@@ -1,4 +1,4 @@
-from admission.models import BaseAdmission
+from admission.contrib.models import BaseAdmission
 
 
 class AdmissionDoctorat(BaseAdmission):
