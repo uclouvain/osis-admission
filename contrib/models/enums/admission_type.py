@@ -4,5 +4,5 @@ from django.utils.translation import gettext_lazy as _
 
 
 class AdmissionType(ChoiceEnum):
-    ADMISSION = _("Admission")
-    PRE_ADMISSION = _("Pré-admission")
+    ADMISSION = _("type_admission")
+    PRE_ADMISSION = _("type_pre_admission")

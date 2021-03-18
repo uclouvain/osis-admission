@@ -1,3 +1,6 @@
-from .enums import *
-from .base import *
-from .doctorat import *
+from .doctorate import AdmissionDoctorate
+from .enums.admission_type import AdmissionType
+
+__all__ = [
+    "AdmissionDoctorate", "AdmissionType"
+]
