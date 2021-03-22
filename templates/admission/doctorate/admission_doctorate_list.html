@@ -1,6 +1,5 @@
 {% extends "layout.html" %}
-{% load static %}
-{% load i18n %}
+{% load bootstrap3 i18n osis_role pagination static %}
 
 {% comment "License" %}
  * OSIS stands for Open Student Information System. It's an application
@@ -27,11 +26,149 @@
 {% endcomment %}
 
 {% block breadcrumb %}
-  <li class="active">{% trans 'admissions_doctorates' %}</li>
+  <li class="active">{% trans "admission_doctorate" %}</li>
 {% endblock %}
 
 {% block content %}
-  {% for admission in object_list %}
-    {{ admission.type }}
-  {% endfor %}
+
+  <div class="page-header">
+    <div class="row">
+      <div class="col-md-12">
+        <h2 class="d-inline-block">{% trans "admission_doctorate" %}</h2>
+
+        <!-- Create dropdown -->
+        <div class="btn-group pull-right" style="margin-top:20px;">
+          <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
+                  aria-expanded="false">
+            <span class="glyphicon glyphicon-cog" aria-hidden="true"></span>
+            {% trans 'actions' %}
+            <span class="caret"></span>
+          </button>
+          <ul class="dropdown-menu dropdown-menu-large row text-right pull-right">
+            <li>
+              <a href="{#{% url 'admissions:doctorate-create' %}#}">  {# TODO Create view #}
+                {% trans "doctorate_create" %}</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel panel-default">
+    <div class="panel-body">
+
+      <form id="search_form">
+        <div class="row">
+          <div class="col-md-2">
+            {% bootstrap_field filter.form.type %}
+          </div>
+          <div class="col-md-2">
+            {% bootstrap_field filter.form.candidate %}
+          </div>
+          <div class="col-md-1">
+            <br>
+            <div class="btn-toolbar pull-right">
+              <button type="submit" id="bt_submit_admission_doctorate_groups_search" class="btn btn-primary"
+                      role="button">
+                <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+              </button>
+              {% include 'blocks/button/button_filter_refresh.html' %} {# FIXME get this to work #}
+            </div>
+          </div>
+        </div>
+        {{ filter.form.media }}
+      </form>
+      <hr style="margin:10px -15px 10px -15px;">
+
+      <div class="row table-responsive">
+        <div class="row">
+          <div class="col-md-6">
+            <strong style="margin-left:10px;color:grey;">
+              {% blocktrans with start_index=page_obj.start_index end_index=page_obj.end_index total_counts=object_list_count %}
+                {{ start_index }} to {{ end_index }} of {{ total_counts }} admission doctorates{% endblocktrans %}
+            </strong>
+          </div>
+          <div class="col-md-6">
+            <button id="dLabel" class="btn btn-default pull-right" type="button"
+                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+                    style="margin-right:10px;"
+                    title="{% trans 'Export' %}">
+              <span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span>
+              <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-large row text-right pull-right">
+              <li>
+                <a id="btn_produce_personnalized_xls"
+                   class="download"
+                   style="margin-right:10px;"
+                   data-toggle="modal" data-target="#modalXlsAdmissionDoctorateListWithParameters"
+                   title="{% trans 'Produce xls with a list of doctorate admissions' %}">
+                  &nbsp;{% trans 'List of doctorate admissions' %}
+                </a>
+              </li>
+              <li>
+                <a id="btn_produce_xls_administrative_data"
+                   class="download"
+                   style="margin-right:10px;"
+                   title="{% trans 'Produce xls of doctorate admissions with administrative data' %}">
+                  &nbsp;{% trans 'List of doctorate admissions with administrative data' %}
+                </a>
+              </li>
+            </ul>
+            <form id="download_xls" action="{{ request.path }}" method="post">
+              {% csrf_token %}
+              <input type="hidden" id="xls_status" class="no_spinner" name="xls_status">
+            </form>
+
+            <div class="pull-right" style="margin-right: 10px"> {% base_pagination_size_select %} </div>
+          </div>
+        </div>
+
+        <table id="table_admission_doctorate_groups" class="table table-striped table-hover" width="99.99%">
+          <thead>
+          <tr>
+            <th id="th_0_type" width="4%">{% trans 'admission_doctorate_type' %}</th>
+            <th id="th_1_candidate.str" width="10%">{% trans 'admission_doctorate_candidate' %}</th>
+            <th id="th_2_comment">{% trans 'admission_doctorate_comment' %}</th>
+            <th id="th_3_author.str" width="15%">{% trans 'admission_doctorate_author' %}</th>
+            <th id="th_4_created" width="4%">{% trans 'admission_doctorate_created' %}</th>
+            <th id="th_5_modified" width="4%">{% trans 'admission_doctorate_modified' %}</th>
+          </tr>
+          </thead>
+        </table>
+        <div class="text-center">
+          {% bootstrap_pagination page_obj extra=request.GET.urlencode %}
+        </div>
+      </div>
+
+    </div>
+  </div>
+{% endblock %}
+
+{% block script %}
+    <script src="{% static "js/osis_datatable.js" %}"></script>
+    <script>
+        $(document).ready(function () {
+            let columnDefs = [
+                {"name": "type", "targets": 0, "data": "type"},
+                {"name": "candidate", "targets": 1, "data": "candidate.str"},
+                {"name": "comment", "targets": 2, "data": "comment"},
+                {"name": "author", "targets": 3,  "data": "author.str"},
+                {"name": "created", "targets": 4, "data": "created"},
+                {"name": "modified", "targets": 5, "data": "modified"},
+            ];
+
+            initializeDataTable(
+             "search_form",
+             "table_admission_doctorate_groups",
+             "admissionDoctorateGroupIds",
+             {{ page_obj.number }},
+             {{ items_per_page }},
+             "{% url 'admissions:doctorate-list' %}",
+             columnDefs
+            );
+        });
+    </script>
+    <script src="{% static "js/sorting_dropdown_type.js" %}"></script>
 {% endblock %}
