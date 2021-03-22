@@ -73,7 +73,10 @@
                       role="button">
                 <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
               </button>
-              {% include 'blocks/button/button_filter_refresh.html' %} {# FIXME get this to work #}
+
+              <a href="{% url 'admissions:doctorate-list' %}" class="btn btn-default">
+                <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span>
+              </a>
             </div>
           </div>
         </div>
