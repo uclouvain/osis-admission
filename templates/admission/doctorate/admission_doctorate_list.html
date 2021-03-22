@@ -131,12 +131,12 @@
         <table id="table_admission_doctorate_groups" class="table table-striped table-hover" width="99.99%">
           <thead>
           <tr>
-            <th id="th_0_type" width="4%">{% trans 'admission_doctorate_type' %}</th>
-            <th id="th_1_candidate.str" width="10%">{% trans 'admission_doctorate_candidate' %}</th>
+            <th id="th_0_type">{% trans 'admission_doctorate_type' %}</th>
+            <th id="th_1_candidate.str">{% trans 'admission_doctorate_candidate' %}</th>
             <th id="th_2_comment">{% trans 'admission_doctorate_comment' %}</th>
-            <th id="th_3_author.str" width="15%">{% trans 'admission_doctorate_author' %}</th>
-            <th id="th_4_created" width="4%">{% trans 'admission_doctorate_created' %}</th>
-            <th id="th_5_modified" width="4%">{% trans 'admission_doctorate_modified' %}</th>
+            <th id="th_3_author.str">{% trans 'admission_doctorate_author' %}</th>
+            <th id="th_4_created">{% trans 'admission_doctorate_created' %}</th>
+            <th id="th_5_modified">{% trans 'admission_doctorate_modified' %}</th>
           </tr>
           </thead>
         </table>
@@ -154,7 +154,14 @@
     <script>
         $(document).ready(function () {
             let columnDefs = [
-                {"name": "type", "targets": 0, "data": "type"},
+                {
+                  "name": "type",
+                  "targets": 0,
+                  "data": "type",
+                  "render": function (data, type, row, meta) {
+                    return outputAnchorOuterHtml(row["url"], data);
+                  }
+                },
                 {"name": "candidate", "targets": 1, "data": "candidate.str"},
                 {"name": "comment", "targets": 2, "data": "comment"},
                 {"name": "author", "targets": 3,  "data": "author.str"},
