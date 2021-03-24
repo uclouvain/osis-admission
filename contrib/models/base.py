@@ -19,7 +19,7 @@ class BaseAdmission(models.Model):
     candidate = models.ForeignKey(
         to="base.Person",
         verbose_name=_("admission_candidate"),
-        related_name="admissions_candidate",
+        related_name="admissions",
         on_delete=models.CASCADE,
     )
     comment = models.TextField(verbose_name=_("admission_comment"))
@@ -31,12 +31,8 @@ class BaseAdmission(models.Model):
         editable=False,
     )
 
-    created = models.DateField(
-        verbose_name=_('created'), auto_now_add=True, editable=False
-    )
-    modified = models.DateField(
-        verbose_name=_('modified'), auto_now=True, editable=False
-    )
+    created = models.DateTimeField(verbose_name=_('created'), auto_now_add=True)
+    modified = models.DateTimeField(verbose_name=_('modified'), auto_now=True)
 
     class Meta:
         abstract = True
