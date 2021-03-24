@@ -47,7 +47,8 @@
           <ul class="dropdown-menu dropdown-menu-large row text-right pull-right">
             <li>
               <a href="{#{% url 'admissions:doctorate-create' %}#}">  {# TODO Create view #}
-                {% trans "doctorate_create" %}</a>
+                {% trans "doctorate_create" %}
+              </a>
             </li>
           </ul>
         </div>
@@ -133,9 +134,9 @@
             <thead>
             <tr>
               <th id="th_0_type" width="5%">{% trans 'admission_doctorate_type' %}</th>
-              <th id="th_1_candidate.str" width="15%">{% trans 'admission_doctorate_candidate' %}</th>
+              <th id="th_1_candidate" width="15%">{% trans 'admission_doctorate_candidate' %}</th>
               <th id="th_2_comment">{% trans 'admission_doctorate_comment' %}</th>
-              <th id="th_3_author.str" width="15%">{% trans 'admission_doctorate_author' %}</th>
+              <th id="th_3_author" width="15%">{% trans 'admission_doctorate_author' %}</th>
               <th id="th_4_created" width="4%">{% trans 'admission_doctorate_created' %}</th>
               <th id="th_5_modified" width="4%">{% trans 'admission_doctorate_modified' %}</th>
             </tr>
@@ -164,9 +165,9 @@
                     return outputAnchorOuterHtml(row["url"], data);
                   }
                 },
-                {"name": "candidate", "targets": 1, "data": "candidate.str"},
+                {"name": "candidate", "targets": 1, "data": "candidate"},
                 {"name": "comment", "targets": 2, "data": "comment"},
-                {"name": "author", "targets": 3,  "data": "author.str"},
+                {"name": "author", "targets": 3,  "data": "author"},
                 {"name": "created", "targets": 4, "data": "created"},
                 {"name": "modified", "targets": 5, "data": "modified"},
             ];
