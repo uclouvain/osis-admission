@@ -10,7 +10,7 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('base', '0582_delete_personentity'),
+        ('base', '0001_initial'),
     ]
 
     operations = [
