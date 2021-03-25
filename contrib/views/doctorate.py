@@ -11,7 +11,6 @@ from base.utils.search import SearchMixin
 
 class AdmissionDoctorateDetailView(DetailView):
     model = AdmissionDoctorate
-    slug_field = "uuid"
     template_name = "admission/doctorate/admission_doctorate_detail.html"
 
 

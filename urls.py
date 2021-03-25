@@ -8,7 +8,7 @@ app_name = "admissions"
 urlpatterns = [
     path("doctorates/", AdmissionDoctorateListView.as_view(), name="doctorate-list"),
     path(
-        "doctorates/<slug>/",
+        "doctorates/<pk>/",
         AdmissionDoctorateDetailView.as_view(),
         name="doctorate-detail",
     ),
