@@ -1,11 +1,18 @@
 from django.contrib import messages
 from django.utils.translation import gettext_lazy as _
+from django.views.generic import DetailView
 from django_filters.views import FilterView
 
 from admission.contrib.filters import AdmissionDoctorateFilter
 from admission.contrib.models import AdmissionDoctorate
 from admission.contrib.serializers import AdmissionDoctorateSerializer
 from base.utils.search import SearchMixin
+
+
+class AdmissionDoctorateDetailView(DetailView):
+    model = AdmissionDoctorate
+    slug_field = "uuid"
+    template_name = "admission/doctorate/admission_doctorate_detail.html"
 
 
 class AdmissionDoctorateListView(SearchMixin, FilterView):
