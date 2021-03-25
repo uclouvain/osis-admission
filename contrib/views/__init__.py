@@ -1,6 +1,11 @@
-from .doctorate import AdmissionDoctorateDetailView, AdmissionDoctorateListView
+from .doctorate import (
+    AdmissionDoctorateCreateView,
+    AdmissionDoctorateDetailView,
+    AdmissionDoctorateListView,
+)
 
 __all__ = [
+    "AdmissionDoctorateCreateView",
     "AdmissionDoctorateDetailView",
     "AdmissionDoctorateListView",
 ]
