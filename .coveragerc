@@ -1,0 +1,9 @@
+[run]
+branch = True
+source = admission
+omit =
+    */migrations/*
+    venv/*
+    */tests/*
+    */management/*
+    */admin.py
