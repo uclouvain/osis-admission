@@ -8,7 +8,7 @@ from base.models.person import Person
 
 class AdmissionDoctorateFilter(filters.FilterSet):
     candidate = filters.ModelChoiceFilter(
-        queryset=Person.objects.all(),
+        queryset=Person.objects.filter(admissions__isnull=False).distinct(),
         required=False,
         widget=autocomplete.ModelSelect2(
             url='admissions:person_autocomplete',

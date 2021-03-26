@@ -30,12 +30,12 @@ from base.models.person import Person
 
 class PersonAutocomplete(LoginRequiredMixin, autocomplete.Select2QuerySetView):
     def get_queryset(self):
-        qs = Person.objects.none()
+        qs = Person.objects.filter(admissions__isnull=False)
         if self.q:
-            qs = Person.objects.filter(
+            qs = qs.filter(
                 Q(email__icontains=self.q) | Q(last_name__icontains=self.q)
             )
-        return qs.order_by("last_name", "first_name")
+        return qs.order_by("last_name", "first_name").distinct()
 
     def get_result_label(self, result: 'Person'):
         return "{person.last_name} {person.first_name} ({person.email})".format(
