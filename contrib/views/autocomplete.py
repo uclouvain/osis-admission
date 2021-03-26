@@ -37,7 +37,7 @@ class PersonAutocomplete(LoginRequiredMixin, autocomplete.Select2QuerySetView):
             )
         return qs.order_by("last_name", "first_name").distinct()
 
-    def get_result_label(self, result: 'Person'):
+    def get_result_label(self, result: Person):
         return "{person.last_name} {person.first_name} ({person.email})".format(
             person=result
         )
