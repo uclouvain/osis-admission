@@ -28,6 +28,11 @@ urlpatterns = [
                 autocomplete.PersonAutocomplete.as_view(),
                 name="person_autocomplete",
             ),
+            path(
+                "candidate/",
+                autocomplete.CandidateAutocomplete.as_view(),
+                name="candidate_autocomplete",
+            ),
         ]
     )),
 ]
