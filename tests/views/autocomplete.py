@@ -15,6 +15,22 @@ class PersonAutocompleteViewTest(TestCase):
         cls.candidate = PersonFactory(email="foo@bar.example.org")
         cls.url = reverse("admissions:person_autocomplete")
 
+    def test_filter_autocomplete_returns_all_persons(self):
+        self.client.force_login(self.user)
+        response = self.client.get(self.url, data={"q": self.candidate.email})
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual(len(data["results"]), 1)
+
+
+class CandidateAutocompleteViewTest(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = UserFactory()
+        cls.author = PersonFactory(user=cls.user)
+        cls.candidate = PersonFactory(email="foo@bar.example.org")
+        cls.url = reverse("admissions:candidate_autocomplete")
+
     def test_filter_autocomplete_doesnt_return_candidates_with_no_admissions(self):
         self.client.force_login(self.user)
         response = self.client.get(self.url, data={"q": self.candidate.email})
