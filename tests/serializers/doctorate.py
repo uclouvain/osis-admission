@@ -55,7 +55,7 @@ class AdmissionDoctorateSerializerTestCase(TestCase):
         self.assertFalse(serializer.is_valid())
 
     def test_serializer_with_incorrect_data(self):
-        serializer = AdmissionDoctorateSerializer(data={'candidate': 1})
+        serializer = AdmissionDoctorateSerializer(data={"candidate": 1})
         with self.assertRaises(serializers.ValidationError):
             serializer.is_valid(raise_exception=True)
 

@@ -11,13 +11,13 @@ class AdmissionDoctorateFilter(filters.FilterSet):
         queryset=Person.objects.filter(admissions__isnull=False).distinct(),
         required=False,
         widget=autocomplete.ModelSelect2(
-            url='admissions:candidate_autocomplete',
+            url="admissions:candidate_autocomplete",
             attrs={
-                'data-theme': 'bootstrap',
-                'data-placeholder': _('Indicate the last name or email'),
+                "data-theme": "bootstrap",
+                "data-placeholder": _("Indicate the last name or email"),
             }
         ),
-        label=_('admission_candidate'),
+        label=_("Candidate"),
     )
 
     class Meta:

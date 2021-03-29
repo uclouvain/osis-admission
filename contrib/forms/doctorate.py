@@ -8,7 +8,7 @@ from base.models.person import Person
 class AdmissionDoctorateCreateForm(forms.ModelForm):
     candidate = forms.ModelChoiceField(
         queryset=Person.objects.all(),
-        widget=autocomplete.ModelSelect2(url="admissions:person_autocomplete")
+        widget=autocomplete.ModelSelect2(url="admissions:person_autocomplete"),
     )
 
     def __init__(self, *args, **kwargs):

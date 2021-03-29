@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-03-22 17:15+0100\n"
+"POT-Creation-Date: 2021-03-29 18:17+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -27,6 +27,27 @@ msgstr ""
 "                %(start_index)s à %(end_index)s sur %(total_counts)s "
 "admissions en doctorat"
 
+msgid "Admission"
+msgstr ""
+
+msgid "Author"
+msgstr "Auteur"
+
+msgid "Candidate"
+msgstr "Candidat"
+
+msgid "Comment"
+msgstr "Commentaire"
+
+msgid "Create new doctorate admission"
+msgstr "Créer une nouvelle admission en doctorat"
+
+msgid "Created"
+msgstr "Créé"
+
+msgid "Doctorate admissions"
+msgstr "Admissions en doctorat"
+
 msgid "Export"
 msgstr "Exporter"
 
@@ -39,8 +60,14 @@ msgstr "Liste des admissions en doctorat"
 msgid "List of doctorate admissions with administrative data"
 msgstr "Liste des admissions en doctorat et données administratives"
 
+msgid "Modified"
+msgstr "Modifée"
+
 msgid "No result!"
 msgstr "Pas de résultat !"
+
+msgid "Pre-Admission"
+msgstr "Pré-Admission"
 
 msgid "Produce xls of doctorate admissions with administrative data"
 msgstr ""
@@ -50,56 +77,17 @@ msgstr ""
 msgid "Produce xls with a list of doctorate admissions"
 msgstr "Produire un fichier xls avec la liste des admissions en doctorat"
 
+msgid "Type"
+msgstr ""
+
+msgid "UUID"
+msgstr ""
+
 msgid "actions"
-msgstr "Actions"
-
-msgid "admission_candidate"
-msgstr "Candidat"
-
-msgid "admission_comment"
-msgstr "Commentaire"
-
-msgid "admission_doctorate"
-msgstr "Admission doctorat"
-
-msgid "admission_doctorate_author"
-msgstr "Auteur"
-
-msgid "admission_doctorate_candidate"
-msgstr "Candidat"
-
-msgid "admission_doctorate_comment"
-msgstr "Commentaire"
-
-msgid "admission_doctorate_created"
-msgstr "Créé"
-
-msgid "admission_doctorate_modified"
-msgstr "Modifié"
-
-msgid "admission_doctorate_type"
-msgstr "Type"
-
-msgid "admission_type"
-msgstr "Type"
-
-msgid "admissions_doctorates"
-msgstr "Admissions doctorats"
-
-msgid "author"
-msgstr "Auteur"
+msgstr "actions"
 
 msgid "created"
-msgstr "Créé"
-
-msgid "doctorate_create"
-msgstr "Nouvelle admission doctorat"
+msgstr "créé"
 
 msgid "modified"
-msgstr "Modifée"
-
-msgid "type_admission"
-msgstr "Admission"
-
-msgid "type_pre_admission"
-msgstr "Pré-Admission"
+msgstr "modifée"
