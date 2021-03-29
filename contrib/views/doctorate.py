@@ -1,4 +1,5 @@
 from django.contrib import messages
+from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView, CreateView
 from django_filters.views import FilterView
@@ -22,6 +23,11 @@ class AdmissionDoctorateCreateView(CreateView):
             # Add user.person to the form kwargs and do the logic in the form
             kwargs.update({"author": user.person})
         return kwargs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["cancel_url"] = reverse("admissions:doctorate-list")
+        return context
 
 
 class AdmissionDoctorateDetailView(DetailView):
