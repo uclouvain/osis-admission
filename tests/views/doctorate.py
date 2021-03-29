@@ -38,3 +38,11 @@ class AdmissionDoctorateCreateViewTest(TestCase):
             response,
             "admission/doctorate/admission_doctorate_detail.html",
         )
+
+    def test_view_context_data_contains_cancel_url(self):
+        self.client.force_login(self.person.user)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.context["cancel_url"], reverse("admissions:doctorate-list")
+        )
