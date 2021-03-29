@@ -1,5 +1,6 @@
 from django.test import TestCase
 from django.urls import reverse
+from django.utils.translation import gettext_lazy as _
 
 from admission.contrib.models import AdmissionDoctorate, AdmissionType
 from base.tests.factories.person import PersonFactory
@@ -43,6 +44,27 @@ class AdmissionDoctorateCreateViewTest(TestCase):
         self.client.force_login(self.person.user)
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(
-            response.context["cancel_url"], reverse("admissions:doctorate-list")
+        self.assertIsNotNone(response.context["cancel_url"])
+
+
+class AdmissionDoctorateListViewTest(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.person = PersonFactory()
+        cls.url = reverse("admissions:doctorate-list")
+
+    def test_view_context_data_contains_items_per_page(self):
+        self.client.force_login(self.person.user)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertIsNotNone(response.context["items_per_page"])
+
+    def test_message_is_triggered_if_no_results(self):
+        self.client.force_login(self.person.user)
+        response = self.client.get(
+            self.url, data={"q": "something that will return no results"}
         )
+        self.assertEqual(response.status_code, 200)
+        messages = list(response.context["messages"])
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(str(messages[0]), _("No result!"))
