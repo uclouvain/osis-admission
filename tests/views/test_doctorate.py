@@ -3,7 +3,9 @@ from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
 from admission.contrib.models import AdmissionDoctorate, AdmissionType
+from admission.contrib.views import AdmissionDoctorateDeleteView
 from admission.tests import TestCase
+from admission.tests.factories import AdmissionDoctorateFactory
 from admission.tests.factories import AdmissionDoctorateFactory
 from base.tests.factories.person import PersonFactory
 
@@ -118,3 +120,23 @@ class AdmissionDoctorateListViewTest(TestCase):
         self.client.force_login(self.person.user)
         with self.assertNumQueriesLessThan(13):
             self.client.get(self.url, HTTP_ACCEPT='application/json')
+
+
+class AdmissionDoctorateDeleteViewTest(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.candidate = PersonFactory()
+        cls.admission = AdmissionDoctorateFactory(
+            candidate=cls.candidate, author=cls.candidate
+        )
+        cls.url = reverse("admissions:doctorate-delete", args=[cls.admission.pk])
+
+    def test_delete_view_sends_message_when_object_is_deleted(self):
+        self.client.force_login(self.candidate.user)
+        response = self.client.post(self.url, follow=True)
+        self.assertEqual(response.status_code, 200)
+        messages = list(response.context["messages"])
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(
+            str(messages[0]), _(AdmissionDoctorateDeleteView.success_message)
+        )
