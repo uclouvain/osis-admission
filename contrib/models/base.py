@@ -11,28 +11,28 @@ class BaseAdmission(models.Model):
         default=uuid.uuid4, editable=False, unique=True, db_index=True
     )
     type = models.CharField(
-        verbose_name=_("admission_type"),
+        verbose_name=_("Type"),
         max_length=255,
         choices=AdmissionType.choices(),
         db_index=True,
     )
     candidate = models.ForeignKey(
         to="base.Person",
-        verbose_name=_("admission_candidate"),
+        verbose_name=_("Candidate"),
         related_name="admissions",
         on_delete=models.CASCADE,
     )
-    comment = models.TextField(verbose_name=_("admission_comment"))
+    comment = models.TextField(verbose_name=_("Comment"))
     author = models.ForeignKey(
         to='base.Person',
-        verbose_name=_('author'),
+        verbose_name=_('Author'),
         on_delete=models.PROTECT,
         related_name='+',
         editable=False,
     )
 
-    created = models.DateTimeField(verbose_name=_('created'), auto_now_add=True)
-    modified = models.DateTimeField(verbose_name=_('modified'), auto_now=True)
+    created = models.DateTimeField(verbose_name=_('Created'), auto_now_add=True)
+    modified = models.DateTimeField(verbose_name=_('Modified'), auto_now=True)
 
     class Meta:
         abstract = True

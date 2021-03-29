@@ -2,7 +2,7 @@
 {% load bootstrap3 i18n osis_role pagination static %}
 
 {% block breadcrumb %}
-  <li class="active">{% trans "admission_doctorate" %}</li>
+  <li class="active">{% trans "Doctorate admissions" %}</li>
 {% endblock %}
 
 {% block content %}
@@ -10,7 +10,7 @@
   <div class="page-header">
     <div class="row">
       <div class="col-md-12">
-        <h2 class="d-inline-block">{% trans "admission_doctorate" %}</h2>
+        <h2 class="d-inline-block">{% trans "Doctorate admissions" %}</h2>
 
         <!-- Create dropdown -->
         <div class="btn-group pull-right" style="margin-top:20px;">
@@ -23,7 +23,7 @@
           <ul class="dropdown-menu dropdown-menu-large row text-right pull-right">
             <li>
               <a href="{% url 'admissions:doctorate-create' %}">
-                {% trans "doctorate_create" %}
+                {% trans "Create new doctorate admission" %}
               </a>
             </li>
           </ul>
@@ -109,12 +109,12 @@
           <table id="table_admission_doctorate_groups" class="table table-striped table-hover" width="99.99%">
             <thead>
             <tr>
-              <th id="th_0_type" width="7%">{% trans 'admission_doctorate_type' %}</th>
-              <th id="th_1_candidate" width="15%">{% trans 'admission_doctorate_candidate' %}</th>
-              <th id="th_2_comment">{% trans 'admission_doctorate_comment' %}</th>
-              <th id="th_3_author" width="15%">{% trans 'admission_doctorate_author' %}</th>
-              <th id="th_4_created" width="9%">{% trans 'admission_doctorate_created' %}</th>
-              <th id="th_5_modified" width="9%">{% trans 'admission_doctorate_modified' %}</th>
+              <th id="th_0_type" width="7%">{% trans 'Type' %}</th>
+              <th id="th_1_candidate" width="15%">{% trans 'Candidate' %}</th>
+              <th id="th_2_comment">{% trans 'Comment' %}</th>
+              <th id="th_3_author" width="15%">{% trans 'Author' %}</th>
+              <th id="th_4_created" width="9%">{% trans 'Created' %}</th>
+              <th id="th_5_modified" width="9%">{% trans 'Modified' %}</th>
             </tr>
             </thead>
           </table>

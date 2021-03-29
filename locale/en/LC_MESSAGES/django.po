@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-03-22 17:15+0100\n"
+"POT-Creation-Date: 2021-03-29 18:17+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -24,6 +24,27 @@ msgid ""
 "doctorate admissions"
 msgstr ""
 
+msgid "Admission"
+msgstr ""
+
+msgid "Author"
+msgstr ""
+
+msgid "Candidate"
+msgstr ""
+
+msgid "Comment"
+msgstr ""
+
+msgid "Create new doctorate admission"
+msgstr ""
+
+msgid "Created"
+msgstr ""
+
+msgid "Doctorate admissions"
+msgstr ""
+
 msgid "Export"
 msgstr ""
 
@@ -36,7 +57,13 @@ msgstr ""
 msgid "List of doctorate admissions with administrative data"
 msgstr ""
 
+msgid "Modified"
+msgstr ""
+
 msgid "No result!"
+msgstr ""
+
+msgid "Pre-Admission"
 msgstr ""
 
 msgid "Produce xls of doctorate admissions with administrative data"
@@ -45,56 +72,17 @@ msgstr ""
 msgid "Produce xls with a list of doctorate admissions"
 msgstr ""
 
-msgid "actions"
+msgid "Type"
 msgstr ""
 
-msgid "admission_candidate"
-msgstr "Candidate"
+msgid "UUID"
+msgstr ""
 
-msgid "admission_comment"
-msgstr "Comment"
-
-msgid "admission_doctorate"
-msgstr "Doctorate admission"
-
-msgid "admission_doctorate_author"
-msgstr "Author"
-
-msgid "admission_doctorate_candidate"
-msgstr "Candidate"
-
-msgid "admission_doctorate_comment"
-msgstr "Comment"
-
-msgid "admission_doctorate_created"
-msgstr "Created"
-
-msgid "admission_doctorate_modified"
-msgstr "Modified"
-
-msgid "admission_doctorate_type"
-msgstr "Type"
-
-msgid "admission_type"
-msgstr "Type"
-
-msgid "admissions_doctorates"
-msgstr "Doctorates admissions"
-
-msgid "author"
+msgid "actions"
 msgstr ""
 
 msgid "created"
 msgstr ""
 
-msgid "doctorate_create"
-msgstr "Create"
-
 msgid "modified"
 msgstr ""
-
-msgid "type_admission"
-msgstr "Admission"
-
-msgid "type_pre_admission"
-msgstr "Pre-Admission"
