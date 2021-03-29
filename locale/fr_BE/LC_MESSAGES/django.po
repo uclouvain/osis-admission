@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-03-29 18:17+0200\n"
+"POT-Creation-Date: 2021-03-29 18:34+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -27,6 +27,16 @@ msgstr ""
 "                %(start_index)s à %(end_index)s sur %(total_counts)s "
 "admissions en doctorat"
 
+#, python-format
+msgid ""
+"\n"
+"              Are you sure you want to delete \"%(object)s\"?\n"
+"            "
+msgstr ""
+"\n"
+"              Êtes-vous sûr de vouloir supprimer \"%(object)s\"?\n"
+"            "
+
 msgid "Admission"
 msgstr ""
 
@@ -36,14 +46,32 @@ msgstr "Auteur"
 msgid "Candidate"
 msgstr "Candidat"
 
+msgid "Close"
+msgstr "Fermer"
+
 msgid "Comment"
 msgstr "Commentaire"
+
+msgid "Confirm"
+msgstr "Confirmer"
 
 msgid "Create new doctorate admission"
 msgstr "Créer une nouvelle admission en doctorat"
 
 msgid "Created"
 msgstr "Créé"
+
+msgid "Delete"
+msgstr "Supprimer"
+
+msgid "Delete?"
+msgstr "Supprimer ?"
+
+msgid "Doctorate admission"
+msgstr "Admission en doctorat"
+
+msgid "Doctorate admission was successfully deleted"
+msgstr "L'admission en doctorat a bien été supprimée"
 
 msgid "Doctorate admissions"
 msgstr "Admissions en doctorat"
@@ -91,3 +119,7 @@ msgstr "créé"
 
 msgid "modified"
 msgstr "modifée"
+
+#, python-brace-format
+msgid "{degree} [{type}] for {candidate}"
+msgstr "{degree} [{type}] pour {candidate}"
