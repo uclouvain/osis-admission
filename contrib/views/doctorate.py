@@ -1,7 +1,7 @@
 from django.contrib import messages
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 from django.utils.translation import gettext_lazy as _
-from django.views.generic import DetailView, CreateView
+from django.views.generic import CreateView, DeleteView, DetailView
 from django_filters.views import FilterView
 
 from admission.contrib.filters import AdmissionDoctorateFilter
@@ -28,6 +28,17 @@ class AdmissionDoctorateCreateView(CreateView):
         context = super().get_context_data(**kwargs)
         context["cancel_url"] = reverse("admissions:doctorate-list")
         return context
+
+
+class AdmissionDoctorateDeleteView(DeleteView):
+    model = AdmissionDoctorate
+    success_url = reverse_lazy("admissions:doctorate-list")
+    success_message = _("Doctorate admission was successfully deleted")
+
+    def delete(self, request, *args, **kwargs):
+        # SuccessMessageMixin won't work with DeleteView, check next Django version?
+        messages.success(self.request, self.success_message)
+        return super().delete(request, *args, **kwargs)
 
 
 class AdmissionDoctorateDetailView(DetailView):
