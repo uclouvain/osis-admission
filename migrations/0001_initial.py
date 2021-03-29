@@ -27,6 +27,7 @@ class Migration(migrations.Migration):
                 ('candidate', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='admissions', to='base.Person', verbose_name='Candidate')),
             ],
             options={
+                'verbose_name': 'Doctorate admission',
                 'ordering': ('-created',),
                 'abstract': False,
             },

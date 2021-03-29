@@ -37,3 +37,10 @@ class BaseAdmission(models.Model):
     class Meta:
         abstract = True
         ordering = ('-created',)
+
+    def __str__(self):
+        return _("{degree} [{type}] for {candidate}").format(
+            degree=self._meta.verbose_name,
+            type=self.get_type_display(),
+            candidate=self.candidate,
+        )
