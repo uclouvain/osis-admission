@@ -5,7 +5,7 @@ from admission.contrib.models import AdmissionDoctorate
 from base.models.person import Person
 
 
-class AdmissionDoctorateCreateForm(forms.ModelForm):
+class AdmissionDoctorateCreateOrUpdateForm(forms.ModelForm):
     candidate = forms.ModelChoiceField(
         queryset=Person.objects.all(),
         widget=autocomplete.ModelSelect2(url="admissions:person-autocomplete"),
@@ -17,7 +17,9 @@ class AdmissionDoctorateCreateForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
 
     def save(self, commit=True):
-        self.instance.author = self.author
+        if not hasattr(self.instance, "author"):
+            # Only for creation
+            self.instance.author = self.author
         return super().save()
 
     class Meta:
@@ -25,14 +27,5 @@ class AdmissionDoctorateCreateForm(forms.ModelForm):
         fields = [
             "type",
             "candidate",
-            "comment",
-        ]
-
-
-class AdmissionDoctorateUpdateForm(forms.ModelForm):
-    class Meta:
-        model = AdmissionDoctorate
-        fields = [
-            "type",
             "comment",
         ]

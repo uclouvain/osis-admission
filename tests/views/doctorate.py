@@ -103,6 +103,7 @@ class AdmissionDoctorateUpdateViewTest(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.candidate = PersonFactory()
+        cls.new_candidate = PersonFactory()
         cls.admission = AdmissionDoctorateFactory(
             candidate=cls.candidate,
             author=cls.candidate,
@@ -112,6 +113,7 @@ class AdmissionDoctorateUpdateViewTest(TestCase):
         cls.update_data = {
             "type": AdmissionType.PRE_ADMISSION.name,
             "comment": "New comment",
+            "candidate": cls.new_candidate.pk,
         }
         cls.url = reverse("admissions:doctorate-update", args=[cls.admission.pk])
 

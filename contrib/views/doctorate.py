@@ -6,18 +6,17 @@ from django.views.generic import CreateView, DeleteView, DetailView, UpdateView
 from django_filters.views import FilterView
 
 from admission.contrib.filters import AdmissionDoctorateFilter
-from admission.contrib.forms import (
-    AdmissionDoctorateCreateForm, AdmissionDoctorateUpdateForm
-)
+from admission.contrib.forms import AdmissionDoctorateCreateOrUpdateForm
 from admission.contrib.models import AdmissionDoctorate
 from admission.contrib.serializers import AdmissionDoctorateSerializer
 from base.utils.search import SearchMixin
 
 
-class AdmissionDoctorateCreateView(CreateView):
+class AdmissionDoctorateCreateView(SuccessMessageMixin, CreateView):
     model = AdmissionDoctorate
     template_name = "admission/doctorate/admission_doctorate_create.html"
-    form_class = AdmissionDoctorateCreateForm
+    form_class = AdmissionDoctorateCreateOrUpdateForm
+    success_message = _("Record successfully saved")
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -71,7 +70,7 @@ class AdmissionDoctorateListView(SearchMixin, FilterView):
 class AdmissionDoctorateUpdateView(SuccessMessageMixin, UpdateView):
     model = AdmissionDoctorate
     template_name = "admission/doctorate/admission_doctorate_update.html"
-    form_class = AdmissionDoctorateUpdateForm
+    form_class = AdmissionDoctorateCreateOrUpdateForm
     success_message = _("Doctorate admission was successfully updated")
 
     def get_context_data(self, **kwargs):
