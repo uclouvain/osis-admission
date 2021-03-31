@@ -1,5 +1,6 @@
-from .doctorate import AdmissionDoctorateCreateForm
+from .doctorate import AdmissionDoctorateCreateForm, AdmissionDoctorateUpdateForm
 
 __all__ = [
     "AdmissionDoctorateCreateForm",
+    "AdmissionDoctorateUpdateForm",
 ]

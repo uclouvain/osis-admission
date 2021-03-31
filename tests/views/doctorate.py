@@ -90,3 +90,42 @@ class AdmissionDoctorateDeleteViewTest(TestCase):
         self.assertEqual(
             str(messages[0]), _(AdmissionDoctorateDeleteView.success_message)
         )
+
+    def test_delete_doctorate_admission(self):
+        self.client.force_login(self.candidate.user)
+        response = self.client.post(self.url, follow=True)
+        self.assertEqual(response.status_code, 200)
+        admissions = AdmissionDoctorate.objects.all()
+        self.assertEqual(admissions.count(), 0)
+
+
+class AdmissionDoctorateUpdateViewTest(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.candidate = PersonFactory()
+        cls.admission = AdmissionDoctorateFactory(
+            candidate=cls.candidate,
+            author=cls.candidate,
+            comment="A comment",
+            type=AdmissionType.ADMISSION,
+        )
+        cls.update_data = {
+            "type": AdmissionType.PRE_ADMISSION.name,
+            "comment": "New comment",
+        }
+        cls.url = reverse("admissions:doctorate-update", args=[cls.admission.pk])
+
+    def test_view_context_data_contains_cancel_url(self):
+        self.client.force_login(self.candidate.user)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertIsNotNone(response.context["cancel_url"])
+
+    def test_doctorate_admission_is_updated(self):
+        self.client.force_login(self.candidate.user)
+        response = self.client.post(self.url, data=self.update_data)
+        self.assertEqual(response.status_code, 302)
+        admission = AdmissionDoctorate.objects.get(pk=self.admission.pk)
+        admission.refresh_from_db()
+        self.assertEqual(admission.comment, self.update_data["comment"])
+        self.assertEqual(admission.type, self.update_data["type"])

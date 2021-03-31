@@ -27,3 +27,12 @@ class AdmissionDoctorateCreateForm(forms.ModelForm):
             "candidate",
             "comment",
         ]
+
+
+class AdmissionDoctorateUpdateForm(forms.ModelForm):
+    class Meta:
+        model = AdmissionDoctorate
+        fields = [
+            "type",
+            "comment",
+        ]

@@ -1,11 +1,14 @@
 from django.contrib import messages
+from django.contrib.messages.views import SuccessMessageMixin
 from django.urls import reverse, reverse_lazy
 from django.utils.translation import gettext_lazy as _
-from django.views.generic import CreateView, DeleteView, DetailView
+from django.views.generic import CreateView, DeleteView, DetailView, UpdateView
 from django_filters.views import FilterView
 
 from admission.contrib.filters import AdmissionDoctorateFilter
-from admission.contrib.forms import AdmissionDoctorateCreateForm
+from admission.contrib.forms import (
+    AdmissionDoctorateCreateForm, AdmissionDoctorateUpdateForm
+)
 from admission.contrib.models import AdmissionDoctorate
 from admission.contrib.serializers import AdmissionDoctorateSerializer
 from base.utils.search import SearchMixin
@@ -62,4 +65,18 @@ class AdmissionDoctorateListView(SearchMixin, FilterView):
         context.update({
             "items_per_page": context["paginator"].per_page,
         })
+        return context
+
+
+class AdmissionDoctorateUpdateView(SuccessMessageMixin, UpdateView):
+    model = AdmissionDoctorate
+    template_name = "admission/doctorate/admission_doctorate_update.html"
+    form_class = AdmissionDoctorateUpdateForm
+    success_message = _("Doctorate admission was successfully updated")
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["cancel_url"] = reverse(
+            "admissions:doctorate-detail", args=[self.get_object().pk]
+        )
         return context

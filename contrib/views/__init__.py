@@ -3,6 +3,7 @@ from .doctorate import (
     AdmissionDoctorateDeleteView,
     AdmissionDoctorateDetailView,
     AdmissionDoctorateListView,
+    AdmissionDoctorateUpdateView,
 )
 
 __all__ = [
@@ -10,4 +11,5 @@ __all__ = [
     "AdmissionDoctorateDeleteView",
     "AdmissionDoctorateDetailView",
     "AdmissionDoctorateListView",
+    "AdmissionDoctorateUpdateView",
 ]

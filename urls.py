@@ -5,6 +5,7 @@ from .contrib.views import (
     AdmissionDoctorateDeleteView,
     AdmissionDoctorateDetailView,
     AdmissionDoctorateListView,
+    AdmissionDoctorateUpdateView,
     autocomplete,
 )
 
@@ -25,6 +26,11 @@ urlpatterns = [
         "doctorates/<pk>/delete/",
         AdmissionDoctorateDeleteView.as_view(),
         name="doctorate-delete",
+    ),
+    path(
+        "doctorates/<pk>/update/",
+        AdmissionDoctorateUpdateView.as_view(),
+        name="doctorate-update",
     ),
 
     path("autocomplete/", include(
