@@ -13,7 +13,7 @@ class PersonAutocompleteViewTest(TestCase):
         cls.user = UserFactory()
         cls.author = PersonFactory(user=cls.user)
         cls.candidate = PersonFactory(email="foo@bar.example.org")
-        cls.url = reverse("admissions:person_autocomplete")
+        cls.url = reverse("admissions:person-autocomplete")
 
     def test_filter_autocomplete_returns_all_persons(self):
         self.client.force_login(self.user)
@@ -29,7 +29,7 @@ class CandidateAutocompleteViewTest(TestCase):
         cls.user = UserFactory()
         cls.author = PersonFactory(user=cls.user)
         cls.candidate = PersonFactory(email="foo@bar.example.org")
-        cls.url = reverse("admissions:candidate_autocomplete")
+        cls.url = reverse("admissions:candidate-autocomplete")
 
     def test_filter_autocomplete_doesnt_return_candidates_with_no_admissions(self):
         self.client.force_login(self.user)
