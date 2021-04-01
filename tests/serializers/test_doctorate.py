@@ -1,6 +1,3 @@
-import datetime
-import uuid
-
 from django.test import TestCase
 from rest_framework import serializers
 
@@ -25,14 +22,9 @@ class AdmissionDoctorateSerializerTestCase(TestCase):
         )
         cls.serializer = AdmissionDoctorateSerializer(instance=cls.admission)
         cls.serializer_data = {
-            "uuid": uuid.uuid4(),
-            "url": "http://test.valid.url",
-            "type": AdmissionType.PRE_ADMISSION.name,
-            "candidate": cls.candidate,
-            "author": author,
+            "type_select": AdmissionType.PRE_ADMISSION.name,
+            "candidate_write": cls.candidate.pk,
             "comment": "test admission doctorate serializer",
-            "created": datetime.datetime.now(),
-            "modified": datetime.datetime.now(),
         }
 
     def test_serializer_contains_expected_field(self):
