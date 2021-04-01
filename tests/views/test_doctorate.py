@@ -140,3 +140,9 @@ class AdmissionDoctorateDeleteViewTest(TestCase):
         self.assertEqual(
             str(messages[0]), _(AdmissionDoctorateDeleteView.success_message)
         )
+
+    def test_delete_view_removes_admission_from_db(self):
+        self.client.force_login(self.candidate.user)
+        response = self.client.post(self.url, follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(AdmissionDoctorate.objects.count(), 0)
