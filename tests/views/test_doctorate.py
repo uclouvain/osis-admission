@@ -1,8 +1,10 @@
-from django.test import TestCase
+from django.test import tag
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
 from admission.contrib.models import AdmissionDoctorate, AdmissionType
+from admission.tests import TestCase
+from admission.tests.factories import AdmissionDoctorateFactory
 from base.tests.factories.person import PersonFactory
 
 
@@ -51,6 +53,24 @@ class AdmissionDoctorateListViewTest(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.person = PersonFactory()
+        AdmissionDoctorateFactory(
+            candidate=cls.person,
+            author=cls.person,
+            type=AdmissionType.ADMISSION.name,
+            comment="First admission",
+        )
+        AdmissionDoctorateFactory(
+            candidate=cls.person,
+            author=cls.person,
+            type=AdmissionType.ADMISSION.name,
+            comment="Second admission",
+        )
+        AdmissionDoctorateFactory(
+            candidate=cls.person,
+            author=cls.person,
+            type=AdmissionType.PRE_ADMISSION.name,
+            comment="A pre-admission",
+        )
         cls.url = reverse("admissions:doctorate-list")
 
     def test_view_context_data_contains_items_per_page(self):
@@ -62,9 +82,39 @@ class AdmissionDoctorateListViewTest(TestCase):
     def test_message_is_triggered_if_no_results(self):
         self.client.force_login(self.person.user)
         response = self.client.get(
-            self.url, data={"q": "something that will return no results"}
+            self.url, data={"type": "this type doesn't exist"}
         )
         self.assertEqual(response.status_code, 200)
         messages = list(response.context["messages"])
         self.assertEqual(len(messages), 1)
         self.assertEqual(str(messages[0]), _("No result!"))
+
+    def test_filtering_by_admission_type(self):
+        self.client.force_login(self.person.user)
+        response = self.client.get(
+            self.url, data={"type": AdmissionType.ADMISSION.name}
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context_data["object_list"]), 2)
+
+    def test_filtering_by_pre_admission_type(self):
+        self.client.force_login(self.person.user)
+        response = self.client.get(
+            self.url, data={"type": AdmissionType.PRE_ADMISSION.name}
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context_data["object_list"]), 1)
+
+    def test_filtering_by_candidate(self):
+        self.client.force_login(self.person.user)
+        response = self.client.get(
+            self.url, data={"candidate": self.person.pk}
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context_data["object_list"]), 3)
+
+    @tag('perf')
+    def test_get_num_queries_serializer(self):
+        self.client.force_login(self.person.user)
+        with self.assertNumQueriesLessThan(13):
+            self.client.get(self.url, HTTP_ACCEPT='application/json')
