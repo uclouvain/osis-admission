@@ -29,6 +29,19 @@ class AdmissionDoctorateSerializer(serializers.ModelSerializer):
         )
         return admission_doctorate
 
+    def update(self, instance, validated_data):
+        candidate_write = validated_data.pop("candidate_write", None)
+        type_select = validated_data.pop("type_select", None)
+        comment = validated_data.pop("comment", None)
+        if candidate_write:
+            instance.candidate = candidate_write
+        if type_select:
+            instance.type = AdmissionType.get_value(type_select)
+        if comment:
+            instance.comment = comment
+        instance.save()
+        return instance
+
     class Meta:
         model = AdmissionDoctorate
         fields = [
