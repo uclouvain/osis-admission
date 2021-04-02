@@ -19,7 +19,7 @@ class AdmissionDoctorateApiTestCase(TestCase):
             "candidate_write": cls.candidate.pk,
             "comment": "test admission doctorate serializer",
         }
-        cls.create_url = reverse("admissions:doctorate-api-list")
+        cls.create_url = reverse("admission_api_v1:doctorate-list")
         cls.admission = AdmissionDoctorateFactory(
             type=AdmissionType.PRE_ADMISSION.name,
             candidate=cls.author,
@@ -32,7 +32,7 @@ class AdmissionDoctorateApiTestCase(TestCase):
             "comment": "updated comment",
         }
         cls.update_url = reverse(
-            "admissions:doctorate-api-detail",
+            "admission_api_v1:doctorate-detail",
             args=[cls.admission.uuid],
         )
 

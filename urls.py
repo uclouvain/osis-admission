@@ -1,7 +1,5 @@
 from django.urls import path, include
-from rest_framework.routers import DefaultRouter
 
-from .contrib.api.doctorate import AdmissionDoctorateViewSet
 from .contrib.views import (
     AdmissionDoctorateCreateView,
     AdmissionDoctorateDeleteView,
@@ -11,12 +9,8 @@ from .contrib.views import (
     autocomplete,
 )
 
-router = DefaultRouter()
-router.register(r'api/v1', AdmissionDoctorateViewSet, basename='doctorate-api')
-urlpatterns = router.urls
-
 app_name = "admissions"
-urlpatterns += [
+urlpatterns = [
     path("doctorates/", AdmissionDoctorateListView.as_view(), name="doctorate-list"),
     path(
         "doctorates/create/",
