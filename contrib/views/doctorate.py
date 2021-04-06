@@ -72,10 +72,3 @@ class AdmissionDoctorateUpdateView(SuccessMessageMixin, UpdateView):
     template_name = "admission/doctorate/admission_doctorate_update.html"
     form_class = AdmissionDoctorateCreateOrUpdateForm
     success_message = _("Doctorate admission was successfully updated")
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["cancel_url"] = reverse(
-            "admissions:doctorate-detail", args=[self.get_object().pk]
-        )
-        return context
