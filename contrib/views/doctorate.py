@@ -8,7 +8,7 @@ from django_filters.views import FilterView
 from admission.contrib.filters import AdmissionDoctorateFilter
 from admission.contrib.forms import AdmissionDoctorateCreateOrUpdateForm
 from admission.contrib.models import AdmissionDoctorate
-from admission.contrib.serializers import AdmissionDoctorateSerializer
+from admission.contrib.serializers import AdmissionDoctorateReadSerializer
 from base.utils.search import SearchMixin
 
 
@@ -53,7 +53,7 @@ class AdmissionDoctorateListView(SearchMixin, FilterView):
     template_name = "admission/doctorate/admission_doctorate_list.html"
     context_object_name = "doctorates"
     filterset_class = AdmissionDoctorateFilter
-    serializer_class = AdmissionDoctorateSerializer
+    serializer_class = AdmissionDoctorateReadSerializer
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
