@@ -36,7 +36,6 @@ class BaseAdmission(models.Model):
 
     class Meta:
         abstract = True
-        ordering = ('-created',)
 
     def __str__(self):
         return _("{degree} [{type}] for {candidate}").format(

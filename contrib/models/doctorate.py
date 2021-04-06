@@ -7,6 +7,7 @@ from .base import BaseAdmission
 class AdmissionDoctorate(BaseAdmission):
     class Meta:
         verbose_name = _("Doctorate admission")
+        ordering = ('-created',)
 
     def get_absolute_url(self):
         return reverse("admissions:doctorate-detail", args=[self.pk])
