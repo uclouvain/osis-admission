@@ -6,7 +6,6 @@ from admission.contrib.models import AdmissionDoctorate, AdmissionType
 from admission.contrib.views import AdmissionDoctorateDeleteView
 from admission.tests import TestCase
 from admission.tests.factories import AdmissionDoctorateFactory
-from admission.tests.factories import AdmissionDoctorateFactory
 from base.tests.factories.person import PersonFactory
 
 
@@ -146,3 +145,31 @@ class AdmissionDoctorateDeleteViewTest(TestCase):
         response = self.client.post(self.url, follow=True)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(AdmissionDoctorate.objects.count(), 0)
+
+
+class AdmissionDoctorateUpdateViewTest(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.candidate = PersonFactory()
+        cls.new_candidate = PersonFactory()
+        cls.admission = AdmissionDoctorateFactory(
+            candidate=cls.candidate,
+            author=cls.candidate,
+            comment="A comment",
+            type=AdmissionType.ADMISSION,
+        )
+        cls.update_data = {
+            "type": AdmissionType.PRE_ADMISSION.name,
+            "comment": "New comment",
+            "candidate": cls.new_candidate.pk,
+        }
+        cls.url = reverse("admissions:doctorate-update", args=[cls.admission.pk])
+
+    def test_doctorate_admission_is_updated(self):
+        self.client.force_login(self.candidate.user)
+        response = self.client.post(self.url, data=self.update_data)
+        self.assertEqual(response.status_code, 302)
+        admission = AdmissionDoctorate.objects.get(pk=self.admission.pk)
+        admission.refresh_from_db()
+        self.assertEqual(admission.comment, self.update_data["comment"])
+        self.assertEqual(admission.type, self.update_data["type"])
