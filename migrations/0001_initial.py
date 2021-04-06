@@ -29,7 +29,6 @@ class Migration(migrations.Migration):
             options={
                 'verbose_name': 'Doctorate admission',
                 'ordering': ('-created',),
-                'abstract': False,
             },
         ),
     ]
