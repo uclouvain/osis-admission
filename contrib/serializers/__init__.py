@@ -1,5 +1,8 @@
-from .doctorate import AdmissionDoctorateSerializer
+from .doctorate import (
+    AdmissionDoctorateReadSerializer, AdmissionDoctorateWriteSerializer
+)
 
 __all__ = [
-    "AdmissionDoctorateSerializer",
+    "AdmissionDoctorateReadSerializer",
+    "AdmissionDoctorateWriteSerializer",
 ]

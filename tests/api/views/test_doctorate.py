@@ -15,8 +15,8 @@ class AdmissionDoctorateApiTestCase(TestCase):
         cls.author = PersonFactory()
         cls.candidate = PersonFactory()
         cls.create_data = {
-            "type_select": AdmissionType.PRE_ADMISSION.name,
-            "candidate_write": cls.candidate.pk,
+            "type": AdmissionType.PRE_ADMISSION.name,
+            "candidate": cls.candidate.pk,
             "comment": "test admission doctorate serializer",
         }
         cls.create_url = reverse("admission_api_v1:doctorate-list")
@@ -27,8 +27,8 @@ class AdmissionDoctorateApiTestCase(TestCase):
             comment="test admission doctorate serializer",
         )
         cls.update_data = {
-            "type_select": AdmissionType.ADMISSION.name,
-            "candidate_write": cls.candidate.pk,
+            "type": AdmissionType.ADMISSION.name,
+            "candidate": cls.candidate.pk,
             "comment": "updated comment",
         }
         cls.update_url = reverse(
@@ -62,9 +62,9 @@ class AdmissionDoctorateApiTestCase(TestCase):
         # But all the following should
         self.assertEqual(
             admissions.get().type,
-            AdmissionType.get_value(self.update_data["type_select"]),
+            AdmissionType.get_value(self.update_data["type"]),
         )
         self.assertEqual(
-            admissions.get().candidate.pk, self.update_data["candidate_write"]
+            admissions.get().candidate.pk, self.update_data["candidate"]
         )
         self.assertEqual(admissions.get().comment, self.update_data["comment"])

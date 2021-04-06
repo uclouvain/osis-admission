@@ -2,7 +2,7 @@ from django.test import TestCase
 from rest_framework import serializers
 
 from admission.contrib.models import AdmissionType, AdmissionDoctorate
-from admission.contrib.serializers import AdmissionDoctorateSerializer
+from admission.contrib.serializers import AdmissionDoctorateReadSerializer
 from base.tests.factories.person import PersonFactory
 
 
@@ -20,7 +20,7 @@ class AdmissionDoctorateSerializerTestCase(TestCase):
         cls.admission = AdmissionDoctorate.objects.create(
             **cls.admission_doctorate_data
         )
-        cls.serializer = AdmissionDoctorateSerializer(instance=cls.admission)
+        cls.serializer = AdmissionDoctorateReadSerializer(instance=cls.admission)
         cls.serializer_data = {
             "type_select": AdmissionType.PRE_ADMISSION.name,
             "candidate_write": cls.candidate.pk,
@@ -43,14 +43,14 @@ class AdmissionDoctorateSerializerTestCase(TestCase):
         )
 
     def test_serializer_without_required_data_is_not_valid(self):
-        serializer = AdmissionDoctorateSerializer(data={})
+        serializer = AdmissionDoctorateReadSerializer(data={})
         self.assertFalse(serializer.is_valid())
 
     def test_serializer_with_incorrect_data(self):
-        serializer = AdmissionDoctorateSerializer(data={"candidate": 1})
+        serializer = AdmissionDoctorateReadSerializer(data={"candidate": 1})
         with self.assertRaises(serializers.ValidationError):
             serializer.is_valid(raise_exception=True)
 
     def test_serializer_with_correct_data(self):
-        serializer = AdmissionDoctorateSerializer(data=self.serializer_data)
+        serializer = AdmissionDoctorateReadSerializer(data=self.serializer_data)
         self.assertTrue(serializer.is_valid())
