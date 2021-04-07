@@ -1,6 +1,6 @@
 from rest_framework.routers import DefaultRouter
 
-from admission.contrib.api.views.doctorate import AdmissionDoctorateViewSet
+from admission.api.views import AdmissionDoctorateViewSet
 
 app_name = "admission_api_v1"
 router = DefaultRouter()
