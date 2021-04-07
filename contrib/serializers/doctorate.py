@@ -6,10 +6,10 @@ from base.models.person import Person
 
 
 class AdmissionDoctorateReadSerializer(serializers.ModelSerializer):
-    url = serializers.URLField(source="get_absolute_url", read_only=True)
-    type = serializers.CharField(source="get_type_display", read_only=True)
-    candidate = serializers.StringRelatedField(read_only=True)
-    author = serializers.StringRelatedField(read_only=True)
+    url = serializers.ReadOnlyField(source="get_absolute_url")
+    type = serializers.ReadOnlyField(source="get_type_display")
+    candidate = serializers.StringRelatedField()
+    author = serializers.StringRelatedField()
 
     class Meta:
         model = AdmissionDoctorate
