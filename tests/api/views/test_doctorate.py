@@ -44,7 +44,8 @@ class AdmissionDoctorateApiTestCase(TestCase):
         self.assertEqual(admissions.count(), 2)
         admission = admissions.get(uuid=response.data["uuid"])
         self.assertEqual(admission.author, self.author)
-        self.assertEqual(admission.candidate, self.candidate)
+        self.assertEqual(admission.type, self.create_data["type"])
+        self.assertEqual(admission.candidate.pk, self.create_data["candidate"])
         self.assertEqual(admission.comment, self.create_data["comment"])
 
     def test_admission_doctorate_update_using_api(self):
@@ -60,11 +61,6 @@ class AdmissionDoctorateApiTestCase(TestCase):
         # The author must not change
         self.assertEqual(admissions.get().author, self.author)
         # But all the following should
-        self.assertEqual(
-            admissions.get().type,
-            AdmissionType.get_value(self.update_data["type"]),
-        )
-        self.assertEqual(
-            admissions.get().candidate.pk, self.update_data["candidate"]
-        )
+        self.assertEqual(admissions.get().type, self.update_data["type"])
+        self.assertEqual(admissions.get().candidate.pk, self.update_data["candidate"])
         self.assertEqual(admissions.get().comment, self.update_data["comment"])
