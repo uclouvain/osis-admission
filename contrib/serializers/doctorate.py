@@ -32,28 +32,8 @@ class AdmissionDoctorateWriteSerializer(serializers.ModelSerializer):
     )
 
     def create(self, validated_data):
-        candidate = validated_data.pop("candidate").id
-        admission_type = validated_data.pop("type")
-        author = self.context["request"].user.person
-        return AdmissionDoctorate.objects.create(
-            candidate_id=candidate,
-            author=author,
-            type=admission_type,
-            **validated_data,
-        )
-
-    def update(self, instance, validated_data):
-        candidate = validated_data.pop("candidate", None)
-        admission_type = validated_data.pop("type", None)
-        comment = validated_data.pop("comment", None)
-        if candidate:
-            instance.candidate = candidate
-        if admission_type:
-            instance.type = AdmissionType.get_value(admission_type)
-        if comment:
-            instance.comment = comment
-        instance.save()
-        return instance
+        validated_data['author'] = self.context["request"].user.person
+        return super().create(validated_data)
 
     class Meta:
         model = AdmissionDoctorate
