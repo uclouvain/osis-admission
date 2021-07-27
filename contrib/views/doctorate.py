@@ -25,6 +25,7 @@
 # ##############################################################################
 
 from django.contrib import messages
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
 from django.urls import reverse, reverse_lazy
 from django.utils.translation import gettext_lazy as _
@@ -36,23 +37,25 @@ from admission.contrib.forms import DoctorateAdmissionCreateOrUpdateForm
 from admission.contrib.models import DoctorateAdmission
 from admission.contrib.serializers import DoctorateAdmissionReadSerializer
 from base.utils.search import SearchMixin
+from osis_role.contrib.views import PermissionRequiredMixin
 
 
 class DoctorateAdmissionCreateView(
     SuccessMessageMixin,
+    LoginRequiredMixin,
+    PermissionRequiredMixin,
     CreateView,
 ):
     model = DoctorateAdmission
     template_name = "admission/doctorate/admission_doctorate_create.html"
     form_class = DoctorateAdmissionCreateOrUpdateForm
     success_message = _("Record successfully saved")
+    permission_required = 'admission.add_doctorateadmission'
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         user = self.request.user
-        if user.is_authenticated and hasattr(user, "person"):
-            # Add user.person to the form kwargs and do the logic in the form
-            kwargs.update({"author": user.person})
+        kwargs.update({"author": user.person})
         return kwargs
 
     def get_context_data(self, **kwargs):

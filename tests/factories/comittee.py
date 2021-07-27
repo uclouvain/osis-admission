@@ -24,21 +24,18 @@
 #
 # ##############################################################################
 
-try:
-    from .doctorate import DoctorateAdmission
-    from .comittee import CommitteeActor
-    from .enums.admission_type import AdmissionType
+import factory
 
-    __all__ = [
-        "DoctorateAdmission",
-        "AdmissionType",
-        "CommitteeActor",
-    ]
+from admission.contrib.models import CommitteeActor
+from admission.contrib.models.enums.actor_type import ActorType
+from osis_signature.tests.factories import ActorFactory
 
-except RuntimeError as e:  # pragma: no cover
-    # There's a weird bug when running tests, the test runner seeing a models
-    # package tries to import it directly, failing to do so
-    import sys
 
-    if 'test' not in sys.argv:
-        raise e
+class MainPromoterFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = CommitteeActor
+
+    actor_ptr = factory.SubFactory(ActorFactory)
+    type = ActorType.MAIN_PROMOTER.name
+    person = factory.SelfAttribute('actor_ptr.person')
+    process = factory.SelfAttribute('actor_ptr.process')

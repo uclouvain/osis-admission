@@ -23,22 +23,21 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import rules
+from django.utils.translation import gettext_lazy as _
 
-try:
-    from .doctorate import DoctorateAdmission
-    from .comittee import CommitteeActor
-    from .enums.admission_type import AdmissionType
+from admission.auth.roles.sic_manager import SicManager
+from osis_role.contrib.models import EntityRoleModel
 
-    __all__ = [
-        "DoctorateAdmission",
-        "AdmissionType",
-        "CommitteeActor",
-    ]
 
-except RuntimeError as e:  # pragma: no cover
-    # There's a weird bug when running tests, the test runner seeing a models
-    # package tries to import it directly, failing to do so
-    import sys
+class SicDirector(EntityRoleModel):
+    class Meta:
+        verbose_name = _("SIC director")
+        verbose_name_plural = _("SIC directors")
+        group_name = "sic_directors"
 
-    if 'test' not in sys.argv:
-        raise e
+    @classmethod
+    def rule_set(cls):
+        return SicManager.rule_set().update({
+            'admission.validate_registration': rules.always_allow,
+        })

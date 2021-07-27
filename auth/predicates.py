@@ -23,22 +23,28 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from django.contrib.auth.models import User
+from rules import predicate
 
-try:
-    from .doctorate import DoctorateAdmission
-    from .comittee import CommitteeActor
-    from .enums.admission_type import AdmissionType
+from admission.contrib.models import DoctorateAdmission
+from admission.contrib.models.base import BaseAdmission
 
-    __all__ = [
-        "DoctorateAdmission",
-        "AdmissionType",
-        "CommitteeActor",
-    ]
 
-except RuntimeError as e:  # pragma: no cover
-    # There's a weird bug when running tests, the test runner seeing a models
-    # package tries to import it directly, failing to do so
-    import sys
+@predicate
+def is_admission_request_author(user: User, obj: BaseAdmission):
+    return obj.author == user.person
 
-    if 'test' not in sys.argv:
-        raise e
+
+@predicate
+def is_admission_request_promoter(user: User, obj: DoctorateAdmission):
+    return obj.main_promoter == user.person
+
+
+@predicate(bind=True)
+def is_part_of_doctoral_commission(self, user: User, obj: DoctorateAdmission):
+    return obj.doctoral_commission_id in self.context['role_qs'].get_entities_ids()
+
+
+@predicate
+def is_part_of_committee(user: User, obj: DoctorateAdmission):
+    return user.person.pk in obj.committee.actors.values_list('person_id', flat=True)

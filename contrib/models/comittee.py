@@ -23,22 +23,28 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from django.core.exceptions import ValidationError
+from django.db import models
 
-try:
-    from .doctorate import DoctorateAdmission
-    from .comittee import CommitteeActor
-    from .enums.admission_type import AdmissionType
+from admission.contrib.models.enums.actor_type import ActorType
+from osis_signature.models import Actor
 
-    __all__ = [
-        "DoctorateAdmission",
-        "AdmissionType",
-        "CommitteeActor",
-    ]
 
-except RuntimeError as e:  # pragma: no cover
-    # There's a weird bug when running tests, the test runner seeing a models
-    # package tries to import it directly, failing to do so
-    import sys
+class CommitteeActor(Actor):
+    type = models.CharField(
+        default=ActorType.choices(),
+        max_length=50,
+    )
 
-    if 'test' not in sys.argv:
-        raise e
+    def validate_unique(self, *args, **kwargs):
+        super().validate_unique(*args, **kwargs)
+
+        other_main_promoter = CommitteeActor.objects.filter(
+            actor_ptr__process_id=self.process_id,
+            type=ActorType.MAIN_PROMOTER.name,
+        )
+        if self.type == ActorType.MAIN_PROMOTER.name and other_main_promoter.exists():
+            raise ValidationError(
+                message='There is already another main promoter for this committee.',
+                code='unique_main_promoter',
+            )

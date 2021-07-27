@@ -23,22 +23,29 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import rules
+from rules import RuleSet
+from django.utils.translation import gettext_lazy as _
 
-try:
-    from .doctorate import DoctorateAdmission
-    from .comittee import CommitteeActor
-    from .enums.admission_type import AdmissionType
+from admission.auth.predicates import is_admission_request_author
+from osis_role.contrib.models import EntityRoleModel
 
-    __all__ = [
-        "DoctorateAdmission",
-        "AdmissionType",
-        "CommitteeActor",
-    ]
 
-except RuntimeError as e:  # pragma: no cover
-    # There's a weird bug when running tests, the test runner seeing a models
-    # package tries to import it directly, failing to do so
-    import sys
+class Candidate(EntityRoleModel):
+    class Meta:
+        verbose_name = _("Candidate")
+        verbose_name_plural = _("Candidates")
+        group_name = "candidates"
 
-    if 'test' not in sys.argv:
-        raise e
+    @classmethod
+    def rule_set(cls):
+        return RuleSet({
+            'admission.add_doctorateadmission': rules.always_allow,
+            'admission.change_doctorateadmission': is_admission_request_author,
+            'admission.delete_doctorateadmission': rules.always_deny,
+            'admission.access_doctorateadmission': rules.always_deny,
+            'admission.download_pdf_confirmation': is_admission_request_author,
+            'admission.upload_pdf_confirmation': is_admission_request_author,
+            'admission.fill_thesis': is_admission_request_author,
+            'admission.upload_publication_authorisation': is_admission_request_author,
+        })

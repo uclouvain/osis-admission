@@ -23,22 +23,23 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from admission.auth.roles.adre import Adre
+from admission.auth.roles.ca_member import CommitteeMember
+from admission.auth.roles.cdd_manager import CddManager
+from admission.auth.roles.jury_secretary import JurySecretary
+from admission.auth.roles.promoter import Promoter
+from admission.auth.roles.sceb import Sceb
+from admission.auth.roles.sic_director import SicDirector
+from admission.auth.roles.sic_manager import SicManager
+from osis_role import role
+from admission.auth.roles.candidate import Candidate
 
-try:
-    from .doctorate import DoctorateAdmission
-    from .comittee import CommitteeActor
-    from .enums.admission_type import AdmissionType
-
-    __all__ = [
-        "DoctorateAdmission",
-        "AdmissionType",
-        "CommitteeActor",
-    ]
-
-except RuntimeError as e:  # pragma: no cover
-    # There's a weird bug when running tests, the test runner seeing a models
-    # package tries to import it directly, failing to do so
-    import sys
-
-    if 'test' not in sys.argv:
-        raise e
+role.role_manager.register(Candidate)
+role.role_manager.register(Adre)
+role.role_manager.register(CommitteeMember)
+role.role_manager.register(CddManager)
+role.role_manager.register(Promoter)
+role.role_manager.register(Sceb)
+role.role_manager.register(SicManager)
+role.role_manager.register(SicDirector)
+role.role_manager.register(JurySecretary)

@@ -43,6 +43,11 @@ class PersonAutocompleteViewTest(TestCase):
 
     def test_filter_autocomplete_returns_all_persons(self):
         self.client.force_login(self.user)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual(len(data["results"]), 2)
+
         response = self.client.get(self.url, data={"q": self.candidate.email})
         self.assertEqual(response.status_code, 200)
         data = response.json()
@@ -67,6 +72,12 @@ class CandidateAutocompleteViewTest(TestCase):
     def test_filter_autocomplete_returns_candidates_with_admissions(self):
         self.client.force_login(self.user)
         DoctorateAdmissionFactory(candidate=self.candidate, author=self.author)
+
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual(len(data["results"]), 1)
+
         response = self.client.get(self.url, data={"q": "bar"})
         self.assertEqual(response.status_code, 200)
         data = response.json()

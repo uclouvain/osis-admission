@@ -24,21 +24,34 @@
 #
 # ##############################################################################
 
-try:
-    from .doctorate import DoctorateAdmission
-    from .comittee import CommitteeActor
-    from .enums.admission_type import AdmissionType
+import factory
 
-    __all__ = [
-        "DoctorateAdmission",
-        "AdmissionType",
-        "CommitteeActor",
-    ]
+from admission.auth.roles.candidate import Candidate
+from admission.auth.roles.cdd_manager import CddManager
+from admission.auth.roles.promoter import Promoter
 
-except RuntimeError as e:  # pragma: no cover
-    # There's a weird bug when running tests, the test runner seeing a models
-    # package tries to import it directly, failing to do so
-    import sys
 
-    if 'test' not in sys.argv:
-        raise e
+class BaseFactory(factory.DjangoModelFactory):
+    person = factory.SubFactory('base.tests.factories.person.PersonFactory')
+    entity = factory.SubFactory(
+        'base.tests.factories.entity.EntityFactory',
+        organization=None,
+    )
+    with_child = True
+
+
+class CandidateFactory(BaseFactory):
+    class Meta:
+        model = Candidate
+
+
+class PromoterFactory(BaseFactory):
+    class Meta:
+        model = Promoter
+
+
+class CddManagerFactory(BaseFactory):
+    class Meta:
+        model = CddManager
+
+    with_child = False

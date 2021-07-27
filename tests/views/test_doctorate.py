@@ -32,13 +32,14 @@ from admission.contrib.models import DoctorateAdmission, AdmissionType
 from admission.contrib.views import DoctorateAdmissionDeleteView
 from admission.tests import TestCase
 from admission.tests.factories import DoctorateAdmissionFactory
+from admission.tests.factories.roles import CandidateFactory
 from base.tests.factories.person import PersonFactory
 
 
 class DoctorateAdmissionCreateViewTest(TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.person = PersonFactory()
+        cls.person = CandidateFactory().person
         cls.candidate = PersonFactory()
         cls.url = reverse("admissions:doctorate-create")
         cls.data = {

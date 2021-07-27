@@ -24,21 +24,12 @@
 #
 # ##############################################################################
 
-try:
-    from .doctorate import DoctorateAdmission
-    from .comittee import CommitteeActor
-    from .enums.admission_type import AdmissionType
+from base.models.utils.utils import ChoiceEnum
 
-    __all__ = [
-        "DoctorateAdmission",
-        "AdmissionType",
-        "CommitteeActor",
-    ]
+from django.utils.translation import gettext_lazy as _
 
-except RuntimeError as e:  # pragma: no cover
-    # There's a weird bug when running tests, the test runner seeing a models
-    # package tries to import it directly, failing to do so
-    import sys
 
-    if 'test' not in sys.argv:
-        raise e
+class ActorType(ChoiceEnum):
+    MAIN_PROMOTER = _("Main promoter")
+    PROMOTER = _("Promoter")
+    CA_MEMBER = _("CA Member")

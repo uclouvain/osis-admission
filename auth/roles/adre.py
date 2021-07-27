@@ -23,22 +23,25 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import rules
+from rules import RuleSet
 
-try:
-    from .doctorate import DoctorateAdmission
-    from .comittee import CommitteeActor
-    from .enums.admission_type import AdmissionType
+from osis_role.contrib.models import EntityRoleModel
+from django.utils.translation import gettext_lazy as _
 
-    __all__ = [
-        "DoctorateAdmission",
-        "AdmissionType",
-        "CommitteeActor",
-    ]
 
-except RuntimeError as e:  # pragma: no cover
-    # There's a weird bug when running tests, the test runner seeing a models
-    # package tries to import it directly, failing to do so
-    import sys
+class Adre(EntityRoleModel):
+    class Meta:
+        verbose_name = _("ADRE")
+        verbose_name_plural = _("ADREs")
+        group_name = "adre"
 
-    if 'test' not in sys.argv:
-        raise e
+    @classmethod
+    def rule_set(cls):
+        return RuleSet({
+            'admission.access_doctorateadmission': rules.always_allow,
+            'admission.download_jury_approved_pdf': rules.always_allow,
+            'admission.upload_jury_approved_pdf': rules.always_allow,
+            'admission.upload_signed_scholarship': rules.always_allow,
+            'admission.check_publication_authorisation': rules.always_allow,
+        })
