@@ -39,5 +39,7 @@ class SicDirector(EntityRoleModel):
     @classmethod
     def rule_set(cls):
         return SicManager.rule_set().update({
+            'admission.access_doctorateadmission': rules.always_allow,
+            'admission.view_doctorateadmission': rules.always_allow,
             'admission.validate_registration': rules.always_allow,
         })

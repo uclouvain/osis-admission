@@ -42,8 +42,9 @@ class Candidate(EntityRoleModel):
         return RuleSet({
             'admission.add_doctorateadmission': rules.always_allow,
             'admission.change_doctorateadmission': is_admission_request_author,
+            'admission.view_doctorateadmission': is_admission_request_author,
             'admission.delete_doctorateadmission': rules.always_deny,
-            'admission.access_doctorateadmission': rules.always_deny,
+            'admission.access_doctorateadmission': rules.always_allow,
             'admission.download_pdf_confirmation': is_admission_request_author,
             'admission.upload_pdf_confirmation': is_admission_request_author,
             'admission.fill_thesis': is_admission_request_author,

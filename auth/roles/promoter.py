@@ -41,6 +41,7 @@ class Promoter(EntityRoleModel):
     def rule_set(cls):
         return RuleSet({
             'admission.access_doctorateadmission': rules.always_allow,
+            'admission.view_doctorateadmission': is_admission_request_promoter,
             'admission.download_pdf_confirmation': is_admission_request_promoter,
             'admission.upload_pdf_confirmation': is_admission_request_promoter,
             'admission.approve_confirmation_paper': is_admission_request_promoter,

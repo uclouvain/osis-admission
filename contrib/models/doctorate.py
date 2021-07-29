@@ -50,7 +50,7 @@ class DoctorateAdmission(BaseAdmission):
         verbose_name = _("Doctorate admission")
         ordering = ('-created',)
         permissions = [
-            ('access_doctorateadmission', _("Can access doctorate admissions")),
+            ('access_doctorateadmission', _("Can access doctorate admission list")),
             ('download_jury_approved_pdf', _("Can download jury-approved PDF")),
             ('upload_jury_approved_pdf', _("Can upload jury-approved PDF")),
             ('upload_signed_scholarship', _("Can upload signed scholarship")),

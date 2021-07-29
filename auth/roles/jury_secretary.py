@@ -40,4 +40,6 @@ class JurySecretary(EntityRoleModel):
     def rule_set(cls):
         return RuleSet({
             'admission.upload_defense_report': rules.always_allow,
+            'admission.view_doctorateadmission': rules.always_allow,
+            'admission.access_doctorateadmission': rules.always_allow,
         })
