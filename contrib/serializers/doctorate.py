@@ -24,18 +24,36 @@
 #
 # ##############################################################################
 
-from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 
-from admission.contrib.models import DoctorateAdmission, AdmissionType
-from base.models.person import Person
+from admission.contrib.models import AdmissionType, DoctorateAdmission
+from base.utils.serializers import DTOSerializer
+from ddd.logic.admission.preparation.projet_doctoral.commands import (
+    CompleterPropositionCommand,
+    InitierPropositionCommand,
+)
+from ddd.logic.admission.preparation.projet_doctoral.domain.model._detail_projet import ChoixLangueRedactionThese
+from ddd.logic.admission.preparation.projet_doctoral.domain.model._experience_precedente_recherche import \
+    ChoixDoctoratDejaRealise
+from ddd.logic.admission.preparation.projet_doctoral.domain.model._enums import ChoixBureauCDE
+from ddd.logic.admission.preparation.projet_doctoral.dtos import DoctoratDTO, PropositionDTO, PropositionSearchDTO
+
+__all__ = [
+    "PropositionIdentityDTOSerializer",
+    "PropositionSearchDTOSerializer",
+    "InitierPropositionCommandSerializer",
+    "CompleterPropositionCommandSerializer",
+    "DoctorateAdmissionReadSerializer",
+    "DoctoratDTOSerializer",
+    "SectorDTOSerializer",
+    "PropositionDTOSerializer",
+]
 
 
 class DoctorateAdmissionReadSerializer(serializers.ModelSerializer):
     url = serializers.ReadOnlyField(source="get_absolute_url")
     type = serializers.ReadOnlyField(source="get_type_display")
     candidate = serializers.StringRelatedField()
-    author = serializers.StringRelatedField()
 
     class Meta:
         model = DoctorateAdmission
@@ -45,26 +63,79 @@ class DoctorateAdmissionReadSerializer(serializers.ModelSerializer):
             "type",
             "candidate",
             "comment",
-            "author",
             "created",
             "modified",
         ]
 
 
-class DoctorateAdmissionWriteSerializer(serializers.ModelSerializer):
-    type = serializers.ChoiceField(choices=AdmissionType.choices())
-    candidate = serializers.PrimaryKeyRelatedField(
-        label=_("Candidate"), queryset=Person.objects.all()
+class PropositionIdentityDTOSerializer(serializers.Serializer):
+    uuid = serializers.ReadOnlyField()
+
+
+class PropositionSearchDTOSerializer(DTOSerializer):
+    class Meta:
+        source = PropositionSearchDTO
+
+
+class PropositionDTOSerializer(DTOSerializer):
+    class Meta:
+        source = PropositionDTO
+
+
+class InitierPropositionCommandSerializer(DTOSerializer):
+    class Meta:
+        source = InitierPropositionCommand
+
+    type_admission = serializers.ChoiceField(choices=AdmissionType.choices())
+    bureau_CDE = serializers.ChoiceField(
+        choices=ChoixBureauCDE.choices(),
+        allow_null=True,
+        default=None,
+    )
+    documents_projet = serializers.ListField(child=serializers.UUIDField())
+    graphe_gantt = serializers.ListField(child=serializers.UUIDField())
+    proposition_programme_doctoral = serializers.ListField(child=serializers.UUIDField())
+    projet_formation_complementaire = serializers.ListField(child=serializers.UUIDField())
+    doctorat_deja_realise = serializers.ChoiceField(
+        choices=ChoixDoctoratDejaRealise.choices(),
+        default=ChoixDoctoratDejaRealise.NO.name,
+    )
+    langue_redaction_these = serializers.ChoiceField(
+        choices=ChoixLangueRedactionThese.choices(),
+        default=ChoixLangueRedactionThese.UNDECIDED.name,
     )
 
-    def create(self, validated_data):
-        validated_data['author'] = self.context["request"].user.person
-        return super().create(validated_data)
 
+class CompleterPropositionCommandSerializer(DTOSerializer):
     class Meta:
-        model = DoctorateAdmission
-        fields = [
-            "type",
-            "candidate",
-            "comment",
-        ]
+        source = CompleterPropositionCommand
+
+    type_admission = serializers.ChoiceField(choices=AdmissionType.choices())
+    bureau_CDE = serializers.ChoiceField(
+        choices=ChoixBureauCDE.choices(),
+        allow_null=True,
+        default=None,
+    )
+    documents_projet = serializers.ListField(child=serializers.UUIDField())
+    graphe_gantt = serializers.ListField(child=serializers.UUIDField())
+    proposition_programme_doctoral = serializers.ListField(child=serializers.UUIDField())
+    projet_formation_complementaire = serializers.ListField(child=serializers.UUIDField())
+    doctorat_deja_realise = serializers.ChoiceField(
+        choices=ChoixDoctoratDejaRealise.choices(),
+        default=ChoixDoctoratDejaRealise.NO.name,
+    )
+    langue_redaction_these = serializers.ChoiceField(
+        choices=ChoixLangueRedactionThese.choices(),
+        default=ChoixLangueRedactionThese.UNDECIDED.name,
+    )
+
+
+class SectorDTOSerializer(serializers.Serializer):
+    sigle = serializers.ReadOnlyField()
+    intitule_fr = serializers.ReadOnlyField()
+    intitule_en = serializers.ReadOnlyField()
+
+
+class DoctoratDTOSerializer(DTOSerializer):
+    class Meta:
+        source = DoctoratDTO

@@ -24,11 +24,5 @@
 #
 # ##############################################################################
 
-from .doctorate import (
-    DoctorateAdmissionReadSerializer, DoctorateAdmissionWriteSerializer
-)
-
-__all__ = [
-    "DoctorateAdmissionReadSerializer",
-    "DoctorateAdmissionWriteSerializer",
-]
+from .doctorate import *
+# from .person import *

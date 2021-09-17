@@ -24,53 +24,6 @@
 #
 # ##############################################################################
 
-from django.urls import path, include
+app_name = "admission"
 
-from .contrib.views import (
-    DoctorateAdmissionCreateView,
-    DoctorateAdmissionDeleteView,
-    DoctorateAdmissionDetailView,
-    DoctorateAdmissionListView,
-    DoctorateAdmissionUpdateView,
-    autocomplete,
-)
-
-app_name = "admissions"
-urlpatterns = [
-    path("doctorates/", DoctorateAdmissionListView.as_view(), name="doctorate-list"),
-    path(
-        "doctorates/create/",
-        DoctorateAdmissionCreateView.as_view(),
-        name="doctorate-create",
-    ),
-    path(
-        "doctorates/<pk>/",
-        DoctorateAdmissionDetailView.as_view(),
-        name="doctorate-detail",
-    ),
-    path(
-        "doctorates/<pk>/delete/",
-        DoctorateAdmissionDeleteView.as_view(),
-        name="doctorate-delete",
-    ),
-    path(
-        "doctorates/<pk>/update/",
-        DoctorateAdmissionUpdateView.as_view(),
-        name="doctorate-update",
-    ),
-
-    path("autocomplete/", include(
-        [
-            path(
-                "person/",
-                autocomplete.PersonAutocomplete.as_view(),
-                name="person-autocomplete",
-            ),
-            path(
-                "candidate/",
-                autocomplete.CandidateAutocomplete.as_view(),
-                name="candidate-autocomplete",
-            ),
-        ]
-    )),
-]
+urlpatterns = ()

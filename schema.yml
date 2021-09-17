@@ -1,0 +1,472 @@
+openapi: 3.0.2
+info:
+  title: Admission API
+  version: ''
+  description: This API delivers data for the Admission project.
+  contact:
+    name: UCLouvain - OSIS
+    url: https://github.com/uclouvain/osis
+paths:
+  /propositions:
+    get:
+      operationId: list_propositions
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PropositionSearchDTO'
+          description: ''
+      tags:
+      - propositions
+    post:
+      operationId: create_proposition
+      description: ''
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InitierPropositionCommand'
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PropositionIdentityDTO'
+          description: ''
+      tags:
+      - propositions
+  /propositions/{uuid}:
+    get:
+      operationId: retrieve_proposition
+      description: ''
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PropositionDTO'
+          description: ''
+      tags:
+      - propositions
+    put:
+      operationId: update_proposition
+      description: ''
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CompleterPropositionCommand'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PropositionIdentityDTO'
+          description: ''
+      tags:
+      - propositions
+  /autocomplete/sector:
+    get:
+      operationId: listSectorDTOs
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SectorDTO'
+          description: ''
+      tags:
+      - autocomplete
+  /autocomplete/sector/{sigle}/doctorates:
+    get:
+      operationId: listDoctoratDTOs
+      description: ''
+      parameters:
+      - name: sigle
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DoctoratDTO'
+          description: ''
+      tags:
+      - autocomplete
+components:
+  schemas:
+    PropositionSearchDTO:
+      type: object
+      properties:
+        uuid:
+          type: string
+        type_admission:
+          type: string
+        sigle_doctorat:
+          type: string
+        intitule_doctorat_fr:
+          type: string
+        intitule_doctorat_en:
+          type: string
+        matricule_candidat:
+          type: string
+        code_secteur_formation:
+          type: string
+        bureau_CDE:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+      required:
+      - uuid
+      - type_admission
+      - sigle_doctorat
+      - intitule_doctorat_fr
+      - intitule_doctorat_en
+      - matricule_candidat
+      - code_secteur_formation
+      - created_at
+    PropositionDTO:
+      type: object
+      properties:
+        type_admission:
+          type: string
+        sigle_doctorat:
+          type: string
+        annee_doctorat:
+          type: integer
+        intitule_doctorat_fr:
+          type: string
+        intitule_doctorat_en:
+          type: string
+        matricule_candidat:
+          type: string
+        code_secteur_formation:
+          type: string
+        bureau_CDE:
+          type: string
+        type_financement:
+          type: string
+        type_contrat_travail:
+          type: string
+        eft:
+          type: integer
+          nullable: true
+        bourse_recherche:
+          type: string
+        duree_prevue:
+          type: integer
+          nullable: true
+        temps_consacre:
+          type: integer
+          nullable: true
+        titre_projet:
+          type: string
+        resume_projet:
+          type: string
+        documents_projet:
+          type: array
+          items:
+            type: string
+        graphe_gantt:
+          type: array
+          items:
+            type: string
+        proposition_programme_doctoral:
+          type: array
+          items:
+            type: string
+        projet_formation_complementaire:
+          type: array
+          items:
+            type: string
+        langue_redaction_these:
+          type: string
+        doctorat_deja_realise:
+          type: string
+        institution:
+          type: string
+        date_soutenance:
+          type: string
+          format: date
+          nullable: true
+        raison_non_soutenue:
+          type: string
+      required:
+      - type_admission
+      - sigle_doctorat
+      - annee_doctorat
+      - intitule_doctorat_fr
+      - intitule_doctorat_en
+      - matricule_candidat
+      - code_secteur_formation
+      - documents_projet
+      - graphe_gantt
+      - proposition_programme_doctoral
+      - projet_formation_complementaire
+      - langue_redaction_these
+      - doctorat_deja_realise
+    SectorDTO:
+      type: object
+      properties:
+        sigle:
+          type: string
+          readOnly: true
+        intitule_fr:
+          type: string
+          readOnly: true
+        intitule_en:
+          type: string
+          readOnly: true
+    DoctoratDTO:
+      type: object
+      properties:
+        sigle:
+          type: string
+        annee:
+          type: integer
+        intitule_fr:
+          type: string
+        intitule_en:
+          type: string
+        sigle_entite_gestion:
+          type: string
+      required:
+      - sigle
+      - annee
+      - intitule_fr
+      - intitule_en
+      - sigle_entite_gestion
+    PropositionIdentityDTO:
+      type: object
+      properties:
+        uuid:
+          type: string
+          readOnly: true
+    InitierPropositionCommand:
+      type: object
+      properties:
+        type_admission:
+          enum:
+          - ADMISSION
+          - PRE_ADMISSION
+          type: string
+        sigle_formation:
+          type: string
+        annee_formation:
+          type: integer
+        matricule_candidat:
+          type: string
+        justification:
+          type: string
+        bureau_CDE:
+          enum:
+          - ECONOMY
+          - MANAGEMENT
+          type: string
+          nullable: true
+        type_financement:
+          type: string
+        type_contrat_travail:
+          type: string
+        eft:
+          type: integer
+          nullable: true
+        bourse_recherche:
+          type: string
+        duree_prevue:
+          type: integer
+          nullable: true
+        temps_consacre:
+          type: integer
+          nullable: true
+        titre_projet:
+          type: string
+        resume_projet:
+          type: string
+        documents_projet:
+          type: array
+          items:
+            type: string
+            format: uuid
+        graphe_gantt:
+          type: array
+          items:
+            type: string
+            format: uuid
+        proposition_programme_doctoral:
+          type: array
+          items:
+            type: string
+            format: uuid
+        projet_formation_complementaire:
+          type: array
+          items:
+            type: string
+            format: uuid
+        langue_redaction_these:
+          enum:
+          - FRENCH
+          - ENGLISH
+          - UNDECIDED
+          type: string
+          default: UNDECIDED
+        doctorat_deja_realise:
+          enum:
+          - 'YES'
+          - 'NO'
+          - PARTIAL
+          type: string
+          default: 'NO'
+        institution:
+          type: string
+        date_soutenance:
+          type: string
+          format: date
+          nullable: true
+        raison_non_soutenue:
+          type: string
+      required:
+      - type_admission
+      - sigle_formation
+      - annee_formation
+      - matricule_candidat
+      - documents_projet
+      - graphe_gantt
+      - proposition_programme_doctoral
+      - projet_formation_complementaire
+    CompleterPropositionCommand:
+      type: object
+      properties:
+        uuid:
+          type: string
+        type_admission:
+          enum:
+          - ADMISSION
+          - PRE_ADMISSION
+          type: string
+        justification:
+          type: string
+        bureau_CDE:
+          enum:
+          - ECONOMY
+          - MANAGEMENT
+          type: string
+          nullable: true
+        type_financement:
+          type: string
+        type_contrat_travail:
+          type: string
+        eft:
+          type: integer
+          nullable: true
+        bourse_recherche:
+          type: string
+        duree_prevue:
+          type: integer
+          nullable: true
+        temps_consacre:
+          type: integer
+          nullable: true
+        titre_projet:
+          type: string
+        resume_projet:
+          type: string
+        documents_projet:
+          type: array
+          items:
+            type: string
+            format: uuid
+        graphe_gantt:
+          type: array
+          items:
+            type: string
+            format: uuid
+        proposition_programme_doctoral:
+          type: array
+          items:
+            type: string
+            format: uuid
+        projet_formation_complementaire:
+          type: array
+          items:
+            type: string
+            format: uuid
+        langue_redaction_these:
+          enum:
+          - FRENCH
+          - ENGLISH
+          - UNDECIDED
+          type: string
+          default: UNDECIDED
+        doctorat_deja_realise:
+          enum:
+          - 'YES'
+          - 'NO'
+          - PARTIAL
+          type: string
+          default: 'NO'
+        institution:
+          type: string
+        date_soutenance:
+          type: string
+          format: date
+          nullable: true
+        raison_non_soutenue:
+          type: string
+      required:
+      - uuid
+      - type_admission
+      - documents_projet
+      - graphe_gantt
+      - proposition_programme_doctoral
+      - projet_formation_complementaire
+  securitySchemes:
+    Token:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: Enter your token in the format **Token &lt;token>**
+servers:
+- url: https://{environment}.osis.uclouvain.be/api/v1/admission/
+  variables:
+    environment:
+      default: dev
+      enum:
+      - dev
+      - qa
+      - test
+- url: https://osis.uclouvain.be/api/v1/admission/
+  description: Production server
+security:
+- Token: []
