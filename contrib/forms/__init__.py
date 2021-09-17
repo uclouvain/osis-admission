@@ -24,8 +24,8 @@
 #
 # ##############################################################################
 
-from .doctorate import DoctorateAdmissionCreateOrUpdateForm
+from .doctorate import DoctorateAdmissionProjectForm
 
 __all__ = [
-    "DoctorateAdmissionCreateOrUpdateForm",
+    "DoctorateAdmissionProjectForm",
 ]

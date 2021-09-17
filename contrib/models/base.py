@@ -15,20 +15,19 @@ class BaseAdmission(models.Model):
         max_length=255,
         choices=AdmissionType.choices(),
         db_index=True,
+        default=AdmissionType.ADMISSION.name,
     )
     candidate = models.ForeignKey(
         to="base.Person",
         verbose_name=_("Candidate"),
         related_name="admissions",
-        on_delete=models.CASCADE,
-    )
-    comment = models.TextField(verbose_name=_("Comment"))
-    author = models.ForeignKey(
-        to='base.Person',
-        verbose_name=_('Author'),
         on_delete=models.PROTECT,
-        related_name='+',
         editable=False,
+    )
+    comment = models.TextField(
+        default='',
+        verbose_name=_("Comment"),
+        blank=True,
     )
 
     created = models.DateTimeField(verbose_name=_('Created'), auto_now_add=True)

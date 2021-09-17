@@ -28,11 +28,13 @@ try:
     from .doctorate import DoctorateAdmission
     from .comittee import CommitteeActor
     from .enums.admission_type import AdmissionType
+    from .entity_proxy import EntityProxy
 
     __all__ = [
         "DoctorateAdmission",
         "AdmissionType",
         "CommitteeActor",
+        "EntityProxy",
     ]
 
 except RuntimeError as e:  # pragma: no cover

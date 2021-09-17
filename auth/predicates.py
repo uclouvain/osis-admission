@@ -32,7 +32,7 @@ from admission.contrib.models.base import BaseAdmission
 
 @predicate
 def is_admission_request_author(user: User, obj: BaseAdmission):
-    return obj.author == user.person
+    return obj.candidate == user.person
 
 
 @predicate

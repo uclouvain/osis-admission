@@ -25,24 +25,132 @@
 # ##############################################################################
 from typing import Optional
 
+from django.contrib.postgres.fields import JSONField
 from django.db import models
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
 from base.models.person import Person
+from ddd.logic.admission.preparation.projet_doctoral.domain.model._experience_precedente_recherche import \
+    ChoixDoctoratDejaRealise
+from ddd.logic.admission.preparation.projet_doctoral.domain.model._financement import ChoixTypeFinancement
+from ddd.logic.admission.preparation.projet_doctoral.domain.model._enums import ChoixBureauCDE
+from osis_document.contrib import FileField
 from osis_signature.contrib.fields import SignatureProcessField
 from .base import BaseAdmission
 from .enums.actor_type import ActorType
 
 
 class DoctorateAdmission(BaseAdmission):
-    doctoral_commission = models.ForeignKey(
-        to="base.Entity",
-        verbose_name=_("Doctoral commission"),
+    doctorate = models.ForeignKey(
+        to="base.EducationGroupYear",
+        verbose_name=_("Doctorate"),
         related_name="+",
         on_delete=models.CASCADE,
+    )
+    bureau = models.CharField(
+        max_length=255,
+        verbose_name=_("Bureau"),
+        choices=ChoixBureauCDE.choices(),
+        default='',
+        blank=True,
+    )
+
+    # Financement
+    financing_type = models.CharField(
+        max_length=255,
+        verbose_name=_("Financing type"),
+        choices=ChoixTypeFinancement.choices(),
+        default='',
+        blank=True,
+    )
+    financing_work_contract = models.CharField(
+        max_length=255,
+        verbose_name=_("Working contract type"),
+        default='',
+        blank=True,
+    )
+    financing_eft = models.PositiveSmallIntegerField(
+        verbose_name=_("EFT"),
+        blank=True,
         null=True,
     )
+    scholarship_grant = models.CharField(
+        max_length=255,
+        verbose_name=_("Scholarship grant"),
+        default='',
+        blank=True,
+    )
+    planned_duration = models.PositiveSmallIntegerField(
+        verbose_name=_("Planned duration"),
+        blank=True,
+        null=True,
+    )
+    dedicated_time = models.PositiveSmallIntegerField(
+        verbose_name=_("Dedicated time (in EFT)"),
+        blank=True,
+        null=True,
+    )
+
+    # Projet
+    project_title = models.CharField(
+        max_length=1023,
+        verbose_name=_("Project title"),
+        default='',
+        blank=True,
+    )
+    project_abstract = models.TextField(
+        verbose_name=_("Abstract"),
+        default='',
+        blank=True,
+    )
+    thesis_language = models.CharField(
+        max_length=255,
+        # TODO choices
+        verbose_name=_("Thesis language"),
+        default='',
+        blank=True,
+    )
+    project_document = FileField(
+        verbose_name=_("Project"),
+    )
+    gantt_graph = FileField(
+        verbose_name=_("Gantt graph"),
+    )
+    program_proposition = FileField(
+        verbose_name=_("Program proposition"),
+    )
+    additional_training_project = FileField(
+        verbose_name=_("Additional training project"),
+    )
+
+    # Experience précédente de recherche
+    phd_already_done = models.CharField(
+        max_length=255,
+        choices=ChoixDoctoratDejaRealise.choices(),
+        verbose_name=_("PhD already done"),
+        default='',
+        blank=True,
+    )
+    phd_already_done_institution = models.CharField(
+        max_length=255,
+        verbose_name=_("Institution"),
+        default='',
+        blank=True,
+    )
+    phd_already_done_defense_date = models.DateField(
+        verbose_name=_("Defense"),
+        null=True,
+        blank=True,
+    )
+    phd_already_done_no_defense_reason = models.CharField(
+        max_length=255,
+        verbose_name=_("No defense reason"),
+        default='',
+        blank=True,
+    )
+
+    detailed_status = JSONField(default=dict)
 
     committee = SignatureProcessField()
 
@@ -71,7 +179,7 @@ class DoctorateAdmission(BaseAdmission):
         ]
 
     def get_absolute_url(self):
-        return reverse("admissions:doctorate-detail", args=[self.pk])
+        return reverse("admission:doctorate-detail", args=[self.pk])
 
     @property
     def main_promoter(self) -> Optional[Person]:

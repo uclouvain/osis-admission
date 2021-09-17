@@ -38,11 +38,11 @@ from osis_signature.tests.factories import ProcessFactory
 
 class PredicatesTestCase(TestCase):
     def test_is_admission_request_author(self):
-        author1 = CandidateFactory().person
-        author2 = CandidateFactory().person
-        request = DoctorateAdmissionFactory(author=author1)
-        self.assertTrue(predicates.is_admission_request_author(author1.user, request))
-        self.assertFalse(predicates.is_admission_request_author(author2.user, request))
+        candidate1 = CandidateFactory().person
+        candidate2 = CandidateFactory().person
+        request = DoctorateAdmissionFactory(candidate=candidate1)
+        self.assertTrue(predicates.is_admission_request_author(candidate1.user, request))
+        self.assertFalse(predicates.is_admission_request_author(candidate2.user, request))
 
     def test_is_main_promoter(self):
         author = CandidateFactory().person

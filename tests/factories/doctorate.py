@@ -34,5 +34,4 @@ class DoctorateAdmissionFactory(factory.DjangoModelFactory):
     class Meta:
         model = DoctorateAdmission
 
-    author = factory.SubFactory(PersonFactory)
-    candidate = factory.SelfAttribute('author')
+    candidate = factory.SubFactory(PersonFactory)
