@@ -26,56 +26,22 @@
 from rest_framework import mixins, status
 from rest_framework.generics import GenericAPIView, ListCreateAPIView
 from rest_framework.response import Response
-from rest_framework.schemas.openapi import AutoSchema
-from rest_framework.serializers import Serializer
 
+from admission.api.generator import DetailedAutoSchema
 from admission.contrib import serializers
+from backoffice.settings.rest_framework.common_views import DisplayExceptionsByFieldNameAPIMixin
 from ddd.logic.admission.preparation.projet_doctoral.commands import (
     CompleterPropositionCommand, GetPropositionCommand,
     InitierPropositionCommand,
     SearchPropositionsCommand,
 )
+from ddd.logic.admission.preparation.projet_doctoral.domain.validator.exceptions import (
+    BureauCDEInconsistantException,
+    ContratTravailInconsistantException,
+    InstitutionInconsistanteException,
+    JustificationRequiseException,
+)
 from infrastructure.messages_bus import message_bus_instance
-
-
-class DetailedAutoSchema(AutoSchema):
-    def get_request_body(self, path, method):
-        if method not in ('PUT', 'PATCH', 'POST'):
-            return {}
-
-        self.request_media_types = self.map_parsers(path, method)
-
-        serializer = self.get_serializer(path, method, for_response=False)
-
-        if not isinstance(serializer, Serializer):
-            item_schema = {}
-        else:
-            item_schema = self._get_reference(serializer)
-
-        return {
-            'content': {
-                ct: {'schema': item_schema}
-                for ct in self.request_media_types
-            }
-        }
-
-    def get_components(self, path, method):
-        if method.lower() == 'delete':
-            return {}
-
-        components = {}
-        for with_response in [True, False]:
-            serializer = self.get_serializer(path, method, for_response=with_response)
-            if not isinstance(serializer, Serializer):
-                return {}
-            component_name = self.get_component_name(serializer)
-            content = self.map_serializer(serializer)
-            components[component_name] = content
-
-        return components
-
-    def get_serializer(self, path, method, for_response=True):
-        raise NotImplementedError
 
 
 class PropositionListSchema(DetailedAutoSchema):
@@ -90,10 +56,16 @@ class PropositionListSchema(DetailedAutoSchema):
         return serializers.PropositionSearchDTOSerializer()
 
 
-class PropositionListViewSet(ListCreateAPIView):
+class PropositionListViewSet(DisplayExceptionsByFieldNameAPIMixin, ListCreateAPIView):
     schema = PropositionListSchema()
     pagination_class = None
     filter_backends = None
+    field_name_by_exception = {
+        JustificationRequiseException: ['justification'],
+        InstitutionInconsistanteException: ['institution'],
+        ContratTravailInconsistantException: ['type_contrat_travail'],
+        BureauCDEInconsistantException: ['bureau_cde'],
+    }
 
     def list(self, request, **kwargs):
         proposition_list = message_bus_instance.invoke(
