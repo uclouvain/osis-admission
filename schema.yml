@@ -66,7 +66,7 @@ paths:
   /propositions/{uuid}:
     get:
       operationId: retrieve_proposition
-      description: ''
+      description: Get a single proposition
       parameters:
       - name: uuid
         in: path
@@ -96,7 +96,7 @@ paths:
       - propositions
     put:
       operationId: update_proposition
-      description: ''
+      description: Edit a proposition
       parameters:
       - name: uuid
         in: path
@@ -134,7 +134,7 @@ paths:
   /autocomplete/sector:
     get:
       operationId: listSectorDTOs
-      description: ''
+      description: Autocomplete sectors
       parameters:
       - $ref: '#/components/parameters/Accept-Language'
       - $ref: '#/components/parameters/X-User-FirstName'
@@ -161,7 +161,7 @@ paths:
   /autocomplete/sector/{sigle}/doctorates:
     get:
       operationId: listDoctoratDTOs
-      description: ''
+      description: Autocomplete doctorates given a sector
       parameters:
       - name: sigle
         in: path

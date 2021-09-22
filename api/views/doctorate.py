@@ -68,6 +68,7 @@ class PropositionListViewSet(DisplayExceptionsByFieldNameAPIMixin, ListCreateAPI
     }
 
     def list(self, request, **kwargs):
+        """List the propositions of the logged in user"""
         proposition_list = message_bus_instance.invoke(
             SearchPropositionsCommand(matricule_candidat=request.user.person.global_id)
         )
@@ -75,6 +76,7 @@ class PropositionListViewSet(DisplayExceptionsByFieldNameAPIMixin, ListCreateAPI
         return Response(serializer.data)
 
     def create(self, request, **kwargs):
+        """Create a new proposition"""
         serializer = serializers.InitierPropositionCommandSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         result = message_bus_instance.invoke(InitierPropositionCommand(**serializer.data))
@@ -100,6 +102,7 @@ class PropositionViewSet(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, Gen
     filter_backends = None
 
     def get(self, request, *args, **kwargs):
+        """Get a single proposition"""
         # TODO call osis_role perm for this object
         proposition = message_bus_instance.invoke(
             GetPropositionCommand(uuid_proposition=kwargs.get('uuid'))
