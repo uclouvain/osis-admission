@@ -27,7 +27,7 @@ from rest_framework import mixins, status
 from rest_framework.generics import GenericAPIView, ListCreateAPIView
 from rest_framework.response import Response
 
-from admission.api.generator import DetailedAutoSchema
+from admission.api.schema import ResponseSpecificSchema
 from admission.contrib import serializers
 from backoffice.settings.rest_framework.common_views import DisplayExceptionsByFieldNameAPIMixin
 from ddd.logic.admission.preparation.projet_doctoral.commands import (
@@ -44,27 +44,25 @@ from ddd.logic.admission.preparation.projet_doctoral.domain.validator.exceptions
 from infrastructure.messages_bus import message_bus_instance
 
 
-class PropositionListSchema(DetailedAutoSchema):
+class PropositionListSchema(ResponseSpecificSchema):
+    serializer_mapping = {
+        'GET': serializers.PropositionSearchDTOSerializer,
+        'POST': (serializers.InitierPropositionCommandSerializer, serializers.PropositionIdentityDTOSerializer),
+    }
+
     def get_operation_id_base(self, path, method, action):
         return '_proposition' if method == 'POST' else '_propositions'
 
-    def get_serializer(self, path, method, for_response=True):
-        if method == 'POST':
-            if for_response:
-                return serializers.PropositionIdentityDTOSerializer()
-            return serializers.InitierPropositionCommandSerializer()
-        return serializers.PropositionSearchDTOSerializer()
 
-
-class PropositionListViewSet(DisplayExceptionsByFieldNameAPIMixin, ListCreateAPIView):
+class PropositionListView(DisplayExceptionsByFieldNameAPIMixin, ListCreateAPIView):
     schema = PropositionListSchema()
     pagination_class = None
-    filter_backends = None
+    filter_backends = []
     field_name_by_exception = {
         JustificationRequiseException: ['justification'],
         InstitutionInconsistanteException: ['institution'],
         ContratTravailInconsistantException: ['type_contrat_travail'],
-        BureauCDEInconsistantException: ['bureau_cde'],
+        BureauCDEInconsistantException: ['bureau_CDE'],
     }
 
     def list(self, request, **kwargs):
@@ -84,22 +82,18 @@ class PropositionListViewSet(DisplayExceptionsByFieldNameAPIMixin, ListCreateAPI
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
-class PropositionSchema(DetailedAutoSchema):
-    def get_operation_id_base(self, path, method, action):
-        return '_proposition'
-
-    def get_serializer(self, path, method, for_response=True):
-        if method == 'PUT':
-            if for_response:
-                return serializers.PropositionIdentityDTOSerializer()
-            return serializers.CompleterPropositionCommandSerializer()
-        return serializers.PropositionDTOSerializer()
+class PropositionSchema(ResponseSpecificSchema):
+    operation_id_base = '_proposition'
+    serializer_mapping = {
+        'GET': serializers.PropositionDTOSerializer,
+        'PUT': (serializers.CompleterPropositionCommandSerializer, serializers.PropositionIdentityDTOSerializer),
+    }
 
 
 class PropositionViewSet(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, GenericAPIView):
     schema = PropositionSchema()
     pagination_class = None
-    filter_backends = None
+    filter_backends = []
 
     def get(self, request, *args, **kwargs):
         """Get a single proposition"""
@@ -111,6 +105,7 @@ class PropositionViewSet(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, Gen
         return Response(serializer.data)
 
     def put(self, request, *args, **kwargs):
+        """Edit a proposition"""
         serializer = serializers.CompleterPropositionCommandSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         result = message_bus_instance.invoke(CompleterPropositionCommand(**serializer.data))

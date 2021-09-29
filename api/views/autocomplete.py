@@ -34,10 +34,10 @@ from ddd.logic.admission.preparation.projet_doctoral.commands import SearchDocto
 from infrastructure.messages_bus import message_bus_instance
 
 
-class AutocompleteSectorViewSet(ListAPIView):
+class AutocompleteSectorView(ListAPIView):
     """Autocomplete sectors"""
     pagination_class = None
-    filter_backends = None
+    filter_backends = []
     serializer_class = serializers.SectorDTOSerializer
 
     def list(self, request, **kwargs):
@@ -51,10 +51,10 @@ class AutocompleteSectorViewSet(ListAPIView):
         return Response(serializer.data)
 
 
-class AutocompleteDoctoratViewSet(ListAPIView):
+class AutocompleteDoctoratView(ListAPIView):
     """Autocomplete doctorates given a sector"""
     pagination_class = None
-    filter_backends = None
+    filter_backends = []
     serializer_class = serializers.DoctoratDTOSerializer
 
     def list(self, request, **kwargs):

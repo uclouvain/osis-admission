@@ -192,8 +192,11 @@ class AdmissionSchemaGenerator(SchemaGenerator):
 
 
 class DetailedAutoSchema(AutoSchema):
+    operation_id_base = None
+
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        kwargs.pop('operation_id_base', None)
+        super().__init__(operation_id_base=self.operation_id_base, *args, **kwargs)
         self.enums = {}
 
     def get_request_body(self, path, method):
@@ -246,3 +249,16 @@ class DetailedAutoSchema(AutoSchema):
                     '$ref': "#/components/responses/{}".format(declared_enum.__name__)
                 }
         return super().map_choicefield(field)
+
+
+class ResponseSpecificSchema(DetailedAutoSchema):
+    serializer_mapping = {}
+
+    def get_serializer(self, path, method, for_response=True):
+        serializer_class = self.serializer_mapping.get(method, None)
+        if serializer_class and isinstance(serializer_class, tuple):
+            if for_response:
+                serializer_class = serializer_class[1]
+            else:
+                serializer_class = serializer_class[0]
+        return serializer_class() if serializer_class else None
