@@ -92,10 +92,10 @@ class InitierPropositionCommandSerializer(DTOSerializer):
         allow_null=True,
         default=None,
     )
-    documents_projet = serializers.ListField(child=serializers.UUIDField())
-    graphe_gantt = serializers.ListField(child=serializers.UUIDField())
-    proposition_programme_doctoral = serializers.ListField(child=serializers.UUIDField())
-    projet_formation_complementaire = serializers.ListField(child=serializers.UUIDField())
+    documents_projet = serializers.ListField(child=serializers.CharField())
+    graphe_gantt = serializers.ListField(child=serializers.CharField())
+    proposition_programme_doctoral = serializers.ListField(child=serializers.CharField())
+    projet_formation_complementaire = serializers.ListField(child=serializers.CharField())
     doctorat_deja_realise = serializers.ChoiceField(
         choices=ChoixDoctoratDejaRealise.choices(),
         default=ChoixDoctoratDejaRealise.NO.name,
@@ -116,10 +116,10 @@ class CompleterPropositionCommandSerializer(DTOSerializer):
         allow_null=True,
         default=None,
     )
-    documents_projet = serializers.ListField(child=serializers.UUIDField())
-    graphe_gantt = serializers.ListField(child=serializers.UUIDField())
-    proposition_programme_doctoral = serializers.ListField(child=serializers.UUIDField())
-    projet_formation_complementaire = serializers.ListField(child=serializers.UUIDField())
+    documents_projet = serializers.ListField(child=serializers.CharField())
+    graphe_gantt = serializers.ListField(child=serializers.CharField())
+    proposition_programme_doctoral = serializers.ListField(child=serializers.CharField())
+    projet_formation_complementaire = serializers.ListField(child=serializers.CharField())
     doctorat_deja_realise = serializers.ChoiceField(
         choices=ChoixDoctoratDejaRealise.choices(),
         default=ChoixDoctoratDejaRealise.NO.name,
