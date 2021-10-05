@@ -358,7 +358,6 @@ components:
           type: string
         bureau_CDE:
           $ref: '#/components/responses/ChoixBureauCDE'
-          nullable: true
         type_financement:
           type: string
         type_contrat_travail:
@@ -413,6 +412,7 @@ components:
       - sigle_formation
       - annee_formation
       - matricule_candidat
+      - bureau_CDE
       - documents_projet
       - graphe_gantt
       - proposition_programme_doctoral
@@ -424,6 +424,7 @@ components:
       type: string
     ChoixBureauCDE:
       enum:
+      - ''
       - ECONOMY
       - MANAGEMENT
       type: string
@@ -450,7 +451,6 @@ components:
           type: string
         bureau_CDE:
           $ref: '#/components/responses/ChoixBureauCDE'
-          nullable: true
         type_financement:
           type: string
         type_contrat_travail:
@@ -503,6 +503,7 @@ components:
       required:
       - uuid
       - type_admission
+      - bureau_CDE
       - documents_projet
       - graphe_gantt
       - proposition_programme_doctoral

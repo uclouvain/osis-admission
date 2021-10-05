@@ -191,7 +191,15 @@ class AdmissionSchemaGenerator(SchemaGenerator):
         return schema
 
 
-class DetailedAutoSchema(AutoSchema):
+class BetterChoicesSchema(AutoSchema):
+    def map_choicefield(self, field):
+        schema = super().map_choicefield(field)
+        if field.allow_blank:
+            schema['enum'] = [''] + schema['enum']
+        return schema
+
+
+class DetailedAutoSchema(BetterChoicesSchema):
     operation_id_base = None
 
     def __init__(self, *args, **kwargs):

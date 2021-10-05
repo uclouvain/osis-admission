@@ -89,8 +89,7 @@ class InitierPropositionCommandSerializer(DTOSerializer):
     type_admission = serializers.ChoiceField(choices=AdmissionType.choices())
     bureau_CDE = serializers.ChoiceField(
         choices=ChoixBureauCDE.choices(),
-        allow_null=True,
-        default=None,
+        allow_blank=True,
     )
     documents_projet = serializers.ListField(child=serializers.CharField())
     graphe_gantt = serializers.ListField(child=serializers.CharField())
@@ -113,8 +112,7 @@ class CompleterPropositionCommandSerializer(DTOSerializer):
     type_admission = serializers.ChoiceField(choices=AdmissionType.choices())
     bureau_CDE = serializers.ChoiceField(
         choices=ChoixBureauCDE.choices(),
-        allow_null=True,
-        default=None,
+        allow_blank=True,
     )
     documents_projet = serializers.ListField(child=serializers.CharField())
     graphe_gantt = serializers.ListField(child=serializers.CharField())
