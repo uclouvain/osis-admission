@@ -23,14 +23,25 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.api.views.person import *
-from admission.api.views.project import *
-from admission.api.views.autocomplete import *
+from rest_framework import mixins
+from rest_framework.generics import GenericAPIView
 
-__all__ = [
-    "PersonViewSet",
-    "PropositionViewSet",
-    "PropositionListView",
-    "AutocompleteDoctoratView",
-    "AutocompleteSectorView",
-]
+from admission.api.schema import BetterChoicesSchema
+from admission.contrib import serializers
+
+
+class PersonViewSet(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, GenericAPIView):
+    name = "person"
+    pagination_class = None
+    filter_backends = []
+    serializer_class = serializers.PersonIdentificationSerializer
+    schema = BetterChoicesSchema()
+
+    def get_object(self):
+        return self.request.user.person
+
+    def get(self, request, *args, **kwargs):
+        return self.retrieve(request, *args, **kwargs)
+
+    def put(self, request, *args, **kwargs):
+        return self.update(request, *args, **kwargs)

@@ -36,6 +36,8 @@ app_name = "admission_api_v1"
 urlpatterns = [
     path('propositions', views.PropositionListView),
     path('propositions/<uuid:uuid>', views.PropositionViewSet),
+    path('autocomplete/country', views.AutocompleteCountryView),
     path('autocomplete/sector', views.AutocompleteSectorView),
     path('autocomplete/sector/<str:sigle>/doctorates', views.AutocompleteDoctoratView),
+    path('person', views.PersonViewSet),
 ]
