@@ -23,11 +23,13 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from admission.api.views.coordonnees import *
 from admission.api.views.person import *
 from admission.api.views.project import *
 from admission.api.views.autocomplete import *
 
 __all__ = [
+    "CoordonneesViewSet",
     "PersonViewSet",
     "PropositionViewSet",
     "PropositionListView",

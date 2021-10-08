@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # ##############################################################################
 #
 #    OSIS stands for Open Student Information System. It's an application
@@ -26,3 +27,4 @@
 
 from .doctorate import *
 from .person import *
+from .coordonnees import CoordonneesSerializer
