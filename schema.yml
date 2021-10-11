@@ -212,7 +212,7 @@ components:
           type: string
         bureau_CDE:
           type: string
-        created_at:
+        creee_le:
           type: string
           format: date-time
       required:
@@ -223,7 +223,7 @@ components:
       - intitule_doctorat_en
       - matricule_candidat
       - code_secteur_formation
-      - created_at
+      - creee_le
     PropositionDTO:
       type: object
       properties:
