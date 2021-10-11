@@ -61,6 +61,60 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - person
+  /coordonnees:
+    get:
+      operationId: retrieveCoordonnees
+      description: ''
+      parameters:
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Coordonnees'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - person
+    put:
+      operationId: updateCoordonnees
+      description: ''
+      parameters:
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Coordonnees'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Coordonnees'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - person
   /propositions:
     get:
       operationId: list_propositions
@@ -360,6 +414,80 @@ components:
         last_registration_year:
           type: integer
           nullable: true
+    Coordonnees:
+      type: object
+      properties:
+        contact:
+          type: object
+          properties:
+            location:
+              type: string
+              nullable: true
+              maxLength: 255
+            postal_code:
+              type: string
+              nullable: true
+              maxLength: 20
+            city:
+              type: string
+              nullable: true
+              maxLength: 255
+            country:
+              type: integer
+              nullable: true
+            street:
+              type: string
+              maxLength: 255
+            street_number:
+              type: string
+              maxLength: 20
+            postal_box:
+              type: string
+              maxLength: 20
+            place:
+              type: string
+              maxLength: 255
+          nullable: true
+        residential:
+          type: object
+          properties:
+            location:
+              type: string
+              nullable: true
+              maxLength: 255
+            postal_code:
+              type: string
+              nullable: true
+              maxLength: 20
+            city:
+              type: string
+              nullable: true
+              maxLength: 255
+            country:
+              type: integer
+              nullable: true
+            street:
+              type: string
+              maxLength: 255
+            street_number:
+              type: string
+              maxLength: 20
+            postal_box:
+              type: string
+              maxLength: 20
+            place:
+              type: string
+              maxLength: 255
+          nullable: true
+        email:
+          type: string
+          readOnly: true
+        phone_mobile:
+          type: string
+      required:
+      - contact
+      - residential
+      - phone_mobile
     PropositionSearchDTO:
       type: object
       properties:

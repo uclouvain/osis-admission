@@ -26,8 +26,8 @@
 from rest_framework import mixins
 from rest_framework.generics import GenericAPIView
 
+from admission.api import serializers
 from admission.api.schema import BetterChoicesSchema
-from admission.contrib import serializers
 
 
 class PersonViewSet(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, GenericAPIView):

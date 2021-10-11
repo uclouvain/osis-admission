@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # ##############################################################################
 #
 #    OSIS stands for Open Student Information System. It's an application

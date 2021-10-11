@@ -12,6 +12,10 @@ class PersonAddressSerializer(serializers.ModelSerializer):
             "postal_code",
             "city",
             "country",
+            "street",
+            "street_number",
+            "postal_box",
+            "place",
         )
 
 
