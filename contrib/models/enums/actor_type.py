@@ -24,14 +24,12 @@
 #
 # ##############################################################################
 
-import factory
+from base.models.utils.utils import ChoiceEnum
 
-from admission.contrib.models import DoctorateAdmission
-from base.tests.factories.person import PersonFactory
+from django.utils.translation import gettext_lazy as _
 
 
-class DoctorateAdmissionFactory(factory.DjangoModelFactory):
-    class Meta:
-        model = DoctorateAdmission
-
-    candidate = factory.SubFactory(PersonFactory)
+class ActorType(ChoiceEnum):
+    MAIN_PROMOTER = _("Main promoter")
+    PROMOTER = _("Promoter")
+    CA_MEMBER = _("CA Member")

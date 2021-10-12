@@ -23,15 +23,14 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from django.urls import path
 
-import factory
+from admission.api import views
 
-from admission.contrib.models import DoctorateAdmission
-from base.tests.factories.person import PersonFactory
-
-
-class DoctorateAdmissionFactory(factory.DjangoModelFactory):
-    class Meta:
-        model = DoctorateAdmission
-
-    candidate = factory.SubFactory(PersonFactory)
+app_name = "admission_api_v1"
+urlpatterns = [
+    path('propositions', views.PropositionListView.as_view()),
+    path('propositions/<uuid:uuid>', views.PropositionViewSet.as_view()),
+    path('autocomplete/sector', views.AutocompleteSectorView.as_view()),
+    path('autocomplete/sector/<str:sigle>/doctorates', views.AutocompleteDoctoratView.as_view()),
+]

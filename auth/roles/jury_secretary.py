@@ -23,15 +23,23 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import rules
+from django.utils.translation import gettext_lazy as _
+from rules import RuleSet
 
-import factory
-
-from admission.contrib.models import DoctorateAdmission
-from base.tests.factories.person import PersonFactory
+from osis_role.contrib.models import EntityRoleModel
 
 
-class DoctorateAdmissionFactory(factory.DjangoModelFactory):
+class JurySecretary(EntityRoleModel):
     class Meta:
-        model = DoctorateAdmission
+        verbose_name = _("Jury secretary")
+        verbose_name_plural = _("Jury secretaries")
+        group_name = "jury_secretary"
 
-    candidate = factory.SubFactory(PersonFactory)
+    @classmethod
+    def rule_set(cls):
+        return RuleSet({
+            'admission.upload_defense_report': rules.always_allow,
+            'admission.view_doctorateadmission': rules.always_allow,
+            'admission.access_doctorateadmission': rules.always_allow,
+        })

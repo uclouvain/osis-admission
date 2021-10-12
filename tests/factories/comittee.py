@@ -26,12 +26,16 @@
 
 import factory
 
-from admission.contrib.models import DoctorateAdmission
-from base.tests.factories.person import PersonFactory
+from admission.contrib.models import CommitteeActor
+from admission.contrib.models.enums.actor_type import ActorType
+from osis_signature.tests.factories import ActorFactory
 
 
-class DoctorateAdmissionFactory(factory.DjangoModelFactory):
+class MainPromoterFactory(factory.DjangoModelFactory):
     class Meta:
-        model = DoctorateAdmission
+        model = CommitteeActor
 
-    candidate = factory.SubFactory(PersonFactory)
+    actor_ptr = factory.SubFactory(ActorFactory)
+    type = ActorType.MAIN_PROMOTER.name
+    person = factory.SelfAttribute('actor_ptr.person')
+    process = factory.SelfAttribute('actor_ptr.process')

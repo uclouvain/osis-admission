@@ -23,15 +23,24 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import rules
+from django.utils.translation import gettext_lazy as _
+from rules import RuleSet
 
-import factory
-
-from admission.contrib.models import DoctorateAdmission
-from base.tests.factories.person import PersonFactory
+from admission.auth.predicates import is_part_of_committee
+from osis_role.contrib.models import EntityRoleModel
 
 
-class DoctorateAdmissionFactory(factory.DjangoModelFactory):
+class CommitteeMember(EntityRoleModel):
     class Meta:
-        model = DoctorateAdmission
+        verbose_name = _("Committee member")
+        verbose_name_plural = _("Committee members")
+        group_name = "committee_members"
 
-    candidate = factory.SubFactory(PersonFactory)
+    @classmethod
+    def rule_set(cls):
+        return RuleSet({
+            'admission.approve_jury': is_part_of_committee,
+            'admission.view_doctorateadmission': is_part_of_committee,
+            'admission.access_doctorateadmission': rules.always_allow,
+        })

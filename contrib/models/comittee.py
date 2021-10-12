@@ -23,15 +23,28 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from django.core.exceptions import ValidationError
+from django.db import models
 
-import factory
-
-from admission.contrib.models import DoctorateAdmission
-from base.tests.factories.person import PersonFactory
+from admission.contrib.models.enums.actor_type import ActorType
+from osis_signature.models import Actor
 
 
-class DoctorateAdmissionFactory(factory.DjangoModelFactory):
-    class Meta:
-        model = DoctorateAdmission
+class CommitteeActor(Actor):
+    type = models.CharField(
+        default=ActorType.choices(),
+        max_length=50,
+    )
 
-    candidate = factory.SubFactory(PersonFactory)
+    def validate_unique(self, *args, **kwargs):
+        super().validate_unique(*args, **kwargs)
+
+        other_main_promoter = CommitteeActor.objects.filter(
+            actor_ptr__process_id=self.process_id,
+            type=ActorType.MAIN_PROMOTER.name,
+        )
+        if self.type == ActorType.MAIN_PROMOTER.name and other_main_promoter.exists():
+            raise ValidationError(
+                message='There is already another main promoter for this committee.',
+                code='unique_main_promoter',
+            )

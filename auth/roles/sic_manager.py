@@ -23,15 +23,25 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import rules
+from rules import RuleSet
+from django.utils.translation import gettext_lazy as _
 
-import factory
-
-from admission.contrib.models import DoctorateAdmission
-from base.tests.factories.person import PersonFactory
+from osis_role.contrib.models import EntityRoleModel
 
 
-class DoctorateAdmissionFactory(factory.DjangoModelFactory):
+class SicManager(EntityRoleModel):
     class Meta:
-        model = DoctorateAdmission
+        verbose_name = _("SIC manager")
+        verbose_name_plural = _("SIC managers")
+        group_name = "sic_managers"
 
-    candidate = factory.SubFactory(PersonFactory)
+    @classmethod
+    def rule_set(cls):
+        return RuleSet({
+            'admission.change_doctorateadmission': rules.always_allow,
+            'admission.delete_doctorateadmission': rules.always_deny,
+            'admission.access_doctorateadmission': rules.always_allow,
+            'admission.view_doctorateadmission': rules.always_allow,
+            'admission.appose_sic_notice': rules.always_allow,
+        })

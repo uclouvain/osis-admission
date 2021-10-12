@@ -23,15 +23,28 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
-import factory
+from django.contrib.auth.models import User
+from rules import predicate
 
 from admission.contrib.models import DoctorateAdmission
-from base.tests.factories.person import PersonFactory
+from admission.contrib.models.base import BaseAdmission
 
 
-class DoctorateAdmissionFactory(factory.DjangoModelFactory):
-    class Meta:
-        model = DoctorateAdmission
+@predicate
+def is_admission_request_author(user: User, obj: BaseAdmission):
+    return obj.candidate == user.person
 
-    candidate = factory.SubFactory(PersonFactory)
+
+@predicate
+def is_admission_request_promoter(user: User, obj: DoctorateAdmission):
+    return obj.main_promoter == user.person
+
+
+@predicate(bind=True)
+def is_part_of_doctoral_commission(self, user: User, obj: DoctorateAdmission):
+    return obj.doctoral_commission_id in self.context['role_qs'].get_entities_ids()
+
+
+@predicate
+def is_part_of_committee(user: User, obj: DoctorateAdmission):
+    return user.person.pk in obj.committee.actors.values_list('person_id', flat=True)

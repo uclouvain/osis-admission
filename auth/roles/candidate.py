@@ -23,15 +23,30 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import rules
+from rules import RuleSet
+from django.utils.translation import gettext_lazy as _
 
-import factory
-
-from admission.contrib.models import DoctorateAdmission
-from base.tests.factories.person import PersonFactory
+from admission.auth.predicates import is_admission_request_author
+from osis_role.contrib.models import EntityRoleModel
 
 
-class DoctorateAdmissionFactory(factory.DjangoModelFactory):
+class Candidate(EntityRoleModel):
     class Meta:
-        model = DoctorateAdmission
+        verbose_name = _("Candidate")
+        verbose_name_plural = _("Candidates")
+        group_name = "candidates"
 
-    candidate = factory.SubFactory(PersonFactory)
+    @classmethod
+    def rule_set(cls):
+        return RuleSet({
+            'admission.add_doctorateadmission': rules.always_allow,
+            'admission.change_doctorateadmission': is_admission_request_author,
+            'admission.view_doctorateadmission': is_admission_request_author,
+            'admission.delete_doctorateadmission': rules.always_deny,
+            'admission.access_doctorateadmission': rules.always_allow,
+            'admission.download_pdf_confirmation': is_admission_request_author,
+            'admission.upload_pdf_confirmation': is_admission_request_author,
+            'admission.fill_thesis': is_admission_request_author,
+            'admission.upload_publication_authorisation': is_admission_request_author,
+        })

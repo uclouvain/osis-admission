@@ -23,15 +23,23 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from admission.auth.roles.adre import Adre
+from admission.auth.roles.ca_member import CommitteeMember
+from admission.auth.roles.cdd_manager import CddManager
+from admission.auth.roles.jury_secretary import JurySecretary
+from admission.auth.roles.promoter import Promoter
+from admission.auth.roles.sceb import Sceb
+from admission.auth.roles.sic_director import SicDirector
+from admission.auth.roles.sic_manager import SicManager
+from osis_role import role
+from admission.auth.roles.candidate import Candidate
 
-import factory
-
-from admission.contrib.models import DoctorateAdmission
-from base.tests.factories.person import PersonFactory
-
-
-class DoctorateAdmissionFactory(factory.DjangoModelFactory):
-    class Meta:
-        model = DoctorateAdmission
-
-    candidate = factory.SubFactory(PersonFactory)
+role.role_manager.register(Candidate)
+role.role_manager.register(Adre)
+role.role_manager.register(CommitteeMember)
+role.role_manager.register(CddManager)
+role.role_manager.register(Promoter)
+role.role_manager.register(Sceb)
+role.role_manager.register(SicManager)
+role.role_manager.register(SicDirector)
+role.role_manager.register(JurySecretary)

@@ -26,12 +26,32 @@
 
 import factory
 
-from admission.contrib.models import DoctorateAdmission
-from base.tests.factories.person import PersonFactory
+from admission.auth.roles.candidate import Candidate
+from admission.auth.roles.cdd_manager import CddManager
+from admission.auth.roles.promoter import Promoter
 
 
-class DoctorateAdmissionFactory(factory.DjangoModelFactory):
+class BaseFactory(factory.DjangoModelFactory):
+    person = factory.SubFactory('base.tests.factories.person.PersonFactory')
+    entity = factory.SubFactory(
+        'base.tests.factories.entity.EntityFactory',
+        organization=None,
+    )
+    with_child = True
+
+
+class CandidateFactory(BaseFactory):
     class Meta:
-        model = DoctorateAdmission
+        model = Candidate
 
-    candidate = factory.SubFactory(PersonFactory)
+
+class PromoterFactory(BaseFactory):
+    class Meta:
+        model = Promoter
+
+
+class CddManagerFactory(BaseFactory):
+    class Meta:
+        model = CddManager
+
+    with_child = False

@@ -23,32 +23,33 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
-import django_filters as filters
-from dal import autocomplete
+import rules
+from rules import RuleSet
 from django.utils.translation import gettext_lazy as _
 
-from admission.contrib.models import DoctorateAdmission
-from base.models.person import Person
+from admission.auth.predicates import is_part_of_doctoral_commission
+from osis_role.contrib.models import EntityRoleModel
 
 
-class DoctorateAdmissionFilter(filters.FilterSet):
-    candidate = filters.ModelChoiceFilter(
-        queryset=Person.objects.filter(admissions__isnull=False).distinct(),
-        required=False,
-        widget=autocomplete.ModelSelect2(
-            url="admissions:candidate-autocomplete",
-            attrs={
-                "data-theme": "bootstrap",
-                "data-placeholder": _("Indicate the last name or email"),
-            }
-        ),
-        label=_("Candidate"),
-    )
-
+class CddManager(EntityRoleModel):
     class Meta:
-        model = DoctorateAdmission
-        fields = [
-            "type",
-            "candidate",
-        ]
+        verbose_name = _("CDD manager")
+        verbose_name_plural = _("CDD managers")
+        group_name = "cdd_managers"
+
+    @classmethod
+    def rule_set(cls):
+        return RuleSet({
+            'admission.change_doctorateadmission': is_part_of_doctoral_commission,
+            'admission.view_doctorateadmission': is_part_of_doctoral_commission,
+            'admission.delete_doctorateadmission': rules.always_deny,
+            'admission.access_doctorateadmission': rules.always_allow,
+            'admission.appose_cdd_notice': is_part_of_doctoral_commission,
+            'admission.download_pdf_confirmation': is_part_of_doctoral_commission,
+            'admission.upload_pdf_confirmation': is_part_of_doctoral_commission,
+            'admission.approve_confirmation_paper': is_part_of_doctoral_commission,
+            'admission.validate_doctoral_training': is_part_of_doctoral_commission,
+            'admission.fill_thesis': is_part_of_doctoral_commission,
+            'admission.submit_thesis': is_part_of_doctoral_commission,
+            'admission.upload_defense_report': is_part_of_doctoral_commission,
+        })
