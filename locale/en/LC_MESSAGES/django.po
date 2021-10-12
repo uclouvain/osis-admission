@@ -31,19 +31,118 @@ msgid ""
 "            "
 msgstr ""
 
+msgid "ADRE"
+msgstr ""
+
+msgid "ADREs"
+msgstr ""
+
+msgid "Abstract"
+msgstr ""
+
+msgid "Additional training project"
+msgstr ""
+
 msgid "Admission"
+msgstr ""
+
+msgid "Admission type"
+msgstr ""
+
+msgid "Allocated time"
 msgstr ""
 
 msgid "Author"
 msgstr ""
 
+msgid "Brief justification"
+msgstr ""
+
+msgid "Bureau"
+msgstr ""
+
+msgid "CA Member"
+msgstr ""
+
+msgid "CDD manager"
+msgstr ""
+
+msgid "CDD managers"
+msgstr ""
+
+msgid "Can access doctorate admission list"
+msgstr ""
+
+msgid "Can appose CDD notice"
+msgstr ""
+
+msgid "Can appose SIC notice"
+msgstr ""
+
+msgid "Can approve confirmation paper"
+msgstr ""
+
+msgid "Can approve jury"
+msgstr ""
+
+msgid "Can check copyright"
+msgstr ""
+
+msgid "Can check publication autorisation"
+msgstr ""
+
+msgid "Can download PDF confirmation"
+msgstr ""
+
+msgid "Can download jury-approved PDF"
+msgstr ""
+
+msgid "Can fill thesis"
+msgstr ""
+
+msgid "Can sign diploma"
+msgstr ""
+
+msgid "Can submit thesis"
+msgstr ""
+
+msgid "Can upload PDF confirmation"
+msgstr ""
+
+msgid "Can upload defense report"
+msgstr ""
+
+msgid "Can upload jury-approved PDF"
+msgstr ""
+
+msgid "Can upload signed scholarship"
+msgstr ""
+
+msgid "Can validate doctoral training"
+msgstr ""
+
+msgid "Can validate registration"
+msgstr ""
+
 msgid "Candidate"
+msgstr ""
+
+msgid "Candidates"
 msgstr ""
 
 msgid "Close"
 msgstr ""
 
 msgid "Comment"
+msgstr ""
+
+msgid "Committee member"
+msgstr ""
+
+msgid "Committee members"
+msgstr ""
+
+msgid "Complementary training project"
 msgstr ""
 
 msgid "Confirm"
@@ -55,10 +154,29 @@ msgstr ""
 msgid "Created"
 msgstr ""
 
+msgid "Dedicated time (in EFT)"
+msgstr ""
+
+msgid "Defense"
+msgstr ""
+
+msgid "Defense date"
+msgstr ""
+
 msgid "Delete"
 msgstr ""
 
 msgid "Delete?"
+msgstr ""
+
+msgid ""
+"Detail here the reasons which justify the recourse to a provisory admission."
+msgstr ""
+
+msgid "Doctoral project proposition"
+msgstr ""
+
+msgid "Doctorate"
 msgstr ""
 
 msgid "Doctorate admission"
@@ -70,10 +188,34 @@ msgstr ""
 msgid "Doctorate admissions"
 msgstr ""
 
+msgid "EFT"
+msgstr ""
+
+msgid "Estimated time"
+msgstr ""
+
 msgid "Export"
 msgstr ""
 
+msgid "Financing type"
+msgstr ""
+
+msgid "Full-time equivalent"
+msgstr ""
+
+msgid "Gantt graph"
+msgstr ""
+
 msgid "Indicate the last name or email"
+msgstr ""
+
+msgid "Institution"
+msgstr ""
+
+msgid "Jury secretaries"
+msgstr ""
+
+msgid "Jury secretary"
 msgstr ""
 
 msgid "List of doctorate admissions"
@@ -82,10 +224,19 @@ msgstr ""
 msgid "List of doctorate admissions with administrative data"
 msgstr ""
 
+msgid "Main promoter"
+msgstr ""
+
 msgid "Modified"
 msgstr ""
 
-msgid "No result!"
+msgid "No defense reason"
+msgstr ""
+
+msgid "PhD already done"
+msgstr ""
+
+msgid "Planned duration"
 msgstr ""
 
 msgid "Pre-Admission"
@@ -97,10 +248,79 @@ msgstr ""
 msgid "Produce xls with a list of doctorate admissions"
 msgstr ""
 
+msgid "Program proposition"
+msgstr ""
+
+msgid "Project"
+msgstr ""
+
+msgid "Project documents"
+msgstr ""
+
+msgid "Project resume"
+msgstr ""
+
+msgid "Project title"
+msgstr ""
+
+msgid "Promoter"
+msgstr ""
+
+msgid "Promoters"
+msgstr ""
+
+msgid "SCEB"
+msgstr ""
+
+msgid "SCEBs"
+msgstr ""
+
+msgid "SIC director"
+msgstr ""
+
+msgid "SIC directors"
+msgstr ""
+
+msgid "SIC manager"
+msgstr ""
+
+msgid "SIC managers"
+msgstr ""
+
+msgid "Scholarship grant"
+msgstr ""
+
+msgid "Sector"
+msgstr ""
+
+msgid "Specify scholarship grant"
+msgstr ""
+
+msgid "Specify work contract"
+msgstr ""
+
+msgid "Thesis language"
+msgstr ""
+
+msgid "Thesis redacting language"
+msgstr ""
+
 msgid "Type"
 msgstr ""
 
 msgid "UUID"
+msgstr ""
+
+msgid "Update"
+msgstr ""
+
+msgid "Update doctorate admission"
+msgstr ""
+
+msgid "Work contract type"
+msgstr ""
+
+msgid "Working contract type"
 msgstr ""
 
 msgid "actions"
