@@ -42,7 +42,7 @@ def is_admission_request_promoter(user: User, obj: DoctorateAdmission):
 
 @predicate(bind=True)
 def is_part_of_doctoral_commission(self, user: User, obj: DoctorateAdmission):
-    return obj.doctoral_commission_id in self.context['role_qs'].get_entities_ids()
+    return obj.doctorate.management_entity_id in self.context['role_qs'].get_entities_ids()
 
 
 @predicate

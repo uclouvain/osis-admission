@@ -29,8 +29,9 @@ from admission.api import views
 
 app_name = "admission_api_v1"
 urlpatterns = [
-    path('propositions', views.PropositionListView.as_view()),
-    path('propositions/<uuid:uuid>', views.PropositionViewSet.as_view()),
-    path('autocomplete/sector', views.AutocompleteSectorView.as_view()),
-    path('autocomplete/sector/<str:sigle>/doctorates', views.AutocompleteDoctoratView.as_view()),
+    path('propositions', views.PropositionListView.as_view(), name="propositions"),
+    path('propositions/<uuid:uuid>', views.PropositionViewSet.as_view(), name="propositions"),
+    path('autocomplete/sector', views.AutocompleteSectorView.as_view(), name="autocomplete-sector"),
+    path('autocomplete/sector/<str:sigle>/doctorates', views.AutocompleteDoctoratView.as_view(),
+         name="autocomplete-doctorate"),
 ]

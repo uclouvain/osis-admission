@@ -28,7 +28,7 @@ from rest_framework.generics import GenericAPIView, ListCreateAPIView
 from rest_framework.response import Response
 
 from admission.api.schema import ResponseSpecificSchema
-from admission.contrib import serializers
+from admission.api import serializers
 from backoffice.settings.rest_framework.common_views import DisplayExceptionsByFieldNameAPIMixin
 from ddd.logic.admission.preparation.projet_doctoral.commands import (
     CompleterPropositionCommand, GetPropositionCommand,

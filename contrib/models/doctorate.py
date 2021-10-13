@@ -129,7 +129,7 @@ class DoctorateAdmission(BaseAdmission):
         max_length=255,
         choices=ChoixDoctoratDejaRealise.choices(),
         verbose_name=_("PhD already done"),
-        default='',
+        default=ChoixDoctoratDejaRealise.NO.name,
         blank=True,
     )
     phd_already_done_institution = models.CharField(
