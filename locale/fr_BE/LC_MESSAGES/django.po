@@ -86,7 +86,7 @@ msgid "Can appose SIC notice"
 msgstr "Peut apposer un avis SIC"
 
 msgid "Can approve confirmation paper"
-msgstr "Peut approuve la lettre de confirmation"
+msgstr "Peut approuver la lettre de confirmation"
 
 msgid "Can approve jury"
 msgstr "Peut approuver le jury"
