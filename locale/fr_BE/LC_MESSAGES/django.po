@@ -37,20 +37,119 @@ msgstr ""
 "              Êtes-vous sûr de vouloir supprimer \"%(object)s\"?\n"
 "            "
 
+msgid "ADRE"
+msgstr "ADRE"
+
+msgid "ADREs"
+msgstr "ADRE"
+
+msgid "Abstract"
+msgstr "Résumé"
+
+msgid "Additional training project"
+msgstr "Projet de formation complémentaire"
+
 msgid "Admission"
-msgstr ""
+msgstr "Admission"
+
+msgid "Admission type"
+msgstr "Type d'admission"
+
+msgid "Allocated time"
+msgstr "Temps consacré"
 
 msgid "Author"
 msgstr "Auteur"
 
+msgid "Brief justification"
+msgstr "Justification succincte"
+
+msgid "Bureau"
+msgstr "Bureau"
+
+msgid "CA Member"
+msgstr "Membre du CA"
+
+msgid "CDD manager"
+msgstr "Gestionnaire CDD"
+
+msgid "CDD managers"
+msgstr "Gestionnaires CDD"
+
+msgid "Can access doctorate admission list"
+msgstr "Peut accéder à la liste des admission en doctorat"
+
+msgid "Can appose CDD notice"
+msgstr "Peut apposer un avis CDD"
+
+msgid "Can appose SIC notice"
+msgstr "Peut apposer un avis SIC"
+
+msgid "Can approve confirmation paper"
+msgstr "Peut approuver la lettre de confirmation"
+
+msgid "Can approve jury"
+msgstr "Peut approuver le jury"
+
+msgid "Can check copyright"
+msgstr "Peut vérifier le copyright"
+
+msgid "Can check publication autorisation"
+msgstr "Peut vérifier l'autorisation de publication"
+
+msgid "Can download PDF confirmation"
+msgstr "Peut télécharger la confirmation PDF"
+
+msgid "Can download jury-approved PDF"
+msgstr "Peut télécharger le PDF d'avis du jury"
+
+msgid "Can fill thesis"
+msgstr "Peut spécifier la thèse"
+
+msgid "Can sign diploma"
+msgstr "Peut signer le diplôme"
+
+msgid "Can submit thesis"
+msgstr "Peut soumettre la thèse"
+
+msgid "Can upload PDF confirmation"
+msgstr "Peut téléverser le PDF de confirmation"
+
+msgid "Can upload defense report"
+msgstr "Peut téléverser le rapport de soutenance"
+
+msgid "Can upload jury-approved PDF"
+msgstr "Peut téléverser le PDF d'avis du jury"
+
+msgid "Can upload signed scholarship"
+msgstr "Peut téléverser la bourse signée"
+
+msgid "Can validate doctoral training"
+msgstr "Peut valider la formation doctorale"
+
+msgid "Can validate registration"
+msgstr "Peut valider l'inscription"
+
 msgid "Candidate"
 msgstr "Candidat"
+
+msgid "Candidates"
+msgstr "Candidats"
 
 msgid "Close"
 msgstr "Fermer"
 
 msgid "Comment"
 msgstr "Commentaire"
+
+msgid "Committee member"
+msgstr "Membre du comité"
+
+msgid "Committee members"
+msgstr "Membres du comité"
+
+msgid "Complementary training project"
+msgstr "Projet de formation complémentaire"
 
 msgid "Confirm"
 msgstr "Confirmer"
@@ -61,11 +160,30 @@ msgstr "Créer une nouvelle admission en doctorat"
 msgid "Created"
 msgstr "Créé"
 
+msgid "Dedicated time (in EFT)"
+msgstr "Temps consacré (en EFT)"
+
+msgid "Defense"
+msgstr "Soutenance"
+
+msgid "Defense date"
+msgstr "Date de soutenance"
+
 msgid "Delete"
 msgstr "Supprimer"
 
 msgid "Delete?"
 msgstr "Supprimer ?"
+
+msgid ""
+"Detail here the reasons which justify the recourse to a provisory admission."
+msgstr "Détaillez ici les raisons justifiant une admission provisoire"
+
+msgid "Doctoral project proposition"
+msgstr "Proposition de projet doctoral"
+
+msgid "Doctorate"
+msgstr "Doctorat"
 
 msgid "Doctorate admission"
 msgstr "Admission en doctorat"
@@ -76,11 +194,35 @@ msgstr "L'admission en doctorat a bien été supprimée"
 msgid "Doctorate admissions"
 msgstr "Admissions en doctorat"
 
+msgid "EFT"
+msgstr "EFT"
+
+msgid "Estimated time"
+msgstr "Temps estimé"
+
 msgid "Export"
 msgstr "Exporter"
 
+msgid "Financing type"
+msgstr "Type de financement"
+
+msgid "Full-time equivalent"
+msgstr "Équivalent full-time"
+
+msgid "Gantt graph"
+msgstr "Graphe de Gantt"
+
 msgid "Indicate the last name or email"
 msgstr "Indiquer le nom de famille ou l'email"
+
+msgid "Institution"
+msgstr "Institution"
+
+msgid "Jury secretaries"
+msgstr "Secrétaires de jury"
+
+msgid "Jury secretary"
+msgstr "Secrétaire de jury"
 
 msgid "List of doctorate admissions"
 msgstr "Liste des admissions en doctorat"
@@ -88,11 +230,20 @@ msgstr "Liste des admissions en doctorat"
 msgid "List of doctorate admissions with administrative data"
 msgstr "Liste des admissions en doctorat et données administratives"
 
+msgid "Main promoter"
+msgstr "Promoteur principal"
+
 msgid "Modified"
 msgstr "Modifée"
 
-msgid "No result!"
-msgstr "Pas de résultat !"
+msgid "No defense reason"
+msgstr "Raison de non-soutenance"
+
+msgid "PhD already done"
+msgstr "Doctorat déjà réalisé"
+
+msgid "Planned duration"
+msgstr "Durée prévue"
 
 msgid "Pre-Admission"
 msgstr "Pré-Admission"
@@ -105,11 +256,80 @@ msgstr ""
 msgid "Produce xls with a list of doctorate admissions"
 msgstr "Produire un fichier xls avec la liste des admissions en doctorat"
 
+msgid "Program proposition"
+msgstr "Proposition de programme"
+
+msgid "Project"
+msgstr "Projet"
+
+msgid "Project documents"
+msgstr "Documents de projet"
+
+msgid "Project resume"
+msgstr "Résumé du projet"
+
+msgid "Project title"
+msgstr "Titre du projet"
+
+msgid "Promoter"
+msgstr "Promoteur"
+
+msgid "Promoters"
+msgstr "Promoteurs"
+
+msgid "SCEB"
+msgstr "SCEB"
+
+msgid "SCEBs"
+msgstr "SCEB"
+
+msgid "SIC director"
+msgstr "Directeur SIC"
+
+msgid "SIC directors"
+msgstr "Directeurs SIC"
+
+msgid "SIC manager"
+msgstr "Gestionnaire SIC"
+
+msgid "SIC managers"
+msgstr "Gestionnaires SIC"
+
+msgid "Scholarship grant"
+msgstr "Bourse de recherche"
+
+msgid "Sector"
+msgstr "Secteur"
+
+msgid "Specify scholarship grant"
+msgstr "Spécifier la bourse de recherche"
+
+msgid "Specify work contract"
+msgstr "Spécifier le contrat de travail"
+
+msgid "Thesis language"
+msgstr "Langue de la thèse"
+
+msgid "Thesis redacting language"
+msgstr "Langue de rédaction de la thèse"
+
 msgid "Type"
-msgstr ""
+msgstr "Type"
 
 msgid "UUID"
-msgstr ""
+msgstr "UUID"
+
+msgid "Update"
+msgstr "Mettre à jour"
+
+msgid "Update doctorate admission"
+msgstr "Mettre à jour admission en doctorat"
+
+msgid "Work contract type"
+msgstr "Type de contrat de travail"
+
+msgid "Working contract type"
+msgstr "Type de contrat de travail"
 
 msgid "actions"
 msgstr "actions"
