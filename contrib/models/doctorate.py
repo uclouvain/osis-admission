@@ -31,10 +31,10 @@ from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
 from base.models.person import Person
-from ddd.logic.admission.preparation.projet_doctoral.domain.model._experience_precedente_recherche import \
+from admission.ddd.preparation.projet_doctoral.domain.model._experience_precedente_recherche import \
     ChoixDoctoratDejaRealise
-from ddd.logic.admission.preparation.projet_doctoral.domain.model._financement import ChoixTypeFinancement
-from ddd.logic.admission.preparation.projet_doctoral.domain.model._enums import ChoixBureauCDE
+from admission.ddd.preparation.projet_doctoral.domain.model._financement import ChoixTypeFinancement
+from admission.ddd.preparation.projet_doctoral.domain.model._enums import ChoixBureauCDE
 from osis_document.contrib import FileField
 from osis_signature.contrib.fields import SignatureProcessField
 from .base import BaseAdmission

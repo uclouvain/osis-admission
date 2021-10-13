@@ -28,11 +28,11 @@ from django import forms
 from django.utils.translation import gettext_lazy as _
 
 from admission.contrib.models import AdmissionType
-from ddd.logic.admission.preparation.projet_doctoral.domain.model._detail_projet import ChoixLangueRedactionThese
-from ddd.logic.admission.preparation.projet_doctoral.domain.model._experience_precedente_recherche import \
+from admission.ddd.preparation.projet_doctoral.domain.model._detail_projet import ChoixLangueRedactionThese
+from admission.ddd.preparation.projet_doctoral.domain.model._experience_precedente_recherche import \
     ChoixDoctoratDejaRealise
-from ddd.logic.admission.preparation.projet_doctoral.domain.model._financement import ChoixTypeFinancement
-from ddd.logic.admission.preparation.projet_doctoral.domain.model._enums import ChoixBureauCDE
+from admission.ddd.preparation.projet_doctoral.domain.model._financement import ChoixTypeFinancement
+from admission.ddd.preparation.projet_doctoral.domain.model._enums import ChoixBureauCDE
 from osis_document.contrib import FileUploadField
 
 

@@ -28,15 +28,15 @@ from rest_framework import serializers
 
 from admission.contrib.models import AdmissionType, DoctorateAdmission
 from base.utils.serializers import DTOSerializer
-from ddd.logic.admission.preparation.projet_doctoral.commands import (
+from admission.ddd.preparation.projet_doctoral.commands import (
     CompleterPropositionCommand,
     InitierPropositionCommand,
 )
-from ddd.logic.admission.preparation.projet_doctoral.domain.model._detail_projet import ChoixLangueRedactionThese
-from ddd.logic.admission.preparation.projet_doctoral.domain.model._experience_precedente_recherche import \
+from admission.ddd.preparation.projet_doctoral.domain.model._detail_projet import ChoixLangueRedactionThese
+from admission.ddd.preparation.projet_doctoral.domain.model._experience_precedente_recherche import \
     ChoixDoctoratDejaRealise
-from ddd.logic.admission.preparation.projet_doctoral.domain.model._enums import ChoixBureauCDE
-from ddd.logic.admission.preparation.projet_doctoral.dtos import DoctoratDTO, PropositionDTO, PropositionSearchDTO
+from admission.ddd.preparation.projet_doctoral.domain.model._enums import ChoixBureauCDE
+from admission.ddd.preparation.projet_doctoral.dtos import DoctoratDTO, PropositionDTO, PropositionSearchDTO
 
 __all__ = [
     "PropositionIdentityDTOSerializer",

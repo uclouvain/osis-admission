@@ -30,8 +30,8 @@ from rest_framework.response import Response
 from admission.contrib import serializers
 from admission.contrib.models import EntityProxy
 from base.models.enums.entity_type import SECTOR
-from ddd.logic.admission.preparation.projet_doctoral.commands import SearchDoctoratCommand
-from infrastructure.messages_bus import message_bus_instance
+from admission.ddd.preparation.projet_doctoral.commands import SearchDoctoratCommand
+from admission.infrastructure.messages_bus import message_bus_instance
 
 
 class AutocompleteSectorView(ListAPIView):

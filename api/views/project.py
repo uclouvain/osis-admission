@@ -30,18 +30,18 @@ from rest_framework.response import Response
 from admission.api.schema import ResponseSpecificSchema
 from admission.contrib import serializers
 from backoffice.settings.rest_framework.common_views import DisplayExceptionsByFieldNameAPIMixin
-from ddd.logic.admission.preparation.projet_doctoral.commands import (
+from admission.ddd.preparation.projet_doctoral.commands import (
     CompleterPropositionCommand, GetPropositionCommand,
     InitierPropositionCommand,
     SearchPropositionsCommand,
 )
-from ddd.logic.admission.preparation.projet_doctoral.domain.validator.exceptions import (
+from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import (
     BureauCDEInconsistantException,
     ContratTravailInconsistantException,
     InstitutionInconsistanteException,
     JustificationRequiseException,
 )
-from infrastructure.messages_bus import message_bus_instance
+from admission.infrastructure.messages_bus import message_bus_instance
 
 
 class PropositionListSchema(ResponseSpecificSchema):
