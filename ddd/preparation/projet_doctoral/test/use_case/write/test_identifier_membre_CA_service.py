@@ -35,7 +35,7 @@ from admission.ddd.preparation.projet_doctoral.commands import (
     IdentifierMembreCACommand,
     IdentifierPromoteurCommand,
 )
-from admission.ddd.preparation.projet_doctoral.domain.model._signature_membre_CA  import (
+from admission.ddd.preparation.projet_doctoral.domain.model._signature_membre_CA import (
     SignatureMembreCA,
     ChoixEtatSignature,
 )

@@ -93,7 +93,10 @@ class TestCompleterPropositionService(SimpleTestCase):
     def test_should_completer_experience_precedente(self):
         proposition_id = self.message_bus.invoke(self.cmd)
         proposition = self.proposition_repository.get(proposition_id)  # type: Proposition
-        self.assertEqual(ChoixDoctoratDejaRealise[self.cmd.doctorat_deja_realise], proposition.experience_precedente_recherche.doctorat_deja_realise)
+        self.assertEqual(
+            ChoixDoctoratDejaRealise[self.cmd.doctorat_deja_realise],
+            proposition.experience_precedente_recherche.doctorat_deja_realise,
+        )
         self.assertEqual(self.cmd.institution, proposition.experience_precedente_recherche.institution)
 
     def test_should_pas_completer_bureau_cde_pas_vide_et_non_CDE(self):

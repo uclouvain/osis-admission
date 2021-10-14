@@ -51,4 +51,3 @@ def definir_cotutelle(
     groupe_supervision_repository.save(groupe_de_supervision)
 
     return proposition_id
-

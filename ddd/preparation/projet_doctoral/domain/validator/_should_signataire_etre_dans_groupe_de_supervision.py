@@ -1,4 +1,3 @@
-
 # ##############################################################################
 #
 #    OSIS stands for Open Student Information System. It's an application
@@ -38,11 +37,14 @@ from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions impor
 @attr.s(frozen=True, slots=True)
 class ShouldSignataireEtreDansGroupeDeSupervision(BusinessValidator):
     groupe_de_supervision = attr.ib(type='GroupeDeSupervision')  # type: GroupeDeSupervision
-    signataire_id = attr.ib(type="Union['PromoteurIdentity', 'MembreCAIdentity']")  # type: Union['PromoteurIdentity', 'MembreCAIdentity']
+    signataire_id = attr.ib(
+        type="Union['PromoteurIdentity', 'MembreCAIdentity']",
+    )  # type: Union['PromoteurIdentity', 'MembreCAIdentity']
 
     def validate(self, *args, **kwargs):
+        groupe = self.groupe_de_supervision
         if (
-                not any(s for s in self.groupe_de_supervision.signatures_promoteurs if s.promoteur_id == self.signataire_id)
-                and not any(s for s in self.groupe_de_supervision.signatures_membres_CA if s.membre_CA_id == self.signataire_id)
+                not any(s for s in groupe.signatures_promoteurs if s.promoteur_id == self.signataire_id)
+                and not any(s for s in groupe.signatures_membres_CA if s.membre_CA_id == self.signataire_id)
         ):
             raise SignataireNonTrouveException

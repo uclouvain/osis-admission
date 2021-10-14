@@ -26,6 +26,18 @@
 from typing import Optional, List, Union
 
 import attr
+from admission.ddd.preparation.projet_doctoral.domain.validator import (
+    ShouldInstitutionDependreDoctoratRealise,
+    ShouldJustificationDonneeSiPreadmission,
+    ShouldMembreCAEtreDansGroupeDeSupervision,
+    ShouldMembreCAPasDejaPresentDansGroupeDeSupervision,
+    ShouldPromoteurEtreDansGroupeDeSupervision,
+    ShouldPromoteurPasDejaPresentDansGroupeDeSupervision,
+    ShouldSignataireEtreDansGroupeDeSupervision,
+    ShouldSignataireEtreInvite,
+    ShouldSignatairePasDejaInvite,
+    ShouldTypeContratTravailDependreTypeFinancement,
+)
 
 from base.ddd.utils.business_validator import TwoStepsMultipleBusinessExceptionListValidator, BusinessValidator
 from admission.ddd.preparation.projet_doctoral.business_types import *
@@ -33,26 +45,6 @@ from admission.ddd.preparation.projet_doctoral.domain.model._experience_preceden
     ChoixDoctoratDejaRealise
 from admission.ddd.preparation.projet_doctoral.domain.model._promoteur import PromoteurIdentity
 from admission.ddd.preparation.projet_doctoral.domain.model._membre_CA import MembreCAIdentity
-from admission.ddd.preparation.projet_doctoral.domain.validator._should_institution_dependre_doctorat_realise import \
-    ShouldInstitutionDependreDoctoratRealise
-from admission.ddd.preparation.projet_doctoral.domain.validator._should_justification_donnee_si_preadmission import \
-    ShouldJustificationDonneeSiPreadmission
-from admission.ddd.preparation.projet_doctoral.domain.validator._should_membre_CA_etre_dans_groupe_de_supervision import \
-    ShouldMembreCAEtreDansGroupeDeSupervision
-from admission.ddd.preparation.projet_doctoral.domain.validator._should_membre_CA_pas_deja_present_dans_groupe_de_supervision import \
-    ShouldMembreCAPasDejaPresentDansGroupeDeSupervision
-from admission.ddd.preparation.projet_doctoral.domain.validator._should_promoteur_etre_dans_groupe_de_supervision import \
-    ShouldPromoteurEtreDansGroupeDeSupervision
-from admission.ddd.preparation.projet_doctoral.domain.validator._should_promoteur_pas_deja_present_dans_groupe_de_supervision import \
-    ShouldPromoteurPasDejaPresentDansGroupeDeSupervision
-from admission.ddd.preparation.projet_doctoral.domain.validator._should_signataire_etre_dans_groupe_de_supervision import \
-    ShouldSignataireEtreDansGroupeDeSupervision
-from admission.ddd.preparation.projet_doctoral.domain.validator._should_signataire_etre_invite import \
-    ShouldSignataireEtreInvite
-from admission.ddd.preparation.projet_doctoral.domain.validator._should_signataire_pas_invite import \
-    ShouldSignatairePasDejaInvite
-from admission.ddd.preparation.projet_doctoral.domain.validator._should_type_contrat_travail_dependre_type_financement import \
-    ShouldTypeContratTravailDependreTypeFinancement
 
 
 @attr.s(frozen=True, slots=True)
@@ -169,7 +161,9 @@ class SupprimerMembreCAValidatorList(TwoStepsMultipleBusinessExceptionListValida
 @attr.s(frozen=True, slots=True)
 class InviterASignerValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
     groupe_de_supervision = attr.ib(type='GroupeDeSupervision')  # type: GroupeDeSupervision
-    signataire_id = attr.ib(type="Union['PromoteurIdentity', 'MembreCAIdentity']")  # type: Union['PromoteurIdentity', 'MembreCAIdentity']
+    signataire_id = attr.ib(
+        type="Union['PromoteurIdentity', 'MembreCAIdentity']",
+    )  # type: Union['PromoteurIdentity', 'MembreCAIdentity']
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
@@ -184,7 +178,9 @@ class InviterASignerValidatorList(TwoStepsMultipleBusinessExceptionListValidator
 @attr.s(frozen=True, slots=True)
 class ApprouverValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
     groupe_de_supervision = attr.ib(type='GroupeDeSupervision')  # type: GroupeDeSupervision
-    signataire_id = attr.ib(type="Union['PromoteurIdentity', 'MembreCAIdentity']")  # type: Union['PromoteurIdentity', 'MembreCAIdentity']
+    signataire_id = attr.ib(
+        type="Union['PromoteurIdentity', 'MembreCAIdentity']",
+    )  # type: Union['PromoteurIdentity', 'MembreCAIdentity']
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []

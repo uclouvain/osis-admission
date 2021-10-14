@@ -31,8 +31,10 @@ from admission.ddd.preparation.projet_doctoral.domain.model._experience_preceden
     ChoixDoctoratDejaRealise,
     aucune_experience_precedente_recherche,
 )
-from admission.ddd.preparation.projet_doctoral.domain.model._financement import ChoixTypeFinancement, \
-    financement_non_rempli
+from admission.ddd.preparation.projet_doctoral.domain.model._financement import (
+    ChoixTypeFinancement,
+    financement_non_rempli,
+)
 from admission.ddd.preparation.projet_doctoral.domain.model.proposition import Proposition
 from admission.ddd.preparation.projet_doctoral.domain.model._enums import ChoixBureauCDE, ChoixTypeAdmission
 from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import (
@@ -95,7 +97,10 @@ class TestInitierPropositionService(SimpleTestCase):
     def test_should_initier_experience_precedente(self):
         proposition_id = self.message_bus.invoke(self.cmd)
         proposition = self.proposition_repository.get(proposition_id)  # type: Proposition
-        self.assertEqual(ChoixDoctoratDejaRealise[self.cmd.doctorat_deja_realise], proposition.experience_precedente_recherche.doctorat_deja_realise)
+        self.assertEqual(
+            ChoixDoctoratDejaRealise[self.cmd.doctorat_deja_realise],
+            proposition.experience_precedente_recherche.doctorat_deja_realise,
+        )
         self.assertEqual(self.cmd.institution, proposition.experience_precedente_recherche.institution)
 
     def test_should_initier_bureau_cde_vide_et_non_CDE(self):

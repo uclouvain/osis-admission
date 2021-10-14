@@ -35,5 +35,6 @@ def rechercher_doctorats(
         cmd: 'SearchDoctoratCommand',
         doctorat_translator: 'IDoctoratTranslator',
 ) -> List['DoctoratDTO']:
-    annee = datetime.date.today().year  # TODO :: comment déterminer l'année concernée pour la formation ? Sur base d'un calendrier ?
+    # TODO :: comment déterminer l'année concernée pour la formation ? Sur base d'un calendrier ?
+    annee = datetime.date.today().year
     return doctorat_translator.search(cmd.sigle_secteur_entite_gestion, annee)

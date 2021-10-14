@@ -23,6 +23,8 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from typing import Union
+
 import attr
 
 from base.ddd.utils.business_validator import BusinessValidator
@@ -36,7 +38,9 @@ from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions impor
 @attr.s(frozen=True, slots=True)
 class ShouldSignatairePasDejaInvite(BusinessValidator):
     groupe_de_supervision = attr.ib(type='GroupeDeSupervision')  # type: GroupeDeSupervision
-    signataire_id = attr.ib(type="Union['PromoteurIdentity', 'MembreCAIdentity']")  # type: Union['PromoteurIdentity', 'MembreCAIdentity']
+    signataire_id = attr.ib(
+        type="Union['PromoteurIdentity', 'MembreCAIdentity']",
+    )  # type: Union['PromoteurIdentity', 'MembreCAIdentity']
 
     def validate(self, *args, **kwargs):
         if (

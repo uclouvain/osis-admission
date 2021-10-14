@@ -27,9 +27,9 @@ from typing import Optional
 
 import attr
 
+from ..model._experience_precedente_recherche import ChoixDoctoratDejaRealise
+from .exceptions import InstitutionInconsistanteException
 from base.ddd.utils.business_validator import BusinessValidator
-from admission.ddd.preparation.projet_doctoral.domain.model._experience_precedente_recherche import ChoixDoctoratDejaRealise
-from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import InstitutionInconsistanteException
 
 
 @attr.s(frozen=True, slots=True)
