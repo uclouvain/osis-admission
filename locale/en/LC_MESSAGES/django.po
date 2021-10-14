@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-03-29 18:34+0200\n"
+"POT-Creation-Date: 2021-10-14 17:16+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -31,10 +31,19 @@ msgid ""
 "            "
 msgstr ""
 
+msgid "A justification is needed when creating a pre-admission."
+msgstr ""
+
+msgid "ADMISSION"
+msgstr ""
+
 msgid "ADRE"
 msgstr ""
 
 msgid "ADREs"
+msgstr ""
+
+msgid "APPROVED"
 msgstr ""
 
 msgid "Abstract"
@@ -52,6 +61,12 @@ msgstr ""
 msgid "Allocated time"
 msgstr ""
 
+msgid "Already a member of CA."
+msgstr ""
+
+msgid "Already a promoter."
+msgstr ""
+
 msgid "Author"
 msgstr ""
 
@@ -64,10 +79,16 @@ msgstr ""
 msgid "CA Member"
 msgstr ""
 
+msgid "CANCELLED"
+msgstr ""
+
 msgid "CDD manager"
 msgstr ""
 
 msgid "CDD managers"
+msgstr ""
+
+msgid "CDE Bureau should be filled in only if the doctorate's entity is CDE"
 msgstr ""
 
 msgid "Can access doctorate admission list"
@@ -188,7 +209,13 @@ msgstr ""
 msgid "Doctorate admissions"
 msgstr ""
 
+msgid "ECONOMY"
+msgstr ""
+
 msgid "EFT"
+msgstr ""
+
+msgid "English"
 msgstr ""
 
 msgid "Estimated time"
@@ -200,16 +227,28 @@ msgstr ""
 msgid "Financing type"
 msgstr ""
 
+msgid "French"
+msgstr ""
+
 msgid "Full-time equivalent"
 msgstr ""
 
 msgid "Gantt graph"
 msgstr ""
 
+msgid "INVITED"
+msgstr ""
+
+msgid "IN_PROGRESS"
+msgstr ""
+
 msgid "Indicate the last name or email"
 msgstr ""
 
 msgid "Institution"
+msgstr ""
+
+msgid "Institution should be set when PhD has been set to yes or partial"
 msgstr ""
 
 msgid "Jury secretaries"
@@ -224,13 +263,43 @@ msgstr ""
 msgid "List of doctorate admissions with administrative data"
 msgstr ""
 
+msgid "MANAGEMENT"
+msgstr ""
+
 msgid "Main promoter"
+msgstr ""
+
+msgid "Member of supervision group already invited."
+msgstr ""
+
+msgid "Member of supervision group not found."
+msgstr ""
+
+msgid "Member of supervision group not invited."
+msgstr ""
+
+msgid "Membre CA not found."
 msgstr ""
 
 msgid "Modified"
 msgstr ""
 
+msgid "NO"
+msgstr ""
+
+msgid "NOT_INVITED"
+msgstr ""
+
+msgid "No PhD found."
+msgstr ""
+
 msgid "No defense reason"
+msgstr ""
+
+msgid "PARTIAL"
+msgstr ""
+
+msgid "PRE_ADMISSION"
 msgstr ""
 
 msgid "PhD already done"
@@ -266,13 +335,28 @@ msgstr ""
 msgid "Promoter"
 msgstr ""
 
+msgid "Promoter not found."
+msgstr ""
+
 msgid "Promoters"
+msgstr ""
+
+msgid "Proposition not found."
+msgstr ""
+
+msgid "REFUSED"
 msgstr ""
 
 msgid "SCEB"
 msgstr ""
 
 msgid "SCEBs"
+msgstr ""
+
+msgid "SEARCH_SCHOLARSHIP"
+msgstr ""
+
+msgid "SELF_FUNDING"
 msgstr ""
 
 msgid "SIC director"
@@ -287,6 +371,9 @@ msgstr ""
 msgid "SIC managers"
 msgstr ""
 
+msgid "SUBMITTED"
+msgstr ""
+
 msgid "Scholarship grant"
 msgstr ""
 
@@ -297,6 +384,9 @@ msgid "Specify scholarship grant"
 msgstr ""
 
 msgid "Specify work contract"
+msgstr ""
+
+msgid "Supervision group not found."
 msgstr ""
 
 msgid "Thesis language"
@@ -311,16 +401,31 @@ msgstr ""
 msgid "UUID"
 msgstr ""
 
+msgid "Undecided"
+msgstr ""
+
 msgid "Update"
 msgstr ""
 
 msgid "Update doctorate admission"
 msgstr ""
 
+msgid "WORK_CONTRACT"
+msgstr ""
+
+msgid "Work contract should be set when financing type is set to work contract"
+msgstr ""
+
 msgid "Work contract type"
 msgstr ""
 
 msgid "Working contract type"
+msgstr ""
+
+msgid "YES"
+msgstr ""
+
+msgid "You've reached the maximum authorized propositions."
 msgstr ""
 
 msgid "actions"
