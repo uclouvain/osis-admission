@@ -24,6 +24,7 @@
 #
 # ##############################################################################
 from django.shortcuts import resolve_url
+from rest_framework import status
 from rest_framework.test import APITestCase
 
 from admission.contrib.models import AdmissionType, DoctorateAdmission
@@ -37,12 +38,26 @@ class DoctorateAdmissionListApiTestCase(APITestCase):
     def setUpTestData(cls):
         cls.admission = DoctorateAdmissionFactory()
         cls.candidate = cls.admission.candidate
-        cls.list_url = resolve_url("admission_api_v1:propositions")
+        cls.url = resolve_url("admission_api_v1:propositions")
 
     def test_list_propositions(self):
         self.client.force_authenticate(user=self.candidate.user)
-        response = self.client.get(self.list_url, format="json")
-        self.assertEqual(response.status_code, 200, response.content)
+        response = self.client.get(self.url, format="json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
+
+    def test_user_not_logged_assert_not_authorized(self):
+        self.client.force_authenticate(user=None)
+
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_assert_methods_not_allowed(self):
+        self.client.force_authenticate(user=self.candidate.user)
+        methods_not_allowed = ['delete', 'put', 'patch']
+
+        for method in methods_not_allowed:
+            response = getattr(self.client, method)(self.url)
+            self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
 class DoctorateAdmissionCreationApiTestCase(APITestCase):
@@ -62,12 +77,12 @@ class DoctorateAdmissionCreationApiTestCase(APITestCase):
             "proposition_programme_doctoral": [],
             "projet_formation_complementaire": [],
         }
-        cls.create_url = resolve_url("admission_api_v1:propositions")
+        cls.url = resolve_url("admission_api_v1:propositions")
 
     def test_admission_doctorate_creation_using_api(self):
         self.client.force_authenticate(user=self.candidate.user)
-        response = self.client.post(self.create_url, data=self.create_data)
-        self.assertEqual(response.status_code, 201, response.content)
+        response = self.client.post(self.url, data=self.create_data)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.content)
         admissions = DoctorateAdmission.objects.all()
         self.assertEqual(admissions.count(), 1)
         admission = admissions.get(uuid=response.data["uuid"])
@@ -75,6 +90,12 @@ class DoctorateAdmissionCreationApiTestCase(APITestCase):
         self.assertEqual(admission.comment, self.create_data["justification"])
         response = self.client.get(resolve_url("admission_api_v1:propositions"), format="json")
         self.assertEqual(response.json()[0]['sigle_doctorat'], self.doctorate.acronym)
+
+    def test_user_not_logged_assert_not_authorized(self):
+        self.client.force_authenticate(user=None)
+
+        response = self.client.post(self.url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
 
 class DoctorateAdmissionUpdatingApiTestCase(APITestCase):
@@ -97,7 +118,7 @@ class DoctorateAdmissionUpdatingApiTestCase(APITestCase):
     def test_admission_doctorate_update_using_api(self):
         self.client.force_authenticate(user=self.candidate.user)
         response = self.client.put(self.url, data=self.update_data, format="json")
-        self.assertEqual(response.status_code, 200, response.content)
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
         admissions = DoctorateAdmission.objects.all()
         self.assertEqual(admissions.count(), 1)
         admission = admissions.get()
@@ -108,3 +129,17 @@ class DoctorateAdmissionUpdatingApiTestCase(APITestCase):
         response = self.client.get(self.url, format="json")
         self.assertEqual(response.json()['sigle_doctorat'], self.admission.doctorate.acronym)
         self.assertEqual(response.json()['titre_projet'], "A new title")
+
+    def test_user_not_logged_assert_not_authorized(self):
+        self.client.force_authenticate(user=None)
+
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_assert_methods_not_allowed(self):
+        self.client.force_authenticate(user=self.candidate.user)
+        methods_not_allowed = ['delete', 'post', 'patch']
+
+        for method in methods_not_allowed:
+            response = getattr(self.client, method)(self.url)
+            self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
