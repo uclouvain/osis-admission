@@ -38,7 +38,7 @@ from ddd.logic.learning_unit.domain.model.responsible_entity import UCLEntityIde
 class DoctoratTranslator(IDoctoratTranslator):
     @classmethod
     def get_dto(cls, sigle: str, annee: int) -> DoctoratDTO:
-        from admission.infrastructure.messages_bus import message_bus_instance
+        from infrastructure.messages_bus import message_bus_instance
         dtos = message_bus_instance.invoke(
             SearchFormationsCommand(sigle=sigle, annee=annee, type=TrainingType.PHD.name)
         )
@@ -55,7 +55,7 @@ class DoctoratTranslator(IDoctoratTranslator):
 
     @classmethod
     def get(cls, sigle: str, annee: int) -> Doctorat:
-        from admission.infrastructure.messages_bus import message_bus_instance
+        from infrastructure.messages_bus import message_bus_instance
         dtos = message_bus_instance.invoke(
             SearchFormationsCommand(sigle=sigle, annee=annee, type=TrainingType.PHD.name)
         )
@@ -69,7 +69,7 @@ class DoctoratTranslator(IDoctoratTranslator):
 
     @classmethod
     def search(cls, sigle_entite_gestion: str, annee: int) -> List['DoctoratDTO']:
-        from admission.infrastructure.messages_bus import message_bus_instance
+        from infrastructure.messages_bus import message_bus_instance
         dtos = message_bus_instance.invoke(
             SearchFormationsCommand(
                 annee=annee,

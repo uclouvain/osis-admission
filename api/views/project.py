@@ -41,7 +41,7 @@ from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions impor
     InstitutionInconsistanteException,
     JustificationRequiseException,
 )
-from admission.infrastructure.messages_bus import message_bus_instance
+from infrastructure.messages_bus import message_bus_instance
 
 
 class PropositionListSchema(ResponseSpecificSchema):

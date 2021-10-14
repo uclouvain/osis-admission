@@ -31,7 +31,7 @@ from admission.contrib import serializers
 from admission.contrib.models import EntityProxy
 from base.models.enums.entity_type import SECTOR
 from admission.ddd.preparation.projet_doctoral.commands import SearchDoctoratCommand
-from admission.infrastructure.messages_bus import message_bus_instance
+from infrastructure.messages_bus import message_bus_instance
 
 
 class AutocompleteSectorView(ListAPIView):

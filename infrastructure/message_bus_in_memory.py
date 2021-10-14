@@ -24,28 +24,6 @@
 #
 # ##############################################################################
 
-##############################################################################
-#
-#
-#    Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
-#
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
-#
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
-#
-#    A copy of this license - GNU General Public License - is available
-#    at the root of the source code of this program.  If not,
-#    see http://www.gnu.org/licenses/.
-#
-##############################################################################
-from typing import Dict, Callable, List
-
 from admission.ddd.preparation.projet_doctoral.commands import (
     ApprouverPropositionCommand,
     DemanderSignatureCommand,
@@ -91,10 +69,10 @@ from admission.infrastructure.preparation.projet_doctoral.repository.in_memory.g
     GroupeDeSupervisionInMemoryRepository
 from admission.infrastructure.preparation.projet_doctoral.repository.in_memory.proposition import \
     PropositionInMemoryRepository
-from osis_common.ddd.interface import CommandRequest, ApplicationServiceResult
+from infrastructure import AbstractMessageBusCommands, load_message_bus_instance
 
 
-class MessageBusInMemory:
+class MessageBusInMemoryCommands(AbstractMessageBusCommands):
     command_handlers = {
         InitierPropositionCommand: lambda cmd: initier_proposition(
             cmd,
@@ -149,13 +127,7 @@ class MessageBusInMemory:
             DoctoratInMemoryTranslator(),
             SecteurUclInMemoryTranslator(),
         ),
-    }  # type: Dict[CommandRequest, Callable[[CommandRequest], ApplicationServiceResult]]
-
-    def invoke(self, command: CommandRequest) -> ApplicationServiceResult:
-        return self.command_handlers[command.__class__](command)
-
-    def invoke_multiple(self, commands: List['CommandRequest']) -> List[ApplicationServiceResult]:
-        return [self.invoke(command) for command in commands]
+    }
 
 
-message_bus_in_memory_instance = MessageBusInMemory()
+message_bus_in_memory_instance = load_message_bus_instance("message_bus_in_memory")

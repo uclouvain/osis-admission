@@ -23,7 +23,6 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
-from typing import Callable, Dict, List
 
 from admission.ddd.preparation.projet_doctoral.commands import (
     ApprouverPropositionCommand,
@@ -31,7 +30,8 @@ from admission.ddd.preparation.projet_doctoral.commands import (
     DemanderSignatureCommand, GetPropositionCommand, IdentifierPromoteurCommand,
     InitierPropositionCommand,
     SearchDoctoratCommand,
-    SearchPropositionsCommand, SupprimerMembreCACommand,
+    SearchPropositionsCommand,
+    SupprimerMembreCACommand,
     SupprimerPromoteurCommand,
 )
 from admission.ddd.preparation.projet_doctoral.use_case.read.get_proposition_service import get_proposition
@@ -60,13 +60,10 @@ from admission.infrastructure.preparation.projet_doctoral.domain.service.secteur
 from admission.infrastructure.preparation.projet_doctoral.repository.groupe_de_supervision import \
     GroupeDeSupervisionRepository
 from admission.infrastructure.preparation.projet_doctoral.repository.proposition import PropositionRepository
-from ddd.logic.formation_catalogue.commands import SearchFormationsCommand
-from ddd.logic.formation_catalogue.use_case.read.search_formation_service import search_formations
-from education_group.ddd.repository.training import TrainingRepository
-from osis_common.ddd.interface import ApplicationServiceResult, CommandRequest
+from infrastructure.utils import AbstractMessageBusCommands
 
 
-class MessageBus:
+class MessageBusCommands(AbstractMessageBusCommands):
     command_handlers = {
         InitierPropositionCommand: lambda cmd: initier_proposition(
             cmd,
@@ -121,17 +118,4 @@ class MessageBus:
             cmd,
             DoctoratTranslator(),
         ),
-        SearchFormationsCommand: lambda cmd: search_formations(
-            cmd,
-            TrainingRepository(),
-        ),
-    }  # type: Dict[CommandRequest, Callable[[CommandRequest], ApplicationServiceResult]]
-
-    def invoke(self, command: CommandRequest) -> ApplicationServiceResult:
-        return self.command_handlers[command.__class__](command)
-
-    def invoke_multiple(self, commands: List['CommandRequest']) -> List[ApplicationServiceResult]:
-        return [self.invoke(command) for command in commands]
-
-
-message_bus_instance = MessageBus()
+    }
