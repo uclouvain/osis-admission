@@ -36,12 +36,12 @@ class IPromoteurTranslator(interface.DomainService):
     @classmethod
     @abstractmethod
     def get(cls, matricule: str) -> 'PromoteurIdentity':
-        pass
+        raise NotImplementedError
 
     @classmethod
     @abstractmethod
     def search(cls, matricules: List[str]) -> List['PromoteurIdentity']:
-        pass
+        raise NotImplementedError
 
     @classmethod
     @abstractmethod
@@ -50,4 +50,4 @@ class IPromoteurTranslator(interface.DomainService):
             terme_de_recherche: str,
             personne_connue_ucl_translator: 'IPersonneConnueUclTranslator',
     ) -> List['PromoteurDTO']:
-        pass
+        raise NotImplementedError

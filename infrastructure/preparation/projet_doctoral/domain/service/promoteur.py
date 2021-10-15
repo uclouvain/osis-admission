@@ -34,11 +34,11 @@ from ddd.logic.shared_kernel.personne_connue_ucl.domain.service.personne_connue_
 class PromoteurTranslator(IPromoteurTranslator):
     @classmethod
     def get(cls, matricule: str) -> 'PromoteurIdentity':
-        pass
+        raise NotImplementedError
 
     @classmethod
     def search(cls, matricules: List[str]) -> List['PromoteurIdentity']:
-        pass
+        raise NotImplementedError
 
     @classmethod
     def search_dto(

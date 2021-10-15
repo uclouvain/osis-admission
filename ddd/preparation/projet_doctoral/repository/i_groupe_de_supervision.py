@@ -40,12 +40,12 @@ class IGroupeDeSupervisionRepository(interface.AbstractRepository):
     @classmethod
     @abc.abstractmethod
     def get(cls, entity_id: 'GroupeDeSupervisionIdentity') -> 'GroupeDeSupervision':
-        pass
+        raise NotImplementedError
 
     @classmethod
     @abc.abstractmethod
     def get_by_proposition_id(cls, proposition_id: 'PropositionIdentity') -> 'GroupeDeSupervision':
-        pass
+        raise NotImplementedError
 
     @classmethod
     @abc.abstractmethod
@@ -55,19 +55,19 @@ class IGroupeDeSupervisionRepository(interface.AbstractRepository):
             matricule_candidat: str = None,
             **kwargs
     ) -> List['GroupeDeSupervision']:
-        pass
+        raise NotImplementedError
 
     @classmethod
     @abc.abstractmethod
     def delete(cls, entity_id: 'GroupeDeSupervisionIdentity', **kwargs: ApplicationService) -> None:
-        pass
+        raise NotImplementedError
 
     @classmethod
     @abc.abstractmethod
     def save(cls, entity: 'GroupeDeSupervision') -> None:
-        pass
+        raise NotImplementedError
 
     @classmethod
     @abc.abstractmethod
     def get_cotutelle_dto(cls, uuid_proposition: str) -> 'CotutelleDTO':
-        pass
+        raise NotImplementedError

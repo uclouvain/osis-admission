@@ -43,7 +43,7 @@ class TestRechercherDoctoratService(SimpleTestCase):
 
     def _mock_message_bus(self):
         message_bus_patcher = mock.patch.multiple(
-            'infrastructure.message_bus_in_memory',
+            'admission.infrastructure.message_bus_in_memory',
             DoctoratInMemoryTranslator=lambda: self.doctorat_translator,
         )
         message_bus_patcher.start()

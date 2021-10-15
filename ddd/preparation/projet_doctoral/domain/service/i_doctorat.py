@@ -35,14 +35,14 @@ class IDoctoratTranslator(interface.DomainService):
     @classmethod
     @abstractmethod
     def get(cls, sigle: str, annee: int) -> Doctorat:
-        pass
+        raise NotImplementedError
 
     @classmethod
     @abstractmethod
     def get_dto(cls, sigle: str, annee: int) -> DoctoratDTO:
-        pass
+        raise NotImplementedError
 
     @classmethod
     @abstractmethod
     def search(cls, sigle_entite_gestion: str, annee: int) -> List['DoctoratDTO']:
-        pass
+        raise NotImplementedError

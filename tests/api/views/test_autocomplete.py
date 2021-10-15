@@ -24,6 +24,7 @@
 #
 # ##############################################################################
 from django.shortcuts import resolve_url
+from django.test import override_settings
 from rest_framework.test import APITestCase
 
 from base.models.enums.education_group_types import TrainingType
@@ -33,6 +34,7 @@ from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.user import UserFactory
 
 
+@override_settings(ROOT_URLCONF='admission.api.url_v1')
 class AutocompleteTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
@@ -49,7 +51,7 @@ class AutocompleteTestCase(APITestCase):
     def test_autocomplete_sectors(self):
         self.client.force_authenticate(user=self.user)
         response = self.client.get(
-            resolve_url('admission_api_v1:autocomplete-sector'),
+            resolve_url('autocomplete-sector'),
             format="json",
         )
         self.assertEqual(response.status_code, 200, response.content)
@@ -58,7 +60,7 @@ class AutocompleteTestCase(APITestCase):
     def test_autocomplete_doctorate(self):
         self.client.force_authenticate(user=self.user)
         response = self.client.get(
-            resolve_url('admission_api_v1:autocomplete-doctorate', sigle="SSH"),
+            resolve_url('autocomplete-doctorate', sigle="SSH"),
             format="json",
         )
         self.assertEqual(response.status_code, 200, response.content)

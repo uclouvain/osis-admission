@@ -37,4 +37,4 @@ class IConstitutionSupervision(interface.DomainService):
             proposition: 'Proposition',
             matricule_candidat: str
     ) -> None:
-        pass
+        raise NotImplementedError

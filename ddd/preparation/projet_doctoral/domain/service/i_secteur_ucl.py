@@ -33,4 +33,4 @@ class ISecteurUclTranslator(interface.DomainService):
     @classmethod
     @abstractmethod
     def get(cls, sigle_entite: str) -> 'EntiteUclDTO':
-        pass
+        raise NotImplementedError

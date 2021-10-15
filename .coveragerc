@@ -8,6 +8,7 @@ omit =
     */management/*
     */admin.py
     */api/schema.py
+    */ddd/*/test/*
 
 [report]
 skip_covered = True

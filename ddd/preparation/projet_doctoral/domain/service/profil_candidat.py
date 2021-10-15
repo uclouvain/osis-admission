@@ -31,12 +31,12 @@ class ProfilCandidat(interface.DomainService):
     @classmethod
     def verifier_identification(cls, profil_candidat_translator: 'IProfilCandidatTranslator') -> None:
         # TODO : cherger les
-        pass
+        raise NotImplementedError
 
     @classmethod
     def verifier_coordonnees(cls, profil_candidat_translator: 'IProfilCandidatTranslator') -> None:
-        pass
+        raise NotImplementedError
 
     @classmethod
     def verifier_curriculum(cls, profil_candidat_translator: 'IProfilCandidatTranslator') -> None:
-        pass
+        raise NotImplementedError

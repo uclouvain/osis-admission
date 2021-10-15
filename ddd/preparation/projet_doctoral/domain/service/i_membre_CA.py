@@ -36,12 +36,12 @@ class IMembreCATranslator(interface.DomainService):
     @classmethod
     @abstractmethod
     def get(cls, matricule: str) -> 'MembreCAIdentity':
-        pass
+        raise NotImplementedError
 
     @classmethod
     @abstractmethod
     def search(cls, matricules: List[str]) -> List['MembreCAIdentity']:
-        pass
+        raise NotImplementedError
 
     @classmethod
     @abstractmethod
@@ -50,4 +50,4 @@ class IMembreCATranslator(interface.DomainService):
             terme_de_recherche: str,
             personne_connue_ucl_translator: 'IPersonneConnueUclTranslator',
     ) -> List['MembreCADTO']:
-        pass
+        raise NotImplementedError

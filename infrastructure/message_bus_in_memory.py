@@ -69,7 +69,7 @@ from admission.infrastructure.preparation.projet_doctoral.repository.in_memory.g
     GroupeDeSupervisionInMemoryRepository
 from admission.infrastructure.preparation.projet_doctoral.repository.in_memory.proposition import \
     PropositionInMemoryRepository
-from infrastructure import AbstractMessageBusCommands, load_message_bus_instance
+from infrastructure.utils import AbstractMessageBusCommands, MessageBus, load_message_bus_instance
 
 
 class MessageBusInMemoryCommands(AbstractMessageBusCommands):
@@ -130,4 +130,4 @@ class MessageBusInMemoryCommands(AbstractMessageBusCommands):
     }
 
 
-message_bus_in_memory_instance = load_message_bus_instance("message_bus_in_memory")
+message_bus_in_memory_instance = MessageBus(MessageBusInMemoryCommands.get_command_handlers())

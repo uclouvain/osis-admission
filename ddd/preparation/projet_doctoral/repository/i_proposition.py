@@ -36,7 +36,7 @@ class IPropositionRepository(interface.AbstractRepository):
     @abc.abstractmethod
     def get(cls, entity_id: 'PropositionIdentity') -> 'Proposition':
         # TODO :: réutiliser get_dto() et convertir DTO en Proposition
-        pass
+        raise NotImplementedError
 
     @classmethod
     @abc.abstractmethod
@@ -46,14 +46,14 @@ class IPropositionRepository(interface.AbstractRepository):
             matricule_candidat: str = None,
             **kwargs
     ) -> List['Proposition']:
-        pass
+        raise NotImplementedError
 
     @classmethod
     @abc.abstractmethod
     def delete(cls, entity_id: 'PropositionIdentity', **kwargs: ApplicationService) -> None:
-        pass
+        raise NotImplementedError
 
     @classmethod
     @abc.abstractmethod
     def save(cls, entity: 'Proposition') -> None:
-        pass
+        raise NotImplementedError

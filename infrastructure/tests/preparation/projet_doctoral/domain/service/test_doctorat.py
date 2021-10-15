@@ -41,7 +41,7 @@ class TestDoctoratTranslator(SimpleTestCase):
 
     def _mock_message_bus(self):
         message_bus_patcher = mock.patch.multiple(
-            'infrastructure.messages_bus',
+            'admission.infrastructure.message_bus',
             DoctoratTranslator=lambda: self.doctorat_translator,
         )
         message_bus_patcher.start()

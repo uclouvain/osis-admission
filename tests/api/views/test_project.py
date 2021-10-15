@@ -24,6 +24,7 @@
 #
 # ##############################################################################
 from django.shortcuts import resolve_url
+from django.test import override_settings
 from rest_framework import status
 from rest_framework.test import APITestCase
 
@@ -33,12 +34,13 @@ from admission.tests.factories.doctorate import DoctorateFactory
 from base.tests.factories.person import PersonFactory
 
 
+@override_settings(ROOT_URLCONF='admission.api.url_v1')
 class DoctorateAdmissionListApiTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
         cls.admission = DoctorateAdmissionFactory()
         cls.candidate = cls.admission.candidate
-        cls.url = resolve_url("admission_api_v1:propositions")
+        cls.url = resolve_url("propositions")
 
     def test_list_propositions(self):
         self.client.force_authenticate(user=self.candidate.user)
@@ -60,6 +62,7 @@ class DoctorateAdmissionListApiTestCase(APITestCase):
             self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
+@override_settings(ROOT_URLCONF='admission.api.url_v1')
 class DoctorateAdmissionCreationApiTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
@@ -77,7 +80,7 @@ class DoctorateAdmissionCreationApiTestCase(APITestCase):
             "proposition_programme_doctoral": [],
             "projet_formation_complementaire": [],
         }
-        cls.url = resolve_url("admission_api_v1:propositions")
+        cls.url = resolve_url("propositions")
 
     def test_admission_doctorate_creation_using_api(self):
         self.client.force_authenticate(user=self.candidate.user)
@@ -88,7 +91,7 @@ class DoctorateAdmissionCreationApiTestCase(APITestCase):
         admission = admissions.get(uuid=response.data["uuid"])
         self.assertEqual(admission.type, self.create_data["type_admission"])
         self.assertEqual(admission.comment, self.create_data["justification"])
-        response = self.client.get(resolve_url("admission_api_v1:propositions"), format="json")
+        response = self.client.get(resolve_url("propositions"), format="json")
         self.assertEqual(response.json()[0]['sigle_doctorat'], self.doctorate.acronym)
 
     def test_user_not_logged_assert_not_authorized(self):
@@ -98,6 +101,7 @@ class DoctorateAdmissionCreationApiTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
 
+@override_settings(ROOT_URLCONF='admission.api.url_v1')
 class DoctorateAdmissionUpdatingApiTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
@@ -113,7 +117,7 @@ class DoctorateAdmissionUpdatingApiTestCase(APITestCase):
             "proposition_programme_doctoral": [],
             "projet_formation_complementaire": [],
         }
-        cls.url = resolve_url("admission_api_v1:propositions", uuid=cls.admission.uuid)
+        cls.url = resolve_url("propositions", uuid=cls.admission.uuid)
 
     def test_admission_doctorate_update_using_api(self):
         self.client.force_authenticate(user=self.candidate.user)

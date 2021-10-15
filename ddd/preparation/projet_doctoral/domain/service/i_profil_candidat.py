@@ -33,14 +33,14 @@ class IProfilCandidatTranslator(interface.DomainService):
     @classmethod
     @abstractmethod
     def get_identification(cls, matricule) -> 'IdentificationDTO':
-        pass
+        raise NotImplementedError
 
     @classmethod
     @abstractmethod
     def get_coordonnees(cls, matricule) -> 'CoordonneesDTO':
-        pass
+        raise NotImplementedError
 
     @classmethod
     @abstractmethod
     def get_curriculum(cls, matricule) -> 'CurriculumDTO':
-        pass
+        raise NotImplementedError
