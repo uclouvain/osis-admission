@@ -24,8 +24,4 @@
 #
 # ##############################################################################
 
-from.doctorate import DoctorateAdmissionFilter
-
-__all__ = [
-    "DoctorateAdmissionFilter",
-]
+from .doctorate import *

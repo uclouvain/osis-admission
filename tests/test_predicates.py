@@ -66,7 +66,7 @@ class PredicatesTestCase(TestCase):
         predicate_context_mock.start()
 
         doctoral_commission = EntityFactory()
-        request = DoctorateAdmissionFactory(doctoral_commission=doctoral_commission)
+        request = DoctorateAdmissionFactory(doctorate__management_entity=doctoral_commission)
         manager1 = CddManagerFactory(entity=doctoral_commission)
         manager2 = CddManagerFactory()
 

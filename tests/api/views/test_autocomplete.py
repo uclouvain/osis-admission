@@ -23,32 +23,43 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from django.shortcuts import resolve_url
+from rest_framework.test import APITestCase
 
-import factory
-
-from admission.contrib.models import DoctorateAdmission
 from base.models.enums.education_group_types import TrainingType
-from base.models.enums.entity_type import EntityType
-from base.tests.factories.academic_year import AcademicYearFactory
-from base.tests.factories.education_group_type import EducationGroupTypeFactory
+from base.models.enums.entity_type import SECTOR
 from base.tests.factories.education_group_year import EducationGroupYearFactory
-from base.tests.factories.entity import EntityWithVersionFactory
-from base.tests.factories.person import PersonFactory
+from base.tests.factories.entity_version import EntityVersionFactory
+from base.tests.factories.user import UserFactory
 
 
-class DoctorateFactory(EducationGroupYearFactory):
-    academic_year = factory.SubFactory(AcademicYearFactory, current=True)
-    education_group_type = factory.SubFactory(EducationGroupTypeFactory, name=TrainingType.PHD.name)
-    management_entity = factory.SubFactory(
-        EntityWithVersionFactory,
-        version__acronym="SSH",
-        version__entity_type=EntityType.SECTOR.name,
-    )
+class AutocompleteTestCase(APITestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = UserFactory()
+        cls.sector = EntityVersionFactory(
+            entity_type=SECTOR,
+        ).entity
+        cls.doctorate = EducationGroupYearFactory(
+            academic_year__current=True,
+            education_group_type__name=TrainingType.PHD.name,
+            management_entity=cls.sector,
+        )
 
+    def test_autocomplete_sectors(self):
+        self.client.force_authenticate(user=self.user)
+        response = self.client.get(
+            resolve_url('admission_api_v1:autocomplete-sector'),
+            format="json",
+        )
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertEqual(len(response.json()), 1)
 
-class DoctorateAdmissionFactory(factory.DjangoModelFactory):
-    class Meta:
-        model = DoctorateAdmission
-
-    candidate = factory.SubFactory(PersonFactory)
-    doctorate = factory.SubFactory(DoctorateFactory)
+    def test_autocomplete_doctorate(self):
+        self.client.force_authenticate(user=self.user)
+        response = self.client.get(
+            resolve_url('admission_api_v1:autocomplete-doctorate', sigle="SSH"),
+            format="json",
+        )
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertEqual(len(response.json()), 1)

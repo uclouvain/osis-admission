@@ -27,7 +27,7 @@ from django.db.models import F
 from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
 
-from admission.contrib import serializers
+from admission.api import serializers
 from admission.contrib.models import EntityProxy
 from base.models.enums.entity_type import SECTOR
 from admission.ddd.preparation.projet_doctoral.commands import SearchDoctoratCommand
