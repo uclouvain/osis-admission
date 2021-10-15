@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-10-14 17:16+0200\n"
+"POT-Creation-Date: 2021-10-15 12:14+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -55,12 +55,6 @@ msgstr ""
 msgid "Admission"
 msgstr ""
 
-msgid "Admission type"
-msgstr ""
-
-msgid "Allocated time"
-msgstr ""
-
 msgid "Already a member of CA."
 msgstr ""
 
@@ -68,9 +62,6 @@ msgid "Already a promoter."
 msgstr ""
 
 msgid "Author"
-msgstr ""
-
-msgid "Brief justification"
 msgstr ""
 
 msgid "Bureau"
@@ -163,9 +154,6 @@ msgstr ""
 msgid "Committee members"
 msgstr ""
 
-msgid "Complementary training project"
-msgstr ""
-
 msgid "Confirm"
 msgstr ""
 
@@ -181,29 +169,16 @@ msgstr ""
 msgid "Defense"
 msgstr ""
 
-msgid "Defense date"
-msgstr ""
-
 msgid "Delete"
 msgstr ""
 
 msgid "Delete?"
 msgstr ""
 
-msgid ""
-"Detail here the reasons which justify the recourse to a provisory admission."
-msgstr ""
-
-msgid "Doctoral project proposition"
-msgstr ""
-
 msgid "Doctorate"
 msgstr ""
 
 msgid "Doctorate admission"
-msgstr ""
-
-msgid "Doctorate admission was successfully deleted"
 msgstr ""
 
 msgid "Doctorate admissions"
@@ -218,9 +193,6 @@ msgstr ""
 msgid "English"
 msgstr ""
 
-msgid "Estimated time"
-msgstr ""
-
 msgid "Export"
 msgstr ""
 
@@ -230,9 +202,6 @@ msgstr ""
 msgid "French"
 msgstr ""
 
-msgid "Full-time equivalent"
-msgstr ""
-
 msgid "Gantt graph"
 msgstr ""
 
@@ -240,9 +209,6 @@ msgid "INVITED"
 msgstr ""
 
 msgid "IN_PROGRESS"
-msgstr ""
-
-msgid "Indicate the last name or email"
 msgstr ""
 
 msgid "Institution"
@@ -323,12 +289,6 @@ msgstr ""
 msgid "Project"
 msgstr ""
 
-msgid "Project documents"
-msgstr ""
-
-msgid "Project resume"
-msgstr ""
-
 msgid "Project title"
 msgstr ""
 
@@ -377,22 +337,10 @@ msgstr ""
 msgid "Scholarship grant"
 msgstr ""
 
-msgid "Sector"
-msgstr ""
-
-msgid "Specify scholarship grant"
-msgstr ""
-
-msgid "Specify work contract"
-msgstr ""
-
 msgid "Supervision group not found."
 msgstr ""
 
 msgid "Thesis language"
-msgstr ""
-
-msgid "Thesis redacting language"
 msgstr ""
 
 msgid "Type"
@@ -414,9 +362,6 @@ msgid "WORK_CONTRACT"
 msgstr ""
 
 msgid "Work contract should be set when financing type is set to work contract"
-msgstr ""
-
-msgid "Work contract type"
 msgstr ""
 
 msgid "Working contract type"

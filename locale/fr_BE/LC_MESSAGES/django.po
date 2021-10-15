@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-10-14 17:16+0200\n"
+"POT-Creation-Date: 2021-10-15 12:14+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -61,12 +61,6 @@ msgstr "Projet de formation complémentaire"
 msgid "Admission"
 msgstr "Admission"
 
-msgid "Admission type"
-msgstr "Type d'admission"
-
-msgid "Allocated time"
-msgstr "Temps consacré"
-
 msgid "Already a member of CA."
 msgstr "Déjà membre du CA"
 
@@ -75,9 +69,6 @@ msgstr "Déjà promoteur"
 
 msgid "Author"
 msgstr "Auteur"
-
-msgid "Brief justification"
-msgstr "Justification succincte"
 
 msgid "Bureau"
 msgstr "Bureau"
@@ -162,16 +153,13 @@ msgid "Close"
 msgstr "Fermer"
 
 msgid "Comment"
-msgstr ""
+msgstr "Commentaire"
 
 msgid "Committee member"
 msgstr "Membre du comité"
 
 msgid "Committee members"
 msgstr "Membres du comité"
-
-msgid "Complementary training project"
-msgstr "Projet de formation complémentaire"
 
 msgid "Confirm"
 msgstr "Confirmer"
@@ -188,30 +176,17 @@ msgstr "Temps consacré (en EFT)"
 msgid "Defense"
 msgstr "Soutenance"
 
-msgid "Defense date"
-msgstr "Date de soutenance"
-
 msgid "Delete"
 msgstr "Supprimer"
 
 msgid "Delete?"
 msgstr "Supprimer ?"
 
-msgid ""
-"Detail here the reasons which justify the recourse to a provisory admission."
-msgstr "Détaillez ici les raisons justifiant une admission provisoire"
-
-msgid "Doctoral project proposition"
-msgstr "Proposition de projet doctoral"
-
 msgid "Doctorate"
 msgstr "Doctorat"
 
 msgid "Doctorate admission"
 msgstr "Admission en doctorat"
-
-msgid "Doctorate admission was successfully deleted"
-msgstr "L'admission en doctorat a bien été supprimée"
 
 msgid "Doctorate admissions"
 msgstr "Admissions en doctorat"
@@ -225,9 +200,6 @@ msgstr "EFT"
 msgid "English"
 msgstr "Anglais"
 
-msgid "Estimated time"
-msgstr "Temps estimé"
-
 msgid "Export"
 msgstr "Exporter"
 
@@ -237,9 +209,6 @@ msgstr "Type de financement"
 msgid "French"
 msgstr "Français"
 
-msgid "Full-time equivalent"
-msgstr "Équivalent full-time"
-
 msgid "Gantt graph"
 msgstr "Graphe de Gantt"
 
@@ -248,9 +217,6 @@ msgstr "Invité"
 
 msgid "IN_PROGRESS"
 msgstr "En cours"
-
-msgid "Indicate the last name or email"
-msgstr "Indiquer le nom de famille ou l'email"
 
 msgid "Institution"
 msgstr "Institution"
@@ -334,12 +300,6 @@ msgstr "Proposition de programme"
 msgid "Project"
 msgstr "Projet"
 
-msgid "Project documents"
-msgstr "Documents de projet"
-
-msgid "Project resume"
-msgstr "Résumé du projet"
-
 msgid "Project title"
 msgstr "Titre du projet"
 
@@ -388,23 +348,11 @@ msgstr "Soumis"
 msgid "Scholarship grant"
 msgstr "Bourse de recherche"
 
-msgid "Sector"
-msgstr "Secteur"
-
-msgid "Specify scholarship grant"
-msgstr "Spécifier la bourse de recherche"
-
-msgid "Specify work contract"
-msgstr "Spécifier le contrat de travail"
-
 msgid "Supervision group not found."
 msgstr "Groupe de supervision non trouvé."
 
 msgid "Thesis language"
 msgstr "Langue de la thèse"
-
-msgid "Thesis redacting language"
-msgstr "Langue de rédaction de la thèse"
 
 msgid "Type"
 msgstr "Type"
@@ -428,9 +376,6 @@ msgid "Work contract should be set when financing type is set to work contract"
 msgstr ""
 "Le contrat de travail doit être renseigné quand le type de financement est "
 "un contrat de travail."
-
-msgid "Work contract type"
-msgstr "Type de contrat de travail"
 
 msgid "Working contract type"
 msgstr "Type de contrat de travail"
