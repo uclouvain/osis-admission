@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-03-29 18:34+0200\n"
+"POT-Creation-Date: 2021-10-15 12:14+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -37,11 +37,20 @@ msgstr ""
 "              Êtes-vous sûr de vouloir supprimer \"%(object)s\"?\n"
 "            "
 
+msgid "A justification is needed when creating a pre-admission."
+msgstr "Une justification est requise pour une pré-admission."
+
+msgid "ADMISSION"
+msgstr "Admission"
+
 msgid "ADRE"
 msgstr "ADRE"
 
 msgid "ADREs"
 msgstr "ADRE"
+
+msgid "APPROVED"
+msgstr "Approuvé"
 
 msgid "Abstract"
 msgstr "Résumé"
@@ -52,17 +61,14 @@ msgstr "Projet de formation complémentaire"
 msgid "Admission"
 msgstr "Admission"
 
-msgid "Admission type"
-msgstr "Type d'admission"
+msgid "Already a member of CA."
+msgstr "Déjà membre du CA"
 
-msgid "Allocated time"
-msgstr "Temps consacré"
+msgid "Already a promoter."
+msgstr "Déjà promoteur"
 
 msgid "Author"
 msgstr "Auteur"
-
-msgid "Brief justification"
-msgstr "Justification succincte"
 
 msgid "Bureau"
 msgstr "Bureau"
@@ -70,11 +76,18 @@ msgstr "Bureau"
 msgid "CA Member"
 msgstr "Membre du CA"
 
+msgid "CANCELLED"
+msgstr "Annulé"
+
 msgid "CDD manager"
 msgstr "Gestionnaire CDD"
 
 msgid "CDD managers"
 msgstr "Gestionnaires CDD"
+
+msgid "CDE Bureau should be filled in only if the doctorate's entity is CDE"
+msgstr ""
+"Le bureau CDE doit être rempli uniquement si l'entité du doctorat est CDE"
 
 msgid "Can access doctorate admission list"
 msgstr "Peut accéder à la liste des admission en doctorat"
@@ -148,9 +161,6 @@ msgstr "Membre du comité"
 msgid "Committee members"
 msgstr "Membres du comité"
 
-msgid "Complementary training project"
-msgstr "Projet de formation complémentaire"
-
 msgid "Confirm"
 msgstr "Confirmer"
 
@@ -166,21 +176,11 @@ msgstr "Temps consacré (en EFT)"
 msgid "Defense"
 msgstr "Soutenance"
 
-msgid "Defense date"
-msgstr "Date de soutenance"
-
 msgid "Delete"
 msgstr "Supprimer"
 
 msgid "Delete?"
 msgstr "Supprimer ?"
-
-msgid ""
-"Detail here the reasons which justify the recourse to a provisory admission."
-msgstr "Détaillez ici les raisons justifiant une admission provisoire"
-
-msgid "Doctoral project proposition"
-msgstr "Proposition de projet doctoral"
 
 msgid "Doctorate"
 msgstr "Doctorat"
@@ -188,17 +188,17 @@ msgstr "Doctorat"
 msgid "Doctorate admission"
 msgstr "Admission en doctorat"
 
-msgid "Doctorate admission was successfully deleted"
-msgstr "L'admission en doctorat a bien été supprimée"
-
 msgid "Doctorate admissions"
 msgstr "Admissions en doctorat"
+
+msgid "ECONOMY"
+msgstr "Economie"
 
 msgid "EFT"
 msgstr "EFT"
 
-msgid "Estimated time"
-msgstr "Temps estimé"
+msgid "English"
+msgstr "Anglais"
 
 msgid "Export"
 msgstr "Exporter"
@@ -206,17 +206,25 @@ msgstr "Exporter"
 msgid "Financing type"
 msgstr "Type de financement"
 
-msgid "Full-time equivalent"
-msgstr "Équivalent full-time"
+msgid "French"
+msgstr "Français"
 
 msgid "Gantt graph"
 msgstr "Graphe de Gantt"
 
-msgid "Indicate the last name or email"
-msgstr "Indiquer le nom de famille ou l'email"
+msgid "INVITED"
+msgstr "Invité"
+
+msgid "IN_PROGRESS"
+msgstr "En cours"
 
 msgid "Institution"
 msgstr "Institution"
+
+msgid "Institution should be set when PhD has been set to yes or partial"
+msgstr ""
+"L'institution doit être renseignée quand le doctorat a déjà été réalisé "
+"partiellement ou complétement."
 
 msgid "Jury secretaries"
 msgstr "Secrétaires de jury"
@@ -230,14 +238,44 @@ msgstr "Liste des admissions en doctorat"
 msgid "List of doctorate admissions with administrative data"
 msgstr "Liste des admissions en doctorat et données administratives"
 
+msgid "MANAGEMENT"
+msgstr "Gestion"
+
 msgid "Main promoter"
 msgstr "Promoteur principal"
+
+msgid "Member of supervision group already invited."
+msgstr "Membre du groupe de supervision déjà invité."
+
+msgid "Member of supervision group not found."
+msgstr "Membre du groupe de supervision non trouvé."
+
+msgid "Member of supervision group not invited."
+msgstr "Membre du groupe de supervision non invité"
+
+msgid "Membre CA not found."
+msgstr "Membre du CA non trouvé"
 
 msgid "Modified"
 msgstr "Modifée"
 
+msgid "NO"
+msgstr "Non"
+
+msgid "NOT_INVITED"
+msgstr "Non invité"
+
+msgid "No PhD found."
+msgstr "Pas de doctorat trouvé"
+
 msgid "No defense reason"
 msgstr "Raison de non-soutenance"
+
+msgid "PARTIAL"
+msgstr "Partiel"
+
+msgid "PRE_ADMISSION"
+msgstr "Pre-admission"
 
 msgid "PhD already done"
 msgstr "Doctorat déjà réalisé"
@@ -262,26 +300,35 @@ msgstr "Proposition de programme"
 msgid "Project"
 msgstr "Projet"
 
-msgid "Project documents"
-msgstr "Documents de projet"
-
-msgid "Project resume"
-msgstr "Résumé du projet"
-
 msgid "Project title"
 msgstr "Titre du projet"
 
 msgid "Promoter"
 msgstr "Promoteur"
 
+msgid "Promoter not found."
+msgstr "Promoteur non trouvé."
+
 msgid "Promoters"
 msgstr "Promoteurs"
+
+msgid "Proposition not found."
+msgstr "Proposition non trouvée."
+
+msgid "REFUSED"
+msgstr "Refusé"
 
 msgid "SCEB"
 msgstr "SCEB"
 
 msgid "SCEBs"
 msgstr "SCEB"
+
+msgid "SEARCH_SCHOLARSHIP"
+msgstr "Bourse de recherche"
+
+msgid "SELF_FUNDING"
+msgstr "Auto-financement"
 
 msgid "SIC director"
 msgstr "Directeur SIC"
@@ -295,23 +342,17 @@ msgstr "Gestionnaire SIC"
 msgid "SIC managers"
 msgstr "Gestionnaires SIC"
 
+msgid "SUBMITTED"
+msgstr "Soumis"
+
 msgid "Scholarship grant"
 msgstr "Bourse de recherche"
 
-msgid "Sector"
-msgstr "Secteur"
-
-msgid "Specify scholarship grant"
-msgstr "Spécifier la bourse de recherche"
-
-msgid "Specify work contract"
-msgstr "Spécifier le contrat de travail"
+msgid "Supervision group not found."
+msgstr "Groupe de supervision non trouvé."
 
 msgid "Thesis language"
 msgstr "Langue de la thèse"
-
-msgid "Thesis redacting language"
-msgstr "Langue de rédaction de la thèse"
 
 msgid "Type"
 msgstr "Type"
@@ -319,17 +360,31 @@ msgstr "Type"
 msgid "UUID"
 msgstr "UUID"
 
+msgid "Undecided"
+msgstr "Non décidé"
+
 msgid "Update"
 msgstr "Mettre à jour"
 
 msgid "Update doctorate admission"
 msgstr "Mettre à jour admission en doctorat"
 
-msgid "Work contract type"
-msgstr "Type de contrat de travail"
+msgid "WORK_CONTRACT"
+msgstr "Contrat de travail"
+
+msgid "Work contract should be set when financing type is set to work contract"
+msgstr ""
+"Le contrat de travail doit être renseigné quand le type de financement est "
+"un contrat de travail."
 
 msgid "Working contract type"
 msgstr "Type de contrat de travail"
+
+msgid "YES"
+msgstr "Oui"
+
+msgid "You've reached the maximum authorized propositions."
+msgstr "Vous avez atteint le maximum de propositions."
 
 msgid "actions"
 msgstr "actions"

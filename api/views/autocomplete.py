@@ -27,15 +27,16 @@ from django.db.models import F
 from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
 
-from admission.contrib import serializers
+from admission.api import serializers
 from admission.contrib.models import EntityProxy
 from base.models.enums.entity_type import SECTOR
-from ddd.logic.admission.preparation.projet_doctoral.commands import SearchDoctoratCommand
+from admission.ddd.preparation.projet_doctoral.commands import SearchDoctoratCommand
 from infrastructure.messages_bus import message_bus_instance
 
 
 class AutocompleteSectorView(ListAPIView):
     """Autocomplete sectors"""
+    name = "autocomplete-sector"
     pagination_class = None
     filter_backends = []
     serializer_class = serializers.SectorDTOSerializer
@@ -53,6 +54,7 @@ class AutocompleteSectorView(ListAPIView):
 
 class AutocompleteDoctoratView(ListAPIView):
     """Autocomplete doctorates given a sector"""
+    name = "autocomplete-doctorate"
     pagination_class = None
     filter_backends = []
     serializer_class = serializers.DoctoratDTOSerializer

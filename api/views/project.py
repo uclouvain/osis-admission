@@ -28,14 +28,14 @@ from rest_framework.generics import GenericAPIView, ListCreateAPIView
 from rest_framework.response import Response
 
 from admission.api.schema import ResponseSpecificSchema
-from admission.contrib import serializers
+from admission.api import serializers
 from backoffice.settings.rest_framework.common_views import DisplayExceptionsByFieldNameAPIMixin
-from ddd.logic.admission.preparation.projet_doctoral.commands import (
+from admission.ddd.preparation.projet_doctoral.commands import (
     CompleterPropositionCommand, GetPropositionCommand,
     InitierPropositionCommand,
     SearchPropositionsCommand,
 )
-from ddd.logic.admission.preparation.projet_doctoral.domain.validator.exceptions import (
+from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import (
     BureauCDEInconsistantException,
     ContratTravailInconsistantException,
     InstitutionInconsistanteException,
@@ -55,6 +55,7 @@ class PropositionListSchema(ResponseSpecificSchema):
 
 
 class PropositionListView(DisplayExceptionsByFieldNameAPIMixin, ListCreateAPIView):
+    name = "propositions"
     schema = PropositionListSchema()
     pagination_class = None
     filter_backends = []
@@ -91,6 +92,7 @@ class PropositionSchema(ResponseSpecificSchema):
 
 
 class PropositionViewSet(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, GenericAPIView):
+    name = "propositions"
     schema = PropositionSchema()
     pagination_class = None
     filter_backends = []

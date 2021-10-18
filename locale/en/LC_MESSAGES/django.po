@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-03-29 18:34+0200\n"
+"POT-Creation-Date: 2021-10-15 12:14+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -31,10 +31,19 @@ msgid ""
 "            "
 msgstr ""
 
+msgid "A justification is needed when creating a pre-admission."
+msgstr ""
+
+msgid "ADMISSION"
+msgstr ""
+
 msgid "ADRE"
 msgstr ""
 
 msgid "ADREs"
+msgstr ""
+
+msgid "APPROVED"
 msgstr ""
 
 msgid "Abstract"
@@ -46,16 +55,13 @@ msgstr ""
 msgid "Admission"
 msgstr ""
 
-msgid "Admission type"
+msgid "Already a member of CA."
 msgstr ""
 
-msgid "Allocated time"
+msgid "Already a promoter."
 msgstr ""
 
 msgid "Author"
-msgstr ""
-
-msgid "Brief justification"
 msgstr ""
 
 msgid "Bureau"
@@ -64,10 +70,16 @@ msgstr ""
 msgid "CA Member"
 msgstr ""
 
+msgid "CANCELLED"
+msgstr ""
+
 msgid "CDD manager"
 msgstr ""
 
 msgid "CDD managers"
+msgstr ""
+
+msgid "CDE Bureau should be filled in only if the doctorate's entity is CDE"
 msgstr ""
 
 msgid "Can access doctorate admission list"
@@ -142,9 +154,6 @@ msgstr ""
 msgid "Committee members"
 msgstr ""
 
-msgid "Complementary training project"
-msgstr ""
-
 msgid "Confirm"
 msgstr ""
 
@@ -160,20 +169,10 @@ msgstr ""
 msgid "Defense"
 msgstr ""
 
-msgid "Defense date"
-msgstr ""
-
 msgid "Delete"
 msgstr ""
 
 msgid "Delete?"
-msgstr ""
-
-msgid ""
-"Detail here the reasons which justify the recourse to a provisory admission."
-msgstr ""
-
-msgid "Doctoral project proposition"
 msgstr ""
 
 msgid "Doctorate"
@@ -182,16 +181,16 @@ msgstr ""
 msgid "Doctorate admission"
 msgstr ""
 
-msgid "Doctorate admission was successfully deleted"
+msgid "Doctorate admissions"
 msgstr ""
 
-msgid "Doctorate admissions"
+msgid "ECONOMY"
 msgstr ""
 
 msgid "EFT"
 msgstr ""
 
-msgid "Estimated time"
+msgid "English"
 msgstr ""
 
 msgid "Export"
@@ -200,16 +199,22 @@ msgstr ""
 msgid "Financing type"
 msgstr ""
 
-msgid "Full-time equivalent"
+msgid "French"
 msgstr ""
 
 msgid "Gantt graph"
 msgstr ""
 
-msgid "Indicate the last name or email"
+msgid "INVITED"
+msgstr ""
+
+msgid "IN_PROGRESS"
 msgstr ""
 
 msgid "Institution"
+msgstr ""
+
+msgid "Institution should be set when PhD has been set to yes or partial"
 msgstr ""
 
 msgid "Jury secretaries"
@@ -224,13 +229,43 @@ msgstr ""
 msgid "List of doctorate admissions with administrative data"
 msgstr ""
 
+msgid "MANAGEMENT"
+msgstr ""
+
 msgid "Main promoter"
+msgstr ""
+
+msgid "Member of supervision group already invited."
+msgstr ""
+
+msgid "Member of supervision group not found."
+msgstr ""
+
+msgid "Member of supervision group not invited."
+msgstr ""
+
+msgid "Membre CA not found."
 msgstr ""
 
 msgid "Modified"
 msgstr ""
 
+msgid "NO"
+msgstr ""
+
+msgid "NOT_INVITED"
+msgstr ""
+
+msgid "No PhD found."
+msgstr ""
+
 msgid "No defense reason"
+msgstr ""
+
+msgid "PARTIAL"
+msgstr ""
+
+msgid "PRE_ADMISSION"
 msgstr ""
 
 msgid "PhD already done"
@@ -254,25 +289,34 @@ msgstr ""
 msgid "Project"
 msgstr ""
 
-msgid "Project documents"
-msgstr ""
-
-msgid "Project resume"
-msgstr ""
-
 msgid "Project title"
 msgstr ""
 
 msgid "Promoter"
 msgstr ""
 
+msgid "Promoter not found."
+msgstr ""
+
 msgid "Promoters"
+msgstr ""
+
+msgid "Proposition not found."
+msgstr ""
+
+msgid "REFUSED"
 msgstr ""
 
 msgid "SCEB"
 msgstr ""
 
 msgid "SCEBs"
+msgstr ""
+
+msgid "SEARCH_SCHOLARSHIP"
+msgstr ""
+
+msgid "SELF_FUNDING"
 msgstr ""
 
 msgid "SIC director"
@@ -287,22 +331,16 @@ msgstr ""
 msgid "SIC managers"
 msgstr ""
 
+msgid "SUBMITTED"
+msgstr ""
+
 msgid "Scholarship grant"
 msgstr ""
 
-msgid "Sector"
-msgstr ""
-
-msgid "Specify scholarship grant"
-msgstr ""
-
-msgid "Specify work contract"
+msgid "Supervision group not found."
 msgstr ""
 
 msgid "Thesis language"
-msgstr ""
-
-msgid "Thesis redacting language"
 msgstr ""
 
 msgid "Type"
@@ -311,16 +349,28 @@ msgstr ""
 msgid "UUID"
 msgstr ""
 
+msgid "Undecided"
+msgstr ""
+
 msgid "Update"
 msgstr ""
 
 msgid "Update doctorate admission"
 msgstr ""
 
-msgid "Work contract type"
+msgid "WORK_CONTRACT"
+msgstr ""
+
+msgid "Work contract should be set when financing type is set to work contract"
 msgstr ""
 
 msgid "Working contract type"
+msgstr ""
+
+msgid "YES"
+msgstr ""
+
+msgid "You've reached the maximum authorized propositions."
 msgstr ""
 
 msgid "actions"

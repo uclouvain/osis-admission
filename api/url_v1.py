@@ -23,14 +23,19 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from django.urls import path
+from django.urls import path as _path
 
 from admission.api import views
 
+
+def path(pattern, view, name=None):
+    return _path(pattern, view.as_view(), name=getattr(view, 'name', name))
+
+
 app_name = "admission_api_v1"
 urlpatterns = [
-    path('propositions', views.PropositionListView.as_view()),
-    path('propositions/<uuid:uuid>', views.PropositionViewSet.as_view()),
-    path('autocomplete/sector', views.AutocompleteSectorView.as_view()),
-    path('autocomplete/sector/<str:sigle>/doctorates', views.AutocompleteDoctoratView.as_view()),
+    path('propositions', views.PropositionListView),
+    path('propositions/<uuid:uuid>', views.PropositionViewSet),
+    path('autocomplete/sector', views.AutocompleteSectorView),
+    path('autocomplete/sector/<str:sigle>/doctorates', views.AutocompleteDoctoratView),
 ]

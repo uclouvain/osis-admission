@@ -29,16 +29,15 @@ from django.test import TestCase
 from admission.contrib.models import CommitteeActor
 from admission.contrib.models.enums.actor_type import ActorType
 from admission.tests.factories import DoctorateAdmissionFactory
-from admission.tests.factories.comittee import MainPromoterFactory
+from admission.tests.factories.comittee import MainPromoterFactory, _ProcessFactory
 from base.tests.factories.person import PersonFactory
-from osis_signature.tests.factories import ProcessFactory
 
 
 class CommitteeActorTestCase(TestCase):
     def test_unique_main_promoter(self):
         existing = MainPromoterFactory()
         self.assertIsNone(CommitteeActor(
-            process=ProcessFactory(),
+            process=_ProcessFactory(),
             person=PersonFactory(),
             type=ActorType.MAIN_PROMOTER.name,
         ).validate_unique())
@@ -56,7 +55,7 @@ class DoctorateAdmissionTestCase(TestCase):
         request = DoctorateAdmissionFactory()
         self.assertIsNone(request.main_promoter)
 
-        request = DoctorateAdmissionFactory(committee=ProcessFactory())
+        request = DoctorateAdmissionFactory(committee=_ProcessFactory())
         self.assertIsNone(request.main_promoter)
 
         promoter = MainPromoterFactory()
