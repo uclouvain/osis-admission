@@ -161,9 +161,7 @@ class SupprimerMembreCAValidatorList(TwoStepsMultipleBusinessExceptionListValida
 @attr.s(frozen=True, slots=True)
 class InviterASignerValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
     groupe_de_supervision = attr.ib(type='GroupeDeSupervision')  # type: GroupeDeSupervision
-    signataire_id = attr.ib(
-        type="Union['PromoteurIdentity', 'MembreCAIdentity']",
-    )  # type: Union['PromoteurIdentity', 'MembreCAIdentity']
+    signataire_id = attr.ib(type=Union['PromoteurIdentity', 'MembreCAIdentity'])
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
@@ -178,9 +176,7 @@ class InviterASignerValidatorList(TwoStepsMultipleBusinessExceptionListValidator
 @attr.s(frozen=True, slots=True)
 class ApprouverValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
     groupe_de_supervision = attr.ib(type='GroupeDeSupervision')  # type: GroupeDeSupervision
-    signataire_id = attr.ib(
-        type="Union['PromoteurIdentity', 'MembreCAIdentity']",
-    )  # type: Union['PromoteurIdentity', 'MembreCAIdentity']
+    signataire_id = attr.ib(type=Union['PromoteurIdentity', 'MembreCAIdentity'])
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []

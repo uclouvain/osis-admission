@@ -37,9 +37,7 @@ from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions impor
 @attr.s(frozen=True, slots=True)
 class ShouldSignataireEtreDansGroupeDeSupervision(BusinessValidator):
     groupe_de_supervision = attr.ib(type='GroupeDeSupervision')  # type: GroupeDeSupervision
-    signataire_id = attr.ib(
-        type="Union['PromoteurIdentity', 'MembreCAIdentity']",
-    )  # type: Union['PromoteurIdentity', 'MembreCAIdentity']
+    signataire_id = attr.ib(type=Union['PromoteurIdentity', 'MembreCAIdentity'])
 
     def validate(self, *args, **kwargs):
         groupe = self.groupe_de_supervision
