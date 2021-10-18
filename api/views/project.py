@@ -55,6 +55,7 @@ class PropositionListSchema(ResponseSpecificSchema):
 
 
 class PropositionListView(DisplayExceptionsByFieldNameAPIMixin, ListCreateAPIView):
+    name = "propositions"
     schema = PropositionListSchema()
     pagination_class = None
     filter_backends = []
@@ -91,6 +92,7 @@ class PropositionSchema(ResponseSpecificSchema):
 
 
 class PropositionViewSet(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, GenericAPIView):
+    name = "propositions"
     schema = PropositionSchema()
     pagination_class = None
     filter_backends = []

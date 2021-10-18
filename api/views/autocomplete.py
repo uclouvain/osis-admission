@@ -36,6 +36,7 @@ from infrastructure.messages_bus import message_bus_instance
 
 class AutocompleteSectorView(ListAPIView):
     """Autocomplete sectors"""
+    name = "autocomplete-sector"
     pagination_class = None
     filter_backends = []
     serializer_class = serializers.SectorDTOSerializer
@@ -53,6 +54,7 @@ class AutocompleteSectorView(ListAPIView):
 
 class AutocompleteDoctoratView(ListAPIView):
     """Autocomplete doctorates given a sector"""
+    name = "autocomplete-doctorate"
     pagination_class = None
     filter_backends = []
     serializer_class = serializers.DoctoratDTOSerializer
