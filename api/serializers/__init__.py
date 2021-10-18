@@ -27,3 +27,4 @@
 from .project import *
 from .person import *
 from .coordonnees import CoordonneesSerializer
+from .secondary_studies import HighSchoolDiplomaSerializer
