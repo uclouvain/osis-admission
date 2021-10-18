@@ -24,6 +24,7 @@
 #
 # ##############################################################################
 from admission.api.views.coordonnees import *
+from admission.api.views.secondary_studies import *
 from admission.api.views.person import *
 from admission.api.views.project import *
 from admission.api.views.autocomplete import *
@@ -33,6 +34,7 @@ __all__ = [
     "PersonViewSet",
     "PropositionViewSet",
     "PropositionListView",
+    "SecondaryStudiesViewSet",
     "AutocompleteDoctoratView",
     "AutocompleteSectorView",
 ]
