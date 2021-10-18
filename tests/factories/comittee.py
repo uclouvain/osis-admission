@@ -28,14 +28,27 @@ import factory
 
 from admission.contrib.models import CommitteeActor
 from admission.contrib.models.enums.actor_type import ActorType
-from osis_signature.tests.factories import ActorFactory
+from osis_signature.models import Actor, Process
+
+
+class _ProcessFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = Process
+
+
+class _ActorFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = Actor
+
+    process = factory.SubFactory(_ProcessFactory)
+    person = factory.SubFactory('base.tests.factories.person.PersonFactory')
 
 
 class MainPromoterFactory(factory.DjangoModelFactory):
     class Meta:
         model = CommitteeActor
 
-    actor_ptr = factory.SubFactory(ActorFactory)
+    actor_ptr = factory.SubFactory(_ActorFactory)
     type = ActorType.MAIN_PROMOTER.name
     person = factory.SelfAttribute('actor_ptr.person')
     process = factory.SelfAttribute('actor_ptr.process')

@@ -30,10 +30,9 @@ from django.test import TestCase
 from admission.auth import predicates
 from admission.auth.roles.cdd_manager import CddManager
 from admission.tests.factories import DoctorateAdmissionFactory
-from admission.tests.factories.comittee import MainPromoterFactory
+from admission.tests.factories.comittee import MainPromoterFactory, _ProcessFactory
 from admission.tests.factories.roles import CandidateFactory, PromoterFactory, CddManagerFactory
 from base.tests.factories.entity import EntityFactory
-from osis_signature.tests.factories import ProcessFactory
 
 
 class PredicatesTestCase(TestCase):
@@ -48,7 +47,7 @@ class PredicatesTestCase(TestCase):
         author = CandidateFactory().person
         promoter1 = PromoterFactory()
         promoter2 = PromoterFactory()
-        process = ProcessFactory()
+        process = _ProcessFactory()
         MainPromoterFactory(actor_ptr__person_id=promoter2.person_id, actor_ptr__process=process)
         request = DoctorateAdmissionFactory(committee=process)
         self.assertFalse(predicates.is_admission_request_promoter(author.user, request))
