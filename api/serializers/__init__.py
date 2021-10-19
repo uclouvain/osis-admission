@@ -24,6 +24,6 @@
 #
 # ##############################################################################
 
-from .doctorate import *
+from .project import *
 from .person import *
 from .coordonnees import CoordonneesSerializer
