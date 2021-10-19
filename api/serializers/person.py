@@ -23,21 +23,26 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
 from django.db import models
 from rest_framework import serializers
 
+from base.api.serializers.academic_year import RelatedAcademicYearField
+from reference.api.serializers.country import RelatedCountryField
 from base.models.person import Person
-from reference.models.country import Country
 
 __all__ = [
     "PersonIdentificationSerializer",
-    "CountrySerializer",
 ]
 
 
 class PersonIdentificationSerializer(serializers.ModelSerializer):
     serializer_field_mapping = serializers.ModelSerializer.serializer_field_mapping
     serializer_field_mapping[models.UUIDField] = serializers.CharField
+
+    last_registration_year = RelatedAcademicYearField(required=False)
+    birth_country = RelatedCountryField(required=False)
+    country_of_citizenship = RelatedCountryField(required=False)
 
     class Meta:
         model = Person
@@ -81,14 +86,3 @@ class PersonIdentificationSerializer(serializers.ModelSerializer):
         # Make all fields optional
         model_field.blank = True
         return super().build_standard_field(field_name, model_field)
-
-
-class CountrySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Country
-        fields = [
-            'pk',
-            'iso_code',
-            'name',
-            'name_en',
-        ]

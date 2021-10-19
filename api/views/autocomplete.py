@@ -26,24 +26,12 @@
 from django.db.models import F
 from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
-from rest_framework.schemas.openapi import AutoSchema
 
 from admission.api import serializers
 from admission.contrib.models import EntityProxy
-from base.models.enums.entity_type import SECTOR
 from admission.ddd.preparation.projet_doctoral.commands import SearchDoctoratCommand
+from base.models.enums.entity_type import SECTOR
 from infrastructure.messages_bus import message_bus_instance
-from reference.models.country import Country
-
-
-class AutocompleteCountryView(ListAPIView):
-    """Autocomplete country"""
-    name = "countries"
-    pagination_class = None
-    filter_backends = []
-    serializer_class = serializers.CountrySerializer
-    queryset = Country.objects.all()
-    schema = AutoSchema(operation_id_base='Countries')
 
 
 class AutocompleteSectorView(ListAPIView):

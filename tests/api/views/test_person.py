@@ -52,9 +52,11 @@ class PersonTestCase(APITestCase):
     def test_person_get(self):
         self.client.force_authenticate(self.user)
         response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
         self.assertEqual(response.json()['first_name'], "John")
 
     def test_person_update(self):
         self.client.force_authenticate(self.user)
         response = self.client.put(self.url,  {"first_name": 'Joe'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
         self.assertEqual(response.json()['first_name'], "Joe")

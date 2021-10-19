@@ -1,22 +1,8 @@
 from rest_framework import serializers
 
+from base.api.serializers.person_address import PersonAddressSerializer
 from base.models.enums.person_address_type import PersonAddressType
 from base.models.person_address import PersonAddress
-
-
-class PersonAddressSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = PersonAddress
-        fields = (
-            "location",
-            "postal_code",
-            "city",
-            "country",
-            "street",
-            "street_number",
-            "postal_box",
-            "place",
-        )
 
 
 class CoordonneesSerializer(serializers.Serializer):

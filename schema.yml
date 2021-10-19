@@ -237,33 +237,6 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - propositions
-  /autocomplete/country:
-    get:
-      operationId: listCountries
-      description: Autocomplete country
-      parameters:
-      - $ref: '#/components/parameters/Accept-Language'
-      - $ref: '#/components/parameters/X-User-FirstName'
-      - $ref: '#/components/parameters/X-User-LastName'
-      - $ref: '#/components/parameters/X-User-Email'
-      - $ref: '#/components/parameters/X-User-GlobalID'
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Country'
-          description: ''
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-      tags:
-      - autocomplete
   /autocomplete/sector:
     get:
       operationId: listSectorDTOs
@@ -352,13 +325,13 @@ components:
           nullable: true
           pattern: ^[1-2]\d{3}$
         birth_country:
-          type: integer
+          type: string
           nullable: true
         birth_place:
           type: string
           maxLength: 255
         country_of_citizenship:
-          type: integer
+          type: string
           nullable: true
         language:
           enum:
@@ -413,6 +386,8 @@ components:
           nullable: true
         last_registration_year:
           type: integer
+          maximum: 2999
+          minimum: 1000
           nullable: true
     Coordonnees:
       type: object
@@ -433,7 +408,7 @@ components:
               nullable: true
               maxLength: 255
             country:
-              type: integer
+              type: string
               nullable: true
             street:
               type: string
@@ -464,7 +439,7 @@ components:
               nullable: true
               maxLength: 255
             country:
-              type: integer
+              type: string
               nullable: true
             street:
               type: string
@@ -601,25 +576,6 @@ components:
       - projet_formation_complementaire
       - langue_redaction_these
       - doctorat_deja_realise
-    Country:
-      type: object
-      properties:
-        pk:
-          type: integer
-          readOnly: true
-        iso_code:
-          type: string
-          maxLength: 2
-        name:
-          type: string
-          maxLength: 80
-        name_en:
-          type: string
-          maxLength: 80
-      required:
-      - iso_code
-      - name
-      - name_en
     SectorDTO:
       type: object
       properties:

@@ -68,6 +68,6 @@ class PersonTestCase(APITestCase):
             "contact": {},
             "phone_mobile": "",
         })
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
         address = PersonAddress.objects.get(person__user_id=self.user.pk, label=PersonAddressType.RESIDENTIAL.value)
         self.assertEqual(address.street, "Rue de la sobriété")
