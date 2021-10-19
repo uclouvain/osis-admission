@@ -347,8 +347,8 @@ components:
           nullable: true
         birth_year:
           type: integer
-          maximum: 2147483647
-          minimum: -2147483648
+          maximum: 2999
+          minimum: 1000
           nullable: true
           pattern: ^[1-2]\d{3}$
         birth_country:

@@ -23,7 +23,6 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
 from django.db import models
 from rest_framework import serializers
 
@@ -69,6 +68,9 @@ class PersonIdentificationSerializer(serializers.ModelSerializer):
             # Inscrit ?
             'last_registration_year',
         ]
+        extra_kwargs = {
+            'birth_year': {'min_value': 1000, 'max_value': 2999}
+        }
 
     def include_extra_kwargs(self, kwargs, extra_kwargs):
         # Make all fields optional
