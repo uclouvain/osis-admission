@@ -26,15 +26,16 @@
 
 from admission.ddd.preparation.projet_doctoral.commands import (
     ApprouverPropositionCommand,
-    DemanderSignatureCommand,
-    SearchDoctoratCommand,
     CompleterPropositionCommand,
-    InitierPropositionCommand,
-    IdentifierPromoteurCommand,
+    DefinirCotutelleCommand,
+    DemanderSignatureCommand,
     IdentifierMembreCACommand,
+    IdentifierPromoteurCommand,
+    InitierPropositionCommand,
+    SearchDoctoratCommand,
+    SearchPropositionsCommand,
     SupprimerMembreCACommand,
     SupprimerPromoteurCommand,
-    SearchPropositionsCommand,
 )
 from admission.ddd.preparation.projet_doctoral.use_case.read.rechercher_doctorats_service import \
     rechercher_doctorats
@@ -44,6 +45,7 @@ from admission.ddd.preparation.projet_doctoral.use_case.write.approuver_proposit
     approuver_proposition
 from admission.ddd.preparation.projet_doctoral.use_case.write.completer_proposition_service import \
     completer_proposition
+from admission.ddd.preparation.projet_doctoral.use_case.write.definir_cotutelle_service import definir_cotutelle
 from admission.ddd.preparation.projet_doctoral.use_case.write.demander_signature_service import demander_signature
 from admission.ddd.preparation.projet_doctoral.use_case.write.identifier_membre_CA_service import \
     identifier_membre_CA
@@ -69,7 +71,7 @@ from admission.infrastructure.preparation.projet_doctoral.repository.in_memory.g
     GroupeDeSupervisionInMemoryRepository
 from admission.infrastructure.preparation.projet_doctoral.repository.in_memory.proposition import \
     PropositionInMemoryRepository
-from infrastructure.utils import AbstractMessageBusCommands, MessageBus, load_message_bus_instance
+from infrastructure.utils import AbstractMessageBusCommands, MessageBus
 
 
 class MessageBusInMemoryCommands(AbstractMessageBusCommands):
@@ -127,6 +129,10 @@ class MessageBusInMemoryCommands(AbstractMessageBusCommands):
             DoctoratInMemoryTranslator(),
             SecteurUclInMemoryTranslator(),
         ),
+        DefinirCotutelleCommand: lambda cmd: definir_cotutelle(
+            cmd,
+            GroupeDeSupervisionInMemoryRepository(),
+        )
     }
 
 
