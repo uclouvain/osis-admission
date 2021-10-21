@@ -38,8 +38,12 @@ from admission.ddd.preparation.projet_doctoral.domain.model._financement import 
 from admission.ddd.preparation.projet_doctoral.domain.model.proposition import Proposition
 from admission.ddd.preparation.projet_doctoral.domain.model._enums import ChoixBureauCDE, ChoixTypeAdmission
 from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import (
+    ContratTravailInconsistantException,
+    InstitutionInconsistanteException,
+    JustificationRequiseException,
     MaximumPropositionsAtteintException,
-    DoctoratNonTrouveException, BureauCDEInconsistantException,
+    DoctoratNonTrouveException,
+    BureauCDEInconsistantException,
 )
 from admission.ddd.preparation.projet_doctoral.test.factory.proposition import (
     PropositionAdmissionSC3DPMinimaleAnnuleeFactory,
@@ -47,6 +51,7 @@ from admission.ddd.preparation.projet_doctoral.test.factory.proposition import (
 from admission.infrastructure.preparation.projet_doctoral.repository.in_memory.proposition import \
     PropositionInMemoryRepository
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
+from base.ddd.utils.business_validator import MultipleBusinessExceptions
 
 
 class TestInitierPropositionService(SimpleTestCase):
@@ -136,6 +141,36 @@ class TestInitierPropositionService(SimpleTestCase):
         cmd = attr.evolve(self.cmd, sigle_formation=not_doctorat)
         with self.assertRaises(DoctoratNonTrouveException):
             self.message_bus.invoke(cmd)
+
+    def test_should_empecher_si_pas_justification(self):
+        cmd = attr.evolve(self.cmd, type_admission=ChoixTypeAdmission.PRE_ADMISSION.name)
+        with self.assertRaises(MultipleBusinessExceptions) as e:
+            self.message_bus.invoke(cmd)
+        self.assertIsInstance(e.exception.exceptions.pop(), JustificationRequiseException)
+
+    def test_should_empecher_si_doctorat_pas_deja_realise(self):
+        cmd = attr.evolve(self.cmd, doctorat_deja_realise=ChoixDoctoratDejaRealise.NO.name)
+        with self.assertRaises(MultipleBusinessExceptions) as e:
+            self.message_bus.invoke(cmd)
+        self.assertIsInstance(e.exception.exceptions.pop(), InstitutionInconsistanteException)
+
+    def test_should_empecher_si_doctorat_deja_realise(self):
+        cmd = attr.evolve(self.cmd, institution="")
+        with self.assertRaises(MultipleBusinessExceptions) as e:
+            self.message_bus.invoke(cmd)
+        self.assertIsInstance(e.exception.exceptions.pop(), InstitutionInconsistanteException)
+
+    def test_should_empecher_si_pas_contrat_travail(self):
+        cmd = attr.evolve(self.cmd, type_contrat_travail="")
+        with self.assertRaises(MultipleBusinessExceptions) as e:
+            self.message_bus.invoke(cmd)
+        self.assertIsInstance(e.exception.exceptions.pop(), ContratTravailInconsistantException)
+
+    def test_should_empecher_si_financement_pas_contrat_travail(self):
+        cmd = attr.evolve(self.cmd, type_financement=ChoixTypeFinancement.SELF_FUNDING.name)
+        with self.assertRaises(MultipleBusinessExceptions) as e:
+            self.message_bus.invoke(cmd)
+        self.assertIsInstance(e.exception.exceptions.pop(), ContratTravailInconsistantException)
 
     def test_should_initier_sans_financement(self):
         cmd = attr.evolve(self.cmd, type_financement='', type_contrat_travail='')

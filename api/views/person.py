@@ -23,7 +23,25 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from rest_framework import mixins
+from rest_framework.generics import GenericAPIView
 
-from .project import *
-from .person import *
-from .coordonnees import CoordonneesSerializer
+from admission.api import serializers
+from admission.api.schema import BetterChoicesSchema
+
+
+class PersonViewSet(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, GenericAPIView):
+    name = "person"
+    pagination_class = None
+    filter_backends = []
+    serializer_class = serializers.PersonIdentificationSerializer
+    schema = BetterChoicesSchema()
+
+    def get_object(self):
+        return self.request.user.person
+
+    def get(self, request, *args, **kwargs):
+        return self.retrieve(request, *args, **kwargs)
+
+    def put(self, request, *args, **kwargs):
+        return self.update(request, *args, **kwargs)

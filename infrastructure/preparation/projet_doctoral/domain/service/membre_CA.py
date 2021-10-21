@@ -34,11 +34,11 @@ from ddd.logic.shared_kernel.personne_connue_ucl.domain.service.personne_connue_
 class MembreCATranslator(IMembreCATranslator):
     @classmethod
     def get(cls, matricule: str) -> 'MembreCAIdentity':
-        pass
+        raise NotImplementedError
 
     @classmethod
     def search(cls, matricules: List[str]) -> List['MembreCAIdentity']:
-        pass
+        raise NotImplementedError
 
     @classmethod
     def search_dto(

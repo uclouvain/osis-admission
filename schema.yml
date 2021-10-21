@@ -7,6 +7,114 @@ info:
     name: UCLouvain - OSIS
     url: https://github.com/uclouvain/osis
 paths:
+  /person:
+    get:
+      operationId: retrievePersonIdentification
+      description: ''
+      parameters:
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PersonIdentification'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - person
+    put:
+      operationId: updatePersonIdentification
+      description: ''
+      parameters:
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PersonIdentification'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PersonIdentification'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - person
+  /coordonnees:
+    get:
+      operationId: retrieveCoordonnees
+      description: ''
+      parameters:
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Coordonnees'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - person
+    put:
+      operationId: updateCoordonnees
+      description: ''
+      parameters:
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Coordonnees'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Coordonnees'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - person
   /propositions:
     get:
       operationId: list_propositions
@@ -129,8 +237,6 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - propositions
-      tags:
-      - propositions
   /autocomplete/sector:
     get:
       operationId: listSectorDTOs
@@ -193,6 +299,170 @@ paths:
       - autocomplete
 components:
   schemas:
+    PersonIdentification:
+      type: object
+      properties:
+        first_name:
+          type: string
+          maxLength: 50
+        middle_name:
+          type: string
+          maxLength: 50
+        last_name:
+          type: string
+          maxLength: 50
+        first_name_in_use:
+          type: string
+          maxLength: 50
+        birth_date:
+          type: string
+          format: date
+          nullable: true
+        birth_year:
+          type: integer
+          maximum: 2999
+          minimum: 1000
+          nullable: true
+          pattern: ^[1-2]\d{3}$
+        birth_country:
+          type: string
+          nullable: true
+        birth_place:
+          type: string
+          maxLength: 255
+        country_of_citizenship:
+          type: string
+          nullable: true
+        language:
+          enum:
+          - ''
+          - fr-be
+          - en
+          type: string
+          nullable: true
+        sex:
+          enum:
+          - ''
+          - F
+          - M
+          type: string
+        gender:
+          enum:
+          - ''
+          - F
+          - H
+          - X
+          type: string
+        id_photo:
+          type: array
+          items:
+            type: string
+          nullable: true
+          maxItems: 1
+        id_card:
+          type: array
+          items:
+            type: string
+          nullable: true
+          maxItems: 1
+        passport:
+          type: array
+          items:
+            type: string
+          nullable: true
+          maxItems: 1
+        national_number:
+          type: string
+          maxLength: 255
+        id_card_number:
+          type: string
+          maxLength: 255
+        passport_number:
+          type: string
+          maxLength: 255
+        passport_expiration_date:
+          type: string
+          format: date
+          nullable: true
+        last_registration_year:
+          type: integer
+          maximum: 2999
+          minimum: 1000
+          nullable: true
+    Coordonnees:
+      type: object
+      properties:
+        contact:
+          type: object
+          properties:
+            location:
+              type: string
+              nullable: true
+              maxLength: 255
+            postal_code:
+              type: string
+              nullable: true
+              maxLength: 20
+            city:
+              type: string
+              nullable: true
+              maxLength: 255
+            country:
+              type: string
+              nullable: true
+            street:
+              type: string
+              maxLength: 255
+            street_number:
+              type: string
+              maxLength: 20
+            postal_box:
+              type: string
+              maxLength: 20
+            place:
+              type: string
+              maxLength: 255
+          nullable: true
+        residential:
+          type: object
+          properties:
+            location:
+              type: string
+              nullable: true
+              maxLength: 255
+            postal_code:
+              type: string
+              nullable: true
+              maxLength: 20
+            city:
+              type: string
+              nullable: true
+              maxLength: 255
+            country:
+              type: string
+              nullable: true
+            street:
+              type: string
+              maxLength: 255
+            street_number:
+              type: string
+              maxLength: 20
+            postal_box:
+              type: string
+              maxLength: 20
+            place:
+              type: string
+              maxLength: 255
+          nullable: true
+        email:
+          type: string
+          readOnly: true
+        phone_mobile:
+          type: string
+      required:
+      - contact
+      - residential
+      - phone_mobile
     PropositionSearchDTO:
       type: object
       properties:
@@ -508,22 +778,6 @@ components:
       - graphe_gantt
       - proposition_programme_doctoral
       - projet_formation_complementaire
-    DefinirCotutelleCommand:
-      type: object
-      properties:
-        uuid_proposition:
-          type: string
-        motivation:
-          type: string
-        institution:
-          type: string
-        document_demande_ouverture:
-          type: array
-          items:
-            type: string
-      required:
-      - uuid_proposition
-      - document_demande_ouverture
     Error:
       type: object
       properties:

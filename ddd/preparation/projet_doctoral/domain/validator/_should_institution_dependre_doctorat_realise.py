@@ -38,7 +38,6 @@ class ShouldInstitutionDependreDoctoratRealise(BusinessValidator):
     institution = attr.ib(type=Optional[str], default='')
 
     def validate(self, *args, **kwargs):
-        # TODO :: unit tests
         if ChoixDoctoratDejaRealise[self.doctorat_deja_realise] == ChoixDoctoratDejaRealise.NO and self.institution:
             raise InstitutionInconsistanteException()
         if ChoixDoctoratDejaRealise[self.doctorat_deja_realise] != ChoixDoctoratDejaRealise.NO and not self.institution:

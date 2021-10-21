@@ -34,6 +34,8 @@ def path(pattern, view, name=None):
 
 app_name = "admission_api_v1"
 urlpatterns = [
+    path('person', views.PersonViewSet),
+    path('coordonnees', views.CoordonneesViewSet),
     path('propositions', views.PropositionListView),
     path('propositions/<uuid:uuid>', views.PropositionViewSet),
     path('autocomplete/sector', views.AutocompleteSectorView),
