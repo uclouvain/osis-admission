@@ -83,7 +83,7 @@ class TestIdentifierMembreCAService(SimpleTestCase):
             self.message_bus.invoke(self.cmd)
         self.assertIsInstance(e.exception.exceptions.pop(), DejaMembreCAException)
 
-    def test_should_pas_ajouter_personne_si_deja_membre_CA(self):
+    def test_should_pas_ajouter_personne_si_deja_promoteur(self):
         self.message_bus.invoke(IdentifierPromoteurCommand(
             uuid_proposition=self.uuid_proposition,
             matricule=self.matricule_membre_CA,

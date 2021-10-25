@@ -23,6 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from functools import partial
 
 from admission.ddd.preparation.projet_doctoral.commands import (
     ApprouverPropositionCommand,
@@ -76,62 +77,62 @@ from infrastructure.utils import AbstractMessageBusCommands, MessageBus
 
 class MessageBusInMemoryCommands(AbstractMessageBusCommands):
     command_handlers = {
-        InitierPropositionCommand: lambda cmd: initier_proposition(
-            cmd,
-            PropositionInMemoryRepository(),
-            DoctoratInMemoryTranslator(),
+        InitierPropositionCommand: partial(
+            initier_proposition,
+            proposition_repository=PropositionInMemoryRepository(),
+            doctorat_translator=DoctoratInMemoryTranslator(),
         ),
-        SearchDoctoratCommand: lambda cmd: rechercher_doctorats(
-            cmd,
-            DoctoratInMemoryTranslator(),
+        SearchDoctoratCommand: partial(
+            rechercher_doctorats,
+            doctorat_translator=DoctoratInMemoryTranslator(),
         ),
-        CompleterPropositionCommand: lambda cmd: completer_proposition(
-            cmd,
-            PropositionInMemoryRepository(),
-            DoctoratInMemoryTranslator(),
+        CompleterPropositionCommand: partial(
+            completer_proposition,
+            proposition_repository=PropositionInMemoryRepository(),
+            doctorat_translator=DoctoratInMemoryTranslator(),
         ),
-        IdentifierPromoteurCommand: lambda cmd: identifier_promoteur(
-            cmd,
-            PropositionInMemoryRepository(),
-            GroupeDeSupervisionInMemoryRepository(),
-            PromoteurInMemoryTranslator(),
+        IdentifierPromoteurCommand: partial(
+            identifier_promoteur,
+            proposition_repository=PropositionInMemoryRepository(),
+            groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
+            promoteur_translator=PromoteurInMemoryTranslator(),
         ),
-        IdentifierMembreCACommand: lambda cmd: identifier_membre_CA(
-            cmd,
-            PropositionInMemoryRepository(),
-            GroupeDeSupervisionInMemoryRepository(),
-            MembreCAInMemoryTranslator(),
+        IdentifierMembreCACommand: partial(
+            identifier_membre_CA,
+            proposition_repository=PropositionInMemoryRepository(),
+            groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
+            membre_CA_translator=MembreCAInMemoryTranslator(),
         ),
-        SupprimerPromoteurCommand: lambda cmd: supprimer_promoteur(
-            cmd,
-            PropositionInMemoryRepository(),
-            GroupeDeSupervisionInMemoryRepository(),
+        SupprimerPromoteurCommand: partial(
+            supprimer_promoteur,
+            proposition_repository=PropositionInMemoryRepository(),
+            groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
         ),
-        SupprimerMembreCACommand: lambda cmd: supprimer_membre_CA(
-            cmd,
-            PropositionInMemoryRepository(),
-            GroupeDeSupervisionInMemoryRepository(),
+        SupprimerMembreCACommand: partial(
+            supprimer_membre_CA,
+            proposition_repository=PropositionInMemoryRepository(),
+            groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
         ),
-        DemanderSignatureCommand: lambda cmd: demander_signature(
-            cmd,
-            PropositionInMemoryRepository(),
-            GroupeDeSupervisionInMemoryRepository(),
-            ConstitutionSupervisionInMemoryService(),
+        DemanderSignatureCommand: partial(
+            demander_signature,
+            proposition_repository=PropositionInMemoryRepository(),
+            groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
+            constitution_supervision_these=ConstitutionSupervisionInMemoryService(),
         ),
-        ApprouverPropositionCommand: lambda cmd: approuver_proposition(
-            cmd,
-            PropositionInMemoryRepository(),
-            GroupeDeSupervisionInMemoryRepository(),
+        ApprouverPropositionCommand: partial(
+            approuver_proposition,
+            proposition_repository=PropositionInMemoryRepository(),
+            groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
         ),
-        SearchPropositionsCommand: lambda cmd: rechercher_propositions(
-            cmd,
-            PropositionInMemoryRepository(),
-            DoctoratInMemoryTranslator(),
-            SecteurUclInMemoryTranslator(),
+        SearchPropositionsCommand: partial(
+            rechercher_propositions,
+            proposition_repository=PropositionInMemoryRepository(),
+            doctorat_translator=DoctoratInMemoryTranslator(),
+            secteur_ucl_translator=SecteurUclInMemoryTranslator(),
         ),
-        DefinirCotutelleCommand: lambda cmd: definir_cotutelle(
-            cmd,
-            GroupeDeSupervisionInMemoryRepository(),
+        DefinirCotutelleCommand: partial(
+            definir_cotutelle,
+            groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
         )
     }
 

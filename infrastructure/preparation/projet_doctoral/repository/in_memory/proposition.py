@@ -25,14 +25,15 @@
 # ##############################################################################
 from typing import List, Optional
 
-from base.ddd.utils.in_memory_repository import InMemoryGenericRepository
 from admission.ddd.preparation.projet_doctoral.domain.model.proposition import Proposition, PropositionIdentity
 from admission.ddd.preparation.projet_doctoral.repository.i_proposition import IPropositionRepository
 from admission.ddd.preparation.projet_doctoral.test.factory.proposition import (
+    PropositionAdmissionECGE3DPMinimaleFactory,
     PropositionAdmissionSC3DPAvecMembresFactory,
     PropositionAdmissionSC3DPAvecMembresInvitesFactory,
     PropositionAdmissionSC3DPMinimaleFactory,
 )
+from base.ddd.utils.in_memory_repository import InMemoryGenericRepository
 
 
 class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepository):
@@ -44,6 +45,7 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
             PropositionAdmissionSC3DPMinimaleFactory(),
             PropositionAdmissionSC3DPAvecMembresFactory(),
             PropositionAdmissionSC3DPAvecMembresInvitesFactory(),
+            PropositionAdmissionECGE3DPMinimaleFactory(),
         ]
 
     @classmethod
