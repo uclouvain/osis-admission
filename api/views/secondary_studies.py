@@ -34,9 +34,7 @@ from osis_profile.models.education import (
 )
 
 
-class SecondaryStudiesViewSet(
-    mixins.RetrieveModelMixin, mixins.UpdateModelMixin, GenericAPIView
-):
+class SecondaryStudiesViewSet(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, GenericAPIView):
     pagination_class = None
     filter_backends = []
     serializer_class = serializers.HighSchoolDiplomaSerializer
