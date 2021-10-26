@@ -28,22 +28,15 @@ import factory
 
 from admission.contrib.models import DoctorateAdmission
 from base.models.enums.education_group_types import TrainingType
-from base.models.enums.entity_type import EntityType
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.education_group_type import EducationGroupTypeFactory
 from base.tests.factories.education_group_year import EducationGroupYearFactory
-from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.person import PersonFactory
 
 
 class DoctorateFactory(EducationGroupYearFactory):
     academic_year = factory.SubFactory(AcademicYearFactory, current=True)
     education_group_type = factory.SubFactory(EducationGroupTypeFactory, name=TrainingType.PHD.name)
-    management_entity = factory.SubFactory(
-        EntityWithVersionFactory,
-        version__acronym="SSH",
-        version__entity_type=EntityType.SECTOR.name,
-    )
 
 
 class DoctorateAdmissionFactory(factory.DjangoModelFactory):

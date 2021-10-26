@@ -29,17 +29,14 @@ import uuid
 import factory
 
 from admission.ddd.preparation.projet_doctoral.domain.model._detail_projet import DetailProjet
-from admission.ddd.preparation.projet_doctoral.domain.model._experience_precedente_recherche import \
-    aucune_experience_precedente_recherche
-from admission.ddd.preparation.projet_doctoral.domain.model._financement import financement_non_rempli
-from admission.ddd.preparation.projet_doctoral.domain.model.proposition import (
-    PropositionIdentity,
-    Proposition,
-)
 from admission.ddd.preparation.projet_doctoral.domain.model._enums import (
     ChoixStatusProposition,
     ChoixTypeAdmission,
 )
+from admission.ddd.preparation.projet_doctoral.domain.model._experience_precedente_recherche import \
+    aucune_experience_precedente_recherche
+from admission.ddd.preparation.projet_doctoral.domain.model._financement import financement_non_rempli
+from admission.ddd.preparation.projet_doctoral.domain.model.proposition import (Proposition, PropositionIdentity)
 from admission.ddd.preparation.projet_doctoral.test.factory.doctorat import _DoctoratIdentityFactory
 
 
@@ -86,10 +83,12 @@ class PropositionAdmissionECGE3DPMinimaleFactory(_PropositionFactory):
     entity_id = factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-ECGE3DP')
     type_admission = ChoixTypeAdmission.ADMISSION
     doctorat_id = factory.SubFactory(_DoctoratIdentityFactory, sigle='ECGE3DP', annee=2020)
+    matricule_candidat = '0123456789'
 
 
 class PropositionAdmissionSC3DPMinimaleAnnuleeFactory(PropositionAdmissionSC3DPMinimaleFactory):
     status = ChoixStatusProposition.CANCELLED
+    matricule_candidat = '0123456789'
 
 
 class PropositionPreAdmissionSC3DPMinimaleFactory(_PropositionFactory):

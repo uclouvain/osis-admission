@@ -29,27 +29,17 @@ import mock
 from django.test import SimpleTestCase
 
 from admission.ddd.preparation.projet_doctoral.commands import SearchDoctoratCommand
-from admission.ddd.preparation.projet_doctoral.domain.service.i_doctorat import IDoctoratTranslator
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 
 
 class TestRechercherDoctoratService(SimpleTestCase):
     def setUp(self) -> None:
-        self._mock_message_bus()
-        self.doctorat_translator = mock.Mock(spec=IDoctoratTranslator)
-        self.cmd = SearchDoctoratCommand(
-            sigle_secteur_entite_gestion='SST',
-        )
-
-    def _mock_message_bus(self):
-        message_bus_patcher = mock.patch.multiple(
-            'admission.infrastructure.message_bus_in_memory',
-            DoctoratInMemoryTranslator=lambda: self.doctorat_translator,
-        )
-        message_bus_patcher.start()
-        self.addCleanup(message_bus_patcher.stop)
+        self.cmd = SearchDoctoratCommand(sigle_secteur_entite_gestion='SST')
         self.message_bus = message_bus_in_memory_instance
 
-    def test_should_appeler_doctorat_translator(self):
-        self.message_bus.invoke(self.cmd)
-        self.doctorat_translator.search.assert_called_with('SST', datetime.date.today().year)
+    @mock.patch('admission.ddd.preparation.projet_doctoral.use_case.read.rechercher_doctorats_service.datetime')
+    def test_should_search(self, mocked_datetime):
+        mocked_datetime.date.today.return_value = datetime.date(2020, 1, 1)
+        results = self.message_bus.invoke(self.cmd)
+        self.assertEqual(results[0].sigle_entite_gestion, 'CDSC')
+        self.assertEqual(results[0].annee, 2020)

@@ -131,6 +131,7 @@ class PropositionSearchDTO(interface.DTO):
     intitule_doctorat_en = attr.ib(type=str)
     matricule_candidat = attr.ib(type=str)
     code_secteur_formation = attr.ib(type=str)
+    intitule_secteur_formation = attr.ib(type=str)
     bureau_CDE = attr.ib(
         type=Optional[str],
     )  # CDE = Comission Doctorale du domaine Sciences Economique et de Gestion

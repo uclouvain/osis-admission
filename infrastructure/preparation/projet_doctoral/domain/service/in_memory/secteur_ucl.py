@@ -24,6 +24,7 @@
 #
 # ##############################################################################
 from admission.ddd.preparation.projet_doctoral.domain.service.i_secteur_ucl import ISecteurUclTranslator
+from admission.ddd.preparation.projet_doctoral.test.factory.secteur_ucl import SSHEntiteFactory
 from ddd.logic.shared_kernel.entite.tests.factory.entiteucl import SSTEntiteFactory
 from infrastructure.shared_kernel.entite.dtos import EntiteUclDTO
 
@@ -31,11 +32,17 @@ from infrastructure.shared_kernel.entite.dtos import EntiteUclDTO
 class SecteurUclInMemoryTranslator(ISecteurUclTranslator):
     entites = [
         SSTEntiteFactory(),
+        SSHEntiteFactory(),
     ]
+    commission_sector_mapping = {
+        'CDA': "SST",
+        'CDSC': "SST",
+        'CDE': "SSH",
+    }
 
     @classmethod
     def get(cls, sigle_entite: str) -> 'EntiteUclDTO':
-        return next(EntiteUclDTO(
+        return list(EntiteUclDTO(
             e.entity_id.sigle,
-            e.intitule_fr,
-        ) for e in cls.entites if e.entity_id.sigle == sigle_entite)
+            e.intitule,
+        ) for e in cls.entites if cls.commission_sector_mapping.get(sigle_entite) == e.entity_id.sigle)[0]

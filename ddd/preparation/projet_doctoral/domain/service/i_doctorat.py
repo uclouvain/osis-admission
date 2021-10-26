@@ -44,5 +44,5 @@ class IDoctoratTranslator(interface.DomainService):
 
     @classmethod
     @abstractmethod
-    def search(cls, sigle_entite_gestion: str, annee: int) -> List['DoctoratDTO']:
+    def search(cls, sigle_secteur_entite_gestion: str, annee: int) -> List['DoctoratDTO']:
         raise NotImplementedError

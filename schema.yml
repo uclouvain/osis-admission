@@ -339,7 +339,6 @@ components:
           - fr-be
           - en
           type: string
-          nullable: true
         sex:
           enum:
           - ''
@@ -359,18 +358,21 @@ components:
             type: string
           nullable: true
           maxItems: 1
+          minItems: 1
         id_card:
           type: array
           items:
             type: string
           nullable: true
-          maxItems: 1
+          maxItems: 2
+          minItems: 1
         passport:
           type: array
           items:
             type: string
           nullable: true
-          maxItems: 1
+          maxItems: 2
+          minItems: 1
         national_number:
           type: string
           maxLength: 255
@@ -386,8 +388,6 @@ components:
           nullable: true
         last_registration_year:
           type: integer
-          maximum: 2999
-          minimum: 1000
           nullable: true
     Coordonnees:
       type: object
@@ -480,6 +480,8 @@ components:
           type: string
         code_secteur_formation:
           type: string
+        intitule_secteur_formation:
+          type: string
         bureau_CDE:
           type: string
         creee_le:
@@ -493,6 +495,7 @@ components:
       - intitule_doctorat_en
       - matricule_candidat
       - code_secteur_formation
+      - intitule_secteur_formation
       - creee_le
     PropositionDTO:
       type: object
