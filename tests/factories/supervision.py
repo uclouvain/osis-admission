@@ -24,32 +24,31 @@
 #
 # ##############################################################################
 
-from admission.ddd.preparation.projet_doctoral.builder.proposition_identity_builder import \
-    PropositionIdentityBuilder
-from admission.ddd.preparation.projet_doctoral.commands import DefinirCotutelleCommand
-from admission.ddd.preparation.projet_doctoral.domain.model.proposition import PropositionIdentity
-from admission.ddd.preparation.projet_doctoral.repository.i_groupe_de_supervision import \
-    IGroupeDeSupervisionRepository
+import factory
+
+from admission.contrib.models import SupervisionActor
+from admission.contrib.models.enums.actor_type import ActorType
+from osis_signature.models import Actor, Process
 
 
-def definir_cotutelle(
-        cmd: 'DefinirCotutelleCommand',
-        groupe_supervision_repository: 'IGroupeDeSupervisionRepository',
-) -> 'PropositionIdentity':
-    # GIVEN
-    proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
-    groupe_de_supervision = groupe_supervision_repository.get_by_proposition_id(proposition_id)
+class _ProcessFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = Process
 
-    # WHEN
-    groupe_de_supervision.definir_cotutelle(
-        motivation=cmd.motivation,
-        institution=cmd.institution,
-        demande_ouverture=cmd.demande_ouverture,
-        convention=cmd.convention,
-        autres_documents=cmd.autres_documents,
-    )
 
-    # THEN
-    groupe_supervision_repository.save(groupe_de_supervision)
+class _ActorFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = Actor
 
-    return proposition_id
+    process = factory.SubFactory(_ProcessFactory)
+    person = factory.SubFactory('base.tests.factories.person.PersonFactory')
+
+
+class PromoterFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = SupervisionActor
+
+    actor_ptr = factory.SubFactory(_ActorFactory)
+    type = ActorType.PROMOTER.name
+    person = factory.SelfAttribute('actor_ptr.person')
+    process = factory.SelfAttribute('actor_ptr.process')

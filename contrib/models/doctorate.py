@@ -23,22 +23,19 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import Optional
 
 from django.contrib.postgres.fields import JSONField
 from django.db import models
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
-from base.models.person import Person
+from admission.ddd.preparation.projet_doctoral.domain.model._enums import ChoixBureauCDE
 from admission.ddd.preparation.projet_doctoral.domain.model._experience_precedente_recherche import \
     ChoixDoctoratDejaRealise
 from admission.ddd.preparation.projet_doctoral.domain.model._financement import ChoixTypeFinancement
-from admission.ddd.preparation.projet_doctoral.domain.model._enums import ChoixBureauCDE
 from osis_document.contrib import FileField
 from osis_signature.contrib.fields import SignatureProcessField
 from .base import BaseAdmission
-from .enums.actor_type import ActorType
 
 
 class DoctorateAdmission(BaseAdmission):
@@ -149,10 +146,28 @@ class DoctorateAdmission(BaseAdmission):
         default='',
         blank=True,
     )
+    cotutelle_motivation = models.CharField(
+        max_length=255,
+        verbose_name=_("Motivation"),
+        default='',
+        blank=True,
+    )
+    cotutelle_institution = models.CharField(
+        max_length=255,
+        verbose_name=_("Institution"),
+        default='',
+        blank=True,
+    )
+    cotutelle_opening_request = FileField(
+        verbose_name=_("Joint thesis request document"),
+        max_files=1,
+    )
+    cotutelle_convention = FileField(max_files=1)
+    cotutelle_other_documents = FileField()
 
     detailed_status = JSONField(default=dict)
 
-    committee = SignatureProcessField()
+    supervision_group = SignatureProcessField()
 
     class Meta:
         verbose_name = _("Doctorate admission")
@@ -180,11 +195,3 @@ class DoctorateAdmission(BaseAdmission):
 
     def get_absolute_url(self):
         return reverse("admission:doctorate-detail", args=[self.pk])
-
-    @property
-    def main_promoter(self) -> Optional[Person]:
-        if not self.committee_id:
-            return None
-        actor = self.committee.actors.filter(committeeactor__type=ActorType.MAIN_PROMOTER.name).first()
-        if actor:
-            return actor.person

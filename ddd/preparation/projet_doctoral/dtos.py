@@ -172,7 +172,8 @@ class GroupeDeSupervisionDTO(interface.DTO):
 
 @attr.s(frozen=True, slots=True)
 class CotutelleDTO(interface.DTO):
-    uuid_proposition = attr.ib(type=str)
     motivation = attr.ib(type=Optional[str])
     institution = attr.ib(type=Optional[str])
-    uuid_document_demande_ouverture = attr.ib(type=Optional[str])
+    demande_ouverture = attr.ib(type=List[str])
+    convention = attr.ib(type=List[str])
+    autres_documents = attr.ib(type=List[str])

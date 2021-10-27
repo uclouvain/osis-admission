@@ -145,7 +145,9 @@ class DefinirCotutelleCommand(interface.CommandRequest):
     uuid_proposition = attr.ib(type=str)
     motivation = attr.ib(type=Optional[str], default='')
     institution = attr.ib(type=Optional[str], default='')
-    uuid_document_demande_ouverture = attr.ib(type=Optional[str], default='')
+    demande_ouverture = attr.ib(type=List[str], factory=list)
+    convention = attr.ib(type=List[str], factory=list)
+    autres_documents = attr.ib(type=List[str], factory=list)
 
 
 @attr.s(frozen=True, slots=True)

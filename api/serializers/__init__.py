@@ -24,6 +24,7 @@
 #
 # ##############################################################################
 
-from .project import *
-from .person import *
 from .coordonnees import CoordonneesSerializer
+from .cotutelle import *
+from .person import *
+from .project import *

@@ -28,6 +28,7 @@ from rules import predicate
 
 from admission.contrib.models import DoctorateAdmission
 from admission.contrib.models.base import BaseAdmission
+from admission.contrib.models.enums.actor_type import ActorType
 
 
 @predicate
@@ -37,7 +38,9 @@ def is_admission_request_author(user: User, obj: BaseAdmission):
 
 @predicate
 def is_admission_request_promoter(user: User, obj: DoctorateAdmission):
-    return obj.main_promoter == user.person
+    return user.person.pk in obj.supervision_group.actors.filter(
+        supervisionactor__type=ActorType.PROMOTER.name,
+    ).values_list('person_id', flat=True)
 
 
 @predicate(bind=True)
@@ -47,4 +50,4 @@ def is_part_of_doctoral_commission(self, user: User, obj: DoctorateAdmission):
 
 @predicate
 def is_part_of_committee(user: User, obj: DoctorateAdmission):
-    return user.person.pk in obj.committee.actors.values_list('person_id', flat=True)
+    return user.person.pk in obj.supervision_group.actors.values_list('person_id', flat=True)
