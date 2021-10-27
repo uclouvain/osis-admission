@@ -36,6 +36,7 @@ from admission.ddd.preparation.projet_doctoral.domain.model._signature_promoteur
     ChoixEtatSignature,
     SignaturePromoteur,
 )
+from admission.ddd.preparation.projet_doctoral.domain.model.proposition import PropositionIdentity
 from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import SignataireNonTrouveException
 from admission.ddd.preparation.projet_doctoral.domain.validator.validator_by_business_action import (
     ApprouverValidatorList,
@@ -140,9 +141,17 @@ class GroupeDeSupervision(interface.Entity):
     def verifier_cotutelle(self):
         raise NotImplementedError
 
-    def definir_cotutelle(self, motivation: str, institution: str, demande_ouverture: str):
+    def definir_cotutelle(self,
+                          motivation: str,
+                          institution: str,
+                          demande_ouverture: List[str] = None,
+                          convention: List[str] = None,
+                          autres_documents: List[str] = None,
+                          ):
         self.cotutelle = Cotutelle(
             motivation=motivation,
             institution=institution,
             demande_ouverture=demande_ouverture,
+            convention=convention,
+            autres_documents=autres_documents,
         )

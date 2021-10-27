@@ -23,17 +23,23 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
+from functools import partial
 
 from admission.ddd.preparation.projet_doctoral.commands import (
     ApprouverPropositionCommand,
     CompleterPropositionCommand,
-    DemanderSignatureCommand, GetPropositionCommand, IdentifierPromoteurCommand,
+    DefinirCotutelleCommand,
+    DemanderSignatureCommand,
+    GetCotutelleCommand,
+    GetPropositionCommand,
+    IdentifierPromoteurCommand,
     InitierPropositionCommand,
     SearchDoctoratCommand,
     SearchPropositionsCommand,
     SupprimerMembreCACommand,
     SupprimerPromoteurCommand,
 )
+from admission.ddd.preparation.projet_doctoral.use_case.read.get_cotutelle import get_cotutelle
 from admission.ddd.preparation.projet_doctoral.use_case.read.get_proposition_service import get_proposition
 from admission.ddd.preparation.projet_doctoral.use_case.read.rechercher_doctorats_service import \
     rechercher_doctorats
@@ -43,6 +49,7 @@ from admission.ddd.preparation.projet_doctoral.use_case.write.approuver_proposit
     approuver_proposition
 from admission.ddd.preparation.projet_doctoral.use_case.write.completer_proposition_service import \
     completer_proposition
+from admission.ddd.preparation.projet_doctoral.use_case.write.definir_cotutelle_service import definir_cotutelle
 from admission.ddd.preparation.projet_doctoral.use_case.write.demander_signature_service import demander_signature
 from admission.ddd.preparation.projet_doctoral.use_case.write.identifier_promoteur_service import \
     identifier_promoteur
@@ -65,57 +72,65 @@ from infrastructure.utils import AbstractMessageBusCommands
 
 class MessageBusCommands(AbstractMessageBusCommands):
     command_handlers = {
-        InitierPropositionCommand: lambda cmd: initier_proposition(
-            cmd,
-            PropositionRepository(),
-            DoctoratTranslator(),
+        InitierPropositionCommand: partial(
+            initier_proposition,
+            proposition_repository=PropositionRepository(),
+            doctorat_translator=DoctoratTranslator(),
         ),
-        SearchPropositionsCommand: lambda cmd: rechercher_propositions(
-            cmd,
-            PropositionRepository(),
-            DoctoratTranslator(),
-            SecteurUclTranslator(),
+        SearchPropositionsCommand: partial(
+            rechercher_propositions,
+            proposition_repository=PropositionRepository(),
+            doctorat_translator=DoctoratTranslator(),
+            secteur_ucl_translator=SecteurUclTranslator(),
         ),
-        GetPropositionCommand: lambda cmd: get_proposition(
-            cmd,
-            PropositionRepository(),
-            DoctoratTranslator(),
-            SecteurUclTranslator(),
+        GetPropositionCommand: partial(
+            get_proposition,
+            proposition_repository=PropositionRepository(),
+            doctorat_translator=DoctoratTranslator(),
+            secteur_ucl_translator=SecteurUclTranslator(),
         ),
-        CompleterPropositionCommand: lambda cmd: completer_proposition(
-            cmd,
-            PropositionRepository(),
-            DoctoratTranslator(),
+        CompleterPropositionCommand: partial(
+            completer_proposition,
+            proposition_repository=PropositionRepository(),
+            doctorat_translator=DoctoratTranslator(),
         ),
-        IdentifierPromoteurCommand: lambda cmd: identifier_promoteur(
-            cmd,
-            PropositionRepository(),
-            GroupeDeSupervisionRepository(),
-            PromoteurTranslator(),
+        DefinirCotutelleCommand: partial(
+            definir_cotutelle,
+            groupe_supervision_repository=GroupeDeSupervisionRepository(),
         ),
-        SupprimerPromoteurCommand: lambda cmd: supprimer_promoteur(
-            cmd,
-            PropositionRepository(),
-            GroupeDeSupervisionRepository(),
+        GetCotutelleCommand: partial(
+            get_cotutelle,
+            groupe_supervision_repository=GroupeDeSupervisionRepository(),
         ),
-        SupprimerMembreCACommand: lambda cmd: supprimer_membre_CA(
-            cmd,
-            PropositionRepository(),
-            GroupeDeSupervisionRepository(),
+        IdentifierPromoteurCommand: partial(
+            identifier_promoteur,
+            proposition_repository=PropositionRepository(),
+            groupe_supervision_repository=GroupeDeSupervisionRepository(),
+            promoteur_translator=PromoteurTranslator(),
         ),
-        DemanderSignatureCommand: lambda cmd: demander_signature(
-            cmd,
-            PropositionRepository(),
-            GroupeDeSupervisionRepository(),
-            ConstitutionSupervisionService(),
+        SupprimerPromoteurCommand: partial(
+            supprimer_promoteur,
+            proposition_repository=PropositionRepository(),
+            groupe_supervision_repository=GroupeDeSupervisionRepository(),
         ),
-        ApprouverPropositionCommand: lambda cmd: approuver_proposition(
-            cmd,
-            PropositionRepository(),
-            GroupeDeSupervisionRepository(),
+        SupprimerMembreCACommand: partial(
+            supprimer_membre_CA,
+            proposition_repository=PropositionRepository(),
+            groupe_supervision_repository=GroupeDeSupervisionRepository(),
         ),
-        SearchDoctoratCommand: lambda cmd: rechercher_doctorats(
-            cmd,
-            DoctoratTranslator(),
+        DemanderSignatureCommand: partial(
+            demander_signature,
+            proposition_repository=PropositionRepository(),
+            groupe_supervision_repository=GroupeDeSupervisionRepository(),
+            constitution_supervision_these=ConstitutionSupervisionService(),
+        ),
+        ApprouverPropositionCommand: partial(
+            approuver_proposition,
+            proposition_repository=PropositionRepository(),
+            groupe_supervision_repository=GroupeDeSupervisionRepository(),
+        ),
+        SearchDoctoratCommand: partial(
+            rechercher_doctorats,
+            doctorat_translator=DoctoratTranslator(),
         ),
     }

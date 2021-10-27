@@ -6,7 +6,7 @@ from admission.ddd.preparation.projet_doctoral.repository.i_groupe_de_supervisio
 
 def get_cotutelle(
         cmd: 'GetCotutelleCommand',
-        repository: 'IGroupeDeSupervisionRepository',
+        groupe_supervision_repository: 'IGroupeDeSupervisionRepository',
 ) -> 'CotutelleDTO':
     # GIVEN
-    return repository.get_cotutelle_dto(cmd.uuid_proposition)
+    return groupe_supervision_repository.get_cotutelle_dto(cmd.uuid_proposition)

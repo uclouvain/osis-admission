@@ -237,6 +237,72 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - propositions
+  /propositions/{uuid}/cotutelle:
+    get:
+      operationId: retrieve_cotutelle
+      description: Get the cotutelle of a proposition
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CotutelleDTO'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
+    put:
+      operationId: update_cotutelle
+      description: Set the cotutelle of a proposition
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DefinirCotutelleCommand'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PropositionIdentityDTO'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
   /autocomplete/sector:
     get:
       operationId: listSectorDTOs
@@ -579,6 +645,29 @@ components:
       - projet_formation_complementaire
       - langue_redaction_these
       - doctorat_deja_realise
+    CotutelleDTO:
+      type: object
+      properties:
+        motivation:
+          type: string
+        institution:
+          type: string
+        demande_ouverture:
+          type: array
+          items:
+            type: string
+        convention:
+          type: array
+          items:
+            type: string
+        autres_documents:
+          type: array
+          items:
+            type: string
+      required:
+      - demande_ouverture
+      - convention
+      - autres_documents
     SectorDTO:
       type: object
       properties:
@@ -781,6 +870,32 @@ components:
       - graphe_gantt
       - proposition_programme_doctoral
       - projet_formation_complementaire
+    DefinirCotutelleCommand:
+      type: object
+      properties:
+        uuid_proposition:
+          type: string
+        motivation:
+          type: string
+        institution:
+          type: string
+        demande_ouverture:
+          type: array
+          items:
+            type: string
+        convention:
+          type: array
+          items:
+            type: string
+        autres_documents:
+          type: array
+          items:
+            type: string
+      required:
+      - uuid_proposition
+      - demande_ouverture
+      - convention
+      - autres_documents
     Error:
       type: object
       properties:

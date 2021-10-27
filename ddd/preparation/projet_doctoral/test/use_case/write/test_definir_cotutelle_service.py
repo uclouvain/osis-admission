@@ -44,7 +44,6 @@ class DefinirCotutelleTestCase(TestCase):
             uuid_proposition=self.uuid_proposition,
             motivation="I'd like to",
             institution="Somewhere",
-            uuid_document_demande_ouverture=[],
         )
         self.addCleanup(self.groupe_de_supervision_repository.reset)
 

@@ -30,7 +30,7 @@ from admission.ddd.preparation.projet_doctoral.commands import (
     CompleterPropositionCommand,
     DefinirCotutelleCommand,
     DemanderSignatureCommand,
-    IdentifierMembreCACommand,
+    GetCotutelleCommand, IdentifierMembreCACommand,
     IdentifierPromoteurCommand,
     InitierPropositionCommand,
     SearchDoctoratCommand,
@@ -38,6 +38,7 @@ from admission.ddd.preparation.projet_doctoral.commands import (
     SupprimerMembreCACommand,
     SupprimerPromoteurCommand,
 )
+from admission.ddd.preparation.projet_doctoral.use_case.read.get_cotutelle import get_cotutelle
 from admission.ddd.preparation.projet_doctoral.use_case.read.rechercher_doctorats_service import \
     rechercher_doctorats
 from admission.ddd.preparation.projet_doctoral.use_case.read.rechercher_propositions_service import \
@@ -91,6 +92,14 @@ class MessageBusInMemoryCommands(AbstractMessageBusCommands):
             proposition_repository=PropositionInMemoryRepository(),
             doctorat_translator=DoctoratInMemoryTranslator(),
         ),
+        DefinirCotutelleCommand: partial(
+            definir_cotutelle,
+            groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
+        ),
+        GetCotutelleCommand: partial(
+            get_cotutelle,
+            groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
+        ),
         IdentifierPromoteurCommand: partial(
             identifier_promoteur,
             proposition_repository=PropositionInMemoryRepository(),
@@ -130,10 +139,6 @@ class MessageBusInMemoryCommands(AbstractMessageBusCommands):
             doctorat_translator=DoctoratInMemoryTranslator(),
             secteur_ucl_translator=SecteurUclInMemoryTranslator(),
         ),
-        DefinirCotutelleCommand: partial(
-            definir_cotutelle,
-            groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
-        )
     }
 
 

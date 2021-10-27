@@ -30,8 +30,8 @@ from django.test import TestCase
 from admission.auth import predicates
 from admission.auth.roles.cdd_manager import CddManager
 from admission.tests.factories import DoctorateAdmissionFactory
-from admission.tests.factories.comittee import MainPromoterFactory, _ProcessFactory
-from admission.tests.factories.roles import CandidateFactory, PromoterFactory, CddManagerFactory
+from admission.tests.factories.roles import CandidateFactory, CddManagerFactory, PromoterFactory
+from admission.tests.factories.supervision import PromoterFactory as PromoterActorFactory, _ProcessFactory
 from base.tests.factories.entity import EntityFactory
 
 
@@ -48,8 +48,8 @@ class PredicatesTestCase(TestCase):
         promoter1 = PromoterFactory()
         promoter2 = PromoterFactory()
         process = _ProcessFactory()
-        MainPromoterFactory(actor_ptr__person_id=promoter2.person_id, actor_ptr__process=process)
-        request = DoctorateAdmissionFactory(committee=process)
+        PromoterActorFactory(actor_ptr__person_id=promoter2.person_id, actor_ptr__process=process)
+        request = DoctorateAdmissionFactory(supervision_group=process)
         self.assertFalse(predicates.is_admission_request_promoter(author.user, request))
         self.assertFalse(predicates.is_admission_request_promoter(promoter1.person.user, request))
         self.assertTrue(predicates.is_admission_request_promoter(promoter2.person.user, request))
@@ -78,7 +78,7 @@ class PredicatesTestCase(TestCase):
         predicate_context_mock.stop()
 
     def test_is_part_of_committee(self):
-        # Promoter is part of the committee
-        promoter = MainPromoterFactory()
-        request = DoctorateAdmissionFactory(committee=promoter.process)
+        # Promoter is part of the supervision group
+        promoter = PromoterActorFactory()
+        request = DoctorateAdmissionFactory(supervision_group=promoter.process)
         self.assertTrue(predicates.is_part_of_committee(promoter.person.user, request))
