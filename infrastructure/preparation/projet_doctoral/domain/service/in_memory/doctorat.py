@@ -28,8 +28,11 @@ from admission.ddd.preparation.projet_doctoral.domain.model.doctorat import Doct
 from admission.ddd.preparation.projet_doctoral.domain.service.i_doctorat import IDoctoratTranslator
 from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import DoctoratNonTrouveException
 from admission.ddd.preparation.projet_doctoral.dtos import DoctoratDTO
-from admission.ddd.preparation.projet_doctoral.test.factory.doctorat import DoctoratCDSCFactory, \
-    DoctoratCDEFactory
+from admission.ddd.preparation.projet_doctoral.test.factory.doctorat import (
+    DoctoratCDEFactory,
+    DoctoratCDSCFactory,
+    _DoctoratDTOFactory,
+)
 
 
 class DoctoratInMemoryTranslator(IDoctoratTranslator):
@@ -37,6 +40,7 @@ class DoctoratInMemoryTranslator(IDoctoratTranslator):
         DoctoratCDEFactory(
             entity_id__sigle='ECGE3DP',
             entity_id__annee=2020,
+            entite_ucl_id__code="CDE",
         ),
         DoctoratCDSCFactory(
             entity_id__sigle='AGRO3DP',
@@ -47,6 +51,10 @@ class DoctoratInMemoryTranslator(IDoctoratTranslator):
             entity_id__annee=2020,
         ),
     ]
+    sector_doctorates_mapping = {
+        "SST": ['AGRO3DP', 'SC3DP'],
+        "SSH": ['ECGE3DP'],
+    }
 
     @classmethod
     def get(cls, sigle: str, annee: int) -> 'Doctorat':
@@ -58,16 +66,19 @@ class DoctoratInMemoryTranslator(IDoctoratTranslator):
     @classmethod
     def get_dto(cls, sigle: str, annee: int) -> DoctoratDTO:
         try:
-            return next(DoctoratDTO(
-                doc.entity_id.sigle,
-                doc.entity_id.annee,
-                doc.intitule_fr,
-                doc.intitule_en,
-                doc.entite_ucl_id.code,
+            return next(_DoctoratDTOFactory(
+                sigle=doc.entity_id.sigle,
+                annee=doc.entity_id.annee,
+                sigle_entite_gestion=doc.entite_ucl_id.code,
             ) for doc in cls.doctorats if doc.entity_id.sigle == sigle and doc.entity_id.annee == annee)
         except StopIteration:
             raise DoctoratNonTrouveException()
 
     @classmethod
-    def search(cls, sigle_entite_gestion: str, annee: int) -> List['DoctoratDTO']:
-        raise NotImplementedError
+    def search(cls, sigle_secteur_entite_gestion: str, annee: int) -> List['DoctoratDTO']:
+        doctorates = cls.sector_doctorates_mapping.get(sigle_secteur_entite_gestion, [])
+        return [_DoctoratDTOFactory(
+            sigle=doc.entity_id.sigle,
+            annee=doc.entity_id.annee,
+            sigle_entite_gestion=doc.entite_ucl_id.code,
+        ) for doc in cls.doctorats if doc.entity_id.sigle in doctorates and doc.entity_id.annee == annee]

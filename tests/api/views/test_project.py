@@ -31,6 +31,8 @@ from rest_framework.test import APITestCase
 from admission.contrib.models import AdmissionType, DoctorateAdmission
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.doctorate import DoctorateFactory
+from base.models.enums.entity_type import EntityType
+from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.person import PersonFactory
 
 
@@ -38,7 +40,18 @@ from base.tests.factories.person import PersonFactory
 class DoctorateAdmissionListApiTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.admission = DoctorateAdmissionFactory()
+        root = EntityVersionFactory(parent=None).entity
+        cls.sector = EntityVersionFactory(
+            parent=root,
+            entity_type=EntityType.SECTOR.name,
+            acronym='SST',
+        ).entity
+        cls.commission = EntityVersionFactory(
+            parent=cls.sector,
+            entity_type=EntityType.DOCTORAL_COMMISSION.name,
+            acronym='CDA',
+        ).entity
+        cls.admission = DoctorateAdmissionFactory(doctorate__management_entity=cls.commission)
         cls.candidate = cls.admission.candidate
         cls.url = resolve_url("propositions")
 
@@ -67,7 +80,18 @@ class DoctorateAdmissionCreationApiTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
         cls.candidate = PersonFactory()
-        cls.doctorate = DoctorateFactory()
+        root = EntityVersionFactory(parent=None).entity
+        cls.sector = EntityVersionFactory(
+            parent=root,
+            entity_type=EntityType.SECTOR.name,
+            acronym='SST',
+        ).entity
+        cls.commission = EntityVersionFactory(
+            parent=cls.sector,
+            entity_type=EntityType.DOCTORAL_COMMISSION.name,
+            acronym='CDA',
+        ).entity
+        cls.doctorate = DoctorateFactory(management_entity=cls.commission)
         cls.create_data = {
             "type_admission": AdmissionType.PRE_ADMISSION.name,
             "justification": "Some justification",
@@ -105,7 +129,18 @@ class DoctorateAdmissionCreationApiTestCase(APITestCase):
 class DoctorateAdmissionUpdatingApiTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.admission = DoctorateAdmissionFactory()
+        root = EntityVersionFactory(parent=None).entity
+        cls.sector = EntityVersionFactory(
+            parent=root,
+            entity_type=EntityType.SECTOR.name,
+            acronym='SST',
+        ).entity
+        cls.commission = EntityVersionFactory(
+            parent=cls.sector,
+            entity_type=EntityType.DOCTORAL_COMMISSION.name,
+            acronym='CDA',
+        ).entity
+        cls.admission = DoctorateAdmissionFactory(doctorate__management_entity=cls.commission)
         cls.candidate = cls.admission.candidate
         cls.update_data = {
             "uuid": cls.admission.uuid,

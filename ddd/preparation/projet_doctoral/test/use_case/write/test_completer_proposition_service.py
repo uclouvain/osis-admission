@@ -27,23 +27,25 @@ import attr
 from django.test import SimpleTestCase
 
 from admission.ddd.preparation.projet_doctoral.commands import CompleterPropositionCommand
+from admission.ddd.preparation.projet_doctoral.domain.model._enums import ChoixBureauCDE, ChoixTypeAdmission
 from admission.ddd.preparation.projet_doctoral.domain.model._experience_precedente_recherche import (
     ChoixDoctoratDejaRealise,
     aucune_experience_precedente_recherche,
 )
-from admission.ddd.preparation.projet_doctoral.domain.model._financement import ChoixTypeFinancement, \
-    financement_non_rempli
+from admission.ddd.preparation.projet_doctoral.domain.model._financement import (
+    ChoixTypeFinancement,
+    financement_non_rempli,
+)
 from admission.ddd.preparation.projet_doctoral.domain.model.proposition import Proposition
-from admission.ddd.preparation.projet_doctoral.domain.model._enums import ChoixBureauCDE, ChoixTypeAdmission
 from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import (
     BureauCDEInconsistantException,
 )
 from admission.ddd.preparation.projet_doctoral.test.factory.proposition import (
-    PropositionAdmissionSC3DPMinimaleFactory, PropositionAdmissionECGE3DPMinimaleFactory,
+    PropositionAdmissionSC3DPMinimaleFactory,
 )
+from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 from admission.infrastructure.preparation.projet_doctoral.repository.in_memory.proposition import \
     PropositionInMemoryRepository
-from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 
 
 class TestCompleterPropositionService(SimpleTestCase):
@@ -105,18 +107,12 @@ class TestCompleterPropositionService(SimpleTestCase):
             self.message_bus.invoke(cmd)
 
     def test_should_pas_completer_bureau_cde_vide_et_CDE(self):
-        proposition_CDE = PropositionAdmissionECGE3DPMinimaleFactory(entity_id=self.proposition_existante.entity_id)
-        self.proposition_repository.save(proposition_CDE)
-
-        cmd = attr.evolve(self.cmd, bureau_CDE='')
+        cmd = attr.evolve(self.cmd, bureau_CDE='', uuid="uuid-ECGE3DP")
         with self.assertRaises(BureauCDEInconsistantException):
             self.message_bus.invoke(cmd)
 
     def test_should_completer_bureau_cde(self):
-        proposition_CDE = PropositionAdmissionECGE3DPMinimaleFactory(entity_id=self.proposition_existante.entity_id)
-        self.proposition_repository.save(proposition_CDE)
-
-        cmd = attr.evolve(self.cmd, bureau_CDE=ChoixBureauCDE.ECONOMY.name)
+        cmd = attr.evolve(self.cmd, bureau_CDE=ChoixBureauCDE.ECONOMY.name, uuid="uuid-ECGE3DP")
         proposition_id = self.message_bus.invoke(cmd)
         proposition = self.proposition_repository.get(proposition_id)  # type: Proposition
         self.assertEqual(cmd.bureau_CDE, proposition.bureau_CDE.name)

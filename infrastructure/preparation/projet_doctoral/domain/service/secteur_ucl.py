@@ -23,7 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from base.models.entity import Entity
+from admission.contrib.models import EntityProxy
 from admission.ddd.preparation.projet_doctoral.domain.service.i_secteur_ucl import ISecteurUclTranslator
 from infrastructure.shared_kernel.entite.dtos import EntiteUclDTO
 
@@ -32,8 +32,9 @@ class SecteurUclTranslator(ISecteurUclTranslator):
     @classmethod
     def get(cls, sigle_entite: str) -> 'EntiteUclDTO':
         # FIXME use command from shared kernel
-        entity = Entity.objects.get(entityversion__acronym=sigle_entite)
+        entity = EntityProxy.objects.with_parent().get(entityversion__acronym=sigle_entite)
+        sector = EntityProxy.objects.only_valid().get(pk=entity.parent)
         return EntiteUclDTO(
-            sigle=entity.most_recent_entity_version.acronym,
-            intitule=entity.most_recent_entity_version.title,
+            sigle=sector.most_recent_entity_version.acronym,
+            intitule=sector.most_recent_entity_version.title,
         )

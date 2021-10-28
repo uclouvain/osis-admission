@@ -24,44 +24,19 @@
 #
 # ##############################################################################
 
-import factory
+from django.test import TestCase
 
-from admission.ddd.preparation.projet_doctoral.domain.model.doctorat import (Doctorat, DoctoratIdentity)
-# FIXME import this factory from shared kernel when available
-from admission.ddd.preparation.projet_doctoral.dtos import DoctoratDTO
-from ddd.logic.learning_unit.tests.factory.ucl_entity import UclEntityIdentityFactory
-
-
-class _DoctoratIdentityFactory(factory.Factory):
-    class Meta:
-        model = DoctoratIdentity
-        abstract = False
-
-    sigle = factory.Sequence(lambda n: 'SIGLE%02d' % n)
-    annee = factory.fuzzy.FuzzyInteger(1999, 2099)
+from admission.ddd.preparation.projet_doctoral.builder.proposition_identity_builder import PropositionIdentityBuilder
+from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import PropositionNonTrouveeException
+from admission.infrastructure.preparation.projet_doctoral.repository.proposition import PropositionRepository
 
 
-class _DoctoratFactory(factory.Factory):
-    class Meta:
-        model = Doctorat
-        abstract = False
+class PropositionRepositoryTestCase(TestCase):
+    def setUp(self):
+        self.repository = PropositionRepository()
 
-    entity_id = factory.SubFactory(_DoctoratIdentityFactory)
-    entite_ucl_id = factory.SubFactory(UclEntityIdentityFactory)
-
-
-class _DoctoratDTOFactory(factory.Factory):
-    class Meta:
-        model = DoctoratDTO
-        abstract = False
-
-    intitule_fr = factory.Faker('sentence', locale='fr')
-    intitule_en = factory.Faker('sentence')
-
-
-class DoctoratCDEFactory(_DoctoratFactory):
-    entite_ucl_id = factory.SubFactory(UclEntityIdentityFactory, code='CDE')
-
-
-class DoctoratCDSCFactory(_DoctoratFactory):
-    entite_ucl_id = factory.SubFactory(UclEntityIdentityFactory, code='CDSC')
+    def test_proposition_non_trouvee(self):
+        entity_id = PropositionIdentityBuilder().build_from_uuid("fdc1ef28-c368-443c-8501-fe0c3ef66d6d")
+        with self.assertRaises(PropositionNonTrouveeException):
+            # Test with real instance so that it fires the exception from DB
+            self.repository.get(entity_id)

@@ -25,11 +25,11 @@
 # ##############################################################################
 from typing import List
 
-from base.models.enums.education_group_types import TrainingType
 from admission.ddd.preparation.projet_doctoral.domain.model.doctorat import Doctorat, DoctoratIdentity
 from admission.ddd.preparation.projet_doctoral.domain.service.i_doctorat import IDoctoratTranslator
 from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import DoctoratNonTrouveException
 from admission.ddd.preparation.projet_doctoral.dtos import DoctoratDTO
+from base.models.enums.education_group_types import TrainingType
 from ddd.logic.formation_catalogue.commands import SearchFormationsCommand
 from ddd.logic.formation_catalogue.dtos import TrainingDto
 from ddd.logic.learning_unit.domain.model.responsible_entity import UCLEntityIdentity  # FIXME reuse from shared_kernel
@@ -68,12 +68,12 @@ class DoctoratTranslator(IDoctoratTranslator):
         raise DoctoratNonTrouveException()
 
     @classmethod
-    def search(cls, sigle_entite_gestion: str, annee: int) -> List['DoctoratDTO']:
+    def search(cls, sigle_secteur_entite_gestion: str, annee: int) -> List['DoctoratDTO']:
         from infrastructure.messages_bus import message_bus_instance
         dtos = message_bus_instance.invoke(
             SearchFormationsCommand(
                 annee=annee,
-                sigle_entite_gestion=sigle_entite_gestion,
+                sigle_entite_gestion=sigle_secteur_entite_gestion,
                 inclure_entites_gestion_subordonnees=True,
                 type=TrainingType.PHD.name,
             )

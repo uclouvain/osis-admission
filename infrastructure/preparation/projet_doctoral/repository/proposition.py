@@ -26,6 +26,7 @@
 from typing import List, Optional
 
 from admission.contrib.models import DoctorateAdmission
+from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import PropositionNonTrouveeException
 from base.models.education_group_year import EducationGroupYear
 from base.models.person import Person
 from admission.ddd.preparation.projet_doctoral.builder.proposition_identity_builder import \
@@ -95,7 +96,10 @@ def load_admissions(matricule) -> List['Proposition']:
 class PropositionRepository(IPropositionRepository):
     @classmethod
     def get(cls, entity_id: 'PropositionIdentity') -> 'Proposition':
-        return _instantiate_admission(DoctorateAdmission.objects.get(uuid=entity_id.uuid))
+        try:
+            return _instantiate_admission(DoctorateAdmission.objects.get(uuid=entity_id.uuid))
+        except DoctorateAdmission.DoesNotExist:
+            raise PropositionNonTrouveeException
 
     @classmethod
     def search(cls, entity_ids: Optional[List['PropositionIdentity']] = None, matricule_candidat: str = None,

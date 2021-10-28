@@ -24,44 +24,17 @@
 #
 # ##############################################################################
 
-import factory
+from django.test import SimpleTestCase
 
-from admission.ddd.preparation.projet_doctoral.domain.model.doctorat import (Doctorat, DoctoratIdentity)
-# FIXME import this factory from shared kernel when available
-from admission.ddd.preparation.projet_doctoral.dtos import DoctoratDTO
-from ddd.logic.learning_unit.tests.factory.ucl_entity import UclEntityIdentityFactory
+from admission.ddd.preparation.projet_doctoral.commands import SearchPropositionsCommand
+from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 
 
-class _DoctoratIdentityFactory(factory.Factory):
-    class Meta:
-        model = DoctoratIdentity
-        abstract = False
+class TestRechercherDoctoratService(SimpleTestCase):
+    def setUp(self) -> None:
+        self.cmd = SearchPropositionsCommand(matricule_candidat='0123456789')
+        self.message_bus = message_bus_in_memory_instance
 
-    sigle = factory.Sequence(lambda n: 'SIGLE%02d' % n)
-    annee = factory.fuzzy.FuzzyInteger(1999, 2099)
-
-
-class _DoctoratFactory(factory.Factory):
-    class Meta:
-        model = Doctorat
-        abstract = False
-
-    entity_id = factory.SubFactory(_DoctoratIdentityFactory)
-    entite_ucl_id = factory.SubFactory(UclEntityIdentityFactory)
-
-
-class _DoctoratDTOFactory(factory.Factory):
-    class Meta:
-        model = DoctoratDTO
-        abstract = False
-
-    intitule_fr = factory.Faker('sentence', locale='fr')
-    intitule_en = factory.Faker('sentence')
-
-
-class DoctoratCDEFactory(_DoctoratFactory):
-    entite_ucl_id = factory.SubFactory(UclEntityIdentityFactory, code='CDE')
-
-
-class DoctoratCDSCFactory(_DoctoratFactory):
-    entite_ucl_id = factory.SubFactory(UclEntityIdentityFactory, code='CDSC')
+    def test_should_rechercher_par_matricule(self):
+        results = self.message_bus.invoke(self.cmd)
+        self.assertEqual(results[0].uuid, 'uuid-ECGE3DP')
