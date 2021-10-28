@@ -157,6 +157,12 @@ msgstr ""
 msgid "Confirm"
 msgstr ""
 
+msgid "Cotutelle convention"
+msgstr ""
+
+msgid "Cotutelle request document"
+msgstr ""
+
 msgid "Create new doctorate admission"
 msgstr ""
 
@@ -250,6 +256,9 @@ msgstr ""
 msgid "Modified"
 msgstr ""
 
+msgid "Motivation"
+msgstr ""
+
 msgid "NO"
 msgstr ""
 
@@ -260,6 +269,9 @@ msgid "No PhD found."
 msgstr ""
 
 msgid "No defense reason"
+msgstr ""
+
+msgid "Other cotutelle-related documents"
 msgstr ""
 
 msgid "PARTIAL"
