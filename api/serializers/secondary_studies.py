@@ -68,9 +68,11 @@ class HighSchoolDiplomaSerializer(serializers.Serializer):
         belgian_diploma_data = validated_data.get("belgian_diploma")
         foreign_diploma_data = validated_data.get("foreign_diploma")
         if belgian_diploma_data:
-            pk = instance.belgian_diploma and instance.belgian_diploma.schedule_id
-            schedule, _ = Schedule.objects.update_or_create(pk=pk, defaults=belgian_diploma_data.get("schedule"))
-            belgian_diploma_data["schedule"] = schedule
+            schedule_data = belgian_diploma_data.get("schedule")
+            if schedule_data:
+                pk = instance.belgian_diploma and instance.belgian_diploma.schedule_id
+                schedule, _ = Schedule.objects.update_or_create(pk=pk, defaults=belgian_diploma_data.get("schedule"))
+                belgian_diploma_data["schedule"] = schedule
             BelgianHighSchoolDiploma.objects.update_or_create(person=instance, defaults=belgian_diploma_data)
             if instance.foreign_diploma:
                 instance.foreign_diploma.delete()
