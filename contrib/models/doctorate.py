@@ -159,11 +159,16 @@ class DoctorateAdmission(BaseAdmission):
         blank=True,
     )
     cotutelle_opening_request = FileField(
-        verbose_name=_("Joint thesis request document"),
+        verbose_name=_("Cotutelle request document"),
         max_files=1,
     )
-    cotutelle_convention = FileField(max_files=1)
-    cotutelle_other_documents = FileField()
+    cotutelle_convention = FileField(
+        verbose_name=_("Cotutelle convention"),
+        max_files=1,
+    )
+    cotutelle_other_documents = FileField(
+        verbose_name=_("Other cotutelle-related documents"),
+    )
 
     detailed_status = JSONField(default=dict)
 

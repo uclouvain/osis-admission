@@ -164,6 +164,12 @@ msgstr "Membres du comité"
 msgid "Confirm"
 msgstr "Confirmer"
 
+msgid "Cotutelle convention"
+msgstr "Convention de cotutelle"
+
+msgid "Cotutelle request document"
+msgstr "Demande d'ouverture de cotutelle"
+
 msgid "Create new doctorate admission"
 msgstr "Créer une nouvelle admission en doctorat"
 
@@ -259,6 +265,9 @@ msgstr "Membre du CA non trouvé"
 msgid "Modified"
 msgstr "Modifée"
 
+msgid "Motivation"
+msgstr "Motivation"
+
 msgid "NO"
 msgstr "Non"
 
@@ -270,6 +279,9 @@ msgstr "Pas de doctorat trouvé"
 
 msgid "No defense reason"
 msgstr "Raison de non-soutenance"
+
+msgid "Other cotutelle-related documents"
+msgstr "Autres documents relatifs à la cotutelle"
 
 msgid "PARTIAL"
 msgstr "Partiel"

@@ -5,7 +5,6 @@ import osis_document.contrib.fields
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('admission', '0002_auto_20211014_1433'),
     ]
@@ -14,7 +13,8 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='doctorateadmission',
             name='cotutelle_convention',
-            field=osis_document.contrib.fields.FileField(base_field=models.UUIDField(), default=list, size=1),
+            field=osis_document.contrib.fields.FileField(base_field=models.UUIDField(), default=list, size=1,
+                                                         verbose_name="Cotutelle convention"),
         ),
         migrations.AddField(
             model_name='doctorateadmission',
@@ -29,11 +29,13 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='doctorateadmission',
             name='cotutelle_opening_request',
-            field=osis_document.contrib.fields.FileField(base_field=models.UUIDField(), default=list, size=1, verbose_name='Joint thesis request document'),
+            field=osis_document.contrib.fields.FileField(base_field=models.UUIDField(), default=list, size=1,
+                                                         verbose_name='Cotutelle request document'),
         ),
         migrations.AddField(
             model_name='doctorateadmission',
             name='cotutelle_other_documents',
-            field=osis_document.contrib.fields.FileField(base_field=models.UUIDField(), default=list, size=None),
+            field=osis_document.contrib.fields.FileField(base_field=models.UUIDField(), default=list, size=None,
+                                                         verbose_name="Other cotutelle-related documents"),
         ),
     ]
