@@ -28,10 +28,6 @@ from rest_framework.generics import GenericAPIView
 
 from admission.api import serializers
 from admission.api.schema import BetterChoicesSchema
-from osis_profile.models.education import (
-    BelgianHighSchoolDiploma,
-    ForeignHighSchoolDiploma,
-)
 
 
 class SecondaryStudiesViewSet(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, GenericAPIView):
@@ -39,6 +35,7 @@ class SecondaryStudiesViewSet(mixins.RetrieveModelMixin, mixins.UpdateModelMixin
     filter_backends = []
     serializer_class = serializers.HighSchoolDiplomaSerializer
     schema = BetterChoicesSchema(tags=["person"])
+    name = "secondary-studies"
 
     def get_object(self):
         return self.request.user.person
