@@ -35,6 +35,6 @@ class TestRechercherDoctoratService(SimpleTestCase):
         self.cmd = SearchPropositionsCommand(matricule_candidat='0123456789')
         self.message_bus = message_bus_in_memory_instance
 
-    def test_should_search(self):
+    def test_should_rechercher_par_matricule(self):
         results = self.message_bus.invoke(self.cmd)
         self.assertEqual(results[0].uuid, 'uuid-ECGE3DP')

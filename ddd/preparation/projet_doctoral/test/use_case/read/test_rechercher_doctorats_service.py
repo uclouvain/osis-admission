@@ -38,7 +38,7 @@ class TestRechercherDoctoratService(SimpleTestCase):
         self.message_bus = message_bus_in_memory_instance
 
     @mock.patch('admission.ddd.preparation.projet_doctoral.use_case.read.rechercher_doctorats_service.datetime')
-    def test_should_search(self, mocked_datetime):
+    def test_should_rechercher_par_sigle_secteur_entite_gestion(self, mocked_datetime):
         mocked_datetime.date.today.return_value = datetime.date(2020, 1, 1)
         results = self.message_bus.invoke(self.cmd)
         self.assertEqual(results[0].sigle_entite_gestion, 'CDSC')
