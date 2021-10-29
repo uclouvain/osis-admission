@@ -709,7 +709,7 @@ components:
       type: object
       properties:
         type_admission:
-          $ref: '#/components/responses/AdmissionType'
+          $ref: '#/components/schemas/AdmissionType'
         sigle_formation:
           type: string
         annee_formation:
@@ -719,7 +719,7 @@ components:
         justification:
           type: string
         bureau_CDE:
-          $ref: '#/components/responses/ChoixBureauCDE'
+          $ref: '#/components/schemas/ChoixBureauCDE'
         type_financement:
           type: string
         type_contrat_travail:
@@ -756,10 +756,10 @@ components:
           items:
             type: string
         langue_redaction_these:
-          $ref: '#/components/responses/ChoixLangueRedactionThese'
+          $ref: '#/components/schemas/ChoixLangueRedactionThese'
           default: UNDECIDED
         doctorat_deja_realise:
-          $ref: '#/components/responses/ChoixDoctoratDejaRealise'
+          $ref: '#/components/schemas/ChoixDoctoratDejaRealise'
           default: 'NO'
         institution:
           type: string
@@ -808,11 +808,11 @@ components:
         uuid:
           type: string
         type_admission:
-          $ref: '#/components/responses/AdmissionType'
+          $ref: '#/components/schemas/AdmissionType'
         justification:
           type: string
         bureau_CDE:
-          $ref: '#/components/responses/ChoixBureauCDE'
+          $ref: '#/components/schemas/ChoixBureauCDE'
         type_financement:
           type: string
         type_contrat_travail:
@@ -849,10 +849,10 @@ components:
           items:
             type: string
         langue_redaction_these:
-          $ref: '#/components/responses/ChoixLangueRedactionThese'
+          $ref: '#/components/schemas/ChoixLangueRedactionThese'
           default: UNDECIDED
         doctorat_deja_realise:
-          $ref: '#/components/responses/ChoixDoctoratDejaRealise'
+          $ref: '#/components/schemas/ChoixDoctoratDejaRealise'
           default: 'NO'
         institution:
           type: string
