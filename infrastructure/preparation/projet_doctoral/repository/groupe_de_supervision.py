@@ -26,9 +26,15 @@
 
 from typing import List, Optional
 
-from admission.contrib.models import DoctorateAdmission
-from admission.ddd.preparation.projet_doctoral.builder.proposition_identity_builder import PropositionIdentityBuilder
+from admission.contrib.models import DoctorateAdmission, SupervisionActor
+from admission.contrib.models.enums.actor_type import ActorType
+from admission.ddd.preparation.projet_doctoral.builder.proposition_identity_builder import \
+    PropositionIdentityBuilder
 from admission.ddd.preparation.projet_doctoral.domain.model._cotutelle import Cotutelle
+from admission.ddd.preparation.projet_doctoral.domain.model._membre_CA import MembreCAIdentity
+from admission.ddd.preparation.projet_doctoral.domain.model._promoteur import PromoteurIdentity
+from admission.ddd.preparation.projet_doctoral.domain.model._signature_membre_CA import SignatureMembreCA
+from admission.ddd.preparation.projet_doctoral.domain.model._signature_promoteur import SignaturePromoteur
 from admission.ddd.preparation.projet_doctoral.domain.model.groupe_de_supervision import (
     GroupeDeSupervision,
     GroupeDeSupervisionIdentity,
@@ -37,7 +43,8 @@ from admission.ddd.preparation.projet_doctoral.domain.model.proposition import P
 from admission.ddd.preparation.projet_doctoral.dtos import CotutelleDTO
 from admission.ddd.preparation.projet_doctoral.repository.i_groupe_de_supervision import \
     IGroupeDeSupervisionRepository
-from osis_signature.models import Process
+from base.models.person import Person
+from osis_signature.models import Process, StateHistory
 
 
 class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
@@ -51,6 +58,16 @@ class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
         return GroupeDeSupervision(
             entity_id=GroupeDeSupervisionIdentity(uuid=groupe.uuid),
             proposition_id=PropositionIdentityBuilder.build_from_uuid(proposition.uuid),
+            signatures_promoteurs=[
+                SignaturePromoteur(promoteur_id=PromoteurIdentity(actor.person.global_id))
+                for actor in groupe.actors.filter(supervisionactor__type__in=[
+                    ActorType.PROMOTER.name,
+                ])
+            ],
+            signatures_membres_CA=[
+                SignatureMembreCA(membre_CA_id=MembreCAIdentity(actor.person.global_id))
+                for actor in groupe.actors.filter(supervisionactor__type=ActorType.CA_MEMBER.name)
+            ],
             cotutelle=Cotutelle(
                 motivation=proposition.cotutelle_motivation,
                 institution=proposition.cotutelle_institution,
@@ -91,6 +108,53 @@ class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
     @classmethod
     def save(cls, entity: 'GroupeDeSupervision') -> None:
         proposition = DoctorateAdmission.objects.get(uuid=entity.proposition_id.uuid)
+        if not proposition.supervision_group_id:
+            proposition.supervision_group = groupe = Process.objects.create()
+        else:
+            groupe = proposition.supervision_group
+
+        # Delete actors not in the current signatures
+        new_promoteurs_persons = Person.objects.filter(
+            global_id__in=[a.promoteur_id.matricule for a in entity.signatures_promoteurs],
+        )
+        current_promoteurs = groupe.actors.filter(supervisionactor__type=ActorType.PROMOTER.name)
+        current_promoteurs.exclude(person__in=new_promoteurs_persons).delete()
+
+        new_membre_CA_persons = Person.objects.filter(
+            global_id__in=[a.membre_CA_id.matricule for a in entity.signatures_membres_CA],
+        )
+        current_members = groupe.actors.filter(supervisionactor__type=ActorType.CA_MEMBER.name)
+        current_members.exclude(person__in=new_membre_CA_persons).delete()
+
+        # Update existing actors
+        for actor in current_promoteurs:
+            membre = next(a for a in entity.signatures_promoteurs if a.promoteur_id.matricule == actor.person.global_id)
+            if actor.state != membre.etat.name:
+                StateHistory.objects.create(state=membre.etat.name, actor_id=actor.person.global_id)
+
+        for actor in current_members:
+            membre = next(a for a in entity.signatures_membres_CA if a.membre_CA_id.matricule == actor.person.global_id)
+            if actor.state != membre.etat.name:
+                StateHistory.objects.create(state=membre.etat.name, actor_id=actor.person.global_id)
+
+        # Add missing actors
+        promoteurs_ids = current_promoteurs.values_list('person__global_id', flat=True)
+        [
+            SupervisionActor.objects.create(
+                person=person,
+                type=ActorType.PROMOTER.name,
+                process_id=groupe.uuid,
+            ) for person in new_promoteurs_persons if person.global_id not in promoteurs_ids
+        ]
+        membre_CA_ids = current_members.values_list('person__global_id', flat=True)
+        [
+            SupervisionActor.objects.create(
+                person=person,
+                type=ActorType.CA_MEMBER.name,
+                process_id=groupe.uuid,
+            ) for person in new_membre_CA_persons if person.global_id not in membre_CA_ids
+        ]
+
         proposition.cotutelle_motivation = entity.cotutelle.motivation
         proposition.cotutelle_institution = entity.cotutelle.institution
         proposition.cotutelle_opening_request = entity.cotutelle.demande_ouverture

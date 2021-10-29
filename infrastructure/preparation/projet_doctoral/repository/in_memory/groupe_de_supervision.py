@@ -24,13 +24,12 @@
 #
 # ##############################################################################
 
-from typing import List, Optional
+from typing import List
 
 from admission.ddd.preparation.projet_doctoral.builder.proposition_identity_builder import \
     PropositionIdentityBuilder
 from admission.ddd.preparation.projet_doctoral.domain.model.groupe_de_supervision import (
     GroupeDeSupervision,
-    GroupeDeSupervisionIdentity,
 )
 from admission.ddd.preparation.projet_doctoral.domain.model.proposition import PropositionIdentity
 from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import \
@@ -63,15 +62,6 @@ class GroupeDeSupervisionInMemoryRepository(InMemoryGenericRepository, IGroupeDe
             return next(e for e in cls.entities if e.proposition_id == proposition_id)
         except StopIteration:
             raise GroupeDeSupervisionNonTrouveException
-
-    @classmethod
-    def search(
-            cls,
-            entity_ids: Optional[List['GroupeDeSupervisionIdentity']] = None,
-            **kwargs
-    ) -> List['GroupeDeSupervision']:
-        if entity_ids is not None:
-            return list(e for e in cls.entities if e.entity_id in entity_ids)
 
     @classmethod
     def get_cotutelle_dto(cls, uuid_proposition: str) -> 'CotutelleDTO':

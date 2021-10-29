@@ -23,14 +23,13 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import contextlib
 from typing import List
 
 from admission.ddd.preparation.projet_doctoral.domain.model._promoteur import PromoteurIdentity
 from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import PromoteurNonTrouveException
 from admission.ddd.preparation.projet_doctoral.dtos import PromoteurDTO
-from ddd.logic.shared_kernel.personne_connue_ucl.domain.service.personne_connue_ucl import IPersonneConnueUclTranslator
 from admission.infrastructure.preparation.projet_doctoral.domain.service.promoteur import IPromoteurTranslator
+from ddd.logic.shared_kernel.personne_connue_ucl.domain.service.personne_connue_ucl import IPersonneConnueUclTranslator
 
 
 class PromoteurInMemoryTranslator(IPromoteurTranslator):
@@ -47,7 +46,7 @@ class PromoteurInMemoryTranslator(IPromoteurTranslator):
 
     @classmethod
     def search(cls, matricules: List[str]) -> List['PromoteurIdentity']:
-        return [p for p in cls.promoteurs if p.matricule in matricules]
+        raise NotImplementedError
 
     @classmethod
     def search_dto(
@@ -55,14 +54,4 @@ class PromoteurInMemoryTranslator(IPromoteurTranslator):
             terme_de_recherche: str,
             personne_connue_ucl_translator: 'IPersonneConnueUclTranslator',
     ) -> List['PromoteurDTO']:
-        results = []
-        personnes = personne_connue_ucl_translator.search(terme_de_recherche)
-        for personne in personnes:
-            with contextlib.suppress:
-                promoteur = cls.get(personne.matricule)
-                results.append(PromoteurDTO(
-                    matricule=promoteur.matricule,
-                    prenom=personne.prenom,
-                    nom=personne.nom,
-                ))
-        return results
+        raise NotImplementedError

@@ -29,6 +29,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from admission.contrib.models import AdmissionType, DoctorateAdmission
+from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import DoctoratNonTrouveException
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.doctorate import DoctorateFactory
 from base.models.enums.entity_type import EntityType
@@ -117,6 +118,13 @@ class DoctorateAdmissionCreationApiTestCase(APITestCase):
         self.assertEqual(admission.comment, self.create_data["justification"])
         response = self.client.get(resolve_url("propositions"), format="json")
         self.assertEqual(response.json()[0]['sigle_doctorat'], self.doctorate.acronym)
+
+    def test_admission_doctorate_creation_using_api_with_wrong_doctorate(self):
+        self.client.force_authenticate(user=self.candidate.user)
+        data = {**self.create_data, "sigle_formation": "UNKONWN"}
+        response = self.client.post(self.url, data=data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.json()['non_field_errors'][0]['status_code'], DoctoratNonTrouveException.status_code)
 
     def test_user_not_logged_assert_not_authorized(self):
         self.client.force_authenticate(user=None)

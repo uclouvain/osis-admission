@@ -28,7 +28,6 @@ from typing import List
 import attr
 from django.test import SimpleTestCase
 
-from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from admission.ddd.preparation.projet_doctoral.builder.proposition_identity_builder import \
     PropositionIdentityBuilder
 from admission.ddd.preparation.projet_doctoral.commands import DemanderSignatureCommand
@@ -38,13 +37,16 @@ from admission.ddd.preparation.projet_doctoral.domain.model._signature_promoteur
 )
 from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import (
     GroupeDeSupervisionNonTrouveException,
-    SignataireDejaInviteException, SignataireNonTrouveException,
+    PropositionNonTrouveeException,
+    SignataireDejaInviteException,
+    SignataireNonTrouveException,
 )
+from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 from admission.infrastructure.preparation.projet_doctoral.repository.in_memory.groupe_de_supervision import \
     GroupeDeSupervisionInMemoryRepository
 from admission.infrastructure.preparation.projet_doctoral.repository.in_memory.proposition import \
     PropositionInMemoryRepository
-from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
+from base.ddd.utils.business_validator import MultipleBusinessExceptions
 
 
 class TestDemanderSignatureService(SimpleTestCase):
@@ -86,6 +88,11 @@ class TestDemanderSignatureService(SimpleTestCase):
         self.assertIsInstance(e.exception.exceptions.pop(), SignataireDejaInviteException)
 
     def test_should_pas_demander_si_groupe_proposition_non_trouve(self):
-        cmd = attr.evolve(self.cmd, uuid_proposition='propositioninconnue')
+        cmd = attr.evolve(self.cmd, uuid_proposition='uuid-ECGE3DP')
         with self.assertRaises(GroupeDeSupervisionNonTrouveException):
+            self.message_bus.invoke(cmd)
+
+    def test_should_pas_demander_si_proposition_non_trouvee(self):
+        cmd = attr.evolve(self.cmd, uuid_proposition='propositioninconnue')
+        with self.assertRaises(PropositionNonTrouveeException):
             self.message_bus.invoke(cmd)

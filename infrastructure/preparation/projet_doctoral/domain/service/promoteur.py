@@ -27,14 +27,18 @@ from typing import List
 
 from admission.ddd.preparation.projet_doctoral.domain.model._promoteur import PromoteurIdentity
 from admission.ddd.preparation.projet_doctoral.domain.service.i_promoteur import IPromoteurTranslator
+from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import PromoteurNonTrouveException
 from admission.ddd.preparation.projet_doctoral.dtos import PromoteurDTO
+from base.auth.roles.tutor import Tutor
 from ddd.logic.shared_kernel.personne_connue_ucl.domain.service.personne_connue_ucl import IPersonneConnueUclTranslator
 
 
 class PromoteurTranslator(IPromoteurTranslator):
     @classmethod
     def get(cls, matricule: str) -> 'PromoteurIdentity':
-        raise NotImplementedError
+        if not Tutor.objects.filter(person__global_id=matricule):
+            raise PromoteurNonTrouveException
+        return PromoteurIdentity(matricule=matricule)
 
     @classmethod
     def search(cls, matricules: List[str]) -> List['PromoteurIdentity']:

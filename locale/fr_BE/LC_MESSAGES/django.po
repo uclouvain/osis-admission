@@ -247,9 +247,6 @@ msgstr "Liste des admissions en doctorat et données administratives"
 msgid "MANAGEMENT"
 msgstr "Gestion"
 
-msgid "Main promoter"
-msgstr "Promoteur principal"
-
 msgid "Member of supervision group already invited."
 msgstr "Membre du groupe de supervision déjà invité."
 

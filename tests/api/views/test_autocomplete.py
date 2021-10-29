@@ -31,6 +31,7 @@ from base.models.enums.education_group_types import TrainingType
 from base.models.enums.entity_type import SECTOR
 from base.tests.factories.education_group_year import EducationGroupYearFactory
 from base.tests.factories.entity_version import EntityVersionFactory
+from base.tests.factories.person import PersonFactory
 from base.tests.factories.user import UserFactory
 
 
@@ -65,3 +66,13 @@ class AutocompleteTestCase(APITestCase):
         )
         self.assertEqual(response.status_code, 200, response.content)
         self.assertEqual(len(response.json()), 1)
+
+    def test_autocomplete_persons(self):
+        self.client.force_authenticate(user=self.user)
+        PersonFactory(first_name="Jean-Marc")
+        response = self.client.get(
+            resolve_url('autocomplete-person') + '?search=jean',
+            format="json",
+        )
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertEqual(response.json()['count'], 1)

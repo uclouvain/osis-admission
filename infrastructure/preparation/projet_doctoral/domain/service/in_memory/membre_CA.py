@@ -23,7 +23,6 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import contextlib
 from typing import List
 
 from admission.ddd.preparation.projet_doctoral.domain.model._membre_CA import MembreCAIdentity
@@ -47,7 +46,7 @@ class MembreCAInMemoryTranslator(IMembreCATranslator):
 
     @classmethod
     def search(cls, matricules: List[str]) -> List['MembreCAIdentity']:
-        return [p for p in cls.membres_CA if p.matricule in matricules]
+        raise NotImplementedError
 
     @classmethod
     def search_dto(
@@ -55,14 +54,4 @@ class MembreCAInMemoryTranslator(IMembreCATranslator):
             terme_de_recherche: str,
             personne_connue_ucl_translator: 'IPersonneConnueUclTranslator',
     ) -> List['MembreCADTO']:
-        results = []
-        personnes = personne_connue_ucl_translator.search(terme_de_recherche)
-        for personne in personnes:
-            with contextlib.suppress:
-                membre_CA = cls.get(personne.matricule)
-                results.append(MembreCADTO(
-                    matricule=membre_CA.matricule,
-                    prenom=personne.prenom,
-                    nom=personne.nom,
-                ))
-        return results
+        raise NotImplementedError

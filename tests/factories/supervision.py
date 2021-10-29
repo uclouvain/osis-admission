@@ -52,3 +52,7 @@ class PromoterFactory(factory.DjangoModelFactory):
     type = ActorType.PROMOTER.name
     person = factory.SelfAttribute('actor_ptr.person')
     process = factory.SelfAttribute('actor_ptr.process')
+
+
+class CaMemberFactory(PromoterFactory):
+    type = ActorType.CA_MEMBER.name
