@@ -28,3 +28,4 @@ from .coordonnees import CoordonneesSerializer
 from .cotutelle import *
 from .person import *
 from .project import *
+from .supervision import *

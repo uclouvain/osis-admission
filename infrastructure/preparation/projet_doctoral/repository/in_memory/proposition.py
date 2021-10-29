@@ -26,6 +26,7 @@
 from typing import List, Optional
 
 from admission.ddd.preparation.projet_doctoral.domain.model.proposition import Proposition, PropositionIdentity
+from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import PropositionNonTrouveeException
 from admission.ddd.preparation.projet_doctoral.repository.i_proposition import IPropositionRepository
 from admission.ddd.preparation.projet_doctoral.test.factory.proposition import (
     PropositionAdmissionECGE3DPMinimaleFactory,
@@ -40,6 +41,13 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
     entities = []  # type: List[Proposition]
 
     @classmethod
+    def get(cls, entity_id: 'PropositionIdentity') -> 'Proposition':
+        proposition = super().get(entity_id)
+        if not proposition:
+            raise PropositionNonTrouveeException
+        return proposition
+
+    @classmethod
     def reset(cls):
         cls.entities = [
             PropositionAdmissionSC3DPMinimaleFactory(),
@@ -47,6 +55,13 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
             PropositionAdmissionSC3DPAvecMembresInvitesFactory(),
             PropositionAdmissionECGE3DPMinimaleFactory(),
         ]
+
+    @classmethod
+    def save(cls, entity: 'Proposition') -> None:
+        try:
+            super().save(entity)
+        except PropositionNonTrouveeException:
+            cls.entities.append(entity)
 
     @classmethod
     def search(
@@ -58,6 +73,6 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
         returned = cls.entities
         if matricule_candidat:
             returned = filter(lambda p: p.matricule_candidat == matricule_candidat, returned)
-        if entity_ids:
+        if entity_ids:  # pragma: no cover
             returned = filter(lambda p: p.entity_id in entity_ids, returned)
         return list(returned)

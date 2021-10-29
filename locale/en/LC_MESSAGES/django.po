@@ -238,9 +238,6 @@ msgstr ""
 msgid "MANAGEMENT"
 msgstr ""
 
-msgid "Main promoter"
-msgstr ""
-
 msgid "Member of supervision group already invited."
 msgstr ""
 

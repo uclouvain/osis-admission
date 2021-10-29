@@ -27,6 +27,7 @@ import attr
 from django.test import SimpleTestCase
 
 from admission.ddd.preparation.projet_doctoral.commands import InitierPropositionCommand
+from admission.ddd.preparation.projet_doctoral.domain.model._enums import ChoixBureauCDE, ChoixTypeAdmission
 from admission.ddd.preparation.projet_doctoral.domain.model._experience_precedente_recherche import (
     ChoixDoctoratDejaRealise,
     aucune_experience_precedente_recherche,
@@ -36,21 +37,20 @@ from admission.ddd.preparation.projet_doctoral.domain.model._financement import 
     financement_non_rempli,
 )
 from admission.ddd.preparation.projet_doctoral.domain.model.proposition import Proposition
-from admission.ddd.preparation.projet_doctoral.domain.model._enums import ChoixBureauCDE, ChoixTypeAdmission
 from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import (
+    BureauCDEInconsistantException,
     ContratTravailInconsistantException,
+    DoctoratNonTrouveException,
     InstitutionInconsistanteException,
     JustificationRequiseException,
     MaximumPropositionsAtteintException,
-    DoctoratNonTrouveException,
-    BureauCDEInconsistantException,
 )
 from admission.ddd.preparation.projet_doctoral.test.factory.proposition import (
     PropositionAdmissionSC3DPMinimaleAnnuleeFactory,
 )
+from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 from admission.infrastructure.preparation.projet_doctoral.repository.in_memory.proposition import \
     PropositionInMemoryRepository
-from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 
 
@@ -125,9 +125,9 @@ class TestInitierPropositionService(SimpleTestCase):
             self.message_bus.invoke(cmd)
 
     def test_should_empecher_si_maximum_propositions_autorisees(self):
-        self.message_bus.invoke(self.cmd)
+        cmd = attr.evolve(self.cmd, matricule_candidat="0123456789")
         with self.assertRaises(MaximumPropositionsAtteintException):
-            self.message_bus.invoke(self.cmd)
+            self.message_bus.invoke(cmd)
 
     def test_should_initier_autre_proposition_si_premiere_annulee(self):
         # TODO This should be changed to the action that changes the status to cancelled

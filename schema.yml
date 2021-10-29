@@ -303,6 +303,107 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - propositions
+  /propositions/{uuid}/supervision:
+    get:
+      operationId: retrieve_supervision
+      description: Get the supervision group of a proposition
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupervisionDTO'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
+    post:
+      operationId: remove_member
+      description: Remove a supervision group member for a proposition
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SupervisionActor'
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PropositionIdentityDTO'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
+    put:
+      operationId: add_member
+      description: Add a supervision group member for a proposition
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SupervisionActor'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PropositionIdentityDTO'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
   /autocomplete/sector:
     get:
       operationId: listSectorDTOs
@@ -354,6 +455,128 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/DoctoratDTO'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - autocomplete
+  /autocomplete/tutor:
+    get:
+      operationId: listTutors
+      description: Autocomplete tutors
+      parameters:
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      - name: search
+        required: true
+        in: query
+        description: The term to search the persons on
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                    example: 123
+                  next:
+                    type: string
+                    nullable: true
+                    format: uri
+                    example: http://api.example.org/accounts/?offset=400&limit=100
+                  previous:
+                    type: string
+                    nullable: true
+                    format: uri
+                    example: http://api.example.org/accounts/?offset=200&limit=100
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Tutor'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - autocomplete
+  /autocomplete/person:
+    get:
+      operationId: listPersons
+      description: Autocomplete person
+      parameters:
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      - name: search
+        required: true
+        in: query
+        description: The term to search the persons on
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                    example: 123
+                  next:
+                    type: string
+                    nullable: true
+                    format: uri
+                    example: http://api.example.org/accounts/?offset=400&limit=100
+                  previous:
+                    type: string
+                    nullable: true
+                    format: uri
+                    example: http://api.example.org/accounts/?offset=200&limit=100
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Person'
           description: ''
         '400':
           $ref: '#/components/responses/BadRequest'
@@ -424,21 +647,18 @@ components:
             type: string
           nullable: true
           maxItems: 1
-          minItems: 1
         id_card:
           type: array
           items:
             type: string
           nullable: true
           maxItems: 2
-          minItems: 1
         passport:
           type: array
           items:
             type: string
           nullable: true
           maxItems: 2
-          minItems: 1
         national_number:
           type: string
           maxLength: 255
@@ -668,6 +888,58 @@ components:
       - demande_ouverture
       - convention
       - autres_documents
+    SupervisionDTO:
+      type: object
+      properties:
+        signatures_promoteurs:
+          type: array
+          items:
+            type: object
+            properties:
+              promoteur:
+                type: object
+                properties:
+                  matricule:
+                    type: string
+                  nom:
+                    type: string
+                  prenom:
+                    type: string
+                required:
+                - matricule
+                - nom
+                - prenom
+              status:
+                type: string
+            required:
+            - promoteur
+            - status
+        signatures_membres_CA:
+          type: array
+          items:
+            type: object
+            properties:
+              membre_CA:
+                type: object
+                properties:
+                  matricule:
+                    type: string
+                  nom:
+                    type: string
+                  prenom:
+                    type: string
+                required:
+                - matricule
+                - nom
+                - prenom
+              status:
+                type: string
+            required:
+            - membre_CA
+            - status
+      required:
+      - signatures_promoteurs
+      - signatures_membres_CA
     SectorDTO:
       type: object
       properties:
@@ -699,6 +971,30 @@ components:
       - intitule_fr
       - intitule_en
       - sigle_entite_gestion
+    Tutor:
+      type: object
+      properties:
+        first_name:
+          type: string
+          readOnly: true
+        last_name:
+          type: string
+          readOnly: true
+        global_id:
+          type: string
+          readOnly: true
+    Person:
+      type: object
+      properties:
+        first_name:
+          type: string
+          maxLength: 50
+        last_name:
+          type: string
+          maxLength: 50
+        global_id:
+          type: string
+          maxLength: 10
     PropositionIdentityDTO:
       type: object
       properties:
@@ -801,6 +1097,21 @@ components:
       - 'YES'
       - 'NO'
       - PARTIAL
+      type: string
+    SupervisionActor:
+      type: object
+      properties:
+        type:
+          $ref: '#/components/responses/ActorType'
+        member:
+          type: string
+      required:
+      - type
+      - member
+    ActorType:
+      enum:
+      - PROMOTER
+      - CA_MEMBER
       type: string
     CompleterPropositionCommand:
       type: object

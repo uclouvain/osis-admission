@@ -166,15 +166,5 @@ class GetGroupeDeSupervisionCommand(interface.CommandRequest):
 
 
 @attr.s(frozen=True, slots=True)
-class SearchPromoteursCommand(interface.CommandRequest):
-    terme_de_recherche = attr.ib(type=str)
-
-
-@attr.s(frozen=True, slots=True)
-class SearchMembresCACommand(interface.CommandRequest):
-    terme_de_recherche = attr.ib(type=str)
-
-
-@attr.s(frozen=True, slots=True)
 class GetCotutelleCommand(interface.CommandRequest):
     uuid_proposition = attr.ib(type=str)

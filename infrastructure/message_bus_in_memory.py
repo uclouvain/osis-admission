@@ -25,20 +25,11 @@
 # ##############################################################################
 from functools import partial
 
-from admission.ddd.preparation.projet_doctoral.commands import (
-    ApprouverPropositionCommand,
-    CompleterPropositionCommand,
-    DefinirCotutelleCommand,
-    DemanderSignatureCommand,
-    GetCotutelleCommand, IdentifierMembreCACommand,
-    IdentifierPromoteurCommand,
-    InitierPropositionCommand,
-    SearchDoctoratCommand,
-    SearchPropositionsCommand,
-    SupprimerMembreCACommand,
-    SupprimerPromoteurCommand,
-)
+from admission.ddd.preparation.projet_doctoral.commands import *
 from admission.ddd.preparation.projet_doctoral.use_case.read.get_cotutelle import get_cotutelle
+from admission.ddd.preparation.projet_doctoral.use_case.read.get_groupe_de_supervision_service import \
+    get_groupe_de_supervision
+from admission.ddd.preparation.projet_doctoral.use_case.read.get_proposition_service import get_proposition
 from admission.ddd.preparation.projet_doctoral.use_case.read.rechercher_doctorats_service import \
     rechercher_doctorats
 from admission.ddd.preparation.projet_doctoral.use_case.read.rechercher_propositions_service import \
@@ -73,6 +64,8 @@ from admission.infrastructure.preparation.projet_doctoral.repository.in_memory.g
     GroupeDeSupervisionInMemoryRepository
 from admission.infrastructure.preparation.projet_doctoral.repository.in_memory.proposition import \
     PropositionInMemoryRepository
+from infrastructure.shared_kernel.personne_connue_ucl.in_memory.personne_connue_ucl import \
+    PersonneConnueUclInMemoryTranslator
 from infrastructure.utils import AbstractMessageBusCommands, MessageBus
 
 
@@ -91,6 +84,12 @@ class MessageBusInMemoryCommands(AbstractMessageBusCommands):
             completer_proposition,
             proposition_repository=PropositionInMemoryRepository(),
             doctorat_translator=DoctoratInMemoryTranslator(),
+        ),
+        GetPropositionCommand: partial(
+            get_proposition,
+            proposition_repository=PropositionInMemoryRepository(),
+            doctorat_translator=DoctoratInMemoryTranslator(),
+            secteur_ucl_translator=SecteurUclInMemoryTranslator(),
         ),
         DefinirCotutelleCommand: partial(
             definir_cotutelle,
@@ -111,6 +110,11 @@ class MessageBusInMemoryCommands(AbstractMessageBusCommands):
             proposition_repository=PropositionInMemoryRepository(),
             groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
             membre_CA_translator=MembreCAInMemoryTranslator(),
+        ),
+        GetGroupeDeSupervisionCommand: partial(
+            get_groupe_de_supervision,
+            groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
+            personne_connue_ucl_translator=PersonneConnueUclInMemoryTranslator(),
         ),
         SupprimerPromoteurCommand: partial(
             supprimer_promoteur,

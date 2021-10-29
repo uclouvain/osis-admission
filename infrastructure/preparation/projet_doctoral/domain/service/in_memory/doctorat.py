@@ -65,14 +65,12 @@ class DoctoratInMemoryTranslator(IDoctoratTranslator):
 
     @classmethod
     def get_dto(cls, sigle: str, annee: int) -> DoctoratDTO:
-        try:
-            return next(_DoctoratDTOFactory(
-                sigle=doc.entity_id.sigle,
-                annee=doc.entity_id.annee,
-                sigle_entite_gestion=doc.entite_ucl_id.code,
-            ) for doc in cls.doctorats if doc.entity_id.sigle == sigle and doc.entity_id.annee == annee)
-        except StopIteration:
-            raise DoctoratNonTrouveException()
+        doctorate = cls.get(sigle, annee)
+        return _DoctoratDTOFactory(
+            sigle=doctorate.entity_id.sigle,
+            annee=doctorate.entity_id.annee,
+            sigle_entite_gestion=doctorate.entite_ucl_id.code,
+        )
 
     @classmethod
     def search(cls, sigle_secteur_entite_gestion: str, annee: int) -> List['DoctoratDTO']:

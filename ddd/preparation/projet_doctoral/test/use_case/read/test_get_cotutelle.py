@@ -23,17 +23,18 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import List
 
-from admission.ddd.preparation.projet_doctoral.commands import SearchMembresCACommand
-from admission.ddd.preparation.projet_doctoral.domain.service.i_membre_CA import IMembreCATranslator
-from admission.ddd.preparation.projet_doctoral.dtos import MembreCADTO
-from ddd.logic.shared_kernel.personne_connue_ucl.domain.service.personne_connue_ucl import IPersonneConnueUclTranslator
+from django.test import TestCase
+
+from admission.ddd.preparation.projet_doctoral.commands import GetCotutelleCommand
+from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 
 
-def search_membres_CA(
-        cmd: 'SearchMembresCACommand',
-        membre_CA_translator: 'IMembreCATranslator',
-        personne_connue_ucl_translator: 'IPersonneConnueUclTranslator',
-) -> List['MembreCADTO']:
-    return membre_CA_translator.search_dto(cmd.terme_de_recherche, personne_connue_ucl_translator)
+class GetCotutelleTestCase(TestCase):
+    def setUp(self):
+        self.cmd = GetCotutelleCommand(uuid_proposition='uuid-SC3DP')
+        self.message_bus = message_bus_in_memory_instance
+
+    def test_get_groupe_de_supervision(self):
+        result = self.message_bus.invoke(self.cmd)
+        self.assertEqual(result.institution, "MIT")

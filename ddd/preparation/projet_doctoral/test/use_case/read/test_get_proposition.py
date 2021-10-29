@@ -23,17 +23,24 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import List
 
-from admission.ddd.preparation.projet_doctoral.commands import SearchPromoteursCommand
-from admission.ddd.preparation.projet_doctoral.domain.service.i_promoteur import IPromoteurTranslator
-from admission.ddd.preparation.projet_doctoral.dtos import PromoteurDTO
-from ddd.logic.shared_kernel.personne_connue_ucl.domain.service.personne_connue_ucl import IPersonneConnueUclTranslator
+from django.test import TestCase
+
+from admission.ddd.preparation.projet_doctoral.commands import GetPropositionCommand
+from admission.ddd.preparation.projet_doctoral.domain.model._enums import ChoixTypeAdmission
+from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import PropositionNonTrouveeException
+from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 
 
-def search_promoteurs(
-        cmd: 'SearchPromoteursCommand',
-        promoteur_translator: 'IPromoteurTranslator',
-        personne_connue_ucl_translator: 'IPersonneConnueUclTranslator',
-) -> List['PromoteurDTO']:
-    return promoteur_translator.search_dto(cmd.terme_de_recherche, personne_connue_ucl_translator)
+class GetPropositionTestCase(TestCase):
+    def setUp(self):
+        self.cmd = GetPropositionCommand(uuid_proposition='uuid-SC3DP')
+        self.message_bus = message_bus_in_memory_instance
+
+    def test_get_proposition(self):
+        result = self.message_bus.invoke(self.cmd)
+        self.assertEqual(result.type_admission, ChoixTypeAdmission.ADMISSION.name)
+
+    def test_get_proposition_non_trouvee(self):
+        with self.assertRaises(PropositionNonTrouveeException):
+            self.message_bus.invoke(GetPropositionCommand(uuid_proposition='inexistant'))
