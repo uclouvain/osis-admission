@@ -59,9 +59,11 @@ class CotutelleAPIView(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, Gener
 
     def put(self, request, *args, **kwargs):
         """Set the cotutelle of a proposition"""
-        data = {'uuid_proposition': str(kwargs['uuid']), **request.data}
-        serializer = serializers.DefinirCotutelleCommandSerializer(data=data)
+        serializer = serializers.DefinirCotutelleCommandSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        result = message_bus_instance.invoke(DefinirCotutelleCommand(**serializer.data))
+        result = message_bus_instance.invoke(DefinirCotutelleCommand(
+            uuid_proposition=str(kwargs['uuid']),
+            **serializer.data,
+        ))
         serializer = serializers.PropositionIdentityDTOSerializer(instance=result)
         return Response(serializer.data, status=status.HTTP_200_OK)

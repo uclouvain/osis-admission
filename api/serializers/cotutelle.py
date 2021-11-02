@@ -34,5 +34,7 @@ class CotutelleDTOSerializer(DTOSerializer):
 
 
 class DefinirCotutelleCommandSerializer(DTOSerializer):
+    uuid_proposition = None
+
     class Meta:
         source = DefinirCotutelleCommand

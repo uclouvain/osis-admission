@@ -424,21 +424,18 @@ components:
             type: string
           nullable: true
           maxItems: 1
-          minItems: 1
         id_card:
           type: array
           items:
             type: string
           nullable: true
           maxItems: 2
-          minItems: 1
         passport:
           type: array
           items:
             type: string
           nullable: true
           maxItems: 2
-          minItems: 1
         national_number:
           type: string
           maxLength: 255
@@ -873,8 +870,6 @@ components:
     DefinirCotutelleCommand:
       type: object
       properties:
-        uuid_proposition:
-          type: string
         motivation:
           type: string
         institution:
@@ -892,7 +887,6 @@ components:
           items:
             type: string
       required:
-      - uuid_proposition
       - demande_ouverture
       - convention
       - autres_documents
