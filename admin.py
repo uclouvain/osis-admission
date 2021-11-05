@@ -27,10 +27,21 @@
 from django.contrib import admin
 
 from admission.contrib.models import DoctorateAdmission
+from osis_profile.models.curriculum import CurriculumYear, Experience
 
 
 class DoctorateAdmissionAdmin(admin.ModelAdmin):
     pass
 
 
+class ExperienceInlineAdmin(admin.TabularInline):
+    model = Experience
+
+
+class CurriculumYearAdmin(admin.ModelAdmin):
+    inlines = [ExperienceInlineAdmin, ]
+    autocomplete_fields = ["person"]
+
+
 admin.site.register(DoctorateAdmission, DoctorateAdmissionAdmin)
+admin.site.register(CurriculumYear, CurriculumYearAdmin)

@@ -23,27 +23,39 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from django.urls import path as _path
 
-from admission.api import views
+from rest_framework import serializers
 
-
-def path(pattern, view, name=None):
-    return _path(pattern, view.as_view(), name=getattr(view, 'name', name))
+from base.api.serializers.academic_year import RelatedAcademicYearField
+from osis_profile.models import Experience, CurriculumYear
 
 
-app_name = "admission_api_v1"
-urlpatterns = [
-    path('person', views.PersonViewSet),
-    path('coordonnees', views.CoordonneesViewSet),
-    path('propositions', views.PropositionListView),
-    path('curriculum', views.CurriculumViewSet),
-    path('secondary_studies', views.SecondaryStudiesViewSet),
-    path('propositions/<uuid:uuid>', views.PropositionViewSet),
-    path('propositions/<uuid:uuid>/cotutelle', views.CotutelleAPIView),
-    path('propositions/<uuid:uuid>/supervision', views.SupervisionAPIView),
-    path('autocomplete/sector', views.AutocompleteSectorView),
-    path('autocomplete/sector/<str:sigle>/doctorates', views.AutocompleteDoctoratView),
-    path('autocomplete/tutor', views.AutocompleteTutorView),
-    path('autocomplete/person', views.AutocompletePersonView),
-]
+class ExperienceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Experience
+        fields = (
+            "curriculum_year",
+            "validated_from",
+            "course_type",
+            "is_valuated",
+        )
+
+
+class CurriculumYearSerializer(serializers.ModelSerializer):
+    academic_graduation_year = RelatedAcademicYearField()
+    experiences = ExperienceSerializer(many=True)
+
+    class Meta:
+        model = CurriculumYear
+        fields = (
+            "academic_graduation_year",
+            "experiences",
+        )
+
+
+class CurriculumSerializer(serializers.Serializer):
+    years = CurriculumYearSerializer(many=True)
+
+    def to_representation(self, instance):
+        instance.years = CurriculumYear.objects.filter(person=instance)
+        return super().to_representation(instance)
