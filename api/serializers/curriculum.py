@@ -78,11 +78,18 @@ class CurriculumSerializer(serializers.Serializer):
         for curriculum_year_data in validated_data.get("curriculum_years"):
             curriculum_year, _ = self.update_curriculum_year(person, curriculum_year_data)
             experiences_data = curriculum_year_data.get("experiences")
+            not_valuated_experiences = curriculum_year.experiences.filter(is_valuated=False)
             if experiences_data:
                 # first remove all previous not valuated experiences
-                curriculum_year.experiences.filter(is_valuated=False).delete()
+                not_valuated_experiences.delete()
                 # then add the receive ones
                 for experience_data in experiences_data:
                     self.add_experience(curriculum_year, experience_data)
+            else:  # we can delete the curriculum year if there is no valuated experiences
+                if not curriculum_year.experiences.filter(is_valuated=True):
+                    curriculum_year.delete()
+                else:  # just delete all experiences that aren't valuated
+                    not_valuated_experiences.delete()
+
         self.load_curriculum(instance)
         return person
