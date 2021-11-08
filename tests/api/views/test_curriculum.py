@@ -27,20 +27,60 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from admission.tests.factories.curriculum import CurriculumYearFactory
-from base.models.enums.person_address_type import PersonAddressType
-from base.models.person_address import PersonAddress
+from admission.tests.factories import DoctorateAdmissionFactory
+from admission.tests.factories.curriculum import CurriculumYearFactory, ExperienceFactory
 from base.tests.factories.academic_year import AcademicYearFactory
-from base.tests.factories.person_address import PersonAddressFactory
+from osis_profile.models import CurriculumYear
 
 
 class CurriculumTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
-        academic_year = AcademicYearFactory(current=True)
-        cls.curriculum_year = CurriculumYearFactory(academic_graduation_year=academic_year)
+        cls.current_academic_year = AcademicYearFactory(current=True)
+        cls.academic_year = AcademicYearFactory(year=2000)
+        cls.curriculum_year = CurriculumYearFactory(academic_graduation_year=cls.current_academic_year)
+        cls.admission = DoctorateAdmissionFactory()
+        cls.valuated_experience = ExperienceFactory(curriculum_year=cls.curriculum_year, validated_from=cls.admission)
         cls.user = cls.curriculum_year.person.user
         cls.url = reverse("admission_api_v1:curriculum")
+        cls.curriculum_year_create_data = {
+            "curriculum_years": [
+                {
+                    "academic_graduation_year": cls.academic_year.year,
+                    "experiences": [
+                        {
+                            "course_type": "BELGIAN_UNIVERSITY",
+                        },
+                        {
+                            "course_type": "FOREIGN_UNIVERSITY",
+                        },
+                    ],
+                },
+            ],
+        }
+        cls.curriculum_year_update_data = {
+            "curriculum_years": [
+                {
+                    "academic_graduation_year": cls.current_academic_year.year,
+                    "experiences": [
+                        {
+                            "course_type": "BELGIAN_NON_UNIVERSITY_HIGHER_EDUCATION",
+                        },
+                        {
+                            "course_type": "FOREIGN_NON_UNIVERSITY_HIGHER_EDUCATION",
+                        },
+                    ],
+                },
+            ],
+        }
+        cls.curriculum_year_without_experiences_data = {
+            "curriculum_years": [
+                {
+                    "academic_graduation_year": cls.current_academic_year.year,
+                    "experiences": [],
+                },
+            ],
+        }
 
     def test_user_not_logged_assert_not_authorized(self):
         self.client.force_authenticate(user=None)
@@ -59,4 +99,44 @@ class CurriculumTestCase(APITestCase):
     def test_curriculum_get(self):
         self.client.force_authenticate(self.user)
         response = self.client.get(self.url)
-        self.assertEqual(response.json()["years"][0]["academic_graduation_year"], 2021)
+        self.assertEqual(len(response.json()["curriculum_years"]), 1)
+        self.assertEqual(response.json()["curriculum_years"][0]["academic_graduation_year"], 2021)
+        self.assertEqual(len(response.json()["curriculum_years"][0]["experiences"]), 1)
+        self.assertEqual(
+            response.json()["curriculum_years"][0]["experiences"][0]["course_type"],
+            self.valuated_experience.course_type,
+        )
+
+    def test_curriculum_create(self):
+        self.client.force_authenticate(self.user)
+        response = self.client.put(self.url, self.curriculum_year_create_data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
+        curriculum_years = CurriculumYear.objects.filter(person=self.user.person)
+        self.assertEqual(curriculum_years.count(), 2)
+        curriculum = curriculum_years.get(academic_graduation_year=self.academic_year)
+        self.assertEqual(curriculum.experiences.count(), 2)
+        curriculum_course_types = curriculum.experiences.values_list("course_type", flat=True)
+        self.assertIn("BELGIAN_UNIVERSITY", curriculum_course_types)
+        self.assertIn("FOREIGN_UNIVERSITY", curriculum_course_types)
+        self.assertEqual(curriculum.academic_graduation_year, self.academic_year)
+
+    def test_curriculum_update(self):
+        self.client.force_authenticate(self.user)
+        response = self.client.put(self.url, self.curriculum_year_update_data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
+        curriculum_years = CurriculumYear.objects.filter(person=self.user.person)
+        self.assertEqual(curriculum_years.count(), 1)
+        curriculum = curriculum_years.get(academic_graduation_year=self.current_academic_year)
+        self.assertEqual(curriculum.experiences.count(), 3)
+        curriculum_course_types = curriculum.experiences.values_list("course_type", flat=True)
+        self.assertIn("BELGIAN_NON_UNIVERSITY_HIGHER_EDUCATION", curriculum_course_types)
+        self.assertIn("FOREIGN_NON_UNIVERSITY_HIGHER_EDUCATION", curriculum_course_types)
+        self.assertIn(self.valuated_experience.course_type, curriculum_course_types)
+        self.assertEqual(curriculum.academic_graduation_year, self.current_academic_year)
+
+    def test_update_curriculum_experiences_wont_delete_valuated_ones(self):
+        self.client.force_authenticate(self.user)
+        response = self.client.put(self.url, self.curriculum_year_without_experiences_data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
+        curriculum_years = CurriculumYear.objects.filter(person=self.user.person)
+        self.assertEqual(curriculum_years.count(), 1)  # only the initial valuated experience must stay
