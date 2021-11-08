@@ -31,12 +31,13 @@ from osis_profile.models import Experience, CurriculumYear
 
 
 class ExperienceSerializer(serializers.ModelSerializer):
+    valuated_from = serializers.UUIDField(source="valuated_from.uuid", read_only=True)
+
     class Meta:
         model = Experience
         fields = (
-            "validated_from",
+            "valuated_from",
             "course_type",
-            "is_valuated",
         )
 
 
@@ -79,7 +80,7 @@ class CurriculumSerializer(serializers.Serializer):
             experiences_data = curriculum_year_data.get("experiences")
             if experiences_data:
                 # first remove all previous not valuated experiences
-                curriculum_year.experiences.filter(validated=False).delete()
+                curriculum_year.experiences.filter(is_valuated=False).delete()
                 # then add the receive ones
                 for experience_data in experiences_data:
                     self.add_experience(curriculum_year, experience_data)

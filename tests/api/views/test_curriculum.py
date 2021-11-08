@@ -40,7 +40,7 @@ class CurriculumTestCase(APITestCase):
         cls.academic_year = AcademicYearFactory(year=2000)
         cls.curriculum_year = CurriculumYearFactory(academic_graduation_year=cls.current_academic_year)
         cls.admission = DoctorateAdmissionFactory()
-        cls.valuated_experience = ExperienceFactory(curriculum_year=cls.curriculum_year, validated_from=cls.admission)
+        cls.valuated_experience = ExperienceFactory(curriculum_year=cls.curriculum_year, valuated_from=cls.admission)
         cls.user = cls.curriculum_year.person.user
         cls.url = reverse("admission_api_v1:curriculum")
         cls.curriculum_year_create_data = {
