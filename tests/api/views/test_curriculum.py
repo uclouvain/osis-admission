@@ -40,7 +40,7 @@ class CurriculumTestCase(APITestCase):
         cls.academic_year = AcademicYearFactory(year=2000)
         cls.curriculum_year = CurriculumYearFactory(academic_graduation_year=cls.current_academic_year)
         cls.admission = DoctorateAdmissionFactory()
-        cls.valuated_experience = ExperienceFactory(curriculum_year=cls.curriculum_year, valuated_from=cls.admission)
+        cls.experience = ExperienceFactory(curriculum_year=cls.curriculum_year)
         cls.user = cls.curriculum_year.person.user
         cls.url = reverse("admission_api_v1:curriculum")
         cls.curriculum_year_create_data = {
@@ -104,7 +104,7 @@ class CurriculumTestCase(APITestCase):
         self.assertEqual(len(response.json()["curriculum_years"][0]["experiences"]), 1)
         self.assertEqual(
             response.json()["curriculum_years"][0]["experiences"][0]["course_type"],
-            self.valuated_experience.course_type,
+            self.experience.course_type,
         )
 
     def test_curriculum_create(self):
@@ -127,16 +127,24 @@ class CurriculumTestCase(APITestCase):
         curriculum_years = CurriculumYear.objects.filter(person=self.user.person)
         self.assertEqual(curriculum_years.count(), 1)
         curriculum = curriculum_years.get(academic_graduation_year=self.current_academic_year)
-        self.assertEqual(curriculum.experiences.count(), 3)
+        self.assertEqual(curriculum.experiences.count(), 2)
         curriculum_course_types = curriculum.experiences.values_list("course_type", flat=True)
         self.assertIn("BELGIAN_NON_UNIVERSITY_HIGHER_EDUCATION", curriculum_course_types)
         self.assertIn("FOREIGN_NON_UNIVERSITY_HIGHER_EDUCATION", curriculum_course_types)
-        self.assertIn(self.valuated_experience.course_type, curriculum_course_types)
         self.assertEqual(curriculum.academic_graduation_year, self.current_academic_year)
 
     def test_update_curriculum_experiences_wont_delete_valuated_ones(self):
         self.client.force_authenticate(self.user)
+        ExperienceFactory(curriculum_year=self.curriculum_year, valuated_from=self.admission)
         response = self.client.put(self.url, self.curriculum_year_without_experiences_data)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
         curriculum_years = CurriculumYear.objects.filter(person=self.user.person)
-        self.assertEqual(curriculum_years.count(), 1)  # only the initial valuated experience must stay
+        self.assertEqual(curriculum_years.count(), 1)
+        self.assertEqual(curriculum_years.get().experiences.count(), 1)  # only the valuated experience must stay
+
+    def test_delete_all_experiences_will_delete_curriculum_year_if_there_is_no_valuated_experience(self):
+        self.client.force_authenticate(self.user)
+        response = self.client.put(self.url, self.curriculum_year_without_experiences_data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
+        curriculum_years = CurriculumYear.objects.filter(person=self.user.person)
+        self.assertEqual(curriculum_years.count(), 0)
