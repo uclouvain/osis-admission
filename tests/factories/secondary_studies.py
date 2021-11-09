@@ -23,18 +23,36 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.api.views.coordonnees import *
-from admission.api.views.secondary_studies import *
-from admission.api.views.person import *
-from admission.api.views.project import *
-from admission.api.views.autocomplete import *
 
-__all__ = [
-    "CoordonneesViewSet",
-    "PersonViewSet",
-    "PropositionViewSet",
-    "PropositionListView",
-    "SecondaryStudiesViewSet",
-    "AutocompleteDoctoratView",
-    "AutocompleteSectorView",
-]
+import factory
+
+from base.tests.factories.academic_year import AcademicYearFactory
+from osis_profile.models import BelgianHighSchoolDiploma, ForeignHighSchoolDiploma
+from osis_profile.models.education import Schedule
+from reference.tests.factories.country import CountryFactory
+from reference.tests.factories.language import LanguageFactory
+
+
+class HighSchoolDiplomaFactory(factory.DjangoModelFactory):
+    person = factory.SubFactory('base.tests.factories.person.PersonFactory')
+    academic_graduation_year = factory.SubFactory(AcademicYearFactory, current=True)
+
+
+class ScheduleFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = Schedule
+
+
+class BelgianHighSchoolDiplomaFactory(HighSchoolDiplomaFactory):
+    schedule = factory.SubFactory(ScheduleFactory)
+
+    class Meta:
+        model = BelgianHighSchoolDiploma
+
+
+class ForeignHighSchoolDiplomaFactory(HighSchoolDiplomaFactory):
+    country = factory.SubFactory(CountryFactory)
+    linguistic_regime = factory.SubFactory(LanguageFactory)
+
+    class Meta:
+        model = ForeignHighSchoolDiploma
