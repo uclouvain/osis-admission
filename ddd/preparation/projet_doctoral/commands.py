@@ -168,3 +168,8 @@ class GetGroupeDeSupervisionCommand(interface.CommandRequest):
 @attr.s(frozen=True, slots=True)
 class GetCotutelleCommand(interface.CommandRequest):
     uuid_proposition = attr.ib(type=str)
+
+
+@attr.s(frozen=True, slots=True)
+class SupprimerPropositionCommand(interface.CommandRequest):
+    uuid_proposition = attr.ib(type=str)

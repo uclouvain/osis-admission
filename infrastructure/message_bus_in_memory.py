@@ -50,6 +50,7 @@ from admission.ddd.preparation.projet_doctoral.use_case.write.supprimer_membre_C
     supprimer_membre_CA
 from admission.ddd.preparation.projet_doctoral.use_case.write.supprimer_promoteur_service import \
     supprimer_promoteur
+from admission.ddd.preparation.projet_doctoral.use_case.write.supprimer_proposition_service import supprimer_proposition
 from admission.infrastructure.preparation.projet_doctoral.domain.service.in_memory.constitution_supervision import \
     ConstitutionSupervisionInMemoryService
 from admission.infrastructure.preparation.projet_doctoral.domain.service.in_memory.doctorat import \
@@ -142,6 +143,14 @@ class MessageBusInMemoryCommands(AbstractMessageBusCommands):
             proposition_repository=PropositionInMemoryRepository(),
             doctorat_translator=DoctoratInMemoryTranslator(),
             secteur_ucl_translator=SecteurUclInMemoryTranslator(),
+        ),
+        DefinirCotutelleCommand: partial(
+            definir_cotutelle,
+            groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
+        ),
+        SupprimerPropositionCommand: partial(
+            supprimer_proposition,
+            proposition_repository=PropositionInMemoryRepository(),
         ),
     }
 

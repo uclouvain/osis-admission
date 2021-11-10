@@ -210,3 +210,6 @@ class Proposition(interface.RootEntity):
 
     def finaliser(self):
         self.status = ChoixStatusProposition.SUBMITTED
+
+    def supprimer(self):
+        self.status = ChoixStatusProposition.CANCELLED
