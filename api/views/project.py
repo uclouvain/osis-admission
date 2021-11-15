@@ -34,6 +34,7 @@ from admission.ddd.preparation.projet_doctoral.commands import (
     CompleterPropositionCommand, GetPropositionCommand,
     InitierPropositionCommand,
     SearchPropositionsCommand,
+    SupprimerPropositionCommand,
 )
 from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import (
     BureauCDEInconsistantException,
@@ -88,6 +89,7 @@ class PropositionSchema(ResponseSpecificSchema):
     serializer_mapping = {
         'GET': serializers.PropositionDTOSerializer,
         'PUT': (serializers.CompleterPropositionCommandSerializer, serializers.PropositionIdentityDTOSerializer),
+        'DELETE': serializers.PropositionIdentityDTOSerializer,
     }
 
 
@@ -112,4 +114,12 @@ class PropositionViewSet(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, Gen
         serializer.is_valid(raise_exception=True)
         result = message_bus_instance.invoke(CompleterPropositionCommand(**serializer.data))
         serializer = serializers.PropositionIdentityDTOSerializer(instance=result)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def delete(self, request, *args, **kwargs):
+        """Soft-Delete a proposition"""
+        proposition_id = message_bus_instance.invoke(
+            SupprimerPropositionCommand(uuid_proposition=kwargs.get('uuid'))
+        )
+        serializer = serializers.PropositionIdentityDTOSerializer(instance=proposition_id)
         return Response(serializer.data, status=status.HTTP_200_OK)

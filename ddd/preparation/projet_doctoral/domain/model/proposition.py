@@ -63,7 +63,7 @@ class Proposition(interface.RootEntity):
     matricule_candidat = attr.ib(type=str)
     projet = attr.ib(type=DetailProjet)
     justification = attr.ib(type=Optional[str], default='')
-    status = attr.ib(type=ChoixStatusProposition, default=ChoixStatusProposition.IN_PROGRESS)
+    statut = attr.ib(type=ChoixStatusProposition, default=ChoixStatusProposition.IN_PROGRESS)
     bureau_CDE = attr.ib(
         type=Optional[ChoixBureauCDE],
         default='',
@@ -84,7 +84,7 @@ class Proposition(interface.RootEntity):
         return self.doctorat_id.annee
 
     def est_en_cours(self):
-        return self.status == ChoixStatusProposition.IN_PROGRESS
+        return self.statut == ChoixStatusProposition.IN_PROGRESS
 
     def completer(
             self,
@@ -209,7 +209,7 @@ class Proposition(interface.RootEntity):
         SoumettrePropositionValidatorList(proposition=self).validate()
 
     def finaliser(self):
-        self.status = ChoixStatusProposition.SUBMITTED
+        self.statut = ChoixStatusProposition.SUBMITTED
 
     def supprimer(self):
-        self.status = ChoixStatusProposition.CANCELLED
+        self.statut = ChoixStatusProposition.CANCELLED

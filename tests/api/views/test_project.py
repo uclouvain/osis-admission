@@ -29,6 +29,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from admission.contrib.models import AdmissionType, DoctorateAdmission
+from admission.ddd.preparation.projet_doctoral.domain.model._enums import ChoixStatusProposition
 from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import DoctoratNonTrouveException
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.doctorate import DoctorateFactory
@@ -185,8 +186,44 @@ class DoctorateAdmissionUpdatingApiTestCase(APITestCase):
 
     def test_assert_methods_not_allowed(self):
         self.client.force_authenticate(user=self.candidate.user)
-        methods_not_allowed = ['delete', 'post', 'patch']
+        methods_not_allowed = ['post', 'patch']
 
         for method in methods_not_allowed:
             response = getattr(self.client, method)(self.url)
             self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+
+
+@override_settings(ROOT_URLCONF='admission.api.url_v1')
+class DoctorateAdmissionDeletingApiTestCase(APITestCase):
+    @classmethod
+    def setUpTestData(cls):
+        root = EntityVersionFactory(parent=None).entity
+        cls.sector = EntityVersionFactory(
+            parent=root,
+            entity_type=EntityType.SECTOR.name,
+            acronym='SST',
+        ).entity
+        cls.commission = EntityVersionFactory(
+            parent=cls.sector,
+            entity_type=EntityType.DOCTORAL_COMMISSION.name,
+            acronym='CDA',
+        ).entity
+        cls.admission = DoctorateAdmissionFactory(doctorate__management_entity=cls.commission)
+        cls.candidate = cls.admission.candidate
+        cls.url = resolve_url("propositions", uuid=cls.admission.uuid)
+
+    def test_admission_doctorate_cancel_using_api(self):
+        self.client.force_authenticate(user=self.candidate.user)
+        response = self.client.delete(self.url, format="json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
+        # This is a soft-delete
+        admissions = DoctorateAdmission.objects.all()
+        self.assertEqual(admissions.count(), 1)
+        admission = admissions.get()
+        self.assertEqual(admission.status, ChoixStatusProposition.CANCELLED.name)
+
+    def test_user_not_logged_assert_not_authorized(self):
+        self.client.force_authenticate(user=None)
+
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
