@@ -23,15 +23,12 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
 from django.core.files.temp import NamedTemporaryFile
 from django.core.management import call_command
 from django.test import TestCase
 
 
 class ApiSchemaTestCase(TestCase):
-    maxDiff = None
-
     def test_api_schema_matches_generation(self):
         with NamedTemporaryFile(mode='w+') as temp:
             call_command(

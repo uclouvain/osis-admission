@@ -69,6 +69,7 @@ class AdmissionSchemaGenerator(SchemaGenerator):
                 "description": "Enter your token in the format **Token &lt;token>**"
             }
         }
+        # Add extra global headers
         schema['components']['parameters'] = {
             "X-User-FirstName": {
                 "in": "header",
@@ -114,6 +115,7 @@ class AdmissionSchemaGenerator(SchemaGenerator):
                 "required": False
             }
         }
+        # Add error responses
         schema['components']['responses'] = {
             "Unauthorized": {
                 "description": "Unauthorized",
@@ -170,6 +172,7 @@ class AdmissionSchemaGenerator(SchemaGenerator):
         }
         for path, path_content in schema['paths'].items():
             for method, method_content in path_content.items():
+                # Add extra global headers to each endpoint
                 method_content['parameters'].extend([
                     {'$ref': '#/components/parameters/Accept-Language'},
                     {'$ref': '#/components/parameters/X-User-FirstName'},
@@ -177,6 +180,7 @@ class AdmissionSchemaGenerator(SchemaGenerator):
                     {'$ref': '#/components/parameters/X-User-Email'},
                     {'$ref': '#/components/parameters/X-User-GlobalID'},
                 ])
+                # Add error responses to each endpoint
                 method_content['responses'].update({
                     "400": {
                         "$ref": "#/components/responses/BadRequest"
@@ -188,6 +192,11 @@ class AdmissionSchemaGenerator(SchemaGenerator):
                         "$ref": "#/components/responses/NotFound"
                     }
                 })
+                # Only allow application/json as content type
+                if 'requestBody' in method_content:
+                    method_content['requestBody']['content'] = {
+                        k: v for k, v in method_content['requestBody']['content'].items() if k == 'application/json'
+                    }
         return schema
 
 
