@@ -849,31 +849,13 @@ components:
               type: integer
               nullable: true
             result:
-              enum:
-              - NOT_KNOWN_YET_RESULT
-              - LT_65_RESULT
-              - BTW_65_AND_75_RESULT
-              - GT_75_RESULT
-              type: string
+              $ref: '#/components/schemas/DiplomaResults'
               nullable: true
             community:
-              enum:
-              - FRENCH_SPEAKING
-              - FLEMISH_SPEAKING
-              - GERMAN_SPEAKING
-              type: string
+              $ref: '#/components/schemas/BelgianCommunitiesOfEducation'
               nullable: true
             educational_type:
-              enum:
-              - ''
-              - TEACHING_OF_GENERAL_EDUCATION
-              - TRANSITION_METHOD
-              - ARTISTIC_TRANSITION
-              - QUALIFICATION_METHOD
-              - ARTISTIC_QUALIFICATION
-              - PROFESSIONAL_EDUCATION
-              - PROFESSIONAL_EDUCATION_AND_MATURITY_EXAM
-              type: string
+              $ref: '#/components/schemas/EducationalType'
               nullable: true
             educational_other:
               type: string
@@ -977,19 +959,10 @@ components:
               type: integer
               nullable: true
             result:
-              enum:
-              - NOT_KNOWN_YET_RESULT
-              - LT_65_RESULT
-              - BTW_65_AND_75_RESULT
-              - GT_75_RESULT
-              type: string
+              $ref: '#/components/schemas/DiplomaResults'
               nullable: true
             foreign_diploma_type:
-              enum:
-              - NATIONAL_BACHELOR
-              - EUROPEAN_BACHELOR
-              - INTERNATIONAL_BACCALAUREATE
-              type: string
+              $ref: '#/components/schemas/ForeignDiplomaTypes'
               nullable: true
             linguistic_regime:
               type: string
@@ -1005,6 +978,36 @@ components:
           - linguistic_regime
           - country
           nullable: true
+    DiplomaResults:
+      enum:
+      - NOT_KNOWN_YET_RESULT
+      - LT_65_RESULT
+      - BTW_65_AND_75_RESULT
+      - GT_75_RESULT
+      type: string
+    BelgianCommunitiesOfEducation:
+      enum:
+      - FRENCH_SPEAKING
+      - FLEMISH_SPEAKING
+      - GERMAN_SPEAKING
+      type: string
+    EducationalType:
+      enum:
+      - ''
+      - TEACHING_OF_GENERAL_EDUCATION
+      - TRANSITION_METHOD
+      - ARTISTIC_TRANSITION
+      - QUALIFICATION_METHOD
+      - ARTISTIC_QUALIFICATION
+      - PROFESSIONAL_EDUCATION
+      - PROFESSIONAL_EDUCATION_AND_MATURITY_EXAM
+      type: string
+    ForeignDiplomaTypes:
+      enum:
+      - NATIONAL_BACHELOR
+      - EUROPEAN_BACHELOR
+      - INTERNATIONAL_BACCALAUREATE
+      type: string
     PropositionDTO:
       type: object
       properties:

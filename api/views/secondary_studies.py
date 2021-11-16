@@ -27,14 +27,14 @@ from rest_framework import mixins
 from rest_framework.generics import GenericAPIView
 
 from admission.api import serializers
-from admission.api.schema import BetterChoicesSchema
+from admission.api.schema import ChoicesEnumSchema
 
 
 class SecondaryStudiesViewSet(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, GenericAPIView):
     pagination_class = None
     filter_backends = []
     serializer_class = serializers.HighSchoolDiplomaSerializer
-    schema = BetterChoicesSchema(tags=["person"])
+    schema = ChoicesEnumSchema(tags=["person"])
     name = "secondary-studies"
 
     def get_object(self):

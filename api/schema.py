@@ -32,6 +32,7 @@ from base.models.utils.utils import ChoiceEnum
 
 
 class AdmissionSchemaGenerator(SchemaGenerator):
+    """This generator adds extra information and reshape the schema for admission"""
     def get_schema(self, *args, **kwargs):
         schema = super().get_schema(*args, **kwargs)
         schema["openapi"] = "3.0.0"
@@ -201,6 +202,7 @@ class AdmissionSchemaGenerator(SchemaGenerator):
 
 
 class BetterChoicesSchema(AutoSchema):
+    """This schema prevents a bug with blank choicefields"""
     def map_choicefield(self, field):
         schema = super().map_choicefield(field)
         if field.allow_blank:
@@ -208,7 +210,8 @@ class BetterChoicesSchema(AutoSchema):
         return schema
 
 
-class DetailedAutoSchema(BetterChoicesSchema):
+class ChoicesEnumSchema(BetterChoicesSchema):
+    """This schema convert enums into schema components"""
     operation_id_base = None
 
     def __init__(self, *args, **kwargs):
@@ -216,6 +219,28 @@ class DetailedAutoSchema(BetterChoicesSchema):
         super().__init__(operation_id_base=self.operation_id_base, *args, **kwargs)
         self.enums = {}
 
+    def map_choicefield(self, field):
+        # The only way to retrieve the original enum is to compare choices
+        for declared_enum in ChoiceEnum.__subclasses__():
+            if OrderedDict(declared_enum.choices()) == field.choices:
+                self.enums[declared_enum.__name__] = super().map_choicefield(field)
+                return {
+                    '$ref': "#/components/schemas/{}".format(declared_enum.__name__)
+                }
+
+        return super().map_choicefield(field)
+
+    def get_components(self, path, method):
+        components = super().get_components(path, method)
+
+        for enum_name, enum in self.enums.items():
+            components[enum_name] = enum
+
+        return components
+
+
+class DetailedAutoSchema(ChoicesEnumSchema):
+    """This schema allows to specify a serializer given an HTTP verb and dissociate for the response body"""
     def get_request_body(self, path, method):
         if method not in ('PUT', 'PATCH', 'POST'):
             return {}
@@ -257,18 +282,9 @@ class DetailedAutoSchema(BetterChoicesSchema):
     def get_serializer(self, path, method, for_response=True):
         raise NotImplementedError
 
-    def map_choicefield(self, field):
-        # The only way to retrieve the original enum is to compare choices
-        for declared_enum in ChoiceEnum.__subclasses__():
-            if OrderedDict(declared_enum.choices()) == field.choices:
-                self.enums[declared_enum.__name__] = super().map_choicefield(field)
-                return {
-                    '$ref': "#/components/schemas/{}".format(declared_enum.__name__)
-                }
-        return super().map_choicefield(field)
-
 
 class ResponseSpecificSchema(DetailedAutoSchema):
+    """This schema allow to map a request/response serializers given an HTTP verb"""
     serializer_mapping = {}
 
     def get_serializer(self, path, method, for_response=True):
