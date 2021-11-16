@@ -171,6 +171,60 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - propositions
+  /secondary_studies:
+    get:
+      operationId: retrieveHighSchoolDiploma
+      description: ''
+      parameters:
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HighSchoolDiploma'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - person
+    put:
+      operationId: updateHighSchoolDiploma
+      description: ''
+      parameters:
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HighSchoolDiploma'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HighSchoolDiploma'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - person
   /propositions/{uuid}:
     get:
       operationId: retrieve_proposition
@@ -484,7 +538,8 @@ paths:
       - name: search
         required: true
         in: query
-        description: The term to search the persons on
+        description: The term to search the persons on (first or last name, or global
+          id)
         schema:
           type: string
       - $ref: '#/components/parameters/Accept-Language'
@@ -545,7 +600,8 @@ paths:
       - name: search
         required: true
         in: query
-        description: The term to search the persons on
+        description: The term to search the persons on (first or last name, or global
+          id)
         schema:
           type: string
       - $ref: '#/components/parameters/Accept-Language'
@@ -783,6 +839,172 @@ components:
       - code_secteur_formation
       - intitule_secteur_formation
       - creee_le
+    HighSchoolDiploma:
+      type: object
+      properties:
+        belgian_diploma:
+          type: object
+          properties:
+            academic_graduation_year:
+              type: integer
+              nullable: true
+            result:
+              enum:
+              - NOT_KNOWN_YET_RESULT
+              - LT_65_RESULT
+              - BTW_65_AND_75_RESULT
+              - GT_75_RESULT
+              type: string
+              nullable: true
+            community:
+              enum:
+              - FRENCH_SPEAKING
+              - FLEMISH_SPEAKING
+              - GERMAN_SPEAKING
+              type: string
+              nullable: true
+            educational_type:
+              enum:
+              - ''
+              - TEACHING_OF_GENERAL_EDUCATION
+              - TRANSITION_METHOD
+              - ARTISTIC_TRANSITION
+              - QUALIFICATION_METHOD
+              - ARTISTIC_QUALIFICATION
+              - PROFESSIONAL_EDUCATION
+              - PROFESSIONAL_EDUCATION_AND_MATURITY_EXAM
+              type: string
+              nullable: true
+            educational_other:
+              type: string
+              maxLength: 50
+            course_repeat:
+              type: boolean
+            course_orientation:
+              type: boolean
+            institute:
+              type: string
+              maxLength: 25
+            other_institute:
+              type: string
+              description: 'In case you could not find your institute in the list,
+                please mention it below. '
+              maxLength: 500
+            schedule:
+              type: object
+              properties:
+                id:
+                  type: integer
+                  readOnly: true
+                latin:
+                  type: integer
+                  maximum: 2147483647
+                  minimum: 0
+                greek:
+                  type: integer
+                  maximum: 2147483647
+                  minimum: 0
+                chemistry:
+                  type: integer
+                  maximum: 2147483647
+                  minimum: 0
+                physic:
+                  type: integer
+                  maximum: 2147483647
+                  minimum: 0
+                biology:
+                  type: integer
+                  maximum: 2147483647
+                  minimum: 0
+                german:
+                  type: integer
+                  maximum: 2147483647
+                  minimum: 0
+                dutch:
+                  type: integer
+                  maximum: 2147483647
+                  minimum: 0
+                english:
+                  type: integer
+                  maximum: 2147483647
+                  minimum: 0
+                french:
+                  type: integer
+                  maximum: 2147483647
+                  minimum: 0
+                modern_languages_other_label:
+                  type: string
+                  description: If other language, please specify
+                  maxLength: 25
+                modern_languages_other_hours:
+                  type: integer
+                  maximum: 2147483647
+                  nullable: true
+                  minimum: 0
+                mathematics:
+                  type: integer
+                  maximum: 2147483647
+                  minimum: 0
+                it:
+                  type: integer
+                  maximum: 2147483647
+                  minimum: 0
+                social_sciences:
+                  type: integer
+                  maximum: 2147483647
+                  minimum: 0
+                economic_sciences:
+                  type: integer
+                  maximum: 2147483647
+                  minimum: 0
+                other_label:
+                  type: string
+                  description: If other optional domains, please specify
+                  maxLength: 25
+                other_hours:
+                  type: integer
+                  maximum: 2147483647
+                  nullable: true
+                  minimum: 0
+              nullable: true
+          required:
+          - academic_graduation_year
+          nullable: true
+        foreign_diploma:
+          type: object
+          properties:
+            academic_graduation_year:
+              type: integer
+              nullable: true
+            result:
+              enum:
+              - NOT_KNOWN_YET_RESULT
+              - LT_65_RESULT
+              - BTW_65_AND_75_RESULT
+              - GT_75_RESULT
+              type: string
+              nullable: true
+            foreign_diploma_type:
+              enum:
+              - NATIONAL_BACHELOR
+              - EUROPEAN_BACHELOR
+              - INTERNATIONAL_BACCALAUREATE
+              type: string
+              nullable: true
+            linguistic_regime:
+              type: string
+              nullable: true
+            other_linguistic_regime:
+              type: string
+              maxLength: 25
+            country:
+              type: string
+              nullable: true
+          required:
+          - academic_graduation_year
+          - linguistic_regime
+          - country
+          nullable: true
     PropositionDTO:
       type: object
       properties:
@@ -1102,7 +1324,7 @@ components:
       type: object
       properties:
         type:
-          $ref: '#/components/responses/ActorType'
+          $ref: '#/components/schemas/ActorType'
         member:
           type: string
       required:
