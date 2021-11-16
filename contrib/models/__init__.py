@@ -26,14 +26,14 @@
 
 try:
     from .doctorate import DoctorateAdmission
-    from .comittee import CommitteeActor
+    from .actor import SupervisionActor
     from .enums.admission_type import AdmissionType
     from .entity_proxy import EntityProxy
 
     __all__ = [
         "DoctorateAdmission",
         "AdmissionType",
-        "CommitteeActor",
+        "SupervisionActor",
         "EntityProxy",
     ]
 

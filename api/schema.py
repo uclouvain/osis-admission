@@ -254,7 +254,7 @@ class DetailedAutoSchema(BetterChoicesSchema):
             if OrderedDict(declared_enum.choices()) == field.choices:
                 self.enums[declared_enum.__name__] = super().map_choicefield(field)
                 return {
-                    '$ref': "#/components/responses/{}".format(declared_enum.__name__)
+                    '$ref': "#/components/schemas/{}".format(declared_enum.__name__)
                 }
         return super().map_choicefield(field)
 

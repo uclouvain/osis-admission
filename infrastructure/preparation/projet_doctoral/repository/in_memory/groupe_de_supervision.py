@@ -24,9 +24,8 @@
 #
 # ##############################################################################
 
-from typing import Optional, List, Any
+from typing import List, Optional
 
-from base.ddd.utils.in_memory_repository import InMemoryGenericRepository
 from admission.ddd.preparation.projet_doctoral.builder.proposition_identity_builder import \
     PropositionIdentityBuilder
 from admission.ddd.preparation.projet_doctoral.domain.model.groupe_de_supervision import (
@@ -40,9 +39,11 @@ from admission.ddd.preparation.projet_doctoral.dtos import CotutelleDTO
 from admission.ddd.preparation.projet_doctoral.repository.i_groupe_de_supervision import \
     IGroupeDeSupervisionRepository
 from admission.ddd.preparation.projet_doctoral.test.factory.groupe_de_supervision import (
-    GroupeDeSupervisionSC3DPAvecMembresInvitesFactory, GroupeDeSupervisionSC3DPFactory,
+    GroupeDeSupervisionSC3DPAvecMembresInvitesFactory,
     GroupeDeSupervisionSC3DPAvecPromoteurEtMembreFactory,
+    GroupeDeSupervisionSC3DPFactory,
 )
+from base.ddd.utils.in_memory_repository import InMemoryGenericRepository
 
 
 class GroupeDeSupervisionInMemoryRepository(InMemoryGenericRepository, IGroupeDeSupervisionRepository):
@@ -77,8 +78,9 @@ class GroupeDeSupervisionInMemoryRepository(InMemoryGenericRepository, IGroupeDe
         proposition_id = PropositionIdentityBuilder.build_from_uuid(uuid_proposition)
         groupe = cls.get_by_proposition_id(proposition_id=proposition_id)
         return CotutelleDTO(
-            uuid_proposition=uuid_proposition,
             motivation=groupe.cotutelle.motivation,
             institution=groupe.cotutelle.institution,
-            uuid_document_demande_ouverture=groupe.cotutelle.uuid_document_demande_ouverture,
+            demande_ouverture=groupe.cotutelle.demande_ouverture,
+            convention=groupe.cotutelle.convention,
+            autres_documents=groupe.cotutelle.autres_documents,
         )
