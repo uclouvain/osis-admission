@@ -79,7 +79,9 @@ class PersonSearchingBackend(BaseFilterBackend):
     def filter_queryset(self, request, queryset, view):
         search_term = request.GET.get(self.searching_param, '')
         return queryset.filter(
-            Q(first_name__icontains=search_term) | Q(last_name__icontains=search_term)
+            Q(first_name__icontains=search_term)
+            | Q(last_name__icontains=search_term)
+            | Q(global_id__contains=search_term)
         )
 
     def get_schema_operation_parameters(self, view):  # pragma: no cover
@@ -88,7 +90,7 @@ class PersonSearchingBackend(BaseFilterBackend):
                 'name': self.searching_param,
                 'required': True,
                 'in': 'query',
-                'description': "The term to search the persons on",
+                'description': "The term to search the persons on (first or last name, or global id)",
                 'schema': {
                     'type': 'string',
                 },
@@ -104,7 +106,8 @@ class AutocompleteTutorView(ListAPIView):
     queryset = Tutor.objects.annotate(
         first_name=F("person__first_name"),
         last_name=F("person__last_name"),
-    ).distinct('person__global_id').select_related("person")
+        global_id=F("person__global_id"),
+    ).distinct('global_id').select_related("person")
 
 
 class AutocompletePersonView(ListAPIView):

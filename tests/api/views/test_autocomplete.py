@@ -69,9 +69,15 @@ class AutocompleteTestCase(APITestCase):
 
     def test_autocomplete_persons(self):
         self.client.force_authenticate(user=self.user)
-        PersonFactory(first_name="Jean-Marc")
+        PersonFactory(first_name="Jean-Marc", global_id="00005789")
         response = self.client.get(
             resolve_url('autocomplete-person') + '?search=jean',
+            format="json",
+        )
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertEqual(response.json()['count'], 1)
+        response = self.client.get(
+            resolve_url('autocomplete-person') + '?search=57',
             format="json",
         )
         self.assertEqual(response.status_code, 200, response.content)

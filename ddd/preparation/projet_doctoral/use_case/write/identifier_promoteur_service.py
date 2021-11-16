@@ -31,7 +31,6 @@ from admission.ddd.preparation.projet_doctoral.repository.i_groupe_de_supervisio
 from admission.ddd.preparation.projet_doctoral.repository.i_proposition import IPropositionRepository
 
 
-# TODO :: unit tests
 def identifier_promoteur(
         cmd: 'IdentifierPromoteurCommand',
         proposition_repository: 'IPropositionRepository',
