@@ -30,6 +30,8 @@ from django.test import TestCase
 
 
 class ApiSchemaTestCase(TestCase):
+    maxDiff = None
+
     def test_api_schema_matches_generation(self):
         with NamedTemporaryFile(mode='w+') as temp:
             call_command(
