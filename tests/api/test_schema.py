@@ -23,17 +23,19 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import List
-
-from admission.ddd.preparation.projet_doctoral.commands import SearchMembresCACommand
-from admission.ddd.preparation.projet_doctoral.domain.service.i_membre_CA import IMembreCATranslator
-from admission.ddd.preparation.projet_doctoral.dtos import MembreCADTO
-from ddd.logic.shared_kernel.personne_connue_ucl.domain.service.personne_connue_ucl import IPersonneConnueUclTranslator
+from django.core.files.temp import NamedTemporaryFile
+from django.core.management import call_command
+from django.test import TestCase
 
 
-def search_membres_CA(
-        cmd: 'SearchMembresCACommand',
-        membre_CA_translator: 'IMembreCATranslator',
-        personne_connue_ucl_translator: 'IPersonneConnueUclTranslator',
-) -> List['MembreCADTO']:
-    return membre_CA_translator.search_dto(cmd.terme_de_recherche, personne_connue_ucl_translator)
+class ApiSchemaTestCase(TestCase):
+    def test_api_schema_matches_generation(self):
+        with NamedTemporaryFile(mode='w+') as temp:
+            call_command(
+                'generateschema',
+                urlconf='admission.api.url_v1',
+                generator_class='admission.api.schema.AdmissionSchemaGenerator',
+                file=temp.name,
+            )
+            with open('admission/schema.yml') as f:
+                self.assertEqual(f.read(), temp.read(), msg="Schema has not been re-generated")

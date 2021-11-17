@@ -68,7 +68,7 @@ def _instantiate_admission(admission: DoctorateAdmission) -> Proposition:
             projet_formation_complementaire=admission.additional_training_project,
         ),
         justification=admission.comment,
-        status=ChoixStatusProposition.IN_PROGRESS,
+        statut=ChoixStatusProposition[admission.status],
         financement=Financement(
             type=ChoixTypeFinancement[admission.financing_type] if admission.financing_type else '',
             type_contrat_travail=admission.financing_work_contract,
@@ -122,6 +122,7 @@ class PropositionRepository(IPropositionRepository):
             uuid=entity.entity_id.uuid,
             defaults={
                 'type': entity.type_admission.name,
+                'status': entity.statut.name,
                 'comment': entity.justification,
                 'candidate': Person.objects.get(global_id=entity.matricule_candidat),
                 'bureau': entity.bureau_CDE and entity.bureau_CDE.name,

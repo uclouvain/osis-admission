@@ -25,13 +25,16 @@
 # ##############################################################################
 from collections import OrderedDict
 
+from rest_framework import status
 from rest_framework.schemas.openapi import AutoSchema, SchemaGenerator
+from rest_framework.schemas.utils import is_list_view
 from rest_framework.serializers import Serializer
 
 from base.models.utils.utils import ChoiceEnum
 
 
 class AdmissionSchemaGenerator(SchemaGenerator):
+    """This generator adds extra information and reshape the schema for admission"""
     def get_schema(self, *args, **kwargs):
         schema = super().get_schema(*args, **kwargs)
         schema["openapi"] = "3.0.0"
@@ -69,6 +72,7 @@ class AdmissionSchemaGenerator(SchemaGenerator):
                 "description": "Enter your token in the format **Token &lt;token>**"
             }
         }
+        # Add extra global headers
         schema['components']['parameters'] = {
             "X-User-FirstName": {
                 "in": "header",
@@ -114,6 +118,7 @@ class AdmissionSchemaGenerator(SchemaGenerator):
                 "required": False
             }
         }
+        # Add error responses
         schema['components']['responses'] = {
             "Unauthorized": {
                 "description": "Unauthorized",
@@ -170,6 +175,7 @@ class AdmissionSchemaGenerator(SchemaGenerator):
         }
         for path, path_content in schema['paths'].items():
             for method, method_content in path_content.items():
+                # Add extra global headers to each endpoint
                 method_content['parameters'].extend([
                     {'$ref': '#/components/parameters/Accept-Language'},
                     {'$ref': '#/components/parameters/X-User-FirstName'},
@@ -177,6 +183,7 @@ class AdmissionSchemaGenerator(SchemaGenerator):
                     {'$ref': '#/components/parameters/X-User-Email'},
                     {'$ref': '#/components/parameters/X-User-GlobalID'},
                 ])
+                # Add error responses to each endpoint
                 method_content['responses'].update({
                     "400": {
                         "$ref": "#/components/responses/BadRequest"
@@ -188,10 +195,16 @@ class AdmissionSchemaGenerator(SchemaGenerator):
                         "$ref": "#/components/responses/NotFound"
                     }
                 })
+                # Only allow application/json as content type
+                if 'requestBody' in method_content:
+                    method_content['requestBody']['content'] = {
+                        k: v for k, v in method_content['requestBody']['content'].items() if k == 'application/json'
+                    }
         return schema
 
 
 class BetterChoicesSchema(AutoSchema):
+    """This schema prevents a bug with blank choicefields"""
     def map_choicefield(self, field):
         schema = super().map_choicefield(field)
         if field.allow_blank:
@@ -199,7 +212,8 @@ class BetterChoicesSchema(AutoSchema):
         return schema
 
 
-class DetailedAutoSchema(BetterChoicesSchema):
+class ChoicesEnumSchema(BetterChoicesSchema):
+    """This schema convert enums into schema components"""
     operation_id_base = None
 
     def __init__(self, *args, **kwargs):
@@ -207,6 +221,28 @@ class DetailedAutoSchema(BetterChoicesSchema):
         super().__init__(operation_id_base=self.operation_id_base, *args, **kwargs)
         self.enums = {}
 
+    def map_choicefield(self, field):
+        # The only way to retrieve the original enum is to compare choices
+        for declared_enum in ChoiceEnum.__subclasses__():
+            if OrderedDict(declared_enum.choices()) == field.choices:
+                self.enums[declared_enum.__name__] = super().map_choicefield(field)
+                return {
+                    '$ref': "#/components/schemas/{}".format(declared_enum.__name__)
+                }
+
+        return super().map_choicefield(field)
+
+    def get_components(self, path, method):
+        components = super().get_components(path, method)
+
+        for enum_name, enum in self.enums.items():
+            components[enum_name] = enum
+
+        return components
+
+
+class DetailedAutoSchema(ChoicesEnumSchema):
+    """This schema allows to specify a serializer given an HTTP verb and dissociate for the response body"""
     def get_request_body(self, path, method):
         if method not in ('PUT', 'PATCH', 'POST'):
             return {}
@@ -248,18 +284,44 @@ class DetailedAutoSchema(BetterChoicesSchema):
     def get_serializer(self, path, method, for_response=True):
         raise NotImplementedError
 
-    def map_choicefield(self, field):
-        # The only way to retrieve the original enum is to compare choices
-        for declared_enum in ChoiceEnum.__subclasses__():
-            if OrderedDict(declared_enum.choices()) == field.choices:
-                self.enums[declared_enum.__name__] = super().map_choicefield(field)
-                return {
-                    '$ref': "#/components/schemas/{}".format(declared_enum.__name__)
-                }
-        return super().map_choicefield(field)
+    def get_responses(self, path, method):
+        # AutoSchema is a nazi and overrides the DELETE response with no reason
+        self.response_media_types = self.map_renderers(path, method)
+
+        serializer = self.get_serializer(path, method)
+
+        if not isinstance(serializer, Serializer):
+            item_schema = {}
+        else:
+            item_schema = self._get_reference(serializer)
+
+        if is_list_view(path, method, self.view):
+            response_schema = {
+                'type': 'array',
+                'items': item_schema,
+            }
+            paginator = self.get_paginator()
+            if paginator:
+                response_schema = paginator.get_paginated_response_schema(response_schema)
+        else:
+            response_schema = item_schema
+        status_code = status.HTTP_201_CREATED if method == 'POST' else status.HTTP_200_OK
+        return {
+            status_code: {
+                'content': {
+                    ct: {'schema': response_schema}
+                    for ct in self.response_media_types
+                },
+                # description is a mandatory property,
+                # https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#responseObject
+                # TODO: put something meaningful into it
+                'description': ""
+            }
+        }
 
 
 class ResponseSpecificSchema(DetailedAutoSchema):
+    """This schema allow to map a request/response serializers given an HTTP verb"""
     serializer_mapping = {}
 
     def get_serializer(self, path, method, for_response=True):

@@ -23,7 +23,16 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
-from admission.ddd.preparation.projet_doctoral.dtos import GroupeDeSupervisionDTO
+from admission.ddd.preparation.projet_doctoral.builder.proposition_identity_builder import PropositionIdentityBuilder
+from admission.ddd.preparation.projet_doctoral.domain.model._signature_membre_CA import SignatureMembreCA
+from admission.ddd.preparation.projet_doctoral.domain.model._signature_promoteur import SignaturePromoteur
+from admission.ddd.preparation.projet_doctoral.dtos import (
+    DetailSignatureMembreCADTO,
+    DetailSignaturePromoteurDTO,
+    GroupeDeSupervisionDTO,
+    MembreCADTO,
+    PromoteurDTO,
+)
 from admission.ddd.preparation.projet_doctoral.repository.i_groupe_de_supervision import \
     IGroupeDeSupervisionRepository
 from ddd.logic.shared_kernel.personne_connue_ucl.domain.service.personne_connue_ucl import IPersonneConnueUclTranslator
@@ -38,4 +47,38 @@ class GroupeDeSupervisionDto(interface.DomainService):
             repository: 'IGroupeDeSupervisionRepository',
             personne_connue_ucl_translator: 'IPersonneConnueUclTranslator',
     ) -> 'GroupeDeSupervisionDTO':
-        raise NotImplementedError
+        groupe = repository.get_by_proposition_id(PropositionIdentityBuilder.build_from_uuid(uuid_proposition))
+        return GroupeDeSupervisionDTO(
+            signatures_promoteurs=[
+                DetailSignaturePromoteurDTO(
+                    promoteur=cls._build_promoteur(signature, personne_connue_ucl_translator),
+                    status=signature.etat.name,
+                )
+                for signature in groupe.signatures_promoteurs
+            ],
+            signatures_membres_CA=[
+                DetailSignatureMembreCADTO(
+                    membre_CA=cls._build_membre_CA(signature, personne_connue_ucl_translator),
+                    status=signature.etat.name,
+                )
+                for signature in groupe.signatures_membres_CA
+            ],
+        )
+
+    @classmethod
+    def _build_promoteur(cls, signature: SignaturePromoteur, personne_connue_ucl_translator):
+        personne = personne_connue_ucl_translator.get(signature.promoteur_id.matricule)
+        return PromoteurDTO(
+            matricule=signature.promoteur_id.matricule,
+            nom=personne.nom,
+            prenom=personne.prenom
+        )
+
+    @classmethod
+    def _build_membre_CA(cls, signature: SignatureMembreCA, personne_connue_ucl_translator):
+        personne = personne_connue_ucl_translator.get(signature.membre_CA_id.matricule)
+        return MembreCADTO(
+            matricule=signature.membre_CA_id.matricule,
+            nom=personne.nom,
+            prenom=personne.prenom
+        )

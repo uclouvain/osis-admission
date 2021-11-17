@@ -23,26 +23,18 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from django.urls import path as _path
 
-from admission.api import views
+from django.test import TestCase
 
-
-def path(pattern, view, name=None):
-    return _path(pattern, view.as_view(), name=getattr(view, 'name', name))
+from admission.ddd.preparation.projet_doctoral.commands import GetCotutelleCommand
+from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 
 
-app_name = "admission_api_v1"
-urlpatterns = [
-    path('person', views.PersonViewSet),
-    path('coordonnees', views.CoordonneesViewSet),
-    path('propositions', views.PropositionListView),
-    path('secondary_studies', views.SecondaryStudiesViewSet),
-    path('propositions/<uuid:uuid>', views.PropositionViewSet),
-    path('propositions/<uuid:uuid>/cotutelle', views.CotutelleAPIView),
-    path('propositions/<uuid:uuid>/supervision', views.SupervisionAPIView),
-    path('autocomplete/sector', views.AutocompleteSectorView),
-    path('autocomplete/sector/<str:sigle>/doctorates', views.AutocompleteDoctoratView),
-    path('autocomplete/tutor', views.AutocompleteTutorView),
-    path('autocomplete/person', views.AutocompletePersonView),
-]
+class GetCotutelleTestCase(TestCase):
+    def setUp(self):
+        self.cmd = GetCotutelleCommand(uuid_proposition='uuid-SC3DP')
+        self.message_bus = message_bus_in_memory_instance
+
+    def test_get_groupe_de_supervision(self):
+        result = self.message_bus.invoke(self.cmd)
+        self.assertEqual(result.institution, "MIT")

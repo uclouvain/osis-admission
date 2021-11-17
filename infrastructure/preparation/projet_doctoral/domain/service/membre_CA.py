@@ -27,14 +27,18 @@ from typing import List
 
 from admission.ddd.preparation.projet_doctoral.domain.model._membre_CA import MembreCAIdentity
 from admission.ddd.preparation.projet_doctoral.domain.service.i_membre_CA import IMembreCATranslator
+from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import MembreCANonTrouveException
 from admission.ddd.preparation.projet_doctoral.dtos import MembreCADTO
+from base.models.person import Person
 from ddd.logic.shared_kernel.personne_connue_ucl.domain.service.personne_connue_ucl import IPersonneConnueUclTranslator
 
 
 class MembreCATranslator(IMembreCATranslator):
     @classmethod
     def get(cls, matricule: str) -> 'MembreCAIdentity':
-        raise NotImplementedError
+        if not Person.objects.filter(global_id=matricule):
+            raise MembreCANonTrouveException
+        return MembreCAIdentity(matricule=matricule)
 
     @classmethod
     def search(cls, matricules: List[str]) -> List['MembreCAIdentity']:

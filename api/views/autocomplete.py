@@ -23,14 +23,20 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from django.db.models import F
+from django.db.models import F, Q
+from rest_framework.filters import BaseFilterBackend
 from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
 
 from admission.api import serializers
+from admission.api.serializers import PersonSerializer
 from admission.contrib.models import EntityProxy
-from admission.ddd.preparation.projet_doctoral.commands import SearchDoctoratCommand
+from admission.ddd.preparation.projet_doctoral.commands import (
+    SearchDoctoratCommand,
+)
+from base.auth.roles.tutor import Tutor
 from base.models.enums.entity_type import SECTOR
+from base.models.person import Person
 from infrastructure.messages_bus import message_bus_instance
 
 
@@ -65,3 +71,48 @@ class AutocompleteDoctoratView(ListAPIView):
         )
         serializer = serializers.DoctoratDTOSerializer(instance=doctorat_list, many=True)
         return Response(serializer.data)
+
+
+class PersonSearchingBackend(BaseFilterBackend):
+    searching_param = 'search'
+
+    def filter_queryset(self, request, queryset, view):
+        search_term = request.GET.get(self.searching_param, '')
+        return queryset.filter(
+            Q(first_name__icontains=search_term)
+            | Q(last_name__icontains=search_term)
+            | Q(global_id__contains=search_term)
+        )
+
+    def get_schema_operation_parameters(self, view):  # pragma: no cover
+        return [
+            {
+                'name': self.searching_param,
+                'required': True,
+                'in': 'query',
+                'description': "The term to search the persons on (first or last name, or global id)",
+                'schema': {
+                    'type': 'string',
+                },
+            },
+        ]
+
+
+class AutocompleteTutorView(ListAPIView):
+    """Autocomplete tutors"""
+    name = "autocomplete-tutor"
+    filter_backends = [PersonSearchingBackend]
+    serializer_class = serializers.TutorSerializer
+    queryset = Tutor.objects.annotate(
+        first_name=F("person__first_name"),
+        last_name=F("person__last_name"),
+        global_id=F("person__global_id"),
+    ).distinct('global_id').select_related("person")
+
+
+class AutocompletePersonView(ListAPIView):
+    """Autocomplete person"""
+    name = "autocomplete-person"
+    filter_backends = [PersonSearchingBackend]
+    serializer_class = PersonSerializer
+    queryset = Person.objects.all()

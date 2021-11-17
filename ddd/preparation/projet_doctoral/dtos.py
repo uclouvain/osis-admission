@@ -120,6 +120,7 @@ class PropositionDTO(interface.DTO):
     institution = attr.ib(type=Optional[str])
     date_soutenance = attr.ib(type=Optional[datetime.date])
     raison_non_soutenue = attr.ib(type=Optional[str])
+    statut = attr.ib(type=str)
 
 
 @attr.s(frozen=True, slots=True)
@@ -136,6 +137,7 @@ class PropositionSearchDTO(interface.DTO):
         type=Optional[str],
     )  # CDE = Comission Doctorale du domaine Sciences Economique et de Gestion
     creee_le = attr.ib(type=datetime.datetime)
+    statut = attr.ib(type=str)
 
 
 @attr.s(frozen=True, slots=True)

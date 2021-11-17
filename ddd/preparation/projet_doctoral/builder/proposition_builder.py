@@ -79,7 +79,7 @@ class PropositionBuilder(interface.RootEntityBuilder):
         ).validate()
         return Proposition(
             entity_id=PropositionIdentityBuilder.build(),
-            status=ChoixStatusProposition.IN_PROGRESS,
+            statut=ChoixStatusProposition.IN_PROGRESS,
             justification=cmd.justification,
             type_admission=ChoixTypeAdmission[cmd.type_admission],
             doctorat_id=doctorat_id,

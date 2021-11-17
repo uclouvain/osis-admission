@@ -23,26 +23,24 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from django.urls import path as _path
 
-from admission.api import views
+from django.test import TestCase
+
+from admission.ddd.preparation.projet_doctoral.commands import GetPropositionCommand
+from admission.ddd.preparation.projet_doctoral.domain.model._enums import ChoixTypeAdmission
+from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import PropositionNonTrouveeException
+from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 
 
-def path(pattern, view, name=None):
-    return _path(pattern, view.as_view(), name=getattr(view, 'name', name))
+class GetPropositionTestCase(TestCase):
+    def setUp(self):
+        self.cmd = GetPropositionCommand(uuid_proposition='uuid-SC3DP')
+        self.message_bus = message_bus_in_memory_instance
 
+    def test_get_proposition(self):
+        result = self.message_bus.invoke(self.cmd)
+        self.assertEqual(result.type_admission, ChoixTypeAdmission.ADMISSION.name)
 
-app_name = "admission_api_v1"
-urlpatterns = [
-    path('person', views.PersonViewSet),
-    path('coordonnees', views.CoordonneesViewSet),
-    path('propositions', views.PropositionListView),
-    path('secondary_studies', views.SecondaryStudiesViewSet),
-    path('propositions/<uuid:uuid>', views.PropositionViewSet),
-    path('propositions/<uuid:uuid>/cotutelle', views.CotutelleAPIView),
-    path('propositions/<uuid:uuid>/supervision', views.SupervisionAPIView),
-    path('autocomplete/sector', views.AutocompleteSectorView),
-    path('autocomplete/sector/<str:sigle>/doctorates', views.AutocompleteDoctoratView),
-    path('autocomplete/tutor', views.AutocompleteTutorView),
-    path('autocomplete/person', views.AutocompletePersonView),
-]
+    def test_get_proposition_non_trouvee(self):
+        with self.assertRaises(PropositionNonTrouveeException):
+            self.message_bus.invoke(GetPropositionCommand(uuid_proposition='inexistant'))

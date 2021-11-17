@@ -23,17 +23,27 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import List
 
-from admission.ddd.preparation.projet_doctoral.commands import SearchPromoteursCommand
-from admission.ddd.preparation.projet_doctoral.domain.service.i_promoteur import IPromoteurTranslator
-from admission.ddd.preparation.projet_doctoral.dtos import PromoteurDTO
-from ddd.logic.shared_kernel.personne_connue_ucl.domain.service.personne_connue_ucl import IPersonneConnueUclTranslator
+from typing import Optional, List
+
+from admission.ddd.preparation.projet_doctoral.builder.proposition_identity_builder import PropositionIdentityBuilder
+from admission.ddd.preparation.projet_doctoral.commands import SupprimerPropositionCommand
+from admission.ddd.preparation.projet_doctoral.domain.model.proposition import PropositionIdentity
+from admission.ddd.preparation.projet_doctoral.repository.i_proposition import IPropositionRepository
 
 
-def search_promoteurs(
-        cmd: 'SearchPromoteursCommand',
-        promoteur_translator: 'IPromoteurTranslator',
-        personne_connue_ucl_translator: 'IPersonneConnueUclTranslator',
-) -> List['PromoteurDTO']:
-    return promoteur_translator.search_dto(cmd.terme_de_recherche, personne_connue_ucl_translator)
+def supprimer_proposition(
+        cmd: 'SupprimerPropositionCommand',
+        proposition_repository: 'IPropositionRepository',
+) -> 'PropositionIdentity':
+    # GIVEN
+    proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
+    proposition = proposition_repository.get(entity_id=proposition_id)
+
+    # WHEN
+
+    # THEN
+    proposition.supprimer()
+    proposition_repository.save(proposition)
+
+    return proposition_id

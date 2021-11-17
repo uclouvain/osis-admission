@@ -29,6 +29,7 @@ from admission.api.views.secondary_studies import *
 from admission.api.views.cotutelle import *
 from admission.api.views.person import *
 from admission.api.views.project import *
+from admission.api.views.supervision import *
 
 __all__ = [
     "CoordonneesViewSet",
@@ -38,5 +39,8 @@ __all__ = [
     "SecondaryStudiesViewSet",
     "AutocompleteDoctoratView",
     "AutocompleteSectorView",
+    "AutocompleteTutorView",
+    "AutocompletePersonView",
     "CotutelleAPIView",
+    "SupervisionAPIView",
 ]

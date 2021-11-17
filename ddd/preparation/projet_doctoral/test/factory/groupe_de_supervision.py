@@ -27,7 +27,7 @@ import uuid
 
 import factory
 
-from admission.ddd.preparation.projet_doctoral.domain.model._cotutelle import pas_de_cotutelle
+from admission.ddd.preparation.projet_doctoral.domain.model._cotutelle import Cotutelle, pas_de_cotutelle
 from admission.ddd.preparation.projet_doctoral.domain.model._membre_CA import MembreCAIdentity
 from admission.ddd.preparation.projet_doctoral.domain.model._promoteur import PromoteurIdentity
 from admission.ddd.preparation.projet_doctoral.domain.model._signature_membre_CA import SignatureMembreCA
@@ -36,7 +36,8 @@ from admission.ddd.preparation.projet_doctoral.domain.model._signature_promoteur
     SignaturePromoteur,
 )
 from admission.ddd.preparation.projet_doctoral.domain.model.groupe_de_supervision import (
-    GroupeDeSupervisionIdentity, GroupeDeSupervision,
+    GroupeDeSupervision,
+    GroupeDeSupervisionIdentity,
 )
 from admission.ddd.preparation.projet_doctoral.test.factory.proposition import (
     _PropositionIdentityFactory,
@@ -95,8 +96,15 @@ class _GroupeDeSupervisionFactory(factory.Factory):
     cotutelle = pas_de_cotutelle
 
 
+class _CotutelleFactory(factory.Factory):
+    class Meta:
+        model = Cotutelle
+        abstract = False
+
+
 class GroupeDeSupervisionSC3DPFactory(_GroupeDeSupervisionFactory):
     proposition_id = factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-SC3DP')
+    cotutelle = factory.SubFactory(_CotutelleFactory, motivation="Runs in family", institution="MIT")
 
 
 class GroupeDeSupervisionSC3DPAvecPromoteurEtMembreFactory(_GroupeDeSupervisionFactory):

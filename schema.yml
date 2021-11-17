@@ -126,7 +126,7 @@ paths:
       - $ref: '#/components/parameters/X-User-Email'
       - $ref: '#/components/parameters/X-User-GlobalID'
       responses:
-        '200':
+        200:
           content:
             application/json:
               schema:
@@ -157,7 +157,7 @@ paths:
             schema:
               $ref: '#/components/schemas/InitierPropositionCommand'
       responses:
-        '201':
+        201:
           content:
             application/json:
               schema:
@@ -171,6 +171,60 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - propositions
+  /secondary_studies:
+    get:
+      operationId: retrieveHighSchoolDiploma
+      description: ''
+      parameters:
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HighSchoolDiploma'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - person
+    put:
+      operationId: updateHighSchoolDiploma
+      description: ''
+      parameters:
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HighSchoolDiploma'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HighSchoolDiploma'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - person
   /propositions/{uuid}:
     get:
       operationId: retrieve_proposition
@@ -188,7 +242,7 @@ paths:
       - $ref: '#/components/parameters/X-User-Email'
       - $ref: '#/components/parameters/X-User-GlobalID'
       responses:
-        '200':
+        200:
           content:
             application/json:
               schema:
@@ -223,7 +277,37 @@ paths:
             schema:
               $ref: '#/components/schemas/CompleterPropositionCommand'
       responses:
-        '200':
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PropositionIdentityDTO'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
+    delete:
+      operationId: destroy_proposition
+      description: Soft-Delete a proposition
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        200:
           content:
             application/json:
               schema:
@@ -254,7 +338,7 @@ paths:
       - $ref: '#/components/parameters/X-User-Email'
       - $ref: '#/components/parameters/X-User-GlobalID'
       responses:
-        '200':
+        200:
           content:
             application/json:
               schema:
@@ -289,7 +373,108 @@ paths:
             schema:
               $ref: '#/components/schemas/DefinirCotutelleCommand'
       responses:
-        '200':
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PropositionIdentityDTO'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
+  /propositions/{uuid}/supervision:
+    get:
+      operationId: retrieve_supervision
+      description: Get the supervision group of a proposition
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupervisionDTO'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
+    post:
+      operationId: remove_member
+      description: Remove a supervision group member for a proposition
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SupervisionActor'
+      responses:
+        201:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PropositionIdentityDTO'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
+    put:
+      operationId: add_member
+      description: Add a supervision group member for a proposition
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SupervisionActor'
+      responses:
+        200:
           content:
             application/json:
               schema:
@@ -354,6 +539,130 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/DoctoratDTO'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - autocomplete
+  /autocomplete/tutor:
+    get:
+      operationId: listTutors
+      description: Autocomplete tutors
+      parameters:
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      - name: search
+        required: true
+        in: query
+        description: The term to search the persons on (first or last name, or global
+          id)
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                    example: 123
+                  next:
+                    type: string
+                    nullable: true
+                    format: uri
+                    example: http://api.example.org/accounts/?offset=400&limit=100
+                  previous:
+                    type: string
+                    nullable: true
+                    format: uri
+                    example: http://api.example.org/accounts/?offset=200&limit=100
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Tutor'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - autocomplete
+  /autocomplete/person:
+    get:
+      operationId: listPersons
+      description: Autocomplete person
+      parameters:
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      - name: search
+        required: true
+        in: query
+        description: The term to search the persons on (first or last name, or global
+          id)
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                    example: 123
+                  next:
+                    type: string
+                    nullable: true
+                    format: uri
+                    example: http://api.example.org/accounts/?offset=400&limit=100
+                  previous:
+                    type: string
+                    nullable: true
+                    format: uri
+                    example: http://api.example.org/accounts/?offset=200&limit=100
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Person'
           description: ''
         '400':
           $ref: '#/components/responses/BadRequest'
@@ -550,6 +859,8 @@ components:
         creee_le:
           type: string
           format: date-time
+        statut:
+          type: string
       required:
       - uuid
       - type_admission
@@ -560,6 +871,176 @@ components:
       - code_secteur_formation
       - intitule_secteur_formation
       - creee_le
+      - statut
+    HighSchoolDiploma:
+      type: object
+      properties:
+        belgian_diploma:
+          type: object
+          properties:
+            academic_graduation_year:
+              type: integer
+              nullable: true
+            result:
+              $ref: '#/components/schemas/DiplomaResults'
+              nullable: true
+            community:
+              $ref: '#/components/schemas/BelgianCommunitiesOfEducation'
+              nullable: true
+            educational_type:
+              $ref: '#/components/schemas/EducationalType'
+              nullable: true
+            educational_other:
+              type: string
+              maxLength: 50
+            course_repeat:
+              type: boolean
+            course_orientation:
+              type: boolean
+            institute:
+              type: string
+              maxLength: 25
+            other_institute:
+              type: string
+              description: 'In case you could not find your institute in the list,
+                please mention it below. '
+              maxLength: 500
+            schedule:
+              type: object
+              properties:
+                id:
+                  type: integer
+                  readOnly: true
+                latin:
+                  type: integer
+                  maximum: 2147483647
+                  minimum: 0
+                greek:
+                  type: integer
+                  maximum: 2147483647
+                  minimum: 0
+                chemistry:
+                  type: integer
+                  maximum: 2147483647
+                  minimum: 0
+                physic:
+                  type: integer
+                  maximum: 2147483647
+                  minimum: 0
+                biology:
+                  type: integer
+                  maximum: 2147483647
+                  minimum: 0
+                german:
+                  type: integer
+                  maximum: 2147483647
+                  minimum: 0
+                dutch:
+                  type: integer
+                  maximum: 2147483647
+                  minimum: 0
+                english:
+                  type: integer
+                  maximum: 2147483647
+                  minimum: 0
+                french:
+                  type: integer
+                  maximum: 2147483647
+                  minimum: 0
+                modern_languages_other_label:
+                  type: string
+                  description: If other language, please specify
+                  maxLength: 25
+                modern_languages_other_hours:
+                  type: integer
+                  maximum: 2147483647
+                  nullable: true
+                  minimum: 0
+                mathematics:
+                  type: integer
+                  maximum: 2147483647
+                  minimum: 0
+                it:
+                  type: integer
+                  maximum: 2147483647
+                  minimum: 0
+                social_sciences:
+                  type: integer
+                  maximum: 2147483647
+                  minimum: 0
+                economic_sciences:
+                  type: integer
+                  maximum: 2147483647
+                  minimum: 0
+                other_label:
+                  type: string
+                  description: If other optional domains, please specify
+                  maxLength: 25
+                other_hours:
+                  type: integer
+                  maximum: 2147483647
+                  nullable: true
+                  minimum: 0
+              nullable: true
+          required:
+          - academic_graduation_year
+          nullable: true
+        foreign_diploma:
+          type: object
+          properties:
+            academic_graduation_year:
+              type: integer
+              nullable: true
+            result:
+              $ref: '#/components/schemas/DiplomaResults'
+              nullable: true
+            foreign_diploma_type:
+              $ref: '#/components/schemas/ForeignDiplomaTypes'
+              nullable: true
+            linguistic_regime:
+              type: string
+              nullable: true
+            other_linguistic_regime:
+              type: string
+              maxLength: 25
+            country:
+              type: string
+              nullable: true
+          required:
+          - academic_graduation_year
+          - linguistic_regime
+          - country
+          nullable: true
+    DiplomaResults:
+      enum:
+      - NOT_KNOWN_YET_RESULT
+      - LT_65_RESULT
+      - BTW_65_AND_75_RESULT
+      - GT_75_RESULT
+      type: string
+    BelgianCommunitiesOfEducation:
+      enum:
+      - FRENCH_SPEAKING
+      - FLEMISH_SPEAKING
+      - GERMAN_SPEAKING
+      type: string
+    EducationalType:
+      enum:
+      - ''
+      - TEACHING_OF_GENERAL_EDUCATION
+      - TRANSITION_METHOD
+      - ARTISTIC_TRANSITION
+      - QUALIFICATION_METHOD
+      - ARTISTIC_QUALIFICATION
+      - PROFESSIONAL_EDUCATION
+      - PROFESSIONAL_EDUCATION_AND_MATURITY_EXAM
+      type: string
+    ForeignDiplomaTypes:
+      enum:
+      - NATIONAL_BACHELOR
+      - EUROPEAN_BACHELOR
+      - INTERNATIONAL_BACCALAUREATE
+      type: string
     PropositionDTO:
       type: object
       properties:
@@ -628,6 +1109,8 @@ components:
           nullable: true
         raison_non_soutenue:
           type: string
+        statut:
+          type: string
       required:
       - type_admission
       - sigle_doctorat
@@ -642,6 +1125,7 @@ components:
       - projet_formation_complementaire
       - langue_redaction_these
       - doctorat_deja_realise
+      - statut
     CotutelleDTO:
       type: object
       properties:
@@ -665,6 +1149,58 @@ components:
       - demande_ouverture
       - convention
       - autres_documents
+    SupervisionDTO:
+      type: object
+      properties:
+        signatures_promoteurs:
+          type: array
+          items:
+            type: object
+            properties:
+              promoteur:
+                type: object
+                properties:
+                  matricule:
+                    type: string
+                  nom:
+                    type: string
+                  prenom:
+                    type: string
+                required:
+                - matricule
+                - nom
+                - prenom
+              status:
+                type: string
+            required:
+            - promoteur
+            - status
+        signatures_membres_CA:
+          type: array
+          items:
+            type: object
+            properties:
+              membre_CA:
+                type: object
+                properties:
+                  matricule:
+                    type: string
+                  nom:
+                    type: string
+                  prenom:
+                    type: string
+                required:
+                - matricule
+                - nom
+                - prenom
+              status:
+                type: string
+            required:
+            - membre_CA
+            - status
+      required:
+      - signatures_promoteurs
+      - signatures_membres_CA
     SectorDTO:
       type: object
       properties:
@@ -696,6 +1232,30 @@ components:
       - intitule_fr
       - intitule_en
       - sigle_entite_gestion
+    Tutor:
+      type: object
+      properties:
+        first_name:
+          type: string
+          readOnly: true
+        last_name:
+          type: string
+          readOnly: true
+        global_id:
+          type: string
+          readOnly: true
+    Person:
+      type: object
+      properties:
+        first_name:
+          type: string
+          maxLength: 50
+        last_name:
+          type: string
+          maxLength: 50
+        global_id:
+          type: string
+          maxLength: 10
     PropositionIdentityDTO:
       type: object
       properties:
@@ -798,6 +1358,21 @@ components:
       - 'YES'
       - 'NO'
       - PARTIAL
+      type: string
+    SupervisionActor:
+      type: object
+      properties:
+        type:
+          $ref: '#/components/schemas/ActorType'
+        member:
+          type: string
+      required:
+      - type
+      - member
+    ActorType:
+      enum:
+      - PROMOTER
+      - CA_MEMBER
       type: string
     CompleterPropositionCommand:
       type: object
