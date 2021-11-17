@@ -137,8 +137,8 @@ class MessageBusCommands(AbstractMessageBusCommands):
             rechercher_doctorats,
             doctorat_translator=DoctoratTranslator(),
         ),
-        SupprimerPropositionCommand: lambda cmd: supprimer_proposition(
-            cmd,
+        SupprimerPropositionCommand: partial(
+            supprimer_proposition,
             proposition_repository=PropositionRepository(),
         ),
     }

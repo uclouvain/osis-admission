@@ -25,6 +25,7 @@
 # ##############################################################################
 from collections import OrderedDict
 
+from rest_framework import status
 from rest_framework.schemas.openapi import AutoSchema, SchemaGenerator
 from rest_framework.schemas.utils import is_list_view
 from rest_framework.serializers import Serializer
@@ -304,7 +305,7 @@ class DetailedAutoSchema(ChoicesEnumSchema):
                 response_schema = paginator.get_paginated_response_schema(response_schema)
         else:
             response_schema = item_schema
-        status_code = '201' if method == 'POST' else '200'
+        status_code = status.HTTP_201_CREATED if method == 'POST' else status.HTTP_200_OK
         return {
             status_code: {
                 'content': {

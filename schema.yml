@@ -126,7 +126,7 @@ paths:
       - $ref: '#/components/parameters/X-User-Email'
       - $ref: '#/components/parameters/X-User-GlobalID'
       responses:
-        '200':
+        200:
           content:
             application/json:
               schema:
@@ -157,7 +157,7 @@ paths:
             schema:
               $ref: '#/components/schemas/InitierPropositionCommand'
       responses:
-        '201':
+        201:
           content:
             application/json:
               schema:
@@ -242,7 +242,7 @@ paths:
       - $ref: '#/components/parameters/X-User-Email'
       - $ref: '#/components/parameters/X-User-GlobalID'
       responses:
-        '200':
+        200:
           content:
             application/json:
               schema:
@@ -277,7 +277,7 @@ paths:
             schema:
               $ref: '#/components/schemas/CompleterPropositionCommand'
       responses:
-        '200':
+        200:
           content:
             application/json:
               schema:
@@ -307,7 +307,7 @@ paths:
       - $ref: '#/components/parameters/X-User-Email'
       - $ref: '#/components/parameters/X-User-GlobalID'
       responses:
-        '200':
+        200:
           content:
             application/json:
               schema:
@@ -338,7 +338,7 @@ paths:
       - $ref: '#/components/parameters/X-User-Email'
       - $ref: '#/components/parameters/X-User-GlobalID'
       responses:
-        '200':
+        200:
           content:
             application/json:
               schema:
@@ -373,7 +373,7 @@ paths:
             schema:
               $ref: '#/components/schemas/DefinirCotutelleCommand'
       responses:
-        '200':
+        200:
           content:
             application/json:
               schema:
@@ -404,7 +404,7 @@ paths:
       - $ref: '#/components/parameters/X-User-Email'
       - $ref: '#/components/parameters/X-User-GlobalID'
       responses:
-        '200':
+        200:
           content:
             application/json:
               schema:
@@ -439,7 +439,7 @@ paths:
             schema:
               $ref: '#/components/schemas/SupervisionActor'
       responses:
-        '201':
+        201:
           content:
             application/json:
               schema:
@@ -474,7 +474,7 @@ paths:
             schema:
               $ref: '#/components/schemas/SupervisionActor'
       responses:
-        '200':
+        200:
           content:
             application/json:
               schema:
