@@ -71,6 +71,7 @@ class GetPropositionDTODomainService(interface.DomainService):
             institution=proposition.experience_precedente_recherche.institution,
             date_soutenance=proposition.experience_precedente_recherche.date_soutenance,
             raison_non_soutenue=proposition.experience_precedente_recherche.raison_non_soutenue,
+            statut=proposition.statut.name,
         )
 
     @classmethod
@@ -93,4 +94,5 @@ class GetPropositionDTODomainService(interface.DomainService):
             intitule_doctorat_en=doctorat.intitule_en,
             intitule_doctorat_fr=doctorat.intitule_fr,
             creee_le=proposition.creee_le,
+            statut=proposition.statut.name,
         )

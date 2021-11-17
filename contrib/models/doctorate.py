@@ -29,7 +29,7 @@ from django.db import models
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
-from admission.ddd.preparation.projet_doctoral.domain.model._enums import ChoixBureauCDE
+from admission.ddd.preparation.projet_doctoral.domain.model._enums import ChoixBureauCDE, ChoixStatusProposition
 from admission.ddd.preparation.projet_doctoral.domain.model._experience_precedente_recherche import \
     ChoixDoctoratDejaRealise
 from admission.ddd.preparation.projet_doctoral.domain.model._financement import ChoixTypeFinancement
@@ -171,6 +171,12 @@ class DoctorateAdmission(BaseAdmission):
     )
 
     detailed_status = JSONField(default=dict)
+
+    status = models.CharField(
+        choices=ChoixStatusProposition.choices(),
+        max_length=30,
+        default=ChoixStatusProposition.IN_PROGRESS.name,
+    )
 
     supervision_group = SignatureProcessField()
 

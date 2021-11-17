@@ -49,6 +49,7 @@ from admission.ddd.preparation.projet_doctoral.use_case.write.supprimer_membre_C
     supprimer_membre_CA
 from admission.ddd.preparation.projet_doctoral.use_case.write.supprimer_promoteur_service import \
     supprimer_promoteur
+from admission.ddd.preparation.projet_doctoral.use_case.write.supprimer_proposition_service import supprimer_proposition
 from admission.infrastructure.preparation.projet_doctoral.domain.service.constitution_supervision import \
     ConstitutionSupervisionService
 from admission.infrastructure.preparation.projet_doctoral.domain.service.doctorat import DoctoratTranslator
@@ -135,5 +136,9 @@ class MessageBusCommands(AbstractMessageBusCommands):
         SearchDoctoratCommand: partial(
             rechercher_doctorats,
             doctorat_translator=DoctoratTranslator(),
+        ),
+        SupprimerPropositionCommand: partial(
+            supprimer_proposition,
+            proposition_repository=PropositionRepository(),
         ),
     }

@@ -25,7 +25,9 @@
 # ##############################################################################
 from collections import OrderedDict
 
+from rest_framework import status
 from rest_framework.schemas.openapi import AutoSchema, SchemaGenerator
+from rest_framework.schemas.utils import is_list_view
 from rest_framework.serializers import Serializer
 
 from base.models.utils.utils import ChoiceEnum
@@ -281,6 +283,41 @@ class DetailedAutoSchema(ChoicesEnumSchema):
 
     def get_serializer(self, path, method, for_response=True):
         raise NotImplementedError
+
+    def get_responses(self, path, method):
+        # AutoSchema is a nazi and overrides the DELETE response with no reason
+        self.response_media_types = self.map_renderers(path, method)
+
+        serializer = self.get_serializer(path, method)
+
+        if not isinstance(serializer, Serializer):
+            item_schema = {}
+        else:
+            item_schema = self._get_reference(serializer)
+
+        if is_list_view(path, method, self.view):
+            response_schema = {
+                'type': 'array',
+                'items': item_schema,
+            }
+            paginator = self.get_paginator()
+            if paginator:
+                response_schema = paginator.get_paginated_response_schema(response_schema)
+        else:
+            response_schema = item_schema
+        status_code = status.HTTP_201_CREATED if method == 'POST' else status.HTTP_200_OK
+        return {
+            status_code: {
+                'content': {
+                    ct: {'schema': response_schema}
+                    for ct in self.response_media_types
+                },
+                # description is a mandatory property,
+                # https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#responseObject
+                # TODO: put something meaningful into it
+                'description': ""
+            }
+        }
 
 
 class ResponseSpecificSchema(DetailedAutoSchema):

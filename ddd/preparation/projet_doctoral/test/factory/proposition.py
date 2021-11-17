@@ -66,7 +66,7 @@ class _PropositionFactory(factory.Factory):
     entity_id = factory.SubFactory(_PropositionIdentityFactory)
     matricule_candidat = factory.fuzzy.FuzzyText(length=10, chars=string.digits)
     doctorat_id = factory.SubFactory(_DoctoratIdentityFactory)
-    status = ChoixStatusProposition.IN_PROGRESS
+    statut = ChoixStatusProposition.IN_PROGRESS
     projet = factory.SubFactory(_DetailProjetFactory)
     creee_le = factory.Faker('past_datetime')
     financement = financement_non_rempli
@@ -87,7 +87,7 @@ class PropositionAdmissionECGE3DPMinimaleFactory(_PropositionFactory):
 
 
 class PropositionAdmissionSC3DPMinimaleAnnuleeFactory(PropositionAdmissionSC3DPMinimaleFactory):
-    status = ChoixStatusProposition.CANCELLED
+    statut = ChoixStatusProposition.CANCELLED
     matricule_candidat = '0123456789'
 
 
