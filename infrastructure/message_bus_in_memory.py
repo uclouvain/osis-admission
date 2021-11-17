@@ -144,10 +144,6 @@ class MessageBusInMemoryCommands(AbstractMessageBusCommands):
             doctorat_translator=DoctoratInMemoryTranslator(),
             secteur_ucl_translator=SecteurUclInMemoryTranslator(),
         ),
-        DefinirCotutelleCommand: partial(
-            definir_cotutelle,
-            groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
-        ),
         SupprimerPropositionCommand: partial(
             supprimer_proposition,
             proposition_repository=PropositionInMemoryRepository(),
