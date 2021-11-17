@@ -174,6 +174,7 @@ class GroupeDeSupervisionDTO(interface.DTO):
 
 @attr.s(frozen=True, slots=True)
 class CotutelleDTO(interface.DTO):
+    cotutelle = attr.ib(type=Optional[bool])
     motivation = attr.ib(type=Optional[str])
     institution = attr.ib(type=Optional[str])
     demande_ouverture = attr.ib(type=List[str])

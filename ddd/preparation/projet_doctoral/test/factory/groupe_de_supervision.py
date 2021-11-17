@@ -107,6 +107,11 @@ class GroupeDeSupervisionSC3DPFactory(_GroupeDeSupervisionFactory):
     cotutelle = factory.SubFactory(_CotutelleFactory, motivation="Runs in family", institution="MIT")
 
 
+class GroupeDeSupervisionSC3DPSansCotutelleFactory(_GroupeDeSupervisionFactory):
+    proposition_id = factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-SC3DP-sans-cotutelle')
+    cotutelle = None
+
+
 class GroupeDeSupervisionSC3DPAvecPromoteurEtMembreFactory(_GroupeDeSupervisionFactory):
     proposition_id = factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-SC3DP-promoteur-membre')
     signatures_promoteurs = factory.LazyFunction(lambda: [

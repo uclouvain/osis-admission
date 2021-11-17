@@ -24,7 +24,7 @@
 #
 # ##############################################################################
 import contextlib
-from typing import List, Union
+from typing import List, Optional, Union
 
 import attr
 
@@ -60,7 +60,7 @@ class GroupeDeSupervision(interface.Entity):
     proposition_id = attr.ib(type='PropositionIdentity')  # type: PropositionIdentity
     signatures_promoteurs = attr.ib(type=List[SignaturePromoteur], factory=list)  # type: List[SignaturePromoteur]
     signatures_membres_CA = attr.ib(type=List[SignatureMembreCA], factory=list)  # type: List[SignatureMembreCA]
-    cotutelle = attr.ib(type=Cotutelle, default=pas_de_cotutelle)
+    cotutelle = attr.ib(type=Optional[Cotutelle], default=None)
 
     def identifier_promoteur(self, promoteur_id: 'PromoteurIdentity') -> None:
         IdentifierPromoteurValidatorList(

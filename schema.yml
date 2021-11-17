@@ -1129,6 +1129,9 @@ components:
     CotutelleDTO:
       type: object
       properties:
+        cotutelle:
+          type: boolean
+          nullable: true
         motivation:
           type: string
         institution:

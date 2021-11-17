@@ -41,6 +41,7 @@ from admission.ddd.preparation.projet_doctoral.test.factory.groupe_de_supervisio
     GroupeDeSupervisionSC3DPAvecMembresInvitesFactory,
     GroupeDeSupervisionSC3DPAvecPromoteurEtMembreFactory,
     GroupeDeSupervisionSC3DPFactory,
+    GroupeDeSupervisionSC3DPSansCotutelleFactory,
 )
 from base.ddd.utils.in_memory_repository import InMemoryGenericRepository
 
@@ -52,6 +53,7 @@ class GroupeDeSupervisionInMemoryRepository(InMemoryGenericRepository, IGroupeDe
     def reset(cls):
         cls.entities = [
             GroupeDeSupervisionSC3DPFactory(),
+            GroupeDeSupervisionSC3DPSansCotutelleFactory(),
             GroupeDeSupervisionSC3DPAvecPromoteurEtMembreFactory(),
             GroupeDeSupervisionSC3DPAvecMembresInvitesFactory(),
         ]
@@ -68,6 +70,7 @@ class GroupeDeSupervisionInMemoryRepository(InMemoryGenericRepository, IGroupeDe
         proposition_id = PropositionIdentityBuilder.build_from_uuid(uuid_proposition)
         groupe = cls.get_by_proposition_id(proposition_id=proposition_id)
         return CotutelleDTO(
+            cotutelle=groupe.cotutelle and bool(groupe.cotutelle.motivation),
             motivation=groupe.cotutelle.motivation,
             institution=groupe.cotutelle.institution,
             demande_ouverture=groupe.cotutelle.demande_ouverture,
