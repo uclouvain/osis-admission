@@ -43,7 +43,7 @@ def demander_signatures(
     proposition_candidat.verifier_projet_doctoral()
 
     # THEN
-    proposition_candidat.verouiller_projet_doctoral_pour_signature()
+    proposition_candidat.verouiller_proposition_pour_signature()
     groupe_de_supervision.inviter_a_signer()
     # groupe_de_supervision.notifier()  # TODO ?
     groupe_supervision_repository.save(groupe_de_supervision)

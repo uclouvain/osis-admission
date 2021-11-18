@@ -33,7 +33,7 @@ from admission.ddd.preparation.projet_doctoral.domain.model._detail_projet impor
     DetailProjet, projet_incomplet,
 )
 from admission.ddd.preparation.projet_doctoral.domain.model._enums import (
-    ChoixStatusProposition,
+    ChoixStatutProposition,
     ChoixTypeAdmission,
 )
 from admission.ddd.preparation.projet_doctoral.domain.model._experience_precedente_recherche import \
@@ -72,7 +72,7 @@ class _PropositionFactory(factory.Factory):
     entity_id = factory.SubFactory(_PropositionIdentityFactory)
     matricule_candidat = factory.fuzzy.FuzzyText(length=10, chars=string.digits)
     doctorat_id = factory.SubFactory(_DoctoratIdentityFactory)
-    statut = ChoixStatusProposition.IN_PROGRESS
+    statut = ChoixStatutProposition.IN_PROGRESS
     projet = factory.SubFactory(_DetailProjetFactory)
     creee_le = factory.Faker('past_datetime')
     financement = financement_non_rempli
@@ -93,7 +93,7 @@ class PropositionAdmissionECGE3DPMinimaleFactory(_PropositionFactory):
 
 
 class PropositionAdmissionSC3DPMinimaleAnnuleeFactory(PropositionAdmissionSC3DPMinimaleFactory):
-    statut = ChoixStatusProposition.CANCELLED
+    statut = ChoixStatutProposition.CANCELLED
     matricule_candidat = '0123456789'
 
 
