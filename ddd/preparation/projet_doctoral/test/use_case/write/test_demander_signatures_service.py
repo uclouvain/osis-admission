@@ -29,7 +29,7 @@ from django.test import SimpleTestCase
 
 from admission.ddd.preparation.projet_doctoral.builder.proposition_identity_builder import PropositionIdentityBuilder
 from admission.ddd.preparation.projet_doctoral.commands import DemanderSignaturesCommand
-from admission.ddd.preparation.projet_doctoral.domain.model._enums import ChoixStatusProposition
+from admission.ddd.preparation.projet_doctoral.domain.model._enums import ChoixStatutProposition
 from admission.ddd.preparation.projet_doctoral.domain.model._signature_promoteur import (
     ChoixEtatSignature,
     SignaturePromoteur,
@@ -74,7 +74,7 @@ class TestDemanderSignaturesService(SimpleTestCase):
         groupe = self.groupe_de_supervision_repository.get_by_proposition_id(proposition_id)
         signatures = groupe.signatures_promoteurs  # type:List[SignaturePromoteur]
         proposition = self.proposition_repository.get(proposition_id)  # type:Proposition
-        self.assertEqual(proposition.status, ChoixStatusProposition.SIGNING_IN_PROGRESS)
+        self.assertEqual(proposition.statut, ChoixStatutProposition.SIGNING_IN_PROGRESS)
         self.assertTrue(proposition.est_verrouillee_pour_signature)
         self.assertEqual(len(signatures), 1)
         self.assertEqual(len(groupe.signatures_membres_CA), 1)

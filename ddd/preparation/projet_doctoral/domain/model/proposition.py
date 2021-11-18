@@ -31,7 +31,7 @@ import attr
 from admission.ddd.preparation.projet_doctoral.domain.model._detail_projet import DetailProjet
 from admission.ddd.preparation.projet_doctoral.domain.model._enums import (
     ChoixBureauCDE,
-    ChoixStatusProposition,
+    ChoixStatutProposition,
     ChoixTypeAdmission,
 )
 from admission.ddd.preparation.projet_doctoral.domain.model._experience_precedente_recherche import (
@@ -64,7 +64,7 @@ class Proposition(interface.RootEntity):
     matricule_candidat = attr.ib(type=str)
     projet = attr.ib(type=DetailProjet)
     justification = attr.ib(type=Optional[str], default='')
-    statut = attr.ib(type=ChoixStatusProposition, default=ChoixStatusProposition.IN_PROGRESS)
+    statut = attr.ib(type=ChoixStatutProposition, default=ChoixStatutProposition.IN_PROGRESS)
     bureau_CDE = attr.ib(
         type=Optional[ChoixBureauCDE],
         default='',
@@ -86,10 +86,10 @@ class Proposition(interface.RootEntity):
 
     @property
     def est_verrouillee_pour_signature(self):
-        return self.status == ChoixStatusProposition.SIGNING_IN_PROGRESS
+        return self.statut == ChoixStatutProposition.SIGNING_IN_PROGRESS
 
     def est_en_cours(self):
-        return self.statut == ChoixStatusProposition.IN_PROGRESS
+        return self.statut == ChoixStatutProposition.IN_PROGRESS
 
     def completer(
             self,
@@ -214,15 +214,15 @@ class Proposition(interface.RootEntity):
         """Vérification complète de la proposition"""
         SoumettrePropositionValidatorList(proposition=self).validate()
 
-    def verouiller_projet_doctoral_pour_signature(self):
-        self.status = ChoixStatusProposition.SIGNING_IN_PROGRESS
+    def verouiller_proposition_pour_signature(self):
+        self.statut = ChoixStatutProposition.SIGNING_IN_PROGRESS
 
     def verifier_projet_doctoral(self):
         """Vérification de la validité du projet doctoral avant demande des signatures"""
         DetailsProjetValidatorList(proposition=self).validate()
 
     def finaliser(self):
-        self.statut = ChoixStatusProposition.SUBMITTED
+        self.statut = ChoixStatutProposition.SUBMITTED
 
     def supprimer(self):
-        self.statut = ChoixStatusProposition.CANCELLED
+        self.statut = ChoixStatutProposition.CANCELLED

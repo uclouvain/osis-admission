@@ -29,7 +29,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from admission.contrib.models import AdmissionType, DoctorateAdmission
-from admission.ddd.preparation.projet_doctoral.domain.model._enums import ChoixStatusProposition
+from admission.ddd.preparation.projet_doctoral.domain.model._enums import ChoixStatutProposition
 from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import DoctoratNonTrouveException
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.doctorate import DoctorateFactory
@@ -220,7 +220,7 @@ class DoctorateAdmissionDeletingApiTestCase(APITestCase):
         admissions = DoctorateAdmission.objects.all()
         self.assertEqual(admissions.count(), 1)
         admission = admissions.get()
-        self.assertEqual(admission.status, ChoixStatusProposition.CANCELLED.name)
+        self.assertEqual(admission.status, ChoixStatutProposition.CANCELLED.name)
 
     def test_user_not_logged_assert_not_authorized(self):
         self.client.force_authenticate(user=None)
