@@ -36,6 +36,7 @@ from admission.ddd.preparation.projet_doctoral.domain.model._signature_promoteur
 )
 from admission.ddd.preparation.projet_doctoral.domain.model.proposition import Proposition
 from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import (
+    CotutelleNonCompleteException,
     DetailProjetNonCompleteException,
     GroupeDeSupervisionNonTrouveException,
     PropositionNonTrouveeException,
@@ -56,12 +57,14 @@ class TestDemanderSignaturesService(SimpleTestCase):
         self.uuid_proposition = 'uuid-SC3DP-promoteur-membre'
         self.uuid_proposition_sans_projet = 'uuid-SC3DP-no-project'
         uuid_proposition_admission = 'uuid-ECGE3DP'
+        self.uuid_proposition_sans_cotutelle = 'uuid-SC3DP-sans-cotutelle'
 
         self.proposition_repository = PropositionInMemoryRepository()
         self.groupe_de_supervision_repository = GroupeDeSupervisionInMemoryRepository()
         PropositionIdentityBuilder.build_from_uuid(self.uuid_proposition)
         PropositionIdentityBuilder.build_from_uuid(self.uuid_proposition_sans_projet)
         PropositionIdentityBuilder.build_from_uuid(uuid_proposition_admission)
+        PropositionIdentityBuilder.build_from_uuid(self.uuid_proposition_sans_cotutelle)
         self.addCleanup(self.groupe_de_supervision_repository.reset)
         self.addCleanup(self.proposition_repository.reset)
 
@@ -86,6 +89,12 @@ class TestDemanderSignaturesService(SimpleTestCase):
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(cmd)
         self.assertIsInstance(context.exception.exceptions.pop(), DetailProjetNonCompleteException)
+
+    def test_should_pas_demander_si_cotutelle_pas_complete(self):
+        cmd = attr.evolve(self.cmd, uuid_proposition=self.uuid_proposition_sans_cotutelle)
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            self.message_bus.invoke(cmd)
+        self.assertIsInstance(context.exception.exceptions.pop(), CotutelleNonCompleteException)
 
     def test_should_pas_demander_si_groupe_supervision_non_trouve(self):
         cmd = attr.evolve(self.cmd, uuid_proposition='uuid-ECGE3DP')

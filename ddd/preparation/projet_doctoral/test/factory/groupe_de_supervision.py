@@ -97,6 +97,8 @@ class _GroupeDeSupervisionFactory(factory.Factory):
 
 
 class _CotutelleFactory(factory.Factory):
+    demande_ouverture = factory.LazyFunction(lambda: [str(uuid.uuid4())])
+
     class Meta:
         model = Cotutelle
         abstract = False
@@ -120,6 +122,7 @@ class GroupeDeSupervisionSC3DPAvecPromoteurEtMembreFactory(_GroupeDeSupervisionF
     signatures_membres_CA = factory.LazyFunction(lambda: [
         _SignatureMembreCAFactory(membre_CA_id__matricule='membre-ca-SC3DP', etat=ChoixEtatSignature.INVITED)
     ])
+    cotutelle = factory.SubFactory(_CotutelleFactory, motivation="Runs in family", institution="MIT")
 
 
 class GroupeDeSupervisionSC3DPAvecPromoteurEtMembreEtPropositionIncompleteFactory(
