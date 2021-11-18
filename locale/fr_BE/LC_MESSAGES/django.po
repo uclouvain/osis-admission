@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-10-15 12:14+0200\n"
+"POT-Creation-Date: 2021-11-18 14:41+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -247,6 +247,10 @@ msgstr "Liste des admissions en doctorat et données administratives"
 msgid "MANAGEMENT"
 msgstr "Gestion"
 
+msgid "Mandatory fields are missing in the project details of the proposition."
+msgstr ""
+"Les champs requis des details du projet de la proposition sont manquants."
+
 msgid "Member of supervision group already invited."
 msgstr "Membre du groupe de supervision déjà invité."
 
@@ -350,6 +354,9 @@ msgstr "Gestionnaire SIC"
 
 msgid "SIC managers"
 msgstr "Gestionnaires SIC"
+
+msgid "SIGNING_IN_PROGRESS"
+msgstr "Signature en cours"
 
 msgid "SUBMITTED"
 msgstr "Soumis"
