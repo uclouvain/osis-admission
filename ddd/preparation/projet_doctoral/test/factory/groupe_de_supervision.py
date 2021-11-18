@@ -107,8 +107,8 @@ class GroupeDeSupervisionSC3DPFactory(_GroupeDeSupervisionFactory):
     cotutelle = factory.SubFactory(_CotutelleFactory, motivation="Runs in family", institution="MIT")
 
 
-class GroupeDeSupervisionSC3DPSansCotutelleFactory(_GroupeDeSupervisionFactory):
-    proposition_id = factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-SC3DP-sans-cotutelle')
+class GroupeDeSupervisionSC3DPCotutelleIndefinieFactory(_GroupeDeSupervisionFactory):
+    proposition_id = factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-SC3DP-cotutelle-indefinie')
     cotutelle = None
 
 

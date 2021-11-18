@@ -23,26 +23,15 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
-from django.test import TestCase
-
 from admission.ddd.preparation.projet_doctoral.commands import GetCotutelleCommand
-from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
+from admission.ddd.preparation.projet_doctoral.dtos import CotutelleDTO
+from admission.ddd.preparation.projet_doctoral.repository.i_groupe_de_supervision import \
+    IGroupeDeSupervisionRepository
 
 
-class GetCotutelleTestCase(TestCase):
-    def setUp(self):
-        self.message_bus = message_bus_in_memory_instance
-
-    def test_get_groupe_de_supervision(self):
-        result = self.message_bus.invoke(GetCotutelleCommand(uuid_proposition='uuid-SC3DP'))
-        self.assertEqual(result.institution, "MIT")
-        self.assertEqual(result.cotutelle, True)
-
-    def test_get_groupe_de_supervision_cotutelle_indefinie(self):
-        result = self.message_bus.invoke(GetCotutelleCommand(uuid_proposition='uuid-SC3DP-cotutelle-indefinie'))
-        self.assertIsNone(result.cotutelle)
-
-    def test_get_groupe_de_supervision_sans_cotutelle(self):
-        result = self.message_bus.invoke(GetCotutelleCommand(uuid_proposition='uuid-SC3DP-promoteur-membre'))
-        self.assertEqual(result.cotutelle, False)
+def get_cotutelle(
+        cmd: 'GetCotutelleCommand',
+        groupe_supervision_repository: 'IGroupeDeSupervisionRepository',
+) -> 'CotutelleDTO':
+    # GIVEN
+    return groupe_supervision_repository.get_cotutelle_dto(cmd.uuid_proposition)
