@@ -57,6 +57,9 @@ class CotutelleApiTestCase(APITestCase):
     def test_cotutelle_update_using_api(self):
         self.client.force_authenticate(user=self.candidate.user)
 
+        admission = DoctorateAdmission.objects.get()
+        self.assertIsNone(admission.cotutelle)
+
         response = self.client.put(self.url, data={
             'motivation': "A good motive",
             'institution': "Famous institution",
@@ -67,6 +70,7 @@ class CotutelleApiTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
 
         admission = DoctorateAdmission.objects.get()
+        self.assertTrue(admission.cotutelle)
         self.assertEqual(admission.cotutelle_institution, "Famous institution")
 
         response = self.client.get(self.url, format="json")

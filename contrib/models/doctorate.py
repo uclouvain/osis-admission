@@ -152,6 +152,10 @@ class DoctorateAdmission(BaseAdmission):
         default='',
         blank=True,
     )
+    cotutelle = models.BooleanField(
+        null=True,
+        blank=True,
+    )
     cotutelle_institution = models.CharField(
         max_length=255,
         verbose_name=_("Institution"),

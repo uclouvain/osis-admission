@@ -55,6 +55,18 @@ class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
             groupe = Process.objects.create()
         else:
             groupe = proposition.supervision_group
+
+        if proposition.cotutelle is not None:
+            cotutelle = Cotutelle(
+                motivation=proposition.cotutelle_motivation,
+                institution=proposition.cotutelle_institution,
+                demande_ouverture=proposition.cotutelle_opening_request,
+                convention=proposition.cotutelle_convention,
+                autres_documents=proposition.cotutelle_other_documents,
+            )
+        else:
+            cotutelle = None
+
         return GroupeDeSupervision(
             entity_id=GroupeDeSupervisionIdentity(uuid=groupe.uuid),
             proposition_id=PropositionIdentityBuilder.build_from_uuid(proposition.uuid),
@@ -68,13 +80,7 @@ class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
                 SignatureMembreCA(membre_CA_id=MembreCAIdentity(actor.person.global_id))
                 for actor in groupe.actors.filter(supervisionactor__type=ActorType.CA_MEMBER.name)
             ],
-            cotutelle=Cotutelle(
-                motivation=proposition.cotutelle_motivation,
-                institution=proposition.cotutelle_institution,
-                demande_ouverture=proposition.cotutelle_opening_request,
-                convention=proposition.cotutelle_convention,
-                autres_documents=proposition.cotutelle_other_documents,
-            ),
+            cotutelle=cotutelle,
         )
 
     @classmethod
@@ -82,11 +88,12 @@ class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
         proposition_id = PropositionIdentityBuilder.build_from_uuid(uuid_proposition)
         groupe = cls.get_by_proposition_id(proposition_id=proposition_id)
         return CotutelleDTO(
-            motivation=groupe.cotutelle.motivation,
-            institution=groupe.cotutelle.institution,
-            demande_ouverture=groupe.cotutelle.demande_ouverture,
-            convention=groupe.cotutelle.convention,
-            autres_documents=groupe.cotutelle.autres_documents,
+            cotutelle=groupe.cotutelle and bool(groupe.cotutelle),
+            motivation=groupe.cotutelle and groupe.cotutelle.motivation or '',
+            institution=groupe.cotutelle and groupe.cotutelle.institution or '',
+            demande_ouverture=groupe.cotutelle and groupe.cotutelle.demande_ouverture or [],
+            convention=groupe.cotutelle and groupe.cotutelle.convention or [],
+            autres_documents=groupe.cotutelle and groupe.cotutelle.autres_documents or [],
         )
 
     @classmethod
@@ -155,9 +162,11 @@ class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
             ) for person in new_membre_CA_persons if person.global_id not in membre_CA_ids
         ]
 
-        proposition.cotutelle_motivation = entity.cotutelle.motivation
-        proposition.cotutelle_institution = entity.cotutelle.institution
-        proposition.cotutelle_opening_request = entity.cotutelle.demande_ouverture
-        proposition.cotutelle_convention = entity.cotutelle.convention
-        proposition.cotutelle_other_documents = entity.cotutelle.autres_documents
+        proposition.cotutelle = None if entity.cotutelle is None else bool(entity.cotutelle.motivation)
+        if entity.cotutelle:
+            proposition.cotutelle_motivation = entity.cotutelle.motivation
+            proposition.cotutelle_institution = entity.cotutelle.institution
+            proposition.cotutelle_opening_request = entity.cotutelle.demande_ouverture
+            proposition.cotutelle_convention = entity.cotutelle.convention
+            proposition.cotutelle_other_documents = entity.cotutelle.autres_documents
         proposition.save()
