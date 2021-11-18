@@ -40,6 +40,7 @@ from admission.ddd.preparation.projet_doctoral.domain.model.proposition import P
 from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import SignataireNonTrouveException
 from admission.ddd.preparation.projet_doctoral.domain.validator.validator_by_business_action import (
     ApprouverValidatorList,
+    CotutelleValidatorList,
     IdentifierMembreCAValidatorList,
     IdentifierPromoteurValidatorList,
     InviterASignerValidatorList,
@@ -138,7 +139,7 @@ class GroupeDeSupervision(interface.Entity):
         raise NotImplementedError
 
     def verifier_cotutelle(self):
-        raise NotImplementedError
+        CotutelleValidatorList(cotutelle=self.cotutelle).validate()
 
     def definir_cotutelle(self,
                           motivation: str,

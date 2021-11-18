@@ -155,3 +155,11 @@ class DetailProjetNonCompleteException(BusinessException):
     def __init__(self, **kwargs):
         message = _("Mandatory fields are missing in the project details of the proposition.")
         super().__init__(message, **kwargs)
+
+
+class CotutelleNonCompleteException(BusinessException):
+    status_code = "PROPOSITION-18"
+
+    def __init__(self, **kwargs):
+        message = _("Mandatory fields are missing in the cotutelle.")
+        super().__init__(message, **kwargs)

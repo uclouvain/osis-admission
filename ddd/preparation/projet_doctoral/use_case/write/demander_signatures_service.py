@@ -41,6 +41,7 @@ def demander_signatures(
 
     # WHEN
     proposition_candidat.verifier_projet_doctoral()
+    groupe_de_supervision.verifier_cotutelle()
 
     # THEN
     proposition_candidat.verouiller_proposition_pour_signature()
