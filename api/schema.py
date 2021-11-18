@@ -32,9 +32,16 @@ from rest_framework.serializers import Serializer
 
 from base.models.utils.utils import ChoiceEnum
 
+ADMISSION_SDK_VERSION = "1.0.1"
+
 
 class AdmissionSchemaGenerator(SchemaGenerator):
     """This generator adds extra information and reshape the schema for admission"""
+
+    def __init__(self, *args, **kwargs):
+        kwargs.pop('version', None)
+        super().__init__(version=ADMISSION_SDK_VERSION, *args, **kwargs)
+
     def get_schema(self, *args, **kwargs):
         schema = super().get_schema(*args, **kwargs)
         schema["openapi"] = "3.0.0"
@@ -205,6 +212,7 @@ class AdmissionSchemaGenerator(SchemaGenerator):
 
 class BetterChoicesSchema(AutoSchema):
     """This schema prevents a bug with blank choicefields"""
+
     def map_choicefield(self, field):
         schema = super().map_choicefield(field)
         if field.allow_blank:
@@ -243,6 +251,7 @@ class ChoicesEnumSchema(BetterChoicesSchema):
 
 class DetailedAutoSchema(ChoicesEnumSchema):
     """This schema allows to specify a serializer given an HTTP verb and dissociate for the response body"""
+
     def get_request_body(self, path, method):
         if method not in ('PUT', 'PATCH', 'POST'):
             return {}
