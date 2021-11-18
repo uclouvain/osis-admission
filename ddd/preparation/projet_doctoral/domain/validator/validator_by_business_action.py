@@ -26,6 +26,13 @@
 from typing import Optional, List, Union
 
 import attr
+
+from admission.ddd.preparation.projet_doctoral.business_types import *
+from admission.ddd.preparation.projet_doctoral.domain.model._experience_precedente_recherche import (
+    ChoixDoctoratDejaRealise,
+)
+from admission.ddd.preparation.projet_doctoral.domain.model._membre_CA import MembreCAIdentity
+from admission.ddd.preparation.projet_doctoral.domain.model._promoteur import PromoteurIdentity
 from admission.ddd.preparation.projet_doctoral.domain.validator import (
     ShouldInstitutionDependreDoctoratRealise,
     ShouldJustificationDonneeSiPreadmission,
@@ -38,13 +45,10 @@ from admission.ddd.preparation.projet_doctoral.domain.validator import (
     ShouldSignatairePasDejaInvite,
     ShouldTypeContratTravailDependreTypeFinancement,
 )
-
+from admission.ddd.preparation.projet_doctoral.domain.validator._should_detail_projet_etre_complete import (
+    ShouldDetailProjetEtreComplete,
+)
 from base.ddd.utils.business_validator import TwoStepsMultipleBusinessExceptionListValidator, BusinessValidator
-from admission.ddd.preparation.projet_doctoral.business_types import *
-from admission.ddd.preparation.projet_doctoral.domain.model._experience_precedente_recherche import \
-    ChoixDoctoratDejaRealise
-from admission.ddd.preparation.projet_doctoral.domain.model._promoteur import PromoteurIdentity
-from admission.ddd.preparation.projet_doctoral.domain.model._membre_CA import MembreCAIdentity
 
 
 @attr.s(frozen=True, slots=True)
@@ -186,3 +190,14 @@ class ApprouverValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
             ShouldSignataireEtreDansGroupeDeSupervision(self.groupe_de_supervision, self.signataire_id),
             ShouldSignataireEtreInvite(self.groupe_de_supervision, self.signataire_id),
         ]
+
+
+@attr.s(frozen=True, slots=True)
+class DetailsProjetValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+    proposition = attr.ib(type='Proposition')  # type: Proposition
+
+    def get_data_contract_validators(self) -> List[BusinessValidator]:
+        return []
+
+    def get_invariants_validators(self) -> List[BusinessValidator]:
+        return [ShouldDetailProjetEtreComplete(self.proposition.type_admission, self.proposition.projet)]

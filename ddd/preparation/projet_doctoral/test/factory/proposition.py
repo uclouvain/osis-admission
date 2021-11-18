@@ -28,7 +28,10 @@ import uuid
 
 import factory
 
-from admission.ddd.preparation.projet_doctoral.domain.model._detail_projet import DetailProjet
+from admission.ddd.preparation.projet_doctoral.domain.model._detail_projet import (
+    ChoixLangueRedactionThese,
+    DetailProjet, projet_incomplet,
+)
 from admission.ddd.preparation.projet_doctoral.domain.model._enums import (
     ChoixStatusProposition,
     ChoixTypeAdmission,
@@ -55,7 +58,10 @@ class _DetailProjetFactory(factory.Factory):
 
     titre = 'Mon projet'
     resume = factory.Faker('sentence')
-    documents = factory.LazyFunction(list)
+    documents = factory.LazyFunction(lambda: [str(uuid.uuid4())])
+    langue_redaction_these = ChoixLangueRedactionThese.FRENCH
+    graphe_gantt = factory.LazyFunction(lambda: [str(uuid.uuid4())])
+    proposition_programme_doctoral = factory.LazyFunction(lambda: [str(uuid.uuid4())])
 
 
 class _PropositionFactory(factory.Factory):
@@ -89,6 +95,11 @@ class PropositionAdmissionECGE3DPMinimaleFactory(_PropositionFactory):
 class PropositionAdmissionSC3DPMinimaleAnnuleeFactory(PropositionAdmissionSC3DPMinimaleFactory):
     statut = ChoixStatusProposition.CANCELLED
     matricule_candidat = '0123456789'
+
+
+class PropositionAdmissionSC3DPMinimaleSansDetailProjetFactory(PropositionAdmissionSC3DPMinimaleFactory):
+    entity_id = factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-SC3DP-no-project')
+    projet = projet_incomplet
 
 
 class PropositionPreAdmissionSC3DPMinimaleFactory(_PropositionFactory):

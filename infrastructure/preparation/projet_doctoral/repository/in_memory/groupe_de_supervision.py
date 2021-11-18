@@ -23,22 +23,17 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
 from typing import List
 
-from admission.ddd.preparation.projet_doctoral.builder.proposition_identity_builder import \
-    PropositionIdentityBuilder
-from admission.ddd.preparation.projet_doctoral.domain.model.groupe_de_supervision import (
-    GroupeDeSupervision,
-)
+from admission.ddd.preparation.projet_doctoral.builder.proposition_identity_builder import PropositionIdentityBuilder
+from admission.ddd.preparation.projet_doctoral.domain.model.groupe_de_supervision import GroupeDeSupervision
 from admission.ddd.preparation.projet_doctoral.domain.model.proposition import PropositionIdentity
-from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import \
-    GroupeDeSupervisionNonTrouveException
+from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import GroupeDeSupervisionNonTrouveException
 from admission.ddd.preparation.projet_doctoral.dtos import CotutelleDTO
-from admission.ddd.preparation.projet_doctoral.repository.i_groupe_de_supervision import \
-    IGroupeDeSupervisionRepository
+from admission.ddd.preparation.projet_doctoral.repository.i_groupe_de_supervision import IGroupeDeSupervisionRepository
 from admission.ddd.preparation.projet_doctoral.test.factory.groupe_de_supervision import (
     GroupeDeSupervisionSC3DPAvecMembresInvitesFactory,
+    GroupeDeSupervisionSC3DPAvecPromoteurEtMembreEtPropositionIncompleteFactory,
     GroupeDeSupervisionSC3DPAvecPromoteurEtMembreFactory,
     GroupeDeSupervisionSC3DPFactory,
     GroupeDeSupervisionSC3DPSansCotutelleFactory,
@@ -56,6 +51,7 @@ class GroupeDeSupervisionInMemoryRepository(InMemoryGenericRepository, IGroupeDe
             GroupeDeSupervisionSC3DPSansCotutelleFactory(),
             GroupeDeSupervisionSC3DPAvecPromoteurEtMembreFactory(),
             GroupeDeSupervisionSC3DPAvecMembresInvitesFactory(),
+            GroupeDeSupervisionSC3DPAvecPromoteurEtMembreEtPropositionIncompleteFactory(),
         ]
 
     @classmethod

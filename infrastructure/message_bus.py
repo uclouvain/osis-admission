@@ -39,7 +39,7 @@ from admission.ddd.preparation.projet_doctoral.use_case.write.approuver_proposit
 from admission.ddd.preparation.projet_doctoral.use_case.write.completer_proposition_service import \
     completer_proposition
 from admission.ddd.preparation.projet_doctoral.use_case.write.definir_cotutelle_service import definir_cotutelle
-from admission.ddd.preparation.projet_doctoral.use_case.write.demander_signature_service import demander_signature
+from admission.ddd.preparation.projet_doctoral.use_case.write.demander_signatures_service import demander_signatures
 from admission.ddd.preparation.projet_doctoral.use_case.write.identifier_membre_CA_service import identifier_membre_CA
 from admission.ddd.preparation.projet_doctoral.use_case.write.identifier_promoteur_service import \
     identifier_promoteur
@@ -50,8 +50,6 @@ from admission.ddd.preparation.projet_doctoral.use_case.write.supprimer_membre_C
 from admission.ddd.preparation.projet_doctoral.use_case.write.supprimer_promoteur_service import \
     supprimer_promoteur
 from admission.ddd.preparation.projet_doctoral.use_case.write.supprimer_proposition_service import supprimer_proposition
-from admission.infrastructure.preparation.projet_doctoral.domain.service.constitution_supervision import \
-    ConstitutionSupervisionService
 from admission.infrastructure.preparation.projet_doctoral.domain.service.doctorat import DoctoratTranslator
 from admission.infrastructure.preparation.projet_doctoral.domain.service.membre_CA import MembreCATranslator
 from admission.infrastructure.preparation.projet_doctoral.domain.service.promoteur import PromoteurTranslator
@@ -122,11 +120,10 @@ class MessageBusCommands(AbstractMessageBusCommands):
             proposition_repository=PropositionRepository(),
             groupe_supervision_repository=GroupeDeSupervisionRepository(),
         ),
-        DemanderSignatureCommand: partial(
-            demander_signature,
+        DemanderSignaturesCommand: partial(
+            demander_signatures,
             proposition_repository=PropositionRepository(),
             groupe_supervision_repository=GroupeDeSupervisionRepository(),
-            constitution_supervision_these=ConstitutionSupervisionService(),
         ),
         ApprouverPropositionCommand: partial(
             approuver_proposition,

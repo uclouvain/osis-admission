@@ -147,3 +147,11 @@ class JustificationRequiseException(BusinessException):
     def __init__(self, **kwargs):
         message = _("A justification is needed when creating a pre-admission.")
         super().__init__(message, **kwargs)
+
+
+class DetailProjetNonCompleteException(BusinessException):
+    status_code = "PROPOSITION-17"
+
+    def __init__(self, **kwargs):
+        message = _("Mandatory fields are missing in the project details of the proposition.")
+        super().__init__(message, **kwargs)
