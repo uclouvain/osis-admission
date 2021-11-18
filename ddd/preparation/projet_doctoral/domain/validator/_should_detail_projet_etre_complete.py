@@ -23,24 +23,30 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import attr
 
-from django.utils.translation import gettext_lazy as _
-
-from base.models.utils.utils import ChoiceEnum
-
-
-class ChoixStatusProposition(ChoiceEnum):
-    CANCELLED = _('CANCELLED')
-    IN_PROGRESS = _('IN_PROGRESS')
-    SUBMITTED = _('SUBMITTED')
-    SIGNING_IN_PROGRESS = _('SIGNING_IN_PROGRESS')
+from admission.ddd.preparation.projet_doctoral.domain.model._detail_projet import DetailProjet
+from admission.ddd.preparation.projet_doctoral.domain.model._enums import ChoixTypeAdmission
+from base.ddd.utils.business_validator import BusinessValidator
+from admission.ddd.preparation.projet_doctoral.business_types import *
+from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import DetailProjetNonCompleteException
 
 
-class ChoixBureauCDE(ChoiceEnum):
-    ECONOMY = _('ECONOMY')
-    MANAGEMENT = _('MANAGEMENT')
+@attr.s(frozen=True, slots=True)
+class ShouldDetailProjetEtreComplete(BusinessValidator):
+    type_admission = attr.ib(type=str)
+    projet = attr.ib(type="DetailProjet")  # type: DetailProjet
 
+    def validate(self, *args, **kwargs):
+        champs_obligatoires = [
+            "titre",
+            "resume",
+            "langue_redaction_these",
+            "documents",
+            "graphe_gantt",
+        ]
+        if self.type_admission == ChoixTypeAdmission.ADMISSION:
+            champs_obligatoires.append("proposition_programme_doctoral")
 
-class ChoixTypeAdmission(ChoiceEnum):
-    ADMISSION = _('ADMISSION')
-    PRE_ADMISSION = _('PRE_ADMISSION')
+        if not all([getattr(self.projet, champ_obligatoire) for champ_obligatoire in champs_obligatoires]):
+            raise DetailProjetNonCompleteException

@@ -89,20 +89,19 @@ class GroupeDeSupervision(interface.Entity):
                         if s.membre_CA_id.matricule == matricule_signataire)
         raise SignataireNonTrouveException
 
-    def inviter_a_signer(self, signataire_id: Union['PromoteurIdentity', 'MembreCAIdentity']) -> None:
-        InviterASignerValidatorList(
-            groupe_de_supervision=self,
-            signataire_id=signataire_id,
-        ).validate()
-        if isinstance(signataire_id, PromoteurIdentity):
-            self.signatures_promoteurs = [s for s in self.signatures_promoteurs if s.promoteur_id != signataire_id]
+    def inviter_a_signer(self) -> None:
+        """Inviter à signer tous les promoteurs et membres CA non invités"""
+        for promoteur in filter(lambda s: s.etat == ChoixEtatSignature.NOT_INVITED, self.signatures_promoteurs):
+            InviterASignerValidatorList(groupe_de_supervision=self, signataire_id=promoteur.promoteur_id).validate()
+            self.signatures_promoteurs = [s for s in self.signatures_promoteurs if s != promoteur]
             self.signatures_promoteurs.append(
-                SignaturePromoteur(promoteur_id=signataire_id, etat=ChoixEtatSignature.INVITED)
+                SignaturePromoteur(promoteur_id=promoteur.promoteur_id, etat=ChoixEtatSignature.INVITED)
             )
-        elif isinstance(signataire_id, MembreCAIdentity):
-            self.signatures_membres_CA = [s for s in self.signatures_membres_CA if s.membre_CA_id != signataire_id]
+        for membre_CA in filter(lambda s: s.etat == ChoixEtatSignature.NOT_INVITED, self.signatures_membres_CA):
+            InviterASignerValidatorList(groupe_de_supervision=self, signataire_id=membre_CA.membre_CA_id).validate()
+            self.signatures_membres_CA = [s for s in self.signatures_membres_CA if s != membre_CA]
             self.signatures_membres_CA.append(
-                SignatureMembreCA(membre_CA_id=signataire_id, etat=ChoixEtatSignature.INVITED)
+                SignatureMembreCA(membre_CA_id=membre_CA.membre_CA_id, etat=ChoixEtatSignature.INVITED)
             )
 
     def supprimer_promoteur(self, promoteur_id: 'PromoteurIdentity') -> None:

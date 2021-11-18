@@ -122,6 +122,12 @@ class GroupeDeSupervisionSC3DPAvecPromoteurEtMembreFactory(_GroupeDeSupervisionF
     ])
 
 
+class GroupeDeSupervisionSC3DPAvecPromoteurEtMembreEtPropositionIncompleteFactory(
+        GroupeDeSupervisionSC3DPAvecPromoteurEtMembreFactory
+):
+    proposition_id = factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-SC3DP-no-project')
+
+
 class GroupeDeSupervisionSC3DPAvecMembresInvitesFactory(_GroupeDeSupervisionFactory):
     proposition_id = factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-SC3DP-membres-invites')
     signatures_promoteurs = factory.LazyFunction(lambda: [

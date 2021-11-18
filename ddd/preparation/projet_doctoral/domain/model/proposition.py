@@ -46,6 +46,7 @@ from admission.ddd.preparation.projet_doctoral.domain.model.doctorat import Doct
 from admission.ddd.preparation.projet_doctoral.domain.validator.validator_by_business_action import (
     CompletionPropositionValidatorList,
     SoumettrePropositionValidatorList,
+    DetailsProjetValidatorList,
 )
 from osis_common.ddd import interface
 
@@ -82,6 +83,10 @@ class Proposition(interface.RootEntity):
     @property
     def annee(self):
         return self.doctorat_id.annee
+
+    @property
+    def est_verrouillee_pour_signature(self):
+        return self.status == ChoixStatusProposition.SIGNING_IN_PROGRESS
 
     def est_en_cours(self):
         return self.statut == ChoixStatusProposition.IN_PROGRESS
@@ -218,7 +223,15 @@ class Proposition(interface.RootEntity):
             )
 
     def verifier(self):
+        """Vérification complète de la proposition"""
         SoumettrePropositionValidatorList(proposition=self).validate()
+
+    def verouiller_projet_doctoral_pour_signature(self):
+        self.status = ChoixStatusProposition.SIGNING_IN_PROGRESS
+
+    def verifier_projet_doctoral(self):
+        """Vérification de la validité du projet doctoral avant demande des signatures"""
+        DetailsProjetValidatorList(proposition=self).validate()
 
     def finaliser(self):
         self.statut = ChoixStatusProposition.SUBMITTED

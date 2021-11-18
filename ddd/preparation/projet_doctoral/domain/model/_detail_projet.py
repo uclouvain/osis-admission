@@ -53,3 +53,6 @@ class DetailProjet(interface.ValueObject):
     proposition_programme_doctoral = attr.ib(type=List[uuid.UUID], factory=list)
     projet_formation_complementaire = attr.ib(type=List[uuid.UUID], factory=list)
     lettres_recommandation = attr.ib(type=List[uuid.UUID], factory=list)
+
+
+projet_incomplet = DetailProjet()
