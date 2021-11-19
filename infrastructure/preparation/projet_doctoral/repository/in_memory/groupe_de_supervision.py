@@ -36,6 +36,7 @@ from admission.ddd.preparation.projet_doctoral.test.factory.groupe_de_supervisio
     GroupeDeSupervisionSC3DPAvecMembresInvitesFactory,
     GroupeDeSupervisionSC3DPAvecPromoteurEtMembreEtPropositionIncompleteFactory,
     GroupeDeSupervisionSC3DPAvecPromoteurEtMembreFactory,
+    GroupeDeSupervisionSC3DPAvecPromoteurEtMembreEtCotutelleFactory,
     GroupeDeSupervisionSC3DPCotutelleIndefinieFactory,
     GroupeDeSupervisionSC3DPFactory,
 )
@@ -51,6 +52,7 @@ class GroupeDeSupervisionInMemoryRepository(InMemoryGenericRepository, IGroupeDe
             GroupeDeSupervisionSC3DPFactory(),
             GroupeDeSupervisionSC3DPCotutelleIndefinieFactory(),
             GroupeDeSupervisionSC3DPAvecPromoteurEtMembreFactory(),
+            GroupeDeSupervisionSC3DPAvecPromoteurEtMembreEtCotutelleFactory(),
             GroupeDeSupervisionSC3DPAvecMembresInvitesFactory(),
             GroupeDeSupervisionSC3DPAvecPromoteurEtMembreEtPropositionIncompleteFactory(),
         ]

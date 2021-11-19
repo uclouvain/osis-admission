@@ -30,16 +30,18 @@ import factory
 
 from admission.ddd.preparation.projet_doctoral.domain.model._detail_projet import (
     ChoixLangueRedactionThese,
-    DetailProjet, projet_incomplet,
+    DetailProjet,
+    projet_incomplet,
 )
 from admission.ddd.preparation.projet_doctoral.domain.model._enums import (
     ChoixStatutProposition,
     ChoixTypeAdmission,
 )
-from admission.ddd.preparation.projet_doctoral.domain.model._experience_precedente_recherche import \
-    aucune_experience_precedente_recherche
+from admission.ddd.preparation.projet_doctoral.domain.model._experience_precedente_recherche import (
+    aucune_experience_precedente_recherche,
+)
 from admission.ddd.preparation.projet_doctoral.domain.model._financement import financement_non_rempli
-from admission.ddd.preparation.projet_doctoral.domain.model.proposition import (Proposition, PropositionIdentity)
+from admission.ddd.preparation.projet_doctoral.domain.model.proposition import Proposition, PropositionIdentity
 from admission.ddd.preparation.projet_doctoral.test.factory.doctorat import _DoctoratIdentityFactory
 
 
@@ -113,6 +115,10 @@ class PropositionPreAdmissionSC3DPMinimaleFactory(_PropositionFactory):
 
 class PropositionAdmissionSC3DPAvecMembresFactory(PropositionAdmissionSC3DPMinimaleFactory):
     entity_id = factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-SC3DP-promoteur-membre')
+
+
+class PropositionAdmissionSC3DPAvecMembresEtCotutelleFactory(PropositionAdmissionSC3DPMinimaleFactory):
+    entity_id = factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-SC3DP-promoteur-membre-cotutelle')
 
 
 class PropositionAdmissionSC3DPAvecMembresInvitesFactory(PropositionAdmissionSC3DPMinimaleFactory):

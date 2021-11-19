@@ -122,13 +122,27 @@ class GroupeDeSupervisionSC3DPAvecPromoteurEtMembreFactory(_GroupeDeSupervisionF
     signatures_membres_CA = factory.LazyFunction(lambda: [
         _SignatureMembreCAFactory(membre_CA_id__matricule='membre-ca-SC3DP', etat=ChoixEtatSignature.INVITED)
     ])
+
+
+class GroupeDeSupervisionSC3DPAvecPromoteurEtMembreEtCotutelleFactory(_GroupeDeSupervisionFactory):
+    proposition_id = factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-SC3DP-promoteur-membre-cotutelle')
+    signatures_promoteurs = factory.LazyFunction(lambda: [
+        _SignaturePromoteurFactory(promoteur_id__matricule='promoteur-SC3DP')
+    ])
+    signatures_membres_CA = factory.LazyFunction(lambda: [
+        _SignatureMembreCAFactory(membre_CA_id__matricule='membre-ca-SC3DP', etat=ChoixEtatSignature.INVITED)
+    ])
     cotutelle = factory.SubFactory(_CotutelleFactory, motivation="Runs in family", institution="MIT")
 
 
-class GroupeDeSupervisionSC3DPAvecPromoteurEtMembreEtPropositionIncompleteFactory(
-        GroupeDeSupervisionSC3DPAvecPromoteurEtMembreFactory
-):
+class GroupeDeSupervisionSC3DPAvecPromoteurEtMembreEtPropositionIncompleteFactory(_GroupeDeSupervisionFactory):
     proposition_id = factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-SC3DP-no-project')
+    signatures_promoteurs = factory.LazyFunction(lambda: [
+        _SignaturePromoteurFactory(promoteur_id__matricule='promoteur-SC3DP')
+    ])
+    signatures_membres_CA = factory.LazyFunction(lambda: [
+        _SignatureMembreCAFactory(membre_CA_id__matricule='membre-ca-SC3DP', etat=ChoixEtatSignature.INVITED)
+    ])
 
 
 class GroupeDeSupervisionSC3DPAvecMembresInvitesFactory(_GroupeDeSupervisionFactory):
