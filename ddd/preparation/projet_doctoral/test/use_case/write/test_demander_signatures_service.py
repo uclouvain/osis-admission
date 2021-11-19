@@ -54,17 +54,12 @@ from base.ddd.utils.business_validator import MultipleBusinessExceptions
 class TestDemanderSignaturesService(SimpleTestCase):
     def setUp(self) -> None:
         self.matricule_promoteur = 'promoteur-SC3DP'
-        self.uuid_proposition = 'uuid-SC3DP-promoteur-membre'
+        self.uuid_proposition = 'uuid-SC3DP-promoteur-membre-cotutelle'
         self.uuid_proposition_sans_projet = 'uuid-SC3DP-no-project'
-        uuid_proposition_admission = 'uuid-ECGE3DP'
         self.uuid_proposition_sans_cotutelle = 'uuid-SC3DP-sans-cotutelle'
 
         self.proposition_repository = PropositionInMemoryRepository()
         self.groupe_de_supervision_repository = GroupeDeSupervisionInMemoryRepository()
-        PropositionIdentityBuilder.build_from_uuid(self.uuid_proposition)
-        PropositionIdentityBuilder.build_from_uuid(self.uuid_proposition_sans_projet)
-        PropositionIdentityBuilder.build_from_uuid(uuid_proposition_admission)
-        PropositionIdentityBuilder.build_from_uuid(self.uuid_proposition_sans_cotutelle)
         self.addCleanup(self.groupe_de_supervision_repository.reset)
         self.addCleanup(self.proposition_repository.reset)
 

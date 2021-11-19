@@ -28,7 +28,8 @@ from typing import List, Optional, Union
 
 import attr
 
-from admission.ddd.preparation.projet_doctoral.domain.model._cotutelle import Cotutelle, pas_de_cotutelle
+from admission.ddd.preparation.projet_doctoral.domain.model._cotutelle import Cotutelle
+from admission.ddd.preparation.projet_doctoral.domain.model._enums import ChoixStatutSignatureGroupeDeSupervision
 from admission.ddd.preparation.projet_doctoral.domain.model._membre_CA import MembreCAIdentity
 from admission.ddd.preparation.projet_doctoral.domain.model._promoteur import PromoteurIdentity
 from admission.ddd.preparation.projet_doctoral.domain.model._signature_membre_CA import SignatureMembreCA
@@ -62,6 +63,9 @@ class GroupeDeSupervision(interface.Entity):
     signatures_promoteurs = attr.ib(type=List[SignaturePromoteur], factory=list)  # type: List[SignaturePromoteur]
     signatures_membres_CA = attr.ib(type=List[SignatureMembreCA], factory=list)  # type: List[SignatureMembreCA]
     cotutelle = attr.ib(type=Optional[Cotutelle], default=None)
+    statut_signature = attr.ib(
+        type=ChoixStatutSignatureGroupeDeSupervision, default=ChoixStatutSignatureGroupeDeSupervision.IN_PROGRESS
+    )
 
     def identifier_promoteur(self, promoteur_id: 'PromoteurIdentity') -> None:
         IdentifierPromoteurValidatorList(
@@ -155,3 +159,6 @@ class GroupeDeSupervision(interface.Entity):
             convention=convention,
             autres_documents=autres_documents,
         )
+
+    def verrouiller_groupe_pour_signature(self):
+        self.statut_signature = ChoixStatutSignatureGroupeDeSupervision.SIGNING_IN_PROGRESS

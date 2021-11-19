@@ -45,8 +45,8 @@ def demander_signatures(
 
     # THEN
     proposition_candidat.verouiller_proposition_pour_signature()
+    groupe_de_supervision.verrouiller_groupe_pour_signature()
     groupe_de_supervision.inviter_a_signer()
-    # groupe_de_supervision.notifier()  # TODO ?
     groupe_supervision_repository.save(groupe_de_supervision)
 
     return proposition_candidat.entity_id
