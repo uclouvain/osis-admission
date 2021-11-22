@@ -26,6 +26,7 @@
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
+from admission.tests.factories.groups import CandidateGroupFactory
 
 from admission.tests.factories.secondary_studies import ForeignHighSchoolDiplomaFactory, BelgianHighSchoolDiplomaFactory
 from base.tests.factories.academic_year import AcademicYearFactory
@@ -40,6 +41,7 @@ class BelgianHighSchoolDiplomaTestCase(APITestCase):
     def setUpTestData(cls):
         cls.academic_year = AcademicYearFactory(current=True)
         cls.user = PersonFactory().user
+        cls.user.groups.add(CandidateGroupFactory())
         cls.url = reverse("admission_api_v1:secondary-studies")
         cls.diploma_data = {
             "belgian_diploma": {
@@ -179,6 +181,7 @@ class ForeignHighSchoolDiplomaTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
         cls.user = PersonFactory().user
+        cls.user.groups.add(CandidateGroupFactory())
         cls.url = reverse("admission_api_v1:secondary-studies")
         cls.academic_year = AcademicYearFactory(current=True)
         cls.language = LanguageFactory(code="FR")

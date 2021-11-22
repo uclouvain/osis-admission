@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-10-15 12:14+0200\n"
+"POT-Creation-Date: 2021-11-19 14:06+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,6 +17,538 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
+#: auth/predicates.py:38
+msgid "You must be the request author to access this admission"
+msgstr ""
+
+#: auth/predicates.py:44
+msgid "You must be the request promoter to access this admission"
+msgstr ""
+
+#: auth/predicates.py:52
+msgid ""
+"You must be a member of the doctoral commission to access this admission"
+msgstr ""
+
+#: auth/predicates.py:58
+msgid "You must be a member of the committee to access this admission"
+msgstr ""
+
+#: auth/roles/adre.py:35
+msgid "ADRE"
+msgstr ""
+
+#: auth/roles/adre.py:36
+msgid "ADREs"
+msgstr ""
+
+#: auth/roles/ca_member.py:36
+msgid "Committee member"
+msgstr ""
+
+#: auth/roles/ca_member.py:37
+msgid "Committee members"
+msgstr ""
+
+#: auth/roles/candidate.py:36 contrib/models/base.py:22
+#: templates/admission/doctorate/admission_doctorate_detail.html:43
+#: templates/admission/doctorate/admission_doctorate_list.html:113
+msgid "Candidate"
+msgstr ""
+
+#: auth/roles/candidate.py:37
+msgid "Candidates"
+msgstr ""
+
+#: auth/roles/cdd_manager.py:36
+msgid "CDD manager"
+msgstr ""
+
+#: auth/roles/cdd_manager.py:37
+msgid "CDD managers"
+msgstr ""
+
+#: auth/roles/jury_secretary.py:35
+msgid "Jury secretary"
+msgstr ""
+
+#: auth/roles/jury_secretary.py:36
+msgid "Jury secretaries"
+msgstr ""
+
+#: auth/roles/promoter.py:36 contrib/models/enums/actor_type.py:33
+msgid "Promoter"
+msgstr ""
+
+#: auth/roles/promoter.py:37
+msgid "Promoters"
+msgstr ""
+
+#: auth/roles/sceb.py:35
+msgid "SCEB"
+msgstr ""
+
+#: auth/roles/sceb.py:36
+msgid "SCEBs"
+msgstr ""
+
+#: auth/roles/sic_director.py:35
+msgid "SIC director"
+msgstr ""
+
+#: auth/roles/sic_director.py:36
+msgid "SIC directors"
+msgstr ""
+
+#: auth/roles/sic_manager.py:35
+msgid "SIC manager"
+msgstr ""
+
+#: auth/roles/sic_manager.py:36
+msgid "SIC managers"
+msgstr ""
+
+#: contrib/models/base.py:14
+#: templates/admission/doctorate/admission_doctorate_detail.html:39
+#: templates/admission/doctorate/admission_doctorate_list.html:112
+msgid "Type"
+msgstr ""
+
+#: contrib/models/base.py:29
+#: templates/admission/doctorate/admission_doctorate_detail.html:90
+#: templates/admission/doctorate/admission_doctorate_list.html:114
+msgid "Comment"
+msgstr ""
+
+#: contrib/models/base.py:33
+#: templates/admission/doctorate/admission_doctorate_list.html:116
+msgid "Created"
+msgstr ""
+
+#: contrib/models/base.py:34
+#: templates/admission/doctorate/admission_doctorate_list.html:117
+msgid "Modified"
+msgstr ""
+
+#: contrib/models/base.py:40
+#, python-brace-format
+msgid "{degree} [{type}] for {candidate}"
+msgstr ""
+
+#: contrib/models/doctorate.py:44
+msgid "Doctorate"
+msgstr ""
+
+#: contrib/models/doctorate.py:50
+msgid "Bureau"
+msgstr ""
+
+#: contrib/models/doctorate.py:59
+msgid "Financing type"
+msgstr ""
+
+#: contrib/models/doctorate.py:66
+msgid "Working contract type"
+msgstr ""
+
+#: contrib/models/doctorate.py:71
+msgid "EFT"
+msgstr ""
+
+#: contrib/models/doctorate.py:77
+msgid "Scholarship grant"
+msgstr ""
+
+#: contrib/models/doctorate.py:82
+msgid "Planned duration"
+msgstr ""
+
+#: contrib/models/doctorate.py:87
+msgid "Dedicated time (in EFT)"
+msgstr ""
+
+#: contrib/models/doctorate.py:95
+msgid "Project title"
+msgstr ""
+
+#: contrib/models/doctorate.py:100
+msgid "Abstract"
+msgstr ""
+
+#: contrib/models/doctorate.py:107
+msgid "Thesis language"
+msgstr ""
+
+#: contrib/models/doctorate.py:112
+msgid "Project"
+msgstr ""
+
+#: contrib/models/doctorate.py:115
+msgid "Gantt graph"
+msgstr ""
+
+#: contrib/models/doctorate.py:118
+msgid "Program proposition"
+msgstr ""
+
+#: contrib/models/doctorate.py:121
+msgid "Additional training project"
+msgstr ""
+
+#: contrib/models/doctorate.py:128
+msgid "PhD already done"
+msgstr ""
+
+#: contrib/models/doctorate.py:134 contrib/models/doctorate.py:157
+msgid "Institution"
+msgstr ""
+
+#: contrib/models/doctorate.py:139
+msgid "Defense"
+msgstr ""
+
+#: contrib/models/doctorate.py:145
+msgid "No defense reason"
+msgstr ""
+
+#: contrib/models/doctorate.py:151
+msgid "Motivation"
+msgstr ""
+
+#: contrib/models/doctorate.py:162
+msgid "Cotutelle request document"
+msgstr ""
+
+#: contrib/models/doctorate.py:166
+msgid "Cotutelle convention"
+msgstr ""
+
+#: contrib/models/doctorate.py:170
+msgid "Other cotutelle-related documents"
+msgstr ""
+
+#: contrib/models/doctorate.py:184
+msgid "Doctorate admission"
+msgstr ""
+
+#: contrib/models/doctorate.py:187
+msgid "Can access doctorate admission list"
+msgstr ""
+
+#: contrib/models/doctorate.py:188
+msgid "Can download jury-approved PDF"
+msgstr ""
+
+#: contrib/models/doctorate.py:189
+msgid "Can upload jury-approved PDF"
+msgstr ""
+
+#: contrib/models/doctorate.py:190
+msgid "Can upload signed scholarship"
+msgstr ""
+
+#: contrib/models/doctorate.py:191
+msgid "Can check publication autorisation"
+msgstr ""
+
+#: contrib/models/doctorate.py:192
+msgid "Can validate registration"
+msgstr ""
+
+#: contrib/models/doctorate.py:193
+msgid "Can approve jury"
+msgstr ""
+
+#: contrib/models/doctorate.py:194
+msgid "Can approve confirmation paper"
+msgstr ""
+
+#: contrib/models/doctorate.py:195
+msgid "Can validate doctoral training"
+msgstr ""
+
+#: contrib/models/doctorate.py:196
+msgid "Can download PDF confirmation"
+msgstr ""
+
+#: contrib/models/doctorate.py:197
+msgid "Can upload PDF confirmation"
+msgstr ""
+
+#: contrib/models/doctorate.py:198
+msgid "Can fill thesis"
+msgstr ""
+
+#: contrib/models/doctorate.py:199
+msgid "Can submit thesis"
+msgstr ""
+
+#: contrib/models/doctorate.py:200
+msgid "Can appose CDD notice"
+msgstr ""
+
+#: contrib/models/doctorate.py:201
+msgid "Can appose SIC notice"
+msgstr ""
+
+#: contrib/models/doctorate.py:202
+msgid "Can upload defense report"
+msgstr ""
+
+#: contrib/models/doctorate.py:203
+msgid "Can check copyright"
+msgstr ""
+
+#: contrib/models/doctorate.py:204
+msgid "Can sign diploma"
+msgstr ""
+
+#: contrib/models/doctorate.py:205
+msgid "Can view the information related to the admission request author"
+msgstr ""
+
+#: contrib/models/doctorate.py:206
+msgid "Can update the information related to the admission request author"
+msgstr ""
+
+#: contrib/models/doctorate.py:207
+msgid "Can view the coordinates of the admission request author"
+msgstr ""
+
+#: contrib/models/doctorate.py:208
+msgid "Can update the coordinates of the admission request author"
+msgstr ""
+
+#: contrib/models/doctorate.py:209
+msgid "Can view the information related to the secondary studies"
+msgstr ""
+
+#: contrib/models/doctorate.py:210
+msgid "Can update the information related to the secondary studies"
+msgstr ""
+
+#: contrib/models/doctorate.py:211
+msgid "Can view the information related to the curriculum"
+msgstr ""
+
+#: contrib/models/doctorate.py:212
+msgid "Can update the information related to the curriculum"
+msgstr ""
+
+#: contrib/models/doctorate.py:213
+msgid "Can view the information related to the admission project"
+msgstr ""
+
+#: contrib/models/doctorate.py:214
+msgid "Can update the information related to the admission project"
+msgstr ""
+
+#: contrib/models/doctorate.py:215
+msgid "Can view the information related to the admission cotutelle"
+msgstr ""
+
+#: contrib/models/doctorate.py:216
+msgid "Can update the information related to the admission cotutelle"
+msgstr ""
+
+#: contrib/models/doctorate.py:217
+msgid "Can view the information related to the admission supervision"
+msgstr ""
+
+#: contrib/models/doctorate.py:218
+msgid "Can update the information related to the admission supervision"
+msgstr ""
+
+#: contrib/models/enums/actor_type.py:34
+msgid "CA Member"
+msgstr ""
+
+#: contrib/models/enums/admission_type.py:33
+msgid "Admission"
+msgstr ""
+
+#: contrib/models/enums/admission_type.py:34
+msgid "Pre-Admission"
+msgstr ""
+
+#: ddd/preparation/projet_doctoral/domain/model/_detail_projet.py:38
+msgid "French"
+msgstr ""
+
+#: ddd/preparation/projet_doctoral/domain/model/_detail_projet.py:39
+msgid "English"
+msgstr ""
+
+#: ddd/preparation/projet_doctoral/domain/model/_detail_projet.py:40
+msgid "Undecided"
+msgstr ""
+
+#: ddd/preparation/projet_doctoral/domain/model/_enums.py:33
+msgid "CANCELLED"
+msgstr ""
+
+#: ddd/preparation/projet_doctoral/domain/model/_enums.py:34
+msgid "IN_PROGRESS"
+msgstr ""
+
+#: ddd/preparation/projet_doctoral/domain/model/_enums.py:35
+msgid "SUBMITTED"
+msgstr ""
+
+#: ddd/preparation/projet_doctoral/domain/model/_enums.py:39
+msgid "ECONOMY"
+msgstr ""
+
+#: ddd/preparation/projet_doctoral/domain/model/_enums.py:40
+msgid "MANAGEMENT"
+msgstr ""
+
+#: ddd/preparation/projet_doctoral/domain/model/_enums.py:44
+msgid "ADMISSION"
+msgstr ""
+
+#: ddd/preparation/projet_doctoral/domain/model/_enums.py:45
+msgid "PRE_ADMISSION"
+msgstr ""
+
+#: ddd/preparation/projet_doctoral/domain/model/_experience_precedente_recherche.py:37
+msgid "YES"
+msgstr ""
+
+#: ddd/preparation/projet_doctoral/domain/model/_experience_precedente_recherche.py:38
+msgid "NO"
+msgstr ""
+
+#: ddd/preparation/projet_doctoral/domain/model/_experience_precedente_recherche.py:39
+msgid "PARTIAL"
+msgstr ""
+
+#: ddd/preparation/projet_doctoral/domain/model/_financement.py:36
+msgid "WORK_CONTRACT"
+msgstr ""
+
+#: ddd/preparation/projet_doctoral/domain/model/_financement.py:37
+msgid "SEARCH_SCHOLARSHIP"
+msgstr ""
+
+#: ddd/preparation/projet_doctoral/domain/model/_financement.py:38
+msgid "SELF_FUNDING"
+msgstr ""
+
+#: ddd/preparation/projet_doctoral/domain/model/_signature_promoteur.py:35
+msgid "NOT_INVITED"
+msgstr ""
+
+#: ddd/preparation/projet_doctoral/domain/model/_signature_promoteur.py:36
+msgid "INVITED"
+msgstr ""
+
+#: ddd/preparation/projet_doctoral/domain/model/_signature_promoteur.py:37
+msgid "APPROVED"
+msgstr ""
+
+#: ddd/preparation/projet_doctoral/domain/model/_signature_promoteur.py:38
+msgid "REFUSED"
+msgstr ""
+
+#: ddd/preparation/projet_doctoral/domain/validator/exceptions.py:36
+msgid "You've reached the maximum authorized propositions."
+msgstr ""
+
+#: ddd/preparation/projet_doctoral/domain/validator/exceptions.py:44
+msgid "No PhD found."
+msgstr ""
+
+#: ddd/preparation/projet_doctoral/domain/validator/exceptions.py:52
+msgid "Proposition not found."
+msgstr ""
+
+#: ddd/preparation/projet_doctoral/domain/validator/exceptions.py:60
+msgid "Supervision group not found."
+msgstr ""
+
+#: ddd/preparation/projet_doctoral/domain/validator/exceptions.py:68
+msgid "CDE Bureau should be filled in only if the doctorate's entity is CDE"
+msgstr ""
+
+#: ddd/preparation/projet_doctoral/domain/validator/exceptions.py:76
+msgid "Work contract should be set when financing type is set to work contract"
+msgstr ""
+
+#: ddd/preparation/projet_doctoral/domain/validator/exceptions.py:84
+msgid "Institution should be set when PhD has been set to yes or partial"
+msgstr ""
+
+#: ddd/preparation/projet_doctoral/domain/validator/exceptions.py:92
+msgid "Promoter not found."
+msgstr ""
+
+#: ddd/preparation/projet_doctoral/domain/validator/exceptions.py:100
+msgid "Membre CA not found."
+msgstr ""
+
+#: ddd/preparation/projet_doctoral/domain/validator/exceptions.py:108
+msgid "Member of supervision group not found."
+msgstr ""
+
+#: ddd/preparation/projet_doctoral/domain/validator/exceptions.py:116
+msgid "Member of supervision group already invited."
+msgstr ""
+
+#: ddd/preparation/projet_doctoral/domain/validator/exceptions.py:124
+msgid "Member of supervision group not invited."
+msgstr ""
+
+#: ddd/preparation/projet_doctoral/domain/validator/exceptions.py:132
+msgid "Already a promoter."
+msgstr ""
+
+#: ddd/preparation/projet_doctoral/domain/validator/exceptions.py:140
+msgid "Already a member of CA."
+msgstr ""
+
+#: ddd/preparation/projet_doctoral/domain/validator/exceptions.py:148
+msgid "A justification is needed when creating a pre-admission."
+msgstr ""
+
+#: templates/admission/doctorate/admission_doctorate_create.html:5
+#: templates/admission/doctorate/admission_doctorate_detail.html:5
+#: templates/admission/doctorate/admission_doctorate_list.html:5
+#: templates/admission/doctorate/admission_doctorate_list.html:13
+#: templates/admission/doctorate/admission_doctorate_update.html:5
+msgid "Doctorate admissions"
+msgstr ""
+
+#: templates/admission/doctorate/admission_doctorate_create.html:6
+#: templates/admission/doctorate/admission_doctorate_create.html:14
+#: templates/admission/doctorate/admission_doctorate_list.html:26
+#: templates/admission/doctorate/includes/admission_doctorate_action_bar.html:13
+msgid "Create new doctorate admission"
+msgstr ""
+
+#: templates/admission/doctorate/admission_doctorate_detail.html:50
+#: templates/admission/doctorate/admission_doctorate_list.html:115
+msgid "Author"
+msgstr ""
+
+#: templates/admission/doctorate/admission_doctorate_detail.html:63
+msgid "UUID"
+msgstr ""
+
+#: templates/admission/doctorate/admission_doctorate_detail.html:70
+msgid "created"
+msgstr ""
+
+#: templates/admission/doctorate/admission_doctorate_detail.html:77
+msgid "modified"
+msgstr ""
+
+#: templates/admission/doctorate/admission_doctorate_list.html:20
+#: templates/admission/doctorate/includes/admission_doctorate_action_bar.html:7
+msgid "actions"
+msgstr ""
+
+#: templates/admission/doctorate/admission_doctorate_list.html:68
 #, python-format
 msgid ""
 "\n"
@@ -24,6 +556,44 @@ msgid ""
 "doctorate admissions"
 msgstr ""
 
+#: templates/admission/doctorate/admission_doctorate_list.html:76
+msgid "Export"
+msgstr ""
+
+#: templates/admission/doctorate/admission_doctorate_list.html:86
+msgid "Produce xls with a list of doctorate admissions"
+msgstr ""
+
+#: templates/admission/doctorate/admission_doctorate_list.html:87
+msgid "List of doctorate admissions"
+msgstr ""
+
+#: templates/admission/doctorate/admission_doctorate_list.html:94
+msgid "Produce xls of doctorate admissions with administrative data"
+msgstr ""
+
+#: templates/admission/doctorate/admission_doctorate_list.html:95
+msgid "List of doctorate admissions with administrative data"
+msgstr ""
+
+#: templates/admission/doctorate/admission_doctorate_update.html:8
+#: templates/admission/doctorate/includes/admission_doctorate_action_bar.html:18
+msgid "Update"
+msgstr ""
+
+#: templates/admission/doctorate/admission_doctorate_update.html:16
+msgid "Update doctorate admission"
+msgstr ""
+
+#: templates/admission/doctorate/includes/admission_doctorate_action_bar.html:23
+msgid "Delete"
+msgstr ""
+
+#: templates/admission/doctorate/includes/admission_doctorate_action_bar.html:40
+msgid "Delete?"
+msgstr ""
+
+#: templates/admission/doctorate/includes/admission_doctorate_action_bar.html:44
 #, python-format
 msgid ""
 "\n"
@@ -31,366 +601,10 @@ msgid ""
 "            "
 msgstr ""
 
-msgid "A justification is needed when creating a pre-admission."
-msgstr ""
-
-msgid "ADMISSION"
-msgstr ""
-
-msgid "ADRE"
-msgstr ""
-
-msgid "ADREs"
-msgstr ""
-
-msgid "APPROVED"
-msgstr ""
-
-msgid "Abstract"
-msgstr ""
-
-msgid "Additional training project"
-msgstr ""
-
-msgid "Admission"
-msgstr ""
-
-msgid "Already a member of CA."
-msgstr ""
-
-msgid "Already a promoter."
-msgstr ""
-
-msgid "Author"
-msgstr ""
-
-msgid "Bureau"
-msgstr ""
-
-msgid "CA Member"
-msgstr ""
-
-msgid "CANCELLED"
-msgstr ""
-
-msgid "CDD manager"
-msgstr ""
-
-msgid "CDD managers"
-msgstr ""
-
-msgid "CDE Bureau should be filled in only if the doctorate's entity is CDE"
-msgstr ""
-
-msgid "Can access doctorate admission list"
-msgstr ""
-
-msgid "Can appose CDD notice"
-msgstr ""
-
-msgid "Can appose SIC notice"
-msgstr ""
-
-msgid "Can approve confirmation paper"
-msgstr ""
-
-msgid "Can approve jury"
-msgstr ""
-
-msgid "Can check copyright"
-msgstr ""
-
-msgid "Can check publication autorisation"
-msgstr ""
-
-msgid "Can download PDF confirmation"
-msgstr ""
-
-msgid "Can download jury-approved PDF"
-msgstr ""
-
-msgid "Can fill thesis"
-msgstr ""
-
-msgid "Can sign diploma"
-msgstr ""
-
-msgid "Can submit thesis"
-msgstr ""
-
-msgid "Can upload PDF confirmation"
-msgstr ""
-
-msgid "Can upload defense report"
-msgstr ""
-
-msgid "Can upload jury-approved PDF"
-msgstr ""
-
-msgid "Can upload signed scholarship"
-msgstr ""
-
-msgid "Can validate doctoral training"
-msgstr ""
-
-msgid "Can validate registration"
-msgstr ""
-
-msgid "Candidate"
-msgstr ""
-
-msgid "Candidates"
-msgstr ""
-
+#: templates/admission/doctorate/includes/admission_doctorate_action_bar.html:50
 msgid "Close"
 msgstr ""
 
-msgid "Comment"
-msgstr ""
-
-msgid "Committee member"
-msgstr ""
-
-msgid "Committee members"
-msgstr ""
-
+#: templates/admission/doctorate/includes/admission_doctorate_action_bar.html:51
 msgid "Confirm"
-msgstr ""
-
-msgid "Cotutelle convention"
-msgstr ""
-
-msgid "Cotutelle request document"
-msgstr ""
-
-msgid "Create new doctorate admission"
-msgstr ""
-
-msgid "Created"
-msgstr ""
-
-msgid "Dedicated time (in EFT)"
-msgstr ""
-
-msgid "Defense"
-msgstr ""
-
-msgid "Delete"
-msgstr ""
-
-msgid "Delete?"
-msgstr ""
-
-msgid "Doctorate"
-msgstr ""
-
-msgid "Doctorate admission"
-msgstr ""
-
-msgid "Doctorate admissions"
-msgstr ""
-
-msgid "ECONOMY"
-msgstr ""
-
-msgid "EFT"
-msgstr ""
-
-msgid "English"
-msgstr ""
-
-msgid "Export"
-msgstr ""
-
-msgid "Financing type"
-msgstr ""
-
-msgid "French"
-msgstr ""
-
-msgid "Gantt graph"
-msgstr ""
-
-msgid "INVITED"
-msgstr ""
-
-msgid "IN_PROGRESS"
-msgstr ""
-
-msgid "Institution"
-msgstr ""
-
-msgid "Institution should be set when PhD has been set to yes or partial"
-msgstr ""
-
-msgid "Jury secretaries"
-msgstr ""
-
-msgid "Jury secretary"
-msgstr ""
-
-msgid "List of doctorate admissions"
-msgstr ""
-
-msgid "List of doctorate admissions with administrative data"
-msgstr ""
-
-msgid "MANAGEMENT"
-msgstr ""
-
-msgid "Member of supervision group already invited."
-msgstr ""
-
-msgid "Member of supervision group not found."
-msgstr ""
-
-msgid "Member of supervision group not invited."
-msgstr ""
-
-msgid "Membre CA not found."
-msgstr ""
-
-msgid "Modified"
-msgstr ""
-
-msgid "Motivation"
-msgstr ""
-
-msgid "NO"
-msgstr ""
-
-msgid "NOT_INVITED"
-msgstr ""
-
-msgid "No PhD found."
-msgstr ""
-
-msgid "No defense reason"
-msgstr ""
-
-msgid "Other cotutelle-related documents"
-msgstr ""
-
-msgid "PARTIAL"
-msgstr ""
-
-msgid "PRE_ADMISSION"
-msgstr ""
-
-msgid "PhD already done"
-msgstr ""
-
-msgid "Planned duration"
-msgstr ""
-
-msgid "Pre-Admission"
-msgstr ""
-
-msgid "Produce xls of doctorate admissions with administrative data"
-msgstr ""
-
-msgid "Produce xls with a list of doctorate admissions"
-msgstr ""
-
-msgid "Program proposition"
-msgstr ""
-
-msgid "Project"
-msgstr ""
-
-msgid "Project title"
-msgstr ""
-
-msgid "Promoter"
-msgstr ""
-
-msgid "Promoter not found."
-msgstr ""
-
-msgid "Promoters"
-msgstr ""
-
-msgid "Proposition not found."
-msgstr ""
-
-msgid "REFUSED"
-msgstr ""
-
-msgid "SCEB"
-msgstr ""
-
-msgid "SCEBs"
-msgstr ""
-
-msgid "SEARCH_SCHOLARSHIP"
-msgstr ""
-
-msgid "SELF_FUNDING"
-msgstr ""
-
-msgid "SIC director"
-msgstr ""
-
-msgid "SIC directors"
-msgstr ""
-
-msgid "SIC manager"
-msgstr ""
-
-msgid "SIC managers"
-msgstr ""
-
-msgid "SUBMITTED"
-msgstr ""
-
-msgid "Scholarship grant"
-msgstr ""
-
-msgid "Supervision group not found."
-msgstr ""
-
-msgid "Thesis language"
-msgstr ""
-
-msgid "Type"
-msgstr ""
-
-msgid "UUID"
-msgstr ""
-
-msgid "Undecided"
-msgstr ""
-
-msgid "Update"
-msgstr ""
-
-msgid "Update doctorate admission"
-msgstr ""
-
-msgid "WORK_CONTRACT"
-msgstr ""
-
-msgid "Work contract should be set when financing type is set to work contract"
-msgstr ""
-
-msgid "Working contract type"
-msgstr ""
-
-msgid "YES"
-msgstr ""
-
-msgid "You've reached the maximum authorized propositions."
-msgstr ""
-
-msgid "actions"
-msgstr ""
-
-msgid "created"
-msgstr ""
-
-msgid "modified"
-msgstr ""
-
-#, python-brace-format
-msgid "{degree} [{type}] for {candidate}"
 msgstr ""

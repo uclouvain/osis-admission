@@ -36,14 +36,27 @@ from base.tests.factories.entity import EntityFactory
 
 
 class PredicatesTestCase(TestCase):
+
+    def setUp(self):
+        self.predicate_context_mock = mock.patch(
+            "rules.Predicate.context",
+            new_callable=mock.PropertyMock,
+            return_value={
+                'perm_name': 'dummy-perm'
+            }
+        )
+
     def test_is_admission_request_author(self):
+        self.predicate_context_mock.start()
         candidate1 = CandidateFactory().person
         candidate2 = CandidateFactory().person
         request = DoctorateAdmissionFactory(candidate=candidate1)
         self.assertTrue(predicates.is_admission_request_author(candidate1.user, request))
         self.assertFalse(predicates.is_admission_request_author(candidate2.user, request))
+        self.predicate_context_mock.stop()
 
     def test_is_main_promoter(self):
+        self.predicate_context_mock.start()
         author = CandidateFactory().person
         promoter1 = PromoterFactory()
         promoter2 = PromoterFactory()
@@ -53,32 +66,28 @@ class PredicatesTestCase(TestCase):
         self.assertFalse(predicates.is_admission_request_promoter(author.user, request))
         self.assertFalse(predicates.is_admission_request_promoter(promoter1.person.user, request))
         self.assertTrue(predicates.is_admission_request_promoter(promoter2.person.user, request))
+        self.predicate_context_mock.stop()
 
     def test_is_part_of_doctoral_commission(self):
-        predicate_context_mock = mock.patch(
-            "rules.Predicate.context",
-            new_callable=mock.PropertyMock,
-            return_value={
-                'perm_name': 'dummy-perm'
-            }
-        )
-        predicate_context_mock.start()
+        self.predicate_context_mock.start()
 
         doctoral_commission = EntityFactory()
         request = DoctorateAdmissionFactory(doctorate__management_entity=doctoral_commission)
         manager1 = CddManagerFactory(entity=doctoral_commission)
         manager2 = CddManagerFactory()
 
-        predicate_context_mock.target.context['role_qs'] = CddManager.objects.filter(person=manager1.person)
+        self.predicate_context_mock.target.context['role_qs'] = CddManager.objects.filter(person=manager1.person)
         self.assertTrue(predicates.is_part_of_doctoral_commission(manager1.person.user, request))
 
-        predicate_context_mock.target.context['role_qs'] = CddManager.objects.filter(person=manager2.person)
+        self.predicate_context_mock.target.context['role_qs'] = CddManager.objects.filter(person=manager2.person)
         self.assertFalse(predicates.is_part_of_doctoral_commission(manager2.person.user, request))
 
-        predicate_context_mock.stop()
+        self.predicate_context_mock.stop()
 
     def test_is_part_of_committee(self):
         # Promoter is part of the supervision group
+        self.predicate_context_mock.start()
         promoter = PromoterActorFactory()
         request = DoctorateAdmissionFactory(supervision_group=promoter.process)
         self.assertTrue(predicates.is_part_of_committee(promoter.person.user, request))
+        self.predicate_context_mock.stop()

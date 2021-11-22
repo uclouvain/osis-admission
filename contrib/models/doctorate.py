@@ -206,6 +206,20 @@ class DoctorateAdmission(BaseAdmission):
             ('upload_defense_report', _("Can upload defense report")),
             ('check_copyright', _("Can check copyright")),
             ('sign_diploma', _("Can sign diploma")),
+            ('view_doctorateadmission_person', _("Can view the information related to the admission request author")),
+            ('change_doctorateadmission_person', _("Can update the information related to the admission request author")),
+            ('view_doctorateadmission_coordinates', _("Can view the coordinates of the admission request author")),
+            ('change_doctorateadmission_coordinates', _("Can update the coordinates of the admission request author")),
+            ('view_doctorateadmission_secondary_studies', _("Can view the information related to the secondary studies")),
+            ('change_doctorateadmission_secondary_studies', _("Can update the information related to the secondary studies")),
+            ('view_doctorateadmission_curriculum', _("Can view the information related to the curriculum")),
+            ('change_doctorateadmission_curriculum', _("Can update the information related to the curriculum")),
+            ('view_doctorateadmission_project', _("Can view the information related to the admission project")),
+            ('change_doctorateadmission_project', _("Can update the information related to the admission project")),
+            ('view_doctorateadmission_cotutelle', _("Can view the information related to the admission cotutelle")),
+            ('change_doctorateadmission_cotutelle', _("Can update the information related to the admission cotutelle")),
+            ('view_doctorateadmission_supervision', _("Can view the information related to the admission supervision")),
+            ('change_doctorateadmission_supervision', _("Can update the information related to the admission supervision")),
         ]
 
     def get_absolute_url(self):

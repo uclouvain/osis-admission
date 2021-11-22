@@ -45,4 +45,11 @@ class Adre(EntityRoleModel):
             'admission.upload_jury_approved_pdf': rules.always_allow,
             'admission.upload_signed_scholarship': rules.always_allow,
             'admission.check_publication_authorisation': rules.always_allow,
+            'admission.view_doctorateadmission_person': rules.always_allow,
+            'admission.view_doctorateadmission_coordinates': rules.always_allow,
+            'admission.view_doctorateadmission_secondary_studies': rules.always_allow,
+            'admission.view_doctorateadmission_curriculum': rules.always_allow,
+            'admission.view_doctorateadmission_project': rules.always_allow,
+            'admission.view_doctorateadmission_cotutelle': rules.always_allow,
+            'admission.view_doctorateadmission_supervision': rules.always_allow,
         })

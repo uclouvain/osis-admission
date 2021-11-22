@@ -30,15 +30,52 @@ from rest_framework.test import APITestCase
 
 from admission.contrib.models import DoctorateAdmission
 from admission.tests.factories import DoctorateAdmissionFactory
+from admission.tests.factories.groups import CandidateGroupFactory, CddManagerGroupFactory, CommitteeMemberGroupFactory, PromoterGroupFactory
+from admission.tests.factories.roles import CddManagerFactory
+from admission.tests.factories.supervision import CaMemberFactory, PromoterFactory
+from base.tests.factories.entity import EntityFactory
+from base.tests.factories.person import PersonFactory
 
 
 @override_settings(ROOT_URLCONF='admission.api.url_v1')
 class CotutelleApiTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.admission = DoctorateAdmissionFactory()
-        cls.candidate = cls.admission.candidate
+        # Data
+        doctoral_commission = EntityFactory()
+        cls.admission = DoctorateAdmissionFactory(doctorate__management_entity=doctoral_commission)
+        cls.updated_data = {
+            'motivation': "A good motive",
+            'institution': "Famous institution",
+            'demande_ouverture': [],
+            'convention': [],
+            'autres_documents': [],
+        }
+        # Targeted url
         cls.url = resolve_url("cotutelle", uuid=cls.admission.uuid)
+        # Create an admission supervision group
+        promoter = PromoterFactory()
+        committee_member = CaMemberFactory(process=promoter.process)
+        cls.admission.supervision_group = promoter.process
+        cls.admission.save()
+        # Users
+        cls.candidate = cls.admission.candidate
+        cls.candidate.user.groups.add(CandidateGroupFactory())
+        cls.other_candidate_user = PersonFactory().user
+        cls.other_candidate_user.groups.add(CandidateGroupFactory())
+        cls.no_role_user = PersonFactory().user
+        cls.cdd_manager_user = CddManagerFactory(entity=doctoral_commission).person.user
+        cls.cdd_manager_user.groups.add(CddManagerGroupFactory())
+        cls.other_cdd_manager_user = CddManagerFactory().person.user
+        cls.other_cdd_manager_user.groups.add(CddManagerGroupFactory())
+        cls.promoter_user = promoter.person.user
+        cls.promoter_user.groups.add(PromoterGroupFactory())
+        cls.other_promoter_user = PersonFactory().user
+        cls.other_promoter_user.groups.add(PromoterGroupFactory())
+        cls.committee_member_user = committee_member.person.user
+        cls.committee_member_user.groups.add(CommitteeMemberGroupFactory())
+        cls.other_committee_member_user = PersonFactory().user
+        cls.other_committee_member_user.groups.add(CommitteeMemberGroupFactory())
 
     def test_user_not_logged_assert_not_authorized(self):
         self.client.force_authenticate(user=None)
@@ -54,19 +91,27 @@ class CotutelleApiTestCase(APITestCase):
             response = getattr(self.client, method)(self.url)
             self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 
-    def test_cotutelle_update_using_api(self):
-        self.client.force_authenticate(user=self.candidate.user)
+    def test_cotutelle_get_no_role(self):
+        self.client.force_authenticate(user=self.no_role_user)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.content)
 
+    def test_cotutelle_update_no_role(self):
+        self.client.force_authenticate(user=self.no_role_user)
+        response = self.client.put(self.url, data=self.updated_data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.content)
+
+    def test_cotutelle_get_candidate(self):
+        self.client.force_authenticate(user=self.candidate.user)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
+
+    def test_cotutelle_update_using_api_candidate(self):
+        self.client.force_authenticate(user=self.candidate.user)
         admission = DoctorateAdmission.objects.get()
         self.assertIsNone(admission.cotutelle)
 
-        response = self.client.put(self.url, data={
-            'motivation': "A good motive",
-            'institution': "Famous institution",
-            'demande_ouverture': [],
-            'convention': [],
-            'autres_documents': [],
-        }, format="json")
+        response = self.client.put(self.url, data=self.updated_data, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
 
         admission = DoctorateAdmission.objects.get()
@@ -75,3 +120,63 @@ class CotutelleApiTestCase(APITestCase):
 
         response = self.client.get(self.url, format="json")
         self.assertEqual(response.json()['institution'], "Famous institution")
+
+    def test_cotutelle_get_other_candidate(self):
+        self.client.force_authenticate(user=self.other_candidate_user)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.content)
+
+    def test_cotutelle_update_other_candidate(self):
+        self.client.force_authenticate(user=self.other_candidate_user)
+        response = self.client.put(self.url, data=self.updated_data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.content)
+
+    def test_cotutelle_get_cdd_manager(self):
+        self.client.force_authenticate(user=self.cdd_manager_user)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
+
+    def test_cotutelle_update_cdd_manager(self):
+        self.client.force_authenticate(user=self.cdd_manager_user)
+        response = self.client.put(self.url, data=self.updated_data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
+
+    def test_cotutelle_get_other_cdd_manager(self):
+        self.client.force_authenticate(user=self.other_cdd_manager_user)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.content)
+
+    def test_cotutelle_update_other_cdd_manager(self):
+        self.client.force_authenticate(user=self.other_cdd_manager_user)
+        response = self.client.put(self.url, data=self.updated_data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.content)
+
+    def test_cotutelle_get_promoter(self):
+        self.client.force_authenticate(user=self.promoter_user)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
+
+    def test_cotutelle_update_promoter(self):
+        self.client.force_authenticate(user=self.promoter_user)
+        response = self.client.put(self.url, data=self.updated_data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.content)
+
+    def test_cotutelle_get_other_promoter(self):
+        self.client.force_authenticate(user=self.other_promoter_user)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.content)
+
+    def test_cotutelle_update_other_promoter(self):
+        self.client.force_authenticate(user=self.other_promoter_user)
+        response = self.client.put(self.url, data=self.updated_data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.content)
+
+    def test_cotutelle_get_committee_member(self):
+        self.client.force_authenticate(user=self.committee_member_user)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
+
+    def test_cotutelle_update_committee_member(self):
+        self.client.force_authenticate(user=self.committee_member_user)
+        response = self.client.put(self.url, data=self.updated_data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.content)

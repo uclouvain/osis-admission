@@ -45,6 +45,12 @@ class _ActorFactory(factory.django.DjangoModelFactory):
 
 
 class PromoterFactory(factory.DjangoModelFactory):
+
+    def __init__(self, process=None):
+        super().__init__()
+        if process:
+            self.actor_ptr.process = process
+
     class Meta:
         model = SupervisionActor
 
