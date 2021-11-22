@@ -36,7 +36,7 @@ class PersonTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
         cls.address = PersonAddressFactory(
-            label=PersonAddressType.CONTACT.value,
+            label=PersonAddressType.CONTACT.name,
             street="Rue de la soif",
         )
         cls.user = cls.address.person.user
@@ -69,5 +69,5 @@ class PersonTestCase(APITestCase):
             "phone_mobile": "",
         })
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
-        address = PersonAddress.objects.get(person__user_id=self.user.pk, label=PersonAddressType.RESIDENTIAL.value)
+        address = PersonAddress.objects.get(person__user_id=self.user.pk, label=PersonAddressType.RESIDENTIAL.name)
         self.assertEqual(address.street, "Rue de la sobriété")
