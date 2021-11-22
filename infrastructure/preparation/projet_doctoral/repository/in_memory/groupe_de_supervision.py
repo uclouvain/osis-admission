@@ -26,8 +26,8 @@
 
 from typing import List
 
-from admission.ddd.preparation.projet_doctoral.builder.proposition_identity_builder import \
-    PropositionIdentityBuilder
+from admission.ddd.preparation.projet_doctoral.builder.proposition_identity_builder import PropositionIdentityBuilder
+from admission.ddd.preparation.projet_doctoral.domain.model._cotutelle import pas_de_cotutelle
 from admission.ddd.preparation.projet_doctoral.domain.model.groupe_de_supervision import (
     GroupeDeSupervision,
 )
@@ -40,8 +40,8 @@ from admission.ddd.preparation.projet_doctoral.repository.i_groupe_de_supervisio
 from admission.ddd.preparation.projet_doctoral.test.factory.groupe_de_supervision import (
     GroupeDeSupervisionSC3DPAvecMembresInvitesFactory,
     GroupeDeSupervisionSC3DPAvecPromoteurEtMembreFactory,
+    GroupeDeSupervisionSC3DPCotutelleIndefinieFactory,
     GroupeDeSupervisionSC3DPFactory,
-    GroupeDeSupervisionSC3DPSansCotutelleFactory,
 )
 from base.ddd.utils.in_memory_repository import InMemoryGenericRepository
 
@@ -53,7 +53,7 @@ class GroupeDeSupervisionInMemoryRepository(InMemoryGenericRepository, IGroupeDe
     def reset(cls):
         cls.entities = [
             GroupeDeSupervisionSC3DPFactory(),
-            GroupeDeSupervisionSC3DPSansCotutelleFactory(),
+            GroupeDeSupervisionSC3DPCotutelleIndefinieFactory(),
             GroupeDeSupervisionSC3DPAvecPromoteurEtMembreFactory(),
             GroupeDeSupervisionSC3DPAvecMembresInvitesFactory(),
         ]
@@ -70,10 +70,10 @@ class GroupeDeSupervisionInMemoryRepository(InMemoryGenericRepository, IGroupeDe
         proposition_id = PropositionIdentityBuilder.build_from_uuid(uuid_proposition)
         groupe = cls.get_by_proposition_id(proposition_id=proposition_id)
         return CotutelleDTO(
-            cotutelle=groupe.cotutelle and bool(groupe.cotutelle.motivation),
-            motivation=groupe.cotutelle.motivation,
-            institution=groupe.cotutelle.institution,
-            demande_ouverture=groupe.cotutelle.demande_ouverture,
-            convention=groupe.cotutelle.convention,
-            autres_documents=groupe.cotutelle.autres_documents,
+            cotutelle=None if groupe.cotutelle is None else groupe.cotutelle != pas_de_cotutelle,
+            motivation=groupe.cotutelle and groupe.cotutelle.motivation or '',
+            institution=groupe.cotutelle and groupe.cotutelle.institution or '',
+            demande_ouverture=groupe.cotutelle and groupe.cotutelle.demande_ouverture or [],
+            convention=groupe.cotutelle and groupe.cotutelle.convention or [],
+            autres_documents=groupe.cotutelle and groupe.cotutelle.autres_documents or [],
         )
