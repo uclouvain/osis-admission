@@ -58,6 +58,4 @@ class PromoteurTranslator(IPromoteurTranslator):
 
     @classmethod
     def est_externe(cls, identity: 'PromoteurIdentity') -> bool:
-        if Person.objects.get(global_id=identity.matricule).source == person_source_type.DOCTORAT:
-            return True
-        return False
+        return Person.objects.get(global_id=identity.matricule).source == person_source_type.DOCTORAT
