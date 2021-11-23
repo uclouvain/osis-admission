@@ -53,5 +53,6 @@ def demander_signatures(
 
     # THEN
     groupe_supervision_repository.save(groupe_de_supervision)
+    proposition_repository.save(proposition_candidat)
 
     return proposition_candidat.entity_id

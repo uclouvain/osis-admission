@@ -29,6 +29,8 @@ import attr
 
 from admission.ddd.preparation.projet_doctoral.business_types import *
 from admission.ddd.preparation.projet_doctoral.domain.model._cotutelle import Cotutelle
+from admission.ddd.preparation.projet_doctoral.domain.model._detail_projet import DetailProjet
+from admission.ddd.preparation.projet_doctoral.domain.model._enums import ChoixTypeAdmission
 from admission.ddd.preparation.projet_doctoral.domain.model._experience_precedente_recherche import (
     ChoixDoctoratDejaRealise,
 )
@@ -56,8 +58,6 @@ from admission.ddd.preparation.projet_doctoral.domain.validator.\
     _should_groupe_de_supervision_avoir_au_moins_un_membre_CA import ShouldGroupeDeSupervisionAvoirAuMoinsUnMembreCA
 from admission.ddd.preparation.projet_doctoral.domain.validator.\
     _should_groupe_de_supervision_avoir_au_moins_un_promoteur import ShouldGroupeDeSupervisionAvoirAuMoinsUnPromoteur
-from admission.ddd.preparation.projet_doctoral.domain.validator.\
-    _should_pre_admission_avoir_au_moins_un_promoteur_externe import ShouldCotutelleAvoirAuMoinsUnPromoteurExterne
 from base.ddd.utils.business_validator import TwoStepsMultipleBusinessExceptionListValidator, BusinessValidator
 
 
@@ -204,14 +204,15 @@ class ApprouverValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
 
 @attr.s(frozen=True, slots=True)
 class DetailsProjetValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
-    proposition = attr.ib(type='Proposition')  # type: Proposition
+    type_admission = attr.ib(type='ChoixTypeAdmission')  # type: ChoixTypeAdmission
+    projet = attr.ib(type='DetailProjet')  # type: DetailProjet
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
 
     def get_invariants_validators(self) -> List[BusinessValidator]:
         return [
-            ShouldDetailProjetEtreComplete(self.proposition.type_admission, self.proposition.projet),
+            ShouldDetailProjetEtreComplete(self.type_admission, self.projet),
         ]
 
 
@@ -239,5 +240,4 @@ class SignatairesValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
         return [
             ShouldGroupeDeSupervisionAvoirAuMoinsUnPromoteur(self.groupe_de_supervision.signatures_promoteurs),
             ShouldGroupeDeSupervisionAvoirAuMoinsUnMembreCA(self.groupe_de_supervision.signatures_membres_CA),
-            ShouldCotutelleAvoirAuMoinsUnPromoteurExterne(self.groupe_de_supervision),
         ]

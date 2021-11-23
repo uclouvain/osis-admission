@@ -231,7 +231,7 @@ class Proposition(interface.RootEntity):
 
     def verifier_projet_doctoral(self):
         """Vérification de la validité du projet doctoral avant demande des signatures"""
-        DetailsProjetValidatorList(proposition=self).validate()
+        DetailsProjetValidatorList(self.type_admission, self.projet).validate()
 
     def finaliser(self):
         self.statut = ChoixStatutProposition.SUBMITTED
