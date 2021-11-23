@@ -58,7 +58,7 @@ class TestDemanderSignaturesService(SimpleTestCase):
         self.matricule_promoteur = 'promoteur-SC3DP-externe'
         self.uuid_proposition = 'uuid-SC3DP-promoteur-membre-cotutelle'
         self.uuid_proposition_sans_projet = 'uuid-SC3DP-no-project'
-        self.uuid_proposition_sans_cotutelle = 'uuid-SC3DP-sans-cotutelle'
+        self.uuid_proposition_sans_cotutelle = 'uuid-SC3DP-cotutelle-indefinie'
         self.uuid_proposition_cotutelle_sans_promoteur = 'uuid-SC3DP-cotutelle-sans-promoteur-externe'
         self.uuid_proposition_cotutelle_avec_promoteur = 'uuid-SC3DP-cotutelle-avec-promoteur-externe'
         self.uuid_proposition_sans_promoteur = 'uuid-SC3DP-sans-promoteur'
