@@ -25,6 +25,8 @@
 from admission.ddd.preparation.projet_doctoral.builder.proposition_identity_builder import PropositionIdentityBuilder
 from admission.ddd.preparation.projet_doctoral.commands import DemanderSignaturesCommand
 from admission.ddd.preparation.projet_doctoral.domain.model.proposition import PropositionIdentity
+from admission.ddd.preparation.projet_doctoral.domain.service.i_promoteur import IPromoteurTranslator
+from admission.ddd.preparation.projet_doctoral.domain.service.verifier_cotutelle import CotutellePossedePromoteurExterne
 from admission.ddd.preparation.projet_doctoral.repository.i_groupe_de_supervision import IGroupeDeSupervisionRepository
 from admission.ddd.preparation.projet_doctoral.repository.i_proposition import IPropositionRepository
 
@@ -33,20 +35,23 @@ def demander_signatures(
         cmd: 'DemanderSignaturesCommand',
         proposition_repository: 'IPropositionRepository',
         groupe_supervision_repository: 'IGroupeDeSupervisionRepository',
+        promoteur_translator: 'IPromoteurTranslator',
 ) -> 'PropositionIdentity':
     # GIVEN
     entity_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
     proposition_candidat = proposition_repository.get(entity_id=entity_id)
     groupe_de_supervision = groupe_supervision_repository.get_by_proposition_id(entity_id)
+    groupe_de_supervision.verifier_cotutelle()
+    CotutellePossedePromoteurExterne().verifier(groupe_de_supervision, promoteur_translator)
+    proposition_candidat.verifier_projet_doctoral()
+    groupe_de_supervision.verifier_signataires()
 
     # WHEN
-    proposition_candidat.verifier_projet_doctoral()
-    groupe_de_supervision.verifier_cotutelle()
-
-    # THEN
     proposition_candidat.verouiller_proposition_pour_signature()
     groupe_de_supervision.verrouiller_groupe_pour_signature()
     groupe_de_supervision.inviter_a_signer()
+
+    # THEN
     groupe_supervision_repository.save(groupe_de_supervision)
 
     return proposition_candidat.entity_id

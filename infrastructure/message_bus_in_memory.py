@@ -129,6 +129,7 @@ class MessageBusInMemoryCommands(AbstractMessageBusCommands):
             demander_signatures,
             proposition_repository=PropositionInMemoryRepository(),
             groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
+            promoteur_translator=PromoteurInMemoryTranslator(),
         ),
         ApprouverPropositionCommand: partial(
             approuver_proposition,

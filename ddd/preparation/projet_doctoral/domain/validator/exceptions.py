@@ -163,3 +163,27 @@ class CotutelleNonCompleteException(BusinessException):
     def __init__(self, **kwargs):
         message = _("Mandatory fields are missing in the cotutelle.")
         super().__init__(message, **kwargs)
+
+
+class PromoteurManquantException(BusinessException):
+    status_code = "PROPOSITION-19"
+
+    def __init__(self, **kwargs):
+        message = _("You must add at least one promoteur in order to request signatures.")
+        super().__init__(message, **kwargs)
+
+
+class MembreCAManquantException(BusinessException):
+    status_code = "PROPOSITION-20"
+
+    def __init__(self, **kwargs):
+        message = _("You must add at least one CA member in order to request signatures.")
+        super().__init__(message, **kwargs)
+
+
+class CotutelleDoitAvoirAuMoinsUnPromoteurExterneException(BusinessException):
+    status_code = "PROPOSITION-21"
+
+    def __init__(self, **kwargs):
+        message = _("You must add at least one external promoteur in order to request signatures.")
+        super().__init__(message, **kwargs)

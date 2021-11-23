@@ -47,6 +47,7 @@ from admission.ddd.preparation.projet_doctoral.domain.validator.validator_by_bus
     InviterASignerValidatorList,
     SupprimerMembreCAValidatorList,
     SupprimerPromoteurValidatorList,
+    SignatairesValidatorList,
 )
 from osis_common.ddd import interface
 
@@ -162,3 +163,6 @@ class GroupeDeSupervision(interface.Entity):
 
     def verrouiller_groupe_pour_signature(self):
         self.statut_signature = ChoixStatutSignatureGroupeDeSupervision.SIGNING_IN_PROGRESS
+
+    def verifier_signataires(self):
+        SignatairesValidatorList(groupe_de_supervision=self).validate()

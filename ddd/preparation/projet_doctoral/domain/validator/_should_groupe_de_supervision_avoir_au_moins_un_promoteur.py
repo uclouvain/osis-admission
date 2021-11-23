@@ -23,30 +23,19 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from typing import List
+
 import attr
 
-from admission.ddd.preparation.projet_doctoral.domain.model._cotutelle import Cotutelle, pas_de_cotutelle
-from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import CotutelleNonCompleteException
+from admission.ddd.preparation.projet_doctoral.domain.model._signature_promoteur import SignaturePromoteur
+from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import PromoteurManquantException
 from base.ddd.utils.business_validator import BusinessValidator
 
 
 @attr.s(frozen=True, slots=True)
-class ShouldCotutelleEtreComplete(BusinessValidator):
-    cotutelle = attr.ib(type="Cotutelle")  # type: Cotutelle
+class ShouldGroupeDeSupervisionAvoirAuMoinsUnPromoteur(BusinessValidator):
+    signatures_promoteurs = attr.ib(type=List[SignaturePromoteur], factory=list)  # type: List[SignaturePromoteur]
 
     def validate(self, *args, **kwargs):
-        champs_obligatoires = [
-            "motivation",
-            "institution",
-            "demande_ouverture",
-        ]
-        if (
-                self.cotutelle is None
-                or (
-                    self.cotutelle != pas_de_cotutelle
-                    and not all(
-                        [getattr(self.cotutelle, champ_obligatoire) for champ_obligatoire in champs_obligatoires]
-                    )
-                )
-        ):
-            raise CotutelleNonCompleteException
+        if len(self.signatures_promoteurs) <= 0:
+            raise PromoteurManquantException

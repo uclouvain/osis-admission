@@ -27,7 +27,6 @@ from typing import List
 import attr
 from django.test import SimpleTestCase
 
-from admission.ddd.preparation.projet_doctoral.builder.proposition_identity_builder import PropositionIdentityBuilder
 from admission.ddd.preparation.projet_doctoral.commands import DemanderSignaturesCommand
 from admission.ddd.preparation.projet_doctoral.domain.model._enums import ChoixStatutProposition
 from admission.ddd.preparation.projet_doctoral.domain.model._signature_promoteur import (
@@ -36,9 +35,12 @@ from admission.ddd.preparation.projet_doctoral.domain.model._signature_promoteur
 )
 from admission.ddd.preparation.projet_doctoral.domain.model.proposition import Proposition
 from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import (
+    CotutelleDoitAvoirAuMoinsUnPromoteurExterneException,
     CotutelleNonCompleteException,
     DetailProjetNonCompleteException,
     GroupeDeSupervisionNonTrouveException,
+    MembreCAManquantException,
+    PromoteurManquantException,
     PropositionNonTrouveeException,
 )
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
@@ -53,10 +55,14 @@ from base.ddd.utils.business_validator import MultipleBusinessExceptions
 
 class TestDemanderSignaturesService(SimpleTestCase):
     def setUp(self) -> None:
-        self.matricule_promoteur = 'promoteur-SC3DP'
+        self.matricule_promoteur = 'promoteur-SC3DP-externe'
         self.uuid_proposition = 'uuid-SC3DP-promoteur-membre-cotutelle'
         self.uuid_proposition_sans_projet = 'uuid-SC3DP-no-project'
         self.uuid_proposition_sans_cotutelle = 'uuid-SC3DP-sans-cotutelle'
+        self.uuid_proposition_cotutelle_sans_promoteur = 'uuid-SC3DP-cotutelle-sans-promoteur-externe'
+        self.uuid_proposition_cotutelle_avec_promoteur = 'uuid-SC3DP-cotutelle-avec-promoteur-externe'
+        self.uuid_proposition_sans_promoteur = 'uuid-SC3DP-sans-promoteur'
+        self.uuid_proposition_sans_membre_CA = 'uuid-SC3DP-sans-membre_CA'
 
         self.proposition_repository = PropositionInMemoryRepository()
         self.groupe_de_supervision_repository = GroupeDeSupervisionInMemoryRepository()
@@ -100,3 +106,25 @@ class TestDemanderSignaturesService(SimpleTestCase):
         cmd = attr.evolve(self.cmd, uuid_proposition='propositioninconnue')
         with self.assertRaises(PropositionNonTrouveeException):
             self.message_bus.invoke(cmd)
+
+    def test_should_pas_demander_si_cotutelle_sans_promoteur_externe(self):
+        cmd = attr.evolve(self.cmd, uuid_proposition=self.uuid_proposition_cotutelle_sans_promoteur)
+        with self.assertRaises(CotutelleDoitAvoirAuMoinsUnPromoteurExterneException):
+            self.message_bus.invoke(cmd)
+
+    def test_should_demander_si_cotutelle_avec_promoteur_externe(self):
+        cmd = attr.evolve(self.cmd, uuid_proposition=self.uuid_proposition_cotutelle_avec_promoteur)
+        proposition_id = self.message_bus.invoke(cmd)
+        self.assertEqual(proposition_id.uuid, self.uuid_proposition_cotutelle_avec_promoteur)
+
+    def test_should_pas_demander_si_groupe_de_supervision_a_pas_promoteur(self):
+        cmd = attr.evolve(self.cmd, uuid_proposition=self.uuid_proposition_sans_promoteur)
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            self.message_bus.invoke(cmd)
+        self.assertIsInstance(context.exception.exceptions.pop(), PromoteurManquantException)
+
+    def test_should_pas_demander_si_groupe_de_supervision_a_pas_membre_CA(self):
+        cmd = attr.evolve(self.cmd, uuid_proposition=self.uuid_proposition_sans_membre_CA)
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            self.message_bus.invoke(cmd)
+        self.assertIsInstance(context.exception.exceptions.pop(), MembreCAManquantException)

@@ -52,6 +52,12 @@ from admission.ddd.preparation.projet_doctoral.domain.validator._should_cotutell
 from admission.ddd.preparation.projet_doctoral.domain.validator._should_detail_projet_etre_complete import (
     ShouldDetailProjetEtreComplete,
 )
+from admission.ddd.preparation.projet_doctoral.domain.validator.\
+    _should_groupe_de_supervision_avoir_au_moins_un_membre_CA import ShouldGroupeDeSupervisionAvoirAuMoinsUnMembreCA
+from admission.ddd.preparation.projet_doctoral.domain.validator.\
+    _should_groupe_de_supervision_avoir_au_moins_un_promoteur import ShouldGroupeDeSupervisionAvoirAuMoinsUnPromoteur
+from admission.ddd.preparation.projet_doctoral.domain.validator.\
+    _should_pre_admission_avoir_au_moins_un_promoteur_externe import ShouldCotutelleAvoirAuMoinsUnPromoteurExterne
 from base.ddd.utils.business_validator import TwoStepsMultipleBusinessExceptionListValidator, BusinessValidator
 
 
@@ -219,4 +225,19 @@ class CotutelleValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
     def get_invariants_validators(self) -> List[BusinessValidator]:
         return [
             ShouldCotutelleEtreComplete(self.cotutelle),
+        ]
+
+
+@attr.s(frozen=True, slots=True)
+class SignatairesValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+    groupe_de_supervision = attr.ib(type='GroupeDeSupervision')  # type: GroupeDeSupervision
+
+    def get_data_contract_validators(self) -> List[BusinessValidator]:
+        return []
+
+    def get_invariants_validators(self) -> List[BusinessValidator]:
+        return [
+            ShouldGroupeDeSupervisionAvoirAuMoinsUnPromoteur(self.groupe_de_supervision.signatures_promoteurs),
+            ShouldGroupeDeSupervisionAvoirAuMoinsUnMembreCA(self.groupe_de_supervision.signatures_membres_CA),
+            ShouldCotutelleAvoirAuMoinsUnPromoteurExterne(self.groupe_de_supervision),
         ]

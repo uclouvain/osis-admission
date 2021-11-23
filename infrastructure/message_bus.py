@@ -124,6 +124,7 @@ class MessageBusCommands(AbstractMessageBusCommands):
             demander_signatures,
             proposition_repository=PropositionRepository(),
             groupe_supervision_repository=GroupeDeSupervisionRepository(),
+            promoteur_translator=PromoteurTranslator(),
         ),
         ApprouverPropositionCommand: partial(
             approuver_proposition,

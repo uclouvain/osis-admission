@@ -34,7 +34,12 @@ from admission.ddd.preparation.projet_doctoral.test.factory.proposition import (
     PropositionAdmissionSC3DPAvecMembresInvitesFactory,
     PropositionAdmissionSC3DPMinimaleFactory,
     PropositionAdmissionSC3DPMinimaleSansCotutelleFactory,
-    PropositionAdmissionSC3DPMinimaleSansDetailProjetFactory, PropositionAdmissionSC3DPAvecMembresEtCotutelleFactory,
+    PropositionAdmissionSC3DPMinimaleSansDetailProjetFactory,
+    PropositionAdmissionSC3DPAvecMembresEtCotutelleFactory,
+    PropositionAdmissionSC3DPMinimaleCotutelleSansPromoteurExterneFactory,
+    PropositionAdmissionSC3DPMinimaleCotutelleAvecPromoteurExterneFactory,
+    PropositionAdmissionSC3DPSansPromoteurFactory,
+    PropositionAdmissionSC3DPSansMembreCAFactory,
 )
 from base.ddd.utils.in_memory_repository import InMemoryGenericRepository
 
@@ -59,6 +64,10 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
             PropositionAdmissionECGE3DPMinimaleFactory(),
             PropositionAdmissionSC3DPMinimaleSansDetailProjetFactory(),
             PropositionAdmissionSC3DPMinimaleSansCotutelleFactory(),
+            PropositionAdmissionSC3DPMinimaleCotutelleSansPromoteurExterneFactory(),
+            PropositionAdmissionSC3DPMinimaleCotutelleAvecPromoteurExterneFactory(),
+            PropositionAdmissionSC3DPSansPromoteurFactory(),
+            PropositionAdmissionSC3DPSansMembreCAFactory(),
         ]
 
     @classmethod
