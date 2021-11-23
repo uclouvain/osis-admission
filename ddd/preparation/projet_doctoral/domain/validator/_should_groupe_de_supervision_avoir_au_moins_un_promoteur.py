@@ -34,7 +34,7 @@ from base.ddd.utils.business_validator import BusinessValidator
 
 @attr.s(frozen=True, slots=True)
 class ShouldGroupeDeSupervisionAvoirAuMoinsUnPromoteur(BusinessValidator):
-    signatures_promoteurs = attr.ib(type=List[SignaturePromoteur], factory=list)  # type: List[SignaturePromoteur]
+    signatures_promoteurs = attr.ib(type=List[SignaturePromoteur])  # type: List[SignaturePromoteur]
 
     def validate(self, *args, **kwargs):
         if len(self.signatures_promoteurs) <= 0:
