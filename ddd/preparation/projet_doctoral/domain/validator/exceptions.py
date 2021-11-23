@@ -185,5 +185,5 @@ class CotutelleDoitAvoirAuMoinsUnPromoteurExterneException(BusinessException):
     status_code = "PROPOSITION-21"
 
     def __init__(self, **kwargs):
-        message = _("You must add at least one external promoteur in order to request signatures.")
+        message = _("You must add at least one external promoter in order to request signatures.")
         super().__init__(message, **kwargs)
