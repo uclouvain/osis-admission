@@ -100,7 +100,7 @@ class CurriculumTestCase(APITestCase):
         self.client.force_authenticate(self.user)
         response = self.client.get(self.url)
         self.assertEqual(len(response.json()["curriculum_years"]), 1)
-        self.assertEqual(response.json()["curriculum_years"][0]["academic_graduation_year"], 2021)
+        self.assertEqual(response.json()["curriculum_years"][0]["academic_graduation_year"], self.current_academic_year.year)
         self.assertEqual(len(response.json()["curriculum_years"][0]["experiences"]), 1)
         self.assertEqual(
             response.json()["curriculum_years"][0]["experiences"][0]["course_type"],
