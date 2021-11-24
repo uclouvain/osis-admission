@@ -55,15 +55,7 @@ from base.ddd.utils.business_validator import MultipleBusinessExceptions
 
 class TestDemanderSignaturesService(SimpleTestCase):
     def setUp(self) -> None:
-        self.matricule_promoteur = 'promoteur-SC3DP-externe'
         self.uuid_proposition = 'uuid-SC3DP-promoteur-membre-cotutelle'
-        self.uuid_proposition_sans_projet = 'uuid-SC3DP-no-project'
-        self.uuid_proposition_sans_cotutelle = 'uuid-SC3DP-cotutelle-indefinie'
-        self.uuid_proposition_cotutelle_sans_promoteur = 'uuid-SC3DP-cotutelle-sans-promoteur-externe'
-        self.uuid_proposition_cotutelle_avec_promoteur = 'uuid-SC3DP-cotutelle-avec-promoteur-externe'
-        self.uuid_proposition_sans_promoteur = 'uuid-SC3DP-sans-promoteur'
-        self.uuid_proposition_sans_membre_CA = 'uuid-SC3DP-sans-membre_CA'
-
         self.proposition_repository = PropositionInMemoryRepository()
         self.groupe_de_supervision_repository = GroupeDeSupervisionInMemoryRepository()
         self.addCleanup(self.groupe_de_supervision_repository.reset)
@@ -82,17 +74,17 @@ class TestDemanderSignaturesService(SimpleTestCase):
         self.assertTrue(proposition.est_verrouillee_pour_signature)
         self.assertEqual(len(signatures), 1)
         self.assertEqual(len(groupe.signatures_membres_CA), 1)
-        self.assertEqual(signatures[0].promoteur_id.matricule, self.matricule_promoteur)
+        self.assertEqual(signatures[0].promoteur_id.matricule, 'promoteur-SC3DP-externe')
         self.assertEqual(signatures[0].etat, ChoixEtatSignature.INVITED)
 
     def test_should_pas_demander_si_detail_projet_pas_complete(self):
-        cmd = attr.evolve(self.cmd, uuid_proposition=self.uuid_proposition_sans_projet)
+        cmd = attr.evolve(self.cmd, uuid_proposition='uuid-SC3DP-no-project')
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(cmd)
         self.assertIsInstance(context.exception.exceptions.pop(), DetailProjetNonCompleteException)
 
     def test_should_pas_demander_si_cotutelle_pas_complete(self):
-        cmd = attr.evolve(self.cmd, uuid_proposition=self.uuid_proposition_sans_cotutelle)
+        cmd = attr.evolve(self.cmd, uuid_proposition='uuid-SC3DP-cotutelle-indefinie')
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(cmd)
         self.assertIsInstance(context.exception.exceptions.pop(), CotutelleNonCompleteException)
@@ -108,23 +100,23 @@ class TestDemanderSignaturesService(SimpleTestCase):
             self.message_bus.invoke(cmd)
 
     def test_should_pas_demander_si_cotutelle_sans_promoteur_externe(self):
-        cmd = attr.evolve(self.cmd, uuid_proposition=self.uuid_proposition_cotutelle_sans_promoteur)
+        cmd = attr.evolve(self.cmd, uuid_proposition='uuid-SC3DP-cotutelle-sans-promoteur-externe')
         with self.assertRaises(CotutelleDoitAvoirAuMoinsUnPromoteurExterneException):
             self.message_bus.invoke(cmd)
 
     def test_should_demander_si_cotutelle_avec_promoteur_externe(self):
-        cmd = attr.evolve(self.cmd, uuid_proposition=self.uuid_proposition_cotutelle_avec_promoteur)
+        cmd = attr.evolve(self.cmd, uuid_proposition='uuid-SC3DP-cotutelle-avec-promoteur-externe')
         proposition_id = self.message_bus.invoke(cmd)
-        self.assertEqual(proposition_id.uuid, self.uuid_proposition_cotutelle_avec_promoteur)
+        self.assertEqual(proposition_id.uuid, 'uuid-SC3DP-cotutelle-avec-promoteur-externe')
 
     def test_should_pas_demander_si_groupe_de_supervision_a_pas_promoteur(self):
-        cmd = attr.evolve(self.cmd, uuid_proposition=self.uuid_proposition_sans_promoteur)
+        cmd = attr.evolve(self.cmd, uuid_proposition='uuid-SC3DP-sans-promoteur')
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(cmd)
         self.assertIsInstance(context.exception.exceptions.pop(), PromoteurManquantException)
 
     def test_should_pas_demander_si_groupe_de_supervision_a_pas_membre_CA(self):
-        cmd = attr.evolve(self.cmd, uuid_proposition=self.uuid_proposition_sans_membre_CA)
+        cmd = attr.evolve(self.cmd, uuid_proposition='uuid-SC3DP-sans-membre_CA')
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(cmd)
         self.assertIsInstance(context.exception.exceptions.pop(), MembreCAManquantException)
