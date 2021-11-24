@@ -66,7 +66,7 @@ class CurriculumSerializer(serializers.Serializer):
 
     @staticmethod
     def update_curriculum_year(person, curriculum_year_data):
-        academic_year = AcademicYear.objects.get(year=curriculum_year_data.get("academic_graduation_year").year)
+        academic_year = curriculum_year_data.get("academic_graduation_year")
         return CurriculumYear.objects.update_or_create(person=person, academic_graduation_year=academic_year)
 
     @staticmethod
