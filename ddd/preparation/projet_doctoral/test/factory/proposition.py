@@ -31,7 +31,7 @@ import factory
 from admission.ddd.preparation.projet_doctoral.domain.model._detail_projet import (
     ChoixLangueRedactionThese,
     DetailProjet,
-    projet_incomplet,
+    projet_non_rempli,
 )
 from admission.ddd.preparation.projet_doctoral.domain.model._enums import (
     ChoixStatutProposition,
@@ -101,7 +101,7 @@ class PropositionAdmissionSC3DPMinimaleAnnuleeFactory(PropositionAdmissionSC3DPM
 
 class PropositionAdmissionSC3DPMinimaleSansDetailProjetFactory(PropositionAdmissionSC3DPMinimaleFactory):
     entity_id = factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-SC3DP-no-project')
-    projet = projet_incomplet
+    projet = projet_non_rempli
 
 
 class PropositionAdmissionSC3DPMinimaleSansCotutelleFactory(PropositionAdmissionSC3DPMinimaleFactory):

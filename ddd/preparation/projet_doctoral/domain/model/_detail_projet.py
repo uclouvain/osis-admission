@@ -55,4 +55,4 @@ class DetailProjet(interface.ValueObject):
     lettres_recommandation = attr.ib(type=List[uuid.UUID], factory=list)
 
 
-projet_incomplet = DetailProjet()
+projet_non_rempli = DetailProjet()
