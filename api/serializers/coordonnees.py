@@ -14,11 +14,11 @@ class CoordonneesSerializer(serializers.Serializer):
     def load_addresses(self, instance):
         instance.contact = PersonAddress.objects.filter(
             person=instance,
-            label=PersonAddressType.CONTACT.value,
+            label=PersonAddressType.CONTACT.name,
         ).first()
         instance.residential = PersonAddress.objects.filter(
             person=instance,
-            label=PersonAddressType.RESIDENTIAL.value,
+            label=PersonAddressType.RESIDENTIAL.name,
         ).first()
 
     def to_representation(self, instance):
@@ -29,12 +29,12 @@ class CoordonneesSerializer(serializers.Serializer):
         person = instance
         PersonAddress.objects.update_or_create(
             person=person,
-            label=PersonAddressType.RESIDENTIAL.value,
+            label=PersonAddressType.RESIDENTIAL.name,
             defaults=validated_data["residential"],
         )
         PersonAddress.objects.update_or_create(
             person=person,
-            label=PersonAddressType.CONTACT.value,
+            label=PersonAddressType.CONTACT.name,
             defaults=validated_data["contact"],
         )
         person.phone_mobile = validated_data["phone_mobile"]
