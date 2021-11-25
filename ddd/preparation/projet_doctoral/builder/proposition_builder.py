@@ -110,6 +110,8 @@ def _build_projet(cmd: 'InitierPropositionCommand') -> 'DetailProjet':
         resume=cmd.resume_projet,
         documents=cmd.documents_projet,
         langue_redaction_these=cmd.langue_redaction_these,
+        institut_these=cmd.institut_these,
+        lieu_these=cmd.lieu_these,
         graphe_gantt=cmd.graphe_gantt,
         proposition_programme_doctoral=cmd.proposition_programme_doctoral,
         projet_formation_complementaire=cmd.projet_formation_complementaire,

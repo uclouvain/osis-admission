@@ -67,6 +67,8 @@ class GetPropositionDTODomainService(interface.DomainService):
             proposition_programme_doctoral=proposition.projet.proposition_programme_doctoral,
             projet_formation_complementaire=proposition.projet.projet_formation_complementaire,
             langue_redaction_these=proposition.projet.langue_redaction_these,
+            institut_these=proposition.projet.institut_these,
+            lieu_these=proposition.projet.lieu_these,
             doctorat_deja_realise=proposition.experience_precedente_recherche.doctorat_deja_realise.name,
             institution=proposition.experience_precedente_recherche.institution,
             date_soutenance=proposition.experience_precedente_recherche.date_soutenance,

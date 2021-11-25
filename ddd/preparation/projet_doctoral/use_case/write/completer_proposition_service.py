@@ -57,6 +57,8 @@ def completer_proposition(
         titre=cmd.titre_projet,
         resume=cmd.resume_projet,
         langue_redaction_these=cmd.langue_redaction_these,
+        institut_these=cmd.institut_these,
+        lieu_these=cmd.lieu_these,
         documents=cmd.documents_projet,
         graphe_gantt=cmd.graphe_gantt,
         proposition_programme_doctoral=cmd.proposition_programme_doctoral,

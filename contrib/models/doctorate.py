@@ -108,6 +108,18 @@ class DoctorateAdmission(BaseAdmission):
         default='',
         blank=True,
     )
+    thesis_institute = models.CharField(
+        max_length=255,
+        verbose_name=_("Thesis institute"),
+        default='',
+        blank=True,
+    )
+    thesis_location = models.CharField(
+        max_length=255,
+        verbose_name=_("Thesis location"),
+        default='',
+        blank=True,
+    )
     project_document = FileField(
         verbose_name=_("Project"),
     )

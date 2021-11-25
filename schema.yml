@@ -1099,6 +1099,10 @@ components:
             type: string
         langue_redaction_these:
           type: string
+        institut_these:
+          type: string
+        lieu_these:
+          type: string
         doctorat_deja_realise:
           type: string
         institution:
@@ -1124,6 +1128,8 @@ components:
       - proposition_programme_doctoral
       - projet_formation_complementaire
       - langue_redaction_these
+      - institut_these
+      - lieu_these
       - doctorat_deja_realise
       - statut
     CotutelleDTO:
@@ -1299,6 +1305,10 @@ components:
           type: string
         resume_projet:
           type: string
+        institut_these:
+          type: string
+        lieu_these:
+          type: string
         documents_projet:
           type: array
           items:
@@ -1426,6 +1436,10 @@ components:
         langue_redaction_these:
           $ref: '#/components/schemas/ChoixLangueRedactionThese'
           default: UNDECIDED
+        institut_these:
+          type: string
+        lieu_these:
+          type: string
         doctorat_deja_realise:
           $ref: '#/components/schemas/ChoixDoctoratDejaRealise'
           default: 'NO'
