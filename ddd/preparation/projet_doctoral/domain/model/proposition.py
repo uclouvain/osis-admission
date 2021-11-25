@@ -110,6 +110,7 @@ class Proposition(interface.RootEntity):
             graphe_gantt: List[str] = None,
             proposition_programme_doctoral: List[str] = None,
             projet_formation_complementaire: List[str] = None,
+            lettres_recommandation: List[str] = None,
     ) -> None:
         CompletionPropositionValidatorList(
             type_admission=type_admission,
@@ -138,6 +139,7 @@ class Proposition(interface.RootEntity):
             graphe_gantt=graphe_gantt,
             proposition_programme_doctoral=proposition_programme_doctoral,
             projet_formation_complementaire=projet_formation_complementaire,
+            lettres_recommandation=lettres_recommandation,
         )
         self._completer_experience_precedente(
             doctorat_deja_realise=doctorat_deja_realise,
@@ -183,6 +185,7 @@ class Proposition(interface.RootEntity):
             graphe_gantt: List[str] = None,
             proposition_programme_doctoral: List[str] = None,
             projet_formation_complementaire: List[str] = None,
+            lettres_recommandation: List[str] = None,
     ):
         self.projet = DetailProjet(
             titre=titre,
@@ -194,6 +197,7 @@ class Proposition(interface.RootEntity):
             graphe_gantt=graphe_gantt,
             proposition_programme_doctoral=proposition_programme_doctoral,
             projet_formation_complementaire=projet_formation_complementaire,
+            lettres_recommandation=lettres_recommandation,
         )
 
     def _completer_experience_precedente(

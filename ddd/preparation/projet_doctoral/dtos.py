@@ -115,6 +115,7 @@ class PropositionDTO(interface.DTO):
     graphe_gantt = attr.ib(type=List[str])
     proposition_programme_doctoral = attr.ib(type=List[str])
     projet_formation_complementaire = attr.ib(type=List[str])
+    lettres_recommandation = attr.ib(type=List[str])
     langue_redaction_these = attr.ib(type=str)
     institut_these = attr.ib(type=str)
     lieu_these = attr.ib(type=str)

@@ -115,6 +115,7 @@ def _build_projet(cmd: 'InitierPropositionCommand') -> 'DetailProjet':
         graphe_gantt=cmd.graphe_gantt,
         proposition_programme_doctoral=cmd.proposition_programme_doctoral,
         projet_formation_complementaire=cmd.projet_formation_complementaire,
+        lettres_recommandation=cmd.lettres_recommandation,
     )
 
 

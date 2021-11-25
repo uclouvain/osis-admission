@@ -133,6 +133,9 @@ class DoctorateAdmission(BaseAdmission):
     additional_training_project = FileField(
         verbose_name=_("Additional training project"),
     )
+    recommendation_letters = FileField(
+        verbose_name=_("Recommendation letters"),
+    )
 
     # Experience précédente de recherche
     phd_already_done = models.CharField(

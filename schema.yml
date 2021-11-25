@@ -1097,6 +1097,10 @@ components:
           type: array
           items:
             type: string
+        lettres_recommandation:
+          type: array
+          items:
+            type: string
         langue_redaction_these:
           type: string
         institut_these:
@@ -1127,6 +1131,7 @@ components:
       - graphe_gantt
       - proposition_programme_doctoral
       - projet_formation_complementaire
+      - lettres_recommandation
       - langue_redaction_these
       - institut_these
       - lieu_these
@@ -1325,6 +1330,10 @@ components:
           type: array
           items:
             type: string
+        lettres_recommandation:
+          type: array
+          items:
+            type: string
         langue_redaction_these:
           $ref: '#/components/schemas/ChoixLangueRedactionThese'
           default: UNDECIDED
@@ -1349,6 +1358,7 @@ components:
       - graphe_gantt
       - proposition_programme_doctoral
       - projet_formation_complementaire
+      - lettres_recommandation
     AdmissionType:
       enum:
       - ADMISSION
@@ -1434,6 +1444,10 @@ components:
           type: array
           items:
             type: string
+        lettres_recommandation:
+          type: array
+          items:
+            type: string
         langue_redaction_these:
           $ref: '#/components/schemas/ChoixLangueRedactionThese'
           default: UNDECIDED
@@ -1460,6 +1474,7 @@ components:
       - graphe_gantt
       - proposition_programme_doctoral
       - projet_formation_complementaire
+      - lettres_recommandation
     DefinirCotutelleCommand:
       type: object
       properties:

@@ -66,6 +66,7 @@ class GetPropositionDTODomainService(interface.DomainService):
             graphe_gantt=proposition.projet.graphe_gantt,
             proposition_programme_doctoral=proposition.projet.proposition_programme_doctoral,
             projet_formation_complementaire=proposition.projet.projet_formation_complementaire,
+            lettres_recommandation=proposition.projet.lettres_recommandation,
             langue_redaction_these=proposition.projet.langue_redaction_these,
             institut_these=proposition.projet.institut_these,
             lieu_these=proposition.projet.lieu_these,

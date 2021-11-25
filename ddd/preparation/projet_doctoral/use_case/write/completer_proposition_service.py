@@ -63,6 +63,7 @@ def completer_proposition(
         graphe_gantt=cmd.graphe_gantt,
         proposition_programme_doctoral=cmd.proposition_programme_doctoral,
         projet_formation_complementaire=cmd.projet_formation_complementaire,
+        lettres_recommandation=cmd.lettres_recommandation,
         doctorat_deja_realise=cmd.doctorat_deja_realise,
         institution=cmd.institution,
         date_soutenance=cmd.date_soutenance,
