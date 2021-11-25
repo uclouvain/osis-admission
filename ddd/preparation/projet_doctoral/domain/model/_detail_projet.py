@@ -37,6 +37,7 @@ from osis_common.ddd import interface
 class ChoixLangueRedactionThese(ChoiceEnum):
     FRENCH = _('French')
     ENGLISH = _('English')
+    OTHER = _('Other')
     UNDECIDED = _('Undecided')
 
 

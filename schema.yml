@@ -1364,6 +1364,7 @@ components:
       enum:
       - FRENCH
       - ENGLISH
+      - OTHER
       - UNDECIDED
       type: string
     ChoixDoctoratDejaRealise:

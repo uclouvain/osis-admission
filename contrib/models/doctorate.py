@@ -33,6 +33,7 @@ from admission.ddd.preparation.projet_doctoral.domain.model._enums import ChoixB
 from admission.ddd.preparation.projet_doctoral.domain.model._experience_precedente_recherche import \
     ChoixDoctoratDejaRealise
 from admission.ddd.preparation.projet_doctoral.domain.model._financement import ChoixTypeFinancement
+from admission.ddd.preparation.projet_doctoral.domain.model._detail_projet import ChoixLangueRedactionThese
 from osis_document.contrib import FileField
 from osis_signature.contrib.fields import SignatureProcessField
 from .base import BaseAdmission
@@ -103,7 +104,7 @@ class DoctorateAdmission(BaseAdmission):
     )
     thesis_language = models.CharField(
         max_length=255,
-        # TODO choices
+        choices=ChoixLangueRedactionThese.choices(),
         verbose_name=_("Thesis language"),
         default='',
         blank=True,
