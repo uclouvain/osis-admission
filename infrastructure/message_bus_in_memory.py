@@ -26,7 +26,7 @@
 from functools import partial
 
 from admission.ddd.preparation.projet_doctoral.commands import *
-from admission.ddd.preparation.projet_doctoral.use_case.read.get_cotutelle import get_cotutelle
+from admission.ddd.preparation.projet_doctoral.use_case.read.get_cotutelle_service import get_cotutelle
 from admission.ddd.preparation.projet_doctoral.use_case.read.get_groupe_de_supervision_service import \
     get_groupe_de_supervision
 from admission.ddd.preparation.projet_doctoral.use_case.read.get_proposition_service import get_proposition

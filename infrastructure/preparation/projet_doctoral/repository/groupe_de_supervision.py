@@ -30,7 +30,7 @@ from admission.contrib.models import DoctorateAdmission, SupervisionActor
 from admission.contrib.models.enums.actor_type import ActorType
 from admission.ddd.preparation.projet_doctoral.builder.proposition_identity_builder import \
     PropositionIdentityBuilder
-from admission.ddd.preparation.projet_doctoral.domain.model._cotutelle import Cotutelle
+from admission.ddd.preparation.projet_doctoral.domain.model._cotutelle import Cotutelle, pas_de_cotutelle
 from admission.ddd.preparation.projet_doctoral.domain.model._membre_CA import MembreCAIdentity
 from admission.ddd.preparation.projet_doctoral.domain.model._promoteur import PromoteurIdentity
 from admission.ddd.preparation.projet_doctoral.domain.model._signature_membre_CA import SignatureMembreCA
@@ -84,21 +84,21 @@ class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
         )
 
     @classmethod
+    def get(cls, entity_id: 'GroupeDeSupervisionIdentity') -> 'GroupeDeSupervision':
+        raise NotImplementedError
+
+    @classmethod
     def get_cotutelle_dto(cls, uuid_proposition: str) -> 'CotutelleDTO':
         proposition_id = PropositionIdentityBuilder.build_from_uuid(uuid_proposition)
         groupe = cls.get_by_proposition_id(proposition_id=proposition_id)
         return CotutelleDTO(
-            cotutelle=groupe.cotutelle and bool(groupe.cotutelle),
+            cotutelle=None if groupe.cotutelle is None else groupe.cotutelle != pas_de_cotutelle,
             motivation=groupe.cotutelle and groupe.cotutelle.motivation or '',
             institution=groupe.cotutelle and groupe.cotutelle.institution or '',
             demande_ouverture=groupe.cotutelle and groupe.cotutelle.demande_ouverture or [],
             convention=groupe.cotutelle and groupe.cotutelle.convention or [],
             autres_documents=groupe.cotutelle and groupe.cotutelle.autres_documents or [],
         )
-
-    @classmethod
-    def get(cls, entity_id: 'GroupeDeSupervisionIdentity') -> 'GroupeDeSupervision':
-        raise NotImplementedError
 
     @classmethod
     def search(

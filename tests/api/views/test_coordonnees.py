@@ -46,7 +46,7 @@ class PersonTestCase(APITestCase):
             "phone_mobile": "",
         }
         cls.address = PersonAddressFactory(
-            label=PersonAddressType.CONTACT.value,
+            label=PersonAddressType.CONTACT.name,
             street="Rue de la soif",
         )
         # Users
@@ -93,7 +93,10 @@ class PersonTestCase(APITestCase):
         self.client.force_authenticate(self.candidate_user)
         response = self.client.put(self.url, self.updated_data)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
-        address = PersonAddress.objects.get(person__user_id=self.candidate_user.pk, label=PersonAddressType.RESIDENTIAL.value)
+        address = PersonAddress.objects.get(
+            person__user_id=self.candidate_user.pk,
+            label=PersonAddressType.RESIDENTIAL.name,
+        )
         self.assertEqual(address.street, "Rue de la sobriété")
 
     def test_coordonnees_get_cdd_manager(self):
