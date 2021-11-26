@@ -33,8 +33,7 @@ from osis_role.contrib.views import APIPermissionRequiredMixin
 
 class ActionLinksField(serializers.Field):
     """
-    Returns a dictionary of actions and their related endpoint (url + method type) depending of the
-    user permissions.
+    Returns a dictionary of actions and their related endpoint (url + method type) that depend on user permissions.
     """
 
     def __init__(self, actions, **kwargs):
@@ -49,10 +48,12 @@ class ActionLinksField(serializers.Field):
         # Get the mandatory parameters from the context
         try:
             request = self.context['request']
-        except KeyError as error:
-            raise ImproperlyConfigured('The \'request\' property must be added to the serializer context to compute the action links.')
+        except KeyError:
+            raise ImproperlyConfigured(
+                'The \'request\' property must be added to the serializer context to compute the action links.'
+            )
 
-        # Get a a dictionary of the available actions with their related endpoint (URL & HTTP method)
+        # Get a dictionary of the available actions with their related endpoint (URL & HTTP method)
         for action_name, action in self.actions.items():
 
             # Get the url params
@@ -67,8 +68,10 @@ class ActionLinksField(serializers.Field):
             # Build the view url
             try:
                 url = reverse(action.get('path_name'), args=url_args)
-            except NoReverseMatch as error:
-                raise ImproperlyConfigured('Please check the following path exists: \'{}\''.format(action.get('path_name')))
+            except NoReverseMatch:
+                raise ImproperlyConfigured(
+                    'Please check the following path exists: \'{}\''.format(action.get('path_name'))
+                )
 
             # Find the view related to this url
             resolver_match = resolve(url)
@@ -80,7 +83,7 @@ class ActionLinksField(serializers.Field):
                 # Check the permissions specified in the view via the 'permission_mapping' property
                 try:
                     view.check_method_permissions(request.user, action.get('method'))
-                    # Add the error if the user hasn't got the right permissions
+                    # Add the related endpoints if the user has the right permissions
                     links[action_name] = {
                         'method': action.get('method'),
                         'url': url,
@@ -88,7 +91,7 @@ class ActionLinksField(serializers.Field):
                 except PermissionDenied as e:
                     # Add the error if the user hasn't got the right permissions
                     links[action_name] = {
-                        'error': e.args
+                        'errors': e.args
                     }
 
             else:

@@ -30,6 +30,7 @@ from rest_framework.schemas.openapi import AutoSchema, SchemaGenerator
 from rest_framework.schemas.utils import is_list_view
 from rest_framework.serializers import Serializer
 
+from admission.api.serializers.fields import ActionLinksField
 from base.models.utils.utils import ChoiceEnum
 
 ADMISSION_SDK_VERSION = "1.0.1"
@@ -210,7 +211,51 @@ class AdmissionSchemaGenerator(SchemaGenerator):
         return schema
 
 
-class BetterChoicesSchema(AutoSchema):
+class ActionLinksFieldSchemaMixin:
+    """This mixin allows to generate the schema related to an ActionLinksField"""
+
+    def map_field(self, field):
+        if isinstance(field, ActionLinksField):
+            properties = {}
+
+            for action in field.actions:
+                properties[action] = {
+                    'type': 'object',
+                    'properties': {
+                        'errors': {
+                            'type': 'array',
+                            'items': {
+                                'type': 'string',
+                            },
+                            'nullable': True,
+                        },
+                        'method': {
+                            'type': 'string',
+                            'enum': [
+                                'DELETE',
+                                'GET',
+                                'PATCH',
+                                'POST',
+                                'PUT',
+                            ],
+                            'nullable': True,
+                        },
+                        'url': {
+                            'type': 'string',
+                            'format': 'uri',
+                            'nullable': True,
+                        },
+                    },
+                }
+            return {
+                'type': 'object',
+                'properties': properties,
+            }
+
+        return super().map_field(field)
+
+
+class BetterChoicesSchema(ActionLinksFieldSchemaMixin, AutoSchema):
     """This schema prevents a bug with blank choicefields"""
 
     def map_choicefield(self, field):

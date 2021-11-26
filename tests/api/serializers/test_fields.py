@@ -33,7 +33,6 @@ from rest_framework.serializers import Serializer
 from rest_framework.response import Response
 from rest_framework.test import APIRequestFactory, APITestCase
 from rest_framework.views import APIView
-from rules.predicates import predicate
 from rules import RuleSet, always_allow, always_deny, predicate
 
 from admission.api.serializers.fields import ActionLinksField
@@ -120,6 +119,7 @@ urlpatterns = [
         name='api_view_without_permission',
     ),
 ]
+
 
 @override_settings(ROOT_URLCONF=__name__)
 class SerializersTestCase(APITestCase):
@@ -248,7 +248,7 @@ class SerializersTestCase(APITestCase):
 
     def test_serializer_with_action_and_param_but_invalid_permission(self):
         # The list of actions contains one available action with a url parameter
-        # But the user hasn't got access to this resource -> we return the related error
+        # But the user hasn't got access to this resource -> we return the related errors
         class SerializerWithActionLinks(Serializer):
             links = ActionLinksField(actions={
                 'update_customer': {
@@ -267,7 +267,7 @@ class SerializersTestCase(APITestCase):
         self.assertTrue('links' in serializer.data)
         self.assertEqual(serializer.data['links'], {
             'update_customer': {
-                'error': ('You don\'t have access to other user information.', ),
+                'errors': ('You don\'t have access to other user information.', ),
             }
         })
 
@@ -332,9 +332,10 @@ class SerializersTestCase(APITestCase):
 
     def test_serializer_with_action_and_valid_permission_and_param_many_instances(self):
         # The list of actions contains one available action with a url parameter. We pass two instances and the user
-        # only has access to one of these instances -> we return two different results depending of the permissions.
+        # only has access to one of these instances -> we return two different results depending on the permissions.
 
         users = User.objects.filter(groups__name='testcustomers').order_by('id')
+
         class SerializerWithActionLinks(Serializer):
             links = ActionLinksField(actions={
                 'get_customer': {
@@ -360,13 +361,14 @@ class SerializersTestCase(APITestCase):
                 'url': reverse('api_view_with_permissions_detail', args=[self.first_user.id])
             }
         })
-        # Second doctorate admission: the user hasn't got the right permissions -> we return the error
+        # Second doctorate admission: the user hasn't got the right permissions -> we return the errors
         self.assertTrue('links' in serializer.data[1])
-        self.assertTrue('error' in serializer.data[1]['links']['get_customer'])
+        self.assertTrue('get_customer' in serializer.data[1]['links'])
+        self.assertTrue('errors' in serializer.data[1]['links']['get_customer'])
 
     def test_serializer_with_action_and_valid_permission_and_param_many_actions(self):
         # The list of actions contains two actions with an url parameter. The user only has the right permissions
-        # for one of these actions -> we return two different results depending of the permissions.
+        # for one of these actions -> we return two different results depending on the permissions.
 
         class SerializerWithActionLinks(Serializer):
             links = ActionLinksField(actions={
@@ -390,11 +392,11 @@ class SerializersTestCase(APITestCase):
         )
         # First action: the user has got the right permissions -> we return the related endpoint
         self.assertTrue('links' in serializer.data)
-        self.assertDictContainsSubset({
-            'get_customer': {
-                'method': 'GET',
-                'url': reverse('api_view_with_permissions_detail', args=[self.first_user.id])
-            }
-        }, serializer.data['links'])
-        # Second action: the user hasn't got the right permissions -> we return the error
-        self.assertTrue('error' in serializer.data['links']['delete_customer'])
+        self.assertTrue('get_customer' in serializer.data['links'])
+        self.assertEqual(serializer.data['links']['get_customer'], {
+            'method': 'GET',
+            'url': reverse('api_view_with_permissions_detail', args=[self.first_user.id])
+        })
+        # Second action: the user hasn't got the right permissions -> we return the errors
+        self.assertTrue('delete_customer' in serializer.data['links'])
+        self.assertTrue('errors' in serializer.data['links']['delete_customer'])
