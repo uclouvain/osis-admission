@@ -24,7 +24,6 @@
 #
 # ##############################################################################
 from django.core.exceptions import ImproperlyConfigured
-from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 from django.test.utils import override_settings
 from django.urls.base import reverse
@@ -33,27 +32,24 @@ from rest_framework.serializers import Serializer
 from rest_framework.response import Response
 from rest_framework.test import APIRequestFactory, APITestCase
 from rest_framework.views import APIView
-from rules import RuleSet, always_allow, always_deny, predicate
 
 from admission.api.serializers.fields import ActionLinksField
-from base.tests.factories.user import UserFactory
-from base.tests.factories.group import GroupFactory
-from osis_role.contrib.models import EntityRoleModel
+from admission.contrib.models import DoctorateAdmission
+from admission.tests.factories import DoctorateAdmissionFactory
+from admission.tests.factories.groups import CandidateGroupFactory
 from osis_role.contrib.views import APIPermissionRequiredMixin
-from osis_role import role
-from osis_role.errors import predicate_failed_msg
 
 
 # Mock views
 class TestAPIDetailViewWithPermissions(APIPermissionRequiredMixin, APIView):
     permission_mapping = {
-        'GET': 'test.view_customer',
-        'DELETE': 'test.delete_customer',
-        'PUT': ('test.change_customer', ),
+        'GET': 'admission.view_doctorateadmission',
+        'DELETE': 'admission.delete_doctorateadmission',
+        'PUT': ('admission.change_doctorateadmission', ),
     }
 
     def get_permission_object(self):
-        return get_object_or_404(User, id=self.kwargs['id'])
+        return get_object_or_404(DoctorateAdmission, uuid=self.kwargs['uuid'])
 
     def delete(self, request, *args, **kwargs):
         return Response()
@@ -70,8 +66,8 @@ class TestAPIDetailViewWithPermissions(APIPermissionRequiredMixin, APIView):
 
 class TestAPIListAndCreateViewWithPermissions(APIPermissionRequiredMixin, APIView):
     permission_mapping = {
-        'GET': 'test.view_customer',
-        'POST': 'test.access_customer',
+        'GET': 'admission.access_doctorateadmission',
+        'POST': 'admission.add_doctorateadmission',
     }
 
     def delete(self, request, *args, **kwargs):
@@ -104,7 +100,7 @@ class TestAPIViewWithoutPermission(APIView):
 # Mock url
 urlpatterns = [
     path(
-        'api-view-with-permissions/<int:id>/',
+        'api-view-with-permissions/<uuid:uuid>/',
         TestAPIDetailViewWithPermissions.as_view(),
         name='api_view_with_permissions_detail',
     ),
@@ -125,52 +121,18 @@ urlpatterns = [
 class SerializersTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
-        # Create role predicate
-        @predicate(bind=True)
-        @predicate_failed_msg(message="You don't have access to other user information.")
-        def is_current_user(self, user: User, obj: User):
-            return user.id == obj.id
-
-        # Create a role with a set of rules
-        class CustomerRole(EntityRoleModel):
-            class Meta:
-                verbose_name = "TestCustomer"
-                verbose_name_plural = "TestCustomers"
-                group_name = "testcustomers"
-
-
-            @classmethod
-            def rule_set(cls):
-                return RuleSet({
-                    'test.access_customer': always_allow,
-                    'test.add_customer': always_allow,
-                    'test.change_customer': is_current_user,
-                    'test.delete_customer': always_deny,
-                    'test.view_customer': is_current_user,
-                })
-
-        class CustomerGroupFactory(GroupFactory):
-            name = 'testcustomers'
-
-        # Register the role
-        role.role_manager.register(CustomerRole)
-        cls.customer_role = CustomerRole
-
         # Data
-        cls.first_user = UserFactory()
-        cls.second_user = UserFactory()
-        cls.first_user.groups.add(CustomerGroupFactory())
-        cls.second_user.groups.add(CustomerGroupFactory())
+        cls.first_doctorate_admission = DoctorateAdmissionFactory()
+        cls.second_doctorate_admission = DoctorateAdmissionFactory()
+        cls.first_user = cls.first_doctorate_admission.candidate.user
+        cls.second_user = cls.second_doctorate_admission.candidate.user
+        cls.first_user.groups.add(CandidateGroupFactory())
+        cls.second_user.groups.add(CandidateGroupFactory())
 
         # Request
         factory = APIRequestFactory()
         cls.request = factory.get('api-view-with-permissions/', format='json')
         cls.request.user = cls.first_user
-
-    @classmethod
-    def tearDownClass(cls):
-        # Remove the used role
-        role.role_manager.roles.remove(cls.customer_role)
 
     def test_serializer_with_no_context_request(self):
         # The request is missing -> we raise an exception
@@ -178,7 +140,7 @@ class SerializersTestCase(APITestCase):
             links = ActionLinksField(actions={})
 
         serializer = SerializerWithActionLinks(
-            instance=self.first_user
+            instance=self.first_doctorate_admission
         )
         with self.assertRaisesMessage(ImproperlyConfigured, 'request'):
             serializer.data
@@ -189,7 +151,7 @@ class SerializersTestCase(APITestCase):
             links = ActionLinksField(actions={})
 
         serializer = SerializerWithActionLinks(
-            instance=self.first_user,
+            instance=self.first_doctorate_admission,
             context={
                 'request': self.request,
             },
@@ -201,21 +163,21 @@ class SerializersTestCase(APITestCase):
         # The list of actions contains one available action -> we return the related endpoint
         class SerializerWithActionLinks(Serializer):
             links = ActionLinksField(actions={
-                'add_customer': {
+                'add_doctorateadmission': {
                     'method': 'POST',
                     'path_name': 'api_view_with_permissions',
                 }
             })
 
         serializer = SerializerWithActionLinks(
-            instance=self.first_user,
+            instance=self.first_doctorate_admission,
             context={
                 'request': self.request,
             },
         )
         self.assertTrue('links' in serializer.data)
         self.assertEqual(serializer.data['links'], {
-            'add_customer': {
+            'add_doctorateadmission': {
                 'method': 'POST',
                 'url': reverse('api_view_with_permissions')
             }
@@ -225,24 +187,24 @@ class SerializersTestCase(APITestCase):
         # The list of actions contains one available action with a url parameter -> we return the related endpoint
         class SerializerWithActionLinks(Serializer):
             links = ActionLinksField(actions={
-                'get_customer': {
+                'get_doctorateadmission': {
                     'method': 'GET',
                     'path_name': 'api_view_with_permissions_detail',
-                    'params': ['id']
+                    'params': ['uuid']
                 }
             })
 
         serializer = SerializerWithActionLinks(
-            instance=self.first_user,
+            instance=self.first_doctorate_admission,
             context={
                 'request': self.request,
             },
         )
         self.assertTrue('links' in serializer.data)
         self.assertEqual(serializer.data['links'], {
-            'get_customer': {
+            'get_doctorateadmission': {
                 'method': 'GET',
-                'url': reverse('api_view_with_permissions_detail', args=[self.first_user.id]),
+                'url': reverse('api_view_with_permissions_detail', args=[self.first_doctorate_admission.uuid]),
             }
         })
 
@@ -251,23 +213,23 @@ class SerializersTestCase(APITestCase):
         # But the user hasn't got access to this resource -> we return the related errors
         class SerializerWithActionLinks(Serializer):
             links = ActionLinksField(actions={
-                'update_customer': {
+                'update_doctorateadmission': {
                     'method': 'PUT',
                     'path_name': 'api_view_with_permissions_detail',
-                    'params': ['id']
+                    'params': ['uuid']
                 }
             })
 
         serializer = SerializerWithActionLinks(
-            instance=self.second_user,
+            instance=self.second_doctorate_admission,
             context={
                 'request': self.request,
             },
         )
         self.assertTrue('links' in serializer.data)
         self.assertEqual(serializer.data['links'], {
-            'update_customer': {
-                'errors': ('You don\'t have access to other user information.', ),
+            'update_doctorateadmission': {
+                'errors': (None, ),
             }
         })
 
@@ -275,7 +237,7 @@ class SerializersTestCase(APITestCase):
         # The list of actions contains one available action but with a bad url parameter -> we raise an exception
         class SerializerWithActionLinks(Serializer):
             links = ActionLinksField(actions={
-                'get_customer': {
+                'get_doctorateadmission': {
                     'method': 'GET',
                     'path_name': 'api_view_with_permissions_detail',
                     'params': ['incorrect_param']
@@ -283,7 +245,7 @@ class SerializersTestCase(APITestCase):
             })
 
         serializer = SerializerWithActionLinks(
-            instance=self.first_user,
+            instance=self.first_doctorate_admission,
             context={
                 'request': self.request,
             },
@@ -295,14 +257,14 @@ class SerializersTestCase(APITestCase):
         # The list of actions contains one action with a bad path name -> we raise an exception
         class SerializerWithActionLinks(Serializer):
             links = ActionLinksField(actions={
-                'add_customer': {
+                'add_doctorateadmission': {
                     'method': 'POST',
                     'path_name': 'invalid_api_view_with_permissions',
                 }
             })
 
         serializer = SerializerWithActionLinks(
-            instance=self.first_user,
+            instance=self.first_doctorate_admission,
             context={
                 'request': self.request,
             },
@@ -315,14 +277,14 @@ class SerializersTestCase(APITestCase):
         # implement the APIPermissionRequiredMixin mixin -> we raise an exception
         class SerializerWithActionLinks(Serializer):
             links = ActionLinksField(actions={
-                'add_customer': {
+                'add_doctorateadmission': {
                     'method': 'POST',
                     'path_name': 'api_view_without_permission',
                 }
             })
 
         serializer = SerializerWithActionLinks(
-            instance=self.first_user,
+            instance=self.first_doctorate_admission,
             context={
                 'request': self.request,
             },
@@ -334,20 +296,20 @@ class SerializersTestCase(APITestCase):
         # The list of actions contains one available action with a url parameter. We pass two instances and the user
         # only has access to one of these instances -> we return two different results depending on the permissions.
 
-        users = User.objects.filter(groups__name='testcustomers').order_by('id')
+        doctorate_admissions = DoctorateAdmission.objects.all().order_by('created')
 
         class SerializerWithActionLinks(Serializer):
             links = ActionLinksField(actions={
-                'get_customer': {
+                'get_doctorateadmission': {
                     'method': 'GET',
                     'path_name': 'api_view_with_permissions_detail',
-                    'params': ['id'],
+                    'params': ['uuid'],
                 }
             })
 
         serializer = SerializerWithActionLinks(
             many=True,
-            instance=users,
+            instance=doctorate_admissions,
             context={
                 'request': self.request,
             },
@@ -356,15 +318,15 @@ class SerializersTestCase(APITestCase):
         # First doctorate admission: the user has got the right permissions -> we return the related endpoint
         self.assertTrue('links' in serializer.data[0])
         self.assertEqual(serializer.data[0]['links'], {
-            'get_customer': {
+            'get_doctorateadmission': {
                 'method': 'GET',
-                'url': reverse('api_view_with_permissions_detail', args=[self.first_user.id])
+                'url': reverse('api_view_with_permissions_detail', args=[self.first_doctorate_admission.uuid])
             }
         })
         # Second doctorate admission: the user hasn't got the right permissions -> we return the errors
         self.assertTrue('links' in serializer.data[1])
-        self.assertTrue('get_customer' in serializer.data[1]['links'])
-        self.assertTrue('errors' in serializer.data[1]['links']['get_customer'])
+        self.assertTrue('get_doctorateadmission' in serializer.data[1]['links'])
+        self.assertTrue('errors' in serializer.data[1]['links']['get_doctorateadmission'])
 
     def test_serializer_with_action_and_valid_permission_and_param_many_actions(self):
         # The list of actions contains two actions with an url parameter. The user only has the right permissions
@@ -372,31 +334,31 @@ class SerializersTestCase(APITestCase):
 
         class SerializerWithActionLinks(Serializer):
             links = ActionLinksField(actions={
-                'get_customer': {
+                'get_doctorateadmission': {
                     'method': 'GET',
                     'path_name': 'api_view_with_permissions_detail',
-                    'params': ['id'],
+                    'params': ['uuid'],
                 },
-                'delete_customer': {
+                'delete_doctorateadmission': {
                     'method': 'DELETE',
                     'path_name': 'api_view_with_permissions_detail',
-                    'params': ['id'],
+                    'params': ['uuid'],
                 }
             })
 
         serializer = SerializerWithActionLinks(
-            instance=self.first_user,
+            instance=self.first_doctorate_admission,
             context={
                 'request': self.request,
             },
         )
         # First action: the user has got the right permissions -> we return the related endpoint
         self.assertTrue('links' in serializer.data)
-        self.assertTrue('get_customer' in serializer.data['links'])
-        self.assertEqual(serializer.data['links']['get_customer'], {
+        self.assertTrue('get_doctorateadmission' in serializer.data['links'])
+        self.assertEqual(serializer.data['links']['get_doctorateadmission'], {
             'method': 'GET',
-            'url': reverse('api_view_with_permissions_detail', args=[self.first_user.id])
+            'url': reverse('api_view_with_permissions_detail', args=[self.first_doctorate_admission.uuid])
         })
         # Second action: the user hasn't got the right permissions -> we return the errors
-        self.assertTrue('delete_customer' in serializer.data['links'])
-        self.assertTrue('errors' in serializer.data['links']['delete_customer'])
+        self.assertTrue('delete_doctorateadmission' in serializer.data['links'])
+        self.assertTrue('errors' in serializer.data['links']['delete_doctorateadmission'])
