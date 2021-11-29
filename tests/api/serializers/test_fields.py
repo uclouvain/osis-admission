@@ -118,7 +118,7 @@ urlpatterns = [
 
 
 @override_settings(ROOT_URLCONF=__name__)
-class SerializersTestCase(APITestCase):
+class SerializerFieldsTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
         # Data
@@ -133,6 +133,7 @@ class SerializersTestCase(APITestCase):
         factory = APIRequestFactory()
         cls.request = factory.get('api-view-with-permissions/', format='json')
         cls.request.user = cls.first_user
+        cls.request._force_auth_user = cls.first_user
 
     def test_serializer_with_no_context_request(self):
         # The request is missing -> we raise an exception
@@ -327,38 +328,3 @@ class SerializersTestCase(APITestCase):
         self.assertTrue('links' in serializer.data[1])
         self.assertTrue('get_doctorateadmission' in serializer.data[1]['links'])
         self.assertTrue('errors' in serializer.data[1]['links']['get_doctorateadmission'])
-
-    def test_serializer_with_action_and_valid_permission_and_param_many_actions(self):
-        # The list of actions contains two actions with an url parameter. The user only has the right permissions
-        # for one of these actions -> we return two different results depending on the permissions.
-
-        class SerializerWithActionLinks(Serializer):
-            links = ActionLinksField(actions={
-                'get_doctorateadmission': {
-                    'method': 'GET',
-                    'path_name': 'api_view_with_permissions_detail',
-                    'params': ['uuid'],
-                },
-                'delete_doctorateadmission': {
-                    'method': 'DELETE',
-                    'path_name': 'api_view_with_permissions_detail',
-                    'params': ['uuid'],
-                }
-            })
-
-        serializer = SerializerWithActionLinks(
-            instance=self.first_doctorate_admission,
-            context={
-                'request': self.request,
-            },
-        )
-        # First action: the user has got the right permissions -> we return the related endpoint
-        self.assertTrue('links' in serializer.data)
-        self.assertTrue('get_doctorateadmission' in serializer.data['links'])
-        self.assertEqual(serializer.data['links']['get_doctorateadmission'], {
-            'method': 'GET',
-            'url': reverse('api_view_with_permissions_detail', args=[self.first_doctorate_admission.uuid])
-        })
-        # Second action: the user hasn't got the right permissions -> we return the errors
-        self.assertTrue('delete_doctorateadmission' in serializer.data['links'])
-        self.assertTrue('errors' in serializer.data['links']['delete_doctorateadmission'])

@@ -23,11 +23,12 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from django.core.exceptions import ImproperlyConfigured, PermissionDenied
+from django.core.exceptions import ImproperlyConfigured
 from django.urls.exceptions import NoReverseMatch
 from django.urls import reverse, resolve
 
 from rest_framework import serializers
+from rest_framework.exceptions import NotAuthenticated, PermissionDenied
 from osis_role.contrib.views import APIPermissionRequiredMixin
 
 
@@ -88,7 +89,7 @@ class ActionLinksField(serializers.Field):
                         'method': action.get('method'),
                         'url': url,
                     }
-                except PermissionDenied as e:
+                except (PermissionDenied, NotAuthenticated) as e:
                     # Add the error if the user hasn't got the right permissions
                     links[action_name] = {
                         'errors': e.args
