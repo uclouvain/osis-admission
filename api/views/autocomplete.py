@@ -26,6 +26,8 @@
 from datetime import datetime
 
 from django.db.models import F, OuterRef, Q, TextField
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 from rest_framework.filters import BaseFilterBackend
 from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
@@ -54,6 +56,7 @@ class AutocompleteSectorView(ListAPIView):
     filter_backends = []
     serializer_class = serializers.SectorDTOSerializer
 
+    @method_decorator(cache_page(timeout=24 * 3600))
     def list(self, request, **kwargs):
         # TODO revert to command once it's in the shared kernel
         # Get all doctorates with their path (containing sector)
