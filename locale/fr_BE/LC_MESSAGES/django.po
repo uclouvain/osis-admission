@@ -348,6 +348,12 @@ msgstr "Peut voir les informations relatives au projet d'admission"
 msgid "Can update the information related to the admission project"
 msgstr "Peut modifier les informations relatives au projet d'admission"
 
+msgid "Other"
+msgstr "Autre"
+
+msgid "Other cotutelle-related documents"
+msgstr "Autres documents relatifs à la cotutelle"
+
 #: contrib/models/doctorate.py:222
 msgid "Can view the information related to the admission cotutelle"
 msgstr "Peut voir les informations relatives à la cotutelle"
@@ -424,6 +430,12 @@ msgstr "Pre-admission"
 msgid "YES"
 msgstr "Oui"
 
+msgid "Recommendation letters"
+msgstr "Lettres de recommandation"
+
+msgid "SCEB"
+msgstr "SCEB"
+
 #: ddd/preparation/projet_doctoral/domain/model/_experience_precedente_recherche.py:38
 msgid "NO"
 msgstr "Non"
@@ -486,6 +498,18 @@ msgid "Work contract should be set when financing type is set to work contract"
 msgstr ""
 "Le contrat de travail doit être renseigné quand le type de financement est "
 "un contrat de travail."
+
+msgid "Thesis institute"
+msgstr "Institut de la thèse"
+
+msgid "Thesis language"
+msgstr "Langue de la thèse"
+
+msgid "Thesis location"
+msgstr "Lieu de la thèse"
+
+msgid "Type"
+msgstr "Type"
 
 #: ddd/preparation/projet_doctoral/domain/validator/exceptions.py:84
 msgid "Institution should be set when PhD has been set to yes or partial"

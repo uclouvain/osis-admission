@@ -355,6 +355,12 @@ msgstr ""
 msgid "Can view the information related to the admission supervision"
 msgstr ""
 
+msgid "Other"
+msgstr ""
+
+msgid "Other cotutelle-related documents"
+msgstr ""
+
 #: contrib/models/doctorate.py:225
 msgid "Can add a member to the supervision group"
 msgstr ""
@@ -419,6 +425,12 @@ msgstr ""
 msgid "YES"
 msgstr ""
 
+msgid "Recommendation letters"
+msgstr ""
+
+msgid "SCEB"
+msgstr ""
+
 #: ddd/preparation/projet_doctoral/domain/model/_experience_precedente_recherche.py:38
 msgid "NO"
 msgstr ""
@@ -477,6 +489,18 @@ msgstr ""
 
 #: ddd/preparation/projet_doctoral/domain/validator/exceptions.py:76
 msgid "Work contract should be set when financing type is set to work contract"
+msgstr ""
+
+msgid "Thesis institute"
+msgstr ""
+
+msgid "Thesis language"
+msgstr ""
+
+msgid "Thesis location"
+msgstr ""
+
+msgid "Type"
 msgstr ""
 
 #: ddd/preparation/projet_doctoral/domain/validator/exceptions.py:84

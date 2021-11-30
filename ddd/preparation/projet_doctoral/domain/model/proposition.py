@@ -98,6 +98,8 @@ class Proposition(interface.RootEntity):
             duree_prevue: str,
             temps_consacre: str,
             langue_redaction_these: str,
+            institut_these: str,
+            lieu_these: str,
             titre: str,
             resume: str,
             doctorat_deja_realise: str,
@@ -108,6 +110,7 @@ class Proposition(interface.RootEntity):
             graphe_gantt: List[str] = None,
             proposition_programme_doctoral: List[str] = None,
             projet_formation_complementaire: List[str] = None,
+            lettres_recommandation: List[str] = None,
     ) -> None:
         CompletionPropositionValidatorList(
             type_admission=type_admission,
@@ -130,10 +133,13 @@ class Proposition(interface.RootEntity):
             titre=titre,
             resume=resume,
             langue_redaction_these=langue_redaction_these,
+            institut_these=institut_these,
+            lieu_these=lieu_these,
             documents=documents,
             graphe_gantt=graphe_gantt,
             proposition_programme_doctoral=proposition_programme_doctoral,
             projet_formation_complementaire=projet_formation_complementaire,
+            lettres_recommandation=lettres_recommandation,
         )
         self._completer_experience_precedente(
             doctorat_deja_realise=doctorat_deja_realise,
@@ -173,19 +179,25 @@ class Proposition(interface.RootEntity):
             titre: str,
             resume: str,
             langue_redaction_these: str,
+            institut_these: str,
+            lieu_these: str,
             documents: List[str] = None,
             graphe_gantt: List[str] = None,
             proposition_programme_doctoral: List[str] = None,
             projet_formation_complementaire: List[str] = None,
+            lettres_recommandation: List[str] = None,
     ):
         self.projet = DetailProjet(
             titre=titre,
             resume=resume,
             documents=documents,
             langue_redaction_these=langue_redaction_these,
+            institut_these=institut_these,
+            lieu_these=lieu_these,
             graphe_gantt=graphe_gantt,
             proposition_programme_doctoral=proposition_programme_doctoral,
             projet_formation_complementaire=projet_formation_complementaire,
+            lettres_recommandation=lettres_recommandation,
         )
 
     def _completer_experience_precedente(

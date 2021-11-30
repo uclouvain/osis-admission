@@ -33,7 +33,7 @@ from rest_framework.serializers import Serializer
 from admission.api.serializers.fields import ActionLinksField
 from base.models.utils.utils import ChoiceEnum
 
-ADMISSION_SDK_VERSION = "1.0.1"
+ADMISSION_SDK_VERSION = "1.0.2"
 
 
 class AdmissionSchemaGenerator(SchemaGenerator):
@@ -181,6 +181,46 @@ class AdmissionSchemaGenerator(SchemaGenerator):
                 "fr-be"
             ]
         }
+        # Custom fields
+        schema['components']['schemas']['ActionLink'] = {
+            'type': 'object',
+            'properties': {
+                'errors': {
+                    'type': 'array',
+                    'items': {
+                        'type': 'string',
+                    },
+                },
+                'method': {
+                    'type': 'string',
+                    'enum': [
+                        'DELETE',
+                        'GET',
+                        'PATCH',
+                        'POST',
+                        'PUT',
+                    ],
+                },
+                'url': {
+                    'type': 'string',
+                    'format': 'uri',
+                },
+            },
+            'oneOf': [
+                {
+                    'required': [
+                        'method',
+                        'url',
+                    ],
+                },
+                {
+                    'required': [
+                        'method',
+                        'errors',
+                    ],
+                },
+            ],
+        }
         for path, path_content in schema['paths'].items():
             for method, method_content in path_content.items():
                 # Add extra global headers to each endpoint
@@ -220,32 +260,7 @@ class ActionLinksFieldSchemaMixin:
 
             for action in field.actions:
                 properties[action] = {
-                    'type': 'object',
-                    'properties': {
-                        'errors': {
-                            'type': 'array',
-                            'items': {
-                                'type': 'string',
-                            },
-                            'nullable': True,
-                        },
-                        'method': {
-                            'type': 'string',
-                            'enum': [
-                                'DELETE',
-                                'GET',
-                                'PATCH',
-                                'POST',
-                                'PUT',
-                            ],
-                            'nullable': True,
-                        },
-                        'url': {
-                            'type': 'string',
-                            'format': 'uri',
-                            'nullable': True,
-                        },
-                    },
+                    '$ref': '#/components/schemas/ActionLink',
                 }
             return {
                 'type': 'object',

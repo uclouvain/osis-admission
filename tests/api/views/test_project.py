@@ -153,6 +153,7 @@ class DoctorateAdmissionCreationApiTestCase(APITestCase):
             "graphe_gantt": [],
             "proposition_programme_doctoral": [],
             "projet_formation_complementaire": [],
+            "lettres_recommandation": [],
         }
         cls.url = resolve_url("propositions")
 
@@ -227,6 +228,7 @@ class DoctorateAdmissionUpdatingApiTestCase(APITestCase):
             "graphe_gantt": [],
             "proposition_programme_doctoral": [],
             "projet_formation_complementaire": [],
+            "lettres_recommandation": [],
         }
         cls.url = resolve_url("propositions", uuid=cls.admission.uuid)
         # Create an admission supervision group

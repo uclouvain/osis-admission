@@ -23,6 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from django.test import override_settings
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -30,10 +31,11 @@ from admission.tests.factories.groups import CandidateGroupFactory, PromoterGrou
 from base.tests.factories.person import PersonFactory
 
 
+@override_settings(ROOT_URLCONF='admission.api.url_v1')
 class PersonTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.url = reverse('admission_api_v1:person')
+        cls.url = reverse('person')
         cls.updated_data = {
             "first_name": "Jo"
         }

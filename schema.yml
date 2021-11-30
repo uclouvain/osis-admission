@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Admission API
-  version: 1.0.1
+  version: 1.0.2
   description: This API delivers data for the Admission project.
   contact:
     name: UCLouvain - OSIS
@@ -1395,7 +1395,15 @@ components:
           type: array
           items:
             type: string
+        lettres_recommandation:
+          type: array
+          items:
+            type: string
         langue_redaction_these:
+          type: string
+        institut_these:
+          type: string
+        lieu_these:
           type: string
         doctorat_deja_realise:
           type: string
@@ -1421,7 +1429,10 @@ components:
       - graphe_gantt
       - proposition_programme_doctoral
       - projet_formation_complementaire
+      - lettres_recommandation
       - langue_redaction_these
+      - institut_these
+      - lieu_these
       - doctorat_deja_realise
       - statut
     CotutelleDTO:
@@ -1597,6 +1608,10 @@ components:
           type: string
         resume_projet:
           type: string
+        institut_these:
+          type: string
+        lieu_these:
+          type: string
         documents_projet:
           type: array
           items:
@@ -1610,6 +1625,10 @@ components:
           items:
             type: string
         projet_formation_complementaire:
+          type: array
+          items:
+            type: string
+        lettres_recommandation:
           type: array
           items:
             type: string
@@ -1637,6 +1656,7 @@ components:
       - graphe_gantt
       - proposition_programme_doctoral
       - projet_formation_complementaire
+      - lettres_recommandation
     AdmissionType:
       enum:
       - ADMISSION
@@ -1652,6 +1672,7 @@ components:
       enum:
       - FRENCH
       - ENGLISH
+      - OTHER
       - UNDECIDED
       type: string
     ChoixDoctoratDejaRealise:
@@ -1721,9 +1742,17 @@ components:
           type: array
           items:
             type: string
+        lettres_recommandation:
+          type: array
+          items:
+            type: string
         langue_redaction_these:
           $ref: '#/components/schemas/ChoixLangueRedactionThese'
           default: UNDECIDED
+        institut_these:
+          type: string
+        lieu_these:
+          type: string
         doctorat_deja_realise:
           $ref: '#/components/schemas/ChoixDoctoratDejaRealise'
           default: 'NO'
@@ -1743,6 +1772,7 @@ components:
       - graphe_gantt
       - proposition_programme_doctoral
       - projet_formation_complementaire
+      - lettres_recommandation
     DefinirCotutelleCommand:
       type: object
       properties:
@@ -1781,6 +1811,31 @@ components:
       enum:
       - en
       - fr-be
+    ActionLink:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            type: string
+        method:
+          type: string
+          enum:
+          - DELETE
+          - GET
+          - PATCH
+          - POST
+          - PUT
+        url:
+          type: string
+          format: uri
+      oneOf:
+      - required:
+        - method
+        - url
+      - required:
+        - method
+        - errors
   securitySchemes:
     Token:
       type: apiKey

@@ -40,6 +40,7 @@ class ActionLinksField(serializers.Field):
     def __init__(self, actions, **kwargs):
         kwargs.setdefault('default', {})
         kwargs.setdefault('source', '*')
+        kwargs.setdefault('read_only', True)
         self.actions = actions
         super().__init__(**kwargs)
 
@@ -51,7 +52,7 @@ class ActionLinksField(serializers.Field):
             request = self.context['request']
         except KeyError:
             raise ImproperlyConfigured(
-                'The \'request\' property must be added to the serializer context to compute the action links.'
+                "The 'request' property must be added to the serializer context to compute the action links."
             )
 
         # Get a dictionary of the available actions with their related endpoint (URL & HTTP method)
@@ -71,7 +72,7 @@ class ActionLinksField(serializers.Field):
                 url = reverse(action.get('path_name'), args=url_args)
             except NoReverseMatch:
                 raise ImproperlyConfigured(
-                    'Please check the following path exists: \'{}\''.format(action.get('path_name'))
+                    "Please check the following path exists: '{}'".format(action.get('path_name'))
                 )
 
             # Find the view related to this url
@@ -81,24 +82,24 @@ class ActionLinksField(serializers.Field):
             if issubclass(view_class, APIPermissionRequiredMixin):
                 view = view_class(args=resolver_match.args, kwargs=resolver_match.kwargs)
 
+                # Either the user has the rights permissions or not, we return the method type
+                links[action_name] = {
+                    'method': action.get('method'),
+                }
+
                 # Check the permissions specified in the view via the 'permission_mapping' property
                 try:
                     view.check_method_permissions(request.user, action.get('method'))
-                    # Add the related endpoints if the user has the right permissions
-                    links[action_name] = {
-                        'method': action.get('method'),
-                        'url': url,
-                    }
+                    # Add the related endpoint if the user has the right permissions
+                    links[action_name]['url'] = url
                 except (PermissionDenied, NotAuthenticated) as e:
                     # Add the error if the user hasn't got the right permissions
-                    links[action_name] = {
-                        'errors': e.args
-                    }
+                    links[action_name]['errors'] = e.args
 
             else:
                 raise ImproperlyConfigured(
-                    'All paths specified in the \'links\' property must be related to views that implement '
-                    'the \'{}\' mixin'.format(APIPermissionRequiredMixin.__name__)
+                    "All paths specified in the 'links' property must be related to views that implement "
+                    "the '{}' mixin".format(APIPermissionRequiredMixin.__name__)
                 )
 
         return links
