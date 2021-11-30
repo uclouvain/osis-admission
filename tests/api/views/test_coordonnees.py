@@ -23,6 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from django.test import override_settings
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -32,6 +33,7 @@ from base.models.person_address import PersonAddress
 from base.tests.factories.person_address import PersonAddressFactory
 
 
+@override_settings(ROOT_URLCONF='admission.api.url_v1')
 class PersonTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
@@ -40,7 +42,7 @@ class PersonTestCase(APITestCase):
             street="Rue de la soif",
         )
         cls.user = cls.address.person.user
-        cls.url = reverse('admission_api_v1:coordonnees')
+        cls.url = reverse('coordonnees')
 
     def test_user_not_logged_assert_not_authorized(self):
         self.client.force_authenticate(user=None)

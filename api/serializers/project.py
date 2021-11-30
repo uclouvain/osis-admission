@@ -95,6 +95,7 @@ class InitierPropositionCommandSerializer(DTOSerializer):
     graphe_gantt = serializers.ListField(child=serializers.CharField())
     proposition_programme_doctoral = serializers.ListField(child=serializers.CharField())
     projet_formation_complementaire = serializers.ListField(child=serializers.CharField())
+    lettres_recommandation = serializers.ListField(child=serializers.CharField())
     doctorat_deja_realise = serializers.ChoiceField(
         choices=ChoixDoctoratDejaRealise.choices(),
         default=ChoixDoctoratDejaRealise.NO.name,
@@ -118,6 +119,7 @@ class CompleterPropositionCommandSerializer(DTOSerializer):
     graphe_gantt = serializers.ListField(child=serializers.CharField())
     proposition_programme_doctoral = serializers.ListField(child=serializers.CharField())
     projet_formation_complementaire = serializers.ListField(child=serializers.CharField())
+    lettres_recommandation = serializers.ListField(child=serializers.CharField())
     doctorat_deja_realise = serializers.ChoiceField(
         choices=ChoixDoctoratDejaRealise.choices(),
         default=ChoixDoctoratDejaRealise.NO.name,

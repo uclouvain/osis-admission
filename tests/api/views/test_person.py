@@ -23,17 +23,19 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from django.test import override_settings
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 from base.tests.factories.person import PersonFactory
 
 
+@override_settings(ROOT_URLCONF='admission.api.url_v1')
 class PersonTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
         cls.user = PersonFactory(first_name="John").user
-        cls.url = reverse('admission_api_v1:person')
+        cls.url = reverse('person')
 
     def test_user_not_logged_assert_not_authorized(self):
         self.client.force_authenticate(user=None)
