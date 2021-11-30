@@ -97,7 +97,6 @@ class SerializerFieldsTestCase(APITestCase):
         # Request
         factory = APIRequestFactory()
         cls.request = factory.get('api-view-with-permissions/', format='json')
-        breakpoint()
         cls.request.user = cls.first_user
         cls.request._force_auth_user = cls.first_user
 
