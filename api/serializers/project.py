@@ -26,6 +26,7 @@
 
 from rest_framework import serializers
 
+from admission.api.serializers.fields import ActionLinksField, ACTION_LINKS
 from admission.contrib.models import AdmissionType, DoctorateAdmission
 from base.utils.serializers import DTOSerializer
 from admission.ddd.preparation.projet_doctoral.commands import (
@@ -41,6 +42,7 @@ from admission.ddd.preparation.projet_doctoral.dtos import DoctoratDTO, Proposit
 __all__ = [
     "PropositionIdentityDTOSerializer",
     "PropositionSearchDTOSerializer",
+    "PropositionSearchSerializer",
     "InitierPropositionCommandSerializer",
     "CompleterPropositionCommandSerializer",
     "DoctorateAdmissionReadSerializer",
@@ -73,6 +75,49 @@ class PropositionIdentityDTOSerializer(serializers.Serializer):
 
 
 class PropositionSearchDTOSerializer(DTOSerializer):
+    links = ActionLinksField(actions={
+        # Profile
+        # Person
+        'retrieve_proposition_person': ACTION_LINKS['retrieve_proposition_person'],
+        'update_proposition_person': ACTION_LINKS['update_proposition_person'],
+        # Coordinates
+        'retrieve_proposition_coordinates': ACTION_LINKS['retrieve_proposition_coordinates'],
+        'update_proposition_coordinates': ACTION_LINKS['update_proposition_coordinates'],
+        # Secondary studies
+        'retrieve_secondary_studies': ACTION_LINKS['retrieve_secondary_studies'],
+        'update_secondary_studies': ACTION_LINKS['update_secondary_studies'],
+        # Proposition
+        # Project
+        'destroy_proposition': ACTION_LINKS['destroy_proposition'],
+        # 'create_proposition': ACTION_LINKS['create_proposition'], # TODO MOVE IT TO GLOBAL LINKS
+        'retrieve_proposition': ACTION_LINKS['retrieve_proposition'],
+        'update_proposition': ACTION_LINKS['update_proposition'],
+        # Cotutelle
+        'retrieve_cotutelle': ACTION_LINKS['retrieve_cotutelle'],
+        'update_cotutelle': ACTION_LINKS['update_cotutelle'],
+        # Supervision
+        'add_member': ACTION_LINKS['add_member'],
+        'remove_member': ACTION_LINKS['remove_member'],
+        'retrieve_supervision': ACTION_LINKS['retrieve_supervision'],
+    })
+
+    class Meta:
+        source = PropositionSearchDTO
+
+
+class PropositionSearchSerializer(serializers.Serializer):
+    links = ActionLinksField(
+        actions={
+            'create_proposition': {
+                'path_name': 'admission_api_v1:propositions',
+                'method': 'POST',
+            }
+        }
+    )
+    propositions = PropositionSearchDTOSerializer(
+        many=True
+    )
+
     class Meta:
         source = PropositionSearchDTO
 

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-11-19 14:06+0100\n"
+"POT-Creation-Date: 2021-11-29 17:06+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -199,7 +199,7 @@ msgstr ""
 msgid "PhD already done"
 msgstr ""
 
-#: contrib/models/doctorate.py:134 contrib/models/doctorate.py:157
+#: contrib/models/doctorate.py:134 contrib/models/doctorate.py:161
 msgid "Institution"
 msgstr ""
 
@@ -215,148 +215,152 @@ msgstr ""
 msgid "Motivation"
 msgstr ""
 
-#: contrib/models/doctorate.py:162
+#: contrib/models/doctorate.py:166
 msgid "Cotutelle request document"
 msgstr ""
 
-#: contrib/models/doctorate.py:166
+#: contrib/models/doctorate.py:170
 msgid "Cotutelle convention"
 msgstr ""
 
-#: contrib/models/doctorate.py:170
+#: contrib/models/doctorate.py:174
 msgid "Other cotutelle-related documents"
 msgstr ""
 
-#: contrib/models/doctorate.py:184
+#: contrib/models/doctorate.py:188
 msgid "Doctorate admission"
 msgstr ""
 
-#: contrib/models/doctorate.py:187
+#: contrib/models/doctorate.py:191
 msgid "Can access doctorate admission list"
 msgstr ""
 
-#: contrib/models/doctorate.py:188
+#: contrib/models/doctorate.py:192
 msgid "Can download jury-approved PDF"
 msgstr ""
 
-#: contrib/models/doctorate.py:189
+#: contrib/models/doctorate.py:193
 msgid "Can upload jury-approved PDF"
 msgstr ""
 
-#: contrib/models/doctorate.py:190
+#: contrib/models/doctorate.py:194
 msgid "Can upload signed scholarship"
 msgstr ""
 
-#: contrib/models/doctorate.py:191
+#: contrib/models/doctorate.py:195
 msgid "Can check publication autorisation"
 msgstr ""
 
-#: contrib/models/doctorate.py:192
+#: contrib/models/doctorate.py:196
 msgid "Can validate registration"
 msgstr ""
 
-#: contrib/models/doctorate.py:193
+#: contrib/models/doctorate.py:197
 msgid "Can approve jury"
 msgstr ""
 
-#: contrib/models/doctorate.py:194
+#: contrib/models/doctorate.py:198
 msgid "Can approve confirmation paper"
 msgstr ""
 
-#: contrib/models/doctorate.py:195
+#: contrib/models/doctorate.py:199
 msgid "Can validate doctoral training"
 msgstr ""
 
-#: contrib/models/doctorate.py:196
+#: contrib/models/doctorate.py:200
 msgid "Can download PDF confirmation"
 msgstr ""
 
-#: contrib/models/doctorate.py:197
+#: contrib/models/doctorate.py:201
 msgid "Can upload PDF confirmation"
 msgstr ""
 
-#: contrib/models/doctorate.py:198
+#: contrib/models/doctorate.py:202
 msgid "Can fill thesis"
 msgstr ""
 
-#: contrib/models/doctorate.py:199
+#: contrib/models/doctorate.py:203
 msgid "Can submit thesis"
 msgstr ""
 
-#: contrib/models/doctorate.py:200
+#: contrib/models/doctorate.py:204
 msgid "Can appose CDD notice"
 msgstr ""
 
-#: contrib/models/doctorate.py:201
+#: contrib/models/doctorate.py:205
 msgid "Can appose SIC notice"
 msgstr ""
 
-#: contrib/models/doctorate.py:202
+#: contrib/models/doctorate.py:206
 msgid "Can upload defense report"
 msgstr ""
 
-#: contrib/models/doctorate.py:203
+#: contrib/models/doctorate.py:207
 msgid "Can check copyright"
 msgstr ""
 
-#: contrib/models/doctorate.py:204
+#: contrib/models/doctorate.py:208
 msgid "Can sign diploma"
 msgstr ""
 
-#: contrib/models/doctorate.py:205
+#: contrib/models/doctorate.py:209
 msgid "Can view the information related to the admission request author"
 msgstr ""
 
-#: contrib/models/doctorate.py:206
+#: contrib/models/doctorate.py:211
 msgid "Can update the information related to the admission request author"
 msgstr ""
 
-#: contrib/models/doctorate.py:207
+#: contrib/models/doctorate.py:212
 msgid "Can view the coordinates of the admission request author"
 msgstr ""
 
-#: contrib/models/doctorate.py:208
+#: contrib/models/doctorate.py:213
 msgid "Can update the coordinates of the admission request author"
 msgstr ""
 
-#: contrib/models/doctorate.py:209
+#: contrib/models/doctorate.py:215
 msgid "Can view the information related to the secondary studies"
 msgstr ""
 
-#: contrib/models/doctorate.py:210
+#: contrib/models/doctorate.py:217
 msgid "Can update the information related to the secondary studies"
 msgstr ""
 
-#: contrib/models/doctorate.py:211
+#: contrib/models/doctorate.py:218
 msgid "Can view the information related to the curriculum"
 msgstr ""
 
-#: contrib/models/doctorate.py:212
+#: contrib/models/doctorate.py:219
 msgid "Can update the information related to the curriculum"
 msgstr ""
 
-#: contrib/models/doctorate.py:213
+#: contrib/models/doctorate.py:220
 msgid "Can view the information related to the admission project"
 msgstr ""
 
-#: contrib/models/doctorate.py:214
+#: contrib/models/doctorate.py:221
 msgid "Can update the information related to the admission project"
 msgstr ""
 
-#: contrib/models/doctorate.py:215
+#: contrib/models/doctorate.py:222
 msgid "Can view the information related to the admission cotutelle"
 msgstr ""
 
-#: contrib/models/doctorate.py:216
+#: contrib/models/doctorate.py:223
 msgid "Can update the information related to the admission cotutelle"
 msgstr ""
 
-#: contrib/models/doctorate.py:217
+#: contrib/models/doctorate.py:224
 msgid "Can view the information related to the admission supervision"
 msgstr ""
 
-#: contrib/models/doctorate.py:218
-msgid "Can update the information related to the admission supervision"
+#: contrib/models/doctorate.py:225
+msgid "Can add a member to the supervision group"
+msgstr ""
+
+#: contrib/models/doctorate.py:226
+msgid "Can remove a member from the supervision group"
 msgstr ""
 
 #: contrib/models/enums/actor_type.py:34

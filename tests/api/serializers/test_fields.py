@@ -230,7 +230,7 @@ class SerializerFieldsTestCase(APITestCase):
         self.assertTrue('links' in serializer.data)
         self.assertEqual(serializer.data['links'], {
             'update_doctorateadmission': {
-                'errors': (None, ),
+                'errors': ('Vous devez être l\'auteur de la demande pour accéder à cette admission', ),
             }
         })
 

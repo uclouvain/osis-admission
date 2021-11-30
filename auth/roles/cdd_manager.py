@@ -65,5 +65,6 @@ class CddManager(EntityRoleModel):
             'admission.view_doctorateadmission_cotutelle': is_part_of_doctoral_commission,
             'admission.change_doctorateadmission_cotutelle': is_part_of_doctoral_commission,
             'admission.view_doctorateadmission_supervision': is_part_of_doctoral_commission,
-            'admission.change_doctorateadmission_supervision': is_part_of_doctoral_commission,
+            'admission.add_supervision_member': is_part_of_doctoral_commission,
+            'admission.remove_supervision_member': is_part_of_doctoral_commission,
         })

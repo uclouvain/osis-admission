@@ -861,6 +861,304 @@ components:
           format: date-time
         statut:
           type: string
+        links:
+          type: object
+          properties:
+            retrieve_proposition_person:
+              type: object
+              properties:
+                errors:
+                  type: array
+                  items:
+                    type: string
+                  nullable: true
+                method:
+                  type: string
+                  enum:
+                  - DELETE
+                  - GET
+                  - PATCH
+                  - POST
+                  - PUT
+                  nullable: true
+                url:
+                  type: string
+                  format: uri
+                  nullable: true
+            update_proposition_person:
+              type: object
+              properties:
+                errors:
+                  type: array
+                  items:
+                    type: string
+                  nullable: true
+                method:
+                  type: string
+                  enum:
+                  - DELETE
+                  - GET
+                  - PATCH
+                  - POST
+                  - PUT
+                  nullable: true
+                url:
+                  type: string
+                  format: uri
+                  nullable: true
+            retrieve_proposition_coordinates:
+              type: object
+              properties:
+                errors:
+                  type: array
+                  items:
+                    type: string
+                  nullable: true
+                method:
+                  type: string
+                  enum:
+                  - DELETE
+                  - GET
+                  - PATCH
+                  - POST
+                  - PUT
+                  nullable: true
+                url:
+                  type: string
+                  format: uri
+                  nullable: true
+            update_proposition_coordinates:
+              type: object
+              properties:
+                errors:
+                  type: array
+                  items:
+                    type: string
+                  nullable: true
+                method:
+                  type: string
+                  enum:
+                  - DELETE
+                  - GET
+                  - PATCH
+                  - POST
+                  - PUT
+                  nullable: true
+                url:
+                  type: string
+                  format: uri
+                  nullable: true
+            retrieve_secondary_studies:
+              type: object
+              properties:
+                errors:
+                  type: array
+                  items:
+                    type: string
+                  nullable: true
+                method:
+                  type: string
+                  enum:
+                  - DELETE
+                  - GET
+                  - PATCH
+                  - POST
+                  - PUT
+                  nullable: true
+                url:
+                  type: string
+                  format: uri
+                  nullable: true
+            update_secondary_studies:
+              type: object
+              properties:
+                errors:
+                  type: array
+                  items:
+                    type: string
+                  nullable: true
+                method:
+                  type: string
+                  enum:
+                  - DELETE
+                  - GET
+                  - PATCH
+                  - POST
+                  - PUT
+                  nullable: true
+                url:
+                  type: string
+                  format: uri
+                  nullable: true
+            destroy_proposition:
+              type: object
+              properties:
+                errors:
+                  type: array
+                  items:
+                    type: string
+                  nullable: true
+                method:
+                  type: string
+                  enum:
+                  - DELETE
+                  - GET
+                  - PATCH
+                  - POST
+                  - PUT
+                  nullable: true
+                url:
+                  type: string
+                  format: uri
+                  nullable: true
+            retrieve_proposition:
+              type: object
+              properties:
+                errors:
+                  type: array
+                  items:
+                    type: string
+                  nullable: true
+                method:
+                  type: string
+                  enum:
+                  - DELETE
+                  - GET
+                  - PATCH
+                  - POST
+                  - PUT
+                  nullable: true
+                url:
+                  type: string
+                  format: uri
+                  nullable: true
+            update_proposition:
+              type: object
+              properties:
+                errors:
+                  type: array
+                  items:
+                    type: string
+                  nullable: true
+                method:
+                  type: string
+                  enum:
+                  - DELETE
+                  - GET
+                  - PATCH
+                  - POST
+                  - PUT
+                  nullable: true
+                url:
+                  type: string
+                  format: uri
+                  nullable: true
+            retrieve_cotutelle:
+              type: object
+              properties:
+                errors:
+                  type: array
+                  items:
+                    type: string
+                  nullable: true
+                method:
+                  type: string
+                  enum:
+                  - DELETE
+                  - GET
+                  - PATCH
+                  - POST
+                  - PUT
+                  nullable: true
+                url:
+                  type: string
+                  format: uri
+                  nullable: true
+            update_cotutelle:
+              type: object
+              properties:
+                errors:
+                  type: array
+                  items:
+                    type: string
+                  nullable: true
+                method:
+                  type: string
+                  enum:
+                  - DELETE
+                  - GET
+                  - PATCH
+                  - POST
+                  - PUT
+                  nullable: true
+                url:
+                  type: string
+                  format: uri
+                  nullable: true
+            add_member:
+              type: object
+              properties:
+                errors:
+                  type: array
+                  items:
+                    type: string
+                  nullable: true
+                method:
+                  type: string
+                  enum:
+                  - DELETE
+                  - GET
+                  - PATCH
+                  - POST
+                  - PUT
+                  nullable: true
+                url:
+                  type: string
+                  format: uri
+                  nullable: true
+            remove_member:
+              type: object
+              properties:
+                errors:
+                  type: array
+                  items:
+                    type: string
+                  nullable: true
+                method:
+                  type: string
+                  enum:
+                  - DELETE
+                  - GET
+                  - PATCH
+                  - POST
+                  - PUT
+                  nullable: true
+                url:
+                  type: string
+                  format: uri
+                  nullable: true
+            retrieve_supervision:
+              type: object
+              properties:
+                errors:
+                  type: array
+                  items:
+                    type: string
+                  nullable: true
+                method:
+                  type: string
+                  enum:
+                  - DELETE
+                  - GET
+                  - PATCH
+                  - POST
+                  - PUT
+                  nullable: true
+                url:
+                  type: string
+                  format: uri
+                  nullable: true
+          default: {}
       required:
       - uuid
       - type_admission

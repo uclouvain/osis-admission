@@ -65,8 +65,8 @@ class SupervisionAPIView(APIPermissionRequiredMixin, mixins.RetrieveModelMixin, 
     filter_backends = []
     permission_mapping = {
         'GET': 'admission.view_doctorateadmission_supervision',
-        'PUT': 'admission.change_doctorateadmission_supervision',
-        'POST': 'admission.change_doctorateadmission_supervision',
+        'PUT': 'admission.add_supervision_member',
+        'POST': 'admission.remove_supervision_member',
     }
 
     def get_permission_object(self):

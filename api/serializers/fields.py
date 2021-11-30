@@ -102,3 +102,88 @@ class ActionLinksField(serializers.Field):
                 )
 
         return links
+
+
+# Available actions
+ACTION_LINKS = {
+    # Profile
+    # Person
+    'retrieve_proposition_person': {
+        'path_name': 'admission_api_v1:person',
+        'method': 'GET',
+    },
+    'update_proposition_person': {
+        'path_name': 'admission_api_v1:person',
+        'method': 'PUT',
+    },
+    # Coordinates
+    'retrieve_proposition_coordinates': {
+        'path_name': 'admission_api_v1:coordonnees',
+        'method': 'GET',
+    },
+    'update_proposition_coordinates': {
+        'path_name': 'admission_api_v1:coordonnees',
+        'method': 'PUT',
+    },
+    # Secondary studies
+    'retrieve_secondary_studies': {
+        'path_name': 'admission_api_v1:secondary-studies',
+        'method': 'GET',
+    },
+    'update_secondary_studies': {
+        'path_name': 'admission_api_v1:secondary-studies',
+        'method': 'PUT',
+    },
+    # Proposition
+    # Project
+    'create_proposition': {
+        'path_name': 'admission_api_v1:propositions',
+        'method': 'POST',
+    },
+    'destroy_proposition': {
+        'path_name': 'admission_api_v1:propositions',
+        'method': 'DELETE',
+        'params': ['uuid'],
+    },
+    'list_propositions': {
+        'path_name': 'admission_api_v1:propositions',
+        'method': 'GET',
+    },
+    'retrieve_proposition': {
+        'path_name': 'admission_api_v1:propositions',
+        'method': 'GET',
+        'params': ['uuid'],
+    },
+    'update_proposition': {
+        'path_name': 'admission_api_v1:propositions',
+        'method': 'PUT',
+        'params': ['uuid'],
+    },
+    # Cotutelle
+    'retrieve_cotutelle': {
+        'path_name': 'admission_api_v1:cotutelle',
+        'method': 'GET',
+        'params': ['uuid'],
+    },
+    'update_cotutelle': {
+        'path_name': 'admission_api_v1:cotutelle',
+        'method': 'PUT',
+        'params': ['uuid'],
+    },
+    # Supervision
+    'add_member': {
+        'path_name': 'admission_api_v1:supervision',
+        'method': 'PUT',
+        'params': ['uuid'],
+    },
+    'remove_member': {
+        'path_name': 'admission_api_v1:supervision',
+        'method': 'POST',
+        'params': ['uuid'],
+    },
+    'retrieve_supervision': {
+        'path_name': 'admission_api_v1:supervision',
+        'method': 'GET',
+        'params': ['uuid'],
+    },
+}

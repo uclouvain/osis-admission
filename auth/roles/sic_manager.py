@@ -57,5 +57,6 @@ class SicManager(EntityRoleModel):
             'admission.view_doctorateadmission_cotutelle': rules.always_allow,
             'admission.change_doctorateadmission_cotutelle': rules.always_allow,
             'admission.view_doctorateadmission_supervision': rules.always_allow,
-            'admission.change_doctorateadmission_supervision': rules.always_allow,
+            'admission.add_supervision_member': rules.always_allow,
+            'admission.remove_supervision_member': rules.always_allow,
         })
