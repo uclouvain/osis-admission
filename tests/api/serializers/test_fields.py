@@ -29,7 +29,6 @@ from django.test.utils import override_settings
 from django.urls.base import reverse
 from django.urls.conf import path
 from rest_framework.serializers import Serializer
-from rest_framework.response import Response
 from rest_framework.test import APIRequestFactory, APITestCase
 from rest_framework.views import APIView
 
@@ -51,18 +50,6 @@ class TestAPIDetailViewWithPermissions(APIPermissionRequiredMixin, APIView):
     def get_permission_object(self):
         return get_object_or_404(DoctorateAdmission, uuid=self.kwargs['uuid'])
 
-    def delete(self, request, *args, **kwargs):
-        return Response()
-
-    def get(self, request, *args, **kwargs):
-        return Response()
-    
-    def post(self, request, *args, **kwargs):
-        return Response()
-    
-    def put(self, request, *args, **kwargs):
-        return Response()
-
 
 class TestAPIListAndCreateViewWithPermissions(APIPermissionRequiredMixin, APIView):
     permission_mapping = {
@@ -70,31 +57,9 @@ class TestAPIListAndCreateViewWithPermissions(APIPermissionRequiredMixin, APIVie
         'POST': 'admission.add_doctorateadmission',
     }
 
-    def delete(self, request, *args, **kwargs):
-        return Response()
-
-    def get(self, request, *args, **kwargs):
-        return Response()
-    
-    def post(self, request, *args, **kwargs):
-        return Response()
-    
-    def put(self, request, *args, **kwargs):
-        return Response()
-
 
 class TestAPIViewWithoutPermission(APIView):
-    def delete(self, request, *args, **kwargs):
-        return Response()
-
-    def get(self, request, *args, **kwargs):
-        return Response()
-    
-    def post(self, request, *args, **kwargs):
-        return Response()
-    
-    def put(self, request, *args, **kwargs):
-        return Response()
+    pass
 
 
 # Mock url
@@ -132,6 +97,7 @@ class SerializerFieldsTestCase(APITestCase):
         # Request
         factory = APIRequestFactory()
         cls.request = factory.get('api-view-with-permissions/', format='json')
+        breakpoint()
         cls.request.user = cls.first_user
         cls.request._force_auth_user = cls.first_user
 
@@ -231,6 +197,7 @@ class SerializerFieldsTestCase(APITestCase):
         self.assertEqual(serializer.data['links'], {
             'update_doctorateadmission': {
                 'errors': (None, ),
+                'method': 'PUT',
             }
         })
 
@@ -326,5 +293,9 @@ class SerializerFieldsTestCase(APITestCase):
         })
         # Second doctorate admission: the user hasn't got the right permissions -> we return the errors
         self.assertTrue('links' in serializer.data[1])
-        self.assertTrue('get_doctorateadmission' in serializer.data[1]['links'])
-        self.assertTrue('errors' in serializer.data[1]['links']['get_doctorateadmission'])
+        self.assertEqual(serializer.data[1]['links'], {
+            'get_doctorateadmission': {
+                'method': 'GET',
+                'errors': (None, ),
+            }
+        })

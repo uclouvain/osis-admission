@@ -1483,6 +1483,31 @@ components:
       enum:
       - en
       - fr-be
+    ActionLink:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            type: string
+        method:
+          type: string
+          enum:
+          - DELETE
+          - GET
+          - PATCH
+          - POST
+          - PUT
+        url:
+          type: string
+          format: uri
+      oneOf:
+      - required:
+        - method
+        - url
+      - required:
+        - method
+        - errors
   securitySchemes:
     Token:
       type: apiKey
