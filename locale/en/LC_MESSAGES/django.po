@@ -268,6 +268,9 @@ msgstr ""
 msgid "No defense reason"
 msgstr ""
 
+msgid "Other"
+msgstr ""
+
 msgid "Other cotutelle-related documents"
 msgstr ""
 
@@ -316,6 +319,9 @@ msgstr ""
 msgid "REFUSED"
 msgstr ""
 
+msgid "Recommendation letters"
+msgstr ""
+
 msgid "SCEB"
 msgstr ""
 
@@ -349,7 +355,13 @@ msgstr ""
 msgid "Supervision group not found."
 msgstr ""
 
+msgid "Thesis institute"
+msgstr ""
+
 msgid "Thesis language"
+msgstr ""
+
+msgid "Thesis location"
 msgstr ""
 
 msgid "Type"

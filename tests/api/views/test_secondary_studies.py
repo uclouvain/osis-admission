@@ -23,6 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from django.test import override_settings
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -35,12 +36,13 @@ from reference.tests.factories.country import CountryFactory
 from reference.tests.factories.language import LanguageFactory
 
 
+@override_settings(ROOT_URLCONF='admission.api.url_v1')
 class BelgianHighSchoolDiplomaTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
         cls.academic_year = AcademicYearFactory(current=True)
         cls.user = PersonFactory().user
-        cls.url = reverse("admission_api_v1:secondary-studies")
+        cls.url = reverse("secondary-studies")
         cls.diploma_data = {
             "belgian_diploma": {
                 "institute": "Test Institute",
@@ -175,11 +177,12 @@ class BelgianHighSchoolDiplomaTestCase(APITestCase):
         self.assertEqual(response.json(), {'belgian_diploma': None, 'foreign_diploma': None})
 
 
+@override_settings(ROOT_URLCONF='admission.api.url_v1')
 class ForeignHighSchoolDiplomaTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
         cls.user = PersonFactory().user
-        cls.url = reverse("admission_api_v1:secondary-studies")
+        cls.url = reverse("secondary-studies")
         cls.academic_year = AcademicYearFactory(current=True)
         cls.language = LanguageFactory(code="FR")
         cls.country = CountryFactory(iso_code="FR")

@@ -23,7 +23,11 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from django.db.models import F, Q
+from datetime import datetime
+
+from django.db.models import F, OuterRef, Q, TextField
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 from rest_framework.filters import BaseFilterBackend
 from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
@@ -35,8 +39,13 @@ from admission.ddd.preparation.projet_doctoral.commands import (
     SearchDoctoratCommand,
 )
 from base.auth.roles.tutor import Tutor
+from base.models.education_group_year import EducationGroupYear
+from base.models.entity_version import EntityVersion
+from base.models.enums.education_group_categories import Categories
+from base.models.enums.education_group_types import TrainingType
 from base.models.enums.entity_type import SECTOR
 from base.models.person import Person
+from base.utils.cte import CTESubquery
 from infrastructure.messages_bus import message_bus_instance
 
 
@@ -47,14 +56,32 @@ class AutocompleteSectorView(ListAPIView):
     filter_backends = []
     serializer_class = serializers.SectorDTOSerializer
 
+    @method_decorator(cache_page(timeout=24 * 3600))
     def list(self, request, **kwargs):
         # TODO revert to command once it's in the shared kernel
+        # Get all doctorates with their path (containing sector)
+        doctorate_qs = EducationGroupYear.objects.annotate(
+            path_as_string=CTESubquery(
+                EntityVersion.objects.with_acronym_path(
+                    entity_id=OuterRef('management_entity'),
+                ).values('path_as_string')[:1],
+                output_field=TextField(),
+            ),
+        ).filter(
+            academic_year__year=datetime.today().year,  # TODO based on calendar ?
+            education_group_type__category=Categories.TRAINING.name,
+            education_group_type__name=TrainingType.PHD.name,
+        )
+        doctorate_paths = doctorate_qs.values_list('path_as_string', flat=True)
+        # Get all sectors
         qs = EntityProxy.objects.with_acronym().with_title().with_type().filter(type=SECTOR).annotate(
             sigle=F('acronym'),
             intitule_fr=F('title'),
-            intitule_en=F('title'),
+            intitule_en=F('title'),  # TODO get translation when available
         ).values('sigle', 'intitule_fr', 'intitule_en')
-        serializer = serializers.SectorDTOSerializer(instance=qs, many=True)
+        # Filter sectors by those which have doctorates
+        filtered = [s for s in qs if any(s['sigle'] in path for path in doctorate_paths)]
+        serializer = serializers.SectorDTOSerializer(instance=filtered, many=True)
         return Response(serializer.data)
 
 

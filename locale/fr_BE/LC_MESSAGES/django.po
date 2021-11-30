@@ -277,6 +277,9 @@ msgstr "Pas de doctorat trouvé"
 msgid "No defense reason"
 msgstr "Raison de non-soutenance"
 
+msgid "Other"
+msgstr "Autre"
+
 msgid "Other cotutelle-related documents"
 msgstr "Autres documents relatifs à la cotutelle"
 
@@ -327,6 +330,9 @@ msgstr "Proposition non trouvée."
 msgid "REFUSED"
 msgstr "Refusé"
 
+msgid "Recommendation letters"
+msgstr "Lettres de recommandation"
+
 msgid "SCEB"
 msgstr "SCEB"
 
@@ -360,8 +366,14 @@ msgstr "Bourse de recherche"
 msgid "Supervision group not found."
 msgstr "Groupe de supervision non trouvé."
 
+msgid "Thesis institute"
+msgstr "Institut de la thèse"
+
 msgid "Thesis language"
 msgstr "Langue de la thèse"
+
+msgid "Thesis location"
+msgstr "Lieu de la thèse"
 
 msgid "Type"
 msgstr "Type"
