@@ -28,6 +28,7 @@ from django.shortcuts import get_object_or_404
 from django.test.utils import override_settings
 from django.urls.base import reverse
 from django.urls.conf import path
+from django.utils.translation import gettext as _
 from rest_framework.serializers import Serializer
 from rest_framework.test import APIRequestFactory, APITestCase
 from rest_framework.views import APIView
@@ -176,7 +177,7 @@ class SerializerFieldsTestCase(APITestCase):
 
     def test_serializer_with_action_and_param_but_invalid_permission(self):
         # The list of actions contains one available action with a url parameter
-        # But the user hasn't got access to this resource -> we return the related errors
+        # But the user hasn't got access to this resource -> we return the related error
         class SerializerWithActionLinks(Serializer):
             links = ActionLinksField(actions={
                 'update_doctorateadmission': {
@@ -195,7 +196,7 @@ class SerializerFieldsTestCase(APITestCase):
         self.assertTrue('links' in serializer.data)
         self.assertEqual(serializer.data['links'], {
             'update_doctorateadmission': {
-                'errors': (None, ),
+                'error': _("Method '{}' not allowed").format('PUT'),
                 'method': 'PUT',
             }
         })
@@ -290,11 +291,11 @@ class SerializerFieldsTestCase(APITestCase):
                 'url': reverse('api_view_with_permissions_detail', args=[self.first_doctorate_admission.uuid])
             }
         })
-        # Second doctorate admission: the user hasn't got the right permissions -> we return the errors
+        # Second doctorate admission: the user hasn't got the right permissions -> we return the error
         self.assertTrue('links' in serializer.data[1])
         self.assertEqual(serializer.data[1]['links'], {
             'get_doctorateadmission': {
                 'method': 'GET',
-                'errors': (None, ),
+                'error': _("Method '{}' not allowed").format('GET'),
             }
         })

@@ -28,7 +28,6 @@ from django.urls.exceptions import NoReverseMatch
 from django.urls import reverse, resolve
 
 from rest_framework import serializers
-from rest_framework.exceptions import NotAuthenticated, PermissionDenied
 from osis_role.contrib.views import APIPermissionRequiredMixin
 
 
@@ -61,7 +60,7 @@ class ActionLinksField(serializers.Field):
             # Get the url params
             if isinstance(action.get('params'), list):
                 try:
-                    url_args = [ getattr(instance, param_name) for param_name in action['params'] ]
+                    url_args = [getattr(instance, param_name) for param_name in action['params']]
                 except AttributeError as error:
                     raise ImproperlyConfigured(error)
             else:
@@ -88,14 +87,14 @@ class ActionLinksField(serializers.Field):
                 }
 
                 # Check the permissions specified in the view via the 'permission_mapping' property
-                try:
-                    view.check_method_permissions(request.user, action.get('method'))
-                    # Add the related endpoint if the user has the right permissions
-                    links[action_name]['url'] = url
-                except (PermissionDenied, NotAuthenticated) as e:
-                    # Add the error if the user hasn't got the right permissions
-                    links[action_name]['errors'] = e.args
+                failed_permission_message = view.check_method_permissions(request.user, action.get('method'))
 
+                if failed_permission_message is None:
+                    # Add the related endpoint as the user has the right permissions
+                    links[action_name]['url'] = url
+                else:
+                    # Add the error as the user hasn't got the right permissions
+                    links[action_name]['error'] = failed_permission_message
             else:
                 raise ImproperlyConfigured(
                     "All paths specified in the 'links' property must be related to views that implement "

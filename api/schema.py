@@ -185,11 +185,8 @@ class AdmissionSchemaGenerator(SchemaGenerator):
         schema['components']['schemas']['ActionLink'] = {
             'type': 'object',
             'properties': {
-                'errors': {
-                    'type': 'array',
-                    'items': {
-                        'type': 'string',
-                    },
+                'error': {
+                    'type': 'string',
                 },
                 'method': {
                     'type': 'string',
