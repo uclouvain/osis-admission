@@ -23,27 +23,31 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from django.urls import path as _path
+from rest_framework.generics import GenericAPIView, RetrieveAPIView
+from rest_framework.response import Response
 
-from admission.api import views
-
-
-def path(pattern, view, name=None):
-    return _path(pattern, view.as_view(), name=getattr(view, 'name', name))
+from admission.api import serializers
+from admission.api.schema import ResponseSpecificSchema
 
 
-app_name = "admission_api_v1"
-urlpatterns = [
-    path('person', views.PersonViewSet),
-    path('coordonnees', views.CoordonneesViewSet),
-    path('propositions', views.PropositionListView),
-    path('secondary_studies', views.SecondaryStudiesViewSet),
-    path('links', views.ActionLinksApiView),
-    path('propositions/<uuid:uuid>', views.PropositionViewSet),
-    path('propositions/<uuid:uuid>/cotutelle', views.CotutelleAPIView),
-    path('propositions/<uuid:uuid>/supervision', views.SupervisionAPIView),
-    path('autocomplete/sector', views.AutocompleteSectorView),
-    path('autocomplete/sector/<str:sigle>/doctorates', views.AutocompleteDoctoratView),
-    path('autocomplete/tutor', views.AutocompleteTutorView),
-    path('autocomplete/person', views.AutocompletePersonView),
-]
+class ActionLinkSchema(ResponseSpecificSchema):
+    operation_id_base = '_action_links'
+    serializer_mapping = {
+        'GET': serializers.PropositionLinksSerializer,
+    }
+
+
+class ActionLinksApiView(RetrieveAPIView, GenericAPIView):
+    name = "action_links"
+    schema = ActionLinkSchema()
+    serializer_class = serializers.PropositionLinksSerializer
+
+    def get(self, request):
+        """
+        Return a dictionary containing global action links related to the admission.
+        """
+        serializer = serializers.PropositionLinksSerializer(
+            instance=request.user,
+            context=self.get_serializer_context()
+        )
+        return Response(serializer.data)

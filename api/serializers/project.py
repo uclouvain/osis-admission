@@ -78,11 +78,11 @@ class PropositionSearchDTOSerializer(DTOSerializer):
     links = ActionLinksField(actions={
         # Profile
         # Person
-        'retrieve_proposition_person': ACTION_LINKS['retrieve_proposition_person'],
-        'update_proposition_person': ACTION_LINKS['update_proposition_person'],
+        'retrieve_person': ACTION_LINKS['retrieve_person'],
+        'update_person': ACTION_LINKS['update_person'],
         # Coordinates
-        'retrieve_proposition_coordinates': ACTION_LINKS['retrieve_proposition_coordinates'],
-        'update_proposition_coordinates': ACTION_LINKS['update_proposition_coordinates'],
+        'retrieve_coordinates': ACTION_LINKS['retrieve_coordinates'],
+        'update_coordinates': ACTION_LINKS['update_coordinates'],
         # Secondary studies
         'retrieve_secondary_studies': ACTION_LINKS['retrieve_secondary_studies'],
         'update_secondary_studies': ACTION_LINKS['update_secondary_studies'],
@@ -106,23 +106,44 @@ class PropositionSearchDTOSerializer(DTOSerializer):
 
 
 class PropositionSearchSerializer(serializers.Serializer):
-    links = ActionLinksField(
-        actions={
-            'create_proposition': {
-                'path_name': 'admission_api_v1:propositions',
-                'method': 'POST',
-            }
-        }
+    # links = ActionLinksField(
+    #     actions={
+    #         'create_proposition': ACTION_LINKS['create_proposition'],
+    #     }
+    # )
+    panda = serializers.CharField(default="Panda roux")
+    propositions = serializers.ListField(
+        child=PropositionSearchDTOSerializer()
     )
-    propositions = PropositionSearchDTOSerializer(
-        many=True
-    )
-
-    class Meta:
-        source = PropositionSearchDTO
 
 
 class PropositionDTOSerializer(DTOSerializer):
+    links = ActionLinksField(
+        actions={
+            # Profile
+            # Person
+            'retrieve_person': ACTION_LINKS['retrieve_person'],
+            'update_person': ACTION_LINKS['update_person'],
+            # Coordinates
+            'retrieve_coordinates': ACTION_LINKS['retrieve_coordinates'],
+            'update_coordinates': ACTION_LINKS['update_coordinates'],
+            # Secondary studies
+            'retrieve_secondary_studies': ACTION_LINKS['retrieve_secondary_studies'],
+            'update_secondary_studies': ACTION_LINKS['update_secondary_studies'],
+            # Proposition
+            'destroy_proposition': ACTION_LINKS['destroy_proposition'],
+            # Project
+            'retrieve_proposition': ACTION_LINKS['retrieve_proposition'],
+            'update_proposition': ACTION_LINKS['update_proposition'],
+            # Cotutelle
+            'retrieve_cotutelle': ACTION_LINKS['retrieve_cotutelle'],
+            'update_cotutelle': ACTION_LINKS['update_cotutelle'],
+            # Supervision
+            'retrieve_supervision': ACTION_LINKS['retrieve_supervision'],
+            'update_supervision': ACTION_LINKS['update_supervision'],
+        }
+    )
+
     class Meta:
         source = PropositionDTO
 

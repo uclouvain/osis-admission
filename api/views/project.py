@@ -62,6 +62,7 @@ class PropositionListView(APIPermissionRequiredMixin, DisplayExceptionsByFieldNa
     schema = PropositionListSchema()
     pagination_class = None
     filter_backends = []
+
     field_name_by_exception = {
         JustificationRequiseException: ['justification'],
         InstitutionInconsistanteException: ['institution'],
@@ -81,11 +82,8 @@ class PropositionListView(APIPermissionRequiredMixin, DisplayExceptionsByFieldNa
         serializer = serializers.PropositionSearchDTOSerializer(
             instance=proposition_list,
             many=True,
-            context={
-                'request': request,
-            },
+            context=self.get_serializer_context(),
         )
-        print(serializer.data)
         return Response(serializer.data)
 
     def create(self, request, **kwargs):
@@ -106,7 +104,12 @@ class PropositionSchema(ResponseSpecificSchema):
     }
 
 
-class PropositionViewSet(APIPermissionRequiredMixin, mixins.RetrieveModelMixin, mixins.UpdateModelMixin, GenericAPIView):
+class PropositionViewSet(
+    APIPermissionRequiredMixin,
+    mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
+    GenericAPIView,
+):
     name = "propositions"
     schema = PropositionSchema()
     pagination_class = None
@@ -125,7 +128,13 @@ class PropositionViewSet(APIPermissionRequiredMixin, mixins.RetrieveModelMixin, 
         proposition = message_bus_instance.invoke(
             GetPropositionCommand(uuid_proposition=kwargs.get('uuid'))
         )
-        serializer = serializers.PropositionDTOSerializer(instance=proposition)
+        serializer = serializers.PropositionDTOSerializer(
+            instance=proposition,
+            context={
+                'request': request,
+                'kwargs': kwargs,
+            }
+        )
         return Response(serializer.data)
 
     def put(self, request, *args, **kwargs):

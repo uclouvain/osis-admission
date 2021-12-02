@@ -62,6 +62,7 @@ class Candidate(EntityRoleModel):
             'admission.view_doctorateadmission_cotutelle': is_admission_request_author,
             'admission.change_doctorateadmission_cotutelle': is_admission_request_author,
             'admission.view_doctorateadmission_supervision': is_admission_request_author,
+            'admission.change_doctorateadmission_supervision': is_admission_request_author,
             'admission.add_supervision_member': is_admission_request_author,
             'admission.remove_supervision_member': is_admission_request_author,
         })

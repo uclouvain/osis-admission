@@ -27,6 +27,7 @@
 from django.db import models
 from rest_framework import serializers
 
+from admission.api.serializers.fields import ActionLinksField, ACTION_LINKS
 from base.api.serializers.academic_year import RelatedAcademicYearField
 from reference.api.serializers.country import RelatedCountryField
 from base.models.person import Person
@@ -43,6 +44,20 @@ class PersonIdentificationSerializer(serializers.ModelSerializer):
     last_registration_year = RelatedAcademicYearField(required=False)
     birth_country = RelatedCountryField(required=False)
     country_of_citizenship = RelatedCountryField(required=False)
+
+    # links = ActionLinksField(actions={
+    # Personal data
+    # 'retrieve_proposition_person': ACTION_LINKS['retrieve_proposition_person'],
+    # 'update_proposition_person': ACTION_LINKS['update_proposition_person'],
+    # 'retrieve_proposition_coordinates': ACTION_LINKS['retrieve_proposition_person'],
+    # 'update_proposition_coordinates': ACTION_LINKS['update_proposition_coordinates'],
+    # Previous experience
+    # 'retrieve_secondary_studies': ACTION_LINKS['retrieve_secondary_studies'],
+    # 'update_secondary_studies': ACTION_LINKS['update_secondary_studies'],
+    # Doctorate
+    # 'retrieve_proposition': ACTION_LINKS['retrieve_proposition'],
+    # 'update_proposition': ACTION_LINKS['update_proposition'],
+    # })
 
     class Meta:
         model = Person

@@ -45,6 +45,7 @@ class GetPropositionDTODomainService(interface.DomainService):
         proposition = repository.get(PropositionIdentityBuilder.build_from_uuid(uuid_proposition))
         doctorat = doctorat_translator.get_dto(proposition.doctorat_id.sigle, proposition.doctorat_id.annee)
         return PropositionDTO(
+            uuid=uuid_proposition,
             type_admission=proposition.type_admission.name,
             sigle_doctorat=proposition.doctorat_id.sigle,
             annee_doctorat=proposition.doctorat_id.annee,

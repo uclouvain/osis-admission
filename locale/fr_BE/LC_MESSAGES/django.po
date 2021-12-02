@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-11-29 17:06+0100\n"
+"POT-Creation-Date: 2021-12-01 17:08+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,6 +16,10 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+
+#: api/serializers/fields.py:59
+msgid "Method not allowed"
+msgstr "Méthode non autorisée"
 
 #: auth/predicates.py:38
 msgid "You must be the request author to access this admission"
@@ -138,239 +142,251 @@ msgstr "Modifée"
 msgid "{degree} [{type}] for {candidate}"
 msgstr "{degree} [{type}] pour {candidate}"
 
-#: contrib/models/doctorate.py:44
+#: contrib/models/doctorate.py:45
 msgid "Doctorate"
 msgstr "Doctorat"
 
-#: contrib/models/doctorate.py:50
+#: contrib/models/doctorate.py:51
 msgid "Bureau"
 msgstr "Bureau"
 
-#: contrib/models/doctorate.py:59
+#: contrib/models/doctorate.py:60
 msgid "Financing type"
 msgstr "Type de financement"
 
-#: contrib/models/doctorate.py:66
+#: contrib/models/doctorate.py:67
 msgid "Working contract type"
 msgstr "Type de contrat de travail"
 
-#: contrib/models/doctorate.py:71
+#: contrib/models/doctorate.py:72
 msgid "EFT"
 msgstr "EFT"
 
-#: contrib/models/doctorate.py:77
+#: contrib/models/doctorate.py:78
 msgid "Scholarship grant"
 msgstr "Bourse de recherche"
 
-#: contrib/models/doctorate.py:82
+#: contrib/models/doctorate.py:83
 msgid "Planned duration"
 msgstr "Durée prévue"
 
-#: contrib/models/doctorate.py:87
+#: contrib/models/doctorate.py:88
 msgid "Dedicated time (in EFT)"
 msgstr "Temps consacré (en EFT)"
 
-#: contrib/models/doctorate.py:95
+#: contrib/models/doctorate.py:96
 msgid "Project title"
 msgstr "Titre du projet"
 
-#: contrib/models/doctorate.py:100
+#: contrib/models/doctorate.py:101
 msgid "Abstract"
 msgstr "Résumé"
 
-#: contrib/models/doctorate.py:107
+#: contrib/models/doctorate.py:108
 msgid "Thesis language"
 msgstr "Langue de la thèse"
 
-#: contrib/models/doctorate.py:112
+#: contrib/models/doctorate.py:114
+msgid "Thesis institute"
+msgstr "Institut de la thèse"
+
+#: contrib/models/doctorate.py:120
+msgid "Thesis location"
+msgstr "Lieu de la thèse"
+
+#: contrib/models/doctorate.py:125
 msgid "Project"
 msgstr "Projet"
 
-#: contrib/models/doctorate.py:115
+#: contrib/models/doctorate.py:128
 msgid "Gantt graph"
 msgstr "Graphe de Gantt"
 
-#: contrib/models/doctorate.py:118
+#: contrib/models/doctorate.py:131
 msgid "Program proposition"
 msgstr "Proposition de programme"
 
-#: contrib/models/doctorate.py:121
+#: contrib/models/doctorate.py:134
 msgid "Additional training project"
 msgstr "Projet de formation complémentaire"
 
-#: contrib/models/doctorate.py:128
+#: contrib/models/doctorate.py:137
+msgid "Recommendation letters"
+msgstr "Lettres de recommandation"
+
+#: contrib/models/doctorate.py:144
 msgid "PhD already done"
 msgstr "Doctorat déjà réalisé"
 
-#: contrib/models/doctorate.py:134 contrib/models/doctorate.py:161
+#: contrib/models/doctorate.py:150 contrib/models/doctorate.py:177
 msgid "Institution"
 msgstr "Institution"
 
-#: contrib/models/doctorate.py:139
+#: contrib/models/doctorate.py:155
 msgid "Defense"
 msgstr "Soutenance"
 
-#: contrib/models/doctorate.py:145
+#: contrib/models/doctorate.py:161
 msgid "No defense reason"
 msgstr "Raison de non-soutenance"
 
-#: contrib/models/doctorate.py:151
+#: contrib/models/doctorate.py:167
 msgid "Motivation"
 msgstr "Motivation"
 
-#: contrib/models/doctorate.py:166
+#: contrib/models/doctorate.py:182
 msgid "Cotutelle request document"
 msgstr "Demande d'ouverture de cotutelle"
 
-#: contrib/models/doctorate.py:170
+#: contrib/models/doctorate.py:186
 msgid "Cotutelle convention"
 msgstr "Convention de cotutelle"
 
-#: contrib/models/doctorate.py:174
+#: contrib/models/doctorate.py:190
 msgid "Other cotutelle-related documents"
 msgstr "Autres documents relatifs à la cotutelle"
 
-#: contrib/models/doctorate.py:188
+#: contrib/models/doctorate.py:204
 msgid "Doctorate admission"
 msgstr "Admission en doctorat"
 
-#: contrib/models/doctorate.py:191
+#: contrib/models/doctorate.py:207
 msgid "Can access doctorate admission list"
 msgstr "Peut accéder à la liste des admission en doctorat"
 
-#: contrib/models/doctorate.py:192
+#: contrib/models/doctorate.py:208
 msgid "Can download jury-approved PDF"
 msgstr "Peut télécharger le PDF d'avis du jury"
 
-#: contrib/models/doctorate.py:193
+#: contrib/models/doctorate.py:209
 msgid "Can upload jury-approved PDF"
 msgstr "Peut téléverser le PDF d'avis du jury"
 
-#: contrib/models/doctorate.py:194
+#: contrib/models/doctorate.py:210
 msgid "Can upload signed scholarship"
 msgstr "Peut téléverser la bourse signée"
 
-#: contrib/models/doctorate.py:195
+#: contrib/models/doctorate.py:211
 msgid "Can check publication autorisation"
 msgstr "Peut vérifier l'autorisation de publication"
 
-#: contrib/models/doctorate.py:196
+#: contrib/models/doctorate.py:212
 msgid "Can validate registration"
 msgstr "Peut valider l'inscription"
 
-#: contrib/models/doctorate.py:197
+#: contrib/models/doctorate.py:213
 msgid "Can approve jury"
 msgstr "Peut approuver le jury"
 
-#: contrib/models/doctorate.py:198
+#: contrib/models/doctorate.py:214
 msgid "Can approve confirmation paper"
 msgstr "Peut approuver la lettre de confirmation"
 
-#: contrib/models/doctorate.py:199
+#: contrib/models/doctorate.py:215
 msgid "Can validate doctoral training"
 msgstr "Peut valider la formation doctorale"
 
-#: contrib/models/doctorate.py:200
+#: contrib/models/doctorate.py:216
 msgid "Can download PDF confirmation"
 msgstr "Peut télécharger la confirmation PDF"
 
-#: contrib/models/doctorate.py:201
+#: contrib/models/doctorate.py:217
 msgid "Can upload PDF confirmation"
 msgstr "Peut téléverser le PDF de confirmation"
 
-#: contrib/models/doctorate.py:202
+#: contrib/models/doctorate.py:218
 msgid "Can fill thesis"
 msgstr "Peut spécifier la thèse"
 
-#: contrib/models/doctorate.py:203
+#: contrib/models/doctorate.py:219
 msgid "Can submit thesis"
 msgstr "Peut soumettre la thèse"
 
-#: contrib/models/doctorate.py:204
+#: contrib/models/doctorate.py:220
 msgid "Can appose CDD notice"
 msgstr "Peut apposer un avis CDD"
 
-#: contrib/models/doctorate.py:205
+#: contrib/models/doctorate.py:221
 msgid "Can appose SIC notice"
 msgstr "Peut apposer un avis SIC"
 
-#: contrib/models/doctorate.py:206
+#: contrib/models/doctorate.py:222
 msgid "Can upload defense report"
 msgstr "Peut téléverser le rapport de soutenance"
 
-#: contrib/models/doctorate.py:207
+#: contrib/models/doctorate.py:223
 msgid "Can check copyright"
 msgstr "Peut vérifier le copyright"
 
-#: contrib/models/doctorate.py:208
+#: contrib/models/doctorate.py:224
 msgid "Can sign diploma"
 msgstr "Peut signer le diplôme"
 
-#: contrib/models/doctorate.py:209
+#: contrib/models/doctorate.py:225
 msgid "Can view the information related to the admission request author"
 msgstr ""
 "Peut voir les informations relatives à l'auteur de la demande d'admission"
 
-#: contrib/models/doctorate.py:211
+#: contrib/models/doctorate.py:227
 msgid "Can update the information related to the admission request author"
 msgstr ""
 "Peut modifier les informations relatives à l'auteur de la demande d'admission"
 
-#: contrib/models/doctorate.py:212
+#: contrib/models/doctorate.py:228
 msgid "Can view the coordinates of the admission request author"
 msgstr "Peut voir les coordonnées de l'auteur de la demande d'admission"
 
-#: contrib/models/doctorate.py:213
+#: contrib/models/doctorate.py:229
 msgid "Can update the coordinates of the admission request author"
 msgstr "Peut modifier les coordonnées de l'auteur de la demande d'admission"
 
-#: contrib/models/doctorate.py:215
+#: contrib/models/doctorate.py:231
 msgid "Can view the information related to the secondary studies"
 msgstr "Peut voir les informations relatives aux études secondaires"
 
-#: contrib/models/doctorate.py:217
+#: contrib/models/doctorate.py:233
 msgid "Can update the information related to the secondary studies"
 msgstr "Peut modifier les informations relatives aux études secondaires"
 
-#: contrib/models/doctorate.py:218
+#: contrib/models/doctorate.py:234
 msgid "Can view the information related to the curriculum"
 msgstr "Peut voir les informations relatives au curriculum"
 
-#: contrib/models/doctorate.py:219
+#: contrib/models/doctorate.py:235
 msgid "Can update the information related to the curriculum"
 msgstr "Peut modifier les informations relatives au curriculum"
 
-#: contrib/models/doctorate.py:220
+#: contrib/models/doctorate.py:236
 msgid "Can view the information related to the admission project"
 msgstr "Peut voir les informations relatives au projet d'admission"
 
-#: contrib/models/doctorate.py:221
+#: contrib/models/doctorate.py:237
 msgid "Can update the information related to the admission project"
 msgstr "Peut modifier les informations relatives au projet d'admission"
 
-msgid "Other"
-msgstr "Autre"
-
-msgid "Other cotutelle-related documents"
-msgstr "Autres documents relatifs à la cotutelle"
-
-#: contrib/models/doctorate.py:222
+#: contrib/models/doctorate.py:238
 msgid "Can view the information related to the admission cotutelle"
 msgstr "Peut voir les informations relatives à la cotutelle"
 
-#: contrib/models/doctorate.py:223
+#: contrib/models/doctorate.py:239
 msgid "Can update the information related to the admission cotutelle"
 msgstr "Peut modifier les informations relatives à la cotutelle"
 
-#: contrib/models/doctorate.py:224
+#: contrib/models/doctorate.py:240
 msgid "Can view the information related to the admission supervision"
 msgstr "Peut voir les informations relatives à la supervision de l'admission"
 
-#: contrib/models/doctorate.py:225
+#: contrib/models/doctorate.py:241
+#, fuzzy
+#| msgid "Can remove a member from the supervision group"
+msgid "Can add and remove a member from the supervision group"
+msgstr "Peut retirer un membre du groupe de supervision"
+
+#: contrib/models/doctorate.py:242
 msgid "Can add a member to the supervision group"
 msgstr "Peut ajouter un membre au groupe de supervision"
 
-#: contrib/models/doctorate.py:226
+#: contrib/models/doctorate.py:243
 msgid "Can remove a member from the supervision group"
 msgstr "Peut retirer un membre du groupe de supervision"
 
@@ -395,6 +411,10 @@ msgid "English"
 msgstr "Anglais"
 
 #: ddd/preparation/projet_doctoral/domain/model/_detail_projet.py:40
+msgid "Other"
+msgstr "Autre"
+
+#: ddd/preparation/projet_doctoral/domain/model/_detail_projet.py:41
 msgid "Undecided"
 msgstr "Non décidé"
 
@@ -429,12 +449,6 @@ msgstr "Pre-admission"
 #: ddd/preparation/projet_doctoral/domain/model/_experience_precedente_recherche.py:37
 msgid "YES"
 msgstr "Oui"
-
-msgid "Recommendation letters"
-msgstr "Lettres de recommandation"
-
-msgid "SCEB"
-msgstr "SCEB"
 
 #: ddd/preparation/projet_doctoral/domain/model/_experience_precedente_recherche.py:38
 msgid "NO"
@@ -498,18 +512,6 @@ msgid "Work contract should be set when financing type is set to work contract"
 msgstr ""
 "Le contrat de travail doit être renseigné quand le type de financement est "
 "un contrat de travail."
-
-msgid "Thesis institute"
-msgstr "Institut de la thèse"
-
-msgid "Thesis language"
-msgstr "Langue de la thèse"
-
-msgid "Thesis location"
-msgstr "Lieu de la thèse"
-
-msgid "Type"
-msgstr "Type"
 
 #: ddd/preparation/projet_doctoral/domain/validator/exceptions.py:84
 msgid "Institution should be set when PhD has been set to yes or partial"
