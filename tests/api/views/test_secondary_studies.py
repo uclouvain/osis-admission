@@ -27,7 +27,8 @@ from django.test import override_settings
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
-from admission.tests.factories.groups import CandidateGroupFactory
+from admission.tests.factories.groups import CandidateGroupFactory, CddManagerGroupFactory, PromoterGroupFactory, \
+    CommitteeMemberGroupFactory
 
 from admission.tests.factories.secondary_studies import ForeignHighSchoolDiplomaFactory, BelgianHighSchoolDiplomaFactory
 from base.tests.factories.academic_year import AcademicYearFactory
@@ -42,9 +43,6 @@ class BelgianHighSchoolDiplomaTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
         cls.academic_year = AcademicYearFactory(current=True)
-        cls.user = PersonFactory().user
-        cls.user.groups.add(CandidateGroupFactory())
-        cls.url = reverse("secondary-studies")
         cls.url = reverse("secondary-studies")
         cls.diploma_data = {
             "belgian_diploma": {
@@ -52,6 +50,12 @@ class BelgianHighSchoolDiplomaTestCase(APITestCase):
                 "academic_graduation_year": cls.academic_year.year,
                 "educational_type": "TEACHING_OF_GENERAL_EDUCATION",
             }
+        }
+        cls.diploma_updated_data = {
+            "belgian_diploma": {
+                "institute": "Institute Of Test",
+                "academic_graduation_year": cls.academic_year.year,
+            },
         }
         cls.diploma_data_with_schedule = {
             "belgian_diploma": {
@@ -73,9 +77,19 @@ class BelgianHighSchoolDiplomaTestCase(APITestCase):
                 },
             },
         }
+        # Users
+        cls.candidate_user = PersonFactory(first_name="John").user
+        cls.candidate_user.groups.add(CandidateGroupFactory())
+        cls.no_role_user = PersonFactory(first_name="Joe").user
+        cls.cdd_manager_user = PersonFactory(first_name="Jack").user
+        cls.cdd_manager_user.groups.add(CddManagerGroupFactory())
+        cls.promoter_user = PersonFactory(first_name="Jane").user
+        cls.promoter_user.groups.add(PromoterGroupFactory())
+        cls.committee_member_user = PersonFactory(first_name="James").user
+        cls.committee_member_user.groups.add(CommitteeMemberGroupFactory())
 
     def create_belgian_diploma(self, data):
-        self.client.force_authenticate(self.user)
+        self.client.force_authenticate(self.candidate_user)
         return self.client.put(self.url, data)
 
     def test_user_not_logged_assert_not_authorized(self):
@@ -85,14 +99,14 @@ class BelgianHighSchoolDiplomaTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_assert_methods_not_allowed(self):
-        self.client.force_authenticate(user=self.user)
+        self.client.force_authenticate(user=self.candidate_user)
         methods_not_allowed = ["delete", "post", "patch"]
 
         for method in methods_not_allowed:
             response = getattr(self.client, method)(self.url)
             self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 
-    def test_diploma_get(self):
+    def test_diploma_get_with_candidate(self):
         self.create_belgian_diploma(self.diploma_data)
         response = self.client.get(self.url)
         self.assertEqual(
@@ -103,7 +117,7 @@ class BelgianHighSchoolDiplomaTestCase(APITestCase):
     def test_diploma_create(self):
         response = self.create_belgian_diploma(self.diploma_data)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
-        belgian_diploma = BelgianHighSchoolDiploma.objects.get(person__user_id=self.user.pk)
+        belgian_diploma = BelgianHighSchoolDiploma.objects.get(person__user_id=self.candidate_user.pk)
         self.assertEqual(
             belgian_diploma.academic_graduation_year.year,
             self.diploma_data["belgian_diploma"]["academic_graduation_year"],
@@ -117,10 +131,10 @@ class BelgianHighSchoolDiplomaTestCase(APITestCase):
         self.assertEqual(belgian_diploma.institute, self.diploma_data["belgian_diploma"]["institute"])
         self.assertEqual(belgian_diploma.other_institute, "")
         self.assertIsNone(belgian_diploma.schedule)
-        foreign_diploma = ForeignHighSchoolDiploma.objects.filter(person__user_id=self.user.pk)
+        foreign_diploma = ForeignHighSchoolDiploma.objects.filter(person__user_id=self.candidate_user.pk)
         self.assertEqual(foreign_diploma.count(), 0)
 
-    def test_diploma_update(self):
+    def test_diploma_update_with_candidate(self):
         self.create_belgian_diploma(self.diploma_data)
         response = self.client.put(self.url, {
             "belgian_diploma": {
@@ -129,24 +143,24 @@ class BelgianHighSchoolDiplomaTestCase(APITestCase):
             },
         })
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
-        diploma = BelgianHighSchoolDiploma.objects.get(person__user_id=self.user.pk)
+        diploma = BelgianHighSchoolDiploma.objects.get(person__user_id=self.candidate_user.pk)
         self.assertEqual(diploma.institute, "Institute Of Test")
 
     def test_diploma_update_by_belgian_diploma(self):
-        ForeignHighSchoolDiplomaFactory(person=self.user.person)
+        ForeignHighSchoolDiplomaFactory(person=self.candidate_user.person)
         self.assertEqual(ForeignHighSchoolDiploma.objects.count(), 1)
         response = self.create_belgian_diploma(self.diploma_data)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
         self.assertIsNone(response.json()["foreign_diploma"])
         self.assertIsNotNone(response.json()["belgian_diploma"])
         self.assertEqual(ForeignHighSchoolDiploma.objects.count(), 0)
-        diploma = BelgianHighSchoolDiploma.objects.get(person__user_id=self.user.pk)
+        diploma = BelgianHighSchoolDiploma.objects.get(person__user_id=self.candidate_user.pk)
         self.assertEqual(diploma.institute, "Test Institute")
 
     def test_diploma_create_with_schedule(self):
         response = self.create_belgian_diploma(self.diploma_data_with_schedule)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
-        diploma = BelgianHighSchoolDiploma.objects.get(person__user_id=self.user.pk)
+        diploma = BelgianHighSchoolDiploma.objects.get(person__user_id=self.candidate_user.pk)
         self.assertEqual(diploma.institute, "Test Institute")
         self.assertIsNotNone(diploma.schedule)
         self.assertEqual(diploma.schedule.latin, 3)
@@ -154,7 +168,7 @@ class BelgianHighSchoolDiplomaTestCase(APITestCase):
     def test_diploma_create_with_schedule_without_correct_educational_type(self):
         response = self.create_belgian_diploma(self.diploma_data_educational_does_not_require_schedule)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
-        diploma = BelgianHighSchoolDiploma.objects.get(person__user_id=self.user.pk)
+        diploma = BelgianHighSchoolDiploma.objects.get(person__user_id=self.candidate_user.pk)
         self.assertEqual(diploma.institute, "Test Institute")
         self.assertIsNone(diploma.schedule)
 
@@ -163,7 +177,7 @@ class BelgianHighSchoolDiplomaTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
         response = self.create_belgian_diploma(self.diploma_data)
         self.assertIsNone(response.json()["belgian_diploma"]["schedule"])
-        diploma = BelgianHighSchoolDiploma.objects.get(person__user_id=self.user.pk)
+        diploma = BelgianHighSchoolDiploma.objects.get(person__user_id=self.candidate_user.pk)
         self.assertIsNone(diploma.schedule)
         self.assertEqual(Schedule.objects.count(), 0)
 
@@ -178,6 +192,54 @@ class BelgianHighSchoolDiplomaTestCase(APITestCase):
         self.create_belgian_diploma({})
         response = self.client.get(self.url)
         self.assertEqual(response.json(), {'belgian_diploma': None, 'foreign_diploma': None})
+
+    def test_diploma_get_with_no_role_user(self):
+        self.create_belgian_diploma(self.diploma_data)
+        self.client.force_authenticate(user=self.no_role_user)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_diploma_update_with_no_role_user(self):
+        self.create_belgian_diploma(self.diploma_data)
+        self.client.force_authenticate(user=self.no_role_user)
+        response = self.client.put(self.url, self.diploma_updated_data)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_diploma_get_with_cdd_manager_user(self):
+        self.create_belgian_diploma(self.diploma_data)
+        self.client.force_authenticate(user=self.cdd_manager_user)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_diploma_update_with_cdd_manager_user(self):
+        self.create_belgian_diploma(self.diploma_data)
+        self.client.force_authenticate(user=self.cdd_manager_user)
+        response = self.client.put(self.url, self.diploma_updated_data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_diploma_get_with_promoter_user(self):
+        self.create_belgian_diploma(self.diploma_data)
+        self.client.force_authenticate(user=self.promoter_user)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_diploma_update_with_promoter_user(self):
+        self.create_belgian_diploma(self.diploma_data)
+        self.client.force_authenticate(user=self.promoter_user)
+        response = self.client.put(self.url, self.diploma_updated_data)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_diploma_get_with_cdd_member_user(self):
+        self.create_belgian_diploma(self.diploma_data)
+        self.client.force_authenticate(user=self.cdd_manager_user)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_diploma_update_with_cdd_member_user(self):
+        self.create_belgian_diploma(self.diploma_data)
+        self.client.force_authenticate(user=self.cdd_manager_user)
+        response = self.client.put(self.url, self.diploma_updated_data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
 
 @override_settings(ROOT_URLCONF='admission.api.url_v1')

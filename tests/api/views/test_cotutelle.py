@@ -30,7 +30,8 @@ from rest_framework.test import APITestCase
 
 from admission.contrib.models import DoctorateAdmission
 from admission.tests.factories import DoctorateAdmissionFactory
-from admission.tests.factories.groups import CandidateGroupFactory, CddManagerGroupFactory, CommitteeMemberGroupFactory, PromoterGroupFactory
+from admission.tests.factories.groups import CandidateGroupFactory, CddManagerGroupFactory,\
+    CommitteeMemberGroupFactory, PromoterGroupFactory
 from admission.tests.factories.roles import CddManagerFactory
 from admission.tests.factories.supervision import CaMemberFactory, PromoterFactory
 from base.tests.factories.entity import EntityFactory

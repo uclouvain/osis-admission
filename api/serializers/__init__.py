@@ -30,4 +30,4 @@ from .person import *
 from .coordonnees import CoordonneesSerializer
 from .secondary_studies import HighSchoolDiplomaSerializer
 from .supervision import *
-from .links import *
+from .action_links import *

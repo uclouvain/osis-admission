@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-12-01 17:08+0100\n"
+"POT-Creation-Date: 2021-12-03 14:47+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,11 +17,8 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: api/serializers/fields.py:59
-msgid "Method not allowed"
-msgstr ""
-
-#: auth/predicates.py:38
+#: auth/predicates.py:38 tests/api/serializers/test_fields.py:199
+#: tests/api/serializers/test_fields.py:299
 msgid "You must be the request author to access this admission"
 msgstr ""
 
@@ -371,15 +368,15 @@ msgstr ""
 msgid "Can view the information related to the admission supervision"
 msgstr ""
 
-#: contrib/models/doctorate.py:241
-msgid "Can add and remove a member from the supervision group"
-msgstr ""
-
 #: contrib/models/doctorate.py:242
-msgid "Can add a member to the supervision group"
+msgid "Can update the information related to the admission supervision"
 msgstr ""
 
 #: contrib/models/doctorate.py:243
+msgid "Can add a member to the supervision group"
+msgstr ""
+
+#: contrib/models/doctorate.py:244
 msgid "Can remove a member from the supervision group"
 msgstr ""
 

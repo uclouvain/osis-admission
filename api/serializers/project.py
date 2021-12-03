@@ -42,7 +42,6 @@ from admission.ddd.preparation.projet_doctoral.dtos import DoctoratDTO, Proposit
 __all__ = [
     "PropositionIdentityDTOSerializer",
     "PropositionSearchDTOSerializer",
-    "PropositionSearchSerializer",
     "InitierPropositionCommandSerializer",
     "CompleterPropositionCommandSerializer",
     "DoctorateAdmissionReadSerializer",
@@ -87,34 +86,20 @@ class PropositionSearchDTOSerializer(DTOSerializer):
         'retrieve_secondary_studies': ACTION_LINKS['retrieve_secondary_studies'],
         'update_secondary_studies': ACTION_LINKS['update_secondary_studies'],
         # Proposition
-        # Project
         'destroy_proposition': ACTION_LINKS['destroy_proposition'],
-        # 'create_proposition': ACTION_LINKS['create_proposition'], # TODO MOVE IT TO GLOBAL LINKS
+        # Project
         'retrieve_proposition': ACTION_LINKS['retrieve_proposition'],
         'update_proposition': ACTION_LINKS['update_proposition'],
         # Cotutelle
         'retrieve_cotutelle': ACTION_LINKS['retrieve_cotutelle'],
         'update_cotutelle': ACTION_LINKS['update_cotutelle'],
         # Supervision
-        'add_member': ACTION_LINKS['add_member'],
-        'remove_member': ACTION_LINKS['remove_member'],
         'retrieve_supervision': ACTION_LINKS['retrieve_supervision'],
+        'update_supervision': ACTION_LINKS['update_supervision'],
     })
 
     class Meta:
         source = PropositionSearchDTO
-
-
-class PropositionSearchSerializer(serializers.Serializer):
-    # links = ActionLinksField(
-    #     actions={
-    #         'create_proposition': ACTION_LINKS['create_proposition'],
-    #     }
-    # )
-    panda = serializers.CharField(default="Panda roux")
-    propositions = serializers.ListField(
-        child=PropositionSearchDTOSerializer()
-    )
 
 
 class PropositionDTOSerializer(DTOSerializer):
@@ -139,6 +124,8 @@ class PropositionDTOSerializer(DTOSerializer):
             'retrieve_cotutelle': ACTION_LINKS['retrieve_cotutelle'],
             'update_cotutelle': ACTION_LINKS['update_cotutelle'],
             # Supervision
+            'add_member': ACTION_LINKS['add_member'],
+            'remove_member': ACTION_LINKS['remove_member'],
             'retrieve_supervision': ACTION_LINKS['retrieve_supervision'],
             'update_supervision': ACTION_LINKS['update_supervision'],
         }

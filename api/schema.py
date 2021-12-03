@@ -213,7 +213,7 @@ class AdmissionSchemaGenerator(SchemaGenerator):
                 {
                     'required': [
                         'method',
-                        'errors',
+                        'error',
                     ],
                 },
             ],

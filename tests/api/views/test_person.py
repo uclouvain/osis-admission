@@ -27,7 +27,8 @@ from django.test import override_settings
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
-from admission.tests.factories.groups import CandidateGroupFactory, PromoterGroupFactory, CddManagerGroupFactory, CommitteeMemberGroupFactory
+from admission.tests.factories.groups import CandidateGroupFactory, PromoterGroupFactory,\
+    CddManagerGroupFactory, CommitteeMemberGroupFactory
 from base.tests.factories.person import PersonFactory
 
 

@@ -34,7 +34,8 @@ from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions impor
     PromoteurNonTrouveException,
 )
 from admission.tests.factories import DoctorateAdmissionFactory
-from admission.tests.factories.groups import CandidateGroupFactory, CddManagerGroupFactory, CommitteeMemberGroupFactory, PromoterGroupFactory
+from admission.tests.factories.groups import CandidateGroupFactory, CddManagerGroupFactory,\
+    CommitteeMemberGroupFactory, PromoterGroupFactory
 from admission.tests.factories.roles import CddManagerFactory
 from admission.tests.factories.supervision import CaMemberFactory, PromoterFactory
 from base.models.enums.entity_type import EntityType
@@ -117,13 +118,6 @@ class SupervisionApiTestCase(APITestCase):
         self.client.force_authenticate(user=self.other_cdd_manager_user)
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-
-    # def test_supervision_get_using_api_promoter(self):
-    #     promoter = PromoterFactory(actor_ptr__person__first_name="Joe")
-    #     self.admission.supervision_group = promoter.actor_ptr.process
-    #     self.admission.save()
-
-    #     cls.other_candidate_user.groups.add(CandidateGroupFactory())
 
     def test_supervision_get_using_api_promoter(self):
         # Current user

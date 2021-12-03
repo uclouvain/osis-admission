@@ -27,7 +27,8 @@ from django.test import override_settings
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
-from admission.tests.factories.groups import CandidateGroupFactory, CddManagerGroupFactory, CommitteeMemberGroupFactory, PromoterGroupFactory
+from admission.tests.factories.groups import CandidateGroupFactory, CddManagerGroupFactory,\
+    CommitteeMemberGroupFactory, PromoterGroupFactory
 
 from base.models.enums.person_address_type import PersonAddressType
 from base.models.person_address import PersonAddress

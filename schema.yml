@@ -488,6 +488,44 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - propositions
+  /action_links:
+    get:
+      operationId: retrieve_action_links
+      description: Return a dictionary containing global action links related to the
+        admission.
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActionLinks'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - action-links
   /autocomplete/sector:
     get:
       operationId: listSectorDTOs
@@ -864,300 +902,33 @@ components:
         links:
           type: object
           properties:
-            retrieve_proposition_person:
-              type: object
-              properties:
-                errors:
-                  type: array
-                  items:
-                    type: string
-                  nullable: true
-                method:
-                  type: string
-                  enum:
-                  - DELETE
-                  - GET
-                  - PATCH
-                  - POST
-                  - PUT
-                  nullable: true
-                url:
-                  type: string
-                  format: uri
-                  nullable: true
-            update_proposition_person:
-              type: object
-              properties:
-                errors:
-                  type: array
-                  items:
-                    type: string
-                  nullable: true
-                method:
-                  type: string
-                  enum:
-                  - DELETE
-                  - GET
-                  - PATCH
-                  - POST
-                  - PUT
-                  nullable: true
-                url:
-                  type: string
-                  format: uri
-                  nullable: true
-            retrieve_proposition_coordinates:
-              type: object
-              properties:
-                errors:
-                  type: array
-                  items:
-                    type: string
-                  nullable: true
-                method:
-                  type: string
-                  enum:
-                  - DELETE
-                  - GET
-                  - PATCH
-                  - POST
-                  - PUT
-                  nullable: true
-                url:
-                  type: string
-                  format: uri
-                  nullable: true
-            update_proposition_coordinates:
-              type: object
-              properties:
-                errors:
-                  type: array
-                  items:
-                    type: string
-                  nullable: true
-                method:
-                  type: string
-                  enum:
-                  - DELETE
-                  - GET
-                  - PATCH
-                  - POST
-                  - PUT
-                  nullable: true
-                url:
-                  type: string
-                  format: uri
-                  nullable: true
+            retrieve_person:
+              $ref: '#/components/schemas/ActionLink'
+            update_person:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_coordinates:
+              $ref: '#/components/schemas/ActionLink'
+            update_coordinates:
+              $ref: '#/components/schemas/ActionLink'
             retrieve_secondary_studies:
-              type: object
-              properties:
-                errors:
-                  type: array
-                  items:
-                    type: string
-                  nullable: true
-                method:
-                  type: string
-                  enum:
-                  - DELETE
-                  - GET
-                  - PATCH
-                  - POST
-                  - PUT
-                  nullable: true
-                url:
-                  type: string
-                  format: uri
-                  nullable: true
+              $ref: '#/components/schemas/ActionLink'
             update_secondary_studies:
-              type: object
-              properties:
-                errors:
-                  type: array
-                  items:
-                    type: string
-                  nullable: true
-                method:
-                  type: string
-                  enum:
-                  - DELETE
-                  - GET
-                  - PATCH
-                  - POST
-                  - PUT
-                  nullable: true
-                url:
-                  type: string
-                  format: uri
-                  nullable: true
+              $ref: '#/components/schemas/ActionLink'
             destroy_proposition:
-              type: object
-              properties:
-                errors:
-                  type: array
-                  items:
-                    type: string
-                  nullable: true
-                method:
-                  type: string
-                  enum:
-                  - DELETE
-                  - GET
-                  - PATCH
-                  - POST
-                  - PUT
-                  nullable: true
-                url:
-                  type: string
-                  format: uri
-                  nullable: true
+              $ref: '#/components/schemas/ActionLink'
             retrieve_proposition:
-              type: object
-              properties:
-                errors:
-                  type: array
-                  items:
-                    type: string
-                  nullable: true
-                method:
-                  type: string
-                  enum:
-                  - DELETE
-                  - GET
-                  - PATCH
-                  - POST
-                  - PUT
-                  nullable: true
-                url:
-                  type: string
-                  format: uri
-                  nullable: true
+              $ref: '#/components/schemas/ActionLink'
             update_proposition:
-              type: object
-              properties:
-                errors:
-                  type: array
-                  items:
-                    type: string
-                  nullable: true
-                method:
-                  type: string
-                  enum:
-                  - DELETE
-                  - GET
-                  - PATCH
-                  - POST
-                  - PUT
-                  nullable: true
-                url:
-                  type: string
-                  format: uri
-                  nullable: true
+              $ref: '#/components/schemas/ActionLink'
             retrieve_cotutelle:
-              type: object
-              properties:
-                errors:
-                  type: array
-                  items:
-                    type: string
-                  nullable: true
-                method:
-                  type: string
-                  enum:
-                  - DELETE
-                  - GET
-                  - PATCH
-                  - POST
-                  - PUT
-                  nullable: true
-                url:
-                  type: string
-                  format: uri
-                  nullable: true
+              $ref: '#/components/schemas/ActionLink'
             update_cotutelle:
-              type: object
-              properties:
-                errors:
-                  type: array
-                  items:
-                    type: string
-                  nullable: true
-                method:
-                  type: string
-                  enum:
-                  - DELETE
-                  - GET
-                  - PATCH
-                  - POST
-                  - PUT
-                  nullable: true
-                url:
-                  type: string
-                  format: uri
-                  nullable: true
-            add_member:
-              type: object
-              properties:
-                errors:
-                  type: array
-                  items:
-                    type: string
-                  nullable: true
-                method:
-                  type: string
-                  enum:
-                  - DELETE
-                  - GET
-                  - PATCH
-                  - POST
-                  - PUT
-                  nullable: true
-                url:
-                  type: string
-                  format: uri
-                  nullable: true
-            remove_member:
-              type: object
-              properties:
-                errors:
-                  type: array
-                  items:
-                    type: string
-                  nullable: true
-                method:
-                  type: string
-                  enum:
-                  - DELETE
-                  - GET
-                  - PATCH
-                  - POST
-                  - PUT
-                  nullable: true
-                url:
-                  type: string
-                  format: uri
-                  nullable: true
+              $ref: '#/components/schemas/ActionLink'
             retrieve_supervision:
-              type: object
-              properties:
-                errors:
-                  type: array
-                  items:
-                    type: string
-                  nullable: true
-                method:
-                  type: string
-                  enum:
-                  - DELETE
-                  - GET
-                  - PATCH
-                  - POST
-                  - PUT
-                  nullable: true
-                url:
-                  type: string
-                  format: uri
-                  nullable: true
+              $ref: '#/components/schemas/ActionLink'
+            update_supervision:
+              $ref: '#/components/schemas/ActionLink'
+          readOnly: true
           default: {}
       required:
       - uuid
@@ -1342,6 +1113,8 @@ components:
     PropositionDTO:
       type: object
       properties:
+        uuid:
+          type: string
         type_admission:
           type: string
         justification:
@@ -1417,7 +1190,43 @@ components:
           type: string
         statut:
           type: string
+        links:
+          type: object
+          properties:
+            retrieve_person:
+              $ref: '#/components/schemas/ActionLink'
+            update_person:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_coordinates:
+              $ref: '#/components/schemas/ActionLink'
+            update_coordinates:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_secondary_studies:
+              $ref: '#/components/schemas/ActionLink'
+            update_secondary_studies:
+              $ref: '#/components/schemas/ActionLink'
+            destroy_proposition:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_proposition:
+              $ref: '#/components/schemas/ActionLink'
+            update_proposition:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_cotutelle:
+              $ref: '#/components/schemas/ActionLink'
+            update_cotutelle:
+              $ref: '#/components/schemas/ActionLink'
+            add_member:
+              $ref: '#/components/schemas/ActionLink'
+            remove_member:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_supervision:
+              $ref: '#/components/schemas/ActionLink'
+            update_supervision:
+              $ref: '#/components/schemas/ActionLink'
+          readOnly: true
+          default: {}
       required:
+      - uuid
       - type_admission
       - sigle_doctorat
       - annee_doctorat
@@ -1513,6 +1322,16 @@ components:
       required:
       - signatures_promoteurs
       - signatures_membres_CA
+    ActionLinks:
+      type: object
+      properties:
+        links:
+          type: object
+          properties:
+            create_proposition:
+              $ref: '#/components/schemas/ActionLink'
+          readOnly: true
+          default: {}
     SectorDTO:
       type: object
       properties:
@@ -1814,10 +1633,8 @@ components:
     ActionLink:
       type: object
       properties:
-        errors:
-          type: array
-          items:
-            type: string
+        error:
+          type: string
         method:
           type: string
           enum:
@@ -1835,7 +1652,7 @@ components:
         - url
       - required:
         - method
-        - errors
+        - error
   securitySchemes:
     Token:
       type: apiKey

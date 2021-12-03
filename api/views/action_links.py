@@ -33,20 +33,20 @@ from admission.api.schema import ResponseSpecificSchema
 class ActionLinkSchema(ResponseSpecificSchema):
     operation_id_base = '_action_links'
     serializer_mapping = {
-        'GET': serializers.PropositionLinksSerializer,
+        'GET': serializers.ActionLinksSerializer,
     }
 
 
 class ActionLinksApiView(RetrieveAPIView, GenericAPIView):
     name = "action_links"
     schema = ActionLinkSchema()
-    serializer_class = serializers.PropositionLinksSerializer
+    serializer_class = serializers.ActionLinksSerializer
 
     def get(self, request):
         """
         Return a dictionary containing global action links related to the admission.
         """
-        serializer = serializers.PropositionLinksSerializer(
+        serializer = serializers.ActionLinksSerializer(
             instance=request.user,
             context=self.get_serializer_context()
         )

@@ -238,7 +238,8 @@ class DoctorateAdmission(BaseAdmission):
             ('view_doctorateadmission_cotutelle', _("Can view the information related to the admission cotutelle")),
             ('change_doctorateadmission_cotutelle', _("Can update the information related to the admission cotutelle")),
             ('view_doctorateadmission_supervision', _("Can view the information related to the admission supervision")),
-            ('change_doctorateadmission_supervision', _("Can add and remove a member from the supervision group")),
+            ('change_doctorateadmission_supervision',
+             _("Can update the information related to the admission supervision")),
             ('add_supervision_member', _("Can add a member to the supervision group")),
             ('remove_supervision_member', _("Can remove a member from the supervision group")),
         ]

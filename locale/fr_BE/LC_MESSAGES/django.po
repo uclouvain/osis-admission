@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-12-01 17:08+0100\n"
+"POT-Creation-Date: 2021-12-03 14:47+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,11 +17,8 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: api/serializers/fields.py:59
-msgid "Method not allowed"
-msgstr "Méthode non autorisée"
-
-#: auth/predicates.py:38
+#: auth/predicates.py:38 tests/api/serializers/test_fields.py:199
+#: tests/api/serializers/test_fields.py:299
 msgid "You must be the request author to access this admission"
 msgstr "Vous devez être l'auteur de la demande pour accéder à cette admission"
 
@@ -376,17 +373,16 @@ msgstr "Peut modifier les informations relatives à la cotutelle"
 msgid "Can view the information related to the admission supervision"
 msgstr "Peut voir les informations relatives à la supervision de l'admission"
 
-#: contrib/models/doctorate.py:241
-#, fuzzy
-#| msgid "Can remove a member from the supervision group"
-msgid "Can add and remove a member from the supervision group"
-msgstr "Peut retirer un membre du groupe de supervision"
-
 #: contrib/models/doctorate.py:242
+msgid "Can update the information related to the admission supervision"
+msgstr ""
+"Peut modifier les informations relatives à la supervision de l'admission"
+
+#: contrib/models/doctorate.py:243
 msgid "Can add a member to the supervision group"
 msgstr "Peut ajouter un membre au groupe de supervision"
 
-#: contrib/models/doctorate.py:243
+#: contrib/models/doctorate.py:244
 msgid "Can remove a member from the supervision group"
 msgstr "Peut retirer un membre du groupe de supervision"
 
@@ -656,7 +652,3 @@ msgstr "Fermer"
 #: templates/admission/doctorate/includes/admission_doctorate_action_bar.html:51
 msgid "Confirm"
 msgstr "Confirmer"
-
-#~ msgid "Can update the information related to the admission supervision"
-#~ msgstr ""
-#~ "Peut modifier les informations relatives à la supervision de l'admission"
