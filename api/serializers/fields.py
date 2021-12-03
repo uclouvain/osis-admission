@@ -108,20 +108,20 @@ class ActionLinksField(serializers.Field):
 ACTION_LINKS = {
     # Profile
     # Person
-    'retrieve_proposition_person': {
+    'retrieve_person': {
         'path_name': 'admission_api_v1:person',
         'method': 'GET',
     },
-    'update_proposition_person': {
+    'update_person': {
         'path_name': 'admission_api_v1:person',
         'method': 'PUT',
     },
     # Coordinates
-    'retrieve_proposition_coordinates': {
+    'retrieve_coordinates': {
         'path_name': 'admission_api_v1:coordonnees',
         'method': 'GET',
     },
-    'update_proposition_coordinates': {
+    'update_coordinates': {
         'path_name': 'admission_api_v1:coordonnees',
         'method': 'PUT',
     },
@@ -184,6 +184,11 @@ ACTION_LINKS = {
     'retrieve_supervision': {
         'path_name': 'admission_api_v1:supervision',
         'method': 'GET',
+        'params': ['uuid'],
+    },
+    'update_supervision': {
+        'path_name': 'admission_api_v1:supervision',
+        'method': 'PUT',
         'params': ['uuid'],
     },
 }
