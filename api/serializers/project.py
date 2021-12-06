@@ -41,7 +41,7 @@ from admission.ddd.preparation.projet_doctoral.dtos import DoctoratDTO, Proposit
 
 __all__ = [
     "PropositionIdentityDTOSerializer",
-    "PropositionSearchDTOSerializer",
+    "PropositionSearchSerializer",
     "InitierPropositionCommandSerializer",
     "CompleterPropositionCommandSerializer",
     "DoctorateAdmissionReadSerializer",
@@ -100,6 +100,14 @@ class PropositionSearchDTOSerializer(DTOSerializer):
 
     class Meta:
         source = PropositionSearchDTO
+
+
+class PropositionSearchSerializer(serializers.Serializer):
+    links = ActionLinksField(actions={
+        'create_proposition': ACTION_LINKS['create_proposition']
+    })
+
+    propositions = PropositionSearchDTOSerializer(many=True)
 
 
 class PropositionDTOSerializer(DTOSerializer):

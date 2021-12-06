@@ -30,7 +30,6 @@ from admission.api.views.cotutelle import *
 from admission.api.views.person import *
 from admission.api.views.project import *
 from admission.api.views.supervision import *
-from admission.api.views.action_links import ActionLinksApiView
 
 __all__ = [
     "CoordonneesViewSet",
@@ -44,5 +43,4 @@ __all__ = [
     "AutocompletePersonView",
     "CotutelleAPIView",
     "SupervisionAPIView",
-    "ActionLinksApiView",
 ]

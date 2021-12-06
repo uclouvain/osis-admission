@@ -49,9 +49,10 @@ from osis_role.contrib.views import APIPermissionRequiredMixin
 
 class PropositionListSchema(ResponseSpecificSchema):
     serializer_mapping = {
-        'GET': serializers.PropositionSearchDTOSerializer,
+        'GET': serializers.PropositionSearchSerializer,
         'POST': (serializers.InitierPropositionCommandSerializer, serializers.PropositionIdentityDTOSerializer),
     }
+    list_force_object = True
 
     def get_operation_id_base(self, path, method, action):
         return '_proposition' if method == 'POST' else '_propositions'
@@ -79,9 +80,10 @@ class PropositionListView(APIPermissionRequiredMixin, DisplayExceptionsByFieldNa
         proposition_list = message_bus_instance.invoke(
             SearchPropositionsCommand(matricule_candidat=request.user.person.global_id)
         )
-        serializer = serializers.PropositionSearchDTOSerializer(
-            instance=proposition_list,
-            many=True,
+        serializer = serializers.PropositionSearchSerializer(
+            instance={
+                "propositions": proposition_list,
+            },
             context=self.get_serializer_context(),
         )
         return Response(serializer.data)
