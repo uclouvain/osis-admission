@@ -28,7 +28,6 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from admission.api.serializers.fields import ACTION_LINKS
 from admission.contrib.models import AdmissionType, DoctorateAdmission
 from admission.ddd.preparation.projet_doctoral.domain.model._enums import ChoixStatusProposition
 from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import DoctoratNonTrouveException
@@ -81,9 +80,19 @@ class DoctorateAdmissionListApiTestCase(APITestCase):
         response = self.client.get(self.url, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
         # Check response data
-        self.assertEqual(len(response.data), 1)
-        # Check links
-        self.assertTrue('links' in response.data[0])
+        # Global links
+        self.assertTrue('links' in response.data)
+        self.assertTrue('create_proposition' in response.data['links'])
+        self.assertEqual(response.data['links']['create_proposition'], {
+            'method': 'POST',
+            'url': reverse('admission_api_v1:propositions'),
+        })
+        # Propositions
+        self.assertTrue('propositions' in response.data)
+        self.assertEqual(len(response.data['propositions']), 1)
+        first_proposition = response.data['propositions'][0]
+        # Check proposition links
+        self.assertTrue('links' in first_proposition)
         actions = [
             'retrieve_person',
             'update_person',
@@ -100,14 +109,14 @@ class DoctorateAdmissionListApiTestCase(APITestCase):
             'update_supervision',
         ]
         self.assertCountEqual(
-            list(response.data[0]['links']),
+            list(first_proposition['links']),
             actions,
         )
         for action in actions:
             # Check the url
-            self.assertTrue('url' in response.data[0]['links'][action])
+            self.assertTrue('url' in first_proposition['links'][action])
             # Check the method type
-            self.assertTrue('method' in response.data[0]['links'][action])
+            self.assertTrue('method' in first_proposition['links'][action])
 
     def test_list_propositions_no_role(self):
         self.client.force_authenticate(user=self.no_role_user)
@@ -195,7 +204,7 @@ class DoctorateAdmissionCreationApiTestCase(APITestCase):
         self.assertEqual(admission.type, self.create_data["type_admission"])
         self.assertEqual(admission.comment, self.create_data["justification"])
         response = self.client.get(self.url, format="json")
-        self.assertEqual(response.json()[0]['sigle_doctorat'], self.doctorate.acronym)
+        self.assertEqual(response.json()['propositions'][0]['sigle_doctorat'], self.doctorate.acronym)
 
     def test_admission_doctorate_creation_using_api_no_role(self):
         self.client.force_authenticate(user=self.no_role_user)
