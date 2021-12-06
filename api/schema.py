@@ -181,43 +181,6 @@ class AdmissionSchemaGenerator(SchemaGenerator):
                 "fr-be"
             ]
         }
-        # Custom fields
-        schema['components']['schemas']['ActionLink'] = {
-            'type': 'object',
-            'properties': {
-                'error': {
-                    'type': 'string',
-                },
-                'method': {
-                    'type': 'string',
-                    'enum': [
-                        'DELETE',
-                        'GET',
-                        'PATCH',
-                        'POST',
-                        'PUT',
-                    ],
-                },
-                'url': {
-                    'type': 'string',
-                    'format': 'uri',
-                },
-            },
-            'oneOf': [
-                {
-                    'required': [
-                        'method',
-                        'url',
-                    ],
-                },
-                {
-                    'required': [
-                        'method',
-                        'error',
-                    ],
-                },
-            ],
-        }
         for path, path_content in schema['paths'].items():
             for method, method_content in path_content.items():
                 # Add extra global headers to each endpoint
@@ -265,6 +228,47 @@ class ActionLinksFieldSchemaMixin:
             }
 
         return super().map_field(field)
+
+    def get_components(self, path, method):
+        components = super().get_components(path, method)
+        # Add a custom component for the field
+        components['ActionLink'] = {
+            'type': 'object',
+            'properties': {
+                'error': {
+                    'type': 'string',
+                },
+                'method': {
+                    'type': 'string',
+                    'enum': [
+                        'DELETE',
+                        'GET',
+                        'PATCH',
+                        'POST',
+                        'PUT',
+                    ],
+                },
+                'url': {
+                    'type': 'string',
+                    'format': 'uri',
+                },
+            },
+            'oneOf': [
+                {
+                    'required': [
+                        'method',
+                        'url',
+                    ],
+                },
+                {
+                    'required': [
+                        'method',
+                        'error',
+                    ],
+                },
+            ],
+        }
+        return components
 
 
 class BetterChoicesSchema(ActionLinksFieldSchemaMixin, AutoSchema):
@@ -361,7 +365,7 @@ class DetailedAutoSchema(ChoicesEnumSchema):
         else:
             item_schema = self._get_reference(serializer)
 
-        if is_list_view(path, method, self.view):
+        if is_list_view(path, method, self.view) and not getattr(self, 'list_force_object', False):
             response_schema = {
                 'type': 'array',
                 'items': item_schema,

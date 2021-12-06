@@ -759,6 +759,29 @@ components:
         last_registration_year:
           type: integer
           nullable: true
+    ActionLink:
+      type: object
+      properties:
+        error:
+          type: string
+        method:
+          type: string
+          enum:
+          - DELETE
+          - GET
+          - PATCH
+          - POST
+          - PUT
+        url:
+          type: string
+          format: uri
+      oneOf:
+      - required:
+        - method
+        - url
+      - required:
+        - method
+        - error
     Coordonnees:
       type: object
       properties:
