@@ -132,10 +132,7 @@ class PropositionViewSet(
         )
         serializer = serializers.PropositionDTOSerializer(
             instance=proposition,
-            context={
-                'request': request,
-                'kwargs': kwargs,
-            }
+            context=self.get_serializer_context()
         )
         return Response(serializer.data)
 
