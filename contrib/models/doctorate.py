@@ -26,6 +26,8 @@
 
 from django.contrib.postgres.fields import JSONField
 from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
@@ -53,6 +55,14 @@ class DoctorateAdmission(BaseAdmission):
         default='',
         blank=True,
     )
+    reference = models.CharField(
+        max_length=32,
+        verbose_name=_("Reference"),
+        unique=True,
+        editable=False,
+    )
+    # Please don't change this value
+    DEFAULT_REFERENCE_ID = 300000
 
     # Financement
     financing_type = models.CharField(
@@ -226,3 +236,14 @@ class DoctorateAdmission(BaseAdmission):
 
     def get_absolute_url(self):
         return reverse("admission:doctorate-detail", args=[self.pk])
+
+
+@receiver(post_save, sender=DoctorateAdmission)
+def set_default_reference(sender, instance, created, **kwargs):
+    # Set the reference of the admission on creation (based on the academic year and the instance id)
+    if created:
+        instance.reference = "{}-{}".format(
+            instance.doctorate.academic_year.year % 100,
+            instance.DEFAULT_REFERENCE_ID + instance.id,
+        )
+        instance.save()

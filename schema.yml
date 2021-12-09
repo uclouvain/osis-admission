@@ -840,6 +840,8 @@ components:
       properties:
         uuid:
           type: string
+        reference:
+          type: string
         type_admission:
           type: string
         sigle_doctorat:
@@ -863,6 +865,7 @@ components:
           type: string
       required:
       - uuid
+      - reference
       - type_admission
       - sigle_doctorat
       - intitule_doctorat_fr
@@ -1046,6 +1049,8 @@ components:
       properties:
         type_admission:
           type: string
+        reference:
+          type: string
         justification:
           type: string
         sigle_doctorat:
@@ -1121,6 +1126,7 @@ components:
           type: string
       required:
       - type_admission
+      - reference
       - sigle_doctorat
       - annee_doctorat
       - intitule_doctorat_fr

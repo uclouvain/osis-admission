@@ -62,6 +62,7 @@ class Proposition(interface.RootEntity):
     doctorat_id = attr.ib(type=DoctoratIdentity)
     matricule_candidat = attr.ib(type=str)
     projet = attr.ib(type=DetailProjet)
+    reference = attr.ib(type=str)
     justification = attr.ib(type=Optional[str], default='')
     statut = attr.ib(type=ChoixStatusProposition, default=ChoixStatusProposition.IN_PROGRESS)
     bureau_CDE = attr.ib(

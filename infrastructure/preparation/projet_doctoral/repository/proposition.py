@@ -58,6 +58,7 @@ def _instantiate_admission(admission: DoctorateAdmission) -> Proposition:
         type_admission=ChoixTypeAdmission[admission.type],
         doctorat_id=DoctoratIdentity(admission.doctorate.acronym, admission.doctorate.academic_year.year),
         matricule_candidat=admission.candidate.global_id,
+        reference=admission.reference,
         projet=DetailProjet(
             titre=admission.project_title,
             resume=admission.project_abstract,
@@ -125,6 +126,7 @@ class PropositionRepository(IPropositionRepository):
             uuid=entity.entity_id.uuid,
             defaults={
                 'type': entity.type_admission.name,
+                'reference': entity.reference,
                 'status': entity.statut.name,
                 'comment': entity.justification,
                 'candidate': Person.objects.get(global_id=entity.matricule_candidat),
