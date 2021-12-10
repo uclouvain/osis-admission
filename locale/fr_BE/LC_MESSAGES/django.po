@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-10-15 12:14+0200\n"
+"POT-Creation-Date: 2021-12-08 09:45+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,31 +17,21 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#, python-format
-msgid ""
-"\n"
-"                %(start_index)s to %(end_index)s of %(total_counts)s "
-"doctorate admissions"
+msgid "You must be the request author to access this admission"
+msgstr "Vous devez être l'auteur de la demande pour accéder à cette admission"
+
+msgid "You must be the request promoter to access this admission"
 msgstr ""
-"\n"
-"                %(start_index)s à %(end_index)s sur %(total_counts)s "
-"admissions en doctorat"
+"Vous devez être le promoteur de la demande pour accéder à cette admission"
 
-#, python-format
 msgid ""
-"\n"
-"              Are you sure you want to delete \"%(object)s\"?\n"
-"            "
+"You must be a member of the doctoral commission to access this admission"
 msgstr ""
-"\n"
-"              Êtes-vous sûr de vouloir supprimer \"%(object)s\"?\n"
-"            "
+"Vous devez être membre de la commission doctorale pour accéder à cette "
+"admission"
 
-msgid "A justification is needed when creating a pre-admission."
-msgstr "Une justification est requise pour une pré-admission."
-
-msgid "ADMISSION"
-msgstr "Admission"
+msgid "You must be a member of the committee to access this admission"
+msgstr "Vous devez être membre du comité pour accéder à cette admission"
 
 msgid "ADRE"
 msgstr "ADRE"
@@ -49,99 +39,11 @@ msgstr "ADRE"
 msgid "ADREs"
 msgstr "ADRE"
 
-msgid "APPROVED"
-msgstr "Approuvé"
+msgid "Committee member"
+msgstr "Membre du comité"
 
-msgid "Abstract"
-msgstr "Résumé"
-
-msgid "Additional training project"
-msgstr "Projet de formation complémentaire"
-
-msgid "Admission"
-msgstr "Admission"
-
-msgid "Already a member of CA."
-msgstr "Déjà membre du CA"
-
-msgid "Already a promoter."
-msgstr "Déjà promoteur"
-
-msgid "Author"
-msgstr "Auteur"
-
-msgid "Bureau"
-msgstr "Bureau"
-
-msgid "CA Member"
-msgstr "Membre du CA"
-
-msgid "CANCELLED"
-msgstr "Annulé"
-
-msgid "CDD manager"
-msgstr "Gestionnaire CDD"
-
-msgid "CDD managers"
-msgstr "Gestionnaires CDD"
-
-msgid "CDE Bureau should be filled in only if the doctorate's entity is CDE"
-msgstr ""
-"Le bureau CDE doit être rempli uniquement si l'entité du doctorat est CDE"
-
-msgid "Can access doctorate admission list"
-msgstr "Peut accéder à la liste des admission en doctorat"
-
-msgid "Can appose CDD notice"
-msgstr "Peut apposer un avis CDD"
-
-msgid "Can appose SIC notice"
-msgstr "Peut apposer un avis SIC"
-
-msgid "Can approve confirmation paper"
-msgstr "Peut approuver la lettre de confirmation"
-
-msgid "Can approve jury"
-msgstr "Peut approuver le jury"
-
-msgid "Can check copyright"
-msgstr "Peut vérifier le copyright"
-
-msgid "Can check publication autorisation"
-msgstr "Peut vérifier l'autorisation de publication"
-
-msgid "Can download PDF confirmation"
-msgstr "Peut télécharger la confirmation PDF"
-
-msgid "Can download jury-approved PDF"
-msgstr "Peut télécharger le PDF d'avis du jury"
-
-msgid "Can fill thesis"
-msgstr "Peut spécifier la thèse"
-
-msgid "Can sign diploma"
-msgstr "Peut signer le diplôme"
-
-msgid "Can submit thesis"
-msgstr "Peut soumettre la thèse"
-
-msgid "Can upload PDF confirmation"
-msgstr "Peut téléverser le PDF de confirmation"
-
-msgid "Can upload defense report"
-msgstr "Peut téléverser le rapport de soutenance"
-
-msgid "Can upload jury-approved PDF"
-msgstr "Peut téléverser le PDF d'avis du jury"
-
-msgid "Can upload signed scholarship"
-msgstr "Peut téléverser la bourse signée"
-
-msgid "Can validate doctoral training"
-msgstr "Peut valider la formation doctorale"
-
-msgid "Can validate registration"
-msgstr "Peut valider l'inscription"
+msgid "Committee members"
+msgstr "Membres du comité"
 
 msgid "Candidate"
 msgstr "Candidat"
@@ -149,201 +51,29 @@ msgstr "Candidat"
 msgid "Candidates"
 msgstr "Candidats"
 
-msgid "Close"
-msgstr "Fermer"
+msgid "CDD manager"
+msgstr "Gestionnaire CDD"
 
-msgid "Comment"
-msgstr "Commentaire"
-
-msgid "Committee member"
-msgstr "Membre du comité"
-
-msgid "Committee members"
-msgstr "Membres du comité"
-
-msgid "Confirm"
-msgstr "Confirmer"
-
-msgid "Cotutelle convention"
-msgstr "Convention de cotutelle"
-
-msgid "Cotutelle request document"
-msgstr "Demande d'ouverture de cotutelle"
-
-msgid "Create new doctorate admission"
-msgstr "Créer une nouvelle admission en doctorat"
-
-msgid "Created"
-msgstr "Créé"
-
-msgid "Dedicated time (in EFT)"
-msgstr "Temps consacré (en EFT)"
-
-msgid "Defense"
-msgstr "Soutenance"
-
-msgid "Delete"
-msgstr "Supprimer"
-
-msgid "Delete?"
-msgstr "Supprimer ?"
-
-msgid "Doctorate"
-msgstr "Doctorat"
-
-msgid "Doctorate admission"
-msgstr "Admission en doctorat"
-
-msgid "Doctorate admissions"
-msgstr "Admissions en doctorat"
-
-msgid "ECONOMY"
-msgstr "Economie"
-
-msgid "EFT"
-msgstr "EFT"
-
-msgid "English"
-msgstr "Anglais"
-
-msgid "Export"
-msgstr "Exporter"
-
-msgid "Financing type"
-msgstr "Type de financement"
-
-msgid "French"
-msgstr "Français"
-
-msgid "Gantt graph"
-msgstr "Graphe de Gantt"
-
-msgid "INVITED"
-msgstr "Invité"
-
-msgid "IN_PROGRESS"
-msgstr "En cours"
-
-msgid "Institution"
-msgstr "Institution"
-
-msgid "Institution should be set when PhD has been set to yes or partial"
-msgstr ""
-"L'institution doit être renseignée quand le doctorat a déjà été réalisé "
-"partiellement ou complétement."
-
-msgid "Jury secretaries"
-msgstr "Secrétaires de jury"
+msgid "CDD managers"
+msgstr "Gestionnaires CDD"
 
 msgid "Jury secretary"
 msgstr "Secrétaire de jury"
 
-msgid "List of doctorate admissions"
-msgstr "Liste des admissions en doctorat"
-
-msgid "List of doctorate admissions with administrative data"
-msgstr "Liste des admissions en doctorat et données administratives"
-
-msgid "MANAGEMENT"
-msgstr "Gestion"
-
-msgid "Member of supervision group already invited."
-msgstr "Membre du groupe de supervision déjà invité."
-
-msgid "Member of supervision group not found."
-msgstr "Membre du groupe de supervision non trouvé."
-
-msgid "Member of supervision group not invited."
-msgstr "Membre du groupe de supervision non invité"
-
-msgid "Membre CA not found."
-msgstr "Membre du CA non trouvé"
-
-msgid "Modified"
-msgstr "Modifée"
-
-msgid "Motivation"
-msgstr "Motivation"
-
-msgid "NO"
-msgstr "Non"
-
-msgid "NOT_INVITED"
-msgstr "Non invité"
-
-msgid "No PhD found."
-msgstr "Pas de doctorat trouvé"
-
-msgid "No defense reason"
-msgstr "Raison de non-soutenance"
-
-msgid "Other"
-msgstr "Autre"
-
-msgid "Other cotutelle-related documents"
-msgstr "Autres documents relatifs à la cotutelle"
-
-msgid "PARTIAL"
-msgstr "Partiel"
-
-msgid "PRE_ADMISSION"
-msgstr "Pre-admission"
-
-msgid "PhD already done"
-msgstr "Doctorat déjà réalisé"
-
-msgid "Planned duration"
-msgstr "Durée prévue"
-
-msgid "Pre-Admission"
-msgstr "Pré-Admission"
-
-msgid "Produce xls of doctorate admissions with administrative data"
-msgstr ""
-"Produire un fichier Excel avec la liste des admissions en doctorat et "
-"données administratives"
-
-msgid "Produce xls with a list of doctorate admissions"
-msgstr "Produire un fichier xls avec la liste des admissions en doctorat"
-
-msgid "Program proposition"
-msgstr "Proposition de programme"
-
-msgid "Project"
-msgstr "Projet"
-
-msgid "Project title"
-msgstr "Titre du projet"
+msgid "Jury secretaries"
+msgstr "Secrétaires de jury"
 
 msgid "Promoter"
 msgstr "Promoteur"
 
-msgid "Promoter not found."
-msgstr "Promoteur non trouvé."
-
 msgid "Promoters"
 msgstr "Promoteurs"
-
-msgid "Proposition not found."
-msgstr "Proposition non trouvée."
-
-msgid "REFUSED"
-msgstr "Refusé"
-
-msgid "Recommendation letters"
-msgstr "Lettres de recommandation"
 
 msgid "SCEB"
 msgstr "SCEB"
 
 msgid "SCEBs"
 msgstr "SCEB"
-
-msgid "SEARCH_SCHOLARSHIP"
-msgstr "Bourse de recherche"
-
-msgid "SELF_FUNDING"
-msgstr "Auto-financement"
 
 msgid "SIC director"
 msgstr "Directeur SIC"
@@ -357,58 +87,341 @@ msgstr "Gestionnaire SIC"
 msgid "SIC managers"
 msgstr "Gestionnaires SIC"
 
-msgid "SUBMITTED"
-msgstr "Soumis"
+msgid "Type"
+msgstr "Type"
+
+msgid "Comment"
+msgstr "Commentaire"
+
+msgid "Created"
+msgstr "Créé"
+
+msgid "Modified"
+msgstr "Modifée"
+
+#, python-brace-format
+msgid "{degree} [{type}] for {candidate}"
+msgstr "{degree} [{type}] pour {candidate}"
+
+msgid "Doctorate"
+msgstr "Doctorat"
+
+msgid "Bureau"
+msgstr "Bureau"
+
+msgid "Financing type"
+msgstr "Type de financement"
+
+msgid "Working contract type"
+msgstr "Type de contrat de travail"
+
+msgid "EFT"
+msgstr "EFT"
 
 msgid "Scholarship grant"
 msgstr "Bourse de recherche"
 
-msgid "Supervision group not found."
-msgstr "Groupe de supervision non trouvé."
+msgid "Planned duration"
+msgstr "Durée prévue"
 
-msgid "Thesis institute"
-msgstr "Institut de la thèse"
+msgid "Dedicated time (in EFT)"
+msgstr "Temps consacré (en EFT)"
+
+msgid "Project title"
+msgstr "Titre du projet"
+
+msgid "Abstract"
+msgstr "Résumé"
 
 msgid "Thesis language"
 msgstr "Langue de la thèse"
 
+msgid "Thesis institute"
+msgstr "Institut de la thèse"
+
 msgid "Thesis location"
 msgstr "Lieu de la thèse"
 
-msgid "Type"
-msgstr "Type"
+msgid "Project"
+msgstr "Projet"
 
-msgid "UUID"
-msgstr "UUID"
+msgid "Gantt graph"
+msgstr "Graphe de Gantt"
+
+msgid "Program proposition"
+msgstr "Proposition de programme"
+
+msgid "Additional training project"
+msgstr "Projet de formation complémentaire"
+
+msgid "Recommendation letters"
+msgstr "Lettres de recommandation"
+
+msgid "PhD already done"
+msgstr "Doctorat déjà réalisé"
+
+msgid "Institution"
+msgstr "Institution"
+
+msgid "Defense"
+msgstr "Soutenance"
+
+msgid "No defense reason"
+msgstr "Raison de non-soutenance"
+
+msgid "Motivation"
+msgstr "Motivation"
+
+msgid "Cotutelle request document"
+msgstr "Demande d'ouverture de cotutelle"
+
+msgid "Cotutelle convention"
+msgstr "Convention de cotutelle"
+
+msgid "Other cotutelle-related documents"
+msgstr "Autres documents relatifs à la cotutelle"
+
+msgid "Doctorate admission"
+msgstr "Admission en doctorat"
+
+msgid "Can access doctorate admission list"
+msgstr "Peut accéder à la liste des admission en doctorat"
+
+msgid "Can download jury-approved PDF"
+msgstr "Peut télécharger le PDF d'avis du jury"
+
+msgid "Can upload jury-approved PDF"
+msgstr "Peut téléverser le PDF d'avis du jury"
+
+msgid "Can upload signed scholarship"
+msgstr "Peut téléverser la bourse signée"
+
+msgid "Can check publication autorisation"
+msgstr "Peut vérifier l'autorisation de publication"
+
+msgid "Can validate registration"
+msgstr "Peut valider l'inscription"
+
+msgid "Can approve jury"
+msgstr "Peut approuver le jury"
+
+msgid "Can approve confirmation paper"
+msgstr "Peut approuver la lettre de confirmation"
+
+msgid "Can validate doctoral training"
+msgstr "Peut valider la formation doctorale"
+
+msgid "Can download PDF confirmation"
+msgstr "Peut télécharger la confirmation PDF"
+
+msgid "Can upload PDF confirmation"
+msgstr "Peut téléverser le PDF de confirmation"
+
+msgid "Can fill thesis"
+msgstr "Peut spécifier la thèse"
+
+msgid "Can submit thesis"
+msgstr "Peut soumettre la thèse"
+
+msgid "Can appose CDD notice"
+msgstr "Peut apposer un avis CDD"
+
+msgid "Can appose SIC notice"
+msgstr "Peut apposer un avis SIC"
+
+msgid "Can upload defense report"
+msgstr "Peut téléverser le rapport de soutenance"
+
+msgid "Can check copyright"
+msgstr "Peut vérifier le copyright"
+
+msgid "Can sign diploma"
+msgstr "Peut signer le diplôme"
+
+msgid "Can view the information related to the admission request author"
+msgstr ""
+"Peut voir les informations relatives à l'auteur de la demande d'admission"
+
+msgid "Can update the information related to the admission request author"
+msgstr ""
+"Peut modifier les informations relatives à l'auteur de la demande d'admission"
+
+msgid "Can view the coordinates of the admission request author"
+msgstr "Peut voir les coordonnées de l'auteur de la demande d'admission"
+
+msgid "Can update the coordinates of the admission request author"
+msgstr "Peut modifier les coordonnées de l'auteur de la demande d'admission"
+
+msgid "Can view the information related to the secondary studies"
+msgstr "Peut voir les informations relatives aux études secondaires"
+
+msgid "Can update the information related to the secondary studies"
+msgstr "Peut modifier les informations relatives aux études secondaires"
+
+msgid "Can view the information related to the curriculum"
+msgstr "Peut voir les informations relatives au curriculum"
+
+msgid "Can update the information related to the curriculum"
+msgstr "Peut modifier les informations relatives au curriculum"
+
+msgid "Can view the information related to the admission project"
+msgstr "Peut voir les informations relatives au projet d'admission"
+
+msgid "Can update the information related to the admission project"
+msgstr "Peut modifier les informations relatives au projet d'admission"
+
+msgid "Can view the information related to the admission cotutelle"
+msgstr "Peut voir les informations relatives à la cotutelle"
+
+msgid "Can update the information related to the admission cotutelle"
+msgstr "Peut modifier les informations relatives à la cotutelle"
+
+msgid "Can view the information related to the admission supervision"
+msgstr "Peut voir les informations relatives à la supervision de l'admission"
+
+msgid "Can update the information related to the admission supervision"
+msgstr ""
+"Peut modifier les informations relatives à la supervision de l'admission"
+
+msgid "Can add a member to the supervision group"
+msgstr "Peut ajouter un membre au groupe de supervision"
+
+msgid "Can remove a member from the supervision group"
+msgstr "Peut retirer un membre du groupe de supervision"
+
+msgid "CA Member"
+msgstr "Membre du CA"
+
+msgid "Admission"
+msgstr "Admission"
+
+msgid "Pre-Admission"
+msgstr "Pré-Admission"
+
+msgid "French"
+msgstr "Français"
+
+msgid "English"
+msgstr "Anglais"
+
+msgid "Other"
+msgstr "Autre"
 
 msgid "Undecided"
 msgstr "Non décidé"
 
-msgid "Update"
-msgstr "Mettre à jour"
+msgid "CANCELLED"
+msgstr "Annulé"
 
-msgid "Update doctorate admission"
-msgstr "Mettre à jour admission en doctorat"
+msgid "IN_PROGRESS"
+msgstr "En cours"
+
+msgid "SUBMITTED"
+msgstr "Soumis"
+
+msgid "ECONOMY"
+msgstr "Economie"
+
+msgid "MANAGEMENT"
+msgstr "Gestion"
+
+msgid "ADMISSION"
+msgstr "Admission"
+
+msgid "PRE_ADMISSION"
+msgstr "Pre-admission"
+
+msgid "YES"
+msgstr "Oui"
+
+msgid "NO"
+msgstr "Non"
+
+msgid "PARTIAL"
+msgstr "Partiel"
 
 msgid "WORK_CONTRACT"
 msgstr "Contrat de travail"
+
+msgid "SEARCH_SCHOLARSHIP"
+msgstr "Bourse de recherche"
+
+msgid "SELF_FUNDING"
+msgstr "Auto-financement"
+
+msgid "NOT_INVITED"
+msgstr "Non invité"
+
+msgid "INVITED"
+msgstr "Invité"
+
+msgid "APPROVED"
+msgstr "Approuvé"
+
+msgid "REFUSED"
+msgstr "Refusé"
+
+msgid "You've reached the maximum authorized propositions."
+msgstr "Vous avez atteint le maximum de propositions."
+
+msgid "No PhD found."
+msgstr "Pas de doctorat trouvé"
+
+msgid "Proposition not found."
+msgstr "Proposition non trouvée."
+
+msgid "Supervision group not found."
+msgstr "Groupe de supervision non trouvé."
+
+msgid "CDE Bureau should be filled in only if the doctorate's entity is CDE"
+msgstr ""
+"Le bureau CDE doit être rempli uniquement si l'entité du doctorat est CDE"
 
 msgid "Work contract should be set when financing type is set to work contract"
 msgstr ""
 "Le contrat de travail doit être renseigné quand le type de financement est "
 "un contrat de travail."
 
-msgid "Working contract type"
-msgstr "Type de contrat de travail"
+msgid "Institution should be set when PhD has been set to yes or partial"
+msgstr ""
+"L'institution doit être renseignée quand le doctorat a déjà été réalisé "
+"partiellement ou complétement."
 
-msgid "YES"
-msgstr "Oui"
+msgid "Promoter not found."
+msgstr "Promoteur non trouvé."
 
-msgid "You've reached the maximum authorized propositions."
-msgstr "Vous avez atteint le maximum de propositions."
+msgid "Membre CA not found."
+msgstr "Membre du CA non trouvé"
 
-msgid "actions"
-msgstr "actions"
+msgid "Member of supervision group not found."
+msgstr "Membre du groupe de supervision non trouvé."
+
+msgid "Member of supervision group already invited."
+msgstr "Membre du groupe de supervision déjà invité."
+
+msgid "Member of supervision group not invited."
+msgstr "Membre du groupe de supervision non invité"
+
+msgid "Already a promoter."
+msgstr "Déjà promoteur"
+
+msgid "Already a member of CA."
+msgstr "Déjà membre du CA"
+
+msgid "A justification is needed when creating a pre-admission."
+msgstr "Une justification est requise pour une pré-admission."
+
+msgid "Doctorate admissions"
+msgstr "Admissions en doctorat"
+
+msgid "Create new doctorate admission"
+msgstr "Créer une nouvelle admission en doctorat"
+
+msgid "Author"
+msgstr "Auteur"
+
+msgid "UUID"
+msgstr "UUID"
 
 msgid "created"
 msgstr "créé"
@@ -416,6 +429,60 @@ msgstr "créé"
 msgid "modified"
 msgstr "modifée"
 
-#, python-brace-format
-msgid "{degree} [{type}] for {candidate}"
-msgstr "{degree} [{type}] pour {candidate}"
+msgid "actions"
+msgstr "actions"
+
+#, python-format
+msgid ""
+"\n"
+"                %(start_index)s to %(end_index)s of %(total_counts)s "
+"doctorate admissions"
+msgstr ""
+"\n"
+"                %(start_index)s à %(end_index)s sur %(total_counts)s "
+"admissions en doctorat"
+
+msgid "Export"
+msgstr "Exporter"
+
+msgid "Produce xls with a list of doctorate admissions"
+msgstr "Produire un fichier xls avec la liste des admissions en doctorat"
+
+msgid "List of doctorate admissions"
+msgstr "Liste des admissions en doctorat"
+
+msgid "Produce xls of doctorate admissions with administrative data"
+msgstr ""
+"Produire un fichier Excel avec la liste des admissions en doctorat et "
+"données administratives"
+
+msgid "List of doctorate admissions with administrative data"
+msgstr "Liste des admissions en doctorat et données administratives"
+
+msgid "Update"
+msgstr "Mettre à jour"
+
+msgid "Update doctorate admission"
+msgstr "Mettre à jour admission en doctorat"
+
+msgid "Delete"
+msgstr "Supprimer"
+
+msgid "Delete?"
+msgstr "Supprimer ?"
+
+#, python-format
+msgid ""
+"\n"
+"              Are you sure you want to delete \"%(object)s\"?\n"
+"            "
+msgstr ""
+"\n"
+"              Êtes-vous sûr de vouloir supprimer \"%(object)s\"?\n"
+"            "
+
+msgid "Close"
+msgstr "Fermer"
+
+msgid "Confirm"
+msgstr "Confirmer"

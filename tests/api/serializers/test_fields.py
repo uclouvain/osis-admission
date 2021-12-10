@@ -196,7 +196,7 @@ class SerializerFieldsTestCase(APITestCase):
         self.assertTrue('links' in serializer.data)
         self.assertEqual(serializer.data['links'], {
             'update_doctorateadmission': {
-                'error': _("Method '{}' not allowed").format('PUT'),
+                'error': _("You must be the request author to access this admission"),
                 'method': 'PUT',
             }
         })
@@ -296,6 +296,6 @@ class SerializerFieldsTestCase(APITestCase):
         self.assertEqual(serializer.data[1]['links'], {
             'get_doctorateadmission': {
                 'method': 'GET',
-                'error': _("Method '{}' not allowed").format('GET'),
+                'error': _("You must be the request author to access this admission"),
             }
         })

@@ -28,14 +28,19 @@ from rest_framework.generics import GenericAPIView
 
 from admission.api import serializers
 from admission.api.schema import BetterChoicesSchema
+from osis_role.contrib.views import APIPermissionRequiredMixin
 
 
-class PersonViewSet(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, GenericAPIView):
+class PersonViewSet(APIPermissionRequiredMixin, mixins.RetrieveModelMixin, mixins.UpdateModelMixin, GenericAPIView):
     name = "person"
     pagination_class = None
     filter_backends = []
     serializer_class = serializers.PersonIdentificationSerializer
     schema = BetterChoicesSchema()
+    permission_mapping = {
+        'GET': 'admission.view_doctorateadmission_person',
+        'PUT': 'admission.change_doctorateadmission_person',
+    }
 
     def get_object(self):
         return self.request.user.person
