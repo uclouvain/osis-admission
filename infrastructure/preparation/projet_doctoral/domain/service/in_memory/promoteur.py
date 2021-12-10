@@ -34,7 +34,10 @@ from ddd.logic.shared_kernel.personne_connue_ucl.domain.service.personne_connue_
 
 class PromoteurInMemoryTranslator(IPromoteurTranslator):
     promoteurs = [
-        PromoteurIdentity('00987890')
+        PromoteurIdentity('00987890'),
+        PromoteurIdentity('00987891'),
+        PromoteurIdentity('00987892'),
+        PromoteurIdentity('00987893'),
     ]
 
     @classmethod

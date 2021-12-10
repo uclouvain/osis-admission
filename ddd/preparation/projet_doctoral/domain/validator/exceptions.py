@@ -147,3 +147,19 @@ class JustificationRequiseException(BusinessException):
     def __init__(self, **kwargs):
         message = _("A justification is needed when creating a pre-admission.")
         super().__init__(message, **kwargs)
+
+
+class GroupeSupervisionCompletPourPromoteursException(BusinessException):
+    status_code = "PROPOSITION-17"
+
+    def __init__(self, **kwargs):
+        message = _("There can be no more promoters in the supervision group")
+        super().__init__(message, **kwargs)
+
+
+class GroupeSupervisionCompletPourMembresCAException(BusinessException):
+    status_code = "PROPOSITION-18"
+
+    def __init__(self, **kwargs):
+        message = _("There can be no more CA members in the supervision group.")
+        super().__init__(message, **kwargs)

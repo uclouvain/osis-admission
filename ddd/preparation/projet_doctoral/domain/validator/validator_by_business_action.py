@@ -37,6 +37,8 @@ from admission.ddd.preparation.projet_doctoral.domain.validator import (
     ShouldSignataireEtreInvite,
     ShouldSignatairePasDejaInvite,
     ShouldTypeContratTravailDependreTypeFinancement,
+    ShouldGroupeDeSupervisionNonCompletPourMembreCA,
+    ShouldGroupeDeSupervisionNonCompletPourPromoteurs,
 )
 
 from base.ddd.utils.business_validator import TwoStepsMultipleBusinessExceptionListValidator, BusinessValidator
@@ -109,6 +111,7 @@ class IdentifierPromoteurValidatorList(TwoStepsMultipleBusinessExceptionListVali
     def get_invariants_validators(self) -> List[BusinessValidator]:
         membre_CA_id = MembreCAIdentity(matricule=self.promoteur_id.matricule)
         return [
+            ShouldGroupeDeSupervisionNonCompletPourPromoteurs(self.groupe_de_supervision),
             ShouldPromoteurPasDejaPresentDansGroupeDeSupervision(self.groupe_de_supervision, self.promoteur_id),
             ShouldMembreCAPasDejaPresentDansGroupeDeSupervision(self.groupe_de_supervision, membre_CA_id),
         ]
@@ -125,6 +128,7 @@ class IdentifierMembreCAValidatorList(TwoStepsMultipleBusinessExceptionListValid
     def get_invariants_validators(self) -> List[BusinessValidator]:
         promoteur_id = PromoteurIdentity(matricule=self.membre_CA_id.matricule)
         return [
+            ShouldGroupeDeSupervisionNonCompletPourMembreCA(self.groupe_de_supervision),
             ShouldMembreCAPasDejaPresentDansGroupeDeSupervision(self.groupe_de_supervision, self.membre_CA_id),
             ShouldPromoteurPasDejaPresentDansGroupeDeSupervision(self.groupe_de_supervision, promoteur_id),
         ]
