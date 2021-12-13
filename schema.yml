@@ -1006,6 +1006,9 @@ components:
             country:
               type: string
               nullable: true
+            equivalence:
+              $ref: '#/components/schemas/Equivalence'
+              nullable: true
           required:
           - academic_graduation_year
           - linguistic_regime
@@ -1040,6 +1043,12 @@ components:
       - NATIONAL_BACHELOR
       - EUROPEAN_BACHELOR
       - INTERNATIONAL_BACCALAUREATE
+      type: string
+    Equivalence:
+      enum:
+      - 'YES'
+      - 'NO'
+      - PENDING
       type: string
     PropositionDTO:
       type: object
