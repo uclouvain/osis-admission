@@ -488,6 +488,74 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - propositions
+  /propositions/{uuid}/request_signatures:
+    get:
+      operationId: list_signatures
+      description: Check the proposition to be OK with all validators.
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PropositionIdentityDTO'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
+    post:
+      operationId: create_signatures
+      description: Ask for all promoters and members to sign the proposition.
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PropositionIdentityDTO'
+      responses:
+        201:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PropositionIdentityDTO'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
   /autocomplete/sector:
     get:
       operationId: listSectorDTOs
@@ -672,42 +740,6 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - autocomplete
-  /propositions/{uuid}/request_signatures:
-    post:
-      operationId: create_signatures
-      description: Ask for all promoters and members to sign the proposition.
-      parameters:
-      - name: uuid
-        in: path
-        required: true
-        description: ''
-        schema:
-          type: string
-      - $ref: '#/components/parameters/Accept-Language'
-      - $ref: '#/components/parameters/X-User-FirstName'
-      - $ref: '#/components/parameters/X-User-LastName'
-      - $ref: '#/components/parameters/X-User-Email'
-      - $ref: '#/components/parameters/X-User-GlobalID'
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PropositionIdentityDTO'
-      responses:
-        201:
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PropositionIdentityDTO'
-          description: ''
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-      tags:
-      - propositions
 components:
   schemas:
     PersonIdentification:
@@ -1260,6 +1292,12 @@ components:
       required:
       - signatures_promoteurs
       - signatures_membres_CA
+    PropositionIdentityDTO:
+      type: object
+      properties:
+        uuid:
+          type: string
+          readOnly: true
     SectorDTO:
       type: object
       properties:
@@ -1315,12 +1353,6 @@ components:
         global_id:
           type: string
           maxLength: 10
-    PropositionIdentityDTO:
-      type: object
-      properties:
-        uuid:
-          type: string
-          readOnly: true
     InitierPropositionCommand:
       type: object
       properties:

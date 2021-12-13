@@ -74,6 +74,16 @@ class RequestSignaturesApiTestCase(APITestCase):
         response = self.client.post(self.url)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
+    def test_check_proposition_using_api(self):
+        self.client.force_authenticate(user=self.candidate.user)
+        promoter = PromoterFactory()
+        CaMemberFactory(process=promoter.process)
+        self.admission.supervision_group = promoter.actor_ptr.process
+        self.admission.save()
+
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
     def test_request_signatures_using_api_without_ca_members_must_fail(self):
         self.client.force_authenticate(user=self.candidate.user)
 
@@ -85,6 +95,17 @@ class RequestSignaturesApiTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.json()['non_field_errors'][0]['status_code'], MembreCAManquantException.status_code)
 
+    def test_check_proposition_using_api_without_ca_members_must_fail(self):
+        self.client.force_authenticate(user=self.candidate.user)
+
+        promoter = PromoterFactory()
+        self.admission.supervision_group = promoter.actor_ptr.process
+        self.admission.save()
+
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.json()['non_field_errors'][0]['status_code'], MembreCAManquantException.status_code)
+
     def test_request_signatures_using_api_without_promoter_must_fail(self):
         self.client.force_authenticate(user=self.candidate.user)
 
@@ -93,5 +114,16 @@ class RequestSignaturesApiTestCase(APITestCase):
         self.admission.save()
 
         response = self.client.post(self.url)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.json()['non_field_errors'][0]['status_code'], PromoteurManquantException.status_code)
+
+    def test_check_proposition_using_api_without_promoter_must_fail(self):
+        self.client.force_authenticate(user=self.candidate.user)
+
+        ca_member = CaMemberFactory()
+        self.admission.supervision_group = ca_member.actor_ptr.process
+        self.admission.save()
+
+        response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.json()['non_field_errors'][0]['status_code'], PromoteurManquantException.status_code)
