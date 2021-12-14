@@ -37,7 +37,6 @@ class RequestSignaturesSchema(ResponseSpecificSchema):
     operation_id_base = "_signatures"
     serializer_mapping = {
         "POST": serializers.PropositionIdentityDTOSerializer,
-        "GET": serializers.PropositionIdentityDTOSerializer,
     }
 
 
@@ -46,11 +45,6 @@ class RequestSignaturesAPIView(APIView):
     schema = RequestSignaturesSchema()
     pagination_class = None
     filter_backends = []
-
-    def get(self, request, *args, **kwargs):
-        """Check the proposition to be OK with all validators."""
-        message_bus_instance.invoke(VerifierPropositionCommand(uuid_proposition=str(kwargs["uuid"])))
-        return Response(status=status.HTTP_200_OK)
 
     def post(self, request, *args, **kwargs):
         """Ask for all promoters and members to sign the proposition."""

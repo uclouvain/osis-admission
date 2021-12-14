@@ -88,7 +88,7 @@ class TestVerifierPropositionService(SimpleTestCase):
         with self.assertRaises(CotutelleDoitAvoirAuMoinsUnPromoteurExterneException):
             self.message_bus.invoke(cmd)
 
-    def test_should_demander_si_cotutelle_avec_promoteur_externe(self):
+    def test_should_verifier_etre_ok_si_cotutelle_avec_promoteur_externe(self):
         cmd = attr.evolve(self.cmd, uuid_proposition='uuid-SC3DP-cotutelle-avec-promoteur-externe')
         proposition_id = self.message_bus.invoke(cmd)
         self.assertEqual(proposition_id.uuid, 'uuid-SC3DP-cotutelle-avec-promoteur-externe')
