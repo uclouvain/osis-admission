@@ -365,7 +365,7 @@ msgid "SIC managers"
 msgstr "Gestionnaires SIC"
 
 msgid "SIGNING_IN_PROGRESS"
-msgstr "Signature en cours"
+msgstr "Signatures en cours"
 
 msgid "SUBMITTED"
 msgstr "Soumis"

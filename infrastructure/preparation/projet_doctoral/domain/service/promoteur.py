@@ -58,4 +58,5 @@ class PromoteurTranslator(IPromoteurTranslator):
 
     @classmethod
     def est_externe(cls, identity: 'PromoteurIdentity') -> bool:
-        return Person.objects.get(global_id=identity.matricule).source == person_source_type.DOCTORAT
+        # TODO see https://github.com/uclouvain/osis-admission/pull/26#discussion_r768060628
+        raise NotImplementedError

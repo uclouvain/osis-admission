@@ -85,7 +85,7 @@ class Proposition(interface.RootEntity):
         return self.doctorat_id.annee
 
     @property
-    def est_verrouillee_pour_signature(self):
+    def est_verrouillee_pour_signature(self) -> bool:
         return self.statut == ChoixStatutProposition.SIGNING_IN_PROGRESS
 
     def est_en_cours(self):
@@ -226,7 +226,7 @@ class Proposition(interface.RootEntity):
         """Vérification complète de la proposition"""
         SoumettrePropositionValidatorList(proposition=self).validate()
 
-    def verouiller_proposition_pour_signature(self):
+    def verrouiller_proposition_pour_signature(self):
         self.statut = ChoixStatutProposition.SIGNING_IN_PROGRESS
 
     def verifier_projet_doctoral(self):

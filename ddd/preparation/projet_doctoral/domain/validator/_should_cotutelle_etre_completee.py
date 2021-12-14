@@ -40,13 +40,8 @@ class ShouldCotutelleEtreComplete(BusinessValidator):
             "institution",
             "demande_ouverture",
         ]
-        if (
-                self.cotutelle is None
-                or (
-                    self.cotutelle != pas_de_cotutelle
-                    and not all(
-                        [getattr(self.cotutelle, champ_obligatoire) for champ_obligatoire in champs_obligatoires]
-                    )
-                )
-        ):
+        champs_obligatoires_completes = self.cotutelle and all(
+            [getattr(self.cotutelle, champ_obligatoire) for champ_obligatoire in champs_obligatoires]
+        )
+        if self.cotutelle != pas_de_cotutelle and not champs_obligatoires_completes:
             raise CotutelleNonCompleteException

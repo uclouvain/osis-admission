@@ -39,9 +39,10 @@ class CotutellePossedePromoteurExterne(interface.DomainService):
             groupe_de_supervision: 'GroupeDeSupervision',
             promoteur_translator: 'IPromoteurTranslator',
     ) -> None:
-        if groupe_de_supervision.cotutelle != pas_de_cotutelle and not any(
-                promoteur_translator.est_externe(signature_promoteur.promoteur_id)
-                for signature_promoteur
-                in groupe_de_supervision.signatures_promoteurs
-        ):
+        aucun_externe = not any(
+            promoteur_translator.est_externe(signature_promoteur.promoteur_id)
+            for signature_promoteur
+            in groupe_de_supervision.signatures_promoteurs
+        )
+        if groupe_de_supervision.cotutelle != pas_de_cotutelle and aucun_externe:
             raise CotutelleDoitAvoirAuMoinsUnPromoteurExterneException
