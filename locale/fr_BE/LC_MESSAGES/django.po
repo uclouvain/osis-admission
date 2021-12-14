@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-10-15 12:14+0200\n"
+"POT-Creation-Date: 2021-11-23 15:23+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -247,6 +247,13 @@ msgstr "Liste des admissions en doctorat et données administratives"
 msgid "MANAGEMENT"
 msgstr "Gestion"
 
+msgid "Mandatory fields are missing in the cotutelle."
+msgstr "Les champs requis de la cotutelle sont manquants."
+
+msgid "Mandatory fields are missing in the project details of the proposition."
+msgstr ""
+"Les champs requis des details du projet de la proposition sont manquants."
+
 msgid "Member of supervision group already invited."
 msgstr "Membre du groupe de supervision déjà invité."
 
@@ -357,6 +364,9 @@ msgstr "Gestionnaire SIC"
 msgid "SIC managers"
 msgstr "Gestionnaires SIC"
 
+msgid "SIGNING_IN_PROGRESS"
+msgstr "Signatures en cours"
+
 msgid "SUBMITTED"
 msgstr "Soumis"
 
@@ -403,6 +413,20 @@ msgstr "Type de contrat de travail"
 
 msgid "YES"
 msgstr "Oui"
+
+msgid "You must add at least one CA member in order to request signatures."
+msgstr ""
+"Vous devez ajouter au moins un membre CA afin de demander les signatures."
+
+msgid ""
+"You must add at least one external promoter in order to request signatures."
+msgstr ""
+"Vous devez ajouter au moins un promoteur externe afin de demander les "
+"signatures."
+
+msgid "You must add at least one promoter in order to request signatures."
+msgstr ""
+"Vous devez ajouter au moins un promoteur afin de demander les signatures."
 
 msgid "You've reached the maximum authorized propositions."
 msgstr "Vous avez atteint le maximum de propositions."

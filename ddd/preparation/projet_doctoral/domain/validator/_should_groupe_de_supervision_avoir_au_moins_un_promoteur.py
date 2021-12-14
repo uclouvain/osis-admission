@@ -23,36 +23,19 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from abc import abstractmethod
 from typing import List
 
-from admission.ddd.preparation.projet_doctoral.domain.model._promoteur import PromoteurIdentity
-from admission.ddd.preparation.projet_doctoral.dtos import PromoteurDTO
-from ddd.logic.shared_kernel.personne_connue_ucl.domain.service.personne_connue_ucl import IPersonneConnueUclTranslator
-from osis_common.ddd import interface
+import attr
+
+from admission.ddd.preparation.projet_doctoral.domain.model._signature_promoteur import SignaturePromoteur
+from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import PromoteurManquantException
+from base.ddd.utils.business_validator import BusinessValidator
 
 
-class IPromoteurTranslator(interface.DomainService):
-    @classmethod
-    @abstractmethod
-    def get(cls, matricule: str) -> 'PromoteurIdentity':
-        raise NotImplementedError
+@attr.s(frozen=True, slots=True)
+class ShouldGroupeDeSupervisionAvoirAuMoinsUnPromoteur(BusinessValidator):
+    signatures_promoteurs = attr.ib(type=List[SignaturePromoteur])  # type: List[SignaturePromoteur]
 
-    @classmethod
-    @abstractmethod
-    def search(cls, matricules: List[str]) -> List['PromoteurIdentity']:
-        raise NotImplementedError
-
-    @classmethod
-    @abstractmethod
-    def search_dto(
-            cls,
-            terme_de_recherche: str,
-            personne_connue_ucl_translator: 'IPersonneConnueUclTranslator',
-    ) -> List['PromoteurDTO']:
-        raise NotImplementedError
-
-    @classmethod
-    @abstractmethod
-    def est_externe(cls, identity: PromoteurIdentity) -> bool:
-        raise NotImplementedError
+    def validate(self, *args, **kwargs):
+        if len(self.signatures_promoteurs) <= 0:
+            raise PromoteurManquantException

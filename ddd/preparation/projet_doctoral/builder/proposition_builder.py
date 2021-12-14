@@ -42,7 +42,7 @@ from admission.ddd.preparation.projet_doctoral.domain.model.proposition import (
 )
 from admission.ddd.preparation.projet_doctoral.domain.model._enums import (
     ChoixBureauCDE,
-    ChoixStatusProposition,
+    ChoixStatutProposition,
     ChoixTypeAdmission,
 )
 from admission.ddd.preparation.projet_doctoral.domain.validator.validator_by_business_action import \
@@ -79,7 +79,7 @@ class PropositionBuilder(interface.RootEntityBuilder):
         ).validate()
         return Proposition(
             entity_id=PropositionIdentityBuilder.build(),
-            statut=ChoixStatusProposition.IN_PROGRESS,
+            statut=ChoixStatutProposition.IN_PROGRESS,
             justification=cmd.justification,
             type_admission=ChoixTypeAdmission[cmd.type_admission],
             doctorat_id=doctorat_id,

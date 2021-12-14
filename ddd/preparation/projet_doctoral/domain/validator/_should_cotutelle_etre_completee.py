@@ -23,36 +23,25 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from abc import abstractmethod
-from typing import List
+import attr
 
-from admission.ddd.preparation.projet_doctoral.domain.model._promoteur import PromoteurIdentity
-from admission.ddd.preparation.projet_doctoral.dtos import PromoteurDTO
-from ddd.logic.shared_kernel.personne_connue_ucl.domain.service.personne_connue_ucl import IPersonneConnueUclTranslator
-from osis_common.ddd import interface
+from admission.ddd.preparation.projet_doctoral.domain.model._cotutelle import Cotutelle, pas_de_cotutelle
+from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import CotutelleNonCompleteException
+from base.ddd.utils.business_validator import BusinessValidator
 
 
-class IPromoteurTranslator(interface.DomainService):
-    @classmethod
-    @abstractmethod
-    def get(cls, matricule: str) -> 'PromoteurIdentity':
-        raise NotImplementedError
+@attr.s(frozen=True, slots=True)
+class ShouldCotutelleEtreComplete(BusinessValidator):
+    cotutelle = attr.ib(type="Cotutelle")  # type: Cotutelle
 
-    @classmethod
-    @abstractmethod
-    def search(cls, matricules: List[str]) -> List['PromoteurIdentity']:
-        raise NotImplementedError
-
-    @classmethod
-    @abstractmethod
-    def search_dto(
-            cls,
-            terme_de_recherche: str,
-            personne_connue_ucl_translator: 'IPersonneConnueUclTranslator',
-    ) -> List['PromoteurDTO']:
-        raise NotImplementedError
-
-    @classmethod
-    @abstractmethod
-    def est_externe(cls, identity: PromoteurIdentity) -> bool:
-        raise NotImplementedError
+    def validate(self, *args, **kwargs):
+        champs_obligatoires = [
+            "motivation",
+            "institution",
+            "demande_ouverture",
+        ]
+        champs_obligatoires_completes = self.cotutelle and all(
+            [getattr(self.cotutelle, champ_obligatoire) for champ_obligatoire in champs_obligatoires]
+        )
+        if self.cotutelle != pas_de_cotutelle and not champs_obligatoires_completes:
+            raise CotutelleNonCompleteException
