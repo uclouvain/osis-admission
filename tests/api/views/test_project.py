@@ -277,8 +277,8 @@ class DoctorateAdmissionVerifyTestCase(APITestCase):
         self.admission.save()
 
         response = self.client.get(self.url)
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.json()['non_field_errors'][0]['status_code'], MembreCAManquantException.status_code)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.json()[0]['status_code'], MembreCAManquantException.status_code)
 
     def test_verify_proposition_using_api_without_promoter_must_fail(self):
         self.client.force_authenticate(user=self.candidate.user)
@@ -288,5 +288,5 @@ class DoctorateAdmissionVerifyTestCase(APITestCase):
         self.admission.save()
 
         response = self.client.get(self.url)
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.json()['non_field_errors'][0]['status_code'], PromoteurManquantException.status_code)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.json()[0]['status_code'], PromoteurManquantException.status_code)
