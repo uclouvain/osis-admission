@@ -38,6 +38,7 @@ urlpatterns = [
     path('coordonnees', views.CoordonneesViewSet),
     path('propositions', views.PropositionListView),
     path('secondary_studies', views.SecondaryStudiesViewSet),
+    path('languages_knowledge', views.LanguagesKnowledgeViewSet),
     path('propositions/<uuid:uuid>', views.PropositionViewSet),
     path('propositions/<uuid:uuid>/verify', views.VerifyPropositionView),
     path('propositions/<uuid:uuid>/cotutelle', views.CotutelleAPIView),
