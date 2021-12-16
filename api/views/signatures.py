@@ -29,7 +29,7 @@ from rest_framework.views import APIView
 
 from admission.api import serializers
 from admission.api.schema import ResponseSpecificSchema
-from admission.ddd.preparation.projet_doctoral.commands import DemanderSignaturesCommand
+from admission.ddd.preparation.projet_doctoral.commands import DemanderSignaturesCommand, VerifierPropositionCommand
 from infrastructure.messages_bus import message_bus_instance
 
 

@@ -23,6 +23,8 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from unittest import mock
+
 from django.shortcuts import resolve_url
 from django.test import override_settings
 from rest_framework import status
@@ -30,9 +32,11 @@ from rest_framework.test import APITestCase
 
 from admission.contrib.models import AdmissionType, DoctorateAdmission
 from admission.ddd.preparation.projet_doctoral.domain.model._enums import ChoixStatutProposition
-from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import DoctoratNonTrouveException
-from admission.tests.factories import DoctorateAdmissionFactory
+from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import DoctoratNonTrouveException, \
+    MembreCAManquantException, PromoteurManquantException
+from admission.tests.factories import DoctorateAdmissionFactory, WriteTokenFactory
 from admission.tests.factories.doctorate import DoctorateFactory
+from admission.tests.factories.supervision import CaMemberFactory, PromoterFactory
 from base.models.enums.entity_type import EntityType
 from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.person import PersonFactory
@@ -229,3 +233,60 @@ class DoctorateAdmissionDeletingApiTestCase(APITestCase):
 
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+
+@override_settings(ROOT_URLCONF='admission.api.url_v1')
+class DoctorateAdmissionVerifyTestCase(APITestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.admission = DoctorateAdmissionFactory(
+            cotutelle=False,
+            project_title="title",
+            project_abstract="abstract",
+            thesis_language="FR",
+            project_document=[WriteTokenFactory().token],
+            gantt_graph=[WriteTokenFactory().token],
+            program_proposition=[WriteTokenFactory().token],
+        )
+        cls.candidate = cls.admission.candidate
+        cls.url = resolve_url("verify-proposition", uuid=cls.admission.uuid)
+
+    @mock.patch(
+        'admission.infrastructure.preparation.projet_doctoral.domain.service.promoteur.PromoteurTranslator.est_externe',
+        return_value=True,
+    )
+    def test_verify_proposition_using_api(self, mock_is_external):
+        self.client.force_authenticate(user=self.candidate.user)
+        promoter = PromoterFactory()
+        CaMemberFactory(process=promoter.process)
+        self.admission.supervision_group = promoter.actor_ptr.process
+        self.admission.save()
+
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    @mock.patch(
+        'admission.infrastructure.preparation.projet_doctoral.domain.service.promoteur.PromoteurTranslator.est_externe',
+        return_value=True,
+    )
+    def test_verify_proposition_using_api_without_ca_members_must_fail(self, mock_is_external):
+        self.client.force_authenticate(user=self.candidate.user)
+
+        promoter = PromoterFactory()
+        self.admission.supervision_group = promoter.actor_ptr.process
+        self.admission.save()
+
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.json()[0]['status_code'], MembreCAManquantException.status_code)
+
+    def test_verify_proposition_using_api_without_promoter_must_fail(self):
+        self.client.force_authenticate(user=self.candidate.user)
+
+        ca_member = CaMemberFactory()
+        self.admission.supervision_group = ca_member.actor_ptr.process
+        self.admission.save()
+
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.json()[0]['status_code'], PromoteurManquantException.status_code)

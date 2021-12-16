@@ -23,6 +23,8 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from unittest import mock
+
 from django.shortcuts import resolve_url
 from django.test import override_settings
 from rest_framework import status
@@ -64,7 +66,11 @@ class RequestSignaturesApiTestCase(APITestCase):
             response = getattr(self.client, method)(self.url)
             self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 
-    def test_request_signatures_using_api(self):
+    @mock.patch(
+        'admission.infrastructure.preparation.projet_doctoral.domain.service.promoteur.PromoteurTranslator.est_externe',
+        return_value=True,
+    )
+    def test_request_signatures_using_api(self, mock_is_external):
         self.client.force_authenticate(user=self.candidate.user)
         promoter = PromoterFactory()
         CaMemberFactory(process=promoter.process)
@@ -74,7 +80,11 @@ class RequestSignaturesApiTestCase(APITestCase):
         response = self.client.post(self.url)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
-    def test_request_signatures_using_api_without_ca_members_must_fail(self):
+    @mock.patch(
+        'admission.infrastructure.preparation.projet_doctoral.domain.service.promoteur.PromoteurTranslator.est_externe',
+        return_value=True,
+    )
+    def test_request_signatures_using_api_without_ca_members_must_fail(self, mock_is_external):
         self.client.force_authenticate(user=self.candidate.user)
 
         promoter = PromoterFactory()
