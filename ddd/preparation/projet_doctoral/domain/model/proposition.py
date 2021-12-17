@@ -31,7 +31,7 @@ import attr
 from admission.ddd.preparation.projet_doctoral.domain.model._detail_projet import DetailProjet
 from admission.ddd.preparation.projet_doctoral.domain.model._enums import (
     ChoixBureauCDE,
-    ChoixStatusProposition,
+    ChoixStatutProposition,
     ChoixTypeAdmission,
 )
 from admission.ddd.preparation.projet_doctoral.domain.model._experience_precedente_recherche import (
@@ -46,6 +46,7 @@ from admission.ddd.preparation.projet_doctoral.domain.model.doctorat import Doct
 from admission.ddd.preparation.projet_doctoral.domain.validator.validator_by_business_action import (
     CompletionPropositionValidatorList,
     SoumettrePropositionValidatorList,
+    DetailsProjetValidatorList,
 )
 from osis_common.ddd import interface
 
@@ -64,7 +65,7 @@ class Proposition(interface.RootEntity):
     projet = attr.ib(type=DetailProjet)
     reference = attr.ib(type=Optional[str], default=None)
     justification = attr.ib(type=Optional[str], default='')
-    statut = attr.ib(type=ChoixStatusProposition, default=ChoixStatusProposition.IN_PROGRESS)
+    statut = attr.ib(type=ChoixStatutProposition, default=ChoixStatutProposition.IN_PROGRESS)
     bureau_CDE = attr.ib(
         type=Optional[ChoixBureauCDE],
         default='',
@@ -86,8 +87,12 @@ class Proposition(interface.RootEntity):
 
     valeur_reference_base = 300000
 
+    @property
+    def est_verrouillee_pour_signature(self) -> bool:
+        return self.statut == ChoixStatutProposition.SIGNING_IN_PROGRESS
+
     def est_en_cours(self):
-        return self.statut == ChoixStatusProposition.IN_PROGRESS
+        return self.statut == ChoixStatutProposition.IN_PROGRESS
 
     def completer(
             self,
@@ -221,10 +226,18 @@ class Proposition(interface.RootEntity):
             )
 
     def verifier(self):
+        """Vérification complète de la proposition"""
         SoumettrePropositionValidatorList(proposition=self).validate()
 
+    def verrouiller_proposition_pour_signature(self):
+        self.statut = ChoixStatutProposition.SIGNING_IN_PROGRESS
+
+    def verifier_projet_doctoral(self):
+        """Vérification de la validité du projet doctoral avant demande des signatures"""
+        DetailsProjetValidatorList(self.type_admission, self.projet).validate()
+
     def finaliser(self):
-        self.statut = ChoixStatusProposition.SUBMITTED
+        self.statut = ChoixStatutProposition.SUBMITTED
 
     def supprimer(self):
-        self.statut = ChoixStatusProposition.CANCELLED
+        self.statut = ChoixStatutProposition.CANCELLED

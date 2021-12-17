@@ -23,28 +23,19 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from django.urls import path as _path
+from typing import List
 
-from admission.api import views
+import attr
+
+from admission.ddd.preparation.projet_doctoral.domain.model._signature_promoteur import SignaturePromoteur
+from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import PromoteurManquantException
+from base.ddd.utils.business_validator import BusinessValidator
 
 
-def path(pattern, view, name=None):
-    return _path(pattern, view.as_view(), name=getattr(view, 'name', name))
+@attr.s(frozen=True, slots=True)
+class ShouldGroupeDeSupervisionAvoirAuMoinsUnPromoteur(BusinessValidator):
+    signatures_promoteurs = attr.ib(type=List[SignaturePromoteur])  # type: List[SignaturePromoteur]
 
-
-app_name = "admission_api_v1"
-urlpatterns = [
-    path('person', views.PersonViewSet),
-    path('coordonnees', views.CoordonneesViewSet),
-    path('propositions', views.PropositionListView),
-    path('secondary_studies', views.SecondaryStudiesViewSet),
-    path('propositions/<uuid:uuid>', views.PropositionViewSet),
-    path('propositions/<uuid:uuid>/verify', views.VerifyPropositionView),
-    path('propositions/<uuid:uuid>/cotutelle', views.CotutelleAPIView),
-    path('propositions/<uuid:uuid>/supervision', views.SupervisionAPIView),
-    path('propositions/<uuid:uuid>/request_signatures', views.RequestSignaturesAPIView),
-    path('autocomplete/sector', views.AutocompleteSectorView),
-    path('autocomplete/sector/<str:sigle>/doctorates', views.AutocompleteDoctoratView),
-    path('autocomplete/tutor', views.AutocompleteTutorView),
-    path('autocomplete/person', views.AutocompletePersonView),
-]
+    def validate(self, *args, **kwargs):
+        if len(self.signatures_promoteurs) <= 0:
+            raise PromoteurManquantException

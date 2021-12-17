@@ -23,28 +23,30 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from django.urls import path as _path
+import attr
 
-from admission.api import views
+from admission.ddd.preparation.projet_doctoral.domain.model._detail_projet import DetailProjet
+from admission.ddd.preparation.projet_doctoral.domain.model._enums import ChoixTypeAdmission
+from base.ddd.utils.business_validator import BusinessValidator
+from admission.ddd.preparation.projet_doctoral.business_types import *
+from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import DetailProjetNonCompleteException
 
 
-def path(pattern, view, name=None):
-    return _path(pattern, view.as_view(), name=getattr(view, 'name', name))
+@attr.s(frozen=True, slots=True)
+class ShouldDetailProjetEtreComplete(BusinessValidator):
+    type_admission = attr.ib(type=str)
+    projet = attr.ib(type="DetailProjet")  # type: DetailProjet
 
+    def validate(self, *args, **kwargs):
+        champs_obligatoires = [
+            "titre",
+            "resume",
+            "langue_redaction_these",
+            "documents",
+            "graphe_gantt",
+        ]
+        if self.type_admission == ChoixTypeAdmission.ADMISSION:
+            champs_obligatoires.append("proposition_programme_doctoral")
 
-app_name = "admission_api_v1"
-urlpatterns = [
-    path('person', views.PersonViewSet),
-    path('coordonnees', views.CoordonneesViewSet),
-    path('propositions', views.PropositionListView),
-    path('secondary_studies', views.SecondaryStudiesViewSet),
-    path('propositions/<uuid:uuid>', views.PropositionViewSet),
-    path('propositions/<uuid:uuid>/verify', views.VerifyPropositionView),
-    path('propositions/<uuid:uuid>/cotutelle', views.CotutelleAPIView),
-    path('propositions/<uuid:uuid>/supervision', views.SupervisionAPIView),
-    path('propositions/<uuid:uuid>/request_signatures', views.RequestSignaturesAPIView),
-    path('autocomplete/sector', views.AutocompleteSectorView),
-    path('autocomplete/sector/<str:sigle>/doctorates', views.AutocompleteDoctoratView),
-    path('autocomplete/tutor', views.AutocompleteTutorView),
-    path('autocomplete/person', views.AutocompletePersonView),
-]
+        if not all([getattr(self.projet, champ_obligatoire) for champ_obligatoire in champs_obligatoires]):
+            raise DetailProjetNonCompleteException

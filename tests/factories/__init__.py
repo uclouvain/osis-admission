@@ -23,9 +23,36 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import string
+
+import factory
+from factory.fuzzy import FuzzyText
+from osis_document.enums import TokenAccess
+from osis_document.models import Upload, Token
 
 from .doctorate import DoctorateAdmissionFactory
 
 __all__ = [
     "DoctorateAdmissionFactory",
 ]
+
+
+class PdfUploadFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = Upload
+
+    file = factory.django.FileField(data=b'hello world', filename='the_file.pdf')
+    size = 1024
+    mimetype = 'application/pdf'
+    metadata = {
+        'md5': '5eb63bbbe01eeed093cb22bb8f5acdc3',
+    }
+
+
+class WriteTokenFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = Token
+
+    token = FuzzyText(length=154, chars=string.ascii_letters + string.digits + ':-')
+    upload = factory.SubFactory(PdfUploadFactory)
+    access = TokenAccess.WRITE.name
