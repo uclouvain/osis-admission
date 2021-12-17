@@ -25,22 +25,17 @@ class Migration(migrations.Migration):
         'editable': False,
         'max_length': 255,
         'unique': True,
-        'verbose_name': 'Reference'
+        'verbose_name': 'Reference',
+        'null': True,
     }
 
     operations = [
-        # Create the new field (accepting null values until we populate the values of the existing admissions)
+        # Create the new field
         migrations.AddField(
             model_name='doctorateadmission',
             name='reference',
-            field=models.CharField(null=True, **default_args),
+            field=models.CharField(**default_args),
         ),
         # Assign a default value depending on the admission
         migrations.RunPython(set_default_references, migrations.RunPython.noop),
-        # Alter the new field to forbid the null values
-        migrations.AlterField(
-            model_name='doctorateadmission',
-            name='reference',
-            field=models.CharField(null=False, **default_args),
-        ),
     ]

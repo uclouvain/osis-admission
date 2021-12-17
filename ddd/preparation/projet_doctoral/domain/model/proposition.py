@@ -62,7 +62,7 @@ class Proposition(interface.RootEntity):
     doctorat_id = attr.ib(type=DoctoratIdentity)
     matricule_candidat = attr.ib(type=str)
     projet = attr.ib(type=DetailProjet)
-    reference = attr.ib(type=str)
+    reference = attr.ib(type=Optional[str], default=None)
     justification = attr.ib(type=Optional[str], default='')
     statut = attr.ib(type=ChoixStatusProposition, default=ChoixStatusProposition.IN_PROGRESS)
     bureau_CDE = attr.ib(
@@ -83,6 +83,8 @@ class Proposition(interface.RootEntity):
     @property
     def annee(self):
         return self.doctorat_id.annee
+
+    valeur_reference_base = 300000
 
     def est_en_cours(self):
         return self.statut == ChoixStatusProposition.IN_PROGRESS
