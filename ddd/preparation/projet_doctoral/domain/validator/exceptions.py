@@ -193,7 +193,7 @@ class GroupeSupervisionCompletPourPromoteursException(BusinessException):
     status_code = "PROPOSITION-22"
 
     def __init__(self, **kwargs):
-        message = _("There can be no more promoters in the supervision group")
+        message = _("There can be no more promoters in the supervision group.")
         super().__init__(message, **kwargs)
 
 
@@ -202,3 +202,4 @@ class GroupeSupervisionCompletPourMembresCAException(BusinessException):
 
     def __init__(self, **kwargs):
         message = _("There can be no more CA members in the supervision group.")
+        super().__init__(message, **kwargs)
