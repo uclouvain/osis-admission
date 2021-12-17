@@ -33,7 +33,7 @@ from admission.ddd.preparation.projet_doctoral.business_types import *
 
 
 @attr.s(frozen=True, slots=True)
-class ShouldGroupeDeSupervisionNonCompletPourMembreCA(BusinessValidator):
+class ShouldGroupeDeSupervisionNonCompletPourMembresCA(BusinessValidator):
     groupe_de_supervision = attr.ib(type='GroupeDeSupervision')  # type: GroupeDeSupervision
     NOMBRE_MAX_MEMBRES_CA = 3
 

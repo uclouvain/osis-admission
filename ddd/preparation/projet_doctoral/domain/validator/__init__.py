@@ -10,7 +10,7 @@ from ._should_signataire_etre_dans_groupe_de_supervision import ShouldSignataire
 from ._should_signataire_etre_invite import ShouldSignataireEtreInvite
 from ._should_signataire_pas_invite import ShouldSignatairePasDejaInvite
 from ._should_type_contrat_travail_dependre_type_financement import ShouldTypeContratTravailDependreTypeFinancement
-from ._should_groupe_de_supervision_non_complet_pour_membre_CA import ShouldGroupeDeSupervisionNonCompletPourMembreCA
+from ._should_groupe_de_supervision_non_complet_pour_membres_CA import ShouldGroupeDeSupervisionNonCompletPourMembresCA
 from ._should_groupe_de_supervision_non_complet_pour_promoteurs import ShouldGroupeDeSupervisionNonCompletPourPromoteurs
 
 __all__ = [
@@ -24,6 +24,6 @@ __all__ = [
     "ShouldSignataireEtreInvite",
     "ShouldSignatairePasDejaInvite",
     "ShouldTypeContratTravailDependreTypeFinancement",
-    "ShouldGroupeDeSupervisionNonCompletPourMembreCA",
+    "ShouldGroupeDeSupervisionNonCompletPourMembresCA",
     "ShouldGroupeDeSupervisionNonCompletPourPromoteurs",
 ]
