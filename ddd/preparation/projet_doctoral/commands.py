@@ -120,9 +120,13 @@ class IdentifierMembreCACommand(interface.CommandRequest):
 
 
 @attr.s(frozen=True, slots=True)
-class DemanderSignatureCommand(interface.CommandRequest):
+class DemanderSignaturesCommand(interface.CommandRequest):
     uuid_proposition = attr.ib(type=str)
-    matricule_signataire = attr.ib(type=str)
+
+
+@attr.s(frozen=True, slots=True)
+class VerifierPropositionCommand(interface.CommandRequest):
+    uuid_proposition = attr.ib(type=str)
 
 
 @attr.s(frozen=True, slots=True)

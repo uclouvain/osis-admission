@@ -29,10 +29,16 @@ from django.utils.translation import gettext_lazy as _
 from base.models.utils.utils import ChoiceEnum
 
 
-class ChoixStatusProposition(ChoiceEnum):
+class ChoixStatutProposition(ChoiceEnum):
     CANCELLED = _('CANCELLED')
     IN_PROGRESS = _('IN_PROGRESS')
     SUBMITTED = _('SUBMITTED')
+    SIGNING_IN_PROGRESS = _('SIGNING_IN_PROGRESS')
+
+
+class ChoixStatutSignatureGroupeDeSupervision(ChoiceEnum):
+    IN_PROGRESS = _('IN_PROGRESS')
+    SIGNING_IN_PROGRESS = _('SIGNING_IN_PROGRESS')
 
 
 class ChoixBureauCDE(ChoiceEnum):
