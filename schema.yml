@@ -1105,7 +1105,11 @@ components:
           type: string
         institut_these:
           type: string
+          format: uuid
+          nullable: true
         lieu_these:
+          type: string
+        autre_lieu_these:
           type: string
         doctorat_deja_realise:
           type: string
@@ -1133,8 +1137,8 @@ components:
       - projet_formation_complementaire
       - lettres_recommandation
       - langue_redaction_these
-      - institut_these
       - lieu_these
+      - autre_lieu_these
       - doctorat_deja_realise
       - statut
     CotutelleDTO:
@@ -1312,7 +1316,10 @@ components:
           type: string
         institut_these:
           type: string
+          nullable: true
         lieu_these:
+          type: string
+        autre_lieu_these:
           type: string
         documents_projet:
           type: array
@@ -1453,7 +1460,10 @@ components:
           default: UNDECIDED
         institut_these:
           type: string
+          nullable: true
         lieu_these:
+          type: string
+        autre_lieu_these:
           type: string
         doctorat_deja_realise:
           $ref: '#/components/schemas/ChoixDoctoratDejaRealise'

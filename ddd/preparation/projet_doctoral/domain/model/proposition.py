@@ -24,6 +24,7 @@
 #
 ##############################################################################
 import datetime
+import uuid
 from typing import List, Optional
 
 import attr
@@ -98,8 +99,9 @@ class Proposition(interface.RootEntity):
             duree_prevue: str,
             temps_consacre: str,
             langue_redaction_these: str,
-            institut_these: str,
+            institut_these: Optional[uuid.UUID],
             lieu_these: str,
+            autre_lieu_these: str,
             titre: str,
             resume: str,
             doctorat_deja_realise: str,
@@ -135,6 +137,7 @@ class Proposition(interface.RootEntity):
             langue_redaction_these=langue_redaction_these,
             institut_these=institut_these,
             lieu_these=lieu_these,
+            autre_lieu_these=autre_lieu_these,
             documents=documents,
             graphe_gantt=graphe_gantt,
             proposition_programme_doctoral=proposition_programme_doctoral,
@@ -179,8 +182,9 @@ class Proposition(interface.RootEntity):
             titre: str,
             resume: str,
             langue_redaction_these: str,
-            institut_these: str,
+            institut_these: Optional[uuid.UUID],
             lieu_these: str,
+            autre_lieu_these: str,
             documents: List[str] = None,
             graphe_gantt: List[str] = None,
             proposition_programme_doctoral: List[str] = None,
@@ -194,6 +198,7 @@ class Proposition(interface.RootEntity):
             langue_redaction_these=langue_redaction_these,
             institut_these=institut_these,
             lieu_these=lieu_these,
+            autre_lieu_these=autre_lieu_these,
             graphe_gantt=graphe_gantt,
             proposition_programme_doctoral=proposition_programme_doctoral,
             projet_formation_complementaire=projet_formation_complementaire,

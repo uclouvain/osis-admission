@@ -283,6 +283,9 @@ msgstr "Autre"
 msgid "Other cotutelle-related documents"
 msgstr "Autres documents relatifs à la cotutelle"
 
+msgid "Other thesis location"
+msgstr "Autre lieu de la thèse"
+
 msgid "PARTIAL"
 msgstr "Partiel"
 

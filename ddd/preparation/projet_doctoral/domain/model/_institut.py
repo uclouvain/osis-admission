@@ -23,27 +23,13 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import uuid
 
-import factory
+import attr
 
-from admission.contrib.models import DoctorateAdmission
-from base.models.enums.education_group_types import TrainingType
-from base.tests.factories.academic_year import AcademicYearFactory
-from base.tests.factories.education_group_type import EducationGroupTypeFactory
-from base.tests.factories.education_group_year import EducationGroupYearFactory
-from base.tests.factories.entity_version import EntityVersionFactory
-from base.tests.factories.person import PersonFactory
+from osis_common.ddd import interface
 
 
-class DoctorateFactory(EducationGroupYearFactory):
-    academic_year = factory.SubFactory(AcademicYearFactory, current=True)
-    education_group_type = factory.SubFactory(EducationGroupTypeFactory, name=TrainingType.PHD.name)
-
-
-class DoctorateAdmissionFactory(factory.DjangoModelFactory):
-    class Meta:
-        model = DoctorateAdmission
-
-    candidate = factory.SubFactory(PersonFactory)
-    doctorate = factory.SubFactory(DoctorateFactory)
-    thesis_institute = factory.SubFactory(EntityVersionFactory)
+@attr.s(slots=True)
+class InstitutIdentity(interface.EntityIdentity):
+    uuid = attr.ib(type=uuid.UUID)

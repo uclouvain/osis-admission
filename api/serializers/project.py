@@ -28,6 +28,7 @@ from rest_framework import serializers
 
 from admission.contrib.models import AdmissionType, DoctorateAdmission
 from base.utils.serializers import DTOSerializer
+from organisation.api.serializers.entities import RelatedInstituteField
 from admission.ddd.preparation.projet_doctoral.commands import (
     CompleterPropositionCommand,
     InitierPropositionCommand,
@@ -104,6 +105,7 @@ class InitierPropositionCommandSerializer(DTOSerializer):
         choices=ChoixLangueRedactionThese.choices(),
         default=ChoixLangueRedactionThese.UNDECIDED.name,
     )
+    institut_these = RelatedInstituteField(required=False)
 
 
 class CompleterPropositionCommandSerializer(DTOSerializer):
@@ -128,6 +130,7 @@ class CompleterPropositionCommandSerializer(DTOSerializer):
         choices=ChoixLangueRedactionThese.choices(),
         default=ChoixLangueRedactionThese.UNDECIDED.name,
     )
+    institut_these = RelatedInstituteField(required=False)
 
 
 class SectorDTOSerializer(serializers.Serializer):
