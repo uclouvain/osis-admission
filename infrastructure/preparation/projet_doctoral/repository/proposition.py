@@ -34,7 +34,7 @@ from admission.ddd.preparation.projet_doctoral.builder.proposition_identity_buil
 from admission.ddd.preparation.projet_doctoral.domain.model._detail_projet import DetailProjet
 from admission.ddd.preparation.projet_doctoral.domain.model._enums import (
     ChoixBureauCDE,
-    ChoixStatusProposition,
+    ChoixStatutProposition,
     ChoixTypeAdmission,
 )
 from admission.ddd.preparation.projet_doctoral.domain.model._experience_precedente_recherche import (
@@ -71,7 +71,7 @@ def _instantiate_admission(admission: DoctorateAdmission) -> Proposition:
             lettres_recommandation=admission.recommendation_letters,
         ),
         justification=admission.comment,
-        statut=ChoixStatusProposition[admission.status],
+        statut=ChoixStatutProposition[admission.status],
         financement=Financement(
             type=ChoixTypeFinancement[admission.financing_type] if admission.financing_type else '',
             type_contrat_travail=admission.financing_work_contract,

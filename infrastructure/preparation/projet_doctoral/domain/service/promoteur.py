@@ -30,6 +30,8 @@ from admission.ddd.preparation.projet_doctoral.domain.service.i_promoteur import
 from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import PromoteurNonTrouveException
 from admission.ddd.preparation.projet_doctoral.dtos import PromoteurDTO
 from base.auth.roles.tutor import Tutor
+from base.models.enums import person_source_type
+from base.models.person import Person
 from ddd.logic.shared_kernel.personne_connue_ucl.domain.service.personne_connue_ucl import IPersonneConnueUclTranslator
 
 
@@ -52,4 +54,9 @@ class PromoteurTranslator(IPromoteurTranslator):
     ) -> List['PromoteurDTO']:
         # TODO :: 1. signaletiques_dto = signaletique_translator.search(terme_de_recherche)
         # TODO :: 2. call cls.seacrh(matricules=signaletiques_dto)
+        raise NotImplementedError
+
+    @classmethod
+    def est_externe(cls, identity: 'PromoteurIdentity') -> bool:
+        # TODO see https://github.com/uclouvain/osis-admission/pull/26#discussion_r768060628
         raise NotImplementedError

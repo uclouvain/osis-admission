@@ -33,17 +33,19 @@ from ddd.logic.shared_kernel.personne_connue_ucl.domain.service.personne_connue_
 
 
 class PromoteurInMemoryTranslator(IPromoteurTranslator):
-    promoteurs = [
-        PromoteurIdentity('00987890'),
-        PromoteurIdentity('00987891'),
-        PromoteurIdentity('00987892'),
-        PromoteurIdentity('00987893'),
+    promoteurs = [  # tuple of promoteurs identities, telling if it is external or not
+        (PromoteurIdentity('00987890'), False),
+        (PromoteurIdentity('00987891'), False),
+        (PromoteurIdentity('00987892'), False),
+        (PromoteurIdentity('00987893'), False),
+        (PromoteurIdentity('promoteur-SC3DP-externe'), True),
+        (PromoteurIdentity('promoteur-SC3DP'), False),
     ]
 
     @classmethod
     def get(cls, matricule: str) -> 'PromoteurIdentity':
         try:
-            return next(p for p in cls.promoteurs if p.matricule == matricule)
+            return next(p for (p, e) in cls.promoteurs if p.matricule == matricule)
         except StopIteration:
             raise PromoteurNonTrouveException
 
@@ -58,3 +60,10 @@ class PromoteurInMemoryTranslator(IPromoteurTranslator):
             personne_connue_ucl_translator: 'IPersonneConnueUclTranslator',
     ) -> List['PromoteurDTO']:
         raise NotImplementedError
+
+    @classmethod
+    def est_externe(cls, identity: 'PromoteurIdentity') -> bool:
+        try:
+            return next(e for (p, e) in cls.promoteurs if p.matricule == identity.matricule)
+        except StopIteration:
+            raise PromoteurNonTrouveException

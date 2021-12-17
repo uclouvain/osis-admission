@@ -23,28 +23,19 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from django.urls import path as _path
+from typing import List
 
-from admission.api import views
+import attr
+
+from admission.ddd.preparation.projet_doctoral.domain.model._signature_membre_CA import SignatureMembreCA
+from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import MembreCAManquantException
+from base.ddd.utils.business_validator import BusinessValidator
 
 
-def path(pattern, view, name=None):
-    return _path(pattern, view.as_view(), name=getattr(view, 'name', name))
+@attr.s(frozen=True, slots=True)
+class ShouldGroupeDeSupervisionAvoirAuMoinsUnMembreCA(BusinessValidator):
+    signatures_membres_CA = attr.ib(type=List[SignatureMembreCA])  # type: List[SignatureMembreCA]
 
-
-app_name = "admission_api_v1"
-urlpatterns = [
-    path('person', views.PersonViewSet),
-    path('coordonnees', views.CoordonneesViewSet),
-    path('propositions', views.PropositionListView),
-    path('secondary_studies', views.SecondaryStudiesViewSet),
-    path('propositions/<uuid:uuid>', views.PropositionViewSet),
-    path('propositions/<uuid:uuid>/verify', views.VerifyPropositionView),
-    path('propositions/<uuid:uuid>/cotutelle', views.CotutelleAPIView),
-    path('propositions/<uuid:uuid>/supervision', views.SupervisionAPIView),
-    path('propositions/<uuid:uuid>/request_signatures', views.RequestSignaturesAPIView),
-    path('autocomplete/sector', views.AutocompleteSectorView),
-    path('autocomplete/sector/<str:sigle>/doctorates', views.AutocompleteDoctoratView),
-    path('autocomplete/tutor', views.AutocompleteTutorView),
-    path('autocomplete/person', views.AutocompletePersonView),
-]
+    def validate(self, *args, **kwargs):
+        if len(self.signatures_membres_CA) <= 0:
+            raise MembreCAManquantException

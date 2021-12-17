@@ -26,6 +26,16 @@
 from typing import Optional, List, Union
 
 import attr
+
+from admission.ddd.preparation.projet_doctoral.business_types import *
+from admission.ddd.preparation.projet_doctoral.domain.model._cotutelle import Cotutelle
+from admission.ddd.preparation.projet_doctoral.domain.model._detail_projet import DetailProjet
+from admission.ddd.preparation.projet_doctoral.domain.model._enums import ChoixTypeAdmission
+from admission.ddd.preparation.projet_doctoral.domain.model._experience_precedente_recherche import (
+    ChoixDoctoratDejaRealise,
+)
+from admission.ddd.preparation.projet_doctoral.domain.model._membre_CA import MembreCAIdentity
+from admission.ddd.preparation.projet_doctoral.domain.model._promoteur import PromoteurIdentity
 from admission.ddd.preparation.projet_doctoral.domain.validator import (
     ShouldInstitutionDependreDoctoratRealise,
     ShouldJustificationDonneeSiPreadmission,
@@ -40,13 +50,17 @@ from admission.ddd.preparation.projet_doctoral.domain.validator import (
     ShouldGroupeDeSupervisionNonCompletPourMembreCA,
     ShouldGroupeDeSupervisionNonCompletPourPromoteurs,
 )
-
+from admission.ddd.preparation.projet_doctoral.domain.validator._should_cotutelle_etre_completee import (
+    ShouldCotutelleEtreComplete,
+)
+from admission.ddd.preparation.projet_doctoral.domain.validator._should_detail_projet_etre_complete import (
+    ShouldDetailProjetEtreComplete,
+)
+from admission.ddd.preparation.projet_doctoral.domain.validator.\
+    _should_groupe_de_supervision_avoir_au_moins_un_membre_CA import ShouldGroupeDeSupervisionAvoirAuMoinsUnMembreCA
+from admission.ddd.preparation.projet_doctoral.domain.validator.\
+    _should_groupe_de_supervision_avoir_au_moins_un_promoteur import ShouldGroupeDeSupervisionAvoirAuMoinsUnPromoteur
 from base.ddd.utils.business_validator import TwoStepsMultipleBusinessExceptionListValidator, BusinessValidator
-from admission.ddd.preparation.projet_doctoral.business_types import *
-from admission.ddd.preparation.projet_doctoral.domain.model._experience_precedente_recherche import \
-    ChoixDoctoratDejaRealise
-from admission.ddd.preparation.projet_doctoral.domain.model._promoteur import PromoteurIdentity
-from admission.ddd.preparation.projet_doctoral.domain.model._membre_CA import MembreCAIdentity
 
 
 @attr.s(frozen=True, slots=True)
@@ -189,4 +203,45 @@ class ApprouverValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
         return [
             ShouldSignataireEtreDansGroupeDeSupervision(self.groupe_de_supervision, self.signataire_id),
             ShouldSignataireEtreInvite(self.groupe_de_supervision, self.signataire_id),
+        ]
+
+
+@attr.s(frozen=True, slots=True)
+class DetailsProjetValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+    type_admission = attr.ib(type='ChoixTypeAdmission')  # type: ChoixTypeAdmission
+    projet = attr.ib(type='DetailProjet')  # type: DetailProjet
+
+    def get_data_contract_validators(self) -> List[BusinessValidator]:
+        return []
+
+    def get_invariants_validators(self) -> List[BusinessValidator]:
+        return [
+            ShouldDetailProjetEtreComplete(self.type_admission, self.projet),
+        ]
+
+
+@attr.s(frozen=True, slots=True)
+class CotutelleValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+    cotutelle = attr.ib(type='Cotutelle')  # type: Cotutelle
+
+    def get_data_contract_validators(self) -> List[BusinessValidator]:
+        return []
+
+    def get_invariants_validators(self) -> List[BusinessValidator]:
+        return [
+            ShouldCotutelleEtreComplete(self.cotutelle),
+        ]
+
+
+@attr.s(frozen=True, slots=True)
+class SignatairesValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+    groupe_de_supervision = attr.ib(type='GroupeDeSupervision')  # type: GroupeDeSupervision
+
+    def get_data_contract_validators(self) -> List[BusinessValidator]:
+        return []
+
+    def get_invariants_validators(self) -> List[BusinessValidator]:
+        return [
+            ShouldGroupeDeSupervisionAvoirAuMoinsUnPromoteur(self.groupe_de_supervision.signatures_promoteurs),
+            ShouldGroupeDeSupervisionAvoirAuMoinsUnMembreCA(self.groupe_de_supervision.signatures_membres_CA),
         ]

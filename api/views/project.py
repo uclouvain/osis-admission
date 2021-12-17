@@ -23,18 +23,21 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from collections import defaultdict
+
 from rest_framework import mixins, status
 from rest_framework.generics import GenericAPIView, ListCreateAPIView
 from rest_framework.response import Response
+from rest_framework.settings import api_settings
 
-from admission.api.schema import ResponseSpecificSchema
 from admission.api import serializers
-from backoffice.settings.rest_framework.common_views import DisplayExceptionsByFieldNameAPIMixin
+from admission.api.schema import ResponseSpecificSchema
 from admission.ddd.preparation.projet_doctoral.commands import (
     CompleterPropositionCommand, GetPropositionCommand,
     InitierPropositionCommand,
     SearchPropositionsCommand,
     SupprimerPropositionCommand,
+    VerifierPropositionCommand,
 )
 from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import (
     BureauCDEInconsistantException,
@@ -42,7 +45,11 @@ from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions impor
     InstitutionInconsistanteException,
     JustificationRequiseException,
 )
+from backoffice.settings.rest_framework.common_views import DisplayExceptionsByFieldNameAPIMixin
+from backoffice.settings.rest_framework.exception_handler import get_error_data
+from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from infrastructure.messages_bus import message_bus_instance
+from osis_common.ddd.interface import BusinessException
 
 
 class PropositionListSchema(ResponseSpecificSchema):
@@ -123,3 +130,53 @@ class PropositionViewSet(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, Gen
         )
         serializer = serializers.PropositionIdentityDTOSerializer(instance=proposition_id)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class VerifyPropositionSchema(ResponseSpecificSchema):
+    operation_id_base = '_verify_proposition'
+
+    def get_responses(self, path, method):
+        return {
+            status.HTTP_200_OK: {
+                "description": "Proposition verification errors",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "status_code": {
+                                        "type": "string",
+                                    },
+                                    "detail": {
+                                        "type": "string",
+                                    }
+                                }
+                            }
+                        }}
+                }
+            }
+        }
+
+
+class VerifyPropositionView(mixins.RetrieveModelMixin, GenericAPIView):
+    name = "verify-proposition"
+    schema = VerifyPropositionSchema()
+    pagination_class = None
+    filter_backends = []
+
+    def get(self, request, *args, **kwargs):
+        """Check the proposition to be OK with all validators."""
+        try:
+            message_bus_instance.invoke(VerifierPropositionCommand(uuid_proposition=str(kwargs["uuid"])))
+        except MultipleBusinessExceptions as exc:
+            data = defaultdict(list)
+            for exception in exc.exceptions:
+                data = get_error_data(data, exception, {})
+            return Response(data.get(api_settings.NON_FIELD_ERRORS_KEY, []), status=status.HTTP_200_OK)
+        except BusinessException as exc:
+            data = defaultdict(list)
+            data = get_error_data(data, exc, {})
+            return Response(data.get(api_settings.NON_FIELD_ERRORS_KEY, []), status=status.HTTP_200_OK)
+        return Response([], status=status.HTTP_200_OK)

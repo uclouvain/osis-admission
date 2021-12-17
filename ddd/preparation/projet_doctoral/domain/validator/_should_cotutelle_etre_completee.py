@@ -23,28 +23,25 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from django.urls import path as _path
+import attr
 
-from admission.api import views
-
-
-def path(pattern, view, name=None):
-    return _path(pattern, view.as_view(), name=getattr(view, 'name', name))
+from admission.ddd.preparation.projet_doctoral.domain.model._cotutelle import Cotutelle, pas_de_cotutelle
+from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import CotutelleNonCompleteException
+from base.ddd.utils.business_validator import BusinessValidator
 
 
-app_name = "admission_api_v1"
-urlpatterns = [
-    path('person', views.PersonViewSet),
-    path('coordonnees', views.CoordonneesViewSet),
-    path('propositions', views.PropositionListView),
-    path('secondary_studies', views.SecondaryStudiesViewSet),
-    path('propositions/<uuid:uuid>', views.PropositionViewSet),
-    path('propositions/<uuid:uuid>/verify', views.VerifyPropositionView),
-    path('propositions/<uuid:uuid>/cotutelle', views.CotutelleAPIView),
-    path('propositions/<uuid:uuid>/supervision', views.SupervisionAPIView),
-    path('propositions/<uuid:uuid>/request_signatures', views.RequestSignaturesAPIView),
-    path('autocomplete/sector', views.AutocompleteSectorView),
-    path('autocomplete/sector/<str:sigle>/doctorates', views.AutocompleteDoctoratView),
-    path('autocomplete/tutor', views.AutocompleteTutorView),
-    path('autocomplete/person', views.AutocompletePersonView),
-]
+@attr.s(frozen=True, slots=True)
+class ShouldCotutelleEtreComplete(BusinessValidator):
+    cotutelle = attr.ib(type="Cotutelle")  # type: Cotutelle
+
+    def validate(self, *args, **kwargs):
+        champs_obligatoires = [
+            "motivation",
+            "institution",
+            "demande_ouverture",
+        ]
+        champs_obligatoires_completes = self.cotutelle and all(
+            [getattr(self.cotutelle, champ_obligatoire) for champ_obligatoire in champs_obligatoires]
+        )
+        if self.cotutelle != pas_de_cotutelle and not champs_obligatoires_completes:
+            raise CotutelleNonCompleteException

@@ -28,15 +28,20 @@ import uuid
 
 import factory
 
-from admission.ddd.preparation.projet_doctoral.domain.model._detail_projet import DetailProjet
+from admission.ddd.preparation.projet_doctoral.domain.model._detail_projet import (
+    ChoixLangueRedactionThese,
+    DetailProjet,
+    projet_non_rempli,
+)
 from admission.ddd.preparation.projet_doctoral.domain.model._enums import (
-    ChoixStatusProposition,
+    ChoixStatutProposition,
     ChoixTypeAdmission,
 )
-from admission.ddd.preparation.projet_doctoral.domain.model._experience_precedente_recherche import \
-    aucune_experience_precedente_recherche
+from admission.ddd.preparation.projet_doctoral.domain.model._experience_precedente_recherche import (
+    aucune_experience_precedente_recherche,
+)
 from admission.ddd.preparation.projet_doctoral.domain.model._financement import financement_non_rempli
-from admission.ddd.preparation.projet_doctoral.domain.model.proposition import (Proposition, PropositionIdentity)
+from admission.ddd.preparation.projet_doctoral.domain.model.proposition import Proposition, PropositionIdentity
 from admission.ddd.preparation.projet_doctoral.test.factory.doctorat import _DoctoratIdentityFactory
 
 
@@ -55,7 +60,10 @@ class _DetailProjetFactory(factory.Factory):
 
     titre = 'Mon projet'
     resume = factory.Faker('sentence')
-    documents = factory.LazyFunction(list)
+    documents = factory.LazyFunction(lambda: [str(uuid.uuid4())])
+    langue_redaction_these = ChoixLangueRedactionThese.FRENCH
+    graphe_gantt = factory.LazyFunction(lambda: [str(uuid.uuid4())])
+    proposition_programme_doctoral = factory.LazyFunction(lambda: [str(uuid.uuid4())])
 
 
 class _PropositionFactory(factory.Factory):
@@ -66,7 +74,7 @@ class _PropositionFactory(factory.Factory):
     entity_id = factory.SubFactory(_PropositionIdentityFactory)
     matricule_candidat = factory.fuzzy.FuzzyText(length=10, chars=string.digits)
     doctorat_id = factory.SubFactory(_DoctoratIdentityFactory)
-    statut = ChoixStatusProposition.IN_PROGRESS
+    statut = ChoixStatutProposition.IN_PROGRESS
     projet = factory.SubFactory(_DetailProjetFactory)
     creee_le = factory.Faker('past_datetime')
     financement = financement_non_rempli
@@ -87,8 +95,25 @@ class PropositionAdmissionECGE3DPMinimaleFactory(_PropositionFactory):
 
 
 class PropositionAdmissionSC3DPMinimaleAnnuleeFactory(PropositionAdmissionSC3DPMinimaleFactory):
-    statut = ChoixStatusProposition.CANCELLED
+    statut = ChoixStatutProposition.CANCELLED
     matricule_candidat = '0123456789'
+
+
+class PropositionAdmissionSC3DPMinimaleSansDetailProjetFactory(PropositionAdmissionSC3DPMinimaleFactory):
+    entity_id = factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-SC3DP-no-project')
+    projet = projet_non_rempli
+
+
+class PropositionAdmissionSC3DPMinimaleSansCotutelleFactory(PropositionAdmissionSC3DPMinimaleFactory):
+    entity_id = factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-SC3DP-cotutelle-indefinie')
+
+
+class PropositionAdmissionSC3DPMinimaleCotutelleSansPromoteurExterneFactory(PropositionAdmissionSC3DPMinimaleFactory):
+    entity_id = factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-SC3DP-cotutelle-sans-promoteur-externe')
+
+
+class PropositionAdmissionSC3DPMinimaleCotutelleAvecPromoteurExterneFactory(PropositionAdmissionSC3DPMinimaleFactory):
+    entity_id = factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-SC3DP-cotutelle-avec-promoteur-externe')
 
 
 class PropositionPreAdmissionSC3DPMinimaleFactory(_PropositionFactory):
@@ -100,5 +125,17 @@ class PropositionAdmissionSC3DPAvecMembresFactory(PropositionAdmissionSC3DPMinim
     entity_id = factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-SC3DP-promoteur-membre')
 
 
+class PropositionAdmissionSC3DPAvecMembresEtCotutelleFactory(PropositionAdmissionSC3DPMinimaleFactory):
+    entity_id = factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-SC3DP-promoteur-membre-cotutelle')
+
+
 class PropositionAdmissionSC3DPAvecMembresInvitesFactory(PropositionAdmissionSC3DPMinimaleFactory):
     entity_id = factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-SC3DP-membres-invites')
+
+
+class PropositionAdmissionSC3DPSansPromoteurFactory(PropositionAdmissionSC3DPMinimaleFactory):
+    entity_id = factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-SC3DP-sans-promoteur')
+
+
+class PropositionAdmissionSC3DPSansMembreCAFactory(PropositionAdmissionSC3DPMinimaleFactory):
+    entity_id = factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-SC3DP-sans-membre_CA')

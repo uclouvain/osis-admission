@@ -137,12 +137,12 @@ class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
         for actor in current_promoteurs:
             membre = next(a for a in entity.signatures_promoteurs if a.promoteur_id.matricule == actor.person.global_id)
             if actor.state != membre.etat.name:
-                StateHistory.objects.create(state=membre.etat.name, actor_id=actor.person.global_id)
+                StateHistory.objects.create(state=membre.etat.name, actor_id=actor.id)
 
         for actor in current_members:
             membre = next(a for a in entity.signatures_membres_CA if a.membre_CA_id.matricule == actor.person.global_id)
             if actor.state != membre.etat.name:
-                StateHistory.objects.create(state=membre.etat.name, actor_id=actor.person.global_id)
+                StateHistory.objects.create(state=membre.etat.name, actor_id=actor.id)
 
         # Add missing actors
         promoteurs_ids = current_promoteurs.values_list('person__global_id', flat=True)

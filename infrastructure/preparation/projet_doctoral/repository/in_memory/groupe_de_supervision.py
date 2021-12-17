@@ -23,25 +23,26 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
 from typing import List
 
 from admission.ddd.preparation.projet_doctoral.builder.proposition_identity_builder import PropositionIdentityBuilder
 from admission.ddd.preparation.projet_doctoral.domain.model._cotutelle import pas_de_cotutelle
-from admission.ddd.preparation.projet_doctoral.domain.model.groupe_de_supervision import (
-    GroupeDeSupervision,
-)
+from admission.ddd.preparation.projet_doctoral.domain.model.groupe_de_supervision import GroupeDeSupervision
 from admission.ddd.preparation.projet_doctoral.domain.model.proposition import PropositionIdentity
-from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import \
-    GroupeDeSupervisionNonTrouveException
+from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import GroupeDeSupervisionNonTrouveException
 from admission.ddd.preparation.projet_doctoral.dtos import CotutelleDTO
-from admission.ddd.preparation.projet_doctoral.repository.i_groupe_de_supervision import \
-    IGroupeDeSupervisionRepository
+from admission.ddd.preparation.projet_doctoral.repository.i_groupe_de_supervision import IGroupeDeSupervisionRepository
 from admission.ddd.preparation.projet_doctoral.test.factory.groupe_de_supervision import (
     GroupeDeSupervisionSC3DPAvecMembresInvitesFactory,
+    GroupeDeSupervisionSC3DPAvecPromoteurEtMembreEtPropositionIncompleteFactory,
     GroupeDeSupervisionSC3DPAvecPromoteurEtMembreFactory,
+    GroupeDeSupervisionSC3DPAvecPromoteurEtMembreEtCotutelleFactory,
     GroupeDeSupervisionSC3DPCotutelleIndefinieFactory,
     GroupeDeSupervisionSC3DPFactory,
+    GroupeDeSupervisionSC3DPCotutelleSansPromoteurExterneFactory,
+    GroupeDeSupervisionSC3DPCotutelleAvecPromoteurExterneFactory,
+    GroupeDeSupervisionSC3DPSansPromoteurFactory,
+    GroupeDeSupervisionSC3DPSansMembresCAFactory,
 )
 from base.ddd.utils.in_memory_repository import InMemoryGenericRepository
 
@@ -55,7 +56,13 @@ class GroupeDeSupervisionInMemoryRepository(InMemoryGenericRepository, IGroupeDe
             GroupeDeSupervisionSC3DPFactory(),
             GroupeDeSupervisionSC3DPCotutelleIndefinieFactory(),
             GroupeDeSupervisionSC3DPAvecPromoteurEtMembreFactory(),
+            GroupeDeSupervisionSC3DPAvecPromoteurEtMembreEtCotutelleFactory(),
             GroupeDeSupervisionSC3DPAvecMembresInvitesFactory(),
+            GroupeDeSupervisionSC3DPAvecPromoteurEtMembreEtPropositionIncompleteFactory(),
+            GroupeDeSupervisionSC3DPCotutelleAvecPromoteurExterneFactory(),
+            GroupeDeSupervisionSC3DPCotutelleSansPromoteurExterneFactory(),
+            GroupeDeSupervisionSC3DPSansPromoteurFactory(),
+            GroupeDeSupervisionSC3DPSansMembresCAFactory(),
         ]
 
     @classmethod
