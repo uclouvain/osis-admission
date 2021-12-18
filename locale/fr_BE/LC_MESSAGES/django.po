@@ -443,3 +443,9 @@ msgstr "modifée"
 #, python-brace-format
 msgid "{degree} [{type}] for {candidate}"
 msgstr "{degree} [{type}] pour {candidate}"
+
+msgid "There can be no more promoters in the supervision group."
+msgstr "Il ne peut y avoir davantage de promoteurs dans le groupe de supervision."
+
+msgid "There can be no more CA members in the supervision group."
+msgstr "Il ne peut y avoir davantage de membres du CA dans le groupe de supervision."
