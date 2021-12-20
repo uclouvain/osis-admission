@@ -23,12 +23,18 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from django.shortcuts import resolve_url
 from django.test import override_settings
-from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
-from admission.tests.factories.groups import CandidateGroupFactory, PromoterGroupFactory,\
-    CddManagerGroupFactory, CommitteeMemberGroupFactory
+
+from admission.tests.factories import DoctorateAdmissionFactory
+from admission.tests.factories.groups import (
+    CandidateGroupFactory,
+    CddManagerGroupFactory,
+    CommitteeMemberGroupFactory,
+    PromoterGroupFactory,
+)
 from base.tests.factories.person import PersonFactory
 
 
@@ -36,7 +42,7 @@ from base.tests.factories.person import PersonFactory
 class PersonTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.url = reverse('person')
+        cls.url = resolve_url('person')
         cls.updated_data = {
             "first_name": "Jo"
         }
@@ -97,6 +103,13 @@ class PersonTestCase(APITestCase):
         response = self.client.put(self.url, self.updated_data)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
         self.assertEqual(response.json()['first_name'], "Jo")
+
+    def test_person_get_from_admission(self):
+        self.client.force_authenticate(self.candidate_user)
+        admission = DoctorateAdmissionFactory(candidate=self.candidate_user.person)
+        response = self.client.get(resolve_url('person', uuid=admission.uuid))
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
+        self.assertEqual(response.json()['first_name'], "John")
 
     def test_person_get_promoter(self):
         self.client.force_authenticate(self.promoter_user)
