@@ -23,6 +23,8 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from django.core.exceptions import ValidationError
+from django.utils.translation import gettext as _
 from rest_framework import mixins, status
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
@@ -30,6 +32,9 @@ from rest_framework.response import Response
 from admission.api import serializers
 from admission.api.schema import ChoicesEnumSchema
 from osis_profile.models.education import LanguageKnowledge
+
+
+MANDATORY_LANGUAGES = ["FR", "EN"]
 
 
 class LanguagesKnowledgeSchema(ChoicesEnumSchema):
@@ -68,10 +73,21 @@ class LanguagesKnowledgeViewSet(mixins.ListModelMixin, mixins.CreateModelMixin, 
     def get(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
 
+    @staticmethod
+    def validate_languages(data):
+        """Validate language uniqueness and mandatory languages presence."""
+        languages = [language_knowledge.get("language").code for language_knowledge in data]
+        if not all(language in languages for language in MANDATORY_LANGUAGES):
+            raise ValidationError(_("Mandatory languages are missing."))
+        duplicate_languages = set([language for language in languages if languages.count(language) > 1])
+        if duplicate_languages:
+            raise ValidationError(_("You cannot fill in a language more than once, please correct the form."))
+
     def post(self, request, *args, **kwargs):
         person = self.request.user.person
         input_serializer = self.get_serializer(request, many=True, data=request.data)
-        input_serializer.is_valid(raise_exception=True)  # should raise unique exception
+        input_serializer.is_valid(raise_exception=True)
+        self.validate_languages(input_serializer.validated_data)
         LanguageKnowledge.objects.filter(person=person).delete()
         LanguageKnowledge.objects.bulk_create(
             (
