@@ -23,25 +23,30 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import datetime
+import attr
 
-import mock
-from django.test import TestCase
+from admission.ddd.preparation.projet_doctoral.domain.model._detail_projet import DetailProjet
+from admission.ddd.preparation.projet_doctoral.domain.model._enums import ChoixTypeAdmission
+from base.ddd.utils.business_validator import BusinessValidator
+from admission.ddd.preparation.projet_doctoral.business_types import *
+from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import DetailProjetNonCompleteException
 
-from admission.ddd.preparation.projet_doctoral.commands import SearchDoctoratCommand
-from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
-from base.tests.factories.academic_year import AcademicYearFactory
 
+@attr.s(frozen=True, slots=True)
+class ShouldDetailProjetEtreComplete(BusinessValidator):
+    type_admission = attr.ib(type=str)
+    projet = attr.ib(type="DetailProjet")  # type: DetailProjet
 
-class TestRechercherDoctoratService(TestCase):
-    def setUp(self) -> None:
-        self.cmd = SearchDoctoratCommand(sigle_secteur_entite_gestion='SST')
-        self.message_bus = message_bus_in_memory_instance
-        AcademicYearFactory(year=2020)
+    def validate(self, *args, **kwargs):
+        champs_obligatoires = [
+            "titre",
+            "resume",
+            "langue_redaction_these",
+            "documents",
+            "graphe_gantt",
+        ]
+        if self.type_admission == ChoixTypeAdmission.ADMISSION:
+            champs_obligatoires.append("proposition_programme_doctoral")
 
-    @mock.patch('admission.ddd.preparation.projet_doctoral.use_case.read.rechercher_doctorats_service.datetime')
-    def test_should_rechercher_par_sigle_secteur_entite_gestion(self, mocked_datetime):
-        mocked_datetime.date.today.return_value = datetime.date(2020, 11, 1)
-        results = self.message_bus.invoke(self.cmd)
-        self.assertEqual(results[0].sigle_entite_gestion, 'CDSC')
-        self.assertEqual(results[0].annee, 2020)
+        if not all([getattr(self.projet, champ_obligatoire) for champ_obligatoire in champs_obligatoires]):
+            raise DetailProjetNonCompleteException

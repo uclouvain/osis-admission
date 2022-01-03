@@ -23,25 +23,19 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import datetime
+from typing import List
 
-import mock
-from django.test import TestCase
+import attr
 
-from admission.ddd.preparation.projet_doctoral.commands import SearchDoctoratCommand
-from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
-from base.tests.factories.academic_year import AcademicYearFactory
+from admission.ddd.preparation.projet_doctoral.domain.model._signature_membre_CA import SignatureMembreCA
+from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import MembreCAManquantException
+from base.ddd.utils.business_validator import BusinessValidator
 
 
-class TestRechercherDoctoratService(TestCase):
-    def setUp(self) -> None:
-        self.cmd = SearchDoctoratCommand(sigle_secteur_entite_gestion='SST')
-        self.message_bus = message_bus_in_memory_instance
-        AcademicYearFactory(year=2020)
+@attr.s(frozen=True, slots=True)
+class ShouldGroupeDeSupervisionAvoirAuMoinsUnMembreCA(BusinessValidator):
+    signatures_membres_CA = attr.ib(type=List[SignatureMembreCA])  # type: List[SignatureMembreCA]
 
-    @mock.patch('admission.ddd.preparation.projet_doctoral.use_case.read.rechercher_doctorats_service.datetime')
-    def test_should_rechercher_par_sigle_secteur_entite_gestion(self, mocked_datetime):
-        mocked_datetime.date.today.return_value = datetime.date(2020, 11, 1)
-        results = self.message_bus.invoke(self.cmd)
-        self.assertEqual(results[0].sigle_entite_gestion, 'CDSC')
-        self.assertEqual(results[0].annee, 2020)
+    def validate(self, *args, **kwargs):
+        if len(self.signatures_membres_CA) <= 0:
+            raise MembreCAManquantException

@@ -467,3 +467,9 @@ msgstr ""
 
 msgid "Confirm"
 msgstr ""
+
+msgid "There can be no more promoters in the supervision group."
+msgstr ""
+
+msgid "There can be no more CA members in the supervision group."
+msgstr ""

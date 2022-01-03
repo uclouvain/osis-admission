@@ -23,18 +23,29 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from unittest import mock
+
 from django.shortcuts import resolve_url
+from django.test import override_settings
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
 from admission.contrib.models import AdmissionType, DoctorateAdmission
-from admission.ddd.preparation.projet_doctoral.domain.model._enums import ChoixStatusProposition
-from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import DoctoratNonTrouveException
-from admission.tests.factories import DoctorateAdmissionFactory
+from admission.ddd.preparation.projet_doctoral.domain.model._enums import ChoixStatutProposition
+from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import (
+    DoctoratNonTrouveException,
+    MembreCAManquantException,
+    PromoteurManquantException,
+)
+from admission.tests.factories import DoctorateAdmissionFactory, WriteTokenFactory
 from admission.tests.factories.doctorate import DoctorateFactory
-from admission.tests.factories.groups import CandidateGroupFactory, CddManagerGroupFactory,\
-    CommitteeMemberGroupFactory, PromoterGroupFactory
+from admission.tests.factories.groups import (
+    CandidateGroupFactory,
+    CddManagerGroupFactory,
+    CommitteeMemberGroupFactory,
+    PromoterGroupFactory,
+)
 from admission.tests.factories.roles import CddManagerFactory
 from admission.tests.factories.supervision import CaMemberFactory, PromoterFactory
 from base.models.enums.entity_type import EntityType
@@ -291,7 +302,6 @@ class DoctorateAdmissionUpdatingApiTestCase(APITestCase):
         cls.other_committee_member_user = PersonFactory(first_name="James").user
         cls.other_committee_member_user.groups.add(CommitteeMemberGroupFactory())
 
-
     def test_admission_doctorate_update_using_api_candidate(self):
         self.client.force_authenticate(user=self.candidate.user)
         response = self.client.put(self.url, data=self.update_data, format="json")
@@ -411,7 +421,7 @@ class DoctorateAdmissionDeletingApiTestCase(APITestCase):
         admissions = DoctorateAdmission.objects.all()
         self.assertEqual(admissions.count(), 1)
         admission = admissions.get()
-        self.assertEqual(admission.status, ChoixStatusProposition.CANCELLED.name)
+        self.assertEqual(admission.status, ChoixStatutProposition.CANCELLED.name)
 
     def test_user_not_logged_assert_not_authorized(self):
         self.client.force_authenticate(user=None)
@@ -573,6 +583,83 @@ class DoctorateAdmissionGetApiTestCase(APITestCase):
 
     def test_admission_doctorate_get_using_api_other_committee_member(self):
         self.client.force_authenticate(user=self.other_committee_member_user)
+        response = self.client.get(self.url, format="json")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_user_not_logged_assert_not_authorized(self):
+        self.client.force_authenticate(user=None)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+
+@override_settings(ROOT_URLCONF='admission.api.url_v1')
+class DoctorateAdmissionVerifyTestCase(APITestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.admission = DoctorateAdmissionFactory(
+            cotutelle=False,
+            project_title="title",
+            project_abstract="abstract",
+            thesis_language="FR",
+            project_document=[WriteTokenFactory().token],
+            gantt_graph=[WriteTokenFactory().token],
+            program_proposition=[WriteTokenFactory().token],
+        )
+        # Users
+        cls.candidate = cls.admission.candidate
+        cls.candidate.user.groups.add(CandidateGroupFactory())
+        cls.other_candidate_user = PersonFactory(first_name="Jim").user
+        cls.other_candidate_user.groups.add(CandidateGroupFactory())
+        cls.no_role_user = PersonFactory(first_name="Joe").user
+        cls.url = resolve_url("verify-proposition", uuid=cls.admission.uuid)
+
+    @mock.patch(
+        'admission.infrastructure.preparation.projet_doctoral.domain.service.promoteur.PromoteurTranslator.est_externe',
+        return_value=True,
+    )
+    def test_verify_proposition_using_api(self, mock_is_external):
+        self.client.force_authenticate(user=self.candidate.user)
+        promoter = PromoterFactory()
+        CaMemberFactory(process=promoter.process)
+        self.admission.supervision_group = promoter.actor_ptr.process
+        self.admission.save()
+
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    @mock.patch(
+        'admission.infrastructure.preparation.projet_doctoral.domain.service.promoteur.PromoteurTranslator.est_externe',
+        return_value=True,
+    )
+    def test_verify_proposition_using_api_without_ca_members_must_fail(self, mock_is_external):
+        self.client.force_authenticate(user=self.candidate.user)
+
+        promoter = PromoterFactory()
+        self.admission.supervision_group = promoter.actor_ptr.process
+        self.admission.save()
+
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.json()[0]['status_code'], MembreCAManquantException.status_code)
+
+    def test_verify_proposition_using_api_without_promoter_must_fail(self):
+        self.client.force_authenticate(user=self.candidate.user)
+
+        ca_member = CaMemberFactory()
+        self.admission.supervision_group = ca_member.actor_ptr.process
+        self.admission.save()
+
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.json()[0]['status_code'], PromoteurManquantException.status_code)
+
+    def test_admission_doctorate_verify_no_role(self):
+        self.client.force_authenticate(user=self.no_role_user)
+        response = self.client.get(self.url, format="json")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_admission_doctorate_verify_other_candidate(self):
+        self.client.force_authenticate(user=self.other_candidate_user)
         response = self.client.get(self.url, format="json")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 

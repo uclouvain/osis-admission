@@ -51,3 +51,8 @@ class IPromoteurTranslator(interface.DomainService):
             personne_connue_ucl_translator: 'IPersonneConnueUclTranslator',
     ) -> List['PromoteurDTO']:
         raise NotImplementedError
+
+    @classmethod
+    @abstractmethod
+    def est_externe(cls, identity: PromoteurIdentity) -> bool:
+        raise NotImplementedError

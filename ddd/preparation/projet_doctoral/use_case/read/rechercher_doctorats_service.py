@@ -29,6 +29,8 @@ from typing import List
 from admission.ddd.preparation.projet_doctoral.commands import SearchDoctoratCommand
 from admission.ddd.preparation.projet_doctoral.domain.service.i_doctorat import IDoctoratTranslator
 from admission.ddd.preparation.projet_doctoral.dtos import DoctoratDTO
+from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import GetCurrentAcademicYear
+from infrastructure.shared_kernel.academic_year.repository import academic_year as academic_year_repository
 
 
 def rechercher_doctorats(
@@ -36,5 +38,8 @@ def rechercher_doctorats(
         doctorat_translator: 'IDoctoratTranslator',
 ) -> List['DoctoratDTO']:
     # TODO :: comment déterminer l'année concernée pour la formation ? Sur base d'un calendrier ?
-    annee = datetime.date.today().year
+    annee = GetCurrentAcademicYear().get_starting_academic_year(
+        datetime.date.today(),
+        academic_year_repository.AcademicYearRepository()
+    ).year
     return doctorat_translator.search(cmd.sigle_secteur_entite_gestion, annee)

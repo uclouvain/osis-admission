@@ -238,6 +238,19 @@ msgstr "Peut vérifier le copyright"
 msgid "Can sign diploma"
 msgstr "Peut signer le diplôme"
 
+msgid "Member of supervision group already invited."
+msgstr "Membre du groupe de supervision déjà invité."
+
+msgid "Mandatory fields are missing in the cotutelle."
+msgstr "Les champs requis de la cotutelle sont manquants."
+
+msgid "Mandatory fields are missing in the project details of the proposition."
+msgstr ""
+"Les champs requis des details du projet de la proposition sont manquants."
+
+msgid "Member of supervision group already invited."
+msgstr "Membre du groupe de supervision déjà invité."
+
 msgid "Can view the information related to the admission request author"
 msgstr ""
 "Peut voir les informations relatives à l'auteur de la demande d'admission"
@@ -363,6 +376,13 @@ msgstr "Refusé"
 
 msgid "You've reached the maximum authorized propositions."
 msgstr "Vous avez atteint le maximum de propositions."
+msgid "SUBMITTED"
+msgstr "Soumis"
+msgid "SIGNING_IN_PROGRESS"
+msgstr "Signatures en cours"
+
+msgid "SUBMITTED"
+msgstr "Soumis"
 
 msgid "No PhD found."
 msgstr "Pas de doctorat trouvé"
@@ -416,6 +436,24 @@ msgstr "Admissions en doctorat"
 
 msgid "Create new doctorate admission"
 msgstr "Créer une nouvelle admission en doctorat"
+msgid "You've reached the maximum authorized propositions."
+msgstr "Vous avez atteint le maximum de propositions."
+msgid "You must add at least one CA member in order to request signatures."
+msgstr ""
+"Vous devez ajouter au moins un membre CA afin de demander les signatures."
+
+msgid ""
+"You must add at least one external promoter in order to request signatures."
+msgstr ""
+"Vous devez ajouter au moins un promoteur externe afin de demander les "
+"signatures."
+
+msgid "You must add at least one promoter in order to request signatures."
+msgstr ""
+"Vous devez ajouter au moins un promoteur afin de demander les signatures."
+
+msgid "You've reached the maximum authorized propositions."
+msgstr "Vous avez atteint le maximum de propositions."
 
 msgid "Author"
 msgstr "Auteur"
@@ -486,3 +524,15 @@ msgstr "Fermer"
 
 msgid "Confirm"
 msgstr "Confirmer"
+#, python-brace-format
+msgid "{degree} [{type}] for {candidate}"
+msgstr "{degree} [{type}] pour {candidate}"
+#, python-brace-format
+msgid "{degree} [{type}] for {candidate}"
+msgstr "{degree} [{type}] pour {candidate}"
+
+msgid "There can be no more promoters in the supervision group."
+msgstr "Il ne peut y avoir davantage de promoteurs dans le groupe de supervision."
+
+msgid "There can be no more CA members in the supervision group."
+msgstr "Il ne peut y avoir davantage de membres du CA dans le groupe de supervision."

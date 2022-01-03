@@ -49,6 +49,7 @@ class Candidate(EntityRoleModel):
             'admission.upload_pdf_confirmation': is_admission_request_author,
             'admission.fill_thesis': is_admission_request_author,
             'admission.upload_publication_authorisation': is_admission_request_author,
+            'admission.verify_doctorateadmission_project': is_admission_request_author,
             'admission.view_doctorateadmission_person': rules.always_allow,
             'admission.change_doctorateadmission_person': rules.always_allow,
             'admission.view_doctorateadmission_coordinates': rules.always_allow,

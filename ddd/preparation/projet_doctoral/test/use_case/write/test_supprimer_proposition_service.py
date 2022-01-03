@@ -27,7 +27,7 @@ import attr
 from django.test import TestCase
 
 from admission.ddd.preparation.projet_doctoral.commands import SupprimerPropositionCommand
-from admission.ddd.preparation.projet_doctoral.domain.model._enums import ChoixStatusProposition
+from admission.ddd.preparation.projet_doctoral.domain.model._enums import ChoixStatutProposition
 from admission.ddd.preparation.projet_doctoral.domain.model.proposition import Proposition
 from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import PropositionNonTrouveeException
 from admission.ddd.preparation.projet_doctoral.test.factory.proposition import PropositionAdmissionSC3DPMinimaleFactory
@@ -54,7 +54,7 @@ class SupprimerPropositionTestCase(TestCase):
         proposition_id = self.message_bus.invoke(self.cmd)
         proposition = self.proposition_repository.get(proposition_id)  # type: Proposition
         self.assertEqual(proposition_id, proposition.entity_id)
-        self.assertEqual(proposition.statut, ChoixStatusProposition.CANCELLED)
+        self.assertEqual(proposition.statut, ChoixStatutProposition.CANCELLED)
 
     def test_should_pas_supprimer_si_non_existante(self):
         cmd = attr.evolve(self.cmd, uuid_proposition="7db06048-6d86-4936-9b22-7522d11e1564")

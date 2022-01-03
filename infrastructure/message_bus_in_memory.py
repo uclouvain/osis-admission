@@ -34,12 +34,13 @@ from admission.ddd.preparation.projet_doctoral.use_case.read.rechercher_doctorat
     rechercher_doctorats
 from admission.ddd.preparation.projet_doctoral.use_case.read.rechercher_propositions_service import \
     rechercher_propositions
+from admission.ddd.preparation.projet_doctoral.use_case.read.verifier_proposition_service import verifier_proposition
 from admission.ddd.preparation.projet_doctoral.use_case.write.approuver_proposition_service import \
     approuver_proposition
 from admission.ddd.preparation.projet_doctoral.use_case.write.completer_proposition_service import \
     completer_proposition
 from admission.ddd.preparation.projet_doctoral.use_case.write.definir_cotutelle_service import definir_cotutelle
-from admission.ddd.preparation.projet_doctoral.use_case.write.demander_signature_service import demander_signature
+from admission.ddd.preparation.projet_doctoral.use_case.write.demander_signatures_service import demander_signatures
 from admission.ddd.preparation.projet_doctoral.use_case.write.identifier_membre_CA_service import \
     identifier_membre_CA
 from admission.ddd.preparation.projet_doctoral.use_case.write.identifier_promoteur_service import \
@@ -51,8 +52,6 @@ from admission.ddd.preparation.projet_doctoral.use_case.write.supprimer_membre_C
 from admission.ddd.preparation.projet_doctoral.use_case.write.supprimer_promoteur_service import \
     supprimer_promoteur
 from admission.ddd.preparation.projet_doctoral.use_case.write.supprimer_proposition_service import supprimer_proposition
-from admission.infrastructure.preparation.projet_doctoral.domain.service.in_memory.constitution_supervision import \
-    ConstitutionSupervisionInMemoryService
 from admission.infrastructure.preparation.projet_doctoral.domain.service.in_memory.doctorat import \
     DoctoratInMemoryTranslator
 from admission.infrastructure.preparation.projet_doctoral.domain.service.in_memory.membre_CA import \
@@ -127,11 +126,17 @@ class MessageBusInMemoryCommands(AbstractMessageBusCommands):
             proposition_repository=PropositionInMemoryRepository(),
             groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
         ),
-        DemanderSignatureCommand: partial(
-            demander_signature,
+        DemanderSignaturesCommand: partial(
+            demander_signatures,
             proposition_repository=PropositionInMemoryRepository(),
             groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
-            constitution_supervision_these=ConstitutionSupervisionInMemoryService(),
+            promoteur_translator=PromoteurInMemoryTranslator(),
+        ),
+        VerifierPropositionCommand: partial(
+            verifier_proposition,
+            proposition_repository=PropositionInMemoryRepository(),
+            groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
+            promoteur_translator=PromoteurInMemoryTranslator(),
         ),
         ApprouverPropositionCommand: partial(
             approuver_proposition,

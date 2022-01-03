@@ -147,3 +147,59 @@ class JustificationRequiseException(BusinessException):
     def __init__(self, **kwargs):
         message = _("A justification is needed when creating a pre-admission.")
         super().__init__(message, **kwargs)
+
+
+class DetailProjetNonCompleteException(BusinessException):
+    status_code = "PROPOSITION-17"
+
+    def __init__(self, **kwargs):
+        message = _("Mandatory fields are missing in the project details of the proposition.")
+        super().__init__(message, **kwargs)
+
+
+class CotutelleNonCompleteException(BusinessException):
+    status_code = "PROPOSITION-18"
+
+    def __init__(self, **kwargs):
+        message = _("Mandatory fields are missing in the cotutelle.")
+        super().__init__(message, **kwargs)
+
+
+class PromoteurManquantException(BusinessException):
+    status_code = "PROPOSITION-19"
+
+    def __init__(self, **kwargs):
+        message = _("You must add at least one promoter in order to request signatures.")
+        super().__init__(message, **kwargs)
+
+
+class MembreCAManquantException(BusinessException):
+    status_code = "PROPOSITION-20"
+
+    def __init__(self, **kwargs):
+        message = _("You must add at least one CA member in order to request signatures.")
+        super().__init__(message, **kwargs)
+
+
+class CotutelleDoitAvoirAuMoinsUnPromoteurExterneException(BusinessException):
+    status_code = "PROPOSITION-21"
+
+    def __init__(self, **kwargs):
+        message = _("You must add at least one external promoter in order to request signatures.")
+        super().__init__(message, **kwargs)
+
+
+class GroupeSupervisionCompletPourPromoteursException(BusinessException):
+    status_code = "PROPOSITION-22"
+
+    def __init__(self, **kwargs):
+        message = _("There can be no more promoters in the supervision group.")
+        super().__init__(message, **kwargs)
+
+
+class GroupeSupervisionCompletPourMembresCAException(BusinessException):
+    status_code = "PROPOSITION-23"
+
+    def __init__(self, **kwargs):
+        message = _("There can be no more CA members in the supervision group.")
+        super().__init__(message, **kwargs)

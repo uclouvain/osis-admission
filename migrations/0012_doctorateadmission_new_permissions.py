@@ -6,7 +6,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('admission', '0010_doctorateadmission_recommendation_letters'),
+        ('admission', '0011_auto_20211216_1514'),
     ]
 
     operations = [

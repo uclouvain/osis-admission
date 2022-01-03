@@ -48,6 +48,7 @@ class ForeignHighSchoolDiplomaSerializer(serializers.ModelSerializer):
             "linguistic_regime",
             "other_linguistic_regime",
             "country",
+            "equivalence",
         )
 
 

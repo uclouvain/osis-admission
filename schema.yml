@@ -319,6 +319,44 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - propositions
+  /propositions/{uuid}/verify:
+    get:
+      operationId: retrieve_verify_proposition
+      description: Check the proposition to be OK with all validators.
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        200:
+          description: Proposition verification errors
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    status_code:
+                      type: string
+                    detail:
+                      type: string
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
   /propositions/{uuid}/cotutelle:
     get:
       operationId: retrieve_cotutelle
@@ -670,6 +708,42 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - autocomplete
+  /propositions/{uuid}/request_signatures:
+    post:
+      operationId: create_signatures
+      description: Ask for all promoters and members to sign the proposition.
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PropositionIdentityDTO'
+      responses:
+        201:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PropositionIdentityDTO'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
 components:
   schemas:
     PersonIdentification:
@@ -1072,6 +1146,9 @@ components:
             country:
               type: string
               nullable: true
+            equivalence:
+              $ref: '#/components/schemas/Equivalence'
+              nullable: true
           required:
           - academic_graduation_year
           - linguistic_regime
@@ -1106,6 +1183,12 @@ components:
       - NATIONAL_BACHELOR
       - EUROPEAN_BACHELOR
       - INTERNATIONAL_BACCALAUREATE
+      type: string
+    Equivalence:
+      enum:
+      - 'YES'
+      - 'NO'
+      - PENDING
       type: string
     PropositionDTO:
       type: object
