@@ -11,7 +11,22 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.RenameField(
+            model_name='doctorateadmission',
+            old_name='thesis_institute',
+            new_name='other_thesis_location',
+        ),
         migrations.AlterField(
+            model_name='doctorateadmission',
+            name='other_thesis_location',
+            field=models.CharField(
+                blank=True,
+                default='',
+                max_length=255,
+                verbose_name='Other thesis location',
+            ),
+        ),
+        migrations.AddField(
             model_name='doctorateadmission',
             name='thesis_institute',
             field=models.ForeignKey(
@@ -21,16 +36,6 @@ class Migration(migrations.Migration):
                 related_name='+',
                 to='base.EntityVersion',
                 verbose_name='Thesis institute',
-            ),
-        ),
-        migrations.AddField(
-            model_name='doctorateadmission',
-            name='other_thesis_location',
-            field=models.CharField(
-                blank=True,
-                default='',
-                max_length=255,
-                verbose_name='Other thesis location'
             ),
         ),
     ]
