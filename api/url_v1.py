@@ -47,6 +47,7 @@ urlpatterns = [
     path('propositions/<uuid:uuid>/cotutelle', views.CotutelleAPIView),
     path('propositions/<uuid:uuid>/supervision', views.SupervisionAPIView),
     path('propositions/<uuid:uuid>/request_signatures', views.RequestSignaturesAPIView),
+    path('propositions/<uuid:uuid>/approve', views.ApprovePropositionAPIView),
     path('autocomplete/sector', views.AutocompleteSectorView),
     path('autocomplete/sector/<str:sigle>/doctorates', views.AutocompleteDoctoratView),
     path('autocomplete/tutor', views.AutocompleteTutorView),
