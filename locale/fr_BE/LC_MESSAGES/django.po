@@ -70,9 +70,6 @@ msgstr "Déjà promoteur"
 msgid "Author"
 msgstr "Auteur"
 
-msgid "Bureau"
-msgstr "Bureau"
-
 msgid "CA Member"
 msgstr "Membre du CA"
 
@@ -85,12 +82,25 @@ msgstr "Gestionnaire CDD"
 msgid "CDD managers"
 msgstr "Gestionnaires CDD"
 
+msgid "CDE proximity commission"
+msgstr "Commission de proximité CDE"
+
 msgid ""
 "CDE proximity commission should be filled in only if the doctorate's entity "
 "is CDE"
 msgstr ""
 "La commission de proximité CDE doit être remplie uniquement si l'entité du "
 "doctorat est CDE"
+
+msgid "CDSS proximity commission"
+msgstr "Commission de proximité CDSS"
+
+msgid ""
+"CDSS proximity commission should be filled in only if the doctorate's entity "
+"is CDSS"
+msgstr ""
+"La commission de proximité CDSS doit être remplie uniquement si l'entité du "
+"doctorat est CDSS"
 
 msgid "Can access doctorate admission list"
 msgstr "Peut accéder à la liste des admission en doctorat"
@@ -399,6 +409,37 @@ msgstr "Promoteurs"
 
 msgid "Proposition not found."
 msgstr "Proposition non trouvée."
+
+
+msgid "Proximity Commission for Dental Sciences (DENT)"
+msgstr "Commission de proximité de sciences dentaires (DENT)"
+
+msgid "Proximity Commission for Genetics and Immunology (GIM)"
+msgstr "Commission de proximité de génétique et immunologie (GIM)"
+
+msgid "Proximity Commission for Motricity Sciences (MOTR)"
+msgstr "Commission de proximité de sciences de la motricité (MOTR)"
+
+msgid "Proximity Commission for Neuroscience (NRSC)"
+msgstr "Commission de proximité de neurosciences (NRSC)"
+
+msgid "Proximity Commission for Pharmaceutical Sciences (DFAR)"
+msgstr "Commission de proximité de sciences pharmaceutiques (DFAR)"
+
+msgid "Proximity commission"
+msgstr "Commission de proximité"
+
+msgid ""
+"Proximity commission for cellular and molecular biology, biochemistry (BCM)"
+msgstr ""
+"Commission de proximité de biologie cellulaire et moléculaire, biochimie "
+"(BCM)"
+
+msgid "Proximity commission for experimental and clinical research (ECLI)"
+msgstr "Commission de proximité de recherche expérimentale et clinique (ECLI)"
+
+msgid "Proximity commission for public health, health and society (SPSS)"
+msgstr "Commission de proximité de santé publique, santé et société (SPSS)"
 
 msgid "REFUSED"
 msgstr "Refusé"
