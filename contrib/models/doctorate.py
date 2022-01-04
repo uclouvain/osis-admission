@@ -116,15 +116,23 @@ class DoctorateAdmission(BaseAdmission):
         default='',
         blank=True,
     )
-    thesis_institute = models.CharField(
-        max_length=255,
+    thesis_institute = models.ForeignKey(
+        'base.EntityVersion',
+        related_name="+",
         verbose_name=_("Thesis institute"),
-        default='',
+        on_delete=models.SET_NULL,
         blank=True,
+        null=True,
     )
     thesis_location = models.CharField(
         max_length=255,
         verbose_name=_("Thesis location"),
+        default='',
+        blank=True,
+    )
+    other_thesis_location = models.CharField(
+        max_length=255,
+        verbose_name=_("Other thesis location"),
         default='',
         blank=True,
     )

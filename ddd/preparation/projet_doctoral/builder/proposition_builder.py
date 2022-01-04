@@ -36,6 +36,7 @@ from admission.ddd.preparation.projet_doctoral.domain.model._financement import 
     Financement, ChoixTypeFinancement,
     financement_non_rempli,
 )
+from admission.ddd.preparation.projet_doctoral.domain.model._institut import InstitutIdentity
 from admission.ddd.preparation.projet_doctoral.domain.model.doctorat import DoctoratIdentity
 from admission.ddd.preparation.projet_doctoral.domain.model.proposition import (
     Proposition,
@@ -110,8 +111,9 @@ def _build_projet(cmd: 'InitierPropositionCommand') -> 'DetailProjet':
         resume=cmd.resume_projet,
         documents=cmd.documents_projet,
         langue_redaction_these=cmd.langue_redaction_these,
-        institut_these=cmd.institut_these,
+        institut_these=InstitutIdentity(cmd.institut_these) if cmd.institut_these else None,
         lieu_these=cmd.lieu_these,
+        autre_lieu_these=cmd.autre_lieu_these,
         graphe_gantt=cmd.graphe_gantt,
         proposition_programme_doctoral=cmd.proposition_programme_doctoral,
         projet_formation_complementaire=cmd.projet_formation_complementaire,
