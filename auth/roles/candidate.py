@@ -27,7 +27,7 @@ import rules
 from rules import RuleSet
 from django.utils.translation import gettext_lazy as _
 
-from admission.auth.predicates import is_admission_request_author
+from admission.auth.predicates import is_admission_request_author, is_admission_request_author_or_person
 from osis_role.contrib.models import EntityRoleModel
 
 
@@ -50,14 +50,16 @@ class Candidate(EntityRoleModel):
             'admission.fill_thesis': is_admission_request_author,
             'admission.upload_publication_authorisation': is_admission_request_author,
             'admission.verify_doctorateadmission_project': is_admission_request_author,
-            'admission.view_doctorateadmission_person': rules.always_allow,
-            'admission.change_doctorateadmission_person': rules.always_allow,
-            'admission.view_doctorateadmission_coordinates': rules.always_allow,
-            'admission.change_doctorateadmission_coordinates': rules.always_allow,
-            'admission.view_doctorateadmission_secondary_studies': rules.always_allow,
-            'admission.change_doctorateadmission_secondary_studies': rules.always_allow,
-            'admission.view_doctorateadmission_curriculum': rules.always_allow,
-            'admission.change_doctorateadmission_curriculum': rules.always_allow,
+            'admission.view_doctorateadmission_person': is_admission_request_author_or_person,
+            'admission.change_doctorateadmission_person': is_admission_request_author_or_person,
+            'admission.view_doctorateadmission_coordinates': is_admission_request_author_or_person,
+            'admission.change_doctorateadmission_coordinates': is_admission_request_author_or_person,
+            'admission.view_doctorateadmission_secondary_studies': is_admission_request_author_or_person,
+            'admission.change_doctorateadmission_secondary_studies': is_admission_request_author_or_person,
+            'admission.view_doctorateadmission_curriculum': is_admission_request_author_or_person,
+            'admission.change_doctorateadmission_curriculum': is_admission_request_author_or_person,
+            'admission.view_doctorateadmission_languages': is_admission_request_author_or_person,
+            'admission.change_doctorateadmission_languages': is_admission_request_author_or_person,
             'admission.view_doctorateadmission_project': is_admission_request_author,
             'admission.change_doctorateadmission_project': is_admission_request_author,
             'admission.view_doctorateadmission_cotutelle': is_admission_request_author,

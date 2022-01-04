@@ -30,14 +30,15 @@ from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 
 from admission.api import serializers
-from admission.api.schema import ChoicesEnumSchema
+from admission.api.views import PersonRelatedMixin
+from admission.api.views.mixins import PersonRelatedSchema
 from osis_profile.models.education import LanguageKnowledge
-
+from osis_role.contrib.views import APIPermissionRequiredMixin
 
 MANDATORY_LANGUAGES = ["FR", "EN"]
 
 
-class LanguagesKnowledgeSchema(ChoicesEnumSchema):
+class LanguagesKnowledgeSchema(PersonRelatedSchema):
     def get_responses(self, path, method):
         if method == "POST":
             return super().get_responses(path, "GET")
@@ -60,12 +61,17 @@ class LanguagesKnowledgeSchema(ChoicesEnumSchema):
         return super().get_request_body(path, method)
 
 
-class LanguagesKnowledgeViewSet(mixins.ListModelMixin, mixins.CreateModelMixin, GenericAPIView):
+class LanguagesKnowledgeViewSet(APIPermissionRequiredMixin, PersonRelatedMixin, mixins.ListModelMixin,
+                                mixins.CreateModelMixin, GenericAPIView):
+    name = "languages-knowledge"
     pagination_class = None
     filter_backends = []
     serializer_class = serializers.LanguageKnowledgeSerializer
-    schema = LanguagesKnowledgeSchema(tags=["person"])
-    name = "languages-knowledge"
+    schema = LanguagesKnowledgeSchema()
+    permission_mapping = {
+        'GET': 'admission.view_doctorateadmission_languages',
+        'POST': 'admission.change_doctorateadmission_languages',
+    }
 
     def get_queryset(self):
         return self.request.user.person.languages_knowledge.all()
