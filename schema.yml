@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Admission API
-  version: 1.0.2
+  version: 1.0.3
   description: This API delivers data for the Admission project.
   contact:
     name: UCLouvain - OSIS
@@ -130,9 +130,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/PropositionSearchDTO'
+                $ref: '#/components/schemas/PropositionSearch'
           description: ''
         '400':
           $ref: '#/components/responses/BadRequest'
@@ -895,6 +893,28 @@ components:
         last_registration_year:
           type: integer
           nullable: true
+    ActionLink:
+      type: object
+      properties:
+        error:
+          type: string
+        method:
+          type: string
+          enum:
+          - DELETE
+          - GET
+          - PATCH
+          - POST
+          - PUT
+        url:
+          type: string
+          format: uri
+      oneOf:
+      - required:
+        - method
+        - url
+      - required:
+        - error
     Coordonnees:
       type: object
       properties:
@@ -969,46 +989,91 @@ components:
       - contact
       - residential
       - phone_mobile
-    PropositionSearchDTO:
+    PropositionSearch:
       type: object
       properties:
-        uuid:
-          type: string
-        reference:
-          type: string
-        type_admission:
-          type: string
-        sigle_doctorat:
-          type: string
-        intitule_doctorat_fr:
-          type: string
-        intitule_doctorat_en:
-          type: string
-        matricule_candidat:
-          type: string
-        code_secteur_formation:
-          type: string
-        intitule_secteur_formation:
-          type: string
-        bureau_CDE:
-          type: string
-        creee_le:
-          type: string
-          format: date-time
-        statut:
-          type: string
+        links:
+          type: object
+          properties:
+            create_proposition:
+              $ref: '#/components/schemas/ActionLink'
+          readOnly: true
+          default: {}
+        propositions:
+          type: array
+          items:
+            type: object
+            properties:
+              uuid:
+                type: string
+              reference:
+                type: string
+              type_admission:
+                type: string
+              sigle_doctorat:
+                type: string
+              intitule_doctorat_fr:
+                type: string
+              intitule_doctorat_en:
+                type: string
+              matricule_candidat:
+                type: string
+              code_secteur_formation:
+                type: string
+              intitule_secteur_formation:
+                type: string
+              bureau_CDE:
+                type: string
+              creee_le:
+                type: string
+                format: date-time
+              statut:
+                type: string
+              links:
+                type: object
+                properties:
+                  retrieve_person:
+                    $ref: '#/components/schemas/ActionLink'
+                  update_person:
+                    $ref: '#/components/schemas/ActionLink'
+                  retrieve_coordinates:
+                    $ref: '#/components/schemas/ActionLink'
+                  update_coordinates:
+                    $ref: '#/components/schemas/ActionLink'
+                  retrieve_secondary_studies:
+                    $ref: '#/components/schemas/ActionLink'
+                  update_secondary_studies:
+                    $ref: '#/components/schemas/ActionLink'
+                  destroy_proposition:
+                    $ref: '#/components/schemas/ActionLink'
+                  retrieve_proposition:
+                    $ref: '#/components/schemas/ActionLink'
+                  update_proposition:
+                    $ref: '#/components/schemas/ActionLink'
+                  retrieve_cotutelle:
+                    $ref: '#/components/schemas/ActionLink'
+                  update_cotutelle:
+                    $ref: '#/components/schemas/ActionLink'
+                  retrieve_supervision:
+                    $ref: '#/components/schemas/ActionLink'
+                  update_supervision:
+                    $ref: '#/components/schemas/ActionLink'
+                readOnly: true
+                default: {}
+            required:
+            - uuid
+            - reference
+            - type_admission
+            - sigle_doctorat
+            - intitule_doctorat_fr
+            - intitule_doctorat_en
+            - matricule_candidat
+            - code_secteur_formation
+            - intitule_secteur_formation
+            - creee_le
+            - statut
       required:
-      - uuid
-      - reference
-      - type_admission
-      - sigle_doctorat
-      - intitule_doctorat_fr
-      - intitule_doctorat_en
-      - matricule_candidat
-      - code_secteur_formation
-      - intitule_secteur_formation
-      - creee_le
-      - statut
+      - propositions
     HighSchoolDiploma:
       type: object
       properties:
@@ -1216,6 +1281,8 @@ components:
     PropositionDTO:
       type: object
       properties:
+        uuid:
+          type: string
         type_admission:
           type: string
         reference:
@@ -1297,7 +1364,43 @@ components:
           type: string
         statut:
           type: string
+        links:
+          type: object
+          properties:
+            retrieve_person:
+              $ref: '#/components/schemas/ActionLink'
+            update_person:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_coordinates:
+              $ref: '#/components/schemas/ActionLink'
+            update_coordinates:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_secondary_studies:
+              $ref: '#/components/schemas/ActionLink'
+            update_secondary_studies:
+              $ref: '#/components/schemas/ActionLink'
+            destroy_proposition:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_proposition:
+              $ref: '#/components/schemas/ActionLink'
+            update_proposition:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_cotutelle:
+              $ref: '#/components/schemas/ActionLink'
+            update_cotutelle:
+              $ref: '#/components/schemas/ActionLink'
+            add_member:
+              $ref: '#/components/schemas/ActionLink'
+            remove_member:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_supervision:
+              $ref: '#/components/schemas/ActionLink'
+            update_supervision:
+              $ref: '#/components/schemas/ActionLink'
+          readOnly: true
+          default: {}
       required:
+      - uuid
       - type_admission
       - reference
       - sigle_doctorat

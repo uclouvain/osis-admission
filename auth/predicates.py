@@ -24,30 +24,37 @@
 #
 # ##############################################################################
 from django.contrib.auth.models import User
+from django.utils.translation import gettext_lazy as _
 from rules import predicate
+
+from osis_role.errors import predicate_failed_msg
 
 from admission.contrib.models import DoctorateAdmission
 from admission.contrib.models.base import BaseAdmission
 from admission.contrib.models.enums.actor_type import ActorType
 
 
-@predicate
-def is_admission_request_author(user: User, obj: BaseAdmission):
+@predicate(bind=True)
+@predicate_failed_msg(message=_("You must be the request author to access this admission"))
+def is_admission_request_author(self, user: User, obj: BaseAdmission):
     return obj.candidate == user.person
 
 
-@predicate
-def is_admission_request_promoter(user: User, obj: DoctorateAdmission):
+@predicate(bind=True)
+@predicate_failed_msg(message=_("You must be the request promoter to access this admission"))
+def is_admission_request_promoter(self, user: User, obj: DoctorateAdmission):
     return user.person.pk in obj.supervision_group.actors.filter(
         supervisionactor__type=ActorType.PROMOTER.name,
     ).values_list('person_id', flat=True)
 
 
 @predicate(bind=True)
+@predicate_failed_msg(message=_("You must be a member of the doctoral commission to access this admission"))
 def is_part_of_doctoral_commission(self, user: User, obj: DoctorateAdmission):
     return obj.doctorate.management_entity_id in self.context['role_qs'].get_entities_ids()
 
 
-@predicate
-def is_part_of_committee(user: User, obj: DoctorateAdmission):
+@predicate(bind=True)
+@predicate_failed_msg(message=_("You must be a member of the committee to access this admission"))
+def is_part_of_committee(self, user: User, obj: DoctorateAdmission):
     return user.person.pk in obj.supervision_group.actors.values_list('person_id', flat=True)

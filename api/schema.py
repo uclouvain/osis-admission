@@ -30,9 +30,10 @@ from rest_framework.schemas.openapi import AutoSchema, SchemaGenerator
 from rest_framework.schemas.utils import is_list_view
 from rest_framework.serializers import Serializer
 
+from admission.api.serializers.fields import ActionLinksField
 from base.models.utils.utils import ChoiceEnum
 
-ADMISSION_SDK_VERSION = "1.0.2"
+ADMISSION_SDK_VERSION = "1.0.3"
 
 
 class AdmissionSchemaGenerator(SchemaGenerator):
@@ -210,7 +211,66 @@ class AdmissionSchemaGenerator(SchemaGenerator):
         return schema
 
 
-class BetterChoicesSchema(AutoSchema):
+class ActionLinksFieldSchemaMixin:
+    """This mixin allows to generate the schema related to an ActionLinksField"""
+
+    def map_field(self, field):
+        if isinstance(field, ActionLinksField):
+            properties = {}
+
+            for action in field.actions:
+                properties[action] = {
+                    '$ref': '#/components/schemas/ActionLink',
+                }
+            return {
+                'type': 'object',
+                'properties': properties,
+            }
+
+        return super().map_field(field)
+
+    def get_components(self, path, method):
+        components = super().get_components(path, method)
+        # Add a custom component for the field
+        components['ActionLink'] = {
+            'type': 'object',
+            'properties': {
+                'error': {
+                    'type': 'string',
+                },
+                'method': {
+                    'type': 'string',
+                    'enum': [
+                        'DELETE',
+                        'GET',
+                        'PATCH',
+                        'POST',
+                        'PUT',
+                    ],
+                },
+                'url': {
+                    'type': 'string',
+                    'format': 'uri',
+                },
+            },
+            'oneOf': [
+                {
+                    'required': [
+                        'method',
+                        'url',
+                    ],
+                },
+                {
+                    'required': [
+                        'error',
+                    ],
+                },
+            ],
+        }
+        return components
+
+
+class BetterChoicesSchema(ActionLinksFieldSchemaMixin, AutoSchema):
     """This schema prevents a bug with blank choicefields"""
 
     def map_choicefield(self, field):
@@ -304,7 +364,7 @@ class DetailedAutoSchema(ChoicesEnumSchema):
         else:
             item_schema = self._get_reference(serializer)
 
-        if is_list_view(path, method, self.view):
+        if is_list_view(path, method, self.view) and not getattr(self, 'list_force_object', False):
             response_schema = {
                 'type': 'array',
                 'items': item_schema,

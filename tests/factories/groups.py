@@ -23,30 +23,21 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from rest_framework import mixins
-from rest_framework.generics import GenericAPIView
 
-from admission.api import serializers
-from admission.api.schema import BetterChoicesSchema
-from osis_role.contrib.views import APIPermissionRequiredMixin
+from base.tests.factories.group import GroupFactory
 
 
-class PersonViewSet(APIPermissionRequiredMixin, mixins.RetrieveModelMixin, mixins.UpdateModelMixin, GenericAPIView):
-    name = "person"
-    pagination_class = None
-    filter_backends = []
-    serializer_class = serializers.PersonIdentificationSerializer
-    schema = BetterChoicesSchema()
-    permission_mapping = {
-        'GET': 'admission.view_doctorateadmission_person',
-        'PUT': 'admission.change_doctorateadmission_person',
-    }
+class CandidateGroupFactory(GroupFactory):
+    name = 'candidates'
 
-    def get_object(self):
-        return self.request.user.person
 
-    def get(self, request, *args, **kwargs):
-        return self.retrieve(request, *args, **kwargs)
+class PromoterGroupFactory(GroupFactory):
+    name = 'promoters'
 
-    def put(self, request, *args, **kwargs):
-        return self.update(request, *args, **kwargs)
+
+class CddManagerGroupFactory(GroupFactory):
+    name = 'cdd_managers'
+
+
+class CommitteeMemberGroupFactory(GroupFactory):
+    name = 'committee_members'

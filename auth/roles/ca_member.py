@@ -43,4 +43,11 @@ class CommitteeMember(EntityRoleModel):
             'admission.approve_jury': is_part_of_committee,
             'admission.view_doctorateadmission': is_part_of_committee,
             'admission.access_doctorateadmission': rules.always_allow,
+            'admission.view_doctorateadmission_person': rules.always_allow,
+            'admission.view_doctorateadmission_coordinates': rules.always_allow,
+            'admission.view_doctorateadmission_secondary_studies': rules.always_allow,
+            'admission.view_doctorateadmission_curriculum': rules.always_allow,
+            'admission.view_doctorateadmission_project': is_part_of_committee,
+            'admission.view_doctorateadmission_cotutelle': is_part_of_committee,
+            'admission.view_doctorateadmission_supervision': is_part_of_committee,
         })

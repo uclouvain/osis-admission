@@ -26,12 +26,13 @@
 from collections import defaultdict
 
 from rest_framework import mixins, status
-from rest_framework.generics import GenericAPIView, ListCreateAPIView
+from rest_framework.generics import GenericAPIView, ListCreateAPIView, get_object_or_404
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
 
 from admission.api import serializers
 from admission.api.schema import ResponseSpecificSchema
+from admission.contrib.models.doctorate import DoctorateAdmission
 from admission.ddd.preparation.projet_doctoral.commands import (
     CompleterPropositionCommand, GetPropositionCommand,
     InitierPropositionCommand,
@@ -50,28 +51,35 @@ from backoffice.settings.rest_framework.exception_handler import get_error_data
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from infrastructure.messages_bus import message_bus_instance
 from osis_common.ddd.interface import BusinessException
+from osis_role.contrib.views import APIPermissionRequiredMixin
 
 
 class PropositionListSchema(ResponseSpecificSchema):
     serializer_mapping = {
-        'GET': serializers.PropositionSearchDTOSerializer,
+        'GET': serializers.PropositionSearchSerializer,
         'POST': (serializers.InitierPropositionCommandSerializer, serializers.PropositionIdentityDTOSerializer),
     }
+    list_force_object = True
 
     def get_operation_id_base(self, path, method, action):
         return '_proposition' if method == 'POST' else '_propositions'
 
 
-class PropositionListView(DisplayExceptionsByFieldNameAPIMixin, ListCreateAPIView):
+class PropositionListView(APIPermissionRequiredMixin, DisplayExceptionsByFieldNameAPIMixin, ListCreateAPIView):
     name = "propositions"
     schema = PropositionListSchema()
     pagination_class = None
     filter_backends = []
+
     field_name_by_exception = {
         JustificationRequiseException: ['justification'],
         InstitutionInconsistanteException: ['institution'],
         ContratTravailInconsistantException: ['type_contrat_travail'],
         BureauCDEInconsistantException: ['bureau_CDE'],
+    }
+    permission_mapping = {
+        'POST': 'admission.add_doctorateadmission',
+        'GET': 'admission.access_doctorateadmission',
     }
 
     def list(self, request, **kwargs):
@@ -79,7 +87,12 @@ class PropositionListView(DisplayExceptionsByFieldNameAPIMixin, ListCreateAPIVie
         proposition_list = message_bus_instance.invoke(
             SearchPropositionsCommand(matricule_candidat=request.user.person.global_id)
         )
-        serializer = serializers.PropositionSearchDTOSerializer(instance=proposition_list, many=True)
+        serializer = serializers.PropositionSearchSerializer(
+            instance={
+                "propositions": proposition_list,
+            },
+            context=self.get_serializer_context(),
+        )
         return Response(serializer.data)
 
     def create(self, request, **kwargs):
@@ -100,19 +113,34 @@ class PropositionSchema(ResponseSpecificSchema):
     }
 
 
-class PropositionViewSet(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, GenericAPIView):
+class PropositionViewSet(
+    APIPermissionRequiredMixin,
+    mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
+    GenericAPIView,
+):
     name = "propositions"
     schema = PropositionSchema()
     pagination_class = None
     filter_backends = []
+    permission_mapping = {
+        'GET': 'admission.view_doctorateadmission_project',
+        'PUT': 'admission.change_doctorateadmission_project',
+        'DELETE': 'admission.delete_doctorateadmission',
+    }
+
+    def get_permission_object(self):
+        return get_object_or_404(DoctorateAdmission, uuid=self.kwargs['uuid'])
 
     def get(self, request, *args, **kwargs):
         """Get a single proposition"""
-        # TODO call osis_role perm for this object
         proposition = message_bus_instance.invoke(
             GetPropositionCommand(uuid_proposition=kwargs.get('uuid'))
         )
-        serializer = serializers.PropositionDTOSerializer(instance=proposition)
+        serializer = serializers.PropositionDTOSerializer(
+            instance=proposition,
+            context=self.get_serializer_context()
+        )
         return Response(serializer.data)
 
     def put(self, request, *args, **kwargs):
@@ -160,11 +188,17 @@ class VerifyPropositionSchema(ResponseSpecificSchema):
         }
 
 
-class VerifyPropositionView(mixins.RetrieveModelMixin, GenericAPIView):
+class VerifyPropositionView(APIPermissionRequiredMixin, mixins.RetrieveModelMixin, GenericAPIView):
     name = "verify-proposition"
     schema = VerifyPropositionSchema()
     pagination_class = None
     filter_backends = []
+    permission_mapping = {
+        'GET': 'admission.view_doctorateadmission_project',
+    }
+
+    def get_permission_object(self):
+        return get_object_or_404(DoctorateAdmission, uuid=self.kwargs['uuid'])
 
     def get(self, request, *args, **kwargs):
         """Check the proposition to be OK with all validators."""

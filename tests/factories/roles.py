@@ -26,6 +26,7 @@
 
 import factory
 
+from admission.auth.roles.ca_member import CommitteeMember
 from admission.auth.roles.candidate import Candidate
 from admission.auth.roles.cdd_manager import CddManager
 from admission.auth.roles.promoter import Promoter
@@ -55,3 +56,8 @@ class CddManagerFactory(BaseFactory):
         model = CddManager
 
     with_child = False
+
+
+class CommitteeMemberFactory(BaseFactory):
+    class Meta:
+        model = CommitteeMember
