@@ -246,6 +246,8 @@ class DoctorateAdmission(BaseAdmission):
              _("Can view the information related to the secondary studies")),
             ('change_doctorateadmission_secondary_studies',
              _("Can update the information related to the secondary studies")),
+            ('view_doctorateadmission_languages', _("Can view the information related to language knowledge")),
+            ('change_doctorateadmission_languages', _("Can update the information related to language knowledge")),
             ('view_doctorateadmission_curriculum', _("Can view the information related to the curriculum")),
             ('change_doctorateadmission_curriculum', _("Can update the information related to the curriculum")),
             ('view_doctorateadmission_project', _("Can view the information related to the admission project")),
