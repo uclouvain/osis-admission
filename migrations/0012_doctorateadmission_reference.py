@@ -18,7 +18,7 @@ def set_default_references(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('admission', '0013_doctorateadmission_fk_thesis_institute'),
+        ('admission', '0011_auto_20211216_1514'),
     ]
 
     default_args = {
