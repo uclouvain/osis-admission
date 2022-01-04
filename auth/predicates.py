@@ -41,6 +41,14 @@ def is_admission_request_author(self, user: User, obj: BaseAdmission):
 
 
 @predicate(bind=True)
+@predicate_failed_msg(message=_("You must be the request author to access this admission"))
+def is_admission_request_author_or_person(self, user: User, obj: BaseAdmission):
+    if obj:
+        return obj.candidate == user.person
+    return True
+
+
+@predicate(bind=True)
 @predicate_failed_msg(message=_("You must be the request promoter to access this admission"))
 def is_admission_request_promoter(self, user: User, obj: DoctorateAdmission):
     return user.person.pk in obj.supervision_group.actors.filter(

@@ -1242,6 +1242,10 @@ components:
                     $ref: '#/components/schemas/ActionLink'
                   update_secondary_studies:
                     $ref: '#/components/schemas/ActionLink'
+                  retrieve_languages:
+                    $ref: '#/components/schemas/ActionLink'
+                  update_languages:
+                    $ref: '#/components/schemas/ActionLink'
                   destroy_proposition:
                     $ref: '#/components/schemas/ActionLink'
                   retrieve_proposition:
@@ -1576,6 +1580,10 @@ components:
             retrieve_secondary_studies:
               $ref: '#/components/schemas/ActionLink'
             update_secondary_studies:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_languages:
+              $ref: '#/components/schemas/ActionLink'
+            update_languages:
               $ref: '#/components/schemas/ActionLink'
             destroy_proposition:
               $ref: '#/components/schemas/ActionLink'

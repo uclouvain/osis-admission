@@ -87,6 +87,9 @@ class PropositionSearchDTOSerializer(DTOSerializer):
         # Secondary studies
         'retrieve_secondary_studies': ACTION_LINKS['retrieve_secondary_studies'],
         'update_secondary_studies': ACTION_LINKS['update_secondary_studies'],
+        # Language knowledge
+        'retrieve_languages': ACTION_LINKS['retrieve_languages'],
+        'update_languages': ACTION_LINKS['update_languages'],
         # Proposition
         'destroy_proposition': ACTION_LINKS['destroy_proposition'],
         # Project
@@ -125,6 +128,9 @@ class PropositionDTOSerializer(DTOSerializer):
             # Secondary studies
             'retrieve_secondary_studies': ACTION_LINKS['retrieve_secondary_studies'],
             'update_secondary_studies': ACTION_LINKS['update_secondary_studies'],
+            # Language knowledge
+            'retrieve_languages': ACTION_LINKS['retrieve_languages'],
+            'update_languages': ACTION_LINKS['update_languages'],
             # Proposition
             'destroy_proposition': ACTION_LINKS['destroy_proposition'],
             # Project

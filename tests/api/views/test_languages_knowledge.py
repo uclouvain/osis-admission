@@ -30,7 +30,7 @@ from django.utils.translation import gettext as _
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from base.tests.factories.person import PersonFactory
+from admission.tests.factories.roles import CandidateFactory
 from reference.tests.factories.language import LanguageFactory, FrenchLanguageFactory, EnglishLanguageFactory
 
 
@@ -38,7 +38,7 @@ from reference.tests.factories.language import LanguageFactory, FrenchLanguageFa
 class LanguagesKnowledgeTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.user = PersonFactory().user
+        cls.user = CandidateFactory().person.user
         cls.url = reverse("languages-knowledge")
         cls.french_knowledge_data = {
             "language": "FR",
