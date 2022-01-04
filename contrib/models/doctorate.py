@@ -222,6 +222,7 @@ class DoctorateAdmission(BaseAdmission):
             ('upload_defense_report', _("Can upload defense report")),
             ('check_copyright', _("Can check copyright")),
             ('sign_diploma', _("Can sign diploma")),
+            ('approve_proposition', _("Can approve proposition")),
         ]
 
     def get_absolute_url(self):

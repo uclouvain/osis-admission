@@ -31,6 +31,7 @@ from admission.api.views.person import *
 from admission.api.views.project import *
 from admission.api.views.supervision import *
 from admission.api.views.signatures import *
+from admission.api.views.approvals import *
 
 __all__ = [
     "CoordonneesViewSet",
@@ -46,4 +47,5 @@ __all__ = [
     "CotutelleAPIView",
     "SupervisionAPIView",
     "RequestSignaturesAPIView",
+    "ApprovePropositionAPIView",
 ]
