@@ -27,7 +27,10 @@ import attr
 from django.test import SimpleTestCase
 
 from admission.ddd.preparation.projet_doctoral.commands import CompleterPropositionCommand
-from admission.ddd.preparation.projet_doctoral.domain.model._enums import ChoixBureauCDE, ChoixTypeAdmission
+from admission.ddd.preparation.projet_doctoral.domain.model._enums import (
+    ChoixCommissionProximiteCDE,
+    ChoixTypeAdmission,
+)
 from admission.ddd.preparation.projet_doctoral.domain.model._experience_precedente_recherche import (
     ChoixDoctoratDejaRealise,
     aucune_experience_precedente_recherche,
@@ -38,7 +41,7 @@ from admission.ddd.preparation.projet_doctoral.domain.model._financement import 
 )
 from admission.ddd.preparation.projet_doctoral.domain.model.proposition import Proposition
 from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import (
-    BureauCDEInconsistantException,
+    CommissionProximiteCDEInconsistantException,
 )
 from admission.ddd.preparation.projet_doctoral.test.factory.proposition import (
     PropositionAdmissionSC3DPMinimaleFactory,
@@ -61,7 +64,7 @@ class TestCompleterPropositionService(SimpleTestCase):
         self.cmd = CompleterPropositionCommand(
             uuid=self.proposition_existante.entity_id.uuid,
             type_admission=ChoixTypeAdmission.ADMISSION.name,
-            bureau_CDE='',
+            commission_proximite_CDE='',
             type_financement=ChoixTypeFinancement.WORK_CONTRACT.name,
             type_contrat_travail='assistant_uclouvain',
             titre_projet='Mon projet',
@@ -101,21 +104,23 @@ class TestCompleterPropositionService(SimpleTestCase):
         )
         self.assertEqual(self.cmd.institution, proposition.experience_precedente_recherche.institution)
 
-    def test_should_pas_completer_bureau_cde_pas_vide_et_non_CDE(self):
-        cmd = attr.evolve(self.cmd, bureau_CDE=ChoixBureauCDE.ECONOMY.name)
-        with self.assertRaises(BureauCDEInconsistantException):
+    def test_should_pas_completer_commission_proximite_cde_pas_vide_et_non_CDE(self):
+        cmd = attr.evolve(self.cmd, commission_proximite_CDE=ChoixCommissionProximiteCDE.ECONOMY.name)
+        with self.assertRaises(CommissionProximiteCDEInconsistantException):
             self.message_bus.invoke(cmd)
 
-    def test_should_pas_completer_bureau_cde_vide_et_CDE(self):
-        cmd = attr.evolve(self.cmd, bureau_CDE='', uuid="uuid-ECGE3DP")
-        with self.assertRaises(BureauCDEInconsistantException):
+    def test_should_pas_completer_commission_proximite_cde_vide_et_CDE(self):
+        cmd = attr.evolve(self.cmd, commission_proximite_CDE='', uuid="uuid-ECGE3DP")
+        with self.assertRaises(CommissionProximiteCDEInconsistantException):
             self.message_bus.invoke(cmd)
 
-    def test_should_completer_bureau_cde(self):
-        cmd = attr.evolve(self.cmd, bureau_CDE=ChoixBureauCDE.ECONOMY.name, uuid="uuid-ECGE3DP")
+    def test_should_completer_commission_proximite_cde(self):
+        cmd = attr.evolve(
+            self.cmd, commission_proximite_CDE=ChoixCommissionProximiteCDE.ECONOMY.name, uuid="uuid-ECGE3DP"
+        )
         proposition_id = self.message_bus.invoke(cmd)
         proposition = self.proposition_repository.get(proposition_id)  # type: Proposition
-        self.assertEqual(cmd.bureau_CDE, proposition.bureau_CDE.name)
+        self.assertEqual(cmd.commission_proximite_CDE, proposition.commission_proximite_CDE.name)
 
     def test_should_completer_sans_financement(self):
         cmd = attr.evolve(self.cmd, type_financement='', type_contrat_travail='')

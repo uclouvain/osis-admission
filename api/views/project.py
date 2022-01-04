@@ -41,7 +41,7 @@ from admission.ddd.preparation.projet_doctoral.commands import (
     VerifierPropositionCommand,
 )
 from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import (
-    BureauCDEInconsistantException,
+    CommissionProximiteCDEInconsistantException,
     ContratTravailInconsistantException,
     InstitutionInconsistanteException,
     JustificationRequiseException,
@@ -75,7 +75,7 @@ class PropositionListView(APIPermissionRequiredMixin, DisplayExceptionsByFieldNa
         JustificationRequiseException: ['justification'],
         InstitutionInconsistanteException: ['institution'],
         ContratTravailInconsistantException: ['type_contrat_travail'],
-        BureauCDEInconsistantException: ['bureau_CDE'],
+        CommissionProximiteCDEInconsistantException: ['commission_proximite_CDE'],
     }
     permission_mapping = {
         'POST': 'admission.add_doctorateadmission',

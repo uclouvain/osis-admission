@@ -41,7 +41,7 @@ class ChoixStatutSignatureGroupeDeSupervision(ChoiceEnum):
     SIGNING_IN_PROGRESS = _('SIGNING_IN_PROGRESS')
 
 
-class ChoixBureauCDE(ChoiceEnum):
+class ChoixCommissionProximiteCDE(ChoiceEnum):
     ECONOMY = _('ECONOMY')
     MANAGEMENT = _('MANAGEMENT')
 

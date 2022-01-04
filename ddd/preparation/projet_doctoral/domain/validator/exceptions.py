@@ -61,11 +61,11 @@ class GroupeDeSupervisionNonTrouveException(BusinessException):
         super().__init__(message, **kwargs)
 
 
-class BureauCDEInconsistantException(BusinessException):
+class CommissionProximiteCDEInconsistantException(BusinessException):
     status_code = "PROPOSITION-5"
 
     def __init__(self, **kwargs):
-        message = _("CDE Bureau should be filled in only if the doctorate's entity is CDE")
+        message = _("CDE proximity commission should be filled in only if the doctorate's entity is CDE")
         super().__init__(message, **kwargs)
 
 

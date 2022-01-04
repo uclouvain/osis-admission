@@ -38,7 +38,7 @@ from admission.ddd.preparation.projet_doctoral.commands import (
 from admission.ddd.preparation.projet_doctoral.domain.model._detail_projet import ChoixLangueRedactionThese
 from admission.ddd.preparation.projet_doctoral.domain.model._experience_precedente_recherche import \
     ChoixDoctoratDejaRealise
-from admission.ddd.preparation.projet_doctoral.domain.model._enums import ChoixBureauCDE
+from admission.ddd.preparation.projet_doctoral.domain.model._enums import ChoixCommissionProximiteCDE
 from admission.ddd.preparation.projet_doctoral.dtos import DoctoratDTO, PropositionDTO, PropositionSearchDTO
 
 __all__ = [
@@ -156,8 +156,8 @@ class InitierPropositionCommandSerializer(DTOSerializer):
         source = InitierPropositionCommand
 
     type_admission = serializers.ChoiceField(choices=AdmissionType.choices())
-    bureau_CDE = serializers.ChoiceField(
-        choices=ChoixBureauCDE.choices(),
+    commission_proximite_CDE = serializers.ChoiceField(
+        choices=ChoixCommissionProximiteCDE.choices(),
         allow_blank=True,
     )
     documents_projet = serializers.ListField(child=serializers.CharField())
@@ -186,8 +186,8 @@ class CompleterPropositionCommandSerializer(DTOSerializer):
         source = CompleterPropositionCommand
 
     type_admission = serializers.ChoiceField(choices=AdmissionType.choices())
-    bureau_CDE = serializers.ChoiceField(
-        choices=ChoixBureauCDE.choices(),
+    commission_proximite_CDE = serializers.ChoiceField(
+        choices=ChoixCommissionProximiteCDE.choices(),
         allow_blank=True,
     )
     documents_projet = serializers.ListField(child=serializers.CharField())

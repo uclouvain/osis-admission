@@ -43,7 +43,7 @@ class InitierPropositionCommand(interface.CommandRequest):
     annee_formation = attr.ib(type=int)
     matricule_candidat = attr.ib(type=str)
     justification = attr.ib(type=Optional[str], default='')
-    bureau_CDE = attr.ib(
+    commission_proximite_CDE = attr.ib(
         type=Optional[str],
         default='',
     )  # CDE = Comission Doctorale du domaine Sciences Economique et de Gestion
@@ -75,7 +75,7 @@ class CompleterPropositionCommand(interface.CommandRequest):
     uuid = attr.ib(type=str)
     type_admission = attr.ib(type=str)
     justification = attr.ib(type=Optional[str], default='')
-    bureau_CDE = attr.ib(
+    commission_proximite_CDE = attr.ib(
         type=Optional[str],
         default='',
     )  # CDE = Comission Doctorale du domaine Sciences Economique et de Gestion

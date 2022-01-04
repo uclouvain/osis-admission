@@ -35,7 +35,7 @@ from admission.ddd.preparation.projet_doctoral.builder.proposition_identity_buil
     PropositionIdentityBuilder
 from admission.ddd.preparation.projet_doctoral.domain.model._detail_projet import DetailProjet
 from admission.ddd.preparation.projet_doctoral.domain.model._enums import (
-    ChoixBureauCDE,
+    ChoixCommissionProximiteCDE,
     ChoixStatutProposition,
     ChoixTypeAdmission,
 )
@@ -56,7 +56,11 @@ from osis_common.ddd.interface import ApplicationService
 def _instantiate_admission(admission: DoctorateAdmission) -> Proposition:
     return Proposition(
         entity_id=PropositionIdentityBuilder().build_from_uuid(admission.uuid),
-        bureau_CDE=ChoixBureauCDE[admission.bureau] if admission.bureau else '',
+        commission_proximite_CDE=(
+            ChoixCommissionProximiteCDE[admission.proximity_commission_cde]
+            if admission.proximity_commission_cde
+            else ''
+        ),
         type_admission=ChoixTypeAdmission[admission.type],
         doctorat_id=DoctoratIdentity(admission.doctorate.acronym, admission.doctorate.academic_year.year),
         matricule_candidat=admission.candidate.global_id,
@@ -132,7 +136,7 @@ class PropositionRepository(IPropositionRepository):
                 'status': entity.statut.name,
                 'comment': entity.justification,
                 'candidate': Person.objects.get(global_id=entity.matricule_candidat),
-                'bureau': entity.bureau_CDE and entity.bureau_CDE.name,
+                'proximity_commission_cde': entity.commission_proximite_CDE and entity.commission_proximite_CDE.name,
                 'doctorate': doctorate,
                 'financing_type': entity.financement.type and entity.financement.type.name,
                 'financing_work_contract': entity.financement.type_contrat_travail,
