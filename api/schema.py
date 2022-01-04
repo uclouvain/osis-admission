@@ -262,7 +262,6 @@ class ActionLinksFieldSchemaMixin:
                 },
                 {
                     'required': [
-                        'method',
                         'error',
                     ],
                 },

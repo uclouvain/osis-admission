@@ -81,20 +81,21 @@ class ActionLinksField(serializers.Field):
             if issubclass(view_class, APIPermissionRequiredMixin):
                 view = view_class(args=resolver_match.args, kwargs=resolver_match.kwargs)
 
-                # Either the user has the rights permissions or not, we return the method type
-                links[action_name] = {
-                    'method': action.get('method'),
-                }
-
                 # Check the permissions specified in the view via the 'permission_mapping' property
                 failed_permission_message = view.check_method_permissions(request.user, action.get('method'))
 
                 if failed_permission_message is None:
-                    # Add the related endpoint as the user has the right permissions
-                    links[action_name]['url'] = url
+                    # If the user has the rights permissions we return the method type and the related endpoint
+                    links[action_name] = {
+                        'method': action.get('method'),
+                        'url': url,
+                    }
                 else:
-                    # Add the error as the user hasn't got the right permissions
-                    links[action_name]['error'] = failed_permission_message
+                    # Return the error message as the user hasn't got the right permissions
+                    links[action_name] = {
+                        'error': failed_permission_message,
+                    }
+
             else:
                 raise ImproperlyConfigured(
                     "All paths specified in the 'links' property must be related to views that implement "

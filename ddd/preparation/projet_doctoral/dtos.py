@@ -24,7 +24,7 @@
 #
 ##############################################################################
 import datetime
-import uuid
+from uuid import UUID
 from typing import List, Optional, Union
 
 import attr
@@ -120,7 +120,7 @@ class PropositionDTO(interface.DTO):
     projet_formation_complementaire = attr.ib(type=List[str])
     lettres_recommandation = attr.ib(type=List[str])
     langue_redaction_these = attr.ib(type=str)
-    institut_these = attr.ib(type=Optional[uuid.UUID])
+    institut_these = attr.ib(type=Optional[UUID])
     lieu_these = attr.ib(type=str)
     autre_lieu_these = attr.ib(type=str)
     doctorat_deja_realise = attr.ib(type=str)

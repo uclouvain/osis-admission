@@ -914,7 +914,6 @@ components:
         - method
         - url
       - required:
-        - method
         - error
     Coordonnees:
       type: object
