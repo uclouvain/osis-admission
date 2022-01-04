@@ -29,6 +29,7 @@ from admission.ddd.preparation.projet_doctoral.commands import CompleterProposit
 from admission.ddd.preparation.projet_doctoral.domain.model._institut import InstitutIdentity
 from admission.ddd.preparation.projet_doctoral.domain.model.proposition import PropositionIdentity
 from admission.ddd.preparation.projet_doctoral.domain.service.commission_proximite_CDE import CommissionProximiteCDE
+from admission.ddd.preparation.projet_doctoral.domain.service.commission_proximite_CDSS import CommissionProximiteCDSS
 from admission.ddd.preparation.projet_doctoral.domain.service.i_doctorat import IDoctoratTranslator
 from admission.ddd.preparation.projet_doctoral.repository.i_proposition import IPropositionRepository
 
@@ -43,12 +44,14 @@ def completer_proposition(
     proposition_candidat = proposition_repository.get(entity_id=entity_id)
     doctorat = doctorat_translator.get(proposition_candidat.sigle_formation, proposition_candidat.annee)
     CommissionProximiteCDE().verifier(doctorat, cmd.commission_proximite_CDE)
+    CommissionProximiteCDSS().verifier(doctorat, cmd.commission_proximite_CDSS)
 
     # WHEN
     proposition_candidat.completer(
         type_admission=cmd.type_admission,
         justification=cmd.justification,
         commission_proximite_CDE=cmd.commission_proximite_CDE,
+        commission_proximite_CDSS=cmd.commission_proximite_CDSS,
         type_financement=cmd.type_financement,
         type_contrat_travail=cmd.type_contrat_travail,
         eft=cmd.eft,

@@ -29,6 +29,7 @@ from django.test import SimpleTestCase
 from admission.ddd.preparation.projet_doctoral.commands import InitierPropositionCommand
 from admission.ddd.preparation.projet_doctoral.domain.model._enums import (
     ChoixCommissionProximiteCDE,
+    ChoixCommissionProximiteCDSS,
     ChoixTypeAdmission,
 )
 from admission.ddd.preparation.projet_doctoral.domain.model._experience_precedente_recherche import (
@@ -46,7 +47,7 @@ from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions impor
     DoctoratNonTrouveException,
     InstitutionInconsistanteException,
     JustificationRequiseException,
-    MaximumPropositionsAtteintException,
+    MaximumPropositionsAtteintException, CommissionProximiteCDSSInconsistantException,
 )
 from admission.ddd.preparation.projet_doctoral.test.factory.proposition import (
     PropositionAdmissionSC3DPMinimaleAnnuleeFactory,
@@ -69,6 +70,7 @@ class TestInitierPropositionService(SimpleTestCase):
             annee_formation=2020,
             matricule_candidat='01234567',
             commission_proximite_CDE=ChoixCommissionProximiteCDE.ECONOMY.name,
+            commission_proximite_CDSS='',
             type_financement=ChoixTypeFinancement.WORK_CONTRACT.name,
             type_contrat_travail='assistant_uclouvain',
             titre_projet='Mon projet',
@@ -78,7 +80,7 @@ class TestInitierPropositionService(SimpleTestCase):
             institution="psychiatrique",
         )
 
-        self.doctorat_non_CDE = 'AGRO3DP'
+        self.doctorat_non_CDE = self.doctorat_non_CDSS = 'AGRO3DP'
 
     def test_should_initier(self):
         proposition_id = self.message_bus.invoke(self.cmd)
@@ -117,14 +119,39 @@ class TestInitierPropositionService(SimpleTestCase):
         proposition = self.proposition_repository.get(proposition_id)  # type: Proposition
         self.assertEqual(proposition.commission_proximite_CDE, '')
 
+    def test_should_initier_commission_proximite_CDSS_vide_et_non_CDSS(self):
+        cmd = attr.evolve(
+            self.cmd, commission_proximite_CDSS='', commission_proximite_CDE='', sigle_formation=self.doctorat_non_CDSS
+        )
+        proposition_id = self.message_bus.invoke(cmd)
+        proposition = self.proposition_repository.get(proposition_id)  # type: Proposition
+        self.assertEqual(proposition.commission_proximite_CDSS, '')
+
     def test_should_pas_initier_commission_proximite_CDE_vide_et_CDE(self):
         cmd = attr.evolve(self.cmd, commission_proximite_CDE='')
         with self.assertRaises(CommissionProximiteCDEInconsistantException):
             self.message_bus.invoke(cmd)
 
+    def test_should_pas_initier_commission_proximite_CDSS_vide_et_CDSS(self):
+        cmd = attr.evolve(
+            self.cmd, sigle_formation='ESP3DP', commission_proximite_CDSS='', commission_proximite_CDE=''
+        )
+        with self.assertRaises(CommissionProximiteCDSSInconsistantException):
+            self.message_bus.invoke(cmd)
+
     def test_should_pas_initier_si_commission_proximite_CDE_et_non_CDE(self):
         cmd = attr.evolve(self.cmd, sigle_formation=self.doctorat_non_CDE)
         with self.assertRaises(CommissionProximiteCDEInconsistantException):
+            self.message_bus.invoke(cmd)
+
+    def test_should_pas_initier_si_commission_proximite_CDSS_et_non_CDSS(self):
+        cmd = attr.evolve(
+            self.cmd,
+            commission_proximite_CDE='',
+            commission_proximite_CDSS='ECLI',
+            sigle_formation=self.doctorat_non_CDSS,
+        )
+        with self.assertRaises(CommissionProximiteCDSSInconsistantException):
             self.message_bus.invoke(cmd)
 
     def test_should_empecher_si_maximum_propositions_autorisees(self):

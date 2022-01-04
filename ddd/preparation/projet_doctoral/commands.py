@@ -47,6 +47,11 @@ class InitierPropositionCommand(interface.CommandRequest):
         type=Optional[str],
         default='',
     )  # CDE = Comission Doctorale du domaine Sciences Economique et de Gestion
+    commission_proximite_CDSS = attr.ib(
+        type=Optional[str],
+        default='',
+    )  # CDE = Commission doctorale des domaines "Sc médicales, santé publique, sc dentaires, biomédicales et
+    #    pharmaceutiques et de la motricité"
     type_financement = attr.ib(type=Optional[str], default='')
     type_contrat_travail = attr.ib(type=Optional[str], default='')
     eft = attr.ib(type=Optional[int], default=None)
@@ -79,6 +84,11 @@ class CompleterPropositionCommand(interface.CommandRequest):
         type=Optional[str],
         default='',
     )  # CDE = Comission Doctorale du domaine Sciences Economique et de Gestion
+    commission_proximite_CDSS = attr.ib(
+        type=Optional[str],
+        default='',
+    )  # CDE = Commission doctorale des domaines "Sc médicales, santé publique, sc dentaires, biomédicales et
+    #    pharmaceutiques et de la motricité"
     type_financement = attr.ib(type=Optional[str], default='')
     type_contrat_travail = attr.ib(type=Optional[str], default='')
     eft = attr.ib(type=Optional[int], default=None)

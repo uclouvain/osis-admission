@@ -29,7 +29,7 @@ from django.test import SimpleTestCase
 from admission.ddd.preparation.projet_doctoral.commands import CompleterPropositionCommand
 from admission.ddd.preparation.projet_doctoral.domain.model._enums import (
     ChoixCommissionProximiteCDE,
-    ChoixTypeAdmission,
+    ChoixTypeAdmission, ChoixCommissionProximiteCDSS,
 )
 from admission.ddd.preparation.projet_doctoral.domain.model._experience_precedente_recherche import (
     ChoixDoctoratDejaRealise,
@@ -41,7 +41,7 @@ from admission.ddd.preparation.projet_doctoral.domain.model._financement import 
 )
 from admission.ddd.preparation.projet_doctoral.domain.model.proposition import Proposition
 from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import (
-    CommissionProximiteCDEInconsistantException,
+    CommissionProximiteCDEInconsistantException, CommissionProximiteCDSSInconsistantException,
 )
 from admission.ddd.preparation.projet_doctoral.test.factory.proposition import (
     PropositionAdmissionSC3DPMinimaleFactory,
@@ -65,6 +65,7 @@ class TestCompleterPropositionService(SimpleTestCase):
             uuid=self.proposition_existante.entity_id.uuid,
             type_admission=ChoixTypeAdmission.ADMISSION.name,
             commission_proximite_CDE='',
+            commission_proximite_CDSS='',
             type_financement=ChoixTypeFinancement.WORK_CONTRACT.name,
             type_contrat_travail='assistant_uclouvain',
             titre_projet='Mon projet',
@@ -109,9 +110,19 @@ class TestCompleterPropositionService(SimpleTestCase):
         with self.assertRaises(CommissionProximiteCDEInconsistantException):
             self.message_bus.invoke(cmd)
 
+    def test_should_pas_completer_commission_proximite_cdss_pas_vide_et_non_CDSS(self):
+        cmd = attr.evolve(self.cmd, commission_proximite_CDSS=ChoixCommissionProximiteCDSS.ECLI.name)
+        with self.assertRaises(CommissionProximiteCDSSInconsistantException):
+            self.message_bus.invoke(cmd)
+
     def test_should_pas_completer_commission_proximite_cde_vide_et_CDE(self):
         cmd = attr.evolve(self.cmd, commission_proximite_CDE='', uuid="uuid-ECGE3DP")
         with self.assertRaises(CommissionProximiteCDEInconsistantException):
+            self.message_bus.invoke(cmd)
+
+    def test_should_pas_completer_commission_proximite_cdss_vide_et_CDSS(self):
+        cmd = attr.evolve(self.cmd, commission_proximite_CDSS='', uuid="uuid-ESP3DP")
+        with self.assertRaises(CommissionProximiteCDSSInconsistantException):
             self.message_bus.invoke(cmd)
 
     def test_should_completer_commission_proximite_cde(self):
@@ -121,6 +132,14 @@ class TestCompleterPropositionService(SimpleTestCase):
         proposition_id = self.message_bus.invoke(cmd)
         proposition = self.proposition_repository.get(proposition_id)  # type: Proposition
         self.assertEqual(cmd.commission_proximite_CDE, proposition.commission_proximite_CDE.name)
+
+    def test_should_completer_commission_proximite_cdss(self):
+        cmd = attr.evolve(
+            self.cmd, commission_proximite_CDSS=ChoixCommissionProximiteCDSS.ECLI.name, uuid="uuid-ESP3DP"
+        )
+        proposition_id = self.message_bus.invoke(cmd)
+        proposition = self.proposition_repository.get(proposition_id)  # type: Proposition
+        self.assertEqual(cmd.commission_proximite_CDSS, proposition.commission_proximite_CDSS.name)
 
     def test_should_completer_sans_financement(self):
         cmd = attr.evolve(self.cmd, type_financement='', type_contrat_travail='')

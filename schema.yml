@@ -1222,6 +1222,8 @@ components:
                 type: string
               commission_proximite_CDE:
                 type: string
+              commission_proximite_CDSS:
+                type: string
               creee_le:
                 type: string
                 format: date-time
@@ -1505,6 +1507,8 @@ components:
           type: string
         commission_proximite_CDE:
           type: string
+        commission_proximite_CDSS:
+          type: string
         type_financement:
           type: string
         type_contrat_travail:
@@ -1779,6 +1783,8 @@ components:
           type: string
         commission_proximite_CDE:
           $ref: '#/components/schemas/ChoixCommissionProximiteCDE'
+        commission_proximite_CDSS:
+          $ref: '#/components/schemas/ChoixCommissionProximiteCDSS'
         type_financement:
           type: string
         type_contrat_travail:
@@ -1845,6 +1851,7 @@ components:
       - annee_formation
       - matricule_candidat
       - commission_proximite_CDE
+      - commission_proximite_CDSS
       - documents_projet
       - graphe_gantt
       - proposition_programme_doctoral
@@ -1860,6 +1867,18 @@ components:
       - ''
       - ECONOMY
       - MANAGEMENT
+      type: string
+    ChoixCommissionProximiteCDSS:
+      enum:
+      - ''
+      - ECLI
+      - GIM
+      - NRSC
+      - BCM
+      - SPSS
+      - DENT
+      - DFAR
+      - MOTR
       type: string
     ChoixLangueRedactionThese:
       enum:
@@ -1900,6 +1919,8 @@ components:
           type: string
         commission_proximite_CDE:
           $ref: '#/components/schemas/ChoixCommissionProximiteCDE'
+        commission_proximite_CDSS:
+          $ref: '#/components/schemas/ChoixCommissionProximiteCDSS'
         type_financement:
           type: string
         type_contrat_travail:
@@ -1964,6 +1985,7 @@ components:
       - uuid
       - type_admission
       - commission_proximite_CDE
+      - commission_proximite_CDSS
       - documents_projet
       - graphe_gantt
       - proposition_programme_doctoral

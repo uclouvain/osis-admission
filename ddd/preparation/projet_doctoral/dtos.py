@@ -106,6 +106,10 @@ class PropositionDTO(interface.DTO):
     commission_proximite_CDE = attr.ib(
         type=Optional[str],
     )  # CDE = Comission Doctorale du domaine Sciences Economique et de Gestion
+    commission_proximite_CDSS = attr.ib(
+        type=Optional[str],
+    )  # CDE = Commission doctorale des domaines "Sc médicales, santé publique, sc dentaires, biomédicales et
+    #    pharmaceutiques et de la motricité"
     type_financement = attr.ib(type=Optional[str])
     type_contrat_travail = attr.ib(type=Optional[str])
     eft = attr.ib(type=Optional[int])
@@ -144,6 +148,10 @@ class PropositionSearchDTO(interface.DTO):
     commission_proximite_CDE = attr.ib(
         type=Optional[str],
     )  # CDE = Comission Doctorale du domaine Sciences Economique et de Gestion
+    commission_proximite_CDSS = attr.ib(
+        type=Optional[str],
+    )  # CDSS = Commission doctorale des domaines "Sc médicales, santé publique, sc dentaires, biomédicales et
+    #    pharmaceutiques et de la motricité"
     creee_le = attr.ib(type=datetime.datetime)
     statut = attr.ib(type=str)
 

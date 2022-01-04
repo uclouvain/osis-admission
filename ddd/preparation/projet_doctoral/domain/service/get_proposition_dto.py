@@ -56,6 +56,9 @@ class GetPropositionDTODomainService(interface.DomainService):
             justification=proposition.justification,
             code_secteur_formation=secteur_ucl_translator.get(doctorat.sigle_entite_gestion).sigle,
             commission_proximite_CDE=proposition.commission_proximite_CDE and proposition.commission_proximite_CDE.name,
+            commission_proximite_CDSS=(
+                    proposition.commission_proximite_CDSS and proposition.commission_proximite_CDSS.name
+            ),
             type_financement=proposition.financement.type and proposition.financement.type.name,
             type_contrat_travail=proposition.financement.type_contrat_travail,
             eft=proposition.financement.eft,
@@ -98,6 +101,7 @@ class GetPropositionDTODomainService(interface.DomainService):
             code_secteur_formation=secteur.sigle,
             intitule_secteur_formation=secteur.intitule,
             commission_proximite_CDE=proposition.commission_proximite_CDE,
+            commission_proximite_CDSS=proposition.commission_proximite_CDSS,
             intitule_doctorat_en=doctorat.intitule_en,
             intitule_doctorat_fr=doctorat.intitule_fr,
             creee_le=proposition.creee_le,

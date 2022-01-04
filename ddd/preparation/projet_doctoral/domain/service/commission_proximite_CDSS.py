@@ -1,4 +1,4 @@
-# ##############################################################################
+##############################################################################
 #
 #    OSIS stands for Open Student Information System. It's an application
 #    designed to manage the core business of higher education institutions,
@@ -22,29 +22,20 @@
 #    at the root of the source code of this program.  If not,
 #    see http://www.gnu.org/licenses/.
 #
-# ##############################################################################
-from admission.ddd.preparation.projet_doctoral.domain.service.i_secteur_ucl import ISecteurUclTranslator
-from admission.ddd.preparation.projet_doctoral.test.factory.secteur_ucl import SSHEntiteFactory, SSSEntiteFactory
-from ddd.logic.shared_kernel.entite.tests.factory.entiteucl import SSTEntiteFactory
-from infrastructure.shared_kernel.entite.dtos import EntiteUclDTO
+##############################################################################
+
+from admission.ddd.preparation.projet_doctoral.domain.model.doctorat import Doctorat
+from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import (
+    CommissionProximiteCDSSInconsistantException,
+)
+from osis_common.ddd import interface
 
 
-class SecteurUclInMemoryTranslator(ISecteurUclTranslator):
-    entites = [
-        SSTEntiteFactory(),
-        SSHEntiteFactory(),
-        SSSEntiteFactory(),
-    ]
-    commission_sector_mapping = {
-        'CDA': "SST",
-        'CDSC': "SST",
-        'CDE': "SSH",
-        'CDSS': "SSS",
-    }
+class CommissionProximiteCDSS(interface.DomainService):
 
     @classmethod
-    def get(cls, sigle_entite: str) -> 'EntiteUclDTO':
-        return list(EntiteUclDTO(
-            e.entity_id.sigle,
-            e.intitule,
-        ) for e in cls.entites if cls.commission_sector_mapping.get(sigle_entite) == e.entity_id.sigle)[0]
+    def verifier(cls, doctorat: 'Doctorat', commission_proximite_CDSS: str) -> None:
+        if doctorat.est_entite_CDSS() and not commission_proximite_CDSS:
+            raise CommissionProximiteCDSSInconsistantException()
+        if not doctorat.est_entite_CDSS() and commission_proximite_CDSS:
+            raise CommissionProximiteCDSSInconsistantException()

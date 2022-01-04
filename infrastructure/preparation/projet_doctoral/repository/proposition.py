@@ -36,6 +36,7 @@ from admission.ddd.preparation.projet_doctoral.builder.proposition_identity_buil
 from admission.ddd.preparation.projet_doctoral.domain.model._detail_projet import DetailProjet
 from admission.ddd.preparation.projet_doctoral.domain.model._enums import (
     ChoixCommissionProximiteCDE,
+    ChoixCommissionProximiteCDSS,
     ChoixStatutProposition,
     ChoixTypeAdmission,
 )
@@ -59,6 +60,11 @@ def _instantiate_admission(admission: DoctorateAdmission) -> Proposition:
         commission_proximite_CDE=(
             ChoixCommissionProximiteCDE[admission.proximity_commission_cde]
             if admission.proximity_commission_cde
+            else ''
+        ),
+        commission_proximite_CDSS=(
+            ChoixCommissionProximiteCDSS[admission.proximity_commission_cdss]
+            if admission.proximity_commission_cdss
             else ''
         ),
         type_admission=ChoixTypeAdmission[admission.type],
@@ -137,6 +143,7 @@ class PropositionRepository(IPropositionRepository):
                 'comment': entity.justification,
                 'candidate': Person.objects.get(global_id=entity.matricule_candidat),
                 'proximity_commission_cde': entity.commission_proximite_CDE and entity.commission_proximite_CDE.name,
+                'proximity_commission_cdss': entity.commission_proximite_CDSS and entity.commission_proximite_CDSS.name,
                 'doctorate': doctorate,
                 'financing_type': entity.financement.type and entity.financement.type.name,
                 'financing_work_contract': entity.financement.type_contrat_travail,

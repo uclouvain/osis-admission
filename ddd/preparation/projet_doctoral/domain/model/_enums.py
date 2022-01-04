@@ -46,6 +46,17 @@ class ChoixCommissionProximiteCDE(ChoiceEnum):
     MANAGEMENT = _('MANAGEMENT')
 
 
+class ChoixCommissionProximiteCDSS(ChoiceEnum):
+    ECLI = _("Proximity commission for experimental and clinical research (ECLI)")
+    GIM = _("Proximity Commission for Genetics and Immunology (GIM)")
+    NRSC = _("Proximity Commission for Neuroscience (NRSC)")
+    BCM = _("Proximity commission for cellular and molecular biology, biochemistry (BCM)")
+    SPSS = _("Proximity commission for public health, health and society (SPSS)")
+    DENT = _("Proximity Commission for Dental Sciences (DENT)")
+    DFAR = _("Proximity Commission for Pharmaceutical Sciences (DFAR)")
+    MOTR = _("Proximity Commission for Motricity Sciences (MOTR)")
+
+
 class ChoixTypeAdmission(ChoiceEnum):
     ADMISSION = _('ADMISSION')
     PRE_ADMISSION = _('PRE_ADMISSION')
