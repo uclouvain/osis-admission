@@ -343,6 +343,9 @@ msgstr "Refusé"
 msgid "Recommendation letters"
 msgstr "Lettres de recommandation"
 
+msgid "Reference"
+msgstr "Référence"
+
 msgid "SCEB"
 msgstr "SCEB"
 

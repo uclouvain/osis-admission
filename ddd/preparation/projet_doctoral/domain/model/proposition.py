@@ -64,6 +64,7 @@ class Proposition(interface.RootEntity):
     doctorat_id = attr.ib(type=DoctoratIdentity)
     matricule_candidat = attr.ib(type=str)
     projet = attr.ib(type=DetailProjet)
+    reference = attr.ib(type=Optional[str], default=None)
     justification = attr.ib(type=Optional[str], default='')
     statut = attr.ib(type=ChoixStatutProposition, default=ChoixStatutProposition.IN_PROGRESS)
     bureau_CDE = attr.ib(
@@ -84,6 +85,8 @@ class Proposition(interface.RootEntity):
     @property
     def annee(self):
         return self.doctorat_id.annee
+
+    valeur_reference_base = 300000
 
     @property
     def est_verrouillee_pour_signature(self) -> bool:
