@@ -23,7 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from datetime import datetime
+from datetime import date
 
 from django.db.models import F, OuterRef, Q, TextField
 from django.utils.decorators import method_decorator
@@ -46,7 +46,9 @@ from base.models.enums.education_group_types import TrainingType
 from base.models.enums.entity_type import SECTOR
 from base.models.person import Person
 from base.utils.cte import CTESubquery
+from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import GetCurrentAcademicYear
 from infrastructure.messages_bus import message_bus_instance
+from infrastructure.shared_kernel.academic_year.repository import academic_year as academic_year_repository
 
 
 class AutocompleteSectorView(ListAPIView):
@@ -60,6 +62,10 @@ class AutocompleteSectorView(ListAPIView):
     def list(self, request, **kwargs):
         # TODO revert to command once it's in the shared kernel
         # Get all doctorates with their path (containing sector)
+        year = GetCurrentAcademicYear().get_starting_academic_year(
+            date.today(),
+            academic_year_repository.AcademicYearRepository()
+        ).year
         doctorate_qs = EducationGroupYear.objects.annotate(
             path_as_string=CTESubquery(
                 EntityVersion.objects.with_acronym_path(
@@ -68,7 +74,7 @@ class AutocompleteSectorView(ListAPIView):
                 output_field=TextField(),
             ),
         ).filter(
-            academic_year__year=datetime.today().year,  # TODO based on calendar ?
+            academic_year__year=year,
             education_group_type__category=Categories.TRAINING.name,
             education_group_type__name=TrainingType.PHD.name,
         )
