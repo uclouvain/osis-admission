@@ -31,7 +31,8 @@ from admission.api.schema import ChoicesEnumSchema
 from osis_role.contrib.views import APIPermissionRequiredMixin
 
 
-class SecondaryStudiesViewSet(APIPermissionRequiredMixin, mixins.RetrieveModelMixin, mixins.UpdateModelMixin, GenericAPIView):
+class SecondaryStudiesViewSet(APIPermissionRequiredMixin, mixins.RetrieveModelMixin, mixins.UpdateModelMixin,
+                              GenericAPIView):
     pagination_class = None
     filter_backends = []
     serializer_class = serializers.HighSchoolDiplomaSerializer

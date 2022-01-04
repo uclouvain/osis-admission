@@ -32,7 +32,8 @@ from admission.api.schema import BetterChoicesSchema
 from osis_role.contrib.views import APIPermissionRequiredMixin
 
 
-class CoordonneesViewSet(APIPermissionRequiredMixin, mixins.RetrieveModelMixin, mixins.UpdateModelMixin, GenericAPIView):
+class CoordonneesViewSet(APIPermissionRequiredMixin, mixins.RetrieveModelMixin, mixins.UpdateModelMixin,
+                         GenericAPIView):
     name = "coordonnees"
     pagination_class = None
     filter_backends = []
