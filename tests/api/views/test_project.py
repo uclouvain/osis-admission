@@ -214,8 +214,13 @@ class DoctorateAdmissionCreationApiTestCase(APITestCase):
         admission = admissions.get(uuid=response.data["uuid"])
         self.assertEqual(admission.type, self.create_data["type_admission"])
         self.assertEqual(admission.comment, self.create_data["justification"])
+
         response = self.client.get(self.url, format="json")
         self.assertEqual(response.json()['propositions'][0]['sigle_doctorat'], self.doctorate.acronym)
+        self.assertEqual(admission.reference, '{}-{}'.format(
+            self.doctorate.academic_year.year % 100,
+            300000 + admission.id,
+        ))
 
     def test_admission_doctorate_creation_using_api_no_role(self):
         self.client.force_authenticate(user=self.no_role_user)

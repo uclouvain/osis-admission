@@ -58,6 +58,7 @@ def _instantiate_admission(admission: DoctorateAdmission) -> Proposition:
         type_admission=ChoixTypeAdmission[admission.type],
         doctorat_id=DoctoratIdentity(admission.doctorate.acronym, admission.doctorate.academic_year.year),
         matricule_candidat=admission.candidate.global_id,
+        reference=admission.reference,
         projet=DetailProjet(
             titre=admission.project_title,
             resume=admission.project_abstract,
@@ -121,7 +122,7 @@ class PropositionRepository(IPropositionRepository):
             acronym=entity.sigle_formation,
             academic_year__year=entity.annee,
         )
-        DoctorateAdmission.objects.update_or_create(
+        (admission, created) = DoctorateAdmission.objects.update_or_create(
             uuid=entity.entity_id.uuid,
             defaults={
                 'type': entity.type_admission.name,
@@ -152,3 +153,10 @@ class PropositionRepository(IPropositionRepository):
                 'phd_already_done_no_defense_reason': entity.experience_precedente_recherche.raison_non_soutenue,
             }
         )
+        if created:
+            # Set the reference of the admission on creation (based on the academic year and the instance id)
+            admission.reference = "{}-{}".format(
+                admission.doctorate.academic_year.year % 100,
+                Proposition.valeur_reference_base + admission.id,
+            )
+            admission.save()

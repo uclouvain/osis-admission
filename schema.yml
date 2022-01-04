@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Admission API
-  version: 1.0.2
+  version: 1.0.3
   description: This API delivers data for the Admission project.
   contact:
     name: UCLouvain - OSIS
@@ -214,6 +214,66 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HighSchoolDiploma'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - person
+  /languages_knowledge:
+    get:
+      operationId: listLanguageKnowledges
+      description: ''
+      parameters:
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LanguageKnowledge'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - person
+    post:
+      operationId: createLanguageKnowledge
+      description: ''
+      parameters:
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/LanguageKnowledge'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LanguageKnowledge'
           description: ''
         '400':
           $ref: '#/components/responses/BadRequest'
@@ -947,6 +1007,8 @@ components:
             properties:
               uuid:
                 type: string
+              reference:
+                type: string
               type_admission:
                 type: string
               sigle_doctorat:
@@ -1001,6 +1063,7 @@ components:
                 default: {}
             required:
             - uuid
+            - reference
             - type_admission
             - sigle_doctorat
             - intitule_doctorat_fr
@@ -1190,12 +1253,40 @@ components:
       - 'NO'
       - PENDING
       type: string
+    LanguageKnowledge:
+      type: object
+      properties:
+        language:
+          type: string
+          nullable: true
+        listening_comprehension:
+          $ref: '#/components/schemas/LanguageKnowledgeGrade'
+          nullable: true
+        speaking_ability:
+          $ref: '#/components/schemas/LanguageKnowledgeGrade'
+          nullable: true
+        writing_ability:
+          $ref: '#/components/schemas/LanguageKnowledgeGrade'
+          nullable: true
+      required:
+      - language
+    LanguageKnowledgeGrade:
+      enum:
+      - A1
+      - A2
+      - B1
+      - B2
+      - C1
+      - C2
+      type: string
     PropositionDTO:
       type: object
       properties:
         uuid:
           type: string
         type_admission:
+          type: string
+        reference:
           type: string
         justification:
           type: string
@@ -1308,6 +1399,7 @@ components:
       required:
       - uuid
       - type_admission
+      - reference
       - sigle_doctorat
       - annee_doctorat
       - intitule_doctorat_fr

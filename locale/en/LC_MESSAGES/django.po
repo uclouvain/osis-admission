@@ -17,17 +17,24 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-msgid "You must be the request author to access this admission"
-msgstr ""
-
-msgid "You must be the request promoter to access this admission"
-msgstr ""
-
+#, python-format
 msgid ""
-"You must be a member of the doctoral commission to access this admission"
+"\n"
+"                %(start_index)s to %(end_index)s of %(total_counts)s "
+"doctorate admissions"
 msgstr ""
 
-msgid "You must be a member of the committee to access this admission"
+#, python-format
+msgid ""
+"\n"
+"              Are you sure you want to delete \"%(object)s\"?\n"
+"            "
+msgstr ""
+
+msgid "A justification is needed when creating a pre-admission."
+msgstr ""
+
+msgid "ADMISSION"
 msgstr ""
 
 msgid "ADRE"
@@ -36,16 +43,34 @@ msgstr ""
 msgid "ADREs"
 msgstr ""
 
-msgid "Committee member"
+msgid "APPROVED"
 msgstr ""
 
-msgid "Committee members"
+msgid "Abstract"
 msgstr ""
 
-msgid "Candidate"
+msgid "Additional training project"
 msgstr ""
 
-msgid "Candidates"
+msgid "Admission"
+msgstr ""
+
+msgid "Already a member of CA."
+msgstr ""
+
+msgid "Already a promoter."
+msgstr ""
+
+msgid "Author"
+msgstr ""
+
+msgid "Bureau"
+msgstr ""
+
+msgid "CA Member"
+msgstr ""
+
+msgid "CANCELLED"
 msgstr ""
 
 msgid "CDD manager"
@@ -54,22 +79,319 @@ msgstr ""
 msgid "CDD managers"
 msgstr ""
 
-msgid "Jury secretary"
+msgid "CDE Bureau should be filled in only if the doctorate's entity is CDE"
+msgstr ""
+
+msgid "Can access doctorate admission list"
+msgstr ""
+
+msgid "Can add a member to the supervision group"
+msgstr ""
+
+msgid "Can appose CDD notice"
+msgstr ""
+
+msgid "Can appose SIC notice"
+msgstr ""
+
+msgid "Can approve confirmation paper"
+msgstr ""
+
+msgid "Can approve jury"
+msgstr ""
+
+msgid "Can check copyright"
+msgstr ""
+
+msgid "Can check publication autorisation"
+msgstr ""
+
+msgid "Can download PDF confirmation"
+msgstr ""
+
+msgid "Can download jury-approved PDF"
+msgstr ""
+
+msgid "Can fill thesis"
+msgstr ""
+
+msgid "Can remove a member from the supervision group"
+msgstr ""
+
+msgid "Can sign diploma"
+msgstr ""
+
+msgid "Can submit thesis"
+msgstr ""
+
+msgid "Can update the coordinates of the admission request author"
+msgstr ""
+
+msgid "Can update the information related to the admission cotutelle"
+msgstr ""
+
+msgid "Can update the information related to the admission project"
+msgstr ""
+
+msgid "Can update the information related to the admission request author"
+msgstr ""
+
+msgid "Can update the information related to the admission supervision"
+msgstr ""
+
+msgid "Can update the information related to the curriculum"
+msgstr ""
+
+msgid "Can update the information related to the secondary studies"
+msgstr ""
+
+msgid "Can upload PDF confirmation"
+msgstr ""
+
+msgid "Can upload defense report"
+msgstr ""
+
+msgid "Can upload jury-approved PDF"
+msgstr ""
+
+msgid "Can upload signed scholarship"
+msgstr ""
+
+msgid "Can validate doctoral training"
+msgstr ""
+
+msgid "Can validate registration"
+msgstr ""
+
+msgid "Can view the coordinates of the admission request author"
+msgstr ""
+
+msgid "Can view the information related to the admission cotutelle"
+msgstr ""
+
+msgid "Can view the information related to the admission project"
+msgstr ""
+
+msgid "Can view the information related to the admission request author"
+msgstr ""
+
+msgid "Can view the information related to the admission supervision"
+msgstr ""
+
+msgid "Can view the information related to the curriculum"
+msgstr ""
+
+msgid "Can view the information related to the secondary studies"
+msgstr ""
+
+msgid "Candidate"
+msgstr ""
+
+msgid "Candidates"
+msgstr ""
+
+msgid "Close"
+msgstr ""
+
+msgid "Comment"
+msgstr ""
+
+msgid "Committee member"
+msgstr ""
+
+msgid "Committee members"
+msgstr ""
+
+msgid "Confirm"
+msgstr ""
+
+msgid "Cotutelle convention"
+msgstr ""
+
+msgid "Cotutelle request document"
+msgstr ""
+
+msgid "Create new doctorate admission"
+msgstr ""
+
+msgid "Created"
+msgstr ""
+
+msgid "Dedicated time (in EFT)"
+msgstr ""
+
+msgid "Defense"
+msgstr ""
+
+msgid "Delete"
+msgstr ""
+
+msgid "Delete?"
+msgstr ""
+
+msgid "Doctorate"
+msgstr ""
+
+msgid "Doctorate admission"
+msgstr ""
+
+msgid "Doctorate admissions"
+msgstr ""
+
+msgid "ECONOMY"
+msgstr ""
+
+msgid "EFT"
+msgstr ""
+
+msgid "English"
+msgstr ""
+
+msgid "Export"
+msgstr ""
+
+msgid "Financing type"
+msgstr ""
+
+msgid "French"
+msgstr ""
+
+msgid "Gantt graph"
+msgstr ""
+
+msgid "INVITED"
+msgstr ""
+
+msgid "IN_PROGRESS"
+msgstr ""
+
+msgid "Institution"
+msgstr ""
+
+msgid "Institution should be set when PhD has been set to yes or partial"
 msgstr ""
 
 msgid "Jury secretaries"
 msgstr ""
 
+msgid "Jury secretary"
+msgstr ""
+
+msgid "List of doctorate admissions"
+msgstr ""
+
+msgid "List of doctorate admissions with administrative data"
+msgstr ""
+
+msgid "MANAGEMENT"
+msgstr ""
+
+msgid "Mandatory fields are missing in the cotutelle."
+msgstr ""
+
+msgid "Mandatory fields are missing in the project details of the proposition."
+msgstr ""
+
+msgid "Mandatory languages are missing."
+msgstr ""
+
+msgid "Member of supervision group already invited."
+msgstr ""
+
+msgid "Member of supervision group not found."
+msgstr ""
+
+msgid "Member of supervision group not invited."
+msgstr ""
+
+msgid "Membre CA not found."
+msgstr ""
+
+msgid "Modified"
+msgstr ""
+
+msgid "Motivation"
+msgstr ""
+
+msgid "NO"
+msgstr ""
+
+msgid "NOT_INVITED"
+msgstr ""
+
+msgid "No PhD found."
+msgstr ""
+
+msgid "No defense reason"
+msgstr ""
+
+msgid "Other"
+msgstr ""
+
+msgid "Other cotutelle-related documents"
+msgstr ""
+
+msgid "PARTIAL"
+msgstr ""
+
+msgid "PRE_ADMISSION"
+msgstr ""
+
+msgid "PhD already done"
+msgstr ""
+
+msgid "Planned duration"
+msgstr ""
+
+msgid "Pre-Admission"
+msgstr ""
+
+msgid "Produce xls of doctorate admissions with administrative data"
+msgstr ""
+
+msgid "Produce xls with a list of doctorate admissions"
+msgstr ""
+
+msgid "Program proposition"
+msgstr ""
+
+msgid "Project"
+msgstr ""
+
+msgid "Project title"
+msgstr ""
+
 msgid "Promoter"
 msgstr ""
 
+msgid "Promoter not found."
+msgstr ""
+
 msgid "Promoters"
+msgstr ""
+
+msgid "Proposition not found."
+msgstr ""
+
+msgid "REFUSED"
+msgstr ""
+
+msgid "Recommendation letters"
+msgstr ""
+
+msgid "Reference"
 msgstr ""
 
 msgid "SCEB"
 msgstr ""
 
 msgid "SCEBs"
+msgstr ""
+
+msgid "SEARCH_SCHOLARSHIP"
+msgstr ""
+
+msgid "SELF_FUNDING"
 msgstr ""
 
 msgid "SIC director"
@@ -84,363 +406,40 @@ msgstr ""
 msgid "SIC managers"
 msgstr ""
 
-msgid "Type"
-msgstr ""
-
-msgid "Comment"
-msgstr ""
-
-msgid "Created"
-msgstr ""
-
-msgid "Modified"
-msgstr ""
-
-#, python-brace-format
-msgid "{degree} [{type}] for {candidate}"
-msgstr ""
-
-msgid "Doctorate"
-msgstr ""
-
-msgid "Bureau"
-msgstr ""
-
-msgid "Financing type"
-msgstr ""
-
-msgid "Working contract type"
-msgstr ""
-
-msgid "EFT"
-msgstr ""
-
-msgid "Scholarship grant"
-msgstr ""
-
-msgid "Planned duration"
-msgstr ""
-
-msgid "Dedicated time (in EFT)"
-msgstr ""
-
-msgid "Project title"
-msgstr ""
-
-msgid "Abstract"
-msgstr ""
-
-msgid "Thesis language"
-msgstr ""
-
-msgid "Thesis institute"
-msgstr ""
-
-msgid "Thesis location"
-msgstr ""
-
-msgid "Project"
-msgstr ""
-
-msgid "Gantt graph"
-msgstr ""
-
-msgid "Program proposition"
-msgstr ""
-
-msgid "Additional training project"
-msgstr ""
-
-msgid "Recommendation letters"
-msgstr ""
-
-msgid "PhD already done"
-msgstr ""
-
-msgid "Institution"
-msgstr ""
-
-msgid "Defense"
-msgstr ""
-
-msgid "No defense reason"
-msgstr ""
-
-msgid "Motivation"
-msgstr ""
-
-msgid "Cotutelle request document"
-msgstr ""
-
-msgid "Cotutelle convention"
-msgstr ""
-
-msgid "Other cotutelle-related documents"
-msgstr ""
-
-msgid "Doctorate admission"
-msgstr ""
-
-msgid "Can access doctorate admission list"
-msgstr ""
-
-msgid "Can download jury-approved PDF"
-msgstr ""
-
-msgid "Can upload jury-approved PDF"
-msgstr ""
-
-msgid "Can upload signed scholarship"
-msgstr ""
-
-msgid "Can check publication autorisation"
-msgstr ""
-
-msgid "Can validate registration"
-msgstr ""
-
-msgid "Can approve jury"
-msgstr ""
-
-msgid "Can approve confirmation paper"
-msgstr ""
-
-msgid "Can validate doctoral training"
-msgstr ""
-
-msgid "Can download PDF confirmation"
-msgstr ""
-
-msgid "Can upload PDF confirmation"
-msgstr ""
-
-msgid "Can fill thesis"
-msgstr ""
-
-msgid "Can submit thesis"
-msgstr ""
-
-msgid "Can appose CDD notice"
-msgstr ""
-
-msgid "Can appose SIC notice"
-msgstr ""
-
-msgid "Can upload defense report"
-msgstr ""
-
-msgid "Can check copyright"
-msgstr ""
-
-msgid "Can sign diploma"
-msgstr ""
-
-msgid "Can view the information related to the admission request author"
-msgstr ""
-
-msgid "Can update the information related to the admission request author"
-msgstr ""
-
-msgid "Can view the coordinates of the admission request author"
-msgstr ""
-
-msgid "Can update the coordinates of the admission request author"
-msgstr ""
-
-msgid "Can view the information related to the secondary studies"
-msgstr ""
-
-msgid "Can update the information related to the secondary studies"
-msgstr ""
-
-msgid "Can view the information related to the curriculum"
-msgstr ""
-
-msgid "Can update the information related to the curriculum"
-msgstr ""
-
-msgid "Can view the information related to the admission project"
-msgstr ""
-
-msgid "Can update the information related to the admission project"
-msgstr ""
-
-msgid "Can view the information related to the admission cotutelle"
-msgstr ""
-
-msgid "Can update the information related to the admission cotutelle"
-msgstr ""
-
-msgid "Can view the information related to the admission supervision"
-msgstr ""
-
-msgid "Can update the information related to the admission supervision"
-msgstr ""
-
-msgid "Can add a member to the supervision group"
-msgstr ""
-
-msgid "Can remove a member from the supervision group"
-msgstr ""
-
-msgid "CA Member"
-msgstr ""
-
-msgid "Admission"
-msgstr ""
-
-msgid "Pre-Admission"
-msgstr ""
-
-msgid "French"
-msgstr ""
-
-msgid "English"
-msgstr ""
-
-msgid "Other"
-msgstr ""
-
-msgid "Undecided"
-msgstr ""
-
-msgid "CANCELLED"
-msgstr ""
-
-msgid "IN_PROGRESS"
+msgid "SIGNING_IN_PROGRESS"
 msgstr ""
 
 msgid "SUBMITTED"
 msgstr ""
 
-msgid "ECONOMY"
-msgstr ""
-
-msgid "MANAGEMENT"
-msgstr ""
-
-msgid "ADMISSION"
-msgstr ""
-
-msgid "PRE_ADMISSION"
-msgstr ""
-
-msgid "YES"
-msgstr ""
-
-msgid "NO"
-msgstr ""
-
-msgid "PARTIAL"
-msgstr ""
-
-msgid "WORK_CONTRACT"
-msgstr ""
-
-msgid "SEARCH_SCHOLARSHIP"
-msgstr ""
-
-msgid "SELF_FUNDING"
-msgstr ""
-
-msgid "NOT_INVITED"
-msgstr ""
-
-msgid "INVITED"
-msgstr ""
-
-msgid "APPROVED"
-msgstr ""
-
-msgid "REFUSED"
-msgstr ""
-
-msgid "You've reached the maximum authorized propositions."
-msgstr ""
-
-msgid "No PhD found."
-msgstr ""
-
-msgid "Proposition not found."
+msgid "Scholarship grant"
 msgstr ""
 
 msgid "Supervision group not found."
 msgstr ""
 
-msgid "CDE Bureau should be filled in only if the doctorate's entity is CDE"
+msgid "There can be no more CA members in the supervision group."
 msgstr ""
 
-msgid "Work contract should be set when financing type is set to work contract"
+msgid "There can be no more promoters in the supervision group."
 msgstr ""
 
-msgid "Institution should be set when PhD has been set to yes or partial"
+msgid "Thesis institute"
 msgstr ""
 
-msgid "Promoter not found."
+msgid "Thesis language"
 msgstr ""
 
-msgid "Membre CA not found."
+msgid "Thesis location"
 msgstr ""
 
-msgid "Member of supervision group not found."
-msgstr ""
-
-msgid "Member of supervision group already invited."
-msgstr ""
-
-msgid "Member of supervision group not invited."
-msgstr ""
-
-msgid "Already a promoter."
-msgstr ""
-
-msgid "Already a member of CA."
-msgstr ""
-
-msgid "A justification is needed when creating a pre-admission."
-msgstr ""
-
-msgid "Doctorate admissions"
-msgstr ""
-
-msgid "Create new doctorate admission"
-msgstr ""
-
-msgid "Author"
+msgid "Type"
 msgstr ""
 
 msgid "UUID"
 msgstr ""
 
-msgid "created"
-msgstr ""
-
-msgid "modified"
-msgstr ""
-
-msgid "actions"
-msgstr ""
-
-#, python-format
-msgid ""
-"\n"
-"                %(start_index)s to %(end_index)s of %(total_counts)s "
-"doctorate admissions"
-msgstr ""
-
-msgid "Export"
-msgstr ""
-
-msgid "Produce xls with a list of doctorate admissions"
-msgstr ""
-
-msgid "List of doctorate admissions"
-msgstr ""
-
-msgid "Produce xls of doctorate admissions with administrative data"
-msgstr ""
-
-msgid "List of doctorate admissions with administrative data"
+msgid "Undecided"
 msgstr ""
 
 msgid "Update"
@@ -449,27 +448,56 @@ msgstr ""
 msgid "Update doctorate admission"
 msgstr ""
 
-msgid "Delete"
+msgid "WORK_CONTRACT"
 msgstr ""
 
-msgid "Delete?"
+msgid "Work contract should be set when financing type is set to work contract"
 msgstr ""
 
-#, python-format
+msgid "Working contract type"
+msgstr ""
+
+msgid "YES"
+msgstr ""
+
+msgid "You cannot fill in a language more than once, please correct the form."
+msgstr ""
+
+msgid "You must add at least one CA member in order to request signatures."
+msgstr ""
+
 msgid ""
-"\n"
-"              Are you sure you want to delete \"%(object)s\"?\n"
-"            "
+"You must add at least one external promoter in order to request signatures."
 msgstr ""
 
-msgid "Close"
+msgid "You must add at least one promoter in order to request signatures."
 msgstr ""
 
-msgid "Confirm"
+msgid "You must be a member of the committee to access this admission"
 msgstr ""
 
-msgid "There can be no more promoters in the supervision group."
+msgid ""
+"You must be a member of the doctoral commission to access this admission"
 msgstr ""
 
-msgid "There can be no more CA members in the supervision group."
+msgid "You must be the request author to access this admission"
+msgstr ""
+
+msgid "You must be the request promoter to access this admission"
+msgstr ""
+
+msgid "You've reached the maximum authorized propositions."
+msgstr ""
+
+msgid "actions"
+msgstr ""
+
+msgid "created"
+msgstr ""
+
+msgid "modified"
+msgstr ""
+
+#, python-brace-format
+msgid "{degree} [{type}] for {candidate}"
 msgstr ""

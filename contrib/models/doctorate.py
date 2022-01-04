@@ -53,6 +53,13 @@ class DoctorateAdmission(BaseAdmission):
         default='',
         blank=True,
     )
+    reference = models.CharField(
+        max_length=32,
+        verbose_name=_("Reference"),
+        unique=True,
+        editable=False,
+        null=True,
+    )
 
     # Financement
     financing_type = models.CharField(
