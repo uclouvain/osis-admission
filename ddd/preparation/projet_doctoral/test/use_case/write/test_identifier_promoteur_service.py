@@ -42,6 +42,7 @@ from admission.ddd.preparation.projet_doctoral.domain.model._signature_promoteur
 from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import (
     DejaPromoteurException,
     PromoteurNonTrouveException, GroupeDeSupervisionNonTrouveException, DejaMembreCAException,
+    GroupeSupervisionCompletPourPromoteursException,
 )
 from admission.infrastructure.preparation.projet_doctoral.repository.in_memory.groupe_de_supervision import \
     GroupeDeSupervisionInMemoryRepository
@@ -95,3 +96,15 @@ class TestIdentifierPromoteurService(SimpleTestCase):
         cmd = attr.evolve(self.cmd, uuid_proposition='propositioninconnue')
         with self.assertRaises(GroupeDeSupervisionNonTrouveException):
             self.message_bus.invoke(cmd)
+
+    def test_should_pas_ajouter_personne_si_groupe_complet_pour_promoteurs(self):
+        # Add 3 promoters -> valid
+        for k in range(1, 4):
+            self.message_bus.invoke(IdentifierPromoteurCommand(
+                uuid_proposition=self.uuid_proposition,
+                matricule='0098789{}'.format(k),
+            ))
+        # Add a 4th promoter -> invalid
+        with self.assertRaises(MultipleBusinessExceptions) as e:
+            self.message_bus.invoke(self.cmd)
+        self.assertIsInstance(e.exception.exceptions.pop(), GroupeSupervisionCompletPourPromoteursException)

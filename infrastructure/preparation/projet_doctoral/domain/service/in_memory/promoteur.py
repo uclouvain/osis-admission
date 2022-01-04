@@ -35,6 +35,9 @@ from ddd.logic.shared_kernel.personne_connue_ucl.domain.service.personne_connue_
 class PromoteurInMemoryTranslator(IPromoteurTranslator):
     promoteurs = [  # tuple of promoteurs identities, telling if it is external or not
         (PromoteurIdentity('00987890'), False),
+        (PromoteurIdentity('00987891'), False),
+        (PromoteurIdentity('00987892'), False),
+        (PromoteurIdentity('00987893'), False),
         (PromoteurIdentity('promoteur-SC3DP-externe'), True),
         (PromoteurIdentity('promoteur-SC3DP'), False),
     ]

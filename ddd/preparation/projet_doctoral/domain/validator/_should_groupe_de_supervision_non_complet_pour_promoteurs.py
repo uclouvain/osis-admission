@@ -1,3 +1,4 @@
+
 # ##############################################################################
 #
 #    OSIS stands for Open Student Information System. It's an application
@@ -23,25 +24,19 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import datetime
+import attr
 
-import mock
-from django.test import TestCase
-
-from admission.ddd.preparation.projet_doctoral.commands import SearchDoctoratCommand
-from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
-from base.tests.factories.academic_year import AcademicYearFactory
+from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import \
+    GroupeSupervisionCompletPourPromoteursException
+from base.ddd.utils.business_validator import BusinessValidator
+from admission.ddd.preparation.projet_doctoral.business_types import *
 
 
-class TestRechercherDoctoratService(TestCase):
-    def setUp(self) -> None:
-        self.cmd = SearchDoctoratCommand(sigle_secteur_entite_gestion='SST')
-        self.message_bus = message_bus_in_memory_instance
-        AcademicYearFactory(year=2020)
+@attr.s(frozen=True, slots=True)
+class ShouldGroupeDeSupervisionNonCompletPourPromoteurs(BusinessValidator):
+    groupe_de_supervision = attr.ib(type='GroupeDeSupervision')  # type: GroupeDeSupervision
+    NOMBRE_MAX_PROMOTEURS = 3
 
-    @mock.patch('admission.ddd.preparation.projet_doctoral.use_case.read.rechercher_doctorats_service.datetime')
-    def test_should_rechercher_par_sigle_secteur_entite_gestion(self, mocked_datetime):
-        mocked_datetime.date.today.return_value = datetime.date(2020, 11, 1)
-        results = self.message_bus.invoke(self.cmd)
-        self.assertEqual(results[0].sigle_entite_gestion, 'CDSC')
-        self.assertEqual(results[0].annee, 2020)
+    def validate(self, *args, **kwargs):
+        if len(self.groupe_de_supervision.signatures_promoteurs) >= self.NOMBRE_MAX_PROMOTEURS:
+            raise GroupeSupervisionCompletPourPromoteursException
