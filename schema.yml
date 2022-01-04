@@ -225,6 +225,66 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - person
+  /languages_knowledge:
+    get:
+      operationId: listLanguageKnowledges
+      description: ''
+      parameters:
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LanguageKnowledge'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - person
+    post:
+      operationId: createLanguageKnowledge
+      description: ''
+      parameters:
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/LanguageKnowledge'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LanguageKnowledge'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - person
   /propositions/{uuid}:
     get:
       operationId: retrieve_proposition
@@ -1123,6 +1183,32 @@ components:
       - 'YES'
       - 'NO'
       - PENDING
+      type: string
+    LanguageKnowledge:
+      type: object
+      properties:
+        language:
+          type: string
+          nullable: true
+        listening_comprehension:
+          $ref: '#/components/schemas/LanguageKnowledgeGrade'
+          nullable: true
+        speaking_ability:
+          $ref: '#/components/schemas/LanguageKnowledgeGrade'
+          nullable: true
+        writing_ability:
+          $ref: '#/components/schemas/LanguageKnowledgeGrade'
+          nullable: true
+      required:
+      - language
+    LanguageKnowledgeGrade:
+      enum:
+      - A1
+      - A2
+      - B1
+      - B2
+      - C1
+      - C2
       type: string
     PropositionDTO:
       type: object

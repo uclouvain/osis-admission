@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-11-23 15:23+0100\n"
+"POT-Creation-Date: 2021-12-23 11:57+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -254,6 +254,9 @@ msgid "Mandatory fields are missing in the project details of the proposition."
 msgstr ""
 "Les champs requis des details du projet de la proposition sont manquants."
 
+msgid "Mandatory languages are missing."
+msgstr "Des langues obligatoires sont manquantes."
+
 msgid "Member of supervision group already invited."
 msgstr "Membre du groupe de supervision déjà invité."
 
@@ -413,6 +416,9 @@ msgstr "Type de contrat de travail"
 
 msgid "YES"
 msgstr "Oui"
+
+msgid "You cannot fill in a language more than once, please correct the form."
+msgstr "Vous ne pouvez pas définir une langue plusieurs fois, merci de corriger le formulaire."
 
 msgid "You must add at least one CA member in order to request signatures."
 msgstr ""
