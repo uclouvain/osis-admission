@@ -60,7 +60,7 @@ class LanguagesKnowledgeTestCase(APITestCase):
         }
         FrenchLanguageFactory()
         EnglishLanguageFactory()
-        LanguageFactory(code="DE")
+        LanguageFactory(code="DE", name="Allemand")
 
     def test_user_not_logged_assert_not_authorized(self):
         self.client.force_authenticate(user=None)

@@ -127,6 +127,9 @@ msgstr ""
 msgid "Can update the coordinates of the admission request author"
 msgstr ""
 
+msgid "Can update the information related to language knowledge"
+msgstr ""
+
 msgid "Can update the information related to the admission cotutelle"
 msgstr ""
 
@@ -164,6 +167,9 @@ msgid "Can validate registration"
 msgstr ""
 
 msgid "Can view the coordinates of the admission request author"
+msgstr ""
+
+msgid "Can view the information related to language knowledge"
 msgstr ""
 
 msgid "Can view the information related to the admission cotutelle"
