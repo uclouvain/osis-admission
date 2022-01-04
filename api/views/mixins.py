@@ -23,27 +23,28 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from rest_framework import mixins
-from rest_framework.generics import GenericAPIView
 
-from admission.api import serializers
-from admission.api.views import PersonRelatedMixin
-from osis_role.contrib.views import APIPermissionRequiredMixin
+from rest_framework.generics import get_object_or_404
+
+from admission.api.schema import ChoicesEnumSchema
+from admission.contrib.models import DoctorateAdmission
 
 
-class PersonViewSet(PersonRelatedMixin, APIPermissionRequiredMixin, mixins.RetrieveModelMixin, mixins.UpdateModelMixin,
-                    GenericAPIView):
-    name = "person"
-    pagination_class = None
-    filter_backends = []
-    serializer_class = serializers.PersonIdentificationSerializer
-    permission_mapping = {
-        'GET': 'admission.view_doctorateadmission_person',
-        'PUT': 'admission.change_doctorateadmission_person',
-    }
+class PersonRelatedSchema(ChoicesEnumSchema):
+    def __init__(self, *args, **kwargs):
+        super().__init__(tags=["person"], *args, **kwargs)
 
-    def get(self, request, *args, **kwargs):
-        return self.retrieve(request, *args, **kwargs)
+    def get_operation_id(self, path, method):
+        operation_id = super().get_operation_id(path, method)
+        if 'uuid' in path:
+            operation_id += 'Admission'
+        return operation_id
 
-    def put(self, request, *args, **kwargs):
-        return self.update(request, *args, **kwargs)
+
+class PersonRelatedMixin:
+    schema = PersonRelatedSchema()
+
+    def get_object(self):
+        if self.kwargs.get('uuid'):
+            return get_object_or_404(DoctorateAdmission, uuid=self.kwargs.get('uuid')).candidate
+        return self.request.user.person
