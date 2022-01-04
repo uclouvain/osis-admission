@@ -134,6 +134,9 @@ msgstr "Peut soumettre la thèse"
 msgid "Can update the coordinates of the admission request author"
 msgstr "Peut modifier les coordonnées de l'auteur de la demande d'admission"
 
+msgid "Can update the information related to language knowledge"
+msgstr "Peut modifier les informations relatives à la connaissance des langues"
+
 msgid "Can update the information related to the admission cotutelle"
 msgstr "Peut modifier les informations relatives à la cotutelle"
 
@@ -174,6 +177,9 @@ msgstr "Peut valider l'inscription"
 
 msgid "Can view the coordinates of the admission request author"
 msgstr "Peut voir les coordonnées de l'auteur de la demande d'admission"
+
+msgid "Can view the information related to language knowledge"
+msgstr "Peut voir les informations relatives à la connaissance des langues"
 
 msgid "Can view the information related to the admission cotutelle"
 msgstr "Peut voir les informations relatives à la cotutelle"
