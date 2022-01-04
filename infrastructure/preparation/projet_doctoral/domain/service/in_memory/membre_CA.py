@@ -34,7 +34,10 @@ from ddd.logic.shared_kernel.personne_connue_ucl.domain.service.personne_connue_
 
 class MembreCAInMemoryTranslator(IMembreCATranslator):
     membres_CA = [
-        MembreCAIdentity('00987890')
+        MembreCAIdentity('00987890'),
+        MembreCAIdentity('00987891'),
+        MembreCAIdentity('00987892'),
+        MembreCAIdentity('00987893'),
     ]
 
     @classmethod

@@ -187,3 +187,19 @@ class CotutelleDoitAvoirAuMoinsUnPromoteurExterneException(BusinessException):
     def __init__(self, **kwargs):
         message = _("You must add at least one external promoter in order to request signatures.")
         super().__init__(message, **kwargs)
+
+
+class GroupeSupervisionCompletPourPromoteursException(BusinessException):
+    status_code = "PROPOSITION-22"
+
+    def __init__(self, **kwargs):
+        message = _("There can be no more promoters in the supervision group.")
+        super().__init__(message, **kwargs)
+
+
+class GroupeSupervisionCompletPourMembresCAException(BusinessException):
+    status_code = "PROPOSITION-23"
+
+    def __init__(self, **kwargs):
+        message = _("There can be no more CA members in the supervision group.")
+        super().__init__(message, **kwargs)
