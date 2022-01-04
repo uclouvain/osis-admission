@@ -124,6 +124,10 @@ class DoctorateAdmissionCreationApiTestCase(APITestCase):
         self.assertEqual(admission.comment, self.create_data["justification"])
         response = self.client.get(resolve_url("propositions"), format="json")
         self.assertEqual(response.json()[0]['sigle_doctorat'], self.doctorate.acronym)
+        self.assertEqual(admission.reference, '{}-{}'.format(
+            self.doctorate.academic_year.year % 100,
+            300000 + admission.id,
+        ))
 
     def test_admission_doctorate_creation_using_api_with_wrong_doctorate(self):
         self.client.force_authenticate(user=self.candidate.user)

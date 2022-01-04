@@ -46,6 +46,7 @@ class GetPropositionDTODomainService(interface.DomainService):
         doctorat = doctorat_translator.get_dto(proposition.doctorat_id.sigle, proposition.doctorat_id.annee)
         return PropositionDTO(
             type_admission=proposition.type_admission.name,
+            reference=proposition.reference,
             sigle_doctorat=proposition.doctorat_id.sigle,
             annee_doctorat=proposition.doctorat_id.annee,
             intitule_doctorat_fr=doctorat.intitule_fr,
@@ -88,6 +89,7 @@ class GetPropositionDTODomainService(interface.DomainService):
         secteur = secteur_ucl_translator.get(doctorat.sigle_entite_gestion)
         return PropositionSearchDTO(
             uuid=proposition.entity_id.uuid,
+            reference=proposition.reference,
             type_admission=proposition.type_admission,
             sigle_doctorat=doctorat.sigle,
             matricule_candidat=proposition.matricule_candidat,
