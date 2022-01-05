@@ -38,10 +38,7 @@ from admission.ddd.preparation.projet_doctoral.commands import (
 from admission.ddd.preparation.projet_doctoral.domain.model._detail_projet import ChoixLangueRedactionThese
 from admission.ddd.preparation.projet_doctoral.domain.model._experience_precedente_recherche import \
     ChoixDoctoratDejaRealise
-from admission.ddd.preparation.projet_doctoral.domain.model._enums import (
-    ChoixCommissionProximiteCDE,
-    ChoixCommissionProximiteCDSS,
-)
+from admission.ddd.preparation.projet_doctoral.domain.model._enums import ChoixCommissionProximite
 from admission.ddd.preparation.projet_doctoral.dtos import DoctoratDTO, PropositionDTO, PropositionSearchDTO
 
 __all__ = [
@@ -159,12 +156,8 @@ class InitierPropositionCommandSerializer(DTOSerializer):
         source = InitierPropositionCommand
 
     type_admission = serializers.ChoiceField(choices=AdmissionType.choices())
-    commission_proximite_CDE = serializers.ChoiceField(
-        choices=ChoixCommissionProximiteCDE.choices(),
-        allow_blank=True,
-    )
-    commission_proximite_CDSS = serializers.ChoiceField(
-        choices=ChoixCommissionProximiteCDSS.choices(),
+    commission_proximite = serializers.ChoiceField(
+        choices=ChoixCommissionProximite.choices(),
         allow_blank=True,
     )
     documents_projet = serializers.ListField(child=serializers.CharField())
@@ -193,12 +186,8 @@ class CompleterPropositionCommandSerializer(DTOSerializer):
         source = CompleterPropositionCommand
 
     type_admission = serializers.ChoiceField(choices=AdmissionType.choices())
-    commission_proximite_CDE = serializers.ChoiceField(
-        choices=ChoixCommissionProximiteCDE.choices(),
-        allow_blank=True,
-    )
-    commission_proximite_CDSS = serializers.ChoiceField(
-        choices=ChoixCommissionProximiteCDSS.choices(),
+    commission_proximite = serializers.ChoiceField(
+        choices=ChoixCommissionProximite.choices(),
         allow_blank=True,
     )
     documents_projet = serializers.ListField(child=serializers.CharField())

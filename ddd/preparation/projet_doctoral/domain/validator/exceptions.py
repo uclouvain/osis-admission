@@ -61,11 +61,11 @@ class GroupeDeSupervisionNonTrouveException(BusinessException):
         super().__init__(message, **kwargs)
 
 
-class CommissionProximiteCDEInconsistantException(BusinessException):
+class CommissionProximiteInconsistantException(BusinessException):
     status_code = "PROPOSITION-5"
 
     def __init__(self, **kwargs):
-        message = _("CDE proximity commission should be filled in only if the doctorate's entity is CDE")
+        message = _("Proximity commission should be filled in only if the doctorate's entity is CDE or CDSS")
         super().__init__(message, **kwargs)
 
 
@@ -202,12 +202,4 @@ class GroupeSupervisionCompletPourMembresCAException(BusinessException):
 
     def __init__(self, **kwargs):
         message = _("There can be no more CA members in the supervision group.")
-        super().__init__(message, **kwargs)
-
-
-class CommissionProximiteCDSSInconsistantException(BusinessException):
-    status_code = "PROPOSITION-24"
-
-    def __init__(self, **kwargs):
-        message = _("CDSS proximity commission should be filled in only if the doctorate's entity is CDSS")
         super().__init__(message, **kwargs)

@@ -30,8 +30,7 @@ from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
 from admission.ddd.preparation.projet_doctoral.domain.model._enums import (
-    ChoixCommissionProximiteCDE,
-    ChoixCommissionProximiteCDSS,
+    ChoixCommissionProximite,
     ChoixStatutProposition,
 )
 from admission.ddd.preparation.projet_doctoral.domain.model._experience_precedente_recherche import \
@@ -50,17 +49,10 @@ class DoctorateAdmission(BaseAdmission):
         related_name="+",
         on_delete=models.CASCADE,
     )
-    proximity_commission_cde = models.CharField(
+    proximity_commission = models.CharField(
         max_length=255,
-        verbose_name=_("CDE proximity commission"),
-        choices=ChoixCommissionProximiteCDE.choices(),
-        default='',
-        blank=True,
-    )
-    proximity_commission_cdss = models.CharField(
-        max_length=255,
-        verbose_name=_("CDSS proximity commission"),
-        choices=ChoixCommissionProximiteCDSS.choices(),
+        verbose_name=_("Proximity commission"),
+        choices=ChoixCommissionProximite.choices(),
         default='',
         blank=True,
     )

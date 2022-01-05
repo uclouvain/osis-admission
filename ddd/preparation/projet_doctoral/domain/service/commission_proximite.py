@@ -26,16 +26,18 @@
 
 from admission.ddd.preparation.projet_doctoral.domain.model.doctorat import Doctorat
 from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import (
-    CommissionProximiteCDEInconsistantException,
+    CommissionProximiteInconsistantException,
 )
 from osis_common.ddd import interface
 
 
-class CommissionProximiteCDE(interface.DomainService):
+class CommissionProximite(interface.DomainService):
 
     @classmethod
-    def verifier(cls, doctorat: 'Doctorat', commission_proximite_CDE: str) -> None:
-        if doctorat.est_entite_CDE() and not commission_proximite_CDE:
-            raise CommissionProximiteCDEInconsistantException()
-        if not doctorat.est_entite_CDE() and commission_proximite_CDE:
-            raise CommissionProximiteCDEInconsistantException()
+    def verifier(cls, doctorat: 'Doctorat', commission_proximite: str) -> None:
+        if doctorat.est_entite_CDE() and not commission_proximite:
+            raise CommissionProximiteInconsistantException()
+        if doctorat.est_entite_CDSS() and not commission_proximite:
+            raise CommissionProximiteInconsistantException()
+        if not doctorat.est_entite_CDE() and not doctorat.est_entite_CDSS() and commission_proximite:
+            raise CommissionProximiteInconsistantException()

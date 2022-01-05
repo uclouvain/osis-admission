@@ -31,8 +31,7 @@ import attr
 
 from admission.ddd.preparation.projet_doctoral.domain.model._detail_projet import DetailProjet
 from admission.ddd.preparation.projet_doctoral.domain.model._enums import (
-    ChoixCommissionProximiteCDE,
-    ChoixCommissionProximiteCDSS,
+    ChoixCommissionProximite,
     ChoixStatutProposition,
     ChoixTypeAdmission,
 )
@@ -68,15 +67,7 @@ class Proposition(interface.RootEntity):
     reference = attr.ib(type=Optional[str], default=None)
     justification = attr.ib(type=Optional[str], default='')
     statut = attr.ib(type=ChoixStatutProposition, default=ChoixStatutProposition.IN_PROGRESS)
-    commission_proximite_CDE = attr.ib(
-        type=Optional[ChoixCommissionProximiteCDE],
-        default='',
-    )  # CDE = Comission Doctorale du domaine Sciences Economique et de Gestion
-    commission_proximite_CDSS = attr.ib(
-        type=Optional[ChoixCommissionProximiteCDSS],
-        default='',
-    )  # CDSS = Commission doctorale des domaines "Sc médicales, santé publique, sc dentaires, biomédicales et
-    #    pharmaceutiques et de la motricité"
+    commission_proximite = attr.ib(type=Optional[ChoixCommissionProximite], default='')
     financement = attr.ib(type=Financement, default=financement_non_rempli)
     experience_precedente_recherche = attr.ib(
         type=ExperiencePrecedenteRecherche,
@@ -105,8 +96,7 @@ class Proposition(interface.RootEntity):
             self,
             type_admission: str,
             justification: str,
-            commission_proximite_CDE: str,
-            commission_proximite_CDSS: str,
+            commission_proximite: str,
             type_financement: str,
             type_contrat_travail: str,
             eft: str,
@@ -137,7 +127,7 @@ class Proposition(interface.RootEntity):
             doctorat_deja_realise=doctorat_deja_realise,
             institution=institution,
         ).validate()
-        self._completer_proposition(type_admission, justification, commission_proximite_CDE, commission_proximite_CDSS)
+        self._completer_proposition(type_admission, justification, commission_proximite)
         self._completer_financement(
             type=type_financement,
             type_contrat_travail=type_contrat_travail,
@@ -166,25 +156,10 @@ class Proposition(interface.RootEntity):
             raison_non_soutenue=raison_non_soutenue,
         )
 
-    def _completer_proposition(
-            self,
-            type_admission: str,
-            justification: str,
-            commission_proximite_CDE: str,
-            commission_proximite_CDSS: str,
-    ):
+    def _completer_proposition(self, type_admission: str, justification: str, commission_proximite: str):
         self.type_admission = ChoixTypeAdmission[type_admission]
         self.justification = justification
-        self.commission_proximite_CDE = (
-            ChoixCommissionProximiteCDE[commission_proximite_CDE]
-            if commission_proximite_CDE
-            else ''
-        )
-        self.commission_proximite_CDSS = (
-            ChoixCommissionProximiteCDSS[commission_proximite_CDSS]
-            if commission_proximite_CDSS
-            else ''
-        )
+        self.commission_proximite = (ChoixCommissionProximite[commission_proximite] if commission_proximite else '')
 
     def _completer_financement(
             self,

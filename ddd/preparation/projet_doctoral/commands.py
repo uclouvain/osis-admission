@@ -43,15 +43,7 @@ class InitierPropositionCommand(interface.CommandRequest):
     annee_formation = attr.ib(type=int)
     matricule_candidat = attr.ib(type=str)
     justification = attr.ib(type=Optional[str], default='')
-    commission_proximite_CDE = attr.ib(
-        type=Optional[str],
-        default='',
-    )  # CDE = Comission Doctorale du domaine Sciences Economique et de Gestion
-    commission_proximite_CDSS = attr.ib(
-        type=Optional[str],
-        default='',
-    )  # CDE = Commission doctorale des domaines "Sc médicales, santé publique, sc dentaires, biomédicales et
-    #    pharmaceutiques et de la motricité"
+    commission_proximite = attr.ib(type=Optional[str], default='')
     type_financement = attr.ib(type=Optional[str], default='')
     type_contrat_travail = attr.ib(type=Optional[str], default='')
     eft = attr.ib(type=Optional[int], default=None)
@@ -80,15 +72,7 @@ class CompleterPropositionCommand(interface.CommandRequest):
     uuid = attr.ib(type=str)
     type_admission = attr.ib(type=str)
     justification = attr.ib(type=Optional[str], default='')
-    commission_proximite_CDE = attr.ib(
-        type=Optional[str],
-        default='',
-    )  # CDE = Comission Doctorale du domaine Sciences Economique et de Gestion
-    commission_proximite_CDSS = attr.ib(
-        type=Optional[str],
-        default='',
-    )  # CDE = Commission doctorale des domaines "Sc médicales, santé publique, sc dentaires, biomédicales et
-    #    pharmaceutiques et de la motricité"
+    commission_proximite = attr.ib(type=Optional[str], default='')
     type_financement = attr.ib(type=Optional[str], default='')
     type_contrat_travail = attr.ib(type=Optional[str], default='')
     eft = attr.ib(type=Optional[int], default=None)
