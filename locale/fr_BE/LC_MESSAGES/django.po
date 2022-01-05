@@ -82,26 +82,6 @@ msgstr "Gestionnaire CDD"
 msgid "CDD managers"
 msgstr "Gestionnaires CDD"
 
-msgid "CDE proximity commission"
-msgstr "Commission de proximité CDE"
-
-msgid ""
-"CDE proximity commission should be filled in only if the doctorate's entity "
-"is CDE"
-msgstr ""
-"La commission de proximité CDE doit être remplie uniquement si l'entité du "
-"doctorat est CDE"
-
-msgid "CDSS proximity commission"
-msgstr "Commission de proximité CDSS"
-
-msgid ""
-"CDSS proximity commission should be filled in only if the doctorate's entity "
-"is CDSS"
-msgstr ""
-"La commission de proximité CDSS doit être remplie uniquement si l'entité du "
-"doctorat est CDSS"
-
 msgid "Can access doctorate admission list"
 msgstr "Peut accéder à la liste des admission en doctorat"
 
@@ -410,7 +390,6 @@ msgstr "Promoteurs"
 msgid "Proposition not found."
 msgstr "Proposition non trouvée."
 
-
 msgid "Proximity Commission for Dental Sciences (DENT)"
 msgstr "Commission de proximité de sciences dentaires (DENT)"
 
@@ -440,6 +419,13 @@ msgstr "Commission de proximité de recherche expérimentale et clinique (ECLI)"
 
 msgid "Proximity commission for public health, health and society (SPSS)"
 msgstr "Commission de proximité de santé publique, santé et société (SPSS)"
+
+msgid ""
+"Proximity commission should be filled in only if the doctorate's entity is "
+"CDE or CDSS"
+msgstr ""
+"La commission de proximité doit être remplie uniquement si l'entité du "
+"doctorat est CDE ou CDSS"
 
 msgid "REFUSED"
 msgstr "Refusé"
