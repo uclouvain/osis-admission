@@ -526,7 +526,7 @@ class DoctorateAdmissionGetApiTestCase(APITestCase):
         # Check response data
         # Check links
         self.assertTrue('links' in response.data)
-        actions = [
+        allowed_actions = [
             'retrieve_person',
             'update_person',
             'retrieve_coordinates',
@@ -545,11 +545,14 @@ class DoctorateAdmissionGetApiTestCase(APITestCase):
             'retrieve_supervision',
             'update_supervision',
         ]
+        all_actions = allowed_actions + [
+            'add_approval',
+        ]
         self.assertCountEqual(
             list(response.data['links']),
-            actions,
+            all_actions,
         )
-        for action in actions:
+        for action in allowed_actions:
             # Check the url
             self.assertTrue('url' in response.data['links'][action])
             # Check the method type
