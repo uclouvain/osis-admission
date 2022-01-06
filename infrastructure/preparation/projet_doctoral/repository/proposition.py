@@ -26,8 +26,10 @@
 from typing import List, Optional
 
 from admission.contrib.models import DoctorateAdmission
+from admission.ddd.preparation.projet_doctoral.domain.model._institut import InstitutIdentity
 from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import PropositionNonTrouveeException
 from base.models.education_group_year import EducationGroupYear
+from base.models.entity_version import EntityVersion
 from base.models.person import Person
 from admission.ddd.preparation.projet_doctoral.builder.proposition_identity_builder import \
     PropositionIdentityBuilder
@@ -58,13 +60,15 @@ def _instantiate_admission(admission: DoctorateAdmission) -> Proposition:
         type_admission=ChoixTypeAdmission[admission.type],
         doctorat_id=DoctoratIdentity(admission.doctorate.acronym, admission.doctorate.academic_year.year),
         matricule_candidat=admission.candidate.global_id,
+        reference=admission.reference,
         projet=DetailProjet(
             titre=admission.project_title,
             resume=admission.project_abstract,
             documents=admission.project_document,
             langue_redaction_these=admission.thesis_language,
-            institut_these=admission.thesis_institute,
+            institut_these=InstitutIdentity(admission.thesis_institute.uuid) if admission.thesis_institute_id else None,
             lieu_these=admission.thesis_location,
+            autre_lieu_these=admission.other_thesis_location,
             graphe_gantt=admission.gantt_graph,
             proposition_programme_doctoral=admission.program_proposition,
             projet_formation_complementaire=admission.additional_training_project,
@@ -121,7 +125,7 @@ class PropositionRepository(IPropositionRepository):
             acronym=entity.sigle_formation,
             academic_year__year=entity.annee,
         )
-        DoctorateAdmission.objects.update_or_create(
+        (admission, created) = DoctorateAdmission.objects.update_or_create(
             uuid=entity.entity_id.uuid,
             defaults={
                 'type': entity.type_admission.name,
@@ -139,8 +143,11 @@ class PropositionRepository(IPropositionRepository):
                 'project_title': entity.projet.titre,
                 'project_abstract': entity.projet.resume,
                 'thesis_language': entity.projet.langue_redaction_these,
-                'thesis_institute': entity.projet.institut_these,
+                'thesis_institute': EntityVersion.objects.get(
+                    uuid=entity.projet.institut_these.uuid,
+                ) if entity.projet.institut_these else None,
                 'thesis_location': entity.projet.lieu_these,
+                'other_thesis_location': entity.projet.autre_lieu_these,
                 'project_document': entity.projet.documents,
                 'gantt_graph': entity.projet.graphe_gantt,
                 'program_proposition': entity.projet.proposition_programme_doctoral,
@@ -152,3 +159,10 @@ class PropositionRepository(IPropositionRepository):
                 'phd_already_done_no_defense_reason': entity.experience_precedente_recherche.raison_non_soutenue,
             }
         )
+        if created:
+            # Set the reference of the admission on creation (based on the academic year and the instance id)
+            admission.reference = "{}-{}".format(
+                admission.doctorate.academic_year.year % 100,
+                Proposition.valeur_reference_base + admission.id,
+            )
+            admission.save()

@@ -24,27 +24,20 @@
 #
 # ##############################################################################
 
-from rest_framework import mixins
-from rest_framework.generics import GenericAPIView
+from rest_framework import serializers
 
-from admission.api import serializers
-from admission.api.views.mixins import PersonRelatedMixin
-from osis_role.contrib.views import APIPermissionRequiredMixin
+from osis_profile.models.education import LanguageKnowledge
+from reference.api.serializers.language import RelatedLanguageField
 
 
-class CoordonneesViewSet(PersonRelatedMixin, APIPermissionRequiredMixin, mixins.RetrieveModelMixin,
-                         mixins.UpdateModelMixin, GenericAPIView):
-    name = "coordonnees"
-    pagination_class = None
-    filter_backends = []
-    serializer_class = serializers.CoordonneesSerializer
-    permission_mapping = {
-        'GET': 'admission.view_doctorateadmission_coordinates',
-        'PUT': 'admission.change_doctorateadmission_coordinates',
-    }
+class LanguageKnowledgeSerializer(serializers.ModelSerializer):
+    language = RelatedLanguageField()
 
-    def get(self, request, *args, **kwargs):
-        return self.retrieve(request, *args, **kwargs)
-
-    def put(self, request, *args, **kwargs):
-        return self.update(request, *args, **kwargs)
+    class Meta:
+        model = LanguageKnowledge
+        fields = (
+            "language",
+            "listening_comprehension",
+            "speaking_ability",
+            "writing_ability",
+        )

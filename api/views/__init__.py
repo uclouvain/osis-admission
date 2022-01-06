@@ -26,6 +26,7 @@
 from admission.api.views.autocomplete import *
 from admission.api.views.coordonnees import *
 from admission.api.views.secondary_studies import *
+from admission.api.views.languages_knowledge import *
 from admission.api.views.cotutelle import *
 from admission.api.views.person import *
 from admission.api.views.project import *
@@ -47,5 +48,6 @@ __all__ = [
     "CotutelleAPIView",
     "SupervisionAPIView",
     "RequestSignaturesAPIView",
+    "LanguagesKnowledgeViewSet",
     "ApprovePropositionAPIView",
 ]

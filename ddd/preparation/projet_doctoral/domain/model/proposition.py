@@ -24,6 +24,7 @@
 #
 ##############################################################################
 import datetime
+import uuid
 from typing import List, Optional
 
 import attr
@@ -63,6 +64,7 @@ class Proposition(interface.RootEntity):
     doctorat_id = attr.ib(type=DoctoratIdentity)
     matricule_candidat = attr.ib(type=str)
     projet = attr.ib(type=DetailProjet)
+    reference = attr.ib(type=Optional[str], default=None)
     justification = attr.ib(type=Optional[str], default='')
     statut = attr.ib(type=ChoixStatutProposition, default=ChoixStatutProposition.IN_PROGRESS)
     bureau_CDE = attr.ib(
@@ -84,6 +86,8 @@ class Proposition(interface.RootEntity):
     def annee(self):
         return self.doctorat_id.annee
 
+    valeur_reference_base = 300000
+
     @property
     def est_verrouillee_pour_signature(self) -> bool:
         return self.statut == ChoixStatutProposition.SIGNING_IN_PROGRESS
@@ -103,8 +107,9 @@ class Proposition(interface.RootEntity):
             duree_prevue: str,
             temps_consacre: str,
             langue_redaction_these: str,
-            institut_these: str,
+            institut_these: Optional[uuid.UUID],
             lieu_these: str,
+            autre_lieu_these: str,
             titre: str,
             resume: str,
             doctorat_deja_realise: str,
@@ -140,6 +145,7 @@ class Proposition(interface.RootEntity):
             langue_redaction_these=langue_redaction_these,
             institut_these=institut_these,
             lieu_these=lieu_these,
+            autre_lieu_these=autre_lieu_these,
             documents=documents,
             graphe_gantt=graphe_gantt,
             proposition_programme_doctoral=proposition_programme_doctoral,
@@ -184,8 +190,9 @@ class Proposition(interface.RootEntity):
             titre: str,
             resume: str,
             langue_redaction_these: str,
-            institut_these: str,
+            institut_these: Optional[uuid.UUID],
             lieu_these: str,
+            autre_lieu_these: str,
             documents: List[str] = None,
             graphe_gantt: List[str] = None,
             proposition_programme_doctoral: List[str] = None,
@@ -199,6 +206,7 @@ class Proposition(interface.RootEntity):
             langue_redaction_these=langue_redaction_these,
             institut_these=institut_these,
             lieu_these=lieu_these,
+            autre_lieu_these=autre_lieu_these,
             graphe_gantt=graphe_gantt,
             proposition_programme_doctoral=proposition_programme_doctoral,
             projet_formation_complementaire=projet_formation_complementaire,

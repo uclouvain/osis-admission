@@ -25,13 +25,15 @@
 # ##############################################################################
 
 from rest_framework import mixins, status
-from rest_framework.generics import GenericAPIView
+from rest_framework.generics import GenericAPIView, get_object_or_404
 from rest_framework.response import Response
 
 from admission.api import serializers
 from admission.api.schema import ResponseSpecificSchema
+from admission.contrib.models.doctorate import DoctorateAdmission
 from admission.ddd.preparation.projet_doctoral.commands import DefinirCotutelleCommand, GetCotutelleCommand
 from infrastructure.messages_bus import message_bus_instance
+from osis_role.contrib.views import APIPermissionRequiredMixin
 
 
 class CotutelleSchema(ResponseSpecificSchema):
@@ -42,15 +44,21 @@ class CotutelleSchema(ResponseSpecificSchema):
     }
 
 
-class CotutelleAPIView(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, GenericAPIView):
+class CotutelleAPIView(APIPermissionRequiredMixin, mixins.RetrieveModelMixin, mixins.UpdateModelMixin, GenericAPIView):
     name = "cotutelle"
     schema = CotutelleSchema()
     pagination_class = None
     filter_backends = []
+    permission_mapping = {
+        'GET': 'admission.view_doctorateadmission_cotutelle',
+        'PUT': 'admission.change_doctorateadmission_cotutelle',
+    }
+
+    def get_permission_object(self):
+        return get_object_or_404(DoctorateAdmission, uuid=self.kwargs['uuid'])
 
     def get(self, request, *args, **kwargs):
         """Get the cotutelle of a proposition"""
-        # TODO call osis_role perm for this object
         cotutelle = message_bus_instance.invoke(
             GetCotutelleCommand(uuid_proposition=kwargs.get('uuid'))
         )

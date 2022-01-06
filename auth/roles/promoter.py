@@ -48,4 +48,11 @@ class Promoter(EntityRoleModel):
             'admission.validate_doctoral_training': is_admission_request_promoter,
             'admission.fill_thesis': is_admission_request_promoter,
             'admission.check_publication_authorisation': is_admission_request_promoter,
+            'admission.view_doctorateadmission_person': rules.always_allow,
+            'admission.view_doctorateadmission_coordinates': rules.always_allow,
+            'admission.view_doctorateadmission_secondary_studies': rules.always_allow,
+            'admission.view_doctorateadmission_curriculum': rules.always_allow,
+            'admission.view_doctorateadmission_project': is_admission_request_promoter,
+            'admission.view_doctorateadmission_cotutelle': is_admission_request_promoter,
+            'admission.view_doctorateadmission_supervision': is_admission_request_promoter,
         })

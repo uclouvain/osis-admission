@@ -31,6 +31,7 @@ from base.models.enums.education_group_types import TrainingType
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.education_group_type import EducationGroupTypeFactory
 from base.tests.factories.education_group_year import EducationGroupYearFactory
+from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.person import PersonFactory
 
 
@@ -45,3 +46,4 @@ class DoctorateAdmissionFactory(factory.DjangoModelFactory):
 
     candidate = factory.SubFactory(PersonFactory)
     doctorate = factory.SubFactory(DoctorateFactory)
+    thesis_institute = factory.SubFactory(EntityVersionFactory)

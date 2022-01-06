@@ -26,6 +26,7 @@
 from admission.ddd.preparation.projet_doctoral.builder.proposition_identity_builder import \
     PropositionIdentityBuilder
 from admission.ddd.preparation.projet_doctoral.commands import CompleterPropositionCommand
+from admission.ddd.preparation.projet_doctoral.domain.model._institut import InstitutIdentity
 from admission.ddd.preparation.projet_doctoral.domain.model.proposition import PropositionIdentity
 from admission.ddd.preparation.projet_doctoral.domain.service.bureau_CDE import BureauCDE
 from admission.ddd.preparation.projet_doctoral.domain.service.i_doctorat import IDoctoratTranslator
@@ -57,8 +58,9 @@ def completer_proposition(
         titre=cmd.titre_projet,
         resume=cmd.resume_projet,
         langue_redaction_these=cmd.langue_redaction_these,
-        institut_these=cmd.institut_these,
+        institut_these=InstitutIdentity(cmd.institut_these) if cmd.institut_these else None,
         lieu_these=cmd.lieu_these,
+        autre_lieu_these=cmd.autre_lieu_these,
         documents=cmd.documents_projet,
         graphe_gantt=cmd.graphe_gantt,
         proposition_programme_doctoral=cmd.proposition_programme_doctoral,

@@ -23,27 +23,13 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from rest_framework import mixins
-from rest_framework.generics import GenericAPIView
+import uuid
 
-from admission.api import serializers
-from admission.api.views import PersonRelatedMixin
-from osis_role.contrib.views import APIPermissionRequiredMixin
+import attr
+
+from osis_common.ddd import interface
 
 
-class PersonViewSet(PersonRelatedMixin, APIPermissionRequiredMixin, mixins.RetrieveModelMixin, mixins.UpdateModelMixin,
-                    GenericAPIView):
-    name = "person"
-    pagination_class = None
-    filter_backends = []
-    serializer_class = serializers.PersonIdentificationSerializer
-    permission_mapping = {
-        'GET': 'admission.view_doctorateadmission_person',
-        'PUT': 'admission.change_doctorateadmission_person',
-    }
-
-    def get(self, request, *args, **kwargs):
-        return self.retrieve(request, *args, **kwargs)
-
-    def put(self, request, *args, **kwargs):
-        return self.update(request, *args, **kwargs)
+@attr.s(slots=True)
+class InstitutIdentity(interface.EntityIdentity):
+    uuid = attr.ib(type=uuid.UUID)

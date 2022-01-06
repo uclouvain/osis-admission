@@ -24,6 +24,7 @@
 #
 ##############################################################################
 import datetime
+from uuid import UUID
 from typing import List, Optional, Union
 
 import attr
@@ -92,7 +93,9 @@ class CurriculumDTO(interface.DTO):
 
 @attr.s(frozen=True, slots=True)
 class PropositionDTO(interface.DTO):
+    uuid = attr.ib(type=str)
     type_admission = attr.ib(type=str)
+    reference = attr.ib(type=str)
     justification = attr.ib(type=Optional[str])
     sigle_doctorat = attr.ib(type=str)
     annee_doctorat = attr.ib(type=int)
@@ -117,8 +120,9 @@ class PropositionDTO(interface.DTO):
     projet_formation_complementaire = attr.ib(type=List[str])
     lettres_recommandation = attr.ib(type=List[str])
     langue_redaction_these = attr.ib(type=str)
-    institut_these = attr.ib(type=str)
+    institut_these = attr.ib(type=Optional[UUID])
     lieu_these = attr.ib(type=str)
+    autre_lieu_these = attr.ib(type=str)
     doctorat_deja_realise = attr.ib(type=str)
     institution = attr.ib(type=Optional[str])
     date_soutenance = attr.ib(type=Optional[datetime.date])
@@ -129,6 +133,7 @@ class PropositionDTO(interface.DTO):
 @attr.s(frozen=True, slots=True)
 class PropositionSearchDTO(interface.DTO):
     uuid = attr.ib(type=str)
+    reference = attr.ib(type=str)
     type_admission = attr.ib(type=str)
     sigle_doctorat = attr.ib(type=str)
     intitule_doctorat_fr = attr.ib(type=str)
