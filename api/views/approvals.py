@@ -36,7 +36,7 @@ from infrastructure.messages_bus import message_bus_instance
 class ApprovePropositionSchema(ResponseSpecificSchema):
     operation_id_base = "_approval"
     serializer_mapping = {
-        "POST": serializers.PropositionIdentityDTOSerializer,
+        "POST": (serializers.ApprouverPropositionCommandSerializer, serializers.PropositionIdentityDTOSerializer),
     }
 
 
@@ -51,10 +51,15 @@ class ApprovePropositionAPIView(APIView):
 
     def post(self, request, *args, **kwargs):
         """Approve the proposition."""
-        message_bus_instance.invoke(
+        serializer = serializers.ApprouverPropositionCommandSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        proposition_id = message_bus_instance.invoke(
             ApprouverPropositionCommand(
                 uuid_proposition=str(kwargs["uuid"]),
-                matricule=request.user.person.global_id,
+                **serializer.data,
             ),
         )
-        return Response(status=status.HTTP_200_OK)
+
+        serializer = serializers.PropositionIdentityDTOSerializer(instance=proposition_id)
+        return Response(serializer.data, status=status.HTTP_200_OK)

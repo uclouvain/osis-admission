@@ -34,7 +34,8 @@ from admission.ddd.preparation.projet_doctoral.domain.model._cotutelle import Co
 from admission.ddd.preparation.projet_doctoral.domain.model._membre_CA import MembreCAIdentity
 from admission.ddd.preparation.projet_doctoral.domain.model._promoteur import PromoteurIdentity
 from admission.ddd.preparation.projet_doctoral.domain.model._signature_membre_CA import SignatureMembreCA
-from admission.ddd.preparation.projet_doctoral.domain.model._signature_promoteur import SignaturePromoteur
+from admission.ddd.preparation.projet_doctoral.domain.model._signature_promoteur import SignaturePromoteur, \
+    ChoixEtatSignature
 from admission.ddd.preparation.projet_doctoral.domain.model.groupe_de_supervision import (
     GroupeDeSupervision,
     GroupeDeSupervisionIdentity,
@@ -71,13 +72,21 @@ class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
             entity_id=GroupeDeSupervisionIdentity(uuid=groupe.uuid),
             proposition_id=PropositionIdentityBuilder.build_from_uuid(proposition.uuid),
             signatures_promoteurs=[
-                SignaturePromoteur(promoteur_id=PromoteurIdentity(actor.person.global_id))
+                SignaturePromoteur(promoteur_id=PromoteurIdentity(actor.person.global_id),
+                                   etat=ChoixEtatSignature[actor.state],
+                                   commentaire_externe=actor.comment,
+                                   commentaire_interne=actor.supervisionactor.internal_comment,
+                                   )
                 for actor in groupe.actors.filter(supervisionactor__type__in=[
                     ActorType.PROMOTER.name,
                 ])
             ],
             signatures_membres_CA=[
-                SignatureMembreCA(membre_CA_id=MembreCAIdentity(actor.person.global_id))
+                SignatureMembreCA(membre_CA_id=MembreCAIdentity(actor.person.global_id),
+                                  etat=ChoixEtatSignature[actor.state],
+                                  commentaire_externe=actor.comment,
+                                  commentaire_interne=actor.supervisionactor.internal_comment,
+                                  )
                 for actor in groupe.actors.filter(supervisionactor__type=ActorType.CA_MEMBER.name)
             ],
             cotutelle=cotutelle,
@@ -138,11 +147,21 @@ class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
             membre = next(a for a in entity.signatures_promoteurs if a.promoteur_id.matricule == actor.person.global_id)
             if actor.state != membre.etat.name:
                 StateHistory.objects.create(state=membre.etat.name, actor_id=actor.id)
+                if membre.etat.name in [ChoixEtatSignature.APPROVED.name]:
+                    actor.comment = membre.commentaire_externe
+                    actor.supervisionactor.internal_comment = membre.commentaire_interne
+                    actor.supervisionactor.save()
+                    actor.save()
 
         for actor in current_members:
             membre = next(a for a in entity.signatures_membres_CA if a.membre_CA_id.matricule == actor.person.global_id)
             if actor.state != membre.etat.name:
                 StateHistory.objects.create(state=membre.etat.name, actor_id=actor.id)
+                if membre.etat.name in [ChoixEtatSignature.APPROVED.name]:
+                    actor.comment = membre.commentaire_externe
+                    actor.supervisionactor.internal_comment = membre.commentaire_interne
+                    actor.supervisionactor.save()
+                    actor.save()
 
         # Add missing actors
         promoteurs_ids = current_promoteurs.values_list('person__global_id', flat=True)

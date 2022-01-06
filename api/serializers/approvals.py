@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,11 +23,12 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from admission.ddd.preparation.projet_doctoral.commands import ApprouverPropositionCommand
+from base.utils.serializers import DTOSerializer
 
-from .project import *
-from .cotutelle import *
-from .person import *
-from .coordonnees import CoordonneesSerializer
-from .secondary_studies import HighSchoolDiplomaSerializer
-from .supervision import *
-from .approvals import ApprouverPropositionCommandSerializer
+
+class ApprouverPropositionCommandSerializer(DTOSerializer):
+    uuid_proposition = None
+
+    class Meta:
+        source = ApprouverPropositionCommand

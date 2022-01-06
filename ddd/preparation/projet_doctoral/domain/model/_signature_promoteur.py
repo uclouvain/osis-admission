@@ -42,3 +42,6 @@ class ChoixEtatSignature(ChoiceEnum):
 class SignaturePromoteur(interface.ValueObject):
     promoteur_id = attr.ib(type=PromoteurIdentity)
     etat = attr.ib(type=ChoixEtatSignature, default=ChoixEtatSignature.NOT_INVITED)
+    commentaire_externe = attr.ib(type=str, default='')
+    commentaire_interne = attr.ib(type=str, default='')
+    motif_refus = attr.ib(type=str, default='')

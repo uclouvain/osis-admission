@@ -223,6 +223,9 @@ msgstr ""
 msgid "Institution should be set when PhD has been set to yes or partial"
 msgstr ""
 
+msgid "Internal comment"
+msgstr ""
+
 msgid "Jury secretaries"
 msgstr ""
 
@@ -320,6 +323,9 @@ msgid "REFUSED"
 msgstr ""
 
 msgid "Recommendation letters"
+msgstr ""
+
+msgid "Rejection reason"
 msgstr ""
 
 msgid "SCEB"
