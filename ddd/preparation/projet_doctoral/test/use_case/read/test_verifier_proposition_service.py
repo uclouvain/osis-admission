@@ -71,7 +71,7 @@ class TestVerifierPropositionService(SimpleTestCase):
         cmd = attr.evolve(self.cmd, uuid_proposition='uuid-SC3DP-cotutelle-indefinie')
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(cmd)
-        self.assertIsInstance(context.exception.exceptions.pop(), CotutelleNonCompleteException)
+        self.assertTrue(any(isinstance(exc, CotutelleNonCompleteException) for exc in context.exception.exceptions))
 
     def test_should_retourner_erreur_si_groupe_supervision_non_trouve(self):
         cmd = attr.evolve(self.cmd, uuid_proposition='uuid-ECGE3DP')
@@ -85,8 +85,9 @@ class TestVerifierPropositionService(SimpleTestCase):
 
     def test_should_retourner_erreur_si_cotutelle_sans_promoteur_externe(self):
         cmd = attr.evolve(self.cmd, uuid_proposition='uuid-SC3DP-cotutelle-sans-promoteur-externe')
-        with self.assertRaises(CotutelleDoitAvoirAuMoinsUnPromoteurExterneException):
+        with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(cmd)
+        self.assertIsInstance(context.exception.exceptions.pop(), CotutelleDoitAvoirAuMoinsUnPromoteurExterneException)
 
     def test_should_verifier_etre_ok_si_cotutelle_avec_promoteur_externe(self):
         cmd = attr.evolve(self.cmd, uuid_proposition='uuid-SC3DP-cotutelle-avec-promoteur-externe')

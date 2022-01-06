@@ -28,7 +28,7 @@ from admission.ddd.preparation.projet_doctoral.builder.proposition_identity_buil
 from admission.ddd.preparation.projet_doctoral.commands import VerifierPropositionCommand
 from admission.ddd.preparation.projet_doctoral.domain.model.proposition import PropositionIdentity
 from admission.ddd.preparation.projet_doctoral.domain.service.i_promoteur import IPromoteurTranslator
-from admission.ddd.preparation.projet_doctoral.domain.service.verifier_cotutelle import CotutellePossedePromoteurExterne
+from admission.ddd.preparation.projet_doctoral.domain.service.verifier_projet_doctoral import VerifierProjetDoctoral
 from admission.ddd.preparation.projet_doctoral.repository.i_groupe_de_supervision import IGroupeDeSupervisionRepository
 from admission.ddd.preparation.projet_doctoral.repository.i_proposition import IPropositionRepository
 
@@ -45,10 +45,7 @@ def verifier_proposition(
     groupe_de_supervision = groupe_supervision_repository.get_by_proposition_id(entity_id)
 
     # WHEN
-    groupe_de_supervision.verifier_cotutelle()
-    CotutellePossedePromoteurExterne().verifier(groupe_de_supervision, promoteur_translator)
-    proposition_candidat.verifier_projet_doctoral()
-    groupe_de_supervision.verifier_signataires()
+    VerifierProjetDoctoral.verifier(proposition_candidat, groupe_de_supervision, promoteur_translator)
 
     # THEN
     return entity_id
