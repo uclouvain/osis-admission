@@ -32,7 +32,7 @@ class SecteurUclTranslator(ISecteurUclTranslator):
     @classmethod
     def get(cls, sigle_entite: str) -> 'EntiteUclDTO':
         # FIXME use command from shared kernel
-        entity = EntityProxy.objects.with_parent().get(entityversion__acronym=sigle_entite)
+        entity = EntityProxy.objects.distinct('pk').with_parent().get(entityversion__acronym=sigle_entite)
         sector = EntityProxy.objects.only_valid().get(pk=entity.parent)
         return EntiteUclDTO(
             sigle=sector.most_recent_entity_version.acronym,
