@@ -80,6 +80,8 @@ class ApprovalsApiTestCase(APITestCase):
             "commentaire_externe": "An external comment",
         }
 
+        cls.error_message = 'You must be a member of the committee who has not yet given his answer'
+
         # Targeted url
         cls.url = resolve_url("approvals", uuid=cls.admission.uuid)
 
@@ -114,7 +116,7 @@ class ApprovalsApiTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(
             response.json()['detail'],
-            'You must be a promoter who has not yet given his answer to access this admission',
+            self.error_message,
         )
 
     def test_supervision_approve_proposition_api_other_promoter(self):
@@ -126,7 +128,7 @@ class ApprovalsApiTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(
             response.json()['detail'],
-            'You must be a promoter who has not yet given his answer to access this admission',
+            self.error_message,
         )
 
     def test_supervision_approve_proposition_api_not_invited_ca_member(self):
@@ -138,7 +140,7 @@ class ApprovalsApiTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(
             response.json()['detail'],
-            'You must be a committee member who has not yet given his answer to access this admission',
+            self.error_message,
         )
 
     def test_supervision_approve_proposition_api_other_ca_member(self):
@@ -150,5 +152,5 @@ class ApprovalsApiTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(
             response.json()['detail'],
-            'You must be a committee member who has not yet given his answer to access this admission',
+            self.error_message,
         )
