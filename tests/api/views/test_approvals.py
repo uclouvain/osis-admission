@@ -34,6 +34,7 @@ from admission.ddd.preparation.projet_doctoral.commands import DemanderSignature
 from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import SignatairePasInviteException
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 from admission.tests.factories import DoctorateAdmissionFactory, WriteTokenFactory
+from admission.tests.factories.groups import PromoterGroupFactory, CommitteeMemberGroupFactory
 from admission.tests.factories.supervision import CaMemberFactory, PromoterFactory
 
 
@@ -42,10 +43,25 @@ class ApprovalsApiTestCase(APITestCase):
 
     @classmethod
     def setUpTestData(cls):
-        # Create supervision actors
+        # Create promoters
         cls.promoter = PromoterFactory()
         cls.promoter.actor_ptr.switch_state(SignatureState.INVITED)
-        cls.member_ca = CaMemberFactory(process=cls.promoter.process)
+        cls.promoter.person.user.groups.add(PromoterGroupFactory())
+
+        cls.promoter_who_approved = PromoterFactory(process=cls.promoter.process)
+        cls.promoter_who_approved.actor_ptr.switch_state(SignatureState.APPROVED)
+        cls.promoter_who_approved.person.user.groups.add(PromoterGroupFactory())
+
+        cls.other_promoter = PromoterFactory()
+        cls.other_promoter.person.user.groups.add(PromoterGroupFactory())
+
+        # Create ca members
+        cls.ca_member = CaMemberFactory(process=cls.promoter.process)
+        cls.ca_member.person.user.groups.add(CommitteeMemberGroupFactory())
+
+        cls.other_ca_member = CaMemberFactory()
+        cls.other_ca_member.person.user.groups.add(CommitteeMemberGroupFactory())
+
         # Create the admission
         cls.admission = DoctorateAdmissionFactory(
             supervision_group=cls.promoter.process,
@@ -57,13 +73,19 @@ class ApprovalsApiTestCase(APITestCase):
             gantt_graph=[WriteTokenFactory().token],
             program_proposition=[WriteTokenFactory().token],
         )
+
+        # Mocked data
+        cls.data = {
+            "commentaire_interne": "A wonderful internal comment",
+            "commentaire_externe": "An external comment",
+        }
+
         # Targeted url
-        cls.url = resolve_url("approve-proposition", uuid=cls.admission.uuid)
+        cls.url = resolve_url("approvals", uuid=cls.admission.uuid)
 
     def test_user_not_logged_assert_not_authorized(self):
         self.client.force_authenticate(user=None)
         response = self.client.get(self.url)
-
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_assert_methods_not_allowed(self):
@@ -74,17 +96,59 @@ class ApprovalsApiTestCase(APITestCase):
             response = getattr(self.client, method)(self.url)
             self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 
-    def test_supervision_approve_proposition_api_invited_member(self):
+    def test_supervision_approve_proposition_api_invited_promoter(self):
         self.client.force_authenticate(user=self.promoter.person.user)
-        response = self.client.post(self.url, {}, format="json")
+        response = self.client.post(self.url, {
+            "matricule": self.promoter.person.global_id,
+            **self.data,
+        }, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.json(), {'uuid': str(self.admission.uuid)})
 
-    def test_supervision_approve_proposition_api_not_invited_member(self):
-        self.client.force_authenticate(user=self.member_ca.person.user)
-        response = self.client.post(self.url, {}, format="json")
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+    def test_supervision_approve_proposition_api_promoter_who_approved(self):
+        self.client.force_authenticate(user=self.promoter_who_approved.person.user)
+        response = self.client.post(self.url, {
+            "matricule": self.promoter_who_approved.person.global_id,
+            **self.data,
+        }, format="json")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(
-            response.json()['non_field_errors'][0]['status_code'],
-            SignatairePasInviteException.status_code,
+            response.json()['detail'],
+            'You must be a promoter who has not yet given his answer to access this admission',
         )
 
+    def test_supervision_approve_proposition_api_other_promoter(self):
+        self.client.force_authenticate(user=self.other_promoter.person.user)
+        response = self.client.post(self.url, {
+            "matricule": self.other_promoter.person.global_id,
+            **self.data,
+        }, format="json")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(
+            response.json()['detail'],
+            'You must be a promoter who has not yet given his answer to access this admission',
+        )
+
+    def test_supervision_approve_proposition_api_not_invited_ca_member(self):
+        self.client.force_authenticate(user=self.ca_member.person.user)
+        response = self.client.post(self.url, {
+            "matricule": self.ca_member.person.global_id,
+            **self.data,
+        }, format="json")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(
+            response.json()['detail'],
+            'You must be a committee member who has not yet given his answer to access this admission',
+        )
+
+    def test_supervision_approve_proposition_api_other_ca_member(self):
+        self.client.force_authenticate(user=self.other_ca_member.person.user)
+        response = self.client.post(self.url, {
+            "matricule": self.other_ca_member.person.global_id,
+            **self.data,
+        }, format="json")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(
+            response.json()['detail'],
+            'You must be a committee member who has not yet given his answer to access this admission',
+        )

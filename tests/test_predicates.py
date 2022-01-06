@@ -26,6 +26,7 @@
 from unittest import mock
 
 from django.test import TestCase
+from osis_signature.enums import SignatureState
 
 from admission.auth import predicates
 from admission.auth.roles.cdd_manager import CddManager
@@ -65,6 +66,25 @@ class PredicatesTestCase(TestCase):
         self.assertFalse(predicates.is_admission_request_promoter(author.user, request))
         self.assertFalse(predicates.is_admission_request_promoter(promoter1.person.user, request))
         self.assertTrue(predicates.is_admission_request_promoter(promoter2.person.user, request))
+
+    def test_is_part_of_committee_and_invited(self):
+        # Create process
+        process = _ProcessFactory()
+
+        # Create promoters
+        invited_promoter = PromoterActorFactory(process=process)
+        invited_promoter.actor_ptr.switch_state(SignatureState.INVITED)
+        approved_promoter = PromoterActorFactory(process=process)
+        approved_promoter.actor_ptr.switch_state(SignatureState.APPROVED)
+        unknown_promoter = PromoterActorFactory()
+
+        # Create admission
+        request = DoctorateAdmissionFactory(supervision_group=process)
+
+        # Check predicate
+        self.assertTrue(predicates.is_part_of_committee_and_invited(invited_promoter.person.user, request))
+        self.assertFalse(predicates.is_part_of_committee_and_invited(approved_promoter.person.user, request))
+        self.assertFalse(predicates.is_part_of_committee_and_invited(unknown_promoter.person.user, request))
 
     def test_is_part_of_doctoral_commission(self):
         doctoral_commission = EntityFactory()

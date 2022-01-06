@@ -27,7 +27,7 @@ import rules
 from django.utils.translation import gettext_lazy as _
 from rules import RuleSet
 
-from admission.auth.predicates import is_invited_part_of_committee, is_part_of_committee
+from admission.auth.predicates import is_part_of_committee_and_invited, is_part_of_committee
 from osis_role.contrib.models import EntityRoleModel
 
 
@@ -50,5 +50,5 @@ class CommitteeMember(EntityRoleModel):
             'admission.view_doctorateadmission_project': is_part_of_committee,
             'admission.view_doctorateadmission_cotutelle': is_part_of_committee,
             'admission.view_doctorateadmission_supervision': is_part_of_committee,
-            'admission.approve_proposition': is_invited_part_of_committee,
+            'admission.approve_proposition': is_part_of_committee_and_invited,
         })
