@@ -30,7 +30,7 @@ from admission.contrib.models import DoctorateAdmission
 
 
 class DoctorateAdmissionAdmin(admin.ModelAdmin):
-    pass
+    autocomplete_fields = ['doctorate', 'thesis_institute']
 
 
 admin.site.register(DoctorateAdmission, DoctorateAdmissionAdmin)
