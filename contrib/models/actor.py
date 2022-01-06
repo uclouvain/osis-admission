@@ -37,10 +37,12 @@ class SupervisionActor(Actor):
     )
     internal_comment = models.TextField(
         default='',
-        verbose_name=_("Internal comment"),
+        verbose_name=_('Internal comment'),
         blank=True,
     )
-    reason = models.CharField(
+    rejection_reason = models.CharField(
         default='',
         max_length=50,
+        blank=True,
+        verbose_name=_('Rejection reason'),
     )

@@ -1022,7 +1022,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PropositionIdentityDTO'
+              $ref: '#/components/schemas/ApprouverPropositionCommand'
       responses:
         201:
           content:
@@ -1710,6 +1710,8 @@ components:
                 - prenom
               status:
                 type: string
+              commentaire_externe:
+                type: string
             required:
             - promoteur
             - status
@@ -1732,6 +1734,8 @@ components:
                 - nom
                 - prenom
               status:
+                type: string
+              commentaire_externe:
                 type: string
             required:
             - membre_CA
@@ -1933,6 +1937,19 @@ components:
       - PROMOTER
       - CA_MEMBER
       type: string
+    ApprouverPropositionCommand:
+      type: object
+      properties:
+        matricule:
+          type: string
+        commentaire_interne:
+          type: string
+        commentaire_externe:
+          type: string
+      required:
+      - matricule
+      - commentaire_interne
+      - commentaire_externe
     CompleterPropositionCommand:
       type: object
       properties:

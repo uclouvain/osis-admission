@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,17 +23,12 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import attr
-
-from admission.ddd.preparation.projet_doctoral.domain.model._membre_CA import MembreCAIdentity
-from admission.ddd.preparation.projet_doctoral.domain.model._signature_promoteur import ChoixEtatSignature
-from osis_common.ddd import interface
+from admission.ddd.preparation.projet_doctoral.commands import ApprouverPropositionCommand
+from base.utils.serializers import DTOSerializer
 
 
-@attr.s(frozen=True, slots=True)
-class SignatureMembreCA(interface.ValueObject):
-    membre_CA_id = attr.ib(type=MembreCAIdentity)
-    etat = attr.ib(type=ChoixEtatSignature, default=ChoixEtatSignature.NOT_INVITED)
-    commentaire_externe = attr.ib(type=str, default='')
-    commentaire_interne = attr.ib(type=str, default='')
-    motif_refus = attr.ib(type=str, default='')
+class ApprouverPropositionCommandSerializer(DTOSerializer):
+    uuid_proposition = None
+
+    class Meta:
+        source = ApprouverPropositionCommand

@@ -64,9 +64,6 @@ msgstr ""
 msgid "Author"
 msgstr ""
 
-msgid "Bureau"
-msgstr ""
-
 msgid "CA Member"
 msgstr ""
 
@@ -77,9 +74,6 @@ msgid "CDD manager"
 msgstr ""
 
 msgid "CDD managers"
-msgstr ""
-
-msgid "CDE Bureau should be filled in only if the doctorate's entity is CDE"
 msgstr ""
 
 msgid "Can access doctorate admission list"
@@ -98,6 +92,9 @@ msgid "Can approve confirmation paper"
 msgstr ""
 
 msgid "Can approve jury"
+msgstr ""
+
+msgid "Can approve proposition"
 msgstr ""
 
 msgid "Can check copyright"
@@ -277,6 +274,9 @@ msgstr ""
 msgid "Institution should be set when PhD has been set to yes or partial"
 msgstr ""
 
+msgid "Internal comment"
+msgstr ""
+
 msgid "Jury secretaries"
 msgstr ""
 
@@ -389,6 +389,9 @@ msgid "Recommendation letters"
 msgstr ""
 
 msgid "Reference"
+msgstr ""
+
+msgid "Rejection reason"
 msgstr ""
 
 msgid "SCEB"

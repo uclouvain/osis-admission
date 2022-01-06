@@ -162,12 +162,14 @@ class MembreCADTO(interface.DTO):
 class DetailSignaturePromoteurDTO(interface.DTO):
     promoteur = attr.ib(type=PromoteurDTO)
     status = attr.ib(type=str)
+    commentaire_externe = attr.ib(type=Optional[str], default='')
 
 
 @attr.s(frozen=True, slots=True)
 class DetailSignatureMembreCADTO(interface.DTO):
     membre_CA = attr.ib(type=MembreCADTO)
     status = attr.ib(type=str)
+    commentaire_externe = attr.ib(type=Optional[str], default='')
 
 
 @attr.s(frozen=True, slots=True)

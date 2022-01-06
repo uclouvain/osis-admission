@@ -282,6 +282,9 @@ msgstr ""
 "L'institution doit être renseignée quand le doctorat a déjà été réalisé "
 "partiellement ou complétement."
 
+msgid "Internal comment"
+msgstr "Commentaire interne"
+
 msgid "Jury secretaries"
 msgstr "Secrétaires de jury"
 
@@ -435,6 +438,9 @@ msgstr "Lettres de recommandation"
 
 msgid "Reference"
 msgstr "Référence"
+
+msgid "Rejection reason"
+msgstr "Motif de refus"
 
 msgid "SCEB"
 msgstr "SCEB"

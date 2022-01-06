@@ -31,6 +31,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from admission.ddd.preparation.projet_doctoral.commands import DemanderSignaturesCommand
+from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import SignatairePasInviteException
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 from admission.tests.factories import DoctorateAdmissionFactory, WriteTokenFactory
 from admission.tests.factories.supervision import CaMemberFactory, PromoterFactory
@@ -41,10 +42,11 @@ class ApprovalsApiTestCase(APITestCase):
 
     @classmethod
     def setUpTestData(cls):
+        # Create supervision actors
         cls.promoter = PromoterFactory()
-        cls.promoter.actor_ptr.last_state = StateHistory.objects.create(actor=cls.promoter, state=SignatureState.INVITED)
         cls.promoter.actor_ptr.switch_state(SignatureState.INVITED)
-        CaMemberFactory(process=cls.promoter.process)
+        cls.member_ca = CaMemberFactory(process=cls.promoter.process)
+        # Create the admission
         cls.admission = DoctorateAdmissionFactory(
             supervision_group=cls.promoter.process,
             cotutelle=False,
@@ -54,8 +56,8 @@ class ApprovalsApiTestCase(APITestCase):
             project_document=[WriteTokenFactory().token],
             gantt_graph=[WriteTokenFactory().token],
             program_proposition=[WriteTokenFactory().token],
-
         )
+        # Targeted url
         cls.url = resolve_url("approve-proposition", uuid=cls.admission.uuid)
 
     def test_user_not_logged_assert_not_authorized(self):
@@ -72,13 +74,17 @@ class ApprovalsApiTestCase(APITestCase):
             response = getattr(self.client, method)(self.url)
             self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 
-    # @mock.patch(
-    #     'admission.infrastructure.preparation.projet_doctoral.domain.service.promoteur.PromoteurTranslator.est_externe',
-    #     return_value=True,
-    # )
-    def test_supervision_approve_proposition_api(self):
-        # self.client.force_authenticate(user=self.admission.candidate.user)
-        message_bus_in_memory_instance.invoke(DemanderSignaturesCommand(uuid_proposition=self.admission.uuid))
+    def test_supervision_approve_proposition_api_invited_member(self):
         self.client.force_authenticate(user=self.promoter.person.user)
         response = self.client.post(self.url, {}, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_supervision_approve_proposition_api_not_invited_member(self):
+        self.client.force_authenticate(user=self.member_ca.person.user)
+        response = self.client.post(self.url, {}, format="json")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(
+            response.json()['non_field_errors'][0]['status_code'],
+            SignatairePasInviteException.status_code,
+        )
+
