@@ -25,13 +25,12 @@
 # ##############################################################################
 from typing import List
 
+from admission.contrib.models import ExternalPerson
 from admission.ddd.preparation.projet_doctoral.domain.model._promoteur import PromoteurIdentity
 from admission.ddd.preparation.projet_doctoral.domain.service.i_promoteur import IPromoteurTranslator
 from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import PromoteurNonTrouveException
 from admission.ddd.preparation.projet_doctoral.dtos import PromoteurDTO
 from base.auth.roles.tutor import Tutor
-from base.models.enums import person_source_type
-from base.models.person import Person
 from ddd.logic.shared_kernel.personne_connue_ucl.domain.service.personne_connue_ucl import IPersonneConnueUclTranslator
 
 
@@ -58,5 +57,4 @@ class PromoteurTranslator(IPromoteurTranslator):
 
     @classmethod
     def est_externe(cls, identity: 'PromoteurIdentity') -> bool:
-        # TODO see https://github.com/uclouvain/osis-admission/pull/26#discussion_r768060628
-        raise NotImplementedError
+        return ExternalPerson.objects.filter(person__global_id=identity.matricule).exists()
