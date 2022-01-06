@@ -28,7 +28,7 @@ from django.test import SimpleTestCase
 
 from admission.ddd.preparation.projet_doctoral.commands import InitierPropositionCommand
 from admission.ddd.preparation.projet_doctoral.domain.model._enums import (
-    ChoixCommissionProximite,
+    ChoixCommissionProximiteCDE,
     ChoixTypeAdmission,
 )
 from admission.ddd.preparation.projet_doctoral.domain.model._experience_precedente_recherche import (
@@ -68,7 +68,7 @@ class TestInitierPropositionService(SimpleTestCase):
             sigle_formation='ECGE3DP',
             annee_formation=2020,
             matricule_candidat='01234567',
-            commission_proximite=ChoixCommissionProximite.ECONOMY.name,
+            commission_proximite=ChoixCommissionProximiteCDE.ECONOMY.name,
             type_financement=ChoixTypeFinancement.WORK_CONTRACT.name,
             type_contrat_travail='assistant_uclouvain',
             titre_projet='Mon projet',

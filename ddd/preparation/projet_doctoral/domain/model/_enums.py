@@ -41,9 +41,12 @@ class ChoixStatutSignatureGroupeDeSupervision(ChoiceEnum):
     SIGNING_IN_PROGRESS = _('SIGNING_IN_PROGRESS')
 
 
-class ChoixCommissionProximite(ChoiceEnum):
+class ChoixCommissionProximiteCDE(ChoiceEnum):
     ECONOMY = _('ECONOMY')
     MANAGEMENT = _('MANAGEMENT')
+
+
+class ChoixCommissionProximiteCDSS(ChoiceEnum):
     ECLI = _("Proximity commission for experimental and clinical research (ECLI)")
     GIM = _("Proximity Commission for Genetics and Immunology (GIM)")
     NRSC = _("Proximity Commission for Neuroscience (NRSC)")

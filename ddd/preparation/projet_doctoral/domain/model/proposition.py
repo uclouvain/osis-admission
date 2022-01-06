@@ -25,13 +25,14 @@
 ##############################################################################
 import datetime
 import uuid
-from typing import List, Optional
+from typing import List, Optional, Union
 
 import attr
 
 from admission.ddd.preparation.projet_doctoral.domain.model._detail_projet import DetailProjet
 from admission.ddd.preparation.projet_doctoral.domain.model._enums import (
-    ChoixCommissionProximite,
+    ChoixCommissionProximiteCDE,
+    ChoixCommissionProximiteCDSS,
     ChoixStatutProposition,
     ChoixTypeAdmission,
 )
@@ -67,7 +68,9 @@ class Proposition(interface.RootEntity):
     reference = attr.ib(type=Optional[str], default=None)
     justification = attr.ib(type=Optional[str], default='')
     statut = attr.ib(type=ChoixStatutProposition, default=ChoixStatutProposition.IN_PROGRESS)
-    commission_proximite = attr.ib(type=Optional[ChoixCommissionProximite], default='')
+    commission_proximite = attr.ib(
+        type=Optional[Union[ChoixCommissionProximiteCDE, ChoixCommissionProximiteCDSS]], default=''
+    )
     financement = attr.ib(type=Financement, default=financement_non_rempli)
     experience_precedente_recherche = attr.ib(
         type=ExperiencePrecedenteRecherche,
@@ -159,7 +162,11 @@ class Proposition(interface.RootEntity):
     def _completer_proposition(self, type_admission: str, justification: str, commission_proximite: str):
         self.type_admission = ChoixTypeAdmission[type_admission]
         self.justification = justification
-        self.commission_proximite = (ChoixCommissionProximite[commission_proximite] if commission_proximite else '')
+        self.commission_proximite = ''
+        if commission_proximite in ChoixCommissionProximiteCDE.get_names():
+            self.commission_proximite = ChoixCommissionProximiteCDE[commission_proximite]
+        elif commission_proximite in ChoixCommissionProximiteCDSS.get_names():
+            self.commission_proximite = ChoixCommissionProximiteCDSS[commission_proximite]
 
     def _completer_financement(
             self,
