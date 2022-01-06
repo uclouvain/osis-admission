@@ -137,6 +137,16 @@ class TestCompleterPropositionService(SimpleTestCase):
         proposition = self.proposition_repository.get(proposition_id)  # type: Proposition
         self.assertEqual(cmd.commission_proximite, proposition.commission_proximite.name)
 
+    def test_should_pas_completer_commission_proximite_cdss_invalide(self):
+        cmd = attr.evolve(self.cmd, commission_proximite=ChoixCommissionProximiteCDE.ECONOMY.name, uuid="uuid-ESP3DP")
+        with self.assertRaises(CommissionProximiteInconsistantException):
+            self.message_bus.invoke(cmd)
+
+    def test_should_pas_completer_commission_proximite_cde_invalide(self):
+        cmd = attr.evolve(self.cmd, commission_proximite=ChoixCommissionProximiteCDSS.ECLI.name, uuid="uuid-ECGE3DP")
+        with self.assertRaises(CommissionProximiteInconsistantException):
+            self.message_bus.invoke(cmd)
+
     def test_should_completer_sans_financement(self):
         cmd = attr.evolve(self.cmd, type_financement='', type_contrat_travail='')
         proposition_id = self.message_bus.invoke(cmd)
