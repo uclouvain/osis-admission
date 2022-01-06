@@ -1778,19 +1778,7 @@ components:
         justification:
           type: string
         commission_proximite:
-          enum:
-          - ''
-          - ECONOMY
-          - MANAGEMENT
-          - ECLI
-          - GIM
-          - NRSC
-          - BCM
-          - SPSS
-          - DENT
-          - DFAR
-          - MOTR
-          type: string
+          $ref: '#/components/schemas/ChoixCommissionProximite'
         type_financement:
           type: string
         type_contrat_travail:
@@ -1867,6 +1855,20 @@ components:
       - ADMISSION
       - PRE_ADMISSION
       type: string
+    ChoixCommissionProximite:
+      enum:
+      - ''
+      - ECONOMY
+      - MANAGEMENT
+      - ECLI
+      - GIM
+      - NRSC
+      - BCM
+      - SPSS
+      - DENT
+      - DFAR
+      - MOTR
+      type: string
     ChoixLangueRedactionThese:
       enum:
       - FRENCH
@@ -1905,19 +1907,7 @@ components:
         justification:
           type: string
         commission_proximite:
-          enum:
-          - ''
-          - ECONOMY
-          - MANAGEMENT
-          - ECLI
-          - GIM
-          - NRSC
-          - BCM
-          - SPSS
-          - DENT
-          - DFAR
-          - MOTR
-          type: string
+          $ref: '#/components/schemas/ChoixCommissionProximite'
         type_financement:
           type: string
         type_contrat_travail:

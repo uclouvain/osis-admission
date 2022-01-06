@@ -64,6 +64,15 @@ class PropositionListSchema(ResponseSpecificSchema):
     def get_operation_id_base(self, path, method, action):
         return '_proposition' if method == 'POST' else '_propositions'
 
+    def map_choicefield(self, field):
+        schema = super().map_choicefield(field)
+        if field.field_name == "commission_proximite":
+            self.enums["ChoixCommissionProximite"] = schema
+            return {
+                '$ref': "#/components/schemas/ChoixCommissionProximite"
+            }
+        return schema
+
 
 class PropositionListView(APIPermissionRequiredMixin, DisplayExceptionsByFieldNameAPIMixin, ListCreateAPIView):
     name = "propositions"
@@ -111,6 +120,15 @@ class PropositionSchema(ResponseSpecificSchema):
         'PUT': (serializers.CompleterPropositionCommandSerializer, serializers.PropositionIdentityDTOSerializer),
         'DELETE': serializers.PropositionIdentityDTOSerializer,
     }
+
+    def map_choicefield(self, field):
+        schema = super().map_choicefield(field)
+        if field.field_name == "commission_proximite":
+            self.enums["ChoixCommissionProximite"] = schema
+            return {
+                '$ref': "#/components/schemas/ChoixCommissionProximite"
+            }
+        return schema
 
 
 class PropositionViewSet(
