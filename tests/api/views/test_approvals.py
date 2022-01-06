@@ -25,14 +25,11 @@
 # ##############################################################################
 from django.shortcuts import resolve_url
 from django.test import override_settings
+from django.utils.translation import gettext as _
 from osis_signature.enums import SignatureState
-from osis_signature.models import StateHistory
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from admission.ddd.preparation.projet_doctoral.commands import DemanderSignaturesCommand
-from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import SignatairePasInviteException
-from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 from admission.tests.factories import DoctorateAdmissionFactory, WriteTokenFactory
 from admission.tests.factories.groups import PromoterGroupFactory, CommitteeMemberGroupFactory
 from admission.tests.factories.supervision import CaMemberFactory, PromoterFactory
@@ -80,8 +77,6 @@ class ApprovalsApiTestCase(APITestCase):
             "commentaire_externe": "An external comment",
         }
 
-        cls.error_message = 'You must be a member of the committee who has not yet given his answer'
-
         # Targeted url
         cls.url = resolve_url("approvals", uuid=cls.admission.uuid)
 
@@ -114,10 +109,6 @@ class ApprovalsApiTestCase(APITestCase):
             **self.data,
         }, format="json")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-        self.assertEqual(
-            response.json()['detail'],
-            self.error_message,
-        )
 
     def test_supervision_approve_proposition_api_other_promoter(self):
         self.client.force_authenticate(user=self.other_promoter.person.user)
@@ -126,10 +117,6 @@ class ApprovalsApiTestCase(APITestCase):
             **self.data,
         }, format="json")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-        self.assertEqual(
-            response.json()['detail'],
-            self.error_message,
-        )
 
     def test_supervision_approve_proposition_api_not_invited_ca_member(self):
         self.client.force_authenticate(user=self.ca_member.person.user)
@@ -138,10 +125,6 @@ class ApprovalsApiTestCase(APITestCase):
             **self.data,
         }, format="json")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-        self.assertEqual(
-            response.json()['detail'],
-            self.error_message,
-        )
 
     def test_supervision_approve_proposition_api_other_ca_member(self):
         self.client.force_authenticate(user=self.other_ca_member.person.user)
@@ -150,7 +133,3 @@ class ApprovalsApiTestCase(APITestCase):
             **self.data,
         }, format="json")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-        self.assertEqual(
-            response.json()['detail'],
-            self.error_message,
-        )
