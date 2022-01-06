@@ -25,6 +25,7 @@
 # ##############################################################################
 from django.contrib.auth.models import User
 from django.utils.translation import gettext_lazy as _
+from osis_signature.enums import SignatureState
 from rules import predicate
 
 from osis_role.errors import predicate_failed_msg
@@ -66,3 +67,21 @@ def is_part_of_doctoral_commission(self, user: User, obj: DoctorateAdmission):
 @predicate_failed_msg(message=_("You must be a member of the committee to access this admission"))
 def is_part_of_committee(self, user: User, obj: DoctorateAdmission):
     return user.person.pk in obj.supervision_group.actors.values_list('person_id', flat=True)
+
+
+@predicate(bind=True)
+@predicate_failed_msg(message=_("You must be a promoter who has not yet given his answer to access this admission"))
+def is_invited_admission_request_promoter(self, user: User, obj: DoctorateAdmission):
+    return user.person.pk in obj.supervision_group.actors.filter(
+        supervisionactor__type=ActorType.PROMOTER.name,
+        last_state=SignatureState.INVITED.name,
+    ).values_list('person_id', flat=True)
+
+
+@predicate(bind=True)
+@predicate_failed_msg(message=_("You must be a promoter who has not yet given his answer to access this admission"))
+def is_invited_part_of_committee(self, user: User, obj: DoctorateAdmission):
+    return user.person.pk in obj.supervision_group.actors.filter(
+        supervisionactor__type=ActorType.CA_MEMBER.name,
+        last_state=SignatureState.INVITED.name,
+    ).values_list('person_id', flat=True)

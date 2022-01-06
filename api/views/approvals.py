@@ -24,13 +24,16 @@
 #
 # ##############################################################################
 from rest_framework import status
+from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from admission.api import serializers
 from admission.api.schema import ResponseSpecificSchema
+from admission.contrib.models import DoctorateAdmission
 from admission.ddd.preparation.projet_doctoral.commands import ApprouverPropositionCommand
 from infrastructure.messages_bus import message_bus_instance
+from osis_role.contrib.views import APIPermissionRequiredMixin
 
 
 class ApprovePropositionSchema(ResponseSpecificSchema):
@@ -40,14 +43,17 @@ class ApprovePropositionSchema(ResponseSpecificSchema):
     }
 
 
-class ApprovePropositionAPIView(APIView):
-    name = "approve-proposition"
+class ApprovePropositionAPIView(APIPermissionRequiredMixin, APIView):
+    name = "approvals"
     schema = ApprovePropositionSchema()
     pagination_class = None
     filter_backends = []
     permission_mapping = {
         'POST': 'admission.approve_proposition',
     }
+
+    def get_permission_object(self):
+        return get_object_or_404(DoctorateAdmission, uuid=self.kwargs['uuid'])
 
     def post(self, request, *args, **kwargs):
         """Approve the proposition."""

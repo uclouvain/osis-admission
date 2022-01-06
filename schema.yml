@@ -1631,6 +1631,8 @@ components:
               $ref: '#/components/schemas/ActionLink'
             update_cotutelle:
               $ref: '#/components/schemas/ActionLink'
+            add_approval:
+              $ref: '#/components/schemas/ActionLink'
             add_member:
               $ref: '#/components/schemas/ActionLink'
             remove_member:
