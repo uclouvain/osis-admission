@@ -488,6 +488,9 @@ msgstr ""
 msgid "You must be a member of the committee to access this admission"
 msgstr ""
 
+msgid "You must be a member of the committee who has not yet given his answer"
+msgstr ""
+
 msgid ""
 "You must be a member of the doctoral commission to access this admission"
 msgstr ""

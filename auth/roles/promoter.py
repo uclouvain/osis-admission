@@ -27,8 +27,8 @@ import rules
 from django.utils.translation import gettext_lazy as _
 from rules import RuleSet
 
-from admission.auth.predicates import is_admission_request_promoter, is_invited_admission_request_promoter
 from osis_role.contrib.models import RoleModel
+from admission.auth.predicates import is_admission_request_promoter, is_part_of_committee_and_invited
 
 
 class Promoter(RoleModel):
@@ -55,5 +55,5 @@ class Promoter(RoleModel):
             'admission.view_doctorateadmission_project': is_admission_request_promoter,
             'admission.view_doctorateadmission_cotutelle': is_admission_request_promoter,
             'admission.view_doctorateadmission_supervision': is_admission_request_promoter,
-            'admission.approve_proposition': is_invited_admission_request_promoter,
+            'admission.approve_proposition': is_part_of_committee_and_invited,
         })

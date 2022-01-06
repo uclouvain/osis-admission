@@ -70,18 +70,8 @@ def is_part_of_committee(self, user: User, obj: DoctorateAdmission):
 
 
 @predicate(bind=True)
-@predicate_failed_msg(message=_("You must be a promoter who has not yet given his answer to access this admission"))
-def is_invited_admission_request_promoter(self, user: User, obj: DoctorateAdmission):
+@predicate_failed_msg(message=_("You must be a member of the committee who has not yet given his answer"))
+def is_part_of_committee_and_invited(self, user: User, obj: DoctorateAdmission):
     return user.person.pk in obj.supervision_group.actors.filter(
-        supervisionactor__type=ActorType.PROMOTER.name,
-        last_state=SignatureState.INVITED.name,
-    ).values_list('person_id', flat=True)
-
-
-@predicate(bind=True)
-@predicate_failed_msg(message=_("You must be a promoter who has not yet given his answer to access this admission"))
-def is_invited_part_of_committee(self, user: User, obj: DoctorateAdmission):
-    return user.person.pk in obj.supervision_group.actors.filter(
-        supervisionactor__type=ActorType.CA_MEMBER.name,
         last_state=SignatureState.INVITED.name,
     ).values_list('person_id', flat=True)

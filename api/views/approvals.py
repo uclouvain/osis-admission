@@ -46,8 +46,6 @@ class ApprovePropositionSchema(ResponseSpecificSchema):
 class ApprovePropositionAPIView(APIPermissionRequiredMixin, APIView):
     name = "approvals"
     schema = ApprovePropositionSchema()
-    pagination_class = None
-    filter_backends = []
     permission_mapping = {
         'POST': 'admission.approve_proposition',
     }
