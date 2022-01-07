@@ -193,6 +193,9 @@ msgstr ""
 msgid "Candidates"
 msgstr ""
 
+msgid "City"
+msgstr ""
+
 msgid "Close"
 msgstr ""
 
@@ -212,6 +215,9 @@ msgid "Cotutelle convention"
 msgstr ""
 
 msgid "Cotutelle request document"
+msgstr ""
+
+msgid "Country"
 msgstr ""
 
 msgid "Create new doctorate admission"
@@ -412,7 +418,7 @@ msgstr ""
 
 msgid ""
 "Proximity commission should be filled in only if the doctorate's entity is "
-"CDE or CDSS"
+"CDE, CLSM or CDSS"
 msgstr ""
 
 msgid "REFUSED"
@@ -460,6 +466,9 @@ msgstr ""
 msgid "Scholarship grant"
 msgstr ""
 
+msgid "Some invitations are already sent"
+msgstr ""
+
 msgid "Supervision group not found."
 msgstr ""
 
@@ -476,6 +485,9 @@ msgid "Thesis language"
 msgstr ""
 
 msgid "Thesis location"
+msgstr ""
+
+msgid "Title"
 msgstr ""
 
 msgid "Type"

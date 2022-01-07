@@ -202,6 +202,9 @@ msgstr "Candidat"
 msgid "Candidates"
 msgstr "Candidats"
 
+msgid "City"
+msgstr "Ville"
+
 msgid "Close"
 msgstr "Fermer"
 
@@ -222,6 +225,9 @@ msgstr "Convention de cotutelle"
 
 msgid "Cotutelle request document"
 msgstr "Demande d'ouverture de cotutelle"
+
+msgid "Country"
+msgstr "Pays"
 
 msgid "Create new doctorate admission"
 msgstr "Créer une nouvelle admission en doctorat"
@@ -478,6 +484,9 @@ msgstr "Soumis"
 msgid "Scholarship grant"
 msgstr "Bourse de recherche"
 
+msgid "Some invitations are already sent"
+msgstr ""
+
 msgid "Supervision group not found."
 msgstr "Groupe de supervision non trouvé."
 
@@ -497,6 +506,9 @@ msgstr "Langue de la thèse"
 
 msgid "Thesis location"
 msgstr "Lieu de la thèse"
+
+msgid "Title"
+msgstr "Titre"
 
 msgid "Type"
 msgstr "Type"
