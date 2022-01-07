@@ -24,7 +24,7 @@ def drop_reference_sequence(apps, schema_editor: DatabaseSchemaEditor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('admission', '0016_simpler_roles'),
+        ('admission', '0017_simpler_roles'),
     ]
 
     operations = [
