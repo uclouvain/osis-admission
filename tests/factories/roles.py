@@ -34,11 +34,6 @@ from admission.auth.roles.promoter import Promoter
 
 class BaseFactory(factory.DjangoModelFactory):
     person = factory.SubFactory('base.tests.factories.person.PersonFactory')
-    entity = factory.SubFactory(
-        'base.tests.factories.entity.EntityFactory',
-        organization=None,
-    )
-    with_child = True
 
 
 class CandidateFactory(BaseFactory):
@@ -55,6 +50,10 @@ class CddManagerFactory(BaseFactory):
     class Meta:
         model = CddManager
 
+    entity = factory.SubFactory(
+        'base.tests.factories.entity.EntityFactory',
+        organization=None,
+    )
     with_child = False
 
 
