@@ -100,6 +100,9 @@ msgstr "Peut approuver la lettre de confirmation"
 msgid "Can approve jury"
 msgstr "Peut approuver le jury"
 
+msgid "Can approve proposition"
+msgstr "Peut approuver la proposition"
+
 msgid "Can check copyright"
 msgstr "Peut vérifier le copyright"
 
@@ -282,6 +285,9 @@ msgstr ""
 "L'institution doit être renseignée quand le doctorat a déjà été réalisé "
 "partiellement ou complétement."
 
+msgid "Internal comment"
+msgstr "Commentaire interne"
+
 msgid "Jury secretaries"
 msgstr "Secrétaires de jury"
 
@@ -436,6 +442,9 @@ msgstr "Lettres de recommandation"
 msgid "Reference"
 msgstr "Référence"
 
+msgid "Rejection reason"
+msgstr "Motif de refus"
+
 msgid "SCEB"
 msgstr "SCEB"
 
@@ -539,6 +548,10 @@ msgstr ""
 
 msgid "You must be a member of the committee to access this admission"
 msgstr "Vous devez être membre du comité pour accéder à cette admission"
+
+msgid "You must be a member of the committee who has not yet given his answer"
+msgstr ""
+"Vous devez être membre du comité et ne pas encore avoir donné votre réponse"
 
 msgid ""
 "You must be a member of the doctoral commission to access this admission"

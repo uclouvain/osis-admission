@@ -1002,6 +1002,42 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - propositions
+  /propositions/{uuid}/approve:
+    post:
+      operationId: create_approval
+      description: Approve the proposition.
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApprouverPropositionCommand'
+      responses:
+        201:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PropositionIdentityDTO'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
 components:
   schemas:
     PersonIdentification:
@@ -1595,6 +1631,8 @@ components:
               $ref: '#/components/schemas/ActionLink'
             update_cotutelle:
               $ref: '#/components/schemas/ActionLink'
+            add_approval:
+              $ref: '#/components/schemas/ActionLink'
             add_member:
               $ref: '#/components/schemas/ActionLink'
             remove_member:
@@ -1674,6 +1712,8 @@ components:
                 - prenom
               status:
                 type: string
+              commentaire_externe:
+                type: string
             required:
             - promoteur
             - status
@@ -1696,6 +1736,8 @@ components:
                 - nom
                 - prenom
               status:
+                type: string
+              commentaire_externe:
                 type: string
             required:
             - membre_CA
@@ -1897,6 +1939,19 @@ components:
       - PROMOTER
       - CA_MEMBER
       type: string
+    ApprouverPropositionCommand:
+      type: object
+      properties:
+        matricule:
+          type: string
+        commentaire_interne:
+          type: string
+        commentaire_externe:
+          type: string
+      required:
+      - matricule
+      - commentaire_interne
+      - commentaire_externe
     CompleterPropositionCommand:
       type: object
       properties:

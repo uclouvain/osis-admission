@@ -143,6 +143,7 @@ class PropositionDTOSerializer(DTOSerializer):
             'retrieve_cotutelle': ACTION_LINKS['retrieve_cotutelle'],
             'update_cotutelle': ACTION_LINKS['update_cotutelle'],
             # Supervision
+            'add_approval': ACTION_LINKS['add_approval'],
             'add_member': ACTION_LINKS['add_member'],
             'remove_member': ACTION_LINKS['remove_member'],
             'retrieve_supervision': ACTION_LINKS['retrieve_supervision'],

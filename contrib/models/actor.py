@@ -24,6 +24,7 @@
 #
 # ##############################################################################
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 
 from admission.contrib.models.enums.actor_type import ActorType
 from osis_signature.models import Actor
@@ -33,4 +34,15 @@ class SupervisionActor(Actor):
     type = models.CharField(
         default=ActorType.choices(),
         max_length=50,
+    )
+    internal_comment = models.TextField(
+        default='',
+        verbose_name=_('Internal comment'),
+        blank=True,
+    )
+    rejection_reason = models.CharField(
+        default='',
+        max_length=50,
+        blank=True,
+        verbose_name=_('Rejection reason'),
     )

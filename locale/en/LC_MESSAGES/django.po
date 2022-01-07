@@ -64,9 +64,6 @@ msgstr ""
 msgid "Author"
 msgstr ""
 
-msgid "Bureau"
-msgstr ""
-
 msgid "CA Member"
 msgstr ""
 
@@ -77,9 +74,6 @@ msgid "CDD manager"
 msgstr ""
 
 msgid "CDD managers"
-msgstr ""
-
-msgid "CDE Bureau should be filled in only if the doctorate's entity is CDE"
 msgstr ""
 
 msgid "Can access doctorate admission list"
@@ -98,6 +92,9 @@ msgid "Can approve confirmation paper"
 msgstr ""
 
 msgid "Can approve jury"
+msgstr ""
+
+msgid "Can approve proposition"
 msgstr ""
 
 msgid "Can check copyright"
@@ -277,6 +274,9 @@ msgstr ""
 msgid "Institution should be set when PhD has been set to yes or partial"
 msgstr ""
 
+msgid "Internal comment"
+msgstr ""
+
 msgid "Jury secretaries"
 msgstr ""
 
@@ -382,6 +382,39 @@ msgstr ""
 msgid "Proposition not found."
 msgstr ""
 
+msgid "Proximity Commission for Dental Sciences (DENT)"
+msgstr ""
+
+msgid "Proximity Commission for Genetics and Immunology (GIM)"
+msgstr ""
+
+msgid "Proximity Commission for Motricity Sciences (MOTR)"
+msgstr ""
+
+msgid "Proximity Commission for Neuroscience (NRSC)"
+msgstr ""
+
+msgid "Proximity Commission for Pharmaceutical Sciences (DFAR)"
+msgstr ""
+
+msgid "Proximity commission"
+msgstr ""
+
+msgid ""
+"Proximity commission for cellular and molecular biology, biochemistry (BCM)"
+msgstr ""
+
+msgid "Proximity commission for experimental and clinical research (ECLI)"
+msgstr ""
+
+msgid "Proximity commission for public health, health and society (SPSS)"
+msgstr ""
+
+msgid ""
+"Proximity commission should be filled in only if the doctorate's entity is "
+"CDE or CDSS"
+msgstr ""
+
 msgid "REFUSED"
 msgstr ""
 
@@ -389,6 +422,9 @@ msgid "Recommendation letters"
 msgstr ""
 
 msgid "Reference"
+msgstr ""
+
+msgid "Rejection reason"
 msgstr ""
 
 msgid "SCEB"
@@ -483,6 +519,9 @@ msgid "You must add at least one promoter in order to request signatures."
 msgstr ""
 
 msgid "You must be a member of the committee to access this admission"
+msgstr ""
+
+msgid "You must be a member of the committee who has not yet given his answer"
 msgstr ""
 
 msgid ""

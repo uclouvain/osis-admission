@@ -64,6 +64,8 @@ class TestApprouverPropositionService(SimpleTestCase):
         self.cmd = ApprouverPropositionCommand(
             uuid_proposition=self.uuid_proposition,
             matricule=self.matricule_promoteur,
+            commentaire_interne='Commentaire interne',
+            commentaire_externe='Commentaire externe',
         )
 
     def test_should_approuver(self):
