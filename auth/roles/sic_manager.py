@@ -27,10 +27,10 @@ import rules
 from rules import RuleSet
 from django.utils.translation import gettext_lazy as _
 
-from osis_role.contrib.models import EntityRoleModel
+from osis_role.contrib.models import RoleModel
 
 
-class SicManager(EntityRoleModel):
+class SicManager(RoleModel):
     class Meta:
         verbose_name = _("SIC manager")
         verbose_name_plural = _("SIC managers")

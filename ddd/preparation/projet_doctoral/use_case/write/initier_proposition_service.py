@@ -44,7 +44,7 @@ def initier_proposition(
     CommissionProximite().verifier(doctorat, cmd.commission_proximite)
 
     # WHEN
-    proposition = PropositionBuilder().initier_proposition(cmd, doctorat.entity_id)
+    proposition = PropositionBuilder().initier_proposition(cmd, doctorat.entity_id, proposition_repository)
 
     # THEN
     proposition_repository.save(proposition)

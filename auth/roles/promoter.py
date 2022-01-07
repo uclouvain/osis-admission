@@ -27,11 +27,11 @@ import rules
 from django.utils.translation import gettext_lazy as _
 from rules import RuleSet
 
+from osis_role.contrib.models import RoleModel
 from admission.auth.predicates import is_admission_request_promoter, is_part_of_committee_and_invited
-from osis_role.contrib.models import EntityRoleModel
 
 
-class Promoter(EntityRoleModel):
+class Promoter(RoleModel):
     class Meta:
         verbose_name = _("Promoter")
         verbose_name_plural = _("Promoters")

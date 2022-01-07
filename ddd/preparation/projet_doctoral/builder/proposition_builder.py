@@ -49,6 +49,7 @@ from admission.ddd.preparation.projet_doctoral.domain.model._enums import (
 )
 from admission.ddd.preparation.projet_doctoral.domain.validator.validator_by_business_action import \
     InitierPropositionValidatorList
+from admission.ddd.preparation.projet_doctoral.repository.i_proposition import IPropositionRepository
 from osis_common.ddd import interface
 
 
@@ -70,6 +71,7 @@ class PropositionBuilder(interface.RootEntityBuilder):
             cls,
             cmd: 'InitierPropositionCommand',
             doctorat_id: 'DoctoratIdentity',
+            proposition_repository: 'IPropositionRepository',
     ) -> 'Proposition':
         InitierPropositionValidatorList(
             type_admission=cmd.type_admission,
@@ -84,8 +86,13 @@ class PropositionBuilder(interface.RootEntityBuilder):
             commission_proximite = ChoixCommissionProximiteCDE[cmd.commission_proximite]
         elif cmd.commission_proximite in ChoixCommissionProximiteCDSS.get_names():
             commission_proximite = ChoixCommissionProximiteCDSS[cmd.commission_proximite]
+        reference = "{}-{}".format(
+            doctorat_id.annee % 100,
+            Proposition.valeur_reference_base + proposition_repository.get_next_reference(),
+        )
         return Proposition(
             entity_id=PropositionIdentityBuilder.build(),
+            reference=reference,
             statut=ChoixStatutProposition.IN_PROGRESS,
             justification=cmd.justification,
             type_admission=ChoixTypeAdmission[cmd.type_admission],

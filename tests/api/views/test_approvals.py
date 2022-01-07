@@ -25,7 +25,6 @@
 # ##############################################################################
 from django.shortcuts import resolve_url
 from django.test import override_settings
-from django.utils.translation import gettext as _
 from osis_signature.enums import SignatureState
 from rest_framework import status
 from rest_framework.test import APITestCase

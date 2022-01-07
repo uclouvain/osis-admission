@@ -23,7 +23,11 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+<<<<<<< HEAD
 from admission.ddd.preparation.projet_doctoral.commands import ApprouverPropositionCommand, RefuserPropositionCommand
+=======
+from admission.ddd.preparation.projet_doctoral.commands import ApprouverPropositionCommand
+>>>>>>> feature/OS-24
 from base.utils.serializers import DTOSerializer
 
 
@@ -32,6 +36,7 @@ class ApprouverPropositionCommandSerializer(DTOSerializer):
 
     class Meta:
         source = ApprouverPropositionCommand
+<<<<<<< HEAD
 
 
 class RefuserPropositionCommandSerializer(DTOSerializer):
@@ -39,3 +44,5 @@ class RefuserPropositionCommandSerializer(DTOSerializer):
 
     class Meta:
         source = RefuserPropositionCommand
+=======
+>>>>>>> feature/OS-24

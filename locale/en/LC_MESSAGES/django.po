@@ -64,9 +64,6 @@ msgstr ""
 msgid "Author"
 msgstr ""
 
-msgid "Bureau"
-msgstr ""
-
 msgid "CA Member"
 msgstr ""
 
@@ -77,9 +74,6 @@ msgid "CDD manager"
 msgstr ""
 
 msgid "CDD managers"
-msgstr ""
-
-msgid "CDE Bureau should be filled in only if the doctorate's entity is CDE"
 msgstr ""
 
 msgid "Can access doctorate admission list"
@@ -386,6 +380,39 @@ msgid "Promoters"
 msgstr ""
 
 msgid "Proposition not found."
+msgstr ""
+
+msgid "Proximity Commission for Dental Sciences (DENT)"
+msgstr ""
+
+msgid "Proximity Commission for Genetics and Immunology (GIM)"
+msgstr ""
+
+msgid "Proximity Commission for Motricity Sciences (MOTR)"
+msgstr ""
+
+msgid "Proximity Commission for Neuroscience (NRSC)"
+msgstr ""
+
+msgid "Proximity Commission for Pharmaceutical Sciences (DFAR)"
+msgstr ""
+
+msgid "Proximity commission"
+msgstr ""
+
+msgid ""
+"Proximity commission for cellular and molecular biology, biochemistry (BCM)"
+msgstr ""
+
+msgid "Proximity commission for experimental and clinical research (ECLI)"
+msgstr ""
+
+msgid "Proximity commission for public health, health and society (SPSS)"
+msgstr ""
+
+msgid ""
+"Proximity commission should be filled in only if the doctorate's entity is "
+"CDE or CDSS"
 msgstr ""
 
 msgid "REFUSED"

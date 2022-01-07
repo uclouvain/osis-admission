@@ -42,6 +42,8 @@ from osis_document.contrib import FileField
 from osis_signature.contrib.fields import SignatureProcessField
 from .base import BaseAdmission
 
+REFERENCE_SEQ_NAME = 'admission_doctorateadmission_reference_seq'
+
 
 class DoctorateAdmission(BaseAdmission):
     doctorate = models.ForeignKey(
