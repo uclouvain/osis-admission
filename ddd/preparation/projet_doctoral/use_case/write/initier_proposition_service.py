@@ -26,7 +26,7 @@
 from admission.ddd.preparation.projet_doctoral.builder.proposition_builder import PropositionBuilder
 from admission.ddd.preparation.projet_doctoral.commands import InitierPropositionCommand
 from admission.ddd.preparation.projet_doctoral.domain.model.proposition import PropositionIdentity
-from admission.ddd.preparation.projet_doctoral.domain.service.bureau_CDE import BureauCDE
+from admission.ddd.preparation.projet_doctoral.domain.service.commission_proximite import CommissionProximite
 from admission.ddd.preparation.projet_doctoral.domain.service.i_doctorat import IDoctoratTranslator
 from admission.ddd.preparation.projet_doctoral.domain.service.initier_proposition import MaximumPropositionAutorisee
 from admission.ddd.preparation.projet_doctoral.repository.i_proposition import IPropositionRepository
@@ -41,7 +41,7 @@ def initier_proposition(
     doctorat = doctorat_translator.get(cmd.sigle_formation, cmd.annee_formation)
     propositions_candidat = proposition_repository.search(matricule_candidat=cmd.matricule_candidat)
     MaximumPropositionAutorisee().verifier(propositions_candidat)
-    BureauCDE().verifier(doctorat, cmd.bureau_CDE)
+    CommissionProximite().verifier(doctorat, cmd.commission_proximite)
 
     # WHEN
     proposition = PropositionBuilder().initier_proposition(cmd, doctorat.entity_id)

@@ -1220,7 +1220,7 @@ components:
                 type: string
               intitule_secteur_formation:
                 type: string
-              bureau_CDE:
+              commission_proximite:
                 type: string
               creee_le:
                 type: string
@@ -1503,7 +1503,7 @@ components:
           type: string
         code_secteur_formation:
           type: string
-        bureau_CDE:
+        commission_proximite:
           type: string
         type_financement:
           type: string
@@ -1777,8 +1777,8 @@ components:
           type: string
         justification:
           type: string
-        bureau_CDE:
-          $ref: '#/components/schemas/ChoixBureauCDE'
+        commission_proximite:
+          $ref: '#/components/schemas/ChoixCommissionProximite'
         type_financement:
           type: string
         type_contrat_travail:
@@ -1844,7 +1844,7 @@ components:
       - sigle_formation
       - annee_formation
       - matricule_candidat
-      - bureau_CDE
+      - commission_proximite
       - documents_projet
       - graphe_gantt
       - proposition_programme_doctoral
@@ -1855,11 +1855,19 @@ components:
       - ADMISSION
       - PRE_ADMISSION
       type: string
-    ChoixBureauCDE:
+    ChoixCommissionProximite:
       enum:
       - ''
       - ECONOMY
       - MANAGEMENT
+      - ECLI
+      - GIM
+      - NRSC
+      - BCM
+      - SPSS
+      - DENT
+      - DFAR
+      - MOTR
       type: string
     ChoixLangueRedactionThese:
       enum:
@@ -1898,8 +1906,8 @@ components:
           $ref: '#/components/schemas/AdmissionType'
         justification:
           type: string
-        bureau_CDE:
-          $ref: '#/components/schemas/ChoixBureauCDE'
+        commission_proximite:
+          $ref: '#/components/schemas/ChoixCommissionProximite'
         type_financement:
           type: string
         type_contrat_travail:
@@ -1963,7 +1971,7 @@ components:
       required:
       - uuid
       - type_admission
-      - bureau_CDE
+      - commission_proximite
       - documents_projet
       - graphe_gantt
       - proposition_programme_doctoral

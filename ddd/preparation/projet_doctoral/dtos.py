@@ -103,9 +103,7 @@ class PropositionDTO(interface.DTO):
     intitule_doctorat_en = attr.ib(type=str)
     matricule_candidat = attr.ib(type=str)
     code_secteur_formation = attr.ib(type=str)
-    bureau_CDE = attr.ib(
-        type=Optional[str],
-    )  # CDE = Comission Doctorale du domaine Sciences Economique et de Gestion
+    commission_proximite = attr.ib(type=Optional[str])
     type_financement = attr.ib(type=Optional[str])
     type_contrat_travail = attr.ib(type=Optional[str])
     eft = attr.ib(type=Optional[int])
@@ -141,9 +139,7 @@ class PropositionSearchDTO(interface.DTO):
     matricule_candidat = attr.ib(type=str)
     code_secteur_formation = attr.ib(type=str)
     intitule_secteur_formation = attr.ib(type=str)
-    bureau_CDE = attr.ib(
-        type=Optional[str],
-    )  # CDE = Comission Doctorale du domaine Sciences Economique et de Gestion
+    commission_proximite = attr.ib(type=Optional[str])
     creee_le = attr.ib(type=datetime.datetime)
     statut = attr.ib(type=str)
 

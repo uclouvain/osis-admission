@@ -41,7 +41,7 @@ from admission.ddd.preparation.projet_doctoral.commands import (
     VerifierPropositionCommand,
 )
 from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import (
-    BureauCDEInconsistantException,
+    CommissionProximiteInconsistantException,
     ContratTravailInconsistantException,
     InstitutionInconsistanteException,
     JustificationRequiseException,
@@ -64,6 +64,15 @@ class PropositionListSchema(ResponseSpecificSchema):
     def get_operation_id_base(self, path, method, action):
         return '_proposition' if method == 'POST' else '_propositions'
 
+    def map_choicefield(self, field):
+        schema = super().map_choicefield(field)
+        if field.field_name == "commission_proximite":
+            self.enums["ChoixCommissionProximite"] = schema
+            return {
+                '$ref': "#/components/schemas/ChoixCommissionProximite"
+            }
+        return schema
+
 
 class PropositionListView(APIPermissionRequiredMixin, DisplayExceptionsByFieldNameAPIMixin, ListCreateAPIView):
     name = "propositions"
@@ -75,7 +84,7 @@ class PropositionListView(APIPermissionRequiredMixin, DisplayExceptionsByFieldNa
         JustificationRequiseException: ['justification'],
         InstitutionInconsistanteException: ['institution'],
         ContratTravailInconsistantException: ['type_contrat_travail'],
-        BureauCDEInconsistantException: ['bureau_CDE'],
+        CommissionProximiteInconsistantException: ['commission_proximite'],
     }
     permission_mapping = {
         'POST': 'admission.add_doctorateadmission',
@@ -111,6 +120,15 @@ class PropositionSchema(ResponseSpecificSchema):
         'PUT': (serializers.CompleterPropositionCommandSerializer, serializers.PropositionIdentityDTOSerializer),
         'DELETE': serializers.PropositionIdentityDTOSerializer,
     }
+
+    def map_choicefield(self, field):
+        schema = super().map_choicefield(field)
+        if field.field_name == "commission_proximite":
+            self.enums["ChoixCommissionProximite"] = schema
+            return {
+                '$ref': "#/components/schemas/ChoixCommissionProximite"
+            }
+        return schema
 
 
 class PropositionViewSet(

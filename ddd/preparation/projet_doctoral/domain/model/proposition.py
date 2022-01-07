@@ -25,13 +25,14 @@
 ##############################################################################
 import datetime
 import uuid
-from typing import List, Optional
+from typing import List, Optional, Union
 
 import attr
 
 from admission.ddd.preparation.projet_doctoral.domain.model._detail_projet import DetailProjet
 from admission.ddd.preparation.projet_doctoral.domain.model._enums import (
-    ChoixBureauCDE,
+    ChoixCommissionProximiteCDE,
+    ChoixCommissionProximiteCDSS,
     ChoixStatutProposition,
     ChoixTypeAdmission,
 )
@@ -67,10 +68,9 @@ class Proposition(interface.RootEntity):
     reference = attr.ib(type=Optional[str], default=None)
     justification = attr.ib(type=Optional[str], default='')
     statut = attr.ib(type=ChoixStatutProposition, default=ChoixStatutProposition.IN_PROGRESS)
-    bureau_CDE = attr.ib(
-        type=Optional[ChoixBureauCDE],
-        default='',
-    )  # CDE = Comission Doctorale du domaine Sciences Economique et de Gestion
+    commission_proximite = attr.ib(
+        type=Optional[Union[ChoixCommissionProximiteCDE, ChoixCommissionProximiteCDSS]], default=''
+    )
     financement = attr.ib(type=Financement, default=financement_non_rempli)
     experience_precedente_recherche = attr.ib(
         type=ExperiencePrecedenteRecherche,
@@ -99,7 +99,7 @@ class Proposition(interface.RootEntity):
             self,
             type_admission: str,
             justification: str,
-            bureau_CDE: str,
+            commission_proximite: str,
             type_financement: str,
             type_contrat_travail: str,
             eft: str,
@@ -130,7 +130,7 @@ class Proposition(interface.RootEntity):
             doctorat_deja_realise=doctorat_deja_realise,
             institution=institution,
         ).validate()
-        self._completer_proposition(type_admission, justification, bureau_CDE)
+        self._completer_proposition(type_admission, justification, commission_proximite)
         self._completer_financement(
             type=type_financement,
             type_contrat_travail=type_contrat_travail,
@@ -159,10 +159,14 @@ class Proposition(interface.RootEntity):
             raison_non_soutenue=raison_non_soutenue,
         )
 
-    def _completer_proposition(self, type_admission: str, justification: str, bureau_CDE: str):
+    def _completer_proposition(self, type_admission: str, justification: str, commission_proximite: str):
         self.type_admission = ChoixTypeAdmission[type_admission]
         self.justification = justification
-        self.bureau_CDE = ChoixBureauCDE[bureau_CDE] if bureau_CDE else ''
+        self.commission_proximite = ''
+        if commission_proximite in ChoixCommissionProximiteCDE.get_names():
+            self.commission_proximite = ChoixCommissionProximiteCDE[commission_proximite]
+        elif commission_proximite in ChoixCommissionProximiteCDSS.get_names():
+            self.commission_proximite = ChoixCommissionProximiteCDSS[commission_proximite]
 
     def _completer_financement(
             self,
