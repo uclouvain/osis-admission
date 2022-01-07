@@ -92,3 +92,7 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
         if entity_ids:  # pragma: no cover
             returned = filter(lambda p: p.entity_id in entity_ids, returned)
         return list(returned)
+
+    @classmethod
+    def get_next_reference(cls):
+        return len(cls.entities) + 1

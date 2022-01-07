@@ -27,10 +27,10 @@ import rules
 from django.utils.translation import gettext_lazy as _
 from rules import RuleSet
 
-from osis_role.contrib.models import EntityRoleModel
+from osis_role.contrib.models import RoleModel
 
 
-class JurySecretary(EntityRoleModel):
+class JurySecretary(RoleModel):
     class Meta:
         verbose_name = _("Jury secretary")
         verbose_name_plural = _("Jury secretaries")

@@ -28,10 +28,10 @@ from rules import RuleSet
 from django.utils.translation import gettext_lazy as _
 
 from admission.auth.predicates import is_admission_request_author, is_admission_request_author_or_person
-from osis_role.contrib.models import EntityRoleModel
+from osis_role.contrib.models import RoleModel
 
 
-class Candidate(EntityRoleModel):
+class Candidate(RoleModel):
     class Meta:
         verbose_name = _("Candidate")
         verbose_name_plural = _("Candidates")

@@ -57,3 +57,8 @@ class IPropositionRepository(interface.AbstractRepository):
     @abc.abstractmethod
     def save(cls, entity: 'Proposition') -> None:
         raise NotImplementedError
+
+    @classmethod
+    @abc.abstractmethod
+    def get_next_reference(cls):
+        raise NotImplementedError

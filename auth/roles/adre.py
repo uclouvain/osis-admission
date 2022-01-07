@@ -26,11 +26,11 @@
 import rules
 from rules import RuleSet
 
-from osis_role.contrib.models import EntityRoleModel
+from osis_role.contrib.models import RoleModel
 from django.utils.translation import gettext_lazy as _
 
 
-class Adre(EntityRoleModel):
+class Adre(RoleModel):
     class Meta:
         verbose_name = _("ADRE")
         verbose_name_plural = _("ADREs")
