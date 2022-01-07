@@ -46,6 +46,7 @@ from admission.ddd.preparation.projet_doctoral.use_case.write.identifier_promote
     identifier_promoteur
 from admission.ddd.preparation.projet_doctoral.use_case.write.initier_proposition_service import \
     initier_proposition
+from admission.ddd.preparation.projet_doctoral.use_case.write.refuser_proposition_service import refuser_proposition
 from admission.ddd.preparation.projet_doctoral.use_case.write.supprimer_membre_CA_service import \
     supprimer_membre_CA
 from admission.ddd.preparation.projet_doctoral.use_case.write.supprimer_promoteur_service import \
@@ -135,6 +136,11 @@ class MessageBusCommands(AbstractMessageBusCommands):
         ),
         ApprouverPropositionCommand: partial(
             approuver_proposition,
+            proposition_repository=PropositionRepository(),
+            groupe_supervision_repository=GroupeDeSupervisionRepository(),
+        ),
+        RefuserPropositionCommand: partial(
+            refuser_proposition,
             proposition_repository=PropositionRepository(),
             groupe_supervision_repository=GroupeDeSupervisionRepository(),
         ),

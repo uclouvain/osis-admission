@@ -144,6 +144,15 @@ class ApprouverPropositionCommand(interface.CommandRequest):
 
 
 @attr.s(frozen=True, slots=True)
+class RefuserPropositionCommand(interface.CommandRequest):
+    uuid_proposition = attr.ib(type=str)
+    matricule = attr.ib(type=str)
+    commentaire_interne = attr.ib(type=str)
+    commentaire_externe = attr.ib(type=str)
+    motif_refus = attr.ib(type=str)
+
+
+@attr.s(frozen=True, slots=True)
 class SoumettrePropositionCommand(interface.CommandRequest):
     uuid_proposition = attr.ib(type=str)
 

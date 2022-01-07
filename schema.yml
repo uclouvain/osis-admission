@@ -1004,7 +1004,7 @@ paths:
       - propositions
   /propositions/{uuid}/approve:
     post:
-      operationId: create_approval
+      operationId: approve_proposition
       description: Approve the proposition.
       parameters:
       - name: uuid
@@ -1025,6 +1025,41 @@ paths:
               $ref: '#/components/schemas/ApprouverPropositionCommand'
       responses:
         201:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PropositionIdentityDTO'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
+    put:
+      operationId: reject_proposition
+      description: Reject the proposition.
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefuserPropositionCommand'
+      responses:
+        200:
           content:
             application/json:
               schema:
@@ -2055,6 +2090,22 @@ components:
       - demande_ouverture
       - convention
       - autres_documents
+    RefuserPropositionCommand:
+      type: object
+      properties:
+        matricule:
+          type: string
+        commentaire_interne:
+          type: string
+        commentaire_externe:
+          type: string
+        motif_refus:
+          type: string
+      required:
+      - matricule
+      - commentaire_interne
+      - commentaire_externe
+      - motif_refus
     Error:
       type: object
       properties:
