@@ -25,7 +25,10 @@
 # ##############################################################################
 from typing import List, Optional
 
+from django.db import connection
+
 from admission.contrib.models import DoctorateAdmission
+from admission.contrib.models.doctorate import REFERENCE_SEQ_NAME
 from admission.ddd.preparation.projet_doctoral.domain.model._institut import InstitutIdentity
 from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import PropositionNonTrouveeException
 from base.models.education_group_year import EducationGroupYear
@@ -126,14 +129,21 @@ class PropositionRepository(IPropositionRepository):
         raise NotImplementedError
 
     @classmethod
+    def get_next_reference(cls) -> int:
+        cursor = connection.cursor()
+        cursor.execute("SELECT NEXTVAL('%(sequence)s')" % {'sequence': REFERENCE_SEQ_NAME})
+        return cursor.fetchone()[0]
+
+    @classmethod
     def save(cls, entity: 'Proposition') -> None:
         doctorate = EducationGroupYear.objects.get(
             acronym=entity.sigle_formation,
             academic_year__year=entity.annee,
         )
-        (admission, created) = DoctorateAdmission.objects.update_or_create(
+        DoctorateAdmission.objects.update_or_create(
             uuid=entity.entity_id.uuid,
             defaults={
+                'reference': entity.reference,
                 'type': entity.type_admission.name,
                 'status': entity.statut.name,
                 'comment': entity.justification,
@@ -165,10 +175,3 @@ class PropositionRepository(IPropositionRepository):
                 'phd_already_done_no_defense_reason': entity.experience_precedente_recherche.raison_non_soutenue,
             }
         )
-        if created:
-            # Set the reference of the admission on creation (based on the academic year and the instance id)
-            admission.reference = "{}-{}".format(
-                admission.doctorate.academic_year.year % 100,
-                Proposition.valeur_reference_base + admission.id,
-            )
-            admission.save()
