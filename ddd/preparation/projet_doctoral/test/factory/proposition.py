@@ -116,9 +116,9 @@ class PropositionAdmissionSC3DPMinimaleCotutelleAvecPromoteurExterneFactory(Prop
     entity_id = factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-SC3DP-cotutelle-avec-promoteur-externe')
 
 
-class PropositionPreAdmissionSC3DPMinimaleFactory(_PropositionFactory):
+class PropositionPreAdmissionSC3DPMinimaleFactory(PropositionAdmissionSC3DPMinimaleFactory):
+    entity_id = factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-SC3DP-pre-admission')
     type_admission = ChoixTypeAdmission.PRE_ADMISSION
-    doctorat_id = factory.SubFactory(_DoctoratIdentityFactory, sigle='SC3DP', annee=2020)
 
 
 class PropositionAdmissionSC3DPAvecMembresFactory(PropositionAdmissionSC3DPMinimaleFactory):

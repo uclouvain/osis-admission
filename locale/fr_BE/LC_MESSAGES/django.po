@@ -206,6 +206,9 @@ msgstr "Candidat"
 msgid "Candidates"
 msgstr "Candidats"
 
+msgid "City"
+msgstr "Ville"
+
 msgid "Close"
 msgstr "Fermer"
 
@@ -226,6 +229,9 @@ msgstr "Convention de cotutelle"
 
 msgid "Cotutelle request document"
 msgstr "Demande d'ouverture de cotutelle"
+
+msgid "Country"
+msgstr "Pays"
 
 msgid "Create new doctorate admission"
 msgstr "Créer une nouvelle admission en doctorat"
@@ -458,6 +464,9 @@ msgstr "Langue de la thèse"
 
 msgid "Thesis location"
 msgstr "Lieu de la thèse"
+
+msgid "Title"
+msgstr "Titre"
 
 msgid "Type"
 msgstr "Type"

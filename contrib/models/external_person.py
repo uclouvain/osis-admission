@@ -39,7 +39,7 @@ class ExternalPerson(models.Model):
         default='',
     )
     institute = models.CharField(
-        verbose_name=_("Institute"),
+        verbose_name=_("Institution"),
         max_length=255,
         blank=True,
         default='',

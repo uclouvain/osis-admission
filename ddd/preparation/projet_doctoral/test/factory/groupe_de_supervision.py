@@ -114,6 +114,10 @@ class GroupeDeSupervisionSC3DPCotutelleIndefinieFactory(_GroupeDeSupervisionFact
     cotutelle = None
 
 
+class GroupeDeSupervisionSC3DPPreAdmissionFactory(_GroupeDeSupervisionFactory):
+    proposition_id = factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-SC3DP-pre-admission')
+
+
 class GroupeDeSupervisionSC3DPAvecPromoteurEtMembreFactory(_GroupeDeSupervisionFactory):
     proposition_id = factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-SC3DP-promoteur-membre')
     signatures_promoteurs = factory.LazyFunction(lambda: [

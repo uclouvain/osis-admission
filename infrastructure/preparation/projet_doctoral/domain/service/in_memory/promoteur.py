@@ -65,5 +65,5 @@ class PromoteurInMemoryTranslator(IPromoteurTranslator):
     def est_externe(cls, identity: 'PromoteurIdentity') -> bool:
         try:
             return next(e for (p, e) in cls.promoteurs if p.matricule == identity.matricule)
-        except StopIteration:
+        except StopIteration:  # pragma: no cover
             raise PromoteurNonTrouveException

@@ -26,7 +26,7 @@
 
 import factory
 
-from admission.contrib.models import SupervisionActor
+from admission.contrib.models import ExternalPerson, SupervisionActor
 from admission.contrib.models.enums.actor_type import ActorType
 from osis_signature.models import Actor, Process
 
@@ -44,8 +44,12 @@ class _ActorFactory(factory.django.DjangoModelFactory):
     person = factory.SubFactory('base.tests.factories.person.PersonFactory')
 
 
-class PromoterFactory(factory.DjangoModelFactory):
+class _ExternalPersonFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = ExternalPerson
 
+
+class PromoterFactory(factory.DjangoModelFactory):
     def __init__(self, process=None):
         super().__init__()
         if process:
@@ -58,6 +62,12 @@ class PromoterFactory(factory.DjangoModelFactory):
     type = ActorType.PROMOTER.name
     person = factory.SelfAttribute('actor_ptr.person')
     process = factory.SelfAttribute('actor_ptr.process')
+
+
+class ExternalPromoterFactory(PromoterFactory):
+    @factory.post_generation
+    def generate_external_person(self, create, extracted, **kwargs):
+        _ExternalPersonFactory(person=self.actor_ptr.person, **kwargs)
 
 
 class CaMemberFactory(PromoterFactory):

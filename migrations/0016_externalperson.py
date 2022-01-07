@@ -18,7 +18,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('title', models.CharField(blank=True, default='', max_length=255, verbose_name='Title')),
-                ('institute', models.CharField(blank=True, default='', max_length=255, verbose_name='Institute')),
+                ('institute', models.CharField(blank=True, default='', max_length=255, verbose_name='Institution')),
                 ('city', models.CharField(blank=True, default='', max_length=255, verbose_name='City')),
                 ('country', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='reference.Country', verbose_name='Country')),
                 ('person', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to='base.Person')),
