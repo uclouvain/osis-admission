@@ -24,7 +24,7 @@
 #
 ##############################################################################
 from admission.ddd.preparation.projet_doctoral.domain.model._enums import (
-    ChoixCommissionProximiteCDE,
+    ChoixCommissionProximiteCDEouCLSM,
     ChoixCommissionProximiteCDSS,
 )
 from admission.ddd.preparation.projet_doctoral.domain.model.doctorat import Doctorat
@@ -37,9 +37,9 @@ from osis_common.ddd import interface
 class CommissionProximite(interface.DomainService):
     @classmethod
     def verifier(cls, doctorat: "Doctorat", commission_proximite: str) -> None:
-        if doctorat.est_entite_CDE() and (
+        if (doctorat.est_entite_CDE() or doctorat.est_entite_CLSM()) and (
             not commission_proximite
-            or commission_proximite not in ChoixCommissionProximiteCDE.get_names()
+            or commission_proximite not in ChoixCommissionProximiteCDEouCLSM.get_names()
         ):
             raise CommissionProximiteInconsistantException()
         if doctorat.est_entite_CDSS() and (
@@ -50,6 +50,7 @@ class CommissionProximite(interface.DomainService):
         if (
             not doctorat.est_entite_CDE()
             and not doctorat.est_entite_CDSS()
+            and not doctorat.est_entite_CLSM()
             and commission_proximite
         ):
             raise CommissionProximiteInconsistantException()

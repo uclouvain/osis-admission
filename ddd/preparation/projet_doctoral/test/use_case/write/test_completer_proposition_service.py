@@ -28,7 +28,7 @@ from django.test import SimpleTestCase
 
 from admission.ddd.preparation.projet_doctoral.commands import CompleterPropositionCommand
 from admission.ddd.preparation.projet_doctoral.domain.model._enums import (
-    ChoixCommissionProximiteCDE,
+    ChoixCommissionProximiteCDEouCLSM,
     ChoixCommissionProximiteCDSS,
     ChoixTypeAdmission,
 )
@@ -106,7 +106,7 @@ class TestCompleterPropositionService(SimpleTestCase):
         self.assertEqual(self.cmd.institution, proposition.experience_precedente_recherche.institution)
 
     def test_should_pas_completer_commission_proximite_cde_pas_vide_et_non_CDE(self):
-        cmd = attr.evolve(self.cmd, commission_proximite=ChoixCommissionProximiteCDE.ECONOMY.name)
+        cmd = attr.evolve(self.cmd, commission_proximite=ChoixCommissionProximiteCDEouCLSM.ECONOMY.name)
         with self.assertRaises(CommissionProximiteInconsistantException):
             self.message_bus.invoke(cmd)
 
@@ -126,7 +126,9 @@ class TestCompleterPropositionService(SimpleTestCase):
             self.message_bus.invoke(cmd)
 
     def test_should_completer_commission_proximite_cde(self):
-        cmd = attr.evolve(self.cmd, commission_proximite=ChoixCommissionProximiteCDE.ECONOMY.name, uuid="uuid-ECGE3DP")
+        cmd = attr.evolve(
+            self.cmd, commission_proximite=ChoixCommissionProximiteCDEouCLSM.ECONOMY.name, uuid="uuid-ECGE3DP"
+        )
         proposition_id = self.message_bus.invoke(cmd)
         proposition = self.proposition_repository.get(proposition_id)  # type: Proposition
         self.assertEqual(cmd.commission_proximite, proposition.commission_proximite.name)
@@ -138,7 +140,9 @@ class TestCompleterPropositionService(SimpleTestCase):
         self.assertEqual(cmd.commission_proximite, proposition.commission_proximite.name)
 
     def test_should_pas_completer_commission_proximite_cdss_invalide(self):
-        cmd = attr.evolve(self.cmd, commission_proximite=ChoixCommissionProximiteCDE.ECONOMY.name, uuid="uuid-ESP3DP")
+        cmd = attr.evolve(
+            self.cmd, commission_proximite=ChoixCommissionProximiteCDEouCLSM.ECONOMY.name, uuid="uuid-ESP3DP"
+        )
         with self.assertRaises(CommissionProximiteInconsistantException):
             self.message_bus.invoke(cmd)
 

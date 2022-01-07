@@ -32,6 +32,7 @@ from osis_common.ddd import interface
 
 ENTITY_CDE = 'CDE'
 ENTITY_CDSS = 'CDSS'
+ENTITY_CLSM = 'CLSM'
 
 
 @attr.s(slots=True)
@@ -50,3 +51,6 @@ class Doctorat(interface.Entity):
 
     def est_entite_CDSS(self):
         return self.entite_ucl_id.code == ENTITY_CDSS
+
+    def est_entite_CLSM(self):
+        return self.entite_ucl_id.code == ENTITY_CLSM

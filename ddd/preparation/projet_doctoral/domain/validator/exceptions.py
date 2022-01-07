@@ -65,7 +65,7 @@ class CommissionProximiteInconsistantException(BusinessException):
     status_code = "PROPOSITION-5"
 
     def __init__(self, **kwargs):
-        message = _("Proximity commission should be filled in only if the doctorate's entity is CDE or CDSS")
+        message = _("Proximity commission should be filled in only if the doctorate's entity is CDE, CLSM or CDSS")
         super().__init__(message, **kwargs)
 
 
