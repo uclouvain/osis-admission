@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('admission', '0015_new_permission_and_reference'),
+        ('admission', '0016_auto_20220106_1524'),
     ]
 
     operations = [
