@@ -28,7 +28,8 @@ from django.test import SimpleTestCase
 
 from admission.ddd.preparation.projet_doctoral.commands import InitierPropositionCommand
 from admission.ddd.preparation.projet_doctoral.domain.model._enums import (
-    ChoixCommissionProximiteCDE,
+    ChoixCommissionProximiteCDEouCLSM,
+    ChoixCommissionProximiteCDSS,
     ChoixTypeAdmission,
 )
 from admission.ddd.preparation.projet_doctoral.domain.model._experience_precedente_recherche import (
@@ -68,7 +69,7 @@ class TestInitierPropositionService(SimpleTestCase):
             sigle_formation='ECGE3DP',
             annee_formation=2020,
             matricule_candidat='01234567',
-            commission_proximite=ChoixCommissionProximiteCDE.ECONOMY.name,
+            commission_proximite=ChoixCommissionProximiteCDEouCLSM.ECONOMY.name,
             type_financement=ChoixTypeFinancement.WORK_CONTRACT.name,
             type_contrat_travail='assistant_uclouvain',
             titre_projet='Mon projet',
@@ -79,6 +80,7 @@ class TestInitierPropositionService(SimpleTestCase):
         )
 
         self.doctorat_non_CDE = self.doctorat_non_CDSS = 'AGRO3DP'
+        self.doctorat_CLSM = "ECGM3DP"
 
     def test_should_initier(self):
         proposition_id = self.message_bus.invoke(self.cmd)
@@ -116,6 +118,35 @@ class TestInitierPropositionService(SimpleTestCase):
         proposition_id = self.message_bus.invoke(cmd)
         proposition = self.proposition_repository.get(proposition_id)  # type: Proposition
         self.assertEqual(proposition.commission_proximite, '')
+
+    def test_should_initier_commission_proximite_CLSM(self):
+        cmd = attr.evolve(
+            self.cmd,
+            commission_proximite=ChoixCommissionProximiteCDEouCLSM.ECONOMY.name,
+            sigle_formation=self.doctorat_CLSM,
+        )
+        proposition_id = self.message_bus.invoke(cmd)
+        proposition = self.proposition_repository.get(proposition_id)  # type: Proposition
+        self.assertEqual(proposition.commission_proximite.name, ChoixCommissionProximiteCDEouCLSM.ECONOMY.name)
+
+    def test_should_pas_initier_commission_proximite_CLSM_vide(self):
+        cmd = attr.evolve(self.cmd, commission_proximite='', sigle_formation=self.doctorat_CLSM)
+        with self.assertRaises(CommissionProximiteInconsistantException):
+            self.message_bus.invoke(cmd)
+
+    def test_should_pas_initier_commission_proximite_cdss_invalide(self):
+        cmd = attr.evolve(
+            self.cmd,
+            sigle_formation=self.doctorat_non_CDSS,
+            commission_proximite=ChoixCommissionProximiteCDEouCLSM.ECONOMY.name,
+        )
+        with self.assertRaises(CommissionProximiteInconsistantException):
+            self.message_bus.invoke(cmd)
+
+    def test_should_pas_initier_commission_proximite_cde_invalide(self):
+        cmd = attr.evolve(self.cmd, commission_proximite=ChoixCommissionProximiteCDSS.ECLI.name)
+        with self.assertRaises(CommissionProximiteInconsistantException):
+            self.message_bus.invoke(cmd)
 
     def test_should_initier_commission_proximite_CDSS_vide_et_non_CDSS(self):
         cmd = attr.evolve(self.cmd, commission_proximite='', sigle_formation=self.doctorat_non_CDSS)

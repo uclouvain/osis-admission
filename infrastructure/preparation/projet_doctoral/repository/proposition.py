@@ -35,7 +35,7 @@ from admission.ddd.preparation.projet_doctoral.builder.proposition_identity_buil
     PropositionIdentityBuilder
 from admission.ddd.preparation.projet_doctoral.domain.model._detail_projet import DetailProjet
 from admission.ddd.preparation.projet_doctoral.domain.model._enums import (
-    ChoixCommissionProximiteCDE,
+    ChoixCommissionProximiteCDEouCLSM,
     ChoixCommissionProximiteCDSS,
     ChoixStatutProposition,
     ChoixTypeAdmission,
@@ -56,8 +56,8 @@ from osis_common.ddd.interface import ApplicationService
 
 def _instantiate_admission(admission: DoctorateAdmission) -> Proposition:
     commission_proximite = ''
-    if admission.proximity_commission in ChoixCommissionProximiteCDE.get_names():
-        commission_proximite = ChoixCommissionProximiteCDE[admission.proximity_commission]
+    if admission.proximity_commission in ChoixCommissionProximiteCDEouCLSM.get_names():
+        commission_proximite = ChoixCommissionProximiteCDEouCLSM[admission.proximity_commission]
     elif admission.proximity_commission in ChoixCommissionProximiteCDSS.get_names():
         commission_proximite = ChoixCommissionProximiteCDSS[admission.proximity_commission]
     return Proposition(

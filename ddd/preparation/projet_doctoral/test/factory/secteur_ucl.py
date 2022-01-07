@@ -67,6 +67,13 @@ class CDSSEntiteFactory(_EntiteUCLFactory):
     )
 
 
+class CLSMEntiteFactory(_EntiteUCLFactory):
+    entity_id = factory.SubFactory(_IdentiteEntiteFactory, sigle='CLSM')
+    parent = factory.SubFactory(_IdentiteEntiteFactory, sigle='SSH')
+    type = EntityType.DOCTORAL_COMMISSION
+    intitule = "CLSM"
+
+
 class SSSEntiteFactory(_EntiteUCLFactory):
     entity_id = factory.SubFactory(_IdentiteEntiteFactory, sigle='SSS')
     parent = factory.SubFactory(_IdentiteEntiteFactory, sigle='UCL')

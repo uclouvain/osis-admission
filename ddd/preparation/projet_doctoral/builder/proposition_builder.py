@@ -42,7 +42,7 @@ from admission.ddd.preparation.projet_doctoral.domain.model.proposition import (
     Proposition,
 )
 from admission.ddd.preparation.projet_doctoral.domain.model._enums import (
-    ChoixCommissionProximiteCDE,
+    ChoixCommissionProximiteCDEouCLSM,
     ChoixCommissionProximiteCDSS,
     ChoixStatutProposition,
     ChoixTypeAdmission,
@@ -80,8 +80,8 @@ class PropositionBuilder(interface.RootEntityBuilder):
             institution=cmd.institution,
         ).validate()
         commission_proximite = ''
-        if cmd.commission_proximite in ChoixCommissionProximiteCDE.get_names():
-            commission_proximite = ChoixCommissionProximiteCDE[cmd.commission_proximite]
+        if cmd.commission_proximite in ChoixCommissionProximiteCDEouCLSM.get_names():
+            commission_proximite = ChoixCommissionProximiteCDEouCLSM[cmd.commission_proximite]
         elif cmd.commission_proximite in ChoixCommissionProximiteCDSS.get_names():
             commission_proximite = ChoixCommissionProximiteCDSS[cmd.commission_proximite]
         return Proposition(

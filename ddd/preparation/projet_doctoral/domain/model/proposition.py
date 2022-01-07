@@ -31,7 +31,7 @@ import attr
 
 from admission.ddd.preparation.projet_doctoral.domain.model._detail_projet import DetailProjet
 from admission.ddd.preparation.projet_doctoral.domain.model._enums import (
-    ChoixCommissionProximiteCDE,
+    ChoixCommissionProximiteCDEouCLSM,
     ChoixCommissionProximiteCDSS,
     ChoixStatutProposition,
     ChoixTypeAdmission,
@@ -69,7 +69,7 @@ class Proposition(interface.RootEntity):
     justification = attr.ib(type=Optional[str], default='')
     statut = attr.ib(type=ChoixStatutProposition, default=ChoixStatutProposition.IN_PROGRESS)
     commission_proximite = attr.ib(
-        type=Optional[Union[ChoixCommissionProximiteCDE, ChoixCommissionProximiteCDSS]], default=''
+        type=Optional[Union[ChoixCommissionProximiteCDEouCLSM, ChoixCommissionProximiteCDSS]], default=''
     )
     financement = attr.ib(type=Financement, default=financement_non_rempli)
     experience_precedente_recherche = attr.ib(
@@ -163,8 +163,8 @@ class Proposition(interface.RootEntity):
         self.type_admission = ChoixTypeAdmission[type_admission]
         self.justification = justification
         self.commission_proximite = ''
-        if commission_proximite in ChoixCommissionProximiteCDE.get_names():
-            self.commission_proximite = ChoixCommissionProximiteCDE[commission_proximite]
+        if commission_proximite in ChoixCommissionProximiteCDEouCLSM.get_names():
+            self.commission_proximite = ChoixCommissionProximiteCDEouCLSM[commission_proximite]
         elif commission_proximite in ChoixCommissionProximiteCDSS.get_names():
             self.commission_proximite = ChoixCommissionProximiteCDSS[commission_proximite]
 
