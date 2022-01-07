@@ -30,6 +30,7 @@ from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions impor
 from admission.ddd.preparation.projet_doctoral.repository.i_proposition import IPropositionRepository
 from admission.ddd.preparation.projet_doctoral.test.factory.proposition import (
     PropositionAdmissionECGE3DPMinimaleFactory,
+    PropositionAdmissionESP3DPMinimaleFactory,
     PropositionAdmissionSC3DPAvecMembresFactory,
     PropositionAdmissionSC3DPAvecMembresInvitesFactory,
     PropositionAdmissionSC3DPMinimaleFactory,
@@ -68,6 +69,7 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
             PropositionAdmissionSC3DPMinimaleCotutelleAvecPromoteurExterneFactory(),
             PropositionAdmissionSC3DPSansPromoteurFactory(),
             PropositionAdmissionSC3DPSansMembreCAFactory(),
+            PropositionAdmissionESP3DPMinimaleFactory(),
         ]
 
     @classmethod

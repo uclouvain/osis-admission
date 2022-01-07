@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-12-08 09:45+0100\n"
+"POT-Creation-Date: 2022-01-04 10:44+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -70,9 +70,6 @@ msgstr "Déjà promoteur"
 msgid "Author"
 msgstr "Auteur"
 
-msgid "Bureau"
-msgstr "Bureau"
-
 msgid "CA Member"
 msgstr "Membre du CA"
 
@@ -84,10 +81,6 @@ msgstr "Gestionnaire CDD"
 
 msgid "CDD managers"
 msgstr "Gestionnaires CDD"
-
-msgid "CDE Bureau should be filled in only if the doctorate's entity is CDE"
-msgstr ""
-"Le bureau CDE doit être rempli uniquement si l'entité du doctorat est CDE"
 
 msgid "Can access doctorate admission list"
 msgstr "Peut accéder à la liste des admission en doctorat"
@@ -402,6 +395,43 @@ msgstr "Promoteurs"
 
 msgid "Proposition not found."
 msgstr "Proposition non trouvée."
+
+msgid "Proximity Commission for Dental Sciences (DENT)"
+msgstr "Commission de proximité de sciences dentaires (DENT)"
+
+msgid "Proximity Commission for Genetics and Immunology (GIM)"
+msgstr "Commission de proximité de génétique et immunologie (GIM)"
+
+msgid "Proximity Commission for Motricity Sciences (MOTR)"
+msgstr "Commission de proximité de sciences de la motricité (MOTR)"
+
+msgid "Proximity Commission for Neuroscience (NRSC)"
+msgstr "Commission de proximité de neurosciences (NRSC)"
+
+msgid "Proximity Commission for Pharmaceutical Sciences (DFAR)"
+msgstr "Commission de proximité de sciences pharmaceutiques (DFAR)"
+
+msgid "Proximity commission"
+msgstr "Commission de proximité"
+
+msgid ""
+"Proximity commission for cellular and molecular biology, biochemistry (BCM)"
+msgstr ""
+"Commission de proximité de biologie cellulaire et moléculaire, biochimie "
+"(BCM)"
+
+msgid "Proximity commission for experimental and clinical research (ECLI)"
+msgstr "Commission de proximité de recherche expérimentale et clinique (ECLI)"
+
+msgid "Proximity commission for public health, health and society (SPSS)"
+msgstr "Commission de proximité de santé publique, santé et société (SPSS)"
+
+msgid ""
+"Proximity commission should be filled in only if the doctorate's entity is "
+"CDE or CDSS"
+msgstr ""
+"La commission de proximité doit être remplie uniquement si l'entité du "
+"doctorat est CDE ou CDSS"
 
 msgid "REFUSED"
 msgstr "Refusé"

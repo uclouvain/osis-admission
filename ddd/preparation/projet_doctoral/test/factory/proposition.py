@@ -94,6 +94,13 @@ class PropositionAdmissionECGE3DPMinimaleFactory(_PropositionFactory):
     matricule_candidat = '0123456789'
 
 
+class PropositionAdmissionESP3DPMinimaleFactory(_PropositionFactory):
+    entity_id = factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-ESP3DP')
+    type_admission = ChoixTypeAdmission.ADMISSION
+    doctorat_id = factory.SubFactory(_DoctoratIdentityFactory, sigle='ESP3DP', annee=2020)
+    matricule_candidat = '0123456789'
+
+
 class PropositionAdmissionSC3DPMinimaleAnnuleeFactory(PropositionAdmissionSC3DPMinimaleFactory):
     statut = ChoixStatutProposition.CANCELLED
     matricule_candidat = '0123456789'

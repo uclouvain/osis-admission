@@ -31,6 +31,7 @@ from ddd.logic.learning_unit.domain.model.responsible_entity import UCLEntityIde
 from osis_common.ddd import interface
 
 ENTITY_CDE = 'CDE'
+ENTITY_CDSS = 'CDSS'
 
 
 @attr.s(slots=True)
@@ -46,3 +47,6 @@ class Doctorat(interface.Entity):
 
     def est_entite_CDE(self):
         return self.entite_ucl_id.code == ENTITY_CDE
+
+    def est_entite_CDSS(self):
+        return self.entite_ucl_id.code == ENTITY_CDSS

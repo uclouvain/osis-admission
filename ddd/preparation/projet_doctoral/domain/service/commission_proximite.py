@@ -23,17 +23,33 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
-
+from admission.ddd.preparation.projet_doctoral.domain.model._enums import (
+    ChoixCommissionProximiteCDE,
+    ChoixCommissionProximiteCDSS,
+)
 from admission.ddd.preparation.projet_doctoral.domain.model.doctorat import Doctorat
-from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import BureauCDEInconsistantException
+from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import (
+    CommissionProximiteInconsistantException,
+)
 from osis_common.ddd import interface
 
 
-class BureauCDE(interface.DomainService):
-
+class CommissionProximite(interface.DomainService):
     @classmethod
-    def verifier(cls, doctorat: 'Doctorat', bureau_CDE: str) -> None:
-        if doctorat.est_entite_CDE() and not bureau_CDE:
-            raise BureauCDEInconsistantException()
-        if not doctorat.est_entite_CDE() and bureau_CDE:
-            raise BureauCDEInconsistantException()
+    def verifier(cls, doctorat: "Doctorat", commission_proximite: str) -> None:
+        if doctorat.est_entite_CDE() and (
+            not commission_proximite
+            or commission_proximite not in ChoixCommissionProximiteCDE.get_names()
+        ):
+            raise CommissionProximiteInconsistantException()
+        if doctorat.est_entite_CDSS() and (
+            not commission_proximite
+            or commission_proximite not in ChoixCommissionProximiteCDSS.get_names()
+        ):
+            raise CommissionProximiteInconsistantException()
+        if (
+            not doctorat.est_entite_CDE()
+            and not doctorat.est_entite_CDSS()
+            and commission_proximite
+        ):
+            raise CommissionProximiteInconsistantException()
