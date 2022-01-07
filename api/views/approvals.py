@@ -31,15 +31,21 @@ from rest_framework.views import APIView
 from admission.api import serializers
 from admission.api.schema import ResponseSpecificSchema
 from admission.contrib.models import DoctorateAdmission
-from admission.ddd.preparation.projet_doctoral.commands import ApprouverPropositionCommand
+from admission.ddd.preparation.projet_doctoral.commands import ApprouverPropositionCommand, RefuserPropositionCommand
 from infrastructure.messages_bus import message_bus_instance
 from osis_role.contrib.views import APIPermissionRequiredMixin
 
 
 class ApprovePropositionSchema(ResponseSpecificSchema):
-    operation_id_base = "_approval"
+    method_mapping = {
+        'post': 'approve',
+        'put': 'reject',
+    }
+
+    operation_id_base = "_proposition"
     serializer_mapping = {
         "POST": (serializers.ApprouverPropositionCommandSerializer, serializers.PropositionIdentityDTOSerializer),
+        "PUT": (serializers.RefuserPropositionCommandSerializer, serializers.PropositionIdentityDTOSerializer),
     }
 
 
@@ -48,6 +54,7 @@ class ApprovePropositionAPIView(APIPermissionRequiredMixin, APIView):
     schema = ApprovePropositionSchema()
     permission_mapping = {
         'POST': 'admission.approve_proposition',
+        'PUT': 'admission.approve_proposition',
     }
 
     def get_permission_object(self):
@@ -60,6 +67,21 @@ class ApprovePropositionAPIView(APIPermissionRequiredMixin, APIView):
 
         proposition_id = message_bus_instance.invoke(
             ApprouverPropositionCommand(
+                uuid_proposition=str(kwargs["uuid"]),
+                **serializer.data,
+            ),
+        )
+
+        serializer = serializers.PropositionIdentityDTOSerializer(instance=proposition_id)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def put(self, request, *args, **kwargs):
+        """Reject the proposition."""
+        serializer = serializers.RefuserPropositionCommandSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        proposition_id = message_bus_instance.invoke(
+            RefuserPropositionCommand(
                 uuid_proposition=str(kwargs["uuid"]),
                 **serializer.data,
             ),

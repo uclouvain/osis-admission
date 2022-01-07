@@ -147,9 +147,10 @@ class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
             membre = next(a for a in entity.signatures_promoteurs if a.promoteur_id.matricule == actor.person.global_id)
             if actor.state != membre.etat.name:
                 StateHistory.objects.create(state=membre.etat.name, actor_id=actor.id)
-                if membre.etat.name in [ChoixEtatSignature.APPROVED.name]:
+                if membre.etat.name in [ChoixEtatSignature.APPROVED.name, ChoixEtatSignature.REFUSED.name]:
                     actor.comment = membre.commentaire_externe
                     actor.supervisionactor.internal_comment = membre.commentaire_interne
+                    actor.supervisionactor.rejection_reason = membre.motif_refus
                     actor.supervisionactor.save()
                     actor.save()
 
@@ -157,9 +158,10 @@ class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
             membre = next(a for a in entity.signatures_membres_CA if a.membre_CA_id.matricule == actor.person.global_id)
             if actor.state != membre.etat.name:
                 StateHistory.objects.create(state=membre.etat.name, actor_id=actor.id)
-                if membre.etat.name in [ChoixEtatSignature.APPROVED.name]:
+                if membre.etat.name in [ChoixEtatSignature.APPROVED.name, ChoixEtatSignature.REFUSED.name]:
                     actor.comment = membre.commentaire_externe
                     actor.supervisionactor.internal_comment = membre.commentaire_interne
+                    actor.supervisionactor.rejection_reason = membre.motif_refus
                     actor.supervisionactor.save()
                     actor.save()
 

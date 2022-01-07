@@ -72,9 +72,13 @@ class ApprovalsApiTestCase(APITestCase):
         )
 
         # Mocked data
-        cls.data = {
+        cls.approved_data = {
             "commentaire_interne": "A wonderful internal comment",
             "commentaire_externe": "An external comment",
+        }
+        cls.refused_data = {
+            **cls.approved_data,
+            "motif_refus": "Incomplete proposition",
         }
 
         # Targeted url
@@ -87,7 +91,7 @@ class ApprovalsApiTestCase(APITestCase):
 
     def test_assert_methods_not_allowed(self):
         self.client.force_authenticate(user=self.promoter.person.user)
-        methods_not_allowed = ['get', 'delete', 'patch', 'put']
+        methods_not_allowed = ['get', 'delete', 'patch']
 
         for method in methods_not_allowed:
             response = getattr(self.client, method)(self.url)
@@ -97,7 +101,7 @@ class ApprovalsApiTestCase(APITestCase):
         self.client.force_authenticate(user=self.promoter.person.user)
         response = self.client.post(self.url, {
             "matricule": self.promoter.person.global_id,
-            **self.data,
+            **self.approved_data,
         }, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json(), {'uuid': str(self.admission.uuid)})
@@ -106,7 +110,7 @@ class ApprovalsApiTestCase(APITestCase):
         self.client.force_authenticate(user=self.promoter_who_approved.person.user)
         response = self.client.post(self.url, {
             "matricule": self.promoter_who_approved.person.global_id,
-            **self.data,
+            **self.approved_data,
         }, format="json")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
@@ -114,7 +118,7 @@ class ApprovalsApiTestCase(APITestCase):
         self.client.force_authenticate(user=self.other_promoter.person.user)
         response = self.client.post(self.url, {
             "matricule": self.other_promoter.person.global_id,
-            **self.data,
+            **self.approved_data,
         }, format="json")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
@@ -122,7 +126,7 @@ class ApprovalsApiTestCase(APITestCase):
         self.client.force_authenticate(user=self.ca_member.person.user)
         response = self.client.post(self.url, {
             "matricule": self.ca_member.person.global_id,
-            **self.data,
+            **self.approved_data,
         }, format="json")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
@@ -130,6 +134,47 @@ class ApprovalsApiTestCase(APITestCase):
         self.client.force_authenticate(user=self.other_ca_member.person.user)
         response = self.client.post(self.url, {
             "matricule": self.other_ca_member.person.global_id,
-            **self.data,
+            **self.approved_data,
+        }, format="json")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_supervision_refuse_proposition_api_invited_promoter(self):
+        self.client.force_authenticate(user=self.promoter.person.user)
+        response = self.client.put(self.url, {
+            "matricule": self.promoter.person.global_id,
+            **self.refused_data,
+        }, format="json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.json(), {'uuid': str(self.admission.uuid)})
+
+    def test_supervision_refuse_proposition_api_promoter_who_approved(self):
+        self.client.force_authenticate(user=self.promoter_who_approved.person.user)
+        response = self.client.put(self.url, {
+            "matricule": self.promoter_who_approved.person.global_id,
+            **self.refused_data,
+        }, format="json")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_supervision_refuse_proposition_api_other_promoter(self):
+        self.client.force_authenticate(user=self.other_promoter.person.user)
+        response = self.client.put(self.url, {
+            "matricule": self.other_promoter.person.global_id,
+            **self.refused_data,
+        }, format="json")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_supervision_refuse_proposition_api_not_invited_ca_member(self):
+        self.client.force_authenticate(user=self.ca_member.person.user)
+        response = self.client.put(self.url, {
+            "matricule": self.ca_member.person.global_id,
+            **self.refused_data,
+        }, format="json")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_supervision_refuse_proposition_api_other_ca_member(self):
+        self.client.force_authenticate(user=self.other_ca_member.person.user)
+        response = self.client.put(self.url, {
+            "matricule": self.other_ca_member.person.global_id,
+            **self.refused_data,
         }, format="json")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)

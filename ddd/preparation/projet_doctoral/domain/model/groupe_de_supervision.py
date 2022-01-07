@@ -154,6 +154,39 @@ class GroupeDeSupervision(interface.Entity):
                 )
             )
 
+    def refuser(self,
+                signataire_id: Union['PromoteurIdentity', 'MembreCAIdentity'],
+                commentaire_interne: str,
+                commentaire_externe: str,
+                motif_refus: str
+                ) -> None:
+        ApprouverValidatorList(
+            groupe_de_supervision=self,
+            signataire_id=signataire_id,
+        ).validate()
+        if isinstance(signataire_id, PromoteurIdentity):
+            self.signatures_promoteurs = [s for s in self.signatures_promoteurs if s.promoteur_id != signataire_id]
+            self.signatures_promoteurs.append(
+                SignaturePromoteur(
+                    promoteur_id=signataire_id,
+                    etat=ChoixEtatSignature.REFUSED,
+                    commentaire_interne=commentaire_interne,
+                    commentaire_externe=commentaire_externe,
+                    motif_refus=motif_refus,
+                )
+            )
+        elif isinstance(signataire_id, MembreCAIdentity):
+            self.signatures_membres_CA = [s for s in self.signatures_membres_CA if s.membre_CA_id != signataire_id]
+            self.signatures_membres_CA.append(
+                SignatureMembreCA(
+                    membre_CA_id=signataire_id,
+                    etat=ChoixEtatSignature.REFUSED,
+                    commentaire_interne=commentaire_interne,
+                    commentaire_externe=commentaire_externe,
+                    motif_refus=motif_refus,
+                )
+            )
+
     def verifier_tout_le_monde_a_approuve(self):
         raise NotImplementedError
 
