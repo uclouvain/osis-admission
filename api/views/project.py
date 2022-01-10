@@ -221,14 +221,12 @@ class VerifyPropositionView(APIPermissionRequiredMixin, mixins.RetrieveModelMixi
     def get(self, request, *args, **kwargs):
         """Check the proposition to be OK with all validators."""
         try:
+            # Trigger the verification command
             message_bus_instance.invoke(VerifierPropositionCommand(uuid_proposition=str(kwargs["uuid"])))
         except MultipleBusinessExceptions as exc:
+            # Gather all errors for output
             data = defaultdict(list)
             for exception in exc.exceptions:
                 data = get_error_data(data, exception, {})
-            return Response(data.get(api_settings.NON_FIELD_ERRORS_KEY, []), status=status.HTTP_200_OK)
-        except BusinessException as exc:
-            data = defaultdict(list)
-            data = get_error_data(data, exc, {})
             return Response(data.get(api_settings.NON_FIELD_ERRORS_KEY, []), status=status.HTTP_200_OK)
         return Response([], status=status.HTTP_200_OK)

@@ -146,7 +146,8 @@ class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
 
         # Update existing actors
         for actor in current_promoteurs:
-            membre = next(a for a in entity.signatures_promoteurs if a.promoteur_id.matricule == actor.person.global_id)
+            membre = next(a for a in entity.signatures_promoteurs  # pragma: no branch
+                          if a.promoteur_id.matricule == actor.person.global_id)
             if actor.state != membre.etat.name:
                 StateHistory.objects.create(state=membre.etat.name, actor_id=actor.id)
                 if membre.etat.name in [ChoixEtatSignature.APPROVED.name, ChoixEtatSignature.REFUSED.name]:
@@ -157,7 +158,8 @@ class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
                     actor.save()
 
         for actor in current_members:
-            membre = next(a for a in entity.signatures_membres_CA if a.membre_CA_id.matricule == actor.person.global_id)
+            membre = next(a for a in entity.signatures_membres_CA  # pragma: no branch
+                          if a.membre_CA_id.matricule == actor.person.global_id)
             if actor.state != membre.etat.name:
                 StateHistory.objects.create(state=membre.etat.name, actor_id=actor.id)
                 if membre.etat.name in [ChoixEtatSignature.APPROVED.name, ChoixEtatSignature.REFUSED.name]:
