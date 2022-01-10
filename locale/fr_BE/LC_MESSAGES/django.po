@@ -121,6 +121,9 @@ msgstr "Peut spécifier la thèse"
 msgid "Can remove a member from the supervision group"
 msgstr "Peut retirer un membre du groupe de supervision"
 
+msgid "Can request signatures"
+msgstr "Peut demander les signatures"
+
 msgid "Can sign diploma"
 msgstr "Peut signer le diplôme"
 
@@ -485,7 +488,7 @@ msgid "Scholarship grant"
 msgstr "Bourse de recherche"
 
 msgid "Some invitations are already sent"
-msgstr ""
+msgstr "Des invitations ont déjà été envoyées"
 
 msgid "Supervision group not found."
 msgstr "Groupe de supervision non trouvé."

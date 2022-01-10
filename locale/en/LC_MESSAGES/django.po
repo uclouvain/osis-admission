@@ -115,6 +115,9 @@ msgstr ""
 msgid "Can remove a member from the supervision group"
 msgstr ""
 
+msgid "Can request signatures"
+msgstr ""
+
 msgid "Can sign diploma"
 msgstr ""
 

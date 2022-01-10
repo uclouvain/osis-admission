@@ -26,6 +26,8 @@
 
 from typing import List, Optional
 
+from admission.auth.roles.ca_member import CommitteeMember
+from admission.auth.roles.promoter import Promoter
 from admission.contrib.models import DoctorateAdmission, SupervisionActor
 from admission.contrib.models.enums.actor_type import ActorType
 from admission.ddd.preparation.projet_doctoral.builder.proposition_identity_builder import \
@@ -167,21 +169,24 @@ class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
 
         # Add missing actors
         promoteurs_ids = current_promoteurs.values_list('person__global_id', flat=True)
-        [
-            SupervisionActor.objects.create(
-                person=person,
-                type=ActorType.PROMOTER.name,
-                process_id=groupe.uuid,
-            ) for person in new_promoteurs_persons if person.global_id not in promoteurs_ids
-        ]
+        for person in new_promoteurs_persons:
+            if person.global_id not in promoteurs_ids:
+                SupervisionActor.objects.create(
+                    person=person,
+                    type=ActorType.PROMOTER.name,
+                    process_id=groupe.uuid,
+                )
+                Promoter.objects.get_or_create(person=person)
+
         membre_CA_ids = current_members.values_list('person__global_id', flat=True)
-        [
-            SupervisionActor.objects.create(
-                person=person,
-                type=ActorType.CA_MEMBER.name,
-                process_id=groupe.uuid,
-            ) for person in new_membre_CA_persons if person.global_id not in membre_CA_ids
-        ]
+        for person in new_membre_CA_persons:
+            if person.global_id not in membre_CA_ids:
+                SupervisionActor.objects.create(
+                    person=person,
+                    type=ActorType.CA_MEMBER.name,
+                    process_id=groupe.uuid,
+                )
+                CommitteeMember.objects.get_or_create(person=person)
 
         proposition.cotutelle = None if entity.cotutelle is None else bool(entity.cotutelle.motivation)
         if entity.cotutelle:

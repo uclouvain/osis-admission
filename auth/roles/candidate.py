@@ -53,7 +53,7 @@ class Candidate(RoleModel):
             'admission.upload_pdf_confirmation': is_admission_request_author,
             'admission.fill_thesis': is_admission_request_author,
             'admission.upload_publication_authorisation': is_admission_request_author,
-            'admission.verify_doctorateadmission_project': is_admission_request_author,
+            'admission.request_signatures': is_admission_request_author & ~invitations_sent,
             'admission.view_doctorateadmission_person': is_admission_request_author_or_person,
             'admission.change_doctorateadmission_person': is_admission_request_author_or_person,
             'admission.view_doctorateadmission_coordinates': is_admission_request_author_or_person,
