@@ -127,7 +127,7 @@ class DoctorateAdmissionListApiTestCase(APITestCase):
         )
         for action in actions:
             # Check the url
-            self.assertTrue('url' in first_proposition['links'][action])
+            self.assertTrue('url' in first_proposition['links'][action], '{} is not allowed'.format('action'))
             # Check the method type
             self.assertTrue('method' in first_proposition['links'][action])
 
@@ -554,7 +554,7 @@ class DoctorateAdmissionGetApiTestCase(APITestCase):
         )
         for action in allowed_actions:
             # Check the url
-            self.assertTrue('url' in response.data['links'][action])
+            self.assertTrue('url' in response.data['links'][action], '{} is not allowed'.format(action))
             # Check the method type
             self.assertTrue('method' in response.data['links'][action])
 

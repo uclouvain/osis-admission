@@ -27,7 +27,11 @@ import rules
 from rules import RuleSet
 from django.utils.translation import gettext_lazy as _
 
-from admission.auth.predicates import is_admission_request_author, is_admission_request_author_or_person
+from admission.auth.predicates import (
+    invitations_sent,
+    is_admission_request_author,
+    is_admission_request_author_or_person,
+)
 from osis_role.contrib.models import RoleModel
 
 
@@ -65,7 +69,7 @@ class Candidate(RoleModel):
             'admission.view_doctorateadmission_cotutelle': is_admission_request_author,
             'admission.change_doctorateadmission_cotutelle': is_admission_request_author,
             'admission.view_doctorateadmission_supervision': is_admission_request_author,
-            'admission.change_doctorateadmission_supervision': is_admission_request_author,
-            'admission.add_supervision_member': is_admission_request_author,
-            'admission.remove_supervision_member': is_admission_request_author,
+            'admission.change_doctorateadmission_supervision': is_admission_request_author & ~invitations_sent,
+            'admission.add_supervision_member': is_admission_request_author & ~invitations_sent,
+            'admission.remove_supervision_member': is_admission_request_author & ~invitations_sent,
         })

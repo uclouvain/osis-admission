@@ -29,6 +29,7 @@ import factory
 from admission.contrib.models import SupervisionActor
 from admission.contrib.models.enums.actor_type import ActorType
 from osis_signature.models import Actor, Process
+from ..factories.roles import PromoterFactory as PromoterRoleFactory, CommitteeMember as CAMemberRoleFactory
 
 
 class _ProcessFactory(factory.django.DjangoModelFactory):
@@ -45,7 +46,6 @@ class _ActorFactory(factory.django.DjangoModelFactory):
 
 
 class PromoterFactory(factory.DjangoModelFactory):
-
     def __init__(self, process=None):
         super().__init__()
         if process:
@@ -59,6 +59,20 @@ class PromoterFactory(factory.DjangoModelFactory):
     person = factory.SelfAttribute('actor_ptr.person')
     process = factory.SelfAttribute('actor_ptr.process')
 
+    @factory.post_generation
+    def generate_role(self, create, extracted, **kwargs):
+        PromoterRoleFactory(person=self.actor_ptr.person, **kwargs)
+
+
+class ExternalPromoterFactory(PromoterFactory):
+    @factory.post_generation
+    def generate_role(self, create, extracted, **kwargs):
+        PromoterRoleFactory(person=self.actor_ptr.person, is_external=True, **kwargs)
+
 
 class CaMemberFactory(PromoterFactory):
     type = ActorType.CA_MEMBER.name
+
+    @factory.post_generation
+    def generate_role(self, create, extracted, **kwargs):
+        CAMemberRoleFactory(person=self.actor_ptr.person, **kwargs)
