@@ -32,7 +32,11 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from admission.contrib.models import AdmissionType, DoctorateAdmission
-from admission.ddd.preparation.projet_doctoral.domain.model._enums import ChoixStatutProposition
+from admission.ddd.preparation.projet_doctoral.domain.model._enums import (
+    ChoixCommissionProximiteCDEouCLSM,
+    ChoixCommissionProximiteCDSS,
+    ChoixStatutProposition,
+)
 from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import (
     DoctoratNonTrouveException,
     MembreCAManquantException,
@@ -518,6 +522,28 @@ class DoctorateAdmissionGetApiTestCase(APITestCase):
         cls.other_committee_member_user.groups.add(CommitteeMemberGroupFactory())
         # Targeted url
         cls.url = resolve_url("admission_api_v1:propositions", uuid=cls.admission.uuid)
+
+    def test_admission_doctorate_get_proximity_commission(self):
+        self.client.force_authenticate(user=self.other_candidate_user)
+        admission = DoctorateAdmissionFactory(
+            candidate=self.other_candidate_user.person,
+            doctorate__management_entity=self.commission,
+            proximity_commission=ChoixCommissionProximiteCDEouCLSM.ECONOMY.name,
+        )
+        response = self.client.get(resolve_url("admission_api_v1:propositions", uuid=admission.uuid), format="json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
+        # Check response data
+        self.assertEqual(response.json()['commission_proximite'], ChoixCommissionProximiteCDEouCLSM.ECONOMY.name)
+
+        admission = DoctorateAdmissionFactory(
+            candidate=self.other_candidate_user.person,
+            doctorate__management_entity=self.commission,
+            proximity_commission=ChoixCommissionProximiteCDSS.ECLI.name,
+        )
+        response = self.client.get(resolve_url("admission_api_v1:propositions", uuid=admission.uuid), format="json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
+        # Check response data
+        self.assertEqual(response.json()['commission_proximite'], ChoixCommissionProximiteCDSS.ECLI.name)
 
     def test_admission_doctorate_get_using_api_candidate(self):
         self.client.force_authenticate(user=self.candidate.user)

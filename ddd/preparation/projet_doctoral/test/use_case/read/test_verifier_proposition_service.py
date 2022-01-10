@@ -67,6 +67,12 @@ class TestVerifierPropositionService(SimpleTestCase):
             self.message_bus.invoke(cmd)
         self.assertIsInstance(context.exception.exceptions.pop(), DetailProjetNonCompleteException)
 
+    def test_should_retourner_erreur_si_preadmission_et_aucun_membre_supervision(self):
+        cmd = attr.evolve(self.cmd, uuid_proposition='uuid-SC3DP-pre-admission')
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            self.message_bus.invoke(cmd)
+        self.assertEqual(len(context.exception.exceptions), 2)
+
     def test_should_retourner_erreur_si_cotutelle_pas_complete(self):
         cmd = attr.evolve(self.cmd, uuid_proposition='uuid-SC3DP-cotutelle-indefinie')
         with self.assertRaises(MultipleBusinessExceptions) as context:
