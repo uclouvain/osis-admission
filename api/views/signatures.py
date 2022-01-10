@@ -48,5 +48,6 @@ class RequestSignaturesAPIView(APIView):
 
     def post(self, request, *args, **kwargs):
         """Ask for all promoters and members to sign the proposition."""
-        message_bus_instance.invoke(DemanderSignaturesCommand(uuid_proposition=str(kwargs["uuid"])))
-        return Response(status=status.HTTP_201_CREATED)
+        result = message_bus_instance.invoke(DemanderSignaturesCommand(uuid_proposition=str(kwargs["uuid"])))
+        serializer = serializers.PropositionIdentityDTOSerializer(instance=result)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)

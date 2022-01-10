@@ -42,12 +42,10 @@ class DoctoratInMemoryTranslator(IDoctoratTranslator):
         DoctoratCDEFactory(
             entity_id__sigle='ECGE3DP',
             entity_id__annee=2020,
-            entite_ucl_id__code="CDE",
         ),
         DoctoratCLSMFactory(
             entity_id__sigle='ECGM3DP',
             entity_id__annee=2020,
-            entite_ucl_id__code="CLSM",
         ),
         DoctoratCDSCFactory(
             entity_id__sigle='AGRO3DP',
