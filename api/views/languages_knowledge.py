@@ -23,6 +23,8 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from functools import partial
+
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext as _
 from rest_framework import mixins, status
@@ -30,6 +32,7 @@ from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 
 from admission.api import serializers
+from admission.api.permissions import IsSelfPersonTabOrTabPermission
 from admission.api.views import PersonRelatedMixin
 from admission.api.views.mixins import PersonRelatedSchema
 from osis_profile.models.education import LanguageKnowledge
@@ -67,11 +70,8 @@ class LanguagesKnowledgeViewSet(APIPermissionRequiredMixin, PersonRelatedMixin, 
     pagination_class = None
     filter_backends = []
     serializer_class = serializers.LanguageKnowledgeSerializer
+    permission_classes = [partial(IsSelfPersonTabOrTabPermission, permission_suffix='languages')]
     schema = LanguagesKnowledgeSchema()
-    permission_mapping = {
-        'GET': 'admission.view_doctorateadmission_languages',
-        'POST': 'admission.change_doctorateadmission_languages',
-    }
 
     def get_queryset(self):
         return self.request.user.person.languages_knowledge.all()

@@ -27,6 +27,7 @@ from collections import defaultdict
 
 from rest_framework import mixins, status
 from rest_framework.generics import GenericAPIView, ListCreateAPIView, get_object_or_404
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
 
@@ -79,16 +80,13 @@ class PropositionListView(APIPermissionRequiredMixin, DisplayExceptionsByFieldNa
     schema = PropositionListSchema()
     pagination_class = None
     filter_backends = []
+    permission_classes = [IsAuthenticated]
 
     field_name_by_exception = {
         JustificationRequiseException: ['justification'],
         InstitutionInconsistanteException: ['institution'],
         ContratTravailInconsistantException: ['type_contrat_travail'],
         CommissionProximiteInconsistantException: ['commission_proximite'],
-    }
-    permission_mapping = {
-        'POST': 'admission.add_doctorateadmission',
-        'GET': 'admission.access_doctorateadmission',
     }
 
     def list(self, request, **kwargs):
