@@ -29,7 +29,7 @@ import factory
 from admission.contrib.models import SupervisionActor
 from admission.contrib.models.enums.actor_type import ActorType
 from osis_signature.models import Actor, Process
-from ..factories.roles import PromoterFactory as PromoterRoleFactory, CommitteeMember as CAMemberRoleFactory
+from ..factories.roles import PromoterRoleFactory, CaMemberRoleFactory
 
 
 class _ProcessFactory(factory.django.DjangoModelFactory):
@@ -75,4 +75,4 @@ class CaMemberFactory(PromoterFactory):
 
     @factory.post_generation
     def generate_role(self, create, extracted, **kwargs):
-        CAMemberRoleFactory(person=self.actor_ptr.person, **kwargs)
+        CaMemberRoleFactory(person=self.actor_ptr.person, **kwargs)

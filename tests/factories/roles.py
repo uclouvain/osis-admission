@@ -39,24 +39,28 @@ class BaseFactory(factory.DjangoModelFactory):
 class CandidateFactory(BaseFactory):
     class Meta:
         model = Candidate
+        django_get_or_create = ('person',)
 
 
-class PromoterFactory(BaseFactory):
+class PromoterRoleFactory(BaseFactory):
     class Meta:
         model = Promoter
+        django_get_or_create = ('person',)
+
+
+class CaMemberRoleFactory(BaseFactory):
+    class Meta:
+        model = CommitteeMember
+        django_get_or_create = ('person',)
 
 
 class CddManagerFactory(BaseFactory):
     class Meta:
         model = CddManager
+        django_get_or_create = ('person',)
 
     entity = factory.SubFactory(
         'base.tests.factories.entity.EntityFactory',
         organization=None,
     )
     with_child = False
-
-
-class CommitteeMemberFactory(BaseFactory):
-    class Meta:
-        model = CommitteeMember

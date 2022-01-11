@@ -41,7 +41,6 @@ class SicManager(RoleModel):
         return RuleSet({
             'admission.change_doctorateadmission': rules.always_allow,
             'admission.delete_doctorateadmission': rules.always_deny,
-            'admission.access_doctorateadmission': rules.always_allow,
             'admission.view_doctorateadmission': rules.always_allow,
             'admission.appose_sic_notice': rules.always_allow,
             'admission.view_doctorateadmission_person': rules.always_allow,

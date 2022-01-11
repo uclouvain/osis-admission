@@ -41,7 +41,6 @@ class Promoter(ExternalActorMixin, RoleModel):
     @classmethod
     def rule_set(cls):
         return RuleSet({
-            'admission.access_doctorateadmission': rules.always_allow,
             'admission.view_doctorateadmission': is_admission_request_promoter,
             'admission.download_pdf_confirmation': is_admission_request_promoter,
             'admission.upload_pdf_confirmation': is_admission_request_promoter,
@@ -49,10 +48,10 @@ class Promoter(ExternalActorMixin, RoleModel):
             'admission.validate_doctoral_training': is_admission_request_promoter,
             'admission.fill_thesis': is_admission_request_promoter,
             'admission.check_publication_authorisation': is_admission_request_promoter,
-            'admission.view_doctorateadmission_person': rules.always_allow,
-            'admission.view_doctorateadmission_coordinates': rules.always_allow,
-            'admission.view_doctorateadmission_secondary_studies': rules.always_allow,
-            'admission.view_doctorateadmission_curriculum': rules.always_allow,
+            'admission.view_doctorateadmission_person': is_admission_request_promoter,
+            'admission.view_doctorateadmission_coordinates': is_admission_request_promoter,
+            'admission.view_doctorateadmission_secondary_studies': is_admission_request_promoter,
+            'admission.view_doctorateadmission_curriculum': is_admission_request_promoter,
             'admission.view_doctorateadmission_project': is_admission_request_promoter,
             'admission.view_doctorateadmission_cotutelle': is_admission_request_promoter,
             'admission.view_doctorateadmission_supervision': is_admission_request_promoter,

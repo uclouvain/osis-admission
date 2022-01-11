@@ -41,5 +41,4 @@ class Sceb(RoleModel):
         return RuleSet({
             'admission.check_copyright': rules.always_allow,
             'admission.sign_diploma': rules.always_allow,
-            'admission.access_doctorateadmission': rules.always_allow,
         })

@@ -35,7 +35,6 @@ from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions impor
     PromoteurManquantException,
 )
 from admission.tests.factories import DoctorateAdmissionFactory, WriteTokenFactory
-from admission.tests.factories.roles import CandidateFactory
 from admission.tests.factories.supervision import CaMemberFactory, ExternalPromoterFactory, PromoterFactory
 
 
@@ -53,7 +52,6 @@ class RequestSignaturesApiTestCase(APITestCase):
             program_proposition=[WriteTokenFactory().token],
         )
         cls.candidate = cls.admission.candidate
-        CandidateFactory(person=cls.admission.candidate)
         cls.url = resolve_url("request-signatures", uuid=cls.admission.uuid)
 
     def test_user_not_logged_assert_not_authorized(self):

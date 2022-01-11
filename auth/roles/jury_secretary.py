@@ -41,7 +41,6 @@ class JurySecretary(RoleModel):
         return RuleSet({
             'admission.upload_defense_report': rules.always_allow,
             'admission.view_doctorateadmission': rules.always_allow,
-            'admission.access_doctorateadmission': rules.always_allow,
             'admission.view_doctorateadmission_person': rules.always_allow,
             'admission.view_doctorateadmission_coordinates': rules.always_allow,
             'admission.view_doctorateadmission_secondary_studies': rules.always_allow,

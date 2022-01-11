@@ -31,7 +31,7 @@ from osis_signature.enums import SignatureState
 from admission.auth import predicates
 from admission.auth.roles.cdd_manager import CddManager
 from admission.tests.factories import DoctorateAdmissionFactory
-from admission.tests.factories.roles import CandidateFactory, CddManagerFactory, PromoterFactory
+from admission.tests.factories.roles import CandidateFactory, CddManagerFactory, PromoterRoleFactory
 from admission.tests.factories.supervision import PromoterFactory as PromoterActorFactory, _ProcessFactory
 from base.tests.factories.entity import EntityFactory
 
@@ -58,8 +58,8 @@ class PredicatesTestCase(TestCase):
 
     def test_is_main_promoter(self):
         author = CandidateFactory().person
-        promoter1 = PromoterFactory()
-        promoter2 = PromoterFactory()
+        promoter1 = PromoterRoleFactory()
+        promoter2 = PromoterRoleFactory()
         process = _ProcessFactory()
         PromoterActorFactory(actor_ptr__person_id=promoter2.person_id, actor_ptr__process=process)
         request = DoctorateAdmissionFactory(supervision_group=process)

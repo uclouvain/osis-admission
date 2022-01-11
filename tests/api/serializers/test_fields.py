@@ -33,10 +33,10 @@ from rest_framework.serializers import Serializer
 from rest_framework.test import APIRequestFactory, APITestCase
 from rest_framework.views import APIView
 
+from admission.api.permissions import IsCreationOrHasPermission
 from admission.api.serializers.fields import ActionLinksField
 from admission.contrib.models import DoctorateAdmission
 from admission.tests.factories import DoctorateAdmissionFactory
-from admission.tests.factories.groups import CandidateGroupFactory
 from osis_role.contrib.views import APIPermissionRequiredMixin
 
 
@@ -53,10 +53,7 @@ class TestAPIDetailViewWithPermissions(APIPermissionRequiredMixin, APIView):
 
 
 class TestAPIListAndCreateViewWithPermissions(APIPermissionRequiredMixin, APIView):
-    permission_mapping = {
-        'GET': 'admission.access_doctorateadmission',
-        'POST': 'admission.add_doctorateadmission',
-    }
+    permission_classes = [IsCreationOrHasPermission]
 
 
 class TestAPIViewWithoutPermission(APIView):
@@ -91,9 +88,6 @@ class SerializerFieldsTestCase(APITestCase):
         cls.first_doctorate_admission = DoctorateAdmissionFactory()
         cls.second_doctorate_admission = DoctorateAdmissionFactory()
         cls.first_user = cls.first_doctorate_admission.candidate.user
-        cls.second_user = cls.second_doctorate_admission.candidate.user
-        cls.first_user.groups.add(CandidateGroupFactory())
-        cls.second_user.groups.add(CandidateGroupFactory())
 
         # Request
         factory = APIRequestFactory()
