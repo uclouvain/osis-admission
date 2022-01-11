@@ -48,3 +48,7 @@ class PersonRelatedMixin:
         if self.kwargs.get('uuid'):
             return get_object_or_404(DoctorateAdmission, uuid=self.kwargs.get('uuid')).candidate
         return self.request.user.person
+
+    def get_permission_object(self):
+        if self.kwargs.get('uuid'):
+            return get_object_or_404(DoctorateAdmission, uuid=self.kwargs.get('uuid'))

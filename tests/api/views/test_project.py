@@ -32,7 +32,11 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from admission.contrib.models import AdmissionType, DoctorateAdmission
-from admission.ddd.preparation.projet_doctoral.domain.model._enums import ChoixStatutProposition
+from admission.ddd.preparation.projet_doctoral.domain.model._enums import (
+    ChoixCommissionProximiteCDEouCLSM,
+    ChoixCommissionProximiteCDSS,
+    ChoixStatutProposition,
+)
 from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import (
     DoctoratNonTrouveException,
     MembreCAManquantException,
@@ -119,7 +123,6 @@ class DoctorateAdmissionListApiTestCase(APITestCase):
             'retrieve_cotutelle',
             'update_cotutelle',
             'retrieve_supervision',
-            'update_supervision',
         ]
         self.assertCountEqual(
             list(first_proposition['links']),
@@ -127,7 +130,7 @@ class DoctorateAdmissionListApiTestCase(APITestCase):
         )
         for action in actions:
             # Check the url
-            self.assertTrue('url' in first_proposition['links'][action])
+            self.assertTrue('url' in first_proposition['links'][action], '{} is not allowed'.format('action'))
             # Check the method type
             self.assertTrue('method' in first_proposition['links'][action])
 
@@ -519,6 +522,28 @@ class DoctorateAdmissionGetApiTestCase(APITestCase):
         # Targeted url
         cls.url = resolve_url("admission_api_v1:propositions", uuid=cls.admission.uuid)
 
+    def test_admission_doctorate_get_proximity_commission(self):
+        self.client.force_authenticate(user=self.other_candidate_user)
+        admission = DoctorateAdmissionFactory(
+            candidate=self.other_candidate_user.person,
+            doctorate__management_entity=self.commission,
+            proximity_commission=ChoixCommissionProximiteCDEouCLSM.ECONOMY.name,
+        )
+        response = self.client.get(resolve_url("admission_api_v1:propositions", uuid=admission.uuid), format="json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
+        # Check response data
+        self.assertEqual(response.json()['commission_proximite'], ChoixCommissionProximiteCDEouCLSM.ECONOMY.name)
+
+        admission = DoctorateAdmissionFactory(
+            candidate=self.other_candidate_user.person,
+            doctorate__management_entity=self.commission,
+            proximity_commission=ChoixCommissionProximiteCDSS.ECLI.name,
+        )
+        response = self.client.get(resolve_url("admission_api_v1:propositions", uuid=admission.uuid), format="json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
+        # Check response data
+        self.assertEqual(response.json()['commission_proximite'], ChoixCommissionProximiteCDSS.ECLI.name)
+
     def test_admission_doctorate_get_using_api_candidate(self):
         self.client.force_authenticate(user=self.candidate.user)
         response = self.client.get(self.url, format="json")
@@ -543,10 +568,10 @@ class DoctorateAdmissionGetApiTestCase(APITestCase):
             'add_member',
             'remove_member',
             'retrieve_supervision',
-            'update_supervision',
         ]
         all_actions = allowed_actions + [
             'add_approval',
+            'request_signatures',
         ]
         self.assertCountEqual(
             list(response.data['links']),
@@ -554,7 +579,7 @@ class DoctorateAdmissionGetApiTestCase(APITestCase):
         )
         for action in allowed_actions:
             # Check the url
-            self.assertTrue('url' in response.data['links'][action])
+            self.assertTrue('url' in response.data['links'][action], '{} is not allowed'.format(action))
             # Check the method type
             self.assertTrue('method' in response.data['links'][action])
 

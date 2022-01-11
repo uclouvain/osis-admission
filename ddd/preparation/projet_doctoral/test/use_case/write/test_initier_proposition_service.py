@@ -81,6 +81,7 @@ class TestInitierPropositionService(SimpleTestCase):
 
         self.doctorat_non_CDE = self.doctorat_non_CDSS = 'AGRO3DP'
         self.doctorat_CLSM = "ECGM3DP"
+        self.doctorat_CDSS = "ESP3DP"
 
     def test_should_initier(self):
         proposition_id = self.message_bus.invoke(self.cmd)
@@ -128,6 +129,16 @@ class TestInitierPropositionService(SimpleTestCase):
         proposition_id = self.message_bus.invoke(cmd)
         proposition = self.proposition_repository.get(proposition_id)  # type: Proposition
         self.assertEqual(proposition.commission_proximite.name, ChoixCommissionProximiteCDEouCLSM.ECONOMY.name)
+
+    def test_should_initier_commission_proximite_CDSS(self):
+        cmd = attr.evolve(
+            self.cmd,
+            commission_proximite=ChoixCommissionProximiteCDSS.ECLI.name,
+            sigle_formation=self.doctorat_CDSS,
+        )
+        proposition_id = self.message_bus.invoke(cmd)
+        proposition = self.proposition_repository.get(proposition_id)  # type: Proposition
+        self.assertEqual(proposition.commission_proximite.name, ChoixCommissionProximiteCDSS.ECLI.name)
 
     def test_should_pas_initier_commission_proximite_CLSM_vide(self):
         cmd = attr.evolve(self.cmd, commission_proximite='', sigle_formation=self.doctorat_CLSM)

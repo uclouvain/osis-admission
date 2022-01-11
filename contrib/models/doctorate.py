@@ -243,6 +243,7 @@ class DoctorateAdmission(BaseAdmission):
             ('upload_defense_report', _("Can upload defense report")),
             ('check_copyright', _("Can check copyright")),
             ('sign_diploma', _("Can sign diploma")),
+            ('request_signatures', _("Can request signatures")),
             ('approve_proposition', _("Can approve proposition")),
             ('view_doctorateadmission_person', _("Can view the information related to the admission request author")),
             ('change_doctorateadmission_person',

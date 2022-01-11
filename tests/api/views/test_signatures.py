@@ -23,17 +23,20 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from unittest import mock
 
 from django.shortcuts import resolve_url
 from django.test import override_settings
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import MembreCAManquantException, \
-    PromoteurManquantException
+from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import (
+    CotutelleDoitAvoirAuMoinsUnPromoteurExterneException,
+    MembreCAManquantException,
+    PromoteurManquantException,
+)
 from admission.tests.factories import DoctorateAdmissionFactory, WriteTokenFactory
-from admission.tests.factories.supervision import PromoterFactory, CaMemberFactory
+from admission.tests.factories.roles import CandidateFactory
+from admission.tests.factories.supervision import CaMemberFactory, ExternalPromoterFactory, PromoterFactory
 
 
 @override_settings(ROOT_URLCONF='admission.api.url_v1')
@@ -50,6 +53,7 @@ class RequestSignaturesApiTestCase(APITestCase):
             program_proposition=[WriteTokenFactory().token],
         )
         cls.candidate = cls.admission.candidate
+        CandidateFactory(person=cls.admission.candidate)
         cls.url = resolve_url("request-signatures", uuid=cls.admission.uuid)
 
     def test_user_not_logged_assert_not_authorized(self):
@@ -66,11 +70,7 @@ class RequestSignaturesApiTestCase(APITestCase):
             response = getattr(self.client, method)(self.url)
             self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 
-    @mock.patch(
-        'admission.infrastructure.preparation.projet_doctoral.domain.service.promoteur.PromoteurTranslator.est_externe',
-        return_value=True,
-    )
-    def test_request_signatures_using_api(self, mock_is_external):
+    def test_request_signatures_using_api(self):
         self.client.force_authenticate(user=self.candidate.user)
         promoter = PromoterFactory()
         CaMemberFactory(process=promoter.process)
@@ -80,11 +80,7 @@ class RequestSignaturesApiTestCase(APITestCase):
         response = self.client.post(self.url)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
-    @mock.patch(
-        'admission.infrastructure.preparation.projet_doctoral.domain.service.promoteur.PromoteurTranslator.est_externe',
-        return_value=True,
-    )
-    def test_request_signatures_using_api_without_ca_members_must_fail(self, mock_is_external):
+    def test_request_signatures_using_api_without_ca_members_must_fail(self):
         self.client.force_authenticate(user=self.candidate.user)
 
         promoter = PromoterFactory()
@@ -94,6 +90,63 @@ class RequestSignaturesApiTestCase(APITestCase):
         response = self.client.post(self.url)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.json()['non_field_errors'][0]['status_code'], MembreCAManquantException.status_code)
+
+    def test_request_signatures_using_api_cotutelle_without_external_promoter_must_fail(self):
+        self.client.force_authenticate(user=self.candidate.user)
+        admission = DoctorateAdmissionFactory(
+            candidate=self.candidate,
+            cotutelle=True,
+            cotutelle_motivation="Very motivated",
+            cotutelle_institution="Somewhere",
+            cotutelle_opening_request=[WriteTokenFactory().token],
+            cotutelle_convention=[WriteTokenFactory().token],
+            project_title="title",
+            project_abstract="abstract",
+            thesis_language="FR",
+            project_document=[WriteTokenFactory().token],
+            gantt_graph=[WriteTokenFactory().token],
+            program_proposition=[WriteTokenFactory().token],
+        )
+        url = resolve_url("request-signatures", uuid=admission.uuid)
+
+        promoter = PromoterFactory()
+        CaMemberFactory(process=promoter.actor_ptr.process)
+        admission.supervision_group = promoter.actor_ptr.process
+        admission.save()
+
+        response = self.client.post(url)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(
+            response.json()['non_field_errors'][0]['status_code'],
+            CotutelleDoitAvoirAuMoinsUnPromoteurExterneException.status_code,
+        )
+
+    def test_request_signatures_using_api_cotutelle_with_external_promoter(self):
+        self.client.force_authenticate(user=self.candidate.user)
+        admission = DoctorateAdmissionFactory(
+            candidate=self.candidate,
+            cotutelle=True,
+            cotutelle_motivation="Very motivated",
+            cotutelle_institution="Somewhere",
+            cotutelle_opening_request=[WriteTokenFactory().token],
+            cotutelle_convention=[WriteTokenFactory().token],
+            project_title="title",
+            project_abstract="abstract",
+            thesis_language="FR",
+            project_document=[WriteTokenFactory().token],
+            gantt_graph=[WriteTokenFactory().token],
+            program_proposition=[WriteTokenFactory().token],
+        )
+        url = resolve_url("request-signatures", uuid=admission.uuid)
+
+        promoter = ExternalPromoterFactory()
+        PromoterFactory(process=promoter.actor_ptr.process)
+        CaMemberFactory(process=promoter.actor_ptr.process)
+        admission.supervision_group = promoter.actor_ptr.process
+        admission.save()
+
+        response = self.client.post(url)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def test_request_signatures_using_api_without_promoter_must_fail(self):
         self.client.force_authenticate(user=self.candidate.user)

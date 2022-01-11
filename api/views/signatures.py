@@ -23,14 +23,18 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from admission.api import serializers
 from admission.api.schema import ResponseSpecificSchema
+from admission.contrib.models import DoctorateAdmission
 from admission.ddd.preparation.projet_doctoral.commands import DemanderSignaturesCommand
 from infrastructure.messages_bus import message_bus_instance
+from osis_role.contrib.views import APIPermissionRequiredMixin
 
 
 class RequestSignaturesSchema(ResponseSpecificSchema):
@@ -40,13 +44,20 @@ class RequestSignaturesSchema(ResponseSpecificSchema):
     }
 
 
-class RequestSignaturesAPIView(APIView):
+class RequestSignaturesAPIView(APIPermissionRequiredMixin, APIView):
     name = "request-signatures"
     schema = RequestSignaturesSchema()
     pagination_class = None
     filter_backends = []
+    permission_mapping = {
+        'POST': 'admission.request_signatures',
+    }
+
+    def get_permission_object(self):
+        return get_object_or_404(DoctorateAdmission, uuid=self.kwargs['uuid'])
 
     def post(self, request, *args, **kwargs):
         """Ask for all promoters and members to sign the proposition."""
-        message_bus_instance.invoke(DemanderSignaturesCommand(uuid_proposition=str(kwargs["uuid"])))
-        return Response(status=status.HTTP_201_CREATED)
+        result = message_bus_instance.invoke(DemanderSignaturesCommand(uuid_proposition=str(kwargs["uuid"])))
+        serializer = serializers.PropositionIdentityDTOSerializer(instance=result)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)

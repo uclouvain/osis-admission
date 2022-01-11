@@ -28,10 +28,11 @@ from django.utils.translation import gettext_lazy as _
 from rules import RuleSet
 
 from admission.auth.predicates import is_part_of_committee, is_part_of_committee_and_invited
+from admission.contrib.models.actor import ExternalActorMixin
 from osis_role.contrib.models import RoleModel
 
 
-class CommitteeMember(RoleModel):
+class CommitteeMember(ExternalActorMixin, RoleModel):
     class Meta:
         verbose_name = _("Committee member")
         verbose_name_plural = _("Committee members")

@@ -196,14 +196,14 @@ ACTION_LINKS = {
         'method': 'GET',
         'params': ['uuid'],
     },
-    'update_supervision': {
-        'path_name': 'admission_api_v1:supervision',
-        'method': 'PUT',
-        'params': ['uuid'],
-    },
     'add_approval': {
         'path_name': 'admission_api_v1:approvals',
         'method': 'POST',
         'params': ['uuid'],
-    }
+    },
+    'request_signatures': {
+        'path_name': 'admission_api_v1:request-signatures',
+        'method': 'POST',
+        'params': ['uuid'],
+    },
 }
