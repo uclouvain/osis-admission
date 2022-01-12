@@ -41,7 +41,6 @@ class SicDirector(RoleModel):
     def rule_set(cls):
         return RuleSet({
             **SicManager.rule_set(),
-            'admission.access_doctorateadmission': rules.always_allow,
             'admission.view_doctorateadmission': rules.always_allow,
             'admission.validate_registration': rules.always_allow,
             'admission.view_doctorateadmission_person': rules.always_allow,

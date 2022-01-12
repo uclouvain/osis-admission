@@ -44,13 +44,7 @@ from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions impor
 )
 from admission.tests.factories import DoctorateAdmissionFactory, WriteTokenFactory
 from admission.tests.factories.doctorate import DoctorateFactory
-from admission.tests.factories.groups import (
-    CandidateGroupFactory,
-    CddManagerGroupFactory,
-    CommitteeMemberGroupFactory,
-    PromoterGroupFactory,
-)
-from admission.tests.factories.roles import CddManagerFactory
+from admission.tests.factories.roles import CandidateFactory, CddManagerFactory
 from admission.tests.factories.supervision import CaMemberFactory, PromoterFactory
 from base.models.enums.entity_type import EntityType
 from base.tests.factories.entity_version import EntityVersionFactory
@@ -79,14 +73,10 @@ class DoctorateAdmissionListApiTestCase(APITestCase):
         cls.admission.save()
         # Users
         cls.candidate = cls.admission.candidate
-        cls.candidate.user.groups.add(CandidateGroupFactory())
         cls.no_role_user = PersonFactory(first_name="Joe").user
         cls.cdd_manager_user = CddManagerFactory(entity=cls.commission).person.user
-        cls.cdd_manager_user.groups.add(CddManagerGroupFactory())
         cls.promoter_user = promoter.person.user
-        cls.promoter_user.groups.add(PromoterGroupFactory())
         cls.committee_member_user = committee_member.person.user
-        cls.committee_member_user.groups.add(CommitteeMemberGroupFactory())
 
         cls.url = resolve_url("admission_api_v1:propositions")
 
@@ -137,7 +127,7 @@ class DoctorateAdmissionListApiTestCase(APITestCase):
     def test_list_propositions_no_role(self):
         self.client.force_authenticate(user=self.no_role_user)
         response = self.client.get(self.url, format="json")
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.content)
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
 
     def test_list_propositions_cdd_manager(self):
         self.client.force_authenticate(user=self.cdd_manager_user)
@@ -173,7 +163,6 @@ class DoctorateAdmissionCreationApiTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
         cls.candidate = PersonFactory()
-        cls.candidate.user.groups.add(CandidateGroupFactory())
         root = EntityVersionFactory(parent=None).entity
         cls.sector = EntityVersionFactory(
             parent=root,
@@ -186,14 +175,6 @@ class DoctorateAdmissionCreationApiTestCase(APITestCase):
             acronym='CDA',
         ).entity
         cls.doctorate = DoctorateFactory(management_entity=cls.commission)
-        # Users
-        cls.no_role_user = PersonFactory(first_name="Joe").user
-        cls.cdd_manager_user = CddManagerFactory(entity=cls.commission).person.user
-        cls.cdd_manager_user.groups.add(CddManagerGroupFactory())
-        cls.promoter_user = PersonFactory(first_name="Jane").user
-        cls.promoter_user.groups.add(PromoterGroupFactory())
-        cls.committee_member_user = PersonFactory(first_name="Jim").user
-        cls.committee_member_user.groups.add(CommitteeMemberGroupFactory())
 
         cls.create_data = {
             "type_admission": AdmissionType.PRE_ADMISSION.name,
@@ -226,26 +207,6 @@ class DoctorateAdmissionCreationApiTestCase(APITestCase):
             self.doctorate.academic_year.year % 100,
             300000 + admission.id,
         ))
-
-    def test_admission_doctorate_creation_using_api_no_role(self):
-        self.client.force_authenticate(user=self.no_role_user)
-        response = self.client.post(self.url, data=self.create_data)
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.content)
-
-    def test_admission_doctorate_creation_using_api_cdd_manager(self):
-        self.client.force_authenticate(user=self.cdd_manager_user)
-        response = self.client.post(self.url, data=self.create_data)
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.content)
-
-    def test_admission_doctorate_creation_using_api_promoter(self):
-        self.client.force_authenticate(user=self.promoter_user)
-        response = self.client.post(self.url, data=self.create_data)
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.content)
-
-    def test_admission_doctorate_creation_using_api_committee_member(self):
-        self.client.force_authenticate(user=self.committee_member_user)
-        response = self.client.post(self.url, data=self.create_data)
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.content)
 
     def test_admission_doctorate_creation_using_api_with_wrong_doctorate(self):
         self.client.force_authenticate(user=self.candidate.user)
@@ -295,22 +256,14 @@ class DoctorateAdmissionUpdatingApiTestCase(APITestCase):
         cls.admission.save()
         # Users
         cls.candidate = cls.admission.candidate
-        cls.candidate.user.groups.add(CandidateGroupFactory())
-        cls.other_candidate_user = PersonFactory(first_name="Jim").user
-        cls.other_candidate_user.groups.add(CandidateGroupFactory())
+        cls.other_candidate_user = CandidateFactory(person__first_name="Jim").person.user
         cls.no_role_user = PersonFactory(first_name="Joe").user
         cls.cdd_manager_user = CddManagerFactory(entity=cls.commission).person.user
-        cls.cdd_manager_user.groups.add(CddManagerGroupFactory())
         cls.other_cdd_manager_user = CddManagerFactory().person.user
-        cls.other_cdd_manager_user.groups.add(CddManagerGroupFactory())
         cls.promoter_user = promoter.person.user
-        cls.promoter_user.groups.add(PromoterGroupFactory())
-        cls.other_promoter_user = PersonFactory(first_name="Jessy").user
-        cls.other_promoter_user.groups.add(PromoterGroupFactory())
+        cls.other_promoter_user = PromoterFactory().person.user
         cls.committee_member_user = committee_member.person.user
-        cls.committee_member_user.groups.add(CommitteeMemberGroupFactory())
-        cls.other_committee_member_user = PersonFactory(first_name="James").user
-        cls.other_committee_member_user.groups.add(CommitteeMemberGroupFactory())
+        cls.other_committee_member_user = CaMemberFactory().person.user
 
     def test_admission_doctorate_update_using_api_candidate(self):
         self.client.force_authenticate(user=self.candidate.user)
@@ -404,22 +357,14 @@ class DoctorateAdmissionDeletingApiTestCase(APITestCase):
         cls.admission.save()
         # Users
         cls.candidate = cls.admission.candidate
-        cls.candidate.user.groups.add(CandidateGroupFactory())
-        cls.other_candidate_user = PersonFactory().user
-        cls.other_candidate_user.groups.add(CandidateGroupFactory())
+        cls.other_candidate_user = CandidateFactory().person.user
         cls.no_role_user = PersonFactory().user
         cls.cdd_manager_user = CddManagerFactory(entity=cls.commission).person.user
-        cls.cdd_manager_user.groups.add(CddManagerGroupFactory())
         cls.other_cdd_manager_user = CddManagerFactory().person.user
-        cls.other_cdd_manager_user.groups.add(CddManagerGroupFactory())
         cls.promoter_user = promoter.person.user
-        cls.promoter_user.groups.add(PromoterGroupFactory())
-        cls.other_promoter_user = PersonFactory().user
-        cls.other_promoter_user.groups.add(PromoterGroupFactory())
+        cls.other_promoter_user = PromoterFactory().person.user
         cls.committee_member_user = committee_member.person.user
-        cls.committee_member_user.groups.add(CommitteeMemberGroupFactory())
-        cls.other_committee_member_user = PersonFactory().user
-        cls.other_committee_member_user.groups.add(CommitteeMemberGroupFactory())
+        cls.other_committee_member_user = CaMemberFactory().person.user
         # Targeted url
         cls.url = resolve_url("admission_api_v1:propositions", uuid=cls.admission.uuid)
 
@@ -503,22 +448,14 @@ class DoctorateAdmissionGetApiTestCase(APITestCase):
         cls.admission.save()
         # Users
         cls.candidate = cls.admission.candidate
-        cls.candidate.user.groups.add(CandidateGroupFactory())
-        cls.other_candidate_user = PersonFactory().user
-        cls.other_candidate_user.groups.add(CandidateGroupFactory())
+        cls.other_candidate_user = CandidateFactory().person.user
         cls.no_role_user = PersonFactory().user
         cls.cdd_manager_user = CddManagerFactory(entity=cls.commission).person.user
-        cls.cdd_manager_user.groups.add(CddManagerGroupFactory())
         cls.other_cdd_manager_user = CddManagerFactory().person.user
-        cls.other_cdd_manager_user.groups.add(CddManagerGroupFactory())
         cls.promoter_user = promoter.person.user
-        cls.promoter_user.groups.add(PromoterGroupFactory())
-        cls.other_promoter_user = PersonFactory().user
-        cls.other_promoter_user.groups.add(PromoterGroupFactory())
+        cls.other_promoter_user = PromoterFactory().person.user
         cls.committee_member_user = committee_member.person.user
-        cls.committee_member_user.groups.add(CommitteeMemberGroupFactory())
-        cls.other_committee_member_user = PersonFactory().user
-        cls.other_committee_member_user.groups.add(CommitteeMemberGroupFactory())
+        cls.other_committee_member_user = CaMemberFactory().person.user
         # Targeted url
         cls.url = resolve_url("admission_api_v1:propositions", uuid=cls.admission.uuid)
 
@@ -644,9 +581,7 @@ class DoctorateAdmissionVerifyTestCase(APITestCase):
         )
         # Users
         cls.candidate = cls.admission.candidate
-        cls.candidate.user.groups.add(CandidateGroupFactory())
-        cls.other_candidate_user = PersonFactory(first_name="Jim").user
-        cls.other_candidate_user.groups.add(CandidateGroupFactory())
+        cls.other_candidate_user = CandidateFactory(person__first_name="Jim").person.user
         cls.no_role_user = PersonFactory(first_name="Joe").user
         cls.url = resolve_url("verify-proposition", uuid=cls.admission.uuid)
 

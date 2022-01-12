@@ -60,7 +60,7 @@ def is_admission_request_author_or_person(self, user: User, obj: BaseAdmission):
 @predicate(bind=True)
 @predicate_failed_msg(message=_("You must be the request promoter to access this admission"))
 def is_admission_request_promoter(self, user: User, obj: DoctorateAdmission):
-    return user.person.pk in obj.supervision_group.actors.filter(
+    return obj.supervision_group and user.person.pk in obj.supervision_group.actors.filter(
         supervisionactor__type=ActorType.PROMOTER.name,
     ).values_list('person_id', flat=True)
 
@@ -74,7 +74,7 @@ def is_part_of_doctoral_commission(self, user: User, obj: DoctorateAdmission):
 @predicate(bind=True)
 @predicate_failed_msg(message=_("You must be a member of the committee to access this admission"))
 def is_part_of_committee(self, user: User, obj: DoctorateAdmission):
-    return user.person.pk in obj.supervision_group.actors.values_list('person_id', flat=True)
+    return obj.supervision_group and user.person.pk in obj.supervision_group.actors.values_list('person_id', flat=True)
 
 
 @predicate(bind=True)

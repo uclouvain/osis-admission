@@ -30,6 +30,7 @@ from django.db import connection
 from admission.contrib.models import DoctorateAdmission
 from admission.contrib.models.doctorate import REFERENCE_SEQ_NAME
 from admission.ddd.preparation.projet_doctoral.domain.model.proposition import Proposition
+from admission.tests.factories.roles import CandidateFactory
 from base.models.enums.education_group_types import TrainingType
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.education_group_type import EducationGroupTypeFactory
@@ -61,3 +62,7 @@ class DoctorateAdmissionFactory(factory.DjangoModelFactory):
     doctorate = factory.SubFactory(DoctorateFactory)
     thesis_institute = factory.SubFactory(EntityVersionFactory)
     reference = factory.LazyAttribute(_generate_reference)
+
+    @factory.post_generation
+    def create_candidate_role(self, create, extracted, **kwargs):
+        CandidateFactory(person=self.candidate)

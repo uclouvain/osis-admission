@@ -39,7 +39,6 @@ class Adre(RoleModel):
     @classmethod
     def rule_set(cls):
         return RuleSet({
-            'admission.access_doctorateadmission': rules.always_allow,
             'admission.view_doctorateadmission': rules.always_allow,
             'admission.download_jury_approved_pdf': rules.always_allow,
             'admission.upload_jury_approved_pdf': rules.always_allow,

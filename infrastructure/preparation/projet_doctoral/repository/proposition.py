@@ -27,6 +27,7 @@ from typing import List, Optional
 
 from django.db import connection
 
+from admission.auth.roles.candidate import Candidate
 from admission.contrib.models import DoctorateAdmission
 from admission.contrib.models.doctorate import REFERENCE_SEQ_NAME
 from admission.ddd.preparation.projet_doctoral.domain.model._institut import InstitutIdentity
@@ -140,6 +141,7 @@ class PropositionRepository(IPropositionRepository):
             acronym=entity.sigle_formation,
             academic_year__year=entity.annee,
         )
+        candidate = Person.objects.get(global_id=entity.matricule_candidat)
         DoctorateAdmission.objects.update_or_create(
             uuid=entity.entity_id.uuid,
             defaults={
@@ -147,7 +149,7 @@ class PropositionRepository(IPropositionRepository):
                 'type': entity.type_admission.name,
                 'status': entity.statut.name,
                 'comment': entity.justification,
-                'candidate': Person.objects.get(global_id=entity.matricule_candidat),
+                'candidate': candidate,
                 'proximity_commission': entity.commission_proximite and entity.commission_proximite.name,
                 'doctorate': doctorate,
                 'financing_type': entity.financement.type and entity.financement.type.name,
@@ -175,3 +177,4 @@ class PropositionRepository(IPropositionRepository):
                 'phd_already_done_no_defense_reason': entity.experience_precedente_recherche.raison_non_soutenue,
             }
         )
+        Candidate.objects.get_or_create(person=candidate)

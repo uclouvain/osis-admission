@@ -34,9 +34,7 @@ from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions impor
     PromoteurNonTrouveException,
 )
 from admission.tests.factories import DoctorateAdmissionFactory
-from admission.tests.factories.groups import CandidateGroupFactory, CddManagerGroupFactory,\
-    CommitteeMemberGroupFactory, PromoterGroupFactory
-from admission.tests.factories.roles import CddManagerFactory
+from admission.tests.factories.roles import CandidateFactory, CddManagerFactory
 from admission.tests.factories.supervision import CaMemberFactory, PromoterFactory
 from base.models.enums.entity_type import EntityType
 from base.tests.factories.entity_version import EntityVersionFactory
@@ -56,14 +54,10 @@ class SupervisionApiTestCase(APITestCase):
         cls.admission = DoctorateAdmissionFactory(doctorate__management_entity=cls.commission)
         # Users
         cls.candidate = cls.admission.candidate
-        cls.candidate.user.groups.add(CandidateGroupFactory())
-        cls.other_candidate_user = PersonFactory(first_name="Jim").user
-        cls.other_candidate_user.groups.add(CandidateGroupFactory())
+        cls.other_candidate_user = CandidateFactory(person__first_name="Jim").person.user
         cls.no_role_user = PersonFactory(first_name="Joe").user
         cls.cdd_manager_user = CddManagerFactory(entity=cls.commission).person.user
-        cls.cdd_manager_user.groups.add(CddManagerGroupFactory())
         cls.other_cdd_manager_user = CddManagerFactory().person.user
-        cls.other_cdd_manager_user.groups.add(CddManagerGroupFactory())
         # Target url
         cls.url = resolve_url("supervision", uuid=cls.admission.uuid)
 
@@ -122,7 +116,6 @@ class SupervisionApiTestCase(APITestCase):
     def test_supervision_get_using_api_promoter(self):
         # Current user
         promoter = PromoterFactory()
-        promoter.person.user.groups.add(PromoterGroupFactory())
 
         # Other user
         other_promoter = PromoterFactory()
@@ -143,7 +136,6 @@ class SupervisionApiTestCase(APITestCase):
     def test_supervision_get_using_api_committee_member(self):
         # Current user
         member = CaMemberFactory()
-        member.person.user.groups.add(CommitteeMemberGroupFactory())
 
         # Other user
         other_member = CaMemberFactory()
@@ -244,7 +236,6 @@ class SupervisionApiTestCase(APITestCase):
     def test_supervision_ajouter_membre_promoter(self):
         # Current user
         promoter = PromoterFactory()
-        promoter.person.user.groups.add(PromoterGroupFactory())
 
         # Other user
         other_promoter = PromoterFactory()
@@ -271,7 +262,6 @@ class SupervisionApiTestCase(APITestCase):
     def test_supervision_ajouter_membre_committee_member(self):
         # Current user
         member = CaMemberFactory()
-        member.person.user.groups.add(CommitteeMemberGroupFactory())
 
         # Other user
         other_member = CaMemberFactory()
@@ -377,7 +367,6 @@ class SupervisionApiTestCase(APITestCase):
     def test_supervision_supprimer_membre_promoter(self):
         # Current user
         promoter = PromoterFactory()
-        promoter.person.user.groups.add(PromoterGroupFactory())
 
         # Other user
         other_promoter = PromoterFactory()
@@ -404,7 +393,6 @@ class SupervisionApiTestCase(APITestCase):
     def test_supervision_supprimer_membre_committee_member(self):
         # Current user
         member = CaMemberFactory()
-        member.person.user.groups.add(CommitteeMemberGroupFactory())
 
         # Other user
         other_member = CaMemberFactory()

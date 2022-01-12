@@ -23,13 +23,14 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from django.shortcuts import resolve_url
 from django.test import override_settings
-from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
-from admission.tests.factories.groups import CandidateGroupFactory, CddManagerGroupFactory,\
-    CommitteeMemberGroupFactory, PromoterGroupFactory
 
+from admission.tests.factories import DoctorateAdmissionFactory
+from admission.tests.factories.roles import CddManagerFactory
+from admission.tests.factories.supervision import CaMemberFactory, PromoterFactory
 from base.models.enums.person_address_type import PersonAddressType
 from base.models.person_address import PersonAddress
 from base.tests.factories.person import PersonFactory
@@ -37,11 +38,10 @@ from base.tests.factories.person_address import PersonAddressFactory
 
 
 @override_settings(ROOT_URLCONF='admission.api.url_v1')
-class PersonTestCase(APITestCase):
+class CoordonneesTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
-        # Targeted url
-        cls.url = reverse('coordonnees')
+        cls.agnostic_url = resolve_url('coordonnees')
         # Data
         cls.updated_data = {
             "residential": {'street': "Rue de la sobriété"},
@@ -52,22 +52,22 @@ class PersonTestCase(APITestCase):
             label=PersonAddressType.CONTACT.name,
             street="Rue de la soif",
         )
+        promoter = PromoterFactory()
+        cls.promoter_user = promoter.person.user
+        admission = DoctorateAdmissionFactory(supervision_group=promoter.process, candidate=cls.address.person)
+        cls.admission_url = resolve_url('coordonnees', uuid=admission.uuid)
         # Users
         cls.candidate_user = cls.address.person.user
-        cls.candidate_user.groups.add(CandidateGroupFactory())
         cls.no_role_user = PersonFactory(first_name="Joe").user
-        cls.cdd_manager_user = PersonFactory(first_name="Jack").user
-        cls.cdd_manager_user.groups.add(CddManagerGroupFactory())
-        cls.promoter_user = PersonFactory(first_name="Jane").user
-        cls.promoter_user.groups.add(PromoterGroupFactory())
-        cls.committee_member_user = PersonFactory(first_name="James").user
-        cls.committee_member_user.groups.add(CommitteeMemberGroupFactory())
-
+        cls.cdd_manager_user = CddManagerFactory().person.user
+        cls.committee_member_user = CaMemberFactory(process=promoter.process).person.user
 
     def test_user_not_logged_assert_not_authorized(self):
         self.client.force_authenticate(user=None)
 
-        response = self.client.get(self.url)
+        response = self.client.get(self.agnostic_url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        response = self.client.get(self.admission_url)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_assert_methods_not_allowed(self):
@@ -75,27 +75,26 @@ class PersonTestCase(APITestCase):
         methods_not_allowed = ['delete', 'post', 'patch']
 
         for method in methods_not_allowed:
-            response = getattr(self.client, method)(self.url)
+            response = getattr(self.client, method)(self.agnostic_url)
             self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 
     def test_coordonnees_get_no_role(self):
         self.client.force_authenticate(self.no_role_user)
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.json())
-
-    def test_coordonnees_update_no_role(self):
-        self.client.force_authenticate(self.no_role_user)
-        response = self.client.put(self.url, self.updated_data)
+        response = self.client.get(self.agnostic_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
+        response = self.client.get(self.admission_url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.json())
 
     def test_coordonnees_get_candidate(self):
         self.client.force_authenticate(self.candidate_user)
-        response = self.client.get(self.url)
+        response = self.client.get(self.agnostic_url)
+        self.assertEqual(response.json()['contact']['street'], "Rue de la soif")
+        response = self.client.get(self.admission_url)
         self.assertEqual(response.json()['contact']['street'], "Rue de la soif")
 
     def test_coordonnees_update_candidate(self):
         self.client.force_authenticate(self.candidate_user)
-        response = self.client.put(self.url, self.updated_data)
+        response = self.client.put(self.agnostic_url, self.updated_data)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
         address = PersonAddress.objects.get(
             person__user_id=self.candidate_user.pk,
@@ -105,40 +104,15 @@ class PersonTestCase(APITestCase):
 
     def test_coordonnees_get_cdd_manager(self):
         self.client.force_authenticate(self.cdd_manager_user)
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
-
-    def test_coordonnees_update_cdd_manager(self):
-        self.client.force_authenticate(self.cdd_manager_user)
-        response = self.client.put(self.url, self.updated_data)
-        self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
-
-    def test_coordonnees_get_cdd_manager(self):
-        self.client.force_authenticate(self.cdd_manager_user)
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
-
-    def test_coordonnees_update_cdd_manager(self):
-        self.client.force_authenticate(self.cdd_manager_user)
-        response = self.client.put(self.url, self.updated_data)
+        response = self.client.get(self.admission_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
 
     def test_coordonnees_get_promoter(self):
         self.client.force_authenticate(self.promoter_user)
-        response = self.client.get(self.url)
+        response = self.client.get(self.admission_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
-
-    def test_coordonnees_update_promoter(self):
-        self.client.force_authenticate(self.promoter_user)
-        response = self.client.put(self.url, self.updated_data)
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.json())
 
     def test_coordonnees_get_committee_member(self):
         self.client.force_authenticate(self.committee_member_user)
-        response = self.client.get(self.url)
+        response = self.client.get(self.admission_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
-
-    def test_coordonnees_update_committee_member(self):
-        self.client.force_authenticate(self.committee_member_user)
-        response = self.client.put(self.url, self.updated_data)
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.json())

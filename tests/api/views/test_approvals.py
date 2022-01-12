@@ -25,13 +25,12 @@
 # ##############################################################################
 from django.shortcuts import resolve_url
 from django.test import override_settings
-from osis_signature.enums import SignatureState
 from rest_framework import status
 from rest_framework.test import APITestCase
 
 from admission.tests.factories import DoctorateAdmissionFactory, WriteTokenFactory
-from admission.tests.factories.groups import PromoterGroupFactory, CommitteeMemberGroupFactory
 from admission.tests.factories.supervision import CaMemberFactory, PromoterFactory
+from osis_signature.enums import SignatureState
 
 
 @override_settings(ROOT_URLCONF='admission.api.url_v1')
@@ -42,21 +41,15 @@ class ApprovalsApiTestCase(APITestCase):
         # Create promoters
         cls.promoter = PromoterFactory()
         cls.promoter.actor_ptr.switch_state(SignatureState.INVITED)
-        cls.promoter.person.user.groups.add(PromoterGroupFactory())
 
         cls.promoter_who_approved = PromoterFactory(process=cls.promoter.process)
         cls.promoter_who_approved.actor_ptr.switch_state(SignatureState.APPROVED)
-        cls.promoter_who_approved.person.user.groups.add(PromoterGroupFactory())
 
         cls.other_promoter = PromoterFactory()
-        cls.other_promoter.person.user.groups.add(PromoterGroupFactory())
 
         # Create ca members
         cls.ca_member = CaMemberFactory(process=cls.promoter.process)
-        cls.ca_member.person.user.groups.add(CommitteeMemberGroupFactory())
-
         cls.other_ca_member = CaMemberFactory()
-        cls.other_ca_member.person.user.groups.add(CommitteeMemberGroupFactory())
 
         # Create the admission
         cls.admission = DoctorateAdmissionFactory(

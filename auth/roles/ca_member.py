@@ -23,7 +23,6 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import rules
 from django.utils.translation import gettext_lazy as _
 from rules import RuleSet
 
@@ -43,11 +42,10 @@ class CommitteeMember(ExternalActorMixin, RoleModel):
         return RuleSet({
             'admission.approve_jury': is_part_of_committee,
             'admission.view_doctorateadmission': is_part_of_committee,
-            'admission.access_doctorateadmission': rules.always_allow,
-            'admission.view_doctorateadmission_person': rules.always_allow,
-            'admission.view_doctorateadmission_coordinates': rules.always_allow,
-            'admission.view_doctorateadmission_secondary_studies': rules.always_allow,
-            'admission.view_doctorateadmission_curriculum': rules.always_allow,
+            'admission.view_doctorateadmission_person': is_part_of_committee,
+            'admission.view_doctorateadmission_coordinates': is_part_of_committee,
+            'admission.view_doctorateadmission_secondary_studies': is_part_of_committee,
+            'admission.view_doctorateadmission_curriculum': is_part_of_committee,
             'admission.view_doctorateadmission_project': is_part_of_committee,
             'admission.view_doctorateadmission_cotutelle': is_part_of_committee,
             'admission.view_doctorateadmission_supervision': is_part_of_committee,

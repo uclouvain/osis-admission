@@ -30,9 +30,7 @@ from rest_framework.test import APITestCase
 
 from admission.contrib.models import DoctorateAdmission
 from admission.tests.factories import DoctorateAdmissionFactory
-from admission.tests.factories.groups import CandidateGroupFactory, CddManagerGroupFactory,\
-    CommitteeMemberGroupFactory, PromoterGroupFactory
-from admission.tests.factories.roles import CddManagerFactory
+from admission.tests.factories.roles import CandidateFactory, CddManagerFactory
 from admission.tests.factories.supervision import CaMemberFactory, PromoterFactory
 from base.tests.factories.entity import EntityFactory
 from base.tests.factories.person import PersonFactory
@@ -61,22 +59,14 @@ class CotutelleApiTestCase(APITestCase):
         cls.admission.save()
         # Users
         cls.candidate = cls.admission.candidate
-        cls.candidate.user.groups.add(CandidateGroupFactory())
-        cls.other_candidate_user = PersonFactory().user
-        cls.other_candidate_user.groups.add(CandidateGroupFactory())
+        cls.other_candidate_user = CandidateFactory().person.user
         cls.no_role_user = PersonFactory().user
         cls.cdd_manager_user = CddManagerFactory(entity=doctoral_commission).person.user
-        cls.cdd_manager_user.groups.add(CddManagerGroupFactory())
         cls.other_cdd_manager_user = CddManagerFactory().person.user
-        cls.other_cdd_manager_user.groups.add(CddManagerGroupFactory())
         cls.promoter_user = promoter.person.user
-        cls.promoter_user.groups.add(PromoterGroupFactory())
-        cls.other_promoter_user = PersonFactory().user
-        cls.other_promoter_user.groups.add(PromoterGroupFactory())
+        cls.other_promoter_user = PromoterFactory().person.user
         cls.committee_member_user = committee_member.person.user
-        cls.committee_member_user.groups.add(CommitteeMemberGroupFactory())
-        cls.other_committee_member_user = PersonFactory().user
-        cls.other_committee_member_user.groups.add(CommitteeMemberGroupFactory())
+        cls.other_committee_member_user = CaMemberFactory().person.user
 
     def test_user_not_logged_assert_not_authorized(self):
         self.client.force_authenticate(user=None)

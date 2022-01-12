@@ -43,7 +43,6 @@ class CddManager(EntityRoleModel):
             'admission.change_doctorateadmission': is_part_of_doctoral_commission,
             'admission.view_doctorateadmission': is_part_of_doctoral_commission,
             'admission.delete_doctorateadmission': rules.always_deny,
-            'admission.access_doctorateadmission': rules.always_allow,
             'admission.appose_cdd_notice': is_part_of_doctoral_commission,
             'admission.download_pdf_confirmation': is_part_of_doctoral_commission,
             'admission.upload_pdf_confirmation': is_part_of_doctoral_commission,
