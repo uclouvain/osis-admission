@@ -25,6 +25,10 @@
 # ##############################################################################
 from rest_framework.permissions import BasePermission, SAFE_METHODS
 
+from admission.contrib.models import DoctorateAdmission
+from admission.ddd.preparation.projet_doctoral.domain.model._enums import ChoixStatutProposition
+from admission.ddd.preparation.projet_doctoral.domain.service.initier_proposition import MAXIMUM_AUTORISE
+
 
 class IsSelfPersonTabOrTabPermission(BasePermission):
     def __init__(self, permission_suffix) -> None:
@@ -45,8 +49,13 @@ class IsSelfPersonTabOrTabPermission(BasePermission):
 
 class IsCreationOrHasPermission(BasePermission):
     def has_permission(self, request, view):
-        # No object means we are creating a new admission
-        return True
+        # No object means we are either listing or creating a new admission
+        if request.method in SAFE_METHODS:
+            return True
+        return DoctorateAdmission.objects.filter(
+            candidate=request.user.person,
+            status=ChoixStatutProposition.IN_PROGRESS.name,
+        ).count() < MAXIMUM_AUTORISE
 
     def has_object_permission(self, request, view, obj):
         if request.method in SAFE_METHODS:
