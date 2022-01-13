@@ -27,11 +27,11 @@ from collections import defaultdict
 
 from rest_framework import mixins, status
 from rest_framework.generics import GenericAPIView, ListCreateAPIView, get_object_or_404
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
 
 from admission.api import serializers
+from admission.api.permissions import IsListingOrHasNotAlreadyCreatedPermission
 from admission.api.schema import ResponseSpecificSchema
 from admission.contrib.models.doctorate import DoctorateAdmission
 from admission.ddd.preparation.projet_doctoral.commands import (
@@ -51,7 +51,6 @@ from backoffice.settings.rest_framework.common_views import DisplayExceptionsByF
 from backoffice.settings.rest_framework.exception_handler import get_error_data
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from infrastructure.messages_bus import message_bus_instance
-from osis_common.ddd.interface import BusinessException
 from osis_role.contrib.views import APIPermissionRequiredMixin
 
 
@@ -80,7 +79,7 @@ class PropositionListView(APIPermissionRequiredMixin, DisplayExceptionsByFieldNa
     schema = PropositionListSchema()
     pagination_class = None
     filter_backends = []
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsListingOrHasNotAlreadyCreatedPermission]
 
     field_name_by_exception = {
         JustificationRequiseException: ['justification'],

@@ -33,10 +33,12 @@ from rest_framework.serializers import Serializer
 from rest_framework.test import APIRequestFactory, APITestCase
 from rest_framework.views import APIView
 
-from admission.api.permissions import IsCreationOrHasPermission
+from admission.api.permissions import IsListingOrHasNotAlreadyCreatedPermission
 from admission.api.serializers.fields import ActionLinksField
 from admission.contrib.models import DoctorateAdmission
 from admission.tests.factories import DoctorateAdmissionFactory
+from base.tests.factories.person import PersonFactory
+from base.tests.factories.user import UserFactory
 from osis_role.contrib.views import APIPermissionRequiredMixin
 
 
@@ -53,7 +55,7 @@ class TestAPIDetailViewWithPermissions(APIPermissionRequiredMixin, APIView):
 
 
 class TestAPIListAndCreateViewWithPermissions(APIPermissionRequiredMixin, APIView):
-    permission_classes = [IsCreationOrHasPermission]
+    permission_classes = [IsListingOrHasNotAlreadyCreatedPermission]
 
 
 class TestAPIViewWithoutPermission(APIView):
@@ -88,12 +90,18 @@ class SerializerFieldsTestCase(APITestCase):
         cls.first_doctorate_admission = DoctorateAdmissionFactory()
         cls.second_doctorate_admission = DoctorateAdmissionFactory()
         cls.first_user = cls.first_doctorate_admission.candidate.user
+        cls.creation_user = PersonFactory().user
 
         # Request
         factory = APIRequestFactory()
         cls.request = factory.get('api-view-with-permissions/', format='json')
         cls.request.user = cls.first_user
         cls.request._force_auth_user = cls.first_user
+
+        factory = APIRequestFactory()
+        cls.creation_request = factory.get('api-view-with-permissions/', format='json')
+        cls.creation_request.user = cls.creation_user
+        cls.creation_request._force_auth_user = cls.creation_user
 
     def test_serializer_with_no_context_request(self):
         # The request is missing -> we raise an exception
@@ -120,7 +128,7 @@ class SerializerFieldsTestCase(APITestCase):
         self.assertTrue('links' in serializer.data)
         self.assertEqual(serializer.data['links'], {})
 
-    def test_serializer_with_action_and_valid_permission(self):
+    def test_serializer_with_action_and_invalid_permission(self):
         # The list of actions contains one available action -> we return the related endpoint
         class SerializerWithActionLinks(Serializer):
             links = ActionLinksField(actions={
@@ -134,6 +142,27 @@ class SerializerFieldsTestCase(APITestCase):
             instance=self.first_doctorate_admission,
             context={
                 'request': self.request,
+            },
+        )
+        self.assertTrue('links' in serializer.data)
+        self.assertEqual(serializer.data['links'], {
+            'add_doctorateadmission': {
+                'error': "Method 'POST' not allowed",
+            }
+        })
+
+    def test_serializer_with_action_and_valid_permission(self):
+        class SerializerWithActionLinks(Serializer):
+            links = ActionLinksField(actions={
+                'add_doctorateadmission': {
+                    'method': 'POST',
+                    'path_name': 'api_view_with_permissions',
+                }
+            })
+        serializer = SerializerWithActionLinks(
+            instance=[],
+            context={
+                'request': self.creation_request,
             },
         )
         self.assertTrue('links' in serializer.data)

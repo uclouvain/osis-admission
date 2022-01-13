@@ -65,7 +65,10 @@ class DoctorateAdmissionListApiTestCase(APITestCase):
             entity_type=EntityType.DOCTORAL_COMMISSION.name,
             acronym='CDA',
         ).entity
-        cls.admission = DoctorateAdmissionFactory(doctorate__management_entity=cls.commission)
+        cls.admission = DoctorateAdmissionFactory(
+            status=ChoixStatutProposition.CANCELLED.name,  # set the status to cancelled so we have access to creation
+            doctorate__management_entity=cls.commission,
+        )
         # Create an admission supervision group
         promoter = PromoterFactory(actor_ptr__person__first_name="Jane")
         committee_member = CaMemberFactory(process=promoter.process)
