@@ -47,7 +47,7 @@ class IsSelfPersonTabOrTabPermission(BasePermission):
         return request.user.has_perm(permission, obj)
 
 
-class IsCreationOrHasPermission(BasePermission):
+class IsListingOrHasNotAlreadyCreatedPermission(BasePermission):
     def has_permission(self, request, view):
         # No object means we are either listing or creating a new admission
         if request.method in SAFE_METHODS:
@@ -56,10 +56,3 @@ class IsCreationOrHasPermission(BasePermission):
             candidate=request.user.person,
             status=ChoixStatutProposition.IN_PROGRESS.name,
         ).count() < MAXIMUM_AUTORISE
-
-    def has_object_permission(self, request, view, obj):
-        if request.method in SAFE_METHODS:
-            permission = 'admission.view_doctorateadmission_project'
-        else:
-            permission = 'admission.change_doctorateadmission_project'
-        return request.user.has_perm(permission, obj)

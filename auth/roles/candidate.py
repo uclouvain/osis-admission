@@ -23,7 +23,6 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import rules
 from rules import RuleSet
 from django.utils.translation import gettext_lazy as _
 
@@ -44,7 +43,6 @@ class Candidate(RoleModel):
     @classmethod
     def rule_set(cls):
         return RuleSet({
-            'admission.add_doctorateadmission': rules.always_allow,
             'admission.change_doctorateadmission': is_admission_request_author,
             'admission.view_doctorateadmission': is_admission_request_author,
             'admission.delete_doctorateadmission': is_admission_request_author,

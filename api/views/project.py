@@ -31,7 +31,7 @@ from rest_framework.response import Response
 from rest_framework.settings import api_settings
 
 from admission.api import serializers
-from admission.api.permissions import IsCreationOrHasPermission
+from admission.api.permissions import IsListingOrHasNotAlreadyCreatedPermission
 from admission.api.schema import ResponseSpecificSchema
 from admission.contrib.models.doctorate import DoctorateAdmission
 from admission.ddd.preparation.projet_doctoral.commands import (
@@ -79,7 +79,7 @@ class PropositionListView(APIPermissionRequiredMixin, DisplayExceptionsByFieldNa
     schema = PropositionListSchema()
     pagination_class = None
     filter_backends = []
-    permission_classes = [IsCreationOrHasPermission]
+    permission_classes = [IsListingOrHasNotAlreadyCreatedPermission]
 
     field_name_by_exception = {
         JustificationRequiseException: ['justification'],
