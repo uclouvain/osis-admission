@@ -42,3 +42,12 @@ class BaseAdmission(models.Model):
             type=self.get_type_display(),
             candidate=self.candidate,
         )
+
+
+def admission_directory_path(admission: BaseAdmission, filename: str):
+    """Return the file upload directory path."""
+    return 'admission/{}/{}/{}'.format(
+        admission.candidate.uuid,
+        admission.uuid,
+        filename
+    )
