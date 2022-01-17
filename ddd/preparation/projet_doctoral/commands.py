@@ -43,10 +43,7 @@ class InitierPropositionCommand(interface.CommandRequest):
     annee_formation = attr.ib(type=int)
     matricule_candidat = attr.ib(type=str)
     justification = attr.ib(type=Optional[str], default='')
-    bureau_CDE = attr.ib(
-        type=Optional[str],
-        default='',
-    )  # CDE = Comission Doctorale du domaine Sciences Economique et de Gestion
+    commission_proximite = attr.ib(type=Optional[str], default='')
     type_financement = attr.ib(type=Optional[str], default='')
     type_contrat_travail = attr.ib(type=Optional[str], default='')
     eft = attr.ib(type=Optional[int], default=None)
@@ -57,6 +54,7 @@ class InitierPropositionCommand(interface.CommandRequest):
     resume_projet = attr.ib(type=Optional[str], default='')
     institut_these = attr.ib(type=Optional[str], default='')
     lieu_these = attr.ib(type=Optional[str], default='')
+    autre_lieu_these = attr.ib(type=Optional[str], default='')
     documents_projet = attr.ib(type=List[str], factory=list)
     graphe_gantt = attr.ib(type=List[str], factory=list)
     proposition_programme_doctoral = attr.ib(type=List[str], factory=list)
@@ -74,10 +72,7 @@ class CompleterPropositionCommand(interface.CommandRequest):
     uuid = attr.ib(type=str)
     type_admission = attr.ib(type=str)
     justification = attr.ib(type=Optional[str], default='')
-    bureau_CDE = attr.ib(
-        type=Optional[str],
-        default='',
-    )  # CDE = Comission Doctorale du domaine Sciences Economique et de Gestion
+    commission_proximite = attr.ib(type=Optional[str], default='')
     type_financement = attr.ib(type=Optional[str], default='')
     type_contrat_travail = attr.ib(type=Optional[str], default='')
     eft = attr.ib(type=Optional[int], default=None)
@@ -94,6 +89,7 @@ class CompleterPropositionCommand(interface.CommandRequest):
     langue_redaction_these = attr.ib(type=str, default=ChoixLangueRedactionThese.UNDECIDED.name)
     institut_these = attr.ib(type=Optional[str], default='')
     lieu_these = attr.ib(type=Optional[str], default='')
+    autre_lieu_these = attr.ib(type=Optional[str], default='')
     doctorat_deja_realise = attr.ib(type=str, default=ChoixDoctoratDejaRealise.NO.name)
     institution = attr.ib(type=Optional[str], default='')
     date_soutenance = attr.ib(type=Optional[datetime.date], default=None)
@@ -118,9 +114,13 @@ class IdentifierMembreCACommand(interface.CommandRequest):
 
 
 @attr.s(frozen=True, slots=True)
-class DemanderSignatureCommand(interface.CommandRequest):
+class DemanderSignaturesCommand(interface.CommandRequest):
     uuid_proposition = attr.ib(type=str)
-    matricule_signataire = attr.ib(type=str)
+
+
+@attr.s(frozen=True, slots=True)
+class VerifierPropositionCommand(interface.CommandRequest):
+    uuid_proposition = attr.ib(type=str)
 
 
 @attr.s(frozen=True, slots=True)
@@ -139,6 +139,17 @@ class SupprimerMembreCACommand(interface.CommandRequest):
 class ApprouverPropositionCommand(interface.CommandRequest):
     uuid_proposition = attr.ib(type=str)
     matricule = attr.ib(type=str)
+    commentaire_interne = attr.ib(type=str)
+    commentaire_externe = attr.ib(type=str)
+
+
+@attr.s(frozen=True, slots=True)
+class RefuserPropositionCommand(interface.CommandRequest):
+    uuid_proposition = attr.ib(type=str)
+    matricule = attr.ib(type=str)
+    commentaire_interne = attr.ib(type=str)
+    commentaire_externe = attr.ib(type=str)
+    motif_refus = attr.ib(type=str)
 
 
 @attr.s(frozen=True, slots=True)

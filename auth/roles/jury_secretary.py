@@ -27,10 +27,10 @@ import rules
 from django.utils.translation import gettext_lazy as _
 from rules import RuleSet
 
-from osis_role.contrib.models import EntityRoleModel
+from osis_role.contrib.models import RoleModel
 
 
-class JurySecretary(EntityRoleModel):
+class JurySecretary(RoleModel):
     class Meta:
         verbose_name = _("Jury secretary")
         verbose_name_plural = _("Jury secretaries")
@@ -41,5 +41,11 @@ class JurySecretary(EntityRoleModel):
         return RuleSet({
             'admission.upload_defense_report': rules.always_allow,
             'admission.view_doctorateadmission': rules.always_allow,
-            'admission.access_doctorateadmission': rules.always_allow,
+            'admission.view_doctorateadmission_person': rules.always_allow,
+            'admission.view_doctorateadmission_coordinates': rules.always_allow,
+            'admission.view_doctorateadmission_secondary_studies': rules.always_allow,
+            'admission.view_doctorateadmission_curriculum': rules.always_allow,
+            'admission.view_doctorateadmission_project': rules.always_allow,
+            'admission.view_doctorateadmission_cotutelle': rules.always_allow,
+            'admission.view_doctorateadmission_supervision': rules.always_allow,
         })

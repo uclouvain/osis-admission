@@ -63,5 +63,13 @@ class DoctoratCDEFactory(_DoctoratFactory):
     entite_ucl_id = factory.SubFactory(UclEntityIdentityFactory, code='CDE')
 
 
+class DoctoratCLSMFactory(_DoctoratFactory):
+    entite_ucl_id = factory.SubFactory(UclEntityIdentityFactory, code='CLSM')
+
+
 class DoctoratCDSCFactory(_DoctoratFactory):
     entite_ucl_id = factory.SubFactory(UclEntityIdentityFactory, code='CDSC')
+
+
+class DoctoratCDSSDPFactory(_DoctoratFactory):
+    entite_ucl_id = factory.SubFactory(UclEntityIdentityFactory, code='CDSS')

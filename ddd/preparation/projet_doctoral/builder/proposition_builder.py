@@ -36,17 +36,20 @@ from admission.ddd.preparation.projet_doctoral.domain.model._financement import 
     Financement, ChoixTypeFinancement,
     financement_non_rempli,
 )
+from admission.ddd.preparation.projet_doctoral.domain.model._institut import InstitutIdentity
 from admission.ddd.preparation.projet_doctoral.domain.model.doctorat import DoctoratIdentity
 from admission.ddd.preparation.projet_doctoral.domain.model.proposition import (
     Proposition,
 )
 from admission.ddd.preparation.projet_doctoral.domain.model._enums import (
-    ChoixBureauCDE,
-    ChoixStatusProposition,
+    ChoixCommissionProximiteCDEouCLSM,
+    ChoixCommissionProximiteCDSS,
+    ChoixStatutProposition,
     ChoixTypeAdmission,
 )
 from admission.ddd.preparation.projet_doctoral.domain.validator.validator_by_business_action import \
     InitierPropositionValidatorList
+from admission.ddd.preparation.projet_doctoral.repository.i_proposition import IPropositionRepository
 from osis_common.ddd import interface
 
 
@@ -68,6 +71,7 @@ class PropositionBuilder(interface.RootEntityBuilder):
             cls,
             cmd: 'InitierPropositionCommand',
             doctorat_id: 'DoctoratIdentity',
+            proposition_repository: 'IPropositionRepository',
     ) -> 'Proposition':
         InitierPropositionValidatorList(
             type_admission=cmd.type_admission,
@@ -77,14 +81,24 @@ class PropositionBuilder(interface.RootEntityBuilder):
             doctorat_deja_realise=cmd.doctorat_deja_realise,
             institution=cmd.institution,
         ).validate()
+        commission_proximite = ''
+        if cmd.commission_proximite in ChoixCommissionProximiteCDEouCLSM.get_names():
+            commission_proximite = ChoixCommissionProximiteCDEouCLSM[cmd.commission_proximite]
+        elif cmd.commission_proximite in ChoixCommissionProximiteCDSS.get_names():
+            commission_proximite = ChoixCommissionProximiteCDSS[cmd.commission_proximite]
+        reference = "{}-{}".format(
+            doctorat_id.annee % 100,
+            Proposition.valeur_reference_base + proposition_repository.get_next_reference(),
+        )
         return Proposition(
             entity_id=PropositionIdentityBuilder.build(),
-            statut=ChoixStatusProposition.IN_PROGRESS,
+            reference=reference,
+            statut=ChoixStatutProposition.IN_PROGRESS,
             justification=cmd.justification,
             type_admission=ChoixTypeAdmission[cmd.type_admission],
             doctorat_id=doctorat_id,
             matricule_candidat=cmd.matricule_candidat,
-            bureau_CDE=ChoixBureauCDE[cmd.bureau_CDE] if cmd.bureau_CDE else '',
+            commission_proximite=commission_proximite,
             financement=_build_financement(cmd),
             projet=_build_projet(cmd),
             experience_precedente_recherche=_build_experience_precedente_recherche(cmd),
@@ -110,8 +124,9 @@ def _build_projet(cmd: 'InitierPropositionCommand') -> 'DetailProjet':
         resume=cmd.resume_projet,
         documents=cmd.documents_projet,
         langue_redaction_these=cmd.langue_redaction_these,
-        institut_these=cmd.institut_these,
+        institut_these=InstitutIdentity(cmd.institut_these) if cmd.institut_these else None,
         lieu_these=cmd.lieu_these,
+        autre_lieu_these=cmd.autre_lieu_these,
         graphe_gantt=cmd.graphe_gantt,
         proposition_programme_doctoral=cmd.proposition_programme_doctoral,
         projet_formation_complementaire=cmd.projet_formation_complementaire,

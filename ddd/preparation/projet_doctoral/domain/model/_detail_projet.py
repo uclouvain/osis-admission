@@ -23,13 +23,14 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
-from typing import List
+from typing import List, Optional
 
 import attr
 import uuid
 
 from django.utils.translation import gettext_lazy as _
 
+from admission.ddd.preparation.projet_doctoral.domain.model._institut import InstitutIdentity
 from base.models.utils.utils import ChoiceEnum
 from osis_common.ddd import interface
 
@@ -46,10 +47,14 @@ class DetailProjet(interface.ValueObject):
     titre = attr.ib(type=str, default='')
     resume = attr.ib(type=str, default='')
     langue_redaction_these = attr.ib(type=ChoixLangueRedactionThese, default=ChoixLangueRedactionThese.UNDECIDED)
-    institut_these = attr.ib(type=str, default='')
+    institut_these = attr.ib(type=Optional[InstitutIdentity], default=None)
     lieu_these = attr.ib(type=str, default='')
+    autre_lieu_these = attr.ib(type=str, default='')
     documents = attr.ib(type=List[uuid.UUID], factory=list)
     graphe_gantt = attr.ib(type=List[uuid.UUID], factory=list)
     proposition_programme_doctoral = attr.ib(type=List[uuid.UUID], factory=list)
     projet_formation_complementaire = attr.ib(type=List[uuid.UUID], factory=list)
     lettres_recommandation = attr.ib(type=List[uuid.UUID], factory=list)
+
+
+projet_non_rempli = DetailProjet()

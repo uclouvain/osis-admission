@@ -30,9 +30,18 @@ from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions impor
 from admission.ddd.preparation.projet_doctoral.repository.i_proposition import IPropositionRepository
 from admission.ddd.preparation.projet_doctoral.test.factory.proposition import (
     PropositionAdmissionECGE3DPMinimaleFactory,
+    PropositionAdmissionESP3DPMinimaleFactory,
     PropositionAdmissionSC3DPAvecMembresFactory,
     PropositionAdmissionSC3DPAvecMembresInvitesFactory,
     PropositionAdmissionSC3DPMinimaleFactory,
+    PropositionAdmissionSC3DPMinimaleSansCotutelleFactory,
+    PropositionAdmissionSC3DPMinimaleSansDetailProjetFactory,
+    PropositionAdmissionSC3DPAvecMembresEtCotutelleFactory,
+    PropositionAdmissionSC3DPMinimaleCotutelleSansPromoteurExterneFactory,
+    PropositionAdmissionSC3DPMinimaleCotutelleAvecPromoteurExterneFactory,
+    PropositionAdmissionSC3DPSansPromoteurFactory,
+    PropositionAdmissionSC3DPSansMembreCAFactory,
+    PropositionPreAdmissionSC3DPMinimaleFactory,
 )
 from base.ddd.utils.in_memory_repository import InMemoryGenericRepository
 
@@ -52,8 +61,17 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
         cls.entities = [
             PropositionAdmissionSC3DPMinimaleFactory(),
             PropositionAdmissionSC3DPAvecMembresFactory(),
+            PropositionAdmissionSC3DPAvecMembresEtCotutelleFactory(),
             PropositionAdmissionSC3DPAvecMembresInvitesFactory(),
             PropositionAdmissionECGE3DPMinimaleFactory(),
+            PropositionPreAdmissionSC3DPMinimaleFactory(),
+            PropositionAdmissionSC3DPMinimaleSansDetailProjetFactory(),
+            PropositionAdmissionSC3DPMinimaleSansCotutelleFactory(),
+            PropositionAdmissionSC3DPMinimaleCotutelleSansPromoteurExterneFactory(),
+            PropositionAdmissionSC3DPMinimaleCotutelleAvecPromoteurExterneFactory(),
+            PropositionAdmissionSC3DPSansPromoteurFactory(),
+            PropositionAdmissionSC3DPSansMembreCAFactory(),
+            PropositionAdmissionESP3DPMinimaleFactory(),
         ]
 
     @classmethod
@@ -76,3 +94,7 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
         if entity_ids:  # pragma: no cover
             returned = filter(lambda p: p.entity_id in entity_ids, returned)
         return list(returned)
+
+    @classmethod
+    def get_next_reference(cls):
+        return len(cls.entities) + 1

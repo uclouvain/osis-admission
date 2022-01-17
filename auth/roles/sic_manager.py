@@ -27,10 +27,10 @@ import rules
 from rules import RuleSet
 from django.utils.translation import gettext_lazy as _
 
-from osis_role.contrib.models import EntityRoleModel
+from osis_role.contrib.models import RoleModel
 
 
-class SicManager(EntityRoleModel):
+class SicManager(RoleModel):
     class Meta:
         verbose_name = _("SIC manager")
         verbose_name_plural = _("SIC managers")
@@ -41,7 +41,21 @@ class SicManager(EntityRoleModel):
         return RuleSet({
             'admission.change_doctorateadmission': rules.always_allow,
             'admission.delete_doctorateadmission': rules.always_deny,
-            'admission.access_doctorateadmission': rules.always_allow,
             'admission.view_doctorateadmission': rules.always_allow,
             'admission.appose_sic_notice': rules.always_allow,
+            'admission.view_doctorateadmission_person': rules.always_allow,
+            'admission.change_doctorateadmission_person': rules.always_allow,
+            'admission.view_doctorateadmission_coordinates': rules.always_allow,
+            'admission.change_doctorateadmission_coordinates': rules.always_allow,
+            'admission.view_doctorateadmission_secondary_studies': rules.always_allow,
+            'admission.change_doctorateadmission_secondary_studies': rules.always_allow,
+            'admission.view_doctorateadmission_curriculum': rules.always_allow,
+            'admission.change_doctorateadmission_curriculum': rules.always_allow,
+            'admission.view_doctorateadmission_project': rules.always_allow,
+            'admission.change_doctorateadmission_project': rules.always_allow,
+            'admission.view_doctorateadmission_cotutelle': rules.always_allow,
+            'admission.change_doctorateadmission_cotutelle': rules.always_allow,
+            'admission.view_doctorateadmission_supervision': rules.always_allow,
+            'admission.add_supervision_member': rules.always_allow,
+            'admission.remove_supervision_member': rules.always_allow,
         })

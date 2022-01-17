@@ -30,7 +30,7 @@ from django.test import SimpleTestCase
 
 from admission.ddd.preparation.projet_doctoral.builder.proposition_identity_builder import \
     PropositionIdentityBuilder
-from admission.ddd.preparation.projet_doctoral.commands import DemanderSignatureCommand
+from admission.ddd.preparation.projet_doctoral.commands import RefuserPropositionCommand
 from admission.ddd.preparation.projet_doctoral.domain.model._signature_promoteur import (
     ChoixEtatSignature,
     SignaturePromoteur,
@@ -38,8 +38,8 @@ from admission.ddd.preparation.projet_doctoral.domain.model._signature_promoteur
 from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import (
     GroupeDeSupervisionNonTrouveException,
     PropositionNonTrouveeException,
-    SignataireDejaInviteException,
     SignataireNonTrouveException,
+    SignatairePasInviteException,
 )
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 from admission.infrastructure.preparation.projet_doctoral.repository.in_memory.groupe_de_supervision import \
@@ -49,10 +49,10 @@ from admission.infrastructure.preparation.projet_doctoral.repository.in_memory.p
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 
 
-class TestDemanderSignatureService(SimpleTestCase):
+class TestRefuserPropositionService(SimpleTestCase):
     def setUp(self) -> None:
         self.matricule_promoteur = 'promoteur-SC3DP'
-        self.uuid_proposition = 'uuid-SC3DP-promoteur-membre'
+        self.uuid_proposition = 'uuid-SC3DP-membres-invites'
 
         self.proposition_repository = PropositionInMemoryRepository()
         self.groupe_de_supervision_repository = GroupeDeSupervisionInMemoryRepository()
@@ -61,12 +61,15 @@ class TestDemanderSignatureService(SimpleTestCase):
         self.addCleanup(self.proposition_repository.reset)
 
         self.message_bus = message_bus_in_memory_instance
-        self.cmd = DemanderSignatureCommand(
+        self.cmd = RefuserPropositionCommand(
             uuid_proposition=self.uuid_proposition,
-            matricule_signataire=self.matricule_promoteur,
+            matricule=self.matricule_promoteur,
+            commentaire_interne='Commentaire interne',
+            commentaire_externe='Commentaire externe',
+            motif_refus="Motif de refus",
         )
 
-    def test_should_demander_signature(self):
+    def test_should_refuser(self):
         proposition_id = self.message_bus.invoke(self.cmd)
         self.assertEqual(proposition_id.uuid, self.uuid_proposition)
         groupe = self.groupe_de_supervision_repository.get_by_proposition_id(proposition_id)
@@ -74,25 +77,28 @@ class TestDemanderSignatureService(SimpleTestCase):
         self.assertEqual(len(signatures), 1)
         self.assertEqual(len(groupe.signatures_membres_CA), 1)
         self.assertEqual(signatures[0].promoteur_id.matricule, self.matricule_promoteur)
-        self.assertEqual(signatures[0].etat, ChoixEtatSignature.INVITED)
+        self.assertEqual(signatures[0].etat, ChoixEtatSignature.REFUSED)
+        self.assertEqual(signatures[0].commentaire_interne, 'Commentaire interne')
+        self.assertEqual(signatures[0].commentaire_externe, 'Commentaire externe')
+        self.assertEqual(signatures[0].motif_refus, 'Motif de refus')
 
-    def test_should_pas_demander_si_pas_dans_groupe(self):
-        cmd = attr.evolve(self.cmd, matricule_signataire='paspromoteur')
+    def test_should_pas_refuser_si_pas_dans_groupe(self):
+        cmd = attr.evolve(self.cmd, matricule='paspromoteur')
         with self.assertRaises(SignataireNonTrouveException):
             self.message_bus.invoke(cmd)
 
-    def test_should_pas_demander_si_deja_invite(self):
-        cmd = attr.evolve(self.cmd, matricule_signataire='membre-ca-SC3DP')
+    def test_should_pas_refuser_si_pas_invite(self):
+        cmd = attr.evolve(self.cmd, matricule='membre-ca-SC3DP')
         with self.assertRaises(MultipleBusinessExceptions) as e:
             self.message_bus.invoke(cmd)
-        self.assertIsInstance(e.exception.exceptions.pop(), SignataireDejaInviteException)
+        self.assertIsInstance(e.exception.exceptions.pop(), SignatairePasInviteException)
 
-    def test_should_pas_demander_si_groupe_proposition_non_trouve(self):
+    def test_should_pas_refuser_si_groupe_proposition_non_trouve(self):
         cmd = attr.evolve(self.cmd, uuid_proposition='uuid-ECGE3DP')
         with self.assertRaises(GroupeDeSupervisionNonTrouveException):
             self.message_bus.invoke(cmd)
 
-    def test_should_pas_demander_si_proposition_non_trouvee(self):
+    def test_should_pas_refuser_si_proposition_non_trouvee(self):
         cmd = attr.evolve(self.cmd, uuid_proposition='propositioninconnue')
         with self.assertRaises(PropositionNonTrouveeException):
             self.message_bus.invoke(cmd)

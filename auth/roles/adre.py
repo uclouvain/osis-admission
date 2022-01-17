@@ -26,11 +26,11 @@
 import rules
 from rules import RuleSet
 
-from osis_role.contrib.models import EntityRoleModel
+from osis_role.contrib.models import RoleModel
 from django.utils.translation import gettext_lazy as _
 
 
-class Adre(EntityRoleModel):
+class Adre(RoleModel):
     class Meta:
         verbose_name = _("ADRE")
         verbose_name_plural = _("ADREs")
@@ -39,10 +39,16 @@ class Adre(EntityRoleModel):
     @classmethod
     def rule_set(cls):
         return RuleSet({
-            'admission.access_doctorateadmission': rules.always_allow,
             'admission.view_doctorateadmission': rules.always_allow,
             'admission.download_jury_approved_pdf': rules.always_allow,
             'admission.upload_jury_approved_pdf': rules.always_allow,
             'admission.upload_signed_scholarship': rules.always_allow,
             'admission.check_publication_authorisation': rules.always_allow,
+            'admission.view_doctorateadmission_person': rules.always_allow,
+            'admission.view_doctorateadmission_coordinates': rules.always_allow,
+            'admission.view_doctorateadmission_secondary_studies': rules.always_allow,
+            'admission.view_doctorateadmission_curriculum': rules.always_allow,
+            'admission.view_doctorateadmission_project': rules.always_allow,
+            'admission.view_doctorateadmission_cotutelle': rules.always_allow,
+            'admission.view_doctorateadmission_supervision': rules.always_allow,
         })

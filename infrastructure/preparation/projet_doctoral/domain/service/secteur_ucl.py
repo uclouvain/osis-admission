@@ -25,6 +25,8 @@
 # ##############################################################################
 from admission.contrib.models import EntityProxy
 from admission.ddd.preparation.projet_doctoral.domain.service.i_secteur_ucl import ISecteurUclTranslator
+from base.models.entity_version import EntityVersion
+from base.models.enums.entity_type import SECTOR
 from infrastructure.shared_kernel.entite.dtos import EntiteUclDTO
 
 
@@ -32,8 +34,11 @@ class SecteurUclTranslator(ISecteurUclTranslator):
     @classmethod
     def get(cls, sigle_entite: str) -> 'EntiteUclDTO':
         # FIXME use command from shared kernel
-        entity = EntityProxy.objects.with_parent().get(entityversion__acronym=sigle_entite)
-        sector = EntityProxy.objects.only_valid().get(pk=entity.parent)
+        cte = EntityVersion.objects.with_children(acronym=sigle_entite)
+        sector_entity_id = cte.join(EntityVersion, id=cte.col.id).with_cte(cte).filter(
+            entity_type=SECTOR,
+        ).values_list('entity_id', flat=True).first()
+        sector = EntityProxy.objects.only_valid().get(pk=sector_entity_id)
         return EntiteUclDTO(
             sigle=sector.most_recent_entity_version.acronym,
             intitule=sector.most_recent_entity_version.title,

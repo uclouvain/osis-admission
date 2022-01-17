@@ -29,7 +29,11 @@ from django.db import models
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
-from admission.ddd.preparation.projet_doctoral.domain.model._enums import ChoixBureauCDE, ChoixStatusProposition
+from admission.ddd.preparation.projet_doctoral.domain.model._enums import (
+    ChoixCommissionProximiteCDEouCLSM,
+    ChoixCommissionProximiteCDSS,
+    ChoixStatutProposition,
+)
 from admission.ddd.preparation.projet_doctoral.domain.model._experience_precedente_recherche import \
     ChoixDoctoratDejaRealise
 from admission.ddd.preparation.projet_doctoral.domain.model._financement import ChoixTypeFinancement
@@ -37,6 +41,8 @@ from admission.ddd.preparation.projet_doctoral.domain.model._detail_projet impor
 from osis_document.contrib import FileField
 from osis_signature.contrib.fields import SignatureProcessField
 from .base import BaseAdmission
+
+REFERENCE_SEQ_NAME = 'admission_doctorateadmission_reference_seq'
 
 
 class DoctorateAdmission(BaseAdmission):
@@ -46,12 +52,19 @@ class DoctorateAdmission(BaseAdmission):
         related_name="+",
         on_delete=models.CASCADE,
     )
-    bureau = models.CharField(
+    proximity_commission = models.CharField(
         max_length=255,
-        verbose_name=_("Bureau"),
-        choices=ChoixBureauCDE.choices(),
+        verbose_name=_("Proximity commission"),
+        choices=ChoixCommissionProximiteCDEouCLSM.choices() + ChoixCommissionProximiteCDSS.choices(),
         default='',
         blank=True,
+    )
+    reference = models.CharField(
+        max_length=32,
+        verbose_name=_("Reference"),
+        unique=True,
+        editable=False,
+        null=True,
     )
 
     # Financement
@@ -109,15 +122,23 @@ class DoctorateAdmission(BaseAdmission):
         default='',
         blank=True,
     )
-    thesis_institute = models.CharField(
-        max_length=255,
+    thesis_institute = models.ForeignKey(
+        'base.EntityVersion',
+        related_name="+",
         verbose_name=_("Thesis institute"),
-        default='',
+        on_delete=models.SET_NULL,
         blank=True,
+        null=True,
     )
     thesis_location = models.CharField(
         max_length=255,
         verbose_name=_("Thesis location"),
+        default='',
+        blank=True,
+    )
+    other_thesis_location = models.CharField(
+        max_length=255,
+        verbose_name=_("Other thesis location"),
         default='',
         blank=True,
     )
@@ -193,9 +214,9 @@ class DoctorateAdmission(BaseAdmission):
     detailed_status = JSONField(default=dict)
 
     status = models.CharField(
-        choices=ChoixStatusProposition.choices(),
+        choices=ChoixStatutProposition.choices(),
         max_length=30,
-        default=ChoixStatusProposition.IN_PROGRESS.name,
+        default=ChoixStatutProposition.IN_PROGRESS.name,
     )
 
     supervision_group = SignatureProcessField()
@@ -204,7 +225,6 @@ class DoctorateAdmission(BaseAdmission):
         verbose_name = _("Doctorate admission")
         ordering = ('-created',)
         permissions = [
-            ('access_doctorateadmission', _("Can access doctorate admission list")),
             ('download_jury_approved_pdf', _("Can download jury-approved PDF")),
             ('upload_jury_approved_pdf', _("Can upload jury-approved PDF")),
             ('upload_signed_scholarship', _("Can upload signed scholarship")),
@@ -222,6 +242,30 @@ class DoctorateAdmission(BaseAdmission):
             ('upload_defense_report', _("Can upload defense report")),
             ('check_copyright', _("Can check copyright")),
             ('sign_diploma', _("Can sign diploma")),
+            ('request_signatures', _("Can request signatures")),
+            ('approve_proposition', _("Can approve proposition")),
+            ('view_doctorateadmission_person', _("Can view the information related to the admission request author")),
+            ('change_doctorateadmission_person',
+             _("Can update the information related to the admission request author")),
+            ('view_doctorateadmission_coordinates', _("Can view the coordinates of the admission request author")),
+            ('change_doctorateadmission_coordinates', _("Can update the coordinates of the admission request author")),
+            ('view_doctorateadmission_secondary_studies',
+             _("Can view the information related to the secondary studies")),
+            ('change_doctorateadmission_secondary_studies',
+             _("Can update the information related to the secondary studies")),
+            ('view_doctorateadmission_languages', _("Can view the information related to language knowledge")),
+            ('change_doctorateadmission_languages', _("Can update the information related to language knowledge")),
+            ('view_doctorateadmission_curriculum', _("Can view the information related to the curriculum")),
+            ('change_doctorateadmission_curriculum', _("Can update the information related to the curriculum")),
+            ('view_doctorateadmission_project', _("Can view the information related to the admission project")),
+            ('change_doctorateadmission_project', _("Can update the information related to the admission project")),
+            ('view_doctorateadmission_cotutelle', _("Can view the information related to the admission cotutelle")),
+            ('change_doctorateadmission_cotutelle', _("Can update the information related to the admission cotutelle")),
+            ('view_doctorateadmission_supervision', _("Can view the information related to the admission supervision")),
+            ('change_doctorateadmission_supervision',
+             _("Can update the information related to the admission supervision")),
+            ('add_supervision_member', _("Can add a member to the supervision group")),
+            ('remove_supervision_member', _("Can remove a member from the supervision group")),
         ]
 
     def get_absolute_url(self):

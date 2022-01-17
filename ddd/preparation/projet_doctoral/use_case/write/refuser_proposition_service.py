@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -24,33 +24,27 @@
 #
 # ##############################################################################
 from admission.ddd.preparation.projet_doctoral.builder.proposition_identity_builder import PropositionIdentityBuilder
-from admission.ddd.preparation.projet_doctoral.commands import DemanderSignatureCommand
+from admission.ddd.preparation.projet_doctoral.commands import RefuserPropositionCommand
 from admission.ddd.preparation.projet_doctoral.domain.model.proposition import PropositionIdentity
-from admission.ddd.preparation.projet_doctoral.domain.service.i_constitution_supervision import IConstitutionSupervision
 from admission.ddd.preparation.projet_doctoral.repository.i_groupe_de_supervision import IGroupeDeSupervisionRepository
 from admission.ddd.preparation.projet_doctoral.repository.i_proposition import IPropositionRepository
 
 
-def demander_signature(
-        cmd: 'DemanderSignatureCommand',
+def refuser_proposition(
+        cmd: 'RefuserPropositionCommand',
         proposition_repository: 'IPropositionRepository',
         groupe_supervision_repository: 'IGroupeDeSupervisionRepository',
-        constitution_supervision_these: 'IConstitutionSupervision',
 ) -> 'PropositionIdentity':
     # GIVEN
     entity_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
     proposition_candidat = proposition_repository.get(entity_id=entity_id)
     groupe_de_supervision = groupe_supervision_repository.get_by_proposition_id(entity_id)
-    signataire_id = groupe_de_supervision.get_signataire(cmd.matricule_signataire)
+    signataire = groupe_de_supervision.get_signataire(cmd.matricule)
 
     # WHEN
-    groupe_de_supervision.inviter_a_signer(signataire_id)
+    groupe_de_supervision.refuser(signataire, cmd.commentaire_interne, cmd.commentaire_externe, cmd.motif_refus)
 
     # THEN
     groupe_supervision_repository.save(groupe_de_supervision)
-    constitution_supervision_these.notifier(
-        proposition_candidat,
-        cmd.matricule_signataire,
-    )
 
     return proposition_candidat.entity_id

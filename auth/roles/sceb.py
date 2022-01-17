@@ -27,10 +27,10 @@ import rules
 from django.utils.translation import gettext_lazy as _
 from rules import RuleSet
 
-from osis_role.contrib.models import EntityRoleModel
+from osis_role.contrib.models import RoleModel
 
 
-class Sceb(EntityRoleModel):
+class Sceb(RoleModel):
     class Meta:
         verbose_name = _("SCEB")
         verbose_name_plural = _("SCEBs")
@@ -41,5 +41,4 @@ class Sceb(EntityRoleModel):
         return RuleSet({
             'admission.check_copyright': rules.always_allow,
             'admission.sign_diploma': rules.always_allow,
-            'admission.access_doctorateadmission': rules.always_allow,
         })

@@ -1,4 +1,4 @@
-##############################################################################
+# ##############################################################################
 #
 #    OSIS stands for Open Student Information System. It's an application
 #    designed to manage the core business of higher education institutions,
@@ -22,18 +22,20 @@
 #    at the root of the source code of this program.  If not,
 #    see http://www.gnu.org/licenses/.
 #
-##############################################################################
+# ##############################################################################
+from typing import List
 
-from admission.ddd.preparation.projet_doctoral.domain.model.doctorat import Doctorat
-from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import BureauCDEInconsistantException
-from osis_common.ddd import interface
+import attr
+
+from admission.ddd.preparation.projet_doctoral.domain.model._signature_promoteur import SignaturePromoteur
+from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import PromoteurManquantException
+from base.ddd.utils.business_validator import BusinessValidator
 
 
-class BureauCDE(interface.DomainService):
+@attr.s(frozen=True, slots=True)
+class ShouldGroupeDeSupervisionAvoirAuMoinsUnPromoteur(BusinessValidator):
+    signatures_promoteurs = attr.ib(type=List[SignaturePromoteur])  # type: List[SignaturePromoteur]
 
-    @classmethod
-    def verifier(cls, doctorat: 'Doctorat', bureau_CDE: str) -> None:
-        if doctorat.est_entite_CDE() and not bureau_CDE:
-            raise BureauCDEInconsistantException()
-        if not doctorat.est_entite_CDE() and bureau_CDE:
-            raise BureauCDEInconsistantException()
+    def validate(self, *args, **kwargs):
+        if len(self.signatures_promoteurs) <= 0:
+            raise PromoteurManquantException

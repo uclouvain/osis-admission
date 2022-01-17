@@ -24,13 +24,61 @@
 #
 # ##############################################################################
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 
 from admission.contrib.models.enums.actor_type import ActorType
 from osis_signature.models import Actor
 
 
 class SupervisionActor(Actor):
+    """This model extend Actor from OSIS-Signature"""
     type = models.CharField(
         default=ActorType.choices(),
         max_length=50,
     )
+    internal_comment = models.TextField(
+        default='',
+        verbose_name=_('Internal comment'),
+        blank=True,
+    )
+    rejection_reason = models.CharField(
+        default='',
+        max_length=50,
+        blank=True,
+        verbose_name=_('Rejection reason'),
+    )
+
+
+class ExternalActorMixin(models.Model):
+    """This mixin is used in Promoter and CAMember roles"""
+    is_external = models.BooleanField(
+        default=False,
+    )
+    title = models.CharField(
+        verbose_name=_("Title"),
+        max_length=255,
+        blank=True,
+        default='',
+    )
+    institute = models.CharField(
+        verbose_name=_("Institution"),
+        max_length=255,
+        blank=True,
+        default='',
+    )
+    city = models.CharField(
+        verbose_name=_("City"),
+        max_length=255,
+        blank=True,
+        default='',
+    )
+    country = models.ForeignKey(
+        'reference.Country',
+        verbose_name=_("Country"),
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+    )
+
+    class Meta:
+        abstract = True

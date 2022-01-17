@@ -23,48 +23,69 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from rest_framework import mixins, status
-from rest_framework.generics import GenericAPIView, ListCreateAPIView
-from rest_framework.response import Response
+from collections import defaultdict
 
-from admission.api.schema import ResponseSpecificSchema
+from rest_framework import mixins, status
+from rest_framework.generics import GenericAPIView, ListCreateAPIView, get_object_or_404
+from rest_framework.response import Response
+from rest_framework.settings import api_settings
+
 from admission.api import serializers
-from backoffice.settings.rest_framework.common_views import DisplayExceptionsByFieldNameAPIMixin
+from admission.api.permissions import IsListingOrHasNotAlreadyCreatedPermission
+from admission.api.schema import ResponseSpecificSchema
+from admission.contrib.models.doctorate import DoctorateAdmission
 from admission.ddd.preparation.projet_doctoral.commands import (
     CompleterPropositionCommand, GetPropositionCommand,
     InitierPropositionCommand,
     SearchPropositionsCommand,
     SupprimerPropositionCommand,
+    VerifierPropositionCommand,
 )
 from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import (
-    BureauCDEInconsistantException,
+    CommissionProximiteInconsistantException,
     ContratTravailInconsistantException,
     InstitutionInconsistanteException,
     JustificationRequiseException,
 )
+from backoffice.settings.rest_framework.common_views import DisplayExceptionsByFieldNameAPIMixin
+from backoffice.settings.rest_framework.exception_handler import get_error_data
+from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from infrastructure.messages_bus import message_bus_instance
+from osis_role.contrib.views import APIPermissionRequiredMixin
 
 
 class PropositionListSchema(ResponseSpecificSchema):
     serializer_mapping = {
-        'GET': serializers.PropositionSearchDTOSerializer,
+        'GET': serializers.PropositionSearchSerializer,
         'POST': (serializers.InitierPropositionCommandSerializer, serializers.PropositionIdentityDTOSerializer),
     }
+    list_force_object = True
 
     def get_operation_id_base(self, path, method, action):
         return '_proposition' if method == 'POST' else '_propositions'
 
+    def map_choicefield(self, field):
+        schema = super().map_choicefield(field)
+        if field.field_name == "commission_proximite":
+            self.enums["ChoixCommissionProximite"] = schema
+            return {
+                '$ref': "#/components/schemas/ChoixCommissionProximite"
+            }
+        return schema
 
-class PropositionListView(DisplayExceptionsByFieldNameAPIMixin, ListCreateAPIView):
+
+class PropositionListView(APIPermissionRequiredMixin, DisplayExceptionsByFieldNameAPIMixin, ListCreateAPIView):
     name = "propositions"
     schema = PropositionListSchema()
     pagination_class = None
     filter_backends = []
+    permission_classes = [IsListingOrHasNotAlreadyCreatedPermission]
+
     field_name_by_exception = {
         JustificationRequiseException: ['justification'],
         InstitutionInconsistanteException: ['institution'],
         ContratTravailInconsistantException: ['type_contrat_travail'],
-        BureauCDEInconsistantException: ['bureau_CDE'],
+        CommissionProximiteInconsistantException: ['commission_proximite'],
     }
 
     def list(self, request, **kwargs):
@@ -72,7 +93,12 @@ class PropositionListView(DisplayExceptionsByFieldNameAPIMixin, ListCreateAPIVie
         proposition_list = message_bus_instance.invoke(
             SearchPropositionsCommand(matricule_candidat=request.user.person.global_id)
         )
-        serializer = serializers.PropositionSearchDTOSerializer(instance=proposition_list, many=True)
+        serializer = serializers.PropositionSearchSerializer(
+            instance={
+                "propositions": proposition_list,
+            },
+            context=self.get_serializer_context(),
+        )
         return Response(serializer.data)
 
     def create(self, request, **kwargs):
@@ -92,20 +118,44 @@ class PropositionSchema(ResponseSpecificSchema):
         'DELETE': serializers.PropositionIdentityDTOSerializer,
     }
 
+    def map_choicefield(self, field):
+        schema = super().map_choicefield(field)
+        if field.field_name == "commission_proximite":
+            self.enums["ChoixCommissionProximite"] = schema
+            return {
+                '$ref': "#/components/schemas/ChoixCommissionProximite"
+            }
+        return schema
 
-class PropositionViewSet(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, GenericAPIView):
+
+class PropositionViewSet(
+    APIPermissionRequiredMixin,
+    mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
+    GenericAPIView,
+):
     name = "propositions"
     schema = PropositionSchema()
     pagination_class = None
     filter_backends = []
+    permission_mapping = {
+        'GET': 'admission.view_doctorateadmission_project',
+        'PUT': 'admission.change_doctorateadmission_project',
+        'DELETE': 'admission.delete_doctorateadmission',
+    }
+
+    def get_permission_object(self):
+        return get_object_or_404(DoctorateAdmission, uuid=self.kwargs['uuid'])
 
     def get(self, request, *args, **kwargs):
         """Get a single proposition"""
-        # TODO call osis_role perm for this object
         proposition = message_bus_instance.invoke(
             GetPropositionCommand(uuid_proposition=kwargs.get('uuid'))
         )
-        serializer = serializers.PropositionDTOSerializer(instance=proposition)
+        serializer = serializers.PropositionDTOSerializer(
+            instance=proposition,
+            context=self.get_serializer_context()
+        )
         return Response(serializer.data)
 
     def put(self, request, *args, **kwargs):
@@ -123,3 +173,57 @@ class PropositionViewSet(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, Gen
         )
         serializer = serializers.PropositionIdentityDTOSerializer(instance=proposition_id)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class VerifyPropositionSchema(ResponseSpecificSchema):
+    operation_id_base = '_verify_proposition'
+
+    def get_responses(self, path, method):
+        return {
+            status.HTTP_200_OK: {
+                "description": "Proposition verification errors",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "status_code": {
+                                        "type": "string",
+                                    },
+                                    "detail": {
+                                        "type": "string",
+                                    }
+                                }
+                            }
+                        }}
+                }
+            }
+        }
+
+
+class VerifyPropositionView(APIPermissionRequiredMixin, mixins.RetrieveModelMixin, GenericAPIView):
+    name = "verify-proposition"
+    schema = VerifyPropositionSchema()
+    pagination_class = None
+    filter_backends = []
+    permission_mapping = {
+        'GET': 'admission.view_doctorateadmission_project',
+    }
+
+    def get_permission_object(self):
+        return get_object_or_404(DoctorateAdmission, uuid=self.kwargs['uuid'])
+
+    def get(self, request, *args, **kwargs):
+        """Check the proposition to be OK with all validators."""
+        try:
+            # Trigger the verification command
+            message_bus_instance.invoke(VerifierPropositionCommand(uuid_proposition=str(kwargs["uuid"])))
+        except MultipleBusinessExceptions as exc:
+            # Gather all errors for output
+            data = defaultdict(list)
+            for exception in exc.exceptions:
+                data = get_error_data(data, exception, {})
+            return Response(data.get(api_settings.NON_FIELD_ERRORS_KEY, []), status=status.HTTP_200_OK)
+        return Response([], status=status.HTTP_200_OK)

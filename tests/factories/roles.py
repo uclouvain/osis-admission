@@ -26,6 +26,7 @@
 
 import factory
 
+from admission.auth.roles.ca_member import CommitteeMember
 from admission.auth.roles.candidate import Candidate
 from admission.auth.roles.cdd_manager import CddManager
 from admission.auth.roles.promoter import Promoter
@@ -33,25 +34,33 @@ from admission.auth.roles.promoter import Promoter
 
 class BaseFactory(factory.DjangoModelFactory):
     person = factory.SubFactory('base.tests.factories.person.PersonFactory')
-    entity = factory.SubFactory(
-        'base.tests.factories.entity.EntityFactory',
-        organization=None,
-    )
-    with_child = True
 
 
 class CandidateFactory(BaseFactory):
     class Meta:
         model = Candidate
+        django_get_or_create = ('person',)
 
 
-class PromoterFactory(BaseFactory):
+class PromoterRoleFactory(BaseFactory):
     class Meta:
         model = Promoter
+        django_get_or_create = ('person',)
+
+
+class CaMemberRoleFactory(BaseFactory):
+    class Meta:
+        model = CommitteeMember
+        django_get_or_create = ('person',)
 
 
 class CddManagerFactory(BaseFactory):
     class Meta:
         model = CddManager
+        django_get_or_create = ('person',)
 
+    entity = factory.SubFactory(
+        'base.tests.factories.entity.EntityFactory',
+        organization=None,
+    )
     with_child = False

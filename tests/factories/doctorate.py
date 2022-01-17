@@ -25,12 +25,17 @@
 # ##############################################################################
 
 import factory
+from django.db import connection
 
 from admission.contrib.models import DoctorateAdmission
+from admission.contrib.models.doctorate import REFERENCE_SEQ_NAME
+from admission.ddd.preparation.projet_doctoral.domain.model.proposition import Proposition
+from admission.tests.factories.roles import CandidateFactory
 from base.models.enums.education_group_types import TrainingType
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.education_group_type import EducationGroupTypeFactory
 from base.tests.factories.education_group_year import EducationGroupYearFactory
+from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.person import PersonFactory
 
 
@@ -39,9 +44,25 @@ class DoctorateFactory(EducationGroupYearFactory):
     education_group_type = factory.SubFactory(EducationGroupTypeFactory, name=TrainingType.PHD.name)
 
 
+def _generate_reference(obj):
+    cursor = connection.cursor()
+    cursor.execute("SELECT NEXTVAL('%(sequence)s')" % {'sequence': REFERENCE_SEQ_NAME})
+    next_id = cursor.fetchone()[0]
+    return "{}-{}".format(
+        obj.doctorate.academic_year.year % 100,
+        Proposition.valeur_reference_base + next_id,
+    )
+
+
 class DoctorateAdmissionFactory(factory.DjangoModelFactory):
     class Meta:
         model = DoctorateAdmission
 
     candidate = factory.SubFactory(PersonFactory)
     doctorate = factory.SubFactory(DoctorateFactory)
+    thesis_institute = factory.SubFactory(EntityVersionFactory)
+    reference = factory.LazyAttribute(_generate_reference)
+
+    @factory.post_generation
+    def create_candidate_role(self, create, extracted, **kwargs):
+        CandidateFactory(person=self.candidate)

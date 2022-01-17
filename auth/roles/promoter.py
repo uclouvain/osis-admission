@@ -27,11 +27,12 @@ import rules
 from django.utils.translation import gettext_lazy as _
 from rules import RuleSet
 
-from admission.auth.predicates import is_admission_request_promoter
-from osis_role.contrib.models import EntityRoleModel
+from admission.auth.predicates import is_admission_request_promoter, is_part_of_committee_and_invited
+from admission.contrib.models.actor import ExternalActorMixin
+from osis_role.contrib.models import RoleModel
 
 
-class Promoter(EntityRoleModel):
+class Promoter(ExternalActorMixin, RoleModel):
     class Meta:
         verbose_name = _("Promoter")
         verbose_name_plural = _("Promoters")
@@ -40,7 +41,6 @@ class Promoter(EntityRoleModel):
     @classmethod
     def rule_set(cls):
         return RuleSet({
-            'admission.access_doctorateadmission': rules.always_allow,
             'admission.view_doctorateadmission': is_admission_request_promoter,
             'admission.download_pdf_confirmation': is_admission_request_promoter,
             'admission.upload_pdf_confirmation': is_admission_request_promoter,
@@ -48,4 +48,12 @@ class Promoter(EntityRoleModel):
             'admission.validate_doctoral_training': is_admission_request_promoter,
             'admission.fill_thesis': is_admission_request_promoter,
             'admission.check_publication_authorisation': is_admission_request_promoter,
+            'admission.view_doctorateadmission_person': is_admission_request_promoter,
+            'admission.view_doctorateadmission_coordinates': is_admission_request_promoter,
+            'admission.view_doctorateadmission_secondary_studies': is_admission_request_promoter,
+            'admission.view_doctorateadmission_curriculum': is_admission_request_promoter,
+            'admission.view_doctorateadmission_project': is_admission_request_promoter,
+            'admission.view_doctorateadmission_cotutelle': is_admission_request_promoter,
+            'admission.view_doctorateadmission_supervision': is_admission_request_promoter,
+            'admission.approve_proposition': is_part_of_committee_and_invited,
         })

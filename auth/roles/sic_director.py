@@ -25,12 +25,13 @@
 # ##############################################################################
 import rules
 from django.utils.translation import gettext_lazy as _
+from rules import RuleSet
 
 from admission.auth.roles.sic_manager import SicManager
-from osis_role.contrib.models import EntityRoleModel
+from osis_role.contrib.models import RoleModel
 
 
-class SicDirector(EntityRoleModel):
+class SicDirector(RoleModel):
     class Meta:
         verbose_name = _("SIC director")
         verbose_name_plural = _("SIC directors")
@@ -38,8 +39,15 @@ class SicDirector(EntityRoleModel):
 
     @classmethod
     def rule_set(cls):
-        return SicManager.rule_set().update({
-            'admission.access_doctorateadmission': rules.always_allow,
+        return RuleSet({
+            **SicManager.rule_set(),
             'admission.view_doctorateadmission': rules.always_allow,
             'admission.validate_registration': rules.always_allow,
+            'admission.view_doctorateadmission_person': rules.always_allow,
+            'admission.view_doctorateadmission_coordinates': rules.always_allow,
+            'admission.view_doctorateadmission_secondary_studies': rules.always_allow,
+            'admission.view_doctorateadmission_curriculum': rules.always_allow,
+            'admission.view_doctorateadmission_project': rules.always_allow,
+            'admission.view_doctorateadmission_cotutelle': rules.always_allow,
+            'admission.view_doctorateadmission_supervision': rules.always_allow,
         })

@@ -53,6 +53,7 @@ class GroupeDeSupervisionDto(interface.DomainService):
                 DetailSignaturePromoteurDTO(
                     promoteur=cls._build_promoteur(signature, personne_connue_ucl_translator),
                     status=signature.etat.name,
+                    commentaire_externe=signature.commentaire_externe,
                 )
                 for signature in groupe.signatures_promoteurs
             ],
@@ -60,6 +61,7 @@ class GroupeDeSupervisionDto(interface.DomainService):
                 DetailSignatureMembreCADTO(
                     membre_CA=cls._build_membre_CA(signature, personne_connue_ucl_translator),
                     status=signature.etat.name,
+                    commentaire_externe=signature.commentaire_externe,
                 )
                 for signature in groupe.signatures_membres_CA
             ],

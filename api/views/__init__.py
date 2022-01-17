@@ -27,10 +27,13 @@ from admission.api.views.autocomplete import *
 from admission.api.views.coordonnees import *
 from admission.api.views.curriculum import *
 from admission.api.views.secondary_studies import *
+from admission.api.views.languages_knowledge import *
 from admission.api.views.cotutelle import *
 from admission.api.views.person import *
 from admission.api.views.project import *
 from admission.api.views.supervision import *
+from admission.api.views.signatures import *
+from admission.api.views.approvals import *
 
 __all__ = [
     "CoordonneesViewSet",
@@ -38,6 +41,7 @@ __all__ = [
     "PersonViewSet",
     "PropositionViewSet",
     "PropositionListView",
+    "VerifyPropositionView",
     "SecondaryStudiesViewSet",
     "AutocompleteDoctoratView",
     "AutocompleteSectorView",
@@ -45,4 +49,7 @@ __all__ = [
     "AutocompletePersonView",
     "CotutelleAPIView",
     "SupervisionAPIView",
+    "RequestSignaturesAPIView",
+    "LanguagesKnowledgeViewSet",
+    "ApprovePropositionAPIView",
 ]

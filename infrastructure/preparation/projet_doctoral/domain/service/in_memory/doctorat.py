@@ -31,6 +31,8 @@ from admission.ddd.preparation.projet_doctoral.dtos import DoctoratDTO
 from admission.ddd.preparation.projet_doctoral.test.factory.doctorat import (
     DoctoratCDEFactory,
     DoctoratCDSCFactory,
+    DoctoratCDSSDPFactory,
+    DoctoratCLSMFactory,
     _DoctoratDTOFactory,
 )
 
@@ -40,7 +42,10 @@ class DoctoratInMemoryTranslator(IDoctoratTranslator):
         DoctoratCDEFactory(
             entity_id__sigle='ECGE3DP',
             entity_id__annee=2020,
-            entite_ucl_id__code="CDE",
+        ),
+        DoctoratCLSMFactory(
+            entity_id__sigle='ECGM3DP',
+            entity_id__annee=2020,
         ),
         DoctoratCDSCFactory(
             entity_id__sigle='AGRO3DP',
@@ -50,10 +55,15 @@ class DoctoratInMemoryTranslator(IDoctoratTranslator):
             entity_id__sigle='SC3DP',
             entity_id__annee=2020,
         ),
+        DoctoratCDSSDPFactory(
+            entity_id__sigle='ESP3DP',
+            entity_id__annee=2020,
+        ),
     ]
     sector_doctorates_mapping = {
         "SST": ['AGRO3DP', 'SC3DP'],
-        "SSH": ['ECGE3DP'],
+        "SSH": ['ECGE3DP', 'ECGM3DP'],
+        "SSS": ['ESP3DP'],
     }
 
     @classmethod

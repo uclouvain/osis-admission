@@ -23,15 +23,18 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import rules
 from rules import RuleSet
 from django.utils.translation import gettext_lazy as _
 
-from admission.auth.predicates import is_admission_request_author
-from osis_role.contrib.models import EntityRoleModel
+from admission.auth.predicates import (
+    invitations_sent,
+    is_admission_request_author,
+    is_admission_request_author_or_person,
+)
+from osis_role.contrib.models import RoleModel
 
 
-class Candidate(EntityRoleModel):
+class Candidate(RoleModel):
     class Meta:
         verbose_name = _("Candidate")
         verbose_name_plural = _("Candidates")
@@ -40,13 +43,30 @@ class Candidate(EntityRoleModel):
     @classmethod
     def rule_set(cls):
         return RuleSet({
-            'admission.add_doctorateadmission': rules.always_allow,
             'admission.change_doctorateadmission': is_admission_request_author,
             'admission.view_doctorateadmission': is_admission_request_author,
-            'admission.delete_doctorateadmission': rules.always_deny,
-            'admission.access_doctorateadmission': rules.always_allow,
+            'admission.delete_doctorateadmission': is_admission_request_author,
             'admission.download_pdf_confirmation': is_admission_request_author,
             'admission.upload_pdf_confirmation': is_admission_request_author,
             'admission.fill_thesis': is_admission_request_author,
             'admission.upload_publication_authorisation': is_admission_request_author,
+            'admission.request_signatures': is_admission_request_author & ~invitations_sent,
+            'admission.view_doctorateadmission_person': is_admission_request_author_or_person,
+            'admission.change_doctorateadmission_person': is_admission_request_author_or_person,
+            'admission.view_doctorateadmission_coordinates': is_admission_request_author_or_person,
+            'admission.change_doctorateadmission_coordinates': is_admission_request_author_or_person,
+            'admission.view_doctorateadmission_secondary_studies': is_admission_request_author_or_person,
+            'admission.change_doctorateadmission_secondary_studies': is_admission_request_author_or_person,
+            'admission.view_doctorateadmission_curriculum': is_admission_request_author_or_person,
+            'admission.change_doctorateadmission_curriculum': is_admission_request_author_or_person,
+            'admission.view_doctorateadmission_languages': is_admission_request_author_or_person,
+            'admission.change_doctorateadmission_languages': is_admission_request_author_or_person,
+            'admission.view_doctorateadmission_project': is_admission_request_author,
+            'admission.change_doctorateadmission_project': is_admission_request_author,
+            'admission.view_doctorateadmission_cotutelle': is_admission_request_author,
+            'admission.change_doctorateadmission_cotutelle': is_admission_request_author,
+            'admission.view_doctorateadmission_supervision': is_admission_request_author,
+            'admission.change_doctorateadmission_supervision': is_admission_request_author & ~invitations_sent,
+            'admission.add_supervision_member': is_admission_request_author & ~invitations_sent,
+            'admission.remove_supervision_member': is_admission_request_author & ~invitations_sent,
         })

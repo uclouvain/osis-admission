@@ -26,7 +26,10 @@
 
 from rest_framework import serializers
 
+from admission.api.serializers.fields import ActionLinksField, ACTION_LINKS
 from admission.contrib.models import AdmissionType, DoctorateAdmission
+from base.models.entity_version import EntityVersion
+from base.models.enums.entity_type import INSTITUTE
 from base.utils.serializers import DTOSerializer
 from admission.ddd.preparation.projet_doctoral.commands import (
     CompleterPropositionCommand,
@@ -35,12 +38,15 @@ from admission.ddd.preparation.projet_doctoral.commands import (
 from admission.ddd.preparation.projet_doctoral.domain.model._detail_projet import ChoixLangueRedactionThese
 from admission.ddd.preparation.projet_doctoral.domain.model._experience_precedente_recherche import \
     ChoixDoctoratDejaRealise
-from admission.ddd.preparation.projet_doctoral.domain.model._enums import ChoixBureauCDE
+from admission.ddd.preparation.projet_doctoral.domain.model._enums import (
+    ChoixCommissionProximiteCDEouCLSM,
+    ChoixCommissionProximiteCDSS,
+)
 from admission.ddd.preparation.projet_doctoral.dtos import DoctoratDTO, PropositionDTO, PropositionSearchDTO
 
 __all__ = [
     "PropositionIdentityDTOSerializer",
-    "PropositionSearchDTOSerializer",
+    "PropositionSearchSerializer",
     "InitierPropositionCommandSerializer",
     "CompleterPropositionCommandSerializer",
     "DoctorateAdmissionReadSerializer",
@@ -73,11 +79,77 @@ class PropositionIdentityDTOSerializer(serializers.Serializer):
 
 
 class PropositionSearchDTOSerializer(DTOSerializer):
+    links = ActionLinksField(actions={
+        # Profile
+        # Person
+        'retrieve_person': ACTION_LINKS['retrieve_person'],
+        'update_person': ACTION_LINKS['update_person'],
+        # Coordinates
+        'retrieve_coordinates': ACTION_LINKS['retrieve_coordinates'],
+        'update_coordinates': ACTION_LINKS['update_coordinates'],
+        # Secondary studies
+        'retrieve_secondary_studies': ACTION_LINKS['retrieve_secondary_studies'],
+        'update_secondary_studies': ACTION_LINKS['update_secondary_studies'],
+        # Language knowledge
+        'retrieve_languages': ACTION_LINKS['retrieve_languages'],
+        'update_languages': ACTION_LINKS['update_languages'],
+        # Proposition
+        'destroy_proposition': ACTION_LINKS['destroy_proposition'],
+        # Project
+        'retrieve_proposition': ACTION_LINKS['retrieve_proposition'],
+        'update_proposition': ACTION_LINKS['update_proposition'],
+        # Cotutelle
+        'retrieve_cotutelle': ACTION_LINKS['retrieve_cotutelle'],
+        'update_cotutelle': ACTION_LINKS['update_cotutelle'],
+        # Supervision
+        'retrieve_supervision': ACTION_LINKS['retrieve_supervision'],
+    })
+
     class Meta:
         source = PropositionSearchDTO
 
 
+class PropositionSearchSerializer(serializers.Serializer):
+    links = ActionLinksField(actions={
+        'create_proposition': ACTION_LINKS['create_proposition']
+    })
+
+    propositions = PropositionSearchDTOSerializer(many=True)
+
+
 class PropositionDTOSerializer(DTOSerializer):
+    links = ActionLinksField(
+        actions={
+            # Profile
+            # Person
+            'retrieve_person': ACTION_LINKS['retrieve_person'],
+            'update_person': ACTION_LINKS['update_person'],
+            # Coordinates
+            'retrieve_coordinates': ACTION_LINKS['retrieve_coordinates'],
+            'update_coordinates': ACTION_LINKS['update_coordinates'],
+            # Secondary studies
+            'retrieve_secondary_studies': ACTION_LINKS['retrieve_secondary_studies'],
+            'update_secondary_studies': ACTION_LINKS['update_secondary_studies'],
+            # Language knowledge
+            'retrieve_languages': ACTION_LINKS['retrieve_languages'],
+            'update_languages': ACTION_LINKS['update_languages'],
+            # Proposition
+            'destroy_proposition': ACTION_LINKS['destroy_proposition'],
+            # Project
+            'retrieve_proposition': ACTION_LINKS['retrieve_proposition'],
+            'update_proposition': ACTION_LINKS['update_proposition'],
+            # Cotutelle
+            'retrieve_cotutelle': ACTION_LINKS['retrieve_cotutelle'],
+            'update_cotutelle': ACTION_LINKS['update_cotutelle'],
+            # Supervision
+            'add_approval': ACTION_LINKS['add_approval'],
+            'add_member': ACTION_LINKS['add_member'],
+            'remove_member': ACTION_LINKS['remove_member'],
+            'retrieve_supervision': ACTION_LINKS['retrieve_supervision'],
+            'request_signatures': ACTION_LINKS['request_signatures'],
+        }
+    )
+
     class Meta:
         source = PropositionDTO
 
@@ -87,8 +159,8 @@ class InitierPropositionCommandSerializer(DTOSerializer):
         source = InitierPropositionCommand
 
     type_admission = serializers.ChoiceField(choices=AdmissionType.choices())
-    bureau_CDE = serializers.ChoiceField(
-        choices=ChoixBureauCDE.choices(),
+    commission_proximite = serializers.ChoiceField(
+        choices=ChoixCommissionProximiteCDEouCLSM.choices() + ChoixCommissionProximiteCDSS.choices(),
         allow_blank=True,
     )
     documents_projet = serializers.ListField(child=serializers.CharField())
@@ -103,6 +175,12 @@ class InitierPropositionCommandSerializer(DTOSerializer):
     langue_redaction_these = serializers.ChoiceField(
         choices=ChoixLangueRedactionThese.choices(),
         default=ChoixLangueRedactionThese.UNDECIDED.name,
+    )
+    institut_these = serializers.SlugRelatedField(
+        allow_null=True,
+        queryset=EntityVersion.objects.filter(entity_type=INSTITUTE),
+        required=False,
+        slug_field='uuid',
     )
 
 
@@ -111,8 +189,8 @@ class CompleterPropositionCommandSerializer(DTOSerializer):
         source = CompleterPropositionCommand
 
     type_admission = serializers.ChoiceField(choices=AdmissionType.choices())
-    bureau_CDE = serializers.ChoiceField(
-        choices=ChoixBureauCDE.choices(),
+    commission_proximite = serializers.ChoiceField(
+        choices=ChoixCommissionProximiteCDEouCLSM.choices() + ChoixCommissionProximiteCDSS.choices(),
         allow_blank=True,
     )
     documents_projet = serializers.ListField(child=serializers.CharField())
@@ -127,6 +205,12 @@ class CompleterPropositionCommandSerializer(DTOSerializer):
     langue_redaction_these = serializers.ChoiceField(
         choices=ChoixLangueRedactionThese.choices(),
         default=ChoixLangueRedactionThese.UNDECIDED.name,
+    )
+    institut_these = serializers.SlugRelatedField(
+        allow_null=True,
+        queryset=EntityVersion.objects.filter(entity_type=INSTITUTE),
+        required=False,
+        slug_field='uuid',
     )
 
 

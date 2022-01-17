@@ -23,23 +23,24 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from functools import partial
 
 from rest_framework import mixins
 from rest_framework.generics import GenericAPIView
 
 from admission.api import serializers
-from admission.api.schema import BetterChoicesSchema
+from admission.api.permissions import IsSelfPersonTabOrTabPermission
+from admission.api.views.mixins import PersonRelatedMixin
+from osis_role.contrib.views import APIPermissionRequiredMixin
 
 
-class CoordonneesViewSet(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, GenericAPIView):
+class CoordonneesViewSet(PersonRelatedMixin, APIPermissionRequiredMixin, mixins.RetrieveModelMixin,
+                         mixins.UpdateModelMixin, GenericAPIView):
     name = "coordonnees"
     pagination_class = None
     filter_backends = []
     serializer_class = serializers.CoordonneesSerializer
-    schema = BetterChoicesSchema(tags=["person"])
-
-    def get_object(self):
-        return self.request.user.person
+    permission_classes = [partial(IsSelfPersonTabOrTabPermission, permission_suffix='coordinates')]
 
     def get(self, request, *args, **kwargs):
         return self.retrieve(request, *args, **kwargs)

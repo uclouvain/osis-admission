@@ -24,14 +24,16 @@
 #
 ##############################################################################
 import datetime
-from typing import List, Optional
+import uuid
+from typing import List, Optional, Union
 
 import attr
 
 from admission.ddd.preparation.projet_doctoral.domain.model._detail_projet import DetailProjet
 from admission.ddd.preparation.projet_doctoral.domain.model._enums import (
-    ChoixBureauCDE,
-    ChoixStatusProposition,
+    ChoixCommissionProximiteCDEouCLSM,
+    ChoixCommissionProximiteCDSS,
+    ChoixStatutProposition,
     ChoixTypeAdmission,
 )
 from admission.ddd.preparation.projet_doctoral.domain.model._experience_precedente_recherche import (
@@ -46,6 +48,7 @@ from admission.ddd.preparation.projet_doctoral.domain.model.doctorat import Doct
 from admission.ddd.preparation.projet_doctoral.domain.validator.validator_by_business_action import (
     CompletionPropositionValidatorList,
     SoumettrePropositionValidatorList,
+    DetailsProjetValidatorList,
 )
 from osis_common.ddd import interface
 
@@ -62,12 +65,12 @@ class Proposition(interface.RootEntity):
     doctorat_id = attr.ib(type=DoctoratIdentity)
     matricule_candidat = attr.ib(type=str)
     projet = attr.ib(type=DetailProjet)
+    reference = attr.ib(type=Optional[str], default=None)
     justification = attr.ib(type=Optional[str], default='')
-    statut = attr.ib(type=ChoixStatusProposition, default=ChoixStatusProposition.IN_PROGRESS)
-    bureau_CDE = attr.ib(
-        type=Optional[ChoixBureauCDE],
-        default='',
-    )  # CDE = Comission Doctorale du domaine Sciences Economique et de Gestion
+    statut = attr.ib(type=ChoixStatutProposition, default=ChoixStatutProposition.IN_PROGRESS)
+    commission_proximite = attr.ib(
+        type=Optional[Union[ChoixCommissionProximiteCDEouCLSM, ChoixCommissionProximiteCDSS]], default=''
+    )
     financement = attr.ib(type=Financement, default=financement_non_rempli)
     experience_precedente_recherche = attr.ib(
         type=ExperiencePrecedenteRecherche,
@@ -83,14 +86,20 @@ class Proposition(interface.RootEntity):
     def annee(self):
         return self.doctorat_id.annee
 
+    valeur_reference_base = 300000
+
+    @property
+    def est_verrouillee_pour_signature(self) -> bool:
+        return self.statut == ChoixStatutProposition.SIGNING_IN_PROGRESS
+
     def est_en_cours(self):
-        return self.statut == ChoixStatusProposition.IN_PROGRESS
+        return self.statut == ChoixStatutProposition.IN_PROGRESS
 
     def completer(
             self,
             type_admission: str,
             justification: str,
-            bureau_CDE: str,
+            commission_proximite: str,
             type_financement: str,
             type_contrat_travail: str,
             eft: str,
@@ -98,8 +107,9 @@ class Proposition(interface.RootEntity):
             duree_prevue: str,
             temps_consacre: str,
             langue_redaction_these: str,
-            institut_these: str,
+            institut_these: Optional[uuid.UUID],
             lieu_these: str,
+            autre_lieu_these: str,
             titre: str,
             resume: str,
             doctorat_deja_realise: str,
@@ -120,7 +130,7 @@ class Proposition(interface.RootEntity):
             doctorat_deja_realise=doctorat_deja_realise,
             institution=institution,
         ).validate()
-        self._completer_proposition(type_admission, justification, bureau_CDE)
+        self._completer_proposition(type_admission, justification, commission_proximite)
         self._completer_financement(
             type=type_financement,
             type_contrat_travail=type_contrat_travail,
@@ -135,6 +145,7 @@ class Proposition(interface.RootEntity):
             langue_redaction_these=langue_redaction_these,
             institut_these=institut_these,
             lieu_these=lieu_these,
+            autre_lieu_these=autre_lieu_these,
             documents=documents,
             graphe_gantt=graphe_gantt,
             proposition_programme_doctoral=proposition_programme_doctoral,
@@ -148,10 +159,14 @@ class Proposition(interface.RootEntity):
             raison_non_soutenue=raison_non_soutenue,
         )
 
-    def _completer_proposition(self, type_admission: str, justification: str, bureau_CDE: str):
+    def _completer_proposition(self, type_admission: str, justification: str, commission_proximite: str):
         self.type_admission = ChoixTypeAdmission[type_admission]
         self.justification = justification
-        self.bureau_CDE = ChoixBureauCDE[bureau_CDE] if bureau_CDE else ''
+        self.commission_proximite = ''
+        if commission_proximite in ChoixCommissionProximiteCDEouCLSM.get_names():
+            self.commission_proximite = ChoixCommissionProximiteCDEouCLSM[commission_proximite]
+        elif commission_proximite in ChoixCommissionProximiteCDSS.get_names():
+            self.commission_proximite = ChoixCommissionProximiteCDSS[commission_proximite]
 
     def _completer_financement(
             self,
@@ -179,8 +194,9 @@ class Proposition(interface.RootEntity):
             titre: str,
             resume: str,
             langue_redaction_these: str,
-            institut_these: str,
+            institut_these: Optional[uuid.UUID],
             lieu_these: str,
+            autre_lieu_these: str,
             documents: List[str] = None,
             graphe_gantt: List[str] = None,
             proposition_programme_doctoral: List[str] = None,
@@ -194,6 +210,7 @@ class Proposition(interface.RootEntity):
             langue_redaction_these=langue_redaction_these,
             institut_these=institut_these,
             lieu_these=lieu_these,
+            autre_lieu_these=autre_lieu_these,
             graphe_gantt=graphe_gantt,
             proposition_programme_doctoral=proposition_programme_doctoral,
             projet_formation_complementaire=projet_formation_complementaire,
@@ -218,10 +235,18 @@ class Proposition(interface.RootEntity):
             )
 
     def verifier(self):
+        """Vérification complète de la proposition"""
         SoumettrePropositionValidatorList(proposition=self).validate()
 
+    def verrouiller_proposition_pour_signature(self):
+        self.statut = ChoixStatutProposition.SIGNING_IN_PROGRESS
+
+    def verifier_projet_doctoral(self):
+        """Vérification de la validité du projet doctoral avant demande des signatures"""
+        DetailsProjetValidatorList(self.type_admission, self.projet).validate()
+
     def finaliser(self):
-        self.statut = ChoixStatusProposition.SUBMITTED
+        self.statut = ChoixStatutProposition.SUBMITTED
 
     def supprimer(self):
-        self.statut = ChoixStatusProposition.CANCELLED
+        self.statut = ChoixStatutProposition.CANCELLED

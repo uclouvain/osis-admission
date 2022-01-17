@@ -31,7 +31,7 @@ from osis_profile.models.curriculum import CurriculumYear, Experience
 
 
 class DoctorateAdmissionAdmin(admin.ModelAdmin):
-    pass
+    autocomplete_fields = ['doctorate', 'thesis_institute']
 
 
 class ExperienceInlineAdmin(admin.TabularInline):

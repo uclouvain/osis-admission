@@ -25,6 +25,7 @@
 # ##############################################################################
 from typing import List
 
+from admission.auth.roles.promoter import Promoter
 from admission.ddd.preparation.projet_doctoral.domain.model._promoteur import PromoteurIdentity
 from admission.ddd.preparation.projet_doctoral.domain.service.i_promoteur import IPromoteurTranslator
 from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import PromoteurNonTrouveException
@@ -53,3 +54,7 @@ class PromoteurTranslator(IPromoteurTranslator):
         # TODO :: 1. signaletiques_dto = signaletique_translator.search(terme_de_recherche)
         # TODO :: 2. call cls.seacrh(matricules=signaletiques_dto)
         raise NotImplementedError
+
+    @classmethod
+    def est_externe(cls, identity: 'PromoteurIdentity') -> bool:
+        return Promoter.objects.get(person__global_id=identity.matricule).is_external

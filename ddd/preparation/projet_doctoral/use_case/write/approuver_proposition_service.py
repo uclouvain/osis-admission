@@ -42,7 +42,7 @@ def approuver_proposition(
     signataire = groupe_de_supervision.get_signataire(cmd.matricule)
 
     # WHEN
-    groupe_de_supervision.approuver(signataire)
+    groupe_de_supervision.approuver(signataire, cmd.commentaire_interne, cmd.commentaire_externe)
 
     # THEN
     groupe_supervision_repository.save(groupe_de_supervision)

@@ -24,6 +24,7 @@
 #
 ##############################################################################
 import datetime
+from uuid import UUID
 from typing import List, Optional, Union
 
 import attr
@@ -92,7 +93,9 @@ class CurriculumDTO(interface.DTO):
 
 @attr.s(frozen=True, slots=True)
 class PropositionDTO(interface.DTO):
+    uuid = attr.ib(type=str)
     type_admission = attr.ib(type=str)
+    reference = attr.ib(type=str)
     justification = attr.ib(type=Optional[str])
     sigle_doctorat = attr.ib(type=str)
     annee_doctorat = attr.ib(type=int)
@@ -100,9 +103,7 @@ class PropositionDTO(interface.DTO):
     intitule_doctorat_en = attr.ib(type=str)
     matricule_candidat = attr.ib(type=str)
     code_secteur_formation = attr.ib(type=str)
-    bureau_CDE = attr.ib(
-        type=Optional[str],
-    )  # CDE = Comission Doctorale du domaine Sciences Economique et de Gestion
+    commission_proximite = attr.ib(type=Optional[str])
     type_financement = attr.ib(type=Optional[str])
     type_contrat_travail = attr.ib(type=Optional[str])
     eft = attr.ib(type=Optional[int])
@@ -117,8 +118,9 @@ class PropositionDTO(interface.DTO):
     projet_formation_complementaire = attr.ib(type=List[str])
     lettres_recommandation = attr.ib(type=List[str])
     langue_redaction_these = attr.ib(type=str)
-    institut_these = attr.ib(type=str)
+    institut_these = attr.ib(type=Optional[UUID])
     lieu_these = attr.ib(type=str)
+    autre_lieu_these = attr.ib(type=str)
     doctorat_deja_realise = attr.ib(type=str)
     institution = attr.ib(type=Optional[str])
     date_soutenance = attr.ib(type=Optional[datetime.date])
@@ -129,6 +131,7 @@ class PropositionDTO(interface.DTO):
 @attr.s(frozen=True, slots=True)
 class PropositionSearchDTO(interface.DTO):
     uuid = attr.ib(type=str)
+    reference = attr.ib(type=str)
     type_admission = attr.ib(type=str)
     sigle_doctorat = attr.ib(type=str)
     intitule_doctorat_fr = attr.ib(type=str)
@@ -136,9 +139,7 @@ class PropositionSearchDTO(interface.DTO):
     matricule_candidat = attr.ib(type=str)
     code_secteur_formation = attr.ib(type=str)
     intitule_secteur_formation = attr.ib(type=str)
-    bureau_CDE = attr.ib(
-        type=Optional[str],
-    )  # CDE = Comission Doctorale du domaine Sciences Economique et de Gestion
+    commission_proximite = attr.ib(type=Optional[str])
     creee_le = attr.ib(type=datetime.datetime)
     statut = attr.ib(type=str)
 
@@ -161,12 +162,14 @@ class MembreCADTO(interface.DTO):
 class DetailSignaturePromoteurDTO(interface.DTO):
     promoteur = attr.ib(type=PromoteurDTO)
     status = attr.ib(type=str)
+    commentaire_externe = attr.ib(type=Optional[str], default='')
 
 
 @attr.s(frozen=True, slots=True)
 class DetailSignatureMembreCADTO(interface.DTO):
     membre_CA = attr.ib(type=MembreCADTO)
     status = attr.ib(type=str)
+    commentaire_externe = attr.ib(type=Optional[str], default='')
 
 
 @attr.s(frozen=True, slots=True)

@@ -29,5 +29,7 @@ from .cotutelle import *
 from .person import *
 from .coordonnees import CoordonneesSerializer
 from .secondary_studies import HighSchoolDiplomaSerializer
+from .languages_knowledge import *
 from .supervision import *
 from .curriculum import CurriculumSerializer
+from .approvals import ApprouverPropositionCommandSerializer, RefuserPropositionCommandSerializer

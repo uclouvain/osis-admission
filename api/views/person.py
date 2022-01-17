@@ -23,22 +23,24 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from functools import partial
+
 from rest_framework import mixins
 from rest_framework.generics import GenericAPIView
 
 from admission.api import serializers
-from admission.api.schema import BetterChoicesSchema
+from admission.api.permissions import IsSelfPersonTabOrTabPermission
+from admission.api.views import PersonRelatedMixin
+from osis_role.contrib.views import APIPermissionRequiredMixin
 
 
-class PersonViewSet(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, GenericAPIView):
+class PersonViewSet(PersonRelatedMixin, APIPermissionRequiredMixin, mixins.RetrieveModelMixin, mixins.UpdateModelMixin,
+                    GenericAPIView):
     name = "person"
     pagination_class = None
     filter_backends = []
     serializer_class = serializers.PersonIdentificationSerializer
-    schema = BetterChoicesSchema()
-
-    def get_object(self):
-        return self.request.user.person
+    permission_classes = [partial(IsSelfPersonTabOrTabPermission, permission_suffix='person')]
 
     def get(self, request, *args, **kwargs):
         return self.retrieve(request, *args, **kwargs)

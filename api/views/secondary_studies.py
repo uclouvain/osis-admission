@@ -23,22 +23,24 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from functools import partial
+
 from rest_framework import mixins
 from rest_framework.generics import GenericAPIView
 
 from admission.api import serializers
-from admission.api.schema import ChoicesEnumSchema
+from admission.api.permissions import IsSelfPersonTabOrTabPermission
+from admission.api.views import PersonRelatedMixin
+from osis_role.contrib.views import APIPermissionRequiredMixin
 
 
-class SecondaryStudiesViewSet(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, GenericAPIView):
+class SecondaryStudiesViewSet(PersonRelatedMixin, APIPermissionRequiredMixin, mixins.RetrieveModelMixin,
+                              mixins.UpdateModelMixin, GenericAPIView):
+    name = "secondary-studies"
     pagination_class = None
     filter_backends = []
+    permission_classes = [partial(IsSelfPersonTabOrTabPermission, permission_suffix='secondary_studies')]
     serializer_class = serializers.HighSchoolDiplomaSerializer
-    schema = ChoicesEnumSchema(tags=["person"])
-    name = "secondary-studies"
-
-    def get_object(self):
-        return self.request.user.person
 
     def get(self, request, *args, **kwargs):
         return self.retrieve(request, *args, **kwargs)
