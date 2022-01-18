@@ -22,12 +22,12 @@ class BelgianHighSchoolDiplomaSerializer(serializers.ModelSerializer):
         model = BelgianHighSchoolDiploma
         fields = (
             "academic_graduation_year",
+            "high_school_transcript",
+            "high_school_diploma",
             "result",
             "community",
             "educational_type",
             "educational_other",
-            "course_repeat",
-            "course_orientation",
             "institute",
             "other_institute",
             "schedule",
@@ -43,12 +43,16 @@ class ForeignHighSchoolDiplomaSerializer(serializers.ModelSerializer):
         model = ForeignHighSchoolDiploma
         fields = (
             "academic_graduation_year",
+            "high_school_transcript",
+            "high_school_diploma",
             "result",
             "foreign_diploma_type",
             "linguistic_regime",
             "other_linguistic_regime",
             "country",
             "equivalence",
+            "high_school_transcript_translation",
+            "high_school_diploma_translation",
         )
 
 
