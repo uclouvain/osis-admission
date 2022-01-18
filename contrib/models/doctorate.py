@@ -40,7 +40,7 @@ from admission.ddd.preparation.projet_doctoral.domain.model._financement import 
 from admission.ddd.preparation.projet_doctoral.domain.model._detail_projet import ChoixLangueRedactionThese
 from osis_document.contrib import FileField
 from osis_signature.contrib.fields import SignatureProcessField
-from .base import BaseAdmission
+from .base import BaseAdmission, admission_directory_path
 
 REFERENCE_SEQ_NAME = 'admission_doctorateadmission_reference_seq'
 
@@ -144,18 +144,23 @@ class DoctorateAdmission(BaseAdmission):
     )
     project_document = FileField(
         verbose_name=_("Project"),
+        upload_to=admission_directory_path,
     )
     gantt_graph = FileField(
         verbose_name=_("Gantt graph"),
+        upload_to=admission_directory_path,
     )
     program_proposition = FileField(
         verbose_name=_("Program proposition"),
+        upload_to=admission_directory_path,
     )
     additional_training_project = FileField(
         verbose_name=_("Additional training project"),
+        upload_to=admission_directory_path,
     )
     recommendation_letters = FileField(
         verbose_name=_("Recommendation letters"),
+        upload_to=admission_directory_path,
     )
 
     # Experience précédente de recherche
@@ -202,13 +207,16 @@ class DoctorateAdmission(BaseAdmission):
     cotutelle_opening_request = FileField(
         verbose_name=_("Cotutelle request document"),
         max_files=1,
+        upload_to=admission_directory_path,
     )
     cotutelle_convention = FileField(
         verbose_name=_("Cotutelle convention"),
         max_files=1,
+        upload_to=admission_directory_path,
     )
     cotutelle_other_documents = FileField(
         verbose_name=_("Other cotutelle-related documents"),
+        upload_to=admission_directory_path,
     )
 
     detailed_status = JSONField(default=dict)
