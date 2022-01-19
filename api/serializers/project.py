@@ -103,6 +103,9 @@ class PropositionSearchDTOSerializer(DTOSerializer):
         'update_cotutelle': ACTION_LINKS['update_cotutelle'],
         # Supervision
         'retrieve_supervision': ACTION_LINKS['retrieve_supervision'],
+        # Curriculum
+        'retrieve_curriculum': ACTION_LINKS['retrieve_curriculum'],
+        'update_curriculum': ACTION_LINKS['update_curriculum'],
     })
 
     class Meta:
@@ -147,6 +150,9 @@ class PropositionDTOSerializer(DTOSerializer):
             'remove_member': ACTION_LINKS['remove_member'],
             'retrieve_supervision': ACTION_LINKS['retrieve_supervision'],
             'request_signatures': ACTION_LINKS['request_signatures'],
+            # Curriculum
+            'retrieve_curriculum': ACTION_LINKS['retrieve_curriculum'],
+            'update_curriculum': ACTION_LINKS['update_curriculum'],
         }
     )
 

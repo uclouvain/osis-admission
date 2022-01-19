@@ -135,13 +135,22 @@ ACTION_LINKS = {
         'path_name': 'admission_api_v1:secondary-studies',
         'method': 'PUT',
     },
-    # Secondary studies
+    # Languages knowledge
     'retrieve_languages': {
         'path_name': 'admission_api_v1:languages-knowledge',
         'method': 'GET',
     },
     'update_languages': {
         'path_name': 'admission_api_v1:languages-knowledge',
+        'method': 'POST',
+    },
+    # Curriculum
+    'retrieve_curriculum': {
+        'path_name': 'admission_api_v1:curriculum',
+        'method': 'GET',
+    },
+    'update_curriculum': {
+        'path_name': 'admission_api_v1:curriculum',
         'method': 'POST',
     },
     # Proposition

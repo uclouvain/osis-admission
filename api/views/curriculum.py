@@ -23,25 +23,89 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from rest_framework import mixins
-from rest_framework.generics import GenericAPIView
+from functools import partial
+from typing import Optional
+
+from rest_framework import status
+from rest_framework.exceptions import ValidationError
+from rest_framework.generics import get_object_or_404
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from admission.api import serializers
-from admission.api.schema import BetterChoicesSchema
+from admission.api.permissions import IsSelfPersonTabOrTabPermission
+from admission.api.schema import ResponseSpecificSchema
+from admission.api.views.mixins import PersonRelatedMixin, PersonRelatedSchema
+from osis_profile.models import Experience
+from osis_role.contrib.views import APIPermissionRequiredMixin
 
 
-class CurriculumViewSet(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, GenericAPIView):
-    pagination_class = None
-    filter_backends = []
-    serializer_class = serializers.CurriculumSerializer
-    schema = BetterChoicesSchema(tags=["person"])
+class CurriculumExperienceSchema(ResponseSpecificSchema, PersonRelatedSchema):
+    serializer_mapping = {
+        'GET': serializers.ExperienceSerializer,
+        'PUT': serializers.ExperienceUpdatingSerializer,
+        'POST': serializers.ExperienceCreationSerializer,
+        'DELETE': (),
+    }
+
+
+class CurriculumExperienceView(PersonRelatedMixin, APIPermissionRequiredMixin, APIView):
+    schema = CurriculumExperienceSchema()
+    permission_classes = [partial(IsSelfPersonTabOrTabPermission, permission_suffix='curriculum')]
     name = "curriculum"
 
-    def get_object(self):
-        return self.request.user.person
+    def get_queryset(self):
+        """Return the list of experiences of the person."""
+        return Experience.objects.filter(curriculum_year__person=self.get_object())
 
+    def get_experience(self) -> Optional[Experience]:
+        """Get the current experience from the uuid."""
+        experience_id = self.kwargs.get('xp')
+
+        if not experience_id:
+            raise ValidationError('The experience id is required.')
+
+        return get_object_or_404(self.get_queryset(), pk=experience_id)
+
+
+class CurriculumExperienceListAndCreateView(CurriculumExperienceView):
     def get(self, request, *args, **kwargs):
-        return self.retrieve(request, *args, **kwargs)
+        """Return the list of experiences from the person's CV."""
+        serializer = serializers.ExperienceSerializer(self.get_queryset(), many=True)
+        return Response(serializer.data)
+
+    def post(self, request, *args, **kwargs):
+        """Add an experience to the person's CV."""
+        serializer = serializers.ExperienceCreationSerializer(data=request.data, related_person=self.get_object())
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class CurriculumExperienceUpdateAndDeleteView(CurriculumExperienceView):
 
     def put(self, request, *args, **kwargs):
-        return self.update(request, *args, **kwargs)
+        """Update one of the experiences from the person's CV."""
+        experience_to_update = self.get_experience()
+
+        if experience_to_update.is_valuated:
+            raise ValidationError('This experience has already been valuated so cannot be updated.')
+
+        serializer = serializers.ExperienceUpdatingSerializer(instance=experience_to_update, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(serializer.data)
+
+    def delete(self, request, *args, **kwargs):
+        """Remove one of the experiences from the person's CV."""
+        experience_to_delete = self.get_experience()
+
+        if experience_to_delete.curriculum_year.experiences.count() == 1:
+            # Remove the curriculum year as the experience to delete is its last experience
+            experience_to_delete.curriculum_year.delete()
+        else:
+            # Just delete the experience
+            experience_to_delete.delete()
+
+        return Response(status=status.HTTP_204_NO_CONTENT)

@@ -24,6 +24,7 @@
 #
 # ##############################################################################
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
 
 from base.api.serializers.academic_year import RelatedAcademicYearField
 from base.models.academic_year import AcademicYear
@@ -35,61 +36,42 @@ class ExperienceSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Experience
-        fields = (
-            "valuated_from",
-            "course_type",
-        )
+        fields = '__all__'
+        extra_kwargs = {
+            "curriculum_year": {
+                "required": False,
+            },
+        }
 
 
-class CurriculumYearSerializer(serializers.ModelSerializer):
-    academic_graduation_year = RelatedAcademicYearField()
-    experiences = ExperienceSerializer(many=True)
+class ExperienceUpdatingSerializer(ExperienceSerializer):
 
-    class Meta:
-        model = CurriculumYear
-        fields = (
-            "academic_graduation_year",
-            "experiences",
-        )
+    def get_extra_kwargs(self):
+        extra_kwargs = super().get_extra_kwargs()
+        extra_kwargs["curriculum_year"]["read_only"] = True
+        return extra_kwargs
 
 
-class CurriculumSerializer(serializers.Serializer):
-    curriculum_years = CurriculumYearSerializer(many=True)
+class ExperienceCreationSerializer(ExperienceSerializer):
+    academic_graduation_year = RelatedAcademicYearField(required=False)
 
-    @staticmethod
-    def load_curriculum(instance):
-        instance.curriculum_years = CurriculumYear.objects.filter(person=instance)
+    def __init__(self, related_person=None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.related_person = related_person
 
-    def to_representation(self, instance):
-        self.load_curriculum(instance)
-        return super().to_representation(instance)
+    def validate(self, data):
+        # The related year must be specified
+        if not data.get('academic_graduation_year') and not data.get('curriculum_year'):
+            raise ValidationError("Please specify the experience's year")
 
-    @staticmethod
-    def update_curriculum_year(person, curriculum_year_data):
-        academic_year = curriculum_year_data.get("academic_graduation_year")
-        return CurriculumYear.objects.update_or_create(person=person, academic_graduation_year=academic_year)
+        return super().validate(data)
 
-    @staticmethod
-    def add_experience(curriculum_year, experience_data):
-        Experience.objects.create(curriculum_year=curriculum_year, **experience_data)
+    def create(self, validated_data):
+        if not validated_data.get('curriculum_year'):
+            # Get (and eventually create) the curriculum year related to the specified academic_year
+            validated_data['curriculum_year'] = CurriculumYear.objects.get_or_create(
+                person=self.related_person,
+                academic_graduation_year=validated_data.pop('academic_graduation_year'),
+            )[0]
 
-    def update(self, instance, validated_data):
-        person = instance
-        for curriculum_year_data in validated_data.get("curriculum_years"):
-            curriculum_year, _ = self.update_curriculum_year(person, curriculum_year_data)
-            experiences_data = curriculum_year_data.get("experiences")
-            not_valuated_experiences = curriculum_year.experiences.filter(is_valuated=False)
-            if experiences_data:
-                # first remove all previous not valuated experiences
-                not_valuated_experiences.delete()
-                # then add the receive ones
-                for experience_data in experiences_data:
-                    self.add_experience(curriculum_year, experience_data)
-            else:  # we can delete the curriculum year if there is no valuated experiences
-                if not curriculum_year.experiences.filter(is_valuated=True):
-                    curriculum_year.delete()
-                else:  # just delete all experiences that aren't valuated
-                    not_valuated_experiences.delete()
-
-        self.load_curriculum(instance)
-        return person
+        return super().create(validated_data)
