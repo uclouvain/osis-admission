@@ -60,6 +60,7 @@ class PersonIdentificationSerializer(serializers.ModelSerializer):
             'language',
             'sex',
             'gender',
+            'civil_state',
             'id_photo',
 
             # Pièce d'identité
