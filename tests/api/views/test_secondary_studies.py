@@ -127,8 +127,6 @@ class BelgianHighSchoolDiplomaTestCase(APITestCase):
         self.assertIsNone(belgian_diploma.community)
         self.assertEqual(belgian_diploma.educational_type, self.diploma_data["belgian_diploma"]["educational_type"])
         self.assertEqual(belgian_diploma.educational_other, "")
-        self.assertEqual(belgian_diploma.course_repeat, False)
-        self.assertEqual(belgian_diploma.course_orientation, False)
         self.assertEqual(belgian_diploma.institute, self.diploma_data["belgian_diploma"]["institute"])
         self.assertEqual(belgian_diploma.other_institute, "")
         self.assertIsNone(belgian_diploma.schedule)

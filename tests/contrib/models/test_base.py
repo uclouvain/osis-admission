@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,37 +23,21 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import string
+import uuid
 
-import factory
-from factory.fuzzy import FuzzyText
-from osis_document.enums import TokenAccess
-from osis_document.models import Upload, Token
+from django.test import TestCase
 
-from .doctorate import DoctorateAdmissionFactory
-
-__all__ = [
-    "DoctorateAdmissionFactory",
-]
+from admission.contrib.models.base import admission_directory_path
+from admission.tests.factories import DoctorateAdmissionFactory
 
 
-class PdfUploadFactory(factory.django.DjangoModelFactory):
-    class Meta:
-        model = Upload
+class BaseTestCase(TestCase):
 
-    file = factory.django.FileField(data=b'hello world', filename='the_file.pdf')
-    size = 1024
-    mimetype = 'application/pdf'
-    metadata = {
-        'md5': '5eb63bbbe01eeed093cb22bb8f5acdc3',
-        'name': 'the_file.pdf',
-    }
+    def setUp(self):
+        self.base_admission = DoctorateAdmissionFactory()
 
-
-class WriteTokenFactory(factory.django.DjangoModelFactory):
-    class Meta:
-        model = Token
-
-    token = FuzzyText(length=154, chars=string.ascii_letters + string.digits + ':-')
-    upload = factory.SubFactory(PdfUploadFactory)
-    access = TokenAccess.WRITE.name
+    def test_valid_upload_to(self):
+        self.assertEqual(
+            admission_directory_path(self.base_admission, 'my_file.pdf'),
+            'admission/{}/{}/my_file.pdf'.format(self.base_admission.candidate.uuid, self.base_admission.uuid)
+        )
