@@ -31,6 +31,6 @@ from rest_framework.generics import get_object_or_404
 from admission.contrib.models import DoctorateAdmission
 
 
-@lru_cache(maxsize=1024)
+@lru_cache()
 def get_cached_admission_perm_obj(admission_uuid):
     return get_object_or_404(DoctorateAdmission, uuid=admission_uuid)
