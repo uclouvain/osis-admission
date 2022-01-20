@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -24,32 +24,13 @@
 #
 # ##############################################################################
 
+from functools import lru_cache
+
 from rest_framework.generics import get_object_or_404
 
-from admission.api.schema import ChoicesEnumSchema
 from admission.contrib.models import DoctorateAdmission
-from admission.utils import get_cached_admission_perm_obj
 
 
-class PersonRelatedSchema(ChoicesEnumSchema):
-    def __init__(self, *args, **kwargs):
-        super().__init__(tags=["person"], *args, **kwargs)
-
-    def get_operation_id(self, path, method):
-        operation_id = super().get_operation_id(path, method)
-        if 'uuid' in path:
-            operation_id += 'Admission'
-        return operation_id
-
-
-class PersonRelatedMixin:
-    schema = PersonRelatedSchema()
-
-    def get_object(self):
-        if self.kwargs.get('uuid'):
-            return get_object_or_404(DoctorateAdmission, uuid=self.kwargs.get('uuid')).candidate
-        return self.request.user.person
-
-    def get_permission_object(self):
-        if self.kwargs.get('uuid'):
-            return get_cached_admission_perm_obj(self.kwargs['uuid'])
+@lru_cache(maxsize=1024)
+def get_cached_admission_perm_obj(admission_uuid):
+    return get_object_or_404(DoctorateAdmission, uuid=admission_uuid)
