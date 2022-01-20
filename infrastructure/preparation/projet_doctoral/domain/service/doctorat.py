@@ -37,21 +37,24 @@ from ddd.logic.learning_unit.domain.model.responsible_entity import UCLEntityIde
 
 class DoctoratTranslator(IDoctoratTranslator):
     @classmethod
+    def _build_dto(cls, dto: TrainingDto) -> DoctoratDTO:
+        return DoctoratDTO(
+            sigle=dto.acronym,
+            annee=dto.year,
+            intitule_fr='{} ({})'.format(dto.title_fr, dto.enrollment_campus_name),
+            intitule_en='{} ({})'.format(dto.title_en, dto.enrollment_campus_name),
+            sigle_entite_gestion=dto.management_entity_acronym,
+        )
+
+    @classmethod
     def get_dto(cls, sigle: str, annee: int) -> DoctoratDTO:
         from infrastructure.messages_bus import message_bus_instance
         dtos = message_bus_instance.invoke(
             SearchFormationsCommand(sigle=sigle, annee=annee, type=TrainingType.PHD.name)
         )
         if dtos:
-            dto = dtos[0]  # type: TrainingDto
-            return DoctoratDTO(
-                sigle=dto.acronym,
-                annee=dto.year,
-                intitule_fr=dto.title_fr,
-                intitule_en=dto.title_en,
-                sigle_entite_gestion=dto.management_entity_acronym,
-            )
-        raise DoctoratNonTrouveException()
+            return cls._build_dto(dtos[0])
+        raise DoctoratNonTrouveException()  # pragma: no cover
 
     @classmethod
     def get(cls, sigle: str, annee: int) -> Doctorat:
@@ -78,12 +81,4 @@ class DoctoratTranslator(IDoctoratTranslator):
                 type=TrainingType.PHD.name,
             )
         )
-        return [
-            DoctoratDTO(
-                sigle=dto.acronym,
-                annee=dto.year,
-                intitule_fr=dto.title_fr,
-                intitule_en=dto.title_en,
-                sigle_entite_gestion=dto.management_entity_acronym,
-            ) for dto in dtos
-        ]
+        return [cls._build_dto(dto) for dto in dtos]
