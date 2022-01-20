@@ -115,8 +115,14 @@ class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
     def search(
             cls,
             entity_ids: Optional[List['GroupeDeSupervisionIdentity']] = None,
+            matricule_membre: str = None,
             **kwargs
     ) -> List['GroupeDeSupervision']:
+        if matricule_membre:
+            propositions = DoctorateAdmission.objects.filter(
+                supervision_group__actors__person__global_id=matricule_membre,
+            ).distinct('pk').order_by('-pk')
+            return [cls.get_by_proposition_id(pid) for pid in propositions]
         raise NotImplementedError
 
     @classmethod

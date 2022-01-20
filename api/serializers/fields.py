@@ -112,37 +112,45 @@ ACTION_LINKS = {
     'retrieve_person': {
         'path_name': 'admission_api_v1:person',
         'method': 'GET',
+        'params': ['uuid'],
     },
     'update_person': {
         'path_name': 'admission_api_v1:person',
         'method': 'PUT',
+        'params': ['uuid'],
     },
     # Coordinates
     'retrieve_coordinates': {
         'path_name': 'admission_api_v1:coordonnees',
         'method': 'GET',
+        'params': ['uuid'],
     },
     'update_coordinates': {
         'path_name': 'admission_api_v1:coordonnees',
         'method': 'PUT',
+        'params': ['uuid'],
     },
     # Secondary studies
     'retrieve_secondary_studies': {
         'path_name': 'admission_api_v1:secondary-studies',
         'method': 'GET',
+        'params': ['uuid'],
     },
     'update_secondary_studies': {
         'path_name': 'admission_api_v1:secondary-studies',
         'method': 'PUT',
+        'params': ['uuid'],
     },
     # Secondary studies
     'retrieve_languages': {
         'path_name': 'admission_api_v1:languages-knowledge',
         'method': 'GET',
+        'params': ['uuid'],
     },
     'update_languages': {
         'path_name': 'admission_api_v1:languages-knowledge',
         'method': 'POST',
+        'params': ['uuid'],
     },
     # Proposition
     # Project

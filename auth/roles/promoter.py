@@ -23,7 +23,6 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import rules
 from django.utils.translation import gettext_lazy as _
 from rules import RuleSet
 
@@ -51,6 +50,7 @@ class Promoter(ExternalActorMixin, RoleModel):
             'admission.view_doctorateadmission_person': is_admission_request_promoter,
             'admission.view_doctorateadmission_coordinates': is_admission_request_promoter,
             'admission.view_doctorateadmission_secondary_studies': is_admission_request_promoter,
+            'admission.view_doctorateadmission_languages': is_admission_request_promoter,
             'admission.view_doctorateadmission_curriculum': is_admission_request_promoter,
             'admission.view_doctorateadmission_project': is_admission_request_promoter,
             'admission.view_doctorateadmission_cotutelle': is_admission_request_promoter,

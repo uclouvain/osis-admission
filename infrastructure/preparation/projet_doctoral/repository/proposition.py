@@ -104,8 +104,11 @@ def _instantiate_admission(admission: DoctorateAdmission) -> Proposition:
     )
 
 
-def load_admissions(matricule) -> List['Proposition']:
-    qs = DoctorateAdmission.objects.filter(candidate__global_id=matricule)
+def load_admissions(matricule=None, ids=None) -> List['Proposition']:
+    if matricule is not None:
+        qs = DoctorateAdmission.objects.filter(candidate__global_id=matricule)
+    elif ids is not None:
+        qs = DoctorateAdmission.objects.filter(uuid__in=ids)
 
     return [_instantiate_admission(a) for a in qs]
 
@@ -122,7 +125,9 @@ class PropositionRepository(IPropositionRepository):
     def search(cls, entity_ids: Optional[List['PropositionIdentity']] = None, matricule_candidat: str = None,
                **kwargs) -> List['Proposition']:
         if matricule_candidat is not None:
-            return load_admissions(matricule_candidat)
+            return load_admissions(matricule=matricule_candidat)
+        if entity_ids is not None:
+            return load_admissions(ids=[e.uuid for e in entity_ids])
         return []
 
     @classmethod

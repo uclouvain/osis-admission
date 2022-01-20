@@ -23,18 +23,23 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
-from django.test import SimpleTestCase
+from typing import List
 
 from admission.ddd.preparation.projet_doctoral.commands import SearchPropositionsCandidatCommand
-from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
+from admission.ddd.preparation.projet_doctoral.domain.service.get_proposition_dto import \
+    GetPropositionDTODomainService
+from admission.ddd.preparation.projet_doctoral.domain.service.i_doctorat import IDoctoratTranslator
+from admission.ddd.preparation.projet_doctoral.domain.service.i_secteur_ucl import ISecteurUclTranslator
+from admission.ddd.preparation.projet_doctoral.dtos import PropositionSearchDTO
+from admission.ddd.preparation.projet_doctoral.repository.i_proposition import IPropositionRepository
 
 
-class TestRechercherDoctoratService(SimpleTestCase):
-    def setUp(self) -> None:
-        self.cmd = SearchPropositionsCandidatCommand(matricule_candidat='0123456789')
-        self.message_bus = message_bus_in_memory_instance
-
-    def test_should_rechercher_par_matricule(self):
-        results = self.message_bus.invoke(self.cmd)
-        self.assertEqual(results[0].uuid, 'uuid-ECGE3DP')
+def rechercher_propositions_candidat(
+        cmd: 'SearchPropositionsCandidatCommand',
+        proposition_repository: 'IPropositionRepository',
+        doctorat_translator: 'IDoctoratTranslator',
+        secteur_ucl_translator: 'ISecteurUclTranslator',
+) -> List['PropositionSearchDTO']:
+    propositions = proposition_repository.search(matricule_candidat=cmd.matricule_candidat)
+    return [GetPropositionDTODomainService.search_dto(proposition, doctorat_translator, secteur_ucl_translator)
+            for proposition in propositions]

@@ -168,8 +168,13 @@ class DefinirCotutelleCommand(interface.CommandRequest):
 
 
 @attr.s(frozen=True, slots=True)
-class SearchPropositionsCommand(interface.CommandRequest):
+class SearchPropositionsCandidatCommand(interface.CommandRequest):
     matricule_candidat = attr.ib(type=Optional[str], default='')
+
+
+@attr.s(frozen=True, slots=True)
+class SearchPropositionsComiteCommand(interface.CommandRequest):
+    matricule_membre = attr.ib(type=Optional[str], default='')
 
 
 @attr.s(frozen=True, slots=True)
