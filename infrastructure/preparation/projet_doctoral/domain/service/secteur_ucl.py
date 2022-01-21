@@ -38,8 +38,8 @@ class SecteurUclTranslator(ISecteurUclTranslator):
         sector_entity_id = cte.join(EntityVersion, id=cte.col.id).with_cte(cte).filter(
             entity_type=SECTOR,
         ).values_list('entity_id', flat=True).first()
-        sector = EntityProxy.objects.only_valid().get(pk=sector_entity_id)
+        sector = EntityProxy.objects.only_valid().with_acronym().with_title().get(pk=sector_entity_id)
         return EntiteUclDTO(
-            sigle=sector.most_recent_entity_version.acronym,
-            intitule=sector.most_recent_entity_version.title,
+            sigle=sector.acronym,
+            intitule=sector.title,
         )

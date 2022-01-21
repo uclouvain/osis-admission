@@ -26,14 +26,13 @@
 from collections import defaultdict
 
 from rest_framework import mixins, status
-from rest_framework.generics import GenericAPIView, ListCreateAPIView, get_object_or_404
+from rest_framework.generics import GenericAPIView, ListCreateAPIView
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
 
 from admission.api import serializers
 from admission.api.permissions import IsListingOrHasNotAlreadyCreatedPermission
 from admission.api.schema import ResponseSpecificSchema
-from admission.contrib.models.doctorate import DoctorateAdmission
 from admission.ddd.preparation.projet_doctoral.commands import (
     CompleterPropositionCommand, GetPropositionCommand,
     InitierPropositionCommand,
@@ -47,6 +46,7 @@ from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions impor
     InstitutionInconsistanteException,
     JustificationRequiseException,
 )
+from admission.utils import get_cached_admission_perm_obj
 from backoffice.settings.rest_framework.common_views import DisplayExceptionsByFieldNameAPIMixin
 from backoffice.settings.rest_framework.exception_handler import get_error_data
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
@@ -145,7 +145,7 @@ class PropositionViewSet(
     }
 
     def get_permission_object(self):
-        return get_object_or_404(DoctorateAdmission, uuid=self.kwargs['uuid'])
+        return get_cached_admission_perm_obj(self.kwargs['uuid'])
 
     def get(self, request, *args, **kwargs):
         """Get a single proposition"""
@@ -213,7 +213,7 @@ class VerifyPropositionView(APIPermissionRequiredMixin, mixins.RetrieveModelMixi
     }
 
     def get_permission_object(self):
-        return get_object_or_404(DoctorateAdmission, uuid=self.kwargs['uuid'])
+        return get_cached_admission_perm_obj(self.kwargs['uuid'])
 
     def get(self, request, *args, **kwargs):
         """Check the proposition to be OK with all validators."""

@@ -54,7 +54,7 @@ class PromoterFactory(factory.DjangoModelFactory):
     class Meta:
         model = SupervisionActor
 
-    actor_ptr = factory.SubFactory(_ActorFactory)
+    actor_ptr = factory.SubFactory(_ActorFactory, person__user__first_name="Promoter")
     type = ActorType.PROMOTER.name
     person = factory.SelfAttribute('actor_ptr.person')
     process = factory.SelfAttribute('actor_ptr.process')
@@ -65,12 +65,15 @@ class PromoterFactory(factory.DjangoModelFactory):
 
 
 class ExternalPromoterFactory(PromoterFactory):
+    actor_ptr = factory.SubFactory(_ActorFactory, person__user__first_name="External promoter")
+
     @factory.post_generation
     def generate_role(self, create, extracted, **kwargs):
         PromoterRoleFactory(person=self.actor_ptr.person, is_external=True, **kwargs)
 
 
 class CaMemberFactory(PromoterFactory):
+    actor_ptr = factory.SubFactory(_ActorFactory, person__user__first_name="CA Member")
     type = ActorType.CA_MEMBER.name
 
     @factory.post_generation

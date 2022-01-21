@@ -24,17 +24,17 @@
 #
 # ##############################################################################
 from rest_framework import mixins, status
-from rest_framework.generics import GenericAPIView, get_object_or_404
+from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 
 from admission.api import serializers
 from admission.api.schema import ResponseSpecificSchema
-from admission.contrib.models.doctorate import DoctorateAdmission
 from admission.contrib.models.enums.actor_type import ActorType
 from admission.ddd.preparation.projet_doctoral.commands import (
     GetGroupeDeSupervisionCommand,
     IdentifierMembreCACommand, IdentifierPromoteurCommand, SupprimerMembreCACommand, SupprimerPromoteurCommand,
 )
+from admission.utils import get_cached_admission_perm_obj
 from infrastructure.messages_bus import message_bus_instance
 from osis_role.contrib.views import APIPermissionRequiredMixin
 
@@ -76,7 +76,7 @@ class SupervisionAPIView(
     }
 
     def get_permission_object(self):
-        return get_object_or_404(DoctorateAdmission, uuid=self.kwargs['uuid'])
+        return get_cached_admission_perm_obj(self.kwargs['uuid'])
 
     def get(self, request, *args, **kwargs):
         """Get the supervision group of a proposition"""
