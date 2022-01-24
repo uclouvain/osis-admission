@@ -26,7 +26,17 @@
 
 from django.contrib import admin
 
+from admission.auth.roles.adre import Adre
+from admission.auth.roles.ca_member import CommitteeMember
+from admission.auth.roles.candidate import Candidate
+from admission.auth.roles.cdd_manager import CddManager
+from admission.auth.roles.jury_secretary import JurySecretary
+from admission.auth.roles.promoter import Promoter
+from admission.auth.roles.sceb import Sceb
+from admission.auth.roles.sic_director import SicDirector
+from admission.auth.roles.sic_manager import SicManager
 from admission.contrib.models import DoctorateAdmission
+from osis_role.contrib.admin import RoleModelAdmin
 
 
 class DoctorateAdmissionAdmin(admin.ModelAdmin):
@@ -34,3 +44,14 @@ class DoctorateAdmissionAdmin(admin.ModelAdmin):
 
 
 admin.site.register(DoctorateAdmission, DoctorateAdmissionAdmin)
+
+# Roles
+admin.site.register(Promoter, RoleModelAdmin)
+admin.site.register(CommitteeMember, RoleModelAdmin)
+admin.site.register(SicManager, RoleModelAdmin)
+admin.site.register(SicDirector, RoleModelAdmin)
+admin.site.register(Adre, RoleModelAdmin)
+admin.site.register(Candidate, RoleModelAdmin)
+admin.site.register(JurySecretary, RoleModelAdmin)
+admin.site.register(Sceb, RoleModelAdmin)
+admin.site.register(CddManager, RoleModelAdmin)
