@@ -2093,8 +2093,6 @@ components:
           type: string
       required:
       - matricule
-      - commentaire_interne
-      - commentaire_externe
     CompleterPropositionCommand:
       type: object
       properties:
@@ -2203,16 +2201,14 @@ components:
       properties:
         matricule:
           type: string
+        motif_refus:
+          type: string
         commentaire_interne:
           type: string
         commentaire_externe:
           type: string
-        motif_refus:
-          type: string
       required:
       - matricule
-      - commentaire_interne
-      - commentaire_externe
       - motif_refus
     Error:
       type: object

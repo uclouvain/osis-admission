@@ -139,17 +139,17 @@ class SupprimerMembreCACommand(interface.CommandRequest):
 class ApprouverPropositionCommand(interface.CommandRequest):
     uuid_proposition = attr.ib(type=str)
     matricule = attr.ib(type=str)
-    commentaire_interne = attr.ib(type=str)
-    commentaire_externe = attr.ib(type=str)
+    commentaire_interne = attr.ib(type=Optional[str], default='')
+    commentaire_externe = attr.ib(type=Optional[str], default='')
 
 
 @attr.s(frozen=True, slots=True)
 class RefuserPropositionCommand(interface.CommandRequest):
     uuid_proposition = attr.ib(type=str)
     matricule = attr.ib(type=str)
-    commentaire_interne = attr.ib(type=str)
-    commentaire_externe = attr.ib(type=str)
     motif_refus = attr.ib(type=str)
+    commentaire_interne = attr.ib(type=Optional[str], default='')
+    commentaire_externe = attr.ib(type=Optional[str], default='')
 
 
 @attr.s(frozen=True, slots=True)
