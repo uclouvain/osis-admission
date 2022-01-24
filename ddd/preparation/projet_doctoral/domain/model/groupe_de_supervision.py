@@ -143,7 +143,7 @@ class GroupeDeSupervision(interface.Entity):
                     commentaire_externe=commentaire_externe,
                 )
             )
-        elif isinstance(signataire_id, MembreCAIdentity):
+        elif isinstance(signataire_id, MembreCAIdentity):  # pragma: no branch
             self.signatures_membres_CA = [s for s in self.signatures_membres_CA if s.membre_CA_id != signataire_id]
             self.signatures_membres_CA.append(
                 SignatureMembreCA(
@@ -175,7 +175,7 @@ class GroupeDeSupervision(interface.Entity):
                     motif_refus=motif_refus,
                 )
             )
-        elif isinstance(signataire_id, MembreCAIdentity):
+        elif isinstance(signataire_id, MembreCAIdentity):  # pragma: no branch
             self.signatures_membres_CA = [s for s in self.signatures_membres_CA if s.membre_CA_id != signataire_id]
             self.signatures_membres_CA.append(
                 SignatureMembreCA(
