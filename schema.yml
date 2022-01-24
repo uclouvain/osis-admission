@@ -1581,7 +1581,6 @@ components:
               nullable: true
             equivalence:
               $ref: '#/components/schemas/Equivalence'
-              nullable: true
             high_school_transcript_translation:
               type: array
               items:
@@ -1629,6 +1628,7 @@ components:
       type: string
     Equivalence:
       enum:
+      - ''
       - 'YES'
       - 'NO'
       - PENDING
