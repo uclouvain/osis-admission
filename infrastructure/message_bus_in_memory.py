@@ -34,6 +34,8 @@ from admission.ddd.preparation.projet_doctoral.use_case.read.rechercher_doctorat
     rechercher_doctorats
 from admission.ddd.preparation.projet_doctoral.use_case.read.rechercher_propositions_candidat_service import \
     rechercher_propositions_candidat
+from admission.ddd.preparation.projet_doctoral.use_case.read.rechercher_propositions_membre import \
+    rechercher_propositions_membre
 from admission.ddd.preparation.projet_doctoral.use_case.read.verifier_proposition_service import verifier_proposition
 from admission.ddd.preparation.projet_doctoral.use_case.write.approuver_proposition_service import \
     approuver_proposition
@@ -152,6 +154,13 @@ class MessageBusInMemoryCommands(AbstractMessageBusCommands):
         SearchPropositionsCandidatCommand: partial(
             rechercher_propositions_candidat,
             proposition_repository=PropositionInMemoryRepository(),
+            doctorat_translator=DoctoratInMemoryTranslator(),
+            secteur_ucl_translator=SecteurUclInMemoryTranslator(),
+        ),
+        SearchPropositionsComiteCommand: partial(
+            rechercher_propositions_membre,
+            proposition_repository=PropositionInMemoryRepository(),
+            groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
             doctorat_translator=DoctoratInMemoryTranslator(),
             secteur_ucl_translator=SecteurUclInMemoryTranslator(),
         ),

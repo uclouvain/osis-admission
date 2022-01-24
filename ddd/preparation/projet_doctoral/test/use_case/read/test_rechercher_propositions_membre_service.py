@@ -26,15 +26,15 @@
 
 from django.test import SimpleTestCase
 
-from admission.ddd.preparation.projet_doctoral.commands import SearchPropositionsCandidatCommand
+from admission.ddd.preparation.projet_doctoral.commands import SearchPropositionsComiteCommand
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 
 
-class TestRechercherDoctoratService(SimpleTestCase):
+class TestRechercherDoctoratMembreService(SimpleTestCase):
     def setUp(self) -> None:
-        self.cmd = SearchPropositionsCandidatCommand(matricule_candidat='0123456789')
+        self.cmd = SearchPropositionsComiteCommand(matricule_membre='promoteur-SC3DP')
         self.message_bus = message_bus_in_memory_instance
 
     def test_should_rechercher_par_matricule(self):
         results = self.message_bus.invoke(self.cmd)
-        self.assertEqual(results[0].uuid, 'uuid-ECGE3DP')
+        self.assertEqual(results[0].uuid, 'uuid-SC3DP-promoteur-membre')
