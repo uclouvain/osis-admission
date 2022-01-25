@@ -1,0 +1,2299 @@
+openapi: 3.0.0
+info:
+  title: Admission API
+  version: 1.0.9
+  description: This API delivers data for the Admission project.
+  contact:
+    name: UCLouvain - OSIS
+    url: https://github.com/uclouvain/osis
+paths:
+  /person:
+    get:
+      operationId: retrievePersonIdentification
+      description: ''
+      parameters:
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PersonIdentification'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - person
+    put:
+      operationId: updatePersonIdentification
+      description: ''
+      parameters:
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PersonIdentification'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PersonIdentification'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - person
+  /coordonnees:
+    get:
+      operationId: retrieveCoordonnees
+      description: ''
+      parameters:
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Coordonnees'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - person
+    put:
+      operationId: updateCoordonnees
+      description: ''
+      parameters:
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Coordonnees'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Coordonnees'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - person
+  /propositions:
+    get:
+      operationId: list_propositions
+      description: ''
+      parameters:
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PropositionSearch'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
+    post:
+      operationId: create_proposition
+      description: ''
+      parameters:
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InitierPropositionCommand'
+      responses:
+        201:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PropositionIdentityDTO'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
+  /secondary_studies:
+    get:
+      operationId: retrieveHighSchoolDiploma
+      description: ''
+      parameters:
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HighSchoolDiploma'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - person
+    put:
+      operationId: updateHighSchoolDiploma
+      description: ''
+      parameters:
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HighSchoolDiploma'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HighSchoolDiploma'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - person
+  /languages_knowledge:
+    get:
+      operationId: listLanguageKnowledges
+      description: ''
+      parameters:
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LanguageKnowledge'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - person
+    post:
+      operationId: createLanguageKnowledge
+      description: ''
+      parameters:
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/LanguageKnowledge'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LanguageKnowledge'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - person
+  /propositions/{uuid}:
+    get:
+      operationId: retrieve_proposition
+      description: Get a single proposition
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PropositionDTO'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
+    put:
+      operationId: update_proposition
+      description: Edit a proposition
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CompleterPropositionCommand'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PropositionIdentityDTO'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
+    delete:
+      operationId: destroy_proposition
+      description: Soft-Delete a proposition
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PropositionIdentityDTO'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
+  /propositions/{uuid}/verify:
+    get:
+      operationId: retrieve_verify_proposition
+      description: Check the proposition to be OK with all validators.
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        200:
+          description: Proposition verification errors
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    status_code:
+                      type: string
+                    detail:
+                      type: string
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
+  /propositions/{uuid}/person:
+    get:
+      operationId: retrievePersonIdentificationAdmission
+      description: ''
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PersonIdentification'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - person
+    put:
+      operationId: updatePersonIdentificationAdmission
+      description: ''
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PersonIdentification'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PersonIdentification'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - person
+  /propositions/{uuid}/coordonnees:
+    get:
+      operationId: retrieveCoordonneesAdmission
+      description: ''
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Coordonnees'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - person
+    put:
+      operationId: updateCoordonneesAdmission
+      description: ''
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Coordonnees'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Coordonnees'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - person
+  /propositions/{uuid}/secondary_studies:
+    get:
+      operationId: retrieveHighSchoolDiplomaAdmission
+      description: ''
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HighSchoolDiploma'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - person
+    put:
+      operationId: updateHighSchoolDiplomaAdmission
+      description: ''
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HighSchoolDiploma'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HighSchoolDiploma'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - person
+  /propositions/{uuid}/languages_knowledge:
+    get:
+      operationId: listLanguageKnowledgesAdmission
+      description: ''
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LanguageKnowledge'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - person
+    post:
+      operationId: createLanguageKnowledgeAdmission
+      description: ''
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/LanguageKnowledge'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LanguageKnowledge'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - person
+  /propositions/{uuid}/cotutelle:
+    get:
+      operationId: retrieve_cotutelle
+      description: Get the cotutelle of a proposition
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CotutelleDTO'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
+    put:
+      operationId: update_cotutelle
+      description: Set the cotutelle of a proposition
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DefinirCotutelleCommand'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PropositionIdentityDTO'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
+  /propositions/{uuid}/supervision:
+    get:
+      operationId: retrieve_supervision
+      description: Get the supervision group of a proposition
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupervisionDTO'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
+    post:
+      operationId: remove_member
+      description: Remove a supervision group member for a proposition
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SupervisionActor'
+      responses:
+        201:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PropositionIdentityDTO'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
+    put:
+      operationId: add_member
+      description: Add a supervision group member for a proposition
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SupervisionActor'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PropositionIdentityDTO'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
+  /autocomplete/sector:
+    get:
+      operationId: listSectorDTOs
+      description: Autocomplete sectors
+      parameters:
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SectorDTO'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - autocomplete
+  /autocomplete/sector/{sigle}/doctorates:
+    get:
+      operationId: listDoctoratDTOs
+      description: Autocomplete doctorates given a sector
+      parameters:
+      - name: sigle
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DoctoratDTO'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - autocomplete
+  /autocomplete/tutor:
+    get:
+      operationId: listTutors
+      description: Autocomplete tutors
+      parameters:
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      - name: search
+        required: true
+        in: query
+        description: The term to search the persons on (first or last name, or global
+          id)
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                    example: 123
+                  next:
+                    type: string
+                    nullable: true
+                    format: uri
+                    example: http://api.example.org/accounts/?offset=400&limit=100
+                  previous:
+                    type: string
+                    nullable: true
+                    format: uri
+                    example: http://api.example.org/accounts/?offset=200&limit=100
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Tutor'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - autocomplete
+  /autocomplete/person:
+    get:
+      operationId: listPersons
+      description: Autocomplete person
+      parameters:
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      - name: search
+        required: true
+        in: query
+        description: The term to search the persons on (first or last name, or global
+          id)
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                    example: 123
+                  next:
+                    type: string
+                    nullable: true
+                    format: uri
+                    example: http://api.example.org/accounts/?offset=400&limit=100
+                  previous:
+                    type: string
+                    nullable: true
+                    format: uri
+                    example: http://api.example.org/accounts/?offset=200&limit=100
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Person'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - autocomplete
+  /propositions/{uuid}/request_signatures:
+    post:
+      operationId: create_signatures
+      description: Ask for all promoters and members to sign the proposition.
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PropositionIdentityDTO'
+      responses:
+        201:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PropositionIdentityDTO'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
+  /propositions/{uuid}/approve:
+    post:
+      operationId: approve_proposition
+      description: Approve the proposition.
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApprouverPropositionCommand'
+      responses:
+        201:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PropositionIdentityDTO'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
+    put:
+      operationId: reject_proposition
+      description: Reject the proposition.
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefuserPropositionCommand'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PropositionIdentityDTO'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
+components:
+  schemas:
+    PersonIdentification:
+      type: object
+      properties:
+        first_name:
+          type: string
+          maxLength: 50
+        middle_name:
+          type: string
+          maxLength: 50
+        last_name:
+          type: string
+          maxLength: 50
+        first_name_in_use:
+          type: string
+          maxLength: 50
+        birth_date:
+          type: string
+          format: date
+          nullable: true
+        birth_year:
+          type: integer
+          maximum: 2999
+          minimum: 1000
+          nullable: true
+          pattern: ^[1-2]\d{3}$
+        birth_country:
+          type: string
+          nullable: true
+        birth_place:
+          type: string
+          maxLength: 255
+        country_of_citizenship:
+          type: string
+          nullable: true
+        language:
+          enum:
+          - ''
+          - fr-be
+          - en
+          type: string
+        sex:
+          enum:
+          - ''
+          - F
+          - M
+          type: string
+        gender:
+          enum:
+          - ''
+          - F
+          - H
+          - X
+          type: string
+        civil_state:
+          $ref: '#/components/schemas/CivilState'
+        id_photo:
+          type: array
+          items:
+            type: string
+          nullable: true
+          maxItems: 1
+        id_card:
+          type: array
+          items:
+            type: string
+          nullable: true
+          maxItems: 2
+        passport:
+          type: array
+          items:
+            type: string
+          nullable: true
+          maxItems: 2
+        national_number:
+          type: string
+          maxLength: 255
+        id_card_number:
+          type: string
+          maxLength: 255
+        passport_number:
+          type: string
+          maxLength: 255
+        passport_expiration_date:
+          type: string
+          format: date
+          nullable: true
+        last_registration_year:
+          type: integer
+          nullable: true
+    ActionLink:
+      type: object
+      properties:
+        error:
+          type: string
+        method:
+          type: string
+          enum:
+          - DELETE
+          - GET
+          - PATCH
+          - POST
+          - PUT
+        url:
+          type: string
+          format: uri
+      oneOf:
+      - required:
+        - method
+        - url
+      - required:
+        - error
+    CivilState:
+      enum:
+      - ''
+      - LEGAL_COHABITANT
+      - SINGLE
+      - DIVORCED
+      - MARRIED
+      - SEPARATE
+      - WIDOWED
+      type: string
+    Coordonnees:
+      type: object
+      properties:
+        contact:
+          type: object
+          properties:
+            location:
+              type: string
+              nullable: true
+              maxLength: 255
+            postal_code:
+              type: string
+              nullable: true
+              maxLength: 20
+            city:
+              type: string
+              nullable: true
+              maxLength: 255
+            country:
+              type: string
+              nullable: true
+            street:
+              type: string
+              maxLength: 255
+            street_number:
+              type: string
+              maxLength: 20
+            postal_box:
+              type: string
+              maxLength: 20
+            place:
+              type: string
+              maxLength: 255
+          nullable: true
+        residential:
+          type: object
+          properties:
+            location:
+              type: string
+              nullable: true
+              maxLength: 255
+            postal_code:
+              type: string
+              nullable: true
+              maxLength: 20
+            city:
+              type: string
+              nullable: true
+              maxLength: 255
+            country:
+              type: string
+              nullable: true
+            street:
+              type: string
+              maxLength: 255
+            street_number:
+              type: string
+              maxLength: 20
+            postal_box:
+              type: string
+              maxLength: 20
+            place:
+              type: string
+              maxLength: 255
+          nullable: true
+        email:
+          type: string
+          readOnly: true
+        phone_mobile:
+          type: string
+      required:
+      - contact
+      - residential
+      - phone_mobile
+    PropositionSearch:
+      type: object
+      properties:
+        links:
+          type: object
+          properties:
+            create_proposition:
+              $ref: '#/components/schemas/ActionLink'
+          readOnly: true
+          default: {}
+        propositions:
+          type: array
+          items:
+            type: object
+            properties:
+              uuid:
+                type: string
+              reference:
+                type: string
+              type_admission:
+                type: string
+              sigle_doctorat:
+                type: string
+              intitule_doctorat_fr:
+                type: string
+              intitule_doctorat_en:
+                type: string
+              matricule_candidat:
+                type: string
+              code_secteur_formation:
+                type: string
+              intitule_secteur_formation:
+                type: string
+              commission_proximite:
+                type: string
+              creee_le:
+                type: string
+                format: date-time
+              statut:
+                type: string
+              links:
+                type: object
+                properties:
+                  retrieve_person:
+                    $ref: '#/components/schemas/ActionLink'
+                  update_person:
+                    $ref: '#/components/schemas/ActionLink'
+                  retrieve_coordinates:
+                    $ref: '#/components/schemas/ActionLink'
+                  update_coordinates:
+                    $ref: '#/components/schemas/ActionLink'
+                  retrieve_secondary_studies:
+                    $ref: '#/components/schemas/ActionLink'
+                  update_secondary_studies:
+                    $ref: '#/components/schemas/ActionLink'
+                  retrieve_languages:
+                    $ref: '#/components/schemas/ActionLink'
+                  update_languages:
+                    $ref: '#/components/schemas/ActionLink'
+                  destroy_proposition:
+                    $ref: '#/components/schemas/ActionLink'
+                  retrieve_proposition:
+                    $ref: '#/components/schemas/ActionLink'
+                  update_proposition:
+                    $ref: '#/components/schemas/ActionLink'
+                  retrieve_cotutelle:
+                    $ref: '#/components/schemas/ActionLink'
+                  update_cotutelle:
+                    $ref: '#/components/schemas/ActionLink'
+                  retrieve_supervision:
+                    $ref: '#/components/schemas/ActionLink'
+                readOnly: true
+                default: {}
+            required:
+            - uuid
+            - reference
+            - type_admission
+            - sigle_doctorat
+            - intitule_doctorat_fr
+            - intitule_doctorat_en
+            - matricule_candidat
+            - code_secteur_formation
+            - intitule_secteur_formation
+            - creee_le
+            - statut
+      required:
+      - propositions
+    HighSchoolDiploma:
+      type: object
+      properties:
+        belgian_diploma:
+          type: object
+          properties:
+            academic_graduation_year:
+              type: integer
+              nullable: true
+            high_school_transcript:
+              type: array
+              items:
+                type: string
+              maxItems: 1
+            high_school_diploma:
+              type: array
+              items:
+                type: string
+              maxItems: 1
+            result:
+              $ref: '#/components/schemas/DiplomaResults'
+              nullable: true
+            community:
+              $ref: '#/components/schemas/BelgianCommunitiesOfEducation'
+              nullable: true
+            educational_type:
+              $ref: '#/components/schemas/EducationalType'
+              nullable: true
+            educational_other:
+              type: string
+              maxLength: 50
+            institute:
+              type: string
+              maxLength: 25
+            other_institute:
+              type: string
+              description: 'In case you could not find your institute in the list,
+                please mention it below. '
+              maxLength: 500
+            schedule:
+              type: object
+              properties:
+                id:
+                  type: integer
+                  readOnly: true
+                latin:
+                  type: integer
+                  maximum: 2147483647
+                  minimum: 0
+                greek:
+                  type: integer
+                  maximum: 2147483647
+                  minimum: 0
+                chemistry:
+                  type: integer
+                  maximum: 2147483647
+                  minimum: 0
+                physic:
+                  type: integer
+                  maximum: 2147483647
+                  minimum: 0
+                biology:
+                  type: integer
+                  maximum: 2147483647
+                  minimum: 0
+                german:
+                  type: integer
+                  maximum: 2147483647
+                  minimum: 0
+                dutch:
+                  type: integer
+                  maximum: 2147483647
+                  minimum: 0
+                english:
+                  type: integer
+                  maximum: 2147483647
+                  minimum: 0
+                french:
+                  type: integer
+                  maximum: 2147483647
+                  minimum: 0
+                modern_languages_other_label:
+                  type: string
+                  description: If other language, please specify
+                  maxLength: 25
+                modern_languages_other_hours:
+                  type: integer
+                  maximum: 2147483647
+                  nullable: true
+                  minimum: 0
+                mathematics:
+                  type: integer
+                  maximum: 2147483647
+                  minimum: 0
+                it:
+                  type: integer
+                  maximum: 2147483647
+                  minimum: 0
+                social_sciences:
+                  type: integer
+                  maximum: 2147483647
+                  minimum: 0
+                economic_sciences:
+                  type: integer
+                  maximum: 2147483647
+                  minimum: 0
+                other_label:
+                  type: string
+                  description: If other optional domains, please specify
+                  maxLength: 25
+                other_hours:
+                  type: integer
+                  maximum: 2147483647
+                  nullable: true
+                  minimum: 0
+              nullable: true
+          required:
+          - academic_graduation_year
+          nullable: true
+        foreign_diploma:
+          type: object
+          properties:
+            academic_graduation_year:
+              type: integer
+              nullable: true
+            high_school_transcript:
+              type: array
+              items:
+                type: string
+              maxItems: 1
+            high_school_diploma:
+              type: array
+              items:
+                type: string
+              maxItems: 1
+            result:
+              $ref: '#/components/schemas/DiplomaResults'
+              nullable: true
+            foreign_diploma_type:
+              $ref: '#/components/schemas/ForeignDiplomaTypes'
+              nullable: true
+            linguistic_regime:
+              type: string
+              nullable: true
+            other_linguistic_regime:
+              type: string
+              maxLength: 25
+            country:
+              type: string
+              nullable: true
+            equivalence:
+              $ref: '#/components/schemas/Equivalence'
+            high_school_transcript_translation:
+              type: array
+              items:
+                type: string
+              maxItems: 1
+            high_school_diploma_translation:
+              type: array
+              items:
+                type: string
+              maxItems: 1
+          required:
+          - academic_graduation_year
+          - linguistic_regime
+          - country
+          nullable: true
+    DiplomaResults:
+      enum:
+      - NOT_KNOWN_YET_RESULT
+      - LT_65_RESULT
+      - BTW_65_AND_75_RESULT
+      - GT_75_RESULT
+      type: string
+    BelgianCommunitiesOfEducation:
+      enum:
+      - FRENCH_SPEAKING
+      - FLEMISH_SPEAKING
+      - GERMAN_SPEAKING
+      type: string
+    EducationalType:
+      enum:
+      - ''
+      - TEACHING_OF_GENERAL_EDUCATION
+      - TRANSITION_METHOD
+      - ARTISTIC_TRANSITION
+      - QUALIFICATION_METHOD
+      - ARTISTIC_QUALIFICATION
+      - PROFESSIONAL_EDUCATION
+      - PROFESSIONAL_EDUCATION_AND_MATURITY_EXAM
+      type: string
+    ForeignDiplomaTypes:
+      enum:
+      - NATIONAL_BACHELOR
+      - EUROPEAN_BACHELOR
+      - INTERNATIONAL_BACCALAUREATE
+      type: string
+    Equivalence:
+      enum:
+      - ''
+      - 'YES'
+      - 'NO'
+      - PENDING
+      type: string
+    LanguageKnowledge:
+      type: object
+      properties:
+        language:
+          type: string
+          nullable: true
+        listening_comprehension:
+          $ref: '#/components/schemas/LanguageKnowledgeGrade'
+          nullable: true
+        speaking_ability:
+          $ref: '#/components/schemas/LanguageKnowledgeGrade'
+          nullable: true
+        writing_ability:
+          $ref: '#/components/schemas/LanguageKnowledgeGrade'
+          nullable: true
+      required:
+      - language
+    LanguageKnowledgeGrade:
+      enum:
+      - A1
+      - A2
+      - B1
+      - B2
+      - C1
+      - C2
+      type: string
+    PropositionDTO:
+      type: object
+      properties:
+        uuid:
+          type: string
+        type_admission:
+          type: string
+        reference:
+          type: string
+        justification:
+          type: string
+        sigle_doctorat:
+          type: string
+        annee_doctorat:
+          type: integer
+        intitule_doctorat_fr:
+          type: string
+        intitule_doctorat_en:
+          type: string
+        matricule_candidat:
+          type: string
+        code_secteur_formation:
+          type: string
+        commission_proximite:
+          type: string
+        type_financement:
+          type: string
+        type_contrat_travail:
+          type: string
+        eft:
+          type: integer
+          nullable: true
+        bourse_recherche:
+          type: string
+        duree_prevue:
+          type: integer
+          nullable: true
+        temps_consacre:
+          type: integer
+          nullable: true
+        titre_projet:
+          type: string
+        resume_projet:
+          type: string
+        documents_projet:
+          type: array
+          items:
+            type: string
+        graphe_gantt:
+          type: array
+          items:
+            type: string
+        proposition_programme_doctoral:
+          type: array
+          items:
+            type: string
+        projet_formation_complementaire:
+          type: array
+          items:
+            type: string
+        lettres_recommandation:
+          type: array
+          items:
+            type: string
+        langue_redaction_these:
+          type: string
+        institut_these:
+          type: string
+          format: uuid
+          nullable: true
+        lieu_these:
+          type: string
+        autre_lieu_these:
+          type: string
+        doctorat_deja_realise:
+          type: string
+        institution:
+          type: string
+        date_soutenance:
+          type: string
+          format: date
+          nullable: true
+        raison_non_soutenue:
+          type: string
+        statut:
+          type: string
+        links:
+          type: object
+          properties:
+            retrieve_person:
+              $ref: '#/components/schemas/ActionLink'
+            update_person:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_coordinates:
+              $ref: '#/components/schemas/ActionLink'
+            update_coordinates:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_secondary_studies:
+              $ref: '#/components/schemas/ActionLink'
+            update_secondary_studies:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_languages:
+              $ref: '#/components/schemas/ActionLink'
+            update_languages:
+              $ref: '#/components/schemas/ActionLink'
+            destroy_proposition:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_proposition:
+              $ref: '#/components/schemas/ActionLink'
+            update_proposition:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_cotutelle:
+              $ref: '#/components/schemas/ActionLink'
+            update_cotutelle:
+              $ref: '#/components/schemas/ActionLink'
+            add_approval:
+              $ref: '#/components/schemas/ActionLink'
+            add_member:
+              $ref: '#/components/schemas/ActionLink'
+            remove_member:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_supervision:
+              $ref: '#/components/schemas/ActionLink'
+            request_signatures:
+              $ref: '#/components/schemas/ActionLink'
+          readOnly: true
+          default: {}
+      required:
+      - uuid
+      - type_admission
+      - reference
+      - sigle_doctorat
+      - annee_doctorat
+      - intitule_doctorat_fr
+      - intitule_doctorat_en
+      - matricule_candidat
+      - code_secteur_formation
+      - documents_projet
+      - graphe_gantt
+      - proposition_programme_doctoral
+      - projet_formation_complementaire
+      - lettres_recommandation
+      - langue_redaction_these
+      - lieu_these
+      - autre_lieu_these
+      - doctorat_deja_realise
+      - statut
+    CotutelleDTO:
+      type: object
+      properties:
+        cotutelle:
+          type: boolean
+          nullable: true
+        motivation:
+          type: string
+        institution:
+          type: string
+        demande_ouverture:
+          type: array
+          items:
+            type: string
+        convention:
+          type: array
+          items:
+            type: string
+        autres_documents:
+          type: array
+          items:
+            type: string
+      required:
+      - demande_ouverture
+      - convention
+      - autres_documents
+    SupervisionDTO:
+      type: object
+      properties:
+        signatures_promoteurs:
+          type: array
+          items:
+            type: object
+            properties:
+              promoteur:
+                type: object
+                properties:
+                  matricule:
+                    type: string
+                  nom:
+                    type: string
+                  prenom:
+                    type: string
+                required:
+                - matricule
+                - nom
+                - prenom
+              status:
+                type: string
+              commentaire_externe:
+                type: string
+            required:
+            - promoteur
+            - status
+        signatures_membres_CA:
+          type: array
+          items:
+            type: object
+            properties:
+              membre_CA:
+                type: object
+                properties:
+                  matricule:
+                    type: string
+                  nom:
+                    type: string
+                  prenom:
+                    type: string
+                required:
+                - matricule
+                - nom
+                - prenom
+              status:
+                type: string
+              commentaire_externe:
+                type: string
+            required:
+            - membre_CA
+            - status
+      required:
+      - signatures_promoteurs
+      - signatures_membres_CA
+    SectorDTO:
+      type: object
+      properties:
+        sigle:
+          type: string
+          readOnly: true
+        intitule_fr:
+          type: string
+          readOnly: true
+        intitule_en:
+          type: string
+          readOnly: true
+    DoctoratDTO:
+      type: object
+      properties:
+        sigle:
+          type: string
+        annee:
+          type: integer
+        intitule_fr:
+          type: string
+        intitule_en:
+          type: string
+        sigle_entite_gestion:
+          type: string
+      required:
+      - sigle
+      - annee
+      - intitule_fr
+      - intitule_en
+      - sigle_entite_gestion
+    Tutor:
+      type: object
+      properties:
+        first_name:
+          type: string
+          readOnly: true
+        last_name:
+          type: string
+          readOnly: true
+        global_id:
+          type: string
+          readOnly: true
+    Person:
+      type: object
+      properties:
+        first_name:
+          type: string
+          maxLength: 50
+        last_name:
+          type: string
+          maxLength: 50
+        global_id:
+          type: string
+          maxLength: 10
+    PropositionIdentityDTO:
+      type: object
+      properties:
+        uuid:
+          type: string
+          readOnly: true
+    InitierPropositionCommand:
+      type: object
+      properties:
+        type_admission:
+          $ref: '#/components/schemas/AdmissionType'
+        sigle_formation:
+          type: string
+        annee_formation:
+          type: integer
+        matricule_candidat:
+          type: string
+        justification:
+          type: string
+        commission_proximite:
+          $ref: '#/components/schemas/ChoixCommissionProximite'
+        type_financement:
+          type: string
+        type_contrat_travail:
+          type: string
+        eft:
+          type: integer
+          nullable: true
+        bourse_recherche:
+          type: string
+        duree_prevue:
+          type: integer
+          nullable: true
+        temps_consacre:
+          type: integer
+          nullable: true
+        titre_projet:
+          type: string
+        resume_projet:
+          type: string
+        institut_these:
+          type: string
+          nullable: true
+        lieu_these:
+          type: string
+        autre_lieu_these:
+          type: string
+        documents_projet:
+          type: array
+          items:
+            type: string
+        graphe_gantt:
+          type: array
+          items:
+            type: string
+        proposition_programme_doctoral:
+          type: array
+          items:
+            type: string
+        projet_formation_complementaire:
+          type: array
+          items:
+            type: string
+        lettres_recommandation:
+          type: array
+          items:
+            type: string
+        langue_redaction_these:
+          $ref: '#/components/schemas/ChoixLangueRedactionThese'
+          default: UNDECIDED
+        doctorat_deja_realise:
+          $ref: '#/components/schemas/ChoixDoctoratDejaRealise'
+          default: 'NO'
+        institution:
+          type: string
+        date_soutenance:
+          type: string
+          format: date
+          nullable: true
+        raison_non_soutenue:
+          type: string
+      required:
+      - type_admission
+      - sigle_formation
+      - annee_formation
+      - matricule_candidat
+      - commission_proximite
+      - documents_projet
+      - graphe_gantt
+      - proposition_programme_doctoral
+      - projet_formation_complementaire
+      - lettres_recommandation
+    AdmissionType:
+      enum:
+      - ADMISSION
+      - PRE_ADMISSION
+      type: string
+    ChoixCommissionProximite:
+      enum:
+      - ''
+      - ECONOMY
+      - MANAGEMENT
+      - ECLI
+      - GIM
+      - NRSC
+      - BCM
+      - SPSS
+      - DENT
+      - DFAR
+      - MOTR
+      type: string
+    ChoixLangueRedactionThese:
+      enum:
+      - FRENCH
+      - ENGLISH
+      - OTHER
+      - UNDECIDED
+      type: string
+    ChoixDoctoratDejaRealise:
+      enum:
+      - 'YES'
+      - 'NO'
+      - PARTIAL
+      type: string
+    SupervisionActor:
+      type: object
+      properties:
+        type:
+          $ref: '#/components/schemas/ActorType'
+        member:
+          type: string
+      required:
+      - type
+      - member
+    ActorType:
+      enum:
+      - PROMOTER
+      - CA_MEMBER
+      type: string
+    ApprouverPropositionCommand:
+      type: object
+      properties:
+        matricule:
+          type: string
+        commentaire_interne:
+          type: string
+        commentaire_externe:
+          type: string
+      required:
+      - matricule
+    CompleterPropositionCommand:
+      type: object
+      properties:
+        uuid:
+          type: string
+        type_admission:
+          $ref: '#/components/schemas/AdmissionType'
+        justification:
+          type: string
+        commission_proximite:
+          $ref: '#/components/schemas/ChoixCommissionProximite'
+        type_financement:
+          type: string
+        type_contrat_travail:
+          type: string
+        eft:
+          type: integer
+          nullable: true
+        bourse_recherche:
+          type: string
+        duree_prevue:
+          type: integer
+          nullable: true
+        temps_consacre:
+          type: integer
+          nullable: true
+        titre_projet:
+          type: string
+        resume_projet:
+          type: string
+        documents_projet:
+          type: array
+          items:
+            type: string
+        graphe_gantt:
+          type: array
+          items:
+            type: string
+        proposition_programme_doctoral:
+          type: array
+          items:
+            type: string
+        projet_formation_complementaire:
+          type: array
+          items:
+            type: string
+        lettres_recommandation:
+          type: array
+          items:
+            type: string
+        langue_redaction_these:
+          $ref: '#/components/schemas/ChoixLangueRedactionThese'
+          default: UNDECIDED
+        institut_these:
+          type: string
+          nullable: true
+        lieu_these:
+          type: string
+        autre_lieu_these:
+          type: string
+        doctorat_deja_realise:
+          $ref: '#/components/schemas/ChoixDoctoratDejaRealise'
+          default: 'NO'
+        institution:
+          type: string
+        date_soutenance:
+          type: string
+          format: date
+          nullable: true
+        raison_non_soutenue:
+          type: string
+      required:
+      - uuid
+      - type_admission
+      - commission_proximite
+      - documents_projet
+      - graphe_gantt
+      - proposition_programme_doctoral
+      - projet_formation_complementaire
+      - lettres_recommandation
+    DefinirCotutelleCommand:
+      type: object
+      properties:
+        motivation:
+          type: string
+        institution:
+          type: string
+        demande_ouverture:
+          type: array
+          items:
+            type: string
+        convention:
+          type: array
+          items:
+            type: string
+        autres_documents:
+          type: array
+          items:
+            type: string
+      required:
+      - demande_ouverture
+      - convention
+      - autres_documents
+    RefuserPropositionCommand:
+      type: object
+      properties:
+        matricule:
+          type: string
+        motif_refus:
+          type: string
+        commentaire_interne:
+          type: string
+        commentaire_externe:
+          type: string
+      required:
+      - matricule
+      - motif_refus
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+      required:
+      - code
+      - message
+    AcceptedLanguageEnum:
+      type: string
+      enum:
+      - en
+      - fr-be
+  securitySchemes:
+    Token:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: Enter your token in the format **Token &lt;token>**
+  parameters:
+    X-User-FirstName:
+      in: header
+      name: X-User-FirstName
+      schema:
+        type: string
+      required: false
+    X-User-LastName:
+      in: header
+      name: X-User-LastName
+      schema:
+        type: string
+      required: false
+    X-User-Email:
+      in: header
+      name: X-User-Email
+      schema:
+        type: string
+      required: false
+    X-User-GlobalID:
+      in: header
+      name: X-User-GlobalID
+      schema:
+        type: string
+      required: false
+    Accept-Language:
+      in: header
+      name: Accept-Language
+      description: The header advertises which languages the client is able to understand,
+        and which locale variant is preferred. (By languages, we mean natural languages,
+        such as English, and not programming languages.)
+      schema:
+        $ref: '#/components/schemas/AcceptedLanguageEnum'
+      required: false
+  responses:
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: The specified resource was not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+servers:
+- url: https://{environment}.osis.uclouvain.be/api/v1/admission/
+  variables:
+    environment:
+      default: dev
+      enum:
+      - dev
+      - qa
+      - test
+- url: https://osis.uclouvain.be/api/v1/admission/
+  description: Production server
+security:
+- Token: []

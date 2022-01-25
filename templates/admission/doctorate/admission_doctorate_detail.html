@@ -1,0 +1,112 @@
+{% extends "layout.html" %}
+{% load bootstrap3 i18n static %}
+
+{% block breadcrumb %}
+  <li><a href="{% url 'admissions:doctorate-list' %}">{% trans "Doctorate admissions" %}</a></li>
+  <li><a href="{% url 'admissions:doctorate-list' %}?type={{ object.type }}">{{ object.get_type_display }}</a></li>
+  <li class="active">{{ object.candidate }}</li>
+{% endblock %}
+
+{% block content %}
+
+  <div class="page-header">
+    <h2>{{ object }}</h2>
+    <h3>{{ object.created }}</h3>
+  </div>
+
+  <div class="panel panel-default" id="panel-data">
+    <div class="panel-heading">
+      <div class="row">
+        <div class="col-md-5">
+        </div>
+        <div class="col-md-7">
+          {% include "admission/doctorate/includes/admission_doctorate_action_bar.html" %}
+        </div>
+      </div>
+    </div>
+    <div class="panel-body" id="tabs">
+      <div class="tab-content" id="tab_content">
+        <div role="tabpanel" class="tab-pane active" id="identification">
+          <div class="row" style="display:flex;">
+            <div class="col-md-12" style="height: 100%;">
+              <div class="row">
+
+                <div class="col-md-7" style="margin-top: 10px">
+                  <div class="panel panel-default">
+                    <div class="panel-body">
+                      <div class="row">
+                        <div class="col-md-6">
+                          {% bootstrap_label _("Type") label_class="d-block" %}
+                          <p>{{ object.get_type_display }}</p>
+                        </div>
+                        <div class="col-md-6">
+                          {% bootstrap_label _("Candidate") label_class="d-block" %}
+                          <p>{{ object.candidate }}</p>
+                        </div>
+                      </div>
+                      <br>
+                      <div class="row">
+                        <div class="col-md-6">
+                          {% bootstrap_label _("Author") label_class="d-block" %}
+                          <p>{{ object.author }}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col-md-5" style="margin-top: 10px">
+                  <div class="panel panel-default">
+                    <div class="panel-body">
+                      <div class="row">
+                        <div class="col-md-12">
+                          {% bootstrap_label _("UUID") label_class="d-block" %}
+                          <p>{{ object.uuid }} </p>
+                        </div>
+                      </div>
+                      <br>
+                      <div class="row">
+                        <div class="col-md-12">
+                          {% bootstrap_label _("created") label_class="d-block" %}
+                          <p>{{ object.created }} </p>
+                        </div>
+                      </div>
+                      <br>
+                      <div class="row">
+                        <div class="col-md-12">
+                          {% bootstrap_label _("modified") label_class="d-block" %}
+                          <p>{{ object.modified }} </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="panel panel-default">
+                <div class="panel-body">
+                  <div class="row">
+                    <div class="col-md-12">
+                      {% bootstrap_label _("Comment") label_class="d-block" %}
+                      <p>{{ object.comment|safe }} </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel-footer text-right">
+      <div class="row">
+        <div class="col-md-5">
+        </div>
+        <div class="col-md-7">
+          {% include "admission/doctorate/includes/admission_doctorate_action_bar.html" with dropdirection="dropup" %}
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock content %}

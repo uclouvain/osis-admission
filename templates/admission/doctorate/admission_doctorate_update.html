@@ -1,0 +1,54 @@
+{% extends "layout.html" %}
+{% load bootstrap3 i18n static %}
+
+{% block breadcrumb %}
+  <li><a href="{% url 'admissions:doctorate-list' %}">{% trans "Doctorate admissions" %}</a></li>
+  <li><a href="{% url 'admissions:doctorate-list' %}?type={{ object.type }}">{{ object.get_type_display }}</a></li>
+  <li><a href="{% url 'admissions:doctorate-detail' object.pk %}">{{ object.candidate }}</a></li>
+  <li class="active">{% trans "Update" %}</li>
+{% endblock %}
+
+{% block content %}
+
+  <div class="page-header">
+    <div class="row">
+      <div class="col-md-12">
+        <h2 class="d-inline-block">{% trans "Update doctorate admission" %}</h2>
+      </div>
+    </div>
+  </div>
+
+
+  <form class="osis-form" method="POST">
+    {% csrf_token %}
+    {% bootstrap_form_errors form %}
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        {% include "blocks/forms/create_cancel_buttons.html" %}
+      </div>
+
+      <div class="panel panel-default">
+        <div class="panel-body">
+          <div class="row">
+            <div class="col-md-4">
+              {% bootstrap_field form.type %}
+            </div>
+            <div class="col-md-8">
+              {% bootstrap_field form.candidate %}
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-12">
+              {% bootstrap_field form.comment %}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel-footer text-right">
+        {% include "blocks/forms/create_cancel_buttons.html" %}
+      </div>
+    </div>
+    {{ form.media }}
+  </form>
+{% endblock %}

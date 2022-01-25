@@ -1,0 +1,47 @@
+language: python
+python: "3.5.5"
+
+cache: pip
+
+services:
+  - postgresql
+addons:
+    postgresql: "9.6"
+    apt:
+      packages:
+      - postgresql-9.6-postgis-2.4
+
+install:
+  - export PROJECT_DIR=`pwd`
+  - cd /tmp
+  - git clone https://github.com/uclouvain/osis.git
+  - cd osis
+  - git checkout dev
+  - git pull origin dev
+  - git submodule init
+  - git submodule update
+  - pip install -r requirements.txt
+  - rm -Rf admission
+  - ln -s $PROJECT_DIR admission
+  - cp admission/.coveragerc .
+
+before_script:
+  - cp .env.example .env
+  - echo 'INSTALLED_APPS += ("admission",)' >> backoffice/settings/local.py
+  - echo 'APPS_TO_TEST += ("admission",)' >> backoffice/settings/local.py
+  - echo 'LOCALE_PATHS = [BASE_DIR + "/admission/locale"]' >> backoffice/settings/local.py
+  - echo >> .env
+  - echo "POSTGRES_USER = 'postgres'" >> .env
+  - echo "POSTGRES_PASSWORD = ''" >> .env
+  - echo "AUTHENTICATION_BACKENDS=osis_role.contrib.permissions.ObjectPermissionBackend" >> .env
+  - python3 manage.py compilemessages
+  - psql -c 'create database osis_local;' -U postgres
+  - psql -c 'create extension postgis;' -U postgres -d osis_local
+
+script:
+  - coverage run manage.py test --exclude-tag=selenium admission
+  - ./manage.py makemigrations --check admission
+
+after_success:
+ - pip install python-coveralls
+ - coveralls --base_dir /home/travis/build/uclouvain/osis-admission/
