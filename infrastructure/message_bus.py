@@ -32,8 +32,10 @@ from admission.ddd.preparation.projet_doctoral.use_case.read.get_groupe_de_super
 from admission.ddd.preparation.projet_doctoral.use_case.read.get_proposition_service import get_proposition
 from admission.ddd.preparation.projet_doctoral.use_case.read.rechercher_doctorats_service import \
     rechercher_doctorats
-from admission.ddd.preparation.projet_doctoral.use_case.read.rechercher_propositions_service import \
-    rechercher_propositions
+from admission.ddd.preparation.projet_doctoral.use_case.read.rechercher_propositions_candidat_service import \
+    rechercher_propositions_candidat
+from admission.ddd.preparation.projet_doctoral.use_case.read.rechercher_propositions_membre import \
+    rechercher_propositions_membre
 from admission.ddd.preparation.projet_doctoral.use_case.read.verifier_proposition_service import verifier_proposition
 from admission.ddd.preparation.projet_doctoral.use_case.write.approuver_proposition_service import \
     approuver_proposition
@@ -70,9 +72,16 @@ class MessageBusCommands(AbstractMessageBusCommands):
             proposition_repository=PropositionRepository(),
             doctorat_translator=DoctoratTranslator(),
         ),
-        SearchPropositionsCommand: partial(
-            rechercher_propositions,
+        SearchPropositionsCandidatCommand: partial(
+            rechercher_propositions_candidat,
             proposition_repository=PropositionRepository(),
+            doctorat_translator=DoctoratTranslator(),
+            secteur_ucl_translator=SecteurUclTranslator(),
+        ),
+        SearchPropositionsComiteCommand: partial(
+            rechercher_propositions_membre,
+            proposition_repository=PropositionRepository(),
+            groupe_supervision_repository=GroupeDeSupervisionRepository(),
             doctorat_translator=DoctoratTranslator(),
             secteur_ucl_translator=SecteurUclTranslator(),
         ),

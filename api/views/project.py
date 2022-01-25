@@ -33,10 +33,13 @@ from rest_framework.settings import api_settings
 from admission.api import serializers
 from admission.api.permissions import IsListingOrHasNotAlreadyCreatedPermission
 from admission.api.schema import ResponseSpecificSchema
+from admission.auth.roles.ca_member import CommitteeMember
+from admission.auth.roles.promoter import Promoter
 from admission.ddd.preparation.projet_doctoral.commands import (
     CompleterPropositionCommand, GetPropositionCommand,
     InitierPropositionCommand,
-    SearchPropositionsCommand,
+    SearchPropositionsCandidatCommand,
+    SearchPropositionsComiteCommand,
     SupprimerPropositionCommand,
     VerifierPropositionCommand,
 )
@@ -51,6 +54,7 @@ from backoffice.settings.rest_framework.common_views import DisplayExceptionsByF
 from backoffice.settings.rest_framework.exception_handler import get_error_data
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from infrastructure.messages_bus import message_bus_instance
+from osis_role.contrib.permissions import _get_roles_assigned_to_user
 from osis_role.contrib.views import APIPermissionRequiredMixin
 
 
@@ -90,9 +94,12 @@ class PropositionListView(APIPermissionRequiredMixin, DisplayExceptionsByFieldNa
 
     def list(self, request, **kwargs):
         """List the propositions of the logged in user"""
-        proposition_list = message_bus_instance.invoke(
-            SearchPropositionsCommand(matricule_candidat=request.user.person.global_id)
-        )
+        roles = _get_roles_assigned_to_user(request.user)
+        if Promoter in roles or CommitteeMember in roles:
+            cmd = SearchPropositionsComiteCommand(matricule_membre=request.user.person.global_id)
+        else:
+            cmd = SearchPropositionsCandidatCommand(matricule_candidat=request.user.person.global_id)
+        proposition_list = message_bus_instance.invoke(cmd)
         serializer = serializers.PropositionSearchSerializer(
             instance={
                 "propositions": proposition_list,

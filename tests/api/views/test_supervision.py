@@ -141,6 +141,26 @@ class SupervisionApiTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     # Add member
+    def test_supervision_ajouter_membre_process_inexistant(self):
+        admission = DoctorateAdmissionFactory(
+            doctorate__management_entity=self.commission,
+            supervision_group=None,
+        )
+        self.client.force_authenticate(user=admission.candidate.user)
+        self.assertIsNone(admission.supervision_group)
+        url = resolve_url("supervision", uuid=admission.uuid)
+        response = self.client.put(url, data={
+            'member': PersonFactory(first_name="John").global_id,
+            'type': ActorType.CA_MEMBER.name,
+        }, format="json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        response = self.client.get(url, format="json")
+        promoteurs = response.json()['signatures_membres_CA']
+        self.assertEqual(promoteurs[0]['membre_CA']['prenom'], 'John')
+        admission.refresh_from_db()
+        self.assertIsNotNone(admission.supervision_group)
+
     def test_supervision_ajouter_membre_ca(self):
         self.client.force_authenticate(user=self.candidate.user)
 

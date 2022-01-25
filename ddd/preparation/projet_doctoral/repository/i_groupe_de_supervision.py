@@ -52,7 +52,7 @@ class IGroupeDeSupervisionRepository(interface.AbstractRepository):
     def search(
             cls,
             entity_ids: Optional[List['GroupeDeSupervisionIdentity']] = None,
-            matricule_candidat: str = None,
+            matricule_membre: str = None,
             **kwargs
     ) -> List['GroupeDeSupervision']:
         raise NotImplementedError

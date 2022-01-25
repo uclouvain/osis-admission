@@ -178,6 +178,7 @@ class GroupeDeSupervisionSC3DPAvecMembresInvitesFactory(_GroupeDeSupervisionFact
         _SignaturePromoteurFactory(promoteur_id__matricule='promoteur-SC3DP', etat=ChoixEtatSignature.INVITED)
     ])
     signatures_membres_CA = factory.LazyFunction(lambda: [
+        _SignatureMembreCAFactory(membre_CA_id__matricule='membre-ca-SC3DP-invite', etat=ChoixEtatSignature.INVITED),
         _SignatureMembreCAFactory(membre_CA_id__matricule='membre-ca-SC3DP')
     ])
 

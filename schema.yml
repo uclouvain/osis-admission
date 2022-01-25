@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Admission API
-  version: 1.0.8
+  version: 1.0.9
   description: This API delivers data for the Admission project.
   contact:
     name: UCLouvain - OSIS
@@ -606,6 +606,78 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HighSchoolDiploma'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - person
+  /propositions/{uuid}/languages_knowledge:
+    get:
+      operationId: listLanguageKnowledgesAdmission
+      description: ''
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LanguageKnowledge'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - person
+    post:
+      operationId: createLanguageKnowledgeAdmission
+      description: ''
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/LanguageKnowledge'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LanguageKnowledge'
           description: ''
         '400':
           $ref: '#/components/responses/BadRequest'
@@ -1509,7 +1581,6 @@ components:
               nullable: true
             equivalence:
               $ref: '#/components/schemas/Equivalence'
-              nullable: true
             high_school_transcript_translation:
               type: array
               items:
@@ -1557,6 +1628,7 @@ components:
       type: string
     Equivalence:
       enum:
+      - ''
       - 'YES'
       - 'NO'
       - PENDING
@@ -2021,8 +2093,6 @@ components:
           type: string
       required:
       - matricule
-      - commentaire_interne
-      - commentaire_externe
     CompleterPropositionCommand:
       type: object
       properties:
@@ -2131,16 +2201,14 @@ components:
       properties:
         matricule:
           type: string
+        motif_refus:
+          type: string
         commentaire_interne:
           type: string
         commentaire_externe:
           type: string
-        motif_refus:
-          type: string
       required:
       - matricule
-      - commentaire_interne
-      - commentaire_externe
       - motif_refus
     Error:
       type: object

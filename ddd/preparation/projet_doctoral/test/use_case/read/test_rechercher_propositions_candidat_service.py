@@ -1,4 +1,4 @@
-##############################################################################
+# ##############################################################################
 #
 #    OSIS stands for Open Student Information System. It's an application
 #    designed to manage the core business of higher education institutions,
@@ -22,19 +22,19 @@
 #    at the root of the source code of this program.  If not,
 #    see http://www.gnu.org/licenses/.
 #
-##############################################################################
-import abc
+# ##############################################################################
 
-from admission.ddd.preparation.projet_doctoral.domain.model.proposition import Proposition
-from osis_common.ddd import interface
+from django.test import SimpleTestCase
+
+from admission.ddd.preparation.projet_doctoral.commands import SearchPropositionsCandidatCommand
+from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 
 
-class IConstitutionSupervision(interface.DomainService):
-    @classmethod
-    @abc.abstractmethod
-    def notifier(
-            cls,
-            proposition: 'Proposition',
-            matricule_candidat: str
-    ) -> None:
-        raise NotImplementedError
+class TestRechercherDoctoratCandidatService(SimpleTestCase):
+    def setUp(self) -> None:
+        self.cmd = SearchPropositionsCandidatCommand(matricule_candidat='0123456789')
+        self.message_bus = message_bus_in_memory_instance
+
+    def test_should_rechercher_par_matricule(self):
+        results = self.message_bus.invoke(self.cmd)
+        self.assertEqual(results[0].uuid, 'uuid-ECGE3DP')
