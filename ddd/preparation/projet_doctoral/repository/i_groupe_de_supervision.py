@@ -39,7 +39,7 @@ from osis_common.ddd.interface import ApplicationService
 class IGroupeDeSupervisionRepository(interface.AbstractRepository):
     @classmethod
     @abc.abstractmethod
-    def get(cls, entity_id: 'GroupeDeSupervisionIdentity') -> 'GroupeDeSupervision':
+    def get(cls, entity_id: 'GroupeDeSupervisionIdentity') -> 'GroupeDeSupervision':  # type: ignore[override]
         raise NotImplementedError
 
     @classmethod
@@ -49,7 +49,7 @@ class IGroupeDeSupervisionRepository(interface.AbstractRepository):
 
     @classmethod
     @abc.abstractmethod
-    def search(
+    def search(  # type: ignore[override]
             cls,
             entity_ids: Optional[List['GroupeDeSupervisionIdentity']] = None,
             matricule_membre: str = None,
@@ -59,12 +59,16 @@ class IGroupeDeSupervisionRepository(interface.AbstractRepository):
 
     @classmethod
     @abc.abstractmethod
-    def delete(cls, entity_id: 'GroupeDeSupervisionIdentity', **kwargs: ApplicationService) -> None:
+    def delete(  # type: ignore[override]
+            cls,
+            entity_id: 'GroupeDeSupervisionIdentity',
+            **kwargs: ApplicationService,
+    ) -> None:
         raise NotImplementedError
 
     @classmethod
     @abc.abstractmethod
-    def save(cls, entity: 'GroupeDeSupervision') -> None:
+    def save(cls, entity: 'GroupeDeSupervision') -> None:  # type: ignore[override]
         raise NotImplementedError
 
     @classmethod

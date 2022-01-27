@@ -67,7 +67,7 @@ class PropositionBuilder(interface.RootEntityBuilder):
         raise NotImplementedError
 
     @classmethod
-    def build_from_command(
+    def build_from_command(  # type: ignore[override]
             cls,
             cmd: 'InitierPropositionCommand'
     ):
