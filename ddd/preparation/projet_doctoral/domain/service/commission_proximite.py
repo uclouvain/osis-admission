@@ -23,6 +23,8 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
+from typing import Optional
+
 from admission.ddd.preparation.projet_doctoral.domain.model._enums import (
     ChoixCommissionProximiteCDEouCLSM,
     ChoixCommissionProximiteCDSS,
@@ -36,7 +38,7 @@ from osis_common.ddd import interface
 
 class CommissionProximite(interface.DomainService):
     @classmethod
-    def verifier(cls, doctorat: "Doctorat", commission_proximite: str) -> None:
+    def verifier(cls, doctorat: "Doctorat", commission_proximite: Optional[str]) -> None:
         if (doctorat.est_entite_CDE() or doctorat.est_entite_CLSM()) and (
             not commission_proximite
             or commission_proximite not in ChoixCommissionProximiteCDEouCLSM.get_names()

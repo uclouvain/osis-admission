@@ -142,8 +142,8 @@ class GroupeDeSupervision(interface.Entity):
 
     def approuver(self,
                   signataire_id: Union['PromoteurIdentity', 'MembreCAIdentity'],
-                  commentaire_interne: str,
-                  commentaire_externe: str,
+                  commentaire_interne: Optional[str],
+                  commentaire_externe: Optional[str],
                   ) -> None:
         ApprouverValidatorList(
             groupe_de_supervision=self,
@@ -155,8 +155,8 @@ class GroupeDeSupervision(interface.Entity):
                 SignaturePromoteur(
                     promoteur_id=signataire_id,
                     etat=ChoixEtatSignature.APPROVED,
-                    commentaire_interne=commentaire_interne,
-                    commentaire_externe=commentaire_externe,
+                    commentaire_interne=commentaire_interne or '',
+                    commentaire_externe=commentaire_externe or '',
                 )
             )
         elif isinstance(signataire_id, MembreCAIdentity):  # pragma: no branch
@@ -165,16 +165,16 @@ class GroupeDeSupervision(interface.Entity):
                 SignatureMembreCA(
                     membre_CA_id=signataire_id,
                     etat=ChoixEtatSignature.APPROVED,
-                    commentaire_interne=commentaire_interne,
-                    commentaire_externe=commentaire_externe,
+                    commentaire_interne=commentaire_interne or '',
+                    commentaire_externe=commentaire_externe or '',
                 )
             )
 
     def refuser(self,
                 signataire_id: Union['PromoteurIdentity', 'MembreCAIdentity'],
-                commentaire_interne: str,
-                commentaire_externe: str,
-                motif_refus: str
+                commentaire_interne: Optional[str],
+                commentaire_externe: Optional[str],
+                motif_refus: Optional[str],
                 ) -> None:
         ApprouverValidatorList(
             groupe_de_supervision=self,
@@ -186,9 +186,9 @@ class GroupeDeSupervision(interface.Entity):
                 SignaturePromoteur(
                     promoteur_id=signataire_id,
                     etat=ChoixEtatSignature.REFUSED,
-                    commentaire_interne=commentaire_interne,
-                    commentaire_externe=commentaire_externe,
-                    motif_refus=motif_refus,
+                    commentaire_interne=commentaire_interne or '',
+                    commentaire_externe=commentaire_externe or '',
+                    motif_refus=motif_refus or '',
                 )
             )
         elif isinstance(signataire_id, MembreCAIdentity):  # pragma: no branch
@@ -197,9 +197,9 @@ class GroupeDeSupervision(interface.Entity):
                 SignatureMembreCA(
                     membre_CA_id=signataire_id,
                     etat=ChoixEtatSignature.REFUSED,
-                    commentaire_interne=commentaire_interne,
-                    commentaire_externe=commentaire_externe,
-                    motif_refus=motif_refus,
+                    commentaire_interne=commentaire_interne or '',
+                    commentaire_externe=commentaire_externe or '',
+                    motif_refus=motif_refus or '',
                 )
             )
 
@@ -210,15 +210,15 @@ class GroupeDeSupervision(interface.Entity):
         CotutelleValidatorList(cotutelle=self.cotutelle).validate()
 
     def definir_cotutelle(self,
-                          motivation: str,
-                          institution: str,
+                          motivation: Optional[str],
+                          institution: Optional[str],
                           demande_ouverture: List[str] = None,
                           convention: List[str] = None,
                           autres_documents: List[str] = None,
                           ):
         self.cotutelle = Cotutelle(
-            motivation=motivation,
-            institution=institution,
+            motivation=motivation or '',
+            institution=institution or '',
             demande_ouverture=demande_ouverture or [],
             convention=convention or [],
             autres_documents=autres_documents or [],

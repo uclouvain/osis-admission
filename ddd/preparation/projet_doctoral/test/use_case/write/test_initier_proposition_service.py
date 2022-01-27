@@ -118,7 +118,7 @@ class TestInitierPropositionService(SimpleTestCase):
         cmd = attr.evolve(self.cmd, commission_proximite='', sigle_formation=self.doctorat_non_CDE)
         proposition_id = self.message_bus.invoke(cmd)
         proposition = self.proposition_repository.get(proposition_id)  # type: Proposition
-        self.assertEqual(proposition.commission_proximite, '')
+        self.assertIsNone(proposition.commission_proximite)
 
     def test_should_initier_commission_proximite_CLSM(self):
         cmd = attr.evolve(
@@ -163,7 +163,7 @@ class TestInitierPropositionService(SimpleTestCase):
         cmd = attr.evolve(self.cmd, commission_proximite='', sigle_formation=self.doctorat_non_CDSS)
         proposition_id = self.message_bus.invoke(cmd)
         proposition = self.proposition_repository.get(proposition_id)  # type: Proposition
-        self.assertEqual(proposition.commission_proximite, '')
+        self.assertIsNone(proposition.commission_proximite)
 
     def test_should_pas_initier_commission_proximite_CDE_vide_et_CDE(self):
         cmd = attr.evolve(self.cmd, commission_proximite='')

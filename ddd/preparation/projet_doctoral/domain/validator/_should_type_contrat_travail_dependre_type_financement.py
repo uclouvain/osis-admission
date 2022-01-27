@@ -34,7 +34,7 @@ from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions impor
 
 @attr.s(frozen=True, slots=True)
 class ShouldTypeContratTravailDependreTypeFinancement(BusinessValidator):
-    type = attr.ib(type=str)
+    type = attr.ib(type=Optional[str], default='')
     type_contrat_travail = attr.ib(type=Optional[str], default='')
 
     def validate(self, *args, **kwargs):

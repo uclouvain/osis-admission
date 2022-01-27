@@ -72,6 +72,7 @@ class _PropositionFactory(factory.Factory):
         abstract = False
 
     entity_id = factory.SubFactory(_PropositionIdentityFactory)
+    reference = factory.Faker('pystr_format', string_format='2#-300###')
     matricule_candidat = factory.fuzzy.FuzzyText(length=10, chars=string.digits)
     doctorat_id = factory.SubFactory(_DoctoratIdentityFactory)
     statut = ChoixStatutProposition.IN_PROGRESS
