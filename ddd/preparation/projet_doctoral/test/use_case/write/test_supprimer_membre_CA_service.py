@@ -72,9 +72,8 @@ class TestSupprimerMembreCAService(SimpleTestCase):
 
     def test_should_pas_supprimer_promoteur(self):
         cmd = attr.evolve(self.cmd, matricule='promoteur-SC3DP')
-        with self.assertRaises(MultipleBusinessExceptions) as e:
+        with self.assertRaises(MembreCANonTrouveException):
             self.message_bus.invoke(cmd)
-        self.assertIsInstance(e.exception.exceptions.pop(), MembreCANonTrouveException)
 
     def test_should_pas_supprimer_si_groupe_proposition_non_trouve(self):
         cmd = attr.evolve(self.cmd, uuid_proposition='uuid-ECGE3DP')

@@ -25,6 +25,7 @@
 # ##############################################################################
 from admission.ddd.preparation.projet_doctoral.builder.proposition_identity_builder import PropositionIdentityBuilder
 from admission.ddd.preparation.projet_doctoral.commands import SupprimerMembreCACommand
+from admission.ddd.preparation.projet_doctoral.domain.model._membre_CA import MembreCAIdentity
 from admission.ddd.preparation.projet_doctoral.domain.model.proposition import PropositionIdentity
 from admission.ddd.preparation.projet_doctoral.repository.i_groupe_de_supervision import IGroupeDeSupervisionRepository
 from admission.ddd.preparation.projet_doctoral.repository.i_proposition import IPropositionRepository
@@ -39,7 +40,7 @@ def supprimer_membre_CA(
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
     proposition_candidat = proposition_repository.get(entity_id=proposition_id)
     groupe_supervision = groupe_supervision_repository.get_by_proposition_id(proposition_id)
-    membre_CA_id = groupe_supervision.get_signataire(cmd.matricule)
+    membre_CA_id = groupe_supervision.get_membre_CA(cmd.matricule)
 
     # WHEN
     groupe_supervision.supprimer_membre_CA(membre_CA_id)

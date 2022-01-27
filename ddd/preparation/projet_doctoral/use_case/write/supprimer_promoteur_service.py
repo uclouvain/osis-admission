@@ -39,7 +39,7 @@ def supprimer_promoteur(
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
     proposition_candidat = proposition_repository.get(entity_id=proposition_id)
     groupe_supervision = groupe_supervision_repository.get_by_proposition_id(proposition_id)
-    promoteur_id = groupe_supervision.get_signataire(cmd.matricule)
+    promoteur_id = groupe_supervision.get_promoteur(cmd.matricule)
 
     # WHEN
     groupe_supervision.supprimer_promoteur(promoteur_id)
