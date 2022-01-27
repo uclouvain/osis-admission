@@ -219,9 +219,9 @@ class GroupeDeSupervision(interface.Entity):
         self.cotutelle = Cotutelle(
             motivation=motivation,
             institution=institution,
-            demande_ouverture=demande_ouverture,
-            convention=convention,
-            autres_documents=autres_documents,
+            demande_ouverture=demande_ouverture or [],
+            convention=convention or [],
+            autres_documents=autres_documents or [],
         )
 
     def verrouiller_groupe_pour_signature(self):

@@ -23,7 +23,6 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import uuid
 from typing import List, Optional
 
 import attr
@@ -35,9 +34,9 @@ from osis_common.ddd import interface
 class Cotutelle(interface.ValueObject):
     motivation = attr.ib(type=Optional[str], default='')
     institution = attr.ib(type=Optional[str], default='')
-    demande_ouverture = attr.ib(type=List[uuid.UUID], factory=list)
-    convention = attr.ib(type=List[uuid.UUID], factory=list)
-    autres_documents = attr.ib(type=List[uuid.UUID], factory=list)
+    demande_ouverture = attr.ib(type=List[str], factory=list)
+    convention = attr.ib(type=List[str], factory=list)
+    autres_documents = attr.ib(type=List[str], factory=list)
 
 
 pas_de_cotutelle = Cotutelle()
