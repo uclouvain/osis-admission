@@ -34,13 +34,13 @@ from osis_common.ddd.interface import ApplicationService
 class IPropositionRepository(interface.AbstractRepository):
     @classmethod
     @abc.abstractmethod
-    def get(cls, entity_id: 'PropositionIdentity') -> 'Proposition':
+    def get(cls, entity_id: 'PropositionIdentity') -> 'Proposition':  # type: ignore[override]
         # TODO :: réutiliser get_dto() et convertir DTO en Proposition
         raise NotImplementedError
 
     @classmethod
     @abc.abstractmethod
-    def search(
+    def search(  # type: ignore[override]
             cls,
             entity_ids: Optional[List['PropositionIdentity']] = None,
             matricule_candidat: str = None,
@@ -50,12 +50,12 @@ class IPropositionRepository(interface.AbstractRepository):
 
     @classmethod
     @abc.abstractmethod
-    def delete(cls, entity_id: 'PropositionIdentity', **kwargs: ApplicationService) -> None:
+    def delete(cls, entity_id: 'PropositionIdentity', **kwargs: ApplicationService) -> None:  # type: ignore[override]
         raise NotImplementedError
 
     @classmethod
     @abc.abstractmethod
-    def save(cls, entity: 'Proposition') -> None:
+    def save(cls, entity: 'Proposition') -> None:  # type: ignore[override]
         raise NotImplementedError
 
     @classmethod
