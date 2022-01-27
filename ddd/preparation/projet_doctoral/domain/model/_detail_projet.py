@@ -23,6 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
+from enum import Enum
 from typing import List, Optional
 
 import attr
@@ -35,7 +36,7 @@ from base.models.utils.utils import ChoiceEnum
 from osis_common.ddd import interface
 
 
-class ChoixLangueRedactionThese(ChoiceEnum):
+class ChoixLangueRedactionThese(ChoiceEnum, Enum):
     FRENCH = _('French')
     ENGLISH = _('English')
     OTHER = _('Other')
