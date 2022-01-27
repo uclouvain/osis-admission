@@ -209,16 +209,16 @@ class Proposition(interface.RootEntity):
         self.projet = DetailProjet(
             titre=titre,
             resume=resume,
-            documents=documents,
+            langue_redaction_these=(ChoixLangueRedactionThese[langue_redaction_these]
+                                    if langue_redaction_these else ChoixLangueRedactionThese.UNDECIDED),
             institut_these=institut_these,
             lieu_these=lieu_these,
             autre_lieu_these=autre_lieu_these,
-            graphe_gantt=graphe_gantt,
-            proposition_programme_doctoral=proposition_programme_doctoral,
-            projet_formation_complementaire=projet_formation_complementaire,
-            lettres_recommandation=lettres_recommandation,
-            langue_redaction_these=(ChoixLangueRedactionThese[langue_redaction_these]
-                                    if langue_redaction_these else ChoixLangueRedactionThese.UNDECIDED),
+            documents=documents or [],
+            graphe_gantt=graphe_gantt or [],
+            proposition_programme_doctoral=proposition_programme_doctoral or [],
+            projet_formation_complementaire=projet_formation_complementaire or [],
+            lettres_recommandation=lettres_recommandation or [],
         )
 
     def _completer_experience_precedente(
