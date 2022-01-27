@@ -119,7 +119,7 @@ class DoctorateAdmission(BaseAdmission):
         max_length=255,
         choices=ChoixLangueRedactionThese.choices(),
         verbose_name=_("Thesis language"),
-        default='',
+        default=ChoixLangueRedactionThese.UNDECIDED.name,
         blank=True,
     )
     thesis_institute = models.ForeignKey(

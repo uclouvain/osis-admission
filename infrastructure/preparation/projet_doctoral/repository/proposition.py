@@ -37,7 +37,10 @@ from base.models.entity_version import EntityVersion
 from base.models.person import Person
 from admission.ddd.preparation.projet_doctoral.builder.proposition_identity_builder import \
     PropositionIdentityBuilder
-from admission.ddd.preparation.projet_doctoral.domain.model._detail_projet import DetailProjet
+from admission.ddd.preparation.projet_doctoral.domain.model._detail_projet import (
+    ChoixLangueRedactionThese,
+    DetailProjet,
+)
 from admission.ddd.preparation.projet_doctoral.domain.model._enums import (
     ChoixCommissionProximiteCDEouCLSM,
     ChoixCommissionProximiteCDSS,
@@ -75,7 +78,7 @@ def _instantiate_admission(admission: DoctorateAdmission) -> Proposition:
             titre=admission.project_title,
             resume=admission.project_abstract,
             documents=admission.project_document,
-            langue_redaction_these=admission.thesis_language,
+            langue_redaction_these=ChoixLangueRedactionThese[admission.thesis_language],
             institut_these=InstitutIdentity(admission.thesis_institute.uuid) if admission.thesis_institute_id else None,
             lieu_these=admission.thesis_location,
             autre_lieu_these=admission.other_thesis_location,
@@ -165,7 +168,7 @@ class PropositionRepository(IPropositionRepository):
                 'dedicated_time': entity.financement.temps_consacre,
                 'project_title': entity.projet.titre,
                 'project_abstract': entity.projet.resume,
-                'thesis_language': entity.projet.langue_redaction_these,
+                'thesis_language': entity.projet.langue_redaction_these.name,
                 'thesis_institute': EntityVersion.objects.get(
                     uuid=entity.projet.institut_these.uuid,
                 ) if entity.projet.institut_these else None,

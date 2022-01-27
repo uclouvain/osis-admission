@@ -28,6 +28,7 @@ from django.test import override_settings
 from rest_framework import status
 from rest_framework.test import APITestCase
 
+from admission.ddd.preparation.projet_doctoral.domain.model._detail_projet import ChoixLangueRedactionThese
 from admission.tests.factories import DoctorateAdmissionFactory, WriteTokenFactory
 from admission.tests.factories.supervision import CaMemberFactory, PromoterFactory
 from osis_signature.enums import SignatureState
@@ -59,7 +60,7 @@ class ApprovalsApiTestCase(APITestCase):
             cotutelle=False,
             project_title="title",
             project_abstract="abstract",
-            thesis_language="FR",
+            thesis_language=ChoixLangueRedactionThese.FRENCH.name,
             project_document=[WriteTokenFactory().token],
             gantt_graph=[WriteTokenFactory().token],
             program_proposition=[WriteTokenFactory().token],

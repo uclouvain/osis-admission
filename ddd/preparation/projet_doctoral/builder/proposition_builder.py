@@ -26,7 +26,10 @@
 from admission.ddd.preparation.projet_doctoral.builder.proposition_identity_builder import \
     PropositionIdentityBuilder
 from admission.ddd.preparation.projet_doctoral.commands import InitierPropositionCommand
-from admission.ddd.preparation.projet_doctoral.domain.model._detail_projet import DetailProjet
+from admission.ddd.preparation.projet_doctoral.domain.model._detail_projet import (
+    ChoixLangueRedactionThese,
+    DetailProjet,
+)
 from admission.ddd.preparation.projet_doctoral.domain.model._experience_precedente_recherche import (
     ExperiencePrecedenteRecherche,
     ChoixDoctoratDejaRealise,
@@ -123,10 +126,10 @@ def _build_projet(cmd: 'InitierPropositionCommand') -> 'DetailProjet':
         titre=cmd.titre_projet,
         resume=cmd.resume_projet,
         documents=cmd.documents_projet,
-        langue_redaction_these=cmd.langue_redaction_these,
         institut_these=InstitutIdentity(cmd.institut_these) if cmd.institut_these else None,
         lieu_these=cmd.lieu_these,
         autre_lieu_these=cmd.autre_lieu_these,
+        langue_redaction_these=ChoixLangueRedactionThese[cmd.langue_redaction_these],
         graphe_gantt=cmd.graphe_gantt,
         proposition_programme_doctoral=cmd.proposition_programme_doctoral,
         projet_formation_complementaire=cmd.projet_formation_complementaire,

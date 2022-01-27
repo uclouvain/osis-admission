@@ -29,7 +29,10 @@ from typing import List, Optional, Union
 
 import attr
 
-from admission.ddd.preparation.projet_doctoral.domain.model._detail_projet import DetailProjet
+from admission.ddd.preparation.projet_doctoral.domain.model._detail_projet import (
+    ChoixLangueRedactionThese,
+    DetailProjet,
+)
 from admission.ddd.preparation.projet_doctoral.domain.model._enums import (
     ChoixCommissionProximiteCDEouCLSM,
     ChoixCommissionProximiteCDSS,
@@ -207,7 +210,6 @@ class Proposition(interface.RootEntity):
             titre=titre,
             resume=resume,
             documents=documents,
-            langue_redaction_these=langue_redaction_these,
             institut_these=institut_these,
             lieu_these=lieu_these,
             autre_lieu_these=autre_lieu_these,
@@ -215,6 +217,8 @@ class Proposition(interface.RootEntity):
             proposition_programme_doctoral=proposition_programme_doctoral,
             projet_formation_complementaire=projet_formation_complementaire,
             lettres_recommandation=lettres_recommandation,
+            langue_redaction_these=(ChoixLangueRedactionThese[langue_redaction_these]
+                                    if langue_redaction_these else ChoixLangueRedactionThese.UNDECIDED),
         )
 
     def _completer_experience_precedente(
