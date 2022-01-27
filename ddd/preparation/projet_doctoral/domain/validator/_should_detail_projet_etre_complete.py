@@ -34,7 +34,7 @@ from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions impor
 
 @attr.s(frozen=True, slots=True)
 class ShouldDetailProjetEtreComplete(BusinessValidator):
-    type_admission = attr.ib(type=str)
+    type_admission = attr.ib(type=ChoixTypeAdmission)
     projet = attr.ib(type="DetailProjet")  # type: DetailProjet
 
     def validate(self, *args, **kwargs):

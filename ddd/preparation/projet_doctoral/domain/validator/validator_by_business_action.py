@@ -66,7 +66,7 @@ from base.ddd.utils.business_validator import TwoStepsMultipleBusinessExceptionL
 @attr.s(frozen=True, slots=True)
 class InitierPropositionValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
     type_admission = attr.ib(type=str)
-    type_financement = attr.ib(type=str)
+    type_financement = attr.ib(type=Optional[str], default='')
     justification = attr.ib(type=Optional[str], default='')
     type_contrat_travail = attr.ib(type=Optional[str], default='')
     doctorat_deja_realise = attr.ib(type=str, default=ChoixDoctoratDejaRealise.NO.name)
@@ -86,7 +86,7 @@ class InitierPropositionValidatorList(TwoStepsMultipleBusinessExceptionListValid
 @attr.s(frozen=True, slots=True)
 class CompletionPropositionValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
     type_admission = attr.ib(type=str)
-    type_financement = attr.ib(type=str)
+    type_financement = attr.ib(type=Optional[str], default='')
     justification = attr.ib(type=Optional[str], default='')
     type_contrat_travail = attr.ib(type=Optional[str], default='')
     doctorat_deja_realise = attr.ib(type=str, default=ChoixDoctoratDejaRealise.NO.name)

@@ -40,18 +40,21 @@ from admission.ddd.preparation.projet_doctoral.domain.model._enums import (
     ChoixTypeAdmission,
 )
 from admission.ddd.preparation.projet_doctoral.domain.model._experience_precedente_recherche import (
+    ChoixDoctoratDejaRealise,
     ExperiencePrecedenteRecherche,
-    aucune_experience_precedente_recherche, ChoixDoctoratDejaRealise,
+    aucune_experience_precedente_recherche,
 )
 from admission.ddd.preparation.projet_doctoral.domain.model._financement import (
+    ChoixTypeFinancement,
     Financement,
-    financement_non_rempli, ChoixTypeFinancement,
+    financement_non_rempli,
 )
+from admission.ddd.preparation.projet_doctoral.domain.model._institut import InstitutIdentity
 from admission.ddd.preparation.projet_doctoral.domain.model.doctorat import DoctoratIdentity
 from admission.ddd.preparation.projet_doctoral.domain.validator.validator_by_business_action import (
     CompletionPropositionValidatorList,
-    SoumettrePropositionValidatorList,
     DetailsProjetValidatorList,
+    SoumettrePropositionValidatorList,
 )
 from osis_common.ddd import interface
 
@@ -72,7 +75,7 @@ class Proposition(interface.RootEntity):
     justification = attr.ib(type=Optional[str], default='')
     statut = attr.ib(type=ChoixStatutProposition, default=ChoixStatutProposition.IN_PROGRESS)
     commission_proximite = attr.ib(
-        type=Optional[Union[ChoixCommissionProximiteCDEouCLSM, ChoixCommissionProximiteCDSS]], default=''
+        type=Optional[Union[ChoixCommissionProximiteCDEouCLSM, ChoixCommissionProximiteCDSS]], default=None
     )
     financement = attr.ib(type=Financement, default=financement_non_rempli)
     experience_precedente_recherche = attr.ib(
@@ -101,24 +104,24 @@ class Proposition(interface.RootEntity):
     def completer(
             self,
             type_admission: str,
-            justification: str,
-            commission_proximite: str,
-            type_financement: str,
-            type_contrat_travail: str,
-            eft: str,
-            bourse_recherche: str,
-            duree_prevue: str,
-            temps_consacre: str,
+            justification: Optional[str],
+            commission_proximite: Optional[str],
+            type_financement: Optional[str],
+            type_contrat_travail: Optional[str],
+            eft: Optional[int],
+            bourse_recherche: Optional[str],
+            duree_prevue: Optional[int],
+            temps_consacre: Optional[int],
             langue_redaction_these: str,
-            institut_these: Optional[uuid.UUID],
-            lieu_these: str,
-            autre_lieu_these: str,
-            titre: str,
-            resume: str,
+            institut_these: Optional[str],
+            lieu_these: Optional[str],
+            autre_lieu_these: Optional[str],
+            titre: Optional[str],
+            resume: Optional[str],
             doctorat_deja_realise: str,
-            institution: str,
-            date_soutenance: str,
-            raison_non_soutenue: str,
+            institution: Optional[str],
+            date_soutenance: Optional[datetime.date],
+            raison_non_soutenue: Optional[str],
             documents: List[str] = None,
             graphe_gantt: List[str] = None,
             proposition_programme_doctoral: List[str] = None,
@@ -162,30 +165,35 @@ class Proposition(interface.RootEntity):
             raison_non_soutenue=raison_non_soutenue,
         )
 
-    def _completer_proposition(self, type_admission: str, justification: str, commission_proximite: str):
+    def _completer_proposition(
+            self,
+            type_admission: str,
+            justification: Optional[str],
+            commission_proximite: Optional[str],
+    ):
         self.type_admission = ChoixTypeAdmission[type_admission]
-        self.justification = justification
-        self.commission_proximite = ''
-        if commission_proximite in ChoixCommissionProximiteCDEouCLSM.get_names():
+        self.justification = justification or ''
+        self.commission_proximite = None
+        if commission_proximite and commission_proximite in ChoixCommissionProximiteCDEouCLSM.get_names():
             self.commission_proximite = ChoixCommissionProximiteCDEouCLSM[commission_proximite]
-        elif commission_proximite in ChoixCommissionProximiteCDSS.get_names():
+        elif commission_proximite and commission_proximite in ChoixCommissionProximiteCDSS.get_names():
             self.commission_proximite = ChoixCommissionProximiteCDSS[commission_proximite]
 
     def _completer_financement(
             self,
-            type: str,
-            type_contrat_travail: str,
-            eft: str,
-            bourse_recherche: str,
-            duree_prevue: str,
-            temps_consacre: str,
+            type: Optional[str],
+            type_contrat_travail: Optional[str],
+            eft: Optional[int],
+            bourse_recherche: Optional[str],
+            duree_prevue: Optional[int],
+            temps_consacre: Optional[int],
     ):
         if type:
             self.financement = Financement(
                 type=ChoixTypeFinancement[type],
-                type_contrat_travail=type_contrat_travail,
+                type_contrat_travail=type_contrat_travail or '',
                 eft=eft,
-                bourse_recherche=bourse_recherche,
+                bourse_recherche=bourse_recherche or '',
                 duree_prevue=duree_prevue,
                 temps_consacre=temps_consacre,
             )
@@ -194,12 +202,12 @@ class Proposition(interface.RootEntity):
 
     def _completer_projet(
             self,
-            titre: str,
-            resume: str,
+            titre: Optional[str],
+            resume: Optional[str],
             langue_redaction_these: str,
-            institut_these: Optional[uuid.UUID],
-            lieu_these: str,
-            autre_lieu_these: str,
+            institut_these: Optional[str],
+            lieu_these: Optional[str],
+            autre_lieu_these: Optional[str],
             documents: List[str] = None,
             graphe_gantt: List[str] = None,
             proposition_programme_doctoral: List[str] = None,
@@ -207,13 +215,13 @@ class Proposition(interface.RootEntity):
             lettres_recommandation: List[str] = None,
     ):
         self.projet = DetailProjet(
-            titre=titre,
-            resume=resume,
+            titre=titre or '',
+            resume=resume or '',
             langue_redaction_these=(ChoixLangueRedactionThese[langue_redaction_these]
                                     if langue_redaction_these else ChoixLangueRedactionThese.UNDECIDED),
-            institut_these=institut_these,
-            lieu_these=lieu_these,
-            autre_lieu_these=autre_lieu_these,
+            institut_these=InstitutIdentity(uuid.UUID(institut_these)) if institut_these else None,
+            lieu_these=lieu_these or '',
+            autre_lieu_these=autre_lieu_these or '',
             documents=documents or [],
             graphe_gantt=graphe_gantt or [],
             proposition_programme_doctoral=proposition_programme_doctoral or [],
@@ -224,18 +232,18 @@ class Proposition(interface.RootEntity):
     def _completer_experience_precedente(
             self,
             doctorat_deja_realise: str,
-            institution: str,
-            date_soutenance: str,
-            raison_non_soutenue: str,
+            institution: Optional[str],
+            date_soutenance: Optional[datetime.date],
+            raison_non_soutenue: Optional[str],
     ):
         if doctorat_deja_realise == ChoixDoctoratDejaRealise.NO.name:
             self.experience_precedente_recherche = aucune_experience_precedente_recherche
         else:
             self.experience_precedente_recherche = ExperiencePrecedenteRecherche(
                 doctorat_deja_realise=ChoixDoctoratDejaRealise[doctorat_deja_realise],
-                institution=institution,
+                institution=institution or '',
                 date_soutenance=date_soutenance,
-                raison_non_soutenue=raison_non_soutenue,
+                raison_non_soutenue=raison_non_soutenue or '',
             )
 
     def verifier(self):

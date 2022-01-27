@@ -30,11 +30,6 @@ from django.db import connection
 from admission.auth.roles.candidate import Candidate
 from admission.contrib.models import DoctorateAdmission
 from admission.contrib.models.doctorate import REFERENCE_SEQ_NAME
-from admission.ddd.preparation.projet_doctoral.domain.model._institut import InstitutIdentity
-from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import PropositionNonTrouveeException
-from base.models.education_group_year import EducationGroupYear
-from base.models.entity_version import EntityVersion
-from base.models.person import Person
 from admission.ddd.preparation.projet_doctoral.builder.proposition_identity_builder import \
     PropositionIdentityBuilder
 from admission.ddd.preparation.projet_doctoral.domain.model._detail_projet import (
@@ -52,17 +47,22 @@ from admission.ddd.preparation.projet_doctoral.domain.model._experience_preceden
     ExperiencePrecedenteRecherche,
 )
 from admission.ddd.preparation.projet_doctoral.domain.model._financement import ChoixTypeFinancement, Financement
+from admission.ddd.preparation.projet_doctoral.domain.model._institut import InstitutIdentity
 from admission.ddd.preparation.projet_doctoral.domain.model.doctorat import DoctoratIdentity
 from admission.ddd.preparation.projet_doctoral.domain.model.proposition import (
     Proposition,
     PropositionIdentity,
 )
+from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import PropositionNonTrouveeException
 from admission.ddd.preparation.projet_doctoral.repository.i_proposition import IPropositionRepository
+from base.models.education_group_year import EducationGroupYear
+from base.models.entity_version import EntityVersion
+from base.models.person import Person
 from osis_common.ddd.interface import ApplicationService
 
 
 def _instantiate_admission(admission: DoctorateAdmission) -> Proposition:
-    commission_proximite = ''
+    commission_proximite = None
     if admission.proximity_commission in ChoixCommissionProximiteCDEouCLSM.get_names():
         commission_proximite = ChoixCommissionProximiteCDEouCLSM[admission.proximity_commission]
     elif admission.proximity_commission in ChoixCommissionProximiteCDSS.get_names():
@@ -90,7 +90,7 @@ def _instantiate_admission(admission: DoctorateAdmission) -> Proposition:
         justification=admission.comment,
         statut=ChoixStatutProposition[admission.status],
         financement=Financement(
-            type=ChoixTypeFinancement[admission.financing_type] if admission.financing_type else '',
+            type=ChoixTypeFinancement[admission.financing_type] if admission.financing_type else None,
             type_contrat_travail=admission.financing_work_contract,
             eft=admission.financing_eft,
             bourse_recherche=admission.scholarship_grant,
@@ -158,9 +158,9 @@ class PropositionRepository(IPropositionRepository):
                 'status': entity.statut.name,
                 'comment': entity.justification,
                 'candidate': candidate,
-                'proximity_commission': entity.commission_proximite and entity.commission_proximite.name,
+                'proximity_commission': entity.commission_proximite and entity.commission_proximite.name or '',
                 'doctorate': doctorate,
-                'financing_type': entity.financement.type and entity.financement.type.name,
+                'financing_type': entity.financement.type and entity.financement.type.name or '',
                 'financing_work_contract': entity.financement.type_contrat_travail,
                 'financing_eft': entity.financement.eft,
                 'scholarship_grant': entity.financement.bourse_recherche,
