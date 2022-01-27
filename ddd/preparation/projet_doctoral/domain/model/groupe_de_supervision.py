@@ -38,16 +38,20 @@ from admission.ddd.preparation.projet_doctoral.domain.model._signature_promoteur
     SignaturePromoteur,
 )
 from admission.ddd.preparation.projet_doctoral.domain.model.proposition import PropositionIdentity
-from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import SignataireNonTrouveException
+from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import (
+    MembreCANonTrouveException,
+    PromoteurNonTrouveException,
+    SignataireNonTrouveException,
+)
 from admission.ddd.preparation.projet_doctoral.domain.validator.validator_by_business_action import (
     ApprouverValidatorList,
     CotutelleValidatorList,
     IdentifierMembreCAValidatorList,
     IdentifierPromoteurValidatorList,
     InviterASignerValidatorList,
+    SignatairesValidatorList,
     SupprimerMembreCAValidatorList,
     SupprimerPromoteurValidatorList,
-    SignatairesValidatorList,
 )
 from osis_common.ddd import interface
 
@@ -94,6 +98,18 @@ class GroupeDeSupervision(interface.Entity):
             return next(s.membre_CA_id for s in self.signatures_membres_CA
                         if s.membre_CA_id.matricule == matricule_signataire)
         raise SignataireNonTrouveException
+
+    def get_promoteur(self, matricule_signataire: str) -> 'PromoteurIdentity':
+        promoteur = self.get_signataire(matricule_signataire)
+        if not isinstance(promoteur, PromoteurIdentity):
+            raise PromoteurNonTrouveException
+        return promoteur
+
+    def get_membre_CA(self, matricule_signataire: str) -> 'MembreCAIdentity':
+        membre_CA = self.get_signataire(matricule_signataire)
+        if not isinstance(membre_CA, MembreCAIdentity):
+            raise MembreCANonTrouveException
+        return membre_CA
 
     def inviter_a_signer(self) -> None:
         """Inviter à signer tous les promoteurs et membres CA non invités"""
