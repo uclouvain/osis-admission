@@ -361,6 +361,9 @@ msgstr ""
 msgid "Planned duration"
 msgstr ""
 
+msgid "Please specify the experience's year."
+msgstr ""
+
 msgid "Pre-Admission"
 msgstr ""
 
@@ -488,6 +491,9 @@ msgid "Thesis language"
 msgstr ""
 
 msgid "Thesis location"
+msgstr ""
+
+msgid "This experience cannot be updated as it has already been valuated."
 msgstr ""
 
 msgid "Title"

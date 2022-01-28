@@ -26,7 +26,7 @@
 from admission.api.views.autocomplete import *
 from admission.api.views.coordonnees import *
 from admission.api.views.curriculum import CurriculumExperienceListAndCreateView, \
-    CurriculumExperienceUpdateAndDeleteView
+    CurriculumExperienceDetailUpdateAndDeleteView
 from admission.api.views.secondary_studies import *
 from admission.api.views.languages_knowledge import *
 from admission.api.views.cotutelle import *
@@ -39,7 +39,7 @@ from admission.api.views.approvals import *
 __all__ = [
     "CoordonneesViewSet",
     "CurriculumExperienceListAndCreateView",
-    "CurriculumExperienceUpdateAndDeleteView",
+    "CurriculumExperienceDetailUpdateAndDeleteView",
     "PersonViewSet",
     "PropositionViewSet",
     "PropositionListView",

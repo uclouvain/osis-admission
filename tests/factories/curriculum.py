@@ -33,7 +33,7 @@ from osis_profile.models import CurriculumYear, Experience
 
 class CurriculumYearFactory(factory.DjangoModelFactory):
     person = factory.SubFactory(PersonFactory)
-    academic_graduation_year = factory.SubFactory(AcademicYearFactory, current=True)
+    academic_year = factory.SubFactory(AcademicYearFactory, current=True)
 
     class Meta:
         model = CurriculumYear

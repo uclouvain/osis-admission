@@ -23,14 +23,91 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from django.conf import settings
+from django.utils.translation import gettext as _, get_language
+
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
 from base.api.serializers.academic_year import RelatedAcademicYearField
-from base.models.academic_year import AcademicYear
+from base.models.education_group_year import EducationGroupYear
+from base.models.organization import Organization
 from osis_profile.models import Experience, CurriculumYear
+from reference.api.serializers.country import RelatedCountryField
+from reference.models.language import Language
+from reference.models.country import Country
 
 
+# Nested serializers
+class CurriculumYearSerializer(serializers.ModelSerializer):
+    academic_year = RelatedAcademicYearField()
+
+    class Meta:
+        model = CurriculumYear
+        fields = (
+            'academic_year',
+            'id',
+        )
+
+
+class EducationGroupYearSerializer(serializers.ModelSerializer):
+    title = serializers.SerializerMethodField()
+
+    class Meta:
+        model = EducationGroupYear
+        fields = (
+            'title',
+            'uuid',
+        )
+
+    @staticmethod
+    def get_title(obj):
+        return obj.title if get_language() == settings.LANGUAGE_CODE else obj.title_english
+
+
+class CountrySerializer(serializers.ModelSerializer):
+    name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Country
+        fields = (
+            'iso_code',
+            'uuid',
+            'name',
+        )
+
+    @staticmethod
+    def get_name(obj):
+        return obj.name if get_language() == settings.LANGUAGE_CODE else obj.name_en
+
+
+class OrganizationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Organization
+        fields = (
+            'acronym',
+            'name',
+            'uuid',
+        )
+
+
+class LanguageSerializer(serializers.ModelSerializer):
+    name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Language
+        fields = (
+            'code',
+            'name',
+            'uuid',
+        )
+
+    @staticmethod
+    def get_name(obj):
+        return obj.name if get_language() == settings.LANGUAGE_CODE else obj.name_en
+
+
+# Experience serializers
 class ExperienceSerializer(serializers.ModelSerializer):
     valuated_from = serializers.UUIDField(source="valuated_from.uuid", read_only=True)
 
@@ -44,7 +121,16 @@ class ExperienceSerializer(serializers.ModelSerializer):
         }
 
 
+class ExperienceOutputSerializer(ExperienceSerializer):
+    curriculum_year = CurriculumYearSerializer()
+    country = CountrySerializer()
+    program = EducationGroupYearSerializer(allow_null=True)
+    linguistic_regime = LanguageSerializer(allow_null=True,)
+    institute = OrganizationSerializer(allow_null=True)
+
+
 class ExperienceUpdatingSerializer(ExperienceSerializer):
+    country = RelatedCountryField()
 
     def get_extra_kwargs(self):
         extra_kwargs = super().get_extra_kwargs()
@@ -53,7 +139,8 @@ class ExperienceUpdatingSerializer(ExperienceSerializer):
 
 
 class ExperienceCreationSerializer(ExperienceSerializer):
-    academic_graduation_year = RelatedAcademicYearField(required=False)
+    academic_year = RelatedAcademicYearField(required=False)
+    country = RelatedCountryField()
 
     def __init__(self, related_person=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -61,8 +148,8 @@ class ExperienceCreationSerializer(ExperienceSerializer):
 
     def validate(self, data):
         # The related year must be specified
-        if not data.get('academic_graduation_year') and not data.get('curriculum_year'):
-            raise ValidationError("Please specify the experience's year")
+        if not data.get('academic_year') and not data.get('curriculum_year'):
+            raise ValidationError(_("Please specify the experience's year."))
 
         return super().validate(data)
 
@@ -71,7 +158,7 @@ class ExperienceCreationSerializer(ExperienceSerializer):
             # Get (and eventually create) the curriculum year related to the specified academic_year
             validated_data['curriculum_year'] = CurriculumYear.objects.get_or_create(
                 person=self.related_person,
-                academic_graduation_year=validated_data.pop('academic_graduation_year'),
+                academic_year=validated_data.pop('academic_year'),
             )[0]
 
         return super().create(validated_data)

@@ -373,6 +373,9 @@ msgstr "Doctorat déjà réalisé"
 msgid "Planned duration"
 msgstr "Durée prévue"
 
+msgid "Please specify the experience's year."
+msgstr "Merci de spécifier l'année de l'expérience."
+
 msgid "Pre-Admission"
 msgstr "Pré-Admission"
 
@@ -509,6 +512,9 @@ msgstr "Langue de la thèse"
 
 msgid "Thesis location"
 msgstr "Lieu de la thèse"
+
+msgid "This experience cannot be updated as it has already been valuated."
+msgstr "Cette expérience ne peut être mise à jour, ayant déjà été évaluée."
 
 msgid "Title"
 msgstr "Titre"

@@ -49,22 +49,22 @@ class CurriculumTestCase(APITestCase):
         cls.second_academic_year = AcademicYearFactory(year=2001)
         cls.other_academic_year = AcademicYearFactory(year=2005)
         cls.first_curriculum_year = CurriculumYearFactory(
-            academic_graduation_year=cls.first_academic_year,
+            academic_year=cls.first_academic_year,
             person=cls.admission.candidate,
         )
         cls.second_curriculum_year = CurriculumYearFactory(
-            academic_graduation_year=cls.second_academic_year,
+            academic_year=cls.second_academic_year,
             person=cls.admission.candidate,
         )
         cls.second_experience = ExperienceFactory(
             curriculum_year=cls.second_curriculum_year,
             country=cls.country,
-            type=ExperienceTypes.OTHER.name,
+            type=ExperienceTypes.OTHER_OCCUPATIONS.name,
         )
         cls.first_experience = ExperienceFactory(
             curriculum_year=cls.first_curriculum_year,
             country=cls.country,
-            type=ExperienceTypes.BELGIAN_UNIVERSITY_HIGHER_EDUCATION.name,
+            type=ExperienceTypes.HIGHER_EDUCATION.name,
         )
         cls.user = cls.admission.candidate.user
         cls.other_user = cls.other_admission.candidate.user
@@ -72,7 +72,7 @@ class CurriculumTestCase(APITestCase):
         # Request data
         cls.created_data = {
             'country': cls.country.pk,
-            'type': ExperienceTypes.BELGIAN_UNIVERSITY_HIGHER_EDUCATION.name,
+            'type': ExperienceTypes.HIGHER_EDUCATION.name,
         }
 
         # Targeted urls
@@ -131,9 +131,9 @@ class CurriculumTestCase(APITestCase):
     def test_add_experience_via_academic_year_and_related_to_existing_cv_year(self):
         self.client.force_authenticate(self.user)
 
-        # Specify the year of the experience via the 'academic_graduation_year' property
+        # Specify the year of the experience via the 'academic_year' property
         response = self.client.post(self.agnostic_url, data={
-            'academic_graduation_year': self.first_academic_year.year,
+            'academic_year': self.first_academic_year.year,
             **self.created_data,
         })
 
@@ -148,12 +148,12 @@ class CurriculumTestCase(APITestCase):
         # There is no experience specified for this user for this academic year
         self.assertFalse(CurriculumYear.objects.filter(
             person=self.admission.candidate,
-            academic_graduation_year=self.other_academic_year,
+            academic_year=self.other_academic_year,
         ).exists())
 
-        # Specify the year of the experience via the 'academic_graduation_year' property
+        # Specify the year of the experience via the 'academic_year' property
         response = self.client.post(self.agnostic_url, data={
-            'academic_graduation_year': self.other_academic_year.year,
+            'academic_year': self.other_academic_year.year,
             **self.created_data,
         })
 
@@ -163,7 +163,7 @@ class CurriculumTestCase(APITestCase):
         # A new CV year has been created
         created_curriculum_year = CurriculumYear.objects.filter(
             person=self.admission.candidate,
-            academic_graduation_year=self.other_academic_year,
+            academic_year=self.other_academic_year,
         )
         self.assertEqual(len(created_curriculum_year), 1)
         self.assertEqual(response.json().get('curriculum_year'), created_curriculum_year[0].id)
@@ -179,13 +179,23 @@ class CurriculumTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn('non_field_errors', response.json())
 
+    def test_get_one_experience_candidate(self):
+        self.client.force_authenticate(self.user)
+        detail_url = resolve_url('curriculum', xp=self.first_experience.id)
+
+        response = self.client.get(detail_url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.json().get('id'), self.first_experience.id)
+        self.assertEqual(response.json().get('type'), self.first_experience.type)
+
     def test_update_experience(self):
         self.client.force_authenticate(self.user)
 
         new_experience = ExperienceFactory(
             curriculum_year=self.first_curriculum_year,
             country=self.country,
-            type=ExperienceTypes.BELGIAN_UNIVERSITY_HIGHER_EDUCATION.name,
+            type=ExperienceTypes.HIGHER_EDUCATION.name,
         )
 
         update_url = resolve_url('curriculum', xp=new_experience.id)
@@ -193,12 +203,12 @@ class CurriculumTestCase(APITestCase):
         response = self.client.put(update_url, data={
             'curriculum_year': self.second_curriculum_year.id,
             'country': new_experience.country.id,
-            'type': ExperienceTypes.FOREIGN_UNIVERSITY_HIGHER_EDUCATION.name,
+            'type': ExperienceTypes.HIGHER_EDUCATION.name,
         })
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json().get('id'), new_experience.id)
-        self.assertEqual(response.json().get('type'), ExperienceTypes.FOREIGN_UNIVERSITY_HIGHER_EDUCATION.name)
+        self.assertEqual(response.json().get('type'), ExperienceTypes.HIGHER_EDUCATION.name)
         self.assertEqual(response.json().get('country'), self.country.id)
         # 'curriculum_year' is a read-only property then it is not updated
         self.assertEqual(response.json().get('curriculum_year'), self.first_curriculum_year.id)
@@ -209,7 +219,7 @@ class CurriculumTestCase(APITestCase):
         new_experience = ExperienceFactory(
             curriculum_year=self.first_curriculum_year,
             country=self.country,
-            type=ExperienceTypes.BELGIAN_UNIVERSITY_HIGHER_EDUCATION.name,
+            type=ExperienceTypes.HIGHER_EDUCATION.name,
             valuated_from=self.admission,
         )
 
@@ -224,7 +234,7 @@ class CurriculumTestCase(APITestCase):
         new_experience = ExperienceFactory(
             curriculum_year=self.first_curriculum_year,
             country=self.country,
-            type=ExperienceTypes.BELGIAN_UNIVERSITY_HIGHER_EDUCATION.name,
+            type=ExperienceTypes.HIGHER_EDUCATION.name,
         )
 
         self.assertEqual(Experience.objects.filter(pk=new_experience.id).count(), 1)
@@ -240,12 +250,12 @@ class CurriculumTestCase(APITestCase):
 
         new_curriculum_year = CurriculumYearFactory(
             person=self.admission.candidate,
-            academic_graduation_year=self.other_academic_year,
+            academic_year=self.other_academic_year,
         )
         new_experience = ExperienceFactory(
             curriculum_year=new_curriculum_year,
             country=self.country,
-            type=ExperienceTypes.BELGIAN_UNIVERSITY_HIGHER_EDUCATION.name,
+            type=ExperienceTypes.HIGHER_EDUCATION.name,
         )
 
         self.assertEqual(Experience.objects.filter(pk=new_experience.id).count(), 1)

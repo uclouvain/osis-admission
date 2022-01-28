@@ -171,7 +171,7 @@ paths:
       - propositions
   /curriculum:
     get:
-      operationId: listExperiences
+      operationId: list_curriculum_experiences
       description: Return the list of experiences from the person's CV.
       parameters:
       - $ref: '#/components/parameters/Accept-Language'
@@ -186,7 +186,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Experience'
+                  $ref: '#/components/schemas/ExperienceOutput'
           description: ''
         '400':
           $ref: '#/components/responses/BadRequest'
@@ -197,7 +197,7 @@ paths:
       tags:
       - person
     post:
-      operationId: createExperienceCreation
+      operationId: create_curriculum_experience
       description: Add an experience to the person's CV.
       parameters:
       - $ref: '#/components/parameters/Accept-Language'
@@ -216,6 +216,101 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ExperienceCreation'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - person
+  /curriculum/{xp}:
+    get:
+      operationId: retrieve_curriculum_experience
+      description: Return a specific experience from the person's CV.
+      parameters:
+      - name: xp
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExperienceOutput'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - person
+    put:
+      operationId: update_curriculum_experience
+      description: Update one of the experiences from the person's CV.
+      parameters:
+      - name: xp
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExperienceUpdating'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExperienceUpdating'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - person
+    delete:
+      operationId: destroy_curriculum_experience
+      description: Remove one of the experiences from the person's CV.
+      parameters:
+      - name: xp
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        200:
+          content:
+            application/json:
+              schema: {}
           description: ''
         '400':
           $ref: '#/components/responses/BadRequest'
@@ -840,7 +935,7 @@ paths:
       - propositions
   /propositions/{uuid}/curriculum:
     get:
-      operationId: listExperiencesAdmission
+      operationId: list_curriculum_experiencesAdmission
       description: Return the list of experiences from the person's CV.
       parameters:
       - name: uuid
@@ -861,7 +956,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Experience'
+                  $ref: '#/components/schemas/ExperienceOutput'
           description: ''
         '400':
           $ref: '#/components/responses/BadRequest'
@@ -872,7 +967,7 @@ paths:
       tags:
       - person
     post:
-      operationId: createExperienceCreationAdmission
+      operationId: create_curriculum_experienceAdmission
       description: Add an experience to the person's CV.
       parameters:
       - name: uuid
@@ -897,6 +992,119 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ExperienceCreation'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - person
+  /propositions/{uuid}/curriculum/{xp}:
+    get:
+      operationId: retrieve_curriculum_experienceAdmission
+      description: Return a specific experience from the person's CV.
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - name: xp
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExperienceOutput'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - person
+    put:
+      operationId: update_curriculum_experienceAdmission
+      description: Update one of the experiences from the person's CV.
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - name: xp
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExperienceUpdating'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExperienceUpdating'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - person
+    delete:
+      operationId: destroy_curriculum_experienceAdmission
+      description: Remove one of the experiences from the person's CV.
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - name: xp
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        200:
+          content:
+            application/json:
+              schema: {}
           description: ''
         '400':
           $ref: '#/components/responses/BadRequest'
@@ -1197,148 +1405,6 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - propositions
-  /curriculum/{xp}:
-    put:
-      operationId: updateExperienceUpdating
-      description: Update one of the experiences from the person's CV.
-      parameters:
-      - name: xp
-        in: path
-        required: true
-        description: ''
-        schema:
-          type: string
-      - $ref: '#/components/parameters/Accept-Language'
-      - $ref: '#/components/parameters/X-User-FirstName'
-      - $ref: '#/components/parameters/X-User-LastName'
-      - $ref: '#/components/parameters/X-User-Email'
-      - $ref: '#/components/parameters/X-User-GlobalID'
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ExperienceUpdating'
-      responses:
-        200:
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ExperienceUpdating'
-          description: ''
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-      tags:
-      - person
-    delete:
-      operationId: destroyCurriculumExperienceUpdateAndDelete
-      description: Remove one of the experiences from the person's CV.
-      parameters:
-      - name: xp
-        in: path
-        required: true
-        description: ''
-        schema:
-          type: string
-      - $ref: '#/components/parameters/Accept-Language'
-      - $ref: '#/components/parameters/X-User-FirstName'
-      - $ref: '#/components/parameters/X-User-LastName'
-      - $ref: '#/components/parameters/X-User-Email'
-      - $ref: '#/components/parameters/X-User-GlobalID'
-      responses:
-        200:
-          content:
-            application/json:
-              schema: {}
-          description: ''
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-      tags:
-      - person
-  /propositions/{uuid}/curriculum/{xp}:
-    put:
-      operationId: updateExperienceUpdatingAdmission
-      description: Update one of the experiences from the person's CV.
-      parameters:
-      - name: uuid
-        in: path
-        required: true
-        description: ''
-        schema:
-          type: string
-      - name: xp
-        in: path
-        required: true
-        description: ''
-        schema:
-          type: string
-      - $ref: '#/components/parameters/Accept-Language'
-      - $ref: '#/components/parameters/X-User-FirstName'
-      - $ref: '#/components/parameters/X-User-LastName'
-      - $ref: '#/components/parameters/X-User-Email'
-      - $ref: '#/components/parameters/X-User-GlobalID'
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ExperienceUpdating'
-      responses:
-        200:
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ExperienceUpdating'
-          description: ''
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-      tags:
-      - person
-    delete:
-      operationId: destroyCurriculumExperienceUpdateAndDeleteAdmission
-      description: Remove one of the experiences from the person's CV.
-      parameters:
-      - name: uuid
-        in: path
-        required: true
-        description: ''
-        schema:
-          type: string
-      - name: xp
-        in: path
-        required: true
-        description: ''
-        schema:
-          type: string
-      - $ref: '#/components/parameters/Accept-Language'
-      - $ref: '#/components/parameters/X-User-FirstName'
-      - $ref: '#/components/parameters/X-User-LastName'
-      - $ref: '#/components/parameters/X-User-Email'
-      - $ref: '#/components/parameters/X-User-GlobalID'
-      responses:
-        200:
-          content:
-            application/json:
-              schema: {}
-          description: ''
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-      tags:
-      - person
 components:
   schemas:
     PersonIdentification:
@@ -1615,7 +1681,7 @@ components:
             - statut
       required:
       - propositions
-    Experience:
+    ExperienceOutput:
       type: object
       properties:
         id:
@@ -1625,21 +1691,86 @@ components:
           type: string
           format: uuid
           readOnly: true
+        curriculum_year:
+          type: object
+          properties:
+            academic_year:
+              type: integer
+              nullable: true
+            id:
+              type: integer
+              readOnly: true
+          required:
+          - academic_year
+        country:
+          type: object
+          properties:
+            iso_code:
+              type: string
+              maxLength: 2
+            uuid:
+              type: string
+              readOnly: true
+            name:
+              type: string
+              readOnly: true
+          required:
+          - iso_code
+        program:
+          type: object
+          properties:
+            title:
+              type: string
+              readOnly: true
+            uuid:
+              type: string
+              readOnly: true
+          nullable: true
+        linguistic_regime:
+          type: object
+          properties:
+            code:
+              type: string
+              maxLength: 4
+            name:
+              type: string
+              readOnly: true
+            uuid:
+              type: string
+              readOnly: true
+          required:
+          - code
+          nullable: true
+        institute:
+          type: object
+          properties:
+            acronym:
+              type: string
+              maxLength: 20
+            name:
+              type: string
+              maxLength: 255
+            uuid:
+              type: string
+              readOnly: true
+          required:
+          - name
+          nullable: true
         type:
-          $ref: '#/components/schemas/ExperienceTypes'
-        other_institute_name:
+          $ref: '#/components/schemas/ExperienceType'
+        institute_name:
           type: string
           nullable: true
           maxLength: 255
-        other_institute_city:
+        institute_city:
           type: string
           nullable: true
           maxLength: 255
-        other_institute_postal_code:
+        institute_postal_code:
           type: string
           nullable: true
           maxLength: 20
-        program_name:
+        education_name:
           type: string
           nullable: true
           maxLength: 255
@@ -1652,7 +1783,7 @@ components:
         obtained_grade:
           $ref: '#/components/schemas/Grade'
           nullable: true
-        diploma_ranked:
+        rank_in_diploma:
           type: string
           nullable: true
           maxLength: 255
@@ -1708,15 +1839,16 @@ components:
           $ref: '#/components/schemas/BelgianCommunitiesOfEducation'
           nullable: true
         study_system:
-          $ref: '#/components/schemas/StudySystems'
+          $ref: '#/components/schemas/StudySystem'
           nullable: true
         curriculum:
           type: array
           items:
             type: string
           nullable: true
-        foreign_study_cycle:
-          $ref: '#/components/schemas/ForeignStudyCycle'
+          description: Must be detailed, dated and signed
+        study_cycle_type:
+          $ref: '#/components/schemas/ForeignStudyCycleType'
           nullable: true
         transcript_translation:
           type: array
@@ -1729,7 +1861,7 @@ components:
             type: string
           nullable: true
         activity_type:
-          $ref: '#/components/schemas/ActivityTypes'
+          $ref: '#/components/schemas/ActivityType'
           nullable: true
         other_activity_type:
           type: string
@@ -1744,27 +1876,17 @@ components:
           type: string
           nullable: true
           maxLength: 255
-        curriculum_year:
-          type: integer
-        country:
-          type: integer
-        institute:
-          type: integer
-          nullable: true
-        program:
-          type: integer
-          nullable: true
-        linguistic_regime:
-          type: integer
-          nullable: true
       required:
-      - type
+      - curriculum_year
       - country
-    ExperienceTypes:
+      - program
+      - linguistic_regime
+      - institute
+      - type
+    ExperienceType:
       enum:
-      - BELGIAN_UNIVERSITY_HIGHER_EDUCATION
-      - FOREIGN_UNIVERSITY_HIGHER_EDUCATION
-      - OTHER
+      - HIGHER_EDUCATION
+      - OTHER_ACTIVITY
       type: string
     Result:
       enum:
@@ -1798,13 +1920,13 @@ components:
       - FLEMISH_SPEAKING
       - GERMAN_SPEAKING
       type: string
-    StudySystems:
+    StudySystem:
       enum:
       - ''
       - CONTINUING_EDUCATION
       - FULL_TIME_EDUCATION
       type: string
-    ForeignStudyCycle:
+    ForeignStudyCycleType:
       enum:
       - ''
       - BACHELOR
@@ -1812,7 +1934,7 @@ components:
       - MASTER
       - OTHER_HIGHER_EDUCATION
       type: string
-    ActivityTypes:
+    ActivityType:
       enum:
       - ''
       - ILLNESS
@@ -2468,24 +2590,27 @@ components:
           type: string
           format: uuid
           readOnly: true
-        academic_graduation_year:
+        academic_year:
           type: integer
           nullable: true
+        country:
+          type: string
+          nullable: true
         type:
-          $ref: '#/components/schemas/ExperienceTypes'
-        other_institute_name:
+          $ref: '#/components/schemas/ExperienceType'
+        institute_name:
           type: string
           nullable: true
           maxLength: 255
-        other_institute_city:
+        institute_city:
           type: string
           nullable: true
           maxLength: 255
-        other_institute_postal_code:
+        institute_postal_code:
           type: string
           nullable: true
           maxLength: 20
-        program_name:
+        education_name:
           type: string
           nullable: true
           maxLength: 255
@@ -2498,7 +2623,7 @@ components:
         obtained_grade:
           $ref: '#/components/schemas/Grade'
           nullable: true
-        diploma_ranked:
+        rank_in_diploma:
           type: string
           nullable: true
           maxLength: 255
@@ -2554,15 +2679,16 @@ components:
           $ref: '#/components/schemas/BelgianCommunitiesOfEducation'
           nullable: true
         study_system:
-          $ref: '#/components/schemas/StudySystems'
+          $ref: '#/components/schemas/StudySystem'
           nullable: true
         curriculum:
           type: array
           items:
             type: string
           nullable: true
-        foreign_study_cycle:
-          $ref: '#/components/schemas/ForeignStudyCycle'
+          description: Must be detailed, dated and signed
+        study_cycle_type:
+          $ref: '#/components/schemas/ForeignStudyCycleType'
           nullable: true
         transcript_translation:
           type: array
@@ -2575,7 +2701,7 @@ components:
             type: string
           nullable: true
         activity_type:
-          $ref: '#/components/schemas/ActivityTypes'
+          $ref: '#/components/schemas/ActivityType'
           nullable: true
         other_activity_type:
           type: string
@@ -2592,8 +2718,6 @@ components:
           maxLength: 255
         curriculum_year:
           type: integer
-        country:
-          type: integer
         institute:
           type: integer
           nullable: true
@@ -2604,8 +2728,8 @@ components:
           type: integer
           nullable: true
       required:
-      - type
       - country
+      - type
     SupervisionActor:
       type: object
       properties:
@@ -2644,21 +2768,24 @@ components:
           type: string
           format: uuid
           readOnly: true
+        country:
+          type: string
+          nullable: true
         type:
-          $ref: '#/components/schemas/ExperienceTypes'
-        other_institute_name:
+          $ref: '#/components/schemas/ExperienceType'
+        institute_name:
           type: string
           nullable: true
           maxLength: 255
-        other_institute_city:
+        institute_city:
           type: string
           nullable: true
           maxLength: 255
-        other_institute_postal_code:
+        institute_postal_code:
           type: string
           nullable: true
           maxLength: 20
-        program_name:
+        education_name:
           type: string
           nullable: true
           maxLength: 255
@@ -2671,7 +2798,7 @@ components:
         obtained_grade:
           $ref: '#/components/schemas/Grade'
           nullable: true
-        diploma_ranked:
+        rank_in_diploma:
           type: string
           nullable: true
           maxLength: 255
@@ -2727,15 +2854,16 @@ components:
           $ref: '#/components/schemas/BelgianCommunitiesOfEducation'
           nullable: true
         study_system:
-          $ref: '#/components/schemas/StudySystems'
+          $ref: '#/components/schemas/StudySystem'
           nullable: true
         curriculum:
           type: array
           items:
             type: string
           nullable: true
-        foreign_study_cycle:
-          $ref: '#/components/schemas/ForeignStudyCycle'
+          description: Must be detailed, dated and signed
+        study_cycle_type:
+          $ref: '#/components/schemas/ForeignStudyCycleType'
           nullable: true
         transcript_translation:
           type: array
@@ -2748,7 +2876,7 @@ components:
             type: string
           nullable: true
         activity_type:
-          $ref: '#/components/schemas/ActivityTypes'
+          $ref: '#/components/schemas/ActivityType'
           nullable: true
         other_activity_type:
           type: string
@@ -2766,8 +2894,6 @@ components:
         curriculum_year:
           type: string
           readOnly: true
-        country:
-          type: integer
         institute:
           type: integer
           nullable: true
@@ -2778,8 +2904,8 @@ components:
           type: integer
           nullable: true
       required:
-      - type
       - country
+      - type
     CompleterPropositionCommand:
       type: object
       properties:
