@@ -23,12 +23,28 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import sys
+from unittest import SkipTest
+
 from django.core.files.temp import NamedTemporaryFile
-from django.core.management import call_command
+from django.core.management import ManagementUtility, call_command
 from django.test import TestCase
 
 
 class ApiSchemaTestCase(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        # Only execute if tests are launched globally
+        argv = sys.argv
+        utility = ManagementUtility(argv)
+        test_command = utility.fetch_command('test')
+        parser = test_command.create_parser(argv[0], argv[1])
+
+        options = parser.parse_args(argv[2:])
+        if not options.args or options.args[0].split('.')[0] != 'admission':
+            raise SkipTest("Not testing admission directly, do not test schema")
+        super().setUpClass()
+
     def test_api_schema_matches_generation(self):
         with NamedTemporaryFile(mode='w+') as temp:
             call_command(

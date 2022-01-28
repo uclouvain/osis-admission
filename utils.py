@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,12 +23,14 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.ddd.preparation.projet_doctoral.domain.model.proposition import Proposition
-from admission.ddd.preparation.projet_doctoral.domain.service.i_constitution_supervision import \
-    IConstitutionSupervision
+
+from functools import lru_cache
+
+from rest_framework.generics import get_object_or_404
+
+from admission.contrib.models import DoctorateAdmission
 
 
-class ConstitutionSupervisionInMemoryService(IConstitutionSupervision):
-    @classmethod
-    def notifier(cls, proposition: 'Proposition', matricule_candidat: str) -> None:
-        pass
+@lru_cache()
+def get_cached_admission_perm_obj(admission_uuid):
+    return get_object_or_404(DoctorateAdmission, uuid=admission_uuid)

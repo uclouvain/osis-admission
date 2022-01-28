@@ -24,14 +24,13 @@
 #
 # ##############################################################################
 from rest_framework import status
-from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from admission.api import serializers
 from admission.api.schema import ResponseSpecificSchema
-from admission.contrib.models import DoctorateAdmission
 from admission.ddd.preparation.projet_doctoral.commands import ApprouverPropositionCommand, RefuserPropositionCommand
+from admission.utils import get_cached_admission_perm_obj
 from infrastructure.messages_bus import message_bus_instance
 from osis_role.contrib.views import APIPermissionRequiredMixin
 
@@ -58,7 +57,7 @@ class ApprovePropositionAPIView(APIPermissionRequiredMixin, APIView):
     }
 
     def get_permission_object(self):
-        return get_object_or_404(DoctorateAdmission, uuid=self.kwargs['uuid'])
+        return get_cached_admission_perm_obj(self.kwargs['uuid'])
 
     def post(self, request, *args, **kwargs):
         """Approve the proposition."""

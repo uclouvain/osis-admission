@@ -38,16 +38,20 @@ from admission.ddd.preparation.projet_doctoral.domain.model._signature_promoteur
     SignaturePromoteur,
 )
 from admission.ddd.preparation.projet_doctoral.domain.model.proposition import PropositionIdentity
-from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import SignataireNonTrouveException
+from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import (
+    MembreCANonTrouveException,
+    PromoteurNonTrouveException,
+    SignataireNonTrouveException,
+)
 from admission.ddd.preparation.projet_doctoral.domain.validator.validator_by_business_action import (
     ApprouverValidatorList,
     CotutelleValidatorList,
     IdentifierMembreCAValidatorList,
     IdentifierPromoteurValidatorList,
     InviterASignerValidatorList,
+    SignatairesValidatorList,
     SupprimerMembreCAValidatorList,
     SupprimerPromoteurValidatorList,
-    SignatairesValidatorList,
 )
 from osis_common.ddd import interface
 
@@ -95,6 +99,18 @@ class GroupeDeSupervision(interface.Entity):
                         if s.membre_CA_id.matricule == matricule_signataire)
         raise SignataireNonTrouveException
 
+    def get_promoteur(self, matricule_signataire: str) -> 'PromoteurIdentity':
+        promoteur = self.get_signataire(matricule_signataire)
+        if not isinstance(promoteur, PromoteurIdentity):
+            raise PromoteurNonTrouveException
+        return promoteur
+
+    def get_membre_CA(self, matricule_signataire: str) -> 'MembreCAIdentity':
+        membre_CA = self.get_signataire(matricule_signataire)
+        if not isinstance(membre_CA, MembreCAIdentity):
+            raise MembreCANonTrouveException
+        return membre_CA
+
     def inviter_a_signer(self) -> None:
         """Inviter à signer tous les promoteurs et membres CA non invités"""
         for promoteur in filter(lambda s: s.etat == ChoixEtatSignature.NOT_INVITED, self.signatures_promoteurs):
@@ -126,8 +142,8 @@ class GroupeDeSupervision(interface.Entity):
 
     def approuver(self,
                   signataire_id: Union['PromoteurIdentity', 'MembreCAIdentity'],
-                  commentaire_interne: str,
-                  commentaire_externe: str,
+                  commentaire_interne: Optional[str],
+                  commentaire_externe: Optional[str],
                   ) -> None:
         ApprouverValidatorList(
             groupe_de_supervision=self,
@@ -139,26 +155,26 @@ class GroupeDeSupervision(interface.Entity):
                 SignaturePromoteur(
                     promoteur_id=signataire_id,
                     etat=ChoixEtatSignature.APPROVED,
-                    commentaire_interne=commentaire_interne,
-                    commentaire_externe=commentaire_externe,
+                    commentaire_interne=commentaire_interne or '',
+                    commentaire_externe=commentaire_externe or '',
                 )
             )
-        elif isinstance(signataire_id, MembreCAIdentity):
+        elif isinstance(signataire_id, MembreCAIdentity):  # pragma: no branch
             self.signatures_membres_CA = [s for s in self.signatures_membres_CA if s.membre_CA_id != signataire_id]
             self.signatures_membres_CA.append(
                 SignatureMembreCA(
                     membre_CA_id=signataire_id,
                     etat=ChoixEtatSignature.APPROVED,
-                    commentaire_interne=commentaire_interne,
-                    commentaire_externe=commentaire_externe,
+                    commentaire_interne=commentaire_interne or '',
+                    commentaire_externe=commentaire_externe or '',
                 )
             )
 
     def refuser(self,
                 signataire_id: Union['PromoteurIdentity', 'MembreCAIdentity'],
-                commentaire_interne: str,
-                commentaire_externe: str,
-                motif_refus: str
+                commentaire_interne: Optional[str],
+                commentaire_externe: Optional[str],
+                motif_refus: Optional[str],
                 ) -> None:
         ApprouverValidatorList(
             groupe_de_supervision=self,
@@ -170,20 +186,20 @@ class GroupeDeSupervision(interface.Entity):
                 SignaturePromoteur(
                     promoteur_id=signataire_id,
                     etat=ChoixEtatSignature.REFUSED,
-                    commentaire_interne=commentaire_interne,
-                    commentaire_externe=commentaire_externe,
-                    motif_refus=motif_refus,
+                    commentaire_interne=commentaire_interne or '',
+                    commentaire_externe=commentaire_externe or '',
+                    motif_refus=motif_refus or '',
                 )
             )
-        elif isinstance(signataire_id, MembreCAIdentity):
+        elif isinstance(signataire_id, MembreCAIdentity):  # pragma: no branch
             self.signatures_membres_CA = [s for s in self.signatures_membres_CA if s.membre_CA_id != signataire_id]
             self.signatures_membres_CA.append(
                 SignatureMembreCA(
                     membre_CA_id=signataire_id,
                     etat=ChoixEtatSignature.REFUSED,
-                    commentaire_interne=commentaire_interne,
-                    commentaire_externe=commentaire_externe,
-                    motif_refus=motif_refus,
+                    commentaire_interne=commentaire_interne or '',
+                    commentaire_externe=commentaire_externe or '',
+                    motif_refus=motif_refus or '',
                 )
             )
 
@@ -194,18 +210,18 @@ class GroupeDeSupervision(interface.Entity):
         CotutelleValidatorList(cotutelle=self.cotutelle).validate()
 
     def definir_cotutelle(self,
-                          motivation: str,
-                          institution: str,
+                          motivation: Optional[str],
+                          institution: Optional[str],
                           demande_ouverture: List[str] = None,
                           convention: List[str] = None,
                           autres_documents: List[str] = None,
                           ):
         self.cotutelle = Cotutelle(
-            motivation=motivation,
-            institution=institution,
-            demande_ouverture=demande_ouverture,
-            convention=convention,
-            autres_documents=autres_documents,
+            motivation=motivation or '',
+            institution=institution or '',
+            demande_ouverture=demande_ouverture or [],
+            convention=convention or [],
+            autres_documents=autres_documents or [],
         )
 
     def verrouiller_groupe_pour_signature(self):

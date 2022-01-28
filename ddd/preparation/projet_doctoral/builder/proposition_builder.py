@@ -23,29 +23,36 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
+from typing import Optional, Union
+from uuid import UUID
+
 from admission.ddd.preparation.projet_doctoral.builder.proposition_identity_builder import \
     PropositionIdentityBuilder
 from admission.ddd.preparation.projet_doctoral.commands import InitierPropositionCommand
-from admission.ddd.preparation.projet_doctoral.domain.model._detail_projet import DetailProjet
-from admission.ddd.preparation.projet_doctoral.domain.model._experience_precedente_recherche import (
-    ExperiencePrecedenteRecherche,
-    ChoixDoctoratDejaRealise,
-    aucune_experience_precedente_recherche,
-)
-from admission.ddd.preparation.projet_doctoral.domain.model._financement import (
-    Financement, ChoixTypeFinancement,
-    financement_non_rempli,
-)
-from admission.ddd.preparation.projet_doctoral.domain.model._institut import InstitutIdentity
-from admission.ddd.preparation.projet_doctoral.domain.model.doctorat import DoctoratIdentity
-from admission.ddd.preparation.projet_doctoral.domain.model.proposition import (
-    Proposition,
+from admission.ddd.preparation.projet_doctoral.domain.model._detail_projet import (
+    ChoixLangueRedactionThese,
+    DetailProjet,
 )
 from admission.ddd.preparation.projet_doctoral.domain.model._enums import (
     ChoixCommissionProximiteCDEouCLSM,
     ChoixCommissionProximiteCDSS,
     ChoixStatutProposition,
     ChoixTypeAdmission,
+)
+from admission.ddd.preparation.projet_doctoral.domain.model._experience_precedente_recherche import (
+    ChoixDoctoratDejaRealise,
+    ExperiencePrecedenteRecherche,
+    aucune_experience_precedente_recherche,
+)
+from admission.ddd.preparation.projet_doctoral.domain.model._financement import (
+    ChoixTypeFinancement,
+    Financement,
+    financement_non_rempli,
+)
+from admission.ddd.preparation.projet_doctoral.domain.model._institut import InstitutIdentity
+from admission.ddd.preparation.projet_doctoral.domain.model.doctorat import DoctoratIdentity
+from admission.ddd.preparation.projet_doctoral.domain.model.proposition import (
+    Proposition,
 )
 from admission.ddd.preparation.projet_doctoral.domain.validator.validator_by_business_action import \
     InitierPropositionValidatorList
@@ -60,7 +67,7 @@ class PropositionBuilder(interface.RootEntityBuilder):
         raise NotImplementedError
 
     @classmethod
-    def build_from_command(
+    def build_from_command(  # type: ignore[override]
             cls,
             cmd: 'InitierPropositionCommand'
     ):
@@ -81,10 +88,10 @@ class PropositionBuilder(interface.RootEntityBuilder):
             doctorat_deja_realise=cmd.doctorat_deja_realise,
             institution=cmd.institution,
         ).validate()
-        commission_proximite = ''
-        if cmd.commission_proximite in ChoixCommissionProximiteCDEouCLSM.get_names():
+        commission_proximite: Optional[Union[ChoixCommissionProximiteCDEouCLSM, ChoixCommissionProximiteCDSS]] = None
+        if cmd.commission_proximite and cmd.commission_proximite in ChoixCommissionProximiteCDEouCLSM.get_names():
             commission_proximite = ChoixCommissionProximiteCDEouCLSM[cmd.commission_proximite]
-        elif cmd.commission_proximite in ChoixCommissionProximiteCDSS.get_names():
+        elif cmd.commission_proximite and cmd.commission_proximite in ChoixCommissionProximiteCDSS.get_names():
             commission_proximite = ChoixCommissionProximiteCDSS[cmd.commission_proximite]
         reference = "{}-{}".format(
             doctorat_id.annee % 100,
@@ -120,13 +127,13 @@ def _build_financement(cmd: 'InitierPropositionCommand') -> 'Financement':
 
 def _build_projet(cmd: 'InitierPropositionCommand') -> 'DetailProjet':
     return DetailProjet(
-        titre=cmd.titre_projet,
-        resume=cmd.resume_projet,
+        titre=cmd.titre_projet or '',
+        resume=cmd.resume_projet or '',
         documents=cmd.documents_projet,
-        langue_redaction_these=cmd.langue_redaction_these,
-        institut_these=InstitutIdentity(cmd.institut_these) if cmd.institut_these else None,
-        lieu_these=cmd.lieu_these,
-        autre_lieu_these=cmd.autre_lieu_these,
+        langue_redaction_these=ChoixLangueRedactionThese[cmd.langue_redaction_these],
+        institut_these=InstitutIdentity(UUID(cmd.institut_these)) if cmd.institut_these else None,
+        lieu_these=cmd.lieu_these or '',
+        autre_lieu_these=cmd.autre_lieu_these or '',
         graphe_gantt=cmd.graphe_gantt,
         proposition_programme_doctoral=cmd.proposition_programme_doctoral,
         projet_formation_complementaire=cmd.projet_formation_complementaire,

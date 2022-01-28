@@ -62,8 +62,8 @@ class TestDoctoratTranslator(SimpleTestCase):
         self.assertEqual(dto.sigle, 'AGRO3DP')
         self.assertEqual(dto.annee, self.annee)
         self.assertEqual(dto.sigle_entite_gestion, 'SST')
-        self.assertEqual(dto.intitule_fr, 'Intitule du doctorat')
-        self.assertEqual(dto.intitule_en, 'Title of PHD')
+        self.assertEqual(dto.intitule_fr, 'Intitule du doctorat (Mons)')
+        self.assertEqual(dto.intitule_en, 'Title of PHD (Mons)')
 
     @mock.patch("infrastructure.messages_bus.search_formations")
     def test_should_filtre_doctorat_uniquement(self, mock_search_formations):
@@ -113,7 +113,7 @@ def _get_training_dto(sigle_gestion, sigle, annee):
         management_entity_acronym=sigle_gestion,
         administration_entity_acronym='',
         end_year='',
-        enrollment_campus_name='',
+        enrollment_campus_name='Mons',
         enrollment_campus_university_name='',
         other_campus_activities='',
         funding_can_be_funded='',

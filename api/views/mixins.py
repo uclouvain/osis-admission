@@ -28,6 +28,7 @@ from rest_framework.generics import get_object_or_404
 
 from admission.api.schema import ChoicesEnumSchema
 from admission.contrib.models import DoctorateAdmission
+from admission.utils import get_cached_admission_perm_obj
 
 
 class PersonRelatedSchema(ChoicesEnumSchema):
@@ -51,4 +52,4 @@ class PersonRelatedMixin:
 
     def get_permission_object(self):
         if self.kwargs.get('uuid'):
-            return get_object_or_404(DoctorateAdmission, uuid=self.kwargs.get('uuid'))
+            return get_cached_admission_perm_obj(self.kwargs['uuid'])

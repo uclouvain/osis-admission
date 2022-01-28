@@ -28,6 +28,7 @@ from django.test import override_settings
 from rest_framework import status
 from rest_framework.test import APITestCase
 
+from admission.ddd.preparation.projet_doctoral.domain.model._detail_projet import ChoixLangueRedactionThese
 from admission.tests.factories import DoctorateAdmissionFactory, WriteTokenFactory
 from admission.tests.factories.supervision import CaMemberFactory, PromoterFactory
 from osis_signature.enums import SignatureState
@@ -49,6 +50,8 @@ class ApprovalsApiTestCase(APITestCase):
 
         # Create ca members
         cls.ca_member = CaMemberFactory(process=cls.promoter.process)
+        cls.invited_ca_member = CaMemberFactory(process=cls.promoter.process)
+        cls.invited_ca_member.actor_ptr.switch_state(SignatureState.INVITED)
         cls.other_ca_member = CaMemberFactory()
 
         # Create the admission
@@ -57,7 +60,7 @@ class ApprovalsApiTestCase(APITestCase):
             cotutelle=False,
             project_title="title",
             project_abstract="abstract",
-            thesis_language="FR",
+            thesis_language=ChoixLangueRedactionThese.FRENCH.name,
             project_document=[WriteTokenFactory().token],
             gantt_graph=[WriteTokenFactory().token],
             program_proposition=[WriteTokenFactory().token],
@@ -134,6 +137,15 @@ class ApprovalsApiTestCase(APITestCase):
         self.client.force_authenticate(user=self.promoter.person.user)
         response = self.client.put(self.url, {
             "matricule": self.promoter.person.global_id,
+            **self.refused_data,
+        }, format="json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.json(), {'uuid': str(self.admission.uuid)})
+
+    def test_supervision_refuse_proposition_api_invited_ca_member(self):
+        self.client.force_authenticate(user=self.invited_ca_member.person.user)
+        response = self.client.put(self.url, {
+            "matricule": self.invited_ca_member.person.global_id,
             **self.refused_data,
         }, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)

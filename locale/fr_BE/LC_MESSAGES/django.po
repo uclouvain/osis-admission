@@ -292,7 +292,7 @@ msgstr "Institution"
 msgid "Institution should be set when PhD has been set to yes or partial"
 msgstr ""
 "L'institution doit être renseignée quand le doctorat a déjà été réalisé "
-"partiellement ou complétement."
+"partiellement ou complètement."
 
 msgid "Internal comment"
 msgstr "Commentaire interne"

@@ -41,7 +41,6 @@ from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions impor
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 from admission.infrastructure.preparation.projet_doctoral.repository.in_memory.groupe_de_supervision import \
     GroupeDeSupervisionInMemoryRepository
-from base.ddd.utils.business_validator import MultipleBusinessExceptions
 
 
 class TestSupprimerPromoteurService(SimpleTestCase):
@@ -72,9 +71,8 @@ class TestSupprimerPromoteurService(SimpleTestCase):
 
     def test_should_pas_supprimer_membre_CA(self):
         cmd = attr.evolve(self.cmd, matricule='membre-ca-SC3DP')
-        with self.assertRaises(MultipleBusinessExceptions) as e:
+        with self.assertRaises(PromoteurNonTrouveException):
             self.message_bus.invoke(cmd)
-        self.assertIsInstance(e.exception.exceptions.pop(), PromoteurNonTrouveException)
 
     def test_should_pas_supprimer_si_groupe_proposition_non_trouve(self):
         cmd = attr.evolve(self.cmd, uuid_proposition='uuid-ECGE3DP')

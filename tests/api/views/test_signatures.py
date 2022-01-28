@@ -29,6 +29,7 @@ from django.test import override_settings
 from rest_framework import status
 from rest_framework.test import APITestCase
 
+from admission.ddd.preparation.projet_doctoral.domain.model._detail_projet import ChoixLangueRedactionThese
 from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import (
     CotutelleDoitAvoirAuMoinsUnPromoteurExterneException,
     MembreCAManquantException,
@@ -46,7 +47,7 @@ class RequestSignaturesApiTestCase(APITestCase):
             cotutelle=False,
             project_title="title",
             project_abstract="abstract",
-            thesis_language="FR",
+            thesis_language=ChoixLangueRedactionThese.FRENCH.name,
             project_document=[WriteTokenFactory().token],
             gantt_graph=[WriteTokenFactory().token],
             program_proposition=[WriteTokenFactory().token],
@@ -100,7 +101,7 @@ class RequestSignaturesApiTestCase(APITestCase):
             cotutelle_convention=[WriteTokenFactory().token],
             project_title="title",
             project_abstract="abstract",
-            thesis_language="FR",
+            thesis_language=ChoixLangueRedactionThese.FRENCH.name,
             project_document=[WriteTokenFactory().token],
             gantt_graph=[WriteTokenFactory().token],
             program_proposition=[WriteTokenFactory().token],
@@ -130,7 +131,7 @@ class RequestSignaturesApiTestCase(APITestCase):
             cotutelle_convention=[WriteTokenFactory().token],
             project_title="title",
             project_abstract="abstract",
-            thesis_language="FR",
+            thesis_language=ChoixLangueRedactionThese.FRENCH.name,
             project_document=[WriteTokenFactory().token],
             gantt_graph=[WriteTokenFactory().token],
             program_proposition=[WriteTokenFactory().token],

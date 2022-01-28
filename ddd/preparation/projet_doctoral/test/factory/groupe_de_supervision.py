@@ -24,6 +24,7 @@
 #
 # ##############################################################################
 import uuid
+from typing import List, Optional
 
 import factory
 
@@ -93,7 +94,7 @@ class _GroupeDeSupervisionFactory(factory.Factory):
     proposition_id = factory.SubFactory(_PropositionIdentityFactory)
     signatures_promoteurs = factory.LazyFunction(list)
     signatures_membres_CA = factory.LazyFunction(list)
-    cotutelle = pas_de_cotutelle
+    cotutelle: Optional[Cotutelle] = pas_de_cotutelle
 
 
 class _CotutelleFactory(factory.Factory):
@@ -178,13 +179,14 @@ class GroupeDeSupervisionSC3DPAvecMembresInvitesFactory(_GroupeDeSupervisionFact
         _SignaturePromoteurFactory(promoteur_id__matricule='promoteur-SC3DP', etat=ChoixEtatSignature.INVITED)
     ])
     signatures_membres_CA = factory.LazyFunction(lambda: [
+        _SignatureMembreCAFactory(membre_CA_id__matricule='membre-ca-SC3DP-invite', etat=ChoixEtatSignature.INVITED),
         _SignatureMembreCAFactory(membre_CA_id__matricule='membre-ca-SC3DP')
     ])
 
 
 class GroupeDeSupervisionSC3DPSansPromoteurFactory(_GroupeDeSupervisionFactory):
     proposition_id = factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-SC3DP-sans-promoteur')
-    signatures_promoteurs = []
+    signatures_promoteurs: List[SignaturePromoteur] = []
     signatures_membres_CA = factory.LazyFunction(lambda: [
         _SignatureMembreCAFactory(membre_CA_id__matricule='membre-ca-SC3DP')
     ])
@@ -195,4 +197,4 @@ class GroupeDeSupervisionSC3DPSansMembresCAFactory(_GroupeDeSupervisionFactory):
     signatures_promoteurs = factory.LazyFunction(lambda: [
         _SignaturePromoteurFactory(promoteur_id__matricule='promoteur-SC3DP', etat=ChoixEtatSignature.INVITED)
     ])
-    signatures_membres_CA = []
+    signatures_membres_CA: List[SignatureMembreCA] = []

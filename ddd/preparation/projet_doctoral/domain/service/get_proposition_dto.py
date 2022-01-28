@@ -44,6 +44,8 @@ class GetPropositionDTODomainService(interface.DomainService):
     ) -> 'PropositionDTO':
         proposition = repository.get(PropositionIdentityBuilder.build_from_uuid(uuid_proposition))
         doctorat = doctorat_translator.get_dto(proposition.doctorat_id.sigle, proposition.doctorat_id.annee)
+        assert proposition.reference
+        assert proposition.creee_le
         return PropositionDTO(
             uuid=uuid_proposition,
             type_admission=proposition.type_admission.name,
@@ -55,8 +57,8 @@ class GetPropositionDTODomainService(interface.DomainService):
             matricule_candidat=proposition.matricule_candidat,
             justification=proposition.justification,
             code_secteur_formation=secteur_ucl_translator.get(doctorat.sigle_entite_gestion).sigle,
-            commission_proximite=proposition.commission_proximite and proposition.commission_proximite.name,
-            type_financement=proposition.financement.type and proposition.financement.type.name,
+            commission_proximite=proposition.commission_proximite and proposition.commission_proximite.name or '',
+            type_financement=proposition.financement.type and proposition.financement.type.name or '',
             type_contrat_travail=proposition.financement.type_contrat_travail,
             eft=proposition.financement.eft,
             bourse_recherche=proposition.financement.bourse_recherche,
@@ -69,7 +71,7 @@ class GetPropositionDTODomainService(interface.DomainService):
             proposition_programme_doctoral=proposition.projet.proposition_programme_doctoral,
             projet_formation_complementaire=proposition.projet.projet_formation_complementaire,
             lettres_recommandation=proposition.projet.lettres_recommandation,
-            langue_redaction_these=proposition.projet.langue_redaction_these,
+            langue_redaction_these=proposition.projet.langue_redaction_these.name,
             institut_these=proposition.projet.institut_these.uuid if proposition.projet.institut_these else None,
             lieu_these=proposition.projet.lieu_these,
             autre_lieu_these=proposition.projet.autre_lieu_these,
@@ -89,15 +91,17 @@ class GetPropositionDTODomainService(interface.DomainService):
     ) -> 'PropositionSearchDTO':
         doctorat = doctorat_translator.get_dto(proposition.doctorat_id.sigle, proposition.doctorat_id.annee)
         secteur = secteur_ucl_translator.get(doctorat.sigle_entite_gestion)
+        assert proposition.reference
+        assert proposition.creee_le
         return PropositionSearchDTO(
             uuid=proposition.entity_id.uuid,
             reference=proposition.reference,
-            type_admission=proposition.type_admission,
+            type_admission=proposition.type_admission.name,
             sigle_doctorat=doctorat.sigle,
             matricule_candidat=proposition.matricule_candidat,
             code_secteur_formation=secteur.sigle,
             intitule_secteur_formation=secteur.intitule,
-            commission_proximite=proposition.commission_proximite,
+            commission_proximite=proposition.commission_proximite and proposition.commission_proximite.name or '',
             intitule_doctorat_en=doctorat.intitule_en,
             intitule_doctorat_fr=doctorat.intitule_fr,
             creee_le=proposition.creee_le,

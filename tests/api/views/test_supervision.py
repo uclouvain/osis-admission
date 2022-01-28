@@ -51,7 +51,11 @@ class SupervisionApiTestCase(APITestCase):
             entity_type=EntityType.DOCTORAL_COMMISSION.name,
             acronym='CDA',
         ).entity
-        cls.admission = DoctorateAdmissionFactory(doctorate__management_entity=cls.commission)
+        cls.promoter = PromoterFactory(actor_ptr__person__first_name="Joe")
+        cls.admission = DoctorateAdmissionFactory(
+            doctorate__management_entity=cls.commission,
+            supervision_group=cls.promoter.actor_ptr.process,
+        )
         # Users
         cls.candidate = cls.admission.candidate
         cls.other_candidate_user = CandidateFactory(person__first_name="Jim").person.user
@@ -78,14 +82,6 @@ class SupervisionApiTestCase(APITestCase):
     # Get
     def test_supervision_get_using_api_candidate(self):
         self.client.force_authenticate(user=self.candidate.user)
-
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.json(), {'signatures_promoteurs': [], 'signatures_membres_CA': []})
-
-        promoter = PromoterFactory(actor_ptr__person__first_name="Joe")
-        self.admission.supervision_group = promoter.actor_ptr.process
-        self.admission.save()
 
         response = self.client.get(self.url, format="json")
         promoteurs = response.json()['signatures_promoteurs']
@@ -114,46 +110,57 @@ class SupervisionApiTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_supervision_get_using_api_promoter(self):
-        # Current user
-        promoter = PromoterFactory()
-
         # Other user
         other_promoter = PromoterFactory()
-        self.admission.supervision_group = other_promoter.actor_ptr.process
-        self.admission.save()
 
         # The current user is not yet a supervisor of the current admission
-        self.client.force_authenticate(user=promoter.person.user)
+        self.client.force_authenticate(user=other_promoter.person.user)
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
         # The current user is now a supervisor of the current admission
-        self.admission.supervision_group = promoter.actor_ptr.process
-        self.admission.save()
+        self.client.force_authenticate(user=self.promoter.person.user)
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_supervision_get_using_api_committee_member(self):
         # Current user
-        member = CaMemberFactory()
+        member = CaMemberFactory(process=self.promoter.actor_ptr.process)
 
         # Other user
         other_member = CaMemberFactory()
-        self.admission.supervision_group = other_member.actor_ptr.process
-        self.admission.save()
 
         # The current user is not yet a supervisor of the admission
-        self.client.force_authenticate(user=member.person.user)
+        self.client.force_authenticate(user=other_member.person.user)
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
         # The current user is now a supervisor of the admission
-        self.admission.supervision_group = member.actor_ptr.process
-        self.admission.save()
+        self.client.force_authenticate(user=member.person.user)
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     # Add member
+    def test_supervision_ajouter_membre_process_inexistant(self):
+        admission = DoctorateAdmissionFactory(
+            doctorate__management_entity=self.commission,
+            supervision_group=None,
+        )
+        self.client.force_authenticate(user=admission.candidate.user)
+        self.assertIsNone(admission.supervision_group)
+        url = resolve_url("supervision", uuid=admission.uuid)
+        response = self.client.put(url, data={
+            'member': PersonFactory(first_name="John").global_id,
+            'type': ActorType.CA_MEMBER.name,
+        }, format="json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        response = self.client.get(url, format="json")
+        promoteurs = response.json()['signatures_membres_CA']
+        self.assertEqual(promoteurs[0]['membre_CA']['prenom'], 'John')
+        admission.refresh_from_db()
+        self.assertIsNotNone(admission.supervision_group)
+
     def test_supervision_ajouter_membre_ca(self):
         self.client.force_authenticate(user=self.candidate.user)
 
@@ -188,7 +195,7 @@ class SupervisionApiTestCase(APITestCase):
 
         response = self.client.get(self.url, format="json")
         promoteurs = response.json()['signatures_promoteurs']
-        self.assertEqual(len(promoteurs), 1)
+        self.assertEqual(len(promoteurs), 2)
         self.assertEqual(promoteurs[0]['promoteur']['prenom'], 'Joe')
 
     def test_supervision_ajouter_promoteur_inexistant(self):
@@ -234,16 +241,11 @@ class SupervisionApiTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_supervision_ajouter_membre_promoter(self):
-        # Current user
-        promoter = PromoterFactory()
-
         # Other user
         other_promoter = PromoterFactory()
-        self.admission.supervision_group = other_promoter.actor_ptr.process
-        self.admission.save()
 
         # The current user is not yet a supervisor of the current admission
-        self.client.force_authenticate(user=promoter.person.user)
+        self.client.force_authenticate(user=other_promoter.person.user)
         response = self.client.put(self.url, data={
             'member': TutorFactory(person__first_name="Joe").person.global_id,
             'type': ActorType.PROMOTER.name,
@@ -251,8 +253,7 @@ class SupervisionApiTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
         # The current user is now a supervisor of the current admission
-        self.admission.supervision_group = promoter.actor_ptr.process
-        self.admission.save()
+        self.client.force_authenticate(user=self.promoter.person.user)
         response = self.client.put(self.url, data={
             'member': TutorFactory(person__first_name="Joe").person.global_id,
             'type': ActorType.PROMOTER.name,
@@ -261,15 +262,13 @@ class SupervisionApiTestCase(APITestCase):
 
     def test_supervision_ajouter_membre_committee_member(self):
         # Current user
-        member = CaMemberFactory()
+        member = CaMemberFactory(process=self.promoter.actor_ptr.process)
 
         # Other user
         other_member = CaMemberFactory()
-        self.admission.supervision_group = other_member.actor_ptr.process
-        self.admission.save()
 
         # The current user is not yet a supervisor of the admission
-        self.client.force_authenticate(user=member.person.user)
+        self.client.force_authenticate(user=other_member.person.user)
         response = self.client.put(self.url, data={
             'member': PersonFactory(first_name="Joe").global_id,
             'type': ActorType.CA_MEMBER.name,
@@ -277,8 +276,7 @@ class SupervisionApiTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
         # The current user is now a supervisor of the admission
-        self.admission.supervision_group = member.actor_ptr.process
-        self.admission.save()
+        self.client.force_authenticate(user=member.person.user)
         response = self.client.put(self.url, data={
             'member': PersonFactory(first_name="Joe").global_id,
             'type': ActorType.CA_MEMBER.name,
@@ -289,9 +287,7 @@ class SupervisionApiTestCase(APITestCase):
     def test_supervision_supprimer_promoteur_using_api(self):
         self.client.force_authenticate(user=self.candidate.user)
 
-        promoter = PromoterFactory()
-        self.admission.supervision_group = promoter.actor_ptr.process
-        self.admission.save()
+        promoter = PromoterFactory(process=self.promoter.actor_ptr.process)
 
         response = self.client.post(self.url, data={
             'member': promoter.person.global_id,
@@ -302,9 +298,7 @@ class SupervisionApiTestCase(APITestCase):
     def test_supervision_supprimer_membre_ca_using_api(self):
         self.client.force_authenticate(user=self.candidate.user)
 
-        member = CaMemberFactory()
-        self.admission.supervision_group = member.actor_ptr.process
-        self.admission.save()
+        member = CaMemberFactory(process=self.promoter.actor_ptr.process)
 
         response = self.client.post(self.url, data={
             'member': member.person.global_id,
@@ -315,25 +309,19 @@ class SupervisionApiTestCase(APITestCase):
     def test_supervision_supprimer_membre_no_role(self):
         self.client.force_authenticate(user=self.no_role_user)
     
-        promoter = PromoterFactory()
-        self.admission.supervision_group = promoter.actor_ptr.process
-        self.admission.save()
+        promoter = PromoterFactory(process=self.promoter.actor_ptr.process)
 
         response = self.client.post(self.url, data={
-            'member': promoter.person.global_id,
+            'member': self.promoter.person.global_id,
             'type': ActorType.PROMOTER.name,
         }, format="json")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_supervision_supprimer_membre_other_candidate(self):
         self.client.force_authenticate(user=self.other_candidate_user)
-    
-        promoter = PromoterFactory()
-        self.admission.supervision_group = promoter.actor_ptr.process
-        self.admission.save()
 
         response = self.client.post(self.url, data={
-            'member': promoter.person.global_id,
+            'member': self.promoter.person.global_id,
             'type': ActorType.PROMOTER.name,
         }, format="json")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
@@ -341,9 +329,7 @@ class SupervisionApiTestCase(APITestCase):
     def test_supervision_supprimer_membre_cdd_manager(self):
         self.client.force_authenticate(user=self.cdd_manager_user)
     
-        promoter = PromoterFactory()
-        self.admission.supervision_group = promoter.actor_ptr.process
-        self.admission.save()
+        promoter = PromoterFactory(process=self.promoter.actor_ptr.process)
 
         response = self.client.post(self.url, data={
             'member': promoter.person.global_id,
@@ -354,53 +340,41 @@ class SupervisionApiTestCase(APITestCase):
     def test_supervision_supprimer_membre_other_cdd_manager(self):
         self.client.force_authenticate(user=self.other_cdd_manager_user)
     
-        promoter = PromoterFactory()
-        self.admission.supervision_group = promoter.actor_ptr.process
-        self.admission.save()
-
         response = self.client.post(self.url, data={
-            'member': promoter.person.global_id,
+            'member': self.promoter.person.global_id,
             'type': ActorType.PROMOTER.name,
         }, format="json")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_supervision_supprimer_membre_promoter(self):
-        # Current user
-        promoter = PromoterFactory()
-
         # Other user
         other_promoter = PromoterFactory()
-        self.admission.supervision_group = other_promoter.actor_ptr.process
-        self.admission.save()
 
         # The current user is not yet a supervisor of the admission
-        self.client.force_authenticate(user=promoter.person.user)
+        self.client.force_authenticate(user=other_promoter.person.user)
         response = self.client.post(self.url, data={
-            'member': promoter.person.global_id,
+            'member': self.promoter.person.global_id,
             'type': ActorType.PROMOTER.name,
         }, format="json")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
         # The current user is now a supervisor of the admission
-        self.admission.supervision_group = promoter.actor_ptr.process
-        self.admission.save()
+        self.client.force_authenticate(user=self.promoter.person.user)
         response = self.client.post(self.url, data={
-            'member': promoter.person.global_id,
+            'member': self.promoter.person.global_id,
             'type': ActorType.PROMOTER.name,
         }, format="json")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_supervision_supprimer_membre_committee_member(self):
         # Current user
-        member = CaMemberFactory()
+        member = CaMemberFactory(process=self.promoter.actor_ptr.process)
 
         # Other user
         other_member = CaMemberFactory()
-        self.admission.supervision_group = other_member.actor_ptr.process
-        self.admission.save()
 
         # The current user is not yet a supervisor of the admission
-        self.client.force_authenticate(user=member.person.user)
+        self.client.force_authenticate(user=other_member.person.user)
         response = self.client.put(self.url, data={
             'member': member.person.global_id,
             'type': ActorType.CA_MEMBER.name,
@@ -408,8 +382,7 @@ class SupervisionApiTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
         # The current user is now a supervisor of the admission
-        self.admission.supervision_group = member.actor_ptr.process
-        self.admission.save()
+        self.client.force_authenticate(user=member.person.user)
         response = self.client.put(self.url, data={
             'member': member.person.global_id,
             'type': ActorType.CA_MEMBER.name,

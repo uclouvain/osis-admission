@@ -64,7 +64,7 @@ class LanguagesKnowledgeSchema(PersonRelatedSchema):
         return super().get_request_body(path, method)
 
 
-class LanguagesKnowledgeViewSet(APIPermissionRequiredMixin, PersonRelatedMixin, mixins.ListModelMixin,
+class LanguagesKnowledgeViewSet(PersonRelatedMixin, APIPermissionRequiredMixin, mixins.ListModelMixin,
                                 mixins.CreateModelMixin, GenericAPIView):
     name = "languages-knowledge"
     pagination_class = None

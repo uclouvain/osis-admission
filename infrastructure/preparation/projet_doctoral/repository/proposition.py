@@ -30,14 +30,12 @@ from django.db import connection
 from admission.auth.roles.candidate import Candidate
 from admission.contrib.models import DoctorateAdmission
 from admission.contrib.models.doctorate import REFERENCE_SEQ_NAME
-from admission.ddd.preparation.projet_doctoral.domain.model._institut import InstitutIdentity
-from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import PropositionNonTrouveeException
-from base.models.education_group_year import EducationGroupYear
-from base.models.entity_version import EntityVersion
-from base.models.person import Person
 from admission.ddd.preparation.projet_doctoral.builder.proposition_identity_builder import \
     PropositionIdentityBuilder
-from admission.ddd.preparation.projet_doctoral.domain.model._detail_projet import DetailProjet
+from admission.ddd.preparation.projet_doctoral.domain.model._detail_projet import (
+    ChoixLangueRedactionThese,
+    DetailProjet,
+)
 from admission.ddd.preparation.projet_doctoral.domain.model._enums import (
     ChoixCommissionProximiteCDEouCLSM,
     ChoixCommissionProximiteCDSS,
@@ -49,17 +47,22 @@ from admission.ddd.preparation.projet_doctoral.domain.model._experience_preceden
     ExperiencePrecedenteRecherche,
 )
 from admission.ddd.preparation.projet_doctoral.domain.model._financement import ChoixTypeFinancement, Financement
+from admission.ddd.preparation.projet_doctoral.domain.model._institut import InstitutIdentity
 from admission.ddd.preparation.projet_doctoral.domain.model.doctorat import DoctoratIdentity
 from admission.ddd.preparation.projet_doctoral.domain.model.proposition import (
     Proposition,
     PropositionIdentity,
 )
+from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import PropositionNonTrouveeException
 from admission.ddd.preparation.projet_doctoral.repository.i_proposition import IPropositionRepository
+from base.models.education_group_year import EducationGroupYear
+from base.models.entity_version import EntityVersion
+from base.models.person import Person
 from osis_common.ddd.interface import ApplicationService
 
 
 def _instantiate_admission(admission: DoctorateAdmission) -> Proposition:
-    commission_proximite = ''
+    commission_proximite = None
     if admission.proximity_commission in ChoixCommissionProximiteCDEouCLSM.get_names():
         commission_proximite = ChoixCommissionProximiteCDEouCLSM[admission.proximity_commission]
     elif admission.proximity_commission in ChoixCommissionProximiteCDSS.get_names():
@@ -75,7 +78,7 @@ def _instantiate_admission(admission: DoctorateAdmission) -> Proposition:
             titre=admission.project_title,
             resume=admission.project_abstract,
             documents=admission.project_document,
-            langue_redaction_these=admission.thesis_language,
+            langue_redaction_these=ChoixLangueRedactionThese[admission.thesis_language],
             institut_these=InstitutIdentity(admission.thesis_institute.uuid) if admission.thesis_institute_id else None,
             lieu_these=admission.thesis_location,
             autre_lieu_these=admission.other_thesis_location,
@@ -87,7 +90,7 @@ def _instantiate_admission(admission: DoctorateAdmission) -> Proposition:
         justification=admission.comment,
         statut=ChoixStatutProposition[admission.status],
         financement=Financement(
-            type=ChoixTypeFinancement[admission.financing_type] if admission.financing_type else '',
+            type=ChoixTypeFinancement[admission.financing_type] if admission.financing_type else None,
             type_contrat_travail=admission.financing_work_contract,
             eft=admission.financing_eft,
             bourse_recherche=admission.scholarship_grant,
@@ -104,8 +107,11 @@ def _instantiate_admission(admission: DoctorateAdmission) -> Proposition:
     )
 
 
-def load_admissions(matricule) -> List['Proposition']:
-    qs = DoctorateAdmission.objects.filter(candidate__global_id=matricule)
+def load_admissions(matricule: Optional[str] = None, ids: Optional[List[str]] = None) -> List['Proposition']:
+    if matricule is not None:
+        qs = DoctorateAdmission.objects.filter(candidate__global_id=matricule)
+    elif ids is not None:  # pragma: no branch
+        qs = DoctorateAdmission.objects.filter(uuid__in=ids)
 
     return [_instantiate_admission(a) for a in qs]
 
@@ -122,8 +128,10 @@ class PropositionRepository(IPropositionRepository):
     def search(cls, entity_ids: Optional[List['PropositionIdentity']] = None, matricule_candidat: str = None,
                **kwargs) -> List['Proposition']:
         if matricule_candidat is not None:
-            return load_admissions(matricule_candidat)
-        return []
+            return load_admissions(matricule=matricule_candidat)
+        if entity_ids is not None:
+            return load_admissions(ids=[e.uuid for e in entity_ids])
+        raise NotImplementedError
 
     @classmethod
     def delete(cls, entity_id: 'PropositionIdentity', **kwargs: ApplicationService) -> None:
@@ -150,9 +158,9 @@ class PropositionRepository(IPropositionRepository):
                 'status': entity.statut.name,
                 'comment': entity.justification,
                 'candidate': candidate,
-                'proximity_commission': entity.commission_proximite and entity.commission_proximite.name,
+                'proximity_commission': entity.commission_proximite and entity.commission_proximite.name or '',
                 'doctorate': doctorate,
-                'financing_type': entity.financement.type and entity.financement.type.name,
+                'financing_type': entity.financement.type and entity.financement.type.name or '',
                 'financing_work_contract': entity.financement.type_contrat_travail,
                 'financing_eft': entity.financement.eft,
                 'scholarship_grant': entity.financement.bourse_recherche,
@@ -160,7 +168,7 @@ class PropositionRepository(IPropositionRepository):
                 'dedicated_time': entity.financement.temps_consacre,
                 'project_title': entity.projet.titre,
                 'project_abstract': entity.projet.resume,
-                'thesis_language': entity.projet.langue_redaction_these,
+                'thesis_language': entity.projet.langue_redaction_these.name,
                 'thesis_institute': EntityVersion.objects.get(
                     uuid=entity.projet.institut_these.uuid,
                 ) if entity.projet.institut_these else None,

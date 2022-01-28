@@ -23,11 +23,14 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import List
+from typing import List, Optional
 
 from admission.ddd.preparation.projet_doctoral.builder.proposition_identity_builder import PropositionIdentityBuilder
 from admission.ddd.preparation.projet_doctoral.domain.model._cotutelle import pas_de_cotutelle
-from admission.ddd.preparation.projet_doctoral.domain.model.groupe_de_supervision import GroupeDeSupervision
+from admission.ddd.preparation.projet_doctoral.domain.model.groupe_de_supervision import (
+    GroupeDeSupervision,
+    GroupeDeSupervisionIdentity,
+)
 from admission.ddd.preparation.projet_doctoral.domain.model.proposition import PropositionIdentity
 from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import GroupeDeSupervisionNonTrouveException
 from admission.ddd.preparation.projet_doctoral.dtos import CotutelleDTO
@@ -66,6 +69,21 @@ class GroupeDeSupervisionInMemoryRepository(InMemoryGenericRepository, IGroupeDe
             GroupeDeSupervisionSC3DPSansPromoteurFactory(),
             GroupeDeSupervisionSC3DPSansMembresCAFactory(),
         ]
+
+    @classmethod
+    def search(
+            cls,
+            entity_ids: Optional[List['GroupeDeSupervisionIdentity']] = None,
+            matricule_membre: str = None,
+            **kwargs
+    ) -> List['GroupeDeSupervision']:
+        if matricule_membre:
+            return [
+                e for e in cls.entities
+                if any(s.promoteur_id for s in e.signatures_promoteurs if s.promoteur_id.matricule == matricule_membre)
+                or any(s.membre_CA_id for s in e.signatures_membres_CA if s.membre_CA_id.matricule == matricule_membre)
+            ]
+        raise NotImplementedError
 
     @classmethod
     def get_by_proposition_id(cls, proposition_id: 'PropositionIdentity') -> 'GroupeDeSupervision':
