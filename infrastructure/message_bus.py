@@ -120,6 +120,7 @@ class MessageBusCommands(AbstractMessageBusCommands):
             get_groupe_de_supervision,
             groupe_supervision_repository=GroupeDeSupervisionRepository(),
             personne_connue_ucl_translator=PersonneConnueUclTranslator(),
+            promoteur_translator=PromoteurTranslator(),
         ),
         SupprimerPromoteurCommand: partial(
             supprimer_promoteur,
