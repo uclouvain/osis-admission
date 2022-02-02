@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,19 +23,26 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import List
 
-import attr
+from admission.ddd.preparation.projet_doctoral.domain.model.groupe_de_supervision import GroupeDeSupervision
+from admission.ddd.preparation.projet_doctoral.domain.service.i_promoteur import IPromoteurTranslator
+from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import (
+    PromoteurManquantException,
+)
+from osis_common.ddd import interface
 
-from admission.ddd.preparation.projet_doctoral.domain.model._signature_promoteur import SignaturePromoteur
-from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import PromoteurManquantException
-from base.ddd.utils.business_validator import BusinessValidator
 
-
-@attr.s(frozen=True, slots=True)
-class ShouldGroupeDeSupervisionAvoirAuMoinsUnPromoteur(BusinessValidator):
-    signatures_promoteurs = attr.ib(type=List[SignaturePromoteur])  # type: List[SignaturePromoteur]
-
-    def validate(self, *args, **kwargs):
-        if len(self.signatures_promoteurs) <= 0:
+class GroupeDeSupervisionPossedeUnPromoteurMinimum(interface.DomainService):
+    @classmethod
+    def verifier(
+        cls,
+        groupe_de_supervision: 'GroupeDeSupervision',
+        promoteur_translator: 'IPromoteurTranslator',
+    ) -> None:
+        promoteurs_non_externes = [
+            signature_promoteur
+            for signature_promoteur in groupe_de_supervision.signatures_promoteurs
+            if not promoteur_translator.est_externe(signature_promoteur.promoteur_id)
+        ]
+        if not len(promoteurs_non_externes):
             raise PromoteurManquantException
