@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,29 +23,18 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
 import attr
 
-from admission.ddd.preparation.projet_doctoral.domain.model._detail_projet import DetailProjet
-from admission.ddd.preparation.projet_doctoral.domain.model._enums import ChoixTypeAdmission
-from base.ddd.utils.business_validator import BusinessValidator
-from admission.ddd.preparation.projet_doctoral.business_types import *
+from admission.ddd.preparation.projet_doctoral.domain.model._financement import Financement, financement_non_rempli
 from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import DetailProjetNonCompleteException
+from base.ddd.utils.business_validator import BusinessValidator
 
 
 @attr.s(frozen=True, slots=True)
-class ShouldDetailProjetEtreComplete(BusinessValidator):
-    type_admission = attr.ib(type=ChoixTypeAdmission)
-    projet = attr.ib(type="DetailProjet")  # type: DetailProjet
+class ShouldFinancementEtreComplete(BusinessValidator):
+    financement = attr.ib(type=Financement)
 
     def validate(self, *args, **kwargs):
-        champs_obligatoires = [
-            "titre",
-            "resume",
-            "langue_redaction_these",
-            "documents",
-        ]
-        if self.type_admission == ChoixTypeAdmission.ADMISSION:
-            champs_obligatoires.append("proposition_programme_doctoral")
-
-        if not all([getattr(self.projet, champ_obligatoire) for champ_obligatoire in champs_obligatoires]):
+        if self.financement == financement_non_rempli:
             raise DetailProjetNonCompleteException

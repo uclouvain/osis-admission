@@ -38,6 +38,7 @@ from admission.ddd.preparation.projet_doctoral.domain.model._enums import (
     ChoixCommissionProximiteCDSS,
     ChoixStatutProposition,
 )
+from admission.ddd.preparation.projet_doctoral.domain.model._financement import ChoixTypeFinancement
 from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import (
     DoctoratNonTrouveException,
     MembreCAManquantException,
@@ -580,6 +581,7 @@ class DoctorateAdmissionVerifyTestCase(APITestCase):
             project_title="title",
             project_abstract="abstract",
             thesis_language=ChoixLangueRedactionThese.FRENCH.name,
+            financing_type=ChoixTypeFinancement.SELF_FUNDING.name,
             project_document=[WriteTokenFactory().token],
             gantt_graph=[WriteTokenFactory().token],
             program_proposition=[WriteTokenFactory().token],

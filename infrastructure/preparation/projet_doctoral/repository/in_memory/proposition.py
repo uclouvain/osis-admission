@@ -31,16 +31,17 @@ from admission.ddd.preparation.projet_doctoral.repository.i_proposition import I
 from admission.ddd.preparation.projet_doctoral.test.factory.proposition import (
     PropositionAdmissionECGE3DPMinimaleFactory,
     PropositionAdmissionESP3DPMinimaleFactory,
+    PropositionAdmissionSC3DPAvecMembresEtCotutelleFactory,
     PropositionAdmissionSC3DPAvecMembresFactory,
     PropositionAdmissionSC3DPAvecMembresInvitesFactory,
+    PropositionAdmissionSC3DPMinimaleCotutelleAvecPromoteurExterneFactory,
+    PropositionAdmissionSC3DPMinimaleCotutelleSansPromoteurExterneFactory,
     PropositionAdmissionSC3DPMinimaleFactory,
     PropositionAdmissionSC3DPMinimaleSansCotutelleFactory,
     PropositionAdmissionSC3DPMinimaleSansDetailProjetFactory,
-    PropositionAdmissionSC3DPAvecMembresEtCotutelleFactory,
-    PropositionAdmissionSC3DPMinimaleCotutelleSansPromoteurExterneFactory,
-    PropositionAdmissionSC3DPMinimaleCotutelleAvecPromoteurExterneFactory,
-    PropositionAdmissionSC3DPSansPromoteurFactory,
+    PropositionAdmissionSC3DPMinimaleSansFinancementFactory,
     PropositionAdmissionSC3DPSansMembreCAFactory,
+    PropositionAdmissionSC3DPSansPromoteurFactory,
     PropositionPreAdmissionSC3DPMinimaleFactory,
 )
 from base.ddd.utils.in_memory_repository import InMemoryGenericRepository
@@ -66,6 +67,7 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
             PropositionAdmissionECGE3DPMinimaleFactory(),
             PropositionPreAdmissionSC3DPMinimaleFactory(),
             PropositionAdmissionSC3DPMinimaleSansDetailProjetFactory(),
+            PropositionAdmissionSC3DPMinimaleSansFinancementFactory(),
             PropositionAdmissionSC3DPMinimaleSansCotutelleFactory(),
             PropositionAdmissionSC3DPMinimaleCotutelleSansPromoteurExterneFactory(),
             PropositionAdmissionSC3DPMinimaleCotutelleAvecPromoteurExterneFactory(),
@@ -83,10 +85,10 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
 
     @classmethod
     def search(
-            cls,
-            entity_ids: Optional[List['PropositionIdentity']] = None,
-            matricule_candidat: str = None,
-            **kwargs
+        cls,
+        entity_ids: Optional[List['PropositionIdentity']] = None,
+        matricule_candidat: str = None,
+        **kwargs,
     ) -> List['Proposition']:
         returned = cls.entities
         if matricule_candidat:

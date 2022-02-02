@@ -53,7 +53,7 @@ from admission.ddd.preparation.projet_doctoral.domain.model._institut import Ins
 from admission.ddd.preparation.projet_doctoral.domain.model.doctorat import DoctoratIdentity
 from admission.ddd.preparation.projet_doctoral.domain.validator.validator_by_business_action import (
     CompletionPropositionValidatorList,
-    DetailsProjetValidatorList,
+    ProjetDoctoralValidatorList,
     SoumettrePropositionValidatorList,
 )
 from osis_common.ddd import interface
@@ -255,7 +255,7 @@ class Proposition(interface.RootEntity):
 
     def verifier_projet_doctoral(self):
         """Vérification de la validité du projet doctoral avant demande des signatures"""
-        DetailsProjetValidatorList(self.type_admission, self.projet).validate()
+        ProjetDoctoralValidatorList(self.type_admission, self.projet, self.financement).validate()
 
     def finaliser(self):
         self.statut = ChoixStatutProposition.SUBMITTED

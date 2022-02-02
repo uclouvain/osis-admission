@@ -30,6 +30,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from admission.ddd.preparation.projet_doctoral.domain.model._detail_projet import ChoixLangueRedactionThese
+from admission.ddd.preparation.projet_doctoral.domain.model._financement import ChoixTypeFinancement
 from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import (
     CotutelleDoitAvoirAuMoinsUnPromoteurExterneException,
     MembreCAManquantException,
@@ -47,6 +48,7 @@ class RequestSignaturesApiTestCase(APITestCase):
             cotutelle=False,
             project_title="title",
             project_abstract="abstract",
+            financing_type=ChoixTypeFinancement.SELF_FUNDING.name,
             thesis_language=ChoixLangueRedactionThese.FRENCH.name,
             project_document=[WriteTokenFactory().token],
             gantt_graph=[WriteTokenFactory().token],
@@ -99,6 +101,7 @@ class RequestSignaturesApiTestCase(APITestCase):
             cotutelle_institution="Somewhere",
             cotutelle_opening_request=[WriteTokenFactory().token],
             cotutelle_convention=[WriteTokenFactory().token],
+            financing_type=ChoixTypeFinancement.SELF_FUNDING.name,
             project_title="title",
             project_abstract="abstract",
             thesis_language=ChoixLangueRedactionThese.FRENCH.name,
@@ -129,6 +132,7 @@ class RequestSignaturesApiTestCase(APITestCase):
             cotutelle_institution="Somewhere",
             cotutelle_opening_request=[WriteTokenFactory().token],
             cotutelle_convention=[WriteTokenFactory().token],
+            financing_type=ChoixTypeFinancement.SELF_FUNDING.name,
             project_title="title",
             project_abstract="abstract",
             thesis_language=ChoixLangueRedactionThese.FRENCH.name,
