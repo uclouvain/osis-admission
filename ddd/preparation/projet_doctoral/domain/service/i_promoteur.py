@@ -28,7 +28,6 @@ from typing import List
 
 from admission.ddd.preparation.projet_doctoral.domain.model._promoteur import PromoteurIdentity
 from admission.ddd.preparation.projet_doctoral.dtos import PromoteurDTO
-from ddd.logic.shared_kernel.personne_connue_ucl.domain.service.personne_connue_ucl import IPersonneConnueUclTranslator
 from osis_common.ddd import interface
 
 
@@ -40,16 +39,12 @@ class IPromoteurTranslator(interface.DomainService):
 
     @classmethod
     @abstractmethod
-    def search(cls, matricules: List[str]) -> List['PromoteurIdentity']:
+    def get_dto(cls, matricule: str) -> 'PromoteurDTO':
         raise NotImplementedError
 
     @classmethod
     @abstractmethod
-    def search_dto(
-            cls,
-            terme_de_recherche: str,
-            personne_connue_ucl_translator: 'IPersonneConnueUclTranslator',
-    ) -> List['PromoteurDTO']:
+    def search(cls, matricules: List[str]) -> List['PromoteurIdentity']:
         raise NotImplementedError
 
     @classmethod

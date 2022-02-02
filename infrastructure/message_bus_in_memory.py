@@ -118,6 +118,7 @@ class MessageBusInMemoryCommands(AbstractMessageBusCommands):
             get_groupe_de_supervision,
             groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
             personne_connue_ucl_translator=PersonneConnueUclInMemoryTranslator(),
+            promoteur_translator=PromoteurInMemoryTranslator(),
         ),
         SupprimerPromoteurCommand: partial(
             supprimer_promoteur,

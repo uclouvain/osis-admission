@@ -25,16 +25,14 @@
 ##############################################################################
 from admission.ddd.preparation.projet_doctoral.builder.proposition_identity_builder import PropositionIdentityBuilder
 from admission.ddd.preparation.projet_doctoral.domain.model._signature_membre_CA import SignatureMembreCA
-from admission.ddd.preparation.projet_doctoral.domain.model._signature_promoteur import SignaturePromoteur
+from admission.ddd.preparation.projet_doctoral.domain.service.i_promoteur import IPromoteurTranslator
 from admission.ddd.preparation.projet_doctoral.dtos import (
     DetailSignatureMembreCADTO,
     DetailSignaturePromoteurDTO,
     GroupeDeSupervisionDTO,
     MembreCADTO,
-    PromoteurDTO,
 )
-from admission.ddd.preparation.projet_doctoral.repository.i_groupe_de_supervision import \
-    IGroupeDeSupervisionRepository
+from admission.ddd.preparation.projet_doctoral.repository.i_groupe_de_supervision import IGroupeDeSupervisionRepository
 from ddd.logic.shared_kernel.personne_connue_ucl.domain.service.personne_connue_ucl import IPersonneConnueUclTranslator
 from osis_common.ddd import interface
 
@@ -42,16 +40,17 @@ from osis_common.ddd import interface
 class GroupeDeSupervisionDto(interface.DomainService):
     @classmethod
     def get(
-            cls,
-            uuid_proposition: str,
-            repository: 'IGroupeDeSupervisionRepository',
-            personne_connue_ucl_translator: 'IPersonneConnueUclTranslator',
+        cls,
+        uuid_proposition: str,
+        repository: 'IGroupeDeSupervisionRepository',
+        personne_connue_ucl_translator: 'IPersonneConnueUclTranslator',
+        promoteur_translator: 'IPromoteurTranslator',
     ) -> 'GroupeDeSupervisionDTO':
         groupe = repository.get_by_proposition_id(PropositionIdentityBuilder.build_from_uuid(uuid_proposition))
         return GroupeDeSupervisionDTO(
             signatures_promoteurs=[
                 DetailSignaturePromoteurDTO(
-                    promoteur=cls._build_promoteur(signature, personne_connue_ucl_translator),
+                    promoteur=promoteur_translator.get_dto(signature.promoteur_id.matricule),
                     status=signature.etat.name,
                     commentaire_externe=signature.commentaire_externe,
                 )
@@ -68,19 +67,15 @@ class GroupeDeSupervisionDto(interface.DomainService):
         )
 
     @classmethod
-    def _build_promoteur(cls, signature: SignaturePromoteur, personne_connue_ucl_translator):
-        personne = personne_connue_ucl_translator.get(signature.promoteur_id.matricule)
-        return PromoteurDTO(
-            matricule=signature.promoteur_id.matricule,
-            nom=personne.nom,
-            prenom=personne.prenom
-        )
-
-    @classmethod
-    def _build_membre_CA(cls, signature: SignatureMembreCA, personne_connue_ucl_translator):
+    def _build_membre_CA(
+        cls,
+        signature: SignatureMembreCA,
+        personne_connue_ucl_translator: 'IPersonneConnueUclTranslator',
+    ):
         personne = personne_connue_ucl_translator.get(signature.membre_CA_id.matricule)
         return MembreCADTO(
             matricule=signature.membre_CA_id.matricule,
             nom=personne.nom,
-            prenom=personne.prenom
+            prenom=personne.prenom,
+            email=personne.email,
         )
