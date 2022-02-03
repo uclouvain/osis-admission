@@ -58,8 +58,6 @@ from admission.ddd.preparation.projet_doctoral.domain.validator._should_detail_p
 )
 from admission.ddd.preparation.projet_doctoral.domain.validator.\
     _should_groupe_de_supervision_avoir_au_moins_un_membre_CA import ShouldGroupeDeSupervisionAvoirAuMoinsUnMembreCA
-from admission.ddd.preparation.projet_doctoral.domain.validator.\
-    _should_groupe_de_supervision_avoir_au_moins_un_promoteur import ShouldGroupeDeSupervisionAvoirAuMoinsUnPromoteur
 from base.ddd.utils.business_validator import TwoStepsMultipleBusinessExceptionListValidator, BusinessValidator
 
 
@@ -242,6 +240,5 @@ class SignatairesValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
 
     def get_invariants_validators(self) -> List[BusinessValidator]:
         return [
-            ShouldGroupeDeSupervisionAvoirAuMoinsUnPromoteur(self.groupe_de_supervision.signatures_promoteurs),
             ShouldGroupeDeSupervisionAvoirAuMoinsUnMembreCA(self.groupe_de_supervision.signatures_membres_CA),
         ]

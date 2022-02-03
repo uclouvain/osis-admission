@@ -46,7 +46,7 @@ from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions impor
 from admission.tests.factories import DoctorateAdmissionFactory, WriteTokenFactory
 from admission.tests.factories.doctorate import DoctorateFactory
 from admission.tests.factories.roles import CandidateFactory, CddManagerFactory
-from admission.tests.factories.supervision import CaMemberFactory, PromoterFactory
+from admission.tests.factories.supervision import CaMemberFactory, PromoterFactory, _ProcessFactory
 from base.models.enums.entity_type import EntityType
 from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.person import PersonFactory
@@ -575,6 +575,7 @@ class DoctorateAdmissionVerifyTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
         cls.admission = DoctorateAdmissionFactory(
+            supervision_group=_ProcessFactory(),
             cotutelle=False,
             project_title="title",
             project_abstract="abstract",
@@ -591,28 +592,24 @@ class DoctorateAdmissionVerifyTestCase(APITestCase):
 
     @mock.patch(
         'admission.infrastructure.preparation.projet_doctoral.domain.service.promoteur.PromoteurTranslator.est_externe',
-        return_value=True,
+        return_value=False,
     )
     def test_verify_proposition_using_api(self, mock_is_external):
         self.client.force_authenticate(user=self.candidate.user)
-        promoter = PromoterFactory()
-        CaMemberFactory(process=promoter.process)
-        self.admission.supervision_group = promoter.actor_ptr.process
-        self.admission.save()
+        PromoterFactory(process=self.admission.supervision_group)
+        CaMemberFactory(process=self.admission.supervision_group)
 
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     @mock.patch(
         'admission.infrastructure.preparation.projet_doctoral.domain.service.promoteur.PromoteurTranslator.est_externe',
-        return_value=True,
+        return_value=False,
     )
     def test_verify_proposition_using_api_without_ca_members_must_fail(self, mock_is_external):
         self.client.force_authenticate(user=self.candidate.user)
 
-        promoter = PromoterFactory()
-        self.admission.supervision_group = promoter.actor_ptr.process
-        self.admission.save()
+        PromoterFactory(process=self.admission.supervision_group)
 
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -621,9 +618,7 @@ class DoctorateAdmissionVerifyTestCase(APITestCase):
     def test_verify_proposition_using_api_without_promoter_must_fail(self):
         self.client.force_authenticate(user=self.candidate.user)
 
-        ca_member = CaMemberFactory()
-        self.admission.supervision_group = ca_member.actor_ptr.process
-        self.admission.save()
+        CaMemberFactory(process=self.admission.supervision_group)
 
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)

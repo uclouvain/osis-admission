@@ -72,7 +72,7 @@ class TestDemanderSignaturesService(SimpleTestCase):
         proposition = self.proposition_repository.get(proposition_id)  # type:Proposition
         self.assertEqual(proposition.statut, ChoixStatutProposition.SIGNING_IN_PROGRESS)
         self.assertTrue(proposition.est_verrouillee_pour_signature)
-        self.assertEqual(len(signatures), 1)
+        self.assertEqual(len(signatures), 2)
         self.assertEqual(len(groupe.signatures_membres_CA), 1)
         self.assertEqual(signatures[0].promoteur_id.matricule, 'promoteur-SC3DP-externe')
         self.assertEqual(signatures[0].etat, ChoixEtatSignature.INVITED)
@@ -111,9 +111,8 @@ class TestDemanderSignaturesService(SimpleTestCase):
 
     def test_should_pas_demander_si_groupe_de_supervision_a_pas_promoteur(self):
         cmd = attr.evolve(self.cmd, uuid_proposition='uuid-SC3DP-sans-promoteur')
-        with self.assertRaises(MultipleBusinessExceptions) as context:
+        with self.assertRaises(PromoteurManquantException):
             self.message_bus.invoke(cmd)
-        self.assertIsInstance(context.exception.exceptions.pop(), PromoteurManquantException)
 
     def test_should_pas_demander_si_groupe_de_supervision_a_pas_membre_CA(self):
         cmd = attr.evolve(self.cmd, uuid_proposition='uuid-SC3DP-sans-membre_CA')

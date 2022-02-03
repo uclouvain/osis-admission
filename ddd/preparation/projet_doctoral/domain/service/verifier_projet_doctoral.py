@@ -29,6 +29,9 @@ from admission.ddd.preparation.projet_doctoral.domain.model.groupe_de_supervisio
 from admission.ddd.preparation.projet_doctoral.domain.model.proposition import Proposition
 from admission.ddd.preparation.projet_doctoral.domain.service.i_promoteur import IPromoteurTranslator
 from admission.ddd.preparation.projet_doctoral.domain.service.verifier_cotutelle import CotutellePossedePromoteurExterne
+from admission.ddd.preparation.projet_doctoral.domain.service.verifier_promoteur import (
+    GroupeDeSupervisionPossedeUnPromoteurMinimum,
+)
 from base.ddd.utils.business_validator import execute_functions_and_aggregate_exceptions
 from osis_common.ddd import interface
 
@@ -36,14 +39,15 @@ from osis_common.ddd import interface
 class VerifierProjetDoctoral(interface.DomainService):
     @classmethod
     def verifier(
-            cls,
-            proposition_candidat: Proposition,
-            groupe_de_supervision: GroupeDeSupervision,
-            promoteur_translator: IPromoteurTranslator,
+        cls,
+        proposition_candidat: Proposition,
+        groupe_de_supervision: GroupeDeSupervision,
+        promoteur_translator: IPromoteurTranslator,
     ) -> None:
         execute_functions_and_aggregate_exceptions(
             groupe_de_supervision.verifier_cotutelle,
             partial(CotutellePossedePromoteurExterne.verifier, groupe_de_supervision, promoteur_translator),
+            partial(GroupeDeSupervisionPossedeUnPromoteurMinimum.verifier, groupe_de_supervision, promoteur_translator),
             proposition_candidat.verifier_projet_doctoral,
             groupe_de_supervision.verifier_signataires,
         )
