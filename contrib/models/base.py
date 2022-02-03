@@ -3,6 +3,7 @@ import uuid
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
+from osis_profile.models import Experience
 from .enums.admission_type import AdmissionType
 
 
@@ -32,6 +33,11 @@ class BaseAdmission(models.Model):
 
     created = models.DateTimeField(verbose_name=_('Created'), auto_now_add=True)
     modified = models.DateTimeField(verbose_name=_('Modified'), auto_now=True)
+
+    valuated_experiences = models.ManyToManyField(
+        Experience,
+        verbose_name=_('The experiences that have been valuated from this admission.'),
+    )
 
     class Meta:
         abstract = True

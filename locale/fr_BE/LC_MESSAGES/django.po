@@ -496,6 +496,9 @@ msgstr "Des invitations ont déjà été envoyées"
 msgid "Supervision group not found."
 msgstr "Groupe de supervision non trouvé."
 
+msgid "The experiences that have been valuated from this admission."
+msgstr "Les expériences qui ont été valorisées depuis cette admission."
+
 msgid "There can be no more CA members in the supervision group."
 msgstr ""
 "Il ne peut y avoir davantage de membres du CA dans le groupe de supervision."
@@ -512,6 +515,9 @@ msgstr "Langue de la thèse"
 
 msgid "Thesis location"
 msgstr "Lieu de la thèse"
+
+msgid "This experience cannot be deleted as it has already been valuated."
+msgstr "Cette expérience ne peut être supprimée, ayant déjà été évaluée."
 
 msgid "This experience cannot be updated as it has already been valuated."
 msgstr "Cette expérience ne peut être mise à jour, ayant déjà été évaluée."

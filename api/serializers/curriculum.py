@@ -32,8 +32,10 @@ from rest_framework.exceptions import ValidationError
 from base.api.serializers.academic_year import RelatedAcademicYearField
 from base.models.education_group_year import EducationGroupYear
 from base.models.organization import Organization
+from base.models.person import Person
 from osis_profile.models import Experience, CurriculumYear
 from reference.api.serializers.country import RelatedCountryField
+from reference.api.serializers.language import RelatedLanguageField
 from reference.models.language import Language
 from reference.models.country import Country
 
@@ -72,7 +74,6 @@ class CountrySerializer(serializers.ModelSerializer):
         model = Country
         fields = (
             'iso_code',
-            'uuid',
             'name',
         )
 
@@ -99,7 +100,6 @@ class LanguageSerializer(serializers.ModelSerializer):
         fields = (
             'code',
             'name',
-            'uuid',
         )
 
     @staticmethod
@@ -109,7 +109,6 @@ class LanguageSerializer(serializers.ModelSerializer):
 
 # Experience serializers
 class ExperienceSerializer(serializers.ModelSerializer):
-    valuated_from = serializers.UUIDField(source="valuated_from.uuid", read_only=True)
 
     class Meta:
         model = Experience
@@ -125,22 +124,19 @@ class ExperienceOutputSerializer(ExperienceSerializer):
     curriculum_year = CurriculumYearSerializer()
     country = CountrySerializer()
     program = EducationGroupYearSerializer(allow_null=True)
-    linguistic_regime = LanguageSerializer(allow_null=True,)
+    linguistic_regime = LanguageSerializer(allow_null=True)
     institute = OrganizationSerializer(allow_null=True)
+    is_valuated = serializers.SerializerMethodField()
+
+    @classmethod
+    def get_is_valuated(cls, experience):
+        return experience.doctorateadmission_set.exists()
 
 
-class ExperienceUpdatingSerializer(ExperienceSerializer):
-    country = RelatedCountryField()
-
-    def get_extra_kwargs(self):
-        extra_kwargs = super().get_extra_kwargs()
-        extra_kwargs["curriculum_year"]["read_only"] = True
-        return extra_kwargs
-
-
-class ExperienceCreationSerializer(ExperienceSerializer):
+class ExperienceInputSerializer(ExperienceSerializer):
     academic_year = RelatedAcademicYearField(required=False)
     country = RelatedCountryField()
+    linguistic_regime = RelatedLanguageField(required=False)
 
     def __init__(self, related_person=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -153,7 +149,7 @@ class ExperienceCreationSerializer(ExperienceSerializer):
 
         return super().validate(data)
 
-    def create(self, validated_data):
+    def _get_or_create_curriculum_year_from_academic_year(self, validated_data):
         if not validated_data.get('curriculum_year'):
             # Get (and eventually create) the curriculum year related to the specified academic_year
             validated_data['curriculum_year'] = CurriculumYear.objects.get_or_create(
@@ -161,4 +157,18 @@ class ExperienceCreationSerializer(ExperienceSerializer):
                 academic_year=validated_data.pop('academic_year'),
             )[0]
 
+    def create(self, validated_data):
+        self._get_or_create_curriculum_year_from_academic_year(validated_data=validated_data)
         return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        self._get_or_create_curriculum_year_from_academic_year(validated_data=validated_data)
+        return super().update(instance, validated_data)
+
+
+class CurriculumFileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Person
+        fields = [
+            'curriculum',
+        ]

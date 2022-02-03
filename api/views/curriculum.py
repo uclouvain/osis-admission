@@ -28,8 +28,10 @@ from typing import Optional
 
 from django.utils.translation import gettext as _
 from rest_framework import status
-from rest_framework.exceptions import ValidationError
-from rest_framework.generics import get_object_or_404
+from rest_framework.exceptions import PermissionDenied
+from rest_framework.fields import BooleanField
+from rest_framework.generics import get_object_or_404, GenericAPIView
+from rest_framework.mixins import RetrieveModelMixin, UpdateModelMixin
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -44,10 +46,18 @@ from osis_role.contrib.views import APIPermissionRequiredMixin
 class CurriculumExperienceSchema(ResponseSpecificSchema, PersonRelatedSchema):
     operation_id_base = '_curriculum_experience'
 
+    def map_field(self, field):
+        # Customize the schema for the SerializerMethodField fields
+        if field.field_name == 'is_valuated':
+            return {
+                'type': 'boolean',
+            }
+        return super().map_field(field)
+
     serializer_mapping = {
         'GET': serializers.ExperienceOutputSerializer,
-        'PUT': serializers.ExperienceUpdatingSerializer,
-        'POST': serializers.ExperienceCreationSerializer,
+        'PUT': (serializers.ExperienceInputSerializer, serializers.ExperienceOutputSerializer,),
+        'POST': (serializers.ExperienceInputSerializer, serializers.ExperienceOutputSerializer,),
         'DELETE': (),
     }
 
@@ -59,7 +69,8 @@ class CurriculumExperienceView(PersonRelatedMixin, APIPermissionRequiredMixin, A
 
     def get_queryset(self):
         """Return the list of experiences of the person."""
-        return Experience.objects.filter(curriculum_year__person=self.get_object())
+        return Experience.objects.filter(curriculum_year__person=self.get_object())\
+            .order_by('curriculum_year__academic__year')
 
     def get_experience(self) -> Optional[Experience]:
         """Get the current experience from the uuid."""
@@ -74,11 +85,12 @@ class CurriculumExperienceListAndCreateView(CurriculumExperienceView):
 
     def post(self, request, *args, **kwargs):
         """Add an experience to the person's CV."""
-        breakpoint()
-        serializer = serializers.ExperienceCreationSerializer(data=request.data, related_person=self.get_object())
+        serializer = serializers.ExperienceInputSerializer(data=request.data, related_person=self.get_object())
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        output_data = serializers.ExperienceOutputSerializer(serializer.instance).data
+        return Response(output_data, status=status.HTTP_201_CREATED)
 
 
 class CurriculumExperienceDetailUpdateAndDeleteView(CurriculumExperienceView):
@@ -91,27 +103,43 @@ class CurriculumExperienceDetailUpdateAndDeleteView(CurriculumExperienceView):
         """Update one of the experiences from the person's CV."""
         experience_to_update = self.get_experience()
 
-        if experience_to_update.is_valuated:
-            raise ValidationError(_('This experience cannot be updated as it has already been valuated.'))
+        if experience_to_update.doctorateadmission_set.exists():
+            raise PermissionDenied(_('This experience cannot be updated as it has already been valuated.'))
 
-        serializer = serializers.ExperienceUpdatingSerializer(instance=experience_to_update, data=request.data)
+        serializer = serializers.ExperienceInputSerializer(
+            instance=experience_to_update,
+            data=request.data,
+            related_person=self.get_object(),
+        )
+
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
-        return Response(serializer.data)
+        output_data = serializers.ExperienceOutputSerializer(serializer.instance).data
+        return Response(output_data)
 
     def delete(self, request, *args, **kwargs):
         """Remove one of the experiences from the person's CV."""
         experience_to_delete = self.get_experience()
 
-        if experience_to_delete.is_valuated:
-            raise ValidationError(_('This experience cannot be deleted as it has already been valuated.'))
+        if experience_to_delete.doctorateadmission_set.exists():
+            raise PermissionDenied(_('This experience cannot be deleted as it has already been valuated.'))
 
-        if experience_to_delete.curriculum_year.experiences.count() == 1:
-            # Remove the curriculum year as the experience to delete is its last experience
-            experience_to_delete.curriculum_year.delete()
-        else:
-            # Just delete the experience
-            experience_to_delete.delete()
+        experience_to_delete.delete()
 
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class CurriculumFileView(PersonRelatedMixin, APIPermissionRequiredMixin, RetrieveModelMixin, UpdateModelMixin,
+                         GenericAPIView):
+    name = "curriculum_file"
+    pagination_class = None
+    filter_backends = []
+    serializer_class = serializers.CurriculumFileSerializer
+    permission_classes = [partial(IsSelfPersonTabOrTabPermission, permission_suffix='curriculum')]
+
+    def get(self, request, *args, **kwargs):
+        return self.retrieve(request, *args, **kwargs)
+
+    def put(self, request, *args, **kwargs):
+        return self.update(request, *args, **kwargs)

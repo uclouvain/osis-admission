@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Admission API
-  version: 1.0.9
+  version: 1.0.10
   description: This API delivers data for the Admission project.
   contact:
     name: UCLouvain - OSIS
@@ -209,13 +209,67 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ExperienceCreation'
+              $ref: '#/components/schemas/ExperienceInput'
       responses:
         201:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ExperienceCreation'
+                $ref: '#/components/schemas/ExperienceOutput'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - person
+  /curriculum/file:
+    get:
+      operationId: retrieveCurriculumFile
+      description: ''
+      parameters:
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CurriculumFile'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - person
+    put:
+      operationId: updateCurriculumFile
+      description: ''
+      parameters:
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CurriculumFile'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CurriculumFile'
           description: ''
         '400':
           $ref: '#/components/responses/BadRequest'
@@ -275,13 +329,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ExperienceUpdating'
+              $ref: '#/components/schemas/ExperienceInput'
       responses:
         200:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ExperienceUpdating'
+                $ref: '#/components/schemas/ExperienceOutput'
           description: ''
         '400':
           $ref: '#/components/responses/BadRequest'
@@ -1057,13 +1111,79 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ExperienceCreation'
+              $ref: '#/components/schemas/ExperienceInput'
       responses:
         201:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ExperienceCreation'
+                $ref: '#/components/schemas/ExperienceOutput'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - person
+  /propositions/{uuid}/curriculum/file:
+    get:
+      operationId: retrieveCurriculumFileAdmission
+      description: ''
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CurriculumFile'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - person
+    put:
+      operationId: updateCurriculumFileAdmission
+      description: ''
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CurriculumFile'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CurriculumFile'
           description: ''
         '400':
           $ref: '#/components/responses/BadRequest'
@@ -1135,13 +1255,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ExperienceUpdating'
+              $ref: '#/components/schemas/ExperienceInput'
       responses:
         200:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ExperienceUpdating'
+                $ref: '#/components/schemas/ExperienceOutput'
           description: ''
         '400':
           $ref: '#/components/responses/BadRequest'
@@ -1771,10 +1891,6 @@ components:
         id:
           type: integer
           readOnly: true
-        valuated_from:
-          type: string
-          format: uuid
-          readOnly: true
         curriculum_year:
           type: object
           properties:
@@ -1792,9 +1908,6 @@ components:
             iso_code:
               type: string
               maxLength: 2
-            uuid:
-              type: string
-              readOnly: true
             name:
               type: string
               readOnly: true
@@ -1819,9 +1932,6 @@ components:
             name:
               type: string
               readOnly: true
-            uuid:
-              type: string
-              readOnly: true
           required:
           - code
           nullable: true
@@ -1840,6 +1950,9 @@ components:
           required:
           - name
           nullable: true
+        is_valuated:
+          type: boolean
+          readOnly: true
         type:
           $ref: '#/components/schemas/ExperienceType'
         institute_name:
@@ -1924,11 +2037,6 @@ components:
           nullable: true
         study_system:
           $ref: '#/components/schemas/StudySystem'
-          nullable: true
-        curriculum:
-          type: array
-          items:
-            type: string
           nullable: true
         study_cycle_type:
           $ref: '#/components/schemas/ForeignStudyCycleType'
@@ -2027,6 +2135,14 @@ components:
       - VOLUNTEERING
       - WORK
       type: string
+    CurriculumFile:
+      type: object
+      properties:
+        curriculum:
+          type: array
+          items:
+            type: string
+          nullable: true
     HighSchoolDiploma:
       type: object
       properties:
@@ -2179,7 +2295,6 @@ components:
               nullable: true
             equivalence:
               $ref: '#/components/schemas/Equivalence'
-              nullable: true
             high_school_transcript_translation:
               type: array
               items:
@@ -2221,6 +2336,7 @@ components:
       type: string
     Equivalence:
       enum:
+      - ''
       - 'YES'
       - 'NO'
       - PENDING
@@ -2663,20 +2779,19 @@ components:
       - 'NO'
       - PARTIAL
       type: string
-    ExperienceCreation:
+    ExperienceInput:
       type: object
       properties:
         id:
           type: integer
           readOnly: true
-        valuated_from:
-          type: string
-          format: uuid
-          readOnly: true
         academic_year:
           type: integer
           nullable: true
         country:
+          type: string
+          nullable: true
+        linguistic_regime:
           type: string
           nullable: true
         type:
@@ -2764,11 +2879,6 @@ components:
         study_system:
           $ref: '#/components/schemas/StudySystem'
           nullable: true
-        curriculum:
-          type: array
-          items:
-            type: string
-          nullable: true
         study_cycle_type:
           $ref: '#/components/schemas/ForeignStudyCycleType'
           nullable: true
@@ -2804,9 +2914,6 @@ components:
           type: integer
           nullable: true
         program:
-          type: integer
-          nullable: true
-        linguistic_regime:
           type: integer
           nullable: true
       required:
@@ -2838,153 +2945,6 @@ components:
           type: string
       required:
       - matricule
-    ExperienceUpdating:
-      type: object
-      properties:
-        id:
-          type: integer
-          readOnly: true
-        valuated_from:
-          type: string
-          format: uuid
-          readOnly: true
-        country:
-          type: string
-          nullable: true
-        type:
-          $ref: '#/components/schemas/ExperienceType'
-        institute_name:
-          type: string
-          nullable: true
-          maxLength: 255
-        institute_city:
-          type: string
-          nullable: true
-          maxLength: 255
-        institute_postal_code:
-          type: string
-          nullable: true
-          maxLength: 20
-        education_name:
-          type: string
-          nullable: true
-          maxLength: 255
-        result:
-          $ref: '#/components/schemas/Result'
-          nullable: true
-        graduation_year:
-          type: boolean
-          nullable: true
-        obtained_grade:
-          $ref: '#/components/schemas/Grade'
-          nullable: true
-        rank_in_diploma:
-          type: string
-          nullable: true
-          maxLength: 255
-        issue_diploma_date:
-          type: string
-          format: date
-          nullable: true
-        credit_type:
-          $ref: '#/components/schemas/CreditType'
-          nullable: true
-        entered_credits_number:
-          type: integer
-          maximum: 2147483647
-          nullable: true
-          minimum: 0
-        acquired_credits_number:
-          type: integer
-          maximum: 2147483647
-          nullable: true
-          minimum: 0
-        transcript:
-          type: array
-          items:
-            type: string
-          nullable: true
-        graduate_degree:
-          type: array
-          items:
-            type: string
-          nullable: true
-        access_certificate_after_60_master:
-          type: array
-          items:
-            type: string
-          nullable: true
-        dissertation_title:
-          type: string
-          nullable: true
-          maxLength: 255
-        dissertation_score:
-          type: string
-          format: decimal
-          multipleOf: 0.01
-          maximum: 100
-          minimum: -100
-          nullable: true
-        dissertation_summary:
-          type: array
-          items:
-            type: string
-          nullable: true
-        belgian_education_community:
-          $ref: '#/components/schemas/BelgianCommunitiesOfEducation'
-          nullable: true
-        study_system:
-          $ref: '#/components/schemas/StudySystem'
-          nullable: true
-        curriculum:
-          type: array
-          items:
-            type: string
-          nullable: true
-        study_cycle_type:
-          $ref: '#/components/schemas/ForeignStudyCycleType'
-          nullable: true
-        transcript_translation:
-          type: array
-          items:
-            type: string
-          nullable: true
-        graduate_degree_translation:
-          type: array
-          items:
-            type: string
-          nullable: true
-        activity_type:
-          $ref: '#/components/schemas/ActivityType'
-          nullable: true
-        other_activity_type:
-          type: string
-          nullable: true
-          maxLength: 255
-        activity_certificate:
-          type: array
-          items:
-            type: string
-          nullable: true
-        activity_position:
-          type: string
-          nullable: true
-          maxLength: 255
-        curriculum_year:
-          type: string
-          readOnly: true
-        institute:
-          type: integer
-          nullable: true
-        program:
-          type: integer
-          nullable: true
-        linguistic_regime:
-          type: integer
-          nullable: true
-      required:
-      - country
-      - type
     CompleterPropositionCommand:
       type: object
       properties:
