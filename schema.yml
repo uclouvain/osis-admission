@@ -1849,10 +1849,25 @@ components:
                     type: string
                   prenom:
                     type: string
+                  email:
+                    type: string
+                  titre:
+                    type: string
+                  institution:
+                    type: string
+                  ville:
+                    type: string
+                  pays:
+                    type: string
                 required:
                 - matricule
                 - nom
                 - prenom
+                - email
+                - titre
+                - institution
+                - ville
+                - pays
               status:
                 type: string
               commentaire_externe:
@@ -1874,10 +1889,13 @@ components:
                     type: string
                   prenom:
                     type: string
+                  email:
+                    type: string
                 required:
                 - matricule
                 - nom
                 - prenom
+                - email
               status:
                 type: string
               commentaire_externe:

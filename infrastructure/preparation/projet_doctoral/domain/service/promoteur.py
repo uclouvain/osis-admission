@@ -25,13 +25,14 @@
 # ##############################################################################
 from typing import List
 
+from django.utils.translation import get_language
+
 from admission.auth.roles.promoter import Promoter
 from admission.ddd.preparation.projet_doctoral.domain.model._promoteur import PromoteurIdentity
 from admission.ddd.preparation.projet_doctoral.domain.service.i_promoteur import IPromoteurTranslator
 from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import PromoteurNonTrouveException
 from admission.ddd.preparation.projet_doctoral.dtos import PromoteurDTO
 from base.auth.roles.tutor import Tutor
-from ddd.logic.shared_kernel.personne_connue_ucl.domain.service.personne_connue_ucl import IPersonneConnueUclTranslator
 
 
 class PromoteurTranslator(IPromoteurTranslator):
@@ -42,17 +43,25 @@ class PromoteurTranslator(IPromoteurTranslator):
         return PromoteurIdentity(matricule=matricule)
 
     @classmethod
-    def search(cls, matricules: List[str]) -> List['PromoteurIdentity']:
-        raise NotImplementedError
+    def get_dto(cls, matricule: str) -> PromoteurDTO:
+        promoter_role = Promoter.objects.select_related('person', 'country').get(person__global_id=matricule)
+        return PromoteurDTO(
+            matricule=matricule,
+            nom=promoter_role.person.last_name,
+            prenom=promoter_role.person.first_name,
+            email=promoter_role.person.email,
+            titre=promoter_role.title,
+            institution=promoter_role.institute,
+            ville=promoter_role.city,
+            pays=(
+                promoter_role.country_id
+                and getattr(promoter_role.country, 'name_en' if get_language() == 'en' else 'name')
+                or ''
+            ),
+        )
 
     @classmethod
-    def search_dto(
-            cls,
-            terme_de_recherche: str,
-            personne_connue_ucl_translator: 'IPersonneConnueUclTranslator',
-    ) -> List['PromoteurDTO']:
-        # TODO :: 1. signaletiques_dto = signaletique_translator.search(terme_de_recherche)
-        # TODO :: 2. call cls.seacrh(matricules=signaletiques_dto)
+    def search(cls, matricules: List[str]) -> List['PromoteurIdentity']:
         raise NotImplementedError
 
     @classmethod
