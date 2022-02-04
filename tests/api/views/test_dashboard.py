@@ -47,7 +47,7 @@ class DashboardTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_dashboard_as_no_role(self):
-        self.client.force_login(self.no_role_user)
+        self.client.force_authenticate(self.no_role_user)
         response = self.client.get(self.url)
         self.assertEqual(
             response.json(),
@@ -60,7 +60,7 @@ class DashboardTestCase(APITestCase):
         )
 
     def test_dashboard_as_candidate(self):
-        self.client.force_login(self.candidate_user)
+        self.client.force_authenticate(self.candidate_user)
         response = self.client.get(self.url)
         self.assertEqual(
             response.json(),
@@ -73,7 +73,7 @@ class DashboardTestCase(APITestCase):
         )
 
     def test_dashboard_as_supervision_member(self):
-        self.client.force_login(self.promoter_user)
+        self.client.force_authenticate(self.promoter_user)
         response = self.client.get(self.url)
         self.assertEqual(
             response.json(),
