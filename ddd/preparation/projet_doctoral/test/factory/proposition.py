@@ -152,6 +152,7 @@ class PropositionAdmissionSC3DPAvecMembresFactory(PropositionAdmissionSC3DPMinim
 
 class PropositionAdmissionSC3DPAvecMembresEtCotutelleFactory(PropositionAdmissionSC3DPMinimaleFactory):
     entity_id = factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-SC3DP-promoteur-membre-cotutelle')
+    matricule_candidat = 'candidat'
 
 
 class PropositionAdmissionSC3DPAvecMembresInvitesFactory(PropositionAdmissionSC3DPMinimaleFactory):
@@ -164,3 +165,4 @@ class PropositionAdmissionSC3DPSansPromoteurFactory(PropositionAdmissionSC3DPMin
 
 class PropositionAdmissionSC3DPSansMembreCAFactory(PropositionAdmissionSC3DPMinimaleFactory):
     entity_id = factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-SC3DP-sans-membre_CA')
+    matricule_candidat = '0123456789'

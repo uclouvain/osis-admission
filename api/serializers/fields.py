@@ -107,6 +107,17 @@ class ActionLinksField(serializers.Field):
 
 # Available actions
 ACTION_LINKS = {
+    # List
+    # Normal
+    'list_propositions': {
+        'path_name': 'admission_api_v1:propositions',
+        'method': 'GET',
+    },
+    # Supervised
+    'list_supervised': {
+        'path_name': 'admission_api_v1:supervised_propositions',
+        'method': 'GET',
+    },
     # Profile
     # Person
     'retrieve_person': {
@@ -162,10 +173,6 @@ ACTION_LINKS = {
         'path_name': 'admission_api_v1:propositions',
         'method': 'DELETE',
         'params': ['uuid'],
-    },
-    'list_propositions': {
-        'path_name': 'admission_api_v1:propositions',
-        'method': 'GET',
     },
     'retrieve_proposition': {
         'path_name': 'admission_api_v1:propositions',

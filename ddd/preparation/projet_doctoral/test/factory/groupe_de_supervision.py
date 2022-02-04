@@ -214,6 +214,6 @@ class GroupeDeSupervisionSC3DPSansPromoteurFactory(_GroupeDeSupervisionFactory):
 class GroupeDeSupervisionSC3DPSansMembresCAFactory(_GroupeDeSupervisionFactory):
     proposition_id = factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-SC3DP-sans-membre_CA')
     signatures_promoteurs = factory.LazyFunction(lambda: [
-        _SignaturePromoteurFactory(promoteur_id__matricule='promoteur-SC3DP', etat=ChoixEtatSignature.INVITED)
+        _SignaturePromoteurFactory(promoteur_id__matricule='promoteur-SC3DP-unique', etat=ChoixEtatSignature.INVITED)
     ])
     signatures_membres_CA: List[SignatureMembreCA] = []

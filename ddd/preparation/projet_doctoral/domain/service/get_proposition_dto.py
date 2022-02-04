@@ -23,24 +23,24 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
-from admission.ddd.preparation.projet_doctoral.builder.proposition_identity_builder import \
-    PropositionIdentityBuilder
+from admission.ddd.preparation.projet_doctoral.builder.proposition_identity_builder import PropositionIdentityBuilder
 from admission.ddd.preparation.projet_doctoral.domain.model.proposition import Proposition
 from admission.ddd.preparation.projet_doctoral.domain.service.i_doctorat import IDoctoratTranslator
 from admission.ddd.preparation.projet_doctoral.domain.service.i_secteur_ucl import ISecteurUclTranslator
 from admission.ddd.preparation.projet_doctoral.dtos import PropositionDTO, PropositionSearchDTO
 from admission.ddd.preparation.projet_doctoral.repository.i_proposition import IPropositionRepository
+from ddd.logic.shared_kernel.personne_connue_ucl.domain.service.personne_connue_ucl import IPersonneConnueUclTranslator
 from osis_common.ddd import interface
 
 
 class GetPropositionDTODomainService(interface.DomainService):
     @classmethod
     def get(
-            cls,
-            uuid_proposition: str,
-            repository: 'IPropositionRepository',
-            doctorat_translator: 'IDoctoratTranslator',
-            secteur_ucl_translator: 'ISecteurUclTranslator',
+        cls,
+        uuid_proposition: str,
+        repository: 'IPropositionRepository',
+        doctorat_translator: 'IDoctoratTranslator',
+        secteur_ucl_translator: 'ISecteurUclTranslator',
     ) -> 'PropositionDTO':
         proposition = repository.get(PropositionIdentityBuilder.build_from_uuid(uuid_proposition))
         doctorat = doctorat_translator.get_dto(proposition.doctorat_id.sigle, proposition.doctorat_id.annee)
@@ -84,13 +84,15 @@ class GetPropositionDTODomainService(interface.DomainService):
 
     @classmethod
     def search_dto(
-            cls,
-            proposition: 'Proposition',
-            doctorat_translator: 'IDoctoratTranslator',
-            secteur_ucl_translator: 'ISecteurUclTranslator',
+        cls,
+        proposition: 'Proposition',
+        doctorat_translator: 'IDoctoratTranslator',
+        secteur_ucl_translator: 'ISecteurUclTranslator',
+        personne_connue_ucl_translator: 'IPersonneConnueUclTranslator',
     ) -> 'PropositionSearchDTO':
         doctorat = doctorat_translator.get_dto(proposition.doctorat_id.sigle, proposition.doctorat_id.annee)
         secteur = secteur_ucl_translator.get(doctorat.sigle_entite_gestion)
+        personne = personne_connue_ucl_translator.get(proposition.matricule_candidat)
         assert proposition.reference
         assert proposition.creee_le
         return PropositionSearchDTO(
@@ -99,6 +101,8 @@ class GetPropositionDTODomainService(interface.DomainService):
             type_admission=proposition.type_admission.name,
             sigle_doctorat=doctorat.sigle,
             matricule_candidat=proposition.matricule_candidat,
+            prenom_candidat=personne.prenom,
+            nom_candidat=personne.nom,
             code_secteur_formation=secteur.sigle,
             intitule_secteur_formation=secteur.intitule,
             commission_proximite=proposition.commission_proximite and proposition.commission_proximite.name or '',

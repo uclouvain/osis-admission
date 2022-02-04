@@ -25,24 +25,32 @@
 # ##############################################################################
 from typing import List
 
-from admission.ddd.preparation.projet_doctoral.commands import SearchPropositionsComiteCommand
-from admission.ddd.preparation.projet_doctoral.domain.service.get_proposition_dto import \
-    GetPropositionDTODomainService
+from admission.ddd.preparation.projet_doctoral.commands import SearchPropositionsSuperviseesCommand
+from admission.ddd.preparation.projet_doctoral.domain.service.get_proposition_dto import GetPropositionDTODomainService
 from admission.ddd.preparation.projet_doctoral.domain.service.i_doctorat import IDoctoratTranslator
 from admission.ddd.preparation.projet_doctoral.domain.service.i_secteur_ucl import ISecteurUclTranslator
 from admission.ddd.preparation.projet_doctoral.dtos import PropositionSearchDTO
 from admission.ddd.preparation.projet_doctoral.repository.i_groupe_de_supervision import IGroupeDeSupervisionRepository
 from admission.ddd.preparation.projet_doctoral.repository.i_proposition import IPropositionRepository
+from ddd.logic.shared_kernel.personne_connue_ucl.domain.service.personne_connue_ucl import IPersonneConnueUclTranslator
 
 
-def rechercher_propositions_membre(
-        cmd: 'SearchPropositionsComiteCommand',
-        proposition_repository: 'IPropositionRepository',
-        groupe_supervision_repository: 'IGroupeDeSupervisionRepository',
-        doctorat_translator: 'IDoctoratTranslator',
-        secteur_ucl_translator: 'ISecteurUclTranslator',
+def rechercher_propositions_supervisees(
+    cmd: 'SearchPropositionsSuperviseesCommand',
+    proposition_repository: 'IPropositionRepository',
+    groupe_supervision_repository: 'IGroupeDeSupervisionRepository',
+    doctorat_translator: 'IDoctoratTranslator',
+    secteur_ucl_translator: 'ISecteurUclTranslator',
+    personne_connue_ucl_translator: 'IPersonneConnueUclTranslator',
 ) -> List['PropositionSearchDTO']:
     groupes = groupe_supervision_repository.search(matricule_membre=cmd.matricule_membre)
     propositions = proposition_repository.search(entity_ids=[g.proposition_id for g in groupes])
-    return [GetPropositionDTODomainService.search_dto(proposition, doctorat_translator, secteur_ucl_translator)
-            for proposition in propositions]
+    return [
+        GetPropositionDTODomainService.search_dto(
+            proposition,
+            doctorat_translator,
+            secteur_ucl_translator,
+            personne_connue_ucl_translator,
+        )
+        for proposition in propositions
+    ]

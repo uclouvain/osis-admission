@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,18 +23,19 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import factory
 
-from django.test import SimpleTestCase
-
-from admission.ddd.preparation.projet_doctoral.commands import SearchPropositionsComiteCommand
-from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
+from base.tests.factories.person import generate_global_id
+from ddd.logic.shared_kernel.personne_connue_ucl.dtos import PersonneConnueUclDTO
 
 
-class TestRechercherDoctoratMembreService(SimpleTestCase):
-    def setUp(self) -> None:
-        self.cmd = SearchPropositionsComiteCommand(matricule_membre='promoteur-SC3DP')
-        self.message_bus = message_bus_in_memory_instance
+class PersonneConnueUclDTOFactory(factory.Factory):
+    matricule = factory.LazyFunction(generate_global_id)
+    nom = factory.Faker('last_name')
+    prenom = factory.Faker('first_name')
+    email = factory.Faker('email')
+    adresse_professionnelle = None
 
-    def test_should_rechercher_par_matricule(self):
-        results = self.message_bus.invoke(self.cmd)
-        self.assertEqual(results[0].uuid, 'uuid-SC3DP-promoteur-membre')
+    class Meta:
+        model = PersonneConnueUclDTO
+        abstract = False

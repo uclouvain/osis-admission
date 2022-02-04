@@ -29,8 +29,9 @@ from typing import List, Optional
 import attr
 
 from admission.ddd.preparation.projet_doctoral.domain.model._detail_projet import ChoixLangueRedactionThese
-from admission.ddd.preparation.projet_doctoral.domain.model._experience_precedente_recherche import \
-    ChoixDoctoratDejaRealise
+from admission.ddd.preparation.projet_doctoral.domain.model._experience_precedente_recherche import (
+    ChoixDoctoratDejaRealise,
+)
 from osis_common.ddd import interface
 
 UUID = str
@@ -173,7 +174,7 @@ class SearchPropositionsCandidatCommand(interface.CommandRequest):
 
 
 @attr.s(frozen=True, slots=True)
-class SearchPropositionsComiteCommand(interface.CommandRequest):
+class SearchPropositionsSuperviseesCommand(interface.CommandRequest):
     matricule_membre = attr.ib(type=str)
 
 
