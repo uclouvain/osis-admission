@@ -48,7 +48,7 @@ from base.ddd.utils.business_validator import MultipleBusinessExceptions
 
 class TestVerifierPropositionService(SimpleTestCase):
     def setUp(self) -> None:
-        self.uuid_proposition = 'uuid-SC3DP-promoteur-membre-cotutelle'
+        self.uuid_proposition = 'uuid-SC3DP-promoteur-membre'
         self.proposition_repository = PropositionInMemoryRepository()
         self.groupe_de_supervision_repository = GroupeDeSupervisionInMemoryRepository()
         self.addCleanup(self.groupe_de_supervision_repository.reset)
@@ -63,6 +63,12 @@ class TestVerifierPropositionService(SimpleTestCase):
 
     def test_should_retourner_erreur_si_detail_projet_pas_complete(self):
         cmd = attr.evolve(self.cmd, uuid_proposition='uuid-SC3DP-no-project')
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            self.message_bus.invoke(cmd)
+        self.assertIsInstance(context.exception.exceptions.pop(), DetailProjetNonCompleteException)
+
+    def test_should_retourner_erreur_si_financement_pas_complete(self):
+        cmd = attr.evolve(self.cmd, uuid_proposition='uuid-SC3DP-no-financement')
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(cmd)
         self.assertIsInstance(context.exception.exceptions.pop(), DetailProjetNonCompleteException)

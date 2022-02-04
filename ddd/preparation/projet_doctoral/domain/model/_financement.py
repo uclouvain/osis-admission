@@ -48,7 +48,4 @@ class Financement(interface.ValueObject):
     temps_consacre = attr.ib(type=Optional[int], default=None)
 
 
-financement_non_rempli = Financement(
-    type=None,
-    type_contrat_travail='',
-)
+financement_non_rempli = Financement(type=None)
