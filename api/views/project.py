@@ -41,7 +41,7 @@ from admission.ddd.preparation.projet_doctoral.commands import (
     SearchPropositionsCandidatCommand,
     SearchPropositionsComiteCommand,
     SupprimerPropositionCommand,
-    VerifierPropositionCommand,
+    VerifierProjetCommand,
 )
 from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import (
     CommissionProximiteInconsistantException,
@@ -226,7 +226,7 @@ class VerifyPropositionView(APIPermissionRequiredMixin, mixins.RetrieveModelMixi
         """Check the proposition to be OK with all validators."""
         try:
             # Trigger the verification command
-            message_bus_instance.invoke(VerifierPropositionCommand(uuid_proposition=str(kwargs["uuid"])))
+            message_bus_instance.invoke(VerifierProjetCommand(uuid_proposition=str(kwargs["uuid"])))
         except MultipleBusinessExceptions as exc:
             # Gather all errors for output
             data = defaultdict(list)

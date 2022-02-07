@@ -30,6 +30,7 @@ from osis_common.ddd import interface
 class ProfilCandidat(interface.DomainService):
     @classmethod
     def verifier_identification(cls, profil_candidat_translator: 'IProfilCandidatTranslator') -> None:
+        profil_candidat_translator.get
         # TODO : cherger les
         raise NotImplementedError
 

@@ -88,15 +88,12 @@ class CompletionPropositionValidatorList(TwoStepsMultipleBusinessExceptionListVa
 @attr.s(frozen=True, slots=True)
 class SoumettrePropositionValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
     proposition = attr.ib(type='Proposition')  # type: Proposition
-    identification = attr.ib(type='IdentificationDTO')  # type: IdentificationDTO
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
 
     def get_invariants_validators(self) -> List[BusinessValidator]:
-        return [
-            ShouldIdentificationCandidatEtreCompletee(self.identification),
-        ]
+        return []
 
 
 @attr.s(frozen=True, slots=True)
@@ -204,6 +201,19 @@ class ProjetDoctoralValidatorList(TwoStepsMultipleBusinessExceptionListValidator
         return [
             ShouldDetailProjetEtreComplete(self.type_admission, self.projet),
             ShouldFinancementEtreComplete(self.financement),
+        ]
+
+
+@attr.s(frozen=True, slots=True)
+class PropositionValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+    identification = attr.ib(type='IdentificationDTO')  # type: IdentificationDTO
+
+    def get_data_contract_validators(self) -> List[BusinessValidator]:
+        return []
+
+    def get_invariants_validators(self) -> List[BusinessValidator]:
+        return [
+            ShouldIdentificationCandidatEtreCompletee(self.identification),
         ]
 
 

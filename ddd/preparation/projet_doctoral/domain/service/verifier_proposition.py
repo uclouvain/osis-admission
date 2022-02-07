@@ -23,19 +23,27 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from functools import partial
+
+from admission.ddd.preparation.projet_doctoral.domain.model.groupe_de_supervision import GroupeDeSupervision
 from admission.ddd.preparation.projet_doctoral.domain.model.proposition import Proposition
-from admission.ddd.preparation.projet_doctoral.domain.service.i_profil_candidat import IProfilCandidatTranslator
+from admission.ddd.preparation.projet_doctoral.domain.service.i_promoteur import IPromoteurTranslator
+from admission.ddd.preparation.projet_doctoral.domain.service.profil_candidat import ProfilCandidat
 from base.ddd.utils.business_validator import execute_functions_and_aggregate_exceptions
 from osis_common.ddd import interface
 
 
-class VerifierProjet(interface.DomainService):
+class VerifierProposition(interface.DomainService):
     @classmethod
     def verifier(
         cls,
         proposition_candidat: Proposition,
-        profil_candidat_translator: IProfilCandidatTranslator,
+        groupe_de_supervision: GroupeDeSupervision,
+        profil_candidat_translator: IPromoteurTranslator,
     ) -> None:
+        profil_candidat_service = ProfilCandidat()
         execute_functions_and_aggregate_exceptions(
-            proposition_candidat.verifier(profil_candidat_translator),
+            partial(profil_candidat_service.verifier_identification, profil_candidat_translator),
+            # partial(profil_candidat_service.verifier_coordonnees, profil_candidat_translator),
+            # partial(profil_candidat_service.verifier_curriculum, profil_candidat_translator),
         )

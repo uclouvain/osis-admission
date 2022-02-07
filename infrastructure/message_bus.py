@@ -50,6 +50,7 @@ from admission.ddd.preparation.projet_doctoral.use_case.write.identifier_promote
 from admission.ddd.preparation.projet_doctoral.use_case.write.initier_proposition_service import \
     initier_proposition
 from admission.ddd.preparation.projet_doctoral.use_case.write.refuser_proposition_service import refuser_proposition
+from admission.ddd.preparation.projet_doctoral.use_case.write.soumettre_proposition_service import soumettre_proposition
 from admission.ddd.preparation.projet_doctoral.use_case.write.supprimer_membre_CA_service import \
     supprimer_membre_CA
 from admission.ddd.preparation.projet_doctoral.use_case.write.supprimer_promoteur_service import \
@@ -140,16 +141,17 @@ class MessageBusCommands(AbstractMessageBusCommands):
             groupe_supervision_repository=GroupeDeSupervisionRepository(),
             promoteur_translator=PromoteurTranslator(),
         ),
+        VerifierProjetCommand: partial(
+            verifier_projet,
+            proposition_repository=PropositionRepository(),
+            groupe_supervision_repository=GroupeDeSupervisionRepository(),
+            promoteur_translator=PromoteurTranslator(),
+        ),
         VerifierPropositionCommand: partial(
             verifier_proposition,
             proposition_repository=PropositionRepository(),
             groupe_supervision_repository=GroupeDeSupervisionRepository(),
             promoteur_translator=PromoteurTranslator(),
-        ),
-        VerifierProjetCommand: partial(
-            verifier_projet,
-            proposition_repository=PropositionRepository(),
-            profil_candidat_translator=ProfilCandidatTranslator(),
         ),
         ApprouverPropositionCommand: partial(
             approuver_proposition,
@@ -169,4 +171,10 @@ class MessageBusCommands(AbstractMessageBusCommands):
             supprimer_proposition,
             proposition_repository=PropositionRepository(),
         ),
+        # SoumettrePropositionCommand: partial(
+        #     soumettre_proposition,
+        #     proposition_repository=PropositionRepository(),
+        #     groupe_supervision_repository=GroupeDeSupervisionRepository(),
+        #     profil_candidat_translator=ProfilCandidatTranslator()
+        # ),
     }

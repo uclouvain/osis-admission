@@ -36,7 +36,7 @@ from admission.ddd.preparation.projet_doctoral.use_case.read.rechercher_proposit
     rechercher_propositions_candidat
 from admission.ddd.preparation.projet_doctoral.use_case.read.rechercher_propositions_membre import \
     rechercher_propositions_membre
-from admission.ddd.preparation.projet_doctoral.use_case.read.verifier_proposition_service import verifier_proposition
+from admission.ddd.preparation.projet_doctoral.use_case.read.verifier_projet_service import verifier_projet
 from admission.ddd.preparation.projet_doctoral.use_case.write.approuver_proposition_service import \
     approuver_proposition
 from admission.ddd.preparation.projet_doctoral.use_case.write.completer_proposition_service import \
@@ -136,8 +136,8 @@ class MessageBusInMemoryCommands(AbstractMessageBusCommands):
             groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
             promoteur_translator=PromoteurInMemoryTranslator(),
         ),
-        VerifierPropositionCommand: partial(
-            verifier_proposition,
+        VerifierProjetCommand: partial(
+            verifier_projet,
             proposition_repository=PropositionInMemoryRepository(),
             groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
             promoteur_translator=PromoteurInMemoryTranslator(),

@@ -247,9 +247,9 @@ class Proposition(interface.RootEntity):
                 raison_non_soutenue=raison_non_soutenue or '',
             )
 
-    def verifier(self, profil_candidat: IProfilCandidatTranslator):
+    def verifier(self):
         """Vérification complète de la proposition"""
-        SoumettrePropositionValidatorList(proposition=self, profil_candidat=profil_candidat).validate()
+        SoumettrePropositionValidatorList(proposition=self).validate()
 
     def verrouiller_proposition_pour_signature(self):
         self.statut = ChoixStatutProposition.SIGNING_IN_PROGRESS

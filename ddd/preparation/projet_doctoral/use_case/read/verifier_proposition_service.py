@@ -25,11 +25,9 @@
 # ##############################################################################
 
 from admission.ddd.preparation.projet_doctoral.builder.proposition_identity_builder import PropositionIdentityBuilder
-from admission.ddd.preparation.projet_doctoral.commands import VerifierPropositionCommand
 from admission.ddd.preparation.projet_doctoral.domain.model.proposition import PropositionIdentity
-from admission.ddd.preparation.projet_doctoral.domain.service.i_promoteur import IPromoteurTranslator
-from admission.ddd.preparation.projet_doctoral.domain.service.verifier_projet_doctoral import VerifierProjetDoctoral
-from admission.ddd.preparation.projet_doctoral.repository.i_groupe_de_supervision import IGroupeDeSupervisionRepository
+from admission.ddd.preparation.projet_doctoral.domain.service.i_profil_candidat import IProfilCandidatTranslator
+from admission.ddd.preparation.projet_doctoral.domain.service.verifier_proposition import VerifierProposition
 from admission.ddd.preparation.projet_doctoral.repository.i_proposition import IPropositionRepository
 
 
@@ -37,7 +35,7 @@ def verifier_proposition(
         cmd: 'VerifierPropositionCommand',
         proposition_repository: 'IPropositionRepository',
         groupe_supervision_repository: 'IGroupeDeSupervisionRepository',
-        promoteur_translator: 'IPromoteurTranslator',
+        profil_candidat_translator: 'IProfilCandidatTranslator',
 ) -> 'PropositionIdentity':
     # GIVEN
     entity_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
@@ -45,7 +43,7 @@ def verifier_proposition(
     groupe_de_supervision = groupe_supervision_repository.get_by_proposition_id(entity_id)
 
     # WHEN
-    VerifierProjetDoctoral.verifier(proposition_candidat, groupe_de_supervision, promoteur_translator)
+    VerifierProposition.verifier(proposition_candidat, profil_candidat_translator)
 
     # THEN
     return entity_id

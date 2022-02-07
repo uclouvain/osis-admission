@@ -23,10 +23,6 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import List
-
-from django.utils.translation import get_language
-
 from admission.auth.roles.candidate import Candidate
 from admission.ddd.preparation.projet_doctoral.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.preparation.projet_doctoral.dtos import IdentificationDTO, AcademicYearDTO, CountryDTO
@@ -75,4 +71,3 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                 year=candidat_role.person.last_registration_year.year,
             )
     )
-

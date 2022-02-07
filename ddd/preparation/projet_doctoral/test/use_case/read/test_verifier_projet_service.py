@@ -26,7 +26,7 @@
 import attr
 from django.test import SimpleTestCase
 
-from admission.ddd.preparation.projet_doctoral.commands import VerifierPropositionCommand
+from admission.ddd.preparation.projet_doctoral.commands import VerifierProjetCommand
 from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import (
     CotutelleDoitAvoirAuMoinsUnPromoteurExterneException,
     CotutelleNonCompleteException,
@@ -46,7 +46,7 @@ from admission.infrastructure.preparation.projet_doctoral.repository.in_memory.p
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 
 
-class TestVerifierPropositionService(SimpleTestCase):
+class TestVerifierProjetService(SimpleTestCase):
     def setUp(self) -> None:
         self.uuid_proposition = 'uuid-SC3DP-promoteur-membre'
         self.proposition_repository = PropositionInMemoryRepository()
@@ -55,7 +55,7 @@ class TestVerifierPropositionService(SimpleTestCase):
         self.addCleanup(self.proposition_repository.reset)
 
         self.message_bus = message_bus_in_memory_instance
-        self.cmd = VerifierPropositionCommand(uuid_proposition=self.uuid_proposition)
+        self.cmd = VerifierProjetCommand(uuid_proposition=self.uuid_proposition)
 
     def test_should_verifier_etre_ok(self):
         proposition_id = self.message_bus.invoke(self.cmd)

@@ -27,10 +27,9 @@ import attr
 
 from admission.ddd.preparation.projet_doctoral.dtos import IdentificationDTO
 from base.ddd.utils.business_validator import BusinessValidator
-from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import DetailProjetNonCompleteException, \
-    IdentificationNonCompleteeException
+from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import IdentificationNonCompleteeException
 
-BE_ISO_CODE = "BE"
+BE_ISO_CODE = "BE"  # TODO constant ?
 
 
 @attr.s(frozen=True, slots=True)

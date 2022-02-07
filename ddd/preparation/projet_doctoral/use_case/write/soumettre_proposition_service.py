@@ -31,7 +31,7 @@ from admission.ddd.preparation.projet_doctoral.repository.i_groupe_de_supervisio
 from admission.ddd.preparation.projet_doctoral.repository.i_proposition import IPropositionRepository
 
 
-def finaliser_proposition(
+def soumettre_proposition(
         cmd: 'SoumettrePropositionCommand',
         proposition_repository: 'IPropositionRepository',
         groupe_supervision_repository: 'IGroupeDeSupervisionRepository',
@@ -39,14 +39,14 @@ def finaliser_proposition(
 ) -> 'PropositionIdentity':
     # GIVEN
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
-    proposition_candidat = proposition_repository.get(entity_id=proposition_id)
+    proposition = proposition_repository.get(entity_id=proposition_id)
     groupe_supervision = groupe_supervision_repository.get_by_proposition_id(proposition_id)
 
     # WHEN
-    DemandeInscription().verifier(proposition_candidat, groupe_supervision, profil_candidat_translator)
+    DemandeInscription().verifier(proposition, groupe_supervision, profil_candidat_translator)
 
     # THEN
-    proposition_candidat.finaliser()
-    proposition_repository.save(proposition_candidat)
+    proposition.finaliser()
+    proposition_repository.save(proposition)
 
     return proposition_id
