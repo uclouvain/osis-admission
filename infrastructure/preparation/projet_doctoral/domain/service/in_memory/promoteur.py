@@ -63,6 +63,7 @@ class PromoteurInMemoryTranslator(IPromoteurTranslator):
             pays="Belgique",
         ),
         Promoteur(PromoteurIdentity('promoteur-SC3DP'), "Jeremy", "Sanchez", "jm@example.org"),
+        Promoteur(PromoteurIdentity('promoteur-SC3DP-unique'), "Marcel", "Troufignon", "mt@example.org"),
     ]
 
     @classmethod

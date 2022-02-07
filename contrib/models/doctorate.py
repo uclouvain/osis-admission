@@ -34,8 +34,9 @@ from admission.ddd.preparation.projet_doctoral.domain.model._enums import (
     ChoixCommissionProximiteCDSS,
     ChoixStatutProposition,
 )
-from admission.ddd.preparation.projet_doctoral.domain.model._experience_precedente_recherche import \
-    ChoixDoctoratDejaRealise
+from admission.ddd.preparation.projet_doctoral.domain.model._experience_precedente_recherche import (
+    ChoixDoctoratDejaRealise,
+)
 from admission.ddd.preparation.projet_doctoral.domain.model._financement import ChoixTypeFinancement
 from admission.ddd.preparation.projet_doctoral.domain.model._detail_projet import ChoixLangueRedactionThese
 from osis_document.contrib import FileField
@@ -253,14 +254,20 @@ class DoctorateAdmission(BaseAdmission):
             ('request_signatures', _("Can request signatures")),
             ('approve_proposition', _("Can approve proposition")),
             ('view_doctorateadmission_person', _("Can view the information related to the admission request author")),
-            ('change_doctorateadmission_person',
-             _("Can update the information related to the admission request author")),
+            (
+                'change_doctorateadmission_person',
+                _("Can update the information related to the admission request author"),
+            ),
             ('view_doctorateadmission_coordinates', _("Can view the coordinates of the admission request author")),
             ('change_doctorateadmission_coordinates', _("Can update the coordinates of the admission request author")),
-            ('view_doctorateadmission_secondary_studies',
-             _("Can view the information related to the secondary studies")),
-            ('change_doctorateadmission_secondary_studies',
-             _("Can update the information related to the secondary studies")),
+            (
+                'view_doctorateadmission_secondary_studies',
+                _("Can view the information related to the secondary studies"),
+            ),
+            (
+                'change_doctorateadmission_secondary_studies',
+                _("Can update the information related to the secondary studies"),
+            ),
             ('view_doctorateadmission_languages', _("Can view the information related to language knowledge")),
             ('change_doctorateadmission_languages', _("Can update the information related to language knowledge")),
             ('view_doctorateadmission_curriculum', _("Can view the information related to the curriculum")),
@@ -270,11 +277,10 @@ class DoctorateAdmission(BaseAdmission):
             ('view_doctorateadmission_cotutelle', _("Can view the information related to the admission cotutelle")),
             ('change_doctorateadmission_cotutelle', _("Can update the information related to the admission cotutelle")),
             ('view_doctorateadmission_supervision', _("Can view the information related to the admission supervision")),
-            ('change_doctorateadmission_supervision',
-             _("Can update the information related to the admission supervision")),
+            (
+                'change_doctorateadmission_supervision',
+                _("Can update the information related to the admission supervision"),
+            ),
             ('add_supervision_member', _("Can add a member to the supervision group")),
             ('remove_supervision_member', _("Can remove a member from the supervision group")),
         ]
-
-    def get_absolute_url(self):
-        return reverse("admission:doctorate-detail", args=[self.pk])

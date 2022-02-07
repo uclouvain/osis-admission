@@ -44,17 +44,12 @@ def is_admission_request_author(self, user: User, obj: BaseAdmission):
 @predicate(bind=True)
 @predicate_failed_msg(message=_("Some invitations are already sent"))
 def invitations_sent(self, user: User, obj: DoctorateAdmission):
-    return obj.supervision_group and obj.supervision_group.actors.exclude(
-        last_state=SignatureState.NOT_INVITED.name,
-    ).exists()
-
-
-@predicate(bind=True)
-@predicate_failed_msg(message=_("You must be the request author to access this admission"))
-def is_admission_request_author_or_person(self, user: User, obj: BaseAdmission):
-    if obj:
-        return obj.candidate == user.person
-    return True
+    return (
+        obj.supervision_group
+        and obj.supervision_group.actors.exclude(
+            last_state=SignatureState.NOT_INVITED.name,
+        ).exists()
+    )
 
 
 @predicate(bind=True)
