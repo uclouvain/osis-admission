@@ -34,32 +34,13 @@ from admission.ddd.preparation.projet_doctoral.domain.model._enums import ChoixT
 from admission.ddd.preparation.projet_doctoral.domain.model._experience_precedente_recherche import (
     ChoixDoctoratDejaRealise,
 )
+from admission.ddd.preparation.projet_doctoral.domain.model._financement import Financement
 from admission.ddd.preparation.projet_doctoral.domain.model._membre_CA import MembreCAIdentity
 from admission.ddd.preparation.projet_doctoral.domain.model._promoteur import PromoteurIdentity
-from admission.ddd.preparation.projet_doctoral.domain.validator import (
-    ShouldInstitutionDependreDoctoratRealise,
-    ShouldJustificationDonneeSiPreadmission,
-    ShouldMembreCAEtreDansGroupeDeSupervision,
-    ShouldMembreCAPasDejaPresentDansGroupeDeSupervision,
-    ShouldPromoteurEtreDansGroupeDeSupervision,
-    ShouldPromoteurPasDejaPresentDansGroupeDeSupervision,
-    ShouldSignataireEtreDansGroupeDeSupervision,
-    ShouldSignataireEtreInvite,
-    ShouldSignatairePasDejaInvite,
-    ShouldTypeContratTravailDependreTypeFinancement,
-    ShouldGroupeDeSupervisionNonCompletPourMembresCA,
-    ShouldGroupeDeSupervisionNonCompletPourPromoteurs,
+from admission.ddd.preparation.projet_doctoral.domain.validator import *
+from admission.ddd.preparation.projet_doctoral.domain.validator._should_financement_etre_complete import (
+    ShouldFinancementEtreComplete,
 )
-from admission.ddd.preparation.projet_doctoral.domain.validator._should_cotutelle_etre_completee import (
-    ShouldCotutelleEtreComplete,
-)
-from admission.ddd.preparation.projet_doctoral.domain.validator._should_detail_projet_etre_complete import (
-    ShouldDetailProjetEtreComplete,
-)
-from admission.ddd.preparation.projet_doctoral.domain.validator.\
-    _should_groupe_de_supervision_avoir_au_moins_un_membre_CA import ShouldGroupeDeSupervisionAvoirAuMoinsUnMembreCA
-from admission.ddd.preparation.projet_doctoral.domain.validator.\
-    _should_groupe_de_supervision_avoir_au_moins_un_promoteur import ShouldGroupeDeSupervisionAvoirAuMoinsUnPromoteur
 from base.ddd.utils.business_validator import TwoStepsMultipleBusinessExceptionListValidator, BusinessValidator
 
 
@@ -207,9 +188,10 @@ class ApprouverValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
 
 
 @attr.s(frozen=True, slots=True)
-class DetailsProjetValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+class ProjetDoctoralValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
     type_admission = attr.ib(type='ChoixTypeAdmission')  # type: ChoixTypeAdmission
     projet = attr.ib(type='DetailProjet')  # type: DetailProjet
+    financement = attr.ib(type='Financement')  # type: Financement
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
@@ -217,6 +199,7 @@ class DetailsProjetValidatorList(TwoStepsMultipleBusinessExceptionListValidator)
     def get_invariants_validators(self) -> List[BusinessValidator]:
         return [
             ShouldDetailProjetEtreComplete(self.type_admission, self.projet),
+            ShouldFinancementEtreComplete(self.financement),
         ]
 
 
@@ -242,6 +225,5 @@ class SignatairesValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
 
     def get_invariants_validators(self) -> List[BusinessValidator]:
         return [
-            ShouldGroupeDeSupervisionAvoirAuMoinsUnPromoteur(self.groupe_de_supervision.signatures_promoteurs),
             ShouldGroupeDeSupervisionAvoirAuMoinsUnMembreCA(self.groupe_de_supervision.signatures_membres_CA),
         ]

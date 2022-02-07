@@ -34,12 +34,14 @@ def path(pattern, view, name=None):
 
 app_name = "admission_api_v1"
 urlpatterns = [
+    path('dashboard', views.DashboardViewSet),
     path('person', views.PersonViewSet),
     path('coordonnees', views.CoordonneesViewSet),
     path('propositions', views.PropositionListView),
     path('curriculum', views.CurriculumExperienceListAndCreateView),
     path('curriculum/file', views.CurriculumFileView),
     path('curriculum/<int:xp>', views.CurriculumExperienceDetailUpdateAndDeleteView),
+    path('supervised_propositions', views.SupervisedPropositionListView),
     path('secondary_studies', views.SecondaryStudiesViewSet),
     path('languages_knowledge', views.LanguagesKnowledgeViewSet),
     path('propositions/<uuid:uuid>', views.PropositionViewSet),

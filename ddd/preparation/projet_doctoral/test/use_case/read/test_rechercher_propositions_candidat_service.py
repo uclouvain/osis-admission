@@ -27,11 +27,18 @@
 from django.test import SimpleTestCase
 
 from admission.ddd.preparation.projet_doctoral.commands import SearchPropositionsCandidatCommand
+from admission.ddd.preparation.projet_doctoral.test.factory.person import PersonneConnueUclDTOFactory
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
+from infrastructure.shared_kernel.personne_connue_ucl.in_memory.personne_connue_ucl import (
+    PersonneConnueUclInMemoryTranslator,
+)
 
 
 class TestRechercherDoctoratCandidatService(SimpleTestCase):
     def setUp(self) -> None:
+        PersonneConnueUclInMemoryTranslator.personnes_connues_ucl = {
+            PersonneConnueUclDTOFactory(matricule='0123456789'),
+        }
         self.cmd = SearchPropositionsCandidatCommand(matricule_candidat='0123456789')
         self.message_bus = message_bus_in_memory_instance
 

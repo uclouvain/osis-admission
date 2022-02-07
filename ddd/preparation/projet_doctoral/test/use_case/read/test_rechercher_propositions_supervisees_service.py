@@ -23,38 +23,26 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.api.views.dashboard import *
-from admission.api.views.autocomplete import *
-from admission.api.views.coordonnees import *
-from admission.api.views.curriculum import CurriculumExperienceListAndCreateView, \
-    CurriculumExperienceDetailUpdateAndDeleteView, CurriculumFileView
-from admission.api.views.secondary_studies import *
-from admission.api.views.languages_knowledge import *
-from admission.api.views.cotutelle import *
-from admission.api.views.person import *
-from admission.api.views.project import *
-from admission.api.views.supervision import *
-from admission.api.views.signatures import *
-from admission.api.views.approvals import *
 
-__all__ = [
-    "CoordonneesViewSet",
-    "CurriculumExperienceListAndCreateView",
-    "CurriculumExperienceDetailUpdateAndDeleteView",
-    "CurriculumFileView",
-    "PersonViewSet",
-    "PropositionViewSet",
-    "PropositionListView",
-    "VerifyPropositionView",
-    "SecondaryStudiesViewSet",
-    "AutocompleteDoctoratView",
-    "AutocompleteSectorView",
-    "AutocompleteTutorView",
-    "AutocompletePersonView",
-    "CotutelleAPIView",
-    "SupervisionAPIView",
-    "RequestSignaturesAPIView",
-    "LanguagesKnowledgeViewSet",
-    "ApprovePropositionAPIView",
-    "DashboardViewSet",
-]
+from django.test import SimpleTestCase
+
+from admission.ddd.preparation.projet_doctoral.commands import SearchPropositionsSuperviseesCommand
+from admission.ddd.preparation.projet_doctoral.test.factory.person import PersonneConnueUclDTOFactory
+from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
+from infrastructure.shared_kernel.personne_connue_ucl.in_memory.personne_connue_ucl import (
+    PersonneConnueUclInMemoryTranslator,
+)
+
+
+class TestRechercherPropositionsSuperviseesService(SimpleTestCase):
+    def setUp(self) -> None:
+        PersonneConnueUclInMemoryTranslator.personnes_connues_ucl = {
+            PersonneConnueUclDTOFactory(matricule='promoteur-SC3DP-unique'),
+            PersonneConnueUclDTOFactory(matricule='0123456789'),
+        }
+        self.cmd = SearchPropositionsSuperviseesCommand(matricule_membre='promoteur-SC3DP-unique')
+        self.message_bus = message_bus_in_memory_instance
+
+    def test_should_rechercher_par_matricule(self):
+        results = self.message_bus.invoke(self.cmd)
+        self.assertEqual(results[0].uuid, 'uuid-SC3DP-sans-membre_CA')

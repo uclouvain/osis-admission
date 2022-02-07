@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,19 +23,18 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import List
 
 import attr
 
-from admission.ddd.preparation.projet_doctoral.domain.model._signature_promoteur import SignaturePromoteur
-from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import PromoteurManquantException
+from admission.ddd.preparation.projet_doctoral.domain.model._financement import Financement, financement_non_rempli
+from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import DetailProjetNonCompleteException
 from base.ddd.utils.business_validator import BusinessValidator
 
 
 @attr.s(frozen=True, slots=True)
-class ShouldGroupeDeSupervisionAvoirAuMoinsUnPromoteur(BusinessValidator):
-    signatures_promoteurs = attr.ib(type=List[SignaturePromoteur])  # type: List[SignaturePromoteur]
+class ShouldFinancementEtreComplete(BusinessValidator):
+    financement = attr.ib(type=Financement)
 
     def validate(self, *args, **kwargs):
-        if len(self.signatures_promoteurs) <= 0:
-            raise PromoteurManquantException
+        if self.financement == financement_non_rempli:
+            raise DetailProjetNonCompleteException

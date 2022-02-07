@@ -40,7 +40,11 @@ from admission.ddd.preparation.projet_doctoral.domain.model._enums import (
 from admission.ddd.preparation.projet_doctoral.domain.model._experience_precedente_recherche import (
     aucune_experience_precedente_recherche,
 )
-from admission.ddd.preparation.projet_doctoral.domain.model._financement import financement_non_rempli
+from admission.ddd.preparation.projet_doctoral.domain.model._financement import (
+    ChoixTypeFinancement,
+    Financement,
+    financement_non_rempli,
+)
 from admission.ddd.preparation.projet_doctoral.domain.model.proposition import Proposition, PropositionIdentity
 from admission.ddd.preparation.projet_doctoral.test.factory.doctorat import _DoctoratIdentityFactory
 
@@ -51,6 +55,14 @@ class _PropositionIdentityFactory(factory.Factory):
         abstract = False
 
     uuid = factory.LazyFunction(lambda: str(uuid.uuid4()))
+
+
+class _FinancementFactory(factory.Factory):
+    class Meta:
+        model = Financement
+        abstract = False
+
+    type = ChoixTypeFinancement.SELF_FUNDING
 
 
 class _DetailProjetFactory(factory.Factory):
@@ -78,7 +90,7 @@ class _PropositionFactory(factory.Factory):
     statut = ChoixStatutProposition.IN_PROGRESS
     projet = factory.SubFactory(_DetailProjetFactory)
     creee_le = factory.Faker('past_datetime')
-    financement = financement_non_rempli
+    financement = factory.SubFactory(_FinancementFactory)
     experience_precedente_recherche = aucune_experience_precedente_recherche
 
 
@@ -112,6 +124,11 @@ class PropositionAdmissionSC3DPMinimaleSansDetailProjetFactory(PropositionAdmiss
     projet = projet_non_rempli
 
 
+class PropositionAdmissionSC3DPMinimaleSansFinancementFactory(PropositionAdmissionSC3DPMinimaleFactory):
+    entity_id = factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-SC3DP-no-financement')
+    financement = financement_non_rempli
+
+
 class PropositionAdmissionSC3DPMinimaleSansCotutelleFactory(PropositionAdmissionSC3DPMinimaleFactory):
     entity_id = factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-SC3DP-cotutelle-indefinie')
 
@@ -135,6 +152,7 @@ class PropositionAdmissionSC3DPAvecMembresFactory(PropositionAdmissionSC3DPMinim
 
 class PropositionAdmissionSC3DPAvecMembresEtCotutelleFactory(PropositionAdmissionSC3DPMinimaleFactory):
     entity_id = factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-SC3DP-promoteur-membre-cotutelle')
+    matricule_candidat = 'candidat'
 
 
 class PropositionAdmissionSC3DPAvecMembresInvitesFactory(PropositionAdmissionSC3DPMinimaleFactory):
@@ -147,3 +165,4 @@ class PropositionAdmissionSC3DPSansPromoteurFactory(PropositionAdmissionSC3DPMin
 
 class PropositionAdmissionSC3DPSansMembreCAFactory(PropositionAdmissionSC3DPMinimaleFactory):
     entity_id = factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-SC3DP-sans-membre_CA')
+    matricule_candidat = '0123456789'

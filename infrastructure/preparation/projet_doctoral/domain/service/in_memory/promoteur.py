@@ -23,30 +23,71 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from dataclasses import dataclass
 from typing import List
 
 from admission.ddd.preparation.projet_doctoral.domain.model._promoteur import PromoteurIdentity
 from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import PromoteurNonTrouveException
 from admission.ddd.preparation.projet_doctoral.dtos import PromoteurDTO
 from admission.infrastructure.preparation.projet_doctoral.domain.service.promoteur import IPromoteurTranslator
-from ddd.logic.shared_kernel.personne_connue_ucl.domain.service.personne_connue_ucl import IPersonneConnueUclTranslator
+
+
+@dataclass
+class Promoteur:
+    id: PromoteurIdentity
+    nom: str
+    prenom: str
+    email: str
+    externe: bool = False
+    titre: str = ''
+    institution: str = ''
+    ville: str = ''
+    pays: str = ''
 
 
 class PromoteurInMemoryTranslator(IPromoteurTranslator):
-    promoteurs = [  # tuple of promoteurs identities, telling if it is external or not
-        (PromoteurIdentity('00987890'), False),
-        (PromoteurIdentity('00987891'), False),
-        (PromoteurIdentity('00987892'), False),
-        (PromoteurIdentity('00987893'), False),
-        (PromoteurIdentity('promoteur-SC3DP-externe'), True),
-        (PromoteurIdentity('promoteur-SC3DP'), False),
+    promoteurs = [
+        Promoteur(PromoteurIdentity('00987890'), "John", "Doe", "john.doe@example.org"),
+        Promoteur(PromoteurIdentity('00987891'), "Jane", "Martin", "jane.martin@example.org"),
+        Promoteur(PromoteurIdentity('00987892'), "Lucy", "Caron", "lucy.caron@example.org"),
+        Promoteur(PromoteurIdentity('00987893'), "Debra", "Gibson", "debra.gibson@example.org"),
+        Promoteur(
+            PromoteurIdentity('promoteur-SC3DP-externe'),
+            nom="John",
+            prenom="Mills",
+            email="john.mills@example.org",
+            externe=True,
+            titre="Dr",
+            institution="USB",
+            ville="Bruxelles",
+            pays="Belgique",
+        ),
+        Promoteur(PromoteurIdentity('promoteur-SC3DP'), "Jeremy", "Sanchez", "jm@example.org"),
+        Promoteur(PromoteurIdentity('promoteur-SC3DP-unique'), "Marcel", "Troufignon", "mt@example.org"),
     ]
 
     @classmethod
     def get(cls, matricule: str) -> 'PromoteurIdentity':
         try:
-            return next(p for (p, e) in cls.promoteurs if p.matricule == matricule)
+            return next(p.id for p in cls.promoteurs if p.id.matricule == matricule)
         except StopIteration:
+            raise PromoteurNonTrouveException
+
+    @classmethod
+    def get_dto(cls, matricule: str) -> 'PromoteurDTO':
+        try:
+            p = next(p for p in cls.promoteurs if p.id.matricule == matricule)  # pragma: no branch
+            return PromoteurDTO(
+                matricule=p.id.matricule,
+                nom=p.nom,
+                prenom=p.prenom,
+                email=p.email,
+                titre=p.titre,
+                institution=p.institution,
+                ville=p.ville,
+                pays=p.pays,
+            )
+        except StopIteration:  # pragma: no cover
             raise PromoteurNonTrouveException
 
     @classmethod
@@ -54,16 +95,8 @@ class PromoteurInMemoryTranslator(IPromoteurTranslator):
         raise NotImplementedError
 
     @classmethod
-    def search_dto(
-            cls,
-            terme_de_recherche: str,
-            personne_connue_ucl_translator: 'IPersonneConnueUclTranslator',
-    ) -> List['PromoteurDTO']:
-        raise NotImplementedError
-
-    @classmethod
     def est_externe(cls, identity: 'PromoteurIdentity') -> bool:
         try:
-            return next(e for (p, e) in cls.promoteurs if p.matricule == identity.matricule)  # pragma: no branch
+            return next(p.externe for p in cls.promoteurs if p.id.matricule == identity.matricule)  # pragma: no branch
         except StopIteration:  # pragma: no cover
             raise PromoteurNonTrouveException

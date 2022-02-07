@@ -133,19 +133,26 @@ class PersonSearchingBackend(BaseFilterBackend):
 
 class AutocompleteTutorView(ListAPIView):
     """Autocomplete tutors"""
+
     name = "autocomplete-tutor"
     filter_backends = [PersonSearchingBackend]
     serializer_class = serializers.TutorSerializer
-    queryset = Tutor.objects.annotate(
-        first_name=F("person__first_name"),
-        last_name=F("person__last_name"),
-        global_id=F("person__global_id"),
-    ).distinct('global_id').select_related("person")
+    queryset = (
+        Tutor.objects.annotate(
+            first_name=F("person__first_name"),
+            last_name=F("person__last_name"),
+            global_id=F("person__global_id"),
+        )
+        .exclude(Q(person__user_id__isnull=True) | Q(person__global_id=''))
+        .distinct('global_id')
+        .select_related("person")
+    )
 
 
 class AutocompletePersonView(ListAPIView):
     """Autocomplete person"""
+
     name = "autocomplete-person"
     filter_backends = [PersonSearchingBackend]
     serializer_class = PersonSerializer
-    queryset = Person.objects.all()
+    queryset = Person.objects.exclude(Q(user_id__isnull=True) | Q(global_id=''))

@@ -43,7 +43,6 @@ class ShouldDetailProjetEtreComplete(BusinessValidator):
             "resume",
             "langue_redaction_these",
             "documents",
-            "graphe_gantt",
         ]
         if self.type_admission == ChoixTypeAdmission.ADMISSION:
             champs_obligatoires.append("proposition_programme_doctoral")

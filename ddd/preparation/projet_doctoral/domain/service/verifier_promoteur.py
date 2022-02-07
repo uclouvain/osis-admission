@@ -23,31 +23,26 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from functools import partial
 
 from admission.ddd.preparation.projet_doctoral.domain.model.groupe_de_supervision import GroupeDeSupervision
-from admission.ddd.preparation.projet_doctoral.domain.model.proposition import Proposition
 from admission.ddd.preparation.projet_doctoral.domain.service.i_promoteur import IPromoteurTranslator
-from admission.ddd.preparation.projet_doctoral.domain.service.verifier_cotutelle import CotutellePossedePromoteurExterne
-from admission.ddd.preparation.projet_doctoral.domain.service.verifier_promoteur import (
-    GroupeDeSupervisionPossedeUnPromoteurMinimum,
+from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import (
+    PromoteurManquantException,
 )
-from base.ddd.utils.business_validator import execute_functions_and_aggregate_exceptions
 from osis_common.ddd import interface
 
 
-class VerifierProjetDoctoral(interface.DomainService):
+class GroupeDeSupervisionPossedeUnPromoteurMinimum(interface.DomainService):
     @classmethod
     def verifier(
         cls,
-        proposition_candidat: Proposition,
-        groupe_de_supervision: GroupeDeSupervision,
-        promoteur_translator: IPromoteurTranslator,
+        groupe_de_supervision: 'GroupeDeSupervision',
+        promoteur_translator: 'IPromoteurTranslator',
     ) -> None:
-        execute_functions_and_aggregate_exceptions(
-            groupe_de_supervision.verifier_cotutelle,
-            partial(CotutellePossedePromoteurExterne.verifier, groupe_de_supervision, promoteur_translator),
-            partial(GroupeDeSupervisionPossedeUnPromoteurMinimum.verifier, groupe_de_supervision, promoteur_translator),
-            proposition_candidat.verifier_projet_doctoral,
-            groupe_de_supervision.verifier_signataires,
-        )
+        promoteurs_non_externes = [
+            signature_promoteur
+            for signature_promoteur in groupe_de_supervision.signatures_promoteurs
+            if not promoteur_translator.est_externe(signature_promoteur.promoteur_id)
+        ]
+        if not len(promoteurs_non_externes):
+            raise PromoteurManquantException

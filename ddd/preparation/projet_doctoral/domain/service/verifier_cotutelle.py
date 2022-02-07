@@ -35,14 +35,13 @@ from osis_common.ddd import interface
 class CotutellePossedePromoteurExterne(interface.DomainService):
     @classmethod
     def verifier(
-            cls,
-            groupe_de_supervision: 'GroupeDeSupervision',
-            promoteur_translator: 'IPromoteurTranslator',
+        cls,
+        groupe_de_supervision: 'GroupeDeSupervision',
+        promoteur_translator: 'IPromoteurTranslator',
     ) -> None:
         aucun_externe = not any(
             promoteur_translator.est_externe(signature_promoteur.promoteur_id)
-            for signature_promoteur
-            in groupe_de_supervision.signatures_promoteurs
+            for signature_promoteur in groupe_de_supervision.signatures_promoteurs
         )
-        if groupe_de_supervision.cotutelle != pas_de_cotutelle and aucun_externe:
+        if groupe_de_supervision.cotutelle and groupe_de_supervision.cotutelle != pas_de_cotutelle and aucun_externe:
             raise CotutelleDoitAvoirAuMoinsUnPromoteurExterneException

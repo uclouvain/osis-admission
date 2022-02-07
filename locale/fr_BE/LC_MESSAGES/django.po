@@ -82,9 +82,6 @@ msgstr "Gestionnaire CDD"
 msgid "CDD managers"
 msgstr "Gestionnaires CDD"
 
-msgid "Can access doctorate admission list"
-msgstr "Peut accéder à la liste des admission en doctorat"
-
 msgid "Can add a member to the supervision group"
 msgstr "Peut ajouter un membre au groupe de supervision"
 
@@ -564,14 +561,15 @@ msgstr ""
 "Vous devez ajouter au moins un membre CA afin de demander les signatures."
 
 msgid ""
+"You must add at least one UCLouvain promoter in order to request signatures."
+msgstr ""
+"Vous devez ajouter au moins un promoteur UCLouvain afin de demander les signatures."
+
+msgid ""
 "You must add at least one external promoter in order to request signatures."
 msgstr ""
 "Vous devez ajouter au moins un promoteur externe afin de demander les "
 "signatures."
-
-msgid "You must add at least one promoter in order to request signatures."
-msgstr ""
-"Vous devez ajouter au moins un promoteur afin de demander les signatures."
 
 msgid "You must be a member of the committee to access this admission"
 msgstr "Vous devez être membre du comité pour accéder à cette admission"

@@ -26,40 +26,15 @@
 from functools import partial
 
 from admission.ddd.preparation.projet_doctoral.commands import *
-from admission.ddd.preparation.projet_doctoral.use_case.read.get_cotutelle_service import get_cotutelle
-from admission.ddd.preparation.projet_doctoral.use_case.read.get_groupe_de_supervision_service import \
-    get_groupe_de_supervision
-from admission.ddd.preparation.projet_doctoral.use_case.read.get_proposition_service import get_proposition
-from admission.ddd.preparation.projet_doctoral.use_case.read.rechercher_doctorats_service import \
-    rechercher_doctorats
-from admission.ddd.preparation.projet_doctoral.use_case.read.rechercher_propositions_candidat_service import \
-    rechercher_propositions_candidat
-from admission.ddd.preparation.projet_doctoral.use_case.read.rechercher_propositions_membre import \
-    rechercher_propositions_membre
-from admission.ddd.preparation.projet_doctoral.use_case.read.verifier_proposition_service import verifier_proposition
-from admission.ddd.preparation.projet_doctoral.use_case.write.approuver_proposition_service import \
-    approuver_proposition
-from admission.ddd.preparation.projet_doctoral.use_case.write.completer_proposition_service import \
-    completer_proposition
-from admission.ddd.preparation.projet_doctoral.use_case.write.definir_cotutelle_service import definir_cotutelle
-from admission.ddd.preparation.projet_doctoral.use_case.write.demander_signatures_service import demander_signatures
-from admission.ddd.preparation.projet_doctoral.use_case.write.identifier_membre_CA_service import identifier_membre_CA
-from admission.ddd.preparation.projet_doctoral.use_case.write.identifier_promoteur_service import \
-    identifier_promoteur
-from admission.ddd.preparation.projet_doctoral.use_case.write.initier_proposition_service import \
-    initier_proposition
-from admission.ddd.preparation.projet_doctoral.use_case.write.refuser_proposition_service import refuser_proposition
-from admission.ddd.preparation.projet_doctoral.use_case.write.supprimer_membre_CA_service import \
-    supprimer_membre_CA
-from admission.ddd.preparation.projet_doctoral.use_case.write.supprimer_promoteur_service import \
-    supprimer_promoteur
-from admission.ddd.preparation.projet_doctoral.use_case.write.supprimer_proposition_service import supprimer_proposition
+from admission.ddd.preparation.projet_doctoral.use_case.read import *
+from admission.ddd.preparation.projet_doctoral.use_case.write import *
 from admission.infrastructure.preparation.projet_doctoral.domain.service.doctorat import DoctoratTranslator
 from admission.infrastructure.preparation.projet_doctoral.domain.service.membre_CA import MembreCATranslator
 from admission.infrastructure.preparation.projet_doctoral.domain.service.promoteur import PromoteurTranslator
 from admission.infrastructure.preparation.projet_doctoral.domain.service.secteur_ucl import SecteurUclTranslator
-from admission.infrastructure.preparation.projet_doctoral.repository.groupe_de_supervision import \
-    GroupeDeSupervisionRepository
+from admission.infrastructure.preparation.projet_doctoral.repository.groupe_de_supervision import (
+    GroupeDeSupervisionRepository,
+)
 from admission.infrastructure.preparation.projet_doctoral.repository.proposition import PropositionRepository
 from infrastructure.shared_kernel.personne_connue_ucl.personne_connue_ucl import PersonneConnueUclTranslator
 from infrastructure.utils import AbstractMessageBusCommands
@@ -77,13 +52,15 @@ class MessageBusCommands(AbstractMessageBusCommands):
             proposition_repository=PropositionRepository(),
             doctorat_translator=DoctoratTranslator(),
             secteur_ucl_translator=SecteurUclTranslator(),
+            personne_connue_ucl_translator=PersonneConnueUclTranslator(),
         ),
-        SearchPropositionsComiteCommand: partial(
-            rechercher_propositions_membre,
+        SearchPropositionsSuperviseesCommand: partial(
+            rechercher_propositions_supervisees,
             proposition_repository=PropositionRepository(),
             groupe_supervision_repository=GroupeDeSupervisionRepository(),
             doctorat_translator=DoctoratTranslator(),
             secteur_ucl_translator=SecteurUclTranslator(),
+            personne_connue_ucl_translator=PersonneConnueUclTranslator(),
         ),
         GetPropositionCommand: partial(
             get_proposition,
@@ -120,6 +97,7 @@ class MessageBusCommands(AbstractMessageBusCommands):
             get_groupe_de_supervision,
             groupe_supervision_repository=GroupeDeSupervisionRepository(),
             personne_connue_ucl_translator=PersonneConnueUclTranslator(),
+            promoteur_translator=PromoteurTranslator(),
         ),
         SupprimerPromoteurCommand: partial(
             supprimer_promoteur,

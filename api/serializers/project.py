@@ -53,6 +53,7 @@ __all__ = [
     "DoctoratDTOSerializer",
     "SectorDTOSerializer",
     "PropositionDTOSerializer",
+    "PropositionSearchDTOSerializer",
 ]
 
 

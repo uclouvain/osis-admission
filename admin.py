@@ -54,12 +54,18 @@ class CurriculumYearAdmin(admin.ModelAdmin):
     autocomplete_fields = ["person"]
 
 
+class ExternalCommitteeMemberAdmin(RoleModelAdmin):
+    list_display = ('person', 'is_external', 'title', 'institute', 'city', 'country')
+    list_filter = ['is_external']
+    list_select_related = ['person', 'country']
+
+
 admin.site.register(DoctorateAdmission, DoctorateAdmissionAdmin)
 admin.site.register(CurriculumYear, CurriculumYearAdmin)
 
 # Roles
-admin.site.register(Promoter, RoleModelAdmin)
-admin.site.register(CommitteeMember, RoleModelAdmin)
+admin.site.register(Promoter, ExternalCommitteeMemberAdmin)
+admin.site.register(CommitteeMember, ExternalCommitteeMemberAdmin)
 admin.site.register(SicManager, RoleModelAdmin)
 admin.site.register(SicDirector, RoleModelAdmin)
 admin.site.register(Adre, RoleModelAdmin)

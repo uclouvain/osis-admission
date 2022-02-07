@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -24,13 +24,16 @@
 #
 # ##############################################################################
 
-from .dashboard import DashboardSerializer
-from .project import *
-from .cotutelle import *
-from .person import *
-from .coordonnees import CoordonneesSerializer
-from .secondary_studies import HighSchoolDiplomaSerializer
-from .languages_knowledge import *
-from .supervision import *
-from .curriculum import ExperienceOutputSerializer, ExperienceInputSerializer, CurriculumFileSerializer
-from .approvals import ApprouverPropositionCommandSerializer, RefuserPropositionCommandSerializer
+from rest_framework import serializers
+
+from admission.api.serializers.fields import ACTION_LINKS, ActionLinksField
+
+
+class DashboardSerializer(serializers.Serializer):
+    links = ActionLinksField(
+        actions={
+            'list_propositions': ACTION_LINKS['list_propositions'],
+            # Supervised propositions
+            'list_supervised': ACTION_LINKS['list_supervised'],
+        }
+    )

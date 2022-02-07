@@ -7,6 +7,43 @@ info:
     name: UCLouvain - OSIS
     url: https://github.com/uclouvain/osis
 paths:
+  /dashboard:
+    get:
+      operationId: retrieve_dashboard
+      description: Get the actions links for the application
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Dashboard'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
   /person:
     get:
       operationId: retrievePersonIdentification
@@ -374,6 +411,33 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - person
+  /supervised_propositions:
+    get:
+      operationId: list_supervised_propositions
+      description: ''
+      parameters:
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PropositionSearchDTO'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
   /secondary_studies:
     get:
       operationId: retrieveHighSchoolDiploma
@@ -1599,6 +1663,18 @@ paths:
       - propositions
 components:
   schemas:
+    Dashboard:
+      type: object
+      properties:
+        links:
+          type: object
+          properties:
+            list_propositions:
+              $ref: '#/components/schemas/ActionLink'
+            list_supervised:
+              $ref: '#/components/schemas/ActionLink'
+          readOnly: true
+          default: {}
     PersonIdentification:
       type: object
       properties:
@@ -1823,6 +1899,10 @@ components:
                 type: string
               matricule_candidat:
                 type: string
+              prenom_candidat:
+                type: string
+              nom_candidat:
+                type: string
               code_secteur_formation:
                 type: string
               intitule_secteur_formation:
@@ -1879,6 +1959,8 @@ components:
             - intitule_doctorat_fr
             - intitule_doctorat_en
             - matricule_candidat
+            - prenom_candidat
+            - nom_candidat
             - code_secteur_formation
             - intitule_secteur_formation
             - creee_le
@@ -2143,6 +2225,89 @@ components:
           items:
             type: string
           nullable: true
+    PropositionSearchDTO:
+      type: object
+      properties:
+        uuid:
+          type: string
+        reference:
+          type: string
+        type_admission:
+          type: string
+        sigle_doctorat:
+          type: string
+        intitule_doctorat_fr:
+          type: string
+        intitule_doctorat_en:
+          type: string
+        matricule_candidat:
+          type: string
+        prenom_candidat:
+          type: string
+        nom_candidat:
+          type: string
+        code_secteur_formation:
+          type: string
+        intitule_secteur_formation:
+          type: string
+        commission_proximite:
+          type: string
+        creee_le:
+          type: string
+          format: date-time
+        statut:
+          type: string
+        links:
+          type: object
+          properties:
+            retrieve_person:
+              $ref: '#/components/schemas/ActionLink'
+            update_person:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_coordinates:
+              $ref: '#/components/schemas/ActionLink'
+            update_coordinates:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_secondary_studies:
+              $ref: '#/components/schemas/ActionLink'
+            update_secondary_studies:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_languages:
+              $ref: '#/components/schemas/ActionLink'
+            update_languages:
+              $ref: '#/components/schemas/ActionLink'
+            destroy_proposition:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_proposition:
+              $ref: '#/components/schemas/ActionLink'
+            update_proposition:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_cotutelle:
+              $ref: '#/components/schemas/ActionLink'
+            update_cotutelle:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_supervision:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_curriculum:
+              $ref: '#/components/schemas/ActionLink'
+            update_curriculum:
+              $ref: '#/components/schemas/ActionLink'
+          readOnly: true
+          default: {}
+      required:
+      - uuid
+      - reference
+      - type_admission
+      - sigle_doctorat
+      - intitule_doctorat_fr
+      - intitule_doctorat_en
+      - matricule_candidat
+      - prenom_candidat
+      - nom_candidat
+      - code_secteur_formation
+      - intitule_secteur_formation
+      - creee_le
+      - statut
     HighSchoolDiploma:
       type: object
       properties:
@@ -2561,13 +2726,30 @@ components:
                     type: string
                   prenom:
                     type: string
+                  email:
+                    type: string
+                  titre:
+                    type: string
+                  institution:
+                    type: string
+                  ville:
+                    type: string
+                  pays:
+                    type: string
                 required:
                 - matricule
                 - nom
                 - prenom
+                - email
+                - titre
+                - institution
+                - ville
+                - pays
               status:
                 type: string
               commentaire_externe:
+                type: string
+              commentaire_interne:
                 type: string
             required:
             - promoteur
@@ -2586,13 +2768,18 @@ components:
                     type: string
                   prenom:
                     type: string
+                  email:
+                    type: string
                 required:
                 - matricule
                 - nom
                 - prenom
+                - email
               status:
                 type: string
               commentaire_externe:
+                type: string
+              commentaire_interne:
                 type: string
             required:
             - membre_CA

@@ -169,7 +169,7 @@ class PromoteurManquantException(BusinessException):
     status_code = "PROPOSITION-19"
 
     def __init__(self, **kwargs):
-        message = _("You must add at least one promoter in order to request signatures.")
+        message = _("You must add at least one UCLouvain promoter in order to request signatures.")
         super().__init__(message, **kwargs)
 
 
