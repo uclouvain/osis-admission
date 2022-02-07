@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -26,11 +26,11 @@
 from functools import partial
 from typing import Optional
 
+from django.db.models import Exists, OuterRef
 from django.utils.translation import gettext as _
 from rest_framework import status
 from rest_framework.exceptions import PermissionDenied
-from rest_framework.fields import BooleanField
-from rest_framework.generics import get_object_or_404, GenericAPIView
+from rest_framework.generics import get_object_or_404, GenericAPIView, RetrieveAPIView
 from rest_framework.mixins import RetrieveModelMixin, UpdateModelMixin
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -39,53 +39,67 @@ from admission.api import serializers
 from admission.api.permissions import IsSelfPersonTabOrTabPermission
 from admission.api.schema import ResponseSpecificSchema
 from admission.api.views.mixins import PersonRelatedMixin, PersonRelatedSchema
+from admission.contrib.models import DoctorateAdmission
 from osis_profile.models import Experience
 from osis_role.contrib.views import APIPermissionRequiredMixin
 
 
 class CurriculumExperienceSchema(ResponseSpecificSchema, PersonRelatedSchema):
-    operation_id_base = '_curriculum_experience'
-
-    def map_field(self, field):
-        # Customize the schema for the SerializerMethodField fields
-        if field.field_name == 'is_valuated':
-            return {
-                'type': 'boolean',
-            }
-        return super().map_field(field)
+    operation_id_base = "_curriculum_experience"
 
     serializer_mapping = {
-        'GET': serializers.ExperienceOutputSerializer,
-        'PUT': (serializers.ExperienceInputSerializer, serializers.ExperienceOutputSerializer,),
-        'POST': (serializers.ExperienceInputSerializer, serializers.ExperienceOutputSerializer,),
-        'DELETE': (),
+        "GET": serializers.ExperienceOutputSerializer,
+        "PUT": (
+            serializers.ExperienceInputSerializer,
+            serializers.ExperienceOutputSerializer,
+        ),
+        "POST": (
+            serializers.ExperienceInputSerializer,
+            serializers.ExperienceOutputSerializer,
+        ),
+        "DELETE": (),
     }
 
 
 class CurriculumExperienceView(PersonRelatedMixin, APIPermissionRequiredMixin, APIView):
     schema = CurriculumExperienceSchema()
-    permission_classes = [partial(IsSelfPersonTabOrTabPermission, permission_suffix='curriculum')]
+    permission_classes = [
+        partial(IsSelfPersonTabOrTabPermission, permission_suffix="curriculum")
+    ]
     name = "curriculum"
 
     def get_queryset(self):
         """Return the list of experiences of the person."""
-        return Experience.objects.filter(curriculum_year__person=self.get_object())\
-            .order_by('curriculum_year__academic__year')
+        return (
+            Experience.objects.filter(curriculum_year__person=self.get_object())
+            .annotate(
+                is_valuated=Exists(
+                    DoctorateAdmission.valuated_experiences.through.objects.filter(
+                        experience_id=OuterRef("pk"),
+                    )
+                )
+            )
+            .order_by("curriculum_year__academic__year")
+        )
 
     def get_experience(self) -> Optional[Experience]:
         """Get the current experience from the uuid."""
-        return get_object_or_404(self.get_queryset(), pk=self.kwargs.get('xp'))
+        return get_object_or_404(self.get_queryset(), pk=self.kwargs.get("xp"))
 
 
 class CurriculumExperienceListAndCreateView(CurriculumExperienceView):
     def get(self, request, *args, **kwargs):
         """Return the list of experiences from the person's CV."""
-        serializer = serializers.ExperienceOutputSerializer(self.get_queryset(), many=True)
+        serializer = serializers.ExperienceOutputSerializer(
+            self.get_queryset(), many=True
+        )
         return Response(serializer.data)
 
     def post(self, request, *args, **kwargs):
         """Add an experience to the person's CV."""
-        serializer = serializers.ExperienceInputSerializer(data=request.data, related_person=self.get_object())
+        serializer = serializers.ExperienceInputSerializer(
+            data=request.data, related_person=self.get_object()
+        )
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
@@ -103,8 +117,10 @@ class CurriculumExperienceDetailUpdateAndDeleteView(CurriculumExperienceView):
         """Update one of the experiences from the person's CV."""
         experience_to_update = self.get_experience()
 
-        if experience_to_update.doctorateadmission_set.exists():
-            raise PermissionDenied(_('This experience cannot be updated as it has already been valuated.'))
+        if experience_to_update.is_valuated:
+            raise PermissionDenied(
+                _("This experience cannot be updated as it has already been valuated.")
+            )
 
         serializer = serializers.ExperienceInputSerializer(
             instance=experience_to_update,
@@ -122,24 +138,26 @@ class CurriculumExperienceDetailUpdateAndDeleteView(CurriculumExperienceView):
         """Remove one of the experiences from the person's CV."""
         experience_to_delete = self.get_experience()
 
-        if experience_to_delete.doctorateadmission_set.exists():
-            raise PermissionDenied(_('This experience cannot be deleted as it has already been valuated.'))
+        if experience_to_delete.is_valuated:
+            raise PermissionDenied(
+                _("This experience cannot be deleted as it has already been valuated.")
+            )
 
         experience_to_delete.delete()
 
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class CurriculumFileView(PersonRelatedMixin, APIPermissionRequiredMixin, RetrieveModelMixin, UpdateModelMixin,
-                         GenericAPIView):
+class CurriculumFileView(
+    PersonRelatedMixin, APIPermissionRequiredMixin, UpdateModelMixin, RetrieveAPIView
+):
     name = "curriculum_file"
     pagination_class = None
     filter_backends = []
     serializer_class = serializers.CurriculumFileSerializer
-    permission_classes = [partial(IsSelfPersonTabOrTabPermission, permission_suffix='curriculum')]
-
-    def get(self, request, *args, **kwargs):
-        return self.retrieve(request, *args, **kwargs)
+    permission_classes = [
+        partial(IsSelfPersonTabOrTabPermission, permission_suffix="curriculum")
+    ]
 
     def put(self, request, *args, **kwargs):
         return self.update(request, *args, **kwargs)

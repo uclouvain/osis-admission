@@ -36,6 +36,7 @@ class BaseAdmission(models.Model):
 
     valuated_experiences = models.ManyToManyField(
         Experience,
+        related_name='valuated_from',
         verbose_name=_('The experiences that have been valuated from this admission.'),
     )
 

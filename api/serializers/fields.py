@@ -23,12 +23,31 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.urls.exceptions import NoReverseMatch
 from django.urls import reverse, resolve
+from django.utils.translation import get_language
 
 from rest_framework import serializers
 from osis_role.contrib.views import APIPermissionRequiredMixin
+
+
+class TranslatedField(serializers.SerializerMethodField):
+    def __init__(self, field_name, en_field_name, **kwargs):
+        kwargs['source'] = '*'
+        kwargs['read_only'] = True
+
+        super().__init__(**kwargs)
+
+        self.field_name = field_name
+        self.en_field_name = en_field_name
+
+    def to_representation(self, value):
+        if get_language() == settings.LANGUAGE_CODE:
+            return getattr(value, self.field_name)
+        else:
+            return getattr(value, self.en_field_name)
 
 
 class ActionLinksField(serializers.Field):

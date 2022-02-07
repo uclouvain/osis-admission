@@ -23,12 +23,12 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from django.conf import settings
-from django.utils.translation import gettext as _, get_language
+from django.utils.translation import gettext as _
 
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
+from admission.api.serializers.fields import TranslatedField
 from base.api.serializers.academic_year import RelatedAcademicYearField
 from base.models.education_group_year import EducationGroupYear
 from base.models.organization import Organization
@@ -53,7 +53,7 @@ class CurriculumYearSerializer(serializers.ModelSerializer):
 
 
 class EducationGroupYearSerializer(serializers.ModelSerializer):
-    title = serializers.SerializerMethodField()
+    title = TranslatedField(field_name='title', en_field_name='title_english')
 
     class Meta:
         model = EducationGroupYear
@@ -62,13 +62,9 @@ class EducationGroupYearSerializer(serializers.ModelSerializer):
             'uuid',
         )
 
-    @staticmethod
-    def get_title(obj):
-        return obj.title if get_language() == settings.LANGUAGE_CODE else obj.title_english
-
 
 class CountrySerializer(serializers.ModelSerializer):
-    name = serializers.SerializerMethodField()
+    name = TranslatedField(field_name='name', en_field_name='name_en')
 
     class Meta:
         model = Country
@@ -76,10 +72,6 @@ class CountrySerializer(serializers.ModelSerializer):
             'iso_code',
             'name',
         )
-
-    @staticmethod
-    def get_name(obj):
-        return obj.name if get_language() == settings.LANGUAGE_CODE else obj.name_en
 
 
 class OrganizationSerializer(serializers.ModelSerializer):
@@ -93,7 +85,7 @@ class OrganizationSerializer(serializers.ModelSerializer):
 
 
 class LanguageSerializer(serializers.ModelSerializer):
-    name = serializers.SerializerMethodField()
+    name = TranslatedField(field_name='name', en_field_name='name_en')
 
     class Meta:
         model = Language
@@ -101,10 +93,6 @@ class LanguageSerializer(serializers.ModelSerializer):
             'code',
             'name',
         )
-
-    @staticmethod
-    def get_name(obj):
-        return obj.name if get_language() == settings.LANGUAGE_CODE else obj.name_en
 
 
 # Experience serializers
@@ -126,11 +114,7 @@ class ExperienceOutputSerializer(ExperienceSerializer):
     program = EducationGroupYearSerializer(allow_null=True)
     linguistic_regime = LanguageSerializer(allow_null=True)
     institute = OrganizationSerializer(allow_null=True)
-    is_valuated = serializers.SerializerMethodField()
-
-    @classmethod
-    def get_is_valuated(cls, experience):
-        return experience.doctorateadmission_set.exists()
+    is_valuated = serializers.BooleanField(read_only=True)
 
 
 class ExperienceInputSerializer(ExperienceSerializer):
