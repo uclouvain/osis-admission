@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,24 +23,19 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from abc import abstractmethod
-
-from admission.ddd.preparation.projet_doctoral.dtos import CurriculumDTO, CoordonneesDTO, IdentificationDTO
+from admission.ddd.preparation.projet_doctoral.domain.model.proposition import Proposition
+from admission.ddd.preparation.projet_doctoral.domain.service.i_profil_candidat import IProfilCandidatTranslator
+from base.ddd.utils.business_validator import execute_functions_and_aggregate_exceptions
 from osis_common.ddd import interface
 
 
-class IProfilCandidatTranslator(interface.DomainService):
+class VerifierProjet(interface.DomainService):
     @classmethod
-    @abstractmethod
-    def get_identification(cls, matricule: str) -> 'IdentificationDTO':
-        raise NotImplementedError
-
-    @classmethod
-    @abstractmethod
-    def get_coordonnees(cls, matricule: str) -> 'CoordonneesDTO':
-        raise NotImplementedError
-
-    @classmethod
-    @abstractmethod
-    def get_curriculum(cls, matricule: str) -> 'CurriculumDTO':
-        raise NotImplementedError
+    def verifier(
+        cls,
+        proposition_candidat: Proposition,
+        profil_candidat_translator: IProfilCandidatTranslator,
+    ) -> None:
+        execute_functions_and_aggregate_exceptions(
+            proposition_candidat.verifier(profil_candidat_translator),
+        )

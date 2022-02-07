@@ -51,6 +51,7 @@ from admission.ddd.preparation.projet_doctoral.domain.model._financement import 
 )
 from admission.ddd.preparation.projet_doctoral.domain.model._institut import InstitutIdentity
 from admission.ddd.preparation.projet_doctoral.domain.model.doctorat import DoctoratIdentity
+from admission.ddd.preparation.projet_doctoral.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.preparation.projet_doctoral.domain.validator.validator_by_business_action import (
     CompletionPropositionValidatorList,
     ProjetDoctoralValidatorList,
@@ -246,9 +247,9 @@ class Proposition(interface.RootEntity):
                 raison_non_soutenue=raison_non_soutenue or '',
             )
 
-    def verifier(self):
+    def verifier(self, profil_candidat: IProfilCandidatTranslator):
         """Vérification complète de la proposition"""
-        SoumettrePropositionValidatorList(proposition=self).validate()
+        SoumettrePropositionValidatorList(proposition=self, profil_candidat=profil_candidat).validate()
 
     def verrouiller_proposition_pour_signature(self):
         self.statut = ChoixStatutProposition.SIGNING_IN_PROGRESS

@@ -27,6 +27,8 @@ import datetime
 from uuid import UUID
 from typing import List, Optional, Union
 
+from django.conf import settings
+
 import attr
 
 from osis_common.ddd import interface
@@ -42,10 +44,47 @@ class DoctoratDTO(interface.DTO):
 
 
 @attr.s(frozen=True, slots=True)
+class CountryDTO(interface.DTO):
+    id = attr.ib(type=str)
+    iso_code = attr.ib(type=str)
+
+
+@attr.s(frozen=True, slots=True)
+class AcademicYearDTO(interface.DTO):
+    id = attr.ib(type=str)
+    year = attr.ib(type=int)
+
+
+@attr.s(frozen=True, slots=True)
 class IdentificationDTO(interface.DTO):
+    matricule = attr.ib(type=str)
+
+    # Signalétique
     nom = attr.ib(type=str)
     prenom = attr.ib(type=str)
-    # TODO completer les champs en fonction de base.Person
+    prenom_d_usage = attr.ib(type=str)
+    autres_prenoms = attr.ib(type=str)
+    date_naissance = attr.ib(type=str)
+    annee_naissance = attr.ib(type=int)
+    pays_naissance = attr.ib(type=CountryDTO)
+    lieu_naissance = attr.ib(type=str)
+    pays_nationalite = attr.ib(type=CountryDTO)
+    langue_contact = attr.ib(type=settings.LANGUAGES)
+    sexe = attr.ib(type=str)
+    genre = attr.ib(type=str)
+    etat_civil = attr.ib(type=str)
+    photo_identite = attr.ib(type=List[str])
+
+    # Pièces d'identité
+    carte_identite = attr.ib(type=List[str])
+    passeport = attr.ib(type=List[str])
+    numero_registre_national_belge = attr.ib(type=str)
+    numero_carte_identite = attr.ib(type=str)
+    numero_passeport = attr.ib(type=str)
+    date_expiration_passeport = attr.ib(type=str)
+
+    # Déjà inscrit précédemment ?
+    annee_derniere_inscription = attr.ib(type=AcademicYearDTO)
 
 
 @attr.s(frozen=True, slots=True)

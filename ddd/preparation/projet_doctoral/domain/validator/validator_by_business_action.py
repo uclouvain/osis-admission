@@ -41,6 +41,7 @@ from admission.ddd.preparation.projet_doctoral.domain.validator import *
 from admission.ddd.preparation.projet_doctoral.domain.validator._should_financement_etre_complete import (
     ShouldFinancementEtreComplete,
 )
+from admission.ddd.preparation.projet_doctoral.dtos import IdentificationDTO
 from base.ddd.utils.business_validator import TwoStepsMultipleBusinessExceptionListValidator, BusinessValidator
 
 
@@ -87,12 +88,15 @@ class CompletionPropositionValidatorList(TwoStepsMultipleBusinessExceptionListVa
 @attr.s(frozen=True, slots=True)
 class SoumettrePropositionValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
     proposition = attr.ib(type='Proposition')  # type: Proposition
+    identification = attr.ib(type='IdentificationDTO')  # type: IdentificationDTO
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
 
     def get_invariants_validators(self) -> List[BusinessValidator]:
-        return []
+        return [
+            ShouldIdentificationCandidatEtreCompletee(self.identification),
+        ]
 
 
 @attr.s(frozen=True, slots=True)

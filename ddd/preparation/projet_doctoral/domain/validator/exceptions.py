@@ -203,3 +203,20 @@ class GroupeSupervisionCompletPourMembresCAException(BusinessException):
     def __init__(self, **kwargs):
         message = _("There can be no more CA members in the supervision group.")
         super().__init__(message, **kwargs)
+
+
+class CandidatNonTrouveException(BusinessException):
+    status_code = "PROPOSITION-24"
+
+    def __init__(self, **kwargs):
+        message = _("Candidate not found.")
+        super().__init__(message, **kwargs)
+
+
+class IdentificationNonCompleteeException(BusinessException):
+    status_code = "PROPOSITION-25"
+
+    def __init__(self, **kwargs):
+        message = _("Please fill in all the required information in the 'Personal Data > Identification' tab.")
+        super().__init__(message, **kwargs)
+
