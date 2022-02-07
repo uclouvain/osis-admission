@@ -1,5 +1,5 @@
 from ._should_cotutelle_etre_completee import ShouldCotutelleEtreComplete
-from ._should_detail_projet_etre_complete import ShouldDetailProjetEtreComplete
+from ._should_projet_etre_complet import ShouldProjetEtreComplet
 from ._should_groupe_de_supervision_avoir_au_moins_un_membre_CA import ShouldGroupeDeSupervisionAvoirAuMoinsUnMembreCA
 from ._should_groupe_de_supervision_non_complet_pour_membres_CA import ShouldGroupeDeSupervisionNonCompletPourMembresCA
 from ._should_groupe_de_supervision_non_complet_pour_promoteurs import ShouldGroupeDeSupervisionNonCompletPourPromoteurs
@@ -32,6 +32,6 @@ __all__ = [
     "ShouldGroupeDeSupervisionNonCompletPourMembresCA",
     "ShouldGroupeDeSupervisionNonCompletPourPromoteurs",
     "ShouldCotutelleEtreComplete",
-    "ShouldDetailProjetEtreComplete",
+    "ShouldProjetEtreComplet",
     "ShouldGroupeDeSupervisionAvoirAuMoinsUnMembreCA",
 ]
