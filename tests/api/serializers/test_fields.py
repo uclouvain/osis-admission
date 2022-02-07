@@ -30,7 +30,7 @@ from django.test.utils import override_settings
 from django.urls.base import reverse
 from django.urls.conf import path
 from django.utils.translation import gettext as _, get_language
-from mock.mock import Mock
+from unittest.mock import Mock
 from rest_framework.serializers import Serializer
 from rest_framework.test import APIRequestFactory, APITestCase
 from rest_framework.views import APIView
@@ -328,7 +328,7 @@ class TranslatedFieldTestCase(APITestCase):
     def setUpTestData(cls):
         cls.default_language = settings.LANGUAGE_CODE
 
-    def setUp(self):
+    def tearDown(self):
         settings.LANGUAGE_CODE = self.default_language
 
     def test_with_supported_language(self):

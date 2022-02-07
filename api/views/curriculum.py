@@ -30,8 +30,8 @@ from django.db.models import Exists, OuterRef
 from django.utils.translation import gettext as _
 from rest_framework import status
 from rest_framework.exceptions import PermissionDenied
-from rest_framework.generics import get_object_or_404, GenericAPIView, RetrieveAPIView
-from rest_framework.mixins import RetrieveModelMixin, UpdateModelMixin
+from rest_framework.generics import get_object_or_404, RetrieveAPIView
+from rest_framework.mixins import UpdateModelMixin
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -148,9 +148,7 @@ class CurriculumExperienceDetailUpdateAndDeleteView(CurriculumExperienceView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class CurriculumFileView(
-    PersonRelatedMixin, APIPermissionRequiredMixin, UpdateModelMixin, RetrieveAPIView
-):
+class CurriculumFileView(PersonRelatedMixin, APIPermissionRequiredMixin, UpdateModelMixin, RetrieveAPIView):
     name = "curriculum_file"
     pagination_class = None
     filter_backends = []
