@@ -52,10 +52,11 @@ class IsListingOrHasNotAlreadyCreatedPermission(BasePermission):
         # No object means we are either listing or creating a new admission
         if request.method in SAFE_METHODS:
             return True
-        admission_count = DoctorateAdmission.objects.filter(
-            candidate=request.user.person,
-            status=ChoixStatutProposition.IN_PROGRESS.name,
-        ).count()
+        admission_count = (
+            DoctorateAdmission.objects.filter(candidate=request.user.person)
+            .exclude(status=ChoixStatutProposition.CANCELLED.name)
+            .count()
+        )
         return admission_count < MAXIMUM_AUTORISE
 
 
