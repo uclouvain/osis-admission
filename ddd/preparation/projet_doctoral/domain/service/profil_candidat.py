@@ -24,15 +24,17 @@
 #
 # ##############################################################################
 from admission.ddd.preparation.projet_doctoral.domain.service.i_profil_candidat import IProfilCandidatTranslator
+from admission.ddd.preparation.projet_doctoral.domain.validator.validator_by_business_action import \
+    IdentificationValidatorList
 from osis_common.ddd import interface
 
 
 class ProfilCandidat(interface.DomainService):
     @classmethod
-    def verifier_identification(cls, profil_candidat_translator: 'IProfilCandidatTranslator') -> None:
-        profil_candidat_translator.get
-        # TODO : cherger les
-        raise NotImplementedError
+    def verifier_identification(cls, matricule: str, profil_candidat_translator: 'IProfilCandidatTranslator') -> None:
+        IdentificationValidatorList(
+            identification=profil_candidat_translator.get_identification(matricule),
+        ).validate()
 
     @classmethod
     def verifier_coordonnees(cls, profil_candidat_translator: 'IProfilCandidatTranslator') -> None:

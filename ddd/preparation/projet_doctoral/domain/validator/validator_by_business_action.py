@@ -205,7 +205,7 @@ class ProjetDoctoralValidatorList(TwoStepsMultipleBusinessExceptionListValidator
 
 
 @attr.s(frozen=True, slots=True)
-class PropositionValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+class IdentificationValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
     identification = attr.ib(type='IdentificationDTO')  # type: IdentificationDTO
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:

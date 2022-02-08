@@ -25,9 +25,8 @@
 # ##############################################################################
 from functools import partial
 
-from admission.ddd.preparation.projet_doctoral.domain.model.groupe_de_supervision import GroupeDeSupervision
 from admission.ddd.preparation.projet_doctoral.domain.model.proposition import Proposition
-from admission.ddd.preparation.projet_doctoral.domain.service.i_promoteur import IPromoteurTranslator
+from admission.ddd.preparation.projet_doctoral.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.preparation.projet_doctoral.domain.service.profil_candidat import ProfilCandidat
 from base.ddd.utils.business_validator import execute_functions_and_aggregate_exceptions
 from osis_common.ddd import interface
@@ -38,12 +37,12 @@ class VerifierProposition(interface.DomainService):
     def verifier(
         cls,
         proposition_candidat: Proposition,
-        groupe_de_supervision: GroupeDeSupervision,
-        profil_candidat_translator: IPromoteurTranslator,
+        profil_candidat_translator: IProfilCandidatTranslator,
     ) -> None:
         profil_candidat_service = ProfilCandidat()
         execute_functions_and_aggregate_exceptions(
-            partial(profil_candidat_service.verifier_identification, profil_candidat_translator),
+            partial(profil_candidat_service.verifier_identification, proposition_candidat.matricule_candidat, profil_candidat_translator),
             # partial(profil_candidat_service.verifier_coordonnees, profil_candidat_translator),
             # partial(profil_candidat_service.verifier_curriculum, profil_candidat_translator),
+            # proposition_candidat.verifier()
         )

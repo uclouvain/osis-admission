@@ -45,7 +45,6 @@ class ShouldIdentificationCandidatEtreCompletee(BusinessValidator):
             'pays_nationalite',
             'photo_identite',
             'langue_contact',
-            'pays_nationalite',
         ]
 
         for champ_obligatoire in champs_obligatoires:
@@ -77,3 +76,6 @@ class ShouldIdentificationCandidatEtreCompletee(BusinessValidator):
         if self.identification.numero_passeport:
             if not self.identification.passeport or not self.identification.date_expiration_passeport:
                 raise IdentificationNonCompleteeException
+
+
+        # TODO diviser les validations

@@ -60,9 +60,9 @@ from base.tests.factories.person import PersonFactory
 
 class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
     profil_candidats = [
-        PersonFactory(),
-        PersonFactory(),
-        PersonFactory(),
+        PersonFactory(global_id='user1'),
+        PersonFactory(global_id='user2'),
+        PersonFactory(global_id='user3'),
     ]
 
     @classmethod
@@ -73,15 +73,8 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 matricule=matricule,
                 nom=candidate.person.last_name,
                 prenom=candidate.person.first_name,
-                prenom_d_usage=candidate.person.first_name_in_use,
-                autres_prenoms=candidate.person.middle_name,
                 date_naissance=candidate.person.birth_date,
                 annee_naissance=candidate.person.birth_year,
-                pays_naissance=CountryDTO(
-                    id=candidate.person.birth_country_id,
-                    iso_code=candidate.person.birth_country.iso_code,
-                ),
-                lieu_naissance=candidate.person.birth_place,
                 pays_nationalite=CountryDTO(
                     id=candidate.person.country_of_citizenship_id,
                     iso_code=candidate.person.country_of_citizenship.iso_code,
@@ -89,7 +82,6 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 langue_contact=candidate.person.language,  # +
                 sexe=candidate.person.sex,
                 genre=candidate.person.genre,
-                etat_civil=candidate.person.civil_state,
                 photo_identite=candidate.person.id_photo,
                 carte_identite=candidate.person.id_card,
                 passeport=candidate.person.passport,
@@ -104,3 +96,11 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
             )
         except StopIteration:  # pragma: no cover
             raise CandidatNonTrouveException
+
+    @classmethod
+    def get_coordonnees(cls, matricule: str) -> 'CoordonneesDTO':
+        pass
+
+    @classmethod
+    def get_curriculum(cls, matricule: str) -> 'CurriculumDTO':
+        pass

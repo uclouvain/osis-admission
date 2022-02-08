@@ -42,15 +42,8 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
             matricule=matricule,
             nom=candidat_role.person.last_name,
             prenom=candidat_role.person.first_name,
-            prenom_d_usage=candidat_role.person.first_name_in_use,
-            autres_prenoms=candidat_role.person.middle_name,
             date_naissance=candidat_role.person.birth_date,
             annee_naissance=candidat_role.person.birth_year,
-            pays_naissance=CountryDTO(
-                id=candidat_role.person.birth_country_id,
-                iso_code=candidat_role.person.birth_country.iso_code,
-            ),
-            lieu_naissance=candidat_role.person.birth_place,
             pays_nationalite=CountryDTO(
                 id=candidat_role.person.country_of_citizenship_id,
                 iso_code=candidat_role.person.country_of_citizenship.iso_code,
@@ -58,7 +51,6 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
             langue_contact=candidat_role.person.language,  # +
             sexe=candidat_role.person.sex,
             genre=candidat_role.person.genre,
-            etat_civil=candidat_role.person.civil_state,
             photo_identite=candidat_role.person.id_photo,
             carte_identite=candidat_role.person.id_card,
             passeport=candidat_role.person.passport,
@@ -70,4 +62,13 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                 id=candidat_role.person.last_registration_year_id,
                 year=candidat_role.person.last_registration_year.year,
             )
-    )
+        )
+
+    @classmethod
+    def get_coordonnees(cls, matricule: str) -> 'CoordonneesDTO':
+        pass
+
+    @classmethod
+    def get_curriculum(cls, matricule: str) -> 'CurriculumDTO':
+        pass
+

@@ -151,7 +151,7 @@ class MessageBusCommands(AbstractMessageBusCommands):
             verifier_proposition,
             proposition_repository=PropositionRepository(),
             groupe_supervision_repository=GroupeDeSupervisionRepository(),
-            promoteur_translator=PromoteurTranslator(),
+            profil_candidat_translator=ProfilCandidatTranslator(),
         ),
         ApprouverPropositionCommand: partial(
             approuver_proposition,

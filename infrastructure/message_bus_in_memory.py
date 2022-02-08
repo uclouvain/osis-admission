@@ -37,6 +37,7 @@ from admission.ddd.preparation.projet_doctoral.use_case.read.rechercher_proposit
 from admission.ddd.preparation.projet_doctoral.use_case.read.rechercher_propositions_membre import \
     rechercher_propositions_membre
 from admission.ddd.preparation.projet_doctoral.use_case.read.verifier_projet_service import verifier_projet
+from admission.ddd.preparation.projet_doctoral.use_case.read.verifier_proposition_service import verifier_proposition
 from admission.ddd.preparation.projet_doctoral.use_case.write.approuver_proposition_service import \
     approuver_proposition
 from admission.ddd.preparation.projet_doctoral.use_case.write.completer_proposition_service import \
@@ -59,6 +60,8 @@ from admission.infrastructure.preparation.projet_doctoral.domain.service.in_memo
     DoctoratInMemoryTranslator
 from admission.infrastructure.preparation.projet_doctoral.domain.service.in_memory.membre_CA import \
     MembreCAInMemoryTranslator
+from admission.infrastructure.preparation.projet_doctoral.domain.service.in_memory.profil_candidat import \
+    ProfilCandidatInMemoryTranslator
 from admission.infrastructure.preparation.projet_doctoral.domain.service.in_memory.promoteur import \
     PromoteurInMemoryTranslator
 from admission.infrastructure.preparation.projet_doctoral.domain.service.in_memory.secteur_ucl import \
@@ -141,6 +144,12 @@ class MessageBusInMemoryCommands(AbstractMessageBusCommands):
             proposition_repository=PropositionInMemoryRepository(),
             groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
             promoteur_translator=PromoteurInMemoryTranslator(),
+        ),
+        VerifierPropositionCommand: partial(
+            verifier_proposition,
+            proposition_repository=PropositionInMemoryRepository(),
+            groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
+            profil_candidat_translator=ProfilCandidatInMemoryTranslator(),
         ),
         ApprouverPropositionCommand: partial(
             approuver_proposition,
