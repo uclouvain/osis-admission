@@ -99,7 +99,7 @@ class Proposition(interface.RootEntity):
         return self.statut == ChoixStatutProposition.SIGNING_IN_PROGRESS
 
     def est_en_cours(self):
-        return self.statut == ChoixStatutProposition.IN_PROGRESS
+        return self.statut != ChoixStatutProposition.CANCELLED
 
     def completer(
             self,
