@@ -83,8 +83,8 @@ class CurriculumExperienceView(PersonRelatedMixin, APIPermissionRequiredMixin, A
         )
 
     def get_experience(self) -> Optional[Experience]:
-        """Get the current experience from the pk."""
-        return get_object_or_404(self.get_queryset(), pk=self.kwargs.get("xp"))
+        """Get the current experience from its uuid."""
+        return get_object_or_404(self.get_queryset(), uuid=self.kwargs.get("xp"))
 
 
 class CurriculumExperienceListAndCreateView(CurriculumExperienceView):

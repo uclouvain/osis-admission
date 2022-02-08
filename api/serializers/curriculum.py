@@ -100,7 +100,9 @@ class ExperienceSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Experience
-        fields = '__all__'
+        exclude = [
+            'id'
+        ]
         extra_kwargs = {
             "curriculum_year": {
                 "required": False,

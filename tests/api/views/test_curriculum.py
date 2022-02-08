@@ -115,8 +115,8 @@ class CurriculumTestCase(APITestCase):
         self.assertEqual(len(response.json()), 2)
 
         # The results are sorted in descending chronological order
-        self.assertEqual(response.json()[0].get('id'), second_experience.id)
-        self.assertEqual(response.json()[1].get('id'), first_experience.id)
+        self.assertEqual(response.json()[0].get('uuid'), str(second_experience.uuid))
+        self.assertEqual(response.json()[1].get('uuid'), str(first_experience.uuid))
         self.assertEqual(response.json()[0].get('type'), second_experience.type)
         self.assertEqual(response.json()[0].get('country'), {
             'iso_code': self.country.iso_code,
@@ -231,11 +231,11 @@ class CurriculumTestCase(APITestCase):
             type=ExperienceType.HIGHER_EDUCATION.name,
         )
 
-        detail_url = resolve_url('curriculum', xp=experience.id)
+        detail_url = resolve_url('curriculum', xp=experience.uuid)
         response = self.client.get(detail_url)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.json().get('id'), experience.id)
+        self.assertEqual(response.json().get('uuid'), str(experience.uuid))
         self.assertEqual(response.json().get('type'), experience.type)
         self.assertEqual(response.json().get('country'), {
             'iso_code': self.country.iso_code,
@@ -256,7 +256,7 @@ class CurriculumTestCase(APITestCase):
             type=ExperienceType.HIGHER_EDUCATION.name,
         )
 
-        detail_url = resolve_url('curriculum', xp=experience.id)
+        detail_url = resolve_url('curriculum', xp=experience.uuid)
         response = self.client.get(detail_url)
 
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
@@ -279,7 +279,7 @@ class CurriculumTestCase(APITestCase):
             type=ExperienceType.HIGHER_EDUCATION.name,
         )
 
-        update_url = resolve_url('curriculum', xp=experience.id)
+        update_url = resolve_url('curriculum', xp=experience.uuid)
         response = self.client.put(update_url, data={
             'curriculum_year': second_curriculum_year.id,
             'country': self.country.iso_code,
@@ -287,7 +287,7 @@ class CurriculumTestCase(APITestCase):
         })
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.json().get('id'), experience.id)
+        self.assertEqual(response.json().get('uuid'), str(experience.uuid))
         self.assertEqual(response.json().get('type'), ExperienceType.OTHER_ACTIVITY.name)
         self.assertEqual(response.json().get('curriculum_year'), {
             'id': second_curriculum_year.id,
@@ -313,7 +313,7 @@ class CurriculumTestCase(APITestCase):
         )
         self.admission.valuated_experiences.add(experience)
 
-        update_url = resolve_url('curriculum', xp=experience.id)
+        update_url = resolve_url('curriculum', xp=experience.uuid)
         response = self.client.put(update_url, data={
             'curriculum_year': curriculum_year.id,
             'country': self.country.iso_code,
@@ -338,7 +338,7 @@ class CurriculumTestCase(APITestCase):
 
         self.assertTrue(Experience.objects.filter(pk=experience.id).exists())
 
-        update_url = resolve_url('curriculum', xp=experience.id)
+        update_url = resolve_url('curriculum', xp=experience.uuid)
         response = self.client.delete(update_url)
 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
@@ -362,7 +362,7 @@ class CurriculumTestCase(APITestCase):
 
         self.assertTrue(Experience.objects.filter(pk=experience.id).exists())
 
-        update_url = resolve_url('curriculum', xp=experience.id)
+        update_url = resolve_url('curriculum', xp=experience.uuid)
         response = self.client.delete(update_url)
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)

@@ -1970,9 +1970,6 @@ components:
     ExperienceOutput:
       type: object
       properties:
-        id:
-          type: integer
-          readOnly: true
         curriculum_year:
           type: object
           properties:
@@ -2034,6 +2031,9 @@ components:
           nullable: true
         is_valuated:
           type: boolean
+          readOnly: true
+        uuid:
+          type: string
           readOnly: true
         type:
           $ref: '#/components/schemas/ExperienceType'
@@ -2969,9 +2969,6 @@ components:
     ExperienceInput:
       type: object
       properties:
-        id:
-          type: integer
-          readOnly: true
         academic_year:
           type: integer
           nullable: true
@@ -2981,6 +2978,9 @@ components:
         linguistic_regime:
           type: string
           nullable: true
+        uuid:
+          type: string
+          readOnly: true
         type:
           $ref: '#/components/schemas/ExperienceType'
         institute_name:
