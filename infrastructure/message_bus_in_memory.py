@@ -127,6 +127,11 @@ class MessageBusInMemoryCommands(AbstractMessageBusCommands):
             proposition_repository=PropositionInMemoryRepository(),
             groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
         ),
+        ApprouverPropositionParPdfCommand: partial(
+            approuver_proposition_par_pdf,
+            proposition_repository=PropositionInMemoryRepository(),
+            groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
+        ),
         RefuserPropositionCommand: partial(
             refuser_proposition,
             proposition_repository=PropositionInMemoryRepository(),

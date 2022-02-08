@@ -37,3 +37,4 @@ class SignatureMembreCA(interface.ValueObject):
     commentaire_externe = attr.ib(type=str, default='')
     commentaire_interne = attr.ib(type=str, default='')
     motif_refus = attr.ib(type=str, default='')
+    pdf = attr.ib(type=str, default='')

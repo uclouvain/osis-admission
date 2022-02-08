@@ -196,3 +196,10 @@ class GetCotutelleCommand(interface.CommandRequest):
 @attr.s(frozen=True, slots=True)
 class SupprimerPropositionCommand(interface.CommandRequest):
     uuid_proposition = attr.ib(type=str)
+
+
+@attr.s(frozen=True, slots=True)
+class ApprouverPropositionParPdfCommand(interface.CommandRequest):
+    uuid_proposition = attr.ib(type=str)
+    matricule = attr.ib(type=str)
+    pdf = attr.ib(type=str)
