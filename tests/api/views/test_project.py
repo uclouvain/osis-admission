@@ -189,6 +189,9 @@ class DoctorateAdmissionCreationApiTestCase(APITestCase):
             acronym='CDA',
         ).entity
         cls.doctorate = DoctorateFactory(management_entity=cls.commission)
+        cls.institute = EntityVersionFactory(
+            entity_type=EntityType.INSTITUTE.name,
+        )
 
         cls.create_data = {
             "type_admission": AdmissionType.PRE_ADMISSION.name,
@@ -202,6 +205,7 @@ class DoctorateAdmissionCreationApiTestCase(APITestCase):
             "proposition_programme_doctoral": [],
             "projet_formation_complementaire": [],
             "lettres_recommandation": [],
+            "institut_these": str(cls.institute.uuid),
         }
         cls.url = resolve_url("admission_api_v1:propositions")
 
