@@ -68,6 +68,7 @@ class Candidate(RoleModel):
                 'admission.view_doctorateadmission_supervision': is_admission_request_author,
                 'admission.change_doctorateadmission_supervision': is_admission_request_author & ~invitations_sent,
                 'admission.add_supervision_member': is_admission_request_author & ~invitations_sent,
+                'admission.approve_proposition_by_pdf': is_admission_request_author & invitations_sent,
                 'admission.remove_supervision_member': is_admission_request_author & ~invitations_sent,
             }
         )

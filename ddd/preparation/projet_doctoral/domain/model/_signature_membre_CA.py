@@ -23,6 +23,8 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from typing import List
+
 import attr
 
 from admission.ddd.preparation.projet_doctoral.domain.model._membre_CA import MembreCAIdentity
@@ -37,4 +39,4 @@ class SignatureMembreCA(interface.ValueObject):
     commentaire_externe = attr.ib(type=str, default='')
     commentaire_interne = attr.ib(type=str, default='')
     motif_refus = attr.ib(type=str, default='')
-    pdf = attr.ib(type=str, default='')
+    pdf = attr.ib(type=List[str], factory=list)

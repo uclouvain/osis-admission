@@ -202,4 +202,4 @@ class SupprimerPropositionCommand(interface.CommandRequest):
 class ApprouverPropositionParPdfCommand(interface.CommandRequest):
     uuid_proposition = attr.ib(type=str)
     matricule = attr.ib(type=str)
-    pdf = attr.ib(type=str)
+    pdf = attr.ib(type=List[str], factory=list)

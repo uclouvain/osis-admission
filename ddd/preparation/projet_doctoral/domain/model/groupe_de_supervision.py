@@ -174,7 +174,7 @@ class GroupeDeSupervision(interface.Entity):
     def approuver_par_pdf(
         self,
         signataire_id: Union['PromoteurIdentity', 'MembreCAIdentity'],
-        pdf: str,
+        pdf: List[str],
     ) -> None:
         ApprouverValidatorList(
             groupe_de_supervision=self,
