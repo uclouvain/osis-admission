@@ -253,6 +253,9 @@ class Proposition(interface.RootEntity):
     def verrouiller_proposition_pour_signature(self):
         self.statut = ChoixStatutProposition.SIGNING_IN_PROGRESS
 
+    def deverrouiller_projet_doctoral(self):
+        self.statut = ChoixStatutProposition.IN_PROGRESS
+
     def verifier_projet_doctoral(self):
         """Vérification de la validité du projet doctoral avant demande des signatures"""
         ProjetDoctoralValidatorList(self.type_admission, self.projet, self.financement).validate()

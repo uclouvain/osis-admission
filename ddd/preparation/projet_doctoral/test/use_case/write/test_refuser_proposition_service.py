@@ -28,8 +28,7 @@ from typing import List
 import attr
 from django.test import SimpleTestCase
 
-from admission.ddd.preparation.projet_doctoral.builder.proposition_identity_builder import \
-    PropositionIdentityBuilder
+from admission.ddd.preparation.projet_doctoral.builder.proposition_identity_builder import PropositionIdentityBuilder
 from admission.ddd.preparation.projet_doctoral.commands import RefuserPropositionCommand
 from admission.ddd.preparation.projet_doctoral.domain.model._signature_membre_CA import SignatureMembreCA
 from admission.ddd.preparation.projet_doctoral.domain.model._signature_promoteur import (
@@ -43,10 +42,12 @@ from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions impor
     SignatairePasInviteException,
 )
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
-from admission.infrastructure.preparation.projet_doctoral.repository.in_memory.groupe_de_supervision import \
-    GroupeDeSupervisionInMemoryRepository
-from admission.infrastructure.preparation.projet_doctoral.repository.in_memory.proposition import \
-    PropositionInMemoryRepository
+from admission.infrastructure.preparation.projet_doctoral.repository.in_memory.groupe_de_supervision import (
+    GroupeDeSupervisionInMemoryRepository,
+)
+from admission.infrastructure.preparation.projet_doctoral.repository.in_memory.proposition import (
+    PropositionInMemoryRepository,
+)
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 
 
@@ -114,3 +115,17 @@ class TestRefuserPropositionService(SimpleTestCase):
         cmd = attr.evolve(self.cmd, uuid_proposition='propositioninconnue')
         with self.assertRaises(PropositionNonTrouveeException):
             self.message_bus.invoke(cmd)
+
+    def test_should_reinitialiser_autres_promoteurs(self):
+        cmd = attr.evolve(self.cmd, uuid_proposition='uuid-SC3DP-promoteur-deja-approuve')
+        proposition_id = self.message_bus.invoke(cmd)
+        groupe = self.groupe_de_supervision_repository.get_by_proposition_id(proposition_id)
+        signatures = groupe.signatures_promoteurs  # type:List[SignaturePromoteur]
+        self.assertEqual(len(signatures), 2)
+        self.assertEqual(len(groupe.signatures_membres_CA), 1)
+        self.assertEqual(signatures[0].promoteur_id.matricule, self.matricule_promoteur)
+        self.assertEqual(signatures[0].etat, ChoixEtatSignature.REFUSED)
+        self.assertEqual(signatures[0].commentaire_interne, 'Commentaire interne')
+        self.assertEqual(signatures[0].commentaire_externe, 'Commentaire externe')
+        self.assertEqual(signatures[0].motif_refus, 'Motif de refus')
+        self.assertEqual(signatures[1].etat, ChoixEtatSignature.NOT_INVITED)
