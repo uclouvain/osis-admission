@@ -27,10 +27,9 @@ import datetime
 from uuid import UUID
 from typing import List, Optional, Union
 
-from django.conf import settings
-
 import attr
 
+from admission.ddd.preparation.projet_doctoral.domain.model._candidat_signaletique import CHOIX_LANGUE_CONTACT
 from osis_common.ddd import interface
 
 
@@ -50,36 +49,26 @@ class CountryDTO(interface.DTO):
 
 
 @attr.s(frozen=True, slots=True)
-class AcademicYearDTO(interface.DTO):
-    id = attr.ib(type=str)
-    year = attr.ib(type=int)
-
-
-@attr.s(frozen=True, slots=True)
 class IdentificationDTO(interface.DTO):
     matricule = attr.ib(type=str)
 
-    # Signalétique
-    nom = attr.ib(type=str)
-    prenom = attr.ib(type=str)
-    date_naissance = attr.ib(type=str)
-    annee_naissance = attr.ib(type=int)
-    pays_nationalite = attr.ib(type=CountryDTO)
-    langue_contact = attr.ib(type=settings.LANGUAGES)
-    sexe = attr.ib(type=str)
-    genre = attr.ib(type=str)
+    nom = attr.ib(type=Optional[str])
+    prenom = attr.ib(type=Optional[str])
+    date_naissance = attr.ib(type=Optional[datetime.date])
+    annee_naissance = attr.ib(type=Optional[int])
+    pays_nationalite = attr.ib(type=Optional[CountryDTO])
+    sexe = attr.ib(type=Optional[str])
+    genre = attr.ib(type=Optional[str])
     photo_identite = attr.ib(type=List[str])
 
-    # Pièces d'identité
     carte_identite = attr.ib(type=List[str])
     passeport = attr.ib(type=List[str])
-    numero_registre_national_belge = attr.ib(type=str)
-    numero_carte_identite = attr.ib(type=str)
-    numero_passeport = attr.ib(type=str)
-    date_expiration_passeport = attr.ib(type=str)
+    numero_registre_national_belge = attr.ib(type=Optional[str])
+    numero_carte_identite = attr.ib(type=Optional[str])
+    numero_passeport = attr.ib(type=Optional[str])
+    date_expiration_passeport = attr.ib(type=Optional[datetime.date])
 
-    # Déjà inscrit précédemment ?
-    annee_derniere_inscription = attr.ib(type=AcademicYearDTO)
+    langue_contact = attr.ib(type=CHOIX_LANGUE_CONTACT, default='')
 
 
 @attr.s(frozen=True, slots=True)
@@ -116,13 +105,17 @@ class AutreOccupationDTO(interface.DTO):
 @attr.s(frozen=True, slots=True)
 class CurriculumDTO(interface.DTO):
     fichier_pdf = attr.ib(type=str)
-    occupations = attr.ib(type=List[Union[
-        SuperieurUniversitaireBelgeDTO,
-        SuperieurUniversitaireNonBelgeDTO,
-        SuperieurNonUniversitaireBelgeDTO,
-        SuperieurNonUniversitaireNonBelgeDTO,
-        AutreOccupationDTO,
-    ]])
+    occupations = attr.ib(
+        type=List[
+            Union[
+                SuperieurUniversitaireBelgeDTO,
+                SuperieurUniversitaireNonBelgeDTO,
+                SuperieurNonUniversitaireBelgeDTO,
+                SuperieurNonUniversitaireNonBelgeDTO,
+                AutreOccupationDTO,
+            ]
+        ]
+    )
 
 
 @attr.s(frozen=True, slots=True)

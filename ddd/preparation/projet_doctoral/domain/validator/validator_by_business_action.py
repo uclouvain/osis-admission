@@ -35,11 +35,19 @@ from admission.ddd.preparation.projet_doctoral.domain.model._experience_preceden
     ChoixDoctoratDejaRealise,
 )
 from admission.ddd.preparation.projet_doctoral.domain.model._financement import Financement
+from admission.ddd.preparation.projet_doctoral.domain.model._candidat_signaletique import IdentiteSignaletique
 from admission.ddd.preparation.projet_doctoral.domain.model._membre_CA import MembreCAIdentity
 from admission.ddd.preparation.projet_doctoral.domain.model._promoteur import PromoteurIdentity
 from admission.ddd.preparation.projet_doctoral.domain.validator import *
 from admission.ddd.preparation.projet_doctoral.domain.validator._should_financement_etre_complete import (
     ShouldFinancementEtreComplete,
+)
+from admission.ddd.preparation.projet_doctoral.domain.validator._should_identification_candidat_etre_completee import (
+    ShouldCandidatSpecifierNumeroIdentite,
+    ShouldCandidatBelgeSpecifierNumeroRegistreNationalBelge,
+    ShouldCandidatSpecifierDateOuAnneeNaissance,
+    ShouldCandidatAuthentiquerIdentite,
+    ShouldCandidatAuthentiquerPasseport,
 )
 from admission.ddd.preparation.projet_doctoral.dtos import IdentificationDTO
 from base.ddd.utils.business_validator import TwoStepsMultipleBusinessExceptionListValidator, BusinessValidator
@@ -206,14 +214,49 @@ class ProjetDoctoralValidatorList(TwoStepsMultipleBusinessExceptionListValidator
 
 @attr.s(frozen=True, slots=True)
 class IdentificationValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
-    identification = attr.ib(type='IdentificationDTO')  # type: IdentificationDTO
+    identite_signaletique = attr.ib(type='IdentiteSignaletique')  # type: IdentiteSignaletique
+
+    date_naissance = attr.ib(type=Optional[str])
+    annee_naissance = attr.ib(type=Optional[int])
+
+    numero_registre_national_belge = attr.ib(type=Optional[str])
+    numero_carte_identite = attr.ib(type=Optional[str])
+    carte_identite = attr.ib(type=List[str])
+    numero_passeport = attr.ib(type=Optional[str])
+    passeport = attr.ib(type=List[str])
+    date_expiration_passeport = attr.ib(type=Optional[str])
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
 
     def get_invariants_validators(self) -> List[BusinessValidator]:
         return [
-            ShouldIdentificationCandidatEtreCompletee(self.identification),
+            ShouldSignaletiqueCandidatEtreCompletee(
+                signaletique=self.identite_signaletique,
+            ),
+            ShouldCandidatSpecifierNumeroIdentite(
+                numero_registre_national_belge=self.numero_registre_national_belge,
+                numero_carte_identite=self.numero_carte_identite,
+                numero_passeport=self.numero_passeport,
+            ),
+            ShouldCandidatBelgeSpecifierNumeroRegistreNationalBelge(
+                numero_registre_national_belge=self.numero_registre_national_belge,
+                pays_nationalite=self.identite_signaletique.pays_nationalite,
+            ),
+            ShouldCandidatSpecifierDateOuAnneeNaissance(
+                date_naissance=self.date_naissance,
+                annee_naissance=self.annee_naissance,
+            ),
+            ShouldCandidatAuthentiquerPasseport(
+                numero_passeport=self.numero_passeport,
+                date_expiration_passeport=self.date_expiration_passeport,
+                passeport=self.passeport,
+            ),
+            ShouldCandidatAuthentiquerIdentite(
+                numero_registre_national_belge=self.numero_registre_national_belge,
+                numero_carte_identite=self.numero_carte_identite,
+                carte_identite=self.carte_identite,
+            ),
         ]
 
 

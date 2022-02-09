@@ -23,76 +23,123 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import datetime
+from dataclasses import dataclass
+from typing import List, Optional
+
+from admission.ddd.preparation.projet_doctoral.domain.model._candidat import CandidatIdentity
 from admission.ddd.preparation.projet_doctoral.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import CandidatNonTrouveException
-from admission.ddd.preparation.projet_doctoral.dtos import IdentificationDTO, CountryDTO, AcademicYearDTO
-from base.tests.factories.person import PersonFactory
+from admission.ddd.preparation.projet_doctoral.dtos import IdentificationDTO, CountryDTO
 
 
-# @dataclass
-# class ProfilCandidat:
-#     nom: str
-#     prenom: str
-#     prenom_d_usage: str
-#     autres_prenoms: str
-#     date_naissance: str
-#     annee_naissance: int
-#     pays_naissance: str
-#     lieu_naissance: str
-#     pays_nationalite: str
-#     langue_contact: str
-#     sexe: str
-#     genre: str
-#     etat_civil: str
-#     photo_identite: List[str]
-#
-#     # Pièces d'identité
-#     carte_identite: List[str]
-#     passeport: List[str]
-#     numero_registre_national_belge: str
-#     numero_carte_identite: str
-#     numero_passeport: str
-#     date_expiration_passeport: str
-#
-#     # Déjà inscrit précédemment ?
-#     annee_derniere_inscription: str
+@dataclass
+class ProfilCandidat:
+    global_id: CandidatIdentity
+    nom: Optional[str]
+    prenom: Optional[str]
+    prenom_d_usage: Optional[str]
+    autres_prenoms: Optional[str]
+    date_naissance: Optional[datetime.date]
+    annee_naissance: Optional[int]
+    lieu_naissance: Optional[str]
+    pays_nationalite: Optional[CountryDTO]
+    langue_contact: Optional[str]
+    sexe: Optional[str]
+    genre: Optional[str]
+    photo_identite: List[str]
+
+    # Pièces d'identité
+    carte_identite: List[str]
+    passeport: List[str]
+    numero_registre_national_belge: Optional[str]
+    numero_carte_identite: Optional[str]
+    numero_passeport: Optional[str]
+    date_expiration_passeport: Optional[datetime.date]
 
 
 class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
     profil_candidats = [
-        PersonFactory(global_id='user1'),
-        PersonFactory(global_id='user2'),
-        PersonFactory(global_id='user3'),
+        ProfilCandidat(
+            global_id=CandidatIdentity(
+                matricule='user1',
+            ),
+            nom='Doe',
+            prenom='John',
+            prenom_d_usage='Jerry',
+            autres_prenoms='James',
+            date_naissance=datetime.date(1990, 1, 1),
+            annee_naissance=1990,
+            lieu_naissance='Louvain-La-Neuve',
+            pays_nationalite=CountryDTO(
+                iso_code='BE',
+                id=1,
+            ),
+            langue_contact='fr-be',
+            sexe='M',
+            genre='M',
+            photo_identite=['uuid11'],
+            carte_identite=['uuid12'],
+            passeport=['uuid13'],
+            numero_registre_national_belge='1001',
+            numero_carte_identite='1002',
+            numero_passeport='1003',
+            date_expiration_passeport=datetime.date(2022, 2, 10),
+        ),
+        ProfilCandidat(
+            global_id=CandidatIdentity(
+                matricule='user2',
+            ),
+            nom='Dean',
+            prenom='Jack',
+            prenom_d_usage='Jared',
+            autres_prenoms='Jim',
+            date_naissance=datetime.date(1991, 1, 1),
+            annee_naissance=1991,
+            lieu_naissance='Louvain-La-Neuve',
+            pays_nationalite=CountryDTO(
+                iso_code='BE',
+                id=1,
+            ),
+            langue_contact='fr-be',
+            sexe='M',
+            genre='M',
+            photo_identite=['uuid21'],
+            carte_identite=['uuid22'],
+            passeport=['uuid23'],
+            numero_registre_national_belge='2001',
+            numero_carte_identite='2002',
+            numero_passeport='2003',
+            date_expiration_passeport=datetime.date(2023, 2, 10),
+        ),
     ]
 
     @classmethod
     def get_identification(cls, matricule: str) -> 'IdentificationDTO':
         try:
-            candidate = next(c for c in cls.profil_candidats if c.global_id == matricule)
+            candidate = next(c for c in cls.profil_candidats if c.global_id.matricule == matricule)
             return IdentificationDTO(
                 matricule=matricule,
-                nom=candidate.person.last_name,
-                prenom=candidate.person.first_name,
-                date_naissance=candidate.person.birth_date,
-                annee_naissance=candidate.person.birth_year,
+                nom=candidate.nom,
+                prenom=candidate.prenom,
+                date_naissance=candidate.date_naissance,
+                annee_naissance=candidate.annee_naissance,
                 pays_nationalite=CountryDTO(
-                    id=candidate.person.country_of_citizenship_id,
-                    iso_code=candidate.person.country_of_citizenship.iso_code,
-                ),
-                langue_contact=candidate.person.language,  # +
-                sexe=candidate.person.sex,
-                genre=candidate.person.genre,
-                photo_identite=candidate.person.id_photo,
-                carte_identite=candidate.person.id_card,
-                passeport=candidate.person.passport,
-                numero_registre_national_belge=candidate.person.national_number,
-                numero_carte_identite=candidate.person.id_card_number,
-                numero_passeport=candidate.person.passport_number,
-                date_expiration_passeport=candidate.person.passport_expiration_date,
-                annee_derniere_inscription=AcademicYearDTO(
-                    id=candidate.person.last_registration_year_id,
-                    year=candidate.person.last_registration_year.year,
-                ),
+                    id=candidate.pays_nationalite.id,
+                    iso_code=candidate.pays_nationalite.iso_code,
+                )
+                if candidate.pays_nationalite
+                else None,
+                langue_contact=candidate.langue_contact,
+                sexe=candidate.sexe,
+                genre=candidate.genre,
+                photo_identite=candidate.photo_identite,
+                carte_identite=candidate.carte_identite,
+                passeport=candidate.passeport,
+                numero_registre_national_belge=candidate.numero_registre_national_belge,
+                numero_carte_identite=candidate.numero_carte_identite,
+                numero_passeport=candidate.numero_passeport,
+                date_expiration_passeport=candidate.date_expiration_passeport,
             )
         except StopIteration:  # pragma: no cover
             raise CandidatNonTrouveException

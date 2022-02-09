@@ -220,3 +220,42 @@ class IdentificationNonCompleteeException(BusinessException):
         message = _("Please fill in all the required information in the 'Personal Data > Identification' tab.")
         super().__init__(message, **kwargs)
 
+
+class NumeroIdentiteNonSpecifieException(BusinessException):
+    status_code = "PROPOSITION-26"
+
+    def __init__(self, **kwargs):
+        message = _("Please specify at least one identity number.")
+        super().__init__(message, **kwargs)
+
+
+class NumeroIdentiteBelgeNonSpecifieException(BusinessException):
+    status_code = "PROPOSITION-27"
+
+    def __init__(self, **kwargs):
+        message = _("Please specify your Belgian national register number.")
+        super().__init__(message, **kwargs)
+
+
+class DateOuAnneeNaissanceNonSpecifieeException(BusinessException):
+    status_code = "PROPOSITION-28"
+
+    def __init__(self, **kwargs):
+        message = _("Please specify either your date of birth or your year of birth.")
+        super().__init__(message, **kwargs)
+
+
+class DetailsPasseportNonSpecifiesException(BusinessException):
+    status_code = "PROPOSITION-29"
+
+    def __init__(self, **kwargs):
+        message = _("Please provide the expiry date and a copy of your passport.")
+        super().__init__(message, **kwargs)
+
+
+class CarteIdentiteeNonSpecifieeException(BusinessException):
+    status_code = "PROPOSITION-30"
+
+    def __init__(self, **kwargs):
+        message = _("Please provide a copy of your identity card.")
+        super().__init__(message, **kwargs)

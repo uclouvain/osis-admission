@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -32,15 +32,13 @@ from admission.ddd.preparation.projet_doctoral.repository.i_proposition import I
 
 
 def verifier_proposition(
-        cmd: 'VerifierPropositionCommand',
-        proposition_repository: 'IPropositionRepository',
-        groupe_supervision_repository: 'IGroupeDeSupervisionRepository',
-        profil_candidat_translator: 'IProfilCandidatTranslator',
+    cmd: 'VerifierPropositionCommand',
+    proposition_repository: 'IPropositionRepository',
+    profil_candidat_translator: 'IProfilCandidatTranslator',
 ) -> 'PropositionIdentity':
     # GIVEN
     entity_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
     proposition_candidat = proposition_repository.get(entity_id=entity_id)
-    groupe_de_supervision = groupe_supervision_repository.get_by_proposition_id(entity_id)
 
     # WHEN
     VerifierProposition.verifier(proposition_candidat, profil_candidat_translator)

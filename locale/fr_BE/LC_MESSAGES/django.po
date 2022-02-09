@@ -199,6 +199,9 @@ msgstr "Peut voir les informations relatives aux études secondaires"
 msgid "Candidate"
 msgstr "Candidat"
 
+msgid "Candidate not found."
+msgstr "Candidat non trouvé."
+
 msgid "Candidates"
 msgstr "Candidats"
 
@@ -369,6 +372,24 @@ msgstr "Doctorat déjà réalisé"
 
 msgid "Planned duration"
 msgstr "Durée prévue"
+
+msgid "Please fill in all the required information in the 'Personal Data > Identification' tab."
+msgstr "Merci de compléter intégralement les informations de l'onglet 'Données personnelles > Identification'."
+
+msgid "Please provide a copy of your identity card."
+msgstr "Merci de fournir une copie de votre carte d'identité."
+
+msgid "Please provide the expiry date and a copy of your passport."
+msgstr "Merci de fournir la date d'expiration et une copie de votre passeport."
+
+msgid "Please specify at least one identity number."
+msgstr "Merci de spécifier au-moins un numéro d'identité."
+
+msgid "Please specify either your date of birth or your year of birth."
+msgstr "Merci de spécifier votre date ou votre année de naissance."
+
+msgid "Please specify your Belgian national register number."
+msgstr "Merci de spécifier votre numéro de registre national belge."
 
 msgid "Pre-Admission"
 msgstr "Pré-Admission"

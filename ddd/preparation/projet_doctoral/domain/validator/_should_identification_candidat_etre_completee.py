@@ -23,18 +23,27 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from typing import List, Optional
+
 import attr
 
-from admission.ddd.preparation.projet_doctoral.dtos import IdentificationDTO
+from admission.ddd.preparation.projet_doctoral.domain.model._candidat_signaletique import IdentiteSignaletique
 from base.ddd.utils.business_validator import BusinessValidator
-from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import IdentificationNonCompleteeException
+from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import (
+    IdentificationNonCompleteeException,
+    NumeroIdentiteBelgeNonSpecifieException,
+    DateOuAnneeNaissanceNonSpecifieeException,
+    DetailsPasseportNonSpecifiesException,
+    CarteIdentiteeNonSpecifieeException,
+    NumeroIdentiteNonSpecifieException,
+)
 
-BE_ISO_CODE = "BE"  # TODO constant ?
+BE_ISO_CODE = 'BE'
 
 
 @attr.s(frozen=True, slots=True)
-class ShouldIdentificationCandidatEtreCompletee(BusinessValidator):
-    identification = attr.ib(type="IdentificationDTO")  # type: IdentificationDTO
+class ShouldSignaletiqueCandidatEtreCompletee(BusinessValidator):
+    signaletique = attr.ib(type='IdentiteSignaletique')  # type: IdentiteSignaletique
 
     def validate(self, *args, **kwargs):
         champs_obligatoires = [
@@ -46,36 +55,58 @@ class ShouldIdentificationCandidatEtreCompletee(BusinessValidator):
             'photo_identite',
             'langue_contact',
         ]
-
-        for champ_obligatoire in champs_obligatoires:
-            if not champ_obligatoire:
-                raise IdentificationNonCompleteeException
-
-        # TODO ne pas le demander s'il a eu une inscription identifiée précédemment
-        if self.identification.annee_derniere_inscription is not None:
+        if not all([getattr(self.signaletique, champ_obligatoire) for champ_obligatoire in champs_obligatoires]):
             raise IdentificationNonCompleteeException
 
-        if not (self.identification.date_naissance or self.identification.annee_naissance):
-            raise IdentificationNonCompleteeException
 
-        if self.identification.pays_nationalite.iso_code == BE_ISO_CODE:
-            if not self.identification.numero_registre_national_belge:
-                raise IdentificationNonCompleteeException
-        else:
-            if not any((
-                self.identification.numero_registre_national_belge,
-                self.identification.numero_carte_identite,
-                self.identification.numero_passeport
-            ),):
-                raise IdentificationNonCompleteeException
+@attr.s(frozen=True, slots=True)
+class ShouldCandidatSpecifierNumeroIdentite(BusinessValidator):
+    numero_registre_national_belge = attr.ib(type=Optional[str])
+    numero_carte_identite = attr.ib(type=Optional[str])
+    numero_passeport = attr.ib(type=Optional[str])
 
-        if self.identification.numero_registre_national_belge or self.identification.numero_carte_identite:
-            if not self.identification.carte_identite:
-                raise IdentificationNonCompleteeException
-
-        if self.identification.numero_passeport:
-            if not self.identification.passeport or not self.identification.date_expiration_passeport:
-                raise IdentificationNonCompleteeException
+    def validate(self, *args, **kwargs):
+        if not (self.numero_registre_national_belge or self.numero_carte_identite or self.numero_passeport):
+            raise NumeroIdentiteNonSpecifieException
 
 
-        # TODO diviser les validations
+@attr.s(frozen=True, slots=True)
+class ShouldCandidatBelgeSpecifierNumeroRegistreNationalBelge(BusinessValidator):
+    numero_registre_national_belge = attr.ib(type=Optional[str])
+    pays_nationalite = attr.ib(type=Optional[str])
+
+    def validate(self, *args, **kwargs):
+        if self.pays_nationalite == BE_ISO_CODE and not self.numero_registre_national_belge:
+            raise NumeroIdentiteBelgeNonSpecifieException
+
+
+@attr.s(frozen=True, slots=True)
+class ShouldCandidatSpecifierDateOuAnneeNaissance(BusinessValidator):
+    date_naissance = attr.ib(type=Optional[str])
+    annee_naissance = attr.ib(type=Optional[int])
+
+    def validate(self, *args, **kwargs):
+        if not (self.date_naissance or self.annee_naissance):
+            raise DateOuAnneeNaissanceNonSpecifieeException
+
+
+@attr.s(frozen=True, slots=True)
+class ShouldCandidatAuthentiquerPasseport(BusinessValidator):
+    numero_passeport = attr.ib(type=Optional[str])
+    passeport = attr.ib(type=List[str])
+    date_expiration_passeport = attr.ib(type=Optional[str])
+
+    def validate(self, *args, **kwargs):
+        if self.numero_passeport and (not self.passeport or not self.date_expiration_passeport):
+            raise DetailsPasseportNonSpecifiesException
+
+
+@attr.s(frozen=True, slots=True)
+class ShouldCandidatAuthentiquerIdentite(BusinessValidator):
+    numero_registre_national_belge = attr.ib(type=Optional[str])
+    numero_carte_identite = attr.ib(type=Optional[str])
+    carte_identite = attr.ib(type=List[str])
+
+    def validate(self, *args, **kwargs):
+        if (self.numero_registre_national_belge or self.numero_carte_identite) and not self.carte_identite:
+            raise CarteIdentiteeNonSpecifieeException

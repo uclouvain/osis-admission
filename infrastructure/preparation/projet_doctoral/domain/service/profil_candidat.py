@@ -23,45 +23,40 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.auth.roles.candidate import Candidate
 from admission.ddd.preparation.projet_doctoral.domain.service.i_profil_candidat import IProfilCandidatTranslator
-from admission.ddd.preparation.projet_doctoral.dtos import IdentificationDTO, AcademicYearDTO, CountryDTO
+from admission.ddd.preparation.projet_doctoral.dtos import IdentificationDTO, CountryDTO
+from base.models.person import Person
 
 
 class ProfilCandidatTranslator(IProfilCandidatTranslator):
     @classmethod
     def get_identification(cls, matricule: str) -> 'IdentificationDTO':
-        candidat_role = Candidate.objects.select_related(
-            'person',
-            'person__birth_country',
-            'person__country_of_citizenship',
-            'person__last_registration_year',
-        ).get(person__global_id=matricule)
+        person = Person.objects.select_related(
+            'country_of_citizenship',
+        ).get(global_id=matricule)
 
         return IdentificationDTO(
             matricule=matricule,
-            nom=candidat_role.person.last_name,
-            prenom=candidat_role.person.first_name,
-            date_naissance=candidat_role.person.birth_date,
-            annee_naissance=candidat_role.person.birth_year,
+            nom=person.last_name,
+            prenom=person.first_name,
+            date_naissance=person.birth_date,
+            annee_naissance=person.birth_year,
             pays_nationalite=CountryDTO(
-                id=candidat_role.person.country_of_citizenship_id,
-                iso_code=candidat_role.person.country_of_citizenship.iso_code,
-            ),
-            langue_contact=candidat_role.person.language,  # +
-            sexe=candidat_role.person.sex,
-            genre=candidat_role.person.genre,
-            photo_identite=candidat_role.person.id_photo,
-            carte_identite=candidat_role.person.id_card,
-            passeport=candidat_role.person.passport,
-            numero_registre_national_belge=candidat_role.person.national_number,
-            numero_carte_identite=candidat_role.person.id_card_number,
-            numero_passeport=candidat_role.person.passport_number,
-            date_expiration_passeport=candidat_role.person.passport_expiration_date,
-            annee_derniere_inscription=AcademicYearDTO(
-                id=candidat_role.person.last_registration_year_id,
-                year=candidat_role.person.last_registration_year.year,
+                id=person.country_of_citizenship_id,
+                iso_code=person.country_of_citizenship.iso_code,
             )
+            if person.country_of_citizenship
+            else None,
+            langue_contact=person.language,
+            sexe=person.sex,
+            genre=person.gender,
+            photo_identite=person.id_photo,
+            carte_identite=person.id_card,
+            passeport=person.passport,
+            numero_registre_national_belge=person.national_number,
+            numero_carte_identite=person.id_card_number,
+            numero_passeport=person.passport_number,
+            date_expiration_passeport=person.passport_expiration_date,
         )
 
     @classmethod
@@ -71,4 +66,3 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
     @classmethod
     def get_curriculum(cls, matricule: str) -> 'CurriculumDTO':
         pass
-
