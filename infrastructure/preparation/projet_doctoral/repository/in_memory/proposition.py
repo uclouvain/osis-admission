@@ -34,6 +34,7 @@ from admission.ddd.preparation.projet_doctoral.test.factory.proposition import (
     PropositionAdmissionSC3DPAvecMembresEtCotutelleFactory,
     PropositionAdmissionSC3DPAvecMembresFactory,
     PropositionAdmissionSC3DPAvecMembresInvitesFactory,
+    PropositionAdmissionSC3DPAvecPromoteurDejaApprouveFactory,
     PropositionAdmissionSC3DPMinimaleCotutelleAvecPromoteurExterneFactory,
     PropositionAdmissionSC3DPMinimaleCotutelleSansPromoteurExterneFactory,
     PropositionAdmissionSC3DPMinimaleFactory,
@@ -74,6 +75,7 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
             PropositionAdmissionSC3DPSansPromoteurFactory(),
             PropositionAdmissionSC3DPSansMembreCAFactory(),
             PropositionAdmissionESP3DPMinimaleFactory(),
+            PropositionAdmissionSC3DPAvecPromoteurDejaApprouveFactory(),
         ]
 
     @classmethod

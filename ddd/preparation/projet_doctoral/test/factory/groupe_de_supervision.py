@@ -217,3 +217,20 @@ class GroupeDeSupervisionSC3DPSansMembresCAFactory(_GroupeDeSupervisionFactory):
         _SignaturePromoteurFactory(promoteur_id__matricule='promoteur-SC3DP-unique', etat=ChoixEtatSignature.INVITED)
     ])
     signatures_membres_CA: List[SignatureMembreCA] = []
+
+
+class GroupeDeSupervisionSC3DPAvecPromoteurDejaApprouveEtAutrePromoteurFactory(_GroupeDeSupervisionFactory):
+    proposition_id = factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-SC3DP-promoteur-deja-approuve')
+    signatures_promoteurs = factory.LazyFunction(
+        lambda: [
+            _SignaturePromoteurFactory(promoteur_id__matricule='promoteur-SC3DP', etat=ChoixEtatSignature.INVITED),
+            _SignaturePromoteurFactory(
+                promoteur_id__matricule='promoteur-SC3DP-deja-approuve',
+                etat=ChoixEtatSignature.APPROVED,
+            ),
+        ]
+    )
+    signatures_membres_CA = factory.LazyFunction(
+        lambda: [_SignatureMembreCAFactory(membre_CA_id__matricule='membre-ca-SC3DP', etat=ChoixEtatSignature.INVITED)]
+    )
+    cotutelle = pas_de_cotutelle
