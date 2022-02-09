@@ -6,7 +6,7 @@ from .identifier_membre_CA_service import identifier_membre_CA
 from .identifier_promoteur_service import identifier_promoteur
 from .initier_proposition_service import initier_proposition
 from .refuser_proposition_service import refuser_proposition
-from .soumettre_proposition_service import finaliser_proposition
+from .soumettre_proposition_service import soumettre_proposition
 from .supprimer_membre_CA_service import supprimer_membre_CA
 from .supprimer_promoteur_service import supprimer_promoteur
 from .supprimer_proposition_service import supprimer_proposition

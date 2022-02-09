@@ -78,7 +78,7 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
             PropositionAdmissionESP3DPMinimaleFactory(),
             PropositionAdmissionSC3DPAvecPromoteurDejaApprouveFactory(),
             PropositionAdmissionSC3DPMinimaleFactoryWithMatricule(),
-            infrastructure / message_bus_in_memory.py        ]
+        ]
 
     @classmethod
     def save(cls, entity: 'Proposition') -> None:

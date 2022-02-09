@@ -39,9 +39,7 @@ from admission.ddd.preparation.projet_doctoral.dtos import CountryDTO
 from admission.ddd.preparation.projet_doctoral.test.factory.proposition import (
     PropositionAdmissionSC3DPMinimaleFactoryWithMatricule,
 )
-from admission.ddd.preparation.projet_doctoral.test.factory.person import PersonneConnueUclDTOFactory
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
-<<<<<<< HEAD
 from admission.infrastructure.preparation.projet_doctoral.domain.service.in_memory.profil_candidat import (
     ProfilCandidatInMemoryTranslator,
 )
@@ -49,12 +47,7 @@ from admission.infrastructure.preparation.projet_doctoral.repository.in_memory.p
     PropositionInMemoryRepository,
 )
 from admission.tests import TestCase
-=======
->>>>>>> dev
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
-from infrastructure.shared_kernel.personne_connue_ucl.in_memory.personne_connue_ucl import (
-    PersonneConnueUclInMemoryTranslator,
-)
 
 
 class TestVerifierPropositionService(TestCase):
