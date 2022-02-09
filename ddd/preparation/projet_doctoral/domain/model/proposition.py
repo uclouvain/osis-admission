@@ -51,7 +51,6 @@ from admission.ddd.preparation.projet_doctoral.domain.model._financement import 
 )
 from admission.ddd.preparation.projet_doctoral.domain.model._institut import InstitutIdentity
 from admission.ddd.preparation.projet_doctoral.domain.model.doctorat import DoctoratIdentity
-from admission.ddd.preparation.projet_doctoral.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.preparation.projet_doctoral.domain.validator.validator_by_business_action import (
     CompletionPropositionValidatorList,
     ProjetDoctoralValidatorList,

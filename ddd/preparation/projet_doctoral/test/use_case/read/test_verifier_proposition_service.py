@@ -25,6 +25,7 @@
 import mock
 
 from admission.ddd.preparation.projet_doctoral.commands import VerifierPropositionCommand
+from admission.ddd.preparation.projet_doctoral.domain.model._candidat import CandidatIdentity
 from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import (
     IdentificationNonCompleteeException,
     NumeroIdentiteNonSpecifieException,
@@ -32,6 +33,7 @@ from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions impor
     DateOuAnneeNaissanceNonSpecifieeException,
     DetailsPasseportNonSpecifiesException,
     CarteIdentiteeNonSpecifieeException,
+    CandidatNonTrouveException,
 )
 from admission.ddd.preparation.projet_doctoral.dtos import CountryDTO
 from admission.ddd.preparation.projet_doctoral.test.factory.proposition import (
@@ -61,6 +63,12 @@ class TestVerifierPropositionService(TestCase):
     def test_should_verifier_etre_ok_si_complet(self):
         proposition_id = self.message_bus.invoke(self.cmd)
         self.assertEqual(proposition_id.uuid, self.proposition.entity_id.uuid)
+
+    def test_should_retourner_erreur_si_candidat_non_trouve(self):
+        with mock.patch.multiple(self.current_candidat, global_id=CandidatIdentity(matricule='unknown_user_id')):
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                self.message_bus.invoke(self.cmd)
+            self.assertIsInstance(context.exception.exceptions.pop(), CandidatNonTrouveException)
 
     def test_should_retourner_erreur_si_identification_non_completee(self):
         with mock.patch.multiple(self.current_candidat, prenom=''):
