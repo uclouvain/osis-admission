@@ -79,6 +79,7 @@ class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
                     etat=ChoixEtatSignature[actor.state],
                     commentaire_externe=actor.comment,
                     commentaire_interne=actor.supervisionactor.internal_comment,
+                    pdf=actor.pdf_file,
                 )
                 for actor in groupe.actors.filter(supervisionactor__type=ActorType.PROMOTER.name)
             ],
@@ -88,6 +89,7 @@ class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
                     etat=ChoixEtatSignature[actor.state],
                     commentaire_externe=actor.comment,
                     commentaire_interne=actor.supervisionactor.internal_comment,
+                    pdf=actor.pdf_file,
                 )
                 for actor in groupe.actors.filter(supervisionactor__type=ActorType.CA_MEMBER.name)
             ],

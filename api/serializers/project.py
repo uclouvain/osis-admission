@@ -150,6 +150,7 @@ class PropositionDTOSerializer(DTOSerializer):
             'remove_member': ACTION_LINKS['remove_member'],
             'retrieve_supervision': ACTION_LINKS['retrieve_supervision'],
             'request_signatures': ACTION_LINKS['request_signatures'],
+            'approve_by_pdf': ACTION_LINKS['approve_by_pdf'],
             # Curriculum
             'retrieve_curriculum': ACTION_LINKS['retrieve_curriculum'],
             'update_curriculum': ACTION_LINKS['update_curriculum'],

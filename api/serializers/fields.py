@@ -266,4 +266,9 @@ ACTION_LINKS = {
         'method': 'POST',
         'params': ['uuid'],
     },
+    'approve_by_pdf': {
+        'path_name': 'admission_api_v1:approve-by-pdf',
+        'method': 'POST',
+        'params': ['uuid'],
+    },
 }

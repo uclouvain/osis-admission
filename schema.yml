@@ -2033,32 +2033,25 @@ components:
           $ref: '#/components/schemas/ExperienceType'
         institute_name:
           type: string
-          nullable: true
           maxLength: 255
         institute_city:
           type: string
-          nullable: true
           maxLength: 255
         institute_postal_code:
           type: string
-          nullable: true
           maxLength: 20
         education_name:
           type: string
-          nullable: true
           maxLength: 255
         result:
           $ref: '#/components/schemas/Result'
-          nullable: true
         graduation_year:
           type: boolean
           nullable: true
         obtained_grade:
           $ref: '#/components/schemas/Grade'
-          nullable: true
         rank_in_diploma:
           type: string
-          nullable: true
           maxLength: 255
         issue_diploma_date:
           type: string
@@ -2066,7 +2059,6 @@ components:
           nullable: true
         credit_type:
           $ref: '#/components/schemas/CreditType'
-          nullable: true
         entered_credits_number:
           type: integer
           maximum: 2147483647
@@ -2094,7 +2086,6 @@ components:
           nullable: true
         dissertation_title:
           type: string
-          nullable: true
           maxLength: 255
         dissertation_score:
           type: string
@@ -2110,13 +2101,10 @@ components:
           nullable: true
         belgian_education_community:
           $ref: '#/components/schemas/BelgianCommunitiesOfEducation'
-          nullable: true
         study_system:
           $ref: '#/components/schemas/StudySystem'
-          nullable: true
         study_cycle_type:
           $ref: '#/components/schemas/ForeignStudyCycleType'
-          nullable: true
         transcript_translation:
           type: array
           items:
@@ -2129,10 +2117,8 @@ components:
           nullable: true
         activity_type:
           $ref: '#/components/schemas/ActivityType'
-          nullable: true
         other_activity_type:
           type: string
-          nullable: true
           maxLength: 255
         activity_certificate:
           type: array
@@ -2141,7 +2127,6 @@ components:
           nullable: true
         activity_position:
           type: string
-          nullable: true
           maxLength: 255
         institute:
           type: integer
@@ -2326,13 +2311,10 @@ components:
               maxItems: 1
             result:
               $ref: '#/components/schemas/DiplomaResults'
-              nullable: true
             community:
               $ref: '#/components/schemas/BelgianCommunitiesOfEducation'
-              nullable: true
             educational_type:
               $ref: '#/components/schemas/EducationalType'
-              nullable: true
             educational_other:
               type: string
               maxLength: 50
@@ -2442,10 +2424,8 @@ components:
               maxItems: 1
             result:
               $ref: '#/components/schemas/DiplomaResults'
-              nullable: true
             foreign_diploma_type:
               $ref: '#/components/schemas/ForeignDiplomaTypes'
-              nullable: true
             linguistic_regime:
               type: string
               nullable: true
@@ -2469,6 +2449,7 @@ components:
               maxItems: 1
           required:
           - academic_graduation_year
+          - foreign_diploma_type
           - linguistic_regime
           - country
           nullable: true
@@ -2511,15 +2492,15 @@ components:
           nullable: true
         listening_comprehension:
           $ref: '#/components/schemas/LanguageKnowledgeGrade'
-          nullable: true
         speaking_ability:
           $ref: '#/components/schemas/LanguageKnowledgeGrade'
-          nullable: true
         writing_ability:
           $ref: '#/components/schemas/LanguageKnowledgeGrade'
-          nullable: true
       required:
       - language
+      - listening_comprehension
+      - speaking_ability
+      - writing_ability
     LanguageKnowledgeGrade:
       enum:
       - A1
@@ -2654,6 +2635,8 @@ components:
               $ref: '#/components/schemas/ActionLink'
             request_signatures:
               $ref: '#/components/schemas/ActionLink'
+            approve_by_pdf:
+              $ref: '#/components/schemas/ActionLink'
             retrieve_curriculum:
               $ref: '#/components/schemas/ActionLink'
             update_curriculum:
@@ -2748,9 +2731,14 @@ components:
                 type: string
               commentaire_interne:
                 type: string
+              pdf:
+                type: array
+                items:
+                  type: string
             required:
             - promoteur
             - status
+            - pdf
         signatures_membres_CA:
           type: array
           items:
@@ -2778,9 +2766,14 @@ components:
                 type: string
               commentaire_interne:
                 type: string
+              pdf:
+                type: array
+                items:
+                  type: string
             required:
             - membre_CA
             - status
+            - pdf
       required:
       - signatures_promoteurs
       - signatures_membres_CA
@@ -2982,32 +2975,25 @@ components:
           $ref: '#/components/schemas/ExperienceType'
         institute_name:
           type: string
-          nullable: true
           maxLength: 255
         institute_city:
           type: string
-          nullable: true
           maxLength: 255
         institute_postal_code:
           type: string
-          nullable: true
           maxLength: 20
         education_name:
           type: string
-          nullable: true
           maxLength: 255
         result:
           $ref: '#/components/schemas/Result'
-          nullable: true
         graduation_year:
           type: boolean
           nullable: true
         obtained_grade:
           $ref: '#/components/schemas/Grade'
-          nullable: true
         rank_in_diploma:
           type: string
-          nullable: true
           maxLength: 255
         issue_diploma_date:
           type: string
@@ -3015,7 +3001,6 @@ components:
           nullable: true
         credit_type:
           $ref: '#/components/schemas/CreditType'
-          nullable: true
         entered_credits_number:
           type: integer
           maximum: 2147483647
@@ -3043,7 +3028,6 @@ components:
           nullable: true
         dissertation_title:
           type: string
-          nullable: true
           maxLength: 255
         dissertation_score:
           type: string
@@ -3059,13 +3043,10 @@ components:
           nullable: true
         belgian_education_community:
           $ref: '#/components/schemas/BelgianCommunitiesOfEducation'
-          nullable: true
         study_system:
           $ref: '#/components/schemas/StudySystem'
-          nullable: true
         study_cycle_type:
           $ref: '#/components/schemas/ForeignStudyCycleType'
-          nullable: true
         transcript_translation:
           type: array
           items:
@@ -3078,10 +3059,8 @@ components:
           nullable: true
         activity_type:
           $ref: '#/components/schemas/ActivityType'
-          nullable: true
         other_activity_type:
           type: string
-          nullable: true
           maxLength: 255
         activity_certificate:
           type: array
@@ -3090,7 +3069,6 @@ components:
           nullable: true
         activity_position:
           type: string
-          nullable: true
           maxLength: 255
         curriculum_year:
           type: integer
