@@ -118,22 +118,8 @@ class CurriculumTestCase(APITestCase):
         self.assertEqual(response.json()[0].get('uuid'), str(second_experience.uuid))
         self.assertEqual(response.json()[1].get('uuid'), str(first_experience.uuid))
         self.assertEqual(response.json()[0].get('type'), second_experience.type)
-        self.assertEqual(response.json()[0].get('country'), {
-            'iso_code': self.country.iso_code,
-            'name': self.country.name,
-        })
-        self.assertEqual(response.json()[0].get('country'), {
-            'iso_code': self.country.iso_code,
-            'name': self.country.name,
-        })
-        self.assertEqual(response.json()[0].get('program'), {
-            'title': program.title,
-            'uuid': str(program.uuid),
-        })
-        self.assertEqual(response.json()[0].get('linguistic_regime'), {
-            'code': linguistic_regime.code,
-            'name': linguistic_regime.name,
-        })
+        self.assertEqual(response.json()[0].get('country'), self.country.iso_code)
+        self.assertEqual(response.json()[0].get('linguistic_regime'), linguistic_regime.code)
 
     def test_add_experience_via_curriculum_year(self):
         self.client.force_authenticate(self.user)
@@ -152,10 +138,7 @@ class CurriculumTestCase(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.json().get('type'), self.created_data['type'])
-        self.assertEqual(response.json().get('country'), {
-            'iso_code': self.country.iso_code,
-            'name': self.country.name,
-        })
+        self.assertEqual(response.json().get('country'), self.country.iso_code)
         self.assertEqual(response.json().get('curriculum_year'), {
             'academic_year': 2022,
             'id': curriculum_year.id,
@@ -237,10 +220,7 @@ class CurriculumTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json().get('uuid'), str(experience.uuid))
         self.assertEqual(response.json().get('type'), experience.type)
-        self.assertEqual(response.json().get('country'), {
-            'iso_code': self.country.iso_code,
-            'name': self.country.name,
-        })
+        self.assertEqual(response.json().get('country'), self.country.iso_code)
 
     def test_get_one_experience_other_candidate(self):
         self.client.force_authenticate(self.other_user)
@@ -293,10 +273,7 @@ class CurriculumTestCase(APITestCase):
             'id': second_curriculum_year.id,
             'academic_year': 2022,
         })
-        self.assertEqual(response.json().get('country'), {
-            'iso_code': self.country.iso_code,
-            'name': self.country.name,
-        })
+        self.assertEqual(response.json().get('country'), self.country.iso_code)
 
     def test_update_valuated_experience(self):
         self.client.force_authenticate(self.user)

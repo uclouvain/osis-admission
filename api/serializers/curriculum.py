@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -28,16 +28,11 @@ from django.utils.translation import gettext as _
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
-from admission.api.serializers.fields import TranslatedField
 from base.api.serializers.academic_year import RelatedAcademicYearField
-from base.models.education_group_year import EducationGroupYear
-from base.models.organization import Organization
 from base.models.person import Person
 from osis_profile.models import Experience, CurriculumYear
 from reference.api.serializers.country import RelatedCountryField
 from reference.api.serializers.language import RelatedLanguageField
-from reference.models.language import Language
-from reference.models.country import Country
 
 
 # Nested serializers
@@ -52,51 +47,10 @@ class CurriculumYearSerializer(serializers.ModelSerializer):
         )
 
 
-class EducationGroupYearSerializer(serializers.ModelSerializer):
-    title = TranslatedField(field_name='title', en_field_name='title_english')
-
-    class Meta:
-        model = EducationGroupYear
-        fields = (
-            'title',
-            'uuid',
-        )
-
-
-class CountrySerializer(serializers.ModelSerializer):
-    name = TranslatedField(field_name='name', en_field_name='name_en')
-
-    class Meta:
-        model = Country
-        fields = (
-            'iso_code',
-            'name',
-        )
-
-
-class OrganizationSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Organization
-        fields = (
-            'acronym',
-            'name',
-            'uuid',
-        )
-
-
-class LanguageSerializer(serializers.ModelSerializer):
-    name = TranslatedField(field_name='name', en_field_name='name_en')
-
-    class Meta:
-        model = Language
-        fields = (
-            'code',
-            'name',
-        )
-
-
 # Experience serializers
 class ExperienceSerializer(serializers.ModelSerializer):
+    country = RelatedCountryField()
+    linguistic_regime = RelatedLanguageField(required=False)
 
     class Meta:
         model = Experience
@@ -112,17 +66,11 @@ class ExperienceSerializer(serializers.ModelSerializer):
 
 class ExperienceOutputSerializer(ExperienceSerializer):
     curriculum_year = CurriculumYearSerializer()
-    country = CountrySerializer()
-    program = EducationGroupYearSerializer(allow_null=True)
-    linguistic_regime = LanguageSerializer(allow_null=True)
-    institute = OrganizationSerializer(allow_null=True)
     is_valuated = serializers.BooleanField(read_only=True)
 
 
 class ExperienceInputSerializer(ExperienceSerializer):
     academic_year = RelatedAcademicYearField(required=False)
-    country = RelatedCountryField()
-    linguistic_regime = RelatedLanguageField(required=False)
 
     def __init__(self, related_person=None, *args, **kwargs):
         super().__init__(*args, **kwargs)

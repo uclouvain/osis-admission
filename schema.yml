@@ -1970,6 +1970,12 @@ components:
     ExperienceOutput:
       type: object
       properties:
+        country:
+          type: string
+          nullable: true
+        linguistic_regime:
+          type: string
+          nullable: true
         curriculum_year:
           type: object
           properties:
@@ -1981,54 +1987,6 @@ components:
               readOnly: true
           required:
           - academic_year
-        country:
-          type: object
-          properties:
-            iso_code:
-              type: string
-              maxLength: 2
-            name:
-              type: string
-              readOnly: true
-          required:
-          - iso_code
-        program:
-          type: object
-          properties:
-            title:
-              type: string
-              readOnly: true
-            uuid:
-              type: string
-              readOnly: true
-          nullable: true
-        linguistic_regime:
-          type: object
-          properties:
-            code:
-              type: string
-              maxLength: 4
-            name:
-              type: string
-              readOnly: true
-          required:
-          - code
-          nullable: true
-        institute:
-          type: object
-          properties:
-            acronym:
-              type: string
-              maxLength: 20
-            name:
-              type: string
-              maxLength: 255
-            uuid:
-              type: string
-              readOnly: true
-          required:
-          - name
-          nullable: true
         is_valuated:
           type: boolean
           readOnly: true
@@ -2149,12 +2107,15 @@ components:
           type: string
           nullable: true
           maxLength: 255
+        institute:
+          type: integer
+          nullable: true
+        program:
+          type: integer
+          nullable: true
       required:
-      - curriculum_year
       - country
-      - program
-      - linguistic_regime
-      - institute
+      - curriculum_year
       - type
     ExperienceType:
       enum:
@@ -2969,14 +2930,14 @@ components:
     ExperienceInput:
       type: object
       properties:
-        academic_year:
-          type: integer
-          nullable: true
         country:
           type: string
           nullable: true
         linguistic_regime:
           type: string
+          nullable: true
+        academic_year:
+          type: integer
           nullable: true
         uuid:
           type: string
