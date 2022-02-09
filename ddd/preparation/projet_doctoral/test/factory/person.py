@@ -23,18 +23,19 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import factory
 
-import attr
-
-from admission.ddd.preparation.projet_doctoral.domain.model._financement import Financement, financement_non_rempli
-from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import DetailProjetNonCompleteException
-from base.ddd.utils.business_validator import BusinessValidator
+from base.tests.factories.person import generate_global_id
+from ddd.logic.shared_kernel.personne_connue_ucl.dtos import PersonneConnueUclDTO
 
 
-@attr.s(frozen=True, slots=True)
-class ShouldFinancementEtreComplete(BusinessValidator):
-    financement = attr.ib(type=Financement)
+class PersonneConnueUclDTOFactory(factory.Factory):
+    matricule = factory.LazyFunction(generate_global_id)
+    nom = factory.Faker('last_name')
+    prenom = factory.Faker('first_name')
+    email = factory.Faker('email')
+    adresse_professionnelle = None
 
-    def validate(self, *args, **kwargs):
-        if self.financement == financement_non_rempli:
-            raise DetailProjetNonCompleteException
+    class Meta:
+        model = PersonneConnueUclDTO
+        abstract = False

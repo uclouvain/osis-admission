@@ -43,6 +43,7 @@ from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions impor
     PromoteurManquantException,
     PropositionNonTrouveeException,
 )
+from admission.ddd.preparation.projet_doctoral.test.factory.person import PersonneConnueUclDTOFactory
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 from admission.infrastructure.preparation.projet_doctoral.repository.in_memory.groupe_de_supervision import (
     GroupeDeSupervisionInMemoryRepository,
@@ -51,11 +52,20 @@ from admission.infrastructure.preparation.projet_doctoral.repository.in_memory.p
     PropositionInMemoryRepository,
 )
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
+from infrastructure.shared_kernel.personne_connue_ucl.in_memory.personne_connue_ucl import (
+    PersonneConnueUclInMemoryTranslator,
+)
 
 
 class TestDemanderSignaturesService(SimpleTestCase):
     def setUp(self) -> None:
         self.uuid_proposition = 'uuid-SC3DP-promoteur-membre-cotutelle'
+        PersonneConnueUclInMemoryTranslator.personnes_connues_ucl = {
+            PersonneConnueUclDTOFactory(matricule='membre-ca-SC3DP'),
+            PersonneConnueUclDTOFactory(matricule='promoteur-SC3DP'),
+            PersonneConnueUclDTOFactory(matricule='promoteur-SC3DP-unique'),
+            PersonneConnueUclDTOFactory(matricule='candidat'),
+        }
         self.proposition_repository = PropositionInMemoryRepository()
         self.groupe_de_supervision_repository = GroupeDeSupervisionInMemoryRepository()
         self.addCleanup(self.groupe_de_supervision_repository.reset)

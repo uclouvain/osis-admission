@@ -24,10 +24,12 @@
 #
 # ##############################################################################
 from django.core.exceptions import ImproperlyConfigured
+from django.urls import resolve, reverse
 from django.urls.exceptions import NoReverseMatch
-from django.urls import reverse, resolve
-
 from rest_framework import serializers
+
+from base.models.entity_version import EntityVersion
+from base.models.enums.entity_type import INSTITUTE
 from osis_role.contrib.views import APIPermissionRequiredMixin
 
 
@@ -105,8 +107,33 @@ class ActionLinksField(serializers.Field):
         return links
 
 
+class RelatedInstituteField(serializers.CharField, serializers.SlugRelatedField):
+    def __init__(self, **kwargs):
+        kwargs.setdefault('slug_field', 'uuid')
+        kwargs.setdefault('queryset', EntityVersion.objects.filter(entity_type=INSTITUTE))
+        kwargs.setdefault('allow_null', True)
+        super().__init__(**kwargs)
+
+    def to_internal_value(self, data):
+        return serializers.SlugRelatedField.to_internal_value(self, data)
+
+    def to_representation(self, value):
+        return str(serializers.SlugRelatedField.to_representation(self, value))
+
+
 # Available actions
 ACTION_LINKS = {
+    # List
+    # Normal
+    'list_propositions': {
+        'path_name': 'admission_api_v1:propositions',
+        'method': 'GET',
+    },
+    # Supervised
+    'list_supervised': {
+        'path_name': 'admission_api_v1:supervised_propositions',
+        'method': 'GET',
+    },
     # Profile
     # Person
     'retrieve_person': {
@@ -162,10 +189,6 @@ ACTION_LINKS = {
         'path_name': 'admission_api_v1:propositions',
         'method': 'DELETE',
         'params': ['uuid'],
-    },
-    'list_propositions': {
-        'path_name': 'admission_api_v1:propositions',
-        'method': 'GET',
     },
     'retrieve_proposition': {
         'path_name': 'admission_api_v1:propositions',

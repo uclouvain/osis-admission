@@ -23,29 +23,26 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import attr
 
-from admission.ddd.preparation.projet_doctoral.domain.model._detail_projet import DetailProjet
-from admission.ddd.preparation.projet_doctoral.domain.model._enums import ChoixTypeAdmission
-from base.ddd.utils.business_validator import BusinessValidator
-from admission.ddd.preparation.projet_doctoral.business_types import *
-from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import DetailProjetNonCompleteException
+from django.test import SimpleTestCase
+
+from admission.ddd.preparation.projet_doctoral.commands import SearchPropositionsSuperviseesCommand
+from admission.ddd.preparation.projet_doctoral.test.factory.person import PersonneConnueUclDTOFactory
+from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
+from infrastructure.shared_kernel.personne_connue_ucl.in_memory.personne_connue_ucl import (
+    PersonneConnueUclInMemoryTranslator,
+)
 
 
-@attr.s(frozen=True, slots=True)
-class ShouldDetailProjetEtreComplete(BusinessValidator):
-    type_admission = attr.ib(type=ChoixTypeAdmission)
-    projet = attr.ib(type="DetailProjet")  # type: DetailProjet
+class TestRechercherPropositionsSuperviseesService(SimpleTestCase):
+    def setUp(self) -> None:
+        PersonneConnueUclInMemoryTranslator.personnes_connues_ucl = {
+            PersonneConnueUclDTOFactory(matricule='promoteur-SC3DP-unique'),
+            PersonneConnueUclDTOFactory(matricule='0123456789'),
+        }
+        self.cmd = SearchPropositionsSuperviseesCommand(matricule_membre='promoteur-SC3DP-unique')
+        self.message_bus = message_bus_in_memory_instance
 
-    def validate(self, *args, **kwargs):
-        champs_obligatoires = [
-            "titre",
-            "resume",
-            "langue_redaction_these",
-            "documents",
-        ]
-        if self.type_admission == ChoixTypeAdmission.ADMISSION:
-            champs_obligatoires.append("proposition_programme_doctoral")
-
-        if not all([getattr(self.projet, champ_obligatoire) for champ_obligatoire in champs_obligatoires]):
-            raise DetailProjetNonCompleteException
+    def test_should_rechercher_par_matricule(self):
+        results = self.message_bus.invoke(self.cmd)
+        self.assertEqual(results[0].uuid, 'uuid-SC3DP-sans-membre_CA')

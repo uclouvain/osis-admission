@@ -26,7 +26,7 @@
 
 from rest_framework import serializers
 
-from admission.api.serializers.fields import ActionLinksField, ACTION_LINKS
+from admission.api.serializers.fields import ActionLinksField, ACTION_LINKS, RelatedInstituteField
 from admission.contrib.models import AdmissionType, DoctorateAdmission
 from base.models.entity_version import EntityVersion
 from base.models.enums.entity_type import INSTITUTE
@@ -36,8 +36,9 @@ from admission.ddd.preparation.projet_doctoral.commands import (
     InitierPropositionCommand,
 )
 from admission.ddd.preparation.projet_doctoral.domain.model._detail_projet import ChoixLangueRedactionThese
-from admission.ddd.preparation.projet_doctoral.domain.model._experience_precedente_recherche import \
-    ChoixDoctoratDejaRealise
+from admission.ddd.preparation.projet_doctoral.domain.model._experience_precedente_recherche import (
+    ChoixDoctoratDejaRealise,
+)
 from admission.ddd.preparation.projet_doctoral.domain.model._enums import (
     ChoixCommissionProximiteCDEouCLSM,
     ChoixCommissionProximiteCDSS,
@@ -53,6 +54,7 @@ __all__ = [
     "DoctoratDTOSerializer",
     "SectorDTOSerializer",
     "PropositionDTOSerializer",
+    "PropositionSearchDTOSerializer",
 ]
 
 
@@ -176,42 +178,12 @@ class InitierPropositionCommandSerializer(DTOSerializer):
         choices=ChoixLangueRedactionThese.choices(),
         default=ChoixLangueRedactionThese.UNDECIDED.name,
     )
-    institut_these = serializers.SlugRelatedField(
-        allow_null=True,
-        queryset=EntityVersion.objects.filter(entity_type=INSTITUTE),
-        required=False,
-        slug_field='uuid',
-    )
+    institut_these = RelatedInstituteField(required=False)
 
 
-class CompleterPropositionCommandSerializer(DTOSerializer):
+class CompleterPropositionCommandSerializer(InitierPropositionCommandSerializer):
     class Meta:
         source = CompleterPropositionCommand
-
-    type_admission = serializers.ChoiceField(choices=AdmissionType.choices())
-    commission_proximite = serializers.ChoiceField(
-        choices=ChoixCommissionProximiteCDEouCLSM.choices() + ChoixCommissionProximiteCDSS.choices(),
-        allow_blank=True,
-    )
-    documents_projet = serializers.ListField(child=serializers.CharField())
-    graphe_gantt = serializers.ListField(child=serializers.CharField())
-    proposition_programme_doctoral = serializers.ListField(child=serializers.CharField())
-    projet_formation_complementaire = serializers.ListField(child=serializers.CharField())
-    lettres_recommandation = serializers.ListField(child=serializers.CharField())
-    doctorat_deja_realise = serializers.ChoiceField(
-        choices=ChoixDoctoratDejaRealise.choices(),
-        default=ChoixDoctoratDejaRealise.NO.name,
-    )
-    langue_redaction_these = serializers.ChoiceField(
-        choices=ChoixLangueRedactionThese.choices(),
-        default=ChoixLangueRedactionThese.UNDECIDED.name,
-    )
-    institut_these = serializers.SlugRelatedField(
-        allow_null=True,
-        queryset=EntityVersion.objects.filter(entity_type=INSTITUTE),
-        required=False,
-        slug_field='uuid',
-    )
 
 
 class SectorDTOSerializer(serializers.Serializer):

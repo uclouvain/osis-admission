@@ -164,6 +164,8 @@ class PropositionSearchDTO(interface.DTO):
     intitule_doctorat_fr = attr.ib(type=str)
     intitule_doctorat_en = attr.ib(type=str)
     matricule_candidat = attr.ib(type=str)
+    prenom_candidat = attr.ib(type=str)
+    nom_candidat = attr.ib(type=str)
     code_secteur_formation = attr.ib(type=str)
     intitule_secteur_formation = attr.ib(type=str)
     commission_proximite = attr.ib(type=Optional[str])
@@ -196,6 +198,7 @@ class DetailSignaturePromoteurDTO(interface.DTO):
     promoteur = attr.ib(type=PromoteurDTO)
     status = attr.ib(type=str)
     commentaire_externe = attr.ib(type=Optional[str], default='')
+    commentaire_interne = attr.ib(type=Optional[str], default='')
 
 
 @attr.s(frozen=True, slots=True)
@@ -203,6 +206,7 @@ class DetailSignatureMembreCADTO(interface.DTO):
     membre_CA = attr.ib(type=MembreCADTO)
     status = attr.ib(type=str)
     commentaire_externe = attr.ib(type=Optional[str], default='')
+    commentaire_interne = attr.ib(type=Optional[str], default='')
 
 
 @attr.s(frozen=True, slots=True)

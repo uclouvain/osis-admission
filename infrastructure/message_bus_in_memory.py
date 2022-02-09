@@ -26,31 +26,9 @@
 from functools import partial
 
 from admission.ddd.preparation.projet_doctoral.commands import *
-from admission.ddd.preparation.projet_doctoral.use_case.read.get_cotutelle_service import get_cotutelle
-from admission.ddd.preparation.projet_doctoral.use_case.read.get_groupe_de_supervision_service import (
-    get_groupe_de_supervision,
-)
-from admission.ddd.preparation.projet_doctoral.use_case.read.get_proposition_service import get_proposition
-from admission.ddd.preparation.projet_doctoral.use_case.read.rechercher_doctorats_service import rechercher_doctorats
-from admission.ddd.preparation.projet_doctoral.use_case.read.rechercher_propositions_candidat_service import (
-    rechercher_propositions_candidat,
-)
-from admission.ddd.preparation.projet_doctoral.use_case.read.rechercher_propositions_membre import (
-    rechercher_propositions_membre,
-)
 from admission.ddd.preparation.projet_doctoral.use_case.read.verifier_projet_service import verifier_projet
-from admission.ddd.preparation.projet_doctoral.use_case.read.verifier_proposition_service import verifier_proposition
-from admission.ddd.preparation.projet_doctoral.use_case.write.approuver_proposition_service import approuver_proposition
-from admission.ddd.preparation.projet_doctoral.use_case.write.completer_proposition_service import completer_proposition
-from admission.ddd.preparation.projet_doctoral.use_case.write.definir_cotutelle_service import definir_cotutelle
-from admission.ddd.preparation.projet_doctoral.use_case.write.demander_signatures_service import demander_signatures
-from admission.ddd.preparation.projet_doctoral.use_case.write.identifier_membre_CA_service import identifier_membre_CA
-from admission.ddd.preparation.projet_doctoral.use_case.write.identifier_promoteur_service import identifier_promoteur
-from admission.ddd.preparation.projet_doctoral.use_case.write.initier_proposition_service import initier_proposition
-from admission.ddd.preparation.projet_doctoral.use_case.write.refuser_proposition_service import refuser_proposition
-from admission.ddd.preparation.projet_doctoral.use_case.write.supprimer_membre_CA_service import supprimer_membre_CA
-from admission.ddd.preparation.projet_doctoral.use_case.write.supprimer_promoteur_service import supprimer_promoteur
-from admission.ddd.preparation.projet_doctoral.use_case.write.supprimer_proposition_service import supprimer_proposition
+from admission.ddd.preparation.projet_doctoral.use_case.read import *
+from admission.ddd.preparation.projet_doctoral.use_case.write import *
 from admission.infrastructure.preparation.projet_doctoral.domain.service.in_memory.doctorat import (
     DoctoratInMemoryTranslator,
 )
@@ -168,13 +146,15 @@ class MessageBusInMemoryCommands(AbstractMessageBusCommands):
             proposition_repository=PropositionInMemoryRepository(),
             doctorat_translator=DoctoratInMemoryTranslator(),
             secteur_ucl_translator=SecteurUclInMemoryTranslator(),
+            personne_connue_ucl_translator=PersonneConnueUclInMemoryTranslator(),
         ),
-        SearchPropositionsComiteCommand: partial(
-            rechercher_propositions_membre,
+        SearchPropositionsSuperviseesCommand: partial(
+            rechercher_propositions_supervisees,
             proposition_repository=PropositionInMemoryRepository(),
             groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
             doctorat_translator=DoctoratInMemoryTranslator(),
             secteur_ucl_translator=SecteurUclInMemoryTranslator(),
+            personne_connue_ucl_translator=PersonneConnueUclInMemoryTranslator(),
         ),
         SupprimerPropositionCommand: partial(
             supprimer_proposition,

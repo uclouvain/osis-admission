@@ -25,7 +25,7 @@
 # ##############################################################################
 from rest_framework.permissions import BasePermission, SAFE_METHODS
 
-from admission.contrib.models import DoctorateAdmission
+from admission.contrib.models import DoctorateAdmission, SupervisionActor
 from admission.ddd.preparation.projet_doctoral.domain.model._enums import ChoixStatutProposition
 from admission.ddd.preparation.projet_doctoral.domain.service.initier_proposition import MAXIMUM_AUTORISE
 
@@ -52,7 +52,15 @@ class IsListingOrHasNotAlreadyCreatedPermission(BasePermission):
         # No object means we are either listing or creating a new admission
         if request.method in SAFE_METHODS:
             return True
-        return DoctorateAdmission.objects.filter(
-            candidate=request.user.person,
-            status=ChoixStatutProposition.IN_PROGRESS.name,
-        ).count() < MAXIMUM_AUTORISE
+        admission_count = (
+            DoctorateAdmission.objects.filter(candidate=request.user.person)
+            .exclude(status=ChoixStatutProposition.CANCELLED.name)
+            .count()
+        )
+        return admission_count < MAXIMUM_AUTORISE
+
+
+class IsSupervisionMember(BasePermission):
+    def has_permission(self, request, view):
+        # User is among supervision actors
+        return SupervisionActor.objects.filter(person_id=request.user.person.pk).exists()

@@ -26,20 +26,19 @@
 from collections import defaultdict
 
 from rest_framework import mixins, status
-from rest_framework.generics import GenericAPIView, ListCreateAPIView
+from rest_framework.generics import GenericAPIView, ListAPIView, ListCreateAPIView
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
 
 from admission.api import serializers
-from admission.api.permissions import IsListingOrHasNotAlreadyCreatedPermission
+from admission.api.permissions import IsListingOrHasNotAlreadyCreatedPermission, IsSupervisionMember
 from admission.api.schema import ResponseSpecificSchema
-from admission.auth.roles.ca_member import CommitteeMember
-from admission.auth.roles.promoter import Promoter
 from admission.ddd.preparation.projet_doctoral.commands import (
-    CompleterPropositionCommand, GetPropositionCommand,
+    CompleterPropositionCommand,
+    GetPropositionCommand,
     InitierPropositionCommand,
     SearchPropositionsCandidatCommand,
-    SearchPropositionsComiteCommand,
+    SearchPropositionsSuperviseesCommand,
     SupprimerPropositionCommand,
     VerifierProjetCommand,
 )
@@ -54,7 +53,6 @@ from backoffice.settings.rest_framework.common_views import DisplayExceptionsByF
 from backoffice.settings.rest_framework.exception_handler import get_error_data
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from infrastructure.messages_bus import message_bus_instance
-from osis_role.contrib.permissions import _get_roles_assigned_to_user
 from osis_role.contrib.views import APIPermissionRequiredMixin
 
 
@@ -63,6 +61,7 @@ class PropositionListSchema(ResponseSpecificSchema):
         'GET': serializers.PropositionSearchSerializer,
         'POST': (serializers.InitierPropositionCommandSerializer, serializers.PropositionIdentityDTOSerializer),
     }
+    # Force schema to return an object (so that we have the results and the links)
     list_force_object = True
 
     def get_operation_id_base(self, path, method, action):
@@ -72,9 +71,7 @@ class PropositionListSchema(ResponseSpecificSchema):
         schema = super().map_choicefield(field)
         if field.field_name == "commission_proximite":
             self.enums["ChoixCommissionProximite"] = schema
-            return {
-                '$ref': "#/components/schemas/ChoixCommissionProximite"
-            }
+            return {'$ref': "#/components/schemas/ChoixCommissionProximite"}
         return schema
 
 
@@ -94,12 +91,9 @@ class PropositionListView(APIPermissionRequiredMixin, DisplayExceptionsByFieldNa
 
     def list(self, request, **kwargs):
         """List the propositions of the logged in user"""
-        roles = _get_roles_assigned_to_user(request.user)
-        if Promoter in roles or CommitteeMember in roles:
-            cmd = SearchPropositionsComiteCommand(matricule_membre=request.user.person.global_id)
-        else:
-            cmd = SearchPropositionsCandidatCommand(matricule_candidat=request.user.person.global_id)
-        proposition_list = message_bus_instance.invoke(cmd)
+        proposition_list = message_bus_instance.invoke(
+            SearchPropositionsCandidatCommand(matricule_candidat=request.user.person.global_id),
+        )
         serializer = serializers.PropositionSearchSerializer(
             instance={
                 "propositions": proposition_list,
@@ -117,6 +111,33 @@ class PropositionListView(APIPermissionRequiredMixin, DisplayExceptionsByFieldNa
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
+class SupervisedPropositionListSchema(ResponseSpecificSchema):
+    operation_id_base = '_supervised_propositions'
+    serializer_mapping = {
+        'GET': serializers.PropositionSearchDTOSerializer,
+    }
+
+
+class SupervisedPropositionListView(APIPermissionRequiredMixin, ListAPIView):
+    name = "supervised_propositions"
+    schema = SupervisedPropositionListSchema(tags=['propositions'])
+    pagination_class = None
+    filter_backends = []
+    permission_classes = [IsSupervisionMember]
+
+    def list(self, request, **kwargs):
+        """List the propositions of the supervision group member"""
+        proposition_list = message_bus_instance.invoke(
+            SearchPropositionsSuperviseesCommand(matricule_membre=request.user.person.global_id),
+        )
+        serializer = serializers.PropositionSearchDTOSerializer(
+            instance=proposition_list,
+            context=self.get_serializer_context(),
+            many=True,
+        )
+        return Response(serializer.data)
+
+
 class PropositionSchema(ResponseSpecificSchema):
     operation_id_base = '_proposition'
     serializer_mapping = {
@@ -129,9 +150,7 @@ class PropositionSchema(ResponseSpecificSchema):
         schema = super().map_choicefield(field)
         if field.field_name == "commission_proximite":
             self.enums["ChoixCommissionProximite"] = schema
-            return {
-                '$ref': "#/components/schemas/ChoixCommissionProximite"
-            }
+            return {'$ref': "#/components/schemas/ChoixCommissionProximite"}
         return schema
 
 
@@ -157,11 +176,11 @@ class PropositionViewSet(
     def get(self, request, *args, **kwargs):
         """Get a single proposition"""
         proposition = message_bus_instance.invoke(
-            GetPropositionCommand(uuid_proposition=kwargs.get('uuid'))
+            GetPropositionCommand(uuid_proposition=kwargs.get('uuid')),
         )
         serializer = serializers.PropositionDTOSerializer(
             instance=proposition,
-            context=self.get_serializer_context()
+            context=self.get_serializer_context(),
         )
         return Response(serializer.data)
 
@@ -176,7 +195,7 @@ class PropositionViewSet(
     def delete(self, request, *args, **kwargs):
         """Soft-Delete a proposition"""
         proposition_id = message_bus_instance.invoke(
-            SupprimerPropositionCommand(uuid_proposition=kwargs.get('uuid'))
+            SupprimerPropositionCommand(uuid_proposition=kwargs.get('uuid')),
         )
         serializer = serializers.PropositionIdentityDTOSerializer(instance=proposition_id)
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -201,11 +220,12 @@ class VerifyPropositionSchema(ResponseSpecificSchema):
                                     },
                                     "detail": {
                                         "type": "string",
-                                    }
-                                }
-                            }
-                        }}
-                }
+                                    },
+                                },
+                            },
+                        }
+                    }
+                },
             }
         }
 

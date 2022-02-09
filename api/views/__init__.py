@@ -23,6 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from admission.api.views.dashboard import *
 from admission.api.views.autocomplete import *
 from admission.api.views.coordonnees import *
 from admission.api.views.secondary_studies import *
@@ -50,4 +51,5 @@ __all__ = [
     "RequestSignaturesAPIView",
     "LanguagesKnowledgeViewSet",
     "ApprovePropositionAPIView",
+    "DashboardViewSet",
 ]

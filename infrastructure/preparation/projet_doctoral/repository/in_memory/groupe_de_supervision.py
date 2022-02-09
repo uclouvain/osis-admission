@@ -37,6 +37,7 @@ from admission.ddd.preparation.projet_doctoral.dtos import CotutelleDTO
 from admission.ddd.preparation.projet_doctoral.repository.i_groupe_de_supervision import IGroupeDeSupervisionRepository
 from admission.ddd.preparation.projet_doctoral.test.factory.groupe_de_supervision import (
     GroupeDeSupervisionSC3DPAvecMembresInvitesFactory,
+    GroupeDeSupervisionSC3DPAvecPromoteurDejaApprouveEtAutrePromoteurFactory,
     GroupeDeSupervisionSC3DPAvecPromoteurEtMembreEtCotutelleFactory,
     GroupeDeSupervisionSC3DPAvecPromoteurEtMembreEtFinancementIncompletFactory,
     GroupeDeSupervisionSC3DPAvecPromoteurEtMembreEtProjetIncompletFactory,
@@ -70,6 +71,7 @@ class GroupeDeSupervisionInMemoryRepository(InMemoryGenericRepository, IGroupeDe
             GroupeDeSupervisionSC3DPCotutelleSansPromoteurExterneFactory(),
             GroupeDeSupervisionSC3DPSansPromoteurFactory(),
             GroupeDeSupervisionSC3DPSansMembresCAFactory(),
+            GroupeDeSupervisionSC3DPAvecPromoteurDejaApprouveEtAutrePromoteurFactory(),
         ]
 
     @classmethod

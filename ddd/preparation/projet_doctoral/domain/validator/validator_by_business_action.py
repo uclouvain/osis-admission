@@ -39,17 +39,7 @@ from admission.ddd.preparation.projet_doctoral.domain.model._candidat_signaletiq
 from admission.ddd.preparation.projet_doctoral.domain.model._membre_CA import MembreCAIdentity
 from admission.ddd.preparation.projet_doctoral.domain.model._promoteur import PromoteurIdentity
 from admission.ddd.preparation.projet_doctoral.domain.validator import *
-from admission.ddd.preparation.projet_doctoral.domain.validator._should_financement_etre_complete import (
-    ShouldFinancementEtreComplete,
-)
-from admission.ddd.preparation.projet_doctoral.domain.validator._should_identification_candidat_etre_completee import (
-    ShouldCandidatSpecifierNumeroIdentite,
-    ShouldCandidatBelgeSpecifierNumeroRegistreNationalBelge,
-    ShouldCandidatSpecifierDateOuAnneeNaissance,
-    ShouldCandidatAuthentiquerIdentite,
-    ShouldCandidatAuthentiquerPasseport,
-)
-from admission.ddd.preparation.projet_doctoral.dtos import IdentificationDTO
+
 from base.ddd.utils.business_validator import TwoStepsMultipleBusinessExceptionListValidator, BusinessValidator
 
 
@@ -207,8 +197,7 @@ class ProjetDoctoralValidatorList(TwoStepsMultipleBusinessExceptionListValidator
 
     def get_invariants_validators(self) -> List[BusinessValidator]:
         return [
-            ShouldDetailProjetEtreComplete(self.type_admission, self.projet),
-            ShouldFinancementEtreComplete(self.financement),
+            ShouldProjetEtreComplet(self.type_admission, self.projet, self.financement),
         ]
 
 

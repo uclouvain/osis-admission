@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -24,17 +24,16 @@
 #
 # ##############################################################################
 
-from django.test import SimpleTestCase
+from rest_framework import serializers
 
-from admission.ddd.preparation.projet_doctoral.commands import SearchPropositionsComiteCommand
-from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
+from admission.api.serializers.fields import ACTION_LINKS, ActionLinksField
 
 
-class TestRechercherDoctoratMembreService(SimpleTestCase):
-    def setUp(self) -> None:
-        self.cmd = SearchPropositionsComiteCommand(matricule_membre='promoteur-SC3DP')
-        self.message_bus = message_bus_in_memory_instance
-
-    def test_should_rechercher_par_matricule(self):
-        results = self.message_bus.invoke(self.cmd)
-        self.assertEqual(results[0].uuid, 'uuid-SC3DP-promoteur-membre')
+class DashboardSerializer(serializers.Serializer):
+    links = ActionLinksField(
+        actions={
+            'list_propositions': ACTION_LINKS['list_propositions'],
+            # Supervised propositions
+            'list_supervised': ACTION_LINKS['list_supervised'],
+        }
+    )

@@ -36,23 +36,21 @@ from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions impor
     PromoteurManquantException,
     PropositionNonTrouveeException,
 )
+from admission.ddd.preparation.projet_doctoral.test.factory.person import PersonneConnueUclDTOFactory
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
-from admission.infrastructure.preparation.projet_doctoral.repository.in_memory.groupe_de_supervision import (
-    GroupeDeSupervisionInMemoryRepository,
-)
-from admission.infrastructure.preparation.projet_doctoral.repository.in_memory.proposition import (
-    PropositionInMemoryRepository,
-)
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
+from infrastructure.shared_kernel.personne_connue_ucl.in_memory.personne_connue_ucl import (
+    PersonneConnueUclInMemoryTranslator,
+)
 
 
-class TestVerifierProjetService(SimpleTestCase):
+class TestVerifierPropositionService(SimpleTestCase):
     def setUp(self) -> None:
         self.uuid_proposition = 'uuid-SC3DP-promoteur-membre'
-        self.proposition_repository = PropositionInMemoryRepository()
-        self.groupe_de_supervision_repository = GroupeDeSupervisionInMemoryRepository()
-        self.addCleanup(self.groupe_de_supervision_repository.reset)
-        self.addCleanup(self.proposition_repository.reset)
+        PersonneConnueUclInMemoryTranslator.personnes_connues_ucl = {
+            PersonneConnueUclDTOFactory(matricule='promoteur-SC3DP-unique'),
+            PersonneConnueUclDTOFactory(matricule='0123456789'),
+        }
 
         self.message_bus = message_bus_in_memory_instance
         self.cmd = VerifierProjetCommand(uuid_proposition=self.uuid_proposition)
