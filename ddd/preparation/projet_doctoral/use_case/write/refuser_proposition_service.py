@@ -26,14 +26,17 @@
 from admission.ddd.preparation.projet_doctoral.builder.proposition_identity_builder import PropositionIdentityBuilder
 from admission.ddd.preparation.projet_doctoral.commands import RefuserPropositionCommand
 from admission.ddd.preparation.projet_doctoral.domain.model.proposition import PropositionIdentity
+from admission.ddd.preparation.projet_doctoral.domain.service.deverrouiller_projet_doctoral import (
+    DeverrouillerProjetDoctoral,
+)
 from admission.ddd.preparation.projet_doctoral.repository.i_groupe_de_supervision import IGroupeDeSupervisionRepository
 from admission.ddd.preparation.projet_doctoral.repository.i_proposition import IPropositionRepository
 
 
 def refuser_proposition(
-        cmd: 'RefuserPropositionCommand',
-        proposition_repository: 'IPropositionRepository',
-        groupe_supervision_repository: 'IGroupeDeSupervisionRepository',
+    cmd: 'RefuserPropositionCommand',
+    proposition_repository: 'IPropositionRepository',
+    groupe_supervision_repository: 'IGroupeDeSupervisionRepository',
 ) -> 'PropositionIdentity':
     # GIVEN
     entity_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
@@ -43,8 +46,10 @@ def refuser_proposition(
 
     # WHEN
     groupe_de_supervision.refuser(signataire, cmd.commentaire_interne, cmd.commentaire_externe, cmd.motif_refus)
+    DeverrouillerProjetDoctoral().deverrouiller_apres_refus(proposition_candidat, signataire)
 
     # THEN
     groupe_supervision_repository.save(groupe_de_supervision)
+    proposition_repository.save(proposition_candidat)
 
     return proposition_candidat.entity_id

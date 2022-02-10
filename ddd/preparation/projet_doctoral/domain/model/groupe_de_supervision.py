@@ -170,27 +170,36 @@ class GroupeDeSupervision(interface.Entity):
                 )
             )
 
-    def refuser(self,
-                signataire_id: Union['PromoteurIdentity', 'MembreCAIdentity'],
-                commentaire_interne: Optional[str],
-                commentaire_externe: Optional[str],
-                motif_refus: Optional[str],
-                ) -> None:
+    def refuser(
+        self,
+        signataire_id: Union['PromoteurIdentity', 'MembreCAIdentity'],
+        commentaire_interne: Optional[str],
+        commentaire_externe: Optional[str],
+        motif_refus: Optional[str],
+    ) -> None:
         ApprouverValidatorList(
             groupe_de_supervision=self,
             signataire_id=signataire_id,
         ).validate()
         if isinstance(signataire_id, PromoteurIdentity):
-            self.signatures_promoteurs = [s for s in self.signatures_promoteurs if s.promoteur_id != signataire_id]
-            self.signatures_promoteurs.append(
-                SignaturePromoteur(
-                    promoteur_id=signataire_id,
-                    etat=ChoixEtatSignature.REFUSED,
-                    commentaire_interne=commentaire_interne or '',
-                    commentaire_externe=commentaire_externe or '',
-                    motif_refus=motif_refus or '',
-                )
-            )
+            # Add signature state for promoter refusing and reset all others signatures
+            new_states = []
+            for s in self.signatures_promoteurs:
+                if s.promoteur_id != signataire_id:
+                    # Reset all others signatures
+                    new_states.append(attr.evolve(s, etat=ChoixEtatSignature.NOT_INVITED))
+                else:
+                    # Add signature state for promoter refusing
+                    new_states.append(
+                        SignaturePromoteur(
+                            promoteur_id=signataire_id,
+                            etat=ChoixEtatSignature.REFUSED,
+                            commentaire_interne=commentaire_interne or '',
+                            commentaire_externe=commentaire_externe or '',
+                            motif_refus=motif_refus or '',
+                        )
+                    )
+            self.signatures_promoteurs = new_states
         elif isinstance(signataire_id, MembreCAIdentity):  # pragma: no branch
             self.signatures_membres_CA = [s for s in self.signatures_membres_CA if s.membre_CA_id != signataire_id]
             self.signatures_membres_CA.append(
