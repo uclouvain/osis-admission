@@ -43,7 +43,7 @@ urlpatterns = [
     path('languages_knowledge', views.LanguagesKnowledgeViewSet),
     path('propositions/<uuid:uuid>', views.PropositionViewSet),
     path('propositions/<uuid:uuid>/verify_project', views.VerifyProjectView),
-    path('propositions/<uuid:uuid>/submit', views.SubmitPropositionView),
+    path('propositions/<uuid:uuid>/submit', views.SubmitPropositionViewSet),
     path('propositions/<uuid:uuid>/person', views.PersonViewSet),
     path('propositions/<uuid:uuid>/coordonnees', views.CoordonneesViewSet),
     path('propositions/<uuid:uuid>/secondary_studies', views.SecondaryStudiesViewSet),

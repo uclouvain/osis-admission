@@ -266,8 +266,13 @@ class VerifyPropositionSchema(VerifySchema):
     operation_id_base = '_submit_proposition'
     response_description = "Proposition verification errors"
 
+    def get_operation_id(self, path, method):
+        if method == 'GET':
+            return 'verify_proposition'
+        return super().get_operation_id(path, method)
 
-class SubmitPropositionView(APIPermissionRequiredMixin, mixins.RetrieveModelMixin, GenericAPIView):
+
+class SubmitPropositionViewSet(APIPermissionRequiredMixin, mixins.RetrieveModelMixin, GenericAPIView):
     name = "submit-proposition"
     schema = VerifyPropositionSchema()
     pagination_class = None

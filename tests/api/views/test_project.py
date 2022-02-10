@@ -383,6 +383,7 @@ class DoctorateAdmissionApiTestCase(APITestCase):
             'add_member',
             'remove_member',
             'retrieve_supervision',
+            'submit_proposition',
         ]
         all_actions = allowed_actions + [
             'add_approval',
@@ -552,7 +553,7 @@ class DoctorateAdmissionVerifyProjectTestCase(APITestCase):
         'admission.infrastructure.preparation.projet_doctoral.domain.service.promoteur.PromoteurTranslator.est_externe',
         return_value=False,
     )
-    def test_verify_proposition_using_api(self, mock_is_external):
+    def test_verify_project_using_api(self, mock_is_external):
         self.client.force_authenticate(user=self.candidate.user)
         PromoterFactory(process=self.admission.supervision_group)
         CaMemberFactory(process=self.admission.supervision_group)
@@ -564,7 +565,7 @@ class DoctorateAdmissionVerifyProjectTestCase(APITestCase):
         'admission.infrastructure.preparation.projet_doctoral.domain.service.promoteur.PromoteurTranslator.est_externe',
         return_value=False,
     )
-    def test_verify_proposition_using_api_without_ca_members_must_fail(self, mock_is_external):
+    def test_verify_project_using_api_without_ca_members_must_fail(self, mock_is_external):
         self.client.force_authenticate(user=self.candidate.user)
 
         PromoterFactory(process=self.admission.supervision_group)
@@ -573,7 +574,7 @@ class DoctorateAdmissionVerifyProjectTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()[0]['status_code'], MembreCAManquantException.status_code)
 
-    def test_verify_proposition_using_api_without_promoter_must_fail(self):
+    def test_verify_project_using_api_without_promoter_must_fail(self):
         self.client.force_authenticate(user=self.candidate.user)
 
         CaMemberFactory(process=self.admission.supervision_group)
@@ -582,12 +583,12 @@ class DoctorateAdmissionVerifyProjectTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()[0]['status_code'], PromoteurManquantException.status_code)
 
-    def test_admission_doctorate_verify_no_role(self):
+    def test_admission_doctorate_verify_project_no_role(self):
         self.client.force_authenticate(user=self.no_role_user)
         response = self.client.get(self.url, format="json")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    def test_admission_doctorate_verify_other_candidate(self):
+    def test_admission_doctorate_verify_project_other_candidate(self):
         self.client.force_authenticate(user=self.other_candidate_user)
         response = self.client.get(self.url, format="json")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
@@ -599,7 +600,7 @@ class DoctorateAdmissionVerifyProjectTestCase(APITestCase):
 
 
 @override_settings(ROOT_URLCONF='admission.api.url_v1')
-class DoctorateAdmissionVerifyPropositionTestCase(APITestCase):
+class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
 
     @classmethod
     def setUpTestData(cls):
@@ -611,21 +612,29 @@ class DoctorateAdmissionVerifyPropositionTestCase(APITestCase):
         cls.first_candidate.passport = [WriteTokenFactory().token]
         cls.first_candidate.save()
         # Incomplete candidate
-        cls.other_candidate = CandidateFactory(person__first_name="Jim").person
+        cls.second_candidate = CandidateFactory(person__first_name="Jim").person
 
         # Create admissions
         cls.first_admission = DoctorateAdmissionFactory(
             candidate=cls.first_candidate,
         )
         cls.second_admission = DoctorateAdmissionFactory(
-            candidate=cls.other_candidate,
+            candidate=cls.second_candidate,
         )
         # Create other users
         cls.no_role_user = PersonFactory(first_name="Joe").user
 
         # Targeted urls
-        cls.first_admission_url = resolve_url("verify-proposition", uuid=cls.first_admission.uuid)
-        cls.second_admission_url = resolve_url("verify-proposition", uuid=cls.second_admission.uuid)
+        cls.first_admission_url = resolve_url("submit-proposition", uuid=cls.first_admission.uuid)
+        cls.second_admission_url = resolve_url("submit-proposition", uuid=cls.second_admission.uuid)
+
+    def test_assert_methods_not_allowed(self):
+        self.client.force_authenticate(user=self.first_candidate.user)
+        methods_not_allowed = ['post', 'patch', 'put', 'delete']
+
+        for method in methods_not_allowed:
+            response = getattr(self.client, method)(self.first_admission_url)
+            self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 
     def test_verify_valid_proposition_using_api(self):
         self.client.force_authenticate(user=self.first_candidate.user)
@@ -636,7 +645,7 @@ class DoctorateAdmissionVerifyPropositionTestCase(APITestCase):
         self.assertEqual(len(response.json()), 0)
 
     def test_verify_invalid_proposition_using_api(self):
-        self.client.force_authenticate(user=self.other_candidate.user)
+        self.client.force_authenticate(user=self.second_candidate.user)
 
         response = self.client.get(self.second_admission_url)
 
@@ -649,7 +658,7 @@ class DoctorateAdmissionVerifyPropositionTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_admission_doctorate_verify_other_candidate(self):
-        self.client.force_authenticate(user=self.other_candidate.user)
+        self.client.force_authenticate(user=self.second_candidate.user)
         response = self.client.get(self.first_admission_url, format="json")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 

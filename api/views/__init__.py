@@ -41,7 +41,7 @@ __all__ = [
     "PropositionViewSet",
     "PropositionListView",
     "VerifyProjectView",
-    "SubmitPropositionView",
+    "SubmitPropositionViewSet",
     "SecondaryStudiesViewSet",
     "AutocompleteDoctoratView",
     "AutocompleteSectorView",
