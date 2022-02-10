@@ -130,10 +130,8 @@ msgstr "Peut demander les signatures"
 msgid "Can sign diploma"
 msgstr "Peut signer le diplôme"
 
-#, fuzzy
-#| msgid "List of doctorate admissions"
 msgid "Can submit a doctorate admission proposition"
-msgstr "Liste des admissions en doctorat"
+msgstr "Peut soumettre une proposition d'admission en doctorat"
 
 msgid "Can submit thesis"
 msgstr "Peut soumettre la thèse"
