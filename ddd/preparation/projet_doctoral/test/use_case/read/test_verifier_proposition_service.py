@@ -33,7 +33,7 @@ from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions impor
     DateOuAnneeNaissanceNonSpecifieeException,
     DetailsPasseportNonSpecifiesException,
     CarteIdentiteeNonSpecifieeException,
-    CandidatNonTrouveException,
+    CandidatNonTrouveException, AdresseDomicileLegalNonCompleteeException, AdresseCorrespondanceNonCompleteeException,
 )
 from admission.ddd.preparation.projet_doctoral.test.factory.proposition import (
     PropositionAdmissionECGE3DPMinimaleFactory,
@@ -55,6 +55,8 @@ class TestVerifierPropositionService(TestCase):
         self.proposition_repository = PropositionInMemoryRepository()
         self.proposition = PropositionAdmissionECGE3DPMinimaleFactory()
         self.current_candidat = self.candidat_translator.profil_candidats[0]
+        self.adresse_domicile_legal = self.candidat_translator.adresses_candidats[0]
+        self.adresse_correspondance = self.candidat_translator.adresses_candidats[1]
         self.addCleanup(self.proposition_repository.reset)
         self.message_bus = message_bus_in_memory_instance
         self.cmd = VerifierPropositionCommand(uuid_proposition=self.proposition.entity_id.uuid)
@@ -124,3 +126,26 @@ class TestVerifierPropositionService(TestCase):
             with self.assertRaises(MultipleBusinessExceptions) as context:
                 self.message_bus.invoke(self.cmd)
             self.assertIsInstance(context.exception.exceptions.pop(), CarteIdentiteeNonSpecifieeException)
+
+    def test_should_retourner_erreur_si_adresse_domicile_legal_non_renseignee(self):
+        with mock.patch.object(self.adresse_domicile_legal, 'personne', 'unknown_user_id'):
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                self.message_bus.invoke(self.cmd)
+            self.assertIsInstance(context.exception.exceptions.pop(), AdresseDomicileLegalNonCompleteeException)
+
+    def test_should_retourner_erreur_si_adresse_domicile_legal_incomplete(self):
+        with mock.patch.object(self.adresse_domicile_legal, 'pays', None):
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                self.message_bus.invoke(self.cmd)
+            self.assertIsInstance(context.exception.exceptions.pop(), AdresseDomicileLegalNonCompleteeException)
+
+    def test_should_verifier_etre_ok_si_adresse_correspondance_non_renseignee(self):
+        with mock.patch.object(self.adresse_correspondance, 'personne', 'unknown_user_id'):
+            proposition_id = self.message_bus.invoke(self.cmd)
+            self.assertEqual(proposition_id.uuid, self.proposition.entity_id.uuid)
+
+    def test_should_retourner_erreur_si_adresse_correspondance_incomplete(self):
+        with mock.patch.object(self.adresse_correspondance, 'pays', None):
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                self.message_bus.invoke(self.cmd)
+            self.assertIsInstance(context.exception.exceptions.pop(), AdresseCorrespondanceNonCompleteeException)

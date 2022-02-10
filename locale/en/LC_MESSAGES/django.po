@@ -118,9 +118,6 @@ msgstr ""
 msgid "Can sign diploma"
 msgstr ""
 
-msgid "Can submit a doctorate admission proposition"
-msgstr ""
-
 msgid "Can submit thesis"
 msgstr ""
 
@@ -364,7 +361,13 @@ msgstr ""
 msgid "Planned duration"
 msgstr ""
 
+msgid "Please fill in all the required information in the 'Personal Data > Coordinates' tab."
+msgstr ""
+
 msgid "Please fill in all the required information in the 'Personal Data > Identification' tab."
+msgstr ""
+
+msgid "Please fill in all the required information related to your contact address."
 msgstr ""
 
 msgid "Please provide a copy of your identity card."
