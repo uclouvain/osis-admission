@@ -124,6 +124,9 @@ msgstr "Peut demander les signatures"
 msgid "Can sign diploma"
 msgstr "Peut signer le diplôme"
 
+msgid "Can submit a doctorate admission proposition"
+msgstr "Peut soumettre une proposition d'admission en doctorat"
+
 msgid "Can submit thesis"
 msgstr "Peut soumettre la thèse"
 
