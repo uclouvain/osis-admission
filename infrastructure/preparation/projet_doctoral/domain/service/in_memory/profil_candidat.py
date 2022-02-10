@@ -27,15 +27,14 @@ import datetime
 from dataclasses import dataclass
 from typing import List, Optional
 
-from admission.ddd.preparation.projet_doctoral.domain.model._candidat import CandidatIdentity
 from admission.ddd.preparation.projet_doctoral.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import CandidatNonTrouveException
-from admission.ddd.preparation.projet_doctoral.dtos import IdentificationDTO, CountryDTO
+from admission.ddd.preparation.projet_doctoral.dtos import IdentificationDTO
 
 
 @dataclass
 class ProfilCandidat:
-    global_id: CandidatIdentity
+    matricule: str
     nom: Optional[str]
     prenom: Optional[str]
     prenom_d_usage: Optional[str]
@@ -43,7 +42,7 @@ class ProfilCandidat:
     date_naissance: Optional[datetime.date]
     annee_naissance: Optional[int]
     lieu_naissance: Optional[str]
-    pays_nationalite: Optional[CountryDTO]
+    pays_nationalite: Optional[str]
     langue_contact: Optional[str]
     sexe: Optional[str]
     genre: Optional[str]
@@ -61,9 +60,7 @@ class ProfilCandidat:
 class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
     profil_candidats = [
         ProfilCandidat(
-            global_id=CandidatIdentity(
-                matricule='user1',
-            ),
+            matricule='0123456789',
             nom='Doe',
             prenom='John',
             prenom_d_usage='Jerry',
@@ -71,10 +68,7 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
             date_naissance=datetime.date(1990, 1, 1),
             annee_naissance=1990,
             lieu_naissance='Louvain-La-Neuve',
-            pays_nationalite=CountryDTO(
-                iso_code='BE',
-                id=1,
-            ),
+            pays_nationalite='BE',
             langue_contact='fr-be',
             sexe='M',
             genre='M',
@@ -86,50 +80,19 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
             numero_passeport='1003',
             date_expiration_passeport=datetime.date(2022, 2, 10),
         ),
-        ProfilCandidat(
-            global_id=CandidatIdentity(
-                matricule='user2',
-            ),
-            nom='Dean',
-            prenom='Jack',
-            prenom_d_usage='Jared',
-            autres_prenoms='Jim',
-            date_naissance=datetime.date(1991, 1, 1),
-            annee_naissance=1991,
-            lieu_naissance='Louvain-La-Neuve',
-            pays_nationalite=CountryDTO(
-                iso_code='BE',
-                id=1,
-            ),
-            langue_contact='fr-be',
-            sexe='M',
-            genre='M',
-            photo_identite=['uuid21'],
-            carte_identite=['uuid22'],
-            passeport=['uuid23'],
-            numero_registre_national_belge='2001',
-            numero_carte_identite='2002',
-            numero_passeport='2003',
-            date_expiration_passeport=datetime.date(2023, 2, 10),
-        ),
     ]
 
     @classmethod
     def get_identification(cls, matricule: str) -> 'IdentificationDTO':
         try:
-            candidate = next(c for c in cls.profil_candidats if c.global_id.matricule == matricule)
+            candidate = next(c for c in cls.profil_candidats if c.matricule == matricule)
             return IdentificationDTO(
                 matricule=matricule,
                 nom=candidate.nom,
                 prenom=candidate.prenom,
                 date_naissance=candidate.date_naissance,
                 annee_naissance=candidate.annee_naissance,
-                pays_nationalite=CountryDTO(
-                    id=candidate.pays_nationalite.id,
-                    iso_code=candidate.pays_nationalite.iso_code,
-                )
-                if candidate.pays_nationalite
-                else None,
+                pays_nationalite=candidate.pays_nationalite,
                 langue_contact=candidate.langue_contact,
                 sexe=candidate.sexe,
                 genre=candidate.genre,

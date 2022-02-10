@@ -24,7 +24,7 @@
 #
 # ##############################################################################
 from admission.ddd.preparation.projet_doctoral.domain.service.i_profil_candidat import IProfilCandidatTranslator
-from admission.ddd.preparation.projet_doctoral.dtos import IdentificationDTO, CountryDTO
+from admission.ddd.preparation.projet_doctoral.dtos import IdentificationDTO
 from base.models.person import Person
 
 
@@ -41,12 +41,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
             prenom=person.first_name,
             date_naissance=person.birth_date,
             annee_naissance=person.birth_year,
-            pays_nationalite=CountryDTO(
-                id=person.country_of_citizenship_id,
-                iso_code=person.country_of_citizenship.iso_code,
-            )
-            if person.country_of_citizenship
-            else None,
+            pays_nationalite=person.country_of_citizenship.iso_code if person.country_of_citizenship else None,
             langue_contact=person.language,
             sexe=person.sex,
             genre=person.gender,

@@ -170,8 +170,3 @@ class PropositionAdmissionSC3DPSansMembreCAFactory(PropositionAdmissionSC3DPMini
 
 class PropositionAdmissionSC3DPAvecPromoteurDejaApprouveFactory(PropositionAdmissionSC3DPMinimaleFactory):
     entity_id = factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-SC3DP-promoteur-deja-approuve')
-
-
-class PropositionAdmissionSC3DPMinimaleFactoryWithMatricule(PropositionAdmissionSC3DPMinimaleFactory):
-    entity_id = factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-SC3DP-avec-matricule')
-    matricule_candidat = 'user1'

@@ -23,7 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.ddd.preparation.projet_doctoral.domain.model._candidat_signaletique import IdentiteSignaletique
+from admission.ddd.preparation.projet_doctoral.domain.model._candidat_signaletique import CandidatSignaletique
 from admission.ddd.preparation.projet_doctoral.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.preparation.projet_doctoral.domain.validator.validator_by_business_action import (
     IdentificationValidatorList,
@@ -36,10 +36,10 @@ class ProfilCandidat(interface.DomainService):
     def verifier_identification(cls, matricule: str, profil_candidat_translator: 'IProfilCandidatTranslator') -> None:
         identification = profil_candidat_translator.get_identification(matricule)
         IdentificationValidatorList(
-            identite_signaletique=IdentiteSignaletique(
+            identite_signaletique=CandidatSignaletique(
                 annee_naissance=identification.annee_naissance,
                 date_naissance=identification.date_naissance,
-                pays_nationalite=identification.pays_nationalite.iso_code if identification.pays_nationalite else None,
+                pays_nationalite=identification.pays_nationalite,
                 photo_identite=identification.photo_identite,
                 prenom=identification.prenom,
                 langue_contact=identification.langue_contact,
