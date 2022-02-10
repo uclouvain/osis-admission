@@ -6,6 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
+#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -25,7 +26,6 @@
 import mock
 
 from admission.ddd.preparation.projet_doctoral.commands import VerifierPropositionCommand
-from admission.ddd.preparation.projet_doctoral.domain.model._candidat import CandidatIdentity
 from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import (
     IdentificationNonCompleteeException,
     NumeroIdentiteNonSpecifieException,
@@ -35,9 +35,8 @@ from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions impor
     CarteIdentiteeNonSpecifieeException,
     CandidatNonTrouveException,
 )
-from admission.ddd.preparation.projet_doctoral.dtos import CountryDTO
 from admission.ddd.preparation.projet_doctoral.test.factory.proposition import (
-    PropositionAdmissionSC3DPMinimaleFactoryWithMatricule,
+    PropositionAdmissionECGE3DPMinimaleFactory,
 )
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 from admission.infrastructure.preparation.projet_doctoral.domain.service.in_memory.profil_candidat import (
@@ -54,7 +53,7 @@ class TestVerifierPropositionService(TestCase):
     def setUp(self) -> None:
         self.candidat_translator = ProfilCandidatInMemoryTranslator()
         self.proposition_repository = PropositionInMemoryRepository()
-        self.proposition = PropositionAdmissionSC3DPMinimaleFactoryWithMatricule()
+        self.proposition = PropositionAdmissionECGE3DPMinimaleFactory()
         self.current_candidat = self.candidat_translator.profil_candidats[0]
         self.addCleanup(self.proposition_repository.reset)
         self.message_bus = message_bus_in_memory_instance
@@ -65,7 +64,7 @@ class TestVerifierPropositionService(TestCase):
         self.assertEqual(proposition_id.uuid, self.proposition.entity_id.uuid)
 
     def test_should_retourner_erreur_si_candidat_non_trouve(self):
-        with mock.patch.multiple(self.current_candidat, global_id=CandidatIdentity(matricule='unknown_user_id')):
+        with mock.patch.multiple(self.current_candidat, matricule='unknown_user_id'):
             with self.assertRaises(MultipleBusinessExceptions) as context:
                 self.message_bus.invoke(self.cmd)
             self.assertIsInstance(context.exception.exceptions.pop(), CandidatNonTrouveException)
@@ -82,7 +81,7 @@ class TestVerifierPropositionService(TestCase):
             numero_registre_national_belge='',
             numero_carte_identite='',
             numero_passeport='',
-            pays_nationalite=CountryDTO(iso_code='FR', id='2'),
+            pays_nationalite='FR',
         ):
             with self.assertRaises(MultipleBusinessExceptions) as context:
                 self.message_bus.invoke(self.cmd)

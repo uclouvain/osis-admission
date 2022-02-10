@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -29,7 +29,6 @@ from typing import List, Optional, Union
 
 import attr
 
-from admission.ddd.preparation.projet_doctoral.domain.model._candidat_signaletique import CHOIX_LANGUE_CONTACT
 from osis_common.ddd import interface
 
 
@@ -43,12 +42,6 @@ class DoctoratDTO(interface.DTO):
 
 
 @attr.s(frozen=True, slots=True)
-class CountryDTO(interface.DTO):
-    id = attr.ib(type=str)
-    iso_code = attr.ib(type=str)
-
-
-@attr.s(frozen=True, slots=True)
 class IdentificationDTO(interface.DTO):
     matricule = attr.ib(type=str)
 
@@ -56,7 +49,7 @@ class IdentificationDTO(interface.DTO):
     prenom = attr.ib(type=Optional[str])
     date_naissance = attr.ib(type=Optional[datetime.date])
     annee_naissance = attr.ib(type=Optional[int])
-    pays_nationalite = attr.ib(type=Optional[CountryDTO])
+    pays_nationalite = attr.ib(type=Optional[str])
     sexe = attr.ib(type=Optional[str])
     genre = attr.ib(type=Optional[str])
     photo_identite = attr.ib(type=List[str])
@@ -68,7 +61,7 @@ class IdentificationDTO(interface.DTO):
     numero_passeport = attr.ib(type=Optional[str])
     date_expiration_passeport = attr.ib(type=Optional[datetime.date])
 
-    langue_contact = attr.ib(type=CHOIX_LANGUE_CONTACT, default='')
+    langue_contact = attr.ib(type=Optional[str])
 
 
 @attr.s(frozen=True, slots=True)

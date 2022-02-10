@@ -23,6 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import datetime
 from typing import Optional, List, Union
 
 import attr
@@ -35,7 +36,7 @@ from admission.ddd.preparation.projet_doctoral.domain.model._experience_preceden
     ChoixDoctoratDejaRealise,
 )
 from admission.ddd.preparation.projet_doctoral.domain.model._financement import Financement
-from admission.ddd.preparation.projet_doctoral.domain.model._candidat_signaletique import IdentiteSignaletique
+from admission.ddd.preparation.projet_doctoral.domain.model._candidat_signaletique import CandidatSignaletique
 from admission.ddd.preparation.projet_doctoral.domain.model._membre_CA import MembreCAIdentity
 from admission.ddd.preparation.projet_doctoral.domain.model._promoteur import PromoteurIdentity
 from admission.ddd.preparation.projet_doctoral.domain.validator import *
@@ -203,9 +204,9 @@ class ProjetDoctoralValidatorList(TwoStepsMultipleBusinessExceptionListValidator
 
 @attr.s(frozen=True, slots=True)
 class IdentificationValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
-    identite_signaletique = attr.ib(type='IdentiteSignaletique')  # type: IdentiteSignaletique
+    identite_signaletique = attr.ib(type='CandidatSignaletique')  # type: CandidatSignaletique
 
-    date_naissance = attr.ib(type=Optional[str])
+    date_naissance = attr.ib(type=Optional[datetime.date])
     annee_naissance = attr.ib(type=Optional[int])
 
     numero_registre_national_belge = attr.ib(type=Optional[str])
@@ -213,7 +214,7 @@ class IdentificationValidatorList(TwoStepsMultipleBusinessExceptionListValidator
     carte_identite = attr.ib(type=List[str])
     numero_passeport = attr.ib(type=Optional[str])
     passeport = attr.ib(type=List[str])
-    date_expiration_passeport = attr.ib(type=Optional[str])
+    date_expiration_passeport = attr.ib(type=Optional[datetime.date])
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []

@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,25 +23,22 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
+import datetime
 from typing import List, Optional
 
 import attr
-from django.conf import settings
 
-from admission.ddd.preparation.projet_doctoral.domain.model._pays import PaysIdentity
 from osis_common.ddd import interface
-
-CHOIX_LANGUE_CONTACT = settings.LANGUAGES + ['', '']
 
 
 @attr.s(frozen=True, slots=True)
-class IdentiteSignaletique(interface.ValueObject):
+class CandidatSignaletique(interface.ValueObject):
     nom = attr.ib(type=Optional[str])
     prenom = attr.ib(type=Optional[str])
-    date_naissance = attr.ib(type=Optional[str])
+    date_naissance = attr.ib(type=Optional[datetime.date])
     annee_naissance = attr.ib(type=Optional[int])
-    pays_nationalite = attr.ib(type=Optional[PaysIdentity])
+    pays_nationalite = attr.ib(type=Optional[str])
     sexe = attr.ib(type=Optional[str])
     genre = attr.ib(type=Optional[str])
     photo_identite = attr.ib(type=List[str])
-    langue_contact = attr.ib(type=CHOIX_LANGUE_CONTACT, default='')
+    langue_contact = attr.ib(type=Optional[str])

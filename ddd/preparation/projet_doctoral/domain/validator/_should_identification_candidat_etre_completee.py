@@ -23,11 +23,12 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import datetime
 from typing import List, Optional
 
 import attr
 
-from admission.ddd.preparation.projet_doctoral.domain.model._candidat_signaletique import IdentiteSignaletique
+from admission.ddd.preparation.projet_doctoral.domain.model._candidat_signaletique import CandidatSignaletique
 from base.ddd.utils.business_validator import BusinessValidator
 from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import (
     IdentificationNonCompleteeException,
@@ -43,7 +44,7 @@ BE_ISO_CODE = 'BE'
 
 @attr.s(frozen=True, slots=True)
 class ShouldSignaletiqueCandidatEtreCompletee(BusinessValidator):
-    signaletique = attr.ib(type='IdentiteSignaletique')  # type: IdentiteSignaletique
+    signaletique = attr.ib(type='CandidatSignaletique')  # type: CandidatSignaletique
 
     def validate(self, *args, **kwargs):
         champs_obligatoires = [
@@ -82,7 +83,7 @@ class ShouldCandidatBelgeSpecifierNumeroRegistreNationalBelge(BusinessValidator)
 
 @attr.s(frozen=True, slots=True)
 class ShouldCandidatSpecifierDateOuAnneeNaissance(BusinessValidator):
-    date_naissance = attr.ib(type=Optional[str])
+    date_naissance = attr.ib(type=Optional[datetime.date])
     annee_naissance = attr.ib(type=Optional[int])
 
     def validate(self, *args, **kwargs):
@@ -94,7 +95,7 @@ class ShouldCandidatSpecifierDateOuAnneeNaissance(BusinessValidator):
 class ShouldCandidatAuthentiquerPasseport(BusinessValidator):
     numero_passeport = attr.ib(type=Optional[str])
     passeport = attr.ib(type=List[str])
-    date_expiration_passeport = attr.ib(type=Optional[str])
+    date_expiration_passeport = attr.ib(type=Optional[datetime.date])
 
     def validate(self, *args, **kwargs):
         if self.numero_passeport and (not self.passeport or not self.date_expiration_passeport):
