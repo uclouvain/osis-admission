@@ -137,6 +137,7 @@ class PropositionDTOSerializer(DTOSerializer):
             'update_languages': ACTION_LINKS['update_languages'],
             # Proposition
             'destroy_proposition': ACTION_LINKS['destroy_proposition'],
+            'submit_proposition': ACTION_LINKS['submit_proposition'],
             # Project
             'retrieve_proposition': ACTION_LINKS['retrieve_proposition'],
             'update_proposition': ACTION_LINKS['update_proposition'],

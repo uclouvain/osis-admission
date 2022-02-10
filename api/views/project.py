@@ -41,6 +41,7 @@ from admission.ddd.preparation.projet_doctoral.commands import (
     SearchPropositionsSuperviseesCommand,
     SupprimerPropositionCommand,
     VerifierProjetCommand,
+    VerifierPropositionCommand,
 )
 from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import (
     CommissionProximiteInconsistantException,
@@ -201,13 +202,13 @@ class PropositionViewSet(
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-class VerifyPropositionSchema(ResponseSpecificSchema):
-    operation_id_base = '_verify_proposition'
+class VerifySchema(ResponseSpecificSchema):
+    response_description = "Verification errors"
 
     def get_responses(self, path, method):
         return {
             status.HTTP_200_OK: {
-                "description": "Proposition verification errors",
+                "description": self.response_description,
                 "content": {
                     "application/json": {
                         "schema": {
@@ -220,23 +221,59 @@ class VerifyPropositionSchema(ResponseSpecificSchema):
                                     },
                                     "detail": {
                                         "type": "string",
-                                    },
-                                },
-                            },
+                                    }
+                                }
+                            }
                         }
                     }
-                },
+                }
             }
         }
 
 
-class VerifyPropositionView(APIPermissionRequiredMixin, mixins.RetrieveModelMixin, GenericAPIView):
-    name = "verify-proposition"
+class VerifyProjectSchema(VerifySchema):
+    operation_id_base = '_verify_project'
+    response_description = "Project verification errors"
+
+
+class VerifyProjectView(APIPermissionRequiredMixin, mixins.RetrieveModelMixin, GenericAPIView):
+    name = "verify-project"
+    schema = VerifyProjectSchema()
+    permission_mapping = {
+        'GET': 'admission.view_doctorateadmission_project',
+    }
+    pagination_class = None
+    filter_backends = []
+
+    def get_permission_object(self):
+        return get_cached_admission_perm_obj(self.kwargs['uuid'])
+
+    def get(self, request, *args, **kwargs):
+        """Check the project to be OK with all validators."""
+        try:
+            # Trigger the verification command
+            message_bus_instance.invoke(VerifierProjetCommand(uuid_proposition=str(kwargs["uuid"])))
+        except MultipleBusinessExceptions as exc:
+            # Gather all errors for output
+            data = defaultdict(list)
+            for exception in exc.exceptions:
+                data = get_error_data(data, exception, {})
+            return Response(data.get(api_settings.NON_FIELD_ERRORS_KEY, []), status=status.HTTP_200_OK)
+        return Response([], status=status.HTTP_200_OK)
+
+
+class VerifyPropositionSchema(VerifySchema):
+    operation_id_base = '_submit_proposition'
+    response_description = "Proposition verification errors"
+
+
+class SubmitPropositionView(APIPermissionRequiredMixin, mixins.RetrieveModelMixin, GenericAPIView):
+    name = "submit-proposition"
     schema = VerifyPropositionSchema()
     pagination_class = None
     filter_backends = []
     permission_mapping = {
-        'GET': 'admission.view_doctorateadmission_project',
+        'GET': 'admission.submit_doctorateadmission',
     }
 
     def get_permission_object(self):
@@ -246,7 +283,7 @@ class VerifyPropositionView(APIPermissionRequiredMixin, mixins.RetrieveModelMixi
         """Check the proposition to be OK with all validators."""
         try:
             # Trigger the verification command
-            message_bus_instance.invoke(VerifierProjetCommand(uuid_proposition=str(kwargs["uuid"])))
+            message_bus_instance.invoke(VerifierPropositionCommand(uuid_proposition=str(kwargs["uuid"])))
         except MultipleBusinessExceptions as exc:
             # Gather all errors for output
             data = defaultdict(list)

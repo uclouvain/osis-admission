@@ -46,6 +46,7 @@ from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions impor
 )
 from admission.tests.factories import DoctorateAdmissionFactory, WriteTokenFactory
 from admission.tests.factories.doctorate import DoctorateFactory
+from admission.tests.factories.person import CompletePersonFactory
 from admission.tests.factories.roles import CandidateFactory, CddManagerFactory
 from admission.tests.factories.supervision import CaMemberFactory, PromoterFactory, _ProcessFactory
 from base.models.enums.entity_type import EntityType
@@ -527,7 +528,7 @@ class DoctorateAdmissionUpdatingApiTestCase(DoctorateAdmissionApiTestCase):
 
 
 @override_settings(ROOT_URLCONF='admission.api.url_v1')
-class DoctorateAdmissionVerifyTestCase(APITestCase):
+class DoctorateAdmissionVerifyProjectTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
         cls.admission = DoctorateAdmissionFactory(
@@ -545,7 +546,7 @@ class DoctorateAdmissionVerifyTestCase(APITestCase):
         cls.candidate = cls.admission.candidate
         cls.other_candidate_user = CandidateFactory().person.user
         cls.no_role_user = PersonFactory().user
-        cls.url = resolve_url("verify-proposition", uuid=cls.admission.uuid)
+        cls.url = resolve_url("verify-project", uuid=cls.admission.uuid)
 
     @mock.patch(
         'admission.infrastructure.preparation.projet_doctoral.domain.service.promoteur.PromoteurTranslator.est_externe',
@@ -594,4 +595,65 @@ class DoctorateAdmissionVerifyTestCase(APITestCase):
     def test_user_not_logged_assert_not_authorized(self):
         self.client.force_authenticate(user=None)
         response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+
+@override_settings(ROOT_URLCONF='admission.api.url_v1')
+class DoctorateAdmissionVerifyPropositionTestCase(APITestCase):
+
+    @classmethod
+    def setUpTestData(cls):
+        # Create candidates
+        # Complete candidate
+        cls.first_candidate = CandidateFactory(person=CompletePersonFactory()).person
+        cls.first_candidate.id_photo = [WriteTokenFactory().token]
+        cls.first_candidate.id_card = [WriteTokenFactory().token]
+        cls.first_candidate.passport = [WriteTokenFactory().token]
+        cls.first_candidate.save()
+        # Incomplete candidate
+        cls.other_candidate = CandidateFactory(person__first_name="Jim").person
+
+        # Create admissions
+        cls.first_admission = DoctorateAdmissionFactory(
+            candidate=cls.first_candidate,
+        )
+        cls.second_admission = DoctorateAdmissionFactory(
+            candidate=cls.other_candidate,
+        )
+        # Create other users
+        cls.no_role_user = PersonFactory(first_name="Joe").user
+
+        # Targeted urls
+        cls.first_admission_url = resolve_url("verify-proposition", uuid=cls.first_admission.uuid)
+        cls.second_admission_url = resolve_url("verify-proposition", uuid=cls.second_admission.uuid)
+
+    def test_verify_valid_proposition_using_api(self):
+        self.client.force_authenticate(user=self.first_candidate.user)
+
+        response = self.client.get(self.first_admission_url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.json()), 0)
+
+    def test_verify_invalid_proposition_using_api(self):
+        self.client.force_authenticate(user=self.other_candidate.user)
+
+        response = self.client.get(self.second_admission_url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertTrue(len(response.json()) > 0)
+
+    def test_admission_doctorate_verify_no_role(self):
+        self.client.force_authenticate(user=self.no_role_user)
+        response = self.client.get(self.first_admission_url, format="json")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_admission_doctorate_verify_other_candidate(self):
+        self.client.force_authenticate(user=self.other_candidate.user)
+        response = self.client.get(self.first_admission_url, format="json")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_user_not_logged_assert_not_authorized(self):
+        self.client.force_authenticate(user=None)
+        response = self.client.get(self.first_admission_url)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
