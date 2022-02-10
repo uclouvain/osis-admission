@@ -29,7 +29,7 @@ from typing import List, Optional
 
 from admission.ddd.preparation.projet_doctoral.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import CandidatNonTrouveException
-from admission.ddd.preparation.projet_doctoral.dtos import IdentificationDTO
+from admission.ddd.preparation.projet_doctoral.dtos import IdentificationDTO, CoordonneesDTO, AdressePersonnelleDTO
 
 
 @dataclass
@@ -57,6 +57,22 @@ class ProfilCandidat:
     date_expiration_passeport: Optional[datetime.date]
 
 
+@dataclass
+class AdressePersonnelle:
+    rue: Optional[str]
+    code_postal: Optional[str]
+    ville: Optional[str]
+    pays: Optional[str]
+    personne: str
+    type: str
+
+
+@dataclass
+class CoordonneesCandidat:
+    domicile_legal: Optional[AdressePersonnelle]
+    adresse_correspondance = Optional[AdressePersonnelle]
+
+
 class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
     profil_candidats = [
         ProfilCandidat(
@@ -80,6 +96,24 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
             numero_passeport='1003',
             date_expiration_passeport=datetime.date(2022, 2, 10),
         ),
+    ]
+    adresses_candidats = [
+        AdressePersonnelle(
+            personne='0123456789',
+            code_postal='1348',
+            ville='Louvain-La-Neuve',
+            pays='BE',
+            rue="Boulevard de Wallonie",
+            type='RESIDENTIAL',
+        ),
+        AdressePersonnelle(
+            personne='0123456789',
+            code_postal='1348',
+            ville='Louvain-La-Neuve',
+            pays='BE',
+            rue="Place de l'Université",
+            type='CONTACT'
+        )
     ]
 
     @classmethod
@@ -109,7 +143,29 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
 
     @classmethod
     def get_coordonnees(cls, matricule: str) -> 'CoordonneesDTO':
-        pass
+        domicile_legal = next(
+            (a for a in cls.adresses_candidats if a.personne == matricule and a.type == 'RESIDENTIAL'),
+            None,
+        )
+        adresse_correspondance = next(
+            (a for a in cls.adresses_candidats if a.personne == matricule and a.type == 'CONTACT'),
+            None,
+        )
+
+        return CoordonneesDTO(
+            domicile_legal=AdressePersonnelleDTO(
+                rue=domicile_legal.rue,
+                code_postal=domicile_legal.code_postal,
+                ville=domicile_legal.ville,
+                pays=domicile_legal.pays,
+            ) if domicile_legal else None,
+            adresse_correspondance=AdressePersonnelleDTO(
+                rue=adresse_correspondance.rue,
+                code_postal=adresse_correspondance.code_postal,
+                ville=adresse_correspondance.ville,
+                pays=adresse_correspondance.pays,
+            ) if adresse_correspondance else None,
+        )
 
     @classmethod
     def get_curriculum(cls, matricule: str) -> 'CurriculumDTO':

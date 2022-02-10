@@ -259,3 +259,19 @@ class CarteIdentiteeNonSpecifieeException(BusinessException):
     def __init__(self, **kwargs):
         message = _("Please provide a copy of your identity card.")
         super().__init__(message, **kwargs)
+
+
+class AdresseDomicileLegalNonCompleteeException(BusinessException):
+    status_code = "PROPOSITION-31"
+
+    def __init__(self, **kwargs):
+        message = _("Please fill in all the required information in the 'Personal Data > Coordinates' tab.")
+        super().__init__(message, **kwargs)
+
+
+class AdresseCorrespondanceNonCompleteeException(BusinessException):
+    status_code = "PROPOSITION-32"
+
+    def __init__(self, **kwargs):
+        message = _("Please fill in all the required information related to your contact address.")
+        super().__init__(message, **kwargs)

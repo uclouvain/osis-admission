@@ -29,6 +29,7 @@ from typing import Optional, List, Union
 import attr
 
 from admission.ddd.preparation.projet_doctoral.business_types import *
+from admission.ddd.preparation.projet_doctoral.domain.model._candidat_adresse import CandidatAdresse
 from admission.ddd.preparation.projet_doctoral.domain.model._cotutelle import Cotutelle
 from admission.ddd.preparation.projet_doctoral.domain.model._detail_projet import DetailProjet
 from admission.ddd.preparation.projet_doctoral.domain.model._enums import ChoixTypeAdmission
@@ -246,6 +247,25 @@ class IdentificationValidatorList(TwoStepsMultipleBusinessExceptionListValidator
                 numero_registre_national_belge=self.numero_registre_national_belge,
                 numero_carte_identite=self.numero_carte_identite,
                 carte_identite=self.carte_identite,
+            ),
+        ]
+
+
+@attr.s(frozen=True, slots=True)
+class CoordonneesValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+    domicile_legal = attr.ib(type=Optional['CandidatAdresse'])  # type: Optional[CandidatAdresse]
+    adresse_correspondance = attr.ib(type=Optional['CandidatAdresse'])  # type: Optional[CandidatAdresse]
+
+    def get_data_contract_validators(self) -> List[BusinessValidator]:
+        return []
+
+    def get_invariants_validators(self) -> List[BusinessValidator]:
+        return [
+            ShouldAdresseDomicileLegalCandidatEtreCompletee(
+                adresse=self.domicile_legal,
+            ),
+            ShouldAdresseCorrespondanceEtreCompleteeSiSpecifiee(
+                adresse=self.adresse_correspondance
             ),
         ]
 

@@ -23,10 +23,11 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from admission.ddd.preparation.projet_doctoral.domain.model._candidat_adresse import CandidatAdresse
 from admission.ddd.preparation.projet_doctoral.domain.model._candidat_signaletique import CandidatSignaletique
 from admission.ddd.preparation.projet_doctoral.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.preparation.projet_doctoral.domain.validator.validator_by_business_action import (
-    IdentificationValidatorList,
+    IdentificationValidatorList, CoordonneesValidatorList,
 )
 from osis_common.ddd import interface
 
@@ -58,8 +59,23 @@ class ProfilCandidat(interface.DomainService):
         ).validate()
 
     @classmethod
-    def verifier_coordonnees(cls, profil_candidat_translator: 'IProfilCandidatTranslator') -> None:
-        raise NotImplementedError
+    def verifier_coordonnees(cls, matricule: str, profil_candidat_translator: 'IProfilCandidatTranslator') -> None:
+        coordonnees = profil_candidat_translator.get_coordonnees(matricule)
+
+        CoordonneesValidatorList(
+            domicile_legal=CandidatAdresse(
+                code_postal=coordonnees.domicile_legal.code_postal,
+                ville=coordonnees.domicile_legal.ville,
+                pays=coordonnees.domicile_legal.pays,
+                rue=coordonnees.domicile_legal.rue,
+            ) if coordonnees.domicile_legal else None,
+            adresse_correspondance=CandidatAdresse(
+                code_postal=coordonnees.adresse_correspondance.code_postal,
+                ville=coordonnees.adresse_correspondance.ville,
+                pays=coordonnees.adresse_correspondance.pays,
+                rue=coordonnees.adresse_correspondance.rue,
+            ) if coordonnees.adresse_correspondance else None
+        ).validate()
 
     @classmethod
     def verifier_curriculum(cls, profil_candidat_translator: 'IProfilCandidatTranslator') -> None:

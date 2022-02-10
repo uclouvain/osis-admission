@@ -23,32 +23,31 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from functools import partial
+from typing import Optional
 
-from admission.ddd.preparation.projet_doctoral.domain.model.proposition import Proposition
-from admission.ddd.preparation.projet_doctoral.domain.service.i_profil_candidat import IProfilCandidatTranslator
-from admission.ddd.preparation.projet_doctoral.domain.service.profil_candidat import ProfilCandidat
-from base.ddd.utils.business_validator import execute_functions_and_aggregate_exceptions
-from osis_common.ddd import interface
+import attr
+
+from admission.ddd.preparation.projet_doctoral.domain.model._candidat_adresse import CandidatAdresse
+from base.ddd.utils.business_validator import BusinessValidator
+from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import (
+    AdresseDomicileLegalNonCompleteeException,
+    AdresseCorrespondanceNonCompleteeException,
+)
 
 
-class VerifierProposition(interface.DomainService):
-    @classmethod
-    def verifier(
-        cls,
-        proposition_candidat: Proposition,
-        profil_candidat_translator: IProfilCandidatTranslator,
-    ) -> None:
-        profil_candidat_service = ProfilCandidat()
-        execute_functions_and_aggregate_exceptions(
-            partial(
-                profil_candidat_service.verifier_identification,
-                proposition_candidat.matricule_candidat,
-                profil_candidat_translator,
-            ),
-            partial(
-                profil_candidat_service.verifier_coordonnees,
-                proposition_candidat.matricule_candidat,
-                profil_candidat_translator,
-            )
-        )
+@attr.s(frozen=True, slots=True)
+class ShouldAdresseDomicileLegalCandidatEtreCompletee(BusinessValidator):
+    adresse = attr.ib(type=Optional['CandidatAdresse'])  # type: Optional[CandidatAdresse]
+
+    def validate(self, *args, **kwargs):
+        if not self.adresse or not self.adresse.est_complete():
+            raise AdresseDomicileLegalNonCompleteeException
+
+
+@attr.s(frozen=True, slots=True)
+class ShouldAdresseCorrespondanceEtreCompleteeSiSpecifiee(BusinessValidator):
+    adresse = attr.ib(type=Optional['CandidatAdresse'])  # type: Optional[CandidatAdresse]
+
+    def validate(self, *args, **kwargs):
+        if self.adresse and not self.adresse.est_complete():
+            raise AdresseCorrespondanceNonCompleteeException
