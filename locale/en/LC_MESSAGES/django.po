@@ -119,7 +119,7 @@ msgid "Can sign diploma"
 msgstr ""
 
 msgid "Can submit a doctorate admission proposition"
-msgstr "Peut soumettre une proposition d'admission en doctorat"
+msgstr ""
 
 msgid "Can submit thesis"
 msgstr ""
