@@ -66,15 +66,16 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
 
     @classmethod
     def get_coordonnees(cls, matricule: str) -> 'CoordonneesDTO':
-        domicile_legal: PersonAddress = PersonAddress.objects.select_related('country').filter(
-            person__global_id=matricule,
-            label=PersonAddressType.RESIDENTIAL.name,
-        ).first()
-
-        adresse_correspondance: Optional[PersonAddress] = PersonAddress.objects.select_related('country').filter(
-            person__global_id=matricule,
-            label=PersonAddressType.CONTACT.name,
-        ).first()
+        # TODO Use in_bulk() in Django 3.2
+        adresses = {
+            a.label: a
+            for a in PersonAddress.objects.select_related('country').filter(
+                person__global_id=matricule,
+                label__in=[PersonAddressType.CONTACT.name, PersonAddressType.RESIDENTIAL.name],
+            )
+        }
+        domicile_legal = adresses.get(PersonAddressType.RESIDENTIAL.name)
+        adresse_correspondance = adresses.get(PersonAddressType.CONTACT.name)
 
         return CoordonneesDTO(
             domicile_legal=AdressePersonnelleDTO(
