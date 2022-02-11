@@ -33,7 +33,9 @@ from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions impor
     DateOuAnneeNaissanceNonSpecifieeException,
     DetailsPasseportNonSpecifiesException,
     CarteIdentiteeNonSpecifieeException,
-    CandidatNonTrouveException, AdresseDomicileLegalNonCompleteeException, AdresseCorrespondanceNonCompleteeException,
+    CandidatNonTrouveException,
+    AdresseDomicileLegalNonCompleteeException,
+    AdresseCorrespondanceNonCompleteeException,
 )
 from admission.ddd.preparation.projet_doctoral.test.factory.proposition import (
     PropositionAdmissionECGE3DPMinimaleFactory,

@@ -27,7 +27,8 @@ from admission.ddd.preparation.projet_doctoral.domain.model._candidat_adresse im
 from admission.ddd.preparation.projet_doctoral.domain.model._candidat_signaletique import CandidatSignaletique
 from admission.ddd.preparation.projet_doctoral.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.preparation.projet_doctoral.domain.validator.validator_by_business_action import (
-    IdentificationValidatorList, CoordonneesValidatorList,
+    IdentificationValidatorList,
+    CoordonneesValidatorList,
 )
 from osis_common.ddd import interface
 
