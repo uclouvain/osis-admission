@@ -54,4 +54,8 @@ class ApiSchemaTestCase(TestCase):
                 file=temp.name,
             )
             with open('admission/schema.yml') as f:
-                self.assertEqual(f.read(), temp.read(), msg="Schema has not been re-generated")
+                original_schema = f.read()
+                temp_schema = temp.read()
+                print('original:', original_schema)
+                print('temp:', temp_schema)
+                self.assertEqual(original_schema, temp_schema, msg="Schema has not been re-generated")
