@@ -38,6 +38,4 @@ class CandidatAdresse(interface.ValueObject):
     pays = attr.ib(type=Optional[str])
 
     def est_complete(self):
-        if self.pays and self.ville and self.code_postal and self.rue:
-            return True
-        return False
+        return all([self.pays, self.ville, self.code_postal, self.rue])
