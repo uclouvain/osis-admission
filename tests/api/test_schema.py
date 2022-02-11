@@ -26,9 +26,11 @@
 import sys
 from unittest import SkipTest
 
+from django.conf import settings
 from django.core.files.temp import NamedTemporaryFile
 from django.core.management import ManagementUtility, call_command
 from django.test import TestCase
+from django.utils.translation import deactivate_all, activate
 
 
 class ApiSchemaTestCase(TestCase):
@@ -46,6 +48,7 @@ class ApiSchemaTestCase(TestCase):
         super().setUpClass()
 
     def test_api_schema_matches_generation(self):
+        deactivate_all()
         with NamedTemporaryFile(mode='w+') as temp:
             call_command(
                 'generateschema',
@@ -54,8 +57,5 @@ class ApiSchemaTestCase(TestCase):
                 file=temp.name,
             )
             with open('admission/schema.yml') as f:
-                original_schema = f.read()
-                temp_schema = temp.read()
-                print('original:', original_schema)
-                print('temp:', temp_schema)
-                self.assertEqual(original_schema, temp_schema, msg="Schema has not been re-generated")
+                self.assertEqual(f.read(), temp.read(), msg="Schema has not been re-generated")
+        activate(settings.LANGUAGE_CODE)
