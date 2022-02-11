@@ -358,6 +358,9 @@ msgstr ""
 msgid "Planned duration"
 msgstr ""
 
+msgid "Please specify the experience's year."
+msgstr ""
+
 msgid "Pre-Admission"
 msgstr ""
 
@@ -472,6 +475,9 @@ msgstr ""
 msgid "Supervision group not found."
 msgstr ""
 
+msgid "The experiences that have been valuated from this admission."
+msgstr ""
+
 msgid "There can be no more CA members in the supervision group."
 msgstr ""
 
@@ -485,6 +491,12 @@ msgid "Thesis language"
 msgstr ""
 
 msgid "Thesis location"
+msgstr ""
+
+msgid "This experience cannot be deleted as it has already been valuated."
+msgstr ""
+
+msgid "This experience cannot be updated as it has already been valuated."
 msgstr ""
 
 msgid "Title"

@@ -23,38 +23,24 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.api.views.dashboard import *
-from admission.api.views.autocomplete import *
-from admission.api.views.coordonnees import *
-from admission.api.views.curriculum import CurriculumExperienceListAndCreateView, \
-    CurriculumExperienceDetailUpdateAndDeleteView, CurriculumFileView
-from admission.api.views.secondary_studies import *
-from admission.api.views.languages_knowledge import *
-from admission.api.views.cotutelle import *
-from admission.api.views.person import *
-from admission.api.views.project import *
-from admission.api.views.supervision import *
-from admission.api.views.signatures import *
-from admission.api.views.approvals import *
 
-__all__ = [
-    "CoordonneesViewSet",
-    "CurriculumExperienceListAndCreateView",
-    "CurriculumExperienceDetailUpdateAndDeleteView",
-    "CurriculumFileView",
-    "PersonViewSet",
-    "PropositionViewSet",
-    "PropositionListView",
-    "VerifyPropositionView",
-    "SecondaryStudiesViewSet",
-    "AutocompleteDoctoratView",
-    "AutocompleteSectorView",
-    "AutocompleteTutorView",
-    "AutocompletePersonView",
-    "CotutelleAPIView",
-    "SupervisionAPIView",
-    "RequestSignaturesAPIView",
-    "LanguagesKnowledgeViewSet",
-    "ApprovePropositionAPIView",
-    "DashboardViewSet",
-]
+import factory
+
+from base.tests.factories.academic_year import AcademicYearFactory
+from base.tests.factories.person import PersonFactory
+from osis_profile.models import CurriculumYear, Experience
+
+
+class CurriculumYearFactory(factory.DjangoModelFactory):
+    person = factory.SubFactory(PersonFactory)
+    academic_year = factory.SubFactory(AcademicYearFactory, current=True)
+
+    class Meta:
+        model = CurriculumYear
+
+
+class ExperienceFactory(factory.DjangoModelFactory):
+    curriculum_year = factory.SubFactory(CurriculumYearFactory)
+
+    class Meta:
+        model = Experience

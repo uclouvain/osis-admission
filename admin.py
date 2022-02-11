@@ -36,11 +36,22 @@ from admission.auth.roles.sceb import Sceb
 from admission.auth.roles.sic_director import SicDirector
 from admission.auth.roles.sic_manager import SicManager
 from admission.contrib.models import DoctorateAdmission
+
+from osis_profile.models.curriculum import CurriculumYear, Experience
 from osis_role.contrib.admin import RoleModelAdmin
 
 
 class DoctorateAdmissionAdmin(admin.ModelAdmin):
     autocomplete_fields = ['doctorate', 'thesis_institute']
+
+
+class ExperienceInlineAdmin(admin.TabularInline):
+    model = Experience
+
+
+class CurriculumYearAdmin(admin.ModelAdmin):
+    inlines = [ExperienceInlineAdmin, ]
+    autocomplete_fields = ["person"]
 
 
 class ExternalCommitteeMemberAdmin(RoleModelAdmin):
@@ -50,6 +61,7 @@ class ExternalCommitteeMemberAdmin(RoleModelAdmin):
 
 
 admin.site.register(DoctorateAdmission, DoctorateAdmissionAdmin)
+admin.site.register(CurriculumYear, CurriculumYearAdmin)
 
 # Roles
 admin.site.register(Promoter, ExternalCommitteeMemberAdmin)

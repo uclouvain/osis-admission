@@ -28,8 +28,6 @@ from rest_framework import serializers
 
 from admission.api.serializers.fields import ActionLinksField, ACTION_LINKS, RelatedInstituteField
 from admission.contrib.models import AdmissionType, DoctorateAdmission
-from base.models.entity_version import EntityVersion
-from base.models.enums.entity_type import INSTITUTE
 from base.utils.serializers import DTOSerializer
 from admission.ddd.preparation.projet_doctoral.commands import (
     CompleterPropositionCommand,
@@ -105,6 +103,9 @@ class PropositionSearchDTOSerializer(DTOSerializer):
         'update_cotutelle': ACTION_LINKS['update_cotutelle'],
         # Supervision
         'retrieve_supervision': ACTION_LINKS['retrieve_supervision'],
+        # Curriculum
+        'retrieve_curriculum': ACTION_LINKS['retrieve_curriculum'],
+        'update_curriculum': ACTION_LINKS['update_curriculum'],
     })
 
     class Meta:
@@ -149,6 +150,9 @@ class PropositionDTOSerializer(DTOSerializer):
             'remove_member': ACTION_LINKS['remove_member'],
             'retrieve_supervision': ACTION_LINKS['retrieve_supervision'],
             'request_signatures': ACTION_LINKS['request_signatures'],
+            # Curriculum
+            'retrieve_curriculum': ACTION_LINKS['retrieve_curriculum'],
+            'update_curriculum': ACTION_LINKS['update_curriculum'],
         }
     )
 

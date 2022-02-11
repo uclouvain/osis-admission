@@ -122,6 +122,8 @@ class DoctorateAdmissionListApiTestCase(APITestCase):
             'retrieve_cotutelle',
             'update_cotutelle',
             'retrieve_supervision',
+            'update_curriculum',
+            'retrieve_curriculum',
         ]
         self.assertCountEqual(
             list(first_proposition['links']),
@@ -382,6 +384,8 @@ class DoctorateAdmissionApiTestCase(APITestCase):
             'add_member',
             'remove_member',
             'retrieve_supervision',
+            'update_curriculum',
+            'retrieve_curriculum',
         ]
         all_actions = allowed_actions + [
             'add_approval',
