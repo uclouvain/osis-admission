@@ -27,7 +27,7 @@ from admission.ddd.preparation.projet_doctoral.domain.model._candidat_adresse im
 from admission.ddd.preparation.projet_doctoral.domain.model._candidat_signaletique import CandidatSignaletique
 from admission.ddd.preparation.projet_doctoral.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.preparation.projet_doctoral.domain.validator.validator_by_business_action import (
-    IdentificationValidatorList, CoordonneesValidatorList,
+    IdentificationValidatorList, CoordonneesValidatorList, LanguesConnuesValidatorList,
 )
 from osis_common.ddd import interface
 
@@ -75,6 +75,15 @@ class ProfilCandidat(interface.DomainService):
                 pays=coordonnees.adresse_correspondance.pays,
                 rue=coordonnees.adresse_correspondance.rue,
             ) if coordonnees.adresse_correspondance else None
+        ).validate()
+
+    @classmethod
+    def verifier_langues_connues(cls, matricule: str, profil_candidat_translator: 'IProfilCandidatTranslator') -> None:
+        langues_connues = profil_candidat_translator.get_langues_connues(matricule)
+
+        LanguesConnuesValidatorList(
+            nb_langues_connues_requises=langues_connues.nb_langues_connues_requises,
+            langues_requises=profil_candidat_translator.CODES_LANGUES_CONNUES_REQUISES,
         ).validate()
 
     @classmethod

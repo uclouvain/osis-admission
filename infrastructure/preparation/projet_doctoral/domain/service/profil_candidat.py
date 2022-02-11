@@ -26,10 +26,16 @@
 from typing import Optional
 
 from admission.ddd.preparation.projet_doctoral.domain.service.i_profil_candidat import IProfilCandidatTranslator
-from admission.ddd.preparation.projet_doctoral.dtos import IdentificationDTO, CoordonneesDTO, AdressePersonnelleDTO
+from admission.ddd.preparation.projet_doctoral.dtos import (
+    IdentificationDTO,
+    CoordonneesDTO,
+    AdressePersonnelleDTO,
+    LanguesConnuesDTO,
+)
 from base.models.enums.person_address_type import PersonAddressType
 from base.models.person import Person
 from base.models.person_address import PersonAddress
+from osis_profile.models.education import LanguageKnowledge
 
 
 class ProfilCandidatTranslator(IProfilCandidatTranslator):
@@ -83,6 +89,21 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                 ville=adresse_correspondance.city,
                 pays=adresse_correspondance.country.iso_code if adresse_correspondance.country else None,
             ) if adresse_correspondance else None,
+        )
+
+    @classmethod
+    def get_langues_connues(cls, matricule: str) -> 'LanguesConnuesDTO':
+        nb_langues_connues_requises = (
+            LanguageKnowledge.objects.filter(
+                person__global_id=matricule,
+                language__code__in=cls.CODES_LANGUES_CONNUES_REQUISES,
+            )
+            .limit(len(cls.CODES_LANGUES_CONNUES_REQUISES))
+            .count()
+        )
+
+        return LanguesConnuesDTO(
+            nb_langues_connues_requises=nb_langues_connues_requises,
         )
 
     @classmethod

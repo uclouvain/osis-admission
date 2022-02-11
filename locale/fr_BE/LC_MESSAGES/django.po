@@ -382,6 +382,9 @@ msgstr "Merci de compléter intégralement les informations requises de l'onglet
 msgid "Please fill in all the required information in the 'Personal Data > Identification' tab."
 msgstr "Merci de compléter intégralement les informations requises de l'onglet 'Données personnelles > Identification'."
 
+msgid "Please fill in all the required information in the 'Previous experience > Languages knowledge' tab."
+msgstr "Merci de compléter intégralement les informations requises de l'onglet 'Parcours antérieur > Connaissance des langues'."
+
 msgid "Please fill in all the required information related to your contact address."
 msgstr "Merci de compléter toutes les informations requises relatives à votre adresse de contact."
 

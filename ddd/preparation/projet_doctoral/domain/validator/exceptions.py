@@ -275,3 +275,13 @@ class AdresseCorrespondanceNonCompleteeException(BusinessException):
     def __init__(self, **kwargs):
         message = _("Please fill in all the required information related to your contact address.")
         super().__init__(message, **kwargs)
+
+
+class LanguesConnuesNonSpecifieesException(BusinessException):
+    status_code = "PROPOSITION-33"
+
+    def __init__(self, **kwargs):
+        message = _(
+            "Please fill in all the required information in the 'Previous experience > Languages knowledge' tab.",
+        )
+        super().__init__(message, **kwargs)

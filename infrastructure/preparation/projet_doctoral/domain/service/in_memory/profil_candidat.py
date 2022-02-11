@@ -29,7 +29,8 @@ from typing import List, Optional
 
 from admission.ddd.preparation.projet_doctoral.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import CandidatNonTrouveException
-from admission.ddd.preparation.projet_doctoral.dtos import IdentificationDTO, CoordonneesDTO, AdressePersonnelleDTO
+from admission.ddd.preparation.projet_doctoral.dtos import IdentificationDTO, CoordonneesDTO, AdressePersonnelleDTO, \
+    LanguesConnuesDTO
 
 
 @dataclass
@@ -73,6 +74,15 @@ class CoordonneesCandidat:
     adresse_correspondance = Optional[AdressePersonnelle]
 
 
+class Langue:
+    code_langue: str
+
+
+class ConnaissanceLangue:
+    personne: str
+    langue: Langue
+
+
 class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
     profil_candidats = [
         ProfilCandidat(
@@ -114,6 +124,17 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
             rue="Place de l'Université",
             type='CONTACT'
         )
+    ]
+    langues = [
+        Langue(code='FR'),
+        Langue(code='EN'),
+        Langue(code='NL'),
+        Langue(code='DE'),
+    ]
+    connaissances_langues = [
+        ConnaissanceLangue(personne='0123456789', langue=langues[0]),
+        ConnaissanceLangue(personne='0123456789', langue=langues[1]),
+        ConnaissanceLangue(personne='0123456789', langue=langues[2]),
     ]
 
     @classmethod
@@ -165,6 +186,18 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 ville=adresse_correspondance.ville,
                 pays=adresse_correspondance.pays,
             ) if adresse_correspondance else None,
+        )
+
+    @classmethod
+    def get_langues_connues(cls, matricule: str) -> 'LanguesConnuesDTO':
+        nb_langues_connues_requises = sum(
+            c.personne == matricule
+            and c.langue.code_langue in cls.CODES_LANGUES_CONNUES_REQUISES
+            for c in cls.connaissances_langues
+        )
+
+        return LanguesConnuesDTO(
+            nb_langues_connues_requises=nb_langues_connues_requises,
         )
 
     @classmethod
