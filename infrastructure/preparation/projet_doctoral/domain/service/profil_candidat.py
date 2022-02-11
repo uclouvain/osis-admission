@@ -60,12 +60,12 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
 
     @classmethod
     def get_coordonnees(cls, matricule: str) -> 'CoordonneesDTO':
-        domicile_legal: PersonAddress = PersonAddress.objects.select_related('country').filter(
+        domicile_legal = PersonAddress.objects.select_related('country').filter(
             person__global_id=matricule,
             label=PersonAddressType.RESIDENTIAL.name,
         ).first()
 
-        adresse_correspondance: Optional[PersonAddress] = PersonAddress.objects.select_related('country').filter(
+        adresse_correspondance = PersonAddress.objects.select_related('country').filter(
             person__global_id=matricule,
             label=PersonAddressType.CONTACT.name,
         ).first()
