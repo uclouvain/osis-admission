@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Admission API
-  version: 1.0.11
+  version: 1.0.12
   description: This API delivers data for the Admission project.
   contact:
     name: UCLouvain - OSIS
@@ -1661,6 +1661,42 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - propositions
+  /propositions/{uuid}/approve-by-pdf:
+    post:
+      operationId: approve_by_pdf
+      description: Approve the proposition with a pdf file.
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApprouverPropositionParPdfCommand'
+      responses:
+        201:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PropositionIdentityDTO'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
 components:
   schemas:
     Dashboard:
@@ -2618,6 +2654,8 @@ components:
               $ref: '#/components/schemas/ActionLink'
             request_signatures:
               $ref: '#/components/schemas/ActionLink'
+            approve_by_pdf:
+              $ref: '#/components/schemas/ActionLink'
             retrieve_curriculum:
               $ref: '#/components/schemas/ActionLink'
             update_curriculum:
@@ -2712,9 +2750,14 @@ components:
                 type: string
               commentaire_interne:
                 type: string
+              pdf:
+                type: array
+                items:
+                  type: string
             required:
             - promoteur
             - status
+            - pdf
         signatures_membres_CA:
           type: array
           items:
@@ -2742,9 +2785,14 @@ components:
                 type: string
               commentaire_interne:
                 type: string
+              pdf:
+                type: array
+                items:
+                  type: string
             required:
             - membre_CA
             - status
+            - pdf
       required:
       - signatures_promoteurs
       - signatures_membres_CA
@@ -3093,6 +3141,18 @@ components:
           type: string
       required:
       - matricule
+    ApprouverPropositionParPdfCommand:
+      type: object
+      properties:
+        matricule:
+          type: string
+        pdf:
+          type: array
+          items:
+            type: string
+      required:
+      - matricule
+      - pdf
     CompleterPropositionCommand:
       type: object
       properties:

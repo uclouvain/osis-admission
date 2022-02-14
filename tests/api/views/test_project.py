@@ -389,6 +389,7 @@ class DoctorateAdmissionApiTestCase(APITestCase):
         ]
         all_actions = allowed_actions + [
             'add_approval',
+            'approve_by_pdf',
             'request_signatures',
         ]
         self.assertCountEqual(

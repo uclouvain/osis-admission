@@ -23,6 +23,8 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from typing import List
+
 import attr
 from django.utils.translation import gettext_lazy as _
 
@@ -45,3 +47,4 @@ class SignaturePromoteur(interface.ValueObject):
     commentaire_externe = attr.ib(type=str, default='')
     commentaire_interne = attr.ib(type=str, default='')
     motif_refus = attr.ib(type=str, default='')
+    pdf = attr.ib(type=List[str], factory=list)

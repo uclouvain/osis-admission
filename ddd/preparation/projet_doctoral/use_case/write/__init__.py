@@ -1,3 +1,4 @@
+from .approuver_proposition_par_pdf_service import approuver_proposition_par_pdf
 from .approuver_proposition_service import approuver_proposition
 from .completer_proposition_service import completer_proposition
 from .definir_cotutelle_service import definir_cotutelle

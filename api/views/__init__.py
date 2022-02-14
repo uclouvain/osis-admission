@@ -56,5 +56,6 @@ __all__ = [
     "RequestSignaturesAPIView",
     "LanguagesKnowledgeViewSet",
     "ApprovePropositionAPIView",
+    "ApproveByPdfPropositionAPIView",
     "DashboardViewSet",
 ]

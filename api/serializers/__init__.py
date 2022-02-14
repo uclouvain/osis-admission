@@ -33,4 +33,8 @@ from .secondary_studies import HighSchoolDiplomaSerializer
 from .languages_knowledge import *
 from .supervision import *
 from .curriculum import ExperienceOutputSerializer, ExperienceInputSerializer, CurriculumFileSerializer
-from .approvals import ApprouverPropositionCommandSerializer, RefuserPropositionCommandSerializer
+from .approvals import (
+    ApprouverPropositionCommandSerializer,
+    RefuserPropositionCommandSerializer,
+    ApprouverPropositionParPdfCommandSerializer,
+)
