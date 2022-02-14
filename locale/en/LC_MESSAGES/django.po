@@ -384,6 +384,13 @@ msgid ""
 "Please fill in all the required information related to your contact address."
 msgstr ""
 
+msgid ""
+"Please fill in the 'Previous Experience > Curriculum vitae' tab for the following years: "
+msgstr ""
+
+msgid "Please provide a copy of your curriculum."
+msgstr ""
+
 msgid "Please provide a copy of your identity card."
 msgstr ""
 

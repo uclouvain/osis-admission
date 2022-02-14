@@ -90,7 +90,12 @@ class ProfilCandidat(interface.DomainService):
         ).validate()
 
     @classmethod
-    def verifier_curriculum(cls, matricule: str, profil_candidat_translator: 'IProfilCandidatTranslator', annee_courante: int) -> None:
+    def verifier_curriculum(
+        cls,
+        matricule: str,
+        profil_candidat_translator: 'IProfilCandidatTranslator',
+        annee_courante: int,
+    ) -> None:
         curriculum = profil_candidat_translator.get_curriculum(matricule)
 
         CurriculumValidatorList(

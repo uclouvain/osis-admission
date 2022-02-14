@@ -299,7 +299,6 @@ class AnneesCurriculumNonSpecifieesException(BusinessException):
     status_code = "PROPOSITION-35"
 
     def __init__(self, annees_manquantes, **kwargs):
-        message = _(
-            "Please add in the 'Previous Experience > Curriculum vitae' tab, the following years: "
-        ) + ', '.join(annees_manquantes) + '.'
+        message = _("Please fill in the 'Previous Experience > Curriculum vitae' tab for the following years: ") \
+                  + ', '.join(annees_manquantes) + '.'
         super().__init__(message, **kwargs)
