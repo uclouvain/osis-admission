@@ -31,8 +31,11 @@ from typing import List, Optional
 from admission.ddd.preparation.projet_doctoral.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import CandidatNonTrouveException
 from admission.ddd.preparation.projet_doctoral.dtos import (
-    IdentificationDTO, CoordonneesDTO, AdressePersonnelleDTO,
-    LanguesConnuesDTO, CurriculumDTO,
+    IdentificationDTO,
+    CoordonneesDTO,
+    AdressePersonnelleDTO,
+    LanguesConnuesDTO,
+    CurriculumDTO,
 )
 
 
@@ -146,8 +149,8 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
             ville='Louvain-La-Neuve',
             pays='BE',
             rue="Place de l'Université",
-            type='CONTACT'
-        )
+            type='CONTACT',
+        ),
     ]
     langues = [
         Langue(code_langue='FR'),
@@ -160,10 +163,8 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
         ConnaissanceLangue(personne=matricule_candidat, langue=langues[1]),
         ConnaissanceLangue(personne=matricule_candidat, langue=langues[2]),
     ]
-    diplomes_etudes_secondaires_belges = [
-    ]
-    diplomes_etudes_secondaires_etrangers = [
-    ]
+    diplomes_etudes_secondaires_belges = []
+    diplomes_etudes_secondaires_etrangers = []
     annees_curriculum = [
         AnneeCurriculum(personne=matricule_candidat, annee=2016),
         AnneeCurriculum(personne=matricule_candidat, annee=2017),
@@ -171,7 +172,6 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
         AnneeCurriculum(personne=matricule_candidat, annee=2019),
         AnneeCurriculum(personne=matricule_candidat, annee=2020),
     ]
-
 
     @classmethod
     def get_identification(cls, matricule: str) -> 'IdentificationDTO':
@@ -215,20 +215,23 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 code_postal=domicile_legal.code_postal,
                 ville=domicile_legal.ville,
                 pays=domicile_legal.pays,
-            ) if domicile_legal else None,
+            )
+            if domicile_legal
+            else None,
             adresse_correspondance=AdressePersonnelleDTO(
                 rue=adresse_correspondance.rue,
                 code_postal=adresse_correspondance.code_postal,
                 ville=adresse_correspondance.ville,
                 pays=adresse_correspondance.pays,
-            ) if adresse_correspondance else None,
+            )
+            if adresse_correspondance
+            else None,
         )
 
     @classmethod
     def get_langues_connues(cls, matricule: str) -> 'LanguesConnuesDTO':
         nb_langues_connues_requises = sum(
-            c.personne == matricule
-            and c.langue.code_langue in cls.CODES_LANGUES_CONNUES_REQUISES
+            c.personne == matricule and c.langue.code_langue in cls.CODES_LANGUES_CONNUES_REQUISES
             for c in cls.connaissances_langues
         )
 
@@ -243,8 +246,14 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
 
             annees = set(a.annee for a in cls.annees_curriculum if a.personne == matricule)
 
-            annee_diplome_belge = next((d.annee for d in cls.diplomes_etudes_secondaires_belges if d.personne == matricule), None)
-            annee_diplome_etranger = next((d.annee for d in cls.diplomes_etudes_secondaires_etrangers if d.personne == matricule), None)
+            annee_diplome_belge = next(
+                (d.annee for d in cls.diplomes_etudes_secondaires_belges if d.personne == matricule),
+                None,
+            )
+            annee_diplome_etranger = next(
+                (d.annee for d in cls.diplomes_etudes_secondaires_etrangers if d.personne == matricule),
+                None,
+            )
 
             return CurriculumDTO(
                 annees=annees,

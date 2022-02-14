@@ -398,12 +398,6 @@ msgstr ""
 msgid "Please fill in all the required information related to your contact address."
 msgstr "Merci de compléter toutes les informations requises relatives à votre adresse de contact."
 
-msgid ""
-"Please fill in all the required information related to your contact address."
-msgstr ""
-"Merci de compléter toutes les informations requises relatives à votre "
-"adresse de contact."
-
 msgid "Please provide a copy of your identity card."
 msgstr "Merci de fournir une copie de votre carte d'identité."
 
