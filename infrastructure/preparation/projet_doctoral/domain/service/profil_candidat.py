@@ -96,14 +96,10 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
 
     @classmethod
     def get_langues_connues(cls, matricule: str) -> 'LanguesConnuesDTO':
-        nb_langues_connues_requises = (
-            LanguageKnowledge.objects.filter(
-                person__global_id=matricule,
-                language__code__in=cls.CODES_LANGUES_CONNUES_REQUISES,
-            )
-            .limit(len(cls.CODES_LANGUES_CONNUES_REQUISES))
-            .count()
-        )
+        nb_langues_connues_requises = LanguageKnowledge.objects.filter(
+            person__global_id=matricule,
+            language__code__in=cls.CODES_LANGUES_CONNUES_REQUISES,
+        )[: len(cls.CODES_LANGUES_CONNUES_REQUISES)].count()
 
         return LanguesConnuesDTO(
             nb_langues_connues_requises=nb_langues_connues_requises,
@@ -119,19 +115,25 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
 
         annees_curriculum = CurriculumYear.objects.select_related('academic_year').filter(
             person__global_id=matricule,
-        ).limit(cls.NB_MAX_ANNEES_CV_REQUISES)
+        )[: cls.NB_MAX_ANNEES_CV_REQUISES]
 
-        annee_diplome_etudes_secondaires_belges, annee_diplome_etudes_secondaires_etrangeres = None
-
-        if person.belgianhighschooldiploma:
-            annee_diplome_etudes_secondaires_belges = person.belgianhighschooldiploma.academic_graduation_year.year
-        if person.foreignhighschooldiploma:
-            annee_diplome_etudes_secondaires_etrangeres = person.foreignhighschooldiploma.academic_graduation_year.year
+        annee_diplome_etudes_secondaires_belges = (
+            person.belgianhighschooldiploma.academic_graduation_year.year
+            if hasattr(person, 'belgianhighschooldiploma')
+            else None
+        )
+        annee_diplome_etudes_secondaires_etrangeres = (
+            person.foreignhighschooldiploma.academic_graduation_year.year
+            if hasattr(person, 'foreignhighschooldiploma')
+            else None
+        )
 
         return CurriculumDTO(
-            annees=set(academic_year.year for academic_year in annees_curriculum),
+            annees=set(curriculum_year.academic_year.year for curriculum_year in annees_curriculum),
             annee_diplome_etudes_secondaires_belges=annee_diplome_etudes_secondaires_belges,
             annee_diplome_etudes_secondaires_etrangeres=annee_diplome_etudes_secondaires_etrangeres,
-            annee_derniere_inscription_ucl=person.last_registration_year.year if person.last_registration_year else None,
+            annee_derniere_inscription_ucl=person.last_registration_year.year
+            if person.last_registration_year
+            else None,
             fichier_pdf=person.curriculum,
         )
