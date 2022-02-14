@@ -38,6 +38,7 @@ class VerifierProposition(interface.DomainService):
         cls,
         proposition_candidat: Proposition,
         profil_candidat_translator: IProfilCandidatTranslator,
+        annee_courante: int,
     ) -> None:
         profil_candidat_service = ProfilCandidat()
         execute_functions_and_aggregate_exceptions(
@@ -50,5 +51,16 @@ class VerifierProposition(interface.DomainService):
                 profil_candidat_service.verifier_coordonnees,
                 proposition_candidat.matricule_candidat,
                 profil_candidat_translator,
+            ),
+            partial(
+                profil_candidat_service.verifier_langues_connues,
+                proposition_candidat.matricule_candidat,
+                profil_candidat_translator,
+            ),
+            partial(
+                profil_candidat_service.verifier_curriculum,
+                proposition_candidat.matricule_candidat,
+                profil_candidat_translator,
+                annee_courante,
             )
         )

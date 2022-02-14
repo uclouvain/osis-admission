@@ -285,3 +285,21 @@ class LanguesConnuesNonSpecifieesException(BusinessException):
             "Please fill in all the required information in the 'Previous experience > Languages knowledge' tab.",
         )
         super().__init__(message, **kwargs)
+
+
+class FichierCurriculumNonRenseigneException(BusinessException):
+    status_code = "PROPOSITION-34"
+
+    def __init__(self, **kwargs):
+        message = _("Please provide a copy of your curriculum.")
+        super().__init__(message, **kwargs)
+
+
+class AnneesCurriculumNonSpecifieesException(BusinessException):
+    status_code = "PROPOSITION-35"
+
+    def __init__(self, annees_manquantes, **kwargs):
+        message = _(
+            "Please add in the 'Previous Experience > Curriculum vitae' tab, the following years: "
+        ) + annees_manquantes.join(',') + '.'
+        super().__init__(message, **kwargs)

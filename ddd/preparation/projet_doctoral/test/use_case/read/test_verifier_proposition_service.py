@@ -23,6 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import datetime
 import mock
 
 from admission.ddd.preparation.projet_doctoral.commands import VerifierPropositionCommand
@@ -49,10 +50,15 @@ from admission.infrastructure.preparation.projet_doctoral.repository.in_memory.p
 )
 from admission.tests import TestCase
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
+from base.tests.factories.academic_year import AcademicYearFactory
 
 
 class TestVerifierPropositionService(TestCase):
+
     def setUp(self) -> None:
+        for year in range(2017, 2021):
+            AcademicYearFactory(year=year)
+
         self.candidat_translator = ProfilCandidatInMemoryTranslator()
         self.proposition_repository = PropositionInMemoryRepository()
         self.proposition = PropositionAdmissionECGE3DPMinimaleFactory()
@@ -61,6 +67,13 @@ class TestVerifierPropositionService(TestCase):
         self.adresse_correspondance = self.candidat_translator.adresses_candidats[1]
         self.addCleanup(self.proposition_repository.reset)
         self.message_bus = message_bus_in_memory_instance
+
+        # Mock datetime to return the 2020 year as the current year
+        patcher = mock.patch('admission.ddd.preparation.projet_doctoral.use_case.read.verifier_proposition_service.datetime')
+        self.addCleanup(patcher.stop)
+        self.mock_foo = patcher.start()
+        self.mock_foo.date.today.return_value = datetime.date(2020, 11, 1)
+
         self.cmd = VerifierPropositionCommand(uuid_proposition=self.proposition.entity_id.uuid)
 
     def test_should_verifier_etre_ok_si_complet(self):

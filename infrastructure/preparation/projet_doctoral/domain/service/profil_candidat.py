@@ -23,7 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import Optional
+from itertools import chain
 
 from admission.ddd.preparation.projet_doctoral.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.preparation.projet_doctoral.dtos import (
@@ -31,10 +31,12 @@ from admission.ddd.preparation.projet_doctoral.dtos import (
     CoordonneesDTO,
     AdressePersonnelleDTO,
     LanguesConnuesDTO,
+    CurriculumDTO,
 )
 from base.models.enums.person_address_type import PersonAddressType
 from base.models.person import Person
 from base.models.person_address import PersonAddress
+from osis_profile.models import CurriculumYear, BelgianHighSchoolDiploma, ForeignHighSchoolDiploma
 from osis_profile.models.education import LanguageKnowledge
 
 
@@ -109,4 +111,27 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
 
     @classmethod
     def get_curriculum(cls, matricule: str) -> 'CurriculumDTO':
-        pass
+        person = Person.objects.select_related(
+            'last_registration_year',
+            'belgianhighschooldiploma__academic_graduation_year',
+            'foreignhighschooldiploma__academic_graduation_year',
+        ).get(global_id=matricule)
+
+        annees_curriculum = CurriculumYear.objects.select_related('academic_year').filter(
+            person__global_id=matricule,
+        ).limit(cls.NB_MAX_ANNEES_CV_REQUISES)
+
+        annee_diplome_etudes_secondaires_belges, annee_diplome_etudes_secondaires_etrangeres = None
+
+        if person.belgianhighschooldiploma:
+            annee_diplome_etudes_secondaires_belges = person.belgianhighschooldiploma.academic_graduation_year.year
+        if person.foreignhighschooldiploma:
+            annee_diplome_etudes_secondaires_etrangeres = person.foreignhighschooldiploma.academic_graduation_year.year
+
+        return CurriculumDTO(
+            annees=set(academic_year.year for academic_year in annees_curriculum),
+            annee_diplome_etudes_secondaires_belges=annee_diplome_etudes_secondaires_belges,
+            annee_diplome_etudes_secondaires_etrangeres=annee_diplome_etudes_secondaires_etrangeres,
+            annee_derniere_inscription_ucl=person.last_registration_year.year if person.last_registration_year else None,
+            fichier_pdf=person.curriculum,
+        )

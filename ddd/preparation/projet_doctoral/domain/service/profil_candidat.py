@@ -29,7 +29,8 @@ from admission.ddd.preparation.projet_doctoral.domain.service.i_profil_candidat 
 from admission.ddd.preparation.projet_doctoral.domain.validator.validator_by_business_action import (
     IdentificationValidatorList,
     CoordonneesValidatorList,
-    LanguesConnuesValidatorList
+    LanguesConnuesValidatorList,
+    CurriculumValidatorList,
 )
 from osis_common.ddd import interface
 
@@ -89,5 +90,15 @@ class ProfilCandidat(interface.DomainService):
         ).validate()
 
     @classmethod
-    def verifier_curriculum(cls, profil_candidat_translator: 'IProfilCandidatTranslator') -> None:
-        raise NotImplementedError
+    def verifier_curriculum(cls, matricule: str, profil_candidat_translator: 'IProfilCandidatTranslator', annee_courante: int) -> None:
+        curriculum = profil_candidat_translator.get_curriculum(matricule)
+
+        CurriculumValidatorList(
+            annee_courante=annee_courante,
+            annees=curriculum.annees,
+            annee_diplome_etudes_secondaires_belges=curriculum.annee_diplome_etudes_secondaires_belges,
+            annee_diplome_etudes_secondaires_etrangeres=curriculum.annee_diplome_etudes_secondaires_etrangeres,
+            annee_derniere_inscription_ucl=curriculum.annee_derniere_inscription_ucl,
+            fichier_pdf=curriculum.fichier_pdf,
+            nb_maximum_annees_requises=profil_candidat_translator.NB_MAX_ANNEES_CV_REQUISES,
+        ).validate()

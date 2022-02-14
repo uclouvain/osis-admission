@@ -25,12 +25,15 @@
 # ##############################################################################
 import datetime
 from dataclasses import dataclass
+from itertools import chain
 from typing import List, Optional
 
 from admission.ddd.preparation.projet_doctoral.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import CandidatNonTrouveException
-from admission.ddd.preparation.projet_doctoral.dtos import IdentificationDTO, CoordonneesDTO, AdressePersonnelleDTO, \
-    LanguesConnuesDTO
+from admission.ddd.preparation.projet_doctoral.dtos import (
+    IdentificationDTO, CoordonneesDTO, AdressePersonnelleDTO,
+    LanguesConnuesDTO, CurriculumDTO,
+)
 
 
 @dataclass
@@ -48,6 +51,8 @@ class ProfilCandidat:
     sexe: Optional[str]
     genre: Optional[str]
     photo_identite: List[str]
+    curriculum: List[str]
+    annee_derniere_inscription_ucl: Optional[int]
 
     # Pièces d'identité
     carte_identite: List[str]
@@ -74,19 +79,36 @@ class CoordonneesCandidat:
     adresse_correspondance = Optional[AdressePersonnelle]
 
 
+@dataclass
 class Langue:
     code_langue: str
 
 
+@dataclass
 class ConnaissanceLangue:
     personne: str
     langue: Langue
 
 
+@dataclass
+class DiplomeEtudeSecondaire:
+    personne: str
+    annee: int
+
+
+@dataclass
+class AnneeCurriculum:
+    personne: str
+    annee: int
+
+
 class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
+    matricule_candidat = '0123456789'
+    annee_reference = 2020
+
     profil_candidats = [
         ProfilCandidat(
-            matricule='0123456789',
+            matricule=matricule_candidat,
             nom='Doe',
             prenom='John',
             prenom_d_usage='Jerry',
@@ -105,11 +127,13 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
             numero_carte_identite='1002',
             numero_passeport='1003',
             date_expiration_passeport=datetime.date(2022, 2, 10),
+            curriculum=['uuid14'],
+            annee_derniere_inscription_ucl=2018,
         ),
     ]
     adresses_candidats = [
         AdressePersonnelle(
-            personne='0123456789',
+            personne=matricule_candidat,
             code_postal='1348',
             ville='Louvain-La-Neuve',
             pays='BE',
@@ -117,7 +141,7 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
             type='RESIDENTIAL',
         ),
         AdressePersonnelle(
-            personne='0123456789',
+            personne=matricule_candidat,
             code_postal='1348',
             ville='Louvain-La-Neuve',
             pays='BE',
@@ -126,16 +150,29 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
         )
     ]
     langues = [
-        Langue(code='FR'),
-        Langue(code='EN'),
-        Langue(code='NL'),
-        Langue(code='DE'),
+        Langue(code_langue='FR'),
+        Langue(code_langue='EN'),
+        Langue(code_langue='NL'),
+        Langue(code_langue='DE'),
     ]
     connaissances_langues = [
-        ConnaissanceLangue(personne='0123456789', langue=langues[0]),
-        ConnaissanceLangue(personne='0123456789', langue=langues[1]),
-        ConnaissanceLangue(personne='0123456789', langue=langues[2]),
+        ConnaissanceLangue(personne=matricule_candidat, langue=langues[0]),
+        ConnaissanceLangue(personne=matricule_candidat, langue=langues[1]),
+        ConnaissanceLangue(personne=matricule_candidat, langue=langues[2]),
     ]
+    diplomes_etudes_secondaires_belges = [
+        DiplomeEtudeSecondaire(personne=matricule_candidat, annee=2018),
+    ]
+    diplomes_etudes_secondaires_etrangers = [
+        DiplomeEtudeSecondaire(personne=matricule_candidat, annee=2018),
+    ]
+    annees_curriculum = [
+        AnneeCurriculum(personne=matricule_candidat, annee=2017),
+        AnneeCurriculum(personne=matricule_candidat, annee=2018),
+        AnneeCurriculum(personne=matricule_candidat, annee=2019),
+        AnneeCurriculum(personne=matricule_candidat, annee=2020),
+    ]
+
 
     @classmethod
     def get_identification(cls, matricule: str) -> 'IdentificationDTO':
@@ -202,4 +239,22 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
 
     @classmethod
     def get_curriculum(cls, matricule: str) -> 'CurriculumDTO':
-        pass
+        try:
+            candidate = next(c for c in cls.profil_candidats if c.matricule == matricule)
+
+            annees = [
+                a.annee for a in cls.annees_curriculum if a.personne == matricule
+            ]
+
+            annee_diplome_belge = next((d.annee for d in cls.diplomes_etudes_secondaires_belges if d.personne == matricule), None)
+            annee_diplome_etranger = next((d.annee for d in cls.diplomes_etudes_secondaires_etrangers if d.personne == matricule), None)
+
+            return CurriculumDTO(
+                annees=annees,
+                annee_diplome_etudes_secondaires_belges=annee_diplome_belge,
+                annee_diplome_etudes_secondaires_etrangeres=annee_diplome_etranger,
+                annee_derniere_inscription_ucl=candidate.annee_derniere_inscription_ucl,
+                fichier_pdf=candidate.curriculum,
+            )
+        except StopIteration:
+            raise CandidatNonTrouveException

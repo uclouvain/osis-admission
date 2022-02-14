@@ -1,6 +1,7 @@
 from ._should_coordonnees_candidat_etre_completees import ShouldAdresseDomicileLegalCandidatEtreCompletee, \
     ShouldAdresseCorrespondanceEtreCompleteeSiSpecifiee
 from ._should_cotutelle_etre_completee import ShouldCotutelleEtreComplete
+from ._should_curriculum_etre_complete import ShouldAnneesCVRequisesCompletees, ShouldCurriculumFichierEtreSpecifie
 from ._should_langues_connues_etre_completees import ShouldLanguesConnuesRequisesEtreSpecifiees
 from ._should_projet_etre_complet import ShouldProjetEtreComplet
 from ._should_groupe_de_supervision_avoir_au_moins_un_membre_CA import ShouldGroupeDeSupervisionAvoirAuMoinsUnMembreCA
@@ -54,4 +55,6 @@ __all__ = [
     "ShouldAdresseDomicileLegalCandidatEtreCompletee",
     "ShouldAdresseCorrespondanceEtreCompleteeSiSpecifiee",
     "ShouldLanguesConnuesRequisesEtreSpecifiees",
+    "ShouldAnneesCVRequisesCompletees",
+    "ShouldCurriculumFichierEtreSpecifie",
 ]
