@@ -65,7 +65,6 @@ class DoctorateAdmission(BaseAdmission):
         verbose_name=_("Reference"),
         unique=True,
         editable=False,
-        null=True,
     )
 
     # Financement
