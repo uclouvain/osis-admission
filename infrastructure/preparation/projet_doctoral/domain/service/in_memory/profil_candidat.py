@@ -128,7 +128,7 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
             numero_passeport='1003',
             date_expiration_passeport=datetime.date(2022, 2, 10),
             curriculum=['uuid14'],
-            annee_derniere_inscription_ucl=2018,
+            annee_derniere_inscription_ucl=None,
         ),
     ]
     adresses_candidats = [
@@ -161,12 +161,11 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
         ConnaissanceLangue(personne=matricule_candidat, langue=langues[2]),
     ]
     diplomes_etudes_secondaires_belges = [
-        DiplomeEtudeSecondaire(personne=matricule_candidat, annee=2018),
     ]
     diplomes_etudes_secondaires_etrangers = [
-        DiplomeEtudeSecondaire(personne=matricule_candidat, annee=2018),
     ]
     annees_curriculum = [
+        AnneeCurriculum(personne=matricule_candidat, annee=2016),
         AnneeCurriculum(personne=matricule_candidat, annee=2017),
         AnneeCurriculum(personne=matricule_candidat, annee=2018),
         AnneeCurriculum(personne=matricule_candidat, annee=2019),
@@ -242,9 +241,7 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
         try:
             candidate = next(c for c in cls.profil_candidats if c.matricule == matricule)
 
-            annees = [
-                a.annee for a in cls.annees_curriculum if a.personne == matricule
-            ]
+            annees = set(a.annee for a in cls.annees_curriculum if a.personne == matricule)
 
             annee_diplome_belge = next((d.annee for d in cls.diplomes_etudes_secondaires_belges if d.personne == matricule), None)
             annee_diplome_etranger = next((d.annee for d in cls.diplomes_etudes_secondaires_etrangers if d.personne == matricule), None)

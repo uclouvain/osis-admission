@@ -56,7 +56,7 @@ class ShouldAnneesCVRequisesCompletees(BusinessValidator):
         )
 
         annees_manquantes = [
-            annee for annee in range(self.annee_courante, annee_minimale, -1) if annee not in self.annees
+            str(annee) for annee in range(self.annee_courante, annee_minimale, -1) if annee not in self.annees
         ]
 
         if annees_manquantes:

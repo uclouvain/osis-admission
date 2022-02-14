@@ -29,7 +29,7 @@ import attr
 
 from base.ddd.utils.business_validator import BusinessValidator
 from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import (
-    AdresseDomicileLegalNonCompleteeException,
+    LanguesConnuesNonSpecifieesException,
 )
 
 
@@ -40,4 +40,4 @@ class ShouldLanguesConnuesRequisesEtreSpecifiees(BusinessValidator):
 
     def validate(self, *args, **kwargs):
         if self.nb_langues_connues_requises < len(self.langues_requises):
-            raise AdresseDomicileLegalNonCompleteeException
+            raise LanguesConnuesNonSpecifieesException

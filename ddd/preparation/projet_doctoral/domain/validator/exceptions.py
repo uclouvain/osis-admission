@@ -301,5 +301,5 @@ class AnneesCurriculumNonSpecifieesException(BusinessException):
     def __init__(self, annees_manquantes, **kwargs):
         message = _(
             "Please add in the 'Previous Experience > Curriculum vitae' tab, the following years: "
-        ) + annees_manquantes.join(',') + '.'
+        ) + ','.join(annees_manquantes) + '.'
         super().__init__(message, **kwargs)
