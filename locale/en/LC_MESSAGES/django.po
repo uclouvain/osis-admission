@@ -377,9 +377,6 @@ msgstr ""
 msgid "Please fill in all the required information in the 'Previous experience > Languages knowledge' tab."
 msgstr ""
 
-msgid "Please fill in all the required information related to your contact address."
-msgstr ""
-
 msgid ""
 "Please fill in all the required information related to your contact address."
 msgstr ""
