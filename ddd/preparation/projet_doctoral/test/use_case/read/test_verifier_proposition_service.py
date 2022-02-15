@@ -27,6 +27,8 @@ import datetime
 import mock
 
 from admission.ddd.preparation.projet_doctoral.commands import VerifierPropositionCommand
+from admission.ddd.preparation.projet_doctoral.domain.model._enums import ChoixStatutSignatureGroupeDeSupervision
+from admission.ddd.preparation.projet_doctoral.domain.model._signature_promoteur import ChoixEtatSignature
 from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import (
     IdentificationNonCompleteeException,
     NumeroIdentiteNonSpecifieException,
@@ -40,14 +42,25 @@ from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions impor
     LanguesConnuesNonSpecifieesException,
     FichierCurriculumNonRenseigneException,
     AnneesCurriculumNonSpecifieesException,
+    ProcedureDemandeSignatureNonLanceeException,
+    PropositionNonApprouveeParPromoteurException,
+    PropositionNonApprouveeParMembreCAException,
+    MembreCAPasReponduException,
+)
+from admission.ddd.preparation.projet_doctoral.test.factory.groupe_de_supervision import (
+    _SignaturePromoteurFactory,
+    _SignatureMembreCAFactory,
 )
 from admission.ddd.preparation.projet_doctoral.test.factory.proposition import (
-    PropositionAdmissionECGE3DPMinimaleFactory,
+    PropositionAdmissionSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory,
 )
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 from admission.infrastructure.preparation.projet_doctoral.domain.service.in_memory.profil_candidat import (
     ProfilCandidatInMemoryTranslator,
     DiplomeEtudeSecondaire,
+)
+from admission.infrastructure.preparation.projet_doctoral.repository.in_memory.groupe_de_supervision import (
+    GroupeDeSupervisionInMemoryRepository,
 )
 from admission.infrastructure.preparation.projet_doctoral.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
@@ -64,7 +77,9 @@ class TestVerifierPropositionServiceCommun(TestCase):
 
         self.candidat_translator = ProfilCandidatInMemoryTranslator()
         self.proposition_repository = PropositionInMemoryRepository()
-        self.proposition = PropositionAdmissionECGE3DPMinimaleFactory()
+        self.groupe_supervision_repository = GroupeDeSupervisionInMemoryRepository()
+        self.proposition = PropositionAdmissionSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory()
+        self.groupe_supervision = self.groupe_supervision_repository.get_by_proposition_id(self.proposition.entity_id)
         self.current_candidat = self.candidat_translator.profil_candidats[0]
         self.adresse_domicile_legal = self.candidat_translator.adresses_candidats[0]
         self.adresse_correspondance = self.candidat_translator.adresses_candidats[1]
@@ -174,9 +189,9 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
 
     def test_should_retourner_erreur_si_pas_toutes_les_langues_requises_connues(self):
         with mock.patch.object(
-                self.candidat_translator.connaissances_langues[0],
-                'langue',
-                self.candidat_translator.langues[3],
+            self.candidat_translator.connaissances_langues[0],
+            'langue',
+            self.candidat_translator.langues[3],
         ):
             with self.assertRaises(MultipleBusinessExceptions) as context:
                 self.message_bus.invoke(self.cmd)
@@ -187,6 +202,46 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
             with self.assertRaises(MultipleBusinessExceptions) as context:
                 self.message_bus.invoke(self.cmd)
             self.assertIsInstance(context.exception.exceptions.pop(), FichierCurriculumNonRenseigneException)
+
+    def test_should_retourner_erreur_si_demande_signature_pas_en_cours(self):
+        with mock.patch.object(
+            self.groupe_supervision,
+            'statut_signature',
+            ChoixStatutSignatureGroupeDeSupervision.IN_PROGRESS,
+        ):
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                self.message_bus.invoke(self.cmd)
+            self.assertIsInstance(context.exception.exceptions.pop(), ProcedureDemandeSignatureNonLanceeException)
+
+    def test_should_retourner_erreur_si_tous_promoteurs_n_ont_pas_approuve(self):
+        self.groupe_supervision.signatures_promoteurs.append(
+            _SignaturePromoteurFactory(promoteur_id__matricule='promoteur-SC3DP', etat=ChoixEtatSignature.REFUSED),
+        )
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            self.message_bus.invoke(self.cmd)
+        self.assertIsInstance(context.exception.exceptions.pop(), PropositionNonApprouveeParPromoteurException)
+
+        self.groupe_supervision.signatures_promoteurs.pop()
+
+    def test_should_retourner_erreur_si_aucun_membre_ca_a_approuve(self):
+        membre_qui_a_approuve = self.groupe_supervision.signatures_membres_CA.pop()
+
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            self.message_bus.invoke(self.cmd)
+        self.assertIsInstance(context.exception.exceptions.pop(), PropositionNonApprouveeParMembreCAException)
+
+        self.groupe_supervision.signatures_membres_CA.append(membre_qui_a_approuve)
+
+    def test_should_retourner_erreur_si_tous_membres_ca_n_ont_pas_repondu(self):
+        self.groupe_supervision.signatures_membres_CA.append(
+            _SignatureMembreCAFactory(membre_CA_id__matricule='membre-ca-SC3DP', etat=ChoixEtatSignature.INVITED),
+        )
+
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            self.message_bus.invoke(self.cmd)
+        self.assertIsInstance(context.exception.exceptions.pop(), MembreCAPasReponduException)
+
+        self.groupe_supervision.signatures_membres_CA.pop()
 
 
 class TestVerifierPropositionServiceCurriculumYears(TestVerifierPropositionServiceCommun):

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-02-11 14:41+0100\n"
+"POT-Creation-Date: 2022-02-15 11:20+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -59,6 +59,9 @@ msgid "Already a member of CA."
 msgstr ""
 
 msgid "Already a promoter."
+msgstr ""
+
+msgid "At least one promotor didn't approve the proposition."
 msgstr ""
 
 msgid "Author"
@@ -337,7 +340,13 @@ msgstr ""
 msgid "NOT_INVITED"
 msgstr ""
 
+msgid "No CA member approved the proposition."
+msgstr ""
+
 msgid "No PhD found."
+msgstr ""
+
+msgid "No all CA member replied."
 msgstr ""
 
 msgid "No defense reason"
@@ -374,10 +383,9 @@ msgid ""
 "Identification' tab."
 msgstr ""
 
-msgid "Please fill in all the required information in the 'Previous experience > Languages knowledge' tab."
-msgstr ""
-
-msgid "Please fill in all the required information related to your contact address."
+msgid ""
+"Please fill in all the required information in the 'Previous experience > "
+"Languages knowledge' tab."
 msgstr ""
 
 msgid ""
@@ -385,7 +393,8 @@ msgid ""
 msgstr ""
 
 msgid ""
-"Please fill in the 'Previous Experience > Curriculum vitae' tab for the following years: "
+"Please fill in the 'Previous Experience > Curriculum vitae' tab for the "
+"following years: "
 msgstr ""
 
 msgid "Please provide a copy of your curriculum."
@@ -518,6 +527,9 @@ msgid "Some invitations are already sent"
 msgstr ""
 
 msgid "Supervision group not found."
+msgstr ""
+
+msgid "The signature request procedure isn't in progress."
 msgstr ""
 
 msgid "There can be no more CA members in the supervision group."

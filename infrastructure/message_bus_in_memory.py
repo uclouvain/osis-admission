@@ -129,6 +129,7 @@ class MessageBusInMemoryCommands(AbstractMessageBusCommands):
         VerifierPropositionCommand: partial(
             verifier_proposition,
             proposition_repository=PropositionInMemoryRepository(),
+            groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
             profil_candidat_translator=ProfilCandidatInMemoryTranslator(),
         ),
         ApprouverPropositionCommand: partial(
