@@ -175,3 +175,4 @@ class PropositionAdmissionSC3DPAvecPromoteurDejaApprouveFactory(PropositionAdmis
 class PropositionAdmissionSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory(PropositionAdmissionSC3DPMinimaleFactory):
     entity_id = factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-SC3DP-promoteurs-membres-deja-approuves')
     matricule_candidat = '0123456789'
+    statut = ChoixStatutProposition.SIGNING_IN_PROGRESS

@@ -29,7 +29,10 @@ import attr
 
 from admission.ddd.preparation.projet_doctoral.domain.model._enums import ChoixStatutSignatureGroupeDeSupervision
 from admission.ddd.preparation.projet_doctoral.domain.model._signature_membre_CA import SignatureMembreCA
-from admission.ddd.preparation.projet_doctoral.domain.model._signature_promoteur import ChoixEtatSignature, SignaturePromoteur
+from admission.ddd.preparation.projet_doctoral.domain.model._signature_promoteur import (
+    ChoixEtatSignature,
+    SignaturePromoteur,
+)
 from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import (
     ProcedureDemandeSignatureNonLanceeException,
     PropositionNonApprouveeParPromoteurException,
@@ -44,7 +47,7 @@ class ShouldDemandeSignatureLancee(BusinessValidator):
     statut_signature = attr.ib(type=ChoixStatutSignatureGroupeDeSupervision)
 
     def validate(self, *args, **kwargs):
-        if self.statut_signature.name != ChoixStatutSignatureGroupeDeSupervision.SIGNING_IN_PROGRESS.name:
+        if self.statut_signature != ChoixStatutSignatureGroupeDeSupervision.SIGNING_IN_PROGRESS:
             raise ProcedureDemandeSignatureNonLanceeException
 
 
@@ -53,7 +56,7 @@ class ShouldPromoteursOntApprouve(BusinessValidator):
     signatures_promoteurs = attr.ib(type=List[SignaturePromoteur])  # type: List[SignaturePromoteur]
 
     def validate(self, *args, **kwargs):
-        if any(signature.etat.name != ChoixEtatSignature.APPROVED.name for signature in self.signatures_promoteurs):
+        if any(signature.etat != ChoixEtatSignature.APPROVED for signature in self.signatures_promoteurs):
             raise PropositionNonApprouveeParPromoteurException
 
 
@@ -62,7 +65,7 @@ class ShouldUnMembreCAAApprouve(BusinessValidator):
     signatures_membres_CA = attr.ib(type=List[SignatureMembreCA])  # type: List[SignatureMembreCA]
 
     def validate(self, *args, **kwargs):
-        if all(signature.etat.name != ChoixEtatSignature.APPROVED.name for signature in self.signatures_membres_CA):
+        if all(signature.etat != ChoixEtatSignature.APPROVED for signature in self.signatures_membres_CA):
             raise PropositionNonApprouveeParMembreCAException
 
 
@@ -70,8 +73,8 @@ class ShouldUnMembreCAAApprouve(BusinessValidator):
 class ShouldMembresCAOntRepondu(BusinessValidator):
     signatures_membres_CA = attr.ib(type=List[SignatureMembreCA])  # type: List[SignatureMembreCA]
 
-    etats_signatures_reponse = {ChoixEtatSignature.APPROVED.name, ChoixEtatSignature.REFUSED.name}
+    etats_signatures_reponse = {ChoixEtatSignature.APPROVED, ChoixEtatSignature.REFUSED}
 
     def validate(self, *args, **kwargs):
-        if any(signature.etat.name not in self.etats_signatures_reponse for signature in self.signatures_membres_CA):
+        if any(signature.etat not in self.etats_signatures_reponse for signature in self.signatures_membres_CA):
             raise MembreCAPasReponduException

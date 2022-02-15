@@ -33,6 +33,10 @@ from admission.contrib.models.enums.actor_type import ActorType
 from admission.ddd.preparation.projet_doctoral.builder.proposition_identity_builder import \
     PropositionIdentityBuilder
 from admission.ddd.preparation.projet_doctoral.domain.model._cotutelle import Cotutelle, pas_de_cotutelle
+from admission.ddd.preparation.projet_doctoral.domain.model._enums import (
+    ChoixStatutSignatureGroupeDeSupervision,
+    ChoixStatutProposition,
+)
 from admission.ddd.preparation.projet_doctoral.domain.model._membre_CA import MembreCAIdentity
 from admission.ddd.preparation.projet_doctoral.domain.model._promoteur import PromoteurIdentity
 from admission.ddd.preparation.projet_doctoral.domain.model._signature_membre_CA import SignatureMembreCA
@@ -92,6 +96,9 @@ class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
                 for actor in groupe.actors.filter(supervisionactor__type=ActorType.CA_MEMBER.name)
             ],
             cotutelle=cotutelle,
+            statut_signature=ChoixStatutSignatureGroupeDeSupervision.SIGNING_IN_PROGRESS
+            if proposition.status == ChoixStatutProposition.SIGNING_IN_PROGRESS.name
+            else None
         )
 
     @classmethod

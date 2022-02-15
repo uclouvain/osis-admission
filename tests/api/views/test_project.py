@@ -28,6 +28,7 @@ from unittest import mock
 from django.shortcuts import resolve_url
 from django.test import override_settings
 from django.urls import reverse
+from osis_signature.enums import SignatureState
 from rest_framework import status
 from rest_framework.test import APITestCase
 
@@ -615,9 +616,17 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
         # Incomplete candidate
         cls.second_candidate = CandidateFactory(person__first_name="Jim").person
 
+        # Create supervision group
+        cls.promoter = PromoterFactory()
+        cls.membre_ca = CaMemberFactory(process=cls.promoter.actor_ptr.process)
+        cls.promoter.actor_ptr.switch_state(SignatureState.APPROVED)
+        cls.membre_ca.actor_ptr.switch_state(SignatureState.APPROVED)
+
         # Create admissions
         cls.first_admission = DoctorateAdmissionFactory(
             candidate=cls.first_candidate,
+            supervision_group=cls.promoter.actor_ptr.process,
+            status=ChoixStatutProposition.SIGNING_IN_PROGRESS.name,
         )
         cls.second_admission = DoctorateAdmissionFactory(
             candidate=cls.second_candidate,
