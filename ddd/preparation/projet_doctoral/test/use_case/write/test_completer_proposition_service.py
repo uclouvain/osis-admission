@@ -30,6 +30,7 @@ from admission.ddd.preparation.projet_doctoral.commands import CompleterProposit
 from admission.ddd.preparation.projet_doctoral.domain.model._enums import (
     ChoixCommissionProximiteCDEouCLSM,
     ChoixCommissionProximiteCDSS,
+    ChoixSousDomaineSciences,
     ChoixTypeAdmission,
 )
 from admission.ddd.preparation.projet_doctoral.domain.model._experience_precedente_recherche import (
@@ -48,8 +49,9 @@ from admission.ddd.preparation.projet_doctoral.test.factory.proposition import (
     PropositionAdmissionSC3DPMinimaleFactory,
 )
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
-from admission.infrastructure.preparation.projet_doctoral.repository.in_memory.proposition import \
-    PropositionInMemoryRepository
+from admission.infrastructure.preparation.projet_doctoral.repository.in_memory.proposition import (
+    PropositionInMemoryRepository,
+)
 
 
 class TestCompleterPropositionService(SimpleTestCase):
@@ -65,7 +67,7 @@ class TestCompleterPropositionService(SimpleTestCase):
         self.cmd = CompleterPropositionCommand(
             uuid=self.proposition_existante.entity_id.uuid,
             type_admission=ChoixTypeAdmission.ADMISSION.name,
-            commission_proximite='',
+            commission_proximite=ChoixSousDomaineSciences.BIOLOGY.name,
             type_financement=ChoixTypeFinancement.WORK_CONTRACT.name,
             type_contrat_travail='assistant_uclouvain',
             titre_projet='Mon projet',

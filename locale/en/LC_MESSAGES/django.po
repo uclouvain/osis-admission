@@ -64,6 +64,9 @@ msgstr ""
 msgid "Author"
 msgstr ""
 
+msgid "BIOLOGY"
+msgstr "Biology"
+
 msgid "CA Member"
 msgstr ""
 
@@ -75,6 +78,9 @@ msgstr ""
 
 msgid "CDD managers"
 msgstr ""
+
+msgid "CHEMISTRY"
+msgstr "Chemistry"
 
 msgid "Can add a member to the supervision group"
 msgstr ""
@@ -265,6 +271,9 @@ msgstr ""
 msgid "French"
 msgstr ""
 
+msgid "GEOGRAPHY"
+msgstr "Geography"
+
 msgid "Gantt graph"
 msgstr ""
 
@@ -297,6 +306,9 @@ msgstr ""
 
 msgid "MANAGEMENT"
 msgstr ""
+
+msgid "MATHEMATICS"
+msgstr "Mathematics"
 
 msgid "Mandatory fields are missing in the cotutelle."
 msgstr ""
@@ -348,6 +360,9 @@ msgstr ""
 
 msgid "PARTIAL"
 msgstr ""
+
+msgid "PHYSICS"
+msgstr "Physics"
 
 msgid "PRE_ADMISSION"
 msgstr ""
@@ -463,6 +478,9 @@ msgstr ""
 msgid "SIGNING_IN_PROGRESS"
 msgstr ""
 
+msgid "STATISTICS"
+msgstr "Statistics"
+
 msgid "SUBMITTED"
 msgstr ""
 
@@ -569,8 +587,4 @@ msgid "created"
 msgstr ""
 
 msgid "modified"
-msgstr ""
-
-#, python-brace-format
-msgid "{degree} [{type}] for {candidate}"
 msgstr ""

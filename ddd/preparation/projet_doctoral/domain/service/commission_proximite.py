@@ -28,6 +28,7 @@ from typing import Optional
 from admission.ddd.preparation.projet_doctoral.domain.model._enums import (
     ChoixCommissionProximiteCDEouCLSM,
     ChoixCommissionProximiteCDSS,
+    ChoixSousDomaineSciences,
 )
 from admission.ddd.preparation.projet_doctoral.domain.model.doctorat import Doctorat
 from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import (
@@ -44,15 +45,20 @@ class CommissionProximite(interface.DomainService):
             or commission_proximite not in ChoixCommissionProximiteCDEouCLSM.get_names()
         ):
             raise CommissionProximiteInconsistantException()
-        if doctorat.est_entite_CDSS() and (
+        elif doctorat.est_entite_CDSS() and (
             not commission_proximite
             or commission_proximite not in ChoixCommissionProximiteCDSS.get_names()
         ):
             raise CommissionProximiteInconsistantException()
-        if (
+        elif doctorat.est_domaine_des_sciences() and (
+            not commission_proximite or commission_proximite not in ChoixSousDomaineSciences.get_names()
+        ):
+            raise CommissionProximiteInconsistantException()
+        elif (
             not doctorat.est_entite_CDE()
             and not doctorat.est_entite_CDSS()
             and not doctorat.est_entite_CLSM()
+            and not doctorat.est_domaine_des_sciences()
             and commission_proximite
         ):
             raise CommissionProximiteInconsistantException()

@@ -30,8 +30,7 @@ from django.db import connection
 from admission.auth.roles.candidate import Candidate
 from admission.contrib.models import DoctorateAdmission
 from admission.contrib.models.doctorate import REFERENCE_SEQ_NAME
-from admission.ddd.preparation.projet_doctoral.builder.proposition_identity_builder import \
-    PropositionIdentityBuilder
+from admission.ddd.preparation.projet_doctoral.builder.proposition_identity_builder import PropositionIdentityBuilder
 from admission.ddd.preparation.projet_doctoral.domain.model._detail_projet import (
     ChoixLangueRedactionThese,
     DetailProjet,
@@ -39,6 +38,7 @@ from admission.ddd.preparation.projet_doctoral.domain.model._detail_projet impor
 from admission.ddd.preparation.projet_doctoral.domain.model._enums import (
     ChoixCommissionProximiteCDEouCLSM,
     ChoixCommissionProximiteCDSS,
+    ChoixSousDomaineSciences,
     ChoixStatutProposition,
     ChoixTypeAdmission,
 )
@@ -67,6 +67,8 @@ def _instantiate_admission(admission: DoctorateAdmission) -> Proposition:
         commission_proximite = ChoixCommissionProximiteCDEouCLSM[admission.proximity_commission]
     elif admission.proximity_commission in ChoixCommissionProximiteCDSS.get_names():
         commission_proximite = ChoixCommissionProximiteCDSS[admission.proximity_commission]
+    elif admission.proximity_commission in ChoixSousDomaineSciences.get_names():
+        commission_proximite = ChoixSousDomaineSciences[admission.proximity_commission]
     return Proposition(
         entity_id=PropositionIdentityBuilder().build_from_uuid(admission.uuid),
         commission_proximite=commission_proximite,

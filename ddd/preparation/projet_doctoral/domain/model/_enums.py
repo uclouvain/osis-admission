@@ -57,6 +57,15 @@ class ChoixCommissionProximiteCDSS(ChoiceEnum):
     MOTR = _("Proximity Commission for Motricity Sciences (MOTR)")
 
 
+class ChoixSousDomaineSciences(ChoiceEnum):
+    PHYSICS = _("PHYSICS")
+    CHEMISTRY = _("CHEMISTRY")
+    MATHEMATICS = _("MATHEMATICS")
+    STATISTICS = _("STATISTICS")
+    BIOLOGY = _("BIOLOGY")
+    GEOGRAPHY = _("GEOGRAPHY")
+
+
 class ChoixTypeAdmission(ChoiceEnum):
     ADMISSION = _('ADMISSION')
     PRE_ADMISSION = _('PRE_ADMISSION')
