@@ -64,6 +64,9 @@ msgstr ""
 msgid "Author"
 msgstr ""
 
+msgid "BIOLOGY"
+msgstr "Biology"
+
 msgid "CA Member"
 msgstr ""
 
@@ -75,6 +78,9 @@ msgstr ""
 
 msgid "CDD managers"
 msgstr ""
+
+msgid "CHEMISTRY"
+msgstr "Chemistry"
 
 msgid "Can add a member to the supervision group"
 msgstr ""
@@ -268,6 +274,9 @@ msgstr ""
 msgid "French"
 msgstr ""
 
+msgid "GEOGRAPHY"
+msgstr "Geography"
+
 msgid "Gantt graph"
 msgstr ""
 
@@ -300,6 +309,9 @@ msgstr ""
 
 msgid "MANAGEMENT"
 msgstr ""
+
+msgid "MATHEMATICS"
+msgstr "Mathematics"
 
 msgid "Mandatory fields are missing in the cotutelle."
 msgstr ""
@@ -352,6 +364,9 @@ msgstr ""
 msgid "PARTIAL"
 msgstr ""
 
+msgid "PHYSICS"
+msgstr "Physics"
+
 msgid "PRE_ADMISSION"
 msgstr ""
 
@@ -374,6 +389,9 @@ msgid "Please specify at least one identity number."
 msgstr ""
 
 msgid "Please specify either your date of birth or your year of birth."
+msgstr ""
+
+msgid "Please specify the experience's year."
 msgstr ""
 
 msgid "Please specify your Belgian national register number."
@@ -481,6 +499,9 @@ msgstr ""
 msgid "SIGNING_IN_PROGRESS"
 msgstr ""
 
+msgid "STATISTICS"
+msgstr "Statistics"
+
 msgid "SUBMITTED"
 msgstr ""
 
@@ -491,6 +512,9 @@ msgid "Some invitations are already sent"
 msgstr ""
 
 msgid "Supervision group not found."
+msgstr ""
+
+msgid "The experiences that have been valuated from this admission."
 msgstr ""
 
 msgid "There can be no more CA members in the supervision group."
@@ -506,6 +530,12 @@ msgid "Thesis language"
 msgstr ""
 
 msgid "Thesis location"
+msgstr ""
+
+msgid "This experience cannot be deleted as it has already been valuated."
+msgstr ""
+
+msgid "This experience cannot be updated as it has already been valuated."
 msgstr ""
 
 msgid "Title"
@@ -578,8 +608,4 @@ msgid "created"
 msgstr ""
 
 msgid "modified"
-msgstr ""
-
-#, python-brace-format
-msgid "{degree} [{type}] for {candidate}"
 msgstr ""

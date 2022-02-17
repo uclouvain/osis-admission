@@ -23,28 +23,24 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import List
 
-import attr
-from django.utils.translation import gettext_lazy as _
+import factory
 
-from base.models.utils.utils import ChoiceEnum
-from admission.ddd.preparation.projet_doctoral.domain.model._promoteur import PromoteurIdentity
-from osis_common.ddd import interface
+from base.tests.factories.academic_year import AcademicYearFactory
+from base.tests.factories.person import PersonFactory
+from osis_profile.models import CurriculumYear, Experience
 
 
-class ChoixEtatSignature(ChoiceEnum):
-    NOT_INVITED = _('NOT_INVITED')  # Pas encore envoyée au signataire
-    INVITED = _('INVITED')  # Envoyée au signataire
-    APPROVED = _('APPROVED')  # Approuvée par le signataire
-    REFUSED = _('REFUSED')  # Refusée par le signataire
+class CurriculumYearFactory(factory.DjangoModelFactory):
+    person = factory.SubFactory(PersonFactory)
+    academic_year = factory.SubFactory(AcademicYearFactory, current=True)
+
+    class Meta:
+        model = CurriculumYear
 
 
-@attr.s(frozen=True, slots=True)
-class SignaturePromoteur(interface.ValueObject):
-    promoteur_id = attr.ib(type=PromoteurIdentity)
-    etat = attr.ib(type=ChoixEtatSignature, default=ChoixEtatSignature.NOT_INVITED)
-    commentaire_externe = attr.ib(type=str, default='')
-    commentaire_interne = attr.ib(type=str, default='')
-    motif_refus = attr.ib(type=str, default='')
-    pdf = attr.ib(type=List[str], factory=list)
+class ExperienceFactory(factory.DjangoModelFactory):
+    curriculum_year = factory.SubFactory(CurriculumYearFactory)
+
+    class Meta:
+        model = Experience

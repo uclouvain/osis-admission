@@ -192,6 +192,7 @@ class DetailSignaturePromoteurDTO(interface.DTO):
     status = attr.ib(type=str)
     commentaire_externe = attr.ib(type=Optional[str], default='')
     commentaire_interne = attr.ib(type=Optional[str], default='')
+    pdf = attr.ib(type=List[str], factory=list)
 
 
 @attr.s(frozen=True, slots=True)
@@ -200,6 +201,7 @@ class DetailSignatureMembreCADTO(interface.DTO):
     status = attr.ib(type=str)
     commentaire_externe = attr.ib(type=Optional[str], default='')
     commentaire_interne = attr.ib(type=Optional[str], default='')
+    pdf = attr.ib(type=List[str], factory=list)
 
 
 @attr.s(frozen=True, slots=True)
