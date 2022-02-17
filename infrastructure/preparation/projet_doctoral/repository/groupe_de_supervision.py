@@ -23,7 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
+from collections import defaultdict
 from typing import List, Optional, Type, Union
 
 from admission.auth.roles.ca_member import CommitteeMember
@@ -53,7 +53,7 @@ from osis_signature.models import Process, StateHistory
 class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
     @classmethod
     def get_by_proposition_id(cls, proposition_id: 'PropositionIdentity') -> 'GroupeDeSupervision':
-        proposition = DoctorateAdmission.objects.get(uuid=proposition_id.uuid)
+        proposition = DoctorateAdmission.objects.select_related('supervision_group').get(uuid=proposition_id.uuid)
         if not proposition.supervision_group_id:
             groupe = Process.objects.create()
         else:
@@ -70,6 +70,11 @@ class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
         else:
             cotutelle = None
 
+        # Single, ordered query for all actors
+        actors = defaultdict(list)
+        for actor in groupe.actors.select_related('supervisionactor', 'person'):
+            actors[actor.supervisionactor.type].append(actor)
+
         return GroupeDeSupervision(
             entity_id=GroupeDeSupervisionIdentity(uuid=groupe.uuid),
             proposition_id=PropositionIdentityBuilder.build_from_uuid(proposition.uuid),
@@ -81,7 +86,7 @@ class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
                     commentaire_interne=actor.supervisionactor.internal_comment,
                     pdf=actor.pdf_file,
                 )
-                for actor in groupe.actors.filter(supervisionactor__type=ActorType.PROMOTER.name)
+                for actor in actors.get(ActorType.PROMOTER.name, [])
             ],
             signatures_membres_CA=[
                 SignatureMembreCA(
@@ -91,7 +96,7 @@ class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
                     commentaire_interne=actor.supervisionactor.internal_comment,
                     pdf=actor.pdf_file,
                 )
-                for actor in groupe.actors.filter(supervisionactor__type=ActorType.CA_MEMBER.name)
+                for actor in actors.get(ActorType.CA_MEMBER.name, [])
             ],
             cotutelle=cotutelle,
         )
