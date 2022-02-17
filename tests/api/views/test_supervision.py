@@ -33,6 +33,7 @@ from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions impor
     MembreCANonTrouveException,
     PromoteurNonTrouveException,
 )
+from admission.tests import QueriesAssertionsMixin
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.roles import CandidateFactory, CddManagerFactory
 from admission.tests.factories.supervision import CaMemberFactory, PromoterFactory
@@ -43,7 +44,7 @@ from base.tests.factories.tutor import TutorFactory
 
 
 @override_settings(ROOT_URLCONF='admission.api.url_v1')
-class SupervisionApiTestCase(APITestCase):
+class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
     @classmethod
     def setUpTestData(cls):
         # Data
@@ -83,7 +84,8 @@ class SupervisionApiTestCase(APITestCase):
     def test_supervision_get_using_api_candidate(self):
         self.client.force_authenticate(user=self.candidate.user)
 
-        response = self.client.get(self.url, format="json")
+        with self.assertNumQueriesLessThan(8):
+            response = self.client.get(self.url, format="json")
         promoteurs = response.json()['signatures_promoteurs']
         self.assertEqual(len(promoteurs), 1)
         self.assertEqual(promoteurs[0]['status'], 'NOT_INVITED')

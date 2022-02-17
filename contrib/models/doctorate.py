@@ -23,9 +23,12 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from typing import Iterable, Optional
 
 from django.contrib.postgres.fields import JSONField
+from django.core.cache import cache
 from django.db import models
+from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 
 from admission.ddd.preparation.projet_doctoral.domain.model._enums import (
@@ -41,6 +44,7 @@ from admission.ddd.preparation.projet_doctoral.domain.model._financement import 
 from admission.ddd.preparation.projet_doctoral.domain.model._detail_projet import ChoixLangueRedactionThese
 from osis_document.contrib import FileField
 from osis_signature.contrib.fields import SignatureProcessField
+from osis_signature.enums import SignatureState
 from .base import BaseAdmission, admission_directory_path
 
 REFERENCE_SEQ_NAME = 'admission_doctorateadmission_reference_seq'
@@ -286,3 +290,19 @@ class DoctorateAdmission(BaseAdmission):
             ('add_supervision_member', _("Can add a member to the supervision group")),
             ('remove_supervision_member', _("Can remove a member from the supervision group")),
         ]
+
+    @cached_property
+    def invitations_sent(self):
+        res = (
+            self.supervision_group
+            and self.supervision_group.actors.exclude(last_state=SignatureState.NOT_INVITED.name).exists()
+        )
+        # Cache the value inside an object property
+        self.__dict__['invitations_sent'] = res
+        # Refresh the permission cache so that the property value is in django's cache
+        cache.set('admission_permission_{}'.format(self.uuid), self)
+        return res
+
+    def save(self, *args, **kwargs) -> None:
+        super().save(*args, **kwargs)
+        cache.delete('admission_permission_{}'.format(self.uuid))

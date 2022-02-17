@@ -44,12 +44,8 @@ def is_admission_request_author(self, user: User, obj: BaseAdmission):
 @predicate(bind=True)
 @predicate_failed_msg(message=_("Some invitations are already sent"))
 def invitations_sent(self, user: User, obj: DoctorateAdmission):
-    return (
-        obj.supervision_group
-        and obj.supervision_group.actors.exclude(
-            last_state=SignatureState.NOT_INVITED.name,
-        ).exists()
-    )
+    # As this predicate does not rely on user, call the cached_property directly
+    return obj.invitations_sent
 
 
 @predicate(bind=True)

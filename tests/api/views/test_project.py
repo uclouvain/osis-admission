@@ -45,6 +45,7 @@ from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions impor
     MembreCAManquantException,
     PromoteurManquantException,
 )
+from admission.tests import QueriesAssertionsMixin
 from admission.tests.factories import DoctorateAdmissionFactory, WriteTokenFactory
 from admission.tests.factories.doctorate import DoctorateFactory
 from admission.tests.factories.roles import CandidateFactory, CddManagerFactory
@@ -246,7 +247,7 @@ class DoctorateAdmissionCreationApiTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
 
-class DoctorateAdmissionApiTestCase(APITestCase):
+class DoctorateAdmissionApiTestCase(QueriesAssertionsMixin, APITestCase):
     @classmethod
     def setUpTestData(cls):
         # Create supervision group members
@@ -283,6 +284,8 @@ class DoctorateAdmissionApiTestCase(APITestCase):
         # Targeted url
         cls.url = resolve_url("admission_api_v1:propositions", uuid=cls.admission.uuid)
 
+
+class DoctorateAdmissionCancelApiTestCase(DoctorateAdmissionApiTestCase):
     def test_admission_doctorate_cancel_using_api(self):
         self.client.force_authenticate(user=self.candidate.user)
         response = self.client.delete(self.url, format="json")
@@ -339,6 +342,8 @@ class DoctorateAdmissionApiTestCase(APITestCase):
         response = self.client.delete(self.url, format="json")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
+
+class DoctorateAdmissionGetApiTestCase(DoctorateAdmissionApiTestCase):
     def test_admission_doctorate_get_proximity_commission(self):
         self.client.force_authenticate(user=self.other_candidate_user)
         admission = DoctorateAdmissionFactory(
@@ -374,7 +379,9 @@ class DoctorateAdmissionApiTestCase(APITestCase):
 
     def test_admission_doctorate_get_using_api_candidate(self):
         self.client.force_authenticate(user=self.candidate.user)
-        response = self.client.get(self.url, format="json")
+
+        with self.assertNumQueriesLessThan(17):
+            response = self.client.get(self.url, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
         # Check response data
         # Check links
