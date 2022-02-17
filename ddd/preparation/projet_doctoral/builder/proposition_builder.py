@@ -26,8 +26,7 @@
 from typing import Optional, Union
 from uuid import UUID
 
-from admission.ddd.preparation.projet_doctoral.builder.proposition_identity_builder import \
-    PropositionIdentityBuilder
+from admission.ddd.preparation.projet_doctoral.builder.proposition_identity_builder import PropositionIdentityBuilder
 from admission.ddd.preparation.projet_doctoral.commands import InitierPropositionCommand
 from admission.ddd.preparation.projet_doctoral.domain.model._detail_projet import (
     ChoixLangueRedactionThese,
@@ -36,6 +35,7 @@ from admission.ddd.preparation.projet_doctoral.domain.model._detail_projet impor
 from admission.ddd.preparation.projet_doctoral.domain.model._enums import (
     ChoixCommissionProximiteCDEouCLSM,
     ChoixCommissionProximiteCDSS,
+    ChoixSousDomaineSciences,
     ChoixStatutProposition,
     ChoixTypeAdmission,
 )
@@ -54,31 +54,28 @@ from admission.ddd.preparation.projet_doctoral.domain.model.doctorat import Doct
 from admission.ddd.preparation.projet_doctoral.domain.model.proposition import (
     Proposition,
 )
-from admission.ddd.preparation.projet_doctoral.domain.validator.validator_by_business_action import \
-    InitierPropositionValidatorList
+from admission.ddd.preparation.projet_doctoral.domain.validator.validator_by_business_action import (
+    InitierPropositionValidatorList,
+)
 from admission.ddd.preparation.projet_doctoral.repository.i_proposition import IPropositionRepository
 from osis_common.ddd import interface
 
 
 class PropositionBuilder(interface.RootEntityBuilder):
-
     @classmethod
     def build_from_repository_dto(cls, dto_object: 'interface.DTO') -> 'Proposition':
         raise NotImplementedError
 
     @classmethod
-    def build_from_command(  # type: ignore[override]
-            cls,
-            cmd: 'InitierPropositionCommand'
-    ):
+    def build_from_command(cls, cmd: 'InitierPropositionCommand'):  # type: ignore[override]
         raise NotImplementedError
 
     @classmethod
     def initier_proposition(
-            cls,
-            cmd: 'InitierPropositionCommand',
-            doctorat_id: 'DoctoratIdentity',
-            proposition_repository: 'IPropositionRepository',
+        cls,
+        cmd: 'InitierPropositionCommand',
+        doctorat_id: 'DoctoratIdentity',
+        proposition_repository: 'IPropositionRepository',
     ) -> 'Proposition':
         InitierPropositionValidatorList(
             type_admission=cmd.type_admission,
@@ -88,11 +85,15 @@ class PropositionBuilder(interface.RootEntityBuilder):
             doctorat_deja_realise=cmd.doctorat_deja_realise,
             institution=cmd.institution,
         ).validate()
-        commission_proximite: Optional[Union[ChoixCommissionProximiteCDEouCLSM, ChoixCommissionProximiteCDSS]] = None
+        commission_proximite: Optional[
+            Union[ChoixCommissionProximiteCDEouCLSM, ChoixCommissionProximiteCDSS, ChoixSousDomaineSciences]
+        ] = None
         if cmd.commission_proximite and cmd.commission_proximite in ChoixCommissionProximiteCDEouCLSM.get_names():
             commission_proximite = ChoixCommissionProximiteCDEouCLSM[cmd.commission_proximite]
         elif cmd.commission_proximite and cmd.commission_proximite in ChoixCommissionProximiteCDSS.get_names():
             commission_proximite = ChoixCommissionProximiteCDSS[cmd.commission_proximite]
+        elif cmd.commission_proximite and cmd.commission_proximite in ChoixSousDomaineSciences.get_names():
+            commission_proximite = ChoixSousDomaineSciences[cmd.commission_proximite]
         reference = "{}-{}".format(
             doctorat_id.annee % 100,
             Proposition.valeur_reference_base + proposition_repository.get_next_reference(),

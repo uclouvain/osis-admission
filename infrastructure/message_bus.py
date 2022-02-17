@@ -134,6 +134,11 @@ class MessageBusCommands(AbstractMessageBusCommands):
             proposition_repository=PropositionRepository(),
             groupe_supervision_repository=GroupeDeSupervisionRepository(),
         ),
+        ApprouverPropositionParPdfCommand: partial(
+            approuver_proposition_par_pdf,
+            proposition_repository=PropositionRepository(),
+            groupe_supervision_repository=GroupeDeSupervisionRepository(),
+        ),
         RefuserPropositionCommand: partial(
             refuser_proposition,
             proposition_repository=PropositionRepository(),

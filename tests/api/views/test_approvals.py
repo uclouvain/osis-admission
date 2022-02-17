@@ -34,9 +34,7 @@ from admission.tests.factories.supervision import CaMemberFactory, PromoterFacto
 from osis_signature.enums import SignatureState
 
 
-@override_settings(ROOT_URLCONF='admission.api.url_v1')
-class ApprovalsApiTestCase(APITestCase):
-
+class ApprovalMixin:
     @classmethod
     def setUpTestData(cls):
         # Create promoters
@@ -79,6 +77,9 @@ class ApprovalsApiTestCase(APITestCase):
         # Targeted url
         cls.url = resolve_url("approvals", uuid=cls.admission.uuid)
 
+
+@override_settings(ROOT_URLCONF='admission.api.url_v1')
+class ApprovalsApiTestCase(ApprovalMixin, APITestCase):
     def test_user_not_logged_assert_not_authorized(self):
         self.client.force_authenticate(user=None)
         response = self.client.get(self.url)
@@ -182,3 +183,58 @@ class ApprovalsApiTestCase(APITestCase):
             **self.refused_data,
         }, format="json")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+
+@override_settings(ROOT_URLCONF='admission.api.url_v1')
+class ApproveByPdfApiTestCase(ApprovalMixin, APITestCase):
+    def setUp(self):
+        # Targeted url
+        self.url = resolve_url("approve-by-pdf", uuid=self.admission.uuid)
+        self.approved_data = {
+            "pdf": [WriteTokenFactory().token],
+        }
+
+    def test_user_not_logged_assert_not_authorized(self):
+        self.client.force_authenticate(user=None)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_assert_methods_not_allowed(self):
+        self.client.force_authenticate(user=self.promoter.person.user)
+        methods_not_allowed = ['get', 'delete', 'put', 'patch']
+
+        for method in methods_not_allowed:
+            response = getattr(self.client, method)(self.url)
+            self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    def test_approve_proposition_api_by_promoter(self):
+        self.client.force_authenticate(user=self.promoter.person.user)
+        response = self.client.post(self.url, {
+            "matricule": self.promoter.person.global_id,
+            **self.approved_data,
+        }, format="json")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_approve_proposition_api_promoter_who_approved(self):
+        self.client.force_authenticate(user=self.admission.candidate.user)
+        response = self.client.post(self.url, {
+            "matricule": self.promoter_who_approved.person.global_id,
+            **self.approved_data,
+        }, format="json")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_approve_proposition_api_not_invited_ca_member(self):
+        self.client.force_authenticate(user=self.admission.candidate.user)
+        response = self.client.post(self.url, {
+            "matricule": self.ca_member.person.global_id,
+            **self.approved_data,
+        }, format="json")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_approve_proposition_api_by_pdf(self):
+        self.client.force_authenticate(user=self.admission.candidate.user)
+        response = self.client.post(self.url, {
+            "matricule": self.promoter.person.global_id,
+            **self.approved_data,
+        }, format="json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())

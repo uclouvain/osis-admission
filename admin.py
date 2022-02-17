@@ -25,6 +25,8 @@
 # ##############################################################################
 
 from django.contrib import admin
+from django.utils.translation import gettext_lazy as _
+
 
 from admission.auth.roles.adre import Adre
 from admission.auth.roles.ca_member import CommitteeMember
@@ -36,11 +38,41 @@ from admission.auth.roles.sceb import Sceb
 from admission.auth.roles.sic_director import SicDirector
 from admission.auth.roles.sic_manager import SicManager
 from admission.contrib.models import DoctorateAdmission
+
+from osis_profile.models.curriculum import CurriculumYear, Experience
 from osis_role.contrib.admin import RoleModelAdmin
 
 
 class DoctorateAdmissionAdmin(admin.ModelAdmin):
     autocomplete_fields = ['doctorate', 'thesis_institute']
+    list_display = ['reference', 'candidate_fmt', 'doctorate', 'type', 'status']
+    list_filter = ['status', 'type']
+    list_select_related = ['candidate', 'doctorate']
+    readonly_fields = [
+        "project_document",
+        "gantt_graph",
+        "program_proposition",
+        "additional_training_project",
+        "recommendation_letters",
+        "cotutelle_opening_request",
+        "cotutelle_convention",
+        "cotutelle_other_documents",
+        "detailed_status",
+    ]
+
+    def candidate_fmt(self, obj):
+        return "{} ({global_id})".format(obj.candidate, global_id=obj.candidate.global_id)
+
+    candidate_fmt.short_description = _("Candidate")
+
+
+class ExperienceInlineAdmin(admin.TabularInline):
+    model = Experience
+
+
+class CurriculumYearAdmin(admin.ModelAdmin):
+    inlines = [ExperienceInlineAdmin, ]
+    autocomplete_fields = ["person"]
 
 
 class ExternalCommitteeMemberAdmin(RoleModelAdmin):
@@ -50,6 +82,7 @@ class ExternalCommitteeMemberAdmin(RoleModelAdmin):
 
 
 admin.site.register(DoctorateAdmission, DoctorateAdmissionAdmin)
+admin.site.register(CurriculumYear, CurriculumYearAdmin)
 
 # Roles
 admin.site.register(Promoter, ExternalCommitteeMemberAdmin)
