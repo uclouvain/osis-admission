@@ -514,6 +514,9 @@ msgstr "Des invitations ont déjà été envoyées"
 msgid "Supervision group not found."
 msgstr "Groupe de supervision non trouvé."
 
+msgid "The invitations have not been sent"
+msgstr "Les invitations n'ont pas été envoyées"
+
 msgid "There can be no more CA members in the supervision group."
 msgstr ""
 "Il ne peut y avoir davantage de membres du CA dans le groupe de supervision."

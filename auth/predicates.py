@@ -53,6 +53,12 @@ def invitations_sent(self, user: User, obj: DoctorateAdmission):
 
 
 @predicate(bind=True)
+@predicate_failed_msg(message=_("The invitations have not been sent"))
+def invitations_not_sent(self, user: User, obj: DoctorateAdmission):
+    return not invitations_sent(user, obj)
+
+
+@predicate(bind=True)
 @predicate_failed_msg(message=_("You must be the request promoter to access this admission"))
 def is_admission_request_promoter(self, user: User, obj: DoctorateAdmission):
     return obj.supervision_group and user.person.pk in obj.supervision_group.actors.filter(

@@ -496,6 +496,9 @@ msgstr ""
 msgid "Supervision group not found."
 msgstr ""
 
+msgid "The invitations have not been sent"
+msgstr ""
+
 msgid "There can be no more CA members in the supervision group."
 msgstr ""
 

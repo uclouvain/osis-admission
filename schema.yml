@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Admission API
-  version: 1.0.12
+  version: 1.0.14
   description: This API delivers data for the Admission project.
   contact:
     name: UCLouvain - OSIS
@@ -1521,6 +1521,8 @@ components:
                     $ref: '#/components/schemas/ActionLink'
                   destroy_proposition:
                     $ref: '#/components/schemas/ActionLink'
+                  submit_proposition:
+                    $ref: '#/components/schemas/ActionLink'
                   retrieve_proposition:
                     $ref: '#/components/schemas/ActionLink'
                   update_proposition:
@@ -1602,6 +1604,8 @@ components:
               $ref: '#/components/schemas/ActionLink'
             destroy_proposition:
               $ref: '#/components/schemas/ActionLink'
+            submit_proposition:
+              $ref: '#/components/schemas/ActionLink'
             retrieve_proposition:
               $ref: '#/components/schemas/ActionLink'
             update_proposition:
@@ -1664,8 +1668,8 @@ components:
               maxLength: 25
             other_institute:
               type: string
-              description: 'In case you could not find your institute in the list,
-                please mention it below. '
+              description: "Si vous ne trouvez pas votre institut dans la liste, merci\
+                \ de le pr\xE9ciser ici"
               maxLength: 500
             schedule:
               type: object
@@ -1711,7 +1715,7 @@ components:
                   minimum: 0
                 modern_languages_other_label:
                   type: string
-                  description: If other language, please specify
+                  description: "Si autre langue, pr\xE9cisez"
                   maxLength: 25
                 modern_languages_other_hours:
                   type: integer
@@ -1736,7 +1740,7 @@ components:
                   minimum: 0
                 other_label:
                   type: string
-                  description: If other optional domains, please specify
+                  description: "Si autres mati\xE8res optionnelles, pr\xE9cisez"
                   maxLength: 25
                 other_hours:
                   type: integer

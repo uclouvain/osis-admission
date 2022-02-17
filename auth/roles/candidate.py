@@ -28,6 +28,7 @@ from django.utils.translation import gettext_lazy as _
 
 from admission.auth.predicates import (
     invitations_sent,
+    invitations_not_sent,
     is_admission_request_author,
 )
 from osis_role.contrib.models import RoleModel
@@ -69,6 +70,6 @@ class Candidate(RoleModel):
                 'admission.change_doctorateadmission_supervision': is_admission_request_author & ~invitations_sent,
                 'admission.add_supervision_member': is_admission_request_author & ~invitations_sent,
                 'admission.remove_supervision_member': is_admission_request_author & ~invitations_sent,
-                'admission.submit_doctorateadmission': is_admission_request_author,
+                'admission.submit_doctorateadmission': is_admission_request_author & ~invitations_not_sent,
             }
         )
