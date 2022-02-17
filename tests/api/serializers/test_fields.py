@@ -23,22 +23,23 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.shortcuts import get_object_or_404
 from django.test.utils import override_settings
 from django.urls.base import reverse
 from django.urls.conf import path
-from django.utils.translation import gettext as _
+from django.utils.translation import gettext as _, get_language
+from unittest.mock import Mock
 from rest_framework.serializers import Serializer
 from rest_framework.test import APIRequestFactory, APITestCase
 from rest_framework.views import APIView
 
 from admission.api.permissions import IsListingOrHasNotAlreadyCreatedPermission
-from admission.api.serializers.fields import ActionLinksField
+from admission.api.serializers.fields import ActionLinksField, TranslatedField
 from admission.contrib.models import DoctorateAdmission
 from admission.tests.factories import DoctorateAdmissionFactory
 from base.tests.factories.person import PersonFactory
-from base.tests.factories.user import UserFactory
 from osis_role.contrib.views import APIPermissionRequiredMixin
 
 
@@ -320,3 +321,34 @@ class SerializerFieldsTestCase(APITestCase):
                 'error': _("You must be the request author to access this admission"),
             }
         })
+
+
+class TranslatedFieldTestCase(APITestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.default_language = settings.LANGUAGE_CODE
+
+    def tearDown(self):
+        settings.LANGUAGE_CODE = self.default_language
+
+    def test_with_supported_language(self):
+        mock_obj = Mock(title='Mon titre', title_en='My title')
+        settings.LANGUAGE_CODE = get_language()
+
+        serializer_field = TranslatedField(field_name='title', en_field_name='title_en')
+
+        self.assertEqual(
+            serializer_field.to_representation(mock_obj),
+            'Mon titre',
+        )
+
+    def test_with_unsupported_language(self):
+        mock_obj = Mock(title='Mon titre', title_en='My title')
+        settings.LANGUAGE_CODE = 'azerty'
+
+        serializer_field = TranslatedField(field_name='title', en_field_name='title_en')
+
+        self.assertEqual(
+            serializer_field.to_representation(mock_obj),
+            'My title',
+        )

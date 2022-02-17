@@ -34,6 +34,7 @@ from admission.ddd.preparation.projet_doctoral.domain.model._detail_projet impor
     projet_non_rempli,
 )
 from admission.ddd.preparation.projet_doctoral.domain.model._enums import (
+    ChoixSousDomaineSciences,
     ChoixStatutProposition,
     ChoixTypeAdmission,
 )
@@ -97,6 +98,7 @@ class _PropositionFactory(factory.Factory):
 class PropositionAdmissionSC3DPMinimaleFactory(_PropositionFactory):
     entity_id = factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-SC3DP')
     type_admission = ChoixTypeAdmission.ADMISSION
+    commission_proximite = ChoixSousDomaineSciences.BIOLOGY
     doctorat_id = factory.SubFactory(_DoctoratIdentityFactory, sigle='SC3DP', annee=2020)
 
 

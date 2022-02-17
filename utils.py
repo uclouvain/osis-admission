@@ -23,14 +23,19 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
-from functools import lru_cache
-
+from django.core.cache import cache
 from rest_framework.generics import get_object_or_404
 
 from admission.contrib.models import DoctorateAdmission
 
 
-@lru_cache()
 def get_cached_admission_perm_obj(admission_uuid):
-    return get_object_or_404(DoctorateAdmission, uuid=admission_uuid)
+    qs = DoctorateAdmission.objects.select_related(
+        'supervision_group',
+        'candidate',
+        'doctorate',
+    )
+    return cache.get_or_set(
+        'admission_permission_{}'.format(admission_uuid),
+        lambda: get_object_or_404(qs, uuid=admission_uuid),
+    )

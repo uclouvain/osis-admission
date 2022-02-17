@@ -25,6 +25,8 @@
 # ##############################################################################
 from itertools import chain
 
+from django.db.models import F
+
 from admission.ddd.preparation.projet_doctoral.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.preparation.projet_doctoral.dtos import (
     IdentificationDTO,
@@ -99,7 +101,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
         nb_langues_connues_requises = LanguageKnowledge.objects.filter(
             person__global_id=matricule,
             language__code__in=cls.CODES_LANGUES_CONNUES_REQUISES,
-        )[: len(cls.CODES_LANGUES_CONNUES_REQUISES)].count()
+        ).count()
 
         return LanguesConnuesDTO(
             nb_langues_connues_requises=nb_langues_connues_requises,
@@ -111,11 +113,20 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
             'last_registration_year',
             'belgianhighschooldiploma__academic_graduation_year',
             'foreignhighschooldiploma__academic_graduation_year',
-        ).get(global_id=matricule)
+        ).only(
+            'belgianhighschooldiploma',
+            'foreignhighschooldiploma',
+            'last_registration_year',
+            'curriculum',
+        ).get(
+            global_id=matricule
+        )
 
-        annees_curriculum = CurriculumYear.objects.select_related('academic_year').filter(
+        annees_curriculum = CurriculumYear.objects.filter(
             person__global_id=matricule,
-        )[: cls.NB_MAX_ANNEES_CV_REQUISES]
+        ).annotate(
+            annee=F("academic_year__year")
+        )[:cls.NB_MAX_ANNEES_CV_REQUISES]
 
         annee_diplome_etudes_secondaires_belges = (
             person.belgianhighschooldiploma.academic_graduation_year.year
@@ -129,7 +140,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
         )
 
         return CurriculumDTO(
-            annees=set(curriculum_year.academic_year.year for curriculum_year in annees_curriculum),
+            annees=set(annee_curriculum.annee for annee_curriculum in annees_curriculum),
             annee_diplome_etudes_secondaires_belges=annee_diplome_etudes_secondaires_belges,
             annee_diplome_etudes_secondaires_etrangeres=annee_diplome_etudes_secondaires_etrangeres,
             annee_derniere_inscription_ucl=person.last_registration_year.year

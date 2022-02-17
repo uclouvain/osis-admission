@@ -65,16 +65,14 @@ from admission.infrastructure.preparation.projet_doctoral.repository.in_memory.g
 from admission.infrastructure.preparation.projet_doctoral.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
-from admission.tests import TestCase
+from django.test import SimpleTestCase
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
-from base.tests.factories.academic_year import AcademicYearFactory
+from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
+from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import AcademicYear, AcademicYearIdentity
 
 
-class TestVerifierPropositionServiceCommun(TestCase):
+class TestVerifierPropositionServiceCommun(SimpleTestCase):
     def setUp(self) -> None:
-        for year in range(2016, 2021):
-            AcademicYearFactory(year=year)
-
         self.candidat_translator = ProfilCandidatInMemoryTranslator()
         self.proposition_repository = PropositionInMemoryRepository()
         self.groupe_supervision_repository = GroupeDeSupervisionInMemoryRepository()
@@ -85,6 +83,15 @@ class TestVerifierPropositionServiceCommun(TestCase):
         self.adresse_correspondance = self.candidat_translator.adresses_candidats[1]
         self.addCleanup(self.proposition_repository.reset)
         self.message_bus = message_bus_in_memory_instance
+
+        self.academic_year_repository = AcademicYearInMemoryRepository()
+
+        for annee in range(2016, 2021):
+            self.academic_year_repository.save(AcademicYear(
+                entity_id=AcademicYearIdentity(year=annee),
+                start_date=datetime.date(annee, 9, 15),
+                end_date=datetime.date(annee+1, 9, 30),
+            ))
 
         # Mock datetime to return the 2020 year as the current year
         patcher = mock.patch(

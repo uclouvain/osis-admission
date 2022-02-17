@@ -33,7 +33,7 @@ from admission.ddd.preparation.projet_doctoral.domain.service.verifier_propositi
 from admission.ddd.preparation.projet_doctoral.repository.i_groupe_de_supervision import IGroupeDeSupervisionRepository
 from admission.ddd.preparation.projet_doctoral.repository.i_proposition import IPropositionRepository
 from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import GetCurrentAcademicYear
-from infrastructure.shared_kernel.academic_year.repository import academic_year as academic_year_repository
+from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import IAcademicYearRepository
 
 
 def verifier_proposition(
@@ -41,6 +41,7 @@ def verifier_proposition(
     proposition_repository: 'IPropositionRepository',
     groupe_supervision_repository: 'IGroupeDeSupervisionRepository',
     profil_candidat_translator: 'IProfilCandidatTranslator',
+    academic_year_repository: 'IAcademicYearRepository'
 ) -> 'PropositionIdentity':
     # GIVEN
     entity_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
@@ -48,7 +49,7 @@ def verifier_proposition(
     groupe_de_supervision = groupe_supervision_repository.get_by_proposition_id(entity_id)
     annee_courante = GetCurrentAcademicYear().get_starting_academic_year(
         datetime.date.today(),
-        academic_year_repository.AcademicYearRepository()
+        academic_year_repository,
     ).year
 
     # WHEN

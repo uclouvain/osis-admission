@@ -30,6 +30,7 @@ from admission.ddd.preparation.projet_doctoral.commands import InitierPropositio
 from admission.ddd.preparation.projet_doctoral.domain.model._enums import (
     ChoixCommissionProximiteCDEouCLSM,
     ChoixCommissionProximiteCDSS,
+    ChoixSousDomaineSciences,
     ChoixTypeAdmission,
 )
 from admission.ddd.preparation.projet_doctoral.domain.model._experience_precedente_recherche import (
@@ -53,8 +54,9 @@ from admission.ddd.preparation.projet_doctoral.test.factory.proposition import (
     PropositionAdmissionSC3DPMinimaleAnnuleeFactory,
 )
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
-from admission.infrastructure.preparation.projet_doctoral.repository.in_memory.proposition import \
-    PropositionInMemoryRepository
+from admission.infrastructure.preparation.projet_doctoral.repository.in_memory.proposition import (
+    PropositionInMemoryRepository,
+)
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 
 
@@ -82,6 +84,7 @@ class TestInitierPropositionService(SimpleTestCase):
         self.doctorat_non_CDE = self.doctorat_non_CDSS = 'AGRO3DP'
         self.doctorat_CLSM = "ECGM3DP"
         self.doctorat_CDSS = "ESP3DP"
+        self.doctorat_science = "SC3DP"
 
     def test_should_initier(self):
         proposition_id = self.message_bus.invoke(self.cmd)
@@ -140,6 +143,16 @@ class TestInitierPropositionService(SimpleTestCase):
         proposition = self.proposition_repository.get(proposition_id)  # type: Proposition
         self.assertEqual(proposition.commission_proximite.name, ChoixCommissionProximiteCDSS.ECLI.name)
 
+    def test_should_initier_sous_domaine_science(self):
+        cmd = attr.evolve(
+            self.cmd,
+            commission_proximite=ChoixSousDomaineSciences.BIOLOGY.name,
+            sigle_formation=self.doctorat_science,
+        )
+        proposition_id = self.message_bus.invoke(cmd)
+        proposition = self.proposition_repository.get(proposition_id)  # type: Proposition
+        self.assertEqual(proposition.commission_proximite.name, ChoixSousDomaineSciences.BIOLOGY.name)
+
     def test_should_pas_initier_commission_proximite_CLSM_vide(self):
         cmd = attr.evolve(self.cmd, commission_proximite='', sigle_formation=self.doctorat_CLSM)
         with self.assertRaises(CommissionProximiteInconsistantException):
@@ -182,6 +195,11 @@ class TestInitierPropositionService(SimpleTestCase):
 
     def test_should_pas_initier_si_commission_proximite_CDSS_et_non_CDSS(self):
         cmd = attr.evolve(self.cmd, commission_proximite='ECLI', sigle_formation=self.doctorat_non_CDSS)
+        with self.assertRaises(CommissionProximiteInconsistantException):
+            self.message_bus.invoke(cmd)
+
+    def test_should_pas_initier_si_sous_domaine_absent_et_doctorat_sciences(self):
+        cmd = attr.evolve(self.cmd, commission_proximite='', sigle_formation=self.doctorat_science)
         with self.assertRaises(CommissionProximiteInconsistantException):
             self.message_bus.invoke(cmd)
 
