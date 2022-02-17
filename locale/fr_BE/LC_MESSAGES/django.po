@@ -70,6 +70,9 @@ msgstr "Déjà promoteur"
 msgid "Author"
 msgstr "Auteur"
 
+msgid "BIOLOGY"
+msgstr "Biologie"
+
 msgid "CA Member"
 msgstr "Membre du CA"
 
@@ -81,6 +84,9 @@ msgstr "Gestionnaire CDD"
 
 msgid "CDD managers"
 msgstr "Gestionnaires CDD"
+
+msgid "CHEMISTRY"
+msgstr "Chimie"
 
 msgid "Can add a member to the supervision group"
 msgstr "Peut ajouter un membre au groupe de supervision"
@@ -280,6 +286,9 @@ msgstr "Type de financement"
 msgid "French"
 msgstr "Français"
 
+msgid "GEOGRAPHY"
+msgstr "Géographie"
+
 msgid "Gantt graph"
 msgstr "Graphe de Gantt"
 
@@ -314,6 +323,9 @@ msgstr "Liste des admissions en doctorat et données administratives"
 
 msgid "MANAGEMENT"
 msgstr "Gestion"
+
+msgid "MATHEMATICS"
+msgstr "Mathématiques"
 
 msgid "Mandatory fields are missing in the cotutelle."
 msgstr "Les champs requis de la cotutelle sont manquants."
@@ -367,6 +379,9 @@ msgstr "Autre lieu de la thèse"
 msgid "PARTIAL"
 msgstr "Partiel"
 
+msgid "PHYSICS"
+msgstr "Physique"
+
 msgid "PRE_ADMISSION"
 msgstr "Pre-admission"
 
@@ -407,6 +422,9 @@ msgstr "Merci de spécifier au-moins un numéro d'identité."
 
 msgid "Please specify either your date of birth or your year of birth."
 msgstr "Merci de spécifier votre date ou votre année de naissance."
+
+msgid "Please specify the experience's year."
+msgstr "Merci de spécifier l'année de l'expérience."
 
 msgid "Please specify your Belgian national register number."
 msgstr "Merci de spécifier votre numéro de registre national belge."
@@ -519,6 +537,9 @@ msgstr "Gestionnaires SIC"
 msgid "SIGNING_IN_PROGRESS"
 msgstr "Signatures en cours"
 
+msgid "STATISTICS"
+msgstr "Statistiques"
+
 msgid "SUBMITTED"
 msgstr "Soumis"
 
@@ -530,6 +551,12 @@ msgstr "Des invitations ont déjà été envoyées"
 
 msgid "Supervision group not found."
 msgstr "Groupe de supervision non trouvé."
+
+msgid "The experiences that have been valuated from this admission."
+msgstr "Les expériences qui ont été valorisées à partir de cette admission."
+
+msgid "The invitations have not been sent"
+msgstr "Les invitations n'ont pas été envoyées"
 
 msgid "There can be no more CA members in the supervision group."
 msgstr ""
@@ -547,6 +574,12 @@ msgstr "Langue de la thèse"
 
 msgid "Thesis location"
 msgstr "Lieu de la thèse"
+
+msgid "This experience cannot be deleted as it has already been valuated."
+msgstr "Cette expérience ne peut être supprimée, ayant déjà été évaluée."
+
+msgid "This experience cannot be updated as it has already been valuated."
+msgstr "Cette expérience ne peut être mise à jour, ayant déjà été évaluée."
 
 msgid "Title"
 msgstr "Titre"
@@ -632,7 +665,3 @@ msgstr "créé"
 
 msgid "modified"
 msgstr "modifée"
-
-#, python-brace-format
-msgid "{degree} [{type}] for {candidate}"
-msgstr "{degree} [{type}] pour {candidate}"

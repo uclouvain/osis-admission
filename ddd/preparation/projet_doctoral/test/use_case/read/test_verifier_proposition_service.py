@@ -47,11 +47,11 @@ from admission.infrastructure.preparation.projet_doctoral.domain.service.in_memo
 from admission.infrastructure.preparation.projet_doctoral.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
-from admission.tests import TestCase
+from django.test import SimpleTestCase
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 
 
-class TestVerifierPropositionService(TestCase):
+class TestVerifierPropositionService(SimpleTestCase):
     def setUp(self) -> None:
         self.candidat_translator = ProfilCandidatInMemoryTranslator()
         self.proposition_repository = PropositionInMemoryRepository()

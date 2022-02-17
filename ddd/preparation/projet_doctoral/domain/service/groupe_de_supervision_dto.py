@@ -54,6 +54,7 @@ class GroupeDeSupervisionDto(interface.DomainService):
                     status=signature.etat.name,
                     commentaire_externe=signature.commentaire_externe,
                     commentaire_interne=signature.commentaire_interne,
+                    pdf=signature.pdf,
                 )
                 for signature in groupe.signatures_promoteurs
             ],
@@ -63,6 +64,7 @@ class GroupeDeSupervisionDto(interface.DomainService):
                     status=signature.etat.name,
                     commentaire_externe=signature.commentaire_externe,
                     commentaire_interne=signature.commentaire_interne,
+                    pdf=signature.pdf,
                 )
                 for signature in groupe.signatures_membres_CA
             ],

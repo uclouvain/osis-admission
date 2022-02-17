@@ -28,6 +28,7 @@ from unittest import mock
 from django.shortcuts import resolve_url
 from django.test import override_settings
 from django.urls import reverse
+from osis_signature.enums import SignatureState
 from rest_framework import status
 from rest_framework.test import APITestCase
 
@@ -36,6 +37,7 @@ from admission.ddd.preparation.projet_doctoral.domain.model._detail_projet impor
 from admission.ddd.preparation.projet_doctoral.domain.model._enums import (
     ChoixCommissionProximiteCDEouCLSM,
     ChoixCommissionProximiteCDSS,
+    ChoixSousDomaineSciences,
     ChoixStatutProposition,
 )
 from admission.ddd.preparation.projet_doctoral.domain.model._financement import ChoixTypeFinancement
@@ -108,7 +110,7 @@ class DoctorateAdmissionListApiTestCase(APITestCase):
         first_proposition = response.data['propositions'][0]
         # Check proposition links
         self.assertTrue('links' in first_proposition)
-        actions = [
+        allowed_actions = [
             'retrieve_person',
             'update_person',
             'retrieve_coordinates',
@@ -123,12 +125,17 @@ class DoctorateAdmissionListApiTestCase(APITestCase):
             'retrieve_cotutelle',
             'update_cotutelle',
             'retrieve_supervision',
+            'update_curriculum',
+            'retrieve_curriculum',
+        ]
+        additional_actions = [
+            'submit_proposition',
         ]
         self.assertCountEqual(
             list(first_proposition['links']),
-            actions,
+            allowed_actions + additional_actions,
         )
-        for action in actions:
+        for action in allowed_actions:
             # Check the url
             self.assertTrue('url' in first_proposition['links'][action], '{} is not allowed'.format('action'))
             # Check the method type
@@ -359,6 +366,17 @@ class DoctorateAdmissionApiTestCase(APITestCase):
         # Check response data
         self.assertEqual(response.json()['commission_proximite'], ChoixCommissionProximiteCDSS.ECLI.name)
 
+        admission = DoctorateAdmissionFactory(
+            candidate=self.other_candidate_user.person,
+            doctorate__management_entity=self.commission,
+            doctorate__acronym="SC3DP",
+            proximity_commission=ChoixSousDomaineSciences.CHEMISTRY.name,
+        )
+        response = self.client.get(resolve_url("admission_api_v1:propositions", uuid=admission.uuid), format="json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
+        # Check response data
+        self.assertEqual(response.json()['commission_proximite'], ChoixSousDomaineSciences.CHEMISTRY.name)
+
     def test_admission_doctorate_get_using_api_candidate(self):
         self.client.force_authenticate(user=self.candidate.user)
         response = self.client.get(self.url, format="json")
@@ -383,11 +401,14 @@ class DoctorateAdmissionApiTestCase(APITestCase):
             'add_member',
             'remove_member',
             'retrieve_supervision',
-            'submit_proposition',
+            'update_curriculum',
+            'retrieve_curriculum',
         ]
         all_actions = allowed_actions + [
             'add_approval',
+            'approve_by_pdf',
             'request_signatures',
+            'submit_proposition',
         ]
         self.assertCountEqual(
             list(response.data['links']),
@@ -613,33 +634,55 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
         cls.first_candidate.save()
         # Incomplete candidate
         cls.second_candidate = CandidateFactory(person__first_name="Jim").person
+        # Create promoters
+        cls.first_invited_promoter = PromoterFactory(actor_ptr__person__first_name="Joe")
+        cls.first_invited_promoter.actor_ptr.switch_state(SignatureState.INVITED)
+        cls.first_not_invited_promoter = PromoterFactory(actor_ptr__person__first_name="Jack")
+        cls.second_invited_promoter = PromoterFactory(actor_ptr__person__first_name="Jim")
+        cls.second_invited_promoter.actor_ptr.switch_state(SignatureState.INVITED)
 
         # Create admissions
-        cls.first_admission = DoctorateAdmissionFactory(
+        cls.first_admission_with_invitation = DoctorateAdmissionFactory(
             candidate=cls.first_candidate,
+            supervision_group=cls.first_invited_promoter.actor_ptr.process,
+        )
+        cls.first_admission_without_invitation = DoctorateAdmissionFactory(
+            candidate=cls.first_candidate,
+            supervision_group=cls.first_not_invited_promoter.actor_ptr.process,
         )
         cls.second_admission = DoctorateAdmissionFactory(
             candidate=cls.second_candidate,
+            supervision_group=cls.second_invited_promoter.actor_ptr.process,
         )
         # Create other users
         cls.no_role_user = PersonFactory(first_name="Joe").user
 
         # Targeted urls
-        cls.first_admission_url = resolve_url("submit-proposition", uuid=cls.first_admission.uuid)
-        cls.second_admission_url = resolve_url("submit-proposition", uuid=cls.second_admission.uuid)
+        cls.first_admission_with_invitation_url = resolve_url(
+            "submit-proposition",
+            uuid=cls.first_admission_with_invitation.uuid,
+        )
+        cls.first_admission_without_invitation_url = resolve_url(
+            "submit-proposition",
+            uuid=cls.first_admission_without_invitation.uuid,
+        )
+        cls.second_admission_url = resolve_url(
+            "submit-proposition",
+            uuid=cls.second_admission.uuid,
+        )
 
     def test_assert_methods_not_allowed(self):
         self.client.force_authenticate(user=self.first_candidate.user)
         methods_not_allowed = ['post', 'patch', 'put', 'delete']
 
         for method in methods_not_allowed:
-            response = getattr(self.client, method)(self.first_admission_url)
+            response = getattr(self.client, method)(self.first_admission_with_invitation_url)
             self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 
     def test_verify_valid_proposition_using_api(self):
         self.client.force_authenticate(user=self.first_candidate.user)
 
-        response = self.client.get(self.first_admission_url)
+        response = self.client.get(self.first_admission_with_invitation_url)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.json()), 0)
@@ -654,15 +697,20 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
 
     def test_admission_doctorate_verify_no_role(self):
         self.client.force_authenticate(user=self.no_role_user)
-        response = self.client.get(self.first_admission_url, format="json")
+        response = self.client.get(self.first_admission_with_invitation_url, format="json")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_admission_doctorate_verify_no_invited_promoters(self):
+        self.client.force_authenticate(user=self.first_candidate.user)
+        response = self.client.get(self.first_admission_without_invitation_url, format="json")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_admission_doctorate_verify_other_candidate(self):
         self.client.force_authenticate(user=self.second_candidate.user)
-        response = self.client.get(self.first_admission_url, format="json")
+        response = self.client.get(self.first_admission_with_invitation_url, format="json")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_user_not_logged_assert_not_authorized(self):
         self.client.force_authenticate(user=None)
-        response = self.client.get(self.first_admission_url)
+        response = self.client.get(self.first_admission_with_invitation_url)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
