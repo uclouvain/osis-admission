@@ -81,6 +81,6 @@ def is_part_of_committee(self, user: User, obj: DoctorateAdmission):
 @predicate(bind=True)
 @predicate_failed_msg(message=_("You must be a member of the committee who has not yet given his answer"))
 def is_part_of_committee_and_invited(self, user: User, obj: DoctorateAdmission):
-    return user.person.pk in obj.supervision_group.actors.filter(
+    return obj.supervision_group and user.person.pk in obj.supervision_group.actors.filter(
         last_state=SignatureState.INVITED.name,
     ).values_list('person_id', flat=True)

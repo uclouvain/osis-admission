@@ -37,6 +37,7 @@ from admission.ddd.preparation.projet_doctoral.domain.model._detail_projet impor
 from admission.ddd.preparation.projet_doctoral.domain.model._enums import (
     ChoixCommissionProximiteCDEouCLSM,
     ChoixCommissionProximiteCDSS,
+    ChoixSousDomaineSciences,
     ChoixStatutProposition,
 )
 from admission.ddd.preparation.projet_doctoral.domain.model._financement import ChoixTypeFinancement
@@ -124,6 +125,8 @@ class DoctorateAdmissionListApiTestCase(APITestCase):
             'retrieve_cotutelle',
             'update_cotutelle',
             'retrieve_supervision',
+            'update_curriculum',
+            'retrieve_curriculum',
         ]
         additional_actions = [
             'submit_proposition',
@@ -363,6 +366,17 @@ class DoctorateAdmissionApiTestCase(APITestCase):
         # Check response data
         self.assertEqual(response.json()['commission_proximite'], ChoixCommissionProximiteCDSS.ECLI.name)
 
+        admission = DoctorateAdmissionFactory(
+            candidate=self.other_candidate_user.person,
+            doctorate__management_entity=self.commission,
+            doctorate__acronym="SC3DP",
+            proximity_commission=ChoixSousDomaineSciences.CHEMISTRY.name,
+        )
+        response = self.client.get(resolve_url("admission_api_v1:propositions", uuid=admission.uuid), format="json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
+        # Check response data
+        self.assertEqual(response.json()['commission_proximite'], ChoixSousDomaineSciences.CHEMISTRY.name)
+
     def test_admission_doctorate_get_using_api_candidate(self):
         self.client.force_authenticate(user=self.candidate.user)
         response = self.client.get(self.url, format="json")
@@ -387,9 +401,12 @@ class DoctorateAdmissionApiTestCase(APITestCase):
             'add_member',
             'remove_member',
             'retrieve_supervision',
+            'update_curriculum',
+            'retrieve_curriculum',
         ]
         all_actions = allowed_actions + [
             'add_approval',
+            'approve_by_pdf',
             'request_signatures',
             'submit_proposition',
         ]

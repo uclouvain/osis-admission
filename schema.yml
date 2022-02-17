@@ -206,6 +206,211 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - propositions
+  /curriculum:
+    get:
+      operationId: list_curriculum_experiences
+      description: Return the list of experiences from the person's CV.
+      parameters:
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ExperienceOutput'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - person
+    post:
+      operationId: create_curriculum_experience
+      description: Add an experience to the person's CV.
+      parameters:
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExperienceInput'
+      responses:
+        201:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExperienceOutput'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - person
+  /curriculum/file:
+    get:
+      operationId: retrieveCurriculumFile
+      description: ''
+      parameters:
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CurriculumFile'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - person
+    put:
+      operationId: updateCurriculumFile
+      description: ''
+      parameters:
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CurriculumFile'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CurriculumFile'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - person
+  /curriculum/{xp}:
+    get:
+      operationId: retrieve_curriculum_experience
+      description: Return a specific experience from the person's CV.
+      parameters:
+      - name: xp
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExperienceOutput'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - person
+    put:
+      operationId: update_curriculum_experience
+      description: Update one of the experiences from the person's CV.
+      parameters:
+      - name: xp
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExperienceInput'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExperienceOutput'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - person
+    delete:
+      operationId: destroy_curriculum_experience
+      description: Remove one of the experiences from the person's CV.
+      parameters:
+      - name: xp
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        200:
+          content:
+            application/json:
+              schema: {}
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - person
   /supervised_propositions:
     get:
       operationId: list_supervised_propositions
@@ -956,6 +1161,253 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - propositions
+  /propositions/{uuid}/curriculum:
+    get:
+      operationId: list_curriculum_experiencesAdmission
+      description: Return the list of experiences from the person's CV.
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ExperienceOutput'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - person
+    post:
+      operationId: create_curriculum_experienceAdmission
+      description: Add an experience to the person's CV.
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExperienceInput'
+      responses:
+        201:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExperienceOutput'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - person
+  /propositions/{uuid}/curriculum/file:
+    get:
+      operationId: retrieveCurriculumFileAdmission
+      description: ''
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CurriculumFile'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - person
+    put:
+      operationId: updateCurriculumFileAdmission
+      description: ''
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CurriculumFile'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CurriculumFile'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - person
+  /propositions/{uuid}/curriculum/{xp}:
+    get:
+      operationId: retrieve_curriculum_experienceAdmission
+      description: Return a specific experience from the person's CV.
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - name: xp
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExperienceOutput'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - person
+    put:
+      operationId: update_curriculum_experienceAdmission
+      description: Update one of the experiences from the person's CV.
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - name: xp
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExperienceInput'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExperienceOutput'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - person
+    delete:
+      operationId: destroy_curriculum_experienceAdmission
+      description: Remove one of the experiences from the person's CV.
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - name: xp
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        200:
+          content:
+            application/json:
+              schema: {}
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - person
   /autocomplete/sector:
     get:
       operationId: listSectorDTOs
@@ -1234,6 +1686,42 @@ paths:
               $ref: '#/components/schemas/RefuserPropositionCommand'
       responses:
         200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PropositionIdentityDTO'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
+  /propositions/{uuid}/approve-by-pdf:
+    post:
+      operationId: approve_by_pdf
+      description: Approve the proposition with a pdf file.
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApprouverPropositionParPdfCommand'
+      responses:
+        201:
           content:
             application/json:
               schema:
@@ -1533,6 +2021,10 @@ components:
                     $ref: '#/components/schemas/ActionLink'
                   retrieve_supervision:
                     $ref: '#/components/schemas/ActionLink'
+                  retrieve_curriculum:
+                    $ref: '#/components/schemas/ActionLink'
+                  update_curriculum:
+                    $ref: '#/components/schemas/ActionLink'
                 readOnly: true
                 default: {}
             required:
@@ -1551,6 +2043,225 @@ components:
             - statut
       required:
       - propositions
+    ExperienceOutput:
+      type: object
+      properties:
+        country:
+          type: string
+          nullable: true
+        linguistic_regime:
+          type: string
+          nullable: true
+        curriculum_year:
+          type: object
+          properties:
+            academic_year:
+              type: integer
+              nullable: true
+            id:
+              type: integer
+              readOnly: true
+          required:
+          - academic_year
+        is_valuated:
+          type: boolean
+          readOnly: true
+        uuid:
+          type: string
+          readOnly: true
+        type:
+          $ref: '#/components/schemas/ExperienceType'
+        institute_name:
+          type: string
+          nullable: true
+          maxLength: 255
+        institute_city:
+          type: string
+          nullable: true
+          maxLength: 255
+        institute_postal_code:
+          type: string
+          nullable: true
+          maxLength: 20
+        education_name:
+          type: string
+          nullable: true
+          maxLength: 255
+        result:
+          $ref: '#/components/schemas/Result'
+          nullable: true
+        graduation_year:
+          type: boolean
+          nullable: true
+        obtained_grade:
+          $ref: '#/components/schemas/Grade'
+          nullable: true
+        rank_in_diploma:
+          type: string
+          nullable: true
+          maxLength: 255
+        issue_diploma_date:
+          type: string
+          format: date
+          nullable: true
+        credit_type:
+          $ref: '#/components/schemas/CreditType'
+          nullable: true
+        entered_credits_number:
+          type: integer
+          maximum: 2147483647
+          nullable: true
+          minimum: 0
+        acquired_credits_number:
+          type: integer
+          maximum: 2147483647
+          nullable: true
+          minimum: 0
+        transcript:
+          type: array
+          items:
+            type: string
+          nullable: true
+        graduate_degree:
+          type: array
+          items:
+            type: string
+          nullable: true
+        access_certificate_after_60_master:
+          type: array
+          items:
+            type: string
+          nullable: true
+        dissertation_title:
+          type: string
+          nullable: true
+          maxLength: 255
+        dissertation_score:
+          type: string
+          format: decimal
+          multipleOf: 0.01
+          maximum: 100
+          minimum: -100
+          nullable: true
+        dissertation_summary:
+          type: array
+          items:
+            type: string
+          nullable: true
+        belgian_education_community:
+          $ref: '#/components/schemas/BelgianCommunitiesOfEducation'
+          nullable: true
+        study_system:
+          $ref: '#/components/schemas/StudySystem'
+          nullable: true
+        study_cycle_type:
+          $ref: '#/components/schemas/ForeignStudyCycleType'
+          nullable: true
+        transcript_translation:
+          type: array
+          items:
+            type: string
+          nullable: true
+        graduate_degree_translation:
+          type: array
+          items:
+            type: string
+          nullable: true
+        activity_type:
+          $ref: '#/components/schemas/ActivityType'
+          nullable: true
+        other_activity_type:
+          type: string
+          nullable: true
+          maxLength: 255
+        activity_certificate:
+          type: array
+          items:
+            type: string
+          nullable: true
+        activity_position:
+          type: string
+          nullable: true
+          maxLength: 255
+        institute:
+          type: integer
+          nullable: true
+        program:
+          type: integer
+          nullable: true
+      required:
+      - country
+      - curriculum_year
+      - type
+    ExperienceType:
+      enum:
+      - HIGHER_EDUCATION
+      - OTHER_ACTIVITY
+      type: string
+    Result:
+      enum:
+      - ''
+      - FAILURE
+      - NO_RESULT
+      - SUCCESS
+      - SUCCESS_WITH_RESIDUAL_CREDITS
+      type: string
+    Grade:
+      enum:
+      - ''
+      - GREATER_DISTINCTION
+      - GREAT_DISTINCTION
+      - DISTINCTION
+      - SATISFACTION
+      - SUCCESS_WITHOUT_DISTINCTION
+      - NO_GRADE
+      type: string
+    CreditType:
+      enum:
+      - ''
+      - EUROPEAN_UNION_CREDITS
+      - NON_EUROPEAN_UNION_CREDITS
+      - SEMESTERS
+      type: string
+    BelgianCommunitiesOfEducation:
+      enum:
+      - ''
+      - FRENCH_SPEAKING
+      - FLEMISH_SPEAKING
+      - GERMAN_SPEAKING
+      type: string
+    StudySystem:
+      enum:
+      - ''
+      - CONTINUING_EDUCATION
+      - FULL_TIME_EDUCATION
+      type: string
+    ForeignStudyCycleType:
+      enum:
+      - ''
+      - BACHELOR
+      - DOCTORATE
+      - MASTER
+      - OTHER_HIGHER_EDUCATION
+      type: string
+    ActivityType:
+      enum:
+      - ''
+      - ILLNESS
+      - INTERNSHIP
+      - OTHER
+      - UNEMPLOYMENT
+      - VOLUNTEERING
+      - WORK
+      type: string
+    CurriculumFile:
+      type: object
+      properties:
+        curriculum:
+          type: array
+          items:
+            type: string
+          nullable: true
     PropositionSearchDTO:
       type: object
       properties:
@@ -1615,6 +2326,10 @@ components:
             update_cotutelle:
               $ref: '#/components/schemas/ActionLink'
             retrieve_supervision:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_curriculum:
+              $ref: '#/components/schemas/ActionLink'
+            update_curriculum:
               $ref: '#/components/schemas/ActionLink'
           readOnly: true
           default: {}
@@ -1806,12 +2521,6 @@ components:
       - BTW_65_AND_75_RESULT
       - GT_75_RESULT
       type: string
-    BelgianCommunitiesOfEducation:
-      enum:
-      - FRENCH_SPEAKING
-      - FLEMISH_SPEAKING
-      - GERMAN_SPEAKING
-      type: string
     EducationalType:
       enum:
       - ''
@@ -1989,6 +2698,12 @@ components:
               $ref: '#/components/schemas/ActionLink'
             request_signatures:
               $ref: '#/components/schemas/ActionLink'
+            approve_by_pdf:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_curriculum:
+              $ref: '#/components/schemas/ActionLink'
+            update_curriculum:
+              $ref: '#/components/schemas/ActionLink'
           readOnly: true
           default: {}
       required:
@@ -2079,9 +2794,14 @@ components:
                 type: string
               commentaire_interne:
                 type: string
+              pdf:
+                type: array
+                items:
+                  type: string
             required:
             - promoteur
             - status
+            - pdf
         signatures_membres_CA:
           type: array
           items:
@@ -2109,9 +2829,14 @@ components:
                 type: string
               commentaire_interne:
                 type: string
+              pdf:
+                type: array
+                items:
+                  type: string
             required:
             - membre_CA
             - status
+            - pdf
       required:
       - signatures_promoteurs
       - signatures_membres_CA
@@ -2280,6 +3005,12 @@ components:
       - DENT
       - DFAR
       - MOTR
+      - PHYSICS
+      - CHEMISTRY
+      - MATHEMATICS
+      - STATISTICS
+      - BIOLOGY
+      - GEOGRAPHY
       type: string
     ChoixLangueRedactionThese:
       enum:
@@ -2294,6 +3025,146 @@ components:
       - 'NO'
       - PARTIAL
       type: string
+    ExperienceInput:
+      type: object
+      properties:
+        country:
+          type: string
+          nullable: true
+        linguistic_regime:
+          type: string
+          nullable: true
+        academic_year:
+          type: integer
+          nullable: true
+        uuid:
+          type: string
+          readOnly: true
+        type:
+          $ref: '#/components/schemas/ExperienceType'
+        institute_name:
+          type: string
+          nullable: true
+          maxLength: 255
+        institute_city:
+          type: string
+          nullable: true
+          maxLength: 255
+        institute_postal_code:
+          type: string
+          nullable: true
+          maxLength: 20
+        education_name:
+          type: string
+          nullable: true
+          maxLength: 255
+        result:
+          $ref: '#/components/schemas/Result'
+          nullable: true
+        graduation_year:
+          type: boolean
+          nullable: true
+        obtained_grade:
+          $ref: '#/components/schemas/Grade'
+          nullable: true
+        rank_in_diploma:
+          type: string
+          nullable: true
+          maxLength: 255
+        issue_diploma_date:
+          type: string
+          format: date
+          nullable: true
+        credit_type:
+          $ref: '#/components/schemas/CreditType'
+          nullable: true
+        entered_credits_number:
+          type: integer
+          maximum: 2147483647
+          nullable: true
+          minimum: 0
+        acquired_credits_number:
+          type: integer
+          maximum: 2147483647
+          nullable: true
+          minimum: 0
+        transcript:
+          type: array
+          items:
+            type: string
+          nullable: true
+        graduate_degree:
+          type: array
+          items:
+            type: string
+          nullable: true
+        access_certificate_after_60_master:
+          type: array
+          items:
+            type: string
+          nullable: true
+        dissertation_title:
+          type: string
+          nullable: true
+          maxLength: 255
+        dissertation_score:
+          type: string
+          format: decimal
+          multipleOf: 0.01
+          maximum: 100
+          minimum: -100
+          nullable: true
+        dissertation_summary:
+          type: array
+          items:
+            type: string
+          nullable: true
+        belgian_education_community:
+          $ref: '#/components/schemas/BelgianCommunitiesOfEducation'
+          nullable: true
+        study_system:
+          $ref: '#/components/schemas/StudySystem'
+          nullable: true
+        study_cycle_type:
+          $ref: '#/components/schemas/ForeignStudyCycleType'
+          nullable: true
+        transcript_translation:
+          type: array
+          items:
+            type: string
+          nullable: true
+        graduate_degree_translation:
+          type: array
+          items:
+            type: string
+          nullable: true
+        activity_type:
+          $ref: '#/components/schemas/ActivityType'
+          nullable: true
+        other_activity_type:
+          type: string
+          nullable: true
+          maxLength: 255
+        activity_certificate:
+          type: array
+          items:
+            type: string
+          nullable: true
+        activity_position:
+          type: string
+          nullable: true
+          maxLength: 255
+        curriculum_year:
+          type: integer
+        institute:
+          type: integer
+          nullable: true
+        program:
+          type: integer
+          nullable: true
+      required:
+      - country
+      - type
     SupervisionActor:
       type: object
       properties:
@@ -2320,6 +3191,18 @@ components:
           type: string
       required:
       - matricule
+    ApprouverPropositionParPdfCommand:
+      type: object
+      properties:
+        matricule:
+          type: string
+        pdf:
+          type: array
+          items:
+            type: string
+      required:
+      - matricule
+      - pdf
     CompleterPropositionCommand:
       type: object
       properties:

@@ -36,6 +36,7 @@ from admission.ddd.preparation.projet_doctoral.domain.model._detail_projet impor
 from admission.ddd.preparation.projet_doctoral.domain.model._enums import (
     ChoixCommissionProximiteCDEouCLSM,
     ChoixCommissionProximiteCDSS,
+    ChoixSousDomaineSciences,
     ChoixStatutProposition,
     ChoixTypeAdmission,
 )
@@ -75,7 +76,10 @@ class Proposition(interface.RootEntity):
     justification = attr.ib(type=Optional[str], default='')
     statut = attr.ib(type=ChoixStatutProposition, default=ChoixStatutProposition.IN_PROGRESS)
     commission_proximite = attr.ib(
-        type=Optional[Union[ChoixCommissionProximiteCDEouCLSM, ChoixCommissionProximiteCDSS]], default=None
+        type=Optional[
+            Union[ChoixCommissionProximiteCDEouCLSM, ChoixCommissionProximiteCDSS, ChoixSousDomaineSciences]
+        ],
+        default=None,
     )
     financement = attr.ib(type=Financement, default=financement_non_rempli)
     experience_precedente_recherche = attr.ib(
@@ -166,10 +170,10 @@ class Proposition(interface.RootEntity):
         )
 
     def _completer_proposition(
-            self,
-            type_admission: str,
-            justification: Optional[str],
-            commission_proximite: Optional[str],
+        self,
+        type_admission: str,
+        justification: Optional[str],
+        commission_proximite: Optional[str],
     ):
         self.type_admission = ChoixTypeAdmission[type_admission]
         self.justification = justification or ''
@@ -178,15 +182,17 @@ class Proposition(interface.RootEntity):
             self.commission_proximite = ChoixCommissionProximiteCDEouCLSM[commission_proximite]
         elif commission_proximite and commission_proximite in ChoixCommissionProximiteCDSS.get_names():
             self.commission_proximite = ChoixCommissionProximiteCDSS[commission_proximite]
+        elif commission_proximite and commission_proximite in ChoixSousDomaineSciences.get_names():
+            self.commission_proximite = ChoixSousDomaineSciences[commission_proximite]
 
     def _completer_financement(
-            self,
-            type: Optional[str],
-            type_contrat_travail: Optional[str],
-            eft: Optional[int],
-            bourse_recherche: Optional[str],
-            duree_prevue: Optional[int],
-            temps_consacre: Optional[int],
+        self,
+        type: Optional[str],
+        type_contrat_travail: Optional[str],
+        eft: Optional[int],
+        bourse_recherche: Optional[str],
+        duree_prevue: Optional[int],
+        temps_consacre: Optional[int],
     ):
         if type:
             self.financement = Financement(
@@ -230,11 +236,11 @@ class Proposition(interface.RootEntity):
         )
 
     def _completer_experience_precedente(
-            self,
-            doctorat_deja_realise: str,
-            institution: Optional[str],
-            date_soutenance: Optional[datetime.date],
-            raison_non_soutenue: Optional[str],
+        self,
+        doctorat_deja_realise: str,
+        institution: Optional[str],
+        date_soutenance: Optional[datetime.date],
+        raison_non_soutenue: Optional[str],
     ):
         if doctorat_deja_realise == ChoixDoctoratDejaRealise.NO.name:
             self.experience_precedente_recherche = aucune_experience_precedente_recherche

@@ -26,7 +26,6 @@
 from functools import partial
 
 from admission.ddd.preparation.projet_doctoral.commands import *
-from admission.ddd.preparation.projet_doctoral.use_case.read.verifier_projet_service import verifier_projet
 from admission.ddd.preparation.projet_doctoral.use_case.read import *
 from admission.ddd.preparation.projet_doctoral.use_case.write import *
 from admission.infrastructure.preparation.projet_doctoral.domain.service.in_memory.doctorat import (
@@ -133,6 +132,11 @@ class MessageBusInMemoryCommands(AbstractMessageBusCommands):
         ),
         ApprouverPropositionCommand: partial(
             approuver_proposition,
+            proposition_repository=PropositionInMemoryRepository(),
+            groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
+        ),
+        ApprouverPropositionParPdfCommand: partial(
+            approuver_proposition_par_pdf,
             proposition_repository=PropositionInMemoryRepository(),
             groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
         ),
