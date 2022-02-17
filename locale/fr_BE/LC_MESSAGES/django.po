@@ -70,6 +70,9 @@ msgstr "Déjà promoteur"
 msgid "Author"
 msgstr "Auteur"
 
+msgid "BIOLOGY"
+msgstr "Biologie"
+
 msgid "CA Member"
 msgstr "Membre du CA"
 
@@ -81,6 +84,9 @@ msgstr "Gestionnaire CDD"
 
 msgid "CDD managers"
 msgstr "Gestionnaires CDD"
+
+msgid "CHEMISTRY"
+msgstr "Chimie"
 
 msgid "Can add a member to the supervision group"
 msgstr "Peut ajouter un membre au groupe de supervision"
@@ -274,6 +280,9 @@ msgstr "Type de financement"
 msgid "French"
 msgstr "Français"
 
+msgid "GEOGRAPHY"
+msgstr "Géographie"
+
 msgid "Gantt graph"
 msgstr "Graphe de Gantt"
 
@@ -308,6 +317,9 @@ msgstr "Liste des admissions en doctorat et données administratives"
 
 msgid "MANAGEMENT"
 msgstr "Gestion"
+
+msgid "MATHEMATICS"
+msgstr "Mathématiques"
 
 msgid "Mandatory fields are missing in the cotutelle."
 msgstr "Les champs requis de la cotutelle sont manquants."
@@ -360,6 +372,9 @@ msgstr "Autre lieu de la thèse"
 
 msgid "PARTIAL"
 msgstr "Partiel"
+
+msgid "PHYSICS"
+msgstr "Physique"
 
 msgid "PRE_ADMISSION"
 msgstr "Pre-admission"
@@ -481,6 +496,9 @@ msgstr "Gestionnaires SIC"
 msgid "SIGNING_IN_PROGRESS"
 msgstr "Signatures en cours"
 
+msgid "STATISTICS"
+msgstr "Statistiques"
+
 msgid "SUBMITTED"
 msgstr "Soumis"
 
@@ -563,7 +581,8 @@ msgstr ""
 msgid ""
 "You must add at least one UCLouvain promoter in order to request signatures."
 msgstr ""
-"Vous devez ajouter au moins un promoteur UCLouvain afin de demander les signatures."
+"Vous devez ajouter au moins un promoteur UCLouvain afin de demander les "
+"signatures."
 
 msgid ""
 "You must add at least one external promoter in order to request signatures."
@@ -602,7 +621,3 @@ msgstr "créé"
 
 msgid "modified"
 msgstr "modifée"
-
-#, python-brace-format
-msgid "{degree} [{type}] for {candidate}"
-msgstr "{degree} [{type}] pour {candidate}"

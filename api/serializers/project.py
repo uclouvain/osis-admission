@@ -40,6 +40,7 @@ from admission.ddd.preparation.projet_doctoral.domain.model._experience_preceden
 from admission.ddd.preparation.projet_doctoral.domain.model._enums import (
     ChoixCommissionProximiteCDEouCLSM,
     ChoixCommissionProximiteCDSS,
+    ChoixSousDomaineSciences,
 )
 from admission.ddd.preparation.projet_doctoral.dtos import DoctoratDTO, PropositionDTO, PropositionSearchDTO
 
@@ -167,7 +168,9 @@ class InitierPropositionCommandSerializer(DTOSerializer):
 
     type_admission = serializers.ChoiceField(choices=AdmissionType.choices())
     commission_proximite = serializers.ChoiceField(
-        choices=ChoixCommissionProximiteCDEouCLSM.choices() + ChoixCommissionProximiteCDSS.choices(),
+        choices=ChoixCommissionProximiteCDEouCLSM.choices()
+        + ChoixCommissionProximiteCDSS.choices()
+        + ChoixSousDomaineSciences.choices(),
         allow_blank=True,
     )
     documents_projet = serializers.ListField(child=serializers.CharField())

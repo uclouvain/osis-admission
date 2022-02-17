@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Admission API
-  version: 1.0.12
+  version: 1.0.13
   description: This API delivers data for the Admission project.
   contact:
     name: UCLouvain - OSIS
@@ -2961,6 +2961,12 @@ components:
       - DENT
       - DFAR
       - MOTR
+      - PHYSICS
+      - CHEMISTRY
+      - MATHEMATICS
+      - STATISTICS
+      - BIOLOGY
+      - GEOGRAPHY
       type: string
     ChoixLangueRedactionThese:
       enum:
