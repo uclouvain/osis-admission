@@ -25,6 +25,7 @@
 # ##############################################################################
 from typing import List, Optional
 
+from django.core.cache import cache
 from django.db import connection
 
 from admission.auth.roles.candidate import Candidate
@@ -188,3 +189,4 @@ class PropositionRepository(IPropositionRepository):
             }
         )
         Candidate.objects.get_or_create(person=candidate)
+        cache.delete('admission_permission_{}'.format(entity.entity_id.uuid))
