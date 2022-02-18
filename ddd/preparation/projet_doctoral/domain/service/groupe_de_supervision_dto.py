@@ -24,16 +24,14 @@
 #
 ##############################################################################
 from admission.ddd.preparation.projet_doctoral.builder.proposition_identity_builder import PropositionIdentityBuilder
-from admission.ddd.preparation.projet_doctoral.domain.model._signature_membre_CA import SignatureMembreCA
+from admission.ddd.preparation.projet_doctoral.domain.service.i_membre_CA import IMembreCATranslator
 from admission.ddd.preparation.projet_doctoral.domain.service.i_promoteur import IPromoteurTranslator
 from admission.ddd.preparation.projet_doctoral.dtos import (
     DetailSignatureMembreCADTO,
     DetailSignaturePromoteurDTO,
     GroupeDeSupervisionDTO,
-    MembreCADTO,
 )
 from admission.ddd.preparation.projet_doctoral.repository.i_groupe_de_supervision import IGroupeDeSupervisionRepository
-from ddd.logic.shared_kernel.personne_connue_ucl.domain.service.personne_connue_ucl import IPersonneConnueUclTranslator
 from osis_common.ddd import interface
 
 
@@ -43,43 +41,32 @@ class GroupeDeSupervisionDto(interface.DomainService):
         cls,
         uuid_proposition: str,
         repository: 'IGroupeDeSupervisionRepository',
-        personne_connue_ucl_translator: 'IPersonneConnueUclTranslator',
         promoteur_translator: 'IPromoteurTranslator',
+        membre_ca_translator: 'IMembreCATranslator',
     ) -> 'GroupeDeSupervisionDTO':
         groupe = repository.get_by_proposition_id(PropositionIdentityBuilder.build_from_uuid(uuid_proposition))
         return GroupeDeSupervisionDTO(
             signatures_promoteurs=[
                 DetailSignaturePromoteurDTO(
                     promoteur=promoteur_translator.get_dto(signature.promoteur_id.matricule),
-                    status=signature.etat.name,
+                    statut=signature.etat.name,
+                    date=signature.date,
                     commentaire_externe=signature.commentaire_externe,
                     commentaire_interne=signature.commentaire_interne,
+                    motif_refus=signature.motif_refus,
                     pdf=signature.pdf,
                 )
                 for signature in groupe.signatures_promoteurs
             ],
             signatures_membres_CA=[
                 DetailSignatureMembreCADTO(
-                    membre_CA=cls._build_membre_CA(signature, personne_connue_ucl_translator),
-                    status=signature.etat.name,
+                    membre_CA=membre_ca_translator.get_dto(signature.membre_CA_id.matricule),
+                    statut=signature.etat.name,
+                    date=signature.date,
                     commentaire_externe=signature.commentaire_externe,
                     commentaire_interne=signature.commentaire_interne,
                     pdf=signature.pdf,
                 )
                 for signature in groupe.signatures_membres_CA
             ],
-        )
-
-    @classmethod
-    def _build_membre_CA(
-        cls,
-        signature: SignatureMembreCA,
-        personne_connue_ucl_translator: 'IPersonneConnueUclTranslator',
-    ):
-        personne = personne_connue_ucl_translator.get(signature.membre_CA_id.matricule)
-        return MembreCADTO(
-            matricule=signature.membre_CA_id.matricule,
-            nom=personne.nom,
-            prenom=personne.prenom,
-            email=personne.email,
         )

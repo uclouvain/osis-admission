@@ -50,6 +50,13 @@ def invitations_sent(self, user: User, obj: DoctorateAdmission):
 
 
 @predicate(bind=True)
+@predicate_failed_msg(message=_("Invitations must have been sent"))
+def any_member_refused(self, user: User, obj: DoctorateAdmission):
+    # As this predicate does not rely on user, call the cached_property directly
+    return obj.any_member_refused
+
+
+@predicate(bind=True)
 @predicate_failed_msg(message=_("The invitations must not have been sent"))
 def invitations_not_sent(self, user: User, obj: DoctorateAdmission):
     return not invitations_sent(user, obj)

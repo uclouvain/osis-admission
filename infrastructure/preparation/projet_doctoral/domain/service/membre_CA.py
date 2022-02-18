@@ -25,12 +25,14 @@
 # ##############################################################################
 from typing import List
 
+from django.utils.translation import get_language
+
+from admission.auth.roles.ca_member import CommitteeMember
 from admission.ddd.preparation.projet_doctoral.domain.model._membre_CA import MembreCAIdentity
 from admission.ddd.preparation.projet_doctoral.domain.service.i_membre_CA import IMembreCATranslator
 from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import MembreCANonTrouveException
 from admission.ddd.preparation.projet_doctoral.dtos import MembreCADTO
 from base.models.person import Person
-from ddd.logic.shared_kernel.personne_connue_ucl.domain.service.personne_connue_ucl import IPersonneConnueUclTranslator
 
 
 class MembreCATranslator(IMembreCATranslator):
@@ -41,15 +43,27 @@ class MembreCATranslator(IMembreCATranslator):
         return MembreCAIdentity(matricule=matricule)
 
     @classmethod
+    def get_dto(cls, matricule: str) -> MembreCADTO:
+        member_role = CommitteeMember.objects.select_related('person', 'country').get(person__global_id=matricule)
+        return MembreCADTO(
+            matricule=matricule,
+            nom=member_role.person.last_name,
+            prenom=member_role.person.first_name,
+            email=member_role.person.email,
+            titre=member_role.title,
+            institution=member_role.institute,
+            ville=member_role.city,
+            pays=(
+                member_role.country_id
+                and getattr(member_role.country, 'name_en' if get_language() == 'en' else 'name')
+                or ''
+            ),
+        )
+
+    @classmethod
     def search(cls, matricules: List[str]) -> List['MembreCAIdentity']:
         raise NotImplementedError
 
     @classmethod
-    def search_dto(
-            cls,
-            terme_de_recherche: str,
-            personne_connue_ucl_translator: 'IPersonneConnueUclTranslator',
-    ) -> List['MembreCADTO']:
-        # TODO :: 1. signaletiques_dto = signaletique_translator.search(terme_de_recherche)
-        # TODO :: 2. call cls.seacrh(matricules=signaletiques_dto)
-        raise NotImplementedError
+    def est_externe(cls, identity: 'MembreCAIdentity') -> bool:  # pragma: no cover
+        return CommitteeMember.objects.get(person__global_id=identity.matricule).is_external

@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Admission API
-  version: 1.0.14
+  version: 1.0.15
   description: This API delivers data for the Admission project.
   contact:
     name: UCLouvain - OSIS
@@ -2823,11 +2823,17 @@ components:
                 - institution
                 - ville
                 - pays
-              status:
+              statut:
                 type: string
+              date:
+                type: string
+                format: date-time
+                nullable: true
               commentaire_externe:
                 type: string
               commentaire_interne:
+                type: string
+              motif_refus:
                 type: string
               pdf:
                 type: array
@@ -2835,7 +2841,7 @@ components:
                   type: string
             required:
             - promoteur
-            - status
+            - statut
             - pdf
         signatures_membres_CA:
           type: array
@@ -2853,13 +2859,29 @@ components:
                     type: string
                   email:
                     type: string
+                  titre:
+                    type: string
+                  institution:
+                    type: string
+                  ville:
+                    type: string
+                  pays:
+                    type: string
                 required:
                 - matricule
                 - nom
                 - prenom
                 - email
-              status:
+                - titre
+                - institution
+                - ville
+                - pays
+              statut:
                 type: string
+              date:
+                type: string
+                format: date-time
+                nullable: true
               commentaire_externe:
                 type: string
               commentaire_interne:
@@ -2870,7 +2892,7 @@ components:
                   type: string
             required:
             - membre_CA
-            - status
+            - statut
             - pdf
       required:
       - signatures_promoteurs

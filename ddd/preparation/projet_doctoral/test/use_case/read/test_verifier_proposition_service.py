@@ -220,7 +220,7 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
 
     def test_should_retourner_erreur_si_tous_promoteurs_n_ont_pas_approuve(self):
         self.groupe_supervision.signatures_promoteurs.append(
-            _SignaturePromoteurFactory(promoteur_id__matricule='promoteur-SC3DP', etat=ChoixEtatSignature.REFUSED),
+            _SignaturePromoteurFactory(promoteur_id__matricule='promoteur-SC3DP', etat=ChoixEtatSignature.DECLINED),
         )
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.cmd)

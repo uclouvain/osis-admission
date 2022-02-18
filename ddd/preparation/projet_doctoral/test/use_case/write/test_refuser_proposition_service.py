@@ -80,7 +80,7 @@ class TestRefuserPropositionService(SimpleTestCase):
         self.assertEqual(len(signatures), 1)
         self.assertEqual(len(groupe.signatures_membres_CA), 2)
         self.assertEqual(signatures[0].promoteur_id.matricule, self.matricule_promoteur)
-        self.assertEqual(signatures[0].etat, ChoixEtatSignature.REFUSED)
+        self.assertEqual(signatures[0].etat, ChoixEtatSignature.DECLINED)
         self.assertEqual(signatures[0].commentaire_interne, 'Commentaire interne')
         self.assertEqual(signatures[0].commentaire_externe, 'Commentaire externe')
         self.assertEqual(signatures[0].motif_refus, 'Motif de refus')
@@ -93,7 +93,7 @@ class TestRefuserPropositionService(SimpleTestCase):
         signatures = groupe.signatures_membres_CA  # type:List[SignatureMembreCA]
         self.assertEqual(len(signatures), 2)
         self.assertEqual(signatures[-1].membre_CA_id.matricule, self.matricule_membre)
-        self.assertEqual(signatures[-1].etat, ChoixEtatSignature.REFUSED)
+        self.assertEqual(signatures[-1].etat, ChoixEtatSignature.DECLINED)
 
     def test_should_pas_refuser_si_pas_dans_groupe(self):
         cmd = attr.evolve(self.cmd, matricule='paspromoteur')
@@ -124,7 +124,7 @@ class TestRefuserPropositionService(SimpleTestCase):
         self.assertEqual(len(signatures), 2)
         self.assertEqual(len(groupe.signatures_membres_CA), 1)
         self.assertEqual(signatures[0].promoteur_id.matricule, self.matricule_promoteur)
-        self.assertEqual(signatures[0].etat, ChoixEtatSignature.REFUSED)
+        self.assertEqual(signatures[0].etat, ChoixEtatSignature.DECLINED)
         self.assertEqual(signatures[0].commentaire_interne, 'Commentaire interne')
         self.assertEqual(signatures[0].commentaire_externe, 'Commentaire externe')
         self.assertEqual(signatures[0].motif_refus, 'Motif de refus')
