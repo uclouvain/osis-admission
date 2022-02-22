@@ -23,27 +23,25 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import datetime
+
+import attr
+
+from admission.ddd.validation.projet_doctoral.domain.model.demande import DemandeIdentity
+from osis_common.ddd import interface
 
 
-from django.utils.translation import gettext_lazy as _
-
-from base.models.utils.utils import ChoiceEnum
-
-
-class ChoixStatutCDD(ChoiceEnum):
-    TO_BE_VERIFIED = _("TO_BE_VERIFIED")
-    TO_BE_COMPLETED = _("TO_BE_COMPLETED")
-    ACCEPTED = _("ACCEPTED")
-    REJECTED = _("REJECTED")
-
-
-class ChoixStatutSIC(ChoiceEnum):
-    TO_BE_VERIFIED = _("TO_BE_VERIFIED")
-    ACKNOWLEDGED = _("ACKNOWLEDGED")
-    TO_BE_COMPLETED = _("TO_BE_COMPLETED")
-    ADMISSIBLE = _("ADMISSIBLE")
-    TO_BE_VALIDATED = _("TO_BE_VALIDATED")
-    INVALID = _("INVALID")
-    VALID = _("VALID")
-    REJECTED = _("REJECTED")
-
+@attr.s(frozen=True, slots=True, auto_attribs=True)
+class DemandeRechercheDTO(interface.DTO):
+    entity_id: DemandeIdentity
+    numero_demande: str
+    statut_cdd: str
+    statut_sic: str
+    statut_demande: str
+    nom_candidat: str
+    sigle_formation: str
+    intitule_formation: str
+    nationalite: str
+    derniere_modification: datetime.datetime
+    date_confirmation: datetime.datetime
+    code_bourse: str

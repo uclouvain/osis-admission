@@ -24,26 +24,31 @@
 #
 # ##############################################################################
 
+from typing import List
 
-from django.utils.translation import gettext_lazy as _
-
-from base.models.utils.utils import ChoiceEnum
-
-
-class ChoixStatutCDD(ChoiceEnum):
-    TO_BE_VERIFIED = _("TO_BE_VERIFIED")
-    TO_BE_COMPLETED = _("TO_BE_COMPLETED")
-    ACCEPTED = _("ACCEPTED")
-    REJECTED = _("REJECTED")
+from admission.ddd.validation.projet_doctoral.commands import RechercherDemandeQuery
+from admission.ddd.validation.projet_doctoral.dtos import DemandeRechercheDTO
+from admission.ddd.validation.projet_doctoral.repository.i_demande import IDemandeRepository
 
 
-class ChoixStatutSIC(ChoiceEnum):
-    TO_BE_VERIFIED = _("TO_BE_VERIFIED")
-    ACKNOWLEDGED = _("ACKNOWLEDGED")
-    TO_BE_COMPLETED = _("TO_BE_COMPLETED")
-    ADMISSIBLE = _("ADMISSIBLE")
-    TO_BE_VALIDATED = _("TO_BE_VALIDATED")
-    INVALID = _("INVALID")
-    VALID = _("VALID")
-    REJECTED = _("REJECTED")
-
+def rechercher_demandes(
+    cmd: 'RechercherDemandeQuery',
+    demande_repository: 'IDemandeRepository',
+) -> 'List[DemandeRechercheDTO]':
+    # GIVEN
+    return demande_repository.search_dto(
+        numero=cmd.numero,
+        etat_cdd=cmd.etat_cdd,
+        etat_sic=cmd.etat_sic,
+        nom_prenom_email=cmd.nom_prenom_email,
+        nationalite=cmd.nationalite,
+        type=cmd.type,
+        commission_proximite=cmd.commission_proximite,
+        annee_academique=cmd.annee_academique,
+        sigle_formation=cmd.sigle_formation,
+        financement=cmd.financement,
+        matricule_promoteur=cmd.matricule_promoteur,
+        cotutelle=cmd.cotutelle,
+        date_pre_admission_debut=cmd.date_pre_admission_debut,
+        date_pre_admission_fin=cmd.date_pre_admission_fin,
+    )

@@ -23,27 +23,3 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
-
-from django.utils.translation import gettext_lazy as _
-
-from base.models.utils.utils import ChoiceEnum
-
-
-class ChoixStatutCDD(ChoiceEnum):
-    TO_BE_VERIFIED = _("TO_BE_VERIFIED")
-    TO_BE_COMPLETED = _("TO_BE_COMPLETED")
-    ACCEPTED = _("ACCEPTED")
-    REJECTED = _("REJECTED")
-
-
-class ChoixStatutSIC(ChoiceEnum):
-    TO_BE_VERIFIED = _("TO_BE_VERIFIED")
-    ACKNOWLEDGED = _("ACKNOWLEDGED")
-    TO_BE_COMPLETED = _("TO_BE_COMPLETED")
-    ADMISSIBLE = _("ADMISSIBLE")
-    TO_BE_VALIDATED = _("TO_BE_VALIDATED")
-    INVALID = _("INVALID")
-    VALID = _("VALID")
-    REJECTED = _("REJECTED")
-

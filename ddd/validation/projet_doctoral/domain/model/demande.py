@@ -28,8 +28,7 @@ from typing import List, Optional
 
 import attr
 
-from admission.ddd.preparation.projet_doctoral.domain.model._enums import ChoixStatutProposition, ChoixTypeAdmission
-from admission.ddd.preparation.projet_doctoral.domain.model.doctorat import DoctoratIdentity
+from admission.ddd.preparation.projet_doctoral.domain.model.proposition import PropositionIdentity
 from admission.ddd.validation.projet_doctoral.domain.model._enums import ChoixStatutCDD, ChoixStatutSIC
 from osis_common.ddd import interface
 
@@ -42,21 +41,11 @@ class DemandeIdentity(interface.EntityIdentity):
 @attr.s(slots=True, hash=False, eq=False)
 class Demande(interface.RootEntity):
     entity_id = attr.ib(type=DemandeIdentity)
-    type_admission = attr.ib(type=ChoixTypeAdmission)
-    doctorat_id = attr.ib(type=DoctoratIdentity)
-    matricule_candidat = attr.ib(type=str)
-    reference = attr.ib(type=str)
-    justification = attr.ib(type=Optional[str], default='')
-    statut = attr.ib(type=ChoixStatutProposition, default=ChoixStatutProposition.IN_PROGRESS)
+    proposition_id = attr.ib(type=PropositionIdentity)
     statut_cdd = attr.ib(type=ChoixStatutCDD, default=ChoixStatutCDD.TO_BE_VERIFIED)
     statut_sic = attr.ib(type=ChoixStatutSIC, default=ChoixStatutSIC.TO_BE_VERIFIED)
     matricule_gestionnaire = attr.ib(type=Optional[str], default='')
-    # commission_proximite = attr.ib(
-    #     type=Optional[Union[ChoixCommissionProximiteCDEouCLSM, ChoixCommissionProximiteCDSS]], default=None
-    # )
     onglets_ouverts = attr.ib(type=List[str], factory=list)
-    creee_le = attr.ib(type=Optional[datetime.datetime], default=None)
     modifiee_le = attr.ib(type=Optional[datetime.datetime], default=None)
-    confirmee_le = attr.ib(type=Optional[datetime.datetime], default=None)
     pre_admission_acceptee_le = attr.ib(type=Optional[datetime.datetime], default=None)
     admission_acceptee_le = attr.ib(type=Optional[datetime.datetime], default=None)

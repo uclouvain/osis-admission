@@ -23,27 +23,27 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from datetime import datetime
+from typing import Optional
+
+import attr
+
+from osis_common.ddd import interface
 
 
-from django.utils.translation import gettext_lazy as _
-
-from base.models.utils.utils import ChoiceEnum
-
-
-class ChoixStatutCDD(ChoiceEnum):
-    TO_BE_VERIFIED = _("TO_BE_VERIFIED")
-    TO_BE_COMPLETED = _("TO_BE_COMPLETED")
-    ACCEPTED = _("ACCEPTED")
-    REJECTED = _("REJECTED")
-
-
-class ChoixStatutSIC(ChoiceEnum):
-    TO_BE_VERIFIED = _("TO_BE_VERIFIED")
-    ACKNOWLEDGED = _("ACKNOWLEDGED")
-    TO_BE_COMPLETED = _("TO_BE_COMPLETED")
-    ADMISSIBLE = _("ADMISSIBLE")
-    TO_BE_VALIDATED = _("TO_BE_VALIDATED")
-    INVALID = _("INVALID")
-    VALID = _("VALID")
-    REJECTED = _("REJECTED")
-
+@attr.s(frozen=True, slots=True, auto_attribs=True)
+class RechercherDemandeQuery(interface.CommandRequest):
+    numero: Optional[str] = ''
+    etat_cdd: Optional[str] = ''
+    etat_sic: Optional[str] = ''
+    nom_prenom_email: Optional[str] = ''
+    nationalite: Optional[str] = ''
+    type: Optional[str] = ''
+    commission_proximite: Optional[str] = ''
+    annee_academique: Optional[int] = None
+    sigle_formation: Optional[str] = ''
+    financement: Optional[str] = ''
+    matricule_promoteur: Optional[str] = ''
+    cotutelle: Optional[bool] = None
+    date_pre_admission_debut: Optional[datetime] = None
+    date_pre_admission_fin: Optional[datetime] = None
