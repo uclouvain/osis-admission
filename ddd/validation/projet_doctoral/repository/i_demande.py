@@ -30,7 +30,7 @@ from typing import List, Optional
 
 from admission.ddd.validation.projet_doctoral.domain.model.demande import Demande
 from admission.ddd.validation.projet_doctoral.domain.model.demande import DemandeIdentity
-from admission.ddd.validation.projet_doctoral.dtos import DemandeRechercheDTO
+from admission.ddd.validation.projet_doctoral.dtos import DemandeDTO, DemandeRechercheDTO
 from osis_common.ddd import interface
 
 
@@ -70,4 +70,9 @@ class IDemandeRepository(interface.AbstractRepository):
     @classmethod
     @abc.abstractmethod
     def save(cls, entity: 'Demande') -> None:
+        pass
+
+    @classmethod
+    @abc.abstractmethod
+    def get_dto(cls, entity_id: DemandeIdentity) -> DemandeDTO:
         pass

@@ -27,7 +27,7 @@ from datetime import datetime
 from typing import Optional, List
 
 from admission.ddd.validation.projet_doctoral.domain.model.demande import Demande, DemandeIdentity
-from admission.ddd.validation.projet_doctoral.dtos import DemandeRechercheDTO
+from admission.ddd.validation.projet_doctoral.dtos import DemandeDTO, DemandeRechercheDTO
 from admission.ddd.validation.projet_doctoral.repository.i_demande import IDemandeRepository
 
 
@@ -68,3 +68,7 @@ class DemandeRepository(IDemandeRepository):
     @classmethod
     def save(cls, entity: 'Demande') -> None:
         raise NotImplementedError
+
+    @classmethod
+    def get_dto(cls, entity_id) -> DemandeDTO:
+        pass

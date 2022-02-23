@@ -23,7 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.ddd.preparation.projet_doctoral.domain.service.i_secteur_ucl import ISecteurUclTranslator
+from admission.ddd.shared_kernel.domain.service.i_secteur_ucl import ISecteurUclTranslator
 from admission.ddd.preparation.projet_doctoral.test.factory.secteur_ucl import SSHEntiteFactory, SSSEntiteFactory
 from ddd.logic.shared_kernel.entite.tests.factory.entiteucl import SSTEntiteFactory
 from infrastructure.shared_kernel.entite.dtos import EntiteUclDTO

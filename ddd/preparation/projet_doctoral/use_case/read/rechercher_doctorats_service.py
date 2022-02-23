@@ -27,7 +27,7 @@ import datetime
 from typing import List
 
 from admission.ddd.preparation.projet_doctoral.commands import SearchDoctoratCommand
-from admission.ddd.preparation.projet_doctoral.domain.service.i_doctorat import IDoctoratTranslator
+from admission.ddd.shared_kernel.domain.service.i_doctorat import IDoctoratTranslator
 from admission.ddd.preparation.projet_doctoral.dtos import DoctoratDTO
 from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import GetCurrentAcademicYear
 from infrastructure.shared_kernel.academic_year.repository import academic_year as academic_year_repository

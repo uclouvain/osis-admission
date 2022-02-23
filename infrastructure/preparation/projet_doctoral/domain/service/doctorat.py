@@ -26,7 +26,7 @@
 from typing import List
 
 from admission.ddd.preparation.projet_doctoral.domain.model.doctorat import Doctorat, DoctoratIdentity
-from admission.ddd.preparation.projet_doctoral.domain.service.i_doctorat import IDoctoratTranslator
+from admission.ddd.shared_kernel.domain.service.i_doctorat import IDoctoratTranslator
 from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import DoctoratNonTrouveException
 from admission.ddd.preparation.projet_doctoral.dtos import DoctoratDTO
 from base.models.enums.education_group_types import TrainingType

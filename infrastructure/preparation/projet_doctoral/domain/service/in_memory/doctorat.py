@@ -25,7 +25,7 @@
 from typing import List
 
 from admission.ddd.preparation.projet_doctoral.domain.model.doctorat import Doctorat
-from admission.ddd.preparation.projet_doctoral.domain.service.i_doctorat import IDoctoratTranslator
+from admission.ddd.shared_kernel.domain.service.i_doctorat import IDoctoratTranslator
 from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import DoctoratNonTrouveException
 from admission.ddd.preparation.projet_doctoral.dtos import DoctoratDTO
 from admission.ddd.preparation.projet_doctoral.test.factory.doctorat import (

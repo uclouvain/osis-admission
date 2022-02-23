@@ -23,32 +23,3 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
-from typing import List
-
-from admission.ddd.validation.projet_doctoral.commands import RechercherDemandeQuery
-from admission.ddd.validation.projet_doctoral.dtos import DemandeRechercheDTO
-from admission.ddd.validation.projet_doctoral.repository.i_demande import IDemandeRepository
-
-
-def rechercher_demandes(
-    cmd: 'RechercherDemandeQuery',
-    demande_repository: 'IDemandeRepository',
-) -> 'List[DemandeRechercheDTO]':
-    # GIVEN
-    return demande_repository.search_dto(
-        numero=cmd.numero,
-        etat_cdd=cmd.etat_cdd,
-        etat_sic=cmd.etat_sic,
-        nom_prenom_email=cmd.nom_prenom_email,
-        nationalite=cmd.nationalite,
-        type=cmd.type,
-        commission_proximite=cmd.commission_proximite,
-        annee_academique=cmd.annee_academique,
-        sigle_formation=cmd.sigle_formation,
-        financement=cmd.financement,
-        matricule_promoteur=cmd.matricule_promoteur,
-        cotutelle=cmd.cotutelle,
-        date_pre_admission_debut=cmd.date_pre_admission_debut,
-        date_pre_admission_fin=cmd.date_pre_admission_fin,
-    )

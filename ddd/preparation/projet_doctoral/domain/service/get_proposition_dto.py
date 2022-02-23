@@ -25,8 +25,8 @@
 ##############################################################################
 from admission.ddd.preparation.projet_doctoral.builder.proposition_identity_builder import PropositionIdentityBuilder
 from admission.ddd.preparation.projet_doctoral.domain.model.proposition import Proposition
-from admission.ddd.preparation.projet_doctoral.domain.service.i_doctorat import IDoctoratTranslator
-from admission.ddd.preparation.projet_doctoral.domain.service.i_secteur_ucl import ISecteurUclTranslator
+from admission.ddd.shared_kernel.domain.service.i_doctorat import IDoctoratTranslator
+from admission.ddd.shared_kernel.domain.service.i_secteur_ucl import ISecteurUclTranslator
 from admission.ddd.preparation.projet_doctoral.dtos import PropositionDTO, PropositionSearchDTO
 from admission.ddd.preparation.projet_doctoral.repository.i_proposition import IPropositionRepository
 from ddd.logic.shared_kernel.personne_connue_ucl.domain.service.personne_connue_ucl import IPersonneConnueUclTranslator

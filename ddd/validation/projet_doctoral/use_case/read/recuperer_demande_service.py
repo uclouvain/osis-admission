@@ -23,40 +23,24 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import datetime
 
-import attr
-
-from admission.ddd.validation.projet_doctoral.domain.model.demande import DemandeIdentity
-from osis_common.ddd import interface
-
-
-@attr.s(frozen=True, slots=True, auto_attribs=True)
-class DemandeRechercheDTO(interface.DTO):
-    numero_demande: str
-    statut_cdd: str
-    statut_sic: str
-    statut_demande: str
-    nom_candidat: str
-    sigle_formation: str
-    intitule_formation: str
-    nationalite: str
-    derniere_modification: datetime.datetime
-    date_confirmation: datetime.datetime
-    code_bourse: str
+from admission.ddd.preparation.projet_doctoral.repository.i_proposition import IPropositionRepository
+from admission.ddd.validation.projet_doctoral.builder.demande_identity import DemandeIdentityBuilder
+from admission.ddd.validation.projet_doctoral.commands import RecupererDemandeQuery
+from admission.ddd.validation.projet_doctoral.domain.service.demande import DemandeService
+from admission.ddd.validation.projet_doctoral.dtos import RecupererDemandeDTO
+from admission.ddd.validation.projet_doctoral.repository.i_demande import IDemandeRepository
 
 
-@attr.s(frozen=True, slots=True, auto_attribs=True)
-class DemandeDTO(interface.DTO):
-    statut_cdd: str
-    statut_sic: str
-    derniere_modification: datetime.datetime
-    # TODO only include info about demande
-
-
-@attr.s(frozen=True, slots=True, auto_attribs=True)
-class RecupererDemandeDTO(interface.DTO):
-    statut_cdd: str
-    statut_sic: str
-    derniere_modification: datetime.datetime
-    # TODO include all info about demande (doctorate and persons too)
+def recuperer_demande(
+    cmd: 'RecupererDemandeQuery',
+    demande_repository: 'IDemandeRepository',
+    proposition_repository: 'IPropositionRepository',
+) -> 'RecupererDemandeDTO':
+    # GIVEN
+    demande_id = DemandeIdentityBuilder.build_from_uuid(cmd.numero)
+    return DemandeService.recuperer(
+        demande_id,
+        demande_repository,
+        proposition_repository,
+    )

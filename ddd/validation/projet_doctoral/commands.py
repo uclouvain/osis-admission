@@ -32,7 +32,7 @@ from osis_common.ddd import interface
 
 
 @attr.s(frozen=True, slots=True, auto_attribs=True)
-class RechercherDemandeQuery(interface.CommandRequest):
+class FiltrerDemandesQuery(interface.CommandRequest):
     numero: Optional[str] = ''
     etat_cdd: Optional[str] = ''
     etat_sic: Optional[str] = ''
@@ -47,3 +47,13 @@ class RechercherDemandeQuery(interface.CommandRequest):
     cotutelle: Optional[bool] = None
     date_pre_admission_debut: Optional[datetime] = None
     date_pre_admission_fin: Optional[datetime] = None
+
+
+@attr.s(frozen=True, slots=True, auto_attribs=True)
+class RecupererDemandeQuery(interface.CommandRequest):
+    numero: Optional[str] = ''
+
+
+@attr.s(frozen=True, slots=True, auto_attribs=True)
+class RefuserDemandeCddCommand(interface.CommandRequest):
+    numero: Optional[str] = ''

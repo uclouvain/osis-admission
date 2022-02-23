@@ -27,8 +27,8 @@ from typing import List
 
 from admission.ddd.preparation.projet_doctoral.commands import SearchPropositionsSuperviseesCommand
 from admission.ddd.preparation.projet_doctoral.domain.service.get_proposition_dto import GetPropositionDTODomainService
-from admission.ddd.preparation.projet_doctoral.domain.service.i_doctorat import IDoctoratTranslator
-from admission.ddd.preparation.projet_doctoral.domain.service.i_secteur_ucl import ISecteurUclTranslator
+from admission.ddd.shared_kernel.domain.service.i_doctorat import IDoctoratTranslator
+from admission.ddd.shared_kernel.domain.service.i_secteur_ucl import ISecteurUclTranslator
 from admission.ddd.preparation.projet_doctoral.dtos import PropositionSearchDTO
 from admission.ddd.preparation.projet_doctoral.repository.i_groupe_de_supervision import IGroupeDeSupervisionRepository
 from admission.ddd.preparation.projet_doctoral.repository.i_proposition import IPropositionRepository

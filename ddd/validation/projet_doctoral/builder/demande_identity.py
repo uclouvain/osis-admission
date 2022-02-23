@@ -23,40 +23,19 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import datetime
-
-import attr
-
 from admission.ddd.validation.projet_doctoral.domain.model.demande import DemandeIdentity
-from osis_common.ddd import interface
+from osis_common.ddd.interface import EntityIdentityBuilder
 
 
-@attr.s(frozen=True, slots=True, auto_attribs=True)
-class DemandeRechercheDTO(interface.DTO):
-    numero_demande: str
-    statut_cdd: str
-    statut_sic: str
-    statut_demande: str
-    nom_candidat: str
-    sigle_formation: str
-    intitule_formation: str
-    nationalite: str
-    derniere_modification: datetime.datetime
-    date_confirmation: datetime.datetime
-    code_bourse: str
+class DemandeIdentityBuilder(EntityIdentityBuilder):
+    @classmethod
+    def build_from_command(cls, cmd: 'CommandRequest') -> 'EntityIdentity':
+        pass
 
+    @classmethod
+    def build_from_repository_dto(cls, dto_object: 'DTO') -> 'EntityIdentity':
+        pass
 
-@attr.s(frozen=True, slots=True, auto_attribs=True)
-class DemandeDTO(interface.DTO):
-    statut_cdd: str
-    statut_sic: str
-    derniere_modification: datetime.datetime
-    # TODO only include info about demande
-
-
-@attr.s(frozen=True, slots=True, auto_attribs=True)
-class RecupererDemandeDTO(interface.DTO):
-    statut_cdd: str
-    statut_sic: str
-    derniere_modification: datetime.datetime
-    # TODO include all info about demande (doctorate and persons too)
+    @classmethod
+    def build_from_uuid(cls, uuid: str) -> 'DemandeIdentity':
+        return DemandeIdentity(uuid=uuid)

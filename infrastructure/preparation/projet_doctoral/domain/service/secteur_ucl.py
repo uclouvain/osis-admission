@@ -24,7 +24,7 @@
 #
 # ##############################################################################
 from admission.contrib.models import EntityProxy
-from admission.ddd.preparation.projet_doctoral.domain.service.i_secteur_ucl import ISecteurUclTranslator
+from admission.ddd.shared_kernel.domain.service.i_secteur_ucl import ISecteurUclTranslator
 from base.models.entity_version import EntityVersion
 from base.models.enums.entity_type import SECTOR
 from infrastructure.shared_kernel.entite.dtos import EntiteUclDTO

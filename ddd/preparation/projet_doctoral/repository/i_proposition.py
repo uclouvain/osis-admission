@@ -35,7 +35,11 @@ class IPropositionRepository(interface.AbstractRepository):
     @classmethod
     @abc.abstractmethod
     def get(cls, entity_id: 'PropositionIdentity') -> 'Proposition':  # type: ignore[override]
-        # TODO :: réutiliser get_dto() et convertir DTO en Proposition
+        raise NotImplementedError
+
+    @classmethod
+    @abc.abstractmethod
+    def get_dto(cls, entity_id: 'PropositionIdentity') -> 'PropositionDTO':  # type: ignore[override]
         raise NotImplementedError
 
     @classmethod

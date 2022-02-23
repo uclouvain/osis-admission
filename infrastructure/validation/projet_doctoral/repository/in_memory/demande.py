@@ -27,14 +27,17 @@ from datetime import datetime
 from typing import List, Optional
 
 from admission.ddd.validation.projet_doctoral.domain.model.demande import Demande, DemandeIdentity
-from admission.ddd.validation.projet_doctoral.dtos import DemandeRechercheDTO
+from admission.ddd.validation.projet_doctoral.dtos import DemandeDTO, DemandeRechercheDTO
 from admission.ddd.validation.projet_doctoral.repository.i_demande import IDemandeRepository
 from base.ddd.utils.in_memory_repository import InMemoryGenericRepository
 
 
 class DemandeInMemoryRepository(InMemoryGenericRepository, IDemandeRepository):
     entities = list()  # type: List[Demande]
-    dtos = list()  # type: List[DemandeRechercheDTO]
+
+    # type: List[DemandeRechercheDTO]
+
+    dtos = list() @ classmethod
 
     @classmethod
     def search_dto(
@@ -69,3 +72,6 @@ class DemandeInMemoryRepository(InMemoryGenericRepository, IDemandeRepository):
     @classmethod
     def reset(cls):
         cls.entities = []
+
+    def get_dto(cls, entity_id) -> DemandeDTO:
+        pass

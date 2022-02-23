@@ -23,40 +23,28 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import datetime
-
-import attr
-
+from admission.ddd.preparation.projet_doctoral.repository.i_proposition import IPropositionRepository
 from admission.ddd.validation.projet_doctoral.domain.model.demande import DemandeIdentity
+from admission.ddd.validation.projet_doctoral.domain.service.proposition_identity import PropositionIdentityTranslator
+from admission.ddd.validation.projet_doctoral.dtos import RecupererDemandeDTO
+from admission.ddd.validation.projet_doctoral.repository.i_demande import IDemandeRepository
 from osis_common.ddd import interface
 
 
-@attr.s(frozen=True, slots=True, auto_attribs=True)
-class DemandeRechercheDTO(interface.DTO):
-    numero_demande: str
-    statut_cdd: str
-    statut_sic: str
-    statut_demande: str
-    nom_candidat: str
-    sigle_formation: str
-    intitule_formation: str
-    nationalite: str
-    derniere_modification: datetime.datetime
-    date_confirmation: datetime.datetime
-    code_bourse: str
-
-
-@attr.s(frozen=True, slots=True, auto_attribs=True)
-class DemandeDTO(interface.DTO):
-    statut_cdd: str
-    statut_sic: str
-    derniere_modification: datetime.datetime
-    # TODO only include info about demande
-
-
-@attr.s(frozen=True, slots=True, auto_attribs=True)
-class RecupererDemandeDTO(interface.DTO):
-    statut_cdd: str
-    statut_sic: str
-    derniere_modification: datetime.datetime
-    # TODO include all info about demande (doctorate and persons too)
+class DemandeService(interface.DomainService):
+    @classmethod
+    def recuperer(
+        cls,
+        demande_id: DemandeIdentity,
+        demande_repository: IDemandeRepository,
+        proposition_repository: IPropositionRepository,
+    ) -> RecupererDemandeDTO:
+        proposition_id = PropositionIdentityTranslator.convertir_depuis_demande(demande_id)
+        proposition_dto = proposition_repository.get_dto(proposition_id)
+        demande_dto = demande_repository.get_dto(demande_id)
+        # TODO
+        return RecupererDemandeDTO(
+            statut_cdd="",
+            statut_sic="",
+            derniere_modification=None,
+        )

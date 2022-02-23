@@ -28,7 +28,7 @@ from admission.ddd.preparation.projet_doctoral.builder.proposition_identity_buil
 from admission.ddd.preparation.projet_doctoral.commands import CompleterPropositionCommand
 from admission.ddd.preparation.projet_doctoral.domain.model.proposition import PropositionIdentity
 from admission.ddd.preparation.projet_doctoral.domain.service.commission_proximite import CommissionProximite
-from admission.ddd.preparation.projet_doctoral.domain.service.i_doctorat import IDoctoratTranslator
+from admission.ddd.shared_kernel.domain.service.i_doctorat import IDoctoratTranslator
 from admission.ddd.preparation.projet_doctoral.repository.i_proposition import IPropositionRepository
 
 
