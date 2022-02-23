@@ -33,6 +33,7 @@ from osis_common.ddd import interface
 
 @attr.s(frozen=True, slots=True, auto_attribs=True)
 class DemandeRechercheDTO(interface.DTO):
+    uuid: str
     numero_demande: str
     statut_cdd: str
     statut_sic: str
@@ -48,6 +49,7 @@ class DemandeRechercheDTO(interface.DTO):
 
 @attr.s(frozen=True, slots=True, auto_attribs=True)
 class DemandeDTO(interface.DTO):
+    uuid: str
     statut_cdd: str
     statut_sic: str
     derniere_modification: datetime.datetime
@@ -56,6 +58,7 @@ class DemandeDTO(interface.DTO):
 
 @attr.s(frozen=True, slots=True, auto_attribs=True)
 class RecupererDemandeDTO(interface.DTO):
+    uuid: str
     statut_cdd: str
     statut_sic: str
     derniere_modification: datetime.datetime

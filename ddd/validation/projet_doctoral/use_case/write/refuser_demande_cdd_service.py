@@ -24,23 +24,25 @@
 #
 # ##############################################################################
 
-from admission.ddd.preparation.projet_doctoral.repository.i_proposition import IPropositionRepository
 from admission.ddd.validation.projet_doctoral.builder.demande_identity import DemandeIdentityBuilder
-from admission.ddd.validation.projet_doctoral.commands import RecupererDemandeQuery
-from admission.ddd.validation.projet_doctoral.domain.service.demande import DemandeService
-from admission.ddd.validation.projet_doctoral.dtos import RecupererDemandeDTO
+from admission.ddd.validation.projet_doctoral.commands import RefuserDemandeCddCommand
+from admission.ddd.validation.projet_doctoral.domain.model.demande import DemandeIdentity
 from admission.ddd.validation.projet_doctoral.repository.i_demande import IDemandeRepository
 
 
-def recuperer_demande(
-    cmd: 'RecupererDemandeQuery',
+def refuser_demande_cdd(
+    cmd: 'RefuserDemandeCddCommand',
     demande_repository: 'IDemandeRepository',
-    proposition_repository: 'IPropositionRepository',
-) -> 'RecupererDemandeDTO':
+) -> 'DemandeIdentity':
     # GIVEN
     demande_id = DemandeIdentityBuilder.build_from_uuid(cmd.uuid)
-    return DemandeService.recuperer(
-        demande_id,
-        demande_repository,
-        proposition_repository,
-    )
+    demande = demande_repository.get(demande_id)
+
+    # WHEN
+    demande.refuser_cdd()
+
+    # THEN
+    demande_repository.save(demande)
+    # TODO :: notification
+
+    return demande.entity_id

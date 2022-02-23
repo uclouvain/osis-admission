@@ -51,9 +51,11 @@ class FiltrerDemandesQuery(interface.CommandRequest):
 
 @attr.s(frozen=True, slots=True, auto_attribs=True)
 class RecupererDemandeQuery(interface.CommandRequest):
-    numero: Optional[str] = ''
+    uuid: str
 
 
 @attr.s(frozen=True, slots=True, auto_attribs=True)
 class RefuserDemandeCddCommand(interface.CommandRequest):
-    numero: Optional[str] = ''
+    uuid: str
+    sujet_doctorant: str
+    contenu_email_doctorant: str

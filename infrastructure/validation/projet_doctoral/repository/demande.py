@@ -32,6 +32,10 @@ from admission.ddd.validation.projet_doctoral.repository.i_demande import IDeman
 
 
 class DemandeRepository(IDemandeRepository):
+    # TODO
+    #   Créer un proxy model Django pour ne travailler que sur les champs qui concernent la demande
+    #   filtrer par défaut sur le statut SUBMITTED
+
     @classmethod
     def search_dto(
         cls,

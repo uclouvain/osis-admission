@@ -62,7 +62,7 @@ class GroupeDeSupervisionIdentity(interface.EntityIdentity):
 
 
 @attr.s(slots=True)
-class GroupeDeSupervision(interface.Entity):
+class GroupeDeSupervision(interface.RootEntity):
     entity_id = attr.ib(type=GroupeDeSupervisionIdentity)
     proposition_id = attr.ib(type='PropositionIdentity')  # type: PropositionIdentity
     signatures_promoteurs = attr.ib(type=List[SignaturePromoteur], factory=list)  # type: List[SignaturePromoteur]

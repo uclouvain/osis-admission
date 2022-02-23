@@ -1,4 +1,4 @@
-# ##############################################################################
+##############################################################################
 #
 #    OSIS stands for Open Student Information System. It's an application
 #    designed to manage the core business of higher education institutions,
@@ -22,24 +22,21 @@
 #    at the root of the source code of this program.  If not,
 #    see http://www.gnu.org/licenses/.
 #
-# ##############################################################################
+##############################################################################
+from typing import TYPE_CHECKING
 
-from typing import Optional, List
+import attr
 
-from admission.ddd.validation.projet_doctoral.commands import RefuserDemandeCddCommand
-from admission.ddd.validation.projet_doctoral.domain.model.demande import DemandeIdentity
-from admission.ddd.validation.projet_doctoral.repository.i_demande import IDemandeRepository
+from admission.ddd.validation.projet_doctoral.domain.model._enums import ChoixStatutCDD
+from base.ddd.utils.business_validator import BusinessValidator
+
+if TYPE_CHECKING:
+    from admission.ddd.validation.projet_doctoral.domain.model.demande import Demande
 
 
-def refuser_demande_cdd(
-    cmd: 'RefuserDemandeCddCommand',
-    demande_repository: 'IDemandeRepository',
-) -> 'DemandeIdentity':
-    # GIVEN
-    demande = demande_repository.get(entity_id=cmd.entity_id)
+@attr.s(frozen=True, slots=True, auto_attribs=True)
+class ShouldDemandeStatusAVerifier(BusinessValidator):
+    demande: Demande
 
-    # WHEN
-
-    # THEN
-
-    return entity_id
+    def validate(self, *args, **kwargs):
+        return self.demande.statut_cdd == ChoixStatutCDD.TO_BE_VERIFIED
