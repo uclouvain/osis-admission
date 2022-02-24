@@ -29,7 +29,6 @@ from admission.ddd.preparation.projet_doctoral.dtos import (
     CurriculumDTO,
     CoordonneesDTO,
     IdentificationDTO,
-    LanguesConnuesDTO,
 )
 from osis_common.ddd import interface
 
@@ -51,7 +50,7 @@ class IProfilCandidatTranslator(interface.DomainService):
 
     @classmethod
     @abstractmethod
-    def get_langues_connues(cls, matricule: str) -> 'LanguesConnuesDTO':
+    def get_langues_connues(cls, matricule: str) -> int:
         raise NotImplementedError
 
     @classmethod

@@ -79,11 +79,6 @@ class CoordonneesDTO(interface.DTO):
 
 
 @attr.s(frozen=True, slots=True)
-class LanguesConnuesDTO(interface.DTO):
-    nb_langues_connues_requises = attr.ib(type=int)
-
-
-@attr.s(frozen=True, slots=True)
 class SuperieurUniversitaireBelgeDTO(interface.DTO):
     communaute_enseignement = attr.ib(type=str)
 

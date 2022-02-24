@@ -34,7 +34,6 @@ from admission.ddd.preparation.projet_doctoral.dtos import (
     IdentificationDTO,
     CoordonneesDTO,
     AdressePersonnelleDTO,
-    LanguesConnuesDTO,
     CurriculumDTO,
 )
 
@@ -229,15 +228,13 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
         )
 
     @classmethod
-    def get_langues_connues(cls, matricule: str) -> 'LanguesConnuesDTO':
+    def get_langues_connues(cls, matricule: str) -> int:
         nb_langues_connues_requises = sum(
             c.personne == matricule and c.langue.code_langue in cls.CODES_LANGUES_CONNUES_REQUISES
             for c in cls.connaissances_langues
         )
 
-        return LanguesConnuesDTO(
-            nb_langues_connues_requises=nb_langues_connues_requises,
-        )
+        return nb_langues_connues_requises
 
     @classmethod
     def get_curriculum(cls, matricule: str) -> 'CurriculumDTO':
