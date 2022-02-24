@@ -302,3 +302,27 @@ class AnneesCurriculumNonSpecifieesException(BusinessException):
         message = _("Please fill in the 'Previous Experience > Curriculum vitae' tab for the following years: ") \
                   + ', '.join(annees_manquantes) + '.'
         super().__init__(message, **kwargs)
+
+
+class ProcedureDemandeSignatureNonLanceeException(BusinessException):
+    status_code = "PROPOSITION-36"
+
+    def __init__(self, **kwargs):
+        message = _("The signature request procedure isn't in progress.")
+        super().__init__(message, **kwargs)
+
+
+class PropositionNonApprouveeParPromoteurException(BusinessException):
+    status_code = "PROPOSITION-37"
+
+    def __init__(self, **kwargs):
+        message = _("All promoters must have approved the proposition.")
+        super().__init__(message, **kwargs)
+
+
+class PropositionNonApprouveeParMembresCAException(BusinessException):
+    status_code = "PROPOSITION-38"
+
+    def __init__(self, **kwargs):
+        message = _("All CA members must have approved the proposition.")
+        super().__init__(message, **kwargs)

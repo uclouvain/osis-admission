@@ -29,6 +29,7 @@ from typing import List, Optional
 import factory
 
 from admission.ddd.preparation.projet_doctoral.domain.model._cotutelle import Cotutelle, pas_de_cotutelle
+from admission.ddd.preparation.projet_doctoral.domain.model._enums import ChoixStatutSignatureGroupeDeSupervision
 from admission.ddd.preparation.projet_doctoral.domain.model._membre_CA import MembreCAIdentity
 from admission.ddd.preparation.projet_doctoral.domain.model._promoteur import PromoteurIdentity
 from admission.ddd.preparation.projet_doctoral.domain.model._signature_membre_CA import SignatureMembreCA
@@ -234,3 +235,26 @@ class GroupeDeSupervisionSC3DPAvecPromoteurDejaApprouveEtAutrePromoteurFactory(_
         lambda: [_SignatureMembreCAFactory(membre_CA_id__matricule='membre-ca-SC3DP', etat=ChoixEtatSignature.INVITED)]
     )
     cotutelle = pas_de_cotutelle
+
+
+class GroupeDeSupervisionSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory(_GroupeDeSupervisionFactory):
+    proposition_id = factory.SubFactory(
+        _PropositionIdentityFactory,
+        uuid='uuid-SC3DP-promoteurs-membres-deja-approuves',
+    )
+    signatures_promoteurs = factory.LazyFunction(
+        lambda: [
+            _SignaturePromoteurFactory(
+                promoteur_id__matricule='promoteur-SC3DP-deja-approuve',
+                etat=ChoixEtatSignature.APPROVED,
+            ),
+        ]
+    )
+    signatures_membres_CA = factory.LazyFunction(
+        lambda: [
+            _SignatureMembreCAFactory(membre_CA_id__matricule='membre-ca-SC3DP', etat=ChoixEtatSignature.APPROVED),
+            _SignatureMembreCAFactory(membre_CA_id__matricule='membre-ca-SC3DP', etat=ChoixEtatSignature.APPROVED),
+        ]
+    )
+    cotutelle = pas_de_cotutelle
+    statut_signature = ChoixStatutSignatureGroupeDeSupervision.SIGNING_IN_PROGRESS

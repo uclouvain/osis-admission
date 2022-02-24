@@ -24,7 +24,7 @@
 #
 # ##############################################################################
 from collections import defaultdict
-from typing import List, Optional, Type, Union
+from typing import List, Optional, Union
 
 from admission.auth.roles.ca_member import CommitteeMember
 from admission.auth.roles.promoter import Promoter
@@ -32,6 +32,10 @@ from admission.contrib.models import DoctorateAdmission, SupervisionActor
 from admission.contrib.models.enums.actor_type import ActorType
 from admission.ddd.preparation.projet_doctoral.builder.proposition_identity_builder import PropositionIdentityBuilder
 from admission.ddd.preparation.projet_doctoral.domain.model._cotutelle import Cotutelle, pas_de_cotutelle
+from admission.ddd.preparation.projet_doctoral.domain.model._enums import (
+    ChoixStatutSignatureGroupeDeSupervision,
+    ChoixStatutProposition,
+)
 from admission.ddd.preparation.projet_doctoral.domain.model._membre_CA import MembreCAIdentity
 from admission.ddd.preparation.projet_doctoral.domain.model._promoteur import PromoteurIdentity
 from admission.ddd.preparation.projet_doctoral.domain.model._signature_membre_CA import SignatureMembreCA
@@ -99,6 +103,9 @@ class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
                 for actor in actors.get(ActorType.CA_MEMBER.name, [])
             ],
             cotutelle=cotutelle,
+            statut_signature=ChoixStatutSignatureGroupeDeSupervision.SIGNING_IN_PROGRESS
+            if proposition.status == ChoixStatutProposition.SIGNING_IN_PROGRESS.name
+            else None
         )
 
     @classmethod

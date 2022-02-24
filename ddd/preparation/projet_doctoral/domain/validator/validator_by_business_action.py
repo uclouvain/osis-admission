@@ -340,3 +340,18 @@ class SignatairesValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
         return [
             ShouldGroupeDeSupervisionAvoirAuMoinsUnMembreCA(self.groupe_de_supervision.signatures_membres_CA),
         ]
+
+
+@attr.s(frozen=True, slots=True)
+class ApprobationValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+    groupe_de_supervision = attr.ib(type='GroupeDeSupervision')  # type: GroupeDeSupervision
+
+    def get_data_contract_validators(self) -> List[BusinessValidator]:
+        return []
+
+    def get_invariants_validators(self) -> List[BusinessValidator]:
+        return [
+            ShouldDemandeSignatureLancee(self.groupe_de_supervision.statut_signature),
+            ShouldPromoteursOntApprouve(self.groupe_de_supervision.signatures_promoteurs),
+            ShouldMembresCAOntApprouve(self.groupe_de_supervision.signatures_membres_CA),
+        ]

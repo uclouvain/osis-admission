@@ -126,6 +126,7 @@ class MessageBusCommands(AbstractMessageBusCommands):
         VerifierPropositionCommand: partial(
             verifier_proposition,
             proposition_repository=PropositionRepository(),
+            groupe_supervision_repository=GroupeDeSupervisionRepository(),
             profil_candidat_translator=ProfilCandidatTranslator(),
             academic_year_repository=AcademicYearRepository(),
         ),

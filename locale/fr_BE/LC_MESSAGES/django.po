@@ -61,6 +61,12 @@ msgstr "Projet de formation complémentaire"
 msgid "Admission"
 msgstr "Admission"
 
+msgid "All CA members must have approved the proposition."
+msgstr "Tous les membres du CA doivent approuver la proposition."
+
+msgid "All promoters must have approved the proposition."
+msgstr "Tous les promoteurs doivent approuver la proposition."
+
 msgid "Already a member of CA."
 msgstr "Déjà membre du CA"
 
@@ -422,8 +428,11 @@ msgstr ""
 "adresse de contact."
 
 msgid ""
-"Please fill in the 'Previous Experience > Curriculum vitae' tab for the following years: "
-msgstr "Merci de compléter l'onglet 'Parcours antérieur > Curriculum' pour les années suivantes : "
+"Please fill in the 'Previous Experience > Curriculum vitae' tab for the "
+"following years: "
+msgstr ""
+"Merci de compléter l'onglet 'Parcours antérieur > Curriculum' pour les "
+"années suivantes : "
 
 msgid "Please provide a copy of your curriculum."
 msgstr "Merci de fournir une copie de votre curriculum."
@@ -571,6 +580,9 @@ msgstr "Les expériences qui ont été valorisées à partir de cette admission.
 
 msgid "The invitations must not have been sent"
 msgstr "Les invitations doivent ne pas avoir été envoyées"
+
+msgid "The signature request procedure isn't in progress."
+msgstr "La procédure de demande de signature n'a pas été lancée."
 
 msgid "There can be no more CA members in the supervision group."
 msgstr ""

@@ -49,6 +49,7 @@ from admission.ddd.preparation.projet_doctoral.test.factory.groupe_de_supervisio
     GroupeDeSupervisionSC3DPPreAdmissionFactory,
     GroupeDeSupervisionSC3DPSansMembresCAFactory,
     GroupeDeSupervisionSC3DPSansPromoteurFactory,
+    GroupeDeSupervisionSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory,
 )
 from base.ddd.utils.in_memory_repository import InMemoryGenericRepository
 
@@ -72,6 +73,7 @@ class GroupeDeSupervisionInMemoryRepository(InMemoryGenericRepository, IGroupeDe
             GroupeDeSupervisionSC3DPSansPromoteurFactory(),
             GroupeDeSupervisionSC3DPSansMembresCAFactory(),
             GroupeDeSupervisionSC3DPAvecPromoteurDejaApprouveEtAutrePromoteurFactory(),
+            GroupeDeSupervisionSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory(),
         ]
 
     @classmethod

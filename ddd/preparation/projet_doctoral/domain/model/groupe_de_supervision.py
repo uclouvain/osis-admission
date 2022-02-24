@@ -52,6 +52,7 @@ from admission.ddd.preparation.projet_doctoral.domain.validator.validator_by_bus
     SignatairesValidatorList,
     SupprimerMembreCAValidatorList,
     SupprimerPromoteurValidatorList,
+    ApprobationValidatorList,
 )
 from osis_common.ddd import interface
 
@@ -242,7 +243,7 @@ class GroupeDeSupervision(interface.Entity):
             )
 
     def verifier_tout_le_monde_a_approuve(self):
-        raise NotImplementedError
+        ApprobationValidatorList(groupe_de_supervision=self).validate()
 
     def verifier_cotutelle(self):
         CotutelleValidatorList(cotutelle=self.cotutelle).validate()

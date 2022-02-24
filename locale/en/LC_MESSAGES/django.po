@@ -55,6 +55,12 @@ msgstr ""
 msgid "Admission"
 msgstr ""
 
+msgid "All CA members must have approved the proposition."
+msgstr ""
+
+msgid "All promoters must have approved the proposition."
+msgstr ""
+
 msgid "Already a member of CA."
 msgstr ""
 
@@ -392,7 +398,9 @@ msgid ""
 "Identification' tab."
 msgstr ""
 
-msgid "Please fill in all the required information in the 'Previous experience > Languages knowledge' tab."
+msgid ""
+"Please fill in all the required information in the 'Previous experience > "
+"Languages knowledge' tab."
 msgstr ""
 
 msgid ""
@@ -400,7 +408,8 @@ msgid ""
 msgstr ""
 
 msgid ""
-"Please fill in the 'Previous Experience > Curriculum vitae' tab for the following years: "
+"Please fill in the 'Previous Experience > Curriculum vitae' tab for the "
+"following years: "
 msgstr ""
 
 msgid "Please provide a copy of your curriculum."
@@ -542,6 +551,9 @@ msgid "The experiences that have been valuated from this admission."
 msgstr ""
 
 msgid "The invitations must not have been sent"
+msgstr ""
+
+msgid "The signature request procedure isn't in progress."
 msgstr ""
 
 msgid "There can be no more CA members in the supervision group."

@@ -644,14 +644,17 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
         cls.second_candidate = CandidateFactory(person__first_name="Jim").person
         # Create promoters
         cls.first_invited_promoter = PromoterFactory(actor_ptr__person__first_name="Joe")
-        cls.first_invited_promoter.actor_ptr.switch_state(SignatureState.INVITED)
+        cls.first_invited_promoter.actor_ptr.switch_state(SignatureState.APPROVED)
         cls.first_not_invited_promoter = PromoterFactory(actor_ptr__person__first_name="Jack")
+        cls.first_ca_member = CaMemberFactory(process=cls.first_invited_promoter.actor_ptr.process)
+        cls.first_ca_member.actor_ptr.switch_state(SignatureState.APPROVED)
         cls.second_invited_promoter = PromoterFactory(actor_ptr__person__first_name="Jim")
         cls.second_invited_promoter.actor_ptr.switch_state(SignatureState.INVITED)
 
         # Create admissions
         cls.first_admission_with_invitation = DoctorateAdmissionFactory(
             candidate=cls.first_candidate,
+            status=ChoixStatutProposition.SIGNING_IN_PROGRESS.name,
             supervision_group=cls.first_invited_promoter.actor_ptr.process,
         )
         cls.first_admission_without_invitation = DoctorateAdmissionFactory(

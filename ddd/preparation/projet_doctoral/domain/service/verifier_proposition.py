@@ -25,6 +25,7 @@
 # ##############################################################################
 from functools import partial
 
+from admission.ddd.preparation.projet_doctoral.domain.model.groupe_de_supervision import GroupeDeSupervision
 from admission.ddd.preparation.projet_doctoral.domain.model.proposition import Proposition
 from admission.ddd.preparation.projet_doctoral.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.preparation.projet_doctoral.domain.service.profil_candidat import ProfilCandidat
@@ -37,6 +38,7 @@ class VerifierProposition(interface.DomainService):
     def verifier(
         cls,
         proposition_candidat: Proposition,
+        groupe_de_supervision: GroupeDeSupervision,
         profil_candidat_translator: IProfilCandidatTranslator,
         annee_courante: int,
     ) -> None:
@@ -62,5 +64,6 @@ class VerifierProposition(interface.DomainService):
                 proposition_candidat.matricule_candidat,
                 profil_candidat_translator,
                 annee_courante,
-            )
+            ),
+            groupe_de_supervision.verifier_tout_le_monde_a_approuve,
         )
