@@ -110,11 +110,19 @@ def _instantiate_admission(admission: DoctorateAdmission) -> Proposition:
     )
 
 
+def _get_queryset():
+    return DoctorateAdmission.objects.all().select_related(
+        'doctorate__academic_year',
+        'candidate',
+        'thesis_institute',
+    )
+
+
 def load_admissions(matricule: Optional[str] = None, ids: Optional[List[str]] = None) -> List['Proposition']:
     if matricule is not None:
-        qs = DoctorateAdmission.objects.filter(candidate__global_id=matricule)
+        qs = _get_queryset().filter(candidate__global_id=matricule)
     elif ids is not None:  # pragma: no branch
-        qs = DoctorateAdmission.objects.filter(uuid__in=ids)
+        qs = _get_queryset().filter(uuid__in=ids)
 
     return [_instantiate_admission(a) for a in qs]
 
@@ -123,13 +131,14 @@ class PropositionRepository(IPropositionRepository):
     @classmethod
     def get(cls, entity_id: 'PropositionIdentity') -> 'Proposition':
         try:
-            return _instantiate_admission(DoctorateAdmission.objects.get(uuid=entity_id.uuid))
+            return _instantiate_admission(_get_queryset().get(uuid=entity_id.uuid))
         except DoctorateAdmission.DoesNotExist:
             raise PropositionNonTrouveeException
 
     @classmethod
-    def search(cls, entity_ids: Optional[List['PropositionIdentity']] = None, matricule_candidat: str = None,
-               **kwargs) -> List['Proposition']:
+    def search(
+        cls, entity_ids: Optional[List['PropositionIdentity']] = None, matricule_candidat: str = None, **kwargs
+    ) -> List['Proposition']:
         if matricule_candidat is not None:
             return load_admissions(matricule=matricule_candidat)
         if entity_ids is not None:
@@ -172,9 +181,11 @@ class PropositionRepository(IPropositionRepository):
                 'project_title': entity.projet.titre,
                 'project_abstract': entity.projet.resume,
                 'thesis_language': entity.projet.langue_redaction_these.name,
-                'thesis_institute': EntityVersion.objects.get(
-                    uuid=entity.projet.institut_these.uuid,
-                ) if entity.projet.institut_these else None,
+                'thesis_institute': (
+                    EntityVersion.objects.get(uuid=entity.projet.institut_these.uuid)
+                    if entity.projet.institut_these
+                    else None
+                ),
                 'thesis_location': entity.projet.lieu_these,
                 'other_thesis_location': entity.projet.autre_lieu_these,
                 'project_document': entity.projet.documents,
@@ -186,7 +197,6 @@ class PropositionRepository(IPropositionRepository):
                 'phd_already_done_institution': entity.experience_precedente_recherche.institution,
                 'phd_already_done_defense_date': entity.experience_precedente_recherche.date_soutenance,
                 'phd_already_done_no_defense_reason': entity.experience_precedente_recherche.raison_non_soutenue,
-            }
+            },
         )
         Candidate.objects.get_or_create(person=candidate)
-        cache.delete('admission_permission_{}'.format(entity.entity_id.uuid))

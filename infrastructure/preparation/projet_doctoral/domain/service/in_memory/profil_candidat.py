@@ -25,7 +25,6 @@
 # ##############################################################################
 import datetime
 from dataclasses import dataclass
-from itertools import chain
 from typing import List, Optional
 
 from admission.ddd.preparation.projet_doctoral.domain.service.i_profil_candidat import IProfilCandidatTranslator
@@ -34,7 +33,6 @@ from admission.ddd.preparation.projet_doctoral.dtos import (
     IdentificationDTO,
     CoordonneesDTO,
     AdressePersonnelleDTO,
-    LanguesConnuesDTO,
     CurriculumDTO,
 )
 
@@ -172,6 +170,24 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
         AnneeCurriculum(personne=matricule_candidat, annee=2019),
         AnneeCurriculum(personne=matricule_candidat, annee=2020),
     ]
+    adresses_candidats = [
+        AdressePersonnelle(
+            personne='0123456789',
+            code_postal='1348',
+            ville='Louvain-La-Neuve',
+            pays='BE',
+            rue="Boulevard de Wallonie",
+            type='RESIDENTIAL',
+        ),
+        AdressePersonnelle(
+            personne='0123456789',
+            code_postal='1348',
+            ville='Louvain-La-Neuve',
+            pays='BE',
+            rue="Place de l'Université",
+            type='CONTACT'
+        )
+    ]
 
     @classmethod
     def get_identification(cls, matricule: str) -> 'IdentificationDTO':
@@ -229,15 +245,13 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
         )
 
     @classmethod
-    def get_langues_connues(cls, matricule: str) -> 'LanguesConnuesDTO':
+    def get_langues_connues(cls, matricule: str) -> int:
         nb_langues_connues_requises = sum(
             c.personne == matricule and c.langue.code_langue in cls.CODES_LANGUES_CONNUES_REQUISES
             for c in cls.connaissances_langues
         )
 
-        return LanguesConnuesDTO(
-            nb_langues_connues_requises=nb_langues_connues_requises,
-        )
+        return nb_langues_connues_requises
 
     @classmethod
     def get_curriculum(cls, matricule: str) -> 'CurriculumDTO':

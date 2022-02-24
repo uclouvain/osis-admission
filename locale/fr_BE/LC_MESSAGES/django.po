@@ -312,6 +312,9 @@ msgstr ""
 msgid "Internal comment"
 msgstr "Commentaire interne"
 
+msgid "Invitations must have been sent"
+msgstr "Les invitations doivent avoir été envoyées"
+
 msgid "Jury secretaries"
 msgstr "Secrétaires de jury"
 
@@ -572,17 +575,14 @@ msgstr "Soumis"
 msgid "Scholarship grant"
 msgstr "Bourse de recherche"
 
-msgid "Some invitations are already sent"
-msgstr "Des invitations ont déjà été envoyées"
-
 msgid "Supervision group not found."
 msgstr "Groupe de supervision non trouvé."
 
 msgid "The experiences that have been valuated from this admission."
 msgstr "Les expériences qui ont été valorisées à partir de cette admission."
 
-msgid "The invitations have not been sent"
-msgstr "Les invitations n'ont pas été envoyées"
+msgid "The invitations must not have been sent"
+msgstr "Les invitations doivent ne pas avoir été envoyées"
 
 msgid "The signature request procedure isn't in progress."
 msgstr "La procédure de demande de signature n'a pas été lancée."
