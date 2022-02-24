@@ -1,4 +1,4 @@
-# ##############################################################################
+##############################################################################
 #
 #    OSIS stands for Open Student Information System. It's an application
 #    designed to manage the core business of higher education institutions,
@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -22,25 +22,23 @@
 #    at the root of the source code of this program.  If not,
 #    see http://www.gnu.org/licenses/.
 #
-# ##############################################################################
-from abc import abstractmethod
+##############################################################################
+import datetime
+from typing import List, Optional
 
-from admission.ddd.preparation.projet_doctoral.dtos import CurriculumDTO, CoordonneesDTO, IdentificationDTO
+import attr
+
 from osis_common.ddd import interface
 
 
-class IProfilCandidatTranslator(interface.DomainService):
-    @classmethod
-    @abstractmethod
-    def get_identification(cls, matricule: str) -> 'IdentificationDTO':
-        raise NotImplementedError
-
-    @classmethod
-    @abstractmethod
-    def get_coordonnees(cls, matricule: str) -> 'CoordonneesDTO':
-        raise NotImplementedError
-
-    @classmethod
-    @abstractmethod
-    def get_curriculum(cls, matricule: str) -> 'CurriculumDTO':
-        raise NotImplementedError
+@attr.s(frozen=True, slots=True)
+class CandidatSignaletique(interface.ValueObject):
+    nom = attr.ib(type=Optional[str])
+    prenom = attr.ib(type=Optional[str])
+    date_naissance = attr.ib(type=Optional[datetime.date])
+    annee_naissance = attr.ib(type=Optional[int])
+    pays_nationalite = attr.ib(type=Optional[str])
+    sexe = attr.ib(type=Optional[str])
+    genre = attr.ib(type=Optional[str])
+    photo_identite = attr.ib(type=List[str])
+    langue_contact = attr.ib(type=Optional[str])

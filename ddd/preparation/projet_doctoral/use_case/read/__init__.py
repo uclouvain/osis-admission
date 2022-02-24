@@ -4,4 +4,5 @@ from .get_proposition_service import get_proposition
 from .rechercher_doctorats_service import rechercher_doctorats
 from .rechercher_propositions_candidat_service import rechercher_propositions_candidat
 from .rechercher_propositions_supervisees_service import rechercher_propositions_supervisees
+from .verifier_projet_service import verifier_projet
 from .verifier_proposition_service import verifier_proposition

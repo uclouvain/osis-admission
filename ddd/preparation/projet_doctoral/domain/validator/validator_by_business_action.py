@@ -23,6 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import datetime
 from typing import Optional, List, Union
 
 import attr
@@ -35,9 +36,11 @@ from admission.ddd.preparation.projet_doctoral.domain.model._experience_preceden
     ChoixDoctoratDejaRealise,
 )
 from admission.ddd.preparation.projet_doctoral.domain.model._financement import Financement
+from admission.ddd.preparation.projet_doctoral.domain.model._candidat_signaletique import CandidatSignaletique
 from admission.ddd.preparation.projet_doctoral.domain.model._membre_CA import MembreCAIdentity
 from admission.ddd.preparation.projet_doctoral.domain.model._promoteur import PromoteurIdentity
 from admission.ddd.preparation.projet_doctoral.domain.validator import *
+
 from base.ddd.utils.business_validator import TwoStepsMultipleBusinessExceptionListValidator, BusinessValidator
 
 
@@ -196,6 +199,54 @@ class ProjetDoctoralValidatorList(TwoStepsMultipleBusinessExceptionListValidator
     def get_invariants_validators(self) -> List[BusinessValidator]:
         return [
             ShouldProjetEtreComplet(self.type_admission, self.projet, self.financement),
+        ]
+
+
+@attr.s(frozen=True, slots=True)
+class IdentificationValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+    identite_signaletique = attr.ib(type='CandidatSignaletique')  # type: CandidatSignaletique
+
+    date_naissance = attr.ib(type=Optional[datetime.date])
+    annee_naissance = attr.ib(type=Optional[int])
+
+    numero_registre_national_belge = attr.ib(type=Optional[str])
+    numero_carte_identite = attr.ib(type=Optional[str])
+    carte_identite = attr.ib(type=List[str])
+    numero_passeport = attr.ib(type=Optional[str])
+    passeport = attr.ib(type=List[str])
+    date_expiration_passeport = attr.ib(type=Optional[datetime.date])
+
+    def get_data_contract_validators(self) -> List[BusinessValidator]:
+        return []
+
+    def get_invariants_validators(self) -> List[BusinessValidator]:
+        return [
+            ShouldSignaletiqueCandidatEtreCompletee(
+                signaletique=self.identite_signaletique,
+            ),
+            ShouldCandidatSpecifierNumeroIdentite(
+                numero_registre_national_belge=self.numero_registre_national_belge,
+                numero_carte_identite=self.numero_carte_identite,
+                numero_passeport=self.numero_passeport,
+            ),
+            ShouldCandidatBelgeSpecifierNumeroRegistreNationalBelge(
+                numero_registre_national_belge=self.numero_registre_national_belge,
+                pays_nationalite=self.identite_signaletique.pays_nationalite,
+            ),
+            ShouldCandidatSpecifierDateOuAnneeNaissance(
+                date_naissance=self.date_naissance,
+                annee_naissance=self.annee_naissance,
+            ),
+            ShouldCandidatAuthentiquerPasseport(
+                numero_passeport=self.numero_passeport,
+                date_expiration_passeport=self.date_expiration_passeport,
+                passeport=self.passeport,
+            ),
+            ShouldCandidatAuthentiquerIdentite(
+                numero_registre_national_belge=self.numero_registre_national_belge,
+                numero_carte_identite=self.numero_carte_identite,
+                carte_identite=self.carte_identite,
+            ),
         ]
 
 

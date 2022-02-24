@@ -23,15 +23,39 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from admission.ddd.preparation.projet_doctoral.domain.model._candidat_signaletique import CandidatSignaletique
 from admission.ddd.preparation.projet_doctoral.domain.service.i_profil_candidat import IProfilCandidatTranslator
+from admission.ddd.preparation.projet_doctoral.domain.validator.validator_by_business_action import (
+    IdentificationValidatorList,
+)
 from osis_common.ddd import interface
 
 
 class ProfilCandidat(interface.DomainService):
     @classmethod
-    def verifier_identification(cls, profil_candidat_translator: 'IProfilCandidatTranslator') -> None:
-        # TODO : cherger les
-        raise NotImplementedError
+    def verifier_identification(cls, matricule: str, profil_candidat_translator: 'IProfilCandidatTranslator') -> None:
+        identification = profil_candidat_translator.get_identification(matricule)
+        IdentificationValidatorList(
+            identite_signaletique=CandidatSignaletique(
+                annee_naissance=identification.annee_naissance,
+                date_naissance=identification.date_naissance,
+                pays_nationalite=identification.pays_nationalite,
+                photo_identite=identification.photo_identite,
+                prenom=identification.prenom,
+                langue_contact=identification.langue_contact,
+                sexe=identification.sexe,
+                nom=identification.nom,
+                genre=identification.genre,
+            ),
+            date_naissance=identification.date_naissance,
+            annee_naissance=identification.annee_naissance,
+            numero_registre_national_belge=identification.numero_registre_national_belge,
+            numero_carte_identite=identification.numero_carte_identite,
+            carte_identite=identification.carte_identite,
+            numero_passeport=identification.numero_passeport,
+            passeport=identification.passeport,
+            date_expiration_passeport=identification.date_expiration_passeport,
+        ).validate()
 
     @classmethod
     def verifier_coordonnees(cls, profil_candidat_translator: 'IProfilCandidatTranslator') -> None:

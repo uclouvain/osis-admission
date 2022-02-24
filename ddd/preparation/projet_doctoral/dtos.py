@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -43,9 +43,25 @@ class DoctoratDTO(interface.DTO):
 
 @attr.s(frozen=True, slots=True)
 class IdentificationDTO(interface.DTO):
-    nom = attr.ib(type=str)
-    prenom = attr.ib(type=str)
-    # TODO completer les champs en fonction de base.Person
+    matricule = attr.ib(type=str)
+
+    nom = attr.ib(type=Optional[str])
+    prenom = attr.ib(type=Optional[str])
+    date_naissance = attr.ib(type=Optional[datetime.date])
+    annee_naissance = attr.ib(type=Optional[int])
+    pays_nationalite = attr.ib(type=Optional[str])
+    sexe = attr.ib(type=Optional[str])
+    genre = attr.ib(type=Optional[str])
+    photo_identite = attr.ib(type=List[str])
+
+    carte_identite = attr.ib(type=List[str])
+    passeport = attr.ib(type=List[str])
+    numero_registre_national_belge = attr.ib(type=Optional[str])
+    numero_carte_identite = attr.ib(type=Optional[str])
+    numero_passeport = attr.ib(type=Optional[str])
+    date_expiration_passeport = attr.ib(type=Optional[datetime.date])
+
+    langue_contact = attr.ib(type=Optional[str])
 
 
 @attr.s(frozen=True, slots=True)
@@ -82,13 +98,17 @@ class AutreOccupationDTO(interface.DTO):
 @attr.s(frozen=True, slots=True)
 class CurriculumDTO(interface.DTO):
     fichier_pdf = attr.ib(type=str)
-    occupations = attr.ib(type=List[Union[
-        SuperieurUniversitaireBelgeDTO,
-        SuperieurUniversitaireNonBelgeDTO,
-        SuperieurNonUniversitaireBelgeDTO,
-        SuperieurNonUniversitaireNonBelgeDTO,
-        AutreOccupationDTO,
-    ]])
+    occupations = attr.ib(
+        type=List[
+            Union[
+                SuperieurUniversitaireBelgeDTO,
+                SuperieurUniversitaireNonBelgeDTO,
+                SuperieurNonUniversitaireBelgeDTO,
+                SuperieurNonUniversitaireNonBelgeDTO,
+                AutreOccupationDTO,
+            ]
+        ]
+    )
 
 
 @attr.s(frozen=True, slots=True)

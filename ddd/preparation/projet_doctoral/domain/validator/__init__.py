@@ -17,6 +17,14 @@ from ._should_signataire_etre_dans_groupe_de_supervision import ShouldSignataire
 from ._should_signataire_etre_invite import ShouldSignataireEtreInvite
 from ._should_signataire_pas_invite import ShouldSignatairePasDejaInvite
 from ._should_type_contrat_travail_dependre_type_financement import ShouldTypeContratTravailDependreTypeFinancement
+from ._should_identification_candidat_etre_completee import ShouldSignaletiqueCandidatEtreCompletee
+from ._should_identification_candidat_etre_completee import (
+    ShouldCandidatSpecifierNumeroIdentite,
+    ShouldCandidatBelgeSpecifierNumeroRegistreNationalBelge,
+    ShouldCandidatSpecifierDateOuAnneeNaissance,
+    ShouldCandidatAuthentiquerIdentite,
+    ShouldCandidatAuthentiquerPasseport,
+)
 
 __all__ = [
     "ShouldInstitutionDependreDoctoratRealise",
@@ -34,4 +42,10 @@ __all__ = [
     "ShouldCotutelleEtreComplete",
     "ShouldProjetEtreComplet",
     "ShouldGroupeDeSupervisionAvoirAuMoinsUnMembreCA",
+    "ShouldSignaletiqueCandidatEtreCompletee",
+    "ShouldCandidatSpecifierNumeroIdentite",
+    "ShouldCandidatBelgeSpecifierNumeroRegistreNationalBelge",
+    "ShouldCandidatSpecifierDateOuAnneeNaissance",
+    "ShouldCandidatAuthentiquerIdentite",
+    "ShouldCandidatAuthentiquerPasseport",
 ]

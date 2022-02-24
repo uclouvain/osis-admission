@@ -30,6 +30,7 @@ from admission.ddd.preparation.projet_doctoral.use_case.read import *
 from admission.ddd.preparation.projet_doctoral.use_case.write import *
 from admission.infrastructure.preparation.projet_doctoral.domain.service.doctorat import DoctoratTranslator
 from admission.infrastructure.preparation.projet_doctoral.domain.service.membre_CA import MembreCATranslator
+from admission.infrastructure.preparation.projet_doctoral.domain.service.profil_candidat import ProfilCandidatTranslator
 from admission.infrastructure.preparation.projet_doctoral.domain.service.promoteur import PromoteurTranslator
 from admission.infrastructure.preparation.projet_doctoral.domain.service.secteur_ucl import SecteurUclTranslator
 from admission.infrastructure.preparation.projet_doctoral.repository.groupe_de_supervision import (
@@ -115,11 +116,16 @@ class MessageBusCommands(AbstractMessageBusCommands):
             groupe_supervision_repository=GroupeDeSupervisionRepository(),
             promoteur_translator=PromoteurTranslator(),
         ),
-        VerifierPropositionCommand: partial(
-            verifier_proposition,
+        VerifierProjetCommand: partial(
+            verifier_projet,
             proposition_repository=PropositionRepository(),
             groupe_supervision_repository=GroupeDeSupervisionRepository(),
             promoteur_translator=PromoteurTranslator(),
+        ),
+        VerifierPropositionCommand: partial(
+            verifier_proposition,
+            proposition_repository=PropositionRepository(),
+            profil_candidat_translator=ProfilCandidatTranslator(),
         ),
         ApprouverPropositionCommand: partial(
             approuver_proposition,

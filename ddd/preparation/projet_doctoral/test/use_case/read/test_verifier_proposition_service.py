@@ -6,6 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
+#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -22,96 +23,104 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
-import attr
-from django.test import SimpleTestCase
+import mock
 
 from admission.ddd.preparation.projet_doctoral.commands import VerifierPropositionCommand
 from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import (
-    CotutelleDoitAvoirAuMoinsUnPromoteurExterneException,
-    CotutelleNonCompleteException,
-    DetailProjetNonCompleteException,
-    GroupeDeSupervisionNonTrouveException,
-    MembreCAManquantException,
-    PromoteurManquantException,
-    PropositionNonTrouveeException,
+    IdentificationNonCompleteeException,
+    NumeroIdentiteNonSpecifieException,
+    NumeroIdentiteBelgeNonSpecifieException,
+    DateOuAnneeNaissanceNonSpecifieeException,
+    DetailsPasseportNonSpecifiesException,
+    CarteIdentiteeNonSpecifieeException,
+    CandidatNonTrouveException,
 )
-from admission.ddd.preparation.projet_doctoral.test.factory.person import PersonneConnueUclDTOFactory
+from admission.ddd.preparation.projet_doctoral.test.factory.proposition import (
+    PropositionAdmissionECGE3DPMinimaleFactory,
+)
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
-from base.ddd.utils.business_validator import MultipleBusinessExceptions
-from infrastructure.shared_kernel.personne_connue_ucl.in_memory.personne_connue_ucl import (
-    PersonneConnueUclInMemoryTranslator,
+from admission.infrastructure.preparation.projet_doctoral.domain.service.in_memory.profil_candidat import (
+    ProfilCandidatInMemoryTranslator,
 )
+from admission.infrastructure.preparation.projet_doctoral.repository.in_memory.proposition import (
+    PropositionInMemoryRepository,
+)
+from admission.tests import TestCase
+from base.ddd.utils.business_validator import MultipleBusinessExceptions
 
 
-class TestVerifierPropositionService(SimpleTestCase):
+class TestVerifierPropositionService(TestCase):
     def setUp(self) -> None:
-        self.uuid_proposition = 'uuid-SC3DP-promoteur-membre'
-        PersonneConnueUclInMemoryTranslator.personnes_connues_ucl = {
-            PersonneConnueUclDTOFactory(matricule='promoteur-SC3DP-unique'),
-            PersonneConnueUclDTOFactory(matricule='0123456789'),
-        }
-
+        self.candidat_translator = ProfilCandidatInMemoryTranslator()
+        self.proposition_repository = PropositionInMemoryRepository()
+        self.proposition = PropositionAdmissionECGE3DPMinimaleFactory()
+        self.current_candidat = self.candidat_translator.profil_candidats[0]
+        self.addCleanup(self.proposition_repository.reset)
         self.message_bus = message_bus_in_memory_instance
-        self.cmd = VerifierPropositionCommand(uuid_proposition=self.uuid_proposition)
+        self.cmd = VerifierPropositionCommand(uuid_proposition=self.proposition.entity_id.uuid)
 
-    def test_should_verifier_etre_ok(self):
+    def test_should_verifier_etre_ok_si_complet(self):
         proposition_id = self.message_bus.invoke(self.cmd)
-        self.assertEqual(proposition_id.uuid, self.uuid_proposition)
+        self.assertEqual(proposition_id.uuid, self.proposition.entity_id.uuid)
 
-    def test_should_retourner_erreur_si_detail_projet_pas_complete(self):
-        cmd = attr.evolve(self.cmd, uuid_proposition='uuid-SC3DP-no-project')
-        with self.assertRaises(MultipleBusinessExceptions) as context:
-            self.message_bus.invoke(cmd)
-        self.assertIsInstance(context.exception.exceptions.pop(), DetailProjetNonCompleteException)
+    def test_should_retourner_erreur_si_candidat_non_trouve(self):
+        with mock.patch.multiple(self.current_candidat, matricule='unknown_user_id'):
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                self.message_bus.invoke(self.cmd)
+            self.assertIsInstance(context.exception.exceptions.pop(), CandidatNonTrouveException)
 
-    def test_should_retourner_erreur_si_financement_pas_complete(self):
-        cmd = attr.evolve(self.cmd, uuid_proposition='uuid-SC3DP-no-financement')
-        with self.assertRaises(MultipleBusinessExceptions) as context:
-            self.message_bus.invoke(cmd)
-        self.assertIsInstance(context.exception.exceptions.pop(), DetailProjetNonCompleteException)
+    def test_should_retourner_erreur_si_identification_non_completee(self):
+        with mock.patch.multiple(self.current_candidat, prenom=''):
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                self.message_bus.invoke(self.cmd)
+            self.assertIsInstance(context.exception.exceptions.pop(), IdentificationNonCompleteeException)
 
-    def test_should_retourner_erreur_si_preadmission_et_aucun_membre_supervision(self):
-        cmd = attr.evolve(self.cmd, uuid_proposition='uuid-SC3DP-pre-admission')
-        with self.assertRaises(MultipleBusinessExceptions) as context:
-            self.message_bus.invoke(cmd)
-        self.assertEqual(len(context.exception.exceptions), 2)
+    def test_should_retourner_erreur_si_numero_identite_non_renseigne_candidat_etranger(self):
+        with mock.patch.multiple(
+            self.current_candidat,
+            numero_registre_national_belge='',
+            numero_carte_identite='',
+            numero_passeport='',
+            pays_nationalite='FR',
+        ):
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                self.message_bus.invoke(self.cmd)
+            self.assertIsInstance(context.exception.exceptions.pop(), NumeroIdentiteNonSpecifieException)
 
-    def test_should_retourner_erreur_si_cotutelle_pas_complete(self):
-        cmd = attr.evolve(self.cmd, uuid_proposition='uuid-SC3DP-cotutelle-indefinie')
-        with self.assertRaises(MultipleBusinessExceptions) as context:
-            self.message_bus.invoke(cmd)
-        self.assertTrue(any(isinstance(exc, CotutelleNonCompleteException) for exc in context.exception.exceptions))
+    def test_should_retourner_erreur_si_numero_identite_belge_non_renseigne_candidat_belge(self):
+        with mock.patch.multiple(
+            self.current_candidat,
+            numero_registre_national_belge='',
+        ):
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                self.message_bus.invoke(self.cmd)
+            self.assertIsInstance(context.exception.exceptions.pop(), NumeroIdentiteBelgeNonSpecifieException)
 
-    def test_should_retourner_erreur_si_groupe_supervision_non_trouve(self):
-        cmd = attr.evolve(self.cmd, uuid_proposition='uuid-ECGE3DP')
-        with self.assertRaises(GroupeDeSupervisionNonTrouveException):
-            self.message_bus.invoke(cmd)
+    def test_should_retourner_erreur_si_date_annee_naissance_non_renseignees(self):
+        with mock.patch.multiple(
+            self.current_candidat,
+            date_naissance=None,
+            annee_naissance=None,
+        ):
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                self.message_bus.invoke(self.cmd)
+            self.assertIsInstance(context.exception.exceptions.pop(), DateOuAnneeNaissanceNonSpecifieeException)
 
-    def test_should_retourner_erreur_si_proposition_non_trouvee(self):
-        cmd = attr.evolve(self.cmd, uuid_proposition='propositioninconnue')
-        with self.assertRaises(PropositionNonTrouveeException):
-            self.message_bus.invoke(cmd)
+    def test_should_retourner_erreur_si_details_passeport_non_renseignes(self):
+        with mock.patch.multiple(
+            self.current_candidat,
+            date_expiration_passeport=None,
+            passeport=[],
+        ):
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                self.message_bus.invoke(self.cmd)
+            self.assertIsInstance(context.exception.exceptions.pop(), DetailsPasseportNonSpecifiesException)
 
-    def test_should_retourner_erreur_si_cotutelle_sans_promoteur_externe(self):
-        cmd = attr.evolve(self.cmd, uuid_proposition='uuid-SC3DP-cotutelle-sans-promoteur-externe')
-        with self.assertRaises(MultipleBusinessExceptions) as context:
-            self.message_bus.invoke(cmd)
-        self.assertIsInstance(context.exception.exceptions.pop(), CotutelleDoitAvoirAuMoinsUnPromoteurExterneException)
-
-    def test_should_verifier_etre_ok_si_cotutelle_avec_promoteur_externe(self):
-        cmd = attr.evolve(self.cmd, uuid_proposition='uuid-SC3DP-cotutelle-avec-promoteur-externe')
-        proposition_id = self.message_bus.invoke(cmd)
-        self.assertEqual(proposition_id.uuid, 'uuid-SC3DP-cotutelle-avec-promoteur-externe')
-
-    def test_should_retourner_erreur_si_groupe_de_supervision_a_pas_promoteur(self):
-        cmd = attr.evolve(self.cmd, uuid_proposition='uuid-SC3DP-sans-promoteur')
-        with self.assertRaises(MultipleBusinessExceptions) as context:
-            self.message_bus.invoke(cmd)
-        self.assertIsInstance(context.exception.exceptions.pop(), PromoteurManquantException)
-
-    def test_should_retourner_erreur_si_groupe_de_supervision_a_pas_membre_CA(self):
-        cmd = attr.evolve(self.cmd, uuid_proposition='uuid-SC3DP-sans-membre_CA')
-        with self.assertRaises(MultipleBusinessExceptions) as context:
-            self.message_bus.invoke(cmd)
-        self.assertIsInstance(context.exception.exceptions.pop(), MembreCAManquantException)
+    def test_should_retourner_erreur_si_carte_identite_non_renseignee(self):
+        with mock.patch.multiple(
+            self.current_candidat,
+            carte_identite=[],
+        ):
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                self.message_bus.invoke(self.cmd)
+            self.assertIsInstance(context.exception.exceptions.pop(), CarteIdentiteeNonSpecifieeException)

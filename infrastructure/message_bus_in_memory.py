@@ -34,6 +34,9 @@ from admission.infrastructure.preparation.projet_doctoral.domain.service.in_memo
 from admission.infrastructure.preparation.projet_doctoral.domain.service.in_memory.membre_CA import (
     MembreCAInMemoryTranslator,
 )
+from admission.infrastructure.preparation.projet_doctoral.domain.service.in_memory.profil_candidat import (
+    ProfilCandidatInMemoryTranslator,
+)
 from admission.infrastructure.preparation.projet_doctoral.domain.service.in_memory.promoteur import (
     PromoteurInMemoryTranslator,
 )
@@ -116,11 +119,16 @@ class MessageBusInMemoryCommands(AbstractMessageBusCommands):
             groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
             promoteur_translator=PromoteurInMemoryTranslator(),
         ),
-        VerifierPropositionCommand: partial(
-            verifier_proposition,
+        VerifierProjetCommand: partial(
+            verifier_projet,
             proposition_repository=PropositionInMemoryRepository(),
             groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
             promoteur_translator=PromoteurInMemoryTranslator(),
+        ),
+        VerifierPropositionCommand: partial(
+            verifier_proposition,
+            proposition_repository=PropositionInMemoryRepository(),
+            profil_candidat_translator=ProfilCandidatInMemoryTranslator(),
         ),
         ApprouverPropositionCommand: partial(
             approuver_proposition,
