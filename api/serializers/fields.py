@@ -224,6 +224,11 @@ ACTION_LINKS = {
         'method': 'GET',
         'params': ['uuid'],
     },
+    'submit_proposition': {
+        'path_name': 'admission_api_v1:submit-proposition',
+        'method': 'GET',
+        'params': ['uuid'],
+    },
     'update_proposition': {
         'path_name': 'admission_api_v1:propositions',
         'method': 'PUT',

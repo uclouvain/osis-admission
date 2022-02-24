@@ -289,6 +289,7 @@ class DoctorateAdmission(BaseAdmission):
             ),
             ('add_supervision_member', _("Can add a member to the supervision group")),
             ('remove_supervision_member', _("Can remove a member from the supervision group")),
+            ('submit_doctorateadmission', _("Can submit a doctorate admission proposition"))
         ]
 
     @cached_property

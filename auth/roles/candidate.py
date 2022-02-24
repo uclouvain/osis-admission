@@ -28,6 +28,7 @@ from django.utils.translation import gettext_lazy as _
 
 from admission.auth.predicates import (
     invitations_sent,
+    invitations_not_sent,
     is_admission_request_author,
 )
 from osis_role.contrib.models import RoleModel
@@ -50,7 +51,7 @@ class Candidate(RoleModel):
                 'admission.upload_pdf_confirmation': is_admission_request_author,
                 'admission.fill_thesis': is_admission_request_author,
                 'admission.upload_publication_authorisation': is_admission_request_author,
-                'admission.request_signatures': is_admission_request_author & ~invitations_sent,
+                'admission.request_signatures': is_admission_request_author & invitations_not_sent,
                 'admission.view_doctorateadmission_person': is_admission_request_author,
                 'admission.change_doctorateadmission_person': is_admission_request_author,
                 'admission.view_doctorateadmission_coordinates': is_admission_request_author,
@@ -62,13 +63,14 @@ class Candidate(RoleModel):
                 'admission.view_doctorateadmission_languages': is_admission_request_author,
                 'admission.change_doctorateadmission_languages': is_admission_request_author,
                 'admission.view_doctorateadmission_project': is_admission_request_author,
-                'admission.change_doctorateadmission_project': is_admission_request_author & ~invitations_sent,
+                'admission.change_doctorateadmission_project': is_admission_request_author & invitations_not_sent,
                 'admission.view_doctorateadmission_cotutelle': is_admission_request_author,
-                'admission.change_doctorateadmission_cotutelle': is_admission_request_author & ~invitations_sent,
+                'admission.change_doctorateadmission_cotutelle': is_admission_request_author & invitations_not_sent,
                 'admission.view_doctorateadmission_supervision': is_admission_request_author,
-                'admission.change_doctorateadmission_supervision': is_admission_request_author & ~invitations_sent,
-                'admission.add_supervision_member': is_admission_request_author & ~invitations_sent,
+                'admission.change_doctorateadmission_supervision': is_admission_request_author & invitations_not_sent,
+                'admission.add_supervision_member': is_admission_request_author & invitations_not_sent,
                 'admission.approve_proposition_by_pdf': is_admission_request_author & invitations_sent,
-                'admission.remove_supervision_member': is_admission_request_author & ~invitations_sent,
+                'admission.remove_supervision_member': is_admission_request_author & invitations_not_sent,
+                'admission.submit_doctorateadmission': is_admission_request_author & invitations_sent,
             }
         )

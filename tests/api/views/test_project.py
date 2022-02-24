@@ -28,6 +28,7 @@ from unittest import mock
 from django.shortcuts import resolve_url
 from django.test import override_settings
 from django.urls import reverse
+from osis_signature.enums import SignatureState
 from rest_framework import status
 from rest_framework.test import APITestCase
 
@@ -48,6 +49,7 @@ from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions impor
 from admission.tests import QueriesAssertionsMixin
 from admission.tests.factories import DoctorateAdmissionFactory, WriteTokenFactory
 from admission.tests.factories.doctorate import DoctorateFactory
+from admission.tests.factories.person import CompletePersonFactory
 from admission.tests.factories.roles import CandidateFactory, CddManagerFactory
 from admission.tests.factories.supervision import CaMemberFactory, PromoterFactory, _ProcessFactory
 from base.models.enums.entity_type import EntityType
@@ -109,7 +111,7 @@ class DoctorateAdmissionListApiTestCase(APITestCase):
         first_proposition = response.data['propositions'][0]
         # Check proposition links
         self.assertTrue('links' in first_proposition)
-        actions = [
+        allowed_actions = [
             'retrieve_person',
             'update_person',
             'retrieve_coordinates',
@@ -127,11 +129,14 @@ class DoctorateAdmissionListApiTestCase(APITestCase):
             'update_curriculum',
             'retrieve_curriculum',
         ]
+        additional_actions = [
+            'submit_proposition',
+        ]
         self.assertCountEqual(
             list(first_proposition['links']),
-            actions,
+            allowed_actions + additional_actions,
         )
-        for action in actions:
+        for action in allowed_actions:
             # Check the url
             self.assertTrue('url' in first_proposition['links'][action], '{} is not allowed'.format('action'))
             # Check the method type
@@ -410,6 +415,7 @@ class DoctorateAdmissionGetApiTestCase(DoctorateAdmissionApiTestCase):
             'add_approval',
             'approve_by_pdf',
             'request_signatures',
+            'submit_proposition',
         ]
         self.assertCountEqual(
             list(response.data['links']),
@@ -551,7 +557,7 @@ class DoctorateAdmissionUpdatingApiTestCase(DoctorateAdmissionApiTestCase):
 
 
 @override_settings(ROOT_URLCONF='admission.api.url_v1')
-class DoctorateAdmissionVerifyTestCase(APITestCase):
+class DoctorateAdmissionVerifyProjectTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
         cls.admission = DoctorateAdmissionFactory(
@@ -569,13 +575,13 @@ class DoctorateAdmissionVerifyTestCase(APITestCase):
         cls.candidate = cls.admission.candidate
         cls.other_candidate_user = CandidateFactory().person.user
         cls.no_role_user = PersonFactory().user
-        cls.url = resolve_url("verify-proposition", uuid=cls.admission.uuid)
+        cls.url = resolve_url("verify-project", uuid=cls.admission.uuid)
 
     @mock.patch(
         'admission.infrastructure.preparation.projet_doctoral.domain.service.promoteur.PromoteurTranslator.est_externe',
         return_value=False,
     )
-    def test_verify_proposition_using_api(self, mock_is_external):
+    def test_verify_project_using_api(self, mock_is_external):
         self.client.force_authenticate(user=self.candidate.user)
         PromoterFactory(process=self.admission.supervision_group)
         CaMemberFactory(process=self.admission.supervision_group)
@@ -587,7 +593,7 @@ class DoctorateAdmissionVerifyTestCase(APITestCase):
         'admission.infrastructure.preparation.projet_doctoral.domain.service.promoteur.PromoteurTranslator.est_externe',
         return_value=False,
     )
-    def test_verify_proposition_using_api_without_ca_members_must_fail(self, mock_is_external):
+    def test_verify_project_using_api_without_ca_members_must_fail(self, mock_is_external):
         self.client.force_authenticate(user=self.candidate.user)
 
         PromoterFactory(process=self.admission.supervision_group)
@@ -596,7 +602,7 @@ class DoctorateAdmissionVerifyTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()[0]['status_code'], MembreCAManquantException.status_code)
 
-    def test_verify_proposition_using_api_without_promoter_must_fail(self):
+    def test_verify_project_using_api_without_promoter_must_fail(self):
         self.client.force_authenticate(user=self.candidate.user)
 
         CaMemberFactory(process=self.admission.supervision_group)
@@ -605,12 +611,12 @@ class DoctorateAdmissionVerifyTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()[0]['status_code'], PromoteurManquantException.status_code)
 
-    def test_admission_doctorate_verify_no_role(self):
+    def test_admission_doctorate_verify_project_no_role(self):
         self.client.force_authenticate(user=self.no_role_user)
         response = self.client.get(self.url, format="json")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    def test_admission_doctorate_verify_other_candidate(self):
+    def test_admission_doctorate_verify_project_other_candidate(self):
         self.client.force_authenticate(user=self.other_candidate_user)
         response = self.client.get(self.url, format="json")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
@@ -618,4 +624,100 @@ class DoctorateAdmissionVerifyTestCase(APITestCase):
     def test_user_not_logged_assert_not_authorized(self):
         self.client.force_authenticate(user=None)
         response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+
+@override_settings(ROOT_URLCONF='admission.api.url_v1')
+class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
+
+    @classmethod
+    def setUpTestData(cls):
+        # Create candidates
+        # Complete candidate
+        cls.first_candidate = CandidateFactory(person=CompletePersonFactory()).person
+        cls.first_candidate.id_photo = [WriteTokenFactory().token]
+        cls.first_candidate.id_card = [WriteTokenFactory().token]
+        cls.first_candidate.passport = [WriteTokenFactory().token]
+        cls.first_candidate.save()
+        # Incomplete candidate
+        cls.second_candidate = CandidateFactory(person__first_name="Jim").person
+        # Create promoters
+        cls.first_invited_promoter = PromoterFactory(actor_ptr__person__first_name="Joe")
+        cls.first_invited_promoter.actor_ptr.switch_state(SignatureState.INVITED)
+        cls.first_not_invited_promoter = PromoterFactory(actor_ptr__person__first_name="Jack")
+        cls.second_invited_promoter = PromoterFactory(actor_ptr__person__first_name="Jim")
+        cls.second_invited_promoter.actor_ptr.switch_state(SignatureState.INVITED)
+
+        # Create admissions
+        cls.first_admission_with_invitation = DoctorateAdmissionFactory(
+            candidate=cls.first_candidate,
+            supervision_group=cls.first_invited_promoter.actor_ptr.process,
+        )
+        cls.first_admission_without_invitation = DoctorateAdmissionFactory(
+            candidate=cls.first_candidate,
+            supervision_group=cls.first_not_invited_promoter.actor_ptr.process,
+        )
+        cls.second_admission = DoctorateAdmissionFactory(
+            candidate=cls.second_candidate,
+            supervision_group=cls.second_invited_promoter.actor_ptr.process,
+        )
+        # Create other users
+        cls.no_role_user = PersonFactory(first_name="Joe").user
+
+        # Targeted urls
+        cls.first_admission_with_invitation_url = resolve_url(
+            "submit-proposition",
+            uuid=cls.first_admission_with_invitation.uuid,
+        )
+        cls.first_admission_without_invitation_url = resolve_url(
+            "submit-proposition",
+            uuid=cls.first_admission_without_invitation.uuid,
+        )
+        cls.second_admission_url = resolve_url(
+            "submit-proposition",
+            uuid=cls.second_admission.uuid,
+        )
+
+    def test_assert_methods_not_allowed(self):
+        self.client.force_authenticate(user=self.first_candidate.user)
+        methods_not_allowed = ['post', 'patch', 'put', 'delete']
+
+        for method in methods_not_allowed:
+            response = getattr(self.client, method)(self.first_admission_with_invitation_url)
+            self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    def test_verify_valid_proposition_using_api(self):
+        self.client.force_authenticate(user=self.first_candidate.user)
+
+        response = self.client.get(self.first_admission_with_invitation_url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.json()), 0)
+
+    def test_verify_invalid_proposition_using_api(self):
+        self.client.force_authenticate(user=self.second_candidate.user)
+
+        response = self.client.get(self.second_admission_url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertTrue(len(response.json()) > 0)
+
+    def test_admission_doctorate_verify_no_role(self):
+        self.client.force_authenticate(user=self.no_role_user)
+        response = self.client.get(self.first_admission_with_invitation_url, format="json")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_admission_doctorate_verify_no_invited_promoters(self):
+        self.client.force_authenticate(user=self.first_candidate.user)
+        response = self.client.get(self.first_admission_without_invitation_url, format="json")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_admission_doctorate_verify_other_candidate(self):
+        self.client.force_authenticate(user=self.second_candidate.user)
+        response = self.client.get(self.first_admission_with_invitation_url, format="json")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_user_not_logged_assert_not_authorized(self):
+        self.client.force_authenticate(user=None)
+        response = self.client.get(self.first_admission_with_invitation_url)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
