@@ -59,3 +59,8 @@ class RefuserDemandeCddCommand(interface.CommandRequest):
     uuid: str
     sujet_doctorant: str
     contenu_email_doctorant: str
+
+
+@attr.s(frozen=True, slots=True, auto_attribs=True)
+class ApprouverDemandeCddCommand(interface.CommandRequest):
+    uuid: str

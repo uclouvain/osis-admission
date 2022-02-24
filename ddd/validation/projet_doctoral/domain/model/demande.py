@@ -31,7 +31,7 @@ import attr
 from admission.ddd.preparation.projet_doctoral.domain.model.proposition import PropositionIdentity
 from admission.ddd.validation.projet_doctoral.domain.model._enums import ChoixStatutCDD, ChoixStatutSIC
 from admission.ddd.validation.projet_doctoral.domain.validator.validator_by_business_action import \
-    RefuserDemandeCDDValidatorList
+    RefuserDemandeCDDValidatorList, ApprouverDemandeCDDValidatorList
 from osis_common.ddd import interface
 
 
@@ -55,3 +55,7 @@ class Demande(interface.RootEntity):
     def refuser_cdd(self) -> None:
         RefuserDemandeCDDValidatorList(self).validate()
         self.statut_cdd = ChoixStatutCDD.REJECTED
+
+    def approuver_cdd(self) -> None:
+        ApprouverDemandeCDDValidatorList(self).validate()
+        self.statut_cdd = ChoixStatutCDD.ACCEPTED

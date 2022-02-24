@@ -50,3 +50,17 @@ class RefuserDemandeCDDValidatorList(TwoStepsMultipleBusinessExceptionListValida
         return [
             ShouldDemandeStatusAVerifier(demande=self.demande),
         ]
+
+
+@attr.s(frozen=True, slots=True, auto_attribs=True)
+class ApprouverDemandeCDDValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+
+    demande: Demande
+
+    def get_data_contract_validators(self) -> List[BusinessValidator]:
+        return []
+
+    def get_invariants_validators(self) -> List[BusinessValidator]:
+        return [
+            ShouldDemandeStatusAVerifier(demande=self.demande),
+        ]
