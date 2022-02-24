@@ -23,31 +23,25 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import List
+
+from django.test import SimpleTestCase
 
 from admission.ddd.preparation.projet_doctoral.commands import SearchPropositionsCandidatCommand
-from admission.ddd.preparation.projet_doctoral.domain.service.get_proposition_dto import GetPropositionDTODomainService
-from admission.ddd.shared_kernel.domain.service.i_doctorat import IDoctoratTranslator
-from admission.ddd.shared_kernel.domain.service.i_secteur_ucl import ISecteurUclTranslator
-from admission.ddd.preparation.projet_doctoral.dtos import PropositionSearchDTO
-from admission.ddd.preparation.projet_doctoral.repository.i_proposition import IPropositionRepository
-from ddd.logic.shared_kernel.personne_connue_ucl.domain.service.personne_connue_ucl import IPersonneConnueUclTranslator
+from admission.ddd.preparation.projet_doctoral.test.factory.person import PersonneConnueUclDTOFactory
+from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
+from infrastructure.shared_kernel.personne_connue_ucl.in_memory.personne_connue_ucl import (
+    PersonneConnueUclInMemoryTranslator,
+)
 
 
-def rechercher_propositions_candidat(
-    cmd: 'SearchPropositionsCandidatCommand',
-    proposition_repository: 'IPropositionRepository',
-    doctorat_translator: 'IDoctoratTranslator',
-    secteur_ucl_translator: 'ISecteurUclTranslator',
-    personne_connue_ucl_translator: 'IPersonneConnueUclTranslator',
-) -> List['PropositionSearchDTO']:
-    propositions = proposition_repository.search(matricule_candidat=cmd.matricule_candidat)
-    return [
-        GetPropositionDTODomainService.search_dto(
-            proposition,
-            doctorat_translator,
-            secteur_ucl_translator,
-            personne_connue_ucl_translator,
-        )
-        for proposition in propositions
-    ]
+class TestListerDoctoratCandidatService(SimpleTestCase):
+    def setUp(self) -> None:
+        PersonneConnueUclInMemoryTranslator.personnes_connues_ucl = {
+            PersonneConnueUclDTOFactory(matricule='0123456789'),
+        }
+        self.cmd = SearchPropositionsCandidatCommand(matricule_candidat='0123456789')
+        self.message_bus = message_bus_in_memory_instance
+
+    def test_should_rechercher_par_matricule(self):
+        results = self.message_bus.invoke(self.cmd)
+        self.assertEqual(results[0].uuid, 'uuid-ECGE3DP')

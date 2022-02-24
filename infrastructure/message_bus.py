@@ -48,11 +48,8 @@ class MessageBusCommands(AbstractMessageBusCommands):
             doctorat_translator=DoctoratTranslator(),
         ),
         SearchPropositionsCandidatCommand: partial(
-            rechercher_propositions_candidat,
+            lister_propositions_candidat,
             proposition_repository=PropositionRepository(),
-            doctorat_translator=DoctoratTranslator(),
-            secteur_ucl_translator=SecteurUclTranslator(),
-            personne_connue_ucl_translator=PersonneConnueUclTranslator(),
         ),
         SearchPropositionsSuperviseesCommand: partial(
             rechercher_propositions_supervisees,

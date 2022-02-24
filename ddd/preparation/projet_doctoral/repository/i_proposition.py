@@ -27,6 +27,7 @@ import abc
 from typing import List, Optional
 
 from admission.ddd.preparation.projet_doctoral.domain.model.proposition import Proposition, PropositionIdentity
+from admission.ddd.preparation.projet_doctoral.dtos import PropositionCandidatDTO
 from osis_common.ddd import interface
 from osis_common.ddd.interface import ApplicationService
 
@@ -50,6 +51,24 @@ class IPropositionRepository(interface.AbstractRepository):
             matricule_candidat: str = None,
             **kwargs
     ) -> List['Proposition']:
+        raise NotImplementedError
+
+    @classmethod
+    @abc.abstractmethod
+    def search_dto(
+            cls,
+            numero: Optional[str] = '',
+            matricule_candidat: Optional[str] = '',
+            etat: Optional[str] = '',
+            nationalite: Optional[str] = '',
+            type: Optional[str] = '',
+            commission_proximite: Optional[str] = '',
+            annee_academique: Optional[str] = '',
+            sigle_formation: Optional[str] = '',
+            financement: Optional[str] = '',
+            matricule_promoteur: Optional[str] = '',
+            cotutelle: Optional[bool] = None,
+    ) -> List['PropositionCandidatDTO']:
         raise NotImplementedError
 
     @classmethod

@@ -47,7 +47,7 @@ class IDemandeRepository(interface.AbstractRepository):
         numero: Optional[str] = '',
         etat_cdd: Optional[str] = '',
         etat_sic: Optional[str] = '',
-        nom_prenom_email: Optional[str] = '',
+        matricule_candidat: Optional[str] = '',
         nationalite: Optional[str] = '',
         type: Optional[str] = '',
         commission_proximite: Optional[str] = '',

@@ -196,3 +196,18 @@ class GetCotutelleCommand(interface.CommandRequest):
 @attr.s(frozen=True, slots=True)
 class SupprimerPropositionCommand(interface.CommandRequest):
     uuid_proposition = attr.ib(type=str)
+
+
+@attr.s(frozen=True, slots=True)
+class FiltrerPropositionsCommand(interface.CommandRequest):
+    numero: Optional[str] = ''
+    etat: Optional[str] = ''
+    matricule_candidat: Optional[str] = ''
+    nationalite: Optional[str] = ''
+    type: Optional[str] = ''
+    commission_proximite: Optional[str] = ''
+    annee_academique: Optional[int] = None
+    sigle_formation: Optional[str] = ''
+    financement: Optional[str] = ''
+    matricule_promoteur: Optional[str] = ''
+    cotutelle: Optional[bool] = None

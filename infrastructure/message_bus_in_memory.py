@@ -133,7 +133,7 @@ class MessageBusInMemoryCommands(AbstractMessageBusCommands):
             groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
         ),
         SearchPropositionsCandidatCommand: partial(
-            rechercher_propositions_candidat,
+            lister_propositions_candidat,
             proposition_repository=PropositionInMemoryRepository(),
             doctorat_translator=DoctoratInMemoryTranslator(),
             secteur_ucl_translator=SecteurUclInMemoryTranslator(),

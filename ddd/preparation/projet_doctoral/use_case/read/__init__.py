@@ -2,6 +2,6 @@ from .get_cotutelle_service import get_cotutelle
 from .get_groupe_de_supervision_service import get_groupe_de_supervision
 from .get_proposition_service import get_proposition
 from .rechercher_doctorats_service import rechercher_doctorats
-from .rechercher_propositions_candidat_service import rechercher_propositions_candidat
+from .lister_propositions_candidat_service import lister_propositions_candidat
 from .rechercher_propositions_supervisees_service import rechercher_propositions_supervisees
 from .verifier_proposition_service import verifier_proposition

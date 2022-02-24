@@ -1,4 +1,4 @@
-# ##############################################################################
+##############################################################################
 #
 #    OSIS stands for Open Student Information System. It's an application
 #    designed to manage the core business of higher education institutions,
@@ -22,23 +22,21 @@
 #    at the root of the source code of this program.  If not,
 #    see http://www.gnu.org/licenses/.
 #
-# ##############################################################################
-
+##############################################################################
 from typing import List
 
-from admission.ddd.validation.projet_doctoral.commands import FiltrerDemandesQuery
-from admission.ddd.validation.projet_doctoral.dtos import DemandeRechercheDTO
-from admission.ddd.validation.projet_doctoral.repository.i_demande import IDemandeRepository
+from admission.ddd.preparation.projet_doctoral.commands import FiltrerPropositionsCommand
+from admission.ddd.preparation.projet_doctoral.dtos import PropositionCandidatDTO
+from admission.ddd.preparation.projet_doctoral.repository.i_proposition import IPropositionRepository
 
 
-def filtrer_demandes(
-    cmd: 'FiltrerDemandesQuery',
-    demande_repository: 'IDemandeRepository',
-) -> 'List[DemandeRechercheDTO]':
-    return demande_repository.search_dto(
+def filtrer_propositions(
+        cmd: 'FiltrerPropositionsCommand',
+        proposition_repository: 'IPropositionRepository',
+) -> List['PropositionCandidatDTO']:
+    return proposition_repository.search_dto(
         numero=cmd.numero,
-        etat_cdd=cmd.etat_cdd,
-        etat_sic=cmd.etat_sic,
+        etat=cmd.etat,
         matricule_candidat=cmd.matricule_candidat,
         nationalite=cmd.nationalite,
         type=cmd.type,
@@ -48,6 +46,4 @@ def filtrer_demandes(
         financement=cmd.financement,
         matricule_promoteur=cmd.matricule_promoteur,
         cotutelle=cmd.cotutelle,
-        date_pre_admission_debut=cmd.date_pre_admission_debut,
-        date_pre_admission_fin=cmd.date_pre_admission_fin,
     )

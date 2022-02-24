@@ -129,7 +129,7 @@ class PropositionDTO(interface.DTO):
 
 
 @attr.s(frozen=True, slots=True)
-class PropositionSearchDTO(interface.DTO):
+class PropositionCandidatDTO(interface.DTO):
     uuid = attr.ib(type=str)
     reference = attr.ib(type=str)
     type_admission = attr.ib(type=str)

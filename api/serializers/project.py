@@ -41,7 +41,7 @@ from admission.ddd.preparation.projet_doctoral.domain.model._enums import (
     ChoixCommissionProximiteCDEouCLSM,
     ChoixCommissionProximiteCDSS,
 )
-from admission.ddd.preparation.projet_doctoral.dtos import DoctoratDTO, PropositionDTO, PropositionSearchDTO
+from admission.ddd.preparation.projet_doctoral.dtos import DoctoratDTO, PropositionDTO, PropositionCandidatDTO
 
 __all__ = [
     "PropositionIdentityDTOSerializer",
@@ -109,7 +109,7 @@ class PropositionSearchDTOSerializer(DTOSerializer):
     })
 
     class Meta:
-        source = PropositionSearchDTO
+        source = PropositionCandidatDTO
 
 
 class PropositionSearchSerializer(serializers.Serializer):

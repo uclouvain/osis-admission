@@ -54,6 +54,7 @@ from admission.ddd.preparation.projet_doctoral.domain.model.proposition import (
     PropositionIdentity,
 )
 from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import PropositionNonTrouveeException
+from admission.ddd.preparation.projet_doctoral.dtos import PropositionCandidatDTO
 from admission.ddd.preparation.projet_doctoral.repository.i_proposition import IPropositionRepository
 from base.models.education_group_year import EducationGroupYear
 from base.models.entity_version import EntityVersion
@@ -186,3 +187,20 @@ class PropositionRepository(IPropositionRepository):
             }
         )
         Candidate.objects.get_or_create(person=candidate)
+
+    @classmethod
+    def search_dto(
+            cls,
+            numero: Optional[str] = '',
+            etat: Optional[str] = '',
+            nom_prenom_email: Optional[str] = '',
+            nationalite: Optional[str] = '',
+            type: Optional[str] = '',
+            commission_proximite: Optional[str] = '',
+            annee_academique: Optional[str] = '',
+            sigle_formation: Optional[str] = '',
+            financement: Optional[str] = '',
+            matricule_promoteur: Optional[str] = '',
+            cotutelle: Optional[bool] = None,
+    ) -> List['PropositionCandidatDTO']:
+        pass
