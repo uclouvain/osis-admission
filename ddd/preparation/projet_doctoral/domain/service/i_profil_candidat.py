@@ -24,6 +24,7 @@
 #
 # ##############################################################################
 from abc import abstractmethod
+from typing import List
 
 from admission.ddd.preparation.projet_doctoral.dtos import (
     CurriculumDTO,
@@ -34,7 +35,7 @@ from osis_common.ddd import interface
 
 
 class IProfilCandidatTranslator(interface.DomainService):
-    CODES_LANGUES_CONNUES_REQUISES = ['FR', 'EN']
+    CODES_LANGUES_REQUISES = ['FR', 'EN']
 
     NB_MAX_ANNEES_CV_REQUISES = 5
 
@@ -50,7 +51,7 @@ class IProfilCandidatTranslator(interface.DomainService):
 
     @classmethod
     @abstractmethod
-    def get_langues_connues(cls, matricule: str) -> int:
+    def get_langues_connues(cls, matricule: str) -> List[str]:
         raise NotImplementedError
 
     @classmethod

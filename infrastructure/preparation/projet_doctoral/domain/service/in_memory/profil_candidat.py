@@ -170,24 +170,6 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
         AnneeCurriculum(personne=matricule_candidat, annee=2019),
         AnneeCurriculum(personne=matricule_candidat, annee=2020),
     ]
-    adresses_candidats = [
-        AdressePersonnelle(
-            personne='0123456789',
-            code_postal='1348',
-            ville='Louvain-La-Neuve',
-            pays='BE',
-            rue="Boulevard de Wallonie",
-            type='RESIDENTIAL',
-        ),
-        AdressePersonnelle(
-            personne='0123456789',
-            code_postal='1348',
-            ville='Louvain-La-Neuve',
-            pays='BE',
-            rue="Place de l'Université",
-            type='CONTACT'
-        )
-    ]
 
     @classmethod
     def get_identification(cls, matricule: str) -> 'IdentificationDTO':
@@ -245,13 +227,8 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
         )
 
     @classmethod
-    def get_langues_connues(cls, matricule: str) -> int:
-        nb_langues_connues_requises = sum(
-            c.personne == matricule and c.langue.code_langue in cls.CODES_LANGUES_CONNUES_REQUISES
-            for c in cls.connaissances_langues
-        )
-
-        return nb_langues_connues_requises
+    def get_langues_connues(cls, matricule: str) -> List[str]:
+        return [c.langue.code_langue for c in cls.connaissances_langues if c.personne == matricule]
 
     @classmethod
     def get_curriculum(cls, matricule: str) -> 'CurriculumDTO':

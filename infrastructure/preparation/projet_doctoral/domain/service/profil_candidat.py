@@ -23,6 +23,8 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from typing import List
+
 from django.db.models import Subquery, OuterRef, Func
 
 from admission.ddd.preparation.projet_doctoral.domain.service.i_profil_candidat import IProfilCandidatTranslator
@@ -84,23 +86,28 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                 code_postal=domicile_legal.postal_code,
                 ville=domicile_legal.city,
                 pays=domicile_legal.country.iso_code if domicile_legal.country else None,
-            ) if domicile_legal else None,
+            )
+            if domicile_legal
+            else None,
             adresse_correspondance=AdressePersonnelleDTO(
                 rue=adresse_correspondance.street,
                 code_postal=adresse_correspondance.postal_code,
                 ville=adresse_correspondance.city,
                 pays=adresse_correspondance.country.iso_code if adresse_correspondance.country else None,
-            ) if adresse_correspondance else None,
+            )
+            if adresse_correspondance
+            else None,
         )
 
     @classmethod
-    def get_langues_connues(cls, matricule: str) -> int:
-        nb_langues_connues_requises = LanguageKnowledge.objects.filter(
-            person__global_id=matricule,
-            language__code__in=cls.CODES_LANGUES_CONNUES_REQUISES,
-        ).count()
-
-        return nb_langues_connues_requises
+    def get_langues_connues(cls, matricule: str) -> List[str]:
+        return (
+            LanguageKnowledge.objects.select_related('language')
+            .filter(
+                person__global_id=matricule,
+            )
+            .values_list('language__code', flat=True)
+        )
 
     @classmethod
     def get_curriculum(cls, matricule: str) -> 'CurriculumDTO':

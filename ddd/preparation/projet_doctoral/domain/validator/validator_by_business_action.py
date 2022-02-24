@@ -272,8 +272,8 @@ class CoordonneesValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
 
 @attr.s(frozen=True, slots=True)
 class LanguesConnuesValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
-    nb_langues_connues_requises = attr.ib(type=int)
-    langues_requises = attr.ib(type=List[str])
+    codes_langues_connues = attr.ib(type=List[str])
+    codes_langues_requises = attr.ib(type=List[str])
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
@@ -281,8 +281,8 @@ class LanguesConnuesValidatorList(TwoStepsMultipleBusinessExceptionListValidator
     def get_invariants_validators(self) -> List[BusinessValidator]:
         return [
             ShouldLanguesConnuesRequisesEtreSpecifiees(
-                langues_requises=self.langues_requises,
-                nb_langues_connues_requises=self.nb_langues_connues_requises,
+                codes_langues_connues=self.codes_langues_connues,
+                codes_langues_requises=self.codes_langues_requises,
             ),
         ]
 

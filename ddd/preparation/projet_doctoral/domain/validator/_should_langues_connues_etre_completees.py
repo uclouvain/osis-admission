@@ -35,9 +35,9 @@ from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions impor
 
 @attr.s(frozen=True, slots=True)
 class ShouldLanguesConnuesRequisesEtreSpecifiees(BusinessValidator):
-    nb_langues_connues_requises = attr.ib(type=int)
-    langues_requises = attr.ib(type=List[str])
+    codes_langues_connues = attr.ib(type=List[str])
+    codes_langues_requises = attr.ib(type=List[str])
 
     def validate(self, *args, **kwargs):
-        if self.nb_langues_connues_requises < len(self.langues_requises):
+        if set(self.codes_langues_requises) - set(self.codes_langues_connues):
             raise LanguesConnuesNonSpecifieesException
