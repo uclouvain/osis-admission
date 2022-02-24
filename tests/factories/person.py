@@ -3,15 +3,26 @@ import operator
 import factory
 
 from admission.tests.factories.language import LanguageKnowledgeFactory
-from admission.tests.factories.secondary_studies import HighSchoolDiplomaFactory, BelgianHighSchoolDiplomaFactory
+from admission.tests.factories.secondary_studies import BelgianHighSchoolDiplomaFactory
+from base.tests.factories.academic_year import get_current_year, AcademicYearFactory
 from base import models as mdl
 from base.models.enums.person_address_type import PersonAddressType
-from base.tests.factories.academic_year import get_current_year, AcademicYearFactory
 
 from base.tests.factories.person import PersonFactory
 from osis_profile.tests.factories.curriculum import CurriculumYearFactory
 from reference.tests.factories.country import CountryFactory
 from reference.tests.factories.language import FrenchLanguageFactory, EnglishLanguageFactory
+
+
+class PersonAddressFactory(factory.DjangoModelFactory):
+
+    class Meta:
+        model = 'base.PersonAddress'
+
+    street = factory.Faker('street_name')
+    postal_code = factory.Faker('zipcode')
+    city = factory.Faker('city')
+    country = factory.SubFactory(CountryFactory)
 
 
 class PersonAddressFactory(factory.DjangoModelFactory):

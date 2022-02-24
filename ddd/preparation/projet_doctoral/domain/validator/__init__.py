@@ -57,4 +57,5 @@ __all__ = [
     "ShouldLanguesConnuesRequisesEtreSpecifiees",
     "ShouldAnneesCVRequisesCompletees",
     "ShouldCurriculumFichierEtreSpecifie",
+    "ShouldAdresseCorrespondanceEtreCompleteeSiSpecifiee"
 ]

@@ -25,7 +25,6 @@
 # ##############################################################################
 import datetime
 from dataclasses import dataclass
-from itertools import chain
 from typing import List, Optional
 
 from admission.ddd.preparation.projet_doctoral.domain.service.i_profil_candidat import IProfilCandidatTranslator
@@ -170,6 +169,24 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
         AnneeCurriculum(personne=matricule_candidat, annee=2018),
         AnneeCurriculum(personne=matricule_candidat, annee=2019),
         AnneeCurriculum(personne=matricule_candidat, annee=2020),
+    ]
+    adresses_candidats = [
+        AdressePersonnelle(
+            personne='0123456789',
+            code_postal='1348',
+            ville='Louvain-La-Neuve',
+            pays='BE',
+            rue="Boulevard de Wallonie",
+            type='RESIDENTIAL',
+        ),
+        AdressePersonnelle(
+            personne='0123456789',
+            code_postal='1348',
+            ville='Louvain-La-Neuve',
+            pays='BE',
+            rue="Place de l'Université",
+            type='CONTACT'
+        )
     ]
 
     @classmethod

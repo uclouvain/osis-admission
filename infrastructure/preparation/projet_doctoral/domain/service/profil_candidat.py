@@ -23,7 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from django.db.models import F, Subquery, OuterRef, Func
+from django.db.models import Subquery, OuterRef, Func
 
 from admission.ddd.preparation.projet_doctoral.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.preparation.projet_doctoral.dtos import (
