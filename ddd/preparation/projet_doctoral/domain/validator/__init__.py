@@ -4,9 +4,8 @@ from ._should_cotutelle_etre_completee import ShouldCotutelleEtreComplete
 from ._should_curriculum_etre_complete import ShouldAnneesCVRequisesCompletees, ShouldCurriculumFichierEtreSpecifie
 from ._should_groupe_de_supervision_a_approuve import (
     ShouldDemandeSignatureLancee,
-    ShouldMembresCAOntRepondu,
+    ShouldMembresCAOntApprouve,
     ShouldPromoteursOntApprouve,
-    ShouldUnMembreCAAApprouve,
 )
 from ._should_langues_connues_etre_completees import ShouldLanguesConnuesRequisesEtreSpecifiees
 from ._should_projet_etre_complet import ShouldProjetEtreComplet
@@ -65,6 +64,5 @@ __all__ = [
     "ShouldCurriculumFichierEtreSpecifie",
     "ShouldDemandeSignatureLancee",
     "ShouldPromoteursOntApprouve",
-    "ShouldUnMembreCAAApprouve",
-    "ShouldMembresCAOntRepondu",
+    "ShouldMembresCAOntApprouve",
 ]

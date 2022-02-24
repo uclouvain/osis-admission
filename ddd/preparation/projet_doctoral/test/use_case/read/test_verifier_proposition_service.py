@@ -44,8 +44,7 @@ from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions impor
     AnneesCurriculumNonSpecifieesException,
     ProcedureDemandeSignatureNonLanceeException,
     PropositionNonApprouveeParPromoteurException,
-    PropositionNonApprouveeParMembreCAException,
-    MembreCAPasReponduException,
+    PropositionNonApprouveeParMembresCAException,
 )
 from admission.ddd.preparation.projet_doctoral.test.factory.groupe_de_supervision import (
     _SignaturePromoteurFactory,
@@ -83,7 +82,6 @@ class TestVerifierPropositionServiceCommun(SimpleTestCase):
         self.adresse_correspondance = self.candidat_translator.adresses_candidats[1]
         self.addCleanup(self.proposition_repository.reset)
         self.message_bus = message_bus_in_memory_instance
-
         self.academic_year_repository = AcademicYearInMemoryRepository()
 
         for annee in range(2016, 2021):
@@ -230,23 +228,14 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
 
         self.groupe_supervision.signatures_promoteurs.pop()
 
-    def test_should_retourner_erreur_si_aucun_membre_ca_a_approuve(self):
-        membre_qui_a_approuve = self.groupe_supervision.signatures_membres_CA.pop()
-
-        with self.assertRaises(MultipleBusinessExceptions) as context:
-            self.message_bus.invoke(self.cmd)
-        self.assertIsInstance(context.exception.exceptions.pop(), PropositionNonApprouveeParMembreCAException)
-
-        self.groupe_supervision.signatures_membres_CA.append(membre_qui_a_approuve)
-
-    def test_should_retourner_erreur_si_tous_membres_ca_n_ont_pas_repondu(self):
+    def test_should_retourner_erreur_si_tous_membres_ca_n_ont_pas_approuve(self):
         self.groupe_supervision.signatures_membres_CA.append(
             _SignatureMembreCAFactory(membre_CA_id__matricule='membre-ca-SC3DP', etat=ChoixEtatSignature.INVITED),
         )
 
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.cmd)
-        self.assertIsInstance(context.exception.exceptions.pop(), MembreCAPasReponduException)
+        self.assertIsInstance(context.exception.exceptions.pop(), PropositionNonApprouveeParMembresCAException)
 
         self.groupe_supervision.signatures_membres_CA.pop()
 

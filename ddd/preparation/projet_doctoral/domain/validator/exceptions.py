@@ -316,21 +316,13 @@ class PropositionNonApprouveeParPromoteurException(BusinessException):
     status_code = "PROPOSITION-37"
 
     def __init__(self, **kwargs):
-        message = _("At least one promotor didn't approve the proposition.")
+        message = _("All promoters must have approved the proposition.")
         super().__init__(message, **kwargs)
 
 
-class MembreCAPasReponduException(BusinessException):
+class PropositionNonApprouveeParMembresCAException(BusinessException):
     status_code = "PROPOSITION-38"
 
     def __init__(self, **kwargs):
-        message = _("No all CA member replied.")
-        super().__init__(message, **kwargs)
-
-
-class PropositionNonApprouveeParMembreCAException(BusinessException):
-    status_code = "PROPOSITION-39"
-
-    def __init__(self, **kwargs):
-        message = _("No CA member approved the proposition.")
+        message = _("All CA members must have approved the proposition.")
         super().__init__(message, **kwargs)

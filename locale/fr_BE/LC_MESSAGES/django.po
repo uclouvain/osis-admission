@@ -61,14 +61,17 @@ msgstr "Projet de formation complémentaire"
 msgid "Admission"
 msgstr "Admission"
 
+msgid "All CA members must have approved the proposition."
+msgstr "Tous les membres du CA doivent approuver la proposition."
+
+msgid "All promoters must have approved the proposition."
+msgstr "Tous les promoteurs doivent approuver la proposition."
+
 msgid "Already a member of CA."
 msgstr "Déjà membre du CA"
 
 msgid "Already a promoter."
 msgstr "Déjà promoteur"
-
-msgid "At least one promotor didn't approve the proposition."
-msgstr "Au-moins un promoteur n'a pas approuvé la proposition."
 
 msgid "Author"
 msgstr "Auteur"
@@ -367,14 +370,8 @@ msgstr "Non"
 msgid "NOT_INVITED"
 msgstr "Non invité"
 
-msgid "No CA member approved the proposition."
-msgstr "Aucun membre du CA n'a approuvé la proposition."
-
 msgid "No PhD found."
 msgstr "Pas de doctorat trouvé"
-
-msgid "No all CA member replied."
-msgstr "Tous les membres du CA n'ont pas répondu."
 
 msgid "No defense reason"
 msgstr "Raison de non-soutenance"

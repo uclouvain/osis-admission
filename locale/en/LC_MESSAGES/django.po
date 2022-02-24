@@ -55,13 +55,16 @@ msgstr ""
 msgid "Admission"
 msgstr ""
 
+msgid "All CA members must have approved the proposition."
+msgstr ""
+
+msgid "All promoters must have approved the proposition."
+msgstr ""
+
 msgid "Already a member of CA."
 msgstr ""
 
 msgid "Already a promoter."
-msgstr ""
-
-msgid "At least one promotor didn't approve the proposition."
 msgstr ""
 
 msgid "Author"
@@ -355,13 +358,7 @@ msgstr ""
 msgid "NOT_INVITED"
 msgstr ""
 
-msgid "No CA member approved the proposition."
-msgstr ""
-
 msgid "No PhD found."
-msgstr ""
-
-msgid "No all CA member replied."
 msgstr ""
 
 msgid "No defense reason"

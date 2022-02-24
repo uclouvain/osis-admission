@@ -353,6 +353,5 @@ class ApprobationValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
         return [
             ShouldDemandeSignatureLancee(self.groupe_de_supervision.statut_signature),
             ShouldPromoteursOntApprouve(self.groupe_de_supervision.signatures_promoteurs),
-            ShouldMembresCAOntRepondu(self.groupe_de_supervision.signatures_membres_CA),
-            ShouldUnMembreCAAApprouve(self.groupe_de_supervision.signatures_membres_CA),
+            ShouldMembresCAOntApprouve(self.groupe_de_supervision.signatures_membres_CA),
         ]

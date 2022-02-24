@@ -36,8 +36,7 @@ from admission.ddd.preparation.projet_doctoral.domain.model._signature_promoteur
 from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import (
     ProcedureDemandeSignatureNonLanceeException,
     PropositionNonApprouveeParPromoteurException,
-    PropositionNonApprouveeParMembreCAException,
-    MembreCAPasReponduException,
+    PropositionNonApprouveeParMembresCAException,
 )
 from base.ddd.utils.business_validator import BusinessValidator
 
@@ -61,20 +60,9 @@ class ShouldPromoteursOntApprouve(BusinessValidator):
 
 
 @attr.s(frozen=True, slots=True)
-class ShouldUnMembreCAAApprouve(BusinessValidator):
+class ShouldMembresCAOntApprouve(BusinessValidator):
     signatures_membres_CA = attr.ib(type=List[SignatureMembreCA])  # type: List[SignatureMembreCA]
 
     def validate(self, *args, **kwargs):
-        if all(signature.etat != ChoixEtatSignature.APPROVED for signature in self.signatures_membres_CA):
-            raise PropositionNonApprouveeParMembreCAException
-
-
-@attr.s(frozen=True, slots=True)
-class ShouldMembresCAOntRepondu(BusinessValidator):
-    signatures_membres_CA = attr.ib(type=List[SignatureMembreCA])  # type: List[SignatureMembreCA]
-
-    etats_signatures_reponse = {ChoixEtatSignature.APPROVED, ChoixEtatSignature.REFUSED}
-
-    def validate(self, *args, **kwargs):
-        if any(signature.etat not in self.etats_signatures_reponse for signature in self.signatures_membres_CA):
-            raise MembreCAPasReponduException
+        if any(signature.etat != ChoixEtatSignature.APPROVED for signature in self.signatures_membres_CA):
+            raise PropositionNonApprouveeParMembresCAException
