@@ -57,7 +57,7 @@ class RecupererDemandeQuery(interface.CommandRequest):
 @attr.s(frozen=True, slots=True, auto_attribs=True)
 class RefuserDemandeCddCommand(interface.CommandRequest):
     uuid: str
-    sujet_doctorant: str
+    sujet_email_doctorant: str
     contenu_email_doctorant: str
 
 
