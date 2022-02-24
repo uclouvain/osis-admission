@@ -44,7 +44,8 @@ class DemandeService(interface.DomainService):
         demande_dto = demande_repository.get_dto(demande_id)
         # TODO
         return RecupererDemandeDTO(
-            statut_cdd="",
-            statut_sic="",
-            derniere_modification=None,
+            uuid=proposition_id.uuid,
+            statut_cdd=demande_dto.statut_cdd,
+            statut_sic=demande_dto.statut_sic,
+            derniere_modification=demande_dto.derniere_modification,
         )

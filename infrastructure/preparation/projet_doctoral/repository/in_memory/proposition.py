@@ -27,7 +27,7 @@ from typing import List, Optional
 
 from admission.ddd.preparation.projet_doctoral.domain.model.proposition import Proposition, PropositionIdentity
 from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import PropositionNonTrouveeException
-from admission.ddd.preparation.projet_doctoral.dtos import PropositionCandidatDTO
+from admission.ddd.preparation.projet_doctoral.dtos import PropositionCandidatDTO, PropositionDTO
 from admission.ddd.preparation.projet_doctoral.repository.i_proposition import IPropositionRepository
 from admission.ddd.preparation.projet_doctoral.test.factory.proposition import (
     PropositionAdmissionECGE3DPMinimaleFactory,
@@ -88,10 +88,10 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
 
     @classmethod
     def search(
-        cls,
-        entity_ids: Optional[List['PropositionIdentity']] = None,
-        matricule_candidat: str = None,
-        **kwargs,
+            cls,
+            entity_ids: Optional[List['PropositionIdentity']] = None,
+            matricule_candidat: str = None,
+            **kwargs,
     ) -> List['Proposition']:
         returned = cls.entities
         if matricule_candidat:
@@ -108,8 +108,8 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
     def search_dto(
             cls,
             numero: Optional[str] = '',
+            matricule_candidat: Optional[str] = '',
             etat: Optional[str] = '',
-            nom_prenom_email: Optional[str] = '',
             nationalite: Optional[str] = '',
             type: Optional[str] = '',
             commission_proximite: Optional[str] = '',
@@ -119,4 +119,8 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
             matricule_promoteur: Optional[str] = '',
             cotutelle: Optional[bool] = None,
     ) -> List['PropositionCandidatDTO']:
-        pass
+        raise NotImplementedError
+
+    @classmethod
+    def get_dto(cls, entity_id: 'PropositionIdentity') -> 'PropositionDTO':
+        raise NotImplementedError

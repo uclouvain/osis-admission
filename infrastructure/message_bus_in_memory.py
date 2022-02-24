@@ -135,9 +135,6 @@ class MessageBusInMemoryCommands(AbstractMessageBusCommands):
         SearchPropositionsCandidatCommand: partial(
             lister_propositions_candidat,
             proposition_repository=PropositionInMemoryRepository(),
-            doctorat_translator=DoctoratInMemoryTranslator(),
-            secteur_ucl_translator=SecteurUclInMemoryTranslator(),
-            personne_connue_ucl_translator=PersonneConnueUclInMemoryTranslator(),
         ),
         SearchPropositionsSuperviseesCommand: partial(
             rechercher_propositions_supervisees,

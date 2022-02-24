@@ -192,8 +192,8 @@ class PropositionRepository(IPropositionRepository):
     def search_dto(
             cls,
             numero: Optional[str] = '',
+            matricule_candidat: Optional[str] = '',
             etat: Optional[str] = '',
-            nom_prenom_email: Optional[str] = '',
             nationalite: Optional[str] = '',
             type: Optional[str] = '',
             commission_proximite: Optional[str] = '',
@@ -203,4 +203,8 @@ class PropositionRepository(IPropositionRepository):
             matricule_promoteur: Optional[str] = '',
             cotutelle: Optional[bool] = None,
     ) -> List['PropositionCandidatDTO']:
-        pass
+        raise NotImplementedError
+
+    @classmethod
+    def get_dto(cls, entity_id: 'PropositionIdentity') -> 'PropositionDTO':
+        raise NotImplementedError

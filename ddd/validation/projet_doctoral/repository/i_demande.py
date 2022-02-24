@@ -37,7 +37,7 @@ from osis_common.ddd import interface
 class IDemandeRepository(interface.AbstractRepository):
     @classmethod
     @abc.abstractmethod
-    def get(cls, entity_id: 'DemandeIdentity') -> 'Demande':
+    def get(cls, entity_id: 'DemandeIdentity') -> 'Demande':  # type: ignore[override]
         pass
 
     @classmethod
@@ -51,7 +51,7 @@ class IDemandeRepository(interface.AbstractRepository):
         nationalite: Optional[str] = '',
         type: Optional[str] = '',
         commission_proximite: Optional[str] = '',
-        annee_academique: Optional[str] = '',
+        annee_academique: Optional[int] = None,
         sigle_formation: Optional[str] = '',
         financement: Optional[str] = '',
         matricule_promoteur: Optional[str] = '',
@@ -64,12 +64,12 @@ class IDemandeRepository(interface.AbstractRepository):
 
     @classmethod
     @abc.abstractmethod
-    def delete(cls, entity_id: 'DemandeIdentity', **kwargs) -> None:
+    def delete(cls, entity_id: 'DemandeIdentity', **kwargs) -> None:  # type: ignore[override]
         pass
 
     @classmethod
     @abc.abstractmethod
-    def save(cls, entity: 'Demande') -> None:
+    def save(cls, entity: 'Demande') -> None:  # type: ignore[override]
         pass
 
     @classmethod

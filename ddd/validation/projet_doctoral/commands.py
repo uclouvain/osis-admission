@@ -32,7 +32,7 @@ from osis_common.ddd import interface
 
 
 @attr.s(frozen=True, slots=True, auto_attribs=True)
-class FiltrerDemandesQuery(interface.CommandRequest):
+class FiltrerDemandesQuery(interface.QueryRequest):
     numero: Optional[str] = ''
     etat_cdd: Optional[str] = ''
     etat_sic: Optional[str] = ''
@@ -50,7 +50,7 @@ class FiltrerDemandesQuery(interface.CommandRequest):
 
 
 @attr.s(frozen=True, slots=True, auto_attribs=True)
-class RecupererDemandeQuery(interface.CommandRequest):
+class RecupererDemandeQuery(interface.QueryRequest):
     uuid: str
 
 

@@ -24,16 +24,16 @@
 #
 # ##############################################################################
 from admission.ddd.validation.projet_doctoral.domain.model.demande import DemandeIdentity
-from osis_common.ddd.interface import EntityIdentityBuilder
+from osis_common.ddd.interface import EntityIdentityBuilder, CommandRequest, DTO
 
 
 class DemandeIdentityBuilder(EntityIdentityBuilder):
     @classmethod
-    def build_from_command(cls, cmd: 'CommandRequest') -> 'EntityIdentity':
+    def build_from_command(cls, cmd: 'CommandRequest') -> 'DemandeIdentity':
         pass
 
     @classmethod
-    def build_from_repository_dto(cls, dto_object: 'DTO') -> 'EntityIdentity':
+    def build_from_repository_dto(cls, dto_object: 'DTO') -> 'DemandeIdentity':
         pass
 
     @classmethod
