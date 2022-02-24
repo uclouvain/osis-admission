@@ -23,13 +23,22 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import Optional
+from typing import List
+
+from django.db.models import Subquery, OuterRef, Func
 
 from admission.ddd.preparation.projet_doctoral.domain.service.i_profil_candidat import IProfilCandidatTranslator
-from admission.ddd.preparation.projet_doctoral.dtos import IdentificationDTO, CoordonneesDTO, AdressePersonnelleDTO
+from admission.ddd.preparation.projet_doctoral.dtos import (
+    IdentificationDTO,
+    CoordonneesDTO,
+    AdressePersonnelleDTO,
+    CurriculumDTO,
+)
 from base.models.enums.person_address_type import PersonAddressType
 from base.models.person import Person
 from base.models.person_address import PersonAddress
+from osis_profile.models import CurriculumYear
+from osis_profile.models.education import LanguageKnowledge
 
 
 class ProfilCandidatTranslator(IProfilCandidatTranslator):
@@ -77,15 +86,75 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                 code_postal=domicile_legal.postal_code,
                 ville=domicile_legal.city,
                 pays=domicile_legal.country.iso_code if domicile_legal.country else None,
-            ) if domicile_legal else None,
+            )
+            if domicile_legal
+            else None,
             adresse_correspondance=AdressePersonnelleDTO(
                 rue=adresse_correspondance.street,
                 code_postal=adresse_correspondance.postal_code,
                 ville=adresse_correspondance.city,
                 pays=adresse_correspondance.country.iso_code if adresse_correspondance.country else None,
-            ) if adresse_correspondance else None,
+            )
+            if adresse_correspondance
+            else None,
+        )
+
+    @classmethod
+    def get_langues_connues(cls, matricule: str) -> List[str]:
+        return (
+            LanguageKnowledge.objects.select_related('language')
+            .filter(
+                person__global_id=matricule,
+            )
+            .values_list('language__code', flat=True)
         )
 
     @classmethod
     def get_curriculum(cls, matricule: str) -> 'CurriculumDTO':
-        pass
+        person = (
+            Person.objects.select_related(
+                'last_registration_year',
+                'belgianhighschooldiploma__academic_graduation_year',
+                'foreignhighschooldiploma__academic_graduation_year',
+            )
+            .only(
+                'foreignhighschooldiploma__academic_graduation_year__year',
+                'foreignhighschooldiploma__academic_graduation_year__year',
+                'last_registration_year__year',
+                'curriculum',
+            )
+            .annotate(
+                annees_curriculum=Subquery(
+                    CurriculumYear.objects.filter(
+                        person__global_id=OuterRef('global_id'),
+                    )
+                    .order_by()
+                    .annotate(years=Func("academic_year__year", function='ARRAY_AGG'))
+                    .values('years')
+                ),
+            )
+            .get(global_id=matricule)
+        )
+
+        annee_diplome_etudes_secondaires_belges = (
+            person.belgianhighschooldiploma.academic_graduation_year.year
+            if hasattr(person, 'belgianhighschooldiploma')
+            else None
+        )
+        annee_diplome_etudes_secondaires_etrangeres = (
+            person.foreignhighschooldiploma.academic_graduation_year.year
+            if hasattr(person, 'foreignhighschooldiploma')
+            else None
+        )
+
+        return CurriculumDTO(
+            annees=set(person.annees_curriculum[: cls.NB_MAX_ANNEES_CV_REQUISES])
+            if person.annees_curriculum
+            else set(),
+            annee_diplome_etudes_secondaires_belges=annee_diplome_etudes_secondaires_belges,
+            annee_diplome_etudes_secondaires_etrangeres=annee_diplome_etudes_secondaires_etrangeres,
+            annee_derniere_inscription_ucl=person.last_registration_year.year
+            if person.last_registration_year
+            else None,
+            fichier_pdf=person.curriculum,
+        )

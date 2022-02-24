@@ -49,6 +49,7 @@ from admission.infrastructure.preparation.projet_doctoral.repository.in_memory.g
 from admission.infrastructure.preparation.projet_doctoral.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
+from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
 from infrastructure.shared_kernel.personne_connue_ucl.in_memory.personne_connue_ucl import (
     PersonneConnueUclInMemoryTranslator,
 )
@@ -129,6 +130,7 @@ class MessageBusInMemoryCommands(AbstractMessageBusCommands):
             verifier_proposition,
             proposition_repository=PropositionInMemoryRepository(),
             profil_candidat_translator=ProfilCandidatInMemoryTranslator(),
+            academic_year_repository=AcademicYearInMemoryRepository(),
         ),
         ApprouverPropositionCommand: partial(
             approuver_proposition,

@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,38 +23,16 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from abc import abstractmethod
-from typing import List
+import factory
 
-from admission.ddd.preparation.projet_doctoral.dtos import (
-    CurriculumDTO,
-    CoordonneesDTO,
-    IdentificationDTO,
-)
-from osis_common.ddd import interface
+from base.tests.factories.person import PersonFactory
+from reference.tests.factories.language import LanguageFactory
 
 
-class IProfilCandidatTranslator(interface.DomainService):
-    CODES_LANGUES_REQUISES = ['FR', 'EN']
+class LanguageKnowledgeFactory(factory.DjangoModelFactory):
 
-    NB_MAX_ANNEES_CV_REQUISES = 5
+    class Meta:
+        model = 'osis_profile.LanguageKnowledge'
 
-    @classmethod
-    @abstractmethod
-    def get_identification(cls, matricule: str) -> 'IdentificationDTO':
-        raise NotImplementedError
-
-    @classmethod
-    @abstractmethod
-    def get_coordonnees(cls, matricule: str) -> 'CoordonneesDTO':
-        raise NotImplementedError
-
-    @classmethod
-    @abstractmethod
-    def get_langues_connues(cls, matricule: str) -> List[str]:
-        raise NotImplementedError
-
-    @classmethod
-    @abstractmethod
-    def get_curriculum(cls, matricule: str) -> 'CurriculumDTO':
-        raise NotImplementedError
+    person = factory.SubFactory(PersonFactory)
+    language = factory.SubFactory(LanguageFactory)

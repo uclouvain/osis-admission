@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,38 +23,21 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from abc import abstractmethod
 from typing import List
 
-from admission.ddd.preparation.projet_doctoral.dtos import (
-    CurriculumDTO,
-    CoordonneesDTO,
-    IdentificationDTO,
+import attr
+
+from base.ddd.utils.business_validator import BusinessValidator
+from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import (
+    LanguesConnuesNonSpecifieesException,
 )
-from osis_common.ddd import interface
 
 
-class IProfilCandidatTranslator(interface.DomainService):
-    CODES_LANGUES_REQUISES = ['FR', 'EN']
+@attr.s(frozen=True, slots=True)
+class ShouldLanguesConnuesRequisesEtreSpecifiees(BusinessValidator):
+    codes_langues_connues = attr.ib(type=List[str])
+    codes_langues_requises = attr.ib(type=List[str])
 
-    NB_MAX_ANNEES_CV_REQUISES = 5
-
-    @classmethod
-    @abstractmethod
-    def get_identification(cls, matricule: str) -> 'IdentificationDTO':
-        raise NotImplementedError
-
-    @classmethod
-    @abstractmethod
-    def get_coordonnees(cls, matricule: str) -> 'CoordonneesDTO':
-        raise NotImplementedError
-
-    @classmethod
-    @abstractmethod
-    def get_langues_connues(cls, matricule: str) -> List[str]:
-        raise NotImplementedError
-
-    @classmethod
-    @abstractmethod
-    def get_curriculum(cls, matricule: str) -> 'CurriculumDTO':
-        raise NotImplementedError
+    def validate(self, *args, **kwargs):
+        if set(self.codes_langues_requises) - set(self.codes_langues_connues):
+            raise LanguesConnuesNonSpecifieesException

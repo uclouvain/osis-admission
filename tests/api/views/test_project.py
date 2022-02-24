@@ -638,6 +638,7 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
         cls.first_candidate.id_photo = [WriteTokenFactory().token]
         cls.first_candidate.id_card = [WriteTokenFactory().token]
         cls.first_candidate.passport = [WriteTokenFactory().token]
+        cls.first_candidate.curriculum = [WriteTokenFactory().token]
         cls.first_candidate.save()
         # Incomplete candidate
         cls.second_candidate = CandidateFactory(person__first_name="Jim").person

@@ -29,7 +29,12 @@ from typing import List, Optional
 
 from admission.ddd.preparation.projet_doctoral.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import CandidatNonTrouveException
-from admission.ddd.preparation.projet_doctoral.dtos import IdentificationDTO, CoordonneesDTO, AdressePersonnelleDTO
+from admission.ddd.preparation.projet_doctoral.dtos import (
+    IdentificationDTO,
+    CoordonneesDTO,
+    AdressePersonnelleDTO,
+    CurriculumDTO,
+)
 
 
 @dataclass
@@ -47,6 +52,8 @@ class ProfilCandidat:
     sexe: Optional[str]
     genre: Optional[str]
     photo_identite: List[str]
+    curriculum: List[str]
+    annee_derniere_inscription_ucl: Optional[int]
 
     # Pièces d'identité
     carte_identite: List[str]
@@ -73,10 +80,36 @@ class CoordonneesCandidat:
     adresse_correspondance = Optional[AdressePersonnelle]
 
 
+@dataclass
+class Langue:
+    code_langue: str
+
+
+@dataclass
+class ConnaissanceLangue:
+    personne: str
+    langue: Langue
+
+
+@dataclass
+class DiplomeEtudeSecondaire:
+    personne: str
+    annee: int
+
+
+@dataclass
+class AnneeCurriculum:
+    personne: str
+    annee: int
+
+
 class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
+    matricule_candidat = '0123456789'
+    annee_reference = 2020
+
     profil_candidats = [
         ProfilCandidat(
-            matricule='0123456789',
+            matricule=matricule_candidat,
             nom='Doe',
             prenom='John',
             prenom_d_usage='Jerry',
@@ -95,11 +128,13 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
             numero_carte_identite='1002',
             numero_passeport='1003',
             date_expiration_passeport=datetime.date(2022, 2, 10),
+            curriculum=['uuid14'],
+            annee_derniere_inscription_ucl=None,
         ),
     ]
     adresses_candidats = [
         AdressePersonnelle(
-            personne='0123456789',
+            personne=matricule_candidat,
             code_postal='1348',
             ville='Louvain-La-Neuve',
             pays='BE',
@@ -107,13 +142,33 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
             type='RESIDENTIAL',
         ),
         AdressePersonnelle(
-            personne='0123456789',
+            personne=matricule_candidat,
             code_postal='1348',
             ville='Louvain-La-Neuve',
             pays='BE',
             rue="Place de l'Université",
-            type='CONTACT'
-        )
+            type='CONTACT',
+        ),
+    ]
+    langues = [
+        Langue(code_langue='FR'),
+        Langue(code_langue='EN'),
+        Langue(code_langue='NL'),
+        Langue(code_langue='DE'),
+    ]
+    connaissances_langues = [
+        ConnaissanceLangue(personne=matricule_candidat, langue=langues[0]),
+        ConnaissanceLangue(personne=matricule_candidat, langue=langues[1]),
+        ConnaissanceLangue(personne=matricule_candidat, langue=langues[2]),
+    ]
+    diplomes_etudes_secondaires_belges = []
+    diplomes_etudes_secondaires_etrangers = []
+    annees_curriculum = [
+        AnneeCurriculum(personne=matricule_candidat, annee=2016),
+        AnneeCurriculum(personne=matricule_candidat, annee=2017),
+        AnneeCurriculum(personne=matricule_candidat, annee=2018),
+        AnneeCurriculum(personne=matricule_candidat, annee=2019),
+        AnneeCurriculum(personne=matricule_candidat, annee=2020),
     ]
 
     @classmethod
@@ -158,15 +213,45 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 code_postal=domicile_legal.code_postal,
                 ville=domicile_legal.ville,
                 pays=domicile_legal.pays,
-            ) if domicile_legal else None,
+            )
+            if domicile_legal
+            else None,
             adresse_correspondance=AdressePersonnelleDTO(
                 rue=adresse_correspondance.rue,
                 code_postal=adresse_correspondance.code_postal,
                 ville=adresse_correspondance.ville,
                 pays=adresse_correspondance.pays,
-            ) if adresse_correspondance else None,
+            )
+            if adresse_correspondance
+            else None,
         )
 
     @classmethod
+    def get_langues_connues(cls, matricule: str) -> List[str]:
+        return [c.langue.code_langue for c in cls.connaissances_langues if c.personne == matricule]
+
+    @classmethod
     def get_curriculum(cls, matricule: str) -> 'CurriculumDTO':
-        pass
+        try:
+            candidate = next(c for c in cls.profil_candidats if c.matricule == matricule)
+
+            annees = set(a.annee for a in cls.annees_curriculum if a.personne == matricule)
+
+            annee_diplome_belge = next(
+                (d.annee for d in cls.diplomes_etudes_secondaires_belges if d.personne == matricule),
+                None,
+            )
+            annee_diplome_etranger = next(
+                (d.annee for d in cls.diplomes_etudes_secondaires_etrangers if d.personne == matricule),
+                None,
+            )
+
+            return CurriculumDTO(
+                annees=annees,
+                annee_diplome_etudes_secondaires_belges=annee_diplome_belge,
+                annee_diplome_etudes_secondaires_etrangeres=annee_diplome_etranger,
+                annee_derniere_inscription_ucl=candidate.annee_derniere_inscription_ucl,
+                fichier_pdf=candidate.curriculum,
+            )
+        except StopIteration:
+            raise CandidatNonTrouveException

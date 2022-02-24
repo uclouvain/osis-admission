@@ -23,6 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import datetime
 import mock
 
 from admission.ddd.preparation.projet_doctoral.commands import VerifierPropositionCommand
@@ -36,6 +37,9 @@ from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions impor
     CandidatNonTrouveException,
     AdresseDomicileLegalNonCompleteeException,
     AdresseCorrespondanceNonCompleteeException,
+    LanguesConnuesNonSpecifieesException,
+    FichierCurriculumNonRenseigneException,
+    AnneesCurriculumNonSpecifieesException,
 )
 from admission.ddd.preparation.projet_doctoral.test.factory.proposition import (
     PropositionAdmissionECGE3DPMinimaleFactory,
@@ -43,15 +47,18 @@ from admission.ddd.preparation.projet_doctoral.test.factory.proposition import (
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 from admission.infrastructure.preparation.projet_doctoral.domain.service.in_memory.profil_candidat import (
     ProfilCandidatInMemoryTranslator,
+    DiplomeEtudeSecondaire,
 )
 from admission.infrastructure.preparation.projet_doctoral.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
 from django.test import SimpleTestCase
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
+from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
+from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import AcademicYear, AcademicYearIdentity
 
 
-class TestVerifierPropositionService(SimpleTestCase):
+class TestVerifierPropositionServiceCommun(SimpleTestCase):
     def setUp(self) -> None:
         self.candidat_translator = ProfilCandidatInMemoryTranslator()
         self.proposition_repository = PropositionInMemoryRepository()
@@ -61,8 +68,28 @@ class TestVerifierPropositionService(SimpleTestCase):
         self.adresse_correspondance = self.candidat_translator.adresses_candidats[1]
         self.addCleanup(self.proposition_repository.reset)
         self.message_bus = message_bus_in_memory_instance
+
+        self.academic_year_repository = AcademicYearInMemoryRepository()
+
+        for annee in range(2016, 2021):
+            self.academic_year_repository.save(AcademicYear(
+                entity_id=AcademicYearIdentity(year=annee),
+                start_date=datetime.date(annee, 9, 15),
+                end_date=datetime.date(annee+1, 9, 30),
+            ))
+
+        # Mock datetime to return the 2020 year as the current year
+        patcher = mock.patch(
+            'admission.ddd.preparation.projet_doctoral.use_case.read.verifier_proposition_service.datetime'
+        )
+        self.addCleanup(patcher.stop)
+        self.mock_foo = patcher.start()
+        self.mock_foo.date.today.return_value = datetime.date(2020, 11, 1)
+
         self.cmd = VerifierPropositionCommand(uuid_proposition=self.proposition.entity_id.uuid)
 
+
+class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
     def test_should_verifier_etre_ok_si_complet(self):
         proposition_id = self.message_bus.invoke(self.cmd)
         self.assertEqual(proposition_id.uuid, self.proposition.entity_id.uuid)
@@ -151,3 +178,106 @@ class TestVerifierPropositionService(SimpleTestCase):
             with self.assertRaises(MultipleBusinessExceptions) as context:
                 self.message_bus.invoke(self.cmd)
             self.assertIsInstance(context.exception.exceptions.pop(), AdresseCorrespondanceNonCompleteeException)
+
+    def test_should_retourner_erreur_si_pas_toutes_les_langues_requises_connues(self):
+        with mock.patch.object(
+                self.candidat_translator.connaissances_langues[0],
+                'langue',
+                self.candidat_translator.langues[3],
+        ):
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                self.message_bus.invoke(self.cmd)
+            self.assertIsInstance(context.exception.exceptions.pop(), LanguesConnuesNonSpecifieesException)
+
+    def test_should_retourner_erreur_si_fichier_curriculum_non_renseigne(self):
+        with mock.patch.object(self.current_candidat, 'curriculum', None):
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                self.message_bus.invoke(self.cmd)
+            self.assertIsInstance(context.exception.exceptions.pop(), FichierCurriculumNonRenseigneException)
+
+
+class TestVerifierPropositionServiceCurriculumYears(TestVerifierPropositionServiceCommun):
+    def setUp(self) -> None:
+        super().setUp()
+
+        # Consider that no experience is related to the current candidate
+        for a in self.candidat_translator.annees_curriculum:
+            a.personne = 'autre personne'
+
+    def tearDown(self) -> None:
+        # Reset the experiences to linked them to the current candidate
+        for a in self.candidat_translator.annees_curriculum:
+            a.personne = self.current_candidat.matricule
+
+    def test_should_retourner_erreur_si_5_dernieres_annees_curriculum_non_saisies(self):
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            self.message_bus.invoke(self.cmd)
+
+        exception = context.exception.exceptions.pop()
+        self.assertIsInstance(exception, AnneesCurriculumNonSpecifieesException)
+        self.assertIn('2020', exception.message)
+        self.assertIn('2019', exception.message)
+        self.assertIn('2018', exception.message)
+        self.assertIn('2017', exception.message)
+        self.assertIn('2016', exception.message)
+
+    def test_should_retourner_erreur_si_dernieres_annees_curriculum_non_saisies_avec_diplome_secondaire_belge(self):
+        self.candidat_translator.diplomes_etudes_secondaires_belges.append(
+            DiplomeEtudeSecondaire(personne=self.current_candidat.matricule, annee=2018)
+        )
+
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            self.message_bus.invoke(self.cmd)
+
+        exception = context.exception.exceptions.pop()
+        self.assertIsInstance(exception, AnneesCurriculumNonSpecifieesException)
+        self.assertIn('2020', exception.message)
+        self.assertIn('2019', exception.message)
+
+        self.candidat_translator.diplomes_etudes_secondaires_belges.pop()
+
+    def test_should_retourner_erreur_si_dernieres_annees_curriculum_non_saisies_avec_diplome_secondaire_etranger(self):
+        self.candidat_translator.diplomes_etudes_secondaires_etrangers.append(
+            DiplomeEtudeSecondaire(personne=self.current_candidat.matricule, annee=2017)
+        )
+
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            self.message_bus.invoke(self.cmd)
+
+        exception = context.exception.exceptions.pop()
+        self.assertIsInstance(exception, AnneesCurriculumNonSpecifieesException)
+        self.assertIn('2020', exception.message)
+        self.assertIn('2019', exception.message)
+        self.assertIn('2018', exception.message)
+
+        self.candidat_translator.diplomes_etudes_secondaires_etrangers = []
+
+    def test_should_retourner_erreur_si_dernieres_annees_curriculum_non_saisies_avec_ancienne_inscription_ucl(self):
+        with mock.patch.object(self.current_candidat, 'annee_derniere_inscription_ucl', 2019):
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                self.message_bus.invoke(self.cmd)
+
+        exception = context.exception.exceptions.pop()
+        self.assertIsInstance(exception, AnneesCurriculumNonSpecifieesException)
+        self.assertIn('2020', exception.message)
+
+    def test_should_retourner_erreur_si_annees_curriculum_non_saisies_avec_diplome_et_ancienne_inscription(self):
+        self.candidat_translator.diplomes_etudes_secondaires_belges.append(
+            DiplomeEtudeSecondaire(personne=self.current_candidat.matricule, annee=2017)
+        )
+
+        with mock.patch.object(self.current_candidat, 'annee_derniere_inscription_ucl', 2018):
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                self.message_bus.invoke(self.cmd)
+
+        exception = context.exception.exceptions.pop()
+        self.assertIsInstance(exception, AnneesCurriculumNonSpecifieesException)
+        self.assertIn('2020', exception.message)
+        self.assertIn('2019', exception.message)
+
+        self.candidat_translator.diplomes_etudes_secondaires_belges = []
+
+    def test_should_verification_etre_ok_si_aucune_annee_curriculum_a_saisir(self):
+        with mock.patch.object(self.current_candidat, 'annee_derniere_inscription_ucl', 2020):
+            proposition_id = self.message_bus.invoke(self.cmd)
+            self.assertEqual(proposition_id.uuid, self.proposition.entity_id.uuid)

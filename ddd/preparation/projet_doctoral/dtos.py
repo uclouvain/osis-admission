@@ -25,7 +25,7 @@
 ##############################################################################
 import datetime
 from uuid import UUID
-from typing import List, Optional, Union
+from typing import List, Optional, Union, Set
 
 import attr
 
@@ -105,18 +105,11 @@ class AutreOccupationDTO(interface.DTO):
 
 @attr.s(frozen=True, slots=True)
 class CurriculumDTO(interface.DTO):
-    fichier_pdf = attr.ib(type=str)
-    occupations = attr.ib(
-        type=List[
-            Union[
-                SuperieurUniversitaireBelgeDTO,
-                SuperieurUniversitaireNonBelgeDTO,
-                SuperieurNonUniversitaireBelgeDTO,
-                SuperieurNonUniversitaireNonBelgeDTO,
-                AutreOccupationDTO,
-            ]
-        ]
-    )
+    fichier_pdf = attr.ib(type=List[str])
+    annees = attr.ib(type=Set[int])
+    annee_derniere_inscription_ucl = attr.ib(type=Optional[int])
+    annee_diplome_etudes_secondaires_belges = attr.ib(type=Optional[int])
+    annee_diplome_etudes_secondaires_etrangeres = attr.ib(type=Optional[int])
 
 
 @attr.s(frozen=True, slots=True)

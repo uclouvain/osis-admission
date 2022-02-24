@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import datetime
 
 from admission.ddd.preparation.projet_doctoral.builder.proposition_identity_builder import PropositionIdentityBuilder
 from admission.ddd.preparation.projet_doctoral.commands import VerifierPropositionCommand
@@ -30,19 +31,26 @@ from admission.ddd.preparation.projet_doctoral.domain.model.proposition import P
 from admission.ddd.preparation.projet_doctoral.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.preparation.projet_doctoral.domain.service.verifier_proposition import VerifierProposition
 from admission.ddd.preparation.projet_doctoral.repository.i_proposition import IPropositionRepository
+from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import GetCurrentAcademicYear
+from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import IAcademicYearRepository
 
 
 def verifier_proposition(
     cmd: 'VerifierPropositionCommand',
     proposition_repository: 'IPropositionRepository',
     profil_candidat_translator: 'IProfilCandidatTranslator',
+    academic_year_repository: 'IAcademicYearRepository'
 ) -> 'PropositionIdentity':
     # GIVEN
     entity_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
     proposition_candidat = proposition_repository.get(entity_id=entity_id)
+    annee_courante = GetCurrentAcademicYear().get_starting_academic_year(
+        datetime.date.today(),
+        academic_year_repository,
+    ).year
 
     # WHEN
-    VerifierProposition.verifier(proposition_candidat, profil_candidat_translator)
+    VerifierProposition.verifier(proposition_candidat, profil_candidat_translator, annee_courante)
 
     # THEN
     return entity_id

@@ -24,7 +24,7 @@
 #
 # ##############################################################################
 import datetime
-from typing import Optional, List, Union
+from typing import Optional, List, Union, Set
 
 import attr
 
@@ -266,6 +266,52 @@ class CoordonneesValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
             ),
             ShouldAdresseCorrespondanceEtreCompleteeSiSpecifiee(
                 adresse=self.adresse_correspondance
+            ),
+        ]
+
+
+@attr.s(frozen=True, slots=True)
+class LanguesConnuesValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+    codes_langues_connues = attr.ib(type=List[str])
+    codes_langues_requises = attr.ib(type=List[str])
+
+    def get_data_contract_validators(self) -> List[BusinessValidator]:
+        return []
+
+    def get_invariants_validators(self) -> List[BusinessValidator]:
+        return [
+            ShouldLanguesConnuesRequisesEtreSpecifiees(
+                codes_langues_connues=self.codes_langues_connues,
+                codes_langues_requises=self.codes_langues_requises,
+            ),
+        ]
+
+
+@attr.s(frozen=True, slots=True)
+class CurriculumValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+    fichier_pdf = attr.ib(type=List[str])
+    annees = attr.ib(type=Set[int])
+    nb_maximum_annees_requises = attr.ib(type=int)
+    annee_courante = attr.ib(type=int)
+    annee_derniere_inscription_ucl = attr.ib(type=Optional[int])
+    annee_diplome_etudes_secondaires_belges = attr.ib(type=Optional[int])
+    annee_diplome_etudes_secondaires_etrangeres = attr.ib(type=Optional[int])
+
+    def get_data_contract_validators(self) -> List[BusinessValidator]:
+        return []
+
+    def get_invariants_validators(self) -> List[BusinessValidator]:
+        return [
+            ShouldCurriculumFichierEtreSpecifie(
+                fichier_pdf=self.fichier_pdf,
+            ),
+            ShouldAnneesCVRequisesCompletees(
+                annee_courante=self.annee_courante,
+                annees=self.annees,
+                annee_derniere_inscription_ucl=self.annee_derniere_inscription_ucl,
+                annee_diplome_etudes_secondaires_belges=self.annee_diplome_etudes_secondaires_belges,
+                annee_diplome_etudes_secondaires_etrangeres=self.annee_diplome_etudes_secondaires_etrangeres,
+                nb_maximum_annees_requises=self.nb_maximum_annees_requises,
             ),
         ]
 
