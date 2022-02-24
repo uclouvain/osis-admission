@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-02-11 14:41+0100\n"
+"POT-Creation-Date: 2022-02-25 10:53+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -60,6 +60,9 @@ msgstr "Projet de formation complémentaire"
 
 msgid "Admission"
 msgstr "Admission"
+
+msgid "Admission submission date"
+msgstr "Date de soumission Admission"
 
 msgid "All CA members must have approved the proposition."
 msgstr "Tous les membres du CA doivent approuver la proposition."
@@ -458,6 +461,9 @@ msgstr "Merci de spécifier votre numéro de registre national belge."
 msgid "Pre-Admission"
 msgstr "Pré-Admission"
 
+msgid "Pre-admission submission date"
+msgstr "Date de soumission Pré-admission"
+
 msgid "Produce xls of doctorate admissions with administrative data"
 msgstr ""
 "Produire un fichier Excel avec la liste des admissions en doctorat et "
@@ -581,6 +587,9 @@ msgstr "Les expériences qui ont été valorisées à partir de cette admission.
 msgid "The invitations must not have been sent"
 msgstr "Les invitations doivent ne pas avoir été envoyées"
 
+msgid "The proposition has already been confirmed"
+msgstr "La proposition a déjà été confirmée."
+
 msgid "The signature request procedure isn't in progress."
 msgstr "La procédure de demande de signature n'a pas été lancée."
 
@@ -691,3 +700,6 @@ msgstr "créé"
 
 msgid "modified"
 msgstr "modifée"
+
+#~ msgid "Confirmed proposition"
+#~ msgstr "Proposition confirmée"

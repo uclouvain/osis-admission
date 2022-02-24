@@ -23,6 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import datetime
 from unittest import mock
 
 from django.shortcuts import resolve_url
@@ -684,7 +685,7 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
 
     def test_assert_methods_not_allowed(self):
         self.client.force_authenticate(user=self.first_candidate.user)
-        methods_not_allowed = ['post', 'patch', 'put', 'delete']
+        methods_not_allowed = ['patch', 'put', 'delete']
 
         for method in methods_not_allowed:
             response = getattr(self.client, method)(self.first_admission_with_invitation_url)
@@ -706,17 +707,17 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertTrue(len(response.json()) > 0)
 
-    def test_admission_doctorate_verify_no_role(self):
+    def test_verify_no_role(self):
         self.client.force_authenticate(user=self.no_role_user)
         response = self.client.get(self.first_admission_with_invitation_url, format="json")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    def test_admission_doctorate_verify_no_invited_promoters(self):
+    def test_verify_no_invited_promoters(self):
         self.client.force_authenticate(user=self.first_candidate.user)
         response = self.client.get(self.first_admission_without_invitation_url, format="json")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    def test_admission_doctorate_verify_other_candidate(self):
+    def test_verify_other_candidate(self):
         self.client.force_authenticate(user=self.second_candidate.user)
         response = self.client.get(self.first_admission_with_invitation_url, format="json")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
@@ -725,3 +726,36 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
         self.client.force_authenticate(user=None)
         response = self.client.get(self.first_admission_with_invitation_url)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_submit_valid_proposition_using_api(self):
+        admission = DoctorateAdmissionFactory(
+            candidate=self.first_candidate,
+            status=ChoixStatutProposition.SIGNING_IN_PROGRESS.name,
+            supervision_group=self.first_invited_promoter.actor_ptr.process,
+        )
+
+        self.client.force_authenticate(user=self.first_candidate.user)
+
+        response = self.client.post(resolve_url("submit-proposition", uuid=admission.uuid))
+
+        updated_admission: DoctorateAdmission = DoctorateAdmission.objects.get(uuid=admission.uuid)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.json().get('uuid'), str(admission.uuid))
+
+        self.assertEqual(updated_admission.status, ChoixStatutProposition.SUBMITTED.name)
+        self.assertEqual(updated_admission.admission_submission_date, datetime.date.today())
+
+    def test_submit_invalid_proposition_using_api(self):
+        admission = DoctorateAdmissionFactory(
+            candidate=self.second_candidate,
+            status=ChoixStatutProposition.SIGNING_IN_PROGRESS.name,
+            supervision_group=self.first_invited_promoter.actor_ptr.process,
+        )
+
+        self.client.force_authenticate(user=self.second_candidate.user)
+
+        response = self.client.post(resolve_url("submit-proposition", uuid=admission.uuid))
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIsNotNone(response.json().get('non_field_errors'))

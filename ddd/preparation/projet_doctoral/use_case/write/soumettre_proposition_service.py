@@ -22,13 +22,17 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import datetime
+
 from admission.ddd.preparation.projet_doctoral.builder.proposition_identity_builder import PropositionIdentityBuilder
 from admission.ddd.preparation.projet_doctoral.commands import SoumettrePropositionCommand
 from admission.ddd.preparation.projet_doctoral.domain.model.proposition import PropositionIdentity
 from admission.ddd.preparation.projet_doctoral.domain.service.i_profil_candidat import IProfilCandidatTranslator
-from admission.ddd.preparation.projet_doctoral.domain.service.demande_inscription import DemandeInscription
+from admission.ddd.preparation.projet_doctoral.domain.service.verifier_proposition import VerifierProposition
 from admission.ddd.preparation.projet_doctoral.repository.i_groupe_de_supervision import IGroupeDeSupervisionRepository
 from admission.ddd.preparation.projet_doctoral.repository.i_proposition import IPropositionRepository
+from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import GetCurrentAcademicYear
+from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import IAcademicYearRepository
 
 
 def soumettre_proposition(
@@ -36,14 +40,19 @@ def soumettre_proposition(
         proposition_repository: 'IPropositionRepository',
         groupe_supervision_repository: 'IGroupeDeSupervisionRepository',
         profil_candidat_translator: 'IProfilCandidatTranslator',
+        academic_year_repository: 'IAcademicYearRepository',
 ) -> 'PropositionIdentity':
     # GIVEN
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
     proposition = proposition_repository.get(entity_id=proposition_id)
     groupe_supervision = groupe_supervision_repository.get_by_proposition_id(proposition_id)
+    annee_courante = GetCurrentAcademicYear().get_starting_academic_year(
+        datetime.date.today(),
+        academic_year_repository,
+    ).year
 
     # WHEN
-    DemandeInscription().verifier(proposition, groupe_supervision, profil_candidat_translator)
+    VerifierProposition().verifier(proposition, groupe_supervision, profil_candidat_translator, annee_courante)
 
     # THEN
     proposition.finaliser()

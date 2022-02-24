@@ -130,6 +130,13 @@ class MessageBusCommands(AbstractMessageBusCommands):
             profil_candidat_translator=ProfilCandidatTranslator(),
             academic_year_repository=AcademicYearRepository(),
         ),
+        SoumettrePropositionCommand: partial(
+            soumettre_proposition,
+            proposition_repository=PropositionRepository(),
+            groupe_supervision_repository=GroupeDeSupervisionRepository(),
+            profil_candidat_translator=ProfilCandidatTranslator(),
+            academic_year_repository=AcademicYearRepository(),
+        ),
         ApprouverPropositionCommand: partial(
             approuver_proposition,
             proposition_repository=PropositionRepository(),

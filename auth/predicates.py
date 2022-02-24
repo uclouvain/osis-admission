@@ -28,6 +28,7 @@ from django.utils.translation import gettext_lazy as _
 from osis_signature.enums import SignatureState
 from rules import predicate
 
+from admission.ddd.preparation.projet_doctoral.domain.model._enums import ChoixStatutProposition
 from osis_role.errors import predicate_failed_msg
 
 from admission.contrib.models import DoctorateAdmission
@@ -52,6 +53,12 @@ def invitations_sent(self, user: User, obj: DoctorateAdmission):
 @predicate_failed_msg(message=_("The invitations must not have been sent"))
 def invitations_not_sent(self, user: User, obj: DoctorateAdmission):
     return not invitations_sent(user, obj)
+
+
+@predicate(bind=True)
+@predicate_failed_msg(message=_("The proposition has already been confirmed"))
+def unconfirmed_proposition(self, user: User, obj: DoctorateAdmission):
+    return obj.status != ChoixStatutProposition.SUBMITTED.name
 
 
 @predicate(bind=True)

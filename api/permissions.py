@@ -37,7 +37,19 @@ class IsSelfPersonTabOrTabPermission(BasePermission):
 
     def has_permission(self, request, view):
         # No object means we are editing our own profile
-        return True
+        if request.method in SAFE_METHODS:
+            return True
+        # When editing, no doctorate admission must have been submitted
+        if not hasattr(request.user.person, 'has_submitted_propositions'):
+            setattr(
+                request.user.person,
+                'has_submitted_propositions',
+                DoctorateAdmission.objects.filter(
+                    candidate=request.user.person,
+                    status=ChoixStatutProposition.SUBMITTED.name,
+                ).exists()
+            )
+        return not request.user.person.has_submitted_propositions
 
     def has_object_permission(self, request, view, obj):
         if request.method in SAFE_METHODS:

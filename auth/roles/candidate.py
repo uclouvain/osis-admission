@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -27,6 +27,7 @@ from rules import RuleSet
 from django.utils.translation import gettext_lazy as _
 
 from admission.auth.predicates import (
+    unconfirmed_proposition,
     invitations_sent,
     invitations_not_sent,
     is_admission_request_author,
@@ -44,24 +45,26 @@ class Candidate(RoleModel):
     def rule_set(cls):
         return RuleSet(
             {
-                'admission.change_doctorateadmission': is_admission_request_author,
+                'admission.change_doctorateadmission': is_admission_request_author & unconfirmed_proposition,
                 'admission.view_doctorateadmission': is_admission_request_author,
-                'admission.delete_doctorateadmission': is_admission_request_author,
+                'admission.delete_doctorateadmission': is_admission_request_author & unconfirmed_proposition,
                 'admission.download_pdf_confirmation': is_admission_request_author,
                 'admission.upload_pdf_confirmation': is_admission_request_author,
                 'admission.fill_thesis': is_admission_request_author,
                 'admission.upload_publication_authorisation': is_admission_request_author,
                 'admission.request_signatures': is_admission_request_author & invitations_not_sent,
                 'admission.view_doctorateadmission_person': is_admission_request_author,
-                'admission.change_doctorateadmission_person': is_admission_request_author,
+                'admission.change_doctorateadmission_person': is_admission_request_author & unconfirmed_proposition,
                 'admission.view_doctorateadmission_coordinates': is_admission_request_author,
-                'admission.change_doctorateadmission_coordinates': is_admission_request_author,
+                'admission.change_doctorateadmission_coordinates': is_admission_request_author
+                & unconfirmed_proposition,
                 'admission.view_doctorateadmission_secondary_studies': is_admission_request_author,
-                'admission.change_doctorateadmission_secondary_studies': is_admission_request_author,
+                'admission.change_doctorateadmission_secondary_studies': is_admission_request_author
+                & unconfirmed_proposition,
                 'admission.view_doctorateadmission_curriculum': is_admission_request_author,
-                'admission.change_doctorateadmission_curriculum': is_admission_request_author,
+                'admission.change_doctorateadmission_curriculum': is_admission_request_author & unconfirmed_proposition,
                 'admission.view_doctorateadmission_languages': is_admission_request_author,
-                'admission.change_doctorateadmission_languages': is_admission_request_author,
+                'admission.change_doctorateadmission_languages': is_admission_request_author & unconfirmed_proposition,
                 'admission.view_doctorateadmission_project': is_admission_request_author,
                 'admission.change_doctorateadmission_project': is_admission_request_author & invitations_not_sent,
                 'admission.view_doctorateadmission_cotutelle': is_admission_request_author,
@@ -71,6 +74,8 @@ class Candidate(RoleModel):
                 'admission.add_supervision_member': is_admission_request_author & invitations_not_sent,
                 'admission.approve_proposition_by_pdf': is_admission_request_author & invitations_sent,
                 'admission.remove_supervision_member': is_admission_request_author & invitations_not_sent,
-                'admission.submit_doctorateadmission': is_admission_request_author & invitations_sent,
+                'admission.submit_doctorateadmission': is_admission_request_author
+                & invitations_sent
+                & unconfirmed_proposition,
             }
         )
