@@ -42,7 +42,7 @@ def is_admission_request_author(self, user: User, obj: BaseAdmission):
 
 
 @predicate(bind=True)
-@predicate_failed_msg(message=_("Some invitations are already sent"))
+@predicate_failed_msg(message=_("Invitations must have been sent"))
 def invitations_sent(self, user: User, obj: DoctorateAdmission):
     return (
         obj.supervision_group
@@ -53,7 +53,7 @@ def invitations_sent(self, user: User, obj: DoctorateAdmission):
 
 
 @predicate(bind=True)
-@predicate_failed_msg(message=_("The invitations have not been sent"))
+@predicate_failed_msg(message=_("The invitations must not have been sent"))
 def invitations_not_sent(self, user: User, obj: DoctorateAdmission):
     return not invitations_sent(user, obj)
 

@@ -298,6 +298,9 @@ msgstr ""
 msgid "Internal comment"
 msgstr ""
 
+msgid "Invitations must have been sent"
+msgstr ""
+
 msgid "Jury secretaries"
 msgstr ""
 
@@ -379,7 +382,9 @@ msgstr ""
 msgid "Planned duration"
 msgstr ""
 
-msgid "Please fill in all the required information in the 'Personal Data > Identification' tab."
+msgid ""
+"Please fill in all the required information in the 'Personal Data > "
+"Identification' tab."
 msgstr ""
 
 msgid "Please provide a copy of your identity card."
@@ -511,16 +516,13 @@ msgstr ""
 msgid "Scholarship grant"
 msgstr ""
 
-msgid "Some invitations are already sent"
-msgstr ""
-
 msgid "Supervision group not found."
 msgstr ""
 
 msgid "The experiences that have been valuated from this admission."
 msgstr ""
 
-msgid "The invitations have not been sent"
+msgid "The invitations must not have been sent"
 msgstr ""
 
 msgid "There can be no more CA members in the supervision group."
