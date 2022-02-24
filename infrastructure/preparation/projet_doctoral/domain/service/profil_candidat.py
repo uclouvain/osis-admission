@@ -23,9 +23,13 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from typing import Optional
+
 from admission.ddd.preparation.projet_doctoral.domain.service.i_profil_candidat import IProfilCandidatTranslator
-from admission.ddd.preparation.projet_doctoral.dtos import IdentificationDTO
+from admission.ddd.preparation.projet_doctoral.dtos import IdentificationDTO, CoordonneesDTO, AdressePersonnelleDTO
+from base.models.enums.person_address_type import PersonAddressType
 from base.models.person import Person
+from base.models.person_address import PersonAddress
 
 
 class ProfilCandidatTranslator(IProfilCandidatTranslator):
@@ -56,7 +60,31 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
 
     @classmethod
     def get_coordonnees(cls, matricule: str) -> 'CoordonneesDTO':
-        pass
+        # TODO Use in_bulk() in Django 3.2
+        adresses = {
+            a.label: a
+            for a in PersonAddress.objects.select_related('country').filter(
+                person__global_id=matricule,
+                label__in=[PersonAddressType.CONTACT.name, PersonAddressType.RESIDENTIAL.name],
+            )
+        }
+        domicile_legal = adresses.get(PersonAddressType.RESIDENTIAL.name)
+        adresse_correspondance = adresses.get(PersonAddressType.CONTACT.name)
+
+        return CoordonneesDTO(
+            domicile_legal=AdressePersonnelleDTO(
+                rue=domicile_legal.street,
+                code_postal=domicile_legal.postal_code,
+                ville=domicile_legal.city,
+                pays=domicile_legal.country.iso_code if domicile_legal.country else None,
+            ) if domicile_legal else None,
+            adresse_correspondance=AdressePersonnelleDTO(
+                rue=adresse_correspondance.street,
+                code_postal=adresse_correspondance.postal_code,
+                ville=adresse_correspondance.city,
+                pays=adresse_correspondance.country.iso_code if adresse_correspondance.country else None,
+            ) if adresse_correspondance else None,
+        )
 
     @classmethod
     def get_curriculum(cls, matricule: str) -> 'CurriculumDTO':

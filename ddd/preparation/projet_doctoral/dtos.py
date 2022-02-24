@@ -65,9 +65,17 @@ class IdentificationDTO(interface.DTO):
 
 
 @attr.s(frozen=True, slots=True)
+class AdressePersonnelleDTO(interface.DTO):
+    rue = attr.ib(type=Optional[str])
+    code_postal = attr.ib(type=Optional[str])
+    ville = attr.ib(type=Optional[str])
+    pays = attr.ib(type=Optional[str])
+
+
+@attr.s(frozen=True, slots=True)
 class CoordonneesDTO(interface.DTO):
-    email = attr.ib(type=str)
-    # TODO completer les champs en fonction de base.Person
+    domicile_legal = attr.ib(type=Optional[AdressePersonnelleDTO])
+    adresse_correspondance = attr.ib(type=Optional[AdressePersonnelleDTO])
 
 
 @attr.s(frozen=True, slots=True)
