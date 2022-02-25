@@ -41,7 +41,7 @@ def verifier_proposition(
     proposition_repository: 'IPropositionRepository',
     groupe_supervision_repository: 'IGroupeDeSupervisionRepository',
     profil_candidat_translator: 'IProfilCandidatTranslator',
-    academic_year_repository: 'IAcademicYearRepository'
+    academic_year_repository: 'IAcademicYearRepository',
 ) -> 'PropositionIdentity':
     # GIVEN
     entity_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)

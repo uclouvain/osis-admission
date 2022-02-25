@@ -107,6 +107,8 @@ def _instantiate_admission(admission: DoctorateAdmission) -> Proposition:
             raison_non_soutenue=admission.phd_already_done_no_defense_reason,
         ),
         creee_le=admission.created,
+        date_soumission_admission=admission.admission_submission_date,
+        date_soumission_pre_admission=admission.pre_admission_submission_date,
     )
 
 
@@ -197,6 +199,8 @@ class PropositionRepository(IPropositionRepository):
                 'phd_already_done_institution': entity.experience_precedente_recherche.institution,
                 'phd_already_done_defense_date': entity.experience_precedente_recherche.date_soutenance,
                 'phd_already_done_no_defense_reason': entity.experience_precedente_recherche.raison_non_soutenue,
-            },
+                'pre_admission_submission_date': entity.date_soumission_pre_admission,
+                'admission_submission_date': entity.date_soumission_admission,
+            }
         )
         Candidate.objects.get_or_create(person=candidate)

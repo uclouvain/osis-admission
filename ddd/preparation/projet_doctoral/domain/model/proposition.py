@@ -75,6 +75,8 @@ class Proposition(interface.RootEntity):
     reference = attr.ib(type=Optional[str], default=None)
     justification = attr.ib(type=Optional[str], default='')
     statut = attr.ib(type=ChoixStatutProposition, default=ChoixStatutProposition.IN_PROGRESS)
+    date_soumission_pre_admission = attr.ib(type=Optional[datetime.datetime], default=None)
+    date_soumission_admission = attr.ib(type=Optional[datetime.datetime], default=None)
     commission_proximite = attr.ib(
         type=Optional[
             Union[ChoixCommissionProximiteCDEouCLSM, ChoixCommissionProximiteCDSS, ChoixSousDomaineSciences]
@@ -268,6 +270,10 @@ class Proposition(interface.RootEntity):
 
     def finaliser(self):
         self.statut = ChoixStatutProposition.SUBMITTED
+        if self.type_admission == ChoixTypeAdmission.ADMISSION:
+            self.date_soumission_admission = datetime.date.today()
+        else:
+            self.date_soumission_pre_admission = datetime.date.today()
 
     def supprimer(self):
         self.statut = ChoixStatutProposition.CANCELLED

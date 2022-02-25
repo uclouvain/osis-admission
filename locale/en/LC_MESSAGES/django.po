@@ -55,6 +55,9 @@ msgstr ""
 msgid "Admission"
 msgstr ""
 
+msgid "Admission submission date"
+msgstr ""
+
 msgid "All CA members must have approved the proposition."
 msgstr ""
 
@@ -436,6 +439,9 @@ msgstr ""
 msgid "Pre-Admission"
 msgstr ""
 
+msgid "Pre-admission submission date"
+msgstr ""
+
 msgid "Produce xls of doctorate admissions with administrative data"
 msgstr ""
 
@@ -551,6 +557,9 @@ msgid "The experiences that have been valuated from this admission."
 msgstr ""
 
 msgid "The invitations must not have been sent"
+msgstr ""
+
+msgid "The proposition has already been confirmed"
 msgstr ""
 
 msgid "The signature request procedure isn't in progress."

@@ -258,3 +258,12 @@ class GroupeDeSupervisionSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory(_Gro
     )
     cotutelle = pas_de_cotutelle
     statut_signature = ChoixStatutSignatureGroupeDeSupervision.SIGNING_IN_PROGRESS
+
+
+class GroupeDeSupervisionPreSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory(
+    GroupeDeSupervisionSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory,
+):
+    proposition_id = factory.SubFactory(
+        _PropositionIdentityFactory,
+        uuid='uuid-pre-SC3DP-promoteurs-membres-deja-approuves',
+    )

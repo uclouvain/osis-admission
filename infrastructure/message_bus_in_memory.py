@@ -133,6 +133,13 @@ class MessageBusInMemoryCommands(AbstractMessageBusCommands):
             profil_candidat_translator=ProfilCandidatInMemoryTranslator(),
             academic_year_repository=AcademicYearInMemoryRepository(),
         ),
+        SoumettrePropositionCommand: partial(
+            soumettre_proposition,
+            proposition_repository=PropositionInMemoryRepository(),
+            groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
+            profil_candidat_translator=ProfilCandidatInMemoryTranslator(),
+            academic_year_repository=AcademicYearInMemoryRepository(),
+        ),
         ApprouverPropositionCommand: partial(
             approuver_proposition,
             proposition_repository=PropositionInMemoryRepository(),

@@ -178,3 +178,10 @@ class PropositionAdmissionSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory(Pro
     entity_id = factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-SC3DP-promoteurs-membres-deja-approuves')
     matricule_candidat = '0123456789'
     statut = ChoixStatutProposition.SIGNING_IN_PROGRESS
+
+
+class PropositionPreAdmissionSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory(
+    PropositionAdmissionSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory,
+):
+    entity_id = factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-pre-SC3DP-promoteurs-membres-deja-approuves')
+    type_admission = ChoixTypeAdmission.PRE_ADMISSION

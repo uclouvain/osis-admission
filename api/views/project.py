@@ -42,6 +42,7 @@ from admission.ddd.preparation.projet_doctoral.commands import (
     SupprimerPropositionCommand,
     VerifierProjetCommand,
     VerifierPropositionCommand,
+    SoumettrePropositionCommand,
 )
 from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import (
     CommissionProximiteInconsistantException,
@@ -228,7 +229,7 @@ class VerifySchema(ResponseSpecificSchema):
                     }
                 }
             }
-        }
+        } if method == 'GET' else super(VerifySchema, self).get_responses(path, method)
 
 
 class VerifyProjectSchema(VerifySchema):
@@ -263,12 +264,17 @@ class VerifyProjectView(APIPermissionRequiredMixin, mixins.RetrieveModelMixin, G
 
 
 class VerifyPropositionSchema(VerifySchema):
-    operation_id_base = '_submit_proposition'
     response_description = "Proposition verification errors"
+
+    serializer_mapping = {
+        'POST': serializers.PropositionIdentityDTOSerializer,
+    }
 
     def get_operation_id(self, path, method):
         if method == 'GET':
             return 'verify_proposition'
+        elif method == 'POST':
+            return 'submit_proposition'
         return super().get_operation_id(path, method)
 
 
@@ -279,6 +285,7 @@ class SubmitPropositionViewSet(APIPermissionRequiredMixin, mixins.RetrieveModelM
     filter_backends = []
     permission_mapping = {
         'GET': 'admission.submit_doctorateadmission',
+        'POST': 'admission.submit_doctorateadmission',
     }
 
     def get_permission_object(self):
@@ -296,3 +303,10 @@ class SubmitPropositionViewSet(APIPermissionRequiredMixin, mixins.RetrieveModelM
                 data = get_error_data(data, exception, {})
             return Response(data.get(api_settings.NON_FIELD_ERRORS_KEY, []), status=status.HTTP_200_OK)
         return Response([], status=status.HTTP_200_OK)
+
+    def post(self, request, *args, **kwargs):
+        """Submit the proposition."""
+        # Trigger the submit command
+        proposition_id = message_bus_instance.invoke(SoumettrePropositionCommand(uuid_proposition=str(kwargs["uuid"])))
+        serializer = serializers.PropositionIdentityDTOSerializer(instance=proposition_id)
+        return Response(serializer.data, status=status.HTTP_200_OK)

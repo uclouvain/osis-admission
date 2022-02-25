@@ -203,10 +203,12 @@ ACTION_LINKS = {
     'retrieve_curriculum': {
         'path_name': 'admission_api_v1:curriculum',
         'method': 'GET',
+        'params': ['uuid'],
     },
     'update_curriculum': {
         'path_name': 'admission_api_v1:curriculum',
         'method': 'POST',
+        'params': ['uuid'],
     },
     # Proposition
     # Project
@@ -226,7 +228,7 @@ ACTION_LINKS = {
     },
     'submit_proposition': {
         'path_name': 'admission_api_v1:submit-proposition',
-        'method': 'GET',
+        'method': 'POST',
         'params': ['uuid'],
     },
     'update_proposition': {
