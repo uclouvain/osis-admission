@@ -25,21 +25,21 @@
 ##############################################################################
 from admission.ddd.preparation.projet_doctoral.commands import GetGroupeDeSupervisionCommand
 from admission.ddd.preparation.projet_doctoral.domain.service.groupe_de_supervision_dto import GroupeDeSupervisionDto
+from admission.ddd.preparation.projet_doctoral.domain.service.i_membre_CA import IMembreCATranslator
 from admission.ddd.preparation.projet_doctoral.domain.service.i_promoteur import IPromoteurTranslator
 from admission.ddd.preparation.projet_doctoral.dtos import GroupeDeSupervisionDTO
 from admission.ddd.preparation.projet_doctoral.repository.i_groupe_de_supervision import IGroupeDeSupervisionRepository
-from ddd.logic.shared_kernel.personne_connue_ucl.domain.service.personne_connue_ucl import IPersonneConnueUclTranslator
 
 
 def get_groupe_de_supervision(
     cmd: 'GetGroupeDeSupervisionCommand',
     groupe_supervision_repository: 'IGroupeDeSupervisionRepository',
-    personne_connue_ucl_translator: 'IPersonneConnueUclTranslator',
     promoteur_translator: 'IPromoteurTranslator',
+    membre_ca_translator: 'IMembreCATranslator',
 ) -> 'GroupeDeSupervisionDTO':
     return GroupeDeSupervisionDto().get(
         uuid_proposition=cmd.uuid_proposition,
         repository=groupe_supervision_repository,
-        personne_connue_ucl_translator=personne_connue_ucl_translator,
         promoteur_translator=promoteur_translator,
+        membre_ca_translator=membre_ca_translator,
     )

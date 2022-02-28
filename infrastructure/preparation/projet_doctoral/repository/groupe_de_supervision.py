@@ -76,7 +76,7 @@ class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
 
         # Single, ordered query for all actors
         actors = defaultdict(list)
-        for actor in groupe.actors.select_related('supervisionactor', 'person'):
+        for actor in groupe.actors.select_related('supervisionactor', 'person').order_by('person__last_name'):
             actors[actor.supervisionactor.type].append(actor)
 
         return GroupeDeSupervision(
@@ -86,8 +86,10 @@ class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
                 SignaturePromoteur(
                     promoteur_id=PromoteurIdentity(actor.person.global_id),
                     etat=ChoixEtatSignature[actor.state],
+                    date=actor.last_state_date,
                     commentaire_externe=actor.comment,
                     commentaire_interne=actor.supervisionactor.internal_comment,
+                    motif_refus=actor.supervisionactor.rejection_reason,
                     pdf=actor.pdf_file,
                 )
                 for actor in actors.get(ActorType.PROMOTER.name, [])
@@ -96,6 +98,7 @@ class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
                 SignatureMembreCA(
                     membre_CA_id=MembreCAIdentity(actor.person.global_id),
                     etat=ChoixEtatSignature[actor.state],
+                    date=actor.last_state_date,
                     commentaire_externe=actor.comment,
                     commentaire_interne=actor.supervisionactor.internal_comment,
                     pdf=actor.pdf_file,
@@ -210,7 +213,7 @@ class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
             membre = cls._get_member_from_matricule(signature_list, actor.person.global_id)
             if actor.state != membre.etat.name:
                 StateHistory.objects.create(state=membre.etat.name, actor_id=actor.id)
-                if membre.etat.name in [ChoixEtatSignature.APPROVED.name, ChoixEtatSignature.REFUSED.name]:
+                if membre.etat.name in [ChoixEtatSignature.APPROVED.name, ChoixEtatSignature.DECLINED.name]:
                     actor.comment = membre.commentaire_externe
                     actor.pdf_file = membre.pdf
                     actor.supervisionactor.internal_comment = membre.commentaire_interne

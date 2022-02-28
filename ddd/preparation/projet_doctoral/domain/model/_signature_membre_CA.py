@@ -23,7 +23,8 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import List
+import datetime
+from typing import List, Optional
 
 import attr
 
@@ -36,6 +37,7 @@ from osis_common.ddd import interface
 class SignatureMembreCA(interface.ValueObject):
     membre_CA_id = attr.ib(type=MembreCAIdentity)
     etat = attr.ib(type=ChoixEtatSignature, default=ChoixEtatSignature.NOT_INVITED)
+    date = attr.ib(type=Optional[datetime.datetime], default=None)
     commentaire_externe = attr.ib(type=str, default='')
     commentaire_interne = attr.ib(type=str, default='')
     motif_refus = attr.ib(type=str, default='')

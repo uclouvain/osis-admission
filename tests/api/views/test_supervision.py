@@ -23,6 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from django.core.cache import cache
 from django.shortcuts import resolve_url
 from django.test import override_settings
 from rest_framework import status
@@ -41,6 +42,8 @@ from base.models.enums.entity_type import EntityType
 from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.person import PersonFactory
 from base.tests.factories.tutor import TutorFactory
+from osis_signature.enums import SignatureState
+from osis_signature.models import StateHistory
 
 
 @override_settings(ROOT_URLCONF='admission.api.url_v1')
@@ -88,7 +91,7 @@ class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
             response = self.client.get(self.url, format="json")
         promoteurs = response.json()['signatures_promoteurs']
         self.assertEqual(len(promoteurs), 1)
-        self.assertEqual(promoteurs[0]['status'], 'NOT_INVITED')
+        self.assertEqual(promoteurs[0]['statut'], 'NOT_INVITED')
         self.assertEqual(promoteurs[0]['promoteur']['prenom'], 'Joe')
 
     def test_supervision_get_using_api_no_role(self):
@@ -310,7 +313,7 @@ class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
 
     def test_supervision_supprimer_membre_no_role(self):
         self.client.force_authenticate(user=self.no_role_user)
-    
+
         promoter = PromoterFactory(process=self.promoter.actor_ptr.process)
 
         response = self.client.post(self.url, data={
@@ -330,7 +333,7 @@ class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
 
     def test_supervision_supprimer_membre_cdd_manager(self):
         self.client.force_authenticate(user=self.cdd_manager_user)
-    
+
         promoter = PromoterFactory(process=self.promoter.actor_ptr.process)
 
         response = self.client.post(self.url, data={
@@ -341,7 +344,7 @@ class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
 
     def test_supervision_supprimer_membre_other_cdd_manager(self):
         self.client.force_authenticate(user=self.other_cdd_manager_user)
-    
+
         response = self.client.post(self.url, data={
             'member': self.promoter.person.global_id,
             'type': ActorType.PROMOTER.name,
@@ -390,3 +393,65 @@ class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
             'type': ActorType.CA_MEMBER.name,
         }, format="json")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_supervision_modification_impossible_par_doctorant_apres_envoi(self):
+        self.client.force_authenticate(user=self.candidate.user)
+
+        StateHistory.objects.create(
+            actor=self.promoter.actor_ptr,
+            state=SignatureState.INVITED.name,
+        )
+        # So that cache is cleared
+        self.admission.save()
+
+        response = self.client.post(self.url, data={
+            'member': self.promoter.person.global_id,
+            'type': ActorType.PROMOTER.name,
+        }, format="json")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        response = self.client.put(self.url, data={
+            'member': TutorFactory(person__first_name="Joe").person.global_id,
+            'type': ActorType.PROMOTER.name,
+        }, format="json")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        # So that cache is cleared for other tests
+        self.admission.save()
+
+    def test_supervision_modification_par_doctorant_apres_refus(self):
+        self.client.force_authenticate(user=self.candidate.user)
+
+        promoter = PromoterFactory(process=self.admission.supervision_group)
+        StateHistory.objects.create(
+            actor=promoter.actor_ptr,
+            state=SignatureState.DECLINED.name,
+        )
+
+        # Check supervision before
+        response = self.client.get(self.url, format="json")
+        promoters = response.json()['signatures_promoteurs']
+        membres_CA = response.json()['signatures_membres_CA']
+        self.assertEqual(len(promoters), 2)
+        self.assertEqual(len(membres_CA), 0)
+
+        # Add CA member
+        response = self.client.put(self.url, data={
+            'member': PersonFactory(first_name="Joe").global_id,
+            'type': ActorType.CA_MEMBER.name,
+        }, format="json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Remove promoter
+        response = self.client.post(self.url, data={
+            'member': promoter.person.global_id,
+            'type': ActorType.PROMOTER.name,
+        }, format="json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Check supervision after
+        response = self.client.get(self.url, format="json")
+        promoters = response.json()['signatures_promoteurs']
+        membres_CA = response.json()['signatures_membres_CA']
+        self.assertEqual(len(promoters), 1)
+        self.assertEqual(membres_CA[0]['membre_CA']['prenom'], 'Joe')

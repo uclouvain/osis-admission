@@ -101,8 +101,8 @@ class MessageBusInMemoryCommands(AbstractMessageBusCommands):
         GetGroupeDeSupervisionCommand: partial(
             get_groupe_de_supervision,
             groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
-            personne_connue_ucl_translator=PersonneConnueUclInMemoryTranslator(),
             promoteur_translator=PromoteurInMemoryTranslator(),
+            membre_ca_translator=MembreCAInMemoryTranslator(),
         ),
         SupprimerPromoteurCommand: partial(
             supprimer_promoteur,

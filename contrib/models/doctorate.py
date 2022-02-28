@@ -295,7 +295,7 @@ class DoctorateAdmission(BaseAdmission):
             ),
             ('add_supervision_member', _("Can add a member to the supervision group")),
             ('remove_supervision_member', _("Can remove a member from the supervision group")),
-            ('submit_doctorateadmission', _("Can submit a doctorate admission proposition"))
+            ('submit_doctorateadmission', _("Can submit a doctorate admission proposition")),
         ]
 
     @cached_property
@@ -306,6 +306,18 @@ class DoctorateAdmission(BaseAdmission):
         )
         # Cache the value inside an object property
         self.__dict__['invitations_sent'] = res
+        # Refresh the permission cache so that the property value is in django's cache
+        cache.set('admission_permission_{}'.format(self.uuid), self)
+        return res
+
+    @cached_property
+    def any_member_refused(self):
+        res = (
+            self.supervision_group
+            and self.supervision_group.actors.filter(last_state=SignatureState.DECLINED.name).exists()
+        )
+        # Cache the value inside an object property
+        self.__dict__['any_member_refused'] = res
         # Refresh the permission cache so that the property value is in django's cache
         cache.set('admission_permission_{}'.format(self.uuid), self)
         return res

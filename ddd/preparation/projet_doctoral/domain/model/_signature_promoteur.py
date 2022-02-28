@@ -23,7 +23,8 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import List
+import datetime
+from typing import List, Optional
 
 import attr
 from django.utils.translation import gettext_lazy as _
@@ -37,13 +38,14 @@ class ChoixEtatSignature(ChoiceEnum):
     NOT_INVITED = _('NOT_INVITED')  # Pas encore envoyée au signataire
     INVITED = _('INVITED')  # Envoyée au signataire
     APPROVED = _('APPROVED')  # Approuvée par le signataire
-    REFUSED = _('REFUSED')  # Refusée par le signataire
+    DECLINED = _('REFUSED')  # Refusée par le signataire
 
 
 @attr.s(frozen=True, slots=True)
 class SignaturePromoteur(interface.ValueObject):
     promoteur_id = attr.ib(type=PromoteurIdentity)
     etat = attr.ib(type=ChoixEtatSignature, default=ChoixEtatSignature.NOT_INVITED)
+    date = attr.ib(type=Optional[datetime.datetime], default=None)
     commentaire_externe = attr.ib(type=str, default='')
     commentaire_interne = attr.ib(type=str, default='')
     motif_refus = attr.ib(type=str, default='')

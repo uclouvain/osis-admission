@@ -27,6 +27,7 @@ from rules import RuleSet
 from django.utils.translation import gettext_lazy as _
 
 from admission.auth.predicates import (
+    any_member_refused,
     unconfirmed_proposition,
     invitations_sent,
     invitations_not_sent,
@@ -52,7 +53,8 @@ class Candidate(RoleModel):
                 'admission.upload_pdf_confirmation': is_admission_request_author,
                 'admission.fill_thesis': is_admission_request_author,
                 'admission.upload_publication_authorisation': is_admission_request_author,
-                'admission.request_signatures': is_admission_request_author & invitations_not_sent,
+                'admission.request_signatures': is_admission_request_author
+                & (invitations_not_sent | any_member_refused),
                 'admission.view_doctorateadmission_person': is_admission_request_author,
                 'admission.change_doctorateadmission_person': is_admission_request_author & unconfirmed_proposition,
                 'admission.view_doctorateadmission_coordinates': is_admission_request_author,
@@ -71,9 +73,11 @@ class Candidate(RoleModel):
                 'admission.change_doctorateadmission_cotutelle': is_admission_request_author & invitations_not_sent,
                 'admission.view_doctorateadmission_supervision': is_admission_request_author,
                 'admission.change_doctorateadmission_supervision': is_admission_request_author & invitations_not_sent,
-                'admission.add_supervision_member': is_admission_request_author & invitations_not_sent,
+                'admission.add_supervision_member': is_admission_request_author
+                & (invitations_not_sent | any_member_refused),
                 'admission.approve_proposition_by_pdf': is_admission_request_author & invitations_sent,
-                'admission.remove_supervision_member': is_admission_request_author & invitations_not_sent,
+                'admission.remove_supervision_member': is_admission_request_author
+                & (invitations_not_sent | any_member_refused),
                 'admission.submit_doctorateadmission': is_admission_request_author
                 & invitations_sent
                 & unconfirmed_proposition,

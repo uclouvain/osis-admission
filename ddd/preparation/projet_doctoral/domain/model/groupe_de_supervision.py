@@ -223,7 +223,7 @@ class GroupeDeSupervision(interface.Entity):
                     new_states.append(
                         SignaturePromoteur(
                             promoteur_id=signataire_id,
-                            etat=ChoixEtatSignature.REFUSED,
+                            etat=ChoixEtatSignature.DECLINED,
                             commentaire_interne=commentaire_interne or '',
                             commentaire_externe=commentaire_externe or '',
                             motif_refus=motif_refus or '',
@@ -235,7 +235,7 @@ class GroupeDeSupervision(interface.Entity):
             self.signatures_membres_CA.append(
                 SignatureMembreCA(
                     membre_CA_id=signataire_id,
-                    etat=ChoixEtatSignature.REFUSED,
+                    etat=ChoixEtatSignature.DECLINED,
                     commentaire_interne=commentaire_interne or '',
                     commentaire_externe=commentaire_externe or '',
                     motif_refus=motif_refus or '',

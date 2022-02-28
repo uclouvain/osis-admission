@@ -23,28 +23,70 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from dataclasses import dataclass
 from typing import List
 
 from admission.ddd.preparation.projet_doctoral.domain.model._membre_CA import MembreCAIdentity
 from admission.ddd.preparation.projet_doctoral.domain.service.i_membre_CA import IMembreCATranslator
 from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import MembreCANonTrouveException
 from admission.ddd.preparation.projet_doctoral.dtos import MembreCADTO
-from ddd.logic.shared_kernel.personne_connue_ucl.domain.service.personne_connue_ucl import IPersonneConnueUclTranslator
+
+
+@dataclass
+class MembreCA:
+    id: MembreCAIdentity
+    nom: str
+    prenom: str
+    email: str
+    externe: bool = False
+    titre: str = ''
+    institution: str = ''
+    ville: str = ''
+    pays: str = ''
 
 
 class MembreCAInMemoryTranslator(IMembreCATranslator):
     membres_CA = [
-        MembreCAIdentity('00987890'),
-        MembreCAIdentity('00987891'),
-        MembreCAIdentity('00987892'),
-        MembreCAIdentity('00987893'),
+        MembreCA(MembreCAIdentity('00987890'), "John", "Doe", "john.doe@example.org"),
+        MembreCA(MembreCAIdentity('00987891'), "Jane", "Martin", "jane.martin@example.org"),
+        MembreCA(MembreCAIdentity('00987892'), "Lucy", "Caron", "lucy.caron@example.org"),
+        MembreCA(MembreCAIdentity('00987893'), "Debra", "Gibson", "debra.gibson@example.org"),
+        MembreCA(MembreCAIdentity('membre-ca-SC3DP'), "John", "Doe", "john.doe@example.org"),
+        MembreCA(
+            MembreCAIdentity('membre-externe'),
+            nom="John",
+            prenom="Mills",
+            email="john.mills@example.org",
+            externe=True,
+            titre="Dr",
+            institution="USB",
+            ville="Bruxelles",
+            pays="Belgique",
+        ),
     ]
 
     @classmethod
     def get(cls, matricule: str) -> 'MembreCAIdentity':
         try:
-            return next(p for p in cls.membres_CA if p.matricule == matricule)
+            return next(p.id for p in cls.membres_CA if p.id.matricule == matricule)
         except StopIteration:
+            raise MembreCANonTrouveException
+
+    @classmethod
+    def get_dto(cls, matricule: str) -> 'MembreCADTO':
+        try:
+            p = next(p for p in cls.membres_CA if p.id.matricule == matricule)  # pragma: no branch
+            return MembreCADTO(
+                matricule=p.id.matricule,
+                nom=p.nom,
+                prenom=p.prenom,
+                email=p.email,
+                titre=p.titre,
+                institution=p.institution,
+                ville=p.ville,
+                pays=p.pays,
+            )
+        except StopIteration:  # pragma: no cover
             raise MembreCANonTrouveException
 
     @classmethod
@@ -52,9 +94,8 @@ class MembreCAInMemoryTranslator(IMembreCATranslator):
         raise NotImplementedError
 
     @classmethod
-    def search_dto(
-            cls,
-            terme_de_recherche: str,
-            personne_connue_ucl_translator: 'IPersonneConnueUclTranslator',
-    ) -> List['MembreCADTO']:
-        raise NotImplementedError
+    def est_externe(cls, identity: 'MembreCAIdentity') -> bool:  # pragma: no cover
+        try:
+            return next(p.externe for p in cls.membres_CA if p.id.matricule == identity.matricule)
+        except StopIteration:
+            raise MembreCANonTrouveException

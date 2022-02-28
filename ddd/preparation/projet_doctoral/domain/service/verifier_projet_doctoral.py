@@ -45,9 +45,9 @@ class VerifierProjetDoctoral(interface.DomainService):
         promoteur_translator: IPromoteurTranslator,
     ) -> None:
         execute_functions_and_aggregate_exceptions(
-            groupe_de_supervision.verifier_cotutelle,
-            partial(CotutellePossedePromoteurExterne.verifier, groupe_de_supervision, promoteur_translator),
-            partial(GroupeDeSupervisionPossedeUnPromoteurMinimum.verifier, groupe_de_supervision, promoteur_translator),
             proposition_candidat.verifier_projet_doctoral,
+            groupe_de_supervision.verifier_cotutelle,
+            partial(GroupeDeSupervisionPossedeUnPromoteurMinimum.verifier, groupe_de_supervision, promoteur_translator),
+            partial(CotutellePossedePromoteurExterne.verifier, groupe_de_supervision, promoteur_translator),
             groupe_de_supervision.verifier_signataires,
         )

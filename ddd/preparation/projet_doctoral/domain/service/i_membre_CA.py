@@ -28,7 +28,6 @@ from typing import List
 
 from admission.ddd.preparation.projet_doctoral.domain.model._membre_CA import MembreCAIdentity
 from admission.ddd.preparation.projet_doctoral.dtos import MembreCADTO
-from ddd.logic.shared_kernel.personne_connue_ucl.domain.service.personne_connue_ucl import IPersonneConnueUclTranslator
 from osis_common.ddd import interface
 
 
@@ -40,14 +39,15 @@ class IMembreCATranslator(interface.DomainService):
 
     @classmethod
     @abstractmethod
+    def get_dto(cls, matricule: str) -> 'MembreCADTO':
+        raise NotImplementedError
+
+    @classmethod
+    @abstractmethod
     def search(cls, matricules: List[str]) -> List['MembreCAIdentity']:
         raise NotImplementedError
 
     @classmethod
     @abstractmethod
-    def search_dto(
-            cls,
-            terme_de_recherche: str,
-            personne_connue_ucl_translator: 'IPersonneConnueUclTranslator',
-    ) -> List['MembreCADTO']:
+    def est_externe(cls, identity: MembreCAIdentity) -> bool:
         raise NotImplementedError
