@@ -307,6 +307,9 @@ msgstr ""
 msgid "Internal comment"
 msgstr ""
 
+msgid "Invitations have not been sent"
+msgstr ""
+
 msgid "Invitations must have been sent"
 msgstr ""
 
@@ -553,10 +556,7 @@ msgstr ""
 msgid "The experiences that have been valuated from this admission."
 msgstr ""
 
-msgid "The invitations must not have been sent"
-msgstr ""
-
-msgid "The proposition has already been confirmed"
+msgid "The proposition has already been confirmed or is cancelled"
 msgstr ""
 
 msgid "The signature request procedure isn't in progress."

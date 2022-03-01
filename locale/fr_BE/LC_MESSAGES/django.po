@@ -318,6 +318,9 @@ msgstr ""
 msgid "Internal comment"
 msgstr "Commentaire interne"
 
+msgid "Invitations have not been sent"
+msgstr "Les invitations n'ont pas été envoyées"
+
 msgid "Invitations must have been sent"
 msgstr "Les invitations doivent avoir été envoyées"
 
@@ -581,11 +584,8 @@ msgstr "Groupe de supervision non trouvé."
 msgid "The experiences that have been valuated from this admission."
 msgstr "Les expériences qui ont été valorisées à partir de cette admission."
 
-msgid "The invitations must not have been sent"
-msgstr "Les invitations doivent ne pas avoir été envoyées"
-
-msgid "The proposition has already been confirmed"
-msgstr "La proposition a déjà été confirmée."
+msgid "The proposition has already been confirmed or is cancelled"
+msgstr "La proposition a déjà été confirmée ou est annulée."
 
 msgid "The signature request procedure isn't in progress."
 msgstr "La procédure de demande de signature n'a pas été lancée."
@@ -700,6 +700,3 @@ msgstr "créé"
 
 msgid "modified"
 msgstr "modifée"
-
-#~ msgid "Confirmed proposition"
-#~ msgstr "Proposition confirmée"

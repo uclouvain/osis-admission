@@ -29,6 +29,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from admission.ddd.preparation.projet_doctoral.domain.model._detail_projet import ChoixLangueRedactionThese
+from admission.ddd.preparation.projet_doctoral.domain.model._enums import ChoixStatutProposition
 from admission.tests.factories import DoctorateAdmissionFactory, WriteTokenFactory
 from admission.tests.factories.supervision import CaMemberFactory, PromoterFactory
 from osis_signature.enums import SignatureState
@@ -54,6 +55,7 @@ class ApprovalMixin:
 
         # Create the admission
         cls.admission = DoctorateAdmissionFactory(
+            status=ChoixStatutProposition.SIGNING_IN_PROGRESS.name,
             supervision_group=cls.promoter.process,
             cotutelle=False,
             project_title="title",

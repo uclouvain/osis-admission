@@ -26,9 +26,9 @@
 from django.contrib.postgres.fields import JSONField
 from django.core.cache import cache
 from django.db import models
-from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 
+from admission.ddd.preparation.projet_doctoral.domain.model._detail_projet import ChoixLangueRedactionThese
 from admission.ddd.preparation.projet_doctoral.domain.model._enums import (
     ChoixCommissionProximiteCDEouCLSM,
     ChoixCommissionProximiteCDSS,
@@ -39,10 +39,8 @@ from admission.ddd.preparation.projet_doctoral.domain.model._experience_preceden
     ChoixDoctoratDejaRealise,
 )
 from admission.ddd.preparation.projet_doctoral.domain.model._financement import ChoixTypeFinancement
-from admission.ddd.preparation.projet_doctoral.domain.model._detail_projet import ChoixLangueRedactionThese
 from osis_document.contrib import FileField
 from osis_signature.contrib.fields import SignatureProcessField
-from osis_signature.enums import SignatureState
 from .base import BaseAdmission, admission_directory_path
 
 REFERENCE_SEQ_NAME = 'admission_doctorateadmission_reference_seq'
@@ -291,30 +289,6 @@ class DoctorateAdmission(BaseAdmission):
             ('remove_supervision_member', _("Can remove a member from the supervision group")),
             ('submit_doctorateadmission', _("Can submit a doctorate admission proposition")),
         ]
-
-    @cached_property
-    def invitations_sent(self):
-        res = (
-            self.supervision_group
-            and self.supervision_group.actors.exclude(last_state=SignatureState.NOT_INVITED.name).exists()
-        )
-        # Cache the value inside an object property
-        self.__dict__['invitations_sent'] = res
-        # Refresh the permission cache so that the property value is in django's cache
-        cache.set('admission_permission_{}'.format(self.uuid), self)
-        return res
-
-    @cached_property
-    def any_member_refused(self):
-        res = (
-            self.supervision_group
-            and self.supervision_group.actors.filter(last_state=SignatureState.DECLINED.name).exists()
-        )
-        # Cache the value inside an object property
-        self.__dict__['any_member_refused'] = res
-        # Refresh the permission cache so that the property value is in django's cache
-        cache.set('admission_permission_{}'.format(self.uuid), self)
-        return res
 
     def save(self, *args, **kwargs) -> None:
         super().save(*args, **kwargs)

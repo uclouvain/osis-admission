@@ -30,6 +30,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from admission.contrib.models.enums.actor_type import ActorType
+from admission.ddd.preparation.projet_doctoral.domain.model._enums import ChoixStatutProposition
 from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import (
     MembreCANonTrouveException,
     PromoteurNonTrouveException,
@@ -397,11 +398,7 @@ class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
     def test_supervision_modification_impossible_par_doctorant_apres_envoi(self):
         self.client.force_authenticate(user=self.candidate.user)
 
-        StateHistory.objects.create(
-            actor=self.promoter.actor_ptr,
-            state=SignatureState.INVITED.name,
-        )
-        # So that cache is cleared
+        self.admission.status = ChoixStatutProposition.SIGNING_IN_PROGRESS.name
         self.admission.save()
 
         response = self.client.post(self.url, data={
@@ -416,7 +413,7 @@ class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
         }, format="json")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-        # So that cache is cleared for other tests
+        self.admission.status = ChoixStatutProposition.IN_PROGRESS.name
         self.admission.save()
 
     def test_supervision_modification_par_doctorant_apres_refus(self):
