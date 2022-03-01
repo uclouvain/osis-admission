@@ -385,9 +385,6 @@ msgstr "Autre"
 msgid "Other cotutelle-related documents"
 msgstr "Autres documents relatifs à la cotutelle"
 
-msgid "Other thesis location"
-msgstr "Autre lieu de la thèse"
-
 msgid "PARTIAL"
 msgstr "Partiel"
 
@@ -603,6 +600,9 @@ msgstr ""
 
 msgid "Thesis institute"
 msgstr "Institut de la thèse"
+
+msgid "Thesis institute must be set."
+msgstr "L'institut de la thèse est obligatoire."
 
 msgid "Thesis language"
 msgstr "Langue de la thèse"

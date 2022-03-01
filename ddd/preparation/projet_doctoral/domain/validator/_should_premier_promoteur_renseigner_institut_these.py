@@ -23,32 +23,31 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.api.serializers.fields import RelatedInstituteField
-from admission.ddd.preparation.projet_doctoral.commands import (
-    ApprouverPropositionCommand,
-    ApprouverPropositionParPdfCommand,
-    RefuserPropositionCommand,
+
+from typing import List, Optional, Union
+
+import attr
+
+from admission.ddd.preparation.projet_doctoral.domain.model._membre_CA import MembreCAIdentity
+from admission.ddd.preparation.projet_doctoral.domain.model._promoteur import PromoteurIdentity
+from admission.ddd.preparation.projet_doctoral.domain.model._signature_promoteur import (
+    ChoixEtatSignature,
+    SignaturePromoteur,
 )
-from base.utils.serializers import DTOSerializer
+from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import InstitutTheseObligatoireException
+from base.ddd.utils.business_validator import BusinessValidator
 
 
-class ApprouverPropositionCommandSerializer(DTOSerializer):
-    uuid_proposition = None
-    institut_these = RelatedInstituteField(required=False)
+@attr.dataclass(frozen=True, slots=True)
+class ShouldPremierPromoteurRenseignerInstitutThese(BusinessValidator):
+    signatures_promoteurs: List[SignaturePromoteur]
+    signataire: Union['PromoteurIdentity', 'MembreCAIdentity']
+    institut_these: Optional[str]
 
-    class Meta:
-        source = ApprouverPropositionCommand
-
-
-class RefuserPropositionCommandSerializer(DTOSerializer):
-    uuid_proposition = None
-
-    class Meta:
-        source = RefuserPropositionCommand
-
-
-class ApprouverPropositionParPdfCommandSerializer(DTOSerializer):
-    uuid_proposition = None
-
-    class Meta:
-        source = ApprouverPropositionParPdfCommand
+    def validate(self, *args, **kwargs):
+        if (
+            isinstance(self.signataire, PromoteurIdentity)
+            and all(s.etat == ChoixEtatSignature.INVITED for s in self.signatures_promoteurs)
+            and not self.institut_these
+        ):
+            raise InstitutTheseObligatoireException()

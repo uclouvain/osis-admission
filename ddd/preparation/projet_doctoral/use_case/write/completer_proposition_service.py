@@ -23,8 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.ddd.preparation.projet_doctoral.builder.proposition_identity_builder import \
-    PropositionIdentityBuilder
+from admission.ddd.preparation.projet_doctoral.builder.proposition_identity_builder import PropositionIdentityBuilder
 from admission.ddd.preparation.projet_doctoral.commands import CompleterPropositionCommand
 from admission.ddd.preparation.projet_doctoral.domain.model.proposition import PropositionIdentity
 from admission.ddd.preparation.projet_doctoral.domain.service.commission_proximite import CommissionProximite
@@ -33,9 +32,9 @@ from admission.ddd.preparation.projet_doctoral.repository.i_proposition import I
 
 
 def completer_proposition(
-        cmd: 'CompleterPropositionCommand',
-        proposition_repository: 'IPropositionRepository',
-        doctorat_translator: 'IDoctoratTranslator',
+    cmd: 'CompleterPropositionCommand',
+    proposition_repository: 'IPropositionRepository',
+    doctorat_translator: 'IDoctoratTranslator',
 ) -> 'PropositionIdentity':
     # GIVEN
     entity_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid)
@@ -59,7 +58,6 @@ def completer_proposition(
         langue_redaction_these=cmd.langue_redaction_these,
         institut_these=cmd.institut_these,
         lieu_these=cmd.lieu_these,
-        autre_lieu_these=cmd.autre_lieu_these,
         documents=cmd.documents_projet,
         graphe_gantt=cmd.graphe_gantt,
         proposition_programme_doctoral=cmd.proposition_programme_doctoral,

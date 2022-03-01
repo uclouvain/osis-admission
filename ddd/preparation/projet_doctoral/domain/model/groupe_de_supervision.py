@@ -44,6 +44,7 @@ from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions impor
     SignataireNonTrouveException,
 )
 from admission.ddd.preparation.projet_doctoral.domain.validator.validator_by_business_action import (
+    ApprobationPromoteurValidatorList,
     ApprouverValidatorList,
     CotutelleValidatorList,
     IdentifierMembreCAValidatorList,
@@ -93,11 +94,13 @@ class GroupeDeSupervision(interface.Entity):
 
     def get_signataire(self, matricule_signataire: str) -> Union['PromoteurIdentity', 'MembreCAIdentity']:
         with contextlib.suppress(StopIteration):
-            return next(s.promoteur_id for s in self.signatures_promoteurs
-                        if s.promoteur_id.matricule == matricule_signataire)
+            return next(
+                s.promoteur_id for s in self.signatures_promoteurs if s.promoteur_id.matricule == matricule_signataire
+            )
         with contextlib.suppress(StopIteration):
-            return next(s.membre_CA_id for s in self.signatures_membres_CA
-                        if s.membre_CA_id.matricule == matricule_signataire)
+            return next(
+                s.membre_CA_id for s in self.signatures_membres_CA if s.membre_CA_id.matricule == matricule_signataire
+            )
         raise SignataireNonTrouveException
 
     def get_promoteur(self, matricule_signataire: str) -> 'PromoteurIdentity':
@@ -248,13 +251,14 @@ class GroupeDeSupervision(interface.Entity):
     def verifier_cotutelle(self):
         CotutelleValidatorList(cotutelle=self.cotutelle).validate()
 
-    def definir_cotutelle(self,
-                          motivation: Optional[str],
-                          institution: Optional[str],
-                          demande_ouverture: List[str] = None,
-                          convention: List[str] = None,
-                          autres_documents: List[str] = None,
-                          ):
+    def definir_cotutelle(
+        self,
+        motivation: Optional[str],
+        institution: Optional[str],
+        demande_ouverture: List[str] = None,
+        convention: List[str] = None,
+        autres_documents: List[str] = None,
+    ):
         self.cotutelle = Cotutelle(
             motivation=motivation or '',
             institution=institution or '',
@@ -268,3 +272,14 @@ class GroupeDeSupervision(interface.Entity):
 
     def verifier_signataires(self):
         SignatairesValidatorList(groupe_de_supervision=self).validate()
+
+    def verifier_premier_promoteur_renseigne_institut_these(
+        self,
+        signataire: Union[PromoteurIdentity, MembreCAIdentity],
+        institut_these: Optional[str],
+    ):
+        ApprobationPromoteurValidatorList(
+            signatures_promoteurs=self.signatures_promoteurs,
+            signataire=signataire,
+            institut_these=institut_these,
+        ).validate()

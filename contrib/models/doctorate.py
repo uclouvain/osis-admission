@@ -141,12 +141,6 @@ class DoctorateAdmission(BaseAdmission):
         default='',
         blank=True,
     )
-    other_thesis_location = models.CharField(
-        max_length=255,
-        verbose_name=_("Other thesis location"),
-        default='',
-        blank=True,
-    )
     project_document = FileField(
         verbose_name=_("Project"),
         upload_to=admission_directory_path,

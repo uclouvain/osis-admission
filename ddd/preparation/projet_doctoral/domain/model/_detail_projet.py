@@ -47,7 +47,6 @@ class DetailProjet(interface.ValueObject):
     langue_redaction_these = attr.ib(type=ChoixLangueRedactionThese, default=ChoixLangueRedactionThese.UNDECIDED)
     institut_these = attr.ib(type=Optional[InstitutIdentity], default=None)
     lieu_these = attr.ib(type=str, default='')
-    autre_lieu_these = attr.ib(type=str, default='')
     documents = attr.ib(type=List[str], factory=list)
     graphe_gantt = attr.ib(type=List[str], factory=list)
     proposition_programme_doctoral = attr.ib(type=List[str], factory=list)

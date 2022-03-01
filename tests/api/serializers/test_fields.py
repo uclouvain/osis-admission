@@ -36,9 +36,11 @@ from rest_framework.test import APIRequestFactory, APITestCase
 from rest_framework.views import APIView
 
 from admission.api.permissions import IsListingOrHasNotAlreadyCreatedPermission
-from admission.api.serializers.fields import ActionLinksField, TranslatedField
+from admission.api.serializers.fields import ActionLinksField, RelatedInstituteField, TranslatedField
 from admission.contrib.models import DoctorateAdmission
 from admission.tests.factories import DoctorateAdmissionFactory
+from base.models.enums.entity_type import EntityType
+from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.person import PersonFactory
 from osis_role.contrib.views import APIPermissionRequiredMixin
 
@@ -48,7 +50,7 @@ class TestAPIDetailViewWithPermissions(APIPermissionRequiredMixin, APIView):
     permission_mapping = {
         'GET': 'admission.view_doctorateadmission',
         'DELETE': 'admission.delete_doctorateadmission',
-        'PUT': ('admission.change_doctorateadmission', ),
+        'PUT': ('admission.change_doctorateadmission',),
     }
 
     def get_permission_object(self):
@@ -352,3 +354,24 @@ class TranslatedFieldTestCase(APITestCase):
             serializer_field.to_representation(mock_obj),
             'My title',
         )
+
+
+class RelatedInstituteFieldTestCase(APITestCase):
+    def test_representation(self):
+        serializer_field = RelatedInstituteField()
+        self.assertIsNone(serializer_field.to_representation(None))
+
+        institute = EntityVersionFactory(
+            entity_type=EntityType.INSTITUTE.name,
+        )
+        self.assertEqual(serializer_field.to_representation(institute), str(institute.uuid))
+
+    def test_internal_value(self):
+        serializer_field = RelatedInstituteField()
+        self.assertIsNone(serializer_field.to_internal_value(None))
+
+        institute = EntityVersionFactory(
+            entity_type=EntityType.INSTITUTE.name,
+        )
+        self.assertEqual(serializer_field.to_internal_value(institute.uuid), institute)
+        self.assertEqual(serializer_field.to_internal_value(str(institute.uuid)), institute)

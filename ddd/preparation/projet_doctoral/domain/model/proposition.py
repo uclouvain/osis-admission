@@ -78,9 +78,7 @@ class Proposition(interface.RootEntity):
     date_soumission_pre_admission = attr.ib(type=Optional[datetime.datetime], default=None)
     date_soumission_admission = attr.ib(type=Optional[datetime.datetime], default=None)
     commission_proximite = attr.ib(
-        type=Optional[
-            Union[ChoixCommissionProximiteCDEouCLSM, ChoixCommissionProximiteCDSS, ChoixSousDomaineSciences]
-        ],
+        type=Optional[Union[ChoixCommissionProximiteCDEouCLSM, ChoixCommissionProximiteCDSS, ChoixSousDomaineSciences]],
         default=None,
     )
     financement = attr.ib(type=Financement, default=financement_non_rempli)
@@ -108,31 +106,30 @@ class Proposition(interface.RootEntity):
         return self.statut != ChoixStatutProposition.CANCELLED
 
     def completer(
-            self,
-            type_admission: str,
-            justification: Optional[str],
-            commission_proximite: Optional[str],
-            type_financement: Optional[str],
-            type_contrat_travail: Optional[str],
-            eft: Optional[int],
-            bourse_recherche: Optional[str],
-            duree_prevue: Optional[int],
-            temps_consacre: Optional[int],
-            langue_redaction_these: str,
-            institut_these: Optional[str],
-            lieu_these: Optional[str],
-            autre_lieu_these: Optional[str],
-            titre: Optional[str],
-            resume: Optional[str],
-            doctorat_deja_realise: str,
-            institution: Optional[str],
-            date_soutenance: Optional[datetime.date],
-            raison_non_soutenue: Optional[str],
-            documents: List[str] = None,
-            graphe_gantt: List[str] = None,
-            proposition_programme_doctoral: List[str] = None,
-            projet_formation_complementaire: List[str] = None,
-            lettres_recommandation: List[str] = None,
+        self,
+        type_admission: str,
+        justification: Optional[str],
+        commission_proximite: Optional[str],
+        type_financement: Optional[str],
+        type_contrat_travail: Optional[str],
+        eft: Optional[int],
+        bourse_recherche: Optional[str],
+        duree_prevue: Optional[int],
+        temps_consacre: Optional[int],
+        langue_redaction_these: str,
+        institut_these: Optional[str],
+        lieu_these: Optional[str],
+        titre: Optional[str],
+        resume: Optional[str],
+        doctorat_deja_realise: str,
+        institution: Optional[str],
+        date_soutenance: Optional[datetime.date],
+        raison_non_soutenue: Optional[str],
+        documents: List[str] = None,
+        graphe_gantt: List[str] = None,
+        proposition_programme_doctoral: List[str] = None,
+        projet_formation_complementaire: List[str] = None,
+        lettres_recommandation: List[str] = None,
     ) -> None:
         CompletionPropositionValidatorList(
             type_admission=type_admission,
@@ -157,7 +154,6 @@ class Proposition(interface.RootEntity):
             langue_redaction_these=langue_redaction_these,
             institut_these=institut_these,
             lieu_these=lieu_these,
-            autre_lieu_these=autre_lieu_these,
             documents=documents,
             graphe_gantt=graphe_gantt,
             proposition_programme_doctoral=proposition_programme_doctoral,
@@ -209,27 +205,28 @@ class Proposition(interface.RootEntity):
             self.financement = financement_non_rempli
 
     def _completer_projet(
-            self,
-            titre: Optional[str],
-            resume: Optional[str],
-            langue_redaction_these: str,
-            institut_these: Optional[str],
-            lieu_these: Optional[str],
-            autre_lieu_these: Optional[str],
-            documents: List[str] = None,
-            graphe_gantt: List[str] = None,
-            proposition_programme_doctoral: List[str] = None,
-            projet_formation_complementaire: List[str] = None,
-            lettres_recommandation: List[str] = None,
+        self,
+        titre: Optional[str],
+        resume: Optional[str],
+        langue_redaction_these: str,
+        institut_these: Optional[str],
+        lieu_these: Optional[str],
+        documents: List[str] = None,
+        graphe_gantt: List[str] = None,
+        proposition_programme_doctoral: List[str] = None,
+        projet_formation_complementaire: List[str] = None,
+        lettres_recommandation: List[str] = None,
     ):
         self.projet = DetailProjet(
             titre=titre or '',
             resume=resume or '',
-            langue_redaction_these=(ChoixLangueRedactionThese[langue_redaction_these]
-                                    if langue_redaction_these else ChoixLangueRedactionThese.UNDECIDED),
+            langue_redaction_these=(
+                ChoixLangueRedactionThese[langue_redaction_these]
+                if langue_redaction_these
+                else ChoixLangueRedactionThese.UNDECIDED
+            ),
             institut_these=InstitutIdentity(uuid.UUID(institut_these)) if institut_these else None,
             lieu_these=lieu_these or '',
-            autre_lieu_these=autre_lieu_these or '',
             documents=documents or [],
             graphe_gantt=graphe_gantt or [],
             proposition_programme_doctoral=proposition_programme_doctoral or [],
@@ -277,3 +274,10 @@ class Proposition(interface.RootEntity):
 
     def supprimer(self):
         self.statut = ChoixStatutProposition.CANCELLED
+
+    def definir_institut_these(self, institut_these: Optional[str]):
+        if institut_these:
+            self.projet = DetailProjet(
+                **self.projet.__dict__,
+                institut_these=InstitutIdentity(uuid.UUID(institut_these)),
+            )

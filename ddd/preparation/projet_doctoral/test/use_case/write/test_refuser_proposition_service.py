@@ -101,7 +101,7 @@ class TestRefuserPropositionService(SimpleTestCase):
             self.message_bus.invoke(cmd)
 
     def test_should_pas_refuser_si_pas_invite(self):
-        cmd = attr.evolve(self.cmd, matricule='membre-ca-SC3DP')
+        cmd = attr.evolve(self.cmd, uuid_proposition="uuid-SC3DP-sans-promoteur", matricule='membre-ca-SC3DP')
         with self.assertRaises(MultipleBusinessExceptions) as e:
             self.message_bus.invoke(cmd)
         self.assertIsInstance(e.exception.exceptions.pop(), SignatairePasInviteException)
