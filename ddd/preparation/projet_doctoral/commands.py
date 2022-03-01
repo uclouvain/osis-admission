@@ -55,7 +55,6 @@ class InitierPropositionCommand(interface.CommandRequest):
     resume_projet = attr.ib(type=Optional[str], default='')
     institut_these = attr.ib(type=Optional[str], default='')
     lieu_these = attr.ib(type=Optional[str], default='')
-    autre_lieu_these = attr.ib(type=Optional[str], default='')
     documents_projet = attr.ib(type=List[str], factory=list)
     graphe_gantt = attr.ib(type=List[str], factory=list)
     proposition_programme_doctoral = attr.ib(type=List[str], factory=list)
@@ -90,7 +89,6 @@ class CompleterPropositionCommand(interface.CommandRequest):
     langue_redaction_these = attr.ib(type=str, default=ChoixLangueRedactionThese.UNDECIDED.name)
     institut_these = attr.ib(type=Optional[str], default='')
     lieu_these = attr.ib(type=Optional[str], default='')
-    autre_lieu_these = attr.ib(type=Optional[str], default='')
     doctorat_deja_realise = attr.ib(type=str, default=ChoixDoctoratDejaRealise.NO.name)
     institution = attr.ib(type=Optional[str], default='')
     date_soutenance = attr.ib(type=Optional[datetime.date], default=None)
@@ -141,12 +139,13 @@ class SupprimerMembreCACommand(interface.CommandRequest):
     matricule = attr.ib(type=str)
 
 
-@attr.s(frozen=True, slots=True)
+@attr.dataclass(frozen=True, slots=True)
 class ApprouverPropositionCommand(interface.CommandRequest):
-    uuid_proposition = attr.ib(type=str)
-    matricule = attr.ib(type=str)
-    commentaire_interne = attr.ib(type=Optional[str], default='')
-    commentaire_externe = attr.ib(type=Optional[str], default='')
+    uuid_proposition: str
+    matricule: str
+    institut_these: Optional[str] = ''
+    commentaire_interne: Optional[str] = ''
+    commentaire_externe: Optional[str] = ''
 
 
 @attr.s(frozen=True, slots=True)

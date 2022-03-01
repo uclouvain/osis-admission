@@ -1,5 +1,7 @@
-from ._should_coordonnees_candidat_etre_completees import ShouldAdresseDomicileLegalCandidatEtreCompletee, \
-    ShouldAdresseCorrespondanceEtreCompleteeSiSpecifiee
+from ._should_coordonnees_candidat_etre_completees import (
+    ShouldAdresseDomicileLegalCandidatEtreCompletee,
+    ShouldAdresseCorrespondanceEtreCompleteeSiSpecifiee,
+)
 from ._should_cotutelle_etre_completee import ShouldCotutelleEtreComplete
 from ._should_curriculum_etre_complete import ShouldAnneesCVRequisesCompletees, ShouldCurriculumFichierEtreSpecifie
 from ._should_groupe_de_supervision_a_approuve import (
@@ -34,6 +36,7 @@ from ._should_identification_candidat_etre_completee import (
     ShouldCandidatAuthentiquerIdentite,
     ShouldCandidatAuthentiquerPasseport,
 )
+from ._should_premier_promoteur_renseigner_institut_these import ShouldPremierPromoteurRenseignerInstitutThese
 
 __all__ = [
     "ShouldInstitutionDependreDoctoratRealise",
@@ -65,4 +68,5 @@ __all__ = [
     "ShouldDemandeSignatureLancee",
     "ShouldPromoteursOntApprouve",
     "ShouldMembresCAOntApprouve",
+    "ShouldPremierPromoteurRenseignerInstitutThese",
 ]

@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Admission API
-  version: 1.0.15
+  version: 1.0.16
   description: This API delivers data for the Admission project.
   contact:
     name: UCLouvain - OSIS
@@ -2678,8 +2678,6 @@ components:
           nullable: true
         lieu_these:
           type: string
-        autre_lieu_these:
-          type: string
         doctorat_deja_realise:
           type: string
         institution:
@@ -2758,7 +2756,6 @@ components:
       - lettres_recommandation
       - langue_redaction_these
       - lieu_these
-      - autre_lieu_these
       - doctorat_deja_realise
       - statut
     CotutelleDTO:
@@ -2996,8 +2993,6 @@ components:
           type: string
           nullable: true
         lieu_these:
-          type: string
-        autre_lieu_these:
           type: string
         documents_projet:
           type: array
@@ -3242,6 +3237,9 @@ components:
       properties:
         matricule:
           type: string
+        institut_these:
+          type: string
+          nullable: true
         commentaire_interne:
           type: string
         commentaire_externe:
@@ -3317,8 +3315,6 @@ components:
           type: string
           nullable: true
         lieu_these:
-          type: string
-        autre_lieu_these:
           type: string
         doctorat_deja_realise:
           $ref: '#/components/schemas/ChoixDoctoratDejaRealise'

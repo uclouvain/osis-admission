@@ -84,7 +84,6 @@ def _instantiate_admission(admission: DoctorateAdmission) -> Proposition:
             langue_redaction_these=ChoixLangueRedactionThese[admission.thesis_language],
             institut_these=InstitutIdentity(admission.thesis_institute.uuid) if admission.thesis_institute_id else None,
             lieu_these=admission.thesis_location,
-            autre_lieu_these=admission.other_thesis_location,
             graphe_gantt=admission.gantt_graph,
             proposition_programme_doctoral=admission.program_proposition,
             projet_formation_complementaire=admission.additional_training_project,
@@ -189,7 +188,6 @@ class PropositionRepository(IPropositionRepository):
                     else None
                 ),
                 'thesis_location': entity.projet.lieu_these,
-                'other_thesis_location': entity.projet.autre_lieu_these,
                 'project_document': entity.projet.documents,
                 'gantt_graph': entity.projet.graphe_gantt,
                 'program_proposition': entity.projet.proposition_programme_doctoral,
@@ -201,6 +199,6 @@ class PropositionRepository(IPropositionRepository):
                 'phd_already_done_no_defense_reason': entity.experience_precedente_recherche.raison_non_soutenue,
                 'pre_admission_submission_date': entity.date_soumission_pre_admission,
                 'admission_submission_date': entity.date_soumission_admission,
-            }
+            },
         )
         Candidate.objects.get_or_create(person=candidate)

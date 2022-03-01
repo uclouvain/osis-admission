@@ -134,7 +134,6 @@ def _build_projet(cmd: 'InitierPropositionCommand') -> 'DetailProjet':
         langue_redaction_these=ChoixLangueRedactionThese[cmd.langue_redaction_these],
         institut_these=InstitutIdentity(UUID(cmd.institut_these)) if cmd.institut_these else None,
         lieu_these=cmd.lieu_these or '',
-        autre_lieu_these=cmd.autre_lieu_these or '',
         graphe_gantt=cmd.graphe_gantt,
         proposition_programme_doctoral=cmd.proposition_programme_doctoral,
         projet_formation_complementaire=cmd.projet_formation_complementaire,

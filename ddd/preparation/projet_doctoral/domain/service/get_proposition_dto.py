@@ -74,7 +74,6 @@ class GetPropositionDTODomainService(interface.DomainService):
             langue_redaction_these=proposition.projet.langue_redaction_these.name,
             institut_these=proposition.projet.institut_these.uuid if proposition.projet.institut_these else None,
             lieu_these=proposition.projet.lieu_these,
-            autre_lieu_these=proposition.projet.autre_lieu_these,
             doctorat_deja_realise=proposition.experience_precedente_recherche.doctorat_deja_realise.name,
             institution=proposition.experience_precedente_recherche.institution,
             date_soutenance=proposition.experience_precedente_recherche.date_soutenance,

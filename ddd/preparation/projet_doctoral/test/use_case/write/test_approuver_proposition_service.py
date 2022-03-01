@@ -40,6 +40,7 @@ from admission.ddd.preparation.projet_doctoral.domain.model._signature_promoteur
 )
 from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import (
     GroupeDeSupervisionNonTrouveException,
+    InstitutTheseObligatoireException,
     PropositionNonTrouveeException,
     SignataireNonTrouveException,
     SignatairePasInviteException,
@@ -75,7 +76,8 @@ class TestApprouverPropositionService(SimpleTestCase):
         )
 
     def test_should_approuver_promoteur(self):
-        proposition_id = self.message_bus.invoke(self.cmd)
+        cmd = attr.evolve(self.cmd, institut_these="9f30aa8a-6a67-4424-b30a-1f4cd0868871")
+        proposition_id = self.message_bus.invoke(cmd)
         self.assertEqual(proposition_id.uuid, self.uuid_proposition)
         groupe = self.groupe_de_supervision_repository.get_by_proposition_id(proposition_id)
         signatures = groupe.signatures_promoteurs  # type:List[SignaturePromoteur]
@@ -137,7 +139,7 @@ class TestApprouverPropositionService(SimpleTestCase):
             self.message_bus.invoke(cmd)
 
     def test_should_pas_approuve_si_pas_invite(self):
-        cmd = attr.evolve(self.cmd, matricule='membre-ca-SC3DP')
+        cmd = attr.evolve(self.cmd, uuid_proposition="uuid-SC3DP-sans-promoteur", matricule='membre-ca-SC3DP')
         with self.assertRaises(MultipleBusinessExceptions) as e:
             self.message_bus.invoke(cmd)
         self.assertIsInstance(e.exception.exceptions.pop(), SignatairePasInviteException)
@@ -151,3 +153,8 @@ class TestApprouverPropositionService(SimpleTestCase):
         cmd = attr.evolve(self.cmd, uuid_proposition='propositioninconnue')
         with self.assertRaises(PropositionNonTrouveeException):
             self.message_bus.invoke(cmd)
+
+    def test_should_pas_approuver_si_premier_promoteur_et_institut_non_renseigne(self):
+        with self.assertRaises(MultipleBusinessExceptions) as e:
+            self.message_bus.invoke(self.cmd)
+        self.assertIsInstance(e.exception.exceptions.pop(), InstitutTheseObligatoireException)

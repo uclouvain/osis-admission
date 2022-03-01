@@ -31,20 +31,23 @@ from admission.ddd.preparation.projet_doctoral.repository.i_proposition import I
 
 
 def approuver_proposition(
-        cmd: 'ApprouverPropositionCommand',
-        proposition_repository: 'IPropositionRepository',
-        groupe_supervision_repository: 'IGroupeDeSupervisionRepository',
+    cmd: 'ApprouverPropositionCommand',
+    proposition_repository: 'IPropositionRepository',
+    groupe_supervision_repository: 'IGroupeDeSupervisionRepository',
 ) -> 'PropositionIdentity':
     # GIVEN
     entity_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
     proposition_candidat = proposition_repository.get(entity_id=entity_id)
     groupe_de_supervision = groupe_supervision_repository.get_by_proposition_id(entity_id)
     signataire = groupe_de_supervision.get_signataire(cmd.matricule)
+    groupe_de_supervision.verifier_premier_promoteur_renseigne_institut_these(signataire, cmd.institut_these)
 
     # WHEN
+    proposition_candidat.definir_institut_these(cmd.institut_these)
     groupe_de_supervision.approuver(signataire, cmd.commentaire_interne, cmd.commentaire_externe)
 
     # THEN
+    proposition_repository.save(proposition_candidat)
     groupe_supervision_repository.save(groupe_de_supervision)
 
     return proposition_candidat.entity_id

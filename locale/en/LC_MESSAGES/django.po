@@ -373,9 +373,6 @@ msgstr ""
 msgid "Other cotutelle-related documents"
 msgstr ""
 
-msgid "Other thesis location"
-msgstr ""
-
 msgid "PARTIAL"
 msgstr ""
 
@@ -572,6 +569,9 @@ msgid "There can be no more promoters in the supervision group."
 msgstr ""
 
 msgid "Thesis institute"
+msgstr ""
+
+msgid "Thesis institute must be set."
 msgstr ""
 
 msgid "Thesis language"

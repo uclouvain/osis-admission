@@ -141,7 +141,6 @@ class PropositionDTO(interface.DTO):
     langue_redaction_these = attr.ib(type=str)
     institut_these = attr.ib(type=Optional[UUID])
     lieu_these = attr.ib(type=str)
-    autre_lieu_these = attr.ib(type=str)
     doctorat_deja_realise = attr.ib(type=str)
     institution = attr.ib(type=Optional[str])
     date_soutenance = attr.ib(type=Optional[datetime.date])

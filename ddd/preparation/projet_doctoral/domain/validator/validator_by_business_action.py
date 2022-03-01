@@ -40,6 +40,7 @@ from admission.ddd.preparation.projet_doctoral.domain.model._financement import 
 from admission.ddd.preparation.projet_doctoral.domain.model._candidat_signaletique import CandidatSignaletique
 from admission.ddd.preparation.projet_doctoral.domain.model._membre_CA import MembreCAIdentity
 from admission.ddd.preparation.projet_doctoral.domain.model._promoteur import PromoteurIdentity
+from admission.ddd.preparation.projet_doctoral.domain.model._signature_promoteur import SignaturePromoteur
 from admission.ddd.preparation.projet_doctoral.domain.validator import *
 
 from base.ddd.utils.business_validator import TwoStepsMultipleBusinessExceptionListValidator, BusinessValidator
@@ -264,9 +265,7 @@ class CoordonneesValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
             ShouldAdresseDomicileLegalCandidatEtreCompletee(
                 adresse=self.domicile_legal,
             ),
-            ShouldAdresseCorrespondanceEtreCompleteeSiSpecifiee(
-                adresse=self.adresse_correspondance
-            ),
+            ShouldAdresseCorrespondanceEtreCompleteeSiSpecifiee(adresse=self.adresse_correspondance),
         ]
 
 
@@ -354,4 +353,23 @@ class ApprobationValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
             ShouldDemandeSignatureLancee(self.groupe_de_supervision.statut_signature),
             ShouldPromoteursOntApprouve(self.groupe_de_supervision.signatures_promoteurs),
             ShouldMembresCAOntApprouve(self.groupe_de_supervision.signatures_membres_CA),
+        ]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ApprobationPromoteurValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+    signatures_promoteurs: List[SignaturePromoteur]
+    signataire: Union['PromoteurIdentity', 'MembreCAIdentity']
+    institut_these: Optional[str]
+
+    def get_data_contract_validators(self) -> List[BusinessValidator]:
+        return []
+
+    def get_invariants_validators(self) -> List[BusinessValidator]:
+        return [
+            ShouldPremierPromoteurRenseignerInstitutThese(
+                self.signatures_promoteurs,
+                self.signataire,
+                self.institut_these,
+            ),
         ]

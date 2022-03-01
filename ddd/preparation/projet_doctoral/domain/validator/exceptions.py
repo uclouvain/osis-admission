@@ -299,8 +299,11 @@ class AnneesCurriculumNonSpecifieesException(BusinessException):
     status_code = "PROPOSITION-35"
 
     def __init__(self, annees_manquantes, **kwargs):
-        message = _("Please fill in the 'Previous Experience > Curriculum vitae' tab for the following years: ") \
-                  + ', '.join(annees_manquantes) + '.'
+        message = (
+            _("Please fill in the 'Previous Experience > Curriculum vitae' tab for the following years: ")
+            + ', '.join(annees_manquantes)
+            + '.'
+        )
         super().__init__(message, **kwargs)
 
 
@@ -325,4 +328,12 @@ class PropositionNonApprouveeParMembresCAException(BusinessException):
 
     def __init__(self, **kwargs):
         message = _("All CA members must have approved the proposition.")
+        super().__init__(message, **kwargs)
+
+
+class InstitutTheseObligatoireException(BusinessException):
+    status_code = "PROPOSITION-39"
+
+    def __init__(self, **kwargs):
+        message = _("Thesis institute must be set.")
         super().__init__(message, **kwargs)

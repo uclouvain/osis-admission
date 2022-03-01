@@ -132,13 +132,16 @@ class RelatedInstituteField(serializers.CharField, serializers.SlugRelatedField)
         kwargs.setdefault('slug_field', 'uuid')
         kwargs.setdefault('queryset', EntityVersion.objects.filter(entity_type=INSTITUTE))
         kwargs.setdefault('allow_null', True)
+        kwargs.setdefault('allow_blank', True)
         super().__init__(**kwargs)
 
     def to_internal_value(self, data):
-        return serializers.SlugRelatedField.to_internal_value(self, data)
+        if data:
+            return serializers.SlugRelatedField.to_internal_value(self, data)
 
     def to_representation(self, value):
-        return str(serializers.SlugRelatedField.to_representation(self, value))
+        if value:
+            return str(serializers.SlugRelatedField.to_representation(self, value))
 
 
 # Available actions
