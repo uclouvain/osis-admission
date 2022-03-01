@@ -114,23 +114,23 @@ class DoctorateAdmissionListApiTestCase(APITestCase):
         self.assertTrue('links' in first_proposition)
         allowed_actions = [
             'retrieve_person',
-            'update_person',
             'retrieve_coordinates',
-            'update_coordinates',
             'retrieve_secondary_studies',
-            'update_secondary_studies',
             'retrieve_languages',
-            'update_languages',
-            'destroy_proposition',
             'retrieve_proposition',
-            'update_proposition',
             'retrieve_cotutelle',
-            'update_cotutelle',
             'retrieve_supervision',
-            'update_curriculum',
             'retrieve_curriculum',
         ]
         additional_actions = [
+            'destroy_proposition',
+            'update_person',
+            'update_coordinates',
+            'update_secondary_studies',
+            'update_languages',
+            'update_proposition',
+            'update_cotutelle',
+            'update_curriculum',
             'submit_proposition',
         ]
         self.assertCountEqual(
@@ -139,7 +139,7 @@ class DoctorateAdmissionListApiTestCase(APITestCase):
         )
         for action in allowed_actions:
             # Check the url
-            self.assertTrue('url' in first_proposition['links'][action], '{} is not allowed'.format('action'))
+            self.assertTrue('url' in first_proposition['links'][action], '{} is not allowed'.format(action))
             # Check the method type
             self.assertTrue('method' in first_proposition['links'][action])
 
@@ -664,6 +664,7 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
         )
         cls.second_admission = DoctorateAdmissionFactory(
             candidate=cls.second_candidate,
+            status=ChoixStatutProposition.SIGNING_IN_PROGRESS.name,
             supervision_group=cls.second_invited_promoter.actor_ptr.process,
         )
         # Create other users
