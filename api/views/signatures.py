@@ -29,7 +29,7 @@ from rest_framework.views import APIView
 
 from admission.api import serializers
 from admission.api.schema import ResponseSpecificSchema
-from admission.ddd.preparation.projet_doctoral.commands import DemanderSignaturesCommand
+from admission.ddd.projet_doctoral.preparation.commands import DemanderSignaturesCommand
 from admission.utils import get_cached_admission_perm_obj
 from infrastructure.messages_bus import message_bus_instance
 from osis_role.contrib.views import APIPermissionRequiredMixin

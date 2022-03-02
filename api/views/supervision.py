@@ -30,9 +30,12 @@ from rest_framework.response import Response
 from admission.api import serializers
 from admission.api.schema import ResponseSpecificSchema
 from admission.contrib.models.enums.actor_type import ActorType
-from admission.ddd.preparation.projet_doctoral.commands import (
+from admission.ddd.projet_doctoral.preparation.commands import (
     GetGroupeDeSupervisionCommand,
-    IdentifierMembreCACommand, IdentifierPromoteurCommand, SupprimerMembreCACommand, SupprimerPromoteurCommand,
+    IdentifierMembreCACommand,
+    IdentifierPromoteurCommand,
+    SupprimerMembreCACommand,
+    SupprimerPromoteurCommand,
 )
 from admission.utils import get_cached_admission_perm_obj
 from infrastructure.messages_bus import message_bus_instance
@@ -63,7 +66,7 @@ class SupervisionAPIView(
     mixins.RetrieveModelMixin,
     mixins.CreateModelMixin,
     mixins.DestroyModelMixin,
-    GenericAPIView
+    GenericAPIView,
 ):
     name = "supervision"
     schema = SupervisionSchema()
@@ -80,9 +83,7 @@ class SupervisionAPIView(
 
     def get(self, request, *args, **kwargs):
         """Get the supervision group of a proposition"""
-        supervision = message_bus_instance.invoke(
-            GetGroupeDeSupervisionCommand(uuid_proposition=kwargs.get('uuid'))
-        )
+        supervision = message_bus_instance.invoke(GetGroupeDeSupervisionCommand(uuid_proposition=kwargs.get('uuid')))
         serializer = serializers.SupervisionDTOSerializer(instance=supervision)
         return Response(serializer.data)
 
@@ -91,7 +92,7 @@ class SupervisionAPIView(
         serializers.SupervisionActorSerializer(data=request.data).is_valid(raise_exception=True)
         data = {
             'uuid_proposition': str(self.kwargs['uuid']),
-            'matricule': request.data['member']
+            'matricule': request.data['member'],
         }
         if request.data['type'] == ActorType.CA_MEMBER.name:
             serializer_cls = serializers.IdentifierMembreCACommandSerializer
@@ -110,7 +111,7 @@ class SupervisionAPIView(
         serializers.SupervisionActorSerializer(data=request.data).is_valid(raise_exception=True)
         data = {
             'uuid_proposition': str(self.kwargs['uuid']),
-            'matricule': request.data['member']
+            'matricule': request.data['member'],
         }
         if request.data['type'] == ActorType.CA_MEMBER.name:
             serializer_cls = serializers.SupprimerMembreCACommandSerializer

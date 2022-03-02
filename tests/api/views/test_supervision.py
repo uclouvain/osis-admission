@@ -23,15 +23,14 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from django.core.cache import cache
 from django.shortcuts import resolve_url
 from django.test import override_settings
 from rest_framework import status
 from rest_framework.test import APITestCase
 
 from admission.contrib.models.enums.actor_type import ActorType
-from admission.ddd.preparation.projet_doctoral.domain.model._enums import ChoixStatutProposition
-from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import (
+from admission.ddd.projet_doctoral.preparation.domain.model._enums import ChoixStatutProposition
+from admission.ddd.projet_doctoral.preparation.domain.validator.exceptions import (
     MembreCANonTrouveException,
     PromoteurNonTrouveException,
 )

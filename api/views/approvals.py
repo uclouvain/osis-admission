@@ -29,7 +29,7 @@ from rest_framework.views import APIView
 
 from admission.api import serializers
 from admission.api.schema import ResponseSpecificSchema
-from admission.ddd.preparation.projet_doctoral.commands import (
+from admission.ddd.projet_doctoral.preparation.commands import (
     ApprouverPropositionCommand,
     ApprouverPropositionParPdfCommand,
     RefuserPropositionCommand,

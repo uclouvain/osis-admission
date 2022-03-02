@@ -33,18 +33,18 @@ from rest_framework.settings import api_settings
 from admission.api import serializers
 from admission.api.permissions import IsListingOrHasNotAlreadyCreatedPermission, IsSupervisionMember
 from admission.api.schema import ResponseSpecificSchema
-from admission.ddd.preparation.projet_doctoral.commands import (
+from admission.ddd.projet_doctoral.preparation.commands import (
     CompleterPropositionCommand,
     GetPropositionCommand,
     InitierPropositionCommand,
     SearchPropositionsCandidatCommand,
     SearchPropositionsSuperviseesCommand,
+    SoumettrePropositionCommand,
     SupprimerPropositionCommand,
     VerifierProjetCommand,
     VerifierPropositionCommand,
-    SoumettrePropositionCommand,
 )
-from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import (
+from admission.ddd.projet_doctoral.preparation.domain.validator.exceptions import (
     CommissionProximiteInconsistantException,
     ContratTravailInconsistantException,
     InstitutionInconsistanteException,
@@ -207,29 +207,33 @@ class VerifySchema(ResponseSpecificSchema):
     response_description = "Verification errors"
 
     def get_responses(self, path, method):
-        return {
-            status.HTTP_200_OK: {
-                "description": self.response_description,
-                "content": {
-                    "application/json": {
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "type": "object",
-                                "properties": {
-                                    "status_code": {
-                                        "type": "string",
+        return (
+            {
+                status.HTTP_200_OK: {
+                    "description": self.response_description,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status_code": {
+                                            "type": "string",
+                                        },
+                                        "detail": {
+                                            "type": "string",
+                                        },
                                     },
-                                    "detail": {
-                                        "type": "string",
-                                    }
-                                }
+                                },
                             }
                         }
-                    }
+                    },
                 }
             }
-        } if method == 'GET' else super(VerifySchema, self).get_responses(path, method)
+            if method == 'GET'
+            else super(VerifySchema, self).get_responses(path, method)
+        )
 
 
 class VerifyProjectSchema(VerifySchema):

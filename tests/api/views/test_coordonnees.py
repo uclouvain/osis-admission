@@ -23,14 +23,13 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from unittest.mock import patch
 
 from django.shortcuts import resolve_url
 from django.test import override_settings
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from admission.ddd.preparation.projet_doctoral.domain.model._enums import ChoixStatutProposition
+from admission.ddd.projet_doctoral.preparation.domain.model._enums import ChoixStatutProposition
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.roles import CddManagerFactory
 from admission.tests.factories.supervision import CaMemberFactory, PromoterFactory
@@ -113,7 +112,10 @@ class CoordonneesTestCase(APITestCase):
 
     def test_coordonnees_update_candidate_with_submitted_proposition(self):
         self.client.force_authenticate(self.candidate_user)
-        submitted_admission = DoctorateAdmissionFactory(candidate=self.address.person, status=ChoixStatutProposition.SUBMITTED.name)
+        submitted_admission = DoctorateAdmissionFactory(
+            candidate=self.address.person,
+            status=ChoixStatutProposition.SUBMITTED.name,
+        )
         response = self.client.put(resolve_url('coordonnees', uuid=submitted_admission.uuid), self.updated_data)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         submitted_admission.delete()
