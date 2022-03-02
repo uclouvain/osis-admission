@@ -28,7 +28,7 @@ from admission.ddd.projet_doctoral.preparation.dtos import CotutelleDTO
 from admission.ddd.projet_doctoral.preparation.repository.i_groupe_de_supervision import IGroupeDeSupervisionRepository
 
 
-def get_cotutelle(
+def recuperer_cotutelle(
     cmd: 'GetCotutelleCommand',
     groupe_supervision_repository: 'IGroupeDeSupervisionRepository',
 ) -> 'CotutelleDTO':

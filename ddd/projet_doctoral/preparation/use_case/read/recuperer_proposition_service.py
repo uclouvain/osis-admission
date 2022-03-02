@@ -23,23 +23,23 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
-from admission.ddd.projet_doctoral.preparation.commands import GetGroupeDeSupervisionCommand
-from admission.ddd.projet_doctoral.preparation.domain.service.groupe_de_supervision_dto import GroupeDeSupervisionDto
-from admission.ddd.projet_doctoral.preparation.domain.service.i_membre_CA import IMembreCATranslator
-from admission.ddd.projet_doctoral.preparation.domain.service.i_promoteur import IPromoteurTranslator
-from admission.ddd.projet_doctoral.preparation.dtos import GroupeDeSupervisionDTO
-from admission.ddd.projet_doctoral.preparation.repository.i_groupe_de_supervision import IGroupeDeSupervisionRepository
+from admission.ddd.projet_doctoral.preparation.commands import GetPropositionCommand
+from admission.ddd.projet_doctoral.preparation.domain.service.i_doctorat import IDoctoratTranslator
+from admission.ddd.projet_doctoral.preparation.domain.service.i_secteur_ucl import ISecteurUclTranslator
+from admission.ddd.projet_doctoral.preparation.domain.service.get_proposition_dto import GetPropositionDTODomainService
+from admission.ddd.projet_doctoral.preparation.dtos import PropositionDTO
+from admission.ddd.projet_doctoral.preparation.repository.i_proposition import IPropositionRepository
 
 
-def get_groupe_de_supervision(
-    cmd: 'GetGroupeDeSupervisionCommand',
-    groupe_supervision_repository: 'IGroupeDeSupervisionRepository',
-    promoteur_translator: 'IPromoteurTranslator',
-    membre_ca_translator: 'IMembreCATranslator',
-) -> 'GroupeDeSupervisionDTO':
-    return GroupeDeSupervisionDto().get(
+def recuperer_proposition(
+    cmd: 'GetPropositionCommand',
+    proposition_repository: 'IPropositionRepository',
+    doctorat_translator: 'IDoctoratTranslator',
+    secteur_ucl_translator: 'ISecteurUclTranslator',
+) -> 'PropositionDTO':
+    return GetPropositionDTODomainService().get(
         uuid_proposition=cmd.uuid_proposition,
-        repository=groupe_supervision_repository,
-        promoteur_translator=promoteur_translator,
-        membre_ca_translator=membre_ca_translator,
+        repository=proposition_repository,
+        doctorat_translator=doctorat_translator,
+        secteur_ucl_translator=secteur_ucl_translator,
     )

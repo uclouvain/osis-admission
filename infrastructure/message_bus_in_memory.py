@@ -73,7 +73,7 @@ class MessageBusInMemoryCommands(AbstractMessageBusCommands):
             doctorat_translator=DoctoratInMemoryTranslator(),
         ),
         GetPropositionCommand: partial(
-            get_proposition,
+            recuperer_proposition,
             proposition_repository=PropositionInMemoryRepository(),
             doctorat_translator=DoctoratInMemoryTranslator(),
             secteur_ucl_translator=SecteurUclInMemoryTranslator(),
@@ -83,7 +83,7 @@ class MessageBusInMemoryCommands(AbstractMessageBusCommands):
             groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
         ),
         GetCotutelleCommand: partial(
-            get_cotutelle,
+            recuperer_cotutelle,
             groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
         ),
         IdentifierPromoteurCommand: partial(
@@ -99,7 +99,7 @@ class MessageBusInMemoryCommands(AbstractMessageBusCommands):
             membre_CA_translator=MembreCAInMemoryTranslator(),
         ),
         GetGroupeDeSupervisionCommand: partial(
-            get_groupe_de_supervision,
+            recuperer_groupe_de_supervision,
             groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
             promoteur_translator=PromoteurInMemoryTranslator(),
             membre_ca_translator=MembreCAInMemoryTranslator(),

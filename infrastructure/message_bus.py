@@ -65,7 +65,7 @@ class MessageBusCommands(AbstractMessageBusCommands):
             personne_connue_ucl_translator=PersonneConnueUclTranslator(),
         ),
         GetPropositionCommand: partial(
-            get_proposition,
+            recuperer_proposition,
             proposition_repository=PropositionRepository(),
             doctorat_translator=DoctoratTranslator(),
             secteur_ucl_translator=SecteurUclTranslator(),
@@ -80,7 +80,7 @@ class MessageBusCommands(AbstractMessageBusCommands):
             groupe_supervision_repository=GroupeDeSupervisionRepository(),
         ),
         GetCotutelleCommand: partial(
-            get_cotutelle,
+            recuperer_cotutelle,
             groupe_supervision_repository=GroupeDeSupervisionRepository(),
         ),
         IdentifierPromoteurCommand: partial(
@@ -96,7 +96,7 @@ class MessageBusCommands(AbstractMessageBusCommands):
             membre_CA_translator=MembreCATranslator(),
         ),
         GetGroupeDeSupervisionCommand: partial(
-            get_groupe_de_supervision,
+            recuperer_groupe_de_supervision,
             groupe_supervision_repository=GroupeDeSupervisionRepository(),
             promoteur_translator=PromoteurTranslator(),
             membre_ca_translator=MembreCATranslator(),
