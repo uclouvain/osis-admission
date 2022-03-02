@@ -115,7 +115,7 @@ class SerializerFieldsTestCase(APITestCase):
             instance=self.first_doctorate_admission
         )
         with self.assertRaisesMessage(ImproperlyConfigured, 'request'):
-            serializer.data
+            assert serializer.data
 
     def test_serializer_without_action(self):
         # The list of actions is empty -> we return an empty dictionary
@@ -244,7 +244,7 @@ class SerializerFieldsTestCase(APITestCase):
             },
         )
         with self.assertRaisesMessage(ImproperlyConfigured, 'incorrect_param'):
-            serializer.data
+            assert serializer.data
 
     def test_serializer_with_action_and_valid_permission_but_bad_path_name(self):
         # The list of actions contains one action with a bad path name -> we raise an exception
@@ -263,7 +263,7 @@ class SerializerFieldsTestCase(APITestCase):
             },
         )
         with self.assertRaisesMessage(ImproperlyConfigured, 'invalid_api_view_with_permissions'):
-            serializer.data
+            assert serializer.data
 
     def test_serializer_with_action_and_valid_permission_but_bad_view(self):
         # The list of actions contains one action with a valid path name but related to a view which doesn't
@@ -283,7 +283,7 @@ class SerializerFieldsTestCase(APITestCase):
             },
         )
         with self.assertRaisesMessage(ImproperlyConfigured, 'APIPermissionRequiredMixin'):
-            serializer.data
+            assert serializer.data
 
     def test_serializer_with_action_and_valid_permission_and_param_many_instances(self):
         # The list of actions contains one available action with a url parameter. We pass two instances and the user

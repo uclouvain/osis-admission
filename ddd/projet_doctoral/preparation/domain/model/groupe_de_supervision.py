@@ -24,7 +24,6 @@
 #
 # ##############################################################################
 import contextlib
-from dataclasses import field
 from typing import List, Optional, Union
 
 import attr
@@ -46,6 +45,7 @@ from admission.ddd.projet_doctoral.preparation.domain.validator.exceptions impor
 )
 from admission.ddd.projet_doctoral.preparation.domain.validator.validator_by_business_action import (
     ApprobationPromoteurValidatorList,
+    ApprobationValidatorList,
     ApprouverValidatorList,
     CotutelleValidatorList,
     IdentifierMembreCAValidatorList,
@@ -54,7 +54,6 @@ from admission.ddd.projet_doctoral.preparation.domain.validator.validator_by_bus
     SignatairesValidatorList,
     SupprimerMembreCAValidatorList,
     SupprimerPromoteurValidatorList,
-    ApprobationValidatorList,
 )
 from osis_common.ddd import interface
 

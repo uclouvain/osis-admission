@@ -223,11 +223,11 @@ class DoctorateAdmission(BaseAdmission):
         max_length=30,
         default=ChoixStatutProposition.IN_PROGRESS.name,
     )
-    pre_admission_submission_date = models.DateField(
+    pre_admission_submission_date = models.DateTimeField(
         verbose_name=_("Pre-admission submission date"),
         null=True,
     )
-    admission_submission_date = models.DateField(
+    admission_submission_date = models.DateTimeField(
         verbose_name=_("Admission submission date"),
         null=True,
     )

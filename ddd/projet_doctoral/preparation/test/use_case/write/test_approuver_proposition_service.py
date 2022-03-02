@@ -93,7 +93,7 @@ class TestApprouverPropositionService(SimpleTestCase):
         cmd = ApprouverPropositionParPdfCommand(
             uuid_proposition=self.uuid_proposition,
             matricule=self.matricule_promoteur,
-            pdf='some-uuid',
+            pdf=['some-uuid'],
         )
         proposition_id = self.message_bus.invoke(cmd)
         self.assertEqual(proposition_id.uuid, self.uuid_proposition)
@@ -122,7 +122,7 @@ class TestApprouverPropositionService(SimpleTestCase):
         cmd = ApprouverPropositionParPdfCommand(
             uuid_proposition=self.uuid_proposition,
             matricule=self.matricule_membre,
-            pdf='some-uuid',
+            pdf=['some-uuid'],
         )
         proposition_id = self.message_bus.invoke(cmd)
         self.assertEqual(proposition_id.uuid, self.uuid_proposition)
