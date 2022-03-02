@@ -28,7 +28,7 @@ from django.utils.translation import gettext_lazy as _
 from osis_signature.enums import SignatureState
 from rules import predicate
 
-from admission.ddd.preparation.projet_doctoral.domain.model._enums import ChoixStatutProposition
+from admission.ddd.projet_doctoral.preparation.domain.model._enums import ChoixStatutProposition
 from osis_role.errors import predicate_failed_msg
 
 from admission.contrib.models import DoctorateAdmission

@@ -25,18 +25,18 @@
 ##############################################################################
 from functools import partial
 
-from admission.ddd.preparation.projet_doctoral.commands import *
-from admission.ddd.preparation.projet_doctoral.use_case.read import *
-from admission.ddd.preparation.projet_doctoral.use_case.write import *
-from admission.infrastructure.preparation.projet_doctoral.domain.service.doctorat import DoctoratTranslator
-from admission.infrastructure.preparation.projet_doctoral.domain.service.membre_CA import MembreCATranslator
-from admission.infrastructure.preparation.projet_doctoral.domain.service.profil_candidat import ProfilCandidatTranslator
-from admission.infrastructure.preparation.projet_doctoral.domain.service.promoteur import PromoteurTranslator
-from admission.infrastructure.preparation.projet_doctoral.domain.service.secteur_ucl import SecteurUclTranslator
-from admission.infrastructure.preparation.projet_doctoral.repository.groupe_de_supervision import (
+from admission.ddd.projet_doctoral.preparation.commands import *
+from admission.ddd.projet_doctoral.preparation.use_case.read import *
+from admission.ddd.projet_doctoral.preparation.use_case.write import *
+from admission.infrastructure.projet_doctoral.preparation.domain.service.doctorat import DoctoratTranslator
+from admission.infrastructure.projet_doctoral.preparation.domain.service.membre_CA import MembreCATranslator
+from admission.infrastructure.projet_doctoral.preparation.domain.service.profil_candidat import ProfilCandidatTranslator
+from admission.infrastructure.projet_doctoral.preparation.domain.service.promoteur import PromoteurTranslator
+from admission.infrastructure.projet_doctoral.preparation.domain.service.secteur_ucl import SecteurUclTranslator
+from admission.infrastructure.projet_doctoral.preparation.repository.groupe_de_supervision import (
     GroupeDeSupervisionRepository,
 )
-from admission.infrastructure.preparation.projet_doctoral.repository.proposition import PropositionRepository
+from admission.infrastructure.projet_doctoral.preparation.repository.proposition import PropositionRepository
 from infrastructure.shared_kernel.academic_year.repository.academic_year import AcademicYearRepository
 from infrastructure.shared_kernel.personne_connue_ucl.personne_connue_ucl import PersonneConnueUclTranslator
 from infrastructure.utils import AbstractMessageBusCommands

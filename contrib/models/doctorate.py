@@ -28,20 +28,20 @@ from django.core.cache import cache
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from admission.ddd.preparation.projet_doctoral.domain.model._detail_projet import ChoixLangueRedactionThese
-from admission.ddd.preparation.projet_doctoral.domain.model._enums import (
+from admission.ddd.projet_doctoral.preparation.domain.model._detail_projet import ChoixLangueRedactionThese
+from admission.ddd.projet_doctoral.preparation.domain.model._enums import (
     ChoixCommissionProximiteCDEouCLSM,
     ChoixCommissionProximiteCDSS,
     ChoixSousDomaineSciences,
     ChoixStatutProposition,
 )
-from admission.ddd.preparation.projet_doctoral.domain.model._experience_precedente_recherche import (
-    ChoixDoctoratDejaRealise,
-)
-from admission.ddd.preparation.projet_doctoral.domain.model._financement import ChoixTypeFinancement
 from osis_document.contrib import FileField
 from osis_signature.contrib.fields import SignatureProcessField
 from .base import BaseAdmission, admission_directory_path
+from admission.ddd.projet_doctoral.preparation.domain.model._experience_precedente_recherche import (
+    ChoixDoctoratDejaRealise,
+)
+from admission.ddd.projet_doctoral.preparation.domain.model._financement import ChoixTypeFinancement
 
 REFERENCE_SEQ_NAME = 'admission_doctorateadmission_reference_seq'
 

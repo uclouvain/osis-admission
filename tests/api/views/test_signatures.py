@@ -29,9 +29,9 @@ from django.test import override_settings
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from admission.ddd.preparation.projet_doctoral.domain.model._detail_projet import ChoixLangueRedactionThese
-from admission.ddd.preparation.projet_doctoral.domain.model._financement import ChoixTypeFinancement
-from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import (
+from admission.ddd.projet_doctoral.preparation.domain.model._detail_projet import ChoixLangueRedactionThese
+from admission.ddd.projet_doctoral.preparation.domain.model._financement import ChoixTypeFinancement
+from admission.ddd.projet_doctoral.preparation.domain.validator.exceptions import (
     CotutelleDoitAvoirAuMoinsUnPromoteurExterneException,
     MembreCAManquantException,
     PromoteurManquantException,

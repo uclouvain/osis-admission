@@ -25,28 +25,28 @@
 # ##############################################################################
 from functools import partial
 
-from admission.ddd.preparation.projet_doctoral.commands import *
-from admission.ddd.preparation.projet_doctoral.use_case.read import *
-from admission.ddd.preparation.projet_doctoral.use_case.write import *
-from admission.infrastructure.preparation.projet_doctoral.domain.service.in_memory.doctorat import (
+from admission.ddd.projet_doctoral.preparation.commands import *
+from admission.ddd.projet_doctoral.preparation.use_case.read import *
+from admission.ddd.projet_doctoral.preparation.use_case.write import *
+from admission.infrastructure.projet_doctoral.preparation.domain.service.in_memory.doctorat import (
     DoctoratInMemoryTranslator,
 )
-from admission.infrastructure.preparation.projet_doctoral.domain.service.in_memory.membre_CA import (
+from admission.infrastructure.projet_doctoral.preparation.domain.service.in_memory.membre_CA import (
     MembreCAInMemoryTranslator,
 )
-from admission.infrastructure.preparation.projet_doctoral.domain.service.in_memory.profil_candidat import (
+from admission.infrastructure.projet_doctoral.preparation.domain.service.in_memory.profil_candidat import (
     ProfilCandidatInMemoryTranslator,
 )
-from admission.infrastructure.preparation.projet_doctoral.domain.service.in_memory.promoteur import (
+from admission.infrastructure.projet_doctoral.preparation.domain.service.in_memory.promoteur import (
     PromoteurInMemoryTranslator,
 )
-from admission.infrastructure.preparation.projet_doctoral.domain.service.in_memory.secteur_ucl import (
+from admission.infrastructure.projet_doctoral.preparation.domain.service.in_memory.secteur_ucl import (
     SecteurUclInMemoryTranslator,
 )
-from admission.infrastructure.preparation.projet_doctoral.repository.in_memory.groupe_de_supervision import (
+from admission.infrastructure.projet_doctoral.preparation.repository.in_memory.groupe_de_supervision import (
     GroupeDeSupervisionInMemoryRepository,
 )
-from admission.infrastructure.preparation.projet_doctoral.repository.in_memory.proposition import (
+from admission.infrastructure.projet_doctoral.preparation.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
 from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
