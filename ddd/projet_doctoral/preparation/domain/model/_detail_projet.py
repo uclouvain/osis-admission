@@ -23,7 +23,6 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
-from dataclasses import field
 from typing import List, Optional
 
 import attr

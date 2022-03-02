@@ -314,7 +314,7 @@ class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
     def test_supervision_supprimer_membre_no_role(self):
         self.client.force_authenticate(user=self.no_role_user)
 
-        promoter = PromoterFactory(process=self.promoter.actor_ptr.process)
+        PromoterFactory(process=self.promoter.actor_ptr.process)
 
         response = self.client.post(self.url, data={
             'member': self.promoter.person.global_id,
