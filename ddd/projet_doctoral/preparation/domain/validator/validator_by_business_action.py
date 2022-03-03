@@ -24,10 +24,11 @@
 #
 # ##############################################################################
 import datetime
-from typing import List, Optional, Set, TYPE_CHECKING, Union
+from typing import List, Optional, Set, Union
 
 import attr
 
+from admission.ddd.projet_doctoral.preparation.business_types import *
 from admission.ddd.projet_doctoral.preparation.domain.model._enums import ChoixTypeAdmission
 from admission.ddd.projet_doctoral.preparation.domain.model._experience_precedente_recherche import (
     ChoixDoctoratDejaRealise,
