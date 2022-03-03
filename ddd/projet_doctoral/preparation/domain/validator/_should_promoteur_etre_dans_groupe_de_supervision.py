@@ -23,18 +23,13 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import TYPE_CHECKING
-
 import attr
 
-from admission.ddd.projet_doctoral.preparation.domain.model._promoteur import PromoteurIdentity
+from admission.ddd.projet_doctoral.preparation.business_types import *
 from admission.ddd.projet_doctoral.preparation.domain.validator.exceptions import (
     PromoteurNonTrouveException,
 )
 from base.ddd.utils.business_validator import BusinessValidator
-
-if TYPE_CHECKING:
-    from admission.ddd.projet_doctoral.preparation.domain.model.groupe_de_supervision import GroupeDeSupervision
 
 
 @attr.dataclass(frozen=True, slots=True)

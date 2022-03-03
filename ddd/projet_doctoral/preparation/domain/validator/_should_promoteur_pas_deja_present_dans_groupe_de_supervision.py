@@ -25,13 +25,9 @@
 # ##############################################################################
 import attr
 
-from admission.ddd.projet_doctoral.preparation.domain.model._promoteur import PromoteurIdentity
+from admission.ddd.projet_doctoral.preparation.business_types import *
 from admission.ddd.projet_doctoral.preparation.domain.validator.exceptions import DejaPromoteurException
 from base.ddd.utils.business_validator import BusinessValidator
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from admission.ddd.projet_doctoral.preparation.domain.model.groupe_de_supervision import GroupeDeSupervision
 
 
 @attr.dataclass(frozen=True, slots=True)
