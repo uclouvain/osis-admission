@@ -744,7 +744,7 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
         self.assertEqual(response.json().get('uuid'), str(admission.uuid))
 
         self.assertEqual(updated_admission.status, ChoixStatutProposition.SUBMITTED.name)
-        self.assertEqual(updated_admission.admission_submission_date, datetime.date.today())
+        self.assertEqual(updated_admission.admission_submission_date.date(), datetime.date.today())
 
     def test_submit_invalid_proposition_using_api(self):
         admission = DoctorateAdmissionFactory(

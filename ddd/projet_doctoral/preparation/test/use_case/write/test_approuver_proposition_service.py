@@ -106,7 +106,7 @@ class TestApprouverPropositionService(SimpleTestCase):
         self.assertEqual(signatures[0].commentaire_interne, '')
         self.assertEqual(signatures[0].commentaire_externe, '')
         self.assertEqual(signatures[0].motif_refus, '')
-        self.assertEqual(signatures[0].pdf, 'some-uuid')
+        self.assertEqual(signatures[0].pdf, ['some-uuid'])
 
     def test_should_approuver_membre_ca(self):
         cmd = attr.evolve(self.cmd, matricule=self.matricule_membre)
@@ -131,7 +131,7 @@ class TestApprouverPropositionService(SimpleTestCase):
         self.assertEqual(len(signatures), 2)
         self.assertEqual(signatures[-1].membre_CA_id.matricule, self.matricule_membre)
         self.assertEqual(signatures[-1].etat, ChoixEtatSignature.APPROVED)
-        self.assertEqual(signatures[-1].pdf, 'some-uuid')
+        self.assertEqual(signatures[-1].pdf, ['some-uuid'])
 
     def test_should_pas_approuve_si_pas_dans_groupe(self):
         cmd = attr.evolve(self.cmd, matricule='paspromoteur')
