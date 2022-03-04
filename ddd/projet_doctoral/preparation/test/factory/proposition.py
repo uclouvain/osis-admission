@@ -174,6 +174,12 @@ class PropositionAdmissionSC3DPAvecPromoteurDejaApprouveFactory(PropositionAdmis
     entity_id = factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-SC3DP-promoteur-deja-approuve')
 
 
+class PropositionAdmissionSC3DPAvecPromoteurRefuseEtMembreCADejaApprouveFactory(
+    PropositionAdmissionSC3DPMinimaleFactory
+):
+    entity_id = factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-SC3DP-promoteur-refus-membre-deja-approuve')
+
+
 class PropositionAdmissionSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory(PropositionAdmissionSC3DPMinimaleFactory):
     entity_id = factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-SC3DP-promoteurs-membres-deja-approuves')
     matricule_candidat = '0123456789'

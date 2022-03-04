@@ -260,6 +260,27 @@ class GroupeDeSupervisionSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory(_Gro
     statut_signature = ChoixStatutSignatureGroupeDeSupervision.SIGNING_IN_PROGRESS
 
 
+class GroupeDeSupervisionSC3DPAvecPromoteurRefuseEtMembreCADejaApprouveFactory(_GroupeDeSupervisionFactory):
+    proposition_id = factory.SubFactory(
+        _PropositionIdentityFactory,
+        uuid='uuid-SC3DP-promoteur-refus-membre-deja-approuve',
+    )
+    signatures_promoteurs = factory.LazyFunction(
+        lambda: [
+            _SignaturePromoteurFactory(
+                promoteur_id__matricule='promoteur-SC3DP',
+                etat=ChoixEtatSignature.DECLINED,
+            ),
+        ]
+    )
+    signatures_membres_CA = factory.LazyFunction(
+        lambda: [
+            _SignatureMembreCAFactory(membre_CA_id__matricule='membre-ca-SC3DP', etat=ChoixEtatSignature.APPROVED),
+        ]
+    )
+    cotutelle = pas_de_cotutelle
+
+
 class GroupeDeSupervisionPreSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory(
     GroupeDeSupervisionSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory,
 ):

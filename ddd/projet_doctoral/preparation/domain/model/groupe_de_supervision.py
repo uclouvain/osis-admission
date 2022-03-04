@@ -114,14 +114,15 @@ class GroupeDeSupervision(interface.Entity):
         return membre_CA
 
     def inviter_a_signer(self) -> None:
-        """Inviter à signer tous les promoteurs et membres CA non invités"""
-        for promoteur in filter(lambda s: s.etat == ChoixEtatSignature.NOT_INVITED, self.signatures_promoteurs):
+        """Inviter à signer tous les promoteurs et membres CA non invités ou refusés"""
+        etats_initiaux = [ChoixEtatSignature.NOT_INVITED, ChoixEtatSignature.DECLINED]
+        for promoteur in filter(lambda s: s.etat in etats_initiaux, self.signatures_promoteurs):
             InviterASignerValidatorList(groupe_de_supervision=self, signataire_id=promoteur.promoteur_id).validate()
             self.signatures_promoteurs = [s for s in self.signatures_promoteurs if s != promoteur]
             self.signatures_promoteurs.append(
                 SignaturePromoteur(promoteur_id=promoteur.promoteur_id, etat=ChoixEtatSignature.INVITED)
             )
-        for membre_CA in filter(lambda s: s.etat == ChoixEtatSignature.NOT_INVITED, self.signatures_membres_CA):
+        for membre_CA in filter(lambda s: s.etat in etats_initiaux, self.signatures_membres_CA):
             InviterASignerValidatorList(groupe_de_supervision=self, signataire_id=membre_CA.membre_CA_id).validate()
             self.signatures_membres_CA = [s for s in self.signatures_membres_CA if s != membre_CA]
             self.signatures_membres_CA.append(
