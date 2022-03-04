@@ -41,13 +41,14 @@ class ShouldSignatairePasDejaInvite(BusinessValidator):
     signataire_id: Union['PromoteurIdentity', 'MembreCAIdentity']
 
     def validate(self, *args, **kwargs):
+        etats_initiaux = [ChoixEtatSignature.NOT_INVITED, ChoixEtatSignature.DECLINED]
         if any(
-            s
-            for s in self.groupe_de_supervision.signatures_promoteurs
-            if s.promoteur_id == self.signataire_id and s.etat != ChoixEtatSignature.NOT_INVITED
+            signature
+            for signature in self.groupe_de_supervision.signatures_promoteurs
+            if signature.promoteur_id == self.signataire_id and signature.etat not in etats_initiaux
         ) or any(
-            s
-            for s in self.groupe_de_supervision.signatures_membres_CA
-            if s.membre_CA_id == self.signataire_id and s.etat != ChoixEtatSignature.NOT_INVITED
+            signature
+            for signature in self.groupe_de_supervision.signatures_membres_CA
+            if signature.membre_CA_id == self.signataire_id and signature.etat not in etats_initiaux
         ):
             raise SignataireDejaInviteException
