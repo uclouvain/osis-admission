@@ -57,18 +57,19 @@ class IPropositionRepository(interface.AbstractRepository):
     @classmethod
     @abc.abstractmethod
     def search_dto(
-            cls,
-            numero: Optional[str] = '',
-            matricule_candidat: Optional[str] = '',
-            etat: Optional[str] = '',
-            nationalite: Optional[str] = '',
-            type: Optional[str] = '',
-            commission_proximite: Optional[str] = '',
-            annee_academique: Optional[int] = None,
-            sigle_formation: Optional[str] = '',
-            financement: Optional[str] = '',
-            matricule_promoteur: Optional[str] = '',
-            cotutelle: Optional[bool] = None,
+        cls,
+        numero: Optional[str] = '',
+        matricule_candidat: Optional[str] = '',
+        etat: Optional[str] = '',
+        nationalite: Optional[str] = '',
+        type: Optional[str] = '',
+        commission_proximite: Optional[str] = '',
+        annee_academique: Optional[int] = None,
+        sigle_formation: Optional[str] = '',
+        financement: Optional[str] = '',
+        matricule_promoteur: Optional[str] = '',
+        cotutelle: Optional[bool] = None,
+        entity_ids: Optional[List['PropositionIdentity']] = None,
     ) -> List['PropositionDTO']:
         raise NotImplementedError
 

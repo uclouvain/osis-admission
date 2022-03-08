@@ -29,12 +29,19 @@ from django.test import TestCase
 from admission.ddd.projet_doctoral.preparation.commands import GetPropositionCommand
 from admission.ddd.projet_doctoral.preparation.domain.model._enums import ChoixTypeAdmission
 from admission.ddd.projet_doctoral.preparation.domain.validator.exceptions import PropositionNonTrouveeException
+from admission.ddd.projet_doctoral.preparation.test.factory.person import PersonneConnueUclDTOFactory
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
+from infrastructure.shared_kernel.personne_connue_ucl.in_memory.personne_connue_ucl import (
+    PersonneConnueUclInMemoryTranslator,
+)
 
 
 class GetPropositionTestCase(TestCase):
     def setUp(self):
-        self.cmd = GetPropositionCommand(uuid_proposition='uuid-SC3DP')
+        PersonneConnueUclInMemoryTranslator.personnes_connues_ucl = {
+            PersonneConnueUclDTOFactory(matricule='0123456789'),
+        }
+        self.cmd = GetPropositionCommand(uuid_proposition='uuid-ECGE3DP')
         self.message_bus = message_bus_in_memory_instance
 
     def test_get_proposition(self):

@@ -23,40 +23,26 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from datetime import datetime
-from typing import List, Optional
 
-from admission.ddd.projet_doctoral.validation.domain.model.demande import Demande, DemandeIdentity
-from admission.ddd.projet_doctoral.validation.dtos import DemandeDTO, DemandeRechercheDTO
+from admission.ddd.projet_doctoral.validation.builder.demande_identity import DemandeIdentityBuilder
+from admission.ddd.projet_doctoral.validation.commands import RefuserDemandeCddCommand
+from admission.ddd.projet_doctoral.validation.domain.model.demande import DemandeIdentity
 from admission.ddd.projet_doctoral.validation.repository.i_demande import IDemandeRepository
-from base.ddd.utils.in_memory_repository import InMemoryGenericRepository
 
 
-class DemandeInMemoryRepository(InMemoryGenericRepository, IDemandeRepository):
-    entities: List[Demande] = list()
-    dtos: List[DemandeRechercheDTO] = list()
+def refuser_demande_cdd(
+    cmd: 'RefuserDemandeCddCommand',
+    demande_repository: 'IDemandeRepository',
+) -> 'DemandeIdentity':
+    # GIVEN
+    demande_id = DemandeIdentityBuilder.build_from_uuid(cmd.uuid)
+    demande = demande_repository.get(demande_id)
 
-    @classmethod
-    def search_dto(
-        cls,
-        etat_cdd: Optional[str] = '',
-        etat_sic: Optional[str] = '',
-        date_pre_admission_debut: Optional[datetime] = None,
-        date_pre_admission_fin: Optional[datetime] = None,
-        entity_ids: Optional[List['DemandeIdentity']] = None,
-        **kwargs,
-    ) -> List['DemandeDTO']:
-        matching: List[DemandeDTO] = []
-        # TODO
-        return matching
+    # WHEN
+    demande.refuser_cdd()
 
-    @classmethod
-    def search(cls, entity_ids: Optional[List['DemandeIdentity']] = None, **kwargs) -> List['Demande']:
-        return [e for e in cls.entities if e.entity_id in entity_ids]
+    # THEN
+    demande_repository.save(demande)
+    # TODO :: notification
 
-    @classmethod
-    def reset(cls):
-        cls.entities = []
-
-    def get_dto(cls, entity_id) -> DemandeDTO:
-        pass
+    return demande.entity_id

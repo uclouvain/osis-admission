@@ -32,6 +32,7 @@ from admission.ddd.projet_doctoral.validation.domain.model.demande import Demand
 from admission.ddd.projet_doctoral.validation.dtos import DemandeDTO, DemandeRechercheDTO
 from admission.ddd.projet_doctoral.validation.repository.i_demande import IDemandeRepository
 
+
 class DemandeRepository(IDemandeRepository):
     # TODO
     #   Créer un proxy model Django pour ne travailler que sur les champs qui concernent la demande
@@ -40,22 +41,13 @@ class DemandeRepository(IDemandeRepository):
     @classmethod
     def search_dto(
         cls,
-        numero: Optional[str] = '',
         etat_cdd: Optional[str] = '',
         etat_sic: Optional[str] = '',
-        nom_prenom_email: Optional[str] = '',
-        nationalite: Optional[str] = '',
-        type: Optional[str] = '',
-        commission_proximite: Optional[str] = '',
-        annee_academique: Optional[str] = '',
-        sigle_formation: Optional[str] = '',
-        financement: Optional[str] = '',
-        matricule_promoteur: Optional[str] = '',
-        cotutelle: Optional[bool] = None,
         date_pre_admission_debut: Optional[datetime] = None,
         date_pre_admission_fin: Optional[datetime] = None,
+        entity_ids: Optional[List['DemandeIdentity']] = None,
         **kwargs,
-    ) -> List['DemandeRechercheDTO']:
+    ) -> List['DemandeDTO']:
         raise NotImplementedError
 
     @classmethod
@@ -107,8 +99,10 @@ class DemandeRepository(IDemandeRepository):
                         'street': entity.profil_candidat.rue,
                         'street_number': entity.profil_candidat.numero_rue,
                         'postal_box': entity.profil_candidat.boite_postale,
-                    }
+                    },
                 },
+                'pre_admission_submission_date': entity.pre_admission_acceptee_le,
+                'admission_submission_date': entity.admission_acceptee_le,
             },
         )
 

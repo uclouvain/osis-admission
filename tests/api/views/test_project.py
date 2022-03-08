@@ -750,25 +750,27 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
 
         self.assertEqual(updated_admission.status, ChoixStatutProposition.SUBMITTED.name)
         self.assertEqual(updated_admission.admission_submission_date.date(), datetime.date.today())
-        self.maxDiff = None
-        self.assertEqual(updated_admission.submitted_profile, {
-            'identification': {
-                'first_name': self.first_candidate.first_name,
-                'last_name': self.first_candidate.last_name,
-                'gender': self.first_candidate.gender,
-                'country_of_citizenship': self.first_candidate.country_of_citizenship.iso_code,
+        self.assertEqual(
+            updated_admission.submitted_profile,
+            {
+                'identification': {
+                    'first_name': self.first_candidate.first_name,
+                    'last_name': self.first_candidate.last_name,
+                    'gender': self.first_candidate.gender,
+                    'country_of_citizenship': self.first_candidate.country_of_citizenship.iso_code,
+                },
+                'coordinates': {
+                    'email': self.first_candidate.email,
+                    'country': 'BE',
+                    'postal_code': '1348',
+                    'city': 'Louvain-La-Neuve',
+                    'place': 'P2',
+                    'street': 'University street',
+                    'street_number': '2',
+                    'postal_box': 'B2',
+                },
             },
-            'coordinates': {
-                'email': self.first_candidate.email,
-                'country': 'BE',
-                'postal_code': '1348',
-                'city': 'Louvain-La-Neuve',
-                'place': 'P2',
-                'street': 'University street',
-                'street_number': '2',
-                'postal_box': 'B2',
-            }
-        })
+        )
 
     def test_submit_invalid_proposition_using_api(self):
         admission = DoctorateAdmissionFactory(

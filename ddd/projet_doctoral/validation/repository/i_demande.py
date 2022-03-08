@@ -30,7 +30,7 @@ from typing import List, Optional
 
 from admission.ddd.projet_doctoral.validation.domain.model.demande import Demande
 from admission.ddd.projet_doctoral.validation.domain.model.demande import DemandeIdentity
-from admission.ddd.projet_doctoral.validation.dtos import DemandeDTO, DemandeRechercheDTO
+from admission.ddd.projet_doctoral.validation.dtos import DemandeDTO
 from osis_common.ddd import interface
 
 
@@ -44,22 +44,13 @@ class IDemandeRepository(interface.AbstractRepository):
     @abc.abstractmethod
     def search_dto(
         cls,
-        numero: Optional[str] = '',
         etat_cdd: Optional[str] = '',
         etat_sic: Optional[str] = '',
-        matricule_candidat: Optional[str] = '',
-        nationalite: Optional[str] = '',
-        type: Optional[str] = '',
-        commission_proximite: Optional[str] = '',
-        annee_academique: Optional[int] = None,
-        sigle_formation: Optional[str] = '',
-        financement: Optional[str] = '',
-        matricule_promoteur: Optional[str] = '',
-        cotutelle: Optional[bool] = None,
         date_pre_admission_debut: Optional[datetime] = None,
         date_pre_admission_fin: Optional[datetime] = None,
+        entity_ids: Optional[List['DemandeIdentity']] = None,
         **kwargs,
-    ) -> List['DemandeRechercheDTO']:
+    ) -> List['DemandeDTO']:
         raise NotImplementedError
 
     @classmethod
