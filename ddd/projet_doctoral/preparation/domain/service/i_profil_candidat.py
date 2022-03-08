@@ -35,8 +35,6 @@ from osis_common.ddd import interface
 
 
 class IProfilCandidatTranslator(interface.DomainService):
-    CODES_LANGUES_REQUISES = ['FR', 'EN']
-
     NB_MAX_ANNEES_CV_REQUISES = 5
 
     @classmethod
