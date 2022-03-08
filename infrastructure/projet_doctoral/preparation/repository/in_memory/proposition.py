@@ -27,6 +27,7 @@ from typing import List, Optional
 
 from admission.ddd.projet_doctoral.preparation.domain.model.proposition import Proposition, PropositionIdentity
 from admission.ddd.projet_doctoral.preparation.domain.validator.exceptions import PropositionNonTrouveeException
+from admission.ddd.projet_doctoral.preparation.dtos import PropositionCandidatDTO, PropositionDTO
 from admission.ddd.projet_doctoral.preparation.repository.i_proposition import IPropositionRepository
 from admission.ddd.projet_doctoral.preparation.test.factory.proposition import (
     PropositionAdmissionECGE3DPMinimaleFactory,
@@ -108,3 +109,24 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
     @classmethod
     def get_next_reference(cls):
         return len(cls.entities) + 1
+
+    @classmethod
+    def search_dto(
+        cls,
+        numero: Optional[str] = '',
+        matricule_candidat: Optional[str] = '',
+        etat: Optional[str] = '',
+        nationalite: Optional[str] = '',
+        type: Optional[str] = '',
+        commission_proximite: Optional[str] = '',
+        annee_academique: Optional[str] = '',
+        sigle_formation: Optional[str] = '',
+        financement: Optional[str] = '',
+        matricule_promoteur: Optional[str] = '',
+        cotutelle: Optional[bool] = None,
+    ) -> List['PropositionCandidatDTO']:
+        raise NotImplementedError
+
+    @classmethod
+    def get_dto(cls, entity_id: 'PropositionIdentity') -> 'PropositionDTO':
+        raise NotImplementedError
