@@ -34,7 +34,7 @@ from infrastructure.shared_kernel.personne_connue_ucl.in_memory.personne_connue_
 )
 
 
-class TestListerDoctoratCandidatService(SimpleTestCase):
+class TestListerPropositionsCandidatService(SimpleTestCase):
     def setUp(self) -> None:
         PersonneConnueUclInMemoryTranslator.personnes_connues_ucl = {
             PersonneConnueUclDTOFactory(matricule='0123456789'),

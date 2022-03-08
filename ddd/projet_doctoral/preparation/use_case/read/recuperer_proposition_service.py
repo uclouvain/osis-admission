@@ -23,23 +23,53 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
+from admission.ddd.projet_doctoral.preparation.builder.proposition_identity_builder import PropositionIdentityBuilder
 from admission.ddd.projet_doctoral.preparation.commands import GetPropositionCommand
 from admission.ddd.projet_doctoral.preparation.domain.service.i_doctorat import IDoctoratTranslator
 from admission.ddd.projet_doctoral.preparation.domain.service.i_secteur_ucl import ISecteurUclTranslator
 from admission.ddd.projet_doctoral.preparation.domain.service.get_proposition_dto import GetPropositionDTODomainService
-from admission.ddd.projet_doctoral.preparation.dtos import PropositionDTO
+from admission.ddd.projet_doctoral.preparation.dtos import AfficherPropositionDTO
 from admission.ddd.projet_doctoral.preparation.repository.i_proposition import IPropositionRepository
 
 
 def recuperer_proposition(
-    cmd: 'GetPropositionCommand',
-    proposition_repository: 'IPropositionRepository',
-    doctorat_translator: 'IDoctoratTranslator',
-    secteur_ucl_translator: 'ISecteurUclTranslator',
-) -> 'PropositionDTO':
-    return GetPropositionDTODomainService().get(
-        uuid_proposition=cmd.uuid_proposition,
-        repository=proposition_repository,
-        doctorat_translator=doctorat_translator,
-        secteur_ucl_translator=secteur_ucl_translator,
+        cmd: 'GetPropositionCommand',
+        proposition_repository: 'IPropositionRepository',
+        doctorat_translator: 'IDoctoratTranslator',
+        secteur_ucl_translator: 'ISecteurUclTranslator',
+) -> 'AfficherPropositionDTO':
+    dto = proposition_repository.get_dto(PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition))
+    return AfficherPropositionDTO(
+        uuid=dto.uuid,
+        type_admission=dto.type_admission,
+        reference=dto.reference,
+        justification=dto.justification,
+        sigle_doctorat=dto.sigle_doctorat,
+        annee_doctorat=dto.annee_doctorat,
+        intitule_doctorat_fr=dto.intitule_doctorat_fr,
+        intitule_doctorat_en=dto.intitule_doctorat_en,
+        matricule_candidat=dto.matricule_candidat,
+        code_secteur_formation=dto.code_secteur_formation,
+        commission_proximite=dto.commission_proximite,
+        type_financement=dto.type_financement,
+        type_contrat_travail=dto.type_contrat_travail,
+        eft=dto.eft,
+        bourse_recherche=dto.bourse_recherche,
+        duree_prevue=dto.duree_prevue,
+        temps_consacre=dto.temps_consacre,
+        titre_projet=dto.titre_projet,
+        resume_projet=dto.resume_projet,
+        documents_projet=dto.documents_projet,
+        graphe_gantt=dto.graphe_gantt,
+        proposition_programme_doctoral=dto.proposition_programme_doctoral,
+        projet_formation_complementaire=dto.projet_formation_complementaire,
+        lettres_recommandation=dto.lettres_recommandation,
+        langue_redaction_these=dto.langue_redaction_these,
+        institut_these=dto.institut_these,
+        lieu_these=dto.lieu_these,
+        doctorat_deja_realise=dto.doctorat_deja_realise,
+        institution=dto.institution,
+        date_soutenance=dto.date_soutenance,
+        raison_non_soutenue=dto.raison_non_soutenue,
+        statut=dto.statut,
     )
