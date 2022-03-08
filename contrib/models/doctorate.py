@@ -231,6 +231,10 @@ class DoctorateAdmission(BaseAdmission):
         verbose_name=_("Admission submission date"),
         null=True,
     )
+    submitted_profile = JSONField(
+        verbose_name=_("Submitted profile"),
+        default=dict,
+    )
 
     supervision_group = SignatureProcessField()
 

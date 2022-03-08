@@ -65,6 +65,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
             numero_carte_identite=person.id_card_number,
             numero_passeport=person.passport_number,
             date_expiration_passeport=person.passport_expiration_date,
+            email=person.email,
         )
 
     @classmethod
@@ -86,6 +87,9 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                 code_postal=domicile_legal.postal_code,
                 ville=domicile_legal.city,
                 pays=domicile_legal.country.iso_code if domicile_legal.country else None,
+                boite_postale=domicile_legal.postal_box,
+                numero_rue=domicile_legal.street_number,
+                lieu_dit=domicile_legal.place,
             )
             if domicile_legal
             else None,
@@ -94,6 +98,9 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                 code_postal=adresse_correspondance.postal_code,
                 ville=adresse_correspondance.city,
                 pays=adresse_correspondance.country.iso_code if adresse_correspondance.country else None,
+                boite_postale=adresse_correspondance.postal_box,
+                numero_rue=adresse_correspondance.street_number,
+                lieu_dit=adresse_correspondance.place,
             )
             if adresse_correspondance
             else None,

@@ -38,6 +38,7 @@ from admission.infrastructure.projet_doctoral.preparation.repository.groupe_de_s
     GroupeDeSupervisionRepository,
 )
 from admission.infrastructure.projet_doctoral.preparation.repository.proposition import PropositionRepository
+from admission.infrastructure.projet_doctoral.validation.repository.demande import DemandeRepository
 from infrastructure.shared_kernel.academic_year.repository.academic_year import AcademicYearRepository
 from infrastructure.shared_kernel.personne_connue_ucl.personne_connue_ucl import PersonneConnueUclTranslator
 from infrastructure.utils import AbstractMessageBusCommands
@@ -141,6 +142,7 @@ class MessageBusCommands(AbstractMessageBusCommands):
             soumettre_proposition,
             proposition_repository=PropositionRepository(),
             groupe_supervision_repository=GroupeDeSupervisionRepository(),
+            demande_repository=DemandeRepository(),
             profil_candidat_translator=ProfilCandidatTranslator(),
             academic_year_repository=AcademicYearRepository(),
             historique=Historique(),

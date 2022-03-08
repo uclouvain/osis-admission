@@ -23,39 +23,19 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import datetime
-from typing import List, Optional
-
-import attr
-
+from admission.ddd.projet_doctoral.preparation.builder.proposition_identity_builder import PropositionIdentityBuilder
 from admission.ddd.projet_doctoral.preparation.domain.model.proposition import PropositionIdentity
-from admission.ddd.projet_doctoral.validation.domain.model._enums import ChoixStatutCDD, ChoixStatutSIC
-from admission.ddd.projet_doctoral.validation.domain.model._profil_candidat import ProfilCandidat
-from osis_common.ddd import interface
+
+from admission.ddd.projet_doctoral.validation.builder.demande_identity import DemandeIdentityBuilder
+from admission.ddd.projet_doctoral.validation.domain.model.demande import DemandeIdentity
+from osis_common.ddd.interface import DomainService
 
 
-@attr.dataclass(frozen=True, slots=True)
-class DemandeIdentity(interface.EntityIdentity):
-    uuid: str
+class PropositionIdentityTranslator(DomainService):
+    @classmethod
+    def convertir_depuis_demande(cls, demande_id: DemandeIdentity) -> PropositionIdentity:
+        return PropositionIdentityBuilder.build_from_uuid(demande_id.uuid)
 
-
-@attr.dataclass(slots=True, hash=False, eq=False)
-class Demande(interface.RootEntity):
-    entity_id: DemandeIdentity
-    proposition_id: PropositionIdentity
-    profil_candidat: ProfilCandidat
-    statut_cdd: ChoixStatutCDD = ChoixStatutCDD.TO_BE_VERIFIED
-    statut_sic: ChoixStatutSIC = ChoixStatutSIC.TO_BE_VERIFIED
-    matricule_gestionnaire: Optional[str] = ''
-    onglets_ouverts: List[str] = attr.Factory(list)
-    modifiee_le: Optional[datetime.datetime] = None
-    pre_admission_acceptee_le: Optional[datetime.datetime] = None
-    admission_acceptee_le: Optional[datetime.datetime] = None
-
-    # def refuser_cdd(self) -> None:
-    #     RefuserDemandeCDDValidatorList(self).validate()
-    #     self.statut_cdd = ChoixStatutCDD.REJECTED
-    #
-    # def approuver_cdd(self) -> None:
-    #     ApprouverDemandeCDDValidatorList(self).validate()
-    #     self.statut_cdd = ChoixStatutCDD.ACCEPTED
+    @classmethod
+    def convertir_en_demande(cls, proposition_id: PropositionIdentity) -> DemandeIdentity:
+        return DemandeIdentityBuilder.build_from_uuid(proposition_id.uuid)

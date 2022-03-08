@@ -61,6 +61,7 @@ class IdentificationDTO(interface.DTO):
     date_expiration_passeport: Optional[datetime.date]
 
     langue_contact: Optional[str]
+    email: Optional[str]
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -69,6 +70,9 @@ class AdressePersonnelleDTO(interface.DTO):
     code_postal: Optional[str]
     ville: Optional[str]
     pays: Optional[str]
+    lieu_dit: Optional[str]
+    numero_rue: Optional[str]
+    boite_postale: Optional[str]
 
 
 @attr.dataclass(frozen=True, slots=True)

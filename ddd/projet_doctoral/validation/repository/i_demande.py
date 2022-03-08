@@ -38,7 +38,7 @@ class IDemandeRepository(interface.AbstractRepository):
     @classmethod
     @abc.abstractmethod
     def get(cls, entity_id: 'DemandeIdentity') -> 'Demande':  # type: ignore[override]
-        pass
+        raise NotImplementedError
 
     @classmethod
     @abc.abstractmethod
@@ -60,19 +60,19 @@ class IDemandeRepository(interface.AbstractRepository):
         date_pre_admission_fin: Optional[datetime] = None,
         **kwargs,
     ) -> List['DemandeRechercheDTO']:
-        pass
+        raise NotImplementedError
 
     @classmethod
     @abc.abstractmethod
     def delete(cls, entity_id: 'DemandeIdentity', **kwargs) -> None:  # type: ignore[override]
-        pass
+        raise NotImplementedError
 
     @classmethod
     @abc.abstractmethod
     def save(cls, entity: 'Demande') -> None:  # type: ignore[override]
-        pass
+        raise NotImplementedError
 
     @classmethod
     @abc.abstractmethod
     def get_dto(cls, entity_id: DemandeIdentity) -> DemandeDTO:
-        pass
+        raise NotImplementedError

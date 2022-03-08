@@ -54,6 +54,7 @@ class ProfilCandidat:
     photo_identite: List[str]
     curriculum: List[str]
     annee_derniere_inscription_ucl: Optional[int]
+    email: Optional[str]
 
     # Pièces d'identité
     carte_identite: List[str]
@@ -70,6 +71,9 @@ class AdressePersonnelle:
     code_postal: Optional[str]
     ville: Optional[str]
     pays: Optional[str]
+    lieu_dit: Optional[str]
+    numero_rue: Optional[str]
+    boite_postale: Optional[str]
     personne: str
     type: str
 
@@ -130,6 +134,7 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
             date_expiration_passeport=datetime.date(2022, 2, 10),
             curriculum=['uuid14'],
             annee_derniere_inscription_ucl=None,
+            email='john.doe@ucl.be',
         ),
     ]
     adresses_candidats = [
@@ -140,6 +145,9 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
             pays='BE',
             rue="Boulevard de Wallonie",
             type='RESIDENTIAL',
+            lieu_dit='',
+            numero_rue='10',
+            boite_postale='B1',
         ),
         AdressePersonnelle(
             personne=matricule_candidat,
@@ -148,6 +156,9 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
             pays='BE',
             rue="Place de l'Université",
             type='CONTACT',
+            lieu_dit='',
+            numero_rue='14',
+            boite_postale='B2',
         ),
     ]
     langues = [
@@ -192,6 +203,7 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 numero_carte_identite=candidate.numero_carte_identite,
                 numero_passeport=candidate.numero_passeport,
                 date_expiration_passeport=candidate.date_expiration_passeport,
+                email=candidate.email,
             )
         except StopIteration:  # pragma: no cover
             raise CandidatNonTrouveException
@@ -213,6 +225,9 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 code_postal=domicile_legal.code_postal,
                 ville=domicile_legal.ville,
                 pays=domicile_legal.pays,
+                lieu_dit=domicile_legal.lieu_dit,
+                numero_rue=domicile_legal.numero_rue,
+                boite_postale=domicile_legal.boite_postale,
             )
             if domicile_legal
             else None,
@@ -221,6 +236,9 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 code_postal=adresse_correspondance.code_postal,
                 ville=adresse_correspondance.ville,
                 pays=adresse_correspondance.pays,
+                lieu_dit=adresse_correspondance.lieu_dit,
+                numero_rue=adresse_correspondance.numero_rue,
+                boite_postale=adresse_correspondance.boite_postale,
             )
             if adresse_correspondance
             else None,

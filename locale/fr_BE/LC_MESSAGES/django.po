@@ -587,6 +587,9 @@ msgstr "Soumis"
 msgid "Scholarship grant"
 msgstr "Bourse de recherche"
 
+msgid "Submitted profile"
+msgstr "Profil soumis"
+
 msgid "Supervision group not found."
 msgstr "Groupe de supervision non trouvé."
 

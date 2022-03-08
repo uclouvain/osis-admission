@@ -57,8 +57,28 @@ class CompletePersonFactory(PersonFactory):
     @factory.post_generation
     def create_related_objects(self, create, extracted, **kwargs):
         # Create addresses
-        PersonAddressFactory(person=self, label=PersonAddressType.RESIDENTIAL.name, street="Test")
-        PersonAddressFactory(person=self, label=PersonAddressType.CONTACT.name, street="Test")
+        PersonAddressFactory(
+            person=self,
+            label=PersonAddressType.RESIDENTIAL.name,
+            street='University street',
+            street_number='1',
+            postal_code='1348',
+            city='Louvain-La-Neuve',
+            country=CountryFactory(iso_code="BE"),
+            postal_box='B1',
+            place='P1',
+        )
+        PersonAddressFactory(
+            person=self,
+            label=PersonAddressType.CONTACT.name,
+            street='University street',
+            street_number='2',
+            postal_code='1348',
+            city='Louvain-La-Neuve',
+            country=CountryFactory(iso_code="BE"),
+            postal_box='B2',
+            place='P2',
+        )
 
         # Create language knowledges
         LanguageKnowledgeFactory(
