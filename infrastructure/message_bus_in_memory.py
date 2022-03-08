@@ -50,6 +50,7 @@ from admission.infrastructure.projet_doctoral.preparation.repository.in_memory.g
 from admission.infrastructure.projet_doctoral.preparation.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
+from admission.infrastructure.projet_doctoral.validation.repository.in_memory.demande import DemandeInMemoryRepository
 from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
 from infrastructure.shared_kernel.personne_connue_ucl.in_memory.personne_connue_ucl import (
     PersonneConnueUclInMemoryTranslator,
@@ -147,6 +148,7 @@ class MessageBusInMemoryCommands(AbstractMessageBusCommands):
             soumettre_proposition,
             proposition_repository=PropositionInMemoryRepository(),
             groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
+            demande_repository=DemandeInMemoryRepository(),
             profil_candidat_translator=ProfilCandidatInMemoryTranslator(),
             academic_year_repository=AcademicYearInMemoryRepository(),
             historique=HistoriqueInMemory(),

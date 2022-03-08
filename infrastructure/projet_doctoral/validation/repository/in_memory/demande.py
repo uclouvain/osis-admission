@@ -33,11 +33,8 @@ from base.ddd.utils.in_memory_repository import InMemoryGenericRepository
 
 
 class DemandeInMemoryRepository(InMemoryGenericRepository, IDemandeRepository):
-    entities = list()  # type: List[Demande]
-
-    # type: List[DemandeRechercheDTO]
-
-    dtos = list() @ classmethod
+    entities: List[Demande] = list()
+    dtos: List[DemandeRechercheDTO] = list()
 
     @classmethod
     def search_dto(
@@ -58,7 +55,7 @@ class DemandeInMemoryRepository(InMemoryGenericRepository, IDemandeRepository):
         date_pre_admission_fin: Optional[datetime] = None,
         **kwargs,
     ) -> List['DemandeRechercheDTO']:
-        matching = []  # type: List[DemandeRechercheDTO]
+        matching: List[DemandeRechercheDTO] = []
         for dto in cls.dtos:
             if numero and dto.numero_demande == numero:
                 matching.append(dto)

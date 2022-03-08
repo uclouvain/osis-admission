@@ -32,6 +32,8 @@ from admission.ddd.projet_doctoral.preparation.domain.service.i_profil_candidat 
 from admission.ddd.projet_doctoral.preparation.domain.service.verifier_proposition import VerifierProposition
 from admission.ddd.projet_doctoral.preparation.repository.i_groupe_de_supervision import IGroupeDeSupervisionRepository
 from admission.ddd.projet_doctoral.preparation.repository.i_proposition import IPropositionRepository
+from admission.ddd.projet_doctoral.validation.domain.service.demande import DemandeService
+from admission.ddd.projet_doctoral.validation.repository.i_demande import IDemandeRepository
 from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import GetCurrentAcademicYear
 from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import IAcademicYearRepository
 
@@ -40,6 +42,7 @@ def soumettre_proposition(
     cmd: 'SoumettrePropositionCommand',
     proposition_repository: 'IPropositionRepository',
     groupe_supervision_repository: 'IGroupeDeSupervisionRepository',
+    demande_repository: 'IDemandeRepository',
     profil_candidat_translator: 'IProfilCandidatTranslator',
     academic_year_repository: 'IAcademicYearRepository',
     historique: 'IHistorique',
@@ -59,10 +62,12 @@ def soumettre_proposition(
 
     # WHEN
     VerifierProposition().verifier(proposition, groupe_supervision, profil_candidat_translator, annee_courante)
+    demande = DemandeService().initier(profil_candidat_translator, proposition_id, proposition.matricule_candidat)
 
     # THEN
     proposition.finaliser()
     proposition_repository.save(proposition)
+    demande_repository.save(demande)
     historique.historiser_soumission(proposition)
 
     return proposition_id

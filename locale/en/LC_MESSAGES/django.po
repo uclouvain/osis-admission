@@ -557,6 +557,9 @@ msgstr ""
 msgid "Scholarship grant"
 msgstr ""
 
+msgid "Submitted profile"
+msgstr ""
+
 msgid "Supervision group not found."
 msgstr ""
 
