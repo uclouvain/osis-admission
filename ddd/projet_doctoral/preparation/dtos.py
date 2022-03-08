@@ -33,6 +33,47 @@ from osis_common.ddd import interface
 
 
 @attr.dataclass(frozen=True, slots=True)
+class PropositionDTO(interface.DTO):
+    uuid: str
+    type_admission: str
+    reference: str
+    justification: Optional[str]
+    sigle_doctorat: str
+    annee_doctorat: int
+    intitule_doctorat_fr: str
+    intitule_doctorat_en: str
+    matricule_candidat: str
+    code_secteur_formation: str
+    commission_proximite: Optional[str]
+    type_financement: Optional[str]
+    type_contrat_travail: Optional[str]
+    eft: Optional[int]
+    bourse_recherche: Optional[str]
+    duree_prevue: Optional[int]
+    temps_consacre: Optional[int]
+    titre_projet: Optional[str]
+    resume_projet: Optional[str]
+    documents_projet: List[str]
+    graphe_gantt: List[str]
+    proposition_programme_doctoral: List[str]
+    projet_formation_complementaire: List[str]
+    lettres_recommandation: List[str]
+    langue_redaction_these: str
+    institut_these: Optional[UUID]
+    lieu_these: str
+    doctorat_deja_realise: str
+    institution: Optional[str]
+    date_soutenance: Optional[datetime.date]
+    raison_non_soutenue: Optional[str]
+    statut: str
+    matricule_candidat: str
+    prenom_candidat: str
+    nom_candidat: str
+    intitule_secteur_formation: str
+    creee_le: datetime.datetime
+
+
+@attr.dataclass(frozen=True, slots=True)
 class DoctoratDTO(interface.DTO):
     sigle: str
     annee: int
@@ -116,7 +157,7 @@ class CurriculumDTO(interface.DTO):
 
 
 @attr.dataclass(frozen=True, slots=True)
-class PropositionDTO(interface.DTO):
+class AfficherPropositionDTO(interface.DTO):
     uuid: str
     type_admission: str
     reference: str

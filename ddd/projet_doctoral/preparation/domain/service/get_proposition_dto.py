@@ -27,7 +27,7 @@ from admission.ddd.projet_doctoral.preparation.builder.proposition_identity_buil
 from admission.ddd.projet_doctoral.preparation.domain.model.proposition import Proposition
 from admission.ddd.projet_doctoral.preparation.domain.service.i_doctorat import IDoctoratTranslator
 from admission.ddd.projet_doctoral.preparation.domain.service.i_secteur_ucl import ISecteurUclTranslator
-from admission.ddd.projet_doctoral.preparation.dtos import PropositionCandidatDTO, PropositionDTO
+from admission.ddd.projet_doctoral.preparation.dtos import PropositionCandidatDTO, AfficherPropositionDTO
 from admission.ddd.projet_doctoral.preparation.repository.i_proposition import IPropositionRepository
 from ddd.logic.shared_kernel.personne_connue_ucl.domain.service.personne_connue_ucl import IPersonneConnueUclTranslator
 from osis_common.ddd import interface
@@ -41,12 +41,12 @@ class GetPropositionDTODomainService(interface.DomainService):
         repository: 'IPropositionRepository',
         doctorat_translator: 'IDoctoratTranslator',
         secteur_ucl_translator: 'ISecteurUclTranslator',
-    ) -> 'PropositionDTO':
+    ) -> 'AfficherPropositionDTO':
         proposition = repository.get(PropositionIdentityBuilder.build_from_uuid(uuid_proposition))
         doctorat = doctorat_translator.get_dto(proposition.doctorat_id.sigle, proposition.doctorat_id.annee)
         assert proposition.reference
         assert proposition.creee_le
-        return PropositionDTO(
+        return AfficherPropositionDTO(
             uuid=uuid_proposition,
             type_admission=proposition.type_admission.name,
             reference=proposition.reference,
