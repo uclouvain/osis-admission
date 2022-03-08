@@ -128,11 +128,12 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
         nationalite: Optional[str] = '',
         type: Optional[str] = '',
         commission_proximite: Optional[str] = '',
-        annee_academique: Optional[str] = '',
+        annee_academique: Optional[str] = None,
         sigle_formation: Optional[str] = '',
         financement: Optional[str] = '',
         matricule_promoteur: Optional[str] = '',
         cotutelle: Optional[bool] = None,
+        entity_ids: Optional[List['PropositionIdentity']] = None,
     ) -> List['PropositionDTO']:
         returned = cls.entities
         if matricule_candidat:
@@ -187,4 +188,6 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
             intitule_secteur_formation=secteur.intitule,
             nom_candidat=candidat.nom,
             prenom_candidat=candidat.prenom,
+            nationalite_candidat="",  # TODO
+            modifiee_le=proposition.modifiee_le,
         )

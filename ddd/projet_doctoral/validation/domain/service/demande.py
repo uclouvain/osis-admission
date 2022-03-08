@@ -24,6 +24,9 @@
 #
 # ##############################################################################
 import attr
+from django.utils.timezone import now
+
+from admission.ddd.projet_doctoral.preparation.domain.model._enums import ChoixTypeAdmission
 from admission.ddd.projet_doctoral.preparation.domain.model.proposition import PropositionIdentity
 from admission.ddd.projet_doctoral.preparation.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.projet_doctoral.preparation.repository.i_proposition import IPropositionRepository
@@ -38,10 +41,10 @@ from osis_common.ddd import interface
 class DemandeService(interface.DomainService):
     @classmethod
     def recuperer(
-            cls,
-            demande_id: DemandeIdentity,
-            demande_repository: IDemandeRepository,
-            proposition_repository: IPropositionRepository,
+        cls,
+        demande_id: DemandeIdentity,
+        demande_repository: IDemandeRepository,
+        proposition_repository: IPropositionRepository,
     ) -> RecupererDemandeDTO:
         proposition_id = PropositionIdentityTranslator.convertir_depuis_demande(demande_id)
         proposition_dto = proposition_repository.get_dto(proposition_id)
@@ -56,16 +59,19 @@ class DemandeService(interface.DomainService):
 
     @classmethod
     def initier(
-            cls,
-            profil_candidat_translator: IProfilCandidatTranslator,
-            proposition_id: PropositionIdentity,
-            matricule_candidat: str,
+        cls,
+        profil_candidat_translator: IProfilCandidatTranslator,
+        proposition_id: PropositionIdentity,
+        matricule_candidat: str,
+        type_admission: ChoixTypeAdmission,
     ) -> Demande:
         identification = profil_candidat_translator.get_identification(matricule_candidat)
         coordonnees = profil_candidat_translator.get_coordonnees(matricule_candidat)
         return Demande(
             entity_id=PropositionIdentityTranslator.convertir_en_demande(proposition_id),
             proposition_id=proposition_id,
+            pre_admission_acceptee_le=now() if type_admission == ChoixTypeAdmission.PRE_ADMISSION else None,
+            admission_acceptee_le=now() if type_admission == ChoixTypeAdmission.ADMISSION else None,
             profil_candidat=ProfilCandidat(
                 nom=identification.nom,
                 prenom=identification.prenom,
@@ -73,5 +79,5 @@ class DemandeService(interface.DomainService):
                 nationalite=identification.pays_nationalite,
                 email=identification.email,
                 **attr.asdict(coordonnees.adresse_correspondance or coordonnees.domicile_legal),
-            )
+            ),
         )

@@ -23,45 +23,23 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import datetime
-from typing import Optional
 
-import attr
+from typing import List
 
-from osis_common.ddd import interface
-
-
-@attr.s(frozen=True, slots=True, auto_attribs=True)
-class DemandeRechercheDTO(interface.DTO):
-    uuid: str
-    numero_demande: str
-    statut_cdd: Optional[str]
-    statut_sic: Optional[str]
-    statut_demande: str
-    nom_candidat: str
-    sigle_formation: str
-    intitule_formation: str
-    nationalite: str
-    derniere_modification: datetime.datetime
-    date_confirmation: Optional[datetime.datetime]
-    code_bourse: str
+from admission.ddd.projet_doctoral.preparation.repository.i_proposition import IPropositionRepository
+from admission.ddd.projet_doctoral.validation.commands import FiltrerDemandesQuery
+from admission.ddd.projet_doctoral.validation.domain.service.PropositionAvecDemande import PropositionAvecDemande
+from admission.ddd.projet_doctoral.validation.dtos import DemandeRechercheDTO
+from admission.ddd.projet_doctoral.validation.repository.i_demande import IDemandeRepository
 
 
-@attr.s(frozen=True, slots=True, auto_attribs=True)
-class DemandeDTO(interface.DTO):
-    uuid: str
-    statut_cdd: str
-    statut_sic: str
-    pre_admission_acceptee_le: Optional[datetime.datetime]
-    admission_acceptee_le: Optional[datetime.datetime]
-    derniere_modification: datetime.datetime
-    # TODO only include info about demande
-
-
-@attr.s(frozen=True, slots=True, auto_attribs=True)
-class RecupererDemandeDTO(interface.DTO):
-    uuid: str
-    statut_cdd: str
-    statut_sic: str
-    derniere_modification: datetime.datetime
-    # TODO include all info about demande (doctorate and persons too)
+def filtrer_demandes(
+    cmd: 'FiltrerDemandesQuery',
+    proposition_repository: 'IPropositionRepository',
+    demande_repository: 'IDemandeRepository',
+) -> 'List[DemandeRechercheDTO]':
+    return PropositionAvecDemande.rechercher(
+        cmd,
+        proposition_repository=proposition_repository,
+        demande_repository=demande_repository,
+    )

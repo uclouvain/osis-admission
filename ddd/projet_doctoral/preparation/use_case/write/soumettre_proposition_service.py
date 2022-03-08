@@ -62,7 +62,12 @@ def soumettre_proposition(
 
     # WHEN
     VerifierProposition().verifier(proposition, groupe_supervision, profil_candidat_translator, annee_courante)
-    demande = DemandeService().initier(profil_candidat_translator, proposition_id, proposition.matricule_candidat)
+    demande = DemandeService().initier(
+        profil_candidat_translator,
+        proposition_id,
+        proposition.matricule_candidat,
+        proposition.type_admission,
+    )
 
     # THEN
     proposition.finaliser()

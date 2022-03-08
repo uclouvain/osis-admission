@@ -96,8 +96,6 @@ class TestVerifierPropositionServiceCommun(SimpleTestCase):
         self.assertEqual(proposition_id.uuid, updated_proposition.entity_id.uuid)
         # Updated proposition
         self.assertEqual(updated_proposition.statut, ChoixStatutProposition.SUBMITTED)
-        self.assertEqual(updated_proposition.date_soumission_admission, self.today_date)
-        self.assertIsNone(updated_proposition.date_soumission_pre_admission)
 
     def test_should_soumettre_proposition_etre_ok_si_preadmission_complete(self):
         proposition = PropositionPreAdmissionSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory()
@@ -112,8 +110,6 @@ class TestVerifierPropositionServiceCommun(SimpleTestCase):
         self.assertEqual(proposition_id.uuid, updated_proposition.entity_id.uuid)
         # Updated proposition
         self.assertEqual(updated_proposition.statut, ChoixStatutProposition.SUBMITTED)
-        self.assertEqual(updated_proposition.date_soumission_pre_admission, self.today_date)
-        self.assertIsNone(updated_proposition.date_soumission_admission)
 
     def test_should_retourner_erreur_si_identification_non_completee(self):
         with mock.patch.multiple(self.current_candidat, prenom=''):

@@ -66,11 +66,12 @@ class PropositionDTO(interface.DTO):
     date_soutenance: Optional[datetime.date]
     raison_non_soutenue: Optional[str]
     statut: str
-    matricule_candidat: str
     prenom_candidat: str
     nom_candidat: str
+    nationalite_candidat: str
     intitule_secteur_formation: str
     creee_le: datetime.datetime
+    modifiee_le: datetime.datetime
 
 
 @attr.dataclass(frozen=True, slots=True)

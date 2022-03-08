@@ -23,40 +23,24 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from datetime import datetime
-from typing import List, Optional
 
-from admission.ddd.projet_doctoral.validation.domain.model.demande import Demande, DemandeIdentity
-from admission.ddd.projet_doctoral.validation.dtos import DemandeDTO, DemandeRechercheDTO
+from admission.ddd.preparation.projet_doctoral.repository.i_proposition import IPropositionRepository
+from admission.ddd.projet_doctoral.validation.builder.demande_identity import DemandeIdentityBuilder
+from admission.ddd.projet_doctoral.validation.commands import RecupererDemandeQuery
+from admission.ddd.projet_doctoral.validation.domain.service.demande import DemandeService
+from admission.ddd.projet_doctoral.validation.dtos import RecupererDemandeDTO
 from admission.ddd.projet_doctoral.validation.repository.i_demande import IDemandeRepository
-from base.ddd.utils.in_memory_repository import InMemoryGenericRepository
 
 
-class DemandeInMemoryRepository(InMemoryGenericRepository, IDemandeRepository):
-    entities: List[Demande] = list()
-    dtos: List[DemandeRechercheDTO] = list()
-
-    @classmethod
-    def search_dto(
-        cls,
-        etat_cdd: Optional[str] = '',
-        etat_sic: Optional[str] = '',
-        date_pre_admission_debut: Optional[datetime] = None,
-        date_pre_admission_fin: Optional[datetime] = None,
-        entity_ids: Optional[List['DemandeIdentity']] = None,
-        **kwargs,
-    ) -> List['DemandeDTO']:
-        matching: List[DemandeDTO] = []
-        # TODO
-        return matching
-
-    @classmethod
-    def search(cls, entity_ids: Optional[List['DemandeIdentity']] = None, **kwargs) -> List['Demande']:
-        return [e for e in cls.entities if e.entity_id in entity_ids]
-
-    @classmethod
-    def reset(cls):
-        cls.entities = []
-
-    def get_dto(cls, entity_id) -> DemandeDTO:
-        pass
+def recuperer_demande(
+    cmd: 'RecupererDemandeQuery',
+    demande_repository: 'IDemandeRepository',
+    proposition_repository: 'IPropositionRepository',
+) -> 'RecupererDemandeDTO':
+    # GIVEN
+    demande_id = DemandeIdentityBuilder.build_from_uuid(cmd.uuid)
+    return DemandeService.recuperer(
+        demande_id,
+        demande_repository,
+        proposition_repository,
+    )

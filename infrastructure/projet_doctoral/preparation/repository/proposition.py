@@ -28,6 +28,8 @@ from typing import List, Optional
 
 from django.db import connection
 from django.db.models import Subquery, OuterRef
+from django.conf import settings
+from django.utils.translation import get_language
 
 from admission.auth.roles.candidate import Candidate
 from admission.contrib.models import DoctorateAdmission
@@ -100,9 +102,7 @@ def _instantiate_admission(admission: 'DoctorateAdmission') -> 'Proposition':
             resume=admission.project_abstract,
             documents=admission.project_document,
             langue_redaction_these=ChoixLangueRedactionThese[admission.thesis_language],
-            institut_these=InstitutIdentity(admission.thesis_institute.uuid)
-            if admission.thesis_institute_id
-            else None,
+            institut_these=InstitutIdentity(admission.thesis_institute.uuid) if admission.thesis_institute_id else None,
             lieu_these=admission.thesis_location,
             graphe_gantt=admission.gantt_graph,
             proposition_programme_doctoral=admission.program_proposition,
@@ -126,8 +126,6 @@ def _instantiate_admission(admission: 'DoctorateAdmission') -> 'Proposition':
             raison_non_soutenue=admission.phd_already_done_no_defense_reason,
         ),
         creee_le=admission.created,
-        date_soumission_admission=admission.admission_submission_date,
-        date_soumission_pre_admission=admission.pre_admission_submission_date,
     )
 
 
@@ -144,7 +142,7 @@ def _get_queryset():
         DoctorateAdmission.objects.all()
         .select_related(
             "doctorate__academic_year",
-            "candidate",
+            "candidate__country_of_citizenship",
             "thesis_institute",
         )
         .annotate(
@@ -236,8 +234,6 @@ class PropositionRepository(IPropositionRepository):
                 'phd_already_done_institution': entity.experience_precedente_recherche.institution,
                 'phd_already_done_defense_date': entity.experience_precedente_recherche.date_soutenance,
                 'phd_already_done_no_defense_reason': entity.experience_precedente_recherche.raison_non_soutenue,
-                'pre_admission_submission_date': entity.date_soumission_pre_admission,
-                'admission_submission_date': entity.date_soumission_admission,
             },
         )
         Candidate.objects.get_or_create(person=candidate)
@@ -251,11 +247,12 @@ class PropositionRepository(IPropositionRepository):
         nationalite: Optional[str] = '',
         type: Optional[str] = '',
         commission_proximite: Optional[str] = '',
-        annee_academique: Optional[str] = '',
+        annee_academique: Optional[str] = None,
         sigle_formation: Optional[str] = '',
         financement: Optional[str] = '',
         matricule_promoteur: Optional[str] = '',
         cotutelle: Optional[bool] = None,
+        entity_ids: Optional[List['PropositionIdentity']] = None,
     ) -> List['PropositionDTO']:
         qs = _get_queryset()
         if numero:
@@ -280,6 +277,8 @@ class PropositionRepository(IPropositionRepository):
             qs = qs.filter(supervision_group__actors__person__global_id=matricule_promoteur)
         if cotutelle is not None:
             qs = qs.filter(cotutelle=cotutelle)
+        if entity_ids is not None:
+            qs = qs.filter(uuid__in=[entity_id.uuid for entity_id in entity_ids])
 
         return [cls._load_dto(admission) for admission in qs]
 
@@ -288,7 +287,7 @@ class PropositionRepository(IPropositionRepository):
         return cls._load_dto(_get_queryset().get(uuid=entity_id.uuid))
 
     @classmethod
-    def _load_dto(cls, admission: DoctorateAdmission):
+    def _load_dto(cls, admission: DoctorateAdmission) -> 'PropositionDTO':
         return PropositionDTO(
             uuid=admission.uuid,
             reference=admission.reference,
@@ -320,10 +319,16 @@ class PropositionRepository(IPropositionRepository):
             projet_formation_complementaire=admission.additional_training_project,
             lettres_recommandation=admission.recommendation_letters,
             langue_redaction_these=admission.thesis_language,
-            institut_these=admission.thesis_institute,
+            institut_these=admission.thesis_institute and admission.thesis_institute.uuid,
             lieu_these=admission.thesis_location,
             doctorat_deja_realise=admission.phd_already_done,
             institution=admission.phd_already_done_institution,
             date_soutenance=admission.phd_already_done_defense_date,
             raison_non_soutenue=admission.phd_already_done_no_defense_reason,
+            nationalite_candidat=admission.candidate.country_of_citizenship
+            and getattr(
+                admission.candidate.country_of_citizenship,
+                'name' if get_language() == settings.LANGUAGE_CODE else 'name_en',
+            ),
+            modifiee_le=admission.modified,
         )

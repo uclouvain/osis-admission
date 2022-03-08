@@ -24,39 +24,43 @@
 #
 # ##############################################################################
 from datetime import datetime
-from typing import List, Optional
+from typing import Optional
 
-from admission.ddd.projet_doctoral.validation.domain.model.demande import Demande, DemandeIdentity
-from admission.ddd.projet_doctoral.validation.dtos import DemandeDTO, DemandeRechercheDTO
-from admission.ddd.projet_doctoral.validation.repository.i_demande import IDemandeRepository
-from base.ddd.utils.in_memory_repository import InMemoryGenericRepository
+import attr
+
+from osis_common.ddd import interface
 
 
-class DemandeInMemoryRepository(InMemoryGenericRepository, IDemandeRepository):
-    entities: List[Demande] = list()
-    dtos: List[DemandeRechercheDTO] = list()
+@attr.s(frozen=True, slots=True, auto_attribs=True)
+class FiltrerDemandesQuery(interface.QueryRequest):
+    numero: Optional[str] = ''
+    etat_cdd: Optional[str] = ''
+    etat_sic: Optional[str] = ''
+    matricule_candidat: Optional[str] = ''
+    nationalite: Optional[str] = ''
+    type: Optional[str] = ''
+    commission_proximite: Optional[str] = ''
+    annee_academique: Optional[int] = None
+    sigle_formation: Optional[str] = ''
+    financement: Optional[str] = ''
+    matricule_promoteur: Optional[str] = ''
+    cotutelle: Optional[bool] = None
+    date_pre_admission_debut: Optional[datetime] = None
+    date_pre_admission_fin: Optional[datetime] = None
 
-    @classmethod
-    def search_dto(
-        cls,
-        etat_cdd: Optional[str] = '',
-        etat_sic: Optional[str] = '',
-        date_pre_admission_debut: Optional[datetime] = None,
-        date_pre_admission_fin: Optional[datetime] = None,
-        entity_ids: Optional[List['DemandeIdentity']] = None,
-        **kwargs,
-    ) -> List['DemandeDTO']:
-        matching: List[DemandeDTO] = []
-        # TODO
-        return matching
 
-    @classmethod
-    def search(cls, entity_ids: Optional[List['DemandeIdentity']] = None, **kwargs) -> List['Demande']:
-        return [e for e in cls.entities if e.entity_id in entity_ids]
+@attr.s(frozen=True, slots=True, auto_attribs=True)
+class RecupererDemandeQuery(interface.QueryRequest):
+    uuid: str
 
-    @classmethod
-    def reset(cls):
-        cls.entities = []
 
-    def get_dto(cls, entity_id) -> DemandeDTO:
-        pass
+@attr.s(frozen=True, slots=True, auto_attribs=True)
+class RefuserDemandeCddCommand(interface.CommandRequest):
+    uuid: str
+    sujet_email_doctorant: str
+    contenu_email_doctorant: str
+
+
+@attr.s(frozen=True, slots=True, auto_attribs=True)
+class ApprouverDemandeCddCommand(interface.CommandRequest):
+    uuid: str
