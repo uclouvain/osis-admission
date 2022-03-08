@@ -51,15 +51,12 @@ class MessageBusCommands(AbstractMessageBusCommands):
             doctorat_translator=DoctoratTranslator(),
             historique=Historique(),
         ),
-        SearchPropositionsCandidatCommand: partial(
-            rechercher_propositions_candidat,
+        ListerPropositionsCandidatQuery: partial(
+            lister_propositions_candidat,
             proposition_repository=PropositionRepository(),
-            doctorat_translator=DoctoratTranslator(),
-            secteur_ucl_translator=SecteurUclTranslator(),
-            personne_connue_ucl_translator=PersonneConnueUclTranslator(),
         ),
-        SearchPropositionsSuperviseesCommand: partial(
-            rechercher_propositions_supervisees,
+        ListerPropositionsSuperviseesQuery: partial(
+            lister_propositions_supervisees,
             proposition_repository=PropositionRepository(),
             groupe_supervision_repository=GroupeDeSupervisionRepository(),
             doctorat_translator=DoctoratTranslator(),

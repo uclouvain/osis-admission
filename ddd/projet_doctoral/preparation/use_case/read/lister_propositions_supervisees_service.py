@@ -25,24 +25,24 @@
 # ##############################################################################
 from typing import List
 
-from admission.ddd.projet_doctoral.preparation.commands import SearchPropositionsSuperviseesCommand
+from admission.ddd.projet_doctoral.preparation.commands import ListerPropositionsSuperviseesQuery
 from admission.ddd.projet_doctoral.preparation.domain.service.get_proposition_dto import GetPropositionDTODomainService
 from admission.ddd.projet_doctoral.preparation.domain.service.i_doctorat import IDoctoratTranslator
 from admission.ddd.projet_doctoral.preparation.domain.service.i_secteur_ucl import ISecteurUclTranslator
-from admission.ddd.projet_doctoral.preparation.dtos import PropositionSearchDTO
+from admission.ddd.projet_doctoral.preparation.dtos import PropositionCandidatDTO
 from admission.ddd.projet_doctoral.preparation.repository.i_groupe_de_supervision import IGroupeDeSupervisionRepository
 from admission.ddd.projet_doctoral.preparation.repository.i_proposition import IPropositionRepository
 from ddd.logic.shared_kernel.personne_connue_ucl.domain.service.personne_connue_ucl import IPersonneConnueUclTranslator
 
 
-def rechercher_propositions_supervisees(
-    cmd: 'SearchPropositionsSuperviseesCommand',
+def lister_propositions_supervisees(
+    cmd: 'ListerPropositionsSuperviseesQuery',
     proposition_repository: 'IPropositionRepository',
     groupe_supervision_repository: 'IGroupeDeSupervisionRepository',
     doctorat_translator: 'IDoctoratTranslator',
     secteur_ucl_translator: 'ISecteurUclTranslator',
     personne_connue_ucl_translator: 'IPersonneConnueUclTranslator',
-) -> List['PropositionSearchDTO']:
+) -> List['PropositionCandidatDTO']:
     groupes = groupe_supervision_repository.search(matricule_membre=cmd.matricule_membre)
     propositions = proposition_repository.search(entity_ids=[g.proposition_id for g in groupes])
     return [

@@ -26,7 +26,7 @@
 
 from django.test import SimpleTestCase
 
-from admission.ddd.projet_doctoral.preparation.commands import SearchPropositionsSuperviseesCommand
+from admission.ddd.projet_doctoral.preparation.commands import ListerPropositionsSuperviseesQuery
 from admission.ddd.projet_doctoral.preparation.test.factory.person import PersonneConnueUclDTOFactory
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 from infrastructure.shared_kernel.personne_connue_ucl.in_memory.personne_connue_ucl import (
@@ -34,13 +34,13 @@ from infrastructure.shared_kernel.personne_connue_ucl.in_memory.personne_connue_
 )
 
 
-class TestRechercherPropositionsSuperviseesService(SimpleTestCase):
+class TestListerPropositionsSuperviseesService(SimpleTestCase):
     def setUp(self) -> None:
         PersonneConnueUclInMemoryTranslator.personnes_connues_ucl = {
             PersonneConnueUclDTOFactory(matricule='promoteur-SC3DP-unique'),
             PersonneConnueUclDTOFactory(matricule='0123456789'),
         }
-        self.cmd = SearchPropositionsSuperviseesCommand(matricule_membre='promoteur-SC3DP-unique')
+        self.cmd = ListerPropositionsSuperviseesQuery(matricule_membre='promoteur-SC3DP-unique')
         self.message_bus = message_bus_in_memory_instance
 
     def test_should_rechercher_par_matricule(self):

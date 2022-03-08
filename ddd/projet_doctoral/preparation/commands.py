@@ -173,12 +173,12 @@ class DefinirCotutelleCommand(interface.CommandRequest):
 
 
 @attr.dataclass(frozen=True, slots=True)
-class SearchPropositionsCandidatCommand(interface.QueryRequest):
+class ListerPropositionsCandidatQuery(interface.QueryRequest):
     matricule_candidat: str
 
 
 @attr.dataclass(frozen=True, slots=True)
-class SearchPropositionsSuperviseesCommand(interface.QueryRequest):
+class ListerPropositionsSuperviseesQuery(interface.QueryRequest):
     matricule_membre: str
 
 

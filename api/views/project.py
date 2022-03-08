@@ -37,8 +37,8 @@ from admission.ddd.projet_doctoral.preparation.commands import (
     CompleterPropositionCommand,
     GetPropositionCommand,
     InitierPropositionCommand,
-    SearchPropositionsCandidatCommand,
-    SearchPropositionsSuperviseesCommand,
+    ListerPropositionsCandidatQuery,
+    ListerPropositionsSuperviseesQuery,
     SoumettrePropositionCommand,
     SupprimerPropositionCommand,
     VerifierProjetCommand,
@@ -94,7 +94,7 @@ class PropositionListView(APIPermissionRequiredMixin, DisplayExceptionsByFieldNa
     def list(self, request, **kwargs):
         """List the propositions of the logged in user"""
         proposition_list = message_bus_instance.invoke(
-            SearchPropositionsCandidatCommand(matricule_candidat=request.user.person.global_id),
+            ListerPropositionsCandidatQuery(matricule_candidat=request.user.person.global_id),
         )
         serializer = serializers.PropositionSearchSerializer(
             instance={
@@ -130,7 +130,7 @@ class SupervisedPropositionListView(APIPermissionRequiredMixin, ListAPIView):
     def list(self, request, **kwargs):
         """List the propositions of the supervision group member"""
         proposition_list = message_bus_instance.invoke(
-            SearchPropositionsSuperviseesCommand(matricule_membre=request.user.person.global_id),
+            ListerPropositionsSuperviseesQuery(matricule_membre=request.user.person.global_id),
         )
         serializer = serializers.PropositionSearchDTOSerializer(
             instance=proposition_list,

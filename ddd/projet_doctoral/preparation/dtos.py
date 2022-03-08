@@ -147,7 +147,7 @@ class PropositionDTO(interface.DTO):
 
 
 @attr.dataclass(frozen=True, slots=True)
-class PropositionSearchDTO(interface.DTO):
+class PropositionCandidatDTO(interface.DTO):
     uuid: str
     reference: str
     type_admission: str

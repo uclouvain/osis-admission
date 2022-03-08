@@ -25,29 +25,16 @@
 # ##############################################################################
 from typing import List
 
-from admission.ddd.projet_doctoral.preparation.commands import SearchPropositionsCandidatCommand
-from admission.ddd.projet_doctoral.preparation.domain.service.get_proposition_dto import GetPropositionDTODomainService
-from admission.ddd.projet_doctoral.preparation.domain.service.i_doctorat import IDoctoratTranslator
-from admission.ddd.projet_doctoral.preparation.domain.service.i_secteur_ucl import ISecteurUclTranslator
-from admission.ddd.projet_doctoral.preparation.dtos import PropositionSearchDTO
+from admission.ddd.projet_doctoral.preparation.commands import ListerPropositionsCandidatQuery
+from admission.ddd.projet_doctoral.preparation.dtos import PropositionCandidatDTO
 from admission.ddd.projet_doctoral.preparation.repository.i_proposition import IPropositionRepository
-from ddd.logic.shared_kernel.personne_connue_ucl.domain.service.personne_connue_ucl import IPersonneConnueUclTranslator
 
 
-def rechercher_propositions_candidat(
-    cmd: 'SearchPropositionsCandidatCommand',
+def lister_propositions_candidat(
+    cmd: 'ListerPropositionsCandidatQuery',
     proposition_repository: 'IPropositionRepository',
-    doctorat_translator: 'IDoctoratTranslator',
-    secteur_ucl_translator: 'ISecteurUclTranslator',
-    personne_connue_ucl_translator: 'IPersonneConnueUclTranslator',
-) -> List['PropositionSearchDTO']:
-    propositions = proposition_repository.search(matricule_candidat=cmd.matricule_candidat)
-    return [
-        GetPropositionDTODomainService.search_dto(
-            proposition,
-            doctorat_translator,
-            secteur_ucl_translator,
-            personne_connue_ucl_translator,
-        )
-        for proposition in propositions
-    ]
+) -> List['PropositionCandidatDTO']:
+    # TODO :: réutiliser proposition_repository.search_dto
+    return proposition_repository.search_dto(
+        matricule_candidat=cmd.matricule_candidat,
+    )
