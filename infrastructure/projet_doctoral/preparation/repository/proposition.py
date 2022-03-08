@@ -51,6 +51,7 @@ from admission.ddd.projet_doctoral.preparation.domain.model._institut import Ins
 from admission.ddd.projet_doctoral.preparation.domain.model.doctorat import DoctoratIdentity
 from admission.ddd.projet_doctoral.preparation.domain.model.proposition import Proposition, PropositionIdentity
 from admission.ddd.projet_doctoral.preparation.domain.validator.exceptions import PropositionNonTrouveeException
+from admission.ddd.projet_doctoral.preparation.dtos import PropositionCandidatDTO, PropositionDTO
 from admission.ddd.projet_doctoral.preparation.repository.i_proposition import IPropositionRepository
 from base.models.education_group_year import EducationGroupYear
 from base.models.entity_version import EntityVersion
@@ -135,10 +136,10 @@ class PropositionRepository(IPropositionRepository):
 
     @classmethod
     def search(
-        cls,
-        entity_ids: Optional[List['PropositionIdentity']] = None,
-        matricule_candidat: str = None,
-        **kwargs,
+            cls,
+            entity_ids: Optional[List['PropositionIdentity']] = None,
+            matricule_candidat: str = None,
+            **kwargs,
     ) -> List['Proposition']:
         if matricule_candidat is not None:
             return load_admissions(matricule=matricule_candidat)
@@ -202,3 +203,67 @@ class PropositionRepository(IPropositionRepository):
             },
         )
         Candidate.objects.get_or_create(person=candidate)
+
+    @classmethod
+    def search_dto(
+        cls,
+        numero: Optional[str] = '',
+        matricule_candidat: Optional[str] = '',
+        etat: Optional[str] = '',
+        nationalite: Optional[str] = '',
+        type: Optional[str] = '',
+        commission_proximite: Optional[str] = '',
+        annee_academique: Optional[str] = '',
+        sigle_formation: Optional[str] = '',
+        financement: Optional[str] = '',
+        matricule_promoteur: Optional[str] = '',
+        cotutelle: Optional[bool] = None,
+    ) -> List['PropositionCandidatDTO']:
+        qs = _get_queryset()
+        if numero:
+            qs = qs.filter(reference=numero)
+        if matricule_candidat is not None:
+            qs = qs.filter(candidate__global_id=matricule_candidat)
+        if etat:  # code enum
+            qs = qs.filter(status=etat)
+        # TODO search in profile json field
+        # if nationalite:  # code pays
+        #     qs = qs.filter(submitted_profile__coordinates__country=nationalite)
+        if type:
+            qs = qs.filter(type=type)
+        if commission_proximite:
+            qs = qs.filter(proximity_comission=commission_proximite)
+        if annee_academique:
+            qs = qs.filter(doctorate__academic_year__year=annee_academique)
+        if sigle_formation:
+            qs = qs.filter(doctorate__acronym=sigle_formation)
+        if financement:
+            qs = qs.filter(financing_type=financement)
+        if matricule_promoteur:
+            qs = qs.filter(supervision_group__actors__person__global_id=matricule_promoteur)
+        if cotutelle is not None:
+            qs = qs.filter(cotutelle=cotutelle)
+
+        return [
+            PropositionCandidatDTO(
+                uuid=admission.uuid,
+                reference=admission.reference,
+                type_admission=admission.type,
+                sigle_doctorat=admission.doctorate.acronym,
+                intitule_doctorat_fr=admission.doctorate.title,
+                intitule_doctorat_en=admission.doctorate.title_english,
+                matricule_candidat=admission.candidate.global_id,
+                prenom_candidat=admission.candidate.first_name,
+                nom_candidat=admission.candidate.last_name,
+                code_secteur_formation="TODO",  # TODO
+                intitule_secteur_formation="TODO",
+                commission_proximite=admission.proximity_commission,
+                creee_le=admission.created,
+                statut=admission.status,
+            )
+            for admission in qs
+        ]
+
+    @classmethod
+    def get_dto(cls, entity_id: 'PropositionIdentity') -> 'PropositionDTO':
+        raise NotImplementedError

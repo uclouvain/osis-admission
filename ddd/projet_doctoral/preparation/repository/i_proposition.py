@@ -41,12 +41,35 @@ class IPropositionRepository(interface.AbstractRepository):
 
     @classmethod
     @abc.abstractmethod
+    def get_dto(cls, entity_id: 'PropositionIdentity') -> 'PropositionDTO':  # type: ignore[override]
+        raise NotImplementedError
+
+    @classmethod
+    @abc.abstractmethod
     def search(  # type: ignore[override]
         cls,
         entity_ids: Optional[List['PropositionIdentity']] = None,
         matricule_candidat: str = None,
         **kwargs,
     ) -> List['Proposition']:
+        raise NotImplementedError
+
+    @classmethod
+    @abc.abstractmethod
+    def search_dto(
+            cls,
+            numero: Optional[str] = '',
+            matricule_candidat: Optional[str] = '',
+            etat: Optional[str] = '',
+            nationalite: Optional[str] = '',
+            type: Optional[str] = '',
+            commission_proximite: Optional[str] = '',
+            annee_academique: Optional[int] = None,
+            sigle_formation: Optional[str] = '',
+            financement: Optional[str] = '',
+            matricule_promoteur: Optional[str] = '',
+            cotutelle: Optional[bool] = None,
+    ) -> List['PropositionCandidatDTO']:
         raise NotImplementedError
 
     @classmethod
