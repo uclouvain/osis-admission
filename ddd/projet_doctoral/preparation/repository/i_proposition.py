@@ -27,6 +27,7 @@ import abc
 from typing import List, Optional
 
 from admission.ddd.projet_doctoral.preparation.domain.model.proposition import Proposition, PropositionIdentity
+from admission.ddd.projet_doctoral.preparation.dtos import PropositionCandidatDTO
 from osis_common.ddd import interface
 from osis_common.ddd.interface import ApplicationService
 

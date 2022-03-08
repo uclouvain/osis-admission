@@ -169,15 +169,12 @@ class MessageBusInMemoryCommands(AbstractMessageBusCommands):
             groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
             historique=HistoriqueInMemory(),
         ),
-        SearchPropositionsCandidatCommand: partial(
-            rechercher_propositions_candidat,
+        ListerPropositionsCandidatQuery: partial(
+            lister_propositions_candidat,
             proposition_repository=PropositionInMemoryRepository(),
-            doctorat_translator=DoctoratInMemoryTranslator(),
-            secteur_ucl_translator=SecteurUclInMemoryTranslator(),
-            personne_connue_ucl_translator=PersonneConnueUclInMemoryTranslator(),
         ),
-        SearchPropositionsSuperviseesCommand: partial(
-            rechercher_propositions_supervisees,
+        ListerPropositionsSuperviseesQuery: partial(
+            lister_propositions_supervisees,
             proposition_repository=PropositionInMemoryRepository(),
             groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
             doctorat_translator=DoctoratInMemoryTranslator(),

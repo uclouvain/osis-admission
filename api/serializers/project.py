@@ -38,7 +38,7 @@ from admission.ddd.projet_doctoral.preparation.domain.model._enums import (
 from admission.ddd.projet_doctoral.preparation.domain.model._experience_precedente_recherche import (
     ChoixDoctoratDejaRealise,
 )
-from admission.ddd.projet_doctoral.preparation.dtos import DoctoratDTO, PropositionDTO, PropositionSearchDTO
+from admission.ddd.projet_doctoral.preparation.dtos import DoctoratDTO, PropositionDTO, PropositionCandidatDTO
 from base.utils.serializers import DTOSerializer
 
 __all__ = [
@@ -110,7 +110,7 @@ class PropositionSearchDTOSerializer(DTOSerializer):
     )
 
     class Meta:
-        source = PropositionSearchDTO
+        source = PropositionCandidatDTO
 
 
 class PropositionSearchSerializer(serializers.Serializer):
