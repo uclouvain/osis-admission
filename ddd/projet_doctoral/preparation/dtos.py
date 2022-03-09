@@ -36,8 +36,7 @@ from osis_common.ddd import interface
 class DoctoratDTO(interface.DTO):
     sigle: str
     annee: int
-    intitule_fr: str
-    intitule_en: str
+    intitule: str
     sigle_entite_gestion: str
 
 
@@ -120,8 +119,7 @@ class PropositionDTO(interface.DTO):
     justification: Optional[str]
     sigle_doctorat: str
     annee_doctorat: int
-    intitule_doctorat_fr: str
-    intitule_doctorat_en: str
+    intitule_doctorat: str
     matricule_candidat: str
     code_secteur_formation: str
     commission_proximite: Optional[str]
@@ -154,8 +152,7 @@ class PropositionSearchDTO(interface.DTO):
     reference: str
     type_admission: str
     sigle_doctorat: str
-    intitule_doctorat_fr: str
-    intitule_doctorat_en: str
+    intitule_doctorat: str
     matricule_candidat: str
     prenom_candidat: str
     nom_candidat: str
