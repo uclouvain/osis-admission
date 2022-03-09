@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Admission API
-  version: 1.0.16
+  version: 1.0.17
   description: This API delivers data for the Admission project.
   contact:
     name: UCLouvain - OSIS
@@ -2002,9 +2002,7 @@ components:
                 type: string
               sigle_doctorat:
                 type: string
-              intitule_doctorat_fr:
-                type: string
-              intitule_doctorat_en:
+              intitule_doctorat:
                 type: string
               matricule_candidat:
                 type: string
@@ -2067,8 +2065,7 @@ components:
             - reference
             - type_admission
             - sigle_doctorat
-            - intitule_doctorat_fr
-            - intitule_doctorat_en
+            - intitule_doctorat
             - matricule_candidat
             - prenom_candidat
             - nom_candidat
@@ -2308,9 +2305,7 @@ components:
           type: string
         sigle_doctorat:
           type: string
-        intitule_doctorat_fr:
-          type: string
-        intitule_doctorat_en:
+        intitule_doctorat:
           type: string
         matricule_candidat:
           type: string
@@ -2373,8 +2368,7 @@ components:
       - reference
       - type_admission
       - sigle_doctorat
-      - intitule_doctorat_fr
-      - intitule_doctorat_en
+      - intitule_doctorat
       - matricule_candidat
       - prenom_candidat
       - nom_candidat
@@ -2621,9 +2615,7 @@ components:
           type: string
         annee_doctorat:
           type: integer
-        intitule_doctorat_fr:
-          type: string
-        intitule_doctorat_en:
+        intitule_doctorat:
           type: string
         matricule_candidat:
           type: string
@@ -2745,8 +2737,7 @@ components:
       - reference
       - sigle_doctorat
       - annee_doctorat
-      - intitule_doctorat_fr
-      - intitule_doctorat_en
+      - intitule_doctorat
       - matricule_candidat
       - code_secteur_formation
       - documents_projet
@@ -2900,10 +2891,7 @@ components:
         sigle:
           type: string
           readOnly: true
-        intitule_fr:
-          type: string
-          readOnly: true
-        intitule_en:
+        intitule:
           type: string
           readOnly: true
     DoctoratDTO:
@@ -2913,17 +2901,14 @@ components:
           type: string
         annee:
           type: integer
-        intitule_fr:
-          type: string
-        intitule_en:
+        intitule:
           type: string
         sigle_entite_gestion:
           type: string
       required:
       - sigle
       - annee
-      - intitule_fr
-      - intitule_en
+      - intitule
       - sigle_entite_gestion
     Tutor:
       type: object

@@ -87,10 +87,9 @@ class AutocompleteSectorView(ListAPIView):
             .filter(type=SECTOR)
             .annotate(
                 sigle=F('acronym'),
-                intitule_fr=F('title'),
-                intitule_en=F('title'),  # TODO get translation when available
+                intitule=F('title'),  # TODO get translation when available
             )
-            .values('sigle', 'intitule_fr', 'intitule_en')
+            .values('sigle', 'intitule')
         )
         # Filter sectors by those which have doctorates
         filtered = [s for s in qs if any(s['sigle'] in path for path in doctorate_paths)]

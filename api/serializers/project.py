@@ -195,8 +195,7 @@ class CompleterPropositionCommandSerializer(InitierPropositionCommandSerializer)
 
 class SectorDTOSerializer(serializers.Serializer):
     sigle = serializers.ReadOnlyField()
-    intitule_fr = serializers.ReadOnlyField()
-    intitule_en = serializers.ReadOnlyField()
+    intitule = serializers.ReadOnlyField()
 
 
 class DoctoratDTOSerializer(DTOSerializer):

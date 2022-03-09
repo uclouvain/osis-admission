@@ -56,8 +56,7 @@ class _DoctoratDTOFactory(factory.Factory):
         model = DoctoratDTO
         abstract = False
 
-    intitule_fr = factory.Faker('sentence', locale='fr')
-    intitule_en = factory.Faker('sentence')
+    intitule = factory.Faker('sentence')
 
 
 class DoctoratCDEFactory(_DoctoratFactory):

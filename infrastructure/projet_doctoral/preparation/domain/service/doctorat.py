@@ -25,6 +25,9 @@
 # ##############################################################################
 from typing import List
 
+from django.conf import settings
+from django.utils.translation import get_language
+
 from admission.ddd.projet_doctoral.preparation.domain.model.doctorat import Doctorat, DoctoratIdentity
 from admission.ddd.projet_doctoral.preparation.domain.service.i_doctorat import IDoctoratTranslator
 from admission.ddd.projet_doctoral.preparation.domain.validator.exceptions import DoctoratNonTrouveException
@@ -41,8 +44,10 @@ class DoctoratTranslator(IDoctoratTranslator):
         return DoctoratDTO(
             sigle=dto.acronym,
             annee=dto.year,
-            intitule_fr='{} ({})'.format(dto.title_fr, dto.enrollment_campus_name),
-            intitule_en='{} ({})'.format(dto.title_en, dto.enrollment_campus_name),
+            intitule='{} ({})'.format(
+                dto.title_fr if get_language() == settings.LANGUAGE_CODE else dto.title_en,
+                dto.enrollment_campus_name,
+            ),
             sigle_entite_gestion=dto.management_entity_acronym,
         )
 
