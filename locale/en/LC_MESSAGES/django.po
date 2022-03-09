@@ -34,8 +34,17 @@ msgstr ""
 msgid "A justification is needed when creating a pre-admission."
 msgstr ""
 
+msgid "ACCEPTED"
+msgstr "Accepted"
+
+msgid "ACKNOWLEDGED"
+msgstr "Acknowledged"
+
+msgid "ADMISSIBLE"
+msgstr "Admissible"
+
 msgid "ADMISSION"
-msgstr ""
+msgstr "Admission"
 
 msgid "ADRE"
 msgstr ""
@@ -44,7 +53,7 @@ msgid "ADREs"
 msgstr ""
 
 msgid "APPROVED"
-msgstr ""
+msgstr "Approved"
 
 msgid "Abstract"
 msgstr ""
@@ -292,11 +301,14 @@ msgstr "Geography"
 msgid "Gantt graph"
 msgstr ""
 
+msgid "INVALID"
+msgstr "Invalid"
+
 msgid "INVITED"
-msgstr ""
+msgstr "Invited"
 
 msgid "IN_PROGRESS"
-msgstr ""
+msgstr "In progress"
 
 msgid "Institution"
 msgstr ""
@@ -326,7 +338,7 @@ msgid "List of doctorate admissions with administrative data"
 msgstr ""
 
 msgid "MANAGEMENT"
-msgstr ""
+msgstr "Management"
 
 msgid "MATHEMATICS"
 msgstr "Mathematics"
@@ -362,7 +374,7 @@ msgid "NO"
 msgstr ""
 
 msgid "NOT_INVITED"
-msgstr ""
+msgstr "Not invited"
 
 msgid "No PhD found."
 msgstr ""
@@ -377,7 +389,7 @@ msgid "Other cotutelle-related documents"
 msgstr ""
 
 msgid "PARTIAL"
-msgstr ""
+msgstr "Partially"
 
 msgid "PDF file"
 msgstr ""
@@ -386,7 +398,7 @@ msgid "PHYSICS"
 msgstr "Physics"
 
 msgid "PRE_ADMISSION"
-msgstr ""
+msgstr "Pre-admission"
 
 msgid "PhD already done"
 msgstr ""
@@ -510,7 +522,10 @@ msgid ""
 msgstr ""
 
 msgid "REFUSED"
-msgstr ""
+msgstr "Declined"
+
+msgid "REJECTED"
+msgstr "Rejected"
 
 msgid "Recommendation letters"
 msgstr ""
@@ -528,10 +543,10 @@ msgid "SCEBs"
 msgstr ""
 
 msgid "SEARCH_SCHOLARSHIP"
-msgstr ""
+msgstr "Search scholarship"
 
 msgid "SELF_FUNDING"
-msgstr ""
+msgstr "Self-funding"
 
 msgid "SIC director"
 msgstr ""
@@ -546,13 +561,13 @@ msgid "SIC managers"
 msgstr ""
 
 msgid "SIGNING_IN_PROGRESS"
-msgstr ""
+msgstr "Signing in progress"
 
 msgid "STATISTICS"
 msgstr "Statistics"
 
 msgid "SUBMITTED"
-msgstr ""
+msgstr "Submitted"
 
 msgid "Scholarship grant"
 msgstr ""
@@ -562,6 +577,15 @@ msgstr ""
 
 msgid "Supervision group not found."
 msgstr ""
+
+msgid "TO_BE_COMPLETED"
+msgstr "To be completed"
+
+msgid "TO_BE_VALIDATED"
+msgstr "To be validated"
+
+msgid "TO_BE_VERIFIED"
+msgstr "To be verified"
 
 msgid "The experiences that have been valuated from this admission."
 msgstr ""
@@ -614,8 +638,11 @@ msgstr ""
 msgid "Update doctorate admission"
 msgstr ""
 
+msgid "VALID"
+msgstr "Valid"
+
 msgid "WORK_CONTRACT"
-msgstr ""
+msgstr "Work contract"
 
 msgid "Work contract should be set when financing type is set to work contract"
 msgstr ""
@@ -624,7 +651,7 @@ msgid "Working contract type"
 msgstr ""
 
 msgid "YES"
-msgstr ""
+msgstr "Yes"
 
 msgid "You cannot fill in a language more than once, please correct the form."
 msgstr ""
