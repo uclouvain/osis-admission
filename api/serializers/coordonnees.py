@@ -27,16 +27,26 @@ class CoordonneesSerializer(serializers.Serializer):
 
     def update(self, instance, validated_data):
         person = instance
+        # Always create / update the residential address
         PersonAddress.objects.update_or_create(
             person=person,
             label=PersonAddressType.RESIDENTIAL.name,
             defaults=validated_data["residential"],
         )
-        PersonAddress.objects.update_or_create(
-            person=person,
-            label=PersonAddressType.CONTACT.name,
-            defaults=validated_data["contact"],
-        )
+        if validated_data.get("contact"):
+            # If some data is specified for the contact address, create / update it
+            PersonAddress.objects.update_or_create(
+                person=person,
+                label=PersonAddressType.CONTACT.name,
+                defaults=validated_data["contact"],
+            )
+        else:
+            # If no data is specified for the contact address, delete the previous one (if it exists)
+            PersonAddress.objects.filter(
+                person=instance,
+                label=PersonAddressType.CONTACT.name,
+            ).delete()
+
         person.phone_mobile = validated_data["phone_mobile"]
         person.save()
         self.load_addresses(person)
