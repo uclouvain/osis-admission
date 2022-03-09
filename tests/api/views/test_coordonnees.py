@@ -50,6 +50,11 @@ class CoordonneesTestCase(APITestCase):
             "contact": {},
             "phone_mobile": "",
         }
+        cls.updated_data_with_contact_address = {
+            "residential": {'street': "Rue de la sobriété"},
+            "contact": {'street': "Rue du pin"},
+            "phone_mobile": "",
+        }
         cls.address = PersonAddressFactory(
             label=PersonAddressType.CONTACT.name,
             street="Rue de la soif",
@@ -103,6 +108,21 @@ class CoordonneesTestCase(APITestCase):
             label=PersonAddressType.RESIDENTIAL.name,
         )
         self.assertEqual(address.street, "Rue de la sobriété")
+
+    def test_coordonnees_update_candidate_with_contact(self):
+        self.client.force_authenticate(self.candidate_user)
+        response = self.client.put(self.agnostic_url, self.updated_data_with_contact_address)
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
+        residential_address = PersonAddress.objects.get(
+            person__user_id=self.candidate_user.pk,
+            label=PersonAddressType.RESIDENTIAL.name,
+        )
+        contact_address = PersonAddress.objects.get(
+            person__user_id=self.candidate_user.pk,
+            label=PersonAddressType.CONTACT.name,
+        )
+        self.assertEqual(residential_address.street, "Rue de la sobriété")
+        self.assertEqual(contact_address.street, "Rue du pin")
 
     def test_coordonnees_update_candidate_with_other_submitted_proposition(self):
         candidate = DoctorateAdmissionFactory(status=ChoixStatutProposition.SUBMITTED.name).candidate
