@@ -25,6 +25,7 @@
 # ##############################################################################
 import datetime
 from unittest import mock
+from unittest.mock import patch
 
 from django.shortcuts import resolve_url
 from django.test import override_settings
@@ -560,7 +561,9 @@ class DoctorateAdmissionUpdatingApiTestCase(DoctorateAdmissionApiTestCase):
 @override_settings(ROOT_URLCONF='admission.api.url_v1')
 class DoctorateAdmissionVerifyProjectTestCase(APITestCase):
     @classmethod
-    def setUpTestData(cls):
+    @patch("osis_document.contrib.fields.FileField._confirm_upload")
+    def setUpTestData(cls, confirm_upload):
+        confirm_upload.return_value = "550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92"
         cls.admission = DoctorateAdmissionFactory(
             supervision_group=_ProcessFactory(),
             cotutelle=False,
@@ -631,7 +634,9 @@ class DoctorateAdmissionVerifyProjectTestCase(APITestCase):
 @override_settings(ROOT_URLCONF='admission.api.url_v1')
 class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
     @classmethod
-    def setUpTestData(cls):
+    @patch("osis_document.contrib.fields.FileField._confirm_upload")
+    def setUpTestData(cls, confirm_upload):
+        confirm_upload.return_value = "550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92"
         # Create candidates
         # Complete candidate
         cls.first_candidate = CandidateFactory(person=CompletePersonFactory()).person
