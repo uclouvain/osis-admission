@@ -90,7 +90,6 @@ class ProfilCandidat(interface.DomainService):
 
         LanguesConnuesValidatorList(
             codes_langues_connues=codes_langues_connues,
-            codes_langues_requises=profil_candidat_translator.CODES_LANGUES_REQUISES,
         ).validate()
 
     @classmethod

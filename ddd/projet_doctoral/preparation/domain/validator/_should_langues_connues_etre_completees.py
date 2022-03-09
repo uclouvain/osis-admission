@@ -36,8 +36,11 @@ from base.ddd.utils.business_validator import BusinessValidator
 @attr.dataclass(frozen=True, slots=True)
 class ShouldLanguesConnuesRequisesEtreSpecifiees(BusinessValidator):
     codes_langues_connues: List[str]
-    codes_langues_requises: List[str]
+    CODES_LANGUES_REQUISES = {
+        'FR',
+        'EN',
+    }
 
     def validate(self, *args, **kwargs):
-        if set(self.codes_langues_requises) - set(self.codes_langues_connues):
+        if self.CODES_LANGUES_REQUISES - set(self.codes_langues_connues):
             raise LanguesConnuesNonSpecifieesException
