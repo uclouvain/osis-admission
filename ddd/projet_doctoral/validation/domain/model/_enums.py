@@ -46,4 +46,3 @@ class ChoixStatutSIC(ChoiceEnum):
     INVALID = _("INVALID")
     VALID = _("VALID")
     REJECTED = _("REJECTED")
-
