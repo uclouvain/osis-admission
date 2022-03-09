@@ -65,6 +65,7 @@ class GroupeDeSupervisionDto(interface.DomainService):
                     date=signature.date,
                     commentaire_externe=signature.commentaire_externe,
                     commentaire_interne=signature.commentaire_interne,
+                    motif_refus=signature.motif_refus,
                     pdf=signature.pdf,
                 )
                 for signature in groupe.signatures_membres_CA

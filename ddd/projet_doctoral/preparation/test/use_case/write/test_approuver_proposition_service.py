@@ -79,6 +79,8 @@ class TestApprouverPropositionService(SimpleTestCase):
         cmd = attr.evolve(self.cmd, institut_these="9f30aa8a-6a67-4424-b30a-1f4cd0868871")
         proposition_id = self.message_bus.invoke(cmd)
         self.assertEqual(proposition_id.uuid, self.uuid_proposition)
+        proposition = self.proposition_repository.get(proposition_id)
+        self.assertEqual(proposition.projet.titre, "Mon projet")
         groupe = self.groupe_de_supervision_repository.get_by_proposition_id(proposition_id)
         signatures = groupe.signatures_promoteurs  # type:List[SignaturePromoteur]
         self.assertEqual(len(signatures), 1)

@@ -208,6 +208,7 @@ class DetailSignatureMembreCADTO(interface.DTO):
     date: Optional[datetime.datetime] = None
     commentaire_externe: Optional[str] = ''
     commentaire_interne: Optional[str] = ''
+    motif_refus: Optional[str] = ''
     pdf: List[str] = attr.Factory(list)
 
 

@@ -26,12 +26,27 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
+from admission.contrib.models import DoctorateAdmission
 from admission.contrib.models.enums.actor_type import ActorType
+from osis_document.contrib import FileField
 from osis_signature.models import Actor
+
+
+def actor_upload_directory_path(instance: 'SupervisionActor', filename):
+    """Return the file upload directory path."""
+    admission = DoctorateAdmission.objects.select_related('candidate').get(
+        supervision_group=instance.process,
+    )
+    return 'admission/{}/{}/approvals/{}'.format(
+        admission.candidate.uuid,
+        admission.uuid,
+        filename,
+    )
 
 
 class SupervisionActor(Actor):
     """This model extend Actor from OSIS-Signature"""
+
     type = models.CharField(
         default=ActorType.choices(),
         max_length=50,
@@ -47,10 +62,18 @@ class SupervisionActor(Actor):
         blank=True,
         verbose_name=_('Rejection reason'),
     )
+    pdf_from_candidate = FileField(
+        min_files=1,
+        max_files=1,
+        mimetypes=['application/pdf'],
+        verbose_name=_("PDF file"),
+        upload_to=actor_upload_directory_path,
+    )
 
 
 class ExternalActorMixin(models.Model):
     """This mixin is used in Promoter and CAMember roles"""
+
     is_external = models.BooleanField(
         default=False,
     )
