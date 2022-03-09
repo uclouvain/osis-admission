@@ -38,7 +38,11 @@ from admission.ddd.projet_doctoral.preparation.domain.model._enums import (
 from admission.ddd.projet_doctoral.preparation.domain.model._experience_precedente_recherche import (
     ChoixDoctoratDejaRealise,
 )
-from admission.ddd.projet_doctoral.preparation.dtos import DoctoratDTO, AfficherPropositionDTO as PropositionDTO, PropositionCandidatDTO
+from admission.ddd.projet_doctoral.preparation.dtos import (
+    DoctoratDTO,
+    AfficherPropositionDTO as PropositionDTO,
+    PropositionCandidatDTO,
+)
 from base.utils.serializers import DTOSerializer
 
 __all__ = [
