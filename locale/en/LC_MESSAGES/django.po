@@ -379,6 +379,9 @@ msgstr ""
 msgid "PARTIAL"
 msgstr ""
 
+msgid "PDF file"
+msgstr ""
+
 msgid "PHYSICS"
 msgstr "Physics"
 

@@ -90,7 +90,7 @@ class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
                     commentaire_externe=actor.comment,
                     commentaire_interne=actor.supervisionactor.internal_comment,
                     motif_refus=actor.supervisionactor.rejection_reason,
-                    pdf=actor.pdf_file,
+                    pdf=actor.supervisionactor.pdf_from_candidate,
                 )
                 for actor in actors.get(ActorType.PROMOTER.name, [])
             ],
@@ -101,7 +101,7 @@ class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
                     date=actor.last_state_date,
                     commentaire_externe=actor.comment,
                     commentaire_interne=actor.supervisionactor.internal_comment,
-                    pdf=actor.pdf_file,
+                    pdf=actor.supervisionactor.pdf_from_candidate,
                 )
                 for actor in actors.get(ActorType.CA_MEMBER.name, [])
             ],
@@ -215,7 +215,7 @@ class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
                 StateHistory.objects.create(state=membre.etat.name, actor_id=actor.id)
                 if membre.etat.name in [ChoixEtatSignature.APPROVED.name, ChoixEtatSignature.DECLINED.name]:
                     actor.comment = membre.commentaire_externe
-                    actor.pdf_file = membre.pdf
+                    actor.supervisionactor.pdf_from_candidate = membre.pdf
                     actor.supervisionactor.internal_comment = membre.commentaire_interne
                     actor.supervisionactor.rejection_reason = membre.motif_refus
                     actor.supervisionactor.save()

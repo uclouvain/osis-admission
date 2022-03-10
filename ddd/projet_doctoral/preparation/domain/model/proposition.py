@@ -277,7 +277,7 @@ class Proposition(interface.RootEntity):
 
     def definir_institut_these(self, institut_these: Optional[str]):
         if institut_these:
-            self.projet = DetailProjet(
-                **self.projet.__dict__,
+            self.projet = attr.evolve(
+                self.projet,
                 institut_these=InstitutIdentity(uuid.UUID(institut_these)),
             )

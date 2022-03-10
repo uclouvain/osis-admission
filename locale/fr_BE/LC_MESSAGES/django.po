@@ -391,6 +391,9 @@ msgstr "Autres documents relatifs à la cotutelle"
 msgid "PARTIAL"
 msgstr "Partiel"
 
+msgid "PDF file"
+msgstr "Fichier PDF"
+
 msgid "PHYSICS"
 msgstr "Physique"
 

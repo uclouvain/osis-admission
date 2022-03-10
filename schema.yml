@@ -2874,6 +2874,8 @@ components:
                 type: string
               commentaire_interne:
                 type: string
+              motif_refus:
+                type: string
               pdf:
                 type: array
                 items:
