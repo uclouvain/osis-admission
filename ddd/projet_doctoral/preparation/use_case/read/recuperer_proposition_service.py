@@ -27,16 +27,15 @@ from admission.ddd.projet_doctoral.preparation.builder.proposition_identity_buil
 from admission.ddd.projet_doctoral.preparation.commands import GetPropositionCommand
 from admission.ddd.projet_doctoral.preparation.domain.service.i_doctorat import IDoctoratTranslator
 from admission.ddd.projet_doctoral.preparation.domain.service.i_secteur_ucl import ISecteurUclTranslator
-from admission.ddd.projet_doctoral.preparation.domain.service.get_proposition_dto import GetPropositionDTODomainService
 from admission.ddd.projet_doctoral.preparation.dtos import AfficherPropositionDTO
 from admission.ddd.projet_doctoral.preparation.repository.i_proposition import IPropositionRepository
 
 
 def recuperer_proposition(
-        cmd: 'GetPropositionCommand',
-        proposition_repository: 'IPropositionRepository',
-        doctorat_translator: 'IDoctoratTranslator',
-        secteur_ucl_translator: 'ISecteurUclTranslator',
+    cmd: 'GetPropositionCommand',
+    proposition_repository: 'IPropositionRepository',
+    doctorat_translator: 'IDoctoratTranslator',
+    secteur_ucl_translator: 'ISecteurUclTranslator',
 ) -> 'AfficherPropositionDTO':
     dto = proposition_repository.get_dto(PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition))
     return AfficherPropositionDTO(
@@ -46,8 +45,7 @@ def recuperer_proposition(
         justification=dto.justification,
         sigle_doctorat=dto.sigle_doctorat,
         annee_doctorat=dto.annee_doctorat,
-        intitule_doctorat_fr=dto.intitule_doctorat_fr,
-        intitule_doctorat_en=dto.intitule_doctorat_en,
+        intitule_doctorat=dto.intitule_doctorat,
         matricule_candidat=dto.matricule_candidat,
         code_secteur_formation=dto.code_secteur_formation,
         commission_proximite=dto.commission_proximite,

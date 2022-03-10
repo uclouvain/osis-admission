@@ -28,7 +28,7 @@ from typing import List
 
 from admission.ddd.projet_doctoral.preparation.repository.i_proposition import IPropositionRepository
 from admission.ddd.projet_doctoral.validation.commands import FiltrerDemandesQuery
-from admission.ddd.projet_doctoral.validation.domain.service.PropositionAvecDemande import PropositionAvecDemande
+from admission.ddd.projet_doctoral.validation.domain.service.proposition_avec_demande import PropositionAvecDemande
 from admission.ddd.projet_doctoral.validation.dtos import DemandeRechercheDTO
 from admission.ddd.projet_doctoral.validation.repository.i_demande import IDemandeRepository
 

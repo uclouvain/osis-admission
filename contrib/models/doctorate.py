@@ -26,6 +26,7 @@
 from django.contrib.postgres.fields import JSONField
 from django.core.cache import cache
 from django.db import models
+from django.db.models import QuerySet
 from django.utils.translation import gettext_lazy as _
 
 from admission.ddd.projet_doctoral.preparation.domain.model._detail_projet import ChoixLangueRedactionThese
@@ -42,6 +43,12 @@ from admission.ddd.projet_doctoral.preparation.domain.model._experience_preceden
     ChoixDoctoratDejaRealise,
 )
 from admission.ddd.projet_doctoral.preparation.domain.model._financement import ChoixTypeFinancement
+from admission.ddd.projet_doctoral.validation.domain.model._enums import ChoixStatutCDD, ChoixStatutSIC
+
+__all__ = [
+    "DoctorateAdmission",
+    "REFERENCE_SEQ_NAME",
+]
 
 REFERENCE_SEQ_NAME = 'admission_doctorateadmission_reference_seq'
 
@@ -223,6 +230,16 @@ class DoctorateAdmission(BaseAdmission):
         max_length=30,
         default=ChoixStatutProposition.IN_PROGRESS.name,
     )
+    status_cdd = models.CharField(
+        choices=ChoixStatutCDD.choices(),
+        max_length=30,
+        default=ChoixStatutCDD.TO_BE_VERIFIED.name,
+    )
+    status_sic = models.CharField(
+        choices=ChoixStatutSIC.choices(),
+        max_length=30,
+        default=ChoixStatutSIC.TO_BE_VERIFIED.name,
+    )
     pre_admission_submission_date = models.DateTimeField(
         verbose_name=_("Pre-admission submission date"),
         null=True,
@@ -297,3 +314,32 @@ class DoctorateAdmission(BaseAdmission):
     def save(self, *args, **kwargs) -> None:
         super().save(*args, **kwargs)
         cache.delete('admission_permission_{}'.format(self.uuid))
+
+
+class DemandeManager(models.Manager):
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .only(
+                'uuid',
+                'pre_admission_submission_date',
+                'admission_submission_date',
+                'submitted_profile',
+                'modified',
+                'status_cdd',
+                'status_sic',
+            )
+            .filter(
+                status=ChoixStatutProposition.SUBMITTED.name,
+            )
+        )
+
+
+class DemandeProxy(DoctorateAdmission):
+    """Proxy model of base.DoctorateAdmission"""
+
+    objects = DemandeManager()
+
+    class Meta:
+        proxy = True

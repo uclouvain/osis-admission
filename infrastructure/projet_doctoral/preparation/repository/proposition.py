@@ -293,8 +293,9 @@ class PropositionRepository(IPropositionRepository):
             reference=admission.reference,
             type_admission=admission.type,
             sigle_doctorat=admission.doctorate.acronym,
-            intitule_doctorat_fr=admission.doctorate.title,
-            intitule_doctorat_en=admission.doctorate.title_english,
+            intitule_doctorat=admission.doctorate.title
+            if get_language() == settings.LANGUAGE_CODE_FR
+            else admission.doctorate.title_english,
             matricule_candidat=admission.candidate.global_id,
             prenom_candidat=admission.candidate.first_name,
             nom_candidat=admission.candidate.last_name,

@@ -7,7 +7,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('admission', '0031_prefer_datetime_over_date'),
+        ('admission', '0033_merge_20220310_1002'),
     ]
 
     operations = [

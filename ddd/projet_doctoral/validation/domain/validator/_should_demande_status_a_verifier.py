@@ -32,7 +32,7 @@ from base.ddd.utils.business_validator import BusinessValidator
 
 
 @attr.s(frozen=True, slots=True, auto_attribs=True)
-class ShouldDemandeStatusAVerifier(BusinessValidator):
+class ShouldStatutDemandeAVerifier(BusinessValidator):
     demande: 'Demande'
 
     def validate(self, *args, **kwargs):

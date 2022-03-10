@@ -40,8 +40,7 @@ class PropositionDTO(interface.DTO):
     justification: Optional[str]
     sigle_doctorat: str
     annee_doctorat: int
-    intitule_doctorat_fr: str
-    intitule_doctorat_en: str
+    intitule_doctorat: str
     matricule_candidat: str
     code_secteur_formation: str
     commission_proximite: Optional[str]
