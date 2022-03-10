@@ -31,7 +31,7 @@ from typing import TYPE_CHECKING
 import attr
 
 from admission.ddd.projet_doctoral.validation.domain.validator._should_demande_status_a_verifier import (
-    ShouldDemandeStatusAVerifier,
+    ShouldStatutDemandeAVerifier,
 )
 from base.ddd.utils.business_validator import TwoStepsMultipleBusinessExceptionListValidator, BusinessValidator
 
@@ -49,7 +49,7 @@ class RefuserDemandeCDDValidatorList(TwoStepsMultipleBusinessExceptionListValida
 
     def get_invariants_validators(self) -> List[BusinessValidator]:
         return [
-            ShouldDemandeStatusAVerifier(demande=self.demande),
+            ShouldStatutDemandeAVerifier(demande=self.demande),
         ]
 
 
@@ -63,5 +63,5 @@ class ApprouverDemandeCDDValidatorList(TwoStepsMultipleBusinessExceptionListVali
 
     def get_invariants_validators(self) -> List[BusinessValidator]:
         return [
-            ShouldDemandeStatusAVerifier(demande=self.demande),
+            ShouldStatutDemandeAVerifier(demande=self.demande),
         ]

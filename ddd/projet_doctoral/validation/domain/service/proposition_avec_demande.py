@@ -26,6 +26,7 @@
 from typing import Dict, List
 
 from admission.ddd.projet_doctoral.preparation.builder.proposition_identity_builder import PropositionIdentityBuilder
+from admission.ddd.projet_doctoral.preparation.domain.model.proposition import PropositionIdentity
 from admission.ddd.projet_doctoral.preparation.repository.i_proposition import IPropositionRepository
 from admission.ddd.projet_doctoral.validation.commands import FiltrerDemandesQuery
 from admission.ddd.projet_doctoral.validation.domain.service.proposition_identity import PropositionIdentityTranslator
@@ -42,6 +43,50 @@ class PropositionAvecDemande(interface.DomainService):
         proposition_repository: 'IPropositionRepository',
         demande_repository: 'IDemandeRepository',
     ) -> List["DemandeRechercheDTO"]:
+        proposition_ids = cls._recherche_combinee(cmd, proposition_repository, demande_repository)
+
+        proposition_dtos = proposition_repository.search_dto(entity_ids=proposition_ids)
+        demande_ids = [
+            PropositionIdentityTranslator.convertir_en_demande(proposition_id) for proposition_id in proposition_ids
+        ]
+        demande_dto_mapping: Dict[str, DemandeDTO] = {
+            demande_dto.uuid: demande_dto for demande_dto in demande_repository.search_dto(entity_ids=demande_ids)
+        }
+
+        return [
+            DemandeRechercheDTO(
+                uuid=proposition_dto.uuid,
+                numero_demande=proposition_dto.reference,
+                statut_cdd=demande_dto_mapping[proposition_dto.uuid].statut_cdd
+                if proposition_dto.uuid in demande_dto_mapping
+                else None,
+                statut_sic=demande_dto_mapping[proposition_dto.uuid].statut_sic
+                if proposition_dto.uuid in demande_dto_mapping
+                else None,
+                statut_demande=proposition_dto.statut,
+                nom_candidat=proposition_dto.nom_candidat,
+                sigle_formation=proposition_dto.sigle_doctorat,
+                intitule_formation=proposition_dto.intitule_doctorat,
+                nationalite=proposition_dto.nationalite_candidat,
+                derniere_modification=proposition_dto.modifiee_le,
+                date_confirmation=(
+                    demande_dto_mapping[proposition_dto.uuid].admission_acceptee_le
+                    or demande_dto_mapping[proposition_dto.uuid].pre_admission_acceptee_le
+                )
+                if proposition_dto.uuid in demande_dto_mapping
+                else None,
+                code_bourse=proposition_dto.type_financement or "",  # TODO bon champ ?
+            )
+            for proposition_dto in proposition_dtos
+        ]
+
+    @classmethod
+    def _recherche_combinee(
+        cls,
+        cmd: FiltrerDemandesQuery,
+        proposition_repository: 'IPropositionRepository',
+        demande_repository: 'IDemandeRepository',
+    ) -> List['PropositionIdentity']:
         proposition_criteria = [
             "numero",
             "matricule_candidat",
@@ -82,47 +127,16 @@ class PropositionAvecDemande(interface.DomainService):
         # Search demandes if any demande criteria
         if any(getattr(cmd, criterion) for criterion in demande_criteria):
             proposition_ids_from_demande = [
-                PropositionIdentityBuilder.build_from_uuid(dto.uuid) for dto in demande_repository.search_dto()
+                PropositionIdentityBuilder.build_from_uuid(dto.uuid)
+                for dto in demande_repository.search_dto(
+                    etat_cdd=cmd.etat_cdd,
+                    etat_sic=cmd.etat_sic,
+                    date_pre_admission_debut=cmd.date_pre_admission_debut,
+                    date_pre_admission_fin=cmd.date_pre_admission_fin,
+                )
             ]
-
         # Only work with proposition identities
         if proposition_ids_from_proposition is not None and proposition_ids_from_demande is not None:
             # Search both and intersect
-            proposition_ids = list(set(proposition_ids_from_proposition) & set(proposition_ids_from_demande))
-        else:
-            proposition_ids = proposition_ids_from_proposition or proposition_ids_from_demande or []
-
-        proposition_dtos = proposition_repository.search_dto(entity_ids=proposition_ids)
-        demande_ids = [
-            PropositionIdentityTranslator.convertir_en_demande(proposition_id) for proposition_id in proposition_ids
-        ]
-        demande_dto_mapping: Dict[str, DemandeDTO] = {
-            demande_dto.uuid: demande_dto for demande_dto in demande_repository.search_dto(entity_ids=demande_ids)
-        }
-
-        return [
-            DemandeRechercheDTO(
-                uuid=proposition_dto.uuid,
-                numero_demande=proposition_dto.reference,
-                statut_cdd=demande_dto_mapping[proposition_dto.uuid].statut_cdd
-                if proposition_dto.uuid in demande_dto_mapping
-                else None,
-                statut_sic=demande_dto_mapping[proposition_dto.uuid].statut_sic
-                if proposition_dto.uuid in demande_dto_mapping
-                else None,
-                statut_demande=proposition_dto.statut,
-                nom_candidat=proposition_dto.nom_candidat,
-                sigle_formation=proposition_dto.sigle_doctorat,
-                intitule_formation=proposition_dto.intitule_doctorat_fr,  # TODO gérer la trad
-                nationalite=proposition_dto.nationalite_candidat,
-                derniere_modification=proposition_dto.modifiee_le,
-                date_confirmation=(
-                    demande_dto_mapping[proposition_dto.uuid].admission_acceptee_le
-                    or demande_dto_mapping[proposition_dto.uuid].pre_admission_acceptee_le
-                )
-                if proposition_dto.uuid in demande_dto_mapping
-                else None,
-                code_bourse=proposition_dto.type_financement or "",  # TODO bon champ ?
-            )
-            for proposition_dto in proposition_dtos
-        ]
+            return list(set(proposition_ids_from_proposition) & set(proposition_ids_from_demande))
+        return proposition_ids_from_proposition or proposition_ids_from_demande or []

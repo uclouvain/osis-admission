@@ -24,20 +24,17 @@
 #
 # ##############################################################################
 from datetime import datetime
-from typing import Optional, List
+from typing import List, Optional
 
 from admission.contrib.models import DoctorateAdmission
+from admission.contrib.models.doctorate import DemandeProxy
 from admission.ddd.projet_doctoral.validation.domain.model._profil_candidat import ProfilCandidat
 from admission.ddd.projet_doctoral.validation.domain.model.demande import Demande, DemandeIdentity
-from admission.ddd.projet_doctoral.validation.dtos import DemandeDTO, DemandeRechercheDTO
+from admission.ddd.projet_doctoral.validation.dtos import DemandeDTO
 from admission.ddd.projet_doctoral.validation.repository.i_demande import IDemandeRepository
 
 
 class DemandeRepository(IDemandeRepository):
-    # TODO
-    #   Créer un proxy model Django pour ne travailler que sur les champs qui concernent la demande
-    #   filtrer par défaut sur le statut SUBMITTED
-
     @classmethod
     def search_dto(
         cls,
@@ -48,11 +45,22 @@ class DemandeRepository(IDemandeRepository):
         entity_ids: Optional[List['DemandeIdentity']] = None,
         **kwargs,
     ) -> List['DemandeDTO']:
-        raise NotImplementedError
+        qs = DemandeProxy.objects.all()
+        if etat_sic:
+            qs = qs.filter(status_sic=etat_sic)
+        if etat_cdd:
+            qs = qs.filter(status_cdd=etat_cdd)
+        if date_pre_admission_debut:
+            qs = qs.filter(pre_admission_submission_date__gte=date_pre_admission_debut)
+        if date_pre_admission_fin:
+            qs = qs.filter(pre_admission_submission_date__lte=date_pre_admission_fin)
+        if entity_ids is not None:
+            qs = qs.filter(uuid__in=[e.uuid for e in entity_ids])
+        return qs
 
     @classmethod
     def get(cls, entity_id: 'DemandeIdentity') -> 'Demande':
-        admission = DoctorateAdmission.objects.get(uuid=entity_id.uuid)
+        admission = DemandeProxy.objects.get(uuid=entity_id.uuid)
         return Demande(
             profil_candidat=ProfilCandidat(
                 prenom=admission.submitted_profile.identification.first_name,
@@ -103,6 +111,8 @@ class DemandeRepository(IDemandeRepository):
                 },
                 'pre_admission_submission_date': entity.pre_admission_acceptee_le,
                 'admission_submission_date': entity.admission_acceptee_le,
+                'status_cdd': entity.statut_cdd,
+                'status_sic': entity.statut_sic,
             },
         )
 

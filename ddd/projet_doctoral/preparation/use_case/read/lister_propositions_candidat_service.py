@@ -31,8 +31,8 @@ from admission.ddd.projet_doctoral.preparation.repository.i_proposition import I
 
 
 def lister_propositions_candidat(
-        cmd: 'ListerPropositionsCandidatQuery',
-        proposition_repository: 'IPropositionRepository',
+    cmd: 'ListerPropositionsCandidatQuery',
+    proposition_repository: 'IPropositionRepository',
 ) -> List['PropositionCandidatDTO']:
     dtos = proposition_repository.search_dto(matricule_candidat=cmd.matricule_candidat)
     return [
@@ -41,8 +41,7 @@ def lister_propositions_candidat(
             reference=dto.reference,
             type_admission=dto.type_admission,
             sigle_doctorat=dto.sigle_doctorat,
-            intitule_doctorat_fr=dto.intitule_doctorat_fr,
-            intitule_doctorat_en=dto.intitule_doctorat_en,
+            intitule_doctorat=dto.intitule_doctorat,
             matricule_candidat=dto.matricule_candidat,
             prenom_candidat=dto.prenom_candidat,
             nom_candidat=dto.nom_candidat,
