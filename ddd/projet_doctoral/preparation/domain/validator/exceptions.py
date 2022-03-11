@@ -24,7 +24,7 @@
 #
 ##############################################################################
 
-from django.utils.translation import gettext_lazy as _
+from django.utils.translation import gettext_lazy as _, ngettext_lazy
 
 from osis_common.ddd.interface import BusinessException
 
@@ -300,7 +300,11 @@ class AnneesCurriculumNonSpecifieesException(BusinessException):
 
     def __init__(self, annees_manquantes, **kwargs):
         message = (
-            _("Please fill in the 'Previous Experience > Curriculum vitae' tab for the following years: ")
+            ngettext_lazy(
+                "Please fill in the 'Previous Experience > Curriculum vitae' tab for the following year: ",
+                "Please fill in the 'Previous Experience > Curriculum vitae' tab for the following years: ",
+                len(annees_manquantes)
+            )
             + ', '.join(annees_manquantes)
             + '.'
         )

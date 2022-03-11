@@ -415,8 +415,12 @@ msgstr ""
 
 msgid ""
 "Please fill in the 'Previous Experience > Curriculum vitae' tab for the "
+"following year: "
+msgid_plural ""
+"Please fill in the 'Previous Experience > Curriculum vitae' tab for the "
 "following years: "
-msgstr ""
+msgstr[0] ""
+msgstr[1] ""
 
 msgid "Please provide a copy of your curriculum."
 msgstr ""
