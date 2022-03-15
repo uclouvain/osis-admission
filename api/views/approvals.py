@@ -29,7 +29,11 @@ from rest_framework.views import APIView
 
 from admission.api import serializers
 from admission.api.schema import ResponseSpecificSchema
-from admission.ddd.preparation.projet_doctoral.commands import ApprouverPropositionCommand, RefuserPropositionCommand
+from admission.ddd.projet_doctoral.preparation.commands import (
+    ApprouverPropositionCommand,
+    ApprouverPropositionParPdfCommand,
+    RefuserPropositionCommand,
+)
 from admission.utils import get_cached_admission_perm_obj
 from infrastructure.messages_bus import message_bus_instance
 from osis_role.contrib.views import APIPermissionRequiredMixin
@@ -81,6 +85,41 @@ class ApprovePropositionAPIView(APIPermissionRequiredMixin, APIView):
 
         proposition_id = message_bus_instance.invoke(
             RefuserPropositionCommand(
+                uuid_proposition=str(kwargs["uuid"]),
+                **serializer.data,
+            ),
+        )
+
+        serializer = serializers.PropositionIdentityDTOSerializer(instance=proposition_id)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class ApproveByPdfPropositionSchema(ResponseSpecificSchema):
+    serializer_mapping = {
+        "POST": (serializers.ApprouverPropositionParPdfCommandSerializer, serializers.PropositionIdentityDTOSerializer),
+    }
+
+    def get_operation_id(self, path, method):
+        return 'approve_by_pdf'
+
+
+class ApproveByPdfPropositionAPIView(APIPermissionRequiredMixin, APIView):
+    name = "approve-by-pdf"
+    schema = ApproveByPdfPropositionSchema()
+    permission_mapping = {
+        'POST': 'admission.approve_proposition_by_pdf',
+    }
+
+    def get_permission_object(self):
+        return get_cached_admission_perm_obj(self.kwargs['uuid'])
+
+    def post(self, request, *args, **kwargs):
+        """Approve the proposition with a pdf file."""
+        serializer = serializers.ApprouverPropositionParPdfCommandSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        proposition_id = message_bus_instance.invoke(
+            ApprouverPropositionParPdfCommand(
                 uuid_proposition=str(kwargs["uuid"]),
                 **serializer.data,
             ),

@@ -6,7 +6,7 @@ from django.test import TestCase as BaseTestCase
 from django.test.utils import CaptureQueriesContext
 
 
-class TestCase(BaseTestCase):
+class QueriesAssertionsMixin:
     @contextmanager
     def assertNumQueriesLessThan(self, value, using="default", verbose=False):
         with CaptureQueriesContext(connections[using]) as context:
@@ -25,6 +25,8 @@ class TestCase(BaseTestCase):
             msg = "\r\n%s" % json.dumps(context.captured_queries, indent=4)
         else:
             msg = None
-        self.assertLess(
-            sum(float(q["time"]) for q in context.captured_queries), value, msg=msg
-        )
+        self.assertLess(sum(float(q["time"]) for q in context.captured_queries), value, msg=msg)
+
+
+class TestCase(QueriesAssertionsMixin, BaseTestCase):
+    pass

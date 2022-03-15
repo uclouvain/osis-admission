@@ -28,6 +28,7 @@ from django.utils.translation import gettext_lazy as _
 from osis_signature.enums import SignatureState
 from rules import predicate
 
+from admission.ddd.projet_doctoral.preparation.domain.model._enums import ChoixStatutProposition
 from osis_role.errors import predicate_failed_msg
 
 from admission.contrib.models import DoctorateAdmission
@@ -42,19 +43,21 @@ def is_admission_request_author(self, user: User, obj: BaseAdmission):
 
 
 @predicate(bind=True)
-@predicate_failed_msg(message=_("Some invitations are already sent"))
-def invitations_sent(self, user: User, obj: DoctorateAdmission):
-    return obj.supervision_group and obj.supervision_group.actors.exclude(
-        last_state=SignatureState.NOT_INVITED.name,
-    ).exists()
+@predicate_failed_msg(message=_("Invitations must have been sent"))
+def in_progress(self, user: User, obj: DoctorateAdmission):
+    return obj.status == ChoixStatutProposition.IN_PROGRESS.name
 
 
 @predicate(bind=True)
-@predicate_failed_msg(message=_("You must be the request author to access this admission"))
-def is_admission_request_author_or_person(self, user: User, obj: BaseAdmission):
-    if obj:
-        return obj.candidate == user.person
-    return True
+@predicate_failed_msg(message=_("Invitations have not been sent"))
+def signing_in_progress(self, user: User, obj: DoctorateAdmission):
+    return obj.status == ChoixStatutProposition.SIGNING_IN_PROGRESS.name
+
+
+@predicate(bind=True)
+@predicate_failed_msg(message=_("The proposition has already been confirmed or is cancelled"))
+def unconfirmed_proposition(self, user: User, obj: DoctorateAdmission):
+    return obj.status not in [ChoixStatutProposition.SUBMITTED.name, ChoixStatutProposition.CANCELLED.name]
 
 
 @predicate(bind=True)
@@ -80,6 +83,6 @@ def is_part_of_committee(self, user: User, obj: DoctorateAdmission):
 @predicate(bind=True)
 @predicate_failed_msg(message=_("You must be a member of the committee who has not yet given his answer"))
 def is_part_of_committee_and_invited(self, user: User, obj: DoctorateAdmission):
-    return user.person.pk in obj.supervision_group.actors.filter(
+    return obj.supervision_group and user.person.pk in obj.supervision_group.actors.filter(
         last_state=SignatureState.INVITED.name,
     ).values_list('person_id', flat=True)

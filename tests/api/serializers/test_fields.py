@@ -23,22 +23,25 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.shortcuts import get_object_or_404
 from django.test.utils import override_settings
 from django.urls.base import reverse
 from django.urls.conf import path
-from django.utils.translation import gettext as _
+from django.utils.translation import gettext as _, get_language
+from unittest.mock import Mock
 from rest_framework.serializers import Serializer
 from rest_framework.test import APIRequestFactory, APITestCase
 from rest_framework.views import APIView
 
 from admission.api.permissions import IsListingOrHasNotAlreadyCreatedPermission
-from admission.api.serializers.fields import ActionLinksField
+from admission.api.serializers.fields import ActionLinksField, RelatedInstituteField, TranslatedField
 from admission.contrib.models import DoctorateAdmission
 from admission.tests.factories import DoctorateAdmissionFactory
+from base.models.enums.entity_type import EntityType
+from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.person import PersonFactory
-from base.tests.factories.user import UserFactory
 from osis_role.contrib.views import APIPermissionRequiredMixin
 
 
@@ -47,7 +50,7 @@ class TestAPIDetailViewWithPermissions(APIPermissionRequiredMixin, APIView):
     permission_mapping = {
         'GET': 'admission.view_doctorateadmission',
         'DELETE': 'admission.delete_doctorateadmission',
-        'PUT': ('admission.change_doctorateadmission', ),
+        'PUT': ('admission.change_doctorateadmission',),
     }
 
     def get_permission_object(self):
@@ -112,7 +115,7 @@ class SerializerFieldsTestCase(APITestCase):
             instance=self.first_doctorate_admission
         )
         with self.assertRaisesMessage(ImproperlyConfigured, 'request'):
-            serializer.data
+            assert serializer.data
 
     def test_serializer_without_action(self):
         # The list of actions is empty -> we return an empty dictionary
@@ -241,7 +244,7 @@ class SerializerFieldsTestCase(APITestCase):
             },
         )
         with self.assertRaisesMessage(ImproperlyConfigured, 'incorrect_param'):
-            serializer.data
+            assert serializer.data
 
     def test_serializer_with_action_and_valid_permission_but_bad_path_name(self):
         # The list of actions contains one action with a bad path name -> we raise an exception
@@ -260,7 +263,7 @@ class SerializerFieldsTestCase(APITestCase):
             },
         )
         with self.assertRaisesMessage(ImproperlyConfigured, 'invalid_api_view_with_permissions'):
-            serializer.data
+            assert serializer.data
 
     def test_serializer_with_action_and_valid_permission_but_bad_view(self):
         # The list of actions contains one action with a valid path name but related to a view which doesn't
@@ -280,7 +283,7 @@ class SerializerFieldsTestCase(APITestCase):
             },
         )
         with self.assertRaisesMessage(ImproperlyConfigured, 'APIPermissionRequiredMixin'):
-            serializer.data
+            assert serializer.data
 
     def test_serializer_with_action_and_valid_permission_and_param_many_instances(self):
         # The list of actions contains one available action with a url parameter. We pass two instances and the user
@@ -320,3 +323,55 @@ class SerializerFieldsTestCase(APITestCase):
                 'error': _("You must be the request author to access this admission"),
             }
         })
+
+
+class TranslatedFieldTestCase(APITestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.default_language = settings.LANGUAGE_CODE
+
+    def tearDown(self):
+        settings.LANGUAGE_CODE = self.default_language
+
+    def test_with_supported_language(self):
+        mock_obj = Mock(title='Mon titre', title_en='My title')
+        settings.LANGUAGE_CODE = get_language()
+
+        serializer_field = TranslatedField(field_name='title', en_field_name='title_en')
+
+        self.assertEqual(
+            serializer_field.to_representation(mock_obj),
+            'Mon titre',
+        )
+
+    def test_with_unsupported_language(self):
+        mock_obj = Mock(title='Mon titre', title_en='My title')
+        settings.LANGUAGE_CODE = 'azerty'
+
+        serializer_field = TranslatedField(field_name='title', en_field_name='title_en')
+
+        self.assertEqual(
+            serializer_field.to_representation(mock_obj),
+            'My title',
+        )
+
+
+class RelatedInstituteFieldTestCase(APITestCase):
+    def test_representation(self):
+        serializer_field = RelatedInstituteField()
+        self.assertIsNone(serializer_field.to_representation(None))
+
+        institute = EntityVersionFactory(
+            entity_type=EntityType.INSTITUTE.name,
+        )
+        self.assertEqual(serializer_field.to_representation(institute), str(institute.uuid))
+
+    def test_internal_value(self):
+        serializer_field = RelatedInstituteField()
+        self.assertIsNone(serializer_field.to_internal_value(None))
+
+        institute = EntityVersionFactory(
+            entity_type=EntityType.INSTITUTE.name,
+        )
+        self.assertEqual(serializer_field.to_internal_value(institute.uuid), institute)
+        self.assertEqual(serializer_field.to_internal_value(str(institute.uuid)), institute)

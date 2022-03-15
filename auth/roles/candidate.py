@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -27,9 +27,10 @@ from rules import RuleSet
 from django.utils.translation import gettext_lazy as _
 
 from admission.auth.predicates import (
-    invitations_sent,
+    signing_in_progress,
+    in_progress,
+    unconfirmed_proposition,
     is_admission_request_author,
-    is_admission_request_author_or_person,
 )
 from osis_role.contrib.models import RoleModel
 
@@ -42,31 +43,42 @@ class Candidate(RoleModel):
 
     @classmethod
     def rule_set(cls):
-        return RuleSet({
-            'admission.change_doctorateadmission': is_admission_request_author,
-            'admission.view_doctorateadmission': is_admission_request_author,
-            'admission.delete_doctorateadmission': is_admission_request_author,
-            'admission.download_pdf_confirmation': is_admission_request_author,
-            'admission.upload_pdf_confirmation': is_admission_request_author,
-            'admission.fill_thesis': is_admission_request_author,
-            'admission.upload_publication_authorisation': is_admission_request_author,
-            'admission.request_signatures': is_admission_request_author & ~invitations_sent,
-            'admission.view_doctorateadmission_person': is_admission_request_author_or_person,
-            'admission.change_doctorateadmission_person': is_admission_request_author_or_person,
-            'admission.view_doctorateadmission_coordinates': is_admission_request_author_or_person,
-            'admission.change_doctorateadmission_coordinates': is_admission_request_author_or_person,
-            'admission.view_doctorateadmission_secondary_studies': is_admission_request_author_or_person,
-            'admission.change_doctorateadmission_secondary_studies': is_admission_request_author_or_person,
-            'admission.view_doctorateadmission_curriculum': is_admission_request_author_or_person,
-            'admission.change_doctorateadmission_curriculum': is_admission_request_author_or_person,
-            'admission.view_doctorateadmission_languages': is_admission_request_author_or_person,
-            'admission.change_doctorateadmission_languages': is_admission_request_author_or_person,
-            'admission.view_doctorateadmission_project': is_admission_request_author,
-            'admission.change_doctorateadmission_project': is_admission_request_author & ~invitations_sent,
-            'admission.view_doctorateadmission_cotutelle': is_admission_request_author,
-            'admission.change_doctorateadmission_cotutelle': is_admission_request_author & ~invitations_sent,
-            'admission.view_doctorateadmission_supervision': is_admission_request_author,
-            'admission.change_doctorateadmission_supervision': is_admission_request_author & ~invitations_sent,
-            'admission.add_supervision_member': is_admission_request_author & ~invitations_sent,
-            'admission.remove_supervision_member': is_admission_request_author & ~invitations_sent,
-        })
+        return RuleSet(
+            {
+                # A candidate can view as long as it's the author
+                'admission.view_doctorateadmission': is_admission_request_author,
+                'admission.view_doctorateadmission_person': is_admission_request_author,
+                'admission.view_doctorateadmission_coordinates': is_admission_request_author,
+                'admission.view_doctorateadmission_curriculum': is_admission_request_author,
+                'admission.view_doctorateadmission_secondary_studies': is_admission_request_author,
+                'admission.view_doctorateadmission_languages': is_admission_request_author,
+                'admission.view_doctorateadmission_project': is_admission_request_author,
+                'admission.view_doctorateadmission_cotutelle': is_admission_request_author,
+                'admission.view_doctorateadmission_supervision': is_admission_request_author,
+                # Can edit while not confirmed proposition
+                'admission.delete_doctorateadmission': is_admission_request_author & unconfirmed_proposition,
+                'admission.change_doctorateadmission': is_admission_request_author & unconfirmed_proposition,
+                'admission.change_doctorateadmission_person': is_admission_request_author & unconfirmed_proposition,
+                'admission.change_doctorateadmission_coordinates': is_admission_request_author
+                & unconfirmed_proposition,
+                'admission.change_doctorateadmission_curriculum': is_admission_request_author & unconfirmed_proposition,
+                'admission.change_doctorateadmission_secondary_studies': is_admission_request_author
+                & unconfirmed_proposition,
+                'admission.change_doctorateadmission_languages': is_admission_request_author & unconfirmed_proposition,
+                # Project tabs and supervision group edition are accessible as long as signing has not begun
+                'admission.change_doctorateadmission_project': is_admission_request_author & in_progress,
+                'admission.change_doctorateadmission_cotutelle': is_admission_request_author & in_progress,
+                'admission.change_doctorateadmission_supervision': is_admission_request_author & in_progress,
+                'admission.request_signatures': is_admission_request_author & in_progress,
+                'admission.add_supervision_member': is_admission_request_author & in_progress,
+                'admission.remove_supervision_member': is_admission_request_author & in_progress,
+                # Once supervision group is signing, he can
+                'admission.approve_proposition_by_pdf': is_admission_request_author & signing_in_progress,
+                'admission.submit_doctorateadmission': is_admission_request_author & signing_in_progress,
+                # Future
+                'admission.download_pdf_confirmation': is_admission_request_author,
+                'admission.upload_pdf_confirmation': is_admission_request_author,
+                'admission.fill_thesis': is_admission_request_author,
+                'admission.upload_publication_authorisation': is_admission_request_author,
+            }
+        )

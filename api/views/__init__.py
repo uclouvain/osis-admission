@@ -23,8 +23,11 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from admission.api.views.dashboard import *
 from admission.api.views.autocomplete import *
 from admission.api.views.coordonnees import *
+from admission.api.views.curriculum import CurriculumExperienceListAndCreateView, \
+    CurriculumExperienceDetailUpdateAndDeleteView, CurriculumFileView
 from admission.api.views.secondary_studies import *
 from admission.api.views.languages_knowledge import *
 from admission.api.views.cotutelle import *
@@ -36,10 +39,14 @@ from admission.api.views.approvals import *
 
 __all__ = [
     "CoordonneesViewSet",
+    "CurriculumExperienceListAndCreateView",
+    "CurriculumExperienceDetailUpdateAndDeleteView",
+    "CurriculumFileView",
     "PersonViewSet",
     "PropositionViewSet",
     "PropositionListView",
-    "VerifyPropositionView",
+    "VerifyProjectView",
+    "SubmitPropositionViewSet",
     "SecondaryStudiesViewSet",
     "AutocompleteDoctoratView",
     "AutocompleteSectorView",
@@ -50,4 +57,6 @@ __all__ = [
     "RequestSignaturesAPIView",
     "LanguagesKnowledgeViewSet",
     "ApprovePropositionAPIView",
+    "ApproveByPdfPropositionAPIView",
+    "DashboardViewSet",
 ]

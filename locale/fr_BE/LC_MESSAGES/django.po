@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-01-04 10:44+0100\n"
+"POT-Creation-Date: 2022-02-25 10:53+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -61,6 +61,15 @@ msgstr "Projet de formation complémentaire"
 msgid "Admission"
 msgstr "Admission"
 
+msgid "Admission submission date"
+msgstr "Date de soumission Admission"
+
+msgid "All CA members must have approved the proposition."
+msgstr "Tous les membres du CA doivent approuver la proposition."
+
+msgid "All promoters must have approved the proposition."
+msgstr "Tous les promoteurs doivent approuver la proposition."
+
 msgid "Already a member of CA."
 msgstr "Déjà membre du CA"
 
@@ -69,6 +78,9 @@ msgstr "Déjà promoteur"
 
 msgid "Author"
 msgstr "Auteur"
+
+msgid "BIOLOGY"
+msgstr "Biologie"
 
 msgid "CA Member"
 msgstr "Membre du CA"
@@ -82,8 +94,8 @@ msgstr "Gestionnaire CDD"
 msgid "CDD managers"
 msgstr "Gestionnaires CDD"
 
-msgid "Can access doctorate admission list"
-msgstr "Peut accéder à la liste des admission en doctorat"
+msgid "CHEMISTRY"
+msgstr "Chimie"
 
 msgid "Can add a member to the supervision group"
 msgstr "Peut ajouter un membre au groupe de supervision"
@@ -126,6 +138,9 @@ msgstr "Peut demander les signatures"
 
 msgid "Can sign diploma"
 msgstr "Peut signer le diplôme"
+
+msgid "Can submit a doctorate admission proposition"
+msgstr "Peut soumettre une proposition d'admission en doctorat"
 
 msgid "Can submit thesis"
 msgstr "Peut soumettre la thèse"
@@ -202,6 +217,9 @@ msgstr "Peut voir les informations relatives aux études secondaires"
 msgid "Candidate"
 msgstr "Candidat"
 
+msgid "Candidate not found."
+msgstr "Candidat non trouvé."
+
 msgid "Candidates"
 msgstr "Candidats"
 
@@ -277,6 +295,9 @@ msgstr "Type de financement"
 msgid "French"
 msgstr "Français"
 
+msgid "GEOGRAPHY"
+msgstr "Géographie"
+
 msgid "Gantt graph"
 msgstr "Graphe de Gantt"
 
@@ -297,6 +318,12 @@ msgstr ""
 msgid "Internal comment"
 msgstr "Commentaire interne"
 
+msgid "Invitations have not been sent"
+msgstr "Les invitations n'ont pas été envoyées"
+
+msgid "Invitations must have been sent"
+msgstr "Les invitations doivent avoir été envoyées"
+
 msgid "Jury secretaries"
 msgstr "Secrétaires de jury"
 
@@ -311,6 +338,9 @@ msgstr "Liste des admissions en doctorat et données administratives"
 
 msgid "MANAGEMENT"
 msgstr "Gestion"
+
+msgid "MATHEMATICS"
+msgstr "Mathématiques"
 
 msgid "Mandatory fields are missing in the cotutelle."
 msgstr "Les champs requis de la cotutelle sont manquants."
@@ -358,11 +388,14 @@ msgstr "Autre"
 msgid "Other cotutelle-related documents"
 msgstr "Autres documents relatifs à la cotutelle"
 
-msgid "Other thesis location"
-msgstr "Autre lieu de la thèse"
-
 msgid "PARTIAL"
 msgstr "Partiel"
+
+msgid "PDF file"
+msgstr "Fichier PDF"
+
+msgid "PHYSICS"
+msgstr "Physique"
 
 msgid "PRE_ADMISSION"
 msgstr "Pre-admission"
@@ -373,8 +406,72 @@ msgstr "Doctorat déjà réalisé"
 msgid "Planned duration"
 msgstr "Durée prévue"
 
+msgid ""
+"Please fill in all the required information in the 'Personal Data > "
+"Coordinates' tab."
+msgstr ""
+"Merci de compléter intégralement les informations requises de l'onglet "
+"'Données personnelles > Coordonnées'."
+
+msgid ""
+"Please fill in all the required information in the 'Personal Data > "
+"Identification' tab."
+msgstr ""
+"Merci de compléter intégralement les informations requises de l'onglet "
+"'Données personnelles > Identification'."
+
+msgid ""
+"Please fill in all the required information in the 'Previous experience > "
+"Languages knowledge' tab."
+msgstr ""
+"Merci de compléter intégralement les informations requises de l'onglet "
+"'Parcours antérieur > Connaissance des langues'."
+
+msgid ""
+"Please fill in all the required information related to your contact address."
+msgstr ""
+"Merci de compléter toutes les informations requises relatives à votre "
+"adresse de contact."
+
+msgid ""
+"Please fill in the 'Previous Experience > Curriculum vitae' tab for the "
+"following year: "
+msgid_plural ""
+"Please fill in the 'Previous Experience > Curriculum vitae' tab for the "
+"following years: "
+msgstr[0] ""
+"Merci de compléter l'onglet 'Parcours antérieur > Curriculum' pour l'année "
+"suivante : "
+msgstr[1] ""
+"Merci de compléter l'onglet 'Parcours antérieur > Curriculum' pour les "
+"années suivantes : "
+
+msgid "Please provide a copy of your curriculum."
+msgstr "Merci de fournir une copie de votre curriculum."
+
+msgid "Please provide a copy of your identity card."
+msgstr "Merci de fournir une copie de votre carte d'identité."
+
+msgid "Please provide the expiry date and a copy of your passport."
+msgstr "Merci de fournir la date d'expiration et une copie de votre passeport."
+
+msgid "Please specify at least one identity number."
+msgstr "Merci de spécifier au-moins un numéro d'identité."
+
+msgid "Please specify either your date of birth or your year of birth."
+msgstr "Merci de spécifier votre date ou votre année de naissance."
+
+msgid "Please specify the experience's year."
+msgstr "Merci de spécifier l'année de l'expérience."
+
+msgid "Please specify your Belgian national register number."
+msgstr "Merci de spécifier votre numéro de registre national belge."
+
 msgid "Pre-Admission"
 msgstr "Pré-Admission"
+
+msgid "Pre-admission submission date"
+msgstr "Date de soumission Pré-admission"
 
 msgid "Produce xls of doctorate admissions with administrative data"
 msgstr ""
@@ -481,17 +578,26 @@ msgstr "Gestionnaires SIC"
 msgid "SIGNING_IN_PROGRESS"
 msgstr "Signatures en cours"
 
+msgid "STATISTICS"
+msgstr "Statistiques"
+
 msgid "SUBMITTED"
 msgstr "Soumis"
 
 msgid "Scholarship grant"
 msgstr "Bourse de recherche"
 
-msgid "Some invitations are already sent"
-msgstr "Des invitations ont déjà été envoyées"
-
 msgid "Supervision group not found."
 msgstr "Groupe de supervision non trouvé."
+
+msgid "The experiences that have been valuated from this admission."
+msgstr "Les expériences qui ont été valorisées à partir de cette admission."
+
+msgid "The proposition has already been confirmed or is cancelled"
+msgstr "La proposition a déjà été confirmée ou est annulée."
+
+msgid "The signature request procedure isn't in progress."
+msgstr "La procédure de demande de signature n'a pas été lancée."
 
 msgid "There can be no more CA members in the supervision group."
 msgstr ""
@@ -504,11 +610,20 @@ msgstr ""
 msgid "Thesis institute"
 msgstr "Institut de la thèse"
 
+msgid "Thesis institute must be set."
+msgstr "L'institut de la thèse est obligatoire."
+
 msgid "Thesis language"
 msgstr "Langue de la thèse"
 
 msgid "Thesis location"
 msgstr "Lieu de la thèse"
+
+msgid "This experience cannot be deleted as it has already been valuated."
+msgstr "Cette expérience ne peut être supprimée, ayant déjà été évaluée."
+
+msgid "This experience cannot be updated as it has already been valuated."
+msgstr "Cette expérience ne peut être mise à jour, ayant déjà été évaluée."
 
 msgid "Title"
 msgstr "Titre"
@@ -552,14 +667,16 @@ msgstr ""
 "Vous devez ajouter au moins un membre CA afin de demander les signatures."
 
 msgid ""
+"You must add at least one UCLouvain promoter in order to request signatures."
+msgstr ""
+"Vous devez ajouter au moins un promoteur UCLouvain afin de demander les "
+"signatures."
+
+msgid ""
 "You must add at least one external promoter in order to request signatures."
 msgstr ""
 "Vous devez ajouter au moins un promoteur externe afin de demander les "
 "signatures."
-
-msgid "You must add at least one promoter in order to request signatures."
-msgstr ""
-"Vous devez ajouter au moins un promoteur afin de demander les signatures."
 
 msgid "You must be a member of the committee to access this admission"
 msgstr "Vous devez être membre du comité pour accéder à cette admission"
@@ -592,7 +709,3 @@ msgstr "créé"
 
 msgid "modified"
 msgstr "modifée"
-
-#, python-brace-format
-msgid "{degree} [{type}] for {candidate}"
-msgstr "{degree} [{type}] pour {candidate}"

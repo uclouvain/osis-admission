@@ -25,9 +25,9 @@
 # ##############################################################################
 from rest_framework.permissions import BasePermission, SAFE_METHODS
 
-from admission.contrib.models import DoctorateAdmission
-from admission.ddd.preparation.projet_doctoral.domain.model._enums import ChoixStatutProposition
-from admission.ddd.preparation.projet_doctoral.domain.service.initier_proposition import MAXIMUM_AUTORISE
+from admission.contrib.models import DoctorateAdmission, SupervisionActor
+from admission.ddd.projet_doctoral.preparation.domain.model._enums import ChoixStatutProposition
+from admission.ddd.projet_doctoral.preparation.domain.service.initier_proposition import MAXIMUM_AUTORISE
 
 
 class IsSelfPersonTabOrTabPermission(BasePermission):
@@ -37,7 +37,19 @@ class IsSelfPersonTabOrTabPermission(BasePermission):
 
     def has_permission(self, request, view):
         # No object means we are editing our own profile
-        return True
+        if request.method in SAFE_METHODS:
+            return True
+        # When editing, no doctorate admission must have been submitted
+        if not hasattr(request.user.person, 'has_submitted_propositions'):
+            setattr(
+                request.user.person,
+                'has_submitted_propositions',
+                DoctorateAdmission.objects.filter(
+                    candidate=request.user.person,
+                    status=ChoixStatutProposition.SUBMITTED.name,
+                ).exists()
+            )
+        return not request.user.person.has_submitted_propositions
 
     def has_object_permission(self, request, view, obj):
         if request.method in SAFE_METHODS:
@@ -52,7 +64,15 @@ class IsListingOrHasNotAlreadyCreatedPermission(BasePermission):
         # No object means we are either listing or creating a new admission
         if request.method in SAFE_METHODS:
             return True
-        return DoctorateAdmission.objects.filter(
-            candidate=request.user.person,
-            status=ChoixStatutProposition.IN_PROGRESS.name,
-        ).count() < MAXIMUM_AUTORISE
+        admission_count = (
+            DoctorateAdmission.objects.filter(candidate=request.user.person)
+            .exclude(status=ChoixStatutProposition.CANCELLED.name)
+            .count()
+        )
+        return admission_count < MAXIMUM_AUTORISE
+
+
+class IsSupervisionMember(BasePermission):
+    def has_permission(self, request, view):
+        # User is among supervision actors
+        return SupervisionActor.objects.filter(person_id=request.user.person.pk).exists()

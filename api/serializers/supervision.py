@@ -27,13 +27,13 @@
 from rest_framework import serializers
 
 from admission.contrib.models.enums.actor_type import ActorType
-from admission.ddd.preparation.projet_doctoral.commands import (
+from admission.ddd.projet_doctoral.preparation.commands import (
     IdentifierMembreCACommand,
     IdentifierPromoteurCommand,
     SupprimerMembreCACommand,
     SupprimerPromoteurCommand,
 )
-from admission.ddd.preparation.projet_doctoral.dtos import GroupeDeSupervisionDTO
+from admission.ddd.projet_doctoral.preparation.dtos import GroupeDeSupervisionDTO
 from base.models.person import Person
 from base.utils.serializers import DTOSerializer
 

@@ -23,7 +23,6 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import uuid
 
 from django.test import TestCase
 
@@ -32,12 +31,11 @@ from admission.tests.factories import DoctorateAdmissionFactory
 
 
 class BaseTestCase(TestCase):
-
     def setUp(self):
         self.base_admission = DoctorateAdmissionFactory()
 
     def test_valid_upload_to(self):
         self.assertEqual(
             admission_directory_path(self.base_admission, 'my_file.pdf'),
-            'admission/{}/{}/my_file.pdf'.format(self.base_admission.candidate.uuid, self.base_admission.uuid)
+            'admission/{}/{}/my_file.pdf'.format(self.base_admission.candidate.uuid, self.base_admission.uuid),
         )

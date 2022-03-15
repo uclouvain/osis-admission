@@ -39,15 +39,18 @@ class CommitteeMember(ExternalActorMixin, RoleModel):
 
     @classmethod
     def rule_set(cls):
-        return RuleSet({
-            'admission.approve_jury': is_part_of_committee,
-            'admission.view_doctorateadmission': is_part_of_committee,
-            'admission.view_doctorateadmission_person': is_part_of_committee,
-            'admission.view_doctorateadmission_coordinates': is_part_of_committee,
-            'admission.view_doctorateadmission_secondary_studies': is_part_of_committee,
-            'admission.view_doctorateadmission_curriculum': is_part_of_committee,
-            'admission.view_doctorateadmission_project': is_part_of_committee,
-            'admission.view_doctorateadmission_cotutelle': is_part_of_committee,
-            'admission.view_doctorateadmission_supervision': is_part_of_committee,
-            'admission.approve_proposition': is_part_of_committee_and_invited,
-        })
+        return RuleSet(
+            {
+                'admission.approve_jury': is_part_of_committee,
+                'admission.view_doctorateadmission': is_part_of_committee,
+                'admission.view_doctorateadmission_person': is_part_of_committee,
+                'admission.view_doctorateadmission_coordinates': is_part_of_committee,
+                'admission.view_doctorateadmission_secondary_studies': is_part_of_committee,
+                'admission.view_doctorateadmission_languages': is_part_of_committee,
+                'admission.view_doctorateadmission_curriculum': is_part_of_committee,
+                'admission.view_doctorateadmission_project': is_part_of_committee,
+                'admission.view_doctorateadmission_cotutelle': is_part_of_committee,
+                'admission.view_doctorateadmission_supervision': is_part_of_committee,
+                'admission.approve_proposition': is_part_of_committee_and_invited,
+            }
+        )

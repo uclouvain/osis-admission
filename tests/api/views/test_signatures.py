@@ -23,13 +23,16 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from unittest.mock import patch
 
 from django.shortcuts import resolve_url
 from django.test import override_settings
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import (
+from admission.ddd.projet_doctoral.preparation.domain.model._detail_projet import ChoixLangueRedactionThese
+from admission.ddd.projet_doctoral.preparation.domain.model._financement import ChoixTypeFinancement
+from admission.ddd.projet_doctoral.preparation.domain.validator.exceptions import (
     CotutelleDoitAvoirAuMoinsUnPromoteurExterneException,
     MembreCAManquantException,
     PromoteurManquantException,
@@ -42,17 +45,27 @@ from admission.tests.factories.supervision import CaMemberFactory, ExternalPromo
 class RequestSignaturesApiTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
+        cls.patcher = patch('osis_document.contrib.fields.FileField._confirm_upload')
+        patched = cls.patcher.start()
+        patched.return_value = "550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92"
         cls.admission = DoctorateAdmissionFactory(
             cotutelle=False,
             project_title="title",
             project_abstract="abstract",
-            thesis_language="FR",
+            financing_type=ChoixTypeFinancement.SELF_FUNDING.name,
+            thesis_language=ChoixLangueRedactionThese.FRENCH.name,
             project_document=[WriteTokenFactory().token],
             gantt_graph=[WriteTokenFactory().token],
             program_proposition=[WriteTokenFactory().token],
         )
+        cls.patcher.stop()
         cls.candidate = cls.admission.candidate
         cls.url = resolve_url("request-signatures", uuid=cls.admission.uuid)
+
+    def setUp(self):
+        patched = self.patcher.start()
+        patched.return_value = "550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92"
+        self.addCleanup(self.patcher.stop)
 
     def test_user_not_logged_assert_not_authorized(self):
         self.client.force_authenticate(user=None)
@@ -98,9 +111,10 @@ class RequestSignaturesApiTestCase(APITestCase):
             cotutelle_institution="Somewhere",
             cotutelle_opening_request=[WriteTokenFactory().token],
             cotutelle_convention=[WriteTokenFactory().token],
+            financing_type=ChoixTypeFinancement.SELF_FUNDING.name,
             project_title="title",
             project_abstract="abstract",
-            thesis_language="FR",
+            thesis_language=ChoixLangueRedactionThese.FRENCH.name,
             project_document=[WriteTokenFactory().token],
             gantt_graph=[WriteTokenFactory().token],
             program_proposition=[WriteTokenFactory().token],
@@ -128,9 +142,10 @@ class RequestSignaturesApiTestCase(APITestCase):
             cotutelle_institution="Somewhere",
             cotutelle_opening_request=[WriteTokenFactory().token],
             cotutelle_convention=[WriteTokenFactory().token],
+            financing_type=ChoixTypeFinancement.SELF_FUNDING.name,
             project_title="title",
             project_abstract="abstract",
-            thesis_language="FR",
+            thesis_language=ChoixLangueRedactionThese.FRENCH.name,
             project_document=[WriteTokenFactory().token],
             gantt_graph=[WriteTokenFactory().token],
             program_proposition=[WriteTokenFactory().token],

@@ -29,7 +29,7 @@ from django.db import connection
 
 from admission.contrib.models import DoctorateAdmission
 from admission.contrib.models.doctorate import REFERENCE_SEQ_NAME
-from admission.ddd.preparation.projet_doctoral.domain.model.proposition import Proposition
+from admission.ddd.projet_doctoral.preparation.domain.model.proposition import Proposition
 from admission.tests.factories.roles import CandidateFactory
 from base.models.enums.education_group_types import TrainingType
 from base.tests.factories.academic_year import AcademicYearFactory

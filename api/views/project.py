@@ -26,24 +26,25 @@
 from collections import defaultdict
 
 from rest_framework import mixins, status
-from rest_framework.generics import GenericAPIView, ListCreateAPIView
+from rest_framework.generics import GenericAPIView, ListAPIView, ListCreateAPIView
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
 
 from admission.api import serializers
-from admission.api.permissions import IsListingOrHasNotAlreadyCreatedPermission
+from admission.api.permissions import IsListingOrHasNotAlreadyCreatedPermission, IsSupervisionMember
 from admission.api.schema import ResponseSpecificSchema
-from admission.auth.roles.ca_member import CommitteeMember
-from admission.auth.roles.promoter import Promoter
-from admission.ddd.preparation.projet_doctoral.commands import (
-    CompleterPropositionCommand, GetPropositionCommand,
+from admission.ddd.projet_doctoral.preparation.commands import (
+    CompleterPropositionCommand,
+    GetPropositionCommand,
     InitierPropositionCommand,
     SearchPropositionsCandidatCommand,
-    SearchPropositionsComiteCommand,
+    SearchPropositionsSuperviseesCommand,
+    SoumettrePropositionCommand,
     SupprimerPropositionCommand,
+    VerifierProjetCommand,
     VerifierPropositionCommand,
 )
-from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import (
+from admission.ddd.projet_doctoral.preparation.domain.validator.exceptions import (
     CommissionProximiteInconsistantException,
     ContratTravailInconsistantException,
     InstitutionInconsistanteException,
@@ -54,7 +55,6 @@ from backoffice.settings.rest_framework.common_views import DisplayExceptionsByF
 from backoffice.settings.rest_framework.exception_handler import get_error_data
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from infrastructure.messages_bus import message_bus_instance
-from osis_role.contrib.permissions import _get_roles_assigned_to_user
 from osis_role.contrib.views import APIPermissionRequiredMixin
 
 
@@ -63,6 +63,7 @@ class PropositionListSchema(ResponseSpecificSchema):
         'GET': serializers.PropositionSearchSerializer,
         'POST': (serializers.InitierPropositionCommandSerializer, serializers.PropositionIdentityDTOSerializer),
     }
+    # Force schema to return an object (so that we have the results and the links)
     list_force_object = True
 
     def get_operation_id_base(self, path, method, action):
@@ -72,9 +73,7 @@ class PropositionListSchema(ResponseSpecificSchema):
         schema = super().map_choicefield(field)
         if field.field_name == "commission_proximite":
             self.enums["ChoixCommissionProximite"] = schema
-            return {
-                '$ref': "#/components/schemas/ChoixCommissionProximite"
-            }
+            return {'$ref': "#/components/schemas/ChoixCommissionProximite"}
         return schema
 
 
@@ -94,12 +93,9 @@ class PropositionListView(APIPermissionRequiredMixin, DisplayExceptionsByFieldNa
 
     def list(self, request, **kwargs):
         """List the propositions of the logged in user"""
-        roles = _get_roles_assigned_to_user(request.user)
-        if Promoter in roles or CommitteeMember in roles:
-            cmd = SearchPropositionsComiteCommand(matricule_membre=request.user.person.global_id)
-        else:
-            cmd = SearchPropositionsCandidatCommand(matricule_candidat=request.user.person.global_id)
-        proposition_list = message_bus_instance.invoke(cmd)
+        proposition_list = message_bus_instance.invoke(
+            SearchPropositionsCandidatCommand(matricule_candidat=request.user.person.global_id),
+        )
         serializer = serializers.PropositionSearchSerializer(
             instance={
                 "propositions": proposition_list,
@@ -117,6 +113,33 @@ class PropositionListView(APIPermissionRequiredMixin, DisplayExceptionsByFieldNa
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
+class SupervisedPropositionListSchema(ResponseSpecificSchema):
+    operation_id_base = '_supervised_propositions'
+    serializer_mapping = {
+        'GET': serializers.PropositionSearchDTOSerializer,
+    }
+
+
+class SupervisedPropositionListView(APIPermissionRequiredMixin, ListAPIView):
+    name = "supervised_propositions"
+    schema = SupervisedPropositionListSchema(tags=['propositions'])
+    pagination_class = None
+    filter_backends = []
+    permission_classes = [IsSupervisionMember]
+
+    def list(self, request, **kwargs):
+        """List the propositions of the supervision group member"""
+        proposition_list = message_bus_instance.invoke(
+            SearchPropositionsSuperviseesCommand(matricule_membre=request.user.person.global_id),
+        )
+        serializer = serializers.PropositionSearchDTOSerializer(
+            instance=proposition_list,
+            context=self.get_serializer_context(),
+            many=True,
+        )
+        return Response(serializer.data)
+
+
 class PropositionSchema(ResponseSpecificSchema):
     operation_id_base = '_proposition'
     serializer_mapping = {
@@ -129,9 +152,7 @@ class PropositionSchema(ResponseSpecificSchema):
         schema = super().map_choicefield(field)
         if field.field_name == "commission_proximite":
             self.enums["ChoixCommissionProximite"] = schema
-            return {
-                '$ref': "#/components/schemas/ChoixCommissionProximite"
-            }
+            return {'$ref': "#/components/schemas/ChoixCommissionProximite"}
         return schema
 
 
@@ -157,11 +178,11 @@ class PropositionViewSet(
     def get(self, request, *args, **kwargs):
         """Get a single proposition"""
         proposition = message_bus_instance.invoke(
-            GetPropositionCommand(uuid_proposition=kwargs.get('uuid'))
+            GetPropositionCommand(uuid_proposition=kwargs.get('uuid')),
         )
         serializer = serializers.PropositionDTOSerializer(
             instance=proposition,
-            context=self.get_serializer_context()
+            context=self.get_serializer_context(),
         )
         return Response(serializer.data)
 
@@ -176,47 +197,99 @@ class PropositionViewSet(
     def delete(self, request, *args, **kwargs):
         """Soft-Delete a proposition"""
         proposition_id = message_bus_instance.invoke(
-            SupprimerPropositionCommand(uuid_proposition=kwargs.get('uuid'))
+            SupprimerPropositionCommand(uuid_proposition=kwargs.get('uuid')),
         )
         serializer = serializers.PropositionIdentityDTOSerializer(instance=proposition_id)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-class VerifyPropositionSchema(ResponseSpecificSchema):
-    operation_id_base = '_verify_proposition'
+class VerifySchema(ResponseSpecificSchema):
+    response_description = "Verification errors"
 
     def get_responses(self, path, method):
-        return {
-            status.HTTP_200_OK: {
-                "description": "Proposition verification errors",
-                "content": {
-                    "application/json": {
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "type": "object",
-                                "properties": {
-                                    "status_code": {
-                                        "type": "string",
+        return (
+            {
+                status.HTTP_200_OK: {
+                    "description": self.response_description,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status_code": {
+                                            "type": "string",
+                                        },
+                                        "detail": {
+                                            "type": "string",
+                                        },
                                     },
-                                    "detail": {
-                                        "type": "string",
-                                    }
-                                }
+                                },
                             }
-                        }}
+                        }
+                    },
                 }
             }
-        }
+            if method == 'GET'
+            else super(VerifySchema, self).get_responses(path, method)
+        )
 
 
-class VerifyPropositionView(APIPermissionRequiredMixin, mixins.RetrieveModelMixin, GenericAPIView):
-    name = "verify-proposition"
+class VerifyProjectSchema(VerifySchema):
+    operation_id_base = '_verify_project'
+    response_description = "Project verification errors"
+
+
+class VerifyProjectView(APIPermissionRequiredMixin, mixins.RetrieveModelMixin, GenericAPIView):
+    name = "verify-project"
+    schema = VerifyProjectSchema()
+    permission_mapping = {
+        'GET': 'admission.view_doctorateadmission_project',
+    }
+    pagination_class = None
+    filter_backends = []
+
+    def get_permission_object(self):
+        return get_cached_admission_perm_obj(self.kwargs['uuid'])
+
+    def get(self, request, *args, **kwargs):
+        """Check the project to be OK with all validators."""
+        try:
+            # Trigger the verification command
+            message_bus_instance.invoke(VerifierProjetCommand(uuid_proposition=str(kwargs["uuid"])))
+        except MultipleBusinessExceptions as exc:
+            # Gather all errors for output
+            data = defaultdict(list)
+            for exception in exc.exceptions:
+                data = get_error_data(data, exception, {})
+            return Response(data.get(api_settings.NON_FIELD_ERRORS_KEY, []), status=status.HTTP_200_OK)
+        return Response([], status=status.HTTP_200_OK)
+
+
+class VerifyPropositionSchema(VerifySchema):
+    response_description = "Proposition verification errors"
+
+    serializer_mapping = {
+        'POST': serializers.PropositionIdentityDTOSerializer,
+    }
+
+    def get_operation_id(self, path, method):
+        if method == 'GET':
+            return 'verify_proposition'
+        elif method == 'POST':
+            return 'submit_proposition'
+        return super().get_operation_id(path, method)
+
+
+class SubmitPropositionViewSet(APIPermissionRequiredMixin, mixins.RetrieveModelMixin, GenericAPIView):
+    name = "submit-proposition"
     schema = VerifyPropositionSchema()
     pagination_class = None
     filter_backends = []
     permission_mapping = {
-        'GET': 'admission.view_doctorateadmission_project',
+        'GET': 'admission.submit_doctorateadmission',
+        'POST': 'admission.submit_doctorateadmission',
     }
 
     def get_permission_object(self):
@@ -234,3 +307,10 @@ class VerifyPropositionView(APIPermissionRequiredMixin, mixins.RetrieveModelMixi
                 data = get_error_data(data, exception, {})
             return Response(data.get(api_settings.NON_FIELD_ERRORS_KEY, []), status=status.HTTP_200_OK)
         return Response([], status=status.HTTP_200_OK)
+
+    def post(self, request, *args, **kwargs):
+        """Submit the proposition."""
+        # Trigger the submit command
+        proposition_id = message_bus_instance.invoke(SoumettrePropositionCommand(uuid_proposition=str(kwargs["uuid"])))
+        serializer = serializers.PropositionIdentityDTOSerializer(instance=proposition_id)
+        return Response(serializer.data, status=status.HTTP_200_OK)

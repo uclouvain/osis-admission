@@ -23,12 +23,34 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.urls.exceptions import NoReverseMatch
 from django.urls import reverse, resolve
+from django.utils.translation import get_language
 
 from rest_framework import serializers
+
+from base.models.entity_version import EntityVersion
+from base.models.enums.entity_type import INSTITUTE
 from osis_role.contrib.views import APIPermissionRequiredMixin
+
+
+class TranslatedField(serializers.SerializerMethodField):
+    def __init__(self, field_name, en_field_name, **kwargs):
+        kwargs['source'] = '*'
+        kwargs['read_only'] = True
+
+        super().__init__(**kwargs)
+
+        self.field_name = field_name
+        self.en_field_name = en_field_name
+
+    def to_representation(self, value):
+        if get_language() == settings.LANGUAGE_CODE:
+            return getattr(value, self.field_name)
+        else:
+            return getattr(value, self.en_field_name)
 
 
 class ActionLinksField(serializers.Field):
@@ -105,8 +127,36 @@ class ActionLinksField(serializers.Field):
         return links
 
 
+class RelatedInstituteField(serializers.CharField, serializers.SlugRelatedField):
+    def __init__(self, **kwargs):
+        kwargs.setdefault('slug_field', 'uuid')
+        kwargs.setdefault('queryset', EntityVersion.objects.filter(entity_type=INSTITUTE))
+        kwargs.setdefault('allow_null', True)
+        kwargs.setdefault('allow_blank', True)
+        super().__init__(**kwargs)
+
+    def to_internal_value(self, data):
+        if data:
+            return serializers.SlugRelatedField.to_internal_value(self, data)
+
+    def to_representation(self, value):
+        if value:
+            return str(serializers.SlugRelatedField.to_representation(self, value))
+
+
 # Available actions
 ACTION_LINKS = {
+    # List
+    # Normal
+    'list_propositions': {
+        'path_name': 'admission_api_v1:propositions',
+        'method': 'GET',
+    },
+    # Supervised
+    'list_supervised': {
+        'path_name': 'admission_api_v1:supervised_propositions',
+        'method': 'GET',
+    },
     # Profile
     # Person
     'retrieve_person': {
@@ -141,7 +191,7 @@ ACTION_LINKS = {
         'method': 'PUT',
         'params': ['uuid'],
     },
-    # Secondary studies
+    # Languages knowledge
     'retrieve_languages': {
         'path_name': 'admission_api_v1:languages-knowledge',
         'method': 'GET',
@@ -149,6 +199,17 @@ ACTION_LINKS = {
     },
     'update_languages': {
         'path_name': 'admission_api_v1:languages-knowledge',
+        'method': 'POST',
+        'params': ['uuid'],
+    },
+    # Curriculum
+    'retrieve_curriculum': {
+        'path_name': 'admission_api_v1:curriculum',
+        'method': 'GET',
+        'params': ['uuid'],
+    },
+    'update_curriculum': {
+        'path_name': 'admission_api_v1:curriculum',
         'method': 'POST',
         'params': ['uuid'],
     },
@@ -163,13 +224,14 @@ ACTION_LINKS = {
         'method': 'DELETE',
         'params': ['uuid'],
     },
-    'list_propositions': {
-        'path_name': 'admission_api_v1:propositions',
-        'method': 'GET',
-    },
     'retrieve_proposition': {
         'path_name': 'admission_api_v1:propositions',
         'method': 'GET',
+        'params': ['uuid'],
+    },
+    'submit_proposition': {
+        'path_name': 'admission_api_v1:submit-proposition',
+        'method': 'POST',
         'params': ['uuid'],
     },
     'update_proposition': {
@@ -211,6 +273,11 @@ ACTION_LINKS = {
     },
     'request_signatures': {
         'path_name': 'admission_api_v1:request-signatures',
+        'method': 'POST',
+        'params': ['uuid'],
+    },
+    'approve_by_pdf': {
+        'path_name': 'admission_api_v1:approve-by-pdf',
         'method': 'POST',
         'params': ['uuid'],
     },

@@ -35,9 +35,7 @@ from rest_framework.response import Response
 from admission.api import serializers
 from admission.api.serializers import PersonSerializer
 from admission.contrib.models import EntityProxy
-from admission.ddd.preparation.projet_doctoral.commands import (
-    SearchDoctoratCommand,
-)
+from admission.ddd.projet_doctoral.preparation.commands import SearchDoctoratCommand
 from base.auth.roles.tutor import Tutor
 from base.models.education_group_year import EducationGroupYear
 from base.models.entity_version import EntityVersion
@@ -53,6 +51,7 @@ from infrastructure.shared_kernel.academic_year.repository import academic_year 
 
 class AutocompleteSectorView(ListAPIView):
     """Autocomplete sectors"""
+
     name = "autocomplete-sector"
     pagination_class = None
     filter_backends = []
@@ -62,15 +61,16 @@ class AutocompleteSectorView(ListAPIView):
     def list(self, request, **kwargs):
         # TODO revert to command once it's in the shared kernel
         # Get all doctorates with their path (containing sector)
-        year = GetCurrentAcademicYear().get_starting_academic_year(
-            date.today(),
-            academic_year_repository.AcademicYearRepository()
-        ).year
+        year = (
+            GetCurrentAcademicYear()
+            .get_starting_academic_year(date.today(), academic_year_repository.AcademicYearRepository())
+            .year
+        )
         doctorate_qs = EducationGroupYear.objects.annotate(
             path_as_string=CTESubquery(
-                EntityVersion.objects.with_acronym_path(
-                    entity_id=OuterRef('management_entity'),
-                ).values('path_as_string')[:1],
+                EntityVersion.objects.with_acronym_path(entity_id=OuterRef('management_entity'),).values(
+                    'path_as_string'
+                )[:1],
                 output_field=TextField(),
             ),
         ).filter(
@@ -80,11 +80,17 @@ class AutocompleteSectorView(ListAPIView):
         )
         doctorate_paths = doctorate_qs.values_list('path_as_string', flat=True)
         # Get all sectors
-        qs = EntityProxy.objects.with_acronym().with_title().with_type().filter(type=SECTOR).annotate(
-            sigle=F('acronym'),
-            intitule_fr=F('title'),
-            intitule_en=F('title'),  # TODO get translation when available
-        ).values('sigle', 'intitule_fr', 'intitule_en')
+        qs = (
+            EntityProxy.objects.with_acronym()
+            .with_title()
+            .with_type()
+            .filter(type=SECTOR)
+            .annotate(
+                sigle=F('acronym'),
+                intitule=F('title'),  # TODO get translation when available
+            )
+            .values('sigle', 'intitule')
+        )
         # Filter sectors by those which have doctorates
         filtered = [s for s in qs if any(s['sigle'] in path for path in doctorate_paths)]
         serializer = serializers.SectorDTOSerializer(instance=filtered, many=True)
@@ -93,6 +99,7 @@ class AutocompleteSectorView(ListAPIView):
 
 class AutocompleteDoctoratView(ListAPIView):
     """Autocomplete doctorates given a sector"""
+
     name = "autocomplete-doctorate"
     pagination_class = None
     filter_backends = []
@@ -133,19 +140,26 @@ class PersonSearchingBackend(BaseFilterBackend):
 
 class AutocompleteTutorView(ListAPIView):
     """Autocomplete tutors"""
+
     name = "autocomplete-tutor"
     filter_backends = [PersonSearchingBackend]
     serializer_class = serializers.TutorSerializer
-    queryset = Tutor.objects.annotate(
-        first_name=F("person__first_name"),
-        last_name=F("person__last_name"),
-        global_id=F("person__global_id"),
-    ).distinct('global_id').select_related("person")
+    queryset = (
+        Tutor.objects.annotate(
+            first_name=F("person__first_name"),
+            last_name=F("person__last_name"),
+            global_id=F("person__global_id"),
+        )
+        .exclude(Q(person__user_id__isnull=True) | Q(person__global_id=''))
+        .distinct('global_id')
+        .select_related("person")
+    )
 
 
 class AutocompletePersonView(ListAPIView):
     """Autocomplete person"""
+
     name = "autocomplete-person"
     filter_backends = [PersonSearchingBackend]
     serializer_class = PersonSerializer
-    queryset = Person.objects.all()
+    queryset = Person.objects.exclude(Q(user_id__isnull=True) | Q(global_id=''))

@@ -29,10 +29,12 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from admission.contrib.models.enums.actor_type import ActorType
-from admission.ddd.preparation.projet_doctoral.domain.validator.exceptions import (
+from admission.ddd.projet_doctoral.preparation.domain.model._enums import ChoixStatutProposition
+from admission.ddd.projet_doctoral.preparation.domain.validator.exceptions import (
     MembreCANonTrouveException,
     PromoteurNonTrouveException,
 )
+from admission.tests import QueriesAssertionsMixin
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.roles import CandidateFactory, CddManagerFactory
 from admission.tests.factories.supervision import CaMemberFactory, PromoterFactory
@@ -40,10 +42,12 @@ from base.models.enums.entity_type import EntityType
 from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.person import PersonFactory
 from base.tests.factories.tutor import TutorFactory
+from osis_signature.enums import SignatureState
+from osis_signature.models import StateHistory
 
 
 @override_settings(ROOT_URLCONF='admission.api.url_v1')
-class SupervisionApiTestCase(APITestCase):
+class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
     @classmethod
     def setUpTestData(cls):
         # Data
@@ -83,10 +87,11 @@ class SupervisionApiTestCase(APITestCase):
     def test_supervision_get_using_api_candidate(self):
         self.client.force_authenticate(user=self.candidate.user)
 
-        response = self.client.get(self.url, format="json")
+        with self.assertNumQueriesLessThan(8):
+            response = self.client.get(self.url, format="json")
         promoteurs = response.json()['signatures_promoteurs']
         self.assertEqual(len(promoteurs), 1)
-        self.assertEqual(promoteurs[0]['status'], 'NOT_INVITED')
+        self.assertEqual(promoteurs[0]['statut'], 'NOT_INVITED')
         self.assertEqual(promoteurs[0]['promoteur']['prenom'], 'Joe')
 
     def test_supervision_get_using_api_no_role(self):
@@ -308,8 +313,8 @@ class SupervisionApiTestCase(APITestCase):
 
     def test_supervision_supprimer_membre_no_role(self):
         self.client.force_authenticate(user=self.no_role_user)
-    
-        promoter = PromoterFactory(process=self.promoter.actor_ptr.process)
+
+        PromoterFactory(process=self.promoter.actor_ptr.process)
 
         response = self.client.post(self.url, data={
             'member': self.promoter.person.global_id,
@@ -328,7 +333,7 @@ class SupervisionApiTestCase(APITestCase):
 
     def test_supervision_supprimer_membre_cdd_manager(self):
         self.client.force_authenticate(user=self.cdd_manager_user)
-    
+
         promoter = PromoterFactory(process=self.promoter.actor_ptr.process)
 
         response = self.client.post(self.url, data={
@@ -339,7 +344,7 @@ class SupervisionApiTestCase(APITestCase):
 
     def test_supervision_supprimer_membre_other_cdd_manager(self):
         self.client.force_authenticate(user=self.other_cdd_manager_user)
-    
+
         response = self.client.post(self.url, data={
             'member': self.promoter.person.global_id,
             'type': ActorType.PROMOTER.name,
@@ -388,3 +393,61 @@ class SupervisionApiTestCase(APITestCase):
             'type': ActorType.CA_MEMBER.name,
         }, format="json")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_supervision_modification_impossible_par_doctorant_apres_envoi(self):
+        self.client.force_authenticate(user=self.candidate.user)
+
+        self.admission.status = ChoixStatutProposition.SIGNING_IN_PROGRESS.name
+        self.admission.save()
+
+        response = self.client.post(self.url, data={
+            'member': self.promoter.person.global_id,
+            'type': ActorType.PROMOTER.name,
+        }, format="json")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        response = self.client.put(self.url, data={
+            'member': TutorFactory(person__first_name="Joe").person.global_id,
+            'type': ActorType.PROMOTER.name,
+        }, format="json")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        self.admission.status = ChoixStatutProposition.IN_PROGRESS.name
+        self.admission.save()
+
+    def test_supervision_modification_par_doctorant_apres_refus(self):
+        self.client.force_authenticate(user=self.candidate.user)
+
+        promoter = PromoterFactory(process=self.admission.supervision_group)
+        StateHistory.objects.create(
+            actor=promoter.actor_ptr,
+            state=SignatureState.DECLINED.name,
+        )
+
+        # Check supervision before
+        response = self.client.get(self.url, format="json")
+        promoters = response.json()['signatures_promoteurs']
+        membres_CA = response.json()['signatures_membres_CA']
+        self.assertEqual(len(promoters), 2)
+        self.assertEqual(len(membres_CA), 0)
+
+        # Add CA member
+        response = self.client.put(self.url, data={
+            'member': PersonFactory(first_name="Joe").global_id,
+            'type': ActorType.CA_MEMBER.name,
+        }, format="json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Remove promoter
+        response = self.client.post(self.url, data={
+            'member': promoter.person.global_id,
+            'type': ActorType.PROMOTER.name,
+        }, format="json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Check supervision after
+        response = self.client.get(self.url, format="json")
+        promoters = response.json()['signatures_promoteurs']
+        membres_CA = response.json()['signatures_membres_CA']
+        self.assertEqual(len(promoters), 1)
+        self.assertEqual(membres_CA[0]['membre_CA']['prenom'], 'Joe')

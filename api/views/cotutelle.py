@@ -30,7 +30,7 @@ from rest_framework.response import Response
 
 from admission.api import serializers
 from admission.api.schema import ResponseSpecificSchema
-from admission.ddd.preparation.projet_doctoral.commands import DefinirCotutelleCommand, GetCotutelleCommand
+from admission.ddd.projet_doctoral.preparation.commands import DefinirCotutelleCommand, GetCotutelleCommand
 from admission.utils import get_cached_admission_perm_obj
 from infrastructure.messages_bus import message_bus_instance
 from osis_role.contrib.views import APIPermissionRequiredMixin
@@ -59,9 +59,7 @@ class CotutelleAPIView(APIPermissionRequiredMixin, mixins.RetrieveModelMixin, mi
 
     def get(self, request, *args, **kwargs):
         """Get the cotutelle of a proposition"""
-        cotutelle = message_bus_instance.invoke(
-            GetCotutelleCommand(uuid_proposition=kwargs.get('uuid'))
-        )
+        cotutelle = message_bus_instance.invoke(GetCotutelleCommand(uuid_proposition=kwargs.get('uuid')))
         serializer = serializers.CotutelleDTOSerializer(instance=cotutelle)
         return Response(serializer.data)
 
@@ -69,9 +67,11 @@ class CotutelleAPIView(APIPermissionRequiredMixin, mixins.RetrieveModelMixin, mi
         """Set the cotutelle of a proposition"""
         serializer = serializers.DefinirCotutelleCommandSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        result = message_bus_instance.invoke(DefinirCotutelleCommand(
-            uuid_proposition=str(kwargs['uuid']),
-            **serializer.data,
-        ))
+        result = message_bus_instance.invoke(
+            DefinirCotutelleCommand(
+                uuid_proposition=str(kwargs['uuid']),
+                **serializer.data,
+            )
+        )
         serializer = serializers.PropositionIdentityDTOSerializer(instance=result)
         return Response(serializer.data, status=status.HTTP_200_OK)
