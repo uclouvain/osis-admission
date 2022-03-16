@@ -26,6 +26,7 @@
 from admission.ddd.projet_doctoral.preparation.builder.proposition_identity_builder import PropositionIdentityBuilder
 from admission.ddd.projet_doctoral.preparation.commands import SupprimerPromoteurCommand
 from admission.ddd.projet_doctoral.preparation.domain.model.proposition import PropositionIdentity
+from admission.ddd.projet_doctoral.preparation.domain.service.i_historique import IHistorique
 from admission.ddd.projet_doctoral.preparation.repository.i_groupe_de_supervision import IGroupeDeSupervisionRepository
 from admission.ddd.projet_doctoral.preparation.repository.i_proposition import IPropositionRepository
 
@@ -34,6 +35,7 @@ def supprimer_promoteur(
     cmd: 'SupprimerPromoteurCommand',
     proposition_repository: 'IPropositionRepository',
     groupe_supervision_repository: 'IGroupeDeSupervisionRepository',
+    historique: 'IHistorique',
 ) -> 'PropositionIdentity':
     # GIVEN
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
@@ -46,5 +48,6 @@ def supprimer_promoteur(
 
     # THEN
     groupe_supervision_repository.save(groupe_supervision)
+    historique.historiser_suppression_membre(proposition_candidat, groupe_supervision, promoteur_id)
 
     return proposition_id

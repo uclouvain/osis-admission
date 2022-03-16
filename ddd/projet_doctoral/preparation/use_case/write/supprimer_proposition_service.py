@@ -27,12 +27,14 @@
 from admission.ddd.projet_doctoral.preparation.builder.proposition_identity_builder import PropositionIdentityBuilder
 from admission.ddd.projet_doctoral.preparation.commands import SupprimerPropositionCommand
 from admission.ddd.projet_doctoral.preparation.domain.model.proposition import PropositionIdentity
+from admission.ddd.projet_doctoral.preparation.domain.service.i_historique import IHistorique
 from admission.ddd.projet_doctoral.preparation.repository.i_proposition import IPropositionRepository
 
 
 def supprimer_proposition(
     cmd: 'SupprimerPropositionCommand',
     proposition_repository: 'IPropositionRepository',
+    historique: 'IHistorique',
 ) -> 'PropositionIdentity':
     # GIVEN
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
@@ -43,5 +45,6 @@ def supprimer_proposition(
     # THEN
     proposition.supprimer()
     proposition_repository.save(proposition)
+    historique.historiser_suppression(proposition)
 
     return proposition_id

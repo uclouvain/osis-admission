@@ -23,11 +23,14 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import attr
+
 from admission.ddd.projet_doctoral.preparation.builder.proposition_identity_builder import PropositionIdentityBuilder
 from admission.ddd.projet_doctoral.preparation.commands import CompleterPropositionCommand
 from admission.ddd.projet_doctoral.preparation.domain.model.proposition import PropositionIdentity
 from admission.ddd.projet_doctoral.preparation.domain.service.commission_proximite import CommissionProximite
 from admission.ddd.projet_doctoral.preparation.domain.service.i_doctorat import IDoctoratTranslator
+from admission.ddd.projet_doctoral.preparation.domain.service.i_historique import IHistorique
 from admission.ddd.projet_doctoral.preparation.repository.i_proposition import IPropositionRepository
 
 
@@ -35,6 +38,7 @@ def completer_proposition(
     cmd: 'CompleterPropositionCommand',
     proposition_repository: 'IPropositionRepository',
     doctorat_translator: 'IDoctoratTranslator',
+    historique: 'IHistorique',
 ) -> 'PropositionIdentity':
     # GIVEN
     entity_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid)
@@ -71,5 +75,6 @@ def completer_proposition(
 
     # THEN
     proposition_repository.save(proposition_candidat)
+    historique.historiser_completion(proposition_candidat)
 
     return entity_id

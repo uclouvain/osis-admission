@@ -27,15 +27,20 @@
 from admission.ddd.projet_doctoral.preparation.builder.proposition_identity_builder import PropositionIdentityBuilder
 from admission.ddd.projet_doctoral.preparation.commands import DefinirCotutelleCommand
 from admission.ddd.projet_doctoral.preparation.domain.model.proposition import PropositionIdentity
+from admission.ddd.projet_doctoral.preparation.domain.service.i_historique import IHistorique
 from admission.ddd.projet_doctoral.preparation.repository.i_groupe_de_supervision import IGroupeDeSupervisionRepository
+from admission.ddd.projet_doctoral.preparation.repository.i_proposition import IPropositionRepository
 
 
 def definir_cotutelle(
     cmd: 'DefinirCotutelleCommand',
     groupe_supervision_repository: 'IGroupeDeSupervisionRepository',
+    proposition_repository: 'IPropositionRepository',
+    historique: 'IHistorique',
 ) -> 'PropositionIdentity':
     # GIVEN
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
+    proposition = proposition_repository.get(proposition_id)
     groupe_de_supervision = groupe_supervision_repository.get_by_proposition_id(proposition_id)
 
     # WHEN
@@ -49,5 +54,6 @@ def definir_cotutelle(
 
     # THEN
     groupe_supervision_repository.save(groupe_de_supervision)
+    historique.historiser_completion(proposition)
 
     return proposition_id
