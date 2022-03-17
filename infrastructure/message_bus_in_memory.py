@@ -31,6 +31,7 @@ from admission.ddd.projet_doctoral.preparation.use_case.write import *
 from admission.infrastructure.projet_doctoral.preparation.domain.service.in_memory.doctorat import (
     DoctoratInMemoryTranslator,
 )
+from admission.infrastructure.projet_doctoral.preparation.domain.service.in_memory.historique import HistoriqueInMemory
 from admission.infrastructure.projet_doctoral.preparation.domain.service.in_memory.membre_CA import (
     MembreCAInMemoryTranslator,
 )
@@ -62,6 +63,7 @@ class MessageBusInMemoryCommands(AbstractMessageBusCommands):
             initier_proposition,
             proposition_repository=PropositionInMemoryRepository(),
             doctorat_translator=DoctoratInMemoryTranslator(),
+            historique=HistoriqueInMemory(),
         ),
         SearchDoctoratCommand: partial(
             rechercher_doctorats,
@@ -71,6 +73,7 @@ class MessageBusInMemoryCommands(AbstractMessageBusCommands):
             completer_proposition,
             proposition_repository=PropositionInMemoryRepository(),
             doctorat_translator=DoctoratInMemoryTranslator(),
+            historique=HistoriqueInMemory(),
         ),
         GetPropositionCommand: partial(
             recuperer_proposition,
@@ -81,6 +84,8 @@ class MessageBusInMemoryCommands(AbstractMessageBusCommands):
         DefinirCotutelleCommand: partial(
             definir_cotutelle,
             groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
+            proposition_repository=PropositionInMemoryRepository(),
+            historique=HistoriqueInMemory(),
         ),
         GetCotutelleCommand: partial(
             recuperer_cotutelle,
@@ -91,12 +96,14 @@ class MessageBusInMemoryCommands(AbstractMessageBusCommands):
             proposition_repository=PropositionInMemoryRepository(),
             groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
             promoteur_translator=PromoteurInMemoryTranslator(),
+            historique=HistoriqueInMemory(),
         ),
         IdentifierMembreCACommand: partial(
             identifier_membre_CA,
             proposition_repository=PropositionInMemoryRepository(),
             groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
             membre_CA_translator=MembreCAInMemoryTranslator(),
+            historique=HistoriqueInMemory(),
         ),
         GetGroupeDeSupervisionCommand: partial(
             recuperer_groupe_de_supervision,
@@ -108,17 +115,20 @@ class MessageBusInMemoryCommands(AbstractMessageBusCommands):
             supprimer_promoteur,
             proposition_repository=PropositionInMemoryRepository(),
             groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
+            historique=HistoriqueInMemory(),
         ),
         SupprimerMembreCACommand: partial(
             supprimer_membre_CA,
             proposition_repository=PropositionInMemoryRepository(),
             groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
+            historique=HistoriqueInMemory(),
         ),
         DemanderSignaturesCommand: partial(
             demander_signatures,
             proposition_repository=PropositionInMemoryRepository(),
             groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
             promoteur_translator=PromoteurInMemoryTranslator(),
+            historique=HistoriqueInMemory(),
         ),
         VerifierProjetCommand: partial(
             verifier_projet,
@@ -139,21 +149,25 @@ class MessageBusInMemoryCommands(AbstractMessageBusCommands):
             groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
             profil_candidat_translator=ProfilCandidatInMemoryTranslator(),
             academic_year_repository=AcademicYearInMemoryRepository(),
+            historique=HistoriqueInMemory(),
         ),
         ApprouverPropositionCommand: partial(
             approuver_proposition,
             proposition_repository=PropositionInMemoryRepository(),
             groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
+            historique=HistoriqueInMemory(),
         ),
         ApprouverPropositionParPdfCommand: partial(
             approuver_proposition_par_pdf,
             proposition_repository=PropositionInMemoryRepository(),
             groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
+            historique=HistoriqueInMemory(),
         ),
         RefuserPropositionCommand: partial(
             refuser_proposition,
             proposition_repository=PropositionInMemoryRepository(),
             groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
+            historique=HistoriqueInMemory(),
         ),
         SearchPropositionsCandidatCommand: partial(
             rechercher_propositions_candidat,
@@ -173,6 +187,7 @@ class MessageBusInMemoryCommands(AbstractMessageBusCommands):
         SupprimerPropositionCommand: partial(
             supprimer_proposition,
             proposition_repository=PropositionInMemoryRepository(),
+            historique=HistoriqueInMemory(),
         ),
     }
 

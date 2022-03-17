@@ -28,6 +28,7 @@ from admission.ddd.projet_doctoral.preparation.commands import InitierPropositio
 from admission.ddd.projet_doctoral.preparation.domain.model.proposition import PropositionIdentity
 from admission.ddd.projet_doctoral.preparation.domain.service.commission_proximite import CommissionProximite
 from admission.ddd.projet_doctoral.preparation.domain.service.i_doctorat import IDoctoratTranslator
+from admission.ddd.projet_doctoral.preparation.domain.service.i_historique import IHistorique
 from admission.ddd.projet_doctoral.preparation.domain.service.initier_proposition import MaximumPropositionAutorisee
 from admission.ddd.projet_doctoral.preparation.repository.i_proposition import IPropositionRepository
 
@@ -36,6 +37,7 @@ def initier_proposition(
     cmd: 'InitierPropositionCommand',
     proposition_repository: 'IPropositionRepository',
     doctorat_translator: 'IDoctoratTranslator',
+    historique: 'IHistorique',
 ) -> 'PropositionIdentity':
     # GIVEN
     doctorat = doctorat_translator.get(cmd.sigle_formation, cmd.annee_formation)
@@ -48,5 +50,6 @@ def initier_proposition(
 
     # THEN
     proposition_repository.save(proposition)
+    historique.historiser_initiation(proposition)
 
     return proposition.entity_id
