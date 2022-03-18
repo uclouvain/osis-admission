@@ -204,6 +204,15 @@ class DetailSignatureMembreCADTO(interface.DTO):
 
 
 @attr.dataclass(frozen=True, slots=True)
+class AvisDTO(interface.DTO):
+    etat: str
+    commentaire_externe: Optional[str] = ''
+    commentaire_interne: Optional[str] = ''
+    motif_refus: Optional[str] = ''
+    pdf: List[str] = attr.Factory(list)
+
+
+@attr.dataclass(frozen=True, slots=True)
 class GroupeDeSupervisionDTO(interface.DTO):
     signatures_promoteurs: List[DetailSignaturePromoteurDTO] = attr.Factory(list)
     signatures_membres_CA: List[DetailSignatureMembreCADTO] = attr.Factory(list)

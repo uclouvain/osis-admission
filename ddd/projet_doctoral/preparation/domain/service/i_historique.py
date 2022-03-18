@@ -29,6 +29,7 @@ from admission.ddd.projet_doctoral.preparation.domain.model._membre_CA import Me
 from admission.ddd.projet_doctoral.preparation.domain.model._promoteur import PromoteurIdentity
 from admission.ddd.projet_doctoral.preparation.domain.model.groupe_de_supervision import GroupeDeSupervision
 from admission.ddd.projet_doctoral.preparation.domain.model.proposition import Proposition
+from admission.ddd.projet_doctoral.preparation.dtos import AvisDTO
 from osis_common.ddd import interface
 
 
@@ -45,8 +46,8 @@ class IHistorique(interface.DomainService):
     def historiser_avis(
         cls,
         proposition: Proposition,
-        groupe_de_supervision: GroupeDeSupervision,
         signataire_id: Union[PromoteurIdentity, MembreCAIdentity],
+        avis: AvisDTO,
     ):
         raise NotImplementedError
 
