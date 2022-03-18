@@ -21,6 +21,17 @@ class Migration(migrations.Migration):
             },
             bases=('admission.doctorateadmission',),
         ),
+        migrations.CreateModel(
+            name='PropositionProxy',
+            fields=[
+            ],
+            options={
+                'proxy': True,
+                'indexes': [],
+                'constraints': [],
+            },
+            bases=('admission.doctorateadmission',),
+        ),
         migrations.AddField(
             model_name='doctorateadmission',
             name='status_cdd',

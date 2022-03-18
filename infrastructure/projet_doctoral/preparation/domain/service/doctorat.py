@@ -52,7 +52,7 @@ class DoctoratTranslator(IDoctoratTranslator):
         )
 
     @classmethod
-    def get_dto(cls, sigle: str, annee: int) -> 'DoctoratDTO':
+    def get_dto(cls, sigle: str, annee: int) -> 'DoctoratDTO':  # pragma: no cover
         from infrastructure.messages_bus import message_bus_instance
 
         dtos = message_bus_instance.invoke(
@@ -60,7 +60,7 @@ class DoctoratTranslator(IDoctoratTranslator):
         )
         if dtos:
             return cls._build_dto(dtos[0])
-        raise DoctoratNonTrouveException()  # pragma: no cover
+        raise DoctoratNonTrouveException()
 
     @classmethod
     def get(cls, sigle: str, annee: int) -> 'Doctorat':

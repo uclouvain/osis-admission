@@ -41,9 +41,6 @@ from admission.infrastructure.projet_doctoral.preparation.domain.service.in_memo
 from admission.infrastructure.projet_doctoral.preparation.domain.service.in_memory.promoteur import (
     PromoteurInMemoryTranslator,
 )
-from admission.infrastructure.projet_doctoral.preparation.domain.service.in_memory.secteur_ucl import (
-    SecteurUclInMemoryTranslator,
-)
 from admission.infrastructure.projet_doctoral.preparation.repository.in_memory.groupe_de_supervision import (
     GroupeDeSupervisionInMemoryRepository,
 )
@@ -52,9 +49,6 @@ from admission.infrastructure.projet_doctoral.preparation.repository.in_memory.p
 )
 from admission.infrastructure.projet_doctoral.validation.repository.in_memory.demande import DemandeInMemoryRepository
 from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
-from infrastructure.shared_kernel.personne_connue_ucl.in_memory.personne_connue_ucl import (
-    PersonneConnueUclInMemoryTranslator,
-)
 from infrastructure.utils import AbstractMessageBusCommands, MessageBus
 
 
@@ -79,8 +73,6 @@ class MessageBusInMemoryCommands(AbstractMessageBusCommands):
         GetPropositionCommand: partial(
             recuperer_proposition,
             proposition_repository=PropositionInMemoryRepository(),
-            doctorat_translator=DoctoratInMemoryTranslator(),
-            secteur_ucl_translator=SecteurUclInMemoryTranslator(),
         ),
         DefinirCotutelleCommand: partial(
             definir_cotutelle,
@@ -179,9 +171,6 @@ class MessageBusInMemoryCommands(AbstractMessageBusCommands):
             lister_propositions_supervisees,
             proposition_repository=PropositionInMemoryRepository(),
             groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
-            doctorat_translator=DoctoratInMemoryTranslator(),
-            secteur_ucl_translator=SecteurUclInMemoryTranslator(),
-            personne_connue_ucl_translator=PersonneConnueUclInMemoryTranslator(),
         ),
         SupprimerPropositionCommand: partial(
             supprimer_proposition,

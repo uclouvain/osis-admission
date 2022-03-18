@@ -33,14 +33,12 @@ from admission.infrastructure.projet_doctoral.preparation.domain.service.histori
 from admission.infrastructure.projet_doctoral.preparation.domain.service.membre_CA import MembreCATranslator
 from admission.infrastructure.projet_doctoral.preparation.domain.service.profil_candidat import ProfilCandidatTranslator
 from admission.infrastructure.projet_doctoral.preparation.domain.service.promoteur import PromoteurTranslator
-from admission.infrastructure.projet_doctoral.preparation.domain.service.secteur_ucl import SecteurUclTranslator
 from admission.infrastructure.projet_doctoral.preparation.repository.groupe_de_supervision import (
     GroupeDeSupervisionRepository,
 )
 from admission.infrastructure.projet_doctoral.preparation.repository.proposition import PropositionRepository
 from admission.infrastructure.projet_doctoral.validation.repository.demande import DemandeRepository
 from infrastructure.shared_kernel.academic_year.repository.academic_year import AcademicYearRepository
-from infrastructure.shared_kernel.personne_connue_ucl.personne_connue_ucl import PersonneConnueUclTranslator
 from infrastructure.utils import AbstractMessageBusCommands
 
 
@@ -60,15 +58,10 @@ class MessageBusCommands(AbstractMessageBusCommands):
             lister_propositions_supervisees,
             proposition_repository=PropositionRepository(),
             groupe_supervision_repository=GroupeDeSupervisionRepository(),
-            doctorat_translator=DoctoratTranslator(),
-            secteur_ucl_translator=SecteurUclTranslator(),
-            personne_connue_ucl_translator=PersonneConnueUclTranslator(),
         ),
         GetPropositionCommand: partial(
             recuperer_proposition,
             proposition_repository=PropositionRepository(),
-            doctorat_translator=DoctoratTranslator(),
-            secteur_ucl_translator=SecteurUclTranslator(),
         ),
         CompleterPropositionCommand: partial(
             completer_proposition,

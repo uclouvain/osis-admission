@@ -23,17 +23,15 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from datetime import date
 from typing import List, Optional
 
-from django.db import connection
-from django.db.models import Subquery, OuterRef
 from django.conf import settings
+from django.db import connection
 from django.utils.translation import get_language
 
 from admission.auth.roles.candidate import Candidate
 from admission.contrib.models import DoctorateAdmission
-from admission.contrib.models.doctorate import REFERENCE_SEQ_NAME
+from admission.contrib.models.doctorate import PropositionProxy, REFERENCE_SEQ_NAME
 from admission.ddd.projet_doctoral.preparation.builder.proposition_identity_builder import (
     PropositionIdentityBuilder,
 )
@@ -77,7 +75,6 @@ from admission.ddd.projet_doctoral.preparation.repository.i_proposition import (
 )
 from base.models.education_group_year import EducationGroupYear
 from base.models.entity_version import EntityVersion
-from base.models.enums.entity_type import SECTOR
 from base.models.person import Person
 from osis_common.ddd.interface import ApplicationService
 
@@ -129,35 +126,12 @@ def _instantiate_admission(admission: 'DoctorateAdmission') -> 'Proposition':
     )
 
 
-def _get_queryset():
-    cte = EntityVersion.objects.with_children()
-    subqs = (
-        cte.join(EntityVersion, id=cte.col.id)
-        .with_cte(cte)
-        .filter(entity_type=SECTOR, entity_id=OuterRef("doctorate__management_entity_id"))
-        .exclude(end_date__lte=date.today())
-    )
-
-    return (
-        DoctorateAdmission.objects.all()
-        .select_related(
-            "doctorate__academic_year",
-            "candidate__country_of_citizenship",
-            "thesis_institute",
-        )
-        .annotate(
-            code_secteur_formation=Subquery(subqs.values("acronym")[:1]),
-            intitule_secteur_formation=Subquery(subqs.values("title")[:1]),
-        )
-    )
-
-
 def load_admissions(matricule: Optional[str] = None, ids: Optional[List[str]] = None) -> List['Proposition']:
     qs = []
     if matricule is not None:
-        qs = _get_queryset().filter(candidate__global_id=matricule)
+        qs = PropositionProxy.objects.filter(candidate__global_id=matricule)
     elif ids is not None:  # pragma: no branch
-        qs = _get_queryset().filter(uuid__in=ids)
+        qs = PropositionProxy.objects.filter(uuid__in=ids)
 
     return [_instantiate_admission(a) for a in qs]
 
@@ -166,7 +140,7 @@ class PropositionRepository(IPropositionRepository):
     @classmethod
     def get(cls, entity_id: 'PropositionIdentity') -> 'Proposition':
         try:
-            return _instantiate_admission(_get_queryset().get(uuid=entity_id.uuid))
+            return _instantiate_admission(PropositionProxy.objects.get(uuid=entity_id.uuid))
         except DoctorateAdmission.DoesNotExist:
             raise PropositionNonTrouveeException
 
@@ -254,7 +228,7 @@ class PropositionRepository(IPropositionRepository):
         cotutelle: Optional[bool] = None,
         entity_ids: Optional[List['PropositionIdentity']] = None,
     ) -> List['PropositionDTO']:
-        qs = _get_queryset()
+        qs = PropositionProxy.objects
         if numero:
             qs = qs.filter(reference=numero)
         if matricule_candidat is not None:
@@ -284,7 +258,7 @@ class PropositionRepository(IPropositionRepository):
 
     @classmethod
     def get_dto(cls, entity_id: 'PropositionIdentity') -> 'PropositionDTO':
-        return cls._load_dto(_get_queryset().get(uuid=entity_id.uuid))
+        return cls._load_dto(PropositionProxy.objects.get(uuid=entity_id.uuid))
 
     @classmethod
     def _load_dto(cls, admission: DoctorateAdmission) -> 'PropositionDTO':

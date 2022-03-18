@@ -26,7 +26,8 @@
 from django.contrib.postgres.fields import JSONField
 from django.core.cache import cache
 from django.db import models
-from django.db.models import QuerySet
+from django.db.models import OuterRef, QuerySet, Subquery
+from django.utils.datetime_safe import date
 from django.utils.translation import gettext_lazy as _
 
 from admission.ddd.projet_doctoral.preparation.domain.model._detail_projet import ChoixLangueRedactionThese
@@ -36,6 +37,8 @@ from admission.ddd.projet_doctoral.preparation.domain.model._enums import (
     ChoixSousDomaineSciences,
     ChoixStatutProposition,
 )
+from base.models.entity_version import EntityVersion
+from base.models.enums.entity_type import SECTOR
 from osis_document.contrib import FileField
 from osis_signature.contrib.fields import SignatureProcessField
 from .base import BaseAdmission, admission_directory_path
@@ -316,6 +319,39 @@ class DoctorateAdmission(BaseAdmission):
         cache.delete('admission_permission_{}'.format(self.uuid))
 
 
+class PropositionManager(models.Manager):
+    def get_queryset(self):
+        cte = EntityVersion.objects.with_children()
+        sector_subqs = (
+            cte.join(EntityVersion, id=cte.col.id, entity_type=SECTOR)
+            .with_cte(cte)
+            .filter(entity_id=OuterRef("doctorate__management_entity_id"))
+            .exclude(end_date__lte=date.today())
+        )
+
+        return (
+            DoctorateAdmission.objects.all()
+            .select_related(
+                "doctorate__academic_year",
+                "candidate__country_of_citizenship",
+                "thesis_institute",
+            )
+            .annotate(
+                code_secteur_formation=Subquery(sector_subqs.values("acronym")[:1]),
+                intitule_secteur_formation=Subquery(sector_subqs.values("title")[:1]),
+            )
+        )
+
+
+class PropositionProxy(DoctorateAdmission):
+    """Proxy model of base.DoctorateAdmission for Proposition in preparation context"""
+
+    objects = PropositionManager()
+
+    class Meta:
+        proxy = True
+
+
 class DemandeManager(models.Manager):
     def get_queryset(self):
         return (
@@ -337,7 +373,7 @@ class DemandeManager(models.Manager):
 
 
 class DemandeProxy(DoctorateAdmission):
-    """Proxy model of base.DoctorateAdmission"""
+    """Proxy model of base.DoctorateAdmission for Demande in validation context"""
 
     objects = DemandeManager()
 
