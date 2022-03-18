@@ -45,4 +45,5 @@ class TestListerPropositionsSuperviseesService(SimpleTestCase):
 
     def test_should_rechercher_par_matricule(self):
         results = self.message_bus.invoke(self.cmd)
+        self.assertEqual(len(results), 1)
         self.assertEqual(results[0].uuid, 'uuid-SC3DP-sans-membre_CA')

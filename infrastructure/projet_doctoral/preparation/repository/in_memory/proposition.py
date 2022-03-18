@@ -23,6 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from dataclasses import dataclass
 from typing import List, Optional
 
 from admission.ddd.projet_doctoral.preparation.domain.model.proposition import Proposition, PropositionIdentity
@@ -49,19 +50,45 @@ from admission.ddd.projet_doctoral.preparation.test.factory.proposition import (
     PropositionPreAdmissionSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory,
     PropositionPreAdmissionSC3DPMinimaleFactory,
 )
-from admission.infrastructure.projet_doctoral.preparation.domain.service.in_memory.doctorat import (
-    DoctoratInMemoryTranslator,
-)
-from admission.infrastructure.projet_doctoral.preparation.domain.service.in_memory.secteur_ucl import (
-    SecteurUclInMemoryTranslator,
-)
 from base.ddd.utils.in_memory_repository import InMemoryGenericRepository
-from infrastructure.shared_kernel.personne_connue_ucl.in_memory.personne_connue_ucl import (
-    PersonneConnueUclInMemoryTranslator,
-)
+
+
+@dataclass
+class Candidat:
+    prenom: str
+    nom: str
+    nationalite: str
+
+
+@dataclass
+class Doctorat:
+    intitule: str
+    code_secteur: str
+    intitule_secteur: str
 
 
 class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepository):
+    doctorats = {
+        ("SC3DP", 2020): Doctorat(
+            intitule="Doctorat en sciences",
+            code_secteur="SST",
+            intitule_secteur="Secteur des sciences et technologies",
+        ),
+        ("ECGE3DP", 2020): Doctorat(
+            intitule="Doctorat en sciences économiques et de gestion",
+            code_secteur="SSH",
+            intitule_secteur="Secteur des sciences humaines",
+        ),
+        ("ESP3DP", 2020): Doctorat(
+            intitule="Doctorat en sciences de la santé publique",
+            code_secteur="SSS",
+            intitule_secteur="Secteur des sciences de la santé",
+        ),
+    }
+    candidats = {
+        "0123456789": Candidat("Jean", "Dupont", "France"),
+        "0000000001": Candidat("Michel", "Durand", "Belgique"),
+    }
     entities: List['Proposition'] = []
 
     @classmethod
@@ -138,8 +165,8 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
         returned = cls.entities
         if matricule_candidat:
             returned = filter(lambda p: p.matricule_candidat == matricule_candidat, returned)
-        # if entity_ids:  # pragma: no cover
-        #     returned = filter(lambda p: p.entity_id in entity_ids, returned)
+        if entity_ids:
+            returned = filter(lambda p: p.entity_id in entity_ids, returned)
         return list(cls._load_dto(proposition) for proposition in returned)
 
     @classmethod
@@ -148,9 +175,8 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
 
     @classmethod
     def _load_dto(cls, proposition):
-        doctorat = DoctoratInMemoryTranslator().get_dto(proposition.doctorat_id.sigle, proposition.doctorat_id.annee)
-        secteur = SecteurUclInMemoryTranslator().get(doctorat.sigle_entite_gestion)
-        candidat = PersonneConnueUclInMemoryTranslator().get(proposition.matricule_candidat)
+        candidat = cls.candidats[proposition.matricule_candidat]
+        doctorat = cls.doctorats[(proposition.doctorat_id.sigle, proposition.doctorat_id.annee)]
         return PropositionDTO(
             uuid=proposition.entity_id.uuid,
             type_admission=proposition.type_admission.name,
@@ -160,7 +186,7 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
             intitule_doctorat=doctorat.intitule,
             matricule_candidat=proposition.matricule_candidat,
             justification=proposition.justification,
-            code_secteur_formation=secteur.sigle,
+            code_secteur_formation=doctorat.code_secteur,
             commission_proximite=proposition.commission_proximite and proposition.commission_proximite.name or '',
             type_financement=proposition.financement.type and proposition.financement.type.name or '',
             type_contrat_travail=proposition.financement.type_contrat_travail,
@@ -184,9 +210,9 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
             raison_non_soutenue=proposition.experience_precedente_recherche.raison_non_soutenue,
             statut=proposition.statut.name,
             creee_le=proposition.creee_le,
-            intitule_secteur_formation=secteur.intitule,
+            intitule_secteur_formation=doctorat.intitule_secteur,
             nom_candidat=candidat.nom,
             prenom_candidat=candidat.prenom,
-            nationalite_candidat="",  # TODO
+            nationalite_candidat=candidat.nationalite,
             modifiee_le=proposition.modifiee_le,
         )

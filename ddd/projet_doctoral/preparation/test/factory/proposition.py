@@ -100,6 +100,7 @@ class PropositionAdmissionSC3DPMinimaleFactory(_PropositionFactory):
     type_admission = ChoixTypeAdmission.ADMISSION
     commission_proximite = ChoixSousDomaineSciences.BIOLOGY
     doctorat_id = factory.SubFactory(_DoctoratIdentityFactory, sigle='SC3DP', annee=2020)
+    matricule_candidat = '0000000001'
 
 
 class PropositionAdmissionECGE3DPMinimaleFactory(_PropositionFactory):

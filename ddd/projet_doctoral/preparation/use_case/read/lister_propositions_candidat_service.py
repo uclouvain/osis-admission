@@ -26,30 +26,12 @@
 from typing import List
 
 from admission.ddd.projet_doctoral.preparation.commands import ListerPropositionsCandidatQuery
-from admission.ddd.projet_doctoral.preparation.dtos import PropositionCandidatDTO
+from admission.ddd.projet_doctoral.preparation.dtos import PropositionDTO
 from admission.ddd.projet_doctoral.preparation.repository.i_proposition import IPropositionRepository
 
 
 def lister_propositions_candidat(
     cmd: 'ListerPropositionsCandidatQuery',
     proposition_repository: 'IPropositionRepository',
-) -> List['PropositionCandidatDTO']:
-    dtos = proposition_repository.search_dto(matricule_candidat=cmd.matricule_candidat)
-    return [
-        PropositionCandidatDTO(
-            uuid=dto.uuid,
-            reference=dto.reference,
-            type_admission=dto.type_admission,
-            sigle_doctorat=dto.sigle_doctorat,
-            intitule_doctorat=dto.intitule_doctorat,
-            matricule_candidat=dto.matricule_candidat,
-            prenom_candidat=dto.prenom_candidat,
-            nom_candidat=dto.nom_candidat,
-            code_secteur_formation=dto.code_secteur_formation,
-            intitule_secteur_formation=dto.intitule_secteur_formation,
-            commission_proximite=dto.commission_proximite,
-            creee_le=dto.creee_le,
-            statut=dto.statut,
-        )
-        for dto in dtos
-    ]
+) -> List['PropositionDTO']:
+    return proposition_repository.search_dto(matricule_candidat=cmd.matricule_candidat)

@@ -74,7 +74,7 @@ class DoctoratInMemoryTranslator(IDoctoratTranslator):
             raise DoctoratNonTrouveException()
 
     @classmethod
-    def get_dto(cls, sigle: str, annee: int) -> DoctoratDTO:
+    def get_dto(cls, sigle: str, annee: int) -> DoctoratDTO:  # pragma: no cover
         doctorate = cls.get(sigle, annee)
         return _DoctoratDTOFactory(
             sigle=doctorate.entity_id.sigle,
