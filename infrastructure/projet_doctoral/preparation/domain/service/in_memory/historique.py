@@ -30,6 +30,7 @@ from admission.ddd.projet_doctoral.preparation.domain.model._promoteur import Pr
 from admission.ddd.projet_doctoral.preparation.domain.model.groupe_de_supervision import GroupeDeSupervision
 from admission.ddd.projet_doctoral.preparation.domain.model.proposition import Proposition
 from admission.ddd.projet_doctoral.preparation.domain.service.i_historique import IHistorique
+from admission.ddd.projet_doctoral.preparation.dtos import AvisDTO
 
 
 class HistoriqueInMemory(IHistorique):
@@ -45,8 +46,8 @@ class HistoriqueInMemory(IHistorique):
     def historiser_avis(
         cls,
         proposition: Proposition,
-        groupe_de_supervision: GroupeDeSupervision,
         signataire_id: Union[PromoteurIdentity, MembreCAIdentity],
+        avis: AvisDTO,
     ):
         pass
 

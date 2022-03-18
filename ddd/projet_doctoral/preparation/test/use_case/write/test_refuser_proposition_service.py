@@ -91,9 +91,8 @@ class TestRefuserPropositionService(SimpleTestCase):
         self.assertEqual(proposition_id.uuid, self.uuid_proposition)
         groupe = self.groupe_de_supervision_repository.get_by_proposition_id(proposition_id)
         signatures = groupe.signatures_membres_CA  # type:List[SignatureMembreCA]
-        self.assertEqual(len(signatures), 2)
-        self.assertEqual(signatures[-1].membre_CA_id.matricule, self.matricule_membre)
-        self.assertEqual(signatures[-1].etat, ChoixEtatSignature.DECLINED)
+        self.assertEqual(len(signatures), 1)
+        self.assertNotEqual(signatures[0].membre_CA_id.matricule, self.matricule_membre)
 
     def test_should_pas_refuser_si_pas_dans_groupe(self):
         cmd = attr.evolve(self.cmd, matricule='paspromoteur')

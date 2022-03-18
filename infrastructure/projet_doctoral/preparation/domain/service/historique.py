@@ -33,6 +33,7 @@ from admission.ddd.projet_doctoral.preparation.domain.model._promoteur import Pr
 from admission.ddd.projet_doctoral.preparation.domain.model.groupe_de_supervision import GroupeDeSupervision
 from admission.ddd.projet_doctoral.preparation.domain.model.proposition import Proposition
 from admission.ddd.projet_doctoral.preparation.domain.service.i_historique import IHistorique
+from admission.ddd.projet_doctoral.preparation.dtos import AvisDTO
 from infrastructure.shared_kernel.personne_connue_ucl.personne_connue_ucl import PersonneConnueUclTranslator
 from osis_history.utilities import add_history_entry
 
@@ -64,49 +65,37 @@ class Historique(IHistorique):
     def historiser_avis(
         cls,
         proposition: Proposition,
-        groupe_de_supervision: GroupeDeSupervision,
         signataire_id: Union[PromoteurIdentity, MembreCAIdentity],
+        avis: AvisDTO,
     ):
-        if isinstance(signataire_id, PromoteurIdentity):
-            signature = next(  # pragma: no branch
-                s
-                for s in groupe_de_supervision.signatures_promoteurs
-                if s.promoteur_id.matricule == signataire_id.matricule
-            )
-        else:
-            signature = next(  # pragma: no branch
-                s
-                for s in groupe_de_supervision.signatures_membres_CA
-                if s.membre_CA_id.matricule == signataire_id.matricule
-            )
         signataire = PersonneConnueUclTranslator().get(signataire_id.matricule)
-        auteur = PersonneConnueUclTranslator().get(proposition.matricule_candidat) if signature.pdf else signataire
+        auteur = PersonneConnueUclTranslator().get(proposition.matricule_candidat) if avis.pdf else signataire
 
         # Basculer en Français pour la traduction de l'état
         with translation.override(settings.LANGUAGE_CODE_FR):
             details = ""
-            if signature.motif_refus:
-                details += "motif : {}".format(signature.motif_refus)
-            if signature.commentaire_externe:
-                details += "commentaire : {}".format(signature.commentaire_externe)
+            if avis.motif_refus:
+                details += "motif : {}".format(avis.motif_refus)
+            if avis.commentaire_externe:
+                details += "commentaire : {}".format(avis.commentaire_externe)
             if details:
                 details = " ({})".format(details)
-            if signature.pdf:
+            if avis.pdf:
                 details += " via PDF pour {signataire.prenom} {signataire.nom}".format(signataire=signataire)
-            message_fr = 'Un avis "{}" a été déposé{}.'.format(signature.etat, details)
+            message_fr = 'Un avis "{}" a été déposé{}.'.format(avis.etat, details)
 
         # Anglais
         with translation.override(settings.LANGUAGE_CODE_EN):
             details = ""
-            if signature.motif_refus:
-                details += "reason : {}".format(signature.motif_refus)
-            if signature.commentaire_externe:
-                details += "comment : {}".format(signature.commentaire_externe)
+            if avis.motif_refus:
+                details += "reason : {}".format(avis.motif_refus)
+            if avis.commentaire_externe:
+                details += "comment : {}".format(avis.commentaire_externe)
             if details:
                 details = " ({})".format(details)
-            if signature.pdf:
+            if avis.pdf:
                 details += " via PDF for {signataire.prenom} {signataire.nom}".format(signataire=signataire)
-            message_en = 'A "{}" notice has been set{}.'.format(signature.etat, details)
+            message_en = 'A "{}" notice has been set{}.'.format(avis.etat, details)
 
         add_history_entry(
             proposition.entity_id.uuid,

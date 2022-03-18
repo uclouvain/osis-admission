@@ -232,17 +232,9 @@ class GroupeDeSupervision(interface.Entity):
                         )
                     )
             self.signatures_promoteurs = new_states
-        elif isinstance(signataire_id, MembreCAIdentity):  # pragma: no branch
+        else:
+            # Simply remove the CA member
             self.signatures_membres_CA = [s for s in self.signatures_membres_CA if s.membre_CA_id != signataire_id]
-            self.signatures_membres_CA.append(
-                SignatureMembreCA(
-                    membre_CA_id=signataire_id,
-                    etat=ChoixEtatSignature.DECLINED,
-                    commentaire_interne=commentaire_interne or '',
-                    commentaire_externe=commentaire_externe or '',
-                    motif_refus=motif_refus or '',
-                )
-            )
 
     def verifier_tout_le_monde_a_approuve(self):
         ApprobationValidatorList(groupe_de_supervision=self).validate()
