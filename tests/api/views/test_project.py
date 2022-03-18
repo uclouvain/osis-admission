@@ -99,6 +99,7 @@ class DoctorateAdmissionListApiTestCase(APITestCase):
         # Check response data
         # Global links
         self.assertTrue('links' in response.data)
+        self.assertContains(response, 'SST')
         self.assertTrue('create_proposition' in response.data['links'])
         self.assertEqual(
             response.data['links']['create_proposition'],

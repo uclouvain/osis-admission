@@ -26,7 +26,7 @@
 from django.contrib.postgres.fields import JSONField
 from django.core.cache import cache
 from django.db import models
-from django.db.models import OuterRef, QuerySet, Subquery
+from django.db.models import OuterRef
 from django.utils.datetime_safe import date
 from django.utils.translation import gettext_lazy as _
 
@@ -37,16 +37,17 @@ from admission.ddd.projet_doctoral.preparation.domain.model._enums import (
     ChoixSousDomaineSciences,
     ChoixStatutProposition,
 )
-from base.models.entity_version import EntityVersion
-from base.models.enums.entity_type import SECTOR
-from osis_document.contrib import FileField
-from osis_signature.contrib.fields import SignatureProcessField
-from .base import BaseAdmission, admission_directory_path
 from admission.ddd.projet_doctoral.preparation.domain.model._experience_precedente_recherche import (
     ChoixDoctoratDejaRealise,
 )
 from admission.ddd.projet_doctoral.preparation.domain.model._financement import ChoixTypeFinancement
 from admission.ddd.projet_doctoral.validation.domain.model._enums import ChoixStatutCDD, ChoixStatutSIC
+from base.models.entity_version import EntityVersion
+from base.models.enums.entity_type import SECTOR
+from base.utils.cte import CTESubquery
+from osis_document.contrib import FileField
+from osis_signature.contrib.fields import SignatureProcessField
+from .base import BaseAdmission, admission_directory_path
 
 __all__ = [
     "DoctorateAdmission",
@@ -321,11 +322,11 @@ class DoctorateAdmission(BaseAdmission):
 
 class PropositionManager(models.Manager):
     def get_queryset(self):
-        cte = EntityVersion.objects.with_children()
+        cte = EntityVersion.objects.with_children(entity_id=OuterRef("doctorate__management_entity_id"))
         sector_subqs = (
-            cte.join(EntityVersion, id=cte.col.id, entity_type=SECTOR)
+            cte.join(EntityVersion, id=cte.col.id)
             .with_cte(cte)
-            .filter(entity_id=OuterRef("doctorate__management_entity_id"))
+            .filter(entity_type=SECTOR)
             .exclude(end_date__lte=date.today())
         )
 
@@ -337,8 +338,8 @@ class PropositionManager(models.Manager):
                 "thesis_institute",
             )
             .annotate(
-                code_secteur_formation=Subquery(sector_subqs.values("acronym")[:1]),
-                intitule_secteur_formation=Subquery(sector_subqs.values("title")[:1]),
+                code_secteur_formation=CTESubquery(sector_subqs.values("acronym")[:1]),
+                intitule_secteur_formation=CTESubquery(sector_subqs.values("title")[:1]),
             )
         )
 
