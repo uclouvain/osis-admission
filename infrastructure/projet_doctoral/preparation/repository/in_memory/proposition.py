@@ -215,4 +215,5 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
             prenom_candidat=candidat.prenom,
             nationalite_candidat=candidat.nationalite,
             modifiee_le=proposition.modifiee_le,
+            erreurs=[],
         )

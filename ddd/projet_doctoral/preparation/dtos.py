@@ -24,7 +24,7 @@
 #
 ##############################################################################
 import datetime
-from typing import List, Optional, Set
+from typing import Dict, List, Optional, Set
 from uuid import UUID
 
 import attr
@@ -71,6 +71,7 @@ class PropositionDTO(interface.DTO):
     intitule_secteur_formation: str
     creee_le: datetime.datetime
     modifiee_le: datetime.datetime
+    erreurs: List[Dict[str, str]]
 
 
 @attr.dataclass(frozen=True, slots=True)

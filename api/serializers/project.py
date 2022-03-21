@@ -109,6 +109,8 @@ class PropositionSearchDTOSerializer(IncludedFieldsMixin, DTOSerializer):
             'update_curriculum': ACTION_LINKS['update_curriculum'],
         }
     )
+    # This is to prevent schema from breaking on JSONField
+    erreurs = None
 
     class Meta:
         source = PropositionDTO
@@ -173,6 +175,8 @@ class PropositionDTOSerializer(IncludedFieldsMixin, DTOSerializer):
             'update_curriculum': ACTION_LINKS['update_curriculum'],
         }
     )
+    # The schema is explicit in PropositionSchema
+    erreurs = serializers.JSONField()
 
     class Meta:
         source = PropositionDTO
@@ -209,6 +213,7 @@ class PropositionDTOSerializer(IncludedFieldsMixin, DTOSerializer):
             'raison_non_soutenue',
             'statut',
             'links',
+            'erreurs',
         ]
 
 

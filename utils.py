@@ -23,10 +23,17 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from collections import defaultdict
+from typing import Dict
+
 from django.core.cache import cache
 from rest_framework.generics import get_object_or_404
 
 from admission.contrib.models import DoctorateAdmission
+from backoffice.settings.rest_framework.exception_handler import get_error_data
+from base.ddd.utils.business_validator import MultipleBusinessExceptions
+from infrastructure.messages_bus import message_bus_instance
+from osis_common.ddd.interface import QueryRequest
 
 
 def get_cached_admission_perm_obj(admission_uuid):
@@ -39,3 +46,15 @@ def get_cached_admission_perm_obj(admission_uuid):
         'admission_permission_{}'.format(admission_uuid),
         lambda: get_object_or_404(qs, uuid=admission_uuid),
     )
+
+
+def gather_business_exceptions(command: QueryRequest) -> Dict[str, list]:
+    data = defaultdict(list)
+    try:
+        # Trigger the verification command
+        message_bus_instance.invoke(command)
+    except MultipleBusinessExceptions as exc:
+        # Gather all errors for output
+        for exception in exc.exceptions:
+            data = get_error_data(data, exception, {})
+    return data
