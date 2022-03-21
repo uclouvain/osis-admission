@@ -74,6 +74,7 @@ class ApprovePropositionAPIView(APIPermissionRequiredMixin, APIView):
                 **serializer.data,
             ),
         )
+        self.get_permission_object().update_detailed_status()
 
         serializer = serializers.PropositionIdentityDTOSerializer(instance=proposition_id)
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -89,6 +90,7 @@ class ApprovePropositionAPIView(APIPermissionRequiredMixin, APIView):
                 **serializer.data,
             ),
         )
+        self.get_permission_object().update_detailed_status()
 
         serializer = serializers.PropositionIdentityDTOSerializer(instance=proposition_id)
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -124,6 +126,7 @@ class ApproveByPdfPropositionAPIView(APIPermissionRequiredMixin, APIView):
                 **serializer.data,
             ),
         )
+        self.get_permission_object().update_detailed_status()
 
         serializer = serializers.PropositionIdentityDTOSerializer(instance=proposition_id)
         return Response(serializer.data, status=status.HTTP_200_OK)

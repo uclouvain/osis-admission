@@ -25,10 +25,12 @@
 # ##############################################################################
 from django.contrib.postgres.fields import JSONField
 from django.core.cache import cache
+from django.core.serializers.json import DjangoJSONEncoder
 from django.db import models
 from django.db.models import OuterRef
 from django.utils.datetime_safe import date
 from django.utils.translation import gettext_lazy as _
+from rest_framework.settings import api_settings
 
 from admission.ddd.projet_doctoral.preparation.domain.model._detail_projet import ChoixLangueRedactionThese
 from admission.ddd.projet_doctoral.preparation.domain.model._enums import (
@@ -227,7 +229,10 @@ class DoctorateAdmission(BaseAdmission):
         upload_to=admission_directory_path,
     )
 
-    detailed_status = JSONField(default=dict)
+    detailed_status = JSONField(
+        default=dict,
+        encoder=DjangoJSONEncoder,
+    )
 
     status = models.CharField(
         choices=ChoixStatutProposition.choices(),
@@ -318,6 +323,16 @@ class DoctorateAdmission(BaseAdmission):
     def save(self, *args, **kwargs) -> None:
         super().save(*args, **kwargs)
         cache.delete('admission_permission_{}'.format(self.uuid))
+
+    def update_detailed_status(self):
+        from admission.ddd.projet_doctoral.preparation.commands import VerifierProjetCommand, VerifierPropositionCommand
+        from admission.utils import gather_business_exceptions
+
+        error_key = api_settings.NON_FIELD_ERRORS_KEY
+        project_errors = gather_business_exceptions(VerifierProjetCommand(self.uuid)).get(error_key, [])
+        submission_errors = gather_business_exceptions(VerifierPropositionCommand(self.uuid)).get(error_key, [])
+        self.detailed_status = project_errors + submission_errors
+        self.save(update_fields=['detailed_status'])
 
 
 class PropositionManager(models.Manager):

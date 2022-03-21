@@ -306,4 +306,5 @@ class PropositionRepository(IPropositionRepository):
                 'name' if get_language() == settings.LANGUAGE_CODE else 'name_en',
             ),
             modifiee_le=admission.modified,
+            erreurs=admission.detailed_status or [],
         )

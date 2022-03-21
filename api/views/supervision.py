@@ -103,6 +103,7 @@ class SupervisionAPIView(
 
         serializer_cls(data=data).is_valid(raise_exception=True)
         result = message_bus_instance.invoke(cmd(**data))
+        self.get_permission_object().update_detailed_status()
         serializer = serializers.PropositionIdentityDTOSerializer(instance=result)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -122,5 +123,6 @@ class SupervisionAPIView(
 
         serializer_cls(data=data).is_valid(raise_exception=True)
         result = message_bus_instance.invoke(cmd(**data))
+        self.get_permission_object().update_detailed_status()
         serializer = serializers.PropositionIdentityDTOSerializer(instance=result)
         return Response(serializer.data, status=status.HTTP_200_OK)
