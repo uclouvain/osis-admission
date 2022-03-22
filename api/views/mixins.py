@@ -23,6 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from typing import Optional
 
 from rest_framework.generics import get_object_or_404
 
@@ -50,6 +51,6 @@ class PersonRelatedMixin:
             return get_object_or_404(DoctorateAdmission, uuid=self.kwargs.get('uuid')).candidate
         return self.request.user.person
 
-    def get_permission_object(self):
+    def get_permission_object(self) -> Optional[DoctorateAdmission]:
         if self.kwargs.get('uuid'):
             return get_cached_admission_perm_obj(self.kwargs['uuid'])

@@ -55,17 +55,17 @@ class LanguagesKnowledgeSchema(PersonRelatedSchema):
                 'type': 'array',
                 'items': item_schema,
             }
-            return {
-                'content': {
-                    ct: {'schema': body_schema}
-                    for ct in self.request_media_types
-                }
-            }
+            return {'content': {ct: {'schema': body_schema} for ct in self.request_media_types}}
         return super().get_request_body(path, method)
 
 
-class LanguagesKnowledgeViewSet(PersonRelatedMixin, APIPermissionRequiredMixin, mixins.ListModelMixin,
-                                mixins.CreateModelMixin, GenericAPIView):
+class LanguagesKnowledgeViewSet(
+    PersonRelatedMixin,
+    APIPermissionRequiredMixin,
+    mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    GenericAPIView,
+):
     name = "languages-knowledge"
     pagination_class = None
     filter_backends = []
@@ -98,12 +98,13 @@ class LanguagesKnowledgeViewSet(PersonRelatedMixin, APIPermissionRequiredMixin, 
         LanguageKnowledge.objects.bulk_create(
             (
                 LanguageKnowledge(person=person, **language_knowledge)
-                for language_knowledge
-                in input_serializer.validated_data
+                for language_knowledge in input_serializer.validated_data
             )
         )
         output_serializer = self.get_serializer_class()(
             instance=LanguageKnowledge.objects.filter(person=person).all(),
             many=True,
         )
+        if self.get_permission_object():
+            self.get_permission_object().update_detailed_status()
         return Response(output_serializer.data, status=status.HTTP_201_CREATED)
