@@ -24,29 +24,35 @@
 #
 # ##############################################################################
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List
 
 import attr
 
+from admission.ddd.interface import SortedQueryRequest
 from osis_common.ddd import interface
 
 
 @attr.s(frozen=True, slots=True, auto_attribs=True)
-class FiltrerDemandesQuery(interface.QueryRequest):
+class FiltrerDemandesQuery(SortedQueryRequest):
     numero: Optional[str] = ''
     etat_cdd: Optional[str] = ''
     etat_sic: Optional[str] = ''
     matricule_candidat: Optional[str] = ''
     nationalite: Optional[str] = ''
     type: Optional[str] = ''
+    cdds: Optional[List[str]] = None
     commission_proximite: Optional[str] = ''
     annee_academique: Optional[int] = None
-    sigle_formation: Optional[str] = ''
-    financement: Optional[str] = ''
+    sigles_formations: Optional[List[str]] = None
+    type_financement: Optional[str] = ''
+    type_contrat_travail: Optional[str] = ''
+    bourse_recherche: Optional[str] = ''
     matricule_promoteur: Optional[str] = ''
     cotutelle: Optional[bool] = None
     date_pre_admission_debut: Optional[datetime] = None
     date_pre_admission_fin: Optional[datetime] = None
+    date_admission_debut: Optional[datetime] = None
+    date_admission_fin: Optional[datetime] = None
 
 
 @attr.s(frozen=True, slots=True, auto_attribs=True)

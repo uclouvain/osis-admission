@@ -23,44 +23,6 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import datetime
-from typing import Optional
+EMPTY_CHOICE = (('', ' - '),)
+NONE_CHOICE = ((None, ' - '),)
 
-import attr
-
-from osis_common.ddd import interface
-
-
-@attr.s(frozen=True, slots=True, auto_attribs=True)
-class DemandeRechercheDTO(interface.DTO):
-    uuid: str
-    numero_demande: str
-    statut_cdd: Optional[str]
-    statut_sic: Optional[str]
-    statut_demande: str
-    nom_candidat: str
-    formation: str
-    nationalite: str
-    derniere_modification: datetime.datetime
-    date_confirmation: Optional[datetime.datetime]
-    code_bourse: Optional[str]
-
-
-@attr.s(frozen=True, slots=True, auto_attribs=True)
-class DemandeDTO(interface.DTO):
-    uuid: str
-    statut_cdd: str
-    statut_sic: str
-    pre_admission_acceptee_le: Optional[datetime.datetime]
-    admission_acceptee_le: Optional[datetime.datetime]
-    derniere_modification: datetime.datetime
-    # TODO only include info about demande
-
-
-@attr.s(frozen=True, slots=True, auto_attribs=True)
-class RecupererDemandeDTO(interface.DTO):
-    uuid: str
-    statut_cdd: str
-    statut_sic: str
-    derniere_modification: datetime.datetime
-    # TODO include all info about demande (doctorate and persons too)

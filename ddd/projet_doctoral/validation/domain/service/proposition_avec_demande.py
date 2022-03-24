@@ -53,7 +53,7 @@ class PropositionAvecDemande(interface.DomainService):
             demande_dto.uuid: demande_dto for demande_dto in demande_repository.search_dto(entity_ids=demande_ids)
         }
 
-        return [
+        resultats = [
             DemandeRechercheDTO(
                 uuid=proposition_dto.uuid,
                 numero_demande=proposition_dto.reference,
@@ -64,9 +64,8 @@ class PropositionAvecDemande(interface.DomainService):
                 if proposition_dto.uuid in demande_dto_mapping
                 else None,
                 statut_demande=proposition_dto.statut,
-                nom_candidat=proposition_dto.nom_candidat,
-                sigle_formation=proposition_dto.sigle_doctorat,
-                intitule_formation=proposition_dto.intitule_doctorat,
+                nom_candidat=', '.join([proposition_dto.nom_candidat, proposition_dto.prenom_candidat]),
+                formation='{} - {}'.format(proposition_dto.sigle_doctorat, proposition_dto.intitule_doctorat),
                 nationalite=proposition_dto.nationalite_candidat,
                 derniere_modification=proposition_dto.modifiee_le,
                 date_confirmation=(
@@ -75,10 +74,21 @@ class PropositionAvecDemande(interface.DomainService):
                 )
                 if proposition_dto.uuid in demande_dto_mapping
                 else None,
-                code_bourse=proposition_dto.type_financement or "",  # TODO bon champ ?
+                code_bourse=proposition_dto.bourse_recherche,
             )
             for proposition_dto in proposition_dtos
         ]
+
+        # Tri
+        champ_tri = cmd.champ_tri or ''
+        if champ_tri:
+            resultats.sort(
+                # We use a tuple to manage the None values
+                key=lambda demande: (getattr(demande, champ_tri) is None, getattr(demande, champ_tri)),
+                reverse=cmd.tri_inverse,
+            )
+
+        return resultats
 
     @classmethod
     def _recherche_combinee(
@@ -94,10 +104,12 @@ class PropositionAvecDemande(interface.DomainService):
             "type",
             "commission_proximite",
             "annee_academique",
-            "sigle_formation",
-            "financement",
+            "sigles_formations",
+            "type_financement",
+            "type_contrat_travail",
+            "bourse_recherche",
             "matricule_promoteur",
-            "cotutelle",
+            "cdds",
         ]
         demande_criteria = [
             "etat_cdd",
@@ -108,7 +120,7 @@ class PropositionAvecDemande(interface.DomainService):
         proposition_ids_from_proposition = None
         proposition_ids_from_demande = None
         # Search proposition if any proposition criteria
-        if any(getattr(cmd, criterion) for criterion in proposition_criteria):
+        if any(getattr(cmd, criterion) for criterion in proposition_criteria) or cmd.cotutelle is not None:
             proposition_ids_from_proposition = [
                 PropositionIdentityBuilder.build_from_uuid(dto.uuid)
                 for dto in proposition_repository.search_dto(
@@ -118,10 +130,13 @@ class PropositionAvecDemande(interface.DomainService):
                     type=cmd.type,
                     commission_proximite=cmd.commission_proximite,
                     annee_academique=cmd.annee_academique,
-                    sigle_formation=cmd.sigle_formation,
-                    financement=cmd.financement,
+                    sigles_formations=cmd.sigles_formations,
+                    financement=cmd.type_financement,
+                    type_contrat_travail=cmd.type_contrat_travail,
+                    bourse_recherche=cmd.bourse_recherche,
                     matricule_promoteur=cmd.matricule_promoteur,
                     cotutelle=cmd.cotutelle,
+                    cdds=cmd.cdds,
                 )
             ]
         # Search demandes if any demande criteria
@@ -131,8 +146,6 @@ class PropositionAvecDemande(interface.DomainService):
                 for dto in demande_repository.search_dto(
                     etat_cdd=cmd.etat_cdd,
                     etat_sic=cmd.etat_sic,
-                    date_pre_admission_debut=cmd.date_pre_admission_debut,
-                    date_pre_admission_fin=cmd.date_pre_admission_fin,
                 )
             ]
         # Only work with proposition identities

@@ -23,10 +23,12 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from datetime import date
 from typing import List, Optional
 
 from django.conf import settings
 from django.db import connection
+from django.db.models import Subquery, OuterRef
 from django.utils.translation import get_language
 
 from admission.auth.roles.candidate import Candidate
@@ -220,10 +222,13 @@ class PropositionRepository(IPropositionRepository):
         etat: Optional[str] = '',
         nationalite: Optional[str] = '',
         type: Optional[str] = '',
+        cdds: Optional[List[str]] = None,
         commission_proximite: Optional[str] = '',
         annee_academique: Optional[str] = None,
-        sigle_formation: Optional[str] = '',
+        sigles_formations: Optional[List[str]] = None,
         financement: Optional[str] = '',
+        type_contrat_travail: Optional[str] = '',
+        bourse_recherche: Optional[str] = '',
         matricule_promoteur: Optional[str] = '',
         cotutelle: Optional[bool] = None,
         entity_ids: Optional[List['PropositionIdentity']] = None,
@@ -231,26 +236,35 @@ class PropositionRepository(IPropositionRepository):
         qs = PropositionProxy.objects
         if numero:
             qs = qs.filter(reference=numero)
-        if matricule_candidat is not None:
+        if matricule_candidat:
             qs = qs.filter(candidate__global_id=matricule_candidat)
         if etat:  # code enum
             qs = qs.filter(status=etat)
         if nationalite:  # code pays
-            qs = qs.filter(candidate__person__country__iso_code=nationalite)
+            qs = qs.filter(candidate__country_of_citizenship__iso_code=nationalite)
         if type:
             qs = qs.filter(type=type)
         if commission_proximite:
-            qs = qs.filter(proximity_comission=commission_proximite)
+            qs = qs.filter(proximity_commission=commission_proximite)
         if annee_academique:
             qs = qs.filter(doctorate__academic_year__year=annee_academique)
-        if sigle_formation:
-            qs = qs.filter(doctorate__acronym=sigle_formation)
+        if sigles_formations:
+            qs = qs.filter(doctorate__acronym__in=sigles_formations)
         if financement:
             qs = qs.filter(financing_type=financement)
+        if type_contrat_travail:
+            qs = qs.filter(financing_work_contract=type_contrat_travail)
+        if bourse_recherche:
+            qs = qs.filter(scholarship_grant=bourse_recherche)
         if matricule_promoteur:
             qs = qs.filter(supervision_group__actors__person__global_id=matricule_promoteur)
         if cotutelle is not None:
             qs = qs.filter(cotutelle=cotutelle)
+        if cdds:
+            qs = qs.annotate(cdd_acronym=Subquery(EntityVersion.objects.current(date.today()).filter(
+                entity_id=OuterRef('doctorate__management_entity_id')).values('acronym')[:1])
+            ).filter(cdd_acronym__in=cdds)
+
         if entity_ids is not None:
             qs = qs.filter(uuid__in=[entity_id.uuid for entity_id in entity_ids])
 

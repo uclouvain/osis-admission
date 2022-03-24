@@ -46,8 +46,6 @@ class IDemandeRepository(interface.AbstractRepository):
         cls,
         etat_cdd: Optional[str] = '',
         etat_sic: Optional[str] = '',
-        date_pre_admission_debut: Optional[datetime] = None,
-        date_pre_admission_fin: Optional[datetime] = None,
         entity_ids: Optional[List['DemandeIdentity']] = None,
         **kwargs,
     ) -> List['DemandeDTO']:

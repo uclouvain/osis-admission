@@ -23,44 +23,25 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import datetime
-from typing import Optional
+from django.contrib.auth.mixins import AccessMixin
 
-import attr
-
-from osis_common.ddd import interface
+from admission.auth.roles.cdd_manager import CddManager
 
 
-@attr.s(frozen=True, slots=True, auto_attribs=True)
-class DemandeRechercheDTO(interface.DTO):
-    uuid: str
-    numero_demande: str
-    statut_cdd: Optional[str]
-    statut_sic: Optional[str]
-    statut_demande: str
-    nom_candidat: str
-    formation: str
-    nationalite: str
-    derniere_modification: datetime.datetime
-    date_confirmation: Optional[datetime.datetime]
-    code_bourse: Optional[str]
+class RoleRequiredMixin(AccessMixin):
+    """Verify that the current user has the specific role."""
+
+    role_manager_class = None
+
+    def dispatch(self, request, *args, **kwargs):
+        http_response = super().dispatch(request, *args, **kwargs)
+        person = getattr(request.user, 'person')
+        if person and self.role_manager_class.belong_to(person):
+            return http_response
+        else:
+            return self.handle_no_permission()
 
 
-@attr.s(frozen=True, slots=True, auto_attribs=True)
-class DemandeDTO(interface.DTO):
-    uuid: str
-    statut_cdd: str
-    statut_sic: str
-    pre_admission_acceptee_le: Optional[datetime.datetime]
-    admission_acceptee_le: Optional[datetime.datetime]
-    derniere_modification: datetime.datetime
-    # TODO only include info about demande
-
-
-@attr.s(frozen=True, slots=True, auto_attribs=True)
-class RecupererDemandeDTO(interface.DTO):
-    uuid: str
-    statut_cdd: str
-    statut_sic: str
-    derniere_modification: datetime.datetime
-    # TODO include all info about demande (doctorate and persons too)
+class CddRequiredMixin(RoleRequiredMixin):
+    """Verify that the current user has the cdd role."""
+    role_manager_class = CddManager

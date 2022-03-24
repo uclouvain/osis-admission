@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,7 +23,25 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from django.urls import include, path
 
-app_name = "admission"
+from admission.views.doctorate.cdd.list import CddDoctorateAdmissionList
+from admission.views.autocomplete.persons import CandidatesAutocomplete, PromotersAutocomplete
+from admission.views.autocomplete.countries import CountriesAutocomplete
 
-urlpatterns = ()
+app_name = 'admission'
+
+urlpatterns = [
+    # Doctorate admissions
+    path('doctorate/', include(([
+        path('cdd/', include(([
+            path('', CddDoctorateAdmissionList.as_view(), name='list'),
+        ], 'cdd'))),
+    ], 'doctorate'))),
+    # Autocomplete
+    path('autocomplete/', include(([
+        path('candidates', CandidatesAutocomplete.as_view(), name='candidates'),
+        path('countries', CountriesAutocomplete.as_view(), name='countries'),
+        path('promoters', PromotersAutocomplete.as_view(), name='promoters'),
+    ], 'autocomplete'))),
+]

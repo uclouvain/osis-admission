@@ -1,0 +1,88 @@
+{% load enums i18n bootstrap3 admission %}
+
+{% comment "License" %}
+* OSIS stands for Open Student Information System. It's an application
+* designed to manage the core business of higher education institutions,
+* such as universities, faculties, institutes and professional schools.
+* The core business involves the administration of students, teachers,
+* courses, programs and so on.
+*
+* Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+*
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* A copy of this license - GNU General Public License - is available
+* at the root of the source code of this program.  If not,
+* see http://www.gnu.org/licenses/.
+{% endcomment %}
+
+<table
+    id="admission_result_list"
+    class="table table-striped table-hover "
+>
+  <thead>
+  <tr
+    hx-boost="true"
+    hx-indicator="#loader"
+    hx-target="#table_doctorate_admission"
+  >
+    {% sortable_header_div 'numero_demande' 'Dossier numero' %}
+    {% sortable_header_div 'nom_candidat' 'Name' %}
+    {% sortable_header_div 'formation' 'Training' %}
+    {% sortable_header_div 'nationalite' 'Nationality' %}
+    {% sortable_header_div 'code_bourse' 'Scholarship' %}
+    {% sortable_header_div 'statut_demande' 'Dossier status' %}
+    {% sortable_header_div 'statut_cdd' 'CDD status' %}
+    {% sortable_header_div 'statut_sic' 'SIC status' %}
+    {% sortable_header_div 'derniere_modification' 'Last modification' %}
+    {% sortable_header_div 'date_confirmation' 'Dossier confirmation' %}
+  </tr>
+  </thead>
+  <tbody>
+  {% for admission in object_list %}
+  <tr>
+    <td>{{ admission.numero_demande }}</td>
+    <td>{{ admission.nom_candidat }}</td>
+    <td>{{ admission.formation }}</td>
+    <td>{{ admission.nationalite|default_if_none:'' }}</td>
+    <td>{{ admission.code_bourse|enum_display:'ChoixTypeFinancement' }}</td>
+    <td>{{ admission.statut_demande|enum_display:'ChoixStatutProposition' }}</td>
+    <td>{{ admission.statut_cdd|enum_display:'ChoixStatutCDD' }}</td>
+    <td>{{ admission.statut_sic|enum_display:'ChoixStatutSIC' }}</td>
+    <td>{{ admission.derniere_modification }}</td>
+    <td>{{ admission.date_confirmation|default_if_none:'' }}</td>
+  </tr>
+  {% endfor %}
+  </tbody>
+  <tfoot>
+  <strong style="margin-left:10px; color:grey;">
+    {% if paginator.count %}
+    {% blocktrans with start_index=page_obj.start_index end_index=page_obj.end_index count total_counts=paginator.count %}
+    One doctorate enrolment
+    {% plural %}
+    {{ start_index }} to {{ end_index }} of {{ total_counts }} doctorate enrolments
+    {% endblocktrans %}
+    {% else %}
+    No doctorate enrolment
+    {% endif %}
+  </strong>
+  </tfoot>
+</table>
+{% if object_list %}
+<div
+    class="text-center"
+    hx-boost="true"
+    hx-indicator="#loader"
+    hx-target="#table_doctorate_admission"
+>
+  {% bootstrap_pagination page_obj extra=request.GET.urlencode %}
+</div>
+{% endif %}

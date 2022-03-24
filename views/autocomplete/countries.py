@@ -23,44 +23,34 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import datetime
-from typing import Optional
+from dal import autocomplete
+from django.conf import settings
+from django.utils.translation import get_language
+from rules.contrib.views import LoginRequiredMixin
 
-import attr
-
-from osis_common.ddd import interface
-
-
-@attr.s(frozen=True, slots=True, auto_attribs=True)
-class DemandeRechercheDTO(interface.DTO):
-    uuid: str
-    numero_demande: str
-    statut_cdd: Optional[str]
-    statut_sic: Optional[str]
-    statut_demande: str
-    nom_candidat: str
-    formation: str
-    nationalite: str
-    derniere_modification: datetime.datetime
-    date_confirmation: Optional[datetime.datetime]
-    code_bourse: Optional[str]
+from osis_role.contrib.views import PermissionRequiredMixin
+from reference.models.country import Country
 
 
-@attr.s(frozen=True, slots=True, auto_attribs=True)
-class DemandeDTO(interface.DTO):
-    uuid: str
-    statut_cdd: str
-    statut_sic: str
-    pre_admission_acceptee_le: Optional[datetime.datetime]
-    admission_acceptee_le: Optional[datetime.datetime]
-    derniere_modification: datetime.datetime
-    # TODO only include info about demande
+class CountriesAutocomplete(LoginRequiredMixin, PermissionRequiredMixin, autocomplete.Select2QuerySetView):
 
+    permission_required = 'admission.can_access_doctorateadmission'
 
-@attr.s(frozen=True, slots=True, auto_attribs=True)
-class RecupererDemandeDTO(interface.DTO):
-    uuid: str
-    statut_cdd: str
-    statut_sic: str
-    derniere_modification: datetime.datetime
-    # TODO include all info about demande (doctorate and persons too)
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.name_field = 'name' if get_language() == settings.LANGUAGE_CODE else 'name_en'
+
+    def get_queryset(self):
+        search_term = self.request.GET.get('q', '')
+        return Country.objects.filter(
+            **{'{}__icontains'.format(self.name_field): search_term}
+        ).values(self.name_field, 'iso_code').order_by(self.name_field)
+
+    def get_results(self, context):
+        """Return data for the 'results' key of the response."""
+        return [
+            {
+                'id': country.get('iso_code'),
+                'text': country.get(self.name_field),
+            } for country in context['object_list']
+        ]

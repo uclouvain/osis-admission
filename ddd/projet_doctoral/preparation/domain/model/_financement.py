@@ -32,6 +32,27 @@ from base.models.utils.utils import ChoiceEnum
 from osis_common.ddd import interface
 
 
+class ChoixTypeContratTravail(ChoiceEnum):
+    UCLOUVAIN_ASSISTANT = _('UCLOUVAIN_ASSISTANT')
+    OTHER = _('OTHER')
+
+
+class BourseRecherche(ChoiceEnum):
+    ARC = _("ARC - Action de Recherche Concertée")
+    ARES = _("ARES - Coopération au développement")
+    CSC = _("CSC - China Scholarship Council")
+    FSR = _("FSR - Fonds Spéciaux de Recherche")
+    ERC = _("ERC - European Research Council")
+    FNRS = _("FNRS")
+    FONDATION_ST_LUC = _("Fondation St Luc")
+    FONDATION_MONT_GODINNE = _("Fondation Mont Godinne")
+    FRC = _("FRC - Fonds de recherche clinique")
+    FRIA = _("FRIA")
+    FRESH = _("FRESH")
+    WBI = _("WBI - Wallonie Bruxelles International")
+    OTHER = _('OTHER')
+
+
 class ChoixTypeFinancement(ChoiceEnum):
     WORK_CONTRACT = _('WORK_CONTRACT')
     SEARCH_SCHOLARSHIP = _('SEARCH_SCHOLARSHIP')
