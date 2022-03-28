@@ -23,31 +23,11 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from dal import autocomplete
-from django.conf import settings
-from django.utils.translation import get_language
-from rules.contrib.views import LoginRequiredMixin
+from base.models.utils.utils import ChoiceEnum
 
-from reference.models.country import Country
+from django.utils.translation import gettext_lazy as _
 
 
-class CountriesAutocomplete(LoginRequiredMixin, autocomplete.Select2QuerySetView):
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.name_field = 'name' if get_language() == settings.LANGUAGE_CODE else 'name_en'
-
-    def get_queryset(self):
-        search_term = self.request.GET.get('q', '')
-        return Country.objects.filter(
-            **{'{}__icontains'.format(self.name_field): search_term}
-        ).values(self.name_field, 'iso_code').order_by(self.name_field)
-
-    def get_results(self, context):
-        """Return data for the 'results' key of the response."""
-        return [
-            {
-                'id': country.get('iso_code'),
-                'text': country.get(self.name_field),
-            } for country in context['object_list']
-        ]
+class YesNo(ChoiceEnum):
+    YES = _("Yes")
+    NO = _("No")

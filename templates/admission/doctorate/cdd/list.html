@@ -56,42 +56,42 @@
         hx-indicator="#loader"
     >
       <div class="row">
-        {% bootstrap_field filter_form.numero form_group_class="col-md-3" %}
-        {% bootstrap_field filter_form.matricule_candidat form_group_class="col-md-3" %}
-        {% bootstrap_field filter_form.nationalite form_group_class="col-md-3" %}
-        {% bootstrap_field filter_form.type form_group_class="col-md-3" %}
+        {% bootstrap_field filter_form.numero form_group_class="form-group col-md-3" %}
+        {% bootstrap_field filter_form.matricule_candidat form_group_class="form-group col-md-3" %}
+        {% bootstrap_field filter_form.nationalite form_group_class="form-group col-md-3" %}
+        {% bootstrap_field filter_form.type form_group_class="form-group col-md-3" %}
       </div>
       <div class="row">
-        {% bootstrap_field filter_form.cdds form_group_class="col-md-3" %}
-        {% bootstrap_field filter_form.commission_proximite form_group_class="col-md-3" %}
-        {% bootstrap_field filter_form.annee_academique form_group_class="col-md-3" %}
-        {% bootstrap_field filter_form.sigles_formations form_group_class="col-md-3" %}
+        {% bootstrap_field filter_form.cdds form_group_class="form-group col-md-3" %}
+        {% bootstrap_field filter_form.commission_proximite form_group_class="form-group col-md-3" %}
+        {% bootstrap_field filter_form.annee_academique form_group_class="form-group col-md-3" %}
+        {% bootstrap_field filter_form.sigles_formations form_group_class="form-group col-md-3" %}
       </div>
       <div class="row">
-        {% bootstrap_field filter_form.matricule_promoteur form_group_class="col-md-3" %}
-        {% bootstrap_field filter_form.cotutelle form_group_class="col-md-3" %}
-        {% bootstrap_field filter_form.type_financement form_group_class="col-md-3" %}
-        {% bootstrap_field filter_form.type_contrat_travail form_group_class="col-md-3" %}
-        {% bootstrap_field filter_form.bourse_recherche form_group_class="col-md-3" %}
+        {% bootstrap_field filter_form.matricule_promoteur form_group_class="form-group col-md-3" %}
+        {% bootstrap_field filter_form.cotutelle form_group_class="form-group col-md-3" %}
+        {% bootstrap_field filter_form.type_financement form_group_class="form-group col-md-3" %}
+        {% bootstrap_field filter_form.type_contrat_travail form_group_class="form-group col-md-3" %}
+        {% bootstrap_field filter_form.bourse_recherche form_group_class="form-group col-md-3" %}
       </div>
       <div class="row">
         <div class="col-md-3">
           <fieldset class="panel panel-default">
             <legend>{% trans "Pre-admission date" %}</legend>
-            {% bootstrap_field filter_form.date_pre_admission_debut form_group_class="col-md-6" %}
-            {% bootstrap_field filter_form.date_pre_admission_fin form_group_class="col-md-6" %}
+            {% bootstrap_field filter_form.date_pre_admission_debut form_group_class="form-group col-md-6" %}
+            {% bootstrap_field filter_form.date_pre_admission_fin form_group_class="form-group col-md-6" %}
           </fieldset>
         </div>
 
         <div class="col-md-3">
           <fieldset class="panel panel-default">
             <legend>{% trans "Admission date" %}</legend>
-            {% bootstrap_field filter_form.date_admission_debut form_group_class="col-md-6" %}
-            {% bootstrap_field filter_form.date_admission_fin form_group_class="col-md-6" %}
+            {% bootstrap_field filter_form.date_admission_debut form_group_class="form-group col-md-6" %}
+            {% bootstrap_field filter_form.date_admission_fin form_group_class="form-group col-md-6" %}
           </fieldset>
         </div>
-        {% bootstrap_field filter_form.etat_cdd form_group_class="col-md-2" %}
-        {% bootstrap_field filter_form.etat_sic form_group_class="col-md-2" %}
+        {% bootstrap_field filter_form.etat_cdd form_group_class="form-group col-md-2" %}
+        {% bootstrap_field filter_form.etat_sic form_group_class="form-group col-md-2" %}
 
         <div class="col-md-2">
           <label class="control-label">&nbsp;</label>
@@ -212,10 +212,10 @@
   $(document).ready(function () {
 
     // Display / hide inputs depending on the values of other inputs
-    $('#id_type_contrat_travail').dependsOn({
+    $('#id_type_contrat_travail').closest('.form-group').dependsOn({
       '#id_type_financement': { values: ['WORK_CONTRACT'] },
     }, { duration: 0 });
-    $('#id_bourse_recherche').dependsOn({
+    $('#id_bourse_recherche').closest('.form-group').dependsOn({
       '#id_type_financement': { values: ['SEARCH_SCHOLARSHIP'] },
     }, { duration: 0 });
 

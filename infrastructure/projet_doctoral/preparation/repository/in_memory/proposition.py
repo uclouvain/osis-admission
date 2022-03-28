@@ -88,6 +88,7 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
     candidats = {
         "0123456789": Candidat("Jean", "Dupont", "France"),
         "0000000001": Candidat("Michel", "Durand", "Belgique"),
+        "candidat": Candidat("Pierre", "Dupond", "Belgique"),
     }
     entities: List['Proposition'] = []
 
@@ -168,7 +169,11 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
         returned = cls.entities
         if matricule_candidat:
             returned = filter(lambda p: p.matricule_candidat == matricule_candidat, returned)
-        if entity_ids:
+        if numero:
+            returned = filter(lambda p: p.reference == numero, returned)
+        if type:
+            returned = filter(lambda p: p.type_admission.name == type, returned)
+        if entity_ids is not None:
             returned = filter(lambda p: p.entity_id in entity_ids, returned)
         return list(cls._load_dto(proposition) for proposition in returned)
 

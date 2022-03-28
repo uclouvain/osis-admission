@@ -23,12 +23,16 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from datetime import datetime
 from typing import List, Optional
 
 from admission.ddd.projet_doctoral.validation.domain.model.demande import Demande, DemandeIdentity
 from admission.ddd.projet_doctoral.validation.dtos import DemandeDTO, DemandeRechercheDTO
 from admission.ddd.projet_doctoral.validation.repository.i_demande import IDemandeRepository
+from admission.ddd.projet_doctoral.validation.test.factory.demande import (
+    DemandeAdmissionSC3DPMinimaleFactory,
+    DemandePreAdmissionSC3DPAvecPromoteursEtMembresCADejaApprouvesAccepteeFactory,
+    DemandeAdmissionSC3DPAvecPromoteurRefuseEtMembreCADejaApprouveFactoryRejeteeCDDFactory,
+)
 from base.ddd.utils.in_memory_repository import InMemoryGenericRepository
 
 
@@ -44,9 +48,19 @@ class DemandeInMemoryRepository(InMemoryGenericRepository, IDemandeRepository):
         entity_ids: Optional[List['DemandeIdentity']] = None,
         **kwargs,
     ) -> List['DemandeDTO']:
-        matching: List[DemandeDTO] = []
-        # TODO
-        return matching
+
+        returned = cls.entities
+
+        # Filter the entities
+        if etat_cdd:
+            returned = filter(lambda d: d.statut_cdd.name == etat_cdd, returned)
+        if etat_sic:
+            returned = filter(lambda d: d.statut_sic.name == etat_sic, returned)
+        if entity_ids:
+            returned = filter(lambda d: d.entity_id in entity_ids, returned)
+
+        # Build the list of DTOs
+        return [cls.get_dto(entity.entity_id) for entity in returned]
 
     @classmethod
     def search(cls, entity_ids: Optional[List['DemandeIdentity']] = None, **kwargs) -> List['Demande']:
@@ -54,7 +68,21 @@ class DemandeInMemoryRepository(InMemoryGenericRepository, IDemandeRepository):
 
     @classmethod
     def reset(cls):
-        cls.entities = []
+        cls.entities = [
+            DemandeAdmissionSC3DPMinimaleFactory(),
+            DemandePreAdmissionSC3DPAvecPromoteursEtMembresCADejaApprouvesAccepteeFactory(),
+            DemandeAdmissionSC3DPAvecPromoteurRefuseEtMembreCADejaApprouveFactoryRejeteeCDDFactory(),
+        ]
 
+    @classmethod
     def get_dto(cls, entity_id) -> DemandeDTO:
-        pass
+        demande = cls.search(entity_ids=[entity_id])[0]
+
+        return DemandeDTO(
+            uuid=demande.entity_id.uuid,
+            statut_cdd=demande.statut_cdd and demande.statut_cdd.name or '',
+            statut_sic=demande.statut_sic and demande.statut_sic.name or '',
+            pre_admission_acceptee_le=demande.pre_admission_acceptee_le,
+            admission_acceptee_le=demande.admission_acceptee_le,
+            derniere_modification=demande.pre_admission_acceptee_le,
+        )

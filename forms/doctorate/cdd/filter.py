@@ -23,6 +23,8 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import re
+
 from dal import autocomplete
 from django import forms
 from django.conf import settings
@@ -30,7 +32,7 @@ from django.utils.translation import gettext_lazy as _, get_language
 
 from admission.auth.roles.cdd_manager import CddManager
 from admission.contrib.models import EntityProxy
-from admission.contrib.models.enums.yes_no import YesNo
+from admission.enums.yes_no import YesNo
 from admission.ddd.projet_doctoral.preparation.domain.model._enums import (
     ChoixTypeAdmission,
     ChoixCommissionProximiteCDEouCLSM,
@@ -49,8 +51,8 @@ from admission.ddd.projet_doctoral.preparation.domain.model.doctorat import (
     ENTITY_CDSS,
 )
 from admission.ddd.projet_doctoral.validation.domain.model._enums import ChoixStatutCDD, ChoixStatutSIC
-from admission.forms import EMPTY_CHOICE, NONE_CHOICE
-from base.forms.utils.datefield import DatePickerInput, DATE_FORMAT_JS
+from admission.forms import EMPTY_CHOICE
+from base.forms.utils.datefield import DatePickerInput
 from base.models.academic_year import AcademicYear
 from base.models.education_group_year import EducationGroupYear
 from base.models.enums.education_group_types import TrainingType
@@ -61,15 +63,16 @@ MAXIMUM_SELECTABLE_YEAR = 2031
 
 
 class FilterForm(forms.Form):
-    numero = forms.CharField(
+    numero = forms.RegexField(
         label=_('Dossier numero'),
+        regex=re.compile(r'^\d{2}\-\d{6}$'),
         required=False,
         widget=forms.TextInput(
             attrs={
-                'data-mask': "00-000000",
+                'data-mask': '00-000000',
+                'placeholder': '00-000000',
             },
         ),
-        help_text=_("(e.g. 21-312345)"),
     )
     etat_cdd = forms.ChoiceField(
         choices=EMPTY_CHOICE + ChoixStatutCDD.choices(),
@@ -88,10 +91,9 @@ class FilterForm(forms.Form):
             url="admission:autocomplete:candidates",
             attrs={
                 'data-minimum-input-length': 3,
-                'data-placeholder': _('Search...'),
+                'data-placeholder': _('Last name / First name / E-mail / NOMA'),
             },
         ),
-        help_text=_('Last name / First name / E-mail / NOMA'),
     )
     nationalite = forms.CharField(
         label=_("Nationality"),
@@ -99,7 +101,7 @@ class FilterForm(forms.Form):
         widget=autocomplete.ListSelect2(
             url="admission:autocomplete:countries",
             attrs={
-                'data-placeholder': _('Search...'),
+                'data-placeholder': _('Country'),
             },
         ),
     )
@@ -111,9 +113,7 @@ class FilterForm(forms.Form):
     cotutelle = forms.NullBooleanField(
         label=_("Cotutelle"),
         required=False,
-        widget=forms.Select(
-            choices=EMPTY_CHOICE + YesNo.choices()
-        ),
+        widget=forms.Select(choices=EMPTY_CHOICE + YesNo.choices()),
     )
     date_pre_admission_debut = forms.DateField(
         disabled=True,
@@ -172,7 +172,6 @@ class FilterForm(forms.Form):
         required=True,
         widget=autocomplete.Select2Multiple(),
     )
-
     matricule_promoteur = forms.CharField(
         label=_('Promoter'),
         required=False,
@@ -180,20 +179,18 @@ class FilterForm(forms.Form):
             url="admission:autocomplete:promoters",
             attrs={
                 'data-minimum-input-length': 3,
-                'data-placeholder': _('Search...'),
+                'data-placeholder': _('Last name / First name / Global id'),
             },
         ),
-        help_text=_('Last name / First name / Global id'),
     )
     sigles_formations = forms.MultipleChoiceField(
         label=_('Training'),
         required=False,
         widget=autocomplete.Select2Multiple(
             attrs={
-                'data-placeholder': _('Search...'),
+                'data-placeholder': _('Acronym / Title'),
             },
         ),
-        help_text=_('Acronym / Title'),
     )
     type_financement = forms.ChoiceField(
         choices=EMPTY_CHOICE + ChoixTypeFinancement.choices(),
@@ -212,11 +209,9 @@ class FilterForm(forms.Form):
     )
     page_size = forms.ChoiceField(
         label=_("Page size"),
-        choices=(
-            (size, size) for size in PAGINATOR_SIZE_LIST + [2]  # TODO TO DELETE
-        ),
+        choices=((size, size) for size in PAGINATOR_SIZE_LIST),
         widget=forms.Select(attrs={'form': 'search_form'}),
-        help_text=_("items per page")
+        help_text=_("items per page"),
     )
 
     def __init__(self, user, **kwargs):
@@ -227,7 +222,12 @@ class FilterForm(forms.Form):
         # Get necessary data to initialize the form
         managed_cdds = CddManager.objects.filter(person=self.user.person).values('entity_id')
 
-        cdd_acronyms = EntityProxy.objects.filter(pk__in=managed_cdds).with_acronym().order_by('acronym').values_list('acronym', flat=True)
+        cdd_acronyms = (
+            EntityProxy.objects.filter(pk__in=managed_cdds)
+            .with_acronym()
+            .order_by('acronym')
+            .values_list('acronym', flat=True)
+        )
 
         title_field = 'title' if get_language() == settings.LANGUAGE_CODE else 'title_english'
         doctorates = (
@@ -249,7 +249,7 @@ class FilterForm(forms.Form):
         self.fields['cdds'].choices = [(acronym, acronym) for acronym in cdd_acronyms]
         self.fields['cdds'].initial = list(cdd_acronyms)
 
-        if len(cdd_acronyms) == 1:
+        if len(cdd_acronyms) <= 1:
             self.fields['cdds'].widget = forms.HiddenInput()
 
         # Initialize the program field
@@ -266,14 +266,10 @@ class FilterForm(forms.Form):
             )
 
         if ENTITY_CDSS in cdd_acronyms:
-            proximity_commission_choices.append(
-                [ENTITY_CDSS, ChoixCommissionProximiteCDSS.choices()]
-            )
+            proximity_commission_choices.append([ENTITY_CDSS, ChoixCommissionProximiteCDSS.choices()])
 
         if SIGLE_SCIENCES in dict(doctorates):
-            proximity_commission_choices.append(
-                [SIGLE_SCIENCES, ChoixSousDomaineSciences.choices()]
-            )
+            proximity_commission_choices.append([SIGLE_SCIENCES, ChoixSousDomaineSciences.choices()])
 
         self.fields['commission_proximite'].choices = proximity_commission_choices
 

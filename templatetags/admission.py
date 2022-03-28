@@ -28,18 +28,6 @@ from django import template
 register = template.Library()
 
 
-@register.simple_tag(takes_context=True)
-def query_transform(context, **kwargs):
-
-    updated = context['request'].GET.copy()
-    for k, v in kwargs.items():
-        if v is None and k in updated:
-            del updated[k]
-        elif v is not None:
-            updated[k] = v
-    return updated.urlencode()
-
-
 @register.inclusion_tag('admission/includes/sortable_header_div.html', takes_context=True)
 def sortable_header_div(context, order_field_name, order_field_label):
     # Ascending sorting by default

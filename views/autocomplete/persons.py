@@ -30,11 +30,9 @@ from django.db.models import Q, Exists, OuterRef
 from admission.auth.roles.promoter import Promoter
 from admission.auth.roles.candidate import Candidate
 from base.models.person import Person
-from osis_role.contrib.views import PermissionRequiredMixin
 
 
-class PersonsAutocomplete(LoginRequiredMixin, PermissionRequiredMixin, autocomplete.Select2QuerySetView):
-    permission_required = 'admission.can_access_doctorateadmission'
+class PersonsAutocomplete(LoginRequiredMixin, autocomplete.Select2QuerySetView):
 
     def get_queryset(self):
         q = self.request.GET.get('q', '')
@@ -63,7 +61,6 @@ class CandidatesAutocomplete(PersonsAutocomplete):
     def get_queryset(self):
         q = self.request.GET.get('q', '')
 
-        # TODO also search by contact, ucl and student e-mails
         return Person.objects.filter(
             Q(first_name__icontains=q)
             | Q(last_name__icontains=q)

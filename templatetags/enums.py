@@ -23,38 +23,17 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
-from typing import Optional
-
 from django import template
 
-from admission.ddd.projet_doctoral.preparation.domain.model._enums import ChoixStatutProposition
-from admission.ddd.projet_doctoral.preparation.domain.model._financement import ChoixTypeFinancement
-from admission.ddd.projet_doctoral.validation.domain.model._enums import ChoixStatutCDD, ChoixStatutSIC
 from base.models.utils.utils import ChoiceEnum
 
 register = template.Library()
 
 
 @register.filter
-def get_enum_value(enum: ChoiceEnum, key: Optional[str]):
-    return enum.get_value(key) if key else ''
-
-
-# Enums
-TEMPLATE_ENUMS = {
-    val.__name__: val for val in [
-        ChoixStatutProposition,
-        ChoixStatutCDD,
-        ChoixStatutSIC,
-        ChoixTypeFinancement,
-    ]
-}
-
-
-@register.filter
-def enum_display(value: Optional[str], enum_name: str):
+def enum_display(value, enum_name):
     if isinstance(value, str):
-        enum = TEMPLATE_ENUMS.get(enum_name)
-        if enum:
-            return enum.get_value(value)
+        for enum in ChoiceEnum.__subclasses__():
+            if enum.__name__ == enum_name:
+                return enum.get_value(value)
     return value or ''

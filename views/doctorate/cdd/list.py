@@ -25,21 +25,23 @@
 ##############################################################################
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import NON_FIELD_ERRORS
-from django.db.models import QuerySet
 from django.shortcuts import render
 from django.utils.translation import gettext as _
 from django.views.generic import ListView
 
-from admission.contrib.models import DoctorateAdmission
 from admission.ddd.projet_doctoral.validation.commands import FiltrerDemandesQuery
 from admission.forms.doctorate.cdd.filter import FilterForm
 from admission.auth.mixins import CddRequiredMixin
 from base.utils.htmx import HtmxMixin
 from infrastructure.messages_bus import message_bus_instance
 
+# Enums that are used in the template
+from admission.ddd.projet_doctoral.preparation.domain.model._enums import ChoixStatutProposition
+from admission.ddd.projet_doctoral.preparation.domain.model._financement import ChoixTypeFinancement
+from admission.ddd.projet_doctoral.validation.domain.model._enums import ChoixStatutCDD, ChoixStatutSIC
+
 
 class CddDoctorateAdmissionList(LoginRequiredMixin, CddRequiredMixin, HtmxMixin, ListView):
-    model = DoctorateAdmission
     raise_exception = True
 
     template_name = 'admission/doctorate/cdd/list.html'
@@ -85,24 +87,22 @@ class CddDoctorateAdmissionList(LoginRequiredMixin, CddRequiredMixin, HtmxMixin,
     def get_paginate_by(self, queryset):
         return self.request.GET.get('page_size')
 
-    def get_queryset(self) -> QuerySet:
-        if self.form.is_bound and self.form.is_valid():
-
-            filters = self.form.cleaned_data
-
-            filters.pop('page_size', None)
-
-            # Order the queryset
-            ordering_field = self.request.GET.get('o')
-            if ordering_field:
-                filters['tri_inverse'] = ordering_field[0] == '-'
-                filters['champ_tri'] = ordering_field.lstrip('-')
-
-            return message_bus_instance.invoke(
-                FiltrerDemandesQuery(
-                    **filters,
-                )
-            )
-
-        else:
+    def get_queryset(self):
+        if not self.form.is_bound or not self.form.is_valid():
             return []
+
+        filters = self.form.cleaned_data
+
+        filters.pop('page_size', None)
+
+        # Order the queryset
+        ordering_field = self.request.GET.get('o')
+        if ordering_field:
+            filters['tri_inverse'] = ordering_field[0] == '-'
+            filters['champ_tri'] = ordering_field.lstrip('-')
+
+        return message_bus_instance.invoke(
+            FiltrerDemandesQuery(
+                **filters,
+            )
+        )

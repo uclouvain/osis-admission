@@ -125,6 +125,7 @@ def _instantiate_admission(admission: 'DoctorateAdmission') -> 'Proposition':
             raison_non_soutenue=admission.phd_already_done_no_defense_reason,
         ),
         creee_le=admission.created,
+        modifiee_le=admission.modified,
     )
 
 

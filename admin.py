@@ -81,6 +81,15 @@ class ExternalCommitteeMemberAdmin(RoleModelAdmin):
     list_select_related = ['person', 'country']
 
 
+class CDDRoleModelAdmin(RoleModelAdmin):
+    list_display = ('person', 'entity')
+    search_fields = [
+        'person__first_name',
+        'person__last_name',
+        'entity__entityversion__acronym',
+    ]
+
+
 admin.site.register(DoctorateAdmission, DoctorateAdmissionAdmin)
 admin.site.register(CurriculumYear, CurriculumYearAdmin)
 
@@ -93,4 +102,4 @@ admin.site.register(Adre, RoleModelAdmin)
 admin.site.register(Candidate, RoleModelAdmin)
 admin.site.register(JurySecretary, RoleModelAdmin)
 admin.site.register(Sceb, RoleModelAdmin)
-admin.site.register(CddManager, RoleModelAdmin)
+admin.site.register(CddManager, CDDRoleModelAdmin)

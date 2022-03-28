@@ -35,11 +35,10 @@ class RoleRequiredMixin(AccessMixin):
 
     def dispatch(self, request, *args, **kwargs):
         http_response = super().dispatch(request, *args, **kwargs)
-        person = getattr(request.user, 'person')
+        person = getattr(request.user, 'person', None)
         if person and self.role_manager_class.belong_to(person):
             return http_response
-        else:
-            return self.handle_no_permission()
+        return self.handle_no_permission()
 
 
 class CddRequiredMixin(RoleRequiredMixin):
