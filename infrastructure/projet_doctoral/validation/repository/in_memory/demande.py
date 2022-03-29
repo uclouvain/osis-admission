@@ -26,12 +26,14 @@
 from typing import List, Optional
 
 from admission.ddd.projet_doctoral.validation.domain.model.demande import Demande, DemandeIdentity
+from admission.ddd.projet_doctoral.validation.domain.validator.exceptions import DemandeNonTrouveeException
 from admission.ddd.projet_doctoral.validation.dtos import DemandeDTO, DemandeRechercheDTO
 from admission.ddd.projet_doctoral.validation.repository.i_demande import IDemandeRepository
 from admission.ddd.projet_doctoral.validation.test.factory.demande import (
     DemandeAdmissionSC3DPMinimaleFactory,
     DemandePreAdmissionSC3DPAvecPromoteursEtMembresCADejaApprouvesAccepteeFactory,
     DemandeAdmissionSC3DPAvecPromoteurRefuseEtMembreCADejaApprouveFactoryRejeteeCDDFactory,
+    DemandeAdmissionSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory,
 )
 from base.ddd.utils.in_memory_repository import InMemoryGenericRepository
 
@@ -60,7 +62,7 @@ class DemandeInMemoryRepository(InMemoryGenericRepository, IDemandeRepository):
             returned = filter(lambda d: d.entity_id in entity_ids, returned)
 
         # Build the list of DTOs
-        return [cls.get_dto(entity.entity_id) for entity in returned]
+        return [cls._load_dto(demande) for demande in returned]
 
     @classmethod
     def search(cls, entity_ids: Optional[List['DemandeIdentity']] = None, **kwargs) -> List['Demande']:
@@ -72,17 +74,30 @@ class DemandeInMemoryRepository(InMemoryGenericRepository, IDemandeRepository):
             DemandeAdmissionSC3DPMinimaleFactory(),
             DemandePreAdmissionSC3DPAvecPromoteursEtMembresCADejaApprouvesAccepteeFactory(),
             DemandeAdmissionSC3DPAvecPromoteurRefuseEtMembreCADejaApprouveFactoryRejeteeCDDFactory(),
+            DemandeAdmissionSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory(),
         ]
 
     @classmethod
-    def get_dto(cls, entity_id) -> DemandeDTO:
-        demande = cls.search(entity_ids=[entity_id])[0]
+    def get(cls, entity_id: 'DemandeIdentity') -> 'Demande':
+        proposition = super().get(entity_id)
+        if not proposition:
+            raise DemandeNonTrouveeException
+        return proposition
 
+    @classmethod
+    def get_dto(cls, entity_id) -> DemandeDTO:
+        demande = cls.get(entity_id=entity_id)
+        return cls._load_dto(demande)
+
+    @classmethod
+    def _load_dto(cls, demande: Demande) -> DemandeDTO:
         return DemandeDTO(
             uuid=demande.entity_id.uuid,
             statut_cdd=demande.statut_cdd and demande.statut_cdd.name or '',
             statut_sic=demande.statut_sic and demande.statut_sic.name or '',
+            pre_admission_confirmee_le=demande.pre_admission_confirmee_le,
+            admission_confirmee_le=demande.admission_confirmee_le,
             pre_admission_acceptee_le=demande.pre_admission_acceptee_le,
             admission_acceptee_le=demande.admission_acceptee_le,
-            derniere_modification=demande.pre_admission_acceptee_le,
+            derniere_modification=demande.modifiee_le,
         )

@@ -23,7 +23,6 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from datetime import datetime
 from typing import List, Optional
 
 from admission.contrib.models import DoctorateAdmission
@@ -50,7 +49,9 @@ class DemandeRepository(IDemandeRepository):
             qs = qs.filter(status_cdd=etat_cdd)
         if entity_ids is not None:
             qs = qs.filter(uuid__in=[e.uuid for e in entity_ids])
-        return qs
+        return [
+            cls._load_dto(demande) for demande in qs
+        ]
 
     @classmethod
     def get(cls, entity_id: 'DemandeIdentity') -> 'Demande':
@@ -103,8 +104,8 @@ class DemandeRepository(IDemandeRepository):
                         'postal_box': entity.profil_candidat.boite_postale,
                     },
                 },
-                'pre_admission_submission_date': entity.pre_admission_acceptee_le,
-                'admission_submission_date': entity.admission_acceptee_le,
+                'pre_admission_submission_date': entity.pre_admission_confirmee_le,
+                'admission_submission_date': entity.admission_confirmee_le,
                 'status_cdd': entity.statut_cdd,
                 'status_sic': entity.statut_sic,
             },
@@ -112,4 +113,18 @@ class DemandeRepository(IDemandeRepository):
 
     @classmethod
     def get_dto(cls, entity_id) -> DemandeDTO:
-        pass
+        return cls._load_dto(DemandeProxy.objects.get(uuid=entity_id.uuid))
+
+    @classmethod
+    def _load_dto(cls, demande: DemandeProxy) -> DemandeDTO:
+        return DemandeDTO(
+            uuid=demande.uuid,
+            statut_cdd=demande.status_cdd,
+            statut_sic=demande.status_sic,
+            derniere_modification=demande.modified,
+            pre_admission_confirmee_le=demande.pre_admission_submission_date,
+            admission_confirmee_le=demande.admission_submission_date,
+            # TODO use the related fields when they will be available
+            pre_admission_acceptee_le=None,
+            admission_acceptee_le=None,
+        )

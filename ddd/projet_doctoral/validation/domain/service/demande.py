@@ -55,6 +55,10 @@ class DemandeService(interface.DomainService):
             statut_cdd=demande_dto.statut_cdd,
             statut_sic=demande_dto.statut_sic,
             derniere_modification=demande_dto.derniere_modification,
+            admission_acceptee_le=demande_dto.admission_acceptee_le,
+            pre_admission_acceptee_le=demande_dto.pre_admission_acceptee_le,
+            admission_confirmee_le=demande_dto.admission_confirmee_le,
+            pre_admission_confirmee_le=demande_dto.pre_admission_confirmee_le,
         )
 
     @classmethod
@@ -70,8 +74,8 @@ class DemandeService(interface.DomainService):
         return Demande(
             entity_id=PropositionIdentityTranslator.convertir_en_demande(proposition_id),
             proposition_id=proposition_id,
-            pre_admission_acceptee_le=now() if type_admission == ChoixTypeAdmission.PRE_ADMISSION else None,
-            admission_acceptee_le=now() if type_admission == ChoixTypeAdmission.ADMISSION else None,
+            pre_admission_confirmee_le=now() if type_admission == ChoixTypeAdmission.PRE_ADMISSION else None,
+            admission_confirmee_le=now() if type_admission == ChoixTypeAdmission.ADMISSION else None,
             profil_candidat=ProfilCandidat(
                 nom=identification.nom,
                 prenom=identification.prenom,

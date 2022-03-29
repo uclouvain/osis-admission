@@ -1,5 +1,3 @@
-{% load i18n %}
-
 {% comment "License" %}
 * OSIS stands for Open Student Information System. It's an application
 * designed to manage the core business of higher education institutions,
@@ -26,7 +24,7 @@
 
 <th class="{{ ordering_class }}">
   <a href="{{ url }}" style="display: flex; justify-content: space-between; text-decoration: none; align-items: center; column-gap: 20px">
-    {% trans field_label %}
+    {{ field_label }}
     <i class="fa fa-{{ ordering_class }}"></i>
   </a>
 </th>

@@ -50,6 +50,7 @@ class _DemandeFactory(factory.Factory):
     statut_sic = ChoixStatutSIC.TO_BE_VERIFIED
     statut_cdd = ChoixStatutCDD.TO_BE_VERIFIED
     profil_candidat = ProfilCandidat()
+    admission_confirmee_le = factory.Faker('past_datetime')
 
 
 class DemandeAdmissionSC3DPMinimaleFactory(_DemandeFactory):
@@ -66,6 +67,7 @@ class DemandePreAdmissionSC3DPAvecPromoteursEtMembresCADejaApprouvesAccepteeFact
     statut_cdd = ChoixStatutCDD.ACCEPTED
     statut_sic = ChoixStatutSIC.VALID
     admission_acceptee_le = factory.Faker('past_datetime')
+    pre_admission_confirmee_le = factory.Faker('past_datetime')
 
 
 class DemandeAdmissionSC3DPAvecPromoteurRefuseEtMembreCADejaApprouveFactoryRejeteeCDDFactory(_DemandeFactory):
@@ -76,3 +78,14 @@ class DemandeAdmissionSC3DPAvecPromoteurRefuseEtMembreCADejaApprouveFactoryRejet
     entity_id = factory.SubFactory(_DemandeIdentityFactory, uuid='uuid-SC3DP-promoteur-refus-membre-deja-approuve')
     statut_cdd = ChoixStatutCDD.REJECTED
     statut_sic = ChoixStatutSIC.VALID
+
+
+class DemandeAdmissionSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory(_DemandeFactory):
+    entity_id = factory.SubFactory(_DemandeIdentityFactory, uuid='uuid-SC3DP-promoteurs-membres-deja-approuves')
+    proposition_id = factory.SubFactory(
+        _PropositionIdentityFactory,
+        uuid='uuid-SC3DP-promoteurs-membres-deja-approuves',
+    )
+    statut_cdd = ChoixStatutCDD.ACCEPTED
+    statut_sic = ChoixStatutSIC.VALID
+    admission_acceptee_le = factory.Faker('past_datetime')

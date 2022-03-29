@@ -53,6 +53,8 @@ class Demande(interface.RootEntity):
     matricule_gestionnaire: Optional[str] = ''
     onglets_ouverts: List[str] = attr.Factory(list)
     modifiee_le: Optional[datetime.datetime] = None
+    pre_admission_confirmee_le: Optional[datetime.datetime] = None
+    admission_confirmee_le: Optional[datetime.datetime] = None
     pre_admission_acceptee_le: Optional[datetime.datetime] = None
     admission_acceptee_le: Optional[datetime.datetime] = None
 

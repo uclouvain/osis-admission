@@ -1,4 +1,4 @@
-# ##############################################################################
+##############################################################################
 #
 #    OSIS stands for Open Student Information System. It's an application
 #    designed to manage the core business of higher education institutions,
@@ -22,24 +22,16 @@
 #    at the root of the source code of this program.  If not,
 #    see http://www.gnu.org/licenses/.
 #
-# ##############################################################################
-from django.contrib.auth.mixins import AccessMixin
+##############################################################################
 
-from admission.auth.roles.cdd_manager import CddManager
+from django.utils.translation import gettext_lazy as _
 
-
-class RoleRequiredMixin(AccessMixin):
-    """Verify that the current user has the specific role."""
-
-    role_manager_class = None
-
-    def dispatch(self, request, *args, **kwargs):
-        person = getattr(request.user, 'person', None)
-        if person and self.role_manager_class.belong_to(person):
-            return super().dispatch(request, *args, **kwargs)
-        return self.handle_no_permission()
+from osis_common.ddd.interface import BusinessException
 
 
-class CddRequiredMixin(RoleRequiredMixin):
-    """Verify that the current user has the cdd role."""
-    role_manager_class = CddManager
+class DemandeNonTrouveeException(BusinessException):
+    status_code = "DEMANDE-1"
+
+    def __init__(self, **kwargs):
+        message = _("Dossier not found.")
+        super().__init__(message, **kwargs)

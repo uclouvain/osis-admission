@@ -1,4 +1,4 @@
-# ##############################################################################
+##############################################################################
 #
 #    OSIS stands for Open Student Information System. It's an application
 #    designed to manage the core business of higher education institutions,
@@ -22,24 +22,27 @@
 #    at the root of the source code of this program.  If not,
 #    see http://www.gnu.org/licenses/.
 #
-# ##############################################################################
-from django.contrib.auth.mixins import AccessMixin
+##############################################################################
+import unittest
 
-from admission.auth.roles.cdd_manager import CddManager
-
-
-class RoleRequiredMixin(AccessMixin):
-    """Verify that the current user has the specific role."""
-
-    role_manager_class = None
-
-    def dispatch(self, request, *args, **kwargs):
-        person = getattr(request.user, 'person', None)
-        if person and self.role_manager_class.belong_to(person):
-            return super().dispatch(request, *args, **kwargs)
-        return self.handle_no_permission()
+from admission.templatetags.enums import enum_display
+from base.models.utils.utils import ChoiceEnum
 
 
-class CddRequiredMixin(RoleRequiredMixin):
-    """Verify that the current user has the cdd role."""
-    role_manager_class = CddManager
+class CustomChoiceEnum(ChoiceEnum):
+    FIRST_CHOICE = 1
+    SECOND_CHOICE = 2
+
+
+class EnumTemplateTagTestCase(unittest.TestCase):
+    def test_enum_return_right_value(self):
+        value = enum_display('FIRST_CHOICE', 'CustomChoiceEnum')
+        self.assertEqual(value, 1)
+
+    def test_enum_return_key_with_unknown_enum(self):
+        value = enum_display('FIRST_CHOICE', 'UnknownChoiceEnum')
+        self.assertEqual(value, 'FIRST_CHOICE')
+
+    def test_enum_return_empty_string_with_none_key(self):
+        value = enum_display(None, 'UnknownChoiceEnum')
+        self.assertEqual(value, '')

@@ -250,7 +250,7 @@ class FilterForm(forms.Form):
         self.fields['cdds'].initial = list(cdd_acronyms)
 
         if len(cdd_acronyms) <= 1:
-            self.fields['cdds'].widget = forms.HiddenInput()
+            self.fields['cdds'].widget = forms.MultipleHiddenInput()
 
         # Initialize the program field
         self.fields['sigles_formations'].choices = [
