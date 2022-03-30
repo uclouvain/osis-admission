@@ -46,9 +46,6 @@ msgstr[1] ""
 "doctorat\n"
 "    "
 
-msgid "(e.g. 21-312345)"
-msgstr "(ex: 21-312345)"
-
 msgid "A justification is needed when creating a pre-admission."
 msgstr "Une justification est requise pour une pré-admission."
 
@@ -328,8 +325,17 @@ msgstr "Admissions en doctorat"
 msgid "Doctorate enrolments"
 msgstr "Inscriptions en doctorat"
 
+msgid "Dossier confirmation"
+msgstr "Confirmation dossier"
+
+msgid "Dossier not found."
+msgstr "Dossier non trouvé."
+
 msgid "Dossier numero"
 msgstr "Numéro de dossier"
+
+msgid "Dossier status"
+msgstr "Statut dossier"
 
 msgid "ECONOMY"
 msgstr "Economie"
@@ -420,6 +426,9 @@ msgstr "Secrétaires de jury"
 msgid "Jury secretary"
 msgstr "Secrétaire de jury"
 
+msgid "Last modification"
+msgstr "Dernière modification"
+
 msgid "Last name / First name / E-mail / NOMA"
 msgstr "Nom / Prénom / E-mail / NOMA"
 
@@ -465,6 +474,9 @@ msgstr "Non"
 
 msgid "NOT_INVITED"
 msgstr "Non invité"
+
+msgid "Name"
+msgstr "Nom"
 
 msgid "Nationality"
 msgstr "Nationalité"
@@ -690,14 +702,14 @@ msgstr "Statistiques"
 msgid "SUBMITTED"
 msgstr "Soumis"
 
+msgid "Scholarship"
+msgstr "Boursier"
+
 msgid "Scholarship grant"
 msgstr "Bourse de recherche"
 
 msgid "Search"
 msgstr "Rechercher"
-
-msgid "Search..."
-msgstr "Rechercher..."
 
 msgid "Submitted profile"
 msgstr "Profil soumis"

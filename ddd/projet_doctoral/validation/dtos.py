@@ -54,6 +54,8 @@ class DemandeDTO(interface.DTO):
     pre_admission_acceptee_le: Optional[datetime.datetime]
     admission_acceptee_le: Optional[datetime.datetime]
     derniere_modification: datetime.datetime
+    pre_admission_confirmee_le: Optional[datetime.datetime]
+    admission_confirmee_le: Optional[datetime.datetime]
     # TODO only include info about demande
 
 
@@ -63,4 +65,9 @@ class RecupererDemandeDTO(interface.DTO):
     statut_cdd: str
     statut_sic: str
     derniere_modification: datetime.datetime
+    pre_admission_acceptee_le: Optional[datetime.datetime]
+    admission_acceptee_le: Optional[datetime.datetime]
+    pre_admission_confirmee_le: Optional[datetime.datetime]
+    admission_confirmee_le: Optional[datetime.datetime]
+
     # TODO include all info about demande (doctorate and persons too)

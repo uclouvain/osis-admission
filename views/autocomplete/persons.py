@@ -34,19 +34,6 @@ from base.models.person import Person
 
 class PersonsAutocomplete(LoginRequiredMixin, autocomplete.Select2QuerySetView):
 
-    def get_queryset(self):
-        q = self.request.GET.get('q', '')
-
-        return Person.objects.filter(
-            Q(first_name__icontains=q)
-            | Q(last_name__icontains=q)
-            | Q(global_id__icontains=q)
-        ).order_by('last_name', 'first_name').values(
-            'first_name',
-            'last_name',
-            'global_id',
-        ) if q else []
-
     def get_results(self, context):
         return [
             {

@@ -69,8 +69,8 @@ class PropositionAvecDemande(interface.DomainService):
                 nationalite=proposition_dto.nationalite_candidat,
                 derniere_modification=proposition_dto.modifiee_le,
                 date_confirmation=(
-                    demande_dto_mapping[proposition_dto.uuid].admission_acceptee_le
-                    or demande_dto_mapping[proposition_dto.uuid].pre_admission_acceptee_le
+                    demande_dto_mapping[proposition_dto.uuid].admission_confirmee_le
+                    or demande_dto_mapping[proposition_dto.uuid].pre_admission_confirmee_le
                 )
                 if proposition_dto.uuid in demande_dto_mapping
                 else None,

@@ -54,13 +54,10 @@ class CddDoctorateAdmissionList(LoginRequiredMixin, CddRequiredMixin, HtmxMixin,
     @staticmethod
     def htmx_render_form_errors(request, form):
         """Returns an HttpResponse containing the errors of the form grouped by field."""
-        field_errors = form.errors
-        non_field_errors = field_errors.pop(NON_FIELD_ERRORS, [])
         formatted_errors = [
-            (form.fields.get(field_name).label, errors) for field_name, errors in field_errors.items()
+            (form.fields.get(field_name).label if field_name != NON_FIELD_ERRORS else _('General'), errors)
+            for field_name, errors in form.errors.items()
         ]
-        if non_field_errors:
-            formatted_errors.append((_('General'), non_field_errors))
 
         return render(
             status=400,

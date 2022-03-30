@@ -42,6 +42,7 @@ from admission.ddd.projet_doctoral.preparation.domain.model._experience_preceden
     aucune_experience_precedente_recherche,
 )
 from admission.ddd.projet_doctoral.preparation.domain.model._financement import (
+    BourseRecherche,
     ChoixTypeFinancement,
     Financement,
     financement_non_rempli,
@@ -193,3 +194,8 @@ class PropositionPreAdmissionSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory(
 ):
     entity_id = factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-pre-SC3DP-promoteurs-membres-deja-approuves')
     type_admission = ChoixTypeAdmission.PRE_ADMISSION
+    financement = factory.SubFactory(
+        _FinancementFactory,
+        type=ChoixTypeFinancement.SEARCH_SCHOLARSHIP,
+        bourse_recherche=BourseRecherche.ARC.name,
+    )
