@@ -40,8 +40,6 @@ class DemandeRepository(IDemandeRepository):
         cls,
         etat_cdd: Optional[str] = '',
         etat_sic: Optional[str] = '',
-        date_pre_admission_debut: Optional[datetime] = None,
-        date_pre_admission_fin: Optional[datetime] = None,
         entity_ids: Optional[List['DemandeIdentity']] = None,
         **kwargs,
     ) -> List['DemandeDTO']:
@@ -50,10 +48,6 @@ class DemandeRepository(IDemandeRepository):
             qs = qs.filter(status_sic=etat_sic)
         if etat_cdd:
             qs = qs.filter(status_cdd=etat_cdd)
-        if date_pre_admission_debut:
-            qs = qs.filter(pre_admission_submission_date__gte=date_pre_admission_debut)
-        if date_pre_admission_fin:
-            qs = qs.filter(pre_admission_submission_date__lte=date_pre_admission_fin)
         if entity_ids is not None:
             qs = qs.filter(uuid__in=[e.uuid for e in entity_ids])
         return qs

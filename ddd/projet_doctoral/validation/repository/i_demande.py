@@ -25,7 +25,6 @@
 # ##############################################################################
 
 import abc
-from datetime import datetime
 from typing import List, Optional
 
 from admission.ddd.projet_doctoral.validation.domain.model.demande import Demande
@@ -46,8 +45,6 @@ class IDemandeRepository(interface.AbstractRepository):
         cls,
         etat_cdd: Optional[str] = '',
         etat_sic: Optional[str] = '',
-        date_pre_admission_debut: Optional[datetime] = None,
-        date_pre_admission_fin: Optional[datetime] = None,
         entity_ids: Optional[List['DemandeIdentity']] = None,
         **kwargs,
     ) -> List['DemandeDTO']:

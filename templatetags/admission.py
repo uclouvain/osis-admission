@@ -23,44 +23,37 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import datetime
-from typing import Optional
+from django import template
 
-import attr
-
-from osis_common.ddd import interface
+register = template.Library()
 
 
-@attr.s(frozen=True, slots=True, auto_attribs=True)
-class DemandeRechercheDTO(interface.DTO):
-    uuid: str
-    numero_demande: str
-    statut_cdd: Optional[str]
-    statut_sic: Optional[str]
-    statut_demande: str
-    nom_candidat: str
-    formation: str
-    nationalite: str
-    derniere_modification: datetime.datetime
-    date_confirmation: Optional[datetime.datetime]
-    code_bourse: Optional[str]
+@register.inclusion_tag('admission/includes/sortable_header_div.html', takes_context=True)
+def sortable_header_div(context, order_field_name, order_field_label):
+    # Ascending sorting by default
+    asc_ordering = True
+    ordering_class = 'sort'
 
+    query_order_param = context.request.GET.get('o')
 
-@attr.s(frozen=True, slots=True, auto_attribs=True)
-class DemandeDTO(interface.DTO):
-    uuid: str
-    statut_cdd: str
-    statut_sic: str
-    pre_admission_acceptee_le: Optional[datetime.datetime]
-    admission_acceptee_le: Optional[datetime.datetime]
-    derniere_modification: datetime.datetime
-    # TODO only include info about demande
+    # An order query parameter is already specified
+    if query_order_param:
+        current_order = query_order_param[0]
+        current_order_field = query_order_param.lstrip('-')
 
+        # The current field is already used to sort
+        if order_field_name == current_order_field:
+            if current_order == '-':
+                ordering_class = 'sort-down'
+            else:
+                asc_ordering = False
+                ordering_class = 'sort-up'
 
-@attr.s(frozen=True, slots=True, auto_attribs=True)
-class RecupererDemandeDTO(interface.DTO):
-    uuid: str
-    statut_cdd: str
-    statut_sic: str
-    derniere_modification: datetime.datetime
-    # TODO include all info about demande (doctorate and persons too)
+    new_params = context.request.GET.copy()
+    new_params['o'] = '{}{}'.format('' if asc_ordering else '-', order_field_name)
+    new_params.pop('page', None)
+    return {
+        'field_label': order_field_label,
+        'url': context.request.path + '?' + new_params.urlencode(),
+        'ordering_class': ordering_class,
+    }

@@ -20,22 +20,34 @@ msgstr ""
 #, python-format
 msgid ""
 "\n"
-"                %(start_index)s to %(end_index)s of %(total_counts)s "
-"doctorate admissions"
-msgstr ""
-"\n"
-"                %(start_index)s à %(end_index)s sur %(total_counts)s "
-"admissions en doctorat"
-
-#, python-format
-msgid ""
-"\n"
 "              Are you sure you want to delete \"%(object)s\"?\n"
 "            "
 msgstr ""
 "\n"
 "              Êtes-vous sûr de vouloir supprimer \"%(object)s\"?\n"
 "            "
+
+msgid ""
+"\n"
+"    One doctorate enrolment\n"
+"    "
+msgid_plural ""
+"\n"
+"    %(start_index)s to %(end_index)s of %(total_counts)s doctorate "
+"enrolments\n"
+"    "
+msgstr[0] ""
+"\n"
+"    Une inscription en doctorat\n"
+"    "
+msgstr[1] ""
+"\n"
+"    %(start_index)s à %(end_index)s sur %(total_counts)s inscriptions en "
+"doctorat\n"
+"    "
+
+msgid "(e.g. 21-312345)"
+msgstr "(ex: 21-312345)"
 
 msgid "A justification is needed when creating a pre-admission."
 msgstr "Une justification est requise pour une pré-admission."
@@ -61,8 +73,17 @@ msgstr "ADRE"
 msgid "APPROVED"
 msgstr "Approuvé"
 
+msgid "ARC - Action de Recherche Concertée"
+msgstr "ARC - Action de Recherche Concertée"
+
+msgid "ARES - Coopération au développement"
+msgstr "ARES - Coopération au développement"
+
 msgid "Abstract"
 msgstr "Résumé"
+
+msgid "Acronym / Title"
+msgstr "Sigle / Intitulé"
 
 msgid "Additional training project"
 msgstr "Projet de formation complémentaire"
@@ -70,8 +91,14 @@ msgstr "Projet de formation complémentaire"
 msgid "Admission"
 msgstr "Admission"
 
+msgid "Admission date"
+msgstr "Date admission"
+
 msgid "Admission submission date"
 msgstr "Date de soumission Admission"
+
+msgid "Admission type"
+msgstr "Type de l'admission"
 
 msgid "All CA members must have approved the proposition."
 msgstr "Tous les membres du CA doivent approuver la proposition."
@@ -103,8 +130,17 @@ msgstr "Gestionnaire CDD"
 msgid "CDD managers"
 msgstr "Gestionnaires CDD"
 
+msgid "CDD status"
+msgstr "Statut CDD"
+
+msgid "CDDs"
+msgstr "CDDs"
+
 msgid "CHEMISTRY"
 msgstr "Chimie"
+
+msgid "CSC - China Scholarship Council"
+msgstr "CSC - China Scholarship Council"
 
 msgid "Can add a member to the supervision group"
 msgstr "Peut ajouter un membre au groupe de supervision"
@@ -250,6 +286,9 @@ msgstr "Membres du comité"
 msgid "Confirm"
 msgstr "Confirmer"
 
+msgid "Cotutelle"
+msgstr "Cotutelle"
+
 msgid "Cotutelle convention"
 msgstr "Convention de cotutelle"
 
@@ -286,29 +325,68 @@ msgstr "Admission en doctorat"
 msgid "Doctorate admissions"
 msgstr "Admissions en doctorat"
 
+msgid "Doctorate enrolments"
+msgstr "Inscriptions en doctorat"
+
+msgid "Dossier numero"
+msgstr "Numéro de dossier"
+
 msgid "ECONOMY"
 msgstr "Economie"
 
 msgid "EFT"
 msgstr "EFT"
 
+msgid "ERC - European Research Council"
+msgstr "ERC - European Research Council"
+
 msgid "English"
 msgstr "Anglais"
+
+msgid "Enrolments"
+msgstr "Inscriptions"
 
 msgid "Export"
 msgstr "Exporter"
 
+msgid "FNRS"
+msgstr "FNRS"
+
+msgid "FRC - Fonds de recherche clinique"
+msgstr "FRC - Fonds de recherche clinique"
+
+msgid "FRESH"
+msgstr "FRESH"
+
+msgid "FRIA"
+msgstr "FRIA"
+
+msgid "FSR - Fonds Spéciaux de Recherche"
+msgstr "FSR - Fonds Spéciaux de Recherche"
+
 msgid "Financing type"
 msgstr "Type de financement"
 
+msgid "Fondation Mont Godinne"
+msgstr "Fondation Mont Godinne"
+
+msgid "Fondation St Luc"
+msgstr "Fondation St Luc"
+
 msgid "French"
 msgstr "Français"
+
+msgid "From"
+msgstr "De"
 
 msgid "GEOGRAPHY"
 msgstr "Géographie"
 
 msgid "Gantt graph"
 msgstr "Graphe de Gantt"
+
+msgid "General"
+msgstr "Général"
 
 msgid "INVALID"
 msgstr "Invalide"
@@ -342,11 +420,11 @@ msgstr "Secrétaires de jury"
 msgid "Jury secretary"
 msgstr "Secrétaire de jury"
 
-msgid "List of doctorate admissions"
-msgstr "Liste des admissions en doctorat"
+msgid "Last name / First name / E-mail / NOMA"
+msgstr "Nom / Prénom / E-mail / NOMA"
 
-msgid "List of doctorate admissions with administrative data"
-msgstr "Liste des admissions en doctorat et données administratives"
+msgid "Last name / First name / Global id"
+msgstr "Nom / Prénom / Identifiant global"
 
 msgid "MANAGEMENT"
 msgstr "Gestion"
@@ -388,11 +466,20 @@ msgstr "Non"
 msgid "NOT_INVITED"
 msgstr "Non invité"
 
+msgid "Nationality"
+msgstr "Nationalité"
+
+msgid "No"
+msgstr "Non"
+
 msgid "No PhD found."
 msgstr "Pas de doctorat trouvé"
 
 msgid "No defense reason"
 msgstr "Raison de non-soutenance"
+
+msgid "OTHER"
+msgstr "Autre"
 
 msgid "Other"
 msgstr "Autre"
@@ -411,6 +498,9 @@ msgstr "Physique"
 
 msgid "PRE_ADMISSION"
 msgstr "Pre-admission"
+
+msgid "Page size"
+msgstr "Taille de la page"
 
 msgid "PhD already done"
 msgstr "Doctorat déjà réalisé"
@@ -482,16 +572,11 @@ msgstr "Merci de spécifier votre numéro de registre national belge."
 msgid "Pre-Admission"
 msgstr "Pré-Admission"
 
+msgid "Pre-admission date"
+msgstr "Date de pré-admission"
+
 msgid "Pre-admission submission date"
 msgstr "Date de soumission Pré-admission"
-
-msgid "Produce xls of doctorate admissions with administrative data"
-msgstr ""
-"Produire un fichier Excel avec la liste des admissions en doctorat et "
-"données administratives"
-
-msgid "Produce xls with a list of doctorate admissions"
-msgstr "Produire un fichier xls avec la liste des admissions en doctorat"
 
 msgid "Program proposition"
 msgstr "Proposition de programme"
@@ -566,6 +651,9 @@ msgstr "Référence"
 msgid "Rejection reason"
 msgstr "Motif de refus"
 
+msgid "Reset"
+msgstr "Réinitialiser"
+
 msgid "SCEB"
 msgstr "SCEB"
 
@@ -590,6 +678,9 @@ msgstr "Gestionnaire SIC"
 msgid "SIC managers"
 msgstr "Gestionnaires SIC"
 
+msgid "SIC status"
+msgstr "Statut SIC"
+
 msgid "SIGNING_IN_PROGRESS"
 msgstr "Signatures en cours"
 
@@ -601,6 +692,12 @@ msgstr "Soumis"
 
 msgid "Scholarship grant"
 msgstr "Bourse de recherche"
+
+msgid "Search"
+msgstr "Rechercher"
+
+msgid "Search..."
+msgstr "Rechercher..."
 
 msgid "Submitted profile"
 msgstr "Profil soumis"
@@ -655,8 +752,17 @@ msgstr "Cette expérience ne peut être mise à jour, ayant déjà été évalu�
 msgid "Title"
 msgstr "Titre"
 
+msgid "To"
+msgstr "À"
+
+msgid "Training"
+msgstr "Formation"
+
 msgid "Type"
 msgstr "Type"
+
+msgid "UCLOUVAIN_ASSISTANT"
+msgstr "Assistant UCLouvain"
 
 msgid "UUID"
 msgstr "UUID"
@@ -673,6 +779,9 @@ msgstr "Mettre à jour admission en doctorat"
 msgid "VALID"
 msgstr "Valide"
 
+msgid "WBI - Wallonie Bruxelles International"
+msgstr "WBI - Wallonie Bruxelles International"
+
 msgid "WORK_CONTRACT"
 msgstr "Contrat de travail"
 
@@ -681,10 +790,19 @@ msgstr ""
 "Le contrat de travail doit être renseigné quand le type de financement est "
 "un contrat de travail."
 
+msgid "Work contract type"
+msgstr "Type de contrat de travail"
+
 msgid "Working contract type"
 msgstr "Type de contrat de travail"
 
 msgid "YES"
+msgstr "Oui"
+
+msgid "Year"
+msgstr "Année"
+
+msgid "Yes"
 msgstr "Oui"
 
 msgid "You cannot fill in a language more than once, please correct the form."
@@ -736,6 +854,12 @@ msgstr "actions"
 
 msgid "created"
 msgstr "créé"
+
+msgid "dd/mm/yyyy"
+msgstr "jj/mm/aaaa"
+
+msgid "items per page"
+msgstr "éléments par page"
 
 msgid "modified"
 msgstr "modifée"

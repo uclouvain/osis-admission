@@ -93,6 +93,7 @@ class _PropositionFactory(factory.Factory):
     creee_le = factory.Faker('past_datetime')
     financement = factory.SubFactory(_FinancementFactory)
     experience_precedente_recherche = aucune_experience_precedente_recherche
+    modifiee_le = factory.Faker('past_datetime')
 
 
 class PropositionAdmissionSC3DPMinimaleFactory(_PropositionFactory):

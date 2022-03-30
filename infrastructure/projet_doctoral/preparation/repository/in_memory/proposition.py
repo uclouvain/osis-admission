@@ -88,6 +88,7 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
     candidats = {
         "0123456789": Candidat("Jean", "Dupont", "France"),
         "0000000001": Candidat("Michel", "Durand", "Belgique"),
+        "candidat": Candidat("Pierre", "Dupond", "Belgique"),
     }
     entities: List['Proposition'] = []
 
@@ -154,10 +155,13 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
         etat: Optional[str] = '',
         nationalite: Optional[str] = '',
         type: Optional[str] = '',
+        cdds: Optional[List[str]] = None,
         commission_proximite: Optional[str] = '',
-        annee_academique: Optional[str] = None,
-        sigle_formation: Optional[str] = '',
+        annee_academique: Optional[int] = None,
+        sigles_formations: Optional[List[str]] = None,
         financement: Optional[str] = '',
+        type_contrat_travail: Optional[str] = '',
+        bourse_recherche: Optional[str] = '',
         matricule_promoteur: Optional[str] = '',
         cotutelle: Optional[bool] = None,
         entity_ids: Optional[List['PropositionIdentity']] = None,
@@ -165,7 +169,11 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
         returned = cls.entities
         if matricule_candidat:
             returned = filter(lambda p: p.matricule_candidat == matricule_candidat, returned)
-        if entity_ids:
+        if numero:
+            returned = filter(lambda p: p.reference == numero, returned)
+        if type:
+            returned = filter(lambda p: p.type_admission.name == type, returned)
+        if entity_ids is not None:
             returned = filter(lambda p: p.entity_id in entity_ids, returned)
         return list(cls._load_dto(proposition) for proposition in returned)
 

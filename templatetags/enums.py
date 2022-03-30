@@ -1,4 +1,4 @@
-# ##############################################################################
+##############################################################################
 #
 #    OSIS stands for Open Student Information System. It's an application
 #    designed to manage the core business of higher education institutions,
@@ -22,26 +22,18 @@
 #    at the root of the source code of this program.  If not,
 #    see http://www.gnu.org/licenses/.
 #
-# ##############################################################################
-from django.urls import include, path
+##############################################################################
+from django import template
 
-from admission.views.doctorate.cdd.list import CddDoctorateAdmissionList
-from admission.views.autocomplete.persons import CandidatesAutocomplete, PromotersAutocomplete
-from admission.views.autocomplete.countries import CountriesAutocomplete
+from base.models.utils.utils import ChoiceEnum
 
-app_name = 'admission'
+register = template.Library()
 
-urlpatterns = [
-    # Doctorate admissions
-    path('doctorate/', include(([
-        path('cdd/', include(([
-            path('', CddDoctorateAdmissionList.as_view(), name='list'),
-        ], 'cdd'))),
-    ], 'doctorate'))),
-    # Autocomplete
-    path('autocomplete/', include(([
-        path('candidates', CandidatesAutocomplete.as_view(), name='candidates'),
-        path('countries', CountriesAutocomplete.as_view(), name='countries'),
-        path('promoters', PromotersAutocomplete.as_view(), name='promoters'),
-    ], 'autocomplete'))),
-]
+
+@register.filter
+def enum_display(value, enum_name):
+    if isinstance(value, str):
+        for enum in ChoiceEnum.__subclasses__():
+            if enum.__name__ == enum_name:
+                return enum.get_value(value)
+    return value or ''
