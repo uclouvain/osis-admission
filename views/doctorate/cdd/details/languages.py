@@ -23,11 +23,8 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from .persons import CandidatesAutocomplete, PromotersAutocomplete
-from .countries import CountriesAutocomplete
+from admission.views.doctorate.cdd.mixins import LoadDossierViewMixin
 
-__all__ = [
-    CandidatesAutocomplete,
-    CountriesAutocomplete,
-    PromotersAutocomplete,
-]
+
+class CddDoctorateAdmissionLanguagesDetailView(LoadDossierViewMixin):
+    template_name = 'admission/doctorate/cdd/details/languages.html'

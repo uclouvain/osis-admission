@@ -29,11 +29,10 @@ from django.utils.timezone import now
 from admission.ddd.projet_doctoral.preparation.domain.model._enums import ChoixTypeAdmission
 from admission.ddd.projet_doctoral.preparation.domain.model.proposition import PropositionIdentity
 from admission.ddd.projet_doctoral.preparation.domain.service.i_profil_candidat import IProfilCandidatTranslator
-from admission.ddd.projet_doctoral.preparation.repository.i_proposition import IPropositionRepository
 from admission.ddd.projet_doctoral.validation.domain.model._profil_candidat import ProfilCandidat
 from admission.ddd.projet_doctoral.validation.domain.model.demande import DemandeIdentity, Demande
 from admission.ddd.projet_doctoral.validation.domain.service.proposition_identity import PropositionIdentityTranslator
-from admission.ddd.projet_doctoral.validation.dtos import RecupererDemandeDTO
+from admission.ddd.projet_doctoral.validation.dtos import DemandeDTO
 from admission.ddd.projet_doctoral.validation.repository.i_demande import IDemandeRepository
 from osis_common.ddd import interface
 
@@ -44,13 +43,11 @@ class DemandeService(interface.DomainService):
         cls,
         demande_id: DemandeIdentity,
         demande_repository: IDemandeRepository,
-        proposition_repository: IPropositionRepository,
-    ) -> RecupererDemandeDTO:
+    ) -> DemandeDTO:
         proposition_id = PropositionIdentityTranslator.convertir_depuis_demande(demande_id)
-        proposition_dto = proposition_repository.get_dto(proposition_id)
         demande_dto = demande_repository.get_dto(demande_id)
         # TODO
-        return RecupererDemandeDTO(
+        return DemandeDTO(
             uuid=proposition_id.uuid,
             statut_cdd=demande_dto.statut_cdd,
             statut_sic=demande_dto.statut_sic,

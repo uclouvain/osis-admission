@@ -25,23 +25,48 @@
 # ##############################################################################
 from django.urls import include, path
 
-from admission.views.doctorate.cdd.list import CddDoctorateAdmissionList
-from admission.views.autocomplete.persons import CandidatesAutocomplete, PromotersAutocomplete
-from admission.views.autocomplete.countries import CountriesAutocomplete
+import admission.views.autocomplete as autocomplete_views
+from admission.views.doctorate.cdd import *
 
 app_name = 'admission'
+
+# Autocomplete
+autocomplete_paths = [
+    path('candidates', autocomplete_views.CandidatesAutocomplete.as_view(), name='candidates'),
+    path('countries', autocomplete_views.CountriesAutocomplete.as_view(), name='countries'),
+    path('promoters', autocomplete_views.PromotersAutocomplete.as_view(), name='promoters'),
+]
+
+# Doctorate
+doctorate_cdd_paths = [
+    path('', CddDoctorateAdmissionList.as_view(), name='list'),
+    path('<uuid:pk>/', include([
+        path('person', CddDoctorateAdmissionPersonDetailView.as_view(), name='person'),
+        path('coordonnees', CddDoctorateAdmissionCoordonneesDetailView.as_view(), name='coordonnees'),
+        path('curriculum', CddDoctorateAdmissionCurriculumDetailView.as_view(), name='curriculum'),
+        path('education', CddDoctorateAdmissionEducationDetailView.as_view(), name='education'),
+        path('languages', CddDoctorateAdmissionLanguagesDetailView.as_view(), name='languages'),
+        path('project', CddDoctorateAdmissionProjectDetailView.as_view(), name='project'),
+        path('cotutelle', CddDoctorateAdmissionCotutelleDetailView.as_view(), name='cotutelle'),
+        path('supervision', CddDoctorateAdmissionSupervisionDetailView.as_view(), name='supervision'),
+        path('update/', include(([
+            path('person', CddDoctorateAdmissionPersonFormView.as_view(), name='person'),
+            path('coordonnees', CddDoctorateAdmissionCoordonneesFormView.as_view(), name='coordonnees'),
+            path('curriculum', CddDoctorateAdmissionCurriculumFormView.as_view(), name='curriculum'),
+            path('education', CddDoctorateAdmissionEducationFormView.as_view(), name='education'),
+            path('languages', CddDoctorateAdmissionLanguagesFormView.as_view(), name='languages'),
+            path('project', CddDoctorateAdmissionProjectFormView.as_view(), name='project'),
+            path('cotutelle', CddDoctorateAdmissionCotutelleFormView.as_view(), name='cotutelle'),
+            path('supervision', CddDoctorateAdmissionSupervisionFormView.as_view(), name='supervision'),
+        ], 'update'))),
+    ])),
+]
 
 urlpatterns = [
     # Doctorate admissions
     path('doctorate/', include(([
-        path('cdd/', include(([
-            path('', CddDoctorateAdmissionList.as_view(), name='list'),
-        ], 'cdd'))),
+        path('cdd/', include((doctorate_cdd_paths, 'cdd'))),
     ], 'doctorate'))),
     # Autocomplete
-    path('autocomplete/', include(([
-        path('candidates', CandidatesAutocomplete.as_view(), name='candidates'),
-        path('countries', CountriesAutocomplete.as_view(), name='countries'),
-        path('promoters', PromotersAutocomplete.as_view(), name='promoters'),
-    ], 'autocomplete'))),
+    path('autocomplete/', include((autocomplete_paths, 'autocomplete'))),
 ]

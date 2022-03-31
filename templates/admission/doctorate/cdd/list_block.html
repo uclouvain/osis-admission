@@ -49,7 +49,7 @@
   <tbody>
   {% for admission in object_list %}
   <tr>
-    <td>{{ admission.numero_demande }}</td>
+    <td><a href="{% url 'admission:doctorate:cdd:project' admission.uuid %}">{{ admission.numero_demande }}</a></td>
     <td>{{ admission.nom_candidat }}</td>
     <td>{{ admission.formation }}</td>
     <td>{{ admission.nationalite|default_if_none:'' }}</td>
