@@ -1,0 +1,123 @@
+{% extends "layout.html" %}
+{% load bootstrap3 i18n static admission enums %}
+
+{% comment "License" %}
+* OSIS stands for Open Student Information System. It's an application
+* designed to manage the core business of higher education institutions,
+* such as universities, faculties, institutes and professional schools.
+* The core business involves the administration of students, teachers,
+* courses, programs and so on.
+*
+* Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+*
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* A copy of this license - GNU General Public License - is available
+* at the root of the source code of this program.  If not,
+* see http://www.gnu.org/licenses/.
+{% endcomment %}
+
+{% block breadcrumb %}
+  <li>
+    <a href="{% url 'admissions' %}" id="lnk_admissions">
+      {% trans 'Enrolments' %}
+    </a>
+  </li>
+  <li>
+    <a href="{% url 'admission:doctorate:cdd:list' %}" id="lnk_admissions">
+      {% trans 'Doctorate enrolments' %}
+    </a>
+  </li>
+  <li class="active">
+    {{ admission.intitule_doctorat }} ({{ admission.reference }})
+  </li>
+{% endblock %}
+
+{% block content %}
+  <div class="page-header flex-content">
+    <h2>{{ admission.intitule_doctorat }} ({{ admission.reference }})</h2>
+    <a
+        href="{% url 'admission:doctorate:cdd:list' %}"
+        class="text-primary"
+    >
+      <span class="fa fa-stream"></span>
+      {% trans "Back to the list" %}
+    </a>
+  </div>
+
+  <div class="panel panel-default">
+    <div class="panel-heading flex-content">
+      <div>
+        <div>
+          {% trans "Candidate:" %} {{ admission.prenom_candidat }} {{ admission.nom_candidat }}
+        </div>
+        <div>
+        {% trans "Status:" %}
+        {{ admission.statut|enum_display:'ChoixStatutProposition' }}
+        {% if dossier %}
+          | {% trans "CDD:" %}
+          {{ dossier.statut_cdd|enum_display:'ChoixStatutCDD' }}
+          | {% trans "SIC:" %}
+          {{ dossier.statut_sic|enum_display:'ChoixStatutSIC' }}
+        {% endif %}
+        </div>
+      </div>
+      <div class="btn-group">
+        <button
+            type="button"
+            class="btn btn-default"
+            data-toggle="dropdown"
+            aria-haspopup="true"
+            aria-expanded="false"
+        >
+          {% trans "Actions" %}
+          <span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu pull-right">
+          {% block actions %}
+          {% endblock %}
+        </ul>
+      </div>
+
+    </div>
+    <div class="panel-body">
+      {% doctorate_tabs %}
+      <div class="row">
+        <div class="col-md-2 visible-md visible-lg border-right">
+          {% doctorate_subtabs %}
+        </div>
+        <div class="col-md-10">
+          {% block tab_content %}
+            <p>{% trans "This page is currently under construction." %}</p>
+          {% endblock %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+{% endblock %}
+
+{% block style %}
+
+  <link href="{% static "admission/admission.css" %}" rel="stylesheet"/>
+
+  <style>
+      .flex-content {
+          display: flex;
+          justify-content:space-between;
+          align-items: center;
+          flex-wrap: wrap;
+      }
+      .border-right {
+        border-right: 1px solid #ddd;
+      }
+  </style>
+{% endblock %}

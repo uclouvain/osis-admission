@@ -91,6 +91,9 @@ msgstr ""
 msgid "Acronym / Title"
 msgstr ""
 
+msgid "Actions"
+msgstr ""
+
 msgid "Actors as list items"
 msgstr ""
 
@@ -130,6 +133,9 @@ msgstr ""
 msgid "BIOLOGY"
 msgstr "Biology"
 
+msgid "Back to the list"
+msgstr ""
+
 msgid "CA Member"
 msgstr ""
 
@@ -143,6 +149,9 @@ msgid "CDD managers"
 msgstr ""
 
 msgid "CDD status"
+msgstr ""
+
+msgid "CDD:"
 msgstr ""
 
 msgid "CDDs"
@@ -274,6 +283,9 @@ msgstr ""
 msgid "Candidate not found."
 msgstr ""
 
+msgid "Candidate:"
+msgstr ""
+
 msgid "Candidates"
 msgstr ""
 
@@ -295,6 +307,9 @@ msgstr ""
 msgid "Confirm"
 msgstr ""
 
+msgid "Contact details"
+msgstr ""
+
 msgid "Cotutelle"
 msgstr ""
 
@@ -313,6 +328,9 @@ msgstr ""
 msgid "Created"
 msgstr ""
 
+msgid "Curriculum"
+msgstr ""
+
 msgid "Dedicated time (in EFT)"
 msgstr ""
 
@@ -323,6 +341,9 @@ msgid "Delete"
 msgstr ""
 
 msgid "Delete?"
+msgstr ""
+
+msgid "Doctoral project"
 msgstr ""
 
 msgid "Doctorate"
@@ -415,6 +436,9 @@ msgstr "Invited"
 msgid "IN_PROGRESS"
 msgstr "In progress"
 
+msgid "Identification"
+msgstr ""
+
 msgid "Institution"
 msgstr ""
 
@@ -434,6 +458,9 @@ msgid "Jury secretaries"
 msgstr ""
 
 msgid "Jury secretary"
+msgstr ""
+
+msgid "Languages knowledge"
 msgstr ""
 
 msgid "Last modification"
@@ -555,6 +582,9 @@ msgstr "Pre-admission"
 msgid "Page size"
 msgstr ""
 
+msgid "Personal data"
+msgstr ""
+
 msgid "PhD already done"
 msgstr ""
 
@@ -619,6 +649,9 @@ msgstr ""
 msgid "Pre-admission submission date"
 msgstr ""
 
+msgid "Previous experience"
+msgstr ""
+
 msgid "Program proposition"
 msgstr ""
 
@@ -679,6 +712,9 @@ msgstr "Declined"
 msgid "REJECTED"
 msgstr "Rejected"
 
+msgid "Read"
+msgstr ""
+
 msgid "Recommendation letters"
 msgstr ""
 
@@ -721,6 +757,9 @@ msgstr ""
 msgid "SIC status"
 msgstr ""
 
+msgid "SIC:"
+msgstr ""
+
 msgid "SIGNING_IN_PROGRESS"
 msgstr "Signing in progress"
 
@@ -739,7 +778,16 @@ msgstr ""
 msgid "Search"
 msgstr ""
 
+msgid "Secondary studies"
+msgstr ""
+
+msgid "Status:"
+msgstr ""
+
 msgid "Submitted profile"
+msgstr ""
+
+msgid "Supervision"
 msgstr ""
 
 msgid "Supervision group not found."
@@ -812,6 +860,9 @@ msgid "This experience cannot be deleted as it has already been valuated."
 msgstr ""
 
 msgid "This experience cannot be updated as it has already been valuated."
+msgstr ""
+
+msgid "This page is currently under construction."
 msgstr ""
 
 msgid "Title"

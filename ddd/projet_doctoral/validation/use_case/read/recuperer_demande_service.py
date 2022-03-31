@@ -23,24 +23,20 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
-from admission.ddd.preparation.projet_doctoral.repository.i_proposition import IPropositionRepository
 from admission.ddd.projet_doctoral.validation.builder.demande_identity import DemandeIdentityBuilder
 from admission.ddd.projet_doctoral.validation.commands import RecupererDemandeQuery
 from admission.ddd.projet_doctoral.validation.domain.service.demande import DemandeService
-from admission.ddd.projet_doctoral.validation.dtos import RecupererDemandeDTO
+from admission.ddd.projet_doctoral.validation.dtos import DemandeDTO
 from admission.ddd.projet_doctoral.validation.repository.i_demande import IDemandeRepository
 
 
 def recuperer_demande(
     cmd: 'RecupererDemandeQuery',
     demande_repository: 'IDemandeRepository',
-    proposition_repository: 'IPropositionRepository',
-) -> 'RecupererDemandeDTO':
+) -> DemandeDTO:
     # GIVEN
     demande_id = DemandeIdentityBuilder.build_from_uuid(cmd.uuid)
     return DemandeService.recuperer(
         demande_id,
         demande_repository,
-        proposition_repository,
     )

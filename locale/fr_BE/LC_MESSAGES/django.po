@@ -107,6 +107,9 @@ msgstr "Résumé"
 msgid "Acronym / Title"
 msgstr "Sigle / Intitulé"
 
+msgid "Actions"
+msgstr "Actions"
+
 msgid "Actors as list items"
 msgstr "Acteurs en tant qu'éléments de liste"
 
@@ -146,6 +149,9 @@ msgstr "Auteur"
 msgid "BIOLOGY"
 msgstr "Biologie"
 
+msgid "Back to the list"
+msgstr "Retour à la liste"
+
 msgid "CA Member"
 msgstr "Membre du CA"
 
@@ -160,6 +166,9 @@ msgstr "Gestionnaires CDD"
 
 msgid "CDD status"
 msgstr "Statut CDD"
+
+msgid "CDD:"
+msgstr "CDD :"
 
 msgid "CDDs"
 msgstr "CDDs"
@@ -293,6 +302,9 @@ msgstr "Candidat"
 msgid "Candidate not found."
 msgstr "Candidat non trouvé."
 
+msgid "Candidate:"
+msgstr "Candidat :"
+
 msgid "Candidates"
 msgstr "Candidats"
 
@@ -314,6 +326,9 @@ msgstr "Membres du comité"
 msgid "Confirm"
 msgstr "Confirmer"
 
+msgid "Contact details"
+msgstr "Coordonnées"
+
 msgid "Cotutelle"
 msgstr "Cotutelle"
 
@@ -332,6 +347,9 @@ msgstr "Créer une nouvelle admission en doctorat"
 msgid "Created"
 msgstr "Créé"
 
+msgid "Curriculum"
+msgstr "Curriculum"
+
 msgid "Dedicated time (in EFT)"
 msgstr "Temps consacré (en EFT)"
 
@@ -343,6 +361,9 @@ msgstr "Supprimer"
 
 msgid "Delete?"
 msgstr "Supprimer ?"
+
+msgid "Doctoral project"
+msgstr "Projet doctoral"
 
 msgid "Doctorate"
 msgstr "Doctorat"
@@ -434,6 +455,9 @@ msgstr "Invité"
 msgid "IN_PROGRESS"
 msgstr "En cours"
 
+msgid "Identification"
+msgstr "Identification"
+
 msgid "Institution"
 msgstr "Institution"
 
@@ -456,6 +480,9 @@ msgstr "Secrétaires de jury"
 
 msgid "Jury secretary"
 msgstr "Secrétaire de jury"
+
+msgid "Languages knowledge"
+msgstr "Connaissance des langues"
 
 msgid "Last modification"
 msgstr "Dernière modification"
@@ -581,6 +608,9 @@ msgstr "Pre-admission"
 msgid "Page size"
 msgstr "Taille de la page"
 
+msgid "Personal data"
+msgstr "Données personnelles"
+
 msgid "PhD already done"
 msgstr "Doctorat déjà réalisé"
 
@@ -657,6 +687,9 @@ msgstr "Date de pré-admission"
 msgid "Pre-admission submission date"
 msgstr "Date de soumission Pré-admission"
 
+msgid "Previous experience"
+msgstr "Parcours antérieur"
+
 msgid "Program proposition"
 msgstr "Proposition de programme"
 
@@ -721,6 +754,9 @@ msgstr "Refusé"
 msgid "REJECTED"
 msgstr "Rejeté"
 
+msgid "Read"
+msgstr "Lire"
+
 msgid "Recommendation letters"
 msgstr "Lettres de recommandation"
 
@@ -763,6 +799,9 @@ msgstr "Gestionnaires SIC"
 msgid "SIC status"
 msgstr "Statut SIC"
 
+msgid "SIC:"
+msgstr "SIC :"
+
 msgid "SIGNING_IN_PROGRESS"
 msgstr "Signatures en cours"
 
@@ -781,8 +820,17 @@ msgstr "Bourse de recherche"
 msgid "Search"
 msgstr "Rechercher"
 
+msgid "Secondary studies"
+msgstr "Études secondaires"
+
+msgid "Status:"
+msgstr "Statut :"
+
 msgid "Submitted profile"
 msgstr "Profil soumis"
+
+msgid "Supervision"
+msgstr "Supervision"
 
 msgid "Supervision group not found."
 msgstr "Groupe de supervision non trouvé."
@@ -857,6 +905,9 @@ msgstr "Cette expérience ne peut être supprimée, ayant déjà été évaluée
 
 msgid "This experience cannot be updated as it has already been valuated."
 msgstr "Cette expérience ne peut être mise à jour, ayant déjà été évaluée."
+
+msgid "This page is currently under construction."
+msgstr "Cette page est en cours de construction."
 
 msgid "Title"
 msgstr "Titre"

@@ -28,8 +28,8 @@ from functools import partial
 from admission.ddd.projet_doctoral.preparation.commands import *
 from admission.ddd.projet_doctoral.preparation.use_case.read import *
 from admission.ddd.projet_doctoral.preparation.use_case.write import *
-from admission.ddd.projet_doctoral.validation.commands import FiltrerDemandesQuery
-from admission.ddd.projet_doctoral.validation.use_case.read.filtrer_demandes_service import filtrer_demandes
+from admission.ddd.projet_doctoral.validation.commands import *
+from admission.ddd.projet_doctoral.validation.use_case.read import *
 from admission.infrastructure.projet_doctoral.preparation.domain.service.doctorat import DoctoratTranslator
 from admission.infrastructure.projet_doctoral.preparation.domain.service.historique import Historique
 from admission.infrastructure.projet_doctoral.preparation.domain.service.membre_CA import MembreCATranslator
@@ -179,6 +179,10 @@ class MessageBusCommands(AbstractMessageBusCommands):
         FiltrerDemandesQuery: partial(
             filtrer_demandes,
             proposition_repository=PropositionRepository(),
+            demande_repository=DemandeRepository(),
+        ),
+        RecupererDemandeQuery: partial(
+            recuperer_demande,
             demande_repository=DemandeRepository(),
         ),
     }

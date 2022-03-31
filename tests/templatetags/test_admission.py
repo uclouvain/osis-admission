@@ -23,15 +23,24 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
+import uuid
+from unittest.mock import Mock
+
 import mock
 from django.http import HttpResponse
 
 from django.test import RequestFactory, TestCase
 from django.test.utils import override_settings
-from django.urls import path
+from django.urls import path, reverse
 from django.views import View
 
-from admission.templatetags.admission import sortable_header_div
+from admission.templatetags.admission import (
+    sortable_header_div,
+    Tab,
+    get_active_parent,
+    update_tab_path_from_detail,
+    detail_tab_path_from_update,
+)
 
 
 # Mock views
@@ -53,8 +62,7 @@ urlpatterns = [
 
 
 @override_settings(ROOT_URLCONF=__name__)
-class AdmissionTestCase(TestCase):
-
+class AdmissionSortableHeaderDivTestCase(TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         super().setUpClass()
@@ -63,68 +71,139 @@ class AdmissionTestCase(TestCase):
         cls.field_label = 'My field label'
 
     def test_sortable_header_div_without_query_order_param(self):
-        context = mock.Mock(
-            request=self.factory.get('', data={})
-        )
+        context = mock.Mock(request=self.factory.get('', data={}))
         value = sortable_header_div(
             context=context,
             order_field_name=self.field_name,
             order_field_label=self.field_label,
         )
-        self.assertEqual(value, {
-            'field_label': self.field_label,
-            'ordering_class': 'sort',
-            'url': '/?o={}'.format(self.field_name),
-        })
+        self.assertEqual(
+            value,
+            {
+                'field_label': self.field_label,
+                'ordering_class': 'sort',
+                'url': '/?o={}'.format(self.field_name),
+            },
+        )
 
     def test_sortable_header_div_with_asc_query_order_param(self):
         context = mock.Mock(
-            request=self.factory.get('', data={
-                'o': self.field_name,
-            })
+            request=self.factory.get(
+                '',
+                data={
+                    'o': self.field_name,
+                },
+            )
         )
         value = sortable_header_div(
             context=context,
             order_field_name=self.field_name,
             order_field_label=self.field_label,
         )
-        self.assertEqual(value, {
-            'field_label': self.field_label,
-            'ordering_class': 'sort-up',
-            'url': '/?o=-{}'.format(self.field_name)
-        })
+        self.assertEqual(
+            value,
+            {'field_label': self.field_label, 'ordering_class': 'sort-up', 'url': '/?o=-{}'.format(self.field_name)},
+        )
 
     def test_sortable_header_div_with_desc_query_order_param(self):
         context = mock.Mock(
-            request=self.factory.get('', data={
-                'o': '-' + self.field_name,
-            })
+            request=self.factory.get(
+                '',
+                data={
+                    'o': '-' + self.field_name,
+                },
+            )
         )
         value = sortable_header_div(
             context=context,
             order_field_name=self.field_name,
             order_field_label=self.field_label,
         )
-        self.assertEqual(value, {
-            'field_label': self.field_label,
-            'ordering_class': 'sort-down',
-            'url': '/?o={}'.format(self.field_name),
-        })
+        self.assertEqual(
+            value,
+            {
+                'field_label': self.field_label,
+                'ordering_class': 'sort-down',
+                'url': '/?o={}'.format(self.field_name),
+            },
+        )
 
     def test_sortable_header_div_with_other_query_order_param(self):
         context = mock.Mock(
-            request=self.factory.get('', data={
-                'o': '-other_field_name',
-                'other_param': '10'
-            })
+            request=self.factory.get(
+                '',
+                data={
+                    'o': '-other_field_name',
+                    'other_param': '10',
+                },
+            )
         )
         value = sortable_header_div(
             context=context,
             order_field_name=self.field_name,
             order_field_label=self.field_label,
         )
-        self.assertEqual(value, {
-            'field_label': self.field_label,
-            'ordering_class': 'sort',
-            'url': '/?o={}&other_param=10'.format(self.field_name),
-        })
+        self.assertEqual(
+            value,
+            {
+                'field_label': self.field_label,
+                'ordering_class': 'sort',
+                'url': '/?o={}&other_param=10'.format(self.field_name),
+            },
+        )
+
+
+class AdmissionTabsTestCase(TestCase):
+    @classmethod
+    def setUpClass(cls) -> None:
+        super().setUpClass()
+        cls.tab_tree = {
+            Tab('t1', 'tab 1'): [
+                Tab('t11', 'tab 11'),
+                Tab('t12', 'tab 12'),
+            ],
+            Tab('t2', 'tab 2'): [
+                Tab('t21', 'tab 21'),
+                Tab('t22', 'tab 22'),
+            ],
+        }
+
+    def test_get_active_parent_with_valid_tab_name(self):
+        result = get_active_parent(tab_tree=self.tab_tree, tab_name='t21')
+        self.assertEqual(result, Tab('t2', 'tab 2'))
+
+    def test_get_active_parent_with_invalid_tab_name(self):
+        result = get_active_parent(tab_tree=self.tab_tree, tab_name='t00')
+        self.assertIsNone(result)
+
+    def test_update_tab_path_from_detail(self):
+        context = {
+            'request': Mock(
+                resolver_match=Mock(
+                    namespace='admission:doctorate:cdd',
+                    url_name='project',
+                ),
+            ),
+        }
+        current_uuid = uuid.uuid4()
+        result = update_tab_path_from_detail(context, current_uuid)
+        self.assertEqual(
+            result,
+            reverse('admission:doctorate:cdd:update:project', args=[current_uuid]),
+        )
+
+    def test_detail_tab_path_from_update(self):
+        context = {
+            'request': Mock(
+                resolver_match=Mock(
+                    namespaces=['admission', 'doctorate', 'cdd', 'update'],
+                    url_name='project',
+                ),
+            ),
+        }
+        current_uuid = uuid.uuid4()
+        result = detail_tab_path_from_update(context, current_uuid)
+        self.assertEqual(
+            result,
+            reverse('admission:doctorate:cdd:project', args=[current_uuid]),
+        )
