@@ -739,6 +739,7 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
             status=ChoixStatutProposition.SIGNING_IN_PROGRESS.name,
             supervision_group=self.first_invited_promoter.actor_ptr.process,
         )
+        CddManagerFactory(entity=admission.doctorate.management_entity)
 
         self.client.force_authenticate(user=self.first_candidate.user)
 

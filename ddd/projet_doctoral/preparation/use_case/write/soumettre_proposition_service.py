@@ -28,6 +28,7 @@ from admission.ddd.projet_doctoral.preparation.builder.proposition_identity_buil
 from admission.ddd.projet_doctoral.preparation.commands import SoumettrePropositionCommand
 from admission.ddd.projet_doctoral.preparation.domain.model.proposition import PropositionIdentity
 from admission.ddd.projet_doctoral.preparation.domain.service.i_historique import IHistorique
+from admission.ddd.projet_doctoral.preparation.domain.service.i_notification import INotification
 from admission.ddd.projet_doctoral.preparation.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.projet_doctoral.preparation.domain.service.verifier_proposition import VerifierProposition
 from admission.ddd.projet_doctoral.preparation.repository.i_groupe_de_supervision import IGroupeDeSupervisionRepository
@@ -46,6 +47,7 @@ def soumettre_proposition(
     profil_candidat_translator: 'IProfilCandidatTranslator',
     academic_year_repository: 'IAcademicYearRepository',
     historique: 'IHistorique',
+    notification: 'INotification',
 ) -> 'PropositionIdentity':
     # GIVEN
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
@@ -74,5 +76,6 @@ def soumettre_proposition(
     proposition_repository.save(proposition)
     demande_repository.save(demande)
     historique.historiser_soumission(proposition)
+    notification.notifier_soumission(proposition)
 
     return proposition_id

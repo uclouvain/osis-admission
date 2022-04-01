@@ -31,6 +31,7 @@ from admission.ddd.projet_doctoral.preparation.domain.service.deverrouiller_proj
     DeverrouillerProjetDoctoral,
 )
 from admission.ddd.projet_doctoral.preparation.domain.service.i_historique import IHistorique
+from admission.ddd.projet_doctoral.preparation.domain.service.i_notification import INotification
 from admission.ddd.projet_doctoral.preparation.repository.i_groupe_de_supervision import IGroupeDeSupervisionRepository
 from admission.ddd.projet_doctoral.preparation.repository.i_proposition import IPropositionRepository
 
@@ -40,6 +41,7 @@ def refuser_proposition(
     proposition_repository: 'IPropositionRepository',
     groupe_supervision_repository: 'IGroupeDeSupervisionRepository',
     historique: 'IHistorique',
+    notification: 'INotification',
 ) -> 'PropositionIdentity':
     # GIVEN
     entity_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
@@ -56,5 +58,6 @@ def refuser_proposition(
     groupe_supervision_repository.save(groupe_de_supervision)
     proposition_repository.save(proposition_candidat)
     historique.historiser_avis(proposition_candidat, signataire_id, avis)
+    notification.notifier_avis(proposition_candidat, signataire_id, avis)
 
     return proposition_candidat.entity_id
