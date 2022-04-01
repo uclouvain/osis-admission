@@ -28,6 +28,7 @@ from admission.ddd.projet_doctoral.preparation.commands import ApprouverProposit
 from admission.ddd.projet_doctoral.preparation.domain.model.proposition import PropositionIdentity
 from admission.ddd.projet_doctoral.preparation.domain.service.avis import Avis
 from admission.ddd.projet_doctoral.preparation.domain.service.i_historique import IHistorique
+from admission.ddd.projet_doctoral.preparation.domain.service.i_notification import INotification
 from admission.ddd.projet_doctoral.preparation.repository.i_groupe_de_supervision import IGroupeDeSupervisionRepository
 from admission.ddd.projet_doctoral.preparation.repository.i_proposition import IPropositionRepository
 
@@ -37,6 +38,7 @@ def approuver_proposition(
     proposition_repository: 'IPropositionRepository',
     groupe_supervision_repository: 'IGroupeDeSupervisionRepository',
     historique: 'IHistorique',
+    notification: 'INotification',
 ) -> 'PropositionIdentity':
     # GIVEN
     entity_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
@@ -54,5 +56,6 @@ def approuver_proposition(
     proposition_repository.save(proposition)
     groupe_supervision_repository.save(groupe_de_supervision)
     historique.historiser_avis(proposition, signataire, avis)
+    notification.notifier_avis(proposition, signataire, avis)
 
     return proposition.entity_id

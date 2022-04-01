@@ -33,6 +33,7 @@ from admission.ddd.projet_doctoral.validation.use_case.read.filtrer_demandes_ser
 from admission.infrastructure.projet_doctoral.preparation.domain.service.doctorat import DoctoratTranslator
 from admission.infrastructure.projet_doctoral.preparation.domain.service.historique import Historique
 from admission.infrastructure.projet_doctoral.preparation.domain.service.membre_CA import MembreCATranslator
+from admission.infrastructure.projet_doctoral.preparation.domain.service.notification import Notification
 from admission.infrastructure.projet_doctoral.preparation.domain.service.profil_candidat import ProfilCandidatTranslator
 from admission.infrastructure.projet_doctoral.preparation.domain.service.promoteur import PromoteurTranslator
 from admission.infrastructure.projet_doctoral.preparation.repository.groupe_de_supervision import (
@@ -106,12 +107,14 @@ class MessageBusCommands(AbstractMessageBusCommands):
             proposition_repository=PropositionRepository(),
             groupe_supervision_repository=GroupeDeSupervisionRepository(),
             historique=Historique(),
+            notification=Notification(),
         ),
         SupprimerMembreCACommand: partial(
             supprimer_membre_CA,
             proposition_repository=PropositionRepository(),
             groupe_supervision_repository=GroupeDeSupervisionRepository(),
             historique=Historique(),
+            notification=Notification(),
         ),
         DemanderSignaturesCommand: partial(
             demander_signatures,
@@ -119,6 +122,7 @@ class MessageBusCommands(AbstractMessageBusCommands):
             groupe_supervision_repository=GroupeDeSupervisionRepository(),
             promoteur_translator=PromoteurTranslator(),
             historique=Historique(),
+            notification=Notification(),
         ),
         VerifierProjetCommand: partial(
             verifier_projet,
@@ -141,12 +145,14 @@ class MessageBusCommands(AbstractMessageBusCommands):
             profil_candidat_translator=ProfilCandidatTranslator(),
             academic_year_repository=AcademicYearRepository(),
             historique=Historique(),
+            notification=Notification(),
         ),
         ApprouverPropositionCommand: partial(
             approuver_proposition,
             proposition_repository=PropositionRepository(),
             groupe_supervision_repository=GroupeDeSupervisionRepository(),
             historique=Historique(),
+            notification=Notification(),
         ),
         ApprouverPropositionParPdfCommand: partial(
             approuver_proposition_par_pdf,
@@ -159,6 +165,7 @@ class MessageBusCommands(AbstractMessageBusCommands):
             proposition_repository=PropositionRepository(),
             groupe_supervision_repository=GroupeDeSupervisionRepository(),
             historique=Historique(),
+            notification=Notification(),
         ),
         SearchDoctoratCommand: partial(
             rechercher_doctorats,

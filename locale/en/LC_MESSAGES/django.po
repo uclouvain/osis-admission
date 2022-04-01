@@ -37,6 +37,24 @@ msgid_plural ""
 msgstr[0] ""
 msgstr[1] ""
 
+#, python-format
+msgid ""
+"%(candidate_first_name)s %(candidate_last_name)s requested signatures for "
+"%(doctorate_title)s"
+msgstr ""
+
+#, python-format
+msgid ""
+"%(candidate_first_name)s %(candidate_last_name)s submitted request for "
+"%(doctorate_title)s"
+msgstr ""
+
+#, python-format
+msgid ""
+"%(signataire_first_name)s %(signataire_last_name)s (%(actor_role)s) has "
+"approved your signature request."
+msgstr ""
+
 msgid "A justification is needed when creating a pre-admission."
 msgstr ""
 
@@ -71,6 +89,12 @@ msgid "Abstract"
 msgstr ""
 
 msgid "Acronym / Title"
+msgstr ""
+
+msgid "Actors as list items"
+msgstr ""
+
+msgid "Actors, comma-separated"
 msgstr ""
 
 msgid "Additional training project"
@@ -421,11 +445,43 @@ msgstr ""
 msgid "Last name / First name / Global id"
 msgstr ""
 
+msgid "Link to the admission (back-office)"
+msgstr ""
+
+msgid "Link to the admission (front-office)"
+msgstr ""
+
 msgid "MANAGEMENT"
 msgstr "Management"
 
 msgid "MATHEMATICS"
 msgstr "Mathematics"
+
+msgid "Mail sent to a supervision member to confirm submission"
+msgstr ""
+
+msgid "Mail sent to a supervision member when removed"
+msgstr ""
+
+msgid "Mail sent to each actor of the supervision group to request a signature"
+msgstr ""
+
+msgid "Mail sent to other promoter after a refusal"
+msgstr ""
+
+msgid "Mail sent to the CDD to confirm submission"
+msgstr ""
+
+msgid "Mail sent to the candidate after each signature"
+msgstr ""
+
+msgid "Mail sent to the candidate to confirm submission"
+msgstr ""
+
+msgid ""
+"Mail sent to the candidate to confirm supervision group signature requests "
+"are sent"
+msgstr ""
 
 msgid "Mandatory fields are missing in the cotutelle."
 msgstr ""
@@ -635,6 +691,9 @@ msgstr ""
 msgid "Reset"
 msgstr ""
 
+msgid "Role of the signing actor"
+msgstr ""
+
 msgid "SCEB"
 msgstr ""
 
@@ -695,10 +754,37 @@ msgstr "To be validated"
 msgid "TO_BE_VERIFIED"
 msgstr "To be verified"
 
+msgid "The decision of the signing actor"
+msgstr ""
+
 msgid "The experiences that have been valuated from this admission."
 msgstr ""
 
+msgid "The first name of the candidate"
+msgstr ""
+
+msgid "The first name of the recipient"
+msgstr ""
+
+msgid "The first name of the signing actor"
+msgstr ""
+
+msgid "The last name of the candidate"
+msgstr ""
+
+msgid "The last name of the recipient"
+msgstr ""
+
+msgid "The last name of the signing actor"
+msgstr ""
+
 msgid "The proposition has already been confirmed or is cancelled"
+msgstr ""
+
+msgid "The public comment about the approval/refusal"
+msgstr ""
+
+msgid "The reason for refusal"
 msgstr ""
 
 msgid "The signature request procedure isn't in progress."
@@ -729,6 +815,9 @@ msgid "This experience cannot be updated as it has already been valuated."
 msgstr ""
 
 msgid "Title"
+msgstr ""
+
+msgid "Title of the doctorate"
 msgstr ""
 
 msgid "To"

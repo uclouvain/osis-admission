@@ -37,6 +37,9 @@ from admission.infrastructure.projet_doctoral.preparation.domain.service.in_memo
 from admission.infrastructure.projet_doctoral.preparation.domain.service.in_memory.membre_CA import (
     MembreCAInMemoryTranslator,
 )
+from admission.infrastructure.projet_doctoral.preparation.domain.service.in_memory.notification import (
+    NotificationInMemory,
+)
 from admission.infrastructure.projet_doctoral.preparation.domain.service.in_memory.profil_candidat import (
     ProfilCandidatInMemoryTranslator,
 )
@@ -111,12 +114,14 @@ class MessageBusInMemoryCommands(AbstractMessageBusCommands):
             proposition_repository=PropositionInMemoryRepository(),
             groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
             historique=HistoriqueInMemory(),
+            notification=NotificationInMemory(),
         ),
         SupprimerMembreCACommand: partial(
             supprimer_membre_CA,
             proposition_repository=PropositionInMemoryRepository(),
             groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
             historique=HistoriqueInMemory(),
+            notification=NotificationInMemory(),
         ),
         DemanderSignaturesCommand: partial(
             demander_signatures,
@@ -124,6 +129,7 @@ class MessageBusInMemoryCommands(AbstractMessageBusCommands):
             groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
             promoteur_translator=PromoteurInMemoryTranslator(),
             historique=HistoriqueInMemory(),
+            notification=NotificationInMemory(),
         ),
         VerifierProjetCommand: partial(
             verifier_projet,
@@ -146,12 +152,14 @@ class MessageBusInMemoryCommands(AbstractMessageBusCommands):
             profil_candidat_translator=ProfilCandidatInMemoryTranslator(),
             academic_year_repository=AcademicYearInMemoryRepository(),
             historique=HistoriqueInMemory(),
+            notification=NotificationInMemory(),
         ),
         ApprouverPropositionCommand: partial(
             approuver_proposition,
             proposition_repository=PropositionInMemoryRepository(),
             groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
             historique=HistoriqueInMemory(),
+            notification=NotificationInMemory(),
         ),
         ApprouverPropositionParPdfCommand: partial(
             approuver_proposition_par_pdf,
@@ -164,6 +172,7 @@ class MessageBusInMemoryCommands(AbstractMessageBusCommands):
             proposition_repository=PropositionInMemoryRepository(),
             groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
             historique=HistoriqueInMemory(),
+            notification=NotificationInMemory(),
         ),
         ListerPropositionsCandidatQuery: partial(
             lister_propositions_candidat,

@@ -38,6 +38,7 @@ from admission.ddd.projet_doctoral.preparation.domain.validator.exceptions impor
     PromoteurManquantException,
 )
 from admission.tests.factories import DoctorateAdmissionFactory, WriteTokenFactory
+from admission.tests.factories.roles import CddManagerFactory
 from admission.tests.factories.supervision import CaMemberFactory, ExternalPromoterFactory, PromoterFactory
 
 
@@ -58,6 +59,7 @@ class RequestSignaturesApiTestCase(APITestCase):
             gantt_graph=[WriteTokenFactory().token],
             program_proposition=[WriteTokenFactory().token],
         )
+        CddManagerFactory(entity=cls.admission.doctorate.management_entity)
         cls.patcher.stop()
         cls.candidate = cls.admission.candidate
         cls.url = resolve_url("request-signatures", uuid=cls.admission.uuid)
