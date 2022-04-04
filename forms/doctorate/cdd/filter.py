@@ -85,7 +85,7 @@ class FilterForm(forms.Form):
         required=False,
     )
     matricule_candidat = forms.CharField(
-        label=_('Candidate'),
+        label=_('Last name / First name / E-mail / NOMA'),
         required=False,
         widget=autocomplete.ListSelect2(
             url="admission:autocomplete:candidates",

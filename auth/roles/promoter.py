@@ -26,7 +26,7 @@
 from django.utils.translation import gettext_lazy as _
 from rules import RuleSet
 
-from admission.auth.predicates import is_admission_request_promoter, is_part_of_committee_and_invited
+from admission.auth.predicates import is_admission_request_promoter, is_part_of_committee_and_invited, is_being_enrolled
 from admission.contrib.models.actor import ExternalActorMixin
 from osis_role.contrib.models import RoleModel
 
@@ -47,13 +47,16 @@ class Promoter(ExternalActorMixin, RoleModel):
             'admission.validate_doctoral_training': is_admission_request_promoter,
             'admission.fill_thesis': is_admission_request_promoter,
             'admission.check_publication_authorisation': is_admission_request_promoter,
-            'admission.view_doctorateadmission_person': is_admission_request_promoter,
-            'admission.view_doctorateadmission_coordinates': is_admission_request_promoter,
-            'admission.view_doctorateadmission_secondary_studies': is_admission_request_promoter,
-            'admission.view_doctorateadmission_languages': is_admission_request_promoter,
-            'admission.view_doctorateadmission_curriculum': is_admission_request_promoter,
+            # A promoter can view as long as he is one of the admission promoters and the registration is ongoing
+            'admission.view_doctorateadmission_person': is_admission_request_promoter & is_being_enrolled,
+            'admission.view_doctorateadmission_coordinates': is_admission_request_promoter & is_being_enrolled,
+            'admission.view_doctorateadmission_secondary_studies': is_admission_request_promoter & is_being_enrolled,
+            'admission.view_doctorateadmission_languages': is_admission_request_promoter & is_being_enrolled,
+            'admission.view_doctorateadmission_curriculum': is_admission_request_promoter & is_being_enrolled,
+            # A promoter can view as long as he is one of the admission promoters
             'admission.view_doctorateadmission_project': is_admission_request_promoter,
             'admission.view_doctorateadmission_cotutelle': is_admission_request_promoter,
             'admission.view_doctorateadmission_supervision': is_admission_request_promoter,
+            # A promoter can approve as long as he is invited to the admission committee
             'admission.approve_proposition': is_part_of_committee_and_invited,
         })

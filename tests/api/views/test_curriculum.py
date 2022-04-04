@@ -31,6 +31,7 @@ from rest_framework.test import APITestCase
 
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.curriculum import CurriculumYearFactory, ExperienceFactory
+from admission.tests.factories.roles import CandidateFactory
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.education_group_year import EducationGroupYearFactory
 from osis_profile.models import Experience, CurriculumYear
@@ -53,6 +54,7 @@ class CurriculumTestCase(APITestCase):
         }
         cls.user = cls.admission.candidate.user
         cls.other_user = cls.other_admission.candidate.user
+        cls.user_without_admission = CandidateFactory().person.user
 
         # Targeted urls
         cls.agnostic_url = resolve_url('curriculum')
@@ -74,11 +76,12 @@ class CurriculumTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_assert_methods_not_allowed(self):
-        self.client.force_authenticate(user=self.user)
+        self.client.force_authenticate(user=self.user_without_admission)
 
         response = getattr(self.client, 'patch')(self.agnostic_url)
         self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 
+        self.client.force_authenticate(user=self.user)
         response = getattr(self.client, 'patch')(self.admission_url)
         self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 
@@ -109,7 +112,7 @@ class CurriculumTestCase(APITestCase):
             type=ExperienceType.HIGHER_EDUCATION.name,
         )
 
-        response = self.client.get(self.agnostic_url)
+        response = self.client.get(self.admission_url)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.json()), 2)
@@ -131,7 +134,7 @@ class CurriculumTestCase(APITestCase):
         )
 
         # Directly specify the year of the experience via the 'curriculum_year' property
-        response = self.client.post(self.agnostic_url, data={
+        response = self.client.post(self.admission_url, data={
             'curriculum_year': curriculum_year.id,
             **self.created_data,
         })
@@ -154,7 +157,7 @@ class CurriculumTestCase(APITestCase):
         )
 
         # Specify the year of the experience via the 'academic_year' property
-        response = self.client.post(self.agnostic_url, data={
+        response = self.client.post(self.admission_url, data={
             'academic_year': curriculum_year.academic_year.year,
             **self.created_data,
         })
@@ -172,7 +175,7 @@ class CurriculumTestCase(APITestCase):
         academic_year = AcademicYearFactory(year=2022)
 
         # Specify the year of the experience via the 'academic_year' property
-        response = self.client.post(self.agnostic_url, data={
+        response = self.client.post(self.admission_url, data={
             'academic_year': academic_year.year,
             **self.created_data,
         })
@@ -193,7 +196,7 @@ class CurriculumTestCase(APITestCase):
         self.client.force_authenticate(self.user)
 
         # Don't specify the year of the experience
-        response = self.client.post(self.agnostic_url, data={
+        response = self.client.post(self.admission_url, data={
             **self.created_data,
         })
 
@@ -214,7 +217,7 @@ class CurriculumTestCase(APITestCase):
             type=ExperienceType.HIGHER_EDUCATION.name,
         )
 
-        detail_url = resolve_url('curriculum', xp=experience.uuid)
+        detail_url = resolve_url('curriculum', xp=experience.uuid, uuid=self.admission.uuid)
         response = self.client.get(detail_url)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -236,7 +239,7 @@ class CurriculumTestCase(APITestCase):
             type=ExperienceType.HIGHER_EDUCATION.name,
         )
 
-        detail_url = resolve_url('curriculum', xp=experience.uuid)
+        detail_url = resolve_url('curriculum', xp=experience.uuid, uuid=self.other_admission.uuid)
         response = self.client.get(detail_url)
 
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
@@ -259,7 +262,7 @@ class CurriculumTestCase(APITestCase):
             type=ExperienceType.HIGHER_EDUCATION.name,
         )
 
-        update_url = resolve_url('curriculum', xp=experience.uuid)
+        update_url = resolve_url('curriculum', xp=experience.uuid, uuid=self.admission.uuid)
         response = self.client.put(update_url, data={
             'curriculum_year': second_curriculum_year.id,
             'country': self.country.iso_code,
@@ -290,7 +293,7 @@ class CurriculumTestCase(APITestCase):
         )
         self.admission.valuated_experiences.add(experience)
 
-        update_url = resolve_url('curriculum', xp=experience.uuid)
+        update_url = resolve_url('curriculum', xp=experience.uuid, uuid=self.admission.uuid)
         response = self.client.put(update_url, data={
             'curriculum_year': curriculum_year.id,
             'country': self.country.iso_code,
@@ -315,7 +318,7 @@ class CurriculumTestCase(APITestCase):
 
         self.assertTrue(Experience.objects.filter(pk=experience.id).exists())
 
-        update_url = resolve_url('curriculum', xp=experience.uuid)
+        update_url = resolve_url('curriculum', xp=experience.uuid, uuid=self.admission.uuid)
         response = self.client.delete(update_url)
 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
@@ -339,7 +342,7 @@ class CurriculumTestCase(APITestCase):
 
         self.assertTrue(Experience.objects.filter(pk=experience.id).exists())
 
-        update_url = resolve_url('curriculum', xp=experience.uuid)
+        update_url = resolve_url('curriculum', xp=experience.uuid, uuid=self.admission.uuid)
         response = self.client.delete(update_url)
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)

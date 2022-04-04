@@ -34,6 +34,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from admission.contrib.models import AdmissionType, DoctorateAdmission
+from admission.ddd.projet_doctoral.doctorat.domain.model.enums import ChoixStatutDoctorat
 from admission.ddd.projet_doctoral.preparation.domain.model._detail_projet import ChoixLangueRedactionThese
 from admission.ddd.projet_doctoral.preparation.domain.model._enums import (
     ChoixCommissionProximiteCDEouCLSM,
@@ -47,6 +48,7 @@ from admission.ddd.projet_doctoral.preparation.domain.validator.exceptions impor
     MembreCAManquantException,
     PromoteurManquantException,
 )
+from admission.ddd.projet_doctoral.validation.domain.model._enums import ChoixStatutCDD
 from admission.tests import QueriesAssertionsMixin
 from admission.tests.factories import DoctorateAdmissionFactory, WriteTokenFactory
 from admission.tests.factories.doctorate import DoctorateFactory
@@ -83,8 +85,12 @@ class DoctorateAdmissionListApiTestCase(APITestCase):
             doctorate__management_entity=cls.commission,
             supervision_group=promoter.process,
         )
+        cls.other_admission = DoctorateAdmissionFactory(
+            status=ChoixStatutProposition.IN_PROGRESS.name,
+        )
         # Users
         cls.candidate = cls.admission.candidate
+        cls.other_candidate = cls.other_admission.candidate
         cls.no_role_user = PersonFactory().user
         cls.cdd_manager_user = CddManagerFactory(entity=cls.commission).person.user
         cls.promoter_user = promoter.person.user
@@ -108,11 +114,19 @@ class DoctorateAdmissionListApiTestCase(APITestCase):
                 'url': reverse('admission_api_v1:propositions'),
             },
         )
-        # Propositions
+
+        # Check proposition links
+        self.client.force_authenticate(user=self.other_candidate.user)
+
+        response = self.client.get(self.url, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
+
         self.assertTrue('propositions' in response.data)
         self.assertEqual(len(response.data['propositions']), 1)
+
         first_proposition = response.data['propositions'][0]
-        # Check proposition links
+
         self.assertTrue('links' in first_proposition)
         allowed_actions = [
             'retrieve_person',
@@ -750,7 +764,17 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json().get('uuid'), str(admission.uuid))
 
-        self.assertEqual(updated_admission.status, ChoixStatutProposition.SUBMITTED.name)
+        # TODO Replace the following lines by the commented ones when the admission approval by CDD and SIC
+        #  will be created
+        self.assertEqual(updated_admission.status, ChoixStatutProposition.ENROLLED.name)
+        self.assertEqual(updated_admission.status_cdd, ChoixStatutCDD.ACCEPTED.name)
+        self.assertEqual(updated_admission.post_enrolment_status, ChoixStatutDoctorat.ADMITTED.name)
+
+        # self.assertEqual(updated_admission.status, ChoixStatutProposition.SUBMITTED.name)
+        # self.assertEqual(updated_admission.status_sic, ChoixStatutCDD.TO_BE_VERIFIED.name)
+        # self.assertEqual(updated_admission.status_cdd, ChoixStatutSIC.TO_BE_VERIFIED.name)
+        # self.assertEqual(updated_admission.post_enrolment_status, ChoixStatutDoctorat.ADMISSION_IN_PROGRESS.name)
+
         self.assertEqual(updated_admission.admission_submission_date.date(), datetime.date.today())
         self.assertEqual(
             updated_admission.submitted_profile,

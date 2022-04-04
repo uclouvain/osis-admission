@@ -23,23 +23,51 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
+from admission.ddd.projet_doctoral.doctorat.domain.service.demande_identity import DemandeIdentityTranslator
+from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.domain.service.epreuve_confirmation import (
+    EpreuveConfirmationService,
+)
+from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.repository.i_epreuve_confirmation import (
+    IEpreuveConfirmationRepository,
+)
+from admission.ddd.projet_doctoral.doctorat.repository.i_doctorat import IDoctoratRepository
+from admission.ddd.projet_doctoral.preparation.repository.i_proposition import IPropositionRepository
 from admission.ddd.projet_doctoral.validation.builder.demande_identity import DemandeIdentityBuilder
 from admission.ddd.projet_doctoral.validation.commands import ApprouverDemandeCddCommand
 from admission.ddd.projet_doctoral.validation.domain.model.demande import DemandeIdentity
+from admission.ddd.projet_doctoral.validation.domain.service.proposition_identity import PropositionIdentityTranslator
 from admission.ddd.projet_doctoral.validation.repository.i_demande import IDemandeRepository
 
 
 def approuver_demande_cdd(
     cmd: 'ApprouverDemandeCddCommand',
     demande_repository: 'IDemandeRepository',
+    proposition_repository: 'IPropositionRepository',
+    epreuve_confirmation_repository: 'IEpreuveConfirmationRepository',
+    doctorat_repository: 'IDoctoratRepository',
 ) -> 'DemandeIdentity':
     # GIVEN
-    demande = demande_repository.get(entity_id=DemandeIdentityBuilder.build_from_uuid(cmd.uuid))
+    demande_id = DemandeIdentityBuilder.build_from_uuid(cmd.uuid)
+    demande = demande_repository.get(entity_id=demande_id)
+
+    proposition_id = PropositionIdentityTranslator.convertir_depuis_demande(demande_id)
+    proposition = proposition_repository.get(entity_id=proposition_id)
+
+    doctorat_id = DemandeIdentityTranslator.convertir_en_doctorat(demande_id)
+    doctorat = doctorat_repository.get(entity_id=doctorat_id)
 
     # WHEN
     demande.approuver_cdd()
 
+    # TODO Both SIC and CDD must approved the proposition
+    proposition.valider_inscription()
+    doctorat.finaliser_inscription()
+    epreuve_confirmation = EpreuveConfirmationService.initier(doctorat_id=doctorat_id)
+
     # THEN
     demande_repository.save(demande)
+    proposition_repository.save(proposition)
+    doctorat_repository.save(doctorat)
+    epreuve_confirmation_repository.save(epreuve_confirmation)
 
     return demande.entity_id

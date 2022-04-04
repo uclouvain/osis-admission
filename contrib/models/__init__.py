@@ -25,7 +25,7 @@
 # ##############################################################################
 
 try:
-    from .doctorate import DoctorateAdmission
+    from .doctorate import DoctorateAdmission, ConfirmationPaper
     from .actor import SupervisionActor
     from .enums.admission_type import AdmissionType
     from .entity_proxy import EntityProxy
@@ -37,6 +37,7 @@ try:
         "SupervisionActor",
         "EntityProxy",
         "CddMailTemplate",
+        "ConfirmationPaper",
     ]
 
 except RuntimeError as e:  # pragma: no cover

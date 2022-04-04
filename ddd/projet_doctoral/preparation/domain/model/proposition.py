@@ -270,6 +270,9 @@ class Proposition(interface.RootEntity):
     def supprimer(self):
         self.statut = ChoixStatutProposition.CANCELLED
 
+    def valider_inscription(self):
+        self.statut = ChoixStatutProposition.ENROLLED
+
     def definir_institut_these(self, institut_these: Optional[str]):
         if institut_these:
             self.projet = attr.evolve(

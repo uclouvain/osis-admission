@@ -84,6 +84,7 @@ class BelgianHighSchoolDiplomaTestCase(APITestCase):
         admission = DoctorateAdmissionFactory(supervision_group=promoter.process)
         cls.admission_url = resolve_url("secondary-studies", uuid=admission.uuid)
         cls.candidate_user = admission.candidate.user
+        cls.candidate_user_without_admission = CandidateFactory().person.user
         cls.no_role_user = PersonFactory(first_name="Joe").user
         cls.cdd_manager_user = CddManagerFactory(person__first_name="Jack").person.user
         cls.promoter_user = promoter.person.user
@@ -91,7 +92,7 @@ class BelgianHighSchoolDiplomaTestCase(APITestCase):
 
     def create_belgian_diploma(self, data):
         self.client.force_authenticate(self.candidate_user)
-        return self.client.put(self.agnostic_url, data)
+        return self.client.put(self.admission_url, data)
 
     def test_user_not_logged_assert_not_authorized(self):
         self.client.force_authenticate(user=None)
@@ -100,7 +101,7 @@ class BelgianHighSchoolDiplomaTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_assert_methods_not_allowed(self):
-        self.client.force_authenticate(user=self.candidate_user)
+        self.client.force_authenticate(user=self.candidate_user_without_admission)
         methods_not_allowed = ["delete", "post", "patch"]
 
         for method in methods_not_allowed:
@@ -108,14 +109,16 @@ class BelgianHighSchoolDiplomaTestCase(APITestCase):
             self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 
     def test_diploma_get_with_candidate(self):
+        self.client.force_authenticate(user=self.candidate_user)
         self.create_belgian_diploma(self.diploma_data)
-        response = self.client.get(self.agnostic_url)
+        response = self.client.get(self.admission_url)
         self.assertEqual(
             response.json()["belgian_diploma"]["academic_graduation_year"],
             self.diploma_data["belgian_diploma"]["academic_graduation_year"],
         )
 
     def test_diploma_create(self):
+        self.client.force_authenticate(user=self.candidate_user)
         response = self.create_belgian_diploma(self.diploma_data)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
         belgian_diploma = BelgianHighSchoolDiploma.objects.get(person__user_id=self.candidate_user.pk)
@@ -135,7 +138,7 @@ class BelgianHighSchoolDiplomaTestCase(APITestCase):
 
     def test_diploma_update_with_candidate(self):
         self.create_belgian_diploma(self.diploma_data)
-        response = self.client.put(self.agnostic_url, {
+        response = self.client.put(self.admission_url, {
             "belgian_diploma": {
                 "institute": "Institute Of Test",
                 "academic_graduation_year": self.academic_year.year,
@@ -183,13 +186,13 @@ class BelgianHighSchoolDiplomaTestCase(APITestCase):
     def test_delete_diploma(self):
         self.create_belgian_diploma(self.diploma_data)
         self.create_belgian_diploma({})
-        response = self.client.get(self.agnostic_url)
+        response = self.client.get(self.admission_url)
         self.assertEqual(response.json(), {'belgian_diploma': None, 'foreign_diploma': None})
 
     def test_delete_diploma_with_schedule(self):
         self.create_belgian_diploma(self.diploma_data_with_schedule)
         self.create_belgian_diploma({})
-        response = self.client.get(self.agnostic_url)
+        response = self.client.get(self.admission_url)
         self.assertEqual(response.json(), {'belgian_diploma': None, 'foreign_diploma': None})
 
     def test_diploma_get_with_no_role_user(self):
