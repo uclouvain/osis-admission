@@ -70,6 +70,12 @@ msgstr "Admissible"
 msgid "ADMISSION"
 msgstr "Admission"
 
+msgid "ADMISSION_IN_PROGRESS"
+msgstr "Admission in progress"
+
+msgid "ADMITTED"
+msgstr "Admitted"
+
 msgid "ADRE"
 msgstr ""
 
@@ -146,6 +152,9 @@ msgstr ""
 msgid "Body"
 msgstr ""
 
+msgid "Brief justification"
+msgstr ""
+
 msgid "CA Member"
 msgstr ""
 
@@ -164,6 +173,9 @@ msgstr ""
 msgid "CDD managers"
 msgstr ""
 
+msgid "CDD opinion"
+msgstr ""
+
 msgid "CDD status"
 msgstr ""
 
@@ -175,6 +187,9 @@ msgstr ""
 
 msgid "CHEMISTRY"
 msgstr "Chemistry"
+
+msgid "CONFIRMATION_TO_BE_REPEATED"
+msgstr "Confirmation to be repeated"
 
 msgid "CSC - China Scholarship Council"
 msgstr ""
@@ -308,6 +323,12 @@ msgstr ""
 msgid "Candidates"
 msgstr ""
 
+msgid "Certificate of achievement"
+msgstr ""
+
+msgid "Certificate of failure"
+msgstr ""
+
 #, python-format
 msgid "Change <em>%(name)s</em> custom mail template"
 msgstr ""
@@ -331,6 +352,9 @@ msgid "Configure"
 msgstr ""
 
 msgid "Confirm"
+msgstr ""
+
+msgid "Confirmation paper not found."
 msgstr ""
 
 msgid "Contact details"
@@ -361,6 +385,15 @@ msgid "Custom mail template"
 msgstr ""
 
 msgid "Custom mail templates"
+msgstr ""
+
+msgid "Date of confirmation"
+msgstr ""
+
+msgid "Deadline extended"
+msgstr ""
+
+msgid "Deadline for confirmation"
 msgstr ""
 
 msgid "Dedicated time (in EFT)"
@@ -410,6 +443,9 @@ msgstr ""
 
 msgid "EFT"
 msgstr ""
+
+msgid "ENROLLED"
+msgstr "Enrolled"
 
 msgid "ERC - European Research Council"
 msgstr ""
@@ -504,6 +540,9 @@ msgstr ""
 msgid "Jury secretary"
 msgstr ""
 
+msgid "Justification letter"
+msgstr ""
+
 msgid "Language"
 msgstr ""
 
@@ -584,8 +623,17 @@ msgstr ""
 msgid "Motivation"
 msgstr ""
 
+msgid "Must be enrolled"
+msgstr ""
+
+msgid "Must be in the process of the enrolment"
+msgstr ""
+
 msgid "NO"
 msgstr ""
+
+msgid "NOT_ALLOWED_TO_CONTINUE"
+msgstr "Not allowed to continue"
 
 msgid "NOT_INVITED"
 msgstr "Not invited"
@@ -605,8 +653,17 @@ msgstr ""
 msgid "No defense reason"
 msgstr ""
 
+msgid "No doctorate found."
+msgstr ""
+
 msgid "OTHER"
 msgstr "Other"
+
+msgid "Only for FNRS, FRIA and FRESH scholarship students"
+msgstr ""
+
+msgid "Opinion on the renewal of the research mandate"
+msgstr ""
 
 msgid "Other"
 msgstr ""
@@ -616,6 +673,9 @@ msgstr ""
 
 msgid "PARTIAL"
 msgstr "Partially"
+
+msgid "PASSED_CONFIRMATION"
+msgstr "Passed confirmation"
 
 msgid "PDF file"
 msgstr ""
@@ -688,6 +748,9 @@ msgid "Please specify the experience's year."
 msgstr ""
 
 msgid "Please specify your Belgian national register number."
+msgstr ""
+
+msgid "Post-enrolment status"
 msgstr ""
 
 msgid "Pre-Admission"
@@ -777,6 +840,12 @@ msgstr ""
 msgid "Rejection reason"
 msgstr ""
 
+msgid "Report of the supervisory panel"
+msgstr ""
+
+msgid "Research report"
+msgstr ""
+
 msgid "Reset"
 msgstr ""
 
@@ -821,6 +890,9 @@ msgstr "Statistics"
 
 msgid "SUBMITTED"
 msgstr "Submitted"
+
+msgid "SUBMITTED_CONFIRMATION"
+msgstr "Submitted confirmation"
 
 msgid "Save"
 msgstr ""
@@ -901,6 +973,9 @@ msgid "There can be no more CA members in the supervision group."
 msgstr ""
 
 msgid "There can be no more promoters in the supervision group."
+msgstr ""
+
+msgid "Thesis funding renewal"
 msgstr ""
 
 msgid "Thesis institute"

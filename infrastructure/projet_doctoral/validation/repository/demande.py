@@ -27,8 +27,10 @@ from typing import List, Optional
 
 from admission.contrib.models import DoctorateAdmission
 from admission.contrib.models.doctorate import DemandeProxy
+from admission.ddd.projet_doctoral.validation.domain.model._enums import ChoixStatutCDD, ChoixStatutSIC
 from admission.ddd.projet_doctoral.validation.domain.model._profil_candidat import ProfilCandidat
 from admission.ddd.projet_doctoral.validation.domain.model.demande import Demande, DemandeIdentity
+from admission.ddd.projet_doctoral.validation.domain.service.proposition_identity import PropositionIdentityTranslator
 from admission.ddd.projet_doctoral.validation.dtos import DemandeDTO
 from admission.ddd.projet_doctoral.validation.repository.i_demande import IDemandeRepository
 
@@ -55,22 +57,29 @@ class DemandeRepository(IDemandeRepository):
 
     @classmethod
     def get(cls, entity_id: 'DemandeIdentity') -> 'Demande':
-        admission = DemandeProxy.objects.get(uuid=entity_id.uuid)
+        admission: DemandeProxy = DemandeProxy.objects.get(uuid=entity_id.uuid)
         return Demande(
             profil_candidat=ProfilCandidat(
-                prenom=admission.submitted_profile.identification.first_name,
-                nom=admission.submitted_profile.identification.last_name,
-                genre=admission.submitted_profile.identification.gender,
-                nationalite=admission.submitted_profile.identification.country_of_citizenship,
-                email=admission.submitted_profile.coordinates.email,
-                pays=admission.submitted_profile.coordinates.country,
-                code_postal=admission.submitted_profile.coordinates.postal_code,
-                ville=admission.submitted_profile.coordinates.city,
-                lieu_dit=admission.submitted_profile.coordinates.place,
-                rue=admission.submitted_profile.coordinates.street,
-                numero_rue=admission.submitted_profile.coordinates.street_number,
-                boite_postale=admission.submitted_profile.coordinates.postal_box,
+                prenom=admission.submitted_profile.get('identification').get('first_name'),
+                nom=admission.submitted_profile.get('identification').get('last_name'),
+                genre=admission.submitted_profile.get('identification').get('gender'),
+                nationalite=admission.submitted_profile.get('identification').get('country_of_citizenship'),
+                email=admission.submitted_profile.get('coordinates').get('email'),
+                pays=admission.submitted_profile.get('coordinates').get('country'),
+                code_postal=admission.submitted_profile.get('coordinates').get('postal_code'),
+                ville=admission.submitted_profile.get('coordinates').get('city'),
+                lieu_dit=admission.submitted_profile.get('coordinates').get('place'),
+                rue=admission.submitted_profile.get('coordinates').get('street'),
+                numero_rue=admission.submitted_profile.get('coordinates').get('street_number'),
+                boite_postale=admission.submitted_profile.get('coordinates').get('postal_box'),
             ),
+            entity_id=entity_id,
+            proposition_id=PropositionIdentityTranslator.convertir_depuis_demande(entity_id),
+            statut_cdd=ChoixStatutCDD[admission.status_cdd],
+            statut_sic=ChoixStatutSIC[admission.status_sic],
+            modifiee_le=admission.modified,
+            pre_admission_confirmee_le=admission.pre_admission_submission_date,
+            admission_confirmee_le=admission.admission_submission_date,
         )
 
     @classmethod
@@ -106,8 +115,8 @@ class DemandeRepository(IDemandeRepository):
                 },
                 'pre_admission_submission_date': entity.pre_admission_confirmee_le,
                 'admission_submission_date': entity.admission_confirmee_le,
-                'status_cdd': entity.statut_cdd,
-                'status_sic': entity.statut_sic,
+                'status_cdd': entity.statut_cdd.name,
+                'status_sic': entity.statut_sic.name,
             },
         )
 

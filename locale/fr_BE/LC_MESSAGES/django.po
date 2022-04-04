@@ -86,6 +86,12 @@ msgstr "Recevable"
 msgid "ADMISSION"
 msgstr "Admission"
 
+msgid "ADMISSION_IN_PROGRESS"
+msgstr "Admission en cours"
+
+msgid "ADMITTED"
+msgstr "Admis"
+
 msgid "ADRE"
 msgstr "ADRE"
 
@@ -162,6 +168,9 @@ msgstr "Retour à la liste"
 msgid "Body"
 msgstr "Corps"
 
+msgid "Brief justification"
+msgstr "Justification succincte"
+
 msgid "CA Member"
 msgstr "Membre du CA"
 
@@ -180,6 +189,9 @@ msgstr "Gestionnaire CDD"
 msgid "CDD managers"
 msgstr "Gestionnaires CDD"
 
+msgid "CDD opinion"
+msgstr "Avis de la CDD"
+
 msgid "CDD status"
 msgstr "Statut CDD"
 
@@ -191,6 +203,9 @@ msgstr "CDDs"
 
 msgid "CHEMISTRY"
 msgstr "Chimie"
+
+msgid "CONFIRMATION_TO_BE_REPEATED"
+msgstr "Confirmation à représenter"
 
 msgid "CSC - China Scholarship Council"
 msgstr "CSC - China Scholarship Council"
@@ -327,6 +342,12 @@ msgstr "Candidat :"
 msgid "Candidates"
 msgstr "Candidats"
 
+msgid "Certificate of achievement"
+msgstr "Attestation de réussite"
+
+msgid "Certificate of failure"
+msgstr "Attestation d'échec"
+
 #, python-format
 msgid "Change <em>%(name)s</em> custom mail template"
 msgstr "Modifier le template d'email personnalisé <em>%(name)s</em>"
@@ -351,6 +372,9 @@ msgstr "Configurer"
 
 msgid "Confirm"
 msgstr "Confirmer"
+
+msgid "Confirmation paper not found."
+msgstr "Épreuve de confirmation non trouvée."
 
 msgid "Contact details"
 msgstr "Coordonnées"
@@ -381,6 +405,15 @@ msgstr "Template d'email personnalisé"
 
 msgid "Custom mail templates"
 msgstr "Templates d'email personnalisé"
+
+msgid "Date of confirmation"
+msgstr "Date de l'épreuve de confirmation"
+
+msgid "Deadline extended"
+msgstr "Nouvelle échéance"
+
+msgid "Deadline for confirmation"
+msgstr "Date limite pour la confirmation"
 
 msgid "Dedicated time (in EFT)"
 msgstr "Temps consacré (en EFT)"
@@ -429,6 +462,9 @@ msgstr "Economie"
 
 msgid "EFT"
 msgstr "EFT"
+
+msgid "ENROLLED"
+msgstr "Inscrit"
 
 msgid "ERC - European Research Council"
 msgstr "ERC - European Research Council"
@@ -525,6 +561,9 @@ msgstr "Secrétaires de jury"
 msgid "Jury secretary"
 msgstr "Secrétaire de jury"
 
+msgid "Justification letter"
+msgstr "Lettre de justification"
+
 msgid "Language"
 msgstr "Langue"
 
@@ -610,8 +649,17 @@ msgstr "Modifée"
 msgid "Motivation"
 msgstr "Motivation"
 
+msgid "Must be enrolled"
+msgstr "Doit être inscrit"
+
+msgid "Must be in the process of the enrolment"
+msgstr "Doit être en cours inscription"
+
 msgid "NO"
 msgstr "Non"
+
+msgid "NOT_ALLOWED_TO_CONTINUE"
+msgstr "Non autorisé à poursuivre"
 
 msgid "NOT_INVITED"
 msgstr "Non invité"
@@ -631,8 +679,17 @@ msgstr "Pas de doctorat trouvé"
 msgid "No defense reason"
 msgstr "Raison de non-soutenance"
 
+msgid "No doctorate found."
+msgstr "Doctorat non trouvé."
+
 msgid "OTHER"
 msgstr "Autre"
+
+msgid "Only for FNRS, FRIA and FRESH scholarship students"
+msgstr "Destinée uniquement aux boursiers FNRS, FRIA, FRESH"
+
+msgid "Opinion on the renewal of the research mandate"
+msgstr "Avis sur le renouvellement du mandat de recherche"
 
 msgid "Other"
 msgstr "Autre"
@@ -642,6 +699,9 @@ msgstr "Autres documents relatifs à la cotutelle"
 
 msgid "PARTIAL"
 msgstr "Partiel"
+
+msgid "PASSED_CONFIRMATION"
+msgstr "Epreuve de confirmation réussie"
 
 msgid "PDF file"
 msgstr "Fichier PDF"
@@ -727,6 +787,9 @@ msgstr "Merci de spécifier l'année de l'expérience."
 
 msgid "Please specify your Belgian national register number."
 msgstr "Merci de spécifier votre numéro de registre national belge."
+
+msgid "Post-enrolment status"
+msgstr "Statut après inscription"
 
 msgid "Pre-Admission"
 msgstr "Pré-Admission"
@@ -819,6 +882,12 @@ msgstr "Référence"
 msgid "Rejection reason"
 msgstr "Motif de refus"
 
+msgid "Report of the supervisory panel"
+msgstr "Procès-verbal du comité d'accompagnement"
+
+msgid "Research report"
+msgstr "Rapport de recherche"
+
 msgid "Reset"
 msgstr "Réinitialiser"
 
@@ -863,6 +932,9 @@ msgstr "Statistiques"
 
 msgid "SUBMITTED"
 msgstr "Soumis"
+
+msgid "SUBMITTED_CONFIRMATION"
+msgstr "Confirmation soumise"
 
 msgid "Save"
 msgstr "Enregistrer"
@@ -946,6 +1018,9 @@ msgstr ""
 msgid "There can be no more promoters in the supervision group."
 msgstr ""
 "Il ne peut y avoir davantage de promoteurs dans le groupe de supervision."
+
+msgid "Thesis funding renewal"
+msgstr "Demande de renouvellement de bourse"
 
 msgid "Thesis institute"
 msgstr "Institut de la thèse"

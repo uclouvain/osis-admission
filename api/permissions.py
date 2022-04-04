@@ -36,20 +36,17 @@ class IsSelfPersonTabOrTabPermission(BasePermission):
         self.permission_suffix = permission_suffix
 
     def has_permission(self, request, view):
-        # No object means we are editing our own profile
-        if request.method in SAFE_METHODS:
-            return True
-        # When editing, no doctorate admission must have been submitted
-        if not hasattr(request.user.person, 'has_submitted_propositions'):
+        # No object means we are reading/editing our own profile.
+        # This is only allowed if the user does not have an admission in progress.
+        if not hasattr(request.user.person, 'has_ongoing_propositions'):
             setattr(
                 request.user.person,
-                'has_submitted_propositions',
-                DoctorateAdmission.objects.filter(
-                    candidate=request.user.person,
-                    status=ChoixStatutProposition.SUBMITTED.name,
-                ).exists()
+                'has_ongoing_propositions',
+                DoctorateAdmission.objects.filter(candidate=request.user.person)
+                .exclude(status=ChoixStatutProposition.CANCELLED.name)
+                .exists(),
             )
-        return not request.user.person.has_submitted_propositions
+        return not request.user.person.has_ongoing_propositions
 
     def has_object_permission(self, request, view, obj):
         if request.method in SAFE_METHODS:

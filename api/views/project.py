@@ -50,6 +50,7 @@ from admission.ddd.projet_doctoral.preparation.domain.validator.exceptions impor
     InstitutionInconsistanteException,
     JustificationRequiseException,
 )
+from admission.ddd.projet_doctoral.validation.commands import ApprouverDemandeCddCommand
 from admission.utils import gather_business_exceptions, get_cached_admission_perm_obj
 from backoffice.settings.rest_framework.common_views import DisplayExceptionsByFieldNameAPIMixin
 from infrastructure.messages_bus import message_bus_instance
@@ -260,7 +261,7 @@ class VerifyProjectView(APIPermissionRequiredMixin, mixins.RetrieveModelMixin, G
     name = "verify-project"
     schema = VerifyProjectSchema()
     permission_mapping = {
-        'GET': 'admission.view_doctorateadmission_project',
+        'GET': 'admission.change_doctorateadmission_project',
     }
     pagination_class = None
     filter_backends = []
@@ -312,4 +313,6 @@ class SubmitPropositionViewSet(APIPermissionRequiredMixin, mixins.RetrieveModelM
         # Trigger the submit command
         proposition_id = message_bus_instance.invoke(SoumettrePropositionCommand(uuid_proposition=str(kwargs["uuid"])))
         serializer = serializers.PropositionIdentityDTOSerializer(instance=proposition_id)
+        # TODO To remove when the admission approval by CDD and SIC will be created
+        message_bus_instance.invoke(ApprouverDemandeCddCommand(uuid=str(kwargs["uuid"])))
         return Response(serializer.data, status=status.HTTP_200_OK)

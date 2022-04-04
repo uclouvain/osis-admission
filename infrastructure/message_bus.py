@@ -30,6 +30,11 @@ from admission.ddd.projet_doctoral.preparation.use_case.read import *
 from admission.ddd.projet_doctoral.preparation.use_case.write import *
 from admission.ddd.projet_doctoral.validation.commands import *
 from admission.ddd.projet_doctoral.validation.use_case.read import *
+from admission.ddd.projet_doctoral.validation.use_case.write import *
+from admission.infrastructure.projet_doctoral.doctorat.epreuve_confirmation.repository.epreuve_confirmation import (
+    EpreuveConfirmationRepository,
+)
+from admission.infrastructure.projet_doctoral.doctorat.repository.doctorat import DoctoratRepository
 from admission.infrastructure.projet_doctoral.preparation.domain.service.doctorat import DoctoratTranslator
 from admission.infrastructure.projet_doctoral.preparation.domain.service.historique import Historique
 from admission.infrastructure.projet_doctoral.preparation.domain.service.membre_CA import MembreCATranslator
@@ -184,5 +189,12 @@ class MessageBusCommands(AbstractMessageBusCommands):
         RecupererDemandeQuery: partial(
             recuperer_demande,
             demande_repository=DemandeRepository(),
+        ),
+        ApprouverDemandeCddCommand: partial(
+            approuver_demande_cdd,
+            demande_repository=DemandeRepository(),
+            proposition_repository=PropositionRepository(),
+            epreuve_confirmation_repository=EpreuveConfirmationRepository(),
+            doctorat_repository=DoctoratRepository(),
         ),
     }

@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,15 +23,18 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import uuid
+
 from django.contrib.postgres.fields import JSONField
 from django.core.cache import cache
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db import models
-from django.db.models import OuterRef
+from django.db.models import OuterRef, F
 from django.utils.datetime_safe import date
 from django.utils.translation import gettext_lazy as _
 from rest_framework.settings import api_settings
 
+from admission.ddd.projet_doctoral.doctorat.domain.model.enums import ChoixStatutDoctorat
 from admission.ddd.projet_doctoral.preparation.domain.model._detail_projet import ChoixLangueRedactionThese
 from admission.ddd.projet_doctoral.preparation.domain.model._enums import (
     ChoixCommissionProximiteCDEouCLSM,
@@ -53,8 +56,10 @@ from .base import BaseAdmission, admission_directory_path
 
 __all__ = [
     "DoctorateAdmission",
+    "ConfirmationPaper",
     "REFERENCE_SEQ_NAME",
 ]
+
 
 REFERENCE_SEQ_NAME = 'admission_doctorateadmission_reference_seq'
 
@@ -249,6 +254,12 @@ class DoctorateAdmission(BaseAdmission):
         max_length=30,
         default=ChoixStatutSIC.TO_BE_VERIFIED.name,
     )
+    post_enrolment_status = models.CharField(
+        choices=ChoixStatutDoctorat.choices(),
+        max_length=30,
+        default=ChoixStatutDoctorat.ADMISSION_IN_PROGRESS.name,
+        verbose_name=_("Post-enrolment status"),
+    )
     pre_admission_submission_date = models.DateTimeField(
         verbose_name=_("Pre-admission submission date"),
         null=True,
@@ -395,3 +406,94 @@ class DemandeProxy(DoctorateAdmission):
 
     class Meta:
         proxy = True
+
+
+def confirmation_paper_directory_path(confirmation, filename: str):
+    """Return the file upload directory path."""
+    return 'admission/{}/{}/confirmation/{}/{}'.format(
+        confirmation.admission.candidate.uuid,
+        confirmation.admission.uuid,
+        confirmation.uuid,
+        filename,
+    )
+
+
+class ConfirmationPaper(models.Model):
+    uuid = models.UUIDField(
+        default=uuid.uuid4,
+        editable=False,
+        unique=True,
+        db_index=True,
+    )
+
+    admission = models.ForeignKey(
+        DoctorateAdmission,
+        verbose_name=_("Admission"),
+        on_delete=models.CASCADE,
+    )
+
+    confirmation_date = models.DateField(
+        verbose_name=_("Date of confirmation"),
+        null=True,
+        blank=True,
+    )
+    confirmation_deadline = models.DateField(
+        verbose_name=_("Deadline for confirmation"),
+        blank=True,
+    )
+    research_report = FileField(
+        verbose_name=_("Research report"),
+        upload_to=confirmation_paper_directory_path,
+        max_files=1,
+    )
+    supervisor_panel_report = FileField(
+        verbose_name=_("Report of the supervisory panel"),
+        upload_to=confirmation_paper_directory_path,
+        max_files=1,
+    )
+    thesis_funding_renewal = FileField(
+        verbose_name=_("Thesis funding renewal"),
+        upload_to=confirmation_paper_directory_path,
+        help_text=_("Only for FNRS, FRIA and FRESH scholarship students"),
+        max_files=1,
+    )
+    research_mandate_renewal_opinion = FileField(
+        verbose_name=_("Opinion on the renewal of the research mandate"),
+        upload_to=confirmation_paper_directory_path,
+        max_files=1,
+    )
+
+    # Result of the confirmation
+    certificate_of_failure = FileField(
+        verbose_name=_("Certificate of failure"),
+        upload_to=confirmation_paper_directory_path,
+    )
+    certificate_of_achievement = FileField(
+        verbose_name=_("Certificate of achievement"),
+        upload_to=confirmation_paper_directory_path,
+    )
+
+    # Extension
+    extended_deadline = models.DateField(
+        verbose_name=_("Deadline extended"),
+        null=True,
+        blank=True,
+    )
+    cdd_opinion = models.TextField(
+        default="",
+        verbose_name=_("CDD opinion"),
+        blank=True,
+    )
+    justification_letter = FileField(
+        verbose_name=_("Justification letter"),
+        upload_to=confirmation_paper_directory_path,
+    )
+    brief_justification = models.TextField(
+        default="",
+        verbose_name=_("Brief justification"),
+        blank=True,
+        max_length=2000,
+    )
+
+    class Meta:
+        ordering = [F("confirmation_date").desc(nulls_first=True)]

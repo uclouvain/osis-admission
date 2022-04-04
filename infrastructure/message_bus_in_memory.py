@@ -30,6 +30,10 @@ from admission.ddd.projet_doctoral.preparation.use_case.read import *
 from admission.ddd.projet_doctoral.preparation.use_case.write import *
 from admission.ddd.projet_doctoral.validation.commands import *
 from admission.ddd.projet_doctoral.validation.use_case.read import *
+from admission.ddd.projet_doctoral.validation.use_case.write import *
+from admission.infrastructure.projet_doctoral.doctorat.epreuve_confirmation.repository.in_memory.epreuve_confirmation \
+    import (EpreuveConfirmationInMemoryRepository)
+from admission.infrastructure.projet_doctoral.doctorat.repository.in_memory.doctorat import DoctoratInMemoryRepository
 from admission.infrastructure.projet_doctoral.preparation.domain.service.in_memory.doctorat import (
     DoctoratInMemoryTranslator,
 )
@@ -196,6 +200,13 @@ class MessageBusInMemoryCommands(AbstractMessageBusCommands):
         RecupererDemandeQuery: partial(
             recuperer_demande,
             demande_repository=DemandeInMemoryRepository(),
+        ),
+        ApprouverDemandeCddCommand: partial(
+            approuver_demande_cdd,
+            demande_repository=DemandeInMemoryRepository(),
+            proposition_repository=PropositionInMemoryRepository(),
+            epreuve_confirmation_repository=EpreuveConfirmationInMemoryRepository(),
+            doctorat_repository=DoctoratInMemoryRepository(),
         ),
     }
 

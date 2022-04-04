@@ -31,9 +31,22 @@ from base.models.utils.utils import ChoiceEnum
 
 class ChoixStatutProposition(ChoiceEnum):
     CANCELLED = _('CANCELLED')
+    # During the enrolment step
     IN_PROGRESS = _('IN_PROGRESS')
     SUBMITTED = _('SUBMITTED')
     SIGNING_IN_PROGRESS = _('SIGNING_IN_PROGRESS')
+    # After the enrolment step
+    ENROLLED = _('ENROLLED')
+
+
+STATUTS_PROPOSITION_AVANT_SOUMISSION = {
+    ChoixStatutProposition.IN_PROGRESS.name,
+    ChoixStatutProposition.SIGNING_IN_PROGRESS.name,
+}
+
+STATUTS_PROPOSITION_AVANT_INSCRIPTION = STATUTS_PROPOSITION_AVANT_SOUMISSION | {
+    ChoixStatutProposition.SUBMITTED.name,
+}
 
 
 class ChoixStatutSignatureGroupeDeSupervision(ChoiceEnum):
