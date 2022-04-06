@@ -116,6 +116,13 @@ msgstr "Acteurs en tant qu'éléments de liste"
 msgid "Actors, comma-separated"
 msgstr "Acteurs, séparés par une virgule"
 
+msgid "Add"
+msgstr "Ajouter"
+
+#, python-format
+msgid "Add a custom mail template for <em>%(description)s</em>"
+msgstr "Ajouter un template d'email personnalisé pour <em>%(description)s</em>"
+
 msgid "Additional training project"
 msgstr "Projet de formation complémentaire"
 
@@ -152,11 +159,20 @@ msgstr "Biologie"
 msgid "Back to the list"
 msgstr "Retour à la liste"
 
+msgid "Body"
+msgstr "Corps"
+
 msgid "CA Member"
 msgstr "Membre du CA"
 
 msgid "CANCELLED"
 msgstr "Annulé"
+
+msgid "CDD Mail template"
+msgstr "Template d'email de CDD"
+
+msgid "CDD Mail templates"
+msgstr "Templates d'email de CDD"
 
 msgid "CDD manager"
 msgstr "Gestionnaire CDD"
@@ -296,6 +312,9 @@ msgstr "Peut voir les informations relatives au curriculum"
 msgid "Can view the information related to the secondary studies"
 msgstr "Peut voir les informations relatives aux études secondaires"
 
+msgid "Cancel"
+msgstr "Annuler"
+
 msgid "Candidate"
 msgstr "Candidat"
 
@@ -307,6 +326,10 @@ msgstr "Candidat :"
 
 msgid "Candidates"
 msgstr "Candidats"
+
+#, python-format
+msgid "Change <em>%(name)s</em> custom mail template"
+msgstr "Modifier le template d'email personnalisé <em>%(name)s</em>"
 
 msgid "City"
 msgstr "Ville"
@@ -322,6 +345,9 @@ msgstr "Membre du comité"
 
 msgid "Committee members"
 msgstr "Membres du comité"
+
+msgid "Configure"
+msgstr "Configurer"
 
 msgid "Confirm"
 msgstr "Confirmer"
@@ -350,6 +376,12 @@ msgstr "Créé"
 msgid "Curriculum"
 msgstr "Curriculum"
 
+msgid "Custom mail template"
+msgstr "Template d'email personnalisé"
+
+msgid "Custom mail templates"
+msgstr "Templates d'email personnalisé"
+
 msgid "Dedicated time (in EFT)"
 msgstr "Temps consacré (en EFT)"
 
@@ -361,6 +393,9 @@ msgstr "Supprimer"
 
 msgid "Delete?"
 msgstr "Supprimer ?"
+
+msgid "Description"
+msgstr "Description"
 
 msgid "Doctoral project"
 msgstr "Projet doctoral"
@@ -404,6 +439,9 @@ msgstr "Anglais"
 msgid "Enrolments"
 msgstr "Inscriptions"
 
+msgid "Example"
+msgstr "Exemple"
+
 msgid "Export"
 msgstr "Exporter"
 
@@ -446,6 +484,9 @@ msgstr "Graphe de Gantt"
 msgid "General"
 msgstr "Général"
 
+msgid "HTML"
+msgstr "HTML"
+
 msgid "INVALID"
 msgstr "Invalide"
 
@@ -457,6 +498,9 @@ msgstr "En cours"
 
 msgid "Identification"
 msgstr "Identification"
+
+msgid "Identifier"
+msgstr "Identifiant"
 
 msgid "Institution"
 msgstr "Institution"
@@ -480,6 +524,9 @@ msgstr "Secrétaires de jury"
 
 msgid "Jury secretary"
 msgstr "Secrétaire de jury"
+
+msgid "Language"
+msgstr "Langue"
 
 msgid "Languages knowledge"
 msgstr "Connaissance des langues"
@@ -614,6 +661,9 @@ msgstr "Données personnelles"
 msgid "PhD already done"
 msgstr "Doctorat déjà réalisé"
 
+msgid "Plain text"
+msgstr "Texte brut"
+
 msgid "Planned duration"
 msgstr "Durée prévue"
 
@@ -686,6 +736,9 @@ msgstr "Date de pré-admission"
 
 msgid "Pre-admission submission date"
 msgstr "Date de soumission Pré-admission"
+
+msgid "Preview"
+msgstr "Prévisualiser"
 
 msgid "Previous experience"
 msgstr "Parcours antérieur"
@@ -811,6 +864,9 @@ msgstr "Statistiques"
 msgid "SUBMITTED"
 msgstr "Soumis"
 
+msgid "Save"
+msgstr "Enregistrer"
+
 msgid "Scholarship"
 msgstr "Boursier"
 
@@ -825,6 +881,9 @@ msgstr "Études secondaires"
 
 msgid "Status:"
 msgstr "Statut :"
+
+msgid "Subject"
+msgstr "Sujet"
 
 msgid "Submitted profile"
 msgstr "Profil soumis"
@@ -917,6 +976,12 @@ msgstr "Titre du doctorat"
 
 msgid "To"
 msgstr "À"
+
+msgid "Token"
+msgstr "Token"
+
+msgid "Tokens that can be used for replacement"
+msgstr "Tokens pouvant être utilisés"
 
 msgid "Training"
 msgstr "Formation"

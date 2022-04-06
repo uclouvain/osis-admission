@@ -24,8 +24,8 @@
 #
 # ##############################################################################
 import rules
-from rules import RuleSet
 from django.utils.translation import gettext_lazy as _
+from rules import RuleSet
 
 from admission.auth.predicates import is_part_of_doctoral_commission
 from osis_role.contrib.models import EntityRoleModel
@@ -39,7 +39,7 @@ class CddManager(EntityRoleModel):
 
     @classmethod
     def rule_set(cls):
-        return RuleSet({
+        ruleset = {
             'admission.change_doctorateadmission': is_part_of_doctoral_commission,
             'admission.view_doctorateadmission': is_part_of_doctoral_commission,
             'admission.delete_doctorateadmission': rules.always_deny,
@@ -66,4 +66,6 @@ class CddManager(EntityRoleModel):
             'admission.view_doctorateadmission_supervision': is_part_of_doctoral_commission,
             'admission.add_supervision_member': is_part_of_doctoral_commission,
             'admission.remove_supervision_member': is_part_of_doctoral_commission,
-        })
+            'admission.change_cddmailtemplate': rules.always_allow,
+        }
+        return RuleSet(ruleset)
