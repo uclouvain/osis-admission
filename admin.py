@@ -37,10 +37,14 @@ from admission.auth.roles.promoter import Promoter
 from admission.auth.roles.sceb import Sceb
 from admission.auth.roles.sic_director import SicDirector
 from admission.auth.roles.sic_manager import SicManager
-from admission.contrib.models import DoctorateAdmission
+from admission.contrib.models import CddMailTemplate, DoctorateAdmission
+from osis_mail_template.admin import MailTemplateAdmin
 
 from osis_profile.models.curriculum import CurriculumYear, Experience
 from osis_role.contrib.admin import RoleModelAdmin
+
+# ##############################################################################
+# Models
 
 
 class DoctorateAdmissionAdmin(admin.ModelAdmin):
@@ -71,8 +75,30 @@ class ExperienceInlineAdmin(admin.TabularInline):
 
 
 class CurriculumYearAdmin(admin.ModelAdmin):
-    inlines = [ExperienceInlineAdmin, ]
+    inlines = [ExperienceInlineAdmin]
     autocomplete_fields = ["person"]
+
+
+class CddMailTemplateAdmin(MailTemplateAdmin):
+    list_display = ('name', 'identifier', 'language', 'cdd')
+    search_fields = [
+        'cdd__acronym',
+        'idenfier',
+    ]
+    list_filter = [
+        'cdd',
+        'language',
+        'identifier',
+    ]
+
+
+admin.site.register(DoctorateAdmission, DoctorateAdmissionAdmin)
+admin.site.register(CurriculumYear, CurriculumYearAdmin)
+admin.site.register(CddMailTemplate, CddMailTemplateAdmin)
+
+
+# ##############################################################################
+# Roles
 
 
 class ExternalCommitteeMemberAdmin(RoleModelAdmin):
@@ -90,10 +116,6 @@ class CDDRoleModelAdmin(RoleModelAdmin):
     ]
 
 
-admin.site.register(DoctorateAdmission, DoctorateAdmissionAdmin)
-admin.site.register(CurriculumYear, CurriculumYearAdmin)
-
-# Roles
 admin.site.register(Promoter, ExternalCommitteeMemberAdmin)
 admin.site.register(CommitteeMember, ExternalCommitteeMemberAdmin)
 admin.site.register(SicManager, RoleModelAdmin)

@@ -100,6 +100,13 @@ msgstr ""
 msgid "Actors, comma-separated"
 msgstr ""
 
+msgid "Add"
+msgstr ""
+
+#, python-format
+msgid "Add a custom mail template for <em>%(description)s</em>"
+msgstr ""
+
 msgid "Additional training project"
 msgstr ""
 
@@ -136,10 +143,19 @@ msgstr "Biology"
 msgid "Back to the list"
 msgstr ""
 
+msgid "Body"
+msgstr ""
+
 msgid "CA Member"
 msgstr ""
 
 msgid "CANCELLED"
+msgstr ""
+
+msgid "CDD Mail template"
+msgstr ""
+
+msgid "CDD Mail templates"
 msgstr ""
 
 msgid "CDD manager"
@@ -277,6 +293,9 @@ msgstr ""
 msgid "Can view the information related to the secondary studies"
 msgstr ""
 
+msgid "Cancel"
+msgstr ""
+
 msgid "Candidate"
 msgstr ""
 
@@ -287,6 +306,10 @@ msgid "Candidate:"
 msgstr ""
 
 msgid "Candidates"
+msgstr ""
+
+#, python-format
+msgid "Change <em>%(name)s</em> custom mail template"
 msgstr ""
 
 msgid "City"
@@ -302,6 +325,9 @@ msgid "Committee member"
 msgstr ""
 
 msgid "Committee members"
+msgstr ""
+
+msgid "Configure"
 msgstr ""
 
 msgid "Confirm"
@@ -331,6 +357,12 @@ msgstr ""
 msgid "Curriculum"
 msgstr ""
 
+msgid "Custom mail template"
+msgstr ""
+
+msgid "Custom mail templates"
+msgstr ""
+
 msgid "Dedicated time (in EFT)"
 msgstr ""
 
@@ -341,6 +373,9 @@ msgid "Delete"
 msgstr ""
 
 msgid "Delete?"
+msgstr ""
+
+msgid "Description"
 msgstr ""
 
 msgid "Doctoral project"
@@ -385,6 +420,9 @@ msgstr ""
 msgid "Enrolments"
 msgstr ""
 
+msgid "Example"
+msgstr ""
+
 msgid "Export"
 msgstr ""
 
@@ -427,6 +465,9 @@ msgstr ""
 msgid "General"
 msgstr ""
 
+msgid "HTML"
+msgstr ""
+
 msgid "INVALID"
 msgstr "Invalid"
 
@@ -437,6 +478,9 @@ msgid "IN_PROGRESS"
 msgstr "In progress"
 
 msgid "Identification"
+msgstr ""
+
+msgid "Identifier"
 msgstr ""
 
 msgid "Institution"
@@ -458,6 +502,9 @@ msgid "Jury secretaries"
 msgstr ""
 
 msgid "Jury secretary"
+msgstr ""
+
+msgid "Language"
 msgstr ""
 
 msgid "Languages knowledge"
@@ -588,6 +635,9 @@ msgstr ""
 msgid "PhD already done"
 msgstr ""
 
+msgid "Plain text"
+msgstr ""
+
 msgid "Planned duration"
 msgstr ""
 
@@ -647,6 +697,9 @@ msgid "Pre-admission date"
 msgstr ""
 
 msgid "Pre-admission submission date"
+msgstr ""
+
+msgid "Preview"
 msgstr ""
 
 msgid "Previous experience"
@@ -769,6 +822,9 @@ msgstr "Statistics"
 msgid "SUBMITTED"
 msgstr "Submitted"
 
+msgid "Save"
+msgstr ""
+
 msgid "Scholarship"
 msgstr ""
 
@@ -782,6 +838,9 @@ msgid "Secondary studies"
 msgstr ""
 
 msgid "Status:"
+msgstr ""
+
+msgid "Subject"
 msgstr ""
 
 msgid "Submitted profile"
@@ -872,6 +931,12 @@ msgid "Title of the doctorate"
 msgstr ""
 
 msgid "To"
+msgstr ""
+
+msgid "Token"
+msgstr ""
+
+msgid "Tokens that can be used for replacement"
 msgstr ""
 
 msgid "Training"
