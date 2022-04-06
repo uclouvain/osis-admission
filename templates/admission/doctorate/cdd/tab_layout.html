@@ -37,13 +37,19 @@
     </a>
   </li>
   <li class="active">
-    {{ admission.intitule_doctorat }} ({{ admission.reference }})
+    {% block breadcrumb_current_page %}
+      {{ admission.intitule_doctorat }} ({{ admission.reference }})
+    {% endblock %}
   </li>
 {% endblock %}
 
 {% block content %}
   <div class="page-header flex-content">
-    <h2>{{ admission.intitule_doctorat }} ({{ admission.reference }})</h2>
+    <h2>
+      {% block content_title %}
+        {{ admission.intitule_doctorat }} ({{ admission.reference }})
+      {% endblock %}
+    </h2>
     <a
         href="{% url 'admission:doctorate:cdd:list' %}"
         class="text-primary"
@@ -56,41 +62,50 @@
   <div class="panel panel-default">
     <div class="panel-heading flex-content">
       <div>
-        <div>
-          {% trans "Candidate:" %} {{ admission.prenom_candidat }} {{ admission.nom_candidat }}
-        </div>
-        <div>
-        {% trans "Status:" %}
-        {{ admission.statut|enum_display:'ChoixStatutProposition' }}
-        {% if dossier %}
-          | {% trans "CDD:" %}
-          {{ dossier.statut_cdd|enum_display:'ChoixStatutCDD' }}
-          | {% trans "SIC:" %}
-          {{ dossier.statut_sic|enum_display:'ChoixStatutSIC' }}
-        {% endif %}
-        </div>
+        {% block panel-heading %}
+          <div>
+            {% trans "Candidate:" %} {{ admission.prenom_candidat }} {{ admission.nom_candidat }}
+          </div>
+          <div>
+            {% trans "Status:" %}
+            {% if doctorat %}
+              {{ doctorat.statut|enum_display:'ChoixStatutDoctorat' }}
+            {% else %}
+              {{ admission.statut|enum_display:'ChoixStatutProposition' }}
+            {% endif %}
+            {% if dossier %}
+              | {% trans "CDD:" %}
+              {{ dossier.statut_cdd|enum_display:'ChoixStatutCDD' }}
+              | {% trans "SIC:" %}
+              {{ dossier.statut_sic|enum_display:'ChoixStatutSIC' }}
+            {% endif %}
+          </div>
+        {% endblock %}
       </div>
-      <div class="btn-group">
-        <button
-            type="button"
-            class="btn btn-default"
-            data-toggle="dropdown"
-            aria-haspopup="true"
-            aria-expanded="false"
-        >
-          {% trans "Actions" %}
-          <span class="caret"></span>
-        </button>
-        <ul class="dropdown-menu pull-right">
-          {% block actions %}
-          {% endblock %}
-        </ul>
+      <div>
+        {% block actions-group %}
+          <div class="btn-group">
+            <button
+                type="button"
+                class="btn btn-default"
+                data-toggle="dropdown"
+                aria-haspopup="true"
+                aria-expanded="false"
+            >
+              {% trans "Actions" %}
+              <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu pull-right">
+              {% block actions %}
+              {% endblock %}
+            </ul>
+          </div>
+        {% endblock %}
       </div>
-
     </div>
     <div class="panel-body">
       {% doctorate_tabs %}
-      <div class="row">
+      <div class="row" style="display: flex">
         <div class="col-md-2 visible-md visible-lg border-right">
           {% doctorate_subtabs %}
         </div>
@@ -102,6 +117,11 @@
       </div>
     </div>
   </div>
+
+{% endblock %}
+
+{% block script %}
+  <script src="{% static 'osis_document/osis-document.umd.min.js' %}"></script>
 
 {% endblock %}
 
@@ -117,7 +137,21 @@
           flex-wrap: wrap;
       }
       .border-right {
-        border-right: 1px solid #ddd;
+          border-right: 1px solid #ddd;
+      }
+      .inline-field-data {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 5px;
+      }
+      p {
+          margin-bottom: 20px;
+      }
+      h3 {
+          margin: 1em 0;
+      }
+      .required_field .control-label:after {
+          color: #a94442;
       }
   </style>
 {% endblock %}

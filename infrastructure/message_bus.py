@@ -25,6 +25,11 @@
 ##############################################################################
 from functools import partial
 
+from admission.ddd.projet_doctoral.doctorat.commands import *
+from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.use_case.read import *
+from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.commands import *
+from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.use_case.write import *
+from admission.ddd.projet_doctoral.doctorat.use_case.read import *
 from admission.ddd.projet_doctoral.preparation.commands import *
 from admission.ddd.projet_doctoral.preparation.use_case.read import *
 from admission.ddd.projet_doctoral.preparation.use_case.write import *
@@ -195,6 +200,24 @@ class MessageBusCommands(AbstractMessageBusCommands):
             demande_repository=DemandeRepository(),
             proposition_repository=PropositionRepository(),
             epreuve_confirmation_repository=EpreuveConfirmationRepository(),
+            doctorat_repository=DoctoratRepository(),
+        ),
+        RecupererEpreuvesConfirmationQuery: partial(
+            recuperer_epreuves_confirmation_service,
+            epreuve_confirmation_repository=EpreuveConfirmationRepository(),
+            doctorat_repository=DoctoratRepository(),
+        ),
+        RecupererDerniereEpreuveConfirmationQuery: partial(
+            recuperer_dernierer_epreuve_confirmation_service,
+            epreuve_confirmation_repository=EpreuveConfirmationRepository(),
+            doctorat_repository=DoctoratRepository(),
+        ),
+        ModifierEpreuveConfirmationParCDDCommand: partial(
+            modifier_epreuve_confirmation_par_cdd_service,
+            epreuve_confirmation_repository=EpreuveConfirmationRepository(),
+        ),
+        RecupererDoctoratQuery: partial(
+            recuperer_doctorat_service,
             doctorat_repository=DoctoratRepository(),
         ),
     }

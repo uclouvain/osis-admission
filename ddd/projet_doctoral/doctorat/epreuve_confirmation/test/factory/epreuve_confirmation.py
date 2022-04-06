@@ -23,6 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import datetime
 import uuid
 
 import factory
@@ -31,7 +32,7 @@ from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.domain.model.ep
     EpreuveConfirmationIdentity,
     EpreuveConfirmation,
 )
-from admission.ddd.projet_doctoral.validation.test.factory.demande import _DemandeIdentityFactory
+from admission.ddd.projet_doctoral.doctorat.test.factory.doctorat import _DoctoratIdentityFactory
 
 
 class _EpreuveConfirmationIdentityFactory(factory.Factory):
@@ -51,10 +52,27 @@ class _EpreuveConfirmationFactory(factory.Factory):
     date_limite = factory.Faker('future_date')
 
 
-class EpreuveConfirmationDemandePreAdmissionSC3DPAvecPromoteursEtMembresCADejaApprouvesAccepteeFactory(
+class EpreuveConfirmation0DoctoratSC3DPFactory(
     _EpreuveConfirmationFactory
 ):
-    entity_id = factory.SubFactory(
-        _EpreuveConfirmationIdentityFactory, uuid='uuid-pre-SC3DP-promoteurs-membres-deja-approuves-1'
-    )
-    doctorat_id = factory.SubFactory(_DemandeIdentityFactory, uuid='uuid-pre-SC3DP-promoteurs-membres-deja-approuves')
+    entity_id = factory.SubFactory(_EpreuveConfirmationIdentityFactory, uuid='c0')
+    doctorat_id = factory.SubFactory(_DoctoratIdentityFactory, uuid='uuid-pre-SC3DP-promoteurs-membres-deja-approuves')
+    date_limite = datetime.date(2022, 12, 5)
+    date = datetime.date(2022, 4, 1)
+
+
+class EpreuveConfirmation1DoctoratSC3DPFactory(
+    _EpreuveConfirmationFactory
+):
+    entity_id = factory.SubFactory(_EpreuveConfirmationIdentityFactory, uuid='c1')
+    doctorat_id = factory.SubFactory(_DoctoratIdentityFactory, uuid='uuid-pre-SC3DP-promoteurs-membres-deja-approuves')
+    date_limite = datetime.date(2022, 4, 5)
+
+
+class EpreuveConfirmation2DoctoratSC3DPFactory(
+    _EpreuveConfirmationFactory
+):
+    entity_id = factory.SubFactory(_EpreuveConfirmationIdentityFactory, uuid='c2')
+    doctorat_id = factory.SubFactory(_DoctoratIdentityFactory, uuid='uuid-pre-SC3DP-promoteurs-membres-deja-approuves')
+    date = datetime.date(2022, 1, 1)
+    date_limite = datetime.date(2022, 1, 5)

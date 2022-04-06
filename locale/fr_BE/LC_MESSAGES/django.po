@@ -391,6 +391,9 @@ msgstr "Configurer"
 msgid "Confirm"
 msgstr "Confirmer"
 
+msgid "Confirmation paper"
+msgstr "Épreuve de confirmation"
+
 msgid "Confirmation paper not found."
 msgstr "Épreuve de confirmation non trouvée."
 
@@ -430,17 +433,26 @@ msgstr "Templates d'email personnalisé"
 msgid "Date of confirmation"
 msgstr "Date de l'épreuve de confirmation"
 
+msgid "Date of confirmation:"
+msgstr "Date de l'épreuve de confirmation :"
+
 msgid "Deadline extended"
 msgstr "Nouvelle échéance"
 
 msgid "Deadline for confirmation"
 msgstr "Date limite pour la confirmation"
 
+msgid "Deadline for confirmation:"
+msgstr "Date limite pour la confirmation :"
+
 msgid "Dedicated time (in EFT)"
 msgstr "Temps consacré (en EFT)"
 
 msgid "Defense"
 msgstr "Soutenance"
+
+msgid "Definitive admission date:"
+msgstr "Date de l'admission définitive :"
 
 msgid "Delete"
 msgstr "Supprimer"
@@ -453,6 +465,9 @@ msgstr "Description"
 
 msgid "Doctoral project"
 msgstr "Projet doctoral"
+
+msgid "Doctoral student:"
+msgstr "Doctorant :"
 
 msgid "Doctorate"
 msgstr "Doctorat"
@@ -525,6 +540,9 @@ msgstr "Fondation Mont Godinne"
 
 msgid "Fondation St Luc"
 msgstr "Fondation St Luc"
+
+msgid "Framework of the supervisory panel report to download"
+msgstr "Canevas du procès-verbal du comité d'accompagnement à télécharger"
 
 msgid "French"
 msgstr "Français"
@@ -709,6 +727,9 @@ msgstr "Raison de non-soutenance"
 msgid "No doctorate found."
 msgstr "Doctorat non trouvé."
 
+msgid "Not specified"
+msgstr "Non spécifié(e)"
+
 msgid "OTHER"
 msgstr "Autre"
 
@@ -741,6 +762,9 @@ msgstr "Pre-admission"
 
 msgid "Page size"
 msgstr "Taille de la page"
+
+msgid "Past confirmation papers"
+msgstr "Epreuves de confirmation passées"
 
 msgid "Personal data"
 msgstr "Données personnelles"
@@ -1004,6 +1028,11 @@ msgstr "Pour validation"
 
 msgid "TO_BE_VERIFIED"
 msgstr "Pour vérification"
+
+msgid "The date of the confirmation paper cannot be later than its deadline."
+msgstr ""
+"La date de l'épreuve de confirmation ne peut être postérieure à sa date "
+"limite."
 
 msgid "The decision of the signing actor"
 msgstr "La décision du signataire"

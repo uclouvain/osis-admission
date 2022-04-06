@@ -25,8 +25,11 @@
 # ##############################################################################
 from typing import List
 
+from attr import dataclass
+
 from admission.ddd.projet_doctoral.doctorat.domain.model.doctorat import DoctoratIdentity, Doctorat
 from admission.ddd.projet_doctoral.doctorat.domain.validator.exceptions import DoctoratNonTrouveException
+from admission.ddd.projet_doctoral.doctorat.dtos import DoctoratDTO
 from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.domain.model.epreuve_confirmation import (
     EpreuveConfirmation,
 )
@@ -41,8 +44,32 @@ from admission.ddd.projet_doctoral.doctorat.test.factory.doctorat import (
 from base.ddd.utils.in_memory_repository import InMemoryGenericRepository
 
 
+@dataclass
+class Doctorant:
+    matricule: str
+    prenom: str
+    nom: str
+
+
+@dataclass
+class Formation:
+    intitule: str
+    sigle: str
+    annee: int
+
+
 class DoctoratInMemoryRepository(InMemoryGenericRepository, IDoctoratRepository):
     entities: List[EpreuveConfirmation] = list()
+    doctorants = [
+        Doctorant("1", "Jean", "Dupont"),
+        Doctorant("2", "Michel", "Durand"),
+        Doctorant("3", "Pierre", "Dupond"),
+    ]
+
+    formations = [
+        Formation("Doctorat en sciences", "SC3DP", 2022),
+        Formation("Doctorat en sciences économiques et de gestion", "ECGM3D", 2022),
+    ]
 
     @classmethod
     def get(cls, entity_id: 'DoctoratIdentity') -> 'Doctorat':
@@ -50,6 +77,24 @@ class DoctoratInMemoryRepository(InMemoryGenericRepository, IDoctoratRepository)
         if not doctorat:
             raise DoctoratNonTrouveException
         return doctorat
+
+    @classmethod
+    def get_dto(cls, entity_id: 'DoctoratIdentity') -> 'DoctoratDTO':
+        doctorat = cls.get(entity_id)
+        doctorant = next(d for d in cls.doctorants if d.matricule == doctorat.matricule_doctorant)
+        formation = next(f for f in cls.formations if f.sigle == doctorat.formation_id.sigle)
+
+        return DoctoratDTO(
+            uuid=str(entity_id.uuid),
+            statut=doctorat.statut.name,
+            reference=doctorat.reference,
+            matricule_doctorant=doctorat.matricule_doctorant,
+            nom_doctorant=doctorant.nom,
+            prenom_doctorant=doctorant.prenom,
+            annee_formation=formation.annee,
+            sigle_formation=formation.sigle,
+            intitule_formation=formation.intitule,
+        )
 
     @classmethod
     def reset(cls):

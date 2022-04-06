@@ -23,7 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import List, Optional
+from typing import List
 
 from admission.ddd.projet_doctoral.doctorat.domain.model.doctorat import DoctoratIdentity
 from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.domain.model.epreuve_confirmation import (
@@ -38,7 +38,9 @@ from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.repository.i_ep
     IEpreuveConfirmationRepository,
 )
 from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.test.factory.epreuve_confirmation import (
-    EpreuveConfirmationDemandePreAdmissionSC3DPAvecPromoteursEtMembresCADejaApprouvesAccepteeFactory,
+    EpreuveConfirmation0DoctoratSC3DPFactory,
+    EpreuveConfirmation1DoctoratSC3DPFactory,
+    EpreuveConfirmation2DoctoratSC3DPFactory,
 )
 from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.validators.exceptions import (
     EpreuveConfirmationNonTrouveeException,
@@ -58,29 +60,34 @@ class EpreuveConfirmationInMemoryRepository(InMemoryGenericRepository, IEpreuveC
 
     @classmethod
     def search_dto_by_doctorat_identity(cls, doctorat_entity_id: 'DoctoratIdentity') -> List['EpreuveConfirmationDTO']:
-        result = [
-            cls._load_confirmation_dto(entity)
-            for entity in cls.entities
-            if entity.doctorat_id.uuid == doctorat_entity_id
-        ]
-        result.sort(key=lambda x: (x.date is None, x.date))
-        return result
+        result = cls.search_by_doctorat_identity(doctorat_entity_id)
+        return [cls._load_confirmation_dto(entity) for entity in result]
 
     @classmethod
-    def search(
-        cls, entity_ids: Optional[List['EpreuveConfirmationIdentity']] = None, **kwargs
-    ) -> List[EpreuveConfirmation]:
-        raise NotImplementedError
-
-    @classmethod
-    def delete(cls, entity_id: 'EpreuveConfirmationIdentity', **kwargs) -> None:
-        raise NotImplementedError
+    def get_dto_by_doctorat_identity(cls, doctorat_entity_id: 'DoctoratIdentity') -> 'EpreuveConfirmationDTO':
+        first_result = cls.search_by_doctorat_identity(doctorat_entity_id)
+        if not first_result:
+            raise EpreuveConfirmationNonTrouveeException
+        return cls._load_confirmation_dto(first_result[0])
 
     @classmethod
     def reset(cls):
         cls.entities = [
-            EpreuveConfirmationDemandePreAdmissionSC3DPAvecPromoteursEtMembresCADejaApprouvesAccepteeFactory(),
+            EpreuveConfirmation0DoctoratSC3DPFactory(),
+            EpreuveConfirmation1DoctoratSC3DPFactory(),
+            EpreuveConfirmation2DoctoratSC3DPFactory(),
         ]
+
+    @classmethod
+    def save(cls, entity: 'EpreuveConfirmation') -> 'EpreuveConfirmationIdentity':
+        try:
+            epreuve_confirmation = cls.get(entity.entity_id)
+            cls.entities.remove(epreuve_confirmation)
+        except EpreuveConfirmationNonTrouveeException:
+            pass
+        cls.entities.append(entity)
+
+        return entity.entity_id
 
     @classmethod
     def get(cls, entity_id: 'EpreuveConfirmationIdentity') -> 'EpreuveConfirmation':
@@ -93,16 +100,6 @@ class EpreuveConfirmationInMemoryRepository(InMemoryGenericRepository, IEpreuveC
     def get_dto(cls, entity_id) -> EpreuveConfirmationDTO:
         epreuve_confirmation = cls.get(entity_id=entity_id)
         return cls._load_confirmation_dto(epreuve_confirmation)
-
-    @classmethod
-    def save(cls, entity: 'EpreuveConfirmation') -> 'EpreuveConfirmationIdentity':
-        try:
-            to_remove = cls.get(entity.entity_id)
-            cls.entities.remove(to_remove)
-        except EpreuveConfirmationNonTrouveeException:
-            pass
-
-        cls.entities.append(entity)
 
     @classmethod
     def _load_confirmation_dto(cls, confirmation_paper: EpreuveConfirmation) -> EpreuveConfirmationDTO:

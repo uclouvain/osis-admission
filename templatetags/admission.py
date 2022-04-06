@@ -87,6 +87,7 @@ TAB_TREES = {
                 Tab('project', _('Doctoral project')),
                 Tab('cotutelle', _('Cotutelle')),
                 Tab('supervision', _('Supervision')),
+                Tab('confirmation', _('Confirmation paper')),
             ],
             Tab('history', _('History'), 'clock'): [
                 Tab('history', _('Status changes')),
@@ -161,3 +162,22 @@ def detail_tab_path_from_update(context, admission_uuid):
         '{}:{}'.format(':'.join(match.namespaces[:-1]), match.url_name),
         args=[admission_uuid],
     )
+
+
+@register.inclusion_tag('admission/includes/field_data.html')
+def field_data(name, data=None, css_class=None, hide_empty=False, translate_data=False):
+    if isinstance(data, list):
+        if data:
+            template_string = "{% load osis_document %}{% document_visualizer files %}"
+            template_context = {'files': data}
+            data = template.Template(template_string).render(template.Context(template_context))
+        else:
+            data = ''
+    elif translate_data is True:
+        data = _(data)
+    return {
+        'name': name,
+        'data': data,
+        'css_class': css_class,
+        'hide_empty': hide_empty,
+    }

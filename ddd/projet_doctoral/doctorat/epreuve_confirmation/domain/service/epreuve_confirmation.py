@@ -30,7 +30,7 @@ from dateutil.relativedelta import relativedelta
 
 from admission.ddd.projet_doctoral.doctorat.domain.model.doctorat import DoctoratIdentity
 from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.builder.epreuve_confirmation_identity import (
-    EpreuveConfirmationIdentityIdentityBuilder,
+    EpreuveConfirmationIdentityBuilder,
 )
 from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.domain.model.epreuve_confirmation import (
     EpreuveConfirmation,
@@ -44,7 +44,7 @@ class EpreuveConfirmationService(interface.DomainService):
     @classmethod
     def initier(cls, doctorat_id: 'DoctoratIdentity') -> EpreuveConfirmation:
         return EpreuveConfirmation(
-            entity_id=EpreuveConfirmationIdentityIdentityBuilder.build_from_uuid(
+            entity_id=EpreuveConfirmationIdentityBuilder.build_from_uuid(
                 str(uuid.uuid4()),
             ),
             doctorat_id=doctorat_id,
