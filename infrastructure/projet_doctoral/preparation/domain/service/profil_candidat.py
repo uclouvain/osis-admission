@@ -25,6 +25,7 @@
 # ##############################################################################
 from typing import List
 
+from django.contrib.postgres.aggregates import ArrayAgg
 from django.db.models import Func, OuterRef, Subquery
 
 from admission.ddd.projet_doctoral.preparation.domain.service.i_profil_candidat import IProfilCandidatTranslator
@@ -124,14 +125,10 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                 'curriculum',
             )
             .annotate(
-                annees_curriculum=Subquery(
-                    CurriculumYear.objects.filter(
-                        person__global_id=OuterRef('global_id'),
-                    )
-                    .order_by()
-                    .annotate(years=Func("academic_year__year", function='ARRAY_AGG'))
-                    .values('years')
-                ),
+                annees_curriculum=ArrayAgg(
+                    "curriculumyear__academic_year__year",
+                    ordering="curriculumyear__academic_year__year"
+                )
             )
             .get(global_id=matricule)
         )
