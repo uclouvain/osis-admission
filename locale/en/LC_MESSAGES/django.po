@@ -272,6 +272,9 @@ msgstr ""
 msgid "Can update the information related to the admission supervision"
 msgstr ""
 
+msgid "Can update the information related to the confirmation paper"
+msgstr ""
+
 msgid "Can update the information related to the curriculum"
 msgstr ""
 
@@ -312,6 +315,9 @@ msgid "Can view the information related to the admission request author"
 msgstr ""
 
 msgid "Can view the information related to the admission supervision"
+msgstr ""
+
+msgid "Can view the information related to the confirmation paper"
 msgstr ""
 
 msgid "Can view the information related to the curriculum"
@@ -367,6 +373,9 @@ msgid "Confirm"
 msgstr ""
 
 msgid "Confirmation paper"
+msgstr ""
+
+msgid "Confirmation paper not completed."
 msgstr ""
 
 msgid "Confirmation paper not found."

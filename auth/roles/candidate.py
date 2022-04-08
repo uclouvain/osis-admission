@@ -32,6 +32,7 @@ from admission.auth.predicates import (
     unconfirmed_proposition,
     is_admission_request_author,
     is_being_enrolled,
+    is_enrolled,
 )
 from osis_role.contrib.models import RoleModel
 
@@ -77,6 +78,9 @@ class Candidate(RoleModel):
                 # Once supervision group is signing, he can
                 'admission.approve_proposition_by_pdf': is_admission_request_author & signing_in_progress,
                 'admission.submit_doctorateadmission': is_admission_request_author & signing_in_progress,
+                # Once the candidate is enrolling, he can
+                'admission.change_doctorateadmission_confirmation': is_admission_request_author & is_enrolled,
+                'admission.view_doctorateadmission_confirmation': is_admission_request_author & is_enrolled,
                 # Future
                 'admission.download_pdf_confirmation': is_admission_request_author,
                 'admission.upload_pdf_confirmation': is_admission_request_author,

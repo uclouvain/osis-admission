@@ -23,19 +23,28 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.ddd.projet_doctoral.doctorat.domain.model.doctorat import DoctoratIdentity
-from osis_common.ddd.interface import EntityIdentityBuilder, CommandRequest, DTO
+import datetime
+from typing import Optional, List
+
+import attr
+
+from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.validators import (
+    ShouldEpreuveConfirmationEtreCompletee,
+    ShouldDateEpreuveEtreValide,
+)
+from base.ddd.utils.business_validator import TwoStepsMultipleBusinessExceptionListValidator, BusinessValidator
 
 
-class DoctoratIdentityBuilder(EntityIdentityBuilder):
-    @classmethod
-    def build_from_command(cls, cmd: 'CommandRequest') -> 'DoctoratIdentity':
-        raise NotImplementedError
+@attr.dataclass(frozen=True, slots=True)
+class SoumettreEpreuveConfirmationValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+    date: Optional[datetime.date]
+    date_limite: datetime.date
 
-    @classmethod
-    def build_from_repository_dto(cls, dto_object: 'DTO') -> 'DoctoratIdentity':
-        raise NotImplementedError
+    def get_data_contract_validators(self) -> List[BusinessValidator]:
+        return []
 
-    @classmethod
-    def build_from_uuid(cls, uuid: str) -> 'DoctoratIdentity':
-        return DoctoratIdentity(uuid=uuid)
+    def get_invariants_validators(self) -> List[BusinessValidator]:
+        return [
+            ShouldEpreuveConfirmationEtreCompletee(self.date),
+            ShouldDateEpreuveEtreValide(self.date, self.date_limite),
+        ]

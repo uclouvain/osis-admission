@@ -220,4 +220,9 @@ class MessageBusCommands(AbstractMessageBusCommands):
             recuperer_doctorat_service,
             doctorat_repository=DoctoratRepository(),
         ),
+        SoumettreEpreuveConfirmationCommand: partial(
+            soumettre_epreuve_confirmation_service,
+            doctorat_repository=DoctoratRepository(),
+            epreuve_confirmation_repository=EpreuveConfirmationRepository(),
+        ),
     }

@@ -23,19 +23,33 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.ddd.projet_doctoral.doctorat.domain.model.doctorat import DoctoratIdentity
-from osis_common.ddd.interface import EntityIdentityBuilder, CommandRequest, DTO
+from rest_framework import serializers
+
+from admission.api.serializers.fields import ActionLinksField, ACTION_LINKS
+from admission.ddd.projet_doctoral.doctorat.dtos import DoctoratDTO
+from base.utils.serializers import DTOSerializer
 
 
-class DoctoratIdentityBuilder(EntityIdentityBuilder):
-    @classmethod
-    def build_from_command(cls, cmd: 'CommandRequest') -> 'DoctoratIdentity':
-        raise NotImplementedError
+class DoctorateIdentityDTOSerializer(serializers.Serializer):
+    uuid = serializers.ReadOnlyField()
 
-    @classmethod
-    def build_from_repository_dto(cls, dto_object: 'DTO') -> 'DoctoratIdentity':
-        raise NotImplementedError
 
-    @classmethod
-    def build_from_uuid(cls, uuid: str) -> 'DoctoratIdentity':
-        return DoctoratIdentity(uuid=uuid)
+class DoctorateDTOSerializer(DTOSerializer):
+    links = ActionLinksField(
+        actions={
+            key: ACTION_LINKS[key] for key in [
+                # Project
+                'retrieve_proposition',
+                # Cotutelle
+                'retrieve_cotutelle',
+                # Supervision
+                'retrieve_supervision',
+                # Confirmation
+                'retrieve_confirmation',
+                'update_confirmation',
+            ]
+        }
+    )
+
+    class Meta:
+        source = DoctoratDTO

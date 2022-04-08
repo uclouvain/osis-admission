@@ -23,19 +23,18 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.ddd.projet_doctoral.doctorat.domain.model.doctorat import DoctoratIdentity
-from osis_common.ddd.interface import EntityIdentityBuilder, CommandRequest, DTO
+from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.commands import SoumettreEpreuveConfirmationCommand
+from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.dtos import EpreuveConfirmationDTO
+from base.utils.serializers import DTOSerializer
 
 
-class DoctoratIdentityBuilder(EntityIdentityBuilder):
-    @classmethod
-    def build_from_command(cls, cmd: 'CommandRequest') -> 'DoctoratIdentity':
-        raise NotImplementedError
+class ConfirmationPaperDTOSerializer(DTOSerializer):
+    class Meta:
+        source = EpreuveConfirmationDTO
 
-    @classmethod
-    def build_from_repository_dto(cls, dto_object: 'DTO') -> 'DoctoratIdentity':
-        raise NotImplementedError
 
-    @classmethod
-    def build_from_uuid(cls, uuid: str) -> 'DoctoratIdentity':
-        return DoctoratIdentity(uuid=uuid)
+class SubmitConfirmationPaperCommandSerializer(DTOSerializer):
+    uuid = None
+
+    class Meta:
+        source = SoumettreEpreuveConfirmationCommand

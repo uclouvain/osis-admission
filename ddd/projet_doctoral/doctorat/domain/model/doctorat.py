@@ -43,3 +43,6 @@ class Doctorat(interface.RootEntity):
     formation_id: FormationIdentity
     matricule_doctorant: str
     reference: str
+
+    def soumettre_epreuve_confirmation(self):
+        self.statut = ChoixStatutDoctorat.SUBMITTED_CONFIRMATION

@@ -53,7 +53,7 @@ class TestModifierEpreuveConfirmationParCDD(SimpleTestCase):
                     date_limite=datetime.date(2022, 7, 1),
                     rapport_recherche=['mon_fichier_1'],
                     proces_verbal_ca=['mon_fichier_2'],
-                    demande_renouvellement_bourse=['mon_fichier_3'],
+                    avis_renouvellement_mandat_recherche=['mon_fichier_3'],
                     date=datetime.date(2022, 4, 1),
                 )
             )
@@ -67,7 +67,7 @@ class TestModifierEpreuveConfirmationParCDD(SimpleTestCase):
                 date_limite=datetime.date(2022, 7, 1),
                 rapport_recherche=['mon_fichier_1'],
                 proces_verbal_ca=['mon_fichier_2'],
-                demande_renouvellement_bourse=['mon_fichier_3'],
+                avis_renouvellement_mandat_recherche=['mon_fichier_3'],
                 date=datetime.date(2022, 4, 1),
             )
         )
@@ -81,4 +81,4 @@ class TestModifierEpreuveConfirmationParCDD(SimpleTestCase):
         self.assertEqual(epreuve_confirmation_mise_a_jour.date_limite, datetime.date(2022, 7, 1))
         self.assertEqual(epreuve_confirmation_mise_a_jour.rapport_recherche, ['mon_fichier_1'])
         self.assertEqual(epreuve_confirmation_mise_a_jour.proces_verbal_ca, ['mon_fichier_2'])
-        self.assertEqual(epreuve_confirmation_mise_a_jour.demande_renouvellement_bourse, ['mon_fichier_3'])
+        self.assertEqual(epreuve_confirmation_mise_a_jour.avis_renouvellement_mandat_recherche, ['mon_fichier_3'])

@@ -330,6 +330,11 @@ class DoctorateAdmission(BaseAdmission):
                 'change_doctorateadmission_supervision',
                 _("Can update the information related to the admission supervision"),
             ),
+            ('view_doctorateadmission_confirmation', _("Can view the information related to the confirmation paper")),
+            (
+                'change_doctorateadmission_confirmation',
+                _("Can update the information related to the confirmation paper"),
+            ),
             ('add_supervision_member', _("Can add a member to the supervision group")),
             ('remove_supervision_member', _("Can remove a member from the supervision group")),
             ('submit_doctorateadmission', _("Can submit a doctorate admission proposition")),

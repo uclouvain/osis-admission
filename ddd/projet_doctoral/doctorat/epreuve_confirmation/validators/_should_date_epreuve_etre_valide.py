@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,19 +23,22 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.ddd.projet_doctoral.doctorat.domain.model.doctorat import DoctoratIdentity
-from osis_common.ddd.interface import EntityIdentityBuilder, CommandRequest, DTO
+import datetime
+from typing import Optional
+
+import attr
+
+from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.validators.exceptions import (
+    EpreuveConfirmationDateIncorrecteException,
+)
+from base.ddd.utils.business_validator import BusinessValidator
 
 
-class DoctoratIdentityBuilder(EntityIdentityBuilder):
-    @classmethod
-    def build_from_command(cls, cmd: 'CommandRequest') -> 'DoctoratIdentity':
-        raise NotImplementedError
+@attr.dataclass(frozen=True, slots=True)
+class ShouldDateEpreuveEtreValide(BusinessValidator):
+    date: Optional[datetime.date]
+    date_limite: datetime.date
 
-    @classmethod
-    def build_from_repository_dto(cls, dto_object: 'DTO') -> 'DoctoratIdentity':
-        raise NotImplementedError
-
-    @classmethod
-    def build_from_uuid(cls, uuid: str) -> 'DoctoratIdentity':
-        return DoctoratIdentity(uuid=uuid)
+    def validate(self, *args, **kwargs):
+        if self.date and self.date > self.date_limite:
+            raise EpreuveConfirmationDateIncorrecteException

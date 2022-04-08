@@ -296,6 +296,10 @@ msgid "Can update the information related to the admission supervision"
 msgstr ""
 "Peut modifier les informations relatives à la supervision de l'admission"
 
+msgid "Can update the information related to the confirmation paper"
+msgstr ""
+"Peut modifier les informations relatives à l'épreuve de confirmation"
+
 msgid "Can update the information related to the curriculum"
 msgstr "Peut modifier les informations relatives au curriculum"
 
@@ -338,6 +342,9 @@ msgstr ""
 
 msgid "Can view the information related to the admission supervision"
 msgstr "Peut voir les informations relatives à la supervision de l'admission"
+
+msgid "Can view the information related to the confirmation paper"
+msgstr "Peut voir les informations relatives à l'épreuve de confirmation"
 
 msgid "Can view the information related to the curriculum"
 msgstr "Peut voir les informations relatives au curriculum"
@@ -393,6 +400,9 @@ msgstr "Confirmer"
 
 msgid "Confirmation paper"
 msgstr "Épreuve de confirmation"
+
+msgid "Confirmation paper not completed."
+msgstr "Épreuve de confirmation non complétée."
 
 msgid "Confirmation paper not found."
 msgstr "Épreuve de confirmation non trouvée."

@@ -32,11 +32,11 @@ from osis_common.ddd.interface import EntityIdentityBuilder, CommandRequest, DTO
 class EpreuveConfirmationIdentityBuilder(EntityIdentityBuilder):
     @classmethod
     def build_from_command(cls, cmd: 'CommandRequest') -> 'EpreuveConfirmationIdentity':
-        pass
+        raise NotImplementedError
 
     @classmethod
     def build_from_repository_dto(cls, dto_object: 'DTO') -> 'EpreuveConfirmationIdentity':
-        pass
+        raise NotImplementedError
 
     @classmethod
     def build_from_uuid(cls, uuid: str) -> 'EpreuveConfirmationIdentity':

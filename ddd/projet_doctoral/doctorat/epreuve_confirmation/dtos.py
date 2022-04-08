@@ -24,7 +24,7 @@
 #
 # ##############################################################################
 import datetime
-from typing import Optional, List
+from typing import Optional, List, Union
 
 import attr
 
@@ -47,7 +47,7 @@ class EpreuveConfirmationDTO(interface.DTO):
     date: Optional[datetime.date] = None
     rapport_recherche: List[str] = attr.Factory(list)
 
-    demande_prolongation: Optional['DemandeProlongationDTO'] = None
+    demande_prolongation: Optional[DemandeProlongationDTO] = None
 
     proces_verbal_ca: List[str] = attr.Factory(list)
     attestation_reussite: List[str] = attr.Factory(list)

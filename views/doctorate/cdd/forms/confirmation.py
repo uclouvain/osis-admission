@@ -76,7 +76,7 @@ class CddDoctorateAdmissionConfirmationFormView(LoginRequiredMixin, CddRequiredM
             'date': self.last_confirmation_paper.date,
             'rapport_recherche': self.last_confirmation_paper.rapport_recherche,
             'proces_verbal_ca': self.last_confirmation_paper.proces_verbal_ca,
-            'demande_renouvellement_bourse': self.last_confirmation_paper.demande_renouvellement_bourse,
+            'avis_renouvellement_mandat_recherche': self.last_confirmation_paper.avis_renouvellement_mandat_recherche,
         }
 
     def form_valid(self, form):

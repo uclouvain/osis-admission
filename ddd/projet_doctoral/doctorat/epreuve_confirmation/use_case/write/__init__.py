@@ -24,3 +24,4 @@
 #
 # ##############################################################################
 from .modifier_epreuve_confirmation_par_cdd import modifier_epreuve_confirmation_par_cdd_service
+from .soumettre_epreuve_confirmation import soumettre_epreuve_confirmation_service

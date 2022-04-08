@@ -50,4 +50,15 @@ class ModifierEpreuveConfirmationParCDDCommand(interface.CommandRequest):
     rapport_recherche: List[str]
 
     proces_verbal_ca: List[str]
-    demande_renouvellement_bourse: List[str]
+    avis_renouvellement_mandat_recherche: List[str]
+
+
+@attr.s(frozen=True, slots=True, auto_attribs=True)
+class SoumettreEpreuveConfirmationCommand(interface.CommandRequest):
+    uuid: str
+
+    date: datetime.date
+    rapport_recherche: List[str]
+
+    proces_verbal_ca: List[str]
+    avis_renouvellement_mandat_recherche: List[str]

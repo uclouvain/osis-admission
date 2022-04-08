@@ -232,6 +232,11 @@ class MessageBusInMemoryCommands(AbstractMessageBusCommands):
             recuperer_doctorat_service,
             doctorat_repository=DoctoratInMemoryRepository(),
         ),
+        SoumettreEpreuveConfirmationCommand: partial(
+            soumettre_epreuve_confirmation_service,
+            doctorat_repository=DoctoratInMemoryRepository(),
+            epreuve_confirmation_repository=EpreuveConfirmationInMemoryRepository(),
+        ),
     }
 
 
