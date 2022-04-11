@@ -45,8 +45,11 @@ class CddMailTemplateListView(PermissionRequiredMixin, generic.ListView):
     permission_required = 'admission.change_cddmailtemplate'
 
     def get_queryset(self):
+        current_manager = CddManager.objects.filter(person=self.request.user.person).first()
+        if not current_manager:
+            raise PermissionDenied('Current user has no CDD')
         qs = CddMailTemplate.objects.filter(
-            cdd_id=CddManager.objects.filter(person=self.request.user.person).first().entity_id,
+            cdd_id=current_manager.entity_id,
             language=get_language(),
         ).order_by('name')
         object_list = defaultdict(list)

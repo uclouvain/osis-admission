@@ -26,9 +26,12 @@
 {% endcomment %}
 
 {% block actions %}
+  {% update_tab_path_from_detail admission.uuid as update_url %}
+  {% if update_url %}
   <li>
-    <a href="{% update_tab_path_from_detail admission.uuid %}">
+    <a href="{{ update_url }}">
       {% trans "Update" %}
     </a>
   </li>
+  {% endif %}
 {% endblock %}

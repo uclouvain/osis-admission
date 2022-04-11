@@ -32,7 +32,6 @@ from admission.views.config.cdd_mail_templates import (
     CddMailTemplatePreview,
 )
 from admission.views.doctorate.cdd import *
-from admission.views.doctorate.cdd.list import CddDoctorateAdmissionList
 
 app_name = 'admission'
 
@@ -63,11 +62,14 @@ doctorate_detail_paths = [
     path('project', CddDoctorateAdmissionProjectDetailView.as_view(), name='project'),
     path('cotutelle', CddDoctorateAdmissionCotutelleDetailView.as_view(), name='cotutelle'),
     path('supervision', CddDoctorateAdmissionSupervisionDetailView.as_view(), name='supervision'),
+    path('history', CddDoctorateHistoryView.as_view(), name='history'),
+    path('history-all', CddDoctorateHistoryView.as_view(), name='history-all'),
     path('update/', include((doctorate_update_paths, 'update'))),
 ]
 doctorate_cdd_paths = [
     path('', CddDoctorateAdmissionList.as_view(), name='list'),
     path('<uuid:pk>/', include(doctorate_detail_paths)),
+    path('<uuid:uuid>/history-api', CddDoctorateHistoryAPIView.as_view(), name='history-api'),
 ]
 
 cdd_mail_template_paths = [

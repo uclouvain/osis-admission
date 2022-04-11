@@ -26,7 +26,7 @@
 from dataclasses import dataclass
 
 from django import template
-from django.urls import reverse
+from django.urls import NoReverseMatch, reverse
 from django.utils.translation import gettext_lazy as _
 
 register = template.Library()
@@ -88,6 +88,10 @@ TAB_TREES = {
                 Tab('cotutelle', _('Cotutelle')),
                 Tab('supervision', _('Supervision')),
             ],
+            Tab('history', _('History'), 'clock'): [
+                Tab('history', _('Status changes')),
+                Tab('history-all', _('All history')),
+            ],
         },
     },
 }
@@ -140,10 +144,13 @@ def doctorate_subtabs(context):
 def update_tab_path_from_detail(context, admission_uuid):
     """From a detail page, get the path of the update page."""
     match = context['request'].resolver_match
-    return reverse(
-        '{}:update:{}'.format(match.namespace, match.url_name),
-        args=[admission_uuid],
-    )
+    try:
+        return reverse(
+            '{}:update:{}'.format(match.namespace, match.url_name),
+            args=[admission_uuid],
+        )
+    except NoReverseMatch:
+        return ''
 
 
 @register.simple_tag(takes_context=True)
