@@ -172,7 +172,7 @@ class MessageBusCommands(AbstractMessageBusCommands):
             historique=Historique(),
             notification=Notification(),
         ),
-        SearchDoctoratCommand: partial(
+        RechercherDoctoratCommand: partial(
             rechercher_doctorats,
             doctorat_translator=DoctoratTranslator(),
         ),

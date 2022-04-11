@@ -31,8 +31,6 @@ from admission.ddd.projet_doctoral.preparation.use_case.write import *
 from admission.ddd.projet_doctoral.validation.commands import *
 from admission.ddd.projet_doctoral.validation.use_case.read import *
 from admission.ddd.projet_doctoral.validation.use_case.write import *
-from admission.infrastructure.projet_doctoral.doctorat.epreuve_confirmation.repository.in_memory.epreuve_confirmation \
-    import (EpreuveConfirmationInMemoryRepository)
 from admission.infrastructure.projet_doctoral.doctorat.repository.in_memory.doctorat import DoctoratInMemoryRepository
 from admission.infrastructure.projet_doctoral.preparation.domain.service.in_memory.doctorat import (
     DoctoratInMemoryTranslator,
@@ -59,6 +57,9 @@ from admission.infrastructure.projet_doctoral.preparation.repository.in_memory.p
 from admission.infrastructure.projet_doctoral.validation.repository.in_memory.demande import DemandeInMemoryRepository
 from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
 from infrastructure.utils import AbstractMessageBusCommands, MessageBus
+from .projet_doctoral.doctorat.epreuve_confirmation.repository.in_memory.epreuve_confirmation import (
+    EpreuveConfirmationInMemoryRepository,
+)
 
 
 class MessageBusInMemoryCommands(AbstractMessageBusCommands):
@@ -69,7 +70,7 @@ class MessageBusInMemoryCommands(AbstractMessageBusCommands):
             doctorat_translator=DoctoratInMemoryTranslator(),
             historique=HistoriqueInMemory(),
         ),
-        SearchDoctoratCommand: partial(
+        RechercherDoctoratCommand: partial(
             rechercher_doctorats,
             doctorat_translator=DoctoratInMemoryTranslator(),
         ),
