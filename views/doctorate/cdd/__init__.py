@@ -23,23 +23,24 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from .list import CddDoctorateAdmissionList
-from .details.person import CddDoctorateAdmissionPersonDetailView
 from .details.coordonnees import CddDoctorateAdmissionCoordonneesDetailView
+from .details.cotutelle import CddDoctorateAdmissionCotutelleDetailView
 from .details.curriculum import CddDoctorateAdmissionCurriculumDetailView
 from .details.education import CddDoctorateAdmissionEducationDetailView
+from .details.history import CddDoctorateHistoryAPIView, CddDoctorateHistoryView
 from .details.languages import CddDoctorateAdmissionLanguagesDetailView
+from .details.person import CddDoctorateAdmissionPersonDetailView
 from .details.project import CddDoctorateAdmissionProjectDetailView
-from .details.cotutelle import CddDoctorateAdmissionCotutelleDetailView
 from .details.supervision import CddDoctorateAdmissionSupervisionDetailView
-from .forms.person import CddDoctorateAdmissionPersonFormView
 from .forms.coordonnees import CddDoctorateAdmissionCoordonneesFormView
+from .forms.cotutelle import CddDoctorateAdmissionCotutelleFormView
 from .forms.curriculum import CddDoctorateAdmissionCurriculumFormView
 from .forms.education import CddDoctorateAdmissionEducationFormView
 from .forms.languages import CddDoctorateAdmissionLanguagesFormView
+from .forms.person import CddDoctorateAdmissionPersonFormView
 from .forms.project import CddDoctorateAdmissionProjectFormView
-from .forms.cotutelle import CddDoctorateAdmissionCotutelleFormView
 from .forms.supervision import CddDoctorateAdmissionSupervisionFormView
+from .list import CddDoctorateAdmissionList
 
 __all__ = [
     'CddDoctorateAdmissionList',
@@ -59,4 +60,6 @@ __all__ = [
     'CddDoctorateAdmissionProjectFormView',
     'CddDoctorateAdmissionCotutelleFormView',
     'CddDoctorateAdmissionSupervisionFormView',
+    'CddDoctorateHistoryAPIView',
+    'CddDoctorateHistoryView',
 ]

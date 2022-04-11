@@ -131,6 +131,9 @@ msgstr ""
 msgid "All CA members must have approved the proposition."
 msgstr ""
 
+msgid "All history"
+msgstr ""
+
 msgid "All promoters must have approved the proposition."
 msgstr ""
 
@@ -502,6 +505,9 @@ msgid "General"
 msgstr ""
 
 msgid "HTML"
+msgstr ""
+
+msgid "History"
 msgstr ""
 
 msgid "INVALID"
@@ -907,6 +913,9 @@ msgid "Search"
 msgstr ""
 
 msgid "Secondary studies"
+msgstr ""
+
+msgid "Status changes"
 msgstr ""
 
 msgid "Status:"

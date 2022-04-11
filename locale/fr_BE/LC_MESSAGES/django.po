@@ -147,6 +147,9 @@ msgstr "Type de l'admission"
 msgid "All CA members must have approved the proposition."
 msgstr "Tous les membres du CA doivent approuver la proposition."
 
+msgid "All history"
+msgstr "Historique complet"
+
 msgid "All promoters must have approved the proposition."
 msgstr "Tous les promoteurs doivent approuver la proposition."
 
@@ -522,6 +525,9 @@ msgstr "Général"
 
 msgid "HTML"
 msgstr "HTML"
+
+msgid "History"
+msgstr "Historique"
 
 msgid "INVALID"
 msgstr "Invalide"
@@ -950,6 +956,9 @@ msgstr "Rechercher"
 
 msgid "Secondary studies"
 msgstr "Études secondaires"
+
+msgid "Status changes"
+msgstr "Changements de statut"
 
 msgid "Status:"
 msgstr "Statut :"
