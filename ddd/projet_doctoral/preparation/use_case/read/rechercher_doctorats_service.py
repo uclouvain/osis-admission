@@ -26,7 +26,7 @@
 import datetime
 from typing import List
 
-from admission.ddd.projet_doctoral.preparation.commands import SearchDoctoratCommand
+from admission.ddd.projet_doctoral.preparation.commands import RechercherDoctoratCommand
 from admission.ddd.projet_doctoral.preparation.domain.service.i_doctorat import IDoctoratTranslator
 from admission.ddd.projet_doctoral.preparation.dtos import DoctoratDTO
 from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import GetCurrentAcademicYear
@@ -34,7 +34,7 @@ from infrastructure.shared_kernel.academic_year.repository import academic_year 
 
 
 def rechercher_doctorats(
-    cmd: 'SearchDoctoratCommand',
+    cmd: 'RechercherDoctoratCommand',
     doctorat_translator: 'IDoctoratTranslator',
 ) -> List['DoctoratDTO']:
     # TODO :: comment déterminer l'année concernée pour la formation ? Sur base d'un calendrier ?

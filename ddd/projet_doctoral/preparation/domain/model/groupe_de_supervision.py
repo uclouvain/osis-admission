@@ -64,7 +64,7 @@ class GroupeDeSupervisionIdentity(interface.EntityIdentity):
 
 
 @attr.dataclass(slots=True)
-class GroupeDeSupervision(interface.Entity):
+class GroupeDeSupervision(interface.RootEntity):
     entity_id: 'GroupeDeSupervisionIdentity'
     proposition_id: 'PropositionIdentity'
     signatures_promoteurs: List['SignaturePromoteur'] = attr.Factory(list)

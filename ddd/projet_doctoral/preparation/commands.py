@@ -96,7 +96,7 @@ class CompleterPropositionCommand(interface.CommandRequest):
 
 
 @attr.dataclass(frozen=True, slots=True)
-class SearchDoctoratCommand(interface.QueryRequest):
+class RechercherDoctoratCommand(interface.QueryRequest):
     sigle_secteur_entite_gestion: str
 
 
