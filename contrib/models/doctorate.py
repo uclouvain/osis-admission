@@ -25,7 +25,6 @@
 # ##############################################################################
 import uuid
 
-from django.contrib.postgres.fields import JSONField
 from django.core.cache import cache
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db import models
@@ -234,7 +233,7 @@ class DoctorateAdmission(BaseAdmission):
         upload_to=admission_directory_path,
     )
 
-    detailed_status = JSONField(
+    detailed_status = models.JSONField(
         default=dict,
         encoder=DjangoJSONEncoder,
     )
@@ -268,7 +267,7 @@ class DoctorateAdmission(BaseAdmission):
         verbose_name=_("Admission submission date"),
         null=True,
     )
-    submitted_profile = JSONField(
+    submitted_profile = models.JSONField(
         verbose_name=_("Submitted profile"),
         default=dict,
     )

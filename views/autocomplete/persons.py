@@ -33,51 +33,50 @@ from base.models.person import Person
 
 
 class PersonsAutocomplete(LoginRequiredMixin, autocomplete.Select2QuerySetView):
-
     def get_results(self, context):
         return [
             {
                 'id': person.get('global_id'),
                 'text': ', '.join([person.get('last_name'), person.get('first_name')]),
-            } for person in context['object_list']
+            }
+            for person in context['object_list']
         ]
 
 
 class CandidatesAutocomplete(PersonsAutocomplete):
-
     def get_queryset(self):
         q = self.request.GET.get('q', '')
 
-        return Person.objects.filter(
-            Q(first_name__icontains=q)
-            | Q(last_name__icontains=q)
-            | Q(email__icontains=q)
-            | Q(student__registration_id__icontains=q)
-        ).annotate(
-            has_admission=Exists(Candidate.objects.filter(person=OuterRef('pk'))),
-        ).filter(
-            has_admission=True,
-        ).order_by('last_name', 'first_name').values(
-            'first_name',
-            'last_name',
-            'global_id',
-        ) if q else []
+        qs = (
+            Person.objects.filter(
+                Q(first_name__icontains=q)
+                | Q(last_name__icontains=q)
+                | Q(email__icontains=q)
+                | Q(student__registration_id__icontains=q)
+            )
+            .filter(Exists(Candidate.objects.filter(person=OuterRef('pk'))))  # Has admissions
+            .order_by('last_name', 'first_name')
+            .values(
+                'first_name',
+                'last_name',
+                'global_id',
+            )
+        )
+        return qs if q else []
 
 
 class PromotersAutocomplete(PersonsAutocomplete):
     def get_queryset(self):
         q = self.request.GET.get('q', '')
 
-        return Person.objects.filter(
-            Q(first_name__icontains=q)
-            | Q(last_name__icontains=q)
-            | Q(global_id__icontains=q)
-        ).annotate(
-            is_promoter=Exists(Promoter.objects.filter(person=OuterRef('pk'))),
-        ).filter(
-            is_promoter=True,
-        ).order_by('last_name', 'first_name').values(
-            'first_name',
-            'last_name',
-            'global_id',
-        ) if q else []
+        qs = (
+            Person.objects.filter(Q(first_name__icontains=q) | Q(last_name__icontains=q) | Q(global_id__icontains=q))
+            .filter(Exists(Promoter.objects.filter(person=OuterRef('pk'))))  # Is a promoter
+            .order_by('last_name', 'first_name')
+            .values(
+                'first_name',
+                'last_name',
+                'global_id',
+            )
+        )
+        return qs if q else []

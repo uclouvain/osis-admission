@@ -262,8 +262,12 @@ class PropositionRepository(IPropositionRepository):
         if cotutelle is not None:
             qs = qs.filter(cotutelle=cotutelle)
         if cdds:
-            qs = qs.annotate(cdd_acronym=Subquery(EntityVersion.objects.current(date.today()).filter(
-                entity_id=OuterRef('doctorate__management_entity_id')).values('acronym')[:1])
+            qs = qs.alias(
+                cdd_acronym=Subquery(
+                    EntityVersion.objects.current(date.today())
+                    .filter(entity_id=OuterRef('doctorate__management_entity_id'))
+                    .values('acronym')[:1]
+                )
             ).filter(cdd_acronym__in=cdds)
 
         if entity_ids is not None:
