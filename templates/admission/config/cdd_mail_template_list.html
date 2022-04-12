@@ -53,6 +53,7 @@
         {% for cdd_mail_template in object_list|get_item:identifier %}
           {% url 'admission:config:cdd_mail_template:preview' identifier=cdd_mail_template.identifier pk=cdd_mail_template.pk as preview_url %}
           {% url 'admission:config:cdd_mail_template:edit'  identifier=cdd_mail_template.identifier pk=cdd_mail_template.pk as change_url %}
+          {% url 'admission:config:cdd_mail_template:delete'  identifier=cdd_mail_template.identifier pk=cdd_mail_template.pk as delete_url %}
           <li class="list-group-item container-fluid">
             {{ cdd_mail_template.name }}
             <div class="pull-right">
@@ -63,6 +64,9 @@
               <a href="{{ preview_url }}" class="btn btn-default">
                 <span class="fa fa-eye"></span>
                 {% trans "Preview" %}
+              </a>
+              <a href="{{ delete_url }}" class="btn btn-danger">
+                <span class="fa fa-trash"></span>
               </a>
             </div>
           </li>

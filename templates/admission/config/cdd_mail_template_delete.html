@@ -1,3 +1,5 @@
+{% extends "layout.html" %}
+{% load bootstrap3 %}
 {% load i18n %}
 
 {% comment "License" %}
@@ -24,29 +26,22 @@
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
 
-{# TODO Add the admission permission #}
-<li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button"
-     aria-haspopup="true" aria-expanded="false"
-     id="lnk_home_dropdown_admissions">
-    <span class="hidden-md fa fa-address-card" aria-hidden="true"></span>
-    <span class="hidden-sm">{% trans 'Enrolments' %}</span>
-    <span class="caret"></span>
-  </a>
-  <ul class="dropdown-menu">
-    <li>
-      <a href="{% url 'admission:doctorate:cdd:list' %}" id="lnk_dropdown_doctorateadmissions">
-        <span class="fa fa-graduation-cap"></span>
-        {% trans 'Doctorate enrolments' %}
-      </a>
-    </li>
-    {% if perms.admission.change_cddmailtemplate %}
-      <li>
-        <a href="{% url 'admission:config:cdd_mail_template:list' %}">
-          <span class="fa fa-tools"></span>
-          {% trans 'CDD Mail template' %}
-        </a>
-      </li>
-    {% endif %}
-  </ul>
-</li>
+{% block breadcrumb %}
+  <li><a href="{% url 'admission:config:cdd_mail_template:list' %}">{% trans 'Custom mail templates' %}</a></li>
+  <li class="active">{{ instances.0.name }}</li>
+{% endblock %}
+
+{% block content %}
+  <div class="page-header">
+    <h2>{% trans 'Custom mail template' %}<small>{{ instances.0.name }}</small></h2>
+  </div>
+  <form action="" method="post">
+    {% csrf_token %}
+    {% blocktrans with name=instance.name %}
+      <h2>Delete "{{ name }}" custom mail template?</h2>
+      <p>Are you sure you want to delete the custom mail template? This cannot be undone.</p>
+    {% endblocktrans %}
+    <a class="btn btn-default" href="{% url 'admission:config:cdd_mail_template:list' %}">{% trans 'Cancel' %}</a>
+    <button type="submit" class="btn btn-danger">{% trans "Delete" %}</button>
+  </form>
+{% endblock %}
