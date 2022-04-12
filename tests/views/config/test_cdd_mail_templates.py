@@ -28,6 +28,7 @@ from unittest.mock import patch
 from django.conf import settings
 from django.shortcuts import resolve_url
 from django.test import TestCase
+from osis_mail_template import templates
 from rest_framework import status
 
 from admission.contrib.models import CddMailTemplate
@@ -35,8 +36,6 @@ from admission.mail_templates import ADMISSION_EMAIL_MEMBER_REMOVED
 from admission.tests.factories.roles import CddManagerFactory
 from base.tests.factories.person import PersonFactory
 from base.tests.factories.user import SuperUserFactory, UserFactory
-from osis_mail_template import templates
-from osis_mail_template.exceptions import MissingToken
 
 
 class CddMailTemplatesTestCase(TestCase):
@@ -78,6 +77,11 @@ class CddMailTemplatesTestCase(TestCase):
             identifier=ADMISSION_EMAIL_MEMBER_REMOVED,
             pk=self.cdd_mail_template.pk,
         )
+        self.delete_url = resolve_url(
+            'admission:config:cdd_mail_template:delete',
+            identifier=ADMISSION_EMAIL_MEMBER_REMOVED,
+            pk=self.cdd_mail_template.pk,
+        )
 
         self.data = {
             "name": "Nom",
@@ -105,6 +109,14 @@ class CddMailTemplatesTestCase(TestCase):
         response = self.client.get(self.list_url)
         self.assertContains(response, "Some name", status_code=status.HTTP_200_OK)
         self.assertContains(response, templates.get_description(ADMISSION_EMAIL_MEMBER_REMOVED))
+
+    def test_list_as_superuser(self, *args):
+        superuser = SuperUserFactory()
+        self.client.force_login(superuser)
+        PersonFactory(user=superuser)
+
+        response = self.client.get(self.list_url)
+        self.assertContains(response, "Current user has no CDD", status_code=status.HTTP_403_FORBIDDEN)
 
     def test_preview_as_cdd(self):
         self.client.force_login(self.cdd_user)
@@ -161,3 +173,12 @@ class CddMailTemplatesTestCase(TestCase):
 
         response = self.client.get(self.add_url)
         self.assertContains(response, "Current user has no CDD", status_code=status.HTTP_403_FORBIDDEN)
+
+    def test_delete_as_cdd(self):
+        self.client.force_login(self.cdd_user)
+
+        response = self.client.get(self.delete_url)
+        self.assertContains(response, "Some name", status_code=status.HTTP_200_OK)
+        response = self.client.post(self.delete_url)
+        self.assertRedirects(response, self.list_url)
+        self.assertEqual(CddMailTemplate.objects.filter(name="Nom modifié").count(), 0)

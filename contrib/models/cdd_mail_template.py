@@ -52,6 +52,17 @@ class CddMailTemplateManager(MailTemplateManager):
             )
         )
 
+    def delete_by_id_and_pk(self, identifier: str, pk: int):
+        """Delete mail template instances associated with an identifier and a pk"""
+        return (
+            self.get_queryset()
+            .filter(
+                identifier=identifier,
+                name=Subquery(CddMailTemplate.objects.filter(pk=pk).values('name')[:1]),
+            )
+            .delete()
+        )
+
 
 class CddMailTemplate(models.Model):
     identifier = models.CharField(

@@ -26,18 +26,28 @@
 from collections import defaultdict
 from typing import Any, Dict
 
+from django import forms
 from django.conf import settings
+from django.contrib import messages
 from django.core.exceptions import PermissionDenied
+from django.forms import BaseForm
 from django.urls import reverse_lazy
-from django.utils.translation import get_language
+from django.utils.translation import get_language, gettext_lazy as _
 from django.views import generic
+from osis_mail_template.forms import MailTemplateConfigureForm
+from osis_mail_template.models import MailTemplate
 
 from admission.auth.roles.cdd_manager import CddManager
 from admission.contrib.models import CddMailTemplate
 from admission.forms.cdd_mail_template import NameMailTemplateForm
-from osis_mail_template.forms import MailTemplateConfigureForm
-from osis_mail_template.models import MailTemplate
 from osis_role.contrib.views import PermissionRequiredMixin
+
+__all__ = [
+    "CddMailTemplateChangeView",
+    "CddMailTemplateDeleteView",
+    "CddMailTemplateListView",
+    "CddMailTemplatePreview",
+]
 
 
 class CddMailTemplateListView(PermissionRequiredMixin, generic.ListView):
@@ -153,3 +163,22 @@ class CddMailTemplatePreview(PermissionRequiredMixin, generic.TemplateView):
         identifier = self.kwargs['identifier']
         context['instances'] = CddMailTemplate.objects.get_by_id_and_pk(identifier, self.kwargs['pk'])
         return context
+
+
+class CddMailTemplateDeleteView(PermissionRequiredMixin, generic.FormView):
+    template_name = "admission/config/cdd_mail_template_delete.html"
+    permission_required = 'admission.change_cddmailtemplate'
+    form_class = forms.Form
+    success_url = reverse_lazy('admission:config:cdd_mail_template:list')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        identifier = self.kwargs['identifier']
+        context['instance'] = CddMailTemplate.objects.get_by_id_and_pk(identifier, self.kwargs['pk'])[0]
+        return context
+
+    def form_valid(self, form: BaseForm):
+        identifier = self.kwargs['identifier']
+        CddMailTemplate.objects.delete_by_id_and_pk(identifier, self.kwargs['pk'])
+        messages.success(self.request, _("Custom mail template deleted successfully"))
+        return super().form_valid(form)

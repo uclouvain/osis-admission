@@ -27,6 +27,15 @@ msgstr ""
 #, python-format
 msgid ""
 "\n"
+"      <h2>Delete \"%(name)s\" custom mail template?</h2>\n"
+"      <p>Are you sure you want to delete the custom mail template? This "
+"cannot be undone.</p>\n"
+"    "
+msgstr ""
+
+#, python-format
+msgid ""
+"\n"
 "    One doctorate enrolment\n"
 "    "
 msgid_plural ""
@@ -385,6 +394,9 @@ msgid "Curriculum"
 msgstr ""
 
 msgid "Custom mail template"
+msgstr ""
+
+msgid "Custom mail template deleted successfully"
 msgstr ""
 
 msgid "Custom mail templates"

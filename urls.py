@@ -26,11 +26,7 @@
 from django.urls import include, path
 
 import admission.views.autocomplete as autocomplete_views
-from admission.views.config.cdd_mail_templates import (
-    CddMailTemplateChangeView,
-    CddMailTemplateListView,
-    CddMailTemplatePreview,
-)
+from admission.views.config.cdd_mail_templates import *
 from admission.views.doctorate.cdd import *
 
 app_name = 'admission'
@@ -76,6 +72,7 @@ cdd_mail_template_paths = [
     path('', CddMailTemplateListView.as_view(), name='list'),
     path('preview/<str:identifier>/<int:pk>', CddMailTemplatePreview.as_view(), name='preview'),
     path('edit/<str:identifier>/<int:pk>', CddMailTemplateChangeView.as_view(), name='edit'),
+    path('delete/<str:identifier>/<int:pk>', CddMailTemplateDeleteView.as_view(), name='delete'),
     path('add/<str:identifier>', CddMailTemplateChangeView.as_view(), name='add'),
 ]
 config_paths = [
