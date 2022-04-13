@@ -212,6 +212,11 @@ class DoctorateAdmission(BaseAdmission):
         null=True,
         blank=True,
     )
+    cotutelle_institution_fwb = models.BooleanField(
+        verbose_name=_("Institution Federation Wallonie-Bruxelles"),
+        blank=True,
+        null=True,
+    )
     cotutelle_institution = models.CharField(
         max_length=255,
         verbose_name=_("Institution"),

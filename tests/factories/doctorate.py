@@ -54,6 +54,12 @@ def _generate_reference(obj):
     )
 
 
+def generate_token():
+    from admission.tests.factories import WriteTokenFactory
+
+    return WriteTokenFactory().token
+
+
 class DoctorateAdmissionFactory(factory.DjangoModelFactory):
     class Meta:
         model = DoctorateAdmission
@@ -62,6 +68,16 @@ class DoctorateAdmissionFactory(factory.DjangoModelFactory):
     doctorate = factory.SubFactory(DoctorateFactory)
     thesis_institute = factory.SubFactory(EntityVersionFactory)
     reference = factory.LazyAttribute(_generate_reference)
+
+    class Params:
+        with_cotutelle = factory.Trait(
+            cotutelle=True,
+            cotutelle_motivation="Very motivated",
+            cotutelle_institution_fwb=False,
+            cotutelle_institution="Somewhere",
+            cotutelle_opening_request=factory.LazyFunction(generate_token),  # This is to overcome circular import
+            cotutelle_convention=factory.LazyFunction(generate_token),
+        )
 
     @factory.post_generation
     def create_candidate_role(self, create, extracted, **kwargs):

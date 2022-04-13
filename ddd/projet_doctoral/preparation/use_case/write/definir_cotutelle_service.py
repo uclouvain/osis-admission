@@ -46,6 +46,7 @@ def definir_cotutelle(
     # WHEN
     groupe_de_supervision.definir_cotutelle(
         motivation=cmd.motivation,
+        institution_fwb=cmd.institution_fwb,
         institution=cmd.institution,
         demande_ouverture=cmd.demande_ouverture,
         convention=cmd.convention,

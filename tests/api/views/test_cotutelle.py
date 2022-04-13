@@ -45,6 +45,7 @@ class CotutelleApiTestCase(APITestCase):
         cls.admission = DoctorateAdmissionFactory(doctorate__management_entity=doctoral_commission)
         cls.updated_data = {
             'motivation': "A good motive",
+            'institution_fwb': False,
             'institution': "Famous institution",
             'demande_ouverture': [],
             'convention': [],

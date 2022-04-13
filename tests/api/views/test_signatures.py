@@ -108,11 +108,7 @@ class RequestSignaturesApiTestCase(APITestCase):
         self.client.force_authenticate(user=self.candidate.user)
         admission = DoctorateAdmissionFactory(
             candidate=self.candidate,
-            cotutelle=True,
-            cotutelle_motivation="Very motivated",
-            cotutelle_institution="Somewhere",
-            cotutelle_opening_request=[WriteTokenFactory().token],
-            cotutelle_convention=[WriteTokenFactory().token],
+            with_cotutelle=True,
             financing_type=ChoixTypeFinancement.SELF_FUNDING.name,
             project_title="title",
             project_abstract="abstract",
@@ -139,11 +135,7 @@ class RequestSignaturesApiTestCase(APITestCase):
         self.client.force_authenticate(user=self.candidate.user)
         admission = DoctorateAdmissionFactory(
             candidate=self.candidate,
-            cotutelle=True,
-            cotutelle_motivation="Very motivated",
-            cotutelle_institution="Somewhere",
-            cotutelle_opening_request=[WriteTokenFactory().token],
-            cotutelle_convention=[WriteTokenFactory().token],
+            with_cotutelle=True,
             financing_type=ChoixTypeFinancement.SELF_FUNDING.name,
             project_title="title",
             project_abstract="abstract",

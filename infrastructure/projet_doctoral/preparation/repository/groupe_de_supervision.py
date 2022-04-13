@@ -66,6 +66,7 @@ class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
         if proposition.cotutelle is not None:
             cotutelle = Cotutelle(
                 motivation=proposition.cotutelle_motivation,
+                institution_fwb=proposition.cotutelle_institution_fwb,
                 institution=proposition.cotutelle_institution,
                 demande_ouverture=proposition.cotutelle_opening_request,
                 convention=proposition.cotutelle_convention,
@@ -122,6 +123,7 @@ class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
         return CotutelleDTO(
             cotutelle=None if groupe.cotutelle is None else groupe.cotutelle != pas_de_cotutelle,
             motivation=groupe.cotutelle and groupe.cotutelle.motivation or '',
+            institution_fwb=groupe.cotutelle and groupe.cotutelle.institution_fwb or None,
             institution=groupe.cotutelle and groupe.cotutelle.institution or '',
             demande_ouverture=groupe.cotutelle and groupe.cotutelle.demande_ouverture or [],
             convention=groupe.cotutelle and groupe.cotutelle.convention or [],
@@ -197,6 +199,7 @@ class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
         proposition.cotutelle = None if entity.cotutelle is None else bool(entity.cotutelle.motivation)
         if entity.cotutelle:
             proposition.cotutelle_motivation = entity.cotutelle.motivation
+            proposition.cotutelle_institution_fwb = entity.cotutelle.institution_fwb
             proposition.cotutelle_institution = entity.cotutelle.institution
             proposition.cotutelle_opening_request = entity.cotutelle.demande_ouverture
             proposition.cotutelle_convention = entity.cotutelle.convention

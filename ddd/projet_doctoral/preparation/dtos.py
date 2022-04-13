@@ -222,6 +222,7 @@ class GroupeDeSupervisionDTO(interface.DTO):
 class CotutelleDTO(interface.DTO):
     cotutelle: Optional[bool]
     motivation: Optional[str]
+    institution_fwb: Optional[bool]
     institution: Optional[str]
     demande_ouverture: List[str]
     convention: List[str]
