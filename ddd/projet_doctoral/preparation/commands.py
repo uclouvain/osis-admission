@@ -166,6 +166,7 @@ class SoumettrePropositionCommand(interface.CommandRequest):
 class DefinirCotutelleCommand(interface.CommandRequest):
     uuid_proposition: str
     motivation: Optional[str] = ''
+    institution_fwb: Optional[bool] = None
     institution: Optional[str] = ''
     demande_ouverture: List[str] = attr.Factory(list)
     convention: List[str] = attr.Factory(list)

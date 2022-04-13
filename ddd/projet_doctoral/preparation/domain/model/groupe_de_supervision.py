@@ -245,6 +245,7 @@ class GroupeDeSupervision(interface.RootEntity):
     def definir_cotutelle(
         self,
         motivation: Optional[str],
+        institution_fwb: Optional[bool],
         institution: Optional[str],
         demande_ouverture: List[str] = None,
         convention: List[str] = None,
@@ -252,6 +253,7 @@ class GroupeDeSupervision(interface.RootEntity):
     ):
         self.cotutelle = Cotutelle(
             motivation=motivation or '',
+            institution_fwb=institution_fwb,
             institution=institution or '',
             demande_ouverture=demande_ouverture or [],
             convention=convention or [],
