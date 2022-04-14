@@ -138,7 +138,7 @@ msgid "Admission type"
 msgstr ""
 
 msgid "All CA members must have approved the proposition."
-msgstr ""
+msgstr "All supervisory panel members must have approved the proposition."
 
 msgid "All history"
 msgstr ""
@@ -147,7 +147,7 @@ msgid "All promoters must have approved the proposition."
 msgstr ""
 
 msgid "Already a member of CA."
-msgstr ""
+msgstr "Already a member of the supervisory panel."
 
 msgid "Already a promoter."
 msgstr ""
@@ -168,7 +168,7 @@ msgid "Brief justification"
 msgstr ""
 
 msgid "CA Member"
-msgstr ""
+msgstr "Supervisory panel member"
 
 msgid "CANCELLED"
 msgstr ""
@@ -540,6 +540,9 @@ msgstr ""
 msgid "Institution"
 msgstr ""
 
+msgid "Institution Federation Wallonie-Bruxelles"
+msgstr ""
+
 msgid "Institution should be set when PhD has been set to yes or partial"
 msgstr ""
 
@@ -633,7 +636,7 @@ msgid "Member of supervision group not invited."
 msgstr ""
 
 msgid "Membre CA not found."
-msgstr ""
+msgstr "Supervisory panel member not found."
 
 msgid "Modified"
 msgstr ""
@@ -992,6 +995,7 @@ msgstr ""
 
 msgid "There can be no more CA members in the supervision group."
 msgstr ""
+"There can be no more supervisory panel members in the supervision group."
 
 msgid "There can be no more promoters in the supervision group."
 msgstr ""
@@ -1088,6 +1092,8 @@ msgstr ""
 
 msgid "You must add at least one CA member in order to request signatures."
 msgstr ""
+"You must add at least one supervisory panel member in order to request "
+"signatures."
 
 msgid ""
 "You must add at least one UCLouvain promoter in order to request signatures."

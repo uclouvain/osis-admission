@@ -26,6 +26,7 @@
 from functools import partial
 
 from django.core.exceptions import ValidationError
+from django.db.models import Case, When
 from django.utils.translation import gettext as _
 from rest_framework import mixins, status
 from rest_framework.generics import GenericAPIView
@@ -74,7 +75,13 @@ class LanguagesKnowledgeViewSet(
     schema = LanguagesKnowledgeSchema()
 
     def get_queryset(self):
-        return self.request.user.person.languages_knowledge.all()
+        return self.request.user.person.languages_knowledge.alias(
+            relevancy=Case(
+                When(language__code='EN', then=2),
+                When(language__code='FR', then=1),
+                default=0,
+            ),
+        ).order_by('-relevancy', 'language__code')
 
     def get(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)

@@ -159,7 +159,8 @@ msgid "Admission type"
 msgstr "Type de l'admission"
 
 msgid "All CA members must have approved the proposition."
-msgstr "Tous les membres du CA doivent approuver la proposition."
+msgstr ""
+"Tous les membres du comité d'accompagnement doivent approuver la proposition."
 
 msgid "All history"
 msgstr "Historique complet"
@@ -168,7 +169,7 @@ msgid "All promoters must have approved the proposition."
 msgstr "Tous les promoteurs doivent approuver la proposition."
 
 msgid "Already a member of CA."
-msgstr "Déjà membre du CA"
+msgstr "Déjà membre du comité d'accompagnement"
 
 msgid "Already a promoter."
 msgstr "Déjà promoteur"
@@ -189,7 +190,7 @@ msgid "Brief justification"
 msgstr "Justification succincte"
 
 msgid "CA Member"
-msgstr "Membre du CA"
+msgstr "Membre du comité d'accompagnement"
 
 msgid "CANCELLED"
 msgstr "Annulé"
@@ -564,6 +565,9 @@ msgstr "Identifiant"
 msgid "Institution"
 msgstr "Institution"
 
+msgid "Institution Federation Wallonie-Bruxelles"
+msgstr "Institution de la Federation Wallonie-Bruxelles"
+
 msgid "Institution should be set when PhD has been set to yes or partial"
 msgstr ""
 "L'institution doit être renseignée quand le doctorat a déjà été réalisé "
@@ -664,7 +668,7 @@ msgid "Member of supervision group not invited."
 msgstr "Membre du groupe de supervision non invité"
 
 msgid "Membre CA not found."
-msgstr "Membre du CA non trouvé"
+msgstr "Membre du comité d'accompagnement non trouvé"
 
 msgid "Modified"
 msgstr "Modifée"
@@ -1039,7 +1043,8 @@ msgstr "La procédure de demande de signature n'a pas été lancée."
 
 msgid "There can be no more CA members in the supervision group."
 msgstr ""
-"Il ne peut y avoir davantage de membres du CA dans le groupe de supervision."
+"Il ne peut y avoir davantage de membres du comité d'accompagnement dans le "
+"groupe de supervision."
 
 msgid "There can be no more promoters in the supervision group."
 msgstr ""
@@ -1141,7 +1146,8 @@ msgstr ""
 
 msgid "You must add at least one CA member in order to request signatures."
 msgstr ""
-"Vous devez ajouter au moins un membre CA afin de demander les signatures."
+"Vous devez ajouter au moins un membre du comité d'accompagnement afin de "
+"demander les signatures."
 
 msgid ""
 "You must add at least one UCLouvain promoter in order to request signatures."

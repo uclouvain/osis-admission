@@ -40,4 +40,5 @@ class LanguageKnowledgeSerializer(serializers.ModelSerializer):
             "listening_comprehension",
             "speaking_ability",
             "writing_ability",
+            "certificate",
         )
