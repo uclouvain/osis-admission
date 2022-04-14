@@ -123,7 +123,7 @@ class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
         return CotutelleDTO(
             cotutelle=None if groupe.cotutelle is None else groupe.cotutelle != pas_de_cotutelle,
             motivation=groupe.cotutelle and groupe.cotutelle.motivation or '',
-            institution_fwb=groupe.cotutelle and groupe.cotutelle.institution_fwb or None,
+            institution_fwb=groupe.cotutelle and groupe.cotutelle.institution_fwb,
             institution=groupe.cotutelle and groupe.cotutelle.institution or '',
             demande_ouverture=groupe.cotutelle and groupe.cotutelle.demande_ouverture or [],
             convention=groupe.cotutelle and groupe.cotutelle.convention or [],

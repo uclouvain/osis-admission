@@ -41,18 +41,21 @@ class LanguagesKnowledgeTestCase(APITestCase):
         cls.user = CandidateFactory().person.user
         cls.url = reverse("languages-knowledge")
         cls.french_knowledge_data = {
+            "certificate": [],
             "language": "FR",
             "listening_comprehension": "C2",
             "speaking_ability": "C2",
             "writing_ability": "C2",
         }
         cls.english_knowledge_data = {
+            "certificate": [],
             "language": "EN",
             "listening_comprehension": "C2",
             "speaking_ability": "B2",
             "writing_ability": "C1",
         }
         cls.germany_knowledge_data = {
+            "certificate": [],
             "language": "DE",
             "listening_comprehension": "C2",
             "speaking_ability": "C2",
@@ -83,8 +86,8 @@ class LanguagesKnowledgeTestCase(APITestCase):
     def test_languages_knowledge_get(self):
         self.create_languages_knowledge([self.french_knowledge_data, self.english_knowledge_data])
         response = self.client.get(self.url)
-        self.assertEqual(response.json()[0], self.french_knowledge_data)
-        self.assertEqual(response.json()[1], self.english_knowledge_data)
+        self.assertDictEqual(response.json()[0], self.english_knowledge_data)
+        self.assertDictEqual(response.json()[1], self.french_knowledge_data)
 
     def test_languages_knowledge_create(self):
         response = self.create_languages_knowledge(
@@ -96,8 +99,8 @@ class LanguagesKnowledgeTestCase(APITestCase):
 
     def test_languages_knowledge_create_should_fail_if_language_set_more_than_once(self):
         with self.assertRaises(
-                ValidationError,
-                msg=_("You cannot fill in a language more than once, please correct the form.")
+            ValidationError,
+            msg=_("You cannot fill in a language more than once, please correct the form."),
         ):
             self.create_languages_knowledge(
                 [
