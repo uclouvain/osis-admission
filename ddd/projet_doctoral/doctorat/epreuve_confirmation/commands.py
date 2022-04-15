@@ -62,3 +62,11 @@ class SoumettreEpreuveConfirmationCommand(interface.CommandRequest):
 
     proces_verbal_ca: List[str]
     avis_renouvellement_mandat_recherche: List[str]
+
+
+@attr.s(frozen=True, slots=True, auto_attribs=True)
+class CompleterEpreuveConfirmationParPromoteurCommand(interface.CommandRequest):
+    uuid: str
+
+    proces_verbal_ca: List[str]
+    avis_renouvellement_mandat_recherche: List[str]

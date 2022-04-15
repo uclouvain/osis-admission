@@ -23,5 +23,5 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from .recuperer_epreuves_confirmation import recuperer_epreuves_confirmation_service
-from .recuperer_derniere_epreuve_confirmation import recuperer_dernierer_epreuve_confirmation_service
+from .recuperer_epreuves_confirmation_service import recuperer_epreuves_confirmation
+from .recuperer_derniere_epreuve_confirmation_service import recuperer_derniere_epreuve_confirmation

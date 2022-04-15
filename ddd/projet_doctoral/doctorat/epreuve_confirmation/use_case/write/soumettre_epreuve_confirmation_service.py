@@ -23,36 +23,47 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from admission.ddd.projet_doctoral.doctorat.domain.model.doctorat import DoctoratIdentity
 from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.builder.epreuve_confirmation_identity import (
     EpreuveConfirmationIdentityBuilder,
 )
 from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.commands import (
-    ModifierEpreuveConfirmationParCDDCommand,
-)
-from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.domain.model.epreuve_confirmation import (
-    EpreuveConfirmationIdentity,
+    SoumettreEpreuveConfirmationCommand,
 )
 from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.repository.i_epreuve_confirmation import (
     IEpreuveConfirmationRepository,
 )
+from admission.ddd.projet_doctoral.doctorat.repository.i_doctorat import IDoctoratRepository
 
 
-def modifier_epreuve_confirmation_par_cdd_service(
-    cmd: 'ModifierEpreuveConfirmationParCDDCommand',
+def soumettre_epreuve_confirmation(
+    cmd: 'SoumettreEpreuveConfirmationCommand',
+    doctorat_repository: 'IDoctoratRepository',
     epreuve_confirmation_repository: 'IEpreuveConfirmationRepository',
-) -> EpreuveConfirmationIdentity:
+) -> DoctoratIdentity:
     # GIVEN
     epreuve_confirmation_id = EpreuveConfirmationIdentityBuilder.build_from_uuid(cmd.uuid)
     epreuve_confirmation = epreuve_confirmation_repository.get(epreuve_confirmation_id)
 
-    # WHEN
-    epreuve_confirmation.completer(
+    epreuve_confirmation.verifier(
         date=cmd.date,
-        date_limite=cmd.date_limite,
+        date_limite=epreuve_confirmation.date_limite,
+    )
+
+    doctorat = doctorat_repository.get(epreuve_confirmation.doctorat_id)
+
+    # WHEN
+    epreuve_confirmation.soumettre(
+        date=cmd.date,
         rapport_recherche=cmd.rapport_recherche,
         proces_verbal_ca=cmd.proces_verbal_ca,
         avis_renouvellement_mandat_recherche=cmd.avis_renouvellement_mandat_recherche,
     )
+    doctorat.soumettre_epreuve_confirmation()
 
     # THEN
-    return epreuve_confirmation_repository.save(epreuve_confirmation)
+    # TODO Send notifications
+    doctorat_repository.save(doctorat)
+    epreuve_confirmation_repository.save(epreuve_confirmation)
+
+    return epreuve_confirmation.doctorat_id

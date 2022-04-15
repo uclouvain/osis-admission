@@ -203,26 +203,30 @@ class MessageBusCommands(AbstractMessageBusCommands):
             doctorat_repository=DoctoratRepository(),
         ),
         RecupererEpreuvesConfirmationQuery: partial(
-            recuperer_epreuves_confirmation_service,
+            recuperer_epreuves_confirmation,
             epreuve_confirmation_repository=EpreuveConfirmationRepository(),
             doctorat_repository=DoctoratRepository(),
         ),
         RecupererDerniereEpreuveConfirmationQuery: partial(
-            recuperer_dernierer_epreuve_confirmation_service,
+            recuperer_derniere_epreuve_confirmation,
             epreuve_confirmation_repository=EpreuveConfirmationRepository(),
             doctorat_repository=DoctoratRepository(),
         ),
         ModifierEpreuveConfirmationParCDDCommand: partial(
-            modifier_epreuve_confirmation_par_cdd_service,
+            modifier_epreuve_confirmation_par_cdd,
             epreuve_confirmation_repository=EpreuveConfirmationRepository(),
         ),
         RecupererDoctoratQuery: partial(
-            recuperer_doctorat_service,
+            recuperer_doctorat,
             doctorat_repository=DoctoratRepository(),
         ),
         SoumettreEpreuveConfirmationCommand: partial(
-            soumettre_epreuve_confirmation_service,
+            soumettre_epreuve_confirmation,
             doctorat_repository=DoctoratRepository(),
+            epreuve_confirmation_repository=EpreuveConfirmationRepository(),
+        ),
+        CompleterEpreuveConfirmationParPromoteurCommand: partial(
+            completer_epreuve_confirmation_par_promoteur,
             epreuve_confirmation_repository=EpreuveConfirmationRepository(),
         ),
     }

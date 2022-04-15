@@ -215,26 +215,30 @@ class MessageBusInMemoryCommands(AbstractMessageBusCommands):
             doctorat_repository=DoctoratInMemoryRepository(),
         ),
         RecupererEpreuvesConfirmationQuery: partial(
-            recuperer_epreuves_confirmation_service,
+            recuperer_epreuves_confirmation,
             epreuve_confirmation_repository=EpreuveConfirmationInMemoryRepository(),
             doctorat_repository=DoctoratInMemoryRepository(),
         ),
         RecupererDerniereEpreuveConfirmationQuery: partial(
-            recuperer_dernierer_epreuve_confirmation_service,
+            recuperer_derniere_epreuve_confirmation,
             epreuve_confirmation_repository=EpreuveConfirmationInMemoryRepository(),
             doctorat_repository=DoctoratInMemoryRepository(),
         ),
         ModifierEpreuveConfirmationParCDDCommand: partial(
-            modifier_epreuve_confirmation_par_cdd_service,
+            modifier_epreuve_confirmation_par_cdd,
             epreuve_confirmation_repository=EpreuveConfirmationInMemoryRepository(),
         ),
         RecupererDoctoratQuery: partial(
-            recuperer_doctorat_service,
+            recuperer_doctorat,
             doctorat_repository=DoctoratInMemoryRepository(),
         ),
         SoumettreEpreuveConfirmationCommand: partial(
-            soumettre_epreuve_confirmation_service,
+            soumettre_epreuve_confirmation,
             doctorat_repository=DoctoratInMemoryRepository(),
+            epreuve_confirmation_repository=EpreuveConfirmationInMemoryRepository(),
+        ),
+        CompleterEpreuveConfirmationParPromoteurCommand: partial(
+            completer_epreuve_confirmation_par_promoteur,
             epreuve_confirmation_repository=EpreuveConfirmationInMemoryRepository(),
         ),
     }

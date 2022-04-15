@@ -23,25 +23,36 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import List
-
-from admission.ddd.projet_doctoral.doctorat.builder.doctorat_identity import DoctoratIdentityBuilder
-from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.commands import RecupererEpreuvesConfirmationQuery
-from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.dtos import EpreuveConfirmationDTO
+from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.builder.epreuve_confirmation_identity import (
+    EpreuveConfirmationIdentityBuilder,
+)
+from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.commands import (
+    ModifierEpreuveConfirmationParCDDCommand,
+)
+from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.domain.model.epreuve_confirmation import (
+    EpreuveConfirmationIdentity,
+)
 from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.repository.i_epreuve_confirmation import (
     IEpreuveConfirmationRepository,
 )
-from admission.ddd.projet_doctoral.doctorat.repository.i_doctorat import IDoctoratRepository
 
 
-def recuperer_epreuves_confirmation_service(
-    cmd: 'RecupererEpreuvesConfirmationQuery',
+def modifier_epreuve_confirmation_par_cdd(
+    cmd: 'ModifierEpreuveConfirmationParCDDCommand',
     epreuve_confirmation_repository: 'IEpreuveConfirmationRepository',
-    doctorat_repository: 'IDoctoratRepository',
-) -> List[EpreuveConfirmationDTO]:
+) -> EpreuveConfirmationIdentity:
     # GIVEN
-    doctorat_id = DoctoratIdentityBuilder.build_from_uuid(cmd.doctorat_uuid)
-    doctorat_repository.get(doctorat_id)
+    epreuve_confirmation_id = EpreuveConfirmationIdentityBuilder.build_from_uuid(cmd.uuid)
+    epreuve_confirmation = epreuve_confirmation_repository.get(epreuve_confirmation_id)
+
+    # WHEN
+    epreuve_confirmation.completer(
+        date=cmd.date,
+        date_limite=cmd.date_limite,
+        rapport_recherche=cmd.rapport_recherche,
+        proces_verbal_ca=cmd.proces_verbal_ca,
+        avis_renouvellement_mandat_recherche=cmd.avis_renouvellement_mandat_recherche,
+    )
 
     # THEN
-    return epreuve_confirmation_repository.search_dto_by_doctorat_identity(doctorat_id)
+    return epreuve_confirmation_repository.save(epreuve_confirmation)

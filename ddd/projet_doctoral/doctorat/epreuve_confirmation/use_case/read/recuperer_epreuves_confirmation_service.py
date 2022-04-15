@@ -23,6 +23,25 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from .modifier_epreuve_confirmation_par_cdd_service import modifier_epreuve_confirmation_par_cdd
-from .soumettre_epreuve_confirmation_service import soumettre_epreuve_confirmation
-from .completer_epreuve_confirmation_par_promoteur_service import completer_epreuve_confirmation_par_promoteur
+from typing import List
+
+from admission.ddd.projet_doctoral.doctorat.builder.doctorat_identity import DoctoratIdentityBuilder
+from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.commands import RecupererEpreuvesConfirmationQuery
+from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.dtos import EpreuveConfirmationDTO
+from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.repository.i_epreuve_confirmation import (
+    IEpreuveConfirmationRepository,
+)
+from admission.ddd.projet_doctoral.doctorat.repository.i_doctorat import IDoctoratRepository
+
+
+def recuperer_epreuves_confirmation(
+    cmd: 'RecupererEpreuvesConfirmationQuery',
+    epreuve_confirmation_repository: 'IEpreuveConfirmationRepository',
+    doctorat_repository: 'IDoctoratRepository',
+) -> List[EpreuveConfirmationDTO]:
+    # GIVEN
+    doctorat_id = DoctoratIdentityBuilder.build_from_uuid(cmd.doctorat_uuid)
+    doctorat_repository.get(doctorat_id)
+
+    # THEN
+    return epreuve_confirmation_repository.search_dto_by_doctorat_identity(doctorat_id)

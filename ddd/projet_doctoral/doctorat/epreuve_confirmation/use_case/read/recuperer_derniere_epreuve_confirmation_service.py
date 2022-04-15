@@ -34,7 +34,7 @@ from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.repository.i_ep
 from admission.ddd.projet_doctoral.doctorat.repository.i_doctorat import IDoctoratRepository
 
 
-def recuperer_dernierer_epreuve_confirmation_service(
+def recuperer_derniere_epreuve_confirmation(
     cmd: 'RecupererDerniereEpreuveConfirmationQuery',
     epreuve_confirmation_repository: 'IEpreuveConfirmationRepository',
     doctorat_repository: 'IDoctoratRepository',

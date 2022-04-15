@@ -1900,6 +1900,42 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - propositions
+  /propositions/{uuid}/supervised_confirmation:
+    put:
+      operationId: complete_confirmation_paper_by_promoter
+      description: Complete the confirmation paper related to a doctorate
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CompleteConfirmationPaperByPromoterCommand'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DoctorateIdentityDTO'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
 components:
   schemas:
     Dashboard:
@@ -3660,6 +3696,20 @@ components:
       required:
       - date
       - rapport_recherche
+      - proces_verbal_ca
+      - avis_renouvellement_mandat_recherche
+    CompleteConfirmationPaperByPromoterCommand:
+      type: object
+      properties:
+        proces_verbal_ca:
+          type: array
+          items:
+            type: string
+        avis_renouvellement_mandat_recherche:
+          type: array
+          items:
+            type: string
+      required:
       - proces_verbal_ca
       - avis_renouvellement_mandat_recherche
     Error:

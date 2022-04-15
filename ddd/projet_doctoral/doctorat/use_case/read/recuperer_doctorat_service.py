@@ -29,7 +29,7 @@ from admission.ddd.projet_doctoral.doctorat.dtos import DoctoratDTO
 from admission.ddd.projet_doctoral.doctorat.repository.i_doctorat import IDoctoratRepository
 
 
-def recuperer_doctorat_service(
+def recuperer_doctorat(
     cmd: 'RecupererDoctoratQuery',
     doctorat_repository: 'IDoctoratRepository',
 ) -> DoctoratDTO:

@@ -107,3 +107,11 @@ class EpreuveConfirmation(interface.RootEntity):
             date_limite=date_limite,
             date=date,
         ).validate()
+
+    def completer_par_promoteur(
+        self,
+        proces_verbal_ca: List[str],
+        avis_renouvellement_mandat_recherche: List[str],
+    ):
+        self.proces_verbal_ca = proces_verbal_ca
+        self.avis_renouvellement_mandat_recherche = avis_renouvellement_mandat_recherche
