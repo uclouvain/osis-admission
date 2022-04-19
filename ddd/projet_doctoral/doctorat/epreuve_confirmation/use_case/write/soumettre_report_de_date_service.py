@@ -23,36 +23,40 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from admission.ddd.projet_doctoral.doctorat.domain.model.doctorat import DoctoratIdentity
+from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.builder.epreuve_confirmation_identity import (
+    EpreuveConfirmationIdentityBuilder,
+)
 from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.commands import (
-    SoumettreEpreuveConfirmationCommand,
-    CompleterEpreuveConfirmationParPromoteurCommand,
     SoumettreReportDeDateCommand,
 )
-from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.dtos import EpreuveConfirmationDTO
-from base.utils.serializers import DTOSerializer
+from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.repository.i_epreuve_confirmation import (
+    IEpreuveConfirmationRepository,
+)
 
 
-class ConfirmationPaperDTOSerializer(DTOSerializer):
-    class Meta:
-        source = EpreuveConfirmationDTO
+def soumettre_report_de_date(
+    cmd: 'SoumettreReportDeDateCommand',
+    epreuve_confirmation_repository: 'IEpreuveConfirmationRepository',
+) -> DoctoratIdentity:
+    # GIVEN
+    epreuve_confirmation_id = EpreuveConfirmationIdentityBuilder.build_from_uuid(cmd.uuid)
+    epreuve_confirmation = epreuve_confirmation_repository.get(epreuve_confirmation_id)
 
+    epreuve_confirmation.verifier_demande_prolongation(
+        nouvelle_echeance=cmd.nouvelle_echeance,
+        justification_succincte=cmd.justification_succincte,
+    )
 
-class SubmitConfirmationPaperCommandSerializer(DTOSerializer):
-    uuid = None
+    # WHEN
+    epreuve_confirmation.faire_demande_prolongation(
+        nouvelle_echeance=cmd.nouvelle_echeance,
+        justification_succincte=cmd.justification_succincte,
+        lettre_justification=cmd.lettre_justification,
+    )
 
-    class Meta:
-        source = SoumettreEpreuveConfirmationCommand
+    # THEN
+    # TODO Send notifications
+    epreuve_confirmation_repository.save(epreuve_confirmation)
 
-
-class CompleteConfirmationPaperByPromoterCommandSerializer(DTOSerializer):
-    uuid = None
-
-    class Meta:
-        source = CompleterEpreuveConfirmationParPromoteurCommand
-
-
-class SubmitConfirmationPaperExtensionRequestCommandSerializer(DTOSerializer):
-    uuid = None
-
-    class Meta:
-        source = SoumettreReportDeDateCommand
+    return epreuve_confirmation.doctorat_id

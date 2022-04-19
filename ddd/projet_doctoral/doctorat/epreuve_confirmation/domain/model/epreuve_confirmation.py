@@ -34,6 +34,7 @@ from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.domain.model._d
 )
 from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.validators.validator_by_business_action import (
     SoumettreEpreuveConfirmationValidatorList,
+    SoumettreDemandeProlongationValidatorList,
 )
 from osis_common.ddd import interface
 
@@ -62,14 +63,14 @@ class EpreuveConfirmation(interface.RootEntity):
 
     def faire_demande_prolongation(
         self,
-        nouvelle_echeance: datetime.datetime,
+        nouvelle_echeance: datetime.date,
         justification_succincte: str,
-        lettre_justification: List[str] = None,
+        lettre_justification: List[str],
     ):
         self.demande_prolongation = DemandeProlongation(
             nouvelle_echeance=nouvelle_echeance,
             justification_succincte=justification_succincte,
-            lettre_justification=lettre_justification or [],
+            lettre_justification=lettre_justification,
         )
 
     def completer(
@@ -115,3 +116,13 @@ class EpreuveConfirmation(interface.RootEntity):
     ):
         self.proces_verbal_ca = proces_verbal_ca
         self.avis_renouvellement_mandat_recherche = avis_renouvellement_mandat_recherche
+
+    def verifier_demande_prolongation(
+        self,
+        nouvelle_echeance: datetime.date,
+        justification_succincte: str,
+    ):
+        SoumettreDemandeProlongationValidatorList(
+            nouvelle_echeance=nouvelle_echeance,
+            justification_succincte=justification_succincte,
+        ).validate()

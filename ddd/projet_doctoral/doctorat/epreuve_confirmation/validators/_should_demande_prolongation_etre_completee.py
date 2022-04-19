@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,7 +23,21 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from .modifier_epreuve_confirmation_par_cdd_service import modifier_epreuve_confirmation_par_cdd
-from .soumettre_epreuve_confirmation_service import soumettre_epreuve_confirmation
-from .completer_epreuve_confirmation_par_promoteur_service import completer_epreuve_confirmation_par_promoteur
-from .soumettre_report_de_date_service import soumettre_report_de_date
+import datetime
+
+import attr
+
+from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.validators.exceptions import (
+    DemandeProlongationNonCompleteeException,
+)
+from base.ddd.utils.business_validator import BusinessValidator
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ShouldDemandeProlongationEtreCompletee(BusinessValidator):
+    nouvelle_echeance: datetime.date
+    justification_succincte: str
+
+    def validate(self, *args, **kwargs):
+        if not self.nouvelle_echeance or not self.justification_succincte:
+            raise DemandeProlongationNonCompleteeException

@@ -507,6 +507,9 @@ msgstr ""
 msgid "Export"
 msgstr ""
 
+msgid "Extension request not completed."
+msgstr ""
+
 msgid "FNRS"
 msgstr ""
 

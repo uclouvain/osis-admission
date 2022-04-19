@@ -31,6 +31,7 @@ import attr
 from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.validators import (
     ShouldEpreuveConfirmationEtreCompletee,
     ShouldDateEpreuveEtreValide,
+    ShouldDemandeProlongationEtreCompletee,
 )
 from base.ddd.utils.business_validator import TwoStepsMultipleBusinessExceptionListValidator, BusinessValidator
 
@@ -47,4 +48,21 @@ class SoumettreEpreuveConfirmationValidatorList(TwoStepsMultipleBusinessExceptio
         return [
             ShouldEpreuveConfirmationEtreCompletee(self.date),
             ShouldDateEpreuveEtreValide(self.date, self.date_limite),
+        ]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class SoumettreDemandeProlongationValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+    nouvelle_echeance: datetime.date
+    justification_succincte: str
+
+    def get_data_contract_validators(self) -> List[BusinessValidator]:
+        return []
+
+    def get_invariants_validators(self) -> List[BusinessValidator]:
+        return [
+            ShouldDemandeProlongationEtreCompletee(
+                self.nouvelle_echeance,
+                self.justification_succincte,
+            ),
         ]

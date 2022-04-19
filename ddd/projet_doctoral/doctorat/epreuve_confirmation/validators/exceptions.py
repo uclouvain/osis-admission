@@ -51,3 +51,11 @@ class EpreuveConfirmationDateIncorrecteException(BusinessException):
     def __init__(self, **kwargs):
         message = _("The date of the confirmation paper cannot be later than its deadline.")
         super().__init__(message, **kwargs)
+
+
+class DemandeProlongationNonCompleteeException(BusinessException):
+    status_code = "EPREUVE-CONFIRMATION-4"
+
+    def __init__(self, **kwargs):
+        message = _("Extension request not completed.")
+        super().__init__(message, **kwargs)

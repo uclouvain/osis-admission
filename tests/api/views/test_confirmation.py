@@ -374,7 +374,6 @@ class LastConfirmationAPIViewTestCase(APITestCase):
         methods_not_allowed = [
             'delete',
             'patch',
-            'post',
         ]
 
         for method in methods_not_allowed:
@@ -520,6 +519,118 @@ class LastConfirmationAPIViewTestCase(APITestCase):
                 'rapport_recherche': [],
                 'proces_verbal_ca': [],
                 'avis_renouvellement_mandat_recherche': [],
+            },
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(
+            response.json()['non_field_errors'][0]['status_code'],
+            EpreuveConfirmationNonTrouveeException.status_code,
+        )
+
+    def test_post_confirmation_student_without_new_date(self):
+        self.client.force_authenticate(user=self.student.user)
+        response = self.client.post(
+            self.doctorate_url,
+            format='json',
+            data={
+                'justification_succincte': 'My reason',
+                'lettre_justification': [],
+            },
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(
+            response.json()['nouvelle_echeance'][0],
+            'Ce champ est obligatoire.',
+        )
+
+    def test_post_confirmation_student_without_justification(self):
+        self.client.force_authenticate(user=self.student.user)
+        response = self.client.post(
+            self.doctorate_url,
+            format='json',
+            data={
+                'nouvelle_echeance': '2022-05-15',
+                'lettre_justification': [],
+            },
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(
+            response.json()['justification_succincte'][0],
+            'Ce champ est obligatoire.',
+        )
+
+    @patch("osis_document.contrib.fields.FileField._confirm_upload")
+    def test_post_confirmation_student(self, confirm_upload):
+        confirmation_paper_uuid = self.confirmation_papers[1].uuid
+
+        token = WriteTokenFactory()
+
+        confirm_upload.return_value = token.upload.uuid
+
+        self.client.force_authenticate(user=self.student.user)
+        response = self.client.post(
+            self.doctorate_url,
+            format='json',
+            data={
+                'nouvelle_echeance': '2022-05-15',
+                'justification_succincte': 'My reason',
+                'lettre_justification': [token.token],
+            },
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Check response data
+        self.assertEqual(response.json()['uuid'], str(self.doctorate.uuid))
+
+        # Check the first confirmation paper
+        confirmation_paper: ConfirmationPaper = ConfirmationPaper.objects.get(uuid=confirmation_paper_uuid)
+
+        self.assertEqual(confirmation_paper.uuid, confirmation_paper_uuid)
+        self.assertEqual(confirmation_paper.extended_deadline, datetime.date(2022, 5, 15))
+        self.assertEqual(confirmation_paper.brief_justification, 'My reason')
+        self.assertEqual(confirmation_paper.justification_letter, [token.upload.uuid])
+
+    def test_post_confirmation_with_doctorate_invalid_status(self):
+        self.client.force_authenticate(user=self.student.user)
+        response = self.client.post(
+            self.admission_url,
+            format='json',
+            data={
+                'nouvelle_echeance': '2022-05-15',
+                'justification_succincte': 'My reason',
+                'lettre_justification': [],
+            },
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_post_confirmation_with_doctorate_other_student(self):
+        self.client.force_authenticate(user=self.other_student.user)
+        response = self.client.post(
+            self.doctorate_url,
+            format='json',
+            data={
+                'nouvelle_echeance': '2022-05-15',
+                'justification_succincte': 'My reason',
+                'lettre_justification': [],
+            },
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_post_confirmation_with_doctorate_without_confirmation_paper(self):
+        self.client.force_authenticate(user=self.other_student.user)
+        response = self.client.post(
+            self.other_doctorate_url,
+            format='json',
+            data={
+                'nouvelle_echeance': '2022-05-15',
+                'justification_succincte': 'My reason',
+                'lettre_justification': [],
             },
         )
 

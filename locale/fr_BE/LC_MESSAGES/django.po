@@ -407,7 +407,7 @@ msgid "Confirmation paper"
 msgstr "Épreuve de confirmation"
 
 msgid "Confirmation paper not completed."
-msgstr "Épreuve de confirmation non complétée."
+msgstr "Épreuve de confirmation non complète."
 
 msgid "Confirmation paper not found."
 msgstr "Épreuve de confirmation non trouvée."
@@ -531,6 +531,9 @@ msgstr "Exemple"
 
 msgid "Export"
 msgstr "Exporter"
+
+msgid "Extension request not completed."
+msgstr "Demande de prolongation non complète."
 
 msgid "FNRS"
 msgstr "FNRS"
