@@ -44,8 +44,8 @@ from base.ddd.utils.business_validator import MultipleBusinessExceptions
 
 class TestSoumettreReportDate(SimpleTestCase):
     def setUp(self):
-        self.message_bus = message_bus_in_memory_instance
         self.epreuve_confirmation_id = EpreuveConfirmationIdentityBuilder.build_from_uuid('c2')
+        self.message_bus = message_bus_in_memory_instance
 
     def test_should_generer_exception_si_confirmation_inconnue(self):
         with self.assertRaises(EpreuveConfirmationNonTrouveeException):

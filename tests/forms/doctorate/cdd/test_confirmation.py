@@ -31,7 +31,7 @@ from django.utils.translation import gettext as _
 from admission.forms.doctorate.cdd.confirmation import ConfirmationForm
 
 
-class FilterTestCase(TestCase):
+class ConfirmationTestCase(TestCase):
     def test_form_validation_with_no_data(self):
         form = ConfirmationForm(data={})
 

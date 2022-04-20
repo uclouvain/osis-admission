@@ -28,6 +28,7 @@ from django.urls import include, path
 import admission.views.autocomplete as autocomplete_views
 from admission.views.config.cdd_mail_templates import *
 from admission.views.doctorate.cdd import *
+from admission.views.doctorate.cdd.details.extension_request import CddDoctorateAdmissionExtensionRequestDetailView
 
 app_name = 'admission'
 
@@ -49,6 +50,7 @@ doctorate_update_paths = [
     path('cotutelle', CddDoctorateAdmissionCotutelleFormView.as_view(), name='cotutelle'),
     path('supervision', CddDoctorateAdmissionSupervisionFormView.as_view(), name='supervision'),
     path('confirmation', CddDoctorateAdmissionConfirmationFormView.as_view(), name='confirmation'),
+    path('extension-request', CddDoctorateAdmissionExtensionRequestFormView.as_view(), name='extension-request'),
 ]
 doctorate_detail_paths = [
     path('person', CddDoctorateAdmissionPersonDetailView.as_view(), name='person'),
@@ -63,6 +65,7 @@ doctorate_detail_paths = [
     path('history-all', CddDoctorateHistoryView.as_view(), name='history-all'),
     path('send-mail', CddDoctorateSendMailView.as_view(), name='send-mail'),
     path('confirmation', CddDoctorateAdmissionConfirmationDetailView.as_view(), name='confirmation'),
+    path('extension-request', CddDoctorateAdmissionExtensionRequestDetailView.as_view(), name='extension-request'),
     path('update/', include((doctorate_update_paths, 'update'))),
 ]
 doctorate_cdd_paths = [

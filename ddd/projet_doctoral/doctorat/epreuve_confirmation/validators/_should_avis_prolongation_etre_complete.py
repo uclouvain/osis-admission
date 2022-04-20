@@ -23,16 +23,20 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from ._should_avis_prolongation_etre_complete import ShouldAvisProlongationEtreComplete
-from ._should_date_epreuve_etre_valide import ShouldDateEpreuveEtreValide
-from ._should_demande_prolongation_etre_completee import ShouldDemandeProlongationEtreCompletee
-from ._should_demande_prolongation_etre_definie import ShouldDemandeProlongationEtreDefinie
-from ._should_epreuve_confirmation_etre_completee import ShouldEpreuveConfirmationEtreCompletee
+import datetime
 
-__all__ = [
-    "ShouldAvisProlongationEtreComplete",
-    "ShouldDateEpreuveEtreValide",
-    "ShouldDemandeProlongationEtreCompletee",
-    "ShouldDemandeProlongationEtreDefinie",
-    "ShouldEpreuveConfirmationEtreCompletee",
-]
+import attr
+
+from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.validators.exceptions import (
+    AvisProlongationNonCompleteException,
+)
+from base.ddd.utils.business_validator import BusinessValidator
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ShouldAvisProlongationEtreComplete(BusinessValidator):
+    avis_cdd: str
+
+    def validate(self, *args, **kwargs):
+        if not self.avis_cdd:
+            raise AvisProlongationNonCompleteException
