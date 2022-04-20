@@ -25,6 +25,7 @@
 # ##############################################################################
 import attr
 
+from admission.ddd.projet_doctoral.doctorat.domain.model._formation import FormationIdentity
 from admission.ddd.projet_doctoral.doctorat.domain.model.enums import ChoixStatutDoctorat
 from osis_common.ddd import interface
 
@@ -39,5 +40,6 @@ class Doctorat(interface.RootEntity):
     entity_id: DoctoratIdentity
     statut: ChoixStatutDoctorat
 
-    def finaliser_inscription(self):
-        self.statut = ChoixStatutDoctorat.ADMITTED
+    formation_id: FormationIdentity
+    matricule_doctorant: str
+    reference: str

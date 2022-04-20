@@ -23,13 +23,15 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import List, Optional
+from typing import List
 
 from admission.contrib.models import DoctorateAdmission
 from admission.contrib.models.doctorate import ConfirmationPaper
+from admission.ddd.projet_doctoral.doctorat.builder.doctorat_identity import DoctoratIdentityBuilder
 from admission.ddd.projet_doctoral.doctorat.domain.model.doctorat import DoctoratIdentity
-from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.builder.epreuve_confirmation_identity import \
-    EpreuveConfirmationIdentityIdentityBuilder
+from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.builder.epreuve_confirmation_identity import (
+    EpreuveConfirmationIdentityBuilder,
+)
 from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.domain.model._demande_prolongation import (
     DemandeProlongation,
 )
@@ -72,6 +74,13 @@ class EpreuveConfirmationRepository(IEpreuveConfirmationRepository):
         return [cls._load_confirmation_dto(confirmation_paper) for confirmation_paper in confirmation_papers]
 
     @classmethod
+    def get_dto_by_doctorat_identity(cls, doctorat_entity_id: 'DoctoratIdentity') -> 'EpreuveConfirmationDTO':
+        first_result = ConfirmationPaper.objects.filter(admission__uuid=doctorat_entity_id.uuid).first()
+        if not first_result:
+            raise EpreuveConfirmationNonTrouveeException
+        return cls._load_confirmation_dto(first_result)
+
+    @classmethod
     def save(cls, entity: 'EpreuveConfirmation') -> 'EpreuveConfirmationIdentity':
         related_admission = DoctorateAdmission.objects.get(uuid=entity.doctorat_id.uuid)
 
@@ -106,17 +115,15 @@ class EpreuveConfirmationRepository(IEpreuveConfirmationRepository):
 
     @classmethod
     def get(cls, entity_id: 'EpreuveConfirmationIdentity') -> 'EpreuveConfirmation':
-        raise NotImplementedError
+        try:
+            confirmation_paper = ConfirmationPaper.objects.select_related('admission').get(uuid=entity_id.uuid)
+        except ConfirmationPaper.DoesNotExist:
+            raise EpreuveConfirmationNonTrouveeException
 
-    @classmethod
-    def search(
-        cls, entity_ids: Optional[List['EpreuveConfirmationIdentity']] = None, **kwargs
-    ) -> List[EpreuveConfirmation]:
-        raise NotImplementedError
-
-    @classmethod
-    def delete(cls, entity_id: 'EpreuveConfirmationIdentity', **kwargs) -> None:
-        raise NotImplementedError
+        return cls._load_confirmation(
+            entity_id=DoctoratIdentityBuilder.build_from_uuid(confirmation_paper.admission.uuid),
+            confirmation_paper=confirmation_paper,
+        )
 
     @classmethod
     def _load_confirmation_dto(cls, confirmation_paper: ConfirmationPaper) -> EpreuveConfirmationDTO:
@@ -147,7 +154,7 @@ class EpreuveConfirmationRepository(IEpreuveConfirmationRepository):
         confirmation_paper: ConfirmationPaper,
     ) -> EpreuveConfirmation:
         return EpreuveConfirmation(
-            entity_id=EpreuveConfirmationIdentityIdentityBuilder.build_from_uuid(str(confirmation_paper.uuid)),
+            entity_id=EpreuveConfirmationIdentityBuilder.build_from_uuid(str(confirmation_paper.uuid)),
             doctorat_id=entity_id,
             date_limite=confirmation_paper.confirmation_deadline,
             date=confirmation_paper.confirmation_date,

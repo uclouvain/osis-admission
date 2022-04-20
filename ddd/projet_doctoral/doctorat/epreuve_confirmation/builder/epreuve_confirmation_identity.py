@@ -29,7 +29,7 @@ from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.domain.model.ep
 from osis_common.ddd.interface import EntityIdentityBuilder, CommandRequest, DTO
 
 
-class EpreuveConfirmationIdentityIdentityBuilder(EntityIdentityBuilder):
+class EpreuveConfirmationIdentityBuilder(EntityIdentityBuilder):
     @classmethod
     def build_from_command(cls, cmd: 'CommandRequest') -> 'EpreuveConfirmationIdentity':
         pass

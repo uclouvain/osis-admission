@@ -26,6 +26,7 @@
 
 import abc
 
+from admission.ddd.projet_doctoral.doctorat.dtos import DoctoratDTO
 from osis_common.ddd import interface
 
 from admission.ddd.projet_doctoral.doctorat.domain.model.doctorat import Doctorat, DoctoratIdentity
@@ -40,4 +41,9 @@ class IDoctoratRepository(interface.AbstractRepository):
     @classmethod
     @abc.abstractmethod
     def save(cls, entity: 'Doctorat') -> None:  # type: ignore[override]
+        raise NotImplementedError
+
+    @classmethod
+    @abc.abstractmethod
+    def get_dto(cls, entity_id: 'DoctoratIdentity') -> 'DoctoratDTO':  # type: ignore[override]
         raise NotImplementedError

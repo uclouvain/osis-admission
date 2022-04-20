@@ -412,6 +412,41 @@ class DemandeProxy(DoctorateAdmission):
         proxy = True
 
 
+class DoctorateManager(models.Manager):
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .only(
+                'candidate',
+                'doctorate',
+                'doctorate__academic_year',
+                'post_enrolment_status',
+                'proximity_commission',
+                'reference',
+                'submitted_profile',
+                'uuid',
+            )
+            .select_related(
+                'candidate',
+                'doctorate',
+                'doctorate__academic_year',
+            )
+            .exclude(
+                post_enrolment_status=ChoixStatutDoctorat.ADMISSION_IN_PROGRESS.name,
+            )
+        )
+
+
+class DoctorateProxy(DoctorateAdmission):
+    """Proxy model of base.DoctorateAdmission for Doctorat in doctorat context"""
+
+    objects = DoctorateManager()
+
+    class Meta:
+        proxy = True
+
+
 def confirmation_paper_directory_path(confirmation, filename: str):
     """Return the file upload directory path."""
     return 'admission/{}/{}/confirmation/{}/{}'.format(

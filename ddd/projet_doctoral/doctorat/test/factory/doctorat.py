@@ -27,6 +27,7 @@ import uuid
 
 import factory
 
+from admission.ddd.projet_doctoral.doctorat.domain.model._formation import FormationIdentity
 from admission.ddd.projet_doctoral.doctorat.domain.model.doctorat import DoctoratIdentity, Doctorat
 from admission.ddd.projet_doctoral.doctorat.domain.model.enums import ChoixStatutDoctorat
 
@@ -50,15 +51,27 @@ class _DoctoratFactory(factory.Factory):
 
 class DoctoratSC3DPMinimaleFactory(_DoctoratFactory):
     entity_id = factory.SubFactory(_DoctoratIdentityFactory, uuid='uuid-SC3DP')
+    formation_id = FormationIdentity(sigle='SC3DP', annee=2022)
+    matricule_doctorant = '1'
+    reference = 'r1'
 
 
 class DoctoratPreSC3DPAvecPromoteursEtMembresCADejaApprouvesAccepteeFactory(_DoctoratFactory):
     entity_id = factory.SubFactory(_DoctoratIdentityFactory, uuid='uuid-pre-SC3DP-promoteurs-membres-deja-approuves')
+    formation_id = FormationIdentity(sigle='SC3DP', annee=2022)
+    matricule_doctorant = '1'
+    reference = 'r2'
 
 
 class DoctoratSC3DPAvecPromoteurRefuseEtMembreCADejaApprouveFactoryRejeteeCDDFactory(_DoctoratFactory):
     entity_id = factory.SubFactory(_DoctoratIdentityFactory, uuid='uuid-SC3DP-promoteur-refus-membre-deja-approuve')
+    formation_id = FormationIdentity(sigle='SC3DP', annee=2022)
+    matricule_doctorant = '2'
+    reference = 'r3'
 
 
 class DoctoratSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory(_DoctoratFactory):
     entity_id = factory.SubFactory(_DoctoratIdentityFactory, uuid='uuid-SC3DP-promoteurs-membres-deja-approuves')
+    formation_id = FormationIdentity(sigle='SC3DP', annee=2022)
+    matricule_doctorant = '3'
+    reference = 'r4'

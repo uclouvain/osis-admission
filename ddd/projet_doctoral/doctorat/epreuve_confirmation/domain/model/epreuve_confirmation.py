@@ -68,3 +68,17 @@ class EpreuveConfirmation(interface.RootEntity):
             justification_succincte=justification_succincte,
             lettre_justification=lettre_justification or [],
         )
+
+    def completer(
+        self,
+        date: datetime.date,
+        date_limite: datetime.date,
+        rapport_recherche: List[str],
+        proces_verbal_ca: List[str],
+        demande_renouvellement_bourse: List[str],
+    ):
+        self.date = date
+        self.date_limite = date_limite
+        self.rapport_recherche = rapport_recherche
+        self.proces_verbal_ca = proces_verbal_ca
+        self.demande_renouvellement_bourse = demande_renouvellement_bourse

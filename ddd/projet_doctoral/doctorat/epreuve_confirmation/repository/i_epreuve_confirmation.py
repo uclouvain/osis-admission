@@ -59,6 +59,11 @@ class IEpreuveConfirmationRepository(interface.AbstractRepository):
 
     @classmethod
     @abc.abstractmethod
+    def get_dto_by_doctorat_identity(cls, doctorat_entity_id: 'DoctoratIdentity') -> 'EpreuveConfirmationDTO':
+        raise NotImplementedError
+
+    @classmethod
+    @abc.abstractmethod
     def save(cls, entity: 'EpreuveConfirmation') -> 'EpreuveConfirmationIdentity':  # type: ignore[override]
         raise NotImplementedError
 

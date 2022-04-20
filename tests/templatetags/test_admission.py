@@ -40,6 +40,7 @@ from admission.templatetags.admission import (
     get_active_parent,
     update_tab_path_from_detail,
     detail_tab_path_from_update,
+    field_data,
 )
 
 
@@ -207,3 +208,32 @@ class AdmissionTabsTestCase(TestCase):
             result,
             reverse('admission:doctorate:cdd:project', args=[current_uuid]),
         )
+
+
+class AdmissionFieldsDataTestCase(TestCase):
+    def test_field_data_with_string_value_default_params(self):
+        result = field_data(
+            name='My field label',
+            data='value',
+        )
+        self.assertEqual(result['name'], 'My field label')
+        self.assertEqual(result['data'], 'value')
+        self.assertIsNone(result['css_class'])
+        self.assertFalse(result['hide_empty'])
+
+    def test_field_data_with_translated_string_value(self):
+        result = field_data(
+            name='My field label',
+            data='From',
+            translate_data=True,
+        )
+        self.assertEqual(result['name'], 'My field label')
+        self.assertEqual(result['data'], 'De')
+
+    def test_field_data_with_empty_list_value(self):
+        result = field_data(
+            name='My field label',
+            data=[],
+        )
+        self.assertEqual(result['name'], 'My field label')
+        self.assertEqual(result['data'], '')

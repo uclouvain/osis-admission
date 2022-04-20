@@ -24,6 +24,7 @@
 #
 ##############################################################################
 from admission.ddd.projet_doctoral.doctorat.domain.service.demande_identity import DemandeIdentityTranslator
+from admission.ddd.projet_doctoral.doctorat.domain.service.doctorat import DoctoratService
 from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.domain.service.epreuve_confirmation import (
     EpreuveConfirmationService,
 )
@@ -54,15 +55,14 @@ def approuver_demande_cdd(
     proposition = proposition_repository.get(entity_id=proposition_id)
 
     doctorat_id = DemandeIdentityTranslator.convertir_en_doctorat(demande_id)
-    doctorat = doctorat_repository.get(entity_id=doctorat_id)
 
     # WHEN
     demande.approuver_cdd()
 
     # TODO Both SIC and CDD must approved the proposition
     proposition.valider_inscription()
-    doctorat.finaliser_inscription()
     epreuve_confirmation = EpreuveConfirmationService.initier(doctorat_id=doctorat_id)
+    doctorat = DoctoratService.initier(entity_id=doctorat_id, proposition=proposition)
 
     # THEN
     demande_repository.save(demande)

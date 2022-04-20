@@ -366,6 +366,9 @@ msgstr ""
 msgid "Confirm"
 msgstr ""
 
+msgid "Confirmation paper"
+msgstr ""
+
 msgid "Confirmation paper not found."
 msgstr ""
 
@@ -405,16 +408,25 @@ msgstr ""
 msgid "Date of confirmation"
 msgstr ""
 
+msgid "Date of confirmation:"
+msgstr ""
+
 msgid "Deadline extended"
 msgstr ""
 
 msgid "Deadline for confirmation"
 msgstr ""
 
+msgid "Deadline for confirmation:"
+msgstr ""
+
 msgid "Dedicated time (in EFT)"
 msgstr ""
 
 msgid "Defense"
+msgstr ""
+
+msgid "Definitive admission date:"
 msgstr ""
 
 msgid "Delete"
@@ -427,6 +439,9 @@ msgid "Description"
 msgstr ""
 
 msgid "Doctoral project"
+msgstr ""
+
+msgid "Doctoral student:"
 msgstr ""
 
 msgid "Doctorate"
@@ -499,6 +514,9 @@ msgid "Fondation Mont Godinne"
 msgstr ""
 
 msgid "Fondation St Luc"
+msgstr ""
+
+msgid "Framework of the supervisory panel report to download"
 msgstr ""
 
 msgid "French"
@@ -677,6 +695,9 @@ msgstr ""
 msgid "No doctorate found."
 msgstr ""
 
+msgid "Not specified"
+msgstr ""
+
 msgid "OTHER"
 msgstr "Other"
 
@@ -708,6 +729,9 @@ msgid "PRE_ADMISSION"
 msgstr "Pre-admission"
 
 msgid "Page size"
+msgstr ""
+
+msgid "Past confirmation papers"
 msgstr ""
 
 msgid "Personal data"
@@ -956,6 +980,9 @@ msgstr "To be validated"
 
 msgid "TO_BE_VERIFIED"
 msgstr "To be verified"
+
+msgid "The date of the confirmation paper cannot be later than its deadline."
+msgstr ""
 
 msgid "The decision of the signing actor"
 msgstr ""

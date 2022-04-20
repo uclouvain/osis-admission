@@ -48,6 +48,7 @@ doctorate_update_paths = [
     path('project', CddDoctorateAdmissionProjectFormView.as_view(), name='project'),
     path('cotutelle', CddDoctorateAdmissionCotutelleFormView.as_view(), name='cotutelle'),
     path('supervision', CddDoctorateAdmissionSupervisionFormView.as_view(), name='supervision'),
+    path('confirmation', CddDoctorateAdmissionConfirmationFormView.as_view(), name='confirmation'),
 ]
 doctorate_detail_paths = [
     path('person', CddDoctorateAdmissionPersonDetailView.as_view(), name='person'),
@@ -60,6 +61,7 @@ doctorate_detail_paths = [
     path('supervision', CddDoctorateAdmissionSupervisionDetailView.as_view(), name='supervision'),
     path('history', CddDoctorateHistoryView.as_view(), name='history'),
     path('history-all', CddDoctorateHistoryView.as_view(), name='history-all'),
+    path('confirmation', CddDoctorateAdmissionConfirmationDetailView.as_view(), name='confirmation'),
     path('update/', include((doctorate_update_paths, 'update'))),
 ]
 doctorate_cdd_paths = [

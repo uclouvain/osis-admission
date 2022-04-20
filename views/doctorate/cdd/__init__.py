@@ -23,6 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from .details.confirmation import CddDoctorateAdmissionConfirmationDetailView
 from .details.coordonnees import CddDoctorateAdmissionCoordonneesDetailView
 from .details.cotutelle import CddDoctorateAdmissionCotutelleDetailView
 from .details.curriculum import CddDoctorateAdmissionCurriculumDetailView
@@ -32,6 +33,7 @@ from .details.languages import CddDoctorateAdmissionLanguagesDetailView
 from .details.person import CddDoctorateAdmissionPersonDetailView
 from .details.project import CddDoctorateAdmissionProjectDetailView
 from .details.supervision import CddDoctorateAdmissionSupervisionDetailView
+from .forms.confirmation import CddDoctorateAdmissionConfirmationFormView
 from .forms.coordonnees import CddDoctorateAdmissionCoordonneesFormView
 from .forms.cotutelle import CddDoctorateAdmissionCotutelleFormView
 from .forms.curriculum import CddDoctorateAdmissionCurriculumFormView
@@ -44,6 +46,7 @@ from .list import CddDoctorateAdmissionList
 
 __all__ = [
     'CddDoctorateAdmissionList',
+    'CddDoctorateAdmissionConfirmationDetailView',
     'CddDoctorateAdmissionPersonDetailView',
     'CddDoctorateAdmissionCoordonneesDetailView',
     'CddDoctorateAdmissionCurriculumDetailView',
@@ -52,6 +55,7 @@ __all__ = [
     'CddDoctorateAdmissionProjectDetailView',
     'CddDoctorateAdmissionCotutelleDetailView',
     'CddDoctorateAdmissionSupervisionDetailView',
+    'CddDoctorateAdmissionConfirmationFormView',
     'CddDoctorateAdmissionPersonFormView',
     'CddDoctorateAdmissionCoordonneesFormView',
     'CddDoctorateAdmissionCurriculumFormView',

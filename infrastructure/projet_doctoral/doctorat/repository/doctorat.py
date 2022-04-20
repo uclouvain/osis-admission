@@ -25,10 +25,15 @@
 # ##############################################################################
 from typing import Optional, List
 
-from admission.contrib.models import DoctorateAdmission
+from django.conf import settings
+from django.utils.translation import get_language
+
+from admission.contrib.models.doctorate import DoctorateProxy, DoctorateAdmission
+from admission.ddd.projet_doctoral.doctorat.domain.model._formation import FormationIdentity
 from admission.ddd.projet_doctoral.doctorat.domain.model.doctorat import DoctoratIdentity, Doctorat
 from admission.ddd.projet_doctoral.doctorat.domain.model.enums import ChoixStatutDoctorat
 from admission.ddd.projet_doctoral.doctorat.domain.validator.exceptions import DoctoratNonTrouveException
+from admission.ddd.projet_doctoral.doctorat.dtos import DoctoratDTO
 from admission.ddd.projet_doctoral.doctorat.repository.i_doctorat import IDoctoratRepository
 from osis_common.ddd.interface import EntityIdentity, RootEntity, ApplicationService
 
@@ -45,13 +50,16 @@ class DoctoratRepository(IDoctoratRepository):
     @classmethod
     def get(cls, entity_id: 'DoctoratIdentity') -> 'Doctorat':
         try:
-            doctorate = DoctorateAdmission.objects.get(uuid=entity_id.uuid)
-        except DoctorateAdmission.DoesNotExist:
+            doctorate: DoctorateProxy = DoctorateProxy.objects.get(uuid=entity_id.uuid)
+        except DoctorateProxy.DoesNotExist:
             raise DoctoratNonTrouveException
 
         return Doctorat(
             entity_id=entity_id,
             statut=ChoixStatutDoctorat[doctorate.post_enrolment_status],
+            formation_id=FormationIdentity(doctorate.doctorate.acronym, doctorate.doctorate.academic_year.year),
+            reference=doctorate.reference,
+            matricule_doctorant=doctorate.candidate.global_id,
         )
 
     @classmethod
@@ -61,4 +69,25 @@ class DoctoratRepository(IDoctoratRepository):
             defaults={
                 'post_enrolment_status': entity.statut.name
             },
+        )
+
+    @classmethod
+    def get_dto(cls, entity_id: 'DoctoratIdentity') -> 'DoctoratDTO':
+        try:
+            doctorate: DoctorateProxy = DoctorateProxy.objects.get(uuid=entity_id.uuid)
+        except DoctorateProxy.DoesNotExist:
+            raise DoctoratNonTrouveException
+
+        return DoctoratDTO(
+            uuid=str(entity_id.uuid),
+            statut=ChoixStatutDoctorat[doctorate.post_enrolment_status].name,
+            reference=doctorate.reference,
+            matricule_doctorant=doctorate.candidate.global_id,
+            nom_doctorant=doctorate.candidate.last_name,
+            prenom_doctorant=doctorate.candidate.first_name,
+            annee_formation=doctorate.doctorate.academic_year.year,
+            sigle_formation=doctorate.doctorate.acronym,
+            intitule_formation=doctorate.doctorate.title
+            if get_language() == settings.LANGUAGE_CODE_FR
+            else doctorate.doctorate.title_english,
         )
