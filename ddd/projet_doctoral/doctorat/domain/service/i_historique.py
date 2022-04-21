@@ -23,21 +23,13 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import attr
+from email.message import EmailMessage
 
+from admission.ddd.projet_doctoral.doctorat.domain.model.doctorat import Doctorat
 from osis_common.ddd import interface
 
 
-@attr.s(frozen=True, slots=True, auto_attribs=True)
-class RecupererDoctoratQuery(interface.QueryRequest):
-    doctorat_uuid: str
-
-
-@attr.s(frozen=True, slots=True, auto_attribs=True)
-class EnvoyerMessageDoctorantCommand(interface.CommandRequest):
-    matricule_emetteur: str
-    doctorat_uuid: str
-    sujet: str
-    message: str
-    cc_promoteurs: bool
-    cc_membres_ca: bool
+class IHistorique(interface.DomainService):
+    @classmethod
+    def historiser_message_au_doctorant(cls, doctorat: Doctorat, matricule_emetteur: str, message: EmailMessage):
+        raise NotImplementedError

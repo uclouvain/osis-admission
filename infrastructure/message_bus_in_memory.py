@@ -30,41 +30,34 @@ from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.commands import
 from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.use_case.read import *
 from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.use_case.write import *
 from admission.ddd.projet_doctoral.doctorat.use_case.read import *
+from admission.ddd.projet_doctoral.doctorat.use_case.write import *
 from admission.ddd.projet_doctoral.preparation.commands import *
 from admission.ddd.projet_doctoral.preparation.use_case.read import *
 from admission.ddd.projet_doctoral.preparation.use_case.write import *
 from admission.ddd.projet_doctoral.validation.commands import *
 from admission.ddd.projet_doctoral.validation.use_case.read import *
 from admission.ddd.projet_doctoral.validation.use_case.write import *
-from admission.infrastructure.projet_doctoral.doctorat.repository.in_memory.doctorat import DoctoratInMemoryRepository
-from admission.infrastructure.projet_doctoral.preparation.domain.service.in_memory.doctorat import (
-    DoctoratInMemoryTranslator,
-)
-from admission.infrastructure.projet_doctoral.preparation.domain.service.in_memory.historique import HistoriqueInMemory
-from admission.infrastructure.projet_doctoral.preparation.domain.service.in_memory.membre_CA import (
-    MembreCAInMemoryTranslator,
-)
-from admission.infrastructure.projet_doctoral.preparation.domain.service.in_memory.notification import (
-    NotificationInMemory,
-)
-from admission.infrastructure.projet_doctoral.preparation.domain.service.in_memory.profil_candidat import (
-    ProfilCandidatInMemoryTranslator,
-)
-from admission.infrastructure.projet_doctoral.preparation.domain.service.in_memory.promoteur import (
-    PromoteurInMemoryTranslator,
-)
-from admission.infrastructure.projet_doctoral.preparation.repository.in_memory.groupe_de_supervision import (
-    GroupeDeSupervisionInMemoryRepository,
-)
-from admission.infrastructure.projet_doctoral.preparation.repository.in_memory.proposition import (
-    PropositionInMemoryRepository,
-)
-from admission.infrastructure.projet_doctoral.validation.repository.in_memory.demande import DemandeInMemoryRepository
 from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
 from infrastructure.utils import AbstractMessageBusCommands, MessageBus
+from .projet_doctoral.doctorat.domain.service.historique import Historique as HistoriqueDoctorat
+from .projet_doctoral.doctorat.domain.service.in_memory.notification import NotificationInMemory as NotificationDoctorat
 from .projet_doctoral.doctorat.epreuve_confirmation.repository.in_memory.epreuve_confirmation import (
     EpreuveConfirmationInMemoryRepository,
 )
+from .projet_doctoral.doctorat.repository.in_memory.doctorat import DoctoratInMemoryRepository
+from .projet_doctoral.preparation.domain.service.in_memory.doctorat import DoctoratInMemoryTranslator
+from .projet_doctoral.preparation.domain.service.in_memory.historique import HistoriqueInMemory
+from .projet_doctoral.preparation.domain.service.in_memory.membre_CA import MembreCAInMemoryTranslator
+from .projet_doctoral.preparation.domain.service.in_memory.notification import (
+    NotificationInMemory as NotificationProposition,
+)
+from .projet_doctoral.preparation.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
+from .projet_doctoral.preparation.domain.service.in_memory.promoteur import PromoteurInMemoryTranslator
+from .projet_doctoral.preparation.repository.in_memory.groupe_de_supervision import (
+    GroupeDeSupervisionInMemoryRepository,
+)
+from .projet_doctoral.preparation.repository.in_memory.proposition import PropositionInMemoryRepository
+from .projet_doctoral.validation.repository.in_memory.demande import DemandeInMemoryRepository
 
 
 class MessageBusInMemoryCommands(AbstractMessageBusCommands):
@@ -124,14 +117,14 @@ class MessageBusInMemoryCommands(AbstractMessageBusCommands):
             proposition_repository=PropositionInMemoryRepository(),
             groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
             historique=HistoriqueInMemory(),
-            notification=NotificationInMemory(),
+            notification=NotificationProposition(),
         ),
         SupprimerMembreCACommand: partial(
             supprimer_membre_CA,
             proposition_repository=PropositionInMemoryRepository(),
             groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
             historique=HistoriqueInMemory(),
-            notification=NotificationInMemory(),
+            notification=NotificationProposition(),
         ),
         DemanderSignaturesCommand: partial(
             demander_signatures,
@@ -139,7 +132,7 @@ class MessageBusInMemoryCommands(AbstractMessageBusCommands):
             groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
             promoteur_translator=PromoteurInMemoryTranslator(),
             historique=HistoriqueInMemory(),
-            notification=NotificationInMemory(),
+            notification=NotificationProposition(),
         ),
         VerifierProjetCommand: partial(
             verifier_projet,
@@ -162,14 +155,14 @@ class MessageBusInMemoryCommands(AbstractMessageBusCommands):
             profil_candidat_translator=ProfilCandidatInMemoryTranslator(),
             academic_year_repository=AcademicYearInMemoryRepository(),
             historique=HistoriqueInMemory(),
-            notification=NotificationInMemory(),
+            notification=NotificationProposition(),
         ),
         ApprouverPropositionCommand: partial(
             approuver_proposition,
             proposition_repository=PropositionInMemoryRepository(),
             groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
             historique=HistoriqueInMemory(),
-            notification=NotificationInMemory(),
+            notification=NotificationProposition(),
         ),
         ApprouverPropositionParPdfCommand: partial(
             approuver_proposition_par_pdf,
@@ -182,7 +175,7 @@ class MessageBusInMemoryCommands(AbstractMessageBusCommands):
             proposition_repository=PropositionInMemoryRepository(),
             groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
             historique=HistoriqueInMemory(),
-            notification=NotificationInMemory(),
+            notification=NotificationProposition(),
         ),
         ListerPropositionsCandidatQuery: partial(
             lister_propositions_candidat,
@@ -240,6 +233,12 @@ class MessageBusInMemoryCommands(AbstractMessageBusCommands):
         CompleterEpreuveConfirmationParPromoteurCommand: partial(
             completer_epreuve_confirmation_par_promoteur,
             epreuve_confirmation_repository=EpreuveConfirmationInMemoryRepository(),
+        ),
+        EnvoyerMessageDoctorantCommand: partial(
+            envoyer_message_au_doctorant,
+            doctorat_repository=DoctoratInMemoryRepository(),
+            notification=NotificationDoctorat(),
+            historique=HistoriqueDoctorat(),
         ),
     }
 

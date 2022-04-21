@@ -37,8 +37,8 @@ msgid ""
 msgstr ""
 "\n"
 "      <h2>Supprimer le template d'email personnalisé \"%(name)s\" ?</h2>\n"
-"      <p>Êtes-vous sûr de vouloir supprimer ce template d'email personnalisé"
-" ? Cette action est irréversible.</p>\n"
+"      <p>Êtes-vous sûr de vouloir supprimer ce template d'email "
+"personnalisé ? Cette action est irréversible.</p>\n"
 "    "
 
 #, python-format
@@ -297,8 +297,7 @@ msgstr ""
 "Peut modifier les informations relatives à la supervision de l'admission"
 
 msgid "Can update the information related to the confirmation paper"
-msgstr ""
-"Peut modifier les informations relatives à l'épreuve de confirmation"
+msgstr "Peut modifier les informations relatives à l'épreuve de confirmation"
 
 msgid "Can update the information related to the curriculum"
 msgstr "Peut modifier les informations relatives au curriculum"
@@ -366,6 +365,12 @@ msgstr "Candidat :"
 
 msgid "Candidates"
 msgstr "Candidats"
+
+msgid "Carbon-copy the CA members"
+msgstr "Mettre en copie les membres de groupe de supervision"
+
+msgid "Carbon-copy the promoters"
+msgstr "Mettre en copie les promoteurs"
 
 msgid "Certificate of achievement"
 msgstr "Attestation de réussite"
@@ -569,6 +574,14 @@ msgstr "Graphe de Gantt"
 msgid "General"
 msgstr "Général"
 
+msgid "Generic"
+msgstr "Générique"
+
+msgid "Generic mail that can be manually sent once the candidate is admitted"
+msgstr ""
+"E-mail générique qui peut être envoyé manuellement une fois que le candidat "
+"est admis."
+
 msgid "HTML"
 msgstr "HTML"
 
@@ -697,6 +710,15 @@ msgstr "Membre du groupe de supervision non invité"
 
 msgid "Membre CA not found."
 msgstr "Membre du comité d'accompagnement non trouvé"
+
+msgid "Message for the candidate"
+msgstr "Message pour le candidat"
+
+msgid "Message sent successfully"
+msgstr "Message envoyé avec succès"
+
+msgid "Message subject"
+msgstr "Sujet du message"
 
 msgid "Modified"
 msgstr "Modifée"
@@ -934,6 +956,9 @@ msgstr "Rejeté"
 msgid "Read"
 msgstr "Lire"
 
+msgid "Recipient"
+msgstr "Destinataire"
+
 msgid "Recommendation letters"
 msgstr "Lettres de recommandation"
 
@@ -1011,6 +1036,18 @@ msgstr "Rechercher"
 
 msgid "Secondary studies"
 msgstr "Études secondaires"
+
+msgid "Select a mail template"
+msgstr "Sélectionner un template d'email"
+
+msgid "Send a mail"
+msgstr "Envoyer un e-mail"
+
+msgid "Send a mail to the candidate"
+msgstr "Envoyer un e-mail au candidat"
+
+msgid "Send the message"
+msgstr "Envoyer le message"
 
 msgid "Status changes"
 msgstr "Changements de statut"

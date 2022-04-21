@@ -23,21 +23,22 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import attr
+from email.message import EmailMessage
 
-from osis_common.ddd import interface
-
-
-@attr.s(frozen=True, slots=True, auto_attribs=True)
-class RecupererDoctoratQuery(interface.QueryRequest):
-    doctorat_uuid: str
+from admission.ddd.projet_doctoral.doctorat.domain.model.doctorat import Doctorat
+from admission.ddd.projet_doctoral.doctorat.domain.service.i_notification import INotification
 
 
-@attr.s(frozen=True, slots=True, auto_attribs=True)
-class EnvoyerMessageDoctorantCommand(interface.CommandRequest):
-    matricule_emetteur: str
-    doctorat_uuid: str
-    sujet: str
-    message: str
-    cc_promoteurs: bool
-    cc_membres_ca: bool
+class NotificationInMemory(INotification):
+    @classmethod
+    def envoyer_message(
+        cls,
+        doctorat: Doctorat,
+        matricule_emetteur: str,
+        matricule_doctorant: str,
+        sujet: str,
+        message: str,
+        cc_promoteurs: bool,
+        cc_membres_ca: bool,
+    ) -> EmailMessage:
+        raise NotImplementedError
