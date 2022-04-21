@@ -26,10 +26,11 @@
 from functools import partial
 
 from admission.ddd.projet_doctoral.doctorat.commands import *
-from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.use_case.read import *
 from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.commands import *
+from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.use_case.read import *
 from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.use_case.write import *
 from admission.ddd.projet_doctoral.doctorat.use_case.read import *
+from admission.ddd.projet_doctoral.doctorat.use_case.write import *
 from admission.ddd.projet_doctoral.preparation.commands import *
 from admission.ddd.projet_doctoral.preparation.use_case.read import *
 from admission.ddd.projet_doctoral.preparation.use_case.write import *
@@ -41,9 +42,7 @@ from admission.infrastructure.projet_doctoral.doctorat.epreuve_confirmation.repo
 )
 from admission.infrastructure.projet_doctoral.doctorat.repository.doctorat import DoctoratRepository
 from admission.infrastructure.projet_doctoral.preparation.domain.service.doctorat import DoctoratTranslator
-from admission.infrastructure.projet_doctoral.preparation.domain.service.historique import Historique
 from admission.infrastructure.projet_doctoral.preparation.domain.service.membre_CA import MembreCATranslator
-from admission.infrastructure.projet_doctoral.preparation.domain.service.notification import Notification
 from admission.infrastructure.projet_doctoral.preparation.domain.service.profil_candidat import ProfilCandidatTranslator
 from admission.infrastructure.projet_doctoral.preparation.domain.service.promoteur import PromoteurTranslator
 from admission.infrastructure.projet_doctoral.preparation.repository.groupe_de_supervision import (
@@ -53,6 +52,10 @@ from admission.infrastructure.projet_doctoral.preparation.repository.proposition
 from admission.infrastructure.projet_doctoral.validation.repository.demande import DemandeRepository
 from infrastructure.shared_kernel.academic_year.repository.academic_year import AcademicYearRepository
 from infrastructure.utils import AbstractMessageBusCommands
+from .projet_doctoral.preparation.domain.service.historique import Historique as HistoriqueProposition
+from .projet_doctoral.preparation.domain.service.notification import Notification as NotificationProposition
+from .projet_doctoral.doctorat.domain.service.historique import Historique as HistoriqueDoctorat
+from .projet_doctoral.doctorat.domain.service.notification import Notification as NotificationDoctorat
 
 
 class MessageBusCommands(AbstractMessageBusCommands):
@@ -61,7 +64,7 @@ class MessageBusCommands(AbstractMessageBusCommands):
             initier_proposition,
             proposition_repository=PropositionRepository(),
             doctorat_translator=DoctoratTranslator(),
-            historique=Historique(),
+            historique=HistoriqueProposition(),
         ),
         ListerPropositionsCandidatQuery: partial(
             lister_propositions_candidat,
@@ -80,13 +83,13 @@ class MessageBusCommands(AbstractMessageBusCommands):
             completer_proposition,
             proposition_repository=PropositionRepository(),
             doctorat_translator=DoctoratTranslator(),
-            historique=Historique(),
+            historique=HistoriqueProposition(),
         ),
         DefinirCotutelleCommand: partial(
             definir_cotutelle,
             groupe_supervision_repository=GroupeDeSupervisionRepository(),
             proposition_repository=PropositionRepository(),
-            historique=Historique(),
+            historique=HistoriqueProposition(),
         ),
         GetCotutelleCommand: partial(
             recuperer_cotutelle,
@@ -97,14 +100,14 @@ class MessageBusCommands(AbstractMessageBusCommands):
             proposition_repository=PropositionRepository(),
             groupe_supervision_repository=GroupeDeSupervisionRepository(),
             promoteur_translator=PromoteurTranslator(),
-            historique=Historique(),
+            historique=HistoriqueProposition(),
         ),
         IdentifierMembreCACommand: partial(
             identifier_membre_CA,
             proposition_repository=PropositionRepository(),
             groupe_supervision_repository=GroupeDeSupervisionRepository(),
             membre_CA_translator=MembreCATranslator(),
-            historique=Historique(),
+            historique=HistoriqueProposition(),
         ),
         GetGroupeDeSupervisionCommand: partial(
             recuperer_groupe_de_supervision,
@@ -116,23 +119,23 @@ class MessageBusCommands(AbstractMessageBusCommands):
             supprimer_promoteur,
             proposition_repository=PropositionRepository(),
             groupe_supervision_repository=GroupeDeSupervisionRepository(),
-            historique=Historique(),
-            notification=Notification(),
+            historique=HistoriqueProposition(),
+            notification=NotificationProposition(),
         ),
         SupprimerMembreCACommand: partial(
             supprimer_membre_CA,
             proposition_repository=PropositionRepository(),
             groupe_supervision_repository=GroupeDeSupervisionRepository(),
-            historique=Historique(),
-            notification=Notification(),
+            historique=HistoriqueProposition(),
+            notification=NotificationProposition(),
         ),
         DemanderSignaturesCommand: partial(
             demander_signatures,
             proposition_repository=PropositionRepository(),
             groupe_supervision_repository=GroupeDeSupervisionRepository(),
             promoteur_translator=PromoteurTranslator(),
-            historique=Historique(),
-            notification=Notification(),
+            historique=HistoriqueProposition(),
+            notification=NotificationProposition(),
         ),
         VerifierProjetCommand: partial(
             verifier_projet,
@@ -154,28 +157,28 @@ class MessageBusCommands(AbstractMessageBusCommands):
             demande_repository=DemandeRepository(),
             profil_candidat_translator=ProfilCandidatTranslator(),
             academic_year_repository=AcademicYearRepository(),
-            historique=Historique(),
-            notification=Notification(),
+            historique=HistoriqueProposition(),
+            notification=NotificationProposition(),
         ),
         ApprouverPropositionCommand: partial(
             approuver_proposition,
             proposition_repository=PropositionRepository(),
             groupe_supervision_repository=GroupeDeSupervisionRepository(),
-            historique=Historique(),
-            notification=Notification(),
+            historique=HistoriqueProposition(),
+            notification=NotificationProposition(),
         ),
         ApprouverPropositionParPdfCommand: partial(
             approuver_proposition_par_pdf,
             proposition_repository=PropositionRepository(),
             groupe_supervision_repository=GroupeDeSupervisionRepository(),
-            historique=Historique(),
+            historique=HistoriqueProposition(),
         ),
         RefuserPropositionCommand: partial(
             refuser_proposition,
             proposition_repository=PropositionRepository(),
             groupe_supervision_repository=GroupeDeSupervisionRepository(),
-            historique=Historique(),
-            notification=Notification(),
+            historique=HistoriqueProposition(),
+            notification=NotificationProposition(),
         ),
         RechercherDoctoratCommand: partial(
             rechercher_doctorats,
@@ -184,7 +187,7 @@ class MessageBusCommands(AbstractMessageBusCommands):
         SupprimerPropositionCommand: partial(
             supprimer_proposition,
             proposition_repository=PropositionRepository(),
-            historique=Historique(),
+            historique=HistoriqueProposition(),
         ),
         FiltrerDemandesQuery: partial(
             filtrer_demandes,
@@ -228,5 +231,11 @@ class MessageBusCommands(AbstractMessageBusCommands):
         CompleterEpreuveConfirmationParPromoteurCommand: partial(
             completer_epreuve_confirmation_par_promoteur,
             epreuve_confirmation_repository=EpreuveConfirmationRepository(),
+        ),
+        EnvoyerMessageDoctorantCommand: partial(
+            envoyer_message_au_doctorant,
+            doctorat_repository=DoctoratRepository(),
+            notification=NotificationDoctorat(),
+            historique=HistoriqueDoctorat(),
         ),
     }

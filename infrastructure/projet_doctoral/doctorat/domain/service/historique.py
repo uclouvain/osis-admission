@@ -23,21 +23,23 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import attr
+from email.message import EmailMessage
 
-from osis_common.ddd import interface
+from osis_history.utilities import add_history_entry
+
+from admission.ddd.projet_doctoral.doctorat.domain.model.doctorat import Doctorat
+from admission.ddd.projet_doctoral.doctorat.domain.service.i_historique import IHistorique
+from infrastructure.shared_kernel.personne_connue_ucl.personne_connue_ucl import PersonneConnueUclTranslator
 
 
-@attr.s(frozen=True, slots=True, auto_attribs=True)
-class RecupererDoctoratQuery(interface.QueryRequest):
-    doctorat_uuid: str
-
-
-@attr.s(frozen=True, slots=True, auto_attribs=True)
-class EnvoyerMessageDoctorantCommand(interface.CommandRequest):
-    matricule_emetteur: str
-    doctorat_uuid: str
-    sujet: str
-    message: str
-    cc_promoteurs: bool
-    cc_membres_ca: bool
+class Historique(IHistorique):
+    @classmethod
+    def historiser_message_au_doctorant(cls, doctorat: Doctorat, matricule_emetteur: str, message: EmailMessage):
+        emetteur = PersonneConnueUclTranslator.get(matricule_emetteur)
+        add_history_entry(
+            doctorat.entity_id.uuid,
+            message.as_string(),
+            message.as_string(),
+            "{emetteur.prenom} {emetteur.nom}".format(emetteur=emetteur),
+            tags=["doctorat", "message"],
+        )

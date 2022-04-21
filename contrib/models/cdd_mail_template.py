@@ -23,14 +23,17 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import Dict
+from typing import Dict, List
 
 from django.conf import settings
 from django.db import models
 from django.db.models import Subquery
 from django.utils.translation import gettext_lazy as _
 
-from admission.mail_templates import ADMISSION_EMAIL_MEMBER_REMOVED, ADMISSION_EMAIL_SUBMISSION_CANDIDATE
+from admission.mail_templates import (
+    ADMISSION_EMAIL_GENERIC_ONCE_ADMITTED,
+    ADMISSION_EMAIL_SUBMISSION_CANDIDATE,
+)
 from base.models.enums.entity_type import DOCTORAL_COMMISSION
 from osis_mail_template.exceptions import MissingToken
 from osis_mail_template.models import MailTemplateManager, check_mail_template_identifier
@@ -38,7 +41,7 @@ from osis_mail_template.utils import transform_html_to_text
 
 ALLOWED_CUSTOM_IDENTIFIERS = [
     ADMISSION_EMAIL_SUBMISSION_CANDIDATE,
-    # ADMISSION_EMAIL_MEMBER_REMOVED,
+    ADMISSION_EMAIL_GENERIC_ONCE_ADMITTED,
 ]
 
 
@@ -49,6 +52,15 @@ class CddMailTemplateManager(MailTemplateManager):
             self.get_queryset().filter(
                 identifier=identifier,
                 name=Subquery(CddMailTemplate.objects.filter(pk=pk).values('name')[:1]),
+            )
+        )
+
+    def get_from_identifiers(self, identifiers: List[str], language: str):
+        """Get a list of mail template instances by identifier and language"""
+        return list(
+            self.get_queryset().filter(
+                identifier__in=identifiers,
+                language=language,
             )
         )
 

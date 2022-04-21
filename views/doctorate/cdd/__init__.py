@@ -41,6 +41,7 @@ from .forms.education import CddDoctorateAdmissionEducationFormView
 from .forms.languages import CddDoctorateAdmissionLanguagesFormView
 from .forms.person import CddDoctorateAdmissionPersonFormView
 from .forms.project import CddDoctorateAdmissionProjectFormView
+from .forms.send_mail import CddDoctorateSendMailView
 from .forms.supervision import CddDoctorateAdmissionSupervisionFormView
 from .list import CddDoctorateAdmissionList
 
@@ -66,4 +67,5 @@ __all__ = [
     'CddDoctorateAdmissionSupervisionFormView',
     'CddDoctorateHistoryAPIView',
     'CddDoctorateHistoryView',
+    'CddDoctorateSendMailView',
 ]

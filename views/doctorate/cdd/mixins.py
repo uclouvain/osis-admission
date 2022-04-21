@@ -34,22 +34,16 @@ from infrastructure.messages_bus import message_bus_instance
 
 
 class LoadDossierViewMixin(LoginRequiredMixin, CddRequiredMixin, TemplateView):
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
         # Get proposition information
-        proposition = message_bus_instance.invoke((
-            GetPropositionCommand(uuid_proposition=kwargs.get('pk'))
-        ))
+        proposition = message_bus_instance.invoke((GetPropositionCommand(uuid_proposition=self.kwargs.get('pk'))))
 
         context['admission'] = proposition
 
         # Add the dossier information if there are some
         if proposition.statut == ChoixStatutProposition.SUBMITTED.name:
-            dossier = message_bus_instance.invoke(
-                RecupererDemandeQuery(uuid=kwargs.get('pk')),
-            )
-            context['dossier'] = dossier
+            context['dossier'] = message_bus_instance.invoke(RecupererDemandeQuery(uuid=self.kwargs.get('pk')))
 
         return context

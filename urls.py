@@ -61,6 +61,7 @@ doctorate_detail_paths = [
     path('supervision', CddDoctorateAdmissionSupervisionDetailView.as_view(), name='supervision'),
     path('history', CddDoctorateHistoryView.as_view(), name='history'),
     path('history-all', CddDoctorateHistoryView.as_view(), name='history-all'),
+    path('send-mail', CddDoctorateSendMailView.as_view(), name='send-mail'),
     path('confirmation', CddDoctorateAdmissionConfirmationDetailView.as_view(), name='confirmation'),
     path('update/', include((doctorate_update_paths, 'update'))),
 ]
