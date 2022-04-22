@@ -28,7 +28,6 @@ from django.urls import include, path
 import admission.views.autocomplete as autocomplete_views
 from admission.views.config.cdd_mail_templates import *
 from admission.views.doctorate.cdd import *
-from admission.views.doctorate.cdd.details.extension_request import CddDoctorateAdmissionExtensionRequestDetailView
 
 app_name = 'admission'
 
@@ -65,6 +64,11 @@ doctorate_detail_paths = [
     path('history-all', CddDoctorateHistoryAllView.as_view(), name='history-all'),
     path('send-mail', CddDoctorateSendMailView.as_view(), name='send-mail'),
     path('confirmation', CddDoctorateAdmissionConfirmationDetailView.as_view(), name='confirmation'),
+    path(
+        'confirmation-success',
+        CddDoctorateAdmissionConfirmationSuccessDecisionView.as_view(),
+        name='confirmation-success',
+    ),
     path('extension-request', CddDoctorateAdmissionExtensionRequestDetailView.as_view(), name='extension-request'),
     path('update/', include((doctorate_update_paths, 'update'))),
 ]

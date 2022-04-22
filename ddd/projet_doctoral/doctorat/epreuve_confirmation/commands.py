@@ -86,3 +86,8 @@ class SoumettreAvisProlongationCommand(interface.CommandRequest):
     uuid: str
 
     avis_cdd: str
+
+
+@attr.s(frozen=True, slots=True, auto_attribs=True)
+class ConfirmerReussiteCommand(interface.CommandRequest):
+    uuid: str

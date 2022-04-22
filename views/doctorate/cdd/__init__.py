@@ -24,6 +24,7 @@
 #
 # ##############################################################################
 from .details.confirmation import CddDoctorateAdmissionConfirmationDetailView
+from .details.confirmation_decision import CddDoctorateAdmissionConfirmationSuccessDecisionView
 from .details.coordonnees import CddDoctorateAdmissionCoordonneesDetailView
 from .details.cotutelle import CddDoctorateAdmissionCotutelleDetailView
 from .details.curriculum import CddDoctorateAdmissionCurriculumDetailView
@@ -76,4 +77,5 @@ __all__ = [
     'CddDoctorateHistoryView',
     'CddDoctorateHistoryAllView',
     'CddDoctorateSendMailView',
+    'CddDoctorateAdmissionConfirmationSuccessDecisionView',
 ]

@@ -24,7 +24,7 @@
 #
 ##############################################################################
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.messages import add_message, ERROR
+from django.contrib.messages import error
 from django.core.cache import cache
 from django.core.exceptions import NON_FIELD_ERRORS
 from django.utils.translation import gettext as _
@@ -62,13 +62,12 @@ class CddDoctorateAdmissionList(LoginRequiredMixin, CddRequiredMixin, HtmxMixin,
     def htmx_render_form_errors(request, form):
         """Display the form errors through the django messages."""
         for field_name, errors in form.errors.items():
-            add_message(
+            error(
                 request=request,
                 message='{} - {}'.format(
                     form.fields.get(field_name).label if field_name != NON_FIELD_ERRORS else _('General'),
                     ' '.join(errors),
                 ),
-                level=ERROR,
             )
 
     def get_context_data(self, **kwargs):

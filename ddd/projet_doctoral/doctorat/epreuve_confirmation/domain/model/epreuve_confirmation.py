@@ -36,6 +36,7 @@ from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.validators.vali
     SoumettreEpreuveConfirmationValidatorList,
     SoumettreDemandeProlongationValidatorList,
     SoumettreAvisProlongationValidatorList,
+    EncodageDecisionValidatorList,
 )
 from osis_common.ddd import interface
 
@@ -139,3 +140,9 @@ class EpreuveConfirmation(interface.RootEntity):
             self.demande_prolongation,
             avis_cdd=avis_cdd,
         )
+
+    def verifier_pour_encodage_decision(self):
+        EncodageDecisionValidatorList(
+            date=self.date,
+            proces_verbal_ca=self.proces_verbal_ca,
+        ).validate()

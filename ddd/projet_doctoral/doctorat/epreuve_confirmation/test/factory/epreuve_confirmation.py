@@ -77,3 +77,4 @@ class EpreuveConfirmation2DoctoratSC3DPFactory(_EpreuveConfirmationFactory):
         justification_succincte='Ma justification',
         nouvelle_echeance=datetime.date(2023, 1, 1),
     )
+    proces_verbal_ca = factory.LazyFunction(lambda: [str(uuid.uuid4())])

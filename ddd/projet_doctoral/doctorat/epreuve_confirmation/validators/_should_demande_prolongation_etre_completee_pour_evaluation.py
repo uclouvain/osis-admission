@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,20 +23,22 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from ._should_avis_prolongation_etre_complete import ShouldAvisProlongationEtreComplete
-from ._should_date_epreuve_etre_valide import ShouldDateEpreuveEtreValide
-from ._should_demande_prolongation_etre_completee import ShouldDemandeProlongationEtreCompletee
-from ._should_demande_prolongation_etre_definie import ShouldDemandeProlongationEtreDefinie
-from ._should_epreuve_confirmation_etre_completee import ShouldEpreuveConfirmationEtreCompletee
-from ._should_demande_prolongation_etre_completee_pour_evaluation import (
-    ShouldDemandeProlongationEtreCompleteePourEvaluation,
-)
+import datetime
+from typing import Optional, List
 
-__all__ = [
-    "ShouldAvisProlongationEtreComplete",
-    "ShouldDateEpreuveEtreValide",
-    "ShouldDemandeProlongationEtreCompletee",
-    "ShouldDemandeProlongationEtreDefinie",
-    "ShouldEpreuveConfirmationEtreCompletee",
-    "ShouldDemandeProlongationEtreCompleteePourEvaluation",
-]
+import attr
+
+from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.validators.exceptions import (
+    EpreuveConfirmationNonCompleteePourEvaluationException,
+)
+from base.ddd.utils.business_validator import BusinessValidator
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ShouldDemandeProlongationEtreCompleteePourEvaluation(BusinessValidator):
+    date: Optional[datetime.date]
+    proces_verbal_ca: List[str]
+
+    def validate(self, *args, **kwargs):
+        if not self.date or not self.proces_verbal_ca:
+            raise EpreuveConfirmationNonCompleteePourEvaluationException

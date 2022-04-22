@@ -30,6 +30,16 @@ msgstr ""
 #, python-format
 msgid ""
 "\n"
+"          Do you wish to move the doctorate to the \"%(status)s\" state?\n"
+"        "
+msgstr ""
+"\n"
+"          Souhaitez-vous passer la demande dans l'état \"%(status)s\" ?\n"
+"            "
+
+#, python-format
+msgid ""
+"\n"
 "        One doctorate enrolment\n"
 "      "
 msgid_plural ""
@@ -59,6 +69,26 @@ msgstr ""
 "      <h2>Supprimer le template d'email personnalisé \"%(name)s\" ?</h2>\n"
 "      <p>Êtes-vous sûr de vouloir supprimer ce template d'email "
 "personnalisé ? Cette action est irréversible.</p>\n"
+"    "
+
+msgid ""
+"\n"
+"      Impossible action: please be sure that the confirmation date and "
+"report are specified.\n"
+"    "
+msgstr ""
+"\n"
+"      Action impossible : veuillez-vous assurer que la date et le procès-"
+"verbal de l'épreuve ont bien été complétés."
+
+#, python-format
+msgid ""
+"\n"
+"      Move the doctorate to the \"%(status)s\" state?\n"
+"    "
+msgstr ""
+"\n"
+"          Passer la demande dans l'état \"%(status)s\" ?\n"
 "    "
 
 #, python-format
@@ -412,6 +442,14 @@ msgstr "Confirmer"
 
 msgid "Confirmation paper"
 msgstr "Épreuve de confirmation"
+
+msgid ""
+"Confirmation paper not completed for evaluation (the confirmation date and "
+"report must be specified)."
+msgstr ""
+"L'épreuve de confirmation n'est pas complète et ne peut donc pas être "
+"évaluée (la date ainsi que le procès-verbal de l'épreuve doivent être "
+"spécifiés)."
 
 msgid "Confirmation paper not completed."
 msgstr "Épreuve de confirmation non complète."
@@ -1121,6 +1159,9 @@ msgstr "Sujet"
 msgid "Submitted profile"
 msgstr "Profil soumis"
 
+msgid "Successful test"
+msgstr "Epreuve réussie"
+
 msgid "Supervision"
 msgstr "Supervision"
 
@@ -1135,6 +1176,9 @@ msgstr "Pour validation"
 
 msgid "TO_BE_VERIFIED"
 msgstr "Pour vérification"
+
+msgid "The confirmation paper is not in progress"
+msgstr "L'épreuve de confirmation n'est pas en cours."
 
 msgid "The date of the confirmation paper cannot be later than its deadline."
 msgstr ""

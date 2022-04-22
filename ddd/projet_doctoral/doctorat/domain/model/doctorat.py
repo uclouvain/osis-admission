@@ -46,3 +46,6 @@ class Doctorat(interface.RootEntity):
 
     def soumettre_epreuve_confirmation(self):
         self.statut = ChoixStatutDoctorat.SUBMITTED_CONFIRMATION
+
+    def encoder_decision_reussite_epreuve_confirmation(self):
+        self.statut = ChoixStatutDoctorat.PASSED_CONFIRMATION
