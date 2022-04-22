@@ -28,6 +28,7 @@ from django.utils.translation import gettext_lazy as _
 from osis_signature.enums import SignatureState
 from rules import predicate
 
+from admission.ddd.projet_doctoral.doctorat.domain.model.enums import STATUTS_DOCTORAT_EPREUVE_CONFIRMATION_EN_COURS
 from admission.ddd.projet_doctoral.preparation.domain.model._enums import (
     ChoixStatutProposition,
     STATUTS_PROPOSITION_AVANT_SOUMISSION,
@@ -76,6 +77,12 @@ def is_enrolled(self, user: User, obj: DoctorateAdmission):
 @predicate_failed_msg(message=_("Must be in the process of the enrolment"))
 def is_being_enrolled(self, user: User, obj: DoctorateAdmission):
     return obj.status in STATUTS_PROPOSITION_AVANT_INSCRIPTION
+
+
+@predicate(bind=True)
+@predicate_failed_msg(message=_("The confirmation paper is not in progress"))
+def confirmation_paper_in_progress(self, user: User, obj: DoctorateAdmission):
+    return obj.post_enrolment_status in STATUTS_DOCTORAT_EPREUVE_CONFIRMATION_EN_COURS
 
 
 @predicate(bind=True)

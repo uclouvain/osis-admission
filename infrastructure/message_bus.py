@@ -246,4 +246,9 @@ class MessageBusCommands(AbstractMessageBusCommands):
             soumettre_avis_prolongation,
             epreuve_confirmation_repository=EpreuveConfirmationRepository(),
         ),
+        ConfirmerReussiteCommand: partial(
+            confirmer_reussite,
+            epreuve_confirmation_repository=EpreuveConfirmationRepository(),
+            doctorat_repository=DoctoratRepository(),
+        )
     }

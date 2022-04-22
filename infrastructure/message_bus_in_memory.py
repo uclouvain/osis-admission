@@ -248,6 +248,11 @@ class MessageBusInMemoryCommands(AbstractMessageBusCommands):
             soumettre_avis_prolongation,
             epreuve_confirmation_repository=EpreuveConfirmationInMemoryRepository(),
         ),
+        ConfirmerReussiteCommand: partial(
+            confirmer_reussite,
+            epreuve_confirmation_repository=EpreuveConfirmationInMemoryRepository(),
+            doctorat_repository=DoctoratInMemoryRepository(),
+        )
     }
 
 

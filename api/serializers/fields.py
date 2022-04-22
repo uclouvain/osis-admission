@@ -288,7 +288,7 @@ ACTION_LINKS = {
         'params': ['uuid'],
     },
     'update_confirmation': {
-        'path_name': 'admission_api_v1:confirmation',
+        'path_name': 'admission_api_v1:last_confirmation',
         'method': 'PUT',
         'params': ['uuid'],
     },

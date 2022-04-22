@@ -1,4 +1,5 @@
 {% extends "admission/doctorate/cdd/doctorate_tab_layout.html" %}
+{% load enums %}
 {% load i18n admission %}
 {% load osis_document %}
 
@@ -33,6 +34,12 @@
         {% trans "Update" %}
       </a>
     </li>
+    <li role="separator" class="divider"></li>
+    <li>
+      <a href="#" data-toggle="modal" data-target="#confirmationSuccessModal">
+        {% trans "Successful test" %}
+      </a>
+    </li>
   {% endif %}
 {% endblock %}
 
@@ -62,6 +69,10 @@
         {% field_data _("Report of the supervisory panel") confirmation_paper.proces_verbal_ca %}
       </div>
     {% endfor %}
+  {% endif %}
+
+  {% if current_confirmation_paper %}
+  {% include "admission/doctorate/cdd/details/includes/confirmation_success_modal.html" %}
   {% endif %}
 {% endblock %}
 

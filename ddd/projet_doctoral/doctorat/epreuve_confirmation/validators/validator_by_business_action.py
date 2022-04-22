@@ -37,6 +37,7 @@ from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.validators impo
     ShouldDemandeProlongationEtreCompletee,
     ShouldAvisProlongationEtreComplete,
     ShouldDemandeProlongationEtreDefinie,
+    ShouldDemandeProlongationEtreCompleteePourEvaluation,
 )
 from base.ddd.utils.business_validator import TwoStepsMultipleBusinessExceptionListValidator, BusinessValidator
 
@@ -85,4 +86,21 @@ class SoumettreAvisProlongationValidatorList(TwoStepsMultipleBusinessExceptionLi
         return [
             ShouldDemandeProlongationEtreDefinie(self.demande_prolongation),
             ShouldAvisProlongationEtreComplete(self.nouvel_avis_cdd),
+        ]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class EncodageDecisionValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+    date: Optional[datetime.date]
+    proces_verbal_ca: List[str]
+
+    def get_data_contract_validators(self) -> List[BusinessValidator]:
+        return []
+
+    def get_invariants_validators(self) -> List[BusinessValidator]:
+        return [
+            ShouldDemandeProlongationEtreCompleteePourEvaluation(
+                date=self.date,
+                proces_verbal_ca=self.proces_verbal_ca,
+            ),
         ]

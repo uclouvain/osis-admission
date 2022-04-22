@@ -75,3 +75,13 @@ class DemandeProlongationNonDefinieException(BusinessException):
     def __init__(self, **kwargs):
         message = _("Extension request not defined.")
         super().__init__(message, **kwargs)
+
+
+class EpreuveConfirmationNonCompleteePourEvaluationException(BusinessException):
+    status_code = "EPREUVE-CONFIRMATION-7"
+
+    def __init__(self, **kwargs):
+        message = _(
+            "Confirmation paper not completed for evaluation (the confirmation date and report must be specified)."
+        )
+        super().__init__(message, **kwargs)

@@ -23,51 +23,37 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import List
-
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import Http404
-from django.views.generic import TemplateView
+from django.contrib.messages import error
+from django.http import Http404, HttpResponseRedirect
+from django.urls import reverse
+from django.views import View
 
 from admission.auth.mixins import CddRequiredMixin
-from admission.ddd.projet_doctoral.doctorat.commands import RecupererDoctoratQuery
-from admission.ddd.projet_doctoral.doctorat.domain.model.enums import ChoixStatutDoctorat
 from admission.ddd.projet_doctoral.doctorat.domain.validator.exceptions import DoctoratNonTrouveException
-from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.commands import RecupererEpreuvesConfirmationQuery
+from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.commands import (
+    ConfirmerReussiteCommand,
+    RecupererDerniereEpreuveConfirmationQuery,
+)
 from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.dtos import EpreuveConfirmationDTO
+from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.validators.exceptions import (
+    EpreuveConfirmationNonTrouveeException,
+)
+from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from infrastructure.messages_bus import message_bus_instance
 
 
-class CddDoctorateAdmissionConfirmationDetailView(LoginRequiredMixin, CddRequiredMixin, TemplateView):
-    template_name = 'admission/doctorate/cdd/details/confirmation.html'
-    mandatory_fields_for_evaluation = [
-        'date',
-        'proces_verbal_ca',
-    ]
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-
+class CddDoctorateAdmissionConfirmationSuccessDecisionView(LoginRequiredMixin, CddRequiredMixin, View):
+    def post(self, request, *args, **kwargs):
         try:
-            results = message_bus_instance.invoke_multiple(
-                [
-                    RecupererDoctoratQuery(doctorat_uuid=kwargs.get('pk')),
-                    RecupererEpreuvesConfirmationQuery(doctorat_uuid=kwargs.get('pk')),
-                ]
+            last_confirmation_paper: EpreuveConfirmationDTO = message_bus_instance.invoke(
+                RecupererDerniereEpreuveConfirmationQuery(doctorat_uuid=self.kwargs.get('pk'))
             )
-        except DoctoratNonTrouveException as e:
+            message_bus_instance.invoke(ConfirmerReussiteCommand(uuid=last_confirmation_paper.uuid))
+            return HttpResponseRedirect(reverse('admission:doctorate:cdd:confirmation', kwargs=kwargs))
+        except (DoctoratNonTrouveException, EpreuveConfirmationNonTrouveeException) as e:
             raise Http404(e.message)
-
-        context['doctorate'] = results[0]
-        all_confirmation_papers: List[EpreuveConfirmationDTO] = results[1]
-
-        if all_confirmation_papers:
-            current_confirmation_paper = all_confirmation_papers.pop(0)
-            context['can_be_evaluated'] = all(
-                getattr(current_confirmation_paper, field) for field in self.mandatory_fields_for_evaluation
-            )
-            context['current_confirmation_paper'] = current_confirmation_paper
-
-        context['previous_confirmation_papers'] = all_confirmation_papers
-
-        return context
+        except MultipleBusinessExceptions as multiple_exceptions:
+            for exception in multiple_exceptions.exceptions:
+                error(request, exception.message)
+            return HttpResponseRedirect(reverse('admission:doctorate:cdd:confirmation', kwargs=kwargs))

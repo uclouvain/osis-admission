@@ -27,6 +27,13 @@ msgstr ""
 #, python-format
 msgid ""
 "\n"
+"          Do you wish to move the doctorate to the \"%(status)s\" state?\n"
+"        "
+msgstr ""
+
+#, python-format
+msgid ""
+"\n"
 "        One doctorate enrolment\n"
 "      "
 msgid_plural ""
@@ -43,6 +50,20 @@ msgid ""
 "      <h2>Delete \"%(name)s\" custom mail template?</h2>\n"
 "      <p>Are you sure you want to delete the custom mail template? This "
 "cannot be undone.</p>\n"
+"    "
+msgstr ""
+
+msgid ""
+"\n"
+"      Impossible action: please be sure that the confirmation date and "
+"report are specified.\n"
+"    "
+msgstr ""
+
+#, python-format
+msgid ""
+"\n"
+"      Move the doctorate to the \"%(status)s\" state?\n"
 "    "
 msgstr ""
 
@@ -386,6 +407,11 @@ msgid "Confirm"
 msgstr ""
 
 msgid "Confirmation paper"
+msgstr ""
+
+msgid ""
+"Confirmation paper not completed for evaluation (the confirmation date and "
+"report must be specified)."
 msgstr ""
 
 msgid "Confirmation paper not completed."
@@ -1067,6 +1093,9 @@ msgstr ""
 msgid "Submitted profile"
 msgstr ""
 
+msgid "Successful test"
+msgstr ""
+
 msgid "Supervision"
 msgstr ""
 
@@ -1081,6 +1110,9 @@ msgstr "To be validated"
 
 msgid "TO_BE_VERIFIED"
 msgstr "To be verified"
+
+msgid "The confirmation paper is not in progress"
+msgstr ""
 
 msgid "The date of the confirmation paper cannot be later than its deadline."
 msgstr ""
