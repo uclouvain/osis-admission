@@ -59,6 +59,10 @@ msgid ""
 msgstr ""
 
 #, python-format
+msgid "%(label)s:"
+msgstr ""
+
+#, python-format
 msgid ""
 "%(signataire_first_name)s %(signataire_last_name)s (%(actor_role)s) has "
 "approved your signature request."
@@ -507,6 +511,12 @@ msgstr ""
 msgid "Export"
 msgstr ""
 
+msgid "Extension request not completed."
+msgstr ""
+
+msgid "Extension request not defined."
+msgstr ""
+
 msgid "FNRS"
 msgstr ""
 
@@ -713,6 +723,9 @@ msgstr ""
 msgid "Nationality"
 msgstr ""
 
+msgid "New deadline"
+msgstr ""
+
 msgid "No"
 msgstr ""
 
@@ -861,6 +874,9 @@ msgstr ""
 msgid "Promoters"
 msgstr ""
 
+msgid "Proposed new deadline"
+msgstr ""
+
 msgid "Proposition not found."
 msgstr ""
 
@@ -919,6 +935,9 @@ msgid "Rejection reason"
 msgstr ""
 
 msgid "Report of the supervisory panel"
+msgstr ""
+
+msgid "Request of a new deadline for the confirmation paper"
 msgstr ""
 
 msgid "Research report"
@@ -1053,6 +1072,9 @@ msgstr ""
 msgid "The last name of the signing actor"
 msgstr ""
 
+msgid "The opinion about the extension request is not completed."
+msgstr ""
+
 msgid "The proposition has already been confirmed or is cancelled"
 msgstr ""
 
@@ -1070,6 +1092,9 @@ msgstr ""
 "There can be no more supervisory panel members in the supervision group."
 
 msgid "There can be no more promoters in the supervision group."
+msgstr ""
+
+msgid "There is no request for a new deadline."
 msgstr ""
 
 msgid "Thesis funding renewal"

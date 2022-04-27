@@ -1260,6 +1260,42 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - propositions
+    post:
+      operationId: submit_confirmation_paper_extension_request
+      description: Submit the extension request of the last confirmation paper of
+        a doctorate
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubmitConfirmationPaperExtensionRequestCommand'
+      responses:
+        201:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DoctorateIdentityDTO'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
     put:
       operationId: submit_confirmation_paper
       description: Submit the confirmation paper related to a doctorate
@@ -3551,6 +3587,28 @@ components:
       required:
       - matricule
       - pdf
+    DoctorateIdentityDTO:
+      type: object
+      properties:
+        uuid:
+          type: string
+          readOnly: true
+    SubmitConfirmationPaperExtensionRequestCommand:
+      type: object
+      properties:
+        nouvelle_echeance:
+          type: string
+          format: date
+        justification_succincte:
+          type: string
+        lettre_justification:
+          type: array
+          items:
+            type: string
+      required:
+      - nouvelle_echeance
+      - justification_succincte
+      - lettre_justification
     CompleterPropositionCommand:
       type: object
       properties:
@@ -3669,12 +3727,6 @@ components:
       required:
       - matricule
       - motif_refus
-    DoctorateIdentityDTO:
-      type: object
-      properties:
-        uuid:
-          type: string
-          readOnly: true
     SubmitConfirmationPaperCommand:
       type: object
       properties:

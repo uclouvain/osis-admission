@@ -27,9 +27,16 @@ import datetime
 import uuid
 from typing import Optional, List
 
+from django.shortcuts import resolve_url
 from django.test import TestCase, override_settings
 from django.urls import reverse
-from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_403_FORBIDDEN, HTTP_200_OK, HTTP_302_FOUND
+from rest_framework.status import (
+    HTTP_404_NOT_FOUND,
+    HTTP_403_FORBIDDEN,
+    HTTP_200_OK,
+    HTTP_302_FOUND,
+    HTTP_400_BAD_REQUEST,
+)
 
 from admission.contrib.models import ConfirmationPaper
 from admission.ddd.projet_doctoral.doctorat.domain.model.enums import ChoixStatutDoctorat
@@ -49,11 +56,7 @@ from base.tests.factories.entity_version import EntityVersionFactory
 
 
 @override_settings(OSIS_DOCUMENT_BASE_URL='http://dummyurl')
-class CddDoctorateAdmissionConfirmationFormViewTestCase(TestCase):
-    admission_with_confirmation_papers = Optional[DoctorateAdmissionFactory]
-    admission_without_confirmation_paper = Optional[DoctorateAdmissionFactory]
-    confirmation_papers = List[ConfirmationPaperFactory]
-
+class CddDoctorateAdmissionExtensionRequestFormViewTestCase(TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -94,117 +97,120 @@ class CddDoctorateAdmissionConfirmationFormViewTestCase(TestCase):
             pre_admission_submission_date=datetime.datetime.now(),
             post_enrolment_status=ChoixStatutDoctorat.ADMITTED.name,
         )
-        cls.confirmation_papers = [
-            ConfirmationPaperFactory(
-                admission=cls.admission_with_confirmation_papers,
-                confirmation_date=datetime.date(2022, 4, 1),
-                confirmation_deadline=datetime.date(2022, 4, 5),
-            ),
-            ConfirmationPaperFactory(
-                admission=cls.admission_with_confirmation_papers,
-                confirmation_date=datetime.date(2022, 1, 1),
-                confirmation_deadline=datetime.date(2022, 4, 5),
-            ),
-        ]
-        cls.last_confirmation_paper = cls.confirmation_papers[0]
 
         cls.candidate = cls.admission_without_confirmation_paper.candidate
 
         # User with one cdd
         cls.cdd_person = CddManagerFactory(entity=first_doctoral_commission).person
+        cls.update_path = 'admission:doctorate:cdd:update:extension-request'
+        cls.read_path = 'admission:doctorate:cdd:extension-request'
 
-        cls.default_updated_params = {
-            'date': datetime.date(2023, 12, 1),
-            'date_limite': datetime.date(2023, 12, 31),
-        }
+    def setUp(self):
+        self.confirmation_paper_with_extension_request = ConfirmationPaperFactory(
+            admission=self.admission_with_confirmation_papers,
+            confirmation_date=datetime.date(2022, 4, 1),
+            confirmation_deadline=datetime.date(2022, 4, 5),
+            extended_deadline=datetime.date(2023, 1, 1),
+            cdd_opinion='My opinion',
+            justification_letter=[],
+            brief_justification='My reason',
+        )
 
-        cls.path = 'admission:doctorate:cdd:update:confirmation'
-
-    def test_get_confirmation_form_candidate_user(self):
+    def test_get_extension_request_detail_candidate_user(self):
         self.client.force_login(user=self.candidate.user)
 
-        url = reverse(self.path, args=[self.admission_without_confirmation_paper.uuid])
+        url = reverse(self.update_path, args=[self.admission_without_confirmation_paper.uuid])
 
         response = self.client.get(url)
 
-        response.status_code = HTTP_403_FORBIDDEN
+        self.assertEqual(response.status_code, HTTP_403_FORBIDDEN)
 
-    def test_get_confirmation_form_cdd_user_without_confirmation_paper(self):
+    def test_get_extension_request_detail_cdd_user_with_unknown_doctorate(self):
         self.client.force_login(user=self.cdd_person.user)
 
-        url = reverse(self.path, args=[self.admission_without_confirmation_paper.uuid])
+        url = reverse(self.update_path, args=[uuid.uuid4()])
 
         response = self.client.get(url)
 
         self.assertEqual(response.status_code, HTTP_404_NOT_FOUND)
 
-    def test_get_confirmation_form_cdd_user_with_confirmation_papers(self):
+    def test_get_extension_request_detail_cdd_user_without_confirmation_paper(self):
         self.client.force_login(user=self.cdd_person.user)
 
-        url = reverse(self.path, args=[self.admission_with_confirmation_papers.uuid])
+        url = reverse(self.update_path, args=[self.admission_without_confirmation_paper.uuid])
+
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, HTTP_404_NOT_FOUND)
+
+    def test_get_extension_request_detail_cdd_user_with_confirmation_paper_with_extension_request(self):
+        self.client.force_login(user=self.cdd_person.user)
+
+        url = reverse(self.update_path, args=[self.admission_with_confirmation_papers.uuid])
 
         response = self.client.get(url)
 
         self.assertEqual(response.status_code, HTTP_200_OK)
 
-        self.assertIsNotNone(response.context.get('doctorate'))
-        self.assertEqual(response.context.get('doctorate').uuid, str(self.admission_with_confirmation_papers.uuid))
-
-        self.assertIsNotNone(response.context.get('confirmation_paper'))
-        self.assertEqual(response.context.get('confirmation_paper').uuid, str(self.last_confirmation_paper.uuid))
-        self.assertEqual(response.context.get('form').initial, {
-            'date_limite': self.last_confirmation_paper.confirmation_deadline,
-            'date': self.last_confirmation_paper.confirmation_date,
-            'rapport_recherche': self.last_confirmation_paper.research_report,
-            'proces_verbal_ca': self.last_confirmation_paper.supervisor_panel_report,
-            'avis_renouvellement_mandat_recherche': self.last_confirmation_paper.research_mandate_renewal_opinion,
-        })
-
-    def test_get_confirmation_detail_cdd_user_with_unknown_doctorate(self):
-        self.client.force_login(user=self.cdd_person.user)
-
-        url = reverse(self.path, args=[uuid.uuid4()])
-
-        response = self.client.get(url, data={})
-
-        self.assertEqual(response.status_code, HTTP_404_NOT_FOUND)
-
-    def test_post_confirmation_detail_cdd_user_with_unknown_doctorate(self):
-        self.client.force_login(user=self.cdd_person.user)
-
-        url = reverse(self.path, args=[uuid.uuid4()])
-
-        response = self.client.post(url, data=self.default_updated_params)
-
-        self.assertEqual(response.status_code, HTTP_404_NOT_FOUND)
-
-    def test_post_confirmation_form_cdd_user_without_confirmation_paper(self):
-        self.client.force_login(user=self.cdd_person.user)
-
-        url = reverse(self.path, args=[self.admission_without_confirmation_paper.uuid])
-
-        response = self.client.post(url, data=self.default_updated_params)
-
-        self.assertEqual(response.status_code, HTTP_404_NOT_FOUND)
-
-    def test_post_confirmation_form_cdd_user_with_confirmation_papers(self):
-        self.client.force_login(user=self.cdd_person.user)
-
-        confirmation_paper_to_update = ConfirmationPaperFactory(
-            admission=self.admission_with_confirmation_papers,
-            confirmation_date=datetime.date(2023, 1, 1),
-            confirmation_deadline=datetime.date(2023, 4, 5),
+        self.assertEqual(
+            response.context.get('doctorate').uuid,
+            str(self.admission_with_confirmation_papers.uuid),
+        )
+        self.assertEqual(
+            response.context['form'].initial['avis_cdd'],
+            'My opinion',
         )
 
-        url = reverse(self.path, args=[self.admission_with_confirmation_papers.uuid])
+    def test_get_extension_request_detail_cdd_user_with_confirmation_paper_without_extension_request(self):
+        self.client.force_login(user=self.cdd_person.user)
+        self.confirmation_paper_without_extension_request = ConfirmationPaperFactory(
+            admission=self.admission_with_confirmation_papers,
+            confirmation_date=datetime.date(2022, 6, 1),
+            confirmation_deadline=datetime.date(2022, 6, 5),
+        )
 
-        response = self.client.post(url, data=self.default_updated_params)
+        url = reverse(self.update_path, args=[self.admission_with_confirmation_papers.uuid])
 
-        self.assertEqual(response.status_code, HTTP_302_FOUND)
+        response = self.client.get(url)
 
-        updated_confirmation_paper = ConfirmationPaper.objects.get(pk=confirmation_paper_to_update.pk)
+        self.assertEqual(response.status_code, HTTP_200_OK)
 
-        self.assertEqual(updated_confirmation_paper.confirmation_date, self.default_updated_params['date'])
-        self.assertEqual(updated_confirmation_paper.confirmation_deadline, self.default_updated_params['date_limite'])
+        self.assertEqual(
+            response.context.get('doctorate').uuid,
+            str(self.admission_with_confirmation_papers.uuid),
+        )
+        self.assertEqual(response.context['form'].initial, {})
 
-        updated_confirmation_paper.delete()
+    def test_post_extension_request_detail_cdd_user_with_confirmation_paper_with_extension_request(self):
+        self.client.force_login(user=self.cdd_person.user)
+
+        url = reverse(self.update_path, args=[self.admission_with_confirmation_papers.uuid])
+
+        response = self.client.post(url, data={'avis_cdd': 'My new opinion'})
+
+        self.assertRedirects(response, resolve_url(self.read_path, pk=self.admission_with_confirmation_papers.uuid))
+
+        updated_confirmation_paper = ConfirmationPaper.objects.get(
+            uuid=self.confirmation_paper_with_extension_request.uuid,
+        )
+        self.assertEqual(updated_confirmation_paper.cdd_opinion, 'My new opinion')
+
+    def test_post_extension_request_detail_cdd_user_with_confirmation_paper_without_extension_request(self):
+        self.client.force_login(user=self.cdd_person.user)
+
+        self.confirmation_paper_without_extension_request = ConfirmationPaperFactory(
+            admission=self.admission_with_confirmation_papers,
+            confirmation_date=datetime.date(2022, 6, 1),
+            confirmation_deadline=datetime.date(2022, 6, 5),
+        )
+
+        url = reverse(self.update_path, kwargs={'pk': self.admission_with_confirmation_papers.uuid})
+
+        response = self.client.post(url, data={'avis_cdd': 'My new opinion'})
+
+        self.assertEqual(response.status_code, HTTP_200_OK)
+        self.assertEqual(
+            response.wsgi_request.path,
+            resolve_url(self.update_path, pk=self.admission_with_confirmation_papers.uuid),
+        )
+        self.assertFormError(response, 'form', None, ['Demande de prolongation non définie.'])

@@ -23,16 +23,23 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from ._should_avis_prolongation_etre_complete import ShouldAvisProlongationEtreComplete
-from ._should_date_epreuve_etre_valide import ShouldDateEpreuveEtreValide
-from ._should_demande_prolongation_etre_completee import ShouldDemandeProlongationEtreCompletee
-from ._should_demande_prolongation_etre_definie import ShouldDemandeProlongationEtreDefinie
-from ._should_epreuve_confirmation_etre_completee import ShouldEpreuveConfirmationEtreCompletee
+from typing import Optional
 
-__all__ = [
-    "ShouldAvisProlongationEtreComplete",
-    "ShouldDateEpreuveEtreValide",
-    "ShouldDemandeProlongationEtreCompletee",
-    "ShouldDemandeProlongationEtreDefinie",
-    "ShouldEpreuveConfirmationEtreCompletee",
-]
+import attr
+
+from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.domain.model._demande_prolongation import (
+    DemandeProlongation,
+)
+from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.validators.exceptions import (
+    DemandeProlongationNonDefinieException,
+)
+from base.ddd.utils.business_validator import BusinessValidator
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ShouldDemandeProlongationEtreDefinie(BusinessValidator):
+    demande_prolongation: Optional[DemandeProlongation]
+
+    def validate(self, *args, **kwargs):
+        if not self.demande_prolongation:
+            raise DemandeProlongationNonDefinieException

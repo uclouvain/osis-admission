@@ -28,9 +28,15 @@ from typing import Optional, List
 
 import attr
 
+from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.domain.model._demande_prolongation import (
+    DemandeProlongation,
+)
 from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.validators import (
     ShouldEpreuveConfirmationEtreCompletee,
     ShouldDateEpreuveEtreValide,
+    ShouldDemandeProlongationEtreCompletee,
+    ShouldAvisProlongationEtreComplete,
+    ShouldDemandeProlongationEtreDefinie,
 )
 from base.ddd.utils.business_validator import TwoStepsMultipleBusinessExceptionListValidator, BusinessValidator
 
@@ -47,4 +53,36 @@ class SoumettreEpreuveConfirmationValidatorList(TwoStepsMultipleBusinessExceptio
         return [
             ShouldEpreuveConfirmationEtreCompletee(self.date),
             ShouldDateEpreuveEtreValide(self.date, self.date_limite),
+        ]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class SoumettreDemandeProlongationValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+    nouvelle_echeance: datetime.date
+    justification_succincte: str
+
+    def get_data_contract_validators(self) -> List[BusinessValidator]:
+        return []
+
+    def get_invariants_validators(self) -> List[BusinessValidator]:
+        return [
+            ShouldDemandeProlongationEtreCompletee(
+                self.nouvelle_echeance,
+                self.justification_succincte,
+            ),
+        ]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class SoumettreAvisProlongationValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+    nouvel_avis_cdd: str
+    demande_prolongation: Optional[DemandeProlongation]
+
+    def get_data_contract_validators(self) -> List[BusinessValidator]:
+        return []
+
+    def get_invariants_validators(self) -> List[BusinessValidator]:
+        return [
+            ShouldDemandeProlongationEtreDefinie(self.demande_prolongation),
+            ShouldAvisProlongationEtreComplete(self.nouvel_avis_cdd),
         ]
