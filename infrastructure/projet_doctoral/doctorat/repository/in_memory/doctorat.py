@@ -81,8 +81,8 @@ class DoctoratInMemoryRepository(InMemoryGenericRepository, IDoctoratRepository)
     @classmethod
     def get_dto(cls, entity_id: 'DoctoratIdentity') -> 'DoctoratDTO':
         doctorat = cls.get(entity_id)
-        doctorant = next(d for d in cls.doctorants if d.matricule == doctorat.matricule_doctorant)
-        formation = next(f for f in cls.formations if f.sigle == doctorat.formation_id.sigle)
+        doctorant = next(d for d in cls.doctorants if d.matricule == doctorat.matricule_doctorant)  # pragma: no branch
+        formation = next(f for f in cls.formations if f.sigle == doctorat.formation_id.sigle)  # pragma: no branch
 
         return DoctoratDTO(
             uuid=str(entity_id.uuid),

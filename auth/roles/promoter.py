@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -26,7 +26,12 @@
 from django.utils.translation import gettext_lazy as _
 from rules import RuleSet
 
-from admission.auth.predicates import is_admission_request_promoter, is_part_of_committee_and_invited, is_being_enrolled
+from admission.auth.predicates import (
+    is_admission_request_promoter,
+    is_part_of_committee_and_invited,
+    is_being_enrolled,
+    is_enrolled,
+)
 from admission.contrib.models.actor import ExternalActorMixin
 from osis_role.contrib.models import RoleModel
 
@@ -42,7 +47,6 @@ class Promoter(ExternalActorMixin, RoleModel):
         return RuleSet({
             'admission.view_doctorateadmission': is_admission_request_promoter,
             'admission.download_pdf_confirmation': is_admission_request_promoter,
-            'admission.upload_pdf_confirmation': is_admission_request_promoter,
             'admission.approve_confirmation_paper': is_admission_request_promoter,
             'admission.validate_doctoral_training': is_admission_request_promoter,
             'admission.fill_thesis': is_admission_request_promoter,
@@ -59,4 +63,8 @@ class Promoter(ExternalActorMixin, RoleModel):
             'admission.view_doctorateadmission_supervision': is_admission_request_promoter,
             # A promoter can approve as long as he is invited to the admission committee
             'admission.approve_proposition': is_part_of_committee_and_invited,
+            # Once the candidate is enrolling, a promoter can
+            'admission.view_doctorateadmission_confirmation': is_admission_request_promoter & is_enrolled,
+            'admission.change_doctorateadmission_confirmation': is_admission_request_promoter & is_enrolled,
+            'admission.upload_pdf_confirmation': is_admission_request_promoter & is_enrolled,
         })

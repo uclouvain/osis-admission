@@ -28,42 +28,28 @@ from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.builder.epreuve
     EpreuveConfirmationIdentityBuilder,
 )
 from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.commands import (
-    SoumettreEpreuveConfirmationCommand,
+    SoumettreAvisProlongationCommand,
 )
 from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.repository.i_epreuve_confirmation import (
     IEpreuveConfirmationRepository,
 )
-from admission.ddd.projet_doctoral.doctorat.repository.i_doctorat import IDoctoratRepository
 
 
-def soumettre_epreuve_confirmation_service(
-    cmd: 'SoumettreEpreuveConfirmationCommand',
-    doctorat_repository: 'IDoctoratRepository',
+def soumettre_avis_prolongation(
+    cmd: 'SoumettreAvisProlongationCommand',
     epreuve_confirmation_repository: 'IEpreuveConfirmationRepository',
 ) -> DoctoratIdentity:
     # GIVEN
     epreuve_confirmation_id = EpreuveConfirmationIdentityBuilder.build_from_uuid(cmd.uuid)
     epreuve_confirmation = epreuve_confirmation_repository.get(epreuve_confirmation_id)
 
-    epreuve_confirmation.verifier(
-        date=cmd.date,
-        date_limite=epreuve_confirmation.date_limite,
-    )
-
-    doctorat = doctorat_repository.get(epreuve_confirmation.doctorat_id)
+    epreuve_confirmation.verifier_avis_prolongation(avis_cdd=cmd.avis_cdd)
 
     # WHEN
-    epreuve_confirmation.soumettre(
-        date=cmd.date,
-        rapport_recherche=cmd.rapport_recherche,
-        proces_verbal_ca=cmd.proces_verbal_ca,
-        avis_renouvellement_mandat_recherche=cmd.avis_renouvellement_mandat_recherche,
-    )
-    doctorat.soumettre_epreuve_confirmation()
+    epreuve_confirmation.soumettre_avis_prolongation(avis_cdd=cmd.avis_cdd)
 
     # THEN
     # TODO Send notifications
-    doctorat_repository.save(doctorat)
     epreuve_confirmation_repository.save(epreuve_confirmation)
 
     return epreuve_confirmation.doctorat_id

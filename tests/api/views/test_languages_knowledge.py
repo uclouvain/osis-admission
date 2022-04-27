@@ -25,11 +25,12 @@
 # ##############################################################################
 from django.core.exceptions import ValidationError
 from django.test import override_settings
-from django.urls import reverse
+from django.shortcuts import resolve_url
 from django.utils.translation import gettext as _
 from rest_framework import status
 from rest_framework.test import APITestCase
 
+from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.roles import CandidateFactory
 from reference.tests.factories.language import LanguageFactory, FrenchLanguageFactory, EnglishLanguageFactory
 
@@ -39,7 +40,7 @@ class LanguagesKnowledgeTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
         cls.user = CandidateFactory().person.user
-        cls.url = reverse("languages-knowledge")
+        cls.url = resolve_url("languages-knowledge")
         cls.french_knowledge_data = {
             "certificate": [],
             "language": "FR",
@@ -95,6 +96,26 @@ class LanguagesKnowledgeTestCase(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.json())
         languages_knowledge = self.user.person.languages_knowledge.all()
+        self.assertEqual(languages_knowledge.count(), 3)
+
+    def test_languages_knowledge_update_from_admission(self):
+        admission = DoctorateAdmissionFactory()
+        admission_url = resolve_url("languages-knowledge", uuid=admission.uuid)
+        self.client.force_authenticate(admission.candidate.user)
+        response = self.client.post(
+            admission_url,
+            [self.french_knowledge_data, self.english_knowledge_data, self.germany_knowledge_data],
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.json())
+        languages_knowledge = admission.candidate.languages_knowledge.all()
+        self.assertEqual(languages_knowledge.count(), 3)
+
+        response = self.client.post(
+            admission_url,
+            [self.french_knowledge_data, self.english_knowledge_data, self.germany_knowledge_data],
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.json())
+        languages_knowledge = admission.candidate.languages_knowledge.all()
         self.assertEqual(languages_knowledge.count(), 3)
 
     def test_languages_knowledge_create_should_fail_if_language_set_more_than_once(self):

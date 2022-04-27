@@ -49,7 +49,7 @@ from base.tests.factories.entity_version import EntityVersionFactory
 
 
 @override_settings(OSIS_DOCUMENT_BASE_URL='http://dummyurl')
-class CddDoctorateAdmissionProjectFormViewTestCase(TestCase):
+class CddDoctorateAdmissionConfirmationFormViewTestCase(TestCase):
     admission_with_confirmation_papers = Optional[DoctorateAdmissionFactory]
     admission_without_confirmation_paper = Optional[DoctorateAdmissionFactory]
     confirmation_papers = List[ConfirmationPaperFactory]

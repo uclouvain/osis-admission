@@ -28,6 +28,7 @@ from .details.coordonnees import CddDoctorateAdmissionCoordonneesDetailView
 from .details.cotutelle import CddDoctorateAdmissionCotutelleDetailView
 from .details.curriculum import CddDoctorateAdmissionCurriculumDetailView
 from .details.education import CddDoctorateAdmissionEducationDetailView
+from .details.extension_request import CddDoctorateAdmissionExtensionRequestDetailView
 from .details.history import CddDoctorateHistoryAPIView, CddDoctorateHistoryView
 from .details.languages import CddDoctorateAdmissionLanguagesDetailView
 from .details.person import CddDoctorateAdmissionPersonDetailView
@@ -38,32 +39,40 @@ from .forms.coordonnees import CddDoctorateAdmissionCoordonneesFormView
 from .forms.cotutelle import CddDoctorateAdmissionCotutelleFormView
 from .forms.curriculum import CddDoctorateAdmissionCurriculumFormView
 from .forms.education import CddDoctorateAdmissionEducationFormView
+from .forms.extension_request import CddDoctorateAdmissionExtensionRequestFormView
 from .forms.languages import CddDoctorateAdmissionLanguagesFormView
 from .forms.person import CddDoctorateAdmissionPersonFormView
 from .forms.project import CddDoctorateAdmissionProjectFormView
+from .forms.send_mail import CddDoctorateSendMailView
 from .forms.supervision import CddDoctorateAdmissionSupervisionFormView
 from .list import CddDoctorateAdmissionList
 
 __all__ = [
     'CddDoctorateAdmissionList',
+    # Details
     'CddDoctorateAdmissionConfirmationDetailView',
     'CddDoctorateAdmissionPersonDetailView',
     'CddDoctorateAdmissionCoordonneesDetailView',
     'CddDoctorateAdmissionCurriculumDetailView',
     'CddDoctorateAdmissionEducationDetailView',
+    'CddDoctorateAdmissionExtensionRequestDetailView',
     'CddDoctorateAdmissionLanguagesDetailView',
     'CddDoctorateAdmissionProjectDetailView',
     'CddDoctorateAdmissionCotutelleDetailView',
     'CddDoctorateAdmissionSupervisionDetailView',
+    # Forms
     'CddDoctorateAdmissionConfirmationFormView',
     'CddDoctorateAdmissionPersonFormView',
     'CddDoctorateAdmissionCoordonneesFormView',
     'CddDoctorateAdmissionCurriculumFormView',
     'CddDoctorateAdmissionEducationFormView',
+    'CddDoctorateAdmissionExtensionRequestFormView',
     'CddDoctorateAdmissionLanguagesFormView',
     'CddDoctorateAdmissionProjectFormView',
     'CddDoctorateAdmissionCotutelleFormView',
     'CddDoctorateAdmissionSupervisionFormView',
+    # Others
     'CddDoctorateHistoryAPIView',
     'CddDoctorateHistoryView',
+    'CddDoctorateSendMailView',
 ]

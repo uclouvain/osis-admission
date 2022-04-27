@@ -58,6 +58,7 @@ urlpatterns = [
     path('propositions/<uuid:uuid>/approve-by-pdf', views.ApproveByPdfPropositionAPIView),
     path('propositions/<uuid:uuid>/confirmation', views.ConfirmationAPIView),
     path('propositions/<uuid:uuid>/confirmation/last', views.LastConfirmationAPIView),
+    path('propositions/<uuid:uuid>/supervised_confirmation', views.SupervisedConfirmationAPIView),
     path('propositions/<uuid:uuid>/curriculum', views.CurriculumExperienceListAndCreateView),
     path('propositions/<uuid:uuid>/curriculum/file', views.CurriculumFileView),
     path('propositions/<uuid:uuid>/curriculum/<uuid:xp>', views.CurriculumExperienceDetailUpdateAndDeleteView),

@@ -54,14 +54,14 @@ from base.ddd.utils.in_memory_repository import InMemoryGenericRepository
 
 
 @dataclass
-class Candidat:
+class _Candidat:
     prenom: str
     nom: str
     nationalite: str
 
 
 @dataclass
-class Doctorat:
+class _Doctorat:
     intitule: str
     code_secteur: str
     intitule_secteur: str
@@ -69,26 +69,26 @@ class Doctorat:
 
 class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepository):
     doctorats = {
-        ("SC3DP", 2020): Doctorat(
+        ("SC3DP", 2020): _Doctorat(
             intitule="Doctorat en sciences",
             code_secteur="SST",
             intitule_secteur="Secteur des sciences et technologies",
         ),
-        ("ECGE3DP", 2020): Doctorat(
+        ("ECGE3DP", 2020): _Doctorat(
             intitule="Doctorat en sciences économiques et de gestion",
             code_secteur="SSH",
             intitule_secteur="Secteur des sciences humaines",
         ),
-        ("ESP3DP", 2020): Doctorat(
+        ("ESP3DP", 2020): _Doctorat(
             intitule="Doctorat en sciences de la santé publique",
             code_secteur="SSS",
             intitule_secteur="Secteur des sciences de la santé",
         ),
     }
     candidats = {
-        "0123456789": Candidat("Jean", "Dupont", "France"),
-        "0000000001": Candidat("Michel", "Durand", "Belgique"),
-        "candidat": Candidat("Pierre", "Dupond", "Belgique"),
+        "0123456789": _Candidat("Jean", "Dupont", "France"),
+        "0000000001": _Candidat("Michel", "Durand", "Belgique"),
+        "candidat": _Candidat("Pierre", "Dupond", "Belgique"),
     }
     entities: List['Proposition'] = []
 

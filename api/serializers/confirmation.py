@@ -23,7 +23,11 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.commands import SoumettreEpreuveConfirmationCommand
+from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.commands import (
+    SoumettreEpreuveConfirmationCommand,
+    CompleterEpreuveConfirmationParPromoteurCommand,
+    SoumettreReportDeDateCommand,
+)
 from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.dtos import EpreuveConfirmationDTO
 from base.utils.serializers import DTOSerializer
 
@@ -38,3 +42,17 @@ class SubmitConfirmationPaperCommandSerializer(DTOSerializer):
 
     class Meta:
         source = SoumettreEpreuveConfirmationCommand
+
+
+class CompleteConfirmationPaperByPromoterCommandSerializer(DTOSerializer):
+    uuid = None
+
+    class Meta:
+        source = CompleterEpreuveConfirmationParPromoteurCommand
+
+
+class SubmitConfirmationPaperExtensionRequestCommandSerializer(DTOSerializer):
+    uuid = None
+
+    class Meta:
+        source = SoumettreReportDeDateCommand

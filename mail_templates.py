@@ -48,11 +48,6 @@ common_tokens = [
         description=_("Link to the admission (front-office)"),
         example="http://dev.studies.uclouvain.be/somewhere",
     ),
-    Token(
-        name='admission_link_back',
-        description=_("Link to the admission (back-office)"),
-        example="http://dev.osis.uclouvain.be/somewhere",
-    ),
 ]
 
 ADMISSION_EMAIL_SIGNATURE_REQUESTS_CANDIDATE = 'osis-admission-signature-requests-candidate'
@@ -188,6 +183,11 @@ templates.register(
             description=_("The last name of the recipient"),
             example="Smith",
         ),
+        Token(
+            name='admission_link_back',
+            description=_("Link to the admission (back-office)"),
+            example="http://dev.osis.uclouvain.be/somewhere",
+        ),
     ],
     tag='Admission',
 )
@@ -229,5 +229,13 @@ templates.register(
             example="Smith",
         ),
     ],
+    tag='Admission',
+)
+
+ADMISSION_EMAIL_GENERIC_ONCE_ADMITTED = 'osis-admission-generic-admitted'
+templates.register(
+    ADMISSION_EMAIL_GENERIC_ONCE_ADMITTED,
+    description=_("Generic mail that can be manually sent once the candidate is admitted"),
+    tokens=common_tokens,
     tag='Admission',
 )

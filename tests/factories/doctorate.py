@@ -29,6 +29,7 @@ from django.db import connection
 
 from admission.contrib.models import DoctorateAdmission
 from admission.contrib.models.doctorate import REFERENCE_SEQ_NAME
+from admission.ddd.projet_doctoral.doctorat.domain.model.enums import ChoixStatutDoctorat
 from admission.ddd.projet_doctoral.preparation.domain.model.proposition import Proposition
 from admission.tests.factories.roles import CandidateFactory
 from base.models.enums.education_group_types import TrainingType
@@ -77,6 +78,9 @@ class DoctorateAdmissionFactory(factory.DjangoModelFactory):
             cotutelle_institution="Somewhere",
             cotutelle_opening_request=factory.LazyFunction(generate_token),  # This is to overcome circular import
             cotutelle_convention=factory.LazyFunction(generate_token),
+        )
+        admitted = factory.Trait(
+            post_enrolment_status=ChoixStatutDoctorat.ADMITTED.name,
         )
 
     @factory.post_generation
