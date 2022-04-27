@@ -24,8 +24,9 @@
 #
 ##############################################################################
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.messages import add_message, ERROR
+from django.core.cache import cache
 from django.core.exceptions import NON_FIELD_ERRORS
-from django.shortcuts import render
 from django.utils.translation import gettext as _
 from django.views.generic import ListView
 
@@ -47,34 +48,28 @@ class CddDoctorateAdmissionList(LoginRequiredMixin, CddRequiredMixin, HtmxMixin,
     template_name = 'admission/doctorate/cdd/list.html'
     htmx_template_name = 'admission/doctorate/cdd/list_block.html'
 
+    DEFAULT_PAGINATOR_SIZE = '10'
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.form = None
 
+    @property
+    def cache_key(self):
+        return "_".join(['cache_filter', str(self.request.user.id), self.request.path])
+
     @staticmethod
     def htmx_render_form_errors(request, form):
-        """Returns an HttpResponse containing the errors of the form grouped by field."""
-        formatted_errors = [
-            (form.fields.get(field_name).label if field_name != NON_FIELD_ERRORS else _('General'), errors)
-            for field_name, errors in form.errors.items()
-        ]
-
-        return render(
-            status=400,
-            request=request,
-            template_name='admission/includes/form_errors.html',
-            context={
-                'errors': formatted_errors,
-            },
-        )
-
-    def get(self, request, *args, **kwargs):
-        self.form = FilterForm(user=self.request.user, data=self.request.GET or None)
-
-        if not self.form.is_valid() and self.request.htmx:
-            return self.htmx_render_form_errors(request, self.form)
-
-        return super().get(request, *args, **kwargs)
+        """Display the form errors through the django messages."""
+        for field_name, errors in form.errors.items():
+            add_message(
+                request=request,
+                message='{} - {}'.format(
+                    form.fields.get(field_name).label if field_name != NON_FIELD_ERRORS else _('General'),
+                    ' '.join(errors),
+                ),
+                level=ERROR,
+            )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -82,11 +77,21 @@ class CddDoctorateAdmissionList(LoginRequiredMixin, CddRequiredMixin, HtmxMixin,
         return context
 
     def get_paginate_by(self, queryset):
-        return self.request.GET.get('page_size')
+        return self.request.GET.get('page_size', self.DEFAULT_PAGINATOR_SIZE)
 
     def get_queryset(self):
-        if not self.form.is_bound or not self.form.is_valid():
+        self.form = FilterForm(
+            user=self.request.user,
+            data=self.request.GET or cache.get(self.cache_key) or None,
+            load_labels=not self.request.htmx,
+        )
+
+        if not self.form.is_valid():
+            if self.request.htmx:
+                self.htmx_render_form_errors(self.request, self.form)
             return []
+
+        cache.set(self.cache_key, self.request.GET)
 
         filters = self.form.cleaned_data
 

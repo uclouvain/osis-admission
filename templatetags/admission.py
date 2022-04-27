@@ -128,16 +128,20 @@ def doctorate_tabs_bar(context):
     }
 
 
+@register.simple_tag(takes_context=True)
+def current_subtabs(context):
+    match = context['request'].resolver_match
+    namespaces = match.namespaces
+    current_tab_tree = TAB_TREES[namespaces[1]][namespaces[2]]
+    return current_tab_tree.get(get_active_parent(current_tab_tree, match.url_name), [])
+
+
 @register.inclusion_tag('admission/includes/doctorate_subtabs_bar.html', takes_context=True)
-def doctorate_subtabs_bar(context):
+def doctorate_subtabs_bar(context, tabs=None):
     match = context['request'].resolver_match
 
-    namespaces = match.namespaces
-
-    current_tab_tree = TAB_TREES[namespaces[1]][namespaces[2]]
-
     return {
-        'subtabs': current_tab_tree.get(get_active_parent(current_tab_tree, match.url_name), []),
+        'subtabs': tabs if tabs is not None else current_subtabs(context),
         'admission_uuid': context['view'].kwargs.get('pk', ''),
         'namespace': match.namespace,
         'request': context['request'],

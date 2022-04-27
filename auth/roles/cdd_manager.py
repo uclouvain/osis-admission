@@ -67,5 +67,6 @@ class CddManager(EntityRoleModel):
             'admission.add_supervision_member': is_part_of_doctoral_commission,
             'admission.remove_supervision_member': is_part_of_doctoral_commission,
             'admission.change_cddmailtemplate': rules.always_allow,
+            'admission.view_cdddossiers': rules.always_allow,
         }
         return RuleSet(ruleset)

@@ -27,9 +27,9 @@ import datetime
 from typing import List
 
 from django.contrib.auth.models import User
+from django.core.cache import cache
 from django.test import RequestFactory, TestCase
 from django.urls import reverse
-from django.utils.translation import gettext as _
 
 from admission.contrib.models import DoctorateAdmission
 from admission.ddd.projet_doctoral.preparation.domain.model._enums import ChoixStatutProposition, ChoixTypeAdmission
@@ -110,6 +110,8 @@ class CddDoctorateAdmissionListTestCase(TestCase):
             DoctorateAdmissionFactory(
                 doctorate__management_entity=second_doctoral_commission,
                 doctorate__academic_year=academic_years[0],
+                scholarship_grant='Custom grant',
+                financing_work_contract='Custom working contract',
             ),
         ]
 
@@ -180,6 +182,9 @@ class CddDoctorateAdmissionListTestCase(TestCase):
 
         # Targeted url
         cls.url = reverse('admission:doctorate:cdd:list')
+
+    def setUp(self) -> None:
+        cache.clear()
 
     def test_list_user_without_person(self):
         self.client.force_login(user=self.user)
@@ -272,6 +277,21 @@ class CddDoctorateAdmissionListTestCase(TestCase):
         self.assertEqual(len(response.context['object_list']), 1)
         self.assertEqual(response.context['object_list'][0], self.results[1])
 
+    def test_list_cdd_user_with_other_params(self):
+        self.client.force_login(user=self.several_cdds_user)
+
+        data = {
+            'cdds': [ENTITY_CDSS],
+            'type_contrat_travail': ChoixTypeContratTravail.OTHER.name,
+            'bourse_recherche': BourseRecherche.OTHER.name,
+        }
+
+        response = self.client.get(self.url, data)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context['object_list']), 1)
+        self.assertEqual(response.context['object_list'][0], self.results[2])
+
     def test_list_cdd_user_with_cotutelle_query_param(self):
         self.client.force_login(user=self.one_cdd_user)
 
@@ -326,7 +346,7 @@ class CddDoctorateAdmissionListTestCase(TestCase):
         self.client.force_login(user=self.one_cdd_user)
 
         data = {
-            'cdds': [ENTITY_CDE],
+            'nationalite': 'FR',
         }
 
         response = self.client.get(
@@ -335,5 +355,5 @@ class CddDoctorateAdmissionListTestCase(TestCase):
             HTTP_HX_REQUEST='true',
         )
 
-        self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.context['errors'][0], (_('Page size'), ["Ce champ est obligatoire."]))
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('CDDs - Ce champ est obligatoire.', [m.message for m in response.context['messages']])

@@ -40,6 +40,16 @@ textarea {
     resize: vertical;
 }
 
+.flex-content {
+  display: flex;
+  justify-content:space-between;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.border-right {
+  border-right: 1px solid #ddd;
+}
+
 @media (min-width: 990px) {
   .tabsbar-collapse {
     width: auto;

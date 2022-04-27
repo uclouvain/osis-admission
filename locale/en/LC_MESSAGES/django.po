@@ -27,24 +27,24 @@ msgstr ""
 #, python-format
 msgid ""
 "\n"
+"        One doctorate enrolment\n"
+"      "
+msgid_plural ""
+"\n"
+"        %(start_index)s to %(end_index)s of %(total_counts)s doctorate "
+"enrolments\n"
+"      "
+msgstr[0] ""
+msgstr[1] ""
+
+#, python-format
+msgid ""
+"\n"
 "      <h2>Delete \"%(name)s\" custom mail template?</h2>\n"
 "      <p>Are you sure you want to delete the custom mail template? This "
 "cannot be undone.</p>\n"
 "    "
 msgstr ""
-
-#, python-format
-msgid ""
-"\n"
-"    One doctorate enrolment\n"
-"    "
-msgid_plural ""
-"\n"
-"    %(start_index)s to %(end_index)s of %(total_counts)s doctorate "
-"enrolments\n"
-"    "
-msgstr[0] ""
-msgstr[1] ""
 
 #, python-format
 msgid ""
@@ -666,6 +666,9 @@ msgid ""
 "are sent"
 msgstr ""
 
+msgid "Management of the doctorate enrolments"
+msgstr ""
+
 msgid "Mandatory fields are missing in the cotutelle."
 msgstr ""
 
@@ -733,6 +736,9 @@ msgid "No PhD found."
 msgstr ""
 
 msgid "No defense reason"
+msgstr ""
+
+msgid "No doctorate enrolment"
 msgstr ""
 
 msgid "No doctorate found."

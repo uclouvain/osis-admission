@@ -55,6 +55,8 @@ from admission.ddd.projet_doctoral.preparation.domain.model._experience_preceden
 from admission.ddd.projet_doctoral.preparation.domain.model._financement import (
     ChoixTypeFinancement,
     Financement,
+    BourseRecherche,
+    ChoixTypeContratTravail,
 )
 from admission.ddd.projet_doctoral.preparation.domain.model._institut import (
     InstitutIdentity,
@@ -254,9 +256,15 @@ class PropositionRepository(IPropositionRepository):
         if financement:
             qs = qs.filter(financing_type=financement)
         if type_contrat_travail:
-            qs = qs.filter(financing_work_contract=type_contrat_travail)
+            if type_contrat_travail == ChoixTypeContratTravail.OTHER.name:
+                qs = qs.exclude(financing_work_contract__in=ChoixTypeContratTravail.get_names())
+            else:
+                qs = qs.filter(financing_work_contract=type_contrat_travail)
         if bourse_recherche:
-            qs = qs.filter(scholarship_grant=bourse_recherche)
+            if bourse_recherche == BourseRecherche.OTHER.name:
+                qs = qs.exclude(scholarship_grant__in=BourseRecherche.get_names())
+            else:
+                qs = qs.filter(scholarship_grant=bourse_recherche)
         if matricule_promoteur:
             qs = qs.filter(supervision_group__actors__person__global_id=matricule_promoteur)
         if cotutelle is not None:

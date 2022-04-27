@@ -53,7 +53,7 @@
         method="get"
         hx-boost="true"
         hx-target="#table_doctorate_admission"
-        hx-indicator="#loader"
+        hx-indicator="#htmx-overlay"
     >
       <div class="row">
         {% bootstrap_field filter_form.numero form_group_class="form-group col-md-3" %}
@@ -123,22 +123,6 @@
 
     <hr>
 
-    <div class="text-right list-actions">
-      {% bootstrap_field filter_form.page_size show_label=False form_group_class="fit-content" show_help=False %}
-      <span>{% trans "items per page" %}</span>
-      <button
-          id="dLabel"
-          class="btn btn-default visible-lg-inline-block"
-          type="button"
-          data-toggle="dropdown"
-          aria-haspopup="true"
-          aria-expanded="false"
-          title="{% trans 'Export' %}"
-      >
-        <span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span>
-      </button>
-    </div>
-
     <div class="table-responsive mt-1" id="table_doctorate_admission">
       {% include 'admission/doctorate/cdd/list_block.html' with object_list=object_list %}
     </div>
@@ -151,15 +135,11 @@
 
 {{ block.super }}
 
+<link rel="stylesheet" href="{% static 'admission/admission.css' %}" type='text/css'>
 <link rel="stylesheet" href="{% static 'css/bootstrap-datepicker3.min.css' %}" type='text/css'>
 <style>
   .mt-1 {
     margin-top: 1em;
-  }
-
-  /* Display the loader when sending an htmx request */
-  #loader.htmx-request{
-    display: unset !important;
   }
 
   /* Customize the form inputs */
@@ -214,25 +194,27 @@
     // Display / hide inputs depending on the values of other inputs
     $('#id_type_contrat_travail').closest('.form-group').dependsOn({
       '#id_type_financement': { values: ['WORK_CONTRACT'] },
-    }, { duration: 0 });
+    }, { duration: 0, valueOnDisable: '', });
     $('#id_bourse_recherche').closest('.form-group').dependsOn({
       '#id_type_financement': { values: ['SEARCH_SCHOLARSHIP'] },
-    }, { duration: 0 });
+    }, { duration: 0, valueOnDisable: '', });
 
     // Clear inputs when the form is reset
     $('#search_form').on('reset', function(evt) {
-      $('#search_form :input:not([type=hidden])').val(null).trigger('change');
+      $('#search_form :input:not([type=hidden]):not([name=cdds])').val(null).trigger('change');
       evt.preventDefault();
+      $('#search_form button[type=submit]').click();
       return false;
     });
 
     // Display / hide the form errors
-    $('#admission-search').on('htmx:responseError', function(evt) {
-      $('#form_errors').html(evt.originalEvent.detail.xhr.response);
-    });
     $('#admission-search').on('htmx:beforeSend', function(evt) {
       $('#form_errors').html('');
     });
+
+    $(document).on('change', '#id_page_size', function(evt) {
+      $('#search_form button[type=submit]').click();
+    })
   });
 </script>
 
