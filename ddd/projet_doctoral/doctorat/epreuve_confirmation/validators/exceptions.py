@@ -59,3 +59,19 @@ class DemandeProlongationNonCompleteeException(BusinessException):
     def __init__(self, **kwargs):
         message = _("Extension request not completed.")
         super().__init__(message, **kwargs)
+
+
+class AvisProlongationNonCompleteException(BusinessException):
+    status_code = "EPREUVE-CONFIRMATION-5"
+
+    def __init__(self, **kwargs):
+        message = _("The opinion about the extension request is not completed.")
+        super().__init__(message, **kwargs)
+
+
+class DemandeProlongationNonDefinieException(BusinessException):
+    status_code = "EPREUVE-CONFIRMATION-6"
+
+    def __init__(self, **kwargs):
+        message = _("Extension request not defined.")
+        super().__init__(message, **kwargs)

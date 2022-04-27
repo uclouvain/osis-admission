@@ -79,3 +79,10 @@ class SoumettreReportDeDateCommand(interface.CommandRequest):
     nouvelle_echeance: datetime.date
     justification_succincte: str
     lettre_justification: List[str]
+
+
+@attr.s(frozen=True, slots=True, auto_attribs=True)
+class SoumettreAvisProlongationCommand(interface.CommandRequest):
+    uuid: str
+
+    avis_cdd: str

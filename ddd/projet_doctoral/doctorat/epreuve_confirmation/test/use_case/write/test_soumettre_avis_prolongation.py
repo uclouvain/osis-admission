@@ -23,51 +23,79 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import datetime
+
 from django.test import SimpleTestCase
 
 from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.builder.epreuve_confirmation_identity import (
     EpreuveConfirmationIdentityBuilder,
 )
 from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.commands import (
-    CompleterEpreuveConfirmationParPromoteurCommand,
+    SoumettreAvisProlongationCommand,
+    RecupererDerniereEpreuveConfirmationQuery,
+    RecupererEpreuvesConfirmationQuery,
 )
 from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.validators.exceptions import (
     EpreuveConfirmationNonTrouveeException,
+    AvisProlongationNonCompleteException,
+    DemandeProlongationNonDefinieException,
 )
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
-from admission.infrastructure.projet_doctoral.doctorat.epreuve_confirmation.repository.in_memory import (
-    epreuve_confirmation,
-)
+from base.ddd.utils.business_validator import MultipleBusinessExceptions
 
 
-class TestCompleterEpreuveConfirmationParPromoteur(SimpleTestCase):
+class TestSoumettreAvisProlongation(SimpleTestCase):
     def setUp(self):
-        self.epreuve_confirmation_id = EpreuveConfirmationIdentityBuilder.build_from_uuid('c2')
         self.message_bus = message_bus_in_memory_instance
+        self.epreuve_confirmation_id = EpreuveConfirmationIdentityBuilder.build_from_uuid('c2')
 
     def test_should_generer_exception_si_confirmation_inconnue(self):
         with self.assertRaises(EpreuveConfirmationNonTrouveeException):
             self.message_bus.invoke(
-                CompleterEpreuveConfirmationParPromoteurCommand(
+                SoumettreAvisProlongationCommand(
                     uuid='inconnue',
-                    proces_verbal_ca=['mon_fichier_2'],
-                    avis_renouvellement_mandat_recherche=['mon_fichier_3'],
+                    avis_cdd='Mon avis',
                 )
             )
 
-    def test_should_completer_epreuve_confirmation_si_valide(self):
+    def test_should_generer_exception_si_avis_cdd_non_specifie(self):
+        with self.assertRaises(MultipleBusinessExceptions) as e:
+            self.message_bus.invoke(
+                SoumettreAvisProlongationCommand(
+                    uuid=str(self.epreuve_confirmation_id.uuid),
+                    avis_cdd='',
+                )
+            )
+        self.assertIsInstance(e.exception.exceptions.pop(), AvisProlongationNonCompleteException)
+
+    def test_should_generer_exception_si_pas_de_demande_de_prolongation(self):
+        with self.assertRaises(MultipleBusinessExceptions) as e:
+            self.message_bus.invoke(
+                SoumettreAvisProlongationCommand(
+                    uuid='c1',
+                    avis_cdd='Mon avis',
+                )
+            )
+        self.assertIsInstance(e.exception.exceptions.pop(), DemandeProlongationNonDefinieException)
+
+    def test_should_soumettre_avis_si_valide(self):
         doctorat_id_resultat = self.message_bus.invoke(
-            CompleterEpreuveConfirmationParPromoteurCommand(
+            SoumettreAvisProlongationCommand(
                 uuid='c2',
-                proces_verbal_ca=['mon_fichier_4'],
-                avis_renouvellement_mandat_recherche=['mon_fichier_5'],
+                avis_cdd='Mon avis',
             )
         )
 
-        epreuve_confirmation_mise_a_jour = epreuve_confirmation.EpreuveConfirmationInMemoryRepository.get(
-            entity_id=self.epreuve_confirmation_id,
+        epreuve_confirmation_mise_a_jour = next(
+            epreuve
+            for epreuve in message_bus_in_memory_instance.invoke(
+                RecupererEpreuvesConfirmationQuery(doctorat_uuid=doctorat_id_resultat.uuid)
+            )
+            if epreuve.uuid == 'c2'
         )
 
-        self.assertEqual(epreuve_confirmation_mise_a_jour.doctorat_id, doctorat_id_resultat)
-        self.assertEqual(epreuve_confirmation_mise_a_jour.proces_verbal_ca, ['mon_fichier_4'])
-        self.assertEqual(epreuve_confirmation_mise_a_jour.avis_renouvellement_mandat_recherche, ['mon_fichier_5'])
+        self.assertIsNotNone(epreuve_confirmation_mise_a_jour.demande_prolongation)
+        self.assertEqual(
+            epreuve_confirmation_mise_a_jour.demande_prolongation.avis_cdd,
+            'Mon avis',
+        )

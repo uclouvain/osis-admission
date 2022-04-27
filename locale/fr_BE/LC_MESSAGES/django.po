@@ -78,6 +78,10 @@ msgstr ""
 "%(doctorate_title)s"
 
 #, python-format
+msgid "%(label)s:"
+msgstr "%(label)s :"
+
+#, python-format
 msgid ""
 "%(signataire_first_name)s %(signataire_last_name)s (%(actor_role)s) has "
 "approved your signature request."
@@ -535,6 +539,9 @@ msgstr "Exporter"
 msgid "Extension request not completed."
 msgstr "Demande de prolongation non complète."
 
+msgid "Extension request not defined."
+msgstr "Demande de prolongation non définie."
+
 msgid "FNRS"
 msgstr "FNRS"
 
@@ -750,6 +757,9 @@ msgstr "Nom"
 msgid "Nationality"
 msgstr "Nationalité"
 
+msgid "New deadline"
+msgstr "Nouvelle échéance"
+
 msgid "No"
 msgstr "Non"
 
@@ -910,6 +920,9 @@ msgstr "Promoteur non trouvé."
 msgid "Promoters"
 msgstr "Promoteurs"
 
+msgid "Proposed new deadline"
+msgstr "Nouvelle échéance proposée"
+
 msgid "Proposition not found."
 msgstr "Proposition non trouvée."
 
@@ -973,6 +986,9 @@ msgstr "Motif de refus"
 
 msgid "Report of the supervisory panel"
 msgstr "Procès-verbal du comité d'accompagnement"
+
+msgid "Request of a new deadline for the confirmation paper"
+msgstr "Demande d'une nouvelle échéance pour l'épreuve de confirmation"
 
 msgid "Research report"
 msgstr "Rapport de recherche"
@@ -1108,6 +1124,9 @@ msgstr "Le nom du destinataire"
 msgid "The last name of the signing actor"
 msgstr "Le nom du signataire"
 
+msgid "The opinion about the extension request is not completed."
+msgstr "L'avis relatif à la demande d'une nouvelle échéance n'est pas complet."
+
 msgid "The proposition has already been confirmed or is cancelled"
 msgstr "La proposition a déjà été confirmée ou est annulée."
 
@@ -1128,6 +1147,9 @@ msgstr ""
 msgid "There can be no more promoters in the supervision group."
 msgstr ""
 "Il ne peut y avoir davantage de promoteurs dans le groupe de supervision."
+
+msgid "There is no request for a new deadline."
+msgstr "Il n'y a pas de demande de nouvelle échéance."
 
 msgid "Thesis funding renewal"
 msgstr "Demande de renouvellement de bourse"
@@ -1276,4 +1298,4 @@ msgid "items per page"
 msgstr "éléments par page"
 
 msgid "modified"
-msgstr "modifée"
+msgstr "modifiée"

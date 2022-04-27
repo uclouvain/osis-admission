@@ -23,8 +23,33 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from .modifier_epreuve_confirmation_par_cdd_service import modifier_epreuve_confirmation_par_cdd
-from .soumettre_epreuve_confirmation_service import soumettre_epreuve_confirmation
-from .completer_epreuve_confirmation_par_promoteur_service import completer_epreuve_confirmation_par_promoteur
-from .soumettre_report_de_date_service import soumettre_report_de_date
-from .soumettre_avis_prolongation_service import soumettre_avis_prolongation
+from admission.ddd.projet_doctoral.doctorat.domain.model.doctorat import DoctoratIdentity
+from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.builder.epreuve_confirmation_identity import (
+    EpreuveConfirmationIdentityBuilder,
+)
+from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.commands import (
+    SoumettreAvisProlongationCommand,
+)
+from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.repository.i_epreuve_confirmation import (
+    IEpreuveConfirmationRepository,
+)
+
+
+def soumettre_avis_prolongation(
+    cmd: 'SoumettreAvisProlongationCommand',
+    epreuve_confirmation_repository: 'IEpreuveConfirmationRepository',
+) -> DoctoratIdentity:
+    # GIVEN
+    epreuve_confirmation_id = EpreuveConfirmationIdentityBuilder.build_from_uuid(cmd.uuid)
+    epreuve_confirmation = epreuve_confirmation_repository.get(epreuve_confirmation_id)
+
+    epreuve_confirmation.verifier_avis_prolongation(avis_cdd=cmd.avis_cdd)
+
+    # WHEN
+    epreuve_confirmation.soumettre_avis_prolongation(avis_cdd=cmd.avis_cdd)
+
+    # THEN
+    # TODO Send notifications
+    epreuve_confirmation_repository.save(epreuve_confirmation)
+
+    return epreuve_confirmation.doctorat_id

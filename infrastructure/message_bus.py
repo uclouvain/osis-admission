@@ -242,4 +242,8 @@ class MessageBusCommands(AbstractMessageBusCommands):
             soumettre_report_de_date,
             epreuve_confirmation_repository=EpreuveConfirmationRepository(),
         ),
+        SoumettreAvisProlongationCommand: partial(
+            soumettre_avis_prolongation,
+            epreuve_confirmation_repository=EpreuveConfirmationRepository(),
+        ),
     }
