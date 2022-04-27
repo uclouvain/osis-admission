@@ -30,11 +30,11 @@ from osis_common.ddd.interface import EntityIdentityBuilder, CommandRequest, DTO
 class DoctoratIdentityBuilder(EntityIdentityBuilder):
     @classmethod
     def build_from_command(cls, cmd: 'CommandRequest') -> 'DoctoratIdentity':
-        pass
+        raise NotImplementedError
 
     @classmethod
     def build_from_repository_dto(cls, dto_object: 'DTO') -> 'DoctoratIdentity':
-        pass
+        raise NotImplementedError
 
     @classmethod
     def build_from_uuid(cls, uuid: str) -> 'DoctoratIdentity':

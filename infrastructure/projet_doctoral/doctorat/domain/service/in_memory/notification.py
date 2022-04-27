@@ -23,17 +23,22 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.ddd.projet_doctoral.doctorat.builder.doctorat_identity import DoctoratIdentityBuilder
-from admission.ddd.projet_doctoral.doctorat.commands import RecupererDoctoratQuery
-from admission.ddd.projet_doctoral.doctorat.dtos import DoctoratDTO
-from admission.ddd.projet_doctoral.doctorat.repository.i_doctorat import IDoctoratRepository
+from email.message import EmailMessage
+
+from admission.ddd.projet_doctoral.doctorat.domain.model.doctorat import Doctorat
+from admission.ddd.projet_doctoral.doctorat.domain.service.i_notification import INotification
 
 
-def recuperer_doctorat_service(
-    cmd: 'RecupererDoctoratQuery',
-    doctorat_repository: 'IDoctoratRepository',
-) -> DoctoratDTO:
-    # GIVEN
-    doctorat_id = DoctoratIdentityBuilder.build_from_uuid(cmd.doctorat_uuid)
-    # THEN
-    return doctorat_repository.get_dto(doctorat_id)
+class NotificationInMemory(INotification):
+    @classmethod
+    def envoyer_message(
+        cls,
+        doctorat: Doctorat,
+        matricule_emetteur: str,
+        matricule_doctorant: str,
+        sujet: str,
+        message: str,
+        cc_promoteurs: bool,
+        cc_membres_ca: bool,
+    ) -> EmailMessage:
+        raise NotImplementedError

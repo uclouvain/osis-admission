@@ -88,10 +88,14 @@ TAB_TREES = {
                 Tab('cotutelle', _('Cotutelle')),
                 Tab('supervision', _('Supervision')),
                 Tab('confirmation', _('Confirmation paper')),
+                Tab('extension-request', _('New deadline')),
             ],
             Tab('history', _('History'), 'clock'): [
                 Tab('history', _('Status changes')),
                 Tab('history-all', _('All history')),
+            ],
+            Tab('messages', _('Send a mail'), 'envelope'): [
+                Tab('send-mail', _('Send a mail')),
             ],
         },
     },
@@ -105,8 +109,8 @@ def get_active_parent(tab_tree, tab_name):
     )
 
 
-@register.inclusion_tag('admission/includes/tabs_bar.html', takes_context=True)
-def doctorate_tabs(context):
+@register.inclusion_tag('admission/includes/doctorate_tabs_bar.html', takes_context=True)
+def doctorate_tabs_bar(context):
     match = context['request'].resolver_match
 
     namespaces = match.namespaces
@@ -124,8 +128,8 @@ def doctorate_tabs(context):
     }
 
 
-@register.inclusion_tag('admission/includes/subtabs_bar.html', takes_context=True)
-def doctorate_subtabs(context):
+@register.inclusion_tag('admission/includes/doctorate_subtabs_bar.html', takes_context=True)
+def doctorate_subtabs_bar(context):
     match = context['request'].resolver_match
 
     namespaces = match.namespaces
@@ -165,7 +169,7 @@ def detail_tab_path_from_update(context, admission_uuid):
 
 
 @register.inclusion_tag('admission/includes/field_data.html')
-def field_data(name, data=None, css_class=None, hide_empty=False, translate_data=False):
+def field_data(name, data=None, css_class=None, hide_empty=False, translate_data=False, inline=False):
     if isinstance(data, list):
         if data:
             template_string = "{% load osis_document %}{% document_visualizer files %}"
@@ -175,6 +179,11 @@ def field_data(name, data=None, css_class=None, hide_empty=False, translate_data
             data = ''
     elif translate_data is True:
         data = _(data)
+
+    if inline is True:
+        name = _("%(label)s:") % {'label': name}
+        css_class = (css_class + ' inline-field-data') if css_class else 'inline-field-data'
+
     return {
         'name': name,
         'data': data,

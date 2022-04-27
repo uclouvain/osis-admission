@@ -104,17 +104,21 @@
       </div>
     </div>
     <div class="panel-body">
-      {% doctorate_tabs %}
-      <div class="row" style="display: flex">
+      {% doctorate_tabs_bar %}
+      {% if children|length > 1 %}
+        <div class="row" style="display: flex">
         <div class="col-md-2 visible-md visible-lg border-right">
-          {% doctorate_subtabs %}
+          {% doctorate_subtabs_bar %}
         </div>
         <div class="col-md-10">
-          {% block tab_content %}
-            <p>{% trans "This page is currently under construction." %}</p>
-          {% endblock %}
+      {% endif %}
+      {% block tab_content %}
+        <p>{% trans "This page is currently under construction." %}</p>
+      {% endblock %}
+      {% if children|length > 1 %}
         </div>
-      </div>
+        </div>
+      {% endif %}
     </div>
   </div>
 

@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -56,9 +56,13 @@ urlpatterns = [
     path('propositions/<uuid:uuid>/request_signatures', views.RequestSignaturesAPIView),
     path('propositions/<uuid:uuid>/approve', views.ApprovePropositionAPIView),
     path('propositions/<uuid:uuid>/approve-by-pdf', views.ApproveByPdfPropositionAPIView),
+    path('propositions/<uuid:uuid>/confirmation', views.ConfirmationAPIView),
+    path('propositions/<uuid:uuid>/confirmation/last', views.LastConfirmationAPIView),
+    path('propositions/<uuid:uuid>/supervised_confirmation', views.SupervisedConfirmationAPIView),
     path('propositions/<uuid:uuid>/curriculum', views.CurriculumExperienceListAndCreateView),
     path('propositions/<uuid:uuid>/curriculum/file', views.CurriculumFileView),
     path('propositions/<uuid:uuid>/curriculum/<uuid:xp>', views.CurriculumExperienceDetailUpdateAndDeleteView),
+    path('propositions/<uuid:uuid>/doctorate', views.DoctorateAPIView),
     path('autocomplete/sector', views.AutocompleteSectorView),
     path('autocomplete/sector/<str:sigle>/doctorates', views.AutocompleteDoctoratView),
     path('autocomplete/tutor', views.AutocompleteTutorView),

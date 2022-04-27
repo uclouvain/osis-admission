@@ -37,8 +37,8 @@ msgid ""
 msgstr ""
 "\n"
 "      <h2>Supprimer le template d'email personnalisé \"%(name)s\" ?</h2>\n"
-"      <p>Êtes-vous sûr de vouloir supprimer ce template d'email personnalisé"
-" ? Cette action est irréversible.</p>\n"
+"      <p>Êtes-vous sûr de vouloir supprimer ce template d'email "
+"personnalisé ? Cette action est irréversible.</p>\n"
 "    "
 
 #, python-format
@@ -76,6 +76,10 @@ msgid ""
 msgstr ""
 "%(candidate_first_name)s %(candidate_last_name)s a soumis une demande pour "
 "%(doctorate_title)s"
+
+#, python-format
+msgid "%(label)s:"
+msgstr "%(label)s :"
 
 #, python-format
 msgid ""
@@ -296,6 +300,9 @@ msgid "Can update the information related to the admission supervision"
 msgstr ""
 "Peut modifier les informations relatives à la supervision de l'admission"
 
+msgid "Can update the information related to the confirmation paper"
+msgstr "Peut modifier les informations relatives à l'épreuve de confirmation"
+
 msgid "Can update the information related to the curriculum"
 msgstr "Peut modifier les informations relatives au curriculum"
 
@@ -339,6 +346,9 @@ msgstr ""
 msgid "Can view the information related to the admission supervision"
 msgstr "Peut voir les informations relatives à la supervision de l'admission"
 
+msgid "Can view the information related to the confirmation paper"
+msgstr "Peut voir les informations relatives à l'épreuve de confirmation"
+
 msgid "Can view the information related to the curriculum"
 msgstr "Peut voir les informations relatives au curriculum"
 
@@ -359,6 +369,12 @@ msgstr "Candidat :"
 
 msgid "Candidates"
 msgstr "Candidats"
+
+msgid "Carbon-copy the CA members"
+msgstr "Mettre en copie les membres de groupe de supervision"
+
+msgid "Carbon-copy the promoters"
+msgstr "Mettre en copie les promoteurs"
 
 msgid "Certificate of achievement"
 msgstr "Attestation de réussite"
@@ -393,6 +409,9 @@ msgstr "Confirmer"
 
 msgid "Confirmation paper"
 msgstr "Épreuve de confirmation"
+
+msgid "Confirmation paper not completed."
+msgstr "Épreuve de confirmation non complète."
 
 msgid "Confirmation paper not found."
 msgstr "Épreuve de confirmation non trouvée."
@@ -517,6 +536,12 @@ msgstr "Exemple"
 msgid "Export"
 msgstr "Exporter"
 
+msgid "Extension request not completed."
+msgstr "Demande de prolongation non complète."
+
+msgid "Extension request not defined."
+msgstr "Demande de prolongation non définie."
+
 msgid "FNRS"
 msgstr "FNRS"
 
@@ -558,6 +583,14 @@ msgstr "Graphe de Gantt"
 
 msgid "General"
 msgstr "Général"
+
+msgid "Generic"
+msgstr "Générique"
+
+msgid "Generic mail that can be manually sent once the candidate is admitted"
+msgstr ""
+"E-mail générique qui peut être envoyé manuellement une fois que le candidat "
+"est admis."
 
 msgid "HTML"
 msgstr "HTML"
@@ -688,6 +721,15 @@ msgstr "Membre du groupe de supervision non invité"
 msgid "Membre CA not found."
 msgstr "Membre du comité d'accompagnement non trouvé"
 
+msgid "Message for the candidate"
+msgstr "Message pour le candidat"
+
+msgid "Message sent successfully"
+msgstr "Message envoyé avec succès"
+
+msgid "Message subject"
+msgstr "Sujet du message"
+
 msgid "Modified"
 msgstr "Modifée"
 
@@ -714,6 +756,9 @@ msgstr "Nom"
 
 msgid "Nationality"
 msgstr "Nationalité"
+
+msgid "New deadline"
+msgstr "Nouvelle échéance"
 
 msgid "No"
 msgstr "Non"
@@ -875,6 +920,9 @@ msgstr "Promoteur non trouvé."
 msgid "Promoters"
 msgstr "Promoteurs"
 
+msgid "Proposed new deadline"
+msgstr "Nouvelle échéance proposée"
+
 msgid "Proposition not found."
 msgstr "Proposition non trouvée."
 
@@ -924,6 +972,9 @@ msgstr "Rejeté"
 msgid "Read"
 msgstr "Lire"
 
+msgid "Recipient"
+msgstr "Destinataire"
+
 msgid "Recommendation letters"
 msgstr "Lettres de recommandation"
 
@@ -935,6 +986,9 @@ msgstr "Motif de refus"
 
 msgid "Report of the supervisory panel"
 msgstr "Procès-verbal du comité d'accompagnement"
+
+msgid "Request of a new deadline for the confirmation paper"
+msgstr "Demande d'une nouvelle échéance pour l'épreuve de confirmation"
 
 msgid "Research report"
 msgstr "Rapport de recherche"
@@ -1002,6 +1056,18 @@ msgstr "Rechercher"
 msgid "Secondary studies"
 msgstr "Études secondaires"
 
+msgid "Select a mail template"
+msgstr "Sélectionner un template d'email"
+
+msgid "Send a mail"
+msgstr "Envoyer un e-mail"
+
+msgid "Send a mail to the candidate"
+msgstr "Envoyer un e-mail au candidat"
+
+msgid "Send the message"
+msgstr "Envoyer le message"
+
 msgid "Status changes"
 msgstr "Changements de statut"
 
@@ -1058,6 +1124,9 @@ msgstr "Le nom du destinataire"
 msgid "The last name of the signing actor"
 msgstr "Le nom du signataire"
 
+msgid "The opinion about the extension request is not completed."
+msgstr "L'avis relatif à la demande d'une nouvelle échéance n'est pas complet."
+
 msgid "The proposition has already been confirmed or is cancelled"
 msgstr "La proposition a déjà été confirmée ou est annulée."
 
@@ -1078,6 +1147,9 @@ msgstr ""
 msgid "There can be no more promoters in the supervision group."
 msgstr ""
 "Il ne peut y avoir davantage de promoteurs dans le groupe de supervision."
+
+msgid "There is no request for a new deadline."
+msgstr "Il n'y a pas de demande de nouvelle échéance."
 
 msgid "Thesis funding renewal"
 msgstr "Demande de renouvellement de bourse"
@@ -1226,4 +1298,4 @@ msgid "items per page"
 msgstr "éléments par page"
 
 msgid "modified"
-msgstr "modifée"
+msgstr "modifiée"

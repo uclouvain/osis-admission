@@ -32,6 +32,11 @@ from admission.ddd.projet_doctoral.doctorat.domain.model.doctorat import Doctora
 from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.domain.model._demande_prolongation import (
     DemandeProlongation,
 )
+from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.validators.validator_by_business_action import (
+    SoumettreEpreuveConfirmationValidatorList,
+    SoumettreDemandeProlongationValidatorList,
+    SoumettreAvisProlongationValidatorList,
+)
 from osis_common.ddd import interface
 
 
@@ -59,14 +64,14 @@ class EpreuveConfirmation(interface.RootEntity):
 
     def faire_demande_prolongation(
         self,
-        nouvelle_echeance: datetime.datetime,
+        nouvelle_echeance: datetime.date,
         justification_succincte: str,
-        lettre_justification: List[str] = None,
+        lettre_justification: List[str],
     ):
         self.demande_prolongation = DemandeProlongation(
             nouvelle_echeance=nouvelle_echeance,
             justification_succincte=justification_succincte,
-            lettre_justification=lettre_justification or [],
+            lettre_justification=lettre_justification,
         )
 
     def completer(
@@ -75,10 +80,62 @@ class EpreuveConfirmation(interface.RootEntity):
         date_limite: datetime.date,
         rapport_recherche: List[str],
         proces_verbal_ca: List[str],
-        demande_renouvellement_bourse: List[str],
+        avis_renouvellement_mandat_recherche: List[str],
     ):
         self.date = date
         self.date_limite = date_limite
         self.rapport_recherche = rapport_recherche
         self.proces_verbal_ca = proces_verbal_ca
-        self.demande_renouvellement_bourse = demande_renouvellement_bourse
+        self.avis_renouvellement_mandat_recherche = avis_renouvellement_mandat_recherche
+
+    def soumettre(
+        self,
+        date: datetime.date,
+        rapport_recherche: List[str],
+        proces_verbal_ca: List[str],
+        avis_renouvellement_mandat_recherche: List[str],
+    ):
+        self.date = date
+        self.rapport_recherche = rapport_recherche
+        self.proces_verbal_ca = proces_verbal_ca
+        self.avis_renouvellement_mandat_recherche = avis_renouvellement_mandat_recherche
+
+    def verifier(
+        self,
+        date: Optional[datetime.date],
+        date_limite: datetime.date,
+    ):
+        SoumettreEpreuveConfirmationValidatorList(
+            date_limite=date_limite,
+            date=date,
+        ).validate()
+
+    def completer_par_promoteur(
+        self,
+        proces_verbal_ca: List[str],
+        avis_renouvellement_mandat_recherche: List[str],
+    ):
+        self.proces_verbal_ca = proces_verbal_ca
+        self.avis_renouvellement_mandat_recherche = avis_renouvellement_mandat_recherche
+
+    def verifier_demande_prolongation(
+        self,
+        nouvelle_echeance: datetime.date,
+        justification_succincte: str,
+    ):
+        SoumettreDemandeProlongationValidatorList(
+            nouvelle_echeance=nouvelle_echeance,
+            justification_succincte=justification_succincte,
+        ).validate()
+
+    def verifier_avis_prolongation(self, avis_cdd: str):
+        SoumettreAvisProlongationValidatorList(
+            nouvel_avis_cdd=avis_cdd,
+            demande_prolongation=self.demande_prolongation,
+        ).validate()
+
+    def soumettre_avis_prolongation(self, avis_cdd: str):
+        self.demande_prolongation = attr.evolve(
+            self.demande_prolongation,
+            avis_cdd=avis_cdd,
+        )

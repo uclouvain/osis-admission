@@ -23,4 +23,8 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from .modifier_epreuve_confirmation_par_cdd import modifier_epreuve_confirmation_par_cdd_service
+from .modifier_epreuve_confirmation_par_cdd_service import modifier_epreuve_confirmation_par_cdd
+from .soumettre_epreuve_confirmation_service import soumettre_epreuve_confirmation
+from .completer_epreuve_confirmation_par_promoteur_service import completer_epreuve_confirmation_par_promoteur
+from .soumettre_report_de_date_service import soumettre_report_de_date
+from .soumettre_avis_prolongation_service import soumettre_avis_prolongation

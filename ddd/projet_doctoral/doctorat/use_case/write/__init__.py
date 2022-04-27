@@ -23,25 +23,9 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.ddd.projet_doctoral.doctorat.builder.doctorat_identity import DoctoratIdentityBuilder
-from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.commands import (
-    RecupererDerniereEpreuveConfirmationQuery,
-)
-from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.dtos import EpreuveConfirmationDTO
-from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.repository.i_epreuve_confirmation import (
-    IEpreuveConfirmationRepository,
-)
-from admission.ddd.projet_doctoral.doctorat.repository.i_doctorat import IDoctoratRepository
 
+from .envoyer_message_au_doctorant_service import envoyer_message_au_doctorant
 
-def recuperer_dernierer_epreuve_confirmation_service(
-    cmd: 'RecupererDerniereEpreuveConfirmationQuery',
-    epreuve_confirmation_repository: 'IEpreuveConfirmationRepository',
-    doctorat_repository: 'IDoctoratRepository',
-) -> EpreuveConfirmationDTO:
-    # GIVEN
-    doctorat_id = DoctoratIdentityBuilder.build_from_uuid(cmd.doctorat_uuid)
-    doctorat_repository.get(doctorat_id)
-
-    # THEN
-    return epreuve_confirmation_repository.get_dto_by_doctorat_identity(doctorat_id)
+__all__ = [
+    "envoyer_message_au_doctorant",
+]

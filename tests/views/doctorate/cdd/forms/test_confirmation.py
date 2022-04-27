@@ -49,7 +49,7 @@ from base.tests.factories.entity_version import EntityVersionFactory
 
 
 @override_settings(OSIS_DOCUMENT_BASE_URL='http://dummyurl')
-class CddDoctorateAdmissionProjectFormViewTestCase(TestCase):
+class CddDoctorateAdmissionConfirmationFormViewTestCase(TestCase):
     admission_with_confirmation_papers = Optional[DoctorateAdmissionFactory]
     admission_without_confirmation_paper = Optional[DoctorateAdmissionFactory]
     confirmation_papers = List[ConfirmationPaperFactory]
@@ -157,7 +157,7 @@ class CddDoctorateAdmissionProjectFormViewTestCase(TestCase):
             'date': self.last_confirmation_paper.confirmation_date,
             'rapport_recherche': self.last_confirmation_paper.research_report,
             'proces_verbal_ca': self.last_confirmation_paper.supervisor_panel_report,
-            'demande_renouvellement_bourse': self.last_confirmation_paper.thesis_funding_renewal,
+            'avis_renouvellement_mandat_recherche': self.last_confirmation_paper.research_mandate_renewal_opinion,
         })
 
     def test_get_confirmation_detail_cdd_user_with_unknown_doctorate(self):

@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -26,8 +26,11 @@
 from admission.api.views.dashboard import *
 from admission.api.views.autocomplete import *
 from admission.api.views.coordonnees import *
-from admission.api.views.curriculum import CurriculumExperienceListAndCreateView, \
-    CurriculumExperienceDetailUpdateAndDeleteView, CurriculumFileView
+from admission.api.views.curriculum import (
+    CurriculumExperienceListAndCreateView,
+    CurriculumExperienceDetailUpdateAndDeleteView,
+    CurriculumFileView,
+)
 from admission.api.views.secondary_studies import *
 from admission.api.views.languages_knowledge import *
 from admission.api.views.cotutelle import *
@@ -36,6 +39,12 @@ from admission.api.views.project import *
 from admission.api.views.supervision import *
 from admission.api.views.signatures import *
 from admission.api.views.approvals import *
+from admission.api.views.confirmation import (
+    ConfirmationAPIView,
+    LastConfirmationAPIView,
+    SupervisedConfirmationAPIView,
+)
+from admission.api.views.doctorate import DoctorateAPIView
 
 __all__ = [
     "CoordonneesViewSet",
@@ -59,4 +68,8 @@ __all__ = [
     "ApprovePropositionAPIView",
     "ApproveByPdfPropositionAPIView",
     "DashboardViewSet",
+    "ConfirmationAPIView",
+    "LastConfirmationAPIView",
+    "SupervisedConfirmationAPIView",
+    "DoctorateAPIView",
 ]
