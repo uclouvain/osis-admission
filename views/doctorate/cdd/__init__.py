@@ -29,7 +29,7 @@ from .details.cotutelle import CddDoctorateAdmissionCotutelleDetailView
 from .details.curriculum import CddDoctorateAdmissionCurriculumDetailView
 from .details.education import CddDoctorateAdmissionEducationDetailView
 from .details.extension_request import CddDoctorateAdmissionExtensionRequestDetailView
-from .details.history import CddDoctorateHistoryAPIView, CddDoctorateHistoryView
+from .details.history import CddDoctorateHistoryAPIView, CddDoctorateHistoryAllView, CddDoctorateHistoryView
 from .details.languages import CddDoctorateAdmissionLanguagesDetailView
 from .details.person import CddDoctorateAdmissionPersonDetailView
 from .details.project import CddDoctorateAdmissionProjectDetailView
@@ -74,5 +74,6 @@ __all__ = [
     # Others
     'CddDoctorateHistoryAPIView',
     'CddDoctorateHistoryView',
+    'CddDoctorateHistoryAllView',
     'CddDoctorateSendMailView',
 ]

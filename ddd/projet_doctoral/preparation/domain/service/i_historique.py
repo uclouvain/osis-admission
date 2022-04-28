@@ -43,6 +43,10 @@ class IHistorique(interface.DomainService):
         raise NotImplementedError
 
     @classmethod
+    def historiser_completion_cotutelle(cls, proposition: Proposition):
+        raise NotImplementedError
+
+    @classmethod
     def historiser_avis(
         cls,
         proposition: Proposition,

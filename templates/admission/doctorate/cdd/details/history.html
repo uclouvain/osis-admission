@@ -25,12 +25,15 @@
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
 
+{% block actions-group %}{% endblock %}
+
 {% block style %}
+  {{ block.super }}
   <link href="{% static 'osis_history/osis-history.css' %}" rel="stylesheet"/>
 {% endblock style %}
 
 {% block tab_content %}
-  <div class="history-viewer" data-url="{% url 'admission:doctorate:cdd:history-api' uuid=admission.uuid %}" data-tags="{{ tags }}"></div>
+  <div class="history-viewer" data-url="{% url 'admission:doctorate:cdd:history-api' uuid=admission.uuid %}" data-tags="{{ tag }}"></div>
 {% endblock %}
 
 {% block script %}

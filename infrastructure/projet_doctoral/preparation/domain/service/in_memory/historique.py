@@ -43,6 +43,10 @@ class HistoriqueInMemory(IHistorique):
         pass
 
     @classmethod
+    def historiser_completion_cotutelle(cls, proposition: Proposition):
+        pass
+
+    @classmethod
     def historiser_avis(
         cls,
         proposition: Proposition,

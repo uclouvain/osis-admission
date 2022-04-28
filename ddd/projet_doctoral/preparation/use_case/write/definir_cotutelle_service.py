@@ -55,6 +55,6 @@ def definir_cotutelle(
 
     # THEN
     groupe_supervision_repository.save(groupe_de_supervision)
-    historique.historiser_completion(proposition)
+    historique.historiser_completion_cotutelle(proposition)
 
     return proposition_id
