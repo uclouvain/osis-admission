@@ -31,15 +31,16 @@ from django.conf import settings
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
 from django.forms import BaseForm
+from django.shortcuts import resolve_url
 from django.urls import reverse_lazy
 from django.utils.translation import get_language, gettext_lazy as _
 from django.views import generic
-from osis_mail_template.forms import MailTemplateConfigureForm
-from osis_mail_template.models import MailTemplate
 
 from admission.auth.roles.cdd_manager import CddManager
 from admission.contrib.models import CddMailTemplate
 from admission.forms.cdd_mail_template import NameMailTemplateForm
+from osis_mail_template.forms import MailTemplateConfigureForm
+from osis_mail_template.models import MailTemplate
 from osis_role.contrib.views import PermissionRequiredMixin
 
 __all__ = [
@@ -55,11 +56,11 @@ class CddMailTemplateListView(PermissionRequiredMixin, generic.ListView):
     permission_required = 'admission.change_cddmailtemplate'
 
     def get_queryset(self):
-        current_manager = CddManager.objects.filter(person=self.request.user.person).first()
-        if not current_manager:
+        managed_cdds = CddManager.objects.filter(person=self.request.user.person).values_list('entity_id', flat=True)
+        if not managed_cdds:
             raise PermissionDenied('Current user has no CDD')
         qs = CddMailTemplate.objects.filter(
-            cdd_id=current_manager.entity_id,
+            cdd_id__in=managed_cdds,
             language=get_language(),
         ).order_by('name')
         object_list = defaultdict(list)
@@ -80,17 +81,19 @@ class CddMailTemplateListView(PermissionRequiredMixin, generic.ListView):
 class CddMailTemplateChangeView(PermissionRequiredMixin, generic.FormView):
     forms = None
     template_name = 'admission/config/cdd_mail_template_change.html'
-    success_url = reverse_lazy('admission:config:cdd_mail_template:list')
     permission_required = 'admission.change_cddmailtemplate'
 
     def get_forms(self, form_class=None):
         if not self.forms:  # pragma: no branch
             identifier = self.kwargs['identifier']
             if self.kwargs.get('pk'):
+                # Editing
+                cdd_mail_template = CddMailTemplate.objects.select_related('cdd').get(pk=self.kwargs['pk'])
                 self.forms = [
                     NameMailTemplateForm(
                         data=self.request.POST or None,
-                        initial={'name': CddMailTemplate.objects.get(pk=self.kwargs['pk']).name},
+                        initial={'name': cdd_mail_template.name},
+                        cdds=[cdd_mail_template.cdd],
                     )
                 ]
                 instances = CddMailTemplate.objects.get_by_id_and_pk(identifier, self.kwargs['pk'])
@@ -103,12 +106,17 @@ class CddMailTemplateChangeView(PermissionRequiredMixin, generic.FormView):
                     for instance in instances
                 ]
             else:
-                cdd = CddManager.objects.filter(person=self.request.user.person).first()
-                if not cdd:
+                # Adding
+                managed_cdds = [
+                    managing.entity
+                    for managing in CddManager.objects.filter(person=self.request.user.person).select_related('entity')
+                ]
+                if not managed_cdds:
                     raise PermissionDenied('Current user has no CDD')
                 self.forms = [
                     NameMailTemplateForm(
                         data=self.request.POST or None,
+                        cdds=managed_cdds,
                     )
                 ]
                 original = {
@@ -118,10 +126,10 @@ class CddMailTemplateChangeView(PermissionRequiredMixin, generic.FormView):
                     MailTemplateConfigureForm(
                         data=self.request.POST or None,
                         prefix=language,
-                        instance=CddMailTemplate(identifier=identifier, cdd_id=cdd.entity_id, language=language),
+                        instance=CddMailTemplate(identifier=identifier, language=language),
                         initial={'subject': original[language].subject, 'body': original[language].body},
                     )
-                    for language in dict(settings.LANGUAGES)
+                    for language in sorted(dict(settings.LANGUAGES).keys())
                 ]
         return self.forms
 
@@ -131,9 +139,21 @@ class CddMailTemplateChangeView(PermissionRequiredMixin, generic.FormView):
         if all(form.is_valid() for form in forms):
             for form in forms[1:]:
                 form.instance.name = forms[0].cleaned_data['name']
+                form.instance.cdd_id = forms[0].cleaned_data['cdd']
                 form.save()
+            self.instance = forms[1].instance
+            messages.info(self.request, _("Custom mail template saved successfully."))
             return self.form_valid(forms)
         return self.form_invalid(forms)
+
+    def get_success_url(self) -> str:
+        if self.request.POST.get('_preview'):
+            return resolve_url(
+                'admission:config:cdd_mail_template:preview',
+                identifier=self.instance.identifier,
+                pk=self.instance.pk,
+            )
+        return resolve_url('admission:config:cdd_mail_template:list')
 
     def form_invalid(self, forms):
         return self.render_to_response(self.get_context_data(forms=forms))

@@ -33,7 +33,9 @@
 
 {% block content %}
   <div class="page-header">
-    <h2>{% trans 'Custom mail template' %}<small>{{ instances.0.name }}</small></h2>
+    <h1 class="h3">
+      {% blocktrans with name=instances.0.name %}Preview <em>{{ name }}</em> custom mail template{% endblocktrans %}
+    </h1>
   </div>
   {% for instance in instances %}
     <h2>{{ instance.get_language_display }}</h2>
@@ -64,4 +66,7 @@
       </div>
     </div>
   {% endfor %}
+
+  {% url 'admission:config:cdd_mail_template:edit' identifier=instances.0.identifier pk=instances.0.pk as change_url %}
+  <a href="{{ change_url }}" class="btn btn-default"><span class="fa fa-edit"></span> {% trans "Edit" %}</a>
 {% endblock %}

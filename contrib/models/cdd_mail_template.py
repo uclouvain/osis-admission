@@ -49,10 +49,12 @@ class CddMailTemplateManager(MailTemplateManager):
     def get_by_id_and_pk(self, identifier: str, pk: int):
         """Get a list of mail template instances by identifier and one pk"""
         return list(
-            self.get_queryset().filter(
+            self.get_queryset()
+            .filter(
                 identifier=identifier,
                 name=Subquery(CddMailTemplate.objects.filter(pk=pk).values('name')[:1]),
             )
+            .order_by('language')
         )
 
     def get_from_identifiers(self, identifiers: List[str], language: str):

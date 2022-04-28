@@ -67,7 +67,7 @@ templates.register(
             example="Jean, Eudes",
         ),
     ],
-    tag='Admission',
+    tag='Admission Doctorat',
 )
 
 signataire_tokens = [
@@ -93,13 +93,13 @@ templates.register(
     ADMISSION_EMAIL_SIGNATURE_REQUESTS_ACTOR,
     description=_("Mail sent to each actor of the supervision group to request a signature"),
     tokens=common_tokens + signataire_tokens,
-    tag='Admission',
+    tag='Admission Doctorat',
 )
 
 ADMISSION_EMAIL_SIGNATURE_CANDIDATE = 'osis-admission-signature-candidate'
 templates.register(
     ADMISSION_EMAIL_SIGNATURE_CANDIDATE,
-    description=_("Mail sent to the candidate after each signature"),
+    description=_("Mail sent to the applicant following approval or rejection by a member of the supervisory group"),
     tokens=common_tokens
     + signataire_tokens
     + [
@@ -119,13 +119,13 @@ templates.register(
             example="I do not handle this kind of doctorates",
         ),
     ],
-    tag='Admission',
+    tag='Admission Doctorat',
 )
 
 ADMISSION_EMAIL_SIGNATURE_REFUSAL = 'osis-admission-signature-refusal'
 templates.register(
     ADMISSION_EMAIL_SIGNATURE_REFUSAL,
-    description=_("Mail sent to other promoter after a refusal"),
+    description=_("Mail sent to promoters when a member of the supervision panel refuses"),
     tokens=common_tokens
     + signataire_tokens
     + [
@@ -155,22 +155,24 @@ templates.register(
             example="Smith",
         ),
     ],
-    tag='Admission',
+    tag='Admission Doctorat',
 )
 
 
 ADMISSION_EMAIL_SUBMISSION_CANDIDATE = 'osis-admission-submission-candidate'
 templates.register(
     ADMISSION_EMAIL_SUBMISSION_CANDIDATE,
-    description=_("Mail sent to the candidate to confirm submission"),
+    description=_(
+        "Mail sent to the candidate to confirm that his application has been taken into account by UCLouvain"
+    ),
     tokens=common_tokens,
-    tag='Admission',
+    tag='Admission Doctorat',
 )
 
 ADMISSION_EMAIL_SUBMISSION_CDD = 'osis-admission-submission-cdd'
 templates.register(
     ADMISSION_EMAIL_SUBMISSION_CDD,
-    description=_("Mail sent to the CDD to confirm submission"),
+    description=_("Mail sent to the CDD to inform them that a new application has been submitted"),
     tokens=common_tokens
     + [
         Token(
@@ -189,13 +191,16 @@ templates.register(
             example="http://dev.osis.uclouvain.be/somewhere",
         ),
     ],
-    tag='Admission',
+    tag='Admission Doctorat',
 )
 
 ADMISSION_EMAIL_SUBMISSION_MEMBER = 'osis-admission-submission-member'
 templates.register(
     ADMISSION_EMAIL_SUBMISSION_MEMBER,
-    description=_("Mail sent to a supervision member to confirm submission"),
+    description=_(
+        "Mail sent to the members of the supervision panel to inform them "
+        "that the application has been submitted to UCLouvain by the applicant"
+    ),
     tokens=common_tokens
     + [
         Token(
@@ -209,13 +214,13 @@ templates.register(
             example="Smith",
         ),
     ],
-    tag='Admission',
+    tag='Admission Doctorat',
 )
 
 ADMISSION_EMAIL_MEMBER_REMOVED = 'osis-admission-member-removed'
 templates.register(
     ADMISSION_EMAIL_MEMBER_REMOVED,
-    description=_("Mail sent to a supervision member when removed"),
+    description=_("Mail sent to the member of the supervision panel when deleted by the candidate"),
     tokens=common_tokens
     + [
         Token(
@@ -229,7 +234,7 @@ templates.register(
             example="Smith",
         ),
     ],
-    tag='Admission',
+    tag='Admission Doctorat',
 )
 
 ADMISSION_EMAIL_GENERIC_ONCE_ADMITTED = 'osis-admission-generic-admitted'
@@ -237,5 +242,5 @@ templates.register(
     ADMISSION_EMAIL_GENERIC_ONCE_ADMITTED,
     description=_("Generic mail that can be manually sent once the candidate is admitted"),
     tokens=common_tokens,
-    tag='Admission',
+    tag='Admission Doctorat',
 )

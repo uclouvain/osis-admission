@@ -26,7 +26,7 @@
 
 from django.contrib import messages
 from django.forms import BaseForm
-from django.utils.translation import gettext_lazy as _
+from django.utils.translation import gettext_lazy as _, override
 from django.views.generic import FormView
 
 from admission.contrib.models import CddMailTemplate
@@ -70,11 +70,12 @@ class CddDoctorateSendMailView(HtmxMixin, LoadDossierViewMixin, FormView):
                     identifier=identifier,
                     language=self.admission.candidate.language,
                 )
-            return {
-                **self.request.GET,
-                'subject': mail_template.render_subject(tokens),
-                'body': mail_template.body_as_html(tokens),
-            }
+            with override(language=self.admission.candidate.language):
+                return {
+                    **self.request.GET,
+                    'subject': mail_template.render_subject(tokens),
+                    'body': mail_template.body_as_html(tokens),
+                }
         return super().get_initial()
 
     def form_valid(self, form: BaseForm):

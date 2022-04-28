@@ -29,3 +29,10 @@ from django.utils.translation import gettext_lazy as _
 
 class NameMailTemplateForm(forms.Form):
     name = forms.CharField(label=_("Name"), max_length=255)
+    cdd = forms.ChoiceField(label=_('CDD'))
+
+    def __init__(self, cdds=None, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        self.fields['cdd'].choices = [
+            (cdd.id, f"{cdd.most_recent_acronym} - {cdd.most_recent_entity_version.title}") for cdd in cdds
+        ]
