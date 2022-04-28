@@ -55,6 +55,7 @@
           {% url 'admission:config:cdd_mail_template:edit'  identifier=cdd_mail_template.identifier pk=cdd_mail_template.pk as change_url %}
           {% url 'admission:config:cdd_mail_template:delete'  identifier=cdd_mail_template.identifier pk=cdd_mail_template.pk as delete_url %}
           <li class="list-group-item container-fluid">
+            <span class="text-muted">{{ cdd_mail_template.cdd.most_recent_acronym }} :</span>
             {{ cdd_mail_template.name }}
             <div class="pull-right">
               <a href="{{ change_url }}" class="btn btn-default">

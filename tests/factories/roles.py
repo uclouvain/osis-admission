@@ -60,7 +60,7 @@ class CddManagerFactory(BaseFactory):
         django_get_or_create = ('person',)
 
     entity = factory.SubFactory(
-        'base.tests.factories.entity.EntityFactory',
+        'base.tests.factories.entity.EntityWithVersionFactory',
         organization=None,
     )
     with_child = False

@@ -85,6 +85,7 @@ class CddMailTemplatesTestCase(TestCase):
 
         self.data = {
             "name": "Nom",
+            "cdd": self.cdd.id,
             "fr-be-subject": "Sujet",
             "fr-be-body": "Corps",
             "en-subject": "Subject",
@@ -155,6 +156,14 @@ class CddMailTemplatesTestCase(TestCase):
         )
         self.assertRedirects(response, self.list_url)
         self.assertEqual(CddMailTemplate.objects.filter(name="Nom modifié").count(), 2)
+
+        # Save and preview
+        response = self.client.post(
+            self.edit_url,
+            {**self.data, 'name': "Nom re-modifié", '_preview': 1},
+        )
+        self.assertRedirects(response, self.preview_url)
+        self.assertEqual(CddMailTemplate.objects.filter(name="Nom re-modifié").count(), 2)
 
     @patch('osis_mail_template.registry.MailTemplateRegistry.get_description', return_value="Foo")
     def test_add_as_cdd(self, *args):

@@ -177,6 +177,9 @@ msgstr "Supervisory panel member"
 msgid "CANCELLED"
 msgstr ""
 
+msgid "CDD"
+msgstr ""
+
 msgid "CDD Mail template"
 msgstr ""
 
@@ -421,6 +424,9 @@ msgstr ""
 msgid "Custom mail template deleted successfully"
 msgstr ""
 
+msgid "Custom mail template saved successfully."
+msgstr ""
+
 msgid "Custom mail templates"
 msgstr ""
 
@@ -497,6 +503,9 @@ msgid "ENROLLED"
 msgstr "Enrolled"
 
 msgid "ERC - European Research Council"
+msgstr ""
+
+msgid "Edit"
 msgstr ""
 
 msgid "English"
@@ -640,30 +649,39 @@ msgstr "Management"
 msgid "MATHEMATICS"
 msgstr "Mathematics"
 
-msgid "Mail sent to a supervision member to confirm submission"
-msgstr ""
-
-msgid "Mail sent to a supervision member when removed"
-msgstr ""
-
 msgid "Mail sent to each actor of the supervision group to request a signature"
 msgstr ""
 
-msgid "Mail sent to other promoter after a refusal"
+msgid "Mail sent to promoters when a member of the supervision panel refuses"
 msgstr ""
 
-msgid "Mail sent to the CDD to confirm submission"
+msgid ""
+"Mail sent to the CDD to inform them that a new application has been submitted"
 msgstr ""
 
-msgid "Mail sent to the candidate after each signature"
-msgstr ""
-
-msgid "Mail sent to the candidate to confirm submission"
+msgid ""
+"Mail sent to the applicant following approval or rejection by a member of "
+"the supervisory group"
 msgstr ""
 
 msgid ""
 "Mail sent to the candidate to confirm supervision group signature requests "
 "are sent"
+msgstr ""
+
+msgid ""
+"Mail sent to the candidate to confirm that his application has been taken "
+"into account by UCLouvain"
+msgstr ""
+
+msgid ""
+"Mail sent to the member of the supervision panel when deleted by the "
+"candidate"
+msgstr ""
+
+msgid ""
+"Mail sent to the members of the supervision panel to inform them that the "
+"application has been submitted to UCLouvain by the applicant"
 msgstr ""
 
 msgid "Management of the doctorate enrolments"
@@ -859,6 +877,10 @@ msgstr ""
 msgid "Preview"
 msgstr ""
 
+#, python-format
+msgid "Preview <em>%(name)s</em> custom mail template"
+msgstr ""
+
 msgid "Previous experience"
 msgstr ""
 
@@ -998,6 +1020,9 @@ msgid "SUBMITTED_CONFIRMATION"
 msgstr "Submitted confirmation"
 
 msgid "Save"
+msgstr ""
+
+msgid "Save and view result"
 msgstr ""
 
 msgid "Scholarship"
