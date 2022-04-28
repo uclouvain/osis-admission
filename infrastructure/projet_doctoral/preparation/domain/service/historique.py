@@ -47,7 +47,7 @@ class Historique(IHistorique):
             "La proposition a été initiée.",
             "The proposition has been initialized.",
             "{candidat.prenom} {candidat.nom}".format(candidat=candidat),
-            tags=["proposition"],
+            tags=["proposition", "status-changed"],
         )
 
     @classmethod
@@ -55,8 +55,19 @@ class Historique(IHistorique):
         candidat = PersonneConnueUclTranslator().get(proposition.matricule_candidat)
         add_history_entry(
             proposition.entity_id.uuid,
-            "La proposition a été modifiée.",
-            "The proposition has been completed.",
+            "La proposition a été modifiée (Projet doctoral).",
+            "The proposition has been completed (Doctoral project).",
+            "{candidat.prenom} {candidat.nom}".format(candidat=candidat),
+            tags=["proposition", 'modification'],
+        )
+
+    @classmethod
+    def historiser_completion_cotutelle(cls, proposition: Proposition):
+        candidat = PersonneConnueUclTranslator().get(proposition.matricule_candidat)
+        add_history_entry(
+            proposition.entity_id.uuid,
+            "La proposition a été modifiée (Cotutelle).",
+            "The proposition has been completed (Cotutelle).",
             "{candidat.prenom} {candidat.nom}".format(candidat=candidat),
             tags=["proposition", 'modification'],
         )
@@ -73,6 +84,16 @@ class Historique(IHistorique):
 
         # Basculer en Français pour la traduction de l'état
         with translation.override(settings.LANGUAGE_CODE_FR):
+            message_fr = (
+                "{signataire.prenom} {signataire.nom} a {action} la proposition {via_pdf}en tant que {role}".format(
+                    signataire=signataire,
+                    action="refusé" if avis.motif_refus else "aprouvé",
+                    via_pdf="via PDF " if avis.pdf else "",
+                    role="promoteur"
+                    if isinstance(signataire_id, PromoteurIdentity)
+                    else "membre du comité d'accompagnement",
+                )
+            )
             details = ""
             if avis.motif_refus:
                 details += "motif : {}".format(avis.motif_refus)
@@ -80,12 +101,16 @@ class Historique(IHistorique):
                 details += "commentaire : {}".format(avis.commentaire_externe)
             if details:
                 details = " ({})".format(details)
-            if avis.pdf:
-                details += " via PDF pour {signataire.prenom} {signataire.nom}".format(signataire=signataire)
-            message_fr = 'Un avis "{}" a été déposé{}.'.format(avis.etat, details)
+            message_fr += details
 
         # Anglais
         with translation.override(settings.LANGUAGE_CODE_EN):
+            message_en = "{signataire.prenom} {signataire.nom} has {action} the proposition {via_pdf}as {role}".format(
+                signataire=signataire,
+                action="refused" if avis.motif_refus else "approved",
+                via_pdf="via PDF " if avis.pdf else "",
+                role="promoter" if isinstance(signataire_id, PromoteurIdentity) else "supervisory panel member",
+            )
             details = ""
             if avis.motif_refus:
                 details += "reason : {}".format(avis.motif_refus)
@@ -93,9 +118,7 @@ class Historique(IHistorique):
                 details += "comment : {}".format(avis.commentaire_externe)
             if details:
                 details = " ({})".format(details)
-            if avis.pdf:
-                details += " via PDF for {signataire.prenom} {signataire.nom}".format(signataire=signataire)
-            message_en = 'A "{}" notice has been set{}.'.format(avis.etat, details)
+            message_en += details
 
         add_history_entry(
             proposition.entity_id.uuid,
@@ -117,11 +140,11 @@ class Historique(IHistorique):
         add_history_entry(
             proposition.entity_id.uuid,
             "{membre.prenom} {membre.nom} a été ajouté en tant que {}.".format(
-                "promoteur" if isinstance(signataire, PromoteurIdentity) else "membre du comité d'accompagnement",
+                "promoteur" if isinstance(signataire_id, PromoteurIdentity) else "membre du comité d'accompagnement",
                 membre=signataire,
             ),
             "{membre.prenom} {membre.nom} has been added as {}.".format(
-                "promoter" if isinstance(signataire, PromoteurIdentity) else "CA member",
+                "promoter" if isinstance(signataire_id, PromoteurIdentity) else "CA member",
                 membre=signataire,
             ),
             "{candidat.prenom} {candidat.nom}".format(candidat=candidat),
@@ -140,11 +163,11 @@ class Historique(IHistorique):
         add_history_entry(
             proposition.entity_id.uuid,
             "{membre.prenom} {membre.nom} a été retiré des {}.".format(
-                "promoteurs" if isinstance(signataire, PromoteurIdentity) else "membres du comité d'accompagnement",
+                "promoteurs" if isinstance(signataire_id, PromoteurIdentity) else "membres du comité d'accompagnement",
                 membre=signataire,
             ),
             "{membre.prenom} {membre.nom} has been removed from {}.".format(
-                "promoters" if isinstance(signataire, PromoteurIdentity) else "CA members",
+                "promoters" if isinstance(signataire_id, PromoteurIdentity) else "CA members",
                 membre=signataire,
             ),
             "{candidat.prenom} {candidat.nom}".format(candidat=candidat),
@@ -159,7 +182,7 @@ class Historique(IHistorique):
             "Les demandes de signatures ont été envoyées.",
             "Signing requests have been sent.",
             "{candidat.prenom} {candidat.nom}".format(candidat=candidat),
-            tags=["proposition", "supervision"],
+            tags=["proposition", "supervision", "status-changed"],
         )
 
     @classmethod
@@ -170,7 +193,7 @@ class Historique(IHistorique):
             "La proposition a été soumise.",
             "The proposition has been submitted.",
             "{candidat.prenom} {candidat.nom}".format(candidat=candidat),
-            tags=["proposition", "soumission"],
+            tags=["proposition", "soumission", "status-changed"],
         )
 
     @classmethod
@@ -181,5 +204,5 @@ class Historique(IHistorique):
             "La proposition a été annulée.",
             "The proposition has been cancelled.",
             "{candidat.prenom} {candidat.nom}".format(candidat=candidat),
-            tags=["proposition"],
+            tags=["proposition", "status-changed"],
         )

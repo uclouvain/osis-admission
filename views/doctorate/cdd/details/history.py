@@ -36,7 +36,7 @@ class CddDoctorateHistoryAPIView(LoginRequiredMixin, CddRequiredMixin, HistoryEn
 
 class CddDoctorateHistoryView(LoadDossierViewMixin):
     template_name = 'admission/doctorate/cdd/details/history.html'
-    extra_context = {'tag': 'status'}
+    extra_context = {'tag': 'status-changed'}
 
 
 class CddDoctorateHistoryAllView(LoadDossierViewMixin):
