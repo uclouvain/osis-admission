@@ -105,10 +105,11 @@
     </div>
     <div class="panel-body">
       {% doctorate_tabs_bar %}
-      {% if children|length > 1 %}
+      {% current_subtabs as subtabs %}
+      {% if subtabs|length > 1 %}
         <div class="row" style="display: flex">
         <div class="col-md-2 visible-md visible-lg border-right">
-          {% doctorate_subtabs_bar %}
+          {% doctorate_subtabs_bar tabs=subtabs %}
         </div>
         <div class="col-md-10">
       {% endif %}
@@ -134,15 +135,6 @@
   <link href="{% static "admission/admission.css" %}" rel="stylesheet"/>
 
   <style>
-      .flex-content {
-          display: flex;
-          justify-content:space-between;
-          align-items: center;
-          flex-wrap: wrap;
-      }
-      .border-right {
-          border-right: 1px solid #ddd;
-      }
       .inline-field-data {
           display: flex;
           flex-wrap: wrap;

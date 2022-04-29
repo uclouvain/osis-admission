@@ -32,7 +32,6 @@ from django.utils.translation import gettext_lazy as _, get_language
 
 from admission.auth.roles.cdd_manager import CddManager
 from admission.contrib.models import EntityProxy
-from admission.enums.yes_no import YesNo
 from admission.ddd.projet_doctoral.preparation.domain.model._enums import (
     ChoixTypeAdmission,
     ChoixCommissionProximiteCDEouCLSM,
@@ -56,7 +55,9 @@ from base.forms.utils.datefield import DatePickerInput
 from base.models.academic_year import AcademicYear
 from base.models.education_group_year import EducationGroupYear
 from base.models.enums.education_group_types import TrainingType
+from base.models.person import Person
 from base.templatetags.pagination import PAGINATOR_SIZE_LIST
+from reference.models.country import Country
 
 MINIMUM_SELECTABLE_YEAR = 2004
 MAXIMUM_SELECTABLE_YEAR = 2031
@@ -113,7 +114,13 @@ class FilterForm(forms.Form):
     cotutelle = forms.NullBooleanField(
         label=_("Cotutelle"),
         required=False,
-        widget=forms.Select(choices=EMPTY_CHOICE + YesNo.choices()),
+        widget=forms.Select(
+            choices=(
+                EMPTY_CHOICE[0],
+                (True, _('Yes')),
+                (False, _('No')),
+            ),
+        ),
     )
     date_pre_admission_debut = forms.DateField(
         disabled=True,
@@ -212,9 +219,10 @@ class FilterForm(forms.Form):
         choices=((size, size) for size in PAGINATOR_SIZE_LIST),
         widget=forms.Select(attrs={'form': 'search_form'}),
         help_text=_("items per page"),
+        required=False,
     )
 
-    def __init__(self, user, **kwargs):
+    def __init__(self, user, load_labels=False, **kwargs):
         super().__init__(**kwargs)
 
         self.user = user
@@ -273,10 +281,39 @@ class FilterForm(forms.Form):
 
         self.fields['commission_proximite'].choices = proximity_commission_choices
 
+        if len(proximity_commission_choices) == 1:
+            self.fields['commission_proximite'].widget = forms.HiddenInput()
+
         # Initialize the academic year field
         self.fields['annee_academique'].choices = [EMPTY_CHOICE[0]] + [
             (academic_year.year, str(academic_year)) for academic_year in academic_years
         ]
+
+        # Initialize the labels of the autocomplete fields
+        if load_labels:
+            nationality = self.data.get(self.add_prefix('nationalite'))
+            if nationality:
+                country = Country.objects.filter(iso_code=nationality).values_list(
+                    'name' if get_language() == settings.LANGUAGE_CODE else 'name_end'
+                ).first()
+                if country:
+                    self.fields['nationalite'].widget.choices = ((nationality, country[0]),)
+
+            candidate = self.data.get(self.add_prefix('matricule_candidat'))
+            if candidate:
+                person = Person.objects.values('last_name', 'first_name').filter(global_id=candidate).first()
+                if person:
+                    self.fields['matricule_candidat'].widget.choices = (
+                        (candidate, '{}, {}'.format(person['last_name'], person['first_name'])),
+                    )
+
+            promoter = self.data.get(self.add_prefix('matricule_promoteur'))
+            if promoter:
+                person = Person.objects.values('last_name', 'first_name').filter(global_id=promoter).first()
+                if person:
+                    self.fields['matricule_promoteur'].widget.choices = (
+                        (promoter, '{}, {}'.format(person['last_name'], person['first_name'])),
+                    )
 
     class Media:
         js = [

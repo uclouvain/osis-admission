@@ -45,6 +45,7 @@ from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityFactory
 from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.person import PersonFactory
+from reference.tests.factories.country import CountryFactory
 
 
 class FilterTestCase(TestCase):
@@ -93,6 +94,9 @@ class FilterTestCase(TestCase):
             ),
         ]
 
+        # Countries
+        cls.country = CountryFactory()
+
         # User with several cdds
         person_with_several_cdds = CddManagerFactory(entity=cls.first_doctoral_commission).person
         cls.user_with_several_cdds = person_with_several_cdds.user
@@ -107,6 +111,10 @@ class FilterTestCase(TestCase):
 
         # User without cdd
         cls.user_without_cdd = PersonFactory().user
+
+        # Other users
+        cls.candidate = PersonFactory()
+        cls.promoter = PersonFactory()
 
     def test_form_initialization_with_user_without_cdd(self):
         form = FilterForm(user=self.user_without_cdd)
@@ -131,6 +139,7 @@ class FilterTestCase(TestCase):
         # Check some fields are hidden
         hidden_fields_names = [field.name for field in form.hidden_fields()]
         self.assertIn('cdds', hidden_fields_names)
+        self.assertIn('commission_proximite', hidden_fields_names)
 
     def test_form_initialization_with_user_with_one_cdd(self):
         form = FilterForm(user=self.user_with_one_cdd)
@@ -202,7 +211,6 @@ class FilterTestCase(TestCase):
 
         # Mandatory fields
         self.assertIn('cdds', form.errors)
-        self.assertIn('page_size', form.errors)
 
     def test_form_validation_with_valid_data(self):
         form = FilterForm(
@@ -230,3 +238,60 @@ class FilterTestCase(TestCase):
         )
         self.assertFalse(form.is_valid())
         self.assertIn('numero', form.errors)
+
+    def test_form_validation_with_valid_cached_data(self):
+        form = FilterForm(
+            user=self.user_with_one_cdd,
+            data={
+                'page_size': PAGINATOR_SIZE_LIST[0],
+                'cdds': [ENTITY_CDE],
+                'numero': '20-300000',
+                'nationalite': self.country.iso_code,
+                'matricule_candidat': self.candidate.global_id,
+                'matricule_promoteur': self.promoter.global_id,
+            },
+            load_labels=True,
+        )
+        self.assertTrue(form.is_valid())
+        self.assertEqual(form.fields['nationalite'].widget.choices, (
+            (self.country.iso_code, self.country.name),
+        ))
+        self.assertEqual(form.fields['matricule_candidat'].widget.choices, (
+            (self.candidate.global_id, '{}, {}'.format(self.candidate.last_name, self.candidate.first_name)),
+        ))
+        self.assertEqual(form.fields['matricule_promoteur'].widget.choices, (
+            (self.promoter.global_id, '{}, {}'.format(self.promoter.last_name, self.promoter.first_name)),
+        ))
+
+    def test_form_validation_with_invalid_cached_data(self):
+        form = FilterForm(
+            user=self.user_with_one_cdd,
+            data={
+                'page_size': PAGINATOR_SIZE_LIST[0],
+                'cdds': [ENTITY_CDE],
+                'numero': '20-300000',
+                'nationalite': 'FR',
+                'matricule_candidat': '123456',
+                'matricule_promoteur': '654321',
+            },
+            load_labels=True,
+        )
+        self.assertTrue(form.is_valid())
+        self.assertEqual(form.fields['nationalite'].widget.choices, [])
+        self.assertEqual(form.fields['matricule_candidat'].widget.choices, [])
+        self.assertEqual(form.fields['matricule_promoteur'].widget.choices, [])
+
+    def test_form_validation_with_no_autocomplete_cached_data(self):
+        form = FilterForm(
+            user=self.user_with_one_cdd,
+            data={
+                'page_size': PAGINATOR_SIZE_LIST[0],
+                'cdds': [ENTITY_CDE],
+                'numero': '20-300000',
+            },
+            load_labels=True,
+        )
+        self.assertTrue(form.is_valid())
+        self.assertEqual(form.fields['nationalite'].widget.choices, [])
+        self.assertEqual(form.fields['matricule_candidat'].widget.choices, [])
+        self.assertEqual(form.fields['matricule_promoteur'].widget.choices, [])
