@@ -32,7 +32,7 @@ from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.builder.epreuve
 )
 from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.commands import (
     SoumettreReportDeDateCommand,
-    RecupererDerniereEpreuveConfirmationQuery,
+    RecupererEpreuvesConfirmationQuery,
 )
 from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.validators.exceptions import (
     EpreuveConfirmationNonTrouveeException,
@@ -96,10 +96,12 @@ class TestSoumettreReportDate(SimpleTestCase):
             )
         )
 
-        epreuve_confirmation_mise_a_jour = self.message_bus.invoke(
-            RecupererDerniereEpreuveConfirmationQuery(
-                doctorat_uuid=doctorat_id_resultat.uuid,
-            ),
+        epreuve_confirmation_mise_a_jour = next(
+            epreuve
+            for epreuve in message_bus_in_memory_instance.invoke(
+                RecupererEpreuvesConfirmationQuery(doctorat_uuid=doctorat_id_resultat.uuid)
+            )
+            if epreuve.uuid == 'c2'
         )
 
         self.assertIsNotNone(epreuve_confirmation_mise_a_jour.demande_prolongation)

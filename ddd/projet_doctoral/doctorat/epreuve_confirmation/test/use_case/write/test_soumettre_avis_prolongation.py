@@ -32,7 +32,6 @@ from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.builder.epreuve
 )
 from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.commands import (
     SoumettreAvisProlongationCommand,
-    RecupererDerniereEpreuveConfirmationQuery,
     RecupererEpreuvesConfirmationQuery,
 )
 from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.validators.exceptions import (
