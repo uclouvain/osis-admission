@@ -98,6 +98,24 @@ class CddDoctorateAdmissionProjectDetailViewTestCase(TestCase):
                 admission_submission_date=datetime.datetime.now(),
                 status_cdd=ChoixStatutCDD.TO_BE_VERIFIED.name,
                 status_sic=ChoixStatutSIC.VALID.name,
+                submitted_profile={
+                    "coordinates": {
+                        "city": "Louvain-La-Neuves",
+                        "email": "user@uclouvain.be",
+                        "place": "",
+                        "street": "Place de l'Université",
+                        "country": "BE",
+                        "postal_box": "",
+                        "postal_code": "1348",
+                        "street_number": "2",
+                    },
+                    "identification": {
+                        "gender": "M",
+                        "last_name": "Doe",
+                        "first_name": "John",
+                        "country_of_citizenship": "BE",
+                    },
+                },
             ),
             DoctorateAdmissionFactory(
                 doctorate__management_entity=second_doctoral_commission,

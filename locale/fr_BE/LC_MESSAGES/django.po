@@ -27,6 +27,7 @@ msgstr ""
 "              Êtes-vous sûr de vouloir supprimer \"%(object)s\"?\n"
 "            "
 
+#, python-format
 msgid ""
 "\n"
 "        One doctorate enrolment\n"
@@ -822,6 +823,9 @@ msgstr "Données personnelles"
 msgid "PhD already done"
 msgstr "Doctorat déjà réalisé"
 
+msgid "Place"
+msgstr "Lieu-dit"
+
 msgid "Plain text"
 msgstr "Texte brut"
 
@@ -891,6 +895,9 @@ msgstr "Merci de spécifier votre numéro de registre national belge."
 
 msgid "Post-enrolment status"
 msgstr "Statut après inscription"
+
+msgid "Postal box"
+msgstr "Boîte"
 
 msgid "Pre-Admission"
 msgstr "Pré-Admission"
@@ -1107,6 +1114,12 @@ msgstr ""
 
 msgid "The decision of the signing actor"
 msgstr "La décision du signataire"
+
+msgid "The dossier has been confirmed as:"
+msgstr "La demande a été confirmée sous le nom :"
+
+msgid "The dossier has been confirmed with the following contact address:"
+msgstr "La demande a été confirmée avec pour adresse de correspondance :"
 
 msgid "The experiences that have been valuated from this admission."
 msgstr "Les expériences qui ont été valorisées à partir de cette admission."

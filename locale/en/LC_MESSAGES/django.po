@@ -789,6 +789,9 @@ msgstr ""
 msgid "PhD already done"
 msgstr ""
 
+msgid "Place"
+msgstr ""
+
 msgid "Plain text"
 msgstr ""
 
@@ -845,6 +848,9 @@ msgid "Please specify your Belgian national register number."
 msgstr ""
 
 msgid "Post-enrolment status"
+msgstr ""
+
+msgid "Postal box"
 msgstr ""
 
 msgid "Pre-Admission"
@@ -1055,6 +1061,12 @@ msgid "The date of the confirmation paper cannot be later than its deadline."
 msgstr ""
 
 msgid "The decision of the signing actor"
+msgstr ""
+
+msgid "The dossier has been confirmed as:"
+msgstr ""
+
+msgid "The dossier has been confirmed with the following contact address:"
 msgstr ""
 
 msgid "The experiences that have been valuated from this admission."

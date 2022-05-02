@@ -24,3 +24,13 @@
 * at the root of the source code of this program.  If not,
 * see http://www.gnu.org/licenses/.
 {% endcomment %}
+{% block tab_content %}
+  {% if dossier %}
+    <p class="alert alert-info" role="alert">
+      <i class="fa fa-info-circle" style="margin-right: 0.5em"></i>
+      {% trans "The dossier has been confirmed as:" %}
+      {{ dossier.profil_candidat.nom }}, {{ dossier.profil_candidat.prenom }} ({{ dossier.profil_candidat.genre }}) -
+      {{ dossier.profil_candidat.nationalite }}
+    </p>
+  {% endif %}
+{% endblock %}

@@ -27,7 +27,7 @@ from typing import List, Optional
 
 from admission.ddd.projet_doctoral.validation.domain.model.demande import Demande, DemandeIdentity
 from admission.ddd.projet_doctoral.validation.domain.validator.exceptions import DemandeNonTrouveeException
-from admission.ddd.projet_doctoral.validation.dtos import DemandeDTO, DemandeRechercheDTO
+from admission.ddd.projet_doctoral.validation.dtos import DemandeDTO, DemandeRechercheDTO, ProfilCandidatDTO
 from admission.ddd.projet_doctoral.validation.repository.i_demande import IDemandeRepository
 from admission.ddd.projet_doctoral.validation.test.factory.demande import (
     DemandeAdmissionSC3DPMinimaleFactory,
@@ -100,4 +100,18 @@ class DemandeInMemoryRepository(InMemoryGenericRepository, IDemandeRepository):
             pre_admission_acceptee_le=demande.pre_admission_acceptee_le,
             admission_acceptee_le=demande.admission_acceptee_le,
             derniere_modification=demande.modifiee_le,
+            profil_candidat=ProfilCandidatDTO(
+                prenom=demande.profil_candidat.prenom,
+                nom=demande.profil_candidat.nom,
+                genre=demande.profil_candidat.genre,
+                nationalite=demande.profil_candidat.nationalite,
+                email=demande.profil_candidat.email,
+                pays=demande.profil_candidat.pays,
+                code_postal=demande.profil_candidat.code_postal,
+                ville=demande.profil_candidat.ville,
+                lieu_dit=demande.profil_candidat.lieu_dit,
+                rue=demande.profil_candidat.rue,
+                numero_rue=demande.profil_candidat.numero_rue,
+                boite_postale=demande.profil_candidat.boite_postale,
+            ),
         )

@@ -27,9 +27,9 @@ import uuid
 
 import factory
 
-from admission.ddd.projet_doctoral.preparation.domain.service.profil_candidat import ProfilCandidat
 from admission.ddd.projet_doctoral.preparation.test.factory.proposition import _PropositionIdentityFactory
 from admission.ddd.projet_doctoral.validation.domain.model._enums import ChoixStatutSIC, ChoixStatutCDD
+from admission.ddd.projet_doctoral.validation.domain.model._profil_candidat import ProfilCandidat
 from admission.ddd.projet_doctoral.validation.domain.model.demande import DemandeIdentity, Demande
 
 
@@ -41,6 +41,12 @@ class _DemandeIdentityFactory(factory.Factory):
     uuid = factory.LazyFunction(lambda: str(uuid.uuid4()))
 
 
+class ProfilCandidatFactory(factory.Factory):
+    class Meta:
+        model = ProfilCandidat
+        abstract = False
+
+
 class _DemandeFactory(factory.Factory):
     class Meta:
         model = Demande
@@ -49,7 +55,7 @@ class _DemandeFactory(factory.Factory):
     entity_id = factory.SubFactory(_DemandeIdentityFactory)
     statut_sic = ChoixStatutSIC.TO_BE_VERIFIED
     statut_cdd = ChoixStatutCDD.TO_BE_VERIFIED
-    profil_candidat = ProfilCandidat()
+    profil_candidat = factory.SubFactory(ProfilCandidatFactory)
     admission_confirmee_le = factory.Faker('past_datetime')
 
 
