@@ -31,7 +31,7 @@ from admission.ddd.projet_doctoral.validation.domain.model._enums import ChoixSt
 from admission.ddd.projet_doctoral.validation.domain.model._profil_candidat import ProfilCandidat
 from admission.ddd.projet_doctoral.validation.domain.model.demande import Demande, DemandeIdentity
 from admission.ddd.projet_doctoral.validation.domain.service.proposition_identity import PropositionIdentityTranslator
-from admission.ddd.projet_doctoral.validation.dtos import DemandeDTO
+from admission.ddd.projet_doctoral.validation.dtos import DemandeDTO, ProfilCandidatDTO
 from admission.ddd.projet_doctoral.validation.repository.i_demande import IDemandeRepository
 
 
@@ -133,6 +133,20 @@ class DemandeRepository(IDemandeRepository):
             derniere_modification=demande.modified,
             pre_admission_confirmee_le=demande.pre_admission_submission_date,
             admission_confirmee_le=demande.admission_submission_date,
+            profil_candidat=ProfilCandidatDTO(
+                prenom=demande.submitted_profile.get('identification').get('first_name'),
+                nom=demande.submitted_profile.get('identification').get('last_name'),
+                genre=demande.submitted_profile.get('identification').get('gender'),
+                nationalite=demande.submitted_profile.get('identification').get('country_of_citizenship'),
+                email=demande.submitted_profile.get('coordinates').get('email'),
+                pays=demande.submitted_profile.get('coordinates').get('country'),
+                code_postal=demande.submitted_profile.get('coordinates').get('postal_code'),
+                ville=demande.submitted_profile.get('coordinates').get('city'),
+                lieu_dit=demande.submitted_profile.get('coordinates').get('place'),
+                rue=demande.submitted_profile.get('coordinates').get('street'),
+                numero_rue=demande.submitted_profile.get('coordinates').get('street_number'),
+                boite_postale=demande.submitted_profile.get('coordinates').get('postal_box'),
+            ),
             # TODO use the related fields when they will be available
             pre_admission_acceptee_le=None,
             admission_acceptee_le=None,

@@ -32,6 +32,26 @@ from osis_common.ddd import interface
 
 
 @attr.s(frozen=True, slots=True, auto_attribs=True)
+class ProfilCandidatDTO(interface.DTO):
+
+    # Identification
+    nom: Optional[str] = ''
+    prenom: Optional[str] = ''
+    genre: Optional[str] = ''
+    nationalite: Optional[str] = ''
+
+    # Coordonnees
+    email: Optional[str] = ''
+    pays: Optional[str] = ''
+    code_postal: Optional[str] = ''
+    ville: Optional[str] = ''
+    lieu_dit: Optional[str] = ''
+    rue: Optional[str] = ''
+    numero_rue: Optional[str] = ''
+    boite_postale: Optional[str] = ''
+
+
+@attr.s(frozen=True, slots=True, auto_attribs=True)
 class DemandeRechercheDTO(interface.DTO):
     uuid: str
     numero_demande: str
@@ -56,6 +76,7 @@ class DemandeDTO(interface.DTO):
     derniere_modification: datetime.datetime
     pre_admission_confirmee_le: Optional[datetime.datetime]
     admission_confirmee_le: Optional[datetime.datetime]
+    profil_candidat: ProfilCandidatDTO
     # TODO only include info about demande
 
 

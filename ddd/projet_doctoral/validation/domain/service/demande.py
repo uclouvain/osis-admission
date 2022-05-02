@@ -32,7 +32,7 @@ from admission.ddd.projet_doctoral.preparation.domain.service.i_profil_candidat 
 from admission.ddd.projet_doctoral.validation.domain.model._profil_candidat import ProfilCandidat
 from admission.ddd.projet_doctoral.validation.domain.model.demande import DemandeIdentity, Demande
 from admission.ddd.projet_doctoral.validation.domain.service.proposition_identity import PropositionIdentityTranslator
-from admission.ddd.projet_doctoral.validation.dtos import DemandeDTO
+from admission.ddd.projet_doctoral.validation.dtos import DemandeDTO, ProfilCandidatDTO
 from admission.ddd.projet_doctoral.validation.repository.i_demande import IDemandeRepository
 from osis_common.ddd import interface
 
@@ -56,6 +56,20 @@ class DemandeService(interface.DomainService):
             pre_admission_acceptee_le=demande_dto.pre_admission_acceptee_le,
             admission_confirmee_le=demande_dto.admission_confirmee_le,
             pre_admission_confirmee_le=demande_dto.pre_admission_confirmee_le,
+            profil_candidat=ProfilCandidatDTO(
+                prenom=demande_dto.profil_candidat.prenom,
+                nom=demande_dto.profil_candidat.nom,
+                genre=demande_dto.profil_candidat.genre,
+                nationalite=demande_dto.profil_candidat.nationalite,
+                email=demande_dto.profil_candidat.email,
+                pays=demande_dto.profil_candidat.pays,
+                code_postal=demande_dto.profil_candidat.code_postal,
+                ville=demande_dto.profil_candidat.ville,
+                lieu_dit=demande_dto.profil_candidat.lieu_dit,
+                rue=demande_dto.profil_candidat.rue,
+                numero_rue=demande_dto.profil_candidat.numero_rue,
+                boite_postale=demande_dto.profil_candidat.boite_postale,
+            ),
         )
 
     @classmethod
