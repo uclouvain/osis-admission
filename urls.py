@@ -74,6 +74,11 @@ doctorate_detail_paths = [
         CddDoctorateAdmissionConfirmationFailureDecisionView.as_view(),
         name='confirmation-failure',
     ),
+    path(
+        'confirmation-retaking',
+        CddDoctorateAdmissionConfirmationRetakingDecisionView.as_view(),
+        name='confirmation-retaking',
+    ),
     path('extension-request', CddDoctorateAdmissionExtensionRequestDetailView.as_view(), name='extension-request'),
     path('update/', include((doctorate_update_paths, 'update'))),
 ]

@@ -25,6 +25,7 @@
 # ##############################################################################
 import uuid
 import datetime
+from typing import Optional
 
 from dateutil.relativedelta import relativedelta
 
@@ -42,11 +43,18 @@ class EpreuveConfirmationService(interface.DomainService):
     NB_MOIS_INTERVALLE_DATE_LIMITE = 24
 
     @classmethod
-    def initier(cls, doctorat_id: 'DoctoratIdentity') -> EpreuveConfirmation:
+    def initier(
+        cls,
+        doctorat_id: 'DoctoratIdentity',
+        date_limite: Optional[datetime.date] = None,
+    ) -> EpreuveConfirmation:
+        if not date_limite:
+            date_limite = datetime.date.today() + relativedelta(months=cls.NB_MOIS_INTERVALLE_DATE_LIMITE)
+
         return EpreuveConfirmation(
             entity_id=EpreuveConfirmationIdentityBuilder.build_from_uuid(
                 str(uuid.uuid4()),
             ),
             doctorat_id=doctorat_id,
-            date_limite=datetime.date.today() + relativedelta(months=cls.NB_MOIS_INTERVALLE_DATE_LIMITE),
+            date_limite=date_limite,
         )

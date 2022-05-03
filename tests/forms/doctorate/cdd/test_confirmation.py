@@ -28,7 +28,7 @@ import datetime
 from django.test import TestCase
 from django.utils.translation import gettext as _
 
-from admission.forms.doctorate.cdd.confirmation import ConfirmationForm
+from admission.forms.doctorate.cdd.confirmation import ConfirmationForm, ConfirmationRetakingForm
 
 
 class ConfirmationTestCase(TestCase):
@@ -64,3 +64,28 @@ class ConfirmationTestCase(TestCase):
             non_fields_errors[0],
             _('The date of the confirmation paper cannot be later than its deadline.'),
         )
+
+
+class ConfirmationRetakingFormTestCase(TestCase):
+    def test_form_validation_with_no_data(self):
+        form = ConfirmationRetakingForm(
+            data={},
+        )
+
+        self.assertFalse(form.is_valid())
+
+        # Mandatory fields
+        self.assertIn('subject', form.errors)
+        self.assertIn('body', form.errors)
+        self.assertIn('date_limite', form.errors)
+
+    def test_form_validation_with_valid_data(self):
+        form = ConfirmationRetakingForm(
+            data={
+                'subject': 'The subject',
+                'body': 'The content of the message',
+                'date_limite': datetime.date(2022, 5, 1),
+            },
+        )
+
+        self.assertTrue(form.is_valid())

@@ -260,4 +260,10 @@ class MessageBusCommands(AbstractMessageBusCommands):
             doctorat_repository=DoctoratRepository(),
             notification=NotificationEpreuveConfirmation(),
         ),
+        ConfirmerRepassageCommand: partial(
+            confirmer_repassage,
+            epreuve_confirmation_repository=EpreuveConfirmationRepository(),
+            doctorat_repository=DoctoratRepository(),
+            notification=NotificationEpreuveConfirmation(),
+        ),
     }

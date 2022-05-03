@@ -99,3 +99,12 @@ class ConfirmerEchecCommand(interface.CommandRequest):
 
     sujet_message: str
     corps_message: str
+
+
+@attr.s(frozen=True, slots=True, auto_attribs=True)
+class ConfirmerRepassageCommand(interface.CommandRequest):
+    uuid: str
+
+    date_limite: datetime.date
+    sujet_message: str
+    corps_message: str

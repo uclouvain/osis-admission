@@ -261,6 +261,12 @@ class MessageBusInMemoryCommands(AbstractMessageBusCommands):
             doctorat_repository=DoctoratInMemoryRepository(),
             notification=NotificationEpreuveConfirmation(),
         ),
+        ConfirmerRepassageCommand: partial(
+            confirmer_repassage,
+            epreuve_confirmation_repository=EpreuveConfirmationInMemoryRepository(),
+            doctorat_repository=DoctoratInMemoryRepository(),
+            notification=NotificationEpreuveConfirmation(),
+        ),
     }
 
 

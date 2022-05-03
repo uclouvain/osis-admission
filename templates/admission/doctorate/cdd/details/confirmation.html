@@ -46,14 +46,22 @@
           {% trans "Failure of the test" %}
         </a>
       </li>
+      <li>
+        <a href="{% url 'admission:doctorate:cdd:confirmation-retaking' pk %}">
+          {% trans "Retaking of the test" %}
+        </a>
+      </li>
     {% else %}
       {% with _("Impossible action: please be sure that the confirmation date and report are specified.") as error_message %}
-      <li class="disabled">
-        <a href="#" title="{{ error_message }}">{% trans "Successful test" %}</a>
-      </li>
-      <li class="disabled">
-        <a href="#" title="{{ error_message }}">{% trans "Failure of the test" %}</a>
-      </li>
+        <li class="disabled">
+          <a href="#" title="{{ error_message }}">{% trans "Successful test" %}</a>
+        </li>
+        <li class="disabled">
+          <a href="#" title="{{ error_message }}">{% trans "Failure of the test" %}</a>
+        </li>
+        <li class="disabled">
+          <a href="#" title="{{ error_message }}">{% trans "Retaking of the test" %}</a>
+        </li>
       {% endwith %}
     {% endif %}
   {% endif %}
@@ -78,13 +86,15 @@
 
   {% if previous_confirmation_papers %}
     <h3>{% trans "Past confirmation papers" %}</h3>
-    {% for confirmation_paper in previous_confirmation_papers %}
-      <div class="past-confirmation-tests">
-        {% field_data _("Date of confirmation:") confirmation_paper.date 'inline-field-data' %}
-        {% field_data _("Research report") confirmation_paper.rapport_recherche %}
-        {% field_data _("Report of the supervisory panel") confirmation_paper.proces_verbal_ca %}
-      </div>
-    {% endfor %}
+    <div>
+      {% for confirmation_paper in previous_confirmation_papers %}
+        <div class="past-confirmation-tests">
+          {% field_data _("Date of confirmation:") confirmation_paper.date 'inline-field-data' %}
+          {% field_data _("Research report") confirmation_paper.rapport_recherche %}
+          {% field_data _("Report of the supervisory panel") confirmation_paper.proces_verbal_ca %}
+        </div>
+      {% endfor %}
+    </div>
   {% endif %}
 
   {% if current_confirmation_paper %}
@@ -95,23 +105,16 @@
 {% block style %}
   {{ block.super }}
   <style>
-      .past-confirmation-tests {
-          margin: 2em 0;
-      }
       .past-confirmation-tests:after {
           content: '';
           border-bottom: 1px solid #ddd;
           display: block;
           width: 80%;
-          margin: auto;
+          margin: 2em auto;
       }
       .past-confirmation-tests:last-child:after {
           border: none;
-      }
-      .media-list {
-          margin-top: 0.5em;
-          border: 1px solid #ddd;
-          padding: 1em;
+          margin: 0;
       }
   </style>
 

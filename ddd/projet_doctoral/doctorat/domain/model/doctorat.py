@@ -52,3 +52,6 @@ class Doctorat(interface.RootEntity):
 
     def encoder_decision_echec_epreuve_confirmation(self):
         self.statut = ChoixStatutDoctorat.NOT_ALLOWED_TO_CONTINUE
+
+    def encoder_decision_repassage_epreuve_confirmation(self):
+        self.statut = ChoixStatutDoctorat.CONFIRMATION_TO_BE_REPEATED
