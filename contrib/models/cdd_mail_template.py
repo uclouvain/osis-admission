@@ -23,7 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from django.conf import settings
 from django.db import models
@@ -33,6 +33,7 @@ from django.utils.translation import gettext_lazy as _
 from admission.mail_templates import (
     ADMISSION_EMAIL_GENERIC_ONCE_ADMITTED,
     ADMISSION_EMAIL_SUBMISSION_CANDIDATE,
+    ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_FAILURE_STUDENT,
 )
 from base.models.enums.entity_type import DOCTORAL_COMMISSION
 from osis_mail_template.exceptions import MissingToken
@@ -42,6 +43,7 @@ from osis_mail_template.utils import transform_html_to_text
 ALLOWED_CUSTOM_IDENTIFIERS = [
     ADMISSION_EMAIL_SUBMISSION_CANDIDATE,
     ADMISSION_EMAIL_GENERIC_ONCE_ADMITTED,
+    ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_FAILURE_STUDENT,
 ]
 
 
@@ -57,14 +59,17 @@ class CddMailTemplateManager(MailTemplateManager):
             .order_by('language')
         )
 
-    def get_from_identifiers(self, identifiers: List[str], language: str):
+    def get_from_identifiers(self, identifiers: List[str], language: str, cdd: Optional[int] = None):
         """Get a list of mail template instances by identifier and language"""
-        return list(
-            self.get_queryset().filter(
-                identifier__in=identifiers,
-                language=language,
-            )
+        qs = self.get_queryset().filter(
+            identifier__in=identifiers,
+            language=language,
         )
+
+        if cdd:
+            qs = qs.filter(cdd=cdd)
+
+        return list(qs)
 
     def delete_by_id_and_pk(self, identifier: str, pk: int):
         """Delete mail template instances associated with an identifier and a pk"""

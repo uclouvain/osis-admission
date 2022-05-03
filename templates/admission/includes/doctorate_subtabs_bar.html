@@ -26,6 +26,10 @@
 
 <ul class="nav nav-pills nav-stacked nav-grey">
   {% for child in subtabs %}
-    {% include 'admission/includes/tab_entry.html' with tab_name=child.name tab_label=child.label %}
+    {% if child.name == active_tab %}
+      {% include 'admission/includes/tab_entry.html' with tab_name=child.name tab_label=child.label is_active=True %}
+    {% else %}
+      {% include 'admission/includes/tab_entry.html' with tab_name=child.name tab_label=child.label %}
+    {% endif %}
   {% endfor %}
 </ul>

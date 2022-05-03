@@ -32,6 +32,7 @@ from django.http import HttpResponse
 from django.test import RequestFactory, TestCase
 from django.test.utils import override_settings
 from django.urls import path, reverse
+from django.utils.translation import gettext as _
 from django.views import View
 
 from admission.templatetags.admission import (
@@ -40,7 +41,7 @@ from admission.templatetags.admission import (
     get_active_parent,
     update_tab_path_from_detail,
     detail_tab_path_from_update,
-    field_data,
+    field_data, current_subtabs, TAB_TREES,
 )
 
 
@@ -208,6 +209,37 @@ class AdmissionTabsTestCase(TestCase):
             result,
             reverse('admission:doctorate:cdd:project', args=[current_uuid]),
         )
+
+    def test_current_tabs_with_visible_tab(self):
+        context = {
+            'request': Mock(
+                resolver_match=Mock(
+                    namespaces=['admission', 'doctorate', 'cdd', 'update'],
+                    url_name='project',
+                ),
+            ),
+        }
+        result = current_subtabs(context)
+        self.assertEqual(
+            result,
+            TAB_TREES['doctorate']['cdd'][Tab('doctorate', _('Doctorate'), 'graduation-cap')]
+        )
+
+    def test_current_tabs_with_hidden_tab(self):
+        context = {
+            'request': Mock(
+                resolver_match=Mock(
+                    namespaces=['admission', 'doctorate', 'cdd'],
+                    url_name='confirmation-failure',
+                ),
+            ),
+        }
+        result = current_subtabs(context)
+        self.assertEqual(
+            result,
+            TAB_TREES['doctorate']['cdd'][Tab('doctorate', _('Doctorate'), 'graduation-cap')]
+        )
+
 
 
 class AdmissionFieldsDataTestCase(TestCase):

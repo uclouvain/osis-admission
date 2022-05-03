@@ -43,9 +43,7 @@
     </form>
   {% else %}
     <p class="text-danger">
-    {% blocktrans %}
-      Impossible action: please be sure that the confirmation date and report are specified.
-    {% endblocktrans %}
+    {% trans "Impossible action: please be sure that the confirmation date and report are specified." %}
     </p>
   {% endif %}
 {% endblock %}

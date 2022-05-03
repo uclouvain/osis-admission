@@ -23,32 +23,12 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import attr
 
-from admission.ddd.projet_doctoral.doctorat.domain.model._formation import FormationIdentity
-from admission.ddd.projet_doctoral.doctorat.domain.model.enums import ChoixStatutDoctorat
-from osis_common.ddd import interface
+import factory
 
-
-@attr.dataclass(frozen=True, slots=True)
-class DoctoratIdentity(interface.EntityIdentity):
-    uuid: str
+from admission.contrib.models import CddMailTemplate
 
 
-@attr.dataclass(slots=True, hash=False, eq=False)
-class Doctorat(interface.RootEntity):
-    entity_id: DoctoratIdentity
-    statut: ChoixStatutDoctorat
-
-    formation_id: FormationIdentity
-    matricule_doctorant: str
-    reference: str
-
-    def soumettre_epreuve_confirmation(self):
-        self.statut = ChoixStatutDoctorat.SUBMITTED_CONFIRMATION
-
-    def encoder_decision_reussite_epreuve_confirmation(self):
-        self.statut = ChoixStatutDoctorat.PASSED_CONFIRMATION
-
-    def encoder_decision_echec_epreuve_confirmation(self):
-        self.statut = ChoixStatutDoctorat.NOT_ALLOWED_TO_CONTINUE
+class CddMailTemplateFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = CddMailTemplate

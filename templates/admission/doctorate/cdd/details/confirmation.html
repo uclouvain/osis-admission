@@ -35,11 +35,27 @@
       </a>
     </li>
     <li role="separator" class="divider"></li>
-    <li>
-      <a href="#" data-toggle="modal" data-target="#confirmationSuccessModal">
-        {% trans "Successful test" %}
-      </a>
-    </li>
+    {% if can_be_evaluated %}
+      <li>
+        <a href="#" data-toggle="modal" data-target="#confirmationSuccessModal">
+          {% trans "Successful test" %}
+        </a>
+      </li>
+      <li>
+        <a href="{% url 'admission:doctorate:cdd:confirmation-failure' pk %}">
+          {% trans "Failure of the test" %}
+        </a>
+      </li>
+    {% else %}
+      {% with _("Impossible action: please be sure that the confirmation date and report are specified.") as error_message %}
+      <li class="disabled">
+        <a href="#" title="{{ error_message }}">{% trans "Successful test" %}</a>
+      </li>
+      <li class="disabled">
+        <a href="#" title="{{ error_message }}">{% trans "Failure of the test" %}</a>
+      </li>
+      {% endwith %}
+    {% endif %}
   {% endif %}
 {% endblock %}
 
@@ -72,7 +88,7 @@
   {% endif %}
 
   {% if current_confirmation_paper %}
-  {% include "admission/doctorate/cdd/details/includes/confirmation_success_modal.html" %}
+    {% include "admission/doctorate/cdd/details/includes/confirmation_success_modal.html" %}
   {% endif %}
 {% endblock %}
 

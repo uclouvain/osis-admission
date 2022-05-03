@@ -82,6 +82,7 @@ class EpreuveConfirmationNonCompleteePourEvaluationException(BusinessException):
 
     def __init__(self, **kwargs):
         message = _(
-            "Confirmation paper not completed for evaluation (the confirmation date and report must be specified)."
+            "The confirmation paper is not completed: please be sure that the confirmation date and report"
+            " have been specified.",
         )
         super().__init__(message, **kwargs)

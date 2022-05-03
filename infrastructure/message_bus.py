@@ -56,6 +56,9 @@ from .projet_doctoral.preparation.domain.service.historique import Historique as
 from .projet_doctoral.preparation.domain.service.notification import Notification as NotificationProposition
 from .projet_doctoral.doctorat.domain.service.historique import Historique as HistoriqueDoctorat
 from .projet_doctoral.doctorat.domain.service.notification import Notification as NotificationDoctorat
+from .projet_doctoral.doctorat.epreuve_confirmation.domain.service.notification import (
+    Notification as NotificationEpreuveConfirmation,
+)
 
 
 class MessageBusCommands(AbstractMessageBusCommands):
@@ -250,5 +253,11 @@ class MessageBusCommands(AbstractMessageBusCommands):
             confirmer_reussite,
             epreuve_confirmation_repository=EpreuveConfirmationRepository(),
             doctorat_repository=DoctoratRepository(),
-        )
+        ),
+        ConfirmerEchecCommand: partial(
+            confirmer_echec,
+            epreuve_confirmation_repository=EpreuveConfirmationRepository(),
+            doctorat_repository=DoctoratRepository(),
+            notification=NotificationEpreuveConfirmation(),
+        ),
     }
