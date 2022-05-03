@@ -38,3 +38,12 @@ class NotificationInMemory(INotification):
         message_notification_candidat,
     ) -> None:
         pass
+
+    @classmethod
+    def notifier_repassage_epreuve(
+        cls,
+        epreuve_confirmation: EpreuveConfirmation,
+        sujet_notification_candidat,
+        message_notification_candidat,
+    ) -> None:
+        pass

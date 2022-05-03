@@ -29,7 +29,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages import error
 from django.http import Http404, HttpResponseRedirect
 from django.urls import reverse
-from django.utils.translation import override
+from django.utils.translation import override, gettext_lazy as _
 from django.views import View
 from django.views.generic import FormView
 from osis_mail_template.models import MailTemplate
@@ -43,16 +43,21 @@ from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.commands import
     ConfirmerReussiteCommand,
     RecupererDerniereEpreuveConfirmationQuery,
     ConfirmerEchecCommand,
+    ConfirmerRepassageCommand,
 )
 from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.dtos import EpreuveConfirmationDTO
 from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.validators.exceptions import (
     EpreuveConfirmationNonTrouveeException,
 )
+from admission.forms.doctorate.cdd.confirmation import ConfirmationRetakingForm
 from admission.forms.doctorate.cdd.generic_send_mail import BaseEmailTemplateForm, SelectCddEmailTemplateForm
 from admission.infrastructure.projet_doctoral.doctorat.epreuve_confirmation.domain.service.notification import (
     Notification,
 )
-from admission.mail_templates import ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_FAILURE_STUDENT
+from admission.mail_templates import (
+    ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_FAILURE_STUDENT,
+    ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_RETAKING_STUDENT,
+)
 from admission.utils import get_cached_admission_perm_obj
 from admission.views.mixins.business_exceptions_form_view_mixin import BusinessExceptionFormViewMixin
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
@@ -76,17 +81,16 @@ class CddDoctorateAdmissionConfirmationSuccessDecisionView(LoginRequiredMixin, C
             return HttpResponseRedirect(reverse('admission:doctorate:cdd:confirmation', kwargs=kwargs))
 
 
-class CddDoctorateAdmissionConfirmationFailureDecisionView(
+class CddDoctorateAdmissionConfirmationDecisionView(
     HtmxMixin,
     LoginRequiredMixin,
     CddRequiredMixin,
     BusinessExceptionFormViewMixin,
     FormView,
 ):
-    template_name = 'admission/doctorate/cdd/forms/confirmation_decision_on_failure.html'
     htmx_template_name = 'admission/doctorate/cdd/forms/send_mail_htmx.html'
-
-    form_class = BaseEmailTemplateForm
+    identifier = ''
+    page_title = ''
 
     @property
     def admission(self):
@@ -113,7 +117,7 @@ class CddDoctorateAdmissionConfirmationFailureDecisionView(
         else:
             # Template is the generic one
             mail_template = MailTemplate.objects.get(
-                identifier=ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_FAILURE_STUDENT,
+                identifier=self.identifier,
                 language=self.admission.candidate.language,
             )
 
@@ -139,14 +143,26 @@ class CddDoctorateAdmissionConfirmationFailureDecisionView(
         context['confirmation_paper'] = self.last_confirmation_paper
 
         context['select_template_form'] = SelectCddEmailTemplateForm(
-            identifier=ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_FAILURE_STUDENT,
+            identifier=self.identifier,
             admission=self.admission,
             initial={
                 'template': self.request.GET.get('template'),
-            }
+            },
         )
 
+        context['page_title'] = self.page_title
+
         return context
+
+    def get_success_url(self):
+        return reverse('admission:doctorate:cdd:confirmation', args=[self.kwargs.get('pk')])
+
+
+class CddDoctorateAdmissionConfirmationFailureDecisionView(CddDoctorateAdmissionConfirmationDecisionView):
+    template_name = 'admission/doctorate/cdd/forms/confirmation_decision.html'
+    form_class = BaseEmailTemplateForm
+    identifier = ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_FAILURE_STUDENT
+    page_title = _('Failure of the confirmation paper')
 
     def call_command(self, form):
         message_bus_instance.invoke(
@@ -157,5 +173,19 @@ class CddDoctorateAdmissionConfirmationFailureDecisionView(
             )
         )
 
-    def get_success_url(self):
-        return reverse('admission:doctorate:cdd:confirmation', args=[self.kwargs.get('pk')])
+
+class CddDoctorateAdmissionConfirmationRetakingDecisionView(CddDoctorateAdmissionConfirmationDecisionView):
+    template_name = 'admission/doctorate/cdd/forms/confirmation_decision.html'
+    form_class = ConfirmationRetakingForm
+    identifier = ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_RETAKING_STUDENT
+    page_title = _('Retaking of the confirmation paper')
+
+    def call_command(self, form):
+        message_bus_instance.invoke(
+            ConfirmerRepassageCommand(
+                uuid=self.last_confirmation_paper.uuid,
+                sujet_message=form.cleaned_data['subject'],
+                corps_message=form.cleaned_data['body'],
+                date_limite=form.cleaned_data['date_limite'],
+            )
+        )
