@@ -91,10 +91,38 @@ class Notification(INotification):
 
         # Notify the promoters and the ca members > email (cc)
         supervising_actor_emails = doctorate.supervision_group.actors.select_related('person').values_list(
-            'person__email'
+            'person__email',
+            flat=True,
         )
 
         email_message = EmailNotificationHandler.build(email_notification)
-        email_message['Cc'] = [email[0] for email in supervising_actor_emails]
+        email_message['Cc'] = ','.join(supervising_actor_emails)
+
+        EmailNotificationHandler.create(email_message, person=doctorate.candidate)
+
+    @classmethod
+    def notifier_repassage_epreuve(
+        cls,
+        epreuve_confirmation: EpreuveConfirmation,
+        sujet_notification_candidat: str,
+        message_notification_candidat: str,
+    ) -> None:
+        doctorate: DoctorateProxy = DoctorateProxy.objects.get(uuid=epreuve_confirmation.doctorat_id.uuid)
+
+        email_notification = EmailNotification(
+            recipient=doctorate.candidate,
+            subject=sujet_notification_candidat,
+            html_content=message_notification_candidat,
+            plain_text_content=transform_html_to_text(message_notification_candidat),
+        )
+
+        # Notify the promoters and the ca members > email (cc)
+        supervising_actor_emails = doctorate.supervision_group.actors.select_related('person').values_list(
+            'person__email',
+            flat=True,
+        )
+
+        email_message = EmailNotificationHandler.build(email_notification)
+        email_message['Cc'] = ','.join(supervising_actor_emails)
 
         EmailNotificationHandler.create(email_message, person=doctorate.candidate)

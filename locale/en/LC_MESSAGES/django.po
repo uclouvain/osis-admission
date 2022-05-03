@@ -1084,6 +1084,12 @@ msgstr ""
 msgid "Reset"
 msgstr ""
 
+msgid "Retaking of the confirmation paper"
+msgstr ""
+
+msgid "Retaking of the test"
+msgstr ""
+
 msgid "Role of the signing actor"
 msgstr ""
 

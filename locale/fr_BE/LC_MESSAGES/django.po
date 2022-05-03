@@ -1175,6 +1175,12 @@ msgstr "Rapport de recherche"
 msgid "Reset"
 msgstr "Réinitialiser"
 
+msgid "Retaking of the confirmation paper"
+msgstr "Épreuve de confirmation à représenter"
+
+msgid "Retaking of the test"
+msgstr "Confirmation à représenter"
+
 msgid "Role of the signing actor"
 msgstr "Rôle du signataire"
 

@@ -28,6 +28,7 @@ from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 from osis_document.contrib import FileUploadField
 
+from admission.forms.doctorate.cdd.generic_send_mail import BaseEmailTemplateForm
 from base.forms.utils.datefield import DatePickerInput
 
 
@@ -79,6 +80,28 @@ class ConfirmationForm(forms.Form):
             raise ValidationError(_('The date of the confirmation paper cannot be later than its deadline.'))
 
         return cleaned_data
+
+    class Media:
+        js = [
+            # Dates
+            'js/moment.min.js',
+            'js/locales/moment-fr.js',
+            'js/bootstrap-datetimepicker.min.js',
+            'js/dates-input.js',
+        ]
+
+
+class ConfirmationRetakingForm(BaseEmailTemplateForm):
+    date_limite = forms.DateField(
+        label=_('Deadline for confirmation'),
+        required=True,
+        widget=DatePickerInput(
+            attrs={
+                'placeholder': _("dd/mm/yyyy"),
+                **DatePickerInput.defaut_attrs,
+            },
+        ),
+    )
 
     class Media:
         js = [
