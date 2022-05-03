@@ -24,7 +24,7 @@
 #
 # ##############################################################################
 import datetime
-from typing import Optional, List, Union
+from typing import Optional, List
 
 import attr
 

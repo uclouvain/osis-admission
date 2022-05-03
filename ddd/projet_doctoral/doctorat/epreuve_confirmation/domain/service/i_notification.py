@@ -42,3 +42,13 @@ class INotification(interface.DomainService):
         message_notification_candidat,
     ) -> None:
         raise NotImplementedError
+
+    @classmethod
+    @abstractmethod
+    def notifier_repassage_epreuve(
+        cls,
+        epreuve_confirmation: EpreuveConfirmation,
+        sujet_notification_candidat,
+        message_notification_candidat,
+    ) -> None:
+        raise NotImplementedError
