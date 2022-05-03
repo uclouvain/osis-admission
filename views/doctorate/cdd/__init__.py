@@ -24,7 +24,10 @@
 #
 # ##############################################################################
 from .details.confirmation import CddDoctorateAdmissionConfirmationDetailView
-from .details.confirmation_decision import CddDoctorateAdmissionConfirmationSuccessDecisionView
+from admission.views.doctorate.cdd.forms.confirmation_decision import (
+    CddDoctorateAdmissionConfirmationSuccessDecisionView,
+    CddDoctorateAdmissionConfirmationFailureDecisionView,
+)
 from .details.coordonnees import CddDoctorateAdmissionCoordonneesDetailView
 from .details.cotutelle import CddDoctorateAdmissionCotutelleDetailView
 from .details.curriculum import CddDoctorateAdmissionCurriculumDetailView
@@ -62,6 +65,7 @@ __all__ = [
     'CddDoctorateAdmissionCotutelleDetailView',
     'CddDoctorateAdmissionSupervisionDetailView',
     # Forms
+    'CddDoctorateAdmissionConfirmationFailureDecisionView',
     'CddDoctorateAdmissionConfirmationFormView',
     'CddDoctorateAdmissionPersonFormView',
     'CddDoctorateAdmissionCoordonneesFormView',

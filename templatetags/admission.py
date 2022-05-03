@@ -101,6 +101,11 @@ TAB_TREES = {
     },
 }
 
+# Associate pages that we want to associate to a specific sub tab
+HIDDEN_TABS = {
+    'confirmation-failure': 'confirmation',
+}
+
 
 def get_active_parent(tab_tree, tab_name):
     return next(
@@ -115,8 +120,9 @@ def doctorate_tabs_bar(context):
 
     namespaces = match.namespaces
 
+    current_tab_name = HIDDEN_TABS.get(match.url_name, match.url_name)
     current_tab_tree = TAB_TREES[namespaces[1]][namespaces[2]]
-    parent = get_active_parent(current_tab_tree, match.url_name)
+    parent = get_active_parent(current_tab_tree, current_tab_name)
 
     return {
         'tab_tree': current_tab_tree,
@@ -132,8 +138,9 @@ def doctorate_tabs_bar(context):
 def current_subtabs(context):
     match = context['request'].resolver_match
     namespaces = match.namespaces
+    current_tab_name = HIDDEN_TABS.get(match.url_name, match.url_name)
     current_tab_tree = TAB_TREES[namespaces[1]][namespaces[2]]
-    return current_tab_tree.get(get_active_parent(current_tab_tree, match.url_name), [])
+    return current_tab_tree.get(get_active_parent(current_tab_tree, current_tab_name), [])
 
 
 @register.inclusion_tag('admission/includes/doctorate_subtabs_bar.html', takes_context=True)
@@ -146,6 +153,7 @@ def doctorate_subtabs_bar(context, tabs=None):
         'namespace': match.namespace,
         'request': context['request'],
         'view': context['view'],
+        'active_tab': HIDDEN_TABS.get(match.url_name, match.url_name),
     }
 
 

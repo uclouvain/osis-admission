@@ -91,3 +91,11 @@ class SoumettreAvisProlongationCommand(interface.CommandRequest):
 @attr.s(frozen=True, slots=True, auto_attribs=True)
 class ConfirmerReussiteCommand(interface.CommandRequest):
     uuid: str
+
+
+@attr.s(frozen=True, slots=True, auto_attribs=True)
+class ConfirmerEchecCommand(interface.CommandRequest):
+    uuid: str
+
+    sujet_message: str
+    corps_message: str

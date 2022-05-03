@@ -23,32 +23,18 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import attr
-
-from admission.ddd.projet_doctoral.doctorat.domain.model._formation import FormationIdentity
-from admission.ddd.projet_doctoral.doctorat.domain.model.enums import ChoixStatutDoctorat
-from osis_common.ddd import interface
-
-
-@attr.dataclass(frozen=True, slots=True)
-class DoctoratIdentity(interface.EntityIdentity):
-    uuid: str
+from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.domain.model.epreuve_confirmation import (
+    EpreuveConfirmation,
+)
+from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.domain.service.i_notification import INotification
 
 
-@attr.dataclass(slots=True, hash=False, eq=False)
-class Doctorat(interface.RootEntity):
-    entity_id: DoctoratIdentity
-    statut: ChoixStatutDoctorat
-
-    formation_id: FormationIdentity
-    matricule_doctorant: str
-    reference: str
-
-    def soumettre_epreuve_confirmation(self):
-        self.statut = ChoixStatutDoctorat.SUBMITTED_CONFIRMATION
-
-    def encoder_decision_reussite_epreuve_confirmation(self):
-        self.statut = ChoixStatutDoctorat.PASSED_CONFIRMATION
-
-    def encoder_decision_echec_epreuve_confirmation(self):
-        self.statut = ChoixStatutDoctorat.NOT_ALLOWED_TO_CONTINUE
+class NotificationInMemory(INotification):
+    @classmethod
+    def notifier_echec_epreuve(
+        cls,
+        epreuve_confirmation: EpreuveConfirmation,
+        sujet_notification_candidat,
+        message_notification_candidat,
+    ) -> None:
+        pass
