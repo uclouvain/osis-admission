@@ -53,13 +53,6 @@ msgid ""
 "    "
 msgstr ""
 
-msgid ""
-"\n"
-"      Impossible action: please be sure that the confirmation date and "
-"report are specified.\n"
-"    "
-msgstr ""
-
 #, python-format
 msgid ""
 "\n"
@@ -407,12 +400,10 @@ msgstr ""
 msgid "Confirm"
 msgstr ""
 
-msgid "Confirmation paper"
+msgid "Confirm and send the message"
 msgstr ""
 
-msgid ""
-"Confirmation paper not completed for evaluation (the confirmation date and "
-"report must be specified)."
+msgid "Confirmation paper"
 msgstr ""
 
 msgid "Confirmation paper not completed."
@@ -461,6 +452,12 @@ msgid "Date of confirmation"
 msgstr ""
 
 msgid "Date of confirmation:"
+msgstr ""
+
+msgid "Date of the confirmation paper"
+msgstr ""
+
+msgid "Date of the confirmation paper (DD/MM/YYYY)"
 msgstr ""
 
 msgid "Deadline extended"
@@ -568,6 +565,12 @@ msgstr ""
 msgid "FSR - Fonds Spéciaux de Recherche"
 msgstr ""
 
+msgid "Failure of the confirmation paper"
+msgstr ""
+
+msgid "Failure of the test"
+msgstr ""
+
 msgid "Financing type"
 msgstr ""
 
@@ -622,6 +625,11 @@ msgstr ""
 msgid "Identifier"
 msgstr ""
 
+msgid ""
+"Impossible action: please be sure that the confirmation date and report are "
+"specified."
+msgstr ""
+
 msgid "Institution"
 msgstr ""
 
@@ -670,17 +678,63 @@ msgstr ""
 msgid "Link to the admission (front-office)"
 msgstr ""
 
+msgid "Link to the certificate of achievement"
+msgstr ""
+
+msgid "Link to the certificate of failure"
+msgstr ""
+
 msgid "MANAGEMENT"
 msgstr "Management"
 
 msgid "MATHEMATICS"
 msgstr "Mathematics"
 
+msgid ""
+"Mail sent to ADRE to confirm the first submission of the confirmation paper"
+msgstr ""
+
+msgid ""
+"Mail sent to ADRE to confirm the first submission of the confirmation paper "
+"by a promoter"
+msgstr ""
+
+msgid ""
+"Mail sent to ADRE to inform him of the defavourable opinion on one "
+"confirmation paper"
+msgstr ""
+
+msgid ""
+"Mail sent to ADRE to inform him of the favourable opinion on one "
+"confirmation paper"
+msgstr ""
+
+msgid ""
+"Mail sent to ADRE to inform him of the necessity to retake one confirmation "
+"paper"
+msgstr ""
+
+msgid ""
+"Mail sent to ADRI to inform him of the defavourable opinion on one "
+"confirmation paper"
+msgstr ""
+
+msgid ""
+"Mail sent to ADRI to inform him of the favourable opinion on one "
+"confirmation paper"
+msgstr ""
+
+msgid ""
+"Mail sent to ADRI to inform him of the necessity to retake one confirmation "
+"paper"
+msgstr ""
+
 msgid "Mail sent to each actor of the supervision group to request a signature"
 msgstr ""
 
 msgid "Mail sent to promoters when a member of the supervision panel refuses"
 msgstr ""
+""
 
 msgid ""
 "Mail sent to the CDD to inform them that a new application has been submitted"
@@ -711,6 +765,26 @@ msgid ""
 "application has been submitted to UCLouvain by the applicant"
 msgstr ""
 
+msgid ""
+"Mail sent to the student to inform him of the defavourable opinion on its "
+"confirmation paper"
+msgstr ""
+
+msgid ""
+"Mail sent to the student to inform him of the favourable opinion on its "
+"confirmation paper"
+msgstr ""
+
+msgid ""
+"Mail sent to the student to inform him of the necessity to retake its "
+"confirmation paper"
+msgstr ""
+
+msgid ""
+"Mail sent to the student to inform him of the opinion of the cdd manager "
+"about the extension request of its confirmation paper"
+msgstr ""
+
 msgid "Management of the doctorate enrolments"
 msgstr ""
 
@@ -734,6 +808,9 @@ msgstr ""
 
 msgid "Membre CA not found."
 msgstr "Supervisory panel member not found."
+
+msgid "Message body"
+msgstr ""
 
 msgid "Message for the candidate"
 msgstr ""
@@ -1112,6 +1189,14 @@ msgstr "To be validated"
 msgid "TO_BE_VERIFIED"
 msgstr "To be verified"
 
+msgid "The acronym of the scholarship grant"
+msgstr ""
+
+msgid ""
+"The confirmation paper is not completed: please be sure that the "
+"confirmation date and report have been specified."
+msgstr ""
+
 msgid "The confirmation paper is not in progress"
 msgstr ""
 
@@ -1133,13 +1218,22 @@ msgstr ""
 msgid "The first name of the candidate"
 msgstr ""
 
+msgid "The first name of the promoter"
+msgstr ""
+
 msgid "The first name of the recipient"
 msgstr ""
 
 msgid "The first name of the signing actor"
 msgstr ""
 
+msgid "The first name of the student"
+msgstr ""
+
 msgid "The last name of the candidate"
+msgstr ""
+
+msgid "The last name of the promoter"
 msgstr ""
 
 msgid "The last name of the recipient"
@@ -1148,7 +1242,16 @@ msgstr ""
 msgid "The last name of the signing actor"
 msgstr ""
 
+msgid "The last name of the student"
+msgstr ""
+
 msgid "The opinion about the extension request is not completed."
+msgstr ""
+
+msgid "The opinion of the cdd manager about the extension request"
+msgstr ""
+
+msgid "The proposed date by the student (DD/MM/YYYY)"
 msgstr ""
 
 msgid "The proposition has already been confirmed or is cancelled"

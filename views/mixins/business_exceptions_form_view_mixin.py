@@ -42,10 +42,7 @@ class BusinessExceptionFormViewMixin:
         except MultipleBusinessExceptions as multiple_exceptions:
             for exception in multiple_exceptions.exceptions:
                 status_code = getattr(exception, 'status_code', None)
-                if status_code and status_code in self._error_mapping:
-                    form.add_error(self._error_mapping[status_code], exception.message)
-                else:
-                    form.add_error(None, exception.message)
+                form.add_error(self._error_mapping.get(status_code), exception.message)
             return self.form_invalid(form)
 
         return super().form_valid(form=form)

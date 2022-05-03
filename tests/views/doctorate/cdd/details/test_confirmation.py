@@ -117,7 +117,7 @@ class CddDoctorateAdmissionConfirmationDetailViewTestCase(TestCase):
 
         response = self.client.get(url)
 
-        response.status_code = HTTP_403_FORBIDDEN
+        self.assertEqual(response.status_code, HTTP_403_FORBIDDEN)
 
     def test_confirmation_detail_cdd_user_with_unknown_doctorate(self):
         self.client.force_login(user=self.cdd_person.user)

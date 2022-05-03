@@ -58,7 +58,9 @@ from .projet_doctoral.preparation.repository.in_memory.groupe_de_supervision imp
 )
 from .projet_doctoral.preparation.repository.in_memory.proposition import PropositionInMemoryRepository
 from .projet_doctoral.validation.repository.in_memory.demande import DemandeInMemoryRepository
-
+from .projet_doctoral.doctorat.epreuve_confirmation.domain.service.in_memory.notification import (
+    NotificationInMemory as NotificationEpreuveConfirmation,
+)
 
 class MessageBusInMemoryCommands(AbstractMessageBusCommands):
     command_handlers = {
@@ -252,7 +254,13 @@ class MessageBusInMemoryCommands(AbstractMessageBusCommands):
             confirmer_reussite,
             epreuve_confirmation_repository=EpreuveConfirmationInMemoryRepository(),
             doctorat_repository=DoctoratInMemoryRepository(),
-        )
+        ),
+        ConfirmerEchecCommand: partial(
+            confirmer_echec,
+            epreuve_confirmation_repository=EpreuveConfirmationInMemoryRepository(),
+            doctorat_repository=DoctoratInMemoryRepository(),
+            notification=NotificationEpreuveConfirmation(),
+        ),
     }
 
 

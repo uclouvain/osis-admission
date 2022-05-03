@@ -71,16 +71,6 @@ msgstr ""
 "personnalisé ? Cette action est irréversible.</p>\n"
 "    "
 
-msgid ""
-"\n"
-"      Impossible action: please be sure that the confirmation date and "
-"report are specified.\n"
-"    "
-msgstr ""
-"\n"
-"      Action impossible : veuillez-vous assurer que la date et le procès-"
-"verbal de l'épreuve ont bien été complétés."
-
 #, python-format
 msgid ""
 "\n"
@@ -441,16 +431,11 @@ msgstr "Configurer"
 msgid "Confirm"
 msgstr "Confirmer"
 
+msgid "Confirm and send the message"
+msgstr "Confirmer et envoyer le message"
+
 msgid "Confirmation paper"
 msgstr "Épreuve de confirmation"
-
-msgid ""
-"Confirmation paper not completed for evaluation (the confirmation date and "
-"report must be specified)."
-msgstr ""
-"L'épreuve de confirmation n'est pas complète et ne peut donc pas être "
-"évaluée (la date ainsi que le procès-verbal de l'épreuve doivent être "
-"spécifiés)."
 
 msgid "Confirmation paper not completed."
 msgstr "Épreuve de confirmation non complète."
@@ -499,6 +484,12 @@ msgstr "Date de l'épreuve de confirmation"
 
 msgid "Date of confirmation:"
 msgstr "Date de l'épreuve de confirmation :"
+
+msgid "Date of the confirmation paper"
+msgstr "Date de l'épreuve de confirmation"
+
+msgid "Date of the confirmation paper (DD/MM/YYYY)"
+msgstr "Date de l'épreuve de confirmation (JJ/MM/AAAA)"
 
 msgid "Deadline extended"
 msgstr "Nouvelle échéance"
@@ -605,6 +596,12 @@ msgstr "FRIA"
 msgid "FSR - Fonds Spéciaux de Recherche"
 msgstr "FSR - Fonds Spéciaux de Recherche"
 
+msgid "Failure of the confirmation paper"
+msgstr "Échec de l'épreuve de l'épreuve de confirmation"
+
+msgid "Failure of the test"
+msgstr "Échec de l'épreuve"
+
 msgid "Financing type"
 msgstr "Type de financement"
 
@@ -661,6 +658,13 @@ msgstr "Identification"
 msgid "Identifier"
 msgstr "Identifiant"
 
+msgid ""
+"Impossible action: please be sure that the confirmation date and report are "
+"specified."
+msgstr ""
+"Action impossible : veuillez-vous assurer que la date et le procès-verbal de "
+"l'épreuve ont bien été complétés."
+
 msgid "Institution"
 msgstr "Institution"
 
@@ -711,11 +715,72 @@ msgstr "Lien vers l'admission (back-office)"
 msgid "Link to the admission (front-office)"
 msgstr "Lien vers l'admission (front-office)"
 
+msgid "Link to the certificate of achievement"
+msgstr "Lien vers l'attestation de réussite"
+
+msgid "Link to the certificate of failure"
+msgstr "Lien vers l'attestation d'échec"
+
 msgid "MANAGEMENT"
 msgstr "Gestion"
 
 msgid "MATHEMATICS"
 msgstr "Mathématiques"
+
+msgid ""
+"Mail sent to ADRE to confirm the first submission of the confirmation paper"
+msgstr ""
+"E-Mail envoyé à ADRE pour confirmer la première soumission du formulaire "
+"d'une épreuve de confirmation"
+
+msgid ""
+"Mail sent to ADRE to confirm the first submission of the confirmation paper "
+"by a promoter"
+msgstr ""
+"E-Mail envoyé à ADRE pour confirmer la première soumission du formulaire "
+"d'une épreuve de confirmation par un promoteur"
+
+msgid ""
+"Mail sent to ADRE to inform him of the defavourable opinion on one "
+"confirmation paper"
+msgstr ""
+"E-Mail envoyé à ADRE pour l'informer de l'issue défavorable d'une épreuve de "
+"confirmation"
+
+msgid ""
+"Mail sent to ADRE to inform him of the favourable opinion on one "
+"confirmation paper"
+msgstr ""
+"E-Mail envoyé à ADRE pour l'informer de l'issue favorable d'une épreuve de "
+"confirmation"
+
+msgid ""
+"Mail sent to ADRE to inform him of the necessity to retake one confirmation "
+"paper"
+msgstr ""
+"E-Mail envoyé à ADRE pour l'informer de la nécessité de repasser une épreuve "
+"de confirmation"
+
+msgid ""
+"Mail sent to ADRI to inform him of the defavourable opinion on one "
+"confirmation paper"
+msgstr ""
+"E-Mail envoyé à ADRI pour l'informer de l'issue défavorable d'une épreuve de "
+"confirmation"
+
+msgid ""
+"Mail sent to ADRI to inform him of the favourable opinion on one "
+"confirmation paper"
+msgstr ""
+"E-Mail envoyé à ADRI pour l'informer de l'issue favorable d'une épreuve de "
+"confirmation"
+
+msgid ""
+"Mail sent to ADRI to inform him of the necessity to retake one confirmation "
+"paper"
+msgstr ""
+"E-Mail envoyé à ADRI pour l'informer de la nécessité de repasser une épreuve "
+"de confirmation"
 
 msgid "Mail sent to each actor of the supervision group to request a signature"
 msgstr ""
@@ -766,6 +831,34 @@ msgstr ""
 "E-mail envoyé aux membres du groupe de supervision pour les informer que la "
 "demande a été soumise à l'UCLouvain par le candidat"
 
+msgid ""
+"Mail sent to the student to inform him of the defavourable opinion on its "
+"confirmation paper"
+msgstr ""
+"E-Mail envoyé à l'étudiant pour l'informer de l'issue défavorable de son "
+"épreuve de confirmation"
+
+msgid ""
+"Mail sent to the student to inform him of the favourable opinion on its "
+"confirmation paper"
+msgstr ""
+"E-Mail envoyé à l'étudiant pour l'informer de l'issue favorable de son "
+"épreuve de confirmation"
+
+msgid ""
+"Mail sent to the student to inform him of the necessity to retake its "
+"confirmation paper"
+msgstr ""
+"E-Mail envoyé à l'étudiant pour l'informer de la nécessité de repasser son "
+"épreuve de confirmation"
+
+msgid ""
+"Mail sent to the student to inform him of the opinion of the cdd manager "
+"about the extension request of its confirmation paper"
+msgstr ""
+"E-Mail envoyé à l'étudiant pour l'informer de l'avis du gestionnaire CDD "
+"concernant sa demande de prolongation de son épreuve de confirmation"
+
 msgid "Management of the doctorate enrolments"
 msgstr "Gestion des inscriptions en doctorats"
 
@@ -790,6 +883,9 @@ msgstr "Membre du groupe de supervision non invité"
 
 msgid "Membre CA not found."
 msgstr "Membre du comité d'accompagnement non trouvé"
+
+msgid "Message body"
+msgstr "Corps du message"
 
 msgid "Message for the candidate"
 msgstr "Message pour le candidat"
@@ -1184,6 +1280,16 @@ msgstr "Pour validation"
 msgid "TO_BE_VERIFIED"
 msgstr "Pour vérification"
 
+msgid "The acronym of the scholarship grant"
+msgstr "L'acronyme de la bourse d'études"
+
+msgid ""
+"The confirmation paper is not completed: please be sure that the "
+"confirmation date and report have been specified."
+msgstr ""
+"L'épreuve de confirmation n'est pas complète : veuillez vous assurer que la "
+"date et le procès verbal de l'épreuve ont bien été complétés."
+
 msgid "The confirmation paper is not in progress"
 msgstr "L'épreuve de confirmation n'est pas en cours."
 
@@ -1207,14 +1313,23 @@ msgstr "Les expériences qui ont été valorisées à partir de cette admission.
 msgid "The first name of the candidate"
 msgstr "Le prénom du candidat"
 
+msgid "The first name of the promoter"
+msgstr "Le prénom du promoteur"
+
 msgid "The first name of the recipient"
 msgstr "Le prénom du destinataire"
 
 msgid "The first name of the signing actor"
 msgstr "Le prénom du signataire"
 
+msgid "The first name of the student"
+msgstr "Le prénom de l'étudiant"
+
 msgid "The last name of the candidate"
 msgstr "Le nom du candidat"
+
+msgid "The last name of the promoter"
+msgstr "Le nom du promoteur"
 
 msgid "The last name of the recipient"
 msgstr "Le nom du destinataire"
@@ -1222,8 +1337,17 @@ msgstr "Le nom du destinataire"
 msgid "The last name of the signing actor"
 msgstr "Le nom du signataire"
 
+msgid "The last name of the student"
+msgstr "Le nom de l'étudiant"
+
 msgid "The opinion about the extension request is not completed."
 msgstr "L'avis relatif à la demande d'une nouvelle échéance n'est pas complet."
+
+msgid "The opinion of the cdd manager about the extension request"
+msgstr "L'avis du gestionnaire CDD au sujet d'une demande de prolongation."
+
+msgid "The proposed date by the student (DD/MM/YYYY)"
+msgstr "La date proposée par l'étudiant (JJ/MM/AAAA)"
 
 msgid "The proposition has already been confirmed or is cancelled"
 msgstr "La proposition a déjà été confirmée ou est annulée."

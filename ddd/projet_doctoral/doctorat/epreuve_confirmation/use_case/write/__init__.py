@@ -29,3 +29,4 @@ from .completer_epreuve_confirmation_par_promoteur_service import completer_epre
 from .soumettre_report_de_date_service import soumettre_report_de_date
 from .soumettre_avis_prolongation_service import soumettre_avis_prolongation
 from .confirmer_reussite_service import confirmer_reussite
+from .confirmer_echec_service import confirmer_echec
