@@ -80,9 +80,13 @@ class CddDoctorateAdmissionList(LoginRequiredMixin, CddRequiredMixin, HtmxMixin,
         return self.request.GET.get('page_size', self.DEFAULT_PAGINATOR_SIZE)
 
     def get_queryset(self):
+        query_params = self.request.GET.copy()
+
+        ordering_field = query_params.pop('o', None)
+
         self.form = FilterForm(
             user=self.request.user,
-            data=self.request.GET or cache.get(self.cache_key) or None,
+            data=query_params or cache.get(self.cache_key) or None,
             load_labels=not self.request.htmx,
         )
 
@@ -91,17 +95,17 @@ class CddDoctorateAdmissionList(LoginRequiredMixin, CddRequiredMixin, HtmxMixin,
                 self.htmx_render_form_errors(self.request, self.form)
             return []
 
-        cache.set(self.cache_key, self.request.GET)
+        if query_params:
+            cache.set(self.cache_key, query_params)
 
         filters = self.form.cleaned_data
 
         filters.pop('page_size', None)
 
         # Order the queryset
-        ordering_field = self.request.GET.get('o')
         if ordering_field:
-            filters['tri_inverse'] = ordering_field[0] == '-'
-            filters['champ_tri'] = ordering_field.lstrip('-')
+            filters['tri_inverse'] = ordering_field[0][0] == '-'
+            filters['champ_tri'] = ordering_field[0].lstrip('-')
 
         return message_bus_instance.invoke(
             FiltrerDemandesQuery(

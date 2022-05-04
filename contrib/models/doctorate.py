@@ -403,7 +403,10 @@ class DemandeManager(models.Manager):
                 'status_sic',
             )
             .filter(
-                status=ChoixStatutProposition.SUBMITTED.name,
+                status__in=[
+                    ChoixStatutProposition.SUBMITTED.name,
+                    ChoixStatutProposition.ENROLLED.name,
+                ]
             )
         )
 

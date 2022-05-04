@@ -43,7 +43,7 @@ class LoadDossierViewMixin(LoginRequiredMixin, CddRequiredMixin, TemplateView):
         context['admission'] = proposition
 
         # Add the dossier information if there are some
-        if proposition.statut == ChoixStatutProposition.SUBMITTED.name:
+        if proposition.statut in [ChoixStatutProposition.SUBMITTED.name, ChoixStatutProposition.ENROLLED.name]:
             context['dossier'] = message_bus_instance.invoke(RecupererDemandeQuery(uuid=self.kwargs.get('pk')))
 
         return context
