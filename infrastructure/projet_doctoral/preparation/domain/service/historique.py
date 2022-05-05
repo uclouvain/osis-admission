@@ -94,14 +94,14 @@ class Historique(IHistorique):
                     else "membre du comité d'accompagnement",
                 )
             )
-            details = ""
+            details = []
             if avis.motif_refus:
-                details += "motif : {}".format(avis.motif_refus)
+                details.append("motif : {}".format(avis.motif_refus))
             if avis.commentaire_externe:
-                details += "commentaire : {}".format(avis.commentaire_externe)
+                details.append("commentaire : {}".format(avis.commentaire_externe))
             if details:
-                details = " ({})".format(details)
-            message_fr += details
+                details = " ({})".format(' ; '.join(details))
+                message_fr += details
 
         # Anglais
         with translation.override(settings.LANGUAGE_CODE_EN):
@@ -111,14 +111,14 @@ class Historique(IHistorique):
                 via_pdf="via PDF " if avis.pdf else "",
                 role="promoter" if isinstance(signataire_id, PromoteurIdentity) else "supervisory panel member",
             )
-            details = ""
+            details = []
             if avis.motif_refus:
-                details += "reason : {}".format(avis.motif_refus)
+                details.append("reason : {}".format(avis.motif_refus))
             if avis.commentaire_externe:
-                details += "comment : {}".format(avis.commentaire_externe)
+                details.append("comment : {}".format(avis.commentaire_externe))
             if details:
-                details = " ({})".format(details)
-            message_en += details
+                details = " ({})".format('; '.join(details))
+                message_en += details
 
         add_history_entry(
             proposition.entity_id.uuid,
