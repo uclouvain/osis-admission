@@ -76,12 +76,13 @@ class CddDoctorateAdmissionList(LoginRequiredMixin, CddRequiredMixin, HtmxMixin,
         return context
 
     def get_paginate_by(self, queryset):
-        return self.request.GET.get('page_size', self.DEFAULT_PAGINATOR_SIZE)
+        return self.form.data.get('page_size', self.DEFAULT_PAGINATOR_SIZE)
 
     def get_queryset(self):
         query_params = self.request.GET.copy()
 
         ordering_field = query_params.pop('o', None)
+        query_params.pop('page', None)
 
         self.form = FilterForm(
             user=self.request.user,
