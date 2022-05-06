@@ -31,6 +31,7 @@ from rest_framework.test import APITestCase
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.roles import CddManagerFactory, CandidateFactory
 from admission.tests.factories.supervision import CaMemberFactory, PromoterFactory
+from base.tests.factories.entity import EntityFactory
 from base.tests.factories.person import PersonFactory
 
 
@@ -42,18 +43,22 @@ class PersonTestCase(APITestCase):
         cls.updated_data = {
             "first_name": "Jo"
         }
+        doctoral_commission = EntityFactory()
         promoter = PromoterFactory(actor_ptr__person__first_name="Jane")
         cls.promoter_user = promoter.person.user
         cls.committee_member_user = CaMemberFactory(
             actor_ptr__person__first_name="James",
             process=promoter.process,
         ).person.user
-        admission = DoctorateAdmissionFactory(candidate__first_name="John")
+        admission = DoctorateAdmissionFactory(
+            candidate__first_name="John",
+            doctorate__management_entity=doctoral_commission,
+        )
         cls.admission_url = resolve_url('person', uuid=admission.uuid)
         cls.candidate_user = admission.candidate.user
         cls.candidate_user_without_admission = CandidateFactory().person.user
         cls.no_role_user = PersonFactory(first_name="Joe").user
-        cls.cdd_manager_user = CddManagerFactory(person__first_name="Jack").person.user
+        cls.cdd_manager_user = CddManagerFactory(entity=doctoral_commission).person.user
 
     def test_user_not_logged_assert_not_authorized(self):
         self.client.force_authenticate(user=None)
@@ -108,7 +113,7 @@ class PersonTestCase(APITestCase):
         self.client.force_authenticate(self.cdd_manager_user)
         response = self.client.get(self.agnostic_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
-        self.assertEqual(response.json()['first_name'], "Jack")
+        self.assertEqual(response.json()['first_name'], self.cdd_manager_user.person.first_name)
         response = self.client.get(self.admission_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
         self.assertEqual(response.json()['first_name'], "John")

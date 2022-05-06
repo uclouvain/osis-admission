@@ -1148,9 +1148,6 @@ msgstr "Refusé"
 msgid "REJECTED"
 msgstr "Rejeté"
 
-msgid "Read"
-msgstr "Lire"
-
 msgid "Recipient"
 msgstr "Destinataire"
 
@@ -1438,6 +1435,9 @@ msgstr "Mettre à jour"
 
 msgid "Update doctorate admission"
 msgstr "Mettre à jour admission en doctorat"
+
+msgid "Upload the opinion on the renewal of the research mandate"
+msgstr "Téléverser l'avis sur le renouvellement du mandat de recherche"
 
 msgid "VALID"
 msgstr "Valide"

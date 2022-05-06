@@ -25,13 +25,16 @@
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
 
-{% url namespace|add:':'|add:tab_name admission_uuid as tab_url %}
+{% if not is_active %}
+  {% url namespace|add:':'|add:tab_name admission_uuid as tab_url %}
+{% endif %}
+
 <li
   role="presentation"
-  {% if request.path == tab_url or is_active %}class="active"
+  {% if is_active %}class="active"
   {% elif not tab_url %}class="disabled"{% endif %}
 >
-  <a href="{{ tab_url }}">
+  <a href="{{ tab_url|default:'#' }}">
     {% if icon %}
       <span class="fa fa-{{ icon }}"></span>
     {% endif %}

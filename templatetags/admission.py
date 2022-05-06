@@ -73,37 +73,37 @@ class Tab:
 
 TAB_TREES = {
     'doctorate': {
-        'cdd': {
-            Tab('personal', _('Personal data'), 'user'): [
-                Tab('person', _('Identification')),
-                Tab('coordonnees', _('Contact details')),
-            ],
-            Tab('experience', _('Previous experience'), 'list-alt'): [
-                Tab('education', _('Secondary studies')),
-                Tab('curriculum', _('Curriculum')),
-                Tab('languages', _('Languages knowledge')),
-            ],
-            Tab('doctorate', _('Doctorate'), 'graduation-cap'): [
-                Tab('project', _('Doctoral project')),
-                Tab('cotutelle', _('Cotutelle')),
-                Tab('supervision', _('Supervision')),
-                Tab('confirmation', _('Confirmation paper')),
-                Tab('extension-request', _('New deadline')),
-            ],
-            Tab('history', _('History'), 'clock'): [
-                Tab('history', _('Status changes')),
-                Tab('history-all', _('All history')),
-            ],
-            Tab('messages', _('Send a mail'), 'envelope'): [
-                Tab('send-mail', _('Send a mail')),
-            ],
-        },
+        Tab('personal', _('Personal data'), 'user'): [
+            Tab('person', _('Identification')),
+            Tab('coordonnees', _('Contact details')),
+        ],
+        Tab('experience', _('Previous experience'), 'list-alt'): [
+            Tab('education', _('Secondary studies')),
+            Tab('curriculum', _('Curriculum')),
+            Tab('languages', _('Languages knowledge')),
+        ],
+        Tab('doctorate', _('Doctorate'), 'graduation-cap'): [
+            Tab('project', _('Doctoral project')),
+            Tab('cotutelle', _('Cotutelle')),
+            Tab('supervision', _('Supervision')),
+            Tab('confirmation', _('Confirmation paper')),
+            Tab('extension-request', _('New deadline')),
+        ],
+        Tab('history', _('History'), 'clock'): [
+            Tab('history', _('Status changes')),
+            Tab('history-all', _('All history')),
+        ],
+        Tab('messages', _('Send a mail'), 'envelope'): [
+            Tab('send-mail', _('Send a mail')),
+        ],
     },
 }
 
 # Associate pages that we want to associate to a specific sub tab
 HIDDEN_TABS = {
     'confirmation-failure': 'confirmation',
+    'confirmation-opinion': 'confirmation',
+    'confirmation-retaking': 'confirmation',
 }
 
 
@@ -121,7 +121,7 @@ def doctorate_tabs_bar(context):
     namespaces = match.namespaces
 
     current_tab_name = HIDDEN_TABS.get(match.url_name, match.url_name)
-    current_tab_tree = TAB_TREES[namespaces[1]][namespaces[2]]
+    current_tab_tree = TAB_TREES[namespaces[1]]
     parent = get_active_parent(current_tab_tree, current_tab_name)
 
     return {
@@ -139,7 +139,7 @@ def current_subtabs(context):
     match = context['request'].resolver_match
     namespaces = match.namespaces
     current_tab_name = HIDDEN_TABS.get(match.url_name, match.url_name)
-    current_tab_tree = TAB_TREES[namespaces[1]][namespaces[2]]
+    current_tab_tree = TAB_TREES[namespaces[1]]
     return current_tab_tree.get(get_active_parent(current_tab_tree, current_tab_name), [])
 
 
@@ -175,7 +175,7 @@ def detail_tab_path_from_update(context, admission_uuid):
     """From an update page, get the path of the detail page."""
     match = context['request'].resolver_match
     return reverse(
-        '{}:{}'.format(':'.join(match.namespaces[:-1]), match.url_name),
+        '{}:{}'.format(':'.join(match.namespaces[:-1]), HIDDEN_TABS.get(match.url_name, match.url_name)),
         args=[admission_uuid],
     )
 

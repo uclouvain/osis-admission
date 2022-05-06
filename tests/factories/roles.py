@@ -26,6 +26,7 @@
 
 import factory
 
+from admission.auth.roles.adre import Adre
 from admission.auth.roles.ca_member import CommitteeMember
 from admission.auth.roles.candidate import Candidate
 from admission.auth.roles.cdd_manager import CddManager
@@ -64,3 +65,9 @@ class CddManagerFactory(BaseFactory):
         organization=None,
     )
     with_child = False
+
+
+class AdreRoleFactory(BaseFactory):
+    class Meta:
+        model = Adre
+        django_get_or_create = ('person',)

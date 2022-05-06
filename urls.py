@@ -27,6 +27,7 @@ from django.urls import include, path
 
 import admission.views.autocomplete as autocomplete_views
 from admission.views.config.cdd_mail_templates import *
+from admission.views.doctorate import *
 from admission.views.doctorate.cdd import *
 
 app_name = 'admission'
@@ -40,52 +41,60 @@ autocomplete_paths = [
 
 # Doctorate
 doctorate_update_paths = [
-    path('person', CddDoctorateAdmissionPersonFormView.as_view(), name='person'),
-    path('coordonnees', CddDoctorateAdmissionCoordonneesFormView.as_view(), name='coordonnees'),
-    path('curriculum', CddDoctorateAdmissionCurriculumFormView.as_view(), name='curriculum'),
-    path('education', CddDoctorateAdmissionEducationFormView.as_view(), name='education'),
-    path('languages', CddDoctorateAdmissionLanguagesFormView.as_view(), name='languages'),
-    path('project', CddDoctorateAdmissionProjectFormView.as_view(), name='project'),
-    path('cotutelle', CddDoctorateAdmissionCotutelleFormView.as_view(), name='cotutelle'),
-    path('supervision', CddDoctorateAdmissionSupervisionFormView.as_view(), name='supervision'),
-    path('confirmation', CddDoctorateAdmissionConfirmationFormView.as_view(), name='confirmation'),
-    path('extension-request', CddDoctorateAdmissionExtensionRequestFormView.as_view(), name='extension-request'),
-]
-doctorate_detail_paths = [
-    path('person', CddDoctorateAdmissionPersonDetailView.as_view(), name='person'),
-    path('coordonnees', CddDoctorateAdmissionCoordonneesDetailView.as_view(), name='coordonnees'),
-    path('curriculum', CddDoctorateAdmissionCurriculumDetailView.as_view(), name='curriculum'),
-    path('education', CddDoctorateAdmissionEducationDetailView.as_view(), name='education'),
-    path('languages', CddDoctorateAdmissionLanguagesDetailView.as_view(), name='languages'),
-    path('project', CddDoctorateAdmissionProjectDetailView.as_view(), name='project'),
-    path('cotutelle', CddDoctorateAdmissionCotutelleDetailView.as_view(), name='cotutelle'),
-    path('supervision', CddDoctorateAdmissionSupervisionDetailView.as_view(), name='supervision'),
-    path('history', CddDoctorateHistoryView.as_view(), name='history'),
-    path('history-all', CddDoctorateHistoryAllView.as_view(), name='history-all'),
-    path('send-mail', CddDoctorateSendMailView.as_view(), name='send-mail'),
-    path('confirmation', CddDoctorateAdmissionConfirmationDetailView.as_view(), name='confirmation'),
+    path('person', DoctorateAdmissionPersonFormView.as_view(), name='person'),
+    path('coordonnees', DoctorateAdmissionCoordonneesFormView.as_view(), name='coordonnees'),
+    path('curriculum', DoctorateAdmissionCurriculumFormView.as_view(), name='curriculum'),
+    path('education', DoctorateAdmissionEducationFormView.as_view(), name='education'),
+    path('languages', DoctorateAdmissionLanguagesFormView.as_view(), name='languages'),
+    path('project', DoctorateAdmissionProjectFormView.as_view(), name='project'),
+    path('cotutelle', DoctorateAdmissionCotutelleFormView.as_view(), name='cotutelle'),
+    path('supervision', DoctorateAdmissionSupervisionFormView.as_view(), name='supervision'),
+    path('confirmation', DoctorateAdmissionConfirmationFormView.as_view(), name='confirmation'),
+    path('confirmation-opinion', DoctorateAdmissionConfirmationOpinionFormView.as_view(), name='confirmation-opinion'),
+    path('extension-request', DoctorateAdmissionExtensionRequestFormView.as_view(), name='extension-request'),
     path(
         'confirmation-success',
-        CddDoctorateAdmissionConfirmationSuccessDecisionView.as_view(),
+        DoctorateAdmissionConfirmationSuccessDecisionView.as_view(),
         name='confirmation-success',
     ),
     path(
         'confirmation-failure',
-        CddDoctorateAdmissionConfirmationFailureDecisionView.as_view(),
+        DoctorateAdmissionConfirmationFailureDecisionView.as_view(),
         name='confirmation-failure',
     ),
     path(
         'confirmation-retaking',
-        CddDoctorateAdmissionConfirmationRetakingDecisionView.as_view(),
+        DoctorateAdmissionConfirmationRetakingDecisionView.as_view(),
         name='confirmation-retaking',
     ),
-    path('extension-request', CddDoctorateAdmissionExtensionRequestDetailView.as_view(), name='extension-request'),
+]
+doctorate_detail_paths = [
+    path('person', DoctorateAdmissionPersonDetailView.as_view(), name='person'),
+    path('coordonnees', DoctorateAdmissionCoordonneesDetailView.as_view(), name='coordonnees'),
+    path('curriculum', DoctorateAdmissionCurriculumDetailView.as_view(), name='curriculum'),
+    path('education', DoctorateAdmissionEducationDetailView.as_view(), name='education'),
+    path('languages', DoctorateAdmissionLanguagesDetailView.as_view(), name='languages'),
+    path('project', DoctorateAdmissionProjectDetailView.as_view(), name='project'),
+    path('cotutelle', DoctorateAdmissionCotutelleDetailView.as_view(), name='cotutelle'),
+    path('supervision', DoctorateAdmissionSupervisionDetailView.as_view(), name='supervision'),
+    path('history', DoctorateHistoryView.as_view(), name='history'),
+    path('history-all', DoctorateHistoryAllView.as_view(), name='history-all'),
+    path('send-mail', DoctorateSendMailView.as_view(), name='send-mail'),
+    path('confirmation', DoctorateAdmissionConfirmationDetailView.as_view(), name='confirmation'),
+    path('extension-request', DoctorateAdmissionExtensionRequestDetailView.as_view(), name='extension-request'),
     path('update/', include((doctorate_update_paths, 'update'))),
 ]
+
 doctorate_cdd_paths = [
     path('', CddDoctorateAdmissionList.as_view(), name='list'),
+]
+
+doctorate_paths = [
+    # Common
     path('<uuid:pk>/', include(doctorate_detail_paths)),
-    path('<uuid:uuid>/history-api', CddDoctorateHistoryAPIView.as_view(), name='history-api'),
+    path('<uuid:uuid>/history-api', DoctorateHistoryAPIView.as_view(), name='history-api'),
+    # Specific
+    path('cdd/', include((doctorate_cdd_paths, 'cdd'))),
 ]
 
 cdd_mail_template_paths = [
@@ -95,13 +104,12 @@ cdd_mail_template_paths = [
     path('delete/<str:identifier>/<int:pk>', CddMailTemplateDeleteView.as_view(), name='delete'),
     path('add/<str:identifier>', CddMailTemplateChangeView.as_view(), name='add'),
 ]
+
+# Global
 config_paths = [
     path('cdd_mail_template/', include((cdd_mail_template_paths, 'cdd_mail_template'))),
 ]
 
-doctorate_paths = [
-    path('cdd/', include((doctorate_cdd_paths, 'cdd'))),
-]
 urlpatterns = [
     # Doctorate admissions
     path('doctorate/', include((doctorate_paths, 'doctorate'))),
