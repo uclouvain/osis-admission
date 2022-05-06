@@ -31,3 +31,4 @@ from .soumettre_avis_prolongation_service import soumettre_avis_prolongation
 from .confirmer_reussite_service import confirmer_reussite
 from .confirmer_echec_service import confirmer_echec
 from .confirmer_repassage_service import confirmer_repassage
+from .televerser_avis_renouvellement_mandat_recherche_service import televerser_avis_renouvellement_mandat_recherche

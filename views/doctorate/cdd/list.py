@@ -23,7 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.contrib.messages import error
 from django.core.cache import cache
 from django.core.exceptions import NON_FIELD_ERRORS
@@ -42,11 +42,13 @@ from admission.ddd.projet_doctoral.preparation.domain.model._financement import 
 from admission.ddd.projet_doctoral.validation.domain.model._enums import ChoixStatutCDD, ChoixStatutSIC
 
 
-class CddDoctorateAdmissionList(LoginRequiredMixin, CddRequiredMixin, HtmxMixin, ListView):
+class CddDoctorateAdmissionList(LoginRequiredMixin, PermissionRequiredMixin, HtmxMixin, ListView):
     raise_exception = True
 
     template_name = 'admission/doctorate/cdd/list.html'
     htmx_template_name = 'admission/doctorate/cdd/list_block.html'
+
+    permission_required = 'admission.view_cdddossiers'
 
     DEFAULT_PAGINATOR_SIZE = '10'
 

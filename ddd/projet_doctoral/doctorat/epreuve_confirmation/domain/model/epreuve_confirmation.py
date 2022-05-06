@@ -146,3 +146,9 @@ class EpreuveConfirmation(interface.RootEntity):
             date=self.date,
             proces_verbal_ca=self.proces_verbal_ca,
         ).validate()
+
+    def televerser_demande_renouvellement_bourse(
+        self,
+        avis_renouvellement_mandat_recherche: List[str],
+    ):
+        self.avis_renouvellement_mandat_recherche = avis_renouvellement_mandat_recherche

@@ -34,6 +34,7 @@ from admission.tests.factories.roles import CandidateFactory, CddManagerFactory
 from admission.tests.factories.secondary_studies import BelgianHighSchoolDiplomaFactory, ForeignHighSchoolDiplomaFactory
 from admission.tests.factories.supervision import CaMemberFactory, PromoterFactory
 from base.tests.factories.academic_year import AcademicYearFactory
+from base.tests.factories.entity import EntityFactory
 from base.tests.factories.person import PersonFactory
 from osis_profile.models import BelgianHighSchoolDiploma, ForeignHighSchoolDiploma, Schedule
 from reference.tests.factories.country import CountryFactory
@@ -79,14 +80,19 @@ class BelgianHighSchoolDiplomaTestCase(APITestCase):
                 },
             },
         }
+        doctoral_commission = EntityFactory()
+
         # Users
         promoter = PromoterFactory()
-        admission = DoctorateAdmissionFactory(supervision_group=promoter.process)
+        admission = DoctorateAdmissionFactory(
+            supervision_group=promoter.process,
+            doctorate__management_entity=doctoral_commission,
+        )
         cls.admission_url = resolve_url("secondary-studies", uuid=admission.uuid)
         cls.candidate_user = admission.candidate.user
         cls.candidate_user_without_admission = CandidateFactory().person.user
         cls.no_role_user = PersonFactory(first_name="Joe").user
-        cls.cdd_manager_user = CddManagerFactory(person__first_name="Jack").person.user
+        cls.cdd_manager_user = CddManagerFactory(entity=doctoral_commission).person.user
         cls.promoter_user = promoter.person.user
         cls.committee_member_user = CaMemberFactory(process=promoter.process).person.user
 

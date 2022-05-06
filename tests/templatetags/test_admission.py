@@ -182,7 +182,7 @@ class AdmissionTabsTestCase(TestCase):
         context = {
             'request': Mock(
                 resolver_match=Mock(
-                    namespace='admission:doctorate:cdd',
+                    namespace='admission:doctorate',
                     url_name='project',
                 ),
             ),
@@ -191,14 +191,14 @@ class AdmissionTabsTestCase(TestCase):
         result = update_tab_path_from_detail(context, current_uuid)
         self.assertEqual(
             result,
-            reverse('admission:doctorate:cdd:update:project', args=[current_uuid]),
+            reverse('admission:doctorate:update:project', args=[current_uuid]),
         )
 
     def test_detail_tab_path_from_update(self):
         context = {
             'request': Mock(
                 resolver_match=Mock(
-                    namespaces=['admission', 'doctorate', 'cdd', 'update'],
+                    namespaces=['admission', 'doctorate', 'update'],
                     url_name='project',
                 ),
             ),
@@ -207,14 +207,14 @@ class AdmissionTabsTestCase(TestCase):
         result = detail_tab_path_from_update(context, current_uuid)
         self.assertEqual(
             result,
-            reverse('admission:doctorate:cdd:project', args=[current_uuid]),
+            reverse('admission:doctorate:project', args=[current_uuid]),
         )
 
     def test_current_tabs_with_visible_tab(self):
         context = {
             'request': Mock(
                 resolver_match=Mock(
-                    namespaces=['admission', 'doctorate', 'cdd', 'update'],
+                    namespaces=['admission', 'doctorate', 'update'],
                     url_name='project',
                 ),
             ),
@@ -222,14 +222,14 @@ class AdmissionTabsTestCase(TestCase):
         result = current_subtabs(context)
         self.assertEqual(
             result,
-            TAB_TREES['doctorate']['cdd'][Tab('doctorate', _('Doctorate'), 'graduation-cap')]
+            TAB_TREES['doctorate'][Tab('doctorate', _('Doctorate'), 'graduation-cap')]
         )
 
     def test_current_tabs_with_hidden_tab(self):
         context = {
             'request': Mock(
                 resolver_match=Mock(
-                    namespaces=['admission', 'doctorate', 'cdd'],
+                    namespaces=['admission', 'doctorate'],
                     url_name='confirmation-failure',
                 ),
             ),
@@ -237,7 +237,7 @@ class AdmissionTabsTestCase(TestCase):
         result = current_subtabs(context)
         self.assertEqual(
             result,
-            TAB_TREES['doctorate']['cdd'][Tab('doctorate', _('Doctorate'), 'graduation-cap')]
+            TAB_TREES['doctorate'][Tab('doctorate', _('Doctorate'), 'graduation-cap')]
         )
 
 

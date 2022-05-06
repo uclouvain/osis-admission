@@ -108,3 +108,10 @@ class ConfirmerRepassageCommand(interface.CommandRequest):
     date_limite: datetime.date
     sujet_message: str
     corps_message: str
+
+
+@attr.s(frozen=True, slots=True, auto_attribs=True)
+class TeleverserAvisRenouvellementMandatRechercheCommand(interface.CommandRequest):
+    uuid: str
+
+    avis_renouvellement_mandat_recherche: List[str]

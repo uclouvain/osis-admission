@@ -266,4 +266,8 @@ class MessageBusCommands(AbstractMessageBusCommands):
             doctorat_repository=DoctoratRepository(),
             notification=NotificationEpreuveConfirmation(),
         ),
+        TeleverserAvisRenouvellementMandatRechercheCommand: partial(
+            televerser_avis_renouvellement_mandat_recherche,
+            epreuve_confirmation_repository=EpreuveConfirmationRepository(),
+        ),
     }
