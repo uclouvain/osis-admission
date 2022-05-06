@@ -1057,9 +1057,6 @@ msgstr "Declined"
 msgid "REJECTED"
 msgstr "Rejected"
 
-msgid "Read"
-msgstr ""
-
 msgid "Recipient"
 msgstr ""
 
@@ -1340,6 +1337,9 @@ msgid "Update"
 msgstr ""
 
 msgid "Update doctorate admission"
+msgstr ""
+
+msgid "Upload the opinion on the renewal of the research mandate"
 msgstr ""
 
 msgid "VALID"

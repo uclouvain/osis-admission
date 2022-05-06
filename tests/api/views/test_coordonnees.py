@@ -35,6 +35,7 @@ from admission.tests.factories.roles import CddManagerFactory, CandidateFactory
 from admission.tests.factories.supervision import CaMemberFactory, PromoterFactory
 from base.models.enums.person_address_type import PersonAddressType
 from base.models.person_address import PersonAddress
+from base.tests.factories.entity import EntityFactory
 from base.tests.factories.person import PersonFactory
 from base.tests.factories.person_address import PersonAddressFactory
 
@@ -63,15 +64,20 @@ class CoordonneesTestCase(APITestCase):
             label=PersonAddressType.CONTACT.name,
             street="Rue de la faim",
         )
+        doctoral_commission = EntityFactory()
         promoter = PromoterFactory()
         cls.promoter_user = promoter.person.user
-        admission = DoctorateAdmissionFactory(supervision_group=promoter.process, candidate=cls.address.person)
+        admission = DoctorateAdmissionFactory(
+            supervision_group=promoter.process,
+            candidate=cls.address.person,
+            doctorate__management_entity=doctoral_commission,
+        )
         cls.admission_url = resolve_url('coordonnees', uuid=admission.uuid)
         # Users
         cls.candidate_user = cls.address.person.user
         cls.candidate_user_without_admission = cls.other_address.person.user
         cls.no_role_user = PersonFactory(first_name="Joe").user
-        cls.cdd_manager_user = CddManagerFactory().person.user
+        cls.cdd_manager_user = CddManagerFactory(entity=doctoral_commission).person.user
         cls.committee_member_user = CaMemberFactory(process=promoter.process).person.user
 
     def test_user_not_logged_assert_not_authorized(self):

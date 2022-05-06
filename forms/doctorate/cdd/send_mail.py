@@ -27,7 +27,7 @@ from collections import defaultdict
 
 from ckeditor.fields import RichTextFormField
 from django import forms
-from django.utils.translation import get_language, gettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 from admission.contrib.models import CddMailTemplate
 from admission.forms import EMPTY_CHOICE
