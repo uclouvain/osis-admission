@@ -30,8 +30,15 @@
   background-color: #aaa;
 }
 
+.media-list {
+  margin: 0;
+}
+
 dl .media-list {
-  margin-top: 0.5em;
+    margin-top: 0.5em;
+}
+
+.media {
   border: 1px solid #ddd;
   padding: 1em;
 }
@@ -46,8 +53,23 @@ textarea {
   align-items: center;
   flex-wrap: wrap;
 }
+
 .border-right {
   border-right: 1px solid #ddd;
+}
+
+.inline-field-data {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.required_field .control-label:after {
+  color: #a94442;
+}
+
+.min_field {
+  width: max-content;
 }
 
 @media (min-width: 990px) {

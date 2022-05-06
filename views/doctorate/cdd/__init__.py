@@ -23,65 +23,8 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from .details.confirmation import CddDoctorateAdmissionConfirmationDetailView
-from admission.views.doctorate.cdd.forms.confirmation_decision import (
-    CddDoctorateAdmissionConfirmationSuccessDecisionView,
-    CddDoctorateAdmissionConfirmationFailureDecisionView,
-    CddDoctorateAdmissionConfirmationRetakingDecisionView,
-)
-from .details.coordonnees import CddDoctorateAdmissionCoordonneesDetailView
-from .details.cotutelle import CddDoctorateAdmissionCotutelleDetailView
-from .details.curriculum import CddDoctorateAdmissionCurriculumDetailView
-from .details.education import CddDoctorateAdmissionEducationDetailView
-from .details.extension_request import CddDoctorateAdmissionExtensionRequestDetailView
-from .details.history import CddDoctorateHistoryAPIView, CddDoctorateHistoryAllView, CddDoctorateHistoryView
-from .details.languages import CddDoctorateAdmissionLanguagesDetailView
-from .details.person import CddDoctorateAdmissionPersonDetailView
-from .details.project import CddDoctorateAdmissionProjectDetailView
-from .details.supervision import CddDoctorateAdmissionSupervisionDetailView
-from .forms.confirmation import CddDoctorateAdmissionConfirmationFormView
-from .forms.coordonnees import CddDoctorateAdmissionCoordonneesFormView
-from .forms.cotutelle import CddDoctorateAdmissionCotutelleFormView
-from .forms.curriculum import CddDoctorateAdmissionCurriculumFormView
-from .forms.education import CddDoctorateAdmissionEducationFormView
-from .forms.extension_request import CddDoctorateAdmissionExtensionRequestFormView
-from .forms.languages import CddDoctorateAdmissionLanguagesFormView
-from .forms.person import CddDoctorateAdmissionPersonFormView
-from .forms.project import CddDoctorateAdmissionProjectFormView
-from .forms.send_mail import CddDoctorateSendMailView
-from .forms.supervision import CddDoctorateAdmissionSupervisionFormView
 from .list import CddDoctorateAdmissionList
 
 __all__ = [
     'CddDoctorateAdmissionList',
-    # Details
-    'CddDoctorateAdmissionConfirmationDetailView',
-    'CddDoctorateAdmissionPersonDetailView',
-    'CddDoctorateAdmissionCoordonneesDetailView',
-    'CddDoctorateAdmissionCurriculumDetailView',
-    'CddDoctorateAdmissionEducationDetailView',
-    'CddDoctorateAdmissionExtensionRequestDetailView',
-    'CddDoctorateAdmissionLanguagesDetailView',
-    'CddDoctorateAdmissionProjectDetailView',
-    'CddDoctorateAdmissionCotutelleDetailView',
-    'CddDoctorateAdmissionSupervisionDetailView',
-    # Forms
-    'CddDoctorateAdmissionConfirmationFailureDecisionView',
-    'CddDoctorateAdmissionConfirmationFormView',
-    'CddDoctorateAdmissionConfirmationRetakingDecisionView',
-    'CddDoctorateAdmissionPersonFormView',
-    'CddDoctorateAdmissionCoordonneesFormView',
-    'CddDoctorateAdmissionCurriculumFormView',
-    'CddDoctorateAdmissionEducationFormView',
-    'CddDoctorateAdmissionExtensionRequestFormView',
-    'CddDoctorateAdmissionLanguagesFormView',
-    'CddDoctorateAdmissionProjectFormView',
-    'CddDoctorateAdmissionCotutelleFormView',
-    'CddDoctorateAdmissionSupervisionFormView',
-    # Others
-    'CddDoctorateHistoryAPIView',
-    'CddDoctorateHistoryView',
-    'CddDoctorateHistoryAllView',
-    'CddDoctorateSendMailView',
-    'CddDoctorateAdmissionConfirmationSuccessDecisionView',
 ]
