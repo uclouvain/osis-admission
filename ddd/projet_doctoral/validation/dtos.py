@@ -39,10 +39,12 @@ class ProfilCandidatDTO(interface.DTO):
     prenom: Optional[str] = ''
     genre: Optional[str] = ''
     nationalite: Optional[str] = ''
+    nom_pays_nationalite: Optional[str] = ''
 
     # Coordonnees
     email: Optional[str] = ''
     pays: Optional[str] = ''
+    nom_pays: Optional[str] = ''
     code_postal: Optional[str] = ''
     ville: Optional[str] = ''
     lieu_dit: Optional[str] = ''

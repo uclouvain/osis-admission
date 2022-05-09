@@ -44,33 +44,7 @@ class DemandeService(interface.DomainService):
         demande_id: DemandeIdentity,
         demande_repository: IDemandeRepository,
     ) -> DemandeDTO:
-        proposition_id = PropositionIdentityTranslator.convertir_depuis_demande(demande_id)
-        demande_dto = demande_repository.get_dto(demande_id)
-        # TODO
-        return DemandeDTO(
-            uuid=proposition_id.uuid,
-            statut_cdd=demande_dto.statut_cdd,
-            statut_sic=demande_dto.statut_sic,
-            derniere_modification=demande_dto.derniere_modification,
-            admission_acceptee_le=demande_dto.admission_acceptee_le,
-            pre_admission_acceptee_le=demande_dto.pre_admission_acceptee_le,
-            admission_confirmee_le=demande_dto.admission_confirmee_le,
-            pre_admission_confirmee_le=demande_dto.pre_admission_confirmee_le,
-            profil_candidat=ProfilCandidatDTO(
-                prenom=demande_dto.profil_candidat.prenom,
-                nom=demande_dto.profil_candidat.nom,
-                genre=demande_dto.profil_candidat.genre,
-                nationalite=demande_dto.profil_candidat.nationalite,
-                email=demande_dto.profil_candidat.email,
-                pays=demande_dto.profil_candidat.pays,
-                code_postal=demande_dto.profil_candidat.code_postal,
-                ville=demande_dto.profil_candidat.ville,
-                lieu_dit=demande_dto.profil_candidat.lieu_dit,
-                rue=demande_dto.profil_candidat.rue,
-                numero_rue=demande_dto.profil_candidat.numero_rue,
-                boite_postale=demande_dto.profil_candidat.boite_postale,
-            ),
-        )
+        return demande_repository.get_dto(demande_id)
 
     @classmethod
     def initier(

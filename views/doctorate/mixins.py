@@ -28,6 +28,7 @@ from django.views.generic import TemplateView
 
 from admission.ddd.projet_doctoral.preparation.commands import GetPropositionCommand
 from admission.ddd.projet_doctoral.preparation.domain.model._enums import ChoixStatutProposition
+from admission.ddd.projet_doctoral.validation.domain.model._enums import ChoixGenre
 from admission.ddd.projet_doctoral.validation.commands import RecupererDemandeQuery
 from admission.utils import get_cached_admission_perm_obj
 from infrastructure.messages_bus import message_bus_instance
