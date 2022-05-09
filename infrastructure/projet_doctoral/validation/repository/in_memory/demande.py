@@ -42,6 +42,11 @@ class DemandeInMemoryRepository(InMemoryGenericRepository, IDemandeRepository):
     entities: List[Demande] = list()
     dtos: List[DemandeRechercheDTO] = list()
 
+    countries = {
+        'BE': 'Belgium',
+        'FR': 'France',
+    }
+
     @classmethod
     def search_dto(
         cls,
@@ -105,8 +110,10 @@ class DemandeInMemoryRepository(InMemoryGenericRepository, IDemandeRepository):
                 nom=demande.profil_candidat.nom,
                 genre=demande.profil_candidat.genre,
                 nationalite=demande.profil_candidat.nationalite,
+                nom_pays_nationalite=cls.countries.get(demande.profil_candidat.nationalite, ''),
                 email=demande.profil_candidat.email,
                 pays=demande.profil_candidat.pays,
+                nom_pays=cls.countries.get(demande.profil_candidat.pays, ''),
                 code_postal=demande.profil_candidat.code_postal,
                 ville=demande.profil_candidat.ville,
                 lieu_dit=demande.profil_candidat.lieu_dit,

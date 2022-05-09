@@ -1,5 +1,5 @@
 {% extends "admission/doctorate/details/tab_layout.html" %}
-{% load i18n static admission %}
+{% load i18n static admission enums %}
 
 {% comment "License" %}
 * OSIS stands for Open Student Information System. It's an application
@@ -29,8 +29,9 @@
     <p class="alert alert-info" role="alert">
       <i class="fa fa-info-circle" style="margin-right: 0.5em"></i>
       {% trans "The dossier has been confirmed as:" %}
-      {{ dossier.profil_candidat.nom }}, {{ dossier.profil_candidat.prenom }} ({{ dossier.profil_candidat.genre }}) -
-      {{ dossier.profil_candidat.nationalite }}
+      {{ dossier.profil_candidat.nom }}, {{ dossier.profil_candidat.prenom }}
+      ({{ dossier.profil_candidat.genre|enum_display:'ChoixGenre' }}) -
+      {{ dossier.profil_candidat.nom_pays_nationalite }}
     </p>
   {% endif %}
 {% endblock %}
