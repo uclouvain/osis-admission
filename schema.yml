@@ -2033,12 +2033,7 @@ components:
           - M
           type: string
         gender:
-          enum:
-          - ''
-          - F
-          - H
-          - X
-          type: string
+          $ref: '#/components/schemas/ChoixGenre'
         civil_state:
           $ref: '#/components/schemas/CivilState'
         id_photo:
@@ -2097,6 +2092,13 @@ components:
         - url
       - required:
         - error
+    ChoixGenre:
+      enum:
+      - ''
+      - F
+      - H
+      - X
+      type: string
     CivilState:
       enum:
       - ''
