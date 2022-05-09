@@ -23,11 +23,13 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
-
 from django.utils.translation import gettext_lazy as _
 
 from base.models.utils.utils import ChoiceEnum
+from base.models.person import Person
+
+
+ChoixGenre = ChoiceEnum('ChoixGenre', Person.GENDER_CHOICES)  # type: ignore
 
 
 class ChoixStatutCDD(ChoiceEnum):
