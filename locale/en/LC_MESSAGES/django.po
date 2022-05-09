@@ -400,6 +400,7 @@ msgstr ""
 msgid "Committee members"
 msgstr ""
 
+msgctxt "admission"
 msgid "Configure"
 msgstr ""
 
