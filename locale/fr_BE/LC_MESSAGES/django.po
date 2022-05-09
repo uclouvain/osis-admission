@@ -434,6 +434,7 @@ msgstr "Membre du comité"
 msgid "Committee members"
 msgstr "Membres du comité"
 
+msgctxt "admission"
 msgid "Configure"
 msgstr "Configurer"
 
