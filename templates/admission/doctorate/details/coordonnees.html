@@ -33,7 +33,7 @@
       {% if dossier.profil_candidat.boite_postale %}{% trans "Postal box" %} {{ dossier.profil_candidat.boite_postale }}, {% endif %}
       {% if dossier.profil_candidat.lieu_dit %}{% trans "Place" %} {{ dossier.profil_candidat.lieu_dit }}, {% endif %}
       {{ dossier.profil_candidat.code_postal }} {{ dossier.profil_candidat.ville }},
-      {{ dossier.profil_candidat.pays }}
+      {{ dossier.profil_candidat.nom_pays }}
     </p>
   {% endif %}
 {% endblock %}
