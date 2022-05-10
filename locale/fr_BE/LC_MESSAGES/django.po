@@ -1080,6 +1080,9 @@ msgstr ""
 "Merci de compléter toutes les informations requises relatives à votre "
 "adresse de contact."
 
+msgid "Please fill in at least your last or first name."
+msgstr "Merci de spécifier au-moins votre nom ou votre prénom."
+
 msgid ""
 "Please fill in the 'Previous Experience > Curriculum vitae' tab for the "
 "following year: "
@@ -1113,6 +1116,9 @@ msgstr "Merci de spécifier l'année de l'expérience."
 
 msgid "Please specify your Belgian national register number."
 msgstr "Merci de spécifier votre numéro de registre national belge."
+
+msgid "Please specify your old NOMA (registration id)."
+msgstr "Merci de spécifier votre ancien NOMA (numéro de matricule)."
 
 msgid "Post-enrolment status"
 msgstr "Statut après inscription"

@@ -95,6 +95,9 @@ class IdentificationDTO(interface.DTO):
     sexe: Optional[str]
     genre: Optional[str]
     photo_identite: List[str]
+    pays_naissance: Optional[str]
+    lieu_naissance: Optional[str]
+    etat_civil: Optional[str]
 
     carte_identite: List[str]
     passeport: List[str]
@@ -105,6 +108,9 @@ class IdentificationDTO(interface.DTO):
 
     langue_contact: Optional[str]
     email: Optional[str]
+
+    annee_derniere_inscription_ucl: Optional[int]
+    noma_derniere_inscription_ucl: Optional[str]
 
 
 @attr.dataclass(frozen=True, slots=True)

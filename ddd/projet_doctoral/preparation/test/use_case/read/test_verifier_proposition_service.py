@@ -47,6 +47,8 @@ from admission.ddd.projet_doctoral.preparation.domain.validator.exceptions impor
     ProcedureDemandeSignatureNonLanceeException,
     PropositionNonApprouveeParMembresCAException,
     PropositionNonApprouveeParPromoteurException,
+    NomEtPrenomNonSpecifiesException,
+    SpecifierNOMASiDejaInscritException,
 )
 from admission.ddd.projet_doctoral.preparation.test.factory.groupe_de_supervision import (
     _SignatureMembreCAFactory,
@@ -117,7 +119,7 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
             self.assertIsInstance(context.exception.exceptions.pop(), CandidatNonTrouveException)
 
     def test_should_retourner_erreur_si_identification_non_completee(self):
-        with mock.patch.multiple(self.current_candidat, prenom=''):
+        with mock.patch.multiple(self.current_candidat, pays_naissance=''):
             with self.assertRaises(MultipleBusinessExceptions) as context:
                 self.message_bus.invoke(self.cmd)
             self.assertIsInstance(context.exception.exceptions.pop(), IdentificationNonCompleteeException)
@@ -142,6 +144,26 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
             with self.assertRaises(MultipleBusinessExceptions) as context:
                 self.message_bus.invoke(self.cmd)
             self.assertIsInstance(context.exception.exceptions.pop(), NumeroIdentiteBelgeNonSpecifieException)
+
+    def test_should_retourner_erreur_si_nom_et_prenom_non_renseignes(self):
+        with mock.patch.multiple(
+            self.current_candidat,
+            nom='',
+            prenom='',
+        ):
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                self.message_bus.invoke(self.cmd)
+            self.assertIsInstance(context.exception.exceptions.pop(), NomEtPrenomNonSpecifiesException)
+
+    def test_should_retourner_erreur_si_noma_non_renseigne_si_precedente_inscription(self):
+        with mock.patch.multiple(
+            self.current_candidat,
+            annee_derniere_inscription_ucl=2020,
+            noma_derniere_inscription_ucl='',
+        ):
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                self.message_bus.invoke(self.cmd)
+            self.assertIsInstance(context.exception.exceptions.pop(), SpecifierNOMASiDejaInscritException)
 
     def test_should_retourner_erreur_si_date_annee_naissance_non_renseignees(self):
         with mock.patch.multiple(
@@ -300,7 +322,11 @@ class TestVerifierPropositionServiceCurriculumYears(TestVerifierPropositionServi
         self.candidat_translator.diplomes_etudes_secondaires_etrangers = []
 
     def test_should_retourner_erreur_si_dernieres_annees_curriculum_non_saisies_avec_ancienne_inscription_ucl(self):
-        with mock.patch.object(self.current_candidat, 'annee_derniere_inscription_ucl', 2019):
+        with mock.patch.multiple(
+            self.current_candidat,
+            annee_derniere_inscription_ucl=2019,
+            noma_derniere_inscription_ucl='01234567',
+        ):
             with self.assertRaises(MultipleBusinessExceptions) as context:
                 self.message_bus.invoke(self.cmd)
 
@@ -313,7 +339,11 @@ class TestVerifierPropositionServiceCurriculumYears(TestVerifierPropositionServi
             DiplomeEtudeSecondaire(personne=self.current_candidat.matricule, annee=2017)
         )
 
-        with mock.patch.object(self.current_candidat, 'annee_derniere_inscription_ucl', 2018):
+        with mock.patch.multiple(
+            self.current_candidat,
+            annee_derniere_inscription_ucl=2018,
+            noma_derniere_inscription_ucl='01234567',
+        ):
             with self.assertRaises(MultipleBusinessExceptions) as context:
                 self.message_bus.invoke(self.cmd)
 
@@ -325,6 +355,10 @@ class TestVerifierPropositionServiceCurriculumYears(TestVerifierPropositionServi
         self.candidat_translator.diplomes_etudes_secondaires_belges = []
 
     def test_should_verification_etre_ok_si_aucune_annee_curriculum_a_saisir(self):
-        with mock.patch.object(self.current_candidat, 'annee_derniere_inscription_ucl', 2020):
+        with mock.patch.multiple(
+            self.current_candidat,
+            annee_derniere_inscription_ucl=2020,
+            noma_derniere_inscription_ucl='01234567',
+        ):
             proposition_id = self.message_bus.invoke(self.cmd)
             self.assertEqual(proposition_id.uuid, self.proposition.entity_id.uuid)

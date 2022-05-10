@@ -50,6 +50,9 @@ class ProfilCandidat(interface.DomainService):
                 sexe=identification.sexe,
                 nom=identification.nom,
                 genre=identification.genre,
+                pays_naissance=identification.pays_naissance,
+                lieu_naissance=identification.lieu_naissance,
+                etat_civil=identification.etat_civil,
             ),
             date_naissance=identification.date_naissance,
             annee_naissance=identification.annee_naissance,
@@ -59,6 +62,8 @@ class ProfilCandidat(interface.DomainService):
             numero_passeport=identification.numero_passeport,
             passeport=identification.passeport,
             date_expiration_passeport=identification.date_expiration_passeport,
+            noma_derniere_inscription_ucl=identification.noma_derniere_inscription_ucl,
+            annee_derniere_inscription_ucl=identification.annee_derniere_inscription_ucl,
         ).validate()
 
     @classmethod

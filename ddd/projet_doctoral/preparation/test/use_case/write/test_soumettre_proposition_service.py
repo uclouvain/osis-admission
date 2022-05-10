@@ -112,7 +112,7 @@ class TestVerifierPropositionServiceCommun(SimpleTestCase):
         self.assertEqual(updated_proposition.statut, ChoixStatutProposition.SUBMITTED)
 
     def test_should_retourner_erreur_si_identification_non_completee(self):
-        with mock.patch.multiple(self.current_candidat, prenom=''):
+        with mock.patch.multiple(self.current_candidat, pays_naissance=''):
             proposition = PropositionAdmissionSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory()
 
             with self.assertRaises(MultipleBusinessExceptions) as context:

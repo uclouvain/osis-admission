@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Admission API
-  version: 1.0.21
+  version: 1.0.22
   description: This API delivers data for the Admission project.
   contact:
     name: UCLouvain - OSIS
@@ -2008,7 +2008,7 @@ components:
         birth_year:
           type: integer
           maximum: 2999
-          minimum: 1000
+          minimum: 1900
           nullable: true
           pattern: ^[1-2]\d{3}$
         birth_country:
@@ -2070,6 +2070,9 @@ components:
         last_registration_year:
           type: integer
           nullable: true
+        last_registration_id:
+          type: string
+          maxLength: 10
     ActionLink:
       type: object
       properties:
