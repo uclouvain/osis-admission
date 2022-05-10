@@ -35,6 +35,7 @@ from admission.ddd.projet_doctoral.preparation.dtos import (
     CurriculumDTO,
     IdentificationDTO,
 )
+from base.models.enums.civil_state import CivilState
 
 
 @dataclass
@@ -54,7 +55,10 @@ class ProfilCandidat:
     photo_identite: List[str]
     curriculum: List[str]
     annee_derniere_inscription_ucl: Optional[int]
+    noma_derniere_inscription_ucl: Optional[str]
     email: Optional[str]
+    pays_naissance: Optional[str]
+    etat_civil: Optional[str]
 
     # Pièces d'identité
     carte_identite: List[str]
@@ -134,7 +138,10 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
             date_expiration_passeport=datetime.date(2022, 2, 10),
             curriculum=['uuid14'],
             annee_derniere_inscription_ucl=None,
+            noma_derniere_inscription_ucl='',
             email='john.doe@ucl.be',
+            pays_naissance='BE',
+            etat_civil=CivilState.MARRIED.name,
         ),
     ]
     adresses_candidats = [
@@ -204,6 +211,11 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 numero_passeport=candidate.numero_passeport,
                 date_expiration_passeport=candidate.date_expiration_passeport,
                 email=candidate.email,
+                pays_naissance=candidate.pays_naissance,
+                lieu_naissance=candidate.lieu_naissance,
+                etat_civil=candidate.etat_civil,
+                annee_derniere_inscription_ucl=candidate.annee_derniere_inscription_ucl,
+                noma_derniere_inscription_ucl=candidate.noma_derniere_inscription_ucl,
             )
         except StopIteration:  # pragma: no cover
             raise CandidatNonTrouveException

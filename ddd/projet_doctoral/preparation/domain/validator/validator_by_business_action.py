@@ -218,6 +218,9 @@ class IdentificationValidatorList(TwoStepsMultipleBusinessExceptionListValidator
     passeport: List[str]
     date_expiration_passeport: Optional[datetime.date]
 
+    noma_derniere_inscription_ucl: Optional[str]
+    annee_derniere_inscription_ucl: Optional[int]
+
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
 
@@ -225,6 +228,10 @@ class IdentificationValidatorList(TwoStepsMultipleBusinessExceptionListValidator
         return [
             ShouldSignaletiqueCandidatEtreCompletee(
                 signaletique=self.identite_signaletique,
+            ),
+            ShouldCandidatSpecifierNomOuPrenom(
+                nom=self.identite_signaletique.nom,
+                prenom=self.identite_signaletique.prenom,
             ),
             ShouldCandidatSpecifierNumeroIdentite(
                 numero_registre_national_belge=self.numero_registre_national_belge,
@@ -248,6 +255,10 @@ class IdentificationValidatorList(TwoStepsMultipleBusinessExceptionListValidator
                 numero_registre_national_belge=self.numero_registre_national_belge,
                 numero_carte_identite=self.numero_carte_identite,
                 carte_identite=self.carte_identite,
+            ),
+            ShouldCandidatSpecifierNOMASiDejaInscrit(
+                noma_derniere_inscription_ucl=self.noma_derniere_inscription_ucl,
+                annee_derniere_inscription_ucl=self.annee_derniere_inscription_ucl,
             ),
         ]
 

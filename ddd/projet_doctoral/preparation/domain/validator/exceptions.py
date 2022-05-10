@@ -341,3 +341,19 @@ class InstitutTheseObligatoireException(BusinessException):
     def __init__(self, **kwargs):
         message = _("Thesis institute must be set.")
         super().__init__(message, **kwargs)
+
+
+class NomEtPrenomNonSpecifiesException(BusinessException):
+    status_code = "PROPOSITION-40"
+
+    def __init__(self, **kwargs):
+        message = _("Please fill in at least your last or first name.")
+        super().__init__(message, **kwargs)
+
+
+class SpecifierNOMASiDejaInscritException(BusinessException):
+    status_code = "PROPOSITION-41"
+
+    def __init__(self, **kwargs):
+        message = _("Please specify your old NOMA (registration id).")
+        super().__init__(message, **kwargs)

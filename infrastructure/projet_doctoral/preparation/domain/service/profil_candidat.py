@@ -65,6 +65,11 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
             numero_passeport=person.passport_number,
             date_expiration_passeport=person.passport_expiration_date,
             email=person.email,
+            pays_naissance=person.birth_country,
+            lieu_naissance=person.birth_place,
+            etat_civil=person.civil_state,
+            annee_derniere_inscription_ucl=person.last_registration_year,
+            noma_derniere_inscription_ucl=person.last_registration_id,
         )
 
     @classmethod

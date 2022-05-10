@@ -993,6 +993,9 @@ msgid ""
 "Please fill in all the required information related to your contact address."
 msgstr ""
 
+msgid "Please fill in at least your last or first name."
+msgstr ""
+
 msgid ""
 "Please fill in the 'Previous Experience > Curriculum vitae' tab for the "
 "following year: "
@@ -1021,6 +1024,9 @@ msgid "Please specify the experience's year."
 msgstr ""
 
 msgid "Please specify your Belgian national register number."
+msgstr ""
+
+msgid "Please specify your old NOMA (registration id)."
 msgstr ""
 
 msgid "Post-enrolment status"
