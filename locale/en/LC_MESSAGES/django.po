@@ -170,6 +170,9 @@ msgstr "Already a member of the supervisory panel."
 msgid "Already a promoter."
 msgstr ""
 
+msgid "Archived record when signatures were sent"
+msgstr ""
+
 msgid "Author"
 msgstr ""
 
@@ -362,6 +365,9 @@ msgstr ""
 msgid "Candidates"
 msgstr ""
 
+msgid "Canvas"
+msgstr ""
+
 msgid "Carbon-copy the CA members"
 msgstr ""
 
@@ -415,6 +421,9 @@ msgstr ""
 msgid "Contact details"
 msgstr ""
 
+msgid "Contact language"
+msgstr ""
+
 msgid "Cotutelle"
 msgstr ""
 
@@ -425,6 +434,9 @@ msgid "Cotutelle request document"
 msgstr ""
 
 msgid "Country"
+msgstr ""
+
+msgid "Country of citizenship"
 msgstr ""
 
 msgid "Create new doctorate admission"
@@ -446,6 +458,12 @@ msgid "Custom mail template saved successfully."
 msgstr ""
 
 msgid "Custom mail templates"
+msgstr ""
+
+msgid "Data related to the thesis"
+msgstr ""
+
+msgid "Date of birth"
 msgstr ""
 
 msgid "Date of confirmation"
@@ -485,6 +503,9 @@ msgid "Delete?"
 msgstr ""
 
 msgid "Description"
+msgstr ""
+
+msgid "Diploma"
 msgstr ""
 
 msgid "Doctoral project"
@@ -532,6 +553,9 @@ msgstr ""
 msgid "Edit"
 msgstr ""
 
+msgid "Email"
+msgstr ""
+
 msgid "English"
 msgstr ""
 
@@ -542,6 +566,13 @@ msgid "Example"
 msgstr ""
 
 msgid "Export"
+msgstr ""
+
+#, python-format
+msgid "Exporting %(reference)s to PDF"
+msgstr ""
+
+msgid "Exporting the admission information to PDF"
 msgstr ""
 
 msgid "Extension request not completed."
@@ -572,6 +603,9 @@ msgid "Failure of the test"
 msgstr ""
 
 msgid "Financing type"
+msgstr ""
+
+msgid "First name"
 msgstr ""
 
 msgid "Fondation Mont Godinne"
@@ -630,6 +664,12 @@ msgid ""
 "specified."
 msgstr ""
 
+msgid "Institute email"
+msgstr ""
+
+msgid "Institute of the thesis"
+msgstr ""
+
 msgid "Institution"
 msgstr ""
 
@@ -670,6 +710,9 @@ msgid "Last name / First name / E-mail / NOMA"
 msgstr ""
 
 msgid "Last name / First name / Global id"
+msgstr ""
+
+msgid "Legal residence"
 msgstr ""
 
 msgid "Link to the admission (back-office)"
@@ -734,7 +777,6 @@ msgstr ""
 
 msgid "Mail sent to promoters when a member of the supervision panel refuses"
 msgstr ""
-""
 
 msgid ""
 "Mail sent to the CDD to inform them that a new application has been submitted"
@@ -821,6 +863,9 @@ msgstr ""
 msgid "Message subject"
 msgstr ""
 
+msgid "Mobile phone"
+msgstr ""
+
 msgid "Modified"
 msgstr ""
 
@@ -872,6 +917,9 @@ msgstr ""
 msgid "OTHER"
 msgstr "Other"
 
+msgid "Office"
+msgstr ""
+
 msgid "Only for FNRS, FRIA and FRESH scholarship students"
 msgstr ""
 
@@ -889,6 +937,9 @@ msgstr "Partially"
 
 msgid "PASSED_CONFIRMATION"
 msgstr "Passed confirmation"
+
+msgid "PDF Export"
+msgstr ""
 
 msgid "PDF file"
 msgstr ""
@@ -1162,10 +1213,19 @@ msgstr ""
 msgid "Send the message"
 msgstr ""
 
+msgid "Sex"
+msgstr ""
+
 msgid "Status changes"
 msgstr ""
 
 msgid "Status:"
+msgstr ""
+
+msgid "Street"
+msgstr ""
+
+msgid "Street number"
 msgstr ""
 
 msgid "Subject"
@@ -1181,6 +1241,9 @@ msgid "Supervision"
 msgstr ""
 
 msgid "Supervision group not found."
+msgstr ""
+
+msgid "Supervisory panel"
 msgstr ""
 
 msgid "TO_BE_COMPLETED"
@@ -1306,6 +1369,9 @@ msgstr ""
 msgid "Title"
 msgstr ""
 
+msgid "Title of diploma or training"
+msgstr ""
+
 msgid "Title of the doctorate"
 msgstr ""
 
@@ -1402,6 +1468,9 @@ msgid "You must be the request promoter to access this admission"
 msgstr ""
 
 msgid "You've reached the maximum authorized propositions."
+msgstr ""
+
+msgid "Zip code"
 msgstr ""
 
 msgid "actions"

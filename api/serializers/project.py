@@ -217,6 +217,7 @@ class PropositionDTOSerializer(IncludedFieldsMixin, DTOSerializer):
             'institution',
             'date_soutenance',
             'raison_non_soutenue',
+            'fiche_archive_signatures_envoyees',
             'statut',
             'links',
             'erreurs',

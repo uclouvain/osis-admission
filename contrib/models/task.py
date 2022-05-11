@@ -23,21 +23,34 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import Union
+from django.db import models
 
-from admission.ddd.projet_doctoral.preparation.domain.model._membre_CA import MembreCAIdentity
-from admission.ddd.projet_doctoral.preparation.domain.model._promoteur import PromoteurIdentity
-from admission.ddd.projet_doctoral.preparation.domain.model.proposition import Proposition
-from osis_common.ddd import interface
+from django.utils.translation import gettext_lazy as _
 
 
-class DeverrouillerProjetDoctoral(interface.DomainService):
-    @classmethod
-    def deverrouiller_apres_refus(
-        cls,
-        proposition: Proposition,
-        signataire: Union[PromoteurIdentity, MembreCAIdentity],
-    ) -> None:
-        if isinstance(signataire, PromoteurIdentity):
-            proposition.deverrouiller_projet_doctoral()
-            proposition.reinitialiser_archive()
+def admission_export_path(task: 'AdmissionTask', filename: str):
+    """Return the file upload directory path."""
+    return 'admission/{}/{}/exports/{}'.format(
+        task.admission.candidate.uuid,
+        task.admission.uuid,
+        filename,
+    )
+
+
+class AdmissionTask(models.Model):
+    class TaskType(models.TextChoices):
+        ARCHIVE = 'ARCHIVE', _('PDF Export')
+        CANVAS = 'CANVAS', _('Canvas')
+
+    task = models.ForeignKey(
+        'osis_async.AsyncTask',
+        on_delete=models.CASCADE,
+    )
+    admission = models.ForeignKey(
+        'admission.DoctorateAdmission',
+        on_delete=models.CASCADE,
+    )
+    type = models.CharField(
+        choices=TaskType.choices,
+        max_length=20,
+    )
