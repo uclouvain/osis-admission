@@ -151,6 +151,7 @@ class CddDoctorateAdmissionConfirmationSuccessDecisionViewTestCase(TestCase):
         cls.confirm_remote_upload_patcher.stop()
         cls.get_remote_metadata_patcher.stop()
         cls.get_remote_token_patcher.stop()
+        super().tearDownClass()
 
     def test_confirmation_success_decision_cdd_user_with_unknown_doctorate(self):
         self.client.force_login(user=self.cdd_person.user)
@@ -313,6 +314,7 @@ class CddDoctorateAdmissionConfirmationFailureDecisionViewTestCase(TestCase):
         cls.confirm_remote_upload_patcher.stop()
         cls.get_remote_metadata_patcher.stop()
         cls.get_remote_token_patcher.stop()
+        super().tearDownClass()
 
     def test_get_confirmation_failure_decision_cdd_user_with_unknown_doctorate(self):
         self.client.force_login(user=self.cdd_person.user)
@@ -574,6 +576,7 @@ class CddDoctorateAdmissionConfirmationRetakingDecisionViewTestCase(TestCase):
         cls.confirm_remote_upload_patcher.stop()
         cls.get_remote_metadata_patcher.stop()
         cls.get_remote_token_patcher.stop()
+        super().tearDownClass()
 
     def test_get_confirmation_retaking_decision_cdd_user_with_unknown_doctorate(self):
         self.client.force_login(user=self.cdd_person.user)

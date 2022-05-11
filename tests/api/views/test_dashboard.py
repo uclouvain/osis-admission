@@ -34,7 +34,7 @@ from base.tests.factories.person import PersonFactory
 
 class DashboardTestCase(APITestCase):
     @classmethod
-    def setUpTestData(cls) -> None:
+    def setUpTestData(cls):
         cls.url = resolve_url('admission_api_v1:dashboard')
         promoter = PromoterFactory()
         cls.promoter_user = promoter.person.user

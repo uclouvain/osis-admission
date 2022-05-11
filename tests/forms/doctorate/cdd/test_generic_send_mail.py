@@ -46,9 +46,8 @@ class SelectCddEmailTemplateFormTestCase(TestCase):
     cdd_mail_template: Optional[CddMailTemplateFactory]
 
     @classmethod
-    def setUpClass(cls) -> None:
+    def setUpTestData(cls):
         cls.identifier = ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_FAILURE_STUDENT
-        super().setUpClass()
 
         cls.first_doctoral_commission = EntityFactory()
         EntityVersionFactory(entity=cls.first_doctoral_commission, acronym=ENTITY_CDE)

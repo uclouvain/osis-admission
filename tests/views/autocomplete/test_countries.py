@@ -35,8 +35,7 @@ from reference.tests.factories.country import CountryFactory
 
 class CountriesAutocompleteTestCase(TestCase):
     @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
+    def setUpTestData(cls):
         cls.factory = RequestFactory()
 
         # Mocked data

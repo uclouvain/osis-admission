@@ -51,9 +51,7 @@ from base.tests.factories.entity_version import EntityVersionFactory
 @override_settings(OSIS_DOCUMENT_BASE_URL='http://dummyurl')
 class DoctorateAdmissionExtensionRequestDetailViewTestCase(TestCase):
     @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-
+    def setUpTestData(cls):
         # Create some academic years
         academic_years = [AcademicYearFactory(year=year) for year in [2021, 2022]]
 

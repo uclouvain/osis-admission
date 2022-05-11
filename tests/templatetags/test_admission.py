@@ -66,8 +66,7 @@ urlpatterns = [
 @override_settings(ROOT_URLCONF=__name__)
 class AdmissionSortableHeaderDivTestCase(TestCase):
     @classmethod
-    def setUpClass(cls) -> None:
-        super().setUpClass()
+    def setUpTestData(cls):
         cls.factory = RequestFactory()
         cls.field_name = 'my_field'
         cls.field_label = 'My field label'
@@ -157,8 +156,7 @@ class AdmissionSortableHeaderDivTestCase(TestCase):
 
 class AdmissionTabsTestCase(TestCase):
     @classmethod
-    def setUpClass(cls) -> None:
-        super().setUpClass()
+    def setUpTestData(cls):
         cls.tab_tree = {
             Tab('t1', 'tab 1'): [
                 Tab('t11', 'tab 11'),

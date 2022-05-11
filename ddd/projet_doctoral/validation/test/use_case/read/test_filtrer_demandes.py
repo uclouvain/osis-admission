@@ -59,6 +59,8 @@ class TestFiltrerDemandes(SimpleTestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
+        super().setUpClass()
+
         cls.entites_propositions = [
             PropositionAdmissionSC3DPMinimaleFactory(),
             PropositionPreAdmissionSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory(),
@@ -74,14 +76,13 @@ class TestFiltrerDemandes(SimpleTestCase):
         ]
         cls.demande_patcher = patch.object(DemandeInMemoryRepository, 'entities', cls.entites_demandes)
         cls.demande_patcher.start()
+        cls.message_bus = message_bus_in_memory_instance
 
     @classmethod
     def tearDownClass(cls):
         cls.proposition_patcher.stop()
         cls.demande_patcher.stop()
-
-    def setUp(self) -> None:
-        self.message_bus = message_bus_in_memory_instance
+        super().tearDownClass()
 
     def test_should_rechercher_sans_parametre(self):
         results: List[DemandeRechercheDTO] = self.message_bus.invoke(FiltrerDemandesQuery())
