@@ -32,7 +32,7 @@ from django.utils.functional import lazy
 from django.utils.translation import get_language, gettext_lazy as _
 
 from admission.auth.roles.cdd_manager import CddManager
-from admission.contrib.models import SupervisionActor
+from admission.contrib.models import AdmissionTask, SupervisionActor
 from admission.contrib.models.doctorate import PropositionProxy
 from admission.contrib.models.enums.actor_type import ActorType
 from admission.ddd.projet_doctoral.preparation.domain.model._membre_CA import MembreCAIdentity
@@ -54,6 +54,7 @@ from admission.mail_templates import (
     ADMISSION_EMAIL_SUBMISSION_MEMBER,
 )
 from base.models.person import Person
+from osis_async.models import AsyncTask
 from osis_mail_template import generate_email
 from osis_notification.contrib.handlers import EmailNotificationHandler, WebNotificationHandler
 from osis_notification.contrib.notification import WebNotification
@@ -87,6 +88,19 @@ class Notification(INotification):
     @classmethod
     def envoyer_signatures(cls, proposition: Proposition, groupe_de_supervision: GroupeDeSupervision) -> None:
         admission = PropositionProxy.objects.get(uuid=proposition.entity_id.uuid)
+
+        # Création de la tâche de génération du document
+        task = AsyncTask.objects.create(
+            name=_("Exporting %(reference)s to PDF") % {'reference': admission.reference},
+            description=_("Exporting the admission information to PDF"),
+            person=admission.candidate,
+            time_to_live=5,
+        )
+        AdmissionTask.objects.create(
+            task=task,
+            admission=admission,
+            type=AdmissionTask.TaskType.ARCHIVE.name,
+        )
 
         # Tokens communs
         candidat = Person.objects.get(global_id=proposition.matricule_candidat)

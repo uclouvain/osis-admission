@@ -242,6 +242,12 @@ class DoctorateAdmission(BaseAdmission):
         default=dict,
         encoder=DjangoJSONEncoder,
     )
+    archived_record_signatures_sent = FileField(
+        verbose_name=_("Archived record when signatures were sent"),
+        max_files=1,
+        upload_to=admission_directory_path,
+        editable=False,
+    )
 
     status = models.CharField(
         choices=ChoixStatutProposition.choices(),

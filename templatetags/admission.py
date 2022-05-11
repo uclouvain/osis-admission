@@ -23,6 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import re
 from dataclasses import dataclass
 
 from django import template
@@ -202,3 +203,13 @@ def field_data(name, data=None, css_class=None, hide_empty=False, translate_data
         'css_class': css_class,
         'hide_empty': hide_empty,
     }
+
+
+@register.filter
+def phone_spaced(phone, with_optional_zero=False):
+    if not phone:
+        return ""
+    # Taken from https://github.com/daviddrysdale/python-phonenumbers/blob/dev/python/phonenumbers/data/region_BE.py#L14
+    if with_optional_zero and phone[0] == "0":
+        return "(0)" + re.sub('(\\d{2})(\\d{2})(\\d{2})(\\d{2})', '\\1 \\2 \\3 \\4', phone[1:])
+    return re.sub('(\\d{3})(\\d{2})(\\d{2})(\\d{2})', '\\1 \\2 \\3 \\4', phone)

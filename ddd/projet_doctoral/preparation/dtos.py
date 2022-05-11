@@ -65,6 +65,7 @@ class PropositionDTO(interface.DTO):
     date_soutenance: Optional[datetime.date]
     raison_non_soutenue: Optional[str]
     statut: str
+    fiche_archive_signatures_envoyees: List[str]
     prenom_candidat: str
     nom_candidat: str
     nationalite_candidat: str

@@ -213,6 +213,7 @@ class PropositionRepository(IPropositionRepository):
                 'phd_already_done_institution': entity.experience_precedente_recherche.institution,
                 'phd_already_done_defense_date': entity.experience_precedente_recherche.date_soutenance,
                 'phd_already_done_no_defense_reason': entity.experience_precedente_recherche.raison_non_soutenue,
+                'archived_record_signatures_sent': entity.fiche_archive_signatures_envoyees,
             },
         )
         Candidate.objects.get_or_create(person=candidate)
@@ -333,5 +334,6 @@ class PropositionRepository(IPropositionRepository):
                 'name' if get_language() == settings.LANGUAGE_CODE else 'name_en',
             ),
             modifiee_le=admission.modified,
+            fiche_archive_signatures_envoyees=admission.archived_record_signatures_sent,
             erreurs=admission.detailed_status or [],
         )

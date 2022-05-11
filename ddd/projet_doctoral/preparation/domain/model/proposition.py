@@ -86,6 +86,7 @@ class Proposition(interface.RootEntity):
     experience_precedente_recherche: 'ExperiencePrecedenteRecherche' = aucune_experience_precedente_recherche
     creee_le: Optional[datetime.datetime] = None
     modifiee_le: Optional[datetime.datetime] = None
+    fiche_archive_signatures_envoyees: List[str] = attr.Factory(list)
 
     @property
     def sigle_formation(self):
@@ -253,6 +254,9 @@ class Proposition(interface.RootEntity):
     def verifier(self):
         """Vérification complète de la proposition"""
         SoumettrePropositionValidatorList(proposition=self).validate()
+
+    def reinitialiser_archive(self):
+        self.fiche_archive_signatures_envoyees = []
 
     def verrouiller_proposition_pour_signature(self):
         self.statut = ChoixStatutProposition.SIGNING_IN_PROGRESS

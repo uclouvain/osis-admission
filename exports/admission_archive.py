@@ -23,21 +23,27 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import Union
 
-from admission.ddd.projet_doctoral.preparation.domain.model._membre_CA import MembreCAIdentity
-from admission.ddd.projet_doctoral.preparation.domain.model._promoteur import PromoteurIdentity
-from admission.ddd.projet_doctoral.preparation.domain.model.proposition import Proposition
-from osis_common.ddd import interface
+from django.utils import translation
+
+from admission.exports.utils import admission_generate_pdf
+from admission.contrib.models import AdmissionTask
+from base.models.enums.person_address_type import PersonAddressType
+from base.models.person_address import get_by_label
 
 
-class DeverrouillerProjetDoctoral(interface.DomainService):
-    @classmethod
-    def deverrouiller_apres_refus(
-        cls,
-        proposition: Proposition,
-        signataire: Union[PromoteurIdentity, MembreCAIdentity],
-    ) -> None:
-        if isinstance(signataire, PromoteurIdentity):
-            proposition.deverrouiller_projet_doctoral()
-            proposition.reinitialiser_archive()
+def admission_pdf_archive(task_uuid, language=None):
+    admission_task = AdmissionTask.objects.select_related('task', 'admission__candidate').get(task__uuid=task_uuid)
+
+    with translation.override(language=language or admission_task.admission.candidate.language):
+        contact_address = get_by_label(admission_task.admission.candidate, PersonAddressType.CONTACT.name)
+        residential_address = get_by_label(admission_task.admission.candidate, PersonAddressType.RESIDENTIAL.name)
+        admission_generate_pdf(
+            admission_task.admission,
+            template='admission/exports/pdf_archive.html',
+            filename='pdf_archive.pdf',
+            context={
+                "contact_address": contact_address,
+                "residential_address": residential_address,
+            },
+        )

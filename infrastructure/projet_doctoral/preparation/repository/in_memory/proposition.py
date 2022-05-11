@@ -218,6 +218,7 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
             raison_non_soutenue=proposition.experience_precedente_recherche.raison_non_soutenue,
             statut=proposition.statut.name,
             creee_le=proposition.creee_le,
+            fiche_archive_signatures_envoyees=proposition.fiche_archive_signatures_envoyees,
             intitule_secteur_formation=doctorat.intitule_secteur,
             nom_candidat=candidat.nom,
             prenom_candidat=candidat.prenom,

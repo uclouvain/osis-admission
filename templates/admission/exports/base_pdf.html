@@ -1,0 +1,95 @@
+{% load static i18n admission %}<!doctype html>{% get_current_language as LANGUAGE_CODE %}
+<html lang="{{ LANGUAGE_CODE }}">
+<head>
+  <meta charset="UTF-8">
+  <title>{% block title %}{{ admission.reference }}{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+  <style>
+      @page {
+          size: A4 portrait;
+          margin: 150px 1cm 120px 1cm;
+          padding: 1em 0;
+
+          @top-left {
+              content: element(header);
+              width: 100%;
+              height: 150px;
+              border-bottom: solid 1px #ccc;
+          }
+
+          @bottom-left {
+              content: element(footer);
+              width: 100%;
+              height: 120px;
+              border-top: solid 1px #ccc;
+          }
+      }
+
+      @media print {
+
+          header {
+              position: running(header);
+          }
+
+          header, header *, footer, footer * {
+              color: #000066 !important;
+          }
+
+          header img {
+              height: 1.5cm;
+              width: auto;
+          }
+
+          header img:first-child {
+              margin-left: -1em;
+          }
+
+          header img:last-child {
+              float: right;
+          }
+
+          footer {
+              position: running(footer);
+              padding-bottom: 1em;
+              padding-left: 2.5em;
+              background: url("{% static "img/l-background.png" %}") left 70% no-repeat !important;
+          }
+
+          body {
+              font-family: Calibri, Arial, sans-serif;
+              font-size: 11pt;
+          }
+      }
+  </style>
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+{% with cdd=admission.doctorate.management_entity cdd_version=admission.doctorate.management_entity.most_recent_entity_version %}
+  <header>
+    {% block header %}
+      <div>
+        <img src="{% static 'img/logo_uclouvain.png' %}"/>
+        <img src="{% static 'img/valo_doc_louvain.png' %}"/>
+      </div>
+      <p>
+        <strong>{{ cdd_version.title }}</strong>
+        {% if admission.proximity_commission %}
+          <br/>
+          <strong>{{ admission.get_proximity_commission_display }}</strong>
+        {% endif %}
+      </p>
+    {% endblock %}
+  </header>
+  <footer>
+    {% block footer %}
+      <p>
+        <strong>LOUVAIN-LA-NEUVE</strong> | BRUXELLES | MONS | TOURNAI | CHARLEROI | NAMUR<br/>
+        {{ cdd.location }} {{ cdd.postal_code }} {{ cdd.city }}, Belgique<br/>
+        Tél: +32 {{ cdd.phone|phone_spaced:True }} www.uclouvain.be
+      </p>
+    {% endblock %}
+  </footer>
+  {% block content %}{% endblock %}
+{% endwith %}
+</body>
+</html>

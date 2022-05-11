@@ -198,6 +198,9 @@ msgstr "Déjà membre du comité d'accompagnement"
 msgid "Already a promoter."
 msgstr "Déjà promoteur"
 
+msgid "Archived record when signatures were sent"
+msgstr "Fiche archivée lors de l'envoi des signatures"
+
 msgid "Author"
 msgstr "Auteur"
 
@@ -393,6 +396,9 @@ msgstr "Candidat :"
 msgid "Candidates"
 msgstr "Candidats"
 
+msgid "Canvas"
+msgstr "Canvas"
+
 msgid "Carbon-copy the CA members"
 msgstr "Mettre en copie les membres de groupe de supervision"
 
@@ -446,6 +452,9 @@ msgstr "Épreuve de confirmation non trouvée."
 msgid "Contact details"
 msgstr "Coordonnées"
 
+msgid "Contact language"
+msgstr "Langue de contact"
+
 msgid "Cotutelle"
 msgstr "Cotutelle"
 
@@ -457,6 +466,9 @@ msgstr "Demande d'ouverture de cotutelle"
 
 msgid "Country"
 msgstr "Pays"
+
+msgid "Country of citizenship"
+msgstr "Pays de nationalité"
 
 msgid "Create new doctorate admission"
 msgstr "Créer une nouvelle admission en doctorat"
@@ -478,6 +490,12 @@ msgstr "Template d'email personnalisé enregistré avec succès"
 
 msgid "Custom mail templates"
 msgstr "Templates d'email personnalisé"
+
+msgid "Data related to the thesis"
+msgstr "Données relatives à la thèse"
+
+msgid "Date of birth"
+msgstr "Date de naissance"
 
 msgid "Date of confirmation"
 msgstr "Date de l'épreuve de confirmation"
@@ -517,6 +535,9 @@ msgstr "Supprimer ?"
 
 msgid "Description"
 msgstr "Description"
+
+msgid "Diploma"
+msgstr "Diplôme"
 
 msgid "Doctoral project"
 msgstr "Projet doctoral"
@@ -563,6 +584,9 @@ msgstr "ERC - European Research Council"
 msgid "Edit"
 msgstr "Modifier"
 
+msgid "Email"
+msgstr "Email"
+
 msgid "English"
 msgstr "Anglais"
 
@@ -574,6 +598,13 @@ msgstr "Exemple"
 
 msgid "Export"
 msgstr "Exporter"
+
+#, python-format
+msgid "Exporting %(reference)s to PDF"
+msgstr "Export de %(reference)s en PDF"
+
+msgid "Exporting the admission information to PDF"
+msgstr "Export des information de la demande d'inscription en PDF"
 
 msgid "Extension request not completed."
 msgstr "Demande de prolongation non complète."
@@ -604,6 +635,9 @@ msgstr "Échec de l'épreuve"
 
 msgid "Financing type"
 msgstr "Type de financement"
+
+msgid "First name"
+msgstr "Prénom"
 
 msgid "Fondation Mont Godinne"
 msgstr "Fondation Mont Godinne"
@@ -665,6 +699,12 @@ msgstr ""
 "Action impossible : veuillez-vous assurer que la date et le procès-verbal de "
 "l'épreuve ont bien été complétés."
 
+msgid "Institute email"
+msgstr "Email de l'institut"
+
+msgid "Institute of the thesis"
+msgstr "Institut de la thèse"
+
 msgid "Institution"
 msgstr "Institution"
 
@@ -708,6 +748,9 @@ msgstr "Nom / Prénom / E-mail / NOMA"
 
 msgid "Last name / First name / Global id"
 msgstr "Nom / Prénom / Identifiant global"
+
+msgid "Legal residence"
+msgstr "Résidence légale"
 
 msgid "Link to the admission (back-office)"
 msgstr "Lien vers l'admission (back-office)"
@@ -896,6 +939,9 @@ msgstr "Message envoyé avec succès"
 msgid "Message subject"
 msgstr "Sujet du message"
 
+msgid "Mobile phone"
+msgstr "Téléphone mobile (GSM)"
+
 msgid "Modified"
 msgstr "Modifée"
 
@@ -947,6 +993,9 @@ msgstr "Non spécifié(e)"
 msgid "OTHER"
 msgstr "Autre"
 
+msgid "Office"
+msgstr "Bureau"
+
 msgid "Only for FNRS, FRIA and FRESH scholarship students"
 msgstr "Destinée uniquement aux boursiers FNRS, FRIA, FRESH"
 
@@ -964,6 +1013,9 @@ msgstr "Partiel"
 
 msgid "PASSED_CONFIRMATION"
 msgstr "Epreuve de confirmation réussie"
+
+msgid "PDF Export"
+msgstr "Export PDF"
 
 msgid "PDF file"
 msgstr "Fichier PDF"
@@ -1253,11 +1305,20 @@ msgstr "Envoyer un e-mail au candidat"
 msgid "Send the message"
 msgstr "Envoyer le message"
 
+msgid "Sex"
+msgstr "Sexe"
+
 msgid "Status changes"
 msgstr "Changements de statut"
 
 msgid "Status:"
 msgstr "Statut :"
+
+msgid "Street"
+msgstr "Rue"
+
+msgid "Street number"
+msgstr "Numéro de la rue"
 
 msgid "Subject"
 msgstr "Sujet"
@@ -1273,6 +1334,9 @@ msgstr "Supervision"
 
 msgid "Supervision group not found."
 msgstr "Groupe de supervision non trouvé."
+
+msgid "Supervisory panel"
+msgstr "Comité d'accompagnement"
 
 msgid "TO_BE_COMPLETED"
 msgstr "À compléter"
@@ -1403,6 +1467,9 @@ msgstr "Cette page est en cours de construction."
 msgid "Title"
 msgstr "Titre"
 
+msgid "Title of diploma or training"
+msgstr "Nom du diplôme ou de la formation"
+
 msgid "Title of the doctorate"
 msgstr "Titre du doctorat"
 
@@ -1512,6 +1579,9 @@ msgstr ""
 
 msgid "You've reached the maximum authorized propositions."
 msgstr "Vous avez atteint le maximum de propositions."
+
+msgid "Zip code"
+msgstr "Code postal"
 
 msgid "actions"
 msgstr "actions"
