@@ -56,9 +56,7 @@ class DoctorateAdmissionConfirmationFormViewTestCase(TestCase):
     confirmation_papers = List[ConfirmationPaperFactory]
 
     @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-
+    def setUpTestData(cls):
         # Create some academic years
         academic_years = [AcademicYearFactory(year=year) for year in [2021, 2022]]
 
@@ -281,6 +279,7 @@ class DoctorateAdmissionConfirmationOpinionFormViewTestCase(TestCase):
         cls.confirm_remote_upload_patcher.stop()
         cls.get_remote_metadata_patcher.stop()
         cls.get_remote_token_patcher.stop()
+        super().tearDownClass()
 
     def test_get_confirmation_form_candidate_user(self):
         self.client.force_login(user=self.candidate.user)

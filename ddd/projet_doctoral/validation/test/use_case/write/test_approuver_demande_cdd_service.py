@@ -67,6 +67,8 @@ class TestApprouverDemandeCDD(SimpleTestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
+        super().setUpClass()
+
         cls.entites_propositions = [
             PropositionAdmissionSC3DPMinimaleFactory(),
             PropositionPreAdmissionSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory(),
@@ -89,15 +91,14 @@ class TestApprouverDemandeCDD(SimpleTestCase):
         )
         mock_date = cls.date_patcher.start()
         mock_date.date.today.return_value = datetime.date(2020, 11, 1)
+        cls.message_bus = message_bus_in_memory_instance
 
     @classmethod
     def tearDownClass(cls):
         cls.proposition_patcher.stop()
         cls.demande_patcher.stop()
         cls.date_patcher.stop()
-
-    def setUp(self):
-        self.message_bus = message_bus_in_memory_instance
+        super().tearDownClass()
 
     def test_should_approuver_demande_a_verifier(self):
         demande_a_approuver_entity_id = self.entites_demandes[0].entity_id

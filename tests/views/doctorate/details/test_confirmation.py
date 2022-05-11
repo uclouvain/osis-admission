@@ -54,9 +54,7 @@ class DoctorateAdmissionConfirmationDetailViewTestCase(TestCase):
     confirmation_papers = List[ConfirmationPaperFactory]
 
     @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-
+    def setUpTestData(cls):
         # Create some academic years
         academic_years = [AcademicYearFactory(year=year) for year in [2021, 2022]]
 

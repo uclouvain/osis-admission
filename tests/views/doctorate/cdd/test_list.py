@@ -54,8 +54,7 @@ class CddDoctorateAdmissionListTestCase(TestCase):
     admissions = []
 
     @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
+    def setUpTestData(cls):
         cls.factory = RequestFactory()
         cls.user = User.objects.create_user(
             username='john_doe',

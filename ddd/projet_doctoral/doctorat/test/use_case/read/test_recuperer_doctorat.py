@@ -59,6 +59,8 @@ class TestRecupererDoctorat(SimpleTestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
+        super().setUpClass()
+
         cls.entites_propositions = [
             PropositionAdmissionSC3DPMinimaleFactory(),
             PropositionPreAdmissionSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory(),
@@ -74,14 +76,13 @@ class TestRecupererDoctorat(SimpleTestCase):
         ]
         cls.demande_patcher = patch.object(DemandeInMemoryRepository, 'entities', cls.entites_demandes)
         cls.demande_patcher.start()
+        cls.message_bus = message_bus_in_memory_instance
 
     @classmethod
     def tearDownClass(cls):
         cls.proposition_patcher.stop()
         cls.demande_patcher.stop()
-
-    def setUp(self) -> None:
-        self.message_bus = message_bus_in_memory_instance
+        super().tearDownClass()
 
     def test_should_pas_trouver_si_doctorat_inconnu(self):
         with self.assertRaises(DoctoratNonTrouveException):
