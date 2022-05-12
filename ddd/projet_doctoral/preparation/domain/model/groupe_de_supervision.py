@@ -269,10 +269,12 @@ class GroupeDeSupervision(interface.RootEntity):
     def verifier_premier_promoteur_renseigne_institut_these(
         self,
         signataire: Union[PromoteurIdentity, MembreCAIdentity],
+        proposition_institut_these: Optional[str],
         institut_these: Optional[str],
     ):
         ApprobationPromoteurValidatorList(
             signatures_promoteurs=self.signatures_promoteurs,
             signataire=signataire,
+            proposition_institut_these=proposition_institut_these,
             institut_these=institut_these,
         ).validate()

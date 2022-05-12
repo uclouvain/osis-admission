@@ -42,12 +42,14 @@ from base.ddd.utils.business_validator import BusinessValidator
 class ShouldPremierPromoteurRenseignerInstitutThese(BusinessValidator):
     signatures_promoteurs: List[SignaturePromoteur]
     signataire: Union['PromoteurIdentity', 'MembreCAIdentity']
+    proposition_institut_these: Optional[str]
     institut_these: Optional[str]
 
     def validate(self, *args, **kwargs):
         if (
             isinstance(self.signataire, PromoteurIdentity)
             and all(s.etat == ChoixEtatSignature.INVITED for s in self.signatures_promoteurs)
+            and not self.proposition_institut_these
             and not self.institut_these
         ):
             raise InstitutTheseObligatoireException()
