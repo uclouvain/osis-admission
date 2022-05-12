@@ -27,7 +27,7 @@
 import factory
 
 from base.tests.factories.academic_year import AcademicYearFactory
-from osis_profile.models import BelgianHighSchoolDiploma, ForeignHighSchoolDiploma
+from osis_profile.models import BelgianHighSchoolDiploma, ForeignHighSchoolDiploma, HighSchoolDiplomaAlternative
 from osis_profile.models.education import Schedule
 from reference.tests.factories.country import CountryFactory
 from reference.tests.factories.language import LanguageFactory
@@ -56,3 +56,10 @@ class ForeignHighSchoolDiplomaFactory(HighSchoolDiplomaFactory):
 
     class Meta:
         model = ForeignHighSchoolDiploma
+
+
+class HighSchoolDiplomaAlternativeFactory(factory.DjangoModelFactory):
+    person = factory.SubFactory('base.tests.factories.person.PersonFactory')
+
+    class Meta:
+        model = HighSchoolDiplomaAlternative

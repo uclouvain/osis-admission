@@ -2605,6 +2605,11 @@ components:
               items:
                 type: string
               maxItems: 1
+            enrolment_certificate:
+              type: array
+              items:
+                type: string
+              maxItems: 1
             result:
               $ref: '#/components/schemas/DiplomaResults'
               nullable: true
@@ -2620,6 +2625,14 @@ components:
             institute:
               type: string
               maxLength: 25
+            other_institute_name:
+              type: string
+              description: "Si vous ne trouvez pas votre institut dans la liste, merci\
+                \ de le pr\xE9ciser ici"
+              maxLength: 500
+            other_institute_address:
+              type: string
+              maxLength: 500
             schedule:
               type: object
               properties:
@@ -2659,6 +2672,10 @@ components:
                   maximum: 2147483647
                   minimum: 0
                 french:
+                  type: integer
+                  maximum: 2147483647
+                  minimum: 0
+                spanish:
                   type: integer
                   maximum: 2147483647
                   minimum: 0
@@ -2716,6 +2733,11 @@ components:
               items:
                 type: string
               maxItems: 1
+            enrolment_certificate:
+              type: array
+              items:
+                type: string
+              maxItems: 1
             result:
               $ref: '#/components/schemas/DiplomaResults'
               nullable: true
@@ -2743,10 +2765,44 @@ components:
               items:
                 type: string
               maxItems: 1
+            enrolment_certificate_translation:
+              type: array
+              items:
+                type: string
+              maxItems: 1
+            final_equivalence_decision:
+              type: array
+              items:
+                type: string
+              maxItems: 1
+            equivalence_decision_proof:
+              type: array
+              items:
+                type: string
+              maxItems: 1
+            restrictive_equivalence_daes:
+              type: array
+              items:
+                type: string
+              maxItems: 1
+            restrictive_equivalence_admission_test:
+              type: array
+              items:
+                type: string
+              maxItems: 1
           required:
           - academic_graduation_year
           - linguistic_regime
           - country
+          nullable: true
+        high_school_diploma_alternative:
+          type: object
+          properties:
+            first_cycle_admission_exam:
+              type: array
+              items:
+                type: string
+              maxItems: 1
           nullable: true
     DiplomaResults:
       enum:
