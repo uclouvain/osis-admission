@@ -25,6 +25,7 @@
 # ##############################################################################
 from rules.contrib.views import LoginRequiredMixin
 
+from admission.utils import get_cached_admission_perm_obj
 from admission.views.doctorate.mixins import LoadDossierViewMixin
 from osis_history.contrib.mixins import HistoryEntryListAPIMixin
 
@@ -35,6 +36,9 @@ class DoctorateHistoryAPIView(LoginRequiredMixin, APIPermissionRequiredMixin, Hi
     permission_mapping = {
         'GET': 'osis_history.view_historyentry',
     }
+
+    def get_permission_object(self):
+        return get_cached_admission_perm_obj(self.kwargs['uuid'])
 
 
 class DoctorateHistoryView(LoadDossierViewMixin):
