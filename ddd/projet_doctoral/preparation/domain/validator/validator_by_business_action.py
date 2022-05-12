@@ -357,6 +357,7 @@ class ApprobationValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
 class ApprobationPromoteurValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
     signatures_promoteurs: List['SignaturePromoteur']
     signataire: Union['PromoteurIdentity', 'MembreCAIdentity']
+    proposition_institut_these: Optional[str]
     institut_these: Optional[str]
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
@@ -367,6 +368,7 @@ class ApprobationPromoteurValidatorList(TwoStepsMultipleBusinessExceptionListVal
             ShouldPremierPromoteurRenseignerInstitutThese(
                 self.signatures_promoteurs,
                 self.signataire,
+                self.proposition_institut_these,
                 self.institut_these,
             ),
         ]
