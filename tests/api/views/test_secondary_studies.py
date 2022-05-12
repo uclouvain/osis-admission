@@ -23,6 +23,9 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from unittest.mock import patch
+from uuid import UUID
+
 from django.shortcuts import resolve_url
 from django.test import override_settings
 from django.urls import reverse
@@ -31,12 +34,21 @@ from rest_framework.test import APITestCase
 
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.roles import CandidateFactory, CddManagerFactory
-from admission.tests.factories.secondary_studies import BelgianHighSchoolDiplomaFactory, ForeignHighSchoolDiplomaFactory
+from admission.tests.factories.secondary_studies import (
+    BelgianHighSchoolDiplomaFactory,
+    ForeignHighSchoolDiplomaFactory,
+    HighSchoolDiplomaAlternativeFactory,
+)
 from admission.tests.factories.supervision import CaMemberFactory, PromoterFactory
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityFactory
 from base.tests.factories.person import PersonFactory
-from osis_profile.models import BelgianHighSchoolDiploma, ForeignHighSchoolDiploma, Schedule
+from osis_profile.models import (
+    BelgianHighSchoolDiploma,
+    ForeignHighSchoolDiploma,
+    HighSchoolDiplomaAlternative,
+    Schedule,
+)
 from reference.tests.factories.country import CountryFactory
 from reference.tests.factories.language import LanguageFactory
 
@@ -137,30 +149,37 @@ class BelgianHighSchoolDiplomaTestCase(APITestCase):
         self.assertEqual(belgian_diploma.educational_type, self.diploma_data["belgian_diploma"]["educational_type"])
         self.assertEqual(belgian_diploma.educational_other, "")
         self.assertEqual(belgian_diploma.institute, self.diploma_data["belgian_diploma"]["institute"])
+        self.assertEqual(belgian_diploma.other_institute_name, "")
         self.assertIsNone(belgian_diploma.schedule)
         foreign_diploma = ForeignHighSchoolDiploma.objects.filter(person__user_id=self.candidate_user.pk)
         self.assertEqual(foreign_diploma.count(), 0)
 
     def test_diploma_update_with_candidate(self):
         self.create_belgian_diploma(self.diploma_data)
-        response = self.client.put(self.admission_url, {
-            "belgian_diploma": {
-                "institute": "Institute Of Test",
-                "academic_graduation_year": self.academic_year.year,
+        response = self.client.put(
+            self.admission_url,
+            {
+                "belgian_diploma": {
+                    "institute": "Institute Of Test",
+                    "academic_graduation_year": self.academic_year.year,
+                },
             },
-        })
+        )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
         diploma = BelgianHighSchoolDiploma.objects.get(person__user_id=self.candidate_user.pk)
         self.assertEqual(diploma.institute, "Institute Of Test")
 
     def test_diploma_update_by_belgian_diploma(self):
         ForeignHighSchoolDiplomaFactory(person=self.candidate_user.person)
+        HighSchoolDiplomaAlternativeFactory(person=self.candidate_user.person)
         self.assertEqual(ForeignHighSchoolDiploma.objects.count(), 1)
         response = self.create_belgian_diploma(self.diploma_data)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
         self.assertIsNone(response.json()["foreign_diploma"])
+        self.assertIsNone(response.json()["high_school_diploma_alternative"])
         self.assertIsNotNone(response.json()["belgian_diploma"])
         self.assertEqual(ForeignHighSchoolDiploma.objects.count(), 0)
+        self.assertEqual(HighSchoolDiplomaAlternative.objects.count(), 0)
         diploma = BelgianHighSchoolDiploma.objects.get(person__user_id=self.candidate_user.pk)
         self.assertEqual(diploma.institute, "Test Institute")
 
@@ -192,13 +211,27 @@ class BelgianHighSchoolDiplomaTestCase(APITestCase):
         self.create_belgian_diploma(self.diploma_data)
         self.create_belgian_diploma({})
         response = self.client.get(self.admission_url)
-        self.assertEqual(response.json(), {'belgian_diploma': None, 'foreign_diploma': None})
+        self.assertEqual(
+            response.json(),
+            {
+                'belgian_diploma': None,
+                'foreign_diploma': None,
+                'high_school_diploma_alternative': None,
+            },
+        )
 
     def test_delete_diploma_with_schedule(self):
         self.create_belgian_diploma(self.diploma_data_with_schedule)
         self.create_belgian_diploma({})
         response = self.client.get(self.admission_url)
-        self.assertEqual(response.json(), {'belgian_diploma': None, 'foreign_diploma': None})
+        self.assertEqual(
+            response.json(),
+            {
+                'belgian_diploma': None,
+                'foreign_diploma': None,
+                'high_school_diploma_alternative': None,
+            },
+        )
 
     def test_diploma_get_with_no_role_user(self):
         self.create_belgian_diploma(self.diploma_data)
@@ -302,12 +335,16 @@ class ForeignHighSchoolDiplomaTestCase(APITestCase):
 
     def test_diploma_update_by_foreign_diploma(self):
         BelgianHighSchoolDiplomaFactory(person=self.user.person)
+        HighSchoolDiplomaAlternativeFactory(person=self.user.person)
         response = self.create_foreign_diploma(self.foreign_diploma_data)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
         self.assertIsNone(response.json()["belgian_diploma"])
+        self.assertIsNone(response.json()["high_school_diploma_alternative"])
         self.assertIsNotNone(response.json()["foreign_diploma"])
         diploma = ForeignHighSchoolDiploma.objects.get(person__user_id=self.user.pk)
         self.assertEqual(diploma.other_linguistic_regime, "Français")
+        self.assertEqual(BelgianHighSchoolDiploma.objects.count(), 0)
+        self.assertEqual(HighSchoolDiplomaAlternative.objects.count(), 0)
 
     def test_diploma_without_schedule_update_by_foreign_diploma(self):
         BelgianHighSchoolDiplomaFactory(person=self.user.person, schedule=None)
@@ -326,5 +363,107 @@ class ForeignHighSchoolDiplomaTestCase(APITestCase):
         )
         self.client.put(self.url, {})
         response = self.client.get(self.url)
-        self.assertEqual(response.json(), {'belgian_diploma': None, 'foreign_diploma': None})
+        self.assertEqual(
+            response.json(),
+            {
+                'belgian_diploma': None,
+                'foreign_diploma': None,
+                'high_school_diploma_alternative': None,
+            },
+        )
         self.assertEqual(ForeignHighSchoolDiploma.objects.filter(person__user_id=self.user.pk).count(), 0)
+
+
+@override_settings(ROOT_URLCONF='admission.api.url_v1', OSIS_DOCUMENT_BASE_URL="http://dummyurl.com/document/")
+class HighSchoolDiplomaAlternativeTestCase(APITestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = CandidateFactory().person.user
+        cls.url = reverse("secondary-studies")
+        cls.file_uuid = '4bdffb42-552d-415d-9e4c-725f10dce228'
+        cls.high_school_diploma_alternative_data = {
+            "high_school_diploma_alternative": {
+                "first_cycle_admission_exam": [cls.file_uuid],
+            },
+        }
+
+    def setUp(self):
+        patcher = patch("osis_document.api.utils.get_remote_token", return_value="foobar")
+        patcher.start()
+        self.addCleanup(patcher.stop)
+        patcher = patch("osis_document.api.utils.get_remote_metadata", return_value={"name": "myfile"})
+        patcher.start()
+        self.addCleanup(patcher.stop)
+        patcher = patch(
+            "osis_document.api.utils.confirm_remote_upload",
+            return_value=self.file_uuid,
+        )
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+    def create_high_school_diploma_alternative(self, data):
+        self.client.force_authenticate(self.user)
+        return self.client.put(self.url, data)
+
+    def test_diploma_get(self):
+        self.create_high_school_diploma_alternative(self.high_school_diploma_alternative_data)
+        response = self.client.get(self.url)
+        self.assertEqual(
+            response.json()["high_school_diploma_alternative"]["first_cycle_admission_exam"],
+            [self.file_uuid],
+        )
+
+    def test_diploma_create(self):
+        BelgianHighSchoolDiplomaFactory(person=self.user.person)
+        ForeignHighSchoolDiplomaFactory(person=self.user.person)
+        # Create the high school diploma alternative
+        response = self.create_high_school_diploma_alternative(self.high_school_diploma_alternative_data)
+        # Check response
+        json_response = response.json()
+        self.assertEqual(response.status_code, status.HTTP_200_OK, json_response)
+        self.assertIsNone(json_response["belgian_diploma"])
+        self.assertIsNone(json_response["foreign_diploma"])
+        self.assertIsNotNone(json_response["high_school_diploma_alternative"])
+        # Check the updated object
+        high_school_diploma_alternative = HighSchoolDiplomaAlternative.objects.get(person__user_id=self.user.pk)
+        self.assertEqual(high_school_diploma_alternative.first_cycle_admission_exam, [UUID(self.file_uuid)])
+        # Clean previous high school diplomas
+        self.assertEqual(BelgianHighSchoolDiploma.objects.filter(person=self.user.person).count(), 0)
+        self.assertEqual(ForeignHighSchoolDiploma.objects.filter(person=self.user.person).count(), 0)
+
+    def test_diploma_update(self):
+        BelgianHighSchoolDiplomaFactory(person=self.user.person)
+        ForeignHighSchoolDiplomaFactory(person=self.user.person)
+        HighSchoolDiplomaAlternativeFactory(person=self.user.person)
+        # Update the high school diploma alternative
+        response = self.create_high_school_diploma_alternative(self.high_school_diploma_alternative_data)
+        # Check response
+        json_response = response.json()
+        self.assertEqual(response.status_code, status.HTTP_200_OK, json_response)
+        self.assertIsNone(json_response["belgian_diploma"])
+        self.assertIsNone(json_response["foreign_diploma"])
+        self.assertIsNotNone(json_response["high_school_diploma_alternative"])
+        # Check the created object
+        high_school_diploma_alternative = HighSchoolDiplomaAlternative.objects.get(person__user_id=self.user.pk)
+        self.assertEqual(high_school_diploma_alternative.first_cycle_admission_exam, [UUID(self.file_uuid)])
+        # Clean previous high school diplomas
+        self.assertEqual(BelgianHighSchoolDiploma.objects.filter(person=self.user.person).count(), 0)
+        self.assertEqual(ForeignHighSchoolDiploma.objects.filter(person=self.user.person).count(), 0)
+
+    def test_delete_diploma(self):
+        self.create_high_school_diploma_alternative(self.high_school_diploma_alternative_data)
+        self.assertEqual(
+            HighSchoolDiplomaAlternative.objects.get(person__user_id=self.user.pk).first_cycle_admission_exam,
+            [UUID(self.file_uuid)],
+        )
+        self.client.put(self.url, {})
+        response = self.client.get(self.url)
+        self.assertEqual(
+            response.json(),
+            {
+                'belgian_diploma': None,
+                'foreign_diploma': None,
+                'high_school_diploma_alternative': None,
+            },
+        )
+        self.assertEqual(HighSchoolDiplomaAlternative.objects.filter(person__user_id=self.user.pk).count(), 0)
