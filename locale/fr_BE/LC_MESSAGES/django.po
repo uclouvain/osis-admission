@@ -82,30 +82,36 @@ msgstr ""
 "    "
 
 #, python-format
-msgid ""
-"%(candidate_first_name)s %(candidate_last_name)s requested signatures for "
-"%(doctorate_title)s"
-msgstr ""
-"%(candidate_first_name)s %(candidate_last_name)s a demandé les signatures "
-"pour %(doctorate_title)s"
-
-#, python-format
-msgid ""
-"%(candidate_first_name)s %(candidate_last_name)s submitted request for "
-"%(doctorate_title)s"
-msgstr ""
-"%(candidate_first_name)s %(candidate_last_name)s a soumis une demande pour "
-"%(doctorate_title)s"
-
-#, python-format
 msgid "%(label)s:"
 msgstr "%(label)s :"
 
 #, python-format
 msgid ""
+"<a href=\"%(admission_link_back)s\">%(reference)s</a> - "
+"%(candidate_first_name)s %(candidate_last_name)s requested signatures for "
+"%(doctorate_title)s"
+msgstr ""
+"<a href=\"%(admission_link_back)s\">%(reference)s</a> - "
+"%(candidate_first_name)s %(candidate_last_name)s a demandé les signatures "
+"pour %(doctorate_title)s"
+
+#, python-format
+msgid ""
+"<a href=\"%(admission_link_back)s\">%(reference)s</a> - "
+"%(candidate_first_name)s %(candidate_last_name)s submitted request for "
+"%(doctorate_title)s"
+msgstr ""
+"<a href=\"%(admission_link_back)s\">%(reference)s</a> - "
+"%(candidate_first_name)s %(candidate_last_name)s a soumis une demande pour "
+"%(doctorate_title)s"
+
+#, python-format
+msgid ""
+"<a href=\"%(admission_link_front)s\">%(reference)s</a> - "
 "%(signataire_first_name)s %(signataire_last_name)s (%(actor_role)s) has "
 "approved your signature request."
 msgstr ""
+"<a href=\"%(admission_link_front)s\">%(reference)s</a> - "
 "%(signataire_first_name)s %(signataire_last_name)s (%(actor_role)s) a "
 "approuvé votre demande de signature."
 

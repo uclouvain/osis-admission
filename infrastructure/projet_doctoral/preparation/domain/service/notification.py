@@ -89,6 +89,7 @@ class Notification(INotification):
                 settings.ADMISSION_BACKEND_LINK_PREFIX.rstrip('/'),
                 resolve_url('admission:doctorate:project', pk=proposition.entity_id.uuid),
             ),
+            "reference": proposition.reference,
         }
 
     @classmethod
@@ -123,7 +124,11 @@ class Notification(INotification):
         ).select_related('person')
         for manager in cdd_managers:
             content = (
-                _("%(candidate_first_name)s %(candidate_last_name)s requested signatures for %(doctorate_title)s")
+                _(
+                    '<a href="%(admission_link_back)s">%(reference)s</a> - '
+                    '%(candidate_first_name)s %(candidate_last_name)s requested '
+                    'signatures for %(doctorate_title)s'
+                )
                 % common_tokens
             )
             with translation.override(manager.person.language):
@@ -185,11 +190,14 @@ class Notification(INotification):
 
         # Notifier le doctorant via web si approuvé
         if avis.etat == ChoixEtatSignature.APPROVED.name:
+            common_tokens = cls.get_common_tokens(proposition, candidat)
             with translation.override(candidat.language):
                 content = _(
-                    "%(signataire_first_name)s %(signataire_last_name)s (%(actor_role)s) has approved "
-                    "your signature request."
+                    '<a href="%(admission_link_front)s">%(reference)s</a> - '
+                    '%(signataire_first_name)s %(signataire_last_name)s '
+                    '(%(actor_role)s) has approved your signature request.'
                 ) % dict(
+                    **common_tokens,
                     signataire_first_name=signataire.first_name,
                     signataire_last_name=signataire.last_name,
                     actor_role=str(actor_role).lower(),
@@ -274,7 +282,11 @@ class Notification(INotification):
             EmailNotificationHandler.create(email_message, person=manager.person)
 
             content = (
-                _("%(candidate_first_name)s %(candidate_last_name)s submitted request for %(doctorate_title)s")
+                _(
+                    '<a href="%(admission_link_back)s">%(reference)s</a> - '
+                    '%(candidate_first_name)s %(candidate_last_name)s '
+                    'submitted request for %(doctorate_title)s'
+                )
                 % common_tokens
             )
             with translation.override(manager.person.language):
