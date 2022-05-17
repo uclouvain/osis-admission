@@ -61,23 +61,26 @@ msgid ""
 msgstr ""
 
 #, python-format
+msgid "%(label)s:"
+msgstr ""
+
+#, python-format
 msgid ""
+"<a href=\"%(admission_link_back)s\">%(reference)s</a> - "
 "%(candidate_first_name)s %(candidate_last_name)s requested signatures for "
 "%(doctorate_title)s"
 msgstr ""
 
 #, python-format
 msgid ""
+"<a href=\"%(admission_link_back)s\">%(reference)s</a> - "
 "%(candidate_first_name)s %(candidate_last_name)s submitted request for "
 "%(doctorate_title)s"
 msgstr ""
 
 #, python-format
-msgid "%(label)s:"
-msgstr ""
-
-#, python-format
 msgid ""
+"<a href=\"%(admission_link_front)s\">%(reference)s</a> - "
 "%(signataire_first_name)s %(signataire_last_name)s (%(actor_role)s) has "
 "approved your signature request."
 msgstr ""
