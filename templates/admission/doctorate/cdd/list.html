@@ -201,7 +201,7 @@
 
     // Clear inputs when the form is reset
     $('#search_form').on('reset', function(evt) {
-      $('#search_form :input:not([type=hidden]):not([name=cdds])').val(null).trigger('change');
+      $('#search_form :input:not([type=hidden])').val(null).trigger('change');
       evt.preventDefault();
       $('#search_form button[type=submit]').click();
       return false;

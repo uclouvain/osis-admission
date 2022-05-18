@@ -31,11 +31,11 @@ from osis_role.contrib.models import RoleModel
 from django.utils.translation import gettext_lazy as _
 
 
-class Adre(RoleModel):
+class AdreSecretary(RoleModel):
     class Meta:
-        verbose_name = _("ADRE")
-        verbose_name_plural = _("ADREs")
-        group_name = "adre"
+        verbose_name = _("ADRE secretary")
+        verbose_name_plural = _("ADRE Secretaries")
+        group_name = "adre_secretary"
 
     @classmethod
     def rule_set(cls):

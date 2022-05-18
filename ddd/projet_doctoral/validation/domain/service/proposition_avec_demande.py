@@ -43,6 +43,7 @@ class PropositionAvecDemande(interface.DomainService):
         proposition_repository: 'IPropositionRepository',
         demande_repository: 'IDemandeRepository',
     ) -> List["DemandeRechercheDTO"]:
+
         proposition_ids = cls._recherche_combinee(cmd, proposition_repository, demande_repository)
 
         proposition_dtos = proposition_repository.search_dto(entity_ids=proposition_ids)
@@ -117,10 +118,16 @@ class PropositionAvecDemande(interface.DomainService):
             "date_pre_admission_debut",
             "date_pre_admission_fin",
         ]
+        has_proposition_criteria = (
+                any(getattr(cmd, criterion) for criterion in proposition_criteria) or cmd.cotutelle is not None
+        )
+        has_demande_criteria = any(getattr(cmd, criterion) for criterion in demande_criteria)
+
         proposition_ids_from_proposition = None
         proposition_ids_from_demande = None
-        # Search proposition if any proposition criteria
-        if any(getattr(cmd, criterion) for criterion in proposition_criteria) or cmd.cotutelle is not None:
+
+        # Search proposition if any proposition criteria or if there is no criteria at all
+        if has_proposition_criteria or not has_demande_criteria:
             proposition_ids_from_proposition = [
                 PropositionIdentityBuilder.build_from_uuid(dto.uuid)
                 for dto in proposition_repository.search_dto(
@@ -140,7 +147,7 @@ class PropositionAvecDemande(interface.DomainService):
                 )
             ]
         # Search demandes if any demande criteria
-        if any(getattr(cmd, criterion) for criterion in demande_criteria):
+        if has_demande_criteria:
             proposition_ids_from_demande = [
                 PropositionIdentityBuilder.build_from_uuid(dto.uuid)
                 for dto in demande_repository.search_dto(

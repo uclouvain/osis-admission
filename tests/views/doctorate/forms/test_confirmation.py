@@ -42,7 +42,7 @@ from admission.ddd.projet_doctoral.preparation.domain.model._financement import 
 from admission.ddd.projet_doctoral.preparation.domain.model.doctorat import ENTITY_CDE, ENTITY_CDSS
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.confirmation_paper import ConfirmationPaperFactory
-from admission.tests.factories.roles import CddManagerFactory, AdreRoleFactory
+from admission.tests.factories.roles import CddManagerFactory, AdreSecretaryRoleFactory
 from admission.tests.factories.supervision import PromoterFactory
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityFactory
@@ -266,7 +266,7 @@ class DoctorateAdmissionConfirmationOpinionFormViewTestCase(TestCase):
         cls.candidate = cls.admission_without_confirmation_paper.candidate
 
         # User with one cdd
-        cls.adre_person = AdreRoleFactory().person
+        cls.adre_person = AdreSecretaryRoleFactory().person
 
         cls.default_updated_params = {
             'avis_renouvellement_mandat_recherche_0': 'avis_renouvellement_mandat_recherche_1',

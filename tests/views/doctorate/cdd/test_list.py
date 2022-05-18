@@ -42,8 +42,9 @@ from admission.ddd.projet_doctoral.preparation.domain.model.doctorat import ENTI
 from admission.ddd.projet_doctoral.validation.domain.model._enums import ChoixStatutCDD, ChoixStatutSIC
 from admission.ddd.projet_doctoral.validation.dtos import DemandeRechercheDTO
 from admission.tests.factories import DoctorateAdmissionFactory
-from admission.tests.factories.roles import CandidateFactory, CddManagerFactory
+from admission.tests.factories.roles import CandidateFactory, CddManagerFactory, DoctorateReaderRoleFactory
 from admission.tests.factories.supervision import PromoterFactory
+from base.models.enums.entity_type import EntityType
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityFactory
 from base.tests.factories.entity_version import EntityVersionFactory
@@ -61,15 +62,25 @@ class CddDoctorateAdmissionListTestCase(TestCase):
             password='top_secret',
         )
 
+        cls.doctorate_reader_user = DoctorateReaderRoleFactory().person.user
+
         # Create some academic years
         academic_years = [AcademicYearFactory(year=year) for year in [2021, 2022]]
 
         # First entity
         first_doctoral_commission = EntityFactory()
-        EntityVersionFactory(entity=first_doctoral_commission, acronym=ENTITY_CDE)
+        EntityVersionFactory(
+            entity=first_doctoral_commission,
+            acronym=ENTITY_CDE,
+            entity_type=EntityType.DOCTORAL_COMMISSION.name,
+        )
 
         second_doctoral_commission = EntityFactory()
-        EntityVersionFactory(entity=second_doctoral_commission, acronym=ENTITY_CDSS)
+        EntityVersionFactory(
+            entity=second_doctoral_commission,
+            acronym=ENTITY_CDSS,
+            entity_type=EntityType.DOCTORAL_COMMISSION.name,
+        )
 
         candidate = CandidateFactory(
             person__country_of_citizenship=CountryFactory(
@@ -364,6 +375,7 @@ class CddDoctorateAdmissionListTestCase(TestCase):
 
         data = {
             'nationalite': 'FR',
+            'cdds': 'unknown_cdd',
         }
 
         response = self.client.get(
@@ -373,4 +385,21 @@ class CddDoctorateAdmissionListTestCase(TestCase):
         )
 
         self.assertEqual(response.status_code, 200)
-        self.assertIn('CDDs - Ce champ est obligatoire.', [m.message for m in response.context['messages']])
+        self.assertIn(
+            'CDDs - Sélectionnez un choix valide. unknown_cdd n’en fait pas partie.',
+            [m.message for m in response.context['messages']],
+        )
+
+    def test_list_doctorate_reader_user_without_any_query_param(self):
+        self.client.force_login(user=self.doctorate_reader_user)
+
+        response = self.client.get(self.url, data={
+            'page_size': 10,
+        })
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context['object_list']), 3)
+
+        self.assertIn(self.results[0], response.context['object_list'])
+        self.assertIn(self.results[1], response.context['object_list'])
+        self.assertIn(self.results[2], response.context['object_list'])

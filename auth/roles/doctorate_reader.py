@@ -23,25 +23,30 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.auth.roles.adre import AdreSecretary
-from admission.auth.roles.ca_member import CommitteeMember
-from admission.auth.roles.cdd_manager import CddManager
-from admission.auth.roles.doctorate_reader import DoctorateReader
-from admission.auth.roles.jury_secretary import JurySecretary
-from admission.auth.roles.promoter import Promoter
-from admission.auth.roles.sceb import Sceb
-from admission.auth.roles.sic_director import SicDirector
-from admission.auth.roles.sic_manager import SicManager
-from osis_role import role
-from admission.auth.roles.candidate import Candidate
+from rules import RuleSet, always_allow
 
-role.role_manager.register(Candidate)
-role.role_manager.register(AdreSecretary)
-role.role_manager.register(CommitteeMember)
-role.role_manager.register(CddManager)
-role.role_manager.register(DoctorateReader)
-role.role_manager.register(Promoter)
-role.role_manager.register(Sceb)
-role.role_manager.register(SicManager)
-role.role_manager.register(SicDirector)
-role.role_manager.register(JurySecretary)
+from osis_role.contrib.models import RoleModel
+from django.utils.translation import gettext_lazy as _
+
+
+class DoctorateReader(RoleModel):
+    class Meta:
+        verbose_name = _("Doctorate reader")
+        verbose_name_plural = _("Doctorate readers")
+        group_name = "doctorate_reader"
+
+    @classmethod
+    def rule_set(cls):
+        return RuleSet({
+            'admission.view_doctorateadmission': always_allow,
+            'admission.view_doctorateadmission_person': always_allow,
+            'admission.view_doctorateadmission_coordinates': always_allow,
+            'admission.view_doctorateadmission_secondary_studies': always_allow,
+            'admission.view_doctorateadmission_languages': always_allow,
+            'admission.view_doctorateadmission_curriculum': always_allow,
+            'admission.view_doctorateadmission_project': always_allow,
+            'admission.view_doctorateadmission_cotutelle': always_allow,
+            'admission.view_doctorateadmission_supervision': always_allow,
+            'admission.view_doctorateadmission_confirmation': always_allow,
+            'admission.view_cdddossiers': always_allow,
+        })

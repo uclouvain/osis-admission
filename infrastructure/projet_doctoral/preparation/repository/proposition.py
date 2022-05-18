@@ -237,7 +237,7 @@ class PropositionRepository(IPropositionRepository):
         cotutelle: Optional[bool] = None,
         entity_ids: Optional[List['PropositionIdentity']] = None,
     ) -> List['PropositionDTO']:
-        qs = PropositionProxy.objects
+        qs = PropositionProxy.objects.all()
         if numero:
             qs = qs.filter(reference=numero)
         if matricule_candidat:
