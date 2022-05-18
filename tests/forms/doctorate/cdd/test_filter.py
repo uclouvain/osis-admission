@@ -23,8 +23,11 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from typing import Optional
+
 from django.test import TestCase
 
+from admission.contrib.models import EntityProxy
 from admission.ddd.projet_doctoral.preparation.domain.model._enums import (
     ChoixCommissionProximiteCDEouCLSM,
     ChoixCommissionProximiteCDSS,
@@ -37,9 +40,11 @@ from admission.ddd.projet_doctoral.preparation.domain.model.doctorat import (
     ENTITY_CLSM,
 )
 from admission.forms import EMPTY_CHOICE
-from admission.forms.doctorate.cdd.filter import FilterForm
+from admission.forms.doctorate.cdd.filter import CddFilterForm, BaseFilterForm
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.roles import CddManagerFactory
+from base.models.entity_version import EntityVersion
+from base.models.enums.entity_type import EntityType
 from base.templatetags.pagination import PAGINATOR_SIZE_LIST
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityFactory
@@ -49,65 +54,90 @@ from reference.tests.factories.country import CountryFactory
 
 
 class FilterTestCase(TestCase):
+
     @classmethod
     def setUpTestData(cls):
         # Create some academic years
         academic_years = [AcademicYearFactory(year=year) for year in [2021, 2022]]
 
         # First entity
-        cls.first_doctoral_commission = EntityFactory()
-        EntityVersionFactory(entity=cls.first_doctoral_commission, acronym=ENTITY_CDE)
+        first_doctoral_commission = EntityFactory()
+        EntityVersionFactory(
+            entity=first_doctoral_commission,
+            acronym=ENTITY_CDE,
+            entity_type=EntityType.DOCTORAL_COMMISSION.name,
+        )
         cls.first_entity_admissions = [
             DoctorateAdmissionFactory(
-                doctorate__management_entity=cls.first_doctoral_commission,
+                doctorate__management_entity=first_doctoral_commission,
                 doctorate__academic_year=academic_years[0],
+                thesis_institute=None,
             ),
             DoctorateAdmissionFactory(
-                doctorate__management_entity=cls.first_doctoral_commission,
+                doctorate__management_entity=first_doctoral_commission,
                 doctorate__academic_year=academic_years[0],
+                thesis_institute=None,
             ),
         ]
 
         # Second entity
-        cls.second_doctoral_commission = EntityFactory()
-        EntityVersionFactory(entity=cls.second_doctoral_commission, acronym=ENTITY_CDSS)
+        second_doctoral_commission = EntityFactory()
+        EntityVersionFactory(
+            entity=second_doctoral_commission,
+            acronym=ENTITY_CDSS,
+            entity_type=EntityType.DOCTORAL_COMMISSION.name,
+        )
 
         cls.second_entity_admissions = [
             DoctorateAdmissionFactory(
-                doctorate__management_entity=cls.second_doctoral_commission,
+                doctorate__management_entity=second_doctoral_commission,
                 doctorate__academic_year=academic_years[1],
+                thesis_institute=None,
             ),
             DoctorateAdmissionFactory(
-                doctorate__management_entity=cls.second_doctoral_commission,
+                doctorate__management_entity=second_doctoral_commission,
                 doctorate__academic_year=academic_years[1],
+                thesis_institute=None,
             ),
         ]
 
         # Third entity
-        cls.third_doctoral_commission = EntityFactory()
-        EntityVersionFactory(entity=cls.third_doctoral_commission)
+        third_doctoral_commission = EntityFactory()
+        EntityVersionFactory(
+            entity=third_doctoral_commission,
+            entity_type=EntityType.DOCTORAL_COMMISSION.name,
+            acronym='ABC'
+        )
         cls.third_entity_admissions = [
             DoctorateAdmissionFactory(
-                doctorate__management_entity=cls.second_doctoral_commission,
+                doctorate__management_entity=second_doctoral_commission,
                 doctorate__academic_year=academic_years[1],
                 doctorate__acronym=SIGLE_SCIENCES,
+                thesis_institute=None,
             ),
         ]
+
+        # Other entity
+        EntityVersionFactory(
+            entity=EntityFactory(),
+            acronym='DEF',
+            entity_type=EntityType.LOGISTICS_ENTITY.name,
+        )
 
         # Countries
         cls.country = CountryFactory()
 
         # User with several cdds
-        person_with_several_cdds = CddManagerFactory(entity=cls.first_doctoral_commission).person
+        person_with_several_cdds = CddManagerFactory(entity=first_doctoral_commission).person
         cls.user_with_several_cdds = person_with_several_cdds.user
 
-        for entity in [cls.second_doctoral_commission, cls.third_doctoral_commission]:
+        for entity in [second_doctoral_commission, third_doctoral_commission]:
             manager_factory = CddManagerFactory(entity=entity)
             manager_factory.person = person_with_several_cdds
             manager_factory.save()
 
         # User with one cdd
-        cls.user_with_one_cdd = CddManagerFactory(entity=cls.first_doctoral_commission).person.user
+        cls.user_with_one_cdd = CddManagerFactory(entity=first_doctoral_commission).person.user
 
         # User without cdd
         cls.user_without_cdd = PersonFactory().user
@@ -117,11 +147,10 @@ class FilterTestCase(TestCase):
         cls.promoter = PersonFactory()
 
     def test_form_initialization_with_user_without_cdd(self):
-        form = FilterForm(user=self.user_without_cdd)
+        form = CddFilterForm(user=self.user_without_cdd)
 
         # Check initial values of dynamic fields
         self.assertEqual(form.fields['cdds'].choices, [])
-        self.assertEqual(form.fields['cdds'].initial, [])
 
         self.assertEqual(form.fields['sigles_formations'].choices, [])
 
@@ -142,7 +171,7 @@ class FilterTestCase(TestCase):
         self.assertIn('commission_proximite', hidden_fields_names)
 
     def test_form_initialization_with_user_with_one_cdd(self):
-        form = FilterForm(user=self.user_with_one_cdd)
+        form = CddFilterForm(user=self.user_with_one_cdd)
 
         # Check initial values of dynamic fields
         self.assertEqual(
@@ -151,7 +180,6 @@ class FilterTestCase(TestCase):
                 (ENTITY_CDE, ENTITY_CDE),
             ],
         )
-        self.assertEqual(form.fields['cdds'].initial, [ENTITY_CDE])
 
         for admission in self.first_entity_admissions:
             self.assertIn(
@@ -169,17 +197,13 @@ class FilterTestCase(TestCase):
         self.assertIn('cdds', hidden_fields_names)
 
     def test_form_initialization_with_user_with_several_cdds(self):
-        form = FilterForm(user=self.user_with_several_cdds)
+        form = CddFilterForm(user=self.user_with_several_cdds)
 
         # Check initial values of dynamic fields
         for cdd in [ENTITY_CDE, ENTITY_CDSS]:
             self.assertIn(
                 (cdd, cdd),
                 form.fields['cdds'].choices,
-            )
-            self.assertIn(
-                cdd,
-                form.fields['cdds'].initial,
             )
 
         for admission in self.first_entity_admissions + self.second_entity_admissions + self.third_entity_admissions:
@@ -205,15 +229,12 @@ class FilterTestCase(TestCase):
         self.assertEqual(len(form.hidden_fields()), 0)
 
     def test_form_validation_with_no_data(self):
-        form = FilterForm(user=self.user_with_one_cdd, data={})
+        form = CddFilterForm(user=self.user_with_one_cdd, data={})
 
-        self.assertFalse(form.is_valid())
-
-        # Mandatory fields
-        self.assertIn('cdds', form.errors)
+        self.assertTrue(form.is_valid())
 
     def test_form_validation_with_valid_data(self):
-        form = FilterForm(
+        form = CddFilterForm(
             user=self.user_with_one_cdd,
             data={
                 'page_size': PAGINATOR_SIZE_LIST[0],
@@ -229,7 +250,7 @@ class FilterTestCase(TestCase):
             'page_size': PAGINATOR_SIZE_LIST[0],
             'cdds': [ENTITY_CDE],
         }
-        form = FilterForm(
+        form = CddFilterForm(
             user=self.user_with_one_cdd,
             data={
                 'numero': '320-300000',
@@ -240,7 +261,7 @@ class FilterTestCase(TestCase):
         self.assertIn('numero', form.errors)
 
     def test_form_validation_with_valid_cached_data(self):
-        form = FilterForm(
+        form = CddFilterForm(
             user=self.user_with_one_cdd,
             data={
                 'page_size': PAGINATOR_SIZE_LIST[0],
@@ -253,18 +274,18 @@ class FilterTestCase(TestCase):
             load_labels=True,
         )
         self.assertTrue(form.is_valid())
-        self.assertEqual(form.fields['nationalite'].widget.choices, (
-            (self.country.iso_code, self.country.name),
-        ))
-        self.assertEqual(form.fields['matricule_candidat'].widget.choices, (
-            (self.candidate.global_id, '{}, {}'.format(self.candidate.last_name, self.candidate.first_name)),
-        ))
-        self.assertEqual(form.fields['matricule_promoteur'].widget.choices, (
-            (self.promoter.global_id, '{}, {}'.format(self.promoter.last_name, self.promoter.first_name)),
-        ))
+        self.assertEqual(form.fields['nationalite'].widget.choices, ((self.country.iso_code, self.country.name),))
+        self.assertEqual(
+            form.fields['matricule_candidat'].widget.choices,
+            ((self.candidate.global_id, '{}, {}'.format(self.candidate.last_name, self.candidate.first_name)),),
+        )
+        self.assertEqual(
+            form.fields['matricule_promoteur'].widget.choices,
+            ((self.promoter.global_id, '{}, {}'.format(self.promoter.last_name, self.promoter.first_name)),),
+        )
 
     def test_form_validation_with_invalid_cached_data(self):
-        form = FilterForm(
+        form = CddFilterForm(
             user=self.user_with_one_cdd,
             data={
                 'page_size': PAGINATOR_SIZE_LIST[0],
@@ -282,7 +303,7 @@ class FilterTestCase(TestCase):
         self.assertEqual(form.fields['matricule_promoteur'].widget.choices, [])
 
     def test_form_validation_with_no_autocomplete_cached_data(self):
-        form = FilterForm(
+        form = CddFilterForm(
             user=self.user_with_one_cdd,
             data={
                 'page_size': PAGINATOR_SIZE_LIST[0],
@@ -295,3 +316,35 @@ class FilterTestCase(TestCase):
         self.assertEqual(form.fields['nationalite'].widget.choices, [])
         self.assertEqual(form.fields['matricule_candidat'].widget.choices, [])
         self.assertEqual(form.fields['matricule_promoteur'].widget.choices, [])
+
+    def test_base_form_initialization(self):
+        form = BaseFilterForm(user=self.user_with_one_cdd)
+
+        # Check initial values of dynamic fields
+        self.assertCountEqual(
+            form.fields['cdds'].choices,
+            [
+                (ENTITY_CDE, ENTITY_CDE),
+                (ENTITY_CDSS, ENTITY_CDSS),
+                ('ABC', 'ABC'),
+            ],
+        )
+
+        for admission in self.first_entity_admissions + self.second_entity_admissions + self.third_entity_admissions:
+            self.assertIn(
+                (admission.doctorate.acronym, '{} - {}'.format(admission.doctorate.acronym, admission.doctorate.title)),
+                form.fields['sigles_formations'].choices,
+            )
+
+        self.assertCountEqual(
+            form.fields['commission_proximite'].choices,
+            [
+                EMPTY_CHOICE[0],
+                ['{} / {}'.format(ENTITY_CDE, ENTITY_CLSM), ChoixCommissionProximiteCDEouCLSM.choices()],
+                [ENTITY_CDSS, ChoixCommissionProximiteCDSS.choices()],
+                [SIGLE_SCIENCES, ChoixSousDomaineSciences.choices()],
+            ],
+        )
+
+        # Check no fields is hidden
+        self.assertEqual(len(form.hidden_fields()), 0)

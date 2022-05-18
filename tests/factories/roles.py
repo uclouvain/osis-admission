@@ -26,10 +26,11 @@
 
 import factory
 
-from admission.auth.roles.adre import Adre
+from admission.auth.roles.adre import AdreSecretary
 from admission.auth.roles.ca_member import CommitteeMember
 from admission.auth.roles.candidate import Candidate
 from admission.auth.roles.cdd_manager import CddManager
+from admission.auth.roles.doctorate_reader import DoctorateReader
 from admission.auth.roles.promoter import Promoter
 
 
@@ -67,7 +68,13 @@ class CddManagerFactory(BaseFactory):
     with_child = False
 
 
-class AdreRoleFactory(BaseFactory):
+class AdreSecretaryRoleFactory(BaseFactory):
     class Meta:
-        model = Adre
+        model = AdreSecretary
+        django_get_or_create = ('person',)
+
+
+class DoctorateReaderRoleFactory(BaseFactory):
+    class Meta:
+        model = DoctorateReader
         django_get_or_create = ('person',)

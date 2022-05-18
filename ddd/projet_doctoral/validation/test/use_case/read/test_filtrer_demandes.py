@@ -66,7 +66,7 @@ class TestFiltrerDemandes(SimpleTestCase):
 
     def test_should_rechercher_sans_parametre(self):
         results: List[DemandeRechercheDTO] = self.message_bus.invoke(FiltrerDemandesQuery())
-        self.assertEqual(len(results), 0)
+        self.assertEqual(len(results), 3)
 
     def test_should_rechercher_selon_parametre_proposition(self):
         resultats: List[DemandeRechercheDTO] = self.message_bus.invoke(

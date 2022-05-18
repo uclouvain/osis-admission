@@ -30,15 +30,11 @@ from django.core.exceptions import NON_FIELD_ERRORS
 from django.utils.translation import gettext as _
 from django.views.generic import ListView
 
+from admission.auth.roles.cdd_manager import CddManager
 from admission.ddd.projet_doctoral.validation.commands import FiltrerDemandesQuery
-from admission.forms.doctorate.cdd.filter import FilterForm
+from admission.forms.doctorate.cdd.filter import CddFilterForm, BaseFilterForm
 from base.utils.htmx import HtmxMixin
 from infrastructure.messages_bus import message_bus_instance
-
-# Enums that are used in the template
-from admission.ddd.projet_doctoral.preparation.domain.model._enums import ChoixStatutProposition
-from admission.ddd.projet_doctoral.preparation.domain.model._financement import ChoixTypeFinancement
-from admission.ddd.projet_doctoral.validation.domain.model._enums import ChoixStatutCDD, ChoixStatutSIC
 
 
 class CddDoctorateAdmissionList(LoginRequiredMixin, PermissionRequiredMixin, HtmxMixin, ListView):
@@ -79,13 +75,19 @@ class CddDoctorateAdmissionList(LoginRequiredMixin, PermissionRequiredMixin, Htm
     def get_paginate_by(self, queryset):
         return self.form.data.get('page_size', self.DEFAULT_PAGINATOR_SIZE)
 
+    def get_form(self):
+        if CddManager.belong_to(self.request.user.person):
+            return CddFilterForm
+        else:
+            return BaseFilterForm
+
     def get_queryset(self):
         query_params = self.request.GET.copy()
 
         ordering_field = query_params.pop('o', None)
         query_params.pop('page', None)
 
-        self.form = FilterForm(
+        self.form = self.get_form()(
             user=self.request.user,
             data=query_params or cache.get(self.cache_key) or None,
             load_labels=not self.request.htmx,

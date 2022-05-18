@@ -106,10 +106,10 @@ msgstr "Admission in progress"
 msgid "ADMITTED"
 msgstr "Admitted"
 
-msgid "ADRE"
+msgid "ADRE Secretaries"
 msgstr ""
 
-msgid "ADREs"
+msgid "ADRE secretary"
 msgstr ""
 
 msgid "APPROVED"
@@ -527,6 +527,12 @@ msgid "Doctorate admissions"
 msgstr ""
 
 msgid "Doctorate enrolments"
+msgstr ""
+
+msgid "Doctorate reader"
+msgstr ""
+
+msgid "Doctorate readers"
 msgstr ""
 
 msgid "Dossier confirmation"
