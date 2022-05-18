@@ -22,14 +22,12 @@ class BelgianHighSchoolDiplomaSerializer(serializers.ModelSerializer):
         model = BelgianHighSchoolDiploma
         fields = (
             "academic_graduation_year",
-            "high_school_transcript",
             "high_school_diploma",
             "result",
             "community",
             "educational_type",
             "educational_other",
             "institute",
-            "other_institute",
             "schedule",
         )
 
