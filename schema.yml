@@ -2600,11 +2600,6 @@ components:
             academic_graduation_year:
               type: integer
               nullable: true
-            high_school_transcript:
-              type: array
-              items:
-                type: string
-              maxItems: 1
             high_school_diploma:
               type: array
               items:
@@ -2625,11 +2620,6 @@ components:
             institute:
               type: string
               maxLength: 25
-            other_institute:
-              type: string
-              description: "Si vous ne trouvez pas votre institut dans la liste, merci\
-                \ de le pr\xE9ciser ici"
-              maxLength: 500
             schedule:
               type: object
               properties:
