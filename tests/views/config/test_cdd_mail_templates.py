@@ -131,8 +131,8 @@ class CddMailTemplatesTestCase(TestCase):
         self.cdd_mail_template.save()
         self.client.force_login(self.cdd_user)
 
-        with self.assertRaises(Exception):
-            self.client.get(self.preview_url)
+        response = self.client.get(self.preview_url)
+        self.assertContains(response, "TOKEN_wrong_token_UNDEFINED", status_code=status.HTTP_200_OK)
 
         self.cdd_mail_template.subject = "Subject"
         self.cdd_mail_template.save()

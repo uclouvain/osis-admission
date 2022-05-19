@@ -25,25 +25,18 @@
 # ##############################################################################
 import datetime
 import uuid
-from typing import Optional, List
 
 from django.shortcuts import resolve_url
 from django.test import TestCase, override_settings
 from django.urls import reverse
-from rest_framework.status import (
-    HTTP_404_NOT_FOUND,
-    HTTP_403_FORBIDDEN,
-    HTTP_200_OK,
-    HTTP_302_FOUND,
-    HTTP_400_BAD_REQUEST,
-)
+from rest_framework.status import HTTP_200_OK, HTTP_404_NOT_FOUND
 
 from admission.contrib.models import ConfirmationPaper
 from admission.ddd.projet_doctoral.doctorat.domain.model.enums import ChoixStatutDoctorat
 from admission.ddd.projet_doctoral.preparation.domain.model._enums import ChoixTypeAdmission
 from admission.ddd.projet_doctoral.preparation.domain.model._financement import (
-    ChoixTypeFinancement,
     ChoixTypeContratTravail,
+    ChoixTypeFinancement,
 )
 from admission.ddd.projet_doctoral.preparation.domain.model.doctorat import ENTITY_CDE, ENTITY_CDSS
 from admission.tests.factories import DoctorateAdmissionFactory

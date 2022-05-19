@@ -650,7 +650,6 @@ class DoctorateAdmissionVerifyProjectTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
 
-@override_settings(ROOT_URLCONF='admission.api.url_v1')
 class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
     @classmethod
     @patch("osis_document.contrib.fields.FileField._confirm_upload")
@@ -695,15 +694,15 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
 
         # Targeted urls
         cls.first_admission_with_invitation_url = resolve_url(
-            "submit-proposition",
+            "admission_api_v1:submit-proposition",
             uuid=cls.first_admission_with_invitation.uuid,
         )
         cls.first_admission_without_invitation_url = resolve_url(
-            "submit-proposition",
+            "admission_api_v1:submit-proposition",
             uuid=cls.first_admission_without_invitation.uuid,
         )
         cls.second_admission_url = resolve_url(
-            "submit-proposition",
+            "admission_api_v1:submit-proposition",
             uuid=cls.second_admission.uuid,
         )
 
@@ -761,7 +760,7 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
 
         self.client.force_authenticate(user=self.first_candidate.user)
 
-        response = self.client.post(resolve_url("submit-proposition", uuid=admission.uuid))
+        response = self.client.post(resolve_url("admission_api_v1:submit-proposition", uuid=admission.uuid))
 
         updated_admission: DoctorateAdmission = DoctorateAdmission.objects.get(uuid=admission.uuid)
 
@@ -811,7 +810,7 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
 
         self.client.force_authenticate(user=self.second_candidate.user)
 
-        response = self.client.post(resolve_url("submit-proposition", uuid=admission.uuid))
+        response = self.client.post(resolve_url("admission_api_v1:submit-proposition", uuid=admission.uuid))
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIsNotNone(response.json().get('non_field_errors'))
