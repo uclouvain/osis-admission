@@ -406,7 +406,7 @@ msgid "Canvas"
 msgstr "Canvas"
 
 msgid "Carbon-copy the CA members"
-msgstr "Mettre en copie les membres de groupe de supervision"
+msgstr "Mettre en copie les membres du groupe de supervision"
 
 msgid "Carbon-copy the promoters"
 msgstr "Mettre en copie les promoteurs"
@@ -1310,6 +1310,9 @@ msgstr "Envoyer un e-mail au candidat"
 
 msgid "Send the message"
 msgstr "Envoyer le message"
+
+msgid "Sender"
+msgstr "Expéditeur"
 
 msgid "Sex"
 msgstr "Sexe"

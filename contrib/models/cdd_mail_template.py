@@ -32,7 +32,6 @@ from django.utils.translation import gettext_lazy as _
 
 from admission.mail_templates import (
     ADMISSION_EMAIL_GENERIC_ONCE_ADMITTED,
-    ADMISSION_EMAIL_SUBMISSION_CANDIDATE,
     ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_FAILURE_STUDENT,
     ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_RETAKING_STUDENT,
 )
@@ -41,7 +40,6 @@ from osis_mail_template.models import MailTemplateManager, check_mail_template_i
 from osis_mail_template.utils import MissingTokenDict, transform_html_to_text
 
 ALLOWED_CUSTOM_IDENTIFIERS = [
-    ADMISSION_EMAIL_SUBMISSION_CANDIDATE,
     ADMISSION_EMAIL_GENERIC_ONCE_ADMITTED,
     ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_FAILURE_STUDENT,
     ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_RETAKING_STUDENT,

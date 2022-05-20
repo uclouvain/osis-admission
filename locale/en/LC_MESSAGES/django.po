@@ -1216,6 +1216,9 @@ msgstr ""
 msgid "Send the message"
 msgstr ""
 
+msgid "Sender"
+msgstr ""
+
 msgid "Sex"
 msgstr ""
 

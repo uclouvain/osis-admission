@@ -34,10 +34,10 @@ from admission.contrib.models.doctorate import DoctorateAdmission, DoctorateProx
 from admission.contrib.models.enums.actor_type import ActorType
 from admission.ddd.projet_doctoral.doctorat.domain.model.doctorat import Doctorat
 from admission.ddd.projet_doctoral.doctorat.domain.service.i_notification import INotification
-from admission.mail_templates import ADMISSION_EMAIL_GENERIC_ONCE_ADMITTED
 from base.models.person import Person
-from osis_mail_template import generate_email
+from osis_mail_template.utils import transform_html_to_text
 from osis_notification.contrib.handlers import EmailNotificationHandler
+from osis_notification.contrib.notification import EmailNotification
 
 
 class Notification(INotification):
@@ -55,11 +55,13 @@ class Notification(INotification):
         admission = DoctorateProxy.objects.get(uuid=doctorate.entity_id.uuid)
 
         # Notifier le doctorant via mail
-        email_message = generate_email(
-            ADMISSION_EMAIL_GENERIC_ONCE_ADMITTED,
-            admission.candidate.language,
-            cls.get_common_tokens(admission),
-            recipients=[cls._format_email(admission.candidate)],
+        email_message = EmailNotificationHandler.build(
+            EmailNotification(
+                admission.candidate,
+                sujet,
+                transform_html_to_text(message),
+                message,
+            )
         )
         actors = SupervisionActor.objects.filter(process=admission.supervision_group).select_related('person')
         cc_list = []

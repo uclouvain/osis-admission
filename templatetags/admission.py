@@ -30,6 +30,9 @@ from django import template
 from django.urls import NoReverseMatch, reverse
 from django.utils.translation import gettext_lazy as _
 
+from admission.ddd.projet_doctoral.doctorat.domain.model.enums import ChoixStatutDoctorat
+from admission.utils import get_cached_admission_perm_obj
+
 register = template.Library()
 
 
@@ -71,7 +74,12 @@ class Tab:
     label: str
     icon: str = ''
 
+    def __hash__(self):
+        # Only hash the name, as lazy strings have different memory addresses
+        return hash(self.name)
 
+
+MESSAGE_TAB = Tab('messages', _('Send a mail'), 'envelope')
 TAB_TREES = {
     'doctorate': {
         Tab('personal', _('Personal data'), 'user'): [
@@ -94,7 +102,7 @@ TAB_TREES = {
             Tab('history', _('Status changes')),
             Tab('history-all', _('All history')),
         ],
-        Tab('messages', _('Send a mail'), 'envelope'): [
+        MESSAGE_TAB: [
             Tab('send-mail', _('Send a mail')),
         ],
     },
@@ -122,7 +130,14 @@ def doctorate_tabs_bar(context):
     namespaces = match.namespaces
 
     current_tab_name = HIDDEN_TABS.get(match.url_name, match.url_name)
-    current_tab_tree = TAB_TREES[namespaces[1]]
+    current_tab_tree = TAB_TREES[namespaces[1]].copy()
+    admission = get_cached_admission_perm_obj(context['view'].kwargs.get('pk', ''))
+
+    # Prevent showing message tab when candidate is not enrolled
+    # TODO switch to a perm-based selection of the tabs
+    if admission.post_enrolment_status == ChoixStatutDoctorat.ADMISSION_IN_PROGRESS.name:
+        del current_tab_tree[MESSAGE_TAB]
+
     parent = get_active_parent(current_tab_tree, current_tab_name)
 
     return {
@@ -137,6 +152,7 @@ def doctorate_tabs_bar(context):
 
 @register.simple_tag(takes_context=True)
 def current_subtabs(context):
+    # TODO switch to a perm-based selection of the subtabs, and hide parent tab if no tabs
     match = context['request'].resolver_match
     namespaces = match.namespaces
     current_tab_name = HIDDEN_TABS.get(match.url_name, match.url_name)

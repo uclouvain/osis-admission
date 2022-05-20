@@ -30,6 +30,7 @@ from django.db import connection
 from admission.contrib.models import DoctorateAdmission
 from admission.contrib.models.doctorate import REFERENCE_SEQ_NAME
 from admission.ddd.projet_doctoral.doctorat.domain.model.enums import ChoixStatutDoctorat
+from admission.ddd.projet_doctoral.preparation.domain.model._enums import ChoixStatutProposition
 from admission.ddd.projet_doctoral.preparation.domain.model.proposition import Proposition
 from admission.tests.factories.roles import CandidateFactory
 from base.models.enums.education_group_types import TrainingType
@@ -80,7 +81,26 @@ class DoctorateAdmissionFactory(factory.DjangoModelFactory):
             cotutelle_convention=factory.LazyFunction(generate_token),
         )
         admitted = factory.Trait(
+            status=ChoixStatutProposition.ENROLLED.name,
             post_enrolment_status=ChoixStatutDoctorat.ADMITTED.name,
+            submitted_profile={
+                "coordinates": {
+                    "city": "Louvain-La-Neuves",
+                    "email": "user@uclouvain.be",
+                    "place": "",
+                    "street": "Place de l'Université",
+                    "country": "BE",
+                    "postal_box": "",
+                    "postal_code": "1348",
+                    "street_number": "2",
+                },
+                "identification": {
+                    "gender": "M",
+                    "last_name": "Doe",
+                    "first_name": "John",
+                    "country_of_citizenship": "BE",
+                },
+            },
         )
 
     @factory.post_generation
