@@ -71,7 +71,6 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
 
     @classmethod
     def get_coordonnees(cls, matricule: str) -> 'CoordonneesDTO':
-        # TODO Use in_bulk() in Django 3.2
         adresses = {
             a.label: a
             for a in PersonAddress.objects.select_related('country').filter(
@@ -134,7 +133,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
             .annotate(
                 annees_curriculum=ArrayAgg(
                     "curriculumyear__academic_year__year",
-                    ordering="curriculumyear__academic_year__year"
+                    ordering="curriculumyear__academic_year__year",
                 )
             )
             .get(global_id=matricule)

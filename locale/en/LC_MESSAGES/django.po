@@ -721,10 +721,10 @@ msgstr ""
 msgid "Link to the admission (front-office)"
 msgstr ""
 
-msgid "Link to the certificate of achievement"
+msgid "Link to the admission supervisory panel (front-office)"
 msgstr ""
 
-msgid "Link to the certificate of failure"
+msgid "Link to the certificate of achievement"
 msgstr ""
 
 msgid "MANAGEMENT"

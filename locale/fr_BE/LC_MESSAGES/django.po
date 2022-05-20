@@ -758,11 +758,11 @@ msgstr "Lien vers l'admission (back-office)"
 msgid "Link to the admission (front-office)"
 msgstr "Lien vers l'admission (front-office)"
 
+msgid "Link to the admission supervisory panel (front-office)"
+msgstr "Lien vers le groupe de supervision de l'admission (front-office)"
+
 msgid "Link to the certificate of achievement"
 msgstr "Lien vers l'attestation de réussite"
-
-msgid "Link to the certificate of failure"
-msgstr "Lien vers l'attestation d'échec"
 
 msgid "MANAGEMENT"
 msgstr "Gestion"

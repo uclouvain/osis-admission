@@ -27,6 +27,7 @@ from typing import Union
 
 from django.conf import settings
 from django.db.models import F, OuterRef, Subquery
+from django.shortcuts import resolve_url
 from django.utils import translation
 from django.utils.functional import lazy
 from django.utils.translation import get_language, gettext_lazy as _
@@ -77,12 +78,17 @@ class Notification(INotification):
     @classmethod
     def get_common_tokens(cls, proposition, candidat):
         """Return common tokens about a submission"""
+        frontend_link = settings.ADMISSION_FRONTEND_LINK.format(uuid=proposition.entity_id.uuid)
         return {
             "candidate_first_name": candidat.first_name,
             "candidate_last_name": candidat.last_name,
             "doctorate_title": cls._get_doctorate_title_translation(proposition.doctorat_id),
-            "admission_link_front": settings.ADMISSION_FRONTEND_LINK.format(uuid=proposition.entity_id.uuid),
-            "admission_link_back": "",  # TODO
+            "admission_link_front": frontend_link,
+            "admission_link_front_supervision": "{}supervision".format(frontend_link),
+            "admission_link_back": "{}{}".format(
+                settings.ADMISSION_BACKEND_LINK_PREFIX.rstrip('/'),
+                resolve_url('admission:doctorate:project', pk=proposition.entity_id.uuid),
+            ),
         }
 
     @classmethod

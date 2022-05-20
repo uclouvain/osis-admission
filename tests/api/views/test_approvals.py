@@ -72,10 +72,9 @@ class ApprovalMixin:
         }
 
         # Targeted url
-        cls.url = resolve_url("approvals", uuid=cls.admission.uuid)
+        cls.url = resolve_url("admission_api_v1:approvals", uuid=cls.admission.uuid)
 
 
-@override_settings(ROOT_URLCONF='admission.api.url_v1')
 class ApprovalsApiTestCase(ApprovalMixin, APITestCase):
     def test_user_not_logged_assert_not_authorized(self):
         self.client.force_authenticate(user=None)
@@ -157,11 +156,10 @@ class ApprovalsApiTestCase(ApprovalMixin, APITestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
 
-@override_settings(ROOT_URLCONF='admission.api.url_v1')
 class ApproveByPdfApiTestCase(ApprovalMixin, APITestCase):
     def setUp(self):
         # Targeted url
-        self.url = resolve_url("approve-by-pdf", uuid=self.admission.uuid)
+        self.url = resolve_url("admission_api_v1:approve-by-pdf", uuid=self.admission.uuid)
         self.approved_data = {
             "pdf": [WriteTokenFactory().token],
         }

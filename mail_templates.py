@@ -40,6 +40,11 @@ common_tokens = [
         description=_("Link to the admission (front-office)"),
         example="http://dev.studies.uclouvain.be/somewhere",
     ),
+    Token(
+        name='admission_link_back',
+        description=_("Link to the admission (back-office)"),
+        example="http://dev.osis.uclouvain.be/somewhere",
+    ),
 ]
 
 admission_common_tokens = common_tokens + [
@@ -90,6 +95,11 @@ signataire_tokens = [
         name='signataire_role',
         description=_("Role of the signing actor"),
         example="promoteur",
+    ),
+    Token(
+        name='admission_link_front_supervision',
+        description=_("Link to the admission supervisory panel (front-office)"),
+        example="http://dev.studies.uclouvain.be/somewhere/some-uuid/supervision",
     ),
 ]
 
@@ -396,11 +406,6 @@ templates.register(
     description=_("Mail sent to the student to inform him of the defavourable opinion on its confirmation paper"),
     tokens=doctorate_common_tokens
     + [
-        Token(
-            name='certificate_of_failure_link',
-            description=_("Link to the certificate of failure"),
-            example="http://dev.studies.uclouvain.be/somewhere",
-        ),
         Token(
             name='confirmation_paper_date',
             description=_("Date of the confirmation paper (DD/MM/YYYY)"),

@@ -37,9 +37,8 @@ from admission.mail_templates import (
     ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_RETAKING_STUDENT,
 )
 from base.models.enums.entity_type import DOCTORAL_COMMISSION
-from osis_mail_template.exceptions import MissingToken
 from osis_mail_template.models import MailTemplateManager, check_mail_template_identifier
-from osis_mail_template.utils import transform_html_to_text
+from osis_mail_template.utils import MissingTokenDict, transform_html_to_text
 
 ALLOWED_CUSTOM_IDENTIFIERS = [
     ADMISSION_EMAIL_SUBMISSION_CANDIDATE,
@@ -139,10 +138,7 @@ class CddMailTemplate(models.Model):
             from osis_mail_template import templates
 
             tokens = templates.get_example_values(self.identifier)
-        try:
-            return getattr(self, field).format(**tokens)
-        except KeyError as e:
-            raise MissingToken(e.args[0])
+        return getattr(self, field).format_map(MissingTokenDict(**tokens))
 
     def render_subject(self, tokens: Dict[str, str] = None) -> str:
         """Renders the subject with the given tokens, or example values"""

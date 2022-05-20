@@ -28,6 +28,7 @@ from typing import Optional
 
 from django.conf import settings
 from django.conf.global_settings import DATE_FORMAT
+from django.shortcuts import resolve_url
 from django.utils.functional import lazy
 from django.utils.translation import get_language
 from osis_mail_template.utils import transform_html_to_text
@@ -67,9 +68,11 @@ class Notification(INotification):
             "student_first_name": doctorate.candidate.first_name,
             "student_last_name": doctorate.candidate.last_name,
             "doctorate_title": cls._get_doctorate_title_translation(doctorate),
-            "admission_link_front": settings.ADMISSION_FRONTEND_LINK.format(uuid=doctorate.uuid),
-            "admission_link_back": "",  # TODO
-            "certificate_of_failure_link": "",
+            "admission_link_front": (settings.ADMISSION_FRONTEND_LINK.format(uuid=doctorate.uuid)),
+            "admission_link_back": "{}{}".format(
+                settings.ADMISSION_BACKEND_LINK_PREFIX.rstrip('/'),
+                resolve_url('admission:doctorate:project', pk=doctorate.uuid),
+            ),
             "confirmation_paper_date": cls.format_date(confirmation_paper.date),
         }
 

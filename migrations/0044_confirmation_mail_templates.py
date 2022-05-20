@@ -203,10 +203,6 @@ class Migration(migrations.Migration):
 </p>
 
 <p>
-    You can retrieve the certificate of failure <a href="{certificate_of_failure_link}">here</a>.
-</p>
-
-<p>
     ---<br/>
     The OSIS Team
 </p>
@@ -219,10 +215,6 @@ class Migration(migrations.Migration):
 
 <p>
     Malheureusement, vous n'avez pas réussi cette épreuve.
-</p>
-
-<p>
-    Vous pouvez récupérer le certificat d'échec <a href="{certificate_of_failure_link}">ici</a>.
 </p>
 
 <p>
