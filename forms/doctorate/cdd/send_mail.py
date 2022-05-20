@@ -29,7 +29,7 @@ from ckeditor.fields import RichTextFormField
 from django import forms
 from django.utils.translation import gettext_lazy as _
 
-from admission.contrib.models import CddMailTemplate
+from admission.contrib.models import CddMailTemplate, DoctorateAdmission
 from admission.forms import EMPTY_CHOICE
 from admission.utils import get_mail_templates_from_admission
 
@@ -67,7 +67,7 @@ class CddDoctorateSendMailForm(forms.Form):
         config_name='osis_mail_template',
     )
 
-    def __init__(self, admission, *args, **kwargs):
+    def __init__(self, admission: 'DoctorateAdmission', *args, **kwargs):
         self.admission = admission
         super().__init__(*args, **kwargs)
         self.fields['recipient'].initial = '{candidate.first_name} {candidate.last_name} ({candidate.email})'.format(
@@ -82,6 +82,7 @@ class CddDoctorateSendMailForm(forms.Form):
         custom_templates = CddMailTemplate.objects.get_from_identifiers(
             identifiers=available_identifiers,
             language=self.admission.candidate.language,
+            cdd=self.admission.doctorate.management_entity_id,
         )
 
         # Regroup custom templates by their identifier and format into choices

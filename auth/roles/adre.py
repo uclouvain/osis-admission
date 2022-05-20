@@ -26,6 +26,7 @@
 import rules
 from rules import RuleSet
 
+from admission.auth.predicates import is_enrolled
 from osis_role.contrib.models import RoleModel
 from django.utils.translation import gettext_lazy as _
 
@@ -38,7 +39,7 @@ class Adre(RoleModel):
 
     @classmethod
     def rule_set(cls):
-        return RuleSet({
+        ruleset = {
             'admission.view_doctorateadmission': rules.always_allow,
             'admission.download_jury_approved_pdf': rules.always_allow,
             'admission.upload_jury_approved_pdf': rules.always_allow,
@@ -55,5 +56,6 @@ class Adre(RoleModel):
             'admission.view_doctorateadmission_confirmation': rules.always_allow,
             'admission.upload_pdf_confirmation': rules.always_allow,
             'osis_history.view_historyentry': rules.always_allow,
-            'admission.send_message': rules.always_allow,
-        })
+            'admission.send_message': rules.always_allow & is_enrolled,
+        }
+        return RuleSet(ruleset)

@@ -27,7 +27,7 @@ import rules
 from django.utils.translation import gettext_lazy as _
 from rules import RuleSet
 
-from admission.auth.predicates import is_part_of_doctoral_commission
+from admission.auth.predicates import is_enrolled, is_part_of_doctoral_commission
 from osis_role.contrib.models import EntityRoleModel
 
 
@@ -74,6 +74,6 @@ class CddManager(EntityRoleModel):
             'admission.change_cddmailtemplate': rules.always_allow,
             'admission.view_cdddossiers': rules.always_allow,
             'osis_history.view_historyentry': is_part_of_doctoral_commission,
-            'admission.send_message': is_part_of_doctoral_commission,
+            'admission.send_message': is_part_of_doctoral_commission & is_enrolled,
         }
         return RuleSet(ruleset)
