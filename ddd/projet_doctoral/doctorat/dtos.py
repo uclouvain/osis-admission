@@ -23,6 +23,9 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import datetime
+from typing import Optional
+
 import attr
 
 from osis_common.ddd import interface
@@ -38,6 +41,13 @@ class DoctoratDTO(interface.DTO):
     annee_formation: int
     intitule_formation: str
 
+    titre_these: str
+    type_financement: str
+    bourse_recherche: Optional[str]
+    admission_acceptee_le: Optional[datetime.datetime]
+
     matricule_doctorant: str
+    noma_doctorant: str
+    genre_doctorant: str
     prenom_doctorant: str
     nom_doctorant: str

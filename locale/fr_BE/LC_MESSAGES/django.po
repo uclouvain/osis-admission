@@ -27,6 +27,38 @@ msgstr ""
 "              Êtes-vous sûr de vouloir supprimer \"%(object)s\"?\n"
 "            "
 
+msgctxt "female gender"
+msgid ""
+"\n"
+"            Following the presentation of the state of the research and the "
+"subsequent discussion with the candidate,\n"
+"            the supervisory panel assessed the progress of the work and "
+"announces:\n"
+"          "
+msgstr ""
+"\n"
+"            À la suite de la présentation de l'état de la recherche et de "
+"l'échange qui s'en est suivi avec la candidate,\n"
+"            le comité d'accompagnement a évalué l'avancement du travail et "
+"conclut à :\n"
+"          "
+
+msgctxt "male gender"
+msgid ""
+"\n"
+"            Following the presentation of the state of the research and the "
+"subsequent discussion with the candidate,\n"
+"            the supervisory panel assessed the progress of the work and "
+"announces:\n"
+"          "
+msgstr ""
+"\n"
+"            À la suite de la présentation de l'état de la recherche et de "
+"l'échange qui s'en est suivi avec le candidat,\n"
+"            le comité d'accompagnement a évalué l'avancement du travail et "
+"conclut à :\n"
+"          "
+
 #, python-format
 msgid ""
 "\n"
@@ -60,6 +92,18 @@ msgstr[1] ""
 #, python-format
 msgid ""
 "\n"
+"        The number of acquired <strong>doctoral</strong> credits amounts to "
+"%(credits_nb)s credits.\n"
+"      "
+msgstr ""
+"\n"
+"        Le nombre de crédits acquis de <strong>formation doctorale</strong> "
+"s'élève à %(credits_nb)s crédits.\n"
+"      "
+
+#, python-format
+msgid ""
+"\n"
 "      <h2>Delete \"%(name)s\" custom mail template?</h2>\n"
 "      <p>Are you sure you want to delete the custom mail template? This "
 "cannot be undone.</p>\n"
@@ -84,6 +128,9 @@ msgstr ""
 #, python-format
 msgid "%(label)s:"
 msgstr "%(label)s :"
+
+msgid ", on"
+msgstr ", le"
 
 #, python-format
 msgid ""
@@ -154,6 +201,9 @@ msgstr "ARES - Coopération au développement"
 msgid "Abstract"
 msgstr "Résumé"
 
+msgid "Achieved additional training"
+msgstr "Formation complémentaire réalisée"
+
 msgid "Acronym / Title"
 msgstr "Sigle / Intitulé"
 
@@ -204,8 +254,14 @@ msgstr "Déjà membre du comité d'accompagnement"
 msgid "Already a promoter."
 msgstr "Déjà promoteur"
 
+msgid "Approximate date for completing the thesis:"
+msgstr "Date approximative d'achèvement de la thèse :"
+
 msgid "Archived record when signatures were sent"
 msgstr "Fiche archivée lors de l'envoi des signatures"
+
+msgid "Attachments:"
+msgstr "Annexes :"
 
 msgid "Author"
 msgstr "Auteur"
@@ -224,6 +280,9 @@ msgstr "Justification succincte"
 
 msgid "CA Member"
 msgstr "Membre du comité d'accompagnement"
+
+msgid "CA members"
+msgstr "Membres du comité d'accompagnement"
 
 msgid "CANCELLED"
 msgstr "Annulé"
@@ -530,6 +589,9 @@ msgstr "Temps consacré (en EFT)"
 msgid "Defense"
 msgstr "Soutenance"
 
+msgid "Definitive admission date to doctorate"
+msgstr "Date de l'admission définitive au doctorat"
+
 msgid "Definitive admission date:"
 msgstr "Date de l'admission définitive :"
 
@@ -547,6 +609,9 @@ msgstr "Diplôme"
 
 msgid "Doctoral project"
 msgstr "Projet doctoral"
+
+msgid "Doctoral student"
+msgstr "Doctorand"
 
 msgid "Doctoral student:"
 msgstr "Doctorant :"
@@ -568,6 +633,9 @@ msgstr "Lecteur doctorat"
 
 msgid "Doctorate readers"
 msgstr "Lecteurs doctorat"
+
+msgid "Done in"
+msgstr "Fait à"
 
 msgid "Dossier confirmation"
 msgstr "Confirmation dossier"
@@ -640,7 +708,7 @@ msgid "FSR - Fonds Spéciaux de Recherche"
 msgstr "FSR - Fonds Spéciaux de Recherche"
 
 msgid "Failure of the confirmation paper"
-msgstr "Échec de l'épreuve de l'épreuve de confirmation"
+msgstr "Échec de l'épreuve de confirmation"
 
 msgid "Failure of the test"
 msgstr "Échec de l'épreuve"
@@ -657,7 +725,10 @@ msgstr "Fondation Mont Godinne"
 msgid "Fondation St Luc"
 msgstr "Fondation St Luc"
 
-msgid "Framework of the supervisory panel report to download"
+msgid "Canvas of the report of the supervisory panel"
+msgstr "Canevas du procès-verbal du comité d'accompagnement"
+
+msgid "Canvas of the supervisory panel report to download"
 msgstr "Canevas du procès-verbal du comité d'accompagnement à télécharger"
 
 msgid "French"
@@ -713,6 +784,9 @@ msgstr ""
 
 msgid "Institute email"
 msgstr "Email de l'institut"
+
+msgid "Institute not specified"
+msgstr "Institut non spécifié"
 
 msgid "Institute of the thesis"
 msgstr "Institut de la thèse"
@@ -984,6 +1058,9 @@ msgstr "Nationalité"
 msgid "New deadline"
 msgstr "Nouvelle échéance"
 
+msgid "New thesis title (if applicable)"
+msgstr "Nouveau titre de la thèse (le cas échéant)"
+
 msgid "No"
 msgstr "Non"
 
@@ -999,6 +1076,9 @@ msgstr "Aucune inscription en doctorat n'a été trouvée"
 msgid "No doctorate found."
 msgstr "Doctorat non trouvé."
 
+msgid "No student found."
+msgstr "Étudiant non trouvé."
+
 msgid "Not specified"
 msgstr "Non spécifié(e)"
 
@@ -1008,8 +1088,8 @@ msgstr "Autre"
 msgid "Office"
 msgstr "Bureau"
 
-msgid "Only for FNRS, FRIA and FRESH scholarship students"
-msgstr "Destinée uniquement aux boursiers FNRS, FRIA, FRESH"
+msgid "Opinion of the CA following the format provided by the CDD"
+msgstr "Avis du comité d'accompagnement suivant le format fourni par la CDD"
 
 msgid "Opinion on the renewal of the research mandate"
 msgstr "Avis sur le renouvellement du mandat de recherche"
@@ -1151,6 +1231,9 @@ msgstr "Prévisualiser le template d'email personnalisé <em>%(name)s</em>"
 msgid "Previous experience"
 msgstr "Parcours antérieur"
 
+msgid "Prof."
+msgstr "Prof."
+
 msgid "Program proposition"
 msgstr "Proposition de programme"
 
@@ -1218,6 +1301,9 @@ msgstr "Refusé"
 msgid "REJECTED"
 msgstr "Rejeté"
 
+msgid "Reason for exceeding the deadline"
+msgstr "Motif du dépassement de l’échéance"
+
 msgid "Recipient"
 msgstr "Destinataire"
 
@@ -1226,6 +1312,9 @@ msgstr "Lettres de recommandation"
 
 msgid "Reference"
 msgstr "Référence"
+
+msgid "Registration Id"
+msgstr "Noma"
 
 msgid "Rejection reason"
 msgstr "Motif de refus"
@@ -1329,8 +1418,14 @@ msgstr "Expéditeur"
 msgid "Sex"
 msgstr "Sexe"
 
+msgid "Signatures"
+msgstr "Signatures"
+
 msgid "Status changes"
 msgstr "Changements de statut"
+
+msgid "Status of the doctoral training"
+msgstr "État d’avancement de la formation doctorale"
 
 msgid "Status:"
 msgstr "Statut :"
@@ -1359,6 +1454,9 @@ msgstr "Groupe de supervision non trouvé."
 msgid "Supervisory panel"
 msgstr "Comité d'accompagnement"
 
+msgid "Supervisory panel report of the confirmation paper"
+msgstr "Procès-verbal de l'épreuve de confirmation"
+
 msgid "TO_BE_COMPLETED"
 msgstr "À compléter"
 
@@ -1368,8 +1466,28 @@ msgstr "Pour validation"
 msgid "TO_BE_VERIFIED"
 msgstr "Pour vérification"
 
+msgid "The <strong>additional training</strong> has been completed: yes / no."
+msgstr ""
+"La <strong>formation complémentaire</strong> a été réalisée : oui / non."
+
 msgid "The acronym of the scholarship grant"
 msgstr "L'acronyme de la bourse d'études"
+
+msgctxt "female gender"
+msgid ""
+"The committee requests the candidate to <strong>retake</strong> the paper "
+"<u>before</u>:"
+msgstr ""
+"Le comité demande à la candidate de présenter une <strong>nouvelle épreuve</"
+"strong> <u>avant</u> le :"
+
+msgctxt "male gender"
+msgid ""
+"The committee requests the candidate to <strong>retake</strong> the paper "
+"<u>before</u>:"
+msgstr ""
+"Le comité demande au candidat de présenter une <strong>nouvelle épreuve</"
+"strong> <u>avant</u> le :"
 
 msgid ""
 "The confirmation paper is not completed: please be sure that the "
@@ -1381,6 +1499,10 @@ msgstr ""
 msgid "The confirmation paper is not in progress"
 msgstr "L'épreuve de confirmation n'est pas en cours."
 
+msgid "The current training is attached to this document."
+msgstr ""
+"La formation réalisée à ce jour se trouve en annexe à ce procès-verbal."
+
 msgid "The date of the confirmation paper cannot be later than its deadline."
 msgstr ""
 "La date de l'épreuve de confirmation ne peut être postérieure à sa date "
@@ -1388,6 +1510,14 @@ msgstr ""
 
 msgid "The decision of the signing actor"
 msgstr "La décision du signataire"
+
+msgctxt "female gender"
+msgid "The doctoral student"
+msgstr "La doctorante"
+
+msgctxt "male gender"
+msgid "The doctoral student"
+msgstr "Le doctorant"
 
 msgid "The dossier has been confirmed as:"
 msgstr "La demande a été confirmée sous le nom :"
@@ -1461,9 +1591,6 @@ msgstr ""
 msgid "There is no request for a new deadline."
 msgstr "Il n'y a pas de demande de nouvelle échéance."
 
-msgid "Thesis funding renewal"
-msgstr "Demande de renouvellement de bourse"
-
 msgid "Thesis institute"
 msgstr "Institut de la thèse"
 
@@ -1475,6 +1602,9 @@ msgstr "Langue de la thèse"
 
 msgid "Thesis location"
 msgstr "Lieu de la thèse"
+
+msgid "Thesis title"
+msgstr "Titre de la thèse"
 
 msgid "This experience cannot be deleted as it has already been valuated."
 msgstr "Cette expérience ne peut être supprimée, ayant déjà été évaluée."
@@ -1496,6 +1626,13 @@ msgstr "Titre du doctorat"
 
 msgid "To"
 msgstr "À"
+
+msgid ""
+"To be uploaded in your dossier on the doctoral platform as soon as possible "
+"after the confirmation test"
+msgstr ""
+"À téléverser dans votre dossier sur la plateforme doctorale dans les plus "
+"brefs délais après l’épreuve de confirmation"
 
 msgid "Token"
 msgstr "Token"
@@ -1618,3 +1755,12 @@ msgstr "éléments par page"
 
 msgid "modified"
 msgstr "modifiée"
+
+msgid "the <strong>failure</strong> of the confirmation paper."
+msgstr "l'<strong>échec</strong> de l'épreuve de confirmation."
+
+msgid "the <strong>not pursing</strong> of the doctorate."
+msgstr "la <strong>non-poursuite</strong> du doctorat."
+
+msgid "the <strong>successful completion</strong> of the confirmation paper."
+msgstr "la <strong>réussite</strong> de l'épreuve de confirmation."

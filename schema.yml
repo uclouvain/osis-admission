@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Admission API
-  version: 1.0.22
+  version: 1.0.23
   description: This API delivers data for the Admission project.
   contact:
     name: UCLouvain - OSIS
@@ -1322,6 +1322,37 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DoctorateIdentityDTO'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
+  /propositions/{uuid}/confirmation/last/canvas:
+    get:
+      operationId: retrieve_last_confirmation_paper_canvas
+      description: Get the last confirmation paper canvas related to the doctorate
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConfirmationPaperCanvas'
           description: ''
         '400':
           $ref: '#/components/responses/BadRequest'
@@ -3222,7 +3253,7 @@ components:
           type: array
           items:
             type: string
-        demande_renouvellement_bourse:
+        canevas_proces_verbal_ca:
           type: array
           items:
             type: string
@@ -3237,8 +3268,16 @@ components:
       - proces_verbal_ca
       - attestation_reussite
       - attestation_echec
-      - demande_renouvellement_bourse
+      - canevas_proces_verbal_ca
       - avis_renouvellement_mandat_recherche
+    ConfirmationPaperCanvas:
+      type: object
+      properties:
+        uuid:
+          type: string
+          format: uuid
+      required:
+      - uuid
     DoctorateDTO:
       type: object
       properties:
@@ -3254,7 +3293,21 @@ components:
           type: integer
         intitule_formation:
           type: string
+        titre_these:
+          type: string
+        type_financement:
+          type: string
+        bourse_recherche:
+          type: string
+        admission_acceptee_le:
+          type: string
+          format: date-time
+          nullable: true
         matricule_doctorant:
+          type: string
+        noma_doctorant:
+          type: string
+        genre_doctorant:
           type: string
         prenom_doctorant:
           type: string
@@ -3282,7 +3335,11 @@ components:
       - sigle_formation
       - annee_formation
       - intitule_formation
+      - titre_these
+      - type_financement
       - matricule_doctorant
+      - noma_doctorant
+      - genre_doctorant
       - prenom_doctorant
       - nom_doctorant
     SectorDTO:

@@ -43,6 +43,7 @@ from admission.api.views.confirmation import (
     ConfirmationAPIView,
     LastConfirmationAPIView,
     SupervisedConfirmationAPIView,
+    LastConfirmationCanvasAPIView,
 )
 from admission.api.views.doctorate import DoctorateAPIView
 
@@ -70,6 +71,7 @@ __all__ = [
     "DashboardViewSet",
     "ConfirmationAPIView",
     "LastConfirmationAPIView",
+    "LastConfirmationCanvasAPIView",
     "SupervisedConfirmationAPIView",
     "DoctorateAPIView",
 ]

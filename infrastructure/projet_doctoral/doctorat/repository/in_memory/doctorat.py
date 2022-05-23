@@ -41,6 +41,7 @@ from admission.ddd.projet_doctoral.doctorat.test.factory.doctorat import (
     DoctoratSC3DPAvecPromoteurRefuseEtMembreCADejaApprouveFactoryRejeteeCDDFactory,
     DoctoratSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory,
 )
+from admission.ddd.projet_doctoral.validation.domain.model._enums import ChoixGenre
 from base.ddd.utils.in_memory_repository import InMemoryGenericRepository
 
 
@@ -49,6 +50,8 @@ class Doctorant:
     matricule: str
     prenom: str
     nom: str
+    noma: str
+    genre: ChoixGenre
 
 
 @dataclass
@@ -61,9 +64,9 @@ class Formation:
 class DoctoratInMemoryRepository(InMemoryGenericRepository, IDoctoratRepository):
     entities: List[EpreuveConfirmation] = list()
     doctorants = [
-        Doctorant("1", "Jean", "Dupont"),
-        Doctorant("2", "Michel", "Durand"),
-        Doctorant("3", "Pierre", "Dupond"),
+        Doctorant("1", "Jean", "Dupont", "01", ChoixGenre.H),
+        Doctorant("2", "Michel", "Durand", "02", ChoixGenre.H),
+        Doctorant("3", "Pierre", "Dupond", "03", ChoixGenre.H),
     ]
 
     formations = [
@@ -94,6 +97,12 @@ class DoctoratInMemoryRepository(InMemoryGenericRepository, IDoctoratRepository)
             annee_formation=formation.annee,
             sigle_formation=formation.sigle,
             intitule_formation=formation.intitule,
+            titre_these='',
+            type_financement='',
+            bourse_recherche=None,
+            admission_acceptee_le=None,  # TODO to add when the field will be added to the model
+            noma_doctorant=doctorant.noma,
+            genre_doctorant=doctorant.genre.name,
         )
 
     @classmethod

@@ -35,6 +35,7 @@ from admission.ddd.projet_doctoral.doctorat.domain.model.enums import ChoixStatu
 from admission.ddd.projet_doctoral.doctorat.domain.validator.exceptions import DoctoratNonTrouveException
 from admission.ddd.projet_doctoral.doctorat.dtos import DoctoratDTO
 from admission.ddd.projet_doctoral.doctorat.repository.i_doctorat import IDoctoratRepository
+from base.models.student import Student
 from osis_common.ddd.interface import EntityIdentity, RootEntity, ApplicationService
 
 
@@ -66,9 +67,7 @@ class DoctoratRepository(IDoctoratRepository):
     def save(cls, entity: 'Doctorat') -> None:
         DoctorateAdmission.objects.update_or_create(
             uuid=entity.entity_id.uuid,
-            defaults={
-                'post_enrolment_status': entity.statut.name
-            },
+            defaults={'post_enrolment_status': entity.statut.name},
         )
 
     @classmethod
@@ -78,6 +77,8 @@ class DoctoratRepository(IDoctoratRepository):
         except DoctorateProxy.DoesNotExist:
             raise DoctoratNonTrouveException
 
+        student: Optional[Student] = Student.objects.filter(person=doctorate.candidate).first()
+
         return DoctoratDTO(
             uuid=str(entity_id.uuid),
             statut=ChoixStatutDoctorat[doctorate.post_enrolment_status].name,
@@ -85,9 +86,15 @@ class DoctoratRepository(IDoctoratRepository):
             matricule_doctorant=doctorate.candidate.global_id,
             nom_doctorant=doctorate.candidate.last_name,
             prenom_doctorant=doctorate.candidate.first_name,
+            genre_doctorant=doctorate.candidate.gender,
             annee_formation=doctorate.doctorate.academic_year.year,
             sigle_formation=doctorate.doctorate.acronym,
+            noma_doctorant=student.registration_id if student else '',
             intitule_formation=doctorate.doctorate.title
             if get_language() == settings.LANGUAGE_CODE_FR
             else doctorate.doctorate.title_english,
+            titre_these=doctorate.project_title,
+            type_financement=doctorate.financing_type,
+            bourse_recherche=doctorate.scholarship_grant,
+            admission_acceptee_le=None,  # TODO to add when the field will be added to the model
         )

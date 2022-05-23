@@ -434,12 +434,17 @@ class DoctorateManager(models.Manager):
             .only(
                 'candidate',
                 'doctorate',
-                'doctorate__academic_year',
+                'doctorate__academic_year__year',
+                'doctorate__title',
+                'doctorate__acronym',
                 'post_enrolment_status',
                 'proximity_commission',
                 'reference',
                 'submitted_profile',
                 'uuid',
+                'project_title',
+                'financing_type',
+                'scholarship_grant',
             )
             .select_related(
                 'candidate',
@@ -504,10 +509,9 @@ class ConfirmationPaper(models.Model):
         upload_to=confirmation_paper_directory_path,
         max_files=1,
     )
-    thesis_funding_renewal = FileField(
-        verbose_name=_("Thesis funding renewal"),
+    supervisor_panel_report_canvas = FileField(
+        verbose_name=_("Canvas of the report of the supervisory panel"),
         upload_to=confirmation_paper_directory_path,
-        help_text=_("Only for FNRS, FRIA and FRESH scholarship students"),
         max_files=1,
     )
     research_mandate_renewal_opinion = FileField(

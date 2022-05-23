@@ -39,6 +39,7 @@ from base.tests.factories.education_group_type import EducationGroupTypeFactory
 from base.tests.factories.education_group_year import EducationGroupYearFactory
 from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.person import PersonFactory
+from base.tests.factories.student import StudentFactory
 
 
 class DoctorateFactory(EducationGroupYearFactory):
@@ -106,3 +107,8 @@ class DoctorateAdmissionFactory(factory.DjangoModelFactory):
     @factory.post_generation
     def create_candidate_role(self, create, extracted, **kwargs):
         CandidateFactory(person=self.candidate)
+
+    @factory.post_generation
+    def create_student_if_admitted(self, create, extracted, *kwargs):
+        if self.post_enrolment_status != ChoixStatutDoctorat.ADMISSION_IN_PROGRESS.name:
+            StudentFactory(person=self.candidate)

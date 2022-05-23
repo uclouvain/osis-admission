@@ -23,42 +23,25 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from rest_framework import serializers
 
-from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.commands import (
-    SoumettreEpreuveConfirmationCommand,
-    CompleterEpreuveConfirmationParPromoteurCommand,
-    SoumettreReportDeDateCommand,
-)
-from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.dtos import EpreuveConfirmationDTO
-from base.utils.serializers import DTOSerializer
+from django.utils import translation
+
+from admission.exports.utils import admission_generate_pdf
+from admission.contrib.models import ConfirmationPaper
 
 
-class ConfirmationPaperCanvasSerializer(serializers.Serializer):
-    uuid = serializers.UUIDField()
-
-
-class ConfirmationPaperDTOSerializer(DTOSerializer):
-    class Meta:
-        source = EpreuveConfirmationDTO
-
-
-class SubmitConfirmationPaperCommandSerializer(DTOSerializer):
-    uuid = None
-
-    class Meta:
-        source = SoumettreEpreuveConfirmationCommand
-
-
-class CompleteConfirmationPaperByPromoterCommandSerializer(DTOSerializer):
-    uuid = None
-
-    class Meta:
-        source = CompleterEpreuveConfirmationParPromoteurCommand
-
-
-class SubmitConfirmationPaperExtensionRequestCommandSerializer(DTOSerializer):
-    uuid = None
-
-    class Meta:
-        source = SoumettreReportDeDateCommand
+def admission_pdf_confirmation_canvas(admission, language, context):
+    with translation.override(language=language):
+        # Generate the pdf
+        save_token = admission_generate_pdf(
+            admission=admission,
+            template='admission/exports/confirmation_export.html',
+            filename='confirmation.pdf',
+            context=context,
+        )
+        # Attach the file to the object
+        confirmation_paper = ConfirmationPaper.objects.get(uuid=context.get('confirmation_paper').uuid)
+        confirmation_paper.supervisor_panel_report_canvas = [save_token]
+        confirmation_paper.save()
+        # Return the file UUID
+        return confirmation_paper.supervisor_panel_report_canvas[0]
