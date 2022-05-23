@@ -24,6 +24,26 @@ msgid ""
 "            "
 msgstr ""
 
+msgctxt "female gender"
+msgid ""
+"\n"
+"            Following the presentation of the state of the research and the "
+"subsequent discussion with the candidate,\n"
+"            the supervisory panel assessed the progress of the work and "
+"announces:\n"
+"          "
+msgstr ""
+
+msgctxt "male gender"
+msgid ""
+"\n"
+"            Following the presentation of the state of the research and the "
+"subsequent discussion with the candidate,\n"
+"            the supervisory panel assessed the progress of the work and "
+"announces:\n"
+"          "
+msgstr ""
+
 #, python-format
 msgid ""
 "\n"
@@ -47,6 +67,14 @@ msgstr[1] ""
 #, python-format
 msgid ""
 "\n"
+"        The number of acquired <strong>doctoral</strong> credits amounts to "
+"%(credits_nb)s credits.\n"
+"      "
+msgstr ""
+
+#, python-format
+msgid ""
+"\n"
 "      <h2>Delete \"%(name)s\" custom mail template?</h2>\n"
 "      <p>Are you sure you want to delete the custom mail template? This "
 "cannot be undone.</p>\n"
@@ -62,6 +90,9 @@ msgstr ""
 
 #, python-format
 msgid "%(label)s:"
+msgstr ""
+
+msgid ", on"
 msgstr ""
 
 #, python-format
@@ -124,6 +155,9 @@ msgstr ""
 msgid "Abstract"
 msgstr ""
 
+msgid "Achieved additional training"
+msgstr ""
+
 msgid "Acronym / Title"
 msgstr ""
 
@@ -173,7 +207,13 @@ msgstr "Already a member of the supervisory panel."
 msgid "Already a promoter."
 msgstr ""
 
+msgid "Approximate date for completing the thesis:"
+msgstr ""
+
 msgid "Archived record when signatures were sent"
+msgstr ""
+
+msgid "Attachments:"
 msgstr ""
 
 msgid "Author"
@@ -193,6 +233,9 @@ msgstr ""
 
 msgid "CA Member"
 msgstr "Supervisory panel member"
+
+msgid "CA members"
+msgstr "Supervisory panel members"
 
 msgid "CANCELLED"
 msgstr ""
@@ -496,6 +539,9 @@ msgstr ""
 msgid "Defense"
 msgstr ""
 
+msgid "Definitive admission date to doctorate"
+msgstr ""
+
 msgid "Definitive admission date:"
 msgstr ""
 
@@ -512,6 +558,9 @@ msgid "Diploma"
 msgstr ""
 
 msgid "Doctoral project"
+msgstr ""
+
+msgid "Doctoral student"
 msgstr ""
 
 msgid "Doctoral student:"
@@ -533,6 +582,9 @@ msgid "Doctorate reader"
 msgstr ""
 
 msgid "Doctorate readers"
+msgstr ""
+
+msgid "Done in"
 msgstr ""
 
 msgid "Dossier confirmation"
@@ -623,7 +675,10 @@ msgstr ""
 msgid "Fondation St Luc"
 msgstr ""
 
-msgid "Framework of the supervisory panel report to download"
+msgid "Canvas of the report of the supervisory panel"
+msgstr ""
+
+msgid "Canvas of the supervisory panel report to download"
 msgstr ""
 
 msgid "French"
@@ -674,6 +729,9 @@ msgid ""
 msgstr ""
 
 msgid "Institute email"
+msgstr ""
+
+msgid "Institute not specified"
 msgstr ""
 
 msgid "Institute of the thesis"
@@ -905,6 +963,9 @@ msgstr ""
 msgid "New deadline"
 msgstr ""
 
+msgid "New thesis title (if applicable)"
+msgstr ""
+
 msgid "No"
 msgstr ""
 
@@ -920,6 +981,9 @@ msgstr ""
 msgid "No doctorate found."
 msgstr ""
 
+msgid "No student found."
+msgstr ""
+
 msgid "Not specified"
 msgstr ""
 
@@ -929,7 +993,7 @@ msgstr "Other"
 msgid "Office"
 msgstr ""
 
-msgid "Only for FNRS, FRIA and FRESH scholarship students"
+msgid "Opinion of the CA following the format provided by the CDD"
 msgstr ""
 
 msgid "Opinion on the renewal of the research mandate"
@@ -1060,6 +1124,9 @@ msgstr ""
 msgid "Previous experience"
 msgstr ""
 
+msgid "Prof."
+msgstr ""
+
 msgid "Program proposition"
 msgstr ""
 
@@ -1123,6 +1190,9 @@ msgstr "Declined"
 msgid "REJECTED"
 msgstr "Rejected"
 
+msgid "Reason for exceeding the deadline"
+msgstr ""
+
 msgid "Recipient"
 msgstr ""
 
@@ -1130,6 +1200,9 @@ msgid "Recommendation letters"
 msgstr ""
 
 msgid "Reference"
+msgstr ""
+
+msgid "Registration Id"
 msgstr ""
 
 msgid "Rejection reason"
@@ -1234,7 +1307,13 @@ msgstr ""
 msgid "Sex"
 msgstr ""
 
+msgid "Signatures"
+msgstr ""
+
 msgid "Status changes"
+msgstr ""
+
+msgid "Status of the doctoral training"
 msgstr ""
 
 msgid "Status:"
@@ -1264,6 +1343,9 @@ msgstr ""
 msgid "Supervisory panel"
 msgstr ""
 
+msgid "Supervisory panel report of the confirmation paper"
+msgstr ""
+
 msgid "TO_BE_COMPLETED"
 msgstr "To be completed"
 
@@ -1273,7 +1355,22 @@ msgstr "To be validated"
 msgid "TO_BE_VERIFIED"
 msgstr "To be verified"
 
+msgid "The <strong>additional training</strong> has been completed: yes / no."
+msgstr ""
+
 msgid "The acronym of the scholarship grant"
+msgstr ""
+
+msgctxt "female gender"
+msgid ""
+"The committee requests the candidate to <strong>retake</strong> the paper "
+"<u>before</u>:"
+msgstr ""
+
+msgctxt "male gender"
+msgid ""
+"The committee requests the candidate to <strong>retake</strong> the paper "
+"<u>before</u>:"
 msgstr ""
 
 msgid ""
@@ -1284,10 +1381,21 @@ msgstr ""
 msgid "The confirmation paper is not in progress"
 msgstr ""
 
+msgid "The current training is attached to this document."
+msgstr ""
+
 msgid "The date of the confirmation paper cannot be later than its deadline."
 msgstr ""
 
 msgid "The decision of the signing actor"
+msgstr ""
+
+msgctxt "female gender"
+msgid "The doctoral student"
+msgstr ""
+
+msgctxt "male gender"
+msgid "The doctoral student"
 msgstr ""
 
 msgid "The dossier has been confirmed as:"
@@ -1360,9 +1468,6 @@ msgstr ""
 msgid "There is no request for a new deadline."
 msgstr ""
 
-msgid "Thesis funding renewal"
-msgstr ""
-
 msgid "Thesis institute"
 msgstr ""
 
@@ -1373,6 +1478,9 @@ msgid "Thesis language"
 msgstr ""
 
 msgid "Thesis location"
+msgstr ""
+
+msgid "Thesis title"
 msgstr ""
 
 msgid "This experience cannot be deleted as it has already been valuated."
@@ -1394,6 +1502,11 @@ msgid "Title of the doctorate"
 msgstr ""
 
 msgid "To"
+msgstr ""
+
+msgid ""
+"To be uploaded in your dossier on the doctoral platform as soon as possible "
+"after the confirmation test"
 msgstr ""
 
 msgid "Token"
@@ -1504,4 +1617,13 @@ msgid "items per page"
 msgstr ""
 
 msgid "modified"
+msgstr ""
+
+msgid "the <strong>failure</strong> of the confirmation paper."
+msgstr ""
+
+msgid "the <strong>not pursing</strong> of the doctorate."
+msgstr ""
+
+msgid "the <strong>successful completion</strong> of the confirmation paper."
 msgstr ""

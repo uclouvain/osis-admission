@@ -36,7 +36,9 @@
   {% bootstrap_field form.date form_group_class="form-group min_field" %}
   {% bootstrap_field form.rapport_recherche %}
   <p>
-    <a href="#">{% trans "Framework of the supervisory panel report to download" %}</a>
+    <a href="{% url 'admission:doctorate:confirmation-canvas' view.kwargs.pk %}" target="_blank">
+      {% trans "Canvas of the supervisory panel report to download" %}
+    </a>
   </p>
   {% bootstrap_field form.proces_verbal_ca %}
   {% bootstrap_field form.avis_renouvellement_mandat_recherche %}

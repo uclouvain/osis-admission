@@ -24,11 +24,11 @@
 #
 # ##############################################################################
 import datetime
-from typing import Optional, List
 from unittest.mock import patch
+from uuid import UUID
 
-from django.contrib.auth.models import User
 from django.shortcuts import resolve_url
+from django.test import override_settings
 from rest_framework import status
 from rest_framework.test import APITestCase
 
@@ -44,29 +44,13 @@ from admission.ddd.projet_doctoral.preparation.domain.model._enums import (
 
 from admission.tests.factories import DoctorateAdmissionFactory, WriteTokenFactory
 from admission.tests.factories.confirmation_paper import ConfirmationPaperFactory
-from admission.tests.factories.roles import CandidateFactory
 from admission.tests.factories.supervision import PromoterFactory
 from base.models.enums.entity_type import EntityType
 from base.tests.factories.entity_version import EntityVersionFactory
-from base.tests.factories.person import PersonFactory
 
 
+@override_settings(OSIS_DOCUMENT_BASE_URL='http://dummyurl/')
 class ConfirmationAPIViewTestCase(APITestCase):
-    admission: Optional[DoctorateAdmissionFactory] = None
-    doctorate: Optional[DoctorateAdmissionFactory] = None
-    other_doctorate: Optional[DoctorateAdmissionFactory] = None
-    commission: Optional[EntityVersionFactory] = None
-    sector: Optional[EntityVersionFactory] = None
-    student: Optional[CandidateFactory] = None
-    other_student: Optional[CandidateFactory] = None
-    no_role_user: Optional[User] = None
-    promoter: Optional[User] = None
-    other_promoter: Optional[User] = None
-    doctorate_url: Optional[str] = None
-    other_doctorate_url: Optional[str] = None
-    admission_url: Optional[str] = None
-    confirmation_papers: List[ConfirmationPaperFactory] = []
-
     @classmethod
     def setUpTestData(cls):
         # Create supervision group members
@@ -75,50 +59,49 @@ class ConfirmationAPIViewTestCase(APITestCase):
 
         # Create doctorate management entity
         root = EntityVersionFactory(parent=None).entity
-        cls.sector = EntityVersionFactory(
+        sector = EntityVersionFactory(
             parent=root,
             entity_type=EntityType.SECTOR.name,
             acronym='SST',
         ).entity
-        cls.commission = EntityVersionFactory(
-            parent=cls.sector,
+        commission = EntityVersionFactory(
+            parent=sector,
             entity_type=EntityType.DOCTORAL_COMMISSION.name,
             acronym='CDA',
         ).entity
         cls.doctorate = DoctorateAdmissionFactory(
             status=ChoixStatutProposition.ENROLLED.name,
             post_enrolment_status=ChoixStatutDoctorat.ADMITTED.name,
-            doctorate__management_entity=cls.commission,
+            doctorate__management_entity=commission,
             supervision_group=promoter.process,
         )
-        cls.admission = DoctorateAdmissionFactory(
-            doctorate__management_entity=cls.commission,
+        admission = DoctorateAdmissionFactory(
+            doctorate__management_entity=commission,
             candidate=cls.doctorate.candidate,
         )
-        cls.other_doctorate = DoctorateAdmissionFactory(
+        other_doctorate = DoctorateAdmissionFactory(
             status=ChoixStatutProposition.ENROLLED.name,
             post_enrolment_status=ChoixStatutDoctorat.ADMITTED.name,
-            doctorate__management_entity=cls.commission,
+            doctorate__management_entity=commission,
             supervision_group=other_promoter.process,
         )
 
         # Users
         cls.student = cls.doctorate.candidate
-        cls.other_student = cls.other_doctorate.candidate
-        cls.no_role_user = PersonFactory().user
+        cls.other_student = other_doctorate.candidate
         cls.promoter = promoter.person.user
         cls.other_promoter = other_promoter.person.user
 
         cls.doctorate_url = resolve_url('admission_api_v1:confirmation', uuid=cls.doctorate.uuid)
-        cls.other_doctorate_url = resolve_url('admission_api_v1:confirmation', uuid=cls.other_doctorate.uuid)
-        cls.admission_url = resolve_url('admission_api_v1:confirmation', uuid=cls.admission.uuid)
+        cls.other_doctorate_url = resolve_url('admission_api_v1:confirmation', uuid=other_doctorate.uuid)
+        cls.admission_url = resolve_url('admission_api_v1:confirmation', uuid=admission.uuid)
 
         cls.supervised_doctorate_url = resolve_url('admission_api_v1:supervised_confirmation', uuid=cls.doctorate.uuid)
         cls.supervised_other_doctorate_url = resolve_url(
             'admission_api_v1:supervised_confirmation',
-            uuid=cls.other_doctorate.uuid,
+            uuid=other_doctorate.uuid,
         )
-        cls.supervised_admission_url = resolve_url('admission_api_v1:supervised_confirmation', uuid=cls.admission.uuid)
+        cls.supervised_admission_url = resolve_url('admission_api_v1:supervised_confirmation', uuid=admission.uuid)
 
     @patch("osis_document.contrib.fields.FileField._confirm_upload")
     def setUp(self, confirm_upload):
@@ -130,7 +113,7 @@ class ConfirmationAPIViewTestCase(APITestCase):
                 confirmation_deadline=datetime.date(2022, 4, 5),
                 research_report=[WriteTokenFactory().token],
                 supervisor_panel_report=[WriteTokenFactory().token],
-                thesis_funding_renewal=[WriteTokenFactory().token],
+                supervisor_panel_report_canvas=[WriteTokenFactory().token],
                 research_mandate_renewal_opinion=[WriteTokenFactory().token],
             ),
             ConfirmationPaperFactory(
@@ -138,7 +121,7 @@ class ConfirmationAPIViewTestCase(APITestCase):
                 confirmation_deadline=datetime.date(2022, 4, 10),
                 research_report=[WriteTokenFactory().token],
                 supervisor_panel_report=[WriteTokenFactory().token],
-                thesis_funding_renewal=[WriteTokenFactory().token],
+                supervisor_panel_report_canvas=[WriteTokenFactory().token],
                 research_mandate_renewal_opinion=[WriteTokenFactory().token],
             ),
         ]
@@ -300,20 +283,8 @@ class ConfirmationAPIViewTestCase(APITestCase):
         )
 
 
+@override_settings(OSIS_DOCUMENT_BASE_URL='http://dummyurl/')
 class LastConfirmationAPIViewTestCase(APITestCase):
-    admission: Optional[DoctorateAdmissionFactory] = None
-    doctorate: Optional[DoctorateAdmissionFactory] = None
-    other_doctorate: Optional[DoctorateAdmissionFactory] = None
-    commission: Optional[EntityVersionFactory] = None
-    sector: Optional[EntityVersionFactory] = None
-    student: Optional[CandidateFactory] = None
-    other_student: Optional[CandidateFactory] = None
-    no_role_user: Optional[User] = None
-    doctorate_url: Optional[str] = None
-    other_doctorate_url: Optional[str] = None
-    admission_url: Optional[str] = None
-    confirmation_papers: List[ConfirmationPaperFactory] = []
-
     @classmethod
     def setUpTestData(cls):
         # Create supervision group members
@@ -321,40 +292,39 @@ class LastConfirmationAPIViewTestCase(APITestCase):
 
         # Create doctorate management entity
         root = EntityVersionFactory(parent=None).entity
-        cls.sector = EntityVersionFactory(
+        sector = EntityVersionFactory(
             parent=root,
             entity_type=EntityType.SECTOR.name,
             acronym='SST',
         ).entity
-        cls.commission = EntityVersionFactory(
-            parent=cls.sector,
+        commission = EntityVersionFactory(
+            parent=sector,
             entity_type=EntityType.DOCTORAL_COMMISSION.name,
             acronym='CDA',
         ).entity
         cls.doctorate = DoctorateAdmissionFactory(
             status=ChoixStatutProposition.ENROLLED.name,
             post_enrolment_status=ChoixStatutDoctorat.ADMITTED.name,
-            doctorate__management_entity=cls.commission,
+            doctorate__management_entity=commission,
             supervision_group=promoter.process,
         )
-        cls.admission = DoctorateAdmissionFactory(
-            doctorate__management_entity=cls.commission,
+        admission = DoctorateAdmissionFactory(
+            doctorate__management_entity=commission,
             candidate=cls.doctorate.candidate,
         )
-        cls.other_doctorate = DoctorateAdmissionFactory(
+        other_doctorate = DoctorateAdmissionFactory(
             status=ChoixStatutProposition.ENROLLED.name,
             post_enrolment_status=ChoixStatutDoctorat.ADMITTED.name,
-            doctorate__management_entity=cls.commission,
+            doctorate__management_entity=commission,
         )
 
         # Users
         cls.student = cls.doctorate.candidate
-        cls.other_student = cls.other_doctorate.candidate
-        cls.no_role_user = PersonFactory().user
+        cls.other_student = other_doctorate.candidate
 
         cls.doctorate_url = resolve_url('admission_api_v1:last_confirmation', uuid=cls.doctorate.uuid)
-        cls.other_doctorate_url = resolve_url('admission_api_v1:last_confirmation', uuid=cls.other_doctorate.uuid)
-        cls.admission_url = resolve_url('admission_api_v1:last_confirmation', uuid=cls.admission.uuid)
+        cls.other_doctorate_url = resolve_url('admission_api_v1:last_confirmation', uuid=other_doctorate.uuid)
+        cls.admission_url = resolve_url('admission_api_v1:last_confirmation', uuid=admission.uuid)
 
     def setUp(self):
         self.confirmation_papers = [
@@ -639,3 +609,122 @@ class LastConfirmationAPIViewTestCase(APITestCase):
             response.json()['non_field_errors'][0]['status_code'],
             EpreuveConfirmationNonTrouveeException.status_code,
         )
+
+
+@override_settings(OSIS_DOCUMENT_BASE_URL='http://dummyurl/')
+class LastConfirmationCanvasAPIViewTestCase(APITestCase):
+    @classmethod
+    def setUpTestData(cls):
+        # Create supervision group members
+        promoter = PromoterFactory()
+
+        # Create doctorate management entity
+        root = EntityVersionFactory(parent=None).entity
+        sector = EntityVersionFactory(
+            parent=root,
+            entity_type=EntityType.SECTOR.name,
+            acronym='SST',
+        ).entity
+
+        commission = EntityVersionFactory(
+            parent=sector,
+            entity_type=EntityType.DOCTORAL_COMMISSION.name,
+            acronym='CDA',
+        ).entity
+        cls.doctorate = DoctorateAdmissionFactory(
+            status=ChoixStatutProposition.ENROLLED.name,
+            post_enrolment_status=ChoixStatutDoctorat.ADMITTED.name,
+            doctorate__management_entity=commission,
+            supervision_group=promoter.process,
+        )
+        admission = DoctorateAdmissionFactory(
+            doctorate__management_entity=commission,
+            candidate=cls.doctorate.candidate,
+        )
+        other_doctorate = DoctorateAdmissionFactory(
+            status=ChoixStatutProposition.ENROLLED.name,
+            post_enrolment_status=ChoixStatutDoctorat.ADMITTED.name,
+            doctorate__management_entity=commission,
+        )
+
+        # Users
+        cls.student = cls.doctorate.candidate
+
+        path_name = 'admission_api_v1:last_confirmation_canvas'
+        cls.doctorate_url = resolve_url(path_name, uuid=cls.doctorate.uuid)
+        cls.other_doctorate_url = resolve_url(path_name, uuid=other_doctorate.uuid)
+        cls.admission_url = resolve_url(path_name, uuid=admission.uuid)
+
+        # Mock osis-document
+        cls.confirm_remote_upload_patcher = patch('osis_document.api.utils.confirm_remote_upload')
+        patched = cls.confirm_remote_upload_patcher.start()
+        patched.return_value = '4bdffb42-552d-415d-9e4c-725f10dce228'
+
+        cls.get_remote_metadata_patcher = patch('osis_document.api.utils.get_remote_metadata')
+        patched = cls.get_remote_metadata_patcher.start()
+        patched.return_value = {"name": "test.pdf"}
+
+        cls.get_remote_token_patcher = patch('osis_document.api.utils.get_remote_token')
+        patched = cls.get_remote_token_patcher.start()
+        patched.return_value = 'b-token'
+
+        cls.save_raw_content_remotely_patcher = patch('osis_document.utils.save_raw_content_remotely')
+        patched = cls.save_raw_content_remotely_patcher.start()
+        patched.return_value = 'a-token'
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.confirm_remote_upload_patcher.stop()
+        cls.get_remote_metadata_patcher.stop()
+        cls.get_remote_token_patcher.stop()
+        cls.save_raw_content_remotely_patcher.stop()
+        super().tearDownClass()
+
+    def setUp(self):
+        self.confirmation_paper = ConfirmationPaperFactory(
+            admission=self.doctorate,
+            confirmation_date=datetime.date(2022, 4, 1),
+            confirmation_deadline=datetime.date(2022, 4, 5),
+        )
+
+    def test_assert_methods_not_allowed(self):
+        self.client.force_authenticate(user=self.student.user)
+        methods_not_allowed = [
+            'delete',
+            'patch',
+            'post',
+            'put',
+        ]
+
+        for method in methods_not_allowed:
+            response = getattr(self.client, method)(self.doctorate_url)
+            self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    def test_get_confirmation_canvas_student(self):
+        self.client.force_authenticate(user=self.student.user)
+        response = self.client.get(self.doctorate_url, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Check response data
+        json_response = response.json()
+        self.assertEqual(json_response['uuid'], '4bdffb42-552d-415d-9e4c-725f10dce228')
+
+        # Check saved data
+        confirmation_paper = ConfirmationPaper.objects.get(uuid=self.confirmation_paper.uuid)
+        self.assertEqual(
+            confirmation_paper.supervisor_panel_report_canvas,
+            [UUID('4bdffb42-552d-415d-9e4c-725f10dce228')],
+        )
+
+    def test_can_not_get_confirmation_canvas_if_not_doctorate(self):
+        self.client.force_authenticate(user=self.student.user)
+        response = self.client.get(self.admission_url, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_can_not_get_confirmation_canvas_if_other_student(self):
+        self.client.force_authenticate(user=self.student.user)
+        response = self.client.get(self.other_doctorate_url, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)

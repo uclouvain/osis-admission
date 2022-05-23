@@ -119,6 +119,6 @@ class EpreuveConfirmationInMemoryRepository(InMemoryGenericRepository, IEpreuveC
             proces_verbal_ca=confirmation_paper.proces_verbal_ca,
             attestation_reussite=confirmation_paper.attestation_reussite,
             attestation_echec=confirmation_paper.attestation_echec,
-            demande_renouvellement_bourse=confirmation_paper.demande_renouvellement_bourse,
+            canevas_proces_verbal_ca=confirmation_paper.canevas_proces_verbal_ca,
             avis_renouvellement_mandat_recherche=confirmation_paper.avis_renouvellement_mandat_recherche,
         )

@@ -23,6 +23,8 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from typing import Optional
+
 import attr
 
 from admission.ddd.projet_doctoral.doctorat.domain.model._formation import FormationIdentity

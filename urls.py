@@ -82,6 +82,11 @@ doctorate_detail_paths = [
     path('send-mail', DoctorateSendMailView.as_view(), name='send-mail'),
     path('confirmation', DoctorateAdmissionConfirmationDetailView.as_view(), name='confirmation'),
     path('extension-request', DoctorateAdmissionExtensionRequestDetailView.as_view(), name='extension-request'),
+    path(
+        'confirmation-canvas',
+        DoctorateAdmissionConfirmationCanvasExportView.as_view(),
+        name='confirmation-canvas',
+    ),
     path('update/', include((doctorate_update_paths, 'update'))),
 ]
 
