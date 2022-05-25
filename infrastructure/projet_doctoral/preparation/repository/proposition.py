@@ -313,7 +313,7 @@ class PropositionRepository(IPropositionRepository):
             eft=admission.financing_eft,
             bourse_recherche=admission.scholarship_grant,
             duree_prevue=admission.planned_duration,
-            temps_consacre=admission.planned_duration,
+            temps_consacre=admission.dedicated_time,
             titre_projet=admission.project_title,
             resume_projet=admission.project_abstract,
             documents_projet=admission.project_document,
