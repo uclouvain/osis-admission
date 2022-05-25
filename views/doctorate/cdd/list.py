@@ -32,7 +32,6 @@ from django.views.generic import ListView
 
 from admission.ddd.projet_doctoral.validation.commands import FiltrerDemandesQuery
 from admission.forms.doctorate.cdd.filter import FilterForm
-from admission.auth.mixins import CddRequiredMixin
 from base.utils.htmx import HtmxMixin
 from infrastructure.messages_bus import message_bus_instance
 

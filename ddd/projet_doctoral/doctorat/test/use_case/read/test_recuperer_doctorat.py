@@ -23,8 +23,6 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import List, Optional
-from unittest.mock import patch, _patch
 
 from django.test import SimpleTestCase
 
@@ -32,57 +30,12 @@ from admission.ddd.projet_doctoral.doctorat.commands import RecupererDoctoratQue
 from admission.ddd.projet_doctoral.doctorat.domain.model.enums import ChoixStatutDoctorat
 from admission.ddd.projet_doctoral.doctorat.domain.validator.exceptions import DoctoratNonTrouveException
 from admission.ddd.projet_doctoral.doctorat.dtos import DoctoratDTO
-from admission.ddd.projet_doctoral.preparation.test.factory.proposition import (
-    PropositionAdmissionSC3DPMinimaleFactory,
-    PropositionPreAdmissionSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory,
-    PropositionAdmissionSC3DPAvecPromoteurRefuseEtMembreCADejaApprouveFactory,
-    _PropositionFactory,
-)
-from admission.ddd.projet_doctoral.validation.test.factory.demande import (
-    DemandeAdmissionSC3DPMinimaleFactory,
-    DemandePreAdmissionSC3DPAvecPromoteursEtMembresCADejaApprouvesAccepteeFactory,
-    DemandeAdmissionSC3DPAvecPromoteurRefuseEtMembreCADejaApprouveFactoryRejeteeCDDFactory,
-    _DemandeFactory,
-)
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
-from admission.infrastructure.projet_doctoral.preparation.repository.in_memory.proposition import (
-    PropositionInMemoryRepository,
-)
-from admission.infrastructure.projet_doctoral.validation.repository.in_memory.demande import DemandeInMemoryRepository
 
 
 class TestRecupererDoctorat(SimpleTestCase):
-    proposition_patcher: Optional[_patch] = None
-    demande_patcher: Optional[_patch] = None
-    entites_propositions: List[_PropositionFactory] = []
-    entites_demandes: List[_DemandeFactory] = []
-
-    @classmethod
-    def setUpClass(cls) -> None:
-        super().setUpClass()
-
-        cls.entites_propositions = [
-            PropositionAdmissionSC3DPMinimaleFactory(),
-            PropositionPreAdmissionSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory(),
-            PropositionAdmissionSC3DPAvecPromoteurRefuseEtMembreCADejaApprouveFactory(),
-        ]
-        cls.proposition_patcher = patch.object(PropositionInMemoryRepository, 'entities', cls.entites_propositions)
-        cls.proposition_patcher.start()
-
-        cls.entites_demandes = [
-            DemandeAdmissionSC3DPMinimaleFactory(),
-            DemandePreAdmissionSC3DPAvecPromoteursEtMembresCADejaApprouvesAccepteeFactory(),
-            DemandeAdmissionSC3DPAvecPromoteurRefuseEtMembreCADejaApprouveFactoryRejeteeCDDFactory(),
-        ]
-        cls.demande_patcher = patch.object(DemandeInMemoryRepository, 'entities', cls.entites_demandes)
-        cls.demande_patcher.start()
-        cls.message_bus = message_bus_in_memory_instance
-
-    @classmethod
-    def tearDownClass(cls):
-        cls.proposition_patcher.stop()
-        cls.demande_patcher.stop()
-        super().tearDownClass()
+    def setUp(self) -> None:
+        self.message_bus = message_bus_in_memory_instance
 
     def test_should_pas_trouver_si_doctorat_inconnu(self):
         with self.assertRaises(DoctoratNonTrouveException):

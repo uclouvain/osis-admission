@@ -22,7 +22,6 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import List
 
 import attr
 from django.test import SimpleTestCase
@@ -31,9 +30,7 @@ from admission.ddd.projet_doctoral.preparation.commands import DemanderSignature
 from admission.ddd.projet_doctoral.preparation.domain.model._enums import ChoixStatutProposition
 from admission.ddd.projet_doctoral.preparation.domain.model._signature_promoteur import (
     ChoixEtatSignature,
-    SignaturePromoteur,
 )
-from admission.ddd.projet_doctoral.preparation.domain.model.proposition import Proposition
 from admission.ddd.projet_doctoral.preparation.domain.validator.exceptions import (
     CotutelleDoitAvoirAuMoinsUnPromoteurExterneException,
     CotutelleNonCompleteException,

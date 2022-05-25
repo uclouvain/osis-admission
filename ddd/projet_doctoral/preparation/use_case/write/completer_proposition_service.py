@@ -23,8 +23,6 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import attr
-
 from admission.ddd.projet_doctoral.preparation.builder.proposition_identity_builder import PropositionIdentityBuilder
 from admission.ddd.projet_doctoral.preparation.commands import CompleterPropositionCommand
 from admission.ddd.projet_doctoral.preparation.domain.model.proposition import PropositionIdentity

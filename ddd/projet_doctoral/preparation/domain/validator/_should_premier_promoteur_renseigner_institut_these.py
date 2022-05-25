@@ -28,6 +28,7 @@ from typing import List, Optional, Union
 
 import attr
 
+from admission.ddd.projet_doctoral.preparation.domain.model._institut import InstitutIdentity
 from admission.ddd.projet_doctoral.preparation.domain.model._membre_CA import MembreCAIdentity
 from admission.ddd.projet_doctoral.preparation.domain.model._promoteur import PromoteurIdentity
 from admission.ddd.projet_doctoral.preparation.domain.model._signature_promoteur import (
@@ -42,7 +43,7 @@ from base.ddd.utils.business_validator import BusinessValidator
 class ShouldPremierPromoteurRenseignerInstitutThese(BusinessValidator):
     signatures_promoteurs: List[SignaturePromoteur]
     signataire: Union['PromoteurIdentity', 'MembreCAIdentity']
-    proposition_institut_these: Optional[str]
+    proposition_institut_these: Optional[InstitutIdentity]
     institut_these: Optional[str]
 
     def validate(self, *args, **kwargs):

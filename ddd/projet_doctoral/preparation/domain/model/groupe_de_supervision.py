@@ -30,6 +30,7 @@ import attr
 
 from admission.ddd.projet_doctoral.preparation.domain.model._cotutelle import Cotutelle
 from admission.ddd.projet_doctoral.preparation.domain.model._enums import ChoixStatutSignatureGroupeDeSupervision
+from admission.ddd.projet_doctoral.preparation.domain.model._institut import InstitutIdentity
 from admission.ddd.projet_doctoral.preparation.domain.model._membre_CA import MembreCAIdentity
 from admission.ddd.projet_doctoral.preparation.domain.model._promoteur import PromoteurIdentity
 from admission.ddd.projet_doctoral.preparation.domain.model._signature_membre_CA import SignatureMembreCA
@@ -269,7 +270,7 @@ class GroupeDeSupervision(interface.RootEntity):
     def verifier_premier_promoteur_renseigne_institut_these(
         self,
         signataire: Union[PromoteurIdentity, MembreCAIdentity],
-        proposition_institut_these: Optional[str],
+        proposition_institut_these: Optional[InstitutIdentity],
         institut_these: Optional[str],
     ):
         ApprobationPromoteurValidatorList(

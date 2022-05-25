@@ -23,8 +23,6 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import datetime
-
 import attr
 
 from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.validators.exceptions import (

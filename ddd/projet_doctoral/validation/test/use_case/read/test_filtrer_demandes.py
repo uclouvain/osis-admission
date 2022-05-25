@@ -23,26 +23,23 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import List, Optional
-from unittest.mock import patch, _patch
+from typing import List
 
 from django.test import SimpleTestCase
 
 from admission.ddd.projet_doctoral.preparation.domain.model._enums import ChoixTypeAdmission
 from admission.ddd.projet_doctoral.preparation.test.factory.proposition import (
+    PropositionAdmissionSC3DPAvecPromoteurRefuseEtMembreCADejaApprouveFactory,
     PropositionAdmissionSC3DPMinimaleFactory,
     PropositionPreAdmissionSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory,
-    PropositionAdmissionSC3DPAvecPromoteurRefuseEtMembreCADejaApprouveFactory,
-    _PropositionFactory,
 )
 from admission.ddd.projet_doctoral.validation.commands import FiltrerDemandesQuery
 from admission.ddd.projet_doctoral.validation.domain.model._enums import ChoixStatutCDD, ChoixStatutSIC
 from admission.ddd.projet_doctoral.validation.dtos import DemandeRechercheDTO
 from admission.ddd.projet_doctoral.validation.test.factory.demande import (
+    DemandeAdmissionSC3DPAvecPromoteurRefuseEtMembreCADejaApprouveFactoryRejeteeCDDFactory,
     DemandeAdmissionSC3DPMinimaleFactory,
     DemandePreAdmissionSC3DPAvecPromoteursEtMembresCADejaApprouvesAccepteeFactory,
-    DemandeAdmissionSC3DPAvecPromoteurRefuseEtMembreCADejaApprouveFactoryRejeteeCDDFactory,
-    _DemandeFactory,
 )
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 from admission.infrastructure.projet_doctoral.preparation.repository.in_memory.proposition import (
@@ -52,52 +49,34 @@ from admission.infrastructure.projet_doctoral.validation.repository.in_memory.de
 
 
 class TestFiltrerDemandes(SimpleTestCase):
-    proposition_patcher: Optional[_patch] = None
-    demande_patcher: Optional[_patch] = None
-    entites_propositions: List[_PropositionFactory] = []
-    entites_demandes: List[_DemandeFactory] = []
-
-    @classmethod
-    def setUpClass(cls) -> None:
-        super().setUpClass()
-
-        cls.entites_propositions = [
+    def setUp(self) -> None:
+        PropositionInMemoryRepository.entities = [
             PropositionAdmissionSC3DPMinimaleFactory(),
             PropositionPreAdmissionSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory(),
             PropositionAdmissionSC3DPAvecPromoteurRefuseEtMembreCADejaApprouveFactory(),
         ]
-        cls.proposition_patcher = patch.object(PropositionInMemoryRepository, 'entities', cls.entites_propositions)
-        cls.proposition_patcher.start()
-
-        cls.entites_demandes = [
+        self.addCleanup(PropositionInMemoryRepository.reset)
+        DemandeInMemoryRepository.entities = [
             DemandeAdmissionSC3DPMinimaleFactory(),
             DemandePreAdmissionSC3DPAvecPromoteursEtMembresCADejaApprouvesAccepteeFactory(),
             DemandeAdmissionSC3DPAvecPromoteurRefuseEtMembreCADejaApprouveFactoryRejeteeCDDFactory(),
         ]
-        cls.demande_patcher = patch.object(DemandeInMemoryRepository, 'entities', cls.entites_demandes)
-        cls.demande_patcher.start()
-        cls.message_bus = message_bus_in_memory_instance
-
-    @classmethod
-    def tearDownClass(cls):
-        cls.proposition_patcher.stop()
-        cls.demande_patcher.stop()
-        super().tearDownClass()
+        self.addCleanup(DemandeInMemoryRepository.reset)
+        self.message_bus = message_bus_in_memory_instance
 
     def test_should_rechercher_sans_parametre(self):
         results: List[DemandeRechercheDTO] = self.message_bus.invoke(FiltrerDemandesQuery())
         self.assertEqual(len(results), 0)
 
     def test_should_rechercher_selon_parametre_proposition(self):
-        proposition_recherchee = self.entites_propositions[0]
         resultats: List[DemandeRechercheDTO] = self.message_bus.invoke(
             FiltrerDemandesQuery(
-                numero=proposition_recherchee.reference,
+                numero=PropositionInMemoryRepository.entities[0].reference,
                 type=ChoixTypeAdmission.ADMISSION.name,
             )
         )
-        self.assertEqual(len(resultats), 1)
-        self.assertEqual(resultats[0].numero_demande, proposition_recherchee.reference)
+        self.assertEqual(len(resultats), 1, resultats)
+        self.assertEqual(resultats[0].uuid, 'uuid-SC3DP')
 
     def test_should_rechercher_selon_parametre_demande(self):
         resultats: List[DemandeRechercheDTO] = self.message_bus.invoke(
@@ -109,10 +88,13 @@ class TestFiltrerDemandes(SimpleTestCase):
         self.assertEqual(resultats[0].statut_cdd, ChoixStatutCDD.ACCEPTED.name)
 
     def test_should_rechercher_selon_parametre_demande_et_proposition_avec_resultat_commun(self):
-        demande_recherchee = self.entites_demandes[1]
-        proposition_recherchee = self.entites_propositions[1]
+        demande_recherchee = DemandeInMemoryRepository.entities[1]
+        proposition_recherchee = PropositionInMemoryRepository.entities[1]
         resultats: List[DemandeRechercheDTO] = self.message_bus.invoke(
-            FiltrerDemandesQuery(etat_cdd=ChoixStatutCDD.ACCEPTED.name, numero=proposition_recherchee.reference)
+            FiltrerDemandesQuery(
+                etat_cdd=ChoixStatutCDD.ACCEPTED.name,
+                numero=PropositionInMemoryRepository.entities[1].reference,
+            )
         )
         self.assertEqual(len(resultats), 1)
         self.assertEqual(resultats[0].numero_demande, proposition_recherchee.reference)
@@ -129,7 +111,7 @@ class TestFiltrerDemandes(SimpleTestCase):
         self.assertEqual(resultats[0].code_bourse, 'ARC')
 
     def test_should_rechercher_selon_parametre_demande_et_proposition_sans_resultat_commun(self):
-        proposition_recherchee = self.entites_propositions[0]
+        proposition_recherchee = PropositionInMemoryRepository.entities[0]
         resultats: List[DemandeRechercheDTO] = self.message_bus.invoke(
             FiltrerDemandesQuery(etat_cdd=ChoixStatutCDD.ACCEPTED.name, numero=proposition_recherchee.reference)
         )
