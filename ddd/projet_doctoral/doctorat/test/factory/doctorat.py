@@ -68,6 +68,7 @@ class DoctoratSC3DPAvecPromoteurRefuseEtMembreCADejaApprouveFactoryRejeteeCDDFac
     formation_id = FormationIdentity(sigle='SC3DP', annee=2022)
     matricule_doctorant = '2'
     reference = 'r3'
+    statut = ChoixStatutDoctorat.ADMISSION_IN_PROGRESS
 
 
 class DoctoratSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory(_DoctoratFactory):

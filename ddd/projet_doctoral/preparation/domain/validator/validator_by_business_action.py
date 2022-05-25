@@ -38,6 +38,7 @@ from admission.ddd.projet_doctoral.preparation.domain.model._experience_preceden
     ChoixDoctoratDejaRealise,
 )
 from admission.ddd.projet_doctoral.preparation.domain.model._financement import Financement
+from admission.ddd.projet_doctoral.preparation.domain.model._institut import InstitutIdentity
 from admission.ddd.projet_doctoral.preparation.domain.model._membre_CA import MembreCAIdentity
 from admission.ddd.projet_doctoral.preparation.domain.model._promoteur import PromoteurIdentity
 from admission.ddd.projet_doctoral.preparation.domain.model._signature_promoteur import SignaturePromoteur
@@ -357,7 +358,7 @@ class ApprobationValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
 class ApprobationPromoteurValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
     signatures_promoteurs: List['SignaturePromoteur']
     signataire: Union['PromoteurIdentity', 'MembreCAIdentity']
-    proposition_institut_these: Optional[str]
+    proposition_institut_these: Optional[InstitutIdentity]
     institut_these: Optional[str]
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:

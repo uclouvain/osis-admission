@@ -25,18 +25,16 @@
 # ##############################################################################
 import datetime
 import uuid
-from typing import Optional, List
 
 from django.test import TestCase, override_settings
 from django.urls import reverse
-from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_403_FORBIDDEN, HTTP_200_OK
+from rest_framework import status
 
-from admission.contrib.models import ConfirmationPaper
 from admission.ddd.projet_doctoral.doctorat.domain.model.enums import ChoixStatutDoctorat
 from admission.ddd.projet_doctoral.preparation.domain.model._enums import ChoixTypeAdmission
 from admission.ddd.projet_doctoral.preparation.domain.model._financement import (
-    ChoixTypeFinancement,
     ChoixTypeContratTravail,
+    ChoixTypeFinancement,
 )
 from admission.ddd.projet_doctoral.preparation.domain.model.doctorat import ENTITY_CDE, ENTITY_CDSS
 from admission.tests.factories import DoctorateAdmissionFactory
@@ -113,7 +111,7 @@ class DoctorateAdmissionExtensionRequestDetailViewTestCase(TestCase):
 
         response = self.client.get(url)
 
-        self.assertEqual(response.status_code, HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_extension_request_detail_cdd_user_with_unknown_doctorate(self):
         self.client.force_login(user=self.cdd_person.user)
@@ -122,7 +120,7 @@ class DoctorateAdmissionExtensionRequestDetailViewTestCase(TestCase):
 
         response = self.client.get(url)
 
-        self.assertEqual(response.status_code, HTTP_404_NOT_FOUND)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_extension_request_detail_cdd_user_without_confirmation_paper(self):
         self.client.force_login(user=self.cdd_person.user)
@@ -131,7 +129,7 @@ class DoctorateAdmissionExtensionRequestDetailViewTestCase(TestCase):
 
         response = self.client.get(url)
 
-        self.assertEqual(response.status_code, HTTP_404_NOT_FOUND)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_extension_request_detail_cdd_user_with_confirmation_paper(self):
         self.client.force_login(user=self.cdd_person.user)
@@ -140,7 +138,7 @@ class DoctorateAdmissionExtensionRequestDetailViewTestCase(TestCase):
 
         response = self.client.get(url)
 
-        self.assertEqual(response.status_code, HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         self.assertEqual(
             response.context.get('doctorate').uuid,

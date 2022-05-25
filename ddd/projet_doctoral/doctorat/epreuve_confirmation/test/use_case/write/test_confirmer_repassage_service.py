@@ -24,7 +24,6 @@
 #
 # ##############################################################################
 import datetime
-from typing import List
 
 from django.test import SimpleTestCase
 
@@ -32,10 +31,8 @@ from admission.ddd.projet_doctoral.doctorat.commands import RecupererDoctoratQue
 from admission.ddd.projet_doctoral.doctorat.domain.model.enums import ChoixStatutDoctorat
 from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.commands import (
     ConfirmerRepassageCommand,
-    RecupererDerniereEpreuveConfirmationQuery,
     RecupererEpreuvesConfirmationQuery,
 )
-from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.dtos import EpreuveConfirmationDTO
 from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.validators.exceptions import (
     EpreuveConfirmationNonTrouveeException,
     EpreuveConfirmationNonCompleteePourEvaluationException,

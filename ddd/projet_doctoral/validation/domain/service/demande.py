@@ -32,7 +32,7 @@ from admission.ddd.projet_doctoral.preparation.domain.service.i_profil_candidat 
 from admission.ddd.projet_doctoral.validation.domain.model._profil_candidat import ProfilCandidat
 from admission.ddd.projet_doctoral.validation.domain.model.demande import DemandeIdentity, Demande
 from admission.ddd.projet_doctoral.validation.domain.service.proposition_identity import PropositionIdentityTranslator
-from admission.ddd.projet_doctoral.validation.dtos import DemandeDTO, ProfilCandidatDTO
+from admission.ddd.projet_doctoral.validation.dtos import DemandeDTO
 from admission.ddd.projet_doctoral.validation.repository.i_demande import IDemandeRepository
 from osis_common.ddd import interface
 

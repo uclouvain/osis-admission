@@ -23,8 +23,6 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import datetime
-
 from django.test import SimpleTestCase
 
 from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.builder.epreuve_confirmation_identity import (
@@ -38,7 +36,7 @@ from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.validators.exce
 )
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 from admission.infrastructure.projet_doctoral.doctorat.epreuve_confirmation.repository.in_memory.epreuve_confirmation \
-    import (EpreuveConfirmationInMemoryRepository)
+    import EpreuveConfirmationInMemoryRepository
 
 
 class TestTeleverserAvisRenouvellementMandatRechercheCommand(SimpleTestCase):

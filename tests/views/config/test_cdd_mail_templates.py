@@ -111,7 +111,7 @@ class CddMailTemplatesTestCase(TestCase):
         self.assertContains(response, "Some name", status_code=status.HTTP_200_OK)
         self.assertContains(response, templates.get_description(ADMISSION_EMAIL_MEMBER_REMOVED))
 
-    def test_list_as_superuser(self, *args):
+    def test_list_as_superuser(self):
         superuser = SuperUserFactory()
         self.client.force_login(superuser)
         PersonFactory(user=superuser)
@@ -175,7 +175,7 @@ class CddMailTemplatesTestCase(TestCase):
         response = self.client.post(self.add_url, {**self.data, 'name': "Nom ajouté"})
         self.assertRedirects(response, self.list_url)
 
-    def test_add_as_superuser(self, *args):
+    def test_add_as_superuser(self):
         superuser = SuperUserFactory()
         self.client.force_login(superuser)
         PersonFactory(user=superuser)

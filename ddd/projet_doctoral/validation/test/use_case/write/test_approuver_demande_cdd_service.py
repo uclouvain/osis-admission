@@ -24,33 +24,20 @@
 #
 # ##############################################################################
 import datetime
-from typing import List, Optional
-from unittest.mock import patch, _patch
+from unittest.mock import patch
 
 from django.test import SimpleTestCase
 
-from admission.ddd.projet_doctoral.doctorat.builder.doctorat_identity import DoctoratIdentityBuilder
 from admission.ddd.projet_doctoral.doctorat.domain.model.enums import ChoixStatutDoctorat
 from admission.ddd.projet_doctoral.doctorat.domain.service.demande_identity import DemandeIdentityTranslator
 from admission.ddd.projet_doctoral.preparation.domain.model._enums import ChoixStatutProposition
-from admission.ddd.projet_doctoral.preparation.test.factory.proposition import (
-    PropositionAdmissionSC3DPMinimaleFactory,
-    PropositionPreAdmissionSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory,
-    PropositionAdmissionSC3DPAvecPromoteurRefuseEtMembreCADejaApprouveFactory,
-    _PropositionFactory,
-)
+from admission.ddd.projet_doctoral.validation.builder.demande_identity import DemandeIdentityBuilder
 from admission.ddd.projet_doctoral.validation.commands import ApprouverDemandeCddCommand
 from admission.ddd.projet_doctoral.validation.domain.model._enums import ChoixStatutCDD
 from admission.ddd.projet_doctoral.validation.domain.service.proposition_identity import PropositionIdentityTranslator
-from admission.ddd.projet_doctoral.validation.test.factory.demande import (
-    DemandeAdmissionSC3DPMinimaleFactory,
-    DemandePreAdmissionSC3DPAvecPromoteursEtMembresCADejaApprouvesAccepteeFactory,
-    DemandeAdmissionSC3DPAvecPromoteurRefuseEtMembreCADejaApprouveFactoryRejeteeCDDFactory,
-    _DemandeFactory,
-)
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 from admission.infrastructure.projet_doctoral.doctorat.epreuve_confirmation.repository.in_memory.epreuve_confirmation \
-    import (EpreuveConfirmationInMemoryRepository)
+    import EpreuveConfirmationInMemoryRepository
 from admission.infrastructure.projet_doctoral.doctorat.repository.in_memory.doctorat import DoctoratInMemoryRepository
 from admission.infrastructure.projet_doctoral.preparation.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
@@ -59,51 +46,19 @@ from admission.infrastructure.projet_doctoral.validation.repository.in_memory.de
 
 
 class TestApprouverDemandeCDD(SimpleTestCase):
-    proposition_patcher: Optional[_patch] = None
-    demande_patcher: Optional[_patch] = None
-    date_patcher: Optional[_patch] = None
-    entites_propositions: List[_PropositionFactory] = []
-    entites_demandes: List[_DemandeFactory] = []
-
-    @classmethod
-    def setUpClass(cls) -> None:
-        super().setUpClass()
-
-        cls.entites_propositions = [
-            PropositionAdmissionSC3DPMinimaleFactory(),
-            PropositionPreAdmissionSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory(),
-            PropositionAdmissionSC3DPAvecPromoteurRefuseEtMembreCADejaApprouveFactory(),
-        ]
-        cls.proposition_patcher = patch.object(PropositionInMemoryRepository, 'entities', cls.entites_propositions)
-        cls.proposition_patcher.start()
-
-        cls.entites_demandes = [
-            DemandeAdmissionSC3DPMinimaleFactory(),
-            DemandePreAdmissionSC3DPAvecPromoteursEtMembresCADejaApprouvesAccepteeFactory(),
-            DemandeAdmissionSC3DPAvecPromoteurRefuseEtMembreCADejaApprouveFactoryRejeteeCDDFactory(),
-        ]
-        cls.demande_patcher = patch.object(DemandeInMemoryRepository, 'entities', cls.entites_demandes)
-        cls.demande_patcher.start()
-
+    def setUp(self) -> None:
         # Mock datetime to return the 2020 year as the current year
-        cls.date_patcher = patch(
+        date_patcher = patch(
             'admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.domain.service.epreuve_confirmation.datetime',
         )
-        mock_date = cls.date_patcher.start()
+        mock_date = date_patcher.start()
+        self.addCleanup(date_patcher.stop)
         mock_date.date.today.return_value = datetime.date(2020, 11, 1)
-        cls.message_bus = message_bus_in_memory_instance
-
-    @classmethod
-    def tearDownClass(cls):
-        cls.proposition_patcher.stop()
-        cls.demande_patcher.stop()
-        cls.date_patcher.stop()
-        super().tearDownClass()
+        self.message_bus = message_bus_in_memory_instance
 
     def test_should_approuver_demande_a_verifier(self):
-        demande_a_approuver_entity_id = self.entites_demandes[0].entity_id
-
-        demande_approuvee_id = self.message_bus.invoke(ApprouverDemandeCddCommand(demande_a_approuver_entity_id.uuid))
+        demande_approuvee_id = self.message_bus.invoke(ApprouverDemandeCddCommand('uuid-SC3DP'))
+        demande_a_approuver_entity_id = DemandeIdentityBuilder.build_from_uuid('uuid-SC3DP')
 
         # Returned result
         self.assertEqual(demande_approuvee_id, demande_a_approuver_entity_id)

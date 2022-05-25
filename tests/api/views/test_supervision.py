@@ -24,7 +24,6 @@
 #
 # ##############################################################################
 from django.shortcuts import resolve_url
-from django.test import override_settings
 from rest_framework import status
 from rest_framework.test import APITestCase
 

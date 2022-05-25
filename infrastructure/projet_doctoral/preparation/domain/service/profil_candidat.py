@@ -26,7 +26,6 @@
 from typing import List
 
 from django.contrib.postgres.aggregates import ArrayAgg
-from django.db.models import Func, OuterRef, Subquery
 
 from admission.ddd.projet_doctoral.preparation.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.projet_doctoral.preparation.dtos import (
@@ -38,7 +37,6 @@ from admission.ddd.projet_doctoral.preparation.dtos import (
 from base.models.enums.person_address_type import PersonAddressType
 from base.models.person import Person
 from base.models.person_address import PersonAddress
-from osis_profile.models import CurriculumYear
 from osis_profile.models.education import LanguageKnowledge
 
 

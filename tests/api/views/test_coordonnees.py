@@ -31,7 +31,7 @@ from rest_framework.test import APITestCase
 
 from admission.ddd.projet_doctoral.preparation.domain.model._enums import ChoixStatutProposition
 from admission.tests.factories import DoctorateAdmissionFactory
-from admission.tests.factories.roles import CddManagerFactory, CandidateFactory
+from admission.tests.factories.roles import CddManagerFactory
 from admission.tests.factories.supervision import CaMemberFactory, PromoterFactory
 from base.models.enums.person_address_type import PersonAddressType
 from base.models.person_address import PersonAddress

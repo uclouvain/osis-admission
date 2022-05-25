@@ -31,7 +31,7 @@ from unittest.mock import patch
 from django.test import TestCase, override_settings
 from django.urls import reverse
 from osis_notification.models import EmailNotification
-from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_403_FORBIDDEN, HTTP_200_OK
+from rest_framework import status
 
 from admission.contrib.models import DoctorateAdmission
 from admission.ddd.projet_doctoral.doctorat.domain.model.enums import ChoixStatutDoctorat
@@ -160,7 +160,7 @@ class CddDoctorateAdmissionConfirmationSuccessDecisionViewTestCase(TestCase):
 
         response = self.client.post(url)
 
-        self.assertEqual(response.status_code, HTTP_404_NOT_FOUND)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_confirmation_success_decision_cdd_user_without_confirmation_paper(self):
         self.client.force_login(user=self.cdd_person.user)
@@ -169,7 +169,7 @@ class CddDoctorateAdmissionConfirmationSuccessDecisionViewTestCase(TestCase):
 
         response = self.client.post(url)
 
-        self.assertEqual(response.status_code, HTTP_404_NOT_FOUND)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_confirmation_success_decision_cdd_user_with_confirmation_paper(self):
         self.client.force_login(user=self.cdd_person.user)
@@ -323,7 +323,7 @@ class CddDoctorateAdmissionConfirmationFailureDecisionViewTestCase(TestCase):
 
         response = self.client.get(url)
 
-        self.assertEqual(response.status_code, HTTP_404_NOT_FOUND)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_get_confirmation_failure_decision_cdd_user_without_confirmation_paper(self):
         self.client.force_login(user=self.cdd_person.user)
@@ -332,7 +332,7 @@ class CddDoctorateAdmissionConfirmationFailureDecisionViewTestCase(TestCase):
 
         response = self.client.get(url)
 
-        self.assertEqual(response.status_code, HTTP_404_NOT_FOUND)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_get_confirmation_failure_decision_cdd_user_with_confirmation_paper_and_generic_email(self):
         self.client.force_login(user=self.cdd_person.user)
@@ -341,7 +341,7 @@ class CddDoctorateAdmissionConfirmationFailureDecisionViewTestCase(TestCase):
 
         response = self.client.get(url)
 
-        self.assertEqual(response.status_code, HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIsNotNone(response.context.get('select_template_form'))
         message_form = response.context.get('form')
         self.assertIsNotNone(message_form)
@@ -358,7 +358,7 @@ class CddDoctorateAdmissionConfirmationFailureDecisionViewTestCase(TestCase):
             },
         )
 
-        self.assertEqual(response.status_code, HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIsNotNone(response.context.get('select_template_form'))
         message_form = response.context.get('form')
         self.assertIsNotNone(message_form)
@@ -376,7 +376,7 @@ class CddDoctorateAdmissionConfirmationFailureDecisionViewTestCase(TestCase):
             **{"HTTP_HX-Request": 'true'},
         )
 
-        self.assertEqual(response.status_code, HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         message_form = response.context.get('form')
         self.assertIsNotNone(message_form)
         self.assertEqual(message_form.initial.get('subject'), self.custom_cdd_mail_template.subject)
@@ -389,7 +389,7 @@ class CddDoctorateAdmissionConfirmationFailureDecisionViewTestCase(TestCase):
 
         response = self.client.post(url)
 
-        self.assertEqual(response.status_code, HTTP_404_NOT_FOUND)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_post_confirmation_failure_decision_cdd_user_without_confirmation_paper(self):
         self.client.force_login(user=self.cdd_person.user)
@@ -398,7 +398,7 @@ class CddDoctorateAdmissionConfirmationFailureDecisionViewTestCase(TestCase):
 
         response = self.client.post(url)
 
-        self.assertEqual(response.status_code, HTTP_404_NOT_FOUND)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_post_confirmation_failure_decision_cdd_user_with_confirmation_paper(self):
         self.client.force_login(user=self.cdd_person.user)
@@ -442,7 +442,7 @@ class CddDoctorateAdmissionConfirmationFailureDecisionViewTestCase(TestCase):
             },
         )
 
-        self.assertEqual(response.status_code, HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertFormError(
             response,
             'form',
@@ -470,7 +470,7 @@ class CddDoctorateAdmissionConfirmationFailureDecisionViewTestCase(TestCase):
             },
         )
 
-        self.assertEqual(response.status_code, HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertFormError(response, 'form', 'body', ['Ce champ est obligatoire.'])
 
 
@@ -585,7 +585,7 @@ class CddDoctorateAdmissionConfirmationRetakingDecisionViewTestCase(TestCase):
 
         response = self.client.get(url)
 
-        self.assertEqual(response.status_code, HTTP_404_NOT_FOUND)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_get_confirmation_retaking_decision_cdd_user_without_confirmation_paper(self):
         self.client.force_login(user=self.cdd_person.user)
@@ -594,7 +594,7 @@ class CddDoctorateAdmissionConfirmationRetakingDecisionViewTestCase(TestCase):
 
         response = self.client.get(url)
 
-        self.assertEqual(response.status_code, HTTP_404_NOT_FOUND)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_get_confirmation_retaking_decision_cdd_user_with_confirmation_paper_and_generic_email(self):
         self.client.force_login(user=self.cdd_person.user)
@@ -603,7 +603,7 @@ class CddDoctorateAdmissionConfirmationRetakingDecisionViewTestCase(TestCase):
 
         response = self.client.get(url)
 
-        self.assertEqual(response.status_code, HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIsNotNone(response.context.get('select_template_form'))
         message_form = response.context.get('form')
         self.assertIsNotNone(message_form)
@@ -620,7 +620,7 @@ class CddDoctorateAdmissionConfirmationRetakingDecisionViewTestCase(TestCase):
             },
         )
 
-        self.assertEqual(response.status_code, HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIsNotNone(response.context.get('select_template_form'))
         message_form = response.context.get('form')
         self.assertIsNotNone(message_form)
@@ -638,7 +638,7 @@ class CddDoctorateAdmissionConfirmationRetakingDecisionViewTestCase(TestCase):
             **{"HTTP_HX-Request": 'true'},
         )
 
-        self.assertEqual(response.status_code, HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         message_form = response.context.get('form')
         self.assertIsNotNone(message_form)
         self.assertEqual(message_form.initial.get('subject'), self.custom_cdd_mail_template.subject)
@@ -651,7 +651,7 @@ class CddDoctorateAdmissionConfirmationRetakingDecisionViewTestCase(TestCase):
 
         response = self.client.post(url)
 
-        self.assertEqual(response.status_code, HTTP_404_NOT_FOUND)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_post_confirmation_retaking_decision_cdd_user_without_confirmation_paper(self):
         self.client.force_login(user=self.cdd_person.user)
@@ -660,7 +660,7 @@ class CddDoctorateAdmissionConfirmationRetakingDecisionViewTestCase(TestCase):
 
         response = self.client.post(url)
 
-        self.assertEqual(response.status_code, HTTP_404_NOT_FOUND)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_post_confirmation_retaking_decision_cdd_user_with_confirmation_paper(self):
         self.client.force_login(user=self.cdd_person.user)
@@ -713,7 +713,7 @@ class CddDoctorateAdmissionConfirmationRetakingDecisionViewTestCase(TestCase):
             },
         )
 
-        self.assertEqual(response.status_code, HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertFormError(
             response,
             'form',
@@ -749,5 +749,5 @@ class CddDoctorateAdmissionConfirmationRetakingDecisionViewTestCase(TestCase):
             },
         )
 
-        self.assertEqual(response.status_code, HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertFormError(response, 'form', 'date_limite', ['Ce champ est obligatoire.'])
