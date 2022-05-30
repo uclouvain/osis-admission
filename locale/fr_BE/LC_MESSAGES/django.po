@@ -62,12 +62,55 @@ msgstr ""
 #, python-format
 msgid ""
 "\n"
+"          After considering the opinion of your supervisory panel, which met "
+"on %(confirmation_date)s, the\n"
+"          %(cdd)s notes that your doctoral confirmation paper has been "
+"successfully completed.\n"
+"        "
+msgstr ""
+"\n"
+"          Après examen de l’avis de votre comité d’accompagnement réuni le "
+"%(confirmation_date)s, la\n"
+"          %(cdd)s constate la réussite de votre épreuve de confirmation au "
+"doctorat. \n"
+"        "
+
+#, python-format
+msgid ""
+"\n"
 "          Do you wish to move the doctorate to the \"%(status)s\" state?\n"
 "        "
 msgstr ""
 "\n"
 "          Souhaitez-vous passer la demande dans l'état \"%(status)s\" ?\n"
 "            "
+
+#, python-format
+msgid ""
+"\n"
+"          The committee also validates the activities carried out as part of "
+"your doctoral training, which now total\n"
+"          %(nb_credits)s ECTS.\n"
+"        "
+msgstr ""
+"\n"
+"          La commission valide également les activités réalisées dans le "
+"cadre de programme de formation doctorale et qui totalisent à ce jour\n"
+"          %(nb_credits)s ECTS.\n"
+"        "
+
+msgid ""
+"\n"
+"          We congratulate you on your successful completion of the paper and "
+"wish you every success in your\n"
+"          doctoral training.\n"
+"        "
+msgstr ""
+"\n"
+"          Nous vous félicitons pour la réussite de votre épreuve et vous "
+"souhaitons un franc succès dans la poursuite de votre\n"
+"           parcours doctoral.\n"
+"        "
 
 #, python-format
 msgid ""
@@ -259,6 +302,9 @@ msgstr "Date approximative d'achèvement de la thèse :"
 
 msgid "Archived record when signatures were sent"
 msgstr "Fiche archivée lors de l'envoi des signatures"
+
+msgid "Attachment: Doctoral training"
+msgstr "Annexe : Formation doctorale"
 
 msgid "Attachments:"
 msgstr "Annexes :"
@@ -514,6 +560,9 @@ msgstr "Épreuve de confirmation non complète."
 msgid "Confirmation paper not found."
 msgstr "Épreuve de confirmation non trouvée."
 
+msgid "Confirmation success attestation"
+msgstr "Attestation de réussite de l'épreuve de confirmation"
+
 msgid "Contact details"
 msgstr "Coordonnées"
 
@@ -537,6 +586,16 @@ msgstr "Pays de nationalité"
 
 msgid "Create new doctorate admission"
 msgstr "Créer une nouvelle admission en doctorat"
+
+#, python-brace-format
+msgid "Create the confirmation paper success attestation ({reference})"
+msgstr ""
+"Création de l'attestation de réussite de l'épreuve de confirmation "
+"({reference})"
+
+msgid "Create the confirmation paper success attestation as PDF"
+msgstr ""
+"Création du PDF de l'attestation de réussite de l'épreuve de confirmation"
 
 msgid "Created"
 msgstr "Créé"
@@ -856,6 +915,9 @@ msgstr "Gestion"
 msgid "MATHEMATICS"
 msgstr "Mathématiques"
 
+msgid "Madam"
+msgstr "Madame"
+
 msgid ""
 "Mail sent to ADRE to confirm the first submission of the confirmation paper"
 msgstr ""
@@ -1076,9 +1138,6 @@ msgstr "Aucune inscription en doctorat n'a été trouvée"
 msgid "No doctorate found."
 msgstr "Doctorat non trouvé."
 
-msgid "No student found."
-msgstr "Étudiant non trouvé."
-
 msgid "Not specified"
 msgstr "Non spécifié(e)"
 
@@ -1220,6 +1279,16 @@ msgstr "Date de pré-admission"
 
 msgid "Pre-admission submission date"
 msgstr "Date de soumission Pré-admission"
+
+#, python-format
+msgctxt "female gender"
+msgid "President of the %(cdd)s"
+msgstr "Présidente de la %(cdd)s"
+
+#, python-format
+msgctxt "male gender"
+msgid "President of the %(cdd)s"
+msgstr "Président de la %(cdd)s"
 
 msgid "Preview"
 msgstr "Prévisualiser"
@@ -1420,6 +1489,9 @@ msgstr "Sexe"
 
 msgid "Signatures"
 msgstr "Signatures"
+
+msgid "Sir"
+msgstr "Monsieur"
 
 msgid "Status changes"
 msgstr "Changements de statut"

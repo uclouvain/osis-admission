@@ -41,6 +41,7 @@ class AdmissionTask(models.Model):
     class TaskType(models.TextChoices):
         ARCHIVE = 'ARCHIVE', _('PDF Export')
         CANVAS = 'CANVAS', _('Canvas')
+        CONFIRMATION_SUCCESS = 'CONFIRMATION_SUCCESS', _('Confirmation success attestation')
 
     task = models.ForeignKey(
         'osis_async.AsyncTask',
