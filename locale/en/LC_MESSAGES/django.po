@@ -47,7 +47,34 @@ msgstr ""
 #, python-format
 msgid ""
 "\n"
+"          After considering the opinion of your supervisory panel, which met "
+"on %(confirmation_date)s, the\n"
+"          %(cdd)s notes that your doctoral confirmation paper has been "
+"successfully completed.\n"
+"        "
+msgstr ""
+
+#, python-format
+msgid ""
+"\n"
 "          Do you wish to move the doctorate to the \"%(status)s\" state?\n"
+"        "
+msgstr ""
+
+#, python-format
+msgid ""
+"\n"
+"          The committee also validates the activities carried out as part of "
+"your doctoral training, which now total\n"
+"          %(nb_credits)s ECTS.\n"
+"        "
+msgstr ""
+
+msgid ""
+"\n"
+"          We congratulate you on your successful completion of the paper and "
+"wish you every success in your\n"
+"          doctoral training.\n"
 "        "
 msgstr ""
 
@@ -211,6 +238,9 @@ msgid "Approximate date for completing the thesis:"
 msgstr ""
 
 msgid "Archived record when signatures were sent"
+msgstr ""
+
+msgid "Attachment: Doctoral training"
 msgstr ""
 
 msgid "Attachments:"
@@ -464,6 +494,9 @@ msgstr ""
 msgid "Confirmation paper not found."
 msgstr ""
 
+msgid "Confirmation success attestation"
+msgstr ""
+
 msgid "Contact details"
 msgstr ""
 
@@ -486,6 +519,13 @@ msgid "Country of citizenship"
 msgstr ""
 
 msgid "Create new doctorate admission"
+msgstr ""
+
+#, python-brace-format
+msgid "Create the confirmation paper success attestation ({reference})"
+msgstr ""
+
+msgid "Create the confirmation paper success attestation as PDF"
 msgstr ""
 
 msgid "Created"
@@ -800,6 +840,9 @@ msgstr "Management"
 msgid "MATHEMATICS"
 msgstr "Mathematics"
 
+msgid "Madam"
+msgstr ""
+
 msgid ""
 "Mail sent to ADRE to confirm the first submission of the confirmation paper"
 msgstr ""
@@ -981,9 +1024,6 @@ msgstr ""
 msgid "No doctorate found."
 msgstr ""
 
-msgid "No student found."
-msgstr ""
-
 msgid "Not specified"
 msgstr ""
 
@@ -1112,6 +1152,16 @@ msgid "Pre-admission date"
 msgstr ""
 
 msgid "Pre-admission submission date"
+msgstr ""
+
+#, python-format
+msgctxt "female gender"
+msgid "President of the %(cdd)s"
+msgstr ""
+
+#, python-format
+msgctxt "male gender"
+msgid "President of the %(cdd)s"
 msgstr ""
 
 msgid "Preview"
@@ -1308,6 +1358,9 @@ msgid "Sex"
 msgstr ""
 
 msgid "Signatures"
+msgstr ""
+
+msgid "Sir"
 msgstr ""
 
 msgid "Status changes"
