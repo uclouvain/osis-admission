@@ -28,6 +28,7 @@ from django.utils.timezone import now
 
 from admission.exports.admission_archive import admission_pdf_archive
 from admission.exports.admission_canvas import admission_pdf_canvas
+from admission.exports.admission_confirmation_success_attestation import admission_confirmation_success_attestation
 from admission.contrib.models import AdmissionTask
 from osis_async.models.enums import TaskStates
 from osis_async.utils import update_task
@@ -48,6 +49,8 @@ class Command(BaseCommand):
                     admission_pdf_archive(task_uuid)
                 elif task_type == AdmissionTask.TaskType.CANVAS.name:
                     admission_pdf_canvas(task_uuid)
+                elif task_type == AdmissionTask.TaskType.CONFIRMATION_SUCCESS.name:
+                    admission_confirmation_success_attestation(task_uuid)
                 update_task(task_uuid, progression=100, state=TaskStates.DONE, completed_at=now())
             except Exception:
                 update_task(task_uuid, progression=0, state=TaskStates.PENDING)

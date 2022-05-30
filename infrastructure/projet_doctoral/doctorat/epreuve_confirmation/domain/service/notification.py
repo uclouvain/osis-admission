@@ -30,16 +30,17 @@ from django.conf import settings
 from django.conf.global_settings import DATE_FORMAT
 from django.shortcuts import resolve_url
 from django.utils.functional import lazy
-from django.utils.translation import get_language
+from django.utils.translation import get_language, gettext as _
+from osis_async.models import AsyncTask
 from osis_mail_template.utils import transform_html_to_text
 from osis_notification.contrib.notification import EmailNotification
 
+from admission.contrib.models import AdmissionTask
 from admission.contrib.models.doctorate import DoctorateProxy
 from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.domain.model.epreuve_confirmation import (
     EpreuveConfirmation,
 )
 from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.domain.service.i_notification import INotification
-from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.dtos import EpreuveConfirmationDTO
 from base.forms.utils.datefield import DATE_FORMAT
 from osis_notification.contrib.handlers import EmailNotificationHandler
 
@@ -62,7 +63,7 @@ class Notification(INotification):
         return lazy(lambda: doctorate_title[get_language()], str)()
 
     @classmethod
-    def get_common_tokens(cls, doctorate: DoctorateProxy, confirmation_paper: EpreuveConfirmationDTO):
+    def get_common_tokens(cls, doctorate: DoctorateProxy, confirmation_paper: EpreuveConfirmation):
         """Return common tokens about a doctorate"""
         return {
             "student_first_name": doctorate.candidate.first_name,
@@ -129,3 +130,21 @@ class Notification(INotification):
         email_message['Cc'] = ','.join(supervising_actor_emails)
 
         EmailNotificationHandler.create(email_message, person=doctorate.candidate)
+
+    @classmethod
+    def notifier_reussite_epreuve(cls, epreuve_confirmation: EpreuveConfirmation):
+        doctorate = DoctorateProxy.objects.get(uuid=epreuve_confirmation.doctorat_id.uuid)
+
+        # Create the async task to generate the success attestation
+        task = AsyncTask.objects.create(
+            name=_('Create the confirmation paper success attestation ({reference})')
+            % {'reference': doctorate.reference},
+            description=_('Create the confirmation paper success attestation as PDF'),
+            person=doctorate.candidate,
+            time_to_live=5,
+        )
+        AdmissionTask.objects.create(
+            task=task,
+            admission=doctorate,
+            type=AdmissionTask.TaskType.CONFIRMATION_SUCCESS.name,
+        )

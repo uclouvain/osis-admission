@@ -47,3 +47,7 @@ class NotificationInMemory(INotification):
         message_notification_candidat,
     ) -> None:
         pass
+
+    @classmethod
+    def notifier_reussite_epreuve(cls, epreuve_confirmation: EpreuveConfirmation) -> None:
+        pass

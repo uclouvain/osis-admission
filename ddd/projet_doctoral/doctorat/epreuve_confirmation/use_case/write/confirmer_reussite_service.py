@@ -30,6 +30,7 @@ from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.builder.epreuve
 from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.commands import (
     ConfirmerReussiteCommand,
 )
+from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.domain.service.i_notification import INotification
 from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.repository.i_epreuve_confirmation import (
     IEpreuveConfirmationRepository,
 )
@@ -40,6 +41,7 @@ def confirmer_reussite(
     cmd: 'ConfirmerReussiteCommand',
     epreuve_confirmation_repository: 'IEpreuveConfirmationRepository',
     doctorat_repository: 'IDoctoratRepository',
+    notification: 'INotification',
 ) -> DoctoratIdentity:
     # GIVEN
     epreuve_confirmation_id = EpreuveConfirmationIdentityBuilder.build_from_uuid(cmd.uuid)
@@ -52,7 +54,7 @@ def confirmer_reussite(
     doctorat.encoder_decision_reussite_epreuve_confirmation()
 
     # THEN
-    # TODO Send notifications
+    notification.notifier_reussite_epreuve(epreuve_confirmation)
     doctorat_repository.save(doctorat)
 
     return doctorat.entity_id
