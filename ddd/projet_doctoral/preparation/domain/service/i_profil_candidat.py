@@ -36,6 +36,8 @@ from osis_common.ddd import interface
 
 class IProfilCandidatTranslator(interface.DomainService):
     NB_MAX_ANNEES_CV_REQUISES = 5
+    MOIS_DEBUT_ANNEE_ACADEMIQUE = 9
+    MOIS_FIN_ANNEE_ACADEMIQUE = 6
 
     @classmethod
     @abstractmethod
@@ -54,5 +56,5 @@ class IProfilCandidatTranslator(interface.DomainService):
 
     @classmethod
     @abstractmethod
-    def get_curriculum(cls, matricule: str) -> 'CurriculumDTO':
+    def get_curriculum(cls, matricule: str, annee_courante: int) -> 'CurriculumDTO':
         raise NotImplementedError

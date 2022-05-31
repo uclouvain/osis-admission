@@ -23,42 +23,271 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import datetime
+from unittest.mock import ANY
+
+import mock
 from django.shortcuts import resolve_url
 from django.test import override_settings
 
 from rest_framework import status
 from rest_framework.test import APITestCase
 
+from admission.ddd.projet_doctoral.preparation.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.tests.factories import DoctorateAdmissionFactory
-from admission.tests.factories.curriculum import CurriculumYearFactory, ExperienceFactory
+from admission.tests.factories.curriculum import (
+    ProfessionalExperienceFactory,
+    EducationalExperienceFactory,
+    EducationalExperienceYearFactory,
+)
 from admission.tests.factories.roles import CandidateFactory
+from admission.tests.factories.secondary_studies import BelgianHighSchoolDiplomaFactory, ForeignHighSchoolDiplomaFactory
 from base.tests.factories.academic_year import AcademicYearFactory
-from base.tests.factories.education_group_year import EducationGroupYearFactory
-from osis_profile.models import Experience, CurriculumYear
-from osis_profile.models.enums.curriculum import ExperienceType
+from osis_profile.models import ProfessionalExperience, EducationalExperience, EducationalExperienceYear
+from osis_profile.models.enums.curriculum import (
+    ActivityType,
+    ActivitySector,
+    Result,
+    StudySystem,
+    EvaluationSystem,
+    TranscriptType,
+    Grade,
+)
 from reference.tests.factories.country import CountryFactory
+from reference.tests.factories.diploma_title import DiplomaTitleFactory
 from reference.tests.factories.language import LanguageFactory
 
 
 @override_settings(ROOT_URLCONF='admission.api.url_v1')
-class CurriculumTestCase(APITestCase):
+class GetCurriculumTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
         # Mocked data
         cls.admission = DoctorateAdmissionFactory()
         cls.other_admission = DoctorateAdmissionFactory()
         cls.country = CountryFactory()
-        cls.created_data = {
-            'country': cls.country.iso_code,
-            'type': ExperienceType.HIGHER_EDUCATION.name,
-        }
+        cls.academic_year_2018 = AcademicYearFactory(year=2018)
+        cls.academic_year_2020 = AcademicYearFactory(year=2020)
         cls.user = cls.admission.candidate.user
         cls.other_user = cls.other_admission.candidate.user
         cls.user_without_admission = CandidateFactory().person.user
 
+        cls.professional_experiences = [
+            ProfessionalExperienceFactory(
+                person=cls.admission.candidate,
+                institute_name='First institute',
+                start_date=datetime.date(2020, 1, 1),
+                end_date=datetime.date(2021, 1, 1),
+                type=ActivityType.WORK.name,
+                role='Librarian',
+                sector=ActivitySector.PUBLIC.name,
+                activity='Work - activity',
+            ),
+            ProfessionalExperienceFactory(
+                person=cls.admission.candidate,
+                institute_name='Second institute',
+                start_date=datetime.date(2020, 1, 1),
+                end_date=datetime.date(2020, 9, 1),
+                type=ActivityType.WORK.name,
+                role='Librarian',
+                sector=ActivitySector.PUBLIC.name,
+                activity='Work - activity',
+            ),
+        ]
+
+        cls.educational_experiences = [
+            EducationalExperienceFactory(
+                person=cls.admission.candidate,
+                country=cls.country,
+                institute_name='UCL',
+                education_name='Computer science',
+                obtained_diploma=False,
+            ),
+        ]
+
+        EducationalExperienceYearFactory(
+            educational_experience=cls.educational_experiences[0],
+            academic_year=cls.academic_year_2020,
+            result=Result.SUCCESS.name,
+        )
+        cls.today_date = datetime.date(2020, 11, 1)
+        cls.today_datetime = datetime.datetime(2020, 11, 1)
+
         # Targeted urls
         cls.agnostic_url = resolve_url('curriculum')
         cls.admission_url = resolve_url('curriculum', uuid=cls.admission.uuid)
+
+    def setUp(self) -> None:
+        # Mock datetime to return the 2020 year as the current year
+        patcher = mock.patch('base.models.academic_year.timezone')
+        self.addCleanup(patcher.stop)
+        self.mock_foo = patcher.start()
+        self.mock_foo.now.return_value = self.today_datetime
+
+    def test_user_not_logged_assert_not_authorized(self):
+        self.client.force_authenticate(user=None)
+
+        response = self.client.get(self.agnostic_url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+        response = self.client.get(self.admission_url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_other_candidate_assert_not_authorized(self):
+        self.client.force_authenticate(user=self.other_user)
+
+        response = self.client.get(self.admission_url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_get_curriculum(self):
+        self.client.force_authenticate(user=self.user)
+
+        response = self.client.get(self.admission_url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Check response data
+        response = response.json()
+        self.assertEqual(response.get('file'), {'curriculum': []})
+        self.assertEqual(
+            response.get('minimal_year'),
+            1 + self.today_date.year - IProfilCandidatTranslator.NB_MAX_ANNEES_CV_REQUISES,
+        )
+        self.assertEqual(
+            response.get('professional_experiences'),
+            [
+                {
+                    'uuid': str(self.professional_experiences[0].uuid),
+                    'institute_name': 'First institute',
+                    'start_date': '2020-01-01',
+                    'end_date': '2021-01-01',
+                    'type': ActivityType.WORK.name,
+                    'valuated_from': [],
+                },
+                {
+                    'uuid': str(self.professional_experiences[1].uuid),
+                    'institute_name': 'Second institute',
+                    'start_date': '2020-01-01',
+                    'end_date': '2020-09-01',
+                    'type': ActivityType.WORK.name,
+                    'valuated_from': [],
+                },
+            ],
+        )
+        self.assertEqual(
+            response.get('educational_experiences'),
+            [
+                {
+                    'uuid': ANY,
+                    'institute_name': 'UCL',
+                    'program': None,
+                    'education_name': 'Computer science',
+                    'educationalexperienceyear_set': [{'academic_year': 2020}],
+                    'valuated_from': [],
+                }
+            ],
+        )
+
+    def test_get_curriculum_minimal_year_with_last_registration(self):
+        self.client.force_authenticate(user=self.user)
+
+        self.user.person.last_registration_year = self.academic_year_2018
+        self.user.person.save()
+        response = self.client.get(self.admission_url)
+
+        # Check response data
+        response = response.json()
+        self.assertEqual(
+            response.get('minimal_year'),
+            self.academic_year_2018.year + 1,
+        )
+
+        self.user.person.last_registration_year = None
+        self.user.person.save()
+
+    def test_get_curriculum_minimal_year_with_belgian_diploma(self):
+        self.client.force_authenticate(user=self.user)
+
+        belgian_diploma = BelgianHighSchoolDiplomaFactory(
+            person=self.user.person,
+            academic_graduation_year=self.academic_year_2018,
+        )
+
+        response = self.client.get(self.admission_url)
+
+        # Check response data
+        response = response.json()
+        self.assertEqual(
+            response.get('minimal_year'),
+            self.academic_year_2018.year + 1,
+        )
+
+        belgian_diploma.delete()
+
+    def test_get_curriculum_minimal_year_with_foreign_diploma(self):
+        self.client.force_authenticate(user=self.user)
+
+        foreign_diploma = ForeignHighSchoolDiplomaFactory(
+            person=self.user.person,
+            academic_graduation_year=self.academic_year_2018,
+        )
+
+        response = self.client.get(self.admission_url)
+
+        # Check response data
+        response = response.json()
+        self.assertEqual(
+            response.get('minimal_year'),
+            self.academic_year_2018.year + 1,
+        )
+
+        foreign_diploma.delete()
+
+
+@override_settings(ROOT_URLCONF='admission.api.url_v1')
+class ProfessionalExperienceTestCase(APITestCase):
+    @classmethod
+    def setUpTestData(cls):
+        # Mocked data
+        cls.admission = DoctorateAdmissionFactory()
+        cls.other_admission = DoctorateAdmissionFactory()
+
+        cls.academic_year_2018 = AcademicYearFactory(year=2018)
+        cls.academic_year_2020 = AcademicYearFactory(year=2020)
+        cls.user = cls.admission.candidate.user
+        cls.other_user = cls.other_admission.candidate.user
+        cls.user_without_admission = CandidateFactory().person.user
+
+        cls.today_date = datetime.date(2020, 11, 1)
+        cls.today_datetime = datetime.datetime(2020, 11, 1)
+
+        # Targeted urls
+        cls.agnostic_url = resolve_url('cv_professional_experiences-list')
+        cls.admission_url = resolve_url('cv_professional_experiences-list', uuid=cls.admission.uuid)
+
+    def setUp(self) -> None:
+        # Mock datetime to return the 2020 year as the current year
+        patcher = mock.patch('base.models.academic_year.timezone')
+        self.addCleanup(patcher.stop)
+        self.mock_foo = patcher.start()
+        self.mock_foo.now.return_value = self.today_datetime
+
+        self.professional_experience = ProfessionalExperienceFactory(
+            person=self.admission.candidate,
+            institute_name='First institute',
+            start_date=datetime.date(2020, 1, 1),
+            end_date=datetime.date(2021, 1, 1),
+            type=ActivityType.WORK.name,
+            role='Librarian',
+            sector=ActivitySector.PUBLIC.name,
+            activity='Work - activity',
+        )
+
+        self.admission_details_url = resolve_url(
+            'cv_professional_experiences-detail',
+            uuid=self.admission.uuid,
+            experience_id=self.professional_experience.uuid,
+        )
 
     def test_user_not_logged_assert_not_authorized(self):
         self.client.force_authenticate(user=None)
@@ -76,274 +305,585 @@ class CurriculumTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_assert_methods_not_allowed(self):
-        self.client.force_authenticate(user=self.user_without_admission)
-
-        response = getattr(self.client, 'patch')(self.agnostic_url)
-        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
-
         self.client.force_authenticate(user=self.user)
-        response = getattr(self.client, 'patch')(self.admission_url)
-        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 
-    def test_get_experiences_candidate(self):
-        self.client.force_authenticate(self.user)
+        methods_not_allowed_on_detail = [
+            'patch',
+            'post',
+        ]
 
-        # Mock data
-        second_curriculum_year = CurriculumYearFactory(
-            academic_year=AcademicYearFactory(year=2022),
+        methods_not_allowed_on_listing_create = [
+            'patch',
+            'put',
+            'get',
+            'delete',
+        ]
+
+        for method in methods_not_allowed_on_detail:
+            response = getattr(self.client, method)(self.admission_details_url)
+            self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+
+        for method in methods_not_allowed_on_listing_create:
+            response = getattr(self.client, method)(self.admission_url)
+            self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    def test_get_professional_experience(self):
+        self.client.force_authenticate(user=self.user)
+
+        response = self.client.get(self.admission_details_url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Check response data
+        self.assertEqual(
+            response.json(),
+            {
+                'uuid': str(self.professional_experience.uuid),
+                'institute_name': 'First institute',
+                'start_date': '2020-01-01',
+                'end_date': '2021-01-01',
+                'type': ActivityType.WORK.name,
+                'certificate': [],
+                'role': 'Librarian',
+                'sector': ActivitySector.PUBLIC.name,
+                'activity': 'Work - activity',
+                'valuated_from': [],
+            },
+        )
+
+    def test_post_professional_experience(self):
+        self.client.force_authenticate(user=self.user)
+
+        response = self.client.post(
+            self.admission_url,
+            data={
+                'institute_name': 'Second institute',
+                'start_date': '2019-01-01',
+                'end_date': '2020-01-01',
+                'type': ActivityType.VOLUNTEERING.name,
+                'certificate': [],
+                'role': 'Helper',
+                'sector': ActivitySector.PRIVATE.name,
+                'activity': 'Volunteering - activity',
+            },
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        json_response = response.json()
+
+        # Check response data
+        self.assertEqual(
+            json_response,
+            {
+                'uuid': ANY,
+                'institute_name': 'Second institute',
+                'start_date': '2019-01-01',
+                'end_date': '2020-01-01',
+                'type': ActivityType.VOLUNTEERING.name,
+                'certificate': [],
+                'role': 'Helper',
+                'sector': ActivitySector.PRIVATE.name,
+                'activity': 'Volunteering - activity',
+                'valuated_from': [],
+            },
+        )
+
+        experience: ProfessionalExperience = ProfessionalExperience.objects.filter(
+            uuid=json_response.get('uuid'),
+        ).first()
+
+        self.assertIsNotNone(experience)
+
+        self.assertEqual(experience.person, self.user.person)
+        self.assertEqual(experience.institute_name, 'Second institute')
+        self.assertEqual(experience.start_date, datetime.date(2019, 1, 1))
+        self.assertEqual(experience.end_date, datetime.date(2020, 1, 1))
+        self.assertEqual(experience.type, ActivityType.VOLUNTEERING.name)
+        self.assertEqual(experience.certificate, [])
+        self.assertEqual(experience.role, 'Helper')
+        self.assertEqual(experience.sector, ActivitySector.PRIVATE.name)
+        self.assertEqual(experience.activity, 'Volunteering - activity')
+
+    def test_put_professional_experience(self):
+        self.client.force_authenticate(user=self.user)
+
+        response = self.client.put(
+            self.admission_details_url,
+            data={
+                'start_date': '2020-01-01',
+                'end_date': '2021-01-01',
+                'type': ActivityType.WORK.name,
+                'sector': ActivitySector.PRIVATE.name,
+            },
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        json_response = response.json()
+
+        # Check response data
+        self.assertEqual(json_response.get('sector'), ActivitySector.PRIVATE.name),
+
+        experience = ProfessionalExperience.objects.get(
+            uuid=self.professional_experience.uuid,
+        )
+
+        self.assertEqual(experience.sector, ActivitySector.PRIVATE.name)
+
+    def test_put_valuated_professional_experience_is_forbidden(self):
+        self.client.force_authenticate(user=self.user)
+
+        self.professional_experience.valuated_from.set([self.admission])
+
+        response = self.client.put(
+            self.admission_details_url,
+            data={
+                'start_date': '2020-01-01',
+                'end_date': '2021-01-01',
+                'type': ActivityType.WORK.name,
+                'sector': ActivitySector.PRIVATE.name,
+            },
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_delete_professional_experience(self):
+        self.client.force_authenticate(user=self.user)
+
+        self.assertTrue(
+            ProfessionalExperience.objects.filter(
+                uuid=self.professional_experience.uuid,
+            ).exists()
+        )
+
+        self.client.delete(self.admission_details_url)
+
+        self.assertFalse(
+            ProfessionalExperience.objects.filter(
+                uuid=self.professional_experience.uuid,
+            ).exists()
+        )
+
+    def test_delete_valuated_professional_experience_is_forbidden(self):
+        self.client.force_authenticate(user=self.user)
+
+        self.professional_experience.valuated_from.set([self.admission])
+
+        response = self.client.delete(self.admission_details_url)
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+
+@override_settings(ROOT_URLCONF='admission.api.url_v1')
+class EducationalExperienceTestCase(APITestCase):
+    @classmethod
+    def setUpTestData(cls):
+        # Mocked data
+        cls.admission = DoctorateAdmissionFactory()
+        cls.other_admission = DoctorateAdmissionFactory()
+
+        cls.academic_year_2018 = AcademicYearFactory(year=2018)
+        cls.academic_year_2019 = AcademicYearFactory(year=2019)
+        cls.academic_year_2020 = AcademicYearFactory(year=2020)
+        cls.user = cls.admission.candidate.user
+        cls.other_user = cls.other_admission.candidate.user
+        cls.user_without_admission = CandidateFactory().person.user
+
+        cls.diploma = DiplomaTitleFactory()
+        cls.linguistic_regime = LanguageFactory()
+
+        cls.today_date = datetime.date(2020, 11, 1)
+        cls.today_datetime = datetime.datetime(2020, 11, 1)
+
+        cls.country = CountryFactory()
+
+        # Targeted urls
+        cls.agnostic_url = resolve_url('cv_educational_experiences-list')
+        cls.admission_url = resolve_url('cv_educational_experiences-list', uuid=cls.admission.uuid)
+
+    def setUp(self) -> None:
+        # Mock datetime to return the 2020 year as the current year
+        patcher = mock.patch('base.models.academic_year.timezone')
+        self.addCleanup(patcher.stop)
+        self.mock_foo = patcher.start()
+        self.mock_foo.now.return_value = self.today_datetime
+
+        self.educational_experience = EducationalExperienceFactory(
             person=self.admission.candidate,
-        )
-        first_curriculum_year = CurriculumYearFactory(
-            academic_year=AcademicYearFactory(year=2021),
-            person=self.admission.candidate,
-        )
-        program = EducationGroupYearFactory()
-        linguistic_regime = LanguageFactory()
-        second_experience = ExperienceFactory(
-            curriculum_year=second_curriculum_year,
             country=self.country,
-            type=ExperienceType.OTHER_ACTIVITY.name,
-            program=program,
-            linguistic_regime=linguistic_regime,
+            institute=None,
+            institute_name='UCL',
+            institute_address='Place de l\'Université',
+            program=self.diploma,
+            education_name='Computer science',
+            study_system=StudySystem.FULL_TIME_EDUCATION.name,
+            evaluation_type=EvaluationSystem.ECTS_CREDITS.name,
+            linguistic_regime=self.linguistic_regime,
+            transcript_type=TranscriptType.ONE_FOR_ALL_YEARS.name,
+            obtained_diploma=True,
+            obtained_grade=Grade.GREAT_DISTINCTION.name,
+            graduate_degree=[],
+            graduate_degree_translation=[],
+            transcript=[],
+            transcript_translation=[],
+            bachelor_cycle_continuation=True,
+            diploma_equivalence=[],
+            rank_in_diploma='10 on 100',
+            expected_graduation_date=datetime.date(2022, 8, 30),
+            dissertation_title='Title',
+            dissertation_score='15/20',
+            dissertation_summary=[],
         )
-        first_experience = ExperienceFactory(
-            curriculum_year=first_curriculum_year,
-            country=self.country,
-            type=ExperienceType.HIGHER_EDUCATION.name,
+
+        EducationalExperienceYearFactory(
+            educational_experience=self.educational_experience,
+            academic_year=self.academic_year_2020,
+            result=Result.SUCCESS.name,
+            registered_credit_number=15.4,
+            acquired_credit_number=15.4,
+            transcript=[],
+            transcript_translation=[],
         )
+
+        EducationalExperienceYearFactory(
+            educational_experience=self.educational_experience,
+            academic_year=self.academic_year_2018,
+            result=Result.SUCCESS_WITH_RESIDUAL_CREDITS.name,
+            registered_credit_number=18,
+            acquired_credit_number=18,
+            transcript=[],
+            transcript_translation=[],
+        )
+
+        self.admission_details_url = resolve_url(
+            'cv_educational_experiences-detail',
+            uuid=self.admission.uuid,
+            experience_id=self.educational_experience.uuid,
+        )
+
+    def test_user_not_logged_assert_not_authorized(self):
+        self.client.force_authenticate(user=None)
+
+        response = self.client.get(self.agnostic_url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
         response = self.client.get(self.admission_url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_other_candidate_assert_not_authorized(self):
+        self.client.force_authenticate(user=self.other_user)
+
+        response = self.client.get(self.admission_url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_assert_methods_not_allowed(self):
+        self.client.force_authenticate(user=self.user)
+
+        methods_not_allowed_on_detail = [
+            'patch',
+            'post',
+        ]
+
+        methods_not_allowed_on_listing_create = [
+            'patch',
+            'put',
+            'get',
+            'delete',
+        ]
+
+        for method in methods_not_allowed_on_detail:
+            response = getattr(self.client, method)(self.admission_details_url)
+            self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+
+        for method in methods_not_allowed_on_listing_create:
+            response = getattr(self.client, method)(self.admission_url)
+            self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    def test_get_educational_experience(self):
+        self.client.force_authenticate(user=self.user)
+
+        response = self.client.get(self.admission_details_url)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.json()), 2)
 
-        # The results are sorted in descending chronological order
-        self.assertEqual(response.json()[0].get('uuid'), str(second_experience.uuid))
-        self.assertEqual(response.json()[1].get('uuid'), str(first_experience.uuid))
-        self.assertEqual(response.json()[0].get('type'), second_experience.type)
-        self.assertEqual(response.json()[0].get('country'), self.country.iso_code)
-        self.assertEqual(response.json()[0].get('linguistic_regime'), linguistic_regime.code)
+        json_response = response.json()
 
-    def test_add_experience_via_curriculum_year(self):
-        self.client.force_authenticate(self.user)
+        # Check response data
+        self.assertEqual(json_response.get('uuid'), str(self.educational_experience.uuid))
+        self.assertEqual(json_response.get('program'), str(self.diploma.uuid))
+        self.assertEqual(json_response.get('education_name'), 'Computer science')
+        self.assertEqual(json_response.get('institute_name'), 'UCL')
+        self.assertEqual(json_response.get('country'), self.country.iso_code)
+        self.assertEqual(json_response.get('institute'), None)
+        self.assertEqual(json_response.get('institute_address'), 'Place de l\'Université')
+        self.assertEqual(json_response.get('study_system'), StudySystem.FULL_TIME_EDUCATION.name)
+        self.assertEqual(json_response.get('evaluation_type'), EvaluationSystem.ECTS_CREDITS.name)
+        self.assertEqual(json_response.get('linguistic_regime'), self.linguistic_regime.code)
+        self.assertEqual(json_response.get('transcript_type'), TranscriptType.ONE_FOR_ALL_YEARS.name)
+        self.assertEqual(json_response.get('obtained_diploma'), True)
+        self.assertEqual(json_response.get('obtained_grade'), Grade.GREAT_DISTINCTION.name)
+        self.assertEqual(json_response.get('graduate_degree'), [])
+        self.assertEqual(json_response.get('graduate_degree_translation'), [])
+        self.assertEqual(json_response.get('transcript'), [])
+        self.assertEqual(json_response.get('transcript_translation'), [])
+        self.assertEqual(json_response.get('bachelor_cycle_continuation'), True)
+        self.assertEqual(json_response.get('diploma_equivalence'), [])
+        self.assertEqual(json_response.get('rank_in_diploma'), '10 on 100')
+        self.assertEqual(json_response.get('expected_graduation_date'), '2022-08-30')
+        self.assertEqual(json_response.get('dissertation_title'), 'Title')
+        self.assertEqual(json_response.get('dissertation_score'), '15/20')
+        self.assertEqual(json_response.get('dissertation_summary'), [])
 
-        # Mock data
-        curriculum_year = CurriculumYearFactory(
-            academic_year=AcademicYearFactory(year=2022),
-            person=self.admission.candidate,
+        self.assertEqual(len(json_response.get('educationalexperienceyear_set')), 2)
+        json_first_educational_experience_year = json_response.get('educationalexperienceyear_set')[0]
+        self.assertEqual(json_first_educational_experience_year.get('academic_year'), 2020)
+        self.assertEqual(json_first_educational_experience_year.get('result'), Result.SUCCESS.name)
+        self.assertEqual(json_first_educational_experience_year.get('registered_credit_number'), 15.4)
+        self.assertEqual(json_first_educational_experience_year.get('acquired_credit_number'), 15.4)
+        self.assertEqual(json_first_educational_experience_year.get('transcript'), [])
+        self.assertEqual(json_first_educational_experience_year.get('transcript_translation'), [])
+
+    def test_post_educational_experience(self):
+        self.client.force_authenticate(user=self.user)
+
+        response = self.client.post(
+            self.admission_url,
+            data={
+                'program': self.diploma.uuid,
+                'education_name': 'Biology',
+                'institute_name': 'Second institute',
+                'country': self.country.iso_code,
+                'institute': None,
+                'institute_address': 'Louvain-La-Neuve',
+                'study_system': StudySystem.FULL_TIME_EDUCATION.name,
+                'evaluation_type': EvaluationSystem.ECTS_CREDITS.name,
+                'linguistic_regime': self.linguistic_regime.code,
+                'transcript_type': TranscriptType.ONE_FOR_ALL_YEARS.name,
+                'obtained_diploma': True,
+                'obtained_grade': Grade.GREAT_DISTINCTION.name,
+                'graduate_degree': [],
+                'graduate_degree_translation': [],
+                'transcript': [],
+                'transcript_translation': [],
+                'bachelor_cycle_continuation': False,
+                'diploma_equivalence': [],
+                'rank_in_diploma': '10 on 100',
+                'expected_graduation_date': '2022-08-30',
+                'dissertation_title': 'Title',
+                'dissertation_score': '15/20',
+                'dissertation_summary': [],
+                'educationalexperienceyear_set': [
+                    {
+                        'academic_year': 2020,
+                        'result': Result.SUCCESS.name,
+                        'registered_credit_number': 15.4,
+                        'acquired_credit_number': 15.4,
+                        'transcript': [],
+                        'transcript_translation': [],
+                    }
+                ],
+            },
         )
-
-        # Directly specify the year of the experience via the 'curriculum_year' property
-        response = self.client.post(self.admission_url, data={
-            'curriculum_year': curriculum_year.id,
-            **self.created_data,
-        })
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(response.json().get('type'), self.created_data['type'])
-        self.assertEqual(response.json().get('country'), self.country.iso_code)
-        self.assertEqual(response.json().get('curriculum_year'), {
-            'academic_year': 2022,
-            'id': curriculum_year.id,
-        })
 
-    def test_add_experience_via_academic_year_and_related_to_existing_cv_year(self):
-        self.client.force_authenticate(self.user)
+        json_response = response.json()
 
-        # Mock data
-        curriculum_year = CurriculumYearFactory(
-            academic_year=AcademicYearFactory(year=2022),
-            person=self.admission.candidate,
+        # Check response data
+        self.assertEqual(json_response.get('program'), str(self.diploma.uuid))
+        self.assertEqual(json_response.get('education_name'), 'Biology')
+        self.assertEqual(json_response.get('institute_name'), 'Second institute')
+        self.assertEqual(json_response.get('country'), self.country.iso_code)
+        self.assertEqual(json_response.get('institute'), None)
+        self.assertEqual(json_response.get('institute_address'), 'Louvain-La-Neuve')
+        self.assertEqual(json_response.get('study_system'), StudySystem.FULL_TIME_EDUCATION.name)
+        self.assertEqual(json_response.get('evaluation_type'), EvaluationSystem.ECTS_CREDITS.name)
+        self.assertEqual(json_response.get('linguistic_regime'), self.linguistic_regime.code)
+        self.assertEqual(json_response.get('transcript_type'), TranscriptType.ONE_FOR_ALL_YEARS.name)
+        self.assertEqual(json_response.get('obtained_diploma'), True)
+        self.assertEqual(json_response.get('obtained_grade'), Grade.GREAT_DISTINCTION.name)
+        self.assertEqual(json_response.get('graduate_degree'), [])
+        self.assertEqual(json_response.get('graduate_degree_translation'), [])
+        self.assertEqual(json_response.get('transcript'), [])
+        self.assertEqual(json_response.get('transcript_translation'), [])
+        self.assertEqual(json_response.get('bachelor_cycle_continuation'), False)
+        self.assertEqual(json_response.get('diploma_equivalence'), [])
+        self.assertEqual(json_response.get('rank_in_diploma'), '10 on 100')
+        self.assertEqual(json_response.get('expected_graduation_date'), '2022-08-30')
+        self.assertEqual(json_response.get('dissertation_title'), 'Title')
+        self.assertEqual(json_response.get('dissertation_score'), '15/20')
+        self.assertEqual(json_response.get('dissertation_summary'), [])
+        self.assertEqual(json_response.get('valuated_from'), [])
+
+        json_first_educational_experience_year = json_response.get('educationalexperienceyear_set')[0]
+        self.assertEqual(json_first_educational_experience_year.get('academic_year'), 2020)
+        self.assertEqual(json_first_educational_experience_year.get('result'), Result.SUCCESS.name)
+        self.assertEqual(json_first_educational_experience_year.get('registered_credit_number'), 15.4)
+        self.assertEqual(json_first_educational_experience_year.get('acquired_credit_number'), 15.4)
+        self.assertEqual(json_first_educational_experience_year.get('transcript'), [])
+        self.assertEqual(json_first_educational_experience_year.get('transcript_translation'), [])
+
+        # Check saved data
+        experience: EducationalExperience = EducationalExperience.objects.filter(
+            uuid=json_response.get('uuid'),
+        ).first()
+
+        self.assertIsNotNone(experience)
+
+        self.assertEqual(experience.person, self.user.person)
+        self.assertEqual(experience.program, self.diploma)
+        self.assertEqual(experience.education_name, 'Biology')
+        self.assertEqual(experience.institute_name, 'Second institute')
+        self.assertEqual(experience.country, self.country)
+        self.assertEqual(experience.institute, None)
+        self.assertEqual(experience.institute_address, 'Louvain-La-Neuve')
+        self.assertEqual(experience.study_system, StudySystem.FULL_TIME_EDUCATION.name)
+        self.assertEqual(experience.evaluation_type, EvaluationSystem.ECTS_CREDITS.name)
+        self.assertEqual(experience.linguistic_regime, self.linguistic_regime)
+        self.assertEqual(experience.transcript_type, TranscriptType.ONE_FOR_ALL_YEARS.name)
+        self.assertEqual(experience.obtained_diploma, True)
+        self.assertEqual(experience.obtained_grade, Grade.GREAT_DISTINCTION.name)
+        self.assertEqual(experience.graduate_degree, [])
+        self.assertEqual(experience.graduate_degree_translation, [])
+        self.assertEqual(experience.transcript, [])
+        self.assertEqual(experience.transcript_translation, [])
+        self.assertEqual(experience.bachelor_cycle_continuation, False)
+        self.assertEqual(experience.diploma_equivalence, [])
+        self.assertEqual(experience.rank_in_diploma, '10 on 100')
+        self.assertEqual(experience.expected_graduation_date, datetime.date(2022, 8, 30))
+        self.assertEqual(experience.dissertation_title, 'Title')
+        self.assertEqual(experience.dissertation_score, '15/20')
+        self.assertEqual(experience.dissertation_summary, [])
+
+        first_educational_experience_year = EducationalExperienceYear.objects.filter(
+            educational_experience=experience
+        ).first()
+
+        self.assertEqual(first_educational_experience_year.academic_year, self.academic_year_2020)
+        self.assertEqual(first_educational_experience_year.result, Result.SUCCESS.name)
+        self.assertEqual(first_educational_experience_year.registered_credit_number, 15.4)
+        self.assertEqual(first_educational_experience_year.acquired_credit_number, 15.4)
+        self.assertEqual(first_educational_experience_year.transcript, [])
+        self.assertEqual(first_educational_experience_year.transcript_translation, [])
+
+    def test_put_educational_experience(self):
+        self.client.force_authenticate(user=self.user)
+
+        response = self.client.put(
+            self.admission_details_url,
+            data={
+                'program': self.diploma.uuid,
+                'education_name': 'Biology',
+                'institute_name': 'Second institute',
+                'country': self.country.iso_code,
+                'institute': None,
+                'institute_address': 'Louvain-La-Neuve',
+                'study_system': StudySystem.FULL_TIME_EDUCATION.name,
+                'evaluation_type': EvaluationSystem.ECTS_CREDITS.name,
+                'linguistic_regime': self.linguistic_regime.code,
+                'transcript_type': TranscriptType.ONE_FOR_ALL_YEARS.name,
+                'obtained_diploma': True,
+                'obtained_grade': Grade.GREATER_DISTINCTION.name,
+                'graduate_degree': [],
+                'graduate_degree_translation': [],
+                'transcript': [],
+                'transcript_translation': [],
+                'bachelor_cycle_continuation': False,
+                'diploma_equivalence': [],
+                'rank_in_diploma': '10 on 100',
+                'expected_graduation_date': '2022-08-30',
+                'dissertation_title': 'Title',
+                'dissertation_score': '15/20',
+                'dissertation_summary': [],
+                'educationalexperienceyear_set': [
+                    {
+                        'academic_year': 2020,
+                        'result': Result.SUCCESS.name,
+                        'registered_credit_number': 25,
+                        'acquired_credit_number': 25,
+                        'transcript': [],
+                        'transcript_translation': [],
+                    },
+                    {
+                        'academic_year': 2019,
+                        'result': Result.SUCCESS.name,
+                        'registered_credit_number': 14,
+                        'acquired_credit_number': 14,
+                        'transcript': [],
+                        'transcript_translation': [],
+                    },
+                ],
+            },
         )
-
-        # Specify the year of the experience via the 'academic_year' property
-        response = self.client.post(self.admission_url, data={
-            'academic_year': curriculum_year.academic_year.year,
-            **self.created_data,
-        })
-
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(response.json().get('curriculum_year'), {
-            'academic_year': 2022,
-            'id': curriculum_year.id,
-        })
-
-    def test_add_experience_via_academic_year_and_related_to_a_non_existing_cv_year(self):
-        self.client.force_authenticate(self.user)
-
-        # Mock data
-        academic_year = AcademicYearFactory(year=2022)
-
-        # Specify the year of the experience via the 'academic_year' property
-        response = self.client.post(self.admission_url, data={
-            'academic_year': academic_year.year,
-            **self.created_data,
-        })
-
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        # A new CV year has been created
-        created_curriculum_year = CurriculumYear.objects.filter(
-            person=self.admission.candidate,
-            academic_year=academic_year,
-        )
-        self.assertEqual(len(created_curriculum_year), 1)
-        self.assertEqual(response.json().get('curriculum_year'), {
-            'academic_year': 2022,
-            'id': created_curriculum_year[0].id
-        })
-
-    def test_add_experience_without_related_year(self):
-        self.client.force_authenticate(self.user)
-
-        # Don't specify the year of the experience
-        response = self.client.post(self.admission_url, data={
-            **self.created_data,
-        })
-
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn('non_field_errors', response.json())
-
-    def test_get_one_experience_candidate(self):
-        self.client.force_authenticate(self.user)
-
-        # Mock data
-        curriculum_year = CurriculumYearFactory(
-            academic_year=AcademicYearFactory(year=2022),
-            person=self.admission.candidate,
-        )
-        experience = ExperienceFactory(
-            curriculum_year=curriculum_year,
-            country=self.country,
-            type=ExperienceType.HIGHER_EDUCATION.name,
-        )
-
-        detail_url = resolve_url('curriculum', xp=experience.uuid, uuid=self.admission.uuid)
-        response = self.client.get(detail_url)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.json().get('uuid'), str(experience.uuid))
-        self.assertEqual(response.json().get('type'), experience.type)
-        self.assertEqual(response.json().get('country'), self.country.iso_code)
 
-    def test_get_one_experience_other_candidate(self):
-        self.client.force_authenticate(self.other_user)
+        json_response = response.json()
 
-        # Mock data
-        curriculum_year = CurriculumYearFactory(
-            academic_year=AcademicYearFactory(year=2022),
-            person=self.admission.candidate,
-        )
-        experience = ExperienceFactory(
-            curriculum_year=curriculum_year,
-            country=self.country,
-            type=ExperienceType.HIGHER_EDUCATION.name,
+        # Check response data
+        self.assertEqual(json_response.get('obtained_grade'), Grade.GREATER_DISTINCTION.name),
+
+        json_first_educational_experience_year = json_response.get('educationalexperienceyear_set')[0]
+        self.assertEqual(json_first_educational_experience_year.get('academic_year'), 2020)
+        self.assertEqual(json_first_educational_experience_year.get('registered_credit_number'), 25)
+        self.assertEqual(json_first_educational_experience_year.get('acquired_credit_number'), 25)
+
+        # Check saved data
+        experience = EducationalExperience.objects.get(
+            uuid=self.educational_experience.uuid,
         )
 
-        detail_url = resolve_url('curriculum', xp=experience.uuid, uuid=self.other_admission.uuid)
-        response = self.client.get(detail_url)
+        self.assertEqual(experience.obtained_grade, Grade.GREATER_DISTINCTION.name)
 
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-
-    def test_update_experience(self):
-        self.client.force_authenticate(self.user)
-
-        # Mock data
-        first_curriculum_year = CurriculumYearFactory(
-            academic_year=AcademicYearFactory(year=2021),
-            person=self.admission.candidate,
-        )
-        second_curriculum_year = CurriculumYearFactory(
-            academic_year=AcademicYearFactory(year=2022),
-            person=self.admission.candidate,
-        )
-        experience = ExperienceFactory(
-            curriculum_year=first_curriculum_year,
-            country=self.country,
-            type=ExperienceType.HIGHER_EDUCATION.name,
+        educational_experience_years = EducationalExperienceYear.objects.filter(
+            educational_experience=experience
         )
 
-        update_url = resolve_url('curriculum', xp=experience.uuid, uuid=self.admission.uuid)
-        response = self.client.put(update_url, data={
-            'curriculum_year': second_curriculum_year.id,
-            'country': self.country.iso_code,
-            'type': ExperienceType.OTHER_ACTIVITY.name,
-        })
+        self.assertEqual(len(educational_experience_years), 2)
 
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.json().get('uuid'), str(experience.uuid))
-        self.assertEqual(response.json().get('type'), ExperienceType.OTHER_ACTIVITY.name)
-        self.assertEqual(response.json().get('curriculum_year'), {
-            'id': second_curriculum_year.id,
-            'academic_year': 2022,
-        })
-        self.assertEqual(response.json().get('country'), self.country.iso_code)
+        self.assertEqual(educational_experience_years[0].academic_year, self.academic_year_2020)
+        self.assertEqual(educational_experience_years[0].registered_credit_number, 25)
+        self.assertEqual(educational_experience_years[0].acquired_credit_number, 25)
 
-    def test_update_valuated_experience(self):
-        self.client.force_authenticate(self.user)
+        self.assertEqual(educational_experience_years[1].academic_year, self.academic_year_2019)
+        self.assertEqual(educational_experience_years[1].registered_credit_number, 14)
+        self.assertEqual(educational_experience_years[1].acquired_credit_number, 14)
 
-        # Mock data
-        curriculum_year = CurriculumYearFactory(
-            academic_year=AcademicYearFactory(year=2021),
-            person=self.admission.candidate,
+    def test_put_valuated_educational_experience_is_forbidden(self):
+        self.client.force_authenticate(user=self.user)
+
+        self.educational_experience.valuated_from.set([self.admission])
+
+        response = self.client.put(
+            self.admission_details_url,
+            data={},
         )
-        experience = ExperienceFactory(
-            curriculum_year=curriculum_year,
-            country=self.country,
-            type=ExperienceType.HIGHER_EDUCATION.name,
-        )
-        self.admission.valuated_experiences.add(experience)
-
-        update_url = resolve_url('curriculum', xp=experience.uuid, uuid=self.admission.uuid)
-        response = self.client.put(update_url, data={
-            'curriculum_year': curriculum_year.id,
-            'country': self.country.iso_code,
-            'type': ExperienceType.OTHER_ACTIVITY.name,
-        })
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    def test_delete_experience(self):
-        self.client.force_authenticate(self.user)
+    def test_delete_educational_experience(self):
+        self.client.force_authenticate(user=self.user)
 
-        # Mock data
-        curriculum_year = CurriculumYearFactory(
-            academic_year=AcademicYearFactory(year=2021),
-            person=self.admission.candidate,
-        )
-        experience = ExperienceFactory(
-            curriculum_year=curriculum_year,
-            country=self.country,
-            type=ExperienceType.HIGHER_EDUCATION.name,
+        self.assertTrue(
+            EducationalExperience.objects.filter(
+                uuid=self.educational_experience.uuid,
+            ).exists()
         )
 
-        self.assertTrue(Experience.objects.filter(pk=experience.id).exists())
+        self.client.delete(self.admission_details_url)
 
-        update_url = resolve_url('curriculum', xp=experience.uuid, uuid=self.admission.uuid)
-        response = self.client.delete(update_url)
-
-        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
-        self.assertFalse(Experience.objects.filter(pk=experience.id).exists())
-        self.assertFalse(CurriculumYear.objects.filter(pk=curriculum_year.id).exists())
-
-    def test_delete_valuated_experience(self):
-        self.client.force_authenticate(self.user)
-
-        # Mock data
-        curriculum_year = CurriculumYearFactory(
-            academic_year=AcademicYearFactory(year=2021),
-            person=self.admission.candidate,
+        self.assertFalse(
+            EducationalExperience.objects.filter(
+                uuid=self.educational_experience.uuid,
+            ).exists()
         )
-        experience = ExperienceFactory(
-            curriculum_year=curriculum_year,
-            country=self.country,
-            type=ExperienceType.HIGHER_EDUCATION.name,
-        )
-        self.admission.valuated_experiences.add(experience)
 
-        self.assertTrue(Experience.objects.filter(pk=experience.id).exists())
+    def test_delete_valuated_educational_experience_is_forbidden(self):
+        self.client.force_authenticate(user=self.user)
 
-        update_url = resolve_url('curriculum', xp=experience.uuid, uuid=self.admission.uuid)
-        response = self.client.delete(update_url)
+        self.educational_experience.valuated_from.set([self.admission])
+
+        response = self.client.delete(self.admission_details_url)
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-        self.assertTrue(Experience.objects.filter(pk=experience.id).exists())

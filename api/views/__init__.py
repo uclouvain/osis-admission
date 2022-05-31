@@ -27,8 +27,9 @@ from admission.api.views.dashboard import *
 from admission.api.views.autocomplete import *
 from admission.api.views.coordonnees import *
 from admission.api.views.curriculum import (
-    CurriculumExperienceListAndCreateView,
-    CurriculumExperienceDetailUpdateAndDeleteView,
+    CurriculumView,
+    EducationalExperienceViewSet,
+    ProfessionalExperienceViewSet,
     CurriculumFileView,
 )
 from admission.api.views.secondary_studies import *
@@ -55,8 +56,9 @@ from admission.api.views.training import (
 
 __all__ = [
     "CoordonneesViewSet",
-    "CurriculumExperienceListAndCreateView",
-    "CurriculumExperienceDetailUpdateAndDeleteView",
+    "CurriculumView",
+    "EducationalExperienceViewSet",
+    "ProfessionalExperienceViewSet",
     "CurriculumFileView",
     "PersonViewSet",
     "PropositionViewSet",

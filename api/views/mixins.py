@@ -25,6 +25,7 @@
 # ##############################################################################
 from typing import Optional
 
+from django.utils.functional import cached_property
 from rest_framework.generics import get_object_or_404
 
 from admission.api.schema import ChoicesEnumSchema
@@ -46,10 +47,14 @@ class PersonRelatedSchema(ChoicesEnumSchema):
 class PersonRelatedMixin:
     schema = PersonRelatedSchema()
 
-    def get_object(self):
+    @cached_property
+    def candidate(self):
         if self.kwargs.get('uuid'):
             return get_object_or_404(DoctorateAdmission, uuid=self.kwargs.get('uuid')).candidate
         return self.request.user.person
+
+    def get_object(self):
+        return self.candidate
 
     def get_permission_object(self) -> Optional[DoctorateAdmission]:
         if self.kwargs.get('uuid'):

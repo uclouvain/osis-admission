@@ -26,21 +26,19 @@
 
 import factory
 
-from base.tests.factories.academic_year import AcademicYearFactory
-from base.tests.factories.person import PersonFactory
-from osis_profile.models import CurriculumYear, Experience
+from osis_profile.models import EducationalExperienceYear, ProfessionalExperience, EducationalExperience
 
 
-class CurriculumYearFactory(factory.DjangoModelFactory):
-    person = factory.SubFactory(PersonFactory)
-    academic_year = factory.SubFactory(AcademicYearFactory, current=True)
-
+class EducationalExperienceYearFactory(factory.DjangoModelFactory):
     class Meta:
-        model = CurriculumYear
+        model = EducationalExperienceYear
 
 
-class ExperienceFactory(factory.DjangoModelFactory):
-    curriculum_year = factory.SubFactory(CurriculumYearFactory)
-
+class EducationalExperienceFactory(factory.DjangoModelFactory):
     class Meta:
-        model = Experience
+        model = EducationalExperience
+
+
+class ProfessionalExperienceFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = ProfessionalExperience

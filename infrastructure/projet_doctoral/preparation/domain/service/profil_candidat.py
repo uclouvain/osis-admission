@@ -23,8 +23,11 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import datetime
+from itertools import chain
 from typing import List
 
+from dateutil import rrule
 from django.contrib.postgres.aggregates import ArrayAgg
 
 from admission.ddd.projet_doctoral.preparation.domain.service.i_profil_candidat import IProfilCandidatTranslator
@@ -37,6 +40,7 @@ from admission.ddd.projet_doctoral.preparation.dtos import (
 from base.models.enums.person_address_type import PersonAddressType
 from base.models.person import Person
 from base.models.person_address import PersonAddress
+from osis_profile.models import ProfessionalExperience, EducationalExperienceYear
 from osis_profile.models.education import LanguageKnowledge
 
 
@@ -120,8 +124,8 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
         )
 
     @classmethod
-    def get_curriculum(cls, matricule: str) -> 'CurriculumDTO':
-        person = (
+    def get_curriculum(cls, matricule: str, annee_courante: int) -> 'CurriculumDTO':
+        personne = (
             Person.objects.select_related(
                 'last_registration_year',
                 'belgianhighschooldiploma__academic_graduation_year',
@@ -133,34 +137,52 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                 'last_registration_year__year',
                 'curriculum',
             )
-            .annotate(
-                annees_curriculum=ArrayAgg(
-                    "curriculumyear__academic_year__year",
-                    ordering="curriculumyear__academic_year__year",
-                )
-            )
             .get(global_id=matricule)
         )
 
         annee_diplome_etudes_secondaires_belges = (
-            person.belgianhighschooldiploma.academic_graduation_year.year
-            if hasattr(person, 'belgianhighschooldiploma')
+            personne.belgianhighschooldiploma.academic_graduation_year.year
+            if hasattr(personne, 'belgianhighschooldiploma')
             else None
         )
         annee_diplome_etudes_secondaires_etrangeres = (
-            person.foreignhighschooldiploma.academic_graduation_year.year
-            if hasattr(person, 'foreignhighschooldiploma')
+            personne.foreignhighschooldiploma.academic_graduation_year.year
+            if hasattr(personne, 'foreignhighschooldiploma')
             else None
         )
 
+        annee_derniere_inscription_ucl = (
+            personne.last_registration_year.year if personne.last_registration_year else None
+        )
+
+        annee_minimale = 1 + max(
+            [
+                annee
+                for annee in [
+                    annee_courante - cls.NB_MAX_ANNEES_CV_REQUISES,
+                    annee_diplome_etudes_secondaires_belges,
+                    annee_diplome_etudes_secondaires_etrangeres,
+                    annee_derniere_inscription_ucl,
+                ]
+                if annee
+            ]
+        )
+
+        annees_experiences_academiques = EducationalExperienceYear.objects.filter(
+            educational_experience__person=personne,
+            academic_year__year__gte=annee_minimale,
+        ).values_list('academic_year__year', flat=True)
+
+        dates_experiences_non_academiques = ProfessionalExperience.objects.filter(
+            person=personne,
+            end_date__gte=datetime.date(annee_minimale, cls.MOIS_DEBUT_ANNEE_ACADEMIQUE, 1),
+        ).values_list('start_date', 'end_date')
+
         return CurriculumDTO(
-            annees=set(person.annees_curriculum[: cls.NB_MAX_ANNEES_CV_REQUISES])
-            if person.annees_curriculum
-            else set(),
+            annees_experiences_academiques=list(annees_experiences_academiques),
             annee_diplome_etudes_secondaires_belges=annee_diplome_etudes_secondaires_belges,
             annee_diplome_etudes_secondaires_etrangeres=annee_diplome_etudes_secondaires_etrangeres,
-            annee_derniere_inscription_ucl=person.last_registration_year.year
-            if person.last_registration_year
-            else None,
-            fichier_pdf=person.curriculum,
+            annee_derniere_inscription_ucl=annee_derniere_inscription_ucl,
+            dates_experiences_non_academiques=list(dates_experiences_non_academiques),
+            fichier_pdf=personne.curriculum,
         )

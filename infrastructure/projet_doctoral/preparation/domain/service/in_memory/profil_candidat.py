@@ -106,88 +106,124 @@ class DiplomeEtudeSecondaire:
 
 
 @dataclass
-class AnneeCurriculum:
+class ExperienceAcademique:
     personne: str
     annee: int
+
+
+@dataclass
+class ExperienceNonAcademique:
+    personne: str
+    date_debut: datetime.date
+    date_fin: datetime.date
 
 
 class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
     matricule_candidat = '0123456789'
     annee_reference = 2020
-
-    profil_candidats = [
-        ProfilCandidat(
-            matricule=matricule_candidat,
-            nom='Doe',
-            prenom='John',
-            prenom_d_usage='Jerry',
-            autres_prenoms='James',
-            date_naissance=datetime.date(1990, 1, 1),
-            annee_naissance=1990,
-            lieu_naissance='Louvain-La-Neuve',
-            pays_nationalite='BE',
-            langue_contact='fr-be',
-            sexe='M',
-            genre='M',
-            photo_identite=['uuid11'],
-            carte_identite=['uuid12'],
-            passeport=['uuid13'],
-            numero_registre_national_belge='1001',
-            numero_carte_identite='1002',
-            numero_passeport='1003',
-            date_expiration_passeport=datetime.date(2022, 2, 10),
-            curriculum=['uuid14'],
-            annee_derniere_inscription_ucl=None,
-            noma_derniere_inscription_ucl='',
-            email='john.doe@ucl.be',
-            pays_naissance='BE',
-            etat_civil=CivilState.MARRIED.name,
-        ),
-    ]
-    adresses_candidats = [
-        AdressePersonnelle(
-            personne=matricule_candidat,
-            code_postal='1348',
-            ville='Louvain-La-Neuve',
-            pays='BE',
-            rue="Boulevard de Wallonie",
-            type='RESIDENTIAL',
-            lieu_dit='',
-            numero_rue='10',
-            boite_postale='B1',
-        ),
-        AdressePersonnelle(
-            personne=matricule_candidat,
-            code_postal='1348',
-            ville='Louvain-La-Neuve',
-            pays='BE',
-            rue="Place de l'Université",
-            type='CONTACT',
-            lieu_dit='',
-            numero_rue='14',
-            boite_postale='B2',
-        ),
-    ]
-    langues = [
-        Langue(code_langue='FR'),
-        Langue(code_langue='EN'),
-        Langue(code_langue='NL'),
-        Langue(code_langue='DE'),
-    ]
-    connaissances_langues = [
-        ConnaissanceLangue(personne=matricule_candidat, langue=langues[0]),
-        ConnaissanceLangue(personne=matricule_candidat, langue=langues[1]),
-        ConnaissanceLangue(personne=matricule_candidat, langue=langues[2]),
-    ]
+    profil_candidats = []
+    adresses_candidats = []
+    langues = []
+    connaissances_langues = []
     diplomes_etudes_secondaires_belges = []
     diplomes_etudes_secondaires_etrangers = []
-    annees_curriculum = [
-        AnneeCurriculum(personne=matricule_candidat, annee=2016),
-        AnneeCurriculum(personne=matricule_candidat, annee=2017),
-        AnneeCurriculum(personne=matricule_candidat, annee=2018),
-        AnneeCurriculum(personne=matricule_candidat, annee=2019),
-        AnneeCurriculum(personne=matricule_candidat, annee=2020),
-    ]
+    experiences_academiques = []
+    experiences_non_academiques = []
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.reset()
+
+    @classmethod
+    def reset(cls):
+        cls.profil_candidats = [
+            ProfilCandidat(
+                matricule=cls.matricule_candidat,
+                nom='Doe',
+                prenom='John',
+                prenom_d_usage='Jerry',
+                autres_prenoms='James',
+                date_naissance=datetime.date(1990, 1, 1),
+                annee_naissance=1990,
+                lieu_naissance='Louvain-La-Neuve',
+                pays_nationalite='BE',
+                langue_contact='fr-be',
+                sexe='M',
+                genre='M',
+                photo_identite=['uuid11'],
+                carte_identite=['uuid12'],
+                passeport=['uuid13'],
+                numero_registre_national_belge='1001',
+                numero_carte_identite='1002',
+                numero_passeport='1003',
+                date_expiration_passeport=datetime.date(2022, 2, 10),
+                curriculum=['uuid14'],
+                annee_derniere_inscription_ucl=None,
+                noma_derniere_inscription_ucl='',
+                email='john.doe@ucl.be',
+                pays_naissance='BE',
+                etat_civil=CivilState.MARRIED.name,
+            ),
+        ]
+        cls.adresses_candidats = [
+            AdressePersonnelle(
+                personne=cls.matricule_candidat,
+                code_postal='1348',
+                ville='Louvain-La-Neuve',
+                pays='BE',
+                rue="Boulevard de Wallonie",
+                type='RESIDENTIAL',
+                lieu_dit='',
+                numero_rue='10',
+                boite_postale='B1',
+            ),
+            AdressePersonnelle(
+                personne=cls.matricule_candidat,
+                code_postal='1348',
+                ville='Louvain-La-Neuve',
+                pays='BE',
+                rue="Place de l'Université",
+                type='CONTACT',
+                lieu_dit='',
+                numero_rue='14',
+                boite_postale='B2',
+            ),
+        ]
+        cls.langues = [
+            Langue(code_langue='FR'),
+            Langue(code_langue='EN'),
+            Langue(code_langue='NL'),
+            Langue(code_langue='DE'),
+        ]
+
+        cls.connaissances_langues = [
+            ConnaissanceLangue(personne=cls.matricule_candidat, langue=cls.langues[0]),
+            ConnaissanceLangue(personne=cls.matricule_candidat, langue=cls.langues[1]),
+            ConnaissanceLangue(personne=cls.matricule_candidat, langue=cls.langues[2]),
+        ]
+
+        cls.experiences_academiques = [
+            ExperienceAcademique(personne=cls.matricule_candidat, annee=2016),
+            ExperienceAcademique(personne=cls.matricule_candidat, annee=2017),
+            ExperienceAcademique(personne=cls.matricule_candidat, annee=2019),
+            ExperienceAcademique(personne=cls.matricule_candidat, annee=2020),
+        ]
+
+        cls.experiences_non_academiques = [
+            ExperienceNonAcademique(
+                personne=cls.matricule_candidat,
+                date_debut=datetime.date(2019, 5, 1),
+                date_fin=datetime.date(2019, 8, 31),
+            ),
+            ExperienceNonAcademique(
+                personne=cls.matricule_candidat,
+                date_debut=datetime.date(2018, 7, 1),
+                date_fin=datetime.date(2019, 4, 30),
+            ),
+        ]
+
+        cls.diplomes_etudes_secondaires_belges = []
+        cls.diplomes_etudes_secondaires_etrangers = []
 
     @classmethod
     def get_identification(cls, matricule: str) -> 'IdentificationDTO':
@@ -261,11 +297,19 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
         return [c.langue.code_langue for c in cls.connaissances_langues if c.personne == matricule]
 
     @classmethod
-    def get_curriculum(cls, matricule: str) -> 'CurriculumDTO':
+    def get_curriculum(cls, matricule: str, annee_courante: int) -> 'CurriculumDTO':
         try:
             candidate = next(c for c in cls.profil_candidats if c.matricule == matricule)
 
-            annees = set(a.annee for a in cls.annees_curriculum if a.personne == matricule)
+            annees_experiences_academiques = [
+                experience.annee for experience in cls.experiences_academiques if experience.personne == matricule
+            ]
+
+            dates_experiences_non_academiques = [
+                (experience.date_debut, experience.date_fin)
+                for experience in cls.experiences_non_academiques
+                if experience.personne == matricule
+            ]
 
             annee_diplome_belge = next(
                 (d.annee for d in cls.diplomes_etudes_secondaires_belges if d.personne == matricule),
@@ -277,11 +321,12 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
             )
 
             return CurriculumDTO(
-                annees=annees,
+                annees_experiences_academiques=annees_experiences_academiques,
                 annee_diplome_etudes_secondaires_belges=annee_diplome_belge,
                 annee_diplome_etudes_secondaires_etrangeres=annee_diplome_etranger,
                 annee_derniere_inscription_ucl=candidate.annee_derniere_inscription_ucl,
                 fichier_pdf=candidate.curriculum,
+                dates_experiences_non_academiques=dates_experiences_non_academiques,
             )
         except StopIteration:
             raise CandidatNonTrouveException

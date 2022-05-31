@@ -1364,9 +1364,6 @@ msgstr ""
 msgid "Please specify either your date of birth or your year of birth."
 msgstr ""
 
-msgid "Please specify the experience's year."
-msgstr ""
-
 msgid "Please specify your Belgian national register number."
 msgstr ""
 
@@ -1814,7 +1811,8 @@ msgstr ""
 msgid "The dossier has been confirmed with the following contact address:"
 msgstr ""
 
-msgid "The experiences that have been valuated from this admission."
+msgid ""
+"The educational experiences that have been valuated from this admission."
 msgstr ""
 
 msgid "The first name of the candidate"
@@ -1848,6 +1846,10 @@ msgid ""
 msgstr ""
 
 msgid "The opinion about the extension request is not completed."
+msgstr ""
+
+msgid ""
+"The professional experiences that have been valuated from this admission."
 msgstr ""
 
 msgid "The proposition has already been confirmed or is cancelled"
@@ -1903,9 +1905,6 @@ msgid "This activity is not complete"
 msgstr ""
 
 msgid "This candidate has not created any activity yet"
-msgstr ""
-
-msgid "This experience cannot be deleted as it has already been valuated."
 msgstr ""
 
 msgid "This experience cannot be updated as it has already been valuated."

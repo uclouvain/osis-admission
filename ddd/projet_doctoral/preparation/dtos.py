@@ -24,7 +24,7 @@
 #
 ##############################################################################
 import datetime
-from typing import Dict, List, Optional, Set
+from typing import Dict, List, Optional, Tuple
 from uuid import UUID
 
 import attr
@@ -158,7 +158,8 @@ class AutreOccupationDTO(interface.DTO):
 @attr.dataclass(frozen=True, slots=True)
 class CurriculumDTO(interface.DTO):
     fichier_pdf: List[str]
-    annees: Set[int]
+    dates_experiences_non_academiques: List[Tuple[datetime.date, datetime.date]]
+    annees_experiences_academiques: List[int]
     annee_derniere_inscription_ucl: Optional[int]
     annee_diplome_etudes_secondaires_belges: Optional[int]
     annee_diplome_etudes_secondaires_etrangeres: Optional[int]

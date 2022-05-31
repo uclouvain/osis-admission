@@ -24,7 +24,7 @@
 #
 # ##############################################################################
 import datetime
-from typing import List, Optional, Set, Union
+from typing import List, Optional, Union, Tuple
 
 import attr
 
@@ -298,12 +298,12 @@ class LanguesConnuesValidatorList(TwoStepsMultipleBusinessExceptionListValidator
 @attr.dataclass(frozen=True, slots=True)
 class CurriculumValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
     fichier_pdf: List[str]
-    annees: Set[int]
-    nb_maximum_annees_requises: int
     annee_courante: int
     annee_derniere_inscription_ucl: Optional[int]
     annee_diplome_etudes_secondaires_belges: Optional[int]
     annee_diplome_etudes_secondaires_etrangeres: Optional[int]
+    dates_experiences_non_academiques: List[Tuple[datetime.date, datetime.date]]
+    annees_experiences_academiques: List[int]
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
@@ -315,11 +315,11 @@ class CurriculumValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
             ),
             ShouldAnneesCVRequisesCompletees(
                 annee_courante=self.annee_courante,
-                annees=self.annees,
+                annees_experiences_academiques=self.annees_experiences_academiques,
                 annee_derniere_inscription_ucl=self.annee_derniere_inscription_ucl,
                 annee_diplome_etudes_secondaires_belges=self.annee_diplome_etudes_secondaires_belges,
                 annee_diplome_etudes_secondaires_etrangeres=self.annee_diplome_etudes_secondaires_etrangeres,
-                nb_maximum_annees_requises=self.nb_maximum_annees_requises,
+                dates_experiences_non_academiques=self.dates_experiences_non_academiques,
             ),
         ]
 

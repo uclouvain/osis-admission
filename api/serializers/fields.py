@@ -23,6 +23,8 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from functools import partial
+
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.urls.exceptions import NoReverseMatch
@@ -144,6 +146,14 @@ class RelatedInstituteField(serializers.CharField, serializers.SlugRelatedField)
             return str(serializers.SlugRelatedField.to_representation(self, value))
 
 
+DoctorateAdmissionField = partial(
+    serializers.SlugRelatedField,
+    slug_field='uuid',
+    read_only=True,
+    allow_null=True,
+)
+
+
 # Available actions
 ACTION_LINKS = {
     # List
@@ -204,13 +214,13 @@ ACTION_LINKS = {
     },
     # Curriculum
     'retrieve_curriculum': {
-        'path_name': 'admission_api_v1:curriculum',
+        'path_name': 'admission_api_v1:curriculum_file',
         'method': 'GET',
         'params': ['uuid'],
     },
     'update_curriculum': {
-        'path_name': 'admission_api_v1:curriculum',
-        'method': 'POST',
+        'path_name': 'admission_api_v1:curriculum_file',
+        'method': 'PUT',
         'params': ['uuid'],
     },
     # Proposition

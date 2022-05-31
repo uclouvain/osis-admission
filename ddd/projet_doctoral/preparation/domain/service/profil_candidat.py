@@ -106,14 +106,14 @@ class ProfilCandidat(interface.DomainService):
         profil_candidat_translator: 'IProfilCandidatTranslator',
         annee_courante: int,
     ) -> None:
-        curriculum = profil_candidat_translator.get_curriculum(matricule)
+        curriculum = profil_candidat_translator.get_curriculum(matricule, annee_courante=annee_courante)
 
         CurriculumValidatorList(
             annee_courante=annee_courante,
-            annees=curriculum.annees,
+            annees_experiences_academiques=curriculum.annees_experiences_academiques,
             annee_diplome_etudes_secondaires_belges=curriculum.annee_diplome_etudes_secondaires_belges,
             annee_diplome_etudes_secondaires_etrangeres=curriculum.annee_diplome_etudes_secondaires_etrangeres,
             annee_derniere_inscription_ucl=curriculum.annee_derniere_inscription_ucl,
             fichier_pdf=curriculum.fichier_pdf,
-            nb_maximum_annees_requises=profil_candidat_translator.NB_MAX_ANNEES_CV_REQUISES,
+            dates_experiences_non_academiques=curriculum.dates_experiences_non_academiques,
         ).validate()

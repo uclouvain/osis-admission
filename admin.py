@@ -41,7 +41,6 @@ from admission.auth.roles.sic_manager import SicManager
 from admission.contrib.models import CddMailTemplate, DoctorateAdmission
 from osis_mail_template.admin import MailTemplateAdmin
 
-from osis_profile.models.curriculum import CurriculumYear, Experience
 from osis_role.contrib.admin import RoleModelAdmin
 
 # ##############################################################################
@@ -63,21 +62,17 @@ class DoctorateAdmissionAdmin(admin.ModelAdmin):
         "cotutelle_convention",
         "cotutelle_other_documents",
         "detailed_status",
+        "submitted_profile",
+        "pre_admission_submission_date",
+        "admission_submission_date",
+        "professional_valuated_experiences",
+        "educational_valuated_experiences",
     ]
 
     def candidate_fmt(self, obj):
         return "{} ({global_id})".format(obj.candidate, global_id=obj.candidate.global_id)
 
     candidate_fmt.short_description = _("Candidate")
-
-
-class ExperienceInlineAdmin(admin.TabularInline):
-    model = Experience
-
-
-class CurriculumYearAdmin(admin.ModelAdmin):
-    inlines = [ExperienceInlineAdmin]
-    autocomplete_fields = ["person"]
 
 
 class CddMailTemplateAdmin(MailTemplateAdmin):
@@ -94,7 +89,6 @@ class CddMailTemplateAdmin(MailTemplateAdmin):
 
 
 admin.site.register(DoctorateAdmission, DoctorateAdmissionAdmin)
-admin.site.register(CurriculumYear, CurriculumYearAdmin)
 admin.site.register(CddMailTemplate, CddMailTemplateAdmin)
 
 
