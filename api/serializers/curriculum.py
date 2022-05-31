@@ -23,81 +23,169 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from django.utils.translation import gettext as _
+from functools import partial
 
 from rest_framework import serializers
-from rest_framework.exceptions import ValidationError
 
+from admission.api.serializers.fields import DoctorateAdmissionField
+from admission.api.serializers.mixins import GetDefaultContextParam
+from admission.ddd.projet_doctoral.preparation.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from base.api.serializers.academic_year import RelatedAcademicYearField
+from base.models.academic_year import current_academic_year
 from base.models.person import Person
-from osis_profile.models import Experience, CurriculumYear
+from osis_profile.models import (
+    ProfessionalExperience,
+    EducationalExperience,
+    EducationalExperienceYear,
+    BelgianHighSchoolDiploma,
+    ForeignHighSchoolDiploma,
+)
 from reference.api.serializers.country import RelatedCountryField
 from reference.api.serializers.language import RelatedLanguageField
+from reference.models.diploma_title import DiplomaTitle
 
 
-# Nested serializers
-class CurriculumYearSerializer(serializers.ModelSerializer):
+class ProfessionalExperienceSerializer(serializers.ModelSerializer):
+    person = serializers.HiddenField(
+        default=serializers.CreateOnlyDefault(GetDefaultContextParam('candidate')),
+    )
+    valuated_from = DoctorateAdmissionField(many=True)
+
+    class Meta:
+        model = ProfessionalExperience
+        exclude = [
+            'id',
+        ]
+
+
+class LiteProfessionalExperienceSerializer(ProfessionalExperienceSerializer):
+    class Meta:
+        model = ProfessionalExperience
+        fields = [
+            'uuid',
+            'institute_name',
+            'start_date',
+            'end_date',
+            'type',
+            'valuated_from',
+        ]
+
+
+class EducationalExperienceYearSerializer(serializers.ModelSerializer):
     academic_year = RelatedAcademicYearField()
 
     class Meta:
-        model = CurriculumYear
-        fields = (
-            'academic_year',
+        model = EducationalExperienceYear
+        exclude = [
             'id',
-        )
+            'educational_experience',
+        ]
 
 
-# Experience serializers
-class ExperienceSerializer(serializers.ModelSerializer):
+RelatedDiplomaField = partial(
+    serializers.SlugRelatedField,
+    slug_field='uuid',
+    queryset=DiplomaTitle.objects.all(),
+    allow_null=True,
+)
+
+
+class EducationalExperienceSerializer(serializers.ModelSerializer):
+    educationalexperienceyear_set = EducationalExperienceYearSerializer(many=True)
     country = RelatedCountryField()
     linguistic_regime = RelatedLanguageField(required=False)
+    person = serializers.HiddenField(
+        default=serializers.CreateOnlyDefault(GetDefaultContextParam('candidate')),
+    )
+    program = RelatedDiplomaField(required=False)
+    valuated_from = DoctorateAdmissionField(many=True)
+
+    YEAR_FIELDS_TO_UPDATE = [
+        'registered_credit_number',
+        'acquired_credit_number',
+        'result',
+        'transcript',
+        'transcript_translation',
+    ]
 
     class Meta:
-        model = Experience
+        model = EducationalExperience
+        depth = 1
         exclude = [
-            'id'
+            'institute',
+            'id',
         ]
-        extra_kwargs = {
-            "curriculum_year": {
-                "required": False,
-            },
-        }
-
-
-class ExperienceOutputSerializer(ExperienceSerializer):
-    curriculum_year = CurriculumYearSerializer()
-    is_valuated = serializers.BooleanField(read_only=True)
-
-
-class ExperienceInputSerializer(ExperienceSerializer):
-    academic_year = RelatedAcademicYearField(required=False)
-
-    def __init__(self, related_person=None, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.related_person = related_person
-
-    def validate(self, data):
-        # The related year must be specified
-        if not data.get('academic_year') and not data.get('curriculum_year'):
-            raise ValidationError(_("Please specify the experience's year."))
-
-        return super().validate(data)
-
-    def _get_or_create_curriculum_year_from_academic_year(self, validated_data):
-        if not validated_data.get('curriculum_year'):
-            # Get (and eventually create) the curriculum year related to the specified academic_year
-            validated_data['curriculum_year'] = CurriculumYear.objects.get_or_create(
-                person=self.related_person,
-                academic_year=validated_data.pop('academic_year'),
-            )[0]
 
     def create(self, validated_data):
-        self._get_or_create_curriculum_year_from_academic_year(validated_data=validated_data)
-        return super().create(validated_data)
+        experience_year_data = validated_data.pop('educationalexperienceyear_set')
+
+        educational_experience = super().create(validated_data)
+
+        # Create the experience years related to the created experience
+        for new_experience_year_data in experience_year_data:
+            new_experience_year = EducationalExperienceYear(
+                educational_experience=educational_experience,
+                **new_experience_year_data,
+            )
+            new_experience_year.save()
+
+        return educational_experience
 
     def update(self, instance, validated_data):
-        self._get_or_create_curriculum_year_from_academic_year(validated_data=validated_data)
-        return super().update(instance, validated_data)
+        experience_year_data = {
+            experience_year.get('academic_year').pk: experience_year
+            for experience_year in validated_data.pop('educationalexperienceyear_set')
+        }
+
+        educational_experience: EducationalExperience = super().update(instance, validated_data)
+
+        # Loop over the existing experience years to update / delete them if necessary
+        for experience_year in educational_experience.educationalexperienceyear_set.all():
+            current_experience_year_data = experience_year_data.pop(experience_year.academic_year.pk, None)
+
+            if current_experience_year_data:
+                # Update it
+                for field in self.YEAR_FIELDS_TO_UPDATE:
+                    setattr(experience_year, field, current_experience_year_data[field])
+
+                experience_year.save(update_fields=self.YEAR_FIELDS_TO_UPDATE)
+
+            else:
+                # Delete it
+                experience_year.delete()
+
+        for academic_year in experience_year_data:
+            # Save the new experience years
+            new_experience_year = EducationalExperienceYear(
+                educational_experience=educational_experience,
+                **experience_year_data[academic_year],
+            )
+            new_experience_year.save()
+
+        return educational_experience
+
+
+class LiteEducationalExperienceYearSerializer(EducationalExperienceYearSerializer):
+    class Meta:
+        model = EducationalExperienceYear
+        fields = [
+            'academic_year',
+        ]
+
+
+class LiteEducationalExperienceSerializer(EducationalExperienceSerializer):
+    educationalexperienceyear_set = LiteEducationalExperienceYearSerializer(many=True)
+
+    class Meta:
+        model = EducationalExperience
+        fields = [
+            'uuid',
+            'institute_name',
+            'program',
+            'education_name',
+            'educationalexperienceyear_set',
+            'valuated_from',
+        ]
 
 
 class CurriculumFileSerializer(serializers.ModelSerializer):
@@ -106,3 +194,41 @@ class CurriculumFileSerializer(serializers.ModelSerializer):
         fields = [
             'curriculum',
         ]
+
+
+class CurriculumSerializer(serializers.Serializer):
+    professional_experiences = LiteProfessionalExperienceSerializer(many=True)
+    educational_experiences = LiteEducationalExperienceSerializer(many=True)
+    file = CurriculumFileSerializer()
+    minimal_year = serializers.SerializerMethodField()
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        # Define a custom schema as the default schema type of a SerializerMethodField is string
+        self.fields['minimal_year'].field_schema = {'type': 'integer'}
+
+    def get_minimal_year(self, _):
+        related_person = self.context.get('related_person')
+        belgian_diploma = (
+            BelgianHighSchoolDiploma.objects.filter(person=related_person)
+            .select_related('academic_graduation_year')
+            .first()
+        )
+        foreign_diploma = (
+            ForeignHighSchoolDiploma.objects.filter(person=related_person)
+            .select_related('academic_graduation_year')
+            .first()
+        )
+        current_year = current_academic_year()
+        min_year = 1 + max(
+            year
+            for year in [
+                belgian_diploma.academic_graduation_year.year if belgian_diploma else None,
+                foreign_diploma.academic_graduation_year.year if foreign_diploma else None,
+                related_person.last_registration_year.year if related_person.last_registration_year else None,
+                current_year.year - IProfilCandidatTranslator.NB_MAX_ANNEES_CV_REQUISES,
+            ]
+            if year
+        )
+
+        return min_year

@@ -23,10 +23,12 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import List, Optional, Set
+import datetime
+from typing import List, Optional, Tuple
 
 import attr
 
+from admission.ddd.projet_doctoral.preparation.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.projet_doctoral.preparation.domain.validator.exceptions import (
     AnneesCurriculumNonSpecifieesException,
     FichierCurriculumNonRenseigneException,
@@ -36,19 +38,19 @@ from base.ddd.utils.business_validator import BusinessValidator
 
 @attr.dataclass(frozen=True, slots=True)
 class ShouldAnneesCVRequisesCompletees(BusinessValidator):
-    annees: Set[int]
-    nb_maximum_annees_requises: int
     annee_courante: int
     annee_derniere_inscription_ucl: Optional[int]
     annee_diplome_etudes_secondaires_belges: Optional[int]
     annee_diplome_etudes_secondaires_etrangeres: Optional[int]
+    dates_experiences_non_academiques: List[Tuple[datetime.date, datetime.date]]
+    annees_experiences_academiques: List[int]
 
     def validate(self, *args, **kwargs):
-        annee_minimale = max(
+        annee_minimale = 1 + max(
             [
                 annee
                 for annee in [
-                    self.annee_courante - self.nb_maximum_annees_requises,
+                    self.annee_courante - IProfilCandidatTranslator.NB_MAX_ANNEES_CV_REQUISES,
                     self.annee_diplome_etudes_secondaires_belges,
                     self.annee_diplome_etudes_secondaires_etrangeres,
                     self.annee_derniere_inscription_ucl,
@@ -57,10 +59,53 @@ class ShouldAnneesCVRequisesCompletees(BusinessValidator):
             ]
         )
 
+        annees_valorisees = set(self.annees_experiences_academiques)
+
+        # Vérifier si certaines années sont valorisées par les expériences non-académiques
+        if self.dates_experiences_non_academiques:
+            annees_restantes_a_valoriser = [
+                [
+                    datetime.date(a, IProfilCandidatTranslator.MOIS_DEBUT_ANNEE_ACADEMIQUE, 1),
+                    datetime.date(a + 1, IProfilCandidatTranslator.MOIS_FIN_ANNEE_ACADEMIQUE, 1),
+                ]
+                for a in range(self.annee_courante, annee_minimale - 1, -1)
+                if a not in annees_valorisees
+            ]
+
+            if annees_restantes_a_valoriser:
+
+                iterateur_dates_experiences_non_academiques = iter(self.dates_experiences_non_academiques)
+                periode_valorisee = list(next(iterateur_dates_experiences_non_academiques))
+
+                for debut, fin in iterateur_dates_experiences_non_academiques:
+                    if (periode_valorisee[0] - fin).days <= 1:
+                        # Extension de la période de valorisation
+                        periode_valorisee = (debut, max(fin, periode_valorisee[1]))
+                    else:
+                        # Rupture dans la période couverte par les expériences -> vérifier si elle valorise des années
+                        annees_restantes_a_valoriser_tmp = []
+                        for annee in annees_restantes_a_valoriser:
+                            if annee[0] >= periode_valorisee[0] and annee[1] <= periode_valorisee[1]:
+                                annees_valorisees.add(annee[0].year)
+                            else:
+                                annees_restantes_a_valoriser_tmp.append(annee)
+
+                        # On passe à la période suivante avec les années restantes
+                        periode_valorisee = [debut, fin]
+                        annees_restantes_a_valoriser = annees_restantes_a_valoriser_tmp
+
+                        if not annees_restantes_a_valoriser:
+                            break
+
+                # Vérifier la valorisation des années pour la dernière période
+                for annee in annees_restantes_a_valoriser:
+                    if annee[0] >= periode_valorisee[0] and annee[1] <= periode_valorisee[1]:
+                        annees_valorisees.add(annee[0].year)
+
         annees_manquantes = [
-            '{0}-{1}'.format(annee, (annee + 1) % 100)
-            for annee in range(self.annee_courante, annee_minimale, -1)
-            if annee not in self.annees
+            f'{annee}-{annee+1}'
+            for annee in range(self.annee_courante, annee_minimale - 1, -1)
+            if annee not in annees_valorisees
         ]
 
         if annees_manquantes:

@@ -61,6 +61,7 @@ from admission.infrastructure.message_bus_in_memory import message_bus_in_memory
 from admission.infrastructure.projet_doctoral.preparation.domain.service.in_memory.profil_candidat import (
     DiplomeEtudeSecondaire,
     ProfilCandidatInMemoryTranslator,
+    ExperienceNonAcademique,
 )
 from admission.infrastructure.projet_doctoral.preparation.repository.in_memory.groupe_de_supervision import (
     GroupeDeSupervisionInMemoryRepository,
@@ -80,9 +81,10 @@ class TestVerifierPropositionServiceCommun(SimpleTestCase):
         self.groupe_supervision_repository = GroupeDeSupervisionInMemoryRepository()
         self.proposition = PropositionAdmissionSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory()
         self.groupe_supervision = self.groupe_supervision_repository.get_by_proposition_id(self.proposition.entity_id)
-        self.current_candidat = self.candidat_translator.profil_candidats[0]
+        self.candidat = self.candidat_translator.profil_candidats[0]
         self.adresse_domicile_legal = self.candidat_translator.adresses_candidats[0]
         self.adresse_correspondance = self.candidat_translator.adresses_candidats[1]
+        self.experiences_non_academiques = self.candidat_translator.experiences_non_academiques
         self.addCleanup(self.proposition_repository.reset)
         self.message_bus = message_bus_in_memory_instance
         self.academic_year_repository = AcademicYearInMemoryRepository()
@@ -113,20 +115,20 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
         self.assertEqual(proposition_id.uuid, self.proposition.entity_id.uuid)
 
     def test_should_retourner_erreur_si_candidat_non_trouve(self):
-        with mock.patch.multiple(self.current_candidat, matricule='unknown_user_id'):
+        with mock.patch.multiple(self.candidat, matricule='unknown_user_id'):
             with self.assertRaises(MultipleBusinessExceptions) as context:
                 self.message_bus.invoke(self.cmd)
             self.assertIsInstance(context.exception.exceptions.pop(), CandidatNonTrouveException)
 
     def test_should_retourner_erreur_si_identification_non_completee(self):
-        with mock.patch.multiple(self.current_candidat, pays_naissance=''):
+        with mock.patch.multiple(self.candidat, pays_naissance=''):
             with self.assertRaises(MultipleBusinessExceptions) as context:
                 self.message_bus.invoke(self.cmd)
             self.assertIsInstance(context.exception.exceptions.pop(), IdentificationNonCompleteeException)
 
     def test_should_retourner_erreur_si_numero_identite_non_renseigne_candidat_etranger(self):
         with mock.patch.multiple(
-            self.current_candidat,
+            self.candidat,
             numero_registre_national_belge='',
             numero_carte_identite='',
             numero_passeport='',
@@ -138,7 +140,7 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
 
     def test_should_retourner_erreur_si_numero_identite_belge_non_renseigne_candidat_belge(self):
         with mock.patch.multiple(
-            self.current_candidat,
+            self.candidat,
             numero_registre_national_belge='',
         ):
             with self.assertRaises(MultipleBusinessExceptions) as context:
@@ -147,7 +149,7 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
 
     def test_should_retourner_erreur_si_nom_et_prenom_non_renseignes(self):
         with mock.patch.multiple(
-            self.current_candidat,
+            self.candidat,
             nom='',
             prenom='',
         ):
@@ -157,7 +159,7 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
 
     def test_should_retourner_erreur_si_noma_non_renseigne_si_precedente_inscription(self):
         with mock.patch.multiple(
-            self.current_candidat,
+            self.candidat,
             annee_derniere_inscription_ucl=2020,
             noma_derniere_inscription_ucl='',
         ):
@@ -167,7 +169,7 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
 
     def test_should_retourner_erreur_si_date_annee_naissance_non_renseignees(self):
         with mock.patch.multiple(
-            self.current_candidat,
+            self.candidat,
             date_naissance=None,
             annee_naissance=None,
         ):
@@ -177,7 +179,7 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
 
     def test_should_retourner_erreur_si_details_passeport_non_renseignes(self):
         with mock.patch.multiple(
-            self.current_candidat,
+            self.candidat,
             date_expiration_passeport=None,
             passeport=[],
         ):
@@ -187,7 +189,7 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
 
     def test_should_retourner_erreur_si_carte_identite_non_renseignee(self):
         with mock.patch.multiple(
-            self.current_candidat,
+            self.candidat,
             carte_identite=[],
         ):
             with self.assertRaises(MultipleBusinessExceptions) as context:
@@ -228,7 +230,7 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
             self.assertIsInstance(context.exception.exceptions.pop(), LanguesConnuesNonSpecifieesException)
 
     def test_should_retourner_erreur_si_fichier_curriculum_non_renseigne(self):
-        with mock.patch.object(self.current_candidat, 'curriculum', None):
+        with mock.patch.object(self.candidat, 'curriculum', None):
             with self.assertRaises(MultipleBusinessExceptions) as context:
                 self.message_bus.invoke(self.cmd)
             self.assertIsInstance(context.exception.exceptions.pop(), FichierCurriculumNonRenseigneException)
@@ -268,15 +270,10 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
 class TestVerifierPropositionServiceCurriculumYears(TestVerifierPropositionServiceCommun):
     def setUp(self) -> None:
         super().setUp()
-
-        # Consider that no experience is related to the current candidate
-        for a in self.candidat_translator.annees_curriculum:
-            a.personne = 'autre personne'
-
-    def tearDown(self) -> None:
-        # Reset the experiences to linked them to the current candidate
-        for a in self.candidat_translator.annees_curriculum:
-            a.personne = self.current_candidat.matricule
+        for experience in (
+            self.candidat_translator.experiences_academiques + self.candidat_translator.experiences_non_academiques
+        ):
+            experience.personne = 'other'
 
     def test_should_retourner_erreur_si_5_dernieres_annees_curriculum_non_saisies(self):
         with self.assertRaises(MultipleBusinessExceptions) as context:
@@ -292,7 +289,7 @@ class TestVerifierPropositionServiceCurriculumYears(TestVerifierPropositionServi
 
     def test_should_retourner_erreur_si_dernieres_annees_curriculum_non_saisies_avec_diplome_secondaire_belge(self):
         self.candidat_translator.diplomes_etudes_secondaires_belges.append(
-            DiplomeEtudeSecondaire(personne=self.current_candidat.matricule, annee=2018)
+            DiplomeEtudeSecondaire(personne=self.candidat.matricule, annee=2018)
         )
 
         with self.assertRaises(MultipleBusinessExceptions) as context:
@@ -303,11 +300,9 @@ class TestVerifierPropositionServiceCurriculumYears(TestVerifierPropositionServi
         self.assertIn('2020', exception.message)
         self.assertIn('2019', exception.message)
 
-        self.candidat_translator.diplomes_etudes_secondaires_belges.pop()
-
     def test_should_retourner_erreur_si_dernieres_annees_curriculum_non_saisies_avec_diplome_secondaire_etranger(self):
         self.candidat_translator.diplomes_etudes_secondaires_etrangers.append(
-            DiplomeEtudeSecondaire(personne=self.current_candidat.matricule, annee=2017)
+            DiplomeEtudeSecondaire(personne=self.candidat.matricule, annee=2017)
         )
 
         with self.assertRaises(MultipleBusinessExceptions) as context:
@@ -319,11 +314,9 @@ class TestVerifierPropositionServiceCurriculumYears(TestVerifierPropositionServi
         self.assertIn('2019', exception.message)
         self.assertIn('2018', exception.message)
 
-        self.candidat_translator.diplomes_etudes_secondaires_etrangers = []
-
     def test_should_retourner_erreur_si_dernieres_annees_curriculum_non_saisies_avec_ancienne_inscription_ucl(self):
         with mock.patch.multiple(
-            self.current_candidat,
+            self.candidat,
             annee_derniere_inscription_ucl=2019,
             noma_derniere_inscription_ucl='01234567',
         ):
@@ -336,11 +329,11 @@ class TestVerifierPropositionServiceCurriculumYears(TestVerifierPropositionServi
 
     def test_should_retourner_erreur_si_annees_curriculum_non_saisies_avec_diplome_et_ancienne_inscription(self):
         self.candidat_translator.diplomes_etudes_secondaires_belges.append(
-            DiplomeEtudeSecondaire(personne=self.current_candidat.matricule, annee=2017)
+            DiplomeEtudeSecondaire(personne=self.candidat.matricule, annee=2017)
         )
 
         with mock.patch.multiple(
-            self.current_candidat,
+            self.candidat,
             annee_derniere_inscription_ucl=2018,
             noma_derniere_inscription_ucl='01234567',
         ):
@@ -352,11 +345,234 @@ class TestVerifierPropositionServiceCurriculumYears(TestVerifierPropositionServi
         self.assertIn('2020', exception.message)
         self.assertIn('2019', exception.message)
 
-        self.candidat_translator.diplomes_etudes_secondaires_belges = []
+    def test_should_verification_etre_ok_si_une_experiences_professionnelles_couvre_exactement(self):
+        self.candidat_translator.diplomes_etudes_secondaires_belges.append(
+            DiplomeEtudeSecondaire(personne=self.candidat.matricule, annee=2017)
+        )
+        self.candidat_translator.experiences_non_academiques.append(
+            ExperienceNonAcademique(
+                personne=self.candidat.matricule,
+                date_debut=datetime.date(2018, 9, 1),
+                date_fin=datetime.date(2021, 6, 30),
+            ),
+        )
+        proposition_id = self.message_bus.invoke(self.cmd)
+        self.assertEqual(proposition_id.uuid, self.proposition.entity_id.uuid)
+        self.candidat_translator.experiences_non_academiques.pop()
+
+    def test_should_verification_etre_ok_si_une_experiences_professionnelles_couvre_davantage(self):
+        self.candidat_translator.diplomes_etudes_secondaires_belges.append(
+            DiplomeEtudeSecondaire(personne=self.candidat.matricule, annee=2017)
+        )
+        self.candidat_translator.experiences_non_academiques.append(
+            ExperienceNonAcademique(
+                personne=self.candidat.matricule,
+                date_debut=datetime.date(2018, 8, 1),
+                date_fin=datetime.date(2021, 7, 31),
+            )
+        )
+        proposition_id = self.message_bus.invoke(self.cmd)
+        self.assertEqual(proposition_id.uuid, self.proposition.entity_id.uuid)
+
+    def test_should_verification_renvoyer_exception_si_une_experiences_professionnelles_couvre_pas_debut(self):
+        self.candidat_translator.diplomes_etudes_secondaires_belges.append(
+            DiplomeEtudeSecondaire(personne=self.candidat.matricule, annee=2017)
+        )
+        self.candidat_translator.experiences_non_academiques.append(
+            ExperienceNonAcademique(
+                personne=self.candidat.matricule,
+                date_debut=datetime.date(2018, 10, 1),
+                date_fin=datetime.date(2021, 6, 30),
+            )
+        )
+
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            self.message_bus.invoke(self.cmd)
+
+        exception = context.exception.exceptions.pop()
+        self.assertIsInstance(exception, AnneesCurriculumNonSpecifieesException)
+        self.assertIn('2018', exception.message)
+
+    def test_should_verification_renvoyer_exception_si_une_experiences_professionnelles_couvre_pas_fin(self):
+        self.candidat_translator.diplomes_etudes_secondaires_belges.append(
+            DiplomeEtudeSecondaire(personne=self.candidat.matricule, annee=2017)
+        )
+        self.candidat_translator.experiences_non_academiques.append(
+            ExperienceNonAcademique(
+                personne=self.candidat.matricule,
+                date_debut=datetime.date(2018, 9, 1),
+                date_fin=datetime.date(2021, 5, 31),
+            )
+        )
+
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            self.message_bus.invoke(self.cmd)
+
+        exception = context.exception.exceptions.pop()
+        self.assertIsInstance(exception, AnneesCurriculumNonSpecifieesException)
+        self.assertIn('2020', exception.message)
+
+    def test_should_verification_etre_ok_si_experiences_professionnelles_couvrent_en_se_suivant_ou_chevauchant(self):
+        self.candidat_translator.diplomes_etudes_secondaires_belges.append(
+            DiplomeEtudeSecondaire(personne=self.candidat.matricule, annee=2017)
+        )
+        self.candidat_translator.experiences_non_academiques.extend(
+            [
+                ExperienceNonAcademique(
+                    personne=self.candidat.matricule,
+                    date_debut=datetime.date(2020, 1, 1),
+                    date_fin=datetime.date(2021, 8, 31),
+                ),
+                ExperienceNonAcademique(
+                    personne=self.candidat.matricule,
+                    date_debut=datetime.date(2019, 11, 1),
+                    date_fin=datetime.date(2020, 3, 31),
+                ),
+                ExperienceNonAcademique(
+                    personne=self.candidat.matricule,
+                    date_debut=datetime.date(2018, 7, 1),
+                    date_fin=datetime.date(2019, 10, 31),
+                ),
+            ]
+        )
+        proposition_id = self.message_bus.invoke(self.cmd)
+        self.assertEqual(proposition_id.uuid, self.proposition.entity_id.uuid)
+
+    def test_should_verification_etre_ok_si_experiences_professionnelles_couvrent_en_ne_se_chevauchant_pas(self):
+        self.candidat_translator.diplomes_etudes_secondaires_belges.append(
+            DiplomeEtudeSecondaire(personne=self.candidat.matricule, annee=2017)
+        )
+        self.candidat_translator.experiences_non_academiques.extend(
+            [
+                ExperienceNonAcademique(
+                    personne=self.candidat.matricule,
+                    date_debut=datetime.date(2019, 10, 1),
+                    date_fin=datetime.date(2021, 8, 31),
+                ),
+                ExperienceNonAcademique(
+                    personne=self.candidat.matricule,
+                    date_debut=datetime.date(2019, 10, 1),
+                    date_fin=datetime.date(2020, 5, 31),
+                ),
+                ExperienceNonAcademique(
+                    personne=self.candidat.matricule,
+                    date_debut=datetime.date(2019, 9, 1),
+                    date_fin=datetime.date(2019, 9, 30),
+                ),
+                ExperienceNonAcademique(
+                    personne=self.candidat.matricule,
+                    date_debut=datetime.date(2018, 9, 1),
+                    date_fin=datetime.date(2019, 6, 30),
+                ),
+            ]
+        )
+        proposition_id = self.message_bus.invoke(self.cmd)
+        self.assertEqual(proposition_id.uuid, self.proposition.entity_id.uuid)
+
+    def test_should_renvoyer_exception_si_experiences_professionnelles_ne_couvrent_pas_et_ne_se_chevauchent_pas(self):
+        self.candidat_translator.diplomes_etudes_secondaires_belges.append(
+            DiplomeEtudeSecondaire(personne=self.candidat.matricule, annee=2017)
+        )
+        self.candidat_translator.experiences_non_academiques.extend(
+            [
+                ExperienceNonAcademique(
+                    personne=self.candidat.matricule,
+                    date_debut=datetime.date(2019, 10, 1),
+                    date_fin=datetime.date(2021, 8, 31),
+                ),
+                ExperienceNonAcademique(
+                    personne=self.candidat.matricule,
+                    date_debut=datetime.date(2019, 10, 1),
+                    date_fin=datetime.date(2020, 5, 31),
+                ),
+                ExperienceNonAcademique(
+                    personne=self.candidat.matricule,
+                    date_debut=datetime.date(2018, 9, 1),
+                    date_fin=datetime.date(2019, 6, 30),
+                ),
+            ]
+        )
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            self.message_bus.invoke(self.cmd)
+
+        exception = context.exception.exceptions.pop()
+        self.assertIsInstance(exception, AnneesCurriculumNonSpecifieesException)
+        self.assertIn('2019', exception.message)
+
+    def test_should_renvoyer_exception_si_experiences_professionnelles_ne_couvrent_pas_et_ne_se_chevauchent_pas_v2(
+        self,
+    ):
+        self.candidat_translator.diplomes_etudes_secondaires_belges.append(
+            DiplomeEtudeSecondaire(personne=self.candidat.matricule, annee=2017)
+        )
+        self.candidat_translator.experiences_non_academiques.extend(
+            [
+                ExperienceNonAcademique(
+                    personne=self.candidat.matricule,
+                    date_debut=datetime.date(2019, 10, 1),
+                    date_fin=datetime.date(2021, 8, 31),
+                ),
+                ExperienceNonAcademique(
+                    personne=self.candidat.matricule,
+                    date_debut=datetime.date(2019, 10, 1),
+                    date_fin=datetime.date(2020, 5, 31),
+                ),
+                ExperienceNonAcademique(
+                    personne=self.candidat.matricule,
+                    date_debut=datetime.date(2019, 2, 1),
+                    date_fin=datetime.date(2019, 6, 30),
+                ),
+                ExperienceNonAcademique(
+                    personne=self.candidat.matricule,
+                    date_debut=datetime.date(2018, 9, 1),
+                    date_fin=datetime.date(2019, 1, 31),
+                ),
+            ]
+        )
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            self.message_bus.invoke(self.cmd)
+
+        exception = context.exception.exceptions.pop()
+        self.assertIsInstance(exception, AnneesCurriculumNonSpecifieesException)
+        self.assertIn('2019', exception.message)
+
+    def test_should_etre_ok_si_periode_couverte_avec_une_experience_professionnelle_continue_apres_future_experience(
+        self,
+    ):
+        self.candidat_translator.diplomes_etudes_secondaires_belges.append(
+            DiplomeEtudeSecondaire(personne=self.candidat.matricule, annee=2017)
+        )
+        self.candidat_translator.experiences_non_academiques.extend(
+            [
+                ExperienceNonAcademique(
+                    personne=self.candidat.matricule,
+                    date_debut=datetime.date(2019, 10, 1),
+                    date_fin=datetime.date(2021, 8, 31),
+                ),
+                ExperienceNonAcademique(
+                    personne=self.candidat.matricule,
+                    date_debut=datetime.date(2019, 9, 1),
+                    date_fin=datetime.date(2020, 5, 31),
+                ),
+                ExperienceNonAcademique(
+                    personne=self.candidat.matricule,
+                    date_debut=datetime.date(2018, 9, 1),
+                    date_fin=datetime.date(2019, 1, 31),
+                ),
+                # L'expérience suivante commence avant la précédente mais se termine après
+                ExperienceNonAcademique(
+                    personne=self.candidat.matricule,
+                    date_debut=datetime.date(2018, 2, 1),
+                    date_fin=datetime.date(2019, 6, 30),
+                ),
+            ]
+        )
+        proposition_id = self.message_bus.invoke(self.cmd)
+        self.assertEqual(proposition_id.uuid, self.proposition.entity_id.uuid)
 
     def test_should_verification_etre_ok_si_aucune_annee_curriculum_a_saisir(self):
         with mock.patch.multiple(
-            self.current_candidat,
+            self.candidat,
             annee_derniere_inscription_ucl=2020,
             noma_derniere_inscription_ucl='01234567',
         ):

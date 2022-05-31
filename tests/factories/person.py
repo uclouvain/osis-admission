@@ -36,7 +36,7 @@ from base.models.enums.person_address_type import PersonAddressType
 
 from base.tests.factories.person import PersonFactory
 from base.tests.factories.person_address import PersonAddressFactory
-from osis_profile.tests.factories.curriculum import CurriculumYearFactory
+from osis_profile.tests.factories.curriculum import EducationalExperienceYearFactory, EducationalExperienceFactory
 from reference.tests.factories.country import CountryFactory
 from reference.tests.factories.language import FrenchLanguageFactory, EnglishLanguageFactory
 
@@ -102,8 +102,21 @@ class CompletePersonFactory(PersonFactory):
 
         # Create curriculum years
         current_year = get_current_year()
-        CurriculumYearFactory(person=self, academic_year=AcademicYearFactory(year=current_year))
-        CurriculumYearFactory(person=self, academic_year=AcademicYearFactory(year=current_year-1))
+        experience = EducationalExperienceFactory(
+            person=self,
+            obtained_diploma=False,
+            country=self.country_of_citizenship,
+        )
+        EducationalExperienceYearFactory(
+            educational_experience=experience,
+            academic_year=AcademicYearFactory(year=current_year),
+        )
+        EducationalExperienceYearFactory(
+            educational_experience=experience,
+            academic_year=AcademicYearFactory(year=current_year-1),
+        )
 
         # Create highschool belgian diploma
-        BelgianHighSchoolDiplomaFactory(person=self, academic_graduation_year=AcademicYearFactory(year=current_year-1))
+        BelgianHighSchoolDiplomaFactory(
+            person=self, academic_graduation_year=AcademicYearFactory(year=current_year - 1)
+        )

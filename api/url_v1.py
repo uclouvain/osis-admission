@@ -24,6 +24,7 @@
 #
 # ##############################################################################
 from django.urls import include, path as _path
+from rest_framework.routers import SimpleRouter
 
 from admission.api import views
 
@@ -32,16 +33,29 @@ def path(pattern, view, name=None):
     return _path(pattern, view.as_view(), name=getattr(view, 'name', name))
 
 
+# Create a router and register our viewsets with it.
+view_set_router = SimpleRouter(trailing_slash=False)
+view_set_router.register(
+    'curriculum/educational',
+    views.EducationalExperienceViewSet,
+    basename="cv_educational_experiences",
+)
+view_set_router.register(
+    'curriculum/professional',
+    views.ProfessionalExperienceViewSet,
+    basename="cv_professional_experiences",
+)
+
 app_name = "admission_api_v1"
 
 person_tabs = [
     path('person', views.PersonViewSet),
     path('coordonnees', views.CoordonneesViewSet),
-    path('curriculum', views.CurriculumExperienceListAndCreateView),
-    path('curriculum/file', views.CurriculumFileView),
-    path('curriculum/<uuid:xp>', views.CurriculumExperienceDetailUpdateAndDeleteView),
     path('secondary_studies', views.SecondaryStudiesViewSet),
     path('languages_knowledge', views.LanguagesKnowledgeViewSet),
+    path('curriculum/file', views.CurriculumFileView),
+    path('curriculum/', views.CurriculumView),
+    _path('', include(view_set_router.urls)),
 ]
 
 urlpatterns = [

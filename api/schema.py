@@ -33,7 +33,7 @@ from rest_framework.serializers import Serializer
 from admission.api.serializers.fields import ActionLinksField
 from base.models.utils.utils import ChoiceEnum
 
-ADMISSION_SDK_VERSION = "1.0.27"
+ADMISSION_SDK_VERSION = "1.0.28"
 
 
 class AdmissionSchemaGenerator(SchemaGenerator):
@@ -215,6 +215,9 @@ class ActionLinksFieldSchemaMixin:
     """This mixin allows to generate the schema related to an ActionLinksField"""
 
     def map_field(self, field):
+        if hasattr(field, 'field_schema'):
+            return field.field_schema
+
         if isinstance(field, ActionLinksField):
             properties = {}
 

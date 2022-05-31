@@ -32,7 +32,12 @@ from .coordonnees import CoordonneesSerializer
 from .secondary_studies import HighSchoolDiplomaSerializer
 from .languages_knowledge import *
 from .supervision import *
-from .curriculum import ExperienceOutputSerializer, ExperienceInputSerializer, CurriculumFileSerializer
+from .curriculum import (
+    CurriculumFileSerializer,
+    EducationalExperienceYearSerializer,
+    CurriculumSerializer,
+    ProfessionalExperienceSerializer,
+)
 from .approvals import (
     ApprouverPropositionCommandSerializer,
     RefuserPropositionCommandSerializer,

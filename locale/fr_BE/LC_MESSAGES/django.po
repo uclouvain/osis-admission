@@ -1455,9 +1455,6 @@ msgstr "Merci de spécifier au-moins un numéro d'identité."
 msgid "Please specify either your date of birth or your year of birth."
 msgstr "Merci de spécifier votre date ou votre année de naissance."
 
-msgid "Please specify the experience's year."
-msgstr "Merci de spécifier l'année de l'expérience."
-
 msgid "Please specify your Belgian national register number."
 msgstr "Merci de spécifier votre numéro de registre national belge."
 
@@ -1924,8 +1921,10 @@ msgstr "La demande a été confirmée sous le nom :"
 msgid "The dossier has been confirmed with the following contact address:"
 msgstr "La demande a été confirmée avec pour adresse de correspondance :"
 
-msgid "The experiences that have been valuated from this admission."
-msgstr "Les expériences qui ont été valorisées à partir de cette admission."
+msgid ""
+"The educational experiences that have been valuated from this admission."
+msgstr ""
+"Les expériences académiques qui ont été valorisées via cette admission."
 
 msgid "The first name of the candidate"
 msgstr "Le prénom du candidat"
@@ -1961,6 +1960,11 @@ msgstr ""
 
 msgid "The opinion about the extension request is not completed."
 msgstr "L'avis relatif à la demande d'une nouvelle échéance n'est pas complet."
+
+msgid ""
+"The professional experiences that have been valuated from this admission."
+msgstr ""
+"Les expériences professionnelles qui ont été valorisées via cette admission."
 
 msgid "The proposition has already been confirmed or is cancelled"
 msgstr "La proposition a déjà été confirmée ou est annulée"
@@ -2019,11 +2023,9 @@ msgstr "Cette activité est incomplète"
 msgid "This candidate has not created any activity yet"
 msgstr "Ce candidat n'a pas encore créé d'activité"
 
-msgid "This experience cannot be deleted as it has already been valuated."
-msgstr "Cette expérience ne peut être supprimée, ayant déjà été évaluée."
-
 msgid "This experience cannot be updated as it has already been valuated."
-msgstr "Cette expérience ne peut être mise à jour, ayant déjà été évaluée."
+msgstr ""
+"Cette expérience ne peut être mise à jour car elle a déjà été valorisée."
 
 msgid "This page is currently under construction."
 msgstr "Cette page est en cours de construction."
