@@ -137,7 +137,6 @@ class BelgianHighSchoolDiplomaTestCase(APITestCase):
         self.assertEqual(belgian_diploma.educational_type, self.diploma_data["belgian_diploma"]["educational_type"])
         self.assertEqual(belgian_diploma.educational_other, "")
         self.assertEqual(belgian_diploma.institute, self.diploma_data["belgian_diploma"]["institute"])
-        self.assertEqual(belgian_diploma.other_institute, "")
         self.assertIsNone(belgian_diploma.schedule)
         foreign_diploma = ForeignHighSchoolDiploma.objects.filter(person__user_id=self.candidate_user.pk)
         self.assertEqual(foreign_diploma.count(), 0)

@@ -11,7 +11,26 @@ from reference.api.serializers.language import RelatedLanguageField
 class ScheduleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Schedule
-        fields = "__all__"
+        fields = [
+            'id',
+            'latin',
+            'greek',
+            'chemistry',
+            'physic',
+            'biology',
+            'german',
+            'dutch',
+            'english',
+            'french',
+            'modern_languages_other_label',
+            'modern_languages_other_hours',
+            'mathematics',
+            'it',
+            'social_sciences',
+            'economic_sciences',
+            'other_label',
+            'other_hours',
+        ]
 
 
 class BelgianHighSchoolDiplomaSerializer(serializers.ModelSerializer):
