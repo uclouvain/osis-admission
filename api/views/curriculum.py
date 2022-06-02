@@ -64,7 +64,7 @@ class CurriculumExperienceSchema(ResponseSpecificSchema, PersonRelatedSchema):
 class CurriculumExperienceView(PersonRelatedMixin, APIPermissionRequiredMixin, APIView):
     schema = CurriculumExperienceSchema()
     permission_classes = [
-        partial(IsSelfPersonTabOrTabPermission, permission_suffix="curriculum")
+        partial(IsSelfPersonTabOrTabPermission, permission_suffix="curriculum"),
     ]
     name = "curriculum"
 
@@ -90,18 +90,16 @@ class CurriculumExperienceView(PersonRelatedMixin, APIPermissionRequiredMixin, A
 class CurriculumExperienceListAndCreateView(CurriculumExperienceView):
     def get(self, request, *args, **kwargs):
         """Return the list of experiences from the person's CV."""
-        serializer = serializers.ExperienceOutputSerializer(
-            self.get_queryset(), many=True
-        )
+        serializer = serializers.ExperienceOutputSerializer(self.get_queryset(), many=True)
         return Response(serializer.data)
 
     def post(self, request, *args, **kwargs):
         """Add an experience to the person's CV."""
-        serializer = serializers.ExperienceInputSerializer(
-            data=request.data, related_person=self.get_object()
-        )
+        serializer = serializers.ExperienceInputSerializer(data=request.data, related_person=self.get_object())
         serializer.is_valid(raise_exception=True)
         serializer.save()
+        if self.get_permission_object():
+            self.get_permission_object().update_detailed_status()
 
         output_data = serializers.ExperienceOutputSerializer(serializer.instance).data
         return Response(output_data, status=status.HTTP_201_CREATED)
@@ -118,9 +116,7 @@ class CurriculumExperienceDetailUpdateAndDeleteView(CurriculumExperienceView):
         experience_to_update = self.get_experience()
 
         if experience_to_update.is_valuated:
-            raise PermissionDenied(
-                _("This experience cannot be updated as it has already been valuated.")
-            )
+            raise PermissionDenied(_("This experience cannot be updated as it has already been valuated."))
 
         serializer = serializers.ExperienceInputSerializer(
             instance=experience_to_update,
@@ -139,11 +135,11 @@ class CurriculumExperienceDetailUpdateAndDeleteView(CurriculumExperienceView):
         experience_to_delete = self.get_experience()
 
         if experience_to_delete.is_valuated:
-            raise PermissionDenied(
-                _("This experience cannot be deleted as it has already been valuated.")
-            )
+            raise PermissionDenied(_("This experience cannot be deleted as it has already been valuated."))
 
         experience_to_delete.delete()
+        if self.get_permission_object():
+            self.get_permission_object().update_detailed_status()
 
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -154,8 +150,11 @@ class CurriculumFileView(PersonRelatedMixin, APIPermissionRequiredMixin, UpdateM
     filter_backends = []
     serializer_class = serializers.CurriculumFileSerializer
     permission_classes = [
-        partial(IsSelfPersonTabOrTabPermission, permission_suffix="curriculum")
+        partial(IsSelfPersonTabOrTabPermission, permission_suffix="curriculum"),
     ]
 
     def put(self, request, *args, **kwargs):
-        return self.update(request, *args, **kwargs)
+        response = self.update(request, *args, **kwargs)
+        if self.get_permission_object():
+            self.get_permission_object().update_detailed_status()
+        return response

@@ -28,14 +28,14 @@ import datetime
 import mock
 from django.test import TestCase
 
-from admission.ddd.projet_doctoral.preparation.commands import SearchDoctoratCommand
+from admission.ddd.projet_doctoral.preparation.commands import RechercherDoctoratCommand
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 from base.tests.factories.academic_year import AcademicYearFactory
 
 
 class TestRechercherDoctoratService(TestCase):
     def setUp(self) -> None:
-        self.cmd = SearchDoctoratCommand(sigle_secteur_entite_gestion='SST')
+        self.cmd = RechercherDoctoratCommand(sigle_secteur_entite_gestion='SST')
         self.message_bus = message_bus_in_memory_instance
         AcademicYearFactory(year=2020)
 

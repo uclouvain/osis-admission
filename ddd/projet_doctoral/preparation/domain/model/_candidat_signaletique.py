@@ -42,3 +42,6 @@ class CandidatSignaletique(interface.ValueObject):
     genre: Optional[str]
     photo_identite: List[str]
     langue_contact: Optional[str]
+    pays_naissance: Optional[str]
+    lieu_naissance: Optional[str]
+    etat_civil: Optional[str]

@@ -29,6 +29,7 @@ import factory
 
 from admission.tests.factories.language import LanguageKnowledgeFactory
 from admission.tests.factories.secondary_studies import BelgianHighSchoolDiplomaFactory
+from base.models.enums.civil_state import CivilState
 from base.tests.factories.academic_year import get_current_year, AcademicYearFactory
 from base import models as mdl
 from base.models.enums.person_address_type import PersonAddressType
@@ -45,7 +46,9 @@ class CompletePersonFactory(PersonFactory):
     birth_year = factory.Faker('pyint', min_value=1900, max_value=2005)
     sex = factory.Iterator(mdl.person.Person.SEX_CHOICES, getter=operator.itemgetter(0))
     country_of_citizenship = factory.SubFactory(CountryFactory)
-
+    civil_state = CivilState.MARRIED.name
+    birth_country = factory.SubFactory(CountryFactory)
+    birth_place = factory.Faker('address')
     national_number = factory.Faker('pystr_format', string_format='##.##.##-###-##')
     id_card_number = factory.Faker('pystr_format', string_format='##-###-##')
 
@@ -53,12 +56,33 @@ class CompletePersonFactory(PersonFactory):
     passport_expiration_date = factory.Faker('future_date')
 
     last_registration_year = factory.LazyAttribute(lambda _: AcademicYearFactory(current=True))
+    last_registration_id = '01234567'
 
     @factory.post_generation
     def create_related_objects(self, create, extracted, **kwargs):
         # Create addresses
-        PersonAddressFactory(person=self, label=PersonAddressType.RESIDENTIAL.name, street="Test")
-        PersonAddressFactory(person=self, label=PersonAddressType.CONTACT.name, street="Test")
+        PersonAddressFactory(
+            person=self,
+            label=PersonAddressType.RESIDENTIAL.name,
+            street='University street',
+            street_number='1',
+            postal_code='1348',
+            city='Louvain-La-Neuve',
+            country=CountryFactory(iso_code="BE"),
+            postal_box='B1',
+            place='P1',
+        )
+        PersonAddressFactory(
+            person=self,
+            label=PersonAddressType.CONTACT.name,
+            street='University street',
+            street_number='2',
+            postal_code='1348',
+            city='Louvain-La-Neuve',
+            country=CountryFactory(iso_code="BE"),
+            postal_box='B2',
+            place='P2',
+        )
 
         # Create language knowledges
         LanguageKnowledgeFactory(

@@ -23,7 +23,6 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from collections import defaultdict
 
 from rest_framework import mixins, status
 from rest_framework.generics import GenericAPIView, ListAPIView, ListCreateAPIView
@@ -33,12 +32,13 @@ from rest_framework.settings import api_settings
 from admission.api import serializers
 from admission.api.permissions import IsListingOrHasNotAlreadyCreatedPermission, IsSupervisionMember
 from admission.api.schema import ResponseSpecificSchema
+from admission.contrib.models import DoctorateAdmission
 from admission.ddd.projet_doctoral.preparation.commands import (
     CompleterPropositionCommand,
     GetPropositionCommand,
     InitierPropositionCommand,
-    SearchPropositionsCandidatCommand,
-    SearchPropositionsSuperviseesCommand,
+    ListerPropositionsCandidatQuery,
+    ListerPropositionsSuperviseesQuery,
     SoumettrePropositionCommand,
     SupprimerPropositionCommand,
     VerifierProjetCommand,
@@ -50,10 +50,9 @@ from admission.ddd.projet_doctoral.preparation.domain.validator.exceptions impor
     InstitutionInconsistanteException,
     JustificationRequiseException,
 )
-from admission.utils import get_cached_admission_perm_obj
+from admission.ddd.projet_doctoral.validation.commands import ApprouverDemandeCddCommand
+from admission.utils import gather_business_exceptions, get_cached_admission_perm_obj
 from backoffice.settings.rest_framework.common_views import DisplayExceptionsByFieldNameAPIMixin
-from backoffice.settings.rest_framework.exception_handler import get_error_data
-from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from infrastructure.messages_bus import message_bus_instance
 from osis_role.contrib.views import APIPermissionRequiredMixin
 
@@ -94,7 +93,7 @@ class PropositionListView(APIPermissionRequiredMixin, DisplayExceptionsByFieldNa
     def list(self, request, **kwargs):
         """List the propositions of the logged in user"""
         proposition_list = message_bus_instance.invoke(
-            SearchPropositionsCandidatCommand(matricule_candidat=request.user.person.global_id),
+            ListerPropositionsCandidatQuery(matricule_candidat=request.user.person.global_id),
         )
         serializer = serializers.PropositionSearchSerializer(
             instance={
@@ -109,6 +108,7 @@ class PropositionListView(APIPermissionRequiredMixin, DisplayExceptionsByFieldNa
         serializer = serializers.InitierPropositionCommandSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         result = message_bus_instance.invoke(InitierPropositionCommand(**serializer.data))
+        DoctorateAdmission.objects.get(uuid=result.uuid).update_detailed_status()
         serializer = serializers.PropositionIdentityDTOSerializer(instance=result)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
@@ -130,7 +130,7 @@ class SupervisedPropositionListView(APIPermissionRequiredMixin, ListAPIView):
     def list(self, request, **kwargs):
         """List the propositions of the supervision group member"""
         proposition_list = message_bus_instance.invoke(
-            SearchPropositionsSuperviseesCommand(matricule_membre=request.user.person.global_id),
+            ListerPropositionsSuperviseesQuery(matricule_membre=request.user.person.global_id),
         )
         serializer = serializers.PropositionSearchDTOSerializer(
             instance=proposition_list,
@@ -154,6 +154,21 @@ class PropositionSchema(ResponseSpecificSchema):
             self.enums["ChoixCommissionProximite"] = schema
             return {'$ref': "#/components/schemas/ChoixCommissionProximite"}
         return schema
+
+    def map_field(self, field):
+        if field.field_name == 'erreurs':
+            return {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "status_code": {"type": "string"},
+                        "detail": {"type": "string"},
+                    },
+                },
+            }
+
+        return super().map_field(field)
 
 
 class PropositionViewSet(
@@ -191,6 +206,7 @@ class PropositionViewSet(
         serializer = serializers.CompleterPropositionCommandSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         result = message_bus_instance.invoke(CompleterPropositionCommand(**serializer.data))
+        self.get_permission_object().update_detailed_status()
         serializer = serializers.PropositionIdentityDTOSerializer(instance=result)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -245,7 +261,7 @@ class VerifyProjectView(APIPermissionRequiredMixin, mixins.RetrieveModelMixin, G
     name = "verify-project"
     schema = VerifyProjectSchema()
     permission_mapping = {
-        'GET': 'admission.view_doctorateadmission_project',
+        'GET': 'admission.change_doctorateadmission_project',
     }
     pagination_class = None
     filter_backends = []
@@ -255,16 +271,8 @@ class VerifyProjectView(APIPermissionRequiredMixin, mixins.RetrieveModelMixin, G
 
     def get(self, request, *args, **kwargs):
         """Check the project to be OK with all validators."""
-        try:
-            # Trigger the verification command
-            message_bus_instance.invoke(VerifierProjetCommand(uuid_proposition=str(kwargs["uuid"])))
-        except MultipleBusinessExceptions as exc:
-            # Gather all errors for output
-            data = defaultdict(list)
-            for exception in exc.exceptions:
-                data = get_error_data(data, exception, {})
-            return Response(data.get(api_settings.NON_FIELD_ERRORS_KEY, []), status=status.HTTP_200_OK)
-        return Response([], status=status.HTTP_200_OK)
+        data = gather_business_exceptions(VerifierProjetCommand(uuid_proposition=str(kwargs["uuid"])))
+        return Response(data.get(api_settings.NON_FIELD_ERRORS_KEY, []), status=status.HTTP_200_OK)
 
 
 class VerifyPropositionSchema(VerifySchema):
@@ -297,20 +305,14 @@ class SubmitPropositionViewSet(APIPermissionRequiredMixin, mixins.RetrieveModelM
 
     def get(self, request, *args, **kwargs):
         """Check the proposition to be OK with all validators."""
-        try:
-            # Trigger the verification command
-            message_bus_instance.invoke(VerifierPropositionCommand(uuid_proposition=str(kwargs["uuid"])))
-        except MultipleBusinessExceptions as exc:
-            # Gather all errors for output
-            data = defaultdict(list)
-            for exception in exc.exceptions:
-                data = get_error_data(data, exception, {})
-            return Response(data.get(api_settings.NON_FIELD_ERRORS_KEY, []), status=status.HTTP_200_OK)
-        return Response([], status=status.HTTP_200_OK)
+        data = gather_business_exceptions(VerifierPropositionCommand(uuid_proposition=str(kwargs["uuid"])))
+        return Response(data.get(api_settings.NON_FIELD_ERRORS_KEY, []), status=status.HTTP_200_OK)
 
     def post(self, request, *args, **kwargs):
         """Submit the proposition."""
         # Trigger the submit command
         proposition_id = message_bus_instance.invoke(SoumettrePropositionCommand(uuid_proposition=str(kwargs["uuid"])))
         serializer = serializers.PropositionIdentityDTOSerializer(instance=proposition_id)
+        # TODO To remove when the admission approval by CDD and SIC will be created
+        message_bus_instance.invoke(ApprouverDemandeCddCommand(uuid=str(kwargs["uuid"])))
         return Response(serializer.data, status=status.HTTP_200_OK)

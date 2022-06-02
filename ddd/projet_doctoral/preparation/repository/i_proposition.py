@@ -27,6 +27,7 @@ import abc
 from typing import List, Optional
 
 from admission.ddd.projet_doctoral.preparation.domain.model.proposition import Proposition, PropositionIdentity
+from admission.ddd.projet_doctoral.preparation.dtos import PropositionDTO
 from osis_common.ddd import interface
 from osis_common.ddd.interface import ApplicationService
 
@@ -40,12 +41,39 @@ class IPropositionRepository(interface.AbstractRepository):
 
     @classmethod
     @abc.abstractmethod
+    def get_dto(cls, entity_id: 'PropositionIdentity') -> 'PropositionDTO':  # type: ignore[override]
+        raise NotImplementedError
+
+    @classmethod
+    @abc.abstractmethod
     def search(  # type: ignore[override]
         cls,
         entity_ids: Optional[List['PropositionIdentity']] = None,
         matricule_candidat: str = None,
         **kwargs,
     ) -> List['Proposition']:
+        raise NotImplementedError
+
+    @classmethod
+    @abc.abstractmethod
+    def search_dto(
+        cls,
+        numero: Optional[str] = '',
+        matricule_candidat: Optional[str] = '',
+        etat: Optional[str] = '',
+        nationalite: Optional[str] = '',
+        type: Optional[str] = '',
+        cdds: Optional[List[str]] = None,
+        commission_proximite: Optional[str] = '',
+        annee_academique: Optional[int] = None,
+        sigles_formations: Optional[List[str]] = None,
+        financement: Optional[str] = '',
+        type_contrat_travail: Optional[str] = '',
+        bourse_recherche: Optional[str] = '',
+        matricule_promoteur: Optional[str] = '',
+        cotutelle: Optional[bool] = None,
+        entity_ids: Optional[List['PropositionIdentity']] = None,
+    ) -> List['PropositionDTO']:
         raise NotImplementedError
 
     @classmethod

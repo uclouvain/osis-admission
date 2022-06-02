@@ -96,7 +96,7 @@ class CompleterPropositionCommand(interface.CommandRequest):
 
 
 @attr.dataclass(frozen=True, slots=True)
-class SearchDoctoratCommand(interface.QueryRequest):
+class RechercherDoctoratCommand(interface.QueryRequest):
     sigle_secteur_entite_gestion: str
 
 
@@ -166,6 +166,7 @@ class SoumettrePropositionCommand(interface.CommandRequest):
 class DefinirCotutelleCommand(interface.CommandRequest):
     uuid_proposition: str
     motivation: Optional[str] = ''
+    institution_fwb: Optional[bool] = None
     institution: Optional[str] = ''
     demande_ouverture: List[str] = attr.Factory(list)
     convention: List[str] = attr.Factory(list)
@@ -173,12 +174,12 @@ class DefinirCotutelleCommand(interface.CommandRequest):
 
 
 @attr.dataclass(frozen=True, slots=True)
-class SearchPropositionsCandidatCommand(interface.QueryRequest):
+class ListerPropositionsCandidatQuery(interface.QueryRequest):
     matricule_candidat: str
 
 
 @attr.dataclass(frozen=True, slots=True)
-class SearchPropositionsSuperviseesCommand(interface.QueryRequest):
+class ListerPropositionsSuperviseesQuery(interface.QueryRequest):
     matricule_membre: str
 
 

@@ -73,9 +73,10 @@ class PersonIdentificationSerializer(serializers.ModelSerializer):
 
             # Inscrit ?
             'last_registration_year',
+            'last_registration_id',
         ]
         extra_kwargs = {
-            'birth_year': {'min_value': 1000, 'max_value': 2999}
+            'birth_year': {'min_value': 1900, 'max_value': 2999}
         }
 
     def include_extra_kwargs(self, kwargs, extra_kwargs):

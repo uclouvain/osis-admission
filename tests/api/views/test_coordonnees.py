@@ -35,6 +35,7 @@ from admission.tests.factories.roles import CddManagerFactory
 from admission.tests.factories.supervision import CaMemberFactory, PromoterFactory
 from base.models.enums.person_address_type import PersonAddressType
 from base.models.person_address import PersonAddress
+from base.tests.factories.entity import EntityFactory
 from base.tests.factories.person import PersonFactory
 from base.tests.factories.person_address import PersonAddressFactory
 
@@ -59,14 +60,24 @@ class CoordonneesTestCase(APITestCase):
             label=PersonAddressType.CONTACT.name,
             street="Rue de la soif",
         )
+        cls.other_address = PersonAddressFactory(
+            label=PersonAddressType.CONTACT.name,
+            street="Rue de la faim",
+        )
+        doctoral_commission = EntityFactory()
         promoter = PromoterFactory()
         cls.promoter_user = promoter.person.user
-        admission = DoctorateAdmissionFactory(supervision_group=promoter.process, candidate=cls.address.person)
+        admission = DoctorateAdmissionFactory(
+            supervision_group=promoter.process,
+            candidate=cls.address.person,
+            doctorate__management_entity=doctoral_commission,
+        )
         cls.admission_url = resolve_url('coordonnees', uuid=admission.uuid)
         # Users
         cls.candidate_user = cls.address.person.user
+        cls.candidate_user_without_admission = cls.other_address.person.user
         cls.no_role_user = PersonFactory(first_name="Joe").user
-        cls.cdd_manager_user = CddManagerFactory().person.user
+        cls.cdd_manager_user = CddManagerFactory(entity=doctoral_commission).person.user
         cls.committee_member_user = CaMemberFactory(process=promoter.process).person.user
 
     def test_user_not_logged_assert_not_authorized(self):
@@ -78,7 +89,7 @@ class CoordonneesTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_assert_methods_not_allowed(self):
-        self.client.force_authenticate(user=self.candidate_user)
+        self.client.force_authenticate(user=self.candidate_user_without_admission)
         methods_not_allowed = ['delete', 'post', 'patch']
 
         for method in methods_not_allowed:
@@ -92,16 +103,31 @@ class CoordonneesTestCase(APITestCase):
         response = self.client.get(self.admission_url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.json())
 
-    def test_coordonnees_get_candidate(self):
+    def test_coordonnees_get_candidate_with_admission(self):
         self.client.force_authenticate(self.candidate_user)
-        response = self.client.get(self.agnostic_url)
-        self.assertEqual(response.json()['contact']['street'], "Rue de la soif")
         response = self.client.get(self.admission_url)
         self.assertEqual(response.json()['contact']['street'], "Rue de la soif")
+        response = self.client.get(self.agnostic_url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    def test_coordonnees_update_candidate(self):
-        self.client.force_authenticate(self.candidate_user)
+    def test_coordonnees_get_candidate_without_admission(self):
+        self.client.force_authenticate(self.candidate_user_without_admission)
+        response = self.client.get(self.agnostic_url)
+        self.assertEqual(response.json()['contact']['street'], "Rue de la faim")
+
+    def test_coordonnees_update_candidate_without_admission(self):
+        self.client.force_authenticate(self.candidate_user_without_admission)
         response = self.client.put(self.agnostic_url, self.updated_data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
+        address = PersonAddress.objects.get(
+            person__user_id=self.candidate_user_without_admission.pk,
+            label=PersonAddressType.RESIDENTIAL.name,
+        )
+        self.assertEqual(address.street, "Rue de la sobriété")
+
+    def test_coordonnees_update_candidate_with_admission(self):
+        self.client.force_authenticate(self.candidate_user)
+        response = self.client.put(self.admission_url, self.updated_data)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
         address = PersonAddress.objects.get(
             person__user_id=self.candidate_user.pk,
@@ -111,7 +137,7 @@ class CoordonneesTestCase(APITestCase):
 
     def test_coordonnees_update_candidate_with_contact(self):
         self.client.force_authenticate(self.candidate_user)
-        response = self.client.put(self.agnostic_url, self.updated_data_with_contact_address)
+        response = self.client.put(self.admission_url, self.updated_data_with_contact_address)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
         residential_address = PersonAddress.objects.get(
             person__user_id=self.candidate_user.pk,

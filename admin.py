@@ -28,19 +28,24 @@ from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
 
 
-from admission.auth.roles.adre import Adre
+from admission.auth.roles.adre import AdreSecretary
 from admission.auth.roles.ca_member import CommitteeMember
 from admission.auth.roles.candidate import Candidate
 from admission.auth.roles.cdd_manager import CddManager
+from admission.auth.roles.doctorate_reader import DoctorateReader
 from admission.auth.roles.jury_secretary import JurySecretary
 from admission.auth.roles.promoter import Promoter
 from admission.auth.roles.sceb import Sceb
 from admission.auth.roles.sic_director import SicDirector
 from admission.auth.roles.sic_manager import SicManager
-from admission.contrib.models import DoctorateAdmission
+from admission.contrib.models import CddMailTemplate, DoctorateAdmission
+from osis_mail_template.admin import MailTemplateAdmin
 
 from osis_profile.models.curriculum import CurriculumYear, Experience
 from osis_role.contrib.admin import RoleModelAdmin
+
+# ##############################################################################
+# Models
 
 
 class DoctorateAdmissionAdmin(admin.ModelAdmin):
@@ -71,8 +76,30 @@ class ExperienceInlineAdmin(admin.TabularInline):
 
 
 class CurriculumYearAdmin(admin.ModelAdmin):
-    inlines = [ExperienceInlineAdmin, ]
+    inlines = [ExperienceInlineAdmin]
     autocomplete_fields = ["person"]
+
+
+class CddMailTemplateAdmin(MailTemplateAdmin):
+    list_display = ('name', 'identifier', 'language', 'cdd')
+    search_fields = [
+        'cdd__acronym',
+        'idenfier',
+    ]
+    list_filter = [
+        'cdd',
+        'language',
+        'identifier',
+    ]
+
+
+admin.site.register(DoctorateAdmission, DoctorateAdmissionAdmin)
+admin.site.register(CurriculumYear, CurriculumYearAdmin)
+admin.site.register(CddMailTemplate, CddMailTemplateAdmin)
+
+
+# ##############################################################################
+# Roles
 
 
 class ExternalCommitteeMemberAdmin(RoleModelAdmin):
@@ -81,16 +108,22 @@ class ExternalCommitteeMemberAdmin(RoleModelAdmin):
     list_select_related = ['person', 'country']
 
 
-admin.site.register(DoctorateAdmission, DoctorateAdmissionAdmin)
-admin.site.register(CurriculumYear, CurriculumYearAdmin)
+class CDDRoleModelAdmin(RoleModelAdmin):
+    list_display = ('person', 'entity')
+    search_fields = [
+        'person__first_name',
+        'person__last_name',
+        'entity__entityversion__acronym',
+    ]
 
-# Roles
+
 admin.site.register(Promoter, ExternalCommitteeMemberAdmin)
 admin.site.register(CommitteeMember, ExternalCommitteeMemberAdmin)
 admin.site.register(SicManager, RoleModelAdmin)
 admin.site.register(SicDirector, RoleModelAdmin)
-admin.site.register(Adre, RoleModelAdmin)
+admin.site.register(AdreSecretary, RoleModelAdmin)
 admin.site.register(Candidate, RoleModelAdmin)
 admin.site.register(JurySecretary, RoleModelAdmin)
 admin.site.register(Sceb, RoleModelAdmin)
-admin.site.register(CddManager, RoleModelAdmin)
+admin.site.register(CddManager, CDDRoleModelAdmin)
+admin.site.register(DoctorateReader, RoleModelAdmin)

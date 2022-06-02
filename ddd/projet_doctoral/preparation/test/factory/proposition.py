@@ -42,6 +42,7 @@ from admission.ddd.projet_doctoral.preparation.domain.model._experience_preceden
     aucune_experience_precedente_recherche,
 )
 from admission.ddd.projet_doctoral.preparation.domain.model._financement import (
+    BourseRecherche,
     ChoixTypeFinancement,
     Financement,
     financement_non_rempli,
@@ -93,6 +94,7 @@ class _PropositionFactory(factory.Factory):
     creee_le = factory.Faker('past_datetime')
     financement = factory.SubFactory(_FinancementFactory)
     experience_precedente_recherche = aucune_experience_precedente_recherche
+    modifiee_le = factory.Faker('past_datetime')
 
 
 class PropositionAdmissionSC3DPMinimaleFactory(_PropositionFactory):
@@ -100,6 +102,7 @@ class PropositionAdmissionSC3DPMinimaleFactory(_PropositionFactory):
     type_admission = ChoixTypeAdmission.ADMISSION
     commission_proximite = ChoixSousDomaineSciences.BIOLOGY
     doctorat_id = factory.SubFactory(_DoctoratIdentityFactory, sigle='SC3DP', annee=2020)
+    matricule_candidat = '0000000001'
 
 
 class PropositionAdmissionECGE3DPMinimaleFactory(_PropositionFactory):
@@ -178,6 +181,7 @@ class PropositionAdmissionSC3DPAvecPromoteurRefuseEtMembreCADejaApprouveFactory(
     PropositionAdmissionSC3DPMinimaleFactory
 ):
     entity_id = factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-SC3DP-promoteur-refus-membre-deja-approuve')
+    matricule_candidat = 'candidat'
 
 
 class PropositionAdmissionSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory(PropositionAdmissionSC3DPMinimaleFactory):
@@ -191,3 +195,8 @@ class PropositionPreAdmissionSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory(
 ):
     entity_id = factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-pre-SC3DP-promoteurs-membres-deja-approuves')
     type_admission = ChoixTypeAdmission.PRE_ADMISSION
+    financement = factory.SubFactory(
+        _FinancementFactory,
+        type=ChoixTypeFinancement.SEARCH_SCHOLARSHIP,
+        bourse_recherche=BourseRecherche.ARC.name,
+    )

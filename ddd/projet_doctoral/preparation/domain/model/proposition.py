@@ -75,8 +75,6 @@ class Proposition(interface.RootEntity):
     reference: Optional[str] = None
     justification: Optional[str] = ''
     statut: ChoixStatutProposition = ChoixStatutProposition.IN_PROGRESS
-    date_soumission_pre_admission: Optional[datetime.datetime] = None
-    date_soumission_admission: Optional[datetime.datetime] = None
     commission_proximite: Optional[
         Union[
             ChoixCommissionProximiteCDEouCLSM,
@@ -87,6 +85,8 @@ class Proposition(interface.RootEntity):
     financement: 'Financement' = financement_non_rempli
     experience_precedente_recherche: 'ExperiencePrecedenteRecherche' = aucune_experience_precedente_recherche
     creee_le: Optional[datetime.datetime] = None
+    modifiee_le: Optional[datetime.datetime] = None
+    fiche_archive_signatures_envoyees: List[str] = attr.Factory(list)
 
     @property
     def sigle_formation(self):
@@ -255,6 +255,9 @@ class Proposition(interface.RootEntity):
         """Vérification complète de la proposition"""
         SoumettrePropositionValidatorList(proposition=self).validate()
 
+    def reinitialiser_archive(self):
+        self.fiche_archive_signatures_envoyees = []
+
     def verrouiller_proposition_pour_signature(self):
         self.statut = ChoixStatutProposition.SIGNING_IN_PROGRESS
 
@@ -267,13 +270,12 @@ class Proposition(interface.RootEntity):
 
     def finaliser(self):
         self.statut = ChoixStatutProposition.SUBMITTED
-        if self.type_admission == ChoixTypeAdmission.ADMISSION:
-            self.date_soumission_admission = datetime.date.today()
-        else:
-            self.date_soumission_pre_admission = datetime.date.today()
 
     def supprimer(self):
         self.statut = ChoixStatutProposition.CANCELLED
+
+    def valider_inscription(self):
+        self.statut = ChoixStatutProposition.ENROLLED
 
     def definir_institut_these(self, institut_these: Optional[str]):
         if institut_these:

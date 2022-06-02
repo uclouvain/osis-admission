@@ -26,6 +26,8 @@
 from admission.ddd.projet_doctoral.preparation.builder.proposition_identity_builder import PropositionIdentityBuilder
 from admission.ddd.projet_doctoral.preparation.commands import ApprouverPropositionParPdfCommand
 from admission.ddd.projet_doctoral.preparation.domain.model.proposition import PropositionIdentity
+from admission.ddd.projet_doctoral.preparation.domain.service.avis import Avis
+from admission.ddd.projet_doctoral.preparation.domain.service.i_historique import IHistorique
 from admission.ddd.projet_doctoral.preparation.repository.i_groupe_de_supervision import IGroupeDeSupervisionRepository
 from admission.ddd.projet_doctoral.preparation.repository.i_proposition import IPropositionRepository
 
@@ -34,17 +36,20 @@ def approuver_proposition_par_pdf(
     cmd: 'ApprouverPropositionParPdfCommand',
     proposition_repository: 'IPropositionRepository',
     groupe_supervision_repository: 'IGroupeDeSupervisionRepository',
+    historique: 'IHistorique',
 ) -> 'PropositionIdentity':
     # GIVEN
     entity_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
-    proposition_candidat = proposition_repository.get(entity_id=entity_id)
+    proposition = proposition_repository.get(entity_id=entity_id)
     groupe_de_supervision = groupe_supervision_repository.get_by_proposition_id(entity_id)
     signataire = groupe_de_supervision.get_signataire(cmd.matricule)
+    avis = Avis.construire_avis_pdf(cmd.pdf)
 
     # WHEN
     groupe_de_supervision.approuver_par_pdf(signataire, cmd.pdf)
 
     # THEN
     groupe_supervision_repository.save(groupe_de_supervision)
+    historique.historiser_avis(proposition, signataire, avis)
 
-    return proposition_candidat.entity_id
+    return proposition.entity_id

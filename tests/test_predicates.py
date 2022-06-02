@@ -29,7 +29,15 @@ from django.test import TestCase
 from osis_signature.enums import SignatureState
 
 from admission.auth import predicates
+from admission.auth.predicates import (
+    unconfirmed_proposition,
+    is_enrolled,
+    is_being_enrolled,
+    confirmation_paper_in_progress,
+)
 from admission.auth.roles.cdd_manager import CddManager
+from admission.ddd.projet_doctoral.doctorat.domain.model.enums import ChoixStatutDoctorat
+from admission.ddd.projet_doctoral.preparation.domain.model._enums import ChoixStatutProposition
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.roles import CandidateFactory, CddManagerFactory, PromoterRoleFactory
 from admission.tests.factories.supervision import PromoterFactory as PromoterActorFactory, _ProcessFactory
@@ -37,14 +45,9 @@ from base.tests.factories.entity import EntityFactory
 
 
 class PredicatesTestCase(TestCase):
-
     def setUp(self):
         self.predicate_context_patcher = mock.patch(
-            "rules.Predicate.context",
-            new_callable=mock.PropertyMock,
-            return_value={
-                'perm_name': 'dummy-perm'
-            }
+            "rules.Predicate.context", new_callable=mock.PropertyMock, return_value={'perm_name': 'dummy-perm'}
         )
         self.predicate_context_patcher.start()
         self.addCleanup(self.predicate_context_patcher.stop)
@@ -103,3 +106,110 @@ class PredicatesTestCase(TestCase):
         promoter = PromoterActorFactory()
         request = DoctorateAdmissionFactory(supervision_group=promoter.process)
         self.assertTrue(predicates.is_part_of_committee(promoter.person.user, request))
+
+    def test_unconfirmed_proposition(self):
+        admission = DoctorateAdmissionFactory()
+
+        valid_status = [
+            ChoixStatutProposition.IN_PROGRESS.name,
+            ChoixStatutProposition.SIGNING_IN_PROGRESS.name,
+        ]
+        invalid_status = [
+            ChoixStatutProposition.CANCELLED.name,
+            ChoixStatutProposition.SUBMITTED.name,
+            ChoixStatutProposition.ENROLLED.name,
+        ]
+
+        for status in valid_status:
+            admission.status = status
+            self.assertTrue(
+                unconfirmed_proposition(admission.candidate.user, admission),
+                'This status must be accepted: {}'.format(status),
+            )
+
+        for status in invalid_status:
+            admission.status = status
+            self.assertFalse(
+                unconfirmed_proposition(admission.candidate.user, admission),
+                'This status must not be accepted: {}'.format(status),
+            )
+
+    def test_is_enrolled(self):
+        admission = DoctorateAdmissionFactory()
+
+        valid_status = [
+            ChoixStatutProposition.ENROLLED.name,
+        ]
+        invalid_status = [
+            ChoixStatutProposition.IN_PROGRESS.name,
+            ChoixStatutProposition.SIGNING_IN_PROGRESS.name,
+            ChoixStatutProposition.SUBMITTED.name,
+            ChoixStatutProposition.CANCELLED.name,
+        ]
+
+        for status in valid_status:
+            admission.status = status
+            self.assertTrue(
+                is_enrolled(admission.candidate.user, admission), 'This status must be accepted: {}'.format(status)
+            )
+
+        for status in invalid_status:
+            admission.status = status
+            self.assertFalse(
+                is_enrolled(admission.candidate.user, admission), 'This status must not be accepted: {}'.format(status)
+            )
+
+    def test_is_being_enrolled(self):
+        admission = DoctorateAdmissionFactory()
+
+        valid_status = [
+            ChoixStatutProposition.IN_PROGRESS.name,
+            ChoixStatutProposition.SIGNING_IN_PROGRESS.name,
+            ChoixStatutProposition.SUBMITTED.name,
+        ]
+        invalid_status = [
+            ChoixStatutProposition.ENROLLED.name,
+            ChoixStatutProposition.CANCELLED.name,
+        ]
+
+        for status in valid_status:
+            admission.status = status
+            self.assertTrue(
+                is_being_enrolled(admission.candidate.user, admission),
+                'This status must be accepted: {}'.format(status),
+            )
+
+        for status in invalid_status:
+            admission.status = status
+            self.assertFalse(
+                is_being_enrolled(admission.candidate.user, admission),
+                'This status must not be accepted: {}'.format(status),
+            )
+
+    def test_confirmation_paper_in_progress(self):
+        admission = DoctorateAdmissionFactory()
+
+        valid_status = [
+            ChoixStatutDoctorat.ADMITTED.name,
+            ChoixStatutDoctorat.SUBMITTED_CONFIRMATION.name,
+            ChoixStatutDoctorat.CONFIRMATION_TO_BE_REPEATED.name,
+        ]
+        invalid_status = [
+            ChoixStatutDoctorat.ADMISSION_IN_PROGRESS.name,
+            ChoixStatutDoctorat.PASSED_CONFIRMATION.name,
+            ChoixStatutDoctorat.NOT_ALLOWED_TO_CONTINUE.name,
+        ]
+
+        for status in valid_status:
+            admission.post_enrolment_status = status
+            self.assertTrue(
+                confirmation_paper_in_progress(admission.candidate.user, admission),
+                'This status must be accepted: {}'.format(status),
+            )
+
+        for status in invalid_status:
+            admission.post_enrolment_status = status
+            self.assertFalse(
+                confirmation_paper_in_progress(admission.candidate.user, admission),
+                'This status must not be accepted: {}'.format(status),
+            )

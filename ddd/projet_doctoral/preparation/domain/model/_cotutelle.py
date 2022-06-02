@@ -33,6 +33,7 @@ from osis_common.ddd import interface
 @attr.dataclass(frozen=True, slots=True)
 class Cotutelle(interface.ValueObject):
     motivation: Optional[str] = ''
+    institution_fwb: Optional[bool] = None
     institution: Optional[str] = ''
     demande_ouverture: List[str] = attr.Factory(list)
     convention: List[str] = attr.Factory(list)

@@ -25,7 +25,7 @@
 # ##############################################################################
 from typing import List
 
-from django.db.models import Func, OuterRef, Subquery
+from django.contrib.postgres.aggregates import ArrayAgg
 
 from admission.ddd.projet_doctoral.preparation.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.projet_doctoral.preparation.dtos import (
@@ -37,7 +37,6 @@ from admission.ddd.projet_doctoral.preparation.dtos import (
 from base.models.enums.person_address_type import PersonAddressType
 from base.models.person import Person
 from base.models.person_address import PersonAddress
-from osis_profile.models import CurriculumYear
 from osis_profile.models.education import LanguageKnowledge
 
 
@@ -65,11 +64,16 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
             numero_carte_identite=person.id_card_number,
             numero_passeport=person.passport_number,
             date_expiration_passeport=person.passport_expiration_date,
+            email=person.email,
+            pays_naissance=person.birth_country,
+            lieu_naissance=person.birth_place,
+            etat_civil=person.civil_state,
+            annee_derniere_inscription_ucl=person.last_registration_year,
+            noma_derniere_inscription_ucl=person.last_registration_id,
         )
 
     @classmethod
     def get_coordonnees(cls, matricule: str) -> 'CoordonneesDTO':
-        # TODO Use in_bulk() in Django 3.2
         adresses = {
             a.label: a
             for a in PersonAddress.objects.select_related('country').filter(
@@ -86,6 +90,9 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                 code_postal=domicile_legal.postal_code,
                 ville=domicile_legal.city,
                 pays=domicile_legal.country.iso_code if domicile_legal.country else None,
+                boite_postale=domicile_legal.postal_box,
+                numero_rue=domicile_legal.street_number,
+                lieu_dit=domicile_legal.place,
             )
             if domicile_legal
             else None,
@@ -94,6 +101,9 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                 code_postal=adresse_correspondance.postal_code,
                 ville=adresse_correspondance.city,
                 pays=adresse_correspondance.country.iso_code if adresse_correspondance.country else None,
+                boite_postale=adresse_correspondance.postal_box,
+                numero_rue=adresse_correspondance.street_number,
+                lieu_dit=adresse_correspondance.place,
             )
             if adresse_correspondance
             else None,
@@ -124,14 +134,10 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                 'curriculum',
             )
             .annotate(
-                annees_curriculum=Subquery(
-                    CurriculumYear.objects.filter(
-                        person__global_id=OuterRef('global_id'),
-                    )
-                    .order_by()
-                    .annotate(years=Func("academic_year__year", function='ARRAY_AGG'))
-                    .values('years')
-                ),
+                annees_curriculum=ArrayAgg(
+                    "curriculumyear__academic_year__year",
+                    ordering="curriculumyear__academic_year__year",
+                )
             )
             .get(global_id=matricule)
         )

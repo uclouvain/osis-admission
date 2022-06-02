@@ -23,14 +23,20 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from datetime import date
 from typing import List, Optional
 
+from django.conf import settings
 from django.db import connection
+from django.db.models import Subquery, OuterRef
+from django.utils.translation import get_language
 
 from admission.auth.roles.candidate import Candidate
 from admission.contrib.models import DoctorateAdmission
-from admission.contrib.models.doctorate import REFERENCE_SEQ_NAME
-from admission.ddd.projet_doctoral.preparation.builder.proposition_identity_builder import PropositionIdentityBuilder
+from admission.contrib.models.doctorate import PropositionProxy, REFERENCE_SEQ_NAME
+from admission.ddd.projet_doctoral.preparation.builder.proposition_identity_builder import (
+    PropositionIdentityBuilder,
+)
 from admission.ddd.projet_doctoral.preparation.domain.model._detail_projet import (
     ChoixLangueRedactionThese,
     DetailProjet,
@@ -46,12 +52,31 @@ from admission.ddd.projet_doctoral.preparation.domain.model._experience_preceden
     ChoixDoctoratDejaRealise,
     ExperiencePrecedenteRecherche,
 )
-from admission.ddd.projet_doctoral.preparation.domain.model._financement import ChoixTypeFinancement, Financement
-from admission.ddd.projet_doctoral.preparation.domain.model._institut import InstitutIdentity
-from admission.ddd.projet_doctoral.preparation.domain.model.doctorat import DoctoratIdentity
-from admission.ddd.projet_doctoral.preparation.domain.model.proposition import Proposition, PropositionIdentity
-from admission.ddd.projet_doctoral.preparation.domain.validator.exceptions import PropositionNonTrouveeException
-from admission.ddd.projet_doctoral.preparation.repository.i_proposition import IPropositionRepository
+from admission.ddd.projet_doctoral.preparation.domain.model._financement import (
+    ChoixTypeFinancement,
+    Financement,
+    BourseRecherche,
+    ChoixTypeContratTravail,
+)
+from admission.ddd.projet_doctoral.preparation.domain.model._institut import (
+    InstitutIdentity,
+)
+from admission.ddd.projet_doctoral.preparation.domain.model.doctorat import (
+    DoctoratIdentity,
+)
+from admission.ddd.projet_doctoral.preparation.domain.model.proposition import (
+    Proposition,
+    PropositionIdentity,
+)
+from admission.ddd.projet_doctoral.preparation.domain.validator.exceptions import (
+    PropositionNonTrouveeException,
+)
+from admission.ddd.projet_doctoral.preparation.dtos import (
+    PropositionDTO,
+)
+from admission.ddd.projet_doctoral.preparation.repository.i_proposition import (
+    IPropositionRepository,
+)
 from base.models.education_group_year import EducationGroupYear
 from base.models.entity_version import EntityVersion
 from base.models.person import Person
@@ -102,25 +127,16 @@ def _instantiate_admission(admission: 'DoctorateAdmission') -> 'Proposition':
             raison_non_soutenue=admission.phd_already_done_no_defense_reason,
         ),
         creee_le=admission.created,
-        date_soumission_admission=admission.admission_submission_date,
-        date_soumission_pre_admission=admission.pre_admission_submission_date,
-    )
-
-
-def _get_queryset():
-    return DoctorateAdmission.objects.all().select_related(
-        'doctorate__academic_year',
-        'candidate',
-        'thesis_institute',
+        modifiee_le=admission.modified,
     )
 
 
 def load_admissions(matricule: Optional[str] = None, ids: Optional[List[str]] = None) -> List['Proposition']:
     qs = []
     if matricule is not None:
-        qs = _get_queryset().filter(candidate__global_id=matricule)
+        qs = PropositionProxy.objects.filter(candidate__global_id=matricule)
     elif ids is not None:  # pragma: no branch
-        qs = _get_queryset().filter(uuid__in=ids)
+        qs = PropositionProxy.objects.filter(uuid__in=ids)
 
     return [_instantiate_admission(a) for a in qs]
 
@@ -129,7 +145,7 @@ class PropositionRepository(IPropositionRepository):
     @classmethod
     def get(cls, entity_id: 'PropositionIdentity') -> 'Proposition':
         try:
-            return _instantiate_admission(_get_queryset().get(uuid=entity_id.uuid))
+            return _instantiate_admission(PropositionProxy.objects.get(uuid=entity_id.uuid))
         except DoctorateAdmission.DoesNotExist:
             raise PropositionNonTrouveeException
 
@@ -197,8 +213,127 @@ class PropositionRepository(IPropositionRepository):
                 'phd_already_done_institution': entity.experience_precedente_recherche.institution,
                 'phd_already_done_defense_date': entity.experience_precedente_recherche.date_soutenance,
                 'phd_already_done_no_defense_reason': entity.experience_precedente_recherche.raison_non_soutenue,
-                'pre_admission_submission_date': entity.date_soumission_pre_admission,
-                'admission_submission_date': entity.date_soumission_admission,
+                'archived_record_signatures_sent': entity.fiche_archive_signatures_envoyees,
             },
         )
         Candidate.objects.get_or_create(person=candidate)
+
+    @classmethod
+    def search_dto(
+        cls,
+        numero: Optional[str] = '',
+        matricule_candidat: Optional[str] = '',
+        etat: Optional[str] = '',
+        nationalite: Optional[str] = '',
+        type: Optional[str] = '',
+        cdds: Optional[List[str]] = None,
+        commission_proximite: Optional[str] = '',
+        annee_academique: Optional[str] = None,
+        sigles_formations: Optional[List[str]] = None,
+        financement: Optional[str] = '',
+        type_contrat_travail: Optional[str] = '',
+        bourse_recherche: Optional[str] = '',
+        matricule_promoteur: Optional[str] = '',
+        cotutelle: Optional[bool] = None,
+        entity_ids: Optional[List['PropositionIdentity']] = None,
+    ) -> List['PropositionDTO']:
+        qs = PropositionProxy.objects.all()
+        if numero:
+            qs = qs.filter(reference=numero)
+        if matricule_candidat:
+            qs = qs.filter(candidate__global_id=matricule_candidat)
+        if etat:  # code enum
+            qs = qs.filter(status=etat)
+        if nationalite:  # code pays
+            qs = qs.filter(candidate__country_of_citizenship__iso_code=nationalite)
+        if type:
+            qs = qs.filter(type=type)
+        if commission_proximite:
+            qs = qs.filter(proximity_commission=commission_proximite)
+        if annee_academique:
+            qs = qs.filter(doctorate__academic_year__year=annee_academique)
+        if sigles_formations:
+            qs = qs.filter(doctorate__acronym__in=sigles_formations)
+        if financement:
+            qs = qs.filter(financing_type=financement)
+        if type_contrat_travail:
+            if type_contrat_travail == ChoixTypeContratTravail.OTHER.name:
+                qs = qs.exclude(financing_work_contract__in=ChoixTypeContratTravail.get_names())
+            else:
+                qs = qs.filter(financing_work_contract=type_contrat_travail)
+        if bourse_recherche:
+            if bourse_recherche == BourseRecherche.OTHER.name:
+                qs = qs.exclude(scholarship_grant__in=BourseRecherche.get_names())
+            else:
+                qs = qs.filter(scholarship_grant=bourse_recherche)
+        if matricule_promoteur:
+            qs = qs.filter(supervision_group__actors__person__global_id=matricule_promoteur)
+        if cotutelle is not None:
+            qs = qs.filter(cotutelle=cotutelle)
+        if cdds:
+            qs = qs.alias(
+                cdd_acronym=Subquery(
+                    EntityVersion.objects.current(date.today())
+                    .filter(entity_id=OuterRef('doctorate__management_entity_id'))
+                    .values('acronym')[:1]
+                )
+            ).filter(cdd_acronym__in=cdds)
+
+        if entity_ids is not None:
+            qs = qs.filter(uuid__in=[entity_id.uuid for entity_id in entity_ids])
+
+        return [cls._load_dto(admission) for admission in qs]
+
+    @classmethod
+    def get_dto(cls, entity_id: 'PropositionIdentity') -> 'PropositionDTO':
+        return cls._load_dto(PropositionProxy.objects.get(uuid=entity_id.uuid))
+
+    @classmethod
+    def _load_dto(cls, admission: DoctorateAdmission) -> 'PropositionDTO':
+        return PropositionDTO(
+            uuid=admission.uuid,
+            reference=admission.reference,
+            type_admission=admission.type,
+            sigle_doctorat=admission.doctorate.acronym,
+            intitule_doctorat=admission.doctorate.title
+            if get_language() == settings.LANGUAGE_CODE_FR
+            else admission.doctorate.title_english,
+            matricule_candidat=admission.candidate.global_id,
+            prenom_candidat=admission.candidate.first_name,
+            nom_candidat=admission.candidate.last_name,
+            code_secteur_formation=admission.code_secteur_formation,  # from annotation
+            intitule_secteur_formation=admission.intitule_secteur_formation,  # from annotation
+            commission_proximite=admission.proximity_commission,
+            creee_le=admission.created,
+            statut=admission.status,
+            justification=admission.comment,
+            annee_doctorat=admission.doctorate.academic_year.year,
+            type_financement=admission.financing_type,
+            type_contrat_travail=admission.financing_work_contract,
+            eft=admission.financing_eft,
+            bourse_recherche=admission.scholarship_grant,
+            duree_prevue=admission.planned_duration,
+            temps_consacre=admission.dedicated_time,
+            titre_projet=admission.project_title,
+            resume_projet=admission.project_abstract,
+            documents_projet=admission.project_document,
+            graphe_gantt=admission.gantt_graph,
+            proposition_programme_doctoral=admission.program_proposition,
+            projet_formation_complementaire=admission.additional_training_project,
+            lettres_recommandation=admission.recommendation_letters,
+            langue_redaction_these=admission.thesis_language,
+            institut_these=admission.thesis_institute and admission.thesis_institute.uuid,
+            lieu_these=admission.thesis_location,
+            doctorat_deja_realise=admission.phd_already_done,
+            institution=admission.phd_already_done_institution,
+            date_soutenance=admission.phd_already_done_defense_date,
+            raison_non_soutenue=admission.phd_already_done_no_defense_reason,
+            nationalite_candidat=admission.candidate.country_of_citizenship
+            and getattr(
+                admission.candidate.country_of_citizenship,
+                'name' if get_language() == settings.LANGUAGE_CODE else 'name_en',
+            ),
+            modifiee_le=admission.modified,
+            fiche_archive_signatures_envoyees=admission.archived_record_signatures_sent,
+            erreurs=admission.detailed_status or [],
+        )

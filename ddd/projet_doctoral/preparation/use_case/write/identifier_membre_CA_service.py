@@ -26,6 +26,7 @@
 from admission.ddd.projet_doctoral.preparation.builder.proposition_identity_builder import PropositionIdentityBuilder
 from admission.ddd.projet_doctoral.preparation.commands import IdentifierMembreCACommand
 from admission.ddd.projet_doctoral.preparation.domain.model.proposition import PropositionIdentity
+from admission.ddd.projet_doctoral.preparation.domain.service.i_historique import IHistorique
 from admission.ddd.projet_doctoral.preparation.domain.service.i_membre_CA import IMembreCATranslator
 from admission.ddd.projet_doctoral.preparation.repository.i_groupe_de_supervision import IGroupeDeSupervisionRepository
 from admission.ddd.projet_doctoral.preparation.repository.i_proposition import IPropositionRepository
@@ -36,10 +37,12 @@ def identifier_membre_CA(
     proposition_repository: 'IPropositionRepository',
     groupe_supervision_repository: 'IGroupeDeSupervisionRepository',
     membre_CA_translator: 'IMembreCATranslator',
+    historique: 'IHistorique',
 ) -> 'PropositionIdentity':
     # GIVEN
-    proposition_candidat_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
-    groupe_de_supervision = groupe_supervision_repository.get_by_proposition_id(proposition_candidat_id)
+    proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
+    groupe_de_supervision = groupe_supervision_repository.get_by_proposition_id(proposition_id)
+    proposition = proposition_repository.get(proposition_id)
     membre_CA = membre_CA_translator.get(cmd.matricule)
 
     # WHEN
@@ -47,5 +50,6 @@ def identifier_membre_CA(
 
     # THEN
     groupe_supervision_repository.save(groupe_de_supervision)
+    historique.historiser_ajout_membre(proposition, groupe_de_supervision, membre_CA)
 
-    return proposition_candidat_id
+    return proposition_id

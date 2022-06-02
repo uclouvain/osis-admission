@@ -40,3 +40,4 @@ class DeverrouillerProjetDoctoral(interface.DomainService):
     ) -> None:
         if isinstance(signataire, PromoteurIdentity):
             proposition.deverrouiller_projet_doctoral()
+            proposition.reinitialiser_archive()

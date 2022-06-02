@@ -25,36 +25,42 @@
 # ##############################################################################
 from functools import partial
 
+from admission.ddd.projet_doctoral.doctorat.commands import *
+from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.commands import *
+from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.use_case.read import *
+from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.use_case.write import *
+from admission.ddd.projet_doctoral.doctorat.use_case.read import *
+from admission.ddd.projet_doctoral.doctorat.use_case.write import *
 from admission.ddd.projet_doctoral.preparation.commands import *
 from admission.ddd.projet_doctoral.preparation.use_case.read import *
 from admission.ddd.projet_doctoral.preparation.use_case.write import *
-from admission.infrastructure.projet_doctoral.preparation.domain.service.in_memory.doctorat import (
-    DoctoratInMemoryTranslator,
+from admission.ddd.projet_doctoral.validation.commands import *
+from admission.ddd.projet_doctoral.validation.use_case.read import *
+from admission.ddd.projet_doctoral.validation.use_case.write import *
+from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
+from infrastructure.utils import AbstractMessageBusCommands, MessageBus
+from .projet_doctoral.doctorat.domain.service.historique import Historique as HistoriqueDoctorat
+from .projet_doctoral.doctorat.domain.service.in_memory.notification import NotificationInMemory as NotificationDoctorat
+from .projet_doctoral.doctorat.epreuve_confirmation.repository.in_memory.epreuve_confirmation import (
+    EpreuveConfirmationInMemoryRepository,
 )
-from admission.infrastructure.projet_doctoral.preparation.domain.service.in_memory.membre_CA import (
-    MembreCAInMemoryTranslator,
+from .projet_doctoral.doctorat.repository.in_memory.doctorat import DoctoratInMemoryRepository
+from .projet_doctoral.preparation.domain.service.in_memory.doctorat import DoctoratInMemoryTranslator
+from .projet_doctoral.preparation.domain.service.in_memory.historique import HistoriqueInMemory
+from .projet_doctoral.preparation.domain.service.in_memory.membre_CA import MembreCAInMemoryTranslator
+from .projet_doctoral.preparation.domain.service.in_memory.notification import (
+    NotificationInMemory as NotificationProposition,
 )
-from admission.infrastructure.projet_doctoral.preparation.domain.service.in_memory.profil_candidat import (
-    ProfilCandidatInMemoryTranslator,
-)
-from admission.infrastructure.projet_doctoral.preparation.domain.service.in_memory.promoteur import (
-    PromoteurInMemoryTranslator,
-)
-from admission.infrastructure.projet_doctoral.preparation.domain.service.in_memory.secteur_ucl import (
-    SecteurUclInMemoryTranslator,
-)
-from admission.infrastructure.projet_doctoral.preparation.repository.in_memory.groupe_de_supervision import (
+from .projet_doctoral.preparation.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
+from .projet_doctoral.preparation.domain.service.in_memory.promoteur import PromoteurInMemoryTranslator
+from .projet_doctoral.preparation.repository.in_memory.groupe_de_supervision import (
     GroupeDeSupervisionInMemoryRepository,
 )
-from admission.infrastructure.projet_doctoral.preparation.repository.in_memory.proposition import (
-    PropositionInMemoryRepository,
+from .projet_doctoral.preparation.repository.in_memory.proposition import PropositionInMemoryRepository
+from .projet_doctoral.validation.repository.in_memory.demande import DemandeInMemoryRepository
+from .projet_doctoral.doctorat.epreuve_confirmation.domain.service.in_memory.notification import (
+    NotificationInMemory as NotificationEpreuveConfirmation,
 )
-from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
-from infrastructure.shared_kernel.personne_connue_ucl.in_memory.personne_connue_ucl import (
-    PersonneConnueUclInMemoryTranslator,
-)
-from infrastructure.utils import AbstractMessageBusCommands, MessageBus
-
 
 class MessageBusInMemoryCommands(AbstractMessageBusCommands):
     command_handlers = {
@@ -62,8 +68,9 @@ class MessageBusInMemoryCommands(AbstractMessageBusCommands):
             initier_proposition,
             proposition_repository=PropositionInMemoryRepository(),
             doctorat_translator=DoctoratInMemoryTranslator(),
+            historique=HistoriqueInMemory(),
         ),
-        SearchDoctoratCommand: partial(
+        RechercherDoctoratCommand: partial(
             rechercher_doctorats,
             doctorat_translator=DoctoratInMemoryTranslator(),
         ),
@@ -71,16 +78,17 @@ class MessageBusInMemoryCommands(AbstractMessageBusCommands):
             completer_proposition,
             proposition_repository=PropositionInMemoryRepository(),
             doctorat_translator=DoctoratInMemoryTranslator(),
+            historique=HistoriqueInMemory(),
         ),
         GetPropositionCommand: partial(
             recuperer_proposition,
             proposition_repository=PropositionInMemoryRepository(),
-            doctorat_translator=DoctoratInMemoryTranslator(),
-            secteur_ucl_translator=SecteurUclInMemoryTranslator(),
         ),
         DefinirCotutelleCommand: partial(
             definir_cotutelle,
             groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
+            proposition_repository=PropositionInMemoryRepository(),
+            historique=HistoriqueInMemory(),
         ),
         GetCotutelleCommand: partial(
             recuperer_cotutelle,
@@ -91,12 +99,14 @@ class MessageBusInMemoryCommands(AbstractMessageBusCommands):
             proposition_repository=PropositionInMemoryRepository(),
             groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
             promoteur_translator=PromoteurInMemoryTranslator(),
+            historique=HistoriqueInMemory(),
         ),
         IdentifierMembreCACommand: partial(
             identifier_membre_CA,
             proposition_repository=PropositionInMemoryRepository(),
             groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
             membre_CA_translator=MembreCAInMemoryTranslator(),
+            historique=HistoriqueInMemory(),
         ),
         GetGroupeDeSupervisionCommand: partial(
             recuperer_groupe_de_supervision,
@@ -108,17 +118,23 @@ class MessageBusInMemoryCommands(AbstractMessageBusCommands):
             supprimer_promoteur,
             proposition_repository=PropositionInMemoryRepository(),
             groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
+            historique=HistoriqueInMemory(),
+            notification=NotificationProposition(),
         ),
         SupprimerMembreCACommand: partial(
             supprimer_membre_CA,
             proposition_repository=PropositionInMemoryRepository(),
             groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
+            historique=HistoriqueInMemory(),
+            notification=NotificationProposition(),
         ),
         DemanderSignaturesCommand: partial(
             demander_signatures,
             proposition_repository=PropositionInMemoryRepository(),
             groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
             promoteur_translator=PromoteurInMemoryTranslator(),
+            historique=HistoriqueInMemory(),
+            notification=NotificationProposition(),
         ),
         VerifierProjetCommand: partial(
             verifier_projet,
@@ -137,42 +153,123 @@ class MessageBusInMemoryCommands(AbstractMessageBusCommands):
             soumettre_proposition,
             proposition_repository=PropositionInMemoryRepository(),
             groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
+            demande_repository=DemandeInMemoryRepository(),
             profil_candidat_translator=ProfilCandidatInMemoryTranslator(),
             academic_year_repository=AcademicYearInMemoryRepository(),
+            historique=HistoriqueInMemory(),
+            notification=NotificationProposition(),
         ),
         ApprouverPropositionCommand: partial(
             approuver_proposition,
             proposition_repository=PropositionInMemoryRepository(),
             groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
+            historique=HistoriqueInMemory(),
+            notification=NotificationProposition(),
         ),
         ApprouverPropositionParPdfCommand: partial(
             approuver_proposition_par_pdf,
             proposition_repository=PropositionInMemoryRepository(),
             groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
+            historique=HistoriqueInMemory(),
         ),
         RefuserPropositionCommand: partial(
             refuser_proposition,
             proposition_repository=PropositionInMemoryRepository(),
             groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
+            historique=HistoriqueInMemory(),
+            notification=NotificationProposition(),
         ),
-        SearchPropositionsCandidatCommand: partial(
-            rechercher_propositions_candidat,
+        ListerPropositionsCandidatQuery: partial(
+            lister_propositions_candidat,
             proposition_repository=PropositionInMemoryRepository(),
-            doctorat_translator=DoctoratInMemoryTranslator(),
-            secteur_ucl_translator=SecteurUclInMemoryTranslator(),
-            personne_connue_ucl_translator=PersonneConnueUclInMemoryTranslator(),
         ),
-        SearchPropositionsSuperviseesCommand: partial(
-            rechercher_propositions_supervisees,
+        ListerPropositionsSuperviseesQuery: partial(
+            lister_propositions_supervisees,
             proposition_repository=PropositionInMemoryRepository(),
             groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
-            doctorat_translator=DoctoratInMemoryTranslator(),
-            secteur_ucl_translator=SecteurUclInMemoryTranslator(),
-            personne_connue_ucl_translator=PersonneConnueUclInMemoryTranslator(),
         ),
         SupprimerPropositionCommand: partial(
             supprimer_proposition,
             proposition_repository=PropositionInMemoryRepository(),
+            historique=HistoriqueInMemory(),
+        ),
+        FiltrerDemandesQuery: partial(
+            filtrer_demandes,
+            proposition_repository=PropositionInMemoryRepository(),
+            demande_repository=DemandeInMemoryRepository(),
+        ),
+        RecupererDemandeQuery: partial(
+            recuperer_demande,
+            demande_repository=DemandeInMemoryRepository(),
+        ),
+        ApprouverDemandeCddCommand: partial(
+            approuver_demande_cdd,
+            demande_repository=DemandeInMemoryRepository(),
+            proposition_repository=PropositionInMemoryRepository(),
+            epreuve_confirmation_repository=EpreuveConfirmationInMemoryRepository(),
+            doctorat_repository=DoctoratInMemoryRepository(),
+        ),
+        RecupererEpreuvesConfirmationQuery: partial(
+            recuperer_epreuves_confirmation,
+            epreuve_confirmation_repository=EpreuveConfirmationInMemoryRepository(),
+            doctorat_repository=DoctoratInMemoryRepository(),
+        ),
+        RecupererDerniereEpreuveConfirmationQuery: partial(
+            recuperer_derniere_epreuve_confirmation,
+            epreuve_confirmation_repository=EpreuveConfirmationInMemoryRepository(),
+            doctorat_repository=DoctoratInMemoryRepository(),
+        ),
+        ModifierEpreuveConfirmationParCDDCommand: partial(
+            modifier_epreuve_confirmation_par_cdd,
+            epreuve_confirmation_repository=EpreuveConfirmationInMemoryRepository(),
+        ),
+        RecupererDoctoratQuery: partial(
+            recuperer_doctorat,
+            doctorat_repository=DoctoratInMemoryRepository(),
+        ),
+        SoumettreEpreuveConfirmationCommand: partial(
+            soumettre_epreuve_confirmation,
+            doctorat_repository=DoctoratInMemoryRepository(),
+            epreuve_confirmation_repository=EpreuveConfirmationInMemoryRepository(),
+        ),
+        CompleterEpreuveConfirmationParPromoteurCommand: partial(
+            completer_epreuve_confirmation_par_promoteur,
+            epreuve_confirmation_repository=EpreuveConfirmationInMemoryRepository(),
+        ),
+        EnvoyerMessageDoctorantCommand: partial(
+            envoyer_message_au_doctorant,
+            doctorat_repository=DoctoratInMemoryRepository(),
+            notification=NotificationDoctorat(),
+            historique=HistoriqueDoctorat(),
+        ),
+        SoumettreReportDeDateCommand: partial(
+            soumettre_report_de_date,
+            epreuve_confirmation_repository=EpreuveConfirmationInMemoryRepository(),
+        ),
+        SoumettreAvisProlongationCommand: partial(
+            soumettre_avis_prolongation,
+            epreuve_confirmation_repository=EpreuveConfirmationInMemoryRepository(),
+        ),
+        ConfirmerReussiteCommand: partial(
+            confirmer_reussite,
+            epreuve_confirmation_repository=EpreuveConfirmationInMemoryRepository(),
+            doctorat_repository=DoctoratInMemoryRepository(),
+        ),
+        ConfirmerEchecCommand: partial(
+            confirmer_echec,
+            epreuve_confirmation_repository=EpreuveConfirmationInMemoryRepository(),
+            doctorat_repository=DoctoratInMemoryRepository(),
+            notification=NotificationEpreuveConfirmation(),
+        ),
+        ConfirmerRepassageCommand: partial(
+            confirmer_repassage,
+            epreuve_confirmation_repository=EpreuveConfirmationInMemoryRepository(),
+            doctorat_repository=DoctoratInMemoryRepository(),
+            notification=NotificationEpreuveConfirmation(),
+        ),
+        TeleverserAvisRenouvellementMandatRechercheCommand: partial(
+            televerser_avis_renouvellement_mandat_recherche,
+            epreuve_confirmation_repository=EpreuveConfirmationInMemoryRepository(),
         ),
     }
 

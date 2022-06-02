@@ -27,6 +27,7 @@
 from rest_framework import serializers
 
 from admission.api.serializers.fields import ACTION_LINKS, ActionLinksField, RelatedInstituteField
+from admission.api.serializers.mixins import IncludedFieldsMixin
 from admission.contrib.models import AdmissionType, DoctorateAdmission
 from admission.ddd.projet_doctoral.preparation.commands import CompleterPropositionCommand, InitierPropositionCommand
 from admission.ddd.projet_doctoral.preparation.domain.model._detail_projet import ChoixLangueRedactionThese
@@ -38,7 +39,7 @@ from admission.ddd.projet_doctoral.preparation.domain.model._enums import (
 from admission.ddd.projet_doctoral.preparation.domain.model._experience_precedente_recherche import (
     ChoixDoctoratDejaRealise,
 )
-from admission.ddd.projet_doctoral.preparation.dtos import DoctoratDTO, PropositionDTO, PropositionSearchDTO
+from admission.ddd.projet_doctoral.preparation.dtos import DoctoratDTO, PropositionDTO
 from base.utils.serializers import DTOSerializer
 
 __all__ = [
@@ -76,7 +77,7 @@ class PropositionIdentityDTOSerializer(serializers.Serializer):
     uuid = serializers.ReadOnlyField()
 
 
-class PropositionSearchDTOSerializer(DTOSerializer):
+class PropositionSearchDTOSerializer(IncludedFieldsMixin, DTOSerializer):
     links = ActionLinksField(
         actions={
             # Profile
@@ -106,11 +107,32 @@ class PropositionSearchDTOSerializer(DTOSerializer):
             # Curriculum
             'retrieve_curriculum': ACTION_LINKS['retrieve_curriculum'],
             'update_curriculum': ACTION_LINKS['update_curriculum'],
+            # Confirmation
+            'retrieve_confirmation': ACTION_LINKS['retrieve_confirmation'],
+            'update_confirmation': ACTION_LINKS['update_confirmation'],
         }
     )
+    # This is to prevent schema from breaking on JSONField
+    erreurs = None
 
     class Meta:
-        source = PropositionSearchDTO
+        source = PropositionDTO
+        fields = [
+            'uuid',
+            'reference',
+            'type_admission',
+            'sigle_doctorat',
+            'intitule_doctorat',
+            'matricule_candidat',
+            'prenom_candidat',
+            'nom_candidat',
+            'code_secteur_formation',
+            'intitule_secteur_formation',
+            'commission_proximite',
+            'creee_le',
+            'statut',
+            'links',
+        ]
 
 
 class PropositionSearchSerializer(serializers.Serializer):
@@ -119,7 +141,7 @@ class PropositionSearchSerializer(serializers.Serializer):
     propositions = PropositionSearchDTOSerializer(many=True)
 
 
-class PropositionDTOSerializer(DTOSerializer):
+class PropositionDTOSerializer(IncludedFieldsMixin, DTOSerializer):
     links = ActionLinksField(
         actions={
             # Profile
@@ -154,11 +176,52 @@ class PropositionDTOSerializer(DTOSerializer):
             # Curriculum
             'retrieve_curriculum': ACTION_LINKS['retrieve_curriculum'],
             'update_curriculum': ACTION_LINKS['update_curriculum'],
+            # Confirmation
+            'retrieve_confirmation': ACTION_LINKS['retrieve_confirmation'],
+            'update_confirmation': ACTION_LINKS['update_confirmation'],
         }
     )
+    # The schema is explicit in PropositionSchema
+    erreurs = serializers.JSONField()
 
     class Meta:
         source = PropositionDTO
+        fields = [
+            'uuid',
+            'type_admission',
+            'reference',
+            'justification',
+            'sigle_doctorat',
+            'annee_doctorat',
+            'intitule_doctorat',
+            'matricule_candidat',
+            'code_secteur_formation',
+            'commission_proximite',
+            'type_financement',
+            'type_contrat_travail',
+            'eft',
+            'bourse_recherche',
+            'duree_prevue',
+            'temps_consacre',
+            'titre_projet',
+            'resume_projet',
+            'documents_projet',
+            'graphe_gantt',
+            'proposition_programme_doctoral',
+            'projet_formation_complementaire',
+            'lettres_recommandation',
+            'langue_redaction_these',
+            'institut_these',
+            'lieu_these',
+            'doctorat_deja_realise',
+            'institution',
+            'date_soutenance',
+            'raison_non_soutenue',
+            'fiche_archive_signatures_envoyees',
+            'statut',
+            'links',
+            'erreurs',
+        ]
 
 
 class InitierPropositionCommandSerializer(DTOSerializer):

@@ -30,6 +30,7 @@ import attr
 
 from admission.ddd.projet_doctoral.preparation.domain.model._cotutelle import Cotutelle
 from admission.ddd.projet_doctoral.preparation.domain.model._enums import ChoixStatutSignatureGroupeDeSupervision
+from admission.ddd.projet_doctoral.preparation.domain.model._institut import InstitutIdentity
 from admission.ddd.projet_doctoral.preparation.domain.model._membre_CA import MembreCAIdentity
 from admission.ddd.projet_doctoral.preparation.domain.model._promoteur import PromoteurIdentity
 from admission.ddd.projet_doctoral.preparation.domain.model._signature_membre_CA import SignatureMembreCA
@@ -64,7 +65,7 @@ class GroupeDeSupervisionIdentity(interface.EntityIdentity):
 
 
 @attr.dataclass(slots=True)
-class GroupeDeSupervision(interface.Entity):
+class GroupeDeSupervision(interface.RootEntity):
     entity_id: 'GroupeDeSupervisionIdentity'
     proposition_id: 'PropositionIdentity'
     signatures_promoteurs: List['SignaturePromoteur'] = attr.Factory(list)
@@ -232,17 +233,9 @@ class GroupeDeSupervision(interface.Entity):
                         )
                     )
             self.signatures_promoteurs = new_states
-        elif isinstance(signataire_id, MembreCAIdentity):  # pragma: no branch
+        else:
+            # Simply remove the CA member
             self.signatures_membres_CA = [s for s in self.signatures_membres_CA if s.membre_CA_id != signataire_id]
-            self.signatures_membres_CA.append(
-                SignatureMembreCA(
-                    membre_CA_id=signataire_id,
-                    etat=ChoixEtatSignature.DECLINED,
-                    commentaire_interne=commentaire_interne or '',
-                    commentaire_externe=commentaire_externe or '',
-                    motif_refus=motif_refus or '',
-                )
-            )
 
     def verifier_tout_le_monde_a_approuve(self):
         ApprobationValidatorList(groupe_de_supervision=self).validate()
@@ -253,6 +246,7 @@ class GroupeDeSupervision(interface.Entity):
     def definir_cotutelle(
         self,
         motivation: Optional[str],
+        institution_fwb: Optional[bool],
         institution: Optional[str],
         demande_ouverture: List[str] = None,
         convention: List[str] = None,
@@ -260,6 +254,7 @@ class GroupeDeSupervision(interface.Entity):
     ):
         self.cotutelle = Cotutelle(
             motivation=motivation or '',
+            institution_fwb=institution_fwb,
             institution=institution or '',
             demande_ouverture=demande_ouverture or [],
             convention=convention or [],
@@ -275,10 +270,12 @@ class GroupeDeSupervision(interface.Entity):
     def verifier_premier_promoteur_renseigne_institut_these(
         self,
         signataire: Union[PromoteurIdentity, MembreCAIdentity],
+        proposition_institut_these: Optional[InstitutIdentity],
         institut_these: Optional[str],
     ):
         ApprobationPromoteurValidatorList(
             signatures_promoteurs=self.signatures_promoteurs,
             signataire=signataire,
+            proposition_institut_these=proposition_institut_these,
             institut_these=institut_these,
         ).validate()

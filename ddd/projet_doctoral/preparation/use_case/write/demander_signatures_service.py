@@ -25,6 +25,8 @@
 from admission.ddd.projet_doctoral.preparation.builder.proposition_identity_builder import PropositionIdentityBuilder
 from admission.ddd.projet_doctoral.preparation.commands import DemanderSignaturesCommand
 from admission.ddd.projet_doctoral.preparation.domain.model.proposition import PropositionIdentity
+from admission.ddd.projet_doctoral.preparation.domain.service.i_historique import IHistorique
+from admission.ddd.projet_doctoral.preparation.domain.service.i_notification import INotification
 from admission.ddd.projet_doctoral.preparation.domain.service.i_promoteur import IPromoteurTranslator
 from admission.ddd.projet_doctoral.preparation.domain.service.verifier_cotutelle import CotutellePossedePromoteurExterne
 from admission.ddd.projet_doctoral.preparation.domain.service.verifier_promoteur import (
@@ -39,6 +41,8 @@ def demander_signatures(
     proposition_repository: 'IPropositionRepository',
     groupe_supervision_repository: 'IGroupeDeSupervisionRepository',
     promoteur_translator: 'IPromoteurTranslator',
+    historique: 'IHistorique',
+    notification: 'INotification',
 ) -> 'PropositionIdentity':
     # GIVEN
     entity_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
@@ -58,5 +62,7 @@ def demander_signatures(
     # THEN
     groupe_supervision_repository.save(groupe_de_supervision)
     proposition_repository.save(proposition_candidat)
+    notification.envoyer_signatures(proposition_candidat, groupe_de_supervision)
+    historique.historiser_demande_signatures(proposition_candidat)
 
     return proposition_candidat.entity_id

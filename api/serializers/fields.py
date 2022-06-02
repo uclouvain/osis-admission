@@ -281,4 +281,15 @@ ACTION_LINKS = {
         'method': 'POST',
         'params': ['uuid'],
     },
+    # Confirmation paper
+    'retrieve_confirmation': {
+        'path_name': 'admission_api_v1:confirmation',
+        'method': 'GET',
+        'params': ['uuid'],
+    },
+    'update_confirmation': {
+        'path_name': 'admission_api_v1:last_confirmation',
+        'method': 'PUT',
+        'params': ['uuid'],
+    },
 }

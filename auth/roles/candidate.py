@@ -31,6 +31,9 @@ from admission.auth.predicates import (
     in_progress,
     unconfirmed_proposition,
     is_admission_request_author,
+    is_being_enrolled,
+    is_enrolled,
+    confirmation_paper_in_progress,
 )
 from osis_role.contrib.models import RoleModel
 
@@ -47,14 +50,15 @@ class Candidate(RoleModel):
             {
                 # A candidate can view as long as it's the author
                 'admission.view_doctorateadmission': is_admission_request_author,
-                'admission.view_doctorateadmission_person': is_admission_request_author,
-                'admission.view_doctorateadmission_coordinates': is_admission_request_author,
-                'admission.view_doctorateadmission_curriculum': is_admission_request_author,
-                'admission.view_doctorateadmission_secondary_studies': is_admission_request_author,
-                'admission.view_doctorateadmission_languages': is_admission_request_author,
                 'admission.view_doctorateadmission_project': is_admission_request_author,
                 'admission.view_doctorateadmission_cotutelle': is_admission_request_author,
                 'admission.view_doctorateadmission_supervision': is_admission_request_author,
+                # A candidate can view as long as he's the author and he is being enrolled
+                'admission.view_doctorateadmission_person': is_admission_request_author & is_being_enrolled,
+                'admission.view_doctorateadmission_coordinates': is_admission_request_author & is_being_enrolled,
+                'admission.view_doctorateadmission_curriculum': is_admission_request_author & is_being_enrolled,
+                'admission.view_doctorateadmission_secondary_studies': is_admission_request_author & is_being_enrolled,
+                'admission.view_doctorateadmission_languages': is_admission_request_author & is_being_enrolled,
                 # Can edit while not confirmed proposition
                 'admission.delete_doctorateadmission': is_admission_request_author & unconfirmed_proposition,
                 'admission.change_doctorateadmission': is_admission_request_author & unconfirmed_proposition,
@@ -75,6 +79,11 @@ class Candidate(RoleModel):
                 # Once supervision group is signing, he can
                 'admission.approve_proposition_by_pdf': is_admission_request_author & signing_in_progress,
                 'admission.submit_doctorateadmission': is_admission_request_author & signing_in_progress,
+                # Once the candidate is enrolling, he can
+                'admission.view_doctorateadmission_confirmation': is_admission_request_author & is_enrolled,
+                # Once the confirmation paper is in progress, he can
+                'admission.change_doctorateadmission_confirmation': is_admission_request_author
+                & confirmation_paper_in_progress,
                 # Future
                 'admission.download_pdf_confirmation': is_admission_request_author,
                 'admission.upload_pdf_confirmation': is_admission_request_author,

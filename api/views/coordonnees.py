@@ -34,8 +34,13 @@ from admission.api.views.mixins import PersonRelatedMixin
 from osis_role.contrib.views import APIPermissionRequiredMixin
 
 
-class CoordonneesViewSet(PersonRelatedMixin, APIPermissionRequiredMixin, mixins.RetrieveModelMixin,
-                         mixins.UpdateModelMixin, GenericAPIView):
+class CoordonneesViewSet(
+    PersonRelatedMixin,
+    APIPermissionRequiredMixin,
+    mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
+    GenericAPIView,
+):
     name = "coordonnees"
     pagination_class = None
     filter_backends = []
@@ -46,4 +51,7 @@ class CoordonneesViewSet(PersonRelatedMixin, APIPermissionRequiredMixin, mixins.
         return self.retrieve(request, *args, **kwargs)
 
     def put(self, request, *args, **kwargs):
-        return self.update(request, *args, **kwargs)
+        response = self.update(request, *args, **kwargs)
+        if self.get_permission_object():
+            self.get_permission_object().update_detailed_status()
+        return response

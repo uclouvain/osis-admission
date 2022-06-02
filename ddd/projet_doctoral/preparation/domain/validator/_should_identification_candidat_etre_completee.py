@@ -36,6 +36,8 @@ from admission.ddd.projet_doctoral.preparation.domain.validator.exceptions impor
     IdentificationNonCompleteeException,
     NumeroIdentiteBelgeNonSpecifieException,
     NumeroIdentiteNonSpecifieException,
+    NomEtPrenomNonSpecifiesException,
+    SpecifierNOMASiDejaInscritException,
 )
 from base.ddd.utils.business_validator import BusinessValidator
 
@@ -48,16 +50,27 @@ class ShouldSignaletiqueCandidatEtreCompletee(BusinessValidator):
 
     def validate(self, *args, **kwargs):
         champs_obligatoires = [
-            'nom',
-            'prenom',
             'sexe',
             'genre',
             'pays_nationalite',
             'photo_identite',
             'langue_contact',
+            'pays_naissance',
+            'lieu_naissance',
+            'etat_civil',
         ]
-        if not all([getattr(self.signaletique, champ_obligatoire) for champ_obligatoire in champs_obligatoires]):
+        if not all(getattr(self.signaletique, champ_obligatoire) for champ_obligatoire in champs_obligatoires):
             raise IdentificationNonCompleteeException
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ShouldCandidatSpecifierNomOuPrenom(BusinessValidator):
+    nom: Optional[str]
+    prenom: Optional[str]
+
+    def validate(self, *args, **kwargs):
+        if not self.nom and not self.prenom:
+            raise NomEtPrenomNonSpecifiesException
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -111,3 +124,13 @@ class ShouldCandidatAuthentiquerIdentite(BusinessValidator):
     def validate(self, *args, **kwargs):
         if (self.numero_registre_national_belge or self.numero_carte_identite) and not self.carte_identite:
             raise CarteIdentiteeNonSpecifieeException
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ShouldCandidatSpecifierNOMASiDejaInscrit(BusinessValidator):
+    noma_derniere_inscription_ucl: Optional[str]
+    annee_derniere_inscription_ucl: Optional[int]
+
+    def validate(self, *args, **kwargs):
+        if self.annee_derniere_inscription_ucl and not self.noma_derniere_inscription_ucl:
+            raise SpecifierNOMASiDejaInscritException

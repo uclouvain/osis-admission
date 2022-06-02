@@ -23,10 +23,8 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
+from admission.ddd.projet_doctoral.preparation.builder.proposition_identity_builder import PropositionIdentityBuilder
 from admission.ddd.projet_doctoral.preparation.commands import GetPropositionCommand
-from admission.ddd.projet_doctoral.preparation.domain.service.i_doctorat import IDoctoratTranslator
-from admission.ddd.projet_doctoral.preparation.domain.service.i_secteur_ucl import ISecteurUclTranslator
-from admission.ddd.projet_doctoral.preparation.domain.service.get_proposition_dto import GetPropositionDTODomainService
 from admission.ddd.projet_doctoral.preparation.dtos import PropositionDTO
 from admission.ddd.projet_doctoral.preparation.repository.i_proposition import IPropositionRepository
 
@@ -34,12 +32,5 @@ from admission.ddd.projet_doctoral.preparation.repository.i_proposition import I
 def recuperer_proposition(
     cmd: 'GetPropositionCommand',
     proposition_repository: 'IPropositionRepository',
-    doctorat_translator: 'IDoctoratTranslator',
-    secteur_ucl_translator: 'ISecteurUclTranslator',
 ) -> 'PropositionDTO':
-    return GetPropositionDTODomainService().get(
-        uuid_proposition=cmd.uuid_proposition,
-        repository=proposition_repository,
-        doctorat_translator=doctorat_translator,
-        secteur_ucl_translator=secteur_ucl_translator,
-    )
+    return proposition_repository.get_dto(PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition))

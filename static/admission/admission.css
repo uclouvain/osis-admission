@@ -1,0 +1,124 @@
+/*
+ *
+ *   OSIS stands for Open Student Information System. It's an application
+ *   designed to manage the core business of higher education institutions,
+ *   such as universities, faculties, institutes and professional schools.
+ *   The core business involves the administration of students, teachers,
+ *   courses, programs and so on.
+ *
+ *   Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+ *
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   A copy of this license - GNU General Public License - is available
+ *   at the root of the source code of this program.  If not,
+ *   see http://www.gnu.org/licenses/.
+ *
+ */
+
+.nav-pills.nav-grey > li.active > a,
+.nav-pills.nav-grey > li.active > a:focus,
+.nav-pills.nav-grey > li.active > a:hover {
+  background-color: #aaa;
+}
+
+.media-list {
+  margin: 0;
+}
+
+dl .media-list {
+    margin-top: 0.5em;
+}
+
+.media {
+  border: 1px solid #ddd;
+  padding: 1em;
+}
+
+textarea {
+    resize: vertical;
+}
+
+.flex-content {
+  display: flex;
+  justify-content:space-between;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.border-right {
+  border-right: 1px solid #ddd;
+}
+
+.inline-field-data {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.required_field .control-label:after {
+  color: #a94442;
+}
+
+.min_field {
+  width: max-content;
+}
+
+@media (min-width: 990px) {
+  .tabsbar-collapse {
+    width: auto;
+    border-top: 0;
+    -webkit-box-shadow: none;
+    box-shadow: none
+  }
+
+  .tabsbar-collapse.collapse {
+    display: block !important;
+    height: auto !important;
+    padding-bottom: 0;
+    overflow: visible !important
+  }
+
+  .tabsbar-collapse.in {
+    overflow-y: visible
+  }
+
+  .tabsbar-toggle {
+    display: none
+  }
+}
+
+@media (max-width: 990px) {
+  .navbar-toggle.tabsbar-toggle {
+    display: block;
+  }
+
+  .tabsbar-collapse > .navbar-nav {
+    float: none;
+    margin: 0;
+    clear: both;
+  }
+
+  .tabsbar-collapse > .navbar-nav > li {
+    float: none;
+    clear: both;
+  }
+}
+
+.tabsbar-collapse.collapsing {
+  width: 100%;
+}
+
+.tabsbar-collapse {
+  border-top: 1px solid #e7e7e7;
+  -webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, .1);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .1);
+}

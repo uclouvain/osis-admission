@@ -24,10 +24,10 @@
 #
 # ##############################################################################
 import rules
-from rules import RuleSet
 from django.utils.translation import gettext_lazy as _
+from rules import RuleSet
 
-from admission.auth.predicates import is_part_of_doctoral_commission
+from admission.auth.predicates import is_enrolled, is_part_of_doctoral_commission
 from osis_role.contrib.models import EntityRoleModel
 
 
@@ -39,31 +39,41 @@ class CddManager(EntityRoleModel):
 
     @classmethod
     def rule_set(cls):
-        return RuleSet({
+        ruleset = {
             'admission.change_doctorateadmission': is_part_of_doctoral_commission,
             'admission.view_doctorateadmission': is_part_of_doctoral_commission,
             'admission.delete_doctorateadmission': rules.always_deny,
             'admission.appose_cdd_notice': is_part_of_doctoral_commission,
             'admission.download_pdf_confirmation': is_part_of_doctoral_commission,
-            'admission.upload_pdf_confirmation': is_part_of_doctoral_commission,
+            'admission.upload_pdf_confirmation': rules.always_deny,
             'admission.approve_confirmation_paper': is_part_of_doctoral_commission,
             'admission.validate_doctoral_training': is_part_of_doctoral_commission,
             'admission.fill_thesis': is_part_of_doctoral_commission,
             'admission.submit_thesis': is_part_of_doctoral_commission,
             'admission.upload_defense_report': is_part_of_doctoral_commission,
-            'admission.view_doctorateadmission_person': rules.always_allow,
-            'admission.change_doctorateadmission_person': rules.always_allow,
-            'admission.view_doctorateadmission_coordinates': rules.always_allow,
-            'admission.change_doctorateadmission_coordinates': rules.always_allow,
-            'admission.view_doctorateadmission_secondary_studies': rules.always_allow,
-            'admission.change_doctorateadmission_secondary_studies': rules.always_allow,
-            'admission.view_doctorateadmission_curriculum': rules.always_allow,
-            'admission.change_doctorateadmission_curriculum': rules.always_allow,
+            'admission.view_doctorateadmission_person': is_part_of_doctoral_commission,
+            'admission.change_doctorateadmission_person': is_part_of_doctoral_commission,
+            'admission.view_doctorateadmission_coordinates': is_part_of_doctoral_commission,
+            'admission.change_doctorateadmission_coordinates': is_part_of_doctoral_commission,
+            'admission.view_doctorateadmission_secondary_studies': is_part_of_doctoral_commission,
+            'admission.change_doctorateadmission_secondary_studies': is_part_of_doctoral_commission,
+            'admission.view_doctorateadmission_languages': is_part_of_doctoral_commission,
+            'admission.change_doctorateadmission_languages': is_part_of_doctoral_commission,
+            'admission.view_doctorateadmission_curriculum': is_part_of_doctoral_commission,
+            'admission.change_doctorateadmission_curriculum': is_part_of_doctoral_commission,
             'admission.view_doctorateadmission_project': is_part_of_doctoral_commission,
             'admission.change_doctorateadmission_project': is_part_of_doctoral_commission,
             'admission.view_doctorateadmission_cotutelle': is_part_of_doctoral_commission,
             'admission.change_doctorateadmission_cotutelle': is_part_of_doctoral_commission,
             'admission.view_doctorateadmission_supervision': is_part_of_doctoral_commission,
+            'admission.change_doctorateadmission_supervision': is_part_of_doctoral_commission,
+            'admission.view_doctorateadmission_confirmation': is_part_of_doctoral_commission,
+            'admission.change_doctorateadmission_confirmation': is_part_of_doctoral_commission,
             'admission.add_supervision_member': is_part_of_doctoral_commission,
             'admission.remove_supervision_member': is_part_of_doctoral_commission,
-        })
+            'admission.change_cddmailtemplate': rules.always_allow,
+            'admission.view_cdddossiers': rules.always_allow,
+            'osis_history.view_historyentry': is_part_of_doctoral_commission,
+            'admission.send_message': is_part_of_doctoral_commission & is_enrolled,
+        }
+        return RuleSet(ruleset)

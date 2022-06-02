@@ -24,12 +24,55 @@
 #
 ##############################################################################
 import datetime
-from typing import List, Optional, Set
+from typing import Dict, List, Optional, Set
 from uuid import UUID
 
 import attr
 
 from osis_common.ddd import interface
+
+
+@attr.dataclass(frozen=True, slots=True)
+class PropositionDTO(interface.DTO):
+    uuid: str
+    type_admission: str
+    reference: str
+    justification: Optional[str]
+    sigle_doctorat: str
+    annee_doctorat: int
+    intitule_doctorat: str
+    matricule_candidat: str
+    code_secteur_formation: str
+    commission_proximite: Optional[str]
+    type_financement: Optional[str]
+    type_contrat_travail: Optional[str]
+    eft: Optional[int]
+    bourse_recherche: Optional[str]
+    duree_prevue: Optional[int]
+    temps_consacre: Optional[int]
+    titre_projet: Optional[str]
+    resume_projet: Optional[str]
+    documents_projet: List[str]
+    graphe_gantt: List[str]
+    proposition_programme_doctoral: List[str]
+    projet_formation_complementaire: List[str]
+    lettres_recommandation: List[str]
+    langue_redaction_these: str
+    institut_these: Optional[UUID]
+    lieu_these: str
+    doctorat_deja_realise: str
+    institution: Optional[str]
+    date_soutenance: Optional[datetime.date]
+    raison_non_soutenue: Optional[str]
+    statut: str
+    fiche_archive_signatures_envoyees: List[str]
+    prenom_candidat: str
+    nom_candidat: str
+    nationalite_candidat: str
+    intitule_secteur_formation: str
+    creee_le: datetime.datetime
+    modifiee_le: datetime.datetime
+    erreurs: List[Dict[str, str]]
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -52,6 +95,9 @@ class IdentificationDTO(interface.DTO):
     sexe: Optional[str]
     genre: Optional[str]
     photo_identite: List[str]
+    pays_naissance: Optional[str]
+    lieu_naissance: Optional[str]
+    etat_civil: Optional[str]
 
     carte_identite: List[str]
     passeport: List[str]
@@ -61,6 +107,10 @@ class IdentificationDTO(interface.DTO):
     date_expiration_passeport: Optional[datetime.date]
 
     langue_contact: Optional[str]
+    email: Optional[str]
+
+    annee_derniere_inscription_ucl: Optional[int]
+    noma_derniere_inscription_ucl: Optional[str]
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -69,6 +119,9 @@ class AdressePersonnelleDTO(interface.DTO):
     code_postal: Optional[str]
     ville: Optional[str]
     pays: Optional[str]
+    lieu_dit: Optional[str]
+    numero_rue: Optional[str]
+    boite_postale: Optional[str]
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -109,58 +162,6 @@ class CurriculumDTO(interface.DTO):
     annee_derniere_inscription_ucl: Optional[int]
     annee_diplome_etudes_secondaires_belges: Optional[int]
     annee_diplome_etudes_secondaires_etrangeres: Optional[int]
-
-
-@attr.dataclass(frozen=True, slots=True)
-class PropositionDTO(interface.DTO):
-    uuid: str
-    type_admission: str
-    reference: str
-    justification: Optional[str]
-    sigle_doctorat: str
-    annee_doctorat: int
-    intitule_doctorat: str
-    matricule_candidat: str
-    code_secteur_formation: str
-    commission_proximite: Optional[str]
-    type_financement: Optional[str]
-    type_contrat_travail: Optional[str]
-    eft: Optional[int]
-    bourse_recherche: Optional[str]
-    duree_prevue: Optional[int]
-    temps_consacre: Optional[int]
-    titre_projet: Optional[str]
-    resume_projet: Optional[str]
-    documents_projet: List[str]
-    graphe_gantt: List[str]
-    proposition_programme_doctoral: List[str]
-    projet_formation_complementaire: List[str]
-    lettres_recommandation: List[str]
-    langue_redaction_these: str
-    institut_these: Optional[UUID]
-    lieu_these: str
-    doctorat_deja_realise: str
-    institution: Optional[str]
-    date_soutenance: Optional[datetime.date]
-    raison_non_soutenue: Optional[str]
-    statut: str
-
-
-@attr.dataclass(frozen=True, slots=True)
-class PropositionSearchDTO(interface.DTO):
-    uuid: str
-    reference: str
-    type_admission: str
-    sigle_doctorat: str
-    intitule_doctorat: str
-    matricule_candidat: str
-    prenom_candidat: str
-    nom_candidat: str
-    code_secteur_formation: str
-    intitule_secteur_formation: str
-    commission_proximite: Optional[str]
-    creee_le: datetime.datetime
-    statut: str
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -210,6 +211,15 @@ class DetailSignatureMembreCADTO(interface.DTO):
 
 
 @attr.dataclass(frozen=True, slots=True)
+class AvisDTO(interface.DTO):
+    etat: str
+    commentaire_externe: Optional[str] = ''
+    commentaire_interne: Optional[str] = ''
+    motif_refus: Optional[str] = ''
+    pdf: List[str] = attr.Factory(list)
+
+
+@attr.dataclass(frozen=True, slots=True)
 class GroupeDeSupervisionDTO(interface.DTO):
     signatures_promoteurs: List[DetailSignaturePromoteurDTO] = attr.Factory(list)
     signatures_membres_CA: List[DetailSignatureMembreCADTO] = attr.Factory(list)
@@ -219,6 +229,7 @@ class GroupeDeSupervisionDTO(interface.DTO):
 class CotutelleDTO(interface.DTO):
     cotutelle: Optional[bool]
     motivation: Optional[str]
+    institution_fwb: Optional[bool]
     institution: Optional[str]
     demande_ouverture: List[str]
     convention: List[str]

@@ -34,8 +34,13 @@ from admission.api.views import PersonRelatedMixin
 from osis_role.contrib.views import APIPermissionRequiredMixin
 
 
-class PersonViewSet(PersonRelatedMixin, APIPermissionRequiredMixin, mixins.RetrieveModelMixin, mixins.UpdateModelMixin,
-                    GenericAPIView):
+class PersonViewSet(
+    PersonRelatedMixin,
+    APIPermissionRequiredMixin,
+    mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
+    GenericAPIView,
+):
     name = "person"
     pagination_class = None
     filter_backends = []
@@ -46,4 +51,7 @@ class PersonViewSet(PersonRelatedMixin, APIPermissionRequiredMixin, mixins.Retri
         return self.retrieve(request, *args, **kwargs)
 
     def put(self, request, *args, **kwargs):
-        return self.update(request, *args, **kwargs)
+        response = self.update(request, *args, **kwargs)
+        if self.get_permission_object():
+            self.get_permission_object().update_detailed_status()
+        return response

@@ -26,7 +26,6 @@
 from unittest.mock import patch
 
 from django.shortcuts import resolve_url
-from django.test import override_settings
 from rest_framework import status
 from rest_framework.test import APITestCase
 
@@ -38,10 +37,10 @@ from admission.ddd.projet_doctoral.preparation.domain.validator.exceptions impor
     PromoteurManquantException,
 )
 from admission.tests.factories import DoctorateAdmissionFactory, WriteTokenFactory
+from admission.tests.factories.roles import CddManagerFactory
 from admission.tests.factories.supervision import CaMemberFactory, ExternalPromoterFactory, PromoterFactory
 
 
-@override_settings(ROOT_URLCONF='admission.api.url_v1')
 class RequestSignaturesApiTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
@@ -58,9 +57,10 @@ class RequestSignaturesApiTestCase(APITestCase):
             gantt_graph=[WriteTokenFactory().token],
             program_proposition=[WriteTokenFactory().token],
         )
+        CddManagerFactory(entity=cls.admission.doctorate.management_entity)
         cls.patcher.stop()
         cls.candidate = cls.admission.candidate
-        cls.url = resolve_url("request-signatures", uuid=cls.admission.uuid)
+        cls.url = resolve_url("admission_api_v1:request-signatures", uuid=cls.admission.uuid)
 
     def setUp(self):
         patched = self.patcher.start()
@@ -106,11 +106,7 @@ class RequestSignaturesApiTestCase(APITestCase):
         self.client.force_authenticate(user=self.candidate.user)
         admission = DoctorateAdmissionFactory(
             candidate=self.candidate,
-            cotutelle=True,
-            cotutelle_motivation="Very motivated",
-            cotutelle_institution="Somewhere",
-            cotutelle_opening_request=[WriteTokenFactory().token],
-            cotutelle_convention=[WriteTokenFactory().token],
+            with_cotutelle=True,
             financing_type=ChoixTypeFinancement.SELF_FUNDING.name,
             project_title="title",
             project_abstract="abstract",
@@ -119,7 +115,7 @@ class RequestSignaturesApiTestCase(APITestCase):
             gantt_graph=[WriteTokenFactory().token],
             program_proposition=[WriteTokenFactory().token],
         )
-        url = resolve_url("request-signatures", uuid=admission.uuid)
+        url = resolve_url("admission_api_v1:request-signatures", uuid=admission.uuid)
 
         promoter = PromoterFactory()
         CaMemberFactory(process=promoter.actor_ptr.process)
@@ -137,11 +133,7 @@ class RequestSignaturesApiTestCase(APITestCase):
         self.client.force_authenticate(user=self.candidate.user)
         admission = DoctorateAdmissionFactory(
             candidate=self.candidate,
-            cotutelle=True,
-            cotutelle_motivation="Very motivated",
-            cotutelle_institution="Somewhere",
-            cotutelle_opening_request=[WriteTokenFactory().token],
-            cotutelle_convention=[WriteTokenFactory().token],
+            with_cotutelle=True,
             financing_type=ChoixTypeFinancement.SELF_FUNDING.name,
             project_title="title",
             project_abstract="abstract",
@@ -150,7 +142,7 @@ class RequestSignaturesApiTestCase(APITestCase):
             gantt_graph=[WriteTokenFactory().token],
             program_proposition=[WriteTokenFactory().token],
         )
-        url = resolve_url("request-signatures", uuid=admission.uuid)
+        url = resolve_url("admission_api_v1:request-signatures", uuid=admission.uuid)
 
         promoter = ExternalPromoterFactory()
         PromoterFactory(process=promoter.actor_ptr.process)

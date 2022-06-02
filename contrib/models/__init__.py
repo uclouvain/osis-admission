@@ -25,16 +25,21 @@
 # ##############################################################################
 
 try:
-    from .doctorate import DoctorateAdmission
+    from .doctorate import DoctorateAdmission, ConfirmationPaper
     from .actor import SupervisionActor
     from .enums.admission_type import AdmissionType
     from .entity_proxy import EntityProxy
+    from .cdd_mail_template import CddMailTemplate
+    from .task import AdmissionTask
 
     __all__ = [
         "DoctorateAdmission",
         "AdmissionType",
         "SupervisionActor",
         "EntityProxy",
+        "CddMailTemplate",
+        "ConfirmationPaper",
+        "AdmissionTask",
     ]
 
 except RuntimeError as e:  # pragma: no cover

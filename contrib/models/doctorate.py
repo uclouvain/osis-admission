@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,11 +23,17 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from django.contrib.postgres.fields import JSONField
-from django.core.cache import cache
-from django.db import models
-from django.utils.translation import gettext_lazy as _
+import uuid
 
+from django.core.cache import cache
+from django.core.serializers.json import DjangoJSONEncoder
+from django.db import models
+from django.db.models import OuterRef, F
+from django.utils.datetime_safe import date
+from django.utils.translation import gettext_lazy as _
+from rest_framework.settings import api_settings
+
+from admission.ddd.projet_doctoral.doctorat.domain.model.enums import ChoixStatutDoctorat
 from admission.ddd.projet_doctoral.preparation.domain.model._detail_projet import ChoixLangueRedactionThese
 from admission.ddd.projet_doctoral.preparation.domain.model._enums import (
     ChoixCommissionProximiteCDEouCLSM,
@@ -35,13 +41,24 @@ from admission.ddd.projet_doctoral.preparation.domain.model._enums import (
     ChoixSousDomaineSciences,
     ChoixStatutProposition,
 )
-from osis_document.contrib import FileField
-from osis_signature.contrib.fields import SignatureProcessField
-from .base import BaseAdmission, admission_directory_path
 from admission.ddd.projet_doctoral.preparation.domain.model._experience_precedente_recherche import (
     ChoixDoctoratDejaRealise,
 )
 from admission.ddd.projet_doctoral.preparation.domain.model._financement import ChoixTypeFinancement
+from admission.ddd.projet_doctoral.validation.domain.model._enums import ChoixStatutCDD, ChoixStatutSIC
+from base.models.entity_version import EntityVersion
+from base.models.enums.entity_type import SECTOR
+from base.utils.cte import CTESubquery
+from osis_document.contrib import FileField
+from osis_signature.contrib.fields import SignatureProcessField
+from .base import BaseAdmission, admission_directory_path
+
+__all__ = [
+    "DoctorateAdmission",
+    "ConfirmationPaper",
+    "REFERENCE_SEQ_NAME",
+]
+
 
 REFERENCE_SEQ_NAME = 'admission_doctorateadmission_reference_seq'
 
@@ -195,6 +212,11 @@ class DoctorateAdmission(BaseAdmission):
         null=True,
         blank=True,
     )
+    cotutelle_institution_fwb = models.BooleanField(
+        verbose_name=_("Institution Federation Wallonie-Bruxelles"),
+        blank=True,
+        null=True,
+    )
     cotutelle_institution = models.CharField(
         max_length=255,
         verbose_name=_("Institution"),
@@ -216,12 +238,37 @@ class DoctorateAdmission(BaseAdmission):
         upload_to=admission_directory_path,
     )
 
-    detailed_status = JSONField(default=dict)
+    detailed_status = models.JSONField(
+        default=dict,
+        encoder=DjangoJSONEncoder,
+    )
+    archived_record_signatures_sent = FileField(
+        verbose_name=_("Archived record when signatures were sent"),
+        max_files=1,
+        upload_to=admission_directory_path,
+        editable=False,
+    )
 
     status = models.CharField(
         choices=ChoixStatutProposition.choices(),
         max_length=30,
         default=ChoixStatutProposition.IN_PROGRESS.name,
+    )
+    status_cdd = models.CharField(
+        choices=ChoixStatutCDD.choices(),
+        max_length=30,
+        default=ChoixStatutCDD.TO_BE_VERIFIED.name,
+    )
+    status_sic = models.CharField(
+        choices=ChoixStatutSIC.choices(),
+        max_length=30,
+        default=ChoixStatutSIC.TO_BE_VERIFIED.name,
+    )
+    post_enrolment_status = models.CharField(
+        choices=ChoixStatutDoctorat.choices(),
+        max_length=30,
+        default=ChoixStatutDoctorat.ADMISSION_IN_PROGRESS.name,
+        verbose_name=_("Post-enrolment status"),
     )
     pre_admission_submission_date = models.DateTimeField(
         verbose_name=_("Pre-admission submission date"),
@@ -230,6 +277,10 @@ class DoctorateAdmission(BaseAdmission):
     admission_submission_date = models.DateTimeField(
         verbose_name=_("Admission submission date"),
         null=True,
+    )
+    submitted_profile = models.JSONField(
+        verbose_name=_("Submitted profile"),
+        default=dict,
     )
 
     supervision_group = SignatureProcessField()
@@ -285,6 +336,11 @@ class DoctorateAdmission(BaseAdmission):
                 'change_doctorateadmission_supervision',
                 _("Can update the information related to the admission supervision"),
             ),
+            ('view_doctorateadmission_confirmation', _("Can view the information related to the confirmation paper")),
+            (
+                'change_doctorateadmission_confirmation',
+                _("Can update the information related to the confirmation paper"),
+            ),
             ('add_supervision_member', _("Can add a member to the supervision group")),
             ('remove_supervision_member', _("Can remove a member from the supervision group")),
             ('submit_doctorateadmission', _("Can submit a doctorate admission proposition")),
@@ -293,3 +349,204 @@ class DoctorateAdmission(BaseAdmission):
     def save(self, *args, **kwargs) -> None:
         super().save(*args, **kwargs)
         cache.delete('admission_permission_{}'.format(self.uuid))
+
+    def update_detailed_status(self):
+        from admission.ddd.projet_doctoral.preparation.commands import VerifierProjetCommand, VerifierPropositionCommand
+        from admission.utils import gather_business_exceptions
+
+        error_key = api_settings.NON_FIELD_ERRORS_KEY
+        project_errors = gather_business_exceptions(VerifierProjetCommand(self.uuid)).get(error_key, [])
+        submission_errors = gather_business_exceptions(VerifierPropositionCommand(self.uuid)).get(error_key, [])
+        self.detailed_status = project_errors + submission_errors
+        self.save(update_fields=['detailed_status'])
+
+
+class PropositionManager(models.Manager):
+    def get_queryset(self):
+        cte = EntityVersion.objects.with_children(entity_id=OuterRef("doctorate__management_entity_id"))
+        sector_subqs = (
+            cte.join(EntityVersion, id=cte.col.id)
+            .with_cte(cte)
+            .filter(entity_type=SECTOR)
+            .exclude(end_date__lte=date.today())
+        )
+
+        return (
+            DoctorateAdmission.objects.all()
+            .select_related(
+                "doctorate__academic_year",
+                "candidate__country_of_citizenship",
+                "thesis_institute",
+            )
+            .annotate(
+                code_secteur_formation=CTESubquery(sector_subqs.values("acronym")[:1]),
+                intitule_secteur_formation=CTESubquery(sector_subqs.values("title")[:1]),
+            )
+        )
+
+
+class PropositionProxy(DoctorateAdmission):
+    """Proxy model of base.DoctorateAdmission for Proposition in preparation context"""
+
+    objects = PropositionManager()
+
+    class Meta:
+        proxy = True
+
+
+class DemandeManager(models.Manager):
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .only(
+                'uuid',
+                'pre_admission_submission_date',
+                'admission_submission_date',
+                'submitted_profile',
+                'modified',
+                'status_cdd',
+                'status_sic',
+            )
+            .filter(
+                status__in=[
+                    ChoixStatutProposition.SUBMITTED.name,
+                    ChoixStatutProposition.ENROLLED.name,
+                ]
+            )
+        )
+
+
+class DemandeProxy(DoctorateAdmission):
+    """Proxy model of base.DoctorateAdmission for Demande in validation context"""
+
+    objects = DemandeManager()
+
+    class Meta:
+        proxy = True
+
+
+class DoctorateManager(models.Manager):
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .only(
+                'candidate',
+                'doctorate',
+                'doctorate__academic_year',
+                'post_enrolment_status',
+                'proximity_commission',
+                'reference',
+                'submitted_profile',
+                'uuid',
+            )
+            .select_related(
+                'candidate',
+                'doctorate',
+                'doctorate__academic_year',
+            )
+            .exclude(
+                post_enrolment_status=ChoixStatutDoctorat.ADMISSION_IN_PROGRESS.name,
+            )
+        )
+
+
+class DoctorateProxy(DoctorateAdmission):
+    """Proxy model of base.DoctorateAdmission for Doctorat in doctorat context"""
+
+    objects = DoctorateManager()
+
+    class Meta:
+        proxy = True
+
+
+def confirmation_paper_directory_path(confirmation, filename: str):
+    """Return the file upload directory path."""
+    return 'admission/{}/{}/confirmation/{}/{}'.format(
+        confirmation.admission.candidate.uuid,
+        confirmation.admission.uuid,
+        confirmation.uuid,
+        filename,
+    )
+
+
+class ConfirmationPaper(models.Model):
+    uuid = models.UUIDField(
+        default=uuid.uuid4,
+        editable=False,
+        unique=True,
+        db_index=True,
+    )
+
+    admission = models.ForeignKey(
+        DoctorateAdmission,
+        verbose_name=_("Admission"),
+        on_delete=models.CASCADE,
+    )
+
+    confirmation_date = models.DateField(
+        verbose_name=_("Date of confirmation"),
+        null=True,
+        blank=True,
+    )
+    confirmation_deadline = models.DateField(
+        verbose_name=_("Deadline for confirmation"),
+        blank=True,
+    )
+    research_report = FileField(
+        verbose_name=_("Research report"),
+        upload_to=confirmation_paper_directory_path,
+        max_files=1,
+    )
+    supervisor_panel_report = FileField(
+        verbose_name=_("Report of the supervisory panel"),
+        upload_to=confirmation_paper_directory_path,
+        max_files=1,
+    )
+    thesis_funding_renewal = FileField(
+        verbose_name=_("Thesis funding renewal"),
+        upload_to=confirmation_paper_directory_path,
+        help_text=_("Only for FNRS, FRIA and FRESH scholarship students"),
+        max_files=1,
+    )
+    research_mandate_renewal_opinion = FileField(
+        verbose_name=_("Opinion on the renewal of the research mandate"),
+        upload_to=confirmation_paper_directory_path,
+        max_files=1,
+    )
+
+    # Result of the confirmation
+    certificate_of_failure = FileField(
+        verbose_name=_("Certificate of failure"),
+        upload_to=confirmation_paper_directory_path,
+    )
+    certificate_of_achievement = FileField(
+        verbose_name=_("Certificate of achievement"),
+        upload_to=confirmation_paper_directory_path,
+    )
+
+    # Extension
+    extended_deadline = models.DateField(
+        verbose_name=_("Deadline extended"),
+        null=True,
+        blank=True,
+    )
+    cdd_opinion = models.TextField(
+        default="",
+        verbose_name=_("CDD opinion"),
+        blank=True,
+    )
+    justification_letter = FileField(
+        verbose_name=_("Justification letter"),
+        upload_to=confirmation_paper_directory_path,
+    )
+    brief_justification = models.TextField(
+        default="",
+        verbose_name=_("Brief justification"),
+        blank=True,
+        max_length=2000,
+    )
+
+    class Meta:
+        ordering = [F("confirmation_date").desc(nulls_first=True)]

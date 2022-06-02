@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Admission API
-  version: 1.0.17
+  version: 1.0.22
   description: This API delivers data for the Admission project.
   contact:
     name: UCLouvain - OSIS
@@ -1196,6 +1196,141 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - propositions
+  /propositions/{uuid}/confirmation:
+    get:
+      operationId: retrieve_confirmation_papers
+      description: Get the confirmation papers related to the doctorate
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ConfirmationPaperDTO'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
+  /propositions/{uuid}/confirmation/last:
+    get:
+      operationId: retrieve_last_confirmation_paper
+      description: Get the last confirmation paper related to the doctorate
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConfirmationPaperDTO'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
+    post:
+      operationId: submit_confirmation_paper_extension_request
+      description: Submit the extension request of the last confirmation paper of
+        a doctorate
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubmitConfirmationPaperExtensionRequestCommand'
+      responses:
+        201:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DoctorateIdentityDTO'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
+    put:
+      operationId: submit_confirmation_paper
+      description: Submit the confirmation paper related to a doctorate
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubmitConfirmationPaperCommand'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DoctorateIdentityDTO'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
   /propositions/{uuid}/curriculum:
     get:
       operationId: list_curriculum_experiencesAdmission
@@ -1443,6 +1578,37 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - person
+  /propositions/{uuid}/doctorate:
+    get:
+      operationId: retrieveDoctorateDTO
+      description: Get the doctorate
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DoctorateDTO'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
   /autocomplete/sector:
     get:
       operationId: listSectorDTOs
@@ -1770,6 +1936,42 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - propositions
+  /propositions/{uuid}/supervised_confirmation:
+    put:
+      operationId: complete_confirmation_paper_by_promoter
+      description: Complete the confirmation paper related to a doctorate
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CompleteConfirmationPaperByPromoterCommand'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DoctorateIdentityDTO'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
 components:
   schemas:
     Dashboard:
@@ -1806,7 +2008,7 @@ components:
         birth_year:
           type: integer
           maximum: 2999
-          minimum: 1000
+          minimum: 1900
           nullable: true
           pattern: ^[1-2]\d{3}$
         birth_country:
@@ -1831,12 +2033,7 @@ components:
           - M
           type: string
         gender:
-          enum:
-          - ''
-          - F
-          - H
-          - X
-          type: string
+          $ref: '#/components/schemas/ChoixGenre'
         civil_state:
           $ref: '#/components/schemas/CivilState'
         id_photo:
@@ -1873,6 +2070,9 @@ components:
         last_registration_year:
           type: integer
           nullable: true
+        last_registration_id:
+          type: string
+          maxLength: 10
     ActionLink:
       type: object
       properties:
@@ -1895,6 +2095,13 @@ components:
         - url
       - required:
         - error
+    ChoixGenre:
+      enum:
+      - ''
+      - F
+      - H
+      - X
+      type: string
     CivilState:
       enum:
       - ''
@@ -2057,6 +2264,10 @@ components:
                   retrieve_curriculum:
                     $ref: '#/components/schemas/ActionLink'
                   update_curriculum:
+                    $ref: '#/components/schemas/ActionLink'
+                  retrieve_confirmation:
+                    $ref: '#/components/schemas/ActionLink'
+                  update_confirmation:
                     $ref: '#/components/schemas/ActionLink'
                 readOnly: true
                 default: {}
@@ -2361,6 +2572,10 @@ components:
               $ref: '#/components/schemas/ActionLink'
             update_curriculum:
               $ref: '#/components/schemas/ActionLink'
+            retrieve_confirmation:
+              $ref: '#/components/schemas/ActionLink'
+            update_confirmation:
+              $ref: '#/components/schemas/ActionLink'
           readOnly: true
           default: {}
       required:
@@ -2385,12 +2600,12 @@ components:
             academic_graduation_year:
               type: integer
               nullable: true
-            high_school_transcript:
+            high_school_diploma:
               type: array
               items:
                 type: string
               maxItems: 1
-            high_school_diploma:
+            enrolment_certificate:
               type: array
               items:
                 type: string
@@ -2410,10 +2625,13 @@ components:
             institute:
               type: string
               maxLength: 25
-            other_institute:
+            other_institute_name:
               type: string
               description: "Si vous ne trouvez pas votre institut dans la liste, merci\
                 \ de le pr\xE9ciser ici"
+              maxLength: 500
+            other_institute_address:
+              type: string
               maxLength: 500
             schedule:
               type: object
@@ -2454,6 +2672,10 @@ components:
                   maximum: 2147483647
                   minimum: 0
                 french:
+                  type: integer
+                  maximum: 2147483647
+                  minimum: 0
+                spanish:
                   type: integer
                   maximum: 2147483647
                   minimum: 0
@@ -2511,6 +2733,11 @@ components:
               items:
                 type: string
               maxItems: 1
+            enrolment_certificate:
+              type: array
+              items:
+                type: string
+              maxItems: 1
             result:
               $ref: '#/components/schemas/DiplomaResults'
               nullable: true
@@ -2538,10 +2765,44 @@ components:
               items:
                 type: string
               maxItems: 1
+            enrolment_certificate_translation:
+              type: array
+              items:
+                type: string
+              maxItems: 1
+            final_equivalence_decision:
+              type: array
+              items:
+                type: string
+              maxItems: 1
+            equivalence_decision_proof:
+              type: array
+              items:
+                type: string
+              maxItems: 1
+            restrictive_equivalence_daes:
+              type: array
+              items:
+                type: string
+              maxItems: 1
+            restrictive_equivalence_admission_test:
+              type: array
+              items:
+                type: string
+              maxItems: 1
           required:
           - academic_graduation_year
           - linguistic_regime
           - country
+          nullable: true
+        high_school_diploma_alternative:
+          type: object
+          properties:
+            first_cycle_admission_exam:
+              type: array
+              items:
+                type: string
+              maxItems: 1
           nullable: true
     DiplomaResults:
       enum:
@@ -2588,6 +2849,11 @@ components:
           nullable: true
         writing_ability:
           $ref: '#/components/schemas/LanguageKnowledgeGrade'
+          nullable: true
+        certificate:
+          type: array
+          items:
+            type: string
           nullable: true
       required:
       - language
@@ -2680,6 +2946,10 @@ components:
           nullable: true
         raison_non_soutenue:
           type: string
+        fiche_archive_signatures_envoyees:
+          type: array
+          items:
+            type: string
         statut:
           type: string
         links:
@@ -2729,8 +2999,21 @@ components:
               $ref: '#/components/schemas/ActionLink'
             update_curriculum:
               $ref: '#/components/schemas/ActionLink'
+            retrieve_confirmation:
+              $ref: '#/components/schemas/ActionLink'
+            update_confirmation:
+              $ref: '#/components/schemas/ActionLink'
           readOnly: true
           default: {}
+        erreurs:
+          type: array
+          items:
+            type: object
+            properties:
+              status_code:
+                type: string
+              detail:
+                type: string
       required:
       - uuid
       - type_admission
@@ -2748,7 +3031,9 @@ components:
       - langue_redaction_these
       - lieu_these
       - doctorat_deja_realise
+      - fiche_archive_signatures_envoyees
       - statut
+      - erreurs
     CotutelleDTO:
       type: object
       properties:
@@ -2757,6 +3042,9 @@ components:
           nullable: true
         motivation:
           type: string
+        institution_fwb:
+          type: boolean
+          nullable: true
         institution:
           type: string
         demande_ouverture:
@@ -2887,6 +3175,116 @@ components:
       required:
       - signatures_promoteurs
       - signatures_membres_CA
+    ConfirmationPaperDTO:
+      type: object
+      properties:
+        uuid:
+          type: string
+        date_limite:
+          type: string
+          format: date
+        date:
+          type: string
+          format: date
+          nullable: true
+        rapport_recherche:
+          type: array
+          items:
+            type: string
+        demande_prolongation:
+          type: object
+          properties:
+            nouvelle_echeance:
+              type: string
+              format: date
+            justification_succincte:
+              type: string
+            lettre_justification:
+              type: array
+              items:
+                type: string
+            avis_cdd:
+              type: string
+          required:
+          - nouvelle_echeance
+          - justification_succincte
+          - lettre_justification
+          nullable: true
+        proces_verbal_ca:
+          type: array
+          items:
+            type: string
+        attestation_reussite:
+          type: array
+          items:
+            type: string
+        attestation_echec:
+          type: array
+          items:
+            type: string
+        demande_renouvellement_bourse:
+          type: array
+          items:
+            type: string
+        avis_renouvellement_mandat_recherche:
+          type: array
+          items:
+            type: string
+      required:
+      - uuid
+      - date_limite
+      - rapport_recherche
+      - proces_verbal_ca
+      - attestation_reussite
+      - attestation_echec
+      - demande_renouvellement_bourse
+      - avis_renouvellement_mandat_recherche
+    DoctorateDTO:
+      type: object
+      properties:
+        uuid:
+          type: string
+        reference:
+          type: string
+        statut:
+          type: string
+        sigle_formation:
+          type: string
+        annee_formation:
+          type: integer
+        intitule_formation:
+          type: string
+        matricule_doctorant:
+          type: string
+        prenom_doctorant:
+          type: string
+        nom_doctorant:
+          type: string
+        links:
+          type: object
+          properties:
+            retrieve_proposition:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_cotutelle:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_supervision:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_confirmation:
+              $ref: '#/components/schemas/ActionLink'
+            update_confirmation:
+              $ref: '#/components/schemas/ActionLink'
+          readOnly: true
+          default: {}
+      required:
+      - uuid
+      - reference
+      - statut
+      - sigle_formation
+      - annee_formation
+      - intitule_formation
+      - matricule_doctorant
+      - prenom_doctorant
+      - nom_doctorant
     SectorDTO:
       type: object
       properties:
@@ -3245,6 +3643,28 @@ components:
       required:
       - matricule
       - pdf
+    DoctorateIdentityDTO:
+      type: object
+      properties:
+        uuid:
+          type: string
+          readOnly: true
+    SubmitConfirmationPaperExtensionRequestCommand:
+      type: object
+      properties:
+        nouvelle_echeance:
+          type: string
+          format: date
+        justification_succincte:
+          type: string
+        lettre_justification:
+          type: array
+          items:
+            type: string
+      required:
+      - nouvelle_echeance
+      - justification_succincte
+      - lettre_justification
     CompleterPropositionCommand:
       type: object
       properties:
@@ -3328,6 +3748,9 @@ components:
       properties:
         motivation:
           type: string
+        institution_fwb:
+          type: boolean
+          nullable: true
         institution:
           type: string
         demande_ouverture:
@@ -3360,6 +3783,43 @@ components:
       required:
       - matricule
       - motif_refus
+    SubmitConfirmationPaperCommand:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        rapport_recherche:
+          type: array
+          items:
+            type: string
+        proces_verbal_ca:
+          type: array
+          items:
+            type: string
+        avis_renouvellement_mandat_recherche:
+          type: array
+          items:
+            type: string
+      required:
+      - date
+      - rapport_recherche
+      - proces_verbal_ca
+      - avis_renouvellement_mandat_recherche
+    CompleteConfirmationPaperByPromoterCommand:
+      type: object
+      properties:
+        proces_verbal_ca:
+          type: array
+          items:
+            type: string
+        avis_renouvellement_mandat_recherche:
+          type: array
+          items:
+            type: string
+      required:
+      - proces_verbal_ca
+      - avis_renouvellement_mandat_recherche
     Error:
       type: object
       properties:

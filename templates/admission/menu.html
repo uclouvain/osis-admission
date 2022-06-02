@@ -1,0 +1,54 @@
+{% load i18n %}
+
+{% comment "License" %}
+  * OSIS stands for Open Student Information System. It's an application
+  * designed to manage the core business of higher education institutions,
+  * such as universities, faculties, institutes and professional schools.
+  * The core business involves the administration of students, teachers,
+  * courses, programs and so on.
+  *
+  * Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+  *
+  * This program is free software: you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License as published by
+  * the Free Software Foundation, either version 3 of the License, or
+  * (at your option) any later version.
+  *
+  * This program is distributed in the hope that it will be useful,
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU General Public License for more details.
+  *
+  * A copy of this license - GNU General Public License - is available
+  * at the root of the source code of this program.  If not,
+  * see http://www.gnu.org/licenses/.
+{% endcomment %}
+
+{# TODO Add the admission permission #}
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button"
+     aria-haspopup="true" aria-expanded="false"
+     id="lnk_home_dropdown_admissions">
+    <span class="hidden-md fa fa-address-card" aria-hidden="true"></span>
+    <span class="hidden-sm">{% trans 'Enrolments' %}</span>
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu">
+    {% if perms.admission.view_cdddossiers %}
+    <li>
+      <a href="{% url 'admission:doctorate:cdd:list' %}" id="lnk_dropdown_doctorateadmissions">
+        <span class="fa fa-graduation-cap"></span>
+        {% trans 'Doctorate enrolments' %}
+      </a>
+    </li>
+    {% endif %}
+    {% if perms.admission.change_cddmailtemplate %}
+      <li>
+        <a href="{% url 'admission:config:cdd_mail_template:list' %}">
+          <span class="fa fa-tools"></span>
+          {% trans 'CDD Mail template' %}
+        </a>
+      </li>
+    {% endif %}
+  </ul>
+</li>

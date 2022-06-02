@@ -29,8 +29,9 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from admission.tests.factories import DoctorateAdmissionFactory
-from admission.tests.factories.roles import CddManagerFactory
+from admission.tests.factories.roles import CddManagerFactory, CandidateFactory
 from admission.tests.factories.supervision import CaMemberFactory, PromoterFactory
+from base.tests.factories.entity import EntityFactory
 from base.tests.factories.person import PersonFactory
 
 
@@ -42,17 +43,22 @@ class PersonTestCase(APITestCase):
         cls.updated_data = {
             "first_name": "Jo"
         }
+        doctoral_commission = EntityFactory()
         promoter = PromoterFactory(actor_ptr__person__first_name="Jane")
         cls.promoter_user = promoter.person.user
         cls.committee_member_user = CaMemberFactory(
             actor_ptr__person__first_name="James",
             process=promoter.process,
         ).person.user
-        admission = DoctorateAdmissionFactory(candidate__first_name="John")
+        admission = DoctorateAdmissionFactory(
+            candidate__first_name="John",
+            doctorate__management_entity=doctoral_commission,
+        )
         cls.admission_url = resolve_url('person', uuid=admission.uuid)
         cls.candidate_user = admission.candidate.user
+        cls.candidate_user_without_admission = CandidateFactory().person.user
         cls.no_role_user = PersonFactory(first_name="Joe").user
-        cls.cdd_manager_user = CddManagerFactory(person__first_name="Jack").person.user
+        cls.cdd_manager_user = CddManagerFactory(entity=doctoral_commission).person.user
 
     def test_user_not_logged_assert_not_authorized(self):
         self.client.force_authenticate(user=None)
@@ -67,7 +73,7 @@ class PersonTestCase(APITestCase):
         methods_not_allowed = ['delete', 'post', 'patch']
 
         for method in methods_not_allowed:
-            response = getattr(self.client, method)(self.agnostic_url)
+            response = getattr(self.client, method)(self.admission_url)
             self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 
     def test_person_get_no_role(self):
@@ -85,19 +91,21 @@ class PersonTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.json())
 
     def test_person_get_candidate(self):
-        self.client.force_authenticate(self.candidate_user)
+        self.client.force_authenticate(self.candidate_user_without_admission)
         response = self.client.get(self.agnostic_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
-        self.assertEqual(response.json()['first_name'], "John")
+        self.assertEqual(response.json()['first_name'], self.candidate_user_without_admission.first_name)
+        self.client.force_authenticate(self.candidate_user)
         response = self.client.get(self.admission_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
         self.assertEqual(response.json()['first_name'], "John")
 
     def test_person_update_candidate(self):
-        self.client.force_authenticate(self.candidate_user)
+        self.client.force_authenticate(self.candidate_user_without_admission)
         response = self.client.put(self.agnostic_url, self.updated_data)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
-        self.assertEqual(response.json()['first_name'], "Jo")
+        self.assertEqual(response.json()['first_name'], 'Jo')
+        self.client.force_authenticate(self.candidate_user)
         response = self.client.put(self.admission_url, self.updated_data)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
 
@@ -105,7 +113,7 @@ class PersonTestCase(APITestCase):
         self.client.force_authenticate(self.cdd_manager_user)
         response = self.client.get(self.agnostic_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
-        self.assertEqual(response.json()['first_name'], "Jack")
+        self.assertEqual(response.json()['first_name'], self.cdd_manager_user.person.first_name)
         response = self.client.get(self.admission_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
         self.assertEqual(response.json()['first_name'], "John")

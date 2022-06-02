@@ -38,3 +38,5 @@ from .approvals import (
     RefuserPropositionCommandSerializer,
     ApprouverPropositionParPdfCommandSerializer,
 )
+from .confirmation import *
+from .doctorate import *

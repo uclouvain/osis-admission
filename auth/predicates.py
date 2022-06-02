@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -28,7 +28,12 @@ from django.utils.translation import gettext_lazy as _
 from osis_signature.enums import SignatureState
 from rules import predicate
 
-from admission.ddd.projet_doctoral.preparation.domain.model._enums import ChoixStatutProposition
+from admission.ddd.projet_doctoral.doctorat.domain.model.enums import STATUTS_DOCTORAT_EPREUVE_CONFIRMATION_EN_COURS
+from admission.ddd.projet_doctoral.preparation.domain.model._enums import (
+    ChoixStatutProposition,
+    STATUTS_PROPOSITION_AVANT_SOUMISSION,
+    STATUTS_PROPOSITION_AVANT_INSCRIPTION,
+)
 from osis_role.errors import predicate_failed_msg
 
 from admission.contrib.models import DoctorateAdmission
@@ -57,7 +62,27 @@ def signing_in_progress(self, user: User, obj: DoctorateAdmission):
 @predicate(bind=True)
 @predicate_failed_msg(message=_("The proposition has already been confirmed or is cancelled"))
 def unconfirmed_proposition(self, user: User, obj: DoctorateAdmission):
-    return obj.status not in [ChoixStatutProposition.SUBMITTED.name, ChoixStatutProposition.CANCELLED.name]
+    return obj.status in STATUTS_PROPOSITION_AVANT_SOUMISSION
+
+
+@predicate(bind=True)
+@predicate_failed_msg(message=_("Must be enrolled"))
+def is_enrolled(self, user: User, obj: DoctorateAdmission):
+    return (
+        obj.status not in STATUTS_PROPOSITION_AVANT_INSCRIPTION and obj.status != ChoixStatutProposition.CANCELLED.name
+    )
+
+
+@predicate(bind=True)
+@predicate_failed_msg(message=_("Must be in the process of the enrolment"))
+def is_being_enrolled(self, user: User, obj: DoctorateAdmission):
+    return obj.status in STATUTS_PROPOSITION_AVANT_INSCRIPTION
+
+
+@predicate(bind=True)
+@predicate_failed_msg(message=_("The confirmation paper is not in progress"))
+def confirmation_paper_in_progress(self, user: User, obj: DoctorateAdmission):
+    return obj.post_enrolment_status in STATUTS_DOCTORAT_EPREUVE_CONFIRMATION_EN_COURS
 
 
 @predicate(bind=True)

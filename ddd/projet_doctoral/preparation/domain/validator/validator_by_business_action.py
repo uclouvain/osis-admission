@@ -29,24 +29,21 @@ from typing import List, Optional, Set, Union
 import attr
 
 from admission.ddd.projet_doctoral.preparation.business_types import *
+from admission.ddd.projet_doctoral.preparation.domain.model._candidat_adresse import CandidatAdresse
+from admission.ddd.projet_doctoral.preparation.domain.model._candidat_signaletique import CandidatSignaletique
+from admission.ddd.projet_doctoral.preparation.domain.model._cotutelle import Cotutelle
+from admission.ddd.projet_doctoral.preparation.domain.model._detail_projet import DetailProjet
 from admission.ddd.projet_doctoral.preparation.domain.model._enums import ChoixTypeAdmission
 from admission.ddd.projet_doctoral.preparation.domain.model._experience_precedente_recherche import (
     ChoixDoctoratDejaRealise,
 )
+from admission.ddd.projet_doctoral.preparation.domain.model._financement import Financement
+from admission.ddd.projet_doctoral.preparation.domain.model._institut import InstitutIdentity
 from admission.ddd.projet_doctoral.preparation.domain.model._membre_CA import MembreCAIdentity
 from admission.ddd.projet_doctoral.preparation.domain.model._promoteur import PromoteurIdentity
+from admission.ddd.projet_doctoral.preparation.domain.model._signature_promoteur import SignaturePromoteur
 from admission.ddd.projet_doctoral.preparation.domain.validator import *
 from base.ddd.utils.business_validator import BusinessValidator, TwoStepsMultipleBusinessExceptionListValidator
-
-if TYPE_CHECKING:
-    from admission.ddd.projet_doctoral.preparation.domain.model._candidat_adresse import CandidatAdresse
-    from admission.ddd.projet_doctoral.preparation.domain.model._cotutelle import Cotutelle
-    from admission.ddd.projet_doctoral.preparation.domain.model._detail_projet import DetailProjet
-    from admission.ddd.projet_doctoral.preparation.domain.model._financement import Financement
-    from admission.ddd.projet_doctoral.preparation.domain.model._candidat_signaletique import CandidatSignaletique
-    from admission.ddd.projet_doctoral.preparation.domain.model._signature_promoteur import SignaturePromoteur
-    from admission.ddd.projet_doctoral.preparation.domain.model.groupe_de_supervision import GroupeDeSupervision
-    from admission.ddd.projet_doctoral.preparation.domain.model.proposition import Proposition
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -221,6 +218,9 @@ class IdentificationValidatorList(TwoStepsMultipleBusinessExceptionListValidator
     passeport: List[str]
     date_expiration_passeport: Optional[datetime.date]
 
+    noma_derniere_inscription_ucl: Optional[str]
+    annee_derniere_inscription_ucl: Optional[int]
+
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
 
@@ -228,6 +228,10 @@ class IdentificationValidatorList(TwoStepsMultipleBusinessExceptionListValidator
         return [
             ShouldSignaletiqueCandidatEtreCompletee(
                 signaletique=self.identite_signaletique,
+            ),
+            ShouldCandidatSpecifierNomOuPrenom(
+                nom=self.identite_signaletique.nom,
+                prenom=self.identite_signaletique.prenom,
             ),
             ShouldCandidatSpecifierNumeroIdentite(
                 numero_registre_national_belge=self.numero_registre_national_belge,
@@ -251,6 +255,10 @@ class IdentificationValidatorList(TwoStepsMultipleBusinessExceptionListValidator
                 numero_registre_national_belge=self.numero_registre_national_belge,
                 numero_carte_identite=self.numero_carte_identite,
                 carte_identite=self.carte_identite,
+            ),
+            ShouldCandidatSpecifierNOMASiDejaInscrit(
+                noma_derniere_inscription_ucl=self.noma_derniere_inscription_ucl,
+                annee_derniere_inscription_ucl=self.annee_derniere_inscription_ucl,
             ),
         ]
 
@@ -361,6 +369,7 @@ class ApprobationValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
 class ApprobationPromoteurValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
     signatures_promoteurs: List['SignaturePromoteur']
     signataire: Union['PromoteurIdentity', 'MembreCAIdentity']
+    proposition_institut_these: Optional[InstitutIdentity]
     institut_these: Optional[str]
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
@@ -371,6 +380,7 @@ class ApprobationPromoteurValidatorList(TwoStepsMultipleBusinessExceptionListVal
             ShouldPremierPromoteurRenseignerInstitutThese(
                 self.signatures_promoteurs,
                 self.signataire,
+                self.proposition_institut_these,
                 self.institut_these,
             ),
         ]
