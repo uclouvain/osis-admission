@@ -41,7 +41,9 @@ from admission.templatetags.admission import (
     get_active_parent,
     update_tab_path_from_detail,
     detail_tab_path_from_update,
-    field_data, current_subtabs, TAB_TREES,
+    field_data,
+    current_subtabs,
+    TAB_TREES,
 )
 
 
@@ -177,20 +179,31 @@ class AdmissionTabsTestCase(TestCase):
         self.assertIsNone(result)
 
     def test_update_tab_path_from_detail(self):
+        current_uuid = uuid.uuid4()
+
+        # admission:doctorate:project ->  admission:doctorate:update:project
+        context = {'request': Mock(resolver_match=Mock(namespaces=['admission', 'doctorate'], url_name='project'))}
+        result = update_tab_path_from_detail(context, current_uuid)
+        self.assertEqual(result, reverse('admission:doctorate:update:project', args=[current_uuid]))
+
+        # admission:doctorate:confirmation ->  admission:doctorate:update:confirmation
+        context = {'request': Mock(resolver_match=Mock(namespaces=['admission', 'doctorate'], url_name='confirmation'))}
+        result = update_tab_path_from_detail(context, current_uuid)
+        self.assertEqual(result, reverse('admission:doctorate:update:confirmation', args=[current_uuid]))
+
+        # admission:doctorate:confirmation:opinion ->  admission:doctorate:confirmation
         context = {
             'request': Mock(
-                resolver_match=Mock(
-                    namespace='admission:doctorate',
-                    url_name='project',
-                ),
-            ),
+                resolver_match=Mock(namespaces=['admission', 'doctorate', 'confirmation'], url_name='opinion')
+            )
         }
-        current_uuid = uuid.uuid4()
         result = update_tab_path_from_detail(context, current_uuid)
-        self.assertEqual(
-            result,
-            reverse('admission:doctorate:update:project', args=[current_uuid]),
-        )
+        self.assertEqual(result, reverse('admission:doctorate:confirmation', args=[current_uuid]))
+
+        # admission:doctorate:send-mail ->  admission:doctorate:send-mail
+        context = {'request': Mock(resolver_match=Mock(namespaces=['admission', 'doctorate'], url_name='send-mail'))}
+        result = update_tab_path_from_detail(context, current_uuid)
+        self.assertEqual(result, reverse('admission:doctorate:send-mail', args=[current_uuid]))
 
     def test_detail_tab_path_from_update(self):
         context = {
@@ -218,26 +231,19 @@ class AdmissionTabsTestCase(TestCase):
             ),
         }
         result = current_subtabs(context)
-        self.assertEqual(
-            result,
-            TAB_TREES['doctorate'][Tab('doctorate', _('Doctorate'), 'graduation-cap')]
-        )
+        self.assertEqual(result, TAB_TREES['doctorate'][Tab('doctorate', _('Doctorate'), 'graduation-cap')])
 
     def test_current_tabs_with_hidden_tab(self):
         context = {
             'request': Mock(
                 resolver_match=Mock(
-                    namespaces=['admission', 'doctorate'],
-                    url_name='confirmation-failure',
+                    namespaces=['admission', 'doctorate', 'confirmation'],
+                    url_name='failure',
                 ),
             ),
         }
         result = current_subtabs(context)
-        self.assertEqual(
-            result,
-            TAB_TREES['doctorate'][Tab('doctorate', _('Doctorate'), 'graduation-cap')]
-        )
-
+        self.assertEqual(result, TAB_TREES['doctorate'][Tab('doctorate', _('Doctorate'), 'graduation-cap')])
 
 
 class AdmissionFieldsDataTestCase(TestCase):

@@ -23,6 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from django.views.generic import TemplateView
 from rules.contrib.views import LoginRequiredMixin
 
 from admission.utils import get_cached_admission_perm_obj
@@ -41,12 +42,12 @@ class DoctorateHistoryAPIView(LoginRequiredMixin, APIPermissionRequiredMixin, Hi
         return get_cached_admission_perm_obj(self.kwargs['uuid'])
 
 
-class DoctorateHistoryView(LoadDossierViewMixin):
+class DoctorateHistoryView(LoadDossierViewMixin, TemplateView):
     template_name = 'admission/doctorate/details/history.html'
     permission_required = 'osis_history.view_historyentry'
     extra_context = {'tag': 'status-changed'}
 
 
-class DoctorateHistoryAllView(LoadDossierViewMixin):
+class DoctorateHistoryAllView(LoadDossierViewMixin, TemplateView):
     template_name = 'admission/doctorate/details/history.html'
     permission_required = 'osis_history.view_historyentry'

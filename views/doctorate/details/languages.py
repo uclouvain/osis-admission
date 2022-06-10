@@ -23,9 +23,11 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from django.views.generic import TemplateView
+
 from admission.views.doctorate.mixins import LoadDossierViewMixin
 
 
-class DoctorateAdmissionLanguagesDetailView(LoadDossierViewMixin):
+class DoctorateAdmissionLanguagesDetailView(LoadDossierViewMixin, TemplateView):
     template_name = 'admission/doctorate/details/languages.html'
     permission_required = 'admission.view_doctorateadmission_languages'

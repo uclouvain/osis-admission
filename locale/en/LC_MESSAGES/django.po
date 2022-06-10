@@ -444,6 +444,12 @@ msgstr ""
 msgid "Canvas"
 msgstr ""
 
+msgid "Canvas of the report of the supervisory panel"
+msgstr ""
+
+msgid "Canvas of the supervisory panel report to download"
+msgstr ""
+
 msgid "Carbon-copy the CA members"
 msgstr ""
 
@@ -713,12 +719,6 @@ msgid "Fondation Mont Godinne"
 msgstr ""
 
 msgid "Fondation St Luc"
-msgstr ""
-
-msgid "Canvas of the report of the supervisory panel"
-msgstr ""
-
-msgid "Canvas of the supervisory panel report to download"
 msgstr ""
 
 msgid "French"

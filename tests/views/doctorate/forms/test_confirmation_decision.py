@@ -158,7 +158,7 @@ class CddDoctorateAdmissionConfirmationSuccessDecisionViewTestCase(TestCase):
         cls.cdd_person = CddManagerFactory(entity=first_doctoral_commission).person
 
         # Targeted path
-        cls.path = 'admission:doctorate:update:confirmation-success'
+        cls.path = 'admission:doctorate:confirmation:success'
 
     @classmethod
     def tearDownClass(cls):
@@ -334,7 +334,7 @@ class CddDoctorateAdmissionConfirmationFailureDecisionViewTestCase(TestCase):
         cls.cdd_person = CddManagerFactory(entity=first_doctoral_commission).person
 
         # Targeted path
-        cls.path = 'admission:doctorate:update:confirmation-failure'
+        cls.path = 'admission:doctorate:confirmation:failure'
 
     @classmethod
     def tearDownClass(cls):
@@ -596,7 +596,7 @@ class CddDoctorateAdmissionConfirmationRetakingDecisionViewTestCase(TestCase):
         cls.cdd_person = CddManagerFactory(entity=first_doctoral_commission).person
 
         # Targeted path
-        cls.path = 'admission:doctorate:update:confirmation-retaking'
+        cls.path = 'admission:doctorate:confirmation:retaking'
 
     @classmethod
     def tearDownClass(cls):

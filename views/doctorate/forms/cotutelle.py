@@ -23,9 +23,11 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from django.views.generic import TemplateView
+
 from admission.views.doctorate.mixins import LoadDossierViewMixin
 
 
-class DoctorateAdmissionCotutelleFormView(LoadDossierViewMixin):
+class DoctorateAdmissionCotutelleFormView(LoadDossierViewMixin, TemplateView):
     template_name = 'admission/doctorate/forms/cotutelle.html'
     permission_required = 'admission.change_doctorateadmission_cotutelle'

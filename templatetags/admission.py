@@ -108,13 +108,6 @@ TAB_TREES = {
     },
 }
 
-# Associate pages that we want to associate to a specific sub tab
-HIDDEN_TABS = {
-    'confirmation-failure': 'confirmation',
-    'confirmation-opinion': 'confirmation',
-    'confirmation-retaking': 'confirmation',
-}
-
 
 def get_active_parent(tab_tree, tab_name):
     return next(
@@ -127,10 +120,11 @@ def get_active_parent(tab_tree, tab_name):
 def doctorate_tabs_bar(context):
     match = context['request'].resolver_match
 
-    namespaces = match.namespaces
+    current_tab_name = match.url_name
+    if len(match.namespaces) > 2:
+        current_tab_name = match.namespaces[2]
 
-    current_tab_name = HIDDEN_TABS.get(match.url_name, match.url_name)
-    current_tab_tree = TAB_TREES[namespaces[1]].copy()
+    current_tab_tree = TAB_TREES[match.namespaces[1]].copy()
     admission = get_cached_admission_perm_obj(context['view'].kwargs.get('pk', ''))
 
     # Prevent showing message tab when candidate is not enrolled
@@ -154,23 +148,27 @@ def doctorate_tabs_bar(context):
 def current_subtabs(context):
     # TODO switch to a perm-based selection of the subtabs, and hide parent tab if no tabs
     match = context['request'].resolver_match
-    namespaces = match.namespaces
-    current_tab_name = HIDDEN_TABS.get(match.url_name, match.url_name)
-    current_tab_tree = TAB_TREES[namespaces[1]]
+    current_tab_name = match.url_name
+    if len(match.namespaces) > 2 and match.namespaces[2] != 'update':
+        current_tab_name = match.namespaces[2]
+    current_tab_tree = TAB_TREES[match.namespaces[1]]
     return current_tab_tree.get(get_active_parent(current_tab_tree, current_tab_name), [])
 
 
 @register.inclusion_tag('admission/includes/doctorate_subtabs_bar.html', takes_context=True)
 def doctorate_subtabs_bar(context, tabs=None):
     match = context['request'].resolver_match
+    current_tab_name = match.url_name
+    if len(match.namespaces) > 2 and match.namespaces[2] != 'update':
+        current_tab_name = match.namespaces[2]
 
     return {
         'subtabs': tabs if tabs is not None else current_subtabs(context),
         'admission_uuid': context['view'].kwargs.get('pk', ''),
-        'namespace': match.namespace,
+        'namespace': ':'.join(match.namespaces[:2]),
         'request': context['request'],
         'view': context['view'],
-        'active_tab': HIDDEN_TABS.get(match.url_name, match.url_name),
+        'active_tab': current_tab_name,
     }
 
 
@@ -180,19 +178,29 @@ def update_tab_path_from_detail(context, admission_uuid):
     match = context['request'].resolver_match
     try:
         return reverse(
-            '{}:update:{}'.format(match.namespace, match.url_name),
+            '{}:update:{}'.format(':'.join(match.namespaces), match.url_name),
             args=[admission_uuid],
         )
     except NoReverseMatch:
-        return ''
+        if len(match.namespaces) > 2:
+            path = ':'.join(match.namespaces[:3])
+        else:
+            path = '{}:{}'.format(':'.join(match.namespaces), match.url_name)
+        return reverse(
+            path,
+            args=[admission_uuid],
+        )
 
 
 @register.simple_tag(takes_context=True)
 def detail_tab_path_from_update(context, admission_uuid):
     """From an update page, get the path of the detail page."""
     match = context['request'].resolver_match
+    current_tab_name = match.url_name
+    if len(match.namespaces) > 2 and match.namespaces[2] != 'update':
+        current_tab_name = match.namespaces[2]
     return reverse(
-        '{}:{}'.format(':'.join(match.namespaces[:-1]), HIDDEN_TABS.get(match.url_name, match.url_name)),
+        '{}:{}'.format(':'.join(match.namespaces[:-1]), current_tab_name),
         args=[admission_uuid],
     )
 

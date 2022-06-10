@@ -510,6 +510,12 @@ msgstr "Candidats"
 msgid "Canvas"
 msgstr "Canvas"
 
+msgid "Canvas of the report of the supervisory panel"
+msgstr "Canevas du procès-verbal du comité d'accompagnement"
+
+msgid "Canvas of the supervisory panel report to download"
+msgstr "Canevas du procès-verbal du comité d'accompagnement à télécharger"
+
 msgid "Carbon-copy the CA members"
 msgstr "Mettre en copie les membres du groupe de supervision"
 
@@ -783,12 +789,6 @@ msgstr "Fondation Mont Godinne"
 
 msgid "Fondation St Luc"
 msgstr "Fondation St Luc"
-
-msgid "Canvas of the report of the supervisory panel"
-msgstr "Canevas du procès-verbal du comité d'accompagnement"
-
-msgid "Canvas of the supervisory panel report to download"
-msgstr "Canevas du procès-verbal du comité d'accompagnement à télécharger"
 
 msgid "French"
 msgstr "Français"
