@@ -25,9 +25,7 @@
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
 
-{% if not is_active %}
-  {% url namespace|add:':'|add:tab_name admission_uuid as tab_url %}
-{% endif %}
+{% url namespace|add:':'|add:tab_name admission_uuid as tab_url %}
 
 <li
   role="presentation"

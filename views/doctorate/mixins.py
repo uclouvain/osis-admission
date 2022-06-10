@@ -24,7 +24,7 @@
 #
 ##############################################################################
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views.generic import TemplateView
+from django.views.generic.base import ContextMixin
 
 from admission.ddd.projet_doctoral.preparation.commands import GetPropositionCommand
 from admission.ddd.projet_doctoral.preparation.domain.model._enums import ChoixStatutProposition
@@ -34,7 +34,7 @@ from infrastructure.messages_bus import message_bus_instance
 from osis_role.contrib.views import PermissionRequiredMixin
 
 
-class LoadDossierViewMixin(LoginRequiredMixin, PermissionRequiredMixin, TemplateView):
+class LoadDossierViewMixin(LoginRequiredMixin, PermissionRequiredMixin, ContextMixin):
     def get_permission_object(self):
         return get_cached_admission_perm_obj(self.kwargs['pk'])
 

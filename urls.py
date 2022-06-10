@@ -40,6 +40,12 @@ autocomplete_paths = [
 ]
 
 # Doctorate
+confirmation_tabs = [
+    path('opinion', DoctorateAdmissionConfirmationOpinionFormView.as_view(), name='opinion'),
+    path('success', DoctorateAdmissionConfirmationSuccessDecisionView.as_view(), name='success'),
+    path('failure', DoctorateAdmissionConfirmationFailureDecisionView.as_view(), name='failure'),
+    path('retaking', DoctorateAdmissionConfirmationRetakingDecisionView.as_view(), name='retaking'),
+]
 doctorate_update_paths = [
     path('person', DoctorateAdmissionPersonFormView.as_view(), name='person'),
     path('coordonnees', DoctorateAdmissionCoordonneesFormView.as_view(), name='coordonnees'),
@@ -50,23 +56,7 @@ doctorate_update_paths = [
     path('cotutelle', DoctorateAdmissionCotutelleFormView.as_view(), name='cotutelle'),
     path('supervision', DoctorateAdmissionSupervisionFormView.as_view(), name='supervision'),
     path('confirmation', DoctorateAdmissionConfirmationFormView.as_view(), name='confirmation'),
-    path('confirmation-opinion', DoctorateAdmissionConfirmationOpinionFormView.as_view(), name='confirmation-opinion'),
     path('extension-request', DoctorateAdmissionExtensionRequestFormView.as_view(), name='extension-request'),
-    path(
-        'confirmation-success',
-        DoctorateAdmissionConfirmationSuccessDecisionView.as_view(),
-        name='confirmation-success',
-    ),
-    path(
-        'confirmation-failure',
-        DoctorateAdmissionConfirmationFailureDecisionView.as_view(),
-        name='confirmation-failure',
-    ),
-    path(
-        'confirmation-retaking',
-        DoctorateAdmissionConfirmationRetakingDecisionView.as_view(),
-        name='confirmation-retaking',
-    ),
 ]
 doctorate_detail_paths = [
     path('person', DoctorateAdmissionPersonDetailView.as_view(), name='person'),
@@ -81,6 +71,7 @@ doctorate_detail_paths = [
     path('history-all', DoctorateHistoryAllView.as_view(), name='history-all'),
     path('send-mail', DoctorateSendMailView.as_view(), name='send-mail'),
     path('confirmation', DoctorateAdmissionConfirmationDetailView.as_view(), name='confirmation'),
+    path('confirmation/', include((confirmation_tabs, 'confirmation'))),
     path('extension-request', DoctorateAdmissionExtensionRequestDetailView.as_view(), name='extension-request'),
     path(
         'confirmation-canvas',

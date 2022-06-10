@@ -35,7 +35,7 @@
       </a>
     </li>
     <li>
-      <a href="{% url "admission:doctorate:update:confirmation-opinion" doctorate.uuid %}">
+      <a href="{% url "admission:doctorate:confirmation:opinion" doctorate.uuid %}">
         {% trans "Upload the opinion on the renewal of the research mandate" %}
       </a>
     </li>
@@ -47,12 +47,12 @@
         </a>
       </li>
       <li>
-        <a href="{% url 'admission:doctorate:update:confirmation-failure' pk %}">
+        <a href="{% url 'admission:doctorate:confirmation:failure' pk %}">
           {% trans "Failure of the test" %}
         </a>
       </li>
       <li>
-        <a href="{% url 'admission:doctorate:update:confirmation-retaking' pk %}">
+        <a href="{% url 'admission:doctorate:confirmation:retaking' pk %}">
           {% trans "Retaking of the test" %}
         </a>
       </li>

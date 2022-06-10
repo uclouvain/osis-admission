@@ -272,7 +272,7 @@ class DoctorateAdmissionConfirmationOpinionFormViewTestCase(TestCase):
             'avis_renouvellement_mandat_recherche_0': 'avis_renouvellement_mandat_recherche_1',
         }
 
-        cls.path = 'admission:doctorate:update:confirmation-opinion'
+        cls.path = 'admission:doctorate:confirmation:opinion'
 
     @classmethod
     def tearDownClass(cls):
