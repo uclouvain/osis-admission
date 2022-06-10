@@ -50,5 +50,13 @@
         </a>
       </li>
     {% endif %}
+    {% if perms.admission.change_cddconfiguration %}
+      <li>
+        <a href="{% url 'admission:config:cdd_config:list' %}">
+          <span class="fa fa-tools"></span>
+          {% trans 'CDD configuration' %}
+        </a>
+      </li>
+    {% endif %}
   </ul>
 </li>

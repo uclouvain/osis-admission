@@ -279,6 +279,9 @@ msgstr ""
 msgid "CDD Mail templates"
 msgstr ""
 
+msgid "CDD configuration"
+msgstr ""
+
 msgid "CDD manager"
 msgstr ""
 
@@ -460,6 +463,10 @@ msgid "Certificate of achievement"
 msgstr ""
 
 msgid "Certificate of failure"
+msgstr ""
+
+#, python-format
+msgid "Change <em>%(name)s</em> configuration"
 msgstr ""
 
 #, python-format
@@ -666,6 +673,9 @@ msgstr ""
 msgid "English"
 msgstr ""
 
+msgid "English values"
+msgstr ""
+
 msgid "Enrolments"
 msgstr ""
 
@@ -722,6 +732,9 @@ msgid "Fondation St Luc"
 msgstr ""
 
 msgid "French"
+msgstr ""
+
+msgid "French values"
 msgstr ""
 
 msgid "From"
@@ -1033,6 +1046,9 @@ msgstr "Other"
 msgid "Office"
 msgstr ""
 
+msgid "One choice per line, leave the \"Other\" value out"
+msgstr ""
+
 msgid "Opinion of the CA following the format provided by the CDD"
 msgstr ""
 
@@ -1342,6 +1358,9 @@ msgstr ""
 msgid "Select a mail template"
 msgstr ""
 
+msgid "Seminar types"
+msgstr ""
+
 msgid "Send a mail"
 msgstr ""
 
@@ -1352,6 +1371,9 @@ msgid "Send the message"
 msgstr ""
 
 msgid "Sender"
+msgstr ""
+
+msgid "Service types"
 msgstr ""
 
 msgid "Sex"
