@@ -1,0 +1,101 @@
+{% load i18n osis_document admission %}
+
+{% comment "License" %}
+  * OSIS stands for Open Student Information System. It's an application
+  * designed to manage the core business of higher education institutions,
+  * such as universities, faculties, institutes and professional schools.
+  * The core business involves the administration of students, teachers,
+  * courses, programs and so on.
+  *
+  * Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+  *
+  * This program is free software: you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License as published by
+  * the Free Software Foundation, either version 3 of the License, or
+  * (at your option) any later version.
+  *
+  * This program is distributed in the hope that it will be useful,
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU General Public License for more details.
+  *
+  * A copy of this license - GNU General Public License - is available
+  * at the root of the source code of this program.  If not,
+  * see http://www.gnu.org/licenses/.
+{% endcomment %}
+
+{% url "admission:doctorate:training:edit" pk=view.kwargs.pk activity_id=activity.uuid as edit_url %}
+{% url "admission:doctorate:training:delete" pk=view.kwargs.pk activity_id=activity.uuid as delete_url %}
+
+{% if activity.website %}
+  {% firstof '<a href="'|safe|add:activity.website|add:'">'|safe|add:activity.website|add:'</a>'|safe "" as website %}
+{% endif %}
+
+{% display activity.ects " ECTS" as ects %}
+{% display '(' activity.city "," activity.country "," activity.start_date|date:"d/m/Y" ")" as location_period %}
+
+<div class="panel-heading">
+  <h3 class="panel-title">
+    <a role="button" data-toggle="collapse" data-parent="#accordion" href="#a-{{ activity.uuid }}"
+       aria-expanded="true"
+       aria-controls="a-{{ activity.uuid }}">
+      <span class="badge">{{ activity.get_status_display }}</span>
+      {% display activity.type '-' activity.subtype ' ' location_period "-" ects %}
+    </a>
+    <div class="btn-group btn-group-sm pull-right">
+      <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
+              aria-expanded="false">
+        {% trans "Actions" %} <span class="caret"></span>
+      </button>
+      <ul class="dropdown-menu">
+        <li>
+          <a href="{{ edit_url }}">
+            {% trans "Edit" %}
+          </a>
+        <li>
+          <a href="{{ delete_url }}">
+            {% trans "Delete" %}
+          </a>
+        </li>
+      </ul>
+    </div>
+    <div class="clearfix"></div>
+  </h3>
+</div>
+<div id="a-{{ activity.uuid }}" class="panel-collapse collapse" role="tabpanel"
+     aria-labelledby="h-{{ activity.uuid }}">
+  <div class="panel-body">
+    <p>
+      <strong class="d-block">{% trans "Event description" %}</strong>
+      {% display activity.title "-" activity.subtitle "-" activity.get_is_online_display "-" website %}
+      <br/>
+      {% display activity.organizing_institution "," activity.city "," activity.country %}
+    </p>
+    <div class="row">
+      {% if activity.participating_days %}
+        <p class="col-md-4">
+          <strong class="d-block">{% trans "Number of days participating" %}</strong>
+          {{ activity.participating_days }}
+        </p>
+      {% endif %}
+      {% if activity.ects %}
+        <p class="col-md-4">
+          <strong class="d-block">{% trans "ECTS for participating" %}</strong>
+          {{ activity.ects }}
+        </p>
+      {% endif %}
+    </div>
+    {% if activity.participating_proof %}
+      <div class="form-group">
+        <strong class="d-block">{% trans "Participation certification" %}</strong>
+        {% document_visualizer activity.participating_proof %}
+      </div>
+    {% endif %}
+    {% if activity.comment %}
+      <div class="form-group">
+        <strong class="d-block">{% trans "Comments" %}</strong>
+        {{ activity.comment|linebreaks }}
+      </div>
+    {% endif %}
+  </div>
+</div>

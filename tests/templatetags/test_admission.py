@@ -28,7 +28,6 @@ from unittest.mock import Mock
 
 import mock
 from django.http import HttpResponse
-
 from django.test import RequestFactory, TestCase
 from django.test.utils import override_settings
 from django.urls import path, reverse
@@ -36,14 +35,16 @@ from django.utils.translation import gettext as _
 from django.views import View
 
 from admission.templatetags.admission import (
-    sortable_header_div,
-    Tab,
-    get_active_parent,
-    update_tab_path_from_detail,
-    detail_tab_path_from_update,
-    field_data,
-    current_subtabs,
     TAB_TREES,
+    Tab,
+    current_subtabs,
+    detail_tab_path_from_update,
+    display,
+    field_data,
+    get_active_parent,
+    sortable_header_div,
+    strip,
+    update_tab_path_from_detail,
 )
 
 
@@ -273,3 +274,41 @@ class AdmissionFieldsDataTestCase(TestCase):
         )
         self.assertEqual(result['name'], 'My field label')
         self.assertEqual(result['data'], '')
+
+
+class DisplayTagTestCase(TestCase):
+    def test_comma(self):
+        self.assertEqual(display('', ',', None), '')
+        self.assertEqual(display('', ',', 0), '')
+        self.assertEqual(display('', ',', ''), '')
+        self.assertEqual(display('Foo', ',', []), 'Foo')
+        self.assertEqual(display('', ',', "bar"), 'bar')
+        self.assertEqual(display('foo', '-', "", '-', ''), 'foo')
+        self.assertEqual(display('foo', '-', "bar", '-', ''), 'foo - bar')
+        self.assertEqual(display('foo', '-', None, '-', ''), 'foo')
+        self.assertEqual(display('foo', '-', None, '-', 'baz'), 'foo - baz')
+        self.assertEqual(display('foo', '-', "bar", '-', 'baz'), 'foo - bar - baz')
+
+    def test_parenthesis(self):
+        self.assertEqual(display('(', '', ")"), '')
+        self.assertEqual(display('(', None, ")"), '')
+        self.assertEqual(display('(', 0, ")"), '')
+        self.assertEqual(display('(', 'lol', ")"), '(lol)')
+
+    def test_suffix(self):
+        self.assertEqual(display('', ' grammes'), '')
+        self.assertEqual(display(5, ' grammes'), '5 grammes')
+        self.assertEqual(display(5, ' grammes'), '5 grammes')
+        self.assertEqual(display(0.0, ' g'), '')
+
+    def test_both(self):
+        self.assertEqual(display('(', '', ")", '-', 0), '')
+        self.assertEqual(display('(', '', ",", "", ")", '-', 0), '')
+        self.assertEqual(display('(', 'jean', ",", "", ")", '-', 0), '(jean)')
+        self.assertEqual(display('(', 'jean', ",", "michel", ")", '-', 0), '(jean, michel)')
+        self.assertEqual(display('(', 'jean', ",", "michel", ")", '-', 100), '(jean, michel) - 100')
+
+    def test_strip(self):
+        self.assertEqual(strip(' coucou '), 'coucou')
+        self.assertEqual(strip(0), 0)
+        self.assertEqual(strip(None), None)

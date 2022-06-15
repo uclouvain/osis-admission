@@ -30,8 +30,42 @@ from django.utils.translation import gettext_lazy as _
 from base.models.enums.entity_type import DOCTORAL_COMMISSION
 
 
-def default_value():
-    return {settings.LANGUAGE_CODE_EN: [], settings.LANGUAGE_CODE_FR: []}
+def default_service_types():
+    return {
+        settings.LANGUAGE_CODE_EN: [
+            "Didactic supervision",
+            "Teaching activities",
+            "Popularisation of science",
+            "Writing a research project",
+            "Organisation of scientific events",
+            "Scientific expertise report (refering)",
+            "Supervision of dissertations",
+            "International cooperation",
+        ],
+        settings.LANGUAGE_CODE_FR: [
+            "Encadrement didactique",
+            "Activités d'enseignement",
+            "Vulgarisation scientifique",
+            "Rédaction d'un projet de recherche",
+            "Organisation de manifestation scientifique",
+            "Rapport d’expertise scientifique (refering)",
+            "Supervision de mémoire",
+            "Coopération internationale",
+        ],
+    }
+
+
+def default_seminar_types():
+    return {
+        settings.LANGUAGE_CODE_EN: [
+            "Research seminar",
+            "PhD students' day",
+        ],
+        settings.LANGUAGE_CODE_FR: [
+            "Séminaire de recherche",
+            "Journée des doctorantes et des doctorants",
+        ],
+    }
 
 
 class CddConfiguration(models.Model):
@@ -43,39 +77,9 @@ class CddConfiguration(models.Model):
     )
     service_types = models.JSONField(
         verbose_name=_("Service types"),
-        default={
-            settings.LANGUAGE_CODE_EN: [
-                "Didactic supervision",
-                "Teaching activities",
-                "Popularisation of science",
-                "Writing a research project",
-                "Organisation of scientific events",
-                "Scientific expertise report (refering)",
-                "Supervision of dissertations",
-                "International cooperation",
-            ],
-            settings.LANGUAGE_CODE_FR: [
-                "Encadrement didactique",
-                "Activités d'enseignement",
-                "Vulgarisation scientifique",
-                "Rédaction d'un projet de recherche",
-                "Organisation de manifestation scientifique",
-                "Rapport d’expertise scientifique (refering)",
-                "Supervision de mémoire",
-                "Coopération internationale",
-            ],
-        },
+        default=default_service_types,
     )
     seminar_types = models.JSONField(
         verbose_name=_("Seminar types"),
-        default={
-            settings.LANGUAGE_CODE_EN: [
-                "Research seminar",
-                "PhD students' day",
-            ],
-            settings.LANGUAGE_CODE_FR: [
-                "Séminaire de recherche",
-                "Journée des doctorantes et des doctorants",
-            ],
-        },
+        default=default_seminar_types,
     )

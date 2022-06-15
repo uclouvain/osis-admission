@@ -1,5 +1,5 @@
-{% extends "layout.html" %}
-{% load bootstrap3 i18n dictionnary %}
+{% extends "admission/doctorate/details/tab_layout.html" %}
+{% load i18n static admission bootstrap3 %}
 
 {% comment "License" %}
   * OSIS stands for Open Student Information System. It's an application
@@ -25,34 +25,23 @@
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
 
-{% block breadcrumb %}
-  {% blocktrans with name=object.cdd trimmed asvar title %}
-    Change <em>{{ name }}</em> configuration
-  {% endblocktrans %}
-  <li>{% trans 'Admission' %}</li>
-  <li><a href="{% url 'admission:config:cdd_config:list' %}">{% trans 'CDD configuration' %}</a></li>
-  <li class="active">{{ title|safe }}</li>
-{% endblock %}
 
-{% block content %}
-  {% blocktrans with name=object.cdd trimmed asvar title %}
-    Change <em>{{ name }}</em> configuration
-  {% endblocktrans %}
-  <div class="page-header">
-    <h1 class="h3">{{ title|safe }}</h1>
-  </div>
-  <div class="row">
-    <form method="post">
-      {% csrf_token %}
-      {% bootstrap_form form %}
-      <button class="btn btn-primary">
-        <span class="glyphicon glyphicon-save" aria-hidden="true"></span>
-        {% trans "Save" %}
-      </button>
-      <a href="{% url 'admission:config:cdd_config:list' %}" class="btn btn-default">
-        <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+{% block tab_content %}
+  <form action="" method="post">
+    {% csrf_token %}
+    {% include form.template_name %}
+    <div class="text-right">
+      <a href="{% url "admission:doctorate:training" pk=view.kwargs.pk %}" class="text-danger">
         {% trans "Cancel" %}
       </a>
-    </form>
-  </div>
+      <button type="submit" class="btn btn-primary">
+        {% trans "Save" %}
+      </button>
+    </div>
+  </form>
+{% endblock %}
+
+{% block script %}
+  {{ block.super }}
+  {{ form.media }}
 {% endblock %}

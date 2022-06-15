@@ -23,16 +23,38 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from .list import CddDoctorateAdmissionList
-from .training import (
-    DoctorateTrainingActivityAddView,
-    DoctorateTrainingActivityEditView,
-    DoctorateTrainingActivityView,
-)
+from django.utils.translation import gettext_lazy as _
 
-__all__ = [
-    'CddDoctorateAdmissionList',
-    'DoctorateTrainingActivityView',
-    'DoctorateTrainingActivityAddView',
-    'DoctorateTrainingActivityEditView',
-]
+from base.models.utils.utils import ChoiceEnum
+
+
+class StatutActivite(ChoiceEnum):
+    NON_SOUMISE = _("NON_SOUMISE")
+    SOUMISE = _("SOUMISE")
+    ACCEPTEE = _("ACCEPTEE")
+    REFUSEE = _("REFUSEE")
+
+
+class CategorieActivite(ChoiceEnum):
+    CONFERENCE = _("CONFERENCE")
+    COMMUNICATION = _("COMMUNICATION")
+    SEMINAR = _("SEMINAR")
+    PUBLICATION = _("PUBLICATION")
+    SERVICE = _("SERVICE")
+    RESIDENCY = _("RESIDENCY")
+    VAE = _("VAE")
+    # COURS = _("COURS")  # TODO
+
+
+class ChoixComiteSelection(ChoiceEnum):
+    YES = _("YES")
+    NO = _("NO")
+    NA = _("N/A")
+
+
+class ChoixStatutPublication(ChoiceEnum):
+    UNSUBMITTED = _("Unsubmitted")
+    SUBMITTED = _("Submitted")
+    IN_REVIEW = _("In review")
+    ACCEPTED = _("Accepted")
+    PUBLISHED = _("Published")

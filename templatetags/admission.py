@@ -28,12 +28,60 @@ from dataclasses import dataclass
 
 from django import template
 from django.urls import NoReverseMatch, reverse
+from django.utils.safestring import SafeString
 from django.utils.translation import gettext_lazy as _
 
 from admission.ddd.projet_doctoral.doctorat.domain.model.enums import ChoixStatutDoctorat
+from admission.ddd.projet_doctoral.doctorat.formation.domain.model._enums import StatutActivite
 from admission.utils import get_cached_admission_perm_obj
 
 register = template.Library()
+
+
+@register.simple_tag
+def display(*args):
+    """Display args if their value is not empty, can be wrapped by parenthesis, or separated by comma or dash"""
+    ret = []
+    iterargs = iter(args)
+    nextarg = next(iterargs)
+    while nextarg != StopIteration:
+        if nextarg == "(":
+            reduce_wrapping = [next(iterargs, None)]
+            while reduce_wrapping[-1] != ")":
+                reduce_wrapping.append(next(iterargs, None))
+            ret.append(reduce_wrapping_parenthesis(*reduce_wrapping[:-1]))
+        elif nextarg == ",":
+            ret.append(reduce_list_separated(ret.pop(), next(iterargs, None)))
+        elif nextarg == "-":
+            ret.append(reduce_list_separated(ret.pop(), next(iterargs, None), separator=" - "))
+        elif isinstance(nextarg, str) and len(nextarg) > 1 and re.match(r'\s', nextarg[0]):
+            suffixed_val = ret.pop()
+            ret.append(f"{suffixed_val}{nextarg}" if suffixed_val else "")
+        else:
+            ret.append(SafeString(nextarg) if nextarg else '')
+        nextarg = next(iterargs, StopIteration)
+    return SafeString("".join(ret))
+
+
+@register.simple_tag
+def reduce_wrapping_parenthesis(*args):
+    """Display args given their value, wrapped by parenthesis"""
+    ret = display(*args)
+    if ret:
+        return SafeString(f"({ret})")
+    return ret
+
+
+@register.simple_tag
+def reduce_list_separated(arg1, arg2, separator=", "):
+    """Display args given their value, joined by separator"""
+    if arg1 and arg2:
+        return separator.join([SafeString(arg1), SafeString(arg2)])
+    elif arg1:
+        return SafeString(arg1)
+    elif arg2:
+        return SafeString(arg2)
+    return ""
 
 
 @register.inclusion_tag('admission/includes/sortable_header_div.html', takes_context=True)
@@ -97,6 +145,7 @@ TAB_TREES = {
             Tab('supervision', _('Supervision')),
             Tab('confirmation', _('Confirmation paper')),
             Tab('extension-request', _('New deadline')),
+            Tab('training', _('Training')),
         ],
         Tab('history', _('History'), 'clock'): [
             Tab('history', _('Status changes')),
@@ -237,3 +286,19 @@ def phone_spaced(phone, with_optional_zero=False):
     if with_optional_zero and phone[0] == "0":
         return "(0)" + re.sub('(\\d{2})(\\d{2})(\\d{2})(\\d{2})', '\\1 \\2 \\3 \\4', phone[1:])
     return re.sub('(\\d{3})(\\d{2})(\\d{2})(\\d{2})', '\\1 \\2 \\3 \\4', phone)
+
+
+@register.filter
+def strip(value):
+    if isinstance(value, str):
+        return value.strip()
+    return value
+
+
+@register.filter
+def status_as_class(activity):
+    return {
+        StatutActivite.SOUMISE.name: "warning",
+        StatutActivite.ACCEPTEE.name: "success",
+        StatutActivite.REFUSEE.name: "danger",
+    }.get(activity.status, 'default')
