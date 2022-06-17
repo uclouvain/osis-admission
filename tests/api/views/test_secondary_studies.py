@@ -42,6 +42,7 @@ from admission.tests.factories.secondary_studies import (
 from admission.tests.factories.supervision import CaMemberFactory, PromoterFactory
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityFactory
+from base.tests.factories.entity_version_address import EntityVersionAddressFactory
 from base.tests.factories.person import PersonFactory
 from osis_profile.models import (
     BelgianHighSchoolDiploma,
@@ -50,6 +51,7 @@ from osis_profile.models import (
     Schedule,
 )
 from reference.tests.factories.country import CountryFactory
+from reference.tests.factories.high_school import HighSchoolFactory
 from reference.tests.factories.language import LanguageFactory
 
 
@@ -58,23 +60,29 @@ class BelgianHighSchoolDiplomaTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
         cls.academic_year = AcademicYearFactory(current=True)
+        cls.high_school = HighSchoolFactory()
+
+        EntityVersionAddressFactory(
+            entity_version__entity=EntityFactory(organization=cls.high_school.organization)
+        )
+
         cls.agnostic_url = resolve_url("secondary-studies")
         cls.diploma_data = {
             "belgian_diploma": {
-                "institute": "Test Institute",
+                "institute": cls.high_school.uuid,
                 "academic_graduation_year": cls.academic_year.year,
                 "educational_type": "TEACHING_OF_GENERAL_EDUCATION",
             }
         }
         cls.diploma_updated_data = {
             "belgian_diploma": {
-                "institute": "Institute Of Test",
+                "institute": cls.high_school.uuid,
                 "academic_graduation_year": cls.academic_year.year,
             },
         }
         cls.diploma_data_with_schedule = {
             "belgian_diploma": {
-                "institute": "Test Institute",
+                "institute": cls.high_school.uuid,
                 "academic_graduation_year": cls.academic_year.year,
                 "educational_type": "TEACHING_OF_GENERAL_EDUCATION",
                 "schedule": {
@@ -84,7 +92,7 @@ class BelgianHighSchoolDiplomaTestCase(APITestCase):
         }
         cls.diploma_data_educational_does_not_require_schedule = {
             "belgian_diploma": {
-                "institute": "Test Institute",
+                "institute": cls.high_school.uuid,
                 "academic_graduation_year": cls.academic_year.year,
                 "educational_type": "PROFESSIONAL_EDUCATION_AND_MATURITY_EXAM",
                 "schedule": {
@@ -148,7 +156,7 @@ class BelgianHighSchoolDiplomaTestCase(APITestCase):
         self.assertIsNone(belgian_diploma.community)
         self.assertEqual(belgian_diploma.educational_type, self.diploma_data["belgian_diploma"]["educational_type"])
         self.assertEqual(belgian_diploma.educational_other, "")
-        self.assertEqual(belgian_diploma.institute, self.diploma_data["belgian_diploma"]["institute"])
+        self.assertEqual(belgian_diploma.institute.uuid, self.diploma_data["belgian_diploma"]["institute"])
         self.assertEqual(belgian_diploma.other_institute_name, "")
         self.assertIsNone(belgian_diploma.schedule)
         foreign_diploma = ForeignHighSchoolDiploma.objects.filter(person__user_id=self.candidate_user.pk)
@@ -160,14 +168,14 @@ class BelgianHighSchoolDiplomaTestCase(APITestCase):
             self.admission_url,
             {
                 "belgian_diploma": {
-                    "institute": "Institute Of Test",
+                    "institute": self.high_school.uuid,
                     "academic_graduation_year": self.academic_year.year,
                 },
             },
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
         diploma = BelgianHighSchoolDiploma.objects.get(person__user_id=self.candidate_user.pk)
-        self.assertEqual(diploma.institute, "Institute Of Test")
+        self.assertEqual(diploma.institute.uuid, self.diploma_data["belgian_diploma"]["institute"])
 
     def test_diploma_update_by_belgian_diploma(self):
         ForeignHighSchoolDiplomaFactory(person=self.candidate_user.person)
@@ -181,13 +189,13 @@ class BelgianHighSchoolDiplomaTestCase(APITestCase):
         self.assertEqual(ForeignHighSchoolDiploma.objects.count(), 0)
         self.assertEqual(HighSchoolDiplomaAlternative.objects.count(), 0)
         diploma = BelgianHighSchoolDiploma.objects.get(person__user_id=self.candidate_user.pk)
-        self.assertEqual(diploma.institute, "Test Institute")
+        self.assertEqual(diploma.institute.uuid, self.diploma_data["belgian_diploma"]["institute"])
 
     def test_diploma_create_with_schedule(self):
         response = self.create_belgian_diploma(self.diploma_data_with_schedule)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
         diploma = BelgianHighSchoolDiploma.objects.get(person__user_id=self.candidate_user.pk)
-        self.assertEqual(diploma.institute, "Test Institute")
+        self.assertEqual(diploma.institute.uuid, self.diploma_data_with_schedule["belgian_diploma"]["institute"])
         self.assertIsNotNone(diploma.schedule)
         self.assertEqual(diploma.schedule.latin, 3)
 
@@ -195,7 +203,10 @@ class BelgianHighSchoolDiplomaTestCase(APITestCase):
         response = self.create_belgian_diploma(self.diploma_data_educational_does_not_require_schedule)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
         diploma = BelgianHighSchoolDiploma.objects.get(person__user_id=self.candidate_user.pk)
-        self.assertEqual(diploma.institute, "Test Institute")
+        self.assertEqual(
+            diploma.institute.uuid,
+            self.diploma_data_educational_does_not_require_schedule["belgian_diploma"]["institute"],
+        )
         self.assertIsNone(diploma.schedule)
 
     def test_diploma_create_without_required_schedule_deletes_it(self):
