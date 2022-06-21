@@ -69,7 +69,7 @@ class Notification(INotification):
             "student_first_name": doctorate.candidate.first_name,
             "student_last_name": doctorate.candidate.last_name,
             "doctorate_title": cls._get_doctorate_title_translation(doctorate),
-            "admission_link_front": (settings.ADMISSION_FRONTEND_LINK.format(uuid=doctorate.uuid)),
+            "admission_link_front": settings.ADMISSION_FRONTEND_LINK.format(uuid=doctorate.uuid),
             "admission_link_back": "{}{}".format(
                 settings.ADMISSION_BACKEND_LINK_PREFIX.rstrip('/'),
                 resolve_url('admission:doctorate:project', pk=doctorate.uuid),

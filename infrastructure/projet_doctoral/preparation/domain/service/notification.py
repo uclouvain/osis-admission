@@ -52,6 +52,7 @@ from admission.mail_templates import (
     ADMISSION_EMAIL_SIGNATURE_REQUESTS_ACTOR,
     ADMISSION_EMAIL_SIGNATURE_REQUESTS_CANDIDATE,
     ADMISSION_EMAIL_SUBMISSION_CANDIDATE,
+    ADMISSION_EMAIL_SUBMISSION_CDD,
     ADMISSION_EMAIL_SUBMISSION_MEMBER,
 )
 from base.models.person import Person
@@ -137,9 +138,9 @@ class Notification(INotification):
 
         # Envoyer au doctorant
         with translation.override(candidat.language):
-            actor_list_str = (
+            actor_list_str = [
                 f"{actor['first_name']} {actor['last_name']} ({ActorType[actor['type']].value})" for actor in actor_list
-            )
+            ]
         email_message = generate_email(
             ADMISSION_EMAIL_SIGNATURE_REQUESTS_CANDIDATE,
             candidat.language,
@@ -270,7 +271,7 @@ class Notification(INotification):
         ).select_related('person')
         for manager in cdd_managers:
             email_message = generate_email(
-                ADMISSION_EMAIL_SUBMISSION_CANDIDATE,
+                ADMISSION_EMAIL_SUBMISSION_CDD,
                 manager.person.language,
                 {
                     **common_tokens,
