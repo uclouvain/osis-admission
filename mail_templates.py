@@ -200,11 +200,6 @@ templates.register(
             description=_("The last name of the recipient"),
             example="Smith",
         ),
-        Token(
-            name='admission_link_back',
-            description=_("Link to the admission (back-office)"),
-            example="http://dev.osis.uclouvain.be/somewhere",
-        ),
     ],
     tag=DOCTORATE_ADMISSION_TAG,
 )
