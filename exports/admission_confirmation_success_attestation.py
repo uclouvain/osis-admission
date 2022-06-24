@@ -80,7 +80,7 @@ def admission_confirmation_success_attestation(task_uuid, language=None):
                 entity_acronym=admission_task.admission.doctorate.management_entity.most_recent_entity_version.acronym,
             )
             if settings.ESB_API_URL
-            else {}
+            else []
         )
 
         # Generate the pdf
@@ -90,7 +90,7 @@ def admission_confirmation_success_attestation(task_uuid, language=None):
             filename='confirmation_attestation.pdf',
             context={
                 'contact_address': contact_address,
-                'cdd_president': cdd_president,
+                'cdd_president': cdd_president[0] if cdd_president else {},
                 'confirmation_paper': confirmation_paper,
             },
         )

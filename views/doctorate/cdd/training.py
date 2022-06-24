@@ -52,7 +52,7 @@ class DoctorateTrainingActivityView(LoadDossierViewMixin, generic.TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        qs = Activity.objects.filter(doctorate__uuid=self.kwargs['pk'])
+        qs = Activity.objects.filter(doctorate__uuid=self.admission_uuid)
         context['activities'] = qs.prefetch_related('children')
         context['categories'] = CategorieActivite.choices
         context['statuses'] = StatutActivite.choices
@@ -107,7 +107,7 @@ class DoctorateTrainingActivityFormMixin(LoadDossierViewMixin):
         return kwargs
 
     def get_success_url(self):
-        base_url = resolve_url("admission:doctorate:training", pk=self.kwargs['pk'])
+        base_url = resolve_url("admission:doctorate:training", uuid=self.admission_uuid)
         return f"{base_url}#{self.object.uuid}"
 
 

@@ -17,93 +17,6 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-msgctxt "female gender"
-msgid ""
-"\n"
-"            Following the presentation of the state of the research and the "
-"subsequent discussion with the candidate,\n"
-"            the supervisory panel assessed the progress of the work and "
-"announces:\n"
-"          "
-msgstr ""
-"\n"
-"            À la suite de la présentation de l'état de la recherche et de "
-"l'échange qui s'en est suivi avec la candidate,\n"
-"            le comité d'accompagnement a évalué l'avancement du travail et "
-"conclut à :\n"
-"          "
-
-msgctxt "male gender"
-msgid ""
-"\n"
-"            Following the presentation of the state of the research and the "
-"subsequent discussion with the candidate,\n"
-"            the supervisory panel assessed the progress of the work and "
-"announces:\n"
-"          "
-msgstr ""
-"\n"
-"            À la suite de la présentation de l'état de la recherche et de "
-"l'échange qui s'en est suivi avec le candidat,\n"
-"            le comité d'accompagnement a évalué l'avancement du travail et "
-"conclut à :\n"
-"          "
-
-#, python-format
-msgid ""
-"\n"
-"          After considering the opinion of your supervisory panel, which met "
-"on %(confirmation_date)s, the\n"
-"          %(cdd)s notes that your doctoral confirmation paper has been "
-"successfully completed.\n"
-"        "
-msgstr ""
-"\n"
-"          Après examen de l’avis de votre comité d’accompagnement réuni le "
-"%(confirmation_date)s, la\n"
-"          %(cdd)s constate la réussite de votre épreuve de confirmation au "
-"doctorat. \n"
-"        "
-
-#, python-format
-msgid ""
-"\n"
-"          The committee also validates the activities carried out as part of "
-"your doctoral training, which now total\n"
-"          %(nb_credits)s ECTS.\n"
-"        "
-msgstr ""
-"\n"
-"          La commission valide également les activités réalisées dans le "
-"cadre de programme de formation doctorale et qui totalisent à ce jour\n"
-"          %(nb_credits)s ECTS.\n"
-"        "
-
-msgid ""
-"\n"
-"          We congratulate you on your successful completion of the paper and "
-"wish you every success in your\n"
-"          doctoral training.\n"
-"        "
-msgstr ""
-"\n"
-"          Nous vous félicitons pour la réussite de votre épreuve et vous "
-"souhaitons un franc succès dans la poursuite de votre\n"
-"           parcours doctoral.\n"
-"        "
-
-#, python-format
-msgid ""
-"\n"
-"        The number of acquired <strong>doctoral</strong> credits amounts to "
-"%(credits_nb)s credits.\n"
-"      "
-msgstr ""
-"\n"
-"        Le nombre de crédits acquis de <strong>formation doctorale</strong> "
-"s'élève à %(credits_nb)s crédits.\n"
-"      "
-
 #, python-format
 msgid "%(added)s ECTS added with %(validated)s validated by the CDD."
 msgstr "%(added)s ECTS ajoutés dont %(validated)s validés par la CDD."
@@ -144,6 +57,28 @@ msgstr ""
 "<a href=\"%(admission_link_front)s\">%(reference)s</a> - "
 "%(signataire_first_name)s %(signataire_last_name)s (%(actor_role)s) a "
 "approuvé votre demande de signature."
+
+#, python-format
+msgid ""
+"<a href=\"%(confirmation_paper_link_back)s\">%(reference)s</a> - "
+"%(student_first_name)s %(student_last_name)s proposed a new deadline "
+"(%(extension_request_proposed_date)s) for the confirmation paper for "
+"%(doctorate_title)s"
+msgstr ""
+"<a href=\"%(confirmation_paper_link_back)s\">%(reference)s</a> - "
+"%(student_first_name)s %(student_last_name)s a proposé une nouvelle échéance "
+"(%(extension_request_proposed_date)s) pour son épreuve de confirmation pour "
+"%(doctorate_title)s"
+
+#, python-format
+msgid ""
+"<a href=\"%(confirmation_paper_link_back)s\">%(reference)s</a> - "
+"%(student_first_name)s %(student_last_name)s submitted a date for the "
+"confirmation paper for %(doctorate_title)s"
+msgstr ""
+"<a href=\"%(confirmation_paper_link_back)s\">%(reference)s</a> - "
+"%(student_first_name)s %(student_last_name)s a soumis une date pour son "
+"épreuve de confirmation pour %(doctorate_title)s"
 
 #, python-format
 msgid ""
@@ -286,6 +221,16 @@ msgstr "Date de soumission Admission"
 
 msgid "Admission type"
 msgstr "Type de l'admission"
+
+#, python-format
+msgid ""
+"After considering the opinion of your supervisory panel, which met on "
+"%(confirmation_date)s, the %(cdd_title)s notes that your doctoral "
+"confirmation paper has been successfully completed."
+msgstr ""
+"Après examen de l’avis de votre comité d’accompagnement réuni le "
+"%(confirmation_date)s, la %(cdd_title)s constate la réussite de votre "
+"épreuve de confirmation au doctorat."
 
 msgctxt "filters"
 msgid "All"
@@ -702,9 +647,6 @@ msgstr "Date de l'exposé"
 msgid "Date of the activity"
 msgstr "Date de l'activité"
 
-msgid "Date of the confirmation paper"
-msgstr "Date de l'épreuve de confirmation"
-
 msgid "Date of the confirmation paper (DD/MM/YYYY)"
 msgstr "Date de l'épreuve de confirmation (JJ/MM/AAAA)"
 
@@ -719,6 +661,9 @@ msgstr "Date limite pour la confirmation"
 
 msgid "Deadline for confirmation:"
 msgstr "Date limite pour la confirmation :"
+
+msgid "Deadline of the confirmation paper (DD/MM/YYYY)"
+msgstr "Date limite pour la confirmation (JJ/MM/AAAA)"
 
 msgid "Dedicated time (in EFT)"
 msgstr "Temps consacré (en EFT)"
@@ -756,9 +701,6 @@ msgstr "Souhaitez-vous passer la demande dans l'état \"%(status)s\" ?"
 
 msgid "Doctoral project"
 msgstr "Projet doctoral"
-
-msgid "Doctoral student"
-msgstr "Doctorand"
 
 msgid "Doctoral student:"
 msgstr "Doctorant :"
@@ -922,6 +864,26 @@ msgstr "Type de financement"
 msgid "First name"
 msgstr "Prénom"
 
+msgctxt "female gender"
+msgid ""
+"Following the presentation of the state of the research and the subsequent "
+"discussion with the candidate, the supervisory panel assessed the progress "
+"of the work and announces:"
+msgstr ""
+"À la suite de la présentation de l'état de la recherche et de l'échange "
+"qui s'en est suivi avec la candidate, le comité d'accompagnement a évalué "
+"l'avancement du travail et conclut à :"
+
+msgctxt "male gender"
+msgid ""
+"Following the presentation of the state of the research and the subsequent "
+"discussion with the candidate, the supervisory panel assessed the progress "
+"of the work and announces:"
+msgstr ""
+"À la suite de la présentation de l'état de la recherche et de l'échange "
+"qui s'en est suivi avec le candidat, le comité d'accompagnement a évalué "
+"l'avancement du travail et conclut à :"
+
 msgid "Fondation Mont Godinne"
 msgstr "Fondation Mont Godinne"
 
@@ -994,9 +956,6 @@ msgstr "En attente de validation"
 msgid "Institute email"
 msgstr "Email de l'institut"
 
-msgid "Institute not specified"
-msgstr "Institut non spécifié"
-
 msgid "Institute of the thesis"
 msgstr "Institut de la thèse"
 
@@ -1062,11 +1021,14 @@ msgstr "Lien vers l'admission (back-office)"
 msgid "Link to the admission (front-office)"
 msgstr "Lien vers l'admission (front-office)"
 
+msgid "Link to the admission confirmation paper panel (back-office)"
+msgstr "Lien vers la page liée à l'épreuve de confirmation (back-office)"
+
+msgid "Link to the admission confirmation paper panel (front-office)"
+msgstr "Lien vers la page liée à l'épreuve de confirmation (front-office)"
+
 msgid "Link to the admission supervisory panel (front-office)"
 msgstr "Lien vers le groupe de supervision de l'admission (front-office)"
-
-msgid "Link to the certificate of achievement"
-msgstr "Lien vers l'attestation de réussite"
 
 msgid "MANAGEMENT"
 msgstr "Gestion"
@@ -1078,17 +1040,11 @@ msgid "Madam"
 msgstr "Madame"
 
 msgid ""
-"Mail sent to ADRE to confirm the first submission of the confirmation paper"
+"Mail sent to ADRE on first submission of the confirmation paper by the "
+"doctoral student"
 msgstr ""
-"E-Mail envoyé à ADRE pour confirmer la première soumission du formulaire "
-"d'une épreuve de confirmation"
-
-msgid ""
-"Mail sent to ADRE to confirm the first submission of the confirmation paper "
-"by a promoter"
-msgstr ""
-"E-Mail envoyé à ADRE pour confirmer la première soumission du formulaire "
-"d'une épreuve de confirmation par un promoteur"
+"E-Mail envoyé à ADRE lors de la première soumission du formulaire d'une "
+"épreuve de confirmation par le doctorand"
 
 msgid ""
 "Mail sent to ADRE to inform him of the defavourable opinion on one "
@@ -1168,6 +1124,34 @@ msgstr ""
 "demande par l'UCLouvain"
 
 msgid ""
+"Mail sent to the doctoral student to give him some information about the "
+"confirmation paper"
+msgstr ""
+"E-Mail envoyé au doctorand pour lui communiquer quelques informations "
+"relatives à l'épreuve de confirmation"
+
+msgid ""
+"Mail sent to the doctoral student to inform him of the defavourable opinion "
+"on the confirmation paper"
+msgstr ""
+"E-Mail envoyé au doctorand pour l'informer de l'issue défavorable de son "
+"épreuve de confirmation"
+
+msgid ""
+"Mail sent to the doctoral student to inform him of the favourable opinion on "
+"the confirmation paper"
+msgstr ""
+"E-Mail envoyé au doctorand pour l'informer de l'issue favorable de son "
+"épreuve de confirmation"
+
+msgid ""
+"Mail sent to the doctoral student to inform him of the necessity to retake "
+"the confirmation paper"
+msgstr ""
+"E-Mail envoyé au doctorand pour l'informer de la nécessité de repasser son "
+"épreuve de confirmation"
+
+msgid ""
 "Mail sent to the member of the supervision panel when deleted by the "
 "candidate"
 msgstr ""
@@ -1180,34 +1164,6 @@ msgid ""
 msgstr ""
 "E-mail envoyé aux membres du groupe de supervision pour les informer que la "
 "demande a été soumise à l'UCLouvain par le candidat"
-
-msgid ""
-"Mail sent to the student to inform him of the defavourable opinion on its "
-"confirmation paper"
-msgstr ""
-"E-Mail envoyé à l'étudiant pour l'informer de l'issue défavorable de son "
-"épreuve de confirmation"
-
-msgid ""
-"Mail sent to the student to inform him of the favourable opinion on its "
-"confirmation paper"
-msgstr ""
-"E-Mail envoyé à l'étudiant pour l'informer de l'issue favorable de son "
-"épreuve de confirmation"
-
-msgid ""
-"Mail sent to the student to inform him of the necessity to retake its "
-"confirmation paper"
-msgstr ""
-"E-Mail envoyé à l'étudiant pour l'informer de la nécessité de repasser son "
-"épreuve de confirmation"
-
-msgid ""
-"Mail sent to the student to inform him of the opinion of the cdd manager "
-"about the extension request of its confirmation paper"
-msgstr ""
-"E-Mail envoyé à l'étudiant pour l'informer de l'avis du gestionnaire CDD "
-"concernant sa demande de prolongation de son épreuve de confirmation"
 
 msgid "Management of the doctorate enrolments"
 msgstr "Gestion des inscriptions en doctorats"
@@ -1329,7 +1285,7 @@ msgid "No doctorate found."
 msgstr "Doctorat non trouvé."
 
 msgid "Not specified"
-msgstr "Non spécifié(e)"
+msgstr "Non renseigné(e)"
 
 msgid "Number of days participating"
 msgstr "Nombre de jours de participation"
@@ -1522,13 +1478,13 @@ msgstr "Date de soumission Pré-admission"
 
 #, python-format
 msgctxt "female gender"
-msgid "President of the %(cdd)s"
-msgstr "Présidente de la %(cdd)s"
+msgid "President of the %(cdd_title)s"
+msgstr "Présidente de la %(cdd_title)s"
 
 #, python-format
 msgctxt "male gender"
-msgid "President of the %(cdd)s"
-msgstr "Président de la %(cdd)s"
+msgid "President of the %(cdd_title)s"
+msgstr "Président de la %(cdd_title)s"
 
 msgid "Preview"
 msgstr "Prévisualiser"
@@ -1560,6 +1516,9 @@ msgstr "Promoteur non trouvé."
 
 msgid "Promoters"
 msgstr "Promoteurs"
+
+msgid "Promotion"
+msgstr "Promotion"
 
 msgid "Proof"
 msgstr "Preuve"
@@ -1779,6 +1738,9 @@ msgstr "Envoyer un e-mail"
 msgid "Send a mail to the candidate"
 msgstr "Envoyer un e-mail au candidat"
 
+msgid "Send an information email"
+msgstr "Envoyer un e-mail d'information"
+
 msgid "Send the message"
 msgstr "Envoyer le message"
 
@@ -1799,6 +1761,9 @@ msgstr "Signatures"
 
 msgid "Sir"
 msgstr "Monsieur"
+
+msgid "Some errors have been encountered."
+msgstr "Des erreurs ont été rencontrées."
 
 msgid "Speaker"
 msgstr "Orateur ou oratrice"
@@ -1868,6 +1833,22 @@ msgstr ""
 msgid "The acronym of the scholarship grant"
 msgstr "L'acronyme de la bourse d'études"
 
+msgid ""
+"The certificate of achievement of the confirmation paper in PDF format is "
+"being generated, please come back later to get it."
+msgstr ""
+"L’attestation de réussite de l’épreuve de confirmation est en cours de "
+"génération, veuillez revenir plus tard pour y accéder."
+
+#, python-format
+msgid ""
+"The committee also validates the activities carried out as part of your "
+"doctoral training, which now total %(nb_credits)s ECTS."
+msgstr ""
+"La commission valide également les activités réalisées dans le cadre de "
+"votre programme de formation doctorale et qui totalisent à ce jour "
+"%(nb_credits)s ECTS."
+
 msgctxt "female gender"
 msgid ""
 "The committee requests the candidate to <strong>retake</strong> the paper "
@@ -1903,6 +1884,11 @@ msgstr ""
 "La date de l'épreuve de confirmation ne peut être postérieure à sa date "
 "limite."
 
+msgid "The date of the confirmation paper cannot be later than the deadline."
+msgstr ""
+"La date de l'épreuve de confirmation ne peut être postérieure à sa date "
+"limite."
+
 msgid "The decision of the signing actor"
 msgstr "La décision du signataire"
 
@@ -1926,9 +1912,6 @@ msgstr "Les expériences qui ont été valorisées à partir de cette admission.
 msgid "The first name of the candidate"
 msgstr "Le prénom du candidat"
 
-msgid "The first name of the promoter"
-msgstr "Le prénom du promoteur"
-
 msgid "The first name of the recipient"
 msgstr "Le prénom du destinataire"
 
@@ -1941,9 +1924,6 @@ msgstr "Le prénom de l'étudiant"
 msgid "The last name of the candidate"
 msgstr "Le nom du candidat"
 
-msgid "The last name of the promoter"
-msgstr "Le nom du promoteur"
-
 msgid "The last name of the recipient"
 msgstr "Le nom du destinataire"
 
@@ -1953,14 +1933,16 @@ msgstr "Le nom du signataire"
 msgid "The last name of the student"
 msgstr "Le nom de l'étudiant"
 
+#, python-format
+msgid ""
+"The number of acquired <strong>doctoral</strong> credits amounts to "
+"%(credits_nb)s credits."
+msgstr ""
+"Le nombre de crédits acquis de <strong>formation doctorale</strong> "
+"s'élève à %(credits_nb)s crédits."
+
 msgid "The opinion about the extension request is not completed."
 msgstr "L'avis relatif à la demande d'une nouvelle échéance n'est pas complet."
-
-msgid "The opinion of the cdd manager about the extension request"
-msgstr "L'avis du gestionnaire CDD au sujet d'une demande de prolongation"
-
-msgid "The proposed date by the student (DD/MM/YYYY)"
-msgstr "La date proposée par l'étudiant (JJ/MM/AAAA)"
 
 msgid "The proposition has already been confirmed or is cancelled"
 msgstr "La proposition a déjà été confirmée ou est annulée"
@@ -2101,6 +2083,13 @@ msgstr "WBI - Wallonie Bruxelles International"
 msgid "WORK_CONTRACT"
 msgstr "Contrat de travail"
 
+msgid ""
+"We congratulate you on your successful completion of the paper and wish you "
+"every success in your doctoral training."
+msgstr ""
+"Nous vous félicitons pour la réussite de votre épreuve et vous souhaitons un "
+"franc succès dans la poursuite de votre parcours doctoral."
+
 msgid "Website"
 msgstr "Site web"
 
@@ -2172,6 +2161,9 @@ msgstr ""
 msgid "You've reached the maximum authorized propositions."
 msgstr "Vous avez atteint le maximum de propositions."
 
+msgid "Your data has been saved"
+msgstr "Vos données ont été sauvegardées"
+
 msgid "Zip code"
 msgstr "Code postal"
 
@@ -2202,3 +2194,6 @@ msgstr "la <strong>non-poursuite</strong> du doctorat."
 
 msgid "the <strong>successful completion</strong> of the confirmation paper."
 msgstr "la <strong>réussite</strong> de l'épreuve de confirmation."
+
+msgid "ucl"
+msgstr "UCLouvain"

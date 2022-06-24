@@ -27,7 +27,6 @@
 
 {% block tab_content_header %}
   <h3>{{ page_title }}</h3>
-  <p><em>{% lorem 1 %}</em></p>
   <form method="get">
     {% csrf_token %}
     {% bootstrap_form select_template_form %}

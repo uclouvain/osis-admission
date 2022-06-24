@@ -117,6 +117,7 @@ class DoctorateAPIViewTestCase(APITestCase):
             'update_confirmation',
             'retrieve_training',
             'add_training',
+            'update_confirmation_extension',
         ]
         self.assertCountEqual(
             json_response['links'],

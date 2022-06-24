@@ -27,7 +27,6 @@
 
 {% block tab_content_header %}
   <h3>{% trans "Confirmation paper" %}</h3>
-  <p><em>{% lorem 1 %}</em></p>
 {% endblock %}
 
 {% block form_content %}
@@ -36,7 +35,7 @@
   {% bootstrap_field form.date form_group_class="form-group min_field" %}
   {% bootstrap_field form.rapport_recherche %}
   <p>
-    <a href="{% url 'admission:doctorate:confirmation-canvas' view.kwargs.pk %}" target="_blank">
+    <a href="{% url 'admission:doctorate:confirmation-canvas' view.kwargs.uuid %}" target="_blank">
       {% trans "Canvas of the supervisory panel report to download" %}
     </a>
   </p>

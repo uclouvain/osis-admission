@@ -41,7 +41,7 @@ class DoctorateAdmissionExtensionRequestFormView(
     FormView,
 ):
     template_name = 'admission/doctorate/forms/extension_request.html'
-    permission_required = 'admission.change_doctorateadmission_confirmation'
+    permission_required = 'admission.change_doctorateadmission_confirmation_extension'
     form_class = ExtensionRequestForm
 
     def get_initial(self):
@@ -62,4 +62,4 @@ class DoctorateAdmissionExtensionRequestFormView(
         )
 
     def get_success_url(self):
-        return reverse('admission:doctorate:extension-request', args=[self.kwargs.get('pk')])
+        return reverse('admission:doctorate:extension-request', args=[self.admission_uuid])

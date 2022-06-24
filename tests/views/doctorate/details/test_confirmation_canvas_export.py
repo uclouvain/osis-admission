@@ -30,10 +30,9 @@ from unittest.mock import patch
 
 from django.test import TestCase, override_settings
 from django.urls import reverse
-from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_403_FORBIDDEN, HTTP_302_FOUND
+from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_403_FORBIDDEN, HTTP_302_FOUND, HTTP_200_OK
 
 from admission.contrib.models import ConfirmationPaper
-from admission.ddd.projet_doctoral.doctorat.domain.model.enums import ChoixStatutDoctorat
 from admission.ddd.projet_doctoral.preparation.domain.model._enums import ChoixTypeAdmission
 from admission.ddd.projet_doctoral.preparation.domain.model._financement import (
     ChoixTypeFinancement,
@@ -74,7 +73,7 @@ class DoctorateAdmissionConfirmationCanvasExportViewTestCase(TestCase):
             financing_work_contract=ChoixTypeContratTravail.UCLOUVAIN_ASSISTANT.name,
             type=ChoixTypeAdmission.PRE_ADMISSION.name,
             pre_admission_submission_date=datetime.datetime.now(),
-            post_enrolment_status=ChoixStatutDoctorat.ADMITTED.name,
+            admitted=True,
         )
         cls.admission_with_confirmation_paper = DoctorateAdmissionFactory(
             doctorate__management_entity=first_doctoral_commission,
@@ -85,7 +84,7 @@ class DoctorateAdmissionConfirmationCanvasExportViewTestCase(TestCase):
             financing_work_contract=ChoixTypeContratTravail.UCLOUVAIN_ASSISTANT.name,
             type=ChoixTypeAdmission.PRE_ADMISSION.name,
             pre_admission_submission_date=datetime.datetime.now(),
-            post_enrolment_status=ChoixStatutDoctorat.ADMITTED.name,
+            admitted=True,
         )
         cls.confirmation_paper = ConfirmationPaperFactory(
             admission=cls.admission_with_confirmation_paper,
@@ -129,7 +128,7 @@ class DoctorateAdmissionConfirmationCanvasExportViewTestCase(TestCase):
     def test_confirmation_canvas_export_candidate_user_is_forbidden(self):
         self.client.force_login(user=self.candidate.user)
 
-        url = reverse(self.path_name, args=[self.admission_without_confirmation_paper.uuid])
+        url = reverse(self.path_name, args=[self.admission_with_confirmation_paper.uuid])
 
         response = self.client.get(url)
 

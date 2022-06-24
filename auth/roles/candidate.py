@@ -84,6 +84,8 @@ class Candidate(RoleModel):
             # Once the confirmation paper is in progress, he can
             'admission.change_doctorateadmission_confirmation': is_admission_request_author
             & confirmation_paper_in_progress,
+            'admission.change_doctorateadmission_confirmation_extension': is_admission_request_author
+            & confirmation_paper_in_progress,
             # Future
             'admission.download_pdf_confirmation': is_admission_request_author,
             'admission.upload_pdf_confirmation': is_admission_request_author,

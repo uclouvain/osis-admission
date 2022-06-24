@@ -26,6 +26,13 @@
 {% if not hide_empty or data %}
 <dl{% if css_class %} class="{{ css_class}}"{% endif %}>
   <dt>{{ name }}</dt>
-  <dd>{{ data|default:_('Not specified')}}</dd>
+  {% with data|default:_('Not specified') as data_to_display %}
+  <dd>
+    {% if html_tag and data %}<{{ html_tag }}>{{ data_to_display }}</{{ html_tag }}>
+    {% else %}
+    {{ data_to_display }}
+    {% endif %}
+  </dd>
+  {% endwith %}
 </dl>
 {% endif %}

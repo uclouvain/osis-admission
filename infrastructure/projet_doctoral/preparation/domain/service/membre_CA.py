@@ -25,7 +25,7 @@
 # ##############################################################################
 from typing import List
 
-from django.utils.translation import get_language
+from django.utils.translation import get_language, gettext_lazy as _
 
 from admission.auth.roles.ca_member import CommitteeMember
 from admission.ddd.projet_doctoral.preparation.domain.model._membre_CA import MembreCAIdentity
@@ -44,14 +44,16 @@ class MembreCATranslator(IMembreCATranslator):
 
     @classmethod
     def get_dto(cls, matricule: str) -> MembreCADTO:
-        member_role = CommitteeMember.objects.select_related('person', 'country').get(person__global_id=matricule)
+        member_role = CommitteeMember.objects.select_related('person__tutor', 'country').get(
+            person__global_id=matricule
+        )
         return MembreCADTO(
             matricule=matricule,
             nom=member_role.person.last_name,
             prenom=member_role.person.first_name,
             email=member_role.person.email,
-            titre=member_role.title,
-            institution=member_role.institute,
+            titre=_('Prof.') if hasattr(member_role.person, 'tutor') else member_role.title,
+            institution=_('ucl') if not member_role.is_external else member_role.institute,
             ville=member_role.city,
             pays=(
                 member_role.country_id

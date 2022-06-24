@@ -24,44 +24,11 @@
 #
 # ##############################################################################
 
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import Http404
 from django.views.generic import TemplateView
 
-from admission.ddd.projet_doctoral.doctorat.commands import RecupererDoctoratQuery
-from admission.ddd.projet_doctoral.doctorat.domain.validator.exceptions import DoctoratNonTrouveException
-from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.commands import (
-    RecupererDerniereEpreuveConfirmationQuery,
-)
-from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.validators.exceptions import (
-    EpreuveConfirmationNonTrouveeException,
-)
-from admission.utils import get_cached_admission_perm_obj
-from infrastructure.messages_bus import message_bus_instance
-from osis_role.contrib.views import PermissionRequiredMixin
+from admission.views.doctorate.forms.confirmation import DoctorateAdmissionLastConfirmationMixin
 
 
-class DoctorateAdmissionExtensionRequestDetailView(LoginRequiredMixin, PermissionRequiredMixin, TemplateView):
+class DoctorateAdmissionExtensionRequestDetailView(DoctorateAdmissionLastConfirmationMixin, TemplateView):
     template_name = 'admission/doctorate/details/extension_request.html'
     permission_required = 'admission.view_doctorateadmission_confirmation'
-
-    def get_permission_object(self):
-        return get_cached_admission_perm_obj(self.kwargs['pk'])
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-
-        try:
-            results = message_bus_instance.invoke_multiple(
-                [
-                    RecupererDoctoratQuery(doctorat_uuid=kwargs.get('pk')),
-                    RecupererDerniereEpreuveConfirmationQuery(doctorat_uuid=kwargs.get('pk')),
-                ]
-            )
-        except (DoctoratNonTrouveException, EpreuveConfirmationNonTrouveeException) as e:
-            raise Http404(e.message)
-
-        context['doctorate'] = results[0]
-        context['confirmation_paper'] = results[1]
-
-        return context

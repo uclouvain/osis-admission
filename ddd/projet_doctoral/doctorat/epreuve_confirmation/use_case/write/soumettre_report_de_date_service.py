@@ -30,6 +30,7 @@ from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.builder.epreuve
 from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.commands import (
     SoumettreReportDeDateCommand,
 )
+from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.domain.service.i_notification import INotification
 from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.repository.i_epreuve_confirmation import (
     IEpreuveConfirmationRepository,
 )
@@ -38,6 +39,7 @@ from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.repository.i_ep
 def soumettre_report_de_date(
     cmd: 'SoumettreReportDeDateCommand',
     epreuve_confirmation_repository: 'IEpreuveConfirmationRepository',
+    notification: 'INotification',
 ) -> DoctoratIdentity:
     # GIVEN
     epreuve_confirmation_id = EpreuveConfirmationIdentityBuilder.build_from_uuid(cmd.uuid)
@@ -56,7 +58,7 @@ def soumettre_report_de_date(
     )
 
     # THEN
-    # TODO Send notifications
     epreuve_confirmation_repository.save(epreuve_confirmation)
+    notification.notifier_nouvelle_echeance(epreuve_confirmation=epreuve_confirmation)
 
     return epreuve_confirmation.doctorat_id

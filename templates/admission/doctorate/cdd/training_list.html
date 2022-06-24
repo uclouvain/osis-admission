@@ -35,7 +35,7 @@
     <ul class="dropdown-menu dropdown-menu-right">
       {% for category_name, category_label in categories %}
         <li>
-          <a href="{% url "admission:doctorate:training:add" pk=view.kwargs.pk category=category_name|lower %}">
+          <a href="{% url "admission:doctorate:training:add" uuid=view.kwargs.uuid category=category_name|lower %}">
             {{ category_label }}
           </a>
         </li>

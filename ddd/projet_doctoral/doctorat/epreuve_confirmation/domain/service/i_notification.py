@@ -35,6 +35,16 @@ from osis_common.ddd import interface
 class INotification(interface.DomainService):
     @classmethod
     @abstractmethod
+    def notifier_soumission(cls, epreuve_confirmation: EpreuveConfirmation) -> None:
+        raise NotImplementedError
+
+    @classmethod
+    @abstractmethod
+    def notifier_nouvelle_echeance(cls, epreuve_confirmation: EpreuveConfirmation) -> None:
+        raise NotImplementedError
+
+    @classmethod
+    @abstractmethod
     def notifier_echec_epreuve(
         cls,
         epreuve_confirmation: EpreuveConfirmation,

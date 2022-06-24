@@ -45,7 +45,6 @@ from admission.ddd.projet_doctoral.preparation.domain.model._financement import 
 )
 from admission.ddd.projet_doctoral.preparation.domain.model.doctorat import ENTITY_CDE, ENTITY_CDSS
 from admission.mail_templates import (
-    ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_FAILURE_STUDENT,
     ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_RETAKING_STUDENT,
 )
 from admission.tests.factories import DoctorateAdmissionFactory
@@ -85,11 +84,11 @@ class CddDoctorateAdmissionConfirmationSuccessDecisionViewTestCase(TestCase):
 
         cls.get_mandates_service_patcher = patch('reference.services.mandates.MandatesService.get')
         patched = cls.get_mandates_service_patcher.start()
-        patched.return_value = {
+        patched.return_value = [{
             'first_name': 'Jane',
             'last_name': 'Doe',
             'function': 'Présidente',
-        }
+        }]
 
         # Create some academic years
         academic_years = [AcademicYearFactory(year=year) for year in [2021, 2022]]
@@ -114,7 +113,8 @@ class CddDoctorateAdmissionConfirmationSuccessDecisionViewTestCase(TestCase):
             financing_work_contract=ChoixTypeContratTravail.UCLOUVAIN_ASSISTANT.name,
             type=ChoixTypeAdmission.PRE_ADMISSION.name,
             pre_admission_submission_date=datetime.datetime.now(),
-            post_enrolment_status=ChoixStatutDoctorat.ADMITTED.name,
+            admitted=True,
+            post_enrolment_status=ChoixStatutDoctorat.SUBMITTED_CONFIRMATION.name,
         )
         cls.admission_with_confirmation_papers = DoctorateAdmissionFactory(
             doctorate__management_entity=first_doctoral_commission,
@@ -125,7 +125,8 @@ class CddDoctorateAdmissionConfirmationSuccessDecisionViewTestCase(TestCase):
             financing_work_contract=ChoixTypeContratTravail.UCLOUVAIN_ASSISTANT.name,
             type=ChoixTypeAdmission.PRE_ADMISSION.name,
             pre_admission_submission_date=datetime.datetime.now(),
-            post_enrolment_status=ChoixStatutDoctorat.ADMITTED.name,
+            admitted=True,
+            post_enrolment_status=ChoixStatutDoctorat.SUBMITTED_CONFIRMATION.name,
         )
         cls.admission_with_incomplete_confirmation_paper = DoctorateAdmissionFactory(
             doctorate__management_entity=first_doctoral_commission,
@@ -136,7 +137,8 @@ class CddDoctorateAdmissionConfirmationSuccessDecisionViewTestCase(TestCase):
             financing_work_contract=ChoixTypeContratTravail.UCLOUVAIN_ASSISTANT.name,
             type=ChoixTypeAdmission.PRE_ADMISSION.name,
             pre_admission_submission_date=datetime.datetime.now(),
-            post_enrolment_status=ChoixStatutDoctorat.ADMITTED.name,
+            admitted=True,
+            post_enrolment_status=ChoixStatutDoctorat.SUBMITTED_CONFIRMATION.name,
         )
         cls.confirmation_papers = [
             ConfirmationPaperFactory(
@@ -218,6 +220,10 @@ class CddDoctorateAdmissionConfirmationSuccessDecisionViewTestCase(TestCase):
         c = ConfirmationPaper.objects.filter(admission=doctorate).first()
         self.assertEqual(c.certificate_of_achievement, [uuid.UUID('4bdffb42-552d-415d-9e4c-725f10dce228')])
 
+        # Check the notifications
+        self.assertEqual(EmailNotification.objects.count(), 1)
+        self.assertEqual(EmailNotification.objects.first().person, self.admission_with_confirmation_papers.candidate)
+
     def test_confirmation_success_decision_cdd_user_with_incomplete_confirmation_paper(self):
         self.client.force_login(user=self.cdd_person.user)
 
@@ -236,7 +242,7 @@ class CddDoctorateAdmissionConfirmationSuccessDecisionViewTestCase(TestCase):
         doctorate: DoctorateAdmission = DoctorateAdmission.objects.get(
             uuid=self.admission_with_incomplete_confirmation_paper.uuid
         )
-        self.assertEqual(doctorate.post_enrolment_status, ChoixStatutDoctorat.ADMITTED.name)
+        self.assertEqual(doctorate.post_enrolment_status, ChoixStatutDoctorat.SUBMITTED_CONFIRMATION.name)
 
 
 @override_settings(OSIS_DOCUMENT_BASE_URL='http://dummyurl')
@@ -260,81 +266,85 @@ class CddDoctorateAdmissionConfirmationFailureDecisionViewTestCase(TestCase):
         patched.return_value = 'foobar'
 
         # Create some academic years
-        academic_years = [AcademicYearFactory(year=year) for year in [2021, 2022]]
+        cls.academic_years = [AcademicYearFactory(year=year) for year in [2021, 2022]]
 
         # First entity
-        first_doctoral_commission = EntityFactory()
-        EntityVersionFactory(entity=first_doctoral_commission, acronym=ENTITY_CDE)
+        cls.first_doctoral_commission = EntityFactory()
+        EntityVersionFactory(entity=cls.first_doctoral_commission, acronym=ENTITY_CDE)
 
-        second_doctoral_commission = EntityFactory()
-        EntityVersionFactory(entity=second_doctoral_commission, acronym=ENTITY_CDSS)
+        cls.second_doctoral_commission = EntityFactory()
+        EntityVersionFactory(entity=cls.second_doctoral_commission, acronym=ENTITY_CDSS)
 
         promoter = PromoterFactory()
-        cls.promoter = promoter.person
+        cls.promoter = promoter
 
+        # User with one cdd
+        cls.cdd_person = CddManagerFactory(entity=cls.first_doctoral_commission).person
+
+        # Targeted path
+        cls.path = 'admission:doctorate:confirmation:failure'
+
+    def setUp(self):
         # Create admissions
-        cls.admission_without_confirmation_paper = DoctorateAdmissionFactory(
-            doctorate__management_entity=first_doctoral_commission,
-            doctorate__academic_year=academic_years[0],
+        self.admission_without_confirmation_paper = DoctorateAdmissionFactory(
+            doctorate__management_entity=self.first_doctoral_commission,
+            doctorate__academic_year=self.academic_years[0],
             cotutelle=False,
-            supervision_group=promoter.process,
+            supervision_group=self.promoter.process,
             financing_type=ChoixTypeFinancement.WORK_CONTRACT.name,
             financing_work_contract=ChoixTypeContratTravail.UCLOUVAIN_ASSISTANT.name,
             type=ChoixTypeAdmission.PRE_ADMISSION.name,
             pre_admission_submission_date=datetime.datetime.now(),
-            post_enrolment_status=ChoixStatutDoctorat.ADMITTED.name,
+            admitted=True,
+            post_enrolment_status=ChoixStatutDoctorat.SUBMITTED_CONFIRMATION.name,
         )
-        cls.admission_with_confirmation_papers = DoctorateAdmissionFactory(
-            doctorate__management_entity=first_doctoral_commission,
-            doctorate__academic_year=academic_years[0],
+        self.admission_with_confirmation_papers = DoctorateAdmissionFactory(
+            doctorate__management_entity=self.first_doctoral_commission,
+            doctorate__academic_year=self.academic_years[0],
             cotutelle=False,
-            supervision_group=promoter.process,
+            supervision_group=self.promoter.process,
             financing_type=ChoixTypeFinancement.WORK_CONTRACT.name,
             financing_work_contract=ChoixTypeContratTravail.UCLOUVAIN_ASSISTANT.name,
             type=ChoixTypeAdmission.PRE_ADMISSION.name,
             pre_admission_submission_date=datetime.datetime.now(),
-            post_enrolment_status=ChoixStatutDoctorat.ADMITTED.name,
+            admitted=True,
+            post_enrolment_status=ChoixStatutDoctorat.SUBMITTED_CONFIRMATION.name,
         )
-        cls.admission_with_incomplete_confirmation_paper = DoctorateAdmissionFactory(
-            doctorate__management_entity=first_doctoral_commission,
-            doctorate__academic_year=academic_years[0],
+        self.admission_with_incomplete_confirmation_paper = DoctorateAdmissionFactory(
+            doctorate__management_entity=self.first_doctoral_commission,
+            doctorate__academic_year=self.academic_years[0],
             cotutelle=False,
-            supervision_group=promoter.process,
+            supervision_group=self.promoter.process,
             financing_type=ChoixTypeFinancement.WORK_CONTRACT.name,
             financing_work_contract=ChoixTypeContratTravail.UCLOUVAIN_ASSISTANT.name,
             type=ChoixTypeAdmission.PRE_ADMISSION.name,
             pre_admission_submission_date=datetime.datetime.now(),
-            post_enrolment_status=ChoixStatutDoctorat.ADMITTED.name,
+            admitted=True,
+            post_enrolment_status=ChoixStatutDoctorat.SUBMITTED_CONFIRMATION.name,
         )
-        cls.confirmation_papers = [
+        self.confirmation_papers = [
             ConfirmationPaperFactory(
-                admission=cls.admission_with_confirmation_papers,
+                admission=self.admission_with_confirmation_papers,
                 confirmation_date=datetime.date(2022, 4, 1),
                 confirmation_deadline=datetime.date(2022, 4, 5),
                 supervisor_panel_report=['f2'],
             ),
             ConfirmationPaperFactory(
-                admission=cls.admission_with_incomplete_confirmation_paper,
+                admission=self.admission_with_incomplete_confirmation_paper,
                 confirmation_deadline=datetime.date(2022, 4, 5),
-                supervisor_panel_report=['f2'],
+                confirmation_date=datetime.date(2022, 4, 5),
             ),
         ]
-        cls.custom_cdd_mail_template = CddMailTemplateFactory(
-            identifier=ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_FAILURE_STUDENT,
-            language=cls.admission_with_confirmation_papers.candidate.language,
-            cdd=cls.admission_with_confirmation_papers.doctorate.management_entity,
+        self.custom_cdd_mail_template = CddMailTemplateFactory(
+            identifier=ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_RETAKING_STUDENT,
+            language=self.admission_with_confirmation_papers.candidate.language,
+            cdd=self.admission_with_confirmation_papers.doctorate.management_entity,
             name='My custom mail',
             subject='The email subject',
             body='The email body',
         )
 
-        cls.candidate = cls.admission_without_confirmation_paper.candidate
-
-        # User with one cdd
-        cls.cdd_person = CddManagerFactory(entity=first_doctoral_commission).person
-
-        # Targeted path
-        cls.path = 'admission:doctorate:confirmation:failure'
+        self.candidate = self.admission_without_confirmation_paper.candidate
 
     @classmethod
     def tearDownClass(cls):
@@ -483,7 +493,7 @@ class CddDoctorateAdmissionConfirmationFailureDecisionViewTestCase(TestCase):
         doctorate: DoctorateAdmission = DoctorateAdmission.objects.get(
             uuid=self.admission_with_incomplete_confirmation_paper.uuid
         )
-        self.assertEqual(doctorate.post_enrolment_status, ChoixStatutDoctorat.ADMITTED.name)
+        self.assertEqual(doctorate.post_enrolment_status, ChoixStatutDoctorat.SUBMITTED_CONFIRMATION.name)
 
     def test_post_confirmation_failure_decision_cdd_user_with_incomplete_form(self):
         self.client.force_login(user=self.cdd_person.user)
@@ -522,81 +532,85 @@ class CddDoctorateAdmissionConfirmationRetakingDecisionViewTestCase(TestCase):
         patched.return_value = 'foobar'
 
         # Create some academic years
-        academic_years = [AcademicYearFactory(year=year) for year in [2021, 2022]]
+        cls.academic_years = [AcademicYearFactory(year=year) for year in [2021, 2022]]
 
         # First entity
-        first_doctoral_commission = EntityFactory()
-        EntityVersionFactory(entity=first_doctoral_commission, acronym=ENTITY_CDE)
+        cls.first_doctoral_commission = EntityFactory()
+        EntityVersionFactory(entity=cls.first_doctoral_commission, acronym=ENTITY_CDE)
 
-        second_doctoral_commission = EntityFactory()
-        EntityVersionFactory(entity=second_doctoral_commission, acronym=ENTITY_CDSS)
+        cls.second_doctoral_commission = EntityFactory()
+        EntityVersionFactory(entity=cls.second_doctoral_commission, acronym=ENTITY_CDSS)
 
         promoter = PromoterFactory()
-        cls.promoter = promoter.person
+        cls.promoter = promoter
 
+        # User with one cdd
+        cls.cdd_person = CddManagerFactory(entity=cls.first_doctoral_commission).person
+
+        # Targeted path
+        cls.path = 'admission:doctorate:confirmation:retaking'
+
+    def setUp(self):
         # Create admissions
-        cls.admission_without_confirmation_paper = DoctorateAdmissionFactory(
-            doctorate__management_entity=first_doctoral_commission,
-            doctorate__academic_year=academic_years[0],
+        self.admission_without_confirmation_paper = DoctorateAdmissionFactory(
+            doctorate__management_entity=self.first_doctoral_commission,
+            doctorate__academic_year=self.academic_years[0],
             cotutelle=False,
-            supervision_group=promoter.process,
+            supervision_group=self.promoter.process,
             financing_type=ChoixTypeFinancement.WORK_CONTRACT.name,
             financing_work_contract=ChoixTypeContratTravail.UCLOUVAIN_ASSISTANT.name,
             type=ChoixTypeAdmission.PRE_ADMISSION.name,
             pre_admission_submission_date=datetime.datetime.now(),
-            post_enrolment_status=ChoixStatutDoctorat.ADMITTED.name,
+            admitted=True,
+            post_enrolment_status=ChoixStatutDoctorat.SUBMITTED_CONFIRMATION.name,
         )
-        cls.admission_with_confirmation_papers = DoctorateAdmissionFactory(
-            doctorate__management_entity=first_doctoral_commission,
-            doctorate__academic_year=academic_years[0],
+        self.admission_with_confirmation_papers = DoctorateAdmissionFactory(
+            doctorate__management_entity=self.first_doctoral_commission,
+            doctorate__academic_year=self.academic_years[0],
             cotutelle=False,
-            supervision_group=promoter.process,
+            supervision_group=self.promoter.process,
             financing_type=ChoixTypeFinancement.WORK_CONTRACT.name,
             financing_work_contract=ChoixTypeContratTravail.UCLOUVAIN_ASSISTANT.name,
             type=ChoixTypeAdmission.PRE_ADMISSION.name,
             pre_admission_submission_date=datetime.datetime.now(),
-            post_enrolment_status=ChoixStatutDoctorat.ADMITTED.name,
+            admitted=True,
+            post_enrolment_status=ChoixStatutDoctorat.SUBMITTED_CONFIRMATION.name,
         )
-        cls.admission_with_incomplete_confirmation_paper = DoctorateAdmissionFactory(
-            doctorate__management_entity=first_doctoral_commission,
-            doctorate__academic_year=academic_years[0],
+        self.admission_with_incomplete_confirmation_paper = DoctorateAdmissionFactory(
+            doctorate__management_entity=self.first_doctoral_commission,
+            doctorate__academic_year=self.academic_years[0],
             cotutelle=False,
-            supervision_group=promoter.process,
+            supervision_group=self.promoter.process,
             financing_type=ChoixTypeFinancement.WORK_CONTRACT.name,
             financing_work_contract=ChoixTypeContratTravail.UCLOUVAIN_ASSISTANT.name,
             type=ChoixTypeAdmission.PRE_ADMISSION.name,
             pre_admission_submission_date=datetime.datetime.now(),
-            post_enrolment_status=ChoixStatutDoctorat.ADMITTED.name,
+            admitted=True,
+            post_enrolment_status=ChoixStatutDoctorat.SUBMITTED_CONFIRMATION.name,
         )
-        cls.confirmation_papers = [
+        self.confirmation_papers = [
             ConfirmationPaperFactory(
-                admission=cls.admission_with_confirmation_papers,
+                admission=self.admission_with_confirmation_papers,
                 confirmation_date=datetime.date(2022, 4, 1),
                 confirmation_deadline=datetime.date(2022, 4, 5),
                 supervisor_panel_report=['f2'],
             ),
             ConfirmationPaperFactory(
-                admission=cls.admission_with_incomplete_confirmation_paper,
+                admission=self.admission_with_incomplete_confirmation_paper,
                 confirmation_deadline=datetime.date(2022, 4, 5),
                 confirmation_date=datetime.date(2022, 4, 5),
             ),
         ]
-        cls.custom_cdd_mail_template = CddMailTemplateFactory(
+        self.custom_cdd_mail_template = CddMailTemplateFactory(
             identifier=ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_RETAKING_STUDENT,
-            language=cls.admission_with_confirmation_papers.candidate.language,
-            cdd=cls.admission_with_confirmation_papers.doctorate.management_entity,
+            language=self.admission_with_confirmation_papers.candidate.language,
+            cdd=self.admission_with_confirmation_papers.doctorate.management_entity,
             name='My custom mail',
             subject='The email subject',
             body='The email body',
         )
 
-        cls.candidate = cls.admission_without_confirmation_paper.candidate
-
-        # User with one cdd
-        cls.cdd_person = CddManagerFactory(entity=first_doctoral_commission).person
-
-        # Targeted path
-        cls.path = 'admission:doctorate:confirmation:retaking'
+        self.candidate = self.admission_without_confirmation_paper.candidate
 
     @classmethod
     def tearDownClass(cls):
@@ -755,7 +769,7 @@ class CddDoctorateAdmissionConfirmationRetakingDecisionViewTestCase(TestCase):
             uuid=self.admission_with_incomplete_confirmation_paper.uuid
         )
 
-        self.assertEqual(doctorate.post_enrolment_status, ChoixStatutDoctorat.ADMITTED.name)
+        self.assertEqual(doctorate.post_enrolment_status, ChoixStatutDoctorat.SUBMITTED_CONFIRMATION.name)
 
         confirmation_papers = message_bus_instance.invoke(
             RecupererEpreuvesConfirmationQuery(doctorat_uuid=doctorate.uuid)

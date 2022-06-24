@@ -37,7 +37,11 @@ class DoctorateAdmissionConfirmationCanvasExportView(DoctorateAdmissionLastConfi
     def get_context_data(self, **kwargs):
         context_data = super().get_context_data()
         context_data['supervision_group'] = message_bus_instance.invoke(
-            GetGroupeDeSupervisionCommand(uuid_proposition=self.kwargs.get('pk')),
+            GetGroupeDeSupervisionCommand(uuid_proposition=self.admission_uuid),
+        )
+        context_data['supervision_people_nb'] = (
+            len(context_data['supervision_group'].signatures_promoteurs) +
+            len(context_data['supervision_group'].signatures_membres_CA)
         )
         return context_data
 

@@ -49,7 +49,6 @@ def soumettre_avis_prolongation(
     epreuve_confirmation.soumettre_avis_prolongation(avis_cdd=cmd.avis_cdd)
 
     # THEN
-    # TODO Send notifications
     epreuve_confirmation_repository.save(epreuve_confirmation)
 
     return epreuve_confirmation.doctorat_id

@@ -24,34 +24,43 @@
 #
 # ##############################################################################
 import datetime
-from typing import Optional
+from typing import Optional, Union, Type
+from uuid import UUID
 
 from django.conf import settings
 from django.conf.global_settings import DATE_FORMAT
 from django.shortcuts import resolve_url
-from django.utils.functional import lazy
+from django.utils import translation
+from django.utils.functional import lazy, Promise
 from django.utils.translation import get_language, gettext as _
 from osis_async.models import AsyncTask
-from osis_mail_template.utils import transform_html_to_text
-from osis_notification.contrib.notification import EmailNotification
+from osis_mail_template.utils import transform_html_to_text, generate_email
+from osis_notification.contrib.notification import EmailNotification, WebNotification
 
-from admission.contrib.models import AdmissionTask
+from admission.auth.roles.cdd_manager import CddManager
+from admission.contrib.models import AdmissionTask, DoctorateAdmission
 from admission.contrib.models.doctorate import DoctorateProxy
 from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.domain.model.epreuve_confirmation import (
     EpreuveConfirmation,
 )
 from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.domain.service.i_notification import INotification
+from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.dtos import EpreuveConfirmationDTO
+from admission.ddd.projet_doctoral.preparation.domain.model._financement import ChoixTypeFinancement, BourseRecherche
+from admission.mail_templates import (
+    ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_SUCCESS_STUDENT,
+)
 from base.forms.utils.datefield import DATE_FORMAT
-from osis_notification.contrib.handlers import EmailNotificationHandler
+from osis_notification.contrib.handlers import EmailNotificationHandler, WebNotificationHandler
 
 
 class Notification(INotification):
+
     @classmethod
     def format_date(cls, date: Optional[datetime.date]) -> str:
         return datetime.date.strftime(date, DATE_FORMAT) if date else ''
 
     @classmethod
-    def _get_doctorate_title_translation(cls, doctorate: DoctorateProxy):
+    def _get_doctorate_title_translation(cls, doctorate: Union[DoctorateProxy, DoctorateAdmission]) -> Promise:
         """Populate the translations of the doctorate title and lazy return them"""
         # Create a dict to cache the translations of the doctorate title
         doctorate_title = {
@@ -63,19 +72,88 @@ class Notification(INotification):
         return lazy(lambda: doctorate_title[get_language()], str)()
 
     @classmethod
-    def get_common_tokens(cls, doctorate: DoctorateProxy, confirmation_paper: EpreuveConfirmation):
+    def get_admission_link_back(cls, uuid: UUID, tab='project') -> str:
+        return "{}{}".format(
+            settings.ADMISSION_BACKEND_LINK_PREFIX.rstrip('/'),
+            resolve_url('admission:doctorate:{}'.format(tab), uuid=uuid),
+        )
+
+    @classmethod
+    def get_admission_link_front(cls, uuid: UUID, tab='') -> str:
+        return settings.ADMISSION_FRONTEND_LINK.format(uuid=uuid) + tab
+
+    @classmethod
+    def get_common_tokens(
+        cls,
+        doctorate: Union[DoctorateProxy, DoctorateAdmission],
+        confirmation_paper: Union[EpreuveConfirmationDTO, EpreuveConfirmation],
+    ) -> dict:
         """Return common tokens about a doctorate"""
+        financing_type = (
+            BourseRecherche.get_value(doctorate.scholarship_grant)
+            if doctorate.financing_type == ChoixTypeFinancement.SEARCH_SCHOLARSHIP.name
+            else ChoixTypeFinancement.get_value(doctorate.financing_type)
+        )
+
         return {
             "student_first_name": doctorate.candidate.first_name,
             "student_last_name": doctorate.candidate.last_name,
             "doctorate_title": cls._get_doctorate_title_translation(doctorate),
-            "admission_link_front": settings.ADMISSION_FRONTEND_LINK.format(uuid=doctorate.uuid),
-            "admission_link_back": "{}{}".format(
-                settings.ADMISSION_BACKEND_LINK_PREFIX.rstrip('/'),
-                resolve_url('admission:doctorate:project', pk=doctorate.uuid),
-            ),
+            "admission_link_front": cls.get_admission_link_front(doctorate.uuid),
+            "admission_link_back": cls.get_admission_link_back(doctorate.uuid),
+            "confirmation_paper_link_front": cls.get_admission_link_front(doctorate.uuid, 'confirmation'),
+            "confirmation_paper_link_back": cls.get_admission_link_back(doctorate.uuid, 'confirmation'),
             "confirmation_paper_date": cls.format_date(confirmation_paper.date),
+            "confirmation_paper_deadline": cls.format_date(confirmation_paper.date_limite),
+            "scholarship_grant_acronym": financing_type,
+            "reference": doctorate.reference,
+            "extension_request_proposed_date": confirmation_paper.demande_prolongation.nouvelle_echeance
+            if confirmation_paper.demande_prolongation
+            else '',
         }
+
+    @classmethod
+    def _send_notification_to_managers(cls, entity_id: Type[int], content: str, tokens: dict) -> None:
+        cdd_managers = CddManager.objects.filter(
+            entity_id=entity_id,
+        ).select_related('person')
+
+        for manager in cdd_managers:
+            with translation.override(manager.person.language):
+                web_notification = WebNotification(recipient=manager.person, content=str(content % tokens))
+            WebNotificationHandler.create(web_notification)
+
+    @classmethod
+    def notifier_soumission(cls, epreuve_confirmation: EpreuveConfirmation) -> None:
+        doctorate: DoctorateProxy = DoctorateProxy.objects.get(uuid=epreuve_confirmation.doctorat_id.uuid)
+        common_tokens = cls.get_common_tokens(doctorate, epreuve_confirmation)
+
+        # Notify the CDD managers > web notification
+        cls._send_notification_to_managers(
+            entity_id=doctorate.doctorate.management_entity_id,
+            content=_(
+                '<a href="%(confirmation_paper_link_back)s">%(reference)s</a> - '
+                '%(student_first_name)s %(student_last_name)s submitted '
+                'a date for the confirmation paper for %(doctorate_title)s'
+            ),
+            tokens=common_tokens,
+        )
+
+    @classmethod
+    def notifier_nouvelle_echeance(cls, epreuve_confirmation: EpreuveConfirmation) -> None:
+        doctorate: DoctorateProxy = DoctorateProxy.objects.get(uuid=epreuve_confirmation.doctorat_id.uuid)
+        common_tokens = cls.get_common_tokens(doctorate, epreuve_confirmation)
+
+        # Notify the CCD managers > web notification
+        cls._send_notification_to_managers(
+            entity_id=doctorate.doctorate.management_entity_id,
+            content=_(
+                '<a href="%(confirmation_paper_link_back)s">%(reference)s</a> - '
+                '%(student_first_name)s %(student_last_name)s proposed a new deadline '
+                '(%(extension_request_proposed_date)s) for the confirmation paper for %(doctorate_title)s'
+            ),
+            tokens=common_tokens,
+        )
 
     @classmethod
     def notifier_echec_epreuve(
@@ -99,10 +177,10 @@ class Notification(INotification):
             flat=True,
         )
 
-        email_message = EmailNotificationHandler.build(email_notification)
-        email_message['Cc'] = ','.join(supervising_actor_emails)
+        student_email_message = EmailNotificationHandler.build(email_notification)
+        student_email_message['Cc'] = ','.join(supervising_actor_emails)
 
-        EmailNotificationHandler.create(email_message, person=doctorate.candidate)
+        EmailNotificationHandler.create(student_email_message, person=doctorate.candidate)
 
     @classmethod
     def notifier_repassage_epreuve(
@@ -148,3 +226,14 @@ class Notification(INotification):
             admission=doctorate,
             type=AdmissionTask.TaskType.CONFIRMATION_SUCCESS.name,
         )
+
+        common_tokens = cls.get_common_tokens(doctorate, epreuve_confirmation)
+
+        # Notify the student > email
+        student_email_message = generate_email(
+            ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_SUCCESS_STUDENT,
+            doctorate.candidate.language,
+            common_tokens,
+            recipients=[doctorate.candidate.email],
+        )
+        EmailNotificationHandler.create(student_email_message, person=doctorate.candidate)

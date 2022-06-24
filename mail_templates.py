@@ -268,90 +268,57 @@ doctorate_common_tokens = common_tokens + [
     ),
 ]
 
+confirmation_paper_tokens = doctorate_common_tokens + [
+    Token(
+        name='confirmation_paper_link_front',
+        description=_("Link to the admission confirmation paper panel (front-office)"),
+        example="http://dev.studies.uclouvain.be/somewhere/some-uuid/confirmation",
+    ),
+    Token(
+        name='confirmation_paper_link_back',
+        description=_("Link to the admission confirmation paper panel (back-office)"),
+        example="http://dev.osis.uclouvain.be/somewhere/some-uuid/confirmation",
+    ),
+    Token(
+        name='confirmation_paper_deadline',
+        description=_("Deadline of the confirmation paper (DD/MM/YYYY)"),
+        example="31/04/2022",
+    ),
+    Token(
+        name='confirmation_paper_date',
+        description=_("Date of the confirmation paper (DD/MM/YYYY)"),
+        example="01/04/2022",
+    ),
+    Token(
+        name='scholarship_grant_acronym',
+        description=_("The acronym of the scholarship grant"),
+        example="ARC",
+    ),
+]
+
 ADMISSION_EMAIL_CONFIRMATION_PAPER_SUBMISSION_ADRE = 'osis-admission-confirmation-submission-adre'
 templates.register(
     ADMISSION_EMAIL_CONFIRMATION_PAPER_SUBMISSION_ADRE,
-    description=_("Mail sent to ADRE to confirm the first submission of the confirmation paper"),
-    tokens=doctorate_common_tokens
-    + [
-        Token(
-            name='scholarship_grant_acronym',
-            description=_("The acronym of the scholarship grant"),
-            example="ARC",
-        ),
-    ],
+    description=_("Mail sent to ADRE on first submission of the confirmation paper by the doctoral student"),
+    tokens=confirmation_paper_tokens,
     tag=DOCTORATE_ADMISSION_TAG,
 )
 
-ADMISSION_EMAIL_CONFIRMATION_PAPER_SUBMISSION_BY_PROMOTER_ADRE = (
-    'osis-admission-confirmation-submission-by-promoter-adre'
-)
+ADMISSION_EMAIL_CONFIRMATION_PAPER_INFO_STUDENT = 'osis-admission-confirmation-info-student'
 templates.register(
-    ADMISSION_EMAIL_CONFIRMATION_PAPER_SUBMISSION_BY_PROMOTER_ADRE,
-    description=_("Mail sent to ADRE to confirm the first submission of the confirmation paper by a promoter"),
-    tokens=doctorate_common_tokens
-    + [
-        Token(
-            name='scholarship_grant_acronym',
-            description=_("The acronym of the scholarship grant"),
-            example="ARC",
-        ),
-        Token(
-            name='promoter_first_name',
-            description=_("The first name of the promoter"),
-            example="John",
-        ),
-        Token(
-            name='promoter_last_name',
-            description=_("The last name of the promoter"),
-            example="Doe",
-        ),
-    ],
-    tag=DOCTORATE_ADMISSION_TAG,
-)
-
-ADMISSION_EMAIL_CONFIRMATION_PAPER_EXTENSION_REQUEST_CDD_OPINION_STUDENT = (
-    'osis-admission-confirmation-extension-request-cdd-opinion-student'
-)
-templates.register(
-    ADMISSION_EMAIL_CONFIRMATION_PAPER_EXTENSION_REQUEST_CDD_OPINION_STUDENT,
-    description=_(
-        "Mail sent to the student to inform him of the opinion of the cdd manager about the extension request "
-        "of its confirmation paper"
-    ),
-    tokens=doctorate_common_tokens
-    + [
-        Token(
-            name='extension_request_proposed_date',
-            description=_("The proposed date by the student (DD/MM/YYYY)"),
-            example="01/04/2022",
-        ),
-        Token(
-            name='extension_request_cdd_opinion',
-            description=_("The opinion of the cdd manager about the extension request"),
-            example="The proposed date has been accepted",
-        ),
-    ],
+    ADMISSION_EMAIL_CONFIRMATION_PAPER_INFO_STUDENT,
+    description=_("Mail sent to the doctoral student to give him some information about the confirmation paper"),
+    tokens=confirmation_paper_tokens,
     tag=DOCTORATE_ADMISSION_TAG,
 )
 
 ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_SUCCESS_STUDENT = 'osis-admission-confirmation-on-success-student'
 templates.register(
     ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_SUCCESS_STUDENT,
-    description=_("Mail sent to the student to inform him of the favourable opinion on its confirmation paper"),
-    tokens=doctorate_common_tokens
-    + [
-        Token(
-            name='certificate_of_achievement_link',
-            description=_("Link to the certificate of achievement"),
-            example="http://dev.studies.uclouvain.be/somewhere",
-        ),
-        Token(
-            name='confirmation_paper_date',
-            description=_("Date of the confirmation paper"),
-            example="01/04/2022",
-        ),
-    ],
+    description=_(
+        "Mail sent to the doctoral student to inform him of the favourable opinion on the confirmation paper"
+    ),
+    tokens=confirmation_paper_tokens,
     tag=DOCTORATE_ADMISSION_TAG,
 )
 
@@ -359,19 +326,7 @@ ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_SUCCESS_ADRE = 'osis-admission-confirmatio
 templates.register(
     ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_SUCCESS_ADRE,
     description=_("Mail sent to ADRE to inform him of the favourable opinion on one confirmation paper"),
-    tokens=doctorate_common_tokens
-    + [
-        Token(
-            name='scholarship_grant_acronym',
-            description=_("The acronym of the scholarship grant"),
-            example="ARC",
-        ),
-        Token(
-            name='confirmation_paper_date',
-            description=_("Date of the confirmation paper (DD/MM/YYYY)"),
-            example="01/04/2022",
-        ),
-    ],
+    tokens=confirmation_paper_tokens,
     tag=DOCTORATE_ADMISSION_TAG,
 )
 
@@ -379,34 +334,17 @@ ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_SUCCESS_ADRI = 'osis-admission-confirmatio
 templates.register(
     ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_SUCCESS_ADRI,
     description=_("Mail sent to ADRI to inform him of the favourable opinion on one confirmation paper"),
-    tokens=doctorate_common_tokens
-    + [
-        Token(
-            name='scholarship_grant_acronym',
-            description=_("The acronym of the scholarship grant"),
-            example="ARC",
-        ),
-        Token(
-            name='confirmation_paper_date',
-            description=_("Date of the confirmation paper (DD/MM/YYYY)"),
-            example="01/04/2022",
-        ),
-    ],
+    tokens=confirmation_paper_tokens,
     tag=DOCTORATE_ADMISSION_TAG,
 )
 
 ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_FAILURE_STUDENT = 'osis-admission-confirmation-on-failure-student'
 templates.register(
     ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_FAILURE_STUDENT,
-    description=_("Mail sent to the student to inform him of the defavourable opinion on its confirmation paper"),
-    tokens=doctorate_common_tokens
-    + [
-        Token(
-            name='confirmation_paper_date',
-            description=_("Date of the confirmation paper (DD/MM/YYYY)"),
-            example="01/04/2022",
-        ),
-    ],
+    description=_(
+        "Mail sent to the doctoral student to inform him of the defavourable opinion on the confirmation paper"
+    ),
+    tokens=confirmation_paper_tokens,
     tag=DOCTORATE_ADMISSION_TAG,
 )
 
@@ -414,19 +352,7 @@ ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_FAILURE_ADRE = 'osis-admission-confirmatio
 templates.register(
     ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_FAILURE_ADRE,
     description=_("Mail sent to ADRE to inform him of the defavourable opinion on one confirmation paper"),
-    tokens=doctorate_common_tokens
-    + [
-        Token(
-            name='scholarship_grant_acronym',
-            description=_("The acronym of the scholarship grant"),
-            example="ARC",
-        ),
-        Token(
-            name='confirmation_paper_date',
-            description=_("Date of the confirmation paper (DD/MM/YYYY)"),
-            example="01/04/2022",
-        ),
-    ],
+    tokens=confirmation_paper_tokens,
     tag=DOCTORATE_ADMISSION_TAG,
 )
 
@@ -434,34 +360,15 @@ ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_FAILURE_ADRI = 'osis-admission-confirmatio
 templates.register(
     ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_FAILURE_ADRI,
     description=_("Mail sent to ADRI to inform him of the defavourable opinion on one confirmation paper"),
-    tokens=doctorate_common_tokens
-    + [
-        Token(
-            name='scholarship_grant_acronym',
-            description=_("The acronym of the scholarship grant"),
-            example="ARC",
-        ),
-        Token(
-            name='confirmation_paper_date',
-            description=_("Date of the confirmation paper (DD/MM/YYYY)"),
-            example="01/04/2022",
-        ),
-    ],
+    tokens=confirmation_paper_tokens,
     tag=DOCTORATE_ADMISSION_TAG,
 )
 
 ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_RETAKING_STUDENT = 'osis-admission-confirmation-on-retaking-student'
 templates.register(
     ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_RETAKING_STUDENT,
-    description=_("Mail sent to the student to inform him of the necessity to retake its confirmation paper"),
-    tokens=doctorate_common_tokens
-    + [
-        Token(
-            name='confirmation_paper_date',
-            description=_("Date of the confirmation paper (DD/MM/YYYY)"),
-            example="01/04/2022",
-        ),
-    ],
+    description=_("Mail sent to the doctoral student to inform him of the necessity to retake the confirmation paper"),
+    tokens=confirmation_paper_tokens,
     tag=DOCTORATE_ADMISSION_TAG,
 )
 
@@ -469,19 +376,7 @@ ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_RETAKING_ADRE = 'osis-admission-confirmati
 templates.register(
     ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_RETAKING_ADRE,
     description=_("Mail sent to ADRE to inform him of the necessity to retake one confirmation paper"),
-    tokens=doctorate_common_tokens
-    + [
-        Token(
-            name='scholarship_grant_acronym',
-            description=_("The acronym of the scholarship grant"),
-            example="ARC",
-        ),
-        Token(
-            name='confirmation_paper_date',
-            description=_("Date of the confirmation paper (DD/MM/YYYY)"),
-            example="01/04/2022",
-        ),
-    ],
+    tokens=confirmation_paper_tokens,
     tag=DOCTORATE_ADMISSION_TAG,
 )
 
@@ -489,18 +384,20 @@ ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_RETAKING_ADRI = 'osis-admission-confirmati
 templates.register(
     ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_RETAKING_ADRI,
     description=_("Mail sent to ADRI to inform him of the necessity to retake one confirmation paper"),
-    tokens=doctorate_common_tokens
-    + [
-        Token(
-            name='scholarship_grant_acronym',
-            description=_("The acronym of the scholarship grant"),
-            example="ARC",
-        ),
-        Token(
-            name='confirmation_paper_date',
-            description=_("Date of the confirmation paper (DD/MM/YYYY)"),
-            example="01/04/2022",
-        ),
-    ],
+    tokens=confirmation_paper_tokens,
     tag=DOCTORATE_ADMISSION_TAG,
 )
+
+CONFIRMATION_PAPER_TEMPLATES_IDENTIFIERS = {
+    ADMISSION_EMAIL_CONFIRMATION_PAPER_SUBMISSION_ADRE,
+    ADMISSION_EMAIL_CONFIRMATION_PAPER_INFO_STUDENT,
+    ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_SUCCESS_STUDENT,
+    ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_SUCCESS_ADRE,
+    ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_SUCCESS_ADRI,
+    ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_FAILURE_STUDENT,
+    ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_FAILURE_ADRE,
+    ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_FAILURE_ADRI,
+    ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_RETAKING_STUDENT,
+    ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_RETAKING_ADRE,
+    ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_RETAKING_ADRI,
+}

@@ -80,7 +80,7 @@ class DoctorateAdmissionConfirmationFormViewTestCase(TestCase):
             financing_work_contract=ChoixTypeContratTravail.UCLOUVAIN_ASSISTANT.name,
             type=ChoixTypeAdmission.PRE_ADMISSION.name,
             pre_admission_submission_date=datetime.datetime.now(),
-            post_enrolment_status=ChoixStatutDoctorat.ADMITTED.name,
+            admitted=True,
         )
         cls.admission_with_confirmation_papers = DoctorateAdmissionFactory(
             doctorate__management_entity=first_doctoral_commission,
@@ -91,21 +91,21 @@ class DoctorateAdmissionConfirmationFormViewTestCase(TestCase):
             financing_work_contract=ChoixTypeContratTravail.UCLOUVAIN_ASSISTANT.name,
             type=ChoixTypeAdmission.PRE_ADMISSION.name,
             pre_admission_submission_date=datetime.datetime.now(),
-            post_enrolment_status=ChoixStatutDoctorat.ADMITTED.name,
+            admitted=True,
         )
         cls.confirmation_papers = [
-            ConfirmationPaperFactory(
-                admission=cls.admission_with_confirmation_papers,
-                confirmation_date=datetime.date(2022, 4, 1),
-                confirmation_deadline=datetime.date(2022, 4, 5),
-            ),
             ConfirmationPaperFactory(
                 admission=cls.admission_with_confirmation_papers,
                 confirmation_date=datetime.date(2022, 1, 1),
                 confirmation_deadline=datetime.date(2022, 4, 5),
             ),
+            ConfirmationPaperFactory(
+                admission=cls.admission_with_confirmation_papers,
+                confirmation_date=datetime.date(2022, 4, 1),
+                confirmation_deadline=datetime.date(2022, 4, 5),
+            ),
         ]
-        cls.last_confirmation_paper = cls.confirmation_papers[0]
+        cls.last_confirmation_paper = cls.confirmation_papers[1]
 
         cls.candidate = cls.admission_without_confirmation_paper.candidate
 
@@ -235,7 +235,7 @@ class DoctorateAdmissionConfirmationOpinionFormViewTestCase(TestCase):
             financing_work_contract=ChoixTypeContratTravail.UCLOUVAIN_ASSISTANT.name,
             type=ChoixTypeAdmission.PRE_ADMISSION.name,
             pre_admission_submission_date=datetime.datetime.now(),
-            post_enrolment_status=ChoixStatutDoctorat.ADMITTED.name,
+            admitted=True,
         )
         cls.admission_with_confirmation_papers = DoctorateAdmissionFactory(
             doctorate__academic_year=academic_years[0],
@@ -245,23 +245,23 @@ class DoctorateAdmissionConfirmationOpinionFormViewTestCase(TestCase):
             financing_work_contract=ChoixTypeContratTravail.UCLOUVAIN_ASSISTANT.name,
             type=ChoixTypeAdmission.PRE_ADMISSION.name,
             pre_admission_submission_date=datetime.datetime.now(),
-            post_enrolment_status=ChoixStatutDoctorat.ADMITTED.name,
+            admitted=True,
         )
         cls.confirmation_papers = [
-            ConfirmationPaperFactory(
-                admission=cls.admission_with_confirmation_papers,
-                confirmation_date=datetime.date(2022, 4, 1),
-                confirmation_deadline=datetime.date(2022, 4, 5),
-                research_mandate_renewal_opinion=['avis_renouvellement_mandat_recherche_0'],
-            ),
             ConfirmationPaperFactory(
                 admission=cls.admission_with_confirmation_papers,
                 confirmation_date=datetime.date(2022, 1, 1),
                 confirmation_deadline=datetime.date(2022, 4, 5),
                 research_mandate_renewal_opinion=['avis_renouvellement_mandat_recherche_0'],
             ),
+            ConfirmationPaperFactory(
+                admission=cls.admission_with_confirmation_papers,
+                confirmation_date=datetime.date(2022, 4, 1),
+                confirmation_deadline=datetime.date(2022, 4, 5),
+                research_mandate_renewal_opinion=['avis_renouvellement_mandat_recherche_0'],
+            ),
         ]
-        cls.last_confirmation_paper = cls.confirmation_papers[0]
+        cls.last_confirmation_paper = cls.confirmation_papers[1]
 
         cls.candidate = cls.admission_without_confirmation_paper.candidate
 

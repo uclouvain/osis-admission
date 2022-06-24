@@ -25,7 +25,7 @@
 # ##############################################################################
 from typing import List
 
-from django.utils.translation import get_language
+from django.utils.translation import get_language, gettext_lazy as _
 
 from admission.auth.roles.promoter import Promoter
 from admission.ddd.projet_doctoral.preparation.domain.model._promoteur import PromoteurIdentity
@@ -44,14 +44,14 @@ class PromoteurTranslator(IPromoteurTranslator):
 
     @classmethod
     def get_dto(cls, matricule: str) -> 'PromoteurDTO':
-        promoter_role = Promoter.objects.select_related('person', 'country').get(person__global_id=matricule)
+        promoter_role = Promoter.objects.select_related('person__tutor', 'country').get(person__global_id=matricule)
         return PromoteurDTO(
             matricule=matricule,
             nom=promoter_role.person.last_name,
             prenom=promoter_role.person.first_name,
             email=promoter_role.person.email,
-            titre=promoter_role.title,
-            institution=promoter_role.institute,
+            titre=_('Prof.') if hasattr(promoter_role.person, 'tutor') else promoter_role.title,
+            institution=_('ucl') if not promoter_role.is_external else promoter_role.institute,
             ville=promoter_role.city,
             pays=(
                 promoter_role.country_id

@@ -1,4 +1,4 @@
-{% extends "admission/doctorate/tab_layout.html" %}
+{% extends "admission/doctorate/details/tab_layout.html" %}
 {% load enums %}
 {% load i18n admission %}
 {% load osis_document %}
@@ -28,15 +28,23 @@
 {% endcomment %}
 
 {% block actions %}
-  {% if current_confirmation_paper %}
-    <li>
-      <a href="{% update_tab_path_from_detail doctorate.uuid %}">
-        {% trans "Update" %}
-      </a>
-    </li>
+  {{ block.super }}
+
+  {% has_perm 'admission.make_confirmation_decision' as can_make_decision %}
+  {% has_perm 'admission.upload_pdf_confirmation' as can_upload_renewal_opinion %}
+
+  {% if can_upload_renewal_opinion %}
     <li>
       <a href="{% url "admission:doctorate:confirmation:opinion" doctorate.uuid %}">
         {% trans "Upload the opinion on the renewal of the research mandate" %}
+      </a>
+    </li>
+  {% endif %}
+  {% if can_make_decision %}
+    <li role="separator" class="divider"></li>
+    <li>
+      <a href="{% url 'admission:doctorate:send-mail' uuid=uuid %}?template={{ INFO_TEMPLATE_IDENTIFIER }}&cc_promoteurs=True">
+        {% trans "Send an information email" %}
       </a>
     </li>
     <li role="separator" class="divider"></li>
@@ -47,12 +55,12 @@
         </a>
       </li>
       <li>
-        <a href="{% url 'admission:doctorate:confirmation:failure' pk %}">
+        <a href="{% url 'admission:doctorate:confirmation:failure' uuid %}">
           {% trans "Failure of the test" %}
         </a>
       </li>
       <li>
-        <a href="{% url 'admission:doctorate:confirmation:retaking' pk %}">
+        <a href="{% url 'admission:doctorate:confirmation:retaking' uuid %}">
           {% trans "Retaking of the test" %}
         </a>
       </li>
@@ -74,20 +82,23 @@
 
 {% block tab_content %}
   <h3>{% trans "Confirmation paper" %}</h3>
-  <p><em>{% lorem 1 %}</em></p>
   <div>
     {% field_data _("Definitive admission date:") doctorate.admission_acceptee_le 'inline-field-data' %}
     {% field_data _("Deadline for confirmation:") current_confirmation_paper.date_limite 'inline-field-data' %}
     {% field_data _("Date of confirmation:") current_confirmation_paper.date 'inline-field-data' %}
     {% field_data _("Research report") current_confirmation_paper.rapport_recherche %}
     <p>
-      <a href="{% url 'admission:doctorate:confirmation-canvas' pk %}" target="_blank">
+      <a href="{% url 'admission:doctorate:confirmation-canvas' uuid %}" target="_blank">
         {% trans "Canvas of the supervisory panel report to download" %}
       </a>
     </p>
     {% field_data _("Report of the supervisory panel") current_confirmation_paper.proces_verbal_ca %}
-    {% field_data _("Certificate of achievement") current_confirmation_paper.attestation_reussite hide_empty=True %}
-    {% field_data _("Certificate of failure") current_confirmation_paper.attestation_echec hide_empty=True %}
+    {% if doctorate.statut == "PASSED_CONFIRMATION" and not current_confirmation_paper.attestation_reussite %}
+      {% trans "The certificate of achievement of the confirmation paper in PDF format is being generated, please come back later to get it." as is_generating_text %}
+      {% field_data _("Certificate of achievement") is_generating_text %}
+    {% else %}
+      {% field_data _("Certificate of achievement") current_confirmation_paper.attestation_reussite hide_empty=True %}
+    {% endif %}
     {% field_data _("Opinion on the renewal of the research mandate") current_confirmation_paper.avis_renouvellement_mandat_recherche %}
   </div>
 
@@ -112,17 +123,17 @@
 {% block style %}
   {{ block.super }}
   <style>
-      .past-confirmation-tests:after {
-          content: '';
-          border-bottom: 1px solid #ddd;
-          display: block;
-          width: 80%;
-          margin: 2em auto;
-      }
-      .past-confirmation-tests:last-child:after {
-          border: none;
-          margin: 0;
-      }
+    .past-confirmation-tests:after {
+      content: '';
+      border-bottom: 1px solid #ddd;
+      display: block;
+      width: 80%;
+      margin: 2em auto;
+    }
+    .past-confirmation-tests:last-child:after {
+      border: none;
+      margin: 0;
+    }
   </style>
 
 {% endblock %}

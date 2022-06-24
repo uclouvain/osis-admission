@@ -30,6 +30,7 @@ from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.builder.epreuve
 from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.commands import (
     SoumettreEpreuveConfirmationCommand,
 )
+from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.domain.service.i_notification import INotification
 from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.repository.i_epreuve_confirmation import (
     IEpreuveConfirmationRepository,
 )
@@ -40,6 +41,7 @@ def soumettre_epreuve_confirmation(
     cmd: 'SoumettreEpreuveConfirmationCommand',
     doctorat_repository: 'IDoctoratRepository',
     epreuve_confirmation_repository: 'IEpreuveConfirmationRepository',
+    notification: 'INotification',
 ) -> DoctoratIdentity:
     # GIVEN
     epreuve_confirmation_id = EpreuveConfirmationIdentityBuilder.build_from_uuid(cmd.uuid)
@@ -62,7 +64,7 @@ def soumettre_epreuve_confirmation(
     doctorat.soumettre_epreuve_confirmation()
 
     # THEN
-    # TODO Send notifications
+    notification.notifier_soumission(epreuve_confirmation=epreuve_confirmation)
     doctorat_repository.save(doctorat)
     epreuve_confirmation_repository.save(epreuve_confirmation)
 

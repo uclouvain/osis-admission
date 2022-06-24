@@ -230,9 +230,10 @@ class AdmissionTabsTestCase(TestCase):
                     url_name='project',
                 ),
             ),
+            'view': Mock(),
         }
         result = current_subtabs(context)
-        self.assertEqual(result, TAB_TREES['doctorate'][Tab('doctorate', _('Doctorate'), 'graduation-cap')])
+        self.assertEqual(result['subtabs'], TAB_TREES['doctorate'][Tab('doctorate', _('Doctorate'), 'graduation-cap')])
 
     def test_current_tabs_with_hidden_tab(self):
         context = {
@@ -242,9 +243,10 @@ class AdmissionTabsTestCase(TestCase):
                     url_name='failure',
                 ),
             ),
+            'view': Mock(),
         }
         result = current_subtabs(context)
-        self.assertEqual(result, TAB_TREES['doctorate'][Tab('doctorate', _('Doctorate'), 'graduation-cap')])
+        self.assertEqual(result['subtabs'], TAB_TREES['doctorate'][Tab('doctorate', _('Doctorate'), 'graduation-cap')])
 
 
 class AdmissionFieldsDataTestCase(TestCase):

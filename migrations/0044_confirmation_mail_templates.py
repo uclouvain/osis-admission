@@ -1,7 +1,6 @@
 from django.db import migrations
 
 from admission.mail_templates import (
-    ADMISSION_EMAIL_CONFIRMATION_PAPER_EXTENSION_REQUEST_CDD_OPINION_STUDENT,
     ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_FAILURE_ADRE,
     ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_FAILURE_ADRI,
     ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_FAILURE_STUDENT,
@@ -12,7 +11,6 @@ from admission.mail_templates import (
     ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_SUCCESS_ADRE,
     ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_SUCCESS_ADRI,
     ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_SUCCESS_STUDENT,
-    ADMISSION_EMAIL_CONFIRMATION_PAPER_SUBMISSION_BY_PROMOTER_ADRE,
 )
 from osis_mail_template import MailTemplateMigration
 
@@ -24,41 +22,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        MailTemplateMigration(
-            ADMISSION_EMAIL_CONFIRMATION_PAPER_SUBMISSION_BY_PROMOTER_ADRE,
-            {
-                'en': '[OSIS] A promoter uploaded documents related to one of its '
-                      'supervised confirmation paper ({scholarship_grant_acronym})',
-                'fr-be': "[OSIS] Un promoteur a téléversé des documents relatifs à "
-                         "une des épreuves de confirmation qu'il supervise ({scholarship_grant_acronym})",
-            },
-            {
-                'en': '''<p>Hello,</p>
-
-<p>
-    {promoter_first_name} {promoter_last_name} uploaded documents related to the confirmation paper of the 
-    {student_first_name} {student_last_name} for its {doctorate_title}.
-</p>
-
-<p>
-    ---<br/>
-    The OSIS Team
-</p>
-''',
-                'fr-be': '''<p>Bonjour,</p>
-
-<p>
-    {promoter_first_name} {promoter_last_name} a téléversé des documents relatifs à l'épreuve de confirmation de 
-    {student_first_name} {student_last_name} pour son {doctorate_title}.
-</p>
-
-<p>
-    ---<br/>
-    L'équipe OSIS
-</p>
-''',
-            },
-        ),
         MailTemplateMigration(
             ADMISSION_EMAIL_CONFIRMATION_PAPER_SUBMISSION_ADRE,
             {
@@ -91,54 +54,6 @@ class Migration(migrations.Migration):
             },
         ),
         MailTemplateMigration(
-            ADMISSION_EMAIL_CONFIRMATION_PAPER_EXTENSION_REQUEST_CDD_OPINION_STUDENT,
-            {
-                'en': '[OSIS] Response to the extension request related to your confirmation paper',
-                'fr-be': '[OSIS] Réponse à la demande de prolongation relative à votre épreuve de confirmation',
-            },
-            {
-                'en': '''<p>Hello {student_first_name} {student_last_name},</p>
-
-<p>
-    You have recently requested a new deadline ({extension_request_proposed_date}) for the confirmation paper of 
-    your {doctorate_title}.
-</p>
-
-<p>
-    Your DDC manager gave his opinion about it:
-</p>
-
-<blockquote>
-    <p>{extension_request_cdd_opinion}</p>
-</blockquote>
-
-<p>
-    ---<br/>
-    The OSIS Team
-</p>
-    ''',
-                'fr-be': '''<p>Bonjour {student_first_name} {student_last_name},</p>
-
-<p>
-    Vous avez récemment proposé une nouvelle échéance ({extension_request_proposed_date}) pour l'épreuve de 
-    confirmation de votre {doctorate_title}.
-</p>
-
-<p>
-    Votre gestionnaire CDD a donné son avis à ce sujet :
-</p>
-<blockquote>
-    <p>{extension_request_cdd_opinion}</p>
-</blockquote>
-
-<p>
-    ---<br/>
-    L'équipe OSIS
-</p>
-    ''',
-            },
-        ),
-        MailTemplateMigration(
             ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_SUCCESS_STUDENT,
             {
                 'en': '[OSIS] Result of your confirmation paper',
@@ -156,7 +71,7 @@ class Migration(migrations.Migration):
 </p>
 
 <p>
-    You can retrieve the certificate of achievement <a href="{certificate_of_achievement_link}">here</a>.
+    You can retrieve the certificate of achievement <a href="{confirmation_paper_link_front}">here</a>.
 </p>
 
 <p>
@@ -175,7 +90,7 @@ class Migration(migrations.Migration):
 </p>
 
 <p>
-    Vous pouvez récupérer le certificat de réussite <a href="{certificate_of_achievement_link}">ici</a>.
+    Vous pouvez récupérer le certificat de réussite <a href="{confirmation_paper_link_front}">ici</a>.
 </p>
 
 <p>

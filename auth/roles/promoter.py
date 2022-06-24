@@ -31,6 +31,7 @@ from admission.auth.predicates import (
     is_part_of_committee_and_invited,
     is_being_enrolled,
     is_enrolled,
+    confirmation_paper_in_progress,
 )
 from admission.contrib.models.actor import ExternalActorMixin
 from osis_role.contrib.models import RoleModel
@@ -65,6 +66,7 @@ class Promoter(ExternalActorMixin, RoleModel):
             'admission.approve_proposition': is_part_of_committee_and_invited,
             # Once the candidate is enrolling, a promoter can
             'admission.view_doctorateadmission_confirmation': is_admission_request_promoter & is_enrolled,
-            'admission.change_doctorateadmission_confirmation': is_admission_request_promoter & is_enrolled,
+            'admission.change_doctorateadmission_confirmation': is_admission_request_promoter
+            & confirmation_paper_in_progress,
             'admission.upload_pdf_confirmation': is_admission_request_promoter & is_enrolled,
         })
