@@ -100,7 +100,7 @@ class Notification(INotification):
             "admission_link_front": settings.ADMISSION_FRONTEND_LINK.format(uuid=doctorat.uuid),
             "admission_link_back": "{}{}".format(
                 settings.ADMISSION_BACKEND_LINK_PREFIX.rstrip('/'),
-                resolve_url('admission:doctorate:project', pk=doctorat.uuid),
+                resolve_url('admission:doctorate:project', uuid=doctorat.uuid),
             ),
         }
 

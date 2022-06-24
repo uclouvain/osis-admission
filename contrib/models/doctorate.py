@@ -28,7 +28,7 @@ import uuid
 from django.core.cache import cache
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db import models
-from django.db.models import OuterRef, F
+from django.db.models import OuterRef
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils.datetime_safe import date
@@ -583,4 +583,4 @@ class ConfirmationPaper(models.Model):
     )
 
     class Meta:
-        ordering = [F("confirmation_date").desc(nulls_first=True)]
+        ordering = ["-id"]

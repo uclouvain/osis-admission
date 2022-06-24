@@ -30,6 +30,13 @@
   background-color: #aaa;
 }
 
+blockquote {
+  padding: 5px 10px;
+  font-size: 1em;
+  font-style: italic;
+  white-space: pre-line;
+}
+
 .media-list {
   margin: 0;
 }

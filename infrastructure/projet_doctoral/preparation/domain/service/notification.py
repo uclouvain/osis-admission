@@ -88,7 +88,7 @@ class Notification(INotification):
             "admission_link_front_supervision": "{}supervision".format(frontend_link),
             "admission_link_back": "{}{}".format(
                 settings.ADMISSION_BACKEND_LINK_PREFIX.rstrip('/'),
-                resolve_url('admission:doctorate:project', pk=proposition.entity_id.uuid),
+                resolve_url('admission:doctorate:project', uuid=proposition.entity_id.uuid),
             ),
             "reference": proposition.reference,
         }

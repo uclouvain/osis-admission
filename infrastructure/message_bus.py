@@ -230,6 +230,7 @@ class MessageBusCommands(AbstractMessageBusCommands):
             soumettre_epreuve_confirmation,
             doctorat_repository=DoctoratRepository(),
             epreuve_confirmation_repository=EpreuveConfirmationRepository(),
+            notification=NotificationEpreuveConfirmation(),
         ),
         CompleterEpreuveConfirmationParPromoteurCommand: partial(
             completer_epreuve_confirmation_par_promoteur,
@@ -244,6 +245,7 @@ class MessageBusCommands(AbstractMessageBusCommands):
         SoumettreReportDeDateCommand: partial(
             soumettre_report_de_date,
             epreuve_confirmation_repository=EpreuveConfirmationRepository(),
+            notification=NotificationEpreuveConfirmation(),
         ),
         SoumettreAvisProlongationCommand: partial(
             soumettre_avis_prolongation,

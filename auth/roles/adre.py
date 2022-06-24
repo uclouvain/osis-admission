@@ -45,6 +45,7 @@ class AdreSecretary(RoleModel):
             'admission.upload_jury_approved_pdf': rules.always_allow,
             'admission.upload_signed_scholarship': rules.always_allow,
             'admission.check_publication_authorisation': rules.always_allow,
+            'admission.view_cdddossiers': rules.always_allow,
             'admission.view_doctorateadmission_person': rules.always_allow,
             'admission.view_doctorateadmission_coordinates': rules.always_allow,
             'admission.view_doctorateadmission_secondary_studies': rules.always_allow,
@@ -53,8 +54,8 @@ class AdreSecretary(RoleModel):
             'admission.view_doctorateadmission_cotutelle': rules.always_allow,
             'admission.view_doctorateadmission_supervision': rules.always_allow,
             'admission.view_doctorateadmission_languages': rules.always_allow,
-            'admission.view_doctorateadmission_confirmation': rules.always_allow,
-            'admission.upload_pdf_confirmation': rules.always_allow,
+            'admission.view_doctorateadmission_confirmation': rules.always_allow & is_enrolled,
+            'admission.upload_pdf_confirmation': rules.always_allow & is_enrolled,
             'osis_history.view_historyentry': rules.always_allow,
             'admission.send_message': rules.always_allow & is_enrolled,
         }

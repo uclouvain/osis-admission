@@ -26,7 +26,12 @@
 from django.utils.translation import gettext_lazy as _
 from rules import RuleSet
 
-from admission.auth.predicates import is_part_of_committee, is_part_of_committee_and_invited, is_being_enrolled
+from admission.auth.predicates import (
+    is_part_of_committee,
+    is_part_of_committee_and_invited,
+    is_being_enrolled,
+    is_enrolled,
+)
 from admission.contrib.models.actor import ExternalActorMixin
 from osis_role.contrib.models import RoleModel
 
@@ -54,5 +59,7 @@ class CommitteeMember(ExternalActorMixin, RoleModel):
             'admission.view_doctorateadmission_supervision': is_part_of_committee,
             # A ca member can approve as long as he is invited to the committee
             'admission.approve_proposition': is_part_of_committee_and_invited,
+            # Once the candidate is enrolling, a ca member can
+            'admission.view_doctorateadmission_confirmation': is_part_of_committee_and_invited & is_enrolled,
         }
         return RuleSet(ruleset)

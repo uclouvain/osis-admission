@@ -231,6 +231,7 @@ class MessageBusInMemoryCommands(AbstractMessageBusCommands):
             soumettre_epreuve_confirmation,
             doctorat_repository=DoctoratInMemoryRepository(),
             epreuve_confirmation_repository=EpreuveConfirmationInMemoryRepository(),
+            notification=NotificationEpreuveConfirmation(),
         ),
         CompleterEpreuveConfirmationParPromoteurCommand: partial(
             completer_epreuve_confirmation_par_promoteur,
@@ -245,6 +246,7 @@ class MessageBusInMemoryCommands(AbstractMessageBusCommands):
         SoumettreReportDeDateCommand: partial(
             soumettre_report_de_date,
             epreuve_confirmation_repository=EpreuveConfirmationInMemoryRepository(),
+            notification=NotificationEpreuveConfirmation(),
         ),
         SoumettreAvisProlongationCommand: partial(
             soumettre_avis_prolongation,

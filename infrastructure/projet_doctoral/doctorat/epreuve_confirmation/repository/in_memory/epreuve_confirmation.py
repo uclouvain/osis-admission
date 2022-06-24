@@ -23,6 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import datetime
 from typing import List
 
 from admission.ddd.projet_doctoral.doctorat.domain.model.doctorat import DoctoratIdentity
@@ -55,7 +56,7 @@ class EpreuveConfirmationInMemoryRepository(InMemoryGenericRepository, IEpreuveC
     @classmethod
     def search_by_doctorat_identity(cls, doctorat_entity_id: 'DoctoratIdentity') -> List['EpreuveConfirmation']:
         result = [entity for entity in cls.entities if entity.doctorat_id.uuid == doctorat_entity_id.uuid]
-        result.sort(key=lambda x: (x.date is None, x.date))
+        result.sort(key=lambda x: x.id, reverse=True)
         return result
 
     @classmethod
@@ -73,9 +74,9 @@ class EpreuveConfirmationInMemoryRepository(InMemoryGenericRepository, IEpreuveC
     @classmethod
     def reset(cls):
         cls.entities = [
-            EpreuveConfirmation0DoctoratSC3DPFactory(),
-            EpreuveConfirmation1DoctoratSC3DPFactory(),
-            EpreuveConfirmation2DoctoratSC3DPFactory(),
+            EpreuveConfirmation0DoctoratSC3DPFactory(id=0),
+            EpreuveConfirmation2DoctoratSC3DPFactory(id=1),
+            EpreuveConfirmation1DoctoratSC3DPFactory(id=2),
         ]
 
     @classmethod
@@ -84,7 +85,7 @@ class EpreuveConfirmationInMemoryRepository(InMemoryGenericRepository, IEpreuveC
             epreuve_confirmation = cls.get(entity.entity_id)
             cls.entities.remove(epreuve_confirmation)
         except EpreuveConfirmationNonTrouveeException:
-            pass
+            entity.id = len(cls.entities)
         cls.entities.append(entity)
 
         return entity.entity_id

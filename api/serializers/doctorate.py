@@ -48,6 +48,7 @@ class DoctorateDTOSerializer(DTOSerializer):
                 # Confirmation
                 'retrieve_confirmation',
                 'update_confirmation',
+                'update_confirmation_extension',
                 # Training
                 'retrieve_training',
                 'add_training',

@@ -3476,6 +3476,8 @@ components:
               $ref: '#/components/schemas/ActionLink'
             update_confirmation:
               $ref: '#/components/schemas/ActionLink'
+            update_confirmation_extension:
+              $ref: '#/components/schemas/ActionLink'
             retrieve_training:
               $ref: '#/components/schemas/ActionLink'
             add_training:

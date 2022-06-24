@@ -52,6 +52,9 @@ class EpreuveConfirmation(interface.RootEntity):
 
     doctorat_id: DoctoratIdentity
     date_limite: datetime.date
+
+    id: int = 0  # Clé de tri
+
     date: Optional[datetime.date] = None
     rapport_recherche: List[str] = attr.Factory(list)
 

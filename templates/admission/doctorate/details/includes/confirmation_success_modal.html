@@ -35,7 +35,7 @@
 
 {% block modal_body %}
   {% if can_be_evaluated %}
-    <form method="post" action="{% url 'admission:doctorate:confirmation:success' pk %}" id="confirmationSuccessModalForm">
+    <form method="post" action="{% url 'admission:doctorate:confirmation:success' uuid %}" id="confirmationSuccessModalForm">
         {% csrf_token %}
         {% blocktrans with status='PASSED_CONFIRMATION'|enum_display:'ChoixStatutDoctorat' trimmed %}
           Do you wish to move the doctorate to the "{{ status }}" state?

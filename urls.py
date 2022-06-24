@@ -83,6 +83,7 @@ doctorate_detail_paths = [
         DoctorateAdmissionConfirmationCanvasExportView.as_view(),
         name='confirmation-canvas',
     ),
+    path('history-api', DoctorateHistoryAPIView.as_view(), name='history-api'),
     path('update/', include((doctorate_update_paths, 'update'))),
     path('training', DoctorateTrainingActivityView.as_view(), name='training'),
     path('training/', include((doctorate_training_paths, 'training'))),
@@ -94,8 +95,7 @@ doctorate_cdd_paths = [
 
 doctorate_paths = [
     # Common
-    path('<uuid:pk>/', include(doctorate_detail_paths)),
-    path('<uuid:uuid>/history-api', DoctorateHistoryAPIView.as_view(), name='history-api'),
+    path('<uuid:uuid>/', include(doctorate_detail_paths)),
     # Specific
     path('cdd/', include((doctorate_cdd_paths, 'cdd'))),
 ]

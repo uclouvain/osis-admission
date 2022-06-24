@@ -31,6 +31,14 @@ from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.domain.service.
 
 class NotificationInMemory(INotification):
     @classmethod
+    def notifier_soumission(cls, epreuve_confirmation: EpreuveConfirmation) -> None:
+        pass
+
+    @classmethod
+    def notifier_nouvelle_echeance(cls, epreuve_confirmation: EpreuveConfirmation) -> None:
+        pass
+
+    @classmethod
     def notifier_echec_epreuve(
         cls,
         epreuve_confirmation: EpreuveConfirmation,

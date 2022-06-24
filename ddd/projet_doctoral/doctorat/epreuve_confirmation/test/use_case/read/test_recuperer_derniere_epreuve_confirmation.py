@@ -59,9 +59,9 @@ class TestRecupererDerniereEpreuveConfirmation(SimpleTestCase):
             )
 
     def test_should_retourner_epreuve_confirmation_si_doctorat_connu_avec_epreuves(self):
-        epreuve_confirmation: List[EpreuveConfirmationDTO] = self.message_bus.invoke(
+        epreuve_confirmation: EpreuveConfirmationDTO = self.message_bus.invoke(
             RecupererDerniereEpreuveConfirmationQuery(
                 doctorat_uuid='uuid-pre-SC3DP-promoteurs-membres-deja-approuves',
             )
         )
-        self.assertEqual(epreuve_confirmation.uuid, 'c2')
+        self.assertEqual(epreuve_confirmation.uuid, 'c1')

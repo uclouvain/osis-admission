@@ -292,6 +292,11 @@ ACTION_LINKS = {
         'method': 'PUT',
         'params': ['uuid'],
     },
+    'update_confirmation_extension': {
+        'path_name': 'admission_api_v1:last_confirmation',
+        'method': 'POST',
+        'params': ['uuid'],
+    },
     # Training
     'retrieve_training': {
         'path_name': 'admission_api_v1:doctoral-training',

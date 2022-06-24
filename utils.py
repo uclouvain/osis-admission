@@ -31,7 +31,11 @@ from rest_framework.generics import get_object_or_404
 
 from admission.contrib.models import DoctorateAdmission
 from admission.ddd.projet_doctoral.doctorat.domain.model.enums import ChoixStatutDoctorat
-from admission.mail_templates import ADMISSION_EMAIL_GENERIC_ONCE_ADMITTED
+
+from admission.mail_templates import (
+    ADMISSION_EMAIL_GENERIC_ONCE_ADMITTED,
+    ADMISSION_EMAIL_CONFIRMATION_PAPER_INFO_STUDENT,
+)
 from backoffice.settings.rest_framework.exception_handler import get_error_data
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from infrastructure.messages_bus import message_bus_instance
@@ -63,6 +67,9 @@ def gather_business_exceptions(command: QueryRequest) -> Dict[str, list]:
 
 
 def get_mail_templates_from_admission(admission: DoctorateAdmission):
-    if admission.post_enrolment_status == ChoixStatutDoctorat.ADMITTED.name:
-        return [ADMISSION_EMAIL_GENERIC_ONCE_ADMITTED]
-    return []
+    allowed_templates = []
+    if admission.post_enrolment_status != ChoixStatutDoctorat.ADMISSION_IN_PROGRESS.name:
+        allowed_templates.append(ADMISSION_EMAIL_GENERIC_ONCE_ADMITTED)
+        if admission.post_enrolment_status == ChoixStatutDoctorat.SUBMITTED_CONFIRMATION.name:
+            allowed_templates.append(ADMISSION_EMAIL_CONFIRMATION_PAPER_INFO_STUDENT)
+    return allowed_templates

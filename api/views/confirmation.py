@@ -106,7 +106,7 @@ class LastConfirmationAPIView(APIPermissionRequiredMixin, mixins.RetrieveModelMi
     permission_mapping = {
         'GET': 'admission.view_doctorateadmission_confirmation',
         'PUT': 'admission.change_doctorateadmission_confirmation',
-        'POST': 'admission.change_doctorateadmission_confirmation',
+        'POST': 'admission.change_doctorateadmission_confirmation_extension',
     }
 
     def get_permission_object(self):
@@ -199,7 +199,10 @@ class LastConfirmationCanvasAPIView(APIPermissionRequiredMixin, mixins.RetrieveM
                 'doctorate': doctorate,
                 'confirmation_paper': confirmation_paper,
                 'supervision_group': supervision_group,
-            }
+                'supervision_people_nb': (
+                    len(supervision_group.signatures_promoteurs) + len(supervision_group.signatures_membres_CA)
+                ),
+            },
         )
 
         serializer = serializers.ConfirmationPaperCanvasSerializer(instance={

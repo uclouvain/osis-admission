@@ -46,7 +46,7 @@ class DoctorateTrainingActivityViewTestCase(TestCase):
         cls.doctorate = cls.conference.doctorate
         cls.service = ServiceFactory(doctorate=cls.doctorate)
         cls.manager = CddManagerFactory(entity=cls.doctorate.doctorate.management_entity)
-        cls.url = resolve_url('admission:doctorate:training', pk=cls.doctorate.uuid)
+        cls.url = resolve_url('admission:doctorate:training', uuid=cls.doctorate.uuid)
 
     def test_view(self):
         self.client.force_login(self.manager.person.user)
@@ -56,7 +56,7 @@ class DoctorateTrainingActivityViewTestCase(TestCase):
         self.assertEqual(str(self.conference), "Conférences, colloques (10 ects, Non soumise)")
 
     def test_form(self):
-        add_url = resolve_url('admission:doctorate:training:add', pk=self.doctorate.uuid, category='service')
+        add_url = resolve_url('admission:doctorate:training:add', uuid=self.doctorate.uuid, category='service')
         self.client.force_login(self.manager.person.user)
         with translation.override(settings.LANGUAGE_CODE_FR):
             response = self.client.get(add_url)
@@ -75,13 +75,13 @@ class DoctorateTrainingActivityViewTestCase(TestCase):
         self.assertIn(self.url, response.redirect_chain[-1][0])
 
     def test_missing_form(self):
-        add_url = resolve_url('admission:doctorate:training:add', pk=self.doctorate.uuid, category='foobar')
+        add_url = resolve_url('admission:doctorate:training:add', uuid=self.doctorate.uuid, category='foobar')
         self.client.force_login(self.manager.person.user)
         response = self.client.get(add_url)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_parent(self):
-        add_url = resolve_url('admission:doctorate:training:add', pk=self.doctorate.uuid, category='publication')
+        add_url = resolve_url('admission:doctorate:training:add', uuid=self.doctorate.uuid, category='publication')
         self.client.force_login(self.manager.person.user)
 
         # test inexistent parent
@@ -104,7 +104,7 @@ class DoctorateTrainingActivityViewTestCase(TestCase):
         # Test edit
         edit_url = resolve_url(
             'admission:doctorate:training:edit',
-            pk=self.doctorate.uuid,
+            uuid=self.doctorate.uuid,
             activity_id=self.service.uuid,
         )
         response = self.client.get(edit_url)
@@ -122,6 +122,6 @@ class DoctorateTrainingActivityViewTestCase(TestCase):
             category=CategorieActivite.PUBLICATION.name,
             parent=self.conference,
         )
-        edit_url = resolve_url('admission:doctorate:training:edit', pk=self.doctorate.uuid, activity_id=child.uuid)
+        edit_url = resolve_url('admission:doctorate:training:edit', uuid=self.doctorate.uuid, activity_id=child.uuid)
         response = self.client.get(edit_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)

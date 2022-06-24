@@ -30,7 +30,6 @@ from django.test import TestCase, override_settings
 from django.urls import reverse
 from rest_framework import status
 
-from admission.ddd.projet_doctoral.doctorat.domain.model.enums import ChoixStatutDoctorat
 from admission.ddd.projet_doctoral.preparation.domain.model._enums import ChoixTypeAdmission
 from admission.ddd.projet_doctoral.preparation.domain.model._financement import (
     ChoixTypeContratTravail,
@@ -73,7 +72,7 @@ class DoctorateAdmissionExtensionRequestDetailViewTestCase(TestCase):
             financing_work_contract=ChoixTypeContratTravail.UCLOUVAIN_ASSISTANT.name,
             type=ChoixTypeAdmission.PRE_ADMISSION.name,
             pre_admission_submission_date=datetime.datetime.now(),
-            post_enrolment_status=ChoixStatutDoctorat.ADMITTED.name,
+            admitted=True,
         )
         cls.admission_with_confirmation_papers = DoctorateAdmissionFactory(
             doctorate__management_entity=first_doctoral_commission,
@@ -84,7 +83,7 @@ class DoctorateAdmissionExtensionRequestDetailViewTestCase(TestCase):
             financing_work_contract=ChoixTypeContratTravail.UCLOUVAIN_ASSISTANT.name,
             type=ChoixTypeAdmission.PRE_ADMISSION.name,
             pre_admission_submission_date=datetime.datetime.now(),
-            post_enrolment_status=ChoixStatutDoctorat.ADMITTED.name,
+            admitted=True,
         )
 
         cls.candidate = cls.admission_without_confirmation_paper.candidate
@@ -107,7 +106,7 @@ class DoctorateAdmissionExtensionRequestDetailViewTestCase(TestCase):
     def test_extension_request_detail_candidate_user(self):
         self.client.force_login(user=self.candidate.user)
 
-        url = reverse(self.detail_path, args=[self.admission_without_confirmation_paper.uuid])
+        url = reverse(self.detail_path, args=[self.admission_with_confirmation_papers.uuid])
 
         response = self.client.get(url)
 
