@@ -46,6 +46,7 @@ from admission.api.views.confirmation import (
     LastConfirmationCanvasAPIView,
 )
 from admission.api.views.doctorate import DoctorateAPIView
+from admission.api.views.training import DoctoralTrainingView, DoctoralTrainingListView
 
 __all__ = [
     "CoordonneesViewSet",
@@ -74,4 +75,6 @@ __all__ = [
     "LastConfirmationCanvasAPIView",
     "SupervisedConfirmationAPIView",
     "DoctorateAPIView",
+    "DoctoralTrainingListView",
+    "DoctoralTrainingView",
 ]

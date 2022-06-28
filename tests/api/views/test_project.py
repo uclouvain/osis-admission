@@ -150,6 +150,7 @@ class DoctorateAdmissionListApiTestCase(APITestCase):
             'submit_proposition',
             'retrieve_confirmation',
             'update_confirmation',
+            'retrieve_training',
         ]
         self.assertCountEqual(
             list(first_proposition['links']),
