@@ -124,15 +124,15 @@ class Notification(INotification):
             entity_id=admission.doctorate.management_entity_id,
         ).select_related('person')
         for manager in cdd_managers:
-            content = (
-                _(
-                    '<a href="%(admission_link_back)s">%(reference)s</a> - '
-                    '%(candidate_first_name)s %(candidate_last_name)s requested '
-                    'signatures for %(doctorate_title)s'
-                )
-                % common_tokens
-            )
             with translation.override(manager.person.language):
+                content = (
+                    _(
+                        '<a href="%(admission_link_back)s">%(reference)s</a> - '
+                        '%(candidate_first_name)s %(candidate_last_name)s requested '
+                        'signatures for %(doctorate_title)s'
+                    )
+                    % common_tokens
+                )
                 web_notification = WebNotification(recipient=manager.person, content=str(content))
             WebNotificationHandler.create(web_notification)
 
@@ -282,15 +282,15 @@ class Notification(INotification):
             )
             EmailNotificationHandler.create(email_message, person=manager.person)
 
-            content = (
-                _(
-                    '<a href="%(admission_link_back)s">%(reference)s</a> - '
-                    '%(candidate_first_name)s %(candidate_last_name)s '
-                    'submitted request for %(doctorate_title)s'
-                )
-                % common_tokens
-            )
             with translation.override(manager.person.language):
+                content = (
+                    _(
+                        '<a href="%(admission_link_back)s">%(reference)s</a> - '
+                        '%(candidate_first_name)s %(candidate_last_name)s '
+                        'submitted request for %(doctorate_title)s'
+                    )
+                    % common_tokens
+                )
                 web_notification = WebNotification(recipient=manager.person, content=str(content))
             WebNotificationHandler.create(web_notification)
 
