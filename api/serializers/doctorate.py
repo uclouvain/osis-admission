@@ -37,7 +37,8 @@ class DoctorateIdentityDTOSerializer(serializers.Serializer):
 class DoctorateDTOSerializer(DTOSerializer):
     links = ActionLinksField(
         actions={
-            key: ACTION_LINKS[key] for key in [
+            key: ACTION_LINKS[key]
+            for key in [
                 # Project
                 'retrieve_proposition',
                 # Cotutelle
@@ -47,6 +48,9 @@ class DoctorateDTOSerializer(DTOSerializer):
                 # Confirmation
                 'retrieve_confirmation',
                 'update_confirmation',
+                # Training
+                'retrieve_training',
+                'add_training',
             ]
         }
     )

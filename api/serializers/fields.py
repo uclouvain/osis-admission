@@ -292,4 +292,15 @@ ACTION_LINKS = {
         'method': 'PUT',
         'params': ['uuid'],
     },
+    # Training
+    'retrieve_training': {
+        'path_name': 'admission_api_v1:doctoral-training',
+        'method': 'GET',
+        'params': ['uuid'],
+    },
+    'add_training': {
+        'path_name': 'admission_api_v1:doctoral-training',
+        'method': 'POST',
+        'params': ['uuid'],
+    },
 }

@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Admission API
-  version: 1.0.24
+  version: 1.0.25
   description: This API delivers data for the Admission project.
   contact:
     name: UCLouvain - OSIS
@@ -1640,6 +1640,152 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - propositions
+  /propositions/{uuid}/training:
+    get:
+      operationId: list_doctoral_trainings
+      description: ''
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DoctoralTrainingActivity'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
+    post:
+      operationId: create_doctoral_training
+      description: ''
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DoctoralTrainingActivity'
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DoctoralTrainingActivity'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
+  /propositions/{uuid}/training/{activity_id}:
+    get:
+      operationId: retrieve_doctoral_training
+      description: ''
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - name: activity_id
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DoctoralTrainingActivity'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
+    put:
+      operationId: update_doctoral_training
+      description: ''
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - name: activity_id
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DoctoralTrainingActivity'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DoctoralTrainingActivity'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
   /autocomplete/sector:
     get:
       operationId: listSectorDTOs
@@ -2100,6 +2246,8 @@ components:
                     $ref: '#/components/schemas/ActionLink'
                   update_confirmation:
                     $ref: '#/components/schemas/ActionLink'
+                  retrieve_training:
+                    $ref: '#/components/schemas/ActionLink'
                 readOnly: true
                 default: {}
             required:
@@ -2187,6 +2335,8 @@ components:
             retrieve_confirmation:
               $ref: '#/components/schemas/ActionLink'
             update_confirmation:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_training:
               $ref: '#/components/schemas/ActionLink'
           readOnly: true
           default: {}
@@ -3326,6 +3476,10 @@ components:
               $ref: '#/components/schemas/ActionLink'
             update_confirmation:
               $ref: '#/components/schemas/ActionLink'
+            retrieve_training:
+              $ref: '#/components/schemas/ActionLink'
+            add_training:
+              $ref: '#/components/schemas/ActionLink'
           readOnly: true
           default: {}
       required:
@@ -3342,6 +3496,704 @@ components:
       - genre_doctorant
       - prenom_doctorant
       - nom_doctorant
+    DoctoralTrainingActivity:
+      oneOf:
+      - $ref: '#/components/schemas/Conference'
+      - $ref: '#/components/schemas/ConferenceCommunication'
+      - $ref: '#/components/schemas/ConferencePublication'
+      - $ref: '#/components/schemas/Residency'
+      - $ref: '#/components/schemas/ResidencyCommunication'
+      - $ref: '#/components/schemas/Communication'
+      - $ref: '#/components/schemas/Publication'
+      - $ref: '#/components/schemas/Service'
+      - $ref: '#/components/schemas/Seminar'
+      - $ref: '#/components/schemas/SeminarCommunication'
+      - $ref: '#/components/schemas/Valorisation'
+      discriminator:
+        propertyName: object_type
+    Conference:
+      type: object
+      properties:
+        type:
+          type: string
+        ects:
+          type: number
+        title:
+          type: string
+        start_date:
+          type: string
+          format: date
+          nullable: true
+        end_date:
+          type: string
+          format: date
+          nullable: true
+        participating_days:
+          type: integer
+        is_online:
+          enum:
+          - false
+          - true
+          type: boolean
+          nullable: true
+        website:
+          type: string
+        country:
+          type: string
+          nullable: true
+        city:
+          type: string
+        organizing_institution:
+          type: string
+        participating_proof:
+          type: array
+          items:
+            type: string
+        comment:
+          type: string
+        object_type:
+          type: string
+        uuid:
+          type: string
+          readOnly: true
+        category:
+          $ref: '#/components/schemas/CategorieActivite'
+        status:
+          $ref: '#/components/schemas/StatutActivite'
+          readOnly: true
+        doctorate:
+          type: integer
+          writeOnly: true
+        children:
+          type: array
+          items:
+            oneOf:
+            - $ref: '#/components/schemas/ConferenceCommunication'
+            - $ref: '#/components/schemas/ConferencePublication'
+            discriminator:
+              propertyName: object_type
+          readOnly: true
+      required:
+      - type
+      - ects
+      - title
+      - start_date
+      - end_date
+      - participating_days
+      - is_online
+      - website
+      - country
+      - city
+      - organizing_institution
+      - comment
+      - object_type
+      - category
+    ConferenceCommunication:
+      type: object
+      properties:
+        type:
+          type: string
+        ects:
+          type: number
+        title:
+          type: string
+        summary:
+          type: array
+          items:
+            type: string
+        committee:
+          enum:
+          - ''
+          - 'YES'
+          - 'NO'
+          - NA
+          type: string
+          nullable: true
+        acceptation_proof:
+          type: array
+          items:
+            type: string
+        dial_reference:
+          type: string
+        participating_proof:
+          type: array
+          items:
+            type: string
+        comment:
+          type: string
+        object_type:
+          type: string
+        uuid:
+          type: string
+          readOnly: true
+        category:
+          $ref: '#/components/schemas/CategorieActivite'
+        status:
+          $ref: '#/components/schemas/StatutActivite'
+          readOnly: true
+        doctorate:
+          type: integer
+          writeOnly: true
+        parent:
+          type: string
+      required:
+      - type
+      - ects
+      - title
+      - committee
+      - dial_reference
+      - comment
+      - object_type
+      - category
+      - parent
+    ConferencePublication:
+      type: object
+      properties:
+        type:
+          type: string
+        ects:
+          type: number
+        title:
+          type: string
+        authors:
+          type: string
+        role:
+          type: string
+        keywords:
+          type: string
+        summary:
+          type: array
+          items:
+            type: string
+        committee:
+          enum:
+          - ''
+          - 'YES'
+          - 'NO'
+          - NA
+          type: string
+          nullable: true
+        journal:
+          type: string
+        dial_reference:
+          type: string
+        participating_proof:
+          type: array
+          items:
+            type: string
+        comment:
+          type: string
+        object_type:
+          type: string
+        uuid:
+          type: string
+          readOnly: true
+        category:
+          $ref: '#/components/schemas/CategorieActivite'
+        status:
+          $ref: '#/components/schemas/StatutActivite'
+          readOnly: true
+        doctorate:
+          type: integer
+          writeOnly: true
+        parent:
+          type: string
+      required:
+      - type
+      - ects
+      - title
+      - authors
+      - role
+      - keywords
+      - committee
+      - journal
+      - dial_reference
+      - comment
+      - object_type
+      - category
+      - parent
+    Residency:
+      type: object
+      properties:
+        type:
+          type: string
+        ects:
+          type: number
+        subtitle:
+          type: string
+        start_date:
+          type: string
+          format: date
+          nullable: true
+        end_date:
+          type: string
+          format: date
+          nullable: true
+        country:
+          type: string
+          nullable: true
+        city:
+          type: string
+        participating_proof:
+          type: array
+          items:
+            type: string
+        comment:
+          type: string
+        object_type:
+          type: string
+        uuid:
+          type: string
+          readOnly: true
+        category:
+          $ref: '#/components/schemas/CategorieActivite'
+        status:
+          $ref: '#/components/schemas/StatutActivite'
+          readOnly: true
+        doctorate:
+          type: integer
+          writeOnly: true
+        children:
+          type: array
+          items:
+            oneOf:
+            - $ref: '#/components/schemas/ResidencyCommunication'
+            discriminator:
+              propertyName: object_type
+          readOnly: true
+      required:
+      - type
+      - ects
+      - subtitle
+      - start_date
+      - end_date
+      - country
+      - city
+      - comment
+      - object_type
+      - category
+    ResidencyCommunication:
+      type: object
+      properties:
+        type:
+          type: string
+        subtype:
+          type: string
+        title:
+          type: string
+        start_date:
+          type: string
+          format: date
+          nullable: true
+        is_online:
+          enum:
+          - false
+          - true
+          type: boolean
+          nullable: true
+        organizing_institution:
+          type: string
+        website:
+          type: string
+        subtitle:
+          type: string
+        ects:
+          type: number
+        summary:
+          type: array
+          items:
+            type: string
+        participating_proof:
+          type: array
+          items:
+            type: string
+        comment:
+          type: string
+        object_type:
+          type: string
+        uuid:
+          type: string
+          readOnly: true
+        category:
+          $ref: '#/components/schemas/CategorieActivite'
+        status:
+          $ref: '#/components/schemas/StatutActivite'
+          readOnly: true
+        doctorate:
+          type: integer
+          writeOnly: true
+        parent:
+          type: string
+      required:
+      - type
+      - subtype
+      - title
+      - start_date
+      - is_online
+      - organizing_institution
+      - website
+      - subtitle
+      - ects
+      - comment
+      - object_type
+      - category
+      - parent
+    Communication:
+      type: object
+      properties:
+        type:
+          type: string
+        subtype:
+          type: string
+        title:
+          type: string
+        start_date:
+          type: string
+          format: date
+          nullable: true
+        is_online:
+          enum:
+          - false
+          - true
+          type: boolean
+          nullable: true
+        country:
+          type: string
+          nullable: true
+        city:
+          type: string
+        organizing_institution:
+          type: string
+        website:
+          type: string
+        subtitle:
+          type: string
+        summary:
+          type: array
+          items:
+            type: string
+        committee:
+          enum:
+          - ''
+          - 'YES'
+          - 'NO'
+          - NA
+          type: string
+          nullable: true
+        acceptation_proof:
+          type: array
+          items:
+            type: string
+        participating_proof:
+          type: array
+          items:
+            type: string
+        dial_reference:
+          type: string
+        ects:
+          type: number
+        comment:
+          type: string
+        object_type:
+          type: string
+        uuid:
+          type: string
+          readOnly: true
+        category:
+          $ref: '#/components/schemas/CategorieActivite'
+        status:
+          $ref: '#/components/schemas/StatutActivite'
+          readOnly: true
+        doctorate:
+          type: integer
+          writeOnly: true
+      required:
+      - type
+      - subtype
+      - title
+      - start_date
+      - is_online
+      - country
+      - city
+      - organizing_institution
+      - website
+      - subtitle
+      - committee
+      - dial_reference
+      - ects
+      - comment
+      - object_type
+      - category
+    Publication:
+      type: object
+      properties:
+        type:
+          type: string
+        title:
+          type: string
+        start_date:
+          type: string
+          format: date
+          nullable: true
+        authors:
+          type: string
+        role:
+          type: string
+        keywords:
+          type: string
+        summary:
+          type: array
+          items:
+            type: string
+        journal:
+          type: string
+        publication_status:
+          enum:
+          - ''
+          - UNSUBMITTED
+          - SUBMITTED
+          - IN_REVIEW
+          - ACCEPTED
+          - PUBLISHED
+          type: string
+          nullable: true
+        dial_reference:
+          type: string
+        ects:
+          type: number
+        participating_proof:
+          type: array
+          items:
+            type: string
+        comment:
+          type: string
+        object_type:
+          type: string
+        uuid:
+          type: string
+          readOnly: true
+        category:
+          $ref: '#/components/schemas/CategorieActivite'
+        status:
+          $ref: '#/components/schemas/StatutActivite'
+          readOnly: true
+        doctorate:
+          type: integer
+          writeOnly: true
+      required:
+      - type
+      - title
+      - start_date
+      - authors
+      - role
+      - keywords
+      - journal
+      - publication_status
+      - dial_reference
+      - ects
+      - comment
+      - object_type
+      - category
+    Service:
+      type: object
+      properties:
+        type:
+          type: string
+        title:
+          type: string
+        start_date:
+          type: string
+          format: date
+          nullable: true
+        end_date:
+          type: string
+          format: date
+          nullable: true
+        organizing_institution:
+          type: string
+        hour_volume:
+          type: string
+        participating_proof:
+          type: array
+          items:
+            type: string
+        ects:
+          type: number
+        comment:
+          type: string
+        object_type:
+          type: string
+        uuid:
+          type: string
+          readOnly: true
+        category:
+          $ref: '#/components/schemas/CategorieActivite'
+        status:
+          $ref: '#/components/schemas/StatutActivite'
+          readOnly: true
+        doctorate:
+          type: integer
+          writeOnly: true
+      required:
+      - type
+      - title
+      - start_date
+      - end_date
+      - organizing_institution
+      - hour_volume
+      - ects
+      - comment
+      - object_type
+      - category
+    Seminar:
+      type: object
+      properties:
+        type:
+          type: string
+        title:
+          type: string
+        start_date:
+          type: string
+          format: date
+          nullable: true
+        end_date:
+          type: string
+          format: date
+          nullable: true
+        hour_volume:
+          type: string
+        participating_proof:
+          type: array
+          items:
+            type: string
+        ects:
+          type: number
+        object_type:
+          type: string
+        uuid:
+          type: string
+          readOnly: true
+        category:
+          $ref: '#/components/schemas/CategorieActivite'
+        status:
+          $ref: '#/components/schemas/StatutActivite'
+          readOnly: true
+        doctorate:
+          type: integer
+          writeOnly: true
+        children:
+          type: array
+          items:
+            oneOf:
+            - $ref: '#/components/schemas/SeminarCommunication'
+            discriminator:
+              propertyName: object_type
+          readOnly: true
+      required:
+      - type
+      - title
+      - start_date
+      - end_date
+      - hour_volume
+      - ects
+      - object_type
+      - category
+    SeminarCommunication:
+      type: object
+      properties:
+        title:
+          type: string
+        start_date:
+          type: string
+          format: date
+          nullable: true
+        is_online:
+          enum:
+          - false
+          - true
+          type: boolean
+          nullable: true
+        country:
+          type: string
+          nullable: true
+        city:
+          type: string
+        organizing_institution:
+          type: string
+        website:
+          type: string
+        authors:
+          type: string
+        participating_proof:
+          type: array
+          items:
+            type: string
+        comment:
+          type: string
+        object_type:
+          type: string
+        uuid:
+          type: string
+          readOnly: true
+        category:
+          $ref: '#/components/schemas/CategorieActivite'
+        status:
+          $ref: '#/components/schemas/StatutActivite'
+          readOnly: true
+        doctorate:
+          type: integer
+          writeOnly: true
+        parent:
+          type: string
+      required:
+      - title
+      - start_date
+      - is_online
+      - country
+      - city
+      - organizing_institution
+      - website
+      - authors
+      - comment
+      - object_type
+      - category
+      - parent
+    Valorisation:
+      type: object
+      properties:
+        title:
+          type: string
+        subtitle:
+          type: string
+        summary:
+          type: array
+          items:
+            type: string
+        participating_proof:
+          type: array
+          items:
+            type: string
+        ects:
+          type: number
+        object_type:
+          type: string
+        uuid:
+          type: string
+          readOnly: true
+        category:
+          $ref: '#/components/schemas/CategorieActivite'
+        status:
+          $ref: '#/components/schemas/StatutActivite'
+          readOnly: true
+        doctorate:
+          type: integer
+          writeOnly: true
+      required:
+      - title
+      - subtitle
+      - ects
+      - object_type
+      - category
     SectorDTO:
       type: object
       properties:
@@ -3722,6 +4574,23 @@ components:
       - nouvelle_echeance
       - justification_succincte
       - lettre_justification
+    CategorieActivite:
+      enum:
+      - CONFERENCE
+      - COMMUNICATION
+      - SEMINAR
+      - PUBLICATION
+      - SERVICE
+      - RESIDENCY
+      - VAE
+      type: string
+    StatutActivite:
+      enum:
+      - NON_SOUMISE
+      - SOUMISE
+      - ACCEPTEE
+      - REFUSEE
+      type: string
     CompleterPropositionCommand:
       type: object
       properties:

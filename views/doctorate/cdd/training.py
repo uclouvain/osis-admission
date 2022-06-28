@@ -131,3 +131,20 @@ class DoctorateTrainingActivityEditView(DoctorateTrainingActivityFormMixin, gene
         if self.object.parent_id:
             return CategorieActivite[self.object.parent.category], category
         return category
+
+    @property
+    def activity(self):
+        # Don't remove, this is to share same template code in front-office
+        return self.object
+
+
+class DoctorateTrainingActivityDeleteView(LoadDossierViewMixin, generic.DeleteView):
+    model = Activity
+    permission_required = "admission.change_activity"
+    slug_field = 'uuid'
+    pk_url_kwarg = "NOT_TO_BE_USED"
+    slug_url_kwarg = 'activity_id'
+    template_name = "admission/doctorate/forms/training/activity_confirm_delete.html"
+
+    def get_success_url(self):
+        return resolve_url("admission:doctorate:training", pk=self.kwargs['pk'])

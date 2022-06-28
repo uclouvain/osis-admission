@@ -32,6 +32,22 @@ from admission.contrib.models.cdd_config import CddConfiguration
 from admission.contrib.models.doctoral_training import Activity
 from base.forms.utils.datefield import DatePickerInput
 
+__all__ = [
+    "ConfigurableActivityTypeWidget",
+    "ConfigurableActivityTypeField",
+    "ConferenceForm",
+    "ConferenceCommunicationForm",
+    "ConferencePublicationForm",
+    "CommunicationForm",
+    "PublicationForm",
+    "ResidencyForm",
+    "ResidencyCommunicationForm",
+    "ServiceForm",
+    "SeminarForm",
+    "SeminarCommunicationForm",
+    "ValorisationForm",
+]
+
 
 class ConfigurableActivityTypeWidget(forms.MultiWidget):
     """Form widget to handle a configurable (from CDDConfiguration) list of choices, or other"""
