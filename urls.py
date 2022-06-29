@@ -59,6 +59,10 @@ doctorate_update_paths = [
     path('confirmation', DoctorateAdmissionConfirmationFormView.as_view(), name='confirmation'),
     path('extension-request', DoctorateAdmissionExtensionRequestFormView.as_view(), name='extension-request'),
 ]
+doctorate_training_paths = [
+    path('add/<str:category>', DoctorateTrainingActivityAddView.as_view(), name='add'),
+    path('edit/<uuid:activity_id>', DoctorateTrainingActivityEditView.as_view(), name='edit'),
+]
 doctorate_detail_paths = [
     path('person', DoctorateAdmissionPersonDetailView.as_view(), name='person'),
     path('coordonnees', DoctorateAdmissionCoordonneesDetailView.as_view(), name='coordonnees'),
@@ -80,6 +84,8 @@ doctorate_detail_paths = [
         name='confirmation-canvas',
     ),
     path('update/', include((doctorate_update_paths, 'update'))),
+    path('training', DoctorateTrainingActivityView.as_view(), name='training'),
+    path('training/', include((doctorate_training_paths, 'training'))),
 ]
 
 doctorate_cdd_paths = [

@@ -27,7 +27,7 @@
 
 {% block modal_header %}
   <strong>
-    {% blocktrans with status='PASSED_CONFIRMATION'|enum_display:'ChoixStatutDoctorat' %}
+    {% blocktrans with status='PASSED_CONFIRMATION'|enum_display:'ChoixStatutDoctorat' trimmed %}
       Move the doctorate to the "{{ status }}" state?
     {% endblocktrans %}
   </strong>
@@ -37,7 +37,7 @@
   {% if can_be_evaluated %}
     <form method="post" action="{% url 'admission:doctorate:confirmation:success' pk %}" id="confirmationSuccessModalForm">
         {% csrf_token %}
-        {% blocktrans with status='PASSED_CONFIRMATION'|enum_display:'ChoixStatutDoctorat' %}
+        {% blocktrans with status='PASSED_CONFIRMATION'|enum_display:'ChoixStatutDoctorat' trimmed %}
           Do you wish to move the doctorate to the "{{ status }}" state?
         {% endblocktrans %}
     </form>
