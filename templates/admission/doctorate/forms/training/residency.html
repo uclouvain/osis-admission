@@ -25,34 +25,34 @@
 {% endcomment %}
 
 <h2>
-  {% if not form.instance.pk %}
+  {% if not view.kwargs.activity_id %}
     {% trans "Add a residency" %}
   {% else %}
-    {% blocktrans with title=form.instance.title trimmed %}
-      Edit {{ title }}
+    {% blocktrans with category=view.activity.get_category_display trimmed %}
+      Edit activity of type <em>{{ category }}</em>
     {% endblocktrans %}
   {% endif %}
 </h2>
 
 <p>{% lorem %}</p>
 
-<h3>{% trans "Event description" %}</h3>
+<h3>{% trans "Description" %}</h3>
 <div class="row">
   {% bootstrap_field form.type form_group_class="form-group col-md-4" %}
 </div>
+{% bootstrap_field form.subtitle form_group_class="form-group required_field" %}
 <div class="row">
   {% bootstrap_field form.start_date form_group_class="form-group col-md-4 required_field" %}
   {% bootstrap_field form.end_date form_group_class="form-group col-md-4 required_field" %}
 </div>
-{% bootstrap_field form.subtitle form_group_class="form-group required_field" %}
 <div class="row">
   {% bootstrap_field form.country form_group_class="form-group col-md-4 required_field" %}
   {% bootstrap_field form.city form_group_class="form-group col-md-4 required_field" %}
 </div>
 
-<h3>{% trans "Event participation" %}</h3>
+<h3>{% trans "Participation" %}</h3>
 <div class="row">
   {% bootstrap_field form.ects form_group_class="form-group col-md-4 required_field" %}
 </div>
-{% bootstrap_field form.participating_proof  form_group_class="form-group required_field"  %}
+{% bootstrap_field form.participating_proof %}
 {% bootstrap_field form.comment %}

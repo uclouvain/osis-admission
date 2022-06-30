@@ -1,4 +1,5 @@
-{% load i18n bootstrap3 %}
+{% extends "admission/doctorate/details/tab_layout.html" %}
+{% load i18n static admission bootstrap3 %}
 
 {% comment "License" %}
   * OSIS stands for Open Student Information System. It's an application
@@ -24,22 +25,17 @@
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
 
-<h2>
-  {% if not view.kwargs.activity_id %}
-    {% trans "Add a VAE" %}
-  {% else %}
-    {% blocktrans with category=view.activity.get_category_display trimmed %}
-      Edit activity of type <em>{{ category }}</em>
-    {% endblocktrans %}
-  {% endif %}
-</h2>
 
-<p>{% lorem %}</p>
-
-{% bootstrap_field form.title form_group_class="form-group required_field" %}
-{% bootstrap_field form.subtitle form_group_class="form-group required_field" %}
-{% bootstrap_field form.summary form_group_class="form-group required_field" %}
-{% bootstrap_field form.participating_proof %}
-<div class="row">
-  {% bootstrap_field form.ects form_group_class="form-group col-md-4 required_field" %}
-</div>
+{% block tab_content %}
+  <form action="" method="post">
+    {% csrf_token %}
+    <div class="text-right">
+      <a href="{% url "admission:doctorate:training" pk=view.kwargs.pk %}">
+        {% trans "Cancel" %}
+      </a>
+      <button type="submit" class="btn btn-danger">
+        {% trans "Confirm" %}
+      </button>
+    </div>
+  </form>
+{% endblock %}

@@ -25,18 +25,16 @@
 {% endcomment %}
 
 <h2>
-  {% if not form.instance.pk %}
+  {% if not view.kwargs.activity_id %}
     {% trans "Add a communication to this seminar" %}
   {% else %}
-    {% blocktrans with title=form.instance.title trimmed %}
-      Edit {{ title }}
-    {% endblocktrans %}
+    {% trans "Edit the communication of this seminar" %}
   {% endif %}
 </h2>
 
 <p>{% lorem %}</p>
 
-<h3>{% trans "Event description" %}</h3>
+<h3>{% trans "Description" %}</h3>
 <div class="row">
   {% bootstrap_field form.start_date form_group_class="form-group col-md-4 required_field" %}
   {% bootstrap_field form.is_online form_group_class="form-group col-md-4 required_field" %}
@@ -45,11 +43,11 @@
   {% bootstrap_field form.country form_group_class="form-group col-md-4 required_field" %}
   {% bootstrap_field form.city form_group_class="form-group col-md-4 required_field" %}
 </div>
-{% bootstrap_field form.title form_group_class="form-group required_field" %}
 {% bootstrap_field form.organizing_institution form_group_class="form-group required_field" %}
 {% bootstrap_field form.website placeholder="https://" %}
-{% bootstrap_field form.authors %}
+{% bootstrap_field form.title form_group_class="form-group required_field" %}
+{% bootstrap_field form.authors form_group_class="form-group required_field" %}
 
-<h3>{% trans "Event participation" %}</h3>
-{% bootstrap_field form.participating_proof form_group_class="form-group required_field"  %}
+<h3>{% trans "Participation" %}</h3>
+{% bootstrap_field form.participating_proof %}
 {% bootstrap_field form.comment %}

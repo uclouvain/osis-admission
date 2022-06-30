@@ -26,17 +26,12 @@
 
 {% url "admission:doctorate:training:edit" pk=view.kwargs.pk activity_id=activity.uuid as edit_url %}
 {% url "admission:doctorate:training:delete" pk=view.kwargs.pk activity_id=activity.uuid as delete_url %}
-{% display activity.ects " ECTS" as ects %}
+{% display activity.ects|default:""|floatformat " ECTS" as ects %}
 
-<div class="panel-heading panel-{{ activity|status_as_class }}" role="tab">
+<div class="panel-heading" role="tab" id="h-{{ activity.uuid }}">
   <h3 class="panel-title">
     <a role="button" data-toggle="collapse" data-parent="#accordion" href="#a-{{ activity.uuid }}"
-       aria-expanded="true"
-       aria-controls="a-{{ activity.uuid }}">
-      <span class="badge">{{ activity.get_status_display }}</span>
-      {{ activity.get_category_display }} :
-      {% display activity.title "-" ects  %}
-    </a>
+       aria-expanded="false" aria-controls="a-{{ activity.uuid }}" class="collapsed"></a>
     <div class="btn-group btn-group-sm pull-right">
       <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
               aria-expanded="false">
@@ -55,6 +50,8 @@
         </li>
       </ul>
     </div>
+    <span class="badge">{{ activity.get_status_display }}</span>
+    {% display activity.type ':' activity.title "-" ects %}
     <div class="clearfix"></div>
   </h3>
 </div>
@@ -62,9 +59,15 @@
      aria-labelledby="h-{{ activity.uuid }}">
   <div class="panel-body">
     <p>
-      <strong class="d-block">{% trans "Event description" %}</strong>
-      {% display activity.title "-" activity.get_committee_display %}
+      <strong class="d-block">{% trans "Description" %}</strong>
+      {% display activity.title %}
     </p>
+    {% if activity.committee %}
+    <p>
+      <strong class="d-block">{% trans "Selection committee" %}</strong>
+      {{ activity.get_committee_display }}
+    </p>
+    {% endif %}
     {% if activity.summary %}
       <div class="form-group">
         <strong class="d-block">{% trans "Summary" context "paper summary" %}</strong>
@@ -72,16 +75,16 @@
       </div>
     {% endif %}
     <div class="row">
+      {% if activity.ects %}
+        <p class="col-md-4">
+          <strong class="d-block">{% trans "ECTS" %}</strong>
+          {{ activity.ects|floatformat }}
+        </p>
+      {% endif %}
       {% if activity.dial_reference %}
         <p class="col-md-4">
           <strong class="d-block">{% trans "Référence DIAL.Pr" %}</strong>
           {{ activity.dial_reference }}
-        </p>
-      {% endif %}
-      {% if activity.ects %}
-        <p class="col-md-4">
-          <strong class="d-block">{% trans "ECTS for participating" %}</strong>
-          {{ activity.ects }}
         </p>
       {% endif %}
     </div>

@@ -33,14 +33,11 @@
 
 {% display '(' activity.city "," activity.country "," activity.start_date|date:"d/m/Y" ")" as location_period %}
 
-<div class="panel-heading">
+<div class="panel-heading" role="tab" id="h-{{ activity.uuid }}">
   <h3 class="panel-title">
     <a role="button" data-toggle="collapse" data-parent="#accordion" href="#a-{{ activity.uuid }}"
-       aria-expanded="true"
-       aria-controls="a-{{ activity.uuid }}">
-      <span class="badge">{{ activity.get_status_display }}</span>
-      {% display activity.title '-' location_period %}
-    </a>
+       aria-expanded="false" aria-controls="a-{{ activity.uuid }}" class="collapsed"></a>
+    <span class="badge">{{ activity.get_status_display }}</span>
     <div class="btn-group btn-group-sm pull-right">
       <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
               aria-expanded="false">
@@ -58,6 +55,8 @@
         </li>
       </ul>
     </div>
+
+    {% display activity.title '-' location_period %}
     <div class="clearfix"></div>
   </h3>
 </div>
@@ -67,7 +66,7 @@
     <p>
       {% display activity.title " " location_period  "-" activity.get_is_online_display "-" website %}
       <br/>
-      {% display activity.organizing_institution "," activity_authors %}
+      {% display activity.organizing_institution "," activity.authors %}
     </p>
     {% if activity.participating_proof %}
       <div class="form-group">

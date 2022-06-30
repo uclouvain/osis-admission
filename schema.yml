@@ -3517,7 +3517,11 @@ components:
         type:
           type: string
         ects:
-          type: number
+          type: string
+          format: decimal
+          multipleOf: 0.01
+          maximum: 100
+          minimum: -100
         title:
           type: string
         start_date:
@@ -3529,13 +3533,13 @@ components:
           format: date
           nullable: true
         participating_days:
-          type: integer
+          type: string
+          format: decimal
+          multipleOf: 0.1
+          maximum: 100
+          minimum: -100
         is_online:
-          enum:
-          - false
-          - true
           type: boolean
-          nullable: true
         website:
           type: string
         country:
@@ -3594,7 +3598,11 @@ components:
         type:
           type: string
         ects:
-          type: number
+          type: string
+          format: decimal
+          multipleOf: 0.01
+          maximum: 100
+          minimum: -100
         title:
           type: string
         summary:
@@ -3652,7 +3660,11 @@ components:
         type:
           type: string
         ects:
-          type: number
+          type: string
+          format: decimal
+          multipleOf: 0.01
+          maximum: 100
+          minimum: -100
         title:
           type: string
         authors:
@@ -3718,7 +3730,11 @@ components:
         type:
           type: string
         ects:
-          type: number
+          type: string
+          format: decimal
+          multipleOf: 0.01
+          maximum: 100
+          minimum: -100
         subtitle:
           type: string
         start_date:
@@ -3786,11 +3802,7 @@ components:
           format: date
           nullable: true
         is_online:
-          enum:
-          - false
-          - true
           type: boolean
-          nullable: true
         organizing_institution:
           type: string
         website:
@@ -3798,7 +3810,11 @@ components:
         subtitle:
           type: string
         ects:
-          type: number
+          type: string
+          format: decimal
+          multipleOf: 0.01
+          maximum: 100
+          minimum: -100
         summary:
           type: array
           items:
@@ -3852,11 +3868,7 @@ components:
           format: date
           nullable: true
         is_online:
-          enum:
-          - false
-          - true
           type: boolean
-          nullable: true
         country:
           type: string
           nullable: true
@@ -3891,7 +3903,11 @@ components:
         dial_reference:
           type: string
         ects:
-          type: number
+          type: string
+          format: decimal
+          multipleOf: 0.01
+          maximum: 100
+          minimum: -100
         comment:
           type: string
         object_type:
@@ -3960,7 +3976,11 @@ components:
         dial_reference:
           type: string
         ects:
-          type: number
+          type: string
+          format: decimal
+          multipleOf: 0.01
+          maximum: 100
+          minimum: -100
         participating_proof:
           type: array
           items:
@@ -4018,7 +4038,11 @@ components:
           items:
             type: string
         ects:
-          type: number
+          type: string
+          format: decimal
+          multipleOf: 0.01
+          maximum: 100
+          minimum: -100
         comment:
           type: string
         object_type:
@@ -4067,7 +4091,11 @@ components:
           items:
             type: string
         ects:
-          type: number
+          type: string
+          format: decimal
+          multipleOf: 0.01
+          maximum: 100
+          minimum: -100
         object_type:
           type: string
         uuid:
@@ -4108,11 +4136,7 @@ components:
           format: date
           nullable: true
         is_online:
-          enum:
-          - false
-          - true
           type: boolean
-          nullable: true
         country:
           type: string
           nullable: true
@@ -4174,7 +4198,11 @@ components:
           items:
             type: string
         ects:
-          type: number
+          type: string
+          format: decimal
+          multipleOf: 0.01
+          maximum: 100
+          minimum: -100
         object_type:
           type: string
         uuid:

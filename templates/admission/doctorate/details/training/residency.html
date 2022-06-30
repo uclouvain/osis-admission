@@ -39,9 +39,12 @@
 
 
 {#  We cannot use {% panel %} as the title contains HTML #}
-<div class="panel panel-{{ activity|status_as_class }}">
+<div class="panel panel-{{ activity|status_as_class }}" data-status="{{ activity.status }}" data-type="{{ activity.category }}">
   <div class="panel-heading" role="tab" id="h-{{ activity.uuid }}">
     <h3 class="panel-title">
+      <a role="button" data-toggle="collapse" data-parent="#accordion" href="#a-{{ activity.uuid }}"
+         aria-expanded="false" aria-controls="a-{{ activity.uuid }}" class="collapsed"></a>
+      <span class="badge">{{ activity.get_status_display }}</span>
       <div class="btn-group btn-group-sm pull-right">
         <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
                 aria-expanded="false">
@@ -65,23 +68,19 @@
         </ul>
       </div>
 
-      <a role="button" data-toggle="collapse" data-parent="#accordion" href="#a-{{ activity.uuid }}"
-         aria-expanded="true"
-         aria-controls="a-{{ activity.uuid }}">
-        <span class="badge">{{ activity.get_status_display }}</span>
-        {% display activity.type ',' activity.title %}
-        {% display activity.ects " ECTS" as ects %}
-        {% display '(' activity.city "," activity.country "," period ")" "-" ects %}
-      </a>
+      {% display activity.type %}
+      {% display activity.ects|default:""|floatformat " ECTS" as ects %}
+      {% display '(' activity.city "," activity.country "," period ")" "-" ects %}
       <div class="clearfix"></div>
     </h3>
   </div>
   <div id="a-{{ activity.uuid }}" class="panel-collapse collapse" role="tabpanel"
        aria-labelledby="h-{{ activity.uuid }}">
     <div class="panel-body">
+      <strong class="d-block">{% trans "Description" %}</strong>
+      {{ activity.subtitle|linebreaks }}
       <p>
-        <strong class="d-block">{% trans "Event description" %}</strong>
-        {% display activity.title "-" period "-" activity.get_is_online_display "-" website %}
+        {% display period "-" activity.get_is_online_display "-" website %}
         <br/>
         {% display activity.organizing_institution "," activity.city "," activity.country %}
       </p>
@@ -89,13 +88,13 @@
         {% if activity.participating_days %}
           <p class="col-md-4">
             <strong class="d-block">{% trans "Number of days participating" %}</strong>
-            {{ activity.participating_days }}
+            {{ activity.participating_days|floatformat }}
           </p>
         {% endif %}
         {% if activity.ects %}
           <p class="col-md-4">
             <strong class="d-block">{% trans "ECTS for participating" %}</strong>
-            {{ activity.ects }}
+            {{ activity.ects|floatformat }}
           </p>
         {% endif %}
       </div>
