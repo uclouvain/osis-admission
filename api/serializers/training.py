@@ -54,6 +54,7 @@ FORM_SERIALIZER_FIELD_MAPPING = {
     forms.FloatField: serializers.FloatField,
     forms.TypedChoiceField: serializers.ChoiceField,  # "is_online" field
     forms.ModelChoiceField: serializers.Field,  # replaced correctly later
+    forms.DecimalField: serializers.DecimalField,
     FileUploadField: serializers.ListField,
 }
 
@@ -119,7 +120,8 @@ class ActivitySerializerBase(serializers.Serializer):
                 serializer_field_class = field_mapping[form_field.__class__]
             except KeyError:
                 raise TypeError(
-                    "{field} is not mapped to a serializer field. Please add {field} to FORM_SERIALIZER_FIELD_MAPPING."
+                    f"{field_name} ({form_field}) is not mapped to a serializer field. "
+                    "Please add id to FORM_SERIALIZER_FIELD_MAPPING."
                 )
             else:
                 ret[field_name] = self._get_field(field_name, form_field, serializer_field_class)

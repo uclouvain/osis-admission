@@ -17,16 +17,6 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#, python-format
-msgid ""
-"\n"
-"              Are you sure you want to delete \"%(object)s\"?\n"
-"            "
-msgstr ""
-"\n"
-"              Êtes-vous sûr de vouloir supprimer \"%(object)s\"?\n"
-"            "
-
 msgctxt "female gender"
 msgid ""
 "\n"
@@ -115,15 +105,12 @@ msgstr ""
 "      "
 
 #, python-format
-msgid "%(label)s:"
-msgstr "%(label)s :"
+msgid "%(added)s ECTS added with %(validated)s validated by the CDD."
+msgstr "%(added)s ECTS ajoutés dont %(validated)s validés par la CDD."
 
 #, python-format
-msgid ""
-"%(validated)s ECTS added with %(pending)s pending validation by the CDD."
-msgstr ""
-"%(validated)s ECTS ajoutés dont %(pending)s en attente de validation par la "
-"CDD."
+msgid "%(label)s:"
+msgstr "%(label)s :"
 
 msgid ", on"
 msgstr ", le"
@@ -224,6 +211,12 @@ msgstr "Actions"
 msgid "Activities"
 msgstr "Activités"
 
+msgid "Activity begin date"
+msgstr "Date de début de l'activité"
+
+msgid "Activity end date"
+msgstr "Date de fin de l'activité"
+
 msgid "Activity subtype"
 msgstr "Sous-type d'activité"
 
@@ -294,6 +287,10 @@ msgstr "Date de soumission Admission"
 msgid "Admission type"
 msgstr "Type de l'admission"
 
+msgctxt "filters"
+msgid "All"
+msgstr "Tous"
+
 msgid "All CA members must have approved the proposition."
 msgstr ""
 "Tous les membres du comité d'accompagnement doivent approuver la proposition."
@@ -352,9 +349,6 @@ msgstr "Biologie"
 
 msgid "Back to the list"
 msgstr "Retour à la liste"
-
-msgid "Begin date"
-msgstr "Date de début"
 
 msgid "Body"
 msgstr "Corps"
@@ -811,6 +805,9 @@ msgstr "Statut dossier"
 msgid "ECONOMY"
 msgstr "Economie"
 
+msgid "ECTS"
+msgstr "ECTS"
+
 msgctxt "summary"
 msgid "ECTS added"
 msgstr "ECTS ajoutés"
@@ -819,6 +816,9 @@ msgid "ECTS credits"
 msgstr "crédits ECTS"
 
 msgid "ECTS for participating"
+msgstr "ECTS pour la participation"
+
+msgid "ECTS for the participation"
 msgstr "ECTS pour la participation"
 
 msgid "EFT"
@@ -834,17 +834,26 @@ msgid "Edit"
 msgstr "Modifier"
 
 #, python-format
-msgid "Edit %(title)s"
-msgstr "Modifier %(title)s"
+msgid "Edit activity of type <em>%(category)s</em>"
+msgstr "Modifier l'activité de type <em>%(category)s</em>"
+
+msgid "Edit the communication of this conference"
+msgstr "Modifier la communication de cette conférence"
+
+msgid "Edit the communication of this residency"
+msgstr "Modifier la communication de ce séjour"
+
+msgid "Edit the communication of this seminar"
+msgstr "Modifier la communication de ce séminaire"
+
+msgid "Edit the publication of this conference"
+msgstr "Modifier la publication de cette conférence"
 
 msgid "Edition or co-publication"
 msgstr "Édition ou coédition"
 
 msgid "Email"
 msgstr "Email"
-
-msgid "End date"
-msgstr "Date de fin"
 
 msgid "English"
 msgstr "Anglais"
@@ -860,6 +869,9 @@ msgstr "Description de l'événement"
 
 msgid "Event participation"
 msgstr "Participation à l'événement"
+
+msgid "Event website"
+msgstr "Site web de l'événement"
 
 msgid "Example"
 msgstr "Exemple"
@@ -964,7 +976,7 @@ msgid "Identifier"
 msgstr "Identifiant"
 
 msgid "If other, specify"
-msgstr "Si autre, spécifier"
+msgstr "Si autre, préciser"
 
 msgid ""
 "Impossible action: please be sure that the confirmation date and report are "
@@ -1277,11 +1289,17 @@ msgstr "Non invité"
 msgid "Name"
 msgstr "Nom"
 
+msgid "Name in the language of the manifestation"
+msgstr "Nom dans la langue de la manifestation"
+
 msgid "Name of the activity"
 msgstr "Nom de l'activité"
 
 msgid "Name of the event"
 msgstr "Nom de l'événement"
+
+msgid "Name of the manifestation"
+msgstr "Nom de la manifestation"
 
 msgid "National conference"
 msgstr "Conférence nationale"
@@ -1338,6 +1356,9 @@ msgstr "En ligne"
 
 msgid "Online event"
 msgstr "Événement en ligne"
+
+msgid "Online or in person"
+msgstr "En ligne ou en présentiel"
 
 msgid "Opinion of the CA following the format provided by the CDD"
 msgstr "Avis du comité d'accompagnement suivant le format fourni par la CDD"
@@ -1687,7 +1708,7 @@ msgid "SELF_FUNDING"
 msgstr "Auto-financement"
 
 msgid "SEMINAR"
-msgstr "Séminaire"
+msgstr "Séminaire de recherche : assistance"
 
 msgid "SERVICE"
 msgstr "Service institutionnel, didactique et d'expertise scientifique"
@@ -1781,6 +1802,9 @@ msgstr "Monsieur"
 
 msgid "Speaker"
 msgstr "Orateur ou oratrice"
+
+msgid "Status"
+msgstr "Statut"
 
 msgid "Status changes"
 msgstr "Changements de statut"
@@ -1950,6 +1974,9 @@ msgstr "La raison du refus"
 msgid "The signature request procedure isn't in progress."
 msgstr "La procédure de demande de signature n'a pas été lancée."
 
+msgid "The start date can't be later than the end date"
+msgstr "La date de début ne peut être postérieure à la date de fin"
+
 msgid "There can be no more CA members in the supervision group."
 msgstr ""
 "Il ne peut y avoir davantage de membres du comité d'accompagnement dans le "
@@ -2020,6 +2047,9 @@ msgstr "Token"
 msgid "Tokens that can be used for replacement"
 msgstr "Tokens pouvant être utilisés"
 
+msgid "Total hourly volume"
+msgstr "Volume horaire total"
+
 msgid "Training"
 msgstr "Formation"
 
@@ -2057,7 +2087,7 @@ msgid "Upload the opinion on the renewal of the research mandate"
 msgstr "Téléverser l'avis sur le renouvellement du mandat de recherche"
 
 msgid "VAE"
-msgstr "VAE"
+msgstr "Valorisation des acquis de l'expérience"
 
 msgid "VALID"
 msgstr "Valide"

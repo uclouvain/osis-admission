@@ -62,7 +62,6 @@ doctorate_update_paths = [
 doctorate_training_paths = [
     path('add/<str:category>', DoctorateTrainingActivityAddView.as_view(), name='add'),
     path('edit/<uuid:activity_id>', DoctorateTrainingActivityEditView.as_view(), name='edit'),
-    path('delete/<uuid:activity_id>', DoctorateTrainingActivityDeleteView.as_view(), name='delete'),
 ]
 doctorate_detail_paths = [
     path('person', DoctorateAdmissionPersonDetailView.as_view(), name='person'),

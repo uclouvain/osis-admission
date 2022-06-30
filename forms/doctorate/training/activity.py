@@ -23,8 +23,10 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from functools import partial
 from typing import List, Optional
 
+from dal import autocomplete
 from django import forms
 from django.utils.translation import get_language, gettext_lazy as _, pgettext_lazy
 
@@ -111,10 +113,29 @@ class ConfigurableActivityTypeField(forms.MultiValueField):
         return radio if radio != "other" else other
 
 
+IsOnlineField = partial(
+    forms.BooleanField,
+    label=_("Online or in person"),
+    initial=False,
+    required=False,
+    widget=forms.RadioSelect(choices=((False, _("In person")), (True, _("Online")))),
+)
+
+
 class ActivityFormMixin:
     def __init__(self, admission, *args, **kwargs) -> None:
         self.cdd_id = admission.doctorate.management_entity_id
         super().__init__(*args, **kwargs)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        if (
+            cleaned_data.get('start_date')
+            and cleaned_data.get('end_date')
+            and cleaned_data.get('start_date') > cleaned_data.get('end_date')
+        ):
+            self.add_error('start_date', forms.ValidationError(_("The start date can't be later than the end date")))
+        return cleaned_data
 
     class Media:
         js = [
@@ -135,6 +156,7 @@ class ConferenceForm(ActivityFormMixin, forms.ModelForm):
             _("International conference"),
         ],
     )
+    is_online = IsOnlineField()
 
     class Meta:
         model = Activity
@@ -154,12 +176,17 @@ class ConferenceForm(ActivityFormMixin, forms.ModelForm):
             'comment',
         ]
         labels = {
-            'title': _("Name of the event"),
+            'title': _("Name of the manifestation"),
+            'website': _("Event website"),
+            'ects': _("ECTS for the participation"),
         }
         widgets = {
-            'is_online': forms.RadioSelect(choices=((False, _("In person")), (True, _("Online")))),
             'start_date': DatePickerInput(attrs={'placeholder': _("dd/mm/yyyy"), **DatePickerInput.defaut_attrs}),
             'end_date': DatePickerInput(attrs={'placeholder': _("dd/mm/yyyy"), **DatePickerInput.defaut_attrs}),
+            'country': autocomplete.ListSelect2(url="country-autocomplete"),
+        }
+        help_texts = {
+            'title': _("Name in the language of the manifestation"),
         }
 
 
@@ -251,7 +278,12 @@ class CommunicationForm(ActivityFormMixin, forms.ModelForm):
             _("Poster"),
         ],
     )
-    subtitle = forms.CharField(label=_("Title of the communication"), max_length=200)
+    subtitle = forms.CharField(
+        label=_("Title of the communication"),
+        max_length=200,
+        required=False,
+    )
+    is_online = IsOnlineField()
 
     class Meta:
         model = Activity
@@ -277,19 +309,22 @@ class CommunicationForm(ActivityFormMixin, forms.ModelForm):
         labels = {
             'title': _("Name of the activity"),
             'start_date': _("Date of the activity"),
+            'website': _("Event website"),
             'acceptation_proof': _("Proof of acceptation by the committee"),
             'participating_proof': _("Communication attestation"),
+            'committee': _("Selection committee"),
+            'summary': _("Summary of the communication"),
         }
         widgets = {
-            'is_online': forms.RadioSelect(choices=((False, _("In person")), (True, _("Online")))),
             'start_date': DatePickerInput(attrs={'placeholder': _("dd/mm/yyyy"), **DatePickerInput.defaut_attrs}),
+            'country': autocomplete.ListSelect2(url="country-autocomplete"),
         }
 
 
 class PublicationForm(ActivityFormMixin, forms.ModelForm):
     template_name = "admission/doctorate/forms/training/publication.html"
     type = ConfigurableActivityTypeField(
-        label=_("Type of publication"),
+        label=_("Type of activity"),
         choices=[
             _("Article for a peer-reviewed journal"),
             _("Article for a non-refereed journal"),
@@ -324,6 +359,7 @@ class PublicationForm(ActivityFormMixin, forms.ModelForm):
             'title': _("Title of the publication"),
             'start_date': _("Date of the publication"),
             'publication_status': _("Publication status"),
+            'participating_proof': _("Proof"),
         }
         widgets = {
             'start_date': DatePickerInput(attrs={'placeholder': _("dd/mm/yyyy"), **DatePickerInput.defaut_attrs}),
@@ -360,14 +396,20 @@ class ResidencyForm(ActivityFormMixin, forms.ModelForm):
         widgets = {
             'start_date': DatePickerInput(attrs={'placeholder': _("dd/mm/yyyy"), **DatePickerInput.defaut_attrs}),
             'end_date': DatePickerInput(attrs={'placeholder': _("dd/mm/yyyy"), **DatePickerInput.defaut_attrs}),
+            'country': autocomplete.ListSelect2(url="country-autocomplete"),
         }
 
 
 class ResidencyCommunicationForm(ActivityFormMixin, forms.ModelForm):
     template_name = "admission/doctorate/forms/training/residency_communication.html"
     type = ConfigurableActivityTypeField(label=_("Type of activity"), choices=[_("Research seminar")])
-    subtype = ConfigurableActivityTypeField(label=_("Type of communication"), choices=[_("Oral exposé")])
-    subtitle = forms.CharField(label=_("Title of the communication"), max_length=200)
+    subtype = ConfigurableActivityTypeField(
+        label=_("Type of communication"),
+        choices=[_("Oral exposé")],
+        required=False,
+    )
+    subtitle = forms.CharField(label=_("Title of the communication"), max_length=200, required=False)
+    is_online = IsOnlineField()
 
     class Meta:
         model = Activity
@@ -388,9 +430,11 @@ class ResidencyCommunicationForm(ActivityFormMixin, forms.ModelForm):
         labels = {
             'title': _("Name of the event"),
             'start_date': _("Date of the activity"),
+            'website': _("Event website"),
+            'summary': _("Summary of the communication"),
+            'participating_proof': _("Attestation of the communication"),
         }
         widgets = {
-            'is_online': forms.RadioSelect(choices=((False, _("In person")), (True, _("Online")))),
             'start_date': DatePickerInput(attrs={'placeholder': _("dd/mm/yyyy"), **DatePickerInput.defaut_attrs}),
         }
 
@@ -413,8 +457,10 @@ class ServiceForm(ActivityFormMixin, forms.ModelForm):
             'comment',
         ]
         labels = {
+            'title': _("Name of the activity"),
             'subtitle': _("Description of the activity"),
             'participating_proof': _("Proof (if needed)"),
+            'organizing_institution': _("Institution"),
         }
         widgets = {
             'start_date': DatePickerInput(attrs={'placeholder': _("dd/mm/yyyy"), **DatePickerInput.defaut_attrs}),
@@ -438,6 +484,7 @@ class SeminarForm(ActivityFormMixin, forms.ModelForm):
             'ects',
         ]
         labels = {
+            'title': _("Name of the activity"),
             'participating_proof': _("Proof of participation for the whole activity"),
         }
         widgets = {
@@ -448,6 +495,7 @@ class SeminarForm(ActivityFormMixin, forms.ModelForm):
 
 class SeminarCommunicationForm(ActivityFormMixin, forms.ModelForm):
     template_name = "admission/doctorate/forms/training/seminar_communication.html"
+    is_online = IsOnlineField()
 
     class Meta:
         model = Activity
@@ -470,8 +518,8 @@ class SeminarCommunicationForm(ActivityFormMixin, forms.ModelForm):
             'participating_proof': _("Certificate of participation in the presentation"),
         }
         widgets = {
-            'is_online': forms.RadioSelect(choices=((False, _("In person")), (True, _("Online")))),
             'start_date': DatePickerInput(attrs={'placeholder': _("dd/mm/yyyy"), **DatePickerInput.defaut_attrs}),
+            'country': autocomplete.ListSelect2(url="country-autocomplete"),
         }
 
 

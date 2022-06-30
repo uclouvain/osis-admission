@@ -23,7 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from django.db.models import Count, Q
+from django.db.models import Q, Sum
 from django.http import Http404
 from django.shortcuts import get_object_or_404, resolve_url
 from django.views import generic
@@ -38,9 +38,9 @@ from admission.forms.doctorate.training.activity import (
     PublicationForm,
     ResidencyCommunicationForm,
     ResidencyForm,
-    ServiceForm,
-    SeminarForm,
     SeminarCommunicationForm,
+    SeminarForm,
+    ServiceForm,
     ValorisationForm,
 )
 from admission.views.doctorate.mixins import LoadDossierViewMixin
@@ -55,14 +55,16 @@ class DoctorateTrainingActivityView(LoadDossierViewMixin, generic.TemplateView):
         qs = Activity.objects.filter(doctorate__uuid=self.kwargs['pk'])
         context['activities'] = qs.prefetch_related('children')
         context['categories'] = CategorieActivite.choices
+        context['statuses'] = StatutActivite.choices
         context['counts'] = qs.aggregate(
-            validated=Count('pk', filter=Q(status=StatutActivite.ACCEPTEE.name)),
-            pending=Count('pk', filter=Q(status=StatutActivite.SOUMISE.name)),
+            total=Sum('ects'),
+            validated=Sum('ects', filter=Q(status=StatutActivite.ACCEPTEE.name)),
+            pending=Sum('ects', filter=Q(status=StatutActivite.SOUMISE.name)),
         )
         context['categories_count'] = qs.values('category').annotate(
-            unsubmitted=Count('pk', filter=Q(status=StatutActivite.NON_SOUMISE.name)),
-            submitted=Count('pk', filter=Q(status=StatutActivite.SOUMISE.name)),
-            validated=Count('pk', filter=Q(status=StatutActivite.ACCEPTEE.name)),
+            unsubmitted=Sum('ects', filter=Q(status=StatutActivite.NON_SOUMISE.name)),
+            submitted=Sum('ects', filter=Q(status=StatutActivite.SOUMISE.name)),
+            validated=Sum('ects', filter=Q(status=StatutActivite.ACCEPTEE.name)),
         )
         return context
 
@@ -136,15 +138,3 @@ class DoctorateTrainingActivityEditView(DoctorateTrainingActivityFormMixin, gene
     def activity(self):
         # Don't remove, this is to share same template code in front-office
         return self.object
-
-
-class DoctorateTrainingActivityDeleteView(LoadDossierViewMixin, generic.DeleteView):
-    model = Activity
-    permission_required = "admission.change_activity"
-    slug_field = 'uuid'
-    pk_url_kwarg = "NOT_TO_BE_USED"
-    slug_url_kwarg = 'activity_id'
-    template_name = "admission/doctorate/forms/training/activity_confirm_delete.html"
-
-    def get_success_url(self):
-        return resolve_url("admission:doctorate:training", pk=self.kwargs['pk'])

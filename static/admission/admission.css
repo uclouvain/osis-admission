@@ -127,3 +127,19 @@ textarea {
   display: inline-block;
   margin-right: 1em;
 }
+
+.popover-buttons {
+  color: initial !important;
+  text-decoration: none !important;
+  margin-left: 5px;
+}
+
+
+.field-with-tooltip .label-container {
+  max-width: 100%;
+  margin-bottom: 5px;
+}
+
+.field-with-tooltip label {
+  display: initial;
+}

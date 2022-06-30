@@ -31,17 +31,12 @@
   {% firstof '<a href="'|safe|add:activity.website|add:'">'|safe|add:activity.website|add:'</a>'|safe "" as website %}
 {% endif %}
 
-<div class="panel panel-{{ activity|status_as_class }}">
+<div class="panel panel-{{ activity|status_as_class }}" data-status="{{ activity.status }}" data-type="{{ activity.category }}">
   <div class="panel-heading" role="tab" id="h-{{ activity.uuid }}">
     <h3 class="panel-title">
       <a role="button" data-toggle="collapse" data-parent="#accordion" href="#a-{{ activity.uuid }}"
-         aria-expanded="true"
-         aria-controls="a-{{ activity.uuid }}">
-        <span class="badge">{{ activity.get_status_display }}</span>
-        {% display '(' activity.city "," activity.country "," activity.start_date ")" as title_details %}
-        {% display activity.ects " ECTS" as ects %}
-        {% display activity.type '-' activity.subtype " " title_details "-" ects %}
-      </a>
+         aria-expanded="false" aria-controls="a-{{ activity.uuid }}" class="collapsed"></a>
+      <span class="badge">{{ activity.get_status_display }}</span>
       <div class="btn-group btn-group-sm pull-right">
         <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
                 aria-expanded="false">
@@ -59,6 +54,9 @@
           </li>
         </ul>
       </div>
+      {% display '(' activity.city "," activity.country "," activity.start_date ")" as title_details %}
+      {% display activity.ects|default:""|floatformat " ECTS" as ects %}
+      {% display activity.type '-' activity.subtype '-' activity.title " " title_details "-" ects %}
       <div class="clearfix"></div>
     </h3>
   </div>
@@ -69,13 +67,17 @@
         <strong class="d-block">{% trans "Description" %}</strong>
         {% display activity.title "-" activity.start_date|date:'d/m/Y' %}
         <br/>
-        {% display activity.role "," activity.authors "," activity.keywords %}
+        {% display activity.role "," activity.authors " " "(" activity.journal ")" %}
+        {% if activity.keywords %}
+          <br/>
+          <strong>{% trans "Keywords" %} :</strong> {{ activity.keywords }}
+        {% endif %}
       </p>
       <div class="row">
         {% if activity.ects %}
           <p class="col-md-4">
-            <strong class="d-block">{% trans "ECTS for participating" %}</strong>
-            {{ activity.ects }}
+            <strong class="d-block">{% trans "ECTS" %}</strong>
+            {{ activity.ects|floatformat }}
           </p>
         {% endif %}
       </div>

@@ -73,12 +73,11 @@ msgid ""
 msgstr ""
 
 #, python-format
-msgid "%(label)s:"
+msgid "%(added)s ECTS added with %(validated)s validated by the CDD."
 msgstr ""
 
 #, python-format
-msgid ""
-"%(validated)s ECTS added with %(pending)s pending validation by the CDD."
+msgid "%(label)s:"
 msgstr ""
 
 msgid ", on"
@@ -168,6 +167,12 @@ msgstr ""
 msgid "Activities"
 msgstr ""
 
+msgid "Activity begin date"
+msgstr ""
+
+msgid "Activity end date"
+msgstr ""
+
 msgid "Activity subtype"
 msgstr ""
 
@@ -238,6 +243,10 @@ msgstr ""
 msgid "Admission type"
 msgstr ""
 
+msgctxt "filters"
+msgid "All"
+msgstr ""
+
 msgid "All CA members must have approved the proposition."
 msgstr "All supervisory panel members must have approved the proposition."
 
@@ -294,9 +303,6 @@ msgid "BIOLOGY"
 msgstr "Biology"
 
 msgid "Back to the list"
-msgstr ""
-
-msgid "Begin date"
 msgstr ""
 
 msgid "Body"
@@ -748,6 +754,9 @@ msgstr ""
 msgid "ECONOMY"
 msgstr ""
 
+msgid "ECTS"
+msgstr ""
+
 msgctxt "summary"
 msgid "ECTS added"
 msgstr ""
@@ -756,6 +765,9 @@ msgid "ECTS credits"
 msgstr ""
 
 msgid "ECTS for participating"
+msgstr ""
+
+msgid "ECTS for the participation"
 msgstr ""
 
 msgid "EFT"
@@ -771,16 +783,25 @@ msgid "Edit"
 msgstr ""
 
 #, python-format
-msgid "Edit %(title)s"
+msgid "Edit activity of type <em>%(category)s</em>"
+msgstr ""
+
+msgid "Edit the communication of this conference"
+msgstr ""
+
+msgid "Edit the communication of this residency"
+msgstr ""
+
+msgid "Edit the communication of this seminar"
+msgstr ""
+
+msgid "Edit the publication of this conference"
 msgstr ""
 
 msgid "Edition or co-publication"
 msgstr ""
 
 msgid "Email"
-msgstr ""
-
-msgid "End date"
 msgstr ""
 
 msgid "English"
@@ -796,6 +817,9 @@ msgid "Event description"
 msgstr ""
 
 msgid "Event participation"
+msgstr ""
+
+msgid "Event website"
 msgstr ""
 
 msgid "Example"
@@ -1169,10 +1193,16 @@ msgstr "Not invited"
 msgid "Name"
 msgstr ""
 
+msgid "Name in the language of the manifestation"
+msgstr ""
+
 msgid "Name of the activity"
 msgstr ""
 
 msgid "Name of the event"
+msgstr ""
+
+msgid "Name of the manifestation"
 msgstr ""
 
 msgid "National conference"
@@ -1228,6 +1258,9 @@ msgid "Online"
 msgstr ""
 
 msgid "Online event"
+msgstr ""
+
+msgid "Online or in person"
 msgstr ""
 
 msgid "Opinion of the CA following the format provided by the CDD"
@@ -1656,6 +1689,9 @@ msgstr ""
 msgid "Speaker"
 msgstr ""
 
+msgid "Status"
+msgstr ""
+
 msgid "Status changes"
 msgstr ""
 
@@ -1814,6 +1850,9 @@ msgstr ""
 msgid "The signature request procedure isn't in progress."
 msgstr ""
 
+msgid "The start date can't be later than the end date"
+msgstr ""
+
 msgid "There can be no more CA members in the supervision group."
 msgstr ""
 "There can be no more supervisory panel members in the supervision group."
@@ -1878,6 +1917,9 @@ msgid "Token"
 msgstr ""
 
 msgid "Tokens that can be used for replacement"
+msgstr ""
+
+msgid "Total hourly volume"
 msgstr ""
 
 msgid "Training"

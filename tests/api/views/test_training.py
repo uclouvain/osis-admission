@@ -94,7 +94,7 @@ class TrainingApiTestCase(QueriesAssertionsMixin, APITestCase):
 
         data = {
             'object_type': 'Conference',
-            'ects': 0,
+            'ects': "0.0",
             'category': 'CONFERENCE',
             'parent': None,
             'type': 'A great conference',
@@ -104,7 +104,7 @@ class TrainingApiTestCase(QueriesAssertionsMixin, APITestCase):
             'start_date': None,
             'end_date': None,
             'participating_days': 0,
-            'is_online': None,
+            'is_online': False,
             'country': None,
             'city': '',
             'organizing_institution': '',
@@ -152,7 +152,7 @@ class TrainingApiTestCase(QueriesAssertionsMixin, APITestCase):
 
         data = {
             'object_type': 'Conference',
-            'ects': 0,
+            'ects': "0.0",
             'category': 'CONFERENCE',
             'parent': None,
             'type': 'A great conference',
@@ -162,7 +162,7 @@ class TrainingApiTestCase(QueriesAssertionsMixin, APITestCase):
             'start_date': None,
             'end_date': None,
             'participating_days': 0,
-            'is_online': None,
+            'is_online': False,
             'country': None,
             'city': '',
             'organizing_institution': '',

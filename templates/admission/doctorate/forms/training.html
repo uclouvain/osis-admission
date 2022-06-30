@@ -26,6 +26,8 @@
 {% endcomment %}
 
 
+{% block actions-group %}{% endblock %}
+
 {% block tab_content %}
   <form action="" method="post">
     {% csrf_token %}
@@ -44,4 +46,15 @@
 {% block script %}
   {{ block.super }}
   {{ form.media }}
+  <script type="application/javascript">
+      $(function () {
+          // Tooltips
+          $('[data-toggle="popover"]').popover();
+
+          $('body').on('mousedown', '.popover', function(e) {
+            e.preventDefault();
+            return false;
+          });
+      });
+  </script>
 {% endblock %}

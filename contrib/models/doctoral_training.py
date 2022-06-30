@@ -48,8 +48,10 @@ class Activity(models.Model):
         'admission.DoctorateAdmission',
         on_delete=models.CASCADE,
     )
-    ects = models.FloatField(
+    ects = models.DecimalField(
         verbose_name=_("ECTS credits"),
+        max_digits=4,
+        decimal_places=2,
         blank=True,
         default=0,
     )
@@ -99,17 +101,19 @@ class Activity(models.Model):
 
     # Conference
     start_date = models.DateField(
-        verbose_name=_("Begin date"),
+        verbose_name=_("Activity begin date"),
         null=True,
         blank=True,
     )
     end_date = models.DateField(
-        verbose_name=_("End date"),
+        verbose_name=_("Activity end date"),
         null=True,
         blank=True,
     )
-    participating_days = models.SmallIntegerField(
+    participating_days = models.DecimalField(
         verbose_name=_("Number of days participating"),
+        max_digits=3,
+        decimal_places=1,
         null=True,
         blank=True,
     )
@@ -216,6 +220,7 @@ class Activity(models.Model):
 
     # Seminaires
     hour_volume = models.CharField(
+        verbose_name=_("Total hourly volume"),
         max_length=100,
         default="",
         blank=True,

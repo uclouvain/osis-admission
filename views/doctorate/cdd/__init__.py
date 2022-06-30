@@ -26,7 +26,6 @@
 from .list import CddDoctorateAdmissionList
 from .training import (
     DoctorateTrainingActivityAddView,
-    DoctorateTrainingActivityDeleteView,
     DoctorateTrainingActivityEditView,
     DoctorateTrainingActivityView,
 )
@@ -36,5 +35,4 @@ __all__ = [
     'DoctorateTrainingActivityView',
     'DoctorateTrainingActivityAddView',
     'DoctorateTrainingActivityEditView',
-    'DoctorateTrainingActivityDeleteView',
 ]

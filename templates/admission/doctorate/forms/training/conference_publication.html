@@ -25,12 +25,10 @@
 {% endcomment %}
 
 <h2>
-  {% if not form.instance.pk %}
+  {% if not view.kwargs.activity_id %}
     {% trans "Add a publication to this conference" %}
   {% else %}
-    {% blocktrans with title=form.instance.title trimmed %}
-      Edit {{ title }}
-    {% endblocktrans %}
+    {% trans "Edit the publication of this conference" %}
   {% endif %}
 </h2>
 
@@ -38,19 +36,19 @@
 
 <div class="row">
   {% bootstrap_field form.type form_group_class="form-group col-md-4" %}
-  {% bootstrap_field form.committee form_group_class="form-group col-md-4" %}
+  {% bootstrap_field form.committee form_group_class="form-group col-md-4 required_field" %}
 </div>
 {% bootstrap_field form.title form_group_class="form-group required_field" %}
-{% bootstrap_field form.summary %}
-{% bootstrap_field form.authors %}
-{% bootstrap_field form.keywords %}
+{% bootstrap_field form.authors form_group_class="form-group required_field" %}
 <div class="row">
   {% bootstrap_field form.role form_group_class="form-group col-md-6 required_field" %}
   {% bootstrap_field form.journal form_group_class="form-group col-md-6 required_field" %}
 </div>
+{% bootstrap_field form.keywords %}
+{% bootstrap_field form.summary %}
 <div class="row">
   {% bootstrap_field form.ects form_group_class="form-group col-md-4 required_field" %}
-  {% bootstrap_field form.dial_reference form_group_class="form-group col-md-4 required_field" %}
+  {% bootstrap_field form.dial_reference form_group_class="form-group col-md-4" %}
 </div>
 {% bootstrap_field form.participating_proof form_group_class="form-group required_field" %}
 {% bootstrap_field form.comment %}
