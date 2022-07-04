@@ -32,10 +32,11 @@ from osis_common.ddd import interface
 
 @attr.dataclass(frozen=True, slots=True)
 class CandidatAdresse(interface.ValueObject):
+    numero: Optional[str]
     rue: Optional[str]
     code_postal: Optional[str]
     ville: Optional[str]
     pays: Optional[str]
 
     def est_complete(self):
-        return all([self.pays, self.ville, self.code_postal, self.rue])
+        return all([self.pays, self.ville, self.code_postal, self.rue, self.numero])

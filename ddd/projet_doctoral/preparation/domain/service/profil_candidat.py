@@ -76,6 +76,7 @@ class ProfilCandidat(interface.DomainService):
                 ville=coordonnees.domicile_legal.ville,
                 pays=coordonnees.domicile_legal.pays,
                 rue=coordonnees.domicile_legal.rue,
+                numero=coordonnees.domicile_legal.numero_rue,
             )
             if coordonnees.domicile_legal
             else None,
@@ -84,6 +85,7 @@ class ProfilCandidat(interface.DomainService):
                 ville=coordonnees.adresse_correspondance.ville,
                 pays=coordonnees.adresse_correspondance.pays,
                 rue=coordonnees.adresse_correspondance.rue,
+                numero=coordonnees.adresse_correspondance.numero_rue,
             )
             if coordonnees.adresse_correspondance
             else None,
