@@ -25,15 +25,120 @@
 # ##############################################################################
 import re
 from dataclasses import dataclass
+from functools import wraps
+from inspect import getfullargspec
 
 from django import template
 from django.urls import NoReverseMatch, reverse
+from django.utils.safestring import SafeString
 from django.utils.translation import gettext_lazy as _
 
 from admission.ddd.projet_doctoral.doctorat.domain.model.enums import ChoixStatutDoctorat
+from admission.ddd.projet_doctoral.doctorat.formation.domain.model._enums import StatutActivite
 from admission.utils import get_cached_admission_perm_obj
 
 register = template.Library()
+
+
+class PanelNode(template.library.InclusionNode):
+    def __init__(self, nodelist: dict, func, takes_context, args, kwargs, filename):
+        super().__init__(func, takes_context, args, kwargs, filename)
+        self.nodelist_dict = nodelist
+
+    def render(self, context):
+        for context_name, nodelist in self.nodelist_dict.items():
+            context[context_name] = nodelist.render(context)
+        return super().render(context)
+
+
+def register_panel(filename, takes_context=None, name=None):
+    def dec(func):
+        params, varargs, varkw, defaults, kwonly, kwonly_defaults, _ = getfullargspec(func)
+        function_name = name or getattr(func, '_decorated_function', func).__name__
+
+        @wraps(func)
+        def compile_func(parser, token):
+            # {% panel %} and its arguments
+            bits = token.split_contents()[1:]
+            args, kwargs = template.library.parse_bits(
+                parser, bits, params, varargs, varkw, defaults, kwonly, kwonly_defaults, takes_context, function_name
+            )
+            nodelist_dict = {'panel_body': parser.parse(('footer', 'endpanel'))}
+            token = parser.next_token()
+
+            # {% footer %} (optional)
+            if token.contents == 'footer':
+                nodelist_dict['panel_footer'] = parser.parse(('endpanel',))
+                parser.next_token()
+
+            return PanelNode(nodelist_dict, func, takes_context, args, kwargs, filename)
+
+        register.tag(function_name, compile_func)
+        return func
+
+    return dec
+
+
+@register.simple_tag
+def display(*args):
+    """Display args if their value is not empty, can be wrapped by parenthesis, or separated by comma or dash"""
+    ret = []
+    iterargs = iter(args)
+    nextarg = next(iterargs)
+    while nextarg != StopIteration:
+        if nextarg == "(":
+            reduce_wrapping = [next(iterargs, None)]
+            while reduce_wrapping[-1] != ")":
+                reduce_wrapping.append(next(iterargs, None))
+            ret.append(reduce_wrapping_parenthesis(*reduce_wrapping[:-1]))
+        elif nextarg == ",":
+            ret.append(reduce_list_separated(ret.pop(), next(iterargs, None)))
+        elif nextarg in ["-", ':']:
+            ret.append(reduce_list_separated(ret.pop(), next(iterargs, None), separator=f" {nextarg} "))
+        elif isinstance(nextarg, str) and len(nextarg) > 1 and re.match(r'\s', nextarg[0]):
+            suffixed_val = ret.pop()
+            ret.append(f"{suffixed_val}{nextarg}" if suffixed_val else "")
+        else:
+            ret.append(SafeString(nextarg) if nextarg else '')
+        nextarg = next(iterargs, StopIteration)
+    return SafeString("".join(ret))
+
+
+@register.simple_tag
+def reduce_wrapping_parenthesis(*args):
+    """Display args given their value, wrapped by parenthesis"""
+    ret = display(*args)
+    if ret:
+        return SafeString(f"({ret})")
+    return ret
+
+
+@register.simple_tag
+def reduce_list_separated(arg1, arg2, separator=", "):
+    """Display args given their value, joined by separator"""
+    if arg1 and arg2:
+        return separator.join([SafeString(arg1), SafeString(arg2)])
+    elif arg1:
+        return SafeString(arg1)
+    elif arg2:
+        return SafeString(arg2)
+    return ""
+
+
+@register_panel('panel.html', takes_context=True)
+def panel(context, title='', title_level=4, additional_class='', **kwargs):
+    """
+    Template tag for panel
+    :param title: the panel title
+    :param title_level: the title level
+    :param additional_class: css class to add
+    :type context: django.template.context.RequestContext
+    """
+    context['title'] = title
+    context['title_level'] = title_level
+    context['additional_class'] = additional_class
+    context['attributes'] = {k.replace('_', '-'): v for k, v in kwargs.items()}
+    return context
 
 
 @register.inclusion_tag('admission/includes/sortable_header_div.html', takes_context=True)
@@ -97,6 +202,7 @@ TAB_TREES = {
             Tab('supervision', _('Supervision')),
             Tab('confirmation', _('Confirmation paper')),
             Tab('extension-request', _('New deadline')),
+            Tab('training', _('Training')),
         ],
         Tab('history', _('History'), 'clock'): [
             Tab('history', _('Status changes')),
@@ -106,13 +212,6 @@ TAB_TREES = {
             Tab('send-mail', _('Send a mail')),
         ],
     },
-}
-
-# Associate pages that we want to associate to a specific sub tab
-HIDDEN_TABS = {
-    'confirmation-failure': 'confirmation',
-    'confirmation-opinion': 'confirmation',
-    'confirmation-retaking': 'confirmation',
 }
 
 
@@ -127,10 +226,11 @@ def get_active_parent(tab_tree, tab_name):
 def doctorate_tabs_bar(context):
     match = context['request'].resolver_match
 
-    namespaces = match.namespaces
+    current_tab_name = match.url_name
+    if len(match.namespaces) > 2:
+        current_tab_name = match.namespaces[2]
 
-    current_tab_name = HIDDEN_TABS.get(match.url_name, match.url_name)
-    current_tab_tree = TAB_TREES[namespaces[1]].copy()
+    current_tab_tree = TAB_TREES[match.namespaces[1]].copy()
     admission = get_cached_admission_perm_obj(context['view'].kwargs.get('pk', ''))
 
     # Prevent showing message tab when candidate is not enrolled
@@ -154,23 +254,27 @@ def doctorate_tabs_bar(context):
 def current_subtabs(context):
     # TODO switch to a perm-based selection of the subtabs, and hide parent tab if no tabs
     match = context['request'].resolver_match
-    namespaces = match.namespaces
-    current_tab_name = HIDDEN_TABS.get(match.url_name, match.url_name)
-    current_tab_tree = TAB_TREES[namespaces[1]]
+    current_tab_name = match.url_name
+    if len(match.namespaces) > 2 and match.namespaces[2] != 'update':
+        current_tab_name = match.namespaces[2]
+    current_tab_tree = TAB_TREES[match.namespaces[1]]
     return current_tab_tree.get(get_active_parent(current_tab_tree, current_tab_name), [])
 
 
 @register.inclusion_tag('admission/includes/doctorate_subtabs_bar.html', takes_context=True)
 def doctorate_subtabs_bar(context, tabs=None):
     match = context['request'].resolver_match
+    current_tab_name = match.url_name
+    if len(match.namespaces) > 2 and match.namespaces[2] != 'update':
+        current_tab_name = match.namespaces[2]
 
     return {
         'subtabs': tabs if tabs is not None else current_subtabs(context),
         'admission_uuid': context['view'].kwargs.get('pk', ''),
-        'namespace': match.namespace,
+        'namespace': ':'.join(match.namespaces[:2]),
         'request': context['request'],
         'view': context['view'],
-        'active_tab': HIDDEN_TABS.get(match.url_name, match.url_name),
+        'active_tab': current_tab_name,
     }
 
 
@@ -180,19 +284,29 @@ def update_tab_path_from_detail(context, admission_uuid):
     match = context['request'].resolver_match
     try:
         return reverse(
-            '{}:update:{}'.format(match.namespace, match.url_name),
+            '{}:update:{}'.format(':'.join(match.namespaces), match.url_name),
             args=[admission_uuid],
         )
     except NoReverseMatch:
-        return ''
+        if len(match.namespaces) > 2:
+            path = ':'.join(match.namespaces[:3])
+        else:
+            path = '{}:{}'.format(':'.join(match.namespaces), match.url_name)
+        return reverse(
+            path,
+            args=[admission_uuid],
+        )
 
 
 @register.simple_tag(takes_context=True)
 def detail_tab_path_from_update(context, admission_uuid):
     """From an update page, get the path of the detail page."""
     match = context['request'].resolver_match
+    current_tab_name = match.url_name
+    if len(match.namespaces) > 2 and match.namespaces[2] != 'update':
+        current_tab_name = match.namespaces[2]
     return reverse(
-        '{}:{}'.format(':'.join(match.namespaces[:-1]), HIDDEN_TABS.get(match.url_name, match.url_name)),
+        '{}:{}'.format(':'.join(match.namespaces[:-1]), current_tab_name),
         args=[admission_uuid],
     )
 
@@ -229,3 +343,28 @@ def phone_spaced(phone, with_optional_zero=False):
     if with_optional_zero and phone[0] == "0":
         return "(0)" + re.sub('(\\d{2})(\\d{2})(\\d{2})(\\d{2})', '\\1 \\2 \\3 \\4', phone[1:])
     return re.sub('(\\d{3})(\\d{2})(\\d{2})(\\d{2})', '\\1 \\2 \\3 \\4', phone)
+
+
+@register.filter
+def strip(value):
+    if isinstance(value, str):
+        return value.strip()
+    return value
+
+
+@register.filter
+def status_as_class(activity):
+    return {
+        StatutActivite.SOUMISE.name: "warning",
+        StatutActivite.ACCEPTEE.name: "success",
+        StatutActivite.REFUSEE.name: "danger",
+    }.get(getattr(activity, 'status', activity), 'info')
+
+
+@register.inclusion_tag('admission/includes/bootstrap_field_with_tooltip.html')
+def bootstrap_field_with_tooltip(field, classes='', show_help=False):
+    return {
+        'field': field,
+        'classes': classes,
+        'show_help': show_help,
+    }

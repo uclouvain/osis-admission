@@ -17,73 +17,103 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#, python-format
+msgctxt "female gender"
 msgid ""
 "\n"
-"              Are you sure you want to delete \"%(object)s\"?\n"
-"            "
+"            Following the presentation of the state of the research and the "
+"subsequent discussion with the candidate,\n"
+"            the supervisory panel assessed the progress of the work and "
+"announces:\n"
+"          "
 msgstr ""
 "\n"
-"              Êtes-vous sûr de vouloir supprimer \"%(object)s\"?\n"
-"            "
+"            À la suite de la présentation de l'état de la recherche et de "
+"l'échange qui s'en est suivi avec la candidate,\n"
+"            le comité d'accompagnement a évalué l'avancement du travail et "
+"conclut à :\n"
+"          "
+
+msgctxt "male gender"
+msgid ""
+"\n"
+"            Following the presentation of the state of the research and the "
+"subsequent discussion with the candidate,\n"
+"            the supervisory panel assessed the progress of the work and "
+"announces:\n"
+"          "
+msgstr ""
+"\n"
+"            À la suite de la présentation de l'état de la recherche et de "
+"l'échange qui s'en est suivi avec le candidat,\n"
+"            le comité d'accompagnement a évalué l'avancement du travail et "
+"conclut à :\n"
+"          "
 
 #, python-format
 msgid ""
 "\n"
-"          Do you wish to move the doctorate to the \"%(status)s\" state?\n"
+"          After considering the opinion of your supervisory panel, which met "
+"on %(confirmation_date)s, the\n"
+"          %(cdd)s notes that your doctoral confirmation paper has been "
+"successfully completed.\n"
 "        "
 msgstr ""
 "\n"
-"          Souhaitez-vous passer la demande dans l'état \"%(status)s\" ?\n"
-"            "
+"          Après examen de l’avis de votre comité d’accompagnement réuni le "
+"%(confirmation_date)s, la\n"
+"          %(cdd)s constate la réussite de votre épreuve de confirmation au "
+"doctorat. \n"
+"        "
 
 #, python-format
 msgid ""
 "\n"
-"        One doctorate enrolment\n"
-"      "
-msgid_plural ""
-"\n"
-"        %(start_index)s to %(end_index)s of %(total_counts)s doctorate "
-"enrolments\n"
-"      "
-msgstr[0] ""
-"\n"
-"    Une inscription en doctorat\n"
-"    "
-msgstr[1] ""
-"\n"
-"    %(start_index)s à %(end_index)s sur %(total_counts)s inscriptions en "
-"doctorat\n"
-"    "
-
-#, python-format
-msgid ""
-"\n"
-"      <h2>Delete \"%(name)s\" custom mail template?</h2>\n"
-"      <p>Are you sure you want to delete the custom mail template? This "
-"cannot be undone.</p>\n"
-"    "
+"          The committee also validates the activities carried out as part of "
+"your doctoral training, which now total\n"
+"          %(nb_credits)s ECTS.\n"
+"        "
 msgstr ""
 "\n"
-"      <h2>Supprimer le template d'email personnalisé \"%(name)s\" ?</h2>\n"
-"      <p>Êtes-vous sûr de vouloir supprimer ce template d'email "
-"personnalisé ? Cette action est irréversible.</p>\n"
-"    "
+"          La commission valide également les activités réalisées dans le "
+"cadre de programme de formation doctorale et qui totalisent à ce jour\n"
+"          %(nb_credits)s ECTS.\n"
+"        "
+
+msgid ""
+"\n"
+"          We congratulate you on your successful completion of the paper and "
+"wish you every success in your\n"
+"          doctoral training.\n"
+"        "
+msgstr ""
+"\n"
+"          Nous vous félicitons pour la réussite de votre épreuve et vous "
+"souhaitons un franc succès dans la poursuite de votre\n"
+"           parcours doctoral.\n"
+"        "
 
 #, python-format
 msgid ""
 "\n"
-"      Move the doctorate to the \"%(status)s\" state?\n"
-"    "
+"        The number of acquired <strong>doctoral</strong> credits amounts to "
+"%(credits_nb)s credits.\n"
+"      "
 msgstr ""
 "\n"
-"          Passer la demande dans l'état \"%(status)s\" ?\n"
-"    "
+"        Le nombre de crédits acquis de <strong>formation doctorale</strong> "
+"s'élève à %(credits_nb)s crédits.\n"
+"      "
+
+#, python-format
+msgid "%(added)s ECTS added with %(validated)s validated by the CDD."
+msgstr "%(added)s ECTS ajoutés dont %(validated)s validés par la CDD."
 
 #, python-format
 msgid "%(label)s:"
 msgstr "%(label)s :"
+
+msgid ", on"
+msgstr ", le"
 
 #, python-format
 msgid ""
@@ -115,11 +145,23 @@ msgstr ""
 "%(signataire_first_name)s %(signataire_last_name)s (%(actor_role)s) a "
 "approuvé votre demande de signature."
 
+#, python-format
+msgid ""
+"<h2>Delete \"%(name)s\" custom mail template?</h2> <p>Are you sure you want "
+"to delete the custom mail template? This cannot be undone.</p>"
+msgstr ""
+"<h2>Supprimer le template d'email personnalisé \"%(name)s\" ?</h2><p>Êtes-"
+"vous sûr de vouloir supprimer ce template d'email personnalisé ? Cette "
+"action est irréversible.</p>"
+
 msgid "A justification is needed when creating a pre-admission."
 msgstr "Une justification est requise pour une pré-admission."
 
 msgid "ACCEPTED"
 msgstr "Accepté"
+
+msgid "ACCEPTEE"
+msgstr "Acceptée"
 
 msgid "ACKNOWLEDGED"
 msgstr "Réceptionné"
@@ -154,11 +196,32 @@ msgstr "ARES - Coopération au développement"
 msgid "Abstract"
 msgstr "Résumé"
 
+msgid "Accepted"
+msgstr "Acceptée"
+
+msgid "Achieved additional training"
+msgstr "Formation complémentaire réalisée"
+
 msgid "Acronym / Title"
 msgstr "Sigle / Intitulé"
 
 msgid "Actions"
 msgstr "Actions"
+
+msgid "Activities"
+msgstr "Activités"
+
+msgid "Activity begin date"
+msgstr "Date de début de l'activité"
+
+msgid "Activity end date"
+msgstr "Date de fin de l'activité"
+
+msgid "Activity subtype"
+msgstr "Sous-type d'activité"
+
+msgid "Activity type"
+msgstr "Type d'activité"
 
 msgid "Actors as list items"
 msgstr "Acteurs en tant qu'éléments de liste"
@@ -169,9 +232,45 @@ msgstr "Acteurs, séparés par une virgule"
 msgid "Add"
 msgstr "Ajouter"
 
+msgid "Add a VAE"
+msgstr "Ajouter une valorisation des acquis d'expérience"
+
+msgid "Add a communication"
+msgstr "Ajouter une communication"
+
+msgid "Add a communication to this conference"
+msgstr "Ajouter une communication à cette conférence"
+
+msgid "Add a communication to this residency"
+msgstr "Ajouter une communication à ce séjour"
+
+msgid "Add a communication to this seminar"
+msgstr "Ajouter une communication à ce séminaire"
+
+msgid "Add a conference"
+msgstr "Ajouter une conférence"
+
 #, python-format
 msgid "Add a custom mail template for <em>%(description)s</em>"
 msgstr "Ajouter un template d'email personnalisé pour <em>%(description)s</em>"
+
+msgid "Add a publication"
+msgstr "Ajouter une publication"
+
+msgid "Add a publication to this conference"
+msgstr "Ajouter une publication à cette conférence"
+
+msgid "Add a residency"
+msgstr "Ajouter un séjour"
+
+msgid "Add a seminar"
+msgstr "Ajouter un séminaire"
+
+msgid "Add a service"
+msgstr "Ajouter un service"
+
+msgid "Add an activity"
+msgstr "Ajouter une activité"
 
 msgid "Additional training project"
 msgstr "Projet de formation complémentaire"
@@ -188,6 +287,10 @@ msgstr "Date de soumission Admission"
 msgid "Admission type"
 msgstr "Type de l'admission"
 
+msgctxt "filters"
+msgid "All"
+msgstr "Tous"
+
 msgid "All CA members must have approved the proposition."
 msgstr ""
 "Tous les membres du comité d'accompagnement doivent approuver la proposition."
@@ -199,16 +302,47 @@ msgid "All promoters must have approved the proposition."
 msgstr "Tous les promoteurs doivent approuver la proposition."
 
 msgid "Already a member of CA."
-msgstr "Déjà membre du comité d'accompagnement"
+msgstr "Déjà membre du comité d'accompagnement."
 
 msgid "Already a promoter."
-msgstr "Déjà promoteur"
+msgstr "Déjà promoteur."
+
+msgid "Approximate date for completing the thesis:"
+msgstr "Date approximative d'achèvement de la thèse :"
 
 msgid "Archived record when signatures were sent"
 msgstr "Fiche archivée lors de l'envoi des signatures"
 
+#, python-format
+msgid "Are you sure you want to delete \"%(object)s\"?"
+msgstr "Êtes-vous sûr de vouloir supprimer \"%(object)s\" ?"
+
+msgid "Article for a non-refereed journal"
+msgstr "Article à destination d'une revue sans comité de lecture"
+
+msgid "Article for a peer-reviewed journal"
+msgstr "Article à destination d'une revue à comité de lecture"
+
+msgid "Article published in a non-refereed journal"
+msgstr "Article publié dans une revue sans comité de lecture"
+
+msgid "Article published in a peer-reviewed journal"
+msgstr "Article publié dans une revue à comité de lecture"
+
+msgid "Attachment: Doctoral training"
+msgstr "Annexe : Formation doctorale"
+
+msgid "Attachments:"
+msgstr "Annexes :"
+
+msgid "Attestation of the communication"
+msgstr "Attestation de communication"
+
 msgid "Author"
 msgstr "Auteur"
+
+msgid "Authors"
+msgstr "Auteurs et autrices"
 
 msgid "BIOLOGY"
 msgstr "Biologie"
@@ -219,11 +353,17 @@ msgstr "Retour à la liste"
 msgid "Body"
 msgstr "Corps"
 
+msgid "Book chapter"
+msgstr "Chapitre de livre"
+
 msgid "Brief justification"
 msgstr "Justification succincte"
 
 msgid "CA Member"
 msgstr "Membre du comité d'accompagnement"
+
+msgid "CA members"
+msgstr "Membres du comité d'accompagnement"
 
 msgid "CANCELLED"
 msgstr "Annulé"
@@ -236,6 +376,9 @@ msgstr "Template d'email de CDD"
 
 msgid "CDD Mail templates"
 msgstr "Templates d'email de CDD"
+
+msgid "CDD configuration"
+msgstr "Configuration de la CDD"
 
 msgid "CDD manager"
 msgstr "Gestionnaire CDD"
@@ -257,6 +400,12 @@ msgstr "CDDs"
 
 msgid "CHEMISTRY"
 msgstr "Chimie"
+
+msgid "COMMUNICATION"
+msgstr "Communication orale (hors conférences)"
+
+msgid "CONFERENCE"
+msgstr "Conférences, colloques"
 
 msgid "CONFIRMATION_TO_BE_REPEATED"
 msgstr "Confirmation à représenter"
@@ -405,17 +554,33 @@ msgstr "Candidats"
 msgid "Canvas"
 msgstr "Canvas"
 
+msgid "Canvas of the report of the supervisory panel"
+msgstr "Canevas du procès-verbal du comité d'accompagnement"
+
+msgid "Canvas of the supervisory panel report to download"
+msgstr "Canevas du procès-verbal du comité d'accompagnement à télécharger"
+
 msgid "Carbon-copy the CA members"
 msgstr "Mettre en copie les membres du groupe de supervision"
 
 msgid "Carbon-copy the promoters"
 msgstr "Mettre en copie les promoteurs"
 
+msgid "Category"
+msgstr "Catégorie"
+
 msgid "Certificate of achievement"
 msgstr "Attestation de réussite"
 
 msgid "Certificate of failure"
 msgstr "Attestation d'échec"
+
+msgid "Certificate of participation in the presentation"
+msgstr "Attestation de participation à l'exposé"
+
+#, python-format
+msgid "Change <em>%(name)s</em> configuration"
+msgstr "Modifier la configuration de <em>%(name)s</em>"
 
 #, python-format
 msgid "Change <em>%(name)s</em> custom mail template"
@@ -430,11 +595,17 @@ msgstr "Fermer"
 msgid "Comment"
 msgstr "Commentaire"
 
+msgid "Comments"
+msgstr "Commentaires"
+
 msgid "Committee member"
 msgstr "Membre du comité"
 
 msgid "Committee members"
 msgstr "Membres du comité"
+
+msgid "Communication attestation"
+msgstr "Attestation de communication"
 
 msgctxt "admission"
 msgid "Configure"
@@ -454,6 +625,9 @@ msgstr "Épreuve de confirmation non complète."
 
 msgid "Confirmation paper not found."
 msgstr "Épreuve de confirmation non trouvée."
+
+msgid "Confirmation success attestation"
+msgstr "Attestation de réussite de l'épreuve de confirmation"
 
 msgid "Contact details"
 msgstr "Coordonnées"
@@ -479,8 +653,21 @@ msgstr "Pays de nationalité"
 msgid "Create new doctorate admission"
 msgstr "Créer une nouvelle admission en doctorat"
 
+#, python-brace-format
+msgid "Create the confirmation paper success attestation ({reference})"
+msgstr ""
+"Création de l'attestation de réussite de l'épreuve de confirmation "
+"({reference})"
+
+msgid "Create the confirmation paper success attestation as PDF"
+msgstr ""
+"Création du PDF de l'attestation de réussite de l'épreuve de confirmation"
+
 msgid "Created"
 msgstr "Créé"
+
+msgid "Created at"
+msgstr "Créé le"
 
 msgid "Curriculum"
 msgstr "Curriculum"
@@ -492,7 +679,7 @@ msgid "Custom mail template deleted successfully"
 msgstr "Template d'email personnalisé supprimé avec succès"
 
 msgid "Custom mail template saved successfully."
-msgstr "Template d'email personnalisé enregistré avec succès"
+msgstr "Template d'email personnalisé enregistré avec succès."
 
 msgid "Custom mail templates"
 msgstr "Templates d'email personnalisé"
@@ -509,11 +696,20 @@ msgstr "Date de l'épreuve de confirmation"
 msgid "Date of confirmation:"
 msgstr "Date de l'épreuve de confirmation :"
 
+msgid "Date of presentation"
+msgstr "Date de l'exposé"
+
+msgid "Date of the activity"
+msgstr "Date de l'activité"
+
 msgid "Date of the confirmation paper"
 msgstr "Date de l'épreuve de confirmation"
 
 msgid "Date of the confirmation paper (DD/MM/YYYY)"
 msgstr "Date de l'épreuve de confirmation (JJ/MM/AAAA)"
+
+msgid "Date of the publication"
+msgstr "Date de publication"
 
 msgid "Deadline extended"
 msgstr "Nouvelle échéance"
@@ -530,6 +726,9 @@ msgstr "Temps consacré (en EFT)"
 msgid "Defense"
 msgstr "Soutenance"
 
+msgid "Definitive admission date to doctorate"
+msgstr "Date de l'admission définitive au doctorat"
+
 msgid "Definitive admission date:"
 msgstr "Date de l'admission définitive :"
 
@@ -542,14 +741,30 @@ msgstr "Supprimer ?"
 msgid "Description"
 msgstr "Description"
 
+msgid "Description of the activity"
+msgstr "Description de l'activité"
+
+msgid "Detailed curriculum vitae"
+msgstr "Curriculum vitae détaillé"
+
 msgid "Diploma"
 msgstr "Diplôme"
+
+#, python-format
+msgid "Do you wish to move the doctorate to the \"%(status)s\" state?"
+msgstr "Souhaitez-vous passer la demande dans l'état \"%(status)s\" ?"
 
 msgid "Doctoral project"
 msgstr "Projet doctoral"
 
+msgid "Doctoral student"
+msgstr "Doctorand"
+
 msgid "Doctoral student:"
 msgstr "Doctorant :"
+
+msgid "Doctoral training"
+msgstr "Formation doctorale"
 
 msgid "Doctorate"
 msgstr "Doctorat"
@@ -569,6 +784,12 @@ msgstr "Lecteur doctorat"
 msgid "Doctorate readers"
 msgstr "Lecteurs doctorat"
 
+msgid "Documentary research residency"
+msgstr "Séjour de recherche documentaire"
+
+msgid "Done in"
+msgstr "Fait à"
+
 msgid "Dossier confirmation"
 msgstr "Confirmation dossier"
 
@@ -584,6 +805,22 @@ msgstr "Statut dossier"
 msgid "ECONOMY"
 msgstr "Economie"
 
+msgid "ECTS"
+msgstr "ECTS"
+
+msgctxt "summary"
+msgid "ECTS added"
+msgstr "ECTS ajoutés"
+
+msgid "ECTS credits"
+msgstr "crédits ECTS"
+
+msgid "ECTS for participating"
+msgstr "ECTS pour la participation"
+
+msgid "ECTS for the participation"
+msgstr "ECTS pour la participation"
+
 msgid "EFT"
 msgstr "EFT"
 
@@ -596,14 +833,45 @@ msgstr "ERC - European Research Council"
 msgid "Edit"
 msgstr "Modifier"
 
+#, python-format
+msgid "Edit activity of type <em>%(category)s</em>"
+msgstr "Modifier l'activité de type <em>%(category)s</em>"
+
+msgid "Edit the communication of this conference"
+msgstr "Modifier la communication de cette conférence"
+
+msgid "Edit the communication of this residency"
+msgstr "Modifier la communication de ce séjour"
+
+msgid "Edit the communication of this seminar"
+msgstr "Modifier la communication de ce séminaire"
+
+msgid "Edit the publication of this conference"
+msgstr "Modifier la publication de cette conférence"
+
+msgid "Edition or co-publication"
+msgstr "Édition ou coédition"
+
 msgid "Email"
 msgstr "Email"
 
 msgid "English"
 msgstr "Anglais"
 
+msgid "English values"
+msgstr "Valeurs en anglais"
+
 msgid "Enrolments"
 msgstr "Inscriptions"
+
+msgid "Event description"
+msgstr "Description de l'événement"
+
+msgid "Event participation"
+msgstr "Participation à l'événement"
+
+msgid "Event website"
+msgstr "Site web de l'événement"
 
 msgid "Example"
 msgstr "Exemple"
@@ -617,6 +885,9 @@ msgstr "Export de %(reference)s en PDF"
 
 msgid "Exporting the admission information to PDF"
 msgstr "Export des information de la demande d'inscription en PDF"
+
+msgid "Extended abstract"
+msgstr "Extended abstract"
 
 msgid "Extension request not completed."
 msgstr "Demande de prolongation non complète."
@@ -640,7 +911,7 @@ msgid "FSR - Fonds Spéciaux de Recherche"
 msgstr "FSR - Fonds Spéciaux de Recherche"
 
 msgid "Failure of the confirmation paper"
-msgstr "Échec de l'épreuve de l'épreuve de confirmation"
+msgstr "Échec de l'épreuve de confirmation"
 
 msgid "Failure of the test"
 msgstr "Échec de l'épreuve"
@@ -657,11 +928,11 @@ msgstr "Fondation Mont Godinne"
 msgid "Fondation St Luc"
 msgstr "Fondation St Luc"
 
-msgid "Framework of the supervisory panel report to download"
-msgstr "Canevas du procès-verbal du comité d'accompagnement à télécharger"
-
 msgid "French"
 msgstr "Français"
+
+msgid "French values"
+msgstr "Valeurs en français"
 
 msgid "From"
 msgstr "De"
@@ -681,7 +952,7 @@ msgstr "Générique"
 msgid "Generic mail that can be manually sent once the candidate is admitted"
 msgstr ""
 "E-mail générique qui peut être envoyé manuellement une fois que le candidat "
-"est admis."
+"est admis"
 
 msgid "HTML"
 msgstr "HTML"
@@ -704,6 +975,9 @@ msgstr "Identification"
 msgid "Identifier"
 msgstr "Identifiant"
 
+msgid "If other, specify"
+msgstr "Si autre, préciser"
+
 msgid ""
 "Impossible action: please be sure that the confirmation date and report are "
 "specified."
@@ -711,8 +985,17 @@ msgstr ""
 "Action impossible : veuillez-vous assurer que la date et le procès-verbal de "
 "l'épreuve ont bien été complétés."
 
+msgid "In person"
+msgstr "En présentiel"
+
+msgid "In review"
+msgstr "En attente de validation"
+
 msgid "Institute email"
 msgstr "Email de l'institut"
+
+msgid "Institute not specified"
+msgstr "Institut non spécifié"
 
 msgid "Institute of the thesis"
 msgstr "Institut de la thèse"
@@ -726,16 +1009,22 @@ msgstr "Institution de la Federation Wallonie-Bruxelles"
 msgid "Institution should be set when PhD has been set to yes or partial"
 msgstr ""
 "L'institution doit être renseignée quand le doctorat a déjà été réalisé "
-"partiellement ou complètement."
+"partiellement ou complètement"
 
 msgid "Internal comment"
 msgstr "Commentaire interne"
+
+msgid "International conference"
+msgstr "Conférence internationale"
 
 msgid "Invitations have not been sent"
 msgstr "Les invitations n'ont pas été envoyées"
 
 msgid "Invitations must have been sent"
 msgstr "Les invitations doivent avoir été envoyées"
+
+msgid "Journal"
+msgstr "Nom de la revue ou de la maison d'édition"
 
 msgid "Jury secretaries"
 msgstr "Secrétaires de jury"
@@ -745,6 +1034,9 @@ msgstr "Secrétaire de jury"
 
 msgid "Justification letter"
 msgstr "Lettre de justification"
+
+msgid "Keywords"
+msgstr "Mots-clés"
 
 msgid "Language"
 msgstr "Langue"
@@ -781,6 +1073,9 @@ msgstr "Gestion"
 
 msgid "MATHEMATICS"
 msgstr "Mathématiques"
+
+msgid "Madam"
+msgstr "Madame"
 
 msgid ""
 "Mail sent to ADRE to confirm the first submission of the confirmation paper"
@@ -934,10 +1229,10 @@ msgid "Member of supervision group not found."
 msgstr "Membre du groupe de supervision non trouvé."
 
 msgid "Member of supervision group not invited."
-msgstr "Membre du groupe de supervision non invité"
+msgstr "Membre du groupe de supervision non invité."
 
 msgid "Membre CA not found."
-msgstr "Membre du comité d'accompagnement non trouvé"
+msgstr "Membre du comité d'accompagnement non trouvé."
 
 msgid "Message body"
 msgstr "Corps du message"
@@ -957,8 +1252,18 @@ msgstr "Téléphone mobile (GSM)"
 msgid "Modified"
 msgstr "Modifée"
 
+msgid "Modified at"
+msgstr "Modifié le"
+
+msgid "Monograph"
+msgstr "Monographie"
+
 msgid "Motivation"
 msgstr "Motivation"
+
+#, python-format
+msgid "Move the doctorate to the \"%(status)s\" state?"
+msgstr "Passer la demande dans l'état \"%(status)s\" ?"
 
 msgid "Must be enrolled"
 msgstr "Doit être inscrit"
@@ -966,8 +1271,14 @@ msgstr "Doit être inscrit"
 msgid "Must be in the process of the enrolment"
 msgstr "Doit être en cours inscription"
 
+msgid "N/A"
+msgstr "Sans objet"
+
 msgid "NO"
 msgstr "Non"
+
+msgid "NON_SOUMISE"
+msgstr "Non soumise"
 
 msgid "NOT_ALLOWED_TO_CONTINUE"
 msgstr "Non autorisé à poursuivre"
@@ -978,17 +1289,35 @@ msgstr "Non invité"
 msgid "Name"
 msgstr "Nom"
 
+msgid "Name in the language of the manifestation"
+msgstr "Nom dans la langue de la manifestation"
+
+msgid "Name of the activity"
+msgstr "Nom de l'activité"
+
+msgid "Name of the event"
+msgstr "Nom de l'événement"
+
+msgid "Name of the manifestation"
+msgstr "Nom de la manifestation"
+
+msgid "National conference"
+msgstr "Conférence nationale"
+
 msgid "Nationality"
 msgstr "Nationalité"
 
 msgid "New deadline"
 msgstr "Nouvelle échéance"
 
+msgid "New thesis title (if applicable)"
+msgstr "Nouveau titre de la thèse (le cas échéant)"
+
 msgid "No"
 msgstr "Non"
 
 msgid "No PhD found."
-msgstr "Pas de doctorat trouvé"
+msgstr "Pas de doctorat trouvé."
 
 msgid "No defense reason"
 msgstr "Raison de non-soutenance"
@@ -1002,17 +1331,49 @@ msgstr "Doctorat non trouvé."
 msgid "Not specified"
 msgstr "Non spécifié(e)"
 
+msgid "Number of days participating"
+msgstr "Nombre de jours de participation"
+
 msgid "OTHER"
 msgstr "Autre"
 
 msgid "Office"
 msgstr "Bureau"
 
-msgid "Only for FNRS, FRIA and FRESH scholarship students"
-msgstr "Destinée uniquement aux boursiers FNRS, FRIA, FRESH"
+msgid "One choice per line, leave the \"Other\" value out"
+msgstr "Un choix, par ligne, ne pas renseigner la valeur \"Autre\""
+
+#, python-format
+msgid "One doctorate enrolment"
+msgid_plural ""
+"%(start_index)s to %(end_index)s of %(total_counts)s doctorate enrolments"
+msgstr[0] "Une inscription en doctorat"
+msgstr[1] ""
+"%(start_index)s à %(end_index)s sur %(total_counts)s inscriptions en doctorat"
+
+msgid "Online"
+msgstr "En ligne"
+
+msgid "Online event"
+msgstr "Événement en ligne"
+
+msgid "Online or in person"
+msgstr "En ligne ou en présentiel"
+
+msgid "Opinion of the CA following the format provided by the CDD"
+msgstr "Avis du comité d'accompagnement suivant le format fourni par la CDD"
 
 msgid "Opinion on the renewal of the research mandate"
 msgstr "Avis sur le renouvellement du mandat de recherche"
+
+msgid "Oral communication"
+msgstr "Communication orale"
+
+msgid "Oral exposé"
+msgstr "Exposé oral"
+
+msgid "Organizing institution"
+msgstr "Institution organisatrice"
 
 msgid "Other"
 msgstr "Autre"
@@ -1038,17 +1399,32 @@ msgstr "Physique"
 msgid "PRE_ADMISSION"
 msgstr "Pre-admission"
 
+msgid "PUBLICATION"
+msgstr "Publication"
+
 msgid "Page size"
 msgstr "Taille de la page"
 
+msgid "Participation"
+msgstr "Participation"
+
+msgid "Participation certification"
+msgstr "Certificat de participation"
+
 msgid "Past confirmation papers"
 msgstr "Epreuves de confirmation passées"
+
+msgid "Patent"
+msgstr "Brevet"
 
 msgid "Personal data"
 msgstr "Données personnelles"
 
 msgid "PhD already done"
 msgstr "Doctorat déjà réalisé"
+
+msgid "PhD students' day"
+msgstr "Journée des doctorantes et des doctorants"
 
 msgid "Place"
 msgstr "Lieu-dit"
@@ -1132,6 +1508,9 @@ msgstr "Statut après inscription"
 msgid "Postal box"
 msgstr "Boîte"
 
+msgid "Poster"
+msgstr "Poster"
+
 msgid "Pre-Admission"
 msgstr "Pré-Admission"
 
@@ -1140,6 +1519,16 @@ msgstr "Date de pré-admission"
 
 msgid "Pre-admission submission date"
 msgstr "Date de soumission Pré-admission"
+
+#, python-format
+msgctxt "female gender"
+msgid "President of the %(cdd)s"
+msgstr "Présidente de la %(cdd)s"
+
+#, python-format
+msgctxt "male gender"
+msgid "President of the %(cdd)s"
+msgstr "Président de la %(cdd)s"
 
 msgid "Preview"
 msgstr "Prévisualiser"
@@ -1150,6 +1539,9 @@ msgstr "Prévisualiser le template d'email personnalisé <em>%(name)s</em>"
 
 msgid "Previous experience"
 msgstr "Parcours antérieur"
+
+msgid "Prof."
+msgstr "Prof."
 
 msgid "Program proposition"
 msgstr "Proposition de programme"
@@ -1168,6 +1560,21 @@ msgstr "Promoteur non trouvé."
 
 msgid "Promoters"
 msgstr "Promoteurs"
+
+msgid "Proof"
+msgstr "Preuve"
+
+msgid "Proof (if needed)"
+msgstr "Preuve (le cas échéant)"
+
+msgid "Proof of acceptation by the committee"
+msgstr "Preuve d'acceptation par le comité de sélection"
+
+msgid "Proof of acceptation or publication"
+msgstr "Preuve d'acceptation ou de publication"
+
+msgid "Proof of participation for the whole activity"
+msgstr "Attestation de participation pour l'ensemble de l'activité"
 
 msgid "Proposed new deadline"
 msgstr "Nouvelle échéance proposée"
@@ -1212,11 +1619,30 @@ msgstr ""
 "La commission de proximité doit être remplie uniquement si l'entité du "
 "doctorat est CDE, CLSM ou CDSS"
 
+msgid "Publication in an international scientific journal with peer review"
+msgstr ""
+"Publication dans une revue scientifique internationale avec peer review"
+
+msgid "Publication status"
+msgstr "Statut de publication"
+
+msgid "Published"
+msgstr "Publié"
+
 msgid "REFUSED"
 msgstr "Refusé"
 
+msgid "REFUSEE"
+msgstr "Refusée"
+
 msgid "REJECTED"
 msgstr "Rejeté"
+
+msgid "RESIDENCY"
+msgstr "Séjour de perfectionnement de recherche"
+
+msgid "Reason for exceeding the deadline"
+msgstr "Motif du dépassement de l’échéance"
 
 msgid "Recipient"
 msgstr "Destinataire"
@@ -1226,6 +1652,9 @@ msgstr "Lettres de recommandation"
 
 msgid "Reference"
 msgstr "Référence"
+
+msgid "Registration Id"
+msgstr "Noma"
 
 msgid "Rejection reason"
 msgstr "Motif de refus"
@@ -1239,6 +1668,12 @@ msgstr "Demande d'une nouvelle échéance pour l'épreuve de confirmation"
 msgid "Research report"
 msgstr "Rapport de recherche"
 
+msgid "Research residency (excluding cotutelle)"
+msgstr "Séjour de recherche (hors cotutelle)"
+
+msgid "Research seminar"
+msgstr "Séminaire de recherche"
+
 msgid "Reset"
 msgstr "Réinitialiser"
 
@@ -1248,8 +1683,17 @@ msgstr "Épreuve de confirmation à représenter"
 msgid "Retaking of the test"
 msgstr "Confirmation à représenter"
 
+msgid "Review of a scientific work"
+msgstr "Compte - rendu d'un ouvrage scientifique"
+
+msgid "Role"
+msgstr "Rôle"
+
 msgid "Role of the signing actor"
 msgstr "Rôle du signataire"
+
+msgid "Référence DIAL.Pr"
+msgstr "Référence DIAL.Pr"
 
 msgid "SCEB"
 msgstr "SCEB"
@@ -1262,6 +1706,12 @@ msgstr "Bourse de recherche"
 
 msgid "SELF_FUNDING"
 msgstr "Auto-financement"
+
+msgid "SEMINAR"
+msgstr "Séminaire de recherche : assistance"
+
+msgid "SERVICE"
+msgstr "Service institutionnel, didactique et d'expertise scientifique"
 
 msgid "SIC director"
 msgstr "Directeur SIC"
@@ -1283,6 +1733,9 @@ msgstr "SIC :"
 
 msgid "SIGNING_IN_PROGRESS"
 msgstr "Signatures en cours"
+
+msgid "SOUMISE"
+msgstr "Soumise"
 
 msgid "STATISTICS"
 msgstr "Statistiques"
@@ -1314,6 +1767,12 @@ msgstr "Études secondaires"
 msgid "Select a mail template"
 msgstr "Sélectionner un template d'email"
 
+msgid "Selection committee"
+msgstr "Comité de sélection"
+
+msgid "Seminar types"
+msgstr "Types de séminaires"
+
 msgid "Send a mail"
 msgstr "Envoyer un e-mail"
 
@@ -1326,11 +1785,32 @@ msgstr "Envoyer le message"
 msgid "Sender"
 msgstr "Expéditeur"
 
+msgid "Service types"
+msgstr "Type des services"
+
 msgid "Sex"
 msgstr "Sexe"
 
+msgid "Show details"
+msgstr "Voir le détail"
+
+msgid "Signatures"
+msgstr "Signatures"
+
+msgid "Sir"
+msgstr "Monsieur"
+
+msgid "Speaker"
+msgstr "Orateur ou oratrice"
+
+msgid "Status"
+msgstr "Statut"
+
 msgid "Status changes"
 msgstr "Changements de statut"
+
+msgid "Status of the doctoral training"
+msgstr "État d’avancement de la formation doctorale"
 
 msgid "Status:"
 msgstr "Statut :"
@@ -1344,11 +1824,21 @@ msgstr "Numéro de la rue"
 msgid "Subject"
 msgstr "Sujet"
 
+msgid "Submitted"
+msgstr "Soumise"
+
 msgid "Submitted profile"
 msgstr "Profil soumis"
 
 msgid "Successful test"
 msgstr "Epreuve réussie"
+
+msgctxt "paper summary"
+msgid "Summary"
+msgstr "Résumé"
+
+msgid "Summary of the communication"
+msgstr "Résumé de la communication"
 
 msgid "Supervision"
 msgstr "Supervision"
@@ -1359,6 +1849,9 @@ msgstr "Groupe de supervision non trouvé."
 msgid "Supervisory panel"
 msgstr "Comité d'accompagnement"
 
+msgid "Supervisory panel report of the confirmation paper"
+msgstr "Procès-verbal de l'épreuve de confirmation"
+
 msgid "TO_BE_COMPLETED"
 msgstr "À compléter"
 
@@ -1368,8 +1861,28 @@ msgstr "Pour validation"
 msgid "TO_BE_VERIFIED"
 msgstr "Pour vérification"
 
+msgid "The <strong>additional training</strong> has been completed: yes / no."
+msgstr ""
+"La <strong>formation complémentaire</strong> a été réalisée : oui / non."
+
 msgid "The acronym of the scholarship grant"
 msgstr "L'acronyme de la bourse d'études"
+
+msgctxt "female gender"
+msgid ""
+"The committee requests the candidate to <strong>retake</strong> the paper "
+"<u>before</u>:"
+msgstr ""
+"Le comité demande à la candidate de présenter une <strong>nouvelle épreuve</"
+"strong> <u>avant</u> le :"
+
+msgctxt "male gender"
+msgid ""
+"The committee requests the candidate to <strong>retake</strong> the paper "
+"<u>before</u>:"
+msgstr ""
+"Le comité demande au candidat de présenter une <strong>nouvelle épreuve</"
+"strong> <u>avant</u> le :"
 
 msgid ""
 "The confirmation paper is not completed: please be sure that the "
@@ -1379,7 +1892,11 @@ msgstr ""
 "date et le procès verbal de l'épreuve ont bien été complétés."
 
 msgid "The confirmation paper is not in progress"
-msgstr "L'épreuve de confirmation n'est pas en cours."
+msgstr "L'épreuve de confirmation n'est pas en cours"
+
+msgid "The current training is attached to this document."
+msgstr ""
+"La formation réalisée à ce jour se trouve en annexe à ce procès-verbal."
 
 msgid "The date of the confirmation paper cannot be later than its deadline."
 msgstr ""
@@ -1388,6 +1905,14 @@ msgstr ""
 
 msgid "The decision of the signing actor"
 msgstr "La décision du signataire"
+
+msgctxt "female gender"
+msgid "The doctoral student"
+msgstr "La doctorante"
+
+msgctxt "male gender"
+msgid "The doctoral student"
+msgstr "Le doctorant"
 
 msgid "The dossier has been confirmed as:"
 msgstr "La demande a été confirmée sous le nom :"
@@ -1432,13 +1957,13 @@ msgid "The opinion about the extension request is not completed."
 msgstr "L'avis relatif à la demande d'une nouvelle échéance n'est pas complet."
 
 msgid "The opinion of the cdd manager about the extension request"
-msgstr "L'avis du gestionnaire CDD au sujet d'une demande de prolongation."
+msgstr "L'avis du gestionnaire CDD au sujet d'une demande de prolongation"
 
 msgid "The proposed date by the student (DD/MM/YYYY)"
 msgstr "La date proposée par l'étudiant (JJ/MM/AAAA)"
 
 msgid "The proposition has already been confirmed or is cancelled"
-msgstr "La proposition a déjà été confirmée ou est annulée."
+msgstr "La proposition a déjà été confirmée ou est annulée"
 
 msgid "The public comment about the approval/refusal"
 msgstr "Le commentaire public de la décision"
@@ -1448,6 +1973,9 @@ msgstr "La raison du refus"
 
 msgid "The signature request procedure isn't in progress."
 msgstr "La procédure de demande de signature n'a pas été lancée."
+
+msgid "The start date can't be later than the end date"
+msgstr "La date de début ne peut être postérieure à la date de fin"
 
 msgid "There can be no more CA members in the supervision group."
 msgstr ""
@@ -1461,9 +1989,6 @@ msgstr ""
 msgid "There is no request for a new deadline."
 msgstr "Il n'y a pas de demande de nouvelle échéance."
 
-msgid "Thesis funding renewal"
-msgstr "Demande de renouvellement de bourse"
-
 msgid "Thesis institute"
 msgstr "Institut de la thèse"
 
@@ -1475,6 +2000,12 @@ msgstr "Langue de la thèse"
 
 msgid "Thesis location"
 msgstr "Lieu de la thèse"
+
+msgid "Thesis title"
+msgstr "Titre de la thèse"
+
+msgid "This candidate has not created any activity yet"
+msgstr "Ce candidat n'a pas encore créé d'activité"
 
 msgid "This experience cannot be deleted as it has already been valuated."
 msgstr "Cette expérience ne peut être supprimée, ayant déjà été évaluée."
@@ -1491,11 +2022,24 @@ msgstr "Titre"
 msgid "Title of diploma or training"
 msgstr "Nom du diplôme ou de la formation"
 
+msgid "Title of the communication"
+msgstr "Titre de la communication"
+
 msgid "Title of the doctorate"
 msgstr "Titre du doctorat"
 
+msgid "Title of the publication"
+msgstr "Intitulé de la publication"
+
 msgid "To"
 msgstr "À"
+
+msgid ""
+"To be uploaded in your dossier on the doctoral platform as soon as possible "
+"after the confirmation test"
+msgstr ""
+"À téléverser dans votre dossier sur la plateforme doctorale dans les plus "
+"brefs délais après l’épreuve de confirmation"
 
 msgid "Token"
 msgstr "Token"
@@ -1503,11 +2047,23 @@ msgstr "Token"
 msgid "Tokens that can be used for replacement"
 msgstr "Tokens pouvant être utilisés"
 
+msgid "Total hourly volume"
+msgstr "Volume horaire total"
+
 msgid "Training"
 msgstr "Formation"
 
 msgid "Type"
 msgstr "Type"
+
+msgid "Type of activity"
+msgstr "Type d'activité"
+
+msgid "Type of communication"
+msgstr "Type de communication"
+
+msgid "Type of publication"
+msgstr "Type de publication"
 
 msgid "UCLOUVAIN_ASSISTANT"
 msgstr "Assistant UCLouvain"
@@ -1518,6 +2074,9 @@ msgstr "UUID"
 msgid "Undecided"
 msgstr "Non décidé"
 
+msgid "Unsubmitted"
+msgstr "Non soumis"
+
 msgid "Update"
 msgstr "Mettre à jour"
 
@@ -1527,8 +2086,14 @@ msgstr "Mettre à jour admission en doctorat"
 msgid "Upload the opinion on the renewal of the research mandate"
 msgstr "Téléverser l'avis sur le renouvellement du mandat de recherche"
 
+msgid "VAE"
+msgstr "Valorisation des acquis de l'expérience"
+
 msgid "VALID"
 msgstr "Valide"
+
+msgid "Validated"
+msgstr "Validé"
 
 msgid "WBI - Wallonie Bruxelles International"
 msgstr "WBI - Wallonie Bruxelles International"
@@ -1536,16 +2101,22 @@ msgstr "WBI - Wallonie Bruxelles International"
 msgid "WORK_CONTRACT"
 msgstr "Contrat de travail"
 
+msgid "Website"
+msgstr "Site web"
+
 msgid "Work contract should be set when financing type is set to work contract"
 msgstr ""
 "Le contrat de travail doit être renseigné quand le type de financement est "
-"un contrat de travail."
+"un contrat de travail"
 
 msgid "Work contract type"
 msgstr "Type de contrat de travail"
 
 msgid "Working contract type"
 msgstr "Type de contrat de travail"
+
+msgid "Working paper"
+msgstr "Rapport de recherche"
 
 msgid "YES"
 msgstr "Oui"
@@ -1613,8 +2184,21 @@ msgstr "créé"
 msgid "dd/mm/yyyy"
 msgstr "jj/mm/aaaa"
 
+#, python-format
+msgid "from %(start)s to %(end)s"
+msgstr "du %(start)s au %(end)s"
+
 msgid "items per page"
 msgstr "éléments par page"
 
 msgid "modified"
 msgstr "modifiée"
+
+msgid "the <strong>failure</strong> of the confirmation paper."
+msgstr "l'<strong>échec</strong> de l'épreuve de confirmation."
+
+msgid "the <strong>not pursing</strong> of the doctorate."
+msgstr "la <strong>non-poursuite</strong> du doctorat."
+
+msgid "the <strong>successful completion</strong> of the confirmation paper."
+msgstr "la <strong>réussite</strong> de l'épreuve de confirmation."

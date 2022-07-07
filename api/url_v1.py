@@ -23,7 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from django.urls import path as _path
+from django.urls import include, path as _path
 
 from admission.api import views
 
@@ -33,36 +33,45 @@ def path(pattern, view, name=None):
 
 
 app_name = "admission_api_v1"
-urlpatterns = [
-    path('dashboard', views.DashboardViewSet),
+
+person_tabs = [
     path('person', views.PersonViewSet),
     path('coordonnees', views.CoordonneesViewSet),
-    path('propositions', views.PropositionListView),
     path('curriculum', views.CurriculumExperienceListAndCreateView),
     path('curriculum/file', views.CurriculumFileView),
     path('curriculum/<uuid:xp>', views.CurriculumExperienceDetailUpdateAndDeleteView),
-    path('supervised_propositions', views.SupervisedPropositionListView),
     path('secondary_studies', views.SecondaryStudiesViewSet),
     path('languages_knowledge', views.LanguagesKnowledgeViewSet),
+]
+
+urlpatterns = [
+    # Lists
+    path('dashboard', views.DashboardViewSet),
+    path('propositions', views.PropositionListView),
+    path('supervised_propositions', views.SupervisedPropositionListView),
+    # Creation tabs
+    _path('', include(person_tabs)),
+    # Admission-related
     path('propositions/<uuid:uuid>', views.PropositionViewSet),
+    _path('propositions/<uuid:uuid>/', include(person_tabs)),
     path('propositions/<uuid:uuid>/verify_project', views.VerifyProjectView),
     path('propositions/<uuid:uuid>/submit', views.SubmitPropositionViewSet),
-    path('propositions/<uuid:uuid>/person', views.PersonViewSet),
-    path('propositions/<uuid:uuid>/coordonnees', views.CoordonneesViewSet),
-    path('propositions/<uuid:uuid>/secondary_studies', views.SecondaryStudiesViewSet),
-    path('propositions/<uuid:uuid>/languages_knowledge', views.LanguagesKnowledgeViewSet),
     path('propositions/<uuid:uuid>/cotutelle', views.CotutelleAPIView),
+    # Supervision
     path('propositions/<uuid:uuid>/supervision', views.SupervisionAPIView),
     path('propositions/<uuid:uuid>/request_signatures', views.RequestSignaturesAPIView),
     path('propositions/<uuid:uuid>/approve', views.ApprovePropositionAPIView),
     path('propositions/<uuid:uuid>/approve-by-pdf', views.ApproveByPdfPropositionAPIView),
+    # Submission confirmation
     path('propositions/<uuid:uuid>/confirmation', views.ConfirmationAPIView),
     path('propositions/<uuid:uuid>/confirmation/last', views.LastConfirmationAPIView),
+    path('propositions/<uuid:uuid>/confirmation/last/canvas', views.LastConfirmationCanvasAPIView),
     path('propositions/<uuid:uuid>/supervised_confirmation', views.SupervisedConfirmationAPIView),
-    path('propositions/<uuid:uuid>/curriculum', views.CurriculumExperienceListAndCreateView),
-    path('propositions/<uuid:uuid>/curriculum/file', views.CurriculumFileView),
-    path('propositions/<uuid:uuid>/curriculum/<uuid:xp>', views.CurriculumExperienceDetailUpdateAndDeleteView),
+    # Doctorate
     path('propositions/<uuid:uuid>/doctorate', views.DoctorateAPIView),
+    path('propositions/<uuid:uuid>/training', views.DoctoralTrainingListView),
+    path('propositions/<uuid:uuid>/training/<uuid:activity_id>', views.DoctoralTrainingView),
+    # Autocompletes
     path('autocomplete/sector', views.AutocompleteSectorView),
     path('autocomplete/sector/<str:sigle>/doctorates', views.AutocompleteDoctoratView),
     path('autocomplete/tutor', views.AutocompleteTutorView),

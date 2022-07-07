@@ -28,12 +28,14 @@ import uuid
 from typing import Optional, List
 from unittest.mock import patch
 
+from django.core.management import call_command
 from django.test import TestCase, override_settings
 from django.urls import reverse
+from osis_async.models.enums import TaskStates
 from osis_notification.models import EmailNotification
 from rest_framework import status
 
-from admission.contrib.models import DoctorateAdmission
+from admission.contrib.models import DoctorateAdmission, AdmissionTask, ConfirmationPaper
 from admission.ddd.projet_doctoral.doctorat.domain.model.enums import ChoixStatutDoctorat
 from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.commands import RecupererEpreuvesConfirmationQuery
 from admission.ddd.projet_doctoral.preparation.domain.model._enums import ChoixTypeAdmission
@@ -76,6 +78,18 @@ class CddDoctorateAdmissionConfirmationSuccessDecisionViewTestCase(TestCase):
         cls.get_remote_token_patcher = patch('osis_document.api.utils.get_remote_token')
         patched = cls.get_remote_token_patcher.start()
         patched.return_value = 'foobar'
+
+        cls.save_raw_content_remotely_patcher = patch('osis_document.utils.save_raw_content_remotely')
+        patched = cls.save_raw_content_remotely_patcher.start()
+        patched.return_value = 'a-token'
+
+        cls.get_mandates_service_patcher = patch('reference.services.mandates.MandatesService.get')
+        patched = cls.get_mandates_service_patcher.start()
+        patched.return_value = {
+            'first_name': 'Jane',
+            'last_name': 'Doe',
+            'function': 'Présidente',
+        }
 
         # Create some academic years
         academic_years = [AcademicYearFactory(year=year) for year in [2021, 2022]]
@@ -144,7 +158,7 @@ class CddDoctorateAdmissionConfirmationSuccessDecisionViewTestCase(TestCase):
         cls.cdd_person = CddManagerFactory(entity=first_doctoral_commission).person
 
         # Targeted path
-        cls.path = 'admission:doctorate:update:confirmation-success'
+        cls.path = 'admission:doctorate:confirmation:success'
 
     @classmethod
     def tearDownClass(cls):
@@ -190,6 +204,19 @@ class CddDoctorateAdmissionConfirmationSuccessDecisionViewTestCase(TestCase):
             uuid=self.admission_with_confirmation_papers.uuid
         )
         self.assertEqual(doctorate.post_enrolment_status, ChoixStatutDoctorat.PASSED_CONFIRMATION.name)
+
+        admission_task = AdmissionTask.objects.filter(admission=doctorate).first()
+        self.assertEqual(admission_task.type, AdmissionTask.TaskType.CONFIRMATION_SUCCESS.name)
+        self.assertEqual(admission_task.task.state, TaskStates.PENDING.name)
+
+        # Simulate the triggering of the async tasks
+        call_command("process_admission_tasks")
+        admission_task.refresh_from_db()
+
+        self.assertEqual(admission_task.task.state, TaskStates.DONE.name)
+
+        c = ConfirmationPaper.objects.filter(admission=doctorate).first()
+        self.assertEqual(c.certificate_of_achievement, [uuid.UUID('4bdffb42-552d-415d-9e4c-725f10dce228')])
 
     def test_confirmation_success_decision_cdd_user_with_incomplete_confirmation_paper(self):
         self.client.force_login(user=self.cdd_person.user)
@@ -307,7 +334,7 @@ class CddDoctorateAdmissionConfirmationFailureDecisionViewTestCase(TestCase):
         cls.cdd_person = CddManagerFactory(entity=first_doctoral_commission).person
 
         # Targeted path
-        cls.path = 'admission:doctorate:update:confirmation-failure'
+        cls.path = 'admission:doctorate:confirmation:failure'
 
     @classmethod
     def tearDownClass(cls):
@@ -569,7 +596,7 @@ class CddDoctorateAdmissionConfirmationRetakingDecisionViewTestCase(TestCase):
         cls.cdd_person = CddManagerFactory(entity=first_doctoral_commission).person
 
         # Targeted path
-        cls.path = 'admission:doctorate:update:confirmation-retaking'
+        cls.path = 'admission:doctorate:confirmation:retaking'
 
     @classmethod
     def tearDownClass(cls):

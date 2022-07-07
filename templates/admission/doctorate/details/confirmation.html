@@ -35,7 +35,7 @@
       </a>
     </li>
     <li>
-      <a href="{% url "admission:doctorate:update:confirmation-opinion" doctorate.uuid %}">
+      <a href="{% url "admission:doctorate:confirmation:opinion" doctorate.uuid %}">
         {% trans "Upload the opinion on the renewal of the research mandate" %}
       </a>
     </li>
@@ -47,12 +47,12 @@
         </a>
       </li>
       <li>
-        <a href="{% url 'admission:doctorate:update:confirmation-failure' pk %}">
+        <a href="{% url 'admission:doctorate:confirmation:failure' pk %}">
           {% trans "Failure of the test" %}
         </a>
       </li>
       <li>
-        <a href="{% url 'admission:doctorate:update:confirmation-retaking' pk %}">
+        <a href="{% url 'admission:doctorate:confirmation:retaking' pk %}">
           {% trans "Retaking of the test" %}
         </a>
       </li>
@@ -81,7 +81,9 @@
     {% field_data _("Date of confirmation:") current_confirmation_paper.date 'inline-field-data' %}
     {% field_data _("Research report") current_confirmation_paper.rapport_recherche %}
     <p>
-      <a href="#">{% trans "Framework of the supervisory panel report to download" %}</a>
+      <a href="{% url 'admission:doctorate:confirmation-canvas' pk %}" target="_blank">
+        {% trans "Canvas of the supervisory panel report to download" %}
+      </a>
     </p>
     {% field_data _("Report of the supervisory panel") current_confirmation_paper.proces_verbal_ca %}
     {% field_data _("Certificate of achievement") current_confirmation_paper.attestation_reussite hide_empty=True %}

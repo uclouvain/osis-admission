@@ -26,6 +26,7 @@
 from email.message import EmailMessage
 
 from django.conf import settings
+from django.shortcuts import resolve_url
 from django.utils.functional import lazy
 from django.utils.translation import get_language
 
@@ -97,6 +98,10 @@ class Notification(INotification):
             "candidate_last_name": doctorat.candidate.last_name,
             "doctorate_title": cls._get_doctorate_title_translation(doctorat),
             "admission_link_front": settings.ADMISSION_FRONTEND_LINK.format(uuid=doctorat.uuid),
+            "admission_link_back": "{}{}".format(
+                settings.ADMISSION_BACKEND_LINK_PREFIX.rstrip('/'),
+                resolve_url('admission:doctorate:project', pk=doctorat.uuid),
+            ),
         }
 
     @classmethod

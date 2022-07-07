@@ -29,6 +29,8 @@ from django.core.cache import cache
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db import models
 from django.db.models import OuterRef, F
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 from django.utils.datetime_safe import date
 from django.utils.translation import gettext_lazy as _
 from rest_framework.settings import api_settings
@@ -46,8 +48,12 @@ from admission.ddd.projet_doctoral.preparation.domain.model._experience_preceden
 )
 from admission.ddd.projet_doctoral.preparation.domain.model._financement import ChoixTypeFinancement
 from admission.ddd.projet_doctoral.validation.domain.model._enums import ChoixStatutCDD, ChoixStatutSIC
+from base.models.education_group_year import EducationGroupYear
 from base.models.entity_version import EntityVersion
+from base.models.enums.education_group_categories import Categories
+from base.models.enums.education_group_types import TrainingType
 from base.models.enums.entity_type import SECTOR
+from base.models.person import Person
 from base.utils.cte import CTESubquery
 from osis_document.contrib import FileField
 from osis_signature.contrib.fields import SignatureProcessField
@@ -385,6 +391,30 @@ class PropositionManager(models.Manager):
         )
 
 
+@receiver(post_save, sender=EducationGroupYear)
+def _invalidate_doctorate_cache(sender, instance, **kwargs):
+    if (
+        instance.education_group_type.category == Categories.TRAINING.name
+        and instance.education_group_type.name == TrainingType.PHD.name
+    ):
+        keys = [
+            f'admission_permission_{a_uuid}'
+            for a_uuid in DoctorateAdmission.objects.filter(doctorate_id=instance.pk).values_list('uuid', flat=True)
+        ]
+        if keys:
+            cache.delete_many(keys)
+
+
+@receiver(post_save, sender=Person)
+def _invalidate_candidate_cache(sender, instance, **kwargs):
+    keys = [
+        f'admission_permission_{a_uuid}'
+        for a_uuid in DoctorateAdmission.objects.filter(candidate_id=instance.pk).values_list('uuid', flat=True)
+    ]
+    if keys:
+        cache.delete_many(keys)
+
+
 class PropositionProxy(DoctorateAdmission):
     """Proxy model of base.DoctorateAdmission for Proposition in preparation context"""
 
@@ -434,12 +464,17 @@ class DoctorateManager(models.Manager):
             .only(
                 'candidate',
                 'doctorate',
-                'doctorate__academic_year',
+                'doctorate__academic_year__year',
+                'doctorate__title',
+                'doctorate__acronym',
                 'post_enrolment_status',
                 'proximity_commission',
                 'reference',
                 'submitted_profile',
                 'uuid',
+                'project_title',
+                'financing_type',
+                'scholarship_grant',
             )
             .select_related(
                 'candidate',
@@ -504,10 +539,9 @@ class ConfirmationPaper(models.Model):
         upload_to=confirmation_paper_directory_path,
         max_files=1,
     )
-    thesis_funding_renewal = FileField(
-        verbose_name=_("Thesis funding renewal"),
+    supervisor_panel_report_canvas = FileField(
+        verbose_name=_("Canvas of the report of the supervisory panel"),
         upload_to=confirmation_paper_directory_path,
-        help_text=_("Only for FNRS, FRIA and FRESH scholarship students"),
         max_files=1,
     )
     research_mandate_renewal_opinion = FileField(

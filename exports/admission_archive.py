@@ -38,7 +38,7 @@ def admission_pdf_archive(task_uuid, language=None):
     with translation.override(language=language or admission_task.admission.candidate.language):
         contact_address = get_by_label(admission_task.admission.candidate, PersonAddressType.CONTACT.name)
         residential_address = get_by_label(admission_task.admission.candidate, PersonAddressType.RESIDENTIAL.name)
-        admission_generate_pdf(
+        token = admission_generate_pdf(
             admission_task.admission,
             template='admission/exports/pdf_archive.html',
             filename='pdf_archive.pdf',
@@ -47,3 +47,5 @@ def admission_pdf_archive(task_uuid, language=None):
                 "residential_address": residential_address,
             },
         )
+    admission_task.admission.archived_record_signatures_sent = [token]
+    admission_task.admission.save()

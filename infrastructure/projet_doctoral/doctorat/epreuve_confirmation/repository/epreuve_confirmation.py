@@ -103,7 +103,7 @@ class EpreuveConfirmationRepository(IEpreuveConfirmationRepository):
                 'confirmation_deadline': entity.date_limite,
                 'research_report': entity.rapport_recherche,
                 'supervisor_panel_report': entity.proces_verbal_ca,
-                'thesis_funding_renewal': entity.demande_renouvellement_bourse,
+                'supervisor_panel_report_canvas': entity.canevas_proces_verbal_ca,
                 'research_mandate_renewal_opinion': entity.avis_renouvellement_mandat_recherche,
                 'certificate_of_failure': entity.attestation_echec,
                 'certificate_of_achievement': entity.attestation_reussite,
@@ -143,7 +143,7 @@ class EpreuveConfirmationRepository(IEpreuveConfirmationRepository):
             proces_verbal_ca=confirmation_paper.supervisor_panel_report,
             attestation_reussite=confirmation_paper.certificate_of_achievement,
             attestation_echec=confirmation_paper.certificate_of_failure,
-            demande_renouvellement_bourse=confirmation_paper.thesis_funding_renewal,
+            canevas_proces_verbal_ca=confirmation_paper.supervisor_panel_report_canvas,
             avis_renouvellement_mandat_recherche=confirmation_paper.research_mandate_renewal_opinion,
         )
 
@@ -170,6 +170,6 @@ class EpreuveConfirmationRepository(IEpreuveConfirmationRepository):
             proces_verbal_ca=confirmation_paper.supervisor_panel_report,
             attestation_reussite=confirmation_paper.certificate_of_achievement,
             attestation_echec=confirmation_paper.certificate_of_failure,
-            demande_renouvellement_bourse=confirmation_paper.thesis_funding_renewal,
+            canevas_proces_verbal_ca=confirmation_paper.supervisor_panel_report_canvas,
             avis_renouvellement_mandat_recherche=confirmation_paper.research_mandate_renewal_opinion,
         )

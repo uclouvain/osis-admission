@@ -24,6 +24,7 @@
 #
 # ##############################################################################
 from .details.confirmation import DoctorateAdmissionConfirmationDetailView
+from .details.confirmation_canvas_export import DoctorateAdmissionConfirmationCanvasExportView
 from .details.coordonnees import DoctorateAdmissionCoordonneesDetailView
 from .details.cotutelle import DoctorateAdmissionCotutelleDetailView
 from .details.curriculum import DoctorateAdmissionCurriculumDetailView
@@ -83,4 +84,5 @@ __all__ = [
     'DoctorateAdmissionConfirmationSuccessDecisionView',
     'DoctorateAdmissionConfirmationFailureDecisionView',
     'DoctorateAdmissionConfirmationRetakingDecisionView',
+    'DoctorateAdmissionConfirmationCanvasExportView',
 ]

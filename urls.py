@@ -26,6 +26,7 @@
 from django.urls import include, path
 
 import admission.views.autocomplete as autocomplete_views
+from admission.views.config.cdd_config import *
 from admission.views.config.cdd_mail_templates import *
 from admission.views.doctorate import *
 from admission.views.doctorate.cdd import *
@@ -40,6 +41,12 @@ autocomplete_paths = [
 ]
 
 # Doctorate
+confirmation_tabs = [
+    path('opinion', DoctorateAdmissionConfirmationOpinionFormView.as_view(), name='opinion'),
+    path('success', DoctorateAdmissionConfirmationSuccessDecisionView.as_view(), name='success'),
+    path('failure', DoctorateAdmissionConfirmationFailureDecisionView.as_view(), name='failure'),
+    path('retaking', DoctorateAdmissionConfirmationRetakingDecisionView.as_view(), name='retaking'),
+]
 doctorate_update_paths = [
     path('person', DoctorateAdmissionPersonFormView.as_view(), name='person'),
     path('coordonnees', DoctorateAdmissionCoordonneesFormView.as_view(), name='coordonnees'),
@@ -50,23 +57,11 @@ doctorate_update_paths = [
     path('cotutelle', DoctorateAdmissionCotutelleFormView.as_view(), name='cotutelle'),
     path('supervision', DoctorateAdmissionSupervisionFormView.as_view(), name='supervision'),
     path('confirmation', DoctorateAdmissionConfirmationFormView.as_view(), name='confirmation'),
-    path('confirmation-opinion', DoctorateAdmissionConfirmationOpinionFormView.as_view(), name='confirmation-opinion'),
     path('extension-request', DoctorateAdmissionExtensionRequestFormView.as_view(), name='extension-request'),
-    path(
-        'confirmation-success',
-        DoctorateAdmissionConfirmationSuccessDecisionView.as_view(),
-        name='confirmation-success',
-    ),
-    path(
-        'confirmation-failure',
-        DoctorateAdmissionConfirmationFailureDecisionView.as_view(),
-        name='confirmation-failure',
-    ),
-    path(
-        'confirmation-retaking',
-        DoctorateAdmissionConfirmationRetakingDecisionView.as_view(),
-        name='confirmation-retaking',
-    ),
+]
+doctorate_training_paths = [
+    path('add/<str:category>', DoctorateTrainingActivityAddView.as_view(), name='add'),
+    path('edit/<uuid:activity_id>', DoctorateTrainingActivityEditView.as_view(), name='edit'),
 ]
 doctorate_detail_paths = [
     path('person', DoctorateAdmissionPersonDetailView.as_view(), name='person'),
@@ -81,8 +76,16 @@ doctorate_detail_paths = [
     path('history-all', DoctorateHistoryAllView.as_view(), name='history-all'),
     path('send-mail', DoctorateSendMailView.as_view(), name='send-mail'),
     path('confirmation', DoctorateAdmissionConfirmationDetailView.as_view(), name='confirmation'),
+    path('confirmation/', include((confirmation_tabs, 'confirmation'))),
     path('extension-request', DoctorateAdmissionExtensionRequestDetailView.as_view(), name='extension-request'),
+    path(
+        'confirmation-canvas',
+        DoctorateAdmissionConfirmationCanvasExportView.as_view(),
+        name='confirmation-canvas',
+    ),
     path('update/', include((doctorate_update_paths, 'update'))),
+    path('training', DoctorateTrainingActivityView.as_view(), name='training'),
+    path('training/', include((doctorate_training_paths, 'training'))),
 ]
 
 doctorate_cdd_paths = [
@@ -105,9 +108,15 @@ cdd_mail_template_paths = [
     path('add/<str:identifier>', CddMailTemplateChangeView.as_view(), name='add'),
 ]
 
+cdd_config_paths = [
+    path('', CddConfigListView.as_view(), name='list'),
+    path('edit/<int:pk>', CddConfigChangeView.as_view(), name='edit'),
+]
+
 # Global
 config_paths = [
     path('cdd_mail_template/', include((cdd_mail_template_paths, 'cdd_mail_template'))),
+    path('cdd/', include((cdd_config_paths, 'cdd_config'))),
 ]
 
 urlpatterns = [

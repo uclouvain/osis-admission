@@ -24,7 +24,15 @@
 #
 # ##############################################################################
 from .list import CddDoctorateAdmissionList
+from .training import (
+    DoctorateTrainingActivityAddView,
+    DoctorateTrainingActivityEditView,
+    DoctorateTrainingActivityView,
+)
 
 __all__ = [
     'CddDoctorateAdmissionList',
+    'DoctorateTrainingActivityView',
+    'DoctorateTrainingActivityAddView',
+    'DoctorateTrainingActivityEditView',
 ]

@@ -27,6 +27,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import Http404
 from django.urls import reverse
 from django.utils.functional import cached_property
+from django.utils.translation import gettext as _
 from django.views.generic import FormView
 
 from admission.ddd.projet_doctoral.doctorat.commands import RecupererDoctoratQuery
@@ -47,18 +48,27 @@ from osis_role.contrib.views import PermissionRequiredMixin
 
 
 class DoctorateAdmissionLastConfirmationMixin(LoginRequiredMixin, PermissionRequiredMixin):
-    def get_permission_object(self):
+    @cached_property
+    def admission(self):
         return get_cached_admission_perm_obj(self.kwargs['pk'])
+
+    def get_permission_object(self):
+        return self.admission
 
     @cached_property
     def last_confirmation_paper(self) -> EpreuveConfirmationDTO:
         try:
-            return message_bus_instance.invoke(RecupererDerniereEpreuveConfirmationQuery(self.kwargs.get('pk')))
+            last_confirmation_paper = message_bus_instance.invoke(
+                RecupererDerniereEpreuveConfirmationQuery(self.kwargs.get('pk'))
+            )
+            if not last_confirmation_paper:
+                raise Http404(_('Confirmation paper not found.'))
+            return last_confirmation_paper
         except (DoctoratNonTrouveException, EpreuveConfirmationNonTrouveeException) as e:
             raise Http404(e.message)
 
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs) if hasattr(super(), 'get_context_data') else {}
 
         try:
             context['doctorate'] = message_bus_instance.invoke(

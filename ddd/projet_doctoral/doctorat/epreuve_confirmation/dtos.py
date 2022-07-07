@@ -52,5 +52,5 @@ class EpreuveConfirmationDTO(interface.DTO):
     proces_verbal_ca: List[str] = attr.Factory(list)
     attestation_reussite: List[str] = attr.Factory(list)
     attestation_echec: List[str] = attr.Factory(list)
-    demande_renouvellement_bourse: List[str] = attr.Factory(list)
+    canevas_proces_verbal_ca: List[str] = attr.Factory(list)
     avis_renouvellement_mandat_recherche: List[str] = attr.Factory(list)

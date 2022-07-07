@@ -253,6 +253,7 @@ class MessageBusCommands(AbstractMessageBusCommands):
             confirmer_reussite,
             epreuve_confirmation_repository=EpreuveConfirmationRepository(),
             doctorat_repository=DoctoratRepository(),
+            notification=NotificationEpreuveConfirmation(),
         ),
         ConfirmerEchecCommand: partial(
             confirmer_echec,

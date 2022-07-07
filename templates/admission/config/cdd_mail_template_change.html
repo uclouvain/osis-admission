@@ -39,9 +39,13 @@
   <div class="page-header">
     <h1 class="h3">
       {% if view.kwargs.pk %}
-        {% blocktrans with name=forms.1.instance.name %}Change <em>{{ name }}</em> custom mail template{% endblocktrans %}
+        {% blocktrans with name=forms.1.instance.name trimmed %}
+          Change <em>{{ name }}</em> custom mail template
+        {% endblocktrans %}
       {% else %}
-        {% blocktrans %}Add a custom mail template for <em>{{ description }}</em>{% endblocktrans %}
+        {% blocktrans trimmed %}
+          Add a custom mail template for <em>{{ description }}</em>
+        {% endblocktrans %}
       {% endif %}
     </h1>
   </div>

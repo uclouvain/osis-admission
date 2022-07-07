@@ -91,8 +91,8 @@ L'équipe OSIS</p>
         MailTemplateMigration(
             ADMISSION_EMAIL_SIGNATURE_CANDIDATE,
             {
-                'en': '[OSIS] Answer from {candidate_first_name} {candidate_last_name} for {doctorate_title}',
-                'fr-be': '[OSIS] Réponse de {candidate_first_name} {candidate_last_name} ' 'pour un {doctorate_title}',
+                'en': '[OSIS] Answer from {signataire_first_name} {signataire_last_name} for {doctorate_title}',
+                'fr-be': '[OSIS] Réponse de {signataire_first_name} {signataire_last_name} pour un {doctorate_title}',
             },
             {
                 'en': '''<p>Hello {candidate_first_name} {candidate_last_name},</p>
@@ -116,10 +116,10 @@ L'équipe OSIS</p>
         MailTemplateMigration(
             ADMISSION_EMAIL_SIGNATURE_REFUSAL,
             {
-                'en': '[OSIS] Refusal from another promoter for the {doctorate_title} '
-                'of {candidate_first_name} {candidate_last_name}',
-                'fr-be': "[OSIS] Refus d'un autre promoteur pour le {doctorate_title} "
-                "de {candidate_first_name} {candidate_last_name}",
+                'en': "[OSIS] Refusal from a member of the supervision group for the {doctorate_title} "
+                      "of {candidate_first_name} {candidate_last_name}",
+                'fr-be': "[OSIS] Refus d'un membre du groupe de supervision pour le {doctorate_title} "
+                         "de {candidate_first_name} {candidate_last_name}",
             },
             {
                 'en': '''<p>Hello {actor_first_name} {actor_last_name},</p>

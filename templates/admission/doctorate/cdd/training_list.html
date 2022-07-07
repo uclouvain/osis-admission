@@ -1,0 +1,197 @@
+{% extends "admission/doctorate/details/tab_layout.html" %}
+{% load i18n static admission enums %}
+
+{% comment "License" %}
+  * OSIS stands for Open Student Information System. It's an application
+  * designed to manage the core business of higher education institutions,
+  * such as universities, faculties, institutes and professional schools.
+  * The core business involves the administration of students, teachers,
+  * courses, programs and so on.
+  *
+  * Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+  *
+  * This program is free software: you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License as published by
+  * the Free Software Foundation, either version 3 of the License, or
+  * (at your option) any later version.
+  *
+  * This program is distributed in the hope that it will be useful,
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU General Public License for more details.
+  *
+  * A copy of this license - GNU General Public License - is available
+  * at the root of the source code of this program.  If not,
+  * see http://www.gnu.org/licenses/.
+{% endcomment %}
+
+
+{% block actions-group %}
+  <div class="btn-group">
+    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
+            aria-expanded="false">
+      {% trans "Add an activity" %} <span class="caret"></span>
+    </button>
+    <ul class="dropdown-menu dropdown-menu-right">
+      {% for category_name, category_label in categories %}
+        <li>
+          <a href="{% url "admission:doctorate:training:add" pk=view.kwargs.pk category=category_name|lower %}">
+            {{ category_label }}
+          </a>
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
+{% endblock %}
+
+
+{% block tab_content %}
+  <h3>{% trans "Doctoral training" %}</h3>
+
+  <p>{% lorem %}</p>
+
+  {% if activities and counts.total %}
+    <h4>{% trans "ECTS added" context "summary" %}</h4>
+    <p>
+      {% blocktrans with added=counts.total validated=counts.validated|default_if_none:0 trimmed %}
+        {{ added }} ECTS added with {{ validated }} validated by the CDD.
+      {% endblocktrans %}
+      <a data-toggle="collapse" href="#show-details" aria-expanded="false" aria-controls="show-details">
+        {% trans "Show details" %}
+      </a>
+    </p>
+
+    <div class="collapse" id="show-details">
+      <table class="table table-condensed table-bordered">
+        <thead>
+        <tr>
+          <th>{% trans "Category" %}</th>
+          <th>{% trans "Unsubmitted" %}</th>
+          <th>{% trans "Submitted" %}</th>
+          <th>{% trans "Validated" %}</th>
+        </tr>
+        {% for count in categories_count %}
+          <tr>
+            <th>{{ count.category|enum_display:"CategorieActivite" }}</th>
+            <td>{{ count.unsubmitted|default_if_none:0 }}</td>
+            <td>{{ count.submitted|default_if_none:0 }}</td>
+            <td>{{ count.validated|default_if_none:0 }}</td>
+          </tr>
+        {% endfor %}
+        </thead>
+      </table>
+    </div>
+  {% endif %}
+
+  <h4>{% trans "Activities" %}</h4>
+  {% if activities %}
+    <div class="filter-type form-group">
+      <strong>{% trans "Type" %}</strong>
+      <div class="btn-group btn-group-sm" role="radiogroup">
+        <button type="button" class="btn btn-default active" data-type="all">{% trans "All" context "filters" %}</button>
+        {% for category_name, category_label in categories %}
+          <button type="button" class="btn btn-default" data-type="{{ category_name }}">{{ category_label }}</button>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="filter-status form-group">
+      <strong>{% trans "Status" %}</strong>
+      <div class="btn-group btn-group-sm" role="radiogroup">
+        <button type="button" class="btn btn-default active" data-status="all">{% trans "All" context "filters" %}</button>
+        {% for status_name, status_label in statuses %}
+          <button type="button"
+                  class="btn btn-default btn-{{ status_name|status_as_class }}"
+                  data-status="{{ status_name }}"
+          >{{ status_label }}</button>
+        {% endfor %}
+      </div>
+    </div>
+  {% endif %}
+
+  <div id="activities">
+    {% for activity in activities %}
+      {% if not activity.parent_id %}
+        {% include "admission/doctorate/details/training/"|add:activity.category|lower|add:'.html' %}
+      {% endif %}
+      {% empty %}
+      {% trans "This candidate has not created any activity yet" %}
+    {% endfor %}
+  </div>
+{% endblock %}
+
+
+{% block style %}
+  {{ block.super }}
+  <style>
+      .panel {
+          margin-bottom: 2em;
+      }
+
+      .panel-heading .panel-title {
+          line-height: 1.3em;
+      }
+
+      .panel-heading .panel-title > a {
+          float: left;
+          font-size: 1.5em;
+          padding-right: .3em;
+      }
+
+      .panel-heading .panel-title > a:focus,
+      .panel-heading .panel-title > a:hover {
+          text-decoration: none;
+      }
+
+      .panel-heading .panel-title > a:after {
+          font-family: 'Glyphicons Halflings';
+          content: "\e114";
+      }
+
+      .panel-heading .panel-title > a.collapsed:after {
+          content: "\e080";
+      }
+  </style>
+{% endblock %}
+
+
+{% block script %}
+  <script src="{% static 'osis_document/osis-document.umd.min.js' %}"></script>
+  <script>
+    $(function () {
+      // Open the right panel depending on location hash
+      if (document.location.hash) {
+        const uuid = document.location.hash.slice(1);
+        $('#a-' + uuid).one('shown.bs.collapse', function () {
+          document.getElementById('h-' + uuid).scrollIntoView({ block: 'center', behavior: 'smooth' });
+        }).collapse('show');
+      }
+
+      // Filters
+      const ALL_VALUES = 'all';
+      let current_filter_type = ALL_VALUES;
+      $('.filter-type button').on('click', function () {
+        current_filter_type = $(this).data('type');
+        $('.filter-type button').removeClass('active')
+        $(this).addClass('active');
+        apply_filters();
+      });
+      let current_filter_status = ALL_VALUES;
+      $('.filter-status button').on('click', function () {
+        current_filter_status = $(this).data('status');
+        $('.filter-status button').removeClass('active')
+        $(this).addClass('active');
+        apply_filters();
+      });
+
+      function apply_filters() {
+        $('#activities .panel').each(function() {
+          $(this).show()
+          if ((current_filter_type !== ALL_VALUES && $(this).data('type') !== current_filter_type)
+            || (current_filter_status !== ALL_VALUES && $(this).data('status') !== current_filter_status)) {
+            $(this).hide()
+          }
+        })
+      }
+    });
+  </script>
+{% endblock %}

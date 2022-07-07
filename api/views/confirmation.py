@@ -29,6 +29,7 @@ from rest_framework.response import Response
 
 from admission.api import serializers
 from admission.api.schema import ResponseSpecificSchema
+from admission.ddd.projet_doctoral.doctorat.commands import RecupererDoctoratQuery
 from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.commands import (
     CompleterEpreuveConfirmationParPromoteurCommand,
     RecupererDerniereEpreuveConfirmationQuery,
@@ -36,6 +37,8 @@ from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.commands import
     SoumettreEpreuveConfirmationCommand,
     SoumettreReportDeDateCommand,
 )
+from admission.ddd.projet_doctoral.preparation.commands import GetGroupeDeSupervisionCommand
+from admission.exports.admission_confirmation_canvas import admission_pdf_confirmation_canvas
 from admission.utils import get_cached_admission_perm_obj
 from infrastructure.messages_bus import message_bus_instance
 from osis_role.contrib.views import APIPermissionRequiredMixin
@@ -156,6 +159,54 @@ class LastConfirmationAPIView(APIPermissionRequiredMixin, mixins.RetrieveModelMi
         serializer = serializers.DoctorateIdentityDTOSerializer(instance=result)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class LastConfirmationCanvasSchema(ResponseSpecificSchema):
+    serializer_mapping = {
+        'GET': serializers.ConfirmationPaperCanvasSerializer,
+    }
+
+    def get_operation_id(self, path, method):
+        return 'retrieve_last_confirmation_paper_canvas'
+
+
+class LastConfirmationCanvasAPIView(APIPermissionRequiredMixin, mixins.RetrieveModelMixin, GenericAPIView):
+    name = "last_confirmation_canvas"
+    schema = LastConfirmationCanvasSchema()
+    filter_backends = []
+    permission_mapping = {
+        'GET': 'admission.view_doctorateadmission_confirmation',
+    }
+
+    def get_permission_object(self):
+        return get_cached_admission_perm_obj(self.kwargs['uuid'])
+
+    def get(self, request, *args, **kwargs):
+        """Get the last confirmation paper canvas related to the doctorate"""
+        doctorate, confirmation_paper, supervision_group = message_bus_instance.invoke_multiple(
+            [
+                RecupererDoctoratQuery(self.kwargs.get('uuid')),
+                RecupererDerniereEpreuveConfirmationQuery(doctorat_uuid=kwargs.get('uuid')),
+                GetGroupeDeSupervisionCommand(uuid_proposition=self.kwargs.get('uuid')),
+            ]
+        )
+        admission = self.get_permission_object()
+
+        uuid = admission_pdf_confirmation_canvas(
+            admission=admission,
+            language=admission.candidate.language,
+            context={
+                'doctorate': doctorate,
+                'confirmation_paper': confirmation_paper,
+                'supervision_group': supervision_group,
+            }
+        )
+
+        serializer = serializers.ConfirmationPaperCanvasSerializer(instance={
+            'uuid': uuid,
+        })
+
+        return Response(serializer.data)
 
 
 class PromoterConfirmationSchema(ResponseSpecificSchema):

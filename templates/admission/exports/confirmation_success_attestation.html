@@ -1,0 +1,70 @@
+{% extends "admission/exports/base_pdf.html" %}
+{% load i18n %}
+
+{% block extra_head %}
+  <style>
+      #letter-recipient {
+          margin-top: 2em;
+          margin-bottom: 4em;
+      }
+      #letter-footer {
+          margin-top: 4em;
+          margin-bottom: 2em;
+      }
+      #letter-attachments {
+          font-style: italic;
+      }
+  </style>
+{% endblock %}
+
+{% block content %}
+  <div class="container">
+    <div id="letter-header" class="text-right">
+      <p>{{ admission.doctorate.enrollment_campus.name }}, {% now "d/m/Y" %}</p>
+      <p>{{ contact_address }}</p>
+    </div>
+
+    <div id="letter-recipient">
+      {% if admission.candidate.gender == 'F' %}{% translate 'Madam' %} {{ admission.candidate.last_name }},
+        {% elif admission.candidate.gender == 'H' %}{% translate 'Sir' %} {{ admission.candidate.last_name }},
+        {% else %}{{ admission.candidate.first_name }} {{ admission.candidate.last_name }},
+      {% endif %}
+    </div>
+
+    <div id="letter-content">
+      <p>
+        {% blocktranslate with confirmation_date=confirmation_paper.confirmation_date %}
+          After considering the opinion of your supervisory panel, which met on {{ confirmation_date }}, the
+          {{ cdd }} notes that your doctoral confirmation paper has been successfully completed.
+        {% endblocktranslate %}
+      </p>
+      <p>
+        {% blocktranslate with nb_credits='[NB_CREDITS]' %}
+          The committee also validates the activities carried out as part of your doctoral training, which now total
+          {{ nb_credits }} ECTS.
+        {% endblocktranslate %}
+      </p>
+      <p>
+        {% blocktranslate %}
+          We congratulate you on your successful completion of the paper and wish you every success in your
+          doctoral training.
+        {% endblocktranslate %}
+      </p>
+    </div>
+
+    <div id="letter-footer">
+      <p>{{ cdd_president.last_name }}</p>
+      <p>
+        {% if cdd_president.function == 'Présidente' %}
+          {% blocktranslate context 'female gender' %}President of the {{ cdd }}{% endblocktranslate %}
+        {% else %}
+          {% blocktranslate context 'male gender' %}President of the {{ cdd }}{% endblocktranslate %}
+        {% endif %}
+      </p>
+    </div>
+
+    <div id="letter-attachments">
+      <p>{% translate 'Attachment: Doctoral training' %}</p>
+    </div>
+  </div>
+{% endblock %}

@@ -37,7 +37,7 @@
   </div>
   <form action="" method="post">
     {% csrf_token %}
-    {% blocktrans with name=instance.name %}
+    {% blocktrans with name=instance.name trimmed %}
       <h2>Delete "{{ name }}" custom mail template?</h2>
       <p>Are you sure you want to delete the custom mail template? This cannot be undone.</p>
     {% endblocktrans %}

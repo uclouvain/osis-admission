@@ -1,0 +1,290 @@
+{% extends "admission/exports/base_pdf.html" %}
+{% load i18n enums admission %}
+
+{% block extra_head %}
+  <style>
+      #title {
+          margin-bottom: 3em;
+      }
+
+      #title h1, #title h2 {
+          font-size: 1em;
+          text-align: center;
+      }
+
+      #title h1 {
+          color: #5db3e6 !important;
+          text-transform: uppercase;
+          font-weight: bold;
+      }
+
+      #title h2 {
+          color: #515151 !important;
+          font-style: italic;
+      }
+
+      dl {
+          margin-bottom: 10px;
+      }
+
+      dd {
+          margin-left: 5px;
+      }
+
+      .to-complete {
+          display: flex;
+      }
+
+      .to-complete dd {
+          flex: 1;
+          height: 1em;
+          border-bottom: 1px dashed black;
+          margin-top: 1px;
+      }
+
+      .to-complete hr {
+          flex: 1;
+          margin-left: 5px;
+      }
+
+      .dashed-line {
+          border: none;
+          border-bottom: 1px dashed black;
+          margin-top: 0;
+          height: 1em;
+      }
+
+      .solid-line {
+          border: none;
+          border-bottom: 1px solid black;
+          margin: 1px 5px;
+          height: 1em;
+      }
+
+      .list-title {
+          margin-bottom: 10px;
+          text-decoration: underline;
+          font-weight: bold;
+      }
+
+      .avoid-break-inside {
+          break-inside: avoid;
+      }
+
+      #confirmation-result {
+          margin-left: 2em;
+      }
+
+      #confirmation-result > div {
+          margin-left: 2em;
+      }
+
+      #confirmation-result label {
+          display: inline;
+          font-weight: normal;
+      }
+
+      #confirmation-result input[type="checkbox"] {
+          float: left;
+          height: 1em;
+          width: 1em;
+          display: inline-block;
+          border: #444 1px solid;
+      }
+
+      p {
+          margin-top: 1.5em;
+      }
+
+      #signatures th, #signatures td {
+          text-align: center;
+      }
+
+      #signatures td {
+          min-height: 6em;
+      }
+
+  </style>
+{% endblock %}
+
+{% block content %}
+  <div class="container">
+    <div id="title">
+      <h1>{% translate "Supervisory panel report of the confirmation paper" %}</h1>
+      <h2>
+        ({% translate "To be uploaded in your dossier on the doctoral platform as soon as possible after the confirmation test" %})
+      </h2>
+    </div>
+
+    {% field_data _("Doctoral student") doctorate.nom_doctorant|add:" "|add:doctorate.prenom_doctorant inline=True %}
+    {% field_data _("Registration Id") doctorate.noma_doctorant inline=True %}
+    {% field_data _("Definitive admission date to doctorate") doctorate.admission_acceptee_le inline=True %}
+
+    {% if doctorate.type_financement == "SEARCH_SCHOLARSHIP" %}
+      {% field_data _("Financing type") doctorate.type_financement|enum_display:"ChoixTypeFinancement"|add:" - "|add:admission.scholarship_grant inline=True %}
+    {% else %}
+      {% field_data _("Financing type") doctorate.type_financement|enum_display:"ChoixTypeFinancement" inline=True %}
+    {% endif %}
+
+    {% field_data _("Thesis title") admission.project_title inline=True %}
+
+    {% field_data _("New thesis title (if applicable)") " " "to-complete" inline=True %}
+    <hr class="dashed-line" />
+
+    <span class="list-title">{% blocktranslate with label="Promotion" %}{{ label }}:{% endblocktranslate %}</span>
+    <ul>
+      {% for signature_promoteur in supervision_group.signatures_promoteurs %}
+        <li>
+          {{ signature_promoteur.promoteur.nom }} {{ signature_promoteur.promoteur.prenom }} -
+          {{ signature_promoteur.promoteur.institution|default:_("Institute not specified") }}
+        </li>
+      {% endfor %}
+    </ul>
+
+    <span class="list-title">{% blocktranslate with label="Supervisory panel" %}{{ label }}:{% endblocktranslate %}</span>
+    <ul>
+      {% for signature_membre_ca in supervision_group.signatures_membres_CA %}
+        <li>
+          {{ signature_membre_ca.membre_CA.nom }} {{ signature_membre_ca.membre_CA.prenom }} -
+          {{ signature_membre_ca.membre_CA.institution|default:_("Institute not specified") }}
+        </li>
+      {% endfor %}
+    </ul>
+
+    {% field_data _("Date of confirmation") confirmation_paper.date inline=True %}
+
+    {% if confirmation_paper.date > confirmation_paper.date_limite %}
+      {% field_data _("Reason for exceeding the deadline") " " "to-complete" inline=True %}
+      <hr class="dashed-line" />
+      <hr class="dashed-line" />
+    {% endif %}
+
+    <div class="avoid-break-inside">
+      <p>
+        {% if doctorate.genre_doctorant == "F" %}
+          {% blocktranslate context "female gender" %}
+            Following the presentation of the state of the research and the subsequent discussion with the candidate,
+            the supervisory panel assessed the progress of the work and announces:
+          {% endblocktranslate %}
+        {% else %}
+          {% blocktranslate context "male gender" %}
+            Following the presentation of the state of the research and the subsequent discussion with the candidate,
+            the supervisory panel assessed the progress of the work and announces:
+          {% endblocktranslate %}
+        {% endif %}
+      </p>
+
+      <form id="confirmation-result">
+
+        <input type="checkbox" name="confirmation-success">
+        <div>
+          <label for="confirmation-success">
+            {% translate "the <strong>successful completion</strong> of the confirmation paper." %}
+          </label>
+          <div class="to-complete">
+            {% translate "Approximate date for completing the thesis:" %}
+            <hr class="dashed-line" />
+          </div>
+        </div>
+
+        <input type="checkbox" name="confirmation-retaking">
+        <div>
+          <label for="confirmation-retaking">
+            {% translate "the <strong>failure</strong> of the confirmation paper." %}
+          </label>
+          <div class="to-complete">
+            <span>
+              {% if doctorate.genre_doctorant == "F" %}
+                {% translate "The committee requests the candidate to <strong>retake</strong> the paper <u>before</u>:" context "female gender" %}
+              {% else %}
+                {% translate "The committee requests the candidate to <strong>retake</strong> the paper <u>before</u>:" context "male gender"%}
+              {% endif %}
+            </span>
+            <hr class="dashed-line"/>
+          </div>
+        </div>
+
+        <input type="checkbox" name="confirmation-failure">
+        <div>
+          <label for="confirmation-retaking">
+            {% translate "the <strong>not pursing</strong> of the doctorate." %}
+          </label>
+        </div>
+
+      </form>
+    </div>
+
+    <p>
+      {# TODO should be replaced by the number of credits #}
+      {% blocktranslate with credits_nb="[CREDITS_NUMBER]" %}
+        The number of acquired <strong>doctoral</strong> credits amounts to {{ credits_nb }} credits.
+      {% endblocktranslate %}
+    </p>
+
+    {# TODO only if an additional training is required #}
+    {% if True %}
+      <p>
+        {% translate "The <strong>additional training</strong> has been completed: yes / no." %}<br>
+        {% translate "The current training is attached to this document." %}
+      </p>
+    {% endif %}
+
+    <div style="display: flex; margin: 2em 0;">
+      <span>{% translate "Done in" %}</span>
+      <span class="solid-line" style="flex: 2;"></span>
+      <span>{% translate ", on" %}</span>
+      <span class="solid-line" style="flex: 1;"></span>
+    </div>
+
+
+    <table id="signatures" class="table table-bordered avoid-break-inside">
+      <caption>
+        <span style="font-weight: bold; text-transform: uppercase;">{% translate "Signatures" %}</span>
+      </caption>
+      <thead>
+      <tr>
+        <th>{% translate "CA members" %}</th>
+        <th>
+          {% if doctorate.genre_doctorant == "F" %}
+            {% translate "The doctoral student" context "female gender" %}
+          {% else %}
+            {% translate "The doctoral student" context "male gender" %}
+          {% endif %}
+        </th>
+      </tr>
+      </thead>
+      <tbody>
+      {% for signature_membre_ca in supervision_group.signatures_membres_CA %}
+        <tr>
+          <td>
+            <span>
+              {% translate "Prof." %} {{ signature_membre_ca.membre_CA.prenom }} {{ signature_membre_ca.membre_CA.nom }}
+            </span>
+          </td>
+          {% if forloop.first %}
+            <td rowspan="{{ supervision_group.signatures_membres_CA|length|add:1 }}">
+              {{ doctorate.nom_doctorant }} {{ doctorate.prenom_doctorant }}
+            </td>
+          {% endif %}
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+
+    <div style="break-before: page">
+      <span class="list-title">
+        {% translate "Attachments:" %}
+      </span>
+      <ul>
+        <li>{% translate "Opinion of the CA following the format provided by the CDD" %}</li>
+        <li>{% translate "Status of the doctoral training" %}</li>
+        {# TODO only if an additional training is required #}
+        {% if True %}
+          <li>
+            {% translate "Achieved additional training" %}
+          </li>
+        {% endif %}
+      </ul>
+    </div>
+  </div>
+{% endblock %}

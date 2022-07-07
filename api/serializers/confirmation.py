@@ -23,6 +23,8 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from rest_framework import serializers
+
 from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.commands import (
     SoumettreEpreuveConfirmationCommand,
     CompleterEpreuveConfirmationParPromoteurCommand,
@@ -30,6 +32,10 @@ from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.commands import
 )
 from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.dtos import EpreuveConfirmationDTO
 from base.utils.serializers import DTOSerializer
+
+
+class ConfirmationPaperCanvasSerializer(serializers.Serializer):
+    uuid = serializers.UUIDField()
 
 
 class ConfirmationPaperDTOSerializer(DTOSerializer):

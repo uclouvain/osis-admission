@@ -30,6 +30,7 @@ import factory
 from admission.ddd.projet_doctoral.doctorat.domain.model._formation import FormationIdentity
 from admission.ddd.projet_doctoral.doctorat.domain.model.doctorat import DoctoratIdentity, Doctorat
 from admission.ddd.projet_doctoral.doctorat.domain.model.enums import ChoixStatutDoctorat
+from admission.ddd.projet_doctoral.preparation.domain.model._financement import BourseRecherche, ChoixTypeFinancement
 
 
 class _DoctoratIdentityFactory(factory.Factory):
