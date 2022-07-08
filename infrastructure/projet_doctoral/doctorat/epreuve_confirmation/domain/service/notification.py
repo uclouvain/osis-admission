@@ -54,6 +54,8 @@ from osis_notification.contrib.handlers import EmailNotificationHandler, WebNoti
 
 
 class Notification(INotification):
+    ADRE_EMAIL = 'adre@uclouvain.be'
+    ADRI_EMAIL = 'adri@uclouvain.be'
 
     @classmethod
     def format_date(cls, date: Optional[datetime.date]) -> str:
@@ -128,6 +130,16 @@ class Notification(INotification):
         doctorate: DoctorateProxy = DoctorateProxy.objects.get(uuid=epreuve_confirmation.doctorat_id.uuid)
         common_tokens = cls.get_common_tokens(doctorate, epreuve_confirmation)
 
+        # Notify ADRE only at the first submission : email
+        # if doctorate.post_enrolment_status != ChoixStatutDoctorat.SUBMITTED_CONFIRMATION.name:
+        #     email_message = generate_email(
+        #         ADMISSION_EMAIL_CONFIRMATION_PAPER_SUBMISSION_ADRE,
+        #         settings.LANGUAGE_CODE,
+        #         common_tokens,
+        #         recipients=[cls.ADRE_EMAIL],
+        #     )
+        #     EmailNotificationHandler.create(email_message)
+
         # Notify the CDD managers > web notification
         cls._send_notification_to_managers(
             entity_id=doctorate.doctorate.management_entity_id,
@@ -182,6 +194,45 @@ class Notification(INotification):
 
         EmailNotificationHandler.create(student_email_message, person=doctorate.candidate)
 
+        # common_tokens = cls.get_common_tokens(doctorate, epreuve_confirmation)
+        # entity_acronym = doctorate.doctorate.management_entity.most_recent_entity_version.acronym
+
+        # Notify ADRE > email
+        # adre_email_message = generate_email(
+        #     ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_FAILURE_ADRE,
+        #     settings.LANGUAGE_CODE,
+        #     common_tokens,
+        #     recipients=[cls.ADRE_EMAIL],
+        # )
+        # EmailNotificationHandler.create(adre_email_message)
+        #
+        # Notify ADRI > email
+        # adri_email_message = generate_email(
+        #     ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_FAILURE_ADRI,
+        #     settings.LANGUAGE_CODE,
+        #     common_tokens,
+        #     recipients=[cls.ADRI_EMAIL],
+        # )
+        #
+        # Notify the faculty dean and the institute president > email (cc)
+        # faculty_dean = []
+        # institute_president = []
+        # if settings.ESB_API_URL:
+        #     faculty_dean = MandatesService.get(
+        #         function=MandateFunctionEnum.DOYEN,
+        #         entity_acronym=entity_acronym,
+        #     )
+        #     institute_president = MandatesService.get(
+        #         function=MandateFunctionEnum.PRESI,
+        #         entity_acronym=entity_acronym,
+        #     )
+        # if faculty_dean:
+        #     adri_email_message['Cc'].append(faculty_dean[0].get('email'))
+        # if institute_president:
+        #     adri_email_message['Cc'].append(institute_president[0].get('email'))
+        #
+        # EmailNotificationHandler.create(adri_email_message)
+
     @classmethod
     def notifier_repassage_epreuve(
         cls,
@@ -208,6 +259,27 @@ class Notification(INotification):
         email_message['Cc'] = ','.join(supervising_actor_emails)
 
         EmailNotificationHandler.create(email_message, person=doctorate.candidate)
+
+        # common_tokens = cls.get_common_tokens(doctorate, epreuve_confirmation)
+
+        # Notify ADRE > email
+        # adre_email_message = generate_email(
+        #     ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_RETAKING_ADRE,
+        #     settings.LANGUAGE_CODE,
+        #     common_tokens,
+        #     recipients=[cls.ADRE_EMAIL],
+        # )
+        # EmailNotificationHandler.create(adre_email_message)
+
+        # Notify ADRI > email
+        # adri_email_message = generate_email(
+        #     ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_RETAKING_ADRI,
+        #     settings.LANGUAGE_CODE,
+        #     common_tokens,
+        #     recipients=[cls.ADRI_EMAIL],
+        # )
+        #
+        # EmailNotificationHandler.create(adri_email_message)
 
     @classmethod
     def notifier_reussite_epreuve(cls, epreuve_confirmation: EpreuveConfirmation):
@@ -237,3 +309,21 @@ class Notification(INotification):
             recipients=[doctorate.candidate.email],
         )
         EmailNotificationHandler.create(student_email_message, person=doctorate.candidate)
+
+        # Notify ADRE > email
+        # adre_email_message = generate_email(
+        #     ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_SUCCESS_ADRE,
+        #     settings.LANGUAGE_CODE,
+        #     common_tokens,
+        #     recipients=[cls.ADRE_EMAIL],
+        # )
+        # EmailNotificationHandler.create(adre_email_message)
+
+        # Notify ADRI > email
+        # adri_email_message = generate_email(
+        #     ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_SUCCESS_ADRI,
+        #     settings.LANGUAGE_CODE,
+        #     common_tokens,
+        #     recipients=[cls.ADRI_EMAIL],
+        # )
+        # EmailNotificationHandler.create(adri_email_message)
