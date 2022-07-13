@@ -23,6 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from django.db.models import JSONField
 from django.shortcuts import resolve_url
 from django.test import TestCase
 from rest_framework import status
@@ -54,12 +55,11 @@ class CddConfigTestCase(TestCase):
         self.client.force_login(self.manager.person.user)
 
         self.assertEqual(CddConfiguration.objects.count(), 0)
-        data = {
-            'service_types_en': "Foo\nBarbaz",
-            'service_types_fr-be': "Bar\nBaz",
-            'seminar_types_en': "Foo\nBar",
-            'seminar_types_fr-be': "Bar\nBaz",
-        }
+        data = {}
+        for field in CddConfiguration._meta.fields:
+            if isinstance(field, JSONField):
+                data[f'{field.name}_en'] = "Foo\nBarbaz"
+                data[f'{field.name}_fr-be'] = "Bar\nBaz"
         response = self.client.post(url, data, follow=True)
         self.assertContains(response, "FOO")
         expected = {

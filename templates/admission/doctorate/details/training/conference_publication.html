@@ -1,4 +1,4 @@
-{% load i18n osis_document admission %}
+{% load i18n osis_document admission enums %}
 
 {% comment "License" %}
   * OSIS stands for Open Student Information System. It's an application
@@ -26,85 +26,78 @@
 
 {% url "admission:doctorate:training:edit" uuid=view.kwargs.uuid activity_id=activity.uuid as edit_url %}
 {% url "admission:doctorate:training:delete" uuid=view.kwargs.uuid activity_id=activity.uuid as delete_url %}
+
 {% display activity.ects|default:""|floatformat " ECTS" as ects %}
 
-<div class="panel-heading" role="tab" id="h-{{ activity.uuid }}">
-  <h3 class="panel-title">
-    <a role="button" data-toggle="collapse" data-parent="#accordion" href="#a-{{ activity.uuid }}"
-       aria-expanded="false" aria-controls="a-{{ activity.uuid }}" class="collapsed"></a>
-    <div class="btn-group btn-group-sm pull-right">
-      <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
-              aria-expanded="false">
-        {% trans "Actions" %} <span class="caret"></span>
-      </button>
-      <ul class="dropdown-menu">
-        <li>
-          <a href="{{ edit_url }}">
-            {% trans "Edit" %}
-          </a>
-        <li>
-          <a href="{{ delete_url }}">
-            {% trans "Delete" %}
-          </a>
-        </li>
-      </ul>
+<div
+  class="panel-{{ activity|status_as_class }}"
+  data-status="{{ activity.status }}"
+  data-type="{{ activity.category }}"
+>
+  <div class="panel-heading" role="tab" id="h-{{ activity.uuid }}">
+    <h3 class="panel-title">
+      {% include "admission/doctorate/details/training/_panel_title.html" %}
+
+      {% display activity.type ':' activity.title "-" ects %}
+      <div class="clearfix"></div>
+    </h3>
+  </div>
+  <div
+    id="a-{{ activity.uuid }}"
+    class="panel-collapse collapse"
+    role="tabpanel"
+    aria-labelledby="h-{{ activity.uuid }}"
+  >
+    <div class="panel-body">
+      <p>
+        <strong class="d-block">{% trans "Description" %}</strong>
+        {% display activity.title %}
+        {% display activity.authors " " "(" activity.role ")" ", " activity.journal %}
+      </p>
+      {% if activity.committee %}
+        <p>
+          <strong class="d-block">{% trans "Selection committee" %}</strong>
+          {{ activity.committee|enum_display:'ChoixComiteSelection' }}
+        </p>
+      {% endif %}
+      {% if activity.summary %}
+        <div class="form-group">
+          <strong class="d-block">{% trans "Summary" context "paper summary" %}</strong>
+          {% document_visualizer activity.summary %}
+        </div>
+      {% endif %}
+      <div class="row">
+        {% if activity.keywords %}
+          <p class="col-md-4">
+            <strong class="d-block">{% trans "Keywords" %}</strong>
+            {{ activity.keywords }}
+          </p>
+        {% endif %}
+        {% if activity.ects %}
+          <p class="col-md-4">
+            <strong class="d-block">{% trans "ECTS" %}</strong>
+            {{ activity.ects|floatformat }}
+          </p>
+        {% endif %}
+        {% if activity.dial_reference %}
+          <p class="col-md-4">
+            <strong class="d-block">{% trans "Référence DIAL.Pr" %}</strong>
+            {{ activity.dial_reference }}
+          </p>
+        {% endif %}
+      </div>
+      {% if activity.participating_proof %}
+        <div class="form-group">
+          <strong class="d-block">{% trans "Proof of acceptation or publication" %}</strong>
+          {% document_visualizer activity.participating_proof %}
+        </div>
+      {% endif %}
+      {% if activity.comment %}
+        <div class="form-group">
+          <strong class="d-block">{% trans "Comments" %}</strong>
+          {{ activity.comment|linebreaks }}
+        </div>
+      {% endif %}
     </div>
-    <span class="badge">{{ activity.get_status_display }}</span>
-    {% display activity.type ':' activity.title "-" ects %}
-    <div class="clearfix"></div>
-  </h3>
-</div>
-<div id="a-{{ activity.uuid }}" class="panel-collapse collapse" role="tabpanel"
-     aria-labelledby="h-{{ activity.uuid }}">
-  <div class="panel-body">
-    <p>
-      <strong class="d-block">{% trans "Description" %}</strong>
-      {% display activity.title %}
-      {% display activity.authors " " "(" activity.role ")" ", " activity.journal %}
-    </p>
-    {% if activity.committee %}
-    <p>
-      <strong class="d-block">{% trans "Selection committee" %}</strong>
-      {{ activity.get_committee_display }}
-    </p>
-    {% endif %}
-    {% if activity.summary %}
-      <div class="form-group">
-        <strong class="d-block">{% trans "Summary" context "paper summary" %}</strong>
-        {% document_visualizer activity.summary %}
-      </div>
-    {% endif %}
-    <div class="row">
-      {% if activity.keywords %}
-        <p class="col-md-4">
-          <strong class="d-block">{% trans "Keywords" %}</strong>
-          {{ activity.keywords }}
-        </p>
-      {% endif %}
-      {% if activity.ects %}
-        <p class="col-md-4">
-          <strong class="d-block">{% trans "ECTS" %}</strong>
-          {{ activity.ects|floatformat }}
-        </p>
-      {% endif %}
-      {% if activity.dial_reference %}
-        <p class="col-md-4">
-          <strong class="d-block">{% trans "Référence DIAL.Pr" %}</strong>
-          {{ activity.dial_reference }}
-        </p>
-      {% endif %}
-    </div>
-    {% if activity.participating_proof %}
-      <div class="form-group">
-        <strong class="d-block">{% trans "Proof of acceptation or publication" %}</strong>
-        {% document_visualizer activity.participating_proof %}
-      </div>
-    {% endif %}
-    {% if activity.comment %}
-      <div class="form-group">
-        <strong class="d-block">{% trans "Comments" %}</strong>
-        {{ activity.comment|linebreaks }}
-      </div>
-    {% endif %}
   </div>
 </div>

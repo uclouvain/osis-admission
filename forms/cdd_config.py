@@ -64,6 +64,9 @@ class TranslatedListsValueField(forms.MultiValueField):
     widget = TranslatedListsValueWidget
 
     def __init__(self, *args, **kwargs):
+        # Remove arguments from JSONField
+        kwargs.pop("encoder", None)
+        kwargs.pop("decoder", None)
         kwargs['help_text'] = _('One choice per line, leave the "Other" value out')
         super().__init__((TextareaArrayField(), TextareaArrayField()), *args, **kwargs)
 
@@ -76,9 +79,15 @@ class TranslatedListsValueField(forms.MultiValueField):
 
 
 class CddConfigForm(forms.ModelForm):
-    service_types = TranslatedListsValueField(label=_("Service types"))
-    seminar_types = TranslatedListsValueField(label=_("Seminar types"))
-
     class Meta:
         model = CddConfiguration
         exclude = ['cdd']
+        field_classes = {
+            "service_types": TranslatedListsValueField,
+            "seminar_types": TranslatedListsValueField,
+            "conference_types": TranslatedListsValueField,
+            "conference_publication_types": TranslatedListsValueField,
+            "communication_types": TranslatedListsValueField,
+            "publication_types": TranslatedListsValueField,
+            "residency_types": TranslatedListsValueField,
+        }

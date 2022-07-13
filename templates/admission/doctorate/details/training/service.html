@@ -1,4 +1,4 @@
-{% load i18n osis_document admission %}
+{% load i18n osis_document admission enums %}
 
 {% comment "License" %}
   * OSIS stands for Open Student Information System. It's an application
@@ -33,42 +33,31 @@
   {% endblocktrans %}
 {% endif %}
 
-<div class="panel panel-{{ activity|status_as_class }}" data-status="{{ activity.status }}" data-type="{{ activity.category }}">
+<div
+  class="panel panel-{{ activity|status_as_class }}"
+  data-status="{{ activity.status }}"
+  data-type="{{ activity.category }}"
+>
   <div class="panel-heading" role="tab" id="h-{{ activity.uuid }}">
     <h3 class="panel-title">
-      <a role="button" data-toggle="collapse" data-parent="#accordion" href="#a-{{ activity.uuid }}"
-         aria-expanded="false" aria-controls="a-{{ activity.uuid }}" class="collapsed"></a>
-      <span class="badge">{{ activity.get_status_display }}</span>
-      <div class="btn-group btn-group-sm pull-right">
-        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
-                aria-expanded="false">
-          {% trans "Actions" %} <span class="caret"></span>
-        </button>
-        <ul class="dropdown-menu">
-          <li>
-            <a href="{{ edit_url }}">
-              {% trans "Edit" %}
-            </a>
-          <li>
-            <a href="{{ delete_url }}">
-              {% trans "Delete" %}
-            </a>
-          </li>
-        </ul>
-      </div>
+      {% include "admission/doctorate/details/training/_panel_title.html" %}
 
       {% display activity.ects|default:""|floatformat " ECTS" as ects %}
       {% display activity.type '-' activity.title '-' period "-" ects %}
       <div class="clearfix"></div>
     </h3>
   </div>
-  <div id="a-{{ activity.uuid }}" class="panel-collapse collapse" role="tabpanel"
-       aria-labelledby="h-{{ activity.uuid }}">
+  <div
+    id="a-{{ activity.uuid }}"
+    class="panel-collapse collapse"
+    role="tabpanel"
+    aria-labelledby="h-{{ activity.uuid }}"
+  >
     <div class="panel-body">
       <p>
         <strong class="d-block">{% trans "Description" %}</strong>
         {% display activity.title " " period %}
-        <br/>
+        <br />
         {% display activity.hour_volume " hours" as hours %}
         {% display activity.organizing_institution "-" hours %}
       </p>
@@ -87,10 +76,10 @@
         </div>
       {% endif %}
       {% if activity.comment %}
-      <div class="form-group">
+        <div class="form-group">
           <strong class="d-block">{% trans "Comments" %}</strong>
           {{ activity.comment|linebreaks }}
-      </div>
+        </div>
       {% endif %}
     </div>
   </div>

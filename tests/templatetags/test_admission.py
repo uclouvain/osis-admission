@@ -28,6 +28,7 @@ from unittest.mock import Mock
 
 import mock
 from django.http import HttpResponse
+from django.template import Context, Template
 from django.test import RequestFactory, TestCase
 from django.test.utils import override_settings
 from django.urls import path, reverse
@@ -247,6 +248,21 @@ class AdmissionTabsTestCase(TestCase):
         }
         result = current_subtabs(context)
         self.assertEqual(result['subtabs'], TAB_TREES['doctorate'][Tab('doctorate', _('Doctorate'), 'graduation-cap')])
+
+
+class AdmissionPanelTagTestCase(TestCase):
+    def test_normal_panel(self):
+        template = Template("{% load admission %}{% panel 'Coucou' %}{% endpanel %}")
+        rendered = template.render(Context())
+        self.assertIn('<h4 class="panel-title">', rendered)
+        self.assertIn('Coucou', rendered)
+        self.assertIn('<div class="panel-body">', rendered)
+
+    def test_panel_no_title(self):
+        template = Template("{% load admission %}{% panel %}{% endpanel %}")
+        rendered = template.render(Context())
+        self.assertNotIn('<h4 class="panel-title">', rendered)
+        self.assertIn('<div class="panel-body">', rendered)
 
 
 class AdmissionFieldsDataTestCase(TestCase):

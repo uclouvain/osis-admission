@@ -29,6 +29,8 @@ from admission.ddd.projet_doctoral.doctorat.commands import *
 from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.commands import *
 from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.use_case.read import *
 from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.use_case.write import *
+from admission.ddd.projet_doctoral.doctorat.formation.commands import *
+from admission.ddd.projet_doctoral.doctorat.formation.use_case.write import *
 from admission.ddd.projet_doctoral.doctorat.use_case.read import *
 from admission.ddd.projet_doctoral.doctorat.use_case.write import *
 from admission.ddd.projet_doctoral.preparation.commands import *
@@ -52,13 +54,14 @@ from admission.infrastructure.projet_doctoral.preparation.repository.proposition
 from admission.infrastructure.projet_doctoral.validation.repository.demande import DemandeRepository
 from infrastructure.shared_kernel.academic_year.repository.academic_year import AcademicYearRepository
 from infrastructure.utils import AbstractMessageBusCommands
-from .projet_doctoral.preparation.domain.service.historique import Historique as HistoriqueProposition
-from .projet_doctoral.preparation.domain.service.notification import Notification as NotificationProposition
 from .projet_doctoral.doctorat.domain.service.historique import Historique as HistoriqueDoctorat
 from .projet_doctoral.doctorat.domain.service.notification import Notification as NotificationDoctorat
 from .projet_doctoral.doctorat.epreuve_confirmation.domain.service.notification import (
     Notification as NotificationEpreuveConfirmation,
 )
+from .projet_doctoral.doctorat.formation.repository.activite import ActiviteRepository
+from .projet_doctoral.preparation.domain.service.historique import Historique as HistoriqueProposition
+from .projet_doctoral.preparation.domain.service.notification import Notification as NotificationProposition
 
 
 class MessageBusCommands(AbstractMessageBusCommands):
@@ -272,5 +275,9 @@ class MessageBusCommands(AbstractMessageBusCommands):
         TeleverserAvisRenouvellementMandatRechercheCommand: partial(
             televerser_avis_renouvellement_mandat_recherche,
             epreuve_confirmation_repository=EpreuveConfirmationRepository(),
+        ),
+        SoumettreActivitesCommand: partial(
+            soumettre_activites,
+            activite_repository=ActiviteRepository(),
         ),
     }

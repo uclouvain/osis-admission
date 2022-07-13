@@ -71,7 +71,7 @@ class ConfirmationTestCase(TestCase):
         self.assertEqual(len(non_fields_errors), 1)
         self.assertEqual(
             non_fields_errors[0],
-            _('The date of the confirmation paper cannot be later than the deadline.'),
+            _('The date of the confirmation paper cannot be later than its deadline.'),
         )
 
 

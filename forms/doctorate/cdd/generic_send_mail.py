@@ -58,16 +58,15 @@ class SelectCddEmailTemplateForm(forms.Form):
             self.fields['template'].widget = forms.HiddenInput()
 
     @classmethod
-    def get_mail_template_choices(cls, identifier, language, cdd):
+    def get_mail_template_choices(cls, identifier, language, cdd_id):
         custom_templates = CddMailTemplate.objects.get_from_identifiers(
             identifiers=[identifier],
             language=language,
-            cdd=cdd,
+            cdd_id=cdd_id,
         )
 
         choices = [(identifier, _('Generic'))] + [
-            (custom_template.pk, custom_template.name)
-            for custom_template in custom_templates
+            (custom_template.pk, custom_template.name) for custom_template in custom_templates
         ]
 
         return choices

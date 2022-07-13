@@ -68,6 +68,95 @@ def default_seminar_types():
     }
 
 
+def default_conference_types():
+    return {
+        settings.LANGUAGE_CODE_EN: [
+            "National conference",
+            "International conference",
+        ],
+        settings.LANGUAGE_CODE_FR: [
+            "Conférence nationale",
+            "Conférence internationale",
+        ],
+    }
+
+
+def default_conference_publication_types():
+    return {
+        settings.LANGUAGE_CODE_EN: [
+            "Article published in a peer-reviewed journal",
+            "Article published in a non-refereed journal",
+            "Book chapter",
+            "Monograph",
+            "Edition or co-publication",
+            "Working paper",
+            "Extended abstract",
+        ],
+        settings.LANGUAGE_CODE_FR: [
+            "Article publié dans une revue à comité de lecture",
+            "Article publié dans une revue sans comité de lecture",
+            "Chapitre de livre",
+            "Monographie",
+            "Édition ou coédition",
+            "Rapport de recherche",
+            "Extended abstract",
+        ],
+    }
+
+
+def default_communication_types():
+    return {
+        settings.LANGUAGE_CODE_EN: [
+            "Research seminar",
+            "PhD students' day",
+        ],
+        settings.LANGUAGE_CODE_FR: [
+            "Séminaire de recherche",
+            "Journée des doctorantes et des doctorants",
+        ],
+    }
+
+
+def default_publication_types():
+    return {
+        settings.LANGUAGE_CODE_EN: [
+            "Article for a peer-reviewed journal",
+            "Article for a non-refereed journal",
+            "Publication in an international scientific journal with peer review",
+            "Book chapter",
+            "Monograph",
+            "Publishing or co-publishing",
+            "Patent",
+            "Review of a scientific work",
+            "Working paper",
+        ],
+        settings.LANGUAGE_CODE_FR: [
+            "Article à destination d'une revue à comité de lecture",
+            "Article à destination d'une revue sans comité de lecture",
+            "Publication dans une revue scientifique internationale avec peer review",
+            "Chapitre de livre",
+            "Monographie",
+            "Édition ou coédition",
+            "Brevet",
+            "Compte - rendu d'un ouvrage scientifique",
+            "Rapport de recherche",
+        ],
+    }
+
+
+def default_residency_types():
+    return {
+        settings.LANGUAGE_CODE_EN: [
+            "Research residency (excluding cotutelle)",
+            "Documentary research residency",
+        ],
+        settings.LANGUAGE_CODE_FR: [
+            "Séjour de recherche (hors cotutelle)",
+            "Séjour de recherche documentaire",
+        ],
+    }
+
+
 class CddConfiguration(models.Model):
     cdd = models.OneToOneField(
         'base.Entity',
@@ -82,4 +171,24 @@ class CddConfiguration(models.Model):
     seminar_types = models.JSONField(
         verbose_name=_("Seminar types"),
         default=default_seminar_types,
+    )
+    conference_types = models.JSONField(
+        verbose_name=_("Seminar types"),
+        default=default_conference_types,
+    )
+    conference_publication_types = models.JSONField(
+        verbose_name=_("Conference publication types"),
+        default=default_conference_publication_types,
+    )
+    communication_types = models.JSONField(
+        verbose_name=_("Communication types"),
+        default=default_communication_types,
+    )
+    publication_types = models.JSONField(
+        verbose_name=_("Publication types"),
+        default=default_publication_types,
+    )
+    residency_types = models.JSONField(
+        verbose_name=_("Residency types"),
+        default=default_residency_types,
     )

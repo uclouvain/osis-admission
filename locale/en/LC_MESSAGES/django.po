@@ -239,18 +239,6 @@ msgstr ""
 msgid "Are you sure you want to delete \"%(object)s\"?"
 msgstr ""
 
-msgid "Article for a non-refereed journal"
-msgstr ""
-
-msgid "Article for a peer-reviewed journal"
-msgstr ""
-
-msgid "Article published in a non-refereed journal"
-msgstr ""
-
-msgid "Article published in a peer-reviewed journal"
-msgstr ""
-
 msgid "Attachment: Doctoral training"
 msgstr ""
 
@@ -273,9 +261,6 @@ msgid "Back to the list"
 msgstr ""
 
 msgid "Body"
-msgstr ""
-
-msgid "Book chapter"
 msgstr ""
 
 msgid "Brief justification"
@@ -526,6 +511,15 @@ msgstr ""
 msgid "Communication attestation"
 msgstr ""
 
+msgid "Communication types"
+msgstr ""
+
+msgid "Conference publication types"
+msgstr ""
+
+msgid "Configuration saved."
+msgstr ""
+
 msgctxt "admission"
 msgid "Configure"
 msgstr ""
@@ -697,9 +691,6 @@ msgstr ""
 msgid "Doctorate readers"
 msgstr ""
 
-msgid "Documentary research residency"
-msgstr ""
-
 msgid "Done in"
 msgstr ""
 
@@ -762,9 +753,6 @@ msgstr ""
 msgid "Edit the publication of this conference"
 msgstr ""
 
-msgid "Edition or co-publication"
-msgstr ""
-
 msgid "Email"
 msgstr ""
 
@@ -797,9 +785,6 @@ msgid "Exporting %(reference)s to PDF"
 msgstr ""
 
 msgid "Exporting the admission information to PDF"
-msgstr ""
-
-msgid "Extended abstract"
 msgstr ""
 
 msgid "Extension request not completed."
@@ -930,9 +915,6 @@ msgid "Institution should be set when PhD has been set to yes or partial"
 msgstr ""
 
 msgid "Internal comment"
-msgstr ""
-
-msgid "International conference"
 msgstr ""
 
 msgid "Invitations have not been sent"
@@ -1133,9 +1115,6 @@ msgstr ""
 msgid "Modified at"
 msgstr ""
 
-msgid "Monograph"
-msgstr ""
-
 msgid "Motivation"
 msgstr ""
 
@@ -1177,9 +1156,6 @@ msgid "Name of the event"
 msgstr ""
 
 msgid "Name of the manifestation"
-msgstr ""
-
-msgid "National conference"
 msgstr ""
 
 msgid "Nationality"
@@ -1291,16 +1267,10 @@ msgstr ""
 msgid "Past confirmation papers"
 msgstr ""
 
-msgid "Patent"
-msgstr ""
-
 msgid "Personal data"
 msgstr ""
 
 msgid "PhD already done"
-msgstr ""
-
-msgid "PhD students' day"
 msgstr ""
 
 msgid "Place"
@@ -1483,10 +1453,10 @@ msgid ""
 "CDE, CLSM or CDSS"
 msgstr ""
 
-msgid "Publication in an international scientific journal with peer review"
+msgid "Publication status"
 msgstr ""
 
-msgid "Publication status"
+msgid "Publication types"
 msgstr ""
 
 msgid "Published"
@@ -1531,22 +1501,16 @@ msgstr ""
 msgid "Research report"
 msgstr ""
 
-msgid "Research residency (excluding cotutelle)"
-msgstr ""
-
-msgid "Research seminar"
-msgstr ""
-
 msgid "Reset"
+msgstr ""
+
+msgid "Residency types"
 msgstr ""
 
 msgid "Retaking of the confirmation paper"
 msgstr ""
 
 msgid "Retaking of the test"
-msgstr ""
-
-msgid "Review of a scientific work"
 msgstr ""
 
 msgid "Role"
@@ -1630,6 +1594,9 @@ msgstr ""
 msgid "Select a mail template"
 msgstr ""
 
+msgid "Select for batch action"
+msgstr ""
+
 msgid "Selection committee"
 msgstr ""
 
@@ -1691,6 +1658,9 @@ msgid "Street number"
 msgstr ""
 
 msgid "Subject"
+msgstr ""
+
+msgid "Submit these activities"
 msgstr ""
 
 msgid "Submitted"
@@ -1771,9 +1741,6 @@ msgid "The current training is attached to this document."
 msgstr ""
 
 msgid "The date of the confirmation paper cannot be later than its deadline."
-msgstr ""
-
-msgid "The date of the confirmation paper cannot be later than the deadline."
 msgstr ""
 
 msgid "The decision of the signing actor"
@@ -1867,6 +1834,15 @@ msgid "Thesis location"
 msgstr ""
 
 msgid "Thesis title"
+msgstr ""
+
+msgid "This activity could not be found"
+msgstr ""
+
+msgid "This activity has been submitted"
+msgstr ""
+
+msgid "This activity is not complete"
 msgstr ""
 
 msgid "This candidate has not created any activity yet"
@@ -1979,9 +1955,6 @@ msgid "Work contract type"
 msgstr ""
 
 msgid "Working contract type"
-msgstr ""
-
-msgid "Working paper"
 msgstr ""
 
 msgid "YES"

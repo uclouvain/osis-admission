@@ -23,10 +23,11 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
+from django.contrib.messages.views import SuccessMessageMixin
 from django.core.exceptions import PermissionDenied
 from django.db.models import OuterRef, Subquery
 from django.views import generic
+from django.utils.translation import gettext_lazy as _
 
 from admission.auth.roles.cdd_manager import CddManager
 from admission.contrib.models.cdd_config import CddConfiguration
@@ -63,11 +64,12 @@ class CddConfigListView(PermissionRequiredMixin, generic.ListView):
         return managed_cdds
 
 
-class CddConfigChangeView(PermissionRequiredMixin, generic.UpdateView):
+class CddConfigChangeView(PermissionRequiredMixin, SuccessMessageMixin, generic.UpdateView):
     template_name = 'admission/config/cdd_config_edit.html'
     permission_required = 'admission.change_cddconfiguration'
     model = CddConfiguration
     form_class = CddConfigForm
+    success_message = _("Configuration saved.")
 
     def has_permission(self):
         managed_cdds = CddManager.objects.filter(person=self.request.user.person).values_list('entity_id', flat=True)

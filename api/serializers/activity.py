@@ -32,6 +32,7 @@ from rest_framework import serializers
 from rest_framework.generics import get_object_or_404
 
 from admission.contrib.models import DoctorateAdmission
+from admission.contrib.models.cdd_config import CddConfiguration
 from admission.contrib.models.doctoral_training import Activity
 from admission.ddd.projet_doctoral.doctorat.formation.domain.model._enums import CategorieActivite, StatutActivite
 from admission.forms.doctorate.training import activity as activity_forms
@@ -54,7 +55,7 @@ FORM_SERIALIZER_FIELD_MAPPING = {
     forms.FloatField: serializers.FloatField,
     forms.TypedChoiceField: serializers.ChoiceField,  # "is_online" field
     forms.ModelChoiceField: serializers.Field,  # replaced correctly later
-    forms.DecimalField: serializers.DecimalField,
+    forms.DecimalField: serializers.FloatField,
     FileUploadField: serializers.ListField,
 }
 
@@ -64,7 +65,7 @@ def find_class_args(klass):
     args = set()
 
     for i in klass.mro():
-        if i is object or not hasattr(i, '__init__'):
+        if i is object or not hasattr(i, '__init__'):  # pragma: no cover
             continue
         function_args = [i for i in getfullargspec(i.__init__)[0] if i not in ['self', 'cls']]
         args |= set(function_args)
@@ -108,17 +109,13 @@ class ActivitySerializerBase(serializers.Serializer):
         # Iterate over the form fields, creating an instance of serializer field for each.
         form = self.Meta.form
         for field_name, form_field in getattr(form, 'all_base_fields', form.base_fields).items():
-            # Field is specified as excluded field
-            if field_name in getattr(self.Meta, 'exclude', []):
-                continue
-
             # Field is already defined via declared fields
-            if field_name in ret:
+            if field_name in ret:  # pragma: no cover
                 continue
 
             try:
                 serializer_field_class = field_mapping[form_field.__class__]
-            except KeyError:
+            except KeyError:  # pragma: no cover
                 raise TypeError(
                     f"{field_name} ({form_field}) is not mapped to a serializer field. "
                     "Please add id to FORM_SERIALIZER_FIELD_MAPPING."
@@ -206,8 +203,11 @@ class ActivitySerializerBase(serializers.Serializer):
             attrs['child'] = serializers.CharField()
         if isinstance(form_field, forms.CharField):
             attrs.setdefault('allow_blank', True)
-        if isinstance(form_field, (forms.DateField, forms.TypedChoiceField)):
+        if isinstance(form_field, (forms.DateField, forms.TypedChoiceField, forms.DecimalField)):
             attrs.setdefault('allow_null', True)
+        if isinstance(form_field, forms.DecimalField):
+            # There are no negative values
+            attrs.setdefault('min_value', 0)
         attrs.pop('required', None)
 
         return attrs
@@ -303,12 +303,23 @@ class DoctoralTrainingActivitySerializer(serializers.Serializer):
         self.only_classes = only_classes
         super().__init__(*args, **kwargs)
 
-    def get_mapped_serializer_class(self, instance: Activity):
+    @staticmethod
+    def _get_mapping_key(instance: Activity):
         if instance.parent_id:
-            return self.serializer_class_mapping.get(
-                (CategorieActivite[instance.parent.category], CategorieActivite[instance.category])
-            )
-        return self.serializer_class_mapping.get(CategorieActivite[instance.category])
+            return CategorieActivite[instance.parent.category], CategorieActivite[instance.category]
+        return CategorieActivite[instance.category]
+
+    @classmethod
+    def get_child_classes(cls, mapping_key):
+        child_classes = []
+        for key, value in cls.serializer_class_mapping.items():
+            if not isinstance(mapping_key, tuple) and isinstance(key, tuple) and key[0] == mapping_key:
+                child_classes.append(value)
+        if child_classes:
+            return child_classes
+
+    def get_mapped_serializer_class(self, instance: Activity):
+        return self.serializer_class_mapping.get(self._get_mapping_key(instance))
 
     def to_representation(self, instance):
         serializer_class = self.get_mapped_serializer_class(instance)
@@ -318,7 +329,8 @@ class DoctoralTrainingActivitySerializer(serializers.Serializer):
         pattern = re.compile("serializer", re.IGNORECASE)
         instance.object_type = pattern.sub("", serializer_class.__name__)
 
-        return serializer_class().to_representation(instance)
+        child_classes = self.get_child_classes(self._get_mapping_key(instance))
+        return serializer_class(child_classes=child_classes).to_representation(instance)
 
     def to_internal_value(self, data):
         mapping_key = CategorieActivite[data.get('category')]
@@ -341,3 +353,15 @@ class DoctoralTrainingActivitySerializer(serializers.Serializer):
             setattr(instance, attr, value)
         instance.save()
         return instance
+
+
+class DoctoralTrainingBatchSerializer(serializers.Serializer):
+    activity_uuids = serializers.ListField(
+        child=serializers.SlugRelatedField(slug_field='uuid', queryset=Activity.objects.all())
+    )
+
+
+class DoctoralTrainingConfigSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CddConfiguration
+        exclude = ['id', 'cdd']

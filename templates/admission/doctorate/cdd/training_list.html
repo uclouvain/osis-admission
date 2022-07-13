@@ -1,5 +1,5 @@
 {% extends "admission/doctorate/details/tab_layout.html" %}
-{% load i18n static admission enums %}
+{% load i18n static admission enums bootstrap3 %}
 
 {% comment "License" %}
   * OSIS stands for Open Student Information System. It's an application
@@ -108,15 +108,25 @@
     </div>
   {% endif %}
 
-  <div id="activities">
+  {# Special error handling #}
+  {% if form.errors %}
+    <div class="alert alert-danger alert-dismissable alert-link">
+        {{ form.non_field_errors.0 }}
+    </div>
+  {% endif %}
+
+  <form id="activities" action="" method="post">
+    {% csrf_token %}
     {% for activity in activities %}
-      {% if not activity.parent_id %}
-        {% include "admission/doctorate/details/training/"|add:activity.category|lower|add:'.html' %}
+      {% firstof 0 activity.category|lower|add:'.html' as template_name %}
+      {% if not activity.parent %}
+        {% include "admission/doctorate/details/training/"|add:template_name %}
       {% endif %}
       {% empty %}
       {% trans "This candidate has not created any activity yet" %}
     {% endfor %}
-  </div>
+    <button class="btn btn-default" type="submit" value="_submit">{% trans "Submit these activities" %}</button>
+  </form>
 {% endblock %}
 
 

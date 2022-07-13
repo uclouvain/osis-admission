@@ -23,12 +23,14 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
 from django.db.models import Q, Sum
 from django.http import Http404
 from django.shortcuts import get_object_or_404, resolve_url
 from django.views import generic
 
 from admission.contrib.models.doctoral_training import Activity
+from admission.ddd.projet_doctoral.doctorat.formation.commands import SoumettreActivitesCommand
 from admission.ddd.projet_doctoral.doctorat.formation.domain.model._enums import CategorieActivite, StatutActivite
 from admission.forms.doctorate.training.activity import (
     CommunicationForm,
@@ -43,12 +45,16 @@ from admission.forms.doctorate.training.activity import (
     ServiceForm,
     ValorisationForm,
 )
+from admission.forms.doctorate.training.processus import BatchActivityForm
 from admission.views.doctorate.mixins import LoadDossierViewMixin
+from base.ddd.utils.business_validator import MultipleBusinessExceptions
+from infrastructure.messages_bus import message_bus_instance
 
 
-class DoctorateTrainingActivityView(LoadDossierViewMixin, generic.TemplateView):
+class DoctorateTrainingActivityView(LoadDossierViewMixin, generic.FormView):
     template_name = "admission/doctorate/cdd/training_list.html"
     permission_required = "admission.change_activity"
+    form_class = BatchActivityForm
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -67,6 +73,26 @@ class DoctorateTrainingActivityView(LoadDossierViewMixin, generic.TemplateView):
             validated=Sum('ects', filter=Q(status=StatutActivite.ACCEPTEE.name)),
         )
         return context
+
+    def get_success_url(self):
+        return self.request.get_full_path()
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['doctorate_id'] = self.get_permission_object().pk
+        return kwargs
+
+    def form_valid(self, form):
+        activity_ids = [activite.uuid for activite in form.cleaned_data['activity_ids']]
+        try:
+            form.activities_in_error = []
+            message_bus_instance.invoke(SoumettreActivitesCommand(activite_uuids=activity_ids))
+        except MultipleBusinessExceptions as multiple_exceptions:
+            for exception in multiple_exceptions.exceptions:
+                form.add_error(None, exception.message)
+                form.activities_in_error.append(exception.activite_id.uuid)
+            return super().form_invalid(form)
+        return super().form_valid(form)
 
 
 class DoctorateTrainingActivityFormMixin(LoadDossierViewMixin):

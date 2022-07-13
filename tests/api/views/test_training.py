@@ -30,7 +30,7 @@ from rest_framework.test import APITestCase
 from admission.ddd.projet_doctoral.doctorat.formation.domain.model._enums import CategorieActivite
 from admission.tests import QueriesAssertionsMixin
 from admission.tests.factories import DoctorateAdmissionFactory
-from admission.tests.factories.activity import ActivityFactory, ConferenceFactory
+from admission.tests.factories.activity import ActivityFactory, ConferenceFactory, ServiceFactory
 from admission.tests.factories.roles import CandidateFactory
 from base.models.enums.entity_type import EntityType
 from base.tests.factories.entity_version import EntityVersionFactory
@@ -103,7 +103,7 @@ class TrainingApiTestCase(QueriesAssertionsMixin, APITestCase):
             'comment': '',
             'start_date': None,
             'end_date': None,
-            'participating_days': 0,
+            'participating_days': 0.0,
             'is_online': False,
             'country': None,
             'city': '',
@@ -161,7 +161,7 @@ class TrainingApiTestCase(QueriesAssertionsMixin, APITestCase):
             'comment': '',
             'start_date': None,
             'end_date': None,
-            'participating_days': 0,
+            'participating_days': 0.0,
             'is_online': False,
             'country': None,
             'city': '',
@@ -170,3 +170,23 @@ class TrainingApiTestCase(QueriesAssertionsMixin, APITestCase):
         }
         response = self.client.put(self.activity_url, data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_training_config(self):
+        self.client.force_authenticate(user=self.candidate.user)
+        config_url = resolve_url("admission_api_v1:doctoral-training-config", uuid=self.admission.uuid)
+        response = self.client.get(config_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_training_submit(self):
+        service = ServiceFactory(doctorate=self.admission)
+        self.client.force_authenticate(user=self.candidate.user)
+        submit_url = resolve_url("admission_api_v1:doctoral-training-submit", uuid=self.admission.uuid)
+        response = self.client.post(submit_url, {'activity_uuids': [service.uuid]})
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_training_submit_with_error(self):
+        self.client.force_authenticate(user=self.candidate.user)
+        service = ServiceFactory(doctorate=self.admission, title="")
+        submit_url = resolve_url("admission_api_v1:doctoral-training-submit", uuid=self.admission.uuid)
+        response = self.client.post(submit_url, {'activity_uuids': [service.uuid]})
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
