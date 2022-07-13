@@ -44,6 +44,7 @@ from .projet_doctoral.doctorat.domain.service.in_memory.notification import Noti
 from .projet_doctoral.doctorat.epreuve_confirmation.repository.in_memory.epreuve_confirmation import (
     EpreuveConfirmationInMemoryRepository,
 )
+from .projet_doctoral.doctorat.formation.repository.in_memory.activite import ActiviteInMemoryRepository
 from .projet_doctoral.doctorat.repository.in_memory.doctorat import DoctoratInMemoryRepository
 from .projet_doctoral.preparation.domain.service.in_memory.doctorat import DoctoratInMemoryTranslator
 from .projet_doctoral.preparation.domain.service.in_memory.historique import HistoriqueInMemory
@@ -61,6 +62,9 @@ from .projet_doctoral.validation.repository.in_memory.demande import DemandeInMe
 from .projet_doctoral.doctorat.epreuve_confirmation.domain.service.in_memory.notification import (
     NotificationInMemory as NotificationEpreuveConfirmation,
 )
+from ..ddd.projet_doctoral.doctorat.formation.commands import SoumettreActivitesCommand
+from ..ddd.projet_doctoral.doctorat.formation.use_case.write import soumettre_activites
+
 
 class MessageBusInMemoryCommands(AbstractMessageBusCommands):
     command_handlers = {
@@ -273,6 +277,10 @@ class MessageBusInMemoryCommands(AbstractMessageBusCommands):
         TeleverserAvisRenouvellementMandatRechercheCommand: partial(
             televerser_avis_renouvellement_mandat_recherche,
             epreuve_confirmation_repository=EpreuveConfirmationInMemoryRepository(),
+        ),
+        SoumettreActivitesCommand: partial(
+            soumettre_activites,
+            activite_repository=ActiviteInMemoryRepository(),
         ),
     }
 

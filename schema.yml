@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Admission API
-  version: 1.0.25
+  version: 1.0.26
   description: This API delivers data for the Admission project.
   contact:
     name: UCLouvain - OSIS
@@ -1708,6 +1708,37 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - propositions
+  /propositions/{uuid}/training/config:
+    get:
+      operationId: retrieveDoctoralTrainingConfig
+      description: ''
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DoctoralTrainingConfig'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
   /propositions/{uuid}/training/{activity_id}:
     get:
       operationId: retrieve_doctoral_training
@@ -2104,6 +2135,42 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PropositionIdentityDTO'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
+  /propositions/{uuid}/training/submit:
+    post:
+      operationId: submit_doctoral_training
+      description: Submit doctoral training activities.
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DoctoralTrainingBatch'
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DoctoralTrainingBatch'
           description: ''
         '400':
           $ref: '#/components/responses/BadRequest'
@@ -3519,11 +3586,9 @@ components:
         type:
           type: string
         ects:
-          type: string
-          format: decimal
-          multipleOf: 0.01
-          maximum: 100
-          minimum: -100
+          type: number
+          nullable: true
+          minimum: 0
         title:
           type: string
         start_date:
@@ -3535,11 +3600,9 @@ components:
           format: date
           nullable: true
         participating_days:
-          type: string
-          format: decimal
-          multipleOf: 0.1
-          maximum: 100
-          minimum: -100
+          type: number
+          nullable: true
+          minimum: 0
         is_online:
           type: boolean
         website:
@@ -3600,11 +3663,9 @@ components:
         type:
           type: string
         ects:
-          type: string
-          format: decimal
-          multipleOf: 0.01
-          maximum: 100
-          minimum: -100
+          type: number
+          nullable: true
+          minimum: 0
         title:
           type: string
         summary:
@@ -3662,11 +3723,9 @@ components:
         type:
           type: string
         ects:
-          type: string
-          format: decimal
-          multipleOf: 0.01
-          maximum: 100
-          minimum: -100
+          type: number
+          nullable: true
+          minimum: 0
         title:
           type: string
         authors:
@@ -3732,11 +3791,9 @@ components:
         type:
           type: string
         ects:
-          type: string
-          format: decimal
-          multipleOf: 0.01
-          maximum: 100
-          minimum: -100
+          type: number
+          nullable: true
+          minimum: 0
         subtitle:
           type: string
         start_date:
@@ -3812,11 +3869,9 @@ components:
         subtitle:
           type: string
         ects:
-          type: string
-          format: decimal
-          multipleOf: 0.01
-          maximum: 100
-          minimum: -100
+          type: number
+          nullable: true
+          minimum: 0
         summary:
           type: array
           items:
@@ -3905,11 +3960,9 @@ components:
         dial_reference:
           type: string
         ects:
-          type: string
-          format: decimal
-          multipleOf: 0.01
-          maximum: 100
-          minimum: -100
+          type: number
+          nullable: true
+          minimum: 0
         comment:
           type: string
         object_type:
@@ -3978,11 +4031,9 @@ components:
         dial_reference:
           type: string
         ects:
-          type: string
-          format: decimal
-          multipleOf: 0.01
-          maximum: 100
-          minimum: -100
+          type: number
+          nullable: true
+          minimum: 0
         participating_proof:
           type: array
           items:
@@ -4040,11 +4091,9 @@ components:
           items:
             type: string
         ects:
-          type: string
-          format: decimal
-          multipleOf: 0.01
-          maximum: 100
-          minimum: -100
+          type: number
+          nullable: true
+          minimum: 0
         comment:
           type: string
         object_type:
@@ -4093,11 +4142,9 @@ components:
           items:
             type: string
         ects:
-          type: string
-          format: decimal
-          multipleOf: 0.01
-          maximum: 100
-          minimum: -100
+          type: number
+          nullable: true
+          minimum: 0
         object_type:
           type: string
         uuid:
@@ -4200,11 +4247,9 @@ components:
           items:
             type: string
         ects:
-          type: string
-          format: decimal
-          multipleOf: 0.01
-          maximum: 100
-          minimum: -100
+          type: number
+          nullable: true
+          minimum: 0
         object_type:
           type: string
         uuid:
@@ -4224,6 +4269,23 @@ components:
       - ects
       - object_type
       - category
+    DoctoralTrainingConfig:
+      type: object
+      properties:
+        service_types:
+          type: object
+        seminar_types:
+          type: object
+        conference_types:
+          type: object
+        conference_publication_types:
+          type: object
+        communication_types:
+          type: object
+        publication_types:
+          type: object
+        residency_types:
+          type: object
     SectorDTO:
       type: object
       properties:
@@ -4621,6 +4683,15 @@ components:
       - ACCEPTEE
       - REFUSEE
       type: string
+    DoctoralTrainingBatch:
+      type: object
+      properties:
+        activity_uuids:
+          type: array
+          items:
+            type: string
+      required:
+      - activity_uuids
     CompleterPropositionCommand:
       type: object
       properties:

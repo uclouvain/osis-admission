@@ -1,4 +1,4 @@
-{% load i18n osis_document admission %}
+{% load i18n osis_document admission enums %}
 
 {% comment "License" %}
   * OSIS stands for Open Student Information System. It's an application
@@ -24,10 +24,8 @@
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
 
-{% url "admission:doctorate:training:edit" uuid=view.kwargs.uuid activity_id=activity.uuid as edit_url %}
-{% url "admission:doctorate:training:delete" uuid=view.kwargs.uuid activity_id=activity.uuid as delete_url %}
-{% url "admission:doctorate:training:add" uuid=view.kwargs.uuid category="communication" as add_communication_url %}
-{% url "admission:doctorate:training:add" uuid=view.kwargs.uuid category="publication" as add_publication_url %}
+{% url "admission:doctorate:training:edit" pk=view.kwargs.uuid activity_id=activity.uuid as edit_url %}
+{% url "admission:doctorate:training:delete" pk=view.kwargs.uuid activity_id=activity.uuid as delete_url %}
 
 {% if activity.start_date and activity.end_date %}
   {% blocktrans with start=activity.start_date|date:"d/m/Y" end=activity.end_date|date:"d/m/Y" asvar period trimmed %}
@@ -40,40 +38,15 @@
 
 
 {#  We cannot use {% panel %} as the title contains HTML #}
-<div class="panel panel-{{ activity|status_as_class }}" data-status="{{ activity.status }}" data-type="{{ activity.category }}">
+<div
+    class="panel panel-{{ activity|status_as_class }}"
+    data-status="{{ activity.status }}"
+    data-type="{{ activity.category }}"
+>
   <div class="panel-heading" role="tab" id="h-{{ activity.uuid }}">
     <h3 class="panel-title">
-      <a role="button" data-toggle="collapse" data-parent="#accordion" href="#a-{{ activity.uuid }}"
-         aria-expanded="false" aria-controls="a-{{ activity.uuid }}" class="collapsed"></a>
-      <div class="btn-group btn-group-sm pull-right">
-        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
-                aria-expanded="false">
-          {% trans "Actions" %} <span class="caret"></span>
-        </button>
-        <ul class="dropdown-menu">
-          <li>
-            <a href="{{ edit_url }}">
-              {% trans "Edit" %}
-            </a>
-          <li>
-            <a href="{{ add_communication_url }}?parent={{ activity.uuid }}">
-              {% trans "Add a communication" %}
-            </a>
-          </li>
-          <li>
-            <a href="{{ add_publication_url }}?parent={{ activity.uuid }}">
-              {% trans "Add a publication" %}
-            </a>
-          </li>
-          <li>
-            <a href="{{ delete_url }}">
-              {% trans "Delete" %}
-            </a>
-          </li>
-        </ul>
-      </div>
+      {% include "admission/doctorate/details/training/_panel_title.html" %}
 
-      <span class="badge">{{ activity.get_status_display }}</span>
       {% display activity.type '-' activity.title as title_details %}
       {% display activity.ects|default:""|floatformat " ECTS" as ects %}
       {% display '(' activity.city "," activity.country "," period ")" as location_period %}
@@ -81,12 +54,16 @@
       <div class="clearfix"></div>
     </h3>
   </div>
-  <div id="a-{{ activity.uuid }}" class="panel-collapse collapse" role="tabpanel"
-       aria-labelledby="h-{{ activity.uuid }}">
+  <div
+      id="a-{{ activity.uuid }}"
+      class="panel-collapse collapse"
+      role="tabpanel"
+      aria-labelledby="h-{{ activity.uuid }}"
+  >
     <div class="panel-body">
       <p>
         <strong class="d-block">{% trans "Event description" %}</strong>
-        {% display activity.title "-" period "-" activity.get_is_online_display "-" website %}
+        {% display activity.title "-" period "-" activity.is_online|format_is_online "-" website %}
         <br/>
         {% display activity.organizing_institution "," activity.city "," activity.country %}
       </p>

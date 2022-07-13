@@ -149,13 +149,7 @@ class ActivityFormMixin:
 
 class ConferenceForm(ActivityFormMixin, forms.ModelForm):
     template_name = "admission/doctorate/forms/training/conference.html"
-    type = ConfigurableActivityTypeField(
-        label=_("Type of activity"),
-        choices=[
-            _("National conference"),
-            _("International conference"),
-        ],
-    )
+    type = ConfigurableActivityTypeField('conference_types', label=_("Type of activity"))
     is_online = IsOnlineField()
 
     class Meta:
@@ -224,18 +218,7 @@ class ConferenceCommunicationForm(ActivityFormMixin, forms.ModelForm):
 
 class ConferencePublicationForm(ActivityFormMixin, forms.ModelForm):
     template_name = "admission/doctorate/forms/training/conference_publication.html"
-    type = ConfigurableActivityTypeField(
-        label=_("Type of publication"),
-        choices=[
-            _("Article published in a peer-reviewed journal"),
-            _("Article published in a non-refereed journal"),
-            _("Book chapter"),
-            _("Monograph"),
-            _("Edition or co-publication"),
-            _("Working paper"),
-            _("Extended abstract"),
-        ],
-    )
+    type = ConfigurableActivityTypeField('conference_publication_types', label=_("Type of publication"))
 
     class Meta:
         model = Activity
@@ -264,13 +247,7 @@ class ConferencePublicationForm(ActivityFormMixin, forms.ModelForm):
 
 class CommunicationForm(ActivityFormMixin, forms.ModelForm):
     template_name = "admission/doctorate/forms/training/communication.html"
-    type = ConfigurableActivityTypeField(
-        label=_("Type of activity"),
-        choices=[
-            _("Research seminar"),
-            _("PhD students' day"),
-        ],
-    )
+    type = ConfigurableActivityTypeField('communication_types', label=_("Type of activity"))
     subtype = ConfigurableActivityTypeField(
         label=_("Type of communication"),
         choices=[
@@ -323,20 +300,7 @@ class CommunicationForm(ActivityFormMixin, forms.ModelForm):
 
 class PublicationForm(ActivityFormMixin, forms.ModelForm):
     template_name = "admission/doctorate/forms/training/publication.html"
-    type = ConfigurableActivityTypeField(
-        label=_("Type of activity"),
-        choices=[
-            _("Article for a peer-reviewed journal"),
-            _("Article for a non-refereed journal"),
-            _("Publication in an international scientific journal with peer review"),
-            _("Book chapter"),
-            _("Monograph"),
-            _("Edition or co-publication"),
-            _("Patent"),
-            _("Review of a scientific work"),
-            _("Working paper"),
-        ],
-    )
+    type = ConfigurableActivityTypeField('publication_types', label=_("Type of activity"))
 
     class Meta:
         model = Activity
@@ -368,13 +332,7 @@ class PublicationForm(ActivityFormMixin, forms.ModelForm):
 
 class ResidencyForm(ActivityFormMixin, forms.ModelForm):
     template_name = "admission/doctorate/forms/training/residency.html"
-    type = ConfigurableActivityTypeField(
-        label=_("Type of activity"),
-        choices=[
-            _("Research residency (excluding cotutelle)"),
-            _("Documentary research residency"),
-        ],
-    )
+    type = ConfigurableActivityTypeField('residency_types', label=_("Type of activity"))
 
     class Meta:
         model = Activity
@@ -402,10 +360,10 @@ class ResidencyForm(ActivityFormMixin, forms.ModelForm):
 
 class ResidencyCommunicationForm(ActivityFormMixin, forms.ModelForm):
     template_name = "admission/doctorate/forms/training/residency_communication.html"
-    type = ConfigurableActivityTypeField(label=_("Type of activity"), choices=[_("Research seminar")])
+    type = ConfigurableActivityTypeField("residency_communication_types", label=_("Type of activity"))
     subtype = ConfigurableActivityTypeField(
+        'residency_communication_subtypes',
         label=_("Type of communication"),
-        choices=[_("Oral exposé")],
         required=False,
     )
     subtitle = forms.CharField(label=_("Title of the communication"), max_length=200, required=False)

@@ -82,7 +82,7 @@ class CddDoctorateSendMailForm(forms.Form):
         custom_templates = CddMailTemplate.objects.get_from_identifiers(
             identifiers=available_identifiers,
             language=self.admission.candidate.language,
-            cdd=self.admission.doctorate.management_entity_id,
+            cdd_id=self.admission.doctorate.management_entity_id,
         )
 
         # Regroup custom templates by their identifier and format into choices

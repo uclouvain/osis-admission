@@ -24,6 +24,7 @@
 #
 # ##############################################################################
 import uuid
+from unittest.mock import patch
 
 from django.conf import settings
 from django.shortcuts import resolve_url
@@ -34,7 +35,20 @@ from rest_framework import status
 
 from admission.contrib.models.doctoral_training import Activity
 from admission.ddd.projet_doctoral.doctorat.formation.domain.model._enums import CategorieActivite
-from admission.tests.factories.activity import ActivityFactory, ConferenceFactory, ServiceFactory
+from admission.tests.factories.activity import (
+    ActivityFactory,
+    CommunicationFactory,
+    ConferenceCommunicationFactory,
+    ConferenceFactory,
+    ConferencePublicationFactory,
+    PublicationFactory,
+    ResidencyCommunicationFactory,
+    ResidencyFactory,
+    SeminarCommunicationFactory,
+    SeminarFactory,
+    ServiceFactory,
+    VaeFactory,
+)
 from admission.tests.factories.roles import CddManagerFactory
 
 
@@ -48,8 +62,10 @@ class DoctorateTrainingActivityViewTestCase(TestCase):
         cls.manager = CddManagerFactory(entity=cls.doctorate.doctorate.management_entity)
         cls.url = resolve_url('admission:doctorate:training', uuid=cls.doctorate.uuid)
 
-    def test_view(self):
+    def setUp(self) -> None:
         self.client.force_login(self.manager.person.user)
+
+    def test_view(self):
         response = self.client.get(self.url)
         self.assertContains(response, self.conference.title)
         self.assertContains(response, _("NON_SOUMISE"))
@@ -57,7 +73,6 @@ class DoctorateTrainingActivityViewTestCase(TestCase):
 
     def test_form(self):
         add_url = resolve_url('admission:doctorate:training:add', uuid=self.doctorate.uuid, category='service')
-        self.client.force_login(self.manager.person.user)
         with translation.override(settings.LANGUAGE_CODE_FR):
             response = self.client.get(add_url)
             self.assertContains(response, "Coopération internationale")
@@ -74,15 +89,22 @@ class DoctorateTrainingActivityViewTestCase(TestCase):
         self.assertEqual(Activity.objects.first().type, "Coopération internationale")
         self.assertIn(self.url, response.redirect_chain[-1][0])
 
+        # Start date must be before end date
+        data = {
+            'type': "Coopération internationale",
+            'start_date': '02/01/2022',
+            'end_date': '01/01/2022',
+        }
+        response = self.client.post(add_url, data)
+        self.assertFormError(response, 'form', 'start_date', _("The start date can't be later than the end date"))
+
     def test_missing_form(self):
         add_url = resolve_url('admission:doctorate:training:add', uuid=self.doctorate.uuid, category='foobar')
-        self.client.force_login(self.manager.person.user)
         response = self.client.get(add_url)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_parent(self):
         add_url = resolve_url('admission:doctorate:training:add', uuid=self.doctorate.uuid, category='publication')
-        self.client.force_login(self.manager.person.user)
 
         # test inexistent parent
         response = self.client.get(f"{add_url}?parent={uuid.uuid4()}")
@@ -100,7 +122,6 @@ class DoctorateTrainingActivityViewTestCase(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_edit(self):
-        self.client.force_login(self.manager.person.user)
         # Test edit
         edit_url = resolve_url(
             'admission:doctorate:training:edit',
@@ -125,3 +146,56 @@ class DoctorateTrainingActivityViewTestCase(TestCase):
         edit_url = resolve_url('admission:doctorate:training:edit', uuid=self.doctorate.uuid, activity_id=child.uuid)
         response = self.client.get(edit_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_submit_activities(self):
+        response = self.client.post(self.url, {'activity_ids': [self.service.uuid]}, follow=True)
+        self.assertContains(response, _('SOUMISE'))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    @patch('osis_document.api.utils.get_remote_token')
+    @patch('osis_document.api.utils.get_remote_metadata')
+    @patch('osis_document.api.utils.confirm_remote_upload')
+    def test_submit_parent_seminar(self, confirm_remote_upload, get_remote_metadata, get_remote_token):
+        get_remote_metadata.return_value = {"name": "test.pdf"}
+        get_remote_token.return_value = "test"
+        confirm_remote_upload.return_value = '4bdffb42-552d-415d-9e4c-725f10dce228'
+        activity = SeminarCommunicationFactory(doctorate=self.doctorate)
+        self.assertEqual(Activity.objects.filter(status='SOUMISE').count(), 0)
+        response = self.client.post(self.url, {'activity_ids': [activity.parent.uuid]}, follow=True)
+        self.assertContains(response, _('SOUMISE'))
+        self.assertEqual(Activity.objects.filter(status='SOUMISE').count(), 2)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    @patch('osis_document.api.utils.get_remote_token')
+    @patch('osis_document.api.utils.get_remote_metadata')
+    @patch('osis_document.api.utils.confirm_remote_upload')
+    def test_submit_activities_with_error(self, confirm_remote_upload, get_remote_metadata, get_remote_token):
+        get_remote_metadata.return_value = {"name": "test.pdf"}
+        get_remote_token.return_value = "test"
+        confirm_remote_upload.return_value = '4bdffb42-552d-415d-9e4c-725f10dce228'
+
+        self.service.title = ""
+        self.service.save()
+        response = self.client.post(self.url, {'activity_ids': [self.service.uuid]})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertContains(response, _('NON_SOUMISE'))
+        self.assertFormError(response, 'form', None, _("This activity is not complete"))
+
+        self.conference.title = ""
+        self.conference.save()
+        activity_list = [
+            self.conference,
+            SeminarFactory(doctorate=self.doctorate, title=""),
+            ResidencyFactory(doctorate=self.doctorate),
+            ConferenceCommunicationFactory(doctorate=self.doctorate),
+            ConferencePublicationFactory(doctorate=self.doctorate),
+            SeminarCommunicationFactory(doctorate=self.doctorate, title=""),
+            ResidencyCommunicationFactory(doctorate=self.doctorate),
+            CommunicationFactory(doctorate=self.doctorate),
+            PublicationFactory(doctorate=self.doctorate),
+            VaeFactory(doctorate=self.doctorate),
+        ]
+        response = self.client.post(self.url, {'activity_ids': [activity.uuid for activity in activity_list]})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertFormError(response, 'form', None, _("This activity is not complete"))
+        self.assertEqual(len(response.context['form'].activities_in_error), len(activity_list))

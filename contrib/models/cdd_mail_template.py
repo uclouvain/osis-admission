@@ -60,15 +60,13 @@ class CddMailTemplateManager(MailTemplateManager):
             .order_by('language')
         )
 
-    def get_from_identifiers(self, identifiers: List[str], language: str, cdd: Optional[int] = None):
+    def get_from_identifiers(self, identifiers: List[str], language: str, cdd_id: int):
         """Get a list of mail template instances by identifier and language"""
         qs = self.get_queryset().filter(
             identifier__in=identifiers,
             language=language,
+            cdd_id=cdd_id,
         )
-
-        if cdd:
-            qs = qs.filter(cdd=cdd)
 
         return list(qs)
 

@@ -35,10 +35,3 @@
       {% include widget.template_name %}
   {% endwith %}
 {% endspaceless %}
-<script>
-  $(function () {
-    $('#parent-{{ widget.subwidgets.1.attrs.id }}').dependsOn({
-      '#{{ widget.subwidgets.0.attrs.id }}': { values: ['other'] },
-    }, { valueOnDisable: '' });
-  });
-</script>

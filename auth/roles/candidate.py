@@ -81,6 +81,7 @@ class Candidate(RoleModel):
             'admission.view_doctorateadmission_confirmation': is_admission_request_author & is_enrolled,
             'admission.view_doctorateadmission_doctoral_training': is_admission_request_author & is_enrolled,
             'admission.add_doctorateadmission_doctoral_training': is_admission_request_author & is_enrolled,
+            'admission.submit_doctorateadmission_doctoral_training': is_admission_request_author & is_enrolled,
             # Once the confirmation paper is in progress, he can
             'admission.change_doctorateadmission_confirmation': is_admission_request_author
             & confirmation_paper_in_progress,
