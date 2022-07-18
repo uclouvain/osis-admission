@@ -36,7 +36,7 @@ from rules.templatetags import rules
 
 from admission.auth.constants import READ_ACTIONS_BY_TAB, UPDATE_ACTIONS_BY_TAB
 from admission.ddd.projet_doctoral.doctorat.domain.model.enums import ChoixStatutDoctorat
-from admission.ddd.projet_doctoral.doctorat.formation.domain.model._enums import StatutActivite
+from admission.ddd.projet_doctoral.doctorat.formation.domain.model._enums import CategorieActivite, StatutActivite
 from admission.utils import get_cached_admission_perm_obj
 from osis_role.templatetags.osis_role import has_perm
 
@@ -409,3 +409,60 @@ def can_read_tab(context, tab_name, obj=None):
 def can_update_tab(context, tab_name, obj=None):
     """Return true if the specified tab can be opened in update mode for this admission, otherwise return False"""
     return has_perm(context, UPDATE_ACTIONS_BY_TAB[tab_name], obj)
+
+
+@register.inclusion_tag('admission/doctorate/includes/training_categories.html')
+def training_categories(activities):
+    added, validated = 0, 0
+
+    categories = {
+        _("Participation"): [0, 0],
+        _("Scientific communication"): [0, 0],
+        _("Publication"): [0, 0],
+        _("Courses and training"): [0, 0],
+        _("Services"): [0, 0],
+        _("VAE"): [0, 0],
+        _("Scientific residencies"): [0, 0],
+        _("Confirmation paper"): [0, 0],
+        _("Thesis defences"): [0, 0],
+    }
+    for activity in activities:
+        index = int(activity.status == StatutActivite.ACCEPTEE.name)
+        if activity.status != StatutActivite.REFUSEE.name:
+            added += activity.ects
+        if activity.status not in [StatutActivite.SOUMISE.name, StatutActivite.ACCEPTEE.name]:
+            continue
+        if activity.status == StatutActivite.ACCEPTEE.name:
+            validated += activity.ects
+        elif (
+            activity.category == CategorieActivite.CONFERENCE.name
+            or activity.category == CategorieActivite.SEMINAR.name
+        ):
+            categories[_("Participation")][index] += activity.ects
+        elif activity.category == CategorieActivite.COMMUNICATION.name and (
+            activity.parent_id is None or activity.parent.category == CategorieActivite.CONFERENCE.name
+        ):
+            categories[_("Scientific communication")][index] += activity.ects
+        elif activity.category == CategorieActivite.PUBLICATION.name and (
+            activity.parent_id is None or activity.parent.category == CategorieActivite.CONFERENCE.name
+        ):
+            categories[_("Publication")][index] += activity.ects
+        # elif activity.category == CategorieActivite.COURS.name:
+        #     categories[_("Courses and training")][index] += activity.ects
+        elif activity.category == CategorieActivite.SERVICE.name:
+            categories[_("Services")][index] += activity.ects
+        elif (
+            activity.category == CategorieActivite.RESIDENCY.name
+            or activity.parent_id
+            and activity.parent.category == CategorieActivite.RESIDENCY.name
+        ):
+            categories[_("Scientific residencies")][index] += activity.ects
+        elif activity.category == CategorieActivite.VAE.name:
+            categories[_("VAE")][index] += activity.ects
+    if not any(cat_added + cat_validated for cat_added, cat_validated in categories.values()):
+        return {}
+    return {
+        'categories': categories,
+        'added': added,
+        'validated': validated,
+    }
