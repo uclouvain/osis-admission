@@ -50,38 +50,7 @@
 
   <p>{% lorem %}</p>
 
-  {% if activities and counts.total %}
-    <h4>{% trans "ECTS added" context "summary" %}</h4>
-    <p>
-      {% blocktrans with added=counts.total validated=counts.validated|default_if_none:0 trimmed %}
-        {{ added }} ECTS added with {{ validated }} validated by the CDD.
-      {% endblocktrans %}
-      <a data-toggle="collapse" href="#show-details" aria-expanded="false" aria-controls="show-details">
-        {% trans "Show details" %}
-      </a>
-    </p>
-
-    <div class="collapse" id="show-details">
-      <table class="table table-condensed table-bordered">
-        <thead>
-        <tr>
-          <th>{% trans "Category" %}</th>
-          <th>{% trans "Unsubmitted" %}</th>
-          <th>{% trans "Submitted" %}</th>
-          <th>{% trans "Validated" %}</th>
-        </tr>
-        {% for count in categories_count %}
-          <tr>
-            <th>{{ count.category|enum_display:"CategorieActivite" }}</th>
-            <td>{{ count.unsubmitted|default_if_none:0 }}</td>
-            <td>{{ count.submitted|default_if_none:0 }}</td>
-            <td>{{ count.validated|default_if_none:0 }}</td>
-          </tr>
-        {% endfor %}
-        </thead>
-      </table>
-    </div>
-  {% endif %}
+  {% training_categories activities.all %}
 
   <h4>{% trans "Activities" %}</h4>
   {% if activities %}

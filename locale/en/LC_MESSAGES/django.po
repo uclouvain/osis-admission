@@ -470,9 +470,6 @@ msgstr ""
 msgid "Carbon-copy the promoters"
 msgstr ""
 
-msgid "Category"
-msgstr ""
-
 msgid "Certificate of achievement"
 msgstr ""
 
@@ -562,6 +559,9 @@ msgstr ""
 
 msgid "Country of citizenship"
 msgstr ""
+
+msgid "Courses and training"
+msgstr "Courses and training"
 
 msgid "Create new doctorate admission"
 msgstr ""
@@ -1453,6 +1453,9 @@ msgid ""
 "CDE, CLSM or CDSS"
 msgstr ""
 
+msgid "Publication"
+msgstr "Publication"
+
 msgid "Publication status"
 msgstr ""
 
@@ -1493,6 +1496,9 @@ msgid "Rejection reason"
 msgstr ""
 
 msgid "Report of the supervisory panel"
+msgstr ""
+
+msgid "Reporting categories"
 msgstr ""
 
 msgid "Request of a new deadline for the confirmation paper"
@@ -1585,6 +1591,12 @@ msgstr ""
 msgid "Scholarship grant"
 msgstr ""
 
+msgid "Scientific communication"
+msgstr ""
+
+msgid "Scientific residencies"
+msgstr ""
+
 msgid "Search"
 msgstr ""
 
@@ -1619,6 +1631,9 @@ msgid "Sender"
 msgstr ""
 
 msgid "Service types"
+msgstr ""
+
+msgid "Services"
 msgstr ""
 
 msgid "Sex"
@@ -1819,6 +1834,9 @@ msgid "There can be no more promoters in the supervision group."
 msgstr ""
 
 msgid "There is no request for a new deadline."
+msgstr ""
+
+msgid "Thesis defences"
 msgstr ""
 
 msgid "Thesis institute"
