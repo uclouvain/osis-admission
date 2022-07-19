@@ -79,5 +79,7 @@ class CddManager(EntityRoleModel):
             'admission.send_message': is_part_of_doctoral_commission & is_enrolled,
             'admission.change_cddconfiguration': rules.always_allow,
             'admission.change_activity': is_part_of_doctoral_commission,
+            'admission.add_internalnote': is_part_of_doctoral_commission,
+            'admission.view_internalnote': is_part_of_doctoral_commission,
         }
         return RuleSet(ruleset)

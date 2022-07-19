@@ -219,14 +219,14 @@ class CddDoctorateAdmissionListTestCase(TestCase):
 
         response = self.client.get(self.url)
 
-        response.status_code = 403
+        self.assertEqual(response.status_code, 403)
 
     def test_list_candidate_user(self):
         self.client.force_login(user=self.admissions[0].candidate.user)
 
         response = self.client.get(self.url)
 
-        response.status_code = 403
+        self.assertEqual(response.status_code, 403)
 
     def test_list_cdd_user_without_any_query_param(self):
         self.client.force_login(user=self.one_cdd_user)

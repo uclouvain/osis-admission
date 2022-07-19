@@ -25,6 +25,7 @@
 # ##############################################################################
 import uuid
 
+from ckeditor.fields import RichTextField
 from django.core.cache import cache
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db import models
@@ -584,3 +585,27 @@ class ConfirmationPaper(models.Model):
 
     class Meta:
         ordering = ["-id"]
+
+
+class InternalNote(models.Model):
+    admission = models.ForeignKey(
+        DoctorateAdmission,
+        on_delete=models.CASCADE,
+        verbose_name=_("Admission"),
+    )
+    author = models.ForeignKey(
+        'base.Person',
+        on_delete=models.SET_NULL,
+        verbose_name=_("Author"),
+        null=True,
+    )
+    created = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name=_('Created'),
+    )
+    text = RichTextField(
+        verbose_name=_("Text"),
+    )
+
+    class Meta:
+        ordering = ['-created']

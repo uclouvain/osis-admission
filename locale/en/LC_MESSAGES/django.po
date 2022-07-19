@@ -197,6 +197,9 @@ msgstr ""
 msgid "Add an activity"
 msgstr ""
 
+msgid "Add an internal note"
+msgstr ""
+
 msgid "Additional training project"
 msgstr ""
 
@@ -944,6 +947,9 @@ msgstr ""
 msgid "Internal comment"
 msgstr ""
 
+msgid "Internal notes"
+msgstr ""
+
 msgid "Invitations have not been sent"
 msgstr ""
 
@@ -1408,6 +1414,9 @@ msgstr ""
 msgid "Previous experience"
 msgstr ""
 
+msgid "Previous notes"
+msgstr ""
+
 msgid "Prof."
 msgstr ""
 
@@ -1751,6 +1760,9 @@ msgstr "To be validated"
 msgid "TO_BE_VERIFIED"
 msgstr "To be verified"
 
+msgid "Text"
+msgstr ""
+
 msgid "The <strong>additional training</strong> has been completed: yes / no."
 msgstr ""
 
@@ -2083,6 +2095,10 @@ msgid "items per page"
 msgstr ""
 
 msgid "modified"
+msgstr ""
+
+#, python-format
+msgid "on %(date)s at %(time)s"
 msgstr ""
 
 msgid "the <strong>failure</strong> of the confirmation paper."

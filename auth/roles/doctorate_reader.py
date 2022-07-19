@@ -49,4 +49,5 @@ class DoctorateReader(RoleModel):
             'admission.view_doctorateadmission_supervision': always_allow,
             'admission.view_doctorateadmission_confirmation': always_allow,
             'admission.view_cdddossiers': always_allow,
+            'admission.view_internalnote': always_allow,
         })

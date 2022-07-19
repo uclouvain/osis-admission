@@ -45,6 +45,8 @@ READ_ACTIONS_BY_TAB = {
     'send-mail': 'admission.send_message',
     # Training
     'training': 'admission.change_activity',
+    # Internal note
+    'internal-note': 'admission.view_internalnote',
 }
 
 # Association between a write-only tab name (path name) and a permission

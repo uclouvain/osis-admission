@@ -185,13 +185,19 @@ class Tab:
     name: str
     label: str
     icon: str = ''
+    badge: str = ''
 
     def __hash__(self):
         # Only hash the name, as lazy strings have different memory addresses
         return hash(self.name)
 
+    def __eq__(self, other):
+        return self.name == other.name
+
 
 MESSAGE_TAB = Tab('messages', _('Send a mail'), 'envelope')
+INTERNAL_NOTE_TAB = Tab('internal-note', _('Internal notes'), 'note-sticky')
+
 TAB_TREES = {
     'doctorate': {
         Tab('personal', _('Personal data'), 'user'): [
@@ -217,6 +223,9 @@ TAB_TREES = {
         ],
         MESSAGE_TAB: [
             Tab('send-mail', _('Send a mail')),
+        ],
+        INTERNAL_NOTE_TAB: [
+            INTERNAL_NOTE_TAB,
         ],
     },
 }
@@ -248,6 +257,18 @@ def get_valid_tab_tree(context, permission_obj, tab_tree):
         # Only add the parent tab if at least one sub tab is allowed
         if len(valid_sub_tabs) > 0:
             valid_tab_tree[parent_tab] = valid_sub_tabs
+
+    # Add dynamic badges
+    sub_tabs_internal_notes = valid_tab_tree.pop(INTERNAL_NOTE_TAB, None)
+    if sub_tabs_internal_notes:
+        valid_tab_tree[
+            Tab(
+                name=INTERNAL_NOTE_TAB.name,
+                label=INTERNAL_NOTE_TAB.label,
+                icon=INTERNAL_NOTE_TAB.icon,
+                badge=permission_obj.internalnote_set.count(),
+            )
+        ] = sub_tabs_internal_notes
 
     return valid_tab_tree
 

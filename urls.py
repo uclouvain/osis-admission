@@ -87,6 +87,7 @@ doctorate_detail_paths = [
     path('update/', include((doctorate_update_paths, 'update'))),
     path('training', DoctorateTrainingActivityView.as_view(), name='training'),
     path('training/', include((doctorate_training_paths, 'training'))),
+    path('internal-note/', InternalNoteView.as_view(), name='internal-note'),
 ]
 
 doctorate_cdd_paths = [
