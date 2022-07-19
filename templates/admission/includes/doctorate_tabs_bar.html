@@ -60,14 +60,14 @@
       <ul class="nav navbar-nav">
         {% for parent, children in tab_tree.items %}
           {% if parent == active_parent %}
-            {% include 'admission/includes/tab_entry.html' with tab_name=children.0.name tab_label=parent.label is_active=True icon=parent.icon %}
+            {% include 'admission/includes/tab_entry.html' with tab_name=children.0.name tab_label=parent.label is_active=True icon=parent.icon badge=parent.badge %}
             {% if children|length > 1 %}
               <div class="col-xs-offset-1">
                 {% doctorate_subtabs_bar %}
               </div>
             {% endif %}
           {% else %}
-            {% include 'admission/includes/tab_entry.html' with tab_name=children.0.name tab_label=parent.label icon=parent.icon %}
+            {% include 'admission/includes/tab_entry.html' with tab_name=children.0.name tab_label=parent.label icon=parent.icon badge=parent.badge %}
           {% endif %}
         {% endfor %}
     </div>
@@ -76,9 +76,9 @@
   <ul class="nav nav-tabs visible-md visible-lg">
     {% for parent, children in tab_tree.items %}
       {% if parent == active_parent %}
-        {% include 'admission/includes/tab_entry.html' with tab_name=children.0.name tab_label=parent.label is_active=True icon=parent.icon %}
+        {% include 'admission/includes/tab_entry.html' with tab_name=children.0.name tab_label=parent.label is_active=True icon=parent.icon badge=parent.badge %}
       {% else %}
-        {% include 'admission/includes/tab_entry.html' with tab_name=children.0.name tab_label=parent.label icon=parent.icon %}
+        {% include 'admission/includes/tab_entry.html' with tab_name=children.0.name tab_label=parent.label icon=parent.icon badge=parent.badge %}
       {% endif %}
     {% endfor %}
   </ul>

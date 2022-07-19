@@ -216,6 +216,9 @@ msgstr "Ajouter un service"
 msgid "Add an activity"
 msgstr "Ajouter une activité"
 
+msgid "Add an internal note"
+msgstr "Ajouter une note interne"
+
 msgid "Additional training project"
 msgstr "Projet de formation complémentaire"
 
@@ -985,6 +988,9 @@ msgstr ""
 msgid "Internal comment"
 msgstr "Commentaire interne"
 
+msgid "Internal notes"
+msgstr "Notes internes"
+
 msgid "Invitations have not been sent"
 msgstr "Les invitations n'ont pas été envoyées"
 
@@ -1499,6 +1505,9 @@ msgstr "Prévisualiser le template d'email personnalisé <em>%(name)s</em>"
 msgid "Previous experience"
 msgstr "Parcours antérieur"
 
+msgid "Previous notes"
+msgstr "Notes précédentes"
+
 msgid "Prof."
 msgstr "Prof."
 
@@ -1845,6 +1854,9 @@ msgstr "Pour validation"
 
 msgid "TO_BE_VERIFIED"
 msgstr "Pour vérification"
+
+msgid "Text"
+msgstr "Texte"
 
 msgid "The <strong>additional training</strong> has been completed: yes / no."
 msgstr ""
@@ -2217,6 +2229,10 @@ msgstr "éléments par page"
 
 msgid "modified"
 msgstr "modifiée"
+
+#, python-format
+msgid "on %(date)s at %(time)s"
+msgstr "le %(date)s à %(time)s"
 
 msgid "the <strong>failure</strong> of the confirmation paper."
 msgstr "l'<strong>échec</strong> de l'épreuve de confirmation."

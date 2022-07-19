@@ -23,18 +23,12 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from .internal_note import InternalNoteView
-from .list import CddDoctorateAdmissionList
-from .training import (
-    DoctorateTrainingActivityAddView,
-    DoctorateTrainingActivityEditView,
-    DoctorateTrainingActivityView,
-)
 
-__all__ = [
-    'CddDoctorateAdmissionList',
-    'DoctorateTrainingActivityView',
-    'DoctorateTrainingActivityAddView',
-    'DoctorateTrainingActivityEditView',
-    'InternalNoteView',
-]
+import factory
+
+from admission.contrib.models.doctorate import InternalNote
+
+
+class InternalNoteFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = InternalNote
