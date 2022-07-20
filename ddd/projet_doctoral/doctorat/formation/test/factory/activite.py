@@ -180,6 +180,28 @@ class SeminarCommunicationDTOFactory(factory.Factory):
     orateur_oratrice = "test"
 
 
+class CourseDTOFactory(factory.Factory):
+    class Meta:
+        model = dtos.CoursDTO
+        abstract = False
+
+    type = "test"
+    nom = "test"
+    institution = "test"
+    date_debut = "test"
+    date_fin = "test"
+    volume_horaire = "test"
+    certificat = ["test"]
+
+
+class PaperDTOFactory(factory.Factory):
+    class Meta:
+        model = dtos.EpreuveDTO
+        abstract = False
+
+    type = "CONFIRMATION_PAPER"
+
+
 class ActiviteIdentityFactory(factory.Factory):
     class Meta:
         model = ActiviteIdentity

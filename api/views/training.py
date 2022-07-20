@@ -23,7 +23,6 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from collections import defaultdict
 
 from rest_framework import status
 from rest_framework.generics import GenericAPIView

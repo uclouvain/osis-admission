@@ -32,6 +32,22 @@ from admission.ddd.projet_doctoral.doctorat.formation.domain.validator import *
 from admission.ddd.projet_doctoral.doctorat.formation.dtos import *
 from base.ddd.utils.business_validator import BusinessValidator, TwoStepsMultipleBusinessExceptionListValidator
 
+__all__ = [
+    "ConferenceValidatorList",
+    "ConferenceCommunicationValidatorList",
+    "CommunicationValidatorList",
+    "ConferencePublicationValidatorList",
+    "PublicationValidatorList",
+    "SejourValidatorList",
+    "SejourCommunicationValidatorList",
+    "SeminaireValidatorList",
+    "SeminaireCommunicationValidatorList",
+    "ServiceValidatorList",
+    "ValorisationValidatorList",
+    "CoursValidatorList",
+    "EpreuveValidatorList",
+]
+
 
 @attr.dataclass(frozen=True, slots=True)
 class ConferenceValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
@@ -163,3 +179,27 @@ class ValorisationValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
 
     def get_invariants_validators(self) -> List[BusinessValidator]:
         return [ShouldValorisationEtreComplete(self.valorisation, self.activite)]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class CoursValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+    cours: CoursDTO
+    activite: Activite
+
+    def get_data_contract_validators(self) -> List[BusinessValidator]:
+        return []
+
+    def get_invariants_validators(self) -> List[BusinessValidator]:
+        return [ShouldCoursEtreComplet(self.cours, self.activite)]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class EpreuveValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+    epreuve: EpreuveDTO
+    activite: Activite
+
+    def get_data_contract_validators(self) -> List[BusinessValidator]:
+        return []
+
+    def get_invariants_validators(self) -> List[BusinessValidator]:
+        return [ShouldEpreuveEtreComplete(self.epreuve, self.activite)]

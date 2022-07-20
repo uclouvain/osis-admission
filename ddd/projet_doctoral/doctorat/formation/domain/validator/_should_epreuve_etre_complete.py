@@ -23,45 +23,25 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from django.utils.translation import gettext_lazy as _
 
-from base.models.utils.utils import ChoiceEnum
+import attr
 
-
-class StatutActivite(ChoiceEnum):
-    NON_SOUMISE = _("NON_SOUMISE")
-    SOUMISE = _("SOUMISE")
-    ACCEPTEE = _("ACCEPTEE")
-    REFUSEE = _("REFUSEE")
+from admission.ddd.projet_doctoral.doctorat.formation.domain.model.activite import Activite
+from admission.ddd.projet_doctoral.doctorat.formation.domain.validator.exceptions import ActiviteNonComplete
+from admission.ddd.projet_doctoral.doctorat.formation.dtos import EpreuveDTO
+from base.ddd.utils.business_validator import BusinessValidator
 
 
-class CategorieActivite(ChoiceEnum):
-    CONFERENCE = _("CONFERENCE")
-    COMMUNICATION = _("COMMUNICATION")
-    SEMINAR = _("SEMINAR")
-    PUBLICATION = _("PUBLICATION")
-    SERVICE = _("SERVICE")
-    RESIDENCY = _("RESIDENCY")
-    VAE = _("VAE")
-    COURSE = _("COURSE")
-    PAPER = _("PAPER")
+@attr.dataclass(frozen=True, slots=True)
+class ShouldEpreuveEtreComplete(BusinessValidator):
+    epreuve: EpreuveDTO
+    activite: Activite
 
-
-class ChoixComiteSelection(ChoiceEnum):
-    YES = _("YES")
-    NO = _("NO")
-    NA = _("N/A")
-
-
-class ChoixStatutPublication(ChoiceEnum):
-    UNSUBMITTED = _("Unsubmitted")
-    SUBMITTED = _("Submitted")
-    IN_REVIEW = _("In review")
-    ACCEPTED = _("Accepted")
-    PUBLISHED = _("Published")
-
-
-class ChoixTypeEpreuve(ChoiceEnum):
-    CONFIRMATION_PAPER = _("CONFIRMATION_PAPER")
-    PRIVATE_DEFENSE = _("PRIVATE_DEFENSE")
-    PUBLIC_DEFENSE = _("PUBLIC_DEFENSE")
+    def validate(self, *args, **kwargs):
+        if not all(
+            [
+                self.epreuve.type,
+                self.activite.ects,
+            ]
+        ):
+            raise ActiviteNonComplete(activite_id=self.activite.entity_id)

@@ -24,17 +24,6 @@
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
 
-{% if activity.start_date and activity.end_date %}
-  {% blocktrans with start=activity.start_date|date:"d/m/Y" end=activity.end_date|date:"d/m/Y" asvar period trimmed %}
-    from {{ start }} to {{ end }}
-  {% endblocktrans %}
-{% endif %}
-{% if activity.website %}
-  {% firstof '<a href="'|safe|add:activity.website|add:'">'|safe|add:activity.website|add:'</a>'|safe "" as website %}
-{% endif %}
-
-
-{#  We cannot use {% panel %} as the title contains HTML #}
 <div
     class="panel panel-{{ activity|status_as_class }}"
     data-status="{{ activity.status }}"
@@ -44,10 +33,9 @@
     <h3 class="panel-title">
       {% include "admission/doctorate/details/training/_panel_title.html" %}
 
-      {% display activity.type '-' activity.title as title_details %}
       {% display activity.ects|default:""|floatformat " ECTS" as ects %}
-      {% display '(' activity.city "," activity.country "," period ")" as location_period %}
-      {% display title_details " " location_period  "-" ects %}
+      {% display '(' activity.subtitle ')' as code %}
+      {% display activity.type '-' activity.title " " code "-" ects %}
       <div class="clearfix"></div>
     </h3>
   </div>
@@ -59,38 +47,41 @@
   >
     <div class="panel-body">
       <p>
-        <strong class="d-block">{% trans "Event description" %}</strong>
-        {% display activity.title "-" period "-" activity.is_online|format_is_online "-" website %}
-        <br/>
-        {% display activity.organizing_institution "," activity.city "," activity.country %}
-      </p>
-      <div class="row">
-        {% if activity.participating_days %}
-          <p class="col-md-4">
-            <strong class="d-block">{% trans "Number of days participating" %}</strong>
-            {{ activity.participating_days|floatformat }}
-          </p>
+        {% if activity.organizing_institution == "UCLouvain" %}
+          {% display activity.start_date|date:"Y" "-" activity.end_date|date:"y" as dates %}
+        {% else %}
+          {% display activity.start_date|date:"m/Y" "-" activity.end_date|date:"m/Y" as dates %}
         {% endif %}
+        {% display activity.hour_volume " hours" as hours %}
+        {% display activity.title "-" activity.organizing_institution "-" dates|cut:" " "-" hours %}
+      </p>
+      {% if activity.authors %}
+        <div class="row">
+          <p class="col-md-4">
+            <strong class="d-block">{% trans "Course owner" %}</strong> {{ activity.authors }}
+          </p>
+        </div>
+      {% endif %}
+      <div class="row">
         {% if activity.ects %}
           <p class="col-md-4">
-            <strong class="d-block">{% trans "ECTS for participating" %}</strong>
+            <strong class="d-block">{% trans "ECTS" %}</strong>
             {{ activity.ects|floatformat }}
           </p>
         {% endif %}
       </div>
       {% if activity.participating_proof %}
         <div class="form-group">
-          <strong class="d-block">{% trans "Participation certification" %}</strong>
+          <strong class="d-block">{% trans "Proof of participation or success" %}</strong>
           {% document_visualizer activity.participating_proof %}
         </div>
       {% endif %}
       {% if activity.comment %}
-        <strong class="d-block">{% trans "Comments" %}</strong>
-        {{ activity.comment|linebreaks }}
+        <div class="form-group">
+          <strong class="d-block">{% trans "Comments" %}</strong>
+          {{ activity.comment|linebreaks }}
+        </div>
       {% endif %}
     </div>
   </div>
-  {% for activity in activity.children.all %}
-    {% include "admission/doctorate/details/training/conference_"|add:activity.category|lower|add:'.html' %}
-  {% endfor %}
 </div>

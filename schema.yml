@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Admission API
-  version: 1.0.26
+  version: 1.0.27
   description: This API delivers data for the Admission project.
   contact:
     name: UCLouvain - OSIS
@@ -3578,6 +3578,8 @@ components:
       - $ref: '#/components/schemas/Seminar'
       - $ref: '#/components/schemas/SeminarCommunication'
       - $ref: '#/components/schemas/Valorisation'
+      - $ref: '#/components/schemas/Course'
+      - $ref: '#/components/schemas/Paper'
       discriminator:
         propertyName: object_type
     Conference:
@@ -4269,6 +4271,102 @@ components:
       - ects
       - object_type
       - category
+    Course:
+      type: object
+      properties:
+        type:
+          type: string
+        title:
+          type: string
+        subtitle:
+          type: string
+        organizing_institution:
+          type: string
+        start_date:
+          type: string
+          format: date
+          nullable: true
+        end_date:
+          type: string
+          format: date
+          nullable: true
+        hour_volume:
+          type: string
+        authors:
+          type: string
+        ects:
+          type: number
+          nullable: true
+          minimum: 0
+        participating_proof:
+          type: array
+          items:
+            type: string
+        comment:
+          type: string
+        academic_year:
+          type: string
+        object_type:
+          type: string
+        uuid:
+          type: string
+          readOnly: true
+        category:
+          $ref: '#/components/schemas/CategorieActivite'
+        status:
+          $ref: '#/components/schemas/StatutActivite'
+          readOnly: true
+        doctorate:
+          type: integer
+          writeOnly: true
+      required:
+      - type
+      - title
+      - subtitle
+      - organizing_institution
+      - start_date
+      - end_date
+      - hour_volume
+      - authors
+      - ects
+      - comment
+      - academic_year
+      - object_type
+      - category
+    Paper:
+      type: object
+      properties:
+        type:
+          enum:
+          - CONFIRMATION_PAPER
+          - PRIVATE_DEFENSE
+          - PUBLIC_DEFENSE
+          type: string
+        ects:
+          type: number
+          nullable: true
+          minimum: 0
+        comment:
+          type: string
+        object_type:
+          type: string
+        uuid:
+          type: string
+          readOnly: true
+        category:
+          $ref: '#/components/schemas/CategorieActivite'
+        status:
+          $ref: '#/components/schemas/StatutActivite'
+          readOnly: true
+        doctorate:
+          type: integer
+          writeOnly: true
+      required:
+      - type
+      - ects
+      - comment
+      - object_type
+      - category
     DoctoralTrainingConfig:
       type: object
       properties:
@@ -4285,6 +4383,8 @@ components:
         publication_types:
           type: object
         residency_types:
+          type: object
+        course_types:
           type: object
     SectorDTO:
       type: object
@@ -4675,6 +4775,8 @@ components:
       - SERVICE
       - RESIDENCY
       - VAE
+      - COURSE
+      - PAPER
       type: string
     StatutActivite:
       enum:

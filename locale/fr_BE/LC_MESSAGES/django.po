@@ -185,9 +185,15 @@ msgstr "Ajouter une communication à ce séminaire"
 msgid "Add a conference"
 msgstr "Ajouter une conférence"
 
+msgid "Add a course"
+msgstr "Ajouter un cours"
+
 #, python-format
 msgid "Add a custom mail template for <em>%(description)s</em>"
 msgstr "Ajouter un template d'email personnalisé pour <em>%(description)s</em>"
+
+msgid "Add a paper"
+msgstr "Ajouter une épreuve"
 
 msgid "Add a publication"
 msgstr "Ajouter une publication"
@@ -337,8 +343,14 @@ msgstr "Communication orale (hors conférences)"
 msgid "CONFERENCE"
 msgstr "Conférences, colloques"
 
+msgid "CONFIRMATION_PAPER"
+msgstr "Épreuve de confirmation"
+
 msgid "CONFIRMATION_TO_BE_REPEATED"
 msgstr "Confirmation à représenter"
+
+msgid "COURSE"
+msgstr "Cours"
 
 msgid "CSC - China Scholarship Council"
 msgstr "CSC - China Scholarship Council"
@@ -585,6 +597,18 @@ msgstr "Pays"
 
 msgid "Country of citizenship"
 msgstr "Pays de nationalité"
+
+msgid "Course code (if needed)"
+msgstr "Code de cours (le cas échéant)"
+
+msgid "Course owner"
+msgstr "Titulaire du cours"
+
+msgid "Course owner if applicable"
+msgstr "Titulaire du cours (le cas échéant)"
+
+msgid "Course types"
+msgstr "Type de cours"
 
 msgid "Courses and training"
 msgstr "Cours et formation"
@@ -1313,6 +1337,9 @@ msgstr "Autre"
 msgid "Other cotutelle-related documents"
 msgstr "Autres documents relatifs à la cotutelle"
 
+msgid "PAPER"
+msgstr "Épreuve"
+
 msgid "PARTIAL"
 msgstr "Partiel"
 
@@ -1331,8 +1358,14 @@ msgstr "Physique"
 msgid "PRE_ADMISSION"
 msgstr "Pre-admission"
 
+msgid "PRIVATE_DEFENSE"
+msgstr "Défense privée"
+
 msgid "PUBLICATION"
 msgstr "Publication"
+
+msgid "PUBLIC_DEFENSE"
+msgstr "Soutenance publique"
 
 msgid "Page size"
 msgstr "Taille de la page"
@@ -1504,6 +1537,9 @@ msgstr "Preuve d'acceptation ou de publication"
 
 msgid "Proof of participation for the whole activity"
 msgstr "Attestation de participation pour l'ensemble de l'activité"
+
+msgid "Proof of participation or success"
+msgstr "Certificat de participation ou de réussite"
 
 msgid "Proposed new deadline"
 msgstr "Nouvelle échéance proposée"
@@ -2034,6 +2070,9 @@ msgstr "Type d'activité"
 
 msgid "Type of communication"
 msgstr "Type de communication"
+
+msgid "Type of paper"
+msgstr "Type d'épreuve'"
 
 msgid "Type of publication"
 msgstr "Type de publication"

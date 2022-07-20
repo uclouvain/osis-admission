@@ -119,3 +119,11 @@ class PublicationFactory(ActivityFactory):
 
 class VaeFactory(ActivityFactory):
     category = CategorieActivite.VAE.name
+
+
+class CourseFactory(ActivityFactory):
+    category = CategorieActivite.COURSE.name
+
+
+class PaperFactory(ActivityFactory):
+    category = CategorieActivite.PAPER.name

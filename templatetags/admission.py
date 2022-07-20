@@ -36,7 +36,11 @@ from rules.templatetags import rules
 
 from admission.auth.constants import READ_ACTIONS_BY_TAB, UPDATE_ACTIONS_BY_TAB
 from admission.ddd.projet_doctoral.doctorat.domain.model.enums import ChoixStatutDoctorat
-from admission.ddd.projet_doctoral.doctorat.formation.domain.model._enums import CategorieActivite, StatutActivite
+from admission.ddd.projet_doctoral.doctorat.formation.domain.model._enums import (
+    CategorieActivite,
+    ChoixTypeEpreuve,
+    StatutActivite,
+)
 from admission.utils import get_cached_admission_perm_obj
 from osis_role.templatetags.osis_role import has_perm
 
@@ -447,8 +451,6 @@ def training_categories(activities):
             activity.parent_id is None or activity.parent.category == CategorieActivite.CONFERENCE.name
         ):
             categories[_("Publication")][index] += activity.ects
-        # elif activity.category == CategorieActivite.COURS.name:
-        #     categories[_("Courses and training")][index] += activity.ects
         elif activity.category == CategorieActivite.SERVICE.name:
             categories[_("Services")][index] += activity.ects
         elif (
@@ -459,6 +461,15 @@ def training_categories(activities):
             categories[_("Scientific residencies")][index] += activity.ects
         elif activity.category == CategorieActivite.VAE.name:
             categories[_("VAE")][index] += activity.ects
+        elif activity.category == CategorieActivite.COURSE.name:
+            categories[_("Courses and training")][index] += activity.ects
+        elif (
+            activity.category == CategorieActivite.PAPER.name
+            and activity.type == ChoixTypeEpreuve.CONFIRMATION_PAPER.name
+        ):
+            categories[_("Confirmation paper")][index] += activity.ects
+        elif activity.category == CategorieActivite.PAPER.name:
+            categories[_("Thesis defences")][index] += activity.ects
     if not any(cat_added + cat_validated for cat_added, cat_validated in categories.values()):
         return {}
     return {

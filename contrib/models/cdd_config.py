@@ -157,6 +157,31 @@ def default_residency_types():
     }
 
 
+def default_course_types():
+    return {
+        settings.LANGUAGE_CODE_EN: [
+            "Graduate course",
+            "Doctoral school (with/without assessment)",
+            "Continuing education",
+            "Transversal training",
+            "Summer school",
+            "Winter school",
+            "Language courses",
+            "Moocs (online / offline)",
+        ],
+        settings.LANGUAGE_CODE_FR: [
+            "Cours de 2e cycle",
+            "Ecole doctorale (avec/sans évaluation)",
+            "Formation continuée",
+            "Formation transversale",
+            "Summer school",
+            "Winter school",
+            "Cours de langue",
+            "Moocs (en ligne / pas en ligne)",
+        ],
+    }
+
+
 class CddConfiguration(models.Model):
     cdd = models.OneToOneField(
         'base.Entity',
@@ -191,4 +216,8 @@ class CddConfiguration(models.Model):
     residency_types = models.JSONField(
         verbose_name=_("Residency types"),
         default=default_residency_types,
+    )
+    course_types = models.JSONField(
+        verbose_name=_("Course types"),
+        default=default_course_types,
     )

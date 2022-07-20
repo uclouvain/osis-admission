@@ -35,20 +35,7 @@ from admission.ddd.projet_doctoral.doctorat.formation.domain.model._enums import
 )
 from admission.ddd.projet_doctoral.doctorat.formation.domain.model.activite import Activite, ActiviteIdentity
 from admission.ddd.projet_doctoral.doctorat.formation.domain.validator.exceptions import ActiviteNonTrouvee
-from admission.ddd.projet_doctoral.doctorat.formation.dtos import (
-    ActiviteDTO,
-    CommunicationDTO,
-    ConferenceCommunicationDTO,
-    ConferenceDTO,
-    ConferencePublicationDTO,
-    PublicationDTO,
-    SejourCommunicationDTO,
-    SejourDTO,
-    SeminaireDTO,
-    ServiceDTO,
-    ValorisationDTO,
-)
-from admission.ddd.projet_doctoral.doctorat.formation.dtos.seminaire import SeminaireCommunicationDTO
+from admission.ddd.projet_doctoral.doctorat.formation.dtos import *
 from admission.ddd.projet_doctoral.doctorat.formation.repository.i_activite import IActiviteRepository
 
 
@@ -237,12 +224,30 @@ class ActiviteRepository(IActiviteRepository):
                 preuve=activity.participating_proof,
                 commentaire=activity.comment,
             )
-        elif categorie == CategorieActivite.VAE:  # pragma: no branch
+        elif categorie == CategorieActivite.VAE:
             return ValorisationDTO(
                 intitule=activity.title,
                 description=activity.subtitle,
                 preuve=activity.participating_proof,
                 cv=activity.summary,
+            )
+        elif categorie == CategorieActivite.COURSE:
+            return CoursDTO(
+                type=activity.type,
+                nom=activity.title,
+                code=activity.subtitle,
+                institution=activity.organizing_institution,
+                date_debut=activity.start_date,
+                date_fin=activity.end_date,
+                volume_horaire=activity.hour_volume,
+                titulaire=activity.authors,
+                certificat=activity.participating_proof,
+                commentaire=activity.comment,
+            )
+        elif categorie == CategorieActivite.PAPER:  # pragma: no branch
+            return EpreuveDTO(
+                type=activity.type,
+                commentaire=activity.comment,
             )
 
     @classmethod

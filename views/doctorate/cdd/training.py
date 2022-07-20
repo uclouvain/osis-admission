@@ -32,19 +32,7 @@ from django.views import generic
 from admission.contrib.models.doctoral_training import Activity
 from admission.ddd.projet_doctoral.doctorat.formation.commands import SoumettreActivitesCommand
 from admission.ddd.projet_doctoral.doctorat.formation.domain.model._enums import CategorieActivite, StatutActivite
-from admission.forms.doctorate.training.activity import (
-    CommunicationForm,
-    ConferenceCommunicationForm,
-    ConferenceForm,
-    ConferencePublicationForm,
-    PublicationForm,
-    ResidencyCommunicationForm,
-    ResidencyForm,
-    SeminarCommunicationForm,
-    SeminarForm,
-    ServiceForm,
-    ValorisationForm,
-)
+from admission.forms.doctorate.training.activity import *
 from admission.forms.doctorate.training.processus import BatchActivityForm
 from admission.views.doctorate.mixins import LoadDossierViewMixin
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
@@ -111,6 +99,8 @@ class DoctorateTrainingActivityFormMixin(LoadDossierViewMixin):
         CategorieActivite.SEMINAR: SeminarForm,
         (CategorieActivite.SEMINAR, CategorieActivite.COMMUNICATION): SeminarCommunicationForm,
         CategorieActivite.VAE: ValorisationForm,
+        CategorieActivite.COURSE: CourseForm,
+        CategorieActivite.PAPER: PaperForm,
     }
 
     def get_form_class(self):

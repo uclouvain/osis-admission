@@ -24,7 +24,6 @@
 #
 # ##############################################################################
 from functools import partial
-from typing import List, Optional
 
 from dal import autocomplete
 from django import forms
@@ -32,10 +31,12 @@ from django.utils.translation import get_language, gettext_lazy as _, pgettext_l
 
 from admission.contrib.models.cdd_config import CddConfiguration
 from admission.contrib.models.doctoral_training import Activity
+from admission.ddd.projet_doctoral.doctorat.formation.domain.model._enums import ChoixTypeEpreuve
+from admission.forms import SelectOrOtherField
 from base.forms.utils.datefield import DatePickerInput
+from base.models.academic_year import AcademicYear
 
 __all__ = [
-    "ConfigurableActivityTypeWidget",
     "ConfigurableActivityTypeField",
     "ConferenceForm",
     "ConferenceCommunicationForm",
@@ -48,69 +49,25 @@ __all__ = [
     "SeminarForm",
     "SeminarCommunicationForm",
     "ValorisationForm",
+    "CourseForm",
+    "PaperForm",
 ]
+INSTITUTION_UCL = "UCLouvain"
 
 
-class ConfigurableActivityTypeWidget(forms.MultiWidget):
-    """Form widget to handle a configurable (from CDDConfiguration) list of choices, or other"""
+class ConfigurableActivityTypeField(SelectOrOtherField):
+    select_class = forms.CharField
 
-    template_name = 'admission/doctorate/forms/activity_type_widget.html'
-    media = forms.Media(js=['js/dependsOn.min.js'])
-
-    def __init__(self, *args, **kwargs):
-        widgets = {
-            '': forms.Select(),
-            'other': forms.TextInput(),
-        }
-        super().__init__(widgets, *args, **kwargs)
-
-    def decompress(self, value):
-        # No value, no value to both fields
-        if not value:
-            return [None, None]
-        # Pass value to radios if part of choices
-        if value in dict(self.widgets[0].choices):
-            return [value, '']
-        # else pass value to textinput
-        return ['other', value]
-
-    def get_context(self, name: str, value, attrs):
-        context = super().get_context(name, value, attrs)
-        # Remove the required attribute on textinput
-        context['widget']['subwidgets'][1]['attrs']['required'] = False
-        return context
-
-
-class ConfigurableActivityTypeField(forms.MultiValueField):
-    """Form field to handle a configurable (from CDD) list of choices, or other"""
-
-    widget = ConfigurableActivityTypeWidget
-
-    def __init__(self, source: str = '', choices: Optional[List[str]] = None, *args, **kwargs):
-        if not source and not choices:  # pragma: no cover
-            raise ValueError("At least source or choices must be specified")
+    def __init__(self, source: str = '', *args, **kwargs):
         self.source = source
-        self.choices = choices
-        fields = [forms.CharField(required=False), forms.CharField(required=False)]
-        super().__init__(fields, require_all_fields=False, *args, **kwargs)
-
-    def validate(self, value):
-        # We do require all fields, but we want to check the final (compressed value)
-        super(forms.MultiValueField, self).validate(value)
+        super().__init__(*args, **kwargs)
 
     def get_bound_field(self, form, field_name):
-        values = self.choices or []
-        if self.source:
-            # Update radio choices from CDD configuration
-            config = CddConfiguration.objects.get_or_create(cdd_id=form.cdd_id)[0]
-            values = getattr(config, self.source, {}).get(get_language(), [])
+        # Update radio choices from CDD configuration
+        config = CddConfiguration.objects.get_or_create(cdd_id=form.cdd_id)[0]
+        values = getattr(config, self.source, {}).get(get_language(), [])
         self.widget.widgets[0].choices = list(zip(values, values)) + [('other', _("Other"))]
         return super().get_bound_field(form, field_name)
-
-    def compress(self, data_list):
-        # On save, take the other value if "other" is chosen
-        radio, other = data_list
-        return radio if radio != "other" else other
 
 
 IsOnlineField = partial(
@@ -186,7 +143,7 @@ class ConferenceForm(ActivityFormMixin, forms.ModelForm):
 
 class ConferenceCommunicationForm(ActivityFormMixin, forms.ModelForm):
     template_name = "admission/doctorate/forms/training/conference_communication.html"
-    type = ConfigurableActivityTypeField(
+    type = SelectOrOtherField(
         label=_("Type of communication"),
         choices=[
             _("Poster"),
@@ -248,7 +205,7 @@ class ConferencePublicationForm(ActivityFormMixin, forms.ModelForm):
 class CommunicationForm(ActivityFormMixin, forms.ModelForm):
     template_name = "admission/doctorate/forms/training/communication.html"
     type = ConfigurableActivityTypeField('communication_types', label=_("Type of activity"))
-    subtype = ConfigurableActivityTypeField(
+    subtype = SelectOrOtherField(
         label=_("Type of communication"),
         choices=[
             _("Oral exposé"),
@@ -499,3 +456,74 @@ class ValorisationForm(ActivityFormMixin, forms.ModelForm):
             'summary': _("Detailed curriculum vitae"),
             'participating_proof': _("Proof"),
         }
+
+
+class CourseForm(ActivityFormMixin, forms.ModelForm):
+    template_name = "admission/doctorate/forms/training/course.html"
+    type = ConfigurableActivityTypeField("course_types", label=_("Type of activity"))
+    subtitle = forms.CharField(
+        label=_("Course code (if needed)"),
+        max_length=200,
+        required=False,
+    )
+    organizing_institution = SelectOrOtherField(choices=[INSTITUTION_UCL], label=_("Institution"))
+    academic_year = forms.ModelChoiceField(
+        queryset=AcademicYear.objects.all(),
+        widget=autocomplete.ListSelect2(),
+        required=False,
+    )
+
+    def __init__(self, admission, *args, **kwargs) -> None:
+        super().__init__(admission, *args, **kwargs)
+        # Convert from dates to year if UCLouvain
+        if self.instance and self.instance.organizing_institution == INSTITUTION_UCL:
+            self.fields['academic_year'].initial = AcademicYear.objects.get(
+                start_date=self.instance.start_date,
+                end_date=self.instance.end_date,
+            )
+
+    def clean(self):
+        cleaned_data = super().clean()
+        # Convert from academic year to dates if UCLouvain
+        if cleaned_data.get('organizing_institution') == INSTITUTION_UCL and cleaned_data.get('academic_year'):
+            cleaned_data['start_date'] = cleaned_data['academic_year'].start_date
+            cleaned_data['end_date'] = cleaned_data['academic_year'].end_date
+        return cleaned_data
+
+    class Meta:
+        model = Activity
+        fields = [
+            'type',
+            'title',
+            'subtitle',
+            'organizing_institution',
+            'start_date',
+            'end_date',
+            'hour_volume',
+            'authors',
+            'ects',
+            'participating_proof',
+            'comment',
+        ]
+        widgets = {
+            'start_date': DatePickerInput(attrs={'placeholder': _("dd/mm/yyyy"), **DatePickerInput.defaut_attrs}),
+            'end_date': DatePickerInput(attrs={'placeholder': _("dd/mm/yyyy"), **DatePickerInput.defaut_attrs}),
+        }
+        labels = {
+            'title': _("Name of the activity"),
+            'authors': _("Course owner if applicable"),
+            'participating_proof': _("Proof of participation or success"),
+        }
+
+
+class PaperForm(ActivityFormMixin, forms.ModelForm):
+    template_name = "admission/doctorate/forms/training/paper.html"
+    type = forms.ChoiceField(label=_("Type of paper"), choices=ChoixTypeEpreuve.choices())
+
+    class Meta:
+        model = Activity
+        fields = [
+            'type',
+            'ects',
+            'comment',
+        ]
