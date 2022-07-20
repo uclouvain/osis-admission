@@ -26,6 +26,8 @@
 from ._should_communication_conference_etre_complete import ShouldCommunicationConferenceEtreComplete
 from ._should_communication_etre_complete import ShouldCommunicationEtreComplete
 from ._should_conference_etre_complete import ShouldConferenceEtreComplete
+from ._should_cours_etre_complet import ShouldCoursEtreComplet
+from ._should_epreuve_etre_complete import ShouldEpreuveEtreComplete
 from ._should_publication_conference_etre_complete import ShouldPublicationConferenceEtreComplete
 from ._should_publication_etre_complete import ShouldPublicationEtreComplete
 from ._should_communication_sejour_etre_complete import ShouldCommunicationSejourEtreComplete
@@ -47,4 +49,6 @@ __all__ = [
     "ShouldServiceEtreComplet",
     "ShouldCommunicationSeminaireEtreComplete",
     "ShouldValorisationEtreComplete",
+    "ShouldCoursEtreComplet",
+    "ShouldEpreuveEtreComplete",
 ]

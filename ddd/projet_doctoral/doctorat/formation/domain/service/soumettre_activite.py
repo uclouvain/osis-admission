@@ -29,19 +29,7 @@ from typing import List
 from admission.ddd.projet_doctoral.doctorat.formation.builder.activite_identity_builder import ActiviteIdentityBuilder
 from admission.ddd.projet_doctoral.doctorat.formation.domain.model._enums import CategorieActivite
 from admission.ddd.projet_doctoral.doctorat.formation.domain.model.activite import Activite, ActiviteIdentity
-from admission.ddd.projet_doctoral.doctorat.formation.domain.validator.validator_by_business_action import (
-    CommunicationValidatorList,
-    ConferenceCommunicationValidatorList,
-    ConferencePublicationValidatorList,
-    ConferenceValidatorList,
-    PublicationValidatorList,
-    SejourCommunicationValidatorList,
-    SejourValidatorList,
-    SeminaireCommunicationValidatorList,
-    SeminaireValidatorList,
-    ServiceValidatorList,
-    ValorisationValidatorList,
-)
+from admission.ddd.projet_doctoral.doctorat.formation.domain.validator.validator_by_business_action import *
 from admission.ddd.projet_doctoral.doctorat.formation.dtos import *
 from admission.ddd.projet_doctoral.doctorat.formation.repository.i_activite import IActiviteRepository
 from base.ddd.utils.business_validator import execute_functions_and_aggregate_exceptions
@@ -84,8 +72,12 @@ class SoumettreActivites(interface.DomainService):
             SeminaireCommunicationValidatorList(communication=dto, activite=activite).validate()
         elif isinstance(dto, ServiceDTO):
             ServiceValidatorList(service=dto, activite=activite).validate()
-        else:  # if isinstance(dto, ValorisationDTO):
+        elif isinstance(dto, ValorisationDTO):
             ValorisationValidatorList(valorisation=dto, activite=activite).validate()
+        elif isinstance(dto, CoursDTO):
+            CoursValidatorList(cours=dto, activite=activite).validate()
+        elif isinstance(dto, EpreuveDTO):  # pragma: no branch
+            EpreuveValidatorList(epreuve=dto, activite=activite).validate()
 
     @classmethod
     def soumettre(cls, activites: List[Activite], activite_repository: IActiviteRepository) -> List[ActiviteIdentity]:

@@ -21,7 +21,7 @@ class Migration(migrations.Migration):
                 ('uuid', models.UUIDField(db_index=True, default=uuid.uuid4, editable=False, unique=True)),
                 ('ects', models.FloatField(blank=True, default=0, verbose_name='ECTS credits')),
                 ('status', models.CharField(choices=[('NON_SOUMISE', 'NON_SOUMISE'), ('SOUMISE', 'SOUMISE'), ('ACCEPTEE', 'ACCEPTEE'), ('REFUSEE', 'REFUSEE')], default='NON_SOUMISE', max_length=20)),
-                ('category', models.CharField(choices=[('CONFERENCE', 'CONFERENCE'), ('COMMUNICATION', 'COMMUNICATION'), ('SEMINAR', 'SEMINAR'), ('PUBLICATION', 'PUBLICATION'), ('SERVICE', 'SERVICE'), ('RESIDENCY', 'RESIDENCY'), ('VAE', 'VAE')], max_length=50)),
+                ('category', models.CharField(choices=[('CONFERENCE', 'CONFERENCE'), ('COMMUNICATION', 'COMMUNICATION'), ('SEMINAR', 'SEMINAR'), ('PUBLICATION', 'PUBLICATION'), ('SERVICE', 'SERVICE'), ('RESIDENCY', 'RESIDENCY'), ('VAE', 'VAE'), ('COURSE', 'COURSE'), ('PAPER', 'PAPER')], max_length=50)),
                 ('type', models.CharField(blank=True, default='', max_length=100, verbose_name='Activity type')),
                 ('title', models.CharField(blank=True, default='', max_length=200, verbose_name='Title')),
                 ('participating_proof', osis_document.contrib.fields.FileField(base_field=models.UUIDField(), blank=True, default=list, size=1, verbose_name='Participation certification')),

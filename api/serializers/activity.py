@@ -37,12 +37,12 @@ from admission.contrib.models.doctoral_training import Activity
 from admission.ddd.projet_doctoral.doctorat.formation.domain.model._enums import CategorieActivite, StatutActivite
 from admission.forms.doctorate.training import activity as activity_forms
 from admission.forms.doctorate.training.activity import ConfigurableActivityTypeField
+from admission.forms import SelectOrOtherField
 from osis_document.contrib import FileUploadField
 from reference.api.serializers.country import RelatedCountryField
 
 FORM_SERIALIZER_FIELD_MAPPING = {
     forms.CharField: serializers.CharField,
-    forms.MultipleChoiceField: serializers.ChoiceField,
     forms.ChoiceField: serializers.ChoiceField,
     forms.BooleanField: serializers.BooleanField,
     forms.IntegerField: serializers.IntegerField,
@@ -51,6 +51,7 @@ FORM_SERIALIZER_FIELD_MAPPING = {
     forms.DateField: serializers.DateField,
     forms.TimeField: serializers.TimeField,
     ConfigurableActivityTypeField: serializers.CharField,
+    SelectOrOtherField: serializers.CharField,
     forms.URLField: serializers.CharField,
     forms.FloatField: serializers.FloatField,
     forms.TypedChoiceField: serializers.ChoiceField,  # "is_online" field
@@ -190,7 +191,7 @@ class ActivitySerializerBase(serializers.Serializer):
 
         if 'choices' in attrs:
             choices = OrderedDict(attrs['choices']).keys()
-            attrs['choices'] = OrderedDict(zip(choices, choices))
+            attrs['choices'] = OrderedDict(list(zip(choices, choices)))
 
         if getattr(form_field, 'initial', None):
             attrs['default'] = form_field.initial
@@ -281,6 +282,16 @@ class ValorisationSerializer(ActivitySerializerBase):
         form = activity_forms.ValorisationForm
 
 
+class CourseSerializer(ActivitySerializerBase):
+    class Meta:
+        form = activity_forms.CourseForm
+
+
+class PaperSerializer(ActivitySerializerBase):
+    class Meta:
+        form = activity_forms.PaperForm
+
+
 class DoctoralTrainingActivitySerializer(serializers.Serializer):
     """Serializer that dispatches to activity serializers given the category and the presence of a parent."""
 
@@ -296,6 +307,8 @@ class DoctoralTrainingActivitySerializer(serializers.Serializer):
         CategorieActivite.SEMINAR: SeminarSerializer,
         (CategorieActivite.SEMINAR, CategorieActivite.COMMUNICATION): SeminarCommunicationSerializer,
         CategorieActivite.VAE: ValorisationSerializer,
+        CategorieActivite.COURSE: CourseSerializer,
+        CategorieActivite.PAPER: PaperSerializer,
     }
     only_classes = None
 

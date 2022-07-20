@@ -29,6 +29,7 @@ from typing import Any
 from django import forms
 from django.conf import settings
 from django.contrib.postgres.forms import SimpleArrayField
+from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from admission.contrib.models.cdd_config import CddConfiguration
@@ -78,16 +79,15 @@ class TranslatedListsValueField(forms.MultiValueField):
         }
 
 
+def map_translated_lists_value_field(field, **kwargs):
+    if isinstance(field, models.JSONField):
+        kwargs['form_class'] = TranslatedListsValueField
+    return models.Field.formfield(field, **kwargs)
+
+
 class CddConfigForm(forms.ModelForm):
+    formfield_callback = map_translated_lists_value_field
+
     class Meta:
         model = CddConfiguration
-        exclude = ['cdd']
-        field_classes = {
-            "service_types": TranslatedListsValueField,
-            "seminar_types": TranslatedListsValueField,
-            "conference_types": TranslatedListsValueField,
-            "conference_publication_types": TranslatedListsValueField,
-            "communication_types": TranslatedListsValueField,
-            "publication_types": TranslatedListsValueField,
-            "residency_types": TranslatedListsValueField,
-        }
+        exclude = ['cdd', 'id']

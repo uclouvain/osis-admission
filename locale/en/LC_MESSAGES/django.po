@@ -166,8 +166,14 @@ msgstr ""
 msgid "Add a conference"
 msgstr ""
 
+msgid "Add a course"
+msgstr ""
+
 #, python-format
 msgid "Add a custom mail template for <em>%(description)s</em>"
+msgstr ""
+
+msgid "Add a paper"
 msgstr ""
 
 msgid "Add a publication"
@@ -314,8 +320,14 @@ msgstr ""
 msgid "CONFERENCE"
 msgstr ""
 
+msgid "CONFIRMATION_PAPER"
+msgstr "Confirmation paper"
+
 msgid "CONFIRMATION_TO_BE_REPEATED"
 msgstr "Confirmation to be repeated"
+
+msgid "COURSE"
+msgstr ""
 
 msgid "CSC - China Scholarship Council"
 msgstr ""
@@ -558,6 +570,18 @@ msgid "Country"
 msgstr ""
 
 msgid "Country of citizenship"
+msgstr ""
+
+msgid "Course code (if needed)"
+msgstr ""
+
+msgid "Course owner"
+msgstr ""
+
+msgid "Course owner if applicable"
+msgstr ""
+
+msgid "Course types"
 msgstr ""
 
 msgid "Courses and training"
@@ -1234,6 +1258,9 @@ msgstr ""
 msgid "Other cotutelle-related documents"
 msgstr ""
 
+msgid "PAPER"
+msgstr ""
+
 msgid "PARTIAL"
 msgstr "Partially"
 
@@ -1252,7 +1279,13 @@ msgstr "Physics"
 msgid "PRE_ADMISSION"
 msgstr "Pre-admission"
 
+msgid "PRIVATE_DEFENSE"
+msgstr ""
+
 msgid "PUBLICATION"
+msgstr ""
+
+msgid "PUBLIC_DEFENSE"
 msgstr ""
 
 msgid "Page size"
@@ -1412,6 +1445,9 @@ msgid "Proof of acceptation or publication"
 msgstr ""
 
 msgid "Proof of participation for the whole activity"
+msgstr ""
+
+msgid "Proof of participation or success"
 msgstr ""
 
 msgid "Proposed new deadline"
@@ -1917,6 +1953,9 @@ msgid "Type of activity"
 msgstr ""
 
 msgid "Type of communication"
+msgstr ""
+
+msgid "Type of paper"
 msgstr ""
 
 msgid "Type of publication"

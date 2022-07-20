@@ -31,6 +31,8 @@ from admission.ddd.projet_doctoral.doctorat.formation.dtos.conference import (
     ConferenceDTO,
     ConferencePublicationDTO,
 )
+from admission.ddd.projet_doctoral.doctorat.formation.dtos.cours import CoursDTO
+from admission.ddd.projet_doctoral.doctorat.formation.dtos.epreuve import EpreuveDTO
 from admission.ddd.projet_doctoral.doctorat.formation.dtos.publication import PublicationDTO
 from admission.ddd.projet_doctoral.doctorat.formation.dtos.sejour import SejourCommunicationDTO, SejourDTO
 from admission.ddd.projet_doctoral.doctorat.formation.dtos.seminaire import SeminaireCommunicationDTO, SeminaireDTO
@@ -49,6 +51,8 @@ ActiviteDTO = Union[
     'ServiceDTO',
     'ValorisationDTO',
     'SeminaireCommunicationDTO',
+    'CoursDTO',
+    'EpreuveDTO',
 ]
 
 __all__ = [
@@ -64,4 +68,6 @@ __all__ = [
     'ServiceDTO',
     'ValorisationDTO',
     'SeminaireCommunicationDTO',
+    'CoursDTO',
+    'EpreuveDTO',
 ]

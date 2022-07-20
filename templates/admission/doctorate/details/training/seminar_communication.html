@@ -24,9 +24,6 @@
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
 
-{% url "admission:doctorate:training:edit" uuid=view.kwargs.uuid activity_id=activity.uuid as edit_url %}
-{% url "admission:doctorate:training:delete" uuid=view.kwargs.uuid activity_id=activity.uuid as delete_url %}
-
 {% if activity.website %}
   {% firstof '<a href="'|safe|add:activity.website|add:'">'|safe|add:activity.website|add:'</a>'|safe "" as website %}
 {% endif %}
