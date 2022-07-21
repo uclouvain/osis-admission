@@ -109,9 +109,13 @@ class ActivitySerializerBase(serializers.Serializer):
 
         # Iterate over the form fields, creating an instance of serializer field for each.
         form = self.Meta.form
+        excluded = getattr(self.Meta, 'exclude', [])
         for field_name, form_field in getattr(form, 'all_base_fields', form.base_fields).items():
             # Field is already defined via declared fields
             if field_name in ret:  # pragma: no cover
+                continue
+
+            if field_name in excluded:
                 continue
 
             try:
@@ -285,6 +289,7 @@ class ValorisationSerializer(ActivitySerializerBase):
 class CourseSerializer(ActivitySerializerBase):
     class Meta:
         form = activity_forms.CourseForm
+        exclude = ['academic_year']
 
 
 class PaperSerializer(ActivitySerializerBase):

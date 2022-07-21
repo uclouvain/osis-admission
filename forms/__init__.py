@@ -80,6 +80,11 @@ class SelectOrOtherField(forms.MultiValueField):
         fields = [self.select_class(required=False, **select_kwargs), forms.CharField(required=False)]
         super().__init__(fields, require_all_fields=False, *args, **kwargs)
 
+    def get_bound_field(self, form, field_name):
+        if not self.widget.widgets[0].choices:
+            self.widget.widgets[0].choices = self.choices
+        return super().get_bound_field(form, field_name)
+
     def validate(self, value):
         # We do require all fields, but we want to check the final (compressed value)
         super(forms.MultiValueField, self).validate(value)
@@ -88,3 +93,10 @@ class SelectOrOtherField(forms.MultiValueField):
         # On save, take the other value if "other" is chosen
         radio, other = data_list
         return radio if radio != "other" else other
+
+    def clean(self, value):
+        # Dispatch the correct values to each field before regular cleaning
+        radio, other = value
+        if hasattr(self, 'choices') and radio not in self.choices and other is None:
+            value = ['other', radio]
+        return super().clean(value)
