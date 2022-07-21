@@ -26,10 +26,10 @@
 
 {% url "admission:doctorate:training:edit" uuid=view.kwargs.uuid activity_id=activity.uuid as edit_url %}
 {% url "admission:doctorate:training:delete" uuid=view.kwargs.uuid activity_id=activity.uuid as delete_url %}
-{% if activity.type == 'CONFERENCE' or activity.type == 'SEMINAR' or activity.type == 'RESIDENCY' %}
+{% if activity.category|safe == 'CONFERENCE' or activity.category|safe == 'SEMINAR' or activity.category|safe == 'RESIDENCY' %}
   {% url "admission:doctorate:training:add" uuid=view.kwargs.uuid category="communication" as add_communication_url %}
 {% endif %}
-{% if activity.type == 'CONFERENCE' %}
+{% if activity.category|safe == 'CONFERENCE' %}
   {% url "admission:doctorate:training:add" uuid=view.kwargs.uuid category="publication" as add_publication_url %}
 {% endif %}
 
@@ -54,7 +54,7 @@
         >
           {% trans "Actions" %} <span class="caret"></span>
         </button>
-        <ul class="dropdown-menu">
+        <ul class="dropdown-menu dropdown-menu-right">
           <li>
             <a href="{{ edit_url }}">
               {% trans "Edit" %}

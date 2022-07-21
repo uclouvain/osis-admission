@@ -4304,8 +4304,6 @@ components:
             type: string
         comment:
           type: string
-        academic_year:
-          type: string
         object_type:
           type: string
         uuid:
@@ -4330,7 +4328,6 @@ components:
       - authors
       - ects
       - comment
-      - academic_year
       - object_type
       - category
     Paper:

@@ -112,6 +112,9 @@ msgstr ""
 msgid "Abstract"
 msgstr ""
 
+msgid "Academic year"
+msgstr ""
+
 msgid "Accepted"
 msgstr ""
 

@@ -468,6 +468,7 @@ class CourseForm(ActivityFormMixin, forms.ModelForm):
     )
     organizing_institution = SelectOrOtherField(choices=[INSTITUTION_UCL], label=_("Institution"))
     academic_year = forms.ModelChoiceField(
+        label=_("Academic year"),
         queryset=AcademicYear.objects.all(),
         widget=autocomplete.ListSelect2(),
         required=False,
@@ -476,7 +477,12 @@ class CourseForm(ActivityFormMixin, forms.ModelForm):
     def __init__(self, admission, *args, **kwargs) -> None:
         super().__init__(admission, *args, **kwargs)
         # Convert from dates to year if UCLouvain
-        if self.instance and self.instance.organizing_institution == INSTITUTION_UCL:
+        if (
+            self.instance
+            and self.instance.organizing_institution == INSTITUTION_UCL
+            and self.instance.start_date
+            and self.instance.end_date
+        ):
             self.fields['academic_year'].initial = AcademicYear.objects.get(
                 start_date=self.instance.start_date,
                 end_date=self.instance.end_date,
