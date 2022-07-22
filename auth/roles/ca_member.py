@@ -60,6 +60,6 @@ class CommitteeMember(ExternalActorMixin, RoleModel):
             # A ca member can approve as long as he is invited to the committee
             'admission.approve_proposition': is_part_of_committee_and_invited,
             # Once the candidate is enrolling, a ca member can
-            'admission.view_doctorateadmission_confirmation': is_part_of_committee_and_invited & is_enrolled,
+            'admission.view_doctorateadmission_confirmation': is_part_of_committee & is_enrolled,
         }
         return RuleSet(ruleset)

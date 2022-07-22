@@ -24,14 +24,17 @@
 #
 # ##############################################################################
 import datetime
+from email.header import make_header, decode_header
+from email.message import EmailMessage
 from typing import Optional, Union, Type
+from unittest.mock import Mock
 from uuid import UUID
 
 from django.conf import settings
-from django.conf.global_settings import DATE_FORMAT
 from django.shortcuts import resolve_url
 from django.utils import translation
 from django.utils.functional import lazy, Promise
+from django.utils.module_loading import import_string
 from django.utils.translation import get_language, gettext as _
 from osis_async.models import AsyncTask
 from osis_mail_template.utils import transform_html_to_text, generate_email
@@ -40,6 +43,7 @@ from osis_notification.contrib.notification import EmailNotification, WebNotific
 from admission.auth.roles.cdd_manager import CddManager
 from admission.contrib.models import AdmissionTask, DoctorateAdmission
 from admission.contrib.models.doctorate import DoctorateProxy
+from admission.ddd.projet_doctoral.doctorat.domain.model.enums import ChoixStatutDoctorat
 from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.domain.model.epreuve_confirmation import (
     EpreuveConfirmation,
 )
@@ -48,12 +52,24 @@ from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.dtos import Epr
 from admission.ddd.projet_doctoral.preparation.domain.model._financement import ChoixTypeFinancement, BourseRecherche
 from admission.mail_templates import (
     ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_SUCCESS_STUDENT,
+    ADMISSION_EMAIL_CONFIRMATION_PAPER_SUBMISSION_ADRE,
+    ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_FAILURE_ADRE,
+    ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_FAILURE_ADRI,
+    ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_RETAKING_ADRE,
+    ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_RETAKING_ADRI,
+    ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_SUCCESS_ADRE,
+    ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_SUCCESS_ADRI,
 )
-from base.forms.utils.datefield import DATE_FORMAT
 from osis_notification.contrib.handlers import EmailNotificationHandler, WebNotificationHandler
+
+from base.forms.utils.datefield import DATE_FORMAT
+from reference.services.mandates import MandatesService, MandateFunctionEnum
+from osis_common.messaging.message_config import create_receiver
 
 
 class Notification(INotification):
+    ADRE_EMAIL = 'adre@uclouvain.be'
+    ADRI_EMAIL = 'adri@uclouvain.be'
 
     @classmethod
     def format_date(cls, date: Optional[datetime.date]) -> str:
@@ -134,10 +150,20 @@ class Notification(INotification):
             content=_(
                 '<a href="%(confirmation_paper_link_back)s">%(reference)s</a> - '
                 '%(student_first_name)s %(student_last_name)s submitted '
-                'a date for the confirmation paper for %(doctorate_title)s'
+                'a date (%(confirmation_paper_date)s) for the confirmation paper for %(doctorate_title)s'
             ),
             tokens=common_tokens,
         )
+
+        # Notify ADRE only at the first submission : email
+        if doctorate.post_enrolment_status != ChoixStatutDoctorat.SUBMITTED_CONFIRMATION.name:
+            email_message = generate_email(
+                ADMISSION_EMAIL_CONFIRMATION_PAPER_SUBMISSION_ADRE,
+                settings.LANGUAGE_CODE,
+                common_tokens,
+                recipients=[cls.ADRE_EMAIL],
+            )
+            send_mail_to_generic_email(message=email_message)
 
     @classmethod
     def notifier_nouvelle_echeance(cls, epreuve_confirmation: EpreuveConfirmation) -> None:
@@ -182,6 +208,44 @@ class Notification(INotification):
 
         EmailNotificationHandler.create(student_email_message, person=doctorate.candidate)
 
+        common_tokens = cls.get_common_tokens(doctorate, epreuve_confirmation)
+        entity_acronym = doctorate.doctorate.management_entity.most_recent_entity_version.acronym
+
+        # Notify ADRE > email
+        adre_email_message = generate_email(
+            ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_FAILURE_ADRE,
+            settings.LANGUAGE_CODE,
+            common_tokens,
+            recipients=[cls.ADRE_EMAIL],
+        )
+        send_mail_to_generic_email(adre_email_message)
+
+        # Notify ADRI > email
+        adri_email_message = generate_email(
+            ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_FAILURE_ADRI,
+            settings.LANGUAGE_CODE,
+            common_tokens,
+            recipients=[cls.ADRI_EMAIL],
+        )
+
+        if settings.ESB_API_URL:
+            # Notify the faculty dean and the institute president > email (cc)
+            cc_receivers = [
+                mandate.get('email')
+                for mandate in MandatesService.get(
+                    function=MandateFunctionEnum.DOYEN,
+                    entity_acronym=entity_acronym,
+                )
+                + MandatesService.get(
+                    function=MandateFunctionEnum.PRESI,
+                    entity_acronym=entity_acronym,
+                )
+            ]
+
+            adri_email_message['Cc'] = ','.join(cc_receivers)
+
+        send_mail_to_generic_email(adri_email_message)
+
     @classmethod
     def notifier_repassage_epreuve(
         cls,
@@ -208,6 +272,27 @@ class Notification(INotification):
         email_message['Cc'] = ','.join(supervising_actor_emails)
 
         EmailNotificationHandler.create(email_message, person=doctorate.candidate)
+
+        common_tokens = cls.get_common_tokens(doctorate, epreuve_confirmation)
+
+        # Notify ADRE > email
+        adre_email_message = generate_email(
+            ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_RETAKING_ADRE,
+            settings.LANGUAGE_CODE,
+            common_tokens,
+            recipients=[cls.ADRE_EMAIL],
+        )
+        send_mail_to_generic_email(adre_email_message)
+
+        # Notify ADRI > email
+        adri_email_message = generate_email(
+            ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_RETAKING_ADRI,
+            settings.LANGUAGE_CODE,
+            common_tokens,
+            recipients=[cls.ADRI_EMAIL],
+        )
+
+        send_mail_to_generic_email(adri_email_message)
 
     @classmethod
     def notifier_reussite_epreuve(cls, epreuve_confirmation: EpreuveConfirmation):
@@ -237,3 +322,57 @@ class Notification(INotification):
             recipients=[doctorate.candidate.email],
         )
         EmailNotificationHandler.create(student_email_message, person=doctorate.candidate)
+
+        # Notify ADRE > email
+        adre_email_message = generate_email(
+            ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_SUCCESS_ADRE,
+            settings.LANGUAGE_CODE,
+            common_tokens,
+            recipients=[cls.ADRE_EMAIL],
+        )
+        send_mail_to_generic_email(adre_email_message)
+
+        # Notify ADRI > email
+        adri_email_message = generate_email(
+            ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_SUCCESS_ADRI,
+            settings.LANGUAGE_CODE,
+            common_tokens,
+            recipients=[cls.ADRI_EMAIL],
+        )
+        send_mail_to_generic_email(adri_email_message)
+
+
+def send_mail_to_generic_email(message: EmailMessage):
+    html_content = ''
+    plain_text_content = ''
+
+    for part in message.walk():
+        if part.get_content_type() == "text/html":
+            html_content = part.get_payload(decode=True).decode(settings.DEFAULT_CHARSET)
+        elif part.get_content_type() == "text/plain":
+            plain_text_content = part.get_payload(decode=True).decode(settings.DEFAULT_CHARSET)
+
+    cc = message.get("Cc")
+    if cc:
+        cc = [Mock(email=cc_email) for cc_email in cc.split(',')]
+
+    for mail_sender_class in settings.MAIL_SENDER_CLASSES:
+        MailSenderClass = import_string(mail_sender_class)
+        mail_sender = MailSenderClass(
+            receivers=[
+                create_receiver(
+                    receiver_person_id=None,
+                    receiver_email=message['To'],
+                    receiver_lang=settings.LANGUAGE_CODE,
+                )
+            ],
+            reference=None,
+            connected_user=None,
+            subject=make_header(decode_header(message.get("subject"))),
+            message=plain_text_content,
+            html_message=html_content,
+            attachment=None,
+            from_email=message['From'],
+            cc=cc,
+        )
+        mail_sender.send_mail()

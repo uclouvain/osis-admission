@@ -16,10 +16,21 @@ from admission.mail_templates import (
 from osis_mail_template import MailTemplateMigration
 
 
-def remove_unused_templates(apps, _):
+def remove_templates(apps, _):
     templates_to_delete = [
         'osis-admission-confirmation-extension-request-cdd-opinion-student',
         'osis-admission-confirmation-submission-by-promoter-adre',
+        ADMISSION_EMAIL_CONFIRMATION_PAPER_INFO_STUDENT,
+        ADMISSION_EMAIL_CONFIRMATION_PAPER_SUBMISSION_ADRE,
+        ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_SUCCESS_STUDENT,
+        ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_SUCCESS_ADRE,
+        ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_SUCCESS_ADRI,
+        ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_FAILURE_STUDENT,
+        ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_FAILURE_ADRE,
+        ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_FAILURE_ADRI,
+        ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_RETAKING_STUDENT,
+        ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_RETAKING_ADRE,
+        ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_RETAKING_ADRI,
     ]
     MailTemplate = apps.get_model('osis_mail_template', 'MailTemplate')
     MailTemplate.objects.filter(identifier__in=templates_to_delete).delete()
@@ -32,7 +43,7 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(remove_unused_templates, migrations.RunPython.noop),
+        migrations.RunPython(remove_templates, migrations.RunPython.noop),
         MailTemplateMigration(
             ADMISSION_EMAIL_CONFIRMATION_PAPER_SUBMISSION_ADRE,
             {
@@ -256,7 +267,7 @@ class Migration(migrations.Migration):
             ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_FAILURE_STUDENT,
             {
                 'en': '[OSIS] Failure of your confirmation paper',
-                'fr-be': '[OSIS] Échec de votre épreuve de confirmation',
+                'fr-be': '[OSIS] Échec à votre épreuve de confirmation',
             },
             {
                 'en': '''<p>Hello {student_first_name} {student_last_name},</p>

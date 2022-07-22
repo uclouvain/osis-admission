@@ -73,12 +73,14 @@ msgstr ""
 #, python-format
 msgid ""
 "<a href=\"%(confirmation_paper_link_back)s\">%(reference)s</a> - "
-"%(student_first_name)s %(student_last_name)s submitted a date for the "
-"confirmation paper for %(doctorate_title)s"
+"%(student_first_name)s %(student_last_name)s submitted a date "
+"(%(confirmation_paper_date)s) for the confirmation paper for "
+"%(doctorate_title)s"
 msgstr ""
 "<a href=\"%(confirmation_paper_link_back)s\">%(reference)s</a> - "
-"%(student_first_name)s %(student_last_name)s a soumis une date pour son "
-"épreuve de confirmation pour %(doctorate_title)s"
+"%(student_first_name)s %(student_last_name)s a soumis une date "
+"(%(confirmation_paper_date)s) pour son épreuve de confirmation pour "
+"%(doctorate_title)s"
 
 #, python-format
 msgid ""
@@ -303,9 +305,6 @@ msgstr "Justification succincte"
 
 msgid "CA Member"
 msgstr "Membre du comité d'accompagnement"
-
-msgid "CA members"
-msgstr "Membres du comité d'accompagnement"
 
 msgid "CANCELLED"
 msgstr "Annulé"
@@ -1871,8 +1870,14 @@ msgid "The <strong>additional training</strong> has been completed: yes / no."
 msgstr ""
 "La <strong>formation complémentaire</strong> a été réalisée : oui / non."
 
+msgid "The CA members"
+msgstr "Les membres du comité d’accompagnement"
+
 msgid "The acronym of the scholarship grant"
 msgstr "L'acronyme de la bourse d'études"
+
+msgid "The certificate of achievement is being generated."
+msgstr "L'attestation de réussite est en cours de génération."
 
 msgid ""
 "The certificate of achievement of the confirmation paper in PDF format is "
@@ -2004,6 +2009,10 @@ msgstr "La procédure de demande de signature n'a pas été lancée."
 
 msgid "The start date can't be later than the end date"
 msgstr "La date de début ne peut être postérieure à la date de fin"
+
+#, python-format
+msgid "The status has been changed to %(status)s."
+msgstr "Le statut a bien été modifié pour : %(status)s."
 
 msgid "There can be no more CA members in the supervision group."
 msgstr ""

@@ -62,6 +62,7 @@ def confirmer_repassage(
 
     # THEN
     doctorat_repository.save(doctorat)
+    epreuve_confirmation_repository.save(epreuve_confirmation)
     epreuve_confirmation_repository.save(nouvelle_epreuve_confirmation)
     notification.notifier_repassage_epreuve(epreuve_confirmation, cmd.sujet_message, cmd.corps_message)
 

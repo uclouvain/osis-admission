@@ -27,56 +27,80 @@
 * see http://www.gnu.org/licenses/.
 {% endcomment %}
 
-{% block actions %}
-  {{ block.super }}
-
+{% block actions-group %}
+  {% default_tab_context as tab_context %}
+  {% update_tab_path_from_detail view.kwargs.uuid as update_url %}
+  {% can_update_tab tab_context.active_tab as can_update_tab %}
   {% has_perm 'admission.make_confirmation_decision' as can_make_decision %}
   {% has_perm 'admission.upload_pdf_confirmation' as can_upload_renewal_opinion %}
 
-  {% if can_upload_renewal_opinion %}
-    <li>
-      <a href="{% url "admission:doctorate:confirmation:opinion" doctorate.uuid %}">
-        {% trans "Upload the opinion on the renewal of the research mandate" %}
-      </a>
-    </li>
-  {% endif %}
-  {% if can_make_decision %}
-    <li role="separator" class="divider"></li>
-    <li>
-      <a href="{% url 'admission:doctorate:send-mail' uuid=uuid %}?template={{ INFO_TEMPLATE_IDENTIFIER }}&cc_promoteurs=True">
-        {% trans "Send an information email" %}
-      </a>
-    </li>
-    <li role="separator" class="divider"></li>
-    {% if can_be_evaluated %}
-      <li>
-        <a href="#" data-toggle="modal" data-target="#confirmationSuccessModal">
-          {% trans "Successful test" %}
-        </a>
-      </li>
-      <li>
-        <a href="{% url 'admission:doctorate:confirmation:failure' uuid %}">
-          {% trans "Failure of the test" %}
-        </a>
-      </li>
-      <li>
-        <a href="{% url 'admission:doctorate:confirmation:retaking' uuid %}">
-          {% trans "Retaking of the test" %}
-        </a>
-      </li>
-    {% else %}
-      {% with _("Impossible action: please be sure that the confirmation date and report are specified.") as error_message %}
-        <li class="disabled">
-          <a href="#" title="{{ error_message }}">{% trans "Successful test" %}</a>
-        </li>
-        <li class="disabled">
-          <a href="#" title="{{ error_message }}">{% trans "Failure of the test" %}</a>
-        </li>
-        <li class="disabled">
-          <a href="#" title="{{ error_message }}">{% trans "Retaking of the test" %}</a>
-        </li>
-      {% endwith %}
-    {% endif %}
+  {% if can_update_tab and update_url or can_make_decision or can_upload_renewal_opinion  %}
+    <div class="btn-group">
+      <button
+          type="button"
+          class="btn btn-default"
+          data-toggle="dropdown"
+          aria-haspopup="true"
+          aria-expanded="false"
+      >
+        {% trans "Actions" %}
+        <span class="caret"></span>
+      </button>
+      <ul class="dropdown-menu pull-right">
+        {% if can_update_tab %}
+          <li>
+            <a href="{{ update_url }}">
+              {% trans "Update" %}
+            </a>
+          </li>
+        {% endif %}
+        {% if can_upload_renewal_opinion %}
+          <li>
+            <a href="{% url "admission:doctorate:confirmation:opinion" doctorate.uuid %}">
+              {% trans "Upload the opinion on the renewal of the research mandate" %}
+            </a>
+          </li>
+        {% endif %}
+        {% if can_make_decision %}
+          <li role="separator" class="divider"></li>
+          <li>
+            <a href="{% url 'admission:doctorate:send-mail' uuid=uuid %}?template={{ INFO_TEMPLATE_IDENTIFIER }}&cc_promoteurs=True">
+              {% trans "Send an information email" %}
+            </a>
+          </li>
+          <li role="separator" class="divider"></li>
+          {% if can_be_evaluated %}
+            <li>
+              <a href="#" data-toggle="modal" data-target="#confirmationSuccessModal">
+                {% trans "Successful test" %}
+              </a>
+            </li>
+            <li>
+              <a href="{% url 'admission:doctorate:confirmation:failure' uuid %}">
+                {% trans "Failure of the test" %}
+              </a>
+            </li>
+            <li>
+              <a href="{% url 'admission:doctorate:confirmation:retaking' uuid %}">
+                {% trans "Retaking of the test" %}
+              </a>
+            </li>
+          {% else %}
+            {% with _("Impossible action: please be sure that the confirmation date and report are specified.") as error_message %}
+              <li class="disabled">
+                <a href="#" title="{{ error_message }}">{% trans "Successful test" %}</a>
+              </li>
+              <li class="disabled">
+                <a href="#" title="{{ error_message }}">{% trans "Failure of the test" %}</a>
+              </li>
+              <li class="disabled">
+                <a href="#" title="{{ error_message }}">{% trans "Retaking of the test" %}</a>
+              </li>
+            {% endwith %}
+          {% endif %}
+        {% endif %}
+      </ul>
+    </div>
   {% endif %}
 {% endblock %}
 
