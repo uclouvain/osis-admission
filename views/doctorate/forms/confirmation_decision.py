@@ -24,7 +24,6 @@
 #
 # ##############################################################################
 from django.contrib import messages
-from django.forms import Form
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.utils.translation import override, gettext_lazy as _
@@ -33,6 +32,7 @@ from django.views.generic import FormView
 from osis_mail_template.models import MailTemplate
 
 from admission.contrib.models import CddMailTemplate
+from admission.ddd.projet_doctoral.doctorat.domain.model.enums import ChoixStatutDoctorat
 from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.commands import (
     ConfirmerReussiteCommand,
     ConfirmerEchecCommand,
@@ -63,6 +63,16 @@ class DoctorateAdmissionConfirmationSuccessDecisionView(
     def post(self, *args, **kwargs):
         try:
             message_bus_instance.invoke(ConfirmerReussiteCommand(uuid=self.last_confirmation_paper.uuid))
+            messages.success(
+                self.request,
+                _("The status has been changed to %(status)s.") % {
+                    'status': _(ChoixStatutDoctorat.PASSED_CONFIRMATION.value)
+                },
+            )
+            messages.success(
+                self.request,
+                _('The certificate of achievement is being generated.'),
+            )
         except MultipleBusinessExceptions as multiple_exceptions:
             for exception in multiple_exceptions.exceptions:
                 messages.error(self.request, exception.message)
@@ -77,7 +87,7 @@ class DoctorateAdmissionConfirmationDecisionView(
     FormView,
 ):
     permission_required = 'admission.make_confirmation_decision'
-    htmx_template_name = 'admission/doctorate/forms/send_mail_htmx.html'
+    htmx_template_name = 'admission/doctorate/forms/send_mail_htmx_fields.html'
     template_name = 'admission/doctorate/forms/confirmation_decision.html'
     identifier = ''
     page_title = ''
@@ -133,6 +143,9 @@ class DoctorateAdmissionConfirmationFailureDecisionView(DoctorateAdmissionConfir
     form_class = BaseEmailTemplateForm
     identifier = ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_FAILURE_STUDENT
     page_title = _('Failure of the confirmation paper')
+    message_on_success = _("The status has been changed to %(status)s.") % {
+        'status': _(ChoixStatutDoctorat.NOT_ALLOWED_TO_CONTINUE.value)
+    }
 
     def call_command(self, form):
         message_bus_instance.invoke(
@@ -148,6 +161,9 @@ class DoctorateAdmissionConfirmationRetakingDecisionView(DoctorateAdmissionConfi
     form_class = ConfirmationRetakingForm
     identifier = ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_RETAKING_STUDENT
     page_title = _('Retaking of the confirmation paper')
+    message_on_success = _("The status has been changed to %(status)s.") % {
+        'status': _(ChoixStatutDoctorat.CONFIRMATION_TO_BE_REPEATED.value)
+    }
 
     def call_command(self, form):
         message_bus_instance.invoke(

@@ -60,8 +60,9 @@ msgstr ""
 #, python-format
 msgid ""
 "<a href=\"%(confirmation_paper_link_back)s\">%(reference)s</a> - "
-"%(student_first_name)s %(student_last_name)s submitted a date for the "
-"confirmation paper for %(doctorate_title)s"
+"%(student_first_name)s %(student_last_name)s submitted a date "
+"(%(confirmation_paper_date)s) for the confirmation paper for "
+"%(doctorate_title)s"
 msgstr ""
 
 #, python-format
@@ -280,9 +281,6 @@ msgstr ""
 
 msgid "CA Member"
 msgstr "Supervisory panel member"
-
-msgid "CA members"
-msgstr "Supervisory panel members"
 
 msgid "CANCELLED"
 msgstr ""
@@ -1766,7 +1764,13 @@ msgstr ""
 msgid "The <strong>additional training</strong> has been completed: yes / no."
 msgstr ""
 
+msgid "The CA members"
+msgstr "The supervisory panel members"
+
 msgid "The acronym of the scholarship grant"
+msgstr ""
+
+msgid "The certificate of achievement is being generated."
 msgstr ""
 
 msgid ""
@@ -1880,6 +1884,10 @@ msgid "The signature request procedure isn't in progress."
 msgstr ""
 
 msgid "The start date can't be later than the end date"
+msgstr ""
+
+#, python-format
+msgid "The status has been changed to %(status)s."
 msgstr ""
 
 msgid "There can be no more CA members in the supervision group."

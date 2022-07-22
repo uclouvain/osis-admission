@@ -1,4 +1,4 @@
-{% extends "admission/doctorate/tab_layout.html" %}
+{% extends "admission/doctorate/details/tab_layout.html" %}
 {% load i18n admission %}
 {% load osis_document %}
 
@@ -26,13 +26,9 @@
 * see http://www.gnu.org/licenses/.
 {% endcomment %}
 
-{% block actions %}
-  {% if confirmation_paper and confirmation_paper.demande_prolongation %}
-    <li>
-      <a href="{% update_tab_path_from_detail doctorate.uuid %}">
-        {% trans "Update" %}
-      </a>
-    </li>
+{% block actions-group %}
+  {% if confirmation_paper.demande_prolongation %}
+    {{ block.super }}
   {% endif %}
 {% endblock %}
 

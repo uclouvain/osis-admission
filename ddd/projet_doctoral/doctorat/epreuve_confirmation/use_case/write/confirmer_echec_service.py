@@ -56,5 +56,6 @@ def confirmer_echec(
     # THEN
     notification.notifier_echec_epreuve(epreuve_confirmation, cmd.sujet_message, cmd.corps_message)
     doctorat_repository.save(doctorat)
+    epreuve_confirmation_repository.save(epreuve_confirmation)
 
     return doctorat.entity_id

@@ -248,7 +248,7 @@
       </caption>
       <thead>
       <tr>
-        <th>{% translate "CA members" %}</th>
+        <th>{% translate "The CA members" %}</th>
         <th>{{ student_title }}</th>
       </tr>
       </thead>
@@ -262,7 +262,7 @@
           </td>
           {% if forloop.first %}
             <td rowspan="{{ supervision_people_nb }}">
-              {{ doctorate.nom_doctorant }} {{ doctorate.prenom_doctorant }}
+              {{ doctorate.prenom_doctorant }} {{ doctorate.nom_doctorant }}
             </td>
           {% endif %}
         </tr>

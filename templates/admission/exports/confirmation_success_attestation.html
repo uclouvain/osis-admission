@@ -53,7 +53,7 @@
     </div>
 
     <div id="letter-footer">
-      <p>{{ cdd_president.lastname }}</p>
+      <p>{{ cdd_president.firstname }} {{ cdd_president.lastname }}</p>
       <p>
         {% if cdd_president.function == 'Présidente' %}
           {% blocktranslate context 'female gender' with cdd_title=cdd_version.title %}President of the {{ cdd_title }}{% endblocktranslate %}
