@@ -514,6 +514,9 @@ msgstr "Mettre en copie les membres du groupe de supervision"
 msgid "Carbon-copy the promoters"
 msgstr "Mettre en copie les promoteurs"
 
+msgid "Category labels"
+msgstr "Libellés de catégories"
+
 msgid "Certificate of achievement"
 msgstr "Attestation de réussite"
 
@@ -718,6 +721,9 @@ msgstr "Curriculum vitae détaillé"
 
 msgid "Diploma"
 msgstr "Diplôme"
+
+msgid "Do not reorder values, and keep the same count"
+msgstr "Ne pas réordonner les valeurs, and garder le même nombre"
 
 #, python-format
 msgid "Do you wish to move the doctorate to the \"%(status)s\" state?"
@@ -1298,6 +1304,9 @@ msgstr "Non renseigné(e)"
 
 msgid "Number of days participating"
 msgstr "Nombre de jours de participation"
+
+msgid "Number of values mismatch"
+msgstr "Le nombre de valeurs ne correspond pas"
 
 msgid "OTHER"
 msgstr "Autre"
@@ -2092,7 +2101,7 @@ msgid "Type of communication"
 msgstr "Type de communication"
 
 msgid "Type of paper"
-msgstr "Type d'épreuve'"
+msgstr "Type d'épreuve"
 
 msgid "Type of publication"
 msgstr "Type de publication"

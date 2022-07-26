@@ -33,6 +33,7 @@ from admission.contrib.models.doctoral_training import Activity
 from admission.ddd.projet_doctoral.doctorat.formation.commands import SoumettreActivitesCommand
 from admission.ddd.projet_doctoral.doctorat.formation.domain.model._enums import CategorieActivite, StatutActivite
 from admission.forms.doctorate.training.activity import *
+from admission.forms.doctorate.training.activity import get_category_labels
 from admission.forms.doctorate.training.processus import BatchActivityForm
 from admission.views.doctorate.mixins import LoadDossierViewMixin
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
@@ -48,7 +49,7 @@ class DoctorateTrainingActivityView(LoadDossierViewMixin, generic.FormView):
         context = super().get_context_data(**kwargs)
         qs = Activity.objects.filter(doctorate__uuid=self.admission_uuid)
         context['activities'] = qs.prefetch_related('children')
-        context['categories'] = CategorieActivite.choices
+        context['categories'] = get_category_labels(self.admission.doctorate.management_entity_id)
         context['statuses'] = StatutActivite.choices
         context['counts'] = qs.aggregate(
             total=Sum('ects'),

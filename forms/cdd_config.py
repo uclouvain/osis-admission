@@ -29,10 +29,12 @@ from typing import Any
 from django import forms
 from django.conf import settings
 from django.contrib.postgres.forms import SimpleArrayField
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from admission.contrib.models.cdd_config import CddConfiguration
+from admission.ddd.projet_doctoral.doctorat.formation.domain.model._enums import CategorieActivite
 
 TextareaArrayField = partial(
     SimpleArrayField,
@@ -68,7 +70,7 @@ class TranslatedListsValueField(forms.MultiValueField):
         # Remove arguments from JSONField
         kwargs.pop("encoder", None)
         kwargs.pop("decoder", None)
-        kwargs['help_text'] = _('One choice per line, leave the "Other" value out')
+        kwargs['help_text'] = kwargs['help_text'] or _('One choice per line, leave the "Other" value out')
         super().__init__((TextareaArrayField(), TextareaArrayField()), *args, **kwargs)
 
     def compress(self, data_list) -> Any:
@@ -82,6 +84,8 @@ class TranslatedListsValueField(forms.MultiValueField):
 def map_translated_lists_value_field(field, **kwargs):
     if isinstance(field, models.JSONField):
         kwargs['form_class'] = TranslatedListsValueField
+    if field.name == 'category_labels':
+        kwargs['help_text'] = _("Do not reorder values, and keep the same count")
     return models.Field.formfield(field, **kwargs)
 
 
@@ -91,3 +95,10 @@ class CddConfigForm(forms.ModelForm):
     class Meta:
         model = CddConfiguration
         exclude = ['cdd', 'id']
+
+    def clean(self):
+        data = super().clean()
+        expected_length = len(CategorieActivite.choices())
+        if any(len(data['category_labels'][lang]) != expected_length for lang in dict(settings.LANGUAGES)):
+            raise ValidationError('category_labels', _("Number of values mismatch"))
+        return data

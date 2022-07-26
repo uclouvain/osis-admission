@@ -29,6 +29,7 @@ from django.test import TestCase
 from rest_framework import status
 
 from admission.contrib.models.cdd_config import CddConfiguration
+from admission.ddd.projet_doctoral.doctorat.formation.domain.model._enums import CategorieActivite
 from admission.tests.factories.roles import CddManagerFactory
 from base.tests.factories.person import SuperUserPersonFactory
 
@@ -57,11 +58,15 @@ class CddConfigTestCase(TestCase):
         self.assertEqual(CddConfiguration.objects.count(), 0)
         data = {}
         for field in CddConfiguration._meta.fields:
-            if isinstance(field, JSONField):
+            if field.name == 'category_labels':
+                values = [str(v) for v in dict(CategorieActivite.choices()).values()]
+                data[f'{field.name}_en'] = "\n".join(values)
+                data[f'{field.name}_fr-be'] = "\n".join(values)
+            elif isinstance(field, JSONField):
                 data[f'{field.name}_en'] = "Foo\nBarbaz"
                 data[f'{field.name}_fr-be'] = "Bar\nBaz"
-        response = self.client.post(url, data, follow=True)
-        self.assertContains(response, "FOO")
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
         expected = {
             'en': ['Foo', 'Barbaz'],
             'fr-be': ['Bar', 'Baz'],

@@ -24,6 +24,7 @@
 #
 # ##############################################################################
 from functools import partial
+from typing import List, Tuple
 
 from dal import autocomplete
 from django import forms
@@ -31,7 +32,7 @@ from django.utils.translation import get_language, gettext_lazy as _, pgettext_l
 
 from admission.contrib.models.cdd_config import CddConfiguration
 from admission.contrib.models.doctoral_training import Activity
-from admission.ddd.projet_doctoral.doctorat.formation.domain.model._enums import ChoixTypeEpreuve
+from admission.ddd.projet_doctoral.doctorat.formation.domain.model._enums import CategorieActivite, ChoixTypeEpreuve
 from admission.forms import SelectOrOtherField
 from base.forms.utils.datefield import DatePickerInput
 from base.models.academic_year import AcademicYear
@@ -55,6 +56,16 @@ __all__ = [
 INSTITUTION_UCL = "UCLouvain"
 
 
+def get_cdd_config(cdd_id) -> CddConfiguration:
+    return CddConfiguration.objects.get_or_create(cdd_id=cdd_id)[0]
+
+
+def get_category_labels(cdd_id, lang_code: str = None) -> List[Tuple[str, str]]:
+    lang_code = lang_code or get_language()
+    original_constants = dict(CategorieActivite.choices()).keys()
+    return list(zip(original_constants, get_cdd_config(cdd_id).category_labels[lang_code]))
+
+
 class ConfigurableActivityTypeField(SelectOrOtherField):
     select_class = forms.CharField
 
@@ -64,7 +75,7 @@ class ConfigurableActivityTypeField(SelectOrOtherField):
 
     def get_bound_field(self, form, field_name):
         # Update radio choices from CDD configuration
-        config = CddConfiguration.objects.get_or_create(cdd_id=form.cdd_id)[0]
+        config = get_cdd_config(form.cdd_id)
         values = getattr(config, self.source, {}).get(get_language(), [])
         self.widget.widgets[0].choices = list(zip(values, values)) + [('other', _("Other"))]
         return super().get_bound_field(form, field_name)
