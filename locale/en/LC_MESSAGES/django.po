@@ -321,10 +321,10 @@ msgid "CHEMISTRY"
 msgstr "Chemistry"
 
 msgid "COMMUNICATION"
-msgstr ""
+msgstr "Oral communication (excluding conferences)"
 
 msgid "CONFERENCE"
-msgstr ""
+msgstr "Conferences, symposiums"
 
 msgid "CONFIRMATION_PAPER"
 msgstr "Confirmation paper"
@@ -333,7 +333,7 @@ msgid "CONFIRMATION_TO_BE_REPEATED"
 msgstr "Confirmation to be repeated"
 
 msgid "COURSE"
-msgstr ""
+msgstr "Course"
 
 msgid "CSC - China Scholarship Council"
 msgstr ""
@@ -486,6 +486,9 @@ msgid "Carbon-copy the CA members"
 msgstr ""
 
 msgid "Carbon-copy the promoters"
+msgstr ""
+
+msgid "Category labels"
 msgstr ""
 
 msgid "Certificate of achievement"
@@ -688,6 +691,9 @@ msgid "Detailed curriculum vitae"
 msgstr ""
 
 msgid "Diploma"
+msgstr ""
+
+msgid "Do not reorder values, and keep the same count"
 msgstr ""
 
 #, python-format
@@ -1221,6 +1227,9 @@ msgstr ""
 msgid "Number of days participating"
 msgstr ""
 
+msgid "Number of values mismatch"
+msgstr ""
+
 msgid "OTHER"
 msgstr "Other"
 
@@ -1268,7 +1277,7 @@ msgid "Other cotutelle-related documents"
 msgstr ""
 
 msgid "PAPER"
-msgstr ""
+msgstr "Examination"
 
 msgid "PARTIAL"
 msgstr "Partially"
@@ -1292,7 +1301,7 @@ msgid "PRIVATE_DEFENSE"
 msgstr ""
 
 msgid "PUBLICATION"
-msgstr ""
+msgstr "Publication"
 
 msgid "PUBLIC_DEFENSE"
 msgstr ""
@@ -1520,7 +1529,7 @@ msgid "REJECTED"
 msgstr "Rejected"
 
 msgid "RESIDENCY"
-msgstr ""
+msgstr "Advanced research residency"
 
 msgid "Reason for exceeding the deadline"
 msgstr ""
@@ -1586,10 +1595,10 @@ msgid "SELF_FUNDING"
 msgstr "Self-funding"
 
 msgid "SEMINAR"
-msgstr ""
+msgstr "Research seminar: attendance"
 
 msgid "SERVICE"
-msgstr ""
+msgstr "Institutional, didactic and scientific expertise service"
 
 msgid "SIC director"
 msgstr ""
@@ -2000,7 +2009,7 @@ msgid "Upload the opinion on the renewal of the research mandate"
 msgstr ""
 
 msgid "VAE"
-msgstr ""
+msgstr "Valorisation of experience"
 
 msgid "VALID"
 msgstr "Valid"

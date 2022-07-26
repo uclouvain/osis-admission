@@ -208,7 +208,7 @@ class ActivitySerializerBase(serializers.Serializer):
             attrs['child'] = serializers.CharField()
         if isinstance(form_field, forms.CharField):
             attrs.setdefault('allow_blank', True)
-        if isinstance(form_field, (forms.DateField, forms.TypedChoiceField, forms.DecimalField)):
+        if isinstance(form_field, (forms.DateField, forms.TypedChoiceField, forms.BooleanField, forms.DecimalField)):
             attrs.setdefault('allow_null', True)
         if isinstance(form_field, forms.DecimalField):
             # There are no negative values

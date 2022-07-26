@@ -25,9 +25,20 @@
 # ##############################################################################
 from django.conf import settings
 from django.db import models
+from django.utils import translation
 from django.utils.translation import gettext_lazy as _
 
+from admission.ddd.projet_doctoral.doctorat.formation.domain.model._enums import CategorieActivite
 from base.models.enums.entity_type import DOCTORAL_COMMISSION
+
+
+def default_category_labels():
+    choices = dict(CategorieActivite.choices()).values()
+    ret = {}
+    for lang in [settings.LANGUAGE_CODE_EN, settings.LANGUAGE_CODE_FR]:
+        with translation.override(lang):
+            ret[lang] = [str(choice) for choice in choices]
+    return ret
 
 
 def default_service_types():
@@ -188,6 +199,10 @@ class CddConfiguration(models.Model):
         on_delete=models.CASCADE,
         limit_choices_to={'entityversion__entity_type': DOCTORAL_COMMISSION},
         related_name='admission_config',
+    )
+    category_labels = models.JSONField(
+        verbose_name=_("Category labels"),
+        default=default_category_labels,
     )
     service_types = models.JSONField(
         verbose_name=_("Service types"),
