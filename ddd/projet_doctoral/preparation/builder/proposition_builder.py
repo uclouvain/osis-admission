@@ -111,6 +111,7 @@ class PropositionBuilder(interface.RootEntityBuilder):
             financement=_build_financement(cmd),
             projet=_build_projet(cmd),
             experience_precedente_recherche=_build_experience_precedente_recherche(cmd),
+            reponses_questions_specifiques=cmd.reponses_questions_specifiques,
         )
 
 

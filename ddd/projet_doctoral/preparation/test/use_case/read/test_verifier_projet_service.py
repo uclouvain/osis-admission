@@ -23,6 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from unittest import mock
 
 import attr
 from django.test import SimpleTestCase
@@ -37,9 +38,13 @@ from admission.ddd.projet_doctoral.preparation.domain.validator.exceptions impor
     PromoteurDeReferenceManquantException,
     PromoteurManquantException,
     PropositionNonTrouveeException,
+    QuestionsSpecifiquesObligatoiresNonCompleteesException,
 )
 from admission.ddd.projet_doctoral.preparation.test.factory.person import PersonneConnueUclDTOFactory
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
+from admission.infrastructure.projet_doctoral.preparation.repository.in_memory.proposition import (
+    PropositionInMemoryRepository,
+)
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from infrastructure.shared_kernel.personne_connue_ucl.in_memory.personne_connue_ucl import (
     PersonneConnueUclInMemoryTranslator,
@@ -66,6 +71,18 @@ class TestVerifierPropositionService(SimpleTestCase):
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(cmd)
         self.assertIsInstance(context.exception.exceptions.pop(), DetailProjetNonCompleteException)
+
+    def test_should_retourner_erreur_si_questions_specifiques_pas_completees(self):
+        proposition = next(
+            p for p in PropositionInMemoryRepository.entities if p.entity_id.uuid == self.uuid_proposition
+        )
+        with mock.patch.multiple(proposition, reponses_questions_specifiques={}):
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                self.message_bus.invoke(self.cmd)
+            self.assertIsInstance(
+                context.exception.exceptions.pop(),
+                QuestionsSpecifiquesObligatoiresNonCompleteesException,
+            )
 
     def test_should_retourner_erreur_si_financement_pas_complete(self):
         cmd = attr.evolve(self.cmd, uuid_proposition='uuid-SC3DP-no-financement')

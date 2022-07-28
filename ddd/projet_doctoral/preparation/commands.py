@@ -24,7 +24,7 @@
 #
 # ##############################################################################
 import datetime
-from typing import List, Optional
+from typing import List, Optional, Dict, Union
 
 import attr
 
@@ -69,6 +69,7 @@ class InitierPropositionCommand(interface.CommandRequest):
     domaine_these: Optional[str] = ''
     date_soutenance: Optional[datetime.date] = None
     raison_non_soutenue: Optional[str] = ''
+    reponses_questions_specifiques: Dict[str, Union[str, List[str]]] = attr.Factory(dict)
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -101,6 +102,7 @@ class CompleterPropositionCommand(interface.CommandRequest):
     domaine_these: Optional[str] = ''
     date_soutenance: Optional[datetime.date] = None
     raison_non_soutenue: Optional[str] = ''
+    reponses_questions_specifiques: Dict[str, Union[str, List[str]]] = attr.Factory(dict)
 
 
 @attr.dataclass(frozen=True, slots=True)

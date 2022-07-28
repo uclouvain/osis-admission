@@ -71,6 +71,7 @@ urlpatterns = [
     path('propositions/<uuid:uuid>/verify_project', views.VerifyProjectView),
     path('propositions/<uuid:uuid>/submit', views.SubmitPropositionViewSet),
     path('propositions/<uuid:uuid>/cotutelle', views.CotutelleAPIView),
+    path('propositions/<uuid:uuid>/specific-questions', views.SpecificQuestionListView),
     # Supervision
     path('propositions/<uuid:uuid>/supervision', views.SupervisionAPIView),
     path('propositions/<uuid:uuid>/supervision/set-reference-promoter', views.SupervisionSetReferencePromoterAPIView),

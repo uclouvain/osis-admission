@@ -24,7 +24,7 @@
 #
 ##############################################################################
 import datetime
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 from uuid import UUID
 
 import attr
@@ -76,3 +76,4 @@ class PropositionDTO(interface.DTO):
     creee_le: datetime.datetime
     modifiee_le: datetime.datetime
     erreurs: List[Dict[str, str]]
+    reponses_questions_specifiques: Dict[str, Union[str, List[str]]]

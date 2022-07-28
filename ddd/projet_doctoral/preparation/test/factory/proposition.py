@@ -97,6 +97,9 @@ class _PropositionFactory(factory.Factory):
     financement = factory.SubFactory(_FinancementFactory)
     experience_precedente_recherche = aucune_experience_precedente_recherche
     modifiee_le = factory.Faker('past_datetime')
+    reponses_questions_specifiques = {
+        '06de0c3d-3c06-4c93-8eb4-c8648f04f140': 'My response',
+    }
 
 
 class PropositionAdmissionSC3DPMinimaleFactory(_PropositionFactory):

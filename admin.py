@@ -23,8 +23,11 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from typing import Optional
 
 from django.contrib import admin
+from django.db import models
+from django.http import HttpRequest
 from django.utils.translation import gettext_lazy as _
 
 
@@ -42,6 +45,9 @@ from admission.contrib.models import CddMailTemplate, DoctorateAdmission
 from admission.contrib.models.cdd_config import CddConfiguration
 from osis_mail_template.admin import MailTemplateAdmin
 
+from admission.contrib.models.form_item import AdmissionFormItem
+from base.models.education_group_year import EducationGroupYear
+from base.models.enums.education_group_categories import Categories
 from osis_role.contrib.admin import RoleModelAdmin
 
 # ##############################################################################
@@ -91,9 +97,57 @@ class CddMailTemplateAdmin(MailTemplateAdmin):
     ]
 
 
+class TabularFormItemAdmin(admin.TabularInline):
+    fields = (
+        'weight',
+        'type',
+        'internal_label',
+        'required',
+        'title',
+        'text',
+        'help_text',
+        'config',
+        'deleted',
+    )
+
+    model = AdmissionFormItem
+    extra = 1
+
+
+class EducationGroupYearAdmin(admin.ModelAdmin):
+    list_display = ['acronym', 'partial_acronym', 'title', 'academic_year', 'education_group_type']
+    search_fields = ['acronym', 'partial_acronym', 'title', 'id']
+
+    def has_add_permission(self, request: HttpRequest) -> bool:
+        return False
+
+    def has_delete_permission(self, request: HttpRequest, obj: Optional[EducationGroupYear] = ...) -> bool:
+        return False
+
+    fields = ['acronym']
+    readonly_fields = ['acronym']
+
+    inlines = [TabularFormItemAdmin]
+
+
+class AdmissionTrainingManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().exclude(education_group_type__category=Categories.MINI_TRAINING.name)
+
+
+class AdmissionTrainingConfiguration(EducationGroupYear):
+    objects = AdmissionTrainingManager()
+
+    class Meta:
+        proxy = True
+        verbose_name = _("Training configuration for admission")
+        verbose_name_plural = _("Training configurations for admission")
+
+
 admin.site.register(DoctorateAdmission, DoctorateAdmissionAdmin)
 admin.site.register(CddMailTemplate, CddMailTemplateAdmin)
 admin.site.register(CddConfiguration)
+admin.site.register(AdmissionTrainingConfiguration, EducationGroupYearAdmin)
 
 
 # ##############################################################################

@@ -27,9 +27,13 @@
 from admission.ddd.projet_doctoral.preparation.builder.proposition_identity_builder import PropositionIdentityBuilder
 from admission.ddd.projet_doctoral.preparation.commands import VerifierProjetCommand
 from admission.ddd.projet_doctoral.preparation.domain.model.proposition import PropositionIdentity
+from admission.ddd.projet_doctoral.preparation.domain.model.question_specifique import \
+    ListeDesQuestionsSpecifiquesDeLaFormationIdentity
 from admission.ddd.projet_doctoral.preparation.domain.service.i_promoteur import IPromoteurTranslator
 from admission.ddd.projet_doctoral.preparation.domain.service.verifier_projet_doctoral import VerifierProjetDoctoral
 from admission.ddd.projet_doctoral.preparation.repository.i_groupe_de_supervision import IGroupeDeSupervisionRepository
+from admission.ddd.projet_doctoral.preparation.repository.i_liste_questions_specifiques import \
+    IListeQuestionsSpecifiquesRepository
 from admission.ddd.projet_doctoral.preparation.repository.i_proposition import IPropositionRepository
 
 
@@ -38,14 +42,26 @@ def verifier_projet(
     proposition_repository: 'IPropositionRepository',
     groupe_supervision_repository: 'IGroupeDeSupervisionRepository',
     promoteur_translator: 'IPromoteurTranslator',
+    liste_questions_specifiques_repository: 'IListeQuestionsSpecifiquesRepository',
 ) -> 'PropositionIdentity':
     # GIVEN
     entity_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
     proposition_candidat = proposition_repository.get(entity_id=entity_id)
     groupe_de_supervision = groupe_supervision_repository.get_by_proposition_id(entity_id)
+    liste_questions_specifiques = liste_questions_specifiques_repository.get(
+        ListeDesQuestionsSpecifiquesDeLaFormationIdentity(
+            annee=proposition_candidat.annee,
+            sigle=proposition_candidat.sigle_formation,
+        )
+    )
 
     # WHEN
-    VerifierProjetDoctoral.verifier(proposition_candidat, groupe_de_supervision, promoteur_translator)
+    VerifierProjetDoctoral.verifier(
+        proposition_candidat,
+        groupe_de_supervision,
+        liste_questions_specifiques,
+        promoteur_translator,
+    )
 
     # THEN
     return entity_id

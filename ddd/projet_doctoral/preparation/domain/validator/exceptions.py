@@ -373,3 +373,11 @@ class PromoteurDeReferenceManquantException(BusinessException):
     def __init__(self, **kwargs):
         message = _("You must set a reference promoter.")
         super().__init__(message, **kwargs)
+
+
+class QuestionsSpecifiquesObligatoiresNonCompleteesException(BusinessException):
+    status_code = "PROPOSITION-43"
+
+    def __init__(self, **kwargs):
+        message = _("Mandatory fields are missing in the specific questions in the project details of the proposition.")
+        super().__init__(message, **kwargs)

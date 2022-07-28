@@ -23,7 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
+from django.core.serializers.json import DjangoJSONEncoder
 from rest_framework import serializers
 
 from admission.api.serializers.fields import ACTION_LINKS, ActionLinksField, RelatedInstituteField
@@ -116,6 +116,7 @@ class PropositionSearchDTOSerializer(IncludedFieldsMixin, DTOSerializer):
     )
     # This is to prevent schema from breaking on JSONField
     erreurs = None
+    reponses_questions_specifiques = None
 
     class Meta:
         source = PropositionDTO
@@ -185,6 +186,7 @@ class PropositionDTOSerializer(IncludedFieldsMixin, DTOSerializer):
             'retrieve_training': ACTION_LINKS['retrieve_training'],
         }
     )
+    reponses_questions_specifiques = serializers.JSONField(encoder=DjangoJSONEncoder, default=dict)
     # The schema is explicit in PropositionSchema
     erreurs = serializers.JSONField()
 
@@ -227,6 +229,7 @@ class PropositionDTOSerializer(IncludedFieldsMixin, DTOSerializer):
             'statut',
             'links',
             'erreurs',
+            'reponses_questions_specifiques',
         ]
 
 
@@ -255,6 +258,7 @@ class InitierPropositionCommandSerializer(DTOSerializer):
         default=ChoixLangueRedactionThese.UNDECIDED.name,
     )
     institut_these = RelatedInstituteField(required=False)
+    reponses_questions_specifiques = serializers.JSONField(encoder=DjangoJSONEncoder, default=dict)
 
 
 class CompleterPropositionCommandSerializer(InitierPropositionCommandSerializer):

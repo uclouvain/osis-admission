@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,26 +23,24 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from rest_framework import serializers
 
-from .dashboard import DashboardSerializer
-from .project import *
-from .cotutelle import *
-from .person import *
-from .coordonnees import CoordonneesSerializer
-from .secondary_studies import HighSchoolDiplomaSerializer
-from .languages_knowledge import *
-from .supervision import *
-from .curriculum import (
-    CurriculumFileSerializer,
-    EducationalExperienceYearSerializer,
-    CurriculumSerializer,
-    ProfessionalExperienceSerializer,
-)
-from .approvals import (
-    ApprouverPropositionCommandSerializer,
-    RefuserPropositionCommandSerializer,
-    ApprouverPropositionParPdfCommandSerializer,
-)
-from .confirmation import *
-from .doctorate import *
-from .specific_question import SpecificQuestionSerializer
+from admission.contrib.models import AdmissionFormItem
+
+__all__ = [
+    "SpecificQuestionSerializer",
+]
+
+
+class SpecificQuestionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AdmissionFormItem
+        fields = [
+            'uuid',
+            'type',
+            'required',
+            'title',
+            'text',
+            'help_text',
+            'config',
+        ]

@@ -75,6 +75,11 @@ textarea {
   color: #a94442;
 }
 
+.required_text:after {
+  content: " *";
+  color: #a94442;
+}
+
 .min_field {
   width: max-content;
 }
@@ -141,6 +146,9 @@ textarea {
   margin-left: 5px;
 }
 
+.popover p {
+  margin: 0;
+}
 
 .field-with-tooltip .label-container {
   max-width: 100%;
@@ -153,4 +161,16 @@ textarea {
 
 .tooltip .tooltip-inner {
   width: auto;
+}
+
+.plain-text-widget {
+  padding: 0.5em;
+  box-shadow: 1px 1px 3px 1px rgba(0, 0, 0, 0.3);
+  width: 100%;
+  white-space: pre-line;
+  border: none;
+}
+
+.multi-widget > .form-group {
+  margin-top: 1em;
 }

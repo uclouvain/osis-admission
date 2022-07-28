@@ -25,7 +25,7 @@
 ##############################################################################
 import datetime
 import uuid
-from typing import List, Optional, Union
+from typing import List, Optional, Union, Dict, Any
 
 import attr
 
@@ -86,6 +86,7 @@ class Proposition(interface.RootEntity):
     creee_le: Optional[datetime.datetime] = None
     modifiee_le: Optional[datetime.datetime] = None
     fiche_archive_signatures_envoyees: List[str] = attr.Factory(list)
+    reponses_questions_specifiques: Dict[str, Union[str, List[str]]] = attr.Factory(dict)
 
     @property
     def sigle_formation(self):
@@ -128,6 +129,7 @@ class Proposition(interface.RootEntity):
         domaine_these: Optional[str],
         date_soutenance: Optional[datetime.date],
         raison_non_soutenue: Optional[str],
+        reponses_questions_specifiques: Dict[str, Union[str, List[str]]],
         documents: List[str] = None,
         graphe_gantt: List[str] = None,
         proposition_programme_doctoral: List[str] = None,
@@ -174,6 +176,7 @@ class Proposition(interface.RootEntity):
             date_soutenance=date_soutenance,
             raison_non_soutenue=raison_non_soutenue,
         )
+        self.reponses_questions_specifiques = reponses_questions_specifiques
 
     def _completer_proposition(
         self,

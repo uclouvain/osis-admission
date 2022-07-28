@@ -23,26 +23,41 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from typing import List
 
-from .dashboard import DashboardSerializer
-from .project import *
-from .cotutelle import *
-from .person import *
-from .coordonnees import CoordonneesSerializer
-from .secondary_studies import HighSchoolDiplomaSerializer
-from .languages_knowledge import *
-from .supervision import *
-from .curriculum import (
-    CurriculumFileSerializer,
-    EducationalExperienceYearSerializer,
-    CurriculumSerializer,
-    ProfessionalExperienceSerializer,
-)
-from .approvals import (
-    ApprouverPropositionCommandSerializer,
-    RefuserPropositionCommandSerializer,
-    ApprouverPropositionParPdfCommandSerializer,
-)
-from .confirmation import *
-from .doctorate import *
-from .specific_question import SpecificQuestionSerializer
+import attr
+
+from admission.ddd.projet_doctoral.preparation.domain.model._enums import TypeItemFormulaire
+from base.ddd.utils.converters import to_upper_case_converter
+from osis_common.ddd import interface
+
+
+@attr.dataclass(frozen=True, slots=True)
+class QuestionSpecifiqueIdentity(interface.EntityIdentity):
+    uuid: str
+
+
+@attr.dataclass(slots=True)
+class QuestionSpecifique(interface.Entity):
+    entity_id: QuestionSpecifiqueIdentity
+    type: TypeItemFormulaire
+    poids: int
+    supprimee: bool
+    label_interne: str
+    requis: bool
+    titre: dict
+    texte: dict
+    texte_aide: dict
+    configuration: dict
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ListeDesQuestionsSpecifiquesDeLaFormationIdentity(interface.EntityIdentity):
+    sigle: str = attr.ib(converter=to_upper_case_converter)
+    annee: int
+
+
+@attr.dataclass(slots=True)
+class ListeDesQuestionsSpecifiquesDeLaFormation(interface.RootEntity):
+    entity_id: ListeDesQuestionsSpecifiquesDeLaFormationIdentity
+    questions: List[QuestionSpecifique] = []

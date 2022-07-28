@@ -82,3 +82,32 @@ class ChoixSousDomaineSciences(ChoiceEnum):
 class ChoixTypeAdmission(ChoiceEnum):
     ADMISSION = _('ADMISSION')
     PRE_ADMISSION = _('PRE_ADMISSION')
+
+
+class TypeItemFormulaire(ChoiceEnum):
+    MESSAGE = _('Message')
+    TEXTE = _('Text')
+    DOCUMENT = _('Document')
+
+
+TYPES_ITEMS_LECTURE_SEULE = {
+    TypeItemFormulaire.MESSAGE.name,
+}
+
+
+class TypeChampTexteFormulaire(ChoiceEnum):
+    COURT = _('Short')
+    LONG = _('Long')
+
+
+VALID_FORM_ITEM_TEXT_TYPES = {
+    TypeChampTexteFormulaire.COURT.name,
+    TypeChampTexteFormulaire.LONG.name,
+}
+
+
+class CleConfigurationItemFormulaire(ChoiceEnum):
+    TAILLE_TEXTE = _('Text size')
+    CLASSE_CSS = _('CSS class')
+    TYPES_MIME_FICHIER = _('File MIME types')
+    NOMBRE_MAX_DOCUMENTS = _('Maximum number of documents')

@@ -51,9 +51,6 @@ from admission.ddd.projet_doctoral.preparation.test.factory.proposition import (
     PropositionPreAdmissionSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory,
     PropositionPreAdmissionSC3DPMinimaleFactory,
 )
-from admission.infrastructure.projet_doctoral.preparation.domain.service.in_memory.doctorat import (
-    DoctoratInMemoryTranslator,
-)
 from base.ddd.utils.in_memory_repository import InMemoryGenericRepository
 
 
@@ -239,4 +236,5 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
             nationalite_candidat=candidat.nationalite,
             modifiee_le=proposition.modifiee_le,
             erreurs=[],
+            reponses_questions_specifiques=proposition.reponses_questions_specifiques,
         )

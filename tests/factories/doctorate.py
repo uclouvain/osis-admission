@@ -33,7 +33,6 @@ from admission.ddd.projet_doctoral.doctorat.domain.model.enums import ChoixStatu
 from admission.ddd.projet_doctoral.preparation.domain.model._enums import ChoixStatutProposition
 from admission.ddd.projet_doctoral.preparation.domain.model.proposition import Proposition
 from admission.tests.factories.roles import CandidateFactory
-from admission.tests.factories.supervision import PromoterFactory
 from base.models.enums.education_group_types import TrainingType
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.education_group_type import EducationGroupTypeFactory
@@ -74,6 +73,7 @@ class DoctorateAdmissionFactory(factory.DjangoModelFactory):
     reference = factory.LazyAttribute(_generate_reference)
     planned_duration = 10
     dedicated_time = 10
+    form_item_answers = {}
 
     class Params:
         with_cotutelle = factory.Trait(

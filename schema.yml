@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Admission API
-  version: 1.0.35
+  version: 1.0.36
   description: This API delivers data for the Admission project.
   contact:
     name: UCLouvain - OSIS
@@ -1463,6 +1463,39 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PropositionIdentityDTO'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
+  /propositions/{uuid}/specific-questions:
+    get:
+      operationId: listSpecificQuestions
+      description: ''
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SpecificQuestion'
           description: ''
         '400':
           $ref: '#/components/responses/BadRequest'
@@ -3769,6 +3802,8 @@ components:
                 type: string
               detail:
                 type: string
+        reponses_questions_specifiques:
+          type: object
       required:
       - uuid
       - type_admission
@@ -3818,6 +3853,32 @@ components:
       - demande_ouverture
       - convention
       - autres_documents
+    SpecificQuestion:
+      type: object
+      properties:
+        uuid:
+          type: string
+          readOnly: true
+        type:
+          $ref: '#/components/schemas/TypeItemFormulaire'
+        required:
+          type: boolean
+        title:
+          type: object
+        text:
+          type: object
+        help_text:
+          type: object
+        config:
+          type: object
+      required:
+      - type
+    TypeItemFormulaire:
+      enum:
+      - MESSAGE
+      - TEXTE
+      - DOCUMENT
+      type: string
     SupervisionDTO:
       type: object
       properties:
@@ -5196,6 +5257,8 @@ components:
           nullable: true
         raison_non_soutenue:
           type: string
+        reponses_questions_specifiques:
+          type: object
       required:
       - type_admission
       - sigle_formation
@@ -5430,6 +5493,8 @@ components:
           nullable: true
         raison_non_soutenue:
           type: string
+        reponses_questions_specifiques:
+          type: object
       required:
       - uuid
       - type_admission

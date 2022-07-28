@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,26 +23,18 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import uuid
 
-from .dashboard import DashboardSerializer
-from .project import *
-from .cotutelle import *
-from .person import *
-from .coordonnees import CoordonneesSerializer
-from .secondary_studies import HighSchoolDiplomaSerializer
-from .languages_knowledge import *
-from .supervision import *
-from .curriculum import (
-    CurriculumFileSerializer,
-    EducationalExperienceYearSerializer,
-    CurriculumSerializer,
-    ProfessionalExperienceSerializer,
-)
-from .approvals import (
-    ApprouverPropositionCommandSerializer,
-    RefuserPropositionCommandSerializer,
-    ApprouverPropositionParPdfCommandSerializer,
-)
-from .confirmation import *
-from .doctorate import *
-from .specific_question import SpecificQuestionSerializer
+from django.test import TestCase
+
+from admission.utils import get_uuid_value
+
+
+class UtilsTestCase(TestCase):
+    def test_get_uuid_returns_uuid_if_value_if_uuid(self):
+        uuid_value = uuid.uuid4()
+        self.assertEqual(get_uuid_value(str(uuid_value)), uuid_value)
+
+    def test_get_uuid_returns_input_value_if_not_uuid(self):
+        other_value = 'abcdef'
+        self.assertEqual(get_uuid_value(other_value), other_value)

@@ -73,6 +73,7 @@ def completer_proposition(
         domaine_these=cmd.domaine_these,
         date_soutenance=cmd.date_soutenance,
         raison_non_soutenue=cmd.raison_non_soutenue,
+        reponses_questions_specifiques=cmd.reponses_questions_specifiques,
     )
 
     # THEN

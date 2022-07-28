@@ -36,6 +36,7 @@ from .domain.service.in_memory.membre_CA import MembreCAInMemoryTranslator
 from .domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
 from .domain.service.in_memory.promoteur import PromoteurInMemoryTranslator
 from .repository.in_memory.groupe_de_supervision import GroupeDeSupervisionInMemoryRepository
+from .repository.in_memory.liste_questions_specifiques import ListeQuestionsSpecifiquesInMemoryRepository
 from .repository.in_memory.proposition import PropositionInMemoryRepository
 from ..validation.repository.in_memory.demande import DemandeInMemoryRepository
 
@@ -90,6 +91,7 @@ COMMAND_HANDLERS = {
         proposition_repository=PropositionInMemoryRepository(),
         groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
         promoteur_translator=PromoteurInMemoryTranslator(),
+        liste_questions_specifiques_repository=ListeQuestionsSpecifiquesInMemoryRepository(),
     ),
     SupprimerPromoteurCommand: partial(
         supprimer_promoteur,

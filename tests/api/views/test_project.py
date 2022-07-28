@@ -24,6 +24,7 @@
 #
 # ##############################################################################
 import datetime
+import uuid
 from unittest import mock
 from unittest.mock import patch
 
@@ -33,7 +34,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from admission.contrib.models import AdmissionType, DoctorateAdmission
+from admission.contrib.models import AdmissionType, DoctorateAdmission, AdmissionFormItem
 from admission.ddd.projet_doctoral.doctorat.domain.model.enums import ChoixStatutDoctorat
 from admission.ddd.projet_doctoral.preparation.domain.model._detail_projet import ChoixLangueRedactionThese
 from admission.ddd.projet_doctoral.preparation.domain.model._enums import (
@@ -48,11 +49,16 @@ from admission.ddd.projet_doctoral.preparation.domain.validator.exceptions impor
     MembreCAManquantException,
     PromoteurDeReferenceManquantException,
     PromoteurManquantException,
+    QuestionsSpecifiquesObligatoiresNonCompleteesException,
 )
 from admission.ddd.projet_doctoral.validation.domain.model._enums import ChoixStatutCDD
 from admission.tests import QueriesAssertionsMixin
 from admission.tests.factories import DoctorateAdmissionFactory, WriteTokenFactory
 from admission.tests.factories.doctorate import DoctorateFactory
+from admission.tests.factories.form_item import (
+    TextAdmissionFormItemFactory,
+    DocumentAdmissionFormItemFactory,
+)
 from admission.tests.factories.person import CompletePersonFactory
 from admission.tests.factories.roles import CandidateFactory, CddManagerFactory
 from admission.tests.factories.supervision import CaMemberFactory, PromoterFactory, _ProcessFactory
@@ -203,7 +209,10 @@ class DoctorateAdmissionListApiTestCase(APITestCase):
             self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
+@override_settings(OSIS_DOCUMENT_BASE_URL='http://dummyurl/')
 class DoctorateAdmissionCreationApiTestCase(APITestCase):
+    file_uuid = str(uuid.uuid4())
+
     @classmethod
     def setUpTestData(cls):
         cls.candidate = PersonFactory()
@@ -222,7 +231,36 @@ class DoctorateAdmissionCreationApiTestCase(APITestCase):
         cls.institute = EntityVersionFactory(
             entity_type=EntityType.INSTITUTE.name,
         )
-
+        TextAdmissionFormItemFactory(
+            uuid=uuid.UUID('fe254203-17c7-47d6-95e4-3c5c532da551'),
+            education=cls.doctorate,
+            weight=1,
+            required=True,
+            internal_label='text_item',
+            title={'en': 'Text field', 'fr-be': 'Champ texte'},
+            text={'en': 'Detailed data.', 'fr-be': 'Données détaillées.'},
+            help_text={'en': 'Write here', 'fr-be': 'Ecrivez ici'},
+            config={},
+        )
+        DocumentAdmissionFormItemFactory(
+            uuid=uuid.UUID('fe254203-17c7-47d6-95e4-3c5c532da552'),
+            education=cls.doctorate,
+            weight=2,
+            internal_label='document_item_1',
+            title={'en': 'Document field', 'fr-be': 'Champ document'},
+            text={'en': 'Detailed data.', 'fr-be': 'Données détaillées.'},
+            config={},
+        )
+        DocumentAdmissionFormItemFactory(
+            uuid=uuid.UUID('fe254203-17c7-47d6-95e4-3c5c532da553'),
+            education=cls.doctorate,
+            weight=3,
+            deleted=True,
+            internal_label='document_item_2',
+            title={'en': 'Document field', 'fr-be': 'Champ document'},
+            text={'en': 'Detailed data.', 'fr-be': 'Données détaillées.'},
+            config={},
+        )
         cls.create_data = {
             "type_admission": AdmissionType.PRE_ADMISSION.name,
             "justification": "Some justification",
@@ -237,8 +275,26 @@ class DoctorateAdmissionCreationApiTestCase(APITestCase):
             "projet_formation_complementaire": [],
             "lettres_recommandation": [],
             "institut_these": str(cls.institute.uuid),
+            "reponses_questions_specifiques": {
+                'fe254203-17c7-47d6-95e4-3c5c532da551': 'My response',
+                'fe254203-17c7-47d6-95e4-3c5c532da552': [cls.file_uuid, 'token:abcdef'],
+            },
         }
         cls.url = resolve_url("admission_api_v1:propositions")
+
+    def setUp(self) -> None:
+        patcher = patch("osis_document.api.utils.get_remote_token", return_value="foobar")
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+        patcher = patch("osis_document.api.utils.get_remote_metadata", return_value={"name": "myfile"})
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+        patcher = patch('osis_document.api.utils.confirm_remote_upload')
+        patched = patcher.start()
+        patched.return_value = "550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92"
+        self.addCleanup(patcher.stop)
 
     def test_admission_doctorate_creation_using_api_candidate(self):
         self.client.force_authenticate(user=self.candidate.user)
@@ -258,6 +314,13 @@ class DoctorateAdmissionCreationApiTestCase(APITestCase):
                 self.doctorate.academic_year.year % 100,
                 300000 + admission.id,
             ),
+        )
+        self.assertEqual(
+            admission.form_item_answers,
+            {
+                'fe254203-17c7-47d6-95e4-3c5c532da551': 'My response',
+                'fe254203-17c7-47d6-95e4-3c5c532da552': [self.file_uuid, '550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92'],
+            },
         )
 
     def test_admission_doctorate_creation_using_api_with_wrong_doctorate(self):
@@ -296,6 +359,14 @@ class DoctorateAdmissionApiTestCase(QueriesAssertionsMixin, APITestCase):
         cls.admission = DoctorateAdmissionFactory(
             doctorate__management_entity=cls.commission,
             supervision_group=promoter.process,
+        )
+        DocumentAdmissionFormItemFactory(
+            education=cls.admission.doctorate,
+            weight=1,
+            internal_label='document_item_1',
+            title={'en': 'Document field', 'fr-be': 'Champ document'},
+            text={'en': 'Detailed data.', 'fr-be': 'Données détaillées.'},
+            config={},
         )
 
         # Users
@@ -512,6 +583,7 @@ class DoctorateAdmissionUpdatingApiTestCase(DoctorateAdmissionApiTestCase):
             "proposition_programme_doctoral": [],
             "projet_formation_complementaire": [],
             "lettres_recommandation": [],
+            "reponses_questions_specifiques": {},
         }
 
     def test_admission_doctorate_update_using_api_candidate(self):
@@ -617,6 +689,53 @@ class DoctorateAdmissionVerifyProjectTestCase(APITestCase):
 
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    @mock.patch(
+        'admission.infrastructure.projet_doctoral.preparation.domain.service.promoteur.PromoteurTranslator.est_externe',
+        return_value=False,
+    )
+    def test_verify_project_with_specific_questions(self, mock_is_external):
+        self.client.force_authenticate(user=self.candidate.user)
+
+        admission = DoctorateAdmission.objects.get(pk=self.admission.pk)
+        item = TextAdmissionFormItemFactory(
+            education=self.admission.doctorate,
+            weight=1,
+            required=True,
+            deleted=False,
+            internal_label='Text item required',
+            title={'en': 'Text field', 'fr-be': 'Champ texte'},
+            text={'en': 'Detailed data.', 'fr-be': 'Données détaillées.'},
+            help_text={'en': 'Write here', 'fr-be': 'Ecrivez ici'},
+            config={},
+        )
+        item = AdmissionFormItem.objects.get(pk=item.pk)
+
+        # The item is required
+        # > the field is not completed
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        status_codes = [e['status_code'] for e in response.json()]
+        self.assertIn(QuestionsSpecifiquesObligatoiresNonCompleteesException.status_code, status_codes)
+
+        # > the field is completed
+        admission.form_item_answers = {str(item.uuid): 'My response'}
+        admission.save()
+
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        status_codes = [e['status_code'] for e in response.json()]
+        self.assertNotIn(QuestionsSpecifiquesObligatoiresNonCompleteesException.status_code, status_codes)
+
+        # > the field is not completed but the item is soft deleted
+        admission.form_item_answers = {}
+        admission.save()
+        item.deleted = True
+        item.save()
+
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertNotIn(QuestionsSpecifiquesObligatoiresNonCompleteesException.status_code, status_codes)
 
     @mock.patch(
         'admission.infrastructure.projet_doctoral.preparation.domain.service.promoteur.PromoteurTranslator.est_externe',

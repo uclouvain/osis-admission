@@ -26,6 +26,9 @@
 from functools import partial
 
 from admission.ddd.projet_doctoral.preparation.commands import *
+from admission.ddd.projet_doctoral.preparation.repository.i_liste_questions_specifiques import (
+    IListeQuestionsSpecifiquesRepository,
+)
 from admission.ddd.projet_doctoral.preparation.use_case.read import *
 from admission.ddd.projet_doctoral.preparation.use_case.write import *
 from infrastructure.shared_kernel.academic_year.repository.academic_year import AcademicYearRepository
@@ -36,6 +39,7 @@ from .domain.service.membre_CA import MembreCATranslator
 from .domain.service.profil_candidat import ProfilCandidatTranslator
 from .domain.service.promoteur import PromoteurTranslator
 from .repository.groupe_de_supervision import GroupeDeSupervisionRepository
+from .repository.liste_questions_specifiques import ListeQuestionsSpecifiquesRepository
 from .repository.proposition import PropositionRepository
 from ..validation.repository.demande import DemandeRepository
 
@@ -90,6 +94,7 @@ COMMAND_HANDLERS = {
         proposition_repository=PropositionRepository(),
         groupe_supervision_repository=GroupeDeSupervisionRepository(),
         promoteur_translator=PromoteurTranslator(),
+        liste_questions_specifiques_repository=ListeQuestionsSpecifiquesRepository(),
     ),
     SupprimerPromoteurCommand: partial(
         supprimer_promoteur,

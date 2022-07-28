@@ -133,6 +133,7 @@ def _instantiate_admission(admission: 'DoctorateAdmission') -> 'Proposition':
         ),
         creee_le=admission.created,
         modifiee_le=admission.modified,
+        reponses_questions_specifiques=admission.form_item_answers,
     )
 
 
@@ -223,6 +224,7 @@ class PropositionRepository(IPropositionRepository):
                 'phd_already_done_defense_date': entity.experience_precedente_recherche.date_soutenance,
                 'phd_already_done_no_defense_reason': entity.experience_precedente_recherche.raison_non_soutenue,
                 'archived_record_signatures_sent': entity.fiche_archive_signatures_envoyees,
+                'form_item_answers': entity.reponses_questions_specifiques,
             },
         )
         Candidate.objects.get_or_create(person=candidate)
@@ -345,4 +347,5 @@ class PropositionRepository(IPropositionRepository):
             modifiee_le=admission.modified,
             fiche_archive_signatures_envoyees=admission.archived_record_signatures_sent,
             erreurs=admission.detailed_status or [],
+            reponses_questions_specifiques=admission.form_item_answers,
         )

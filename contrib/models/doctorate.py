@@ -67,6 +67,7 @@ __all__ = [
     "REFERENCE_SEQ_NAME",
 ]
 
+from .form_item import ConfigurableModelFormItemField
 
 REFERENCE_SEQ_NAME = 'admission_doctorateadmission_reference_seq'
 
@@ -312,6 +313,14 @@ class DoctorateAdmission(BaseAdmission):
     )
 
     supervision_group = SignatureProcessField()
+
+    form_item_answers = ConfigurableModelFormItemField(
+        blank=True,
+        default=dict,
+        encoder=DjangoJSONEncoder,
+        upload_to=admission_directory_path,
+        education_field_name='doctorate',
+    )
 
     class Meta:
         verbose_name = _("Doctorate admission")

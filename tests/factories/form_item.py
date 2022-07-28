@@ -23,26 +23,24 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import factory
 
-from .dashboard import DashboardSerializer
-from .project import *
-from .cotutelle import *
-from .person import *
-from .coordonnees import CoordonneesSerializer
-from .secondary_studies import HighSchoolDiplomaSerializer
-from .languages_knowledge import *
-from .supervision import *
-from .curriculum import (
-    CurriculumFileSerializer,
-    EducationalExperienceYearSerializer,
-    CurriculumSerializer,
-    ProfessionalExperienceSerializer,
-)
-from .approvals import (
-    ApprouverPropositionCommandSerializer,
-    RefuserPropositionCommandSerializer,
-    ApprouverPropositionParPdfCommandSerializer,
-)
-from .confirmation import *
-from .doctorate import *
-from .specific_question import SpecificQuestionSerializer
+from admission.contrib.models import AdmissionFormItem
+from admission.ddd.projet_doctoral.preparation.domain.model._enums import TypeItemFormulaire
+
+
+class AdmissionFormItemFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = AdmissionFormItem
+
+
+class MessageAdmissionFormItemFactory(AdmissionFormItemFactory):
+    type = TypeItemFormulaire.MESSAGE.name
+
+
+class TextAdmissionFormItemFactory(AdmissionFormItemFactory):
+    type = TypeItemFormulaire.TEXTE.name
+
+
+class DocumentAdmissionFormItemFactory(AdmissionFormItemFactory):
+    type = TypeItemFormulaire.DOCUMENT.name

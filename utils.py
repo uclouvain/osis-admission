@@ -23,8 +23,9 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import uuid
 from collections import defaultdict
-from typing import Dict
+from typing import Dict, Union
 
 from django.core.cache import cache
 from rest_framework.generics import get_object_or_404
@@ -73,3 +74,10 @@ def get_mail_templates_from_admission(admission: DoctorateAdmission):
         if admission.post_enrolment_status == ChoixStatutDoctorat.SUBMITTED_CONFIRMATION.name:
             allowed_templates.append(ADMISSION_EMAIL_CONFIRMATION_PAPER_INFO_STUDENT)
     return allowed_templates
+
+
+def get_uuid_value(value: str) -> Union[uuid.UUID, str]:
+    try:
+        return uuid.UUID(hex=value)
+    except ValueError:
+        return value
