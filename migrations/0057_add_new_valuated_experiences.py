@@ -7,7 +7,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('osis_profile', '0013_cv_new_models'),
-        ('admission', '0056_remove_valuated_experiences'),
+        ('admission', '0055_course_types'),
     ]
 
     operations = [

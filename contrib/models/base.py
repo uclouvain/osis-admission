@@ -36,6 +36,11 @@ class BaseAdmission(models.Model):
     created = models.DateTimeField(verbose_name=_('Created'), auto_now_add=True)
     modified = models.DateTimeField(verbose_name=_('Modified'), auto_now=True)
 
+    valuated_experiences = models.ManyToManyField(
+        'osis_profile.Experience',
+        related_name='valuated_from',
+        verbose_name=_('The experiences that have been valuated from this admission.'),
+    )
     professional_valuated_experiences = models.ManyToManyField(
         'osis_profile.ProfessionalExperience',
         related_name='valuated_from',

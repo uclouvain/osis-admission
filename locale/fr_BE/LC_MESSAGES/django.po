@@ -1926,6 +1926,9 @@ msgid ""
 msgstr ""
 "Les expériences académiques qui ont été valorisées via cette admission."
 
+msgid "The experiences that have been valuated from this admission."
+msgstr "Les expériences qui ont été valorisées via cette admission."
+
 msgid "The first name of the candidate"
 msgstr "Le prénom du candidat"
 

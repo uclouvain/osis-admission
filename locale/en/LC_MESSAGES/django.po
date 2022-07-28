@@ -1815,6 +1815,9 @@ msgid ""
 "The educational experiences that have been valuated from this admission."
 msgstr ""
 
+msgid "The experiences that have been valuated from this admission."
+msgstr ""
+
 msgid "The first name of the candidate"
 msgstr ""
 
