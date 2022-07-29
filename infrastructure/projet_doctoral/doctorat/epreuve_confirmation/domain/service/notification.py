@@ -63,7 +63,7 @@ from admission.mail_templates import (
 from osis_notification.contrib.handlers import EmailNotificationHandler, WebNotificationHandler
 
 from base.forms.utils.datefield import DATE_FORMAT
-from reference.services.mandates import MandatesService, MandateFunctionEnum
+from reference.services.mandates import MandatesService, MandateFunctionEnum, MandatesException
 from osis_common.messaging.message_config import create_receiver
 
 
@@ -123,7 +123,9 @@ class Notification(INotification):
             "confirmation_paper_deadline": cls.format_date(confirmation_paper.date_limite),
             "scholarship_grant_acronym": financing_type,
             "reference": doctorate.reference,
-            "extension_request_proposed_date": confirmation_paper.demande_prolongation.nouvelle_echeance
+            "extension_request_proposed_date": cls.format_date(
+                confirmation_paper.demande_prolongation.nouvelle_echeance
+            )
             if confirmation_paper.demande_prolongation
             else '',
         }
@@ -230,19 +232,26 @@ class Notification(INotification):
 
         if settings.ESB_API_URL:
             # Notify the faculty dean and the institute president > email (cc)
-            cc_receivers = [
-                mandate.get('email')
-                for mandate in MandatesService.get(
+            try:
+                dean = MandatesService.get(
                     function=MandateFunctionEnum.DOYEN,
                     entity_acronym=entity_acronym,
                 )
-                + MandatesService.get(
+            except MandatesException:
+                dean = []
+
+            try:
+                president = MandatesService.get(
                     function=MandateFunctionEnum.PRESI,
                     entity_acronym=entity_acronym,
                 )
-            ]
+            except MandatesException:
+                president = []
 
-            adri_email_message['Cc'] = ','.join(cc_receivers)
+            cc_receivers = [mandate.get('email') for mandate in president + dean]
+
+            if cc_receivers:
+                adri_email_message['Cc'] = ','.join(cc_receivers)
 
         send_mail_to_generic_email(adri_email_message)
 
