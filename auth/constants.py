@@ -39,8 +39,8 @@ READ_ACTIONS_BY_TAB = {
     'confirmation': 'admission.view_doctorateadmission_confirmation',
     'extension-request': 'admission.view_doctorateadmission_confirmation',
     # History
-    'history': 'admission.view_historyentry',
-    'history-all': 'admission.view_historyentry',
+    'history': 'osis_history.view_historyentry',
+    'history-all': 'osis_history.view_historyentry',
     # Mails
     'send-mail': 'admission.send_message',
     # Training
@@ -65,9 +65,6 @@ UPDATE_ACTIONS_BY_TAB = {
     # Confirmation paper
     'confirmation': 'admission.change_doctorateadmission_confirmation',
     'extension-request': 'admission.change_doctorateadmission_confirmation_extension',
-    # History
-    'history': 'admission.change_historyentry',
-    'history-all': 'admission.change_historyentry',
     # Mails
     'send-mail': 'admission.send_message',
     # Training
