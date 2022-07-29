@@ -30,7 +30,7 @@ from admission.exports.utils import admission_generate_pdf
 from admission.contrib.models import AdmissionTask, ConfirmationPaper
 from base.models.enums.person_address_type import PersonAddressType
 from base.models.person_address import PersonAddress
-from reference.services.mandates import MandatesService, MandateFunctionEnum
+from reference.services.mandates import MandatesService, MandateFunctionEnum, MandatesException
 
 
 def format_address(address, language):
@@ -74,14 +74,13 @@ def admission_confirmation_success_attestation(task_uuid, language=None):
             else None
         )
 
-        cdd_president = (
-            MandatesService.get(
-                function=MandateFunctionEnum.PRESI,
-                entity_acronym=admission_task.admission.doctorate.management_entity.most_recent_entity_version.acronym,
-            )
-            if settings.ESB_API_URL
-            else []
-        )
+        cdd_president = []
+        if settings.ESB_API_URL:
+            acronym = admission_task.admission.doctorate.management_entity.most_recent_entity_version.acronym
+            try:
+                cdd_president = MandatesService.get(function=MandateFunctionEnum.PRESI, entity_acronym=acronym)
+            except MandatesException:
+                pass
 
         # Generate the pdf
         save_token = admission_generate_pdf(
