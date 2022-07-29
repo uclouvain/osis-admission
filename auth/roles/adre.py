@@ -58,5 +58,6 @@ class AdreSecretary(RoleModel):
             'admission.upload_pdf_confirmation': rules.always_allow & is_enrolled,
             'osis_history.view_historyentry': rules.always_allow,
             'admission.send_message': rules.always_allow & is_enrolled,
+            'admission.view_internalnote': rules.always_allow,
         }
         return RuleSet(ruleset)

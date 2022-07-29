@@ -58,4 +58,5 @@ class SicManager(RoleModel):
             'admission.view_doctorateadmission_supervision': rules.always_allow,
             'admission.add_supervision_member': rules.always_allow,
             'admission.remove_supervision_member': rules.always_allow,
+            'admission.view_internalnote': rules.always_allow,
         })

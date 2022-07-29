@@ -23,7 +23,9 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
+from django.contrib import messages
 from django.urls import reverse
+from django.utils.translation import gettext_lazy as _
 from django.views.generic import CreateView
 
 from admission.contrib.models.doctorate import InternalNote
@@ -45,19 +47,19 @@ class InternalNoteView(LoadDossierViewMixin, CreateView):
     def get_context_data(self, **kwargs):
         context_data = super().get_context_data(**kwargs)
 
-        if self.request.method == 'GET':
-            context_data['internal_notes'] = InternalNote.objects.filter(admission=self.admission).values(
-                'author__first_name',
-                'author__last_name',
-                'created',
-                'text',
-            )
+        context_data['internal_notes'] = InternalNote.objects.filter(admission=self.admission).values(
+            'author__first_name',
+            'author__last_name',
+            'created',
+            'text',
+        )
 
         return context_data
 
     def form_valid(self, form):
         form.instance.author = self.request.user.person
         form.instance.admission = self.admission
+        messages.success(self.request, _('Your note has been added.'))
         return super().form_valid(form)
 
     def get_success_url(self):
