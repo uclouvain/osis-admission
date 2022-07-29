@@ -68,6 +68,7 @@ class DoctorateAdmissionAdmin(admin.ModelAdmin):
         "professional_valuated_experiences",
         "educational_valuated_experiences",
     ]
+    exclude = ["valuated_experiences"]
 
     def candidate_fmt(self, obj):
         return "{} ({global_id})".format(obj.candidate, global_id=obj.candidate.global_id)
