@@ -2229,6 +2229,9 @@ msgstr "Vous avez atteint le maximum de propositions."
 msgid "Your data has been saved"
 msgstr "Vos données ont été sauvegardées"
 
+msgid "Your note has been added."
+msgstr "Votre note a bien été ajoutée."
+
 msgid "Zip code"
 msgstr "Code postal"
 

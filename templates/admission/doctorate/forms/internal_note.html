@@ -25,13 +25,16 @@
 * see http://www.gnu.org/licenses/.
 {% endcomment %}
 
+{% block actions-group %}
+{% endblock %}
+
 {% block tab_content %}
   <h3>{% trans "Internal notes" %}</h3>
 
   {% has_perm 'admission.add_internalnote' as can_add_note %}
   {% if can_add_note %}
     <h4>{% trans "Add an internal note" %}</h4>
-    <form action="" method="post">
+    <form id="internal-note-form" action="" method="post">
       {% csrf_token %}
       {% bootstrap_form_errors form %}
       {% bootstrap_field form.text show_label=False %}
@@ -81,6 +84,9 @@
     .internal-note > div.flex-content {
       border-bottom: 3px solid #ddd;
       margin-bottom: 0.5em;
+    }
+    #cke_1_contents {
+      height: initial !important;
     }
   </style>
 {% endblock %}

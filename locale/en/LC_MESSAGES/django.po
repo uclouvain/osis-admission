@@ -2095,6 +2095,9 @@ msgstr ""
 msgid "Your data has been saved"
 msgstr ""
 
+msgid "Your note has been added."
+msgstr ""
+
 msgid "Zip code"
 msgstr ""
 
