@@ -14,26 +14,26 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='cddconfiguration',
             name='communication_types',
-            field=models.JSONField(default=admission.contrib.models.cdd_config.default_communication_types, verbose_name='Communication types'),
+            field=models.JSONField(default=admission.contrib.models.cdd_config.default_communication_types, verbose_name='COMMUNICATION types'),
         ),
         migrations.AddField(
             model_name='cddconfiguration',
             name='conference_publication_types',
-            field=models.JSONField(default=admission.contrib.models.cdd_config.default_conference_publication_types, verbose_name='Conference publication types'),
+            field=models.JSONField(default=admission.contrib.models.cdd_config.default_conference_publication_types, verbose_name='CONFERENCE PUBLICATION types'),
         ),
         migrations.AddField(
             model_name='cddconfiguration',
             name='conference_types',
-            field=models.JSONField(default=admission.contrib.models.cdd_config.default_conference_types, verbose_name='Seminar types'),
+            field=models.JSONField(default=admission.contrib.models.cdd_config.default_conference_types, verbose_name='CONFERENCE types'),
         ),
         migrations.AddField(
             model_name='cddconfiguration',
             name='publication_types',
-            field=models.JSONField(default=admission.contrib.models.cdd_config.default_publication_types, verbose_name='Publication types'),
+            field=models.JSONField(default=admission.contrib.models.cdd_config.default_publication_types, verbose_name='PUBLICATION types'),
         ),
         migrations.AddField(
             model_name='cddconfiguration',
             name='residency_types',
-            field=models.JSONField(default=admission.contrib.models.cdd_config.default_residency_types, verbose_name='Residency types'),
+            field=models.JSONField(default=admission.contrib.models.cdd_config.default_residency_types, verbose_name='RESIDENCY types'),
         ),
     ]

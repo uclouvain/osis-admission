@@ -1262,9 +1262,6 @@ msgstr ""
 msgid "Opinion on the renewal of the research mandate"
 msgstr ""
 
-msgid "Oral communication"
-msgstr ""
-
 msgid "Oral exposé"
 msgstr ""
 
@@ -1311,6 +1308,9 @@ msgid "PUBLIC_DEFENSE"
 msgstr ""
 
 msgid "Page size"
+msgstr ""
+
+msgid "Participating proof"
 msgstr ""
 
 msgid "Participation"
@@ -1563,6 +1563,9 @@ msgid "Request of a new deadline for the confirmation paper"
 msgstr ""
 
 msgid "Research report"
+msgstr ""
+
+msgid "Research residency"
 msgstr ""
 
 msgid "Reset"

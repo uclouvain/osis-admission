@@ -346,19 +346,22 @@ msgid "COMMUNICATION"
 msgstr "Communication orale (hors conférences)"
 
 msgid "COMMUNICATION types"
-msgstr "Types d'activité pour la catégorie Communication orale (hors conférences)"
+msgstr ""
+"Types d'activité pour la catégorie Communication orale (hors conférences)"
 
 msgid "CONFERENCE"
 msgstr "Conférences, colloques"
 
 msgid "CONFERENCE PUBLICATION types"
-msgstr "Types d'activité pour une communication dans la catégorie Conférences, colloques"
+msgstr ""
+"Types d'activité pour une communication dans la catégorie Conférences, "
+"colloques"
 
 msgid "CONFERENCE types"
 msgstr "Types d'activité pour la catégorie Conférences, colloques"
 
 msgid "CONFIRMATION_PAPER"
-msgstr "Épreuve de confirmation"
+msgstr "Confirmation"
 
 msgid "CONFIRMATION_TO_BE_REPEATED"
 msgstr "Confirmation à représenter"
@@ -974,7 +977,7 @@ msgid "In person"
 msgstr "En présentiel"
 
 msgid "In review"
-msgstr "En attente de validation"
+msgstr "En révision"
 
 msgid "Institute email"
 msgstr "Email de l'institut"
@@ -1342,9 +1345,6 @@ msgstr "Avis du comité d'accompagnement suivant le format fourni par la CDD"
 msgid "Opinion on the renewal of the research mandate"
 msgstr "Avis sur le renouvellement du mandat de recherche"
 
-msgid "Oral communication"
-msgstr "Communication orale"
-
 msgid "Oral exposé"
 msgstr "Exposé oral"
 
@@ -1392,6 +1392,9 @@ msgstr "Soutenance publique"
 
 msgid "Page size"
 msgstr "Taille de la page"
+
+msgid "Participating proof"
+msgstr "Preuve de participation"
 
 msgid "Participation"
 msgstr "Participation"
@@ -1629,7 +1632,8 @@ msgid "RESIDENCY"
 msgstr "Séjour de perfectionnement de recherche"
 
 msgid "RESIDENCY types"
-msgstr "Types d'activité pour la catégorie Séjour de perfectionnement de recherche"
+msgstr ""
+"Types d'activité pour la catégorie Séjour de perfectionnement de recherche"
 
 msgid "Reason for exceeding the deadline"
 msgstr "Motif du dépassement de l’échéance"
@@ -1660,6 +1664,9 @@ msgstr "Demande d'une nouvelle échéance pour l'épreuve de confirmation"
 
 msgid "Research report"
 msgstr "Rapport de recherche"
+
+msgid "Research residency"
+msgstr "Séjour de recherche"
 
 msgid "Reset"
 msgstr "Réinitialiser"
@@ -1701,7 +1708,9 @@ msgid "SERVICE"
 msgstr "Service institutionnel, didactique et d'expertise scientifique"
 
 msgid "SERVICE types"
-msgstr "Types d'activité pour la catégorie Service institutionnel, didactique et d'expertise scientifique"
+msgstr ""
+"Types d'activité pour la catégorie Service institutionnel, didactique et "
+"d'expertise scientifique"
 
 msgid "SIC director"
 msgstr "Directeur SIC"

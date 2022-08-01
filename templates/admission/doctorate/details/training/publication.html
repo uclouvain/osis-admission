@@ -25,52 +25,69 @@
 {% endcomment %}
 
 {% if activity.website %}
-  {% firstof '<a href="'|safe|add:activity.website|add:'">'|safe|add:activity.website|add:'</a>'|safe "" as website %}
+  {% firstof '<a href="'|safe|add:activity.website|add:'" target="_blank">'|safe|add:activity.website|add:'</a>'|safe "" as website %}
 {% endif %}
 
 <div
-  class="panel panel-{{ activity|status_as_class }}"
-  data-status="{{ activity.status }}"
-  data-type="{{ activity.category }}"
+    class="panel panel-{{ activity|status_as_class }}"
+    data-status="{{ activity.status }}"
+    data-type="{{ activity.category }}"
 >
   <div class="panel-heading" role="tab" id="h-{{ activity.uuid }}">
     <h3 class="panel-title">
       {% include "admission/doctorate/details/training/_panel_title.html" %}
 
-      {% display '(' activity.city "," activity.country "," activity.start_date ")" as title_details %}
-      {% display activity.ects|default:""|floatformat " ECTS" as ects %}
+      {% display '(' activity.city "," activity.country "," activity.start_date|date:'d/m/Y' ")" as title_details %}
+      {% display activity.ects|default:""|floatformat:"-2" " ECTS" as ects %}
       {% display activity.type '-' activity.subtype '-' activity.title " " title_details "-" ects %}
       <div class="clearfix"></div>
     </h3>
   </div>
   <div
-    id="a-{{ activity.uuid }}"
-    class="panel-collapse collapse"
-    role="tabpanel"
-    aria-labelledby="h-{{ activity.uuid }}"
+      id="a-{{ activity.uuid }}"
+      class="panel-collapse collapse"
+      role="tabpanel"
+      aria-labelledby="h-{{ activity.uuid }}"
   >
     <div class="panel-body">
-      <p>
+      <div>
         <strong class="d-block">{% trans "Description" %}</strong>
-        {% display activity.title "-" activity.start_date|date:'d/m/Y' %}
-        <br />
-        {% display activity.role "," activity.authors " " "(" activity.journal ")" %}
+        <p>{% display activity.title "-" activity.start_date|date:'d/m/Y' %}</p>
+        <p>{% display activity.role "," activity.authors %}</p>
+        <p>{% display activity.journal %}</p>
         {% if activity.keywords %}
-          <br />
+          <br/>
           <strong>{% trans "Keywords" %} :</strong> {{ activity.keywords }}
         {% endif %}
-      </p>
+        {% if activity.publication_status %}
+          <br/>
+          <strong>{% trans "Publication status" %} :</strong>
+          {{ activity.publication_status|enum_display:'ChoixStatutPublication' }}
+        {% endif %}
+      </div>
+      {% if activity.summary %}
+        <div class="form-group">
+          <strong class="d-block">{% trans "Summary" context "paper summary" %}</strong>
+          {% document_visualizer activity.summary %}
+        </div>
+      {% endif %}
       <div class="row">
         {% if activity.ects %}
           <p class="col-md-4">
             <strong class="d-block">{% trans "ECTS" %}</strong>
-            {{ activity.ects|floatformat }}
+            {{ activity.ects|floatformat:"-2" }}
+          </p>
+        {% endif %}
+        {% if activity.dial_reference %}
+          <p class="col-md-4">
+            <strong class="d-block">{% trans "Référence DIAL.Pr" %}</strong>
+            {{ activity.dial_reference }}
           </p>
         {% endif %}
       </div>
       {% if activity.participating_proof %}
         <div class="form-group">
-          <strong class="d-block">{% trans "Participation certification" %}</strong>
+          <strong class="d-block">{% trans "Proof" %}</strong>
           {% document_visualizer activity.participating_proof %}
         </div>
       {% endif %}

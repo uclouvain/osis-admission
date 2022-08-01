@@ -39,7 +39,9 @@
 <h3>{% trans "Description" %}</h3>
 <div class="row">
   {% bootstrap_field form.type form_group_class="form-group col-md-4" %}
-  {% bootstrap_field form.subtype form_group_class="form-group col-md-4" %}
+</div>
+<div class="row">
+  {% bootstrap_field form.subtype form_group_class="form-group col-md-4 required_field" %}
 </div>
 {% bootstrap_field form.title form_group_class="form-group required_field" %}
 <div class="row">
@@ -69,6 +71,6 @@
   $(function () {
     $('.acceptation-proof').dependsOn({
       '#id_committee': { values: ['YES'] }
-    });
+    }, { valueOnDisable: '' });
   });
 </script>

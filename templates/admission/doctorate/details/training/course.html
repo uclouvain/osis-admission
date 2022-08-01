@@ -33,7 +33,7 @@
     <h3 class="panel-title">
       {% include "admission/doctorate/details/training/_panel_title.html" %}
 
-      {% display activity.ects|default:""|floatformat " ECTS" as ects %}
+      {% display activity.ects|default:""|floatformat:"-2" " ECTS" as ects %}
       {% display '(' activity.subtitle ')' as code %}
       {% display activity.type '-' activity.title " " code "-" ects %}
       <div class="clearfix"></div>
@@ -48,9 +48,9 @@
     <div class="panel-body">
       <p>
         {% if activity.organizing_institution == "UCLouvain" %}
-          {% display activity.start_date|date:"Y" "-" activity.end_date|date:"y" as dates %}
+          {% display activity.start_date|date:"Y" "-" activity.end_date|date:"Y" as dates %}
         {% else %}
-          {% display activity.start_date|date:"m/Y" "-" activity.end_date|date:"m/Y" as dates %}
+          {% display activity.start_date|date:"d/m/Y" "-" activity.end_date|date:"d/m/Y" as dates %}
         {% endif %}
         {% display activity.hour_volume " hours" as hours %}
         {% display activity.title "-" activity.organizing_institution "-" dates|cut:" " "-" hours %}
@@ -66,7 +66,7 @@
         {% if activity.ects %}
           <p class="col-md-4">
             <strong class="d-block">{% trans "ECTS" %}</strong>
-            {{ activity.ects|floatformat }}
+            {{ activity.ects|floatformat:"-2" }}
           </p>
         {% endif %}
       </div>

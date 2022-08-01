@@ -29,9 +29,6 @@
     from {{ start }} to {{ end }}
   {% endblocktrans %}
 {% endif %}
-{% if activity.website %}
-  {% firstof '<a href="'|safe|add:activity.website|add:'">'|safe|add:activity.website|add:'</a>'|safe "" as website %}
-{% endif %}
 
 
 {#  We cannot use {% panel %} as the title contains HTML #}
@@ -45,7 +42,7 @@
       {% include "admission/doctorate/details/training/_panel_title.html" %}
 
       {% display activity.type %}
-      {% display activity.ects|default:""|floatformat " ECTS" as ects %}
+      {% display activity.ects|default:""|floatformat:"-2" " ECTS" as ects %}
       {% display '(' activity.city "," activity.country "," period ")" "-" ects %}
       <div class="clearfix"></div>
     </h3>
@@ -60,7 +57,7 @@
       <strong class="d-block">{% trans "Description" %}</strong>
       {{ activity.subtitle|linebreaks }}
       <p>
-        {% display period "-" activity.is_online|format_is_online "-" website %}
+        {% display period %}
         <br/>
         {% display activity.organizing_institution "," activity.city "," activity.country %}
       </p>
@@ -74,13 +71,13 @@
         {% if activity.ects %}
           <p class="col-md-4">
             <strong class="d-block">{% trans "ECTS for participating" %}</strong>
-            {{ activity.ects|floatformat }}
+            {{ activity.ects|floatformat:"-2" }}
           </p>
         {% endif %}
       </div>
       {% if activity.participating_proof %}
         <div class="form-group">
-          <strong class="d-block">{% trans "Participation certification" %}</strong>
+          <strong class="d-block">{% trans "Participating proof" %}</strong>
           {% document_visualizer activity.participating_proof %}
         </div>
       {% endif %}

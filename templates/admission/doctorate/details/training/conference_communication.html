@@ -24,7 +24,7 @@
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
 
-{% display activity.ects|default:""|floatformat " ECTS" as ects %}
+{% display activity.ects|default:""|floatformat:"-2" " ECTS" as ects %}
 
 <div
   class="panel-{{ activity|status_as_class }}"
@@ -66,7 +66,7 @@
         {% if activity.ects %}
           <p class="col-md-4">
             <strong class="d-block">{% trans "ECTS" %}</strong>
-            {{ activity.ects|floatformat }}
+            {{ activity.ects|floatformat:"-2" }}
           </p>
         {% endif %}
         {% if activity.dial_reference %}
@@ -78,7 +78,7 @@
       </div>
       {% if activity.participating_proof %}
         <div class="form-group">
-          <strong class="d-block">{% trans "Participation certification" %}</strong>
+          <strong class="d-block">{% trans "Attestation of the communication" %}</strong>
           {% document_visualizer activity.participating_proof %}
         </div>
       {% endif %}
