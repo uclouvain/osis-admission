@@ -81,12 +81,34 @@ class ConfigurableActivityTypeField(SelectOrOtherField):
         return super().get_bound_field(form, field_name)
 
 
+class BooleanRadioSelect(forms.RadioSelect):
+    def get_context(self, name, value, attrs):
+        context = super().get_context(name, value, attrs)
+        # Override to explicitly set initial selected option to 'False' value
+        if value is None:
+            context['widget']['optgroups'][0][1][0]['selected'] = True
+            context['widget']['optgroups'][0][1][0]['attrs']['checked'] = True
+        return context
+
+
+class AcademicYearField(forms.ModelChoiceField):
+    def __init__(self, *args, **kwargs):
+        super().__init__(
+            label=_("Academic year"),
+            queryset=AcademicYear.objects.order_by('-year'),
+            **kwargs,
+        )
+
+    def label_from_instance(self, obj) -> str:
+        return f"{obj.year}-{obj.year + 1}"
+
+
 IsOnlineField = partial(
     forms.BooleanField,
     label=_("Online or in person"),
     initial=False,
     required=False,
-    widget=forms.RadioSelect(choices=((False, _("In person")), (True, _("Online")))),
+    widget=BooleanRadioSelect(choices=((False, _("In person")), (True, _("Online")))),
 )
 
 
@@ -157,10 +179,16 @@ class ConferenceCommunicationForm(ActivityFormMixin, forms.ModelForm):
     type = SelectOrOtherField(
         label=_("Type of communication"),
         choices=[
+            _("Oral exposé"),
             _("Poster"),
-            _("Oral communication"),
         ],
     )
+
+    def clean(self):
+        data = super().clean()
+        if data.get('committee') != 'YES' and data.get('acceptation_proof'):
+            data['acceptation_proof'] = []
+        return data
 
     class Meta:
         model = Activity
@@ -229,6 +257,12 @@ class CommunicationForm(ActivityFormMixin, forms.ModelForm):
         required=False,
     )
     is_online = IsOnlineField()
+
+    def clean(self):
+        data = super().clean()
+        if data.get('committee') != 'YES' and data.get('acceptation_proof'):
+            data['acceptation_proof'] = []
+        return data
 
     class Meta:
         model = Activity
@@ -328,9 +362,9 @@ class ResidencyForm(ActivityFormMixin, forms.ModelForm):
 
 class ResidencyCommunicationForm(ActivityFormMixin, forms.ModelForm):
     template_name = "admission/doctorate/forms/training/residency_communication.html"
-    type = ConfigurableActivityTypeField("residency_communication_types", label=_("Type of activity"))
-    subtype = ConfigurableActivityTypeField(
-        'residency_communication_subtypes',
+    type = SelectOrOtherField(choices=[_("Research residency")], label=_("Type of activity"))
+    subtype = SelectOrOtherField(
+        choices=[_("Oral exposé")],
         label=_("Type of communication"),
         required=False,
     )
@@ -460,6 +494,7 @@ class ValorisationForm(ActivityFormMixin, forms.ModelForm):
             'summary',
             'participating_proof',
             'ects',
+            'comment',
         ]
         labels = {
             'title': _("Title"),
@@ -478,12 +513,7 @@ class CourseForm(ActivityFormMixin, forms.ModelForm):
         required=False,
     )
     organizing_institution = SelectOrOtherField(choices=[INSTITUTION_UCL], label=_("Institution"))
-    academic_year = forms.ModelChoiceField(
-        label=_("Academic year"),
-        queryset=AcademicYear.objects.all(),
-        widget=autocomplete.ListSelect2(),
-        required=False,
-    )
+    academic_year = AcademicYearField(widget=autocomplete.ListSelect2(), required=False)
 
     def __init__(self, admission, *args, **kwargs) -> None:
         super().__init__(admission, *args, **kwargs)

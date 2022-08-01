@@ -4594,6 +4594,8 @@ components:
           type: number
           nullable: true
           minimum: 0
+        comment:
+          type: string
         object_type:
           type: string
         uuid:
@@ -4611,6 +4613,7 @@ components:
       - title
       - subtitle
       - ects
+      - comment
       - object_type
       - category
     Course:
@@ -4711,17 +4714,17 @@ components:
       properties:
         category_labels:
           type: object
-        service_types:
-          type: object
-        seminar_types:
-          type: object
         conference_types:
           type: object
         conference_publication_types:
           type: object
         communication_types:
           type: object
+        seminar_types:
+          type: object
         publication_types:
+          type: object
+        service_types:
           type: object
         residency_types:
           type: object

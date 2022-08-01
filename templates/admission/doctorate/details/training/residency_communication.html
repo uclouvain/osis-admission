@@ -25,10 +25,10 @@
 {% endcomment %}
 
 {% if activity.website %}
-  {% firstof '<a href="'|safe|add:activity.website|add:'">'|safe|add:activity.website|add:'</a>'|safe "" as website %}
+  {% firstof '<a href="'|safe|add:activity.website|add:'" target="_blank">'|safe|add:activity.website|add:'</a>'|safe "" as website %}
 {% endif %}
 
-{% display activity.ects|default:""|floatformat " ECTS" as ects %}
+{% display activity.ects|default:""|floatformat:"-2" " ECTS" as ects %}
 {% display '(' activity.city "," activity.country "," activity.start_date|date:"d/m/Y" ")" as location_period %}
 
 <div
@@ -73,7 +73,7 @@
         {% if activity.ects %}
           <p class="col-md-4">
             <strong class="d-block">{% trans "ECTS" %}</strong>
-            {{ activity.ects|floatformat }}
+            {{ activity.ects|floatformat:"-2" }}
           </p>
         {% endif %}
       </div>

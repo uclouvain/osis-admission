@@ -25,7 +25,7 @@
 {% endcomment %}
 
 {% if activity.website %}
-  {% firstof '<a href="'|safe|add:activity.website|add:'">'|safe|add:activity.website|add:'</a>'|safe "" as website %}
+  {% firstof '<a href="'|safe|add:activity.website|add:'" target="_blank">'|safe|add:activity.website|add:'</a>'|safe "" as website %}
 {% endif %}
 
 {% display '(' activity.city "," activity.country "," activity.start_date|date:"d/m/Y" ")" as location_period %}

@@ -24,7 +24,7 @@
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
 
-{% display activity.ects|default:""|floatformat " ECTS" as ects %}
+{% display activity.ects|default:""|floatformat:"-2" " ECTS" as ects %}
 
 <div
   class="panel-{{ activity|status_as_class }}"
@@ -46,11 +46,12 @@
     aria-labelledby="h-{{ activity.uuid }}"
   >
     <div class="panel-body">
-      <p>
+      <div>
         <strong class="d-block">{% trans "Description" %}</strong>
-        {% display activity.title %}
-        {% display activity.authors " " "(" activity.role ")" ", " activity.journal %}
-      </p>
+        <p>{{ activity.title }}</p>
+        <p>{% display activity.authors " " "(" activity.role ")" %}</p>
+        <p>{{ activity.journal }}</p>
+      </div>
       {% if activity.committee %}
         <p>
           <strong class="d-block">{% trans "Selection committee" %}</strong>
@@ -73,7 +74,7 @@
         {% if activity.ects %}
           <p class="col-md-4">
             <strong class="d-block">{% trans "ECTS" %}</strong>
-            {{ activity.ects|floatformat }}
+            {{ activity.ects|floatformat:"-2" }}
           </p>
         {% endif %}
         {% if activity.dial_reference %}

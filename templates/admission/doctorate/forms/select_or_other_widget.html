@@ -25,13 +25,14 @@
 {% endcomment %}
 
 {% spaceless %}
+  {% firstof widget.required 0 as widget_required %}
   {% with widget=widget.subwidgets.0 %}
     {% include widget.template_name %}
   {% endwith %}
   {% with widget=widget.subwidgets.1 %}
     </div>
-    <div id="parent-{{ widget.attrs.id }}" class="form-group col-md-4">
-      <label for="{{ widget.attrs.id }}">{% trans "If other, specify" %}</label>
+    <div id="parent-{{ widget.attrs.id }}" class="form-group col-md-4{% if widget_required %} required_field{% endif %}">
+      <label for="{{ widget.attrs.id }}" class="control-label">{% trans "If other, specify" %}</label>
       {% include widget.template_name %}
   {% endwith %}
 {% endspaceless %}

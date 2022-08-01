@@ -39,7 +39,7 @@
     <h3 class="panel-title">
       {% include "admission/doctorate/details/training/_panel_title.html" %}
 
-      {% display activity.ects|default:""|floatformat " ECTS" as ects %}
+      {% display activity.ects|default:""|floatformat:"-2" " ECTS" as ects %}
       {% display activity.type '-' activity.title '-' period "-" ects %}
       <div class="clearfix"></div>
     </h3>
@@ -60,7 +60,7 @@
         {% if activity.ects %}
           <p class="col-md-4">
             <strong class="d-block">{% trans "ECTS" %}</strong>
-            {{ activity.ects|floatformat }}
+            {{ activity.ects|floatformat:"-2" }}
           </p>
         {% endif %}
       </div>

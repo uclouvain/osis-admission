@@ -49,7 +49,6 @@ class ShouldConferenceEtreComplete(BusinessValidator):
                 self.conference.ville,
                 self.conference.institution_organisatrice,
                 self.activite.ects,
-                self.conference.certificat_participation,
             ]
         ):
             raise ActiviteNonComplete(activite_id=self.activite.entity_id)
