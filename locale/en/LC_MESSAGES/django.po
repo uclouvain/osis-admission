@@ -321,8 +321,17 @@ msgstr "Chemistry"
 msgid "COMMUNICATION"
 msgstr "Oral communication (excluding conferences)"
 
+msgid "COMMUNICATION types"
+msgstr ""
+
 msgid "CONFERENCE"
 msgstr "Conferences, symposiums"
+
+msgid "CONFERENCE PUBLICATION types"
+msgstr ""
+
+msgid "CONFERENCE types"
+msgstr ""
 
 msgid "CONFIRMATION_PAPER"
 msgstr "Confirmation paper"
@@ -332,6 +341,9 @@ msgstr "Confirmation to be repeated"
 
 msgid "COURSE"
 msgstr "Course"
+
+msgid "COURSE types"
+msgstr ""
 
 msgid "CSC - China Scholarship Council"
 msgstr ""
@@ -527,12 +539,6 @@ msgstr ""
 msgid "Communication attestation"
 msgstr ""
 
-msgid "Communication types"
-msgstr ""
-
-msgid "Conference publication types"
-msgstr ""
-
 msgid "Configuration saved."
 msgstr ""
 
@@ -586,9 +592,6 @@ msgid "Course owner"
 msgstr ""
 
 msgid "Course owner if applicable"
-msgstr ""
-
-msgid "Course types"
 msgstr ""
 
 msgid "Courses and training"
@@ -1301,6 +1304,9 @@ msgstr ""
 msgid "PUBLICATION"
 msgstr "Publication"
 
+msgid "PUBLICATION types"
+msgstr ""
+
 msgid "PUBLIC_DEFENSE"
 msgstr ""
 
@@ -1511,9 +1517,6 @@ msgstr "Publication"
 msgid "Publication status"
 msgstr ""
 
-msgid "Publication types"
-msgstr ""
-
 msgid "Published"
 msgstr ""
 
@@ -1528,6 +1531,9 @@ msgstr "Rejected"
 
 msgid "RESIDENCY"
 msgstr "Advanced research residency"
+
+msgid "RESIDENCY types"
+msgstr ""
 
 msgid "Reason for exceeding the deadline"
 msgstr ""
@@ -1562,9 +1568,6 @@ msgstr ""
 msgid "Reset"
 msgstr ""
 
-msgid "Residency types"
-msgstr ""
-
 msgid "Retaking of the confirmation paper"
 msgstr ""
 
@@ -1595,8 +1598,14 @@ msgstr "Self-funding"
 msgid "SEMINAR"
 msgstr "Research seminar: attendance"
 
+msgid "SEMINAR types"
+msgstr ""
+
 msgid "SERVICE"
 msgstr "Institutional, didactic and scientific expertise service"
+
+msgid "SERVICE types"
+msgstr ""
 
 msgid "SIC director"
 msgstr ""
@@ -1664,9 +1673,6 @@ msgstr ""
 msgid "Selection committee"
 msgstr ""
 
-msgid "Seminar types"
-msgstr ""
-
 msgid "Send a mail"
 msgstr ""
 
@@ -1680,9 +1686,6 @@ msgid "Send the message"
 msgstr ""
 
 msgid "Sender"
-msgstr ""
-
-msgid "Service types"
 msgstr ""
 
 msgid "Services"
