@@ -400,6 +400,14 @@ def strip(value):
 
 
 @register.filter
+def status_list(admission):
+    statuses = {str(admission.status)}
+    for child in admission.children.all():
+        statuses.add(str(child.status))
+    return ','.join(statuses)
+
+
+@register.filter
 def status_as_class(activity):
     return {
         StatutActivite.SOUMISE.name: "warning",
