@@ -37,7 +37,7 @@
 {#  We cannot use {% panel %} as the title contains HTML #}
 <div
     class="panel panel-{{ activity|status_as_class }}"
-    data-status="{{ activity.status }}"
+    data-status="{{ activity|status_list }}"
     data-type="{{ activity.category }}"
 >
   <div class="panel-heading" role="tab" id="h-{{ activity.uuid }}">
