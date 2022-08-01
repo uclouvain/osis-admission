@@ -204,35 +204,35 @@ class CddConfiguration(models.Model):
         verbose_name=_("Category labels"),
         default=default_category_labels,
     )
-    service_types = models.JSONField(
-        verbose_name=_("Service types"),
-        default=default_service_types,
-    )
-    seminar_types = models.JSONField(
-        verbose_name=_("Seminar types"),
-        default=default_seminar_types,
-    )
     conference_types = models.JSONField(
-        verbose_name=_("Seminar types"),
+        verbose_name=_("CONFERENCE types"),
         default=default_conference_types,
     )
     conference_publication_types = models.JSONField(
-        verbose_name=_("Conference publication types"),
+        verbose_name=_("CONFERENCE PUBLICATION types"),
         default=default_conference_publication_types,
     )
     communication_types = models.JSONField(
-        verbose_name=_("Communication types"),
+        verbose_name=_("COMMUNICATION types"),
         default=default_communication_types,
     )
+    seminar_types = models.JSONField(
+        verbose_name=_("SEMINAR types"),
+        default=default_seminar_types,
+    )
     publication_types = models.JSONField(
-        verbose_name=_("Publication types"),
+        verbose_name=_("PUBLICATION types"),
         default=default_publication_types,
     )
+    service_types = models.JSONField(
+        verbose_name=_("SERVICE types"),
+        default=default_service_types,
+    )
     residency_types = models.JSONField(
-        verbose_name=_("Residency types"),
+        verbose_name=_("RESIDENCY types"),
         default=default_residency_types,
     )
     course_types = models.JSONField(
-        verbose_name=_("Course types"),
+        verbose_name=_("COURSE types"),
         default=default_course_types,
     )

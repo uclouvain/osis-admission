@@ -48,6 +48,8 @@ TextareaArrayField = partial(
 class TranslatedListsValueWidget(forms.MultiWidget):
     """Widget of two textareas (one for each language)"""
 
+    template_name = 'admission/config/translated_lists_value_widget.html'
+
     def __init__(self, *args, **kwargs):
         widgets = {
             settings.LANGUAGE_CODE_EN: forms.Textarea(attrs={'placeholder': _("English values")}),

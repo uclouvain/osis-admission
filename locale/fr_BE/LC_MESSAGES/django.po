@@ -345,8 +345,17 @@ msgstr "Chimie"
 msgid "COMMUNICATION"
 msgstr "Communication orale (hors conférences)"
 
+msgid "COMMUNICATION types"
+msgstr "Types d'activité pour la catégorie Communication orale (hors conférences)"
+
 msgid "CONFERENCE"
 msgstr "Conférences, colloques"
+
+msgid "CONFERENCE PUBLICATION types"
+msgstr "Types d'activité pour une communication dans la catégorie Conférences, colloques"
+
+msgid "CONFERENCE types"
+msgstr "Types d'activité pour la catégorie Conférences, colloques"
 
 msgid "CONFIRMATION_PAPER"
 msgstr "Épreuve de confirmation"
@@ -356,6 +365,9 @@ msgstr "Confirmation à représenter"
 
 msgid "COURSE"
 msgstr "Cours"
+
+msgid "COURSE types"
+msgstr "Types d'activité pour la catégorie Cours"
 
 msgid "CSC - China Scholarship Council"
 msgstr "CSC - China Scholarship Council"
@@ -554,12 +566,6 @@ msgstr "Membres du comité"
 msgid "Communication attestation"
 msgstr "Attestation de communication"
 
-msgid "Communication types"
-msgstr "Types de communication"
-
-msgid "Conference publication types"
-msgstr "Type de publication (pour une conférence)"
-
 msgid "Configuration saved."
 msgstr "Configuration enregistrée."
 
@@ -614,9 +620,6 @@ msgstr "Titulaire du cours"
 
 msgid "Course owner if applicable"
 msgstr "Titulaire du cours (le cas échéant)"
-
-msgid "Course types"
-msgstr "Type de cours"
 
 msgid "Courses and training"
 msgstr "Cours et formation"
@@ -1381,6 +1384,9 @@ msgstr "Défense privée"
 msgid "PUBLICATION"
 msgstr "Publication"
 
+msgid "PUBLICATION types"
+msgstr "Types d'activité pour la catégorie Publication"
+
 msgid "PUBLIC_DEFENSE"
 msgstr "Soutenance publique"
 
@@ -1607,9 +1613,6 @@ msgstr "Publication"
 msgid "Publication status"
 msgstr "Statut de publication"
 
-msgid "Publication types"
-msgstr "Types de publication"
-
 msgid "Published"
 msgstr "Publié"
 
@@ -1624,6 +1627,9 @@ msgstr "Rejeté"
 
 msgid "RESIDENCY"
 msgstr "Séjour de perfectionnement de recherche"
+
+msgid "RESIDENCY types"
+msgstr "Types d'activité pour la catégorie Séjour de perfectionnement de recherche"
 
 msgid "Reason for exceeding the deadline"
 msgstr "Motif du dépassement de l’échéance"
@@ -1658,9 +1664,6 @@ msgstr "Rapport de recherche"
 msgid "Reset"
 msgstr "Réinitialiser"
 
-msgid "Residency types"
-msgstr "Types de séjours"
-
 msgid "Retaking of the confirmation paper"
 msgstr "Épreuve de confirmation à représenter"
 
@@ -1691,8 +1694,14 @@ msgstr "Auto-financement"
 msgid "SEMINAR"
 msgstr "Séminaire de recherche : assistance"
 
+msgid "SEMINAR types"
+msgstr "Types d'activité pour la catégorie Séminaire de recherche : assistance"
+
 msgid "SERVICE"
 msgstr "Service institutionnel, didactique et d'expertise scientifique"
+
+msgid "SERVICE types"
+msgstr "Types d'activité pour la catégorie Service institutionnel, didactique et d'expertise scientifique"
 
 msgid "SIC director"
 msgstr "Directeur SIC"
@@ -1760,9 +1769,6 @@ msgstr "Sélectionner pour une action en masse"
 msgid "Selection committee"
 msgstr "Comité de sélection"
 
-msgid "Seminar types"
-msgstr "Types de séminaires"
-
 msgid "Send a mail"
 msgstr "Envoyer un e-mail"
 
@@ -1777,9 +1783,6 @@ msgstr "Envoyer le message"
 
 msgid "Sender"
 msgstr "Expéditeur"
-
-msgid "Service types"
-msgstr "Type des services"
 
 msgid "Services"
 msgstr "Services"
