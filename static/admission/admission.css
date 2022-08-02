@@ -150,3 +150,7 @@ textarea {
 .field-with-tooltip label {
   display: initial;
 }
+
+.tooltip .tooltip-inner {
+  width: auto;
+}
