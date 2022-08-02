@@ -24,6 +24,7 @@
 #
 # ##############################################################################
 from django import forms
+from django.utils.translation import gettext_lazy as _
 
 from admission.contrib.models.doctoral_training import Activity
 
@@ -34,3 +35,9 @@ class BatchActivityForm(forms.Form):
     def __init__(self, doctorate_id=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['activity_ids'].queryset = Activity.objects.filter(doctorate_id=doctorate_id)
+
+    def clean(self):
+        data = super().clean()
+        if not data.get('activity_ids'):
+            self.add_error(None, _("Select at least one activity"))
+        return data

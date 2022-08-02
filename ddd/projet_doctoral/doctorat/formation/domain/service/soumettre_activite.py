@@ -44,14 +44,14 @@ class SoumettreActivites(interface.DomainService):
         activites = activite_repository.get_multiple(entity_ids)
         execute_functions_and_aggregate_exceptions(
             *[
-                partial(cls._verifier_activite, activite=activites[entity_id], dto=dtos[entity_id])
+                partial(cls.verifier_activite, activite=activites[entity_id], dto=dtos[entity_id])
                 for entity_id in entity_ids
             ]
         )
         return list(activites.values())
 
     @classmethod
-    def _verifier_activite(cls, activite: Activite, dto: ActiviteDTO) -> None:
+    def verifier_activite(cls, activite: Activite, dto: ActiviteDTO) -> None:
         if isinstance(dto, ConferenceDTO):
             ConferenceValidatorList(conference=dto, activite=activite).validate()
         elif isinstance(dto, ConferenceCommunicationDTO):

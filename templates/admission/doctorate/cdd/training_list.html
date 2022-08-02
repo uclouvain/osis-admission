@@ -78,13 +78,13 @@
   {% endif %}
 
   {# Special error handling #}
-  {% if form.errors %}
+  {% if form.non_field_errors %}
     <div class="alert alert-danger alert-dismissable alert-link">
         {{ form.non_field_errors.0 }}
     </div>
   {% endif %}
 
-  <form id="activities" action="" method="post">
+  <form id="activities" action="{% url 'admission:doctorate:training' uuid=view.kwargs.uuid %}" method="post">
     {% csrf_token %}
     {% for activity in activities %}
       {% firstof 0 activity.category|lower|add:'.html' as template_name %}

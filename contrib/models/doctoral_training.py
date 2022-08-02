@@ -23,10 +23,13 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import contextlib
 from uuid import uuid4
 
 from django.db import models
+from django.dispatch import receiver
 from django.utils.translation import gettext_lazy as _, pgettext_lazy
+from django.db.models.signals import post_save
 
 from admission.ddd.projet_doctoral.doctorat.formation.domain.model._enums import (
     CategorieActivite,
@@ -34,6 +37,7 @@ from admission.ddd.projet_doctoral.doctorat.formation.domain.model._enums import
     ChoixStatutPublication,
     StatutActivite,
 )
+from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from osis_document.contrib import FileField
 
 
@@ -230,10 +234,13 @@ class Activity(models.Model):
         auto_now_add=True,
         verbose_name=_("Created at"),
     )
-
     modified_at = models.DateTimeField(
         auto_now=True,
         verbose_name=_("Modified at"),
+    )
+    can_be_submitted = models.BooleanField(
+        default=False,
+        verbose_name=_("Can be submitted"),
     )
 
     def __str__(self) -> str:
@@ -241,3 +248,26 @@ class Activity(models.Model):
 
     class Meta:
         ordering = ['-created_at']
+
+
+@receiver(post_save, sender=Activity)
+def _activity_update_can_be_submitted(sender, instance, **kwargs):
+    from admission.ddd.projet_doctoral.doctorat.formation.builder.activite_identity_builder import (
+        ActiviteIdentityBuilder,
+    )
+    from admission.ddd.projet_doctoral.doctorat.formation.domain.service.soumettre_activite import SoumettreActivites
+    from admission.infrastructure.projet_doctoral.doctorat.formation.repository.activite import ActiviteRepository
+
+    activite_identity = ActiviteIdentityBuilder.build_from_uuid(instance.uuid)
+    activite = ActiviteRepository.get(activite_identity)
+    activite_dto = ActiviteRepository.get_dto(activite_identity)
+    can_be_submitted = False
+    with contextlib.suppress(MultipleBusinessExceptions):
+        SoumettreActivites().verifier_activite(activite, activite_dto)
+        if activite.categorie == CategorieActivite.SEMINAR:
+            # We must check children too for seminar activities
+            for sous_activite in ActiviteRepository.search(parent_id=activite.entity_id):
+                sous_activite_dto = ActiviteRepository.get_dto(sous_activite.entity_id)
+                SoumettreActivites().verifier_activite(sous_activite, sous_activite_dto)
+        can_be_submitted = True
+    Activity.objects.filter(uuid=instance.uuid).update(can_be_submitted=can_be_submitted)

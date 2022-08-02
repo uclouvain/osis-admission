@@ -85,7 +85,14 @@
         <label class="input-group-addon">
           <input
             type="checkbox" name="activity_ids" value="{{ activity.uuid }}"
+            {% if not activity.can_be_submitted %}
+            disabled="disabled"
+            data-toggle="tooltip"
+            data-container="body"
+            title="{% trans "This activity is not complete" %}"
+            {% else %}
             aria-label="{% trans "Select for batch action" %}"
+            {% endif %}
           />
         </label>
       {% endif %}
