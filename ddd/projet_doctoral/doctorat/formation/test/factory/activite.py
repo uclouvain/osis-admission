@@ -87,6 +87,7 @@ class ConferencePublicationDTOFactory(factory.Factory):
     intitule = "test"
     auteurs = "test"
     role = "test"
+    comite_selection = "test"
     nom_revue_maison_edition = "test"
     preuve_acceptation = "test"
 

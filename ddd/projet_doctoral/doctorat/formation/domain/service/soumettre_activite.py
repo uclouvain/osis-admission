@@ -44,14 +44,19 @@ class SoumettreActivites(interface.DomainService):
         activites = activite_repository.get_multiple(entity_ids)
         execute_functions_and_aggregate_exceptions(
             *[
-                partial(cls.verifier_activite, activite=activites[entity_id], dto=dtos[entity_id])
+                partial(
+                    cls.verifier_activite,
+                    activite=activites[entity_id],
+                    dto=dtos[entity_id],
+                    activite_repository=activite_repository,
+                )
                 for entity_id in entity_ids
             ]
         )
         return list(activites.values())
 
     @classmethod
-    def verifier_activite(cls, activite: Activite, dto: ActiviteDTO) -> None:
+    def verifier_activite(cls, activite: Activite, dto: ActiviteDTO, activite_repository: IActiviteRepository) -> None:
         if isinstance(dto, ConferenceDTO):
             ConferenceValidatorList(conference=dto, activite=activite).validate()
         elif isinstance(dto, ConferenceCommunicationDTO):
@@ -68,6 +73,10 @@ class SoumettreActivites(interface.DomainService):
             SejourCommunicationValidatorList(communication=dto, activite=activite).validate()
         elif isinstance(dto, SeminaireDTO):
             SeminaireValidatorList(seminaire=dto, activite=activite).validate()
+            # Also check children
+            for sous_activite in activite_repository.search(parent_id=activite.entity_id):
+                sous_dto = activite_repository.get_dto(sous_activite.entity_id)
+                cls.verifier_activite(sous_activite, sous_dto, activite_repository)
         elif isinstance(dto, SeminaireCommunicationDTO):
             SeminaireCommunicationValidatorList(communication=dto, activite=activite).validate()
         elif isinstance(dto, ServiceDTO):

@@ -26,6 +26,7 @@
 from django.db.models import JSONField
 from django.shortcuts import resolve_url
 from django.test import TestCase
+from django.utils.translation import gettext_lazy as _
 from rest_framework import status
 
 from admission.contrib.models.cdd_config import CddConfiguration
@@ -35,9 +36,19 @@ from base.tests.factories.person import SuperUserPersonFactory
 
 
 class CddConfigTestCase(TestCase):
+    data = {}
+
     @classmethod
     def setUpTestData(cls):
         cls.manager = CddManagerFactory(entity__version__acronym="FOO")
+        for field in CddConfiguration._meta.fields:
+            if field.name == 'category_labels':
+                values = [str(v) for v in dict(CategorieActivite.choices()).values()]
+                cls.data[f'{field.name}_en'] = "\n".join(values)
+                cls.data[f'{field.name}_fr-be'] = "\n".join(values)
+            elif isinstance(field, JSONField):
+                cls.data[f'{field.name}_en'] = "Foo\nBarbaz"
+                cls.data[f'{field.name}_fr-be'] = "Bar\nBaz"
 
     def test_cdd_config_access(self):
         url = resolve_url('admission:config:cdd_config:list')
@@ -56,16 +67,7 @@ class CddConfigTestCase(TestCase):
         self.client.force_login(self.manager.person.user)
 
         self.assertEqual(CddConfiguration.objects.count(), 0)
-        data = {}
-        for field in CddConfiguration._meta.fields:
-            if field.name == 'category_labels':
-                values = [str(v) for v in dict(CategorieActivite.choices()).values()]
-                data[f'{field.name}_en'] = "\n".join(values)
-                data[f'{field.name}_fr-be'] = "\n".join(values)
-            elif isinstance(field, JSONField):
-                data[f'{field.name}_en'] = "Foo\nBarbaz"
-                data[f'{field.name}_fr-be'] = "Bar\nBaz"
-        response = self.client.post(url, data)
+        response = self.client.post(url, self.data)
         self.assertEqual(response.status_code, status.HTTP_302_FOUND)
         expected = {
             'en': ['Foo', 'Barbaz'],
@@ -73,3 +75,9 @@ class CddConfigTestCase(TestCase):
         }
         config = CddConfiguration.objects.first()
         self.assertEqual(config.service_types, expected)
+
+        data = self.data.copy()
+        values = [str(v) for v in dict(CategorieActivite.choices()).values()][:-2]
+        data['category_labels_en'] = "\n".join(values)
+        response = self.client.post(url, data)
+        self.assertFormError(response, 'form', 'category_labels', _("Number of values mismatch"))

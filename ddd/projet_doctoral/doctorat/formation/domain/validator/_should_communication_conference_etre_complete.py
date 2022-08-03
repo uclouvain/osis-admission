@@ -26,6 +26,7 @@
 
 import attr
 
+from admission.ddd.projet_doctoral.doctorat.formation.domain.model._enums import ChoixComiteSelection
 from admission.ddd.projet_doctoral.doctorat.formation.domain.model.activite import Activite
 from admission.ddd.projet_doctoral.doctorat.formation.domain.validator.exceptions import ActiviteNonComplete
 from admission.ddd.projet_doctoral.doctorat.formation.dtos import ConferenceCommunicationDTO
@@ -43,9 +44,11 @@ class ShouldCommunicationConferenceEtreComplete(BusinessValidator):
                 self.communication.type,
                 self.communication.titre,
                 self.communication.comite_selection,
-                self.communication.preuve_acceptation,
                 self.communication.attestation_communication,
                 self.activite.ects,
             ]
+        ) or (
+            self.communication.comite_selection == ChoixComiteSelection.YES
+            and not self.communication.preuve_acceptation
         ):
             raise ActiviteNonComplete(activite_id=self.activite.entity_id)

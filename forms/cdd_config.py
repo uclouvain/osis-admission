@@ -98,9 +98,9 @@ class CddConfigForm(forms.ModelForm):
         model = CddConfiguration
         exclude = ['cdd', 'id']
 
-    def clean(self):
-        data = super().clean()
+    def clean_category_labels(self):
+        data = self.cleaned_data['category_labels']
         expected_length = len(CategorieActivite.choices())
-        if any(len(data['category_labels'][lang]) != expected_length for lang in dict(settings.LANGUAGES)):
-            raise ValidationError('category_labels', _("Number of values mismatch"))
+        if any(len(data[lang]) != expected_length for lang in dict(settings.LANGUAGES)):
+            raise ValidationError(_("Number of values mismatch"))
         return data

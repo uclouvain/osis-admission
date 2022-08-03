@@ -393,6 +393,9 @@ msgstr "Peut approuver le jury"
 msgid "Can approve proposition"
 msgstr "Peut approuver la proposition"
 
+msgid "Can be submitted"
+msgstr "Peut être soumis"
+
 msgid "Can check copyright"
 msgstr "Peut vérifier le copyright"
 
@@ -1421,6 +1424,19 @@ msgid "Planned duration"
 msgstr "Durée prévue"
 
 msgid ""
+"Please check the details of the activity (and sub-activities) to fill in all "
+"mandatory fields"
+msgstr ""
+"Veuillez vérifier le détail de l’activité (et des sous-activités) pour "
+"renseigner tous les champs obligatoires"
+
+msgid ""
+"Please check the details of the activity to fill in all mandatory fields"
+msgstr ""
+"Veuillez vérifier le détail de l’activité pour renseigner tous les champs "
+"obligatoires"
+
+msgid ""
 "Please fill in all the required information in the 'Personal Data > "
 "Coordinates' tab."
 msgstr ""
@@ -1772,6 +1788,9 @@ msgstr "Études secondaires"
 msgid "Select a mail template"
 msgstr "Sélectionner un template d'email"
 
+msgid "Select at least one activity"
+msgstr "Veuillez sélectionner au moins une activité"
+
 msgid "Select for batch action"
 msgstr "Sélectionner pour une action en masse"
 
@@ -1834,6 +1853,9 @@ msgstr "Numéro de la rue"
 
 msgid "Subject"
 msgstr "Sujet"
+
+msgid "Submit"
+msgstr "Soumettre"
 
 msgid "Submit these activities"
 msgstr "Soumettre ces activités"

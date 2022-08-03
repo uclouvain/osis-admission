@@ -32,7 +32,11 @@ from django.utils.translation import get_language, gettext_lazy as _, pgettext_l
 
 from admission.contrib.models.cdd_config import CddConfiguration
 from admission.contrib.models.doctoral_training import Activity
-from admission.ddd.projet_doctoral.doctorat.formation.domain.model._enums import CategorieActivite, ChoixTypeEpreuve
+from admission.ddd.projet_doctoral.doctorat.formation.domain.model._enums import (
+    CategorieActivite,
+    ChoixComiteSelection,
+    ChoixTypeEpreuve,
+)
 from admission.forms import SelectOrOtherField
 from base.forms.utils.datefield import DatePickerInput
 from base.models.academic_year import AcademicYear
@@ -186,7 +190,7 @@ class ConferenceCommunicationForm(ActivityFormMixin, forms.ModelForm):
 
     def clean(self):
         data = super().clean()
-        if data.get('committee') != 'YES' and data.get('acceptation_proof'):
+        if data.get('committee') != ChoixComiteSelection.YES.name and data.get('acceptation_proof'):
             data['acceptation_proof'] = []
         return data
 
@@ -229,7 +233,7 @@ class ConferencePublicationForm(ActivityFormMixin, forms.ModelForm):
             'committee',
             'journal',
             'dial_reference',
-            'participating_proof',
+            'acceptation_proof',
             'comment',
         ]
         labels = {
@@ -237,7 +241,7 @@ class ConferencePublicationForm(ActivityFormMixin, forms.ModelForm):
             'title': _("Title of the publication"),
             'committee': _("Selection committee"),
             'summary': pgettext_lazy("paper summary", "Summary"),
-            'participating_proof': _("Proof of acceptation or publication"),
+            'acceptation_proof': _("Proof of acceptation or publication"),
         }
 
 
@@ -260,7 +264,7 @@ class CommunicationForm(ActivityFormMixin, forms.ModelForm):
 
     def clean(self):
         data = super().clean()
-        if data.get('committee') != 'YES' and data.get('acceptation_proof'):
+        if data.get('committee') != ChoixComiteSelection.YES.name and data.get('acceptation_proof'):
             data['acceptation_proof'] = []
         return data
 
@@ -318,14 +322,14 @@ class PublicationForm(ActivityFormMixin, forms.ModelForm):
             'publication_status',
             'dial_reference',
             'ects',
-            'participating_proof',
+            'acceptation_proof',
             'comment',
         ]
         labels = {
             'title': _("Title of the publication"),
             'start_date': _("Date of the publication"),
             'publication_status': _("Publication status"),
-            'participating_proof': _("Proof"),
+            'acceptation_proof': _("Proof"),
         }
         widgets = {
             'start_date': DatePickerInput(attrs={'placeholder': _("dd/mm/yyyy"), **DatePickerInput.defaut_attrs}),

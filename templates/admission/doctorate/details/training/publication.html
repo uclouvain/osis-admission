@@ -85,10 +85,10 @@
           </p>
         {% endif %}
       </div>
-      {% if activity.participating_proof %}
+      {% if activity.acceptation_proof %}
         <div class="form-group">
           <strong class="d-block">{% trans "Proof" %}</strong>
-          {% document_visualizer activity.participating_proof %}
+          {% document_visualizer activity.acceptation_proof %}
         </div>
       {% endif %}
       {% if activity.comment %}

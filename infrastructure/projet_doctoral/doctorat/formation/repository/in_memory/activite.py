@@ -40,7 +40,7 @@ class ActiviteInMemoryRepository(InMemoryGenericRepository, IActiviteRepository)
     @classmethod
     def get_multiple(cls, entity_ids: List['ActiviteIdentity']) -> Mapping['ActiviteIdentity', 'Activite']:
         ret = {activite.entity_id: activite for activite in cls.entities if activite.entity_id in entity_ids}
-        if len(entity_ids) != len(ret):
+        if len(entity_ids) != len(ret):  # pragma: no cover
             raise ActiviteNonTrouvee
         return ret
 
@@ -51,7 +51,7 @@ class ActiviteInMemoryRepository(InMemoryGenericRepository, IActiviteRepository)
     @classmethod
     def get_dtos(cls, entity_ids: List['ActiviteIdentity']) -> Mapping['ActiviteIdentity', ActiviteDTO]:
         ret = {activite.entity_id: activite._dto for activite in cls.entities if activite.entity_id in entity_ids}
-        if len(entity_ids) != len(ret):
+        if len(entity_ids) != len(ret):  # pragma: no cover
             raise ActiviteNonTrouvee
         return ret
 
