@@ -34,33 +34,55 @@
 {% endif %}
 
 <a
-  role="button"
-  data-toggle="collapse"
-  data-parent="#accordion"
-  href="#a-{{ activity.uuid }}"
-  aria-expanded="false"
-  aria-controls="a-{{ activity.uuid }}"
-  class="collapsed"
+    role="button"
+    data-toggle="collapse"
+    data-parent="#accordion"
+    href="#a-{{ activity.uuid }}"
+    aria-expanded="false"
+    aria-controls="a-{{ activity.uuid }}"
+    class="collapsed"
 ></a>
 <span class="badge">{{ activity.status|enum_display:'StatutActivite' }}</span>
 
 <div style="width: auto" class="pull-right">
   <div class="input-group input-group-sm{% if activity.uuid in form.activities_in_error %} has-error{% endif %}">
-    {% if activity.status|safe == "NON_SOUMISE" %}
+    {% if activity.category|safe == "SEMINAR" and activity.status|safe != "NON_SOUMISE" and add_communication_url %}
+      {# Do not display the dropdown #}
+    {% elif activity.status|safe == "NON_SOUMISE" or add_communication_url or add_publication_url %}
       <div class="input-group-btn">
         <button
-          type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
-          aria-expanded="false"
+            type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
+            aria-expanded="false"
         >
           {% trans "Actions" %} <span class="caret"></span>
         </button>
         <ul class="dropdown-menu dropdown-menu-right">
-          <li>
-            <a href="{{ edit_url }}">
-              {% trans "Edit" %}
-            </a>
-          </li>
-          {% if add_communication_url %}
+          {% if activity.status|safe == "NON_SOUMISE" %}
+            <li>
+              <a href="{{ edit_url }}">
+                {% trans "Edit" %}
+              </a>
+            </li>
+            {% if not remove_batch_action %}
+              <li>
+                <a
+                    href="#"
+                    onclick="$('[name=activity_ids]').val(['{{ activity.uuid }}']);$('form#activities').submit();return false;"
+                >
+                  {% trans "Submit" %}
+                </a>
+              </li>
+            {% endif %}
+          {% endif %}
+          {# Can't add a communication to seminar once submitted #}
+          {% if activity.category|safe == "SEMINAR" and activity.status|safe == "NON_SOUMISE" and add_communication_url %}
+            <li>
+              <a href="{{ add_communication_url }}?parent={{ activity.uuid }}">
+                {% trans "Add a communication" %}
+              </a>
+            </li>
+            {# Can add a communication to others once submitted #}
+            {% elif activity.category|safe != "SEMINAR" and add_communication_url %}
             <li>
               <a href="{{ add_communication_url }}?parent={{ activity.uuid }}">
                 {% trans "Add a communication" %}
@@ -74,25 +96,33 @@
               </a>
             </li>
           {% endif %}
-          <li>
-            <a href="{{ delete_url }}">
-              {% trans "Delete" %}
-            </a>
-          </li>
+          {% if activity.status|safe == "NON_SOUMISE" %}
+            <li>
+              <a href="{{ delete_url }}">
+                {% trans "Delete" %}
+              </a>
+            </li>
+          {% endif %}
         </ul>
       </div>
-      {% if not remove_batch_action %}
+      {% if not remove_batch_action and activity.status|safe == "NON_SOUMISE" %}
+        {% trans "Please check the details of the activity (and sub-activities) to fill in all mandatory fields" as not_complete_sub %}
+        {% trans "Please check the details of the activity to fill in all mandatory fields" as not_complete %}
         <label class="input-group-addon">
           <input
-            type="checkbox" name="activity_ids" value="{{ activity.uuid }}"
-            {% if not activity.can_be_submitted %}
-            disabled="disabled"
-            data-toggle="tooltip"
-            data-container="body"
-            title="{% trans "This activity is not complete" %}"
-            {% else %}
-            aria-label="{% trans "Select for batch action" %}"
-            {% endif %}
+              type="checkbox" name="activity_ids" value="{{ activity.uuid }}"
+              {% if not activity.can_be_submitted %}
+              disabled="disabled"
+              data-toggle="tooltip"
+              data-container="body"
+                {% if activity.category == 'SEMINAR' %}
+              title="{{ not_complete_sub }}"
+                {% else %}
+              title="{{ not_complete }}"
+                {% endif %}
+              {% else %}
+              aria-label="{% trans "Select for batch action" %}"
+              {% endif %}
           />
         </label>
       {% endif %}

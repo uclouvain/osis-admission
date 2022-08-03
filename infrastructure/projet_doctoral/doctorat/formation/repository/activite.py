@@ -31,6 +31,7 @@ from admission.ddd.projet_doctoral.doctorat.formation.builder.activite_identity_
 from admission.ddd.projet_doctoral.doctorat.formation.domain.model._enums import (
     CategorieActivite,
     ChoixStatutPublication,
+    ChoixTypeEpreuve,
     StatutActivite,
 )
 from admission.ddd.projet_doctoral.doctorat.formation.domain.model.activite import Activite, ActiviteIdentity
@@ -51,7 +52,7 @@ class ActiviteRepository(IActiviteRepository):
         for activity in cls._get_queryset(entity_ids):
             entity_id = ActiviteIdentityBuilder.build_from_uuid(activity.uuid)
             ret[entity_id] = cls._get(activity, entity_id)
-        if len(entity_ids) != len(ret):
+        if len(entity_ids) != len(ret):  # pragma: no cover
             raise ActiviteNonTrouvee
         return ret
 
@@ -66,7 +67,7 @@ class ActiviteRepository(IActiviteRepository):
         for activity in cls._get_queryset(entity_ids):
             entity_id = ActiviteIdentityBuilder.build_from_uuid(activity.uuid)
             ret[entity_id] = cls._get_dto(activity)
-        if len(entity_ids) != len(ret):
+        if len(entity_ids) != len(ret):  # pragma: no cover
             raise ActiviteNonTrouvee
         return ret
 
@@ -246,7 +247,7 @@ class ActiviteRepository(IActiviteRepository):
             )
         elif categorie == CategorieActivite.PAPER:  # pragma: no branch
             return EpreuveDTO(
-                type=activity.type,
+                type=activity.type and ChoixTypeEpreuve[activity.type],
                 commentaire=activity.comment,
             )
 

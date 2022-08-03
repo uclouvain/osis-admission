@@ -23,6 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import datetime
 import uuid
 from unittest.mock import patch
 
@@ -34,13 +35,16 @@ from django.utils.translation import gettext_lazy as _
 from rest_framework import status
 
 from admission.contrib.models.doctoral_training import Activity
-from admission.ddd.projet_doctoral.doctorat.formation.domain.model._enums import CategorieActivite
+from admission.ddd.projet_doctoral.doctorat.formation.domain.model._enums import CategorieActivite, ChoixComiteSelection
+from admission.forms.doctorate.training.activity import INSTITUTION_UCL
 from admission.tests.factories.activity import (
     ActivityFactory,
     CommunicationFactory,
     ConferenceCommunicationFactory,
     ConferenceFactory,
     ConferencePublicationFactory,
+    CourseFactory,
+    PaperFactory,
     PublicationFactory,
     ResidencyCommunicationFactory,
     ResidencyFactory,
@@ -50,6 +54,7 @@ from admission.tests.factories.activity import (
     VaeFactory,
 )
 from admission.tests.factories.roles import CddManagerFactory
+from base.tests.factories.academic_year import AcademicYearFactory
 
 
 @override_settings(OSIS_DOCUMENT_BASE_URL='http://dummyurl/')
@@ -70,6 +75,28 @@ class DoctorateTrainingActivityViewTestCase(TestCase):
         self.assertContains(response, self.conference.title)
         self.assertContains(response, _("NON_SOUMISE"))
         self.assertEqual(str(self.conference), "Conférences, colloques (10 ects, Non soumise)")
+
+    def test_boolean_select_is_online(self):
+        add_url = resolve_url('admission:doctorate:training:add', uuid=self.doctorate.uuid, category='communication')
+        response = self.client.get(add_url)
+        default_input = (
+            '<input type="radio" name="is_online" value="False" class="" title="" id="id_is_online_0" checked>'
+        )
+        self.assertContains(response, default_input, html=True)
+
+    def test_academic_year_field(self):
+        AcademicYearFactory(year=2022)
+        add_url = resolve_url('admission:doctorate:training:add', uuid=self.doctorate.uuid, category='course')
+        response = self.client.get(add_url)
+        self.assertContains(response, "2022-2023", html=True)
+
+    def test_boolean_select_is_online_with_value(self):
+        add_url = resolve_url('admission:doctorate:training:add', uuid=self.doctorate.uuid, category='communication')
+        response = self.client.post(add_url, {'is_online': True})
+        default_input = (
+            '<input type="radio" name="is_online" value="False" class="" title="" id="id_is_online_0" checked>'
+        )
+        self.assertNotContains(response, default_input, html=True)
 
     def test_form(self):
         add_url = resolve_url('admission:doctorate:training:add', uuid=self.doctorate.uuid, category='service')
@@ -147,10 +174,118 @@ class DoctorateTrainingActivityViewTestCase(TestCase):
         response = self.client.get(edit_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
+    @patch('osis_document.api.utils.get_remote_token')
+    @patch('osis_document.api.utils.get_remote_metadata')
+    @patch('osis_document.api.utils.confirm_remote_upload')
+    def test_remove_proof_if_not_needed(self, confirm_remote_upload, get_remote_metadata, get_remote_token):
+        get_remote_metadata.return_value = {"name": "test.pdf"}
+        get_remote_token.return_value = "test"
+        confirm_remote_upload.return_value = '4bdffb42-552d-415d-9e4c-725f10dce228'
+
+        # Communication
+        activity = ActivityFactory(
+            doctorate=self.doctorate,
+            category=CategorieActivite.COMMUNICATION.name,
+        )
+        edit_url = resolve_url('admission:doctorate:training:edit', uuid=self.doctorate.uuid, activity_id=activity.uuid)
+        response = self.client.post(
+            edit_url,
+            {
+                'type': 'Some type',
+                'subtype': 'Some type',
+                'committee': ChoixComiteSelection.NO.name,
+                'acceptation_proof_0': 'test',
+            },
+        )
+        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+        activity.refresh_from_db()
+        self.assertEqual(activity.acceptation_proof, [])
+        response = self.client.post(
+            edit_url,
+            {
+                'type': 'Some type',
+                'subtype': 'Some type',
+                'committee': ChoixComiteSelection.YES.name,
+                'acceptation_proof_0': 'test',
+            },
+        )
+        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+        activity.refresh_from_db()
+        self.assertEqual(activity.acceptation_proof, [uuid.UUID('4bdffb42-552d-415d-9e4c-725f10dce228')])
+
+        # Conference communication
+        child = ActivityFactory(
+            doctorate=self.doctorate,
+            category=CategorieActivite.COMMUNICATION.name,
+            parent=self.conference,
+        )
+        edit_url = resolve_url('admission:doctorate:training:edit', uuid=self.doctorate.uuid, activity_id=child.uuid)
+        response = self.client.post(
+            edit_url,
+            {
+                'type': 'Some type',
+                'committee': ChoixComiteSelection.NO.name,
+                'acceptation_proof_0': 'test',
+            },
+        )
+        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+        child.refresh_from_db()
+        self.assertEqual(child.acceptation_proof, [])
+        response = self.client.post(
+            edit_url,
+            {
+                'type': 'Some type',
+                'committee': ChoixComiteSelection.YES.name,
+                'acceptation_proof_0': 'test',
+            },
+        )
+        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+        child.refresh_from_db()
+        self.assertEqual(child.acceptation_proof, [uuid.UUID('4bdffb42-552d-415d-9e4c-725f10dce228')])
+
     def test_submit_activities(self):
         response = self.client.post(self.url, {'activity_ids': [self.service.uuid]}, follow=True)
         self.assertContains(response, _('SOUMISE'))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_course_dates(self):
+        activity = ActivityFactory(
+            doctorate=self.doctorate,
+            category=CategorieActivite.COURSE.name,
+        )
+        edit_url = resolve_url('admission:doctorate:training:edit', uuid=self.doctorate.uuid, activity_id=activity.uuid)
+        year = AcademicYearFactory(year=2022)
+        response = self.client.post(
+            edit_url,
+            {
+                'type': 'Some type',
+                'organizing_institution': "Lorem",
+                'academic_year': year.pk,
+            },
+        )
+        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+        activity.refresh_from_db()
+        self.assertIsNone(activity.start_date)
+
+        response = self.client.post(
+            edit_url,
+            {
+                'type': 'Some type',
+                'organizing_institution': INSTITUTION_UCL,
+                'academic_year': year.pk,
+            },
+        )
+        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+        activity.refresh_from_db()
+        self.assertEqual(activity.start_date.year, 2022)
+
+        response = self.client.get(edit_url)
+        self.assertContains(response, f'<option value="{year.pk}" selected>2022-2023</option>')
+
+    def test_submit_without_activities(self):
+        response = self.client.post(self.url, {'activity_ids': []})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertFormError(response, 'form', None, _("Select at least one activity"))
 
     @patch('osis_document.api.utils.get_remote_token')
     @patch('osis_document.api.utils.get_remote_metadata')
@@ -183,6 +318,7 @@ class DoctorateTrainingActivityViewTestCase(TestCase):
 
         self.conference.title = ""
         self.conference.save()
+
         activity_list = [
             self.conference,
             SeminarFactory(doctorate=self.doctorate, title=""),
@@ -194,6 +330,8 @@ class DoctorateTrainingActivityViewTestCase(TestCase):
             CommunicationFactory(doctorate=self.doctorate),
             PublicationFactory(doctorate=self.doctorate),
             VaeFactory(doctorate=self.doctorate),
+            CourseFactory(doctorate=self.doctorate),
+            PaperFactory(doctorate=self.doctorate),
         ]
         response = self.client.post(self.url, {'activity_ids': [activity.uuid for activity in activity_list]})
         self.assertEqual(response.status_code, status.HTTP_200_OK)

@@ -366,6 +366,9 @@ msgstr ""
 msgid "Can approve proposition"
 msgstr ""
 
+msgid "Can be submitted"
+msgstr ""
+
 msgid "Can check copyright"
 msgstr ""
 
@@ -1338,6 +1341,15 @@ msgid "Planned duration"
 msgstr ""
 
 msgid ""
+"Please check the details of the activity (and sub-activities) to fill in all "
+"mandatory fields"
+msgstr ""
+
+msgid ""
+"Please check the details of the activity to fill in all mandatory fields"
+msgstr ""
+
+msgid ""
 "Please fill in all the required information in the 'Personal Data > "
 "Coordinates' tab."
 msgstr ""
@@ -1670,6 +1682,9 @@ msgstr ""
 msgid "Select a mail template"
 msgstr ""
 
+msgid "Select at least one activity"
+msgstr ""
+
 msgid "Select for batch action"
 msgstr ""
 
@@ -1731,6 +1746,9 @@ msgid "Street number"
 msgstr ""
 
 msgid "Subject"
+msgstr ""
+
+msgid "Submit"
 msgstr ""
 
 msgid "Submit these activities"

@@ -262,12 +262,21 @@ def _activity_update_can_be_submitted(sender, instance, **kwargs):
     activite = ActiviteRepository.get(activite_identity)
     activite_dto = ActiviteRepository.get_dto(activite_identity)
     can_be_submitted = False
+
+    # When communication seminar activity, update the parent uuid
+    is_communication_seminar = (
+        activite.categorie == CategorieActivite.COMMUNICATION
+        and activite.categorie_parente == CategorieActivite.SEMINAR
+    )
+    instance_uuid = instance.uuid if not is_communication_seminar else instance.parent.uuid
+
     with contextlib.suppress(MultipleBusinessExceptions):
-        SoumettreActivites().verifier_activite(activite, activite_dto)
-        if activite.categorie == CategorieActivite.SEMINAR:
-            # We must check children too for seminar activities
-            for sous_activite in ActiviteRepository.search(parent_id=activite.entity_id):
-                sous_activite_dto = ActiviteRepository.get_dto(sous_activite.entity_id)
-                SoumettreActivites().verifier_activite(sous_activite, sous_activite_dto)
+        SoumettreActivites().verifier_activite(activite, activite_dto, ActiviteRepository())
+
+        if is_communication_seminar:
+            # We must also trigger parent check (to check all children) for communication seminar activities
+            instance.parent.save()
+            return
+
         can_be_submitted = True
-    Activity.objects.filter(uuid=instance.uuid).update(can_be_submitted=can_be_submitted)
+    Activity.objects.filter(uuid=instance_uuid).update(can_be_submitted=can_be_submitted)

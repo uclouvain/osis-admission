@@ -4091,7 +4091,7 @@ components:
           type: string
         dial_reference:
           type: string
-        participating_proof:
+        acceptation_proof:
           type: array
           items:
             type: string
@@ -4377,7 +4377,7 @@ components:
           type: number
           nullable: true
           minimum: 0
-        participating_proof:
+        acceptation_proof:
           type: array
           items:
             type: string
