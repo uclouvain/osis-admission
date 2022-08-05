@@ -309,7 +309,7 @@ class Notification(INotification):
 
         # Create the async task to generate the success attestation
         task = AsyncTask.objects.create(
-            name=_('Create the confirmation paper success attestation ({reference})')
+            name=_('Create the confirmation paper success attestation (%(reference)s)')
             % {'reference': doctorate.reference},
             description=_('Create the confirmation paper success attestation as PDF'),
             person=doctorate.candidate,
