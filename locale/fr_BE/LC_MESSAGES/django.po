@@ -633,11 +633,11 @@ msgstr "Cours et formation"
 msgid "Create new doctorate admission"
 msgstr "Créer une nouvelle admission en doctorat"
 
-#, python-brace-format
-msgid "Create the confirmation paper success attestation ({reference})"
+#, python-format
+msgid "Create the confirmation paper success attestation (%(reference)s)"
 msgstr ""
 "Création de l'attestation de réussite de l'épreuve de confirmation "
-"({reference})"
+"(%(reference)s)"
 
 msgid "Create the confirmation paper success attestation as PDF"
 msgstr ""

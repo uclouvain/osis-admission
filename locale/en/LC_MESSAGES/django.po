@@ -603,8 +603,8 @@ msgstr "Courses and training"
 msgid "Create new doctorate admission"
 msgstr ""
 
-#, python-brace-format
-msgid "Create the confirmation paper success attestation ({reference})"
+#, python-format
+msgid "Create the confirmation paper success attestation (%(reference)s)"
 msgstr ""
 
 msgid "Create the confirmation paper success attestation as PDF"
