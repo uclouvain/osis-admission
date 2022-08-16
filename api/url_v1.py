@@ -73,9 +73,10 @@ urlpatterns = [
     path('propositions/<uuid:uuid>/cotutelle', views.CotutelleAPIView),
     # Supervision
     path('propositions/<uuid:uuid>/supervision', views.SupervisionAPIView),
-    path('propositions/<uuid:uuid>/request_signatures', views.RequestSignaturesAPIView),
-    path('propositions/<uuid:uuid>/approve', views.ApprovePropositionAPIView),
-    path('propositions/<uuid:uuid>/approve-by-pdf', views.ApproveByPdfPropositionAPIView),
+    path('propositions/<uuid:uuid>/supervision/set-reference-promoter', views.SupervisionSetReferencePromoterAPIView),
+    path('propositions/<uuid:uuid>/supervision/request-signatures', views.RequestSignaturesAPIView),
+    path('propositions/<uuid:uuid>/supervision/approve', views.ApprovePropositionAPIView),
+    path('propositions/<uuid:uuid>/supervision/approve-by-pdf', views.ApproveByPdfPropositionAPIView),
     # Submission confirmation
     path('propositions/<uuid:uuid>/confirmation', views.ConfirmationAPIView),
     path('propositions/<uuid:uuid>/confirmation/last', views.LastConfirmationAPIView),

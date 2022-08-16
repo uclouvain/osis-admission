@@ -2263,6 +2263,9 @@ msgid "You must be the request promoter to access this admission"
 msgstr ""
 "Vous devez être le promoteur de la demande pour accéder à cette admission"
 
+msgid "You must set a reference promoter."
+msgstr "Vous devez désigner un promoteur de référence."
+
 msgid "You've reached the maximum authorized propositions."
 msgstr "Vous avez atteint le maximum de propositions."
 

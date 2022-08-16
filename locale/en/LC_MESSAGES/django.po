@@ -2119,6 +2119,9 @@ msgstr ""
 msgid "You must be the request promoter to access this admission"
 msgstr ""
 
+msgid "You must set a reference promoter."
+msgstr ""
+
 msgid "You've reached the maximum authorized propositions."
 msgstr ""
 

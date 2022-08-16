@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Admission API
-  version: 1.0.29
+  version: 1.0.30
   description: This API delivers data for the Admission project.
   contact:
     name: UCLouvain - OSIS
@@ -2263,7 +2263,7 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - person
-  /propositions/{uuid}/request_signatures:
+  /propositions/{uuid}/supervision/request-signatures:
     post:
       operationId: create_signatures
       description: Ask for all promoters and members to sign the proposition.
@@ -2299,7 +2299,7 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - propositions
-  /propositions/{uuid}/approve:
+  /propositions/{uuid}/supervision/approve:
     post:
       operationId: approve_proposition
       description: Approve the proposition.
@@ -2370,7 +2370,7 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - propositions
-  /propositions/{uuid}/approve-by-pdf:
+  /propositions/{uuid}/supervision/approve-by-pdf:
     post:
       operationId: approve_by_pdf
       description: Approve the proposition with a pdf file.
@@ -2433,6 +2433,42 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DoctoralTrainingBatch'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
+  /propositions/{uuid}/supervision/set-reference-promoter:
+    put:
+      operationId: set_reference_promoter
+      description: Set a supervision group member as reference promoter
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DesignerPromoteurReferenceCommand'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PropositionIdentityDTO'
           description: ''
         '400':
           $ref: '#/components/responses/BadRequest'
@@ -3575,6 +3611,8 @@ components:
               $ref: '#/components/schemas/ActionLink'
             remove_member:
               $ref: '#/components/schemas/ActionLink'
+            set_reference_promoter:
+              $ref: '#/components/schemas/ActionLink'
             retrieve_supervision:
               $ref: '#/components/schemas/ActionLink'
             request_signatures:
@@ -3758,6 +3796,8 @@ components:
             - membre_CA
             - statut
             - pdf
+        promoteur_reference:
+          type: string
       required:
       - signatures_promoteurs
       - signatures_membres_CA
@@ -5106,6 +5146,16 @@ components:
       - demande_ouverture
       - convention
       - autres_documents
+    DesignerPromoteurReferenceCommand:
+      type: object
+      properties:
+        uuid_proposition:
+          type: string
+        matricule:
+          type: string
+      required:
+      - uuid_proposition
+      - matricule
     RefuserPropositionCommand:
       type: object
       properties:

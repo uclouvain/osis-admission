@@ -106,6 +106,14 @@ class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
                 )
                 for actor in actors.get(ActorType.CA_MEMBER.name, [])
             ],
+            promoteur_reference_id=next(
+                (
+                    PromoteurIdentity(actor.person.global_id)
+                    for actor in actors.get(ActorType.PROMOTER.name, [])
+                    if actor.supervisionactor.is_reference_promoter
+                ),
+                None,
+            ),
             cotutelle=cotutelle,
             statut_signature=ChoixStatutSignatureGroupeDeSupervision.SIGNING_IN_PROGRESS
             if proposition.status == ChoixStatutProposition.SIGNING_IN_PROGRESS.name
@@ -172,7 +180,7 @@ class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
         current_members.exclude(person__in=new_membre_CA_persons).delete()
 
         # Update existing actors
-        cls._update_members(current_promoteurs, entity.signatures_promoteurs)
+        cls._update_members(current_promoteurs, entity.signatures_promoteurs, entity.promoteur_reference_id)
         cls._update_members(current_members, entity.signatures_membres_CA)
 
         # Add missing actors
@@ -183,6 +191,9 @@ class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
                     person=person,
                     type=ActorType.PROMOTER.name,
                     process_id=groupe.uuid,
+                    is_reference_promoter=bool(
+                        entity.promoteur_reference_id and entity.promoteur_reference_id.matricule == person.global_id
+                    ),
                 )
                 Promoter.objects.get_or_create(person=person)
 
@@ -211,6 +222,7 @@ class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
         cls,
         member_list: list,
         signature_list: Union[List[SignaturePromoteur], List[SignatureMembreCA]],
+        reference_promoter: Optional[PromoteurIdentity] = None,
     ):
         for actor in member_list:
             membre = cls._get_member_from_matricule(signature_list, actor.person.global_id)
@@ -221,11 +233,28 @@ class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
                     actor.supervisionactor.pdf_from_candidate = membre.pdf
                     actor.supervisionactor.internal_comment = membre.commentaire_interne
                     actor.supervisionactor.rejection_reason = membre.motif_refus
+                    actor.supervisionactor.is_reference_promoter = bool(
+                        reference_promoter and membre.promoteur_id == reference_promoter
+                    )
                     actor.supervisionactor.save()
                     actor.save()
+            # Actor is no longer the reference promoter
+            if actor.supervisionactor.is_reference_promoter and (
+                not reference_promoter or actor.person.global_id != reference_promoter.matricule
+            ):
+                actor.supervisionactor.is_reference_promoter = False
+                actor.supervisionactor.save()
+            elif (
+                # Actor is the reference promoter and need to be updated
+                reference_promoter
+                and not actor.supervisionactor.is_reference_promoter
+                and actor.person.global_id == reference_promoter.matricule
+            ):
+                actor.supervisionactor.is_reference_promoter = True
+                actor.supervisionactor.save()
 
     @classmethod
-    def _get_member_from_matricule(cls, signatures: list, matricule):
+    def _get_member_from_matricule(cls, signatures: list, matricule) -> Union[SignaturePromoteur, SignatureMembreCA]:
         if isinstance(signatures[0], SignaturePromoteur):
             return next(a for a in signatures if a.promoteur_id.matricule == matricule)  # pragma: no branch
         return next(a for a in signatures if a.membre_CA_id.matricule == matricule)  # pragma: no branch

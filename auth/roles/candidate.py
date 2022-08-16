@@ -74,6 +74,7 @@ class Candidate(RoleModel):
             'admission.request_signatures': is_admission_request_author & in_progress,
             'admission.add_supervision_member': is_admission_request_author & in_progress,
             'admission.remove_supervision_member': is_admission_request_author & in_progress,
+            'admission.set_reference_promoter': is_admission_request_author & unconfirmed_proposition,
             # Once supervision group is signing, he can
             'admission.approve_proposition_by_pdf': is_admission_request_author & signing_in_progress,
             'admission.submit_doctorateadmission': is_admission_request_author & signing_in_progress,

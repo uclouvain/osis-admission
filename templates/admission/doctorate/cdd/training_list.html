@@ -57,7 +57,9 @@
     <div class="filter-type form-group">
       <strong>{% trans "Type" %}</strong>
       <div class="btn-group btn-group-sm" role="radiogroup">
-        <button type="button" class="btn btn-default active" data-type="all">{% trans "All" context "filters" %}</button>
+        <button type="button" class="btn btn-default active" data-type="all">
+          {% trans "All" context "filters" %}
+        </button>
         {% for category_name, category_label in categories %}
           <button type="button" class="btn btn-default" data-type="{{ category_name }}">{{ category_label }}</button>
         {% endfor %}
@@ -66,7 +68,9 @@
     <div class="filter-status form-group">
       <strong>{% trans "Status" %}</strong>
       <div class="btn-group btn-group-sm" role="radiogroup">
-        <button type="button" class="btn btn-default active" data-status="all">{% trans "All" context "filters" %}</button>
+        <button type="button" class="btn btn-default active" data-status="all">
+          {% trans "All" context "filters" %}
+        </button>
         {% for status_name, status_label in statuses %}
           <button type="button"
                   class="btn btn-default btn-{{ status_name|status_as_class }}"
@@ -75,60 +79,60 @@
         {% endfor %}
       </div>
     </div>
-  {% endif %}
 
-  {# Special error handling #}
-  {% if form.non_field_errors %}
-    <div class="alert alert-danger alert-dismissable alert-link">
+    {# Special error handling #}
+    {% if form.non_field_errors %}
+      <div class="alert alert-danger alert-dismissable alert-link">
         {{ form.non_field_errors.0 }}
-    </div>
-  {% endif %}
+      </div>
+    {% endif %}
 
-  <form id="activities" action="{% url 'admission:doctorate:training' uuid=view.kwargs.uuid %}" method="post">
-    {% csrf_token %}
-    {% for activity in activities %}
-      {% firstof 0 activity.category|lower|add:'.html' as template_name %}
-      {% if not activity.parent %}
-        {% include "admission/doctorate/details/training/"|add:template_name %}
-      {% endif %}
-      {% empty %}
-      {% trans "This candidate has not created any activity yet" %}
-    {% endfor %}
-    <button class="btn btn-default" type="submit" value="_submit">{% trans "Submit these activities" %}</button>
-  </form>
+    <form id="activities" action="{% url 'admission:doctorate:training' uuid=view.kwargs.uuid %}" method="post">
+      {% csrf_token %}
+      {% for activity in activities %}
+        {% firstof 0 activity.category|lower|add:'.html' as template_name %}
+        {% if not activity.parent %}
+          {% include "admission/doctorate/details/training/"|add:template_name %}
+        {% endif %}
+      {% endfor %}
+      <button class="btn btn-default" type="submit" value="_submit">{% trans "Submit these activities" %}</button>
+    </form>
+  {% else %}
+    {% trans "This candidate has not created any activity yet" %}
+  {% endif %}
 {% endblock %}
 
 
 {% block style %}
   {{ block.super }}
   <style>
-      .panel {
-          margin-bottom: 2em;
-      }
+    .panel {
+      margin-bottom: 2em;
+    }
 
-      .panel-heading .panel-title {
-          line-height: 1.3em;
-      }
+    .panel-heading .panel-title {
+      line-height: 1.3em;
+    }
 
-      .panel-heading .panel-title > a {
-          float: left;
-          font-size: 1.5em;
-          padding-right: .3em;
-      }
+    .panel-heading .panel-title > a {
+      float: left;
+      font-size: 1.5em;
+      padding-right: .3em;
+    }
 
-      .panel-heading .panel-title > a:focus,
-      .panel-heading .panel-title > a:hover {
-          text-decoration: none;
-      }
+    .panel-heading .panel-title > a:focus,
+    .panel-heading .panel-title > a:hover {
+      text-decoration: none;
+    }
 
-      .panel-heading .panel-title > a:after {
-          font-family: 'Glyphicons Halflings';
-          content: "\e114";
-      }
+    .panel-heading .panel-title > a:after {
+      font-family: 'Glyphicons Halflings';
+      content: "\e114";
+    }
 
-      .panel-heading .panel-title > a.collapsed:after {
-          content: "\e080";
-      }
+    .panel-heading .panel-title > a.collapsed:after {
+      content: "\e080";
+    }
   </style>
 {% endblock %}
 
@@ -150,27 +154,27 @@
       let current_filter_type = ALL_VALUES;
       $('.filter-type button').on('click', function () {
         current_filter_type = $(this).data('type');
-        $('.filter-type button').removeClass('active')
+        $('.filter-type button').removeClass('active');
         $(this).addClass('active');
         apply_filters();
       });
       let current_filter_status = ALL_VALUES;
       $('.filter-status button').on('click', function () {
         current_filter_status = $(this).data('status');
-        $('.filter-status button').removeClass('active')
+        $('.filter-status button').removeClass('active');
         $(this).addClass('active');
         apply_filters();
       });
 
-      function apply_filters() {
+      function apply_filters () {
         const reStatus = new RegExp(`\\b${current_filter_status}\\b`);
-        $('#activities .panel').each(function() {
-          $(this).show()
+        $('#activities .panel').each(function () {
+          $(this).show();
           if ((current_filter_type !== ALL_VALUES && $(this).data('type') !== current_filter_type)
             || (current_filter_status !== ALL_VALUES && !$(this).data('status').match(reStatus))) {
-            $(this).hide()
+            $(this).hide();
           }
-        })
+        });
       }
     });
   </script>

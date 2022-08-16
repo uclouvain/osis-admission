@@ -55,7 +55,6 @@ from admission.ddd.projet_doctoral.preparation.domain.model.doctorat import Doct
 from admission.ddd.projet_doctoral.preparation.domain.validator.validator_by_business_action import (
     CompletionPropositionValidatorList,
     ProjetDoctoralValidatorList,
-    SoumettrePropositionValidatorList,
 )
 from osis_common.ddd import interface
 
@@ -250,10 +249,6 @@ class Proposition(interface.RootEntity):
                 date_soutenance=date_soutenance,
                 raison_non_soutenue=raison_non_soutenue or '',
             )
-
-    def verifier(self):
-        """Vérification complète de la proposition"""
-        SoumettrePropositionValidatorList(proposition=self).validate()
 
     def reinitialiser_archive(self):
         self.fiche_archive_signatures_envoyees = []

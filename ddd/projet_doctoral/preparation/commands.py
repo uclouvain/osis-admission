@@ -134,6 +134,12 @@ class SupprimerPromoteurCommand(interface.CommandRequest):
 
 
 @attr.dataclass(frozen=True, slots=True)
+class DesignerPromoteurReferenceCommand(interface.CommandRequest):
+    uuid_proposition: str
+    matricule: str
+
+
+@attr.dataclass(frozen=True, slots=True)
 class SupprimerMembreCACommand(interface.CommandRequest):
     uuid_proposition: str
     matricule: str

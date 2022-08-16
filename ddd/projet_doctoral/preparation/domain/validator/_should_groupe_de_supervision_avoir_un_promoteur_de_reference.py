@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,20 +23,18 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
 import attr
 
-from admission.ddd.projet_doctoral.preparation.business_types import *
-from admission.ddd.projet_doctoral.preparation.domain.validator.exceptions import (
-    MembreCANonTrouveException,
-)
 from base.ddd.utils.business_validator import BusinessValidator
+from admission.ddd.projet_doctoral.preparation.business_types import *
+from admission.ddd.projet_doctoral.preparation.domain.validator.exceptions import PromoteurDeReferenceManquantException
 
 
 @attr.dataclass(frozen=True, slots=True)
-class ShouldMembreCAEtreDansGroupeDeSupervision(BusinessValidator):
-    groupe_de_supervision: 'GroupeDeSupervision'
-    membre_CA_id: 'MembreCAIdentity'
+class ShouldGroupeDeSupervisionAvoirUnPromoteurDeReference(BusinessValidator):
+    groupe: 'GroupeDeSupervision'
 
-    def validate(self, *args, **kwargs):  # pragma: no cover
-        if not any(s for s in self.groupe_de_supervision.signatures_membres_CA if s.membre_CA_id == self.membre_CA_id):
-            raise MembreCANonTrouveException
+    def validate(self, *args, **kwargs):
+        if self.groupe.promoteur_reference_id is None:
+            raise PromoteurDeReferenceManquantException

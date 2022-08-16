@@ -39,7 +39,7 @@ class ShouldSignataireEtreDansGroupeDeSupervision(BusinessValidator):
     groupe_de_supervision: 'GroupeDeSupervision'
     signataire_id: Union['PromoteurIdentity', 'MembreCAIdentity']
 
-    def validate(self, *args, **kwargs):
+    def validate(self, *args, **kwargs):  # pragma: no cover
         groupe = self.groupe_de_supervision
         if (
             # Promoters

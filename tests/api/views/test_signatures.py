@@ -83,7 +83,7 @@ class RequestSignaturesApiTestCase(APITestCase):
 
     def test_request_signatures_using_api(self):
         self.client.force_authenticate(user=self.candidate.user)
-        promoter = PromoterFactory()
+        promoter = PromoterFactory(is_reference_promoter=True)
         CaMemberFactory(process=promoter.process)
         self.admission.supervision_group = promoter.actor_ptr.process
         self.admission.save()
@@ -94,7 +94,7 @@ class RequestSignaturesApiTestCase(APITestCase):
     def test_request_signatures_using_api_without_ca_members_must_fail(self):
         self.client.force_authenticate(user=self.candidate.user)
 
-        promoter = PromoterFactory()
+        promoter = PromoterFactory(is_reference_promoter=True)
         self.admission.supervision_group = promoter.actor_ptr.process
         self.admission.save()
 
@@ -117,7 +117,7 @@ class RequestSignaturesApiTestCase(APITestCase):
         )
         url = resolve_url("admission_api_v1:request-signatures", uuid=admission.uuid)
 
-        promoter = PromoterFactory()
+        promoter = PromoterFactory(is_reference_promoter=True)
         CaMemberFactory(process=promoter.actor_ptr.process)
         admission.supervision_group = promoter.actor_ptr.process
         admission.save()
@@ -145,7 +145,7 @@ class RequestSignaturesApiTestCase(APITestCase):
         url = resolve_url("admission_api_v1:request-signatures", uuid=admission.uuid)
 
         promoter = ExternalPromoterFactory()
-        PromoterFactory(process=promoter.actor_ptr.process)
+        PromoterFactory(process=promoter.actor_ptr.process, is_reference_promoter=True)
         CaMemberFactory(process=promoter.actor_ptr.process)
         admission.supervision_group = promoter.actor_ptr.process
         admission.save()

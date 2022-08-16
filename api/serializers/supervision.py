@@ -28,6 +28,7 @@ from rest_framework import serializers
 
 from admission.contrib.models.enums.actor_type import ActorType
 from admission.ddd.projet_doctoral.preparation.commands import (
+    DesignerPromoteurReferenceCommand,
     IdentifierMembreCACommand,
     IdentifierPromoteurCommand,
     SupprimerMembreCACommand,
@@ -58,6 +59,11 @@ class IdentifierPromoteurCommandSerializer(DTOSerializer):
 class IdentifierMembreCACommandSerializer(DTOSerializer):
     class Meta:
         source = IdentifierMembreCACommand
+
+
+class DesignerPromoteurReferenceCommandSerializer(DTOSerializer):
+    class Meta:
+        source = DesignerPromoteurReferenceCommand
 
 
 class SupprimerPromoteurCommandSerializer(DTOSerializer):

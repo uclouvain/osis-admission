@@ -87,17 +87,6 @@ class CompletionPropositionValidatorList(TwoStepsMultipleBusinessExceptionListVa
 
 
 @attr.dataclass(frozen=True, slots=True)
-class SoumettrePropositionValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
-    proposition: 'Proposition'
-
-    def get_data_contract_validators(self) -> List[BusinessValidator]:
-        return []
-
-    def get_invariants_validators(self) -> List[BusinessValidator]:
-        return []
-
-
-@attr.dataclass(frozen=True, slots=True)
 class IdentifierPromoteurValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
     groupe_de_supervision: 'GroupeDeSupervision'
     promoteur_id: 'PromoteurIdentity'
@@ -128,6 +117,20 @@ class IdentifierMembreCAValidatorList(TwoStepsMultipleBusinessExceptionListValid
             ShouldGroupeDeSupervisionNonCompletPourMembresCA(self.groupe_de_supervision),
             ShouldMembreCAPasDejaPresentDansGroupeDeSupervision(self.groupe_de_supervision, self.membre_CA_id),
             ShouldPromoteurPasDejaPresentDansGroupeDeSupervision(self.groupe_de_supervision, promoteur_id),
+        ]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class DesignerPromoteurReferenceValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+    groupe_de_supervision: 'GroupeDeSupervision'
+    promoteur_id: 'PromoteurIdentity'
+
+    def get_data_contract_validators(self) -> List[BusinessValidator]:
+        return []
+
+    def get_invariants_validators(self) -> List[BusinessValidator]:
+        return [
+            ShouldPromoteurEtreDansGroupeDeSupervision(self.groupe_de_supervision, self.promoteur_id),
         ]
 
 
@@ -347,6 +350,7 @@ class SignatairesValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
     def get_invariants_validators(self) -> List[BusinessValidator]:
         return [
             ShouldGroupeDeSupervisionAvoirAuMoinsUnMembreCA(self.groupe_de_supervision.signatures_membres_CA),
+            ShouldGroupeDeSupervisionAvoirUnPromoteurDeReference(self.groupe_de_supervision),
         ]
 
 

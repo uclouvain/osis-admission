@@ -40,7 +40,7 @@ class ShouldSignatairePasDejaInvite(BusinessValidator):
     groupe_de_supervision: 'GroupeDeSupervision'
     signataire_id: Union['PromoteurIdentity', 'MembreCAIdentity']
 
-    def validate(self, *args, **kwargs):
+    def validate(self, *args, **kwargs):  # pragma: no cover
         etats_initiaux = [ChoixEtatSignature.NOT_INVITED, ChoixEtatSignature.DECLINED]
         if any(
             signature

@@ -47,6 +47,7 @@ from admission.ddd.projet_doctoral.preparation.test.factory.proposition import (
     PropositionAdmissionSC3DPMinimaleSansFinancementFactory,
     PropositionAdmissionSC3DPSansMembreCAFactory,
     PropositionAdmissionSC3DPSansPromoteurFactory,
+    PropositionAdmissionSC3DPSansPromoteurReferenceFactory,
     PropositionPreAdmissionSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory,
     PropositionPreAdmissionSC3DPMinimaleFactory,
 )
@@ -114,6 +115,7 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
             PropositionAdmissionSC3DPMinimaleCotutelleSansPromoteurExterneFactory(),
             PropositionAdmissionSC3DPMinimaleCotutelleAvecPromoteurExterneFactory(),
             PropositionAdmissionSC3DPSansPromoteurFactory(),
+            PropositionAdmissionSC3DPSansPromoteurReferenceFactory(),
             PropositionAdmissionSC3DPSansMembreCAFactory(),
             PropositionAdmissionESP3DPMinimaleFactory(),
             PropositionAdmissionSC3DPAvecPromoteurDejaApprouveFactory(),
@@ -124,10 +126,7 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
 
     @classmethod
     def save(cls, entity: 'Proposition') -> None:
-        try:
-            super().save(entity)
-        except PropositionNonTrouveeException:
-            cls.entities.append(entity)
+        super().save(entity)
 
     @classmethod
     def search(

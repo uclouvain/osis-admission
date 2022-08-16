@@ -49,6 +49,7 @@ from admission.ddd.projet_doctoral.preparation.domain.validator.validator_by_bus
     ApprobationValidatorList,
     ApprouverValidatorList,
     CotutelleValidatorList,
+    DesignerPromoteurReferenceValidatorList,
     IdentifierMembreCAValidatorList,
     IdentifierPromoteurValidatorList,
     InviterASignerValidatorList,
@@ -72,6 +73,7 @@ class GroupeDeSupervision(interface.RootEntity):
     signatures_membres_CA: List['SignatureMembreCA'] = attr.Factory(list)
     cotutelle: Optional['Cotutelle'] = None
     statut_signature: ChoixStatutSignatureGroupeDeSupervision = ChoixStatutSignatureGroupeDeSupervision.IN_PROGRESS
+    promoteur_reference_id: Optional['PromoteurIdentity'] = None
 
     def identifier_promoteur(self, promoteur_id: 'PromoteurIdentity') -> None:
         IdentifierPromoteurValidatorList(
@@ -81,6 +83,13 @@ class GroupeDeSupervision(interface.RootEntity):
         self.signatures_promoteurs.append(
             SignaturePromoteur(promoteur_id=promoteur_id, etat=ChoixEtatSignature.NOT_INVITED)
         )
+
+    def designer_promoteur_reference(self, promoteur_id: 'PromoteurIdentity') -> None:
+        DesignerPromoteurReferenceValidatorList(
+            groupe_de_supervision=self,
+            promoteur_id=promoteur_id,
+        ).validate()
+        self.promoteur_reference_id = promoteur_id
 
     def identifier_membre_CA(self, membre_CA_id: 'MembreCAIdentity') -> None:
         IdentifierMembreCAValidatorList(
@@ -136,6 +145,8 @@ class GroupeDeSupervision(interface.RootEntity):
             promoteur_id=promoteur_id,
         ).validate()
         self.signatures_promoteurs = [s for s in self.signatures_promoteurs if s.promoteur_id != promoteur_id]
+        if self.promoteur_reference_id == promoteur_id:
+            self.promoteur_reference_id = None
 
     def supprimer_membre_CA(self, membre_CA_id: 'MembreCAIdentity') -> None:
         SupprimerMembreCAValidatorList(

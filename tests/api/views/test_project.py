@@ -46,6 +46,7 @@ from admission.ddd.projet_doctoral.preparation.domain.model._financement import 
 from admission.ddd.projet_doctoral.preparation.domain.validator.exceptions import (
     DoctoratNonTrouveException,
     MembreCAManquantException,
+    PromoteurDeReferenceManquantException,
     PromoteurManquantException,
 )
 from admission.ddd.projet_doctoral.validation.domain.model._enums import ChoixStatutCDD
@@ -427,6 +428,7 @@ class DoctorateAdmissionGetApiTestCase(DoctorateAdmissionApiTestCase):
             'update_cotutelle',
             'add_member',
             'remove_member',
+            'set_reference_promoter',
             'retrieve_supervision',
             'update_curriculum',
             'retrieve_curriculum',
@@ -620,7 +622,7 @@ class DoctorateAdmissionVerifyProjectTestCase(APITestCase):
     def test_verify_project_using_api_without_ca_members_must_fail(self, mock_is_external):
         self.client.force_authenticate(user=self.candidate.user)
 
-        PromoterFactory(process=self.admission.supervision_group)
+        PromoterFactory(process=self.admission.supervision_group, is_reference_promoter=True)
 
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -633,7 +635,18 @@ class DoctorateAdmissionVerifyProjectTestCase(APITestCase):
 
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.json()[0]['status_code'], PromoteurManquantException.status_code)
+        status_codes = [e['status_code'] for e in response.json()]
+        self.assertIn(PromoteurManquantException.status_code, status_codes)
+
+    def test_verify_project_using_api_without_reference_promoter_must_fail(self):
+        self.client.force_authenticate(user=self.candidate.user)
+
+        CaMemberFactory(process=self.admission.supervision_group)
+        PromoterFactory(process=self.admission.supervision_group)
+
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.json()[0]['status_code'], PromoteurDeReferenceManquantException.status_code)
 
     def test_admission_doctorate_verify_project_no_role(self):
         self.client.force_authenticate(user=self.no_role_user)

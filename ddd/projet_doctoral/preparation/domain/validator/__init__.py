@@ -9,6 +9,9 @@ from ._should_groupe_de_supervision_a_approuve import (
     ShouldMembresCAOntApprouve,
     ShouldPromoteursOntApprouve,
 )
+from ._should_groupe_de_supervision_avoir_un_promoteur_de_reference import (
+    ShouldGroupeDeSupervisionAvoirUnPromoteurDeReference,
+)
 from ._should_langues_connues_etre_completees import ShouldLanguesConnuesRequisesEtreSpecifiees
 from ._should_projet_etre_complet import ShouldProjetEtreComplet
 from ._should_groupe_de_supervision_avoir_au_moins_un_membre_CA import ShouldGroupeDeSupervisionAvoirAuMoinsUnMembreCA
@@ -75,4 +78,5 @@ __all__ = [
     "ShouldPromoteursOntApprouve",
     "ShouldMembresCAOntApprouve",
     "ShouldPremierPromoteurRenseignerInstitutThese",
+    "ShouldGroupeDeSupervisionAvoirUnPromoteurDeReference",
 ]

@@ -34,6 +34,7 @@ from admission.ddd.projet_doctoral.validation.domain.model._enums import ChoixSt
 from admission.ddd.projet_doctoral.validation.domain.model._profil_candidat import ProfilCandidat
 from admission.ddd.projet_doctoral.validation.domain.model.demande import Demande, DemandeIdentity
 from admission.ddd.projet_doctoral.validation.domain.service.proposition_identity import PropositionIdentityTranslator
+from admission.ddd.projet_doctoral.validation.domain.validator.exceptions import DemandeNonTrouveeException
 from admission.ddd.projet_doctoral.validation.dtos import DemandeDTO, ProfilCandidatDTO
 from admission.ddd.projet_doctoral.validation.repository.i_demande import IDemandeRepository
 from reference.models.country import Country
@@ -59,7 +60,10 @@ class DemandeRepository(IDemandeRepository):
 
     @classmethod
     def get(cls, entity_id: 'DemandeIdentity') -> 'Demande':
-        admission: DemandeProxy = DemandeProxy.objects.get(uuid=entity_id.uuid)
+        try:
+            admission: DemandeProxy = DemandeProxy.objects.get(uuid=entity_id.uuid)
+        except DoctorateAdmission.DoesNotExist:
+            raise DemandeNonTrouveeException
         return Demande(
             profil_candidat=ProfilCandidat(
                 prenom=admission.submitted_profile.get('identification').get('first_name'),
