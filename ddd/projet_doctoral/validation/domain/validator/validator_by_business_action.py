@@ -41,7 +41,6 @@ if TYPE_CHECKING:
 
 @attr.s(frozen=True, slots=True, auto_attribs=True)
 class RefuserDemandeCDDValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
-
     demande: Demande
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
@@ -55,7 +54,6 @@ class RefuserDemandeCDDValidatorList(TwoStepsMultipleBusinessExceptionListValida
 
 @attr.s(frozen=True, slots=True, auto_attribs=True)
 class ApprouverDemandeCDDValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
-
     demande: Demande
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:

@@ -172,6 +172,7 @@ class PropositionDTOSerializer(IncludedFieldsMixin, DTOSerializer):
             'add_approval': ACTION_LINKS['add_approval'],
             'add_member': ACTION_LINKS['add_member'],
             'remove_member': ACTION_LINKS['remove_member'],
+            'set_reference_promoter': ACTION_LINKS['set_reference_promoter'],
             'retrieve_supervision': ACTION_LINKS['retrieve_supervision'],
             'request_signatures': ACTION_LINKS['request_signatures'],
             'approve_by_pdf': ACTION_LINKS['approve_by_pdf'],

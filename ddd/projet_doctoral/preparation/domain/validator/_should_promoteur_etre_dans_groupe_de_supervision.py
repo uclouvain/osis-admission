@@ -37,6 +37,6 @@ class ShouldPromoteurEtreDansGroupeDeSupervision(BusinessValidator):
     groupe_de_supervision: 'GroupeDeSupervision'
     promoteur_id: 'PromoteurIdentity'
 
-    def validate(self, *args, **kwargs):
+    def validate(self, *args, **kwargs):  # pragma: no cover
         if not any(s for s in self.groupe_de_supervision.signatures_promoteurs if s.promoteur_id == self.promoteur_id):
             raise PromoteurNonTrouveException

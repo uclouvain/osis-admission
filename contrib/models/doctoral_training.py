@@ -41,6 +41,15 @@ from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from osis_document.contrib import FileField
 
 
+def training_activity_directory_path(instance: 'Activity', filename: str):
+    """Return the file upload directory path."""
+    return 'admission/{}/{}/training/{}'.format(
+        instance.doctorate.candidate.uuid,
+        instance.doctorate.uuid,
+        filename,
+    )
+
+
 class Activity(models.Model):
     uuid = models.UUIDField(
         default=uuid4,
@@ -96,6 +105,7 @@ class Activity(models.Model):
         verbose_name=_("Participation certification"),
         max_files=1,
         blank=True,
+        upload_to=training_activity_directory_path,
     )
     comment = models.TextField(
         verbose_name=_("Comment"),
@@ -170,6 +180,7 @@ class Activity(models.Model):
         verbose_name=_("Participation certification"),
         max_files=1,
         blank=True,
+        upload_to=training_activity_directory_path,
     )
 
     # Communication
@@ -177,6 +188,7 @@ class Activity(models.Model):
         verbose_name=pgettext_lazy("paper summary", "Summary"),
         max_files=1,
         blank=True,
+        upload_to=training_activity_directory_path,
     )
     subtype = models.CharField(
         verbose_name=_("Activity subtype"),

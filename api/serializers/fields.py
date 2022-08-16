@@ -266,6 +266,11 @@ ACTION_LINKS = {
         'method': 'PUT',
         'params': ['uuid'],
     },
+    'set_reference_promoter': {
+        'path_name': 'admission_api_v1:set-reference-promoter',
+        'method': 'PUT',
+        'params': ['uuid'],
+    },
     'remove_member': {
         'path_name': 'admission_api_v1:supervision',
         'method': 'POST',

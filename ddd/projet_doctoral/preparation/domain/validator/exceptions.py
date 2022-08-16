@@ -112,7 +112,7 @@ class SignataireNonTrouveException(BusinessException):
 class SignataireDejaInviteException(BusinessException):
     status_code = "PROPOSITION-12"
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs):  # pragma: no cover
         message = _("Member of supervision group already invited.")
         super().__init__(message, **kwargs)
 
@@ -303,7 +303,7 @@ class AnneesCurriculumNonSpecifieesException(BusinessException):
             ngettext_lazy(
                 "Please fill in the 'Previous Experience > Curriculum vitae' tab for the following year: ",
                 "Please fill in the 'Previous Experience > Curriculum vitae' tab for the following years: ",
-                len(annees_manquantes)
+                len(annees_manquantes),
             )
             + ', '.join(annees_manquantes)
             + '.'
@@ -356,4 +356,12 @@ class SpecifierNOMASiDejaInscritException(BusinessException):
 
     def __init__(self, **kwargs):
         message = _("Please specify your old NOMA (registration id).")
+        super().__init__(message, **kwargs)
+
+
+class PromoteurDeReferenceManquantException(BusinessException):
+    status_code = "PROPOSITION-42"
+
+    def __init__(self, **kwargs):
+        message = _("You must set a reference promoter.")
         super().__init__(message, **kwargs)

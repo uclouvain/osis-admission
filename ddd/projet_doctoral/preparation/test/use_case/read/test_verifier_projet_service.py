@@ -34,6 +34,7 @@ from admission.ddd.projet_doctoral.preparation.domain.validator.exceptions impor
     DetailProjetNonCompleteException,
     GroupeDeSupervisionNonTrouveException,
     MembreCAManquantException,
+    PromoteurDeReferenceManquantException,
     PromoteurManquantException,
     PropositionNonTrouveeException,
 )
@@ -76,7 +77,12 @@ class TestVerifierPropositionService(SimpleTestCase):
         cmd = attr.evolve(self.cmd, uuid_proposition='uuid-SC3DP-pre-admission')
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(cmd)
-        self.assertEqual(len(context.exception.exceptions), 2)
+        self.assertTrue(any(isinstance(exc, PromoteurManquantException) for exc in context.exception.exceptions))
+        self.assertTrue(any(isinstance(exc, MembreCAManquantException) for exc in context.exception.exceptions))
+        self.assertTrue(
+            any(isinstance(exc, PromoteurDeReferenceManquantException) for exc in context.exception.exceptions)
+        )
+        self.assertEqual(len(context.exception.exceptions), 3)
 
     def test_should_retourner_erreur_si_cotutelle_pas_complete(self):
         cmd = attr.evolve(self.cmd, uuid_proposition='uuid-SC3DP-cotutelle-indefinie')
@@ -109,7 +115,11 @@ class TestVerifierPropositionService(SimpleTestCase):
         cmd = attr.evolve(self.cmd, uuid_proposition='uuid-SC3DP-sans-promoteur')
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(cmd)
-        self.assertIsInstance(context.exception.exceptions.pop(), PromoteurManquantException)
+        self.assertTrue(any(isinstance(exc, PromoteurManquantException) for exc in context.exception.exceptions))
+        self.assertTrue(
+            any(isinstance(exc, PromoteurDeReferenceManquantException) for exc in context.exception.exceptions)
+        )
+        self.assertEqual(len(context.exception.exceptions), 2)
 
     def test_should_retourner_erreur_si_groupe_de_supervision_a_pas_membre_CA(self):
         cmd = attr.evolve(self.cmd, uuid_proposition='uuid-SC3DP-sans-membre_CA')

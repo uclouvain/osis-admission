@@ -118,6 +118,11 @@ class MessageBusInMemoryCommands(AbstractMessageBusCommands):
             promoteur_translator=PromoteurInMemoryTranslator(),
             membre_ca_translator=MembreCAInMemoryTranslator(),
         ),
+        DesignerPromoteurReferenceCommand: partial(
+            designer_promoteur_reference,
+            proposition_repository=PropositionInMemoryRepository(),
+            groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
+        ),
         SupprimerPromoteurCommand: partial(
             supprimer_promoteur,
             proposition_repository=PropositionInMemoryRepository(),

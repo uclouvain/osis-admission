@@ -18,3 +18,4 @@ exclude_lines =
     pragma: no cover
     raise NotImplementedError
     class \w+Schema\(\w+Schema\):
+    if TYPE_CHECKING:

@@ -121,6 +121,11 @@ class MessageBusCommands(AbstractMessageBusCommands):
             promoteur_translator=PromoteurTranslator(),
             membre_ca_translator=MembreCATranslator(),
         ),
+        DesignerPromoteurReferenceCommand: partial(
+            designer_promoteur_reference,
+            proposition_repository=PropositionRepository(),
+            groupe_supervision_repository=GroupeDeSupervisionRepository(),
+        ),
         SupprimerPromoteurCommand: partial(
             supprimer_promoteur,
             proposition_repository=PropositionRepository(),

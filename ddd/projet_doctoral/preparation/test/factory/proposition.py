@@ -168,6 +168,10 @@ class PropositionAdmissionSC3DPSansPromoteurFactory(PropositionAdmissionSC3DPMin
     entity_id = factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-SC3DP-sans-promoteur')
 
 
+class PropositionAdmissionSC3DPSansPromoteurReferenceFactory(PropositionAdmissionSC3DPMinimaleFactory):
+    entity_id = factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-SC3DP-sans-promoteur-reference')
+
+
 class PropositionAdmissionSC3DPSansMembreCAFactory(PropositionAdmissionSC3DPMinimaleFactory):
     entity_id = factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-SC3DP-sans-membre_CA')
     matricule_candidat = '0123456789'

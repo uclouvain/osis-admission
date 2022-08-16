@@ -531,3 +531,34 @@ class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
         membres_CA = response.json()['signatures_membres_CA']
         self.assertEqual(len(promoters), 1)
         self.assertEqual(membres_CA[0]['membre_CA']['prenom'], 'Joe')
+
+    def test_supervision_designer_promoteur_reference(self):
+        self.client.force_authenticate(user=self.candidate.user)
+        promoter1 = PromoterFactory(process=self.admission.supervision_group)
+        promoter2 = PromoterFactory(process=self.admission.supervision_group)
+
+        url = resolve_url("admission_api_v1:set-reference-promoter", uuid=self.admission.uuid)
+        response = self.client.put(
+            url,
+            data={
+                'matricule': promoter1.person.global_id,
+                'uuid_proposition': self.admission.uuid,
+            },
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        response = self.client.get(self.url, format="json")
+        self.assertEqual(response.json()['promoteur_reference'], promoter1.person.global_id)
+
+        # Now change promoter
+        response = self.client.put(
+            url,
+            data={
+                'matricule': promoter2.person.global_id,
+                'uuid_proposition': self.admission.uuid,
+            },
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        response = self.client.get(self.url, format="json")
+        self.assertEqual(response.json()['promoteur_reference'], promoter2.person.global_id)
