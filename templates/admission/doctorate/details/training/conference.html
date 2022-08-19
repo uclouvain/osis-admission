@@ -44,7 +44,7 @@
     <h3 class="panel-title">
       {% include "admission/doctorate/details/training/_panel_title.html" %}
 
-      {% display activity.type '-' activity.title as title_details %}
+      {% display activity.type ':' activity.title as title_details %}
       {% display activity.ects|default:""|floatformat:"-2" " ECTS" as ects %}
       {% display '(' activity.city "," activity.country "," period ")" as location_period %}
       {% display title_details " " location_period  "-" ects %}

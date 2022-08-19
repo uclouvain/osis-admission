@@ -40,6 +40,24 @@ from base.tests.factories.person import PersonFactory
 class TrainingApiTestCase(QueriesAssertionsMixin, APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        cls.valid_data_for_conference = {
+            'object_type': 'Conference',
+            'ects': "0.0",
+            'category': 'CONFERENCE',
+            'parent': None,
+            'type': 'A great conference',
+            'title': '',
+            'participating_proof': [],
+            'comment': '',
+            'start_date': None,
+            'end_date': None,
+            'participating_days': 0.0,
+            'is_online': False,
+            'country': None,
+            'city': '',
+            'organizing_institution': '',
+            'website': '',
+        }
         cls.commission = EntityVersionFactory(
             entity_type=EntityType.DOCTORAL_COMMISSION.name,
             acronym='CDA',
@@ -92,28 +110,22 @@ class TrainingApiTestCase(QueriesAssertionsMixin, APITestCase):
     def test_training_create_with_candidate(self):
         self.client.force_authenticate(user=self.candidate.user)
 
-        data = {
-            'object_type': 'Conference',
-            'ects': "0.0",
-            'category': 'CONFERENCE',
-            'parent': None,
-            'type': 'A great conference',
-            'title': '',
-            'participating_proof': [],
-            'comment': '',
-            'start_date': None,
-            'end_date': None,
-            'participating_days': 0.0,
-            'is_online': False,
-            'country': None,
-            'city': '',
-            'organizing_institution': '',
-            'website': '',
-        }
-        response = self.client.post(self.url, data)
+        response = self.client.post(self.url, self.valid_data_for_conference)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.json())
 
-        # Child activity
+    def test_training_create_errors_with_candidate(self):
+        self.client.force_authenticate(user=self.candidate.user)
+
+        data = {
+            **self.valid_data_for_conference,
+            'start_date': '02/01/2022',
+            'end_date': '01/01/2022',
+        }
+        response = self.client.post(self.url, data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.json())
+
+    def test_training_create_child_with_candidate(self):
+        self.client.force_authenticate(user=self.candidate.user)
         data = {
             'object_type': 'ConferenceCommunication',
             'ects': 0,

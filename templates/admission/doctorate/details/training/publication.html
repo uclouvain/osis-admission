@@ -37,9 +37,9 @@
     <h3 class="panel-title">
       {% include "admission/doctorate/details/training/_panel_title.html" %}
 
-      {% display '(' activity.city "," activity.country "," activity.start_date|date:'d/m/Y' ")" as title_details %}
+      {% display '(' activity.start_date|date:'d/m/Y' ")" as title_details %}
       {% display activity.ects|default:""|floatformat:"-2" " ECTS" as ects %}
-      {% display activity.type '-' activity.subtype '-' activity.title " " title_details "-" ects %}
+      {% display activity.type " " title_details "-" ects %}
       <div class="clearfix"></div>
     </h3>
   </div>
@@ -50,21 +50,23 @@
       aria-labelledby="h-{{ activity.uuid }}"
   >
     <div class="panel-body">
-      <div>
+      <p>
         <strong class="d-block">{% trans "Description" %}</strong>
-        <p>{% display activity.title "-" activity.start_date|date:'d/m/Y' %}</p>
-        <p>{% display activity.role "," activity.authors %}</p>
-        <p>{% display activity.journal %}</p>
-        {% if activity.keywords %}
-          <br/>
+        {% display activity.role "," activity.authors '<br/>'|safe %}
+        {% display activity.title '<br/>'|safe activity.start_date|date:'d/m/Y' '<br/>'|safe %}
+        {% display activity.journal %}
+      </p>
+      {% if activity.keywords %}
+        <p>
           <strong>{% trans "Keywords" %} :</strong> {{ activity.keywords }}
-        {% endif %}
-        {% if activity.publication_status %}
-          <br/>
+        </p>
+      {% endif %}
+      {% if activity.publication_status %}
+        <p>
           <strong>{% trans "Publication status" %} :</strong>
           {{ activity.publication_status|enum_display:'ChoixStatutPublication' }}
-        {% endif %}
-      </div>
+        </p>
+      {% endif %}
       {% if activity.summary %}
         <div class="form-group">
           <strong class="d-block">{% trans "Summary" context "paper summary" %}</strong>

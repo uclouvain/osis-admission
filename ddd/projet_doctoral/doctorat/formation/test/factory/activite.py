@@ -113,6 +113,7 @@ class ResidencyCommunicationDTOFactory(factory.Factory):
         abstract = False
 
     type_activite = "test"
+    type_communication = "test"
     nom = "test"
     date = "test"
     institution_organisatrice = "test"
@@ -154,6 +155,7 @@ class ServiceDTOFactory(factory.Factory):
     nom = "test"
     date_debut = "test"
     date_fin = "test"
+    institution = "test"
     volume_horaire = "test"
 
 

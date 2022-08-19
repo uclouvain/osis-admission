@@ -42,6 +42,7 @@ class ShouldCommunicationSejourEtreComplete(BusinessValidator):
         if not all(
             [
                 self.communication.type_activite,
+                self.communication.type_communication,
                 self.communication.nom,
                 self.communication.date,
                 self.communication.institution_organisatrice,

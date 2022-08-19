@@ -36,7 +36,7 @@
 
 <p>{% lorem %}</p>
 
-<h3>{% trans "Event description" %}</h3>
+<h3>{% trans "Context" %}</h3>
 <div class="row">
   {% bootstrap_field form.type form_group_class="form-group col-md-4" %}
   {% bootstrap_field form.is_online form_group_class="form-group col-md-4 required_field" %}
@@ -53,7 +53,7 @@
 </div>
 {% bootstrap_field form.website placeholder="https://" %}
 
-<h3>{% trans "Event participation" %}</h3>
+<h3>{% trans "Your participation to the event" %}</h3>
 <div class="row">
   {% bootstrap_field form.participating_days form_group_class="form-group col-md-4 required_field" %}
   {% bootstrap_field form.ects form_group_class="form-group col-md-4 required_field" %}

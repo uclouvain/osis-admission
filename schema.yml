@@ -4639,6 +4639,9 @@ components:
           type: string
         authors:
           type: string
+        is_online:
+          type: boolean
+          nullable: true
         ects:
           type: number
           nullable: true
@@ -4671,6 +4674,7 @@ components:
       - end_date
       - hour_volume
       - authors
+      - is_online
       - ects
       - comment
       - object_type

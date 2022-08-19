@@ -573,6 +573,9 @@ msgstr ""
 msgid "Contact language"
 msgstr ""
 
+msgid "Context"
+msgstr ""
+
 msgid "Cotutelle"
 msgstr ""
 
@@ -595,6 +598,9 @@ msgid "Course owner"
 msgstr ""
 
 msgid "Course owner if applicable"
+msgstr ""
+
+msgid "Course with evaluation"
 msgstr ""
 
 msgid "Courses and training"
@@ -689,6 +695,9 @@ msgid "Description"
 msgstr ""
 
 msgid "Description of the activity"
+msgstr ""
+
+msgid "Description of your communication"
 msgstr ""
 
 msgid "Detailed curriculum vitae"
@@ -806,9 +815,6 @@ msgid "Enrolments"
 msgstr ""
 
 msgid "Event description"
-msgstr ""
-
-msgid "Event participation"
 msgstr ""
 
 msgid "Event website"
@@ -1577,7 +1583,7 @@ msgstr ""
 msgid "Research report"
 msgstr ""
 
-msgid "Research residency"
+msgid "Research seminar"
 msgstr ""
 
 msgid "Reset"
@@ -2120,6 +2126,9 @@ msgid "Your data has been saved"
 msgstr ""
 
 msgid "Your note has been added."
+msgstr ""
+
+msgid "Your participation to the event"
 msgstr ""
 
 msgid "Zip code"
