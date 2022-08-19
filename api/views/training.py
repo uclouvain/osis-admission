@@ -97,11 +97,12 @@ class DoctoralTrainingListView(APIPermissionRequiredMixin, GenericAPIView):
         return Response(serializer.data)
 
     def post(self, request, *args, **kwargs):
+        admission = self.get_permission_object()
         data = {
             **request.data,
-            'doctorate': self.get_permission_object().pk,
+            'doctorate': admission.pk,
         }
-        serializer = DoctoralTrainingActivitySerializer(data=data)
+        serializer = DoctoralTrainingActivitySerializer(admission=admission, data=data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -150,7 +151,7 @@ class DoctoralTrainingView(APIPermissionRequiredMixin, GenericAPIView):
 
     def get(self, request, *args, **kwargs):
         instance = self.get_object()
-        serializer = DoctoralTrainingActivitySerializer(instance)
+        serializer = DoctoralTrainingActivitySerializer(instance, admission=self.get_permission_object())
         return Response(serializer.data)
 
     def put(self, request, *args, **kwargs):
@@ -159,7 +160,7 @@ class DoctoralTrainingView(APIPermissionRequiredMixin, GenericAPIView):
             **request.data,
             'doctorate': self.get_permission_object().pk,
         }
-        serializer = DoctoralTrainingActivitySerializer(instance, data=data)
+        serializer = DoctoralTrainingActivitySerializer(instance, admission=self.get_permission_object(), data=data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)

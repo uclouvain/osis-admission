@@ -35,7 +35,7 @@
 
       {% display activity.ects|default:""|floatformat:"-2" " ECTS" as ects %}
       {% display '(' activity.subtitle ')' as code %}
-      {% display activity.type '-' activity.title " " code "-" ects %}
+      {% display activity.type ':' activity.title " " code "-" ects %}
       <div class="clearfix"></div>
     </h3>
   </div>
@@ -70,6 +70,9 @@
           </p>
         {% endif %}
       </div>
+      <p>
+        <strong class="d-block">{% trans "Course with evaluation" %}</strong> {{ activity.is_online|yesno }}
+      </p>
       {% if activity.participating_proof %}
         <div class="form-group">
           <strong class="d-block">{% trans "Proof of participation or success" %}</strong>

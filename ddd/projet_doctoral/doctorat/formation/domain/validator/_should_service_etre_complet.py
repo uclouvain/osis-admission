@@ -45,6 +45,7 @@ class ShouldServiceEtreComplet(BusinessValidator):
                 self.service.date_debut,
                 self.service.date_fin,
                 self.service.volume_horaire,
+                self.service.institution,
                 self.activite.ects,
             ]
         ):

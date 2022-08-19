@@ -35,6 +35,7 @@ class GetDefaultContextParam:
         default=serializers.CreateOnlyDefault(GetDefaultContextParam('context_param_name')),
     )
     """
+
     requires_context = True
 
     def __init__(self, param):
@@ -43,7 +44,7 @@ class GetDefaultContextParam:
     def __call__(self, serializer_field):
         return serializer_field.context.get(self.param)
 
-    def __repr__(self):
+    def __repr__(self):  # pragma: no cover
         return '%s()' % self.__class__.__name__
 
 

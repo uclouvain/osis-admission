@@ -74,7 +74,7 @@ class DoctorateTrainingActivityViewTestCase(TestCase):
         response = self.client.get(self.url)
         self.assertContains(response, self.conference.title)
         self.assertContains(response, _("NON_SOUMISE"))
-        self.assertEqual(str(self.conference), "Conférences, colloques (10 ects, Non soumise)")
+        self.assertEqual(str(self.conference), "Conférence, colloque (10 ects, Non soumise)")
 
     def test_boolean_select_is_online(self):
         add_url = resolve_url('admission:doctorate:training:add', uuid=self.doctorate.uuid, category='communication')

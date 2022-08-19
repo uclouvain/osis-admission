@@ -366,7 +366,7 @@ class ResidencyForm(ActivityFormMixin, forms.ModelForm):
 
 class ResidencyCommunicationForm(ActivityFormMixin, forms.ModelForm):
     template_name = "admission/doctorate/forms/training/residency_communication.html"
-    type = SelectOrOtherField(choices=[_("Research residency")], label=_("Type of activity"))
+    type = SelectOrOtherField(choices=[_("Research seminar")], label=_("Type of activity"))
     subtype = SelectOrOtherField(
         choices=[_("Oral exposé")],
         label=_("Type of communication"),
@@ -518,6 +518,12 @@ class CourseForm(ActivityFormMixin, forms.ModelForm):
     )
     organizing_institution = SelectOrOtherField(choices=[INSTITUTION_UCL], label=_("Institution"))
     academic_year = AcademicYearField(widget=autocomplete.ListSelect2(), required=False)
+    is_online = forms.BooleanField(
+        label=_("Course with evaluation"),  # Yes, its another meaning, but we spare a db field
+        initial=False,
+        required=False,
+        widget=BooleanRadioSelect(choices=((False, _("No")), (True, _("Yes")))),
+    )
 
     def __init__(self, admission, *args, **kwargs) -> None:
         super().__init__(admission, *args, **kwargs)
@@ -552,6 +558,7 @@ class CourseForm(ActivityFormMixin, forms.ModelForm):
             'end_date',
             'hour_volume',
             'authors',
+            'is_online',
             'ects',
             'participating_proof',
             'comment',

@@ -89,14 +89,15 @@ class ActivitySerializerBase(serializers.Serializer):
 
     child_classes = None
 
-    def __init__(self, *args, child_classes=None, **kwargs):
+    def __init__(self, *args, admission=None, child_classes=None, **kwargs):
         self.child_classes = child_classes
         self.form_instance = None
+        self.admission = admission
         super().__init__(*args, **kwargs)
 
     def get_form(self, data=None, **kwargs):
         """Create an instance of configured form class."""
-        return self.Meta.form(data=data, **kwargs)
+        return self.Meta.form(admission=self.admission, data=data, **kwargs)
 
     def get_fields(self):
         """
@@ -172,7 +173,7 @@ class ActivitySerializerBase(serializers.Serializer):
         for kwarg, value in kwargs.items():
             # set corresponding DRF attributes which don't have alternative
             # in Django form fields
-            if kwarg == 'required':
+            if kwarg == 'required':  # pragma: no cover
                 field.allow_blank = not value
                 field.allow_null = not value
 
@@ -201,7 +202,7 @@ class ActivitySerializerBase(serializers.Serializer):
             attrs['default'] = form_field.initial
 
         # avoid "May not set both `required` and `default`"
-        if attrs.get('required') and 'default' in attrs:
+        if attrs.get('required') and 'default' in attrs:  # pragma: no cover
             del attrs['required']
 
         if isinstance(form_field, FileUploadField):
@@ -317,8 +318,9 @@ class DoctoralTrainingActivitySerializer(serializers.Serializer):
     }
     only_classes = None
 
-    def __init__(self, *args, only_classes=None, **kwargs):
+    def __init__(self, *args, admission=None, only_classes=None, **kwargs):
         self.only_classes = only_classes
+        self.admission = admission
         super().__init__(*args, **kwargs)
 
     @staticmethod
@@ -350,23 +352,32 @@ class DoctoralTrainingActivitySerializer(serializers.Serializer):
         child_classes = self.get_child_classes(self._get_mapping_key(instance))
         return serializer_class(child_classes=child_classes).to_representation(instance)
 
-    def to_internal_value(self, data):
+    def get_serializer_class(self, data):
         mapping_key = CategorieActivite[data.get('category')]
         if data.get('parent'):
-            parent = get_object_or_404(Activity.objects.filter(doctorate_id=data['doctorate']), uuid=data['parent'])
+            if not isinstance(data['parent'], Activity):
+                parent = get_object_or_404(Activity.objects.filter(doctorate_id=data['doctorate']), uuid=data['parent'])
+            else:
+                parent = data['parent']
             mapping_key = (CategorieActivite[parent.category], CategorieActivite[data.get('category')])
         serializer_class = self.serializer_class_mapping.get(mapping_key)
+        return serializer_class
 
-        return serializer_class().to_internal_value(data)
+    def to_internal_value(self, data):
+        return self.get_serializer_class(data)(admission=self.admission).to_internal_value(data)
+
+    def validate(self, data):
+        return self.get_serializer_class(data)(admission=self.admission).validate(data)
 
     def create(self, validated_data):
         """Save a new activity object (simplified ModelSerializer mechanic)"""
-        validated_data.pop('object_type')
-        return Activity.objects.create(**validated_data)
+        params = {'doctorate': self.admission, 'category': self.initial_data['category'].upper()}
+        if self.initial_data.get('parent'):
+            params['parent'] = get_object_or_404(Activity, uuid=self.initial_data.get('parent'))
+        return Activity.objects.create(**validated_data, **params)
 
     def update(self, instance, validated_data):
         """Save an existing activity object (simplified ModelSerializer mechanic)"""
-        validated_data.pop('object_type')
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
         instance.save()

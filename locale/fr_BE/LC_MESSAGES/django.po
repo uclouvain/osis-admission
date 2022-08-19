@@ -350,7 +350,7 @@ msgstr ""
 "Types d'activité pour la catégorie Communication orale (hors conférences)"
 
 msgid "CONFERENCE"
-msgstr "Conférences, colloques"
+msgstr "Conférence, colloque"
 
 msgid "CONFERENCE PUBLICATION types"
 msgstr ""
@@ -603,6 +603,9 @@ msgstr "Coordonnées"
 msgid "Contact language"
 msgstr "Langue de contact"
 
+msgid "Context"
+msgstr "Contexte"
+
 msgid "Cotutelle"
 msgstr "Cotutelle"
 
@@ -626,6 +629,9 @@ msgstr "Titulaire du cours"
 
 msgid "Course owner if applicable"
 msgstr "Titulaire du cours (le cas échéant)"
+
+msgid "Course with evaluation"
+msgstr "Cours avec évaluation"
 
 msgid "Courses and training"
 msgstr "Cours et formation"
@@ -723,6 +729,9 @@ msgstr "Description"
 
 msgid "Description of the activity"
 msgstr "Description de l'activité"
+
+msgid "Description of your communication"
+msgstr "Description de votre communication"
 
 msgid "Detailed curriculum vitae"
 msgstr "Curriculum vitae détaillé"
@@ -840,9 +849,6 @@ msgstr "Inscriptions"
 
 msgid "Event description"
 msgstr "Description de l'événement"
-
-msgid "Event participation"
-msgstr "Participation à l'événement"
 
 msgid "Event website"
 msgstr "Site web de l'événement"
@@ -1681,8 +1687,8 @@ msgstr "Demande d'une nouvelle échéance pour l'épreuve de confirmation"
 msgid "Research report"
 msgstr "Rapport de recherche"
 
-msgid "Research residency"
-msgstr "Séjour de recherche"
+msgid "Research seminar"
+msgstr "Séminaire de recherche"
 
 msgid "Reset"
 msgstr "Réinitialiser"
@@ -1861,7 +1867,7 @@ msgid "Submit these activities"
 msgstr "Soumettre ces activités"
 
 msgid "Submitted"
-msgstr "Soumise"
+msgstr "Soumis pour publication"
 
 msgid "Submitted profile"
 msgstr "Profil soumis"
@@ -2159,7 +2165,7 @@ msgid "Undecided"
 msgstr "Non décidé"
 
 msgid "Unsubmitted"
-msgstr "Non soumis"
+msgstr "Non soumis pour publication"
 
 msgid "Update"
 msgstr "Mettre à jour"
@@ -2265,6 +2271,9 @@ msgstr "Vos données ont été sauvegardées"
 
 msgid "Your note has been added."
 msgstr "Votre note a bien été ajoutée."
+
+msgid "Your participation to the event"
+msgstr "Votre participation à l'événement"
 
 msgid "Zip code"
 msgstr "Code postal"
