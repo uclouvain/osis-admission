@@ -62,6 +62,7 @@ from .projet_doctoral.doctorat.epreuve_confirmation.domain.service.notification 
 from .projet_doctoral.doctorat.formation.repository.activite import ActiviteRepository
 from .projet_doctoral.preparation.domain.service.historique import Historique as HistoriqueProposition
 from .projet_doctoral.preparation.domain.service.notification import Notification as NotificationProposition
+from .projet_doctoral.doctorat.formation.domain.service.notification import Notification as NotificationFormation
 
 
 class MessageBusCommands(AbstractMessageBusCommands):
@@ -284,5 +285,8 @@ class MessageBusCommands(AbstractMessageBusCommands):
         SoumettreActivitesCommand: partial(
             soumettre_activites,
             activite_repository=ActiviteRepository(),
+            doctorat_repository=DoctoratRepository(),
+            groupe_de_supervision_repository=GroupeDeSupervisionRepository(),
+            notification=NotificationFormation(),
         ),
     }

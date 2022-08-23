@@ -75,7 +75,12 @@ class DoctorateTrainingActivityView(LoadDossierViewMixin, generic.FormView):
         activity_ids = [activite.uuid for activite in form.cleaned_data['activity_ids']]
         try:
             form.activities_in_error = []
-            message_bus_instance.invoke(SoumettreActivitesCommand(activite_uuids=activity_ids))
+            message_bus_instance.invoke(
+                SoumettreActivitesCommand(
+                    doctorat_uuid=self.admission_uuid,
+                    activite_uuids=activity_ids,
+                )
+            )
         except MultipleBusinessExceptions as multiple_exceptions:
             for exception in multiple_exceptions.exceptions:
                 form.add_error(None, exception.message)

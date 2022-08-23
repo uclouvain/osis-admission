@@ -43,7 +43,7 @@ class Migration(migrations.Migration):
                 ('role', models.CharField(blank=True, default='', max_length=100, verbose_name='Role')),
                 ('keywords', models.CharField(blank=True, default='', max_length=100, verbose_name='Keywords')),
                 ('journal', models.CharField(blank=True, default='', max_length=100, verbose_name='Journal')),
-                ('publication_status', models.CharField(blank=True, choices=[('UNSUBMITTED', 'Unsubmitted'), ('SUBMITTED', 'Submitted'), ('IN_REVIEW', 'In review'), ('ACCEPTED', 'Accepted'), ('PUBLISHED', 'Published')], max_length=100, default='')),
+                ('publication_status', models.CharField(blank=True, choices=[('UNSUBMITTED', 'Unsubmitted for publication'), ('SUBMITTED', 'Submitted for publication'), ('IN_REVIEW', 'In review'), ('ACCEPTED', 'Accepted'), ('PUBLISHED', 'Published')], max_length=100, default='')),
                 ('hour_volume', models.CharField(blank=True, default='', max_length=100)),
                 ('created_at', models.DateTimeField(auto_now_add=True, verbose_name='Created at')),
                 ('modified_at', models.DateTimeField(auto_now=True, verbose_name='Modified at')),

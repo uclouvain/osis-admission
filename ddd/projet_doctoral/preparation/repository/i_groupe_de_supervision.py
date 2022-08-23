@@ -26,6 +26,7 @@
 import abc
 from typing import List, Optional
 
+from admission.ddd.projet_doctoral.doctorat.domain.model.doctorat import DoctoratIdentity
 from admission.ddd.projet_doctoral.preparation.domain.model.groupe_de_supervision import (
     GroupeDeSupervision,
     GroupeDeSupervisionIdentity,
@@ -45,6 +46,11 @@ class IGroupeDeSupervisionRepository(interface.AbstractRepository):
     @classmethod
     @abc.abstractmethod
     def get_by_proposition_id(cls, proposition_id: 'PropositionIdentity') -> 'GroupeDeSupervision':
+        raise NotImplementedError
+
+    @classmethod
+    @abc.abstractmethod
+    def get_by_doctorat_id(cls, doctorat_id: 'DoctoratIdentity') -> 'GroupeDeSupervision':
         raise NotImplementedError
 
     @classmethod

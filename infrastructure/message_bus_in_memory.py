@@ -62,6 +62,9 @@ from .projet_doctoral.validation.repository.in_memory.demande import DemandeInMe
 from .projet_doctoral.doctorat.epreuve_confirmation.domain.service.in_memory.notification import (
     NotificationInMemory as NotificationEpreuveConfirmation,
 )
+from .projet_doctoral.doctorat.formation.domain.service.in_memory.notification import (
+    NotificationInMemory as NotificationFormation,
+)
 from ..ddd.projet_doctoral.doctorat.formation.commands import SoumettreActivitesCommand
 from ..ddd.projet_doctoral.doctorat.formation.use_case.write import soumettre_activites
 
@@ -286,6 +289,9 @@ class MessageBusInMemoryCommands(AbstractMessageBusCommands):
         SoumettreActivitesCommand: partial(
             soumettre_activites,
             activite_repository=ActiviteInMemoryRepository(),
+            doctorat_repository=DoctoratInMemoryRepository(),
+            groupe_de_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
+            notification=NotificationFormation(),
         ),
     }
 
