@@ -236,3 +236,6 @@ class CddConfiguration(models.Model):
         verbose_name=_("COURSE types"),
         default=default_course_types,
     )
+
+    def __str__(self):  # pragma: no cover
+        return f"Configuration for {self.cdd}"

@@ -44,7 +44,8 @@ class SoumettreActivitesTestCase(SimpleTestCase):
         with self.assertRaises(MultipleBusinessExceptions) as e:
             self.message_bus.invoke(
                 SoumettreActivitesCommand(
-                    activite_uuids=[activite.entity_id.uuid for activite in ActiviteInMemoryRepository.entities]
+                    doctorat_uuid="uuid-SC3DP-promoteurs-membres-deja-approuves",
+                    activite_uuids=[activite.entity_id.uuid for activite in ActiviteInMemoryRepository.entities],
                 )
             )
         self.assertEqual(len(e.exception.exceptions), len(ActiviteInMemoryRepository.entities))
@@ -76,7 +77,8 @@ class SoumettreActivitesTestCase(SimpleTestCase):
         with self.assertRaises(MultipleBusinessExceptions) as e:
             self.message_bus.invoke(
                 SoumettreActivitesCommand(
-                    activite_uuids=[activite.entity_id.uuid for activite in ActiviteInMemoryRepository.entities]
+                    doctorat_uuid="uuid-SC3DP-promoteurs-membres-deja-approuves",
+                    activite_uuids=[activite.entity_id.uuid for activite in ActiviteInMemoryRepository.entities],
                 )
             )
         self.assertEqual(len(e.exception.exceptions), len(ActiviteInMemoryRepository.entities))
@@ -85,7 +87,8 @@ class SoumettreActivitesTestCase(SimpleTestCase):
     def test_soumettre_activites_ok(self):
         self.message_bus.invoke(
             SoumettreActivitesCommand(
-                activite_uuids=[activite.entity_id.uuid for activite in ActiviteInMemoryRepository.entities]
+                doctorat_uuid="uuid-SC3DP-promoteurs-membres-deja-approuves",
+                activite_uuids=[activite.entity_id.uuid for activite in ActiviteInMemoryRepository.entities],
             )
         )
         self.assertEqual(ActiviteInMemoryRepository.entities[0].statut, StatutActivite.SOUMISE)
@@ -117,7 +120,8 @@ class SoumettreActivitesTestCase(SimpleTestCase):
         ]
         self.message_bus.invoke(
             SoumettreActivitesCommand(
-                activite_uuids=[activite.entity_id.uuid for activite in ActiviteInMemoryRepository.entities]
+                doctorat_uuid="uuid-SC3DP-promoteurs-membres-deja-approuves",
+                activite_uuids=[activite.entity_id.uuid for activite in ActiviteInMemoryRepository.entities],
             )
         )
         self.assertEqual(ActiviteInMemoryRepository.entities[0].statut, StatutActivite.SOUMISE)

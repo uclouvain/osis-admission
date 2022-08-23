@@ -33,6 +33,7 @@ from admission.ddd.projet_doctoral.doctorat.domain.model.enums import ChoixStatu
 from admission.ddd.projet_doctoral.preparation.domain.model._enums import ChoixStatutProposition
 from admission.ddd.projet_doctoral.preparation.domain.model.proposition import Proposition
 from admission.tests.factories.roles import CandidateFactory
+from admission.tests.factories.supervision import PromoterFactory
 from base.models.enums.education_group_types import TrainingType
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.education_group_type import EducationGroupTypeFactory
@@ -109,6 +110,6 @@ class DoctorateAdmissionFactory(factory.DjangoModelFactory):
         CandidateFactory(person=self.candidate)
 
     @factory.post_generation
-    def create_student_if_admitted(self, create, extracted, *kwargs):
+    def create_student_if_admitted(self, create, extracted, **kwargs):
         if self.post_enrolment_status != ChoixStatutDoctorat.ADMISSION_IN_PROGRESS.name:
             StudentFactory(person=self.candidate)

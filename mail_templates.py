@@ -388,6 +388,67 @@ templates.register(
     tag=DOCTORATE_ADMISSION_TAG,
 )
 
+# Doctoral training
+training_common_tokens = common_tokens + [
+    Token(
+        name='student_first_name',
+        description=_("The first name of the student"),
+        example="John",
+    ),
+    Token(
+        name='student_last_name',
+        description=_("The last name of the student"),
+        example="Doe",
+    ),
+    Token(
+        name='admission_link_front_training',
+        description=_("Link to the doctoral training panel (front-office)"),
+        example="http://dev.studies.uclouvain.be/somewhere/some-uuid/training",
+    ),
+    Token(
+        name='admission_link_back_training',
+        description=_("Link to the doctoral training panel (back-office)"),
+        example="http://dev.osis.uclouvain.be/somewhere/some-uuid/training",
+    ),
+]
+
+ADMISSION_EMAIL_REFERENCE_PROMOTER_TRAININGS_SUBMITTED = 'osis-admission-doctoral-training-submitted-reference-promoter'
+templates.register(
+    ADMISSION_EMAIL_REFERENCE_PROMOTER_TRAININGS_SUBMITTED,
+    description=_("Mail sent to reference promter to inform of the submission of doctoral training activities"),
+    tokens=training_common_tokens,
+    tag=DOCTORATE_ADMISSION_TAG,
+)
+
+ADMISSION_EMAIL_CANDIDATE_TRAINING_REFUSED = 'osis-admission-doctoral-training-refused-candidate'
+templates.register(
+    ADMISSION_EMAIL_CANDIDATE_TRAINING_REFUSED,
+    description=_("Mail sent to the candidate to inform of the refusal of doctoral training activity"),
+    tokens=training_common_tokens
+    + [
+        Token(
+            name='reason',
+            description=_("The reason for refusal"),
+            example="This activity is not part of doctoral program",
+        ),
+    ],
+    tag=DOCTORATE_ADMISSION_TAG,
+)
+ADMISSION_EMAIL_CANDIDATE_TRAINING_NEEDS_UPDATE = 'osis-admission-doctoral-training-needs-update-candidate'
+templates.register(
+    ADMISSION_EMAIL_CANDIDATE_TRAINING_NEEDS_UPDATE,
+    description=_("Mail sent to the candidate to update a doctoral training activity"),
+    tokens=training_common_tokens
+    + [
+        Token(
+            name='reason',
+            description=_("The reason for needing update"),
+            example="Some information is missing",
+        ),
+    ],
+    tag=DOCTORATE_ADMISSION_TAG,
+)
+
 CONFIRMATION_PAPER_TEMPLATES_IDENTIFIERS = {
     ADMISSION_EMAIL_CONFIRMATION_PAPER_SUBMISSION_ADRE,
     ADMISSION_EMAIL_CONFIRMATION_PAPER_INFO_STUDENT,

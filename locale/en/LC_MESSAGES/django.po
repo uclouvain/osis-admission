@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-02-11 14:41+0100\n"
+"POT-Creation-Date: 2022-08-22 17:43+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -319,13 +319,13 @@ msgid "CHEMISTRY"
 msgstr "Chemistry"
 
 msgid "COMMUNICATION"
-msgstr "Oral communication (excluding conferences)"
+msgstr "Oral communication (excluding conference)"
 
 msgid "COMMUNICATION types"
 msgstr ""
 
 msgid "CONFERENCE"
-msgstr "Conferences, symposiums"
+msgstr "Conference, symposium"
 
 msgid "CONFERENCE PUBLICATION types"
 msgstr ""
@@ -1020,6 +1020,12 @@ msgstr ""
 msgid "Link to the admission supervisory panel (front-office)"
 msgstr ""
 
+msgid "Link to the doctoral training panel (back-office)"
+msgstr ""
+
+msgid "Link to the doctoral training panel (front-office)"
+msgstr ""
+
 msgid "MANAGEMENT"
 msgstr "Management"
 
@@ -1071,6 +1077,11 @@ msgid "Mail sent to promoters when a member of the supervision panel refuses"
 msgstr ""
 
 msgid ""
+"Mail sent to reference promter to inform of the submission of doctoral "
+"training activities"
+msgstr ""
+
+msgid ""
 "Mail sent to the CDD to inform them that a new application has been submitted"
 msgstr ""
 
@@ -1087,6 +1098,14 @@ msgstr ""
 msgid ""
 "Mail sent to the candidate to confirm that his application has been taken "
 "into account by UCLouvain"
+msgstr ""
+
+msgid ""
+"Mail sent to the candidate to inform of the refusal of doctoral training "
+"activity"
+msgstr ""
+
+msgid "Mail sent to the candidate to update a doctoral training activity"
 msgstr ""
 
 msgid ""
@@ -1763,6 +1782,9 @@ msgstr ""
 msgid "Submitted"
 msgstr ""
 
+msgid "Submitted for publication"
+msgstr ""
+
 msgid "Submitted profile"
 msgstr ""
 
@@ -1916,6 +1938,9 @@ msgstr ""
 msgid "The public comment about the approval/refusal"
 msgstr ""
 
+msgid "The reason for needing update"
+msgstr ""
+
 msgid "The reason for refusal"
 msgstr ""
 
@@ -2034,7 +2059,7 @@ msgstr ""
 msgid "Undecided"
 msgstr ""
 
-msgid "Unsubmitted"
+msgid "Unsubmitted for publication"
 msgstr ""
 
 msgid "Update"

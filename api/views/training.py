@@ -189,7 +189,10 @@ class DoctoralTrainingSubmitView(APIPermissionRequiredMixin, GenericAPIView):
         """Submit doctoral training activities."""
         serializer = DoctoralTrainingBatchSerializer(data=request.data)
         serializer.is_valid(True)
-        cmd = SoumettreActivitesCommand(activite_uuids=serializer.data['activity_uuids'])
+        cmd = SoumettreActivitesCommand(
+            doctorat_uuid=self.kwargs['uuid'],
+            activite_uuids=serializer.data['activity_uuids'],
+        )
         try:
             message_bus_instance.invoke(cmd)
         except MultipleBusinessExceptions as exc:

@@ -62,6 +62,7 @@ from .base import BaseAdmission, admission_directory_path
 
 __all__ = [
     "DoctorateAdmission",
+    "DoctorateProxy",
     "ConfirmationPaper",
     "REFERENCE_SEQ_NAME",
 ]

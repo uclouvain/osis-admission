@@ -39,6 +39,7 @@ from admission.auth.roles.sceb import Sceb
 from admission.auth.roles.sic_director import SicDirector
 from admission.auth.roles.sic_manager import SicManager
 from admission.contrib.models import CddMailTemplate, DoctorateAdmission
+from admission.contrib.models.cdd_config import CddConfiguration
 from osis_mail_template.admin import MailTemplateAdmin
 
 from osis_role.contrib.admin import RoleModelAdmin
@@ -91,6 +92,7 @@ class CddMailTemplateAdmin(MailTemplateAdmin):
 
 admin.site.register(DoctorateAdmission, DoctorateAdmissionAdmin)
 admin.site.register(CddMailTemplate, CddMailTemplateAdmin)
+admin.site.register(CddConfiguration)
 
 
 # ##############################################################################

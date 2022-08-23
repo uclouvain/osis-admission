@@ -23,45 +23,20 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from django.utils.translation import gettext_lazy as _
+from typing import List
 
-from base.models.utils.utils import ChoiceEnum
-
-
-class StatutActivite(ChoiceEnum):
-    NON_SOUMISE = _("NON_SOUMISE")
-    SOUMISE = _("SOUMISE")
-    ACCEPTEE = _("ACCEPTEE")
-    REFUSEE = _("REFUSEE")
+from admission.ddd.projet_doctoral.doctorat.domain.model.doctorat import Doctorat
+from admission.ddd.projet_doctoral.doctorat.formation.domain.model.activite import Activite
+from admission.ddd.projet_doctoral.preparation.domain.model._promoteur import PromoteurIdentity
+from osis_common.ddd import interface
 
 
-class CategorieActivite(ChoiceEnum):
-    CONFERENCE = _("CONFERENCE")
-    COMMUNICATION = _("COMMUNICATION")
-    SEMINAR = _("SEMINAR")
-    PUBLICATION = _("PUBLICATION")
-    SERVICE = _("SERVICE")
-    RESIDENCY = _("RESIDENCY")
-    VAE = _("VAE")
-    COURSE = _("COURSE")
-    PAPER = _("PAPER")
-
-
-class ChoixComiteSelection(ChoiceEnum):
-    YES = _("YES")
-    NO = _("NO")
-    NA = _("N/A")
-
-
-class ChoixStatutPublication(ChoiceEnum):
-    UNSUBMITTED = _("Unsubmitted for publication")
-    SUBMITTED = _("Submitted for publication")
-    IN_REVIEW = _("In review")
-    ACCEPTED = _("Accepted")
-    PUBLISHED = _("Published")
-
-
-class ChoixTypeEpreuve(ChoiceEnum):
-    CONFIRMATION_PAPER = _("CONFIRMATION_PAPER")
-    PRIVATE_DEFENSE = _("PRIVATE_DEFENSE")
-    PUBLIC_DEFENSE = _("PUBLIC_DEFENSE")
+class INotification(interface.DomainService):
+    @classmethod
+    def notifier_soumission_au_promoteur_de_reference(
+        cls,
+        doctorat: Doctorat,
+        activites: List[Activite],
+        promoteur_de_reference_id: PromoteurIdentity,
+    ) -> None:
+        raise NotImplementedError

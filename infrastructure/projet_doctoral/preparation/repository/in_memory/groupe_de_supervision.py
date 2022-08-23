@@ -25,6 +25,7 @@
 # ##############################################################################
 from typing import List, Optional
 
+from admission.ddd.projet_doctoral.doctorat.domain.model.doctorat import DoctoratIdentity
 from admission.ddd.projet_doctoral.preparation.builder.proposition_identity_builder import PropositionIdentityBuilder
 from admission.ddd.projet_doctoral.preparation.domain.model._cotutelle import pas_de_cotutelle
 from admission.ddd.projet_doctoral.preparation.domain.model.groupe_de_supervision import (
@@ -101,6 +102,10 @@ class GroupeDeSupervisionInMemoryRepository(InMemoryGenericRepository, IGroupeDe
             return next(e for e in cls.entities if e.proposition_id == proposition_id)
         except StopIteration:
             raise GroupeDeSupervisionNonTrouveException
+
+    @classmethod
+    def get_by_doctorat_id(cls, doctorat_id: 'DoctoratIdentity') -> 'GroupeDeSupervision':
+        return cls.get_by_proposition_id(PropositionIdentityBuilder.build_from_uuid(doctorat_id.uuid))
 
     @classmethod
     def get_cotutelle_dto(cls, uuid_proposition: str) -> 'CotutelleDTO':

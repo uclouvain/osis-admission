@@ -32,6 +32,7 @@ from admission.tests import QueriesAssertionsMixin
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.activity import ActivityFactory, ConferenceFactory, ServiceFactory
 from admission.tests.factories.roles import CandidateFactory
+from admission.tests.factories.supervision import PromoterFactory
 from base.models.enums.entity_type import EntityType
 from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.person import PersonFactory
@@ -62,9 +63,11 @@ class TrainingApiTestCase(QueriesAssertionsMixin, APITestCase):
             entity_type=EntityType.DOCTORAL_COMMISSION.name,
             acronym='CDA',
         ).entity
+        cls.reference_promoter = PromoterFactory(is_reference_promoter=True)
         cls.admission = DoctorateAdmissionFactory(
             doctorate__management_entity=cls.commission,
             admitted=True,
+            supervision_group=cls.reference_promoter.process,
         )
         cls.candidate = cls.admission.candidate
         cls.other_candidate_user = CandidateFactory(person__first_name="Jim").person.user

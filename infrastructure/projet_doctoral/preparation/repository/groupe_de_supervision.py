@@ -30,6 +30,7 @@ from admission.auth.roles.ca_member import CommitteeMember
 from admission.auth.roles.promoter import Promoter
 from admission.contrib.models import DoctorateAdmission, SupervisionActor
 from admission.contrib.models.enums.actor_type import ActorType
+from admission.ddd.projet_doctoral.doctorat.domain.model.doctorat import DoctoratIdentity
 from admission.ddd.projet_doctoral.preparation.builder.proposition_identity_builder import PropositionIdentityBuilder
 from admission.ddd.projet_doctoral.preparation.domain.model._cotutelle import Cotutelle, pas_de_cotutelle
 from admission.ddd.projet_doctoral.preparation.domain.model._enums import (
@@ -119,6 +120,10 @@ class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
             if proposition.status == ChoixStatutProposition.SIGNING_IN_PROGRESS.name
             else None,
         )
+
+    @classmethod
+    def get_by_doctorat_id(cls, doctorat_id: 'DoctoratIdentity') -> 'GroupeDeSupervision':
+        return cls.get_by_proposition_id(PropositionIdentityBuilder.build_from_uuid(doctorat_id.uuid))
 
     @classmethod
     def get(cls, entity_id: 'GroupeDeSupervisionIdentity') -> 'GroupeDeSupervision':

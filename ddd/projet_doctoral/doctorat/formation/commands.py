@@ -37,6 +37,7 @@ class SupprimerActiviteCommand(CommandRequest):
 
 @attr.dataclass
 class SoumettreActivitesCommand(CommandRequest):
+    doctorat_uuid: str
     activite_uuids: List[str]
 
 

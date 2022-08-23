@@ -23,7 +23,6 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import datetime
 import uuid
 from unittest.mock import patch
 
@@ -54,6 +53,7 @@ from admission.tests.factories.activity import (
     VaeFactory,
 )
 from admission.tests.factories.roles import CddManagerFactory
+from admission.tests.factories.supervision import PromoterFactory
 from base.tests.factories.academic_year import AcademicYearFactory
 
 
@@ -61,7 +61,11 @@ from base.tests.factories.academic_year import AcademicYearFactory
 class DoctorateTrainingActivityViewTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.conference = ConferenceFactory(ects=10)
+        cls.reference_promoter = PromoterFactory(is_reference_promoter=True)
+        cls.conference = ConferenceFactory(
+            ects=10,
+            doctorate__supervision_group=cls.reference_promoter.process,
+        )
         cls.doctorate = cls.conference.doctorate
         cls.service = ServiceFactory(doctorate=cls.doctorate)
         cls.manager = CddManagerFactory(entity=cls.doctorate.doctorate.management_entity)
@@ -74,7 +78,7 @@ class DoctorateTrainingActivityViewTestCase(TestCase):
         response = self.client.get(self.url)
         self.assertContains(response, self.conference.title)
         self.assertContains(response, _("NON_SOUMISE"))
-        self.assertEqual(str(self.conference), "Conférence, colloque (10 ects, Non soumise)")
+        self.assertEqual(str(self.conference), "Conférence (10 ects, Non soumise)")
 
     def test_boolean_select_is_online(self):
         add_url = resolve_url('admission:doctorate:training:add', uuid=self.doctorate.uuid, category='communication')
