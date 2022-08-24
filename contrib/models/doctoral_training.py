@@ -242,6 +242,21 @@ class Activity(models.Model):
         blank=True,
     )
 
+    # Process
+    reference_promoter_assent = models.BooleanField(
+        verbose_name=_("Reference promoter assent"),
+        null=True,
+    )
+    reference_promoter_comment = models.TextField(
+        verbose_name=_("Reference promoter comment"),
+        default="",
+    )
+    cdd_comment = models.TextField(
+        verbose_name=_("CDD manager comment"),
+        default="",
+    )
+
+    # Management
     created_at = models.DateTimeField(
         auto_now_add=True,
         verbose_name=_("Created at"),

@@ -89,6 +89,22 @@ class ActivitySerializerBase(serializers.Serializer):
 
     child_classes = None
 
+    # Add hint for serializer class
+    object_type = serializers.CharField()
+
+    # Add useful fields (that are not in form)
+    uuid = serializers.CharField(read_only=True)
+    category = serializers.ChoiceField(choices=CategorieActivite.choices())
+    status = serializers.ChoiceField(choices=StatutActivite.choices(), read_only=True)
+    doctorate = serializers.PrimaryKeyRelatedField(
+        queryset=DoctorateAdmission.objects.all(),
+        write_only=True,
+        required=False,
+    )
+    reference_promoter_assent = serializers.NullBooleanField(read_only=True)
+    reference_promoter_comment = serializers.CharField(read_only=True)
+    cdd_comment = serializers.CharField(read_only=True)
+
     def __init__(self, *args, admission=None, child_classes=None, **kwargs):
         self.child_classes = child_classes
         self.form_instance = None
@@ -128,19 +144,6 @@ class ActivitySerializerBase(serializers.Serializer):
                 )
             else:
                 ret[field_name] = self._get_field(field_name, form_field, serializer_field_class)
-
-        # Add hint for serializer class
-        ret['object_type'] = serializers.CharField()
-
-        # Add useful fields (that are not in form)
-        ret['uuid'] = serializers.CharField(read_only=True)
-        ret['category'] = serializers.ChoiceField(choices=CategorieActivite.choices())
-        ret['status'] = serializers.ChoiceField(choices=StatutActivite.choices(), read_only=True)
-        ret['doctorate'] = serializers.PrimaryKeyRelatedField(
-            queryset=DoctorateAdmission.objects.all(),
-            write_only=True,
-            required=False,
-        )
 
         # Hierarchy handling
         mapping_key = [
@@ -388,6 +391,11 @@ class DoctoralTrainingBatchSerializer(serializers.Serializer):
     activity_uuids = serializers.ListField(
         child=serializers.SlugRelatedField(slug_field='uuid', queryset=Activity.objects.all())
     )
+
+
+class DoctoralTrainingAssentSerializer(serializers.Serializer):
+    approbation = serializers.BooleanField()
+    commentaire = serializers.CharField()
 
 
 class DoctoralTrainingConfigSerializer(serializers.ModelSerializer):

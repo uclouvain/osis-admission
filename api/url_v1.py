@@ -88,6 +88,7 @@ urlpatterns = [
     path('propositions/<uuid:uuid>/training/config', views.DoctoralTrainingConfigView),
     path('propositions/<uuid:uuid>/training/submit', views.DoctoralTrainingSubmitView),
     path('propositions/<uuid:uuid>/training/<uuid:activity_id>', views.DoctoralTrainingView),
+    path('propositions/<uuid:uuid>/training/<uuid:activity_id>/assent', views.DoctoralTrainingAssentView),
     # Autocompletes
     path('autocomplete/sector', views.AutocompleteSectorView),
     path('autocomplete/sector/<str:sigle>/doctorates', views.AutocompleteDoctoratView),

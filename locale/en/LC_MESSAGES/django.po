@@ -300,6 +300,9 @@ msgstr ""
 msgid "CDD manager"
 msgstr ""
 
+msgid "CDD manager comment"
+msgstr ""
+
 msgid "CDD managers"
 msgstr ""
 
@@ -1584,6 +1587,12 @@ msgstr ""
 msgid "Reference"
 msgstr ""
 
+msgid "Reference promoter assent"
+msgstr ""
+
+msgid "Reference promoter comment"
+msgstr ""
+
 msgid "Registration Id"
 msgstr ""
 
@@ -2136,6 +2145,9 @@ msgstr ""
 
 msgid ""
 "You must be a member of the doctoral commission to access this admission"
+msgstr ""
+
+msgid "You must be the reference promoter to access this admission"
 msgstr ""
 
 msgid "You must be the request author to access this admission"

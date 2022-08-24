@@ -48,6 +48,7 @@ from admission.api.views.confirmation import (
 )
 from admission.api.views.doctorate import DoctorateAPIView
 from admission.api.views.training import (
+    DoctoralTrainingAssentView,
     DoctoralTrainingConfigView,
     DoctoralTrainingView,
     DoctoralTrainingListView,
@@ -86,4 +87,5 @@ __all__ = [
     "DoctoralTrainingConfigView",
     "DoctoralTrainingView",
     "DoctoralTrainingSubmitView",
+    "DoctoralTrainingAssentView",
 ]

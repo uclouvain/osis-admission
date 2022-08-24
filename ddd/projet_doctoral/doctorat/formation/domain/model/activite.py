@@ -44,8 +44,13 @@ class Activite(interface.RootEntity):
     categorie: 'CategorieActivite'
     statut: 'StatutActivite' = StatutActivite.NON_SOUMISE
     ects: Optional[float] = None
+
     parent_id: Optional['ActiviteIdentity'] = None
     categorie_parente: Optional['CategorieActivite'] = None
+
+    avis_promoteur_reference: Optional[bool] = None
+    commentaire_promoteur_reference: str = ''
+    commentaire_gestionnaire: str = ''
 
     def soumettre(self):
         self.statut = StatutActivite.SOUMISE
@@ -55,3 +60,7 @@ class Activite(interface.RootEntity):
 
     def refuser(self):
         self.statut = StatutActivite.REFUSEE
+
+    def donner_avis_promoteur_reference(self, approbation, commentaire):
+        self.avis_promoteur_reference = approbation
+        self.commentaire_promoteur_reference = commentaire

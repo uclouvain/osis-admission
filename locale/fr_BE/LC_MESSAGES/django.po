@@ -324,6 +324,9 @@ msgstr "Configuration de la CDD"
 msgid "CDD manager"
 msgstr "Gestionnaire CDD"
 
+msgid "CDD manager comment"
+msgstr "Commentaire du gestionnaire CDD"
+
 msgid "CDD managers"
 msgstr "Gestionnaires CDD"
 
@@ -1692,6 +1695,12 @@ msgstr "Lettres de recommandation"
 msgid "Reference"
 msgstr "Référence"
 
+msgid "Reference promoter assent"
+msgstr "Avis du promoteur de référence"
+
+msgid "Reference promoter comment"
+msgstr "Commentaire deu promoteur de référence"
+
 msgid "Registration Id"
 msgstr "Noma"
 
@@ -2284,6 +2293,10 @@ msgid ""
 msgstr ""
 "Vous devez être membre de la commission doctorale pour accéder à cette "
 "admission"
+
+msgid "You must be the reference promoter to access this admission"
+msgstr ""
+"Vous devez être le promoteur de référence pour accéder à cette admission"
 
 msgid "You must be the request author to access this admission"
 msgstr "Vous devez être l'auteur de la demande pour accéder à cette admission"

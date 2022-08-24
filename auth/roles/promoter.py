@@ -27,6 +27,7 @@ from django.utils.translation import gettext_lazy as _
 from rules import RuleSet
 
 from admission.auth.predicates import (
+    is_admission_reference_promoter,
     is_admission_request_promoter,
     is_part_of_committee_and_invited,
     is_being_enrolled,
@@ -45,7 +46,7 @@ class Promoter(ExternalActorMixin, RoleModel):
 
     @classmethod
     def rule_set(cls):
-        return RuleSet({
+        rules = {
             'admission.view_doctorateadmission': is_admission_request_promoter,
             'admission.download_pdf_confirmation': is_admission_request_promoter,
             'admission.approve_confirmation_paper': is_admission_request_promoter,
@@ -69,4 +70,6 @@ class Promoter(ExternalActorMixin, RoleModel):
             'admission.change_doctorateadmission_confirmation': is_admission_request_promoter
             & confirmation_paper_in_progress,
             'admission.upload_pdf_confirmation': is_admission_request_promoter & is_enrolled,
-        })
+            'admission.assent_doctoral_training': is_admission_reference_promoter & is_enrolled,
+        }
+        return RuleSet(rules)
