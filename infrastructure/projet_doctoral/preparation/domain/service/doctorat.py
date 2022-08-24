@@ -44,11 +44,9 @@ class DoctoratTranslator(IDoctoratTranslator):
         return DoctoratDTO(
             sigle=dto.acronym,
             annee=dto.year,
-            intitule='{} ({})'.format(
-                dto.title_fr if get_language() == settings.LANGUAGE_CODE else dto.title_en,
-                dto.enrollment_campus_name,
-            ),
+            intitule=dto.title_fr if get_language() == settings.LANGUAGE_CODE else dto.title_en,
             sigle_entite_gestion=dto.management_entity_acronym,
+            campus=dto.enrollment_campus_name,
         )
 
     @classmethod

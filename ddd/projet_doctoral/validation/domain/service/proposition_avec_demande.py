@@ -66,7 +66,7 @@ class PropositionAvecDemande(interface.DomainService):
                 else None,
                 statut_demande=proposition_dto.statut,
                 nom_candidat=', '.join([proposition_dto.nom_candidat, proposition_dto.prenom_candidat]),
-                formation='{} - {}'.format(proposition_dto.sigle_doctorat, proposition_dto.intitule_doctorat),
+                formation='{} - {}'.format(proposition_dto.doctorat.sigle, proposition_dto.doctorat.intitule),
                 nationalite=proposition_dto.nationalite_candidat,
                 derniere_modification=proposition_dto.modifiee_le,
                 date_confirmation=(
@@ -119,7 +119,7 @@ class PropositionAvecDemande(interface.DomainService):
             "date_pre_admission_fin",
         ]
         has_proposition_criteria = (
-                any(getattr(cmd, criterion) for criterion in proposition_criteria) or cmd.cotutelle is not None
+            any(getattr(cmd, criterion) for criterion in proposition_criteria) or cmd.cotutelle is not None
         )
         has_demande_criteria = any(getattr(cmd, criterion) for criterion in demande_criteria)
 

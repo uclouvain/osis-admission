@@ -33,16 +33,23 @@ from osis_common.ddd import interface
 
 
 @attr.dataclass(frozen=True, slots=True)
+class DoctoratDTO(interface.DTO):
+    sigle: str
+    annee: int
+    intitule: str
+    sigle_entite_gestion: str
+    campus: str
+
+
+@attr.dataclass(frozen=True, slots=True)
 class PropositionDTO(interface.DTO):
     uuid: str
     type_admission: str
     reference: str
     justification: Optional[str]
-    sigle_doctorat: str
-    annee_doctorat: int
-    intitule_doctorat: str
-    matricule_candidat: str
+    doctorat: DoctoratDTO
     code_secteur_formation: str
+    intitule_secteur_formation: str
     commission_proximite: Optional[str]
     type_financement: Optional[str]
     type_contrat_travail: Optional[str]
@@ -66,21 +73,13 @@ class PropositionDTO(interface.DTO):
     raison_non_soutenue: Optional[str]
     statut: str
     fiche_archive_signatures_envoyees: List[str]
+    matricule_candidat: str
     prenom_candidat: str
     nom_candidat: str
     nationalite_candidat: str
-    intitule_secteur_formation: str
     creee_le: datetime.datetime
     modifiee_le: datetime.datetime
     erreurs: List[Dict[str, str]]
-
-
-@attr.dataclass(frozen=True, slots=True)
-class DoctoratDTO(interface.DTO):
-    sigle: str
-    annee: int
-    intitule: str
-    sigle_entite_gestion: str
 
 
 @attr.dataclass(frozen=True, slots=True)

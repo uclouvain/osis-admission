@@ -28,7 +28,7 @@ from typing import List, Optional
 
 from admission.ddd.projet_doctoral.preparation.domain.model.proposition import Proposition, PropositionIdentity
 from admission.ddd.projet_doctoral.preparation.domain.validator.exceptions import PropositionNonTrouveeException
-from admission.ddd.projet_doctoral.preparation.dtos import PropositionDTO
+from admission.ddd.projet_doctoral.preparation.dtos import DoctoratDTO, PropositionDTO
 from admission.ddd.projet_doctoral.preparation.repository.i_proposition import IPropositionRepository
 from admission.ddd.projet_doctoral.preparation.test.factory.proposition import (
     PropositionAdmissionECGE3DPMinimaleFactory,
@@ -51,6 +51,9 @@ from admission.ddd.projet_doctoral.preparation.test.factory.proposition import (
     PropositionPreAdmissionSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory,
     PropositionPreAdmissionSC3DPMinimaleFactory,
 )
+from admission.infrastructure.projet_doctoral.preparation.domain.service.in_memory.doctorat import (
+    DoctoratInMemoryTranslator,
+)
 from base.ddd.utils.in_memory_repository import InMemoryGenericRepository
 
 
@@ -66,6 +69,7 @@ class _Doctorat:
     intitule: str
     code_secteur: str
     intitule_secteur: str
+    campus: str
 
 
 class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepository):
@@ -74,16 +78,19 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
             intitule="Doctorat en sciences",
             code_secteur="SST",
             intitule_secteur="Secteur des sciences et technologies",
+            campus="Louvain-la-Neuve",
         ),
         ("ECGE3DP", 2020): _Doctorat(
             intitule="Doctorat en sciences économiques et de gestion",
             code_secteur="SSH",
             intitule_secteur="Secteur des sciences humaines",
+            campus="Louvain-la-Neuve",
         ),
         ("ESP3DP", 2020): _Doctorat(
             intitule="Doctorat en sciences de la santé publique",
             code_secteur="SSS",
             intitule_secteur="Secteur des sciences de la santé",
+            campus="Mons",
         ),
     }
     candidats = {
@@ -188,9 +195,13 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
             uuid=proposition.entity_id.uuid,
             type_admission=proposition.type_admission.name,
             reference=proposition.reference,
-            sigle_doctorat=proposition.doctorat_id.sigle,
-            annee_doctorat=proposition.doctorat_id.annee,
-            intitule_doctorat=doctorat.intitule,
+            doctorat=DoctoratDTO(
+                proposition.doctorat_id.sigle,
+                proposition.doctorat_id.annee,
+                doctorat.intitule,
+                doctorat.code_secteur,
+                doctorat.campus,
+            ),
             matricule_candidat=proposition.matricule_candidat,
             justification=proposition.justification,
             code_secteur_formation=doctorat.code_secteur,
