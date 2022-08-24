@@ -33,7 +33,7 @@ from . import process_admission_tasks
 tasks = {
     'Generate admission files': {
         'task': 'admission.tasks.process_admission_tasks.run',
-        'schedule': crontab(minute=1),
+        'schedule': crontab(),  # this runs every minute
     },
 }
 celery_app.conf.beat_schedule.update(tasks)
