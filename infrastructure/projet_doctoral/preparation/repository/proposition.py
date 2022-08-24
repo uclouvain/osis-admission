@@ -77,6 +77,7 @@ from admission.ddd.projet_doctoral.preparation.dtos import (
 from admission.ddd.projet_doctoral.preparation.repository.i_proposition import (
     IPropositionRepository,
 )
+from admission.infrastructure.projet_doctoral.preparation.domain.service.doctorat import DoctoratTranslator
 from base.models.education_group_year import EducationGroupYear
 from base.models.entity_version import EntityVersion
 from base.models.person import Person
@@ -294,10 +295,7 @@ class PropositionRepository(IPropositionRepository):
             uuid=admission.uuid,
             reference=admission.reference,
             type_admission=admission.type,
-            sigle_doctorat=admission.doctorate.acronym,
-            intitule_doctorat=admission.doctorate.title
-            if get_language() == settings.LANGUAGE_CODE_FR
-            else admission.doctorate.title_english,
+            doctorat=DoctoratTranslator.get_dto(admission.doctorate.acronym, admission.doctorate.academic_year.year),
             matricule_candidat=admission.candidate.global_id,
             prenom_candidat=admission.candidate.first_name,
             nom_candidat=admission.candidate.last_name,
@@ -307,7 +305,6 @@ class PropositionRepository(IPropositionRepository):
             creee_le=admission.created,
             statut=admission.status,
             justification=admission.comment,
-            annee_doctorat=admission.doctorate.academic_year.year,
             type_financement=admission.financing_type,
             type_contrat_travail=admission.financing_work_contract,
             eft=admission.financing_eft,

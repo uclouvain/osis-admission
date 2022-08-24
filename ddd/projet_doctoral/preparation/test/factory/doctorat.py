@@ -57,6 +57,17 @@ class _DoctoratDTOFactory(factory.Factory):
         abstract = False
 
     intitule = factory.Faker('sentence')
+    campus = factory.Iterator(
+        [
+            "Louvain-la-Neuve",
+            "Mons",
+            "Bruxelles Woluwe",
+            "Namur",
+            "Charleroi",
+            "Tournai",
+            "St-Gilles",
+        ]
+    )
 
 
 class DoctoratCDEFactory(_DoctoratFactory):

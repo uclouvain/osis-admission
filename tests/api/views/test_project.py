@@ -250,7 +250,7 @@ class DoctorateAdmissionCreationApiTestCase(APITestCase):
         self.assertEqual(admission.comment, self.create_data["justification"])
 
         response = self.client.get(self.url, format="json")
-        self.assertEqual(response.json()['propositions'][0]['sigle_doctorat'], self.doctorate.acronym)
+        self.assertEqual(response.json()['propositions'][0]["doctorat"]['sigle'], self.doctorate.acronym)
         self.assertEqual(
             admission.reference,
             '{}-{}'.format(
@@ -523,7 +523,7 @@ class DoctorateAdmissionUpdatingApiTestCase(DoctorateAdmissionApiTestCase):
         # But all the following should
         self.assertEqual(admission.type, self.update_data["type_admission"])
         response = self.client.get(self.url, format="json")
-        self.assertEqual(response.json()['sigle_doctorat'], self.admission.doctorate.acronym)
+        self.assertEqual(response.json()['doctorat']['sigle'], self.admission.doctorate.acronym)
         self.assertEqual(response.json()['titre_projet'], "A new title")
 
     def test_admission_doctorate_update_using_api_no_role(self):
