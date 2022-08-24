@@ -2095,8 +2095,8 @@ msgstr ""
 msgid "There is no request for a new deadline."
 msgstr "Il n'y a pas de demande de nouvelle échéance."
 
-msgid "Thesis defences"
-msgstr "Défenses de thèse"
+msgid "Thesis defence"
+msgstr "Défense de thèse"
 
 msgid "Thesis institute"
 msgstr "Institut de la thèse"

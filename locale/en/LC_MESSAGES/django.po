@@ -1964,7 +1964,7 @@ msgstr ""
 msgid "There is no request for a new deadline."
 msgstr ""
 
-msgid "Thesis defences"
+msgid "Thesis defence"
 msgstr ""
 
 msgid "Thesis institute"

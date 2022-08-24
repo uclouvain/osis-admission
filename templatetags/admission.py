@@ -457,7 +457,7 @@ def training_categories(activities):
         _("VAE"): [0, 0],
         _("Scientific residencies"): [0, 0],
         _("Confirmation paper"): [0, 0],
-        _("Thesis defences"): [0, 0],
+        _("Thesis defence"): [0, 0],
     }
     for activity in activities:
         index = int(activity.status == StatutActivite.ACCEPTEE.name)
@@ -498,7 +498,7 @@ def training_categories(activities):
         ):
             categories[_("Confirmation paper")][index] += activity.ects
         elif activity.category == CategorieActivite.PAPER.name:
-            categories[_("Thesis defences")][index] += activity.ects
+            categories[_("Thesis defence")][index] += activity.ects
     if not any(cat_added + cat_validated for cat_added, cat_validated in categories.values()):
         return {}
     return {
