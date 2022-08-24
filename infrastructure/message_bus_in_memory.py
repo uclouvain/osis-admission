@@ -29,6 +29,8 @@ from admission.ddd.projet_doctoral.doctorat.commands import *
 from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.commands import *
 from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.use_case.read import *
 from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.use_case.write import *
+from admission.ddd.projet_doctoral.doctorat.formation.commands import *
+from admission.ddd.projet_doctoral.doctorat.formation.use_case.write import *
 from admission.ddd.projet_doctoral.doctorat.use_case.read import *
 from admission.ddd.projet_doctoral.doctorat.use_case.write import *
 from admission.ddd.projet_doctoral.preparation.commands import *
@@ -41,8 +43,14 @@ from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_ye
 from infrastructure.utils import AbstractMessageBusCommands, MessageBus
 from .projet_doctoral.doctorat.domain.service.historique import Historique as HistoriqueDoctorat
 from .projet_doctoral.doctorat.domain.service.in_memory.notification import NotificationInMemory as NotificationDoctorat
+from .projet_doctoral.doctorat.epreuve_confirmation.domain.service.in_memory.notification import (
+    NotificationInMemory as NotificationEpreuveConfirmation,
+)
 from .projet_doctoral.doctorat.epreuve_confirmation.repository.in_memory.epreuve_confirmation import (
     EpreuveConfirmationInMemoryRepository,
+)
+from .projet_doctoral.doctorat.formation.domain.service.in_memory.notification import (
+    NotificationInMemory as NotificationFormation,
 )
 from .projet_doctoral.doctorat.formation.repository.in_memory.activite import ActiviteInMemoryRepository
 from .projet_doctoral.doctorat.repository.in_memory.doctorat import DoctoratInMemoryRepository
@@ -59,14 +67,6 @@ from .projet_doctoral.preparation.repository.in_memory.groupe_de_supervision imp
 )
 from .projet_doctoral.preparation.repository.in_memory.proposition import PropositionInMemoryRepository
 from .projet_doctoral.validation.repository.in_memory.demande import DemandeInMemoryRepository
-from .projet_doctoral.doctorat.epreuve_confirmation.domain.service.in_memory.notification import (
-    NotificationInMemory as NotificationEpreuveConfirmation,
-)
-from .projet_doctoral.doctorat.formation.domain.service.in_memory.notification import (
-    NotificationInMemory as NotificationFormation,
-)
-from ..ddd.projet_doctoral.doctorat.formation.commands import SoumettreActivitesCommand
-from ..ddd.projet_doctoral.doctorat.formation.use_case.write import soumettre_activites
 
 
 class MessageBusInMemoryCommands(AbstractMessageBusCommands):
@@ -292,6 +292,10 @@ class MessageBusInMemoryCommands(AbstractMessageBusCommands):
             doctorat_repository=DoctoratInMemoryRepository(),
             groupe_de_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
             notification=NotificationFormation(),
+        ),
+        DonnerAvisSurActiviteCommand: partial(
+            donner_avis_sur_activite,
+            activite_repository=ActiviteInMemoryRepository(),
         ),
     }
 

@@ -34,12 +34,16 @@ from rest_framework.settings import api_settings
 from admission.api.schema import ChoicesEnumSchema
 from admission.api.serializers.activity import (
     DoctoralTrainingActivitySerializer,
+    DoctoralTrainingAssentSerializer,
     DoctoralTrainingBatchSerializer,
     DoctoralTrainingConfigSerializer,
 )
 from admission.contrib.models.cdd_config import CddConfiguration
 from admission.contrib.models.doctoral_training import Activity
-from admission.ddd.projet_doctoral.doctorat.formation.commands import SoumettreActivitesCommand
+from admission.ddd.projet_doctoral.doctorat.formation.commands import (
+    DonnerAvisSurActiviteCommand,
+    SoumettreActivitesCommand,
+)
 from admission.utils import get_cached_admission_perm_obj
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from infrastructure.messages_bus import message_bus_instance
@@ -208,4 +212,36 @@ class DoctoralTrainingSubmitView(APIPermissionRequiredMixin, GenericAPIView):
                 ]
             }
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class DoctoralTrainingAssentSchema(AutoSchema):
+    def get_operation_id(self, path, method):
+        return "assent_doctoral_training"
+
+
+class DoctoralTrainingAssentView(APIPermissionRequiredMixin, GenericAPIView):
+    name = "doctoral-training-assent"
+    pagination_class = None
+    filter_backends = []
+    serializer_class = DoctoralTrainingAssentSerializer
+    schema = DoctoralTrainingAssentSchema()
+    lookup_field = 'uuid'
+    permission_mapping = {
+        'POST': 'admission.assent_doctoral_training',
+    }
+
+    def get_permission_object(self):
+        return get_cached_admission_perm_obj(self.kwargs['uuid'])
+
+    def post(self, request, *args, **kwargs):
+        """Assent on a doctoral training activity."""
+        serializer = DoctoralTrainingAssentSerializer(data=request.data)
+        serializer.is_valid(True)
+        cmd = DonnerAvisSurActiviteCommand(
+            doctorat_uuid=self.kwargs['uuid'],
+            activite_uuid=self.kwargs['activity_id'],
+            **serializer.data,
+        )
+        message_bus_instance.invoke(cmd)
         return Response(serializer.data, status=status.HTTP_201_CREATED)

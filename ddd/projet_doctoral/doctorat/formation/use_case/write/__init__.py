@@ -1,5 +1,7 @@
+from .donner_avis_sur_activite_service import donner_avis_sur_activite
 from .soumettre_activites_service import soumettre_activites
 
 __all__ = [
     "soumettre_activites",
+    "donner_avis_sur_activite",
 ]

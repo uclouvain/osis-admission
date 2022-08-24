@@ -87,6 +87,9 @@ class ActiviteRepository(IActiviteRepository):
             statut=StatutActivite[activity.status],
             parent_id=ActiviteIdentityBuilder.build_from_uuid(activity.parent.uuid) if activity.parent_id else None,
             categorie_parente=CategorieActivite[activity.parent.category] if activity.parent_id else None,
+            avis_promoteur_reference=activity.reference_promoter_assent,
+            commentaire_promoteur_reference=activity.reference_promoter_comment,
+            commentaire_gestionnaire=activity.cdd_comment,
         )
 
     @classmethod
@@ -257,8 +260,14 @@ class ActiviteRepository(IActiviteRepository):
 
     @classmethod
     def save(cls, activite: 'Activite') -> None:
-        # The only thing that can be modified is status, for now
-        Activity.objects.filter(uuid=activite.entity_id.uuid).update(status=activite.statut.name)
+        # The only data that can be updated through repo are process-related fields
+        # (else it would override the other dto-related fields)
+        Activity.objects.filter(uuid=activite.entity_id.uuid).update(
+            status=activite.statut.name,
+            reference_promoter_assent=activite.avis_promoteur_reference,
+            reference_promoter_comment=activite.commentaire_promoteur_reference,
+            cdd_comment=activite.commentaire_gestionnaire,
+        )
 
     @classmethod
     def search(cls, parent_id: Optional[ActiviteIdentity] = None, **kwargs) -> List[Activite]:

@@ -23,43 +23,28 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import List
 
-import attr
+from django.test import SimpleTestCase
 
-from osis_common.ddd.interface import CommandRequest
-
-
-@attr.dataclass
-class SupprimerActiviteCommand(CommandRequest):
-    activite_uuid: str
+from admission.ddd.projet_doctoral.doctorat.formation.commands import DonnerAvisSurActiviteCommand
+from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
+from admission.infrastructure.projet_doctoral.doctorat.formation.repository.in_memory.activite import (
+    ActiviteInMemoryRepository,
+)
 
 
-@attr.dataclass
-class SoumettreActivitesCommand(CommandRequest):
-    doctorat_uuid: str
-    activite_uuids: List[str]
+class DonnerAvisSurActiviteTestCase(SimpleTestCase):
+    def setUp(self) -> None:
+        self.message_bus = message_bus_in_memory_instance
 
-
-@attr.dataclass
-class DonnerAvisSurActiviteCommand(CommandRequest):
-    doctorat_uuid: str
-    activite_uuid: str
-    approbation: bool
-    commentaire: str
-
-
-@attr.dataclass
-class AccepterActiviteCommand(CommandRequest):
-    activite_uuid: str
-
-
-@attr.dataclass
-class RefuserActiviteCommand(CommandRequest):
-    activite_uuid: str
-
-
-@attr.dataclass
-class DemanderModificationCommand(CommandRequest):
-    activite_uuid: str
-    remarque: str
+    def test_donner_avis_sur_activite(self):
+        activite_id = ActiviteInMemoryRepository.entities[0].entity_id
+        self.message_bus.invoke(
+            DonnerAvisSurActiviteCommand(
+                doctorat_uuid="uuid-SC3DP-promoteurs-membres-deja-approuves",
+                activite_uuid=activite_id.uuid,
+                approbation=False,
+                commentaire="Pas ok",
+            )
+        )
+        self.assertEqual(ActiviteInMemoryRepository.get(activite_id).commentaire_promoteur_reference, "Pas ok")

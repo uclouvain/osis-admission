@@ -205,3 +205,19 @@ class TrainingApiTestCase(QueriesAssertionsMixin, APITestCase):
         submit_url = resolve_url("admission_api_v1:doctoral-training-submit", uuid=self.admission.uuid)
         response = self.client.post(submit_url, {'activity_uuids': [service.uuid]})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_training_assent(self):
+        self.client.force_authenticate(user=self.reference_promoter.person.user)
+        submit_url = resolve_url(
+            "admission_api_v1:doctoral-training-assent",
+            uuid=self.admission.uuid,
+            activity_id=self.activity.uuid,
+        )
+        data = {
+            'approbation': False,
+            'commentaire': 'Do not agree',
+        }
+        response = self.client.post(submit_url, data)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.activity.refresh_from_db()
+        self.assertEqual(self.activity.reference_promoter_comment, "Do not agree")

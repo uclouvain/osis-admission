@@ -23,43 +23,25 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import List
 
-import attr
-
-from osis_common.ddd.interface import CommandRequest
-
-
-@attr.dataclass
-class SupprimerActiviteCommand(CommandRequest):
-    activite_uuid: str
+from admission.ddd.projet_doctoral.doctorat.formation.builder.activite_identity_builder import ActiviteIdentityBuilder
+from admission.ddd.projet_doctoral.doctorat.formation.commands import DonnerAvisSurActiviteCommand
+from admission.ddd.projet_doctoral.doctorat.formation.domain.model.activite import ActiviteIdentity
+from admission.ddd.projet_doctoral.doctorat.formation.repository.i_activite import IActiviteRepository
 
 
-@attr.dataclass
-class SoumettreActivitesCommand(CommandRequest):
-    doctorat_uuid: str
-    activite_uuids: List[str]
+def donner_avis_sur_activite(
+    cmd: 'DonnerAvisSurActiviteCommand',
+    activite_repository: 'IActiviteRepository',
+) -> 'ActiviteIdentity':
+    # GIVEN
+    activite_id = ActiviteIdentityBuilder.build_from_uuid(cmd.activite_uuid)
+    activite = activite_repository.get(activite_id)
 
+    # WHEN
 
-@attr.dataclass
-class DonnerAvisSurActiviteCommand(CommandRequest):
-    doctorat_uuid: str
-    activite_uuid: str
-    approbation: bool
-    commentaire: str
+    # THEN
+    activite.donner_avis_promoteur_reference(cmd.approbation, cmd.commentaire)
+    activite_repository.save(activite)
 
-
-@attr.dataclass
-class AccepterActiviteCommand(CommandRequest):
-    activite_uuid: str
-
-
-@attr.dataclass
-class RefuserActiviteCommand(CommandRequest):
-    activite_uuid: str
-
-
-@attr.dataclass
-class DemanderModificationCommand(CommandRequest):
-    activite_uuid: str
-    remarque: str
+    return activite_id

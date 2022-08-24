@@ -102,6 +102,19 @@ def is_admission_request_promoter(self, user: User, obj: DoctorateAdmission):
 
 
 @predicate(bind=True)
+@predicate_failed_msg(message=_("You must be the reference promoter to access this admission"))
+def is_admission_reference_promoter(self, user: User, obj: DoctorateAdmission):
+    return (
+        obj.supervision_group
+        and obj.supervision_group.actors.filter(
+            supervisionactor__type=ActorType.PROMOTER.name,
+            supervisionactor__is_reference_promoter=True,
+            person_id=user.person.pk,
+        ).exists()
+    )
+
+
+@predicate(bind=True)
 @predicate_failed_msg(message=_("You must be a member of the doctoral commission to access this admission"))
 @predicate_cache(cache_key_fn=lambda obj: getattr(obj, 'pk', None))
 def is_part_of_doctoral_commission(self, user: User, obj: DoctorateAdmission):

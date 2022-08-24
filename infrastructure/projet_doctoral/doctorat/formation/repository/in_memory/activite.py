@@ -38,6 +38,10 @@ class ActiviteInMemoryRepository(InMemoryGenericRepository, IActiviteRepository)
     entities: List['Activite']
 
     @classmethod
+    def get(cls, entity_id: 'ActiviteIdentity') -> 'Activite':
+        return super().get(entity_id)
+
+    @classmethod
     def get_multiple(cls, entity_ids: List['ActiviteIdentity']) -> Mapping['ActiviteIdentity', 'Activite']:
         ret = {activite.entity_id: activite for activite in cls.entities if activite.entity_id in entity_ids}
         if len(entity_ids) != len(ret):  # pragma: no cover
