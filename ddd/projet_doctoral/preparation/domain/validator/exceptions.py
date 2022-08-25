@@ -85,6 +85,14 @@ class InstitutionInconsistanteException(BusinessException):
         super().__init__(message, **kwargs)
 
 
+class DomaineTheseInconsistantException(BusinessException):
+    status_code = "PROPOSITION-8"
+
+    def __init__(self, **kwargs):
+        message = _("Thesis domain should be set when PhD has been set to yes or partial")
+        super().__init__(message, **kwargs)
+
+
 class PromoteurNonTrouveException(BusinessException):
     status_code = "PROPOSITION-9"
 

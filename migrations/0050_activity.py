@@ -34,7 +34,7 @@ class Migration(migrations.Migration):
                 ('organizing_institution', models.CharField(blank=True, default='', max_length=100, verbose_name='Organizing institution')),
                 ('website', models.URLField(blank=True, default='', verbose_name='Website')),
                 ('committee', models.CharField(blank=True, choices=[('YES', 'YES'), ('NO', 'NO'), ('NA', 'N/A')], max_length=100, default='')),
-                ('dial_reference', models.CharField(blank=True, default='', max_length=100, verbose_name='Référence DIAL.Pr')),
+                ('dial_reference', models.CharField(blank=True, default='', max_length=100, verbose_name='Reference DIAL.Pr')),
                 ('acceptation_proof', osis_document.contrib.fields.FileField(base_field=models.UUIDField(), blank=True, default=list, size=1, verbose_name='Participation certification')),
                 ('summary', osis_document.contrib.fields.FileField(base_field=models.UUIDField(), blank=True, default=list, size=1, verbose_name='Summary')),
                 ('subtype', models.CharField(blank=True, default='', max_length=100, verbose_name='Activity subtype')),

@@ -104,11 +104,11 @@ msgstr ""
 msgid "APPROVED"
 msgstr "Approved"
 
-msgid "ARC - Action de Recherche Concertée"
-msgstr ""
+msgid "ARC - Action de Recherche Concertee"
+msgstr "ARC - Action de Recherche Concertée"
 
-msgid "ARES - Coopération au développement"
-msgstr ""
+msgid "ARES - Cooperation au developpement"
+msgstr "ARES - Coopération au développement"
 
 msgid "Abstract"
 msgstr ""
@@ -854,8 +854,8 @@ msgstr ""
 msgid "FRIA"
 msgstr ""
 
-msgid "FSR - Fonds Spéciaux de Recherche"
-msgstr ""
+msgid "FSR - Fonds Speciaux de Recherche"
+msgstr "FSR - Fonds Spéciaux de Recherche"
 
 msgid "Failure of the confirmation paper"
 msgstr ""
@@ -1293,8 +1293,8 @@ msgstr ""
 msgid "Opinion on the renewal of the research mandate"
 msgstr ""
 
-msgid "Oral exposé"
-msgstr ""
+msgid "Oral expose"
+msgstr "Oral exposé"
 
 msgid "Organizing institution"
 msgstr ""
@@ -1587,6 +1587,9 @@ msgstr ""
 msgid "Reference"
 msgstr ""
 
+msgid "Reference DIAL.Pr"
+msgstr "Référence DIAL.Pr"
+
 msgid "Reference promoter assent"
 msgstr ""
 
@@ -1627,9 +1630,6 @@ msgid "Role"
 msgstr ""
 
 msgid "Role of the signing actor"
-msgstr ""
-
-msgid "Référence DIAL.Pr"
 msgstr ""
 
 msgid "SCEB"
@@ -1698,7 +1698,19 @@ msgstr ""
 msgid "Scholarship"
 msgstr ""
 
+msgid "Scholarship date"
+msgstr ""
+
+msgid "Scholarship end date"
+msgstr ""
+
 msgid "Scholarship grant"
+msgstr ""
+
+msgid "Scholarship proof"
+msgstr ""
+
+msgid "Scholarship start date"
 msgstr ""
 
 msgid "Scientific communication"
@@ -1974,6 +1986,12 @@ msgid "There is no request for a new deadline."
 msgstr ""
 
 msgid "Thesis defence"
+msgstr ""
+
+msgid "Thesis domain"
+msgstr ""
+
+msgid "Thesis domain should be set when PhD has been set to yes or partial"
 msgstr ""
 
 msgid "Thesis institute"

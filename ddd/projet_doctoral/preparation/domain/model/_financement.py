@@ -23,7 +23,8 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
-from typing import Optional
+from datetime import date
+from typing import List, Optional
 
 import attr
 from django.utils.translation import gettext_lazy as _
@@ -38,10 +39,10 @@ class ChoixTypeContratTravail(ChoiceEnum):
 
 
 class BourseRecherche(ChoiceEnum):
-    ARC = _("ARC - Action de Recherche Concertée")
-    ARES = _("ARES - Coopération au développement")
+    ARC = _("ARC - Action de Recherche Concertee")
+    ARES = _("ARES - Cooperation au developpement")
     CSC = _("CSC - China Scholarship Council")
-    FSR = _("FSR - Fonds Spéciaux de Recherche")
+    FSR = _("FSR - Fonds Speciaux de Recherche")
     ERC = _("ERC - European Research Council")
     FNRS = _("FNRS")
     FONDATION_ST_LUC = _("Fondation St Luc")
@@ -65,6 +66,9 @@ class Financement(interface.ValueObject):
     type_contrat_travail: Optional[str] = ''
     eft: Optional[int] = None
     bourse_recherche: Optional[str] = ''
+    bourse_date_debut: Optional[date] = None
+    bourse_date_fin: Optional[date] = None
+    bourse_preuve: List[str] = attr.Factory(list)
     duree_prevue: Optional[int] = None
     temps_consacre: Optional[int] = None
 

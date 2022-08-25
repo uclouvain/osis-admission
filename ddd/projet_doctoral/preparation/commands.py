@@ -49,6 +49,9 @@ class InitierPropositionCommand(interface.CommandRequest):
     type_contrat_travail: Optional[str] = ''
     eft: Optional[int] = None
     bourse_recherche: Optional[str] = ''
+    bourse_date_debut: Optional[datetime.date] = None
+    bourse_date_fin: Optional[datetime.date] = None
+    bourse_preuve: List[str] = attr.Factory(list)
     duree_prevue: Optional[int] = None
     temps_consacre: Optional[int] = None
     titre_projet: Optional[str] = ''
@@ -63,6 +66,7 @@ class InitierPropositionCommand(interface.CommandRequest):
     langue_redaction_these: str = ChoixLangueRedactionThese.UNDECIDED.name
     doctorat_deja_realise: str = ChoixDoctoratDejaRealise.NO.name
     institution: Optional[str] = ''
+    domaine_these: Optional[str] = ''
     date_soutenance: Optional[datetime.date] = None
     raison_non_soutenue: Optional[str] = ''
 
@@ -77,6 +81,9 @@ class CompleterPropositionCommand(interface.CommandRequest):
     type_contrat_travail: Optional[str] = ''
     eft: Optional[int] = None
     bourse_recherche: Optional[str] = ''
+    bourse_date_debut: Optional[datetime.date] = None
+    bourse_date_fin: Optional[datetime.date] = None
+    bourse_preuve: List[str] = attr.Factory(list)
     duree_prevue: Optional[int] = None
     temps_consacre: Optional[int] = None
     titre_projet: Optional[str] = ''
@@ -91,6 +98,7 @@ class CompleterPropositionCommand(interface.CommandRequest):
     lieu_these: Optional[str] = ''
     doctorat_deja_realise: str = ChoixDoctoratDejaRealise.NO.name
     institution: Optional[str] = ''
+    domaine_these: Optional[str] = ''
     date_soutenance: Optional[datetime.date] = None
     raison_non_soutenue: Optional[str] = ''
 

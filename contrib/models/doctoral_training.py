@@ -172,7 +172,7 @@ class Activity(models.Model):
     )
     dial_reference = models.CharField(
         max_length=100,
-        verbose_name=_("Référence DIAL.Pr"),
+        verbose_name=_("Reference DIAL.Pr"),
         default="",
         blank=True,
     )

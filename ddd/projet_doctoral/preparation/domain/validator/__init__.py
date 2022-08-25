@@ -4,6 +4,7 @@ from ._should_coordonnees_candidat_etre_completees import (
 )
 from ._should_cotutelle_etre_completee import ShouldCotutelleEtreComplete
 from ._should_curriculum_etre_complete import ShouldAnneesCVRequisesCompletees, ShouldCurriculumFichierEtreSpecifie
+from ._should_domaine_dependre_doctorat_realise import ShouldDomaineDependreDoctoratRealise
 from ._should_groupe_de_supervision_a_approuve import (
     ShouldDemandeSignatureLancee,
     ShouldMembresCAOntApprouve,
@@ -47,6 +48,7 @@ from ._should_premier_promoteur_renseigner_institut_these import ShouldPremierPr
 
 __all__ = [
     "ShouldInstitutionDependreDoctoratRealise",
+    "ShouldDomaineDependreDoctoratRealise",
     "ShouldJustificationDonneeSiPreadmission",
     "ShouldMembreCAEtreDansGroupeDeSupervision",
     "ShouldMembreCAPasDejaPresentDansGroupeDeSupervision",

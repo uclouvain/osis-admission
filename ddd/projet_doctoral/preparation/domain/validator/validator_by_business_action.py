@@ -54,6 +54,7 @@ class InitierPropositionValidatorList(TwoStepsMultipleBusinessExceptionListValid
     type_contrat_travail: Optional[str] = ''
     doctorat_deja_realise: str = ChoixDoctoratDejaRealise.NO.name
     institution: Optional[str] = ''
+    domaine_these: Optional[str] = ''
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
@@ -63,6 +64,7 @@ class InitierPropositionValidatorList(TwoStepsMultipleBusinessExceptionListValid
             ShouldJustificationDonneeSiPreadmission(self.type_admission, self.justification),
             ShouldTypeContratTravailDependreTypeFinancement(self.type_financement, self.type_contrat_travail),
             ShouldInstitutionDependreDoctoratRealise(self.doctorat_deja_realise, self.institution),
+            ShouldDomaineDependreDoctoratRealise(self.doctorat_deja_realise, self.domaine_these),
         ]
 
 
@@ -74,6 +76,7 @@ class CompletionPropositionValidatorList(TwoStepsMultipleBusinessExceptionListVa
     type_contrat_travail: Optional[str] = ''
     doctorat_deja_realise: str = ChoixDoctoratDejaRealise.NO.name
     institution: Optional[str] = ''
+    domaine_these: Optional[str] = ''
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
@@ -83,6 +86,7 @@ class CompletionPropositionValidatorList(TwoStepsMultipleBusinessExceptionListVa
             ShouldJustificationDonneeSiPreadmission(self.type_admission, self.justification),
             ShouldTypeContratTravailDependreTypeFinancement(self.type_financement, self.type_contrat_travail),
             ShouldInstitutionDependreDoctoratRealise(self.doctorat_deja_realise, self.institution),
+            ShouldDomaineDependreDoctoratRealise(self.doctorat_deja_realise, self.domaine_these),
         ]
 
 

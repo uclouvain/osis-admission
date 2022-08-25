@@ -54,6 +54,14 @@
           <td>{% trans "Scholarship" %}</td>
           <td>{{ admission.scholarship_grant }}</td>
         </tr>
+        <tr>
+          <td>{% trans "Scholarship date" %}</td>
+          <td>{{ admission.scholarship_start_date|date:'d/m/Y' }} - {{ admission.scholarship_end_date|date:'d/m/Y' }}</td>
+        </tr>
+        <tr>
+          <td>{% trans "Scholarship proof" %}</td>
+          <td>{{ admission.scholarship_proof }}</td>
+        </tr>
       {% endif %}
       {% if admission.cotutelle %}
         <tr>

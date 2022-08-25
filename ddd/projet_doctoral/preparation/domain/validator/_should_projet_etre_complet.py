@@ -27,7 +27,11 @@ import attr
 
 from admission.ddd.projet_doctoral.preparation.domain.model._detail_projet import DetailProjet
 from admission.ddd.projet_doctoral.preparation.domain.model._enums import ChoixTypeAdmission
-from admission.ddd.projet_doctoral.preparation.domain.model._financement import Financement, financement_non_rempli
+from admission.ddd.projet_doctoral.preparation.domain.model._financement import (
+    ChoixTypeFinancement,
+    Financement,
+    financement_non_rempli,
+)
 from admission.ddd.projet_doctoral.preparation.domain.validator.exceptions import DetailProjetNonCompleteException
 from base.ddd.utils.business_validator import BusinessValidator
 
@@ -48,8 +52,24 @@ class ShouldProjetEtreComplet(BusinessValidator):
         if self.type_admission == ChoixTypeAdmission.ADMISSION:
             champs_obligatoires.append("proposition_programme_doctoral")
 
+        champs_financements_obligatoires = [
+            "duree_prevue",
+            "temps_consacre",
+        ]
         if (
+            # projet
             not all([getattr(self.projet, champ_obligatoire) for champ_obligatoire in champs_obligatoires])
+            # financement
             or self.financement == financement_non_rempli
+            or not all([getattr(self.financement, champ) for champ in champs_financements_obligatoires])
+            # bourse
+            or (
+                self.financement.type == ChoixTypeFinancement.SEARCH_SCHOLARSHIP
+                and (
+                    not self.financement.bourse_date_debut
+                    or not self.financement.bourse_date_fin
+                    or not self.financement.bourse_preuve
+                )
+            )
         ):
             raise DetailProjetNonCompleteException

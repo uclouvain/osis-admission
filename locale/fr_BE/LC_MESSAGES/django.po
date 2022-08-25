@@ -124,10 +124,10 @@ msgstr "Secrétaire ADRE"
 msgid "APPROVED"
 msgstr "Approuvé"
 
-msgid "ARC - Action de Recherche Concertée"
+msgid "ARC - Action de Recherche Concertee"
 msgstr "ARC - Action de Recherche Concertée"
 
-msgid "ARES - Coopération au développement"
+msgid "ARES - Cooperation au developpement"
 msgstr "ARES - Coopération au développement"
 
 msgid "Abstract"
@@ -885,7 +885,7 @@ msgstr "FRESH"
 msgid "FRIA"
 msgstr "FRIA"
 
-msgid "FSR - Fonds Spéciaux de Recherche"
+msgid "FSR - Fonds Speciaux de Recherche"
 msgstr "FSR - Fonds Spéciaux de Recherche"
 
 msgid "Failure of the confirmation paper"
@@ -1380,7 +1380,7 @@ msgstr "Avis du comité d'accompagnement suivant le format fourni par la CDD"
 msgid "Opinion on the renewal of the research mandate"
 msgstr "Avis sur le renouvellement du mandat de recherche"
 
-msgid "Oral exposé"
+msgid "Oral expose"
 msgstr "Exposé oral"
 
 msgid "Organizing institution"
@@ -1695,6 +1695,9 @@ msgstr "Lettres de recommandation"
 msgid "Reference"
 msgstr "Référence"
 
+msgid "Reference DIAL.Pr"
+msgstr "Référence DIAL.Pr"
+
 msgid "Reference promoter assent"
 msgstr "Avis du promoteur de référence"
 
@@ -1736,9 +1739,6 @@ msgstr "Rôle"
 
 msgid "Role of the signing actor"
 msgstr "Rôle du signataire"
-
-msgid "Référence DIAL.Pr"
-msgstr "Référence DIAL.Pr"
 
 msgid "SCEB"
 msgstr "SCEB"
@@ -1808,8 +1808,20 @@ msgstr "Enregistrer et voir le résultat"
 msgid "Scholarship"
 msgstr "Boursier"
 
+msgid "Scholarship date"
+msgstr "Dates de la bourse"
+
+msgid "Scholarship end date"
+msgstr "Date de fin de la bourse"
+
 msgid "Scholarship grant"
 msgstr "Bourse de recherche"
+
+msgid "Scholarship proof"
+msgstr "Preuve d'octroi de la bourse"
+
+msgid "Scholarship start date"
+msgstr "Date de démarrage de la bourse"
 
 msgid "Scientific communication"
 msgstr "Communication scientifique"
@@ -2106,6 +2118,14 @@ msgstr "Il n'y a pas de demande de nouvelle échéance."
 
 msgid "Thesis defence"
 msgstr "Défense de thèse"
+
+msgid "Thesis domain"
+msgstr "Domaine de la thèse"
+
+msgid "Thesis domain should be set when PhD has been set to yes or partial"
+msgstr ""
+"Le domaine de la thèse doit être renseigné quand le doctorat a déjà été "
+"réalisé partiellement ou complètement"
 
 msgid "Thesis institute"
 msgstr "Institut de la thèse"

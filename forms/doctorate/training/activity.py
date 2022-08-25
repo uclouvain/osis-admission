@@ -183,7 +183,7 @@ class ConferenceCommunicationForm(ActivityFormMixin, forms.ModelForm):
     type = SelectOrOtherField(
         label=_("Type of communication"),
         choices=[
-            _("Oral exposé"),
+            _("Oral expose"),
             _("Poster"),
         ],
     )
@@ -251,7 +251,7 @@ class CommunicationForm(ActivityFormMixin, forms.ModelForm):
     subtype = SelectOrOtherField(
         label=_("Type of communication"),
         choices=[
-            _("Oral exposé"),
+            _("Oral expose"),
             _("Poster"),
         ],
     )
@@ -368,7 +368,7 @@ class ResidencyCommunicationForm(ActivityFormMixin, forms.ModelForm):
     template_name = "admission/doctorate/forms/training/residency_communication.html"
     type = SelectOrOtherField(choices=[_("Research seminar")], label=_("Type of activity"))
     subtype = SelectOrOtherField(
-        choices=[_("Oral exposé")],
+        choices=[_("Oral expose")],
         label=_("Type of communication"),
         required=False,
     )

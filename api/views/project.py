@@ -47,6 +47,7 @@ from admission.ddd.projet_doctoral.preparation.commands import (
 from admission.ddd.projet_doctoral.preparation.domain.validator.exceptions import (
     CommissionProximiteInconsistantException,
     ContratTravailInconsistantException,
+    DomaineTheseInconsistantException,
     InstitutionInconsistanteException,
     JustificationRequiseException,
 )
@@ -86,6 +87,7 @@ class PropositionListView(APIPermissionRequiredMixin, DisplayExceptionsByFieldNa
     field_name_by_exception = {
         JustificationRequiseException: ['justification'],
         InstitutionInconsistanteException: ['institution'],
+        DomaineTheseInconsistantException: ['domaine_these'],
         ContratTravailInconsistantException: ['type_contrat_travail'],
         CommissionProximiteInconsistantException: ['commission_proximite'],
     }

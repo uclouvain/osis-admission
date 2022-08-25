@@ -120,6 +120,20 @@ class DoctorateAdmission(BaseAdmission):
         default='',
         blank=True,
     )
+    scholarship_start_date = models.DateField(
+        verbose_name=_("Scholarship start date"),
+        null=True,
+        blank=True,
+    )
+    scholarship_end_date = models.DateField(
+        verbose_name=_("Scholarship end date"),
+        null=True,
+        blank=True,
+    )
+    scholarship_proof = FileField(
+        verbose_name=_("Scholarship proof"),
+        upload_to=admission_directory_path,
+    )
     planned_duration = models.PositiveSmallIntegerField(
         verbose_name=_("Planned duration"),
         blank=True,
@@ -196,6 +210,12 @@ class DoctorateAdmission(BaseAdmission):
     phd_already_done_institution = models.CharField(
         max_length=255,
         verbose_name=_("Institution"),
+        default='',
+        blank=True,
+    )
+    phd_already_done_thesis_domain = models.CharField(
+        max_length=255,
+        verbose_name=_("Thesis domain"),
         default='',
         blank=True,
     )
