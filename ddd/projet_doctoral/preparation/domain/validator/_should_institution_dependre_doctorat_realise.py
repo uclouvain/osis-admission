@@ -28,7 +28,9 @@ from typing import Optional
 import attr
 
 from base.ddd.utils.business_validator import BusinessValidator
-from admission.ddd.projet_doctoral.preparation.domain.validator.exceptions import InstitutionInconsistanteException
+from admission.ddd.projet_doctoral.preparation.domain.validator.exceptions import (
+    InstitutionInconsistanteException,
+)
 from admission.ddd.projet_doctoral.preparation.domain.model._experience_precedente_recherche import (
     ChoixDoctoratDejaRealise,
 )
@@ -40,7 +42,9 @@ class ShouldInstitutionDependreDoctoratRealise(BusinessValidator):
     institution: Optional[str] = ''
 
     def validate(self, *args, **kwargs):
-        if ChoixDoctoratDejaRealise[self.doctorat_deja_realise] == ChoixDoctoratDejaRealise.NO and self.institution:
-            raise InstitutionInconsistanteException()
-        if ChoixDoctoratDejaRealise[self.doctorat_deja_realise] != ChoixDoctoratDejaRealise.NO and not self.institution:
+        if (
+            ChoixDoctoratDejaRealise[self.doctorat_deja_realise] == ChoixDoctoratDejaRealise.NO and self.institution
+        ) or (
+            ChoixDoctoratDejaRealise[self.doctorat_deja_realise] != ChoixDoctoratDejaRealise.NO and not self.institution
+        ):
             raise InstitutionInconsistanteException()

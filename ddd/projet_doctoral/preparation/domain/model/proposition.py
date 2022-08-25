@@ -113,6 +113,9 @@ class Proposition(interface.RootEntity):
         type_contrat_travail: Optional[str],
         eft: Optional[int],
         bourse_recherche: Optional[str],
+        bourse_date_debut: Optional[datetime.date],
+        bourse_date_fin: Optional[datetime.date],
+        bourse_preuve: List[str],
         duree_prevue: Optional[int],
         temps_consacre: Optional[int],
         langue_redaction_these: str,
@@ -122,6 +125,7 @@ class Proposition(interface.RootEntity):
         resume: Optional[str],
         doctorat_deja_realise: str,
         institution: Optional[str],
+        domaine_these: Optional[str],
         date_soutenance: Optional[datetime.date],
         raison_non_soutenue: Optional[str],
         documents: List[str] = None,
@@ -137,6 +141,7 @@ class Proposition(interface.RootEntity):
             type_contrat_travail=type_contrat_travail,
             doctorat_deja_realise=doctorat_deja_realise,
             institution=institution,
+            domaine_these=domaine_these,
         ).validate()
         self._completer_proposition(type_admission, justification, commission_proximite)
         self._completer_financement(
@@ -144,6 +149,9 @@ class Proposition(interface.RootEntity):
             type_contrat_travail=type_contrat_travail,
             eft=eft,
             bourse_recherche=bourse_recherche,
+            bourse_date_debut=bourse_date_debut,
+            bourse_date_fin=bourse_date_fin,
+            bourse_preuve=bourse_preuve,
             duree_prevue=duree_prevue,
             temps_consacre=temps_consacre,
         )
@@ -162,6 +170,7 @@ class Proposition(interface.RootEntity):
         self._completer_experience_precedente(
             doctorat_deja_realise=doctorat_deja_realise,
             institution=institution,
+            domaine_these=domaine_these,
             date_soutenance=date_soutenance,
             raison_non_soutenue=raison_non_soutenue,
         )
@@ -188,6 +197,9 @@ class Proposition(interface.RootEntity):
         type_contrat_travail: Optional[str],
         eft: Optional[int],
         bourse_recherche: Optional[str],
+        bourse_date_debut: Optional[datetime.date],
+        bourse_date_fin: Optional[datetime.date],
+        bourse_preuve: List[str],
         duree_prevue: Optional[int],
         temps_consacre: Optional[int],
     ):
@@ -197,6 +209,9 @@ class Proposition(interface.RootEntity):
                 type_contrat_travail=type_contrat_travail or '',
                 eft=eft,
                 bourse_recherche=bourse_recherche or '',
+                bourse_date_debut=bourse_date_debut,
+                bourse_date_fin=bourse_date_fin,
+                bourse_preuve=bourse_preuve or [],
                 duree_prevue=duree_prevue,
                 temps_consacre=temps_consacre,
             )
@@ -237,6 +252,7 @@ class Proposition(interface.RootEntity):
         self,
         doctorat_deja_realise: str,
         institution: Optional[str],
+        domaine_these: Optional[str],
         date_soutenance: Optional[datetime.date],
         raison_non_soutenue: Optional[str],
     ):
@@ -246,6 +262,7 @@ class Proposition(interface.RootEntity):
             self.experience_precedente_recherche = ExperiencePrecedenteRecherche(
                 doctorat_deja_realise=ChoixDoctoratDejaRealise[doctorat_deja_realise],
                 institution=institution or '',
+                domaine_these=domaine_these or '',
                 date_soutenance=date_soutenance,
                 raison_non_soutenue=raison_non_soutenue or '',
             )

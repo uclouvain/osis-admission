@@ -53,6 +53,9 @@ def completer_proposition(
         type_contrat_travail=cmd.type_contrat_travail,
         eft=cmd.eft,
         bourse_recherche=cmd.bourse_recherche,
+        bourse_date_debut=cmd.bourse_date_debut,
+        bourse_date_fin=cmd.bourse_date_fin,
+        bourse_preuve=cmd.bourse_preuve,
         duree_prevue=cmd.duree_prevue,
         temps_consacre=cmd.temps_consacre,
         titre=cmd.titre_projet,
@@ -67,6 +70,7 @@ def completer_proposition(
         lettres_recommandation=cmd.lettres_recommandation,
         doctorat_deja_realise=cmd.doctorat_deja_realise,
         institution=cmd.institution,
+        domaine_these=cmd.domaine_these,
         date_soutenance=cmd.date_soutenance,
         raison_non_soutenue=cmd.raison_non_soutenue,
     )

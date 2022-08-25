@@ -46,6 +46,7 @@ from admission.ddd.projet_doctoral.preparation.domain.validator.exceptions impor
     CommissionProximiteInconsistantException,
     ContratTravailInconsistantException,
     DoctoratNonTrouveException,
+    DomaineTheseInconsistantException,
     InstitutionInconsistanteException,
     JustificationRequiseException,
     MaximumPropositionsAtteintException,
@@ -79,6 +80,7 @@ class TestInitierPropositionService(SimpleTestCase):
             documents_projet=[],
             doctorat_deja_realise=ChoixDoctoratDejaRealise.YES.name,
             institution="psychiatrique",
+            domaine_these="Psy",
         )
 
         self.doctorat_non_CDE = self.doctorat_non_CDSS = 'AGRO3DP'
@@ -227,17 +229,29 @@ class TestInitierPropositionService(SimpleTestCase):
             self.message_bus.invoke(cmd)
         self.assertIsInstance(e.exception.exceptions.pop(), JustificationRequiseException)
 
-    def test_should_empecher_si_doctorat_pas_deja_realise(self):
-        cmd = attr.evolve(self.cmd, doctorat_deja_realise=ChoixDoctoratDejaRealise.NO.name)
+    def test_should_empecher_si_doctorat_pas_deja_realise_et_institution(self):
+        cmd = attr.evolve(self.cmd, doctorat_deja_realise=ChoixDoctoratDejaRealise.NO.name, domaine_these="")
         with self.assertRaises(MultipleBusinessExceptions) as e:
             self.message_bus.invoke(cmd)
         self.assertIsInstance(e.exception.exceptions.pop(), InstitutionInconsistanteException)
 
-    def test_should_empecher_si_doctorat_deja_realise(self):
+    def test_should_empecher_si_doctorat_deja_realise_et_institution_manquante(self):
         cmd = attr.evolve(self.cmd, institution="")
         with self.assertRaises(MultipleBusinessExceptions) as e:
             self.message_bus.invoke(cmd)
         self.assertIsInstance(e.exception.exceptions.pop(), InstitutionInconsistanteException)
+
+    def test_should_empecher_si_doctorat_pas_deja_realise_et_domaine(self):
+        cmd = attr.evolve(self.cmd, doctorat_deja_realise=ChoixDoctoratDejaRealise.NO.name, institution="")
+        with self.assertRaises(MultipleBusinessExceptions) as e:
+            self.message_bus.invoke(cmd)
+        self.assertIsInstance(e.exception.exceptions.pop(), DomaineTheseInconsistantException)
+
+    def test_should_empecher_si_doctorat_deja_realise_et_domaine_manquant(self):
+        cmd = attr.evolve(self.cmd, domaine_these="")
+        with self.assertRaises(MultipleBusinessExceptions) as e:
+            self.message_bus.invoke(cmd)
+        self.assertIsInstance(e.exception.exceptions.pop(), DomaineTheseInconsistantException)
 
     def test_should_empecher_si_pas_contrat_travail(self):
         cmd = attr.evolve(self.cmd, type_contrat_travail="")
@@ -266,7 +280,12 @@ class TestInitierPropositionService(SimpleTestCase):
         self.assertEqual(proposition.projet.documents, [])
 
     def test_should_initier_sans_experience(self):
-        cmd = attr.evolve(self.cmd, doctorat_deja_realise=ChoixDoctoratDejaRealise.NO.name, institution='')
+        cmd = attr.evolve(
+            self.cmd,
+            doctorat_deja_realise=ChoixDoctoratDejaRealise.NO.name,
+            institution='',
+            domaine_these="",
+        )
         proposition_id = self.message_bus.invoke(cmd)
         proposition = self.proposition_repository.get(proposition_id)  # type: Proposition
         self.assertEqual(proposition.experience_precedente_recherche, aucune_experience_precedente_recherche)

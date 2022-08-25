@@ -75,6 +75,7 @@ class TestCompleterPropositionService(SimpleTestCase):
             documents_projet=[],
             doctorat_deja_realise=ChoixDoctoratDejaRealise.YES.name,
             institution="psychiatrique",
+            domaine_these="Psy",
         )
 
         self.doctorat_non_CDE = 'AGRO3DP'
@@ -168,7 +169,12 @@ class TestCompleterPropositionService(SimpleTestCase):
         self.assertEqual(proposition.projet.documents, [])
 
     def test_should_completer_sans_experience(self):
-        cmd = attr.evolve(self.cmd, doctorat_deja_realise=ChoixDoctoratDejaRealise.NO.name, institution='')
+        cmd = attr.evolve(
+            self.cmd,
+            doctorat_deja_realise=ChoixDoctoratDejaRealise.NO.name,
+            institution='',
+            domaine_these='',
+        )
         proposition_id = self.message_bus.invoke(cmd)
         proposition = self.proposition_repository.get(proposition_id)  # type: Proposition
         self.assertEqual(proposition.experience_precedente_recherche, aucune_experience_precedente_recherche)

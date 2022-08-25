@@ -84,6 +84,7 @@ class PropositionBuilder(interface.RootEntityBuilder):
             type_contrat_travail=cmd.type_contrat_travail,
             doctorat_deja_realise=cmd.doctorat_deja_realise,
             institution=cmd.institution,
+            domaine_these=cmd.domaine_these,
         ).validate()
         commission_proximite: Optional[
             Union[ChoixCommissionProximiteCDEouCLSM, ChoixCommissionProximiteCDSS, ChoixSousDomaineSciences]
@@ -120,6 +121,9 @@ def _build_financement(cmd: 'InitierPropositionCommand') -> 'Financement':
             type_contrat_travail=cmd.type_contrat_travail,
             eft=cmd.eft,
             bourse_recherche=cmd.bourse_recherche,
+            bourse_date_debut=cmd.bourse_date_debut,
+            bourse_date_fin=cmd.bourse_date_fin,
+            bourse_preuve=cmd.bourse_preuve,
             duree_prevue=cmd.duree_prevue,
             temps_consacre=cmd.temps_consacre,
         )
@@ -147,6 +151,7 @@ def _build_experience_precedente_recherche(cmd: 'InitierPropositionCommand') -> 
     return ExperiencePrecedenteRecherche(
         doctorat_deja_realise=ChoixDoctoratDejaRealise[cmd.doctorat_deja_realise],
         institution=cmd.institution,
+        domaine_these=cmd.domaine_these,
         date_soutenance=cmd.date_soutenance,
         raison_non_soutenue=cmd.raison_non_soutenue,
     )

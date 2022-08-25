@@ -55,6 +55,9 @@ class PropositionDTO(interface.DTO):
     type_contrat_travail: Optional[str]
     eft: Optional[int]
     bourse_recherche: Optional[str]
+    bourse_date_debut: Optional[datetime.date]
+    bourse_date_fin: Optional[datetime.date]
+    bourse_preuve: List[str]
     duree_prevue: Optional[int]
     temps_consacre: Optional[int]
     titre_projet: Optional[str]
@@ -69,6 +72,7 @@ class PropositionDTO(interface.DTO):
     lieu_these: str
     doctorat_deja_realise: str
     institution: Optional[str]
+    domaine_these: str
     date_soutenance: Optional[datetime.date]
     raison_non_soutenue: Optional[str]
     statut: str

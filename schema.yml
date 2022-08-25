@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Admission API
-  version: 1.0.32
+  version: 1.0.33
   description: This API delivers data for the Admission project.
   contact:
     name: UCLouvain - OSIS
@@ -3603,6 +3603,18 @@ components:
           nullable: true
         bourse_recherche:
           type: string
+        bourse_date_debut:
+          type: string
+          format: date
+          nullable: true
+        bourse_date_fin:
+          type: string
+          format: date
+          nullable: true
+        bourse_preuve:
+          type: array
+          items:
+            type: string
         duree_prevue:
           type: integer
           nullable: true
@@ -3644,6 +3656,8 @@ components:
         doctorat_deja_realise:
           type: string
         institution:
+          type: string
+        domaine_these:
           type: string
         date_soutenance:
           type: string
@@ -3728,6 +3742,7 @@ components:
       - doctorat
       - matricule_candidat
       - code_secteur_formation
+      - bourse_preuve
       - documents_projet
       - graphe_gantt
       - proposition_programme_doctoral
@@ -3736,6 +3751,7 @@ components:
       - langue_redaction_these
       - lieu_these
       - doctorat_deja_realise
+      - domaine_these
       - fiche_archive_signatures_envoyees
       - statut
       - erreurs
@@ -5067,6 +5083,18 @@ components:
           nullable: true
         bourse_recherche:
           type: string
+        bourse_date_debut:
+          type: string
+          format: date
+          nullable: true
+        bourse_date_fin:
+          type: string
+          format: date
+          nullable: true
+        bourse_preuve:
+          type: array
+          items:
+            type: string
         duree_prevue:
           type: integer
           nullable: true
@@ -5110,6 +5138,8 @@ components:
           default: 'NO'
         institution:
           type: string
+        domaine_these:
+          type: string
         date_soutenance:
           type: string
           format: date
@@ -5122,6 +5152,7 @@ components:
       - annee_formation
       - matricule_candidat
       - commission_proximite
+      - bourse_preuve
       - documents_projet
       - graphe_gantt
       - proposition_programme_doctoral
@@ -5286,6 +5317,18 @@ components:
           nullable: true
         bourse_recherche:
           type: string
+        bourse_date_debut:
+          type: string
+          format: date
+          nullable: true
+        bourse_date_fin:
+          type: string
+          format: date
+          nullable: true
+        bourse_preuve:
+          type: array
+          items:
+            type: string
         duree_prevue:
           type: integer
           nullable: true
@@ -5329,6 +5372,8 @@ components:
           default: 'NO'
         institution:
           type: string
+        domaine_these:
+          type: string
         date_soutenance:
           type: string
           format: date
@@ -5339,6 +5384,7 @@ components:
       - uuid
       - type_admission
       - commission_proximite
+      - bourse_preuve
       - documents_projet
       - graphe_gantt
       - proposition_programme_doctoral

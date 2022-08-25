@@ -65,6 +65,8 @@ class _FinancementFactory(factory.Factory):
         abstract = False
 
     type = ChoixTypeFinancement.SELF_FUNDING
+    duree_prevue = 10
+    temps_consacre = 10
 
 
 class _DetailProjetFactory(factory.Factory):

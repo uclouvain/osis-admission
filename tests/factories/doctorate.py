@@ -72,6 +72,8 @@ class DoctorateAdmissionFactory(factory.DjangoModelFactory):
     doctorate = factory.SubFactory(DoctorateFactory)
     thesis_institute = factory.SubFactory(EntityVersionFactory)
     reference = factory.LazyAttribute(_generate_reference)
+    planned_duration = 10
+    dedicated_time = 10
 
     class Params:
         with_cotutelle = factory.Trait(

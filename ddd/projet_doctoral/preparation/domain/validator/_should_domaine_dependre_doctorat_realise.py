@@ -1,4 +1,4 @@
-##############################################################################
+# ##############################################################################
 #
 #    OSIS stands for Open Student Information System. It's an application
 #    designed to manage the core business of higher education institutions,
@@ -22,32 +22,26 @@
 #    at the root of the source code of this program.  If not,
 #    see http://www.gnu.org/licenses/.
 #
-##############################################################################
-import datetime
+# ##############################################################################
 from typing import Optional
 
 import attr
-from django.utils.translation import gettext_lazy as _
 
-from base.models.utils.utils import ChoiceEnum
-from osis_common.ddd import interface
-
-
-class ChoixDoctoratDejaRealise(ChoiceEnum):
-    YES = _('YES')
-    NO = _('NO')
-    PARTIAL = _('PARTIAL')
+from ..model._experience_precedente_recherche import ChoixDoctoratDejaRealise
+from .exceptions import DomaineTheseInconsistantException
+from base.ddd.utils.business_validator import BusinessValidator
 
 
 @attr.dataclass(frozen=True, slots=True)
-class ExperiencePrecedenteRecherche(interface.ValueObject):
-    doctorat_deja_realise: ChoixDoctoratDejaRealise = ChoixDoctoratDejaRealise.NO
-    institution: Optional[str] = ''
-    domaine_these: str = ''
-    date_soutenance: Optional[datetime.date] = None
-    raison_non_soutenue: Optional[str] = ''
+class ShouldDomaineDependreDoctoratRealise(BusinessValidator):
+    doctorat_deja_realise: str = ChoixDoctoratDejaRealise.NO.name
+    domaine_these: Optional[str] = ''
 
-
-aucune_experience_precedente_recherche = ExperiencePrecedenteRecherche(
-    doctorat_deja_realise=ChoixDoctoratDejaRealise.NO,
-)
+    def validate(self, *args, **kwargs):
+        if (
+            ChoixDoctoratDejaRealise[self.doctorat_deja_realise] == ChoixDoctoratDejaRealise.NO and self.domaine_these
+        ) or (
+            ChoixDoctoratDejaRealise[self.doctorat_deja_realise] != ChoixDoctoratDejaRealise.NO
+            and not self.domaine_these
+        ):
+            raise DomaineTheseInconsistantException()
