@@ -50,8 +50,7 @@ from admission.ddd.projet_doctoral.preparation.domain.model.doctorat import (
     ENTITY_CDSS,
 )
 from admission.ddd.projet_doctoral.validation.domain.model._enums import ChoixStatutCDD, ChoixStatutSIC
-from admission.forms import EMPTY_CHOICE
-from base.forms.utils.datefield import DatePickerInput
+from admission.forms import EMPTY_CHOICE, CustomDateInput
 from base.models.academic_year import AcademicYear
 from base.models.education_group_year import EducationGroupYear
 from base.models.enums.education_group_types import TrainingType
@@ -127,45 +126,25 @@ class BaseFilterForm(forms.Form):
         disabled=True,
         label=_("From"),
         required=False,
-        widget=DatePickerInput(
-            attrs={
-                'placeholder': _("dd/mm/yyyy"),
-                **DatePickerInput.defaut_attrs,
-            },
-        ),
+        widget=CustomDateInput(),
     )
     date_pre_admission_fin = forms.DateField(
         disabled=True,
         label=_("To"),
         required=False,
-        widget=DatePickerInput(
-            attrs={
-                'placeholder': _("dd/mm/yyyy"),
-                **DatePickerInput.defaut_attrs,
-            },
-        ),
+        widget=CustomDateInput(),
     )
     date_admission_debut = forms.DateField(
         disabled=True,
         label=_("From"),
         required=False,
-        widget=DatePickerInput(
-            attrs={
-                'placeholder': _("dd/mm/yyyy"),
-                **DatePickerInput.defaut_attrs,
-            },
-        ),
+        widget=CustomDateInput(),
     )
     date_admission_fin = forms.DateField(
         disabled=True,
         label=_("To"),
         required=False,
-        widget=DatePickerInput(
-            attrs={
-                'placeholder': _("dd/mm/yyyy"),
-                **DatePickerInput.defaut_attrs,
-            },
-        ),
+        widget=CustomDateInput(),
     )
     annee_academique = forms.ChoiceField(
         label=_('Year'),
@@ -311,11 +290,6 @@ class BaseFilterForm(forms.Form):
         js = [
             # DependsOn
             'js/dependsOn.min.js',
-            # Dates
-            'js/moment.min.js',
-            'js/locales/moment-fr.js',
-            'js/bootstrap-datetimepicker.min.js',
-            'js/dates-input.js',
             # Mask
             'js/jquery.mask.min.js',
         ]

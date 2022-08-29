@@ -28,6 +28,8 @@ from typing import List, Optional
 from django import forms
 from django.utils.translation import gettext_lazy as _
 
+from base.forms.utils.datefield import DATE_FORMAT
+
 EMPTY_CHOICE = (('', ' - '),)
 NONE_CHOICE = ((None, ' - '),)
 
@@ -100,3 +102,13 @@ class SelectOrOtherField(forms.MultiValueField):
         if hasattr(self, 'choices') and radio not in self.choices and other is None:
             value = ['other', radio]
         return super().clean(value)
+
+
+class CustomDateInput(forms.DateInput):
+    def __init__(self, attrs=None, format=DATE_FORMAT):
+        if attrs is None:
+            attrs = {
+                'placeholder': _("dd/mm/yyyy"),
+                'data-mask': '00/00/0000',
+            }
+        super().__init__(attrs, format)

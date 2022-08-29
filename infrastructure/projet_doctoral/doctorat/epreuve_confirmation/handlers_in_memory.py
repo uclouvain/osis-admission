@@ -56,6 +56,7 @@ COMMAND_HANDLERS = {
     CompleterEpreuveConfirmationParPromoteurCommand: partial(
         completer_epreuve_confirmation_par_promoteur,
         epreuve_confirmation_repository=EpreuveConfirmationInMemoryRepository(),
+        notification=NotificationInMemory(),
     ),
     SoumettreReportDeDateCommand: partial(
         soumettre_report_de_date,

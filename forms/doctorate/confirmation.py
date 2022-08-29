@@ -29,8 +29,8 @@ from django.utils.translation import gettext_lazy as _
 from osis_document.contrib import FileUploadField
 
 from admission.ddd.projet_doctoral.doctorat.domain.model.enums import ChoixStatutDoctorat
+from admission.forms import CustomDateInput
 from admission.forms.doctorate.cdd.generic_send_mail import BaseEmailTemplateForm
-from base.forms.utils.datefield import DatePickerInput
 
 
 class ConfirmationOpinionForm(forms.Form):
@@ -45,24 +45,12 @@ class ConfirmationForm(ConfirmationOpinionForm):
     date_limite = forms.DateField(
         label=_('Deadline for confirmation'),
         required=True,
-        widget=DatePickerInput(
-            attrs={
-                'placeholder': _("dd/mm/yyyy"),
-                'autocomplete': 'off',
-                **DatePickerInput.defaut_attrs,
-            },
-        ),
+        widget=CustomDateInput(),
     )
     date = forms.DateField(
         label=_('Date of confirmation'),
         required=True,
-        widget=DatePickerInput(
-            attrs={
-                'placeholder': _("dd/mm/yyyy"),
-                'autocomplete': 'off',
-                **DatePickerInput.defaut_attrs,
-            },
-        ),
+        widget=CustomDateInput(),
     )
     rapport_recherche = FileUploadField(
         label=_('Research report'),
@@ -94,11 +82,7 @@ class ConfirmationForm(ConfirmationOpinionForm):
 
     class Media:
         js = [
-            # Dates
-            'js/moment.min.js',
-            'js/locales/moment-fr.js',
-            'js/bootstrap-datetimepicker.min.js',
-            'js/dates-input.js',
+            'js/jquery.mask.min.js',
         ]
 
 
@@ -106,20 +90,10 @@ class ConfirmationRetakingForm(BaseEmailTemplateForm):
     date_limite = forms.DateField(
         label=_('Deadline for confirmation'),
         required=True,
-        widget=DatePickerInput(
-            attrs={
-                'placeholder': _("dd/mm/yyyy"),
-                'autocomplete': 'off',
-                **DatePickerInput.defaut_attrs,
-            },
-        ),
+        widget=CustomDateInput(),
     )
 
     class Media:
         js = [
-            # Dates
-            'js/moment.min.js',
-            'js/locales/moment-fr.js',
-            'js/bootstrap-datetimepicker.min.js',
-            'js/dates-input.js',
+            'js/jquery.mask.min.js',
         ]
