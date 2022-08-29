@@ -248,7 +248,7 @@ class Notification(INotification):
             except MandatesException:
                 president = []
 
-            cc_receivers = [mandate.get('email') for mandate in president + dean]
+            cc_receivers = [mandate.get('email') for mandate in president + dean if mandate.get('email')]
 
             if cc_receivers:
                 adri_email_message['Cc'] = ','.join(cc_receivers)
