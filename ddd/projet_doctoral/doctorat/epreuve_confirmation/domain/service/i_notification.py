@@ -67,3 +67,8 @@ class INotification(interface.DomainService):
     @abstractmethod
     def notifier_reussite_epreuve(cls, epreuve_confirmation: EpreuveConfirmation) -> None:
         raise NotImplementedError
+
+    @classmethod
+    @abstractmethod
+    def notifier_completion_par_promoteur(cls, epreuve_confirmation: EpreuveConfirmation) -> None:
+        raise NotImplementedError

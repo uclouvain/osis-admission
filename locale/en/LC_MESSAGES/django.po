@@ -66,9 +66,22 @@ msgstr ""
 #, python-format
 msgid ""
 "<a href=\"%(confirmation_paper_link_back)s\">%(reference)s</a> - "
-"%(student_first_name)s %(student_last_name)s submitted a date "
-"(%(confirmation_paper_date)s) for the confirmation paper for "
-"%(doctorate_title)s"
+"%(student_first_name)s %(student_last_name)s submitted data for the first "
+"time for the confirmation paper for %(doctorate_title)s"
+msgstr ""
+
+#, python-format
+msgid ""
+"<a href=\"%(confirmation_paper_link_back)s\">%(reference)s</a> - "
+"%(student_first_name)s %(student_last_name)s submitted new data for the "
+"confirmation paper for %(doctorate_title)s"
+msgstr ""
+
+#, python-format
+msgid ""
+"<a href=\"%(confirmation_paper_link_back)s\">%(reference)s</a> - A promoter "
+"submitted documents related to the confirmation paper of "
+"%(student_first_name)s %(student_last_name)s for %(doctorate_title)s"
 msgstr ""
 
 #, python-format

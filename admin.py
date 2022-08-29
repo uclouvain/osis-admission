@@ -68,6 +68,7 @@ class DoctorateAdmissionAdmin(admin.ModelAdmin):
         "admission_submission_date",
         "professional_valuated_experiences",
         "educational_valuated_experiences",
+        "scholarship_proof",
     ]
     exclude = ["valuated_experiences"]
 

@@ -146,19 +146,23 @@ class Notification(INotification):
         doctorate: DoctorateProxy = DoctorateProxy.objects.get(uuid=epreuve_confirmation.doctorat_id.uuid)
         common_tokens = cls.get_common_tokens(doctorate, epreuve_confirmation)
 
-        # Notify the CDD managers > web notification
-        cls._send_notification_to_managers(
-            entity_id=doctorate.doctorate.management_entity_id,
-            content=_(
+        if doctorate.post_enrolment_status == ChoixStatutDoctorat.SUBMITTED_CONFIRMATION.name:
+            # Already submitted at least once
+            manager_notification_content = _(
                 '<a href="%(confirmation_paper_link_back)s">%(reference)s</a> - '
-                '%(student_first_name)s %(student_last_name)s submitted '
-                'a date (%(confirmation_paper_date)s) for the confirmation paper for %(doctorate_title)s'
-            ),
-            tokens=common_tokens,
-        )
+                '%(student_first_name)s %(student_last_name)s submitted new data '
+                'for the confirmation paper for %(doctorate_title)s'
+            )
 
-        # Notify ADRE only at the first submission : email
-        if doctorate.post_enrolment_status != ChoixStatutDoctorat.SUBMITTED_CONFIRMATION.name:
+        else:
+            # First submission
+            manager_notification_content = _(
+                '<a href="%(confirmation_paper_link_back)s">%(reference)s</a> - '
+                '%(student_first_name)s %(student_last_name)s submitted data '
+                'for the first time for the confirmation paper for %(doctorate_title)s'
+            )
+
+            # Notify ADRE : email
             email_message = generate_email(
                 ADMISSION_EMAIL_CONFIRMATION_PAPER_SUBMISSION_ADRE,
                 settings.LANGUAGE_CODE,
@@ -166,6 +170,29 @@ class Notification(INotification):
                 recipients=[cls.ADRE_EMAIL],
             )
             send_mail_to_generic_email(message=email_message)
+
+        # Notify the CDD managers > web notification
+        cls._send_notification_to_managers(
+            entity_id=doctorate.doctorate.management_entity_id,
+            content=manager_notification_content,
+            tokens=common_tokens,
+        )
+
+    @classmethod
+    def notifier_completion_par_promoteur(cls, epreuve_confirmation: EpreuveConfirmation) -> None:
+        doctorate: DoctorateProxy = DoctorateProxy.objects.get(uuid=epreuve_confirmation.doctorat_id.uuid)
+        common_tokens = cls.get_common_tokens(doctorate, epreuve_confirmation)
+
+        # Notify the CDD managers > web notification
+        cls._send_notification_to_managers(
+            entity_id=doctorate.doctorate.management_entity_id,
+            content=_(
+                '<a href="%(confirmation_paper_link_back)s">%(reference)s</a> - '
+                'A promoter submitted documents related to the confirmation paper of '
+                '%(student_first_name)s %(student_last_name)s for %(doctorate_title)s'
+            ),
+            tokens=common_tokens,
+        )
 
     @classmethod
     def notifier_nouvelle_echeance(cls, epreuve_confirmation: EpreuveConfirmation) -> None:
@@ -211,7 +238,6 @@ class Notification(INotification):
         EmailNotificationHandler.create(student_email_message, person=doctorate.candidate)
 
         common_tokens = cls.get_common_tokens(doctorate, epreuve_confirmation)
-        entity_acronym = doctorate.doctorate.management_entity.most_recent_entity_version.acronym
 
         # Notify ADRE > email
         adre_email_message = generate_email(
@@ -229,30 +255,6 @@ class Notification(INotification):
             common_tokens,
             recipients=[cls.ADRI_EMAIL],
         )
-
-        if settings.ESB_API_URL:
-            # Notify the faculty dean and the institute president > email (cc)
-            try:
-                dean = MandatesService.get(
-                    function=MandateFunctionEnum.DOYEN,
-                    entity_acronym=entity_acronym,
-                )
-            except MandatesException:
-                dean = []
-
-            try:
-                president = MandatesService.get(
-                    function=MandateFunctionEnum.PRESI,
-                    entity_acronym=entity_acronym,
-                )
-            except MandatesException:
-                president = []
-
-            cc_receivers = [mandate.get('email') for mandate in president + dean if mandate.get('email')]
-
-            if cc_receivers:
-                adri_email_message['Cc'] = ','.join(cc_receivers)
-
         send_mail_to_generic_email(adri_email_message)
 
     @classmethod
