@@ -169,11 +169,7 @@ class DoctorateTrainingActivityViewTestCase(TestCase):
         self.assertContains(response, "Foobar")
 
         # Test edit a child activity
-        child = ActivityFactory(
-            doctorate=self.doctorate,
-            category=CategorieActivite.PUBLICATION.name,
-            parent=self.conference,
-        )
+        child = PublicationFactory(doctorate=self.doctorate, parent=self.conference)
         edit_url = resolve_url('admission:doctorate:training:edit', uuid=self.doctorate.uuid, activity_id=child.uuid)
         response = self.client.get(edit_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -252,11 +248,17 @@ class DoctorateTrainingActivityViewTestCase(TestCase):
         self.assertContains(response, _('SOUMISE'))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    def test_course_dates(self):
-        activity = ActivityFactory(
-            doctorate=self.doctorate,
-            category=CategorieActivite.COURSE.name,
+    def test_delete_activities(self):
+        child = PublicationFactory(doctorate=self.doctorate, parent=self.conference)
+        url = resolve_url(
+            'admission:doctorate:training:delete', uuid=self.doctorate.uuid, activity_id=self.conference.uuid
         )
+        response = self.client.post(url, {}, follow=True)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIsNone(Activity.objects.filter(pk__in=[child.pk, self.conference.pk]).first())
+
+    def test_course_dates(self):
+        activity = CourseFactory(doctorate=self.doctorate)
         edit_url = resolve_url('admission:doctorate:training:edit', uuid=self.doctorate.uuid, activity_id=activity.uuid)
         year = AcademicYearFactory(year=2022)
         response = self.client.post(

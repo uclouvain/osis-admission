@@ -39,7 +39,10 @@ class ActiviteInMemoryRepository(InMemoryGenericRepository, IActiviteRepository)
 
     @classmethod
     def get(cls, entity_id: 'ActiviteIdentity') -> 'Activite':
-        return super().get(entity_id)
+        activite = super().get(entity_id)
+        if not activite:
+            raise ActiviteNonTrouvee
+        return activite
 
     @classmethod
     def get_multiple(cls, entity_ids: List['ActiviteIdentity']) -> Mapping['ActiviteIdentity', 'Activite']:

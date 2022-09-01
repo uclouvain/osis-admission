@@ -44,6 +44,9 @@
 ></a>
 <span class="badge">{{ activity.status|enum_display:'StatutActivite' }}</span>
 
+{% trans "Please check the details of the activity (and sub-activities) to fill in all mandatory fields" as not_complete_sub %}
+{% trans "Please check the details of the activity to fill in all mandatory fields" as not_complete %}
+
 <div style="width: auto" class="pull-right">
   <div class="input-group input-group-sm{% if activity.uuid in form.activities_in_error %} has-error{% endif %}">
     {% if activity.category|safe == "SEMINAR" and activity.status|safe != "NON_SOUMISE" and add_communication_url %}
@@ -64,7 +67,18 @@
               </a>
             </li>
             {% if not remove_batch_action %}
-              <li>
+              <li
+                  {% if not activity.can_be_submitted %}
+                    class="disabled"
+                    data-toggle="tooltip"
+                    data-container="body"
+                    {% if activity.category == 'SEMINAR' %}
+                    title="{{ not_complete_sub }}"
+                    {% else %}
+                    title="{{ not_complete }}"
+                    {% endif %}
+                  {% endif %}
+              >
                 <a
                     href="#"
                     onclick="$('[name=activity_ids]').val(['{{ activity.uuid }}']);$('form#activities').submit();return false;"
@@ -106,8 +120,6 @@
         </ul>
       </div>
       {% if not remove_batch_action and activity.status|safe == "NON_SOUMISE" %}
-        {% trans "Please check the details of the activity (and sub-activities) to fill in all mandatory fields" as not_complete_sub %}
-        {% trans "Please check the details of the activity to fill in all mandatory fields" as not_complete %}
         <label class="input-group-addon">
           <input
               type="checkbox" name="activity_ids" value="{{ activity.uuid }}"

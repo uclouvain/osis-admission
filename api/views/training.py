@@ -43,7 +43,9 @@ from admission.contrib.models.doctoral_training import Activity
 from admission.ddd.projet_doctoral.doctorat.formation.commands import (
     DonnerAvisSurActiviteCommand,
     SoumettreActivitesCommand,
+    SupprimerActiviteCommand,
 )
+from admission.ddd.projet_doctoral.doctorat.formation.domain.model._enums import StatutActivite
 from admission.utils import get_cached_admission_perm_obj
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from infrastructure.messages_bus import message_bus_instance
@@ -145,6 +147,7 @@ class DoctoralTrainingView(APIPermissionRequiredMixin, GenericAPIView):
     permission_mapping = {
         'GET': 'admission.view_doctorateadmission_doctoral_training',
         'PUT': 'admission.view_doctorateadmission_doctoral_training',
+        'DELETE': 'admission.delete_doctorateadmission_doctoral_training',
     }
 
     def get_permission_object(self):
@@ -168,6 +171,10 @@ class DoctoralTrainingView(APIPermissionRequiredMixin, GenericAPIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
+
+    def delete(self, request, *args, **kwargs):
+        message_bus_instance.invoke(SupprimerActiviteCommand(activite_uuid=str(kwargs["activity_id"])))
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class DoctoralTrainingBatchSchema(AutoSchema):

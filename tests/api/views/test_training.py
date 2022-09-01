@@ -27,10 +27,18 @@ from django.shortcuts import resolve_url
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from admission.ddd.projet_doctoral.doctorat.formation.domain.model._enums import CategorieActivite
+from admission.contrib.models.doctoral_training import Activity
+from admission.ddd.projet_doctoral.doctorat.formation.domain.model._enums import CategorieActivite, StatutActivite
+from admission.ddd.projet_doctoral.doctorat.formation.domain.validator.exceptions import ActiviteNonTrouvee
+from admission.infrastructure.projet_doctoral.doctorat.formation.repository.activite import ActiviteRepository
 from admission.tests import QueriesAssertionsMixin
 from admission.tests.factories import DoctorateAdmissionFactory
-from admission.tests.factories.activity import ActivityFactory, ConferenceFactory, ServiceFactory
+from admission.tests.factories.activity import (
+    ActivityFactory,
+    ConferenceCommunicationFactory,
+    ConferenceFactory,
+    ServiceFactory,
+)
 from admission.tests.factories.roles import CandidateFactory
 from admission.tests.factories.supervision import PromoterFactory
 from base.models.enums.entity_type import EntityType
@@ -191,6 +199,48 @@ class TrainingApiTestCase(QueriesAssertionsMixin, APITestCase):
         config_url = resolve_url("admission_api_v1:doctoral-training-config", uuid=self.admission.uuid)
         response = self.client.get(config_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_training_should_delete_unsubmitted(self):
+        service = ServiceFactory(doctorate=self.admission)
+        self.client.force_authenticate(user=self.candidate.user)
+        url = resolve_url("admission_api_v1:doctoral-training", uuid=self.admission.uuid, activity_id=service.uuid)
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertIsNone(Activity.objects.filter(pk=service.pk).first())
+
+    def test_training_should_not_delete_submitted(self):
+        service = ServiceFactory(doctorate=self.admission, status=StatutActivite.SOUMISE.name)
+        self.client.force_authenticate(user=self.candidate.user)
+        url = resolve_url("admission_api_v1:doctoral-training", uuid=self.admission.uuid, activity_id=service.uuid)
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIsNotNone(Activity.objects.filter(pk=service.pk).first())
+
+    def test_training_should_not_delete_parent_with_child_submitted(self):
+        communication = ConferenceCommunicationFactory(
+            doctorate=self.admission,
+            status=StatutActivite.SOUMISE.name,
+        )
+        self.client.force_authenticate(user=self.candidate.user)
+        url = resolve_url(
+            "admission_api_v1:doctoral-training",
+            uuid=self.admission.uuid,
+            activity_id=communication.parent.uuid,
+        )
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIsNotNone(Activity.objects.filter(pk=communication.pk).first())
+        self.assertIsNotNone(Activity.objects.filter(pk=communication.parent.pk).first())
+
+    def test_training_should_delete_parent_unsubmitted_with_child(self):
+        communication = ConferenceCommunicationFactory(
+            doctorate=self.admission,
+            parent=self.activity,
+        )
+        self.client.force_authenticate(user=self.candidate.user)
+        response = self.client.delete(self.activity_url)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertIsNone(Activity.objects.filter(pk__in=[communication.pk, self.activity.pk]).first())
 
     def test_training_submit(self):
         service = ServiceFactory(doctorate=self.admission)
