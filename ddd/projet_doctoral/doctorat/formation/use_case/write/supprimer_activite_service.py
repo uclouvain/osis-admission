@@ -23,20 +23,24 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from .internal_note import InternalNoteView
-from .list import CddDoctorateAdmissionList
-from .training import (
-    DoctorateTrainingActivityAddView,
-    DoctorateTrainingActivityEditView,
-    DoctorateTrainingActivityView,
-    DoctorateTrainingActivityDeleteView,
-)
 
-__all__ = [
-    'CddDoctorateAdmissionList',
-    'DoctorateTrainingActivityView',
-    'DoctorateTrainingActivityAddView',
-    'DoctorateTrainingActivityEditView',
-    'DoctorateTrainingActivityDeleteView',
-    'InternalNoteView',
-]
+from admission.ddd.projet_doctoral.doctorat.formation.builder.activite_identity_builder import ActiviteIdentityBuilder
+from admission.ddd.projet_doctoral.doctorat.formation.commands import SupprimerActiviteCommand
+from admission.ddd.projet_doctoral.doctorat.formation.domain.model.activite import ActiviteIdentity
+from admission.ddd.projet_doctoral.doctorat.formation.domain.service.supprimer_activite import SupprimerActivite
+from admission.ddd.projet_doctoral.doctorat.formation.repository.i_activite import IActiviteRepository
+
+
+def supprimer_activite(
+    cmd: 'SupprimerActiviteCommand',
+    activite_repository: 'IActiviteRepository',
+) -> 'ActiviteIdentity':
+    # GIVEN
+    activite = activite_repository.get(entity_id=ActiviteIdentityBuilder.build_from_uuid(cmd.activite_uuid))
+
+    # WHEN
+
+    # THEN
+    SupprimerActivite().supprimer_activite(activite, activite_repository)
+
+    return activite.entity_id

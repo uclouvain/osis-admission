@@ -2142,6 +2142,9 @@ msgstr "Lieu de la thèse"
 msgid "Thesis title"
 msgstr "Titre de la thèse"
 
+msgid "This activity and potential sub-activities will be deleted"
+msgstr "Cette activité et ses potentielles sous-activités seront supprimées"
+
 msgid "This activity could not be found"
 msgstr "Cette activité n'existe pas"
 

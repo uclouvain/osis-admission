@@ -25,7 +25,7 @@
 # ##############################################################################
 
 from django.db.models import Q, Sum
-from django.http import Http404
+from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, resolve_url
 from django.views import generic
 
@@ -160,3 +160,21 @@ class DoctorateTrainingActivityEditView(DoctorateTrainingActivityFormMixin, gene
     def activity(self):
         # Don't remove, this is to share same template code in front-office
         return self.object
+
+
+class DoctorateTrainingActivityDeleteView(LoadDossierViewMixin, generic.DeleteView):
+    model = Activity
+    permission_required = "admission.delete_activity"
+    slug_field = 'uuid'
+    pk_url_kwarg = "NOT_TO_BE_USED"
+    slug_url_kwarg = 'activity_id'
+    template_name = "admission/doctorate/forms/training/activity_confirm_delete.html"
+
+    def delete(self, request, *args, **kwargs):
+        Activity.objects.filter(
+            Q(uuid=self.kwargs['activity_id']) | Q(parent__uuid=self.kwargs['activity_id'])
+        ).delete()
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_success_url(self):
+        return resolve_url("admission:doctorate:training", uuid=self.admission_uuid)

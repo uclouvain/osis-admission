@@ -2009,6 +2009,9 @@ msgstr ""
 msgid "Thesis title"
 msgstr ""
 
+msgid "This activity and potential sub-activities will be deleted"
+msgstr ""
+
 msgid "This activity could not be found"
 msgstr ""
 

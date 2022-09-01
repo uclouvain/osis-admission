@@ -50,6 +50,7 @@ class CddManager(EntityRoleModel):
             'admission.fill_thesis': is_part_of_doctoral_commission,
             'admission.submit_thesis': is_part_of_doctoral_commission,
             'admission.upload_defense_report': is_part_of_doctoral_commission,
+            # Profile
             'admission.view_doctorateadmission_person': is_part_of_doctoral_commission,
             'admission.change_doctorateadmission_person': is_part_of_doctoral_commission,
             'admission.view_doctorateadmission_coordinates': is_part_of_doctoral_commission,
@@ -60,25 +61,30 @@ class CddManager(EntityRoleModel):
             'admission.change_doctorateadmission_languages': is_part_of_doctoral_commission,
             'admission.view_doctorateadmission_curriculum': is_part_of_doctoral_commission,
             'admission.change_doctorateadmission_curriculum': is_part_of_doctoral_commission,
+            # Project
             'admission.view_doctorateadmission_project': is_part_of_doctoral_commission,
             'admission.change_doctorateadmission_project': is_part_of_doctoral_commission,
             'admission.view_doctorateadmission_cotutelle': is_part_of_doctoral_commission,
             'admission.change_doctorateadmission_cotutelle': is_part_of_doctoral_commission,
+            # Supervision
             'admission.view_doctorateadmission_supervision': is_part_of_doctoral_commission,
             'admission.change_doctorateadmission_supervision': is_part_of_doctoral_commission,
+            'admission.add_supervision_member': is_part_of_doctoral_commission,
+            'admission.remove_supervision_member': is_part_of_doctoral_commission,
             # Confirmation paper
             'admission.view_doctorateadmission_confirmation': is_part_of_doctoral_commission & is_enrolled,
             'admission.change_doctorateadmission_confirmation': is_part_of_doctoral_commission & is_enrolled,
             'admission.change_doctorateadmission_confirmation_extension': is_part_of_doctoral_commission & is_enrolled,
             'admission.make_confirmation_decision': is_part_of_doctoral_commission & submitted_confirmation_paper,
-            'admission.add_supervision_member': is_part_of_doctoral_commission,
-            'admission.remove_supervision_member': is_part_of_doctoral_commission,
             'admission.change_cddmailtemplate': rules.always_allow,
             'admission.view_cdddossiers': rules.always_allow,
             'osis_history.view_historyentry': is_part_of_doctoral_commission,
             'admission.send_message': is_part_of_doctoral_commission & is_enrolled,
             'admission.change_cddconfiguration': rules.always_allow,
+            # Training
             'admission.change_activity': is_part_of_doctoral_commission,
+            'admission.delete_activity': is_part_of_doctoral_commission,
+            # Internal notes
             'admission.add_internalnote': is_part_of_doctoral_commission,
             'admission.view_internalnote': is_part_of_doctoral_commission,
         }

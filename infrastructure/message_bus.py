@@ -289,6 +289,10 @@ class MessageBusCommands(AbstractMessageBusCommands):
             groupe_de_supervision_repository=GroupeDeSupervisionRepository(),
             notification=NotificationFormation(),
         ),
+        SupprimerActiviteCommand: partial(
+            supprimer_activite,
+            activite_repository=ActiviteRepository(),
+        ),
         DonnerAvisSurActiviteCommand: partial(
             donner_avis_sur_activite,
             activite_repository=ActiviteRepository(),
