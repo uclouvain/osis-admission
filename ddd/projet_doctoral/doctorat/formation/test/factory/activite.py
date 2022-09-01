@@ -90,6 +90,8 @@ class ConferencePublicationDTOFactory(factory.Factory):
     comite_selection = "test"
     nom_revue_maison_edition = "test"
     preuve_acceptation = "test"
+    date = "test"
+    statut_publication = "test"
 
 
 class PublicationDTOFactory(factory.Factory):

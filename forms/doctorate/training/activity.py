@@ -226,6 +226,8 @@ class ConferencePublicationForm(ActivityFormMixin, forms.ModelForm):
             'type',
             'ects',
             'title',
+            'start_date',
+            'publication_status',
             'authors',
             'role',
             'keywords',
@@ -239,9 +241,14 @@ class ConferencePublicationForm(ActivityFormMixin, forms.ModelForm):
         labels = {
             'type': _("Type of publication"),
             'title': _("Title of the publication"),
+            'start_date': _("Date of the publication"),
             'committee': _("Selection committee"),
             'summary': pgettext_lazy("paper summary", "Summary"),
             'acceptation_proof': _("Proof of acceptation or publication"),
+            'publication_status': _("Publication status"),
+        }
+        widgets = {
+            'start_date': DatePickerInput(attrs={'placeholder': _("dd/mm/yyyy"), **DatePickerInput.defaut_attrs}),
         }
 
 
@@ -306,7 +313,7 @@ class CommunicationForm(ActivityFormMixin, forms.ModelForm):
 
 class PublicationForm(ActivityFormMixin, forms.ModelForm):
     template_name = "admission/doctorate/forms/training/publication.html"
-    type = ConfigurableActivityTypeField('publication_types', label=_("Type of activity"))
+    type = ConfigurableActivityTypeField('publication_types', label=_("Type of publication"))
 
     class Meta:
         model = Activity
@@ -329,7 +336,7 @@ class PublicationForm(ActivityFormMixin, forms.ModelForm):
             'title': _("Title of the publication"),
             'start_date': _("Date of the publication"),
             'publication_status': _("Publication status"),
-            'acceptation_proof': _("Proof"),
+            'acceptation_proof': _("Proof of publication"),
         }
         widgets = {
             'start_date': DatePickerInput(attrs={'placeholder': _("dd/mm/yyyy"), **DatePickerInput.defaut_attrs}),
