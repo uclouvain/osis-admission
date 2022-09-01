@@ -114,6 +114,8 @@ class ActiviteRepository(IActiviteRepository):
                 auteurs=activity.authors,
                 role=activity.role,
                 nom_revue_maison_edition=activity.journal,
+                date=activity.start_date,
+                statut_publication=activity.publication_status and ChoixStatutPublication[activity.publication_status],
                 preuve_acceptation=activity.acceptation_proof,
                 comite_selection=activity.committee,
                 mots_cles=activity.keywords,

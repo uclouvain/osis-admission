@@ -4249,6 +4249,20 @@ components:
           minimum: 0
         title:
           type: string
+        start_date:
+          type: string
+          format: date
+          nullable: true
+        publication_status:
+          enum:
+          - ''
+          - UNSUBMITTED
+          - SUBMITTED
+          - IN_REVIEW
+          - ACCEPTED
+          - PUBLISHED
+          type: string
+          nullable: true
         authors:
           type: string
         role:
@@ -4285,6 +4299,8 @@ components:
       - type
       - ects
       - title
+      - start_date
+      - publication_status
       - authors
       - role
       - keywords

@@ -48,9 +48,15 @@
     <div class="panel-body">
       <div>
         <strong class="d-block">{% trans "Description" %}</strong>
-        <p>{{ activity.title }}</p>
-        <p>{% display activity.authors " " "(" activity.role ")" %}</p>
-        <p>{{ activity.journal }}</p>
+        {% display activity.role "," activity.authors '<br/>'|safe %}
+        {% display activity.title '<br/>'|safe activity.start_date|date:'d/m/Y' '<br/>'|safe %}
+        {% display activity.journal %}
+        {% if activity.publication_status %}
+          <p>
+            <strong>{% trans "Publication status" %} :</strong>
+            {{ activity.publication_status|enum_display:'ChoixStatutPublication' }}
+          </p>
+        {% endif %}
       </div>
       {% if activity.committee %}
         <p>

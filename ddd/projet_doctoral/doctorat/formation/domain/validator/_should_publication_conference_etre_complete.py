@@ -44,6 +44,8 @@ class ShouldPublicationConferenceEtreComplete(BusinessValidator):
                 self.conference.intitule,
                 self.conference.auteurs,
                 self.conference.role,
+                self.conference.date,
+                self.conference.statut_publication,
                 self.conference.nom_revue_maison_edition,
                 self.conference.comite_selection,
                 self.activite.ects,

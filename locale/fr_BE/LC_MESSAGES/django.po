@@ -1615,6 +1615,9 @@ msgstr "Attestation de participation pour l'ensemble de l'activité"
 msgid "Proof of participation or success"
 msgstr "Certificat de participation ou de réussite"
 
+msgid "Proof of publication"
+msgstr "Preuve de publication"
+
 msgid "Proposed new deadline"
 msgstr "Nouvelle échéance proposée"
 

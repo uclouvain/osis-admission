@@ -29,6 +29,7 @@ from typing import List, Optional
 
 import attr
 
+from admission.ddd.projet_doctoral.doctorat.formation.domain.model._enums import ChoixStatutPublication
 from osis_common.ddd import interface
 
 
@@ -64,9 +65,11 @@ class ConferenceCommunicationDTO(interface.DTO):
 class ConferencePublicationDTO(interface.DTO):
     type: str = ""
     intitule: str = ""
+    date: Optional[date] = None
     auteurs: str = ""
     role: str = ""
     nom_revue_maison_edition: str = ""
+    statut_publication: Optional[ChoixStatutPublication] = None
     preuve_acceptation: List[str] = attr.Factory(list)
     comite_selection: str = ""
     mots_cles: str = ""
