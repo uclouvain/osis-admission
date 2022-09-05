@@ -140,4 +140,24 @@
       {% endif %}
     {% endif %}
   </div>
+
+  {% if activity.reference_promoter_assent is not None %}
+    <span
+      type="button"
+      data-content="{{ activity.reference_promoter_comment }}"
+      data-toggle="popover"
+      data-placement="auto left"
+      title="{% trans "Comment from reference promoter" %}"
+      data-container="body"
+      {% if activity.reference_promoter_assent %}
+      class="btn btn-sm btn-success"
+        >
+        <span class="glyphicon glyphicon-ok-circle"></span>
+      {% else %}
+        class="btn btn-sm btn-danger"
+        >
+        <span class="glyphicon glyphicon-remove-circle"></span>
+      {% endif %}
+      </span>
+  {% endif %}
 </div>

@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Admission API
-  version: 1.0.34
+  version: 1.0.35
   description: This API delivers data for the Admission project.
   contact:
     name: UCLouvain - OSIS
@@ -4106,7 +4106,7 @@ components:
           type: integer
           writeOnly: true
         reference_promoter_assent:
-          type: string
+          type: boolean
           readOnly: true
           nullable: true
         reference_promoter_comment:
@@ -4194,7 +4194,7 @@ components:
           type: integer
           writeOnly: true
         reference_promoter_assent:
-          type: string
+          type: boolean
           readOnly: true
           nullable: true
         reference_promoter_comment:
@@ -4264,7 +4264,7 @@ components:
           type: integer
           writeOnly: true
         reference_promoter_assent:
-          type: string
+          type: boolean
           readOnly: true
           nullable: true
         reference_promoter_comment:
@@ -4358,7 +4358,7 @@ components:
           type: integer
           writeOnly: true
         reference_promoter_assent:
-          type: string
+          type: boolean
           readOnly: true
           nullable: true
         reference_promoter_comment:
@@ -4430,7 +4430,7 @@ components:
           type: integer
           writeOnly: true
         reference_promoter_assent:
-          type: string
+          type: boolean
           readOnly: true
           nullable: true
         reference_promoter_comment:
@@ -4505,7 +4505,7 @@ components:
           type: integer
           writeOnly: true
         reference_promoter_assent:
-          type: string
+          type: boolean
           readOnly: true
           nullable: true
         reference_promoter_comment:
@@ -4600,7 +4600,7 @@ components:
           type: integer
           writeOnly: true
         reference_promoter_assent:
-          type: string
+          type: boolean
           readOnly: true
           nullable: true
         reference_promoter_comment:
@@ -4682,7 +4682,7 @@ components:
           type: integer
           writeOnly: true
         reference_promoter_assent:
-          type: string
+          type: boolean
           readOnly: true
           nullable: true
         reference_promoter_comment:
@@ -4745,7 +4745,7 @@ components:
           type: integer
           writeOnly: true
         reference_promoter_assent:
-          type: string
+          type: boolean
           readOnly: true
           nullable: true
         reference_promoter_comment:
@@ -4810,7 +4810,7 @@ components:
           type: integer
           writeOnly: true
         reference_promoter_assent:
-          type: string
+          type: boolean
           readOnly: true
           nullable: true
         reference_promoter_comment:
@@ -4877,7 +4877,7 @@ components:
           type: integer
           writeOnly: true
         reference_promoter_assent:
-          type: string
+          type: boolean
           readOnly: true
           nullable: true
         reference_promoter_comment:
@@ -4928,7 +4928,7 @@ components:
           type: integer
           writeOnly: true
         reference_promoter_assent:
-          type: string
+          type: boolean
           readOnly: true
           nullable: true
         reference_promoter_comment:
@@ -5001,7 +5001,7 @@ components:
           type: integer
           writeOnly: true
         reference_promoter_assent:
-          type: string
+          type: boolean
           readOnly: true
           nullable: true
         reference_promoter_comment:

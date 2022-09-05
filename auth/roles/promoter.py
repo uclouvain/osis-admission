@@ -70,6 +70,8 @@ class Promoter(ExternalActorMixin, RoleModel):
             'admission.change_doctorateadmission_confirmation': is_admission_request_promoter
             & confirmation_paper_in_progress,
             'admission.upload_pdf_confirmation': is_admission_request_promoter & is_enrolled,
+            # Doctoral training
+            'admission.view_doctorateadmission_doctoral_training': is_admission_reference_promoter & is_enrolled,
             'admission.assent_doctoral_training': is_admission_reference_promoter & is_enrolled,
         }
         return RuleSet(rules)
