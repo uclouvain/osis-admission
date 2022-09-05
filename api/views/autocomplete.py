@@ -25,7 +25,7 @@
 # ##############################################################################
 from datetime import date
 
-from django.db.models import F, OuterRef, Q, TextField
+from django.db.models import Exists, F, OuterRef, Q, TextField
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from rest_framework.filters import BaseFilterBackend
@@ -43,6 +43,7 @@ from base.models.enums.education_group_categories import Categories
 from base.models.enums.education_group_types import TrainingType
 from base.models.enums.entity_type import SECTOR
 from base.models.person import Person
+from base.models.student import Student
 from base.utils.cte import CTESubquery
 from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import GetCurrentAcademicYear
 from infrastructure.messages_bus import message_bus_instance
@@ -162,4 +163,15 @@ class AutocompletePersonView(ListAPIView):
     name = "autocomplete-person"
     filter_backends = [PersonSearchingBackend]
     serializer_class = PersonSerializer
-    queryset = Person.objects.exclude(Q(user_id__isnull=True) | Q(global_id=''))
+    queryset = (
+        Person.objects.exclude(
+            # Remove unexistent users
+            Q(user_id__isnull=True)
+            | Q(global_id=''),
+        )
+        .alias(
+            # Remove students
+            is_student=Exists(Student.objects.filter(person=OuterRef('pk'))),
+        )
+        .filter(is_student=False)
+    )
