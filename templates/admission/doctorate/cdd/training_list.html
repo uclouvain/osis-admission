@@ -141,6 +141,8 @@
   <script src="{% static 'osis_document/osis-document.umd.min.js' %}"></script>
   <script>
     $(function () {
+      $('[data-toggle="popover"]').popover();
+
       // Open the right panel depending on location hash
       if (document.location.hash) {
         const uuid = document.location.hash.slice(1);

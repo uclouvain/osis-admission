@@ -561,6 +561,9 @@ msgstr "Fermer"
 msgid "Comment"
 msgstr "Commentaire"
 
+msgid "Comment from reference promoter"
+msgstr "Commentaire du promoteur de référence"
+
 msgid "Comments"
 msgstr "Commentaires"
 

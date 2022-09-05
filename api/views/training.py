@@ -45,7 +45,6 @@ from admission.ddd.projet_doctoral.doctorat.formation.commands import (
     SoumettreActivitesCommand,
     SupprimerActiviteCommand,
 )
-from admission.ddd.projet_doctoral.doctorat.formation.domain.model._enums import StatutActivite
 from admission.utils import get_cached_admission_perm_obj
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from infrastructure.messages_bus import message_bus_instance

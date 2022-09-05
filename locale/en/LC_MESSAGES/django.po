@@ -533,6 +533,9 @@ msgstr ""
 msgid "Comment"
 msgstr ""
 
+msgid "Comment from reference promoter"
+msgstr ""
+
 msgid "Comments"
 msgstr ""
 
