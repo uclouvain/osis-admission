@@ -30,7 +30,7 @@ from django.utils.translation import gettext_lazy as _
 class ActiviteNonComplete(BusinessException):
     status_code = "FORMATION-1"
 
-    def __init__(self, activite_id=None, *args, **kwargs):
+    def __init__(self, activite_id, *args, **kwargs):
         self.activite_id = activite_id
         message = _("This activity is not complete")
         super().__init__(message, **kwargs)
@@ -39,7 +39,7 @@ class ActiviteNonComplete(BusinessException):
 class ActiviteDejaSoumise(BusinessException):
     status_code = "FORMATION-2"
 
-    def __init__(self, activite_id=None, *args, **kwargs):
+    def __init__(self, activite_id, *args, **kwargs):
         self.activite_id = activite_id
         message = _("This activity has been submitted")
         super().__init__(message, **kwargs)
@@ -50,4 +50,22 @@ class ActiviteNonTrouvee(BusinessException):
 
     def __init__(self, *args, **kwargs):
         message = _("This activity could not be found")
+        super().__init__(message, **kwargs)
+
+
+class ActiviteDoitEtreNonSoumise(BusinessException):
+    status_code = "FORMATION-4"
+
+    def __init__(self, activite_id, *args, **kwargs):
+        self.activite_id = activite_id
+        message = _("This activity must be unsubmitted")
+        super().__init__(message, **kwargs)
+
+
+class ActiviteDoitEtreSoumise(BusinessException):
+    status_code = "FORMATION-5"
+
+    def __init__(self, activite_id=None, *args, **kwargs):
+        self.activite_id = activite_id
+        message = _("This activity must be submitted")
         super().__init__(message, **kwargs)

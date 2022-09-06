@@ -40,3 +40,11 @@ class INotification(interface.DomainService):
         promoteur_de_reference_id: PromoteurIdentity,
     ) -> None:
         raise NotImplementedError
+
+    @classmethod
+    def notifier_validation_au_candidat(
+        cls,
+        doctorat: Doctorat,
+        activites: List[Activite],
+    ) -> None:
+        raise NotImplementedError

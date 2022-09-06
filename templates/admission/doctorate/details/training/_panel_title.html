@@ -50,8 +50,8 @@
 <div style="width: auto" class="pull-right">
   <div class="input-group input-group-sm{% if activity.uuid in form.activities_in_error %} has-error{% endif %}">
     {% if activity.category|safe == "SEMINAR" and activity.status|safe != "NON_SOUMISE" and add_communication_url %}
-      {# Do not display the dropdown #}
-    {% elif activity.status|safe == "NON_SOUMISE" or add_communication_url or add_publication_url %}
+      {# Do not display the dropdown if seminar has been submitted #}
+    {% elif activity.status|safe == "NON_SOUMISE" or activity.status|safe == "SOUMISE" or add_communication_url or add_publication_url %}
       <div class="input-group-btn">
         <button
             type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
@@ -60,12 +60,14 @@
           {% trans "Actions" %} <span class="caret"></span>
         </button>
         <ul class="dropdown-menu dropdown-menu-right">
-          {% if activity.status|safe == "NON_SOUMISE" %}
+
+            {# Activity is unsubmitted : display edit/delete/submit/add-children #}
             <li>
               <a href="{{ edit_url }}">
                 {% trans "Edit" %}
               </a>
             </li>
+          {% if activity.status|safe == "NON_SOUMISE" %}
             {% if not remove_batch_action %}
               <li
                   {% if not activity.can_be_submitted %}
@@ -135,6 +137,13 @@
               {% else %}
               aria-label="{% trans "Select for batch action" %}"
               {% endif %}
+          />
+        </label>
+      {% elif not remove_batch_action and activity.status|safe == "SOUMISE" %}
+        <label class="input-group-addon">
+          <input
+              type="checkbox" name="activity_ids" value="{{ activity.uuid }}"
+              aria-label="{% trans "Select for batch action" %}"
           />
         </label>
       {% endif %}

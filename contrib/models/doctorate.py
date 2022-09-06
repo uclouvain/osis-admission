@@ -415,7 +415,7 @@ class PropositionManager(models.Manager):
 
 @receiver(post_save, sender=EducationGroupYear)
 def _invalidate_doctorate_cache(sender, instance, **kwargs):
-    if (
+    if (  # pragma: no branch
         instance.education_group_type.category == Categories.TRAINING.name
         and instance.education_group_type.name == TrainingType.PHD.name
     ):

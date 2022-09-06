@@ -34,7 +34,11 @@ from django.utils.translation import gettext_lazy as _
 from rest_framework import status
 
 from admission.contrib.models.doctoral_training import Activity
-from admission.ddd.projet_doctoral.doctorat.formation.domain.model._enums import CategorieActivite, ChoixComiteSelection
+from admission.ddd.projet_doctoral.doctorat.formation.domain.model._enums import (
+    CategorieActivite,
+    ChoixComiteSelection,
+    StatutActivite,
+)
 from admission.forms.doctorate.training.activity import INSTITUTION_UCL
 from admission.tests.factories.activity import (
     ActivityFactory,
@@ -55,6 +59,7 @@ from admission.tests.factories.activity import (
 from admission.tests.factories.roles import CddManagerFactory
 from admission.tests.factories.supervision import PromoterFactory
 from base.tests.factories.academic_year import AcademicYearFactory
+from osis_notification.models import WebNotification
 
 
 @override_settings(OSIS_DOCUMENT_BASE_URL='http://dummyurl/')
@@ -247,6 +252,13 @@ class DoctorateTrainingActivityViewTestCase(TestCase):
         response = self.client.post(self.url, {'activity_ids': [self.service.uuid]}, follow=True)
         self.assertContains(response, _('SOUMISE'))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_accept_activities(self):
+        communication = CommunicationFactory(doctorate=self.doctorate, status=StatutActivite.SOUMISE.name)
+        response = self.client.post(self.url, {'activity_ids': [communication.uuid], '_accept': True}, follow=True)
+        self.assertContains(response, _('ACCEPTEE'))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(WebNotification.objects.count(), 1)
 
     def test_delete_activities(self):
         child = PublicationFactory(doctorate=self.doctorate, parent=self.conference)

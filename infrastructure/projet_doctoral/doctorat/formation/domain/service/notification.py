@@ -27,8 +27,9 @@ from typing import List, Union
 
 from django.conf import settings
 from django.shortcuts import resolve_url
+from django.utils import translation
 from django.utils.functional import Promise, lazy
-from django.utils.translation import get_language
+from django.utils.translation import get_language, gettext_lazy as _
 
 from admission.contrib.models import DoctorateAdmission
 from admission.contrib.models.doctorate import DoctorateProxy
@@ -40,7 +41,8 @@ from admission.ddd.projet_doctoral.preparation.domain.model._promoteur import Pr
 from admission.mail_templates import ADMISSION_EMAIL_REFERENCE_PROMOTER_TRAININGS_SUBMITTED
 from base.models.person import Person
 from osis_mail_template import generate_email
-from osis_notification.contrib.handlers import EmailNotificationHandler
+from osis_notification.contrib.handlers import EmailNotificationHandler, WebNotificationHandler
+from osis_notification.contrib.notification import WebNotification
 
 
 class Notification(INotification):
@@ -101,3 +103,19 @@ class Notification(INotification):
             recipients=[promoteur],
         )
         EmailNotificationHandler.create(email_message, person=promoteur)
+
+    @classmethod
+    def notifier_validation_au_candidat(cls, doctorat: Doctorat, activites: List[Activite]) -> None:
+        doctorate: DoctorateProxy = DoctorateProxy.objects.get(uuid=doctorat.entity_id.uuid)
+        candidat = Person.objects.get(global_id=doctorat.matricule_doctorant)
+        common_tokens = cls.get_common_tokens(doctorate)
+        with translation.override(candidat.language):
+            content = (
+                _(
+                    '<a href="%(admission_link_front_training)s">%(reference)s</a> - '
+                    'Some doctoral training activities have been approved.'
+                )
+                % common_tokens
+            )
+        web_notification = WebNotification(recipient=candidat, content=content)
+        WebNotificationHandler.create(web_notification)
