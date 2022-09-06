@@ -48,3 +48,7 @@ class INotification(interface.DomainService):
         activites: List[Activite],
     ) -> None:
         raise NotImplementedError
+
+    @classmethod
+    def notifier_refus_au_candidat(cls, doctorat, activite):
+        raise NotImplementedError

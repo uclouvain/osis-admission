@@ -28,16 +28,18 @@ from django.db.models import Q, Sum
 from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, resolve_url
 from django.views import generic
+from django.views.generic.detail import SingleObjectMixin
 
 from admission.contrib.models.doctoral_training import Activity
 from admission.ddd.projet_doctoral.doctorat.formation.commands import (
     AccepterActivitesCommand,
+    RefuserActiviteCommand,
     SoumettreActivitesCommand,
 )
 from admission.ddd.projet_doctoral.doctorat.formation.domain.model._enums import CategorieActivite, StatutActivite
 from admission.forms.doctorate.training.activity import *
 from admission.forms.doctorate.training.activity import get_category_labels
-from admission.forms.doctorate.training.processus import BatchActivityForm
+from admission.forms.doctorate.training.processus import BatchActivityForm, RefuseForm
 from admission.views.doctorate.mixins import LoadDossierViewMixin
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from infrastructure.messages_bus import message_bus_instance
@@ -186,3 +188,46 @@ class DoctorateTrainingActivityDeleteView(LoadDossierViewMixin, generic.DeleteVi
 
     def get_success_url(self):
         return resolve_url("admission:doctorate:training", uuid=self.admission_uuid)
+
+
+class DoctorateTrainingActivityRefuseView(LoadDossierViewMixin, SingleObjectMixin, generic.FormView):
+    model = Activity
+    permission_required = "admission.refuse_activity"
+    slug_field = 'uuid'
+    pk_url_kwarg = "NOT_TO_BE_USED"
+    slug_url_kwarg = 'activity_id'
+    template_name = "admission/doctorate/forms/training/activity_refuse.html"
+    form_class = RefuseForm
+    avec_modification = False
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        return super().get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        return super().post(request, *args, **kwargs)
+
+    @property
+    def activity(self):
+        # Don't remove, this is to share same template code in front-office
+        return self.object
+
+    def form_valid(self, form):
+        message_bus_instance.invoke(
+            RefuserActiviteCommand(
+                doctorat_uuid=self.admission_uuid,
+                activite_uuid=self.kwargs['activity_id'],
+                avec_modification=self.avec_modification,
+                remarque=form.cleaned_data['reason'],
+            )
+        )
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return resolve_url("admission:doctorate:training", uuid=self.admission_uuid)
+
+
+class DoctorateTrainingActivityRequireChangesView(DoctorateTrainingActivityRefuseView):
+    avec_modification = True
+    template_name = "admission/doctorate/forms/training/activity_require_changes.html"

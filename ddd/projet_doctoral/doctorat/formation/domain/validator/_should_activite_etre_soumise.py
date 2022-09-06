@@ -23,24 +23,19 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from .internal_note import InternalNoteView
-from .list import CddDoctorateAdmissionList
-from .training import (
-    DoctorateTrainingActivityAddView,
-    DoctorateTrainingActivityDeleteView,
-    DoctorateTrainingActivityEditView,
-    DoctorateTrainingActivityRefuseView,
-    DoctorateTrainingActivityRequireChangesView,
-    DoctorateTrainingActivityView,
-)
 
-__all__ = [
-    'CddDoctorateAdmissionList',
-    'DoctorateTrainingActivityView',
-    'DoctorateTrainingActivityAddView',
-    'DoctorateTrainingActivityEditView',
-    'DoctorateTrainingActivityDeleteView',
-    'DoctorateTrainingActivityRefuseView',
-    'DoctorateTrainingActivityRequireChangesView',
-    'InternalNoteView',
-]
+import attr
+
+from admission.ddd.projet_doctoral.doctorat.formation.business_types import *
+from admission.ddd.projet_doctoral.doctorat.formation.domain.model._enums import StatutActivite
+from admission.ddd.projet_doctoral.doctorat.formation.domain.validator.exceptions import ActiviteDoitEtreSoumise
+from base.ddd.utils.business_validator import BusinessValidator
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ShouldActiviteEtreSoumise(BusinessValidator):
+    activite: 'Activite'
+
+    def validate(self, *args, **kwargs):
+        if self.activite.statut != StatutActivite.SOUMISE:
+            raise ActiviteDoitEtreSoumise(activite_id=self.activite.entity_id)

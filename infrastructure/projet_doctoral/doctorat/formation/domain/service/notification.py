@@ -34,11 +34,16 @@ from django.utils.translation import get_language, gettext_lazy as _
 from admission.contrib.models import DoctorateAdmission
 from admission.contrib.models.doctorate import DoctorateProxy
 from admission.ddd.projet_doctoral.doctorat.domain.model.doctorat import Doctorat
+from admission.ddd.projet_doctoral.doctorat.formation.domain.model._enums import StatutActivite
 from admission.ddd.projet_doctoral.doctorat.formation.domain.model.activite import Activite
 from admission.ddd.projet_doctoral.doctorat.formation.domain.service.i_notification import INotification
 from admission.ddd.projet_doctoral.preparation.commands import UUID
 from admission.ddd.projet_doctoral.preparation.domain.model._promoteur import PromoteurIdentity
-from admission.mail_templates import ADMISSION_EMAIL_REFERENCE_PROMOTER_TRAININGS_SUBMITTED
+from admission.mail_templates import (
+    ADMISSION_EMAIL_REFERENCE_PROMOTER_TRAININGS_SUBMITTED,
+    ADMISSION_EMAIL_CANDIDATE_TRAINING_REFUSED,
+    ADMISSION_EMAIL_CANDIDATE_TRAINING_NEEDS_UPDATE,
+)
 from base.models.person import Person
 from osis_mail_template import generate_email
 from osis_notification.contrib.handlers import EmailNotificationHandler, WebNotificationHandler
@@ -119,3 +124,21 @@ class Notification(INotification):
             )
         web_notification = WebNotification(recipient=candidat, content=content)
         WebNotificationHandler.create(web_notification)
+
+    @classmethod
+    def notifier_refus_au_candidat(cls, doctorat, activite):
+        doctorate: DoctorateProxy = DoctorateProxy.objects.get(uuid=doctorat.entity_id.uuid)
+        common_tokens = cls.get_common_tokens(doctorate)
+
+        mail_template_id = (
+            ADMISSION_EMAIL_CANDIDATE_TRAINING_REFUSED
+            if activite.statut == StatutActivite.REFUSEE
+            else ADMISSION_EMAIL_CANDIDATE_TRAINING_NEEDS_UPDATE
+        )
+        email_message = generate_email(
+            mail_template_id,
+            doctorate.candidate.language,
+            {**common_tokens, 'reason': activite.commentaire_gestionnaire},
+            recipients=[doctorate.candidate.email],
+        )
+        EmailNotificationHandler.create(email_message, person=doctorate.candidate)

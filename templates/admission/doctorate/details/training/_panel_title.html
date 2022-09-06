@@ -25,6 +25,8 @@
 {% endcomment %}
 
 {% url "admission:doctorate:training:edit" uuid=view.kwargs.uuid activity_id=activity.uuid as edit_url %}
+{% url "admission:doctorate:training:refuse" uuid=view.kwargs.uuid activity_id=activity.uuid as refuse_url %}
+{% url "admission:doctorate:training:require-changes" uuid=view.kwargs.uuid activity_id=activity.uuid as require_changes_url %}
 {% url "admission:doctorate:training:delete" uuid=view.kwargs.uuid activity_id=activity.uuid as delete_url %}
 {% if activity.category|safe == 'CONFERENCE' or activity.category|safe == 'SEMINAR' or activity.category|safe == 'RESIDENCY' %}
   {% url "admission:doctorate:training:add" uuid=view.kwargs.uuid category="communication" as add_communication_url %}
@@ -61,12 +63,24 @@
         </button>
         <ul class="dropdown-menu dropdown-menu-right">
 
-            {# Activity is unsubmitted : display edit/delete/submit/add-children #}
+          {# Activity is unsubmitted : display edit/delete/submit/add-children #}
+          <li>
+            <a href="{{ edit_url }}">
+              {% trans "Edit" %}
+            </a>
+          </li>
+          {% if activity.status|safe == "SOUMISE" %}
             <li>
-              <a href="{{ edit_url }}">
-                {% trans "Edit" %}
+              <a href="{{ require_changes_url }}">
+                {% trans "Require changes" %}
               </a>
             </li>
+            <li>
+              <a href="{{ refuse_url }}">
+                {% trans "Refuse activity" %}
+              </a>
+            </li>
+          {% endif %}
           {% if activity.status|safe == "NON_SOUMISE" %}
             {% if not remove_batch_action %}
               <li
@@ -148,25 +162,38 @@
         </label>
       {% endif %}
     {% endif %}
-  </div>
 
-  {% if activity.reference_promoter_assent is not None %}
-    <span
-      type="button"
-      data-content="{{ activity.reference_promoter_comment }}"
-      data-toggle="popover"
-      data-placement="auto left"
-      title="{% trans "Comment from reference promoter" %}"
-      data-container="body"
-      {% if activity.reference_promoter_assent %}
-      class="btn btn-sm btn-success"
-        >
-        <span class="glyphicon glyphicon-ok-circle"></span>
-      {% else %}
-        class="btn btn-sm btn-danger"
-        >
-        <span class="glyphicon glyphicon-remove-circle"></span>
-      {% endif %}
+    {% if activity.reference_promoter_assent is not None %}
+      <span
+          type="button"
+          data-content="{{ activity.reference_promoter_comment }}"
+          data-toggle="popover"
+          data-placement="auto left"
+          title="{% trans "Comment from reference promoter" %}"
+          data-container="body"
+          {% if activity.reference_promoter_assent %}
+          class="btn btn-sm btn-success"
+            >
+            <span class="glyphicon glyphicon-ok-circle"></span>
+          {% else %}
+            class="btn btn-sm btn-danger"
+            >
+            <span class="glyphicon glyphicon-remove-circle"></span>
+          {% endif %}
       </span>
-  {% endif %}
+    {% endif %}
+    {% if activity.cdd_comment %}
+      <span
+          type="button"
+          data-content="{{ activity.cdd_comment }}"
+          data-toggle="popover"
+          data-placement="auto left"
+          title="{% trans "Comment from CDD manager" %}"
+          data-container="body"
+          class="btn btn-sm btn-danger"
+      >
+        <span class="glyphicon glyphicon-info-sign"></span>
+      </span>
+    {% endif %}
+  </div>
 </div>

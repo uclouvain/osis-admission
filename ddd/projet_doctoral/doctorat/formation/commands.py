@@ -57,6 +57,7 @@ class AccepterActivitesCommand(CommandRequest):
 
 @attr.dataclass
 class RefuserActiviteCommand(CommandRequest):
+    doctorat_uuid: str
     activite_uuid: str
     avec_modification: bool
     remarque: str

@@ -29,6 +29,9 @@ import attr
 
 from admission.ddd.projet_doctoral.doctorat.domain.model.doctorat import DoctoratIdentity
 from admission.ddd.projet_doctoral.doctorat.formation.domain.model._enums import CategorieActivite, StatutActivite
+from admission.ddd.projet_doctoral.doctorat.formation.domain.validator.validator_by_business_action import (
+    RefusActiviteValidationList,
+)
 from osis_common.ddd import interface
 
 
@@ -58,8 +61,13 @@ class Activite(interface.RootEntity):
     def accepter(self):
         self.statut = StatutActivite.ACCEPTEE
 
-    def refuser(self):
-        self.statut = StatutActivite.REFUSEE
+    def refuser(self, avec_modification: bool, remarque: str):
+        RefusActiviteValidationList(self, remarque).validate()
+        if avec_modification:
+            self.statut = StatutActivite.NON_SOUMISE
+        else:
+            self.statut = StatutActivite.REFUSEE
+        self.commentaire_gestionnaire = remarque
 
     def donner_avis_promoteur_reference(self, approbation, commentaire):
         self.avis_promoteur_reference = approbation

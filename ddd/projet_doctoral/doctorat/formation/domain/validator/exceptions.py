@@ -65,7 +65,15 @@ class ActiviteDoitEtreNonSoumise(BusinessException):
 class ActiviteDoitEtreSoumise(BusinessException):
     status_code = "FORMATION-5"
 
-    def __init__(self, activite_id=None, *args, **kwargs):
+    def __init__(self, activite_id, *args, **kwargs):
         self.activite_id = activite_id
         message = _("This activity must be submitted")
+        super().__init__(message, **kwargs)
+
+
+class RemarqueObligatoire(BusinessException):
+    status_code = "FORMATION-6"
+
+    def __init__(self, *args, **kwargs):
+        message = _("A comment is required.")
         super().__init__(message, **kwargs)

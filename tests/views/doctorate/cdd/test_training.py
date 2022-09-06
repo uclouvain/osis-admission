@@ -27,6 +27,7 @@ import uuid
 from unittest.mock import patch
 
 from django.conf import settings
+from django.forms import Field
 from django.shortcuts import resolve_url
 from django.test import TestCase, override_settings
 from django.utils import translation
@@ -75,6 +76,7 @@ class DoctorateTrainingActivityViewTestCase(TestCase):
         cls.service = ServiceFactory(doctorate=cls.doctorate)
         cls.manager = CddManagerFactory(entity=cls.doctorate.doctorate.management_entity)
         cls.url = resolve_url('admission:doctorate:training', uuid=cls.doctorate.uuid)
+        cls.default_url_args = dict(uuid=cls.doctorate.uuid, activity_id=cls.conference.uuid)
 
     def setUp(self) -> None:
         self.client.force_login(self.manager.person.user)
@@ -84,6 +86,14 @@ class DoctorateTrainingActivityViewTestCase(TestCase):
         self.assertContains(response, self.conference.title)
         self.assertContains(response, _("NON_SOUMISE"))
         self.assertEqual(str(self.conference), "Conférence (10 ects, Non soumise)")
+
+        # With an unsubmitted conference and unsubmitted service, we should have these links
+        url = resolve_url('admission:doctorate:training:add', uuid=self.doctorate.uuid, category='communication')
+        self.assertContains(response, f"{url}?parent={self.conference.uuid}")
+        url = resolve_url('admission:doctorate:training:add', uuid=self.doctorate.uuid, category='publication')
+        self.assertContains(response, f"{url}?parent={self.conference.uuid}")
+        self.assertContains(response, resolve_url('admission:doctorate:training:edit', **self.default_url_args))
+        self.assertContains(response, resolve_url('admission:doctorate:training:delete', **self.default_url_args))
 
     def test_boolean_select_is_online(self):
         add_url = resolve_url('admission:doctorate:training:add', uuid=self.doctorate.uuid, category='communication')
@@ -260,11 +270,9 @@ class DoctorateTrainingActivityViewTestCase(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(WebNotification.objects.count(), 1)
 
-    def test_delete_activities(self):
+    def test_delete_activity(self):
         child = PublicationFactory(doctorate=self.doctorate, parent=self.conference)
-        url = resolve_url(
-            'admission:doctorate:training:delete', uuid=self.doctorate.uuid, activity_id=self.conference.uuid
-        )
+        url = resolve_url('admission:doctorate:training:delete', **self.default_url_args)
         response = self.client.post(url, {}, follow=True)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIsNone(Activity.objects.filter(pk__in=[child.pk, self.conference.pk]).first())
@@ -355,3 +363,17 @@ class DoctorateTrainingActivityViewTestCase(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertFormError(response, 'form', None, _("This activity is not complete"))
         self.assertEqual(len(response.context['form'].activities_in_error), len(activity_list))
+
+    def test_refuse_activity(self):
+        self.conference.status = StatutActivite.SOUMISE.name
+        self.conference.save()
+        url = resolve_url('admission:doctorate:training:refuse', **self.default_url_args)
+        response = self.client.get(url)
+        self.assertContains(response, _("Refuse activity"))
+
+        response = self.client.post(url, {}, follow=True)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertFormError(response, "form", "reason", Field.default_error_messages['required'])
+
+        response = self.client.post(url, {"reason": "Not ok"}, follow=True)
+        self.assertRedirects(response, self.url)

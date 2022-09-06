@@ -26,7 +26,7 @@
 
 import attr
 
-from admission.ddd.projet_doctoral.doctorat.formation.domain.model.activite import Activite
+from admission.ddd.projet_doctoral.doctorat.formation.business_types import *
 from admission.ddd.projet_doctoral.doctorat.formation.domain.validator.exceptions import ActiviteNonComplete
 from admission.ddd.projet_doctoral.doctorat.formation.dtos import EpreuveDTO
 from base.ddd.utils.business_validator import BusinessValidator
@@ -34,8 +34,8 @@ from base.ddd.utils.business_validator import BusinessValidator
 
 @attr.dataclass(frozen=True, slots=True)
 class ShouldEpreuveEtreComplete(BusinessValidator):
-    epreuve: EpreuveDTO
-    activite: Activite
+    epreuve: 'EpreuveDTO'
+    activite: 'Activite'
 
     def validate(self, *args, **kwargs):
         if not all(

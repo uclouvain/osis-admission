@@ -23,28 +23,31 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import List
-
-from admission.ddd.projet_doctoral.doctorat.domain.model.doctorat import Doctorat
-from admission.ddd.projet_doctoral.doctorat.formation.domain.model.activite import Activite
+from admission.ddd.projet_doctoral.doctorat.builder.doctorat_identity import DoctoratIdentityBuilder
+from admission.ddd.projet_doctoral.doctorat.formation.builder.activite_identity_builder import ActiviteIdentityBuilder
+from admission.ddd.projet_doctoral.doctorat.formation.commands import RefuserActiviteCommand
+from admission.ddd.projet_doctoral.doctorat.formation.domain.model.activite import ActiviteIdentity
 from admission.ddd.projet_doctoral.doctorat.formation.domain.service.i_notification import INotification
-from admission.ddd.projet_doctoral.preparation.domain.model._promoteur import PromoteurIdentity
+from admission.ddd.projet_doctoral.doctorat.formation.repository.i_activite import IActiviteRepository
+from admission.ddd.projet_doctoral.doctorat.repository.i_doctorat import IDoctoratRepository
 
 
-class NotificationInMemory(INotification):
-    @classmethod
-    def notifier_soumission_au_promoteur_de_reference(
-        cls,
-        doctorat: Doctorat,
-        activites: List[Activite],
-        promoteur_de_reference_id: PromoteurIdentity,
-    ) -> None:
-        pass
+def refuser_activite(
+    cmd: 'RefuserActiviteCommand',
+    activite_repository: 'IActiviteRepository',
+    doctorat_repository: 'IDoctoratRepository',
+    notification: 'INotification',
+) -> 'ActiviteIdentity':
+    # GIVEN
+    doctorat_id = DoctoratIdentityBuilder.build_from_uuid(cmd.doctorat_uuid)
+    doctorat = doctorat_repository.get(doctorat_id)
+    activite = activite_repository.get(entity_id=ActiviteIdentityBuilder.build_from_uuid(cmd.activite_uuid))
 
-    @classmethod
-    def notifier_validation_au_candidat(cls, doctorat: Doctorat, activites: List[Activite]) -> None:
-        pass
+    # WHEN
+    activite.refuser(cmd.avec_modification, cmd.remarque)
 
-    @classmethod
-    def notifier_refus_au_candidat(cls, doctorat, activite):
-        pass
+    # THEN
+    activite_repository.save(activite)
+    notification.notifier_refus_au_candidat(doctorat, activite)
+
+    return activite.entity_id

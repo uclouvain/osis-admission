@@ -23,16 +23,18 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from ._should_activite_etre_soumise import ShouldActiviteEtreSoumise
 from ._should_communication_conference_etre_complete import ShouldCommunicationConferenceEtreComplete
 from ._should_communication_etre_complete import ShouldCommunicationEtreComplete
+from ._should_communication_sejour_etre_complete import ShouldCommunicationSejourEtreComplete
+from ._should_communication_seminaire_etre_complete import ShouldCommunicationSeminaireEtreComplete
 from ._should_conference_etre_complete import ShouldConferenceEtreComplete
 from ._should_cours_etre_complet import ShouldCoursEtreComplet
 from ._should_epreuve_etre_complete import ShouldEpreuveEtreComplete
 from ._should_publication_conference_etre_complete import ShouldPublicationConferenceEtreComplete
 from ._should_publication_etre_complete import ShouldPublicationEtreComplete
-from ._should_communication_sejour_etre_complete import ShouldCommunicationSejourEtreComplete
+from ._should_remarque_etre_presente import ShouldRemarqueEtrePresente
 from ._should_sejour_etre_complet import ShouldSejourEtreComplet
-from ._should_communication_seminaire_etre_complete import ShouldCommunicationSeminaireEtreComplete
 from ._should_seminaire_etre_complet import ShouldSeminaireEtreComplet
 from ._should_service_etre_complet import ShouldServiceEtreComplet
 from ._should_valorisation_etre_complete import ShouldValorisationEtreComplete
@@ -51,4 +53,6 @@ __all__ = [
     "ShouldValorisationEtreComplete",
     "ShouldCoursEtreComplet",
     "ShouldEpreuveEtreComplete",
+    "ShouldActiviteEtreSoumise",
+    "ShouldRemarqueEtrePresente",
 ]

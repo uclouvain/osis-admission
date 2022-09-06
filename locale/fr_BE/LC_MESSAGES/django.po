@@ -99,6 +99,9 @@ msgstr ""
 "vous sûr de vouloir supprimer ce template d'email personnalisé ? Cette "
 "action est irréversible.</p>"
 
+msgid "A comment is required."
+msgstr "Un commentaire est requis."
+
 msgid "A justification is needed when creating a pre-admission."
 msgstr "Une justification est requise pour une pré-admission."
 
@@ -286,6 +289,10 @@ msgstr "Fiche archivée lors de l'envoi des signatures"
 #, python-format
 msgid "Are you sure you want to delete \"%(object)s\"?"
 msgstr "Êtes-vous sûr de vouloir supprimer \"%(object)s\" ?"
+
+#, python-format
+msgid "Are you sure you want to refuse \"%(object)s\"?"
+msgstr "Êtes-vous sûr de vouloir refuser \"%(object)s\" ?"
 
 msgid "Attachment: Doctoral training"
 msgstr "Annexe : Formation doctorale"
@@ -571,6 +578,9 @@ msgstr "Fermer"
 
 msgid "Comment"
 msgstr "Commentaire"
+
+msgid "Comment from CDD manager"
+msgstr "Commentaire du gestionnaire CDD"
 
 msgid "Comment from reference promoter"
 msgstr "Commentaire du promoteur de référence"
@@ -1721,6 +1731,9 @@ msgstr "Avis du promoteur de référence"
 msgid "Reference promoter comment"
 msgstr "Commentaire deu promoteur de référence"
 
+msgid "Refuse activity"
+msgstr "Refuser l'activité"
+
 msgid "Registration Id"
 msgstr "Noma"
 
@@ -1735,6 +1748,13 @@ msgstr "Catégories de reporting"
 
 msgid "Request of a new deadline for the confirmation paper"
 msgstr "Demande d'une nouvelle échéance pour l'épreuve de confirmation"
+
+msgid "Require changes"
+msgstr "Demander des changements"
+
+#, python-format
+msgid "Require changes for \"%(object)s\""
+msgstr "Demander des changements pour \"%(object)s\""
 
 msgid "Research report"
 msgstr "Rapport de recherche"
@@ -2161,6 +2181,16 @@ msgstr "Titre de la thèse"
 
 msgid "This activity and potential sub-activities will be deleted"
 msgstr "Cette activité et ses potentielles sous-activités seront supprimées"
+
+msgid "This activity and potential sub-activities will be refused"
+msgstr "Cette activité et ses potentielles sous-activités seront refusées"
+
+msgid ""
+"This activity and potential sub-activities will be set back to Unsubmitted "
+"for modification"
+msgstr ""
+"Cette activité et ses potentielles sous-activités seront repassées en Non "
+"soumise pour modification"
 
 msgid "This activity could not be found"
 msgstr "Cette activité n'existe pas"

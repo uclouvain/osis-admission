@@ -41,3 +41,7 @@ class BatchActivityForm(forms.Form):
         if not data.get('activity_ids'):
             self.add_error(None, _("Select at least one activity"))
         return data
+
+
+class RefuseForm(forms.Form):
+    reason = forms.CharField(widget=forms.Textarea())

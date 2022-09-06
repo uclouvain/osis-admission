@@ -23,24 +23,17 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from .internal_note import InternalNoteView
-from .list import CddDoctorateAdmissionList
-from .training import (
-    DoctorateTrainingActivityAddView,
-    DoctorateTrainingActivityDeleteView,
-    DoctorateTrainingActivityEditView,
-    DoctorateTrainingActivityRefuseView,
-    DoctorateTrainingActivityRequireChangesView,
-    DoctorateTrainingActivityView,
-)
 
-__all__ = [
-    'CddDoctorateAdmissionList',
-    'DoctorateTrainingActivityView',
-    'DoctorateTrainingActivityAddView',
-    'DoctorateTrainingActivityEditView',
-    'DoctorateTrainingActivityDeleteView',
-    'DoctorateTrainingActivityRefuseView',
-    'DoctorateTrainingActivityRequireChangesView',
-    'InternalNoteView',
-]
+import attr
+
+from admission.ddd.projet_doctoral.doctorat.formation.domain.validator.exceptions import RemarqueObligatoire
+from base.ddd.utils.business_validator import BusinessValidator
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ShouldRemarqueEtrePresente(BusinessValidator):
+    remarque: str
+
+    def validate(self, *args, **kwargs):
+        if not self.remarque:
+            raise RemarqueObligatoire()

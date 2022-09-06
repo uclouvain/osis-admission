@@ -77,6 +77,9 @@ msgid ""
 "to delete the custom mail template? This cannot be undone.</p>"
 msgstr ""
 
+msgid "A comment is required."
+msgstr ""
+
 msgid "A justification is needed when creating a pre-admission."
 msgstr ""
 
@@ -259,6 +262,10 @@ msgstr ""
 
 #, python-format
 msgid "Are you sure you want to delete \"%(object)s\"?"
+msgstr ""
+
+#, python-format
+msgid "Are you sure you want to refuse \"%(object)s\"?"
 msgstr ""
 
 msgid "Attachment: Doctoral training"
@@ -540,6 +547,9 @@ msgid "Close"
 msgstr ""
 
 msgid "Comment"
+msgstr ""
+
+msgid "Comment from CDD manager"
 msgstr ""
 
 msgid "Comment from reference promoter"
@@ -1611,6 +1621,9 @@ msgstr ""
 msgid "Reference promoter comment"
 msgstr ""
 
+msgid "Refuse activity"
+msgstr ""
+
 msgid "Registration Id"
 msgstr ""
 
@@ -1624,6 +1637,13 @@ msgid "Reporting categories"
 msgstr ""
 
 msgid "Request of a new deadline for the confirmation paper"
+msgstr ""
+
+msgid "Require changes"
+msgstr ""
+
+#, python-format
+msgid "Require changes for \"%(object)s\""
 msgstr ""
 
 msgid "Research report"
@@ -2025,6 +2045,14 @@ msgid "Thesis title"
 msgstr ""
 
 msgid "This activity and potential sub-activities will be deleted"
+msgstr ""
+
+msgid "This activity and potential sub-activities will be refused"
+msgstr ""
+
+msgid ""
+"This activity and potential sub-activities will be set back to Unsubmitted "
+"for modification"
 msgstr ""
 
 msgid "This activity could not be found"
