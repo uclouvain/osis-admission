@@ -293,6 +293,12 @@ class MessageBusInMemoryCommands(AbstractMessageBusCommands):
             groupe_de_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
             notification=NotificationFormation(),
         ),
+        AccepterActivitesCommand: partial(
+            accepter_activites,
+            activite_repository=ActiviteInMemoryRepository(),
+            doctorat_repository=DoctoratInMemoryRepository(),
+            notification=NotificationFormation(),
+        ),
         SupprimerActiviteCommand: partial(
             supprimer_activite,
             activite_repository=ActiviteInMemoryRepository(),

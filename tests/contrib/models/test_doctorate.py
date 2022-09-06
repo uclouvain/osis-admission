@@ -25,11 +25,13 @@
 # ##############################################################################
 import datetime
 
+from django.core.cache import cache
 from django.test import TestCase
 
 from admission.contrib.models.doctorate import confirmation_paper_directory_path
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.confirmation_paper import ConfirmationPaperFactory
+from admission.utils import get_cached_admission_perm_obj
 
 
 class ConfirmationPaperTestCase(TestCase):
@@ -50,3 +52,15 @@ class ConfirmationPaperTestCase(TestCase):
                 self.confirmation_paper.uuid,
             ),
         )
+
+    def test_permission_cache_dropped_on_doctorate_save(self):
+        self.assertEqual(get_cached_admission_perm_obj(self.base_admission.uuid), self.base_admission)
+        self.assertIsNotNone(cache.get(f"admission_permission_{self.base_admission.uuid}"))
+        self.base_admission.doctorate.save()
+        self.assertIsNone(cache.get(f"admission_permission_{self.base_admission.uuid}"))
+
+    def test_permission_cache_dropped_on_candidate_save(self):
+        self.assertEqual(get_cached_admission_perm_obj(self.base_admission.uuid), self.base_admission)
+        self.assertIsNotNone(cache.get(f"admission_permission_{self.base_admission.uuid}"))
+        self.base_admission.candidate.save()
+        self.assertIsNone(cache.get(f"admission_permission_{self.base_admission.uuid}"))

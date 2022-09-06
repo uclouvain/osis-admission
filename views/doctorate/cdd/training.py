@@ -30,7 +30,10 @@ from django.shortcuts import get_object_or_404, resolve_url
 from django.views import generic
 
 from admission.contrib.models.doctoral_training import Activity
-from admission.ddd.projet_doctoral.doctorat.formation.commands import SoumettreActivitesCommand
+from admission.ddd.projet_doctoral.doctorat.formation.commands import (
+    AccepterActivitesCommand,
+    SoumettreActivitesCommand,
+)
 from admission.ddd.projet_doctoral.doctorat.formation.domain.model._enums import CategorieActivite, StatutActivite
 from admission.forms.doctorate.training.activity import *
 from admission.forms.doctorate.training.activity import get_category_labels
@@ -73,14 +76,19 @@ class DoctorateTrainingActivityView(LoadDossierViewMixin, generic.FormView):
 
     def form_valid(self, form):
         activity_ids = [activite.uuid for activite in form.cleaned_data['activity_ids']]
+        if '_accept' in self.request.POST:
+            cmd = AccepterActivitesCommand(
+                doctorat_uuid=self.admission_uuid,
+                activite_uuids=activity_ids,
+            )
+        else:
+            cmd = SoumettreActivitesCommand(
+                doctorat_uuid=self.admission_uuid,
+                activite_uuids=activity_ids,
+            )
         try:
             form.activities_in_error = []
-            message_bus_instance.invoke(
-                SoumettreActivitesCommand(
-                    doctorat_uuid=self.admission_uuid,
-                    activite_uuids=activity_ids,
-                )
-            )
+            message_bus_instance.invoke(cmd)
         except MultipleBusinessExceptions as multiple_exceptions:
             for exception in multiple_exceptions.exceptions:
                 form.add_error(None, exception.message)

@@ -27,8 +27,9 @@ from functools import partial
 from typing import List
 
 from admission.ddd.projet_doctoral.doctorat.formation.builder.activite_identity_builder import ActiviteIdentityBuilder
-from admission.ddd.projet_doctoral.doctorat.formation.domain.model._enums import CategorieActivite
+from admission.ddd.projet_doctoral.doctorat.formation.domain.model._enums import CategorieActivite, StatutActivite
 from admission.ddd.projet_doctoral.doctorat.formation.domain.model.activite import Activite, ActiviteIdentity
+from admission.ddd.projet_doctoral.doctorat.formation.domain.validator.exceptions import ActiviteDoitEtreNonSoumise
 from admission.ddd.projet_doctoral.doctorat.formation.domain.validator.validator_by_business_action import *
 from admission.ddd.projet_doctoral.doctorat.formation.dtos import *
 from admission.ddd.projet_doctoral.doctorat.formation.repository.i_activite import IActiviteRepository
@@ -51,9 +52,15 @@ class SoumettreActivites(interface.DomainService):
                     activite_repository=activite_repository,
                 )
                 for entity_id in entity_ids
-            ]
+            ],
+            *[partial(cls.verifier_statut, activite=activites[entity_id]) for entity_id in entity_ids],
         )
         return list(activites.values())
+
+    @classmethod
+    def verifier_statut(cls, activite: Activite) -> None:
+        if activite.statut != StatutActivite.NON_SOUMISE:
+            raise ActiviteDoitEtreNonSoumise(activite.entity_id)
 
     @classmethod
     def verifier_activite(cls, activite: Activite, dto: ActiviteDTO, activite_repository: IActiviteRepository) -> None:

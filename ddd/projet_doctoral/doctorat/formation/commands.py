@@ -50,16 +50,13 @@ class DonnerAvisSurActiviteCommand(CommandRequest):
 
 
 @attr.dataclass
-class AccepterActiviteCommand(CommandRequest):
-    activite_uuid: str
+class AccepterActivitesCommand(CommandRequest):
+    doctorat_uuid: str
+    activite_uuids: List[str]
 
 
 @attr.dataclass
 class RefuserActiviteCommand(CommandRequest):
     activite_uuid: str
-
-
-@attr.dataclass
-class DemanderModificationCommand(CommandRequest):
-    activite_uuid: str
+    avec_modification: bool
     remarque: str

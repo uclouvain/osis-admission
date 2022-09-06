@@ -25,9 +25,8 @@
 # ##############################################################################
 from django.test import SimpleTestCase
 
-from admission.ddd.projet_doctoral.doctorat.formation.commands import SoumettreActivitesCommand
+from admission.ddd.projet_doctoral.doctorat.formation.commands import AccepterActivitesCommand
 from admission.ddd.projet_doctoral.doctorat.formation.domain.model._enums import CategorieActivite, StatutActivite
-from admission.ddd.projet_doctoral.doctorat.formation.domain.validator.exceptions import ActiviteDoitEtreNonSoumise
 from admission.ddd.projet_doctoral.doctorat.formation.test.factory.activite import ActiviteFactory
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 from admission.infrastructure.projet_doctoral.doctorat.formation.repository.in_memory.activite import (
@@ -36,77 +35,44 @@ from admission.infrastructure.projet_doctoral.doctorat.formation.repository.in_m
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 
 
-class SoumettreActivitesTestCase(SimpleTestCase):
+class AccepterActivitesTestCase(SimpleTestCase):
     def setUp(self) -> None:
         self.message_bus = message_bus_in_memory_instance
 
     def tearDown(self) -> None:
         ActiviteInMemoryRepository.reset()
 
-    def test_soumettre_activite_deja_soumises(self):
+    def test_accepter_activites_non_soumises(self):
+        with self.assertRaises(MultipleBusinessExceptions) as e:
+            self.message_bus.invoke(
+                AccepterActivitesCommand(
+                    doctorat_uuid="uuid-SC3DP-promoteurs-membres-deja-approuves",
+                    activite_uuids=[activite.entity_id.uuid for activite in ActiviteInMemoryRepository.entities],
+                )
+            )
+        self.assertEqual(len(e.exception.exceptions), len(ActiviteInMemoryRepository.entities))
+
+    def test_accepter_activites_ok(self):
         ActiviteInMemoryRepository.entities = [
             ActiviteFactory(
                 categorie=CategorieActivite.COMMUNICATION,
-                generate_dto__class='SeminarCommunicationDTOFactory',
+                generate_dto__class='ResidencyCommunicationDTOFactory',
                 statut=StatutActivite.SOUMISE,
             ),
         ]
-        with self.assertRaises(MultipleBusinessExceptions) as e:
-            self.message_bus.invoke(
-                SoumettreActivitesCommand(
-                    doctorat_uuid="uuid-SC3DP-promoteurs-membres-deja-approuves",
-                    activite_uuids=[activite.entity_id.uuid for activite in ActiviteInMemoryRepository.entities],
-                )
-            )
-        self.assertEqual(len(e.exception.exceptions), len(ActiviteInMemoryRepository.entities))
-        self.assertIsInstance(list(e.exception.exceptions)[0], ActiviteDoitEtreNonSoumise)
-
-    def test_soumettre_sous_activites_vides(self):
-        ActiviteInMemoryRepository.entities = [
-            ActiviteFactory(
-                categorie=CategorieActivite.COMMUNICATION,
-                generate_dto__date=None,
-                generate_dto__class='SeminarCommunicationDTOFactory',
-            ),
-            ActiviteFactory(
-                ects=0,
-                categorie=CategorieActivite.COMMUNICATION,
-                generate_dto__class='ResidencyCommunicationDTOFactory',
-            ),
-            ActiviteFactory(
-                ects=0,
-                categorie=CategorieActivite.COMMUNICATION,
-                generate_dto__class='ConferenceCommunicationDTOFactory',
-            ),
-            ActiviteFactory(
-                ects=0,
-                categorie=CategorieActivite.PUBLICATION,
-                generate_dto__class='ConferencePublicationDTOFactory',
-            ),
-        ]
-        with self.assertRaises(MultipleBusinessExceptions) as e:
-            self.message_bus.invoke(
-                SoumettreActivitesCommand(
-                    doctorat_uuid="uuid-SC3DP-promoteurs-membres-deja-approuves",
-                    activite_uuids=[activite.entity_id.uuid for activite in ActiviteInMemoryRepository.entities],
-                )
-            )
-        self.assertEqual(len(e.exception.exceptions), len(ActiviteInMemoryRepository.entities))
-
-    def test_soumettre_activites_ok(self):
-        self.assertEqual(ActiviteInMemoryRepository.entities[0].statut, StatutActivite.NON_SOUMISE)
         self.message_bus.invoke(
-            SoumettreActivitesCommand(
+            AccepterActivitesCommand(
                 doctorat_uuid="uuid-SC3DP-promoteurs-membres-deja-approuves",
                 activite_uuids=[activite.entity_id.uuid for activite in ActiviteInMemoryRepository.entities],
             )
         )
-        self.assertEqual(ActiviteInMemoryRepository.entities[0].statut, StatutActivite.SOUMISE)
+        self.assertEqual(ActiviteInMemoryRepository.entities[0].statut, StatutActivite.ACCEPTEE)
 
-    def test_soumettre_sous_activites_ok(self):
+    def test_accepter_activites_et_sous_activites(self):
         parent_service = ActiviteFactory(
             categorie=CategorieActivite.SEMINAR,
             generate_dto__class='SeminarDTOFactory',
+            statut=StatutActivite.SOUMISE,
         )
         ActiviteInMemoryRepository.entities = [
             parent_service,
@@ -114,24 +80,13 @@ class SoumettreActivitesTestCase(SimpleTestCase):
                 parent_id=parent_service.entity_id,
                 categorie=CategorieActivite.COMMUNICATION,
                 generate_dto__class='SeminarCommunicationDTOFactory',
-            ),
-            ActiviteFactory(
-                categorie=CategorieActivite.COMMUNICATION,
-                generate_dto__class='ResidencyCommunicationDTOFactory',
-            ),
-            ActiviteFactory(
-                categorie=CategorieActivite.COMMUNICATION,
-                generate_dto__class='ConferenceCommunicationDTOFactory',
-            ),
-            ActiviteFactory(
-                categorie=CategorieActivite.PUBLICATION,
-                generate_dto__class='ConferencePublicationDTOFactory',
+                statut=StatutActivite.SOUMISE,
             ),
         ]
         self.message_bus.invoke(
-            SoumettreActivitesCommand(
+            AccepterActivitesCommand(
                 doctorat_uuid="uuid-SC3DP-promoteurs-membres-deja-approuves",
-                activite_uuids=[activite.entity_id.uuid for activite in ActiviteInMemoryRepository.entities],
+                activite_uuids=[parent_service.entity_id.uuid],
             )
         )
-        self.assertEqual(ActiviteInMemoryRepository.entities[0].statut, StatutActivite.SOUMISE)
+        self.assertEqual(ActiviteInMemoryRepository.entities[0].statut, StatutActivite.ACCEPTEE)

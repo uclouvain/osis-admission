@@ -60,6 +60,14 @@ msgstr ""
 
 #, python-format
 msgid ""
+"<a href=\"%(admission_link_front_training)s\">%(reference)s</a> - Some "
+"doctoral training activities have been approved."
+msgstr ""
+"<a href=\"%(admission_link_front_training)s\">%(reference)s</a> - "
+"Desactivités de formation doctorale ont été approuvées."
+
+#, python-format
+msgid ""
 "<a href=\"%(confirmation_paper_link_back)s\">%(reference)s</a> - "
 "%(student_first_name)s %(student_last_name)s proposed a new deadline "
 "(%(extension_request_proposed_date)s) for the confirmation paper for "
@@ -135,6 +143,9 @@ msgstr "Résumé"
 
 msgid "Academic year"
 msgstr "Année académique"
+
+msgid "Accept these activities"
+msgstr "Accepter ces activités"
 
 msgid "Accepted"
 msgstr "Acceptée"
@@ -2159,6 +2170,12 @@ msgstr "Cette activité est déjà soumise"
 
 msgid "This activity is not complete"
 msgstr "Cette activité est incomplète"
+
+msgid "This activity must be submitted"
+msgstr "Cette activité doit être soumise"
+
+msgid "This activity must be unsubmitted"
+msgstr "Cette activité doit être non soumise"
 
 msgid "This candidate has not created any activity yet"
 msgstr "Ce candidat n'a pas encore créé d'activité"

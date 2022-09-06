@@ -40,3 +40,7 @@ class NotificationInMemory(INotification):
         promoteur_de_reference_id: PromoteurIdentity,
     ) -> None:
         pass
+
+    @classmethod
+    def notifier_validation_au_candidat(cls, doctorat: Doctorat, activites: List[Activite]) -> None:
+        pass

@@ -282,7 +282,7 @@ def _activity_update_can_be_submitted(sender, instance, **kwargs):
     from admission.ddd.projet_doctoral.doctorat.formation.builder.activite_identity_builder import (
         ActiviteIdentityBuilder,
     )
-    from admission.ddd.projet_doctoral.doctorat.formation.domain.service.soumettre_activite import SoumettreActivites
+    from admission.ddd.projet_doctoral.doctorat.formation.domain.service.soumettre_activites import SoumettreActivites
     from admission.infrastructure.projet_doctoral.doctorat.formation.repository.activite import ActiviteRepository
 
     activite_identity = ActiviteIdentityBuilder.build_from_uuid(instance.uuid)

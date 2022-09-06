@@ -26,36 +26,29 @@
 from typing import List
 
 from admission.ddd.projet_doctoral.doctorat.builder.doctorat_identity import DoctoratIdentityBuilder
-from admission.ddd.projet_doctoral.doctorat.formation.commands import SoumettreActivitesCommand
+from admission.ddd.projet_doctoral.doctorat.formation.commands import AccepterActivitesCommand
 from admission.ddd.projet_doctoral.doctorat.formation.domain.model.activite import ActiviteIdentity
 from admission.ddd.projet_doctoral.doctorat.formation.domain.service.i_notification import INotification
-from admission.ddd.projet_doctoral.doctorat.formation.domain.service.soumettre_activites import SoumettreActivites
+from admission.ddd.projet_doctoral.doctorat.formation.domain.service.accepter_activites import AccepterActivites
 from admission.ddd.projet_doctoral.doctorat.formation.repository.i_activite import IActiviteRepository
 from admission.ddd.projet_doctoral.doctorat.repository.i_doctorat import IDoctoratRepository
-from admission.ddd.projet_doctoral.preparation.repository.i_groupe_de_supervision import IGroupeDeSupervisionRepository
 
 
-def soumettre_activites(
-    cmd: 'SoumettreActivitesCommand',
+def accepter_activites(
+    cmd: 'AccepterActivitesCommand',
     activite_repository: 'IActiviteRepository',
     doctorat_repository: 'IDoctoratRepository',
-    groupe_de_supervision_repository: 'IGroupeDeSupervisionRepository',
     notification: 'INotification',
 ) -> List['ActiviteIdentity']:
     # GIVEN
     doctorat_id = DoctoratIdentityBuilder.build_from_uuid(cmd.doctorat_uuid)
     doctorat = doctorat_repository.get(doctorat_id)
-    activites = SoumettreActivites.verifier(cmd.activite_uuids, activite_repository)
-    groupe_de_supervision = groupe_de_supervision_repository.get_by_doctorat_id(doctorat_id)
+    activites = AccepterActivites.verifier(cmd.activite_uuids, activite_repository)
 
     # WHEN
 
     # THEN
-    entity_ids = SoumettreActivites.soumettre(activites, activite_repository)
-    notification.notifier_soumission_au_promoteur_de_reference(
-        doctorat,
-        activites,
-        groupe_de_supervision.promoteur_reference_id,
-    )
+    entity_ids = AccepterActivites.accepter(activites, activite_repository)
+    notification.notifier_validation_au_candidat(doctorat, activites)
 
     return entity_ids
