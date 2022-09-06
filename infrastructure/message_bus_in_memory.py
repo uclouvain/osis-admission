@@ -299,6 +299,12 @@ class MessageBusInMemoryCommands(AbstractMessageBusCommands):
             doctorat_repository=DoctoratInMemoryRepository(),
             notification=NotificationFormation(),
         ),
+        RefuserActiviteCommand: partial(
+            refuser_activite,
+            activite_repository=ActiviteInMemoryRepository(),
+            doctorat_repository=DoctoratInMemoryRepository(),
+            notification=NotificationFormation(),
+        ),
         SupprimerActiviteCommand: partial(
             supprimer_activite,
             activite_repository=ActiviteInMemoryRepository(),

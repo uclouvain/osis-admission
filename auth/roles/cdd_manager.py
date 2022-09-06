@@ -84,6 +84,7 @@ class CddManager(EntityRoleModel):
             # Training
             'admission.change_activity': is_part_of_doctoral_commission,
             'admission.delete_activity': is_part_of_doctoral_commission,
+            'admission.refuse_activity': is_part_of_doctoral_commission,
             # Internal notes
             'admission.add_internalnote': is_part_of_doctoral_commission,
             'admission.view_internalnote': is_part_of_doctoral_commission,

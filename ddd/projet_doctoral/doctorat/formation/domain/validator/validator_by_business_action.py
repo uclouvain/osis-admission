@@ -27,7 +27,7 @@ from typing import List
 
 import attr
 
-from admission.ddd.projet_doctoral.doctorat.formation.domain.model.activite import Activite
+from admission.ddd.projet_doctoral.doctorat.formation.business_types import *
 from admission.ddd.projet_doctoral.doctorat.formation.domain.validator import *
 from admission.ddd.projet_doctoral.doctorat.formation.dtos import *
 from base.ddd.utils.business_validator import BusinessValidator, TwoStepsMultipleBusinessExceptionListValidator
@@ -46,13 +46,14 @@ __all__ = [
     "ValorisationValidatorList",
     "CoursValidatorList",
     "EpreuveValidatorList",
+    "RefusActiviteValidationList",
 ]
 
 
 @attr.dataclass(frozen=True, slots=True)
 class ConferenceValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
-    conference: ConferenceDTO
-    activite: Activite
+    conference: 'ConferenceDTO'
+    activite: 'Activite'
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
@@ -63,8 +64,8 @@ class ConferenceValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
 
 @attr.dataclass(frozen=True, slots=True)
 class ConferenceCommunicationValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
-    communication: ConferenceCommunicationDTO
-    activite: Activite
+    communication: 'ConferenceCommunicationDTO'
+    activite: 'Activite'
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
@@ -75,8 +76,8 @@ class ConferenceCommunicationValidatorList(TwoStepsMultipleBusinessExceptionList
 
 @attr.dataclass(frozen=True, slots=True)
 class CommunicationValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
-    communication: CommunicationDTO
-    activite: Activite
+    communication: 'CommunicationDTO'
+    activite: 'Activite'
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
@@ -87,8 +88,8 @@ class CommunicationValidatorList(TwoStepsMultipleBusinessExceptionListValidator)
 
 @attr.dataclass(frozen=True, slots=True)
 class ConferencePublicationValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
-    publication: ConferencePublicationDTO
-    activite: Activite
+    publication: 'ConferencePublicationDTO'
+    activite: 'Activite'
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
@@ -99,8 +100,8 @@ class ConferencePublicationValidatorList(TwoStepsMultipleBusinessExceptionListVa
 
 @attr.dataclass(frozen=True, slots=True)
 class PublicationValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
-    publication: PublicationDTO
-    activite: Activite
+    publication: 'PublicationDTO'
+    activite: 'Activite'
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
@@ -111,8 +112,8 @@ class PublicationValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
 
 @attr.dataclass(frozen=True, slots=True)
 class SejourValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
-    sejour: SejourDTO
-    activite: Activite
+    sejour: 'SejourDTO'
+    activite: 'Activite'
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
@@ -123,8 +124,8 @@ class SejourValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
 
 @attr.dataclass(frozen=True, slots=True)
 class SejourCommunicationValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
-    communication: SejourCommunicationDTO
-    activite: Activite
+    communication: 'SejourCommunicationDTO'
+    activite: 'Activite'
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
@@ -135,8 +136,8 @@ class SejourCommunicationValidatorList(TwoStepsMultipleBusinessExceptionListVali
 
 @attr.dataclass(frozen=True, slots=True)
 class SeminaireValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
-    seminaire: SeminaireDTO
-    activite: Activite
+    seminaire: 'SeminaireDTO'
+    activite: 'Activite'
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
@@ -147,8 +148,8 @@ class SeminaireValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
 
 @attr.dataclass(frozen=True, slots=True)
 class SeminaireCommunicationValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
-    communication: SeminaireCommunicationDTO
-    activite: Activite
+    communication: 'SeminaireCommunicationDTO'
+    activite: 'Activite'
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
@@ -159,8 +160,8 @@ class SeminaireCommunicationValidatorList(TwoStepsMultipleBusinessExceptionListV
 
 @attr.dataclass(frozen=True, slots=True)
 class ServiceValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
-    service: ServiceDTO
-    activite: Activite
+    service: 'ServiceDTO'
+    activite: 'Activite'
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
@@ -171,8 +172,8 @@ class ServiceValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
 
 @attr.dataclass(frozen=True, slots=True)
 class ValorisationValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
-    valorisation: ValorisationDTO
-    activite: Activite
+    valorisation: 'ValorisationDTO'
+    activite: 'Activite'
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
@@ -183,8 +184,8 @@ class ValorisationValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
 
 @attr.dataclass(frozen=True, slots=True)
 class CoursValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
-    cours: CoursDTO
-    activite: Activite
+    cours: 'CoursDTO'
+    activite: 'Activite'
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
@@ -195,11 +196,26 @@ class CoursValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
 
 @attr.dataclass(frozen=True, slots=True)
 class EpreuveValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
-    epreuve: EpreuveDTO
-    activite: Activite
+    epreuve: 'EpreuveDTO'
+    activite: 'Activite'
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
 
     def get_invariants_validators(self) -> List[BusinessValidator]:
         return [ShouldEpreuveEtreComplete(self.epreuve, self.activite)]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RefusActiviteValidationList(TwoStepsMultipleBusinessExceptionListValidator):
+    activite: 'Activite'
+    remarque: str
+
+    def get_data_contract_validators(self) -> List[BusinessValidator]:
+        return []
+
+    def get_invariants_validators(self) -> List[BusinessValidator]:
+        return [
+            ShouldActiviteEtreSoumise(self.activite),
+            ShouldRemarqueEtrePresente(self.remarque),
+        ]

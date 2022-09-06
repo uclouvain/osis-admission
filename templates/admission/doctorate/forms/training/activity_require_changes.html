@@ -28,12 +28,13 @@
 
 {% block tab_content %}
   <h3>
-    {% display view.activity.type " - " view.activity.title as object %}
-    {% blocktrans trimmed %}Are you sure you want to delete "{{ object }}"?{% endblocktrans %}
+    {% display view.activity.type "-" view.activity.title as object %}
+    {% blocktrans trimmed %}Require changes for "{{ object }}"{% endblocktrans %}
   </h3>
-  <p>{% trans "This activity and potential sub-activities will be deleted" %}</p>
+  <p>{% trans "This activity and potential sub-activities will be set back to Unsubmitted for modification" %}</p>
   <form action="" method="post">
     {% csrf_token %}
+    {% bootstrap_form form %}
     <div class="text-right">
       <a href="{% url "admission:doctorate:training" uuid=view.kwargs.uuid %}#{{ view.kwargs.activity_id }}">
         {% trans "Cancel" %}
