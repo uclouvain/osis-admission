@@ -23,19 +23,35 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
-from infrastructure.utils import AbstractMessageBusCommands
-from .projet_doctoral.doctorat import handlers as doctorat_handlers
-from .projet_doctoral.doctorat.epreuve_confirmation import handlers as epreuve_confirmation_handlers
-from .projet_doctoral.doctorat.formation import handlers as formation_handlers
-from .projet_doctoral.preparation import handlers as preparation_handlers
-from .projet_doctoral.validation import handlers as validation_handlers
+from functools import partial
 
+from admission.ddd.projet_doctoral.validation.commands import *
+from admission.ddd.projet_doctoral.validation.use_case.read import *
+from admission.ddd.projet_doctoral.validation.use_case.write import *
+from .repository.demande import DemandeRepository
+from ..doctorat.epreuve_confirmation.repository.epreuve_confirmation import EpreuveConfirmationRepository
+from ..doctorat.repository.doctorat import DoctoratRepository
+from ..preparation.repository.proposition import PropositionRepository
 
-class MessageBusCommands(AbstractMessageBusCommands):
-    command_handlers = {
-        **doctorat_handlers.COMMAND_HANDLERS,
-        **epreuve_confirmation_handlers.COMMAND_HANDLERS,
-        **formation_handlers.COMMAND_HANDLERS,
-        **preparation_handlers.COMMAND_HANDLERS,
-        **validation_handlers.COMMAND_HANDLERS,
-    }
+COMMAND_HANDLERS = {
+    FiltrerDemandesQuery: partial(
+        filtrer_demandes,
+        proposition_repository=PropositionRepository(),
+        demande_repository=DemandeRepository(),
+    ),
+    RecupererDemandeQuery: partial(
+        recuperer_demande,
+        demande_repository=DemandeRepository(),
+    ),
+    RefuserDemandeCddCommand: partial(
+        refuser_demande_cdd,
+        demande_repository=DemandeRepository(),
+    ),
+    ApprouverDemandeCddCommand: partial(
+        approuver_demande_cdd,
+        demande_repository=DemandeRepository(),
+        proposition_repository=PropositionRepository(),
+        epreuve_confirmation_repository=EpreuveConfirmationRepository(),
+        doctorat_repository=DoctoratRepository(),
+    ),
+}

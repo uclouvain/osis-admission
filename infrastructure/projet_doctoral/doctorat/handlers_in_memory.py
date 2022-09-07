@@ -23,19 +23,24 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
-from infrastructure.utils import AbstractMessageBusCommands
-from .projet_doctoral.doctorat import handlers as doctorat_handlers
-from .projet_doctoral.doctorat.epreuve_confirmation import handlers as epreuve_confirmation_handlers
-from .projet_doctoral.doctorat.formation import handlers as formation_handlers
-from .projet_doctoral.preparation import handlers as preparation_handlers
-from .projet_doctoral.validation import handlers as validation_handlers
+from functools import partial
 
+from admission.ddd.projet_doctoral.doctorat.commands import *
+from admission.ddd.projet_doctoral.doctorat.use_case.read import *
+from admission.ddd.projet_doctoral.doctorat.use_case.write import *
+from .domain.service.in_memory.historique import HistoriqueInMemory
+from .domain.service.in_memory.notification import NotificationInMemory
+from .repository.in_memory.doctorat import DoctoratInMemoryRepository
 
-class MessageBusCommands(AbstractMessageBusCommands):
-    command_handlers = {
-        **doctorat_handlers.COMMAND_HANDLERS,
-        **epreuve_confirmation_handlers.COMMAND_HANDLERS,
-        **formation_handlers.COMMAND_HANDLERS,
-        **preparation_handlers.COMMAND_HANDLERS,
-        **validation_handlers.COMMAND_HANDLERS,
-    }
+COMMAND_HANDLERS = {
+    RecupererDoctoratQuery: partial(
+        recuperer_doctorat,
+        doctorat_repository=DoctoratInMemoryRepository(),
+    ),
+    EnvoyerMessageDoctorantCommand: partial(
+        envoyer_message_au_doctorant,
+        doctorat_repository=DoctoratInMemoryRepository(),
+        notification=NotificationInMemory(),
+        historique=HistoriqueInMemory(),
+    ),
+}
