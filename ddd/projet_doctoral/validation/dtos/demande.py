@@ -28,29 +28,8 @@ from typing import Optional
 
 import attr
 
+from .profil_candidat import ProfilCandidatDTO
 from osis_common.ddd import interface
-
-
-@attr.s(frozen=True, slots=True, auto_attribs=True)
-class ProfilCandidatDTO(interface.DTO):
-
-    # Identification
-    nom: Optional[str] = ''
-    prenom: Optional[str] = ''
-    genre: Optional[str] = ''
-    nationalite: Optional[str] = ''
-    nom_pays_nationalite: Optional[str] = ''
-
-    # Coordonnees
-    email: Optional[str] = ''
-    pays: Optional[str] = ''
-    nom_pays: Optional[str] = ''
-    code_postal: Optional[str] = ''
-    ville: Optional[str] = ''
-    lieu_dit: Optional[str] = ''
-    rue: Optional[str] = ''
-    numero_rue: Optional[str] = ''
-    boite_postale: Optional[str] = ''
 
 
 @attr.s(frozen=True, slots=True, auto_attribs=True)
@@ -92,5 +71,4 @@ class RecupererDemandeDTO(interface.DTO):
     admission_acceptee_le: Optional[datetime.datetime]
     pre_admission_confirmee_le: Optional[datetime.datetime]
     admission_confirmee_le: Optional[datetime.datetime]
-
     # TODO include all info about demande (doctorate and persons too)

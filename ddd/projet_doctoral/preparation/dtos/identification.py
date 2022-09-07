@@ -1,4 +1,4 @@
-# ##############################################################################
+##############################################################################
 #
 #    OSIS stands for Open Student Information System. It's an application
 #    designed to manage the core business of higher education institutions,
@@ -22,35 +22,40 @@
 #    at the root of the source code of this program.  If not,
 #    see http://www.gnu.org/licenses/.
 #
-# ##############################################################################
+##############################################################################
 import datetime
-from typing import Optional, List
+from typing import List, Optional
 
 import attr
 
 from osis_common.ddd import interface
 
 
-@attr.s(frozen=True, slots=True, auto_attribs=True)
-class DemandeProlongationDTO(interface.DTO):
-    nouvelle_echeance: datetime.date
-    justification_succincte: str
-    lettre_justification: List[str] = attr.Factory(list)
-    avis_cdd: Optional[str] = ''
+@attr.dataclass(frozen=True, slots=True)
+class IdentificationDTO(interface.DTO):
+    matricule: str
 
+    nom: Optional[str]
+    prenom: Optional[str]
+    date_naissance: Optional[datetime.date]
+    annee_naissance: Optional[int]
+    pays_nationalite: Optional[str]
+    sexe: Optional[str]
+    genre: Optional[str]
+    photo_identite: List[str]
+    pays_naissance: Optional[str]
+    lieu_naissance: Optional[str]
+    etat_civil: Optional[str]
 
-@attr.s(frozen=True, slots=True, auto_attribs=True)
-class EpreuveConfirmationDTO(interface.DTO):
-    uuid: str
+    carte_identite: List[str]
+    passeport: List[str]
+    numero_registre_national_belge: Optional[str]
+    numero_carte_identite: Optional[str]
+    numero_passeport: Optional[str]
+    date_expiration_passeport: Optional[datetime.date]
 
-    date_limite: datetime.date
-    date: Optional[datetime.date] = None
-    rapport_recherche: List[str] = attr.Factory(list)
+    langue_contact: Optional[str]
+    email: Optional[str]
 
-    demande_prolongation: Optional[DemandeProlongationDTO] = None
-
-    proces_verbal_ca: List[str] = attr.Factory(list)
-    attestation_reussite: List[str] = attr.Factory(list)
-    attestation_echec: List[str] = attr.Factory(list)
-    canevas_proces_verbal_ca: List[str] = attr.Factory(list)
-    avis_renouvellement_mandat_recherche: List[str] = attr.Factory(list)
+    annee_derniere_inscription_ucl: Optional[int]
+    noma_derniere_inscription_ucl: Optional[str]
