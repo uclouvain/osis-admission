@@ -24,3 +24,4 @@
 #
 # ##############################################################################
 from .approuver_demande_cdd_service import approuver_demande_cdd
+from .refuser_demande_cdd_service import refuser_demande_cdd
