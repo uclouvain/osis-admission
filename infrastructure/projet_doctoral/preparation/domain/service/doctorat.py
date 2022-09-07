@@ -34,7 +34,7 @@ from admission.ddd.projet_doctoral.preparation.domain.validator.exceptions impor
 from admission.ddd.projet_doctoral.preparation.dtos import DoctoratDTO
 from base.models.enums.education_group_types import TrainingType
 from ddd.logic.formation_catalogue.commands import SearchFormationsCommand
-from ddd.logic.formation_catalogue.dtos import TrainingDto
+from ddd.logic.formation_catalogue.dtos.training import TrainingDto
 from ddd.logic.learning_unit.domain.model.responsible_entity import UCLEntityIdentity  # FIXME reuse from shared_kernel
 
 
