@@ -218,12 +218,13 @@ class IdentificationValidatorList(TwoStepsMultipleBusinessExceptionListValidator
     date_naissance: Optional[datetime.date]
     annee_naissance: Optional[int]
 
+    pays_residence: Optional[str]
+
     numero_registre_national_belge: Optional[str]
     numero_carte_identite: Optional[str]
     carte_identite: List[str]
     numero_passeport: Optional[str]
     passeport: List[str]
-    date_expiration_passeport: Optional[datetime.date]
 
     noma_derniere_inscription_ucl: Optional[str]
     annee_derniere_inscription_ucl: Optional[int]
@@ -248,6 +249,7 @@ class IdentificationValidatorList(TwoStepsMultipleBusinessExceptionListValidator
             ShouldCandidatBelgeSpecifierNumeroRegistreNationalBelge(
                 numero_registre_national_belge=self.numero_registre_national_belge,
                 pays_nationalite=self.identite_signaletique.pays_nationalite,
+                pays_residence=self.pays_residence,
             ),
             ShouldCandidatSpecifierDateOuAnneeNaissance(
                 date_naissance=self.date_naissance,
@@ -255,7 +257,6 @@ class IdentificationValidatorList(TwoStepsMultipleBusinessExceptionListValidator
             ),
             ShouldCandidatAuthentiquerPasseport(
                 numero_passeport=self.numero_passeport,
-                date_expiration_passeport=self.date_expiration_passeport,
                 passeport=self.passeport,
             ),
             ShouldCandidatAuthentiquerIdentite(

@@ -46,13 +46,13 @@ class IdentificationDTO(interface.DTO):
     pays_naissance: Optional[str]
     lieu_naissance: Optional[str]
     etat_civil: Optional[str]
+    pays_residence: Optional[str]
 
     carte_identite: List[str]
     passeport: List[str]
     numero_registre_national_belge: Optional[str]
     numero_carte_identite: Optional[str]
     numero_passeport: Optional[str]
-    date_expiration_passeport: Optional[datetime.date]
 
     langue_contact: Optional[str]
     email: Optional[str]

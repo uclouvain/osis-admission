@@ -36,6 +36,7 @@ from admission.ddd.projet_doctoral.preparation.dtos import (
     IdentificationDTO,
 )
 from base.models.enums.civil_state import CivilState
+from base.models.enums.person_address_type import PersonAddressType
 
 
 @dataclass
@@ -66,7 +67,6 @@ class ProfilCandidat:
     numero_registre_national_belge: Optional[str]
     numero_carte_identite: Optional[str]
     numero_passeport: Optional[str]
-    date_expiration_passeport: Optional[datetime.date]
 
 
 @dataclass
@@ -156,7 +156,6 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 numero_registre_national_belge='1001',
                 numero_carte_identite='1002',
                 numero_passeport='1003',
-                date_expiration_passeport=datetime.date(2022, 2, 10),
                 curriculum=['uuid14'],
                 annee_derniere_inscription_ucl=None,
                 noma_derniere_inscription_ucl='',
@@ -227,6 +226,15 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
 
     @classmethod
     def get_identification(cls, matricule: str) -> 'IdentificationDTO':
+        domicile_legal = next(
+            (
+                a
+                for a in cls.adresses_candidats
+                if a.personne == matricule and a.type == PersonAddressType.RESIDENTIAL.name
+            ),
+            None,
+        )
+
         try:
             candidate = next(c for c in cls.profil_candidats if c.matricule == matricule)
             return IdentificationDTO(
@@ -245,13 +253,13 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 numero_registre_national_belge=candidate.numero_registre_national_belge,
                 numero_carte_identite=candidate.numero_carte_identite,
                 numero_passeport=candidate.numero_passeport,
-                date_expiration_passeport=candidate.date_expiration_passeport,
                 email=candidate.email,
                 pays_naissance=candidate.pays_naissance,
                 lieu_naissance=candidate.lieu_naissance,
                 etat_civil=candidate.etat_civil,
                 annee_derniere_inscription_ucl=candidate.annee_derniere_inscription_ucl,
                 noma_derniere_inscription_ucl=candidate.noma_derniere_inscription_ucl,
+                pays_residence=domicile_legal.pays if domicile_legal else None,
             )
         except StopIteration:  # pragma: no cover
             raise CandidatNonTrouveException

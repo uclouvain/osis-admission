@@ -88,9 +88,10 @@ class ShouldCandidatSpecifierNumeroIdentite(BusinessValidator):
 class ShouldCandidatBelgeSpecifierNumeroRegistreNationalBelge(BusinessValidator):
     numero_registre_national_belge: Optional[str]
     pays_nationalite: Optional[str]
+    pays_residence: Optional[str]
 
     def validate(self, *args, **kwargs):
-        if self.pays_nationalite == BE_ISO_CODE and not self.numero_registre_national_belge:
+        if self.pays_nationalite == self.pays_residence == BE_ISO_CODE and not self.numero_registre_national_belge:
             raise NumeroIdentiteBelgeNonSpecifieException
 
 
@@ -108,10 +109,9 @@ class ShouldCandidatSpecifierDateOuAnneeNaissance(BusinessValidator):
 class ShouldCandidatAuthentiquerPasseport(BusinessValidator):
     numero_passeport: Optional[str]
     passeport: List[str]
-    date_expiration_passeport: Optional[datetime.date]
 
     def validate(self, *args, **kwargs):
-        if self.numero_passeport and (not self.passeport or not self.date_expiration_passeport):
+        if self.numero_passeport and not self.passeport:
             raise DetailsPasseportNonSpecifiesException
 
 

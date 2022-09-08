@@ -24,11 +24,7 @@
 #
 # ##############################################################################
 import datetime
-from itertools import chain
 from typing import List
-
-from dateutil import rrule
-from django.contrib.postgres.aggregates import ArrayAgg
 
 from admission.ddd.projet_doctoral.preparation.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.projet_doctoral.preparation.dtos import (
@@ -51,6 +47,10 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
             'country_of_citizenship',
         ).get(global_id=matricule)
 
+        residential_country = (
+            PersonAddress.objects.filter(label=PersonAddressType.RESIDENTIAL.name).values('country__iso_code').first()
+        )
+
         return IdentificationDTO(
             matricule=matricule,
             nom=person.last_name,
@@ -67,13 +67,13 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
             numero_registre_national_belge=person.national_number,
             numero_carte_identite=person.id_card_number,
             numero_passeport=person.passport_number,
-            date_expiration_passeport=person.passport_expiration_date,
             email=person.email,
             pays_naissance=person.birth_country,
             lieu_naissance=person.birth_place,
             etat_civil=person.civil_state,
             annee_derniere_inscription_ucl=person.last_registration_year,
             noma_derniere_inscription_ucl=person.last_registration_id,
+            pays_residence=residential_country.get('country__iso_code') if residential_country else None,
         )
 
     @classmethod
