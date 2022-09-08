@@ -180,7 +180,6 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
     def test_should_retourner_erreur_si_details_passeport_non_renseignes(self):
         with mock.patch.multiple(
             self.candidat,
-            date_expiration_passeport=None,
             passeport=[],
         ):
             with self.assertRaises(MultipleBusinessExceptions) as context:

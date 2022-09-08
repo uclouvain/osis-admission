@@ -1559,8 +1559,8 @@ msgstr "Merci de fournir une copie de votre curriculum."
 msgid "Please provide a copy of your identity card."
 msgstr "Merci de fournir une copie de votre carte d'identité."
 
-msgid "Please provide the expiry date and a copy of your passport."
-msgstr "Merci de fournir la date d'expiration et une copie de votre passeport."
+msgid "Please provide a copy of your passport."
+msgstr "Merci de fournir une copie de votre passeport."
 
 msgid "Please specify at least one identity number."
 msgstr "Merci de spécifier au-moins un numéro d'identité."

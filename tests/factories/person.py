@@ -53,7 +53,6 @@ class CompletePersonFactory(PersonFactory):
     id_card_number = factory.Faker('pystr_format', string_format='##-###-##')
 
     passport_number = factory.Faker('pystr_format', string_format='??-######')
-    passport_expiration_date = factory.Faker('future_date')
 
     last_registration_year = factory.LazyAttribute(lambda _: AcademicYearFactory(current=True))
     last_registration_id = '01234567'

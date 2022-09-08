@@ -61,9 +61,9 @@ class ProfilCandidat(interface.DomainService):
             carte_identite=identification.carte_identite,
             numero_passeport=identification.numero_passeport,
             passeport=identification.passeport,
-            date_expiration_passeport=identification.date_expiration_passeport,
             noma_derniere_inscription_ucl=identification.noma_derniere_inscription_ucl,
             annee_derniere_inscription_ucl=identification.annee_derniere_inscription_ucl,
+            pays_residence=identification.pays_residence,
         ).validate()
 
     @classmethod

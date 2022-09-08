@@ -1449,7 +1449,7 @@ msgstr ""
 msgid "Please provide a copy of your identity card."
 msgstr ""
 
-msgid "Please provide the expiry date and a copy of your passport."
+msgid "Please provide a copy of your passport."
 msgstr ""
 
 msgid "Please specify at least one identity number."
