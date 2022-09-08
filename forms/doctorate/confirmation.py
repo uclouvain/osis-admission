@@ -48,6 +48,7 @@ class ConfirmationForm(ConfirmationOpinionForm):
         widget=DatePickerInput(
             attrs={
                 'placeholder': _("dd/mm/yyyy"),
+                'autocomplete': 'off',
                 **DatePickerInput.defaut_attrs,
             },
         ),
@@ -58,6 +59,7 @@ class ConfirmationForm(ConfirmationOpinionForm):
         widget=DatePickerInput(
             attrs={
                 'placeholder': _("dd/mm/yyyy"),
+                'autocomplete': 'off',
                 **DatePickerInput.defaut_attrs,
             },
         ),
@@ -107,6 +109,7 @@ class ConfirmationRetakingForm(BaseEmailTemplateForm):
         widget=DatePickerInput(
             attrs={
                 'placeholder': _("dd/mm/yyyy"),
+                'autocomplete': 'off',
                 **DatePickerInput.defaut_attrs,
             },
         ),
