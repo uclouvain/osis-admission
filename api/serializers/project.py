@@ -181,6 +181,8 @@ class PropositionDTOSerializer(IncludedFieldsMixin, DTOSerializer):
             # Confirmation
             'retrieve_confirmation': ACTION_LINKS['retrieve_confirmation'],
             'update_confirmation': ACTION_LINKS['update_confirmation'],
+            # Training
+            'retrieve_training': ACTION_LINKS['retrieve_training'],
         }
     )
     # The schema is explicit in PropositionSchema

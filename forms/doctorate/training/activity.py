@@ -107,6 +107,15 @@ class AcademicYearField(forms.ModelChoiceField):
         return f"{obj.year}-{obj.year + 1}"
 
 
+CustomDatePickerInput = partial(
+    DatePickerInput,
+    attrs={
+        'placeholder': _("dd/mm/yyyy"),
+        'autocomplete': 'off',
+        **DatePickerInput.defaut_attrs,
+    },
+)
+
 IsOnlineField = partial(
     forms.BooleanField,
     label=_("Online or in person"),
@@ -169,8 +178,8 @@ class ConferenceForm(ActivityFormMixin, forms.ModelForm):
             'ects': _("ECTS for the participation"),
         }
         widgets = {
-            'start_date': DatePickerInput(attrs={'placeholder': _("dd/mm/yyyy"), **DatePickerInput.defaut_attrs}),
-            'end_date': DatePickerInput(attrs={'placeholder': _("dd/mm/yyyy"), **DatePickerInput.defaut_attrs}),
+            'start_date': CustomDatePickerInput(),
+            'end_date': CustomDatePickerInput(),
             'country': autocomplete.ListSelect2(url="country-autocomplete"),
         }
         help_texts = {
@@ -248,7 +257,7 @@ class ConferencePublicationForm(ActivityFormMixin, forms.ModelForm):
             'publication_status': _("Publication status"),
         }
         widgets = {
-            'start_date': DatePickerInput(attrs={'placeholder': _("dd/mm/yyyy"), **DatePickerInput.defaut_attrs}),
+            'start_date': CustomDatePickerInput(),
         }
 
 
@@ -306,7 +315,7 @@ class CommunicationForm(ActivityFormMixin, forms.ModelForm):
             'summary': _("Summary of the communication"),
         }
         widgets = {
-            'start_date': DatePickerInput(attrs={'placeholder': _("dd/mm/yyyy"), **DatePickerInput.defaut_attrs}),
+            'start_date': CustomDatePickerInput(),
             'country': autocomplete.ListSelect2(url="country-autocomplete"),
         }
 
@@ -339,7 +348,7 @@ class PublicationForm(ActivityFormMixin, forms.ModelForm):
             'acceptation_proof': _("Proof of publication"),
         }
         widgets = {
-            'start_date': DatePickerInput(attrs={'placeholder': _("dd/mm/yyyy"), **DatePickerInput.defaut_attrs}),
+            'start_date': CustomDatePickerInput(),
         }
 
 
@@ -365,8 +374,8 @@ class ResidencyForm(ActivityFormMixin, forms.ModelForm):
             'participating_proof': _("Proof (if needed)"),
         }
         widgets = {
-            'start_date': DatePickerInput(attrs={'placeholder': _("dd/mm/yyyy"), **DatePickerInput.defaut_attrs}),
-            'end_date': DatePickerInput(attrs={'placeholder': _("dd/mm/yyyy"), **DatePickerInput.defaut_attrs}),
+            'start_date': CustomDatePickerInput(),
+            'end_date': CustomDatePickerInput(),
             'country': autocomplete.ListSelect2(url="country-autocomplete"),
         }
 
@@ -406,7 +415,7 @@ class ResidencyCommunicationForm(ActivityFormMixin, forms.ModelForm):
             'participating_proof': _("Attestation of the communication"),
         }
         widgets = {
-            'start_date': DatePickerInput(attrs={'placeholder': _("dd/mm/yyyy"), **DatePickerInput.defaut_attrs}),
+            'start_date': CustomDatePickerInput(),
         }
 
 
@@ -434,8 +443,8 @@ class ServiceForm(ActivityFormMixin, forms.ModelForm):
             'organizing_institution': _("Institution"),
         }
         widgets = {
-            'start_date': DatePickerInput(attrs={'placeholder': _("dd/mm/yyyy"), **DatePickerInput.defaut_attrs}),
-            'end_date': DatePickerInput(attrs={'placeholder': _("dd/mm/yyyy"), **DatePickerInput.defaut_attrs}),
+            'start_date': CustomDatePickerInput(),
+            'end_date': CustomDatePickerInput(),
         }
 
 
@@ -459,8 +468,8 @@ class SeminarForm(ActivityFormMixin, forms.ModelForm):
             'participating_proof': _("Proof of participation for the whole activity"),
         }
         widgets = {
-            'start_date': DatePickerInput(attrs={'placeholder': _("dd/mm/yyyy"), **DatePickerInput.defaut_attrs}),
-            'end_date': DatePickerInput(attrs={'placeholder': _("dd/mm/yyyy"), **DatePickerInput.defaut_attrs}),
+            'start_date': CustomDatePickerInput(),
+            'end_date': CustomDatePickerInput(),
         }
 
 
@@ -489,7 +498,7 @@ class SeminarCommunicationForm(ActivityFormMixin, forms.ModelForm):
             'participating_proof': _("Certificate of participation in the presentation"),
         }
         widgets = {
-            'start_date': DatePickerInput(attrs={'placeholder': _("dd/mm/yyyy"), **DatePickerInput.defaut_attrs}),
+            'start_date': CustomDatePickerInput(),
             'country': autocomplete.ListSelect2(url="country-autocomplete"),
         }
 
@@ -571,8 +580,8 @@ class CourseForm(ActivityFormMixin, forms.ModelForm):
             'comment',
         ]
         widgets = {
-            'start_date': DatePickerInput(attrs={'placeholder': _("dd/mm/yyyy"), **DatePickerInput.defaut_attrs}),
-            'end_date': DatePickerInput(attrs={'placeholder': _("dd/mm/yyyy"), **DatePickerInput.defaut_attrs}),
+            'start_date': CustomDatePickerInput(),
+            'end_date': CustomDatePickerInput(),
         }
         labels = {
             'title': _("Name of the activity"),

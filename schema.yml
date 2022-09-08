@@ -3756,6 +3756,8 @@ components:
               $ref: '#/components/schemas/ActionLink'
             update_confirmation:
               $ref: '#/components/schemas/ActionLink'
+            retrieve_training:
+              $ref: '#/components/schemas/ActionLink'
           readOnly: true
           default: {}
         erreurs:
