@@ -3,12 +3,13 @@ from functools import partial
 from rest_framework import serializers
 
 from base.api.serializers.academic_year import RelatedAcademicYearField
+from base.models.enums.establishment_type import EstablishmentTypeEnum
+from base.models.organization import Organization
 from osis_profile.models import BelgianHighSchoolDiploma, ForeignHighSchoolDiploma, HighSchoolDiplomaAlternative
 from osis_profile.models.education import Schedule
 from osis_profile.models.enums.education import EducationalType
 from reference.api.serializers.country import RelatedCountryField
 from reference.api.serializers.language import RelatedLanguageField
-from reference.models.high_school import HighSchool
 
 
 class ScheduleSerializer(serializers.ModelSerializer):
@@ -20,7 +21,7 @@ class ScheduleSerializer(serializers.ModelSerializer):
 RelatedHighSchoolField = partial(
     serializers.SlugRelatedField,
     slug_field='uuid',
-    queryset=HighSchool.objects.all(),
+    queryset=Organization.objects.filter(establishment_type=EstablishmentTypeEnum.HIGH_SCHOOL.name),
 )
 
 
