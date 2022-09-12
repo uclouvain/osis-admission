@@ -70,8 +70,6 @@ class ForeignHighSchoolDiplomaSerializer(serializers.ModelSerializer):
             "enrolment_certificate_translation",
             "final_equivalence_decision",
             "equivalence_decision_proof",
-            "restrictive_equivalence_daes",
-            "restrictive_equivalence_admission_test",
         )
 
 
