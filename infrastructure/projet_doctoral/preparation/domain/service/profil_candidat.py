@@ -32,10 +32,13 @@ from admission.ddd.projet_doctoral.preparation.dtos import (
     CoordonneesDTO,
     CurriculumDTO,
     IdentificationDTO,
+    ConditionsComptabiliteDTO,
 )
+from base.models.enums.community import CommunityEnum
 from base.models.enums.person_address_type import PersonAddressType
 from base.models.person import Person
 from base.models.person_address import PersonAddress
+from base.tasks.synchronize_entities_addresses import UCLouvain_acronym
 from osis_profile.models import ProfessionalExperience, EducationalExperienceYear
 from osis_profile.models.education import LanguageKnowledge
 
@@ -127,64 +130,103 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
 
     @classmethod
     def get_curriculum(cls, matricule: str, annee_courante: int) -> 'CurriculumDTO':
-        personne = (
+        person = Person.objects.only('pk', 'curriculum').get(global_id=matricule)
+
+        minimal_years = cls.get_annees_minimum_curriculum(matricule, annee_courante)
+
+        annees_experiences_academiques = EducationalExperienceYear.objects.filter(
+            educational_experience__person=person,
+            academic_year__year__gte=minimal_years.get('minimal_year'),
+        ).values_list('academic_year__year', flat=True)
+
+        dates_experiences_non_academiques = ProfessionalExperience.objects.filter(
+            person=person,
+            end_date__gte=datetime.date(minimal_years.get('minimal_year'), cls.MOIS_DEBUT_ANNEE_ACADEMIQUE, 1),
+        ).values_list('start_date', 'end_date')
+
+        return CurriculumDTO(
+            annees_experiences_academiques=list(annees_experiences_academiques),
+            annee_diplome_etudes_secondaires_belges=minimal_years.get('belgian_highschool_diploma_year'),
+            annee_diplome_etudes_secondaires_etrangeres=minimal_years.get('foreign_highschool_diploma_year'),
+            annee_derniere_inscription_ucl=minimal_years.get('last_registration_year'),
+            dates_experiences_non_academiques=list(dates_experiences_non_academiques),
+            fichier_pdf=person.curriculum,
+        )
+
+    @classmethod
+    def get_annees_minimum_curriculum(cls, global_id, current_year):
+        person = (
             Person.objects.select_related(
                 'last_registration_year',
                 'belgianhighschooldiploma__academic_graduation_year',
                 'foreignhighschooldiploma__academic_graduation_year',
             )
             .only(
-                'foreignhighschooldiploma__academic_graduation_year__year',
+                'belgianhighschooldiploma__academic_graduation_year__year',
                 'foreignhighschooldiploma__academic_graduation_year__year',
                 'last_registration_year__year',
-                'curriculum',
             )
-            .get(global_id=matricule)
+            .get(global_id=global_id)
         )
 
-        annee_diplome_etudes_secondaires_belges = (
-            personne.belgianhighschooldiploma.academic_graduation_year.year
-            if hasattr(personne, 'belgianhighschooldiploma')
+        belgian_highschool_diploma_year = (
+            person.belgianhighschooldiploma.academic_graduation_year.year
+            if hasattr(person, 'belgianhighschooldiploma')
             else None
         )
-        annee_diplome_etudes_secondaires_etrangeres = (
-            personne.foreignhighschooldiploma.academic_graduation_year.year
-            if hasattr(personne, 'foreignhighschooldiploma')
+        foreign_highschool_diploma_year = (
+            person.foreignhighschooldiploma.academic_graduation_year.year
+            if hasattr(person, 'foreignhighschooldiploma')
             else None
         )
 
-        annee_derniere_inscription_ucl = (
-            personne.last_registration_year.year if personne.last_registration_year else None
+        last_registration_year = person.last_registration_year.year if person.last_registration_year else None
+
+        minimal_year = cls.get_annee_minimale_a_completer_cv(
+            annee_courante=current_year,
+            annee_derniere_inscription_ucl=last_registration_year,
+            annee_diplome_etudes_secondaires_belges=belgian_highschool_diploma_year,
+            annee_diplome_etudes_secondaires_etrangeres=foreign_highschool_diploma_year,
         )
 
-        annee_minimale = 1 + max(
-            [
-                annee
-                for annee in [
-                    annee_courante - cls.NB_MAX_ANNEES_CV_REQUISES,
-                    annee_diplome_etudes_secondaires_belges,
-                    annee_diplome_etudes_secondaires_etrangeres,
-                    annee_derniere_inscription_ucl,
-                ]
-                if annee
-            ]
+        return {
+            'minimal_year': minimal_year,
+            'last_registration_year': last_registration_year,
+            'belgian_highschool_diploma_year': belgian_highschool_diploma_year,
+            'foreign_highschool_diploma_year': foreign_highschool_diploma_year,
+        }
+
+    @classmethod
+    def get_conditions_comptabilite(
+        cls,
+        matricule: str,
+        annee_courante: int,
+    ) -> 'ConditionsComptabiliteDTO':
+
+        minimal_years = cls.get_annees_minimum_curriculum(
+            global_id=matricule,
+            current_year=annee_courante,
         )
 
-        annees_experiences_academiques = EducationalExperienceYear.objects.filter(
-            educational_experience__person=personne,
-            academic_year__year__gte=annee_minimale,
-        ).values_list('academic_year__year', flat=True)
+        person = Person.objects.only('pk', 'country_of_citizenship').get(global_id=matricule)
 
-        dates_experiences_non_academiques = ProfessionalExperience.objects.filter(
-            person=personne,
-            end_date__gte=datetime.date(annee_minimale, cls.MOIS_DEBUT_ANNEE_ACADEMIQUE, 1),
-        ).values_list('start_date', 'end_date')
+        is_ue_country = (
+            person.country_of_citizenship.european_union if getattr(person, 'country_of_citizenship') else None
+        )
 
-        return CurriculumDTO(
-            annees_experiences_academiques=list(annees_experiences_academiques),
-            annee_diplome_etudes_secondaires_belges=annee_diplome_etudes_secondaires_belges,
-            annee_diplome_etudes_secondaires_etrangeres=annee_diplome_etudes_secondaires_etrangeres,
-            annee_derniere_inscription_ucl=annee_derniere_inscription_ucl,
-            dates_experiences_non_academiques=list(dates_experiences_non_academiques),
-            fichier_pdf=personne.curriculum,
+        has_attented_french_community_institute = (
+            EducationalExperienceYear.objects.filter(
+                educational_experience__person=person,
+                educational_experience__institute__community=CommunityEnum.FRENCH_SPEAKING.name,
+                academic_year__year__gte=minimal_years.get('minimal_year'),
+            )
+            .exclude(
+                educational_experience__institute__code=UCLouvain_acronym,
+            )
+            .exists()
+        )
+
+        return ConditionsComptabiliteDTO(
+            pays_nationalite_ue=is_ue_country,
+            a_frequente_recemment_etablissement_communaute_fr=has_attented_french_community_institute,
         )

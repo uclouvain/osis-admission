@@ -174,4 +174,8 @@ COMMAND_HANDLERS = {
         groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
         historique=HistoriqueInMemory(),
     ),
+    CompleterComptabilitePropositionCommand: partial(
+        completer_comptabilite_proposition,
+        proposition_repository=PropositionInMemoryRepository(),
+    ),
 }

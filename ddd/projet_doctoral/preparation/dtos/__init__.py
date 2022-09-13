@@ -23,6 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
+from .comptabilite import ConditionsComptabiliteDTO, ComptabiliteDTO
 from .coordonnees import AdressePersonnelleDTO, CoordonneesDTO
 from .curriculum import CurriculumDTO
 from .doctorat import DoctoratDTO
@@ -49,6 +50,8 @@ __all__ = [
     "AvisDTO",
     "AutreOccupationDTO",
     "AdressePersonnelleDTO",
+    "ConditionsComptabiliteDTO",
+    "ComptabiliteDTO",
     "CoordonneesDTO",
     "CotutelleDTO",
     "CurriculumDTO",

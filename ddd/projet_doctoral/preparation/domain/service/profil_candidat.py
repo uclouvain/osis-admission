@@ -25,12 +25,14 @@
 # ##############################################################################
 from admission.ddd.projet_doctoral.preparation.domain.model._candidat_adresse import CandidatAdresse
 from admission.ddd.projet_doctoral.preparation.domain.model._candidat_signaletique import CandidatSignaletique
+from admission.ddd.projet_doctoral.preparation.domain.model.proposition import Proposition
 from admission.ddd.projet_doctoral.preparation.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.projet_doctoral.preparation.domain.validator.validator_by_business_action import (
     IdentificationValidatorList,
     CoordonneesValidatorList,
     LanguesConnuesValidatorList,
     CurriculumValidatorList,
+    ComptabiliteValidatorList,
 )
 from osis_common.ddd import interface
 
@@ -116,4 +118,24 @@ class ProfilCandidat(interface.DomainService):
             annee_derniere_inscription_ucl=curriculum.annee_derniere_inscription_ucl,
             fichier_pdf=curriculum.fichier_pdf,
             dates_experiences_non_academiques=curriculum.dates_experiences_non_academiques,
+        ).validate()
+
+    @classmethod
+    def verifier_comptabilite(
+        cls,
+        proposition: Proposition,
+        profil_candidat_translator: 'IProfilCandidatTranslator',
+        annee_courante: int,
+    ):
+        conditions_comptabilite = profil_candidat_translator.get_conditions_comptabilite(
+            matricule=proposition.matricule_candidat,
+            annee_courante=annee_courante,
+        )
+
+        ComptabiliteValidatorList(
+            pays_nationalite_ue=conditions_comptabilite.pays_nationalite_ue,
+            a_frequente_recemment_etablissement_communaute_fr=(
+                conditions_comptabilite.a_frequente_recemment_etablissement_communaute_fr
+            ),
+            comptabilite=proposition.comptabilite,
         ).validate()

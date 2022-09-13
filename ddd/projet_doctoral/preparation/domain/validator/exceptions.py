@@ -373,3 +373,56 @@ class PromoteurDeReferenceManquantException(BusinessException):
     def __init__(self, **kwargs):
         message = _("You must set a reference promoter.")
         super().__init__(message, **kwargs)
+
+
+class AbsenceDeDetteNonCompleteeException(BusinessException):
+    status_code = "PROPOSITION-43"
+
+    def __init__(self, **kwargs):
+        message = _("Some fields are missing in the 'Absence of debt' block in the 'Finalization > Accounting' tab.")
+        super().__init__(message, **kwargs)
+
+
+class ReductionDesDroitsInscriptionNonCompleteeException(BusinessException):
+    status_code = "PROPOSITION-44"
+
+    def __init__(self, **kwargs):
+        message = _(
+            "Some fields are missing in the 'Reduced registration fees' block in the 'Finalization > Accounting' tab."
+        )
+        super().__init__(message, **kwargs)
+
+
+class AssimilationNonCompleteeException(BusinessException):
+    status_code = "PROPOSITION-45"
+
+    def __init__(self, **kwargs):
+        message = _("Some fields are missing in the 'Assimilation' block in the 'Finalization > Accounting' tab.")
+        super().__init__(message, **kwargs)
+
+
+class AffiliationsNonCompleteesException(BusinessException):
+    status_code = "PROPOSITION-46"
+
+    def __init__(self, **kwargs):
+        message = _("Some fields are missing in the 'Affiliations' block in the 'Finalization > Accounting' tab.")
+        super().__init__(message, **kwargs)
+
+
+class CarteBancaireRemboursementIbanNonCompleteException(BusinessException):
+    status_code = "PROPOSITION-47"
+
+    def __init__(self, **kwargs):
+        message = _(
+            "Some fields related to the bank account number in IBAN format are missing in the 'Finalization > "
+            "Accounting' tab."
+        )
+        super().__init__(message, **kwargs)
+
+
+class CarteBancaireRemboursementAutreFormatNonCompleteException(BusinessException):
+    status_code = "PROPOSITION-48"
+
+    def __init__(self, **kwargs):
+        message = _("Some fields related to the bank account are missing in the 'Finalization > Accounting' tab.")
+        super().__init__(message, **kwargs)

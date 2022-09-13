@@ -48,6 +48,7 @@ from admission.ddd.projet_doctoral.preparation.domain.validator.exceptions impor
     MembreCAManquantException,
     PromoteurDeReferenceManquantException,
     PromoteurManquantException,
+    AbsenceDeDetteNonCompleteeException,
 )
 from admission.ddd.projet_doctoral.validation.domain.model._enums import ChoixStatutCDD
 from admission.tests import QueriesAssertionsMixin
@@ -56,10 +57,17 @@ from admission.tests.factories.doctorate import DoctorateFactory
 from admission.tests.factories.person import CompletePersonFactory
 from admission.tests.factories.roles import CandidateFactory, CddManagerFactory
 from admission.tests.factories.supervision import CaMemberFactory, PromoterFactory, _ProcessFactory
+from base.models.enums.community import CommunityEnum
 from base.models.enums.entity_type import EntityType
+from base.models.person import Person
+from base.tests.factories.academic_year import AcademicYearFactory, get_current_year
 from base.tests.factories.entity_version import EntityVersionFactory
+from base.tests.factories.organization import OrganizationFactory
 from base.tests.factories.person import PersonFactory
 from osis_signature.enums import SignatureState
+
+from osis_profile.tests.factories.curriculum import EducationalExperienceFactory, EducationalExperienceYearFactory
+from reference.tests.factories.country import CountryFactory
 
 
 class DoctorateAdmissionListApiTestCase(APITestCase):
@@ -152,6 +160,8 @@ class DoctorateAdmissionListApiTestCase(APITestCase):
             'retrieve_confirmation',
             'update_confirmation',
             'retrieve_training',
+            'retrieve_accounting',
+            'update_accounting',
         ]
         self.assertCountEqual(
             list(first_proposition['links']),
@@ -433,6 +443,8 @@ class DoctorateAdmissionGetApiTestCase(DoctorateAdmissionApiTestCase):
             'retrieve_supervision',
             'update_curriculum',
             'retrieve_curriculum',
+            'retrieve_accounting',
+            'update_accounting',
         ]
         all_actions = allowed_actions + [
             'add_approval',
@@ -831,3 +843,102 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIsNotNone(response.json().get('non_field_errors'))
+
+    def test_submit_invalid_proposition_using_api_accounting(self):
+
+        admission = DoctorateAdmissionFactory(
+            candidate=CandidateFactory().person,
+            status=ChoixStatutProposition.SIGNING_IN_PROGRESS.name,
+            supervision_group=self.first_invited_promoter.actor_ptr.process,
+        )
+        CddManagerFactory(entity=admission.doctorate.management_entity)
+
+        self.client.force_authenticate(user=admission.candidate.user)
+
+        # No academic experience -> the absence of debt certificate is not required
+        response = self.client.post(resolve_url("admission_api_v1:submit-proposition", uuid=admission.uuid))
+
+        errors = response.json().get('non_field_errors', [])
+        self.assertFalse(
+            any(
+                exception
+                for exception in errors
+                if exception['status_code'] == AbsenceDeDetteNonCompleteeException.status_code
+            )
+        )
+
+        # Experience in a french speaking community institute -> the absence of debt certificate is required
+        experience = EducationalExperienceFactory(
+            person=admission.candidate,
+            obtained_diploma=False,
+            country=CountryFactory(iso_code="BE"),
+            institute=OrganizationFactory(
+                community=CommunityEnum.FRENCH_SPEAKING.name,
+                code='INSTITUTE',
+                name='First institute',
+            ),
+        )
+        experience_year = EducationalExperienceYearFactory(
+            educational_experience=experience,
+            academic_year=AcademicYearFactory(year=get_current_year()),
+        )
+
+        response = self.client.post(resolve_url("admission_api_v1:submit-proposition", uuid=admission.uuid))
+
+        errors = response.json().get('non_field_errors', [])
+        self.assertTrue(
+            any(
+                exception
+                for exception in errors
+                if exception['status_code'] == AbsenceDeDetteNonCompleteeException.status_code
+            )
+        )
+
+        # Experience in UCL -> the absence of debt certificate is not required
+        experience.institute.code = "UCL"
+        experience.institute.save()
+
+        response = self.client.post(resolve_url("admission_api_v1:submit-proposition", uuid=admission.uuid))
+
+        errors = response.json().get('non_field_errors', [])
+        self.assertFalse(
+            any(
+                exception
+                for exception in errors
+                if exception['status_code'] == AbsenceDeDetteNonCompleteeException.status_code
+            )
+        )
+
+        # Experience in a german speaking community institute -> the absence of debt certificate is not required
+        experience.institute.code = "INSTITUTE"
+        experience.institute.community = CommunityEnum.GERMAN_SPEAKING.name
+        experience.institute.save()
+
+        response = self.client.post(resolve_url("admission_api_v1:submit-proposition", uuid=admission.uuid))
+
+        errors = response.json().get('non_field_errors', [])
+        self.assertFalse(
+            any(
+                exception
+                for exception in errors
+                if exception['status_code'] == AbsenceDeDetteNonCompleteeException.status_code
+            )
+        )
+
+        # Too old experience in a french speaking community institute -> the absence of debt certificate is not required
+        experience.institute.community = CommunityEnum.FRENCH_SPEAKING.name
+        experience.institute.save()
+
+        experience_year.academic_year = AcademicYearFactory(year=2000)
+        experience_year.save()
+
+        response = self.client.post(resolve_url("admission_api_v1:submit-proposition", uuid=admission.uuid))
+
+        errors = response.json().get('non_field_errors', [])
+        self.assertFalse(
+            any(
+                exception
+                for exception in errors
+                if exception['status_code'] == AbsenceDeDetteNonCompleteeException.status_code
+            )
+        )

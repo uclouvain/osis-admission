@@ -54,6 +54,7 @@ from admission.api.views.training import (
     DoctoralTrainingListView,
     DoctoralTrainingSubmitView,
 )
+from admission.api.views.accounting import AccountingView
 
 __all__ = [
     "CoordonneesViewSet",
@@ -88,4 +89,5 @@ __all__ = [
     "DoctoralTrainingView",
     "DoctoralTrainingSubmitView",
     "DoctoralTrainingAssentView",
+    "AccountingView",
 ]

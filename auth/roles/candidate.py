@@ -58,6 +58,7 @@ class Candidate(RoleModel):
             'admission.view_doctorateadmission_curriculum': is_admission_request_author & is_being_enrolled,
             'admission.view_doctorateadmission_secondary_studies': is_admission_request_author & is_being_enrolled,
             'admission.view_doctorateadmission_languages': is_admission_request_author & is_being_enrolled,
+            'admission.view_accounting': is_admission_request_author & is_being_enrolled,
             # Can edit while not confirmed proposition
             'admission.delete_doctorateadmission': is_admission_request_author & unconfirmed_proposition,
             'admission.change_doctorateadmission': is_admission_request_author & unconfirmed_proposition,
@@ -67,6 +68,7 @@ class Candidate(RoleModel):
             'admission.change_doctorateadmission_secondary_studies': is_admission_request_author
             & unconfirmed_proposition,
             'admission.change_doctorateadmission_languages': is_admission_request_author & unconfirmed_proposition,
+            'admission.change_accounting': is_admission_request_author & unconfirmed_proposition,
             # Project tabs and supervision group edition are accessible as long as signing has not begun
             'admission.change_doctorateadmission_project': is_admission_request_author & in_progress,
             'admission.change_doctorateadmission_cotutelle': is_admission_request_author & in_progress,

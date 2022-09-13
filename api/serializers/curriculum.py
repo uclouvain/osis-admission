@@ -30,6 +30,7 @@ from rest_framework import serializers
 from admission.api.serializers.fields import DoctorateAdmissionField
 from admission.api.serializers.mixins import GetDefaultContextParam
 from admission.ddd.projet_doctoral.preparation.domain.service.i_profil_candidat import IProfilCandidatTranslator
+from admission.infrastructure.projet_doctoral.preparation.domain.service.profil_candidat import ProfilCandidatTranslator
 from base.api.serializers.academic_year import RelatedAcademicYearField
 from base.models.academic_year import current_academic_year
 from base.models.enums.establishment_type import EstablishmentTypeEnum
@@ -230,27 +231,8 @@ class CurriculumSerializer(serializers.Serializer):
         self.fields['minimal_year'].field_schema = {'type': 'integer'}
 
     def get_minimal_year(self, _):
-        related_person = self.context.get('related_person')
-        belgian_diploma = (
-            BelgianHighSchoolDiploma.objects.filter(person=related_person)
-            .select_related('academic_graduation_year')
-            .first()
-        )
-        foreign_diploma = (
-            ForeignHighSchoolDiploma.objects.filter(person=related_person)
-            .select_related('academic_graduation_year')
-            .first()
-        )
         current_year = current_academic_year()
-        min_year = 1 + max(
-            year
-            for year in [
-                belgian_diploma.academic_graduation_year.year if belgian_diploma else None,
-                foreign_diploma.academic_graduation_year.year if foreign_diploma else None,
-                related_person.last_registration_year.year if related_person.last_registration_year else None,
-                current_year.year - IProfilCandidatTranslator.NB_MAX_ANNEES_CV_REQUISES,
-            ]
-            if year
-        )
-
-        return min_year
+        return ProfilCandidatTranslator.get_annees_minimum_curriculum(
+            global_id=self.context.get('related_person').global_id,
+            current_year=current_year.year,
+        ).get('minimal_year')

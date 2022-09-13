@@ -34,6 +34,7 @@ from admission.ddd.projet_doctoral.preparation.dtos import (
     CoordonneesDTO,
     CurriculumDTO,
     IdentificationDTO,
+    ConditionsComptabiliteDTO,
 )
 from base.models.enums.civil_state import CivilState
 from base.models.enums.person_address_type import PersonAddressType
@@ -109,6 +110,7 @@ class DiplomeEtudeSecondaire:
 class ExperienceAcademique:
     personne: str
     annee: int
+    communaute_fr: bool
 
 
 @dataclass
@@ -129,6 +131,35 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
     diplomes_etudes_secondaires_etrangers = []
     experiences_academiques = []
     experiences_non_academiques = []
+    pays_union_europeenne = {
+        "AT",
+        "BE",
+        "BG",
+        "HR",
+        "CY",
+        "CZ",
+        "DK",
+        "EE",
+        "FI",
+        "FR",
+        "DE",
+        "GR",
+        "HU",
+        "IE",
+        "IT",
+        "LV",
+        "LT",
+        "LU",
+        "MT",
+        "NL",
+        "PL",
+        "PT",
+        "RO",
+        "SK",
+        "SI",
+        "ES",
+        "SE",
+    }
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -202,10 +233,10 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
         ]
 
         cls.experiences_academiques = [
-            ExperienceAcademique(personne=cls.matricule_candidat, annee=2016),
-            ExperienceAcademique(personne=cls.matricule_candidat, annee=2017),
-            ExperienceAcademique(personne=cls.matricule_candidat, annee=2019),
-            ExperienceAcademique(personne=cls.matricule_candidat, annee=2020),
+            ExperienceAcademique(personne=cls.matricule_candidat, annee=2016, communaute_fr=False),
+            ExperienceAcademique(personne=cls.matricule_candidat, annee=2017, communaute_fr=False),
+            ExperienceAcademique(personne=cls.matricule_candidat, annee=2019, communaute_fr=False),
+            ExperienceAcademique(personne=cls.matricule_candidat, annee=2020, communaute_fr=True),
         ]
 
         cls.experiences_non_academiques = [
@@ -335,6 +366,27 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 annee_derniere_inscription_ucl=candidate.annee_derniere_inscription_ucl,
                 fichier_pdf=candidate.curriculum,
                 dates_experiences_non_academiques=dates_experiences_non_academiques,
+            )
+        except StopIteration:
+            raise CandidatNonTrouveException
+
+    @classmethod
+    def get_conditions_comptabilite(
+        cls,
+        matricule: str,
+        annee_courante: int,
+    ) -> 'ConditionsComptabiliteDTO':
+        try:
+            candidate = next(c for c in cls.profil_candidats if c.matricule == matricule)
+            return ConditionsComptabiliteDTO(
+                pays_nationalite_ue=candidate.pays_nationalite in cls.pays_union_europeenne
+                if candidate.pays_nationalite
+                else None,
+                a_frequente_recemment_etablissement_communaute_fr=any(
+                    experience.communaute_fr
+                    for experience in cls.experiences_academiques
+                    if experience.personne == matricule
+                ),
             )
         except StopIteration:
             raise CandidatNonTrouveException

@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -24,25 +24,23 @@
 #
 # ##############################################################################
 
-from .dashboard import DashboardSerializer
-from .project import *
-from .cotutelle import *
-from .person import *
-from .coordonnees import CoordonneesSerializer
-from .secondary_studies import HighSchoolDiplomaSerializer
-from .languages_knowledge import *
-from .supervision import *
-from .curriculum import (
-    CurriculumFileSerializer,
-    EducationalExperienceYearSerializer,
-    CurriculumSerializer,
-    ProfessionalExperienceSerializer,
+import factory
+
+from admission.contrib.models import Accounting
+from admission.ddd.projet_doctoral.preparation.domain.model._comptabilite import (
+    TypeSituationAssimilation,
+    ChoixAffiliationSport,
+    ChoixTypeCompteBancaire,
 )
-from .approvals import (
-    ApprouverPropositionCommandSerializer,
-    RefuserPropositionCommandSerializer,
-    ApprouverPropositionParPdfCommandSerializer,
-)
-from .confirmation import *
-from .doctorate import *
-from .accounting import CompleterComptabilitePropositionCommandSerializer, AccountingConditionsSerializer
+
+
+class AccountingFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = Accounting
+
+    french_community_study_allowance_application = False
+    is_staff_child = False
+    assimilation_situation = TypeSituationAssimilation.AUCUNE_ASSIMILATION.name
+    sport_affiliation = ChoixAffiliationSport.NON.name
+    solidarity_student = False
+    account_number_type = ChoixTypeCompteBancaire.NON.name

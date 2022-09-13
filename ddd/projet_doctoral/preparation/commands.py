@@ -222,3 +222,80 @@ class ApprouverPropositionParPdfCommand(interface.CommandRequest):
     uuid_proposition: str
     matricule: str
     pdf: List[str] = attr.Factory(list)
+
+
+@attr.dataclass(frozen=True, slots=True)
+class CompleterComptabilitePropositionCommand(interface.CommandRequest):
+    uuid_proposition: str
+
+    # Absence de dettes
+    attestation_absence_dette_etablissement: List[str]
+
+    # Réduction des droits d'inscription
+    demande_allocation_d_etudes_communaute_francaise_belgique: Optional[bool]
+    enfant_personnel: Optional[bool]
+    attestation_enfant_personnel: List[str]
+
+    # Assimilation
+    type_situation_assimilation: Optional[str]
+
+    # Assimilation 1
+    sous_type_situation_assimilation_1: Optional[str]
+    carte_resident_longue_duree: List[str]
+    carte_cire_sejour_illimite_etranger: List[str]
+    carte_sejour_membre_ue: List[str]
+    carte_sejour_permanent_membre_ue: List[str]
+
+    # Assimilation 2
+    sous_type_situation_assimilation_2: Optional[str]
+    carte_a_b_refugie: List[str]
+    annexe_25_26_refugies_apatrides: List[str]
+    attestation_immatriculation: List[str]
+    carte_a_b: List[str]
+    decision_protection_subsidiaire: List[str]
+    decision_protection_temporaire: List[str]
+
+    # Assimilation 3
+    sous_type_situation_assimilation_3: Optional[str]
+    titre_sejour_3_mois_professionel: List[str]
+    fiches_remuneration: List[str]
+    titre_sejour_3_mois_remplacement: List[str]
+    preuve_allocations_chomage_pension_indemnite: List[str]
+
+    # Assimilation 4
+    attestation_cpas: List[str]
+
+    # Assimilation 5
+    relation_parente: Optional[str]
+    sous_type_situation_assimilation_5: Optional[str]
+    composition_menage_acte_naissance: List[str]
+    acte_tutelle: List[str]
+    composition_menage_acte_mariage: List[str]
+    attestation_cohabitation_legale: List[str]
+    carte_identite_parent: List[str]
+    titre_sejour_longue_duree_parent: List[str]
+    annexe_25_26_refugies_apatrides_decision_protection_parent: List[str]
+    titre_sejour_3_mois_parent: List[str]
+    fiches_remuneration_parent: List[str]
+    attestation_cpas_parent: List[str]
+
+    # Assimilation 6
+    sous_type_situation_assimilation_6: Optional[str]
+    decision_bourse_cfwb: List[str]
+    attestation_boursier: List[str]
+
+    # Assimilation 7
+    titre_identite_sejour_longue_duree_ue: List[str]
+    titre_sejour_belgique: List[str]
+
+    # Affiliations
+    affiliation_sport: Optional[str]
+    etudiant_solidaire: Optional[bool]
+
+    # Compte bancaire
+    type_numero_compte: Optional[str]
+    numero_compte_iban: Optional[str]
+    numero_compte_autre_format: Optional[str]
+    code_bic_swift_banque: Optional[str]
+    prenom_titulaire_compte: Optional[str]
+    nom_titulaire_compte: Optional[str]
