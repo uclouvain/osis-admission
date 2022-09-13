@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,26 +23,30 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from django.test import TestCase
 
-from .dashboard import DashboardSerializer
-from .project import *
-from .cotutelle import *
-from .person import *
-from .coordonnees import CoordonneesSerializer
-from .secondary_studies import HighSchoolDiplomaSerializer
-from .languages_knowledge import *
-from .supervision import *
-from .curriculum import (
-    CurriculumFileSerializer,
-    EducationalExperienceYearSerializer,
-    CurriculumSerializer,
-    ProfessionalExperienceSerializer,
-)
-from .approvals import (
-    ApprouverPropositionCommandSerializer,
-    RefuserPropositionCommandSerializer,
-    ApprouverPropositionParPdfCommandSerializer,
-)
-from .confirmation import *
-from .doctorate import *
-from .accounting import CompleterComptabilitePropositionCommandSerializer, AccountingConditionsSerializer
+from admission.utils import takewhile_return_attribute_values
+
+
+class UtilsTestCase(TestCase):
+    @classmethod
+    def setUpTestData(cls) -> None:
+        cls.array = [
+            {'a': 1, 'b': 'First element'},
+            {'a': 1, 'b': 'Second element'},
+            {'a': 1, 'b': 'Third element'},
+            {'a': 2, 'b': 2},
+            {'a': 3, 'b': 2},
+        ]
+
+    def test_takewhile_return_attribute_values_with_checked_predicate(self):
+        self.assertEqual(
+            list(takewhile_return_attribute_values(lambda obj: obj['a'] == 1, self.array, 'b')),
+            ['First element', 'Second element', 'Third element'],
+        )
+
+    def test_takewhile_return_attribute_values_with_unchecked_predicate(self):
+        self.assertEqual(
+            list(takewhile_return_attribute_values(lambda obj: obj['a'] == 5, self.array, 'b')),
+            [],
+        )

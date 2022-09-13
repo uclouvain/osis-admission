@@ -31,6 +31,7 @@ try:
     from .entity_proxy import EntityProxy
     from .cdd_mail_template import CddMailTemplate
     from .task import AdmissionTask
+    from .accounting import Accounting
 
     __all__ = [
         "DoctorateAdmission",
@@ -40,6 +41,7 @@ try:
         "CddMailTemplate",
         "ConfirmationPaper",
         "AdmissionTask",
+        "Accounting",
     ]
 
 except RuntimeError as e:  # pragma: no cover

@@ -31,6 +31,7 @@ import attr
 from admission.ddd.projet_doctoral.preparation.business_types import *
 from admission.ddd.projet_doctoral.preparation.domain.model._candidat_adresse import CandidatAdresse
 from admission.ddd.projet_doctoral.preparation.domain.model._candidat_signaletique import CandidatSignaletique
+from admission.ddd.projet_doctoral.preparation.domain.model._comptabilite import Comptabilite
 from admission.ddd.projet_doctoral.preparation.domain.model._cotutelle import Cotutelle
 from admission.ddd.projet_doctoral.preparation.domain.model._detail_projet import DetailProjet
 from admission.ddd.projet_doctoral.preparation.domain.model._enums import ChoixTypeAdmission
@@ -328,6 +329,53 @@ class CurriculumValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
                 annee_diplome_etudes_secondaires_belges=self.annee_diplome_etudes_secondaires_belges,
                 annee_diplome_etudes_secondaires_etrangeres=self.annee_diplome_etudes_secondaires_etrangeres,
                 dates_experiences_non_academiques=self.dates_experiences_non_academiques,
+            ),
+        ]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ComptabiliteValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+    pays_nationalite_ue: Optional[bool]
+    a_frequente_recemment_etablissement_communaute_fr: Optional[bool]
+    comptabilite: Comptabilite
+
+    def get_data_contract_validators(self) -> List[BusinessValidator]:
+        return []
+
+    def get_invariants_validators(self) -> List[BusinessValidator]:
+        demande_allocation_etudes_fr_be = self.comptabilite.demande_allocation_d_etudes_communaute_francaise_belgique
+        return [
+            ShouldAbsenceDeDetteEtreCompletee(
+                attestation_absence_dette_etablissement=self.comptabilite.attestation_absence_dette_etablissement,
+                a_frequente_recemment_etablissement_communaute_fr=(
+                    self.a_frequente_recemment_etablissement_communaute_fr
+                ),
+            ),
+            ShouldReductionDesDroitsInscriptionEtreCompletee(
+                demande_allocation_d_etudes_communaute_francaise_belgique=demande_allocation_etudes_fr_be,
+                enfant_personnel=self.comptabilite.enfant_personnel,
+                attestation_enfant_personnel=self.comptabilite.attestation_enfant_personnel,
+            ),
+            ShouldAssimilationEtreCompletee(
+                pays_nationalite_ue=self.pays_nationalite_ue,
+                comptabilite=self.comptabilite,
+            ),
+            ShouldAffiliationsEtreCompletees(
+                affiliation_sport=self.comptabilite.affiliation_sport,
+                etudiant_solidaire=self.comptabilite.etudiant_solidaire,
+            ),
+            ShouldIBANCarteBancaireRemboursementEtreCompletee(
+                type_numero_compte=self.comptabilite.type_numero_compte,
+                numero_compte_iban=self.comptabilite.numero_compte_iban,
+                prenom_titulaire_compte=self.comptabilite.prenom_titulaire_compte,
+                nom_titulaire_compte=self.comptabilite.nom_titulaire_compte,
+            ),
+            ShouldAutreFormatCarteBancaireRemboursementEtreCompletee(
+                type_numero_compte=self.comptabilite.type_numero_compte,
+                numero_compte_autre_format=self.comptabilite.numero_compte_autre_format,
+                code_bic_swift_banque=self.comptabilite.code_bic_swift_banque,
+                prenom_titulaire_compte=self.comptabilite.prenom_titulaire_compte,
+                nom_titulaire_compte=self.comptabilite.nom_titulaire_compte,
             ),
         ]
 

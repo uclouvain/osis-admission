@@ -405,6 +405,7 @@ class PropositionManager(models.Manager):
                 "doctorate__academic_year",
                 "candidate__country_of_citizenship",
                 "thesis_institute",
+                "accounting",
             )
             .annotate(
                 code_secteur_formation=CTESubquery(sector_subqs.values("acronym")[:1]),

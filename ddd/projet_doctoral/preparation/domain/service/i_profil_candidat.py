@@ -24,11 +24,12 @@
 #
 # ##############################################################################
 from abc import abstractmethod
-from typing import List
+from typing import List, Optional
 
 from admission.ddd.projet_doctoral.preparation.dtos import (
-    CurriculumDTO,
+    ConditionsComptabiliteDTO,
     CoordonneesDTO,
+    CurriculumDTO,
     IdentificationDTO,
 )
 from osis_common.ddd import interface
@@ -58,3 +59,33 @@ class IProfilCandidatTranslator(interface.DomainService):
     @abstractmethod
     def get_curriculum(cls, matricule: str, annee_courante: int) -> 'CurriculumDTO':
         raise NotImplementedError
+
+    @classmethod
+    @abstractmethod
+    def get_conditions_comptabilite(
+        cls,
+        matricule: str,
+        annee_courante: int,
+    ) -> 'ConditionsComptabiliteDTO':
+        raise NotImplementedError
+
+    @classmethod
+    def get_annee_minimale_a_completer_cv(
+        cls,
+        annee_courante: int,
+        annee_diplome_etudes_secondaires_belges: Optional[int] = None,
+        annee_diplome_etudes_secondaires_etrangeres: Optional[int] = None,
+        annee_derniere_inscription_ucl: Optional[int] = None,
+    ):
+        return 1 + max(
+            [
+                annee
+                for annee in [
+                    annee_courante - cls.NB_MAX_ANNEES_CV_REQUISES,
+                    annee_diplome_etudes_secondaires_belges,
+                    annee_diplome_etudes_secondaires_etrangeres,
+                    annee_derniere_inscription_ucl,
+                ]
+                if annee
+            ]
+        )

@@ -28,6 +28,7 @@ from functools import partial
 from admission.ddd.projet_doctoral.preparation.commands import *
 from admission.ddd.projet_doctoral.preparation.use_case.read import *
 from admission.ddd.projet_doctoral.preparation.use_case.write import *
+from admission.ddd.projet_doctoral.preparation.use_case.write import completer_comptabilite_proposition_service
 from infrastructure.shared_kernel.academic_year.repository.academic_year import AcademicYearRepository
 from .domain.service.doctorat import DoctoratTranslator
 from .domain.service.historique import Historique
@@ -173,5 +174,9 @@ COMMAND_HANDLERS = {
         proposition_repository=PropositionRepository(),
         groupe_supervision_repository=GroupeDeSupervisionRepository(),
         historique=Historique(),
+    ),
+    CompleterComptabilitePropositionCommand: partial(
+        completer_comptabilite_proposition,
+        proposition_repository=PropositionRepository(),
     ),
 }

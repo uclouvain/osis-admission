@@ -73,3 +73,15 @@ def get_mail_templates_from_admission(admission: DoctorateAdmission):
         if admission.post_enrolment_status == ChoixStatutDoctorat.SUBMITTED_CONFIRMATION.name:
             allowed_templates.append(ADMISSION_EMAIL_CONFIRMATION_PAPER_INFO_STUDENT)
     return allowed_templates
+
+
+def takewhile_return_attribute_values(predicate, iterable, attribute):
+    """
+    Make an iterator that returns the values of a specific attribute of elements from the iterable as long as the
+    predicate is true.
+    """
+    for x in iterable:
+        if predicate(x):
+            yield x[attribute]
+        else:
+            break

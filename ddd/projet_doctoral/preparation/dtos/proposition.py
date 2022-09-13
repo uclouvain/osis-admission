@@ -29,6 +29,7 @@ from uuid import UUID
 
 import attr
 
+from .comptabilite import ComptabiliteDTO
 from .doctorat import DoctoratDTO
 from osis_common.ddd import interface
 
@@ -76,3 +77,4 @@ class PropositionDTO(interface.DTO):
     creee_le: datetime.datetime
     modifiee_le: datetime.datetime
     erreurs: List[Dict[str, str]]
+    comptabilite: ComptabiliteDTO

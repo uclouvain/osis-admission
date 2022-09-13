@@ -25,6 +25,36 @@ msgstr ""
 msgid "%(label)s:"
 msgstr ""
 
+#, python-format
+msgid ""
+"%(person_concerned)s has a long-term residence permit (B, C, D, F, F+ or M "
+"cards) in Belgium"
+msgstr ""
+
+#, python-format
+msgid ""
+"%(person_concerned)s has a residence permit for more than 3 months and "
+"receives professional or replacement income"
+msgstr ""
+
+#, python-format
+msgid ""
+"%(person_concerned)s has the nationality of a country of a Member State of "
+"the European Union"
+msgstr ""
+
+#, python-format
+msgid ""
+"%(person_concerned)s is a refugee applicant, refugee, stateless person, or "
+"has temporary/subsidiary protection"
+msgstr ""
+
+#, python-format
+msgid ""
+"%(person_concerned)s is supported by the CPAS, or by a CPAS rest home or "
+"designated by the CPAS"
+msgstr ""
+
 msgid ", on"
 msgstr ""
 
@@ -96,6 +126,12 @@ msgstr ""
 msgid "A justification is needed when creating a pre-admission."
 msgstr ""
 
+msgid "A or B card"
+msgstr ""
+
+msgid "A or B card with refugee mention"
+msgstr ""
+
 msgid "ACCEPTED"
 msgstr "Accepted"
 
@@ -142,6 +178,12 @@ msgid "Accept these activities"
 msgstr ""
 
 msgid "Accepted"
+msgstr ""
+
+msgid "Account number"
+msgstr ""
+
+msgid "Account number type"
 msgstr ""
 
 msgid "Achieved additional training"
@@ -267,6 +309,17 @@ msgstr "Already a member of the supervisory panel."
 msgid "Already a promoter."
 msgstr ""
 
+msgid "Annex 25 or 26 for refugees and stateless persons"
+msgstr ""
+
+msgid ""
+"Annex 25 or 26 or the A/B card mentioning the refugee status or the decision "
+"confirming the protection of the parent"
+msgstr ""
+
+msgid "Application for a study allowance from the French Community of Belgium"
+msgstr ""
+
 msgid "Approximate date for completing the thesis:"
 msgstr ""
 
@@ -279,6 +332,24 @@ msgstr ""
 
 #, python-format
 msgid "Are you sure you want to refuse \"%(object)s\"?"
+msgstr ""
+
+msgid "Assimilation 1 situation types"
+msgstr ""
+
+msgid "Assimilation 2 situation types"
+msgstr ""
+
+msgid "Assimilation 3 situation types"
+msgstr ""
+
+msgid "Assimilation 5 situation types"
+msgstr ""
+
+msgid "Assimilation 6 situation types"
+msgstr ""
+
+msgid "Assimilation situation"
 msgstr ""
 
 msgid "Attachment: Doctoral training"
@@ -294,6 +365,9 @@ msgid "Author"
 msgstr ""
 
 msgid "Authors"
+msgstr ""
+
+msgid "BIC/SWIFT code identifying the bank from which the account was opened"
 msgstr ""
 
 msgid "BIOLOGY"
@@ -347,8 +421,14 @@ msgstr ""
 msgid "CDDs"
 msgstr ""
 
+msgid "CFWB scholarship decision"
+msgstr ""
+
 msgid "CHEMISTRY"
 msgstr "Chemistry"
+
+msgid "CIRE, unlimited stay or foreigner`s card"
+msgstr ""
 
 msgid "COMMUNICATION"
 msgstr "Oral communication (excluding conference)"
@@ -545,12 +625,21 @@ msgstr ""
 msgid "Certificate of participation in the presentation"
 msgstr ""
 
+msgid "Certificate of support from the CPAS"
+msgstr ""
+
+msgid "Certificate stating the absence of debts towards the institute"
+msgstr ""
+
 #, python-format
 msgid "Change <em>%(name)s</em> configuration"
 msgstr ""
 
 #, python-format
 msgid "Change <em>%(name)s</em> custom mail template"
+msgstr ""
+
+msgid "Child of a member of the staff of the UCLouvain or the Martin V entity"
 msgstr ""
 
 msgid "City"
@@ -709,6 +798,12 @@ msgid "Deadline for confirmation:"
 msgstr ""
 
 msgid "Deadline of the confirmation paper (DD/MM/YYYY)"
+msgstr ""
+
+msgid "Decision confirming the granting of subsidiary protection"
+msgstr ""
+
+msgid "Decision confirming the granting of temporary protection"
 msgstr ""
 
 msgid "Dedicated time (in EFT)"
@@ -904,6 +999,9 @@ msgstr ""
 msgid "First name"
 msgstr ""
 
+msgid "First name of the account holder"
+msgstr ""
+
 msgctxt "female gender"
 msgid ""
 "Following the presentation of the state of the research and the subsequent "
@@ -954,6 +1052,89 @@ msgstr ""
 msgid "History"
 msgstr ""
 
+msgid "Household composition or the birth certificate"
+msgstr ""
+
+msgid "Household composition or the marriage certificate"
+msgstr ""
+
+msgid ""
+"I am a long-term resident in the European Union outside Belgium "
+"(assimilation 7)"
+msgstr ""
+
+msgid "I am a refugee"
+msgstr ""
+
+msgid ""
+"I am a refugee, stateless person, or have been granted a subsidiary or "
+"temporary protection (assimilation 2)"
+msgstr ""
+
+msgid "I am an asylum seeker"
+msgstr ""
+
+msgid ""
+"I am supported by the CPAS, or by a CPAS rest home or designated by the CPAS "
+"(assimilation 4)"
+msgstr ""
+
+msgid "I benefit from a Development Cooperation grant"
+msgstr ""
+
+msgid ""
+"I benefit from a grant covered by the paragraph 2 of article 105 of the "
+"decree of 7 November 2013 (assimilation 6)"
+msgstr ""
+
+msgid ""
+"I benefit from a grant given by the study allowance service of the French "
+"Community"
+msgstr ""
+
+msgid "I benefit from subsidiary protection"
+msgstr ""
+
+msgid "I benefit from temporary protection"
+msgstr ""
+
+msgid "I have a foreigner's card"
+msgstr ""
+
+msgid "I have a long-term resident card"
+msgstr ""
+
+msgid ""
+"I have a permanent residence card as a family member of a European Union "
+"citizen"
+msgstr ""
+
+msgid "I have a residence card as a family member of an EU citizen."
+msgstr ""
+
+msgid ""
+"I have a residence permit for more than 3 months, and I also have "
+"professional or replacement income (assimilation 3)"
+msgstr ""
+
+msgid ""
+"I have a residence permit for more than 3 months, and I have a professional "
+"income"
+msgstr ""
+
+msgid ""
+"I have a residence permit for more than 3 months, and I receive a "
+"replacement income"
+msgstr ""
+
+msgid ""
+"I have a settlement permit or I am a long-term resident in Belgium "
+"(assimilation 1)"
+msgstr ""
+
+msgid "IBAN account number"
+msgstr ""
+
 msgid "INVALID"
 msgstr "Invalid"
 
@@ -967,6 +1148,11 @@ msgid "Identification"
 msgstr ""
 
 msgid "Identifier"
+msgstr ""
+
+msgid ""
+"Identity document proving the long-term stay in a member state of the "
+"European Union"
 msgstr ""
 
 msgid "If other, specify"
@@ -1040,6 +1226,12 @@ msgstr ""
 msgid "Last name / First name / Global id"
 msgstr ""
 
+msgid "Last name of the account holder"
+msgstr ""
+
+msgid "Legal cohabitation certificate"
+msgstr ""
+
 msgid "Legal residence"
 msgstr ""
 
@@ -1062,6 +1254,9 @@ msgid "Link to the doctoral training panel (back-office)"
 msgstr ""
 
 msgid "Link to the doctoral training panel (front-office)"
+msgstr ""
+
+msgid "Long-term resident card"
 msgstr ""
 
 msgid "MANAGEMENT"
@@ -1234,6 +1429,28 @@ msgstr ""
 msgid "Must be in the process of the enrolment"
 msgstr ""
 
+msgid "My father"
+msgstr ""
+
+msgid ""
+"My father, mother, legal tutor, spouse or legal cohabitant has the "
+"nationality of a country of a Member State of the European Union, or "
+"fulfills the conditions referred to by one of the assimilations from 1 to 4 "
+"(assimilation 5)"
+msgstr ""
+
+msgid "My legal cohabitant"
+msgstr ""
+
+msgid "My legal tutor"
+msgstr ""
+
+msgid "My mother"
+msgstr ""
+
+msgid "My partner"
+msgstr ""
+
 msgid "N/A"
 msgstr ""
 
@@ -1286,6 +1503,9 @@ msgid "No doctorate enrolment"
 msgstr ""
 
 msgid "No doctorate found."
+msgstr ""
+
+msgid "None of these proposals are relevant to me"
 msgstr ""
 
 msgid "Not specified"
@@ -1376,6 +1596,21 @@ msgstr ""
 msgid "Page size"
 msgstr ""
 
+msgid "Parent certificate of support from the CPAS"
+msgstr ""
+
+msgid "Parent identity card"
+msgstr ""
+
+msgid "Parent long-term residence permit"
+msgstr ""
+
+msgid "Parent residence permit valid for more than 3 months"
+msgstr ""
+
+msgid "Parent salary slips"
+msgstr ""
+
 msgid "Participating proof"
 msgstr ""
 
@@ -1386,6 +1621,9 @@ msgid "Participation certification"
 msgstr ""
 
 msgid "Past confirmation papers"
+msgstr ""
+
+msgid "Permanent residence card of a family member of a European Union citizen"
 msgstr ""
 
 msgid "Personal data"
@@ -1550,6 +1788,9 @@ msgstr ""
 msgid "Proof of publication"
 msgstr ""
 
+msgid "Proof of receipt of unemployment benefit, pension or compensation"
+msgstr ""
+
 msgid "Proposed new deadline"
 msgstr ""
 
@@ -1640,7 +1881,13 @@ msgstr ""
 msgid "Registration Id"
 msgstr ""
 
+msgid "Registration certificate"
+msgstr ""
+
 msgid "Rejection reason"
+msgstr ""
+
+msgid "Relationship"
 msgstr ""
 
 msgid "Report of the supervisory panel"
@@ -1666,6 +1913,18 @@ msgid "Research seminar"
 msgstr ""
 
 msgid "Reset"
+msgstr ""
+
+msgid "Residence card of a family member of a European Union citizen"
+msgstr ""
+
+msgid "Residence permit in Belgium"
+msgstr ""
+
+msgid "Residence permit valid for more than 3 months with professional income"
+msgstr ""
+
+msgid "Residence permit valid for more than 3 months with replacement income"
 msgstr ""
 
 msgid "Retaking of the confirmation paper"
@@ -1737,6 +1996,9 @@ msgstr "Submitted"
 msgid "SUBMITTED_CONFIRMATION"
 msgstr "Submitted confirmation"
 
+msgid "Salary slips"
+msgstr ""
+
 msgid "Save"
 msgstr ""
 
@@ -1744,6 +2006,9 @@ msgid "Save and view result"
 msgstr ""
 
 msgid "Scholarship"
+msgstr ""
+
+msgid "Scholarship certificate"
 msgstr ""
 
 msgid "Scholarship date"
@@ -1815,10 +2080,49 @@ msgstr ""
 msgid "Sir"
 msgstr ""
 
+msgid "Solidarity student"
+msgstr ""
+
 msgid "Some errors have been encountered."
 msgstr ""
 
+msgid ""
+"Some fields are missing in the 'Absence of debt' block in the 'Finalization "
+"> Accounting' tab."
+msgstr ""
+
+msgid ""
+"Some fields are missing in the 'Affiliations' block in the 'Finalization > "
+"Accounting' tab."
+msgstr ""
+
+msgid ""
+"Some fields are missing in the 'Assimilation' block in the 'Finalization > "
+"Accounting' tab."
+msgstr ""
+
+msgid ""
+"Some fields are missing in the 'Reduced registration fees' block in the "
+"'Finalization > Accounting' tab."
+msgstr ""
+
+msgid ""
+"Some fields related to the bank account are missing in the 'Finalization > "
+"Accounting' tab."
+msgstr ""
+
+msgid ""
+"Some fields related to the bank account number in IBAN format are missing in "
+"the 'Finalization > Accounting' tab."
+msgstr ""
+
 msgid "Speaker"
+msgstr ""
+
+msgid "Sport affiliation"
+msgstr ""
+
+msgid "Staff child certificate"
 msgstr ""
 
 msgid "Status"
@@ -1997,6 +2301,9 @@ msgstr ""
 msgid "The opinion about the extension request is not completed."
 msgstr ""
 
+msgid "The person concerned"
+msgstr ""
+
 msgid ""
 "The professional experiences that have been valuated from this admission."
 msgstr ""
@@ -2127,6 +2434,9 @@ msgstr ""
 msgid "Training"
 msgstr ""
 
+msgid "Tutorship act"
+msgstr ""
+
 msgid "Type"
 msgstr ""
 
@@ -2202,6 +2512,33 @@ msgid "Year"
 msgstr ""
 
 msgid "Yes"
+msgstr ""
+
+msgid "Yes, an account number in IBAN format"
+msgstr ""
+
+msgid "Yes, an account number in another format"
+msgstr ""
+
+msgid "Yes, in Louvain-la-Neuve and/or Woluwe-Saint-Lambert (50 EUR)"
+msgstr "Yes, in Louvain-la-Neuve and/or Woluwé-Saint-Lambert (50 EUR)"
+
+msgid "Yes, in Mons and other UCLouvain sites (50 EUR)"
+msgstr ""
+
+msgid "Yes, in Saint-Gilles and other UCLouvain sites (50 EUR)"
+msgstr ""
+
+msgid "Yes, in Tournai and other UCLouvain sites (50 EUR)"
+msgstr ""
+
+msgid "Yes, only in Mons (10 EUR)"
+msgstr ""
+
+msgid "Yes, only in Saint-Gilles (10 EUR)"
+msgstr ""
+
+msgid "Yes, only in Tournai (10 EUR)"
 msgstr ""
 
 msgid "You cannot fill in a language more than once, please correct the form."
@@ -2289,5 +2626,23 @@ msgstr ""
 msgid "the <strong>successful completion</strong> of the confirmation paper."
 msgstr ""
 
+msgid "the person concerned"
+msgstr ""
+
 msgid "ucl"
 msgstr "UCLouvain"
+
+msgid "your father"
+msgstr ""
+
+msgid "your legal cohabitant"
+msgstr ""
+
+msgid "your legal tutor"
+msgstr ""
+
+msgid "your mother"
+msgstr ""
+
+msgid "your partner"
+msgstr ""

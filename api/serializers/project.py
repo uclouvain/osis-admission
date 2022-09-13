@@ -110,6 +110,9 @@ class PropositionSearchDTOSerializer(IncludedFieldsMixin, DTOSerializer):
             # Confirmation
             'retrieve_confirmation': ACTION_LINKS['retrieve_confirmation'],
             'update_confirmation': ACTION_LINKS['update_confirmation'],
+            # Accounting
+            'retrieve_accounting': ACTION_LINKS['retrieve_accounting'],
+            'update_accounting': ACTION_LINKS['update_accounting'],
             # Training
             'retrieve_training': ACTION_LINKS['retrieve_training'],
         }
@@ -181,6 +184,9 @@ class PropositionDTOSerializer(IncludedFieldsMixin, DTOSerializer):
             # Confirmation
             'retrieve_confirmation': ACTION_LINKS['retrieve_confirmation'],
             'update_confirmation': ACTION_LINKS['update_confirmation'],
+            # Accounting
+            'retrieve_accounting': ACTION_LINKS['retrieve_accounting'],
+            'update_accounting': ACTION_LINKS['update_accounting'],
             # Training
             'retrieve_training': ACTION_LINKS['retrieve_training'],
         }
@@ -227,6 +233,7 @@ class PropositionDTOSerializer(IncludedFieldsMixin, DTOSerializer):
             'statut',
             'links',
             'erreurs',
+            'comptabilite',
         ]
 
 

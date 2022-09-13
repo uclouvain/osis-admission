@@ -46,17 +46,11 @@ class ShouldAnneesCVRequisesCompletees(BusinessValidator):
     annees_experiences_academiques: List[int]
 
     def validate(self, *args, **kwargs):
-        annee_minimale = 1 + max(
-            [
-                annee
-                for annee in [
-                    self.annee_courante - IProfilCandidatTranslator.NB_MAX_ANNEES_CV_REQUISES,
-                    self.annee_diplome_etudes_secondaires_belges,
-                    self.annee_diplome_etudes_secondaires_etrangeres,
-                    self.annee_derniere_inscription_ucl,
-                ]
-                if annee
-            ]
+        annee_minimale = IProfilCandidatTranslator.get_annee_minimale_a_completer_cv(
+            annee_courante=self.annee_courante,
+            annee_diplome_etudes_secondaires_belges=self.annee_diplome_etudes_secondaires_belges,
+            annee_diplome_etudes_secondaires_etrangeres=self.annee_diplome_etudes_secondaires_etrangeres,
+            annee_derniere_inscription_ucl=self.annee_derniere_inscription_ucl,
         )
 
         annees_valorisees = set(self.annees_experiences_academiques)

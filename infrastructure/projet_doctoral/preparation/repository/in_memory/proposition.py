@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -51,8 +51,8 @@ from admission.ddd.projet_doctoral.preparation.test.factory.proposition import (
     PropositionPreAdmissionSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory,
     PropositionPreAdmissionSC3DPMinimaleFactory,
 )
-from admission.infrastructure.projet_doctoral.preparation.domain.service.in_memory.doctorat import (
-    DoctoratInMemoryTranslator,
+from admission.infrastructure.projet_doctoral.preparation.repository.in_memory._comptabilite import (
+    get_dto_accounting_from_domain_model,
 )
 from base.ddd.utils.in_memory_repository import InMemoryGenericRepository
 
@@ -239,4 +239,5 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
             nationalite_candidat=candidat.nationalite,
             modifiee_le=proposition.modifiee_le,
             erreurs=[],
+            comptabilite=get_dto_accounting_from_domain_model(proposition.comptabilite),
         )

@@ -45,6 +45,14 @@ from ._should_identification_candidat_etre_completee import (
     ShouldCandidatAuthentiquerPasseport,
 )
 from ._should_premier_promoteur_renseigner_institut_these import ShouldPremierPromoteurRenseignerInstitutThese
+from ._should_comptabilite_etre_completee import (
+    ShouldIBANCarteBancaireRemboursementEtreCompletee,
+    ShouldAutreFormatCarteBancaireRemboursementEtreCompletee,
+    ShouldAffiliationsEtreCompletees,
+    ShouldAssimilationEtreCompletee,
+    ShouldAbsenceDeDetteEtreCompletee,
+    ShouldReductionDesDroitsInscriptionEtreCompletee,
+)
 
 __all__ = [
     "ShouldInstitutionDependreDoctoratRealise",
@@ -81,4 +89,10 @@ __all__ = [
     "ShouldMembresCAOntApprouve",
     "ShouldPremierPromoteurRenseignerInstitutThese",
     "ShouldGroupeDeSupervisionAvoirUnPromoteurDeReference",
+    "ShouldIBANCarteBancaireRemboursementEtreCompletee",
+    "ShouldAutreFormatCarteBancaireRemboursementEtreCompletee",
+    "ShouldAbsenceDeDetteEtreCompletee",
+    "ShouldReductionDesDroitsInscriptionEtreCompletee",
+    "ShouldAssimilationEtreCompletee",
+    "ShouldAffiliationsEtreCompletees",
 ]
