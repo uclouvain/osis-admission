@@ -48,7 +48,9 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
         ).get(global_id=matricule)
 
         residential_country = (
-            PersonAddress.objects.filter(label=PersonAddressType.RESIDENTIAL.name).values('country__iso_code').first()
+            PersonAddress.objects.filter(label=PersonAddressType.RESIDENTIAL.name, person=person)
+            .values('country__iso_code')
+            .first()
         )
 
         return IdentificationDTO(
