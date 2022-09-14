@@ -72,10 +72,11 @@ class DoctorateTrainingActivityViewTestCase(TestCase):
             ects=10,
             doctorate__supervision_group=cls.reference_promoter.process,
         )
+        cls.namespace = 'admission:doctorate:doctoral-training'
         cls.doctorate = cls.conference.doctorate
         cls.service = ServiceFactory(doctorate=cls.doctorate)
         cls.manager = CddManagerFactory(entity=cls.doctorate.doctorate.management_entity)
-        cls.url = resolve_url('admission:doctorate:training', uuid=cls.doctorate.uuid)
+        cls.url = resolve_url(cls.namespace, uuid=cls.doctorate.uuid)
         cls.default_url_args = dict(uuid=cls.doctorate.uuid, activity_id=cls.conference.uuid)
 
     def setUp(self) -> None:
@@ -88,15 +89,15 @@ class DoctorateTrainingActivityViewTestCase(TestCase):
         self.assertEqual(str(self.conference), "Conférence (10 ects, Non soumise)")
 
         # With an unsubmitted conference and unsubmitted service, we should have these links
-        url = resolve_url('admission:doctorate:training:add', uuid=self.doctorate.uuid, category='communication')
+        url = resolve_url(f'{self.namespace}:add', uuid=self.doctorate.uuid, category='communication')
         self.assertContains(response, f"{url}?parent={self.conference.uuid}")
-        url = resolve_url('admission:doctorate:training:add', uuid=self.doctorate.uuid, category='publication')
+        url = resolve_url(f'{self.namespace}:add', uuid=self.doctorate.uuid, category='publication')
         self.assertContains(response, f"{url}?parent={self.conference.uuid}")
-        self.assertContains(response, resolve_url('admission:doctorate:training:edit', **self.default_url_args))
-        self.assertContains(response, resolve_url('admission:doctorate:training:delete', **self.default_url_args))
+        self.assertContains(response, resolve_url(f'{self.namespace}:edit', **self.default_url_args))
+        self.assertContains(response, resolve_url(f'{self.namespace}:delete', **self.default_url_args))
 
     def test_boolean_select_is_online(self):
-        add_url = resolve_url('admission:doctorate:training:add', uuid=self.doctorate.uuid, category='communication')
+        add_url = resolve_url(f'{self.namespace}:add', uuid=self.doctorate.uuid, category='communication')
         response = self.client.get(add_url)
         default_input = (
             '<input type="radio" name="is_online" value="False" class="" title="" id="id_is_online_0" checked>'
@@ -105,12 +106,12 @@ class DoctorateTrainingActivityViewTestCase(TestCase):
 
     def test_academic_year_field(self):
         AcademicYearFactory(year=2022)
-        add_url = resolve_url('admission:doctorate:training:add', uuid=self.doctorate.uuid, category='course')
+        add_url = resolve_url(f'{self.namespace}:add', uuid=self.doctorate.uuid, category='course')
         response = self.client.get(add_url)
         self.assertContains(response, "2022-2023", html=True)
 
     def test_boolean_select_is_online_with_value(self):
-        add_url = resolve_url('admission:doctorate:training:add', uuid=self.doctorate.uuid, category='communication')
+        add_url = resolve_url(f'{self.namespace}:add', uuid=self.doctorate.uuid, category='communication')
         response = self.client.post(add_url, {'is_online': True})
         default_input = (
             '<input type="radio" name="is_online" value="False" class="" title="" id="id_is_online_0" checked>'
@@ -118,7 +119,7 @@ class DoctorateTrainingActivityViewTestCase(TestCase):
         self.assertNotContains(response, default_input, html=True)
 
     def test_form(self):
-        add_url = resolve_url('admission:doctorate:training:add', uuid=self.doctorate.uuid, category='service')
+        add_url = resolve_url(f'{self.namespace}:add', uuid=self.doctorate.uuid, category='service')
         with translation.override(settings.LANGUAGE_CODE_FR):
             response = self.client.get(add_url)
             self.assertContains(response, "Coopération internationale")
@@ -145,12 +146,12 @@ class DoctorateTrainingActivityViewTestCase(TestCase):
         self.assertFormError(response, 'form', 'start_date', _("The start date can't be later than the end date"))
 
     def test_missing_form(self):
-        add_url = resolve_url('admission:doctorate:training:add', uuid=self.doctorate.uuid, category='foobar')
+        add_url = resolve_url(f'{self.namespace}:add', uuid=self.doctorate.uuid, category='foobar')
         response = self.client.get(add_url)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_parent(self):
-        add_url = resolve_url('admission:doctorate:training:add', uuid=self.doctorate.uuid, category='publication')
+        add_url = resolve_url(f'{self.namespace}:add', uuid=self.doctorate.uuid, category='publication')
 
         # test inexistent parent
         response = self.client.get(f"{add_url}?parent={uuid.uuid4()}")
@@ -170,7 +171,7 @@ class DoctorateTrainingActivityViewTestCase(TestCase):
     def test_edit(self):
         # Test edit
         edit_url = resolve_url(
-            'admission:doctorate:training:edit',
+            f'{self.namespace}:edit',
             uuid=self.doctorate.uuid,
             activity_id=self.service.uuid,
         )
@@ -185,7 +186,7 @@ class DoctorateTrainingActivityViewTestCase(TestCase):
 
         # Test edit a child activity
         child = PublicationFactory(doctorate=self.doctorate, parent=self.conference)
-        edit_url = resolve_url('admission:doctorate:training:edit', uuid=self.doctorate.uuid, activity_id=child.uuid)
+        edit_url = resolve_url(f'{self.namespace}:edit', uuid=self.doctorate.uuid, activity_id=child.uuid)
         response = self.client.get(edit_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -202,7 +203,7 @@ class DoctorateTrainingActivityViewTestCase(TestCase):
             doctorate=self.doctorate,
             category=CategorieActivite.COMMUNICATION.name,
         )
-        edit_url = resolve_url('admission:doctorate:training:edit', uuid=self.doctorate.uuid, activity_id=activity.uuid)
+        edit_url = resolve_url(f'{self.namespace}:edit', uuid=self.doctorate.uuid, activity_id=activity.uuid)
         response = self.client.post(
             edit_url,
             {
@@ -234,7 +235,7 @@ class DoctorateTrainingActivityViewTestCase(TestCase):
             category=CategorieActivite.COMMUNICATION.name,
             parent=self.conference,
         )
-        edit_url = resolve_url('admission:doctorate:training:edit', uuid=self.doctorate.uuid, activity_id=child.uuid)
+        edit_url = resolve_url(f'{self.namespace}:edit', uuid=self.doctorate.uuid, activity_id=child.uuid)
         response = self.client.post(
             edit_url,
             {
@@ -272,14 +273,14 @@ class DoctorateTrainingActivityViewTestCase(TestCase):
 
     def test_delete_activity(self):
         child = PublicationFactory(doctorate=self.doctorate, parent=self.conference)
-        url = resolve_url('admission:doctorate:training:delete', **self.default_url_args)
+        url = resolve_url(f'{self.namespace}:delete', **self.default_url_args)
         response = self.client.post(url, {}, follow=True)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIsNone(Activity.objects.filter(pk__in=[child.pk, self.conference.pk]).first())
 
     def test_course_dates(self):
         activity = CourseFactory(doctorate=self.doctorate)
-        edit_url = resolve_url('admission:doctorate:training:edit', uuid=self.doctorate.uuid, activity_id=activity.uuid)
+        edit_url = resolve_url(f'{self.namespace}:edit', uuid=self.doctorate.uuid, activity_id=activity.uuid)
         year = AcademicYearFactory(year=2022)
         response = self.client.post(
             edit_url,
@@ -367,7 +368,7 @@ class DoctorateTrainingActivityViewTestCase(TestCase):
     def test_refuse_activity(self):
         self.conference.status = StatutActivite.SOUMISE.name
         self.conference.save()
-        url = resolve_url('admission:doctorate:training:refuse', **self.default_url_args)
+        url = resolve_url(f'{self.namespace}:refuse', **self.default_url_args)
         response = self.client.get(url)
         self.assertContains(response, _("Refuse activity"))
 

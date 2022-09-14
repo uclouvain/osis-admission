@@ -41,7 +41,7 @@ def recuperer_derniere_epreuve_confirmation(
 ) -> EpreuveConfirmationDTO:
     # GIVEN
     doctorat_id = DoctoratIdentityBuilder.build_from_uuid(cmd.doctorat_uuid)
-    doctorat_repository.get(doctorat_id)
+    doctorat_repository.verifier_existence(doctorat_id)
 
     # THEN
     return epreuve_confirmation_repository.get_dto_by_doctorat_identity(doctorat_id)

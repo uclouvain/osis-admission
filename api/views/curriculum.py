@@ -42,6 +42,16 @@ from admission.api.views.mixins import PersonRelatedMixin, PersonRelatedSchema
 from osis_profile.models import ProfessionalExperience, EducationalExperience
 from osis_role.contrib.views import APIPermissionRequiredMixin
 
+__all__ = [
+    "CurriculumView",
+    "ProfessionalExperienceViewSetSchema",
+    "EducationalExperienceViewSetSchema",
+    "ExperienceViewSet",
+    "ProfessionalExperienceViewSet",
+    "EducationalExperienceViewSet",
+    "CurriculumFileView",
+]
+
 
 class CurriculumView(PersonRelatedMixin, APIPermissionRequiredMixin, RetrieveAPIView):
     permission_classes = [

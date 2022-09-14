@@ -43,11 +43,9 @@ class ChoixDoctoratDejaRealise(ChoiceEnum):
 class ExperiencePrecedenteRecherche(interface.ValueObject):
     doctorat_deja_realise: ChoixDoctoratDejaRealise = ChoixDoctoratDejaRealise.NO
     institution: Optional[str] = ''
-    domaine_these: str = ''
+    domaine_these: Optional[str] = ''
     date_soutenance: Optional[datetime.date] = None
     raison_non_soutenue: Optional[str] = ''
 
 
-aucune_experience_precedente_recherche = ExperiencePrecedenteRecherche(
-    doctorat_deja_realise=ChoixDoctoratDejaRealise.NO,
-)
+aucune_experience_precedente_recherche = ExperiencePrecedenteRecherche()

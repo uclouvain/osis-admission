@@ -84,11 +84,14 @@ urlpatterns = [
     path('propositions/<uuid:uuid>/supervised_confirmation', views.SupervisedConfirmationAPIView),
     # Doctorate
     path('propositions/<uuid:uuid>/doctorate', views.DoctorateAPIView),
-    path('propositions/<uuid:uuid>/training', views.DoctoralTrainingListView),
-    path('propositions/<uuid:uuid>/training/config', views.DoctoralTrainingConfigView),
-    path('propositions/<uuid:uuid>/training/submit', views.DoctoralTrainingSubmitView),
-    path('propositions/<uuid:uuid>/training/<uuid:activity_id>', views.DoctoralTrainingView),
-    path('propositions/<uuid:uuid>/training/<uuid:activity_id>/assent', views.DoctoralTrainingAssentView),
+    # Training
+    path('propositions/<uuid:uuid>/training/config', views.TrainingConfigView),
+    path('propositions/<uuid:uuid>/doctoral-training', views.DoctoralTrainingListView),
+    path('propositions/<uuid:uuid>/training/submit', views.TrainingSubmitView),
+    path('propositions/<uuid:uuid>/training/<uuid:activity_id>', views.TrainingView),
+    path('propositions/<uuid:uuid>/training/<uuid:activity_id>/assent', views.TrainingAssentView),
+    path('propositions/<uuid:uuid>/complementary-training', views.ComplementaryTrainingListView),
+    path('propositions/<uuid:uuid>/course-enrollment', views.CourseEnrollmentListView),
     # Autocompletes
     path('autocomplete/sector', views.AutocompleteSectorView),
     path('autocomplete/sector/<str:sigle>/doctorates', views.AutocompleteDoctoratView),

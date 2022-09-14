@@ -82,6 +82,12 @@ class DoctoratInMemoryRepository(InMemoryGenericRepository, IDoctoratRepository)
         return doctorat
 
     @classmethod
+    def verifier_existence(cls, entity_id: 'DoctoratIdentity') -> None:
+        doctorat = super().get(entity_id)
+        if not doctorat:
+            raise DoctoratNonTrouveException
+
+    @classmethod
     def get_dto(cls, entity_id: 'DoctoratIdentity') -> 'DoctoratDTO':
         doctorat = cls.get(entity_id)
         doctorant = next(d for d in cls.doctorants if d.matricule == doctorat.matricule_doctorant)  # pragma: no branch

@@ -55,6 +55,7 @@ class AccepterActivites(interface.DomainService):
         for activite in activites:
             activite.accepter()
             # TODO Performance ?
+            # TODO Communicate to OSIS-Parcours if UCL_COURSE
             activite_repository.save(activite)
             # Also accept sub-activities for seminars
             if activite.categorie == CategorieActivite.SEMINAR:

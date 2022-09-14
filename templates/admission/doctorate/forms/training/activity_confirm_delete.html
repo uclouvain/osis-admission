@@ -35,7 +35,7 @@
   <form action="" method="post">
     {% csrf_token %}
     <div class="text-right">
-      <a href="{% url "admission:doctorate:training" uuid=view.kwargs.uuid %}#{{ view.kwargs.activity_id }}">
+      <a href="{% url "admission:doctorate:doctoral-training" uuid=view.kwargs.uuid %}#{{ view.kwargs.activity_id }}">
         {% trans "Cancel" %}
       </a>
       <button type="submit" class="btn btn-danger">

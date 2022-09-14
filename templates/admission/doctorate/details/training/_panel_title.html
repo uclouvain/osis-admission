@@ -24,15 +24,17 @@
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
 
-{% url "admission:doctorate:training:edit" uuid=view.kwargs.uuid activity_id=activity.uuid as edit_url %}
-{% url "admission:doctorate:training:refuse" uuid=view.kwargs.uuid activity_id=activity.uuid as refuse_url %}
-{% url "admission:doctorate:training:require-changes" uuid=view.kwargs.uuid activity_id=activity.uuid as require_changes_url %}
-{% url "admission:doctorate:training:delete" uuid=view.kwargs.uuid activity_id=activity.uuid as delete_url %}
+
+{% display request.resolver_match.namespace|add:':'|add:request.resolver_match.url_name as namespace %}
+{% url namespace|add:":edit" uuid=view.kwargs.uuid activity_id=activity.uuid as edit_url %}
+{% url namespace|add:":refuse" uuid=view.kwargs.uuid activity_id=activity.uuid as refuse_url %}
+{% url namespace|add:":require-changes" uuid=view.kwargs.uuid activity_id=activity.uuid as require_changes_url %}
+{% url namespace|add:":delete" uuid=view.kwargs.uuid activity_id=activity.uuid as delete_url %}
 {% if activity.category|safe == 'CONFERENCE' or activity.category|safe == 'SEMINAR' or activity.category|safe == 'RESIDENCY' %}
-  {% url "admission:doctorate:training:add" uuid=view.kwargs.uuid category="communication" as add_communication_url %}
+  {% url namespace|add:":add" uuid=view.kwargs.uuid category="communication" as add_communication_url %}
 {% endif %}
 {% if activity.category|safe == 'CONFERENCE' %}
-  {% url "admission:doctorate:training:add" uuid=view.kwargs.uuid category="publication" as add_publication_url %}
+  {% url namespace|add:":add" uuid=view.kwargs.uuid category="publication" as add_publication_url %}
 {% endif %}
 
 <a

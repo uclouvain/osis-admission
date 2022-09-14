@@ -27,12 +27,14 @@ from django.utils.translation import gettext_lazy as _
 from rules import RuleSet
 
 from admission.auth.predicates import (
+    complementary_training_enabled,
+    confirmation_paper_in_progress,
     is_admission_reference_promoter,
     is_admission_request_promoter,
-    is_part_of_committee_and_invited,
     is_being_enrolled,
     is_enrolled,
-    confirmation_paper_in_progress,
+    is_part_of_committee_and_invited,
+    is_pre_admission,
 )
 from admission.contrib.models.actor import ExternalActorMixin
 from osis_role.contrib.models import RoleModel
@@ -46,6 +48,7 @@ class Promoter(ExternalActorMixin, RoleModel):
 
     @classmethod
     def rule_set(cls):
+        reference_promoter_and_enrolled = is_admission_reference_promoter & is_enrolled
         rules = {
             'admission.view_doctorateadmission': is_admission_request_promoter,
             'admission.download_pdf_confirmation': is_admission_request_promoter,
@@ -71,7 +74,11 @@ class Promoter(ExternalActorMixin, RoleModel):
             & confirmation_paper_in_progress,
             'admission.upload_pdf_confirmation': is_admission_request_promoter & is_enrolled,
             # Doctoral training
-            'admission.view_doctorateadmission_doctoral_training': is_admission_reference_promoter & is_enrolled,
-            'admission.assent_doctoral_training': is_admission_reference_promoter & is_enrolled,
+            'admission.view_doctoral_training': reference_promoter_and_enrolled & ~is_pre_admission,
+            'admission.assent_doctoral_training': reference_promoter_and_enrolled & ~is_pre_admission,
+            'view_complementary_training': reference_promoter_and_enrolled & complementary_training_enabled,
+            'add_complementary_training': reference_promoter_and_enrolled & complementary_training_enabled,
+            'submit_complementary_training': reference_promoter_and_enrolled & complementary_training_enabled,
+            'delete_complementary_training': reference_promoter_and_enrolled & complementary_training_enabled,
         }
         return RuleSet(rules)

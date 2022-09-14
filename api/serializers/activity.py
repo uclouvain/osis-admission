@@ -34,10 +34,16 @@ from rest_framework.generics import get_object_or_404
 from admission.contrib.models import DoctorateAdmission
 from admission.contrib.models.cdd_config import CddConfiguration
 from admission.contrib.models.doctoral_training import Activity
-from admission.ddd.projet_doctoral.doctorat.formation.domain.model._enums import CategorieActivite, StatutActivite
-from admission.forms.doctorate.training import activity as activity_forms
-from admission.forms.doctorate.training.activity import ConfigurableActivityTypeField
+from admission.ddd.projet_doctoral.doctorat.formation.domain.model._enums import (
+    CategorieActivite,
+    ContexteFormation,
+    StatutActivite,
+)
 from admission.forms import SelectOrOtherField
+from admission.forms.doctorate.training import activity as activity_forms
+from admission.forms.doctorate.training.activity import AcademicYearField, ConfigurableActivityTypeField
+from base.api.serializers.academic_year import RelatedAcademicYearField
+from base.models.learning_unit_year import LearningUnitYear
 from osis_document.contrib import FileUploadField
 from reference.api.serializers.country import RelatedCountryField
 
@@ -58,6 +64,7 @@ FORM_SERIALIZER_FIELD_MAPPING = {
     forms.ModelChoiceField: serializers.Field,  # replaced correctly later
     forms.DecimalField: serializers.FloatField,
     FileUploadField: serializers.ListField,
+    AcademicYearField: RelatedAcademicYearField,
 }
 
 
@@ -96,6 +103,7 @@ class ActivitySerializerBase(serializers.Serializer):
     uuid = serializers.CharField(read_only=True)
     category = serializers.ChoiceField(choices=CategorieActivite.choices())
     status = serializers.ChoiceField(choices=StatutActivite.choices(), read_only=True)
+    context = serializers.ChoiceField(choices=ContexteFormation.choices())
     doctorate = serializers.PrimaryKeyRelatedField(
         queryset=DoctorateAdmission.objects.all(),
         write_only=True,
@@ -104,6 +112,7 @@ class ActivitySerializerBase(serializers.Serializer):
     reference_promoter_assent = serializers.NullBooleanField(read_only=True)
     reference_promoter_comment = serializers.CharField(read_only=True)
     cdd_comment = serializers.CharField(read_only=True)
+    can_be_submitted = serializers.BooleanField(read_only=True)
 
     def __init__(self, *args, admission=None, child_classes=None, **kwargs):
         self.child_classes = child_classes
@@ -301,6 +310,11 @@ class PaperSerializer(ActivitySerializerBase):
         form = activity_forms.PaperForm
 
 
+class UclCourseSerializer(ActivitySerializerBase):
+    class Meta:
+        form = activity_forms.UclCourseForm
+
+
 class DoctoralTrainingActivitySerializer(serializers.Serializer):
     """Serializer that dispatches to activity serializers given the category and the presence of a parent."""
 
@@ -318,6 +332,7 @@ class DoctoralTrainingActivitySerializer(serializers.Serializer):
         CategorieActivite.VAE: ValorisationSerializer,
         CategorieActivite.COURSE: CourseSerializer,
         CategorieActivite.PAPER: PaperSerializer,
+        CategorieActivite.UCL_COURSE: UclCourseSerializer,
     }
     only_classes = None
 
@@ -344,7 +359,7 @@ class DoctoralTrainingActivitySerializer(serializers.Serializer):
     def get_mapped_serializer_class(self, instance: Activity):
         return self.serializer_class_mapping.get(self._get_mapping_key(instance))
 
-    def to_representation(self, instance):
+    def to_representation(self, instance: Activity):
         serializer_class = self.get_mapped_serializer_class(instance)
 
         # Use the serializer's class name to hint which oneOf class to map to
@@ -374,10 +389,16 @@ class DoctoralTrainingActivitySerializer(serializers.Serializer):
 
     def create(self, validated_data):
         """Save a new activity object (simplified ModelSerializer mechanic)"""
-        params = {'doctorate': self.admission, 'category': self.initial_data['category'].upper()}
+        params = {
+            'doctorate': self.admission,
+            'category': self.initial_data['category'].upper(),
+            'context': self.initial_data['context'],
+        }
         if self.initial_data.get('parent'):
             params['parent'] = get_object_or_404(Activity, uuid=self.initial_data.get('parent'))
-        return Activity.objects.create(**validated_data, **params)
+        data = {**validated_data, **params}
+        data.pop('academic_year', None)
+        return Activity.objects.create(**data)
 
     def update(self, instance, validated_data):
         """Save an existing activity object (simplified ModelSerializer mechanic)"""
@@ -401,4 +422,4 @@ class DoctoralTrainingAssentSerializer(serializers.Serializer):
 class DoctoralTrainingConfigSerializer(serializers.ModelSerializer):
     class Meta:
         model = CddConfiguration
-        exclude = ['id', 'cdd']
+        exclude = ['id', 'cdd', 'is_complementary_training_enabled']

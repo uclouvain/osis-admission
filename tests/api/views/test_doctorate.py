@@ -115,8 +115,11 @@ class DoctorateAPIViewTestCase(APITestCase):
             'retrieve_proposition',
             'retrieve_confirmation',
             'update_confirmation',
-            'retrieve_training',
+            'retrieve_doctoral_training',
+            'retrieve_complementary_training',
+            'retrieve_course_enrollment',
             'add_training',
+            'submit_training',
             'update_confirmation_extension',
         ]
         self.assertCountEqual(

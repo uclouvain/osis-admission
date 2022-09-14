@@ -34,7 +34,7 @@ from rest_framework.serializers import Serializer
 from admission.api.serializers.fields import ActionLinksField
 from base.models.utils.utils import ChoiceEnum
 
-ADMISSION_SDK_VERSION = "1.0.38"
+ADMISSION_SDK_VERSION = "1.0.39"
 
 
 class AdmissionSchemaGenerator(SchemaGenerator):
@@ -265,8 +265,8 @@ class ChoicesEnumSchema(BetterChoicesSchema):
     operation_id_base = None
 
     def __init__(self, *args, **kwargs):
-        kwargs.pop('operation_id_base', None)
-        super().__init__(operation_id_base=self.operation_id_base, *args, **kwargs)
+        operation_id_base = kwargs.pop('operation_id_base', self.operation_id_base)
+        super().__init__(operation_id_base=operation_id_base, *args, **kwargs)
         self.enums = {}
 
     def map_choicefield(self, field):
@@ -365,6 +365,11 @@ class ResponseSpecificSchema(DetailedAutoSchema):
     """This schema allow to map a request/response serializers given an HTTP verb"""
 
     serializer_mapping = {}
+
+    def __init__(self, serializer_mapping=None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if serializer_mapping:
+            self.serializer_mapping = serializer_mapping
 
     def get_serializer(self, path, method, for_response=True):
         serializer_class = self.serializer_mapping.get(method, None)

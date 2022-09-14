@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Admission API
-  version: 1.0.38
+  version: 1.0.39
   description: This API delivers data for the Admission project.
   contact:
     name: UCLouvain - OSIS
@@ -1770,9 +1770,40 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - propositions
-  /propositions/{uuid}/training:
+  /propositions/{uuid}/training/config:
     get:
-      operationId: list_doctoral_trainings
+      operationId: retrieveDoctoralTrainingConfig
+      description: ''
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DoctoralTrainingConfig'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
+  /propositions/{uuid}/doctoral-training:
+    get:
+      operationId: list_doctoral_training
       description: ''
       parameters:
       - name: uuid
@@ -1838,40 +1869,9 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - propositions
-  /propositions/{uuid}/training/config:
-    get:
-      operationId: retrieveDoctoralTrainingConfig
-      description: ''
-      parameters:
-      - name: uuid
-        in: path
-        required: true
-        description: ''
-        schema:
-          type: string
-      - $ref: '#/components/parameters/Accept-Language'
-      - $ref: '#/components/parameters/X-User-FirstName'
-      - $ref: '#/components/parameters/X-User-LastName'
-      - $ref: '#/components/parameters/X-User-Email'
-      - $ref: '#/components/parameters/X-User-GlobalID'
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DoctoralTrainingConfig'
-          description: ''
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-      tags:
-      - propositions
   /propositions/{uuid}/training/{activity_id}:
     get:
-      operationId: retrieve_doctoral_training
+      operationId: retrieve_training
       description: ''
       parameters:
       - name: uuid
@@ -1907,7 +1907,7 @@ paths:
       tags:
       - propositions
     put:
-      operationId: update_doctoral_training
+      operationId: update_training
       description: ''
       parameters:
       - name: uuid
@@ -1948,7 +1948,7 @@ paths:
       tags:
       - propositions
     delete:
-      operationId: destroy_doctoral_training
+      operationId: destroy_training
       description: ''
       parameters:
       - name: uuid
@@ -1970,6 +1970,72 @@ paths:
       - $ref: '#/components/parameters/X-User-GlobalID'
       responses:
         '204':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
+  /propositions/{uuid}/complementary-training:
+    get:
+      operationId: list_complementary_training
+      description: ''
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DoctoralTrainingActivity'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
+  /propositions/{uuid}/course-enrollment:
+    get:
+      operationId: list_course_enrollment
+      description: ''
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DoctoralTrainingActivity'
           description: ''
         '400':
           $ref: '#/components/responses/BadRequest'
@@ -2440,7 +2506,7 @@ paths:
       - propositions
   /propositions/{uuid}/training/submit:
     post:
-      operationId: submit_doctoral_training
+      operationId: submit_training
       description: Submit doctoral training activities.
       parameters:
       - name: uuid
@@ -2476,7 +2542,7 @@ paths:
       - propositions
   /propositions/{uuid}/training/{activity_id}/assent:
     post:
-      operationId: assent_doctoral_training
+      operationId: assent_training
       description: Assent on a doctoral training activity.
       parameters:
       - name: uuid
@@ -2700,7 +2766,11 @@ components:
                     $ref: '#/components/schemas/ActionLink'
                   update_confirmation:
                     $ref: '#/components/schemas/ActionLink'
-                  retrieve_training:
+                  retrieve_doctoral_training:
+                    $ref: '#/components/schemas/ActionLink'
+                  retrieve_complementary_training:
+                    $ref: '#/components/schemas/ActionLink'
+                  retrieve_course_enrollment:
                     $ref: '#/components/schemas/ActionLink'
                 readOnly: true
                 default: {}
@@ -2804,7 +2874,11 @@ components:
               $ref: '#/components/schemas/ActionLink'
             update_confirmation:
               $ref: '#/components/schemas/ActionLink'
-            retrieve_training:
+            retrieve_doctoral_training:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_complementary_training:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_course_enrollment:
               $ref: '#/components/schemas/ActionLink'
           readOnly: true
           default: {}
@@ -3751,7 +3825,11 @@ components:
               $ref: '#/components/schemas/ActionLink'
             update_confirmation:
               $ref: '#/components/schemas/ActionLink'
-            retrieve_training:
+            retrieve_doctoral_training:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_complementary_training:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_course_enrollment:
               $ref: '#/components/schemas/ActionLink'
           readOnly: true
           default: {}
@@ -4049,9 +4127,15 @@ components:
               $ref: '#/components/schemas/ActionLink'
             update_confirmation_extension:
               $ref: '#/components/schemas/ActionLink'
-            retrieve_training:
+            retrieve_doctoral_training:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_complementary_training:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_course_enrollment:
               $ref: '#/components/schemas/ActionLink'
             add_training:
+              $ref: '#/components/schemas/ActionLink'
+            submit_training:
               $ref: '#/components/schemas/ActionLink'
           readOnly: true
           default: {}
@@ -4069,6 +4153,29 @@ components:
       - genre_doctorant
       - prenom_doctorant
       - nom_doctorant
+    DoctoralTrainingConfig:
+      type: object
+      properties:
+        category_labels:
+          type: object
+        conference_types:
+          type: object
+        conference_publication_types:
+          type: object
+        communication_types:
+          type: object
+        seminar_types:
+          type: object
+        publication_types:
+          type: object
+        service_types:
+          type: object
+        residency_types:
+          type: object
+        course_types:
+          type: object
+        complementary_course_types:
+          type: object
     DoctoralTrainingActivity:
       oneOf:
       - $ref: '#/components/schemas/Conference'
@@ -4084,6 +4191,7 @@ components:
       - $ref: '#/components/schemas/Valorisation'
       - $ref: '#/components/schemas/Course'
       - $ref: '#/components/schemas/Paper'
+      - $ref: '#/components/schemas/UclCourse'
       discriminator:
         propertyName: object_type
     Conference:
@@ -4099,6 +4207,8 @@ components:
         status:
           $ref: '#/components/schemas/StatutActivite'
           readOnly: true
+        context:
+          $ref: '#/components/schemas/ContexteFormation'
         doctorate:
           type: integer
           writeOnly: true
@@ -4111,6 +4221,9 @@ components:
           readOnly: true
         cdd_comment:
           type: string
+          readOnly: true
+        can_be_submitted:
+          type: boolean
           readOnly: true
         type:
           type: string
@@ -4162,6 +4275,7 @@ components:
       required:
       - object_type
       - category
+      - context
       - type
       - ects
       - title
@@ -4187,6 +4301,8 @@ components:
         status:
           $ref: '#/components/schemas/StatutActivite'
           readOnly: true
+        context:
+          $ref: '#/components/schemas/ContexteFormation'
         doctorate:
           type: integer
           writeOnly: true
@@ -4199,6 +4315,9 @@ components:
           readOnly: true
         cdd_comment:
           type: string
+          readOnly: true
+        can_be_submitted:
+          type: boolean
           readOnly: true
         type:
           type: string
@@ -4237,6 +4356,7 @@ components:
       required:
       - object_type
       - category
+      - context
       - type
       - ects
       - title
@@ -4257,6 +4377,8 @@ components:
         status:
           $ref: '#/components/schemas/StatutActivite'
           readOnly: true
+        context:
+          $ref: '#/components/schemas/ContexteFormation'
         doctorate:
           type: integer
           writeOnly: true
@@ -4269,6 +4391,9 @@ components:
           readOnly: true
         cdd_comment:
           type: string
+          readOnly: true
+        can_be_submitted:
+          type: boolean
           readOnly: true
         type:
           type: string
@@ -4325,6 +4450,7 @@ components:
       required:
       - object_type
       - category
+      - context
       - type
       - ects
       - title
@@ -4351,6 +4477,8 @@ components:
         status:
           $ref: '#/components/schemas/StatutActivite'
           readOnly: true
+        context:
+          $ref: '#/components/schemas/ContexteFormation'
         doctorate:
           type: integer
           writeOnly: true
@@ -4363,6 +4491,9 @@ components:
           readOnly: true
         cdd_comment:
           type: string
+          readOnly: true
+        can_be_submitted:
+          type: boolean
           readOnly: true
         type:
           type: string
@@ -4402,6 +4533,7 @@ components:
       required:
       - object_type
       - category
+      - context
       - type
       - ects
       - subtitle
@@ -4423,6 +4555,8 @@ components:
         status:
           $ref: '#/components/schemas/StatutActivite'
           readOnly: true
+        context:
+          $ref: '#/components/schemas/ContexteFormation'
         doctorate:
           type: integer
           writeOnly: true
@@ -4435,6 +4569,9 @@ components:
           readOnly: true
         cdd_comment:
           type: string
+          readOnly: true
+        can_be_submitted:
+          type: boolean
           readOnly: true
         type:
           type: string
@@ -4474,6 +4611,7 @@ components:
       required:
       - object_type
       - category
+      - context
       - type
       - subtype
       - title
@@ -4498,6 +4636,8 @@ components:
         status:
           $ref: '#/components/schemas/StatutActivite'
           readOnly: true
+        context:
+          $ref: '#/components/schemas/ContexteFormation'
         doctorate:
           type: integer
           writeOnly: true
@@ -4510,6 +4650,9 @@ components:
           readOnly: true
         cdd_comment:
           type: string
+          readOnly: true
+        can_be_submitted:
+          type: boolean
           readOnly: true
         type:
           type: string
@@ -4566,6 +4709,7 @@ components:
       required:
       - object_type
       - category
+      - context
       - type
       - subtype
       - title
@@ -4593,6 +4737,8 @@ components:
         status:
           $ref: '#/components/schemas/StatutActivite'
           readOnly: true
+        context:
+          $ref: '#/components/schemas/ContexteFormation'
         doctorate:
           type: integer
           writeOnly: true
@@ -4605,6 +4751,9 @@ components:
           readOnly: true
         cdd_comment:
           type: string
+          readOnly: true
+        can_be_submitted:
+          type: boolean
           readOnly: true
         type:
           type: string
@@ -4651,6 +4800,7 @@ components:
       required:
       - object_type
       - category
+      - context
       - type
       - title
       - start_date
@@ -4675,6 +4825,8 @@ components:
         status:
           $ref: '#/components/schemas/StatutActivite'
           readOnly: true
+        context:
+          $ref: '#/components/schemas/ContexteFormation'
         doctorate:
           type: integer
           writeOnly: true
@@ -4687,6 +4839,9 @@ components:
           readOnly: true
         cdd_comment:
           type: string
+          readOnly: true
+        can_be_submitted:
+          type: boolean
           readOnly: true
         type:
           type: string
@@ -4717,6 +4872,7 @@ components:
       required:
       - object_type
       - category
+      - context
       - type
       - title
       - start_date
@@ -4738,6 +4894,8 @@ components:
         status:
           $ref: '#/components/schemas/StatutActivite'
           readOnly: true
+        context:
+          $ref: '#/components/schemas/ContexteFormation'
         doctorate:
           type: integer
           writeOnly: true
@@ -4750,6 +4908,9 @@ components:
           readOnly: true
         cdd_comment:
           type: string
+          readOnly: true
+        can_be_submitted:
+          type: boolean
           readOnly: true
         type:
           type: string
@@ -4784,6 +4945,7 @@ components:
       required:
       - object_type
       - category
+      - context
       - type
       - title
       - start_date
@@ -4803,6 +4965,8 @@ components:
         status:
           $ref: '#/components/schemas/StatutActivite'
           readOnly: true
+        context:
+          $ref: '#/components/schemas/ContexteFormation'
         doctorate:
           type: integer
           writeOnly: true
@@ -4815,6 +4979,9 @@ components:
           readOnly: true
         cdd_comment:
           type: string
+          readOnly: true
+        can_be_submitted:
+          type: boolean
           readOnly: true
         title:
           type: string
@@ -4847,6 +5014,7 @@ components:
       required:
       - object_type
       - category
+      - context
       - title
       - start_date
       - is_online
@@ -4870,6 +5038,8 @@ components:
         status:
           $ref: '#/components/schemas/StatutActivite'
           readOnly: true
+        context:
+          $ref: '#/components/schemas/ContexteFormation'
         doctorate:
           type: integer
           writeOnly: true
@@ -4882,6 +5052,9 @@ components:
           readOnly: true
         cdd_comment:
           type: string
+          readOnly: true
+        can_be_submitted:
+          type: boolean
           readOnly: true
         title:
           type: string
@@ -4904,6 +5077,7 @@ components:
       required:
       - object_type
       - category
+      - context
       - title
       - subtitle
       - ects
@@ -4921,6 +5095,8 @@ components:
         status:
           $ref: '#/components/schemas/StatutActivite'
           readOnly: true
+        context:
+          $ref: '#/components/schemas/ContexteFormation'
         doctorate:
           type: integer
           writeOnly: true
@@ -4933,6 +5109,9 @@ components:
           readOnly: true
         cdd_comment:
           type: string
+          readOnly: true
+        can_be_submitted:
+          type: boolean
           readOnly: true
         type:
           type: string
@@ -4970,6 +5149,7 @@ components:
       required:
       - object_type
       - category
+      - context
       - type
       - title
       - subtitle
@@ -4994,6 +5174,8 @@ components:
         status:
           $ref: '#/components/schemas/StatutActivite'
           readOnly: true
+        context:
+          $ref: '#/components/schemas/ContexteFormation'
         doctorate:
           type: integer
           writeOnly: true
@@ -5006,6 +5188,9 @@ components:
           readOnly: true
         cdd_comment:
           type: string
+          readOnly: true
+        can_be_submitted:
+          type: boolean
           readOnly: true
         type:
           enum:
@@ -5022,30 +5207,78 @@ components:
       required:
       - object_type
       - category
+      - context
       - type
       - ects
       - comment
-    DoctoralTrainingConfig:
+    UclCourse:
       type: object
       properties:
-        category_labels:
-          type: object
-        conference_types:
-          type: object
-        conference_publication_types:
-          type: object
-        communication_types:
-          type: object
-        seminar_types:
-          type: object
-        publication_types:
-          type: object
-        service_types:
-          type: object
-        residency_types:
-          type: object
-        course_types:
-          type: object
+        object_type:
+          type: string
+        uuid:
+          type: string
+          readOnly: true
+        category:
+          $ref: '#/components/schemas/CategorieActivite'
+        status:
+          $ref: '#/components/schemas/StatutActivite'
+          readOnly: true
+        context:
+          $ref: '#/components/schemas/ContexteFormation'
+        doctorate:
+          type: integer
+          writeOnly: true
+        reference_promoter_assent:
+          type: boolean
+          readOnly: true
+          nullable: true
+        reference_promoter_comment:
+          type: string
+          readOnly: true
+        cdd_comment:
+          type: string
+          readOnly: true
+        can_be_submitted:
+          type: boolean
+          readOnly: true
+        learning_unit_year:
+          type: string
+        academic_year:
+          type: integer
+          nullable: true
+      required:
+      - object_type
+      - category
+      - context
+      - learning_unit_year
+      - academic_year
+    CategorieActivite:
+      enum:
+      - CONFERENCE
+      - COMMUNICATION
+      - SEMINAR
+      - PUBLICATION
+      - SERVICE
+      - RESIDENCY
+      - VAE
+      - COURSE
+      - PAPER
+      - UCL_COURSE
+      type: string
+    StatutActivite:
+      enum:
+      - NON_SOUMISE
+      - SOUMISE
+      - ACCEPTEE
+      - REFUSEE
+      type: string
+    ContexteFormation:
+      enum:
+      - DOCTORAL_TRAINING
+      - COMPLEMENTARY_TRAINING
+      - FREE_COURSE
+      type: string
     SectorDTO:
       type: object
       properties:
@@ -5304,25 +5537,6 @@ components:
       - nouvelle_echeance
       - justification_succincte
       - lettre_justification
-    CategorieActivite:
-      enum:
-      - CONFERENCE
-      - COMMUNICATION
-      - SEMINAR
-      - PUBLICATION
-      - SERVICE
-      - RESIDENCY
-      - VAE
-      - COURSE
-      - PAPER
-      type: string
-    StatutActivite:
-      enum:
-      - NON_SOUMISE
-      - SOUMISE
-      - ACCEPTEE
-      - REFUSEE
-      type: string
     DoctoralTrainingBatch:
       type: object
       properties:

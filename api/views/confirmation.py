@@ -43,6 +43,13 @@ from admission.utils import get_cached_admission_perm_obj
 from infrastructure.messages_bus import message_bus_instance
 from osis_role.contrib.views import APIPermissionRequiredMixin
 
+__all__ = [
+    "ConfirmationAPIView",
+    "LastConfirmationAPIView",
+    "LastConfirmationCanvasAPIView",
+    "SupervisedConfirmationAPIView",
+]
+
 
 class ConfirmationSchema(ResponseSpecificSchema):
     serializer_mapping = {
@@ -205,9 +212,7 @@ class LastConfirmationCanvasAPIView(APIPermissionRequiredMixin, mixins.RetrieveM
             },
         )
 
-        serializer = serializers.ConfirmationPaperCanvasSerializer(instance={
-            'uuid': uuid,
-        })
+        serializer = serializers.ConfirmationPaperCanvasSerializer(instance={'uuid': uuid})
 
         return Response(serializer.data)
 

@@ -37,6 +37,7 @@ from admission.ddd.projet_doctoral.doctorat.formation.dtos.publication import Pu
 from admission.ddd.projet_doctoral.doctorat.formation.dtos.sejour import SejourCommunicationDTO, SejourDTO
 from admission.ddd.projet_doctoral.doctorat.formation.dtos.seminaire import SeminaireCommunicationDTO, SeminaireDTO
 from admission.ddd.projet_doctoral.doctorat.formation.dtos.service import ServiceDTO
+from admission.ddd.projet_doctoral.doctorat.formation.dtos.ucl_course import CoursUclDTO
 from admission.ddd.projet_doctoral.doctorat.formation.dtos.valorisation import ValorisationDTO
 
 ActiviteDTO = Union[
@@ -53,6 +54,7 @@ ActiviteDTO = Union[
     'SeminaireCommunicationDTO',
     'CoursDTO',
     'EpreuveDTO',
+    'CoursUclDTO',
 ]
 
 __all__ = [
@@ -70,4 +72,5 @@ __all__ = [
     'SeminaireCommunicationDTO',
     'CoursDTO',
     'EpreuveDTO',
+    'CoursUclDTO',
 ]

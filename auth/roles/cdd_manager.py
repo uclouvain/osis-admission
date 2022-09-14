@@ -27,7 +27,13 @@ import rules
 from django.utils.translation import gettext_lazy as _
 from rules import RuleSet
 
-from admission.auth.predicates import is_enrolled, is_part_of_doctoral_commission, submitted_confirmation_paper
+from admission.auth.predicates import (
+    complementary_training_enabled,
+    is_enrolled,
+    is_part_of_doctoral_commission,
+    is_pre_admission,
+    submitted_confirmation_paper,
+)
 from osis_role.contrib.models import EntityRoleModel
 
 
@@ -82,9 +88,12 @@ class CddManager(EntityRoleModel):
             'admission.send_message': is_part_of_doctoral_commission & is_enrolled,
             'admission.change_cddconfiguration': rules.always_allow,
             # Training
-            'admission.change_activity': is_part_of_doctoral_commission,
-            'admission.delete_activity': is_part_of_doctoral_commission,
-            'admission.refuse_activity': is_part_of_doctoral_commission,
+            'admission.view_training': is_part_of_doctoral_commission & is_enrolled,
+            'admission.view_doctoral_training': is_part_of_doctoral_commission & is_enrolled & ~is_pre_admission,
+            'admission.view_complementary_training': is_part_of_doctoral_commission & complementary_training_enabled,
+            'admission.change_activity': is_part_of_doctoral_commission & is_enrolled,
+            'admission.delete_activity': is_part_of_doctoral_commission & is_enrolled,
+            'admission.refuse_activity': is_part_of_doctoral_commission & is_enrolled,
             # Internal notes
             'admission.add_internalnote': is_part_of_doctoral_commission,
             'admission.view_internalnote': is_part_of_doctoral_commission,

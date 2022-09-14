@@ -151,7 +151,9 @@ class DoctorateAdmissionListApiTestCase(APITestCase):
             'submit_proposition',
             'retrieve_confirmation',
             'update_confirmation',
-            'retrieve_training',
+            'retrieve_doctoral_training',
+            'retrieve_complementary_training',
+            'retrieve_course_enrollment',
         ]
         self.assertCountEqual(
             list(first_proposition['links']),
@@ -441,7 +443,9 @@ class DoctorateAdmissionGetApiTestCase(DoctorateAdmissionApiTestCase):
             'submit_proposition',
             'retrieve_confirmation',
             'update_confirmation',
-            'retrieve_training',
+            'retrieve_doctoral_training',
+            'retrieve_complementary_training',
+            'retrieve_course_enrollment',
         ]
         self.assertCountEqual(
             list(response.data['links']),

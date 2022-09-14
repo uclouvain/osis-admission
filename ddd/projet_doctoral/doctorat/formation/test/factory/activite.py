@@ -29,7 +29,11 @@ import uuid
 import factory
 
 from admission.ddd.projet_doctoral.doctorat.formation import dtos
-from admission.ddd.projet_doctoral.doctorat.formation.domain.model._enums import CategorieActivite, ChoixComiteSelection
+from admission.ddd.projet_doctoral.doctorat.formation.domain.model._enums import (
+    CategorieActivite,
+    ChoixComiteSelection,
+    ContexteFormation,
+)
 from admission.ddd.projet_doctoral.doctorat.formation.domain.model.activite import Activite, ActiviteIdentity
 from admission.ddd.projet_doctoral.doctorat.test.factory.doctorat import _DoctoratIdentityFactory
 
@@ -207,6 +211,16 @@ class PaperDTOFactory(factory.Factory):
     type = "CONFIRMATION_PAPER"
 
 
+class UclCourseDTOFactory(factory.Factory):
+    class Meta:
+        model = dtos.CoursUclDTO
+        abstract = False
+
+    contexte = ContexteFormation.FREE_COURSE
+    annee = 2022
+    unite_enseignement = "ESA2004"
+
+
 class ActiviteIdentityFactory(factory.Factory):
     class Meta:
         model = ActiviteIdentity
@@ -228,5 +242,5 @@ class ActiviteFactory(factory.Factory):
     @factory.post_generation
     def generate_dto(self, *args, **kwargs):
         module = sys.modules[__name__]
-        class_name = f"{self.categorie.name.capitalize()}DTOFactory"
+        class_name = f"{self.categorie.name.title().replace('_', '')}DTOFactory"
         self._dto = getattr(module, kwargs.pop('class', class_name))(**kwargs)

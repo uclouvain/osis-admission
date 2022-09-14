@@ -64,6 +64,12 @@ class DoctoratRepository(IDoctoratRepository):
         )
 
     @classmethod
+    def verifier_existence(cls, entity_id: 'DoctoratIdentity') -> None:
+        doctorate: DoctorateProxy = DoctorateProxy.objects.filter(uuid=entity_id.uuid)
+        if not doctorate:
+            raise DoctoratNonTrouveException
+
+    @classmethod
     def save(cls, entity: 'Doctorat') -> None:
         DoctorateAdmission.objects.update_or_create(
             uuid=entity.entity_id.uuid,

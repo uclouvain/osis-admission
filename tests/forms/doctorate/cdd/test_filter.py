@@ -23,11 +23,9 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import Optional
 
 from django.test import TestCase
 
-from admission.contrib.models import EntityProxy
 from admission.ddd.projet_doctoral.preparation.domain.model._enums import (
     ChoixCommissionProximiteCDEouCLSM,
     ChoixCommissionProximiteCDSS,
@@ -36,14 +34,13 @@ from admission.ddd.projet_doctoral.preparation.domain.model._enums import (
 from admission.ddd.projet_doctoral.preparation.domain.model.doctorat import (
     ENTITY_CDE,
     ENTITY_CDSS,
-    SIGLE_SCIENCES,
     ENTITY_CLSM,
+    SIGLE_SCIENCES,
 )
 from admission.forms import EMPTY_CHOICE
-from admission.forms.doctorate.cdd.filter import CddFilterForm, BaseFilterForm
+from admission.forms.doctorate.cdd.filter import BaseFilterForm, CddFilterForm
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.roles import CddManagerFactory
-from base.models.entity_version import EntityVersion
 from base.models.enums.entity_type import EntityType
 from base.templatetags.pagination import PAGINATOR_SIZE_LIST
 from base.tests.factories.academic_year import AcademicYearFactory
@@ -54,7 +51,6 @@ from reference.tests.factories.country import CountryFactory
 
 
 class FilterTestCase(TestCase):
-
     @classmethod
     def setUpTestData(cls):
         # Create some academic years
@@ -71,12 +67,10 @@ class FilterTestCase(TestCase):
             DoctorateAdmissionFactory(
                 doctorate__management_entity=first_doctoral_commission,
                 doctorate__academic_year=academic_years[0],
-                thesis_institute=None,
             ),
             DoctorateAdmissionFactory(
                 doctorate__management_entity=first_doctoral_commission,
                 doctorate__academic_year=academic_years[0],
-                thesis_institute=None,
             ),
         ]
 
@@ -92,12 +86,10 @@ class FilterTestCase(TestCase):
             DoctorateAdmissionFactory(
                 doctorate__management_entity=second_doctoral_commission,
                 doctorate__academic_year=academic_years[1],
-                thesis_institute=None,
             ),
             DoctorateAdmissionFactory(
                 doctorate__management_entity=second_doctoral_commission,
                 doctorate__academic_year=academic_years[1],
-                thesis_institute=None,
             ),
         ]
 
@@ -106,14 +98,13 @@ class FilterTestCase(TestCase):
         EntityVersionFactory(
             entity=third_doctoral_commission,
             entity_type=EntityType.DOCTORAL_COMMISSION.name,
-            acronym='ABC'
+            acronym='ABC',
         )
         cls.third_entity_admissions = [
             DoctorateAdmissionFactory(
                 doctorate__management_entity=second_doctoral_commission,
                 doctorate__academic_year=academic_years[1],
                 doctorate__acronym=SIGLE_SCIENCES,
-                thesis_institute=None,
             ),
         ]
 

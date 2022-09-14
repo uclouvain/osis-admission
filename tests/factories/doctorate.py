@@ -33,7 +33,6 @@ from admission.ddd.projet_doctoral.doctorat.domain.model.enums import ChoixStatu
 from admission.ddd.projet_doctoral.preparation.domain.model._enums import ChoixStatutProposition
 from admission.ddd.projet_doctoral.preparation.domain.model.proposition import Proposition
 from admission.tests.factories.roles import CandidateFactory
-from admission.tests.factories.supervision import PromoterFactory
 from base.models.enums.education_group_types import TrainingType
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.education_group_type import EducationGroupTypeFactory
@@ -46,6 +45,8 @@ from base.tests.factories.student import StudentFactory
 class DoctorateFactory(EducationGroupYearFactory):
     academic_year = factory.SubFactory(AcademicYearFactory, current=True)
     education_group_type = factory.SubFactory(EducationGroupTypeFactory, name=TrainingType.PHD.name)
+    primary_language = None
+    enrollment_campus = None
 
 
 def _generate_reference(obj):
@@ -70,7 +71,6 @@ class DoctorateAdmissionFactory(factory.DjangoModelFactory):
 
     candidate = factory.SubFactory(PersonFactory)
     doctorate = factory.SubFactory(DoctorateFactory)
-    thesis_institute = factory.SubFactory(EntityVersionFactory)
     reference = factory.LazyAttribute(_generate_reference)
     planned_duration = 10
     dedicated_time = 10
@@ -105,6 +105,9 @@ class DoctorateAdmissionFactory(factory.DjangoModelFactory):
                     "country_of_citizenship": "BE",
                 },
             },
+        )
+        with_thesis_institute = factory.Trait(
+            thesis_institute=factory.SubFactory(EntityVersionFactory),
         )
 
     @factory.post_generation

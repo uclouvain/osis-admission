@@ -63,8 +63,8 @@ msgid ""
 "<a href=\"%(admission_link_front_training)s\">%(reference)s</a> - Some "
 "doctoral training activities have been approved."
 msgstr ""
-"<a href=\"%(admission_link_front_training)s\">%(reference)s</a> - "
-"Desactivités de formation doctorale ont été approuvées."
+"<a href=\"%(admission_link_front_training)s\">%(reference)s</a> - Des "
+"activités de formation doctorale ont été approuvées."
 
 #, python-format
 msgid ""
@@ -107,6 +107,14 @@ msgstr ""
 "<a href=\"%(confirmation_paper_link_back)s\">%(reference)s</a> - Un "
 "promoteur a soumis des documents relatifs à l'épreuve de confirmation de "
 "%(student_first_name)s %(student_last_name)s pour %(doctorate_title)s"
+
+#, python-format
+msgid ""
+"<a href=\"%(enrollment_url)s\">Go to course enrollment</a> or <a href="
+"\"%(add_url)s\">add a course</a>"
+msgstr ""
+"<a href=\"%(enrollment_url)s\">Aller à l'inscription aux cours</a> ou <a href="
+"\"%(add_url)s\">ajouter un cours</a>"
 
 #, python-format
 msgid ""
@@ -388,6 +396,9 @@ msgid "COMMUNICATION types"
 msgstr ""
 "Types d'activité pour la catégorie Communication orale (hors conférence)"
 
+msgid "COMPLEMENTARY_TRAINING"
+msgstr "Formation complémentaire"
+
 msgid "CONFERENCE"
 msgstr "Conférence"
 
@@ -408,6 +419,9 @@ msgstr "Cours"
 
 msgid "COURSE types"
 msgstr "Types d'activité pour la catégorie Cours"
+
+msgid "COURSE types for complementary training"
+msgstr "Type de cours pour la formation complémentaire"
 
 msgid "CSC - China Scholarship Council"
 msgstr "CSC - China Scholarship Council"
@@ -568,6 +582,9 @@ msgstr "Mettre en copie les membres du groupe de supervision"
 msgid "Carbon-copy the promoters"
 msgstr "Mettre en copie les promoteurs"
 
+msgid "Category"
+msgstr "Catégorie"
+
 msgid "Category labels"
 msgstr "Libellés de catégories"
 
@@ -615,6 +632,12 @@ msgstr "Membres du comité"
 msgid "Communication attestation"
 msgstr "Attestation de communication"
 
+msgid "Complementary training"
+msgstr "Formation complémentaire"
+
+msgid "Complementary training not enabled"
+msgstr "Formation complémentaire non activée"
+
 msgid "Configuration saved."
 msgstr "Configuration enregistrée."
 
@@ -627,6 +650,10 @@ msgstr "Confirmer"
 
 msgid "Confirm and send the message"
 msgstr "Confirmer et envoyer le message"
+
+msgctxt "tab"
+msgid "Confirmation"
+msgstr "Confirmation"
 
 msgid "Confirmation paper"
 msgstr "Épreuve de confirmation"
@@ -667,6 +694,12 @@ msgstr "Pays de nationalité"
 msgid "Course code (if needed)"
 msgstr "Code de cours (le cas échéant)"
 
+msgid "Course completed"
+msgstr "Cours terminé"
+
+msgid "Course enrollment"
+msgstr "Inscriptions aux cours"
+
 msgid "Course owner"
 msgstr "Titulaire du cours"
 
@@ -675,6 +708,9 @@ msgstr "Titulaire du cours (le cas échéant)"
 
 msgid "Course with evaluation"
 msgstr "Cours avec évaluation"
+
+msgid "Courses"
+msgstr "Cours"
 
 msgid "Courses and training"
 msgstr "Cours et formation"
@@ -712,6 +748,9 @@ msgstr "Template d'email personnalisé enregistré avec succès."
 
 msgid "Custom mail templates"
 msgstr "Templates d'email personnalisé"
+
+msgid "DOCTORAL_TRAINING"
+msgstr "Formation doctorale"
 
 msgid "Data related to the thesis"
 msgstr "Données relatives à la thèse"
@@ -755,6 +794,10 @@ msgstr "Temps consacré (en EFT)"
 msgid "Defense"
 msgstr "Soutenance"
 
+msgctxt "tab"
+msgid "Defense"
+msgstr "Soutenance"
+
 msgid "Definitive admission date to doctorate"
 msgstr "Date de l'admission définitive au doctorat"
 
@@ -789,6 +832,10 @@ msgstr "Ne pas réordonner les valeurs, and garder le même nombre"
 msgid "Do you wish to move the doctorate to the \"%(status)s\" state?"
 msgstr "Souhaitez-vous passer la demande dans l'état \"%(status)s\" ?"
 
+msgid "Doctoral project"
+msgstr "Projet doctoral"
+
+msgctxt "tab"
 msgid "Doctoral project"
 msgstr "Projet doctoral"
 
@@ -881,11 +928,17 @@ msgstr "Modifier la publication de cette conférence"
 msgid "Email"
 msgstr "Email"
 
+msgid "Enable complementary training tab"
+msgstr "Activer l'onglet Formation complémentaire"
+
 msgid "English"
 msgstr "Anglais"
 
 msgid "English values"
 msgstr "Valeurs en anglais"
+
+msgid "Enroll in a course"
+msgstr "S'inscrire à un cours"
 
 msgid "Enrolments"
 msgstr "Inscriptions"
@@ -920,6 +973,9 @@ msgstr "FNRS"
 
 msgid "FRC - Fonds de recherche clinique"
 msgstr "FRC - Fonds de recherche clinique"
+
+msgid "FREE_COURSE"
+msgstr "Cours libre"
 
 msgid "FRESH"
 msgstr "FRESH"
@@ -996,9 +1052,6 @@ msgstr ""
 
 msgid "HTML"
 msgstr "HTML"
-
-msgid "History"
-msgstr "Historique"
 
 msgid "INVALID"
 msgstr "Invalide"
@@ -1268,6 +1321,10 @@ msgstr ""
 "E-mail envoyé aux membres du groupe de supervision pour les informer que la "
 "demande a été soumise à l'UCLouvain par le candidat"
 
+msgctxt "tab"
+msgid "Management"
+msgstr "Gestion"
+
 msgid "Management of the doctorate enrolments"
 msgstr "Gestion des inscriptions en doctorats"
 
@@ -1326,6 +1383,9 @@ msgstr "Doit être inscrit"
 
 msgid "Must be in the process of the enrolment"
 msgstr "Doit être en cours inscription"
+
+msgid "Must not be pre-admission"
+msgstr "Ne doit pas être une pré-admission"
 
 msgid "N/A"
 msgstr "Sans objet"
@@ -1774,6 +1834,10 @@ msgstr "Demander des changements"
 msgid "Require changes for \"%(object)s\""
 msgstr "Demander des changements pour \"%(object)s\""
 
+msgctxt "tab"
+msgid "Research project"
+msgstr "Projet de recherche"
+
 msgid "Research report"
 msgstr "Rapport de recherche"
 
@@ -1886,6 +1950,9 @@ msgstr "Séjours scientifiques"
 
 msgid "Search"
 msgstr "Rechercher"
+
+msgid "Search for an EU code (outside the EU of the form)"
+msgstr "Rechercher un code UE (hors UE du formulaire)"
 
 msgid "Secondary studies"
 msgstr "Études secondaires"
@@ -2225,8 +2292,16 @@ msgstr "Cette activité doit être soumise"
 msgid "This activity must be unsubmitted"
 msgstr "Cette activité doit être non soumise"
 
+msgid ""
+"This adds a \"Complementary training\" tab on admissions concerning this CDD."
+msgstr ""
+"Ceci active l'onglet \"Formation complémentaire\" sur les doctorats concernant cette CDD."
+
 msgid "This candidate has not created any activity yet"
 msgstr "Ce candidat n'a pas encore créé d'activité"
+
+msgid "This candidate has not created any course yet."
+msgstr "Ce candidat n'a pas encore créé de cours."
 
 msgid "This experience cannot be updated as it has already been valuated."
 msgstr ""
@@ -2272,6 +2347,12 @@ msgstr "Volume horaire total"
 msgid "Training"
 msgstr "Formation"
 
+msgid "Training activities"
+msgstr "Activités de formation"
+
+msgid "Training activity"
+msgstr "Activité de formation"
+
 msgid "Type"
 msgstr "Type"
 
@@ -2289,6 +2370,9 @@ msgstr "Type de publication"
 
 msgid "UCLOUVAIN_ASSISTANT"
 msgstr "Assistant UCLouvain"
+
+msgid "UCL_COURSE"
+msgstr "Cours UCL"
 
 msgid "UUID"
 msgstr "UUID"

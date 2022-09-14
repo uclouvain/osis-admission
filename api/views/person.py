@@ -30,7 +30,7 @@ from rest_framework.generics import GenericAPIView
 
 from admission.api import serializers
 from admission.api.permissions import IsSelfPersonTabOrTabPermission
-from admission.api.views import PersonRelatedMixin
+from admission.api.views.mixins import PersonRelatedMixin
 from osis_role.contrib.views import APIPermissionRequiredMixin
 
 
