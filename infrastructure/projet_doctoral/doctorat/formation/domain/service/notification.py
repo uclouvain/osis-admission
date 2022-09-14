@@ -85,7 +85,7 @@ class Notification(INotification):
             ),
             "admission_link_back_training": "{}{}".format(
                 settings.ADMISSION_BACKEND_LINK_PREFIX.rstrip('/'),
-                resolve_url('admission:doctorate:training', uuid=doctorate.uuid),
+                resolve_url('admission:doctorate:doctoral-training', uuid=doctorate.uuid),
             ),
             "reference": doctorate.reference,
         }

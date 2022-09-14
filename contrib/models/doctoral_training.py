@@ -27,6 +27,7 @@ import contextlib
 from uuid import uuid4
 
 from django.db import models
+from django.db.models import Q
 from django.dispatch import receiver
 from django.utils.translation import gettext_lazy as _, pgettext_lazy
 from django.db.models.signals import post_save
@@ -36,9 +37,14 @@ from admission.ddd.projet_doctoral.doctorat.formation.domain.model._enums import
     ChoixComiteSelection,
     ChoixStatutPublication,
     StatutActivite,
+    ContexteFormation,
 )
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from osis_document.contrib import FileField
+
+__all__ = [
+    "Activity",
+]
 
 
 def training_activity_directory_path(instance: 'Activity', filename: str):
@@ -48,6 +54,40 @@ def training_activity_directory_path(instance: 'Activity', filename: str):
         instance.doctorate.uuid,
         filename,
     )
+
+
+class ActivityQuerySet(models.QuerySet):
+    def for_doctoral_training(self, doctorate_uuid):
+        return (
+            self.filter(
+                doctorate__uuid=doctorate_uuid,
+                context=ContexteFormation.DOCTORAL_TRAINING.name,
+            )
+            .exclude(Q(category=CategorieActivite.UCL_COURSE.name, course_completed=False))
+            .prefetch_related('children')
+            .select_related('learning_unit_year')
+        )
+
+    def for_complementary_training(self, doctorate_uuid):
+        return (
+            self.filter(
+                doctorate__uuid=doctorate_uuid,
+                context=ContexteFormation.COMPLEMENTARY_TRAINING.name,
+            )
+            .exclude(Q(category=CategorieActivite.UCL_COURSE.name, course_completed=False))
+            .prefetch_related('children')
+            .select_related('learning_unit_year')
+        )
+
+    def for_enrollment_courses(self, doctorate_uuid):
+        return (
+            self.filter(
+                doctorate__uuid=doctorate_uuid,
+                category=CategorieActivite.UCL_COURSE.name,
+            )
+            .select_related('learning_unit_year')
+            .order_by('context')
+        )
 
 
 class Activity(models.Model):
@@ -60,6 +100,11 @@ class Activity(models.Model):
     doctorate = models.ForeignKey(
         'admission.DoctorateAdmission',
         on_delete=models.CASCADE,
+    )
+    context = models.CharField(
+        max_length=30,
+        choices=ContexteFormation.choices(),
+        default=ContexteFormation.DOCTORAL_TRAINING.name,
     )
     ects = models.DecimalField(
         verbose_name=_("ECTS credits"),
@@ -242,6 +287,18 @@ class Activity(models.Model):
         blank=True,
     )
 
+    # UCL Course
+    learning_unit_year = models.ForeignKey(
+        'base.LearningUnitYear',
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT,
+    )
+    course_completed = models.BooleanField(
+        blank=True,
+        default=False,
+    )
+
     # Process
     reference_promoter_assent = models.BooleanField(
         verbose_name=_("Reference promoter assent"),
@@ -270,10 +327,14 @@ class Activity(models.Model):
         verbose_name=_("Can be submitted"),
     )
 
+    objects = models.Manager.from_queryset(ActivityQuerySet)()
+
     def __str__(self) -> str:
         return f"{self.get_category_display()} ({self.ects} ects, {self.get_status_display()})"
 
     class Meta:
+        verbose_name = _("Training activity")
+        verbose_name_plural = _("Training activities")
         ordering = ['-created_at']
 
 

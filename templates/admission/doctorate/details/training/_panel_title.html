@@ -24,15 +24,17 @@
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
 
-{% url "admission:doctorate:training:edit" uuid=view.kwargs.uuid activity_id=activity.uuid as edit_url %}
-{% url "admission:doctorate:training:refuse" uuid=view.kwargs.uuid activity_id=activity.uuid as refuse_url %}
-{% url "admission:doctorate:training:require-changes" uuid=view.kwargs.uuid activity_id=activity.uuid as require_changes_url %}
-{% url "admission:doctorate:training:delete" uuid=view.kwargs.uuid activity_id=activity.uuid as delete_url %}
+
+{% display request.resolver_match.namespace|add:':'|add:request.resolver_match.url_name as namespace %}
+{% url namespace|add:":edit" uuid=view.kwargs.uuid activity_id=activity.uuid as edit_url %}
+{% url namespace|add:":refuse" uuid=view.kwargs.uuid activity_id=activity.uuid as refuse_url %}
+{% url namespace|add:":require-changes" uuid=view.kwargs.uuid activity_id=activity.uuid as require_changes_url %}
+{% url namespace|add:":delete" uuid=view.kwargs.uuid activity_id=activity.uuid as delete_url %}
 {% if activity.category|safe == 'CONFERENCE' or activity.category|safe == 'SEMINAR' or activity.category|safe == 'RESIDENCY' %}
-  {% url "admission:doctorate:training:add" uuid=view.kwargs.uuid category="communication" as add_communication_url %}
+  {% url namespace|add:":add" uuid=view.kwargs.uuid category="communication" as add_communication_url %}
 {% endif %}
 {% if activity.category|safe == 'CONFERENCE' %}
-  {% url "admission:doctorate:training:add" uuid=view.kwargs.uuid category="publication" as add_publication_url %}
+  {% url namespace|add:":add" uuid=view.kwargs.uuid category="publication" as add_publication_url %}
 {% endif %}
 
 <a
@@ -51,116 +53,110 @@
 
 <div style="width: auto" class="pull-right">
   <div class="input-group input-group-sm{% if activity.uuid in form.activities_in_error %} has-error{% endif %}">
-    {% if activity.category|safe == "SEMINAR" and activity.status|safe != "NON_SOUMISE" and add_communication_url %}
-      {# Do not display the dropdown if seminar has been submitted #}
-    {% elif activity.status|safe == "NON_SOUMISE" or activity.status|safe == "SOUMISE" or add_communication_url or add_publication_url %}
-      <div class="input-group-btn">
-        <button
-            type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
-            aria-expanded="false"
-        >
-          {% trans "Actions" %} <span class="caret"></span>
-        </button>
-        <ul class="dropdown-menu dropdown-menu-right">
+    <div class="input-group-btn">
+      <button
+          type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
+          aria-expanded="false"
+      >
+        {% trans "Actions" %} <span class="caret"></span>
+      </button>
+      <ul class="dropdown-menu dropdown-menu-right">
 
-          {# Activity is unsubmitted : display edit/delete/submit/add-children #}
+        {# Activity is unsubmitted : display edit/delete/submit/add-children #}
+        <li>
+          <a href="{{ edit_url }}">
+            {% trans "Edit" %}
+          </a>
+        </li>
+        {% if activity.status|safe == "SOUMISE" %}
           <li>
-            <a href="{{ edit_url }}">
-              {% trans "Edit" %}
+            <a href="{{ require_changes_url }}">
+              {% trans "Require changes" %}
             </a>
           </li>
-          {% if activity.status|safe == "SOUMISE" %}
-            <li>
-              <a href="{{ require_changes_url }}">
-                {% trans "Require changes" %}
-              </a>
-            </li>
-            <li>
-              <a href="{{ refuse_url }}">
-                {% trans "Refuse activity" %}
-              </a>
-            </li>
-          {% endif %}
-          {% if activity.status|safe == "NON_SOUMISE" %}
-            {% if not remove_batch_action %}
-              <li
-                  {% if not activity.can_be_submitted %}
-                    class="disabled"
-                    data-toggle="tooltip"
-                    data-container="body"
-                    {% if activity.category == 'SEMINAR' %}
-                    title="{{ not_complete_sub }}"
-                    {% else %}
-                    title="{{ not_complete }}"
-                    {% endif %}
+          <li>
+            <a href="{{ refuse_url }}">
+              {% trans "Refuse activity" %}
+            </a>
+          </li>
+        {% endif %}
+        {% if activity.status|safe == "NON_SOUMISE" %}
+          {% if not remove_batch_action %}
+            <li
+                {% if not activity.can_be_submitted %}
+                  class="disabled"
+                  data-toggle="tooltip"
+                  data-container="body"
+                  {% if activity.category == 'SEMINAR' %}
+                  title="{{ not_complete_sub }}"
+                  {% else %}
+                  title="{{ not_complete }}"
                   {% endif %}
-              >
-                <a
-                    href="#"
-                    onclick="$('[name=activity_ids]').val(['{{ activity.uuid }}']);$('form#activities').submit();return false;"
-                >
-                  {% trans "Submit" %}
-                </a>
-              </li>
-            {% endif %}
-          {% endif %}
-          {# Can't add a communication to seminar once submitted #}
-          {% if activity.category|safe == "SEMINAR" and activity.status|safe == "NON_SOUMISE" and add_communication_url %}
-            <li>
-              <a href="{{ add_communication_url }}?parent={{ activity.uuid }}">
-                {% trans "Add a communication" %}
-              </a>
-            </li>
-            {# Can add a communication to others once submitted #}
-            {% elif activity.category|safe != "SEMINAR" and add_communication_url %}
-            <li>
-              <a href="{{ add_communication_url }}?parent={{ activity.uuid }}">
-                {% trans "Add a communication" %}
-              </a>
-            </li>
-          {% endif %}
-          {% if add_publication_url %}
-            <li>
-              <a href="{{ add_publication_url }}?parent={{ activity.uuid }}">
-                {% trans "Add a publication" %}
-              </a>
-            </li>
-          {% endif %}
-          {% if activity.status|safe == "NON_SOUMISE" %}
-            <li>
-              <a href="{{ delete_url }}">
-                {% trans "Delete" %}
-              </a>
-            </li>
-          {% endif %}
-        </ul>
-      </div>
-      {% if not remove_batch_action and activity.status|safe == "NON_SOUMISE" %}
-        <label class="input-group-addon">
-          <input
-              type="checkbox" name="activity_ids" value="{{ activity.uuid }}"
-              {% if not activity.can_be_submitted %}
-              disabled="disabled"
-              data-toggle="tooltip"
-              data-container="body"
-                {% if activity.category == 'SEMINAR' %}
-              title="{{ not_complete_sub }}"
-                {% else %}
-              title="{{ not_complete }}"
                 {% endif %}
+            >
+              <a
+                  href="#"
+                  onclick="$('[name=activity_ids]').val(['{{ activity.uuid }}']);$('form#activities').submit();return false;"
+              >
+                {% trans "Submit" %}
+              </a>
+            </li>
+          {% endif %}
+        {% endif %}
+        {# Can't add a communication to seminar once submitted #}
+        {% if activity.category|safe == "SEMINAR" and activity.status|safe == "NON_SOUMISE" and add_communication_url %}
+          <li>
+            <a href="{{ add_communication_url }}?parent={{ activity.uuid }}">
+              {% trans "Add a communication" %}
+            </a>
+          </li>
+          {# Can add a communication to others once submitted #}
+          {% elif activity.category|safe != "SEMINAR" and add_communication_url %}
+          <li>
+            <a href="{{ add_communication_url }}?parent={{ activity.uuid }}">
+              {% trans "Add a communication" %}
+            </a>
+          </li>
+        {% endif %}
+        {% if add_publication_url %}
+          <li>
+            <a href="{{ add_publication_url }}?parent={{ activity.uuid }}">
+              {% trans "Add a publication" %}
+            </a>
+          </li>
+        {% endif %}
+        <li>
+          <a href="{{ delete_url }}">
+            {% trans "Delete" %}
+          </a>
+        </li>
+      </ul>
+    </div>
+    {% if not remove_batch_action and activity.status|safe == "NON_SOUMISE" %}
+      <label class="input-group-addon">
+        <input
+            type="checkbox" name="activity_ids" value="{{ activity.uuid }}"
+            {% if not activity.can_be_submitted %}
+            disabled="disabled"
+            data-toggle="tooltip"
+            data-container="body"
+              {% if activity.category == 'SEMINAR' %}
+            title="{{ not_complete_sub }}"
               {% else %}
-              aria-label="{% trans "Select for batch action" %}"
+            title="{{ not_complete }}"
               {% endif %}
-          />
-        </label>
-      {% elif not remove_batch_action and activity.status|safe == "SOUMISE" %}
-        <label class="input-group-addon">
-          <input
-              type="checkbox" name="activity_ids" value="{{ activity.uuid }}"
-              aria-label="{% trans "Select for batch action" %}"
-          />
-        </label>
-      {% endif %}
+            {% else %}
+            aria-label="{% trans "Select for batch action" %}"
+            {% endif %}
+        />
+      </label>
+    {% elif not remove_batch_action and activity.status|safe == "SOUMISE" %}
+      <label class="input-group-addon">
+        <input
+            type="checkbox" name="activity_ids" value="{{ activity.uuid }}"
+            aria-label="{% trans "Select for batch action" %}"
+        />
+      </label>
     {% endif %}
 
     {% if activity.reference_promoter_assent is not None %}

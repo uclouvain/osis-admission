@@ -23,71 +23,19 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.api.views.dashboard import *
+from admission.api.views.dashboard import DashboardViewSet
 from admission.api.views.autocomplete import *
-from admission.api.views.coordonnees import *
-from admission.api.views.curriculum import (
-    CurriculumView,
-    EducationalExperienceViewSet,
-    ProfessionalExperienceViewSet,
-    CurriculumFileView,
-)
-from admission.api.views.secondary_studies import *
-from admission.api.views.languages_knowledge import *
-from admission.api.views.cotutelle import *
-from admission.api.views.person import *
+from admission.api.views.coordonnees import CoordonneesViewSet
+from admission.api.views.curriculum import *
+from admission.api.views.secondary_studies import SecondaryStudiesViewSet
+from admission.api.views.languages_knowledge import LanguagesKnowledgeViewSet
+from admission.api.views.cotutelle import CotutelleAPIView
+from admission.api.views.person import PersonViewSet
 from admission.api.views.project import *
 from admission.api.views.supervision import *
-from admission.api.views.signatures import *
+from admission.api.views.signatures import RequestSignaturesAPIView
 from admission.api.views.approvals import *
-from admission.api.views.confirmation import (
-    ConfirmationAPIView,
-    LastConfirmationAPIView,
-    SupervisedConfirmationAPIView,
-    LastConfirmationCanvasAPIView,
-)
+from admission.api.views.confirmation import *
 from admission.api.views.doctorate import DoctorateAPIView
-from admission.api.views.training import (
-    DoctoralTrainingAssentView,
-    DoctoralTrainingConfigView,
-    DoctoralTrainingView,
-    DoctoralTrainingListView,
-    DoctoralTrainingSubmitView,
-)
+from admission.api.views.training import *
 from admission.api.views.accounting import AccountingView
-
-__all__ = [
-    "CoordonneesViewSet",
-    "CurriculumView",
-    "EducationalExperienceViewSet",
-    "ProfessionalExperienceViewSet",
-    "CurriculumFileView",
-    "PersonViewSet",
-    "PropositionViewSet",
-    "PropositionListView",
-    "VerifyProjectView",
-    "SubmitPropositionViewSet",
-    "SecondaryStudiesViewSet",
-    "AutocompleteDoctoratView",
-    "AutocompleteSectorView",
-    "AutocompleteTutorView",
-    "AutocompletePersonView",
-    "CotutelleAPIView",
-    "SupervisionAPIView",
-    "RequestSignaturesAPIView",
-    "LanguagesKnowledgeViewSet",
-    "ApprovePropositionAPIView",
-    "ApproveByPdfPropositionAPIView",
-    "DashboardViewSet",
-    "ConfirmationAPIView",
-    "LastConfirmationAPIView",
-    "LastConfirmationCanvasAPIView",
-    "SupervisedConfirmationAPIView",
-    "DoctorateAPIView",
-    "DoctoralTrainingListView",
-    "DoctoralTrainingConfigView",
-    "DoctoralTrainingView",
-    "DoctoralTrainingSubmitView",
-    "DoctoralTrainingAssentView",
-    "AccountingView",
-]

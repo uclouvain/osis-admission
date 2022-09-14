@@ -23,11 +23,13 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from .learning_unit import LearningUnitYearAutocomplete
 from .persons import CandidatesAutocomplete, PromotersAutocomplete
 from .countries import CountriesAutocomplete
 
 __all__ = [
-    CandidatesAutocomplete,
-    CountriesAutocomplete,
-    PromotersAutocomplete,
+    "CandidatesAutocomplete",
+    "CountriesAutocomplete",
+    "PromotersAutocomplete",
+    "LearningUnitYearAutocomplete",
 ]

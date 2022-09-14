@@ -42,6 +42,11 @@ from admission.utils import get_cached_admission_perm_obj
 from infrastructure.messages_bus import message_bus_instance
 from osis_role.contrib.views import APIPermissionRequiredMixin
 
+__all__ = [
+    "SupervisionAPIView",
+    "SupervisionSetReferencePromoterAPIView",
+]
+
 
 class SupervisionSchema(ResponseSpecificSchema):
     serializer_mapping = {

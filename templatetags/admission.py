@@ -31,18 +31,23 @@ from inspect import getfullargspec
 from django import template
 from django.urls import NoReverseMatch, reverse
 from django.utils.safestring import SafeString
-from django.utils.translation import gettext_lazy as _
+from django.utils.translation import gettext_lazy as _, pgettext
 from rules.templatetags import rules
 
 from admission.auth.constants import READ_ACTIONS_BY_TAB, UPDATE_ACTIONS_BY_TAB
+from admission.contrib.models import DoctorateAdmission
 from admission.ddd.projet_doctoral.doctorat.domain.model.enums import ChoixStatutDoctorat
 from admission.ddd.projet_doctoral.doctorat.formation.domain.model._enums import (
     CategorieActivite,
     ChoixTypeEpreuve,
     StatutActivite,
 )
+from admission.ddd.projet_doctoral.preparation.domain.model._enums import STATUTS_PROPOSITION_AVANT_INSCRIPTION
 from admission.utils import get_cached_admission_perm_obj
 from osis_role.templatetags.osis_role import has_perm
+
+CONTEXT_ADMISSION = 'admission'
+CONTEXT_DOCTORATE = 'doctorate'
 
 register = template.Library()
 
@@ -199,11 +204,12 @@ MESSAGE_TAB = Tab('messages', _('Send a mail'), 'envelope')
 INTERNAL_NOTE_TAB = Tab('internal-note', _('Internal notes'), 'note-sticky')
 
 TAB_TREES = {
-    'doctorate': {
+    CONTEXT_ADMISSION: {
         Tab('personal', _('Personal data'), 'user'): [
             Tab('person', _('Identification')),
             Tab('coordonnees', _('Contact details')),
         ],
+        # TODO Education choice
         Tab('experience', _('Previous experience'), 'list-alt'): [
             Tab('education', _('Secondary studies')),
             Tab('curriculum', _('Curriculum')),
@@ -213,28 +219,51 @@ TAB_TREES = {
             Tab('project', _('Doctoral project')),
             Tab('cotutelle', _('Cotutelle')),
             Tab('supervision', _('Supervision')),
-            Tab('confirmation', _('Confirmation paper')),
-            Tab('extension-request', _('New deadline')),
-            Tab('training', _('Training')),
         ],
-        Tab('history', _('History'), 'clock'): [
+        # TODO Specificities
+        # TODO Completion
+        Tab('management', pgettext('tab', 'Management'), 'gear'): [
             Tab('history', _('Status changes')),
             Tab('history-all', _('All history')),
-        ],
-        MESSAGE_TAB: [
             Tab('send-mail', _('Send a mail')),
-        ],
-        INTERNAL_NOTE_TAB: [
             INTERNAL_NOTE_TAB,
         ],
+        # TODO Documents
+    },
+    CONTEXT_DOCTORATE: {
+        Tab('person', _('Personal data'), 'user'): [
+            Tab('person', _('Personal data'), 'user'),
+        ],
+        Tab('education', _('Previous experience'), 'list-alt'): [
+            Tab('education', _('Previous experience'), 'list-alt'),
+        ],
+        Tab('doctorate', pgettext('tab', 'Doctoral project'), 'graduation-cap'): [
+            Tab('project', pgettext('tab', 'Research project')),
+            Tab('cotutelle', _('Cotutelle')),
+            Tab('supervision', _('Supervision')),
+        ],
+        Tab('confirmation', pgettext('tab', 'Confirmation'), 'award'): [
+            Tab('confirmation', _('Confirmation paper')),
+            Tab('extension-request', _('New deadline')),
+        ],
+        Tab('training', _('Training'), 'book-open-reader'): [
+            Tab('doctoral-training', _('Doctoral training')),
+            Tab('complementary-training', _('Complementary training')),
+            Tab('course-enrollment', _('Course enrollment')),
+        ],
+        Tab('defense', pgettext('tab', 'Defense'), 'person-chalkboard'): [
+            # TODO
+            # Tab('jury', _('Jury')),
+        ],
+        Tab('management', pgettext('tab', 'Management'), 'gear'): [
+            Tab('history', _('Status changes')),
+            Tab('history-all', _('All history')),
+            Tab('send-mail', _('Send a mail')),
+            INTERNAL_NOTE_TAB,
+        ],
+        # TODO Documents
     },
 }
-
-PARENT_TAB_BY_CHILD_TAB = {}
-for tree in TAB_TREES:
-    PARENT_TAB_BY_CHILD_TAB[tree] = {
-        child.name: parent for parent, children in TAB_TREES[tree].items() for child in children
-    }
 
 
 def get_active_parent(tab_tree, tab_name):
@@ -281,7 +310,8 @@ def default_tab_context(context):
     if len(match.namespaces) > 2 and match.namespaces[2] != 'update':
         active_tab = match.namespaces[2]
 
-    active_parent = PARENT_TAB_BY_CHILD_TAB['doctorate'][active_tab]
+    tab_tree = TAB_TREES[get_current_context(context['view'].get_permission_object())]
+    active_parent = get_active_parent(tab_tree, active_tab)
 
     return {
         'active_parent': active_parent,
@@ -297,7 +327,7 @@ def default_tab_context(context):
 def doctorate_tabs_bar(context):
     tab_context = default_tab_context(context)
     admission = get_cached_admission_perm_obj(tab_context['admission_uuid'])
-    current_tab_tree = get_valid_tab_tree(context, admission, TAB_TREES['doctorate']).copy()
+    current_tab_tree = get_valid_tab_tree(context, admission, TAB_TREES[get_current_context(admission)]).copy()
 
     # Prevent showing message tab when candidate is not enrolled
     if admission.post_enrolment_status == ChoixStatutDoctorat.ADMISSION_IN_PROGRESS.name:
@@ -311,12 +341,17 @@ def doctorate_tabs_bar(context):
 def current_subtabs(context):
     tab_context = default_tab_context(context)
     permission_obj = context['view'].get_permission_object()
+    tab_tree = TAB_TREES[get_current_context(admission=permission_obj)]
     tab_context['subtabs'] = [
-        tab
-        for tab in TAB_TREES['doctorate'][tab_context['active_parent']]
-        if can_read_tab(context, tab.name, permission_obj)
+        tab for tab in tab_tree[tab_context['active_parent']] if can_read_tab(context, tab.name, permission_obj)
     ]
     return tab_context
+
+
+def get_current_context(admission: DoctorateAdmission):
+    if admission.status in STATUTS_PROPOSITION_AVANT_INSCRIPTION:
+        return CONTEXT_ADMISSION
+    return CONTEXT_DOCTORATE
 
 
 @register.inclusion_tag('admission/includes/doctorate_subtabs_bar.html', takes_context=True)

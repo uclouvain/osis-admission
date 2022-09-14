@@ -1,5 +1,4 @@
-{% extends "admission/doctorate/details/tab_layout.html" %}
-{% load i18n static admission bootstrap3 %}
+{% load i18n osis_document admission enums %}
 
 {% comment "License" %}
   * OSIS stands for Open Student Information System. It's an application
@@ -25,23 +24,32 @@
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
 
+<div
+  class="panel panel-{{ activity|status_as_class }}"
+  data-status="{{ activity.status }}"
+  data-type="{{ activity.category }}"
+>
+  <div class="panel-heading" role="tab" id="h-{{ activity.uuid }}">
+    <h3 class="panel-title">
+      {% include "admission/doctorate/details/training/_panel_title.html" %}
 
-{% block tab_content %}
-  <h3>
-    {% display view.activity.type "-" view.activity.title as object %}
-    {% blocktrans trimmed %}Are you sure you want to refuse "{{ object }}"?{% endblocktrans %}
-  </h3>
-  <p>{% trans "This activity and potential sub-activities will be refused" %}</p>
-  <form action="" method="post">
-    {% csrf_token %}
-    {% bootstrap_form form %}
-    <div class="text-right">
-      <a href="{% url "admission:doctorate:doctoral-training" uuid=view.kwargs.uuid %}#{{ view.kwargs.activity_id }}">
-        {% trans "Cancel" %}
-      </a>
-      <button type="submit" class="btn btn-danger">
-        {% trans "Refuse activity" %}
-      </button>
+      {% display activity.learning_unit_year "-" activity.context %}
+      <div class="clearfix"></div>
+    </h3>
+  </div>
+  <div
+    id="a-{{ activity.uuid }}"
+    class="panel-collapse collapse"
+    role="tabpanel"
+    aria-labelledby="h-{{ activity.uuid }}"
+  >
+    <div class="panel-body">
+      <div class="form-group">
+        <strong class="d-block">{% trans "Description" %}</strong>
+        {{ activity.get_context_display }}
+        {{ activity.academic_year }}
+        {{ activity.learning_unit_year }}
+      </div>
     </div>
-  </form>
-{% endblock %}
+  </div>
+</div>

@@ -116,6 +116,12 @@ msgstr ""
 
 #, python-format
 msgid ""
+"<a href=\"%(enrollment_url)s\">Go to course enrollment</a> or <a href="
+"\"%(add_url)s\">add a course</a>"
+msgstr ""
+
+#, python-format
+msgid ""
 "<h2>Delete \"%(name)s\" custom mail template?</h2> <p>Are you sure you want "
 "to delete the custom mail template? This cannot be undone.</p>"
 msgstr ""
@@ -175,6 +181,9 @@ msgid "Academic year"
 msgstr ""
 
 msgid "Accept these activities"
+msgstr ""
+
+msgid "Accept these courses"
 msgstr ""
 
 msgid "Accepted"
@@ -436,6 +445,9 @@ msgstr "Oral communication (excluding conference)"
 msgid "COMMUNICATION types"
 msgstr ""
 
+msgid "COMPLEMENTARY_TRAINING"
+msgstr "Complementary training"
+
 msgid "CONFERENCE"
 msgstr "Conference, symposium"
 
@@ -455,6 +467,9 @@ msgid "COURSE"
 msgstr "Course"
 
 msgid "COURSE types"
+msgstr ""
+
+msgid "COURSE types for complementary training"
 msgstr ""
 
 msgid "CSC - China Scholarship Council"
@@ -613,6 +628,9 @@ msgstr ""
 msgid "Carbon-copy the promoters"
 msgstr ""
 
+msgid "Category"
+msgstr ""
+
 msgid "Category labels"
 msgstr ""
 
@@ -669,6 +687,12 @@ msgstr ""
 msgid "Communication attestation"
 msgstr ""
 
+msgid "Complementary training"
+msgstr ""
+
+msgid "Complementary training not enabled"
+msgstr ""
+
 msgid "Configuration saved."
 msgstr ""
 
@@ -680,6 +704,10 @@ msgid "Confirm"
 msgstr ""
 
 msgid "Confirm and send the message"
+msgstr ""
+
+msgctxt "tab"
+msgid "Confirmation"
 msgstr ""
 
 msgid "Confirmation paper"
@@ -721,6 +749,12 @@ msgstr ""
 msgid "Course code (if needed)"
 msgstr ""
 
+msgid "Course completed"
+msgstr ""
+
+msgid "Course enrollment"
+msgstr ""
+
 msgid "Course owner"
 msgstr ""
 
@@ -728,6 +762,9 @@ msgid "Course owner if applicable"
 msgstr ""
 
 msgid "Course with evaluation"
+msgstr ""
+
+msgid "Courses"
 msgstr ""
 
 msgid "Courses and training"
@@ -763,6 +800,9 @@ msgstr ""
 
 msgid "Custom mail templates"
 msgstr ""
+
+msgid "DOCTORAL_TRAINING"
+msgstr "Doctoral training"
 
 msgid "Data related to the thesis"
 msgstr ""
@@ -812,6 +852,10 @@ msgstr ""
 msgid "Defense"
 msgstr ""
 
+msgctxt "tab"
+msgid "Defense"
+msgstr ""
+
 msgid "Definitive admission date to doctorate"
 msgstr ""
 
@@ -846,6 +890,10 @@ msgstr ""
 msgid "Do you wish to move the doctorate to the \"%(status)s\" state?"
 msgstr ""
 
+msgid "Doctoral project"
+msgstr ""
+
+msgctxt "tab"
 msgid "Doctoral project"
 msgstr ""
 
@@ -938,10 +986,16 @@ msgstr ""
 msgid "Email"
 msgstr ""
 
+msgid "Enable complementary training tab"
+msgstr ""
+
 msgid "English"
 msgstr ""
 
 msgid "English values"
+msgstr ""
+
+msgid "Enroll in a course"
 msgstr ""
 
 msgid "Enrolments"
@@ -977,6 +1031,9 @@ msgstr ""
 
 msgid "FRC - Fonds de recherche clinique"
 msgstr ""
+
+msgid "FREE_COURSE"
+msgstr "Free course"
 
 msgid "FRESH"
 msgstr ""
@@ -1047,9 +1104,6 @@ msgid "Generic mail that can be manually sent once the candidate is admitted"
 msgstr ""
 
 msgid "HTML"
-msgstr ""
-
-msgid "History"
 msgstr ""
 
 msgid "Household composition or the birth certificate"
@@ -1371,6 +1425,10 @@ msgid ""
 "application has been submitted to UCLouvain by the applicant"
 msgstr ""
 
+msgctxt "tab"
+msgid "Management"
+msgstr ""
+
 msgid "Management of the doctorate enrolments"
 msgstr ""
 
@@ -1427,6 +1485,9 @@ msgid "Must be enrolled"
 msgstr ""
 
 msgid "Must be in the process of the enrolment"
+msgstr ""
+
+msgid "Must not be pre-admission"
 msgstr ""
 
 msgid "My father"
@@ -1906,6 +1967,10 @@ msgstr ""
 msgid "Require changes for \"%(object)s\""
 msgstr ""
 
+msgctxt "tab"
+msgid "Research project"
+msgstr ""
+
 msgid "Research report"
 msgstr ""
 
@@ -2035,6 +2100,9 @@ msgstr ""
 msgid "Search"
 msgstr ""
 
+msgid "Search for an EU code (outside the EU of the form)"
+msgstr ""
+
 msgid "Secondary studies"
 msgstr ""
 
@@ -2150,6 +2218,9 @@ msgid "Submit"
 msgstr ""
 
 msgid "Submit these activities"
+msgstr ""
+
+msgid "Submit these courses"
 msgstr ""
 
 msgid "Submitted"
@@ -2390,7 +2461,14 @@ msgstr ""
 msgid "This activity must be unsubmitted"
 msgstr ""
 
+msgid ""
+"This adds a \"Complementary training\" tab on admissions concerning this CDD."
+msgstr ""
+
 msgid "This candidate has not created any activity yet"
+msgstr ""
+
+msgid "This candidate has not created any course yet."
 msgstr ""
 
 msgid "This experience cannot be updated as it has already been valuated."
@@ -2434,6 +2512,12 @@ msgstr ""
 msgid "Training"
 msgstr ""
 
+msgid "Training activities"
+msgstr ""
+
+msgid "Training activity"
+msgstr ""
+
 msgid "Tutorship act"
 msgstr ""
 
@@ -2454,6 +2538,9 @@ msgstr ""
 
 msgid "UCLOUVAIN_ASSISTANT"
 msgstr ""
+
+msgid "UCL_COURSE"
+msgstr "UCL Course"
 
 msgid "UUID"
 msgstr ""
@@ -2478,6 +2565,9 @@ msgstr "Valorisation of experience"
 
 msgid "VALID"
 msgstr "Valid"
+
+msgid "Validate these courses"
+msgstr ""
 
 msgid "Validated"
 msgstr ""

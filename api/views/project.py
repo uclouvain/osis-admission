@@ -57,6 +57,14 @@ from backoffice.settings.rest_framework.common_views import DisplayExceptionsByF
 from infrastructure.messages_bus import message_bus_instance
 from osis_role.contrib.views import APIPermissionRequiredMixin
 
+__all__ = [
+    "PropositionListView",
+    "SupervisedPropositionListView",
+    "PropositionViewSet",
+    "VerifyProjectView",
+    "SubmitPropositionViewSet",
+]
+
 
 class PropositionListSchema(ResponseSpecificSchema):
     serializer_mapping = {

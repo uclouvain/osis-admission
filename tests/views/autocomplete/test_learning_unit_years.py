@@ -23,52 +23,31 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from django.utils.translation import gettext_lazy as _
+from django.shortcuts import resolve_url
+from django.test import TestCase
 
-from base.models.utils.utils import ChoiceEnum
-
-
-class StatutActivite(ChoiceEnum):
-    NON_SOUMISE = _("NON_SOUMISE")
-    SOUMISE = _("SOUMISE")
-    ACCEPTEE = _("ACCEPTEE")
-    REFUSEE = _("REFUSEE")
+from base.models.enums.learning_container_year_types import LearningContainerYearType
+from base.tests.factories.learning_unit_year import LearningUnitYearFactory
+from base.tests.factories.user import UserFactory
 
 
-class CategorieActivite(ChoiceEnum):
-    CONFERENCE = _("CONFERENCE")
-    COMMUNICATION = _("COMMUNICATION")
-    SEMINAR = _("SEMINAR")
-    PUBLICATION = _("PUBLICATION")
-    SERVICE = _("SERVICE")
-    RESIDENCY = _("RESIDENCY")
-    VAE = _("VAE")
-    COURSE = _("COURSE")
-    PAPER = _("PAPER")
-    UCL_COURSE = _("UCL_COURSE")
+class AutocompleteTestCase(TestCase):
+    def test_autocomplete_learning_unit_year(self):
+        self.client.force_login(UserFactory())
+        LearningUnitYearFactory(acronym="FOOBAR1", academic_year__year=2022)
+        LearningUnitYearFactory(
+            acronym="FOOBAR2",
+            academic_year__year=2022,
+            learning_container_year__container_type=LearningContainerYearType.EXTERNAL.name,
+        )
+        url = resolve_url('admission:autocomplete:learning_unit_years')
+        data = {'forward': '{"annee": "2022"}', 'q': 'FO'}
+        response = self.client.get(url, format="json")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json()['results']), 0)
 
-
-class ChoixComiteSelection(ChoiceEnum):
-    YES = _("YES")
-    NO = _("NO")
-    NA = _("N/A")
-
-
-class ChoixStatutPublication(ChoiceEnum):
-    UNSUBMITTED = _("Unsubmitted for publication")
-    SUBMITTED = _("Submitted for publication")
-    IN_REVIEW = _("In review")
-    ACCEPTED = _("Accepted")
-    PUBLISHED = _("Published")
-
-
-class ChoixTypeEpreuve(ChoiceEnum):
-    CONFIRMATION_PAPER = _("CONFIRMATION_PAPER")
-    PRIVATE_DEFENSE = _("PRIVATE_DEFENSE")
-    PUBLIC_DEFENSE = _("PUBLIC_DEFENSE")
-
-
-class ContexteFormation(ChoiceEnum):
-    DOCTORAL_TRAINING = _("DOCTORAL_TRAINING")
-    COMPLEMENTARY_TRAINING = _("COMPLEMENTARY_TRAINING")
-    FREE_COURSE = _("FREE_COURSE")
+        response = self.client.get(url, data=data, format="json")
+        self.assertEqual(response.status_code, 200)
+        results = response.json()['results']
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0]['id'], "FOOBAR1")

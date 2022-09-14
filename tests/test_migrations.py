@@ -36,9 +36,11 @@ class TestMigrations(TestCase):
     def test_should_not_create_new_migrations_files_when_makemigrations_is_called(self):
         out = StringIO()
         try:
-            call_command("makemigrations", "admission", dry_run=True, check=True, stdout=out)
+            call_command("makemigrations", "admission", dry_run=True, check=True, stdout=out, skip_checks=True)
         except SystemExit as e:
-            error_msg = "Some models changes has no migrations file.\n" \
-                        "Migrations file that would be created:\n" \
-                        "{}".format(out.getvalue())
+            error_msg = (
+                "Some models changes has no migrations file.\n"
+                "Migrations file that would be created:\n"
+                "{}".format(out.getvalue())
+            )
             self.assertEqual(e.code, SUCCESS_EXIT_CODE, error_msg)

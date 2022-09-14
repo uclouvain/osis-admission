@@ -49,6 +49,13 @@ from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_y
 from infrastructure.messages_bus import message_bus_instance
 from infrastructure.shared_kernel.academic_year.repository import academic_year as academic_year_repository
 
+__all__ = [
+    "AutocompleteSectorView",
+    "AutocompleteDoctoratView",
+    "AutocompleteTutorView",
+    "AutocompletePersonView",
+]
+
 
 class AutocompleteSectorView(ListAPIView):
     """Autocomplete sectors"""
@@ -69,7 +76,7 @@ class AutocompleteSectorView(ListAPIView):
         )
         doctorate_qs = EducationGroupYear.objects.annotate(
             path_as_string=CTESubquery(
-                EntityVersion.objects.with_acronym_path(entity_id=OuterRef('management_entity'),).values(
+                EntityVersion.objects.with_acronym_path(entity_id=OuterRef('management_entity')).values(
                     'path_as_string'
                 )[:1],
                 output_field=TextField(),

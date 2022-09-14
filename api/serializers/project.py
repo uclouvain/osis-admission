@@ -114,7 +114,9 @@ class PropositionSearchDTOSerializer(IncludedFieldsMixin, DTOSerializer):
             'retrieve_accounting': ACTION_LINKS['retrieve_accounting'],
             'update_accounting': ACTION_LINKS['update_accounting'],
             # Training
-            'retrieve_training': ACTION_LINKS['retrieve_training'],
+            'retrieve_doctoral_training': ACTION_LINKS['retrieve_doctoral_training'],
+            'retrieve_complementary_training': ACTION_LINKS['retrieve_complementary_training'],
+            'retrieve_course_enrollment': ACTION_LINKS['retrieve_course_enrollment'],
         }
     )
     # This is to prevent schema from breaking on JSONField
@@ -188,7 +190,9 @@ class PropositionDTOSerializer(IncludedFieldsMixin, DTOSerializer):
             'retrieve_accounting': ACTION_LINKS['retrieve_accounting'],
             'update_accounting': ACTION_LINKS['update_accounting'],
             # Training
-            'retrieve_training': ACTION_LINKS['retrieve_training'],
+            'retrieve_doctoral_training': ACTION_LINKS['retrieve_doctoral_training'],
+            'retrieve_complementary_training': ACTION_LINKS['retrieve_complementary_training'],
+            'retrieve_course_enrollment': ACTION_LINKS['retrieve_course_enrollment'],
         }
     )
     # The schema is explicit in PropositionSchema
