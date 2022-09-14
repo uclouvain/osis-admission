@@ -26,21 +26,27 @@
 from .internal_note import InternalNoteView
 from .list import CddDoctorateAdmissionList
 from .training import (
-    DoctorateTrainingActivityAddView,
-    DoctorateTrainingActivityDeleteView,
-    DoctorateTrainingActivityEditView,
-    DoctorateTrainingActivityRefuseView,
-    DoctorateTrainingActivityRequireChangesView,
-    DoctorateTrainingActivityView,
+    ComplementaryTrainingView,
+    TrainingActivityAddView,
+    TrainingActivityDeleteView,
+    TrainingActivityEditView,
+    TrainingActivityRefuseView,
+    TrainingActivityRequireChangesView,
+    DoctoralTrainingActivityView,
+    TrainingRedirectView,
+    CourseEnrollmentView,
 )
 
 __all__ = [
     'CddDoctorateAdmissionList',
-    'DoctorateTrainingActivityView',
-    'DoctorateTrainingActivityAddView',
-    'DoctorateTrainingActivityEditView',
-    'DoctorateTrainingActivityDeleteView',
-    'DoctorateTrainingActivityRefuseView',
-    'DoctorateTrainingActivityRequireChangesView',
+    'DoctoralTrainingActivityView',
+    'TrainingActivityAddView',
+    'TrainingActivityEditView',
+    'TrainingActivityDeleteView',
+    'TrainingActivityRefuseView',
+    'TrainingActivityRequireChangesView',
+    'ComplementaryTrainingView',
+    'TrainingRedirectView',
+    'CourseEnrollmentView',
     'InternalNoteView',
 ]

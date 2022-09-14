@@ -50,8 +50,12 @@ class DoctorateDTOSerializer(DTOSerializer):
                 'update_confirmation',
                 'update_confirmation_extension',
                 # Training
-                'retrieve_training',
+                'retrieve_doctoral_training',
+                'retrieve_complementary_training',
+                'retrieve_course_enrollment',
                 'add_training',
+                'submit_training',
+                'assent_training',
             ]
         }
     )

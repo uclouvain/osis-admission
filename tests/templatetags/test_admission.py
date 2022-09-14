@@ -247,7 +247,7 @@ class AdmissionTabsTestCase(TestCase):
             'view': Mock(),
         }
         result = current_subtabs(context)
-        self.assertEqual(result['subtabs'], TAB_TREES['doctorate'][Tab('doctorate', _('Doctorate'), 'graduation-cap')])
+        self.assertEqual(result['subtabs'], TAB_TREES['doctorate'][Tab('confirmation', '')])
 
 
 class AdmissionPanelTagTestCase(TestCase):

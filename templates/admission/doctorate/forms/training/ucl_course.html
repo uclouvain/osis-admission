@@ -1,5 +1,4 @@
-{% extends "admission/doctorate/details/tab_layout.html" %}
-{% load i18n static admission bootstrap3 %}
+{% load i18n bootstrap3 %}
 
 {% comment "License" %}
   * OSIS stands for Open Student Information System. It's an application
@@ -25,23 +24,12 @@
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
 
+<h2>
+  {% trans "Enroll in a course" %}
+</h2>
 
-{% block tab_content %}
-  <h3>
-    {% display view.activity.type "-" view.activity.title as object %}
-    {% blocktrans trimmed %}Are you sure you want to refuse "{{ object }}"?{% endblocktrans %}
-  </h3>
-  <p>{% trans "This activity and potential sub-activities will be refused" %}</p>
-  <form action="" method="post">
-    {% csrf_token %}
-    {% bootstrap_form form %}
-    <div class="text-right">
-      <a href="{% url "admission:doctorate:doctoral-training" uuid=view.kwargs.uuid %}#{{ view.kwargs.activity_id }}">
-        {% trans "Cancel" %}
-      </a>
-      <button type="submit" class="btn btn-danger">
-        {% trans "Refuse activity" %}
-      </button>
-    </div>
-  </form>
-{% endblock %}
+<p>{% lorem %}</p>
+
+{% bootstrap_field form.context form_group_class="form-group required_field" %}
+{% bootstrap_field form.academic_year form_group_class="form-group required_field" %}
+{% bootstrap_field form.learning_unit_year form_group_class="form-group required_field" %}

@@ -252,6 +252,7 @@ class AccountingAPIViewTestCase(APITestCase):
         self.student.country_of_citizenship = CountryFactory(european_union=False)
         self.student.save()
         response = self.client.get(self.admission_url)
+        self.assertEqual(response.status_code, HTTP_200_OK)
         self.assertEqual(response.json().get('has_ue_nationality'), False)
 
     def test_get_accounting_conditions_with_country_of_citizenship_inside_ue(self):
@@ -260,6 +261,7 @@ class AccountingAPIViewTestCase(APITestCase):
         self.student.country_of_citizenship = CountryFactory(european_union=True)
         self.student.save()
         response = self.client.get(self.admission_url)
+        self.assertEqual(response.status_code, HTTP_200_OK)
         self.assertEqual(response.json().get('has_ue_nationality'), True)
 
     def test_get_accounting_conditions_with_specified_educational_experiences(self):

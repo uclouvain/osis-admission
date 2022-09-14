@@ -47,7 +47,16 @@ class RefuserActiviteTestCase(SimpleTestCase):
             categorie=CategorieActivite.COMMUNICATION,
             statut=StatutActivite.SOUMISE,
         )
-        ActiviteInMemoryRepository.entities = [self.activite]
+        self.seminaire = ActiviteFactory(
+            categorie=CategorieActivite.SEMINAR,
+            statut=StatutActivite.SOUMISE,
+        )
+        self.sous_activite = ActiviteFactory(
+            categorie=CategorieActivite.COMMUNICATION,
+            statut=StatutActivite.ACCEPTEE,
+            parent_id=self.seminaire.entity_id,
+        )
+        ActiviteInMemoryRepository.entities = [self.activite, self.seminaire, self.sous_activite]
 
     def tearDown(self) -> None:
         ActiviteInMemoryRepository.reset()
@@ -90,6 +99,18 @@ class RefuserActiviteTestCase(SimpleTestCase):
             )
         )
         self.assertEqual(ActiviteInMemoryRepository.get(self.activite.entity_id).statut, StatutActivite.REFUSEE)
+
+    def test_refuser_seminaire_et_sous_activites(self):
+        self.message_bus.invoke(
+            RefuserActiviteCommand(
+                doctorat_uuid="uuid-SC3DP-promoteurs-membres-deja-approuves",
+                activite_uuid=self.seminaire.entity_id.uuid,
+                avec_modification=False,
+                remarque="Pas ok",
+            )
+        )
+        self.assertEqual(ActiviteInMemoryRepository.get(self.seminaire.entity_id).statut, StatutActivite.REFUSEE)
+        self.assertEqual(ActiviteInMemoryRepository.get(self.sous_activite.entity_id).statut, StatutActivite.REFUSEE)
 
     def test_demander_modications_activite(self):
         self.message_bus.invoke(

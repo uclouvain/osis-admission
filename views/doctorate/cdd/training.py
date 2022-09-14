@@ -23,10 +23,12 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from typing import Optional
 
 from django.db.models import Q, Sum
 from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, resolve_url
+from django.utils.functional import cached_property
 from django.views import generic
 from django.views.generic.detail import SingleObjectMixin
 
@@ -36,37 +38,60 @@ from admission.ddd.projet_doctoral.doctorat.formation.commands import (
     RefuserActiviteCommand,
     SoumettreActivitesCommand,
 )
-from admission.ddd.projet_doctoral.doctorat.formation.domain.model._enums import CategorieActivite, StatutActivite
+from admission.ddd.projet_doctoral.doctorat.formation.domain.model._enums import (
+    CategorieActivite,
+    StatutActivite,
+)
 from admission.forms.doctorate.training.activity import *
-from admission.forms.doctorate.training.activity import get_category_labels
+from admission.forms.doctorate.training.activity import ComplementaryCourseForm, get_category_labels
 from admission.forms.doctorate.training.processus import BatchActivityForm, RefuseForm
+from admission.templatetags.admission import CONTEXT_DOCTORATE, can_read_tab
 from admission.views.doctorate.mixins import LoadDossierViewMixin
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from infrastructure.messages_bus import message_bus_instance
 
 
-class DoctorateTrainingActivityView(LoadDossierViewMixin, generic.FormView):
+class TrainingRedirectView(LoadDossierViewMixin, generic.RedirectView):
+    """Redirect depending on the status of CDD and admission type"""
+
+    def get_redirect_url(self, *args, **kwargs):
+        if can_read_tab(CONTEXT_DOCTORATE, 'doctoral-training', self.admission):
+            return resolve_url('admission:doctorate:doctoral-training', uuid=self.admission_uuid)
+        if can_read_tab(CONTEXT_DOCTORATE, 'complementary-training', self.admission):
+            return resolve_url('admission:doctorate:complementary-training', uuid=self.admission_uuid)
+        return resolve_url('admission:doctorate:course-enrollment', uuid=self.admission_uuid)
+
+
+class DoctoralTrainingActivityView(LoadDossierViewMixin, generic.FormView):
+    """List view for doctoral training activities"""
+
     template_name = "admission/doctorate/cdd/training_list.html"
     permission_required = "admission.change_activity"
     form_class = BatchActivityForm
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        qs = Activity.objects.filter(doctorate__uuid=self.admission_uuid)
-        context['activities'] = qs.prefetch_related('children')
+        context['activities'] = self.get_queryset()
         context['categories'] = get_category_labels(self.admission.doctorate.management_entity_id)
         context['statuses'] = StatutActivite.choices
-        context['counts'] = qs.aggregate(
+        context['counts'] = self.get_queryset().aggregate(
             total=Sum('ects'),
             validated=Sum('ects', filter=Q(status=StatutActivite.ACCEPTEE.name)),
             pending=Sum('ects', filter=Q(status=StatutActivite.SOUMISE.name)),
         )
-        context['categories_count'] = qs.values('category').annotate(
-            unsubmitted=Sum('ects', filter=Q(status=StatutActivite.NON_SOUMISE.name)),
-            submitted=Sum('ects', filter=Q(status=StatutActivite.SOUMISE.name)),
-            validated=Sum('ects', filter=Q(status=StatutActivite.ACCEPTEE.name)),
+        context['categories_count'] = (
+            self.get_queryset()
+            .values('category')
+            .annotate(
+                unsubmitted=Sum('ects', filter=Q(status=StatutActivite.NON_SOUMISE.name)),
+                submitted=Sum('ects', filter=Q(status=StatutActivite.SOUMISE.name)),
+                validated=Sum('ects', filter=Q(status=StatutActivite.ACCEPTEE.name)),
+            )
         )
         return context
+
+    def get_queryset(self):
+        return Activity.objects.for_doctoral_training(self.admission_uuid)
 
     def get_success_url(self):
         return self.request.get_full_path()
@@ -99,39 +124,69 @@ class DoctorateTrainingActivityView(LoadDossierViewMixin, generic.FormView):
         return super().form_valid(form)
 
 
-class DoctorateTrainingActivityFormMixin(LoadDossierViewMixin):
+class TrainingActivityFormMixin(LoadDossierViewMixin):
+    """Form mixin for an activity"""
+
     template_name = "admission/doctorate/forms/training.html"
     model = Activity
     permission_required = "admission.change_activity"
     form_class_mapping = {
-        CategorieActivite.CONFERENCE: ConferenceForm,
-        (CategorieActivite.CONFERENCE, CategorieActivite.COMMUNICATION): ConferenceCommunicationForm,
-        (CategorieActivite.CONFERENCE, CategorieActivite.PUBLICATION): ConferencePublicationForm,
-        CategorieActivite.RESIDENCY: ResidencyForm,
-        (CategorieActivite.RESIDENCY, CategorieActivite.COMMUNICATION): ResidencyCommunicationForm,
-        CategorieActivite.COMMUNICATION: CommunicationForm,
-        CategorieActivite.PUBLICATION: PublicationForm,
-        CategorieActivite.SERVICE: ServiceForm,
-        CategorieActivite.SEMINAR: SeminarForm,
-        (CategorieActivite.SEMINAR, CategorieActivite.COMMUNICATION): SeminarCommunicationForm,
-        CategorieActivite.VAE: ValorisationForm,
-        CategorieActivite.COURSE: CourseForm,
-        CategorieActivite.PAPER: PaperForm,
+        "doctoral-training": {
+            CategorieActivite.CONFERENCE: ConferenceForm,
+            (CategorieActivite.CONFERENCE, CategorieActivite.COMMUNICATION): ConferenceCommunicationForm,
+            (CategorieActivite.CONFERENCE, CategorieActivite.PUBLICATION): ConferencePublicationForm,
+            CategorieActivite.RESIDENCY: ResidencyForm,
+            (CategorieActivite.RESIDENCY, CategorieActivite.COMMUNICATION): ResidencyCommunicationForm,
+            CategorieActivite.COMMUNICATION: CommunicationForm,
+            CategorieActivite.PUBLICATION: PublicationForm,
+            CategorieActivite.SERVICE: ServiceForm,
+            CategorieActivite.SEMINAR: SeminarForm,
+            (CategorieActivite.SEMINAR, CategorieActivite.COMMUNICATION): SeminarCommunicationForm,
+            CategorieActivite.VAE: ValorisationForm,
+            CategorieActivite.COURSE: CourseForm,
+            CategorieActivite.PAPER: PaperForm,
+        },
+        "complementary-training": {
+            CategorieActivite.COURSE: ComplementaryCourseForm,
+        },
+        "course-enrollment": {
+            CategorieActivite.UCL_COURSE: UclCourseForm,
+        },
     }
+
+    @property
+    def namespace(self) -> str:
+        return self.request.resolver_match.namespaces[2]
+
+    @property
+    def category(self) -> str:
+        """Return category being worked on"""
+        category = self.activity.category if hasattr(self, 'activity') else self.kwargs['category']
+        return str(category).upper()
+
+    @cached_property
+    def parent(self) -> Optional[Activity]:
+        if hasattr(self, 'activity'):
+            if self.activity.parent_id:
+                return self.activity.parent
+        else:
+            parent_id = self.request.GET.get('parent')
+            if parent_id:
+                return get_object_or_404(Activity, uuid=parent_id)
+
+    @property
+    def category_mapping_key(self):
+        """Return the form_class mapping key (with parent if needed)"""
+        category = CategorieActivite[self.category]
+        if self.parent:
+            return CategorieActivite[str(self.parent.category)], category
+        return category
 
     def get_form_class(self):
         try:
-            form_class = self.form_class_mapping[self.get_category()]
+            return self.form_class_mapping[self.namespace][self.category_mapping_key]
         except KeyError as e:
             raise Http404(f"No form mapped: {e}")
-        return form_class
-
-    def get_category(self):
-        category = CategorieActivite[self.kwargs['category'].upper()]
-        if self.request.GET.get('parent'):
-            parent = get_object_or_404(Activity, uuid=self.request.GET.get('parent'))
-            return CategorieActivite[parent.category], category
-        return category
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -139,32 +194,26 @@ class DoctorateTrainingActivityFormMixin(LoadDossierViewMixin):
         return kwargs
 
     def get_success_url(self):
-        base_url = resolve_url("admission:doctorate:training", uuid=self.admission_uuid)
+        base_url = resolve_url(':'.join(self.request.resolver_match.namespaces), uuid=self.admission_uuid)
         return f"{base_url}#{self.object.uuid}"
 
 
-class DoctorateTrainingActivityAddView(DoctorateTrainingActivityFormMixin, generic.CreateView):
+class TrainingActivityAddView(TrainingActivityFormMixin, generic.CreateView):
     object = None
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        params = {'doctorate': kwargs['admission'], 'category': self.kwargs['category'].upper()}
-        if self.request.GET.get('parent'):
-            params['parent'] = get_object_or_404(Activity, uuid=self.request.GET.get('parent'))
+        params = {'doctorate': kwargs['admission'], 'category': self.category}
+        if self.parent:
+            params['parent'] = self.parent
         self.object = kwargs['instance'] = Activity(**params)
         return kwargs
 
 
-class DoctorateTrainingActivityEditView(DoctorateTrainingActivityFormMixin, generic.UpdateView):
+class TrainingActivityEditView(TrainingActivityFormMixin, generic.UpdateView):
     slug_field = 'uuid'
     pk_url_kwarg = None
     slug_url_kwarg = 'activity_id'
-
-    def get_category(self):
-        category = CategorieActivite[self.object.category]
-        if self.object.parent_id:
-            return CategorieActivite[self.object.parent.category], category
-        return category
 
     @property
     def activity(self):
@@ -172,7 +221,7 @@ class DoctorateTrainingActivityEditView(DoctorateTrainingActivityFormMixin, gene
         return self.object
 
 
-class DoctorateTrainingActivityDeleteView(LoadDossierViewMixin, generic.DeleteView):
+class TrainingActivityDeleteView(LoadDossierViewMixin, generic.DeleteView):
     model = Activity
     permission_required = "admission.delete_activity"
     slug_field = 'uuid'
@@ -187,10 +236,10 @@ class DoctorateTrainingActivityDeleteView(LoadDossierViewMixin, generic.DeleteVi
         return HttpResponseRedirect(self.get_success_url())
 
     def get_success_url(self):
-        return resolve_url("admission:doctorate:training", uuid=self.admission_uuid)
+        return resolve_url(':'.join(self.request.resolver_match.namespaces), uuid=self.admission_uuid)
 
 
-class DoctorateTrainingActivityRefuseView(LoadDossierViewMixin, SingleObjectMixin, generic.FormView):
+class TrainingActivityRefuseView(LoadDossierViewMixin, SingleObjectMixin, generic.FormView):
     model = Activity
     permission_required = "admission.refuse_activity"
     slug_field = 'uuid'
@@ -209,7 +258,7 @@ class DoctorateTrainingActivityRefuseView(LoadDossierViewMixin, SingleObjectMixi
         return super().post(request, *args, **kwargs)
 
     @property
-    def activity(self):
+    def activity(self) -> Activity:
         # Don't remove, this is to share same template code in front-office
         return self.object
 
@@ -225,9 +274,25 @@ class DoctorateTrainingActivityRefuseView(LoadDossierViewMixin, SingleObjectMixi
         return super().form_valid(form)
 
     def get_success_url(self):
-        return resolve_url("admission:doctorate:training", uuid=self.admission_uuid)
+        return resolve_url(':'.join(self.request.resolver_match.namespaces), uuid=self.admission_uuid)
 
 
-class DoctorateTrainingActivityRequireChangesView(DoctorateTrainingActivityRefuseView):
+class TrainingActivityRequireChangesView(TrainingActivityRefuseView):
     avec_modification = True
     template_name = "admission/doctorate/forms/training/activity_require_changes.html"
+
+
+class ComplementaryTrainingView(DoctoralTrainingActivityView):
+    template_name = "admission/doctorate/cdd/complementary_training_list.html"
+    permission_required = 'admission.view_complementary_training'
+
+    def get_queryset(self):
+        return Activity.objects.for_complementary_training(self.admission_uuid)
+
+
+class CourseEnrollmentView(DoctoralTrainingActivityView):
+    template_name = "admission/doctorate/cdd/course_enrollment.html"
+    permission_required = 'admission.view_course_enrollment'
+
+    def get_queryset(self):
+        return Activity.objects.for_enrollment_courses(self.admission_uuid)

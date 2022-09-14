@@ -88,7 +88,7 @@ def map_translated_lists_value_field(field, **kwargs):
         kwargs['form_class'] = TranslatedListsValueField
     if field.name == 'category_labels':
         kwargs['help_text'] = _("Do not reorder values, and keep the same count")
-    return models.Field.formfield(field, **kwargs)
+    return field.formfield(**kwargs)
 
 
 class CddConfigForm(forms.ModelForm):

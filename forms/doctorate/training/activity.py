@@ -26,6 +26,7 @@
 from functools import partial
 from typing import List, Tuple
 
+import dal.forward
 from dal import autocomplete
 from django import forms
 from django.utils.translation import get_language, gettext_lazy as _, pgettext_lazy
@@ -36,13 +37,16 @@ from admission.ddd.projet_doctoral.doctorat.formation.domain.model._enums import
     CategorieActivite,
     ChoixComiteSelection,
     ChoixTypeEpreuve,
+    ContexteFormation,
 )
 from admission.forms import SelectOrOtherField
 from base.forms.utils.datefield import DatePickerInput
 from base.models.academic_year import AcademicYear
+from base.models.learning_unit_year import LearningUnitYear
 
 __all__ = [
     "ConfigurableActivityTypeField",
+    "AcademicYearField",
     "ConferenceForm",
     "ConferenceCommunicationForm",
     "ConferencePublicationForm",
@@ -56,7 +60,10 @@ __all__ = [
     "ValorisationForm",
     "CourseForm",
     "PaperForm",
+    "ComplementaryCourseForm",
+    "UclCourseForm",
 ]
+
 INSTITUTION_UCL = "UCLouvain"
 
 
@@ -97,13 +104,11 @@ class BooleanRadioSelect(forms.RadioSelect):
 
 class AcademicYearField(forms.ModelChoiceField):
     def __init__(self, *args, **kwargs):
-        super().__init__(
-            label=_("Academic year"),
-            queryset=AcademicYear.objects.order_by('-year'),
-            **kwargs,
-        )
+        kwargs.setdefault('label', _("Academic year"))
+        kwargs.setdefault('queryset', AcademicYear.objects.order_by('-year'))
+        super().__init__(*args, **kwargs)
 
-    def label_from_instance(self, obj) -> str:
+    def label_from_instance(self, obj: AcademicYear) -> str:
         return f"{obj.year}-{obj.year + 1}"
 
 
@@ -125,7 +130,7 @@ IsOnlineField = partial(
 )
 
 
-class ActivityFormMixin:
+class ActivityFormMixin(forms.BaseForm):
     def __init__(self, admission, *args, **kwargs) -> None:
         self.cdd_id = admission.doctorate.management_entity_id
         super().__init__(*args, **kwargs)
@@ -561,6 +566,7 @@ class CourseForm(ActivityFormMixin, forms.ModelForm):
         if cleaned_data.get('organizing_institution') == INSTITUTION_UCL and cleaned_data.get('academic_year'):
             cleaned_data['start_date'] = cleaned_data['academic_year'].start_date
             cleaned_data['end_date'] = cleaned_data['academic_year'].end_date
+        cleaned_data.pop('academic_year', None)
         return cleaned_data
 
     class Meta:
@@ -590,6 +596,16 @@ class CourseForm(ActivityFormMixin, forms.ModelForm):
         }
 
 
+class ComplementaryCourseForm(CourseForm):
+    """Course form for complementary training"""
+
+    type = ConfigurableActivityTypeField("complementary_course_types", label=_("Type of activity"))
+
+    def __init__(self, admission, *args, **kwargs):
+        super().__init__(admission, *args, **kwargs)
+        self.instance.context = ContexteFormation.COMPLEMENTARY_TRAINING.name
+
+
 class PaperForm(ActivityFormMixin, forms.ModelForm):
     template_name = "admission/doctorate/forms/training/paper.html"
     type = forms.ChoiceField(label=_("Type of paper"), choices=ChoixTypeEpreuve.choices())
@@ -600,4 +616,46 @@ class PaperForm(ActivityFormMixin, forms.ModelForm):
             'type',
             'ects',
             'comment',
+        ]
+
+
+class UclCourseForm(ActivityFormMixin, forms.ModelForm):
+    template_name = "admission/doctorate/forms/training/ucl_course.html"
+    academic_year = AcademicYearField(to_field_name='year', widget=autocomplete.ListSelect2())
+    learning_unit_year = forms.CharField(
+        widget=autocomplete.ListSelect2(
+            url='admission:autocomplete:learning_unit_years',
+            attrs={
+                'data-html': True,
+                'data-minimum-input-length': 2,
+                'data-placeholder': _('Search for an EU code (outside the EU of the form)'),
+            },
+            forward=[dal.forward.Field("academic_year", "annee")],
+        ),
+    )
+
+    def __init__(self, admission, *args, **kwargs):
+        super().__init__(admission, *args, **kwargs)
+        self.fields['learning_unit_year'].required = True
+        if self.initial.get('learning_unit_year'):
+            learning_unit_year = LearningUnitYear.objects.get(pk=self.initial['learning_unit_year'])
+            self.initial['academic_year'] = learning_unit_year.academic_year.year
+            self.fields['learning_unit_year'].widget.choices = [
+                (learning_unit_year.pk, f"{learning_unit_year.acronym} - {learning_unit_year.complete_title_i18n}"),
+            ]
+
+    def clean(self):
+        cleaned_data = super().clean()
+        if cleaned_data.get('academic_year') and cleaned_data.get('learning_unit_year'):
+            cleaned_data['learning_unit_year'] = LearningUnitYear.objects.get(
+                academic_year=cleaned_data['academic_year'],
+                acronym=cleaned_data['learning_unit_year'],
+            )
+        return cleaned_data
+
+    class Meta:
+        model = Activity
+        fields = [
+            'context',
+            'learning_unit_year',
         ]

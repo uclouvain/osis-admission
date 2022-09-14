@@ -32,6 +32,7 @@ from admission.ddd.projet_doctoral.doctorat.formation.domain.model._enums import
     CategorieActivite,
     ChoixStatutPublication,
     ChoixTypeEpreuve,
+    ContexteFormation,
     StatutActivite,
 )
 from admission.ddd.projet_doctoral.doctorat.formation.domain.model.activite import Activite, ActiviteIdentity
@@ -249,6 +250,12 @@ class ActiviteRepository(IActiviteRepository):
                 titulaire=activity.authors,
                 certificat=activity.participating_proof,
                 commentaire=activity.comment,
+            )
+        elif categorie == CategorieActivite.UCL_COURSE:
+            return CoursUclDTO(
+                contexte=ContexteFormation[activity.context],
+                annee=activity.learning_unit_year.academic_year.year,
+                code_unite_enseignement=activity.learning_unit_year.acronym,
             )
         elif categorie == CategorieActivite.PAPER:  # pragma: no branch
             return EpreuveDTO(

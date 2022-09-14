@@ -374,6 +374,9 @@ class DoctorateAdmission(BaseAdmission):
             ('submit_doctorateadmission', _("Can submit a doctorate admission proposition")),
         ]
 
+    def __str__(self):  # pragma: no cover
+        return self.reference
+
     def save(self, *args, **kwargs) -> None:
         super().save(*args, **kwargs)
         cache.delete('admission_permission_{}'.format(self.uuid))

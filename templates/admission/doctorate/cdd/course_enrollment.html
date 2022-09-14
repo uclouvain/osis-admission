@@ -27,47 +27,21 @@
 
 
 {% block actions-group %}
-  <div class="btn-group">
-    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
-            aria-expanded="false">
-      {% trans "Add an activity" %} <span class="caret"></span>
-    </button>
-    <ul class="dropdown-menu dropdown-menu-right">
-      {% for category_name, category_label in categories %}
-        {% if category_name != 'UCL_COURSE' %}
-          <li>
-            {% url "admission:doctorate:doctoral-training:add" uuid=view.kwargs.uuid category=category_name|lower as add_url %}
-            <a href="{{ add_url }}">
-              {{ category_label }}
-            </a>
-          </li>
-        {% endif %}
-      {% endfor %}
-    </ul>
-  </div>
+  {% url "admission:doctorate:course-enrollment:add" uuid=view.kwargs.uuid category='UCL_COURSE' as add_url %}
+  <a href="{{ add_url }}" class="btn btn-default">
+    {% trans "Enroll in a course" %}
+  </a>
 {% endblock %}
 
 
 {% block tab_content %}
-  <h3>{% trans "Doctoral training" %}</h3>
+  {% url "admission:doctorate:course-enrollment:add" uuid=view.kwargs.uuid category='UCL_COURSE' as add_url %}
+  <h3>{% trans "Course enrollment" %}</h3>
 
   <p>{% lorem %}</p>
 
-  {% training_categories activities.all %}
-
-  <h4>{% trans "Activities" %}</h4>
+  <h4>{% trans "Courses" %}</h4>
   {% if activities %}
-    <div class="filter-type form-group">
-      <strong>{% trans "Type" %}</strong>
-      <div class="btn-group btn-group-sm" role="radiogroup">
-        <button type="button" class="btn btn-default active" data-type="all">
-          {% trans "All" context "filters" %}
-        </button>
-        {% for category_name, category_label in categories %}
-          <button type="button" class="btn btn-default" data-type="{{ category_name }}">{{ category_label }}</button>
-        {% endfor %}
-      </div>
-    </div>
     <div class="filter-status form-group">
       <strong>{% trans "Status" %}</strong>
       <div class="btn-group btn-group-sm" role="radiogroup">
@@ -90,7 +64,7 @@
       </div>
     {% endif %}
 
-    <form id="activities" action="{% url 'admission:doctorate:doctoral-training' uuid=view.kwargs.uuid %}"
+    <form id="activities" action="{% url 'admission:doctorate:course-enrollment' uuid=view.kwargs.uuid %}"
           method="post">
       {% csrf_token %}
       {% for activity in activities %}
@@ -99,11 +73,14 @@
           {% include "admission/doctorate/details/training/"|add:template_name %}
         {% endif %}
       {% endfor %}
-      <button class="btn btn-default" type="submit" name="_submit">{% trans "Submit these activities" %}</button>
-      <button class="btn btn-default" type="submit" name="_accept">{% trans "Accept these activities" %}</button>
+      <button class="btn btn-default" type="submit" name="_submit">{% trans "Submit these courses" %}</button>
+      <button class="btn btn-default" type="submit" name="_accept">{% trans "Validate these courses" %}</button>
     </form>
   {% else %}
-    {% trans "This candidate has not created any activity yet" %}
+    {% trans "This candidate has not created any course yet." %}
+    <a href="{{ add_url }}">
+      {% trans "Enroll in a course" %}
+    </a>
   {% endif %}
 {% endblock %}
 
@@ -159,13 +136,6 @@
 
       // Filters
       const ALL_VALUES = 'all';
-      let current_filter_type = ALL_VALUES;
-      $('.filter-type button').on('click', function () {
-        current_filter_type = $(this).data('type');
-        $('.filter-type button').removeClass('active');
-        $(this).addClass('active');
-        apply_filters();
-      });
       let current_filter_status = ALL_VALUES;
       $('.filter-status button').on('click', function () {
         current_filter_status = $(this).data('status');

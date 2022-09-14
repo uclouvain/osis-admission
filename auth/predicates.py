@@ -34,6 +34,7 @@ from admission.ddd.projet_doctoral.doctorat.domain.model.enums import (
 )
 from admission.ddd.projet_doctoral.preparation.domain.model._enums import (
     ChoixStatutProposition,
+    ChoixTypeAdmission,
     STATUTS_PROPOSITION_AVANT_SOUMISSION,
     STATUTS_PROPOSITION_AVANT_INSCRIPTION,
 )
@@ -76,6 +77,12 @@ def is_enrolled(self, user: User, obj: DoctorateAdmission):
 
 
 @predicate(bind=True)
+@predicate_failed_msg(message=_("Must not be pre-admission"))
+def is_pre_admission(self, user: User, obj: DoctorateAdmission):
+    return obj.type == ChoixTypeAdmission.PRE_ADMISSION.name
+
+
+@predicate(bind=True)
 @predicate_failed_msg(message=_("Must be in the process of the enrolment"))
 def is_being_enrolled(self, user: User, obj: DoctorateAdmission):
     return obj.status in STATUTS_PROPOSITION_AVANT_INSCRIPTION
@@ -91,6 +98,15 @@ def confirmation_paper_in_progress(self, user: User, obj: DoctorateAdmission):
 @predicate_failed_msg(message=_("The confirmation paper is not in progress"))
 def submitted_confirmation_paper(self, user: User, obj: DoctorateAdmission):
     return obj.post_enrolment_status == ChoixStatutDoctorat.SUBMITTED_CONFIRMATION.name
+
+
+@predicate(bind=True)
+@predicate_failed_msg(message=_("Complementary training not enabled"))
+def complementary_training_enabled(self, user: User, obj: DoctorateAdmission):
+    return (
+        hasattr(obj.doctorate.management_entity, 'admission_config')
+        and obj.doctorate.management_entity.admission_config.is_complementary_training_enabled
+    )
 
 
 @predicate(bind=True)

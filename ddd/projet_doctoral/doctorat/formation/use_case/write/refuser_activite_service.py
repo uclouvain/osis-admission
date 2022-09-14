@@ -28,6 +28,7 @@ from admission.ddd.projet_doctoral.doctorat.formation.builder.activite_identity_
 from admission.ddd.projet_doctoral.doctorat.formation.commands import RefuserActiviteCommand
 from admission.ddd.projet_doctoral.doctorat.formation.domain.model.activite import ActiviteIdentity
 from admission.ddd.projet_doctoral.doctorat.formation.domain.service.i_notification import INotification
+from admission.ddd.projet_doctoral.doctorat.formation.domain.service.refuser_activite import RefuserActivite
 from admission.ddd.projet_doctoral.doctorat.formation.repository.i_activite import IActiviteRepository
 from admission.ddd.projet_doctoral.doctorat.repository.i_doctorat import IDoctoratRepository
 
@@ -44,10 +45,9 @@ def refuser_activite(
     activite = activite_repository.get(entity_id=ActiviteIdentityBuilder.build_from_uuid(cmd.activite_uuid))
 
     # WHEN
-    activite.refuser(cmd.avec_modification, cmd.remarque)
+    RefuserActivite().refuser_activite(activite, activite_repository, cmd.avec_modification, cmd.remarque)
 
     # THEN
-    activite_repository.save(activite)
     notification.notifier_refus_au_candidat(doctorat, activite)
 
     return activite.entity_id

@@ -313,14 +313,34 @@ ACTION_LINKS = {
         'params': ['uuid'],
     },
     # Training
-    'retrieve_training': {
+    'add_training': {
+        'path_name': 'admission_api_v1:doctoral-training',
+        'method': 'POST',
+        'params': ['uuid'],
+    },
+    'assent_training': {
+        'path_name': 'admission_api_v1:training-assent',
+        'method': 'POST',
+        'params': ['uuid'],
+    },
+    'submit_training': {
+        'path_name': 'admission_api_v1:training-submit',
+        'method': 'POST',
+        'params': ['uuid'],
+    },
+    'retrieve_doctoral_training': {
         'path_name': 'admission_api_v1:doctoral-training',
         'method': 'GET',
         'params': ['uuid'],
     },
-    'add_training': {
-        'path_name': 'admission_api_v1:doctoral-training',
-        'method': 'POST',
+    'retrieve_complementary_training': {
+        'path_name': 'admission_api_v1:complementary-training',
+        'method': 'GET',
+        'params': ['uuid'],
+    },
+    'retrieve_course_enrollment': {
+        'path_name': 'admission_api_v1:course-enrollment',
+        'method': 'GET',
         'params': ['uuid'],
     },
     # Accounting

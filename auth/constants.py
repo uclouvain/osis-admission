@@ -44,7 +44,10 @@ READ_ACTIONS_BY_TAB = {
     # Mails
     'send-mail': 'admission.send_message',
     # Training
-    'training': 'admission.change_activity',
+    'training': 'admission.view_training',
+    'doctoral-training': 'admission.change_activity',
+    'complementary-training': 'admission.view_complementary_training',
+    'course-enrollment': 'admission.view_training',
     # Internal note
     'internal-note': 'admission.view_internalnote',
 }
@@ -68,5 +71,8 @@ UPDATE_ACTIONS_BY_TAB = {
     # Mails
     'send-mail': 'admission.send_message',
     # Training
-    'training': 'admission.change_activity',
+    'training': '',
+    'doctoral-training': '',
+    'complementary-training': '',
+    'course-enrollment': '',
 }

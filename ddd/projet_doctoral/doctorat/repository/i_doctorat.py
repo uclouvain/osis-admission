@@ -40,6 +40,11 @@ class IDoctoratRepository(interface.AbstractRepository):
 
     @classmethod
     @abc.abstractmethod
+    def verifier_existence(cls, entity_id: 'DoctoratIdentity') -> None:
+        raise NotImplementedError
+
+    @classmethod
+    @abc.abstractmethod
     def save(cls, entity: 'Doctorat') -> None:  # type: ignore[override]
         raise NotImplementedError
 

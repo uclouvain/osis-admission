@@ -58,7 +58,22 @@ from osis_signature.models import Process, StateHistory
 class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
     @classmethod
     def get_by_proposition_id(cls, proposition_id: 'PropositionIdentity') -> 'GroupeDeSupervision':
-        proposition = DoctorateAdmission.objects.select_related('supervision_group').get(uuid=proposition_id.uuid)
+        proposition = (
+            DoctorateAdmission.objects.select_related('supervision_group')
+            .only(
+                "uuid",
+                "status",
+                "supervision_group",
+                "cotutelle",
+                "cotutelle_motivation",
+                "cotutelle_institution_fwb",
+                "cotutelle_institution",
+                "cotutelle_opening_request",
+                "cotutelle_convention",
+                "cotutelle_other_documents",
+            )
+            .get(uuid=proposition_id.uuid)
+        )
         if not proposition.supervision_group_id:
             groupe = Process.objects.create()
         else:

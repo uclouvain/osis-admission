@@ -55,7 +55,7 @@ def soumettre_activites(
     notification.notifier_soumission_au_promoteur_de_reference(
         doctorat,
         activites,
-        groupe_de_supervision.promoteur_reference_id,
+        groupe_de_supervision.promoteur_reference_id,  # type: ignore[arg-type]
     )
 
     return entity_ids

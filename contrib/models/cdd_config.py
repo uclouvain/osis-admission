@@ -193,12 +193,38 @@ def default_course_types():
     }
 
 
+def default_complementary_course_types():
+    return {
+        settings.LANGUAGE_CODE_EN: [
+            "Graduate course",
+            "Doctoral school (with/without assessment)",
+            "Continuing education",
+            "Transversal training",
+            "Language courses",
+            "Moocs (online / offline)",
+        ],
+        settings.LANGUAGE_CODE_FR: [
+            "Cours de 2e cycle",
+            "Ecole doctorale (avec/sans évaluation)",
+            "Formation continuée",
+            "Formation transversale",
+            "Cours de langue",
+            "Moocs (en ligne / pas en ligne)",
+        ],
+    }
+
+
 class CddConfiguration(models.Model):
     cdd = models.OneToOneField(
         'base.Entity',
         on_delete=models.CASCADE,
         limit_choices_to={'entityversion__entity_type': DOCTORAL_COMMISSION},
         related_name='admission_config',
+    )
+    is_complementary_training_enabled = models.BooleanField(
+        verbose_name=_("Enable complementary training tab"),
+        default=False,
+        help_text=_('This adds a "Complementary training" tab on admissions concerning this CDD.'),
     )
     category_labels = models.JSONField(
         verbose_name=_("Category labels"),
@@ -235,6 +261,10 @@ class CddConfiguration(models.Model):
     course_types = models.JSONField(
         verbose_name=_("COURSE types"),
         default=default_course_types,
+    )
+    complementary_course_types = models.JSONField(
+        verbose_name=_("COURSE types for complementary training"),
+        default=default_complementary_course_types,
     )
 
     def __str__(self):  # pragma: no cover

@@ -32,6 +32,24 @@ from admission.contrib.models.doctoral_training import Activity
 from admission.ddd.projet_doctoral.doctorat.formation.domain.model._enums import CategorieActivite
 from admission.tests.factories import DoctorateAdmissionFactory
 
+__all__ = [
+    "ActivityFactory",
+    "CommunicationFactory",
+    "ConferenceCommunicationFactory",
+    "ConferenceFactory",
+    "ConferencePublicationFactory",
+    "CourseFactory",
+    "PaperFactory",
+    "PublicationFactory",
+    "ResidencyCommunicationFactory",
+    "ResidencyFactory",
+    "SeminarCommunicationFactory",
+    "SeminarFactory",
+    "ServiceFactory",
+    "UclCourseFactory",
+    "VaeFactory",
+]
+
 
 class ActivityFactory(factory.DjangoModelFactory):
     doctorate = factory.SubFactory(DoctorateAdmissionFactory, admitted=True)
@@ -126,3 +144,8 @@ class CourseFactory(ActivityFactory):
 
 class PaperFactory(ActivityFactory):
     category = CategorieActivite.PAPER.name
+
+
+class UclCourseFactory(ActivityFactory):
+    category = CategorieActivite.UCL_COURSE.name
+    learning_unit_year = factory.SubFactory("base.tests.factories.learning_unit_year.LearningUnitYearFactory")
