@@ -63,7 +63,7 @@ class BelgianHighSchoolDiplomaTestCase(APITestCase):
         cls.high_school = HighSchoolFactory()
 
         EntityVersionAddressFactory(
-            entity_version__entity=EntityFactory(organization=cls.high_school.organization)
+            entity_version__entity=EntityFactory(organization=cls.high_school)
         )
 
         cls.agnostic_url = resolve_url("secondary-studies")
