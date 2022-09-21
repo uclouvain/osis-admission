@@ -32,6 +32,9 @@ from admission.api.serializers.mixins import GetDefaultContextParam
 from admission.ddd.projet_doctoral.preparation.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from base.api.serializers.academic_year import RelatedAcademicYearField
 from base.models.academic_year import current_academic_year
+from base.models.enums.establishment_type import EstablishmentTypeEnum
+from base.models.enums.teaching_type import TeachingTypeEnum
+from base.models.organization import Organization
 from base.models.person import Person
 from osis_profile.models import (
     ProfessionalExperience,
@@ -40,6 +43,7 @@ from osis_profile.models import (
     BelgianHighSchoolDiploma,
     ForeignHighSchoolDiploma,
 )
+from osis_profile.models.enums.curriculum import StudySystem
 from reference.api.serializers.country import RelatedCountryField
 from reference.api.serializers.language import RelatedLanguageField
 from reference.models.diploma_title import DiplomaTitle
@@ -89,6 +93,13 @@ RelatedDiplomaField = partial(
     allow_null=True,
 )
 
+RelatedInstitute = partial(
+    serializers.SlugRelatedField,
+    slug_field='uuid',
+    queryset=Organization.objects.filter(establishment_type=EstablishmentTypeEnum.NON_UNIVERSITY_HIGHER.name),
+    allow_null=True,
+)
+
 
 class EducationalExperienceSerializer(serializers.ModelSerializer):
     educationalexperienceyear_set = EducationalExperienceYearSerializer(many=True)
@@ -99,6 +110,7 @@ class EducationalExperienceSerializer(serializers.ModelSerializer):
     )
     program = RelatedDiplomaField(required=False)
     valuated_from = DoctorateAdmissionField(many=True)
+    institute = RelatedInstitute(required=False)
 
     YEAR_FIELDS_TO_UPDATE = [
         'registered_credit_number',
@@ -112,13 +124,27 @@ class EducationalExperienceSerializer(serializers.ModelSerializer):
         model = EducationalExperience
         depth = 1
         exclude = [
-            'institute',
             'id',
         ]
+
+    @classmethod
+    def _set_study_system(cls, validated_data):
+        institute = validated_data.get('institute')
+
+        # If an institute with a teaching type is specified, the study system is based on it
+        if institute and institute.teaching_type:
+            validated_data['study_system'] = (
+                StudySystem.CONTINUING_EDUCATION.name
+                if institute.teaching_type == TeachingTypeEnum.SOCIAL_PROMOTION.name
+                else StudySystem.FULL_TIME_EDUCATION.name
+            )
+        else:
+            validated_data['study_system'] = ''
 
     def create(self, validated_data):
         experience_year_data = validated_data.pop('educationalexperienceyear_set')
 
+        self._set_study_system(validated_data)
         educational_experience = super().create(validated_data)
 
         # Create the experience years related to the created experience
@@ -137,6 +163,7 @@ class EducationalExperienceSerializer(serializers.ModelSerializer):
             for experience_year in validated_data.pop('educationalexperienceyear_set')
         }
 
+        self._set_study_system(validated_data)
         educational_experience: EducationalExperience = super().update(instance, validated_data)
 
         # Loop over the existing experience years to update / delete them if necessary
@@ -181,6 +208,7 @@ class LiteEducationalExperienceSerializer(EducationalExperienceSerializer):
         fields = [
             'uuid',
             'institute_name',
+            'institute',
             'program',
             'education_name',
             'educationalexperienceyear_set',
