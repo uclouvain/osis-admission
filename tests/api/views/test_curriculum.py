@@ -42,6 +42,7 @@ from admission.tests.factories.curriculum import (
 )
 from admission.tests.factories.roles import CandidateFactory
 from admission.tests.factories.secondary_studies import BelgianHighSchoolDiplomaFactory, ForeignHighSchoolDiplomaFactory
+from base.models.enums.teaching_type import TeachingTypeEnum
 from base.tests.factories.academic_year import AcademicYearFactory
 from osis_profile.models import ProfessionalExperience, EducationalExperience, EducationalExperienceYear
 from osis_profile.models.enums.curriculum import (
@@ -56,6 +57,7 @@ from osis_profile.models.enums.curriculum import (
 from reference.tests.factories.country import CountryFactory
 from reference.tests.factories.diploma_title import DiplomaTitleFactory
 from reference.tests.factories.language import LanguageFactory
+from reference.tests.factories.superior_non_university import SuperiorNonUniversityFactory
 
 
 @override_settings(ROOT_URLCONF='admission.api.url_v1')
@@ -180,6 +182,7 @@ class GetCurriculumTestCase(APITestCase):
                 {
                     'uuid': ANY,
                     'institute_name': 'UCL',
+                    'institute': None,
                     'program': None,
                     'education_name': 'Computer science',
                     'educationalexperienceyear_set': [{'academic_year': 2020}],
@@ -492,6 +495,7 @@ class EducationalExperienceTestCase(APITestCase):
 
         cls.diploma = DiplomaTitleFactory()
         cls.linguistic_regime = LanguageFactory()
+        cls.institute = SuperiorNonUniversityFactory(teaching_type=TeachingTypeEnum.SOCIAL_PROMOTION.name)
 
         cls.today_date = datetime.date(2020, 11, 1)
         cls.today_datetime = datetime.datetime(2020, 11, 1)
@@ -517,7 +521,7 @@ class EducationalExperienceTestCase(APITestCase):
             institute_address='Place de l\'Université',
             program=self.diploma,
             education_name='Computer science',
-            study_system=StudySystem.FULL_TIME_EDUCATION.name,
+            study_system='',
             evaluation_type=EvaluationSystem.ECTS_CREDITS.name,
             linguistic_regime=self.linguistic_regime,
             transcript_type=TranscriptType.ONE_FOR_ALL_YEARS.name,
@@ -617,7 +621,7 @@ class EducationalExperienceTestCase(APITestCase):
         self.assertEqual(json_response.get('country'), self.country.iso_code)
         self.assertEqual(json_response.get('institute'), None)
         self.assertEqual(json_response.get('institute_address'), 'Place de l\'Université')
-        self.assertEqual(json_response.get('study_system'), StudySystem.FULL_TIME_EDUCATION.name)
+        self.assertEqual(json_response.get('study_system'), '')
         self.assertEqual(json_response.get('evaluation_type'), EvaluationSystem.ECTS_CREDITS.name)
         self.assertEqual(json_response.get('linguistic_regime'), self.linguistic_regime.code)
         self.assertEqual(json_response.get('transcript_type'), TranscriptType.ONE_FOR_ALL_YEARS.name)
@@ -656,7 +660,7 @@ class EducationalExperienceTestCase(APITestCase):
                 'country': self.country.iso_code,
                 'institute': None,
                 'institute_address': 'Louvain-La-Neuve',
-                'study_system': StudySystem.FULL_TIME_EDUCATION.name,
+                'study_system': '',
                 'evaluation_type': EvaluationSystem.ECTS_CREDITS.name,
                 'linguistic_regime': self.linguistic_regime.code,
                 'transcript_type': TranscriptType.ONE_FOR_ALL_YEARS.name,
@@ -697,7 +701,7 @@ class EducationalExperienceTestCase(APITestCase):
         self.assertEqual(json_response.get('country'), self.country.iso_code)
         self.assertEqual(json_response.get('institute'), None)
         self.assertEqual(json_response.get('institute_address'), 'Louvain-La-Neuve')
-        self.assertEqual(json_response.get('study_system'), StudySystem.FULL_TIME_EDUCATION.name)
+        self.assertEqual(json_response.get('study_system'), '')
         self.assertEqual(json_response.get('evaluation_type'), EvaluationSystem.ECTS_CREDITS.name)
         self.assertEqual(json_response.get('linguistic_regime'), self.linguistic_regime.code)
         self.assertEqual(json_response.get('transcript_type'), TranscriptType.ONE_FOR_ALL_YEARS.name)
@@ -738,7 +742,7 @@ class EducationalExperienceTestCase(APITestCase):
         self.assertEqual(experience.country, self.country)
         self.assertEqual(experience.institute, None)
         self.assertEqual(experience.institute_address, 'Louvain-La-Neuve')
-        self.assertEqual(experience.study_system, StudySystem.FULL_TIME_EDUCATION.name)
+        self.assertEqual(experience.study_system, '')
         self.assertEqual(experience.evaluation_type, EvaluationSystem.ECTS_CREDITS.name)
         self.assertEqual(experience.linguistic_regime, self.linguistic_regime)
         self.assertEqual(experience.transcript_type, TranscriptType.ONE_FOR_ALL_YEARS.name)
@@ -775,11 +779,10 @@ class EducationalExperienceTestCase(APITestCase):
             data={
                 'program': self.diploma.uuid,
                 'education_name': 'Biology',
-                'institute_name': 'Second institute',
+                'institute_name': '',
                 'country': self.country.iso_code,
-                'institute': None,
-                'institute_address': 'Louvain-La-Neuve',
-                'study_system': StudySystem.FULL_TIME_EDUCATION.name,
+                'institute': self.institute.uuid,
+                'institute_address': '',
                 'evaluation_type': EvaluationSystem.ECTS_CREDITS.name,
                 'linguistic_regime': self.linguistic_regime.code,
                 'transcript_type': TranscriptType.ONE_FOR_ALL_YEARS.name,
@@ -822,7 +825,8 @@ class EducationalExperienceTestCase(APITestCase):
         json_response = response.json()
 
         # Check response data
-        self.assertEqual(json_response.get('obtained_grade'), Grade.GREATER_DISTINCTION.name),
+        self.assertEqual(json_response.get('obtained_grade'), Grade.GREATER_DISTINCTION.name)
+        self.assertEqual(json_response.get('study_system'), StudySystem.CONTINUING_EDUCATION.name)
 
         json_first_educational_experience_year = json_response.get('educationalexperienceyear_set')[0]
         self.assertEqual(json_first_educational_experience_year.get('academic_year'), 2020)
@@ -836,9 +840,7 @@ class EducationalExperienceTestCase(APITestCase):
 
         self.assertEqual(experience.obtained_grade, Grade.GREATER_DISTINCTION.name)
 
-        educational_experience_years = EducationalExperienceYear.objects.filter(
-            educational_experience=experience
-        )
+        educational_experience_years = EducationalExperienceYear.objects.filter(educational_experience=experience)
 
         self.assertEqual(len(educational_experience_years), 2)
 
