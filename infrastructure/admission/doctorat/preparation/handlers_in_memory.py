@@ -28,6 +28,9 @@ from functools import partial
 from admission.ddd.admission.doctorat.preparation.commands import *
 from admission.ddd.admission.doctorat.preparation.use_case.read import *
 from admission.ddd.admission.doctorat.preparation.use_case.write import *
+from admission.infrastructure.admission.domain.service.in_memory.annee_inscription_formation import (
+    AnneeInscriptionFormationInMemoryTranslator,
+)
 from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
 from .domain.service.in_memory.doctorat import DoctoratInMemoryTranslator
 from .domain.service.in_memory.historique import HistoriqueInMemory
@@ -52,9 +55,10 @@ COMMAND_HANDLERS = {
         doctorat_translator=DoctoratInMemoryTranslator(),
         historique=HistoriqueInMemory(),
     ),
-    RechercherDoctoratCommand: partial(
+    RechercherDoctoratQuery: partial(
         rechercher_doctorats,
         doctorat_translator=DoctoratInMemoryTranslator(),
+        annee_inscription_formation_translator=AnneeInscriptionFormationInMemoryTranslator(),
     ),
     IdentifierPromoteurCommand: partial(
         identifier_promoteur,

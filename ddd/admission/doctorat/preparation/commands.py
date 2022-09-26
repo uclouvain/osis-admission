@@ -104,8 +104,9 @@ class CompleterPropositionCommand(interface.CommandRequest):
 
 
 @attr.dataclass(frozen=True, slots=True)
-class RechercherDoctoratCommand(interface.QueryRequest):
+class RechercherDoctoratQuery(interface.QueryRequest):
     sigle_secteur_entite_gestion: str
+    campus: Optional[str] = ''
 
 
 @attr.dataclass(frozen=True, slots=True)

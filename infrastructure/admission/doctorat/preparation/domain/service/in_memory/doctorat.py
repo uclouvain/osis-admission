@@ -22,7 +22,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import List
+from typing import List, Optional
 
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import Doctorat
 from admission.ddd.admission.doctorat.preparation.domain.service.i_doctorat import IDoctoratTranslator
@@ -59,6 +59,10 @@ class DoctoratInMemoryTranslator(IDoctoratTranslator):
             entity_id__sigle='ESP3DP',
             entity_id__annee=2020,
         ),
+        DoctoratCDSSDPFactory(
+            entity_id__sigle='AGRO3DP',
+            entity_id__annee=2022,
+        ),
     ]
     sector_doctorates_mapping = {
         "SST": ['AGRO3DP', 'SC3DP'],
@@ -83,7 +87,12 @@ class DoctoratInMemoryTranslator(IDoctoratTranslator):
         )
 
     @classmethod
-    def search(cls, sigle_secteur_entite_gestion: str, annee: int) -> List['DoctoratDTO']:
+    def search(
+        cls,
+        sigle_secteur_entite_gestion: str,
+        annee: Optional[int],
+        campus: Optional[str],
+    ) -> List['DoctoratDTO']:
         doctorates = cls.sector_doctorates_mapping.get(sigle_secteur_entite_gestion, [])
         return [
             _DoctoratDTOFactory(
@@ -92,5 +101,7 @@ class DoctoratInMemoryTranslator(IDoctoratTranslator):
                 sigle_entite_gestion=doc.entite_ucl_id.code,
             )
             for doc in cls.doctorats
-            if doc.entity_id.sigle in doctorates and doc.entity_id.annee == annee
+            if doc.entity_id.sigle in doctorates
+            and doc.entity_id.annee == annee
+            and (not campus or doc.campus == campus)
         ]

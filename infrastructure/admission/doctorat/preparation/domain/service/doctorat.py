@@ -23,7 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import List
+from typing import List, Optional
 
 from django.conf import settings
 from django.utils.translation import get_language
@@ -76,8 +76,16 @@ class DoctoratTranslator(IDoctoratTranslator):
         raise DoctoratNonTrouveException()
 
     @classmethod
-    def search(cls, sigle_secteur_entite_gestion: str, annee: int) -> List['DoctoratDTO']:
+    def search(
+        cls,
+        sigle_secteur_entite_gestion: str,
+        annee: Optional[int],
+        campus: Optional[str],
+    ) -> List['DoctoratDTO']:
         from infrastructure.messages_bus import message_bus_instance
+
+        if not annee:
+            return []
 
         dtos = message_bus_instance.invoke(
             SearchFormationsCommand(
@@ -85,6 +93,7 @@ class DoctoratTranslator(IDoctoratTranslator):
                 sigle_entite_gestion=sigle_secteur_entite_gestion,
                 inclure_entites_gestion_subordonnees=True,
                 type=TrainingType.PHD.name,
+                campus=campus,
             )
         )
         return [cls._build_dto(dto) for dto in dtos]
