@@ -341,6 +341,9 @@ msgstr ""
 "%(confirmation_date)s, la %(cdd_title)s constate la réussite de votre "
 "épreuve de confirmation au doctorat."
 
+msgid "Aggregation and CAPAES"
+msgstr "Agrégation et CAPAES"
+
 msgctxt "filters"
 msgid "All"
 msgstr "Tous"
@@ -434,6 +437,9 @@ msgstr "Code BIC/SWIFT identifiant la banque dont provient le compte"
 
 msgid "BIOLOGY"
 msgstr "Biologie"
+
+msgid "Bachelor"
+msgstr "Bachelier"
 
 msgid "Back to the list"
 msgstr "Retour à la liste"
@@ -691,6 +697,9 @@ msgstr "Catégorie"
 msgid "Category labels"
 msgstr "Libellés de catégories"
 
+msgid "Certificate"
+msgstr "Certificat"
+
 msgid "Certificate of achievement"
 msgstr "Attestation de réussite"
 
@@ -787,6 +796,9 @@ msgstr "Langue de contact"
 
 msgid "Context"
 msgstr "Contexte"
+
+msgid "Continuing education"
+msgstr "Formation continue"
 
 msgid "Cotutelle"
 msgstr "Cotutelle"
@@ -1593,6 +1605,9 @@ msgstr ""
 msgid "Mandatory languages are missing."
 msgstr "Des langues obligatoires sont manquantes."
 
+msgid "Master"
+msgstr "Master"
+
 msgid "Member of supervision group already invited."
 msgstr "Membre du groupe de supervision déjà invité."
 
@@ -1720,6 +1735,9 @@ msgstr "Aucune inscription en doctorat n'a été trouvée"
 
 msgid "No doctorate found."
 msgstr "Doctorat non trouvé."
+
+msgid "No training found."
+msgstr "Formation non trouvée."
 
 msgid "None of these proposals are relevant to me"
 msgstr "Aucune de ces propositions ne me correspond"

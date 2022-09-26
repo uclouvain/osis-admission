@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,24 +23,19 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import datetime
 from typing import List
 
-from admission.ddd.admission.doctorat.preparation.commands import RechercherDoctoratCommand
+from admission.ddd.admission.doctorat.preparation.commands import RechercherDoctoratQuery
 from admission.ddd.admission.doctorat.preparation.domain.service.i_doctorat import IDoctoratTranslator
 from admission.ddd.admission.doctorat.preparation.dtos import DoctoratDTO
-from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import GetCurrentAcademicYear
-from infrastructure.shared_kernel.academic_year.repository import academic_year as academic_year_repository
+from admission.ddd.admission.domain.service.i_annee_inscription_formation import IAnneeInscriptionFormationTranslator
+from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 
 
 def rechercher_doctorats(
-    cmd: 'RechercherDoctoratCommand',
+    cmd: 'RechercherDoctoratQuery',
     doctorat_translator: 'IDoctoratTranslator',
+    annee_inscription_formation_translator: 'IAnneeInscriptionFormationTranslator',
 ) -> List['DoctoratDTO']:
-    # TODO :: comment déterminer l'année concernée pour la formation ? Sur base d'un calendrier ?
-    annee = (
-        GetCurrentAcademicYear()
-        .get_starting_academic_year(datetime.date.today(), academic_year_repository.AcademicYearRepository())
-        .year
-    )
-    return doctorat_translator.search(cmd.sigle_secteur_entite_gestion, annee)
+    annee = annee_inscription_formation_translator.recuperer(AcademicCalendarTypes.DOCTORATE_EDUCATION_ENROLLMENT)
+    return doctorat_translator.search(cmd.sigle_secteur_entite_gestion, annee, campus=cmd.campus)

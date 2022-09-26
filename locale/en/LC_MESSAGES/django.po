@@ -299,6 +299,9 @@ msgid ""
 "confirmation paper has been successfully completed."
 msgstr ""
 
+msgid "Aggregation and CAPAES"
+msgstr ""
+
 msgctxt "filters"
 msgid "All"
 msgstr ""
@@ -388,6 +391,9 @@ msgstr ""
 
 msgid "BIOLOGY"
 msgstr "Biology"
+
+msgid "Bachelor"
+msgstr ""
 
 msgid "Back to the list"
 msgstr ""
@@ -641,6 +647,9 @@ msgstr ""
 msgid "Category labels"
 msgstr ""
 
+msgid "Certificate"
+msgstr ""
+
 msgid "Certificate of achievement"
 msgstr ""
 
@@ -736,6 +745,9 @@ msgid "Contact language"
 msgstr ""
 
 msgid "Context"
+msgstr ""
+
+msgid "Continuing education"
 msgstr ""
 
 msgid "Cotutelle"
@@ -1459,6 +1471,9 @@ msgstr ""
 msgid "Mandatory languages are missing."
 msgstr ""
 
+msgid "Master"
+msgstr ""
+
 msgid "Member of supervision group already invited."
 msgstr ""
 
@@ -1582,6 +1597,9 @@ msgid "No doctorate enrolment"
 msgstr ""
 
 msgid "No doctorate found."
+msgstr ""
+
+msgid "No training found."
 msgstr ""
 
 msgid "None of these proposals are relevant to me"
