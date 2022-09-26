@@ -35,7 +35,7 @@ from rest_framework.response import Response
 from admission.api import serializers
 from admission.api.serializers import PersonSerializer
 from admission.contrib.models import EntityProxy
-from admission.ddd.admission.doctorat.preparation.commands import RechercherDoctoratCommand
+from admission.ddd.admission.doctorat.preparation.commands import RechercherDoctoratQuery
 from base.auth.roles.tutor import Tutor
 from base.models.education_group_year import EducationGroupYear
 from base.models.entity_version import EntityVersion
@@ -115,7 +115,7 @@ class AutocompleteDoctoratView(ListAPIView):
 
     def list(self, request, **kwargs):
         doctorat_list = message_bus_instance.invoke(
-            RechercherDoctoratCommand(sigle_secteur_entite_gestion=kwargs.get('sigle'))
+            RechercherDoctoratQuery(sigle_secteur_entite_gestion=kwargs.get('sigle'))
         )
         serializer = serializers.DoctoratDTOSerializer(instance=doctorat_list, many=True)
         return Response(serializer.data)

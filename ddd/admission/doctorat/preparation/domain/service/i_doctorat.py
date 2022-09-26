@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@
 #
 # ##############################################################################
 from abc import abstractmethod
-from typing import List
+from typing import List, Optional
 
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import Doctorat
 from admission.ddd.admission.doctorat.preparation.dtos import DoctoratDTO
@@ -44,5 +44,10 @@ class IDoctoratTranslator(interface.DomainService):
 
     @classmethod
     @abstractmethod
-    def search(cls, sigle_secteur_entite_gestion: str, annee: int) -> List['DoctoratDTO']:
+    def search(
+        cls,
+        sigle_secteur_entite_gestion: str,
+        annee: Optional[int],
+        campus: Optional[str],
+    ) -> List['DoctoratDTO']:
         raise NotImplementedError
