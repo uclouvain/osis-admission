@@ -887,6 +887,9 @@ msgstr ""
 msgid "Delete?"
 msgstr ""
 
+msgid "Deleted"
+msgstr ""
+
 msgid "Description"
 msgstr ""
 
@@ -958,6 +961,9 @@ msgstr ""
 msgid "Dossier status"
 msgstr ""
 
+msgid "Double or triple diplomation"
+msgstr ""
+
 msgid "ECONOMY"
 msgstr ""
 
@@ -1021,6 +1027,9 @@ msgid "Enroll in a course"
 msgstr ""
 
 msgid "Enrolments"
+msgstr ""
+
+msgid "Erasmus Mundus"
 msgstr ""
 
 msgid "Event description"
@@ -1271,6 +1280,12 @@ msgstr ""
 msgid "Internal notes"
 msgstr ""
 
+msgid "International for doctorate"
+msgstr ""
+
+msgid "International for general education"
+msgstr ""
+
 msgid "Invitations have not been sent"
 msgstr ""
 
@@ -1341,6 +1356,9 @@ msgid "Link to the doctoral training panel (back-office)"
 msgstr ""
 
 msgid "Link to the doctoral training panel (front-office)"
+msgstr ""
+
+msgid "Long name"
 msgstr ""
 
 msgid "Long-term resident card"
@@ -2140,6 +2158,10 @@ msgstr ""
 msgid "Scholarship"
 msgstr ""
 
+msgctxt "admission model"
+msgid "Scholarship"
+msgstr ""
+
 msgid "Scholarship certificate"
 msgstr ""
 
@@ -2204,6 +2226,9 @@ msgid "Services"
 msgstr ""
 
 msgid "Sex"
+msgstr ""
+
+msgid "Short name"
 msgstr ""
 
 msgid "Show details"

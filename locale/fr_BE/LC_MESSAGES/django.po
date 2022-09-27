@@ -940,6 +940,9 @@ msgstr "Supprimer"
 msgid "Delete?"
 msgstr "Supprimer ?"
 
+msgid "Deleted"
+msgstr "Supprimé"
+
 msgid "Description"
 msgstr "Description"
 
@@ -1011,6 +1014,9 @@ msgstr "Numéro de dossier"
 msgid "Dossier status"
 msgstr "Statut dossier"
 
+msgid "Double or triple diplomation"
+msgstr "Double ou triple diplomation"
+
 msgid "ECONOMY"
 msgstr "Economie"
 
@@ -1075,6 +1081,9 @@ msgstr "S'inscrire à un cours"
 
 msgid "Enrolments"
 msgstr "Inscriptions"
+
+msgid "Erasmus Mundus"
+msgstr "Erasmus Mundus"
 
 msgid "Event description"
 msgstr "Description de l'événement"
@@ -1362,6 +1371,12 @@ msgstr "Commentaire interne"
 msgid "Internal notes"
 msgstr "Notes internes"
 
+msgid "International for doctorate"
+msgstr "Internationale pour les doctorats"
+
+msgid "International for general education"
+msgstr "Internationale pour les formation générales"
+
 msgid "Invitations have not been sent"
 msgstr "Les invitations n'ont pas été envoyées"
 
@@ -1433,6 +1448,9 @@ msgstr "Lien vers la page liée à la formation doctorale (back-office)"
 
 msgid "Link to the doctoral training panel (front-office)"
 msgstr "Lien vers la page liée à la formation doctorale (front-office)"
+
+msgid "Long name"
+msgstr "Nom long"
 
 msgid "Long-term resident card"
 msgstr "Carte de résident longue durée"
@@ -2322,6 +2340,10 @@ msgstr "Enregistrer et voir le résultat"
 msgid "Scholarship"
 msgstr "Boursier"
 
+msgctxt "admission model"
+msgid "Scholarship"
+msgstr "Bourse"
+
 msgid "Scholarship certificate"
 msgstr "Attestation de boursier"
 
@@ -2387,6 +2409,9 @@ msgstr "Services"
 
 msgid "Sex"
 msgstr "Sexe"
+
+msgid "Short name"
+msgstr "Nom court"
 
 msgid "Show details"
 msgstr "Voir le détail"

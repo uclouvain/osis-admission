@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,33 +23,13 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from django.utils.translation import gettext_lazy as _
 
-try:
-    from .doctorate import DoctorateAdmission, ConfirmationPaper
-    from .actor import SupervisionActor
-    from .enums.admission_type import AdmissionType
-    from .entity_proxy import EntityProxy
-    from .cdd_mail_template import CddMailTemplate
-    from .task import AdmissionTask
-    from .accounting import Accounting
-    from .scholarship import Scholarship
+from base.models.utils.utils import ChoiceEnum
 
-    __all__ = [
-        "DoctorateAdmission",
-        "AdmissionType",
-        "SupervisionActor",
-        "EntityProxy",
-        "CddMailTemplate",
-        "ConfirmationPaper",
-        "AdmissionTask",
-        "Accounting",
-        "Scholarship",
-    ]
 
-except RuntimeError as e:  # pragma: no cover
-    # There's a weird bug when running tests, the test runner seeing a models
-    # package tries to import it directly, failing to do so
-    import sys
-
-    if 'test' not in sys.argv:
-        raise e
+class TypeBourse(ChoiceEnum):
+    DOUBLE_TRIPLE_DIPLOMATION = _('Double or triple diplomation')
+    BOURSE_INTERNATIONALE_DOCTORAT = _('International for doctorate')
+    BOURSE_INTERNATIONALE_FORMATION_GENERALE = _('International for general education')
+    ERASMUS_MUNDUS = _('Erasmus Mundus')
