@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -38,7 +38,11 @@ from admission.auth.roles.promoter import Promoter
 from admission.auth.roles.sceb import Sceb
 from admission.auth.roles.sic_director import SicDirector
 from admission.auth.roles.sic_manager import SicManager
-from admission.contrib.models import CddMailTemplate, DoctorateAdmission
+from admission.contrib.models import (
+    CddMailTemplate,
+    DoctorateAdmission,
+    Scholarship,
+)
 from admission.contrib.models.cdd_config import CddConfiguration
 from admission.contrib.models.doctoral_training import Activity
 from admission.ddd.parcours_doctoral.formation.domain.model.enums import CategorieActivite
@@ -93,9 +97,30 @@ class CddMailTemplateAdmin(MailTemplateAdmin):
     ]
 
 
+class ScholarshipAdmin(admin.ModelAdmin):
+    list_display = [
+        'short_name',
+        'long_name',
+    ]
+    search_fields = [
+        'short_name',
+        'long_name',
+    ]
+    list_filter = [
+        'type',
+    ]
+    fields = [
+        'type',
+        'short_name',
+        'long_name',
+        'deleted',
+    ]
+
+
 admin.site.register(DoctorateAdmission, DoctorateAdmissionAdmin)
 admin.site.register(CddMailTemplate, CddMailTemplateAdmin)
 admin.site.register(CddConfiguration)
+admin.site.register(Scholarship, ScholarshipAdmin)
 
 
 class ActivityAdmin(admin.ModelAdmin):
