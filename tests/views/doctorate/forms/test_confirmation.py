@@ -33,13 +33,13 @@ from django.urls import reverse
 from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_403_FORBIDDEN, HTTP_200_OK, HTTP_302_FOUND
 
 from admission.contrib.models import ConfirmationPaper
-from admission.ddd.projet_doctoral.doctorat.domain.model.enums import ChoixStatutDoctorat
-from admission.ddd.projet_doctoral.preparation.domain.model._enums import ChoixTypeAdmission
-from admission.ddd.projet_doctoral.preparation.domain.model._financement import (
+from admission.ddd.doctorat.domain.model.enums import ChoixStatutDoctorat
+from admission.ddd.admission.projet_doctoral.preparation.domain.model._enums import ChoixTypeAdmission
+from admission.ddd.admission.projet_doctoral.preparation.domain.model._financement import (
     ChoixTypeFinancement,
     ChoixTypeContratTravail,
 )
-from admission.ddd.projet_doctoral.preparation.domain.model.doctorat import ENTITY_CDE, ENTITY_CDSS
+from admission.ddd.admission.projet_doctoral.preparation.domain.model.doctorat import ENTITY_CDE, ENTITY_CDSS
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.confirmation_paper import ConfirmationPaperFactory
 from admission.tests.factories.roles import CddManagerFactory, AdreSecretaryRoleFactory

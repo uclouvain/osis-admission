@@ -35,8 +35,8 @@ from django.utils.translation import gettext_lazy as _
 from rules.templatetags import rules
 
 from admission.auth.constants import READ_ACTIONS_BY_TAB, UPDATE_ACTIONS_BY_TAB
-from admission.ddd.projet_doctoral.doctorat.domain.model.enums import ChoixStatutDoctorat
-from admission.ddd.projet_doctoral.doctorat.formation.domain.model._enums import (
+from admission.ddd.doctorat.domain.model.enums import ChoixStatutDoctorat
+from admission.ddd.doctorat.formation.domain.model._enums import (
     CategorieActivite,
     ChoixTypeEpreuve,
     StatutActivite,

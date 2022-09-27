@@ -36,19 +36,19 @@ from django.utils.datetime_safe import date
 from django.utils.translation import gettext_lazy as _
 from rest_framework.settings import api_settings
 
-from admission.ddd.projet_doctoral.doctorat.domain.model.enums import ChoixStatutDoctorat
-from admission.ddd.projet_doctoral.preparation.domain.model._detail_projet import ChoixLangueRedactionThese
-from admission.ddd.projet_doctoral.preparation.domain.model._enums import (
+from admission.ddd.doctorat.domain.model.enums import ChoixStatutDoctorat
+from admission.ddd.admission.projet_doctoral.preparation.domain.model._detail_projet import ChoixLangueRedactionThese
+from admission.ddd.admission.projet_doctoral.preparation.domain.model._enums import (
     ChoixCommissionProximiteCDEouCLSM,
     ChoixCommissionProximiteCDSS,
     ChoixSousDomaineSciences,
     ChoixStatutProposition,
 )
-from admission.ddd.projet_doctoral.preparation.domain.model._experience_precedente_recherche import (
+from admission.ddd.admission.projet_doctoral.preparation.domain.model._experience_precedente_recherche import (
     ChoixDoctoratDejaRealise,
 )
-from admission.ddd.projet_doctoral.preparation.domain.model._financement import ChoixTypeFinancement
-from admission.ddd.projet_doctoral.validation.domain.model._enums import ChoixStatutCDD, ChoixStatutSIC
+from admission.ddd.admission.projet_doctoral.preparation.domain.model._financement import ChoixTypeFinancement
+from admission.ddd.admission.projet_doctoral.validation.domain.model._enums import ChoixStatutCDD, ChoixStatutSIC
 from base.models.education_group_year import EducationGroupYear
 from base.models.entity_version import EntityVersion
 from base.models.enums.education_group_categories import Categories
@@ -379,7 +379,10 @@ class DoctorateAdmission(BaseAdmission):
         cache.delete('admission_permission_{}'.format(self.uuid))
 
     def update_detailed_status(self):
-        from admission.ddd.projet_doctoral.preparation.commands import VerifierProjetCommand, VerifierPropositionCommand
+        from admission.ddd.admission.projet_doctoral.preparation.commands import (
+            VerifierProjetCommand,
+            VerifierPropositionCommand,
+        )
         from admission.utils import gather_business_exceptions
 
         error_key = api_settings.NON_FIELD_ERRORS_KEY

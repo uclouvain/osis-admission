@@ -40,7 +40,7 @@ from admission.api.serializers.activity import (
 )
 from admission.contrib.models.cdd_config import CddConfiguration
 from admission.contrib.models.doctoral_training import Activity
-from admission.ddd.projet_doctoral.doctorat.formation.commands import (
+from admission.ddd.doctorat.formation.commands import (
     DonnerAvisSurActiviteCommand,
     SoumettreActivitesCommand,
     SupprimerActiviteCommand,

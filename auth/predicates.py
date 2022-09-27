@@ -28,11 +28,11 @@ from django.utils.translation import gettext_lazy as _
 from osis_signature.enums import SignatureState
 from rules import predicate
 
-from admission.ddd.projet_doctoral.doctorat.domain.model.enums import (
+from admission.ddd.doctorat.domain.model.enums import (
     ChoixStatutDoctorat,
     STATUTS_DOCTORAT_EPREUVE_CONFIRMATION_EN_COURS,
 )
-from admission.ddd.projet_doctoral.preparation.domain.model._enums import (
+from admission.ddd.admission.projet_doctoral.preparation.domain.model._enums import (
     ChoixStatutProposition,
     STATUTS_PROPOSITION_AVANT_SOUMISSION,
     STATUTS_PROPOSITION_AVANT_INSCRIPTION,

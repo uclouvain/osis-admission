@@ -28,7 +28,7 @@ import datetime
 from django.test import TestCase
 from django.utils.translation import gettext as _
 
-from admission.ddd.projet_doctoral.doctorat.domain.model.enums import ChoixStatutDoctorat
+from admission.ddd.doctorat.domain.model.enums import ChoixStatutDoctorat
 from admission.forms.doctorate.confirmation import ConfirmationForm, ConfirmationRetakingForm
 
 

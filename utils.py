@@ -30,7 +30,7 @@ from django.core.cache import cache
 from rest_framework.generics import get_object_or_404
 
 from admission.contrib.models import DoctorateAdmission
-from admission.ddd.projet_doctoral.doctorat.domain.model.enums import ChoixStatutDoctorat
+from admission.ddd.doctorat.domain.model.enums import ChoixStatutDoctorat
 
 from admission.mail_templates import (
     ADMISSION_EMAIL_GENERIC_ONCE_ADMITTED,

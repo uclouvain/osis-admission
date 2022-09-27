@@ -32,7 +32,7 @@ from django.utils.translation import get_language, gettext_lazy as _, pgettext_l
 
 from admission.contrib.models.cdd_config import CddConfiguration
 from admission.contrib.models.doctoral_training import Activity
-from admission.ddd.projet_doctoral.doctorat.formation.domain.model._enums import (
+from admission.ddd.doctorat.formation.domain.model._enums import (
     CategorieActivite,
     ChoixComiteSelection,
     ChoixTypeEpreuve,

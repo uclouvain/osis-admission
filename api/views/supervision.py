@@ -30,7 +30,7 @@ from rest_framework.response import Response
 from admission.api import serializers
 from admission.api.schema import ResponseSpecificSchema
 from admission.contrib.models.enums.actor_type import ActorType
-from admission.ddd.projet_doctoral.preparation.commands import (
+from admission.ddd.admission.projet_doctoral.preparation.commands import (
     DesignerPromoteurReferenceCommand,
     GetGroupeDeSupervisionCommand,
     IdentifierMembreCACommand,

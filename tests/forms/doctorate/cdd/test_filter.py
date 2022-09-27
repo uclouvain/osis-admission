@@ -28,12 +28,12 @@ from typing import Optional
 from django.test import TestCase
 
 from admission.contrib.models import EntityProxy
-from admission.ddd.projet_doctoral.preparation.domain.model._enums import (
+from admission.ddd.admission.projet_doctoral.preparation.domain.model._enums import (
     ChoixCommissionProximiteCDEouCLSM,
     ChoixCommissionProximiteCDSS,
     ChoixSousDomaineSciences,
 )
-from admission.ddd.projet_doctoral.preparation.domain.model.doctorat import (
+from admission.ddd.admission.projet_doctoral.preparation.domain.model.doctorat import (
     ENTITY_CDE,
     ENTITY_CDSS,
     SIGLE_SCIENCES,
@@ -54,7 +54,6 @@ from reference.tests.factories.country import CountryFactory
 
 
 class FilterTestCase(TestCase):
-
     @classmethod
     def setUpTestData(cls):
         # Create some academic years
@@ -104,9 +103,7 @@ class FilterTestCase(TestCase):
         # Third entity
         third_doctoral_commission = EntityFactory()
         EntityVersionFactory(
-            entity=third_doctoral_commission,
-            entity_type=EntityType.DOCTORAL_COMMISSION.name,
-            acronym='ABC'
+            entity=third_doctoral_commission, entity_type=EntityType.DOCTORAL_COMMISSION.name, acronym='ABC'
         )
         cls.third_entity_admissions = [
             DoctorateAdmissionFactory(

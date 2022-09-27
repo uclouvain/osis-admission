@@ -34,12 +34,12 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from admission.contrib.models import ConfirmationPaper
-from admission.ddd.projet_doctoral.doctorat.domain.model.enums import ChoixStatutDoctorat
-from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.validators.exceptions import (
+from admission.ddd.doctorat.domain.model.enums import ChoixStatutDoctorat
+from admission.ddd.doctorat.epreuve_confirmation.validators.exceptions import (
     EpreuveConfirmationDateIncorrecteException,
     EpreuveConfirmationNonTrouveeException,
 )
-from admission.ddd.projet_doctoral.preparation.domain.model._enums import (
+from admission.ddd.admission.projet_doctoral.preparation.domain.model._enums import (
     ChoixStatutProposition,
 )
 

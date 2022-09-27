@@ -112,7 +112,7 @@ class CompletePersonFactory(PersonFactory):
         )
         EducationalExperienceYearFactory(
             educational_experience=experience,
-            academic_year=AcademicYearFactory(year=current_year-1),
+            academic_year=AcademicYearFactory(year=current_year - 1),
         )
 
         # Create highschool belgian diploma

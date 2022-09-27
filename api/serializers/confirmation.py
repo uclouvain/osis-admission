@@ -25,12 +25,12 @@
 # ##############################################################################
 from rest_framework import serializers
 
-from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.commands import (
+from admission.ddd.doctorat.epreuve_confirmation.commands import (
     SoumettreEpreuveConfirmationCommand,
     CompleterEpreuveConfirmationParPromoteurCommand,
     SoumettreReportDeDateCommand,
 )
-from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.dtos import EpreuveConfirmationDTO
+from admission.ddd.doctorat.epreuve_confirmation.dtos import EpreuveConfirmationDTO
 from base.utils.serializers import DTOSerializer
 
 

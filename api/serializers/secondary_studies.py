@@ -76,9 +76,7 @@ class ForeignHighSchoolDiplomaSerializer(serializers.ModelSerializer):
 class HighSchoolDiplomaAlternativeSerializer(serializers.ModelSerializer):
     class Meta:
         model = HighSchoolDiplomaAlternative
-        fields = (
-            "first_cycle_admission_exam",
-        )
+        fields = ("first_cycle_admission_exam",)
 
 
 class HighSchoolDiplomaSerializer(serializers.Serializer):

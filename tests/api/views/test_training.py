@@ -28,9 +28,9 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from admission.contrib.models.doctoral_training import Activity
-from admission.ddd.projet_doctoral.doctorat.formation.domain.model._enums import CategorieActivite, StatutActivite
-from admission.ddd.projet_doctoral.doctorat.formation.domain.validator.exceptions import ActiviteNonTrouvee
-from admission.infrastructure.projet_doctoral.doctorat.formation.repository.activite import ActiviteRepository
+from admission.ddd.doctorat.formation.domain.model._enums import CategorieActivite, StatutActivite
+from admission.ddd.doctorat.formation.domain.validator.exceptions import ActiviteNonTrouvee
+from admission.infrastructure.doctorat.formation.repository.activite import ActiviteRepository
 from admission.tests import QueriesAssertionsMixin
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.activity import (

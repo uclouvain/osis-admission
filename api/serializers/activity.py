@@ -34,7 +34,7 @@ from rest_framework.generics import get_object_or_404
 from admission.contrib.models import DoctorateAdmission
 from admission.contrib.models.cdd_config import CddConfiguration
 from admission.contrib.models.doctoral_training import Activity
-from admission.ddd.projet_doctoral.doctorat.formation.domain.model._enums import CategorieActivite, StatutActivite
+from admission.ddd.doctorat.formation.domain.model._enums import CategorieActivite, StatutActivite
 from admission.forms.doctorate.training import activity as activity_forms
 from admission.forms.doctorate.training.activity import ConfigurableActivityTypeField
 from admission.forms import SelectOrOtherField

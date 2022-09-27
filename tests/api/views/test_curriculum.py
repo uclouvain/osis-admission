@@ -33,7 +33,9 @@ from django.test import override_settings
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from admission.ddd.projet_doctoral.preparation.domain.service.i_profil_candidat import IProfilCandidatTranslator
+from admission.ddd.admission.projet_doctoral.preparation.domain.service.i_profil_candidat import (
+    IProfilCandidatTranslator,
+)
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.curriculum import (
     ProfessionalExperienceFactory,
@@ -836,9 +838,7 @@ class EducationalExperienceTestCase(APITestCase):
 
         self.assertEqual(experience.obtained_grade, Grade.GREATER_DISTINCTION.name)
 
-        educational_experience_years = EducationalExperienceYear.objects.filter(
-            educational_experience=experience
-        )
+        educational_experience_years = EducationalExperienceYear.objects.filter(educational_experience=experience)
 
         self.assertEqual(len(educational_experience_years), 2)
 

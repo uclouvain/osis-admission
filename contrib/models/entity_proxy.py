@@ -41,21 +41,17 @@ class EntityQuerySet(models.QuerySet):
     def get_last_version(self):
         """Get the last version subquery for entity version"""
         if self._last_version_qs is None:
-            self._last_version_qs = EntityVersion.objects.filter(
-                entity=models.OuterRef('pk')
-            ).order_by('-start_date')
+            self._last_version_qs = EntityVersion.objects.filter(entity=models.OuterRef('pk')).order_by('-start_date')
         return self._last_version_qs
 
     def with_title(self):
         return self.annotate(
-            title=models.Subquery(
-                self.get_last_version().values('title')[:1]),
+            title=models.Subquery(self.get_last_version().values('title')[:1]),
         )
 
     def with_type(self):
         return self.annotate(
-            type=models.Subquery(
-                self.get_last_version().values('entity_type')[:1]),
+            type=models.Subquery(self.get_last_version().values('entity_type')[:1]),
         )
 
     def with_parent(self):
@@ -65,34 +61,37 @@ class EntityQuerySet(models.QuerySet):
 
     def with_acronym(self):
         return self.annotate(
-            acronym=models.Subquery(
-                self.get_last_version().values('acronym')[:1]),
+            acronym=models.Subquery(self.get_last_version().values('acronym')[:1]),
         )
 
     def with_acronym_path(self):
         return self.annotate(
             acronym_path=CTESubquery(
-                EntityVersion.objects.with_acronym_path(
-                    entity_id=models.OuterRef('pk'),
-                ).values('acronym_path')[:1]
+                EntityVersion.objects.with_acronym_path(entity_id=models.OuterRef('pk'),).values(
+                    'acronym_path'
+                )[:1]
             ),
         )
 
     def with_path_as_string(self):
         return self.annotate(
             path_as_string=CTESubquery(
-                EntityVersion.objects.with_acronym_path(
-                    entity_id=models.OuterRef('pk'),
-                ).values('path_as_string')[:1],
-                output_field=models.TextField()
+                EntityVersion.objects.with_acronym_path(entity_id=models.OuterRef('pk'),).values(
+                    'path_as_string'
+                )[:1],
+                output_field=models.TextField(),
             ),
         )
 
     def only_roots(self):
         return self.annotate(
-            is_root=models.Exists(EntityVersion.objects.filter(
-                entity_id=models.OuterRef('pk'),
-            ).current(date.today()).only_roots()),
+            is_root=models.Exists(
+                EntityVersion.objects.filter(
+                    entity_id=models.OuterRef('pk'),
+                )
+                .current(date.today())
+                .only_roots()
+            ),
         ).filter(is_root=True)
 
     def only_valid(self):
@@ -107,6 +106,7 @@ class EntityManager(models.Manager.from_queryset(EntityQuerySet)):
 
 class EntityProxy(Entity):
     """Proxy model of base.Entity"""
+
     objects = EntityManager()
 
     class Meta:

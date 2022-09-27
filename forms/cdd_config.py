@@ -34,7 +34,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from admission.contrib.models.cdd_config import CddConfiguration
-from admission.ddd.projet_doctoral.doctorat.formation.domain.model._enums import CategorieActivite
+from admission.ddd.doctorat.formation.domain.model._enums import CategorieActivite
 
 TextareaArrayField = partial(
     SimpleArrayField,

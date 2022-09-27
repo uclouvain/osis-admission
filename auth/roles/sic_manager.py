@@ -38,25 +38,27 @@ class SicManager(RoleModel):
 
     @classmethod
     def rule_set(cls):
-        return RuleSet({
-            'admission.change_doctorateadmission': rules.always_allow,
-            'admission.delete_doctorateadmission': rules.always_deny,
-            'admission.view_doctorateadmission': rules.always_allow,
-            'admission.appose_sic_notice': rules.always_allow,
-            'admission.view_doctorateadmission_person': rules.always_allow,
-            'admission.change_doctorateadmission_person': rules.always_allow,
-            'admission.view_doctorateadmission_coordinates': rules.always_allow,
-            'admission.change_doctorateadmission_coordinates': rules.always_allow,
-            'admission.view_doctorateadmission_secondary_studies': rules.always_allow,
-            'admission.change_doctorateadmission_secondary_studies': rules.always_allow,
-            'admission.view_doctorateadmission_curriculum': rules.always_allow,
-            'admission.change_doctorateadmission_curriculum': rules.always_allow,
-            'admission.view_doctorateadmission_project': rules.always_allow,
-            'admission.change_doctorateadmission_project': rules.always_allow,
-            'admission.view_doctorateadmission_cotutelle': rules.always_allow,
-            'admission.change_doctorateadmission_cotutelle': rules.always_allow,
-            'admission.view_doctorateadmission_supervision': rules.always_allow,
-            'admission.add_supervision_member': rules.always_allow,
-            'admission.remove_supervision_member': rules.always_allow,
-            'admission.view_internalnote': rules.always_allow,
-        })
+        return RuleSet(
+            {
+                'admission.change_doctorateadmission': rules.always_allow,
+                'admission.delete_doctorateadmission': rules.always_deny,
+                'admission.view_doctorateadmission': rules.always_allow,
+                'admission.appose_sic_notice': rules.always_allow,
+                'admission.view_doctorateadmission_person': rules.always_allow,
+                'admission.change_doctorateadmission_person': rules.always_allow,
+                'admission.view_doctorateadmission_coordinates': rules.always_allow,
+                'admission.change_doctorateadmission_coordinates': rules.always_allow,
+                'admission.view_doctorateadmission_secondary_studies': rules.always_allow,
+                'admission.change_doctorateadmission_secondary_studies': rules.always_allow,
+                'admission.view_doctorateadmission_curriculum': rules.always_allow,
+                'admission.change_doctorateadmission_curriculum': rules.always_allow,
+                'admission.view_doctorateadmission_project': rules.always_allow,
+                'admission.change_doctorateadmission_project': rules.always_allow,
+                'admission.view_doctorateadmission_cotutelle': rules.always_allow,
+                'admission.change_doctorateadmission_cotutelle': rules.always_allow,
+                'admission.view_doctorateadmission_supervision': rules.always_allow,
+                'admission.add_supervision_member': rules.always_allow,
+                'admission.remove_supervision_member': rules.always_allow,
+                'admission.view_internalnote': rules.always_allow,
+            }
+        )

@@ -32,15 +32,15 @@ from django.views.generic import FormView
 from osis_mail_template.models import MailTemplate
 
 from admission.contrib.models import CddMailTemplate
-from admission.ddd.projet_doctoral.doctorat.domain.model.enums import ChoixStatutDoctorat
-from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.commands import (
+from admission.ddd.doctorat.domain.model.enums import ChoixStatutDoctorat
+from admission.ddd.doctorat.epreuve_confirmation.commands import (
     ConfirmerReussiteCommand,
     ConfirmerEchecCommand,
     ConfirmerRepassageCommand,
 )
 from admission.forms.doctorate.cdd.generic_send_mail import SelectCddEmailTemplateForm, BaseEmailTemplateForm
 from admission.forms.doctorate.confirmation import ConfirmationRetakingForm
-from admission.infrastructure.projet_doctoral.doctorat.epreuve_confirmation.domain.service.notification import (
+from admission.infrastructure.doctorat.epreuve_confirmation.domain.service.notification import (
     Notification,
 )
 from admission.mail_templates import (
@@ -65,9 +65,8 @@ class DoctorateAdmissionConfirmationSuccessDecisionView(
             message_bus_instance.invoke(ConfirmerReussiteCommand(uuid=self.last_confirmation_paper.uuid))
             messages.success(
                 self.request,
-                _("The status has been changed to %(status)s.") % {
-                    'status': _(ChoixStatutDoctorat.PASSED_CONFIRMATION.value)
-                },
+                _("The status has been changed to %(status)s.")
+                % {'status': _(ChoixStatutDoctorat.PASSED_CONFIRMATION.value)},
             )
             messages.success(
                 self.request,

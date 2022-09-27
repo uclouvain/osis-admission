@@ -33,7 +33,7 @@ from admission.api import serializers
 from admission.api.permissions import IsListingOrHasNotAlreadyCreatedPermission, IsSupervisionMember
 from admission.api.schema import ResponseSpecificSchema
 from admission.contrib.models import DoctorateAdmission
-from admission.ddd.projet_doctoral.preparation.commands import (
+from admission.ddd.admission.projet_doctoral.preparation.commands import (
     CompleterPropositionCommand,
     GetPropositionCommand,
     InitierPropositionCommand,
@@ -44,14 +44,14 @@ from admission.ddd.projet_doctoral.preparation.commands import (
     VerifierProjetCommand,
     VerifierPropositionCommand,
 )
-from admission.ddd.projet_doctoral.preparation.domain.validator.exceptions import (
+from admission.ddd.admission.projet_doctoral.preparation.domain.validator.exceptions import (
     CommissionProximiteInconsistantException,
     ContratTravailInconsistantException,
     DomaineTheseInconsistantException,
     InstitutionInconsistanteException,
     JustificationRequiseException,
 )
-from admission.ddd.projet_doctoral.validation.commands import ApprouverDemandeCddCommand
+from admission.ddd.admission.projet_doctoral.validation.commands import ApprouverDemandeCddCommand
 from admission.utils import gather_business_exceptions, get_cached_admission_perm_obj
 from backoffice.settings.rest_framework.common_views import DisplayExceptionsByFieldNameAPIMixin
 from infrastructure.messages_bus import message_bus_instance

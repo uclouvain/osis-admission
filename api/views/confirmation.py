@@ -29,15 +29,15 @@ from rest_framework.response import Response
 
 from admission.api import serializers
 from admission.api.schema import ResponseSpecificSchema
-from admission.ddd.projet_doctoral.doctorat.commands import RecupererDoctoratQuery
-from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.commands import (
+from admission.ddd.doctorat.commands import RecupererDoctoratQuery
+from admission.ddd.doctorat.epreuve_confirmation.commands import (
     CompleterEpreuveConfirmationParPromoteurCommand,
     RecupererDerniereEpreuveConfirmationQuery,
     RecupererEpreuvesConfirmationQuery,
     SoumettreEpreuveConfirmationCommand,
     SoumettreReportDeDateCommand,
 )
-from admission.ddd.projet_doctoral.preparation.commands import GetGroupeDeSupervisionCommand
+from admission.ddd.admission.projet_doctoral.preparation.commands import GetGroupeDeSupervisionCommand
 from admission.exports.admission_confirmation_canvas import admission_pdf_confirmation_canvas
 from admission.utils import get_cached_admission_perm_obj
 from infrastructure.messages_bus import message_bus_instance
@@ -205,9 +205,11 @@ class LastConfirmationCanvasAPIView(APIPermissionRequiredMixin, mixins.RetrieveM
             },
         )
 
-        serializer = serializers.ConfirmationPaperCanvasSerializer(instance={
-            'uuid': uuid,
-        })
+        serializer = serializers.ConfirmationPaperCanvasSerializer(
+            instance={
+                'uuid': uuid,
+            }
+        )
 
         return Response(serializer.data)
 

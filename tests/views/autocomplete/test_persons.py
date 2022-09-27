@@ -55,15 +55,22 @@ class PersonsAutocompleteTestCase(TestCase):
             password='top_secret',
         )
         # Create candidates
-        cls.first_candidate = CandidateFactory(person=PersonFactory(
-            first_name='John',
-            last_name='Doe',
-        )).person
-        StudentFactory(person=cls.first_candidate, registration_id='0001',)
-        cls.second_candidate = CandidateFactory(person=PersonFactory(
-            first_name='Jane',
-            last_name='Poe',
-        )).person
+        cls.first_candidate = CandidateFactory(
+            person=PersonFactory(
+                first_name='John',
+                last_name='Doe',
+            )
+        ).person
+        StudentFactory(
+            person=cls.first_candidate,
+            registration_id='0001',
+        )
+        cls.second_candidate = CandidateFactory(
+            person=PersonFactory(
+                first_name='Jane',
+                last_name='Poe',
+            )
+        ).person
         StudentFactory(person=cls.second_candidate, registration_id='0002')
 
         # Create promoters
@@ -91,9 +98,7 @@ class PersonsAutocompleteTestCase(TestCase):
         )
 
     def test_candidates_with_name(self):
-        request = self.factory.get(reverse('admission:autocomplete:candidates'), data={
-            'q': 'oe'
-        })
+        request = self.factory.get(reverse('admission:autocomplete:candidates'), data={'q': 'oe'})
         request.user = self.user
 
         response = CandidatesAutocomplete.as_view()(request)
@@ -110,9 +115,12 @@ class PersonsAutocompleteTestCase(TestCase):
         )
 
     def test_candidates_with_registration_id(self):
-        request = self.factory.get(reverse('admission:autocomplete:candidates'), data={
-            'q': '0001',
-        })
+        request = self.factory.get(
+            reverse('admission:autocomplete:candidates'),
+            data={
+                'q': '0001',
+            },
+        )
         request.user = self.user
 
         response = CandidatesAutocomplete.as_view()(request)
@@ -149,9 +157,12 @@ class PersonsAutocompleteTestCase(TestCase):
         )
 
     def test_promoters_with_name(self):
-        request = self.factory.get(reverse('admission:autocomplete:promoters'), data={
-            'q': self.first_promoter.first_name,
-        })
+        request = self.factory.get(
+            reverse('admission:autocomplete:promoters'),
+            data={
+                'q': self.first_promoter.first_name,
+            },
+        )
         request.user = self.user
 
         response = PromotersAutocomplete.as_view()(request)

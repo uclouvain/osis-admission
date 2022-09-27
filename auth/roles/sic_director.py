@@ -39,16 +39,18 @@ class SicDirector(RoleModel):
 
     @classmethod
     def rule_set(cls):
-        return RuleSet({
-            **SicManager.rule_set(),
-            'admission.view_doctorateadmission': rules.always_allow,
-            'admission.validate_registration': rules.always_allow,
-            'admission.view_doctorateadmission_person': rules.always_allow,
-            'admission.view_doctorateadmission_coordinates': rules.always_allow,
-            'admission.view_doctorateadmission_secondary_studies': rules.always_allow,
-            'admission.view_doctorateadmission_curriculum': rules.always_allow,
-            'admission.view_doctorateadmission_project': rules.always_allow,
-            'admission.view_doctorateadmission_cotutelle': rules.always_allow,
-            'admission.view_doctorateadmission_supervision': rules.always_allow,
-            'admission.view_internalnote': rules.always_allow,
-        })
+        return RuleSet(
+            {
+                **SicManager.rule_set(),
+                'admission.view_doctorateadmission': rules.always_allow,
+                'admission.validate_registration': rules.always_allow,
+                'admission.view_doctorateadmission_person': rules.always_allow,
+                'admission.view_doctorateadmission_coordinates': rules.always_allow,
+                'admission.view_doctorateadmission_secondary_studies': rules.always_allow,
+                'admission.view_doctorateadmission_curriculum': rules.always_allow,
+                'admission.view_doctorateadmission_project': rules.always_allow,
+                'admission.view_doctorateadmission_cotutelle': rules.always_allow,
+                'admission.view_doctorateadmission_supervision': rules.always_allow,
+                'admission.view_internalnote': rules.always_allow,
+            }
+        )

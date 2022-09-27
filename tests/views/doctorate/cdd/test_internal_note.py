@@ -32,12 +32,12 @@ from django.urls import reverse
 
 from admission.contrib.models import DoctorateAdmission
 from admission.contrib.models.doctorate import InternalNote
-from admission.ddd.projet_doctoral.preparation.domain.model._enums import ChoixTypeAdmission
-from admission.ddd.projet_doctoral.preparation.domain.model._financement import (
+from admission.ddd.admission.projet_doctoral.preparation.domain.model._enums import ChoixTypeAdmission
+from admission.ddd.admission.projet_doctoral.preparation.domain.model._financement import (
     ChoixTypeFinancement,
     ChoixTypeContratTravail,
 )
-from admission.ddd.projet_doctoral.preparation.domain.model.doctorat import ENTITY_CDE, ENTITY_CDSS
+from admission.ddd.admission.projet_doctoral.preparation.domain.model.doctorat import ENTITY_CDE, ENTITY_CDSS
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.internal_note import InternalNoteFactory
 from admission.tests.factories.roles import CddManagerFactory, DoctorateReaderRoleFactory
@@ -158,18 +158,24 @@ class InternalNoteTestCase(TestCase):
         internal_notes = response.context.get('internal_notes')
 
         self.assertEqual(len(internal_notes), 2)
-        self.assertEqual(internal_notes[0], {
-            'author__first_name': self.first_admission_note_2.author.first_name,
-            'author__last_name': self.first_admission_note_2.author.last_name,
-            'created': self.first_admission_note_2.created,
-            'text': self.first_admission_note_2.text,
-        })
-        self.assertEqual(internal_notes[1], {
-            'author__first_name': self.first_admission_note_1.author.first_name,
-            'author__last_name': self.first_admission_note_1.author.last_name,
-            'created': self.first_admission_note_1.created,
-            'text': self.first_admission_note_1.text,
-        })
+        self.assertEqual(
+            internal_notes[0],
+            {
+                'author__first_name': self.first_admission_note_2.author.first_name,
+                'author__last_name': self.first_admission_note_2.author.last_name,
+                'created': self.first_admission_note_2.created,
+                'text': self.first_admission_note_2.text,
+            },
+        )
+        self.assertEqual(
+            internal_notes[1],
+            {
+                'author__first_name': self.first_admission_note_1.author.first_name,
+                'author__last_name': self.first_admission_note_1.author.last_name,
+                'created': self.first_admission_note_1.created,
+                'text': self.first_admission_note_1.text,
+            },
+        )
 
         self.assertIn('form', response.context.keys())
 
@@ -193,4 +199,3 @@ class InternalNoteTestCase(TestCase):
         self.assertEqual(len(internal_notes), 3)
         self.assertEqual(internal_notes[0].author, self.one_cdd_user.person)
         self.assertEqual(internal_notes[0].text, 'A fantastic text')
-

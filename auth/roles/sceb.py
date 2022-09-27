@@ -38,7 +38,9 @@ class Sceb(RoleModel):
 
     @classmethod
     def rule_set(cls):
-        return RuleSet({
-            'admission.check_copyright': rules.always_allow,
-            'admission.sign_diploma': rules.always_allow,
-        })
+        return RuleSet(
+            {
+                'admission.check_copyright': rules.always_allow,
+                'admission.sign_diploma': rules.always_allow,
+            }
+        )

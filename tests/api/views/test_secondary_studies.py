@@ -62,9 +62,7 @@ class BelgianHighSchoolDiplomaTestCase(APITestCase):
         cls.academic_year = AcademicYearFactory(current=True)
         cls.high_school = HighSchoolFactory()
 
-        EntityVersionAddressFactory(
-            entity_version__entity=EntityFactory(organization=cls.high_school)
-        )
+        EntityVersionAddressFactory(entity_version__entity=EntityFactory(organization=cls.high_school))
 
         cls.agnostic_url = resolve_url("secondary-studies")
         cls.diploma_data = {

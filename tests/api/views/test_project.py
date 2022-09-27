@@ -34,22 +34,22 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from admission.contrib.models import AdmissionType, DoctorateAdmission
-from admission.ddd.projet_doctoral.doctorat.domain.model.enums import ChoixStatutDoctorat
-from admission.ddd.projet_doctoral.preparation.domain.model._detail_projet import ChoixLangueRedactionThese
-from admission.ddd.projet_doctoral.preparation.domain.model._enums import (
+from admission.ddd.doctorat.domain.model.enums import ChoixStatutDoctorat
+from admission.ddd.admission.projet_doctoral.preparation.domain.model._detail_projet import ChoixLangueRedactionThese
+from admission.ddd.admission.projet_doctoral.preparation.domain.model._enums import (
     ChoixCommissionProximiteCDEouCLSM,
     ChoixCommissionProximiteCDSS,
     ChoixSousDomaineSciences,
     ChoixStatutProposition,
 )
-from admission.ddd.projet_doctoral.preparation.domain.model._financement import ChoixTypeFinancement
-from admission.ddd.projet_doctoral.preparation.domain.validator.exceptions import (
+from admission.ddd.admission.projet_doctoral.preparation.domain.model._financement import ChoixTypeFinancement
+from admission.ddd.admission.projet_doctoral.preparation.domain.validator.exceptions import (
     DoctoratNonTrouveException,
     MembreCAManquantException,
     PromoteurDeReferenceManquantException,
     PromoteurManquantException,
 )
-from admission.ddd.projet_doctoral.validation.domain.model._enums import ChoixStatutCDD
+from admission.ddd.admission.projet_doctoral.validation.domain.model._enums import ChoixStatutCDD
 from admission.tests import QueriesAssertionsMixin
 from admission.tests.factories import DoctorateAdmissionFactory, WriteTokenFactory
 from admission.tests.factories.doctorate import DoctorateFactory
@@ -607,7 +607,7 @@ class DoctorateAdmissionVerifyProjectTestCase(APITestCase):
         cls.url = resolve_url("verify-project", uuid=cls.admission.uuid)
 
     @mock.patch(
-        'admission.infrastructure.projet_doctoral.preparation.domain.service.promoteur.PromoteurTranslator.est_externe',
+        'admission.infrastructure.admission.projet_doctoral.preparation.domain.service.promoteur.PromoteurTranslator.est_externe',
         return_value=False,
     )
     def test_verify_project_using_api(self, mock_is_external):
@@ -619,7 +619,7 @@ class DoctorateAdmissionVerifyProjectTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     @mock.patch(
-        'admission.infrastructure.projet_doctoral.preparation.domain.service.promoteur.PromoteurTranslator.est_externe',
+        'admission.infrastructure.admission.projet_doctoral.preparation.domain.service.promoteur.PromoteurTranslator.est_externe',
         return_value=False,
     )
     def test_verify_project_using_api_without_ca_members_must_fail(self, mock_is_external):

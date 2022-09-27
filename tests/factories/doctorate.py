@@ -29,9 +29,9 @@ from django.db import connection
 
 from admission.contrib.models import DoctorateAdmission
 from admission.contrib.models.doctorate import REFERENCE_SEQ_NAME
-from admission.ddd.projet_doctoral.doctorat.domain.model.enums import ChoixStatutDoctorat
-from admission.ddd.projet_doctoral.preparation.domain.model._enums import ChoixStatutProposition
-from admission.ddd.projet_doctoral.preparation.domain.model.proposition import Proposition
+from admission.ddd.doctorat.domain.model.enums import ChoixStatutDoctorat
+from admission.ddd.admission.projet_doctoral.preparation.domain.model._enums import ChoixStatutProposition
+from admission.ddd.admission.projet_doctoral.preparation.domain.model.proposition import Proposition
 from admission.tests.factories.roles import CandidateFactory
 from admission.tests.factories.supervision import PromoterFactory
 from base.models.enums.education_group_types import TrainingType

@@ -37,17 +37,19 @@ class DoctorateReader(RoleModel):
 
     @classmethod
     def rule_set(cls):
-        return RuleSet({
-            'admission.view_doctorateadmission': always_allow,
-            'admission.view_doctorateadmission_person': always_allow,
-            'admission.view_doctorateadmission_coordinates': always_allow,
-            'admission.view_doctorateadmission_secondary_studies': always_allow,
-            'admission.view_doctorateadmission_languages': always_allow,
-            'admission.view_doctorateadmission_curriculum': always_allow,
-            'admission.view_doctorateadmission_project': always_allow,
-            'admission.view_doctorateadmission_cotutelle': always_allow,
-            'admission.view_doctorateadmission_supervision': always_allow,
-            'admission.view_doctorateadmission_confirmation': always_allow,
-            'admission.view_cdddossiers': always_allow,
-            'admission.view_internalnote': always_allow,
-        })
+        return RuleSet(
+            {
+                'admission.view_doctorateadmission': always_allow,
+                'admission.view_doctorateadmission_person': always_allow,
+                'admission.view_doctorateadmission_coordinates': always_allow,
+                'admission.view_doctorateadmission_secondary_studies': always_allow,
+                'admission.view_doctorateadmission_languages': always_allow,
+                'admission.view_doctorateadmission_curriculum': always_allow,
+                'admission.view_doctorateadmission_project': always_allow,
+                'admission.view_doctorateadmission_cotutelle': always_allow,
+                'admission.view_doctorateadmission_supervision': always_allow,
+                'admission.view_doctorateadmission_confirmation': always_allow,
+                'admission.view_cdddossiers': always_allow,
+                'admission.view_internalnote': always_allow,
+            }
+        )

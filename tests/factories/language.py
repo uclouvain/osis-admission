@@ -30,7 +30,6 @@ from reference.tests.factories.language import LanguageFactory
 
 
 class LanguageKnowledgeFactory(factory.DjangoModelFactory):
-
     class Meta:
         model = 'osis_profile.LanguageKnowledge'
 

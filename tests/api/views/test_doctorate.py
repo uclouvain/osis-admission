@@ -30,9 +30,9 @@ from django.shortcuts import resolve_url
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from admission.ddd.projet_doctoral.doctorat.domain.model.enums import ChoixStatutDoctorat
-from admission.ddd.projet_doctoral.doctorat.domain.validator.exceptions import DoctoratNonTrouveException
-from admission.ddd.projet_doctoral.preparation.domain.model._enums import (
+from admission.ddd.doctorat.domain.model.enums import ChoixStatutDoctorat
+from admission.ddd.doctorat.domain.validator.exceptions import DoctoratNonTrouveException
+from admission.ddd.admission.projet_doctoral.preparation.domain.model._enums import (
     ChoixStatutProposition,
 )
 

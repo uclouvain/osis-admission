@@ -26,7 +26,7 @@
 from rest_framework import serializers
 
 from admission.api.serializers.fields import ActionLinksField, ACTION_LINKS
-from admission.ddd.projet_doctoral.doctorat.dtos import DoctoratDTO
+from admission.ddd.doctorat.dtos import DoctoratDTO
 from base.utils.serializers import DTOSerializer
 
 

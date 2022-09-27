@@ -62,7 +62,6 @@ class CountriesAutocompleteTestCase(TestCase):
         response = CountriesAutocomplete.as_view()(request)
         self.assertEqual(response.status_code, 302)
 
-
     def test_countries_without_query(self):
         request = self.factory.get(reverse('admission:autocomplete:countries'))
         request.user = self.user

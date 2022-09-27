@@ -35,7 +35,7 @@ from django.utils.translation import gettext_lazy as _
 from rest_framework import status
 
 from admission.contrib.models.doctoral_training import Activity
-from admission.ddd.projet_doctoral.doctorat.formation.domain.model._enums import (
+from admission.ddd.doctorat.formation.domain.model._enums import (
     CategorieActivite,
     ChoixComiteSelection,
     StatutActivite,

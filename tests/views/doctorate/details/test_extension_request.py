@@ -30,12 +30,12 @@ from django.test import TestCase, override_settings
 from django.urls import reverse
 from rest_framework import status
 
-from admission.ddd.projet_doctoral.preparation.domain.model._enums import ChoixTypeAdmission
-from admission.ddd.projet_doctoral.preparation.domain.model._financement import (
+from admission.ddd.admission.projet_doctoral.preparation.domain.model._enums import ChoixTypeAdmission
+from admission.ddd.admission.projet_doctoral.preparation.domain.model._financement import (
     ChoixTypeContratTravail,
     ChoixTypeFinancement,
 )
-from admission.ddd.projet_doctoral.preparation.domain.model.doctorat import ENTITY_CDE, ENTITY_CDSS
+from admission.ddd.admission.projet_doctoral.preparation.domain.model.doctorat import ENTITY_CDE, ENTITY_CDSS
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.confirmation_paper import ConfirmationPaperFactory
 from admission.tests.factories.roles import CddManagerFactory

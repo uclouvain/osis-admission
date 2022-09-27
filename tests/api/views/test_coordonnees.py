@@ -29,7 +29,7 @@ from django.test import override_settings
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from admission.ddd.projet_doctoral.preparation.domain.model._enums import ChoixStatutProposition
+from admission.ddd.admission.projet_doctoral.preparation.domain.model._enums import ChoixStatutProposition
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.roles import CddManagerFactory
 from admission.tests.factories.supervision import CaMemberFactory, PromoterFactory

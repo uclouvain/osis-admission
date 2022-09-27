@@ -29,9 +29,9 @@ from django.shortcuts import resolve_url
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from admission.ddd.projet_doctoral.preparation.domain.model._detail_projet import ChoixLangueRedactionThese
-from admission.ddd.projet_doctoral.preparation.domain.model._financement import ChoixTypeFinancement
-from admission.ddd.projet_doctoral.preparation.domain.validator.exceptions import (
+from admission.ddd.admission.projet_doctoral.preparation.domain.model._detail_projet import ChoixLangueRedactionThese
+from admission.ddd.admission.projet_doctoral.preparation.domain.model._financement import ChoixTypeFinancement
+from admission.ddd.admission.projet_doctoral.preparation.domain.validator.exceptions import (
     CotutelleDoitAvoirAuMoinsUnPromoteurExterneException,
     MembreCAManquantException,
     PromoteurManquantException,
