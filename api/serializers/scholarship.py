@@ -23,28 +23,17 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from rest_framework.serializers import ModelSerializer
 
-from .dashboard import DashboardSerializer
-from .project import *
-from .cotutelle import *
-from .person import *
-from .coordonnees import CoordonneesSerializer
-from .secondary_studies import HighSchoolDiplomaSerializer
-from .languages_knowledge import *
-from .supervision import *
-from .curriculum import (
-    CurriculumFileSerializer,
-    EducationalExperienceYearSerializer,
-    CurriculumSerializer,
-    ProfessionalExperienceSerializer,
-)
-from .approvals import (
-    ApprouverPropositionCommandSerializer,
-    RefuserPropositionCommandSerializer,
-    ApprouverPropositionParPdfCommandSerializer,
-)
-from .confirmation import *
-from .doctorate import *
-from .accounting import CompleterComptabilitePropositionCommandSerializer, AccountingConditionsSerializer
-from .scholarship import ScholarshipSerializer
-from .campus import CampusSerializer
+from admission.contrib.models import Scholarship
+
+
+class ScholarshipSerializer(ModelSerializer):
+    class Meta:
+        model = Scholarship
+        fields = [
+            'uuid',
+            'short_name',
+            'long_name',
+            'type',
+        ]
