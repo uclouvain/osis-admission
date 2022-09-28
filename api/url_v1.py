@@ -96,6 +96,13 @@ urlpatterns = [
     # Autocompletes
     path('autocomplete/sector', views.AutocompleteSectorView),
     path('autocomplete/sector/<str:sigle>/doctorates', views.AutocompleteDoctoratView),
+    path('autocomplete/general-education', views.AutocompleteGeneralEducationView),
+    path('autocomplete/continuing-education', views.AutocompleteContinuingEducationView),
     path('autocomplete/tutor', views.AutocompleteTutorView),
     path('autocomplete/person', views.AutocompletePersonView),
+    path('autocomplete/<str:scholarship_type>/scholarship', views.AutocompleteScholarshipView),
+    # Others
+    path('scholarship/<uuid:uuid>', views.RetrieveScholarshipView),
+    path('campus', views.ListCampusView),
+    path('campus/<uuid:uuid>', views.RetrieveCampusView),
 ]

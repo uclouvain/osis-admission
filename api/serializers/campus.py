@@ -23,28 +23,16 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from rest_framework import serializers
 
-from .dashboard import DashboardSerializer
-from .project import *
-from .cotutelle import *
-from .person import *
-from .coordonnees import CoordonneesSerializer
-from .secondary_studies import HighSchoolDiplomaSerializer
-from .languages_knowledge import *
-from .supervision import *
-from .curriculum import (
-    CurriculumFileSerializer,
-    EducationalExperienceYearSerializer,
-    CurriculumSerializer,
-    ProfessionalExperienceSerializer,
-)
-from .approvals import (
-    ApprouverPropositionCommandSerializer,
-    RefuserPropositionCommandSerializer,
-    ApprouverPropositionParPdfCommandSerializer,
-)
-from .confirmation import *
-from .doctorate import *
-from .accounting import CompleterComptabilitePropositionCommandSerializer, AccountingConditionsSerializer
-from .scholarship import ScholarshipSerializer
-from .campus import CampusSerializer
+
+class CampusSerializer(serializers.Serializer):
+    uuid = serializers.CharField(source='entity_id.uuid', read_only=True)
+    name = serializers.CharField(read_only=True)
+
+    def update(self, instance, validated_data):
+        raise NotImplementedError
+
+    def create(self, validated_data):
+        raise NotImplementedError
+

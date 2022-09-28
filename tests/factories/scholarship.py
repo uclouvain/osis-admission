@@ -24,27 +24,37 @@
 #
 # ##############################################################################
 
-from .dashboard import DashboardSerializer
-from .project import *
-from .cotutelle import *
-from .person import *
-from .coordonnees import CoordonneesSerializer
-from .secondary_studies import HighSchoolDiplomaSerializer
-from .languages_knowledge import *
-from .supervision import *
-from .curriculum import (
-    CurriculumFileSerializer,
-    EducationalExperienceYearSerializer,
-    CurriculumSerializer,
-    ProfessionalExperienceSerializer,
-)
-from .approvals import (
-    ApprouverPropositionCommandSerializer,
-    RefuserPropositionCommandSerializer,
-    ApprouverPropositionParPdfCommandSerializer,
-)
-from .confirmation import *
-from .doctorate import *
-from .accounting import CompleterComptabilitePropositionCommandSerializer, AccountingConditionsSerializer
-from .scholarship import ScholarshipSerializer
-from .campus import CampusSerializer
+import factory
+
+from admission.contrib.models import Scholarship
+from admission.ddd.admission.enums.type_bourse import TypeBourse
+
+
+class ScholarshipFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = Scholarship
+
+
+class DoubleDegreeScholarship(factory.DjangoModelFactory):
+    type = TypeBourse.DOUBLE_TRIPLE_DIPLOMATION.name
+    class Meta:
+        model = Scholarship
+
+
+class InternationalScholarship(factory.DjangoModelFactory):
+    type = TypeBourse.BOURSE_INTERNATIONALE_FORMATION_GENERALE.name
+    class Meta:
+        model = Scholarship
+
+
+class DoctorateScholarship(factory.DjangoModelFactory):
+    type = TypeBourse.BOURSE_INTERNATIONALE_DOCTORAT.name
+
+    class Meta:
+        model = Scholarship
+
+
+class ErasmusMundusScholarship(factory.DjangoModelFactory):
+    type = TypeBourse.ERASMUS_MUNDUS.name
+    class Meta:
+        model = Scholarship
