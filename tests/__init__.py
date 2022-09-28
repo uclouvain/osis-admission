@@ -30,3 +30,10 @@ class QueriesAssertionsMixin:
 
 class TestCase(QueriesAssertionsMixin, BaseTestCase):
     pass
+
+
+TESTING_CACHE_SETTING = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
+    }
+}

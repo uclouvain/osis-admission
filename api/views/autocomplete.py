@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,8 +23,6 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from datetime import date
-
 from django.db.models import Exists, F, OuterRef, Q, TextField
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
@@ -34,8 +32,15 @@ from rest_framework.response import Response
 
 from admission.api import serializers
 from admission.api.serializers import PersonSerializer
-from admission.contrib.models import EntityProxy
+from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
+    AnneeInscriptionFormationTranslator,
+)
+from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from admission.ddd.admission.doctorat.preparation.commands import RechercherDoctoratQuery
+from admission.ddd.admission.formation_continue.commands import RechercherFormationContinueQuery
+from admission.ddd.admission.formation_generale.commands import RechercherFormationGeneraleQuery
+from admission.contrib.models import EntityProxy, Scholarship
+from admission.ddd.admission.domain.enums import LISTE_TYPES_FORMATION_GENERALE
 from base.auth.roles.tutor import Tutor
 from base.models.education_group_year import EducationGroupYear
 from base.models.entity_version import EntityVersion
@@ -45,15 +50,16 @@ from base.models.enums.entity_type import SECTOR
 from base.models.person import Person
 from base.models.student import Student
 from base.utils.cte import CTESubquery
-from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import GetCurrentAcademicYear
 from infrastructure.messages_bus import message_bus_instance
-from infrastructure.shared_kernel.academic_year.repository import academic_year as academic_year_repository
 
 __all__ = [
     "AutocompleteSectorView",
     "AutocompleteDoctoratView",
     "AutocompleteTutorView",
     "AutocompletePersonView",
+    "AutocompleteGeneralEducationView",
+    "AutocompleteContinuingEducationView",
+    "AutocompleteScholarshipView",
 ]
 
 
@@ -69,11 +75,9 @@ class AutocompleteSectorView(ListAPIView):
     def list(self, request, **kwargs):
         # TODO revert to command once it's in the shared kernel
         # Get all doctorates with their path (containing sector)
-        year = (
-            GetCurrentAcademicYear()
-            .get_starting_academic_year(date.today(), academic_year_repository.AcademicYearRepository())
-            .year
-        )
+        year = AnneeInscriptionFormationTranslator().recuperer(AcademicCalendarTypes.DOCTORATE_EDUCATION_ENROLLMENT)
+        if not year:
+            return Response([])
         doctorate_qs = EducationGroupYear.objects.annotate(
             path_as_string=CTESubquery(
                 EntityVersion.objects.with_acronym_path(entity_id=OuterRef('management_entity')).values(
@@ -105,19 +109,116 @@ class AutocompleteSectorView(ListAPIView):
         return Response(serializer.data)
 
 
+class EducationSearchingBackendMixin:
+    NAME_SCHEMA = {
+        'name': 'name',
+        'required': True,
+        'in': 'query',
+        'description': "The name of the training",
+        'schema': {
+            'type': 'string',
+        },
+    }
+    CAMPUS_SCHEMA = {
+        'name': 'campus',
+        'required': False,
+        'in': 'query',
+        'description': "The identifier of the campus where the training takes place",
+        'schema': {
+            'type': 'string',
+        },
+    }
+    TRAINING_TYPE_SCHEMA = {
+        'name': 'type',
+        'required': True,
+        'in': 'query',
+        'description': "The type of the training",
+        'schema': {
+            'type': 'string',
+            'enum': LISTE_TYPES_FORMATION_GENERALE,
+        },
+    }
+
+
+class DoctorateEducationSearchingBackend(BaseFilterBackend, EducationSearchingBackendMixin):
+    def get_schema_operation_parameters(self, view):  # pragma: no cover
+        return [
+            self.CAMPUS_SCHEMA,
+        ]
+
+
 class AutocompleteDoctoratView(ListAPIView):
     """Autocomplete doctorates given a sector"""
 
     name = "autocomplete-doctorate"
     pagination_class = None
-    filter_backends = []
+    filter_backends = [DoctorateEducationSearchingBackend]
     serializer_class = serializers.DoctoratDTOSerializer
 
     def list(self, request, **kwargs):
         doctorat_list = message_bus_instance.invoke(
-            RechercherDoctoratQuery(sigle_secteur_entite_gestion=kwargs.get('sigle'))
+            RechercherDoctoratQuery(
+                sigle_secteur_entite_gestion=kwargs.get('sigle'),
+                campus=request.GET.get('campus'),
+            )
         )
         serializer = serializers.DoctoratDTOSerializer(instance=doctorat_list, many=True)
+        return Response(serializer.data)
+
+
+class GeneralEducationSearchingBackend(BaseFilterBackend, EducationSearchingBackendMixin):
+    def get_schema_operation_parameters(self, view):  # pragma: no cover
+        return [
+            self.TRAINING_TYPE_SCHEMA,
+            self.NAME_SCHEMA,
+            self.CAMPUS_SCHEMA,
+        ]
+
+
+class ContinuingEducationSearchingBackend(BaseFilterBackend, EducationSearchingBackendMixin):
+    def get_schema_operation_parameters(self, view):  # pragma: no cover
+        return [
+            self.NAME_SCHEMA,
+            self.CAMPUS_SCHEMA,
+        ]
+
+
+class AutocompleteGeneralEducationView(ListAPIView):
+    """Autocomplete to find a general education"""
+
+    name = "autocomplete-general-education"
+    serializer_class = serializers.FormationGeneraleDTOSerializer
+    filter_backends = [GeneralEducationSearchingBackend]
+    pagination_class = None
+
+    def list(self, request, **kwargs):
+        education_list = message_bus_instance.invoke(
+            RechercherFormationGeneraleQuery(
+                type_formation=request.GET.get('type'),
+                campus=request.GET.get('campus'),
+                intitule_formation=request.GET.get('name'),
+            )
+        )
+        serializer = serializers.FormationGeneraleDTOSerializer(instance=education_list, many=True)
+        return Response(serializer.data)
+
+
+class AutocompleteContinuingEducationView(ListAPIView):
+    """Autocomplete to find a continuing education"""
+
+    name = "autocomplete-continuing-education"
+    serializer_class = serializers.FormationContinueDTOSerializer
+    filter_backends = [ContinuingEducationSearchingBackend]
+    pagination_class = None
+
+    def list(self, request, **kwargs):
+        education_list = message_bus_instance.invoke(
+            RechercherFormationContinueQuery(
+                campus=request.GET.get('campus'),
+                intitule_formation=request.GET.get('name'),
+            )
+        )
+        serializer = serializers.FormationContinueDTOSerializer(instance=education_list, many=True)
         return Response(serializer.data)
 
 
@@ -139,6 +240,63 @@ class PersonSearchingBackend(BaseFilterBackend):
                 'required': True,
                 'in': 'query',
                 'description': "The term to search the persons on (first or last name, or global id)",
+                'schema': {
+                    'type': 'string',
+                },
+            },
+        ]
+
+
+class ScholarshipSearchBackend(BaseFilterBackend):
+    searching_param = 'search'
+
+    def filter_queryset(self, request, queryset, view):
+        search_term = request.GET.get(self.searching_param, '')
+        scholarship_type = view.kwargs.get('scholarship_type', '')
+
+        return queryset.filter(type=scholarship_type).filter(
+            Q(short_name__icontains=search_term) | Q(long_name__icontains=search_term)
+        )
+
+    def get_schema_operation_parameters(self, view):  # pragma: no cover
+        return [
+            {
+                'name': self.searching_param,
+                'required': False,
+                'in': 'query',
+                'description': 'The term to search the scholarship on (short or long name)',
+                'schema': {
+                    'type': 'string',
+                },
+            },
+        ]
+
+
+class AutocompleteScholarshipView(ListAPIView):
+    """Autocomplete scholarships"""
+
+    name = 'autocomplete-scholarships'
+
+    filter_backends = [ScholarshipSearchBackend]
+    serializer_class = serializers.ScholarshipSerializer
+    queryset = Scholarship.objects.exclude(deleted=True)
+
+
+class CampusSearchBackend(BaseFilterBackend):
+    searching_param = 'search'
+
+    def filter_queryset(self, request, queryset, view):
+        search_term = request.GET.get(self.searching_param, '')
+
+        return queryset.filter(Q(name__icontains=search_term))
+
+    def get_schema_operation_parameters(self, view):  # pragma: no cover
+        return [
+            {
+                'name': self.searching_param,
+                'required': False,
+                'in': 'query',
+                'description': 'The term to search the campus on (its name)',
                 'schema': {
                     'type': 'string',
                 },

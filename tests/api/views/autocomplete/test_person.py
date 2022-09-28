@@ -27,57 +27,15 @@ from django.shortcuts import resolve_url
 from django.test import override_settings
 from rest_framework.test import APITestCase
 
-from base.models.enums.education_group_types import TrainingType
-from base.models.enums.entity_type import DOCTORAL_COMMISSION, SECTOR
-from base.tests.factories.education_group_year import EducationGroupYearFactory
-from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.person import PersonFactory
 from base.tests.factories.user import UserFactory
 
 
 @override_settings(ROOT_URLCONF='admission.api.url_v1')
-class AutocompleteTestCase(APITestCase):
+class PersonAutocompleteTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
         cls.user = UserFactory()
-        cls.root = EntityVersionFactory(
-            entity_type='',
-            acronym="UCL",
-            parent=None,
-        ).entity
-        cls.sector = EntityVersionFactory(
-            entity_type=SECTOR,
-            acronym="SST",
-            parent=cls.root,
-        ).entity
-        cls.management_entity = EntityVersionFactory(
-            entity_type=DOCTORAL_COMMISSION,
-            acronym="CDSC",
-            parent=cls.sector,
-        ).entity
-        cls.doctorate = EducationGroupYearFactory(
-            academic_year__current=True,
-            education_group_type__name=TrainingType.PHD.name,
-            management_entity=cls.management_entity,
-        )
-
-    def test_autocomplete_sectors(self):
-        self.client.force_authenticate(user=self.user)
-        response = self.client.get(
-            resolve_url('autocomplete-sector'),
-            format="json",
-        )
-        self.assertEqual(response.status_code, 200, response.content)
-        self.assertEqual(len(response.json()), 1)
-
-    def test_autocomplete_doctorate(self):
-        self.client.force_authenticate(user=self.user)
-        response = self.client.get(
-            resolve_url('autocomplete-doctorate', sigle="SST"),
-            format="json",
-        )
-        self.assertEqual(response.status_code, 200, response.content)
-        self.assertEqual(len(response.json()), 1)
 
     def test_autocomplete_persons(self):
         self.client.force_authenticate(user=self.user)
