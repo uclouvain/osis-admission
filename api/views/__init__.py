@@ -39,3 +39,4 @@ from admission.api.views.confirmation import *
 from admission.api.views.doctorate import DoctorateAPIView
 from admission.api.views.training import *
 from admission.api.views.accounting import AccountingView
+from admission.api.views.references import RetrieveScholarshipView, RetrieveCampusView, ListCampusView

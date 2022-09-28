@@ -38,9 +38,11 @@ class TypeFormation(ChoiceEnum):
     CERTIFICAT = _("Certificate")
 
 
-TYPES_FORMATION_GENERALE = {
+LISTE_TYPES_FORMATION_GENERALE = [
     TypeFormation.BACHELIER.name,
     TypeFormation.MASTER.name,
     TypeFormation.AGREGATION_CAPES.name,
     TypeFormation.CERTIFICAT.name,
-}
+]
+
+TYPES_FORMATION_GENERALE = set(LISTE_TYPES_FORMATION_GENERALE)

@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -30,6 +30,7 @@ from admission.api.serializers.fields import ACTION_LINKS, ActionLinksField, Rel
 from admission.api.serializers.mixins import IncludedFieldsMixin
 from admission.contrib.models import AdmissionType, DoctorateAdmission
 from admission.ddd.admission.doctorat.preparation.commands import CompleterPropositionCommand, InitierPropositionCommand
+from admission.ddd.admission.dtos.formation import FormationDTO
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixCommissionProximiteCDEouCLSM,
     ChoixCommissionProximiteCDSS,
@@ -50,6 +51,8 @@ __all__ = [
     "SectorDTOSerializer",
     "PropositionDTOSerializer",
     "PropositionSearchDTOSerializer",
+    "FormationContinueDTOSerializer",
+    "FormationGeneraleDTOSerializer",
 ]
 
 
@@ -279,3 +282,13 @@ class SectorDTOSerializer(serializers.Serializer):
 class DoctoratDTOSerializer(DTOSerializer):
     class Meta:
         source = DoctoratDTO
+
+
+class FormationGeneraleDTOSerializer(DTOSerializer):
+    class Meta:
+        source = FormationDTO
+
+
+class FormationContinueDTOSerializer(DTOSerializer):
+    class Meta:
+        source = FormationDTO
