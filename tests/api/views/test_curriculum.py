@@ -49,7 +49,6 @@ from osis_profile.models.enums.curriculum import (
     ActivityType,
     ActivitySector,
     Result,
-    StudySystem,
     EvaluationSystem,
     TranscriptType,
     Grade,
@@ -826,7 +825,7 @@ class EducationalExperienceTestCase(APITestCase):
 
         # Check response data
         self.assertEqual(json_response.get('obtained_grade'), Grade.GREATER_DISTINCTION.name)
-        self.assertEqual(json_response.get('study_system'), StudySystem.CONTINUING_EDUCATION.name)
+        self.assertEqual(json_response.get('study_system'), TeachingTypeEnum.SOCIAL_PROMOTION.name)
 
         json_first_educational_experience_year = json_response.get('educationalexperienceyear_set')[0]
         self.assertEqual(json_first_educational_experience_year.get('academic_year'), 2020)

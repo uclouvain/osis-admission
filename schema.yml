@@ -3451,7 +3451,7 @@ components:
           type: string
           maxLength: 255
         study_system:
-          $ref: '#/components/schemas/StudySystem'
+          $ref: '#/components/schemas/TeachingTypeEnum'
         evaluation_type:
           $ref: '#/components/schemas/EvaluationSystem'
         transcript_type:
@@ -3513,11 +3513,11 @@ components:
       - SUCCESS
       - SUCCESS_WITH_RESIDUAL_CREDITS
       type: string
-    StudySystem:
+    TeachingTypeEnum:
       enum:
       - ''
-      - CONTINUING_EDUCATION
-      - FULL_TIME_EDUCATION
+      - SOCIAL_PROMOTION
+      - FULL_EXERCICES
       type: string
     EvaluationSystem:
       enum:

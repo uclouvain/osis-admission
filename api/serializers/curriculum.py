@@ -33,7 +33,6 @@ from admission.ddd.projet_doctoral.preparation.domain.service.i_profil_candidat 
 from base.api.serializers.academic_year import RelatedAcademicYearField
 from base.models.academic_year import current_academic_year
 from base.models.enums.establishment_type import EstablishmentTypeEnum
-from base.models.enums.teaching_type import TeachingTypeEnum
 from base.models.organization import Organization
 from base.models.person import Person
 from osis_profile.models import (
@@ -43,7 +42,6 @@ from osis_profile.models import (
     BelgianHighSchoolDiploma,
     ForeignHighSchoolDiploma,
 )
-from osis_profile.models.enums.curriculum import StudySystem
 from reference.api.serializers.country import RelatedCountryField
 from reference.api.serializers.language import RelatedLanguageField
 from reference.models.diploma_title import DiplomaTitle
@@ -133,11 +131,7 @@ class EducationalExperienceSerializer(serializers.ModelSerializer):
 
         # If an institute with a teaching type is specified, the study system is based on it
         if institute and institute.teaching_type:
-            validated_data['study_system'] = (
-                StudySystem.CONTINUING_EDUCATION.name
-                if institute.teaching_type == TeachingTypeEnum.SOCIAL_PROMOTION.name
-                else StudySystem.FULL_TIME_EDUCATION.name
-            )
+            validated_data['study_system'] = institute.teaching_type
         else:
             validated_data['study_system'] = ''
 
