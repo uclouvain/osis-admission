@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -32,11 +32,10 @@ from django.db.models import OuterRef, Subquery
 from django.utils.translation import get_language
 
 from admission.auth.roles.candidate import Candidate
-from admission.contrib.models import Accounting, DoctorateAdmission
+from admission.contrib.models import Accounting, DoctorateAdmission, Scholarship
 from admission.contrib.models.doctorate import PropositionProxy, REFERENCE_SEQ_NAME
-from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import (
-    PropositionIdentityBuilder,
-)
+from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import PropositionIdentityBuilder
+from admission.ddd.admission.domain.model.bourse import BourseErasmusMundusIdentity
 from admission.ddd.admission.doctorat.preparation.domain.model._detail_projet import (
     DetailProjet,
 )
@@ -117,6 +116,9 @@ def _instantiate_admission(admission: 'DoctorateAdmission') -> 'Proposition':
         ),
         justification=admission.comment,
         statut=ChoixStatutProposition[admission.status],
+        bourse_erasmus_mundus_id=BourseErasmusMundusIdentity(uuid=admission.erasmus_mundus_scholarship.uuid)
+        if admission.erasmus_mundus_scholarship_id
+        else None,
         financement=Financement(
             type=ChoixTypeFinancement[admission.financing_type] if admission.financing_type else None,
             type_contrat_travail=admission.financing_work_contract,
@@ -189,6 +191,11 @@ class PropositionRepository(IPropositionRepository):
             academic_year__year=entity.annee,
         )
         candidate = Person.objects.get(global_id=entity.matricule_candidat)
+        erasmus_mundus_scholarship = (
+            Scholarship.objects.get(pk=entity.bourse_erasmus_mundus_id.uuid)
+            if entity.bourse_erasmus_mundus_id
+            else None
+        )
         admission, _ = DoctorateAdmission.objects.update_or_create(
             uuid=entity.entity_id.uuid,
             defaults={
@@ -228,6 +235,7 @@ class PropositionRepository(IPropositionRepository):
                 'phd_already_done_defense_date': entity.experience_precedente_recherche.date_soutenance,
                 'phd_already_done_no_defense_reason': entity.experience_precedente_recherche.raison_non_soutenue,
                 'archived_record_signatures_sent': entity.fiche_archive_signatures_envoyees,
+                'erasmus_mundus_scholarship': erasmus_mundus_scholarship,
             },
         )
         Candidate.objects.get_or_create(person=candidate)
@@ -437,4 +445,5 @@ class PropositionRepository(IPropositionRepository):
             fiche_archive_signatures_envoyees=admission.archived_record_signatures_sent,
             erreurs=admission.detailed_status or [],
             comptabilite=get_dto_accounting_from_admission(admission=admission),
+            bourse_erasmus_mundus=admission.erasmus_mundus_scholarship and admission.erasmus_mundus_scholarship.uuid,
         )

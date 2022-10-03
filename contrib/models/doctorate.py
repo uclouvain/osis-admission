@@ -60,6 +60,7 @@ from osis_document.contrib import FileField
 from osis_signature.contrib.fields import SignatureProcessField
 from reference.models.country import Country
 from .base import BaseAdmission, admission_directory_path
+from .enums.admission_type import AdmissionType
 
 __all__ = [
     "DoctorateAdmission",
@@ -78,6 +79,18 @@ class DoctorateAdmission(BaseAdmission):
         verbose_name=_("Doctorate"),
         related_name="+",
         on_delete=models.CASCADE,
+    )
+    type = models.CharField(
+        verbose_name=_("Type"),
+        max_length=255,
+        choices=AdmissionType.choices(),
+        db_index=True,
+        default=AdmissionType.ADMISSION.name,
+    )
+    valuated_experiences = models.ManyToManyField(
+        'osis_profile.Experience',
+        related_name='valuated_from',
+        verbose_name=_('The experiences that have been valuated from this admission.'),
     )
     proximity_commission = models.CharField(
         max_length=255,
@@ -266,11 +279,6 @@ class DoctorateAdmission(BaseAdmission):
         verbose_name=_("Other cotutelle-related documents"),
         upload_to=admission_directory_path,
     )
-
-    detailed_status = models.JSONField(
-        default=dict,
-        encoder=DjangoJSONEncoder,
-    )
     archived_record_signatures_sent = FileField(
         verbose_name=_("Archived record when signatures were sent"),
         max_files=1,
@@ -313,6 +321,15 @@ class DoctorateAdmission(BaseAdmission):
     )
 
     supervision_group = SignatureProcessField()
+
+    erasmus_mundus_scholarship = models.ForeignKey(
+        to="admission.Scholarship",
+        verbose_name=_("Erasmus Mundus scholarship"),
+        related_name="+",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+    )
 
     class Meta:
         verbose_name = _("Doctorate admission")
@@ -414,6 +431,7 @@ class PropositionManager(models.Manager):
                 "candidate__country_of_citizenship",
                 "thesis_institute",
                 "accounting",
+                "erasmus_mundus_scholarship",
             )
             .annotate(
                 code_secteur_formation=CTESubquery(sector_subqs.values("acronym")[:1]),

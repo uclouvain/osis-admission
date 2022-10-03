@@ -40,36 +40,42 @@ class FormationContinueInMemoryTranslator(IFormationContinueTranslator):
             entity_id__sigle='ECGE3DP',
             entity_id__annee=2022,
             type=TypeFormation.FORMATION_CONTINUE,
+            campus='Mons',
         ),
         FormationFactory(
             intitule='Formation ECGE3DP',
             entity_id__sigle='ECGE3DP',
             entity_id__annee=2020,
             type=TypeFormation.FORMATION_CONTINUE,
+            campus='Louvain-La-Neuve',
         ),
         FormationFactory(
             intitule='Formation ECGM3DP',
             entity_id__sigle='ECGM3DP',
             entity_id__annee=2022,
             type=TypeFormation.FORMATION_CONTINUE,
+            campus='Louvain-La-Neuve',
         ),
         FormationFactory(
             intitule='Formation AGRO3DP',
             entity_id__sigle='AGRO3DP',
             entity_id__annee=2022,
             type=TypeFormation.FORMATION_CONTINUE,
+            campus='Charleroi',
         ),
         FormationFactory(
             intitule='Formation SC3DP',
             entity_id__sigle='SC3DP',
             entity_id__annee=2022,
             type=TypeFormation.FORMATION_CONTINUE,
+            campus='Louvain-La-Neuve',
         ),
         FormationFactory(
             intitule='Formation ESP3DP',
             entity_id__sigle='ESP3DP',
             entity_id__annee=2022,
             type=TypeFormation.FORMATION_CONTINUE,
+            campus='Charleroi',
         ),
     ]
 

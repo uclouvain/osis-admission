@@ -35,7 +35,7 @@ from rest_framework.serializers import Serializer
 from rest_framework.test import APIRequestFactory, APITestCase
 from rest_framework.views import APIView
 
-from admission.api.permissions import IsListingOrHasNotAlreadyCreatedPermission
+from admission.api.permissions import IsListingOrHasNotAlreadyCreatedForDoctoratePermission
 from admission.api.serializers.fields import ActionLinksField, RelatedInstituteField, TranslatedField
 from admission.contrib.models import DoctorateAdmission
 from admission.tests.factories import DoctorateAdmissionFactory
@@ -58,7 +58,7 @@ class TestAPIDetailViewWithPermissions(APIPermissionRequiredMixin, APIView):
 
 
 class TestAPIListAndCreateViewWithPermissions(APIPermissionRequiredMixin, APIView):
-    permission_classes = [IsListingOrHasNotAlreadyCreatedPermission]
+    permission_classes = [IsListingOrHasNotAlreadyCreatedForDoctoratePermission]
 
 
 class TestAPIViewWithoutPermission(APIView):

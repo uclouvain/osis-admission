@@ -253,6 +253,9 @@ class InitierPropositionCommandSerializer(DTOSerializer):
         + ChoixSousDomaineSciences.choices(),
         allow_blank=True,
     )
+
+
+class CompleterPropositionCommandSerializer(InitierPropositionCommandSerializer):
     documents_projet = serializers.ListField(child=serializers.CharField())
     graphe_gantt = serializers.ListField(child=serializers.CharField())
     proposition_programme_doctoral = serializers.ListField(child=serializers.CharField())
@@ -268,8 +271,6 @@ class InitierPropositionCommandSerializer(DTOSerializer):
     )
     institut_these = RelatedInstituteField(required=False)
 
-
-class CompleterPropositionCommandSerializer(InitierPropositionCommandSerializer):
     class Meta:
         source = CompleterPropositionCommand
 

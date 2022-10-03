@@ -30,8 +30,12 @@ from admission.ddd.admission.formation_continue.use_case.read import *
 from admission.infrastructure.admission.domain.service.in_memory.annee_inscription_formation import (
     AnneeInscriptionFormationInMemoryTranslator,
 )
+from admission.ddd.admission.formation_continue.use_case.write import *
 from admission.infrastructure.admission.formation_continue.domain.service.in_memory.formation import (
     FormationContinueInMemoryTranslator,
+)
+from admission.infrastructure.admission.formation_continue.repository.in_memory.proposition import (
+    PropositionInMemoryRepository,
 )
 
 COMMAND_HANDLERS = {
@@ -39,5 +43,10 @@ COMMAND_HANDLERS = {
         rechercher_formations,
         formation_continue_translator=FormationContinueInMemoryTranslator(),
         annee_inscription_formation_translator=AnneeInscriptionFormationInMemoryTranslator(),
+    ),
+    InitierPropositionCommand: partial(
+        initier_proposition,
+        proposition_repository=PropositionInMemoryRepository(),
+        formation_translator=FormationContinueInMemoryTranslator(),
     ),
 }

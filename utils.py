@@ -29,7 +29,7 @@ from typing import Dict
 from django.core.cache import cache
 from rest_framework.generics import get_object_or_404
 
-from admission.contrib.models import DoctorateAdmission
+from admission.contrib.models import DoctorateAdmission, GeneralEducationAdmission, ContinuingEducationAdmission
 from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
 
 from admission.mail_templates import (
@@ -52,6 +52,23 @@ def get_cached_admission_perm_obj(admission_uuid):
         'admission_permission_{}'.format(admission_uuid),
         lambda: get_object_or_404(qs, uuid=admission_uuid),
     )
+
+
+def get_cached_general_education_admission_perm_obj(admission_uuid):
+    qs = GeneralEducationAdmission.objects.select_related('candidate')
+    return cache.get_or_set(
+        'admission_permission_{}'.format(admission_uuid),
+        lambda: get_object_or_404(qs, uuid=admission_uuid),
+    )
+
+
+def get_cached_continuing_education_admission_perm_obj(admission_uuid):
+    qs = ContinuingEducationAdmission.objects.select_related('candidate')
+    return cache.get_or_set(
+        'admission_permission_{}'.format(admission_uuid),
+        lambda: get_object_or_404(qs, uuid=admission_uuid),
+    )
+
 
 
 def gather_business_exceptions(command: QueryRequest) -> Dict[str, list]:

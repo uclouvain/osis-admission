@@ -750,6 +750,9 @@ msgstr ""
 msgid "Continuing education"
 msgstr ""
 
+msgid "Continuing education admission"
+msgstr ""
+
 msgid "Cotutelle"
 msgstr ""
 
@@ -961,6 +964,9 @@ msgstr ""
 msgid "Dossier status"
 msgstr ""
 
+msgid "Double degree scholarship"
+msgstr ""
+
 msgid "Double or triple diplomation"
 msgstr ""
 
@@ -1030,6 +1036,9 @@ msgid "Enrolments"
 msgstr ""
 
 msgid "Erasmus Mundus"
+msgstr ""
+
+msgid "Erasmus Mundus scholarship"
 msgstr ""
 
 msgid "Event description"
@@ -1126,6 +1135,9 @@ msgid "Gantt graph"
 msgstr ""
 
 msgid "General"
+msgstr ""
+
+msgid "General education admission"
 msgstr ""
 
 msgid "Generic"
@@ -1284,6 +1296,9 @@ msgid "International for doctorate"
 msgstr ""
 
 msgid "International for general education"
+msgstr ""
+
+msgid "International scholarship"
 msgstr ""
 
 msgid "Invitations have not been sent"
@@ -1615,6 +1630,9 @@ msgid "No doctorate enrolment"
 msgstr ""
 
 msgid "No doctorate found."
+msgstr ""
+
+msgid "No scholarship found."
 msgstr ""
 
 msgid "No training found."
