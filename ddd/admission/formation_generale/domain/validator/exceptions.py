@@ -30,8 +30,16 @@ from osis_common.ddd.interface import BusinessException
 
 
 class FormationNonTrouveeException(BusinessException):
-    status_code = "FORMATION_GENERALE-1"
+    status_code = "FORMATION-GENERALE-1"
 
     def __init__(self, **kwargs):
         message = _("No training found.")
+        super().__init__(message, **kwargs)
+
+
+class PropositionNonTrouveeException(BusinessException):
+    status_code = "FORMATION-GENERALE-2"
+
+    def __init__(self, **kwargs):
+        message = _("Proposition not found.")
         super().__init__(message, **kwargs)

@@ -45,30 +45,7 @@ class InitierPropositionCommand(interface.CommandRequest):
     matricule_candidat: str
     justification: Optional[str] = ''
     commission_proximite: Optional[str] = ''
-    type_financement: Optional[str] = ''
-    type_contrat_travail: Optional[str] = ''
-    eft: Optional[int] = None
-    bourse_recherche: Optional[str] = ''
-    bourse_date_debut: Optional[datetime.date] = None
-    bourse_date_fin: Optional[datetime.date] = None
-    bourse_preuve: List[str] = attr.Factory(list)
-    duree_prevue: Optional[int] = None
-    temps_consacre: Optional[int] = None
-    titre_projet: Optional[str] = ''
-    resume_projet: Optional[str] = ''
-    institut_these: Optional[str] = ''
-    lieu_these: Optional[str] = ''
-    documents_projet: List[str] = attr.Factory(list)
-    graphe_gantt: List[str] = attr.Factory(list)
-    proposition_programme_doctoral: List[str] = attr.Factory(list)
-    projet_formation_complementaire: List[str] = attr.Factory(list)
-    lettres_recommandation: List[str] = attr.Factory(list)
-    langue_redaction_these: str = ChoixLangueRedactionThese.UNDECIDED.name
-    doctorat_deja_realise: str = ChoixDoctoratDejaRealise.NO.name
-    institution: Optional[str] = ''
-    domaine_these: Optional[str] = ''
-    date_soutenance: Optional[datetime.date] = None
-    raison_non_soutenue: Optional[str] = ''
+    bourse_erasmus_mundus: Optional[str] = ''
 
 
 @attr.dataclass(frozen=True, slots=True)

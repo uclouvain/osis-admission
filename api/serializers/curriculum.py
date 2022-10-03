@@ -47,7 +47,7 @@ class ProfessionalExperienceSerializer(serializers.ModelSerializer):
     person = serializers.HiddenField(
         default=serializers.CreateOnlyDefault(GetDefaultContextParam('candidate')),
     )
-    valuated_from = DoctorateAdmissionField(many=True)
+    valuated_from_doctorateadmission = DoctorateAdmissionField(many=True)
 
     class Meta:
         model = ProfessionalExperience
@@ -65,7 +65,7 @@ class LiteProfessionalExperienceSerializer(ProfessionalExperienceSerializer):
             'start_date',
             'end_date',
             'type',
-            'valuated_from',
+            'valuated_from_doctorateadmission',
         ]
 
 
@@ -103,7 +103,7 @@ class EducationalExperienceSerializer(serializers.ModelSerializer):
         default=serializers.CreateOnlyDefault(GetDefaultContextParam('candidate')),
     )
     program = RelatedDiplomaField(required=False)
-    valuated_from = DoctorateAdmissionField(many=True)
+    valuated_from_doctorateadmission = DoctorateAdmissionField(many=True)
     institute = RelatedInstitute(required=False)
 
     YEAR_FIELDS_TO_UPDATE = [
@@ -202,7 +202,7 @@ class LiteEducationalExperienceSerializer(EducationalExperienceSerializer):
             'program',
             'education_name',
             'educationalexperienceyear_set',
-            'valuated_from',
+            'valuated_from_doctorateadmission',
         ]
 
 

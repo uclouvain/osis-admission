@@ -23,10 +23,13 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import uuid
+
 import attr
 from unittest import TestCase
 
 from admission.ddd.admission.doctorat.preparation.commands import InitierPropositionCommand
+from admission.ddd.admission.doctorat.preparation.domain.model._detail_projet import projet_non_rempli
 from admission.ddd.admission.doctorat.preparation.domain.model._experience_precedente_recherche import (
     aucune_experience_precedente_recherche,
 )
@@ -36,32 +39,35 @@ from admission.ddd.admission.doctorat.preparation.domain.model._financement impo
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixCommissionProximiteCDEouCLSM,
     ChoixCommissionProximiteCDSS,
-    ChoixDoctoratDejaRealise,
     ChoixSousDomaineSciences,
     ChoixTypeAdmission,
-    ChoixTypeFinancement,
+    ChoixStatutProposition,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     CommissionProximiteInconsistantException,
-    ContratTravailInconsistantException,
     DoctoratNonTrouveException,
-    DomaineTheseInconsistantException,
-    InstitutionInconsistanteException,
     JustificationRequiseException,
     MaximumPropositionsAtteintException,
 )
 from admission.ddd.admission.doctorat.preparation.test.factory.proposition import (
     PropositionAdmissionSC3DPMinimaleAnnuleeFactory,
 )
+from admission.ddd.admission.domain.validator.exceptions import BourseNonTrouveeException
+from admission.ddd.admission.enums.type_bourse import TypeBourse
 from admission.infrastructure.admission.doctorat.preparation.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
+from admission.infrastructure.admission.domain.service.in_memory.bourse import BourseInMemoryTranslator
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 
 
 class TestInitierPropositionService(TestCase):
+    @classmethod
+    def _get_une_bourse_par_type(cls, type_bourse: TypeBourse):
+        return next((bourse.uuid for bourse in BourseInMemoryTranslator.ENTITIES if bourse.type == type_bourse), None)
+
     def setUp(self) -> None:
         self.proposition_repository = PropositionInMemoryRepository()
         self.addCleanup(self.proposition_repository.reset)
@@ -73,14 +79,7 @@ class TestInitierPropositionService(TestCase):
             annee_formation=2020,
             matricule_candidat='01234567',
             commission_proximite=ChoixCommissionProximiteCDEouCLSM.ECONOMY.name,
-            type_financement=ChoixTypeFinancement.WORK_CONTRACT.name,
-            type_contrat_travail='assistant_uclouvain',
-            titre_projet='Mon projet',
-            resume_projet='LE résumé de mon projet',
-            documents_projet=[],
-            doctorat_deja_realise=ChoixDoctoratDejaRealise.YES.name,
-            institution="psychiatrique",
-            domaine_these="Psy",
+            bourse_erasmus_mundus=self._get_une_bourse_par_type(type_bourse=TypeBourse.ERASMUS_MUNDUS),
         )
 
         self.doctorat_non_CDE = self.doctorat_non_CDSS = 'AGRO3DP'
@@ -96,28 +95,23 @@ class TestInitierPropositionService(TestCase):
         self.assertEqual(self.cmd.sigle_formation, proposition.doctorat_id.sigle)
         self.assertEqual(self.cmd.annee_formation, proposition.doctorat_id.annee)
         self.assertEqual(self.cmd.matricule_candidat, proposition.matricule_candidat)
+        self.assertEqual(ChoixStatutProposition.IN_PROGRESS, proposition.statut)
+        self.assertEqual(self.cmd.bourse_erasmus_mundus, proposition.bourse_erasmus_mundus_id.uuid)
 
     def test_should_initier_financement(self):
         proposition_id = self.message_bus.invoke(self.cmd)
         proposition = self.proposition_repository.get(proposition_id)  # type: Proposition
-        self.assertEqual(ChoixTypeFinancement[self.cmd.type_financement], proposition.financement.type)
-        self.assertEqual(self.cmd.type_contrat_travail, proposition.financement.type_contrat_travail)
+        self.assertEqual(proposition.financement, financement_non_rempli)
 
     def test_should_initier_projet(self):
         proposition_id = self.message_bus.invoke(self.cmd)
         proposition = self.proposition_repository.get(proposition_id)  # type: Proposition
-        self.assertEqual(self.cmd.titre_projet, proposition.projet.titre)
-        self.assertEqual(self.cmd.resume_projet, proposition.projet.resume)
-        self.assertEqual(self.cmd.documents_projet, proposition.projet.documents)
+        self.assertEqual(proposition.projet, projet_non_rempli)
 
     def test_should_initier_experience_precedente(self):
         proposition_id = self.message_bus.invoke(self.cmd)
         proposition = self.proposition_repository.get(proposition_id)  # type: Proposition
-        self.assertEqual(
-            ChoixDoctoratDejaRealise[self.cmd.doctorat_deja_realise],
-            proposition.experience_precedente_recherche.doctorat_deja_realise,
-        )
-        self.assertEqual(self.cmd.institution, proposition.experience_precedente_recherche.institution)
+        self.assertEqual(proposition.experience_precedente_recherche, aucune_experience_precedente_recherche)
 
     def test_should_initier_commission_proximite_CDE_vide_et_non_CDE(self):
         cmd = attr.evolve(self.cmd, commission_proximite='', sigle_formation=self.doctorat_non_CDE)
@@ -229,63 +223,7 @@ class TestInitierPropositionService(TestCase):
             self.message_bus.invoke(cmd)
         self.assertIsInstance(e.exception.exceptions.pop(), JustificationRequiseException)
 
-    def test_should_empecher_si_doctorat_pas_deja_realise_et_institution(self):
-        cmd = attr.evolve(self.cmd, doctorat_deja_realise=ChoixDoctoratDejaRealise.NO.name, domaine_these="")
-        with self.assertRaises(MultipleBusinessExceptions) as e:
+    def test_should_empecher_si_bourse_inconnue(self):
+        cmd = attr.evolve(self.cmd, bourse_erasmus_mundus=str(uuid.uuid4()))
+        with self.assertRaises(BourseNonTrouveeException):
             self.message_bus.invoke(cmd)
-        self.assertIsInstance(e.exception.exceptions.pop(), InstitutionInconsistanteException)
-
-    def test_should_empecher_si_doctorat_deja_realise_et_institution_manquante(self):
-        cmd = attr.evolve(self.cmd, institution="")
-        with self.assertRaises(MultipleBusinessExceptions) as e:
-            self.message_bus.invoke(cmd)
-        self.assertIsInstance(e.exception.exceptions.pop(), InstitutionInconsistanteException)
-
-    def test_should_empecher_si_doctorat_pas_deja_realise_et_domaine(self):
-        cmd = attr.evolve(self.cmd, doctorat_deja_realise=ChoixDoctoratDejaRealise.NO.name, institution="")
-        with self.assertRaises(MultipleBusinessExceptions) as e:
-            self.message_bus.invoke(cmd)
-        self.assertIsInstance(e.exception.exceptions.pop(), DomaineTheseInconsistantException)
-
-    def test_should_empecher_si_doctorat_deja_realise_et_domaine_manquant(self):
-        cmd = attr.evolve(self.cmd, domaine_these="")
-        with self.assertRaises(MultipleBusinessExceptions) as e:
-            self.message_bus.invoke(cmd)
-        self.assertIsInstance(e.exception.exceptions.pop(), DomaineTheseInconsistantException)
-
-    def test_should_empecher_si_pas_contrat_travail(self):
-        cmd = attr.evolve(self.cmd, type_contrat_travail="")
-        with self.assertRaises(MultipleBusinessExceptions) as e:
-            self.message_bus.invoke(cmd)
-        self.assertIsInstance(e.exception.exceptions.pop(), ContratTravailInconsistantException)
-
-    def test_should_empecher_si_financement_pas_contrat_travail(self):
-        cmd = attr.evolve(self.cmd, type_financement=ChoixTypeFinancement.SELF_FUNDING.name)
-        with self.assertRaises(MultipleBusinessExceptions) as e:
-            self.message_bus.invoke(cmd)
-        self.assertIsInstance(e.exception.exceptions.pop(), ContratTravailInconsistantException)
-
-    def test_should_initier_sans_financement(self):
-        cmd = attr.evolve(self.cmd, type_financement='', type_contrat_travail='')
-        proposition_id = self.message_bus.invoke(cmd)
-        proposition = self.proposition_repository.get(proposition_id)  # type: Proposition
-        self.assertEqual(proposition.financement, financement_non_rempli)
-
-    def test_should_initier_sans_projet(self):
-        cmd = attr.evolve(self.cmd, titre_projet='', resume_projet='', documents_projet=[])
-        proposition_id = self.message_bus.invoke(cmd)
-        proposition = self.proposition_repository.get(proposition_id)  # type: Proposition
-        self.assertEqual(proposition.projet.titre, '')
-        self.assertEqual(proposition.projet.resume, '')
-        self.assertEqual(proposition.projet.documents, [])
-
-    def test_should_initier_sans_experience(self):
-        cmd = attr.evolve(
-            self.cmd,
-            doctorat_deja_realise=ChoixDoctoratDejaRealise.NO.name,
-            institution='',
-            domaine_these="",
-        )
-        proposition_id = self.message_bus.invoke(cmd)
-        proposition = self.proposition_repository.get(proposition_id)  # type: Proposition
-        self.assertEqual(proposition.experience_precedente_recherche, aucune_experience_precedente_recherche)

@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -24,33 +24,19 @@
 #
 ##############################################################################
 from typing import Optional, Union
-from uuid import UUID
 
 from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import PropositionIdentityBuilder
 from admission.ddd.admission.doctorat.preparation.commands import InitierPropositionCommand
-from admission.ddd.admission.doctorat.preparation.domain.model._detail_projet import (
-    DetailProjet,
-)
-from admission.ddd.admission.doctorat.preparation.domain.model._experience_precedente_recherche import (
-    ExperiencePrecedenteRecherche,
-    aucune_experience_precedente_recherche,
-)
-from admission.ddd.admission.doctorat.preparation.domain.model._financement import (
-    Financement,
-    financement_non_rempli,
-)
-from admission.ddd.admission.doctorat.preparation.domain.model._institut import InstitutIdentity
+from admission.ddd.admission.doctorat.preparation.domain.model._detail_projet import projet_non_rempli
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import DoctoratIdentity
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixCommissionProximiteCDEouCLSM,
     ChoixCommissionProximiteCDSS,
-    ChoixDoctoratDejaRealise,
-    ChoixLangueRedactionThese,
     ChoixSousDomaineSciences,
     ChoixStatutProposition,
     ChoixTypeAdmission,
-    ChoixTypeFinancement,
 )
+from admission.ddd.admission.domain.service.i_bourse import IBourseTranslator
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import (
     Proposition,
 )
@@ -76,15 +62,11 @@ class PropositionBuilder(interface.RootEntityBuilder):
         cmd: 'InitierPropositionCommand',
         doctorat_id: 'DoctoratIdentity',
         proposition_repository: 'IPropositionRepository',
+        bourse_translator: Optional['IBourseTranslator'],
     ) -> 'Proposition':
         InitierPropositionValidatorList(
             type_admission=cmd.type_admission,
             justification=cmd.justification,
-            type_financement=cmd.type_financement,
-            type_contrat_travail=cmd.type_contrat_travail,
-            doctorat_deja_realise=cmd.doctorat_deja_realise,
-            institution=cmd.institution,
-            domaine_these=cmd.domaine_these,
         ).validate()
         commission_proximite: Optional[
             Union[ChoixCommissionProximiteCDEouCLSM, ChoixCommissionProximiteCDSS, ChoixSousDomaineSciences]
@@ -99,6 +81,7 @@ class PropositionBuilder(interface.RootEntityBuilder):
             doctorat_id.annee % 100,
             Proposition.valeur_reference_base + proposition_repository.get_next_reference(),
         )
+        bourse_erasmus = bourse_translator.get(cmd.bourse_erasmus_mundus) if cmd.bourse_erasmus_mundus else None
         return Proposition(
             entity_id=PropositionIdentityBuilder.build(),
             reference=reference,
@@ -108,50 +91,6 @@ class PropositionBuilder(interface.RootEntityBuilder):
             doctorat_id=doctorat_id,
             matricule_candidat=cmd.matricule_candidat,
             commission_proximite=commission_proximite,
-            financement=_build_financement(cmd),
-            projet=_build_projet(cmd),
-            experience_precedente_recherche=_build_experience_precedente_recherche(cmd),
+            projet=projet_non_rempli,
+            bourse_erasmus_mundus_id=bourse_erasmus,
         )
-
-
-def _build_financement(cmd: 'InitierPropositionCommand') -> 'Financement':
-    if cmd.type_financement:
-        return Financement(
-            type=ChoixTypeFinancement[cmd.type_financement],
-            type_contrat_travail=cmd.type_contrat_travail,
-            eft=cmd.eft,
-            bourse_recherche=cmd.bourse_recherche,
-            bourse_date_debut=cmd.bourse_date_debut,
-            bourse_date_fin=cmd.bourse_date_fin,
-            bourse_preuve=cmd.bourse_preuve,
-            duree_prevue=cmd.duree_prevue,
-            temps_consacre=cmd.temps_consacre,
-        )
-    return financement_non_rempli
-
-
-def _build_projet(cmd: 'InitierPropositionCommand') -> 'DetailProjet':
-    return DetailProjet(
-        titre=cmd.titre_projet or '',
-        resume=cmd.resume_projet or '',
-        documents=cmd.documents_projet,
-        langue_redaction_these=ChoixLangueRedactionThese[cmd.langue_redaction_these],
-        institut_these=InstitutIdentity(UUID(cmd.institut_these)) if cmd.institut_these else None,
-        lieu_these=cmd.lieu_these or '',
-        graphe_gantt=cmd.graphe_gantt,
-        proposition_programme_doctoral=cmd.proposition_programme_doctoral,
-        projet_formation_complementaire=cmd.projet_formation_complementaire,
-        lettres_recommandation=cmd.lettres_recommandation,
-    )
-
-
-def _build_experience_precedente_recherche(cmd: 'InitierPropositionCommand') -> 'ExperiencePrecedenteRecherche':
-    if cmd.doctorat_deja_realise == ChoixDoctoratDejaRealise.NO.name:
-        return aucune_experience_precedente_recherche
-    return ExperiencePrecedenteRecherche(
-        doctorat_deja_realise=ChoixDoctoratDejaRealise[cmd.doctorat_deja_realise],
-        institution=cmd.institution,
-        domaine_these=cmd.domaine_these,
-        date_soutenance=cmd.date_soutenance,
-        raison_non_soutenue=cmd.raison_non_soutenue,
-    )

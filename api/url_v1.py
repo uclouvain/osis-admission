@@ -63,6 +63,8 @@ urlpatterns = [
     path('dashboard', views.DashboardViewSet),
     path('propositions', views.PropositionListView),
     path('supervised_propositions', views.SupervisedPropositionListView),
+    path('propositions/general_education', views.GeneralTrainingChoiceAPIView),
+    path('propositions/continuing_education', views.ContinuingTrainingChoiceAPIView),
     # Creation tabs
     _path('', include(person_tabs)),
     # Admission-related

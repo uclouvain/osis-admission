@@ -66,10 +66,10 @@ class CurriculumView(PersonRelatedMixin, APIPermissionRequiredMixin, RetrieveAPI
         """Return the experiences and the curriculum pdf of a person and the mandatory years to complete."""
         current_person = self.get_object()
         professional_experiences = ProfessionalExperience.objects.filter(person=current_person).prefetch_related(
-            'valuated_from'
+            'valuated_from_doctorateadmission'
         )
         educational_experiences = EducationalExperience.objects.filter(person=current_person).prefetch_related(
-            'valuated_from'
+            'valuated_from_doctorateadmission'
         )
 
         serializer = serializers.CurriculumSerializer(
@@ -116,7 +116,7 @@ class ExperienceViewSet(
 
     def get_queryset(self):
         return (
-            self.model.objects.filter(person=self.candidate).prefetch_related('valuated_from')
+            self.model.objects.filter(person=self.candidate).prefetch_related('valuated_from_doctorateadmission')
             if self.request
             else self.model.objects.none()
         )
@@ -142,7 +142,7 @@ class ExperienceViewSet(
         return response
 
     def update(self, request, *args, **kwargs):
-        if self.experience.valuated_from.exists():
+        if self.experience.valuated_from_doctorateadmission.exists():
             raise PermissionDenied(_("This experience cannot be updated as it has already been valuated."))
 
         response = super().update(request, *args, **kwargs)
@@ -151,7 +151,7 @@ class ExperienceViewSet(
         return response
 
     def destroy(self, request, *args, **kwargs):
-        if self.experience.valuated_from.exists():
+        if self.experience.valuated_from_doctorateadmission.exists():
             raise PermissionDenied(_("This experience cannot be updated as it has already been valuated."))
 
         response = super().destroy(request, *args, **kwargs)

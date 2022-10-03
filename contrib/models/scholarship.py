@@ -34,8 +34,7 @@ class Scholarship(models.Model):
     uuid = models.UUIDField(
         default=uuid.uuid4,
         editable=False,
-        unique=True,
-        db_index=True,
+        primary_key=True,
     )
 
     short_name = models.CharField(

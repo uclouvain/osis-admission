@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -33,6 +33,8 @@ try:
     from .task import AdmissionTask
     from .accounting import Accounting
     from .scholarship import Scholarship
+    from .continuing_education import ContinuingEducationAdmission, ContinuingEducationAdmissionProxy
+    from .general_education import GeneralEducationAdmission, GeneralEducationAdmissionProxy
 
     __all__ = [
         "DoctorateAdmission",
@@ -44,6 +46,10 @@ try:
         "AdmissionTask",
         "Accounting",
         "Scholarship",
+        "ContinuingEducationAdmission",
+        "ContinuingEducationAdmissionProxy",
+        "GeneralEducationAdmission",
+        "GeneralEducationAdmissionProxy",
     ]
 
 except RuntimeError as e:  # pragma: no cover

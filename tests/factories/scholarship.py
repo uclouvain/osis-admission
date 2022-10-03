@@ -37,12 +37,14 @@ class ScholarshipFactory(factory.DjangoModelFactory):
 
 class DoubleDegreeScholarship(factory.DjangoModelFactory):
     type = TypeBourse.DOUBLE_TRIPLE_DIPLOMATION.name
+
     class Meta:
         model = Scholarship
 
 
 class InternationalScholarship(factory.DjangoModelFactory):
     type = TypeBourse.BOURSE_INTERNATIONALE_FORMATION_GENERALE.name
+
     class Meta:
         model = Scholarship
 
@@ -56,5 +58,6 @@ class DoctorateScholarship(factory.DjangoModelFactory):
 
 class ErasmusMundusScholarship(factory.DjangoModelFactory):
     type = TypeBourse.ERASMUS_MUNDUS.name
+
     class Meta:
         model = Scholarship
