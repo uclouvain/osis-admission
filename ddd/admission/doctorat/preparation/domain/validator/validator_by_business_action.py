@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -47,12 +47,7 @@ from base.ddd.utils.business_validator import BusinessValidator, TwoStepsMultipl
 @attr.dataclass(frozen=True, slots=True)
 class InitierPropositionValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
     type_admission: str
-    type_financement: Optional[str] = ''
     justification: Optional[str] = ''
-    type_contrat_travail: Optional[str] = ''
-    doctorat_deja_realise: str = ChoixDoctoratDejaRealise.NO.name
-    institution: Optional[str] = ''
-    domaine_these: Optional[str] = ''
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
@@ -60,9 +55,6 @@ class InitierPropositionValidatorList(TwoStepsMultipleBusinessExceptionListValid
     def get_invariants_validators(self) -> List[BusinessValidator]:
         return [
             ShouldJustificationDonneeSiPreadmission(self.type_admission, self.justification),
-            ShouldTypeContratTravailDependreTypeFinancement(self.type_financement, self.type_contrat_travail),
-            ShouldInstitutionDependreDoctoratRealise(self.doctorat_deja_realise, self.institution),
-            ShouldDomaineDependreDoctoratRealise(self.doctorat_deja_realise, self.domaine_these),
         ]
 
 

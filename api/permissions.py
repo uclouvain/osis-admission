@@ -56,7 +56,7 @@ class IsSelfPersonTabOrTabPermission(BasePermission):
         return request.user.has_perm(permission, obj)
 
 
-class IsListingOrHasNotAlreadyCreatedPermission(BasePermission):
+class IsListingOrHasNotAlreadyCreatedForDoctoratePermission(BasePermission):
     def has_permission(self, request, view):
         # No object means we are either listing or creating a new admission
         if request.method in SAFE_METHODS:
@@ -67,6 +67,16 @@ class IsListingOrHasNotAlreadyCreatedPermission(BasePermission):
             .count()
         )
         return admission_count < MAXIMUM_AUTORISE
+
+
+class IsListingOrHasNotAlreadyCreatedForGeneralEducationPermission(BasePermission):
+    def has_permission(self, request, view):
+        return True
+
+
+class IsListingOrHasNotAlreadyCreatedForContinuingEducationPermission(BasePermission):
+    def has_permission(self, request, view):
+        return True
 
 
 class IsSupervisionMember(BasePermission):

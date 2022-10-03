@@ -42,7 +42,7 @@ class TestRechercherFormationService(TestCase):
         self.message_bus = message_bus_in_memory_instance
 
     @mock.patch('admission.infrastructure.admission.domain.service.in_memory.annee_inscription_formation.today')
-    def test_should_rechercher_par_intitule_formation(self, mock_today):
+    def test_should_rechercher_par_intitule_formation_et_type(self, mock_today):
         mock_today.return_value = datetime.date(2019, 11, 1)
         results = self.message_bus.invoke(self.cmd)
         self.assertEqual(results[0].sigle, 'ECGE3DP')
@@ -52,3 +52,27 @@ class TestRechercherFormationService(TestCase):
         results = self.message_bus.invoke(self.cmd)
         self.assertEqual(results[0].sigle, 'ECGE3DP')
         self.assertEqual(results[0].annee, 2022)
+
+    @mock.patch('admission.infrastructure.admission.domain.service.in_memory.annee_inscription_formation.today')
+    def test_should_rechercher_par_intitule_formation_par_type_et_par_campus(self, mock_today):
+        mock_today.return_value = datetime.date(2019, 11, 1)
+
+        # Tous les campus
+        results = self.message_bus.invoke(
+            RechercherFormationGeneraleQuery(
+                intitule_formation='ECGE3DP',
+                type_formation=TypeFormation.BACHELIER.name,
+            ),
+        )
+        self.assertEqual(len(results), 2)
+
+        # Un campus
+        results = self.message_bus.invoke(
+            RechercherFormationGeneraleQuery(
+                intitule_formation='ECGE3DP',
+                type_formation=TypeFormation.BACHELIER.name,
+                campus='Mons',
+            ),
+        )
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0].campus, 'Mons')

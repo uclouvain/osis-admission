@@ -29,6 +29,7 @@ from uuid import UUID
 
 import attr
 
+from admission.ddd.admission.dtos.bourse import BourseDTO
 from osis_common.ddd import interface
 from .comptabilite import ComptabiliteDTO
 from .doctorat import DoctoratDTO
@@ -78,3 +79,4 @@ class PropositionDTO(interface.DTO):
     modifiee_le: datetime.datetime
     erreurs: List[Dict[str, str]]
     comptabilite: ComptabiliteDTO
+    bourse_erasmus_mundus: Optional[BourseDTO]
