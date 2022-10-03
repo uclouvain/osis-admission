@@ -42,26 +42,32 @@ class DoctoratInMemoryTranslator(IDoctoratTranslator):
         DoctoratCDEFactory(
             entity_id__sigle='ECGE3DP',
             entity_id__annee=2020,
+            campus='Mons',
         ),
         DoctoratCLSMFactory(
             entity_id__sigle='ECGM3DP',
             entity_id__annee=2020,
+            campus='Mons',
         ),
         DoctoratCDSCFactory(
             entity_id__sigle='AGRO3DP',
             entity_id__annee=2020,
+            campus='Louvain-La-Neuve',
         ),
         DoctoratCDSCFactory(
             entity_id__sigle='SC3DP',
             entity_id__annee=2020,
+            campus='Mons',
         ),
         DoctoratCDSSDPFactory(
             entity_id__sigle='ESP3DP',
             entity_id__annee=2020,
+            campus='Louvain-La-Neuve',
         ),
         DoctoratCDSSDPFactory(
             entity_id__sigle='AGRO3DP',
             entity_id__annee=2022,
+            campus='Charleroi',
         ),
     ]
     sector_doctorates_mapping = {

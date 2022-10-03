@@ -800,6 +800,9 @@ msgstr "Contexte"
 msgid "Continuing education"
 msgstr "Formation continue"
 
+msgid "Continuing education admission"
+msgstr "Admission en formation continue"
+
 msgid "Cotutelle"
 msgstr "Cotutelle"
 
@@ -1014,6 +1017,9 @@ msgstr "Numéro de dossier"
 msgid "Dossier status"
 msgstr "Statut dossier"
 
+msgid "Double degree scholarship"
+msgstr "Bourse double diplomation"
+
 msgid "Double or triple diplomation"
 msgstr "Double ou triple diplomation"
 
@@ -1084,6 +1090,9 @@ msgstr "Inscriptions"
 
 msgid "Erasmus Mundus"
 msgstr "Erasmus Mundus"
+
+msgid "Erasmus Mundus scholarship"
+msgstr "Bourse Erasmus Mundus"
 
 msgid "Event description"
 msgstr "Description de l'événement"
@@ -1186,6 +1195,9 @@ msgstr "Graphe de Gantt"
 
 msgid "General"
 msgstr "Général"
+
+msgid "General education admission"
+msgstr "Admission en formation générale"
 
 msgid "Generic"
 msgstr "Générique"
@@ -1376,6 +1388,9 @@ msgstr "Internationale pour les doctorats"
 
 msgid "International for general education"
 msgstr "Internationale pour les formation générales"
+
+msgid "International scholarship"
+msgstr "Bourse internationale"
 
 msgid "Invitations have not been sent"
 msgstr "Les invitations n'ont pas été envoyées"
@@ -1792,6 +1807,9 @@ msgstr "Aucune inscription en doctorat n'a été trouvée"
 
 msgid "No doctorate found."
 msgstr "Doctorat non trouvé."
+
+msgid "No scholarship found."
+msgstr "Bourse non trouvée."
 
 msgid "No training found."
 msgstr "Formation non trouvée."

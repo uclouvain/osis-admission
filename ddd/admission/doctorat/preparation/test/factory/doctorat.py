@@ -24,6 +24,7 @@
 #
 # ##############################################################################
 
+import attr
 import factory
 
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import Doctorat, DoctoratIdentity
@@ -42,13 +43,29 @@ class _DoctoratIdentityFactory(factory.Factory):
     annee = factory.fuzzy.FuzzyInteger(1999, 2099)
 
 
+@attr.dataclass(frozen=True, slots=True)
+class DoctoratEtendu(Doctorat):
+    campus: str
+
+
 class _DoctoratFactory(factory.Factory):
     class Meta:
-        model = Doctorat
+        model = DoctoratEtendu
         abstract = False
 
     entity_id = factory.SubFactory(_DoctoratIdentityFactory)
     entite_ucl_id = factory.SubFactory(UclEntityIdentityFactory)
+    campus = factory.Iterator(
+        [
+            "Louvain-la-Neuve",
+            "Mons",
+            "Bruxelles Woluwe",
+            "Namur",
+            "Charleroi",
+            "Tournai",
+            "St-Gilles",
+        ]
+    )
 
 
 class _DoctoratDTOFactory(factory.Factory):

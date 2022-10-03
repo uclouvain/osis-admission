@@ -31,6 +31,7 @@ from admission.ddd.admission.doctorat.preparation.use_case.write import *
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
+from admission.infrastructure.admission.domain.service.bourse import BourseTranslator
 from infrastructure.shared_kernel.academic_year.repository.academic_year import AcademicYearRepository
 from .domain.service.doctorat import DoctoratTranslator
 from .domain.service.historique import Historique
@@ -47,6 +48,7 @@ COMMAND_HANDLERS = {
         initier_proposition,
         proposition_repository=PropositionRepository(),
         doctorat_translator=DoctoratTranslator(),
+        bourse_translator=BourseTranslator(),
         historique=Historique(),
     ),
     CompleterPropositionCommand: partial(

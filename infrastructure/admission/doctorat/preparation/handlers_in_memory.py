@@ -31,6 +31,7 @@ from admission.ddd.admission.doctorat.preparation.use_case.write import *
 from admission.infrastructure.admission.domain.service.in_memory.annee_inscription_formation import (
     AnneeInscriptionFormationInMemoryTranslator,
 )
+from admission.infrastructure.admission.domain.service.in_memory.bourse import BourseInMemoryTranslator
 from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
 from .domain.service.in_memory.doctorat import DoctoratInMemoryTranslator
 from .domain.service.in_memory.historique import HistoriqueInMemory
@@ -47,6 +48,7 @@ COMMAND_HANDLERS = {
         initier_proposition,
         proposition_repository=PropositionInMemoryRepository(),
         doctorat_translator=DoctoratInMemoryTranslator(),
+        bourse_translator=BourseInMemoryTranslator(),
         historique=HistoriqueInMemory(),
     ),
     CompleterPropositionCommand: partial(

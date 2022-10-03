@@ -30,7 +30,7 @@ from rest_framework.response import Response
 from rest_framework.settings import api_settings
 
 from admission.api import serializers
-from admission.api.permissions import IsListingOrHasNotAlreadyCreatedPermission, IsSupervisionMember
+from admission.api.permissions import IsListingOrHasNotAlreadyCreatedForDoctoratePermission, IsSupervisionMember
 from admission.api.schema import ResponseSpecificSchema
 from admission.contrib.models import DoctorateAdmission
 from admission.ddd.admission.doctorat.preparation.commands import (
@@ -45,10 +45,6 @@ from admission.ddd.admission.doctorat.preparation.commands import (
     VerifierPropositionCommand,
 )
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
-    CommissionProximiteInconsistantException,
-    ContratTravailInconsistantException,
-    DomaineTheseInconsistantException,
-    InstitutionInconsistanteException,
     JustificationRequiseException,
 )
 from admission.ddd.admission.doctorat.validation.commands import ApprouverDemandeCddCommand
@@ -90,14 +86,10 @@ class PropositionListView(APIPermissionRequiredMixin, DisplayExceptionsByFieldNa
     schema = PropositionListSchema()
     pagination_class = None
     filter_backends = []
-    permission_classes = [IsListingOrHasNotAlreadyCreatedPermission]
+    permission_classes = [IsListingOrHasNotAlreadyCreatedForDoctoratePermission]
 
     field_name_by_exception = {
         JustificationRequiseException: ['justification'],
-        InstitutionInconsistanteException: ['institution'],
-        DomaineTheseInconsistantException: ['domaine_these'],
-        ContratTravailInconsistantException: ['type_contrat_travail'],
-        CommissionProximiteInconsistantException: ['commission_proximite'],
     }
 
     def list(self, request, **kwargs):
