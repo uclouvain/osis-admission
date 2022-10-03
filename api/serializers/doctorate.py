@@ -55,6 +55,7 @@ class DoctorateDTOSerializer(DTOSerializer):
                 'retrieve_course_enrollment',
                 'add_training',
                 'submit_training',
+                'assent_training',
             ]
         }
     )

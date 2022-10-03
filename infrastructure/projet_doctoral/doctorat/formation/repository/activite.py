@@ -255,7 +255,7 @@ class ActiviteRepository(IActiviteRepository):
             return CoursUclDTO(
                 contexte=ContexteFormation[activity.context],
                 annee=activity.learning_unit_year.academic_year.year,
-                unite_enseignement=activity.learning_unit_year.acronym,
+                code_unite_enseignement=activity.learning_unit_year.acronym,
             )
         elif categorie == CategorieActivite.PAPER:  # pragma: no branch
             return EpreuveDTO(

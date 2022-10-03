@@ -292,7 +292,7 @@ class ComplementaryTrainingView(DoctoralTrainingActivityView):
 
 class CourseEnrollmentView(DoctoralTrainingActivityView):
     template_name = "admission/doctorate/cdd/course_enrollment.html"
-    permission_required = 'admission.view_training'
+    permission_required = 'admission.view_course_enrollment'
 
     def get_queryset(self):
         return Activity.objects.for_enrollment_courses(self.admission_uuid)

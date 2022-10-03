@@ -113,8 +113,8 @@ msgid ""
 "<a href=\"%(enrollment_url)s\">Go to course enrollment</a> or <a href="
 "\"%(add_url)s\">add a course</a>"
 msgstr ""
-"<a href=\"%(enrollment_url)s\">Aller à l'inscription aux cours</a> ou <a href="
-"\"%(add_url)s\">ajouter un cours</a>"
+"<a href=\"%(enrollment_url)s\">Aller à l'inscription aux cours</a> ou <a "
+"href=\"%(add_url)s\">ajouter un cours</a>"
 
 #, python-format
 msgid ""
@@ -175,6 +175,9 @@ msgstr "Année académique"
 
 msgid "Accept these activities"
 msgstr "Accepter ces activités"
+
+msgid "Accept these courses"
+msgstr "Accepter ces cours"
 
 msgid "Accepted"
 msgstr "Acceptée"
@@ -2032,6 +2035,9 @@ msgstr "Soumettre"
 msgid "Submit these activities"
 msgstr "Soumettre ces activités"
 
+msgid "Submit these courses"
+msgstr "Soumettre ces cours"
+
 msgid "Submitted"
 msgstr "Soumis pour publication"
 
@@ -2295,7 +2301,8 @@ msgstr "Cette activité doit être non soumise"
 msgid ""
 "This adds a \"Complementary training\" tab on admissions concerning this CDD."
 msgstr ""
-"Ceci active l'onglet \"Formation complémentaire\" sur les doctorats concernant cette CDD."
+"Ceci active l'onglet \"Formation complémentaire\" sur les doctorats "
+"concernant cette CDD."
 
 msgid "This candidate has not created any activity yet"
 msgstr "Ce candidat n'a pas encore créé d'activité"
@@ -2397,6 +2404,9 @@ msgstr "Valorisation des acquis de l'expérience"
 
 msgid "VALID"
 msgstr "Valide"
+
+msgid "Validate these courses"
+msgstr "Valider ces cours"
 
 msgid "Validated"
 msgstr "Validé"

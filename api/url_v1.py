@@ -88,8 +88,8 @@ urlpatterns = [
     path('propositions/<uuid:uuid>/training/config', views.TrainingConfigView),
     path('propositions/<uuid:uuid>/doctoral-training', views.DoctoralTrainingListView),
     path('propositions/<uuid:uuid>/training/submit', views.TrainingSubmitView),
+    path('propositions/<uuid:uuid>/training/assent', views.TrainingAssentView),
     path('propositions/<uuid:uuid>/training/<uuid:activity_id>', views.TrainingView),
-    path('propositions/<uuid:uuid>/training/<uuid:activity_id>/assent', views.TrainingAssentView),
     path('propositions/<uuid:uuid>/complementary-training', views.ComplementaryTrainingListView),
     path('propositions/<uuid:uuid>/course-enrollment', views.CourseEnrollmentListView),
     # Autocompletes

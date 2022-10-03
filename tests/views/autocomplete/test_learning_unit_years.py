@@ -23,15 +23,31 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from django.shortcuts import resolve_url
+from django.test import TestCase
 
-import attr
+from base.models.enums.learning_container_year_types import LearningContainerYearType
+from base.tests.factories.learning_unit_year import LearningUnitYearFactory
+from base.tests.factories.user import UserFactory
 
-from admission.ddd.projet_doctoral.doctorat.formation.domain.model._enums import ContexteFormation
-from osis_common.ddd import interface
 
+class AutocompleteTestCase(TestCase):
+    def test_autocomplete_learning_unit_year(self):
+        self.client.force_login(UserFactory())
+        LearningUnitYearFactory(acronym="FOOBAR1", academic_year__year=2022)
+        LearningUnitYearFactory(
+            acronym="FOOBAR2",
+            academic_year__year=2022,
+            learning_container_year__container_type=LearningContainerYearType.EXTERNAL.name,
+        )
+        url = resolve_url('admission:autocomplete:learning_unit_years')
+        data = {'forward': '{"annee": "2022"}', 'q': 'FO'}
+        response = self.client.get(url, format="json")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json()['results']), 0)
 
-@attr.dataclass(slots=True, frozen=True)
-class CoursUclDTO(interface.DTO):
-    contexte: ContexteFormation
-    annee: str = ""
-    code_unite_enseignement: str = ""
+        response = self.client.get(url, data=data, format="json")
+        self.assertEqual(response.status_code, 200)
+        results = response.json()['results']
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0]['id'], "FOOBAR1")

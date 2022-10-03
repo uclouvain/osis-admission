@@ -2540,7 +2540,7 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - propositions
-  /propositions/{uuid}/training/{activity_id}/assent:
+  /propositions/{uuid}/training/assent:
     post:
       operationId: assent_training
       description: Assent on a doctoral training activity.
@@ -2552,9 +2552,8 @@ paths:
         schema:
           type: string
       - name: activity_id
-        in: path
+        in: query
         required: true
-        description: ''
         schema:
           type: string
       - $ref: '#/components/parameters/Accept-Language'
@@ -4136,6 +4135,8 @@ components:
             add_training:
               $ref: '#/components/schemas/ActionLink'
             submit_training:
+              $ref: '#/components/schemas/ActionLink'
+            assent_training:
               $ref: '#/components/schemas/ActionLink'
           readOnly: true
           default: {}

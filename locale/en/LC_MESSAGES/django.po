@@ -147,6 +147,9 @@ msgstr ""
 msgid "Accept these activities"
 msgstr ""
 
+msgid "Accept these courses"
+msgstr ""
+
 msgid "Accepted"
 msgstr ""
 
@@ -1913,6 +1916,9 @@ msgstr ""
 msgid "Submit these activities"
 msgstr ""
 
+msgid "Submit these courses"
+msgstr ""
+
 msgid "Submitted"
 msgstr ""
 
@@ -2249,6 +2255,9 @@ msgstr "Valorisation of experience"
 
 msgid "VALID"
 msgstr "Valid"
+
+msgid "Validate these courses"
+msgstr ""
 
 msgid "Validated"
 msgstr ""

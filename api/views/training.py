@@ -99,7 +99,7 @@ class DoctoralTrainingListView(APIPermissionRequiredMixin, GenericAPIView):
     lookup_url_kwarg = 'activity_id'
     permission_mapping = {
         'GET': 'admission.view_doctoral_training',
-        'POST': 'admission.add_doctoral_training',
+        'POST': 'admission.add_training',
     }
 
     def get_permission_object(self):
@@ -131,7 +131,7 @@ class TrainingConfigView(APIPermissionRequiredMixin, RetrieveModelMixin, Generic
     serializer_class = DoctoralTrainingConfigSerializer
     lookup_field = 'uuid'
     permission_mapping = {
-        'GET': 'admission.view_doctoral_training',
+        'GET': 'admission.view_training',
     }
 
     def get_permission_object(self):
@@ -155,9 +155,9 @@ class TrainingView(APIPermissionRequiredMixin, GenericAPIView):
     lookup_field = 'uuid'
     lookup_url_kwarg = 'activity_id'
     permission_mapping = {
-        'GET': 'admission.view_doctoral_training',
-        'PUT': 'admission.view_doctoral_training',
-        'DELETE': 'admission.delete_doctoral_training',
+        'GET': 'admission.view_training',
+        'PUT': 'admission.update_training',
+        'DELETE': 'admission.delete_training',
     }
 
     def get_permission_object(self):
@@ -204,7 +204,7 @@ class TrainingSubmitView(APIPermissionRequiredMixin, GenericAPIView):
     schema = TrainingBatchSchema()
     lookup_field = 'uuid'
     permission_mapping = {
-        'POST': 'admission.submit_doctoral_training',
+        'POST': 'admission.submit_training',
     }
 
     def get_permission_object(self):
@@ -240,6 +240,17 @@ class TrainingAssentSchema(AutoSchema):
     def get_operation_id(self, path, method):
         return "assent_training"
 
+    def get_operation(self, path: str, method: str):
+        operation = super().get_operation(path, method)
+        activity_id_param = {
+            "name": 'activity_id',
+            "in": "query",
+            "required": True,
+            'schema': {'type': 'string'},
+        }
+        operation['parameters'].append(activity_id_param)
+        return operation
+
 
 class TrainingAssentView(APIPermissionRequiredMixin, GenericAPIView):
     name = "training-assent"
@@ -249,7 +260,7 @@ class TrainingAssentView(APIPermissionRequiredMixin, GenericAPIView):
     schema = TrainingAssentSchema()
     lookup_field = 'uuid'
     permission_mapping = {
-        'POST': 'admission.assent_doctoral_training',
+        'POST': 'admission.assent_training',
     }
 
     def get_permission_object(self):
@@ -261,7 +272,7 @@ class TrainingAssentView(APIPermissionRequiredMixin, GenericAPIView):
         serializer.is_valid(True)
         cmd = DonnerAvisSurActiviteCommand(
             doctorat_uuid=self.kwargs['uuid'],
-            activite_uuid=self.kwargs['activity_id'],
+            activite_uuid=self.request.GET['activity_id'],
             **serializer.data,
         )
         message_bus_instance.invoke(cmd)
@@ -271,6 +282,9 @@ class TrainingAssentView(APIPermissionRequiredMixin, GenericAPIView):
 class ComplementaryTrainingListView(DoctoralTrainingListView):
     name = "complementary-training"
     http_method_names = ['get']
+    permission_mapping = {
+        'GET': 'admission.view_complementary_training',
+    }
 
     def get_queryset(self):
         return Activity.objects.for_complementary_training(self.kwargs['uuid'])
@@ -279,6 +293,9 @@ class ComplementaryTrainingListView(DoctoralTrainingListView):
 class CourseEnrollmentListView(DoctoralTrainingListView):
     name = "course-enrollment"
     http_method_names = ['get']
+    permission_mapping = {
+        'GET': 'admission.view_course_enrollment',
+    }
 
     def get_queryset(self):
         return Activity.objects.for_enrollment_courses(self.kwargs['uuid'])

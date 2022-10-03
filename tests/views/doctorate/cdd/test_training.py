@@ -38,25 +38,11 @@ from admission.contrib.models.doctoral_training import Activity
 from admission.ddd.projet_doctoral.doctorat.formation.domain.model._enums import (
     CategorieActivite,
     ChoixComiteSelection,
+    ContexteFormation,
     StatutActivite,
 )
 from admission.forms.doctorate.training.activity import INSTITUTION_UCL
-from admission.tests.factories.activity import (
-    ActivityFactory,
-    CommunicationFactory,
-    ConferenceCommunicationFactory,
-    ConferenceFactory,
-    ConferencePublicationFactory,
-    CourseFactory,
-    PaperFactory,
-    PublicationFactory,
-    ResidencyCommunicationFactory,
-    ResidencyFactory,
-    SeminarCommunicationFactory,
-    SeminarFactory,
-    ServiceFactory,
-    VaeFactory,
-)
+from admission.tests.factories.activity import *
 from admission.tests.factories.roles import CddManagerFactory
 from admission.tests.factories.supervision import PromoterFactory
 from base.tests.factories.academic_year import AcademicYearFactory
@@ -75,6 +61,7 @@ class DoctorateTrainingActivityViewTestCase(TestCase):
         cls.namespace = 'admission:doctorate:doctoral-training'
         cls.doctorate = cls.conference.doctorate
         cls.service = ServiceFactory(doctorate=cls.doctorate)
+        cls.ucl_course = UclCourseFactory(doctorate=cls.doctorate)
         cls.manager = CddManagerFactory(entity=cls.doctorate.doctorate.management_entity)
         cls.url = resolve_url(cls.namespace, uuid=cls.doctorate.uuid)
         cls.default_url_args = dict(uuid=cls.doctorate.uuid, activity_id=cls.conference.uuid)
@@ -144,6 +131,33 @@ class DoctorateTrainingActivityViewTestCase(TestCase):
         }
         response = self.client.post(add_url, data)
         self.assertFormError(response, 'form', 'start_date', _("The start date can't be later than the end date"))
+
+    def test_complementary_training_course(self):
+        url = resolve_url(
+            f'admission:doctorate:course-enrollment:edit',
+            uuid=self.doctorate.uuid,
+            activity_id=self.ucl_course.uuid,
+        )
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = {
+            'context': ContexteFormation.COMPLEMENTARY_TRAINING.name,
+            'academic_year': self.ucl_course.learning_unit_year.academic_year.year,
+            'learning_unit_year': self.ucl_course.learning_unit_year.acronym,
+        }
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+
+    def test_ucl_course(self):
+        url = resolve_url(
+            f'admission:doctorate:complementary-training:add',
+            uuid=self.doctorate.uuid,
+            category='COURSE',
+        )
+        response = self.client.post(url, {'type': "Foobar", "organizing_institution": INSTITUTION_UCL})
+        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+        just_created = Activity.objects.first()
+        self.assertEqual(just_created.context, ContexteFormation.COMPLEMENTARY_TRAINING.name)
 
     def test_missing_form(self):
         add_url = resolve_url(f'{self.namespace}:add', uuid=self.doctorate.uuid, category='foobar')

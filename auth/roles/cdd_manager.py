@@ -91,6 +91,7 @@ class CddManager(EntityRoleModel):
             'admission.view_training': is_part_of_doctoral_commission & is_enrolled,
             'admission.view_doctoral_training': is_part_of_doctoral_commission & is_enrolled & ~is_pre_admission,
             'admission.view_complementary_training': is_part_of_doctoral_commission & complementary_training_enabled,
+            'admission.view_course_enrollment': is_part_of_doctoral_commission & is_enrolled,
             'admission.change_activity': is_part_of_doctoral_commission & is_enrolled,
             'admission.delete_activity': is_part_of_doctoral_commission & is_enrolled,
             'admission.refuse_activity': is_part_of_doctoral_commission & is_enrolled,

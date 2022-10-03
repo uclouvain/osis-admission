@@ -23,16 +23,26 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from django.http import HttpResponseBadRequest
-
-from base.models.academic_year import AcademicYear
+from base.models.enums.learning_container_year_types import LearningContainerYearType
+from ddd.logic.learning_unit.commands import LearningUnitAndPartimSearchCommand, SearchDetailClassesEffectivesCommand
+from infrastructure.messages_bus import message_bus_instance
 from learning_unit.views.autocomplete import LearningUnitYearAutoComplete
 
 
 class LearningUnitYearAutocomplete(LearningUnitYearAutoComplete):
-    def get(self, request, *args, **kwargs):
-        if not self.forwarded['academic_year']:
-            return HttpResponseBadRequest()
+    def get_list(self):
+        sigle = self.q.upper()
+        annee = self.forwarded.get('annee')
+        types_a_exclure = [LearningContainerYearType.EXTERNAL.name]
+        if not sigle or not annee:
+            return []
 
-        self.forwarded['annee'] = AcademicYear.objects.get(pk=self.forwarded['academic_year']).year
-        return super().get(request, *args, **kwargs)
+        cmd = LearningUnitAndPartimSearchCommand(annee_academique=annee, code=sigle, types_a_exclure=types_a_exclure)
+        result_unites_enseignement = message_bus_instance.invoke(cmd)
+
+        cmd = SearchDetailClassesEffectivesCommand(annee=annee, code=sigle, types_a_exclure=types_a_exclure)
+        result_classes = message_bus_instance.invoke(cmd)
+
+        full_results = result_unites_enseignement + result_classes
+
+        return sorted(full_results, key=lambda t: t.code if hasattr(t, "code") else t.code_complet_classe)

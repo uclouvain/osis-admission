@@ -23,15 +23,27 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
-import attr
-
-from admission.ddd.projet_doctoral.doctorat.formation.domain.model._enums import ContexteFormation
+from admission.ddd.projet_doctoral.doctorat.formation.domain.model._enums import CategorieActivite, StatutActivite
+from admission.ddd.projet_doctoral.doctorat.formation.domain.model.activite import Activite
+from admission.ddd.projet_doctoral.doctorat.formation.repository.i_activite import IActiviteRepository
 from osis_common.ddd import interface
 
 
-@attr.dataclass(slots=True, frozen=True)
-class CoursUclDTO(interface.DTO):
-    contexte: ContexteFormation
-    annee: str = ""
-    code_unite_enseignement: str = ""
+class RefuserActivite(interface.DomainService):
+    @classmethod
+    def refuser_activite(
+        cls,
+        activite: Activite,
+        activite_repository: IActiviteRepository,
+        avec_modification: bool,
+        remarque: str,
+    ) -> None:
+        activite.refuser(avec_modification, remarque)
+        activite_repository.save(activite)
+
+        # Refuser toutes les sous-activités
+        if activite.categorie in [CategorieActivite.CONFERENCE, CategorieActivite.RESIDENCY, CategorieActivite.SEMINAR]:
+            sous_activites = activite_repository.search(parent_id=activite.entity_id)
+            for sous_activite in sous_activites:
+                sous_activite.statut = StatutActivite.REFUSEE
+                activite_repository.save(sous_activite)

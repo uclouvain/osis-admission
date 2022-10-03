@@ -64,7 +64,7 @@ class DoctoratRepository(IDoctoratRepository):
         )
 
     @classmethod
-    def verifier_existence(cls, entity_id: 'DoctoratIdentity') -> None:
+    def verifier_existence(cls, entity_id: 'DoctoratIdentity') -> None:  # pragma: no cover
         doctorate: DoctorateProxy = DoctorateProxy.objects.filter(uuid=entity_id.uuid)
         if not doctorate:
             raise DoctoratNonTrouveException

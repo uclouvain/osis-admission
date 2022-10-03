@@ -48,7 +48,7 @@ class Promoter(ExternalActorMixin, RoleModel):
 
     @classmethod
     def rule_set(cls):
-        reference_promoter_and_enrolled = is_admission_reference_promoter & is_enrolled
+        promoter_and_enrolled = is_admission_request_promoter & is_enrolled
         rules = {
             'admission.view_doctorateadmission': is_admission_request_promoter,
             'admission.download_pdf_confirmation': is_admission_request_promoter,
@@ -70,15 +70,15 @@ class Promoter(ExternalActorMixin, RoleModel):
             'admission.approve_proposition': is_part_of_committee_and_invited,
             # Once the candidate is enrolling, a promoter can
             'admission.view_doctorateadmission_confirmation': is_admission_request_promoter & is_enrolled,
-            'admission.change_doctorateadmission_confirmation': is_admission_request_promoter
-            & confirmation_paper_in_progress,
+            'admission.change_doctorateadmission_confirmation': (
+                is_admission_request_promoter & confirmation_paper_in_progress
+            ),
             'admission.upload_pdf_confirmation': is_admission_request_promoter & is_enrolled,
             # Doctoral training
-            'admission.view_doctoral_training': reference_promoter_and_enrolled & ~is_pre_admission,
-            'admission.assent_doctoral_training': reference_promoter_and_enrolled & ~is_pre_admission,
-            'view_complementary_training': reference_promoter_and_enrolled & complementary_training_enabled,
-            'add_complementary_training': reference_promoter_and_enrolled & complementary_training_enabled,
-            'submit_complementary_training': reference_promoter_and_enrolled & complementary_training_enabled,
-            'delete_complementary_training': reference_promoter_and_enrolled & complementary_training_enabled,
+            'admission.view_doctoral_training': promoter_and_enrolled & ~is_pre_admission,
+            'admission.view_complementary_training': promoter_and_enrolled & complementary_training_enabled,
+            'admission.view_course_enrollment': promoter_and_enrolled,
+            'admission.view_training': promoter_and_enrolled,
+            'admission.assent_training': is_admission_reference_promoter & is_enrolled,
         }
         return RuleSet(rules)

@@ -44,4 +44,4 @@ class BatchActivityForm(forms.Form):
 
 
 class RefuseForm(forms.Form):
-    reason = forms.CharField(widget=forms.Textarea())
+    reason = forms.CharField(label=_("Comment"), widget=forms.Textarea())

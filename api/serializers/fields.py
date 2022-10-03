@@ -318,6 +318,11 @@ ACTION_LINKS = {
         'method': 'POST',
         'params': ['uuid'],
     },
+    'assent_training': {
+        'path_name': 'admission_api_v1:training-assent',
+        'method': 'POST',
+        'params': ['uuid'],
+    },
     'submit_training': {
         'path_name': 'admission_api_v1:training-submit',
         'method': 'POST',

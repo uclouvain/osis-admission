@@ -27,6 +27,7 @@ from django.shortcuts import resolve_url
 from rest_framework import status
 from rest_framework.test import APITestCase
 
+from admission.contrib.models.cdd_config import CddConfiguration
 from admission.contrib.models.doctoral_training import Activity
 from admission.ddd.projet_doctoral.doctorat.formation.domain.model._enums import (
     CategorieActivite,
@@ -39,7 +40,9 @@ from admission.tests.factories.activity import (
     ActivityFactory,
     ConferenceCommunicationFactory,
     ConferenceFactory,
+    CourseFactory,
     ServiceFactory,
+    UclCourseFactory,
 )
 from admission.tests.factories.roles import CandidateFactory
 from admission.tests.factories.supervision import PromoterFactory
@@ -74,6 +77,7 @@ class TrainingApiTestCase(QueriesAssertionsMixin, APITestCase):
             entity_type=EntityType.DOCTORAL_COMMISSION.name,
             acronym='CDA',
         ).entity
+        CddConfiguration.objects.create(cdd=cls.commission, is_complementary_training_enabled=True)
         cls.reference_promoter = PromoterFactory(is_reference_promoter=True)
         cls.admission = DoctorateAdmissionFactory(
             doctorate__management_entity=cls.commission,
@@ -111,6 +115,20 @@ class TrainingApiTestCase(QueriesAssertionsMixin, APITestCase):
         with self.assertNumQueriesLessThan(8):
             response = self.client.get(self.url)
         activities = response.json()
+        self.assertEqual(len(activities), 1)
+
+        CourseFactory(doctorate=self.admission, context=ContexteFormation.COMPLEMENTARY_TRAINING.name)
+        with self.assertNumQueriesLessThan(8):
+            response = self.client.get(self.complementary_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        activities = response.json()
+        self.assertEqual(len(activities), 1)
+
+        UclCourseFactory(doctorate=self.admission, context=ContexteFormation.FREE_COURSE.name)
+        with self.assertNumQueriesLessThan(8):
+            response = self.client.get(self.enrollment_url)
+        activities = response.json()
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(activities), 1)
 
     def test_training_get_with_no_role(self):
@@ -257,16 +275,12 @@ class TrainingApiTestCase(QueriesAssertionsMixin, APITestCase):
 
     def test_training_assent(self):
         self.client.force_authenticate(user=self.reference_promoter.person.user)
-        submit_url = resolve_url(
-            "admission_api_v1:training-assent",
-            uuid=self.admission.uuid,
-            activity_id=self.activity.uuid,
-        )
+        submit_url = resolve_url("admission_api_v1:training-assent", uuid=self.admission.uuid)
         data = {
             'approbation': False,
             'commentaire': 'Do not agree',
         }
-        response = self.client.post(submit_url, data)
+        response = self.client.post(f"{submit_url}?activity_id={self.activity.uuid}", data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.activity.refresh_from_db()
         self.assertEqual(self.activity.reference_promoter_comment, "Do not agree")

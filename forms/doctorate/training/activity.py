@@ -26,6 +26,7 @@
 from functools import partial
 from typing import List, Tuple
 
+import dal.forward
 from dal import autocomplete
 from django import forms
 from django.utils.translation import get_language, gettext_lazy as _, pgettext_lazy
@@ -62,7 +63,6 @@ __all__ = [
     "ComplementaryCourseForm",
     "UclCourseForm",
 ]
-
 
 INSTITUTION_UCL = "UCLouvain"
 
@@ -621,7 +621,7 @@ class PaperForm(ActivityFormMixin, forms.ModelForm):
 
 class UclCourseForm(ActivityFormMixin, forms.ModelForm):
     template_name = "admission/doctorate/forms/training/ucl_course.html"
-    academic_year = AcademicYearField(widget=autocomplete.ListSelect2())
+    academic_year = AcademicYearField(to_field_name='year', widget=autocomplete.ListSelect2())
     learning_unit_year = forms.CharField(
         widget=autocomplete.ListSelect2(
             url='admission:autocomplete:learning_unit_years',
@@ -630,13 +630,19 @@ class UclCourseForm(ActivityFormMixin, forms.ModelForm):
                 'data-minimum-input-length': 2,
                 'data-placeholder': _('Search for an EU code (outside the EU of the form)'),
             },
-            forward=["academic_year"],
+            forward=[dal.forward.Field("academic_year", "annee")],
         ),
     )
 
     def __init__(self, admission, *args, **kwargs):
         super().__init__(admission, *args, **kwargs)
         self.fields['learning_unit_year'].required = True
+        if self.initial.get('learning_unit_year'):
+            learning_unit_year = LearningUnitYear.objects.get(pk=self.initial['learning_unit_year'])
+            self.initial['academic_year'] = learning_unit_year.academic_year.year
+            self.fields['learning_unit_year'].widget.choices = [
+                (learning_unit_year.pk, f"{learning_unit_year.acronym} - {learning_unit_year.complete_title_i18n}"),
+            ]
 
     def clean(self):
         cleaned_data = super().clean()

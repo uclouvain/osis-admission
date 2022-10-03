@@ -218,7 +218,7 @@ class UclCourseDTOFactory(factory.Factory):
 
     contexte = ContexteFormation.FREE_COURSE
     annee = 2022
-    unite_enseignement = "ESA2004"
+    code_unite_enseignement = "ESA2004"
 
 
 class ActiviteIdentityFactory(factory.Factory):
