@@ -35,3 +35,14 @@ class RechercherFormationGeneraleQuery(interface.QueryRequest):
     type_formation: str
     intitule_formation: str
     campus: Optional[str] = ''
+
+
+@attr.dataclass(frozen=True, slots=True)
+class InitierPropositionCommand(interface.CommandRequest):
+    sigle_formation: str
+    annee_formation: int
+    matricule_candidat: str
+
+    bourse_double_diplome: Optional[str] = ''
+    bourse_internationale: Optional[str] = ''
+    bourse_erasmus_mundus: Optional[str] = ''

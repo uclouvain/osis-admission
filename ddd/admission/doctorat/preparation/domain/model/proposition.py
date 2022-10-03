@@ -69,6 +69,7 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.validator_by_
     CompletionPropositionValidatorList,
     ProjetDoctoralValidatorList,
 )
+from admission.ddd.admission.domain.model.bourse import BourseErasmusMundusIdentity
 from osis_common.ddd import interface
 
 
@@ -100,6 +101,7 @@ class Proposition(interface.RootEntity):
     modifiee_le: Optional[datetime.datetime] = None
     fiche_archive_signatures_envoyees: List[str] = attr.Factory(list)
     comptabilite: 'Comptabilite' = comptabilite_non_remplie
+    bourse_erasmus_mundus_id: Optional[BourseErasmusMundusIdentity] = None
 
     @property
     def sigle_formation(self):

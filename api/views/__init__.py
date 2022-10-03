@@ -40,3 +40,43 @@ from admission.api.views.doctorate import DoctorateAPIView
 from admission.api.views.training import *
 from admission.api.views.accounting import AccountingView
 from admission.api.views.references import RetrieveScholarshipView, RetrieveCampusView, ListCampusView
+from admission.api.views.training_choice import ContinuingTrainingChoiceAPIView, GeneralTrainingChoiceAPIView
+
+__all__ = [
+    "CoordonneesViewSet",
+    "CurriculumView",
+    "EducationalExperienceViewSet",
+    "ProfessionalExperienceViewSet",
+    "CurriculumFileView",
+    "PersonViewSet",
+    "PropositionViewSet",
+    "PropositionListView",
+    "VerifyProjectView",
+    "SubmitPropositionViewSet",
+    "SecondaryStudiesViewSet",
+    "AutocompleteDoctoratView",
+    "AutocompleteGeneralEducationView",
+    "AutocompleteContinuingEducationView",
+    "AutocompleteSectorView",
+    "AutocompleteTutorView",
+    "AutocompletePersonView",
+    "CotutelleAPIView",
+    "SupervisionAPIView",
+    "RequestSignaturesAPIView",
+    "LanguagesKnowledgeViewSet",
+    "ApprovePropositionAPIView",
+    "ApproveByPdfPropositionAPIView",
+    "DashboardViewSet",
+    "ConfirmationAPIView",
+    "LastConfirmationAPIView",
+    "LastConfirmationCanvasAPIView",
+    "SupervisedConfirmationAPIView",
+    "DoctorateAPIView",
+    "DoctoralTrainingListView",
+    "AutocompleteScholarshipView",
+    "ListCampusView",
+    "RetrieveScholarshipView",
+    "RetrieveCampusView",
+    "GeneralTrainingChoiceAPIView",
+    "ContinuingTrainingChoiceAPIView",
+]

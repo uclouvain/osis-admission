@@ -2465,7 +2465,7 @@ paths:
       - name: uuid
         in: path
         required: true
-        description: ''
+        description: A UUID string identifying this Bourse.
         schema:
           type: string
       - $ref: '#/components/parameters/Accept-Language'
@@ -2546,6 +2546,66 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - campus
+  /propositions/general_education:
+    post:
+      operationId: create_general_training_choice
+      description: ''
+      parameters:
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InitierPropositionGeneraleCommand'
+      responses:
+        201:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PropositionIdentityDTO'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
+  /propositions/continuing_education:
+    post:
+      operationId: create_continuing_training_choice
+      description: ''
+      parameters:
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InitierPropositionContinueCommand'
+      responses:
+        201:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PropositionIdentityDTO'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
   /curriculum/educational:
     post:
       operationId: create_educational_experience
@@ -3719,7 +3779,7 @@ components:
                 format: date
               type:
                 $ref: '#/components/schemas/ActivityType'
-              valuated_from:
+              valuated_from_doctorateadmission:
                 type: array
                 items:
                   type: string
@@ -3758,7 +3818,7 @@ components:
                       nullable: true
                   required:
                   - academic_year
-              valuated_from:
+              valuated_from_doctorateadmission:
                 type: array
                 items:
                   type: string
@@ -3828,7 +3888,7 @@ components:
         program:
           type: string
           nullable: true
-        valuated_from:
+        valuated_from_doctorateadmission:
           type: array
           items:
             type: string
@@ -3941,7 +4001,7 @@ components:
     ProfessionalExperience:
       type: object
       properties:
-        valuated_from:
+        valuated_from_doctorateadmission:
           type: array
           items:
             type: string
@@ -5967,77 +6027,7 @@ components:
           type: string
         commission_proximite:
           $ref: '#/components/schemas/ChoixCommissionProximite'
-        type_financement:
-          type: string
-        type_contrat_travail:
-          type: string
-        eft:
-          type: integer
-          nullable: true
-        bourse_recherche:
-          type: string
-        bourse_date_debut:
-          type: string
-          format: date
-          nullable: true
-        bourse_date_fin:
-          type: string
-          format: date
-          nullable: true
-        bourse_preuve:
-          type: array
-          items:
-            type: string
-        duree_prevue:
-          type: integer
-          nullable: true
-        temps_consacre:
-          type: integer
-          nullable: true
-        titre_projet:
-          type: string
-        resume_projet:
-          type: string
-        institut_these:
-          type: string
-          nullable: true
-        lieu_these:
-          type: string
-        documents_projet:
-          type: array
-          items:
-            type: string
-        graphe_gantt:
-          type: array
-          items:
-            type: string
-        proposition_programme_doctoral:
-          type: array
-          items:
-            type: string
-        projet_formation_complementaire:
-          type: array
-          items:
-            type: string
-        lettres_recommandation:
-          type: array
-          items:
-            type: string
-        langue_redaction_these:
-          $ref: '#/components/schemas/ChoixLangueRedactionThese'
-          default: UNDECIDED
-        doctorat_deja_realise:
-          $ref: '#/components/schemas/ChoixDoctoratDejaRealise'
-          default: 'NO'
-        institution:
-          type: string
-        domaine_these:
-          type: string
-        date_soutenance:
-          type: string
-          format: date
-          nullable: true
-        raison_non_soutenue:
+        bourse_erasmus_mundus:
           type: string
       required:
       - type_admission
@@ -6045,12 +6035,6 @@ components:
       - annee_formation
       - matricule_candidat
       - commission_proximite
-      - bourse_preuve
-      - documents_projet
-      - graphe_gantt
-      - proposition_programme_doctoral
-      - projet_formation_complementaire
-      - lettres_recommandation
     AdmissionType:
       enum:
       - ADMISSION
@@ -6076,19 +6060,38 @@ components:
       - BIOLOGY
       - GEOGRAPHY
       type: string
-    ChoixLangueRedactionThese:
-      enum:
-      - FRENCH
-      - ENGLISH
-      - OTHER
-      - UNDECIDED
-      type: string
-    ChoixDoctoratDejaRealise:
-      enum:
-      - 'YES'
-      - 'NO'
-      - PARTIAL
-      type: string
+    InitierPropositionGeneraleCommand:
+      type: object
+      properties:
+        sigle_formation:
+          type: string
+        annee_formation:
+          type: integer
+        matricule_candidat:
+          type: string
+        bourse_double_diplome:
+          type: string
+        bourse_internationale:
+          type: string
+        bourse_erasmus_mundus:
+          type: string
+      required:
+      - sigle_formation
+      - annee_formation
+      - matricule_candidat
+    InitierPropositionContinueCommand:
+      type: object
+      properties:
+        sigle_formation:
+          type: string
+        annee_formation:
+          type: integer
+        matricule_candidat:
+          type: string
+      required:
+      - sigle_formation
+      - annee_formation
+      - matricule_candidat
     SupervisionActor:
       type: object
       properties:
@@ -6264,6 +6267,19 @@ components:
       - proposition_programme_doctoral
       - projet_formation_complementaire
       - lettres_recommandation
+    ChoixLangueRedactionThese:
+      enum:
+      - FRENCH
+      - ENGLISH
+      - OTHER
+      - UNDECIDED
+      type: string
+    ChoixDoctoratDejaRealise:
+      enum:
+      - 'YES'
+      - 'NO'
+      - PARTIAL
+      type: string
     DefinirCotutelleCommand:
       type: object
       properties:

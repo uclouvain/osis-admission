@@ -24,6 +24,7 @@
 #
 # ##############################################################################
 import datetime
+import uuid
 from unittest import mock
 from unittest.mock import patch
 
@@ -50,12 +51,14 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
     PromoteurManquantException,
 )
 from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixStatutCDD
+from admission.ddd.admission.domain.validator.exceptions import BourseNonTrouveeException
 from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
 from admission.tests import QueriesAssertionsMixin
 from admission.tests.factories import DoctorateAdmissionFactory, WriteTokenFactory
 from admission.tests.factories.doctorate import DoctorateFactory
 from admission.tests.factories.person import CompletePersonFactory
 from admission.tests.factories.roles import CandidateFactory, CddManagerFactory
+from admission.tests.factories.scholarship import ScholarshipFactory, ErasmusMundusScholarship
 from admission.tests.factories.supervision import CaMemberFactory, PromoterFactory, _ProcessFactory
 from base.models.enums.community import CommunityEnum
 from base.models.enums.entity_type import EntityType
@@ -229,9 +232,7 @@ class DoctorateAdmissionCreationApiTestCase(APITestCase):
             acronym='CDA',
         ).entity
         cls.doctorate = DoctorateFactory(management_entity=cls.commission)
-        cls.institute = EntityVersionFactory(
-            entity_type=EntityType.INSTITUTE.name,
-        )
+        cls.scholarship = ErasmusMundusScholarship()
 
         cls.create_data = {
             "type_admission": AdmissionType.PRE_ADMISSION.name,
@@ -240,13 +241,7 @@ class DoctorateAdmissionCreationApiTestCase(APITestCase):
             "annee_formation": cls.doctorate.academic_year.year,
             "matricule_candidat": cls.candidate.global_id,
             "commission_proximite": '',
-            "bourse_preuve": [],
-            "documents_projet": [],
-            "graphe_gantt": [],
-            "proposition_programme_doctoral": [],
-            "projet_formation_complementaire": [],
-            "lettres_recommandation": [],
-            "institut_these": str(cls.institute.uuid),
+            "bourse_erasmus_mundus": cls.scholarship.uuid,
         }
         cls.url = resolve_url("admission_api_v1:propositions")
 
@@ -259,6 +254,7 @@ class DoctorateAdmissionCreationApiTestCase(APITestCase):
         admission = admissions.get(uuid=response.data["uuid"])
         self.assertEqual(admission.type, self.create_data["type_admission"])
         self.assertEqual(admission.comment, self.create_data["justification"])
+        self.assertEqual(admission.erasmus_mundus_scholarship_id, self.scholarship.pk)
 
         response = self.client.get(self.url, format="json")
         self.assertEqual(response.json()['propositions'][0]["doctorat"]['sigle'], self.doctorate.acronym)
@@ -276,6 +272,13 @@ class DoctorateAdmissionCreationApiTestCase(APITestCase):
         response = self.client.post(self.url, data=data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.json()['non_field_errors'][0]['status_code'], DoctoratNonTrouveException.status_code)
+
+    def test_admission_doctorate_creation_using_api_with_wrong_scholarship(self):
+        self.client.force_authenticate(user=self.candidate.user)
+        data = {**self.create_data, 'bourse_erasmus_mundus': str(uuid.uuid4())}
+        response = self.client.post(self.url, data=data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.json()['non_field_errors'][0]['status_code'], BourseNonTrouveeException.status_code)
 
     def test_user_not_logged_assert_not_authorized(self):
         self.client.force_authenticate(user=None)

@@ -34,3 +34,10 @@ from osis_common.ddd import interface
 class RechercherFormationContinueQuery(interface.QueryRequest):
     intitule_formation: str
     campus: Optional[str] = ''
+
+
+@attr.dataclass(frozen=True, slots=True)
+class InitierPropositionCommand(interface.CommandRequest):
+    sigle_formation: str
+    annee_formation: int
+    matricule_candidat: str

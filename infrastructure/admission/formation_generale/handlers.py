@@ -30,7 +30,10 @@ from admission.ddd.admission.formation_generale.use_case.read import *
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
+from admission.ddd.admission.formation_generale.use_case.write import *
+from admission.infrastructure.admission.domain.service.bourse import BourseTranslator
 from admission.infrastructure.admission.formation_generale.domain.service.formation import FormationGeneraleTranslator
+from admission.infrastructure.admission.formation_generale.repository.proposition import PropositionRepository
 
 COMMAND_HANDLERS = {
     RechercherFormationGeneraleQuery: partial(
@@ -38,4 +41,10 @@ COMMAND_HANDLERS = {
         formation_generale_translator=FormationGeneraleTranslator(),
         annee_inscription_formation_translator=AnneeInscriptionFormationTranslator(),
     ),
+    InitierPropositionCommand: partial(
+        initier_proposition,
+        proposition_repository=PropositionRepository(),
+        formation_translator=FormationGeneraleTranslator(),
+        bourse_translator=BourseTranslator(),
+    )
 }
