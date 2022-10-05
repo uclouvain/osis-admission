@@ -23,31 +23,15 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import Optional
+from typing import List
 
-import attr
-
-from osis_common.ddd import interface
-
-
-@attr.dataclass(frozen=True, slots=True, auto_attribs=True)
-class RechercherFormationGeneraleQuery(interface.QueryRequest):
-    type_formation: str
-    intitule_formation: str
-    campus: Optional[str] = ''
+from admission.ddd.admission.formation_generale.commands import ListerPropositionsCandidatQuery
+from admission.ddd.admission.formation_generale.dtos import PropositionDTO
+from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
 
 
-@attr.dataclass(frozen=True, slots=True)
-class InitierPropositionCommand(interface.CommandRequest):
-    sigle_formation: str
-    annee_formation: int
-    matricule_candidat: str
-
-    bourse_double_diplome: Optional[str] = ''
-    bourse_internationale: Optional[str] = ''
-    bourse_erasmus_mundus: Optional[str] = ''
-
-
-@attr.dataclass(frozen=True, slots=True)
-class ListerPropositionsCandidatQuery(interface.QueryRequest):
-    matricule_candidat: str
+def lister_propositions_candidat(
+    cmd: 'ListerPropositionsCandidatQuery',
+    proposition_repository: 'IPropositionRepository',
+) -> List['PropositionDTO']:
+    return proposition_repository.search_dto(matricule_candidat=cmd.matricule_candidat)

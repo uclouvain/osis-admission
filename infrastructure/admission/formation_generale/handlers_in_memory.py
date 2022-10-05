@@ -51,4 +51,8 @@ COMMAND_HANDLERS = {
         formation_translator=FormationGeneraleInMemoryTranslator(),
         bourse_translator=BourseInMemoryTranslator(),
     ),
+    ListerPropositionsCandidatQuery: partial(
+        lister_propositions_candidat,
+        proposition_repository=PropositionInMemoryRepository(),
+    ),
 }

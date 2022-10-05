@@ -37,16 +37,20 @@ from admission.ddd.admission.doctorat.preparation.commands import (
     CompleterPropositionCommand,
     GetPropositionCommand,
     InitierPropositionCommand,
-    ListerPropositionsCandidatQuery,
+    ListerPropositionsCandidatQuery as ListerPropositionsDoctoralesCandidatQuery,
     ListerPropositionsSuperviseesQuery,
     SoumettrePropositionCommand,
     SupprimerPropositionCommand,
     VerifierProjetCommand,
     VerifierPropositionCommand,
 )
-from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
-    JustificationRequiseException,
+from admission.ddd.admission.formation_continue.commands import (
+    ListerPropositionsCandidatQuery as ListerPropositionsFormationContinueCandidatQuery,
 )
+from admission.ddd.admission.formation_generale.commands import (
+    ListerPropositionsCandidatQuery as ListerPropositionsFormationGeneraleCandidatQuery,
+)
+from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import JustificationRequiseException
 from admission.ddd.admission.doctorat.validation.commands import ApprouverDemandeCddCommand
 from admission.utils import gather_business_exceptions, get_cached_admission_perm_obj
 from backoffice.settings.rest_framework.common_views import DisplayExceptionsByFieldNameAPIMixin
@@ -94,15 +98,25 @@ class PropositionListView(APIPermissionRequiredMixin, DisplayExceptionsByFieldNa
 
     def list(self, request, **kwargs):
         """List the propositions of the logged in user"""
-        proposition_list = message_bus_instance.invoke(
-            ListerPropositionsCandidatQuery(matricule_candidat=request.user.person.global_id),
+        candidate_global_id = request.user.person.global_id
+
+        doctorate_list, general_education_list, continuing_education_list = message_bus_instance.invoke_multiple(
+            [
+                ListerPropositionsDoctoralesCandidatQuery(matricule_candidat=candidate_global_id),
+                ListerPropositionsFormationGeneraleCandidatQuery(matricule_candidat=candidate_global_id),
+                ListerPropositionsFormationContinueCandidatQuery(matricule_candidat=candidate_global_id),
+            ]
         )
+
         serializer = serializers.PropositionSearchSerializer(
             instance={
-                "propositions": proposition_list,
+                "doctorate_propositions": doctorate_list,
+                "general_education_propositions": general_education_list,
+                "continuing_education_propositions": continuing_education_list,
             },
             context=self.get_serializer_context(),
         )
+
         return Response(serializer.data)
 
     def create(self, request, **kwargs):
@@ -118,7 +132,7 @@ class PropositionListView(APIPermissionRequiredMixin, DisplayExceptionsByFieldNa
 class SupervisedPropositionListSchema(ResponseSpecificSchema):
     operation_id_base = '_supervised_propositions'
     serializer_mapping = {
-        'GET': serializers.PropositionSearchDTOSerializer,
+        'GET': serializers.DoctoratePropositionSearchDTOSerializer,
     }
 
 
@@ -134,7 +148,7 @@ class SupervisedPropositionListView(APIPermissionRequiredMixin, ListAPIView):
         proposition_list = message_bus_instance.invoke(
             ListerPropositionsSuperviseesQuery(matricule_membre=request.user.person.global_id),
         )
-        serializer = serializers.PropositionSearchDTOSerializer(
+        serializer = serializers.DoctoratePropositionSearchDTOSerializer(
             instance=proposition_list,
             context=self.get_serializer_context(),
             many=True,

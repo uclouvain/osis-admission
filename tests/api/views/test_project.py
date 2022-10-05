@@ -55,10 +55,12 @@ from admission.ddd.admission.domain.validator.exceptions import BourseNonTrouvee
 from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
 from admission.tests import QueriesAssertionsMixin
 from admission.tests.factories import DoctorateAdmissionFactory, WriteTokenFactory
+from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
 from admission.tests.factories.doctorate import DoctorateFactory
+from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.person import CompletePersonFactory
 from admission.tests.factories.roles import CandidateFactory, CddManagerFactory
-from admission.tests.factories.scholarship import ScholarshipFactory, ErasmusMundusScholarship
+from admission.tests.factories.scholarship import ErasmusMundusScholarship
 from admission.tests.factories.supervision import CaMemberFactory, PromoterFactory, _ProcessFactory
 from base.models.enums.community import CommunityEnum
 from base.models.enums.entity_type import EntityType
@@ -98,6 +100,12 @@ class DoctorateAdmissionListApiTestCase(APITestCase):
         cls.other_admission = DoctorateAdmissionFactory(
             status=ChoixStatutProposition.IN_PROGRESS.name,
         )
+        cls.general_education_admission = GeneralEducationAdmissionFactory(
+            candidate=cls.admission.candidate,
+        )
+        cls.continuing_education_admission = ContinuingEducationAdmissionFactory(
+            candidate=cls.admission.candidate,
+        )
         # Users
         cls.candidate = cls.admission.candidate
         cls.other_candidate = cls.other_admission.candidate
@@ -125,6 +133,65 @@ class DoctorateAdmissionListApiTestCase(APITestCase):
             },
         )
 
+        # Check general education propositions
+        self.assertTrue('general_education_propositions' in response.data)
+        self.assertEqual(len(response.data['general_education_propositions']), 1)
+        general_education_proposition = response.data['general_education_propositions'][0]
+        self.assertEqual(general_education_proposition['uuid'], str(self.general_education_admission.uuid))
+        self.assertEqual(
+            general_education_proposition['formation'],
+            {
+                'sigle': self.general_education_admission.training.acronym,
+                'annee': self.general_education_admission.training.academic_year.year,
+                'intitule': self.general_education_admission.training.title,
+                'campus': self.general_education_admission.training.enrollment_campus.name,
+            },
+        )
+        self.assertEqual(
+            general_education_proposition['matricule_candidat'],
+            self.general_education_admission.candidate.global_id,
+        )
+        self.assertEqual(
+            general_education_proposition['prenom_candidat'],
+            self.general_education_admission.candidate.first_name,
+        )
+        self.assertEqual(
+            general_education_proposition['nom_candidat'],
+            self.general_education_admission.candidate.last_name,
+        )
+        self.assertEqual(general_education_proposition['statut'], ChoixStatutProposition.IN_PROGRESS.name)
+        self.assertEqual(general_education_proposition['links'], {})
+
+        # Check continuing education propositions
+        self.assertTrue('continuing_education_propositions' in response.data)
+        self.assertEqual(len(response.data['continuing_education_propositions']), 1)
+        continuing_education_proposition = response.data['continuing_education_propositions'][0]
+        self.assertEqual(continuing_education_proposition['uuid'], str(self.continuing_education_admission.uuid))
+        self.assertEqual(
+            continuing_education_proposition['formation'],
+            {
+                'sigle': self.continuing_education_admission.training.acronym,
+                'annee': self.continuing_education_admission.training.academic_year.year,
+                'intitule': self.continuing_education_admission.training.title,
+                'campus': self.continuing_education_admission.training.enrollment_campus.name,
+            },
+        )
+        self.assertEqual(
+            continuing_education_proposition['matricule_candidat'],
+            self.continuing_education_admission.candidate.global_id,
+        )
+        self.assertEqual(
+            continuing_education_proposition['prenom_candidat'],
+            self.continuing_education_admission.candidate.first_name,
+        )
+        self.assertEqual(
+            continuing_education_proposition['nom_candidat'],
+            self.continuing_education_admission.candidate.last_name,
+        )
+        self.assertEqual(continuing_education_proposition['statut'], ChoixStatutProposition.IN_PROGRESS.name)
+        self.assertEqual(continuing_education_proposition['links'], {})
+
+    def test_list_propositions_other_candidate(self):
         # Check proposition links
         self.client.force_authenticate(user=self.other_candidate.user)
 
@@ -132,10 +199,10 @@ class DoctorateAdmissionListApiTestCase(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
 
-        self.assertTrue('propositions' in response.data)
-        self.assertEqual(len(response.data['propositions']), 1)
+        self.assertTrue('doctorate_propositions' in response.data)
+        self.assertEqual(len(response.data['doctorate_propositions']), 1)
 
-        first_proposition = response.data['propositions'][0]
+        first_proposition = response.data['doctorate_propositions'][0]
 
         self.assertTrue('links' in first_proposition)
         allowed_actions = [
@@ -257,7 +324,7 @@ class DoctorateAdmissionCreationApiTestCase(APITestCase):
         self.assertEqual(admission.erasmus_mundus_scholarship_id, self.scholarship.pk)
 
         response = self.client.get(self.url, format="json")
-        self.assertEqual(response.json()['propositions'][0]["doctorat"]['sigle'], self.doctorate.acronym)
+        self.assertEqual(response.json()['doctorate_propositions'][0]["doctorat"]['sigle'], self.doctorate.acronym)
         self.assertEqual(
             admission.reference,
             '{}-{}'.format(

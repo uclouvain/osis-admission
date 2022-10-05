@@ -31,6 +31,8 @@ from admission.ddd.admission.formation_generale.domain.model.proposition import 
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import PropositionNonTrouveeException
 from admission.ddd.admission.formation_generale.dtos import PropositionDTO
 from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
+from admission.ddd.admission.formation_generale.test.factory.proposition import PropositionFactory
+from admission.ddd.admission.test.factory.formation import _FormationIdentityFactory
 from admission.infrastructure.admission.domain.service.in_memory.bourse import BourseInMemoryTranslator
 from base.ddd.utils.in_memory_repository import InMemoryGenericRepository
 
@@ -78,16 +80,34 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
         return proposition
 
     @classmethod
+    def search_dto(cls, matricule_candidat: Optional[str] = '') -> List['PropositionDTO']:
+        propositions = [
+            cls._load_dto(proposition)
+            for proposition in cls.entities
+            if proposition.matricule_candidat == matricule_candidat
+        ]
+        return propositions
+
+    @classmethod
     def reset(cls):
-        cls.entities = []
+        cls.entities = [
+            PropositionFactory(
+                matricule_candidat='0123456789',
+                formation_id=_FormationIdentityFactory(sigle="SC3DP", annee=2020),
+                bourse_double_diplome_id=BourseInMemoryTranslator.bourse_dd_1.entity_id,
+                bourse_erasmus_mundus_id=BourseInMemoryTranslator.bourse_em_1.entity_id,
+                bourse_internationale_id=BourseInMemoryTranslator.bourse_ifg_1.entity_id,
+            ),
+            PropositionFactory(
+                matricule_candidat='0000000001',
+                formation_id=_FormationIdentityFactory(sigle="ECGE3DP", annee=2020),
+                bourse_erasmus_mundus_id=BourseInMemoryTranslator.bourse_em_1.entity_id,
+            ),
+        ]
 
     @classmethod
     def get_dto(cls, entity_id: 'PropositionIdentity') -> 'PropositionDTO':
         return cls._load_dto(cls.get(entity_id))
-
-    @classmethod
-    def search_dto(cls, matricule_candidat: Optional[str] = '') -> List['PropositionDTO']:
-        raise NotImplementedError
 
     @classmethod
     def _load_dto(cls, proposition: Proposition) -> PropositionDTO:
@@ -112,10 +132,10 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
             bourse_double_diplome=BourseInMemoryTranslator.get_dto(proposition.bourse_double_diplome_id.uuid)
             if proposition.bourse_double_diplome_id
             else None,
-            bourse_internationale=BourseInMemoryTranslator.get_dto(proposition.bourse_erasmus_mundus_id.uuid)
+            bourse_erasmus_mundus=BourseInMemoryTranslator.get_dto(proposition.bourse_erasmus_mundus_id.uuid)
             if proposition.bourse_erasmus_mundus_id
             else None,
-            bourse_erasmus_mundus=BourseInMemoryTranslator.get_dto(proposition.bourse_internationale_id.uuid)
+            bourse_internationale=BourseInMemoryTranslator.get_dto(proposition.bourse_internationale_id.uuid)
             if proposition.bourse_internationale_id
             else None,
         )

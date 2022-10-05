@@ -49,4 +49,8 @@ COMMAND_HANDLERS = {
         proposition_repository=PropositionInMemoryRepository(),
         formation_translator=FormationContinueInMemoryTranslator(),
     ),
+    ListerPropositionsCandidatQuery: partial(
+        lister_propositions_candidat,
+        proposition_repository=PropositionInMemoryRepository(),
+    ),
 }
