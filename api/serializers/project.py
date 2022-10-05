@@ -29,17 +29,15 @@ from rest_framework import serializers
 from admission.api.serializers.fields import ACTION_LINKS, ActionLinksField, RelatedInstituteField
 from admission.api.serializers.mixins import IncludedFieldsMixin
 from admission.contrib.models import AdmissionType, DoctorateAdmission
-from admission.ddd.projet_doctoral.preparation.commands import CompleterPropositionCommand, InitierPropositionCommand
-from admission.ddd.projet_doctoral.preparation.domain.model._detail_projet import ChoixLangueRedactionThese
-from admission.ddd.projet_doctoral.preparation.domain.model._enums import (
+from admission.ddd.admission.doctorat.preparation.commands import CompleterPropositionCommand, InitierPropositionCommand
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixCommissionProximiteCDEouCLSM,
     ChoixCommissionProximiteCDSS,
+    ChoixDoctoratDejaRealise,
+    ChoixLangueRedactionThese,
     ChoixSousDomaineSciences,
 )
-from admission.ddd.projet_doctoral.preparation.domain.model._experience_precedente_recherche import (
-    ChoixDoctoratDejaRealise,
-)
-from admission.ddd.projet_doctoral.preparation.dtos import DoctoratDTO, PropositionDTO
+from admission.ddd.admission.doctorat.preparation.dtos import DoctoratDTO, PropositionDTO
 from base.utils.serializers import DTOSerializer
 
 __all__ = [

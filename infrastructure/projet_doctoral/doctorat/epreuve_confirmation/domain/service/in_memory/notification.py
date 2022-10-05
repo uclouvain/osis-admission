@@ -23,10 +23,10 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.domain.model.epreuve_confirmation import (
+from admission.ddd.parcours_doctoral.epreuve_confirmation.domain.model.epreuve_confirmation import (
     EpreuveConfirmation,
 )
-from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.domain.service.i_notification import INotification
+from admission.ddd.parcours_doctoral.epreuve_confirmation.domain.service.i_notification import INotification
 
 
 class NotificationInMemory(INotification):

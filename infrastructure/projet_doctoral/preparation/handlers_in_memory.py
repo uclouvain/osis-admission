@@ -25,9 +25,9 @@
 ##############################################################################
 from functools import partial
 
-from admission.ddd.projet_doctoral.preparation.commands import *
-from admission.ddd.projet_doctoral.preparation.use_case.read import *
-from admission.ddd.projet_doctoral.preparation.use_case.write import *
+from admission.ddd.admission.doctorat.preparation.commands import *
+from admission.ddd.admission.doctorat.preparation.use_case.read import *
+from admission.ddd.admission.doctorat.preparation.use_case.write import *
 from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
 from .domain.service.in_memory.doctorat import DoctoratInMemoryTranslator
 from .domain.service.in_memory.historique import HistoriqueInMemory

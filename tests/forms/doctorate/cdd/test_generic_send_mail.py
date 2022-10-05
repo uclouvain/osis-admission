@@ -28,7 +28,7 @@ from typing import Optional
 from django.test import TestCase
 from django.utils.translation import gettext as _
 
-from admission.ddd.projet_doctoral.preparation.domain.model.doctorat import ENTITY_CDE
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
 from admission.forms.doctorate.cdd.generic_send_mail import SelectCddEmailTemplateForm, BaseEmailTemplateForm
 from admission.mail_templates import ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_FAILURE_STUDENT
 from admission.tests.factories import DoctorateAdmissionFactory
@@ -112,7 +112,6 @@ class SelectCddEmailTemplateFormTestCase(TestCase):
 
 
 class BaseEmailTemplateFormTestCase(TestCase):
-
     def test_form_validation_with_no_data(self):
         form = BaseEmailTemplateForm(
             data={},

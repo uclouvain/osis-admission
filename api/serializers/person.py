@@ -27,14 +27,12 @@
 from django.db import models
 from rest_framework import serializers
 
-from admission.ddd.projet_doctoral.preparation.domain.validator._should_identification_candidat_etre_completee import (
-    BE_ISO_CODE,
-)
+from admission.ddd.admission.doctorat.preparation.domain.validator import _should_identification_candidat_etre_completee
 from base.api.serializers.academic_year import RelatedAcademicYearField
 from base.models.enums.person_address_type import PersonAddressType
+from base.models.person import Person
 from base.models.person_address import PersonAddress
 from reference.api.serializers.country import RelatedCountryField
-from base.models.person import Person
 
 __all__ = [
     "PersonIdentificationSerializer",
@@ -55,7 +53,7 @@ class PersonIdentificationSerializer(serializers.ModelSerializer):
         instance.resides_in_belgium = PersonAddress.objects.filter(
             person=instance,
             label=PersonAddressType.RESIDENTIAL.name,
-            country__iso_code=BE_ISO_CODE,
+            country__iso_code=_should_identification_candidat_etre_completee.BE_ISO_CODE,
         ).exists()
 
     def to_representation(self, instance):

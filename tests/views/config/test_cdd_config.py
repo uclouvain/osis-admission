@@ -30,7 +30,7 @@ from django.utils.translation import gettext_lazy as _
 from rest_framework import status
 
 from admission.contrib.models.cdd_config import CddConfiguration
-from admission.ddd.projet_doctoral.doctorat.formation.domain.model._enums import CategorieActivite
+from admission.ddd.parcours_doctoral.formation.domain.model.enums import CategorieActivite
 from admission.tests.factories.roles import CddManagerFactory
 from base.tests.factories.person import SuperUserPersonFactory
 

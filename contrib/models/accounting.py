@@ -28,15 +28,16 @@ from django.utils.translation import gettext_lazy as _
 from osis_document.contrib import FileField
 
 from admission.contrib.models import DoctorateAdmission
-from admission.ddd.projet_doctoral.preparation.domain.model._comptabilite import (
-    TypeSituationAssimilation,
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    ChoixAffiliationSport,
     ChoixAssimilation1,
     ChoixAssimilation2,
     ChoixAssimilation3,
     ChoixAssimilation5,
     ChoixAssimilation6,
-    ChoixAffiliationSport,
-    ChoixTypeCompteBancaire, LienParente,
+    ChoixTypeCompteBancaire,
+    LienParente,
+    TypeSituationAssimilation,
 )
 
 
@@ -173,7 +174,7 @@ class Accounting(models.Model):
         choices=LienParente.choices(),
         default='',
         max_length=32,
-        verbose_name=_('Relationship')
+        verbose_name=_('Relationship'),
     )
     assimilation_5_situation_type = models.CharField(
         blank=False,

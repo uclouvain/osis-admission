@@ -26,7 +26,7 @@
 from django.urls import reverse
 from django.views.generic import FormView
 
-from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.commands import (
+from admission.ddd.parcours_doctoral.epreuve_confirmation.commands import (
     SoumettreAvisProlongationCommand,
 )
 from admission.forms.doctorate.extension_request import ExtensionRequestForm

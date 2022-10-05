@@ -27,26 +27,26 @@ from typing import List
 
 from admission.contrib.models import DoctorateAdmission
 from admission.contrib.models.doctorate import ConfirmationPaper
-from admission.ddd.projet_doctoral.doctorat.builder.doctorat_identity import DoctoratIdentityBuilder
-from admission.ddd.projet_doctoral.doctorat.domain.model.doctorat import DoctoratIdentity
-from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.builder.epreuve_confirmation_identity import (
+from admission.ddd.parcours_doctoral.builder.doctorat_identity import DoctoratIdentityBuilder
+from admission.ddd.parcours_doctoral.domain.model.doctorat import DoctoratIdentity
+from admission.ddd.parcours_doctoral.epreuve_confirmation.builder.epreuve_confirmation_identity import (
     EpreuveConfirmationIdentityBuilder,
 )
-from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.domain.model._demande_prolongation import (
+from admission.ddd.parcours_doctoral.epreuve_confirmation.domain.model._demande_prolongation import (
     DemandeProlongation,
 )
-from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.domain.model.epreuve_confirmation import (
+from admission.ddd.parcours_doctoral.epreuve_confirmation.domain.model.epreuve_confirmation import (
     EpreuveConfirmationIdentity,
     EpreuveConfirmation,
 )
-from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.dtos import (
+from admission.ddd.parcours_doctoral.epreuve_confirmation.dtos import (
     EpreuveConfirmationDTO,
     DemandeProlongationDTO,
 )
-from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.repository.i_epreuve_confirmation import (
+from admission.ddd.parcours_doctoral.epreuve_confirmation.repository.i_epreuve_confirmation import (
     IEpreuveConfirmationRepository,
 )
-from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.validators.exceptions import (
+from admission.ddd.parcours_doctoral.epreuve_confirmation.validators.exceptions import (
     EpreuveConfirmationNonTrouveeException,
 )
 

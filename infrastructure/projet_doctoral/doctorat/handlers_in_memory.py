@@ -25,9 +25,9 @@
 ##############################################################################
 from functools import partial
 
-from admission.ddd.projet_doctoral.doctorat.commands import *
-from admission.ddd.projet_doctoral.doctorat.use_case.read import *
-from admission.ddd.projet_doctoral.doctorat.use_case.write import *
+from admission.ddd.parcours_doctoral.commands import *
+from admission.ddd.parcours_doctoral.use_case.read import *
+from admission.ddd.parcours_doctoral.use_case.write import *
 from .domain.service.in_memory.historique import HistoriqueInMemory
 from .domain.service.in_memory.notification import NotificationInMemory
 from .repository.in_memory.doctorat import DoctoratInMemoryRepository

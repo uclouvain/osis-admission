@@ -26,12 +26,12 @@
 
 from django.test import TestCase
 
-from admission.ddd.projet_doctoral.preparation.domain.model._enums import (
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixCommissionProximiteCDEouCLSM,
     ChoixCommissionProximiteCDSS,
     ChoixSousDomaineSciences,
 )
-from admission.ddd.projet_doctoral.preparation.domain.model.doctorat import (
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import (
     ENTITY_CDE,
     ENTITY_CDSS,
     ENTITY_CLSM,

@@ -29,15 +29,16 @@ from typing import List, Optional
 from django.contrib.auth.models import User
 from django.test import RequestFactory, TestCase
 from django.urls import reverse
+from rest_framework import status
 
 from admission.contrib.models import DoctorateAdmission
 from admission.contrib.models.doctorate import InternalNote
-from admission.ddd.projet_doctoral.preparation.domain.model._enums import ChoixTypeAdmission
-from admission.ddd.projet_doctoral.preparation.domain.model._financement import (
-    ChoixTypeFinancement,
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE, ENTITY_CDSS
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    ChoixTypeAdmission,
     ChoixTypeContratTravail,
+    ChoixTypeFinancement,
 )
-from admission.ddd.projet_doctoral.preparation.domain.model.doctorat import ENTITY_CDE, ENTITY_CDSS
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.internal_note import InternalNoteFactory
 from admission.tests.factories.roles import CddManagerFactory, DoctorateReaderRoleFactory
@@ -133,43 +134,45 @@ class InternalNoteTestCase(TestCase):
     def test_get_with_user_without_person_is_forbidden(self):
         self.client.force_login(user=self.user)
         response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_get_with_candidate_user_is_forbidden(self):
         self.client.force_login(user=self.first_admission.candidate.user)
         response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_get_with_doctorate_reader_is_allowed(self):
         self.client.force_login(user=self.doctorate_reader_user)
         response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_post_with_doctorate_reader_is_forbidden(self):
         self.client.force_login(user=self.doctorate_reader_user)
         response = self.client.post(self.url)
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_get_with_cdd_user_retrieves_previous_notes(self):
         self.client.force_login(user=self.one_cdd_user)
         response = self.client.get(self.url)
 
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         internal_notes = response.context.get('internal_notes')
 
         self.assertEqual(len(internal_notes), 2)
-        self.assertEqual(internal_notes[0], {
+        first_note = {
             'author__first_name': self.first_admission_note_2.author.first_name,
             'author__last_name': self.first_admission_note_2.author.last_name,
             'created': self.first_admission_note_2.created,
             'text': self.first_admission_note_2.text,
-        })
-        self.assertEqual(internal_notes[1], {
+        }
+        self.assertEqual(internal_notes[0], first_note)
+        second_note = {
             'author__first_name': self.first_admission_note_1.author.first_name,
             'author__last_name': self.first_admission_note_1.author.last_name,
             'created': self.first_admission_note_1.created,
             'text': self.first_admission_note_1.text,
-        })
+        }
+        self.assertEqual(internal_notes[1], second_note)
 
         self.assertIn('form', response.context.keys())
 
@@ -193,4 +196,3 @@ class InternalNoteTestCase(TestCase):
         self.assertEqual(len(internal_notes), 3)
         self.assertEqual(internal_notes[0].author, self.one_cdd_user.person)
         self.assertEqual(internal_notes[0].text, 'A fantastic text')
-

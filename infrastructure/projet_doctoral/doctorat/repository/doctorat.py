@@ -29,12 +29,12 @@ from django.conf import settings
 from django.utils.translation import get_language
 
 from admission.contrib.models.doctorate import DoctorateProxy, DoctorateAdmission
-from admission.ddd.projet_doctoral.doctorat.domain.model._formation import FormationIdentity
-from admission.ddd.projet_doctoral.doctorat.domain.model.doctorat import DoctoratIdentity, Doctorat
-from admission.ddd.projet_doctoral.doctorat.domain.model.enums import ChoixStatutDoctorat
-from admission.ddd.projet_doctoral.doctorat.domain.validator.exceptions import DoctoratNonTrouveException
-from admission.ddd.projet_doctoral.doctorat.dtos import DoctoratDTO
-from admission.ddd.projet_doctoral.doctorat.repository.i_doctorat import IDoctoratRepository
+from admission.ddd.parcours_doctoral.domain.model._formation import FormationIdentity
+from admission.ddd.parcours_doctoral.domain.model.doctorat import DoctoratIdentity, Doctorat
+from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
+from admission.ddd.parcours_doctoral.domain.validator.exceptions import DoctoratNonTrouveException
+from admission.ddd.parcours_doctoral.dtos import DoctoratDTO
+from admission.ddd.parcours_doctoral.repository.i_doctorat import IDoctoratRepository
 from base.models.student import Student
 from osis_common.ddd.interface import EntityIdentity, RootEntity, ApplicationService
 

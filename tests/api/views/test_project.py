@@ -34,23 +34,23 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from admission.contrib.models import AdmissionType, DoctorateAdmission
-from admission.ddd.projet_doctoral.doctorat.domain.model.enums import ChoixStatutDoctorat
-from admission.ddd.projet_doctoral.preparation.domain.model._detail_projet import ChoixLangueRedactionThese
-from admission.ddd.projet_doctoral.preparation.domain.model._enums import (
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixCommissionProximiteCDEouCLSM,
     ChoixCommissionProximiteCDSS,
+    ChoixLangueRedactionThese,
     ChoixSousDomaineSciences,
     ChoixStatutProposition,
+    ChoixTypeFinancement,
 )
-from admission.ddd.projet_doctoral.preparation.domain.model._financement import ChoixTypeFinancement
-from admission.ddd.projet_doctoral.preparation.domain.validator.exceptions import (
+from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
+    AbsenceDeDetteNonCompleteeException,
     DoctoratNonTrouveException,
     MembreCAManquantException,
     PromoteurDeReferenceManquantException,
     PromoteurManquantException,
-    AbsenceDeDetteNonCompleteeException,
 )
-from admission.ddd.projet_doctoral.validation.domain.model._enums import ChoixStatutCDD
+from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixStatutCDD
+from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
 from admission.tests import QueriesAssertionsMixin
 from admission.tests.factories import DoctorateAdmissionFactory, WriteTokenFactory
 from admission.tests.factories.doctorate import DoctorateFactory
@@ -59,14 +59,12 @@ from admission.tests.factories.roles import CandidateFactory, CddManagerFactory
 from admission.tests.factories.supervision import CaMemberFactory, PromoterFactory, _ProcessFactory
 from base.models.enums.community import CommunityEnum
 from base.models.enums.entity_type import EntityType
-from base.models.person import Person
 from base.tests.factories.academic_year import AcademicYearFactory, get_current_year
 from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.organization import OrganizationFactory
 from base.tests.factories.person import PersonFactory
-from osis_signature.enums import SignatureState
-
 from osis_profile.tests.factories.curriculum import EducationalExperienceFactory, EducationalExperienceYearFactory
+from osis_signature.enums import SignatureState
 from reference.tests.factories.country import CountryFactory
 
 

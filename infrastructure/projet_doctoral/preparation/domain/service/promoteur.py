@@ -28,10 +28,10 @@ from typing import List
 from django.utils.translation import get_language, gettext_lazy as _
 
 from admission.auth.roles.promoter import Promoter
-from admission.ddd.projet_doctoral.preparation.domain.model._promoteur import PromoteurIdentity
-from admission.ddd.projet_doctoral.preparation.domain.service.i_promoteur import IPromoteurTranslator
-from admission.ddd.projet_doctoral.preparation.domain.validator.exceptions import PromoteurNonTrouveException
-from admission.ddd.projet_doctoral.preparation.dtos import PromoteurDTO
+from admission.ddd.admission.doctorat.preparation.domain.model._promoteur import PromoteurIdentity
+from admission.ddd.admission.doctorat.preparation.domain.service.i_promoteur import IPromoteurTranslator
+from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import PromoteurNonTrouveException
+from admission.ddd.admission.doctorat.preparation.dtos import PromoteurDTO
 from base.auth.roles.tutor import Tutor
 
 

@@ -33,22 +33,19 @@ from rest_framework.status import HTTP_200_OK
 from rest_framework.test import APITestCase
 
 from admission.contrib.models import Accounting
-from admission.ddd.projet_doctoral.doctorat.domain.model.enums import ChoixStatutDoctorat
-from admission.ddd.projet_doctoral.preparation.domain.model._comptabilite import (
-    TypeSituationAssimilation,
+from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    ChoixAffiliationSport,
     ChoixAssimilation1,
-    ChoixTypeCompteBancaire,
     ChoixAssimilation2,
     ChoixAssimilation3,
-    LienParente,
     ChoixAssimilation5,
     ChoixAssimilation6,
-    ChoixAffiliationSport,
-)
-from admission.ddd.projet_doctoral.preparation.domain.model._enums import (
     ChoixStatutProposition,
+    ChoixTypeCompteBancaire,
+    LienParente,
+    TypeSituationAssimilation,
 )
-from admission.ddd.projet_doctoral.preparation.domain.service.i_profil_candidat import IProfilCandidatTranslator
 
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.roles import CddManagerFactory

@@ -28,10 +28,10 @@ from typing import List
 from django.utils.translation import get_language, gettext_lazy as _
 
 from admission.auth.roles.ca_member import CommitteeMember
-from admission.ddd.projet_doctoral.preparation.domain.model._membre_CA import MembreCAIdentity
-from admission.ddd.projet_doctoral.preparation.domain.service.i_membre_CA import IMembreCATranslator
-from admission.ddd.projet_doctoral.preparation.domain.validator.exceptions import MembreCANonTrouveException
-from admission.ddd.projet_doctoral.preparation.dtos import MembreCADTO
+from admission.ddd.admission.doctorat.preparation.domain.model._membre_CA import MembreCAIdentity
+from admission.ddd.admission.doctorat.preparation.domain.service.i_membre_CA import IMembreCATranslator
+from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import MembreCANonTrouveException
+from admission.ddd.admission.doctorat.preparation.dtos import MembreCADTO
 from base.models.person import Person
 
 

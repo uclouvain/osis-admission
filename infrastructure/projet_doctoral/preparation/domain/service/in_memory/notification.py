@@ -25,11 +25,11 @@
 # ##############################################################################
 from typing import Union
 
-from admission.ddd.projet_doctoral.preparation.domain.model._membre_CA import MembreCAIdentity
-from admission.ddd.projet_doctoral.preparation.domain.model._promoteur import PromoteurIdentity
-from admission.ddd.projet_doctoral.preparation.domain.model.proposition import Proposition
-from admission.ddd.projet_doctoral.preparation.domain.service.i_notification import INotification
-from admission.ddd.projet_doctoral.preparation.dtos import AvisDTO
+from admission.ddd.admission.doctorat.preparation.domain.model._membre_CA import MembreCAIdentity
+from admission.ddd.admission.doctorat.preparation.domain.model._promoteur import PromoteurIdentity
+from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition
+from admission.ddd.admission.doctorat.preparation.domain.service.i_notification import INotification
+from admission.ddd.admission.doctorat.preparation.dtos import AvisDTO
 
 
 class NotificationInMemory(INotification):

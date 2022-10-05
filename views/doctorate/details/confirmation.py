@@ -28,9 +28,9 @@ from typing import List
 from django.http import Http404
 from django.views.generic import TemplateView
 
-from admission.ddd.projet_doctoral.doctorat.domain.validator.exceptions import DoctoratNonTrouveException
-from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.commands import RecupererEpreuvesConfirmationQuery
-from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.dtos import EpreuveConfirmationDTO
+from admission.ddd.parcours_doctoral.domain.validator.exceptions import DoctoratNonTrouveException
+from admission.ddd.parcours_doctoral.epreuve_confirmation.commands import RecupererEpreuvesConfirmationQuery
+from admission.ddd.parcours_doctoral.epreuve_confirmation.dtos import EpreuveConfirmationDTO
 from admission.mail_templates import ADMISSION_EMAIL_CONFIRMATION_PAPER_INFO_STUDENT
 from admission.views.doctorate.mixins import LoadDossierViewMixin
 from infrastructure.messages_bus import message_bus_instance

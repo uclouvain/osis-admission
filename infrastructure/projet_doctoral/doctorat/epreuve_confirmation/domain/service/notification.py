@@ -43,13 +43,13 @@ from osis_notification.contrib.notification import EmailNotification, WebNotific
 from admission.auth.roles.cdd_manager import CddManager
 from admission.contrib.models import AdmissionTask, DoctorateAdmission
 from admission.contrib.models.doctorate import DoctorateProxy
-from admission.ddd.projet_doctoral.doctorat.domain.model.enums import ChoixStatutDoctorat
-from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.domain.model.epreuve_confirmation import (
+from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
+from admission.ddd.parcours_doctoral.epreuve_confirmation.domain.model.epreuve_confirmation import (
     EpreuveConfirmation,
 )
-from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.domain.service.i_notification import INotification
-from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.dtos import EpreuveConfirmationDTO
-from admission.ddd.projet_doctoral.preparation.domain.model._financement import ChoixTypeFinancement, BourseRecherche
+from admission.ddd.parcours_doctoral.epreuve_confirmation.domain.service.i_notification import INotification
+from admission.ddd.parcours_doctoral.epreuve_confirmation.dtos import EpreuveConfirmationDTO
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixTypeFinancement, BourseRecherche
 from admission.mail_templates import (
     ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_SUCCESS_STUDENT,
     ADMISSION_EMAIL_CONFIRMATION_PAPER_SUBMISSION_ADRE,
@@ -63,7 +63,6 @@ from admission.mail_templates import (
 from osis_notification.contrib.handlers import EmailNotificationHandler, WebNotificationHandler
 
 from base.forms.utils.datefield import DATE_FORMAT
-from reference.services.mandates import MandatesService, MandateFunctionEnum, MandatesException
 from osis_common.messaging.message_config import create_receiver
 
 

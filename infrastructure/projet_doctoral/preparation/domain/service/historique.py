@@ -28,12 +28,12 @@ from typing import Union
 from django.conf import settings
 from django.utils import translation
 
-from admission.ddd.projet_doctoral.preparation.domain.model._membre_CA import MembreCAIdentity
-from admission.ddd.projet_doctoral.preparation.domain.model._promoteur import PromoteurIdentity
-from admission.ddd.projet_doctoral.preparation.domain.model.groupe_de_supervision import GroupeDeSupervision
-from admission.ddd.projet_doctoral.preparation.domain.model.proposition import Proposition
-from admission.ddd.projet_doctoral.preparation.domain.service.i_historique import IHistorique
-from admission.ddd.projet_doctoral.preparation.dtos import AvisDTO
+from admission.ddd.admission.doctorat.preparation.domain.model._membre_CA import MembreCAIdentity
+from admission.ddd.admission.doctorat.preparation.domain.model._promoteur import PromoteurIdentity
+from admission.ddd.admission.doctorat.preparation.domain.model.groupe_de_supervision import GroupeDeSupervision
+from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition
+from admission.ddd.admission.doctorat.preparation.domain.service.i_historique import IHistorique
+from admission.ddd.admission.doctorat.preparation.dtos import AvisDTO
 from infrastructure.shared_kernel.personne_connue_ucl.personne_connue_ucl import PersonneConnueUclTranslator
 from osis_history.utilities import add_history_entry
 

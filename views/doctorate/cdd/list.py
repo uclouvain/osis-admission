@@ -31,7 +31,7 @@ from django.utils.translation import gettext as _
 from django.views.generic import ListView
 
 from admission.auth.roles.cdd_manager import CddManager
-from admission.ddd.projet_doctoral.validation.commands import FiltrerDemandesQuery
+from admission.ddd.admission.doctorat.validation.commands import FiltrerDemandesQuery
 from admission.forms.doctorate.cdd.filter import CddFilterForm, BaseFilterForm
 from base.utils.htmx import HtmxMixin
 from infrastructure.messages_bus import message_bus_instance

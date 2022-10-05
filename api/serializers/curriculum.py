@@ -29,20 +29,13 @@ from rest_framework import serializers
 
 from admission.api.serializers.fields import DoctorateAdmissionField
 from admission.api.serializers.mixins import GetDefaultContextParam
-from admission.ddd.projet_doctoral.preparation.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.infrastructure.projet_doctoral.preparation.domain.service.profil_candidat import ProfilCandidatTranslator
 from base.api.serializers.academic_year import RelatedAcademicYearField
 from base.models.academic_year import current_academic_year
 from base.models.enums.establishment_type import EstablishmentTypeEnum
 from base.models.organization import Organization
 from base.models.person import Person
-from osis_profile.models import (
-    ProfessionalExperience,
-    EducationalExperience,
-    EducationalExperienceYear,
-    BelgianHighSchoolDiploma,
-    ForeignHighSchoolDiploma,
-)
+from osis_profile.models import EducationalExperience, EducationalExperienceYear, ProfessionalExperience
 from reference.api.serializers.country import RelatedCountryField
 from reference.api.serializers.language import RelatedLanguageField
 from reference.models.diploma_title import DiplomaTitle

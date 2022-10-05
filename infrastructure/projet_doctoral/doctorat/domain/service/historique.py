@@ -29,8 +29,8 @@ from django.conf import settings
 from django.utils import translation
 from django.utils.translation import gettext_lazy as _
 
-from admission.ddd.projet_doctoral.doctorat.domain.model.doctorat import Doctorat
-from admission.ddd.projet_doctoral.doctorat.domain.service.i_historique import IHistorique
+from admission.ddd.parcours_doctoral.domain.model.doctorat import Doctorat
+from admission.ddd.parcours_doctoral.domain.service.i_historique import IHistorique
 from infrastructure.shared_kernel.personne_connue_ucl.personne_connue_ucl import PersonneConnueUclTranslator
 from osis_history.utilities import add_history_entry
 

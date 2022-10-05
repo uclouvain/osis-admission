@@ -30,15 +30,15 @@ from unittest.mock import patch
 
 from django.test import TestCase, override_settings
 from django.urls import reverse
-from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_403_FORBIDDEN, HTTP_302_FOUND, HTTP_200_OK
+from rest_framework.status import HTTP_302_FOUND, HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND
 
 from admission.contrib.models import ConfirmationPaper
-from admission.ddd.projet_doctoral.preparation.domain.model._enums import ChoixTypeAdmission
-from admission.ddd.projet_doctoral.preparation.domain.model._financement import (
-    ChoixTypeFinancement,
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    ChoixTypeAdmission,
     ChoixTypeContratTravail,
+    ChoixTypeFinancement,
 )
-from admission.ddd.projet_doctoral.preparation.domain.model.doctorat import ENTITY_CDE
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.confirmation_paper import ConfirmationPaperFactory
 from admission.tests.factories.roles import CddManagerFactory

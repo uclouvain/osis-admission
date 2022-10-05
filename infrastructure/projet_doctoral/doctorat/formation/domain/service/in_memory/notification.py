@@ -25,10 +25,10 @@
 # ##############################################################################
 from typing import List
 
-from admission.ddd.projet_doctoral.doctorat.domain.model.doctorat import Doctorat
-from admission.ddd.projet_doctoral.doctorat.formation.domain.model.activite import Activite
-from admission.ddd.projet_doctoral.doctorat.formation.domain.service.i_notification import INotification
-from admission.ddd.projet_doctoral.preparation.domain.model._promoteur import PromoteurIdentity
+from admission.ddd.parcours_doctoral.domain.model.doctorat import Doctorat
+from admission.ddd.parcours_doctoral.formation.domain.model.activite import Activite
+from admission.ddd.parcours_doctoral.formation.domain.service.i_notification import INotification
+from admission.ddd.admission.doctorat.preparation.domain.model._promoteur import PromoteurIdentity
 
 
 class NotificationInMemory(INotification):

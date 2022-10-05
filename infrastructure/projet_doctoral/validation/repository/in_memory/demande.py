@@ -25,11 +25,11 @@
 # ##############################################################################
 from typing import List, Optional
 
-from admission.ddd.projet_doctoral.validation.domain.model.demande import Demande, DemandeIdentity
-from admission.ddd.projet_doctoral.validation.domain.validator.exceptions import DemandeNonTrouveeException
-from admission.ddd.projet_doctoral.validation.dtos import DemandeDTO, DemandeRechercheDTO, ProfilCandidatDTO
-from admission.ddd.projet_doctoral.validation.repository.i_demande import IDemandeRepository
-from admission.ddd.projet_doctoral.validation.test.factory.demande import (
+from admission.ddd.admission.doctorat.validation.domain.model.demande import Demande, DemandeIdentity
+from admission.ddd.admission.doctorat.validation.domain.validator.exceptions import DemandeNonTrouveeException
+from admission.ddd.admission.doctorat.validation.dtos import DemandeDTO, DemandeRechercheDTO, ProfilCandidatDTO
+from admission.ddd.admission.doctorat.validation.repository.i_demande import IDemandeRepository
+from admission.ddd.admission.doctorat.validation.test.factory.demande import (
     DemandeAdmissionSC3DPMinimaleFactory,
     DemandePreAdmissionSC3DPAvecPromoteursEtMembresCADejaApprouvesAccepteeFactory,
     DemandeAdmissionSC3DPAvecPromoteurRefuseEtMembreCADejaApprouveFactoryRejeteeCDDFactory,

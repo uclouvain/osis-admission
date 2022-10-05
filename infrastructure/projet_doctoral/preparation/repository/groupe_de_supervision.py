@@ -30,27 +30,29 @@ from admission.auth.roles.ca_member import CommitteeMember
 from admission.auth.roles.promoter import Promoter
 from admission.contrib.models import DoctorateAdmission, SupervisionActor
 from admission.contrib.models.enums.actor_type import ActorType
-from admission.ddd.projet_doctoral.doctorat.domain.model.doctorat import DoctoratIdentity
-from admission.ddd.projet_doctoral.preparation.builder.proposition_identity_builder import PropositionIdentityBuilder
-from admission.ddd.projet_doctoral.preparation.domain.model._cotutelle import Cotutelle, pas_de_cotutelle
-from admission.ddd.projet_doctoral.preparation.domain.model._enums import (
+from admission.ddd.parcours_doctoral.domain.model.doctorat import DoctoratIdentity
+from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import PropositionIdentityBuilder
+from admission.ddd.admission.doctorat.preparation.domain.model._cotutelle import Cotutelle, pas_de_cotutelle
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    ChoixEtatSignature,
     ChoixStatutProposition,
     ChoixStatutSignatureGroupeDeSupervision,
 )
-from admission.ddd.projet_doctoral.preparation.domain.model._membre_CA import MembreCAIdentity
-from admission.ddd.projet_doctoral.preparation.domain.model._promoteur import PromoteurIdentity
-from admission.ddd.projet_doctoral.preparation.domain.model._signature_membre_CA import SignatureMembreCA
-from admission.ddd.projet_doctoral.preparation.domain.model._signature_promoteur import (
-    ChoixEtatSignature,
+from admission.ddd.admission.doctorat.preparation.domain.model._membre_CA import MembreCAIdentity
+from admission.ddd.admission.doctorat.preparation.domain.model._promoteur import PromoteurIdentity
+from admission.ddd.admission.doctorat.preparation.domain.model._signature_membre_CA import SignatureMembreCA
+from admission.ddd.admission.doctorat.preparation.domain.model._signature_promoteur import (
     SignaturePromoteur,
 )
-from admission.ddd.projet_doctoral.preparation.domain.model.groupe_de_supervision import (
+from admission.ddd.admission.doctorat.preparation.domain.model.groupe_de_supervision import (
     GroupeDeSupervision,
     GroupeDeSupervisionIdentity,
 )
-from admission.ddd.projet_doctoral.preparation.domain.model.proposition import PropositionIdentity
-from admission.ddd.projet_doctoral.preparation.dtos import CotutelleDTO
-from admission.ddd.projet_doctoral.preparation.repository.i_groupe_de_supervision import IGroupeDeSupervisionRepository
+from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity
+from admission.ddd.admission.doctorat.preparation.dtos import CotutelleDTO
+from admission.ddd.admission.doctorat.preparation.repository.i_groupe_de_supervision import (
+    IGroupeDeSupervisionRepository,
+)
 from base.models.person import Person
 from osis_signature.models import Process, StateHistory
 
