@@ -115,7 +115,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/PropositionSearchDTO'
+                  $ref: '#/components/schemas/DoctoratePropositionSearchDTO'
           description: ''
         '400':
           $ref: '#/components/responses/BadRequest'
@@ -3054,7 +3054,7 @@ components:
               $ref: '#/components/schemas/ActionLink'
           readOnly: true
           default: {}
-        propositions:
+        doctorate_propositions:
           type: array
           items:
             type: object
@@ -3166,9 +3166,105 @@ components:
             - intitule_secteur_formation
             - creee_le
             - statut
+        general_education_propositions:
+          type: array
+          items:
+            type: object
+            properties:
+              uuid:
+                type: string
+              formation:
+                type: object
+                properties:
+                  sigle:
+                    type: string
+                  annee:
+                    type: integer
+                  intitule:
+                    type: string
+                  campus:
+                    type: string
+                required:
+                - sigle
+                - annee
+                - intitule
+                - campus
+              matricule_candidat:
+                type: string
+              prenom_candidat:
+                type: string
+              nom_candidat:
+                type: string
+              creee_le:
+                type: string
+                format: date-time
+              statut:
+                type: string
+              links:
+                type: object
+                properties: {}
+                readOnly: true
+                default: {}
+            required:
+            - uuid
+            - formation
+            - matricule_candidat
+            - prenom_candidat
+            - nom_candidat
+            - creee_le
+            - statut
+        continuing_education_propositions:
+          type: array
+          items:
+            type: object
+            properties:
+              uuid:
+                type: string
+              formation:
+                type: object
+                properties:
+                  sigle:
+                    type: string
+                  annee:
+                    type: integer
+                  intitule:
+                    type: string
+                  campus:
+                    type: string
+                required:
+                - sigle
+                - annee
+                - intitule
+                - campus
+              matricule_candidat:
+                type: string
+              prenom_candidat:
+                type: string
+              nom_candidat:
+                type: string
+              creee_le:
+                type: string
+                format: date-time
+              statut:
+                type: string
+              links:
+                type: object
+                properties: {}
+                readOnly: true
+                default: {}
+            required:
+            - uuid
+            - formation
+            - matricule_candidat
+            - prenom_candidat
+            - nom_candidat
+            - creee_le
+            - statut
       required:
-      - propositions
-    PropositionSearchDTO:
+      - doctorate_propositions
+      - general_education_propositions
+      - continuing_education_propositions
+    DoctoratePropositionSearchDTO:
       type: object
       properties:
         uuid:

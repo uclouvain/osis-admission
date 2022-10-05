@@ -43,7 +43,10 @@ from admission.infrastructure.message_bus_in_memory import message_bus_in_memory
 class TestInitierPropositionService(SimpleTestCase):
     @classmethod
     def _get_une_bourse_par_type(cls, type_bourse: TypeBourse):
-        return next((bourse.uuid for bourse in BourseInMemoryTranslator.ENTITIES if bourse.type == type_bourse), None)
+        return next(
+            (bourse.entity_id.uuid for bourse in BourseInMemoryTranslator.ENTITIES if bourse.type == type_bourse),
+            None,
+        )
 
     def setUp(self) -> None:
         self.proposition_repository = PropositionInMemoryRepository()

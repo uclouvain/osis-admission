@@ -23,33 +23,41 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import string
+import uuid
+
 import factory
+from factory.fuzzy import FuzzyText
 
-from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
-    AnneeInscriptionFormationTranslator,
+from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity, Proposition
+from admission.ddd.admission.test.factory.bourse import (
+    BourseInternationaleIdentityFactory,
+    BourseDoubleDiplomeIdentityFactory,
+    BourseErasmusMundusIdentityFactory,
 )
-from admission.contrib.models import ContinuingEducationAdmission
-from admission.tests.factories.roles import CandidateFactory
-from base.models.enums import education_group_categories
-from base.tests.factories.education_group_year import EducationGroupYearFactory
-from base.tests.factories.person import PersonFactory
+from admission.ddd.admission.test.factory.formation import _FormationIdentityFactory
 
 
-class ContinuingEducationTrainingFactory(EducationGroupYearFactory):
-    education_group_type = factory.SubFactory(
-        'base.tests.factories.education_group_type.EducationGroupTypeFactory',
-        category=education_group_categories.TRAINING,
-        name=factory.fuzzy.FuzzyChoice(AnneeInscriptionFormationTranslator.CONTINUING_EDUCATION_TYPES),
-    )
-
-
-class ContinuingEducationAdmissionFactory(factory.DjangoModelFactory):
+class _PropositionIdentityFactory(factory.Factory):
     class Meta:
-        model = ContinuingEducationAdmission
+        model = PropositionIdentity
+        abstract = False
 
-    candidate = factory.SubFactory(PersonFactory)
-    training = factory.SubFactory(ContinuingEducationTrainingFactory)
+    uuid = factory.LazyFunction(lambda: str(uuid.uuid4()))
 
-    @factory.post_generation
-    def create_candidate_role(self, create, extracted, **kwargs):
-        CandidateFactory(person=self.candidate)
+
+class PropositionFactory(factory.Factory):
+    class Meta:
+        model = Proposition
+        abstract = False
+
+    entity_id = factory.SubFactory(_PropositionIdentityFactory)
+    matricule_candidat = FuzzyText(length=10, chars=string.digits)
+    formation_id = factory.SubFactory(_FormationIdentityFactory)
+
+    creee_le = factory.Faker('past_datetime')
+    modifiee_le = factory.Faker('past_datetime')
+
+    bourse_double_diplome_id = factory.SubFactory(BourseDoubleDiplomeIdentityFactory)
+    bourse_internationale_id = factory.SubFactory(BourseInternationaleIdentityFactory)
+    bourse_erasmus_mundus_id = factory.SubFactory(BourseErasmusMundusIdentityFactory)

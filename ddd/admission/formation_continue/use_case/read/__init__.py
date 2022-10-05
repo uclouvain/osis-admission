@@ -24,3 +24,4 @@
 #
 # ##############################################################################
 from .rechercher_formations_service import rechercher_formations
+from .lister_propositions_candidat_service import lister_propositions_candidat
