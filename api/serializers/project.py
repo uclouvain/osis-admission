@@ -31,6 +31,8 @@ from admission.api.serializers.mixins import IncludedFieldsMixin
 from admission.contrib.models import AdmissionType, DoctorateAdmission
 from admission.ddd.admission.doctorat.preparation.commands import CompleterPropositionCommand, InitierPropositionCommand
 from admission.ddd.admission.dtos.formation import FormationDTO
+from admission.ddd.admission.formation_generale.dtos import PropositionDTO as FormationGeneralePropositionDTO
+from admission.ddd.admission.formation_continue.dtos import PropositionDTO as FormationContinuePropositionDTO
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixCommissionProximiteCDEouCLSM,
     ChoixCommissionProximiteCDSS,
@@ -38,7 +40,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixLangueRedactionThese,
     ChoixSousDomaineSciences,
 )
-from admission.ddd.admission.doctorat.preparation.dtos import DoctoratDTO, PropositionDTO
+from admission.ddd.admission.doctorat.preparation.dtos import DoctoratDTO, PropositionDTO as DoctoratPropositionDTO
 from base.utils.serializers import DTOSerializer
 
 __all__ = [
@@ -50,7 +52,9 @@ __all__ = [
     "DoctoratDTOSerializer",
     "SectorDTOSerializer",
     "PropositionDTOSerializer",
-    "PropositionSearchDTOSerializer",
+    "DoctoratePropositionSearchDTOSerializer",
+    "GeneralEducationPropositionSearchDTOSerializer",
+    "ContinuingEducationPropositionSearchDTOSerializer",
     "FormationContinueDTOSerializer",
     "FormationGeneraleDTOSerializer",
 ]
@@ -78,7 +82,7 @@ class PropositionIdentityDTOSerializer(serializers.Serializer):
     uuid = serializers.ReadOnlyField()
 
 
-class PropositionSearchDTOSerializer(IncludedFieldsMixin, DTOSerializer):
+class DoctoratePropositionSearchDTOSerializer(IncludedFieldsMixin, DTOSerializer):
     links = ActionLinksField(
         actions={
             # Profile
@@ -120,11 +124,12 @@ class PropositionSearchDTOSerializer(IncludedFieldsMixin, DTOSerializer):
             'retrieve_course_enrollment': ACTION_LINKS['retrieve_course_enrollment'],
         }
     )
+
     # This is to prevent schema from breaking on JSONField
     erreurs = None
 
     class Meta:
-        source = PropositionDTO
+        source = DoctoratPropositionDTO
         fields = [
             'uuid',
             'reference',
@@ -142,10 +147,53 @@ class PropositionSearchDTOSerializer(IncludedFieldsMixin, DTOSerializer):
         ]
 
 
+class GeneralEducationPropositionSearchDTOSerializer(IncludedFieldsMixin, DTOSerializer):
+    links = ActionLinksField(actions={})
+
+    # This is to prevent schema from breaking on JSONField
+    erreurs = None
+
+    class Meta:
+        source = FormationGeneralePropositionDTO
+
+        fields = [
+            'uuid',
+            'formation',
+            'matricule_candidat',
+            'prenom_candidat',
+            'nom_candidat',
+            'creee_le',
+            'statut',
+            'links',
+        ]
+
+
+class ContinuingEducationPropositionSearchDTOSerializer(IncludedFieldsMixin, DTOSerializer):
+    links = ActionLinksField(actions={})
+
+    # This is to prevent schema from breaking on JSONField
+    erreurs = None
+
+    class Meta:
+        source = FormationContinuePropositionDTO
+        fields = [
+            'uuid',
+            'formation',
+            'matricule_candidat',
+            'prenom_candidat',
+            'nom_candidat',
+            'creee_le',
+            'statut',
+            'links',
+        ]
+
+
 class PropositionSearchSerializer(serializers.Serializer):
     links = ActionLinksField(actions={'create_proposition': ACTION_LINKS['create_proposition']})
 
-    propositions = PropositionSearchDTOSerializer(many=True)
+    doctorate_propositions = DoctoratePropositionSearchDTOSerializer(many=True)
+    general_education_propositions = GeneralEducationPropositionSearchDTOSerializer(many=True)
+    continuing_education_propositions = ContinuingEducationPropositionSearchDTOSerializer(many=True)
 
 
 class PropositionDTOSerializer(IncludedFieldsMixin, DTOSerializer):
@@ -200,7 +248,7 @@ class PropositionDTOSerializer(IncludedFieldsMixin, DTOSerializer):
     erreurs = serializers.JSONField()
 
     class Meta:
-        source = PropositionDTO
+        source = DoctoratPropositionDTO
         fields = [
             'uuid',
             'type_admission',

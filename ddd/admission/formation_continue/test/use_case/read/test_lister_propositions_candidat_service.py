@@ -23,31 +23,27 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import Optional
 
-import attr
+from django.test import SimpleTestCase
 
-from osis_common.ddd import interface
-
-
-@attr.dataclass(frozen=True, slots=True, auto_attribs=True)
-class RechercherFormationGeneraleQuery(interface.QueryRequest):
-    type_formation: str
-    intitule_formation: str
-    campus: Optional[str] = ''
+from admission.ddd.admission.formation_continue.commands import ListerPropositionsCandidatQuery
+from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutProposition
+from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 
 
-@attr.dataclass(frozen=True, slots=True)
-class InitierPropositionCommand(interface.CommandRequest):
-    sigle_formation: str
-    annee_formation: int
-    matricule_candidat: str
+class TestListerPropositionsCandidatService(SimpleTestCase):
+    def setUp(self) -> None:
+        self.cmd = ListerPropositionsCandidatQuery(matricule_candidat='0123456789')
+        self.message_bus = message_bus_in_memory_instance
 
-    bourse_double_diplome: Optional[str] = ''
-    bourse_internationale: Optional[str] = ''
-    bourse_erasmus_mundus: Optional[str] = ''
-
-
-@attr.dataclass(frozen=True, slots=True)
-class ListerPropositionsCandidatQuery(interface.QueryRequest):
-    matricule_candidat: str
+    def test_should_rechercher_par_matricule(self):
+        results = self.message_bus.invoke(self.cmd)
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0].formation.sigle, 'SC3DP')
+        self.assertEqual(results[0].formation.annee, 2020)
+        self.assertEqual(results[0].formation.intitule, 'Doctorat en sciences')
+        self.assertEqual(results[0].formation.campus, 'Louvain-la-Neuve')
+        self.assertEqual(results[0].statut, ChoixStatutProposition.IN_PROGRESS.name)
+        self.assertEqual(results[0].matricule_candidat, '0123456789')
+        self.assertEqual(results[0].prenom_candidat, 'Jean')
+        self.assertEqual(results[0].nom_candidat, 'Dupont')
