@@ -26,8 +26,8 @@
 import datetime
 from typing import List
 
-from admission.ddd.projet_doctoral.preparation.domain.service.i_profil_candidat import IProfilCandidatTranslator
-from admission.ddd.projet_doctoral.preparation.dtos import (
+from admission.ddd.admission.doctorat.preparation.domain.service.i_profil_candidat import IProfilCandidatTranslator
+from admission.ddd.admission.doctorat.preparation.dtos import (
     AdressePersonnelleDTO,
     CoordonneesDTO,
     CurriculumDTO,

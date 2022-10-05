@@ -28,7 +28,7 @@ from django.db import models
 from django.utils import translation
 from django.utils.translation import gettext_lazy as _
 
-from admission.ddd.projet_doctoral.doctorat.formation.domain.model._enums import CategorieActivite
+from admission.ddd.parcours_doctoral.formation.domain.model.enums import CategorieActivite
 from base.models.enums.entity_type import DOCTORAL_COMMISSION
 
 

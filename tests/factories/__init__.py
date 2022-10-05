@@ -34,6 +34,7 @@ from .doctorate import DoctorateAdmissionFactory
 
 __all__ = [
     "DoctorateAdmissionFactory",
+    "WriteTokenFactory",
 ]
 
 

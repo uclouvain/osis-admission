@@ -34,8 +34,7 @@ from rest_framework.response import Response
 
 from admission.api import serializers
 from admission.api.permissions import IsSelfPersonTabOrTabPermission
-from admission.api.views.mixins import PersonRelatedMixin
-from admission.api.views.mixins import PersonRelatedSchema
+from admission.api.views.mixins import PersonRelatedMixin, PersonRelatedSchema
 from osis_profile.models.education import LanguageKnowledge
 from osis_role.contrib.views import APIPermissionRequiredMixin
 

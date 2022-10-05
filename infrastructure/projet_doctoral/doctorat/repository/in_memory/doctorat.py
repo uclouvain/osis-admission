@@ -27,21 +27,21 @@ from typing import List
 
 from attr import dataclass
 
-from admission.ddd.projet_doctoral.doctorat.domain.model.doctorat import DoctoratIdentity, Doctorat
-from admission.ddd.projet_doctoral.doctorat.domain.validator.exceptions import DoctoratNonTrouveException
-from admission.ddd.projet_doctoral.doctorat.dtos import DoctoratDTO
-from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.domain.model.epreuve_confirmation import (
+from admission.ddd.parcours_doctoral.domain.model.doctorat import DoctoratIdentity, Doctorat
+from admission.ddd.parcours_doctoral.domain.validator.exceptions import DoctoratNonTrouveException
+from admission.ddd.parcours_doctoral.dtos import DoctoratDTO
+from admission.ddd.parcours_doctoral.epreuve_confirmation.domain.model.epreuve_confirmation import (
     EpreuveConfirmation,
 )
 
-from admission.ddd.projet_doctoral.doctorat.repository.i_doctorat import IDoctoratRepository
-from admission.ddd.projet_doctoral.doctorat.test.factory.doctorat import (
+from admission.ddd.parcours_doctoral.repository.i_doctorat import IDoctoratRepository
+from admission.ddd.parcours_doctoral.test.factory.doctorat import (
     DoctoratSC3DPMinimaleFactory,
     DoctoratPreSC3DPAvecPromoteursEtMembresCADejaApprouvesAccepteeFactory,
     DoctoratSC3DPAvecPromoteurRefuseEtMembreCADejaApprouveFactoryRejeteeCDDFactory,
     DoctoratSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory,
 )
-from admission.ddd.projet_doctoral.validation.domain.model._enums import ChoixGenre
+from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixGenre
 from base.ddd.utils.in_memory_repository import InMemoryGenericRepository
 
 

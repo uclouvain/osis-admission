@@ -33,12 +33,12 @@ from django.utils.translation import get_language, gettext_lazy as _
 
 from admission.contrib.models import DoctorateAdmission
 from admission.contrib.models.doctorate import DoctorateProxy
-from admission.ddd.projet_doctoral.doctorat.domain.model.doctorat import Doctorat
-from admission.ddd.projet_doctoral.doctorat.formation.domain.model._enums import StatutActivite
-from admission.ddd.projet_doctoral.doctorat.formation.domain.model.activite import Activite
-from admission.ddd.projet_doctoral.doctorat.formation.domain.service.i_notification import INotification
-from admission.ddd.projet_doctoral.preparation.commands import UUID
-from admission.ddd.projet_doctoral.preparation.domain.model._promoteur import PromoteurIdentity
+from admission.ddd.parcours_doctoral.domain.model.doctorat import Doctorat
+from admission.ddd.parcours_doctoral.formation.domain.model.enums import StatutActivite
+from admission.ddd.parcours_doctoral.formation.domain.model.activite import Activite
+from admission.ddd.parcours_doctoral.formation.domain.service.i_notification import INotification
+from admission.ddd.admission.doctorat.preparation.commands import UUID
+from admission.ddd.admission.doctorat.preparation.domain.model._promoteur import PromoteurIdentity
 from admission.mail_templates import (
     ADMISSION_EMAIL_REFERENCE_PROMOTER_TRAININGS_SUBMITTED,
     ADMISSION_EMAIL_CANDIDATE_TRAINING_REFUSED,

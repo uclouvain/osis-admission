@@ -27,9 +27,9 @@ import datetime
 from dataclasses import dataclass
 from typing import List, Optional
 
-from admission.ddd.projet_doctoral.preparation.domain.service.i_profil_candidat import IProfilCandidatTranslator
-from admission.ddd.projet_doctoral.preparation.domain.validator.exceptions import CandidatNonTrouveException
-from admission.ddd.projet_doctoral.preparation.dtos import (
+from admission.ddd.admission.doctorat.preparation.domain.service.i_profil_candidat import IProfilCandidatTranslator
+from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import CandidatNonTrouveException
+from admission.ddd.admission.doctorat.preparation.dtos import (
     AdressePersonnelleDTO,
     CoordonneesDTO,
     CurriculumDTO,

@@ -23,8 +23,8 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.ddd.projet_doctoral.preparation.domain.model._comptabilite import Comptabilite
-from admission.ddd.projet_doctoral.preparation.dtos import ComptabiliteDTO
+from admission.ddd.admission.doctorat.preparation.domain.model._comptabilite import Comptabilite
+from admission.ddd.admission.doctorat.preparation.dtos import ComptabiliteDTO
 
 
 def get_dto_accounting_from_domain_model(comptabilite: 'Comptabilite') -> 'ComptabiliteDTO':
@@ -63,9 +63,7 @@ def get_dto_accounting_from_domain_model(comptabilite: 'Comptabilite') -> 'Compt
         titre_sejour_3_mois_remplacement=comptabilite.titre_sejour_3_mois_remplacement,
         preuve_allocations_chomage_pension_indemnite=comptabilite.preuve_allocations_chomage_pension_indemnite,
         attestation_cpas=comptabilite.attestation_cpas,
-        relation_parente=comptabilite.relation_parente.name
-        if comptabilite.relation_parente
-        else '',
+        relation_parente=comptabilite.relation_parente.name if comptabilite.relation_parente else '',
         sous_type_situation_assimilation_5=comptabilite.sous_type_situation_assimilation_5.name
         if comptabilite.sous_type_situation_assimilation_5
         else '',
@@ -86,13 +84,9 @@ def get_dto_accounting_from_domain_model(comptabilite: 'Comptabilite') -> 'Compt
         attestation_boursier=comptabilite.attestation_boursier,
         titre_identite_sejour_longue_duree_ue=comptabilite.titre_identite_sejour_longue_duree_ue,
         titre_sejour_belgique=comptabilite.titre_sejour_belgique,
-        affiliation_sport=comptabilite.affiliation_sport.name
-        if comptabilite.affiliation_sport
-        else '',
+        affiliation_sport=comptabilite.affiliation_sport.name if comptabilite.affiliation_sport else '',
         etudiant_solidaire=comptabilite.etudiant_solidaire,
-        type_numero_compte=comptabilite.type_numero_compte.name
-        if comptabilite.type_numero_compte
-        else '',
+        type_numero_compte=comptabilite.type_numero_compte.name if comptabilite.type_numero_compte else '',
         numero_compte_iban=comptabilite.numero_compte_iban,
         numero_compte_autre_format=comptabilite.numero_compte_autre_format,
         code_bic_swift_banque=comptabilite.code_bic_swift_banque,

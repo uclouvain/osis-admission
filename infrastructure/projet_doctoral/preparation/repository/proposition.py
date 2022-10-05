@@ -28,53 +28,53 @@ from typing import List, Optional
 
 from django.conf import settings
 from django.db import connection
-from django.db.models import Subquery, OuterRef
+from django.db.models import OuterRef, Subquery
 from django.utils.translation import get_language
 
 from admission.auth.roles.candidate import Candidate
-from admission.contrib.models import DoctorateAdmission, Accounting
+from admission.contrib.models import Accounting, DoctorateAdmission
 from admission.contrib.models.doctorate import PropositionProxy, REFERENCE_SEQ_NAME
-from admission.ddd.projet_doctoral.preparation.builder.proposition_identity_builder import (
+from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import (
     PropositionIdentityBuilder,
 )
-from admission.ddd.projet_doctoral.preparation.domain.model._detail_projet import (
-    ChoixLangueRedactionThese,
+from admission.ddd.admission.doctorat.preparation.domain.model._detail_projet import (
     DetailProjet,
 )
-from admission.ddd.projet_doctoral.preparation.domain.model._enums import (
+from admission.ddd.admission.doctorat.preparation.domain.model._experience_precedente_recherche import (
+    ExperiencePrecedenteRecherche,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model._financement import (
+    Financement,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model._institut import (
+    InstitutIdentity,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import (
+    DoctoratIdentity,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    BourseRecherche,
     ChoixCommissionProximiteCDEouCLSM,
     ChoixCommissionProximiteCDSS,
+    ChoixDoctoratDejaRealise,
+    ChoixLangueRedactionThese,
     ChoixSousDomaineSciences,
     ChoixStatutProposition,
     ChoixTypeAdmission,
-)
-from admission.ddd.projet_doctoral.preparation.domain.model._experience_precedente_recherche import (
-    ChoixDoctoratDejaRealise,
-    ExperiencePrecedenteRecherche,
-)
-from admission.ddd.projet_doctoral.preparation.domain.model._financement import (
-    ChoixTypeFinancement,
-    Financement,
-    BourseRecherche,
     ChoixTypeContratTravail,
+    ChoixTypeFinancement,
 )
-from admission.ddd.projet_doctoral.preparation.domain.model._institut import (
-    InstitutIdentity,
-)
-from admission.ddd.projet_doctoral.preparation.domain.model.doctorat import (
-    DoctoratIdentity,
-)
-from admission.ddd.projet_doctoral.preparation.domain.model.proposition import (
+from admission.ddd.admission.doctorat.preparation.domain.model.proposition import (
     Proposition,
     PropositionIdentity,
 )
-from admission.ddd.projet_doctoral.preparation.domain.validator.exceptions import (
+from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     PropositionNonTrouveeException,
 )
-from admission.ddd.projet_doctoral.preparation.dtos import (
+from admission.ddd.admission.doctorat.preparation.dtos import (
     PropositionDTO,
 )
-from admission.ddd.projet_doctoral.preparation.repository.i_proposition import (
+from admission.ddd.admission.doctorat.preparation.repository.i_proposition import (
     IPropositionRepository,
 )
 from admission.infrastructure.projet_doctoral.preparation.domain.service.doctorat import DoctoratTranslator

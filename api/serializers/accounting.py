@@ -26,7 +26,7 @@
 from rest_framework import serializers
 from rest_framework.fields import SerializerMethodField
 
-from admission.ddd.projet_doctoral.preparation.commands import CompleterComptabilitePropositionCommand
+from admission.ddd.admission.doctorat.preparation.commands import CompleterComptabilitePropositionCommand
 from admission.infrastructure.projet_doctoral.preparation.domain.service.profil_candidat import ProfilCandidatTranslator
 from admission.utils import takewhile_return_attribute_values
 from base.models.academic_year import current_academic_year
@@ -89,7 +89,7 @@ class AccountingConditionsSerializer(serializers.ModelSerializer):
             names = takewhile_return_attribute_values(
                 lambda institute: institute.get('academic_year__year') == year,
                 last_institutes,
-                'educational_experience__institute__name'
+                'educational_experience__institute__name',
             )
 
             return {

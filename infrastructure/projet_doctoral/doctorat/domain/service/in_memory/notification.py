@@ -25,8 +25,8 @@
 # ##############################################################################
 from email.message import EmailMessage
 
-from admission.ddd.projet_doctoral.doctorat.domain.model.doctorat import Doctorat
-from admission.ddd.projet_doctoral.doctorat.domain.service.i_notification import INotification
+from admission.ddd.parcours_doctoral.domain.model.doctorat import Doctorat
+from admission.ddd.parcours_doctoral.domain.service.i_notification import INotification
 
 
 class NotificationInMemory(INotification):

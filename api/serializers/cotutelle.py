@@ -23,8 +23,8 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.ddd.projet_doctoral.preparation.commands import DefinirCotutelleCommand
-from admission.ddd.projet_doctoral.preparation.dtos import CotutelleDTO
+from admission.ddd.admission.doctorat.preparation.commands import DefinirCotutelleCommand
+from admission.ddd.admission.doctorat.preparation.dtos import CotutelleDTO
 from base.utils.serializers import DTOSerializer
 
 

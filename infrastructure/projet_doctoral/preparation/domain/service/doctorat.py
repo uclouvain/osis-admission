@@ -28,10 +28,10 @@ from typing import List
 from django.conf import settings
 from django.utils.translation import get_language
 
-from admission.ddd.projet_doctoral.preparation.domain.model.doctorat import Doctorat, DoctoratIdentity
-from admission.ddd.projet_doctoral.preparation.domain.service.i_doctorat import IDoctoratTranslator
-from admission.ddd.projet_doctoral.preparation.domain.validator.exceptions import DoctoratNonTrouveException
-from admission.ddd.projet_doctoral.preparation.dtos import DoctoratDTO
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import Doctorat, DoctoratIdentity
+from admission.ddd.admission.doctorat.preparation.domain.service.i_doctorat import IDoctoratTranslator
+from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import DoctoratNonTrouveException
+from admission.ddd.admission.doctorat.preparation.dtos import DoctoratDTO
 from base.models.enums.education_group_types import TrainingType
 from ddd.logic.formation_catalogue.commands import SearchFormationsCommand
 from ddd.logic.formation_catalogue.dtos.training import TrainingDto

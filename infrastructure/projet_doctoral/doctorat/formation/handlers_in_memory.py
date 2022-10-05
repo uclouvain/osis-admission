@@ -25,8 +25,8 @@
 ##############################################################################
 from functools import partial
 
-from admission.ddd.projet_doctoral.doctorat.formation.commands import *
-from admission.ddd.projet_doctoral.doctorat.formation.use_case.write import *
+from admission.ddd.parcours_doctoral.formation.commands import *
+from admission.ddd.parcours_doctoral.formation.use_case.write import *
 from admission.infrastructure.projet_doctoral.preparation.repository.in_memory.groupe_de_supervision import (
     GroupeDeSupervisionInMemoryRepository,
 )

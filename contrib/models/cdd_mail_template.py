@@ -23,7 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import Dict, List, Optional
+from typing import Dict, List
 
 from django.conf import settings
 from django.db import models

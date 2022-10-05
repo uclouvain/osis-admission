@@ -26,11 +26,11 @@
 from dataclasses import dataclass
 from typing import List, Optional
 
-from admission.ddd.projet_doctoral.preparation.domain.model.proposition import Proposition, PropositionIdentity
-from admission.ddd.projet_doctoral.preparation.domain.validator.exceptions import PropositionNonTrouveeException
-from admission.ddd.projet_doctoral.preparation.dtos import DoctoratDTO, PropositionDTO
-from admission.ddd.projet_doctoral.preparation.repository.i_proposition import IPropositionRepository
-from admission.ddd.projet_doctoral.preparation.test.factory.proposition import (
+from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition, PropositionIdentity
+from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import PropositionNonTrouveeException
+from admission.ddd.admission.doctorat.preparation.dtos import DoctoratDTO, PropositionDTO
+from admission.ddd.admission.doctorat.preparation.repository.i_proposition import IPropositionRepository
+from admission.ddd.admission.doctorat.preparation.test.factory.proposition import (
     PropositionAdmissionECGE3DPMinimaleFactory,
     PropositionAdmissionESP3DPMinimaleFactory,
     PropositionAdmissionSC3DPAvecMembresEtCotutelleFactory,

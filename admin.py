@@ -41,7 +41,7 @@ from admission.auth.roles.sic_manager import SicManager
 from admission.contrib.models import CddMailTemplate, DoctorateAdmission
 from admission.contrib.models.cdd_config import CddConfiguration
 from admission.contrib.models.doctoral_training import Activity
-from admission.ddd.projet_doctoral.doctorat.formation.domain.model._enums import CategorieActivite
+from admission.ddd.parcours_doctoral.formation.domain.model.enums import CategorieActivite
 from osis_mail_template.admin import MailTemplateAdmin
 
 from osis_role.contrib.admin import RoleModelAdmin

@@ -30,13 +30,15 @@ from django.utils.translation import get_language
 
 from admission.contrib.models import DoctorateAdmission
 from admission.contrib.models.doctorate import DemandeProxy
-from admission.ddd.projet_doctoral.validation.domain.model._enums import ChoixStatutCDD, ChoixStatutSIC
-from admission.ddd.projet_doctoral.validation.domain.model._profil_candidat import ProfilCandidat
-from admission.ddd.projet_doctoral.validation.domain.model.demande import Demande, DemandeIdentity
-from admission.ddd.projet_doctoral.validation.domain.service.proposition_identity import PropositionIdentityTranslator
-from admission.ddd.projet_doctoral.validation.domain.validator.exceptions import DemandeNonTrouveeException
-from admission.ddd.projet_doctoral.validation.dtos import DemandeDTO, ProfilCandidatDTO
-from admission.ddd.projet_doctoral.validation.repository.i_demande import IDemandeRepository
+from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixStatutCDD, ChoixStatutSIC
+from admission.ddd.admission.doctorat.validation.domain.model._profil_candidat import ProfilCandidat
+from admission.ddd.admission.doctorat.validation.domain.model.demande import Demande, DemandeIdentity
+from admission.ddd.admission.doctorat.validation.domain.service.proposition_identity import (
+    PropositionIdentityTranslator,
+)
+from admission.ddd.admission.doctorat.validation.domain.validator.exceptions import DemandeNonTrouveeException
+from admission.ddd.admission.doctorat.validation.dtos import DemandeDTO, ProfilCandidatDTO
+from admission.ddd.admission.doctorat.validation.repository.i_demande import IDemandeRepository
 from reference.models.country import Country
 
 

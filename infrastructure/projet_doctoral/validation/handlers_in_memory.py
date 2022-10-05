@@ -25,9 +25,9 @@
 ##############################################################################
 from functools import partial
 
-from admission.ddd.projet_doctoral.validation.commands import *
-from admission.ddd.projet_doctoral.validation.use_case.read import *
-from admission.ddd.projet_doctoral.validation.use_case.write import *
+from admission.ddd.admission.doctorat.validation.commands import *
+from admission.ddd.admission.doctorat.validation.use_case.read import *
+from admission.ddd.admission.doctorat.validation.use_case.write import *
 from .repository.in_memory.demande import DemandeInMemoryRepository
 from ..doctorat.epreuve_confirmation.repository.in_memory.epreuve_confirmation import (
     EpreuveConfirmationInMemoryRepository,

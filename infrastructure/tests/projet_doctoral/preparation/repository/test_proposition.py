@@ -26,8 +26,8 @@
 
 from django.test import TestCase
 
-from admission.ddd.projet_doctoral.preparation.builder.proposition_identity_builder import PropositionIdentityBuilder
-from admission.ddd.projet_doctoral.preparation.domain.validator.exceptions import PropositionNonTrouveeException
+from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import PropositionIdentityBuilder
+from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import PropositionNonTrouveeException
 from admission.infrastructure.projet_doctoral.preparation.repository.proposition import PropositionRepository
 
 

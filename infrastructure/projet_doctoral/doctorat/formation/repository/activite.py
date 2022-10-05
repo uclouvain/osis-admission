@@ -26,19 +26,19 @@
 from typing import List, Mapping, Optional
 
 from admission.contrib.models.doctoral_training import Activity
-from admission.ddd.projet_doctoral.doctorat.builder.doctorat_identity import DoctoratIdentityBuilder
-from admission.ddd.projet_doctoral.doctorat.formation.builder.activite_identity_builder import ActiviteIdentityBuilder
-from admission.ddd.projet_doctoral.doctorat.formation.domain.model._enums import (
+from admission.ddd.parcours_doctoral.builder.doctorat_identity import DoctoratIdentityBuilder
+from admission.ddd.parcours_doctoral.formation.builder.activite_identity_builder import ActiviteIdentityBuilder
+from admission.ddd.parcours_doctoral.formation.domain.model.enums import (
     CategorieActivite,
     ChoixStatutPublication,
     ChoixTypeEpreuve,
     ContexteFormation,
     StatutActivite,
 )
-from admission.ddd.projet_doctoral.doctorat.formation.domain.model.activite import Activite, ActiviteIdentity
-from admission.ddd.projet_doctoral.doctorat.formation.domain.validator.exceptions import ActiviteNonTrouvee
-from admission.ddd.projet_doctoral.doctorat.formation.dtos import *
-from admission.ddd.projet_doctoral.doctorat.formation.repository.i_activite import IActiviteRepository
+from admission.ddd.parcours_doctoral.formation.domain.model.activite import Activite, ActiviteIdentity
+from admission.ddd.parcours_doctoral.formation.domain.validator.exceptions import ActiviteNonTrouvee
+from admission.ddd.parcours_doctoral.formation.dtos import *
+from admission.ddd.parcours_doctoral.formation.repository.i_activite import IActiviteRepository
 
 
 class ActiviteRepository(IActiviteRepository):

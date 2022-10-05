@@ -23,27 +23,26 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import datetime
 from typing import List
 
-from admission.ddd.projet_doctoral.doctorat.domain.model.doctorat import DoctoratIdentity
-from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.domain.model.epreuve_confirmation import (
+from admission.ddd.parcours_doctoral.domain.model.doctorat import DoctoratIdentity
+from admission.ddd.parcours_doctoral.epreuve_confirmation.domain.model.epreuve_confirmation import (
     EpreuveConfirmation,
     EpreuveConfirmationIdentity,
 )
-from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.dtos import (
+from admission.ddd.parcours_doctoral.epreuve_confirmation.dtos import (
     EpreuveConfirmationDTO,
     DemandeProlongationDTO,
 )
-from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.repository.i_epreuve_confirmation import (
+from admission.ddd.parcours_doctoral.epreuve_confirmation.repository.i_epreuve_confirmation import (
     IEpreuveConfirmationRepository,
 )
-from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.test.factory.epreuve_confirmation import (
+from admission.ddd.parcours_doctoral.epreuve_confirmation.test.factory.epreuve_confirmation import (
     EpreuveConfirmation0DoctoratSC3DPFactory,
     EpreuveConfirmation1DoctoratSC3DPFactory,
     EpreuveConfirmation2DoctoratSC3DPFactory,
 )
-from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.validators.exceptions import (
+from admission.ddd.parcours_doctoral.epreuve_confirmation.validators.exceptions import (
     EpreuveConfirmationNonTrouveeException,
 )
 from base.ddd.utils.in_memory_repository import InMemoryGenericRepository

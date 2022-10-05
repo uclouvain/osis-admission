@@ -24,20 +24,22 @@
 #
 # ##############################################################################
 from admission.contrib.models import DoctorateAdmission
-from admission.ddd.projet_doctoral.preparation.domain.model._comptabilite import (
+from admission.ddd.admission.doctorat.preparation.domain.model._comptabilite import (
     Comptabilite,
+    comptabilite_non_remplie,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    ChoixAffiliationSport,
     ChoixAssimilation1,
     ChoixAssimilation2,
     ChoixAssimilation3,
-    LienParente,
     ChoixAssimilation5,
     ChoixAssimilation6,
-    ChoixAffiliationSport,
     ChoixTypeCompteBancaire,
-    comptabilite_non_remplie,
+    LienParente,
     TypeSituationAssimilation,
 )
-from admission.ddd.projet_doctoral.preparation.dtos import ComptabiliteDTO
+from admission.ddd.admission.doctorat.preparation.dtos import ComptabiliteDTO
 from admission.infrastructure.projet_doctoral.preparation.repository.in_memory._comptabilite import (
     get_dto_accounting_from_domain_model,
 )

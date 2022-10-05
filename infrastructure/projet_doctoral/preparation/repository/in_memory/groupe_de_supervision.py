@@ -25,18 +25,22 @@
 # ##############################################################################
 from typing import List, Optional
 
-from admission.ddd.projet_doctoral.doctorat.domain.model.doctorat import DoctoratIdentity
-from admission.ddd.projet_doctoral.preparation.builder.proposition_identity_builder import PropositionIdentityBuilder
-from admission.ddd.projet_doctoral.preparation.domain.model._cotutelle import pas_de_cotutelle
-from admission.ddd.projet_doctoral.preparation.domain.model.groupe_de_supervision import (
+from admission.ddd.parcours_doctoral.domain.model.doctorat import DoctoratIdentity
+from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import PropositionIdentityBuilder
+from admission.ddd.admission.doctorat.preparation.domain.model._cotutelle import pas_de_cotutelle
+from admission.ddd.admission.doctorat.preparation.domain.model.groupe_de_supervision import (
     GroupeDeSupervision,
     GroupeDeSupervisionIdentity,
 )
-from admission.ddd.projet_doctoral.preparation.domain.model.proposition import PropositionIdentity
-from admission.ddd.projet_doctoral.preparation.domain.validator.exceptions import GroupeDeSupervisionNonTrouveException
-from admission.ddd.projet_doctoral.preparation.dtos import CotutelleDTO
-from admission.ddd.projet_doctoral.preparation.repository.i_groupe_de_supervision import IGroupeDeSupervisionRepository
-from admission.ddd.projet_doctoral.preparation.test.factory.groupe_de_supervision import (
+from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity
+from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
+    GroupeDeSupervisionNonTrouveException,
+)
+from admission.ddd.admission.doctorat.preparation.dtos import CotutelleDTO
+from admission.ddd.admission.doctorat.preparation.repository.i_groupe_de_supervision import (
+    IGroupeDeSupervisionRepository,
+)
+from admission.ddd.admission.doctorat.preparation.test.factory.groupe_de_supervision import (
     GroupeDeSupervisionPreSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory,
     GroupeDeSupervisionSC3DPAvecMembresInvitesFactory,
     GroupeDeSupervisionSC3DPAvecPromoteurDejaApprouveEtAutrePromoteurFactory,

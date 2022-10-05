@@ -26,10 +26,10 @@
 from dataclasses import dataclass
 from typing import List
 
-from admission.ddd.projet_doctoral.preparation.domain.model._membre_CA import MembreCAIdentity
-from admission.ddd.projet_doctoral.preparation.domain.service.i_membre_CA import IMembreCATranslator
-from admission.ddd.projet_doctoral.preparation.domain.validator.exceptions import MembreCANonTrouveException
-from admission.ddd.projet_doctoral.preparation.dtos import MembreCADTO
+from admission.ddd.admission.doctorat.preparation.domain.model._membre_CA import MembreCAIdentity
+from admission.ddd.admission.doctorat.preparation.domain.service.i_membre_CA import IMembreCATranslator
+from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import MembreCANonTrouveException
+from admission.ddd.admission.doctorat.preparation.dtos import MembreCADTO
 
 
 @dataclass

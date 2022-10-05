@@ -24,11 +24,11 @@
 # ##############################################################################
 from typing import List
 
-from admission.ddd.projet_doctoral.preparation.domain.model.doctorat import Doctorat
-from admission.ddd.projet_doctoral.preparation.domain.service.i_doctorat import IDoctoratTranslator
-from admission.ddd.projet_doctoral.preparation.domain.validator.exceptions import DoctoratNonTrouveException
-from admission.ddd.projet_doctoral.preparation.dtos import DoctoratDTO
-from admission.ddd.projet_doctoral.preparation.test.factory.doctorat import (
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import Doctorat
+from admission.ddd.admission.doctorat.preparation.domain.service.i_doctorat import IDoctoratTranslator
+from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import DoctoratNonTrouveException
+from admission.ddd.admission.doctorat.preparation.dtos import DoctoratDTO
+from admission.ddd.admission.doctorat.preparation.test.factory.doctorat import (
     DoctoratCDEFactory,
     DoctoratCDSCFactory,
     DoctoratCDSSDPFactory,

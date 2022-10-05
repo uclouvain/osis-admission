@@ -25,25 +25,23 @@
 # ##############################################################################
 import datetime
 import uuid
-from typing import Optional, List
+from typing import List, Optional
 from unittest.mock import patch
 
 from django.core.management import call_command
 from django.test import TestCase, override_settings
 from django.urls import reverse
-from osis_async.models.enums import TaskStates
-from osis_notification.models import EmailNotification
 from rest_framework import status
 
-from admission.contrib.models import DoctorateAdmission, AdmissionTask, ConfirmationPaper
-from admission.ddd.projet_doctoral.doctorat.domain.model.enums import ChoixStatutDoctorat
-from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.commands import RecupererEpreuvesConfirmationQuery
-from admission.ddd.projet_doctoral.preparation.domain.model._enums import ChoixTypeAdmission
-from admission.ddd.projet_doctoral.preparation.domain.model._financement import (
-    ChoixTypeFinancement,
+from admission.contrib.models import AdmissionTask, ConfirmationPaper, DoctorateAdmission
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE, ENTITY_CDSS
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    ChoixTypeAdmission,
     ChoixTypeContratTravail,
+    ChoixTypeFinancement,
 )
-from admission.ddd.projet_doctoral.preparation.domain.model.doctorat import ENTITY_CDE, ENTITY_CDSS
+from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
+from admission.ddd.parcours_doctoral.epreuve_confirmation.commands import RecupererEpreuvesConfirmationQuery
 from admission.mail_templates import (
     ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_RETAKING_STUDENT,
 )
@@ -56,6 +54,8 @@ from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityFactory
 from base.tests.factories.entity_version import EntityVersionFactory
 from infrastructure.messages_bus import message_bus_instance
+from osis_async.models.enums import TaskStates
+from osis_notification.models import EmailNotification
 
 
 @override_settings(OSIS_DOCUMENT_BASE_URL='http://dummyurl')
@@ -84,11 +84,13 @@ class CddDoctorateAdmissionConfirmationSuccessDecisionViewTestCase(TestCase):
 
         cls.get_mandates_service_patcher = patch('reference.services.mandates.MandatesService.get')
         patched = cls.get_mandates_service_patcher.start()
-        patched.return_value = [{
-            'first_name': 'Jane',
-            'last_name': 'Doe',
-            'function': 'Présidente',
-        }]
+        patched.return_value = [
+            {
+                'first_name': 'Jane',
+                'last_name': 'Doe',
+                'function': 'Présidente',
+            }
+        ]
 
         # Create some academic years
         academic_years = [AcademicYearFactory(year=year) for year in [2021, 2022]]

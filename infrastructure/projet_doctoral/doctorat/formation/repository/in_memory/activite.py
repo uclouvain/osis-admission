@@ -25,12 +25,12 @@
 # ##############################################################################
 from typing import List, Mapping, Optional
 
-from admission.ddd.projet_doctoral.doctorat.formation.domain.model._enums import CategorieActivite
-from admission.ddd.projet_doctoral.doctorat.formation.domain.model.activite import Activite, ActiviteIdentity
-from admission.ddd.projet_doctoral.doctorat.formation.domain.validator.exceptions import ActiviteNonTrouvee
-from admission.ddd.projet_doctoral.doctorat.formation.dtos import ActiviteDTO
-from admission.ddd.projet_doctoral.doctorat.formation.repository.i_activite import IActiviteRepository
-from admission.ddd.projet_doctoral.doctorat.formation.test.factory.activite import ActiviteFactory
+from admission.ddd.parcours_doctoral.formation.domain.model.enums import CategorieActivite
+from admission.ddd.parcours_doctoral.formation.domain.model.activite import Activite, ActiviteIdentity
+from admission.ddd.parcours_doctoral.formation.domain.validator.exceptions import ActiviteNonTrouvee
+from admission.ddd.parcours_doctoral.formation.dtos import ActiviteDTO
+from admission.ddd.parcours_doctoral.formation.repository.i_activite import IActiviteRepository
+from admission.ddd.parcours_doctoral.formation.test.factory.activite import ActiviteFactory
 from base.ddd.utils.in_memory_repository import InMemoryGenericRepository
 
 

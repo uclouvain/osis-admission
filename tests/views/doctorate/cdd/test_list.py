@@ -32,15 +32,16 @@ from django.test import RequestFactory, TestCase
 from django.urls import reverse
 
 from admission.contrib.models import DoctorateAdmission
-from admission.ddd.projet_doctoral.preparation.domain.model._enums import ChoixStatutProposition, ChoixTypeAdmission
-from admission.ddd.projet_doctoral.preparation.domain.model._financement import (
-    ChoixTypeFinancement,
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE, ENTITY_CDSS
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     BourseRecherche,
+    ChoixStatutProposition,
+    ChoixTypeAdmission,
     ChoixTypeContratTravail,
+    ChoixTypeFinancement,
 )
-from admission.ddd.projet_doctoral.preparation.domain.model.doctorat import ENTITY_CDE, ENTITY_CDSS
-from admission.ddd.projet_doctoral.validation.domain.model._enums import ChoixStatutCDD, ChoixStatutSIC
-from admission.ddd.projet_doctoral.validation.dtos import DemandeRechercheDTO
+from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixStatutCDD, ChoixStatutSIC
+from admission.ddd.admission.doctorat.validation.dtos import DemandeRechercheDTO
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.roles import CandidateFactory, CddManagerFactory, DoctorateReaderRoleFactory
 from admission.tests.factories.supervision import PromoterFactory
@@ -393,9 +394,7 @@ class CddDoctorateAdmissionListTestCase(TestCase):
     def test_list_doctorate_reader_user_without_any_query_param(self):
         self.client.force_login(user=self.doctorate_reader_user)
 
-        response = self.client.get(self.url, data={
-            'page_size': 10,
-        })
+        response = self.client.get(self.url, data={'page_size': 10})
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.context['object_list']), 3)

@@ -33,12 +33,12 @@ from django.views import generic
 from django.views.generic.detail import SingleObjectMixin
 
 from admission.contrib.models.doctoral_training import Activity
-from admission.ddd.projet_doctoral.doctorat.formation.commands import (
+from admission.ddd.parcours_doctoral.formation.commands import (
     AccepterActivitesCommand,
     RefuserActiviteCommand,
     SoumettreActivitesCommand,
 )
-from admission.ddd.projet_doctoral.doctorat.formation.domain.model._enums import (
+from admission.ddd.parcours_doctoral.formation.domain.model.enums import (
     CategorieActivite,
     StatutActivite,
 )

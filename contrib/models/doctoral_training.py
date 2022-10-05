@@ -32,7 +32,7 @@ from django.dispatch import receiver
 from django.utils.translation import gettext_lazy as _, pgettext_lazy
 from django.db.models.signals import post_save
 
-from admission.ddd.projet_doctoral.doctorat.formation.domain.model._enums import (
+from admission.ddd.parcours_doctoral.formation.domain.model.enums import (
     CategorieActivite,
     ChoixComiteSelection,
     ChoixStatutPublication,
@@ -340,10 +340,8 @@ class Activity(models.Model):
 
 @receiver(post_save, sender=Activity)
 def _activity_update_can_be_submitted(sender, instance, **kwargs):
-    from admission.ddd.projet_doctoral.doctorat.formation.builder.activite_identity_builder import (
-        ActiviteIdentityBuilder,
-    )
-    from admission.ddd.projet_doctoral.doctorat.formation.domain.service.soumettre_activites import SoumettreActivites
+    from admission.ddd.parcours_doctoral.formation.builder.activite_identity_builder import ActiviteIdentityBuilder
+    from admission.ddd.parcours_doctoral.formation.domain.service.soumettre_activites import SoumettreActivites
     from admission.infrastructure.projet_doctoral.doctorat.formation.repository.activite import ActiviteRepository
 
     activite_identity = ActiviteIdentityBuilder.build_from_uuid(instance.uuid)

@@ -34,7 +34,7 @@ from rest_framework.generics import get_object_or_404
 from admission.contrib.models import DoctorateAdmission
 from admission.contrib.models.cdd_config import CddConfiguration
 from admission.contrib.models.doctoral_training import Activity
-from admission.ddd.projet_doctoral.doctorat.formation.domain.model._enums import (
+from admission.ddd.parcours_doctoral.formation.domain.model.enums import (
     CategorieActivite,
     ContexteFormation,
     StatutActivite,
@@ -43,7 +43,6 @@ from admission.forms import SelectOrOtherField
 from admission.forms.doctorate.training import activity as activity_forms
 from admission.forms.doctorate.training.activity import AcademicYearField, ConfigurableActivityTypeField
 from base.api.serializers.academic_year import RelatedAcademicYearField
-from base.models.learning_unit_year import LearningUnitYear
 from osis_document.contrib import FileUploadField
 from reference.api.serializers.country import RelatedCountryField
 

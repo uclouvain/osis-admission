@@ -30,23 +30,23 @@ from django.utils.translation import gettext_lazy as _
 from django.views.generic.base import ContextMixin
 
 from admission.contrib.models import DoctorateAdmission
-from admission.ddd.projet_doctoral.doctorat.commands import RecupererDoctoratQuery
-from admission.ddd.projet_doctoral.doctorat.domain.validator.exceptions import DoctoratNonTrouveException
-from admission.ddd.projet_doctoral.doctorat.dtos import DoctoratDTO
-from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.commands import (
+from admission.ddd.parcours_doctoral.commands import RecupererDoctoratQuery
+from admission.ddd.parcours_doctoral.domain.validator.exceptions import DoctoratNonTrouveException
+from admission.ddd.parcours_doctoral.dtos import DoctoratDTO
+from admission.ddd.parcours_doctoral.epreuve_confirmation.commands import (
     RecupererDerniereEpreuveConfirmationQuery,
 )
-from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.dtos import EpreuveConfirmationDTO
-from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.validators.exceptions import (
+from admission.ddd.parcours_doctoral.epreuve_confirmation.dtos import EpreuveConfirmationDTO
+from admission.ddd.parcours_doctoral.epreuve_confirmation.validators.exceptions import (
     EpreuveConfirmationNonTrouveeException,
 )
-from admission.ddd.projet_doctoral.preparation.commands import GetPropositionCommand
-from admission.ddd.projet_doctoral.preparation.domain.model._enums import ChoixStatutProposition
-from admission.ddd.projet_doctoral.preparation.domain.validator.exceptions import PropositionNonTrouveeException
-from admission.ddd.projet_doctoral.preparation.dtos import PropositionDTO
-from admission.ddd.projet_doctoral.validation.commands import RecupererDemandeQuery
-from admission.ddd.projet_doctoral.validation.domain.validator.exceptions import DemandeNonTrouveeException
-from admission.ddd.projet_doctoral.validation.dtos import DemandeDTO
+from admission.ddd.admission.doctorat.preparation.commands import GetPropositionCommand
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutProposition
+from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import PropositionNonTrouveeException
+from admission.ddd.admission.doctorat.preparation.dtos import PropositionDTO
+from admission.ddd.admission.doctorat.validation.commands import RecupererDemandeQuery
+from admission.ddd.admission.doctorat.validation.domain.validator.exceptions import DemandeNonTrouveeException
+from admission.ddd.admission.doctorat.validation.dtos import DemandeDTO
 from admission.utils import get_cached_admission_perm_obj
 from infrastructure.messages_bus import message_bus_instance
 from osis_role.contrib.views import PermissionRequiredMixin

@@ -25,9 +25,9 @@
 ##############################################################################
 from functools import partial
 
-from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.commands import *
-from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.use_case.read import *
-from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.use_case.write import *
+from admission.ddd.parcours_doctoral.epreuve_confirmation.commands import *
+from admission.ddd.parcours_doctoral.epreuve_confirmation.use_case.read import *
+from admission.ddd.parcours_doctoral.epreuve_confirmation.use_case.write import *
 from .domain.service.in_memory.notification import NotificationInMemory
 from .repository.in_memory.epreuve_confirmation import EpreuveConfirmationInMemoryRepository
 from ..repository.in_memory.doctorat import DoctoratInMemoryRepository

@@ -36,14 +36,14 @@ from admission.auth.roles.cdd_manager import CddManager
 from admission.contrib.models import AdmissionTask, SupervisionActor
 from admission.contrib.models.doctorate import PropositionProxy
 from admission.contrib.models.enums.actor_type import ActorType
-from admission.ddd.projet_doctoral.preparation.domain.model._membre_CA import MembreCAIdentity
-from admission.ddd.projet_doctoral.preparation.domain.model._promoteur import PromoteurIdentity
-from admission.ddd.projet_doctoral.preparation.domain.model._signature_promoteur import ChoixEtatSignature
-from admission.ddd.projet_doctoral.preparation.domain.model.doctorat import DoctoratIdentity
-from admission.ddd.projet_doctoral.preparation.domain.model.groupe_de_supervision import GroupeDeSupervision
-from admission.ddd.projet_doctoral.preparation.domain.model.proposition import Proposition
-from admission.ddd.projet_doctoral.preparation.domain.service.i_notification import INotification
-from admission.ddd.projet_doctoral.preparation.dtos import AvisDTO
+from admission.ddd.admission.doctorat.preparation.domain.model._membre_CA import MembreCAIdentity
+from admission.ddd.admission.doctorat.preparation.domain.model._promoteur import PromoteurIdentity
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixEtatSignature
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import DoctoratIdentity
+from admission.ddd.admission.doctorat.preparation.domain.model.groupe_de_supervision import GroupeDeSupervision
+from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition
+from admission.ddd.admission.doctorat.preparation.domain.service.i_notification import INotification
+from admission.ddd.admission.doctorat.preparation.dtos import AvisDTO
 from admission.infrastructure.projet_doctoral.preparation.domain.service.doctorat import DoctoratTranslator
 from admission.mail_templates import (
     ADMISSION_EMAIL_MEMBER_REMOVED,

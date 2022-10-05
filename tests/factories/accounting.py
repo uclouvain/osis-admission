@@ -27,10 +27,10 @@
 import factory
 
 from admission.contrib.models import Accounting
-from admission.ddd.projet_doctoral.preparation.domain.model._comptabilite import (
-    TypeSituationAssimilation,
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixAffiliationSport,
     ChoixTypeCompteBancaire,
+    TypeSituationAssimilation,
 )
 
 
