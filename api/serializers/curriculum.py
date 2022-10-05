@@ -29,7 +29,9 @@ from rest_framework import serializers
 
 from admission.api.serializers.fields import DoctorateAdmissionField
 from admission.api.serializers.mixins import GetDefaultContextParam
-from admission.infrastructure.projet_doctoral.preparation.domain.service.profil_candidat import ProfilCandidatTranslator
+from admission.infrastructure.admission.doctorat.preparation.domain.service.profil_candidat import (
+    ProfilCandidatTranslator,
+)
 from base.api.serializers.academic_year import RelatedAcademicYearField
 from base.models.academic_year import current_academic_year
 from base.models.enums.establishment_type import EstablishmentTypeEnum

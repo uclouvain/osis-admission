@@ -27,7 +27,9 @@ from rest_framework import serializers
 from rest_framework.fields import SerializerMethodField
 
 from admission.ddd.admission.doctorat.preparation.commands import CompleterComptabilitePropositionCommand
-from admission.infrastructure.projet_doctoral.preparation.domain.service.profil_candidat import ProfilCandidatTranslator
+from admission.infrastructure.admission.doctorat.preparation.domain.service.profil_candidat import (
+    ProfilCandidatTranslator,
+)
 from admission.utils import takewhile_return_attribute_values
 from base.models.academic_year import current_academic_year
 from base.models.enums.community import CommunityEnum

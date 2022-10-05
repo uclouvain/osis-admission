@@ -37,7 +37,7 @@ from admission.ddd.parcours_doctoral.epreuve_confirmation.validators.exceptions 
     EpreuveConfirmationNonTrouveeException,
 )
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
-from admission.infrastructure.projet_doctoral.doctorat.epreuve_confirmation.repository.in_memory import (
+from admission.infrastructure.parcours_doctoral.epreuve_confirmation.repository.in_memory import (
     epreuve_confirmation,
 )
 

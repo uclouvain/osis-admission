@@ -29,7 +29,7 @@ from admission.ddd.parcours_doctoral.formation.commands import AccepterActivites
 from admission.ddd.parcours_doctoral.formation.domain.model.enums import CategorieActivite, StatutActivite
 from admission.ddd.parcours_doctoral.formation.test.factory.activite import ActiviteFactory
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
-from admission.infrastructure.projet_doctoral.doctorat.formation.repository.in_memory.activite import (
+from admission.infrastructure.parcours_doctoral.formation.repository.in_memory.activite import (
     ActiviteInMemoryRepository,
 )
 from base.ddd.utils.business_validator import MultipleBusinessExceptions

@@ -37,15 +37,17 @@ from admission.ddd.admission.doctorat.validation.domain.service.proposition_iden
 )
 from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
 from admission.ddd.parcours_doctoral.domain.service.demande_identity import DemandeIdentityTranslator
-from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
-from admission.infrastructure.projet_doctoral.doctorat.epreuve_confirmation.repository.in_memory import (
-    epreuve_confirmation,
-)
-from admission.infrastructure.projet_doctoral.doctorat.repository.in_memory.doctorat import DoctoratInMemoryRepository
-from admission.infrastructure.projet_doctoral.preparation.repository.in_memory.proposition import (
+from admission.infrastructure.admission.doctorat.preparation.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
-from admission.infrastructure.projet_doctoral.validation.repository.in_memory.demande import DemandeInMemoryRepository
+from admission.infrastructure.admission.doctorat.validation.repository.in_memory.demande import (
+    DemandeInMemoryRepository,
+)
+from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
+from admission.infrastructure.parcours_doctoral.epreuve_confirmation.repository.in_memory import (
+    epreuve_confirmation,
+)
+from admission.infrastructure.parcours_doctoral.repository.in_memory.doctorat import DoctoratInMemoryRepository
 
 
 class TestApprouverDemandeCDD(SimpleTestCase):

@@ -24,11 +24,11 @@
 #
 # ##############################################################################
 from infrastructure.utils import AbstractMessageBusCommands, MessageBus
-from .projet_doctoral.doctorat import handlers_in_memory as doctorat_handlers
-from .projet_doctoral.doctorat.epreuve_confirmation import handlers_in_memory as epreuve_confirmation_handlers
-from .projet_doctoral.doctorat.formation import handlers_in_memory as formation_handlers
-from .projet_doctoral.preparation import handlers_in_memory as preparation_handlers
-from .projet_doctoral.validation import handlers_in_memory as validation_handlers
+from .admission.doctorat.preparation import handlers_in_memory as preparation_handlers
+from .admission.doctorat.validation import handlers_in_memory as validation_handlers
+from .parcours_doctoral import handlers_in_memory as doctorat_handlers
+from .parcours_doctoral.epreuve_confirmation import handlers_in_memory as epreuve_confirmation_handlers
+from .parcours_doctoral.formation import handlers_in_memory as formation_handlers
 
 
 class MessageBusInMemoryCommands(AbstractMessageBusCommands):

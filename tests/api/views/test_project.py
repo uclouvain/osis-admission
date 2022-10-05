@@ -621,7 +621,7 @@ class DoctorateAdmissionVerifyProjectTestCase(APITestCase):
         cls.url = resolve_url("verify-project", uuid=cls.admission.uuid)
 
     @mock.patch(
-        'admission.infrastructure.projet_doctoral.preparation.domain.service.promoteur.PromoteurTranslator.est_externe',
+        'admission.infrastructure.admission.doctorat.preparation.domain.service.promoteur.PromoteurTranslator.est_externe',
         return_value=False,
     )
     def test_verify_project_using_api(self, mock_is_external):
@@ -633,7 +633,7 @@ class DoctorateAdmissionVerifyProjectTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     @mock.patch(
-        'admission.infrastructure.projet_doctoral.preparation.domain.service.promoteur.PromoteurTranslator.est_externe',
+        'admission.infrastructure.admission.doctorat.preparation.domain.service.promoteur.PromoteurTranslator.est_externe',
         return_value=False,
     )
     def test_verify_project_using_api_without_ca_members_must_fail(self, mock_is_external):

@@ -24,11 +24,11 @@
 #
 ##############################################################################
 from infrastructure.utils import AbstractMessageBusCommands
-from .projet_doctoral.doctorat import handlers as doctorat_handlers
-from .projet_doctoral.doctorat.epreuve_confirmation import handlers as epreuve_confirmation_handlers
-from .projet_doctoral.doctorat.formation import handlers as formation_handlers
-from .projet_doctoral.preparation import handlers as preparation_handlers
-from .projet_doctoral.validation import handlers as validation_handlers
+from .admission.doctorat.preparation import handlers as preparation_handlers
+from .admission.doctorat.validation import handlers as validation_handlers
+from .parcours_doctoral import handlers as doctorat_handlers
+from .parcours_doctoral.epreuve_confirmation import handlers as epreuve_confirmation_handlers
+from .parcours_doctoral.formation import handlers as formation_handlers
 
 
 class MessageBusCommands(AbstractMessageBusCommands):
