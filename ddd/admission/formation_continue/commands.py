@@ -41,3 +41,8 @@ class InitierPropositionCommand(interface.CommandRequest):
     sigle_formation: str
     annee_formation: int
     matricule_candidat: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ListerPropositionsCandidatQuery(interface.QueryRequest):
+    matricule_candidat: str

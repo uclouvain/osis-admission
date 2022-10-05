@@ -28,27 +28,35 @@ import factory
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
-from admission.contrib.models import ContinuingEducationAdmission
+from admission.contrib.models import GeneralEducationAdmission
 from admission.tests.factories.roles import CandidateFactory
+from admission.tests.factories.scholarship import (
+    ErasmusMundusScholarship,
+    DoubleDegreeScholarship,
+    InternationalScholarship,
+)
 from base.models.enums import education_group_categories
 from base.tests.factories.education_group_year import EducationGroupYearFactory
 from base.tests.factories.person import PersonFactory
 
 
-class ContinuingEducationTrainingFactory(EducationGroupYearFactory):
+class GeneralEducationTrainingFactory(EducationGroupYearFactory):
     education_group_type = factory.SubFactory(
         'base.tests.factories.education_group_type.EducationGroupTypeFactory',
         category=education_group_categories.TRAINING,
-        name=factory.fuzzy.FuzzyChoice(AnneeInscriptionFormationTranslator.CONTINUING_EDUCATION_TYPES),
+        name=factory.fuzzy.FuzzyChoice(AnneeInscriptionFormationTranslator.GENERAL_EDUCATION_TYPES),
     )
 
 
-class ContinuingEducationAdmissionFactory(factory.DjangoModelFactory):
+class GeneralEducationAdmissionFactory(factory.DjangoModelFactory):
     class Meta:
-        model = ContinuingEducationAdmission
+        model = GeneralEducationAdmission
 
     candidate = factory.SubFactory(PersonFactory)
-    training = factory.SubFactory(ContinuingEducationTrainingFactory)
+    training = factory.SubFactory(GeneralEducationTrainingFactory)
+    erasmus_mundus_scholarship = factory.SubFactory(ErasmusMundusScholarship)
+    double_degree_scholarship = factory.SubFactory(DoubleDegreeScholarship)
+    international_scholarship = factory.SubFactory(InternationalScholarship)
 
     @factory.post_generation
     def create_candidate_role(self, create, extracted, **kwargs):
