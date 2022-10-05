@@ -23,31 +23,44 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import Optional
+import factory
+import uuid
 
-import attr
-
-from osis_common.ddd import interface
-
-
-@attr.dataclass(frozen=True, slots=True, auto_attribs=True)
-class RechercherFormationGeneraleQuery(interface.QueryRequest):
-    type_formation: str
-    intitule_formation: str
-    campus: Optional[str] = ''
+from admission.ddd.admission.domain.service.i_bourse import (
+    BourseInternationaleIdentity,
+    BourseDoubleDiplomeIdentity,
+    BourseErasmusMundusIdentity,
+    BourseDoctoratIdentity,
+)
 
 
-@attr.dataclass(frozen=True, slots=True)
-class InitierPropositionCommand(interface.CommandRequest):
-    sigle_formation: str
-    annee_formation: int
-    matricule_candidat: str
+class BourseInternationaleIdentityFactory(factory.Factory):
+    class Meta:
+        model = BourseInternationaleIdentity
+        abstract = False
 
-    bourse_double_diplome: Optional[str] = ''
-    bourse_internationale: Optional[str] = ''
-    bourse_erasmus_mundus: Optional[str] = ''
+    uuid = factory.LazyFunction(lambda: str(uuid.uuid4()))
 
 
-@attr.dataclass(frozen=True, slots=True)
-class ListerPropositionsCandidatQuery(interface.QueryRequest):
-    matricule_candidat: str
+class BourseDoubleDiplomeIdentityFactory(factory.Factory):
+    class Meta:
+        model = BourseDoubleDiplomeIdentity
+        abstract = False
+
+    uuid = factory.LazyFunction(lambda: str(uuid.uuid4()))
+
+
+class BourseErasmusMundusIdentityFactory(factory.Factory):
+    class Meta:
+        model = BourseErasmusMundusIdentity
+        abstract = False
+
+    uuid = factory.LazyFunction(lambda: str(uuid.uuid4()))
+
+
+class BourseDoctoratIdentityFactory(factory.Factory):
+    class Meta:
+        model = BourseDoctoratIdentity
+        abstract = False
+
+    uuid = factory.LazyFunction(lambda: str(uuid.uuid4()))

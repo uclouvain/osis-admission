@@ -23,31 +23,31 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import Optional
+import string
+import uuid
 
-import attr
+import factory
+from factory.fuzzy import FuzzyText
 
-from osis_common.ddd import interface
-
-
-@attr.dataclass(frozen=True, slots=True, auto_attribs=True)
-class RechercherFormationGeneraleQuery(interface.QueryRequest):
-    type_formation: str
-    intitule_formation: str
-    campus: Optional[str] = ''
+from admission.ddd.admission.formation_continue.domain.model.proposition import PropositionIdentity, Proposition
+from admission.ddd.admission.test.factory.formation import _FormationIdentityFactory
 
 
-@attr.dataclass(frozen=True, slots=True)
-class InitierPropositionCommand(interface.CommandRequest):
-    sigle_formation: str
-    annee_formation: int
-    matricule_candidat: str
+class _PropositionIdentityFactory(factory.Factory):
+    class Meta:
+        model = PropositionIdentity
+        abstract = False
 
-    bourse_double_diplome: Optional[str] = ''
-    bourse_internationale: Optional[str] = ''
-    bourse_erasmus_mundus: Optional[str] = ''
+    uuid = factory.LazyFunction(lambda: str(uuid.uuid4()))
 
 
-@attr.dataclass(frozen=True, slots=True)
-class ListerPropositionsCandidatQuery(interface.QueryRequest):
-    matricule_candidat: str
+class PropositionFactory(factory.Factory):
+    class Meta:
+        model = Proposition
+        abstract = False
+
+    entity_id = factory.SubFactory(_PropositionIdentityFactory)
+    matricule_candidat = FuzzyText(length=10, chars=string.digits)
+    formation_id = factory.SubFactory(_FormationIdentityFactory)
+    creee_le = factory.Faker('past_datetime')
+    modifiee_le = factory.Faker('past_datetime')
