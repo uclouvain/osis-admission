@@ -28,16 +28,16 @@ from uuid import uuid4
 
 from django.db import models
 from django.db.models import Q
+from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils.translation import gettext_lazy as _, pgettext_lazy
-from django.db.models.signals import post_save
 
 from admission.ddd.parcours_doctoral.formation.domain.model.enums import (
     CategorieActivite,
     ChoixComiteSelection,
     ChoixStatutPublication,
-    StatutActivite,
     ContexteFormation,
+    StatutActivite,
 )
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from osis_document.contrib import FileField
@@ -342,7 +342,7 @@ class Activity(models.Model):
 def _activity_update_can_be_submitted(sender, instance, **kwargs):
     from admission.ddd.parcours_doctoral.formation.builder.activite_identity_builder import ActiviteIdentityBuilder
     from admission.ddd.parcours_doctoral.formation.domain.service.soumettre_activites import SoumettreActivites
-    from admission.infrastructure.projet_doctoral.doctorat.formation.repository.activite import ActiviteRepository
+    from admission.infrastructure.parcours_doctoral.formation.repository.activite import ActiviteRepository
 
     activite_identity = ActiviteIdentityBuilder.build_from_uuid(instance.uuid)
     activite = ActiviteRepository.get(activite_identity)

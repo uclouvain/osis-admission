@@ -28,7 +28,7 @@ from django.test import SimpleTestCase
 
 from admission.ddd.parcours_doctoral.formation.commands import DonnerAvisSurActiviteCommand
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
-from admission.infrastructure.projet_doctoral.doctorat.formation.repository.in_memory.activite import (
+from admission.infrastructure.parcours_doctoral.formation.repository.in_memory.activite import (
     ActiviteInMemoryRepository,
 )
 

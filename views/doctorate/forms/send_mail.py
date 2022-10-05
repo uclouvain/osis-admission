@@ -32,11 +32,11 @@ from django.views.generic import FormView
 from admission.contrib.models import CddMailTemplate
 from admission.ddd.parcours_doctoral.commands import EnvoyerMessageDoctorantCommand
 from admission.forms.doctorate.cdd.send_mail import CddDoctorateSendMailForm
-from admission.infrastructure.projet_doctoral.doctorat.epreuve_confirmation.domain.service.notification import (
-    Notification as NotificationEpreuveConfirmation,
-)
-from admission.infrastructure.projet_doctoral.doctorat.domain.service.notification import (
+from admission.infrastructure.parcours_doctoral.domain.service.notification import (
     Notification as NotificationDoctorat,
+)
+from admission.infrastructure.parcours_doctoral.epreuve_confirmation.domain.service.notification import (
+    Notification as NotificationEpreuveConfirmation,
 )
 from admission.mail_templates import CONFIRMATION_PAPER_TEMPLATES_IDENTIFIERS
 from admission.views.doctorate.mixins import LoadDossierViewMixin

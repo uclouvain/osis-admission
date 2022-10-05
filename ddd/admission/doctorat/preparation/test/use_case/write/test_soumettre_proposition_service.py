@@ -37,16 +37,16 @@ from admission.ddd.admission.doctorat.preparation.test.factory.proposition impor
     PropositionAdmissionSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory,
     PropositionPreAdmissionSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory,
 )
-from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
-from admission.infrastructure.projet_doctoral.preparation.domain.service.in_memory.profil_candidat import (
+from admission.infrastructure.admission.doctorat.preparation.domain.service.in_memory.profil_candidat import (
     ProfilCandidatInMemoryTranslator,
 )
-from admission.infrastructure.projet_doctoral.preparation.repository.in_memory.groupe_de_supervision import (
+from admission.infrastructure.admission.doctorat.preparation.repository.in_memory.groupe_de_supervision import (
     GroupeDeSupervisionInMemoryRepository,
 )
-from admission.infrastructure.projet_doctoral.preparation.repository.in_memory.proposition import (
+from admission.infrastructure.admission.doctorat.preparation.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
+from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import AcademicYear, AcademicYearIdentity
 from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository

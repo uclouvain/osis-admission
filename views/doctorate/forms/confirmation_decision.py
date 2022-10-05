@@ -26,21 +26,20 @@
 from django.contrib import messages
 from django.http import HttpResponseRedirect
 from django.urls import reverse
-from django.utils.translation import override, gettext_lazy as _
+from django.utils.translation import gettext_lazy as _, override
 from django.views import View
 from django.views.generic import FormView
-from osis_mail_template.models import MailTemplate
 
 from admission.contrib.models import CddMailTemplate
 from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
 from admission.ddd.parcours_doctoral.epreuve_confirmation.commands import (
-    ConfirmerReussiteCommand,
     ConfirmerEchecCommand,
     ConfirmerRepassageCommand,
+    ConfirmerReussiteCommand,
 )
-from admission.forms.doctorate.cdd.generic_send_mail import SelectCddEmailTemplateForm, BaseEmailTemplateForm
+from admission.forms.doctorate.cdd.generic_send_mail import BaseEmailTemplateForm, SelectCddEmailTemplateForm
 from admission.forms.doctorate.confirmation import ConfirmationRetakingForm
-from admission.infrastructure.projet_doctoral.doctorat.epreuve_confirmation.domain.service.notification import (
+from admission.infrastructure.parcours_doctoral.epreuve_confirmation.domain.service.notification import (
     Notification,
 )
 from admission.mail_templates import (
@@ -52,6 +51,7 @@ from admission.views.mixins.business_exceptions_form_view_mixin import BusinessE
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from base.utils.htmx import HtmxMixin
 from infrastructure.messages_bus import message_bus_instance
+from osis_mail_template.models import MailTemplate
 
 
 class DoctorateAdmissionConfirmationSuccessDecisionView(
