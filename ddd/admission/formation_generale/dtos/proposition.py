@@ -49,4 +49,3 @@ class PropositionDTO(interface.DTO):
     bourse_double_diplome: Optional[BourseDTO] = None
     bourse_internationale: Optional[BourseDTO] = None
     bourse_erasmus_mundus: Optional[BourseDTO] = None
-

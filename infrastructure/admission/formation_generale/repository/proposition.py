@@ -57,7 +57,15 @@ class PropositionRepository(IPropositionRepository):
 
     @classmethod
     def search_dto(cls, matricule_candidat: Optional[str] = '') -> List['PropositionDTO']:
-        raise NotImplementedError
+        # Default queryset
+        qs = GeneralEducationAdmissionProxy.objects.all()
+
+        # Add filters
+        if matricule_candidat:
+            qs = qs.filter(candidate__global_id=matricule_candidat)
+
+        # Return dtos
+        return [cls._load_dto(proposition) for proposition in qs]
 
     @classmethod
     def delete(cls, entity_id: 'PropositionIdentity', **kwargs: ApplicationService) -> None:
@@ -116,13 +124,13 @@ class PropositionRepository(IPropositionRepository):
     def get_dto(cls, entity_id: 'PropositionIdentity') -> 'PropositionDTO':
         try:
             return cls._load_dto(GeneralEducationAdmissionProxy.objects.get(uuid=entity_id.uuid))
-        except GeneralEducationAdmission.DoesNotExist:
+        except GeneralEducationAdmissionProxy.DoesNotExist:
             raise PropositionNonTrouveeException
 
     @classmethod
     def _load(cls, admission: 'GeneralEducationAdmission') -> 'Proposition':
         scholarships_uuids = list(
-            scholarship
+            str(scholarship.uuid)
             for scholarship in [
                 admission.double_degree_scholarship,
                 admission.erasmus_mundus_scholarship,
@@ -157,7 +165,7 @@ class PropositionRepository(IPropositionRepository):
     @classmethod
     def _load_dto(cls, admission: GeneralEducationAdmission) -> 'PropositionDTO':
         scholarships_uuids = list(
-            scholarship
+            str(scholarship.uuid)
             for scholarship in [
                 admission.double_degree_scholarship,
                 admission.erasmus_mundus_scholarship,
