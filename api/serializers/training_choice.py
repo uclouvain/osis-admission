@@ -23,20 +23,33 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.ddd.admission.formation_generale.commands import (
-    InitierPropositionCommand as InitierPropositionGeneraleCommand,
-)
-from admission.ddd.admission.formation_continue.commands import (
-    InitierPropositionCommand as InitierPropositionContinueCommand,
-)
+from admission.ddd.admission.formation_continue import commands as continuing_education_commands
+from admission.ddd.admission.formation_generale import commands as general_education_commands
+from admission.ddd.admission.doctorat.preparation import commands as doctorate_education_commands
+
 from base.utils.serializers import DTOSerializer
 
 
 class InitierPropositionGeneraleCommandSerializer(DTOSerializer):
     class Meta:
-        source = InitierPropositionGeneraleCommand
+        source = general_education_commands.InitierPropositionCommand
 
 
 class InitierPropositionContinueCommandSerializer(DTOSerializer):
     class Meta:
-        source = InitierPropositionContinueCommand
+        source = continuing_education_commands.InitierPropositionCommand
+
+
+class ModifierChoixFormationContinueCommandSerializer(DTOSerializer):
+    class Meta:
+        source = continuing_education_commands.ModifierChoixFormationCommand
+
+
+class ModifierChoixFormationGeneraleCommandSerializer(DTOSerializer):
+    class Meta:
+        source = general_education_commands.ModifierChoixFormationCommand
+
+
+class ModifierTypeAdmissionDoctoraleCommandSerializer(DTOSerializer):
+    class Meta:
+        source = doctorate_education_commands.ModifierTypeAdmissionCommand

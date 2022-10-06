@@ -31,27 +31,20 @@ from admission.ddd.admission.domain.builder.bourse_identity import BourseIdentit
 from admission.ddd.admission.domain.service.i_bourse import IBourseTranslator, BourseIdentity
 from admission.ddd.admission.domain.validator.exceptions import BourseNonTrouveeException
 from admission.ddd.admission.dtos.bourse import BourseDTO
-from admission.ddd.admission.enums.type_bourse import TypeBourse
 
 
 class BourseTranslator(IBourseTranslator):
     @classmethod
     def get(cls, uuid: str) -> BourseIdentity:
-        try:
-            scholarship = Scholarship.objects.get(pk=uuid)
-            return BourseIdentityBuilder.build_from_uuid(type=scholarship.type, uuid=uuid)
-        except Scholarship.DoesNotExist:
+        if not cls.verifier_existence(uuid=uuid):
             raise BourseNonTrouveeException
+        return BourseIdentityBuilder.build_from_uuid(uuid=uuid)
 
     @classmethod
     def get_dto(cls, uuid: str) -> BourseDTO:
         try:
             scholarship = Scholarship.objects.get(pk=uuid)
-            return BourseDTO(
-                nom_court=scholarship.short_name,
-                nom_long=scholarship.long_name,
-                type=TypeBourse.get_value(scholarship.type),
-            )
+            return cls.build_dto(scholarship)
         except Scholarship.DoesNotExist:
             raise BourseNonTrouveeException
 
@@ -59,8 +52,7 @@ class BourseTranslator(IBourseTranslator):
     def search(cls, uuids: List[str]) -> Dict[str, BourseIdentity]:
         if uuids:
             scholarships = {
-                str(scholarship.uuid):
-                BourseIdentityBuilder.build_from_uuid(type=scholarship.type, uuid=scholarship.uuid)
+                str(scholarship.uuid): BourseIdentityBuilder.build_from_uuid(uuid=scholarship.uuid)
                 for scholarship in Scholarship.objects.filter(uuid__in=uuids)
             }
             if len(scholarships) != len(uuids):
@@ -72,14 +64,23 @@ class BourseTranslator(IBourseTranslator):
     def search_dto(cls, uuids: List[str]) -> Dict[str, BourseDTO]:
         if uuids:
             scholarships = {
-                str(scholarship.uuid): BourseDTO(
-                    nom_court=scholarship.short_name,
-                    nom_long=scholarship.long_name,
-                    type=scholarship.type,
-                )
+                str(scholarship.uuid): cls.build_dto(scholarship)
                 for scholarship in Scholarship.objects.filter(uuid__in=uuids)
             }
             if len(scholarships) != len(uuids):
                 raise BourseNonTrouveeException
             return scholarships
         return {}
+
+    @classmethod
+    def build_dto(cls, scholarship: Scholarship) -> BourseDTO:
+        return BourseDTO(
+            nom_court=scholarship.short_name,
+            nom_long=scholarship.long_name,
+            type=scholarship.type,
+            uuid=str(scholarship.uuid),
+        )
+
+    @classmethod
+    def verifier_existence(cls, uuid: str) -> bool:
+        return Scholarship.objects.filter(pk=uuid).exists()

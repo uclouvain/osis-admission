@@ -611,7 +611,7 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - person
-  /propositions/{uuid}:
+  /propositions/doctorate/{uuid}:
     get:
       operationId: retrieve_proposition
       description: Get a single proposition
@@ -632,7 +632,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PropositionDTO'
+                $ref: '#/components/schemas/DoctoratePropositionDTO'
           description: ''
         '400':
           $ref: '#/components/responses/BadRequest'
@@ -707,7 +707,7 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - propositions
-  /propositions/{uuid}/person:
+  /propositions/doctorate/{uuid}/person:
     get:
       operationId: retrievePersonIdentificationAdmission
       description: ''
@@ -773,7 +773,7 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - person
-  /propositions/{uuid}/coordonnees:
+  /propositions/doctorate/{uuid}/coordonnees:
     get:
       operationId: retrieveCoordonneesAdmission
       description: ''
@@ -839,7 +839,7 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - person
-  /propositions/{uuid}/secondary_studies:
+  /propositions/doctorate/{uuid}/secondary_studies:
     get:
       operationId: retrieveHighSchoolDiplomaAdmission
       description: ''
@@ -905,7 +905,7 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - person
-  /propositions/{uuid}/languages_knowledge:
+  /propositions/doctorate/{uuid}/languages_knowledge:
     get:
       operationId: listLanguageKnowledgesAdmission
       description: ''
@@ -977,7 +977,7 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - person
-  /propositions/{uuid}/curriculum/file:
+  /propositions/doctorate/{uuid}/curriculum/file:
     get:
       operationId: retrieveCurriculumFileAdmission
       description: ''
@@ -1043,7 +1043,7 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - person
-  /propositions/{uuid}/curriculum/:
+  /propositions/doctorate/{uuid}/curriculum/:
     get:
       operationId: retrieveCurriculumAdmission
       description: Return the experiences and the curriculum pdf of a person and the
@@ -1075,7 +1075,7 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - person
-  /propositions/{uuid}/curriculum/educational/{experience_id}:
+  /propositions/doctorate/{uuid}/curriculum/educational/{experience_id}:
     get:
       operationId: retrieve_educational_experienceAdmission
       description: ''
@@ -1185,7 +1185,7 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - person
-  /propositions/{uuid}/curriculum/professional/{experience_id}:
+  /propositions/doctorate/{uuid}/curriculum/professional/{experience_id}:
     get:
       operationId: retrieve_professional_experienceAdmission
       description: ''
@@ -1295,7 +1295,7 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - person
-  /propositions/{uuid}/verify_project:
+  /propositions/doctorate/{uuid}/verify_project:
     get:
       operationId: retrieve_verify_project
       description: Check the project to be OK with all validators.
@@ -1333,7 +1333,7 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - propositions
-  /propositions/{uuid}/submit:
+  /propositions/doctorate/{uuid}/submit:
     get:
       operationId: verify_proposition
       description: Check the proposition to be OK with all validators.
@@ -1406,7 +1406,7 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - propositions
-  /propositions/{uuid}/cotutelle:
+  /propositions/doctorate/{uuid}/cotutelle:
     get:
       operationId: retrieve_cotutelle
       description: Get the cotutelle of a proposition
@@ -1472,7 +1472,7 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - propositions
-  /propositions/{uuid}/accounting:
+  /propositions/doctorate/{uuid}/accounting:
     get:
       operationId: retrieve_accounting
       description: Get additional data conditioning the required accounting fields
@@ -1538,7 +1538,7 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - propositions
-  /propositions/{uuid}/supervision:
+  /propositions/doctorate/{uuid}/supervision:
     get:
       operationId: retrieve_supervision
       description: Get the supervision group of a proposition
@@ -1639,7 +1639,7 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - propositions
-  /propositions/{uuid}/confirmation:
+  /propositions/doctorate/{uuid}/confirmation:
     get:
       operationId: retrieve_confirmation_papers
       description: Get the confirmation papers related to the doctorate
@@ -1672,7 +1672,7 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - propositions
-  /propositions/{uuid}/confirmation/last:
+  /propositions/doctorate/{uuid}/confirmation/last:
     get:
       operationId: retrieve_last_confirmation_paper
       description: Get the last confirmation paper related to the doctorate
@@ -1774,7 +1774,7 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - propositions
-  /propositions/{uuid}/confirmation/last/canvas:
+  /propositions/doctorate/{uuid}/confirmation/last/canvas:
     get:
       operationId: retrieve_last_confirmation_paper_canvas
       description: Get the last confirmation paper canvas related to the doctorate
@@ -1805,7 +1805,7 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - propositions
-  /propositions/{uuid}/doctorate:
+  /propositions/doctorate/{uuid}/doctorate:
     get:
       operationId: retrieveDoctorateDTO
       description: Get the doctorate
@@ -1836,7 +1836,7 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - propositions
-  /propositions/{uuid}/training/config:
+  /propositions/doctorate/{uuid}/training/config:
     get:
       operationId: retrieveDoctoralTrainingConfig
       description: ''
@@ -1867,7 +1867,7 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - propositions
-  /propositions/{uuid}/doctoral-training:
+  /propositions/doctorate/{uuid}/doctoral-training:
     get:
       operationId: list_doctoral_training
       description: ''
@@ -1935,7 +1935,7 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - propositions
-  /propositions/{uuid}/training/{activity_id}:
+  /propositions/doctorate/{uuid}/training/{activity_id}:
     get:
       operationId: retrieve_training
       description: ''
@@ -2045,7 +2045,7 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - propositions
-  /propositions/{uuid}/complementary-training:
+  /propositions/doctorate/{uuid}/complementary-training:
     get:
       operationId: list_complementary_training
       description: ''
@@ -2078,7 +2078,7 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - propositions
-  /propositions/{uuid}/course-enrollment:
+  /propositions/doctorate/{uuid}/course-enrollment:
     get:
       operationId: list_course_enrollment
       description: ''
@@ -2102,6 +2102,68 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/DoctoralTrainingActivity'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
+  /propositions/general-education/{uuid}:
+    get:
+      operationId: retrieve_general_education_proposition
+      description: Get a single proposition
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GeneralEducationPropositionDTO'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
+  /propositions/continuing-education/{uuid}:
+    get:
+      operationId: retrieve_continuing_education_proposition
+      description: Get a single proposition
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContinuingEducationPropositionDTO'
           description: ''
         '400':
           $ref: '#/components/responses/BadRequest'
@@ -2546,66 +2608,6 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - campus
-  /propositions/general_education:
-    post:
-      operationId: create_general_training_choice
-      description: ''
-      parameters:
-      - $ref: '#/components/parameters/Accept-Language'
-      - $ref: '#/components/parameters/X-User-FirstName'
-      - $ref: '#/components/parameters/X-User-LastName'
-      - $ref: '#/components/parameters/X-User-Email'
-      - $ref: '#/components/parameters/X-User-GlobalID'
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/InitierPropositionGeneraleCommand'
-      responses:
-        201:
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PropositionIdentityDTO'
-          description: ''
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-      tags:
-      - propositions
-  /propositions/continuing_education:
-    post:
-      operationId: create_continuing_training_choice
-      description: ''
-      parameters:
-      - $ref: '#/components/parameters/Accept-Language'
-      - $ref: '#/components/parameters/X-User-FirstName'
-      - $ref: '#/components/parameters/X-User-LastName'
-      - $ref: '#/components/parameters/X-User-Email'
-      - $ref: '#/components/parameters/X-User-GlobalID'
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/InitierPropositionContinueCommand'
-      responses:
-        201:
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PropositionIdentityDTO'
-          description: ''
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-      tags:
-      - propositions
   /curriculum/educational:
     post:
       operationId: create_educational_experience
@@ -2666,7 +2668,7 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - person
-  /propositions/{uuid}/curriculum/educational:
+  /propositions/doctorate/{uuid}/curriculum/educational:
     post:
       operationId: create_educational_experienceAdmission
       description: ''
@@ -2702,7 +2704,7 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - person
-  /propositions/{uuid}/curriculum/professional:
+  /propositions/doctorate/{uuid}/curriculum/professional:
     post:
       operationId: create_professional_experienceAdmission
       description: ''
@@ -2738,7 +2740,7 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - person
-  /propositions/{uuid}/supervision/request-signatures:
+  /propositions/doctorate/{uuid}/supervision/request-signatures:
     post:
       operationId: create_signatures
       description: Ask for all promoters and members to sign the proposition.
@@ -2774,7 +2776,7 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - propositions
-  /propositions/{uuid}/supervision/approve:
+  /propositions/doctorate/{uuid}/supervision/approve:
     post:
       operationId: approve_proposition
       description: Approve the proposition.
@@ -2845,7 +2847,7 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - propositions
-  /propositions/{uuid}/supervision/approve-by-pdf:
+  /propositions/doctorate/{uuid}/supervision/approve-by-pdf:
     post:
       operationId: approve_by_pdf
       description: Approve the proposition with a pdf file.
@@ -2881,7 +2883,7 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - propositions
-  /propositions/{uuid}/training/submit:
+  /propositions/doctorate/{uuid}/training/submit:
     post:
       operationId: submit_training
       description: Submit doctoral training activities.
@@ -2917,7 +2919,7 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - propositions
-  /propositions/{uuid}/training/assent:
+  /propositions/doctorate/{uuid}/training/assent:
     post:
       operationId: assent_training
       description: Assent on a doctoral training activity.
@@ -2958,7 +2960,136 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - propositions
-  /propositions/{uuid}/supervision/set-reference-promoter:
+  /propositions/general-education:
+    post:
+      operationId: create_general_training_choice
+      description: ''
+      parameters:
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InitierPropositionGeneraleCommand'
+      responses:
+        201:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PropositionIdentityDTO'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
+  /propositions/continuing-education:
+    post:
+      operationId: create_continuing_training_choice
+      description: ''
+      parameters:
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InitierPropositionContinueCommand'
+      responses:
+        201:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PropositionIdentityDTO'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
+  /propositions/doctorate/{uuid}/training_choice:
+    put:
+      operationId: update_doctorate_training_choice
+      description: ''
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ModifierTypeAdmissionDoctoraleCommand'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PropositionIdentityDTO'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
+    patch:
+      operationId: partialUpdate_doctorate_training_choice
+      description: ''
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema: {}
+      responses:
+        200:
+          content:
+            application/json:
+              schema: {}
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
+  /propositions/doctorate/{uuid}/supervision/set-reference-promoter:
     put:
       operationId: set_reference_promoter
       description: Set a supervision group member as reference promoter
@@ -2994,7 +3125,7 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - propositions
-  /propositions/{uuid}/supervised_confirmation:
+  /propositions/doctorate/{uuid}/supervised_confirmation:
     put:
       operationId: complete_confirmation_paper_by_promoter
       description: Complete the confirmation paper related to a doctorate
@@ -3030,6 +3161,144 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - propositions
+  /propositions/general-education/{uuid}/training_choice:
+    put:
+      operationId: update_general_training_choice
+      description: ''
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ModifierChoixFormationGeneraleCommand'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PropositionIdentityDTO'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
+    patch:
+      operationId: partialUpdate_general_training_choice
+      description: ''
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema: {}
+      responses:
+        200:
+          content:
+            application/json:
+              schema: {}
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
+  /propositions/continuing-education/{uuid}/training_choice:
+    put:
+      operationId: update_continuing_training_choice
+      description: ''
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ModifierChoixFormationContinueCommand'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PropositionIdentityDTO'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
+    patch:
+      operationId: partialUpdate_continuing_training_choice
+      description: ''
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema: {}
+      responses:
+        200:
+          content:
+            application/json:
+              schema: {}
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
 components:
   schemas:
     Dashboard:
@@ -3050,7 +3319,11 @@ components:
         links:
           type: object
           properties:
-            create_proposition:
+            create_doctorate_proposition:
+              $ref: '#/components/schemas/ActionLink'
+            create_general_proposition:
+              $ref: '#/components/schemas/ActionLink'
+            create_continuing_proposition:
               $ref: '#/components/schemas/ActionLink'
           readOnly: true
           default: {}
@@ -3152,6 +3425,8 @@ components:
                     $ref: '#/components/schemas/ActionLink'
                   retrieve_course_enrollment:
                     $ref: '#/components/schemas/ActionLink'
+                  retrieve_training_choice:
+                    $ref: '#/components/schemas/ActionLink'
                 readOnly: true
                 default: {}
             required:
@@ -3202,7 +3477,9 @@ components:
                 type: string
               links:
                 type: object
-                properties: {}
+                properties:
+                  retrieve_training_choice:
+                    $ref: '#/components/schemas/ActionLink'
                 readOnly: true
                 default: {}
             required:
@@ -3249,7 +3526,9 @@ components:
                 type: string
               links:
                 type: object
-                properties: {}
+                properties:
+                  retrieve_training_choice:
+                    $ref: '#/components/schemas/ActionLink'
                 readOnly: true
                 default: {}
             required:
@@ -3359,6 +3638,8 @@ components:
             retrieve_complementary_training:
               $ref: '#/components/schemas/ActionLink'
             retrieve_course_enrollment:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_training_choice:
               $ref: '#/components/schemas/ActionLink'
           readOnly: true
           default: {}
@@ -4139,7 +4420,7 @@ components:
       - PRIVATE
       - ASSOCIATIVE
       type: string
-    PropositionDTO:
+    DoctoratePropositionDTO:
       type: object
       properties:
         uuid:
@@ -4278,6 +4559,10 @@ components:
             retrieve_proposition:
               $ref: '#/components/schemas/ActionLink'
             update_proposition:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_training_choice:
+              $ref: '#/components/schemas/ActionLink'
+            update_training_choice:
               $ref: '#/components/schemas/ActionLink'
             retrieve_cotutelle:
               $ref: '#/components/schemas/ActionLink'
@@ -4522,6 +4807,23 @@ components:
           - attestation_boursier
           - titre_identite_sejour_longue_duree_ue
           - titre_sejour_belgique
+        bourse_erasmus_mundus:
+          type: object
+          properties:
+            uuid:
+              type: string
+            nom_court:
+              type: string
+            nom_long:
+              type: string
+            type:
+              type: string
+          required:
+          - uuid
+          - nom_court
+          - nom_long
+          - type
+          nullable: true
       required:
       - uuid
       - type_admission
@@ -5987,6 +6289,175 @@ components:
       - COMPLEMENTARY_TRAINING
       - FREE_COURSE
       type: string
+    GeneralEducationPropositionDTO:
+      type: object
+      properties:
+        uuid:
+          type: string
+        formation:
+          type: object
+          properties:
+            sigle:
+              type: string
+            annee:
+              type: integer
+            intitule:
+              type: string
+            campus:
+              type: string
+          required:
+          - sigle
+          - annee
+          - intitule
+          - campus
+        matricule_candidat:
+          type: string
+        prenom_candidat:
+          type: string
+        nom_candidat:
+          type: string
+        creee_le:
+          type: string
+          format: date-time
+        statut:
+          type: string
+        links:
+          type: object
+          properties:
+            retrieve_training_choice:
+              $ref: '#/components/schemas/ActionLink'
+            update_training_choice:
+              $ref: '#/components/schemas/ActionLink'
+          readOnly: true
+          default: {}
+        erreurs:
+          type: array
+          items:
+            type: object
+            properties:
+              status_code:
+                type: string
+              detail:
+                type: string
+        bourse_double_diplome:
+          type: object
+          properties:
+            uuid:
+              type: string
+            nom_court:
+              type: string
+            nom_long:
+              type: string
+            type:
+              type: string
+          required:
+          - uuid
+          - nom_court
+          - nom_long
+          - type
+          nullable: true
+        bourse_internationale:
+          type: object
+          properties:
+            uuid:
+              type: string
+            nom_court:
+              type: string
+            nom_long:
+              type: string
+            type:
+              type: string
+          required:
+          - uuid
+          - nom_court
+          - nom_long
+          - type
+          nullable: true
+        bourse_erasmus_mundus:
+          type: object
+          properties:
+            uuid:
+              type: string
+            nom_court:
+              type: string
+            nom_long:
+              type: string
+            type:
+              type: string
+          required:
+          - uuid
+          - nom_court
+          - nom_long
+          - type
+          nullable: true
+      required:
+      - uuid
+      - formation
+      - matricule_candidat
+      - prenom_candidat
+      - nom_candidat
+      - creee_le
+      - statut
+      - erreurs
+    ContinuingEducationPropositionDTO:
+      type: object
+      properties:
+        uuid:
+          type: string
+        formation:
+          type: object
+          properties:
+            sigle:
+              type: string
+            annee:
+              type: integer
+            intitule:
+              type: string
+            campus:
+              type: string
+          required:
+          - sigle
+          - annee
+          - intitule
+          - campus
+        matricule_candidat:
+          type: string
+        prenom_candidat:
+          type: string
+        nom_candidat:
+          type: string
+        creee_le:
+          type: string
+          format: date-time
+        statut:
+          type: string
+        links:
+          type: object
+          properties:
+            retrieve_training_choice:
+              $ref: '#/components/schemas/ActionLink'
+            update_training_choice:
+              $ref: '#/components/schemas/ActionLink'
+          readOnly: true
+          default: {}
+        erreurs:
+          type: array
+          items:
+            type: object
+            properties:
+              status_code:
+                type: string
+              detail:
+                type: string
+      required:
+      - uuid
+      - formation
+      - matricule_candidat
+      - prenom_candidat
+      - nom_candidat
+      - creee_le
+      - statut
+      - erreurs
     SectorDTO:
       type: object
       properties:
@@ -6156,38 +6627,6 @@ components:
       - BIOLOGY
       - GEOGRAPHY
       type: string
-    InitierPropositionGeneraleCommand:
-      type: object
-      properties:
-        sigle_formation:
-          type: string
-        annee_formation:
-          type: integer
-        matricule_candidat:
-          type: string
-        bourse_double_diplome:
-          type: string
-        bourse_internationale:
-          type: string
-        bourse_erasmus_mundus:
-          type: string
-      required:
-      - sigle_formation
-      - annee_formation
-      - matricule_candidat
-    InitierPropositionContinueCommand:
-      type: object
-      properties:
-        sigle_formation:
-          type: string
-        annee_formation:
-          type: integer
-        matricule_candidat:
-          type: string
-      required:
-      - sigle_formation
-      - annee_formation
-      - matricule_candidat
     SupervisionActor:
       type: object
       properties:
@@ -6270,6 +6709,38 @@ components:
       required:
       - approbation
       - commentaire
+    InitierPropositionGeneraleCommand:
+      type: object
+      properties:
+        sigle_formation:
+          type: string
+        annee_formation:
+          type: integer
+        matricule_candidat:
+          type: string
+        bourse_double_diplome:
+          type: string
+        bourse_internationale:
+          type: string
+        bourse_erasmus_mundus:
+          type: string
+      required:
+      - sigle_formation
+      - annee_formation
+      - matricule_candidat
+    InitierPropositionContinueCommand:
+      type: object
+      properties:
+        sigle_formation:
+          type: string
+        annee_formation:
+          type: integer
+        matricule_candidat:
+          type: string
+      required:
+      - sigle_formation
+      - annee_formation
+      - matricule_candidat
     CompleterPropositionCommand:
       type: object
       properties:
@@ -6601,6 +7072,20 @@ components:
       - attestation_boursier
       - titre_identite_sejour_longue_duree_ue
       - titre_sejour_belgique
+    ModifierTypeAdmissionDoctoraleCommand:
+      type: object
+      properties:
+        uuid_proposition:
+          type: string
+        type_admission:
+          type: string
+        justification:
+          type: string
+        bourse_erasmus_mundus:
+          type: string
+      required:
+      - uuid_proposition
+      - type_admission
     DesignerPromoteurReferenceCommand:
       type: object
       properties:
@@ -6662,6 +7147,38 @@ components:
       required:
       - proces_verbal_ca
       - avis_renouvellement_mandat_recherche
+    ModifierChoixFormationGeneraleCommand:
+      type: object
+      properties:
+        uuid_proposition:
+          type: string
+        sigle_formation:
+          type: string
+        annee_formation:
+          type: integer
+        bourse_double_diplome:
+          type: string
+        bourse_internationale:
+          type: string
+        bourse_erasmus_mundus:
+          type: string
+      required:
+      - uuid_proposition
+      - sigle_formation
+      - annee_formation
+    ModifierChoixFormationContinueCommand:
+      type: object
+      properties:
+        uuid_proposition:
+          type: string
+        sigle_formation:
+          type: string
+        annee_formation:
+          type: integer
+      required:
+      - uuid_proposition
+      - sigle_formation
+      - annee_formation
     Error:
       type: object
       properties:

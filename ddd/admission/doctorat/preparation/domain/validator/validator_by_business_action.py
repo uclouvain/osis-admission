@@ -59,6 +59,20 @@ class InitierPropositionValidatorList(TwoStepsMultipleBusinessExceptionListValid
 
 
 @attr.dataclass(frozen=True, slots=True)
+class ModifierTypeAdmissionValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+    type_admission: str
+    justification: Optional[str] = ''
+
+    def get_data_contract_validators(self) -> List[BusinessValidator]:
+        return []
+
+    def get_invariants_validators(self) -> List[BusinessValidator]:
+        return [
+            ShouldJustificationDonneeSiPreadmission(self.type_admission, self.justification),
+        ]
+
+
+@attr.dataclass(frozen=True, slots=True)
 class CompletionPropositionValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
     type_admission: str
     type_financement: Optional[str] = ''

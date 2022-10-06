@@ -28,7 +28,6 @@ from dataclasses import dataclass
 from typing import Optional, List, Dict
 
 from admission.ddd.admission.domain.builder.bourse_identity import BourseIdentityBuilder
-from admission.ddd.admission.domain.model.bourse import BourseDoubleDiplomeIdentity
 from admission.ddd.admission.domain.service.i_bourse import IBourseTranslator, BourseIdentity
 from admission.ddd.admission.domain.validator.exceptions import BourseNonTrouveeException
 from admission.ddd.admission.dtos.bourse import BourseDTO
@@ -45,31 +44,31 @@ class Bourse:
 
 class BourseInMemoryTranslator(IBourseTranslator):
     bourse_dd_1 = Bourse(
-        entity_id=BourseDoubleDiplomeIdentity(uuid=str(uuid4())),
+        entity_id=BourseIdentity(uuid=str(uuid4())),
         type=TypeBourse.DOUBLE_TRIPLE_DIPLOMATION,
         nom_court='AGRO DD UCLOUVAIN/GEM',
         nom_long='AGRO DD UCLOUVAIN/GEM --',
     )
     bourse_dd_2 = Bourse(
-        entity_id=BourseDoubleDiplomeIdentity(uuid=str(uuid4())),
+        entity_id=BourseIdentity(uuid=str(uuid4())),
         type=TypeBourse.DOUBLE_TRIPLE_DIPLOMATION,
         nom_court='CRIM DD UCL/LILLE',
         nom_long='CRIM DD UCL/LILLE --',
     )
     bourse_ifg_1 = Bourse(
-        entity_id=BourseDoubleDiplomeIdentity(uuid=str(uuid4())),
+        entity_id=BourseIdentity(uuid=str(uuid4())),
         type=TypeBourse.BOURSE_INTERNATIONALE_FORMATION_GENERALE,
         nom_court='AFEPA',
         nom_long='AFEPA --',
     )
     bourse_ifg_2 = Bourse(
-        entity_id=BourseDoubleDiplomeIdentity(uuid=str(uuid4())),
+        entity_id=BourseIdentity(uuid=str(uuid4())),
         type=TypeBourse.BOURSE_INTERNATIONALE_FORMATION_GENERALE,
         nom_court='WBI',
         nom_long='WBI --',
     )
     bourse_em_1 = Bourse(
-        entity_id=BourseDoubleDiplomeIdentity(uuid=str(uuid4())),
+        entity_id=BourseIdentity(uuid=str(uuid4())),
         type=TypeBourse.ERASMUS_MUNDUS,
         nom_court='EMDI',
         nom_long='EMDI --',
@@ -85,10 +84,9 @@ class BourseInMemoryTranslator(IBourseTranslator):
 
     @classmethod
     def get(cls, uuid: str) -> BourseIdentity:
-        scholarship = next((entity for entity in cls.ENTITIES if entity.entity_id.uuid == uuid), None)
-        if scholarship:
-            return scholarship.entity_id
-        raise BourseNonTrouveeException
+        if not cls.verifier_existence(uuid=uuid):
+            raise BourseNonTrouveeException
+        return BourseIdentityBuilder.build_from_uuid(uuid=uuid)
 
     @classmethod
     def get_dto(cls, uuid: str) -> BourseDTO:
@@ -98,6 +96,7 @@ class BourseInMemoryTranslator(IBourseTranslator):
                 type=scholarship.type.name,
                 nom_court=scholarship.nom_court,
                 nom_long=scholarship.nom_long,
+                uuid=scholarship.entity_id.uuid,
             )
         raise BourseNonTrouveeException
 
@@ -105,10 +104,7 @@ class BourseInMemoryTranslator(IBourseTranslator):
     def search(cls, uuids: List[str]) -> Dict[str, BourseIdentity]:
         if uuids:
             scholarships = {
-                scholarship.entity_id.uuid: BourseIdentityBuilder.build_from_uuid(
-                    type=scholarship.type.name,
-                    uuid=scholarship.entity_id.uuid,
-                )
+                scholarship.entity_id.uuid: BourseIdentityBuilder.build_from_uuid(uuid=scholarship.entity_id.uuid)
                 for scholarship in cls.ENTITIES
                 if scholarship.entity_id.uuid in uuids
             }
@@ -125,6 +121,7 @@ class BourseInMemoryTranslator(IBourseTranslator):
                     nom_court=entity.nom_court,
                     nom_long=entity.nom_long,
                     type=entity.type.name,
+                    uuid=entity.entity_id.uuid,
                 )
                 for entity in cls.ENTITIES
                 if entity.entity_id.uuid in uuids
@@ -134,3 +131,7 @@ class BourseInMemoryTranslator(IBourseTranslator):
             return scholarships
 
         return {}
+
+    @classmethod
+    def verifier_existence(cls, uuid: str) -> bool:
+        return any(scholarship for scholarship in cls.ENTITIES if scholarship.entity_id.uuid == uuid)

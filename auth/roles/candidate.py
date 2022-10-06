@@ -42,8 +42,10 @@ from osis_role.contrib.models import RoleModel
 author_and_enrolled = is_admission_request_author & is_enrolled
 
 _CANDIDATE_RULESET = {
+    # Doctorate
     # A candidate can view as long as it's the author
     'view_doctorateadmission': is_admission_request_author,
+    'view_doctorateadmission_training_choice': is_admission_request_author,
     'view_doctorateadmission_project': is_admission_request_author,
     'view_doctorateadmission_cotutelle': is_admission_request_author,
     'view_doctorateadmission_supervision': is_admission_request_author,
@@ -64,6 +66,7 @@ _CANDIDATE_RULESET = {
     'change_doctorateadmission_languages': is_admission_request_author & unconfirmed_proposition,
     'change_accounting': is_admission_request_author & unconfirmed_proposition,
     # Project tabs and supervision group edition are accessible as long as signing has not begun
+    'change_doctorateadmission_training_choice': is_admission_request_author & in_progress,
     'change_doctorateadmission_project': is_admission_request_author & in_progress,
     'change_doctorateadmission_cotutelle': is_admission_request_author & in_progress,
     'change_doctorateadmission_supervision': is_admission_request_author & in_progress,
@@ -92,6 +95,18 @@ _CANDIDATE_RULESET = {
     'upload_pdf_confirmation': is_admission_request_author,
     'fill_thesis': is_admission_request_author,
     'upload_publication_authorisation': is_admission_request_author,
+
+    # General admission
+    # A candidate can view as long as he's the author
+    'view_generaleducationadmission': is_admission_request_author,
+    # A candidate can edit some tabs as long as the proposition is not submitted
+    'change_generaleducationadmission_training_choice': is_admission_request_author & in_progress,
+
+    # Continuing admission
+    # A candidate can view as long as he's the author
+    'view_continuingeducationadmission': is_admission_request_author,
+    # A candidate can edit some tabs as long as the proposition is not submitted
+    'change_continuingeducationadmission_training_choice': is_admission_request_author & in_progress,
 }
 
 
