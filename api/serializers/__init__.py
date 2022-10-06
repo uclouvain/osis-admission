@@ -48,4 +48,10 @@ from .doctorate import *
 from .accounting import CompleterComptabilitePropositionCommandSerializer, AccountingConditionsSerializer
 from .scholarship import ScholarshipSerializer
 from .campus import CampusSerializer
-from .training_choice import InitierPropositionGeneraleCommandSerializer, InitierPropositionContinueCommandSerializer
+from .training_choice import (
+    InitierPropositionContinueCommandSerializer,
+    InitierPropositionGeneraleCommandSerializer,
+    ModifierChoixFormationContinueCommandSerializer,
+    ModifierTypeAdmissionDoctoraleCommandSerializer,
+    ModifierChoixFormationGeneraleCommandSerializer,
+)

@@ -225,9 +225,19 @@ ACTION_LINKS = {
     },
     # Proposition
     # Project
-    'create_proposition': {
+    'create_doctorate_proposition': {
         'path_name': 'admission_api_v1:propositions',
         'method': 'POST',
+    },
+    'update_doctorate_training_choice': {
+        'path_name': 'admission_api_v1:doctorate_admission_type_update',
+        'method': 'PUT',
+        'params': ['uuid'],
+    },
+    'retrieve_doctorate_training_choice': {
+        'path_name': 'admission_api_v1:propositions',
+        'method': 'GET',
+        'params': ['uuid'],
     },
     'destroy_proposition': {
         'path_name': 'admission_api_v1:propositions',
@@ -352,6 +362,36 @@ ACTION_LINKS = {
     'update_accounting': {
         'path_name': 'admission_api_v1:accounting',
         'method': 'PUT',
+        'params': ['uuid'],
+    },
+    # General education
+    'create_general_proposition': {
+        'path_name': 'admission_api_v1:general_training_choice',
+        'method': 'POST',
+    },
+    'update_general_training_choice': {
+        'path_name': 'admission_api_v1:general_training_choice',
+        'method': 'PUT',
+        'params': ['uuid'],
+    },
+    'retrieve_general_training_choice': {
+        'path_name': 'admission_api_v1:general_propositions',
+        'method': 'GET',
+        'params': ['uuid'],
+    },
+    # Continuing education
+    'create_continuing_proposition': {
+        'path_name': 'admission_api_v1:continuing_training_choice',
+        'method': 'POST',
+    },
+    'update_continuing_training_choice': {
+        'path_name': 'admission_api_v1:continuing_training_choice',
+        'method': 'PUT',
+        'params': ['uuid'],
+    },
+    'retrieve_continuing_training_choice': {
+        'path_name': 'admission_api_v1:continuing_propositions',
+        'method': 'GET',
         'params': ['uuid'],
     },
 }

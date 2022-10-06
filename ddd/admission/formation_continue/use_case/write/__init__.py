@@ -24,3 +24,4 @@
 #
 ##############################################################################
 from .initier_proposition_service import initier_proposition
+from .modifier_choix_formation_service import modifier_choix_formation

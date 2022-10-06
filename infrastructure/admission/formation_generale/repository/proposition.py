@@ -29,6 +29,7 @@ from admission.auth.roles.candidate import Candidate
 from admission.contrib.models import Scholarship, GeneralEducationAdmissionProxy
 from admission.contrib.models.general_education import GeneralEducationAdmission
 from admission.ddd.admission.domain.builder.formation_identity import FormationIdentityBuilder
+from admission.ddd.admission.domain.model.bourse import BourseIdentity
 from admission.ddd.admission.enums.type_bourse import TypeBourse
 from admission.ddd.admission.formation_generale.domain.builder.proposition_identity_builder import (
     PropositionIdentityBuilder,
@@ -75,7 +76,7 @@ class PropositionRepository(IPropositionRepository):
     def get(cls, entity_id: 'PropositionIdentity') -> 'Proposition':
         try:
             return cls._load(GeneralEducationAdmissionProxy.objects.get(uuid=entity_id.uuid))
-        except GeneralEducationAdmissionProxy.DoesNotExist:
+        except GeneralEducationAdmission.DoesNotExist:
             raise PropositionNonTrouveeException
 
     @classmethod
@@ -124,23 +125,11 @@ class PropositionRepository(IPropositionRepository):
     def get_dto(cls, entity_id: 'PropositionIdentity') -> 'PropositionDTO':
         try:
             return cls._load_dto(GeneralEducationAdmissionProxy.objects.get(uuid=entity_id.uuid))
-        except GeneralEducationAdmissionProxy.DoesNotExist:
+        except GeneralEducationAdmission.DoesNotExist:
             raise PropositionNonTrouveeException
 
     @classmethod
     def _load(cls, admission: 'GeneralEducationAdmission') -> 'Proposition':
-        scholarships_uuids = list(
-            str(scholarship.uuid)
-            for scholarship in [
-                admission.double_degree_scholarship,
-                admission.erasmus_mundus_scholarship,
-                admission.international_scholarship,
-            ]
-            if scholarship
-        )
-
-        scholarships = BourseTranslator.search(scholarships_uuids)
-
         return Proposition(
             entity_id=PropositionIdentityBuilder().build_from_uuid(admission.uuid),
             matricule_candidat=admission.candidate.global_id,
@@ -151,51 +140,36 @@ class PropositionRepository(IPropositionRepository):
                 annee=admission.training.academic_year.year,
             ),
             statut=ChoixStatutProposition[admission.status],
-            bourse_internationale_id=scholarships.get(admission.international_scholarship.uuid)
+            bourse_internationale_id=BourseIdentity(uuid=str(admission.international_scholarship.uuid))
             if admission.international_scholarship
             else None,
-            bourse_double_diplome_id=scholarships.get(admission.double_degree_scholarship.uuid)
+            bourse_double_diplome_id=BourseIdentity(uuid=str(admission.double_degree_scholarship.uuid))
             if admission.double_degree_scholarship
             else None,
-            bourse_erasmus_mundus_id=scholarships.get(admission.erasmus_mundus_scholarship.uuid)
+            bourse_erasmus_mundus_id=BourseIdentity(uuid=str(admission.erasmus_mundus_scholarship.uuid))
             if admission.erasmus_mundus_scholarship
             else None,
         )
 
     @classmethod
     def _load_dto(cls, admission: GeneralEducationAdmission) -> 'PropositionDTO':
-        scholarships_uuids = list(
-            str(scholarship.uuid)
-            for scholarship in [
-                admission.double_degree_scholarship,
-                admission.erasmus_mundus_scholarship,
-                admission.international_scholarship,
-            ]
-            if scholarship
-        )
-
-        scholarships = BourseTranslator.search_dto(scholarships_uuids)
-
         return PropositionDTO(
             uuid=admission.uuid,
             creee_le=admission.created,
             modifiee_le=admission.modified,
             erreurs=admission.detailed_status or [],
             statut=admission.status,
-            formation=FormationGeneraleTranslator.get_dto(
-                sigle=admission.training.acronym,
-                annee=admission.training.academic_year.year,
-            ),
+            formation=FormationGeneraleTranslator.load_dto(admission.training),
             matricule_candidat=admission.candidate.global_id,
             prenom_candidat=admission.candidate.first_name,
             nom_candidat=admission.candidate.last_name,
-            bourse_double_diplome=scholarships.get(admission.double_degree_scholarship.uuid)
+            bourse_double_diplome=BourseTranslator.build_dto(admission.double_degree_scholarship)
             if admission.double_degree_scholarship
             else None,
-            bourse_internationale=scholarships.get(admission.international_scholarship.uuid)
+            bourse_internationale=BourseTranslator.build_dto(admission.international_scholarship)
             if admission.international_scholarship
             else None,
-            bourse_erasmus_mundus=scholarships.get(admission.erasmus_mundus_scholarship.uuid)
+            bourse_erasmus_mundus=BourseTranslator.build_dto(admission.erasmus_mundus_scholarship)
             if admission.erasmus_mundus_scholarship
             else None,
         )

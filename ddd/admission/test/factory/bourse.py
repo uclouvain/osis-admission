@@ -26,41 +26,12 @@
 import factory
 import uuid
 
-from admission.ddd.admission.domain.service.i_bourse import (
-    BourseInternationaleIdentity,
-    BourseDoubleDiplomeIdentity,
-    BourseErasmusMundusIdentity,
-    BourseDoctoratIdentity,
-)
+from admission.ddd.admission.domain.service.i_bourse import BourseIdentity
 
 
-class BourseInternationaleIdentityFactory(factory.Factory):
+class BourseIdentityFactory(factory.Factory):
     class Meta:
-        model = BourseInternationaleIdentity
-        abstract = False
-
-    uuid = factory.LazyFunction(lambda: str(uuid.uuid4()))
-
-
-class BourseDoubleDiplomeIdentityFactory(factory.Factory):
-    class Meta:
-        model = BourseDoubleDiplomeIdentity
-        abstract = False
-
-    uuid = factory.LazyFunction(lambda: str(uuid.uuid4()))
-
-
-class BourseErasmusMundusIdentityFactory(factory.Factory):
-    class Meta:
-        model = BourseErasmusMundusIdentity
-        abstract = False
-
-    uuid = factory.LazyFunction(lambda: str(uuid.uuid4()))
-
-
-class BourseDoctoratIdentityFactory(factory.Factory):
-    class Meta:
-        model = BourseDoctoratIdentity
+        model = BourseIdentity
         abstract = False
 
     uuid = factory.LazyFunction(lambda: str(uuid.uuid4()))

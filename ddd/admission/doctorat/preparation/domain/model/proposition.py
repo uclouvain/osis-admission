@@ -68,8 +68,9 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
 from admission.ddd.admission.doctorat.preparation.domain.validator.validator_by_business_action import (
     CompletionPropositionValidatorList,
     ProjetDoctoralValidatorList,
+    ModifierTypeAdmissionValidatorList,
 )
-from admission.ddd.admission.domain.model.bourse import BourseErasmusMundusIdentity
+from admission.ddd.admission.domain.model.bourse import BourseIdentity
 from osis_common.ddd import interface
 
 
@@ -101,7 +102,7 @@ class Proposition(interface.RootEntity):
     modifiee_le: Optional[datetime.datetime] = None
     fiche_archive_signatures_envoyees: List[str] = attr.Factory(list)
     comptabilite: 'Comptabilite' = comptabilite_non_remplie
-    bourse_erasmus_mundus_id: Optional[BourseErasmusMundusIdentity] = None
+    bourse_erasmus_mundus_id: Optional[BourseIdentity] = None
 
     @property
     def sigle_formation(self):
@@ -425,3 +426,18 @@ class Proposition(interface.RootEntity):
                 self.projet,
                 institut_these=InstitutIdentity(uuid.UUID(institut_these)),
             )
+
+    def modifier_type_admission(
+        self,
+        type_admission: str,
+        justification: Optional[str],
+        bourse_erasmus_mundus: Optional[BourseIdentity],
+    ):
+        ModifierTypeAdmissionValidatorList(
+            type_admission=type_admission,
+            justification=justification,
+        ).validate()
+
+        self.type_admission = ChoixTypeAdmission[type_admission]
+        self.justification = justification or ''
+        self.bourse_erasmus_mundus_id = bourse_erasmus_mundus
