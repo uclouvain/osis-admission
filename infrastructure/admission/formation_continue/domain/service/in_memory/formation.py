@@ -77,6 +77,13 @@ class FormationContinueInMemoryTranslator(IFormationContinueTranslator):
             type=TypeFormation.FORMATION_CONTINUE,
             campus='Charleroi',
         ),
+        FormationFactory(
+            intitule='Master ESP3DP',
+            entity_id__sigle='ESP3DP-MASTER',
+            entity_id__annee=2022,
+            type=TypeFormation.MASTER,
+            campus='Charleroi',
+        ),
     ]
 
     @classmethod
@@ -91,12 +98,26 @@ class FormationContinueInMemoryTranslator(IFormationContinueTranslator):
     @classmethod
     def get_dto(cls, sigle: str, annee: int) -> 'FormationDTO':
         formation_entity_id = FormationIdentity(sigle=sigle, annee=annee)
-        training = next((training for training in cls.trainings if training.entity_id == formation_entity_id), None)
+        training = next(
+            (
+                training
+                for training in cls.trainings
+                if training.entity_id == formation_entity_id and training.type == TypeFormation.FORMATION_CONTINUE
+            ),
+            None,
+        )
         return cls._build_dto(entity=training)
 
     @classmethod
     def get(cls, entity_id: FormationIdentity) -> 'Formation':
-        training = next((training for training in cls.trainings if training.entity_id == entity_id), None)
+        training = next(
+            (
+                training
+                for training in cls.trainings
+                if training.entity_id == entity_id and training.type == TypeFormation.FORMATION_CONTINUE
+            ),
+            None,
+        )
 
         if training:
             return Formation(

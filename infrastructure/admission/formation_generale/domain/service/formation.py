@@ -36,6 +36,7 @@ from admission.ddd.admission.formation_generale.domain.validator.exceptions impo
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
+from base.models.education_group_year import EducationGroupYear
 from ddd.logic.formation_catalogue.commands import SearchFormationsCommand
 from ddd.logic.formation_catalogue.dtos.training import TrainingDto
 
@@ -65,7 +66,13 @@ class FormationGeneraleTranslator(IFormationGeneraleTranslator):
     def get(cls, entity_id: FormationIdentity) -> 'Formation':
         from infrastructure.messages_bus import message_bus_instance
 
-        dtos = message_bus_instance.invoke(SearchFormationsCommand(sigle=entity_id.sigle, annee=entity_id.annee))
+        dtos = message_bus_instance.invoke(
+            SearchFormationsCommand(
+                sigle=entity_id.sigle,
+                annee=entity_id.annee,
+                types=list(AnneeInscriptionFormationTranslator.GENERAL_EDUCATION_TYPES),
+            )
+        )
 
         if dtos:
             dto: TrainingDto = dtos[0]
@@ -103,3 +110,12 @@ class FormationGeneraleTranslator(IFormationGeneraleTranslator):
         )
 
         return [cls._build_dto(dto) for dto in dtos]
+
+    @classmethod
+    def load_dto(cls, training: EducationGroupYear) -> FormationDTO:
+        return FormationDTO(
+            sigle=training.acronym,
+            annee=training.academic_year.year,
+            intitule=training.title if get_language() == settings.LANGUAGE_CODE else training.title_english,
+            campus=training.enrollment_campus.name or '',
+        )

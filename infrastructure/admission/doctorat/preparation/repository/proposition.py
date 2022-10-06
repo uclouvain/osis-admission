@@ -35,7 +35,7 @@ from admission.auth.roles.candidate import Candidate
 from admission.contrib.models import Accounting, DoctorateAdmission, Scholarship
 from admission.contrib.models.doctorate import PropositionProxy, REFERENCE_SEQ_NAME
 from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import PropositionIdentityBuilder
-from admission.ddd.admission.domain.model.bourse import BourseErasmusMundusIdentity
+from admission.ddd.admission.domain.model.bourse import BourseIdentity
 from admission.ddd.admission.doctorat.preparation.domain.model._detail_projet import (
     DetailProjet,
 )
@@ -81,6 +81,7 @@ from admission.infrastructure.admission.doctorat.preparation.repository._comptab
     get_accounting_from_admission,
     get_dto_accounting_from_admission,
 )
+from admission.infrastructure.admission.domain.service.bourse import BourseTranslator
 from base.models.education_group_year import EducationGroupYear
 from base.models.entity_version import EntityVersion
 from base.models.person import Person
@@ -116,7 +117,7 @@ def _instantiate_admission(admission: 'DoctorateAdmission') -> 'Proposition':
         ),
         justification=admission.comment,
         statut=ChoixStatutProposition[admission.status],
-        bourse_erasmus_mundus_id=BourseErasmusMundusIdentity(uuid=admission.erasmus_mundus_scholarship.uuid)
+        bourse_erasmus_mundus_id=BourseIdentity(uuid=admission.erasmus_mundus_scholarship.uuid)
         if admission.erasmus_mundus_scholarship_id
         else None,
         financement=Financement(
@@ -445,5 +446,7 @@ class PropositionRepository(IPropositionRepository):
             fiche_archive_signatures_envoyees=admission.archived_record_signatures_sent,
             erreurs=admission.detailed_status or [],
             comptabilite=get_dto_accounting_from_admission(admission=admission),
-            bourse_erasmus_mundus=admission.erasmus_mundus_scholarship and admission.erasmus_mundus_scholarship.uuid,
+            bourse_erasmus_mundus=BourseTranslator.build_dto(admission.erasmus_mundus_scholarship)
+            if admission.erasmus_mundus_scholarship
+            else None,
         )

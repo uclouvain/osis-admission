@@ -51,3 +51,20 @@ class InitierPropositionCommand(interface.CommandRequest):
 @attr.dataclass(frozen=True, slots=True)
 class ListerPropositionsCandidatQuery(interface.QueryRequest):
     matricule_candidat: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RecupererPropositionQuery(interface.QueryRequest):
+    uuid_proposition: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ModifierChoixFormationCommand(interface.CommandRequest):
+    uuid_proposition: str
+
+    sigle_formation: str
+    annee_formation: int
+
+    bourse_double_diplome: Optional[str] = ''
+    bourse_internationale: Optional[str] = ''
+    bourse_erasmus_mundus: Optional[str] = ''

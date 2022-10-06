@@ -70,7 +70,6 @@ def get_cached_continuing_education_admission_perm_obj(admission_uuid):
     )
 
 
-
 def gather_business_exceptions(command: QueryRequest) -> Dict[str, list]:
     data = defaultdict(list)
     try:
