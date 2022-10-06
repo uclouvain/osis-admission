@@ -40,7 +40,14 @@ from admission.api.views.doctorate import DoctorateAPIView
 from admission.api.views.training import *
 from admission.api.views.accounting import AccountingView
 from admission.api.views.references import RetrieveScholarshipView, RetrieveCampusView, ListCampusView
-from admission.api.views.training_choice import ContinuingTrainingChoiceAPIView, GeneralTrainingChoiceAPIView
+from admission.api.views.training_choice import (
+    ContinuingTrainingChoiceAPIView,
+    ContinuingUpdateTrainingChoiceAPIView,
+    DoctorateUpdateAdmissionTypeAPIView,
+    GeneralTrainingChoiceAPIView,
+    GeneralUpdateTrainingChoiceAPIView,
+)
+from admission.api.views.proposition import GeneralPropositionViewSet, ContinuingPropositionViewSet
 
 __all__ = [
     "CoordonneesViewSet",
@@ -79,4 +86,9 @@ __all__ = [
     "RetrieveCampusView",
     "GeneralTrainingChoiceAPIView",
     "ContinuingTrainingChoiceAPIView",
+    "GeneralPropositionViewSet",
+    "ContinuingPropositionViewSet",
+    "ContinuingUpdateTrainingChoiceAPIView",
+    "DoctorateUpdateAdmissionTypeAPIView",
+    "GeneralUpdateTrainingChoiceAPIView"
 ]

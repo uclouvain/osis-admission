@@ -25,7 +25,7 @@
 # ##############################################################################
 
 from rest_framework import status
-from rest_framework.generics import CreateAPIView
+from rest_framework.generics import CreateAPIView, UpdateAPIView
 from rest_framework.response import Response
 
 from admission.api import serializers
@@ -34,11 +34,13 @@ from admission.api.permissions import (
     IsListingOrHasNotAlreadyCreatedForContinuingEducationPermission,
 )
 from admission.api.schema import ResponseSpecificSchema
-from admission.ddd.admission.formation_generale.commands import (
-    InitierPropositionCommand as InitierPropositionGeneraleCommand,
-)
-from admission.ddd.admission.formation_continue.commands import (
-    InitierPropositionCommand as InitierPropositionContinueCommand,
+from admission.ddd.admission.formation_generale import commands as general_education_commands
+from admission.ddd.admission.formation_continue import commands as continuing_education_commands
+from admission.ddd.admission.doctorat.preparation import commands as doctorate_education_commands
+from admission.utils import (
+    get_cached_continuing_education_admission_perm_obj,
+    get_cached_general_education_admission_perm_obj,
+    get_cached_admission_perm_obj,
 )
 from infrastructure.messages_bus import message_bus_instance
 from osis_role.contrib.views import APIPermissionRequiredMixin
@@ -49,6 +51,10 @@ class GeneralTrainingChoiceSchema(ResponseSpecificSchema):
     serializer_mapping = {
         'POST': (
             serializers.InitierPropositionGeneraleCommandSerializer,
+            serializers.PropositionIdentityDTOSerializer,
+        ),
+        'PUT': (
+            serializers.ModifierChoixFormationGeneraleCommandSerializer,
             serializers.PropositionIdentityDTOSerializer,
         ),
     }
@@ -66,7 +72,7 @@ class GeneralTrainingChoiceAPIView(
         serializer = serializers.InitierPropositionGeneraleCommandSerializer(data=request.data)
         serializer.is_valid(True)
         result = message_bus_instance.invoke(
-            InitierPropositionGeneraleCommand(
+            general_education_commands.InitierPropositionCommand(
                 **serializer.data,
             )
         )
@@ -79,6 +85,10 @@ class ContinuingTrainingChoiceSchema(ResponseSpecificSchema):
     serializer_mapping = {
         'POST': (
             serializers.InitierPropositionContinueCommandSerializer,
+            serializers.PropositionIdentityDTOSerializer,
+        ),
+        'PUT': (
+            serializers.ModifierChoixFormationContinueCommandSerializer,
             serializers.PropositionIdentityDTOSerializer,
         ),
     }
@@ -96,9 +106,101 @@ class ContinuingTrainingChoiceAPIView(
         serializer = serializers.InitierPropositionContinueCommandSerializer(data=request.data)
         serializer.is_valid(True)
         result = message_bus_instance.invoke(
-            InitierPropositionContinueCommand(
+            continuing_education_commands.InitierPropositionCommand(
                 **serializer.data,
             )
         )
         serializer = serializers.PropositionIdentityDTOSerializer(instance=result)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class DoctorateTrainingChoiceSchema(ResponseSpecificSchema):
+    operation_id_base = '_doctorate_training_choice'
+    serializer_mapping = {
+        'PUT': (
+            serializers.ModifierTypeAdmissionDoctoraleCommandSerializer,
+            serializers.PropositionIdentityDTOSerializer,
+        ),
+    }
+
+
+class GeneralUpdateTrainingChoiceAPIView(
+    APIPermissionRequiredMixin,
+    UpdateAPIView,
+):
+    name = "general_training_choice"
+    schema = GeneralTrainingChoiceSchema()
+    permission_classes = [IsListingOrHasNotAlreadyCreatedForGeneralEducationPermission]
+    permission_mapping = {
+        'PUT': 'admission.change_generaleducationadmission_training_choice',
+    }
+    pagination_class = None
+    filter_backends = []
+
+    def get_permission_object(self):
+        return get_cached_general_education_admission_perm_obj(self.kwargs['uuid'])
+
+    def put(self, request, *args, **kwargs):
+        serializer = serializers.ModifierChoixFormationGeneraleCommandSerializer(data=request.data)
+        serializer.is_valid(True)
+        result = message_bus_instance.invoke(
+            general_education_commands.ModifierChoixFormationCommand(
+                **serializer.data,
+            )
+        )
+        serializer = serializers.PropositionIdentityDTOSerializer(instance=result)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class DoctorateUpdateAdmissionTypeAPIView(
+    APIPermissionRequiredMixin,
+    UpdateAPIView,
+):
+    name = "doctorate_admission_type_update"
+    schema = DoctorateTrainingChoiceSchema()
+    permission_mapping = {
+        'PUT': 'admission.change_doctorateadmission_training_choice',
+    }
+    pagination_class = None
+    filter_backends = []
+
+    def get_permission_object(self):
+        return get_cached_admission_perm_obj(self.kwargs['uuid'])
+
+    def put(self, request, *args, **kwargs):
+        serializer = serializers.ModifierTypeAdmissionDoctoraleCommandSerializer(data=request.data)
+        serializer.is_valid(True)
+        result = message_bus_instance.invoke(
+            doctorate_education_commands.ModifierTypeAdmissionCommand(
+                **serializer.data,
+            )
+        )
+        serializer = serializers.PropositionIdentityDTOSerializer(instance=result)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class ContinuingUpdateTrainingChoiceAPIView(
+    APIPermissionRequiredMixin,
+    UpdateAPIView,
+):
+    name = "continuing_training_choice"
+    schema = ContinuingTrainingChoiceSchema()
+    permission_mapping = {
+        'PUT': 'admission.change_continuingeducationadmission_training_choice',
+    }
+    pagination_class = None
+    filter_backends = []
+
+    def get_permission_object(self):
+        return get_cached_continuing_education_admission_perm_obj(self.kwargs['uuid'])
+
+    def put(self, request, *args, **kwargs):
+        serializer = serializers.ModifierChoixFormationContinueCommandSerializer(data=request.data)
+        serializer.is_valid(True)
+        result = message_bus_instance.invoke(
+            continuing_education_commands.ModifierChoixFormationCommand(
+                **serializer.data,
+            )
+        )
+        serializer = serializers.PropositionIdentityDTOSerializer(instance=result)
+        return Response(serializer.data, status=status.HTTP_200_OK)

@@ -62,7 +62,7 @@ class PropositionBuilder(interface.RootEntityBuilder):
         cmd: 'InitierPropositionCommand',
         doctorat_id: 'DoctoratIdentity',
         proposition_repository: 'IPropositionRepository',
-        bourse_translator: Optional['IBourseTranslator'],
+        bourse_translator: 'IBourseTranslator',
     ) -> 'Proposition':
         InitierPropositionValidatorList(
             type_admission=cmd.type_admission,

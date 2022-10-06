@@ -55,7 +55,7 @@ class PropositionBuilder(interface.RootEntityBuilder):
             entity_id=PropositionIdentityBuilder.build(),
             matricule_candidat=cmd.matricule_candidat,
             formation_id=formation_id,
-            bourse_double_diplome_id=bourses_ids.get(cmd.bourse_double_diplome),
-            bourse_internationale_id=bourses_ids.get(cmd.bourse_internationale),
-            bourse_erasmus_mundus_id=bourses_ids.get(cmd.bourse_erasmus_mundus),
+            bourse_double_diplome_id=bourses_ids.get(cmd.bourse_double_diplome) if cmd.bourse_double_diplome else None,
+            bourse_internationale_id=bourses_ids.get(cmd.bourse_internationale) if cmd.bourse_internationale else None,
+            bourse_erasmus_mundus_id=bourses_ids.get(cmd.bourse_erasmus_mundus) if cmd.bourse_erasmus_mundus else None,
         )

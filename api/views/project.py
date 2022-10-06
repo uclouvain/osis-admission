@@ -159,7 +159,7 @@ class SupervisedPropositionListView(APIPermissionRequiredMixin, ListAPIView):
 class PropositionSchema(ResponseSpecificSchema):
     operation_id_base = '_proposition'
     serializer_mapping = {
-        'GET': serializers.PropositionDTOSerializer,
+        'GET': serializers.DoctoratePropositionDTOSerializer,
         'PUT': (serializers.CompleterPropositionCommandSerializer, serializers.PropositionIdentityDTOSerializer),
         'DELETE': serializers.PropositionIdentityDTOSerializer,
     }
@@ -173,17 +173,7 @@ class PropositionSchema(ResponseSpecificSchema):
 
     def map_field(self, field):
         if field.field_name == 'erreurs':
-            return {
-                "type": "array",
-                "items": {
-                    "type": "object",
-                    "properties": {
-                        "status_code": {"type": "string"},
-                        "detail": {"type": "string"},
-                    },
-                },
-            }
-
+            return serializers.PROPOSITION_ERROR_SCHEMA
         return super().map_field(field)
 
 
@@ -211,7 +201,7 @@ class PropositionViewSet(
         proposition = message_bus_instance.invoke(
             GetPropositionCommand(uuid_proposition=kwargs.get('uuid')),
         )
-        serializer = serializers.PropositionDTOSerializer(
+        serializer = serializers.DoctoratePropositionDTOSerializer(
             instance=proposition,
             context=self.get_serializer_context(),
         )

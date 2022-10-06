@@ -25,7 +25,7 @@
 ##############################################################################
 from typing import Optional, List
 
-from admission.ddd.admission.domain.enums import TypeFormation
+from admission.ddd.admission.domain.enums import TypeFormation, TYPES_FORMATION_GENERALE
 from admission.ddd.admission.domain.model.formation import FormationIdentity, Formation
 from admission.ddd.admission.dtos.formation import FormationDTO
 from admission.ddd.admission.formation_generale.domain.service.i_formation import IFormationGeneraleTranslator
@@ -84,6 +84,13 @@ class FormationGeneraleInMemoryTranslator(IFormationGeneraleTranslator):
             type=TypeFormation.MASTER,
             campus='Charleroi',
         ),
+        FormationFactory(
+            intitule='Formation continue ESP3DP',
+            entity_id__sigle='ES3DP-CONTINUE',
+            entity_id__annee=2022,
+            type=TypeFormation.FORMATION_CONTINUE,
+            campus='Charleroi',
+        ),
     ]
 
     @classmethod
@@ -98,12 +105,26 @@ class FormationGeneraleInMemoryTranslator(IFormationGeneraleTranslator):
     @classmethod
     def get_dto(cls, sigle: str, annee: int) -> 'FormationDTO':
         formation_entity_id = FormationIdentity(sigle=sigle, annee=annee)
-        training = next((training for training in cls.trainings if training.entity_id == formation_entity_id), None)
+        training = next(
+            (
+                training
+                for training in cls.trainings
+                if training.entity_id == formation_entity_id and training.type.name in TYPES_FORMATION_GENERALE
+            ),
+            None,
+        )
         return cls._build_dto(entity=training)
 
     @classmethod
     def get(cls, entity_id: FormationIdentity) -> 'Formation':
-        training = next((training for training in cls.trainings if training.entity_id == entity_id), None)
+        training = next(
+            (
+                training
+                for training in cls.trainings
+                if training.entity_id == entity_id and training.type.name in TYPES_FORMATION_GENERALE
+            ),
+            None,
+        )
 
         if training:
             return Formation(

@@ -29,20 +29,5 @@ from osis_common.ddd import interface
 
 
 @attr.dataclass(frozen=True, slots=True)
-class BourseDoubleDiplomeIdentity(interface.EntityIdentity):
-    uuid: str
-
-
-@attr.dataclass(frozen=True, slots=True)
-class BourseInternationaleIdentity(interface.EntityIdentity):
-    uuid: str
-
-
-@attr.dataclass(frozen=True, slots=True)
-class BourseErasmusMundusIdentity(interface.EntityIdentity):
-    uuid: str
-
-
-@attr.dataclass(frozen=True, slots=True)
-class BourseDoctoratIdentity(interface.EntityIdentity):
+class BourseIdentity(interface.EntityIdentity):
     uuid: str

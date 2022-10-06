@@ -23,14 +23,16 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
-import attr
+from admission.ddd.admission.formation_continue.domain.builder.proposition_identity_builder import (
+    PropositionIdentityBuilder,
+)
+from admission.ddd.admission.formation_continue.commands import RecupererPropositionQuery
+from admission.ddd.admission.formation_continue.dtos import PropositionDTO
+from admission.ddd.admission.formation_continue.repository.i_proposition import IPropositionRepository
 
-from osis_common.ddd import interface
 
-
-@attr.dataclass(frozen=True, slots=True)
-class BourseDTO(interface.DTO):
-    uuid: str
-    nom_court: str
-    nom_long: str
-    type: str
+def recuperer_proposition(
+    cmd: 'RecupererPropositionQuery',
+    proposition_repository: 'IPropositionRepository',
+) -> 'PropositionDTO':
+    return proposition_repository.get_dto(PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition))

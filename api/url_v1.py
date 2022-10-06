@@ -59,42 +59,53 @@ person_tabs = [
 ]
 
 urlpatterns = [
-    # Lists
+    # > Every education
     path('dashboard', views.DashboardViewSet),
     path('propositions', views.PropositionListView),
+    # > Doctorate education
     path('supervised_propositions', views.SupervisedPropositionListView),
-    path('propositions/general_education', views.GeneralTrainingChoiceAPIView),
-    path('propositions/continuing_education', views.ContinuingTrainingChoiceAPIView),
     # Creation tabs
     _path('', include(person_tabs)),
     # Admission-related
-    path('propositions/<uuid:uuid>', views.PropositionViewSet),
-    _path('propositions/<uuid:uuid>/', include(person_tabs)),
-    path('propositions/<uuid:uuid>/verify_project', views.VerifyProjectView),
-    path('propositions/<uuid:uuid>/submit', views.SubmitPropositionViewSet),
-    path('propositions/<uuid:uuid>/cotutelle', views.CotutelleAPIView),
-    path('propositions/<uuid:uuid>/accounting', views.AccountingView),
+    path('propositions/doctorate/<uuid:uuid>', views.PropositionViewSet),
+    _path('propositions/doctorate/<uuid:uuid>/', include(person_tabs)),
+    path('propositions/doctorate/<uuid:uuid>/verify_project', views.VerifyProjectView),
+    path('propositions/doctorate/<uuid:uuid>/submit', views.SubmitPropositionViewSet),
+    path('propositions/doctorate/<uuid:uuid>/cotutelle', views.CotutelleAPIView),
+    path('propositions/doctorate/<uuid:uuid>/accounting', views.AccountingView),
+    path('propositions/doctorate/<uuid:uuid>/training_choice', views.DoctorateUpdateAdmissionTypeAPIView),
     # Supervision
-    path('propositions/<uuid:uuid>/supervision', views.SupervisionAPIView),
-    path('propositions/<uuid:uuid>/supervision/set-reference-promoter', views.SupervisionSetReferencePromoterAPIView),
-    path('propositions/<uuid:uuid>/supervision/request-signatures', views.RequestSignaturesAPIView),
-    path('propositions/<uuid:uuid>/supervision/approve', views.ApprovePropositionAPIView),
-    path('propositions/<uuid:uuid>/supervision/approve-by-pdf', views.ApproveByPdfPropositionAPIView),
+    path('propositions/doctorate/<uuid:uuid>/supervision', views.SupervisionAPIView),
+    path(
+        'propositions/doctorate/<uuid:uuid>/supervision/set-reference-promoter',
+        views.SupervisionSetReferencePromoterAPIView,
+    ),
+    path('propositions/doctorate/<uuid:uuid>/supervision/request-signatures', views.RequestSignaturesAPIView),
+    path('propositions/doctorate/<uuid:uuid>/supervision/approve', views.ApprovePropositionAPIView),
+    path('propositions/doctorate/<uuid:uuid>/supervision/approve-by-pdf', views.ApproveByPdfPropositionAPIView),
     # Submission confirmation
-    path('propositions/<uuid:uuid>/confirmation', views.ConfirmationAPIView),
-    path('propositions/<uuid:uuid>/confirmation/last', views.LastConfirmationAPIView),
-    path('propositions/<uuid:uuid>/confirmation/last/canvas', views.LastConfirmationCanvasAPIView),
-    path('propositions/<uuid:uuid>/supervised_confirmation', views.SupervisedConfirmationAPIView),
+    path('propositions/doctorate/<uuid:uuid>/confirmation', views.ConfirmationAPIView),
+    path('propositions/doctorate/<uuid:uuid>/confirmation/last', views.LastConfirmationAPIView),
+    path('propositions/doctorate/<uuid:uuid>/confirmation/last/canvas', views.LastConfirmationCanvasAPIView),
+    path('propositions/doctorate/<uuid:uuid>/supervised_confirmation', views.SupervisedConfirmationAPIView),
     # Doctorate
-    path('propositions/<uuid:uuid>/doctorate', views.DoctorateAPIView),
+    path('propositions/doctorate/<uuid:uuid>/doctorate', views.DoctorateAPIView),
     # Training
-    path('propositions/<uuid:uuid>/training/config', views.TrainingConfigView),
-    path('propositions/<uuid:uuid>/doctoral-training', views.DoctoralTrainingListView),
-    path('propositions/<uuid:uuid>/training/submit', views.TrainingSubmitView),
-    path('propositions/<uuid:uuid>/training/assent', views.TrainingAssentView),
-    path('propositions/<uuid:uuid>/training/<uuid:activity_id>', views.TrainingView),
-    path('propositions/<uuid:uuid>/complementary-training', views.ComplementaryTrainingListView),
-    path('propositions/<uuid:uuid>/course-enrollment', views.CourseEnrollmentListView),
+    path('propositions/doctorate/<uuid:uuid>/training/config', views.TrainingConfigView),
+    path('propositions/doctorate/<uuid:uuid>/doctoral-training', views.DoctoralTrainingListView),
+    path('propositions/doctorate/<uuid:uuid>/training/submit', views.TrainingSubmitView),
+    path('propositions/doctorate/<uuid:uuid>/training/assent', views.TrainingAssentView),
+    path('propositions/doctorate/<uuid:uuid>/training/<uuid:activity_id>', views.TrainingView),
+    path('propositions/doctorate/<uuid:uuid>/complementary-training', views.ComplementaryTrainingListView),
+    path('propositions/doctorate/<uuid:uuid>/course-enrollment', views.CourseEnrollmentListView),
+    # > General education
+    path('propositions/general-education', views.GeneralTrainingChoiceAPIView),
+    path('propositions/general-education/<uuid:uuid>', views.GeneralPropositionViewSet),
+    path('propositions/general-education/<uuid:uuid>/training_choice', views.GeneralUpdateTrainingChoiceAPIView),
+    # > Continuing education
+    path('propositions/continuing-education', views.ContinuingTrainingChoiceAPIView),
+    path('propositions/continuing-education/<uuid:uuid>', views.ContinuingPropositionViewSet),
+    path('propositions/continuing-education/<uuid:uuid>/training_choice', views.ContinuingUpdateTrainingChoiceAPIView),
     # Autocompletes
     path('autocomplete/sector', views.AutocompleteSectorView),
     path('autocomplete/sector/<str:sigle>/doctorates', views.AutocompleteDoctoratView),
