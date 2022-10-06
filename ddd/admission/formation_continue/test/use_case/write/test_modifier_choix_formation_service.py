@@ -26,38 +26,48 @@
 import attr
 from django.test import SimpleTestCase
 
-from admission.ddd.admission.formation_continue.commands import InitierPropositionCommand
+from admission.ddd.admission.formation_continue.commands import ModifierChoixFormationCommand
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutProposition
-from admission.ddd.admission.formation_continue.domain.validator.exceptions import FormationNonTrouveeException
+from admission.ddd.admission.formation_continue.domain.validator.exceptions import (
+    PropositionNonTrouveeException, FormationNonTrouveeException,
+)
 from admission.infrastructure.admission.formation_continue.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 
 
-class TestInitierPropositionService(SimpleTestCase):
+class TestModifierChoixFormationPropositionService(SimpleTestCase):
     def setUp(self) -> None:
         self.proposition_repository = PropositionInMemoryRepository()
         self.addCleanup(self.proposition_repository.reset)
 
         self.message_bus = message_bus_in_memory_instance
-        self.cmd = InitierPropositionCommand(
-            sigle_formation='ECGE3DP',
-            annee_formation=2020,
-            matricule_candidat='01234567',
+        self.cmd = ModifierChoixFormationCommand(
+            sigle_formation='SC3DP',
+            annee_formation=2022,
+            uuid_proposition='uuid-ECGE3DP',
         )
 
-    def test_should_initier(self):
+    def test_should_modifier_choix_formation(self):
         proposition_id = self.message_bus.invoke(self.cmd)
         proposition = self.proposition_repository.get(proposition_id)
         self.assertEqual(proposition.entity_id, proposition_id)
         self.assertEqual(proposition.statut, ChoixStatutProposition.IN_PROGRESS)
         self.assertEqual(proposition.formation_id.sigle, self.cmd.sigle_formation)
         self.assertEqual(proposition.formation_id.annee, self.cmd.annee_formation)
-        self.assertEqual(proposition.matricule_candidat, self.cmd.matricule_candidat)
+
+    def test_should_empecher_si_proposition_non_trouvee(self):
+        cmd = attr.evolve(self.cmd, uuid_proposition='INCONNUE')
+        with self.assertRaises(PropositionNonTrouveeException):
+            self.message_bus.invoke(cmd)
+
+    def test_should_empecher_si_formation_non_trouvee(self):
+        cmd = attr.evolve(self.cmd, sigle_formation='INCONNUE')
+        with self.assertRaises(FormationNonTrouveeException):
+            self.message_bus.invoke(cmd)
 
     def test_should_empecher_si_pas_formation_continue(self):
-        pas_formation_continue = 'DROI1BA'
-        cmd = attr.evolve(self.cmd, sigle_formation=pas_formation_continue)
+        cmd = attr.evolve(self.cmd, sigle_formation='ESP3DP-MASTER')
         with self.assertRaises(FormationNonTrouveeException):
             self.message_bus.invoke(cmd)

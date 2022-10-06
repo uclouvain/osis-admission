@@ -184,4 +184,9 @@ COMMAND_HANDLERS = {
         completer_comptabilite_proposition,
         proposition_repository=PropositionInMemoryRepository(),
     ),
+    ModifierTypeAdmissionCommand: partial(
+        modifier_type_admission,
+        proposition_repository=PropositionInMemoryRepository(),
+        bourse_translator=BourseInMemoryTranslator(),
+    ),
 }

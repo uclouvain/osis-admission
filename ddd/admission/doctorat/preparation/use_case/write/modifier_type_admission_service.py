@@ -23,14 +23,32 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
-import attr
+from admission.ddd.admission.domain.service.i_bourse import IBourseTranslator
+from admission.ddd.admission.doctorat.preparation.commands import ModifierTypeAdmissionCommand
+from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import (
+    PropositionIdentityBuilder,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity
+from admission.ddd.admission.doctorat.preparation.repository.i_proposition import IPropositionRepository
 
-from osis_common.ddd import interface
 
+def modifier_type_admission(
+    cmd: 'ModifierTypeAdmissionCommand',
+    proposition_repository: 'IPropositionRepository',
+    bourse_translator: 'IBourseTranslator',
+) -> 'PropositionIdentity':
+    # GIVEN
+    proposition = proposition_repository.get(PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition))
+    bourse_erasmus_mundus = bourse_translator.get(cmd.bourse_erasmus_mundus) if cmd.bourse_erasmus_mundus else None
 
-@attr.dataclass(frozen=True, slots=True)
-class BourseDTO(interface.DTO):
-    uuid: str
-    nom_court: str
-    nom_long: str
-    type: str
+    # WHEN
+    proposition.modifier_type_admission(
+        bourse_erasmus_mundus=bourse_erasmus_mundus,
+        type_admission=cmd.type_admission,
+        justification=cmd.justification,
+    )
+
+    # THEN
+    proposition_repository.save(proposition)
+
+    return proposition.entity_id

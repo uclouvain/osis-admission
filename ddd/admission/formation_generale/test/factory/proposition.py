@@ -30,11 +30,7 @@ import factory
 from factory.fuzzy import FuzzyText
 
 from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity, Proposition
-from admission.ddd.admission.test.factory.bourse import (
-    BourseInternationaleIdentityFactory,
-    BourseDoubleDiplomeIdentityFactory,
-    BourseErasmusMundusIdentityFactory,
-)
+from admission.ddd.admission.test.factory.bourse import BourseIdentityFactory
 from admission.ddd.admission.test.factory.formation import _FormationIdentityFactory
 
 
@@ -58,6 +54,6 @@ class PropositionFactory(factory.Factory):
     creee_le = factory.Faker('past_datetime')
     modifiee_le = factory.Faker('past_datetime')
 
-    bourse_double_diplome_id = factory.SubFactory(BourseDoubleDiplomeIdentityFactory)
-    bourse_internationale_id = factory.SubFactory(BourseInternationaleIdentityFactory)
-    bourse_erasmus_mundus_id = factory.SubFactory(BourseErasmusMundusIdentityFactory)
+    bourse_double_diplome_id = factory.SubFactory(BourseIdentityFactory)
+    bourse_internationale_id = factory.SubFactory(BourseIdentityFactory)
+    bourse_erasmus_mundus_id = factory.SubFactory(BourseIdentityFactory)
