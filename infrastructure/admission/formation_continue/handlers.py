@@ -49,4 +49,13 @@ COMMAND_HANDLERS = {
         lister_propositions_candidat,
         proposition_repository=PropositionRepository(),
     ),
+    RecupererPropositionQuery: partial(
+        recuperer_proposition,
+        proposition_repository=PropositionRepository(),
+    ),
+    ModifierChoixFormationCommand: partial(
+        modifier_choix_formation,
+        proposition_repository=PropositionRepository(),
+        formation_translator=FormationContinueTranslator(),
+    ),
 }

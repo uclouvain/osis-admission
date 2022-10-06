@@ -23,6 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import factory
 from dataclasses import dataclass
 from typing import List, Optional
 
@@ -31,7 +32,10 @@ from admission.ddd.admission.formation_continue.domain.model.proposition import 
 from admission.ddd.admission.formation_continue.domain.validator.exceptions import PropositionNonTrouveeException
 from admission.ddd.admission.formation_continue.dtos import PropositionDTO
 from admission.ddd.admission.formation_continue.repository.i_proposition import IPropositionRepository
-from admission.ddd.admission.formation_continue.test.factory.proposition import PropositionFactory
+from admission.ddd.admission.formation_continue.test.factory.proposition import (
+    PropositionFactory,
+    _PropositionIdentityFactory,
+)
 from admission.ddd.admission.test.factory.formation import _FormationIdentityFactory
 from base.ddd.utils.in_memory_repository import InMemoryGenericRepository
 
@@ -81,7 +85,8 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
     @classmethod
     def search_dto(cls, matricule_candidat: Optional[str] = '') -> List['PropositionDTO']:
         propositions = [
-            cls._load_dto(proposition) for proposition in cls.entities
+            cls._load_dto(proposition)
+            for proposition in cls.entities
             if proposition.matricule_candidat == matricule_candidat
         ]
         return propositions
@@ -90,10 +95,12 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
     def reset(cls):
         cls.entities = [
             PropositionFactory(
+                entity_id=factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-SC3DP'),
                 matricule_candidat='0123456789',
                 formation_id=_FormationIdentityFactory(sigle="SC3DP", annee=2020),
             ),
             PropositionFactory(
+                entity_id=factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-ECGE3DP'),
                 matricule_candidat='0000000001',
                 formation_id=_FormationIdentityFactory(sigle="ECGE3DP", annee=2020),
             ),

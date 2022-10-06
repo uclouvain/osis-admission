@@ -47,3 +47,6 @@ class Proposition(interface.RootEntity):
 
     creee_le: Optional[datetime.datetime] = None
     modifiee_le: Optional[datetime.datetime] = None
+
+    def modifier_choix_formation(self, formation_id: FormationIdentity):
+        self.formation_id = formation_id

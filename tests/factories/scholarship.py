@@ -25,6 +25,7 @@
 # ##############################################################################
 
 import factory
+from factory.fuzzy import FuzzyText
 
 from admission.contrib.models import Scholarship
 from admission.ddd.admission.enums.type_bourse import TypeBourse
@@ -37,6 +38,8 @@ class ScholarshipFactory(factory.DjangoModelFactory):
 
 class DoubleDegreeScholarship(factory.DjangoModelFactory):
     type = TypeBourse.DOUBLE_TRIPLE_DIPLOMATION.name
+    short_name = FuzzyText(length=20)
+    long_name = FuzzyText(length=40)
 
     class Meta:
         model = Scholarship
@@ -44,6 +47,8 @@ class DoubleDegreeScholarship(factory.DjangoModelFactory):
 
 class InternationalScholarship(factory.DjangoModelFactory):
     type = TypeBourse.BOURSE_INTERNATIONALE_FORMATION_GENERALE.name
+    short_name = FuzzyText(length=20)
+    long_name = FuzzyText(length=40)
 
     class Meta:
         model = Scholarship
@@ -51,6 +56,8 @@ class InternationalScholarship(factory.DjangoModelFactory):
 
 class DoctorateScholarship(factory.DjangoModelFactory):
     type = TypeBourse.BOURSE_INTERNATIONALE_DOCTORAT.name
+    short_name = FuzzyText(length=20)
+    long_name = FuzzyText(length=40)
 
     class Meta:
         model = Scholarship
@@ -58,6 +65,8 @@ class DoctorateScholarship(factory.DjangoModelFactory):
 
 class ErasmusMundusScholarship(factory.DjangoModelFactory):
     type = TypeBourse.ERASMUS_MUNDUS.name
+    short_name = FuzzyText(length=20)
+    long_name = FuzzyText(length=40)
 
     class Meta:
         model = Scholarship

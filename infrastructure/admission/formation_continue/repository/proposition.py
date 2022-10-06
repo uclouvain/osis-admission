@@ -73,7 +73,7 @@ class PropositionRepository(IPropositionRepository):
     def get(cls, entity_id: 'PropositionIdentity') -> 'Proposition':
         try:
             return cls._load(ContinuingEducationAdmissionProxy.objects.get(uuid=entity_id.uuid))
-        except ContinuingEducationAdmissionProxy.DoesNotExist:
+        except ContinuingEducationAdmission.DoesNotExist:
             raise PropositionNonTrouveeException
 
     @classmethod
@@ -121,10 +121,7 @@ class PropositionRepository(IPropositionRepository):
             creee_le=admission.created,
             modifiee_le=admission.modified,
             erreurs=admission.detailed_status or [],
-            formation=FormationContinueTranslator.get_dto(
-                sigle=admission.training.acronym,
-                annee=admission.training.academic_year.year,
-            ),
+            formation=FormationContinueTranslator.load_dto(admission.training),
             matricule_candidat=admission.candidate.global_id,
             prenom_candidat=admission.candidate.first_name,
             nom_candidat=admission.candidate.last_name,

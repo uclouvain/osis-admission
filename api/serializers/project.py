@@ -51,13 +51,28 @@ __all__ = [
     "DoctorateAdmissionReadSerializer",
     "DoctoratDTOSerializer",
     "SectorDTOSerializer",
-    "PropositionDTOSerializer",
+    "DoctoratePropositionDTOSerializer",
     "DoctoratePropositionSearchDTOSerializer",
     "GeneralEducationPropositionSearchDTOSerializer",
     "ContinuingEducationPropositionSearchDTOSerializer",
     "FormationContinueDTOSerializer",
     "FormationGeneraleDTOSerializer",
+    "GeneralEducationPropositionDTOSerializer",
+    "ContinuingEducationPropositionDTOSerializer",
+    "PROPOSITION_ERROR_SCHEMA",
 ]
+
+
+PROPOSITION_ERROR_SCHEMA = {
+    "type": "array",
+    "items": {
+        "type": "object",
+        "properties": {
+            "status_code": {"type": "string"},
+            "detail": {"type": "string"},
+        },
+    },
+}
 
 
 class DoctorateAdmissionReadSerializer(serializers.ModelSerializer):
@@ -122,6 +137,8 @@ class DoctoratePropositionSearchDTOSerializer(IncludedFieldsMixin, DTOSerializer
             'retrieve_doctoral_training': ACTION_LINKS['retrieve_doctoral_training'],
             'retrieve_complementary_training': ACTION_LINKS['retrieve_complementary_training'],
             'retrieve_course_enrollment': ACTION_LINKS['retrieve_course_enrollment'],
+            # Training choice
+            'retrieve_training_choice': ACTION_LINKS['retrieve_doctorate_training_choice'],
         }
     )
 
@@ -148,7 +165,12 @@ class DoctoratePropositionSearchDTOSerializer(IncludedFieldsMixin, DTOSerializer
 
 
 class GeneralEducationPropositionSearchDTOSerializer(IncludedFieldsMixin, DTOSerializer):
-    links = ActionLinksField(actions={})
+    links = ActionLinksField(
+        actions={
+            # Training choice
+            'retrieve_training_choice': ACTION_LINKS['retrieve_general_training_choice'],
+        }
+    )
 
     # This is to prevent schema from breaking on JSONField
     erreurs = None
@@ -169,7 +191,12 @@ class GeneralEducationPropositionSearchDTOSerializer(IncludedFieldsMixin, DTOSer
 
 
 class ContinuingEducationPropositionSearchDTOSerializer(IncludedFieldsMixin, DTOSerializer):
-    links = ActionLinksField(actions={})
+    links = ActionLinksField(
+        actions={
+            # Training choice
+            'retrieve_training_choice': ACTION_LINKS['retrieve_continuing_training_choice'],
+        }
+    )
 
     # This is to prevent schema from breaking on JSONField
     erreurs = None
@@ -189,14 +216,20 @@ class ContinuingEducationPropositionSearchDTOSerializer(IncludedFieldsMixin, DTO
 
 
 class PropositionSearchSerializer(serializers.Serializer):
-    links = ActionLinksField(actions={'create_proposition': ACTION_LINKS['create_proposition']})
+    links = ActionLinksField(
+        actions={
+            'create_doctorate_proposition': ACTION_LINKS['create_doctorate_proposition'],
+            'create_general_proposition': ACTION_LINKS['create_general_proposition'],
+            'create_continuing_proposition': ACTION_LINKS['create_continuing_proposition'],
+        }
+    )
 
     doctorate_propositions = DoctoratePropositionSearchDTOSerializer(many=True)
     general_education_propositions = GeneralEducationPropositionSearchDTOSerializer(many=True)
     continuing_education_propositions = ContinuingEducationPropositionSearchDTOSerializer(many=True)
 
 
-class PropositionDTOSerializer(IncludedFieldsMixin, DTOSerializer):
+class DoctoratePropositionDTOSerializer(IncludedFieldsMixin, DTOSerializer):
     links = ActionLinksField(
         actions={
             # Profile
@@ -218,6 +251,9 @@ class PropositionDTOSerializer(IncludedFieldsMixin, DTOSerializer):
             # Project
             'retrieve_proposition': ACTION_LINKS['retrieve_proposition'],
             'update_proposition': ACTION_LINKS['update_proposition'],
+            # Training choice
+            'retrieve_training_choice': ACTION_LINKS['retrieve_doctorate_training_choice'],
+            'update_training_choice': ACTION_LINKS['update_doctorate_training_choice'],
             # Cotutelle
             'retrieve_cotutelle': ACTION_LINKS['retrieve_cotutelle'],
             'update_cotutelle': ACTION_LINKS['update_cotutelle'],
@@ -287,6 +323,67 @@ class PropositionDTOSerializer(IncludedFieldsMixin, DTOSerializer):
             'links',
             'erreurs',
             'comptabilite',
+            'bourse_erasmus_mundus',
+        ]
+
+
+class GeneralEducationPropositionDTOSerializer(IncludedFieldsMixin, DTOSerializer):
+    links = ActionLinksField(
+        actions={
+            'retrieve_training_choice': ACTION_LINKS['retrieve_general_training_choice'],
+            'update_training_choice': ACTION_LINKS['update_general_training_choice'],
+        }
+    )
+    erreurs = serializers.JSONField()
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.fields['erreurs'].field_schema = PROPOSITION_ERROR_SCHEMA
+
+    class Meta:
+        source = FormationGeneralePropositionDTO
+
+        fields = [
+            'uuid',
+            'formation',
+            'matricule_candidat',
+            'prenom_candidat',
+            'nom_candidat',
+            'creee_le',
+            'statut',
+            'links',
+            'erreurs',
+            'bourse_double_diplome',
+            'bourse_internationale',
+            'bourse_erasmus_mundus',
+        ]
+
+
+class ContinuingEducationPropositionDTOSerializer(IncludedFieldsMixin, DTOSerializer):
+    links = ActionLinksField(
+        actions={
+            'retrieve_training_choice': ACTION_LINKS['retrieve_continuing_training_choice'],
+            'update_training_choice': ACTION_LINKS['update_continuing_training_choice'],
+        }
+    )
+    erreurs = serializers.JSONField()
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.fields['erreurs'].field_schema = PROPOSITION_ERROR_SCHEMA
+
+    class Meta:
+        source = FormationContinuePropositionDTO
+        fields = [
+            'uuid',
+            'formation',
+            'matricule_candidat',
+            'prenom_candidat',
+            'nom_candidat',
+            'creee_le',
+            'statut',
+            'links',
+            'erreurs',
         ]
 
 
