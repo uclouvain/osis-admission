@@ -24,16 +24,17 @@
 #
 ##############################################################################
 import datetime
-from typing import Optional
+from typing import Optional, Dict
 
 import attr
 
 from admission.ddd.admission.domain.model.bourse import (
-    BourseDoubleDiplomeIdentity,
-    BourseInternationaleIdentity,
-    BourseErasmusMundusIdentity,
+    BourseIdentity,
+    BourseIdentity,
+    BourseIdentity,
 )
 from admission.ddd.admission.domain.model.formation import FormationIdentity
+from admission.ddd.admission.domain.service.i_bourse import BourseIdentity
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutProposition
 from osis_common.ddd import interface
 
@@ -53,6 +54,25 @@ class Proposition(interface.RootEntity):
     creee_le: Optional[datetime.datetime] = None
     modifiee_le: Optional[datetime.datetime] = None
 
-    bourse_double_diplome_id: Optional[BourseDoubleDiplomeIdentity] = None
-    bourse_internationale_id: Optional[BourseInternationaleIdentity] = None
-    bourse_erasmus_mundus_id: Optional[BourseErasmusMundusIdentity] = None
+    bourse_double_diplome_id: Optional[BourseIdentity] = None
+    bourse_internationale_id: Optional[BourseIdentity] = None
+    bourse_erasmus_mundus_id: Optional[BourseIdentity] = None
+
+    def modifier_choix_formation(
+        self,
+        formation_id: FormationIdentity,
+        bourses_ids: Dict[str, BourseIdentity],
+        bourse_double_diplome: Optional[str],
+        bourse_internationale: Optional[str],
+        bourse_erasmus_mundus: Optional[str],
+    ):
+        self.formation_id = formation_id
+
+        if bourse_double_diplome:
+            self.bourse_double_diplome_id = bourses_ids.get(bourse_double_diplome)
+
+        if bourse_internationale:
+            self.bourse_internationale_id = bourses_ids.get(bourse_internationale)
+
+        if bourse_erasmus_mundus:
+            self.bourse_erasmus_mundus_id = bourses_ids.get(bourse_erasmus_mundus)

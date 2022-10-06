@@ -24,24 +24,11 @@
 #
 # ##############################################################################
 from abc import abstractmethod
-from typing import Union, List, Dict
+from typing import List, Dict
 
-from admission.ddd.admission.domain.model.bourse import (
-    BourseErasmusMundusIdentity,
-    BourseInternationaleIdentity,
-    BourseDoubleDiplomeIdentity,
-    BourseDoctoratIdentity,
-)
+from admission.ddd.admission.domain.model.bourse import BourseIdentity
 from admission.ddd.admission.dtos.bourse import BourseDTO
 from osis_common.ddd import interface
-
-
-BourseIdentity = Union[
-    BourseErasmusMundusIdentity,
-    BourseInternationaleIdentity,
-    BourseDoubleDiplomeIdentity,
-    BourseDoctoratIdentity,
-]
 
 
 class IBourseTranslator(interface.DomainService):
@@ -52,7 +39,7 @@ class IBourseTranslator(interface.DomainService):
 
     @classmethod
     @abstractmethod
-    def get_dto(cls, entity_id: BourseIdentity) -> BourseDTO:
+    def get_dto(cls, uuid: str) -> BourseDTO:
         raise NotImplementedError
 
     @classmethod
@@ -63,4 +50,9 @@ class IBourseTranslator(interface.DomainService):
     @classmethod
     @abstractmethod
     def search_dto(cls, entity_ids: BourseIdentity) -> Dict[str, BourseDTO]:
+        raise NotImplementedError
+
+    @classmethod
+    @abstractmethod
+    def verifier_existence(cls, uuid: str) -> bool:
         raise NotImplementedError

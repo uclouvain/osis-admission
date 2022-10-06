@@ -277,3 +277,13 @@ class CompleterComptabilitePropositionCommand(interface.CommandRequest):
     code_bic_swift_banque: Optional[str]
     prenom_titulaire_compte: Optional[str]
     nom_titulaire_compte: Optional[str]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ModifierTypeAdmissionCommand(interface.CommandRequest):
+    uuid_proposition: str
+
+    type_admission: str
+    justification: Optional[str] = ''
+
+    bourse_erasmus_mundus: Optional[str] = ''

@@ -23,25 +23,11 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.ddd.admission.domain.model.bourse import (
-    BourseDoubleDiplomeIdentity,
-    BourseInternationaleIdentity,
-    BourseDoctoratIdentity,
-    BourseErasmusMundusIdentity,
-)
-from admission.ddd.admission.domain.service.i_bourse import BourseIdentity
-from admission.ddd.admission.enums.type_bourse import TypeBourse
+from admission.ddd.admission.domain.model.bourse import BourseIdentity
 from osis_common.ddd.interface import EntityIdentityBuilder, CommandRequest, DTO
 
 
 class BourseIdentityBuilder(EntityIdentityBuilder):
-    MAPPING_TYPE_IDENTITY = {
-        TypeBourse.DOUBLE_TRIPLE_DIPLOMATION.name: BourseDoubleDiplomeIdentity,
-        TypeBourse.BOURSE_INTERNATIONALE_DOCTORAT.name: BourseInternationaleIdentity,
-        TypeBourse.BOURSE_INTERNATIONALE_FORMATION_GENERALE.name: BourseDoctoratIdentity,
-        TypeBourse.ERASMUS_MUNDUS.name: BourseErasmusMundusIdentity,
-    }
-
     @classmethod
     def build_from_command(cls, cmd: 'CommandRequest') -> 'BourseIdentity':
         raise NotImplementedError
@@ -51,5 +37,5 @@ class BourseIdentityBuilder(EntityIdentityBuilder):
         raise NotImplementedError
 
     @classmethod
-    def build_from_uuid(cls, type: str, uuid: str) -> 'BourseIdentity':
-        return cls.MAPPING_TYPE_IDENTITY[type](uuid=uuid)
+    def build_from_uuid(cls, uuid: str) -> 'BourseIdentity':
+        return BourseIdentity(uuid=uuid)
