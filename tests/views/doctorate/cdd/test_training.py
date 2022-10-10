@@ -73,7 +73,12 @@ class DoctorateTrainingActivityViewTestCase(TestCase):
         response = self.client.get(self.url)
         self.assertContains(response, self.conference.title)
         self.assertContains(response, _("NON_SOUMISE"))
-        self.assertEqual(str(self.conference), "Conférence (10 ects, Non soumise)")
+        self.assertEqual(repr(self.conference), "Conférence (10 ects, Non soumise)")
+        self.assertEqual(
+            str(self.conference),
+            f"Conférence nationale : {self.conference.title}"
+            f" ({self.conference.city}, {self.conference.country}) - 10 ECTS",
+        )
 
         # With an unsubmitted conference and unsubmitted service, we should have these links
         url = resolve_url(f'{self.namespace}:add', uuid=self.doctorate.uuid, category='communication')

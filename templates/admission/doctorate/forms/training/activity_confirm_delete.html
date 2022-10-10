@@ -28,7 +28,6 @@
 
 {% block tab_content %}
   <h3>
-    {% display view.activity.type " - " view.activity.title as object %}
     {% blocktrans trimmed %}Are you sure you want to delete "{{ object }}"?{% endblocktrans %}
   </h3>
   <p>{% trans "This activity and potential sub-activities will be deleted" %}</p>
