@@ -39,8 +39,7 @@
   <div class="panel-heading" role="tab" id="h-{{ activity.uuid }}">
     <h3 class="panel-title">
       {% include "admission/doctorate/details/training/_panel_title.html" %}
-
-      {% display activity.type ':' activity.subtype '-' activity.title '-' location_period "-" ects %}
+      {% include "admission/doctorate/details/training/_activity_title.html" %}
       <div class="clearfix"></div>
     </h3>
   </div>

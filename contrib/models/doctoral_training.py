@@ -30,6 +30,7 @@ from django.db import models
 from django.db.models import Q
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.template import Context, Template
 from django.utils.translation import gettext_lazy as _, pgettext_lazy
 
 from admission.ddd.parcours_doctoral.formation.domain.model.enums import (
@@ -329,8 +330,20 @@ class Activity(models.Model):
 
     objects = models.Manager.from_queryset(ActivityQuerySet)()
 
-    def __str__(self) -> str:
+    def __repr__(self):
         return f"{self.get_category_display()} ({self.ects} ects, {self.get_status_display()})"
+
+    def __str__(self) -> str:
+        return (
+            Template(
+                """{% load admission %}
+            {% firstof 0 activity.category|lower|add:'.html' as template_name %}
+            {% include "admission/doctorate/details/training/_activity_title.html" %}
+            """
+            )
+            .render(Context({'activity': self}))
+            .strip()
+        )
 
     class Meta:
         verbose_name = _("Training activity")
