@@ -23,7 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import List, Optional
+from typing import List, Optional, Dict
 
 import attr
 
@@ -50,6 +50,7 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
     ReductionDesDroitsInscriptionNonCompleteeException,
 )
 from base.ddd.utils.business_validator import BusinessValidator
+from base.models.utils.utils import ChoiceEnum
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -81,7 +82,7 @@ class ShouldAssimilationEtreCompletee(BusinessValidator):
     pays_nationalite_ue: Optional[bool]
     comptabilite: Comptabilite
 
-    DEPENDANCES_CHAMPS_ASSIMILATION = {
+    DEPENDANCES_CHAMPS_ASSIMILATION: Dict[str, Dict[ChoiceEnum, List[str]]] = {
         'type_situation_assimilation': {
             TypeSituationAssimilation.AUTORISATION_ETABLISSEMENT_OU_RESIDENT_LONGUE_DUREE: [
                 'sous_type_situation_assimilation_1',
