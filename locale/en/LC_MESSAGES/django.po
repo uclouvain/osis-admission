@@ -2438,9 +2438,6 @@ msgstr ""
 msgid "This activity and potential sub-activities will be deleted"
 msgstr ""
 
-msgid "This activity and potential sub-activities will be refused"
-msgstr ""
-
 msgid ""
 "This activity and potential sub-activities will be set back to Unsubmitted "
 "for modification"
@@ -2452,6 +2449,10 @@ msgstr ""
 msgid "This activity has been submitted"
 msgstr ""
 
+msgid ""
+"This activity has underlying sub-activities that will be refused as well"
+msgstr ""
+
 msgid "This activity is not complete"
 msgstr ""
 
@@ -2459,6 +2460,9 @@ msgid "This activity must be submitted"
 msgstr ""
 
 msgid "This activity must be unsubmitted"
+msgstr ""
+
+msgid "This activity will be refused"
 msgstr ""
 
 msgid ""

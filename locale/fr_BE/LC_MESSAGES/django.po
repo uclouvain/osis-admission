@@ -2642,9 +2642,6 @@ msgstr "Titre de la thèse"
 msgid "This activity and potential sub-activities will be deleted"
 msgstr "Cette activité et ses potentielles sous-activités seront supprimées"
 
-msgid "This activity and potential sub-activities will be refused"
-msgstr "Cette activité et ses potentielles sous-activités seront refusées"
-
 msgid ""
 "This activity and potential sub-activities will be set back to Unsubmitted "
 "for modification"
@@ -2658,6 +2655,10 @@ msgstr "Cette activité n'existe pas"
 msgid "This activity has been submitted"
 msgstr "Cette activité est déjà soumise"
 
+msgid ""
+"This activity has underlying sub-activities that will be refused as well"
+msgstr "Cette activité a des activités dépendantes qui seront également refusées"
+
 msgid "This activity is not complete"
 msgstr "Cette activité est incomplète"
 
@@ -2666,6 +2667,9 @@ msgstr "Cette activité doit être soumise"
 
 msgid "This activity must be unsubmitted"
 msgstr "Cette activité doit être non soumise"
+
+msgid "This activity will be refused"
+msgstr "Cette activité sera refusée"
 
 msgid ""
 "This adds a \"Complementary training\" tab on admissions concerning this CDD."
