@@ -1372,6 +1372,9 @@ msgstr "Nom / Prénom / Identifiant global"
 msgid "Last name of the account holder"
 msgstr "Nom du titulaire du compte"
 
+msgid "Learning unit"
+msgstr "Unité d'enseignement"
+
 msgid "Legal cohabitation certificate"
 msgstr "Attestation de cohabitation légale"
 

@@ -50,6 +50,18 @@ from admission.views.doctorate.mixins import LoadDossierViewMixin
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from infrastructure.messages_bus import message_bus_instance
 
+__all__ = [
+    "ComplementaryTrainingView",
+    "CourseEnrollmentView",
+    "DoctoralTrainingActivityView",
+    "TrainingActivityAddView",
+    "TrainingActivityDeleteView",
+    "TrainingActivityEditView",
+    "TrainingActivityRefuseView",
+    "TrainingActivityRequireChangesView",
+    "TrainingRedirectView",
+]
+
 
 class TrainingRedirectView(LoadDossierViewMixin, generic.RedirectView):
     """Redirect depending on the status of CDD and admission type"""
@@ -62,11 +74,7 @@ class TrainingRedirectView(LoadDossierViewMixin, generic.RedirectView):
         return resolve_url('admission:doctorate:course-enrollment', uuid=self.admission_uuid)
 
 
-class DoctoralTrainingActivityView(LoadDossierViewMixin, generic.FormView):
-    """List view for doctoral training activities"""
-
-    template_name = "admission/doctorate/cdd/training_list.html"
-    permission_required = "admission.change_activity"
+class TrainingListMixin(LoadDossierViewMixin, generic.FormView):
     form_class = BatchActivityForm
 
     def get_context_data(self, **kwargs):
@@ -74,24 +82,7 @@ class DoctoralTrainingActivityView(LoadDossierViewMixin, generic.FormView):
         context['activities'] = self.get_queryset()
         context['categories'] = get_category_labels(self.admission.doctorate.management_entity_id)
         context['statuses'] = StatutActivite.choices
-        context['counts'] = self.get_queryset().aggregate(
-            total=Sum('ects'),
-            validated=Sum('ects', filter=Q(status=StatutActivite.ACCEPTEE.name)),
-            pending=Sum('ects', filter=Q(status=StatutActivite.SOUMISE.name)),
-        )
-        context['categories_count'] = (
-            self.get_queryset()
-            .values('category')
-            .annotate(
-                unsubmitted=Sum('ects', filter=Q(status=StatutActivite.NON_SOUMISE.name)),
-                submitted=Sum('ects', filter=Q(status=StatutActivite.SOUMISE.name)),
-                validated=Sum('ects', filter=Q(status=StatutActivite.ACCEPTEE.name)),
-            )
-        )
         return context
-
-    def get_queryset(self):
-        return Activity.objects.for_doctoral_training(self.admission_uuid)
 
     def get_success_url(self):
         return self.request.get_full_path()
@@ -282,7 +273,35 @@ class TrainingActivityRequireChangesView(TrainingActivityRefuseView):
     template_name = "admission/doctorate/forms/training/activity_require_changes.html"
 
 
-class ComplementaryTrainingView(DoctoralTrainingActivityView):
+class DoctoralTrainingActivityView(TrainingListMixin):  # pylint: disable=too-many-ancestors
+    """List view for doctoral training activities"""
+
+    template_name = "admission/doctorate/cdd/training_list.html"
+    permission_required = "admission.change_activity"
+
+    def get_queryset(self):
+        return Activity.objects.for_doctoral_training(self.admission_uuid)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['counts'] = self.get_queryset().aggregate(
+            total=Sum('ects'),
+            validated=Sum('ects', filter=Q(status=StatutActivite.ACCEPTEE.name)),
+            pending=Sum('ects', filter=Q(status=StatutActivite.SOUMISE.name)),
+        )
+        context['categories_count'] = (
+            self.get_queryset()
+            .values('category')
+            .annotate(
+                unsubmitted=Sum('ects', filter=Q(status=StatutActivite.NON_SOUMISE.name)),
+                submitted=Sum('ects', filter=Q(status=StatutActivite.SOUMISE.name)),
+                validated=Sum('ects', filter=Q(status=StatutActivite.ACCEPTEE.name)),
+            )
+        )
+        return context
+
+
+class ComplementaryTrainingView(TrainingListMixin):  # pylint: disable=too-many-ancestors
     template_name = "admission/doctorate/cdd/complementary_training_list.html"
     permission_required = 'admission.view_complementary_training'
 
@@ -290,7 +309,7 @@ class ComplementaryTrainingView(DoctoralTrainingActivityView):
         return Activity.objects.for_complementary_training(self.admission_uuid)
 
 
-class CourseEnrollmentView(DoctoralTrainingActivityView):
+class CourseEnrollmentView(TrainingListMixin):  # pylint: disable=too-many-ancestors
     template_name = "admission/doctorate/cdd/course_enrollment.html"
     permission_required = 'admission.view_course_enrollment'
 
