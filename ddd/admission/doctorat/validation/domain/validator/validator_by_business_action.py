@@ -36,7 +36,7 @@ if TYPE_CHECKING:
     from admission.ddd.admission.doctorat.validation.domain.model.demande import Demande
 
 
-@attr.s(frozen=True, slots=True, auto_attribs=True)
+@attr.dataclass(frozen=True, slots=True)
 class RefuserDemandeCDDValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
     demande: 'Demande'
 
@@ -49,7 +49,7 @@ class RefuserDemandeCDDValidatorList(TwoStepsMultipleBusinessExceptionListValida
         ]
 
 
-@attr.s(frozen=True, slots=True, auto_attribs=True)
+@attr.dataclass(frozen=True, slots=True)
 class ApprouverDemandeCDDValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
     demande: 'Demande'
 

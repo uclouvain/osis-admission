@@ -31,17 +31,17 @@ import attr
 from osis_common.ddd import interface
 
 
-@attr.s(frozen=True, slots=True, auto_attribs=True)
+@attr.dataclass(frozen=True, slots=True)
 class RecupererEpreuvesConfirmationQuery(interface.QueryRequest):
     doctorat_uuid: str
 
 
-@attr.s(frozen=True, slots=True, auto_attribs=True)
+@attr.dataclass(frozen=True, slots=True)
 class RecupererDerniereEpreuveConfirmationQuery(interface.QueryRequest):
     doctorat_uuid: str
 
 
-@attr.s(frozen=True, slots=True, auto_attribs=True)
+@attr.dataclass(frozen=True, slots=True)
 class ModifierEpreuveConfirmationParCDDCommand(interface.CommandRequest):
     uuid: str
 
@@ -53,7 +53,7 @@ class ModifierEpreuveConfirmationParCDDCommand(interface.CommandRequest):
     avis_renouvellement_mandat_recherche: List[str]
 
 
-@attr.s(frozen=True, slots=True, auto_attribs=True)
+@attr.dataclass(frozen=True, slots=True)
 class SoumettreEpreuveConfirmationCommand(interface.CommandRequest):
     uuid: str
 
@@ -64,7 +64,7 @@ class SoumettreEpreuveConfirmationCommand(interface.CommandRequest):
     avis_renouvellement_mandat_recherche: List[str]
 
 
-@attr.s(frozen=True, slots=True, auto_attribs=True)
+@attr.dataclass(frozen=True, slots=True)
 class CompleterEpreuveConfirmationParPromoteurCommand(interface.CommandRequest):
     uuid: str
 
@@ -72,7 +72,7 @@ class CompleterEpreuveConfirmationParPromoteurCommand(interface.CommandRequest):
     avis_renouvellement_mandat_recherche: List[str]
 
 
-@attr.s(frozen=True, slots=True, auto_attribs=True)
+@attr.dataclass(frozen=True, slots=True)
 class SoumettreReportDeDateCommand(interface.CommandRequest):
     uuid: str
 
@@ -81,19 +81,19 @@ class SoumettreReportDeDateCommand(interface.CommandRequest):
     lettre_justification: List[str]
 
 
-@attr.s(frozen=True, slots=True, auto_attribs=True)
+@attr.dataclass(frozen=True, slots=True)
 class SoumettreAvisProlongationCommand(interface.CommandRequest):
     uuid: str
 
     avis_cdd: str
 
 
-@attr.s(frozen=True, slots=True, auto_attribs=True)
+@attr.dataclass(frozen=True, slots=True)
 class ConfirmerReussiteCommand(interface.CommandRequest):
     uuid: str
 
 
-@attr.s(frozen=True, slots=True, auto_attribs=True)
+@attr.dataclass(frozen=True, slots=True)
 class ConfirmerEchecCommand(interface.CommandRequest):
     uuid: str
 
@@ -101,7 +101,7 @@ class ConfirmerEchecCommand(interface.CommandRequest):
     corps_message: str
 
 
-@attr.s(frozen=True, slots=True, auto_attribs=True)
+@attr.dataclass(frozen=True, slots=True)
 class ConfirmerRepassageCommand(interface.CommandRequest):
     uuid: str
 
@@ -110,7 +110,7 @@ class ConfirmerRepassageCommand(interface.CommandRequest):
     corps_message: str
 
 
-@attr.s(frozen=True, slots=True, auto_attribs=True)
+@attr.dataclass(frozen=True, slots=True)
 class TeleverserAvisRenouvellementMandatRechercheCommand(interface.CommandRequest):
     uuid: str
 

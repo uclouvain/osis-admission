@@ -30,7 +30,7 @@ import attr
 from osis_common.ddd import interface
 
 
-@attr.s(frozen=True, slots=True, auto_attribs=True)
+@attr.dataclass(frozen=True, slots=True)
 class ProfilCandidatDTO(interface.DTO):
 
     # Identification

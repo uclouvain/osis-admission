@@ -31,7 +31,7 @@ import attr
 from osis_common.ddd import interface
 
 
-@attr.s(frozen=True, slots=True, auto_attribs=True)
+@attr.dataclass(frozen=True, slots=True)
 class DemandeProlongationDTO(interface.DTO):
     nouvelle_echeance: datetime.date
     justification_succincte: str
