@@ -43,7 +43,6 @@ class ShouldValorisationEtreComplete(BusinessValidator):
                 self.valorisation.intitule,
                 self.valorisation.description,
                 self.valorisation.cv,
-                self.valorisation.preuve,
                 self.activite.ects,
             ]
         ):
