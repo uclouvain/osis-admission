@@ -32,7 +32,7 @@ from osis_common.ddd import interface
 from .demande_prolongation import DemandeProlongationDTO
 
 
-@attr.s(frozen=True, slots=True, auto_attribs=True)
+@attr.dataclass(frozen=True, slots=True)
 class EpreuveConfirmationDTO(interface.DTO):
     uuid: str
 

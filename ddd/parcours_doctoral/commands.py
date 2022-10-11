@@ -28,12 +28,12 @@ import attr
 from osis_common.ddd import interface
 
 
-@attr.s(frozen=True, slots=True, auto_attribs=True)
+@attr.dataclass(frozen=True, slots=True)
 class RecupererDoctoratQuery(interface.QueryRequest):
     doctorat_uuid: str
 
 
-@attr.s(frozen=True, slots=True, auto_attribs=True)
+@attr.dataclass(frozen=True, slots=True)
 class EnvoyerMessageDoctorantCommand(interface.CommandRequest):
     matricule_emetteur: str
     doctorat_uuid: str

@@ -33,7 +33,7 @@ from admission.ddd.parcours_doctoral.formation.domain.model.enums import ChoixSt
 from osis_common.ddd import interface
 
 
-@attr.dataclass(frozen=True, slots=True, auto_attribs=True)
+@attr.dataclass(frozen=True, slots=True)
 class ConferenceDTO(interface.DTO):
     type: str = ""
     nom_manifestation: str = ""

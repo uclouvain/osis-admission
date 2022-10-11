@@ -32,7 +32,7 @@ from osis_common.ddd import interface
 from .profil_candidat import ProfilCandidatDTO
 
 
-@attr.s(frozen=True, slots=True, auto_attribs=True)
+@attr.dataclass(frozen=True, slots=True)
 class DemandeRechercheDTO(interface.DTO):
     uuid: str
     numero_demande: str
@@ -47,7 +47,7 @@ class DemandeRechercheDTO(interface.DTO):
     code_bourse: Optional[str]
 
 
-@attr.s(frozen=True, slots=True, auto_attribs=True)
+@attr.dataclass(frozen=True, slots=True)
 class DemandeDTO(interface.DTO):
     uuid: str
     statut_cdd: str
@@ -61,7 +61,7 @@ class DemandeDTO(interface.DTO):
     # TODO only include info about demande
 
 
-@attr.s(frozen=True, slots=True, auto_attribs=True)
+@attr.dataclass(frozen=True, slots=True)
 class RecupererDemandeDTO(interface.DTO):
     uuid: str
     statut_cdd: str

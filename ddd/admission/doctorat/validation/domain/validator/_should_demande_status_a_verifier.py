@@ -31,7 +31,7 @@ from admission.ddd.admission.doctorat.validation.domain.model.enums import Choix
 from base.ddd.utils.business_validator import BusinessValidator
 
 
-@attr.s(frozen=True, slots=True, auto_attribs=True)
+@attr.dataclass(frozen=True, slots=True)
 class ShouldStatutDemandeAVerifier(BusinessValidator):
     demande: 'Demande'
 

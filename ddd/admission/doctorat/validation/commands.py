@@ -32,7 +32,7 @@ from admission.ddd.interface import SortedQueryRequest
 from osis_common.ddd import interface
 
 
-@attr.s(frozen=True, slots=True, auto_attribs=True)
+@attr.dataclass(frozen=True, slots=True)
 class FiltrerDemandesQuery(SortedQueryRequest):
     numero: Optional[str] = ''
     etat_cdd: Optional[str] = ''
@@ -55,18 +55,18 @@ class FiltrerDemandesQuery(SortedQueryRequest):
     date_admission_fin: Optional[datetime] = None
 
 
-@attr.s(frozen=True, slots=True, auto_attribs=True)
+@attr.dataclass(frozen=True, slots=True)
 class RecupererDemandeQuery(interface.QueryRequest):
     uuid: str
 
 
-@attr.s(frozen=True, slots=True, auto_attribs=True)
+@attr.dataclass(frozen=True, slots=True)
 class RefuserDemandeCddCommand(interface.CommandRequest):
     uuid: str
     sujet_email_doctorant: str
     contenu_email_doctorant: str
 
 
-@attr.s(frozen=True, slots=True, auto_attribs=True)
+@attr.dataclass(frozen=True, slots=True)
 class ApprouverDemandeCddCommand(interface.CommandRequest):
     uuid: str
