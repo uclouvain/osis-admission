@@ -24,7 +24,7 @@
 #
 # ##############################################################################
 import attr
-from django.test import SimpleTestCase
+from unittest import TestCase
 
 from admission.ddd.admission.doctorat.preparation.commands import InitierPropositionCommand
 from admission.ddd.admission.doctorat.preparation.domain.model._experience_precedente_recherche import (
@@ -61,7 +61,7 @@ from admission.infrastructure.message_bus_in_memory import message_bus_in_memory
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 
 
-class TestInitierPropositionService(SimpleTestCase):
+class TestInitierPropositionService(TestCase):
     def setUp(self) -> None:
         self.proposition_repository = PropositionInMemoryRepository()
         self.addCleanup(self.proposition_repository.reset)

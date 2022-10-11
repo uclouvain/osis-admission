@@ -24,7 +24,7 @@
 #
 # ##############################################################################
 
-from django.test import SimpleTestCase
+from unittest import TestCase
 
 from admission.ddd.parcours_doctoral.formation.commands import RefuserActiviteCommand
 from admission.ddd.parcours_doctoral.formation.domain.model.enums import CategorieActivite, StatutActivite
@@ -40,7 +40,7 @@ from admission.infrastructure.parcours_doctoral.formation.repository.in_memory.a
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 
 
-class RefuserActiviteTestCase(SimpleTestCase):
+class RefuserActiviteTestCase(TestCase):
     def setUp(self) -> None:
         self.message_bus = message_bus_in_memory_instance
         self.activite = ActiviteFactory(

@@ -26,7 +26,7 @@
 from typing import List
 
 import attr
-from django.test import SimpleTestCase
+from unittest import TestCase
 
 from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import PropositionIdentityBuilder
 from admission.ddd.admission.doctorat.preparation.commands import RefuserPropositionCommand
@@ -51,7 +51,7 @@ from admission.infrastructure.message_bus_in_memory import message_bus_in_memory
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 
 
-class TestRefuserPropositionService(SimpleTestCase):
+class TestRefuserPropositionService(TestCase):
     def setUp(self) -> None:
         self.matricule_promoteur = 'promoteur-SC3DP'
         self.matricule_membre = 'membre-ca-SC3DP-invite'

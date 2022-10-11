@@ -25,7 +25,7 @@
 # ##############################################################################
 import datetime
 
-from django.test import SimpleTestCase
+from unittest import TestCase
 
 from admission.ddd.parcours_doctoral.commands import RecupererDoctoratQuery
 from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
@@ -41,7 +41,7 @@ from admission.infrastructure.message_bus_in_memory import message_bus_in_memory
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 
 
-class TestConfirmerRepassage(SimpleTestCase):
+class TestConfirmerRepassage(TestCase):
     def setUp(self):
         self.message_bus = message_bus_in_memory_instance
         self.parametres_commande_defaut = {

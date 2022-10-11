@@ -23,7 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from django.test import SimpleTestCase
+from unittest import TestCase
 
 from admission.ddd.parcours_doctoral.epreuve_confirmation.builder.epreuve_confirmation_identity import (
     EpreuveConfirmationIdentityBuilder,
@@ -40,7 +40,7 @@ from admission.infrastructure.parcours_doctoral.epreuve_confirmation.repository.
 )
 
 
-class TestCompleterEpreuveConfirmationParPromoteur(SimpleTestCase):
+class TestCompleterEpreuveConfirmationParPromoteur(TestCase):
     def setUp(self):
         self.epreuve_confirmation_id = EpreuveConfirmationIdentityBuilder.build_from_uuid('c2')
         self.message_bus = message_bus_in_memory_instance

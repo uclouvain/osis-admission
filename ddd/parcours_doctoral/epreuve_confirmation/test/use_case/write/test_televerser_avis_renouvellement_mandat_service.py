@@ -23,7 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from django.test import SimpleTestCase
+from unittest import TestCase
 
 from admission.ddd.parcours_doctoral.epreuve_confirmation.builder.epreuve_confirmation_identity import (
     EpreuveConfirmationIdentityBuilder,
@@ -40,7 +40,7 @@ from admission.infrastructure.parcours_doctoral.epreuve_confirmation.repository.
 )
 
 
-class TestTeleverserAvisRenouvellementMandatRechercheCommand(SimpleTestCase):
+class TestTeleverserAvisRenouvellementMandatRechercheCommand(TestCase):
     def setUp(self):
         self.message_bus = message_bus_in_memory_instance
 

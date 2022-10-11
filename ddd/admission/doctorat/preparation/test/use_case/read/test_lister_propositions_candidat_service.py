@@ -24,7 +24,7 @@
 #
 # ##############################################################################
 
-from django.test import SimpleTestCase
+from unittest import TestCase
 
 from admission.ddd.admission.doctorat.preparation.commands import ListerPropositionsCandidatQuery
 from admission.ddd.admission.doctorat.preparation.test.factory.person import PersonneConnueUclDTOFactory
@@ -34,7 +34,7 @@ from infrastructure.shared_kernel.personne_connue_ucl.in_memory.personne_connue_
 )
 
 
-class TestListerPropositionsCandidatService(SimpleTestCase):
+class TestListerPropositionsCandidatService(TestCase):
     def setUp(self) -> None:
         PersonneConnueUclInMemoryTranslator.personnes_connues_ucl = {
             PersonneConnueUclDTOFactory(matricule='0123456789'),

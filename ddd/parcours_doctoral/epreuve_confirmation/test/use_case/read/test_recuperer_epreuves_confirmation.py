@@ -25,7 +25,7 @@
 # ##############################################################################
 from typing import List
 
-from django.test import SimpleTestCase
+from unittest import TestCase
 
 from admission.ddd.parcours_doctoral.domain.validator.exceptions import DoctoratNonTrouveException
 from admission.ddd.parcours_doctoral.epreuve_confirmation.commands import RecupererEpreuvesConfirmationQuery
@@ -33,7 +33,7 @@ from admission.ddd.parcours_doctoral.epreuve_confirmation.dtos import EpreuveCon
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 
 
-class TestRecupererEpreuvesConfirmation(SimpleTestCase):
+class TestRecupererEpreuvesConfirmation(TestCase):
     def setUp(self) -> None:
         self.message_bus = message_bus_in_memory_instance
 

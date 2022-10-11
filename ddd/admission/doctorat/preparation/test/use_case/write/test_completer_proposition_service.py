@@ -24,7 +24,7 @@
 #
 # ##############################################################################
 import attr
-from django.test import SimpleTestCase
+from unittest import TestCase
 
 from admission.ddd.admission.doctorat.preparation.commands import CompleterPropositionCommand
 from admission.ddd.admission.doctorat.preparation.domain.model._experience_precedente_recherche import (
@@ -54,7 +54,7 @@ from admission.infrastructure.admission.doctorat.preparation.repository.in_memor
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 
 
-class TestCompleterPropositionService(SimpleTestCase):
+class TestCompleterPropositionService(TestCase):
     def setUp(self) -> None:
         self.proposition_repository = PropositionInMemoryRepository()
 

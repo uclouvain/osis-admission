@@ -26,7 +26,7 @@
 import datetime
 from unittest.mock import patch
 
-from django.test import SimpleTestCase
+from unittest import TestCase
 
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutProposition
 from admission.ddd.admission.doctorat.validation.builder.demande_identity import DemandeIdentityBuilder
@@ -50,7 +50,7 @@ from admission.infrastructure.parcours_doctoral.epreuve_confirmation.repository.
 from admission.infrastructure.parcours_doctoral.repository.in_memory.doctorat import DoctoratInMemoryRepository
 
 
-class TestApprouverDemandeCDD(SimpleTestCase):
+class TestApprouverDemandeCDD(TestCase):
     def setUp(self) -> None:
         # Mock datetime to return the 2020 year as the current year
         date_patcher = patch(

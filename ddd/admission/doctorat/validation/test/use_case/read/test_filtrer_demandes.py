@@ -25,7 +25,7 @@
 # ##############################################################################
 from typing import List
 
-from django.test import SimpleTestCase
+from unittest import TestCase
 
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixTypeAdmission
 from admission.ddd.admission.doctorat.preparation.test.factory.proposition import (
@@ -50,7 +50,7 @@ from admission.infrastructure.admission.doctorat.validation.repository.in_memory
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 
 
-class TestFiltrerDemandes(SimpleTestCase):
+class TestFiltrerDemandes(TestCase):
     def setUp(self) -> None:
         PropositionInMemoryRepository.entities = [
             PropositionAdmissionSC3DPMinimaleFactory(),

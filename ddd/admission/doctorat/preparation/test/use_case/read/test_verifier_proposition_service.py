@@ -26,7 +26,7 @@
 import datetime
 
 import mock
-from django.test import SimpleTestCase
+from unittest import TestCase
 
 from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import PropositionIdentityBuilder
 from admission.ddd.admission.doctorat.preparation.commands import VerifierPropositionCommand
@@ -90,7 +90,7 @@ from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import Aca
 from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
 
 
-class TestVerifierPropositionServiceCommun(SimpleTestCase):
+class TestVerifierPropositionServiceCommun(TestCase):
     def setUp(self) -> None:
         self.candidat_translator = ProfilCandidatInMemoryTranslator()
         self.proposition_repository = PropositionInMemoryRepository()

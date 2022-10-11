@@ -25,7 +25,7 @@
 # ##############################################################################
 import datetime
 
-from django.test import SimpleTestCase
+from unittest import TestCase
 
 from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
 from admission.ddd.parcours_doctoral.epreuve_confirmation.builder.epreuve_confirmation_identity import (
@@ -47,7 +47,7 @@ from admission.infrastructure.parcours_doctoral.repository.in_memory.doctorat im
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 
 
-class TestSoumettreEpreuveConfirmation(SimpleTestCase):
+class TestSoumettreEpreuveConfirmation(TestCase):
     def setUp(self):
         self.message_bus = message_bus_in_memory_instance
         self.epreuve_confirmation_id = EpreuveConfirmationIdentityBuilder.build_from_uuid('c2')

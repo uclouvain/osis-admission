@@ -24,7 +24,7 @@
 # ##############################################################################
 
 import attr
-from django.test import SimpleTestCase
+from unittest import TestCase
 
 from admission.ddd.admission.doctorat.preparation.commands import DemanderSignaturesCommand
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixEtatSignature, ChoixStatutProposition
@@ -51,7 +51,7 @@ from infrastructure.shared_kernel.personne_connue_ucl.in_memory.personne_connue_
 )
 
 
-class TestDemanderSignaturesService(SimpleTestCase):
+class TestDemanderSignaturesService(TestCase):
     def setUp(self) -> None:
         self.uuid_proposition = 'uuid-SC3DP-promoteur-membre-cotutelle'
         PersonneConnueUclInMemoryTranslator.personnes_connues_ucl = {
