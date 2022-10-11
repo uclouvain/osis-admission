@@ -66,7 +66,11 @@ class ActivityQuerySet(models.QuerySet):
             )
             .exclude(Q(category=CategorieActivite.UCL_COURSE.name, course_completed=False))
             .prefetch_related('children')
-            .select_related('learning_unit_year')
+            .select_related(
+                'parent',
+                'learning_unit_year__learning_container_year',
+                'learning_unit_year__academic_year',
+            )
         )
 
     def for_complementary_training(self, doctorate_uuid):
@@ -77,7 +81,11 @@ class ActivityQuerySet(models.QuerySet):
             )
             .exclude(Q(category=CategorieActivite.UCL_COURSE.name, course_completed=False))
             .prefetch_related('children')
-            .select_related('learning_unit_year')
+            .select_related(
+                'parent',
+                'learning_unit_year__learning_container_year',
+                'learning_unit_year__academic_year',
+            )
         )
 
     def for_enrollment_courses(self, doctorate_uuid):
@@ -86,7 +94,11 @@ class ActivityQuerySet(models.QuerySet):
                 doctorate__uuid=doctorate_uuid,
                 category=CategorieActivite.UCL_COURSE.name,
             )
-            .select_related('learning_unit_year')
+            .select_related(
+                'parent',
+                'learning_unit_year__learning_container_year',
+                'learning_unit_year__academic_year',
+            )
             .order_by('context')
         )
 

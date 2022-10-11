@@ -61,7 +61,7 @@ class DoctorateTrainingActivityViewTestCase(TestCase):
         cls.namespace = 'admission:doctorate:doctoral-training'
         cls.doctorate = cls.conference.doctorate
         cls.service = ServiceFactory(doctorate=cls.doctorate)
-        cls.ucl_course = UclCourseFactory(doctorate=cls.doctorate)
+        cls.ucl_course = UclCourseFactory(doctorate=cls.doctorate, learning_unit_year__academic_year__current=True)
         cls.manager = CddManagerFactory(entity=cls.doctorate.doctorate.management_entity)
         cls.url = resolve_url(cls.namespace, uuid=cls.doctorate.uuid)
         cls.default_url_args = dict(uuid=cls.doctorate.uuid, activity_id=cls.conference.uuid)

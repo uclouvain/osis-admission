@@ -44,10 +44,11 @@
   >
     <div class="panel-body">
       <div class="form-group">
-        <strong class="d-block">{% trans "Description" %}</strong>
+        <strong class="d-block">{% trans "Context" %}</strong>
         {{ activity.get_context_display }}
-        {{ activity.academic_year }}
-        {{ activity.learning_unit_year }}
+        <strong class="d-block">{% trans "Learning unit" %}</strong>
+        {{ activity.learning_unit_year.complete_title_i18n }} -
+        {{ activity.learning_unit_year.academic_year }}
       </div>
     </div>
   </div>

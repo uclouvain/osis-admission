@@ -23,6 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from datetime import date
 from functools import partial
 from typing import List, Tuple
 
@@ -105,7 +106,10 @@ class BooleanRadioSelect(forms.RadioSelect):
 class AcademicYearField(forms.ModelChoiceField):
     def __init__(self, *args, **kwargs):
         kwargs.setdefault('label', _("Academic year"))
-        kwargs.setdefault('queryset', AcademicYear.objects.order_by('-year'))
+        if kwargs.pop('future_only', False):
+            kwargs.setdefault('queryset', AcademicYear.objects.filter(year__gte=date.today().year).order_by('-year'))
+        else:
+            kwargs.setdefault('queryset', AcademicYear.objects.order_by('-year'))
         super().__init__(*args, **kwargs)
 
     def label_from_instance(self, obj: AcademicYear) -> str:
@@ -621,7 +625,7 @@ class PaperForm(ActivityFormMixin, forms.ModelForm):
 
 class UclCourseForm(ActivityFormMixin, forms.ModelForm):
     template_name = "admission/doctorate/forms/training/ucl_course.html"
-    academic_year = AcademicYearField(to_field_name='year', widget=autocomplete.ListSelect2())
+    academic_year = AcademicYearField(to_field_name='year', widget=autocomplete.ListSelect2(), future_only=True)
     learning_unit_year = forms.CharField(
         widget=autocomplete.ListSelect2(
             url='admission:autocomplete:learning_unit_years',

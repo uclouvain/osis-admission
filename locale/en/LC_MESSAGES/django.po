@@ -1283,6 +1283,9 @@ msgstr ""
 msgid "Last name of the account holder"
 msgstr ""
 
+msgid "Learning unit"
+msgstr ""
+
 msgid "Legal cohabitation certificate"
 msgstr ""
 

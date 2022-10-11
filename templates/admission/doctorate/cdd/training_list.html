@@ -95,7 +95,7 @@
       {% csrf_token %}
       {% for activity in activities %}
         {% firstof 0 activity.category|lower|add:'.html' as template_name %}
-        {% if not activity.parent %}
+        {% if not activity.parent_id %}
           {% include "admission/doctorate/details/training/"|add:template_name %}
         {% endif %}
       {% endfor %}
