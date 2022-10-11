@@ -31,7 +31,12 @@
     {% display view.activity.type "-" view.activity.title as object %}
     {% blocktrans trimmed %}Are you sure you want to refuse "{{ object }}"?{% endblocktrans %}
   </h3>
-  <p>{% trans "This activity and potential sub-activities will be refused" %}</p>
+  <p>{% trans "This activity will be refused" %}</p>
+  {% if view.activity.children.exists %}
+    <div class="alert alert-danger">
+      {% trans "This activity has underlying sub-activities that will be refused as well" %}
+    </div>
+  {% endif %}
   <form action="" method="post">
     {% csrf_token %}
     {% bootstrap_form form %}
