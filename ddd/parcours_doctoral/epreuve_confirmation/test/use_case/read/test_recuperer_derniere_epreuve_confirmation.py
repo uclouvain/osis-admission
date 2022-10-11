@@ -24,7 +24,7 @@
 #
 # ##############################################################################
 
-from django.test import SimpleTestCase
+from unittest import TestCase
 
 from admission.ddd.parcours_doctoral.domain.validator.exceptions import DoctoratNonTrouveException
 from admission.ddd.parcours_doctoral.epreuve_confirmation.commands import (
@@ -37,7 +37,7 @@ from admission.ddd.parcours_doctoral.epreuve_confirmation.validators.exceptions 
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 
 
-class TestRecupererDerniereEpreuveConfirmation(SimpleTestCase):
+class TestRecupererDerniereEpreuveConfirmation(TestCase):
     def setUp(self) -> None:
         self.message_bus = message_bus_in_memory_instance
 

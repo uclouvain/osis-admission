@@ -25,7 +25,7 @@
 # ##############################################################################
 
 import attr
-from django.test import SimpleTestCase
+from unittest import TestCase
 
 from admission.ddd.admission.doctorat.preparation.commands import VerifierProjetCommand
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
@@ -46,7 +46,7 @@ from infrastructure.shared_kernel.personne_connue_ucl.in_memory.personne_connue_
 )
 
 
-class TestVerifierPropositionService(SimpleTestCase):
+class TestVerifierPropositionService(TestCase):
     def setUp(self) -> None:
         self.uuid_proposition = 'uuid-SC3DP-promoteur-membre'
         PersonneConnueUclInMemoryTranslator.personnes_connues_ucl = {

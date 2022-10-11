@@ -25,7 +25,7 @@
 # ##############################################################################
 
 import attr
-from django.test import SimpleTestCase
+from unittest import TestCase
 
 from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import PropositionIdentityBuilder
 from admission.ddd.admission.doctorat.preparation.commands import DesignerPromoteurReferenceCommand
@@ -39,7 +39,7 @@ from admission.infrastructure.admission.doctorat.preparation.repository.in_memor
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 
 
-class TestDesignerPromoteurDeReferenceService(SimpleTestCase):
+class TestDesignerPromoteurDeReferenceService(TestCase):
     def setUp(self) -> None:
         self.matricule_promoteur = 'promoteur-SC3DP'
         self.uuid_proposition = 'uuid-SC3DP-sans-promoteur-reference'

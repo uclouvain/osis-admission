@@ -23,7 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from django.test import SimpleTestCase
+from unittest import TestCase
 
 from admission.ddd.admission.doctorat.preparation.commands import (
     CompleterComptabilitePropositionCommand,
@@ -49,7 +49,7 @@ from admission.infrastructure.admission.doctorat.preparation.repository.in_memor
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 
 
-class TestCompleterComptabilitePropositionService(SimpleTestCase):
+class TestCompleterComptabilitePropositionService(TestCase):
     def setUp(self) -> None:
         self.proposition_repository = PropositionInMemoryRepository()
 

@@ -24,7 +24,7 @@
 #
 # ##############################################################################
 
-from django.test import SimpleTestCase
+from unittest import TestCase
 
 from admission.ddd.parcours_doctoral.formation.commands import DonnerAvisSurActiviteCommand
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
@@ -33,7 +33,7 @@ from admission.infrastructure.parcours_doctoral.formation.repository.in_memory.a
 )
 
 
-class DonnerAvisSurActiviteTestCase(SimpleTestCase):
+class DonnerAvisSurActiviteTestCase(TestCase):
     def setUp(self) -> None:
         self.message_bus = message_bus_in_memory_instance
 
