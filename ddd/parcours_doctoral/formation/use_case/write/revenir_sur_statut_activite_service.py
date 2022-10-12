@@ -23,6 +23,25 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from .internal_note import InternalNoteView
-from .list import CddDoctorateAdmissionList
-from .training import *
+from admission.ddd.parcours_doctoral.formation.builder.activite_identity_builder import ActiviteIdentityBuilder
+from admission.ddd.parcours_doctoral.formation.commands import RevenirSurStatutActiviteCommand
+from admission.ddd.parcours_doctoral.formation.domain.model.activite import ActiviteIdentity
+from admission.ddd.parcours_doctoral.formation.domain.service.remettre_activite_a_soumise import (
+    RemettreActiviteASoumise,
+)
+from admission.ddd.parcours_doctoral.formation.repository.i_activite import IActiviteRepository
+
+
+def revenir_sur_statut_activite(
+    cmd: 'RevenirSurStatutActiviteCommand',
+    activite_repository: 'IActiviteRepository',
+) -> 'ActiviteIdentity':
+    # GIVEN
+    activite = activite_repository.get(entity_id=ActiviteIdentityBuilder.build_from_uuid(cmd.activite_uuid))
+
+    # WHEN
+    RemettreActiviteASoumise().revenir(activite, activite_repository)
+
+    # THEN
+
+    return activite.entity_id

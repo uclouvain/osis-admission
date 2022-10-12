@@ -23,6 +23,19 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from .internal_note import InternalNoteView
-from .list import CddDoctorateAdmissionList
-from .training import *
+
+import attr
+
+from admission.ddd.parcours_doctoral.formation.business_types import *
+from admission.ddd.parcours_doctoral.formation.domain.model.enums import StatutActivite
+from admission.ddd.parcours_doctoral.formation.domain.validator.exceptions import ActiviteDoitEtreAccepteeOuRefusee
+from base.ddd.utils.business_validator import BusinessValidator
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ShouldActiviteEtreAccepteeOuRefusee(BusinessValidator):
+    activite: 'Activite'
+
+    def validate(self, *args, **kwargs):
+        if self.activite.statut not in [StatutActivite.ACCEPTEE, StatutActivite.REFUSEE]:
+            raise ActiviteDoitEtreAccepteeOuRefusee(activite_id=self.activite.entity_id)

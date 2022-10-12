@@ -30,18 +30,18 @@ import attr
 from osis_common.ddd.interface import CommandRequest
 
 
-@attr.dataclass
+@attr.dataclass(frozen=True, slots=True)
 class SupprimerActiviteCommand(CommandRequest):
     activite_uuid: str
 
 
-@attr.dataclass
+@attr.dataclass(frozen=True, slots=True)
 class SoumettreActivitesCommand(CommandRequest):
     doctorat_uuid: str
     activite_uuids: List[str]
 
 
-@attr.dataclass
+@attr.dataclass(frozen=True, slots=True)
 class DonnerAvisSurActiviteCommand(CommandRequest):
     doctorat_uuid: str
     activite_uuid: str
@@ -49,15 +49,20 @@ class DonnerAvisSurActiviteCommand(CommandRequest):
     commentaire: str
 
 
-@attr.dataclass
+@attr.dataclass(frozen=True, slots=True)
 class AccepterActivitesCommand(CommandRequest):
     doctorat_uuid: str
     activite_uuids: List[str]
 
 
-@attr.dataclass
+@attr.dataclass(frozen=True, slots=True)
 class RefuserActiviteCommand(CommandRequest):
     doctorat_uuid: str
     activite_uuid: str
     avec_modification: bool
     remarque: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RevenirSurStatutActiviteCommand(CommandRequest):
+    activite_uuid: str

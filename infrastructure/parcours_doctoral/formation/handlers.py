@@ -62,4 +62,8 @@ COMMAND_HANDLERS = {
         doctorat_repository=DoctoratRepository(),
         notification=Notification(),
     ),
+    RevenirSurStatutActiviteCommand: partial(
+        revenir_sur_statut_activite,
+        activite_repository=ActiviteRepository(),
+    ),
 }

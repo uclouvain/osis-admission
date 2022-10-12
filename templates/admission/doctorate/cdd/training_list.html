@@ -169,11 +169,15 @@
 
       // USer must confirm submission of seminars
       let confirmed = false;
+      let acceptedButtonClicked = true;
+      $('#submit—activities').on('click', function () {
+        acceptedButtonClicked = false;
+      });
       $('form#activities').on('submit', function (e) {
         const hasSeminar = !!(new FormData(e.target)).getAll("activity_ids").filter(
           uuid => $(`#h-${uuid}`).parent().data('type') === "SEMINAR"
         ).length;
-        if (hasSeminar && !confirmed) {
+        if (hasSeminar && !confirmed && !acceptedButtonClicked) {
           $('#confirm-button').on('click', function () {
             confirmed = true;
             e.target.submit()

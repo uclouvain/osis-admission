@@ -65,6 +65,7 @@ training_paths = [
     path('edit/<uuid:activity_id>', TrainingActivityEditView.as_view(), name='edit'),
     path('refuse/<uuid:activity_id>', TrainingActivityRefuseView.as_view(), name='refuse'),
     path('require-changes/<uuid:activity_id>', TrainingActivityRequireChangesView.as_view(), name='require-changes'),
+    path('restore/<uuid:activity_id>', TrainingActivityRestoreView.as_view(), name='restore'),
     path('delete/<uuid:activity_id>', TrainingActivityDeleteView.as_view(), name='delete'),
 ]
 doctorate_detail_paths = [

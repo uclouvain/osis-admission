@@ -23,6 +23,25 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from .internal_note import InternalNoteView
-from .list import CddDoctorateAdmissionList
-from .training import *
+from admission.ddd.parcours_doctoral.formation.domain.model.activite import Activite
+from admission.ddd.parcours_doctoral.formation.domain.model.enums import CategorieActivite
+from admission.ddd.parcours_doctoral.formation.repository.i_activite import IActiviteRepository
+from osis_common.ddd import interface
+
+
+class RemettreActiviteASoumise(interface.DomainService):
+    @classmethod
+    def revenir(
+        cls,
+        activite: 'Activite',
+        activite_repository: 'IActiviteRepository',
+    ) -> None:
+        activite.revenir_a_soumise()
+        activite_repository.save(activite)
+
+        # Revenir également sur toutes les sous-activités pour les séminaires
+        if activite.categorie == CategorieActivite.SEMINAR:
+            sous_activites = activite_repository.search(parent_id=activite.entity_id)
+            for sous_activite in sous_activites:
+                sous_activite.revenir_a_soumise()
+                activite_repository.save(sous_activite)

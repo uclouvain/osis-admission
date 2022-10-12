@@ -95,6 +95,7 @@ class CddManager(EntityRoleModel):
             'admission.change_activity': is_part_of_doctoral_commission & is_enrolled,
             'admission.delete_activity': is_part_of_doctoral_commission & is_enrolled,
             'admission.refuse_activity': is_part_of_doctoral_commission & is_enrolled,
+            'admission.restore_activity': is_part_of_doctoral_commission & is_enrolled,
             # Internal notes
             'admission.add_internalnote': is_part_of_doctoral_commission,
             'admission.view_internalnote': is_part_of_doctoral_commission,
