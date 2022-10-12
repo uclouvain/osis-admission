@@ -389,6 +389,11 @@ msgstr "Êtes-vous sûr de vouloir supprimer \"%(object)s\" ?"
 msgid "Are you sure you want to refuse \"%(object)s\"?"
 msgstr "Êtes-vous sûr de vouloir refuser \"%(object)s\" ?"
 
+#, python-format
+msgid "Are you sure you want to restore \"%(object)s\"?"
+msgstr ""
+"Êtes-vous sûr de vouloir remettre \"%(object)s\" au statut non-soumis ?"
+
 msgid "Assimilation 1 situation types"
 msgstr "Types de situation de l'assimilation 1"
 
@@ -755,6 +760,9 @@ msgstr "Confirmer"
 
 msgid "Confirm and send the message"
 msgstr "Confirmer et envoyer le message"
+
+msgid "Confirm restoring activity to submitted"
+msgstr "Confirmer la remise au statut non-soumise de cette activité"
 
 msgctxt "tab"
 msgid "Confirmation"
@@ -2169,6 +2177,9 @@ msgstr ""
 "Titre de séjour d’une validité supérieure à 3 mois avec des revenus de "
 "remplacement"
 
+msgid "Restore activity to submitted"
+msgstr "Remmetre cette activité au statut non-soumise"
+
 msgid "Retaking of the confirmation paper"
 msgstr "Épreuve de confirmation à représenter"
 
@@ -2670,8 +2681,17 @@ msgid ""
 msgstr ""
 "Cette activité a des activités dépendantes qui seront également refusées"
 
+msgid ""
+"This activity has underlying sub-activities that will be restored as well"
+msgstr ""
+"Cette activité a des activités dépendantes qui seront également remises au "
+"statut non-soumise"
+
 msgid "This activity is not complete"
 msgstr "Cette activité est incomplète"
+
+msgid "This activity must be either accepted or refused"
+msgstr "Cette activité doit être acceptée ou refusée"
 
 msgid "This activity must be submitted"
 msgstr "Cette activité doit être soumise"
@@ -2681,6 +2701,9 @@ msgstr "Cette activité doit être non soumise"
 
 msgid "This activity will be refused"
 msgstr "Cette activité sera refusée"
+
+msgid "This activity will be restored"
+msgstr "Cette activité sera remise au statut non-soumise"
 
 msgid ""
 "This adds a \"Complementary training\" tab on admissions concerning this CDD."

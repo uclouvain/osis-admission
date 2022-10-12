@@ -47,6 +47,7 @@ __all__ = [
     "CoursValidatorList",
     "EpreuveValidatorList",
     "RefusActiviteValidationList",
+    "RevenirASoumiseActiviteValidationList",
 ]
 
 
@@ -218,4 +219,17 @@ class RefusActiviteValidationList(TwoStepsMultipleBusinessExceptionListValidator
         return [
             ShouldActiviteEtreSoumise(self.activite),
             ShouldRemarqueEtrePresente(self.remarque),
+        ]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RevenirASoumiseActiviteValidationList(TwoStepsMultipleBusinessExceptionListValidator):
+    activite: 'Activite'
+
+    def get_data_contract_validators(self) -> List[BusinessValidator]:
+        return []
+
+    def get_invariants_validators(self) -> List[BusinessValidator]:
+        return [
+            ShouldActiviteEtreAccepteeOuRefusee(self.activite),
         ]

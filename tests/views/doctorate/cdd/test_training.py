@@ -396,4 +396,16 @@ class DoctorateTrainingActivityViewTestCase(TestCase):
         self.assertFormError(response, "form", "reason", Field.default_error_messages['required'])
 
         response = self.client.post(url, {"reason": "Not ok"}, follow=True)
-        self.assertRedirects(response, self.url)
+        self.assertRedirects(response, f"{self.url}#{self.conference.uuid}")
+
+    def test_restore_activity(self):
+        self.conference.status = StatutActivite.ACCEPTEE.name
+        self.conference.save()
+        url = resolve_url(f'{self.namespace}:restore', **self.default_url_args)
+        response = self.client.get(url)
+        self.assertContains(response, _("This activity will be restored"))
+
+        response = self.client.post(url, {}, follow=True)
+        self.assertRedirects(response, f"{self.url}#{self.conference.uuid}")
+        self.conference.refresh_from_db()
+        self.assertEqual(self.conference.status, StatutActivite.SOUMISE.name)

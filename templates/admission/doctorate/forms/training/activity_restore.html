@@ -28,12 +28,12 @@
 
 {% block tab_content %}
   <h3>
-    {% blocktrans trimmed %}Are you sure you want to refuse "{{ object }}"?{% endblocktrans %}
+    {% blocktrans trimmed %}Are you sure you want to restore "{{ object }}"?{% endblocktrans %}
   </h3>
-  <p>{% trans "This activity will be refused" %}</p>
-  {% if view.activity.children.exists %}
+  <p>{% trans "This activity will be restored" %}</p>
+  {% if view.activity.category == "SEMINAR" and view.activity.children.exists %}
     <div class="alert alert-danger">
-      {% trans "This activity has underlying sub-activities that will be refused as well" %}
+      {% trans "This activity has underlying sub-activities that will be restored as well" %}
     </div>
   {% endif %}
   <form action="" method="post">
@@ -43,8 +43,8 @@
       <a href="{% url "admission:doctorate:doctoral-training" uuid=view.kwargs.uuid %}#{{ view.kwargs.activity_id }}">
         {% trans "Cancel" %}
       </a>
-      <button type="submit" class="btn btn-danger">
-        {% trans "Refuse activity" %}
+      <button type="submit" class="btn btn-primary">
+        {% trans "Confirm restoring activity to submitted" %}
       </button>
     </div>
   </form>

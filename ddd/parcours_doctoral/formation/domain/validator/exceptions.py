@@ -78,3 +78,12 @@ class RemarqueObligatoire(BusinessException):
     def __init__(self, *args, **kwargs):
         message = _("A comment is required.")
         super().__init__(message, **kwargs)
+
+
+class ActiviteDoitEtreAccepteeOuRefusee(BusinessException):
+    status_code = "FORMATION-7"
+
+    def __init__(self, activite_id, *args, **kwargs):
+        self.activite_id = activite_id
+        message = _("This activity must be either accepted or refused")
+        super().__init__(message, **kwargs)

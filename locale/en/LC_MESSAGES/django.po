@@ -343,6 +343,10 @@ msgstr ""
 msgid "Are you sure you want to refuse \"%(object)s\"?"
 msgstr ""
 
+#, python-format
+msgid "Are you sure you want to restore \"%(object)s\"?"
+msgstr ""
+
 msgid "Assimilation 1 situation types"
 msgstr ""
 
@@ -704,6 +708,9 @@ msgid "Confirm"
 msgstr ""
 
 msgid "Confirm and send the message"
+msgstr ""
+
+msgid "Confirm restoring activity to submitted"
 msgstr ""
 
 msgctxt "tab"
@@ -2000,6 +2007,9 @@ msgstr ""
 msgid "Residence permit valid for more than 3 months with replacement income"
 msgstr ""
 
+msgid "Restore activity to submitted"
+msgstr ""
+
 msgid "Retaking of the confirmation paper"
 msgstr ""
 
@@ -2461,7 +2471,14 @@ msgid ""
 "This activity has underlying sub-activities that will be refused as well"
 msgstr ""
 
+msgid ""
+"This activity has underlying sub-activities that will be restored as well"
+msgstr ""
+
 msgid "This activity is not complete"
+msgstr ""
+
+msgid "This activity must be either accepted or refused"
 msgstr ""
 
 msgid "This activity must be submitted"
@@ -2471,6 +2488,9 @@ msgid "This activity must be unsubmitted"
 msgstr ""
 
 msgid "This activity will be refused"
+msgstr ""
+
+msgid "This activity will be restored"
 msgstr ""
 
 msgid ""

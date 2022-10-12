@@ -23,6 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from ._should_activite_etre_acceptee_ou_refusee import ShouldActiviteEtreAccepteeOuRefusee
 from ._should_activite_etre_soumise import ShouldActiviteEtreSoumise
 from ._should_communication_conference_etre_complete import ShouldCommunicationConferenceEtreComplete
 from ._should_communication_etre_complete import ShouldCommunicationEtreComplete
@@ -55,4 +56,5 @@ __all__ = [
     "ShouldEpreuveEtreComplete",
     "ShouldActiviteEtreSoumise",
     "ShouldRemarqueEtrePresente",
+    "ShouldActiviteEtreAccepteeOuRefusee",
 ]

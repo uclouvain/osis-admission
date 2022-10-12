@@ -26,6 +26,7 @@
 from typing import Optional
 
 from django.db.models import Q, Sum
+from django.forms import Form
 from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, resolve_url
 from django.utils.functional import cached_property
@@ -36,6 +37,7 @@ from admission.contrib.models.doctoral_training import Activity
 from admission.ddd.parcours_doctoral.formation.commands import (
     AccepterActivitesCommand,
     RefuserActiviteCommand,
+    RevenirSurStatutActiviteCommand,
     SoumettreActivitesCommand,
 )
 from admission.ddd.parcours_doctoral.formation.domain.model.enums import (
@@ -60,6 +62,7 @@ __all__ = [
     "TrainingActivityRefuseView",
     "TrainingActivityRequireChangesView",
     "TrainingRedirectView",
+    "TrainingActivityRestoreView",
 ]
 
 
@@ -230,15 +233,11 @@ class TrainingActivityDeleteView(LoadDossierViewMixin, generic.DeleteView):
         return resolve_url(':'.join(self.request.resolver_match.namespaces), uuid=self.admission_uuid)
 
 
-class TrainingActivityRefuseView(LoadDossierViewMixin, SingleObjectMixin, generic.FormView):
+class TrainingActivityActionFormMixin(LoadDossierViewMixin, SingleObjectMixin, generic.FormView):
     model = Activity
-    permission_required = "admission.refuse_activity"
     slug_field = 'uuid'
     pk_url_kwarg = "NOT_TO_BE_USED"
     slug_url_kwarg = 'activity_id'
-    template_name = "admission/doctorate/forms/training/activity_refuse.html"
-    form_class = RefuseForm
-    avec_modification = False
 
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
@@ -253,6 +252,17 @@ class TrainingActivityRefuseView(LoadDossierViewMixin, SingleObjectMixin, generi
         # Don't remove, this is to share same template code in front-office
         return self.object
 
+    def get_success_url(self):
+        base_url = resolve_url(':'.join(self.request.resolver_match.namespaces), uuid=self.admission_uuid)
+        return f"{base_url}#{self.object.uuid}"
+
+
+class TrainingActivityRefuseView(TrainingActivityActionFormMixin):
+    permission_required = "admission.refuse_activity"
+    template_name = "admission/doctorate/forms/training/activity_refuse.html"
+    form_class = RefuseForm
+    avec_modification = False
+
     def form_valid(self, form):
         message_bus_instance.invoke(
             RefuserActiviteCommand(
@@ -264,13 +274,20 @@ class TrainingActivityRefuseView(LoadDossierViewMixin, SingleObjectMixin, generi
         )
         return super().form_valid(form)
 
-    def get_success_url(self):
-        return resolve_url(':'.join(self.request.resolver_match.namespaces), uuid=self.admission_uuid)
-
 
 class TrainingActivityRequireChangesView(TrainingActivityRefuseView):
     avec_modification = True
     template_name = "admission/doctorate/forms/training/activity_require_changes.html"
+
+
+class TrainingActivityRestoreView(TrainingActivityActionFormMixin):
+    permission_required = "admission.restore_activity"
+    template_name = "admission/doctorate/forms/training/activity_restore.html"
+    form_class = Form
+
+    def form_valid(self, form):
+        message_bus_instance.invoke(RevenirSurStatutActiviteCommand(activite_uuid=self.kwargs['activity_id']))
+        return super().form_valid(form)
 
 
 class DoctoralTrainingActivityView(TrainingListMixin):  # pylint: disable=too-many-ancestors

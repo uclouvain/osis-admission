@@ -67,6 +67,7 @@ class ActivityQuerySet(models.QuerySet):
             .exclude(Q(category=CategorieActivite.UCL_COURSE.name, course_completed=False))
             .prefetch_related('children')
             .select_related(
+                'country',
                 'parent',
                 'learning_unit_year__learning_container_year',
                 'learning_unit_year__academic_year',
@@ -80,8 +81,8 @@ class ActivityQuerySet(models.QuerySet):
                 context=ContexteFormation.COMPLEMENTARY_TRAINING.name,
             )
             .exclude(Q(category=CategorieActivite.UCL_COURSE.name, course_completed=False))
-            .prefetch_related('children')
             .select_related(
+                'country',
                 'parent',
                 'learning_unit_year__learning_container_year',
                 'learning_unit_year__academic_year',
@@ -95,6 +96,7 @@ class ActivityQuerySet(models.QuerySet):
                 category=CategorieActivite.UCL_COURSE.name,
             )
             .select_related(
+                'country',
                 'parent',
                 'learning_unit_year__learning_container_year',
                 'learning_unit_year__academic_year',

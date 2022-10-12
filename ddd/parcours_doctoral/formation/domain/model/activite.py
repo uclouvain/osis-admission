@@ -31,6 +31,7 @@ from admission.ddd.parcours_doctoral.domain.model.doctorat import DoctoratIdenti
 from admission.ddd.parcours_doctoral.formation.domain.model.enums import CategorieActivite, StatutActivite
 from admission.ddd.parcours_doctoral.formation.domain.validator.validator_by_business_action import (
     RefusActiviteValidationList,
+    RevenirASoumiseActiviteValidationList,
 )
 from osis_common.ddd import interface
 
@@ -60,6 +61,10 @@ class Activite(interface.RootEntity):
 
     def accepter(self):
         self.statut = StatutActivite.ACCEPTEE
+
+    def revenir_a_soumise(self):
+        RevenirASoumiseActiviteValidationList(self).validate()
+        self.statut = StatutActivite.SOUMISE
 
     def refuser(self, avec_modification: bool, remarque: str):
         RefusActiviteValidationList(self, remarque).validate()

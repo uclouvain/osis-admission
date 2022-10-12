@@ -29,6 +29,7 @@
 {% url namespace|add:":edit" uuid=view.kwargs.uuid activity_id=activity.uuid as edit_url %}
 {% url namespace|add:":refuse" uuid=view.kwargs.uuid activity_id=activity.uuid as refuse_url %}
 {% url namespace|add:":require-changes" uuid=view.kwargs.uuid activity_id=activity.uuid as require_changes_url %}
+{% url namespace|add:":restore" uuid=view.kwargs.uuid activity_id=activity.uuid as restore_url %}
 {% url namespace|add:":delete" uuid=view.kwargs.uuid activity_id=activity.uuid as delete_url %}
 {% if activity.category|safe == 'CONFERENCE' or activity.category|safe == 'SEMINAR' or activity.category|safe == 'RESIDENCY' %}
   {% url namespace|add:":add" uuid=view.kwargs.uuid category="communication" as add_communication_url %}
@@ -68,20 +69,27 @@
             {% trans "Edit" %}
           </a>
         </li>
-        {% if activity.status|safe == "SOUMISE" %}
-          <li>
-            <a href="{{ require_changes_url }}">
-              {% trans "Require changes" %}
-            </a>
-          </li>
-          <li>
-            <a href="{{ refuse_url }}">
-              {% trans "Refuse activity" %}
-            </a>
-          </li>
-        {% endif %}
-        {% if activity.status|safe == "NON_SOUMISE" %}
-          {% if not remove_batch_action %}
+        {% if not remove_batch_action %}
+          {% if activity.status|safe == "SOUMISE" %}
+            <li>
+              <a href="{{ require_changes_url }}">
+                {% trans "Require changes" %}
+              </a>
+            </li>
+            <li>
+              <a href="{{ refuse_url }}">
+                {% trans "Refuse activity" %}
+              </a>
+            </li>
+          {% endif %}
+          {% if activity.status|safe == "ACCEPTEE" or activity.status|safe == "REFUSEE" %}
+            <li>
+              <a href="{{ restore_url }}">
+                {% trans "Restore activity to submitted" %}
+              </a>
+            </li>
+          {% endif %}
+          {% if activity.status|safe == "NON_SOUMISE" %}
             <li
                 {% if not activity.can_be_submitted %}
                   class="disabled"
