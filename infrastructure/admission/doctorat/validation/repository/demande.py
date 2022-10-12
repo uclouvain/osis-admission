@@ -134,19 +134,6 @@ class DemandeRepository(IDemandeRepository):
 
     @classmethod
     def _load_dto(cls, demande: DemandeProxy) -> DemandeDTO:
-        # Retrieve the country names
-        country_of_citizenship = demande.submitted_profile.get('identification').get('country_of_citizenship')
-        residential_country = demande.submitted_profile.get('coordinates').get('country')
-
-        field_to_retrieve = 'name' if get_language() == settings.LANGUAGE_CODE else 'name_en'
-
-        countries = dict(
-            Country.objects.filter(iso_code__in=[residential_country, country_of_citizenship]).values_list(
-                'iso_code',
-                field_to_retrieve,
-            )
-        )
-
         return DemandeDTO(
             uuid=demande.uuid,
             statut_cdd=demande.status_cdd,
@@ -158,11 +145,11 @@ class DemandeRepository(IDemandeRepository):
                 prenom=demande.submitted_profile.get('identification').get('first_name'),
                 nom=demande.submitted_profile.get('identification').get('last_name'),
                 genre=demande.submitted_profile.get('identification').get('gender'),
-                nationalite=country_of_citizenship,
-                nom_pays_nationalite=countries.get(country_of_citizenship, ''),
+                nationalite=demande.submitted_profile.get('identification').get('country_of_citizenship'),
+                nom_pays_nationalite=demande.nom_pays_nationalite or '',  # from DemandeManager annotation
                 email=demande.submitted_profile.get('coordinates').get('email'),
-                pays=residential_country,
-                nom_pays=countries.get(residential_country, ''),
+                pays=demande.submitted_profile.get('coordinates').get('country'),
+                nom_pays=demande.nom_pays or '',  # from DemandeManager annotation
                 code_postal=demande.submitted_profile.get('coordinates').get('postal_code'),
                 ville=demande.submitted_profile.get('coordinates').get('city'),
                 lieu_dit=demande.submitted_profile.get('coordinates').get('place'),
