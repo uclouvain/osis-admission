@@ -316,8 +316,8 @@ msgstr "Ajouter une activité"
 msgid "Add an internal note"
 msgstr "Ajouter une note interne"
 
-msgid "Additional training project"
-msgstr "Projet de formation complémentaire"
+msgid "Complementary training proposition"
+msgstr "Proposition de formation complémentaire"
 
 msgid "Admission"
 msgstr "Admission"

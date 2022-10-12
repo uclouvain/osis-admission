@@ -192,7 +192,7 @@ class DoctorateAdmission(BaseAdmission):
         upload_to=admission_directory_path,
     )
     additional_training_project = FileField(
-        verbose_name=_("Additional training project"),
+        verbose_name=_("Complementary training proposition"),
         upload_to=admission_directory_path,
     )
     recommendation_letters = FileField(

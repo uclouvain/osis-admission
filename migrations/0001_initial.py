@@ -124,7 +124,7 @@ class Migration(migrations.Migration):
                 ('project_document', osis_document.contrib.fields.FileField(base_field=models.UUIDField(), default=list, size=None, verbose_name='Project')),
                 ('gantt_graph', osis_document.contrib.fields.FileField(base_field=models.UUIDField(), default=list, size=None, verbose_name='Gantt graph')),
                 ('program_proposition', osis_document.contrib.fields.FileField(base_field=models.UUIDField(), default=list, size=None, verbose_name='Program proposition')),
-                ('additional_training_project', osis_document.contrib.fields.FileField(base_field=models.UUIDField(), default=list, size=None, verbose_name='Additional training project')),
+                ('additional_training_project', osis_document.contrib.fields.FileField(base_field=models.UUIDField(), default=list, size=None, verbose_name='Complementary training proposition')),
                 ('phd_already_done', models.CharField(blank=True, choices=[('YES', 'YES'), ('NO', 'NO'), ('PARTIAL', 'PARTIAL')], default='', max_length=255, verbose_name='PhD already done')),
                 ('phd_already_done_institution', models.CharField(blank=True, default='', max_length=255, verbose_name='Institution')),
                 ('phd_already_done_defense_date', models.DateField(blank=True, null=True, verbose_name='Defense')),

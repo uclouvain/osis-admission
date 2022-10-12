@@ -277,7 +277,7 @@ msgstr ""
 msgid "Add an internal note"
 msgstr ""
 
-msgid "Additional training project"
+msgid "Complementary training proposition"
 msgstr ""
 
 msgid "Admission"
