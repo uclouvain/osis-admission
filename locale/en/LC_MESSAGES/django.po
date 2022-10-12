@@ -1213,6 +1213,11 @@ msgid "If other, specify"
 msgstr ""
 
 msgid ""
+"If you submit the activity, you will no longer be able to modify the "
+"seminar, nor the different activities within it."
+msgstr ""
+
+msgid ""
 "Impossible action: please be sure that the confirmation date and report are "
 "specified."
 msgstr ""
