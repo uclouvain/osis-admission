@@ -99,8 +99,26 @@
           {% include "admission/doctorate/details/training/"|add:template_name %}
         {% endif %}
       {% endfor %}
-      <button class="btn btn-default" type="submit" name="_submit">{% trans "Submit these activities" %}</button>
+      <button class="btn btn-default" type="submit" name="_submit" id="submit—activities">
+        {% trans "Submit these activities" %}
+      </button>
       <button class="btn btn-default" type="submit" name="_accept">{% trans "Accept these activities" %}</button>
+
+      <div id="confirm-submit-modal" class="modal fade" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-body alert-danger">
+              {% trans "If you submit the activity, you will no longer be able to modify the seminar, nor the different activities within it." %}
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
+              <button id="confirm-button" class="btn btn-primary" type="submit" name="_submit">
+                {% trans "Confirm" %}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
     </form>
   {% else %}
     {% trans "This candidate has not created any activity yet" %}
@@ -148,6 +166,23 @@
   <script>
     $(function () {
       $('[data-toggle="popover"]').popover();
+
+      // USer must confirm submission of seminars
+      let confirmed = false;
+      $('form#activities').on('submit', function (e) {
+        const hasSeminar = !!(new FormData(e.target)).getAll("activity_ids").filter(
+          uuid => $(`#h-${uuid}`).parent().data('type') === "SEMINAR"
+        ).length;
+        if (hasSeminar && !confirmed) {
+          $('#confirm-button').on('click', function () {
+            confirmed = true;
+            e.target.submit()
+          });
+          $('#confirm-submit-modal').modal('show');
+          e.preventDefault();
+          return false;
+        }
+      });
 
       // Open the right panel depending on location hash
       if (document.location.hash) {

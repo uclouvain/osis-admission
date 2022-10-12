@@ -1298,6 +1298,13 @@ msgid "If other, specify"
 msgstr "Si autre, préciser"
 
 msgid ""
+"If you submit the activity, you will no longer be able to modify the "
+"seminar, nor the different activities within it."
+msgstr ""
+"Si vous soumettez l'activité, vous ne pourrez plus modifier le séminaire, ni "
+"les différentes activités en faisant partie."
+
+msgid ""
 "Impossible action: please be sure that the confirmation date and report are "
 "specified."
 msgstr ""
@@ -2660,7 +2667,8 @@ msgstr "Cette activité est déjà soumise"
 
 msgid ""
 "This activity has underlying sub-activities that will be refused as well"
-msgstr "Cette activité a des activités dépendantes qui seront également refusées"
+msgstr ""
+"Cette activité a des activités dépendantes qui seront également refusées"
 
 msgid "This activity is not complete"
 msgstr "Cette activité est incomplète"

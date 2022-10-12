@@ -28,7 +28,7 @@ from uuid import uuid4
 
 from django.db import models
 from django.db.models import Q
-from django.db.models.signals import post_save
+from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 from django.template import Context, Template
 from django.utils.translation import gettext_lazy as _, pgettext_lazy
@@ -391,3 +391,13 @@ def _activity_update_can_be_submitted(sender, instance, **kwargs):
 
         can_be_submitted = True
     Activity.objects.filter(uuid=instance_uuid).update(can_be_submitted=can_be_submitted)
+
+
+@receiver(post_delete, sender=Activity)
+def _activity_update_seminar_can_be_submitted(sender, instance, **kwargs):
+    # When communication seminar activity is deleted, trigger a parent seminar update
+    if (
+        instance.category == CategorieActivite.COMMUNICATION.name
+        and instance.parent.category == CategorieActivite.SEMINAR.name
+    ):
+        instance.parent.save()
