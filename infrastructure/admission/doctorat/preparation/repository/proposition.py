@@ -72,12 +72,12 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
     PropositionNonTrouveeException,
 )
 from admission.ddd.admission.doctorat.preparation.dtos import (
+    DoctoratDTO,
     PropositionDTO,
 )
 from admission.ddd.admission.doctorat.preparation.repository.i_proposition import (
     IPropositionRepository,
 )
-from admission.infrastructure.admission.doctorat.preparation.domain.service.doctorat import DoctoratTranslator
 from admission.infrastructure.admission.doctorat.preparation.repository._comptabilite import (
     get_accounting_from_admission,
     get_dto_accounting_from_admission,
@@ -384,12 +384,22 @@ class PropositionRepository(IPropositionRepository):
             uuid=admission.uuid,
             reference=admission.reference,
             type_admission=admission.type,
-            doctorat=DoctoratTranslator.get_dto(admission.doctorate.acronym, admission.doctorate.academic_year.year),
+            doctorat=DoctoratDTO(
+                sigle=admission.doctorate.acronym,
+                annee=admission.doctorate.academic_year.year,
+                intitule=(
+                    admission.doctorate.title_english
+                    if get_language() == settings.LANGUAGE_CODE_EN
+                    else admission.doctorate.title
+                ),
+                sigle_entite_gestion=admission.sigle_entite_gestion,  # from PropositionManager annotation
+                campus=admission.doctorate.enrollment_campus.name if admission.doctorate.enrollment_campus_id else None,
+            ),
             matricule_candidat=admission.candidate.global_id,
             prenom_candidat=admission.candidate.first_name,
             nom_candidat=admission.candidate.last_name,
-            code_secteur_formation=admission.code_secteur_formation,  # from annotation
-            intitule_secteur_formation=admission.intitule_secteur_formation,  # from annotation
+            code_secteur_formation=admission.code_secteur_formation,  # from PropositionManager annotation
+            intitule_secteur_formation=admission.intitule_secteur_formation,  # from PropositionManager annotation
             commission_proximite=admission.proximity_commission,
             creee_le=admission.created,
             statut=admission.status,

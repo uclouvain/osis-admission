@@ -26,14 +26,16 @@
 import uuid
 
 from ckeditor.fields import RichTextField
+from django.conf import settings
 from django.core.cache import cache
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db import models
 from django.db.models import OuterRef
+from django.db.models.functions import Cast
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils.datetime_safe import date
-from django.utils.translation import gettext_lazy as _
+from django.utils.translation import get_language, gettext_lazy as _
 from rest_framework.settings import api_settings
 
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
@@ -56,6 +58,7 @@ from base.models.person import Person
 from base.utils.cte import CTESubquery
 from osis_document.contrib import FileField
 from osis_signature.contrib.fields import SignatureProcessField
+from reference.models.country import Country
 from .base import BaseAdmission, admission_directory_path
 
 __all__ = [
@@ -407,6 +410,7 @@ class PropositionManager(models.Manager):
             DoctorateAdmission.objects.all()
             .select_related(
                 "doctorate__academic_year",
+                "doctorate__enrollment_campus",
                 "candidate__country_of_citizenship",
                 "thesis_institute",
                 "accounting",
@@ -414,6 +418,11 @@ class PropositionManager(models.Manager):
             .annotate(
                 code_secteur_formation=CTESubquery(sector_subqs.values("acronym")[:1]),
                 intitule_secteur_formation=CTESubquery(sector_subqs.values("title")[:1]),
+                sigle_entite_gestion=models.Subquery(
+                    EntityVersion.objects.filter(entity_id=OuterRef("doctorate__management_entity_id"))
+                    .order_by('-start_date')
+                    .values("acronym")[:1]
+                ),
             )
         )
 
@@ -453,6 +462,7 @@ class PropositionProxy(DoctorateAdmission):
 
 class DemandeManager(models.Manager):
     def get_queryset(self):
+        country_title_field = 'name' if get_language() == settings.LANGUAGE_CODE_FR else 'name_en'
         return (
             super()
             .get_queryset()
@@ -464,6 +474,18 @@ class DemandeManager(models.Manager):
                 'modified',
                 'status_cdd',
                 'status_sic',
+            )
+            .annotate(
+                nationalite_iso_code=Cast(
+                    'submitted_profile__identification__country_of_citizenship', output_field=models.CharField()
+                ),
+                nom_pays_nationalite=models.Subquery(
+                    Country.objects.filter(iso_code=OuterRef('nationalite_iso_code')).values(country_title_field)[:1]
+                ),
+                pays_iso_code=Cast('submitted_profile__coordinates__country', models.CharField()),
+                nom_pays=models.Subquery(
+                    Country.objects.filter(iso_code=OuterRef('pays_iso_code')).values(country_title_field)[:1]
+                ),
             )
             .filter(
                 status__in=[
