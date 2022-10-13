@@ -379,6 +379,11 @@ ACTION_LINKS = {
         'method': 'GET',
         'params': ['uuid'],
     },
+    'destroy_general_proposition': {
+        'path_name': 'admission_api_v1:general_propositions',
+        'method': 'DELETE',
+        'params': ['uuid'],
+    },
     # Continuing education
     'create_continuing_proposition': {
         'path_name': 'admission_api_v1:continuing_training_choice',
@@ -392,6 +397,11 @@ ACTION_LINKS = {
     'retrieve_continuing_training_choice': {
         'path_name': 'admission_api_v1:continuing_propositions',
         'method': 'GET',
+        'params': ['uuid'],
+    },
+    'destroy_continuing_proposition': {
+        'path_name': 'admission_api_v1:continuing_propositions',
+        'method': 'DELETE',
         'params': ['uuid'],
     },
 }

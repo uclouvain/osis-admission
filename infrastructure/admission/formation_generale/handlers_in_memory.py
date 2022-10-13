@@ -65,4 +65,8 @@ COMMAND_HANDLERS = {
         formation_translator=FormationGeneraleInMemoryTranslator(),
         bourse_translator=BourseInMemoryTranslator(),
     ),
+    SupprimerPropositionCommand: partial(
+        supprimer_proposition,
+        proposition_repository=PropositionInMemoryRepository(),
+    ),
 }
