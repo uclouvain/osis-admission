@@ -2142,6 +2142,36 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - propositions
+    delete:
+      operationId: destroy_general_education_proposition
+      description: Soft-Delete a proposition
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PropositionIdentityDTO'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
   /propositions/continuing-education/{uuid}:
     get:
       operationId: retrieve_continuing_education_proposition
@@ -2164,6 +2194,36 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ContinuingEducationPropositionDTO'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
+    delete:
+      operationId: destroy_continuing_education_proposition
+      description: Soft-Delete a proposition
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PropositionIdentityDTO'
           description: ''
         '400':
           $ref: '#/components/responses/BadRequest'
@@ -3480,6 +3540,8 @@ components:
                 properties:
                   retrieve_training_choice:
                     $ref: '#/components/schemas/ActionLink'
+                  destroy_proposition:
+                    $ref: '#/components/schemas/ActionLink'
                 readOnly: true
                 default: {}
             required:
@@ -3528,6 +3590,8 @@ components:
                 type: object
                 properties:
                   retrieve_training_choice:
+                    $ref: '#/components/schemas/ActionLink'
+                  destroy_proposition:
                     $ref: '#/components/schemas/ActionLink'
                 readOnly: true
                 default: {}
@@ -6326,6 +6390,8 @@ components:
               $ref: '#/components/schemas/ActionLink'
             update_training_choice:
               $ref: '#/components/schemas/ActionLink'
+            destroy_proposition:
+              $ref: '#/components/schemas/ActionLink'
           readOnly: true
           default: {}
         erreurs:
@@ -6435,6 +6501,8 @@ components:
             retrieve_training_choice:
               $ref: '#/components/schemas/ActionLink'
             update_training_choice:
+              $ref: '#/components/schemas/ActionLink'
+            destroy_proposition:
               $ref: '#/components/schemas/ActionLink'
           readOnly: true
           default: {}

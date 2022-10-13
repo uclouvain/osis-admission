@@ -76,3 +76,6 @@ class Proposition(interface.RootEntity):
 
         if bourse_erasmus_mundus:
             self.bourse_erasmus_mundus_id = bourses_ids.get(bourse_erasmus_mundus)
+
+    def supprimer(self):
+        self.statut = ChoixStatutProposition.CANCELLED
