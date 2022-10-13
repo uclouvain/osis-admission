@@ -101,12 +101,13 @@ _CANDIDATE_RULESET = {
     'view_generaleducationadmission': is_admission_request_author,
     # A candidate can edit some tabs as long as the proposition is not submitted
     'change_generaleducationadmission_training_choice': is_admission_request_author & in_progress,
-
+    'delete_generaleducationadmission': is_admission_request_author & in_progress,
     # Continuing admission
     # A candidate can view as long as he's the author
     'view_continuingeducationadmission': is_admission_request_author,
     # A candidate can edit some tabs as long as the proposition is not submitted
     'change_continuingeducationadmission_training_choice': is_admission_request_author & in_progress,
+    'delete_continuingeducationadmission': is_admission_request_author & in_progress,
 }
 
 

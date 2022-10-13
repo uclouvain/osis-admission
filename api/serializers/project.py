@@ -169,6 +169,8 @@ class GeneralEducationPropositionSearchDTOSerializer(IncludedFieldsMixin, DTOSer
         actions={
             # Training choice
             'retrieve_training_choice': ACTION_LINKS['retrieve_general_training_choice'],
+            # Proposition
+            'destroy_proposition': ACTION_LINKS['destroy_general_proposition'],
         }
     )
 
@@ -195,6 +197,8 @@ class ContinuingEducationPropositionSearchDTOSerializer(IncludedFieldsMixin, DTO
         actions={
             # Training choice
             'retrieve_training_choice': ACTION_LINKS['retrieve_continuing_training_choice'],
+            # Proposition
+            'destroy_proposition': ACTION_LINKS['destroy_continuing_proposition'],
         }
     )
 
@@ -332,6 +336,8 @@ class GeneralEducationPropositionDTOSerializer(IncludedFieldsMixin, DTOSerialize
         actions={
             'retrieve_training_choice': ACTION_LINKS['retrieve_general_training_choice'],
             'update_training_choice': ACTION_LINKS['update_general_training_choice'],
+            # Proposition
+            'destroy_proposition': ACTION_LINKS['destroy_general_proposition'],
         }
     )
     erreurs = serializers.JSONField()
@@ -364,6 +370,8 @@ class ContinuingEducationPropositionDTOSerializer(IncludedFieldsMixin, DTOSerial
         actions={
             'retrieve_training_choice': ACTION_LINKS['retrieve_continuing_training_choice'],
             'update_training_choice': ACTION_LINKS['update_continuing_training_choice'],
+            # Proposition
+            'destroy_proposition': ACTION_LINKS['destroy_continuing_proposition'],
         }
     )
     erreurs = serializers.JSONField()
