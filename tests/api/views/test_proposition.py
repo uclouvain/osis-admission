@@ -26,6 +26,13 @@
 from django.shortcuts import resolve_url
 from rest_framework import status
 
+from admission.contrib.models import GeneralEducationAdmission, ContinuingEducationAdmission
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    ChoixStatutProposition as ChoixStatutPropositionFormationGenerale,
+)
+from admission.ddd.admission.formation_continue.domain.model.enums import (
+    ChoixStatutProposition as ChoixStatutPropositionFormationContinue,
+)
 from admission.tests import CheckActionLinksMixin
 from rest_framework.test import APITestCase
 
@@ -93,6 +100,7 @@ class GeneralPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase):
             allowed_actions=[
                 'retrieve_training_choice',
                 'update_training_choice',
+                'destroy_proposition',
             ],
             forbidden_actions=[],
         )
@@ -105,6 +113,32 @@ class GeneralPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase):
     def test_get_proposition_no_role_user_is_forbidden(self):
         self.client.force_authenticate(user=self.no_role_user)
         response = self.client.get(self.url, format="json")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.content)
+
+    def test_delete_proposition(self):
+        self.client.force_authenticate(user=self.candidate.user)
+
+        # Create a new admission
+        admission = GeneralEducationAdmissionFactory(candidate=self.candidate)
+        self.assertEqual(admission.status, ChoixStatutPropositionFormationGenerale.IN_PROGRESS.name)
+
+        # Cancel it
+        admission_to_cancel_url = resolve_url("admission_api_v1:general_propositions", uuid=str(admission.uuid))
+        response = self.client.delete(admission_to_cancel_url, format="json")
+
+        self.assertEqual(response.json()['uuid'], str(admission.uuid))
+
+        admission = GeneralEducationAdmission.objects.get(pk=admission.pk)
+        self.assertEqual(admission.status, ChoixStatutPropositionFormationGenerale.CANCELLED.name)
+
+    def test_delete_proposition_other_candidate_is_forbidden(self):
+        self.client.force_authenticate(user=self.other_candidate.user)
+        response = self.client.delete(self.url, format="json")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.content)
+
+    def test_delete_proposition_no_role_user_is_forbidden(self):
+        self.client.force_authenticate(user=self.no_role_user)
+        response = self.client.delete(self.url, format="json")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.content)
 
 
@@ -145,6 +179,7 @@ class ContinuingPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase
             allowed_actions=[
                 'retrieve_training_choice',
                 'update_training_choice',
+                'destroy_proposition',
             ],
             forbidden_actions=[],
         )
@@ -157,4 +192,30 @@ class ContinuingPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase
     def test_get_proposition_no_role_user_is_forbidden(self):
         self.client.force_authenticate(user=self.no_role_user)
         response = self.client.get(self.url, format="json")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.content)
+
+    def test_delete_proposition(self):
+        self.client.force_authenticate(user=self.candidate.user)
+
+        # Create a new admission
+        admission = ContinuingEducationAdmissionFactory(candidate=self.candidate)
+        self.assertEqual(admission.status, ChoixStatutPropositionFormationContinue.IN_PROGRESS.name)
+
+        # Cancel it
+        admission_to_cancel_url = resolve_url("admission_api_v1:continuing_propositions", uuid=str(admission.uuid))
+        response = self.client.delete(admission_to_cancel_url, format="json")
+
+        self.assertEqual(response.json()['uuid'], str(admission.uuid))
+
+        admission = ContinuingEducationAdmission.objects.get(pk=admission.pk)
+        self.assertEqual(admission.status, ChoixStatutPropositionFormationContinue.CANCELLED.name)
+
+    def test_delete_proposition_other_candidate_is_forbidden(self):
+        self.client.force_authenticate(user=self.other_candidate.user)
+        response = self.client.delete(self.url, format="json")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.content)
+
+    def test_delete_proposition_no_role_user_is_forbidden(self):
+        self.client.force_authenticate(user=self.no_role_user)
+        response = self.client.delete(self.url, format="json")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.content)

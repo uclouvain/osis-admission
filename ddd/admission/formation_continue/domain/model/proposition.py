@@ -50,3 +50,6 @@ class Proposition(interface.RootEntity):
 
     def modifier_choix_formation(self, formation_id: FormationIdentity):
         self.formation_id = formation_id
+
+    def supprimer(self):
+        self.statut = ChoixStatutProposition.CANCELLED

@@ -59,3 +59,8 @@ class ModifierChoixFormationCommand(interface.CommandRequest):
 
     sigle_formation: str
     annee_formation: int
+
+
+@attr.dataclass(frozen=True, slots=True)
+class SupprimerPropositionCommand(interface.CommandRequest):
+    uuid_proposition: str

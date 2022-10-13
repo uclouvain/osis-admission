@@ -23,19 +23,18 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from rest_framework import status
 from rest_framework.generics import RetrieveAPIView
 from rest_framework.response import Response
 
 from admission.api import serializers
 from admission.api.schema import ResponseSpecificSchema
-from admission.ddd.admission.formation_generale.commands import (
-    RecupererPropositionQuery as RecupererPropositionFormationGeneraleQuery,
+from admission.ddd.admission.formation_generale import commands as general_education_commands
+from admission.ddd.admission.formation_continue import commands as continuing_education_commands
+from admission.utils import (
+    get_cached_general_education_admission_perm_obj,
+    get_cached_continuing_education_admission_perm_obj,
 )
-from admission.ddd.admission.formation_continue.commands import (
-    RecupererPropositionQuery as RecupererPropositionFormationContinueQuery,
-)
-from admission.utils import get_cached_general_education_admission_perm_obj, \
-    get_cached_continuing_education_admission_perm_obj
 from infrastructure.messages_bus import message_bus_instance
 from osis_role.contrib.views import APIPermissionRequiredMixin
 
@@ -44,6 +43,7 @@ class GeneralPropositionSchema(ResponseSpecificSchema):
     operation_id_base = '_general_education_proposition'
     serializer_mapping = {
         'GET': serializers.GeneralEducationPropositionDTOSerializer,
+        'DELETE': serializers.PropositionIdentityDTOSerializer,
     }
 
 
@@ -54,6 +54,7 @@ class GeneralPropositionViewSet(APIPermissionRequiredMixin, RetrieveAPIView):
     filter_backends = []
     permission_mapping = {
         'GET': 'admission.view_generaleducationadmission',
+        'DELETE': 'admission.delete_generaleducationadmission',
     }
 
     def get_permission_object(self):
@@ -62,7 +63,7 @@ class GeneralPropositionViewSet(APIPermissionRequiredMixin, RetrieveAPIView):
     def get(self, request, *args, **kwargs):
         """Get a single proposition"""
         proposition = message_bus_instance.invoke(
-            RecupererPropositionFormationGeneraleQuery(uuid_proposition=kwargs.get('uuid')),
+            general_education_commands.RecupererPropositionQuery(uuid_proposition=kwargs.get('uuid')),
         )
         serializer = serializers.GeneralEducationPropositionDTOSerializer(
             instance=proposition,
@@ -70,11 +71,20 @@ class GeneralPropositionViewSet(APIPermissionRequiredMixin, RetrieveAPIView):
         )
         return Response(serializer.data)
 
+    def delete(self, request, *args, **kwargs):
+        """Soft-Delete a proposition"""
+        proposition_id = message_bus_instance.invoke(
+            general_education_commands.SupprimerPropositionCommand(uuid_proposition=kwargs.get('uuid')),
+        )
+        serializer = serializers.PropositionIdentityDTOSerializer(instance=proposition_id)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 class ContinuingPropositionSchema(ResponseSpecificSchema):
     operation_id_base = '_continuing_education_proposition'
     serializer_mapping = {
         'GET': serializers.ContinuingEducationPropositionDTOSerializer,
+        'DELETE': serializers.PropositionIdentityDTOSerializer,
     }
 
 
@@ -85,6 +95,7 @@ class ContinuingPropositionViewSet(APIPermissionRequiredMixin, RetrieveAPIView):
     filter_backends = []
     permission_mapping = {
         'GET': 'admission.view_continuingeducationadmission',
+        'DELETE': 'admission.delete_continuingeducationadmission',
     }
 
     def get_permission_object(self):
@@ -93,10 +104,18 @@ class ContinuingPropositionViewSet(APIPermissionRequiredMixin, RetrieveAPIView):
     def get(self, request, *args, **kwargs):
         """Get a single proposition"""
         proposition = message_bus_instance.invoke(
-            RecupererPropositionFormationContinueQuery(uuid_proposition=kwargs.get('uuid')),
+            continuing_education_commands.RecupererPropositionQuery(uuid_proposition=kwargs.get('uuid')),
         )
         serializer = serializers.ContinuingEducationPropositionDTOSerializer(
             instance=proposition,
             context=self.get_serializer_context(),
         )
         return Response(serializer.data)
+
+    def delete(self, request, *args, **kwargs):
+        """Soft-Delete a proposition"""
+        proposition_id = message_bus_instance.invoke(
+            continuing_education_commands.SupprimerPropositionCommand(uuid_proposition=kwargs.get('uuid')),
+        )
+        serializer = serializers.PropositionIdentityDTOSerializer(instance=proposition_id)
+        return Response(serializer.data, status=status.HTTP_200_OK)

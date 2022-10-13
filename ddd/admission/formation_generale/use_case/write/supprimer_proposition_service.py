@@ -1,4 +1,4 @@
-##############################################################################
+# ##############################################################################
 #
 #    OSIS stands for Open Student Information System. It's an application
 #    designed to manage the core business of higher education institutions,
@@ -22,7 +22,28 @@
 #    at the root of the source code of this program.  If not,
 #    see http://www.gnu.org/licenses/.
 #
-##############################################################################
-from .initier_proposition_service import initier_proposition
-from .modifier_choix_formation_service import modifier_choix_formation
-from .supprimer_proposition_service import supprimer_proposition
+# ##############################################################################
+
+from admission.ddd.admission.formation_generale.domain.builder.proposition_identity_builder import (
+    PropositionIdentityBuilder,
+)
+from admission.ddd.admission.formation_generale.commands import SupprimerPropositionCommand
+from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
+from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
+
+
+def supprimer_proposition(
+    cmd: 'SupprimerPropositionCommand',
+    proposition_repository: 'IPropositionRepository',
+) -> 'PropositionIdentity':
+    # GIVEN
+    proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
+    proposition = proposition_repository.get(entity_id=proposition_id)
+
+    # WHEN
+    proposition.supprimer()
+
+    # THEN
+    proposition_repository.save(proposition)
+
+    return proposition_id
