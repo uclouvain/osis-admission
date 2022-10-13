@@ -68,3 +68,8 @@ class ModifierChoixFormationCommand(interface.CommandRequest):
     bourse_double_diplome: Optional[str] = ''
     bourse_internationale: Optional[str] = ''
     bourse_erasmus_mundus: Optional[str] = ''
+
+
+@attr.dataclass(frozen=True, slots=True)
+class SupprimerPropositionCommand(interface.CommandRequest):
+    uuid_proposition: str

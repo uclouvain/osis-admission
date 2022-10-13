@@ -58,4 +58,8 @@ COMMAND_HANDLERS = {
         proposition_repository=PropositionRepository(),
         formation_translator=FormationContinueTranslator(),
     ),
+    SupprimerPropositionCommand: partial(
+        supprimer_proposition,
+        proposition_repository=PropositionRepository(),
+    ),
 }
