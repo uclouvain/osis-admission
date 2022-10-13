@@ -166,6 +166,7 @@ class DoctorateAdmissionListApiTestCase(CheckActionLinksMixin, APITestCase):
             proposition['links'],
             allowed_actions=[
                 'retrieve_training_choice',
+                'destroy_proposition',
             ],
             forbidden_actions=[],
         )
@@ -202,6 +203,7 @@ class DoctorateAdmissionListApiTestCase(CheckActionLinksMixin, APITestCase):
             proposition['links'],
             allowed_actions=[
                 'retrieve_training_choice',
+                'destroy_proposition',
             ],
             forbidden_actions=[],
         )
