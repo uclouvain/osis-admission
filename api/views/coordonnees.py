@@ -30,22 +30,23 @@ from rest_framework.generics import GenericAPIView
 
 from admission.api import serializers
 from admission.api.permissions import IsSelfPersonTabOrTabPermission
-from admission.api.views.mixins import PersonRelatedMixin
+from admission.api.views.mixins import (
+    PersonRelatedMixin,
+    GeneralEducationPersonRelatedMixin,
+    ContinuingEducationPersonRelatedMixin,
+)
 from osis_role.contrib.views import APIPermissionRequiredMixin
 
 
-class CoordonneesViewSet(
-    PersonRelatedMixin,
+class BaseCoordonneesViewSet(
     APIPermissionRequiredMixin,
     mixins.RetrieveModelMixin,
     mixins.UpdateModelMixin,
     GenericAPIView,
 ):
-    name = "coordonnees"
     pagination_class = None
     filter_backends = []
     serializer_class = serializers.CoordonneesSerializer
-    permission_classes = [partial(IsSelfPersonTabOrTabPermission, permission_suffix='coordinates')]
 
     def get(self, request, *args, **kwargs):
         return self.retrieve(request, *args, **kwargs)
@@ -55,3 +56,30 @@ class CoordonneesViewSet(
         if self.get_permission_object():
             self.get_permission_object().update_detailed_status()
         return response
+
+
+class CoordonneesViewSet(PersonRelatedMixin, BaseCoordonneesViewSet):  # pylint: disable=too-many-ancestors
+    name = "coordonnees"
+    permission_classes = [partial(IsSelfPersonTabOrTabPermission, permission_suffix='coordinates')]
+
+
+class GeneralCoordonneesViewSet(
+    GeneralEducationPersonRelatedMixin,
+    BaseCoordonneesViewSet,
+):  # pylint: disable=too-many-ancestors
+    name = "general_coordinates"
+    permission_mapping = {
+        'GET': 'admission.view_generaleducationadmission_coordinates',
+        'PUT': 'admission.change_generaleducationadmission_coordinates',
+    }
+
+
+class ContinuingCoordonneesViewSet(
+    ContinuingEducationPersonRelatedMixin,
+    BaseCoordonneesViewSet,
+):  # pylint: disable=too-many-ancestors
+    name = "continuing_coordinates"
+    permission_mapping = {
+        'GET': 'admission.view_continuingeducationadmission_coordinates',
+        'PUT': 'admission.change_continuingeducationadmission_coordinates',
+    }
