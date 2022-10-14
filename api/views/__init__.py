@@ -25,12 +25,20 @@
 # ##############################################################################
 from admission.api.views.dashboard import DashboardViewSet
 from admission.api.views.autocomplete import *
-from admission.api.views.coordonnees import CoordonneesViewSet
+from admission.api.views.coordonnees import CoordonneesViewSet, GeneralCoordonneesViewSet, ContinuingCoordonneesViewSet
 from admission.api.views.curriculum import *
-from admission.api.views.secondary_studies import SecondaryStudiesViewSet
+from admission.api.views.secondary_studies import (
+    SecondaryStudiesViewSet,
+    GeneralSecondaryStudiesViewSet,
+    ContinuingSecondaryStudiesViewSet,
+)
 from admission.api.views.languages_knowledge import LanguagesKnowledgeViewSet
 from admission.api.views.cotutelle import CotutelleAPIView
-from admission.api.views.person import PersonViewSet
+from admission.api.views.person import (
+    PersonViewSet,
+    GeneralPersonViewSet,
+    ContinuingPersonViewSet,
+)
 from admission.api.views.project import *
 from admission.api.views.supervision import *
 from admission.api.views.signatures import RequestSignaturesAPIView
@@ -51,16 +59,22 @@ from admission.api.views.proposition import GeneralPropositionViewSet, Continuin
 
 __all__ = [
     "CoordonneesViewSet",
+    "GeneralCoordonneesViewSet",
+    "ContinuingCoordonneesViewSet",
     "CurriculumView",
     "EducationalExperienceViewSet",
     "ProfessionalExperienceViewSet",
     "CurriculumFileView",
     "PersonViewSet",
+    "GeneralPersonViewSet",
+    "ContinuingPersonViewSet",
     "PropositionViewSet",
     "PropositionListView",
     "VerifyProjectView",
     "SubmitPropositionViewSet",
     "SecondaryStudiesViewSet",
+    "GeneralSecondaryStudiesViewSet",
+    "ContinuingSecondaryStudiesViewSet",
     "AutocompleteDoctoratView",
     "AutocompleteGeneralEducationView",
     "AutocompleteContinuingEducationView",
@@ -90,5 +104,5 @@ __all__ = [
     "ContinuingPropositionViewSet",
     "ContinuingUpdateTrainingChoiceAPIView",
     "DoctorateUpdateAdmissionTypeAPIView",
-    "GeneralUpdateTrainingChoiceAPIView"
+    "GeneralUpdateTrainingChoiceAPIView",
 ]

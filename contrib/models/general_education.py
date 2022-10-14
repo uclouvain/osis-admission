@@ -82,6 +82,9 @@ class GeneralEducationAdmission(BaseAdmission):
         ordering = ('-created',)
         permissions = []
 
+    def update_detailed_status(self):
+        pass
+
 
 class GeneralEducationAdmissionManager(models.Manager):
     def get_queryset(self):
