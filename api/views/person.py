@@ -30,22 +30,23 @@ from rest_framework.generics import GenericAPIView
 
 from admission.api import serializers
 from admission.api.permissions import IsSelfPersonTabOrTabPermission
-from admission.api.views.mixins import PersonRelatedMixin
+from admission.api.views.mixins import (
+    PersonRelatedMixin,
+    GeneralEducationPersonRelatedMixin,
+    ContinuingEducationPersonRelatedMixin,
+)
 from osis_role.contrib.views import APIPermissionRequiredMixin
 
 
-class PersonViewSet(
-    PersonRelatedMixin,
+class BasePersonViewSet(
     APIPermissionRequiredMixin,
     mixins.RetrieveModelMixin,
     mixins.UpdateModelMixin,
     GenericAPIView,
 ):
-    name = "person"
     pagination_class = None
     filter_backends = []
     serializer_class = serializers.PersonIdentificationSerializer
-    permission_classes = [partial(IsSelfPersonTabOrTabPermission, permission_suffix='person')]
 
     def get(self, request, *args, **kwargs):
         return self.retrieve(request, *args, **kwargs)
@@ -55,3 +56,24 @@ class PersonViewSet(
         if self.get_permission_object():
             self.get_permission_object().update_detailed_status()
         return response
+
+
+class PersonViewSet(PersonRelatedMixin, BasePersonViewSet):
+    name = "person"
+    permission_classes = [partial(IsSelfPersonTabOrTabPermission, permission_suffix='person')]
+
+
+class GeneralPersonViewSet(GeneralEducationPersonRelatedMixin, BasePersonViewSet):
+    name = "general_person"
+    permission_mapping = {
+        'GET': 'admission.view_generaleducationadmission_person',
+        'PUT': 'admission.change_generaleducationadmission_person',
+    }
+
+
+class ContinuingPersonViewSet(ContinuingEducationPersonRelatedMixin, BasePersonViewSet):
+    name = "continuing_person"
+    permission_mapping = {
+        'GET': 'admission.view_continuingeducationadmission_person',
+        'PUT': 'admission.change_continuingeducationadmission_person',
+    }

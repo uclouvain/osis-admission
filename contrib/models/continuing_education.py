@@ -57,6 +57,9 @@ class ContinuingEducationAdmission(BaseAdmission):
         ordering = ('-created',)
         permissions = []
 
+    def update_detailed_status(self):
+        pass
+
 
 class ContinuingEducationAdmissionManager(models.Manager):
     def get_queryset(self):
