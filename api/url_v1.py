@@ -33,19 +33,42 @@ def path(pattern, view, name=None):
     return _path(pattern, view.as_view(), name=getattr(view, 'name', name))
 
 
-# Create a router and register our viewsets with it.
-view_set_router = SimpleRouter(trailing_slash=False)
-view_set_router.register(
+# Create the routers and register our viewsets with it.
+doctorate_view_set_router = SimpleRouter(trailing_slash=False)
+doctorate_view_set_router.register(
     'curriculum/educational',
     views.EducationalExperienceViewSet,
     basename="cv_educational_experiences",
 )
-view_set_router.register(
+doctorate_view_set_router.register(
     'curriculum/professional',
     views.ProfessionalExperienceViewSet,
     basename="cv_professional_experiences",
 )
 
+general_education_view_set_router = SimpleRouter(trailing_slash=False)
+general_education_view_set_router.register(
+    'curriculum/educational',
+    views.GeneralEducationalExperienceViewSet,
+    basename="general_cv_educational_experiences",
+)
+general_education_view_set_router.register(
+    'curriculum/professional',
+    views.GeneralProfessionalExperienceViewSet,
+    basename="general_cv_professional_experiences",
+)
+
+continuing_education_view_set_router = SimpleRouter(trailing_slash=False)
+continuing_education_view_set_router.register(
+    'curriculum/educational',
+    views.ContinuingEducationalExperienceViewSet,
+    basename="continuing_cv_educational_experiences",
+)
+continuing_education_view_set_router.register(
+    'curriculum/professional',
+    views.ContinuingProfessionalExperienceViewSet,
+    basename="continuing_cv_professional_experiences",
+)
 app_name = "admission_api_v1"
 
 person_tabs = [
@@ -55,7 +78,7 @@ person_tabs = [
     path('languages_knowledge', views.LanguagesKnowledgeViewSet),
     path('curriculum/file', views.CurriculumFileView),
     path('curriculum/', views.CurriculumView),
-    _path('', include(view_set_router.urls)),
+    _path('', include(doctorate_view_set_router.urls)),
 ]
 
 urlpatterns = [
@@ -101,11 +124,23 @@ urlpatterns = [
     # > General education
     path('propositions/general-education', views.GeneralTrainingChoiceAPIView),
     path('propositions/general-education/<uuid:uuid>', views.GeneralPropositionViewSet),
-    path('propositions/general-education/<uuid:uuid>/training_choice', views.GeneralUpdateTrainingChoiceAPIView),
+    path('propositions/general-education/<uuid:uuid>/training-choice', views.GeneralUpdateTrainingChoiceAPIView),
+    path('propositions/general-education/<uuid:uuid>/person', views.GeneralPersonViewSet),
+    path('propositions/general-education/<uuid:uuid>/coordonnees', views.GeneralCoordonneesViewSet),
+    path('propositions/general-education/<uuid:uuid>/secondary-studies', views.GeneralSecondaryStudiesViewSet),
+    path('propositions/general-education/<uuid:uuid>/curriculum/file', views.GeneralCurriculumFileView),
+    path('propositions/general-education/<uuid:uuid>/curriculum/', views.GeneralCurriculumView),
+    _path('propositions/general-education/<uuid:uuid>/', include(general_education_view_set_router.urls)),
     # > Continuing education
     path('propositions/continuing-education', views.ContinuingTrainingChoiceAPIView),
     path('propositions/continuing-education/<uuid:uuid>', views.ContinuingPropositionViewSet),
-    path('propositions/continuing-education/<uuid:uuid>/training_choice', views.ContinuingUpdateTrainingChoiceAPIView),
+    path('propositions/continuing-education/<uuid:uuid>/training-choice', views.ContinuingUpdateTrainingChoiceAPIView),
+    path('propositions/continuing-education/<uuid:uuid>/person', views.ContinuingPersonViewSet),
+    path('propositions/continuing-education/<uuid:uuid>/coordonnees', views.ContinuingCoordonneesViewSet),
+    path('propositions/continuing-education/<uuid:uuid>/secondary-studies', views.ContinuingSecondaryStudiesViewSet),
+    path('propositions/continuing-education/<uuid:uuid>/curriculum/file', views.ContinuingCurriculumFileView),
+    path('propositions/continuing-education/<uuid:uuid>/curriculum/', views.ContinuingCurriculumView),
+    _path('propositions/continuing-education/<uuid:uuid>/', include(continuing_education_view_set_router.urls)),
     # Autocompletes
     path('autocomplete/sector', views.AutocompleteSectorView),
     path('autocomplete/sector/<str:sigle>/doctorates', views.AutocompleteDoctoratView),

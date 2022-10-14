@@ -98,7 +98,15 @@ class GeneralPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase):
         self.assertActionLinks(
             links=json_response['links'],
             allowed_actions=[
+                'retrieve_person',
+                'retrieve_coordinates',
+                'retrieve_secondary_studies',
+                'retrieve_curriculum',
                 'retrieve_training_choice',
+                'update_person',
+                'update_coordinates',
+                'update_secondary_studies',
+                'update_curriculum',
                 'update_training_choice',
                 'destroy_proposition',
             ],
@@ -177,7 +185,15 @@ class ContinuingPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase
         self.assertActionLinks(
             links=json_response['links'],
             allowed_actions=[
+                'retrieve_person',
+                'retrieve_coordinates',
+                'retrieve_secondary_studies',
+                'retrieve_curriculum',
                 'retrieve_training_choice',
+                'update_person',
+                'update_coordinates',
+                'update_secondary_studies',
+                'update_curriculum',
                 'update_training_choice',
                 'destroy_proposition',
             ],

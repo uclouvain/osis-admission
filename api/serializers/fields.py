@@ -364,44 +364,130 @@ ACTION_LINKS = {
         'method': 'PUT',
         'params': ['uuid'],
     },
+}
+
+GENERAL_EDUCATION_ACTION_LINKS = {
     # General education
-    'create_general_proposition': {
+    'create_proposition': {
         'path_name': 'admission_api_v1:general_training_choice',
         'method': 'POST',
     },
-    'update_general_training_choice': {
+    'update_training_choice': {
         'path_name': 'admission_api_v1:general_training_choice',
         'method': 'PUT',
         'params': ['uuid'],
     },
-    'retrieve_general_training_choice': {
+    'retrieve_training_choice': {
         'path_name': 'admission_api_v1:general_propositions',
         'method': 'GET',
         'params': ['uuid'],
     },
-    'destroy_general_proposition': {
+    'destroy_proposition': {
         'path_name': 'admission_api_v1:general_propositions',
         'method': 'DELETE',
         'params': ['uuid'],
     },
+    'retrieve_person': {
+        'path_name': 'admission_api_v1:general_person',
+        'method': 'GET',
+        'params': ['uuid'],
+    },
+    'update_person': {
+        'path_name': 'admission_api_v1:general_person',
+        'method': 'PUT',
+        'params': ['uuid'],
+    },
+    'retrieve_coordinates': {
+        'path_name': 'admission_api_v1:general_coordinates',
+        'method': 'GET',
+        'params': ['uuid'],
+    },
+    'update_coordinates': {
+        'path_name': 'admission_api_v1:general_coordinates',
+        'method': 'PUT',
+        'params': ['uuid'],
+    },
+    'retrieve_secondary_studies': {
+        'path_name': 'admission_api_v1:general_secondary_studies',
+        'method': 'GET',
+        'params': ['uuid'],
+    },
+    'update_secondary_studies': {
+        'path_name': 'admission_api_v1:general_secondary_studies',
+        'method': 'PUT',
+        'params': ['uuid'],
+    },
+    'retrieve_curriculum': {
+        'path_name': 'admission_api_v1:general_curriculum_file',
+        'method': 'GET',
+        'params': ['uuid'],
+    },
+    'update_curriculum': {
+        'path_name': 'admission_api_v1:general_curriculum_file',
+        'method': 'PUT',
+        'params': ['uuid'],
+    },
+}
+
+CONTINUING_EDUCATION_ACTION_LINKS = {
     # Continuing education
-    'create_continuing_proposition': {
+    'create_proposition': {
         'path_name': 'admission_api_v1:continuing_training_choice',
         'method': 'POST',
     },
-    'update_continuing_training_choice': {
+    'update_training_choice': {
         'path_name': 'admission_api_v1:continuing_training_choice',
         'method': 'PUT',
         'params': ['uuid'],
     },
-    'retrieve_continuing_training_choice': {
+    'retrieve_training_choice': {
         'path_name': 'admission_api_v1:continuing_propositions',
         'method': 'GET',
         'params': ['uuid'],
     },
-    'destroy_continuing_proposition': {
+    'destroy_proposition': {
         'path_name': 'admission_api_v1:continuing_propositions',
         'method': 'DELETE',
+        'params': ['uuid'],
+    },
+    'retrieve_person': {
+        'path_name': 'admission_api_v1:continuing_person',
+        'method': 'GET',
+        'params': ['uuid'],
+    },
+    'update_person': {
+        'path_name': 'admission_api_v1:continuing_person',
+        'method': 'PUT',
+        'params': ['uuid'],
+    },
+    'retrieve_coordinates': {
+        'path_name': 'admission_api_v1:continuing_coordinates',
+        'method': 'GET',
+        'params': ['uuid'],
+    },
+    'update_coordinates': {
+        'path_name': 'admission_api_v1:continuing_coordinates',
+        'method': 'PUT',
+        'params': ['uuid'],
+    },
+    'retrieve_secondary_studies': {
+        'path_name': 'admission_api_v1:continuing_secondary_studies',
+        'method': 'GET',
+        'params': ['uuid'],
+    },
+    'update_secondary_studies': {
+        'path_name': 'admission_api_v1:continuing_secondary_studies',
+        'method': 'PUT',
+        'params': ['uuid'],
+    },
+    'retrieve_curriculum': {
+        'path_name': 'admission_api_v1:continuing_curriculum_file',
+        'method': 'GET',
+        'params': ['uuid'],
+    },
+    'update_curriculum': {
+        'path_name': 'admission_api_v1:continuing_curriculum_file',
+        'method': 'PUT',
         'params': ['uuid'],
     },
 }

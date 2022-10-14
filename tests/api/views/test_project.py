@@ -165,6 +165,10 @@ class DoctorateAdmissionListApiTestCase(CheckActionLinksMixin, APITestCase):
         self.assertActionLinks(
             proposition['links'],
             allowed_actions=[
+                'retrieve_person',
+                'retrieve_coordinates',
+                'retrieve_secondary_studies',
+                'retrieve_curriculum',
                 'retrieve_training_choice',
                 'destroy_proposition',
             ],
@@ -202,6 +206,10 @@ class DoctorateAdmissionListApiTestCase(CheckActionLinksMixin, APITestCase):
         self.assertActionLinks(
             proposition['links'],
             allowed_actions=[
+                'retrieve_person',
+                'retrieve_coordinates',
+                'retrieve_secondary_studies',
+                'retrieve_curriculum',
                 'retrieve_training_choice',
                 'destroy_proposition',
             ],
