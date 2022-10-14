@@ -26,7 +26,8 @@
 
 from rest_framework import serializers
 
-from admission.api.serializers.fields import ACTION_LINKS, ActionLinksField, RelatedInstituteField
+from admission.api.serializers.fields import ACTION_LINKS, ActionLinksField, RelatedInstituteField, \
+    CONTINUING_EDUCATION_ACTION_LINKS, GENERAL_EDUCATION_ACTION_LINKS
 from admission.api.serializers.mixins import IncludedFieldsMixin
 from admission.contrib.models import AdmissionType, DoctorateAdmission
 from admission.ddd.admission.doctorat.preparation.commands import CompleterPropositionCommand, InitierPropositionCommand
@@ -167,10 +168,17 @@ class DoctoratePropositionSearchDTOSerializer(IncludedFieldsMixin, DTOSerializer
 class GeneralEducationPropositionSearchDTOSerializer(IncludedFieldsMixin, DTOSerializer):
     links = ActionLinksField(
         actions={
-            # Training choice
-            'retrieve_training_choice': ACTION_LINKS['retrieve_general_training_choice'],
-            # Proposition
-            'destroy_proposition': ACTION_LINKS['destroy_general_proposition'],
+            action: GENERAL_EDUCATION_ACTION_LINKS[action] for action in [
+                # Profile
+                'retrieve_person',
+                'retrieve_coordinates',
+                'retrieve_secondary_studies',
+                'retrieve_curriculum',
+                # Project
+                'retrieve_training_choice',
+                # Proposition
+                'destroy_proposition',
+            ]
         }
     )
 
@@ -195,10 +203,17 @@ class GeneralEducationPropositionSearchDTOSerializer(IncludedFieldsMixin, DTOSer
 class ContinuingEducationPropositionSearchDTOSerializer(IncludedFieldsMixin, DTOSerializer):
     links = ActionLinksField(
         actions={
-            # Training choice
-            'retrieve_training_choice': ACTION_LINKS['retrieve_continuing_training_choice'],
-            # Proposition
-            'destroy_proposition': ACTION_LINKS['destroy_continuing_proposition'],
+            action: CONTINUING_EDUCATION_ACTION_LINKS[action] for action in [
+                # Profile
+                'retrieve_person',
+                'retrieve_coordinates',
+                'retrieve_secondary_studies',
+                'retrieve_curriculum',
+                # Project
+                'retrieve_training_choice',
+                # Proposition
+                'destroy_proposition',
+            ]
         }
     )
 
@@ -223,8 +238,8 @@ class PropositionSearchSerializer(serializers.Serializer):
     links = ActionLinksField(
         actions={
             'create_doctorate_proposition': ACTION_LINKS['create_doctorate_proposition'],
-            'create_general_proposition': ACTION_LINKS['create_general_proposition'],
-            'create_continuing_proposition': ACTION_LINKS['create_continuing_proposition'],
+            'create_general_proposition': GENERAL_EDUCATION_ACTION_LINKS['create_proposition'],
+            'create_continuing_proposition': CONTINUING_EDUCATION_ACTION_LINKS['create_proposition'],
         }
     )
 
@@ -334,10 +349,22 @@ class DoctoratePropositionDTOSerializer(IncludedFieldsMixin, DTOSerializer):
 class GeneralEducationPropositionDTOSerializer(IncludedFieldsMixin, DTOSerializer):
     links = ActionLinksField(
         actions={
-            'retrieve_training_choice': ACTION_LINKS['retrieve_general_training_choice'],
-            'update_training_choice': ACTION_LINKS['update_general_training_choice'],
-            # Proposition
-            'destroy_proposition': ACTION_LINKS['destroy_general_proposition'],
+            action: GENERAL_EDUCATION_ACTION_LINKS[action] for action in [
+                # Profile
+                'retrieve_person',
+                'update_person',
+                'retrieve_coordinates',
+                'update_coordinates',
+                'retrieve_secondary_studies',
+                'update_secondary_studies',
+                'retrieve_curriculum',
+                'update_curriculum',
+                # Project
+                'retrieve_training_choice',
+                'update_training_choice',
+                # Proposition
+                'destroy_proposition',
+            ]
         }
     )
     erreurs = serializers.JSONField()
@@ -368,10 +395,22 @@ class GeneralEducationPropositionDTOSerializer(IncludedFieldsMixin, DTOSerialize
 class ContinuingEducationPropositionDTOSerializer(IncludedFieldsMixin, DTOSerializer):
     links = ActionLinksField(
         actions={
-            'retrieve_training_choice': ACTION_LINKS['retrieve_continuing_training_choice'],
-            'update_training_choice': ACTION_LINKS['update_continuing_training_choice'],
-            # Proposition
-            'destroy_proposition': ACTION_LINKS['destroy_continuing_proposition'],
+            action: CONTINUING_EDUCATION_ACTION_LINKS[action] for action in [
+                # Profile
+                'retrieve_person',
+                'update_person',
+                'retrieve_coordinates',
+                'update_coordinates',
+                'retrieve_secondary_studies',
+                'update_secondary_studies',
+                'retrieve_curriculum',
+                'update_curriculum',
+                # Project
+                'retrieve_training_choice',
+                'update_training_choice',
+                # Proposition
+                'destroy_proposition',
+            ]
         }
     )
     erreurs = serializers.JSONField()

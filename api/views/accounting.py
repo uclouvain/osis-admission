@@ -54,8 +54,8 @@ class AccountingView(APIPermissionRequiredMixin, mixins.RetrieveModelMixin, mixi
     pagination_class = None
     filter_backends = []
     permission_mapping = {
-        'GET': 'admission.view_accounting',
-        'PUT': 'admission.change_accounting',
+        'GET': 'admission.view_doctorateadmission_accounting',
+        'PUT': 'admission.change_doctorateadmission_accounting',
     }
 
     def get_permission_object(self):
