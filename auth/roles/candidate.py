@@ -55,7 +55,7 @@ _CANDIDATE_RULESET = {
     'view_doctorateadmission_curriculum': is_admission_request_author & is_being_enrolled,
     'view_doctorateadmission_secondary_studies': is_admission_request_author & is_being_enrolled,
     'view_doctorateadmission_languages': is_admission_request_author & is_being_enrolled,
-    'view_accounting': is_admission_request_author & is_being_enrolled,
+    'view_doctorateadmission_accounting': is_admission_request_author & is_being_enrolled,
     # Can edit while not confirmed proposition
     'delete_doctorateadmission': is_admission_request_author & unconfirmed_proposition,
     'change_doctorateadmission': is_admission_request_author & unconfirmed_proposition,
@@ -64,7 +64,7 @@ _CANDIDATE_RULESET = {
     'change_doctorateadmission_curriculum': is_admission_request_author & unconfirmed_proposition,
     'change_doctorateadmission_secondary_studies': is_admission_request_author & unconfirmed_proposition,
     'change_doctorateadmission_languages': is_admission_request_author & unconfirmed_proposition,
-    'change_accounting': is_admission_request_author & unconfirmed_proposition,
+    'change_doctorateadmission_accounting': is_admission_request_author & unconfirmed_proposition,
     # Project tabs and supervision group edition are accessible as long as signing has not begun
     'change_doctorateadmission_training_choice': is_admission_request_author & in_progress,
     'change_doctorateadmission_project': is_admission_request_author & in_progress,
@@ -99,14 +99,38 @@ _CANDIDATE_RULESET = {
     # General admission
     # A candidate can view as long as he's the author
     'view_generaleducationadmission': is_admission_request_author,
-    # A candidate can edit some tabs as long as the proposition is not submitted
+    'view_generaleducationadmission_person': is_admission_request_author,
+    'view_generaleducationadmission_coordinates': is_admission_request_author,
+    'view_generaleducationadmission_curriculum': is_admission_request_author,
+    'view_generaleducationadmission_secondary_studies': is_admission_request_author,
+    'view_generaleducationadmission_languages': is_admission_request_author,
+    'view_generaleducationadmission_accounting': is_admission_request_author,
+    # A candidate can edit some tabs as long as the proposition is in progress
     'change_generaleducationadmission_training_choice': is_admission_request_author & in_progress,
+    'change_generaleducationadmission_person': is_admission_request_author & in_progress,
+    'change_generaleducationadmission_coordinates': is_admission_request_author & in_progress,
+    'change_generaleducationadmission_curriculum': is_admission_request_author & in_progress,
+    'change_generaleducationadmission_secondary_studies': is_admission_request_author & in_progress,
+    'change_generaleducationadmission_languages': is_admission_request_author & in_progress,
+    'change_generaleducationadmission_accounting': is_admission_request_author & in_progress,
     'delete_generaleducationadmission': is_admission_request_author & in_progress,
     # Continuing admission
     # A candidate can view as long as he's the author
     'view_continuingeducationadmission': is_admission_request_author,
-    # A candidate can edit some tabs as long as the proposition is not submitted
+    'view_continuingeducationadmission_person': is_admission_request_author,
+    'view_continuingeducationadmission_coordinates': is_admission_request_author,
+    'view_continuingeducationadmission_curriculum': is_admission_request_author,
+    'view_continuingeducationadmission_secondary_studies': is_admission_request_author,
+    'view_continuingeducationadmission_languages': is_admission_request_author,
+    'view_continuingeducationadmission_accounting': is_admission_request_author,
+    # A candidate can edit some tabs as long as the proposition is in progress
     'change_continuingeducationadmission_training_choice': is_admission_request_author & in_progress,
+    'change_continuingeducationadmission_person': is_admission_request_author & in_progress,
+    'change_continuingeducationadmission_coordinates': is_admission_request_author & in_progress,
+    'change_continuingeducationadmission_curriculum': is_admission_request_author & in_progress,
+    'change_continuingeducationadmission_secondary_studies': is_admission_request_author & in_progress,
+    'change_continuingeducationadmission_languages': is_admission_request_author & in_progress,
+    'change_continuingeducationadmission_accounting': is_admission_request_author & in_progress,
     'delete_continuingeducationadmission': is_admission_request_author & in_progress,
 }
 
