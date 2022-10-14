@@ -30,21 +30,22 @@ from rest_framework.generics import GenericAPIView
 
 from admission.api import serializers
 from admission.api.permissions import IsSelfPersonTabOrTabPermission
-from admission.api.views.mixins import PersonRelatedMixin
+from admission.api.views.mixins import (
+    PersonRelatedMixin,
+    GeneralEducationPersonRelatedMixin,
+    ContinuingEducationPersonRelatedMixin,
+)
 from osis_role.contrib.views import APIPermissionRequiredMixin
 
 
-class SecondaryStudiesViewSet(
-    PersonRelatedMixin,
+class BaseSecondaryStudiesViewSet(
     APIPermissionRequiredMixin,
     mixins.RetrieveModelMixin,
     mixins.UpdateModelMixin,
     GenericAPIView,
 ):
-    name = "secondary-studies"
     pagination_class = None
     filter_backends = []
-    permission_classes = [partial(IsSelfPersonTabOrTabPermission, permission_suffix='secondary_studies')]
     serializer_class = serializers.HighSchoolDiplomaSerializer
 
     def get(self, request, *args, **kwargs):
@@ -55,3 +56,24 @@ class SecondaryStudiesViewSet(
         if self.get_permission_object():
             self.get_permission_object().update_detailed_status()
         return response
+
+
+class SecondaryStudiesViewSet(PersonRelatedMixin, BaseSecondaryStudiesViewSet):
+    name = "secondary-studies"
+    permission_classes = [partial(IsSelfPersonTabOrTabPermission, permission_suffix='secondary_studies')]
+
+
+class GeneralSecondaryStudiesViewSet(GeneralEducationPersonRelatedMixin, BaseSecondaryStudiesViewSet):
+    name = "general_secondary_studies"
+    permission_mapping = {
+        'GET': 'admission.view_generaleducationadmission_secondary_studies',
+        'PUT': 'admission.change_generaleducationadmission_secondary_studies',
+    }
+
+
+class ContinuingSecondaryStudiesViewSet(ContinuingEducationPersonRelatedMixin, BaseSecondaryStudiesViewSet):
+    name = "continuing_secondary_studies"
+    permission_mapping = {
+        'GET': 'admission.view_continuingeducationadmission_secondary_studies',
+        'PUT': 'admission.change_continuingeducationadmission_secondary_studies',
+    }
