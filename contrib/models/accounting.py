@@ -278,6 +278,11 @@ class Accounting(models.Model):
         max_length=34,
         verbose_name=_('IBAN account number'),
     )
+    valid_iban = models.BooleanField(
+        blank=True,
+        null=True,
+        verbose_name=_('The IBAN account number is valid')
+    )
     other_format_account_number = models.CharField(
         blank=True,
         default='',

@@ -119,6 +119,7 @@ class TestCompleterComptabilitePropositionService(TestCase):
             # Compte bancaire
             type_numero_compte=ChoixTypeCompteBancaire.IBAN.name,
             numero_compte_iban='BARC20658244971655GB87',
+            iban_valide=True,
             numero_compte_autre_format='123456',
             code_bic_swift_banque='GEBABEBB',
             prenom_titulaire_compte='Jane',
@@ -304,6 +305,10 @@ class TestCompleterComptabilitePropositionService(TestCase):
         self.assertEqual(
             proposition.comptabilite.numero_compte_iban,
             self.cmd.numero_compte_iban,
+        )
+        self.assertEqual(
+            proposition.comptabilite.iban_valide,
+            self.cmd.iban_valide,
         )
         self.assertEqual(
             proposition.comptabilite.numero_compte_autre_format,

@@ -88,6 +88,7 @@ def get_dto_accounting_from_domain_model(comptabilite: 'Comptabilite') -> 'Compt
         etudiant_solidaire=comptabilite.etudiant_solidaire,
         type_numero_compte=comptabilite.type_numero_compte.name if comptabilite.type_numero_compte else '',
         numero_compte_iban=comptabilite.numero_compte_iban,
+        iban_valide=comptabilite.iban_valide,
         numero_compte_autre_format=comptabilite.numero_compte_autre_format,
         code_bic_swift_banque=comptabilite.code_bic_swift_banque,
         prenom_titulaire_compte=comptabilite.prenom_titulaire_compte,

@@ -2577,6 +2577,9 @@ msgstr ""
 msgid "The CA members"
 msgstr "Les membres du comité d’accompagnement"
 
+msgid "The IBAN account number is valid"
+msgstr "Le numéro de compte IBAN est valide"
+
 msgid "The acronym of the scholarship grant"
 msgstr "L'acronyme de la bourse d'études"
 

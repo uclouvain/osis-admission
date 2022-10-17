@@ -141,6 +141,7 @@ class _ComptabiliteFactory(factory.Factory):
     titre_sejour_belgique = ['file_token.pdf']
 
     numero_compte_iban = 'BE43068999999501'
+    iban_valide = True
     numero_compte_autre_format = '123456'
     code_bic_swift_banque = 'GKCCBEBB'
     prenom_titulaire_compte = 'John'

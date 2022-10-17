@@ -110,6 +110,7 @@ class Comptabilite(interface.ValueObject):
     # Compte bancaire
     type_numero_compte: Optional[ChoixTypeCompteBancaire] = None
     numero_compte_iban: Optional[str] = ''
+    iban_valide: Optional[bool] = None
     numero_compte_autre_format: Optional[str] = ''
     code_bic_swift_banque: Optional[str] = ''
     prenom_titulaire_compte: Optional[str] = ''
