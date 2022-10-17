@@ -2382,6 +2382,9 @@ msgstr ""
 msgid "The CA members"
 msgstr "The supervisory panel members"
 
+msgid "The IBAN account number is valid"
+msgstr ""
+
 msgid "The acronym of the scholarship grant"
 msgstr ""
 

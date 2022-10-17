@@ -310,6 +310,7 @@ class PropositionRepository(IPropositionRepository):
                 if entity.comptabilite.type_numero_compte
                 else '',
                 'iban_account_number': entity.comptabilite.numero_compte_iban,
+                'valid_iban': entity.comptabilite.iban_valide,
                 'other_format_account_number': entity.comptabilite.numero_compte_autre_format,
                 'bic_swift_code': entity.comptabilite.code_bic_swift_banque,
                 'account_holder_first_name': entity.comptabilite.prenom_titulaire_compte,

@@ -273,6 +273,7 @@ class CompleterComptabilitePropositionCommand(interface.CommandRequest):
     # Compte bancaire
     type_numero_compte: Optional[str]
     numero_compte_iban: Optional[str]
+    iban_valide: Optional[bool]
     numero_compte_autre_format: Optional[str]
     code_bic_swift_banque: Optional[str]
     prenom_titulaire_compte: Optional[str]

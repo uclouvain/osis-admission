@@ -85,6 +85,7 @@ def completer_comptabilite_proposition(
         etudiant_solidaire=cmd.etudiant_solidaire,
         type_numero_compte=cmd.type_numero_compte,
         numero_compte_iban=cmd.numero_compte_iban,
+        iban_valide=cmd.iban_valide,
         numero_compte_autre_format=cmd.numero_compte_autre_format,
         code_bic_swift_banque=cmd.code_bic_swift_banque,
         prenom_titulaire_compte=cmd.prenom_titulaire_compte,

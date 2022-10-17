@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Admission API
-  version: 1.0.43
+  version: 1.0.44
   description: This API delivers data for the Admission project.
   contact:
     name: UCLouvain - OSIS
@@ -6023,6 +6023,9 @@ components:
               type: string
             numero_compte_iban:
               type: string
+            iban_valide:
+              type: boolean
+              nullable: true
             numero_compte_autre_format:
               type: string
             code_bic_swift_banque:
@@ -8323,6 +8326,9 @@ components:
           type: string
         numero_compte_iban:
           type: string
+        iban_valide:
+          type: boolean
+          nullable: true
         numero_compte_autre_format:
           type: string
         code_bic_swift_banque:
