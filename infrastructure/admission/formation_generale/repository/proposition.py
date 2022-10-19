@@ -25,11 +25,15 @@
 # ##############################################################################
 from typing import Optional, List
 
+from django.conf import settings
+from django.utils.translation import get_language
+
 from admission.auth.roles.candidate import Candidate
 from admission.contrib.models import Scholarship, GeneralEducationAdmissionProxy
 from admission.contrib.models.general_education import GeneralEducationAdmission
 from admission.ddd.admission.domain.builder.formation_identity import FormationIdentityBuilder
 from admission.ddd.admission.domain.model.bourse import BourseIdentity
+from admission.ddd.admission.dtos.formation import FormationDTO
 from admission.ddd.admission.enums.type_bourse import TypeBourse
 from admission.ddd.admission.formation_generale.domain.builder.proposition_identity_builder import (
     PropositionIdentityBuilder,
@@ -159,7 +163,14 @@ class PropositionRepository(IPropositionRepository):
             modifiee_le=admission.modified,
             erreurs=admission.detailed_status or [],
             statut=admission.status,
-            formation=FormationGeneraleTranslator.load_dto(admission.training),
+            formation=FormationDTO(
+                sigle=admission.training.acronym,
+                annee=admission.training.academic_year.year,
+                intitule=admission.training.title
+                if get_language() == settings.LANGUAGE_CODE
+                else admission.training.title_english,
+                campus=admission.teaching_campus or '',
+            ),
             matricule_candidat=admission.candidate.global_id,
             prenom_candidat=admission.candidate.first_name,
             nom_candidat=admission.candidate.last_name,
