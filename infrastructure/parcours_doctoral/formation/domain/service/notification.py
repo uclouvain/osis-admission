@@ -32,17 +32,28 @@ from django.utils.functional import Promise, lazy
 from django.utils.translation import get_language, gettext_lazy as _
 
 from admission.contrib.models import DoctorateAdmission
+from admission.contrib.models.doctoral_training import Activity
 from admission.contrib.models.doctorate import DoctorateProxy
 from admission.ddd.admission.doctorat.preparation.commands import UUID
 from admission.ddd.admission.doctorat.preparation.domain.model._promoteur import PromoteurIdentity
 from admission.ddd.parcours_doctoral.domain.model.doctorat import Doctorat
 from admission.ddd.parcours_doctoral.formation.domain.model.activite import Activite
-from admission.ddd.parcours_doctoral.formation.domain.model.enums import StatutActivite
+from admission.ddd.parcours_doctoral.formation.domain.model.enums import (
+    CategorieActivite,
+    ContexteFormation,
+    StatutActivite,
+)
 from admission.ddd.parcours_doctoral.formation.domain.service.i_notification import INotification
 from admission.mail_templates import (
-    ADMISSION_EMAIL_CANDIDATE_TRAINING_NEEDS_UPDATE,
-    ADMISSION_EMAIL_CANDIDATE_TRAINING_REFUSED,
-    ADMISSION_EMAIL_REFERENCE_PROMOTER_TRAININGS_SUBMITTED,
+    ADMISSION_EMAIL_CANDIDATE_COMPLEMENTARY_TRAINING_NEEDS_UPDATE,
+    ADMISSION_EMAIL_CANDIDATE_COMPLEMENTARY_TRAINING_REFUSED,
+    ADMISSION_EMAIL_CANDIDATE_COURSE_ENROLLMENT_NEEDS_UPDATE,
+    ADMISSION_EMAIL_CANDIDATE_COURSE_ENROLLMENT_REFUSED,
+    ADMISSION_EMAIL_CANDIDATE_DOCTORAL_TRAINING_NEEDS_UPDATE,
+    ADMISSION_EMAIL_CANDIDATE_DOCTORAL_TRAINING_REFUSED,
+    ADMISSION_EMAIL_REFERENCE_PROMOTER_COMPLEMENTARY_TRAININGS_SUBMITTED,
+    ADMISSION_EMAIL_REFERENCE_PROMOTER_COURSE_ENROLLMENTS_SUBMITTED,
+    ADMISSION_EMAIL_REFERENCE_PROMOTER_DOCTORAL_TRAININGS_SUBMITTED,
 )
 from base.models.person import Person
 from osis_mail_template import generate_email
@@ -78,16 +89,36 @@ class Notification(INotification):
             "student_last_name": doctorate.candidate.last_name,
             "doctorate_title": cls._get_doctorate_title_translation(doctorate),
             "admission_link_front": cls.get_admission_link_front(doctorate.uuid),
-            "admission_link_front_training": cls.get_admission_link_front(doctorate.uuid, 'training'),
+            "admission_link_front_doctoral_training": cls.get_admission_link_front(doctorate.uuid, 'training'),
             "admission_link_back": "{}{}".format(
                 settings.ADMISSION_BACKEND_LINK_PREFIX.rstrip('/'),
                 resolve_url('admission:doctorate:project', uuid=doctorate.uuid),
             ),
-            "admission_link_back_training": "{}{}".format(
+            "admission_link_back_doctoral_training": "{}{}".format(
                 settings.ADMISSION_BACKEND_LINK_PREFIX.rstrip('/'),
                 resolve_url('admission:doctorate:doctoral-training', uuid=doctorate.uuid),
             ),
             "reference": doctorate.reference,
+        }
+
+    @classmethod
+    def _get_mail_template_ids(cls, activite: Activite):
+        if activite.categorie == CategorieActivite.UCL_COURSE:
+            return {
+                'submitted': ADMISSION_EMAIL_REFERENCE_PROMOTER_COURSE_ENROLLMENTS_SUBMITTED,
+                'refusal': ADMISSION_EMAIL_CANDIDATE_COURSE_ENROLLMENT_REFUSED,
+                'needs-update': ADMISSION_EMAIL_CANDIDATE_COURSE_ENROLLMENT_NEEDS_UPDATE,
+            }
+        elif activite.contexte == ContexteFormation.COMPLEMENTARY_TRAINING:
+            return {
+                'submitted': ADMISSION_EMAIL_REFERENCE_PROMOTER_COMPLEMENTARY_TRAININGS_SUBMITTED,
+                'refusal': ADMISSION_EMAIL_CANDIDATE_COMPLEMENTARY_TRAINING_REFUSED,
+                'needs-update': ADMISSION_EMAIL_CANDIDATE_COMPLEMENTARY_TRAINING_NEEDS_UPDATE,
+            }
+        return {
+            'submitted': ADMISSION_EMAIL_REFERENCE_PROMOTER_DOCTORAL_TRAININGS_SUBMITTED,
+            'refusal': ADMISSION_EMAIL_CANDIDATE_DOCTORAL_TRAINING_REFUSED,
+            'needs-update': ADMISSION_EMAIL_CANDIDATE_DOCTORAL_TRAINING_NEEDS_UPDATE,
         }
 
     @classmethod
@@ -102,7 +133,7 @@ class Notification(INotification):
         promoteur = Person.objects.get(global_id=promoteur_de_reference_id.matricule)
 
         email_message = generate_email(
-            ADMISSION_EMAIL_REFERENCE_PROMOTER_TRAININGS_SUBMITTED,
+            cls._get_mail_template_ids(activites[0])['submitted'],
             promoteur.language,
             common_tokens,
             recipients=[promoteur],
@@ -117,7 +148,7 @@ class Notification(INotification):
         with translation.override(candidat.language):
             content = (
                 _(
-                    '<a href="%(admission_link_front_training)s">%(reference)s</a> - '
+                    '<a href="%(admission_link_front_doctoral_training)s">%(reference)s</a> - '
                     'Some doctoral training activities have been approved.'
                 )
                 % common_tokens
@@ -130,15 +161,17 @@ class Notification(INotification):
         doctorate: DoctorateProxy = DoctorateProxy.objects.get(uuid=doctorat.entity_id.uuid)
         common_tokens = cls.get_common_tokens(doctorate)
 
-        mail_template_id = (
-            ADMISSION_EMAIL_CANDIDATE_TRAINING_REFUSED
-            if activite.statut == StatutActivite.REFUSEE
-            else ADMISSION_EMAIL_CANDIDATE_TRAINING_NEEDS_UPDATE
+        mail_template_id = cls._get_mail_template_ids(activite).get(
+            'refusal' if activite.statut == StatutActivite.REFUSEE else 'needs-update'
         )
         email_message = generate_email(
             mail_template_id,
             doctorate.candidate.language,
-            {**common_tokens, 'reason': activite.commentaire_gestionnaire},
+            {
+                **common_tokens,
+                'reason': activite.commentaire_gestionnaire,
+                'activity_title': str(Activity.objects.get(uuid=activite.entity_id.uuid)),
+            },
             recipients=[doctorate.candidate.email],
         )
         EmailNotificationHandler.create(email_message, person=doctorate.candidate)

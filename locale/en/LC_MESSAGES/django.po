@@ -81,8 +81,8 @@ msgstr ""
 
 #, python-format
 msgid ""
-"<a href=\"%(admission_link_front_training)s\">%(reference)s</a> - Some "
-"doctoral training activities have been approved."
+"<a href=\"%(admission_link_front_doctoral_training)s\">%(reference)s</a> - "
+"Some doctoral training activities have been approved."
 msgstr ""
 
 #, python-format
@@ -275,9 +275,6 @@ msgid "Add an activity"
 msgstr ""
 
 msgid "Add an internal note"
-msgstr ""
-
-msgid "Complementary training proposition"
 msgstr ""
 
 msgid "Admission"
@@ -695,6 +692,9 @@ msgid "Complementary training"
 msgstr ""
 
 msgid "Complementary training not enabled"
+msgstr ""
+
+msgid "Complementary training proposition"
 msgstr ""
 
 msgid "Configuration saved."
@@ -1322,6 +1322,9 @@ msgstr ""
 msgid "Link to the admission supervisory panel (front-office)"
 msgstr ""
 
+msgid "Link to the complementary training panel (front-office)"
+msgstr ""
+
 msgid "Link to the doctoral training panel (back-office)"
 msgstr ""
 
@@ -1382,7 +1385,17 @@ msgid "Mail sent to promoters when a member of the supervision panel refuses"
 msgstr ""
 
 msgid ""
-"Mail sent to reference promter to inform of the submission of doctoral "
+"Mail sent to reference promoter to inform of the submission of complementary "
+"training activities"
+msgstr ""
+
+msgid ""
+"Mail sent to reference promoter to inform of the submission of course "
+"enrollment"
+msgstr ""
+
+msgid ""
+"Mail sent to reference promoter to inform of the submission of doctoral "
 "training activities"
 msgstr ""
 
@@ -1406,8 +1419,23 @@ msgid ""
 msgstr ""
 
 msgid ""
+"Mail sent to the candidate to inform of the refusal of complementary "
+"training activity"
+msgstr ""
+
+msgid ""
+"Mail sent to the candidate to inform of the refusal of course enrollment"
+msgstr ""
+
+msgid ""
 "Mail sent to the candidate to inform of the refusal of doctoral training "
 "activity"
+msgstr ""
+
+msgid "Mail sent to the candidate to update a complementary training activity"
+msgstr ""
+
+msgid "Mail sent to the candidate to update a course enrollment"
 msgstr ""
 
 msgid "Mail sent to the candidate to update a doctoral training activity"
@@ -2294,6 +2322,9 @@ msgid "The CA members"
 msgstr "The supervisory panel members"
 
 msgid "The acronym of the scholarship grant"
+msgstr ""
+
+msgid "The activity title"
 msgstr ""
 
 msgid "The certificate of achievement is being generated."

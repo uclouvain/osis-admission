@@ -237,6 +237,7 @@ class ActiviteFactory(factory.Factory):
     entity_id = factory.SubFactory(ActiviteIdentityFactory)
     doctorat_id = factory.SubFactory(_DoctoratIdentityFactory)
     categorie = factory.Iterator(CategorieActivite._member_map_.values())
+    contexte = ContexteFormation.DOCTORAL_TRAINING
     ects = factory.Faker("pydecimal", left_digits=2, right_digits=2, positive=True)
 
     @factory.post_generation

@@ -3,8 +3,9 @@
 from django.db import migrations
 
 from admission.mail_templates import (
-    ADMISSION_EMAIL_CANDIDATE_TRAINING_NEEDS_UPDATE,
-    ADMISSION_EMAIL_CANDIDATE_TRAINING_REFUSED, ADMISSION_EMAIL_REFERENCE_PROMOTER_TRAININGS_SUBMITTED,
+    ADMISSION_EMAIL_CANDIDATE_DOCTORAL_TRAINING_NEEDS_UPDATE,
+    ADMISSION_EMAIL_CANDIDATE_DOCTORAL_TRAINING_REFUSED,
+    ADMISSION_EMAIL_REFERENCE_PROMOTER_DOCTORAL_TRAININGS_SUBMITTED,
 )
 from osis_mail_template import MailTemplateMigration
 
@@ -16,18 +17,18 @@ class Migration(migrations.Migration):
 
     operations = [
         MailTemplateMigration(
-            ADMISSION_EMAIL_REFERENCE_PROMOTER_TRAININGS_SUBMITTED,
+            ADMISSION_EMAIL_REFERENCE_PROMOTER_DOCTORAL_TRAININGS_SUBMITTED,
             {
                 'en': '[OSIS] New doctoral training activities been submitted by {student_first_name} {student_last_name}',
                 'fr-be': "[OSIS] De nouvelles activités de formation doctorale ont été soumises par {student_first_name} "
-                         "{student_last_name}",
+                "{student_last_name}",
             },
             {
                 'en': '''<p>Hello,</p>
 
         <p>
             {student_first_name} {student_last_name} have submitted new doctoral training activities {doctorate_title}, 
-            you can review them by following this link: {admission_link_front_training}.
+            you can review them by following this link: {admission_link_front_doctoral_training}.
         </p>
 
         <p>
@@ -39,7 +40,7 @@ class Migration(migrations.Migration):
 
         <p>
             {student_first_name} {student_last_name} a soumis de nouvelles activités de formation doctorale pour son {doctorate_title},
-            vous pouvez les consulter en suivant ce lien : {admission_link_front_training}.
+            vous pouvez les consulter en suivant ce lien : {admission_link_front_doctoral_training}.
         </p>
 
         <p>
@@ -50,7 +51,7 @@ class Migration(migrations.Migration):
             },
         ),
         MailTemplateMigration(
-            ADMISSION_EMAIL_CANDIDATE_TRAINING_REFUSED,
+            ADMISSION_EMAIL_CANDIDATE_DOCTORAL_TRAINING_REFUSED,
             {
                 'en': '[OSIS] A doctoral training activity has been refused',
                 'fr-be': "[OSIS] Une activité de formation doctorale a été refusée",
@@ -60,7 +61,7 @@ class Migration(migrations.Migration):
 
         <p>
             A submitted doctoral training activity for your {doctorate_title} has been refused, 
-            you can review all activities by following this link: {admission_link_front_training}.
+            you can review all activities by following this link: {admission_link_front_doctoral_training}.
             
             Here's the reason for this refusal: {reason}
         </p>
@@ -74,7 +75,7 @@ class Migration(migrations.Migration):
 
         <p>
             Un activité activité de formation doctorale soumis pour votre {doctorate_title} a été refusée,
-            vous pouvez les consulter en suivant ce lien : {admission_link_front_training}.
+            vous pouvez les consulter en suivant ce lien : {admission_link_front_doctoral_training}.
             
             La raison invoquée pour ce refus : {reason}
         </p>
@@ -87,7 +88,7 @@ class Migration(migrations.Migration):
             },
         ),
         MailTemplateMigration(
-            ADMISSION_EMAIL_CANDIDATE_TRAINING_NEEDS_UPDATE,
+            ADMISSION_EMAIL_CANDIDATE_DOCTORAL_TRAINING_NEEDS_UPDATE,
             {
                 'en': '[OSIS] A doctoral training activity needs to be updated',
                 'fr-be': "[OSIS] Une activité de formation doctorale doit être mise à jour",
@@ -97,7 +98,7 @@ class Migration(migrations.Migration):
 
         <p>
             A submitted doctoral training activity for {doctorate_title} must be updated, 
-            you can review them by following this link: {admission_link_front_training}.
+            you can review them by following this link: {admission_link_front_doctoral_training}.
             
             Here's  why it need to be updated: {reason}
         </p>
@@ -111,7 +112,7 @@ class Migration(migrations.Migration):
 
         <p>
             Une activité de formation doctorale doit être mise à jour pour {doctorate_title},
-            vous pouvez les consulter en suivant ce lien : {admission_link_front_training}.
+            vous pouvez les consulter en suivant ce lien : {admission_link_front_doctoral_training}.
 
             Voici ce pourquoi vous devez la modifier : {reason}
         </p>

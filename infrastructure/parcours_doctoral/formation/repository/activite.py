@@ -83,6 +83,7 @@ class ActiviteRepository(IActiviteRepository):
         return Activite(
             entity_id=entity_id or ActiviteIdentityBuilder.build_from_uuid(activity.uuid),
             doctorat_id=DoctoratIdentityBuilder.build_from_uuid(activity.doctorate.uuid),
+            contexte=ContexteFormation[activity.context],
             ects=activity.ects,
             categorie=CategorieActivite[activity.category],
             statut=StatutActivite[activity.status],

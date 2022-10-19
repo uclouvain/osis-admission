@@ -29,6 +29,7 @@ import attr
 
 from admission.ddd.parcours_doctoral.domain.model.doctorat import DoctoratIdentity
 from admission.ddd.parcours_doctoral.formation.domain.model.enums import CategorieActivite, StatutActivite
+from admission.ddd.parcours_doctoral.formation.domain.model.enums import ContexteFormation
 from admission.ddd.parcours_doctoral.formation.domain.validator.validator_by_business_action import (
     RefusActiviteValidationList,
     RevenirASoumiseActiviteValidationList,
@@ -46,6 +47,7 @@ class Activite(interface.RootEntity):
     entity_id: 'ActiviteIdentity'
     doctorat_id: 'DoctoratIdentity'
     categorie: 'CategorieActivite'
+    contexte: 'ContexteFormation'
     statut: 'StatutActivite' = StatutActivite.NON_SOUMISE
     ects: Optional[float] = None
 
