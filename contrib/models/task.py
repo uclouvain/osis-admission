@@ -27,6 +27,8 @@ from django.db import models
 
 from django.utils.translation import gettext_lazy as _
 
+from admission.contrib.models.base import BaseAdmissionQuerySet
+
 
 def admission_export_path(task: 'AdmissionTask', filename: str):
     """Return the file upload directory path."""
@@ -35,6 +37,14 @@ def admission_export_path(task: 'AdmissionTask', filename: str):
         task.admission.uuid,
         filename,
     )
+
+
+class AdmissionTaskQuerySet(BaseAdmissionQuerySet):
+    training_field_name = 'admission__doctorate_id'
+
+
+class AdmissionTaskManager(models.Manager.from_queryset(AdmissionTaskQuerySet)):
+    pass
 
 
 class AdmissionTask(models.Model):
@@ -55,3 +65,5 @@ class AdmissionTask(models.Model):
         choices=TaskType.choices,
         max_length=20,
     )
+
+    objects = AdmissionTaskManager()

@@ -41,13 +41,17 @@ from base.tests.factories.education_group_year import EducationGroupYearFactory
 from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.person import PersonFactory
 from base.tests.factories.student import StudentFactory
+from program_management.tests.factories.education_group_version import EducationGroupVersionFactory
 
 
 class DoctorateFactory(EducationGroupYearFactory):
     academic_year = factory.SubFactory(AcademicYearFactory, current=True)
     education_group_type = factory.SubFactory(EducationGroupTypeFactory, name=TrainingType.PHD.name)
     primary_language = None
-    enrollment_campus = None
+
+    @factory.post_generation
+    def create_related_group_version_factory(self, create, extracted, **kwargs):
+        EducationGroupVersionFactory(offer=self, root_group__academic_year__year=self.academic_year.year)
 
 
 def _generate_reference(obj):

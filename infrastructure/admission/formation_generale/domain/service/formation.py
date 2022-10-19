@@ -36,7 +36,6 @@ from admission.ddd.admission.formation_generale.domain.validator.exceptions impo
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
-from base.models.education_group_year import EducationGroupYear
 from ddd.logic.formation_catalogue.commands import SearchFormationsCommand
 from ddd.logic.formation_catalogue.dtos.training import TrainingDto
 
@@ -48,7 +47,7 @@ class FormationGeneraleTranslator(IFormationGeneraleTranslator):
             sigle=dto.acronym,
             annee=dto.year,
             intitule=dto.title_fr if get_language() == settings.LANGUAGE_CODE else dto.title_en,
-            campus=dto.enrollment_campus_name or '',
+            campus=dto.main_teaching_campus_name or '',
         )
 
     @classmethod
@@ -110,12 +109,3 @@ class FormationGeneraleTranslator(IFormationGeneraleTranslator):
         )
 
         return [cls._build_dto(dto) for dto in dtos]
-
-    @classmethod
-    def load_dto(cls, training: EducationGroupYear) -> FormationDTO:
-        return FormationDTO(
-            sigle=training.acronym,
-            annee=training.academic_year.year,
-            intitule=training.title if get_language() == settings.LANGUAGE_CODE else training.title_english,
-            campus=training.enrollment_campus.name or '',
-        )

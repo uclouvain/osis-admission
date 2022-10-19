@@ -29,7 +29,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils.translation import gettext_lazy as _
 
-from admission.contrib.models.base import BaseAdmission
+from admission.contrib.models.base import BaseAdmission, BaseAdmissionQuerySet
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutProposition
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
@@ -86,15 +86,22 @@ class GeneralEducationAdmission(BaseAdmission):
         pass
 
 
-class GeneralEducationAdmissionManager(models.Manager):
+class GeneralEducationAdmissionQuerySet(BaseAdmissionQuerySet):
+    training_field_name = 'training_id'
+
+
+class GeneralEducationAdmissionManager(models.Manager.from_queryset(GeneralEducationAdmissionQuerySet)):
     def get_queryset(self):
-        return GeneralEducationAdmission.objects.all().select_related(
-            "candidate__country_of_citizenship",
-            "training__academic_year",
-            "training__enrollment_campus",
-            "double_degree_scholarship",
-            "international_scholarship",
-            "erasmus_mundus_scholarship",
+        return (
+            super()
+            .get_queryset()
+            .select_related(
+                "candidate__country_of_citizenship",
+                "training__academic_year",
+                "double_degree_scholarship",
+                "international_scholarship",
+                "erasmus_mundus_scholarship",
+            ).annotate_campus()
         )
 
 
