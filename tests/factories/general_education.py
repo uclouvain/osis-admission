@@ -38,6 +38,7 @@ from admission.tests.factories.scholarship import (
 from base.models.enums import education_group_categories
 from base.tests.factories.education_group_year import EducationGroupYearFactory
 from base.tests.factories.person import PersonFactory
+from program_management.tests.factories.education_group_version import EducationGroupVersionFactory
 
 
 class GeneralEducationTrainingFactory(EducationGroupYearFactory):
@@ -46,6 +47,10 @@ class GeneralEducationTrainingFactory(EducationGroupYearFactory):
         category=education_group_categories.TRAINING,
         name=factory.fuzzy.FuzzyChoice(AnneeInscriptionFormationTranslator.GENERAL_EDUCATION_TYPES),
     )
+
+    @factory.post_generation
+    def create_related_group_version_factory(self, create, extracted, **kwargs):
+        EducationGroupVersionFactory(offer=self, root_group__academic_year__year=self.academic_year.year)
 
 
 class GeneralEducationAdmissionFactory(factory.DjangoModelFactory):
