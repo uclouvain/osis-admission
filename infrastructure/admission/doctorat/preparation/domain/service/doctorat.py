@@ -46,7 +46,7 @@ class DoctoratTranslator(IDoctoratTranslator):
             annee=dto.year,
             intitule=dto.title_fr if get_language() == settings.LANGUAGE_CODE else dto.title_en,
             sigle_entite_gestion=dto.management_entity_acronym,
-            campus=dto.enrollment_campus_name,
+            campus=dto.main_teaching_campus_name,
         )
 
     @classmethod

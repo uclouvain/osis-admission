@@ -402,7 +402,7 @@ class PropositionRepository(IPropositionRepository):
                     else admission.doctorate.title
                 ),
                 sigle_entite_gestion=admission.sigle_entite_gestion,  # from PropositionManager annotation
-                campus=admission.doctorate.enrollment_campus.name if admission.doctorate.enrollment_campus_id else None,
+                campus=admission.teaching_campus or '',  # from PropositionManager annotation
             ),
             matricule_candidat=admission.candidate.global_id,
             prenom_candidat=admission.candidate.first_name,
