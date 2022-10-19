@@ -46,6 +46,9 @@ class GeneralPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase):
     @classmethod
     def setUpTestData(cls):
         cls.admission = GeneralEducationAdmissionFactory()
+        cls.teaching_campus_name = (
+            cls.admission.training.educationgroupversion_set.first().root_group.main_teaching_campus.name
+        )
         # Users
         cls.candidate = cls.admission.candidate
         cls.other_candidate = CandidateFactory().person
@@ -65,7 +68,7 @@ class GeneralPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase):
             'sigle': self.admission.training.acronym,
             'annee': self.admission.training.academic_year.year,
             'intitule': self.admission.training.title,
-            'campus': self.admission.training.enrollment_campus.name,
+            'campus': self.teaching_campus_name,
         }
         double_degree_scholarship_json = {
             'uuid': str(self.admission.double_degree_scholarship.uuid),
@@ -154,6 +157,9 @@ class ContinuingPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase
     @classmethod
     def setUpTestData(cls):
         cls.admission = ContinuingEducationAdmissionFactory()
+        cls.teaching_campus_name = (
+            cls.admission.training.educationgroupversion_set.first().root_group.main_teaching_campus.name
+        )
         # Users
         cls.candidate = cls.admission.candidate
         cls.other_candidate = CandidateFactory().person
@@ -173,7 +179,7 @@ class ContinuingPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase
             'sigle': self.admission.training.acronym,
             'annee': self.admission.training.academic_year.year,
             'intitule': self.admission.training.title,
-            'campus': self.admission.training.enrollment_campus.name,
+            'campus': self.teaching_campus_name,
         }
         self.assertEqual(json_response['uuid'], str(self.admission.uuid))
         self.assertEqual(json_response['formation'], training_json)
