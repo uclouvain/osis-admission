@@ -44,12 +44,15 @@ def format_address(address, language):
 
 
 def admission_confirmation_success_attestation(task_uuid, language=None):
-    admission_task = AdmissionTask.objects.select_related(
-        'task',
-        'admission__candidate',
-        'admission__doctorate__enrollment_campus',
-        'admission__doctorate__management_entity',
-    ).get(task__uuid=task_uuid)
+    admission_task = (
+        AdmissionTask.objects.select_related(
+            'task',
+            'admission__candidate',
+            'admission__doctorate__management_entity',
+        )
+        .annotate_campus()
+        .get(task__uuid=task_uuid)
+    )
 
     current_language = language or admission_task.admission.candidate.language
 
@@ -91,6 +94,7 @@ def admission_confirmation_success_attestation(task_uuid, language=None):
                 'contact_address': contact_address,
                 'cdd_president': cdd_president[0] if cdd_president else {},
                 'confirmation_paper': confirmation_paper,
+                'teaching_campus': admission_task.teaching_campus,
             },
         )
 

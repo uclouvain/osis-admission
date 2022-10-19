@@ -25,10 +25,14 @@
 # ##############################################################################
 from typing import Optional, List
 
+from django.conf import settings
+from django.utils.translation import get_language
+
 from admission.auth.roles.candidate import Candidate
 from admission.contrib.models import ContinuingEducationAdmissionProxy
 from admission.contrib.models.continuing_education import ContinuingEducationAdmission
 from admission.ddd.admission.domain.builder.formation_identity import FormationIdentityBuilder
+from admission.ddd.admission.dtos.formation import FormationDTO
 from admission.ddd.admission.formation_continue.domain.builder.proposition_identity_builder import (
     PropositionIdentityBuilder,
 )
@@ -37,7 +41,6 @@ from admission.ddd.admission.formation_continue.domain.model.proposition import 
 from admission.ddd.admission.formation_continue.domain.validator.exceptions import PropositionNonTrouveeException
 from admission.ddd.admission.formation_continue.dtos import PropositionDTO
 from admission.ddd.admission.formation_continue.repository.i_proposition import IPropositionRepository
-from admission.infrastructure.admission.formation_continue.domain.service.formation import FormationContinueTranslator
 from base.models.education_group_year import EducationGroupYear
 from base.models.person import Person
 from osis_common.ddd.interface import ApplicationService
@@ -121,7 +124,14 @@ class PropositionRepository(IPropositionRepository):
             creee_le=admission.created,
             modifiee_le=admission.modified,
             erreurs=admission.detailed_status or [],
-            formation=FormationContinueTranslator.load_dto(admission.training),
+            formation=FormationDTO(
+                sigle=admission.training.acronym,
+                annee=admission.training.academic_year.year,
+                intitule=admission.training.title
+                if get_language() == settings.LANGUAGE_CODE
+                else admission.training.title_english,
+                campus=admission.teaching_campus or '',
+            ),
             matricule_candidat=admission.candidate.global_id,
             prenom_candidat=admission.candidate.first_name,
             nom_candidat=admission.candidate.last_name,

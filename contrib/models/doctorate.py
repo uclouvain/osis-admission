@@ -59,7 +59,7 @@ from base.utils.cte import CTESubquery
 from osis_document.contrib import FileField
 from osis_signature.contrib.fields import SignatureProcessField
 from reference.models.country import Country
-from .base import BaseAdmission, admission_directory_path
+from .base import BaseAdmission, admission_directory_path, BaseAdmissionQuerySet
 from .enums.admission_type import AdmissionType
 
 __all__ = [
@@ -413,7 +413,11 @@ class DoctorateAdmission(BaseAdmission):
         self.save(update_fields=['detailed_status'])
 
 
-class PropositionManager(models.Manager):
+class DoctorateAdmissionQuerySet(BaseAdmissionQuerySet):
+    training_field_name = 'doctorate_id'
+
+
+class PropositionManager(models.Manager.from_queryset(DoctorateAdmissionQuerySet)):
     def get_queryset(self):
         cte = EntityVersion.objects.with_children(entity_id=OuterRef("doctorate__management_entity_id"))
         sector_subqs = (
@@ -424,10 +428,10 @@ class PropositionManager(models.Manager):
         )
 
         return (
-            DoctorateAdmission.objects.all()
+            super()
+            .get_queryset()
             .select_related(
                 "doctorate__academic_year",
-                "doctorate__enrollment_campus",
                 "candidate__country_of_citizenship",
                 "thesis_institute",
                 "accounting",
@@ -442,6 +446,7 @@ class PropositionManager(models.Manager):
                     .values("acronym")[:1]
                 ),
             )
+            .annotate_campus()
         )
 
 
@@ -461,6 +466,7 @@ def _invalidate_doctorate_cache(sender, instance, **kwargs):
 
 @receiver(post_save, sender=Person)
 def _invalidate_candidate_cache(sender, instance, **kwargs):
+    # FIXME, the person is updated at authentication so this signal is often emitted
     keys = [
         f'admission_permission_{a_uuid}'
         for a_uuid in DoctorateAdmission.objects.filter(candidate_id=instance.pk).values_list('uuid', flat=True)
