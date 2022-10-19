@@ -149,8 +149,7 @@
         const reStatus = new RegExp(`\\b${current_filter_status}\\b`);
         $('#activities .panel').each(function () {
           $(this).show();
-          if ((current_filter_type !== ALL_VALUES && $(this).data('type') !== current_filter_type)
-            || (current_filter_status !== ALL_VALUES && !$(this).data('status').match(reStatus))) {
+          if ((current_filter_status !== ALL_VALUES && !$(this).data('status').match(reStatus))) {
             $(this).hide();
           }
         });

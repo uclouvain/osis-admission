@@ -294,28 +294,10 @@ class DoctoralTrainingActivityView(TrainingListMixin):  # pylint: disable=too-ma
     """List view for doctoral training activities"""
 
     template_name = "admission/doctorate/cdd/training_list.html"
-    permission_required = "admission.change_activity"
+    permission_required = "admission.view_doctoral_training"
 
     def get_queryset(self):
         return Activity.objects.for_doctoral_training(self.admission_uuid)
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['counts'] = self.get_queryset().aggregate(
-            total=Sum('ects'),
-            validated=Sum('ects', filter=Q(status=StatutActivite.ACCEPTEE.name)),
-            pending=Sum('ects', filter=Q(status=StatutActivite.SOUMISE.name)),
-        )
-        context['categories_count'] = (
-            self.get_queryset()
-            .values('category')
-            .annotate(
-                unsubmitted=Sum('ects', filter=Q(status=StatutActivite.NON_SOUMISE.name)),
-                submitted=Sum('ects', filter=Q(status=StatutActivite.SOUMISE.name)),
-                validated=Sum('ects', filter=Q(status=StatutActivite.ACCEPTEE.name)),
-            )
-        )
-        return context
 
 
 class ComplementaryTrainingView(TrainingListMixin):  # pylint: disable=too-many-ancestors

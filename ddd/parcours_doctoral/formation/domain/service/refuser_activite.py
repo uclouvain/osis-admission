@@ -41,8 +41,17 @@ class RefuserActivite(interface.DomainService):
         activite.refuser(avec_modification, remarque)
         activite_repository.save(activite)
 
-        # Refuser toutes les sous-activités
-        if activite.categorie in [CategorieActivite.CONFERENCE, CategorieActivite.RESIDENCY, CategorieActivite.SEMINAR]:
+        # Synchroniser les sous-activités de séminaire
+        if activite.categorie == CategorieActivite.SEMINAR:
+            sous_activites = activite_repository.search(parent_id=activite.entity_id)
+            for sous_activite in sous_activites:
+                sous_activite.statut = StatutActivite.NON_SOUMISE if avec_modification else StatutActivite.REFUSEE
+                activite_repository.save(sous_activite)
+
+        # Refuser toutes les sous-activités lors d'un refus de parent
+        elif (
+            activite.categorie in [CategorieActivite.CONFERENCE, CategorieActivite.RESIDENCY] and not avec_modification
+        ):
             sous_activites = activite_repository.search(parent_id=activite.entity_id)
             for sous_activite in sous_activites:
                 sous_activite.statut = StatutActivite.REFUSEE

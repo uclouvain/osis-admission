@@ -424,7 +424,7 @@ class DoctoralTrainingBatchSerializer(serializers.Serializer):
 
 class DoctoralTrainingAssentSerializer(serializers.Serializer):
     approbation = serializers.BooleanField()
-    commentaire = serializers.CharField()
+    commentaire = serializers.CharField(allow_blank=True)
 
 
 class DoctoralTrainingConfigSerializer(serializers.ModelSerializer):

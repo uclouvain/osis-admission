@@ -64,7 +64,7 @@
 {% elif template_name == "service.html" %}
   {% display activity.type ':' activity.title '-' period "-" ects %}
 {% elif template_name == "ucl_course.html" %}
-  {% display activity.learning_unit_year.complete_title_i18n "-" activity.learning_unit_year.academic_year "-" activity.context|enum_display:'ContexteFormation' %}
+  {% display activity.learning_unit_year.complete_title_i18n "-" activity.learning_unit_year.academic_year "-" activity.context|enum_display:'ContexteFormation' '-' ects %}
 {% elif template_name == "vae.html" %}
   {% display activity.title '-' ects %}
 {% endif %}
