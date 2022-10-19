@@ -100,11 +100,11 @@ msgstr ""
 
 #, python-format
 msgid ""
-"<a href=\"%(admission_link_front_training)s\">%(reference)s</a> - Some "
-"doctoral training activities have been approved."
+"<a href=\"%(admission_link_front_doctoral_training)s\">%(reference)s</a> - "
+"Some doctoral training activities have been approved."
 msgstr ""
-"<a href=\"%(admission_link_front_training)s\">%(reference)s</a> - Des "
-"activités de formation doctorale ont été approuvées."
+"<a href=\"%(admission_link_front_doctoral_training)s\">%(reference)s</a> - "
+"Des activités de formation doctorale ont été approuvées."
 
 #, python-format
 msgid ""
@@ -315,9 +315,6 @@ msgstr "Ajouter une activité"
 
 msgid "Add an internal note"
 msgstr "Ajouter une note interne"
-
-msgid "Complementary training proposition"
-msgstr "Proposition de formation complémentaire"
 
 msgid "Admission"
 msgstr "Admission"
@@ -746,6 +743,9 @@ msgstr "Formation complémentaire"
 
 msgid "Complementary training not enabled"
 msgstr "Formation complémentaire non activée"
+
+msgid "Complementary training proposition"
+msgstr "Proposition de formation complémentaire"
 
 msgid "Configuration saved."
 msgstr "Configuration enregistrée."
@@ -1413,6 +1413,9 @@ msgstr "Lien vers la page liée à l'épreuve de confirmation (front-office)"
 msgid "Link to the admission supervisory panel (front-office)"
 msgstr "Lien vers le groupe de supervision de l'admission (front-office)"
 
+msgid "Link to the complementary training panel (front-office)"
+msgstr "Lien vers la page liée à la formation complémentaire (front-office)"
+
 msgid "Link to the doctoral training panel (back-office)"
 msgstr "Lien vers la page liée à la formation doctorale (back-office)"
 
@@ -1491,7 +1494,21 @@ msgstr ""
 "supervision"
 
 msgid ""
-"Mail sent to reference promter to inform of the submission of doctoral "
+"Mail sent to reference promoter to inform of the submission of complementary "
+"training activities"
+msgstr ""
+"E-mail envoyé au promoteur de référence lors de la soumission d'une activité "
+"de formation complémentaire"
+
+msgid ""
+"Mail sent to reference promoter to inform of the submission of course "
+"enrollment"
+msgstr ""
+"E-mail envoyé au promoteur de référence lors de la soumission d'une "
+"inscription à un cours"
+
+msgid ""
+"Mail sent to reference promoter to inform of the submission of doctoral "
 "training activities"
 msgstr ""
 "E-mail envoyé au promoteur de référence lors de la soumission d'une activité "
@@ -1523,11 +1540,33 @@ msgstr ""
 "demande par l'UCLouvain"
 
 msgid ""
+"Mail sent to the candidate to inform of the refusal of complementary "
+"training activity"
+msgstr ""
+"E-mail envoyé au candidat pour lui informer du refus d'une activité de "
+"formation complémentaire"
+
+msgid ""
+"Mail sent to the candidate to inform of the refusal of course enrollment"
+msgstr ""
+"E-mail envoyé au candidat pour lui informer du refus d'une inscription à un "
+"cours"
+
+msgid ""
 "Mail sent to the candidate to inform of the refusal of doctoral training "
 "activity"
 msgstr ""
 "E-mail envoyé au candidat pour lui informer du refus d'une activité de "
 "formation doctorale"
+
+msgid "Mail sent to the candidate to update a complementary training activity"
+msgstr ""
+"E-mail envoyé au candidat pour mettre à jour une activité de formation "
+"complémentaire"
+
+msgid "Mail sent to the candidate to update a course enrollment"
+msgstr ""
+"E-mail envoyé au candidat pour mettre à jour une inscription à un cours"
 
 msgid "Mail sent to the candidate to update a doctoral training activity"
 msgstr ""
@@ -2479,6 +2518,9 @@ msgstr "Les membres du comité d’accompagnement"
 
 msgid "The acronym of the scholarship grant"
 msgstr "L'acronyme de la bourse d'études"
+
+msgid "The activity title"
+msgstr "Le titre de l'activité"
 
 msgid "The certificate of achievement is being generated."
 msgstr "L'attestation de réussite est en cours de génération."
