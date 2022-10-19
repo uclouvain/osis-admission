@@ -27,6 +27,7 @@
 
 
 {% block tab_content %}
+  {% url request.resolver_match.namespace uuid=view.kwargs.uuid as back_url %}
   <h3>
     {% blocktrans trimmed %}Are you sure you want to restore "{{ object }}"?{% endblocktrans %}
   </h3>
@@ -40,7 +41,7 @@
     {% csrf_token %}
     {% bootstrap_form form %}
     <div class="text-right">
-      <a href="{% url "admission:doctorate:doctoral-training" uuid=view.kwargs.uuid %}#{{ view.kwargs.activity_id }}">
+      <a href="{{ back_url }}#{{ view.kwargs.activity_id }}">
         {% trans "Cancel" %}
       </a>
       <button type="submit" class="btn btn-primary">

@@ -27,8 +27,8 @@
 
 
 {% block tab_content %}
+  {% url request.resolver_match.namespace uuid=view.kwargs.uuid as back_url %}
   <h3>
-    {% display view.activity.type "-" view.activity.title as object %}
     {% blocktrans trimmed %}Require changes for "{{ object }}"{% endblocktrans %}
   </h3>
   <p>{% trans "This activity and potential sub-activities will be set back to Unsubmitted for modification" %}</p>
@@ -36,7 +36,7 @@
     {% csrf_token %}
     {% bootstrap_form form %}
     <div class="text-right">
-      <a href="{% url "admission:doctorate:doctoral-training" uuid=view.kwargs.uuid %}#{{ view.kwargs.activity_id }}">
+      <a href="{{ back_url }}#{{ view.kwargs.activity_id }}">
         {% trans "Cancel" %}
       </a>
       <button type="submit" class="btn btn-danger">

@@ -22,7 +22,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='activity',
             name='context',
-            field=models.CharField(choices=[('DOCTORAL_TRAINING', 'DOCTORAL_TRAINING'), ('COMPLEMENTARY_TRAINING', 'COMPLEMENTARY_TRAINING'), ('FREE_COURSE', 'FREE_COURSE')], default='DOCTORAL_TRAINING', max_length=30),
+            field=models.CharField(choices=[('DOCTORAL_TRAINING', 'DOCTORAL_TRAINING'), ('COMPLEMENTARY_TRAINING', 'COMPLEMENTARY_TRAINING'), ('FREE_COURSE', 'FREE_COURSE')], default='DOCTORAL_TRAINING', max_length=30, verbose_name="Context"),
         ),
         migrations.AddField(
             model_name='activity',

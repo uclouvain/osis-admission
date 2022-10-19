@@ -117,6 +117,7 @@ class Activity(models.Model):
         on_delete=models.CASCADE,
     )
     context = models.CharField(
+        verbose_name=_("Context"),
         max_length=30,
         choices=ContexteFormation.choices(),
         default=ContexteFormation.DOCTORAL_TRAINING.name,
@@ -400,6 +401,6 @@ def _activity_update_seminar_can_be_submitted(sender, instance, **kwargs):
     # When communication seminar activity is deleted, trigger a parent seminar update
     if (
         instance.category == CategorieActivite.COMMUNICATION.name
-        and instance.parent.category == CategorieActivite.SEMINAR.name
+        and instance.parent_id == CategorieActivite.SEMINAR.name
     ):
         instance.parent.save()

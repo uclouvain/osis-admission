@@ -391,8 +391,10 @@ msgstr "Êtes-vous sûr de vouloir refuser \"%(object)s\" ?"
 
 #, python-format
 msgid "Are you sure you want to restore \"%(object)s\"?"
-msgstr ""
-"Êtes-vous sûr de vouloir remettre \"%(object)s\" au statut non-soumis ?"
+msgstr "Êtes-vous sûr de vouloir remettre \"%(object)s\" au statut soumis ?"
+
+msgid "Assent from reference promoter"
+msgstr "Avis positif du promoteur de référence"
 
 msgid "Assimilation 1 situation types"
 msgstr "Types de situation de l'assimilation 1"
@@ -727,9 +729,6 @@ msgstr "Commentaire"
 msgid "Comment from CDD manager"
 msgstr "Commentaire du gestionnaire CDD"
 
-msgid "Comment from reference promoter"
-msgstr "Commentaire du promoteur de référence"
-
 msgid "Comments"
 msgstr "Commentaires"
 
@@ -762,7 +761,7 @@ msgid "Confirm and send the message"
 msgstr "Confirmer et envoyer le message"
 
 msgid "Confirm restoring activity to submitted"
-msgstr "Confirmer la remise au statut non-soumise de cette activité"
+msgstr "Confirmer la remise au statut soumise de cette activité"
 
 msgctxt "tab"
 msgid "Confirmation"
@@ -805,7 +804,7 @@ msgid "Country of citizenship"
 msgstr "Pays de nationalité"
 
 msgid "Course code (if needed)"
-msgstr "Code de cours (le cas échéant)"
+msgstr "Code du cours (le cas échéant)"
 
 msgid "Course completed"
 msgstr "Cours terminé"
@@ -943,6 +942,9 @@ msgstr "Curriculum vitae détaillé"
 
 msgid "Diploma"
 msgstr "Diplôme"
+
+msgid "Dissent from reference promoter"
+msgstr "Avis négatif du promoteur de référence"
 
 msgid "Do not reorder values, and keep the same count"
 msgstr "Ne pas réordonner les valeurs, and garder le même nombre"
@@ -2178,7 +2180,7 @@ msgstr ""
 "remplacement"
 
 msgid "Restore activity to submitted"
-msgstr "Remmetre cette activité au statut non-soumise"
+msgstr "Remettre cette activité au statut soumise"
 
 msgid "Retaking of the confirmation paper"
 msgstr "Épreuve de confirmation à représenter"
@@ -2634,7 +2636,7 @@ msgstr ""
 msgid "There is no request for a new deadline."
 msgstr "Il n'y a pas de demande de nouvelle échéance."
 
-msgid "Thesis defence"
+msgid "Thesis defences"
 msgstr "Défense de thèse"
 
 msgid "Thesis domain"
@@ -2685,7 +2687,7 @@ msgid ""
 "This activity has underlying sub-activities that will be restored as well"
 msgstr ""
 "Cette activité a des activités dépendantes qui seront également remises au "
-"statut non-soumise"
+"statut soumise"
 
 msgid "This activity is not complete"
 msgstr "Cette activité est incomplète"
@@ -2703,7 +2705,7 @@ msgid "This activity will be refused"
 msgstr "Cette activité sera refusée"
 
 msgid "This activity will be restored"
-msgstr "Cette activité sera remise au statut non-soumise"
+msgstr "Cette activité sera remise au statut soumise"
 
 msgid ""
 "This adds a \"Complementary training\" tab on admissions concerning this CDD."

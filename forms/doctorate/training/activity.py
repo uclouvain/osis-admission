@@ -627,6 +627,7 @@ class UclCourseForm(ActivityFormMixin, forms.ModelForm):
     template_name = "admission/doctorate/forms/training/ucl_course.html"
     academic_year = AcademicYearField(to_field_name='year', widget=autocomplete.ListSelect2(), future_only=True)
     learning_unit_year = forms.CharField(
+        label=_("Learning unit"),
         widget=autocomplete.ListSelect2(
             url='admission:autocomplete:learning_unit_years',
             attrs={

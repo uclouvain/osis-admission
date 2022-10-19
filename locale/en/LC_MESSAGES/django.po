@@ -347,6 +347,9 @@ msgstr ""
 msgid "Are you sure you want to restore \"%(object)s\"?"
 msgstr ""
 
+msgid "Assent from reference promoter"
+msgstr ""
+
 msgid "Assimilation 1 situation types"
 msgstr ""
 
@@ -676,9 +679,6 @@ msgstr ""
 msgid "Comment from CDD manager"
 msgstr ""
 
-msgid "Comment from reference promoter"
-msgstr ""
-
 msgid "Comments"
 msgstr ""
 
@@ -888,6 +888,9 @@ msgid "Detailed curriculum vitae"
 msgstr ""
 
 msgid "Diploma"
+msgstr ""
+
+msgid "Dissent from reference promoter"
 msgstr ""
 
 msgid "Do not reorder values, and keep the same count"
@@ -2429,7 +2432,7 @@ msgstr ""
 msgid "There is no request for a new deadline."
 msgstr ""
 
-msgid "Thesis defence"
+msgid "Thesis defences"
 msgstr ""
 
 msgid "Thesis domain"

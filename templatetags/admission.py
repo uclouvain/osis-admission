@@ -492,17 +492,20 @@ def training_categories(activities):
         _("VAE"): [0, 0],
         _("Scientific residencies"): [0, 0],
         _("Confirmation paper"): [0, 0],
-        _("Thesis defence"): [0, 0],
+        _("Thesis defences"): [0, 0],
     }
     for activity in activities:
-        index = int(activity.status == StatutActivite.ACCEPTEE.name)
+        # Increment global counts
         if activity.status != StatutActivite.REFUSEE.name:
             added += activity.ects
-        if activity.status not in [StatutActivite.SOUMISE.name, StatutActivite.ACCEPTEE.name]:
-            continue
         if activity.status == StatutActivite.ACCEPTEE.name:
             validated += activity.ects
-        elif (
+        if activity.status not in [StatutActivite.SOUMISE.name, StatutActivite.ACCEPTEE.name]:
+            continue
+
+        # Increment category counts
+        index = int(activity.status == StatutActivite.ACCEPTEE.name)
+        if (
             activity.category == CategorieActivite.CONFERENCE.name
             or activity.category == CategorieActivite.SEMINAR.name
         ):
@@ -525,7 +528,7 @@ def training_categories(activities):
             categories[_("Scientific residencies")][index] += activity.ects
         elif activity.category == CategorieActivite.VAE.name:
             categories[_("VAE")][index] += activity.ects
-        elif activity.category == CategorieActivite.COURSE.name:
+        elif activity.category in [CategorieActivite.COURSE.name, CategorieActivite.UCL_COURSE.name]:
             categories[_("Courses and training")][index] += activity.ects
         elif (
             activity.category == CategorieActivite.PAPER.name
@@ -533,10 +536,11 @@ def training_categories(activities):
         ):
             categories[_("Confirmation paper")][index] += activity.ects
         elif activity.category == CategorieActivite.PAPER.name:
-            categories[_("Thesis defence")][index] += activity.ects
-    if not any(cat_added + cat_validated for cat_added, cat_validated in categories.values()):
+            categories[_("Thesis defences")][index] += activity.ects
+    if not added:
         return {}
     return {
+        'display_table': any(cat_added + cat_validated for cat_added, cat_validated in categories.values()),
         'categories': categories,
         'added': added,
         'validated': validated,

@@ -72,7 +72,8 @@ class Activite(interface.RootEntity):
             self.statut = StatutActivite.NON_SOUMISE
         else:
             self.statut = StatutActivite.REFUSEE
-        self.commentaire_gestionnaire = remarque
+        if self.categorie_parente != CategorieActivite.SEMINAR:
+            self.commentaire_gestionnaire = remarque
 
     def donner_avis_promoteur_reference(self, approbation, commentaire):
         self.avis_promoteur_reference = approbation
