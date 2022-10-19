@@ -102,8 +102,16 @@ class DoctorateAdmissionListApiTestCase(CheckActionLinksMixin, APITestCase):
         cls.general_education_admission = GeneralEducationAdmissionFactory(
             candidate=cls.admission.candidate,
         )
+        cls.general_campus_name = (
+            cls.general_education_admission.training.educationgroupversion_set.first()
+            .root_group.main_teaching_campus.name
+        )
         cls.continuing_education_admission = ContinuingEducationAdmissionFactory(
             candidate=cls.admission.candidate,
+        )
+        cls.continuing_campus_name = (
+            cls.continuing_education_admission.training.educationgroupversion_set.first()
+            .root_group.main_teaching_campus.name
         )
         # Users
         cls.candidate = cls.admission.candidate
@@ -158,7 +166,7 @@ class DoctorateAdmissionListApiTestCase(CheckActionLinksMixin, APITestCase):
                 'sigle': self.general_education_admission.training.acronym,
                 'annee': self.general_education_admission.training.academic_year.year,
                 'intitule': self.general_education_admission.training.title,
-                'campus': self.general_education_admission.training.enrollment_campus.name,
+                'campus': self.general_campus_name,
             },
         )
 
@@ -199,7 +207,7 @@ class DoctorateAdmissionListApiTestCase(CheckActionLinksMixin, APITestCase):
                 'sigle': self.continuing_education_admission.training.acronym,
                 'annee': self.continuing_education_admission.training.academic_year.year,
                 'intitule': self.continuing_education_admission.training.title,
-                'campus': self.continuing_education_admission.training.enrollment_campus.name,
+                'campus': self.continuing_campus_name,
             },
         )
 

@@ -43,8 +43,7 @@ from base.tests.factories.campus import CampusFactory
 from base.tests.factories.education_group_year import EducationGroupYearFactory
 from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.user import UserFactory
-from education_group.tests.factories.group_year import GroupYearFactory
-from program_management.models.education_group_version import EducationGroupVersion
+from program_management.tests.factories.education_group_version import EducationGroupVersionFactory
 
 
 @override_settings(CACHES=TESTING_CACHE_SETTING)
@@ -123,32 +122,40 @@ class DoctorateAutocompleteTestCase(TrainingDateMockTestCase):
             education_group_type__name=TrainingType.PHD.name,
             management_entity=cls.management_entity,
         )
-        group_year = GroupYearFactory(main_teaching_campus=cls.first_campus)
-        EducationGroupVersion.objects.create(root_group_id=group_year.pk, offer=cls.last_year_doctorate)
+        EducationGroupVersionFactory(
+            root_group__main_teaching_campus=cls.first_campus,
+            offer=cls.last_year_doctorate,
+        )
 
         cls.current_year_first_doctorate = EducationGroupYearFactory(
             academic_year=cls.current_year,
             education_group_type__name=TrainingType.PHD.name,
             management_entity=cls.management_entity,
         )
-        group_year = GroupYearFactory(main_teaching_campus=cls.second_campus)
-        EducationGroupVersion.objects.create(root_group_id=group_year.pk, offer=cls.current_year_first_doctorate)
+        EducationGroupVersionFactory(
+            root_group__main_teaching_campus=cls.second_campus,
+            offer=cls.current_year_first_doctorate,
+        )
 
         cls.current_year_second_doctorate = EducationGroupYearFactory(
             academic_year=cls.current_year,
             education_group_type__name=TrainingType.PHD.name,
             management_entity=cls.management_entity,
         )
-        group_year = GroupYearFactory(main_teaching_campus=cls.first_campus)
-        EducationGroupVersion.objects.create(root_group_id=group_year.pk, offer=cls.current_year_second_doctorate)
+        EducationGroupVersionFactory(
+            root_group__main_teaching_campus=cls.first_campus,
+            offer=cls.current_year_second_doctorate,
+        )
 
         cls.next_year_doctorate = EducationGroupYearFactory(
             academic_year=cls.next_year,
             education_group_type__name=TrainingType.PHD.name,
             management_entity=cls.management_entity,
         )
-        group_year = GroupYearFactory(main_teaching_campus=cls.first_campus)
-        EducationGroupVersion.objects.create(root_group_id=group_year.pk, offer=cls.next_year_doctorate)
+        EducationGroupVersionFactory(
+            root_group__main_teaching_campus=cls.first_campus,
+            offer=cls.next_year_doctorate,
+        )
 
     def test_autocomplete_sectors(self):
         self.client.force_authenticate(user=self.user)
@@ -270,40 +277,50 @@ class GeneralEducationAutocompleteTestCase(TrainingDateMockTestCase):
             education_group_type__name=TrainingType.CERTIFICATE.name,
             title='Certificat en informatique 1',
         )
-        group_year = GroupYearFactory(main_teaching_campus=cls.first_campus)
-        EducationGroupVersion.objects.create(root_group_id=group_year.pk, offer=cls.last_year_training)
+        EducationGroupVersionFactory(
+            root_group__main_teaching_campus=cls.first_campus,
+            offer=cls.last_year_training,
+        )
 
         cls.current_year_computer_certificate = EducationGroupYearFactory(
             academic_year=cls.current_year,
             education_group_type__name=TrainingType.CERTIFICATE.name,
             title='Certificat en informatique 1',
         )
-        group_year = GroupYearFactory(main_teaching_campus=cls.first_campus)
-        EducationGroupVersion.objects.create(root_group_id=group_year.pk, offer=cls.current_year_computer_certificate)
+        EducationGroupVersionFactory(
+            root_group__main_teaching_campus=cls.first_campus,
+            offer=cls.current_year_computer_certificate,
+        )
 
         cls.current_year_biologist_certificate = EducationGroupYearFactory(
             academic_year=cls.current_year,
             education_group_type__name=TrainingType.CERTIFICATE.name,
             title='Certificat en biologie 1',
         )
-        group_year = GroupYearFactory(main_teaching_campus=cls.first_campus)
-        EducationGroupVersion.objects.create(root_group_id=group_year.pk, offer=cls.current_year_biologist_certificate)
+        EducationGroupVersionFactory(
+            root_group__main_teaching_campus=cls.first_campus,
+            offer=cls.current_year_biologist_certificate,
+        )
 
         cls.current_year_computer_master = EducationGroupYearFactory(
             academic_year=cls.current_year,
             education_group_type__name=TrainingType.MASTER_MA_120.name,
             title='Master en informatique 1',
         )
-        group_year = GroupYearFactory(main_teaching_campus=cls.second_campus)
-        EducationGroupVersion.objects.create(root_group_id=group_year.pk, offer=cls.current_year_computer_master)
+        EducationGroupVersionFactory(
+            root_group__main_teaching_campus=cls.second_campus,
+            offer=cls.current_year_computer_master,
+        )
 
         cls.next_year_training = EducationGroupYearFactory(
             academic_year=cls.next_year,
             education_group_type__name=TrainingType.CERTIFICATE.name,
             title='Certificat en informatique 1',
         )
-        group_year = GroupYearFactory(main_teaching_campus=cls.first_campus)
-        EducationGroupVersion.objects.create(root_group_id=group_year.pk, offer=cls.next_year_training)
+        EducationGroupVersionFactory(
+            root_group__main_teaching_campus=cls.first_campus,
+            offer=cls.next_year_training,
+        )
 
     def test_autocomplete_general_education_with_name(self):
         self.client.force_authenticate(user=self.user)
@@ -433,17 +450,18 @@ class ContinuingEducationAutocompleteTestCase(TrainingDateMockTestCase):
             education_group_type__name=TrainingType.CERTIFICATE_OF_SUCCESS.name,
             title='Certificat de succès en informatique 1',
         )
-        group_year = GroupYearFactory(main_teaching_campus=cls.first_campus)
-        EducationGroupVersion.objects.create(root_group_id=group_year.pk, offer=cls.last_year_training)
+        EducationGroupVersionFactory(
+            root_group__main_teaching_campus=cls.first_campus,
+            offer=cls.last_year_training,
+        )
 
         cls.current_year_computer_certificate_of_success = EducationGroupYearFactory(
             academic_year=cls.current_year,
             education_group_type__name=TrainingType.CERTIFICATE_OF_SUCCESS.name,
             title='Certificat de succès en informatique 1',
         )
-        group_year = GroupYearFactory(main_teaching_campus=cls.second_campus)
-        EducationGroupVersion.objects.create(
-            root_group_id=group_year.pk,
+        EducationGroupVersionFactory(
+            root_group__main_teaching_campus=cls.second_campus,
             offer=cls.current_year_computer_certificate_of_success,
         )
 
@@ -453,9 +471,8 @@ class ContinuingEducationAutocompleteTestCase(TrainingDateMockTestCase):
             title='Certificat de succès en biologie 1',
             enrollment_campus=cls.current_year_computer_certificate_of_success.enrollment_campus,
         )
-        group_year = GroupYearFactory(main_teaching_campus=cls.second_campus)
-        EducationGroupVersion.objects.create(
-            root_group_id=group_year.pk,
+        EducationGroupVersionFactory(
+            root_group__main_teaching_campus=cls.second_campus,
             offer=cls.current_year_biologist_certificate_of_success,
         )
 
@@ -464,9 +481,8 @@ class ContinuingEducationAutocompleteTestCase(TrainingDateMockTestCase):
             education_group_type__name=TrainingType.CERTIFICATE_OF_PARTICIPATION.name,
             title='Certificat de participation en informatique 1',
         )
-        group_year = GroupYearFactory(main_teaching_campus=cls.first_campus)
-        EducationGroupVersion.objects.create(
-            root_group_id=group_year.pk,
+        EducationGroupVersionFactory(
+            root_group__main_teaching_campus=cls.first_campus,
             offer=cls.current_year_computer_certificate_of_participation,
         )
 
@@ -475,9 +491,8 @@ class ContinuingEducationAutocompleteTestCase(TrainingDateMockTestCase):
             education_group_type__name=TrainingType.CERTIFICATE_OF_SUCCESS.name,
             title='Certificat de succès en informatique 1',
         )
-        group_year = GroupYearFactory(main_teaching_campus=cls.second_campus)
-        EducationGroupVersion.objects.create(
-            root_group_id=group_year.pk,
+        EducationGroupVersionFactory(
+            root_group__main_teaching_campus=cls.second_campus,
             offer=cls.next_year_training,
         )
 

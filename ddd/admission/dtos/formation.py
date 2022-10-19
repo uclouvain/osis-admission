@@ -34,17 +34,3 @@ class FormationDTO(interface.DTO):
     annee: int
     intitule: str
     campus: str
-
-
-@attr.dataclass(frozen=True, slots=True)
-class DateDTO(interface.DTO):
-    jour: int
-    mois: int
-    annee: int
-
-
-@attr.dataclass(frozen=True, slots=True)
-class PeriodeDTO(interface.DTO):
-    date_debut: DateDTO
-    date_fin: DateDTO
-    annee_visee: int
