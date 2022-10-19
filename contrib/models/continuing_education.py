@@ -29,7 +29,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils.translation import gettext_lazy as _
 
-from admission.contrib.models.base import BaseAdmission
+from admission.contrib.models.base import BaseAdmission, BaseAdmissionQuerySet
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutProposition
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
@@ -61,13 +61,16 @@ class ContinuingEducationAdmission(BaseAdmission):
         pass
 
 
-class ContinuingEducationAdmissionManager(models.Manager):
+class ContinuingEducationAdmissionQuerySet(BaseAdmissionQuerySet):
+    training_field_name = 'training_id'
+
+
+class ContinuingEducationAdmissionManager(models.Manager.from_queryset(ContinuingEducationAdmissionQuerySet)):
     def get_queryset(self):
-        return ContinuingEducationAdmission.objects.all().select_related(
+        return super().get_queryset().select_related(
             "candidate__country_of_citizenship",
             "training__academic_year",
-            "training__enrollment_campus",
-        )
+        ).annotate_campus()
 
 
 class ContinuingEducationAdmissionProxy(ContinuingEducationAdmission):
