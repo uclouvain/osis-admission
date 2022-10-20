@@ -430,4 +430,7 @@ class DoctoralTrainingAssentSerializer(serializers.Serializer):
 class DoctoralTrainingConfigSerializer(serializers.ModelSerializer):
     class Meta:
         model = CddConfiguration
-        exclude = ['id', 'cdd', 'is_complementary_training_enabled']
+        exclude = ['id', 'cdd']
+        extra_kwargs = {
+            'is_complementary_training_enabled': {'help_text': ''},
+        }

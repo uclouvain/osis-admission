@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Admission API
-  version: 1.0.41
+  version: 1.0.42
   description: This API delivers data for the Admission project.
   contact:
     name: UCLouvain - OSIS
@@ -4450,6 +4450,8 @@ components:
     DoctoralTrainingConfig:
       type: object
       properties:
+        is_complementary_training_enabled:
+          type: boolean
         category_labels:
           type: object
         conference_types:
