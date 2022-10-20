@@ -34,7 +34,9 @@ from django.utils import translation
 from django.utils.translation import gettext_lazy as _
 from rest_framework import status
 
+from admission.contrib.models.cdd_config import CddConfiguration
 from admission.contrib.models.doctoral_training import Activity
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixTypeAdmission
 from admission.ddd.parcours_doctoral.formation.domain.model.enums import (
     CategorieActivite,
     ChoixComiteSelection,
@@ -42,6 +44,7 @@ from admission.ddd.parcours_doctoral.formation.domain.model.enums import (
     StatutActivite,
 )
 from admission.forms.doctorate.training.activity import INSTITUTION_UCL
+from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.activity import *
 from admission.tests.factories.roles import CddManagerFactory
 from admission.tests.factories.supervision import PromoterFactory
@@ -53,6 +56,11 @@ from osis_notification.models import WebNotification
 class DoctorateTrainingActivityViewTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
+        # A doctorate without doctoral and complementary training
+        cls.restricted_doctorate = DoctorateAdmissionFactory(type=ChoixTypeAdmission.PRE_ADMISSION.name, admitted=True)
+        CddConfiguration.objects.create(cdd=cls.restricted_doctorate.doctorate.management_entity)
+
+        # A normal doctorate
         cls.reference_promoter = PromoterFactory(is_reference_promoter=True)
         cls.conference = ConferenceFactory(
             ects=10,
@@ -62,7 +70,15 @@ class DoctorateTrainingActivityViewTestCase(TestCase):
         cls.doctorate = cls.conference.doctorate
         cls.service = ServiceFactory(doctorate=cls.doctorate)
         cls.ucl_course = UclCourseFactory(doctorate=cls.doctorate, learning_unit_year__academic_year__current=True)
+
+        # A manager that can manage both doctorates
         cls.manager = CddManagerFactory(entity=cls.doctorate.doctorate.management_entity)
+        CddConfiguration.objects.create(
+            cdd=cls.doctorate.doctorate.management_entity,
+            is_complementary_training_enabled=True,
+        )
+        CddManagerFactory(entity=cls.restricted_doctorate.doctorate.management_entity, person=cls.manager.person)
+
         cls.url = resolve_url(cls.namespace, uuid=cls.doctorate.uuid)
         cls.default_url_args = dict(uuid=cls.doctorate.uuid, activity_id=cls.conference.uuid)
 
@@ -136,6 +152,28 @@ class DoctorateTrainingActivityViewTestCase(TestCase):
         }
         response = self.client.post(add_url, data)
         self.assertFormError(response, 'form', 'start_date', _("The start date can't be later than the end date"))
+
+    def test_training_restricted(self):
+        url = resolve_url(f'admission:doctorate:doctoral-training', uuid=self.restricted_doctorate.uuid)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        url = resolve_url(f'admission:doctorate:complementary-training', uuid=self.restricted_doctorate.uuid)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        url = resolve_url(f'admission:doctorate:course-enrollment', uuid=self.restricted_doctorate.uuid)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        url = resolve_url(
+            f'admission:doctorate:course-enrollment:add',
+            uuid=self.restricted_doctorate.uuid,
+            category="ucl_course",
+        )
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.context['form'].fields['context'].widget.choices), 1)
 
     def test_complementary_training_course(self):
         url = resolve_url(

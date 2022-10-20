@@ -32,8 +32,10 @@ from dal import autocomplete
 from django import forms
 from django.utils.translation import get_language, gettext_lazy as _, pgettext_lazy
 
+from admission.contrib.models import DoctorateAdmission
 from admission.contrib.models.cdd_config import CddConfiguration
 from admission.contrib.models.doctoral_training import Activity
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixTypeAdmission
 from admission.ddd.parcours_doctoral.formation.domain.model.enums import (
     CategorieActivite,
     ChoixComiteSelection,
@@ -639,9 +641,18 @@ class UclCourseForm(ActivityFormMixin, forms.ModelForm):
         ),
     )
 
-    def __init__(self, admission, *args, **kwargs):
+    def __init__(self, admission: DoctorateAdmission, *args, **kwargs):
         super().__init__(admission, *args, **kwargs)
         self.fields['learning_unit_year'].required = True
+        # Filter out disabled contexts
+        choices = dict(self.fields['context'].widget.choices)
+        if admission.type == ChoixTypeAdmission.PRE_ADMISSION.name:
+            del choices[ContexteFormation.DOCTORAL_TRAINING.name]
+        if not admission.doctorate.management_entity.admission_config.is_complementary_training_enabled:
+            del choices[ContexteFormation.COMPLEMENTARY_TRAINING.name]
+        self.fields['context'].widget.choices = list(choices.items())
+
+        # Initialize values
         if self.initial.get('learning_unit_year'):
             learning_unit_year = LearningUnitYear.objects.get(pk=self.initial['learning_unit_year'])
             self.initial['academic_year'] = learning_unit_year.academic_year.year

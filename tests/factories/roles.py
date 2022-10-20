@@ -59,7 +59,6 @@ class CaMemberRoleFactory(BaseFactory):
 class CddManagerFactory(BaseFactory):
     class Meta:
         model = CddManager
-        django_get_or_create = ('person',)
 
     entity = factory.SubFactory(
         'base.tests.factories.entity.EntityWithVersionFactory',

@@ -25,7 +25,7 @@
 # ##############################################################################
 from typing import Optional
 
-from django.db.models import Q, Sum
+from django.db.models import Q
 from django.forms import Form
 from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, resolve_url
@@ -123,7 +123,6 @@ class TrainingActivityFormMixin(LoadDossierViewMixin):
 
     template_name = "admission/doctorate/forms/training.html"
     model = Activity
-    permission_required = "admission.change_activity"
     form_class_mapping = {
         "doctoral-training": {
             CategorieActivite.CONFERENCE: ConferenceForm,
@@ -151,6 +150,9 @@ class TrainingActivityFormMixin(LoadDossierViewMixin):
     @property
     def namespace(self) -> str:
         return self.request.resolver_match.namespaces[2]
+
+    def get_permission_required(self):
+        return ["admission.change_activity", f"admission.view_{self.namespace.replace('-', '_')}"]
 
     @property
     def category(self) -> str:
@@ -217,11 +219,16 @@ class TrainingActivityEditView(TrainingActivityFormMixin, generic.UpdateView):
 
 class TrainingActivityDeleteView(LoadDossierViewMixin, generic.DeleteView):
     model = Activity
-    permission_required = "admission.delete_activity"
     slug_field = 'uuid'
     pk_url_kwarg = "NOT_TO_BE_USED"
     slug_url_kwarg = 'activity_id'
     template_name = "admission/doctorate/forms/training/activity_confirm_delete.html"
+
+    def get_permission_required(self):
+        return [
+            "admission.delete_activity",
+            f"admission.view_{self.request.resolver_match.namespaces[2].replace('-', '_')}",
+        ]
 
     def delete(self, request, *args, **kwargs):
         Activity.objects.filter(
@@ -246,6 +253,12 @@ class TrainingActivityActionFormMixin(LoadDossierViewMixin, SingleObjectMixin, g
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
         return super().post(request, *args, **kwargs)
+
+    def get_permission_required(self):
+        return [
+            self.permission_required,
+            f"admission.view_{self.request.resolver_match.namespaces[2].replace('-', '_')}",
+        ]
 
     @property
     def activity(self) -> Activity:
