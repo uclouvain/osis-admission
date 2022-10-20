@@ -185,10 +185,10 @@ def sortable_header_div(context, order_field_name, order_field_label):
 
 
 # Manage the tabs
-@dataclass(frozen=True)
+@dataclass
 class Tab:
     name: str
-    label: str
+    label: str = ''
     icon: str = ''
     badge: str = ''
 
@@ -199,9 +199,6 @@ class Tab:
     def __eq__(self, other):
         return self.name == other.name
 
-
-MESSAGE_TAB = Tab('messages', _('Send a mail'), 'envelope')
-INTERNAL_NOTE_TAB = Tab('internal-note', _('Internal notes'), 'note-sticky')
 
 TAB_TREES = {
     CONTEXT_ADMISSION: {
@@ -223,10 +220,10 @@ TAB_TREES = {
         # TODO Specificities
         # TODO Completion
         Tab('management', pgettext('tab', 'Management'), 'gear'): [
-            Tab('history', _('Status changes')),
             Tab('history-all', _('All history')),
+            Tab('history', _('Status changes')),
             Tab('send-mail', _('Send a mail')),
-            INTERNAL_NOTE_TAB,
+            Tab('internal-note', _('Internal notes'), 'note-sticky'),
         ],
         # TODO Documents
     },
@@ -256,10 +253,10 @@ TAB_TREES = {
             # Tab('jury', _('Jury')),
         ],
         Tab('management', pgettext('tab', 'Management'), 'gear'): [
-            Tab('history', _('Status changes')),
             Tab('history-all', _('All history')),
+            Tab('history', _('Status changes')),
             Tab('send-mail', _('Send a mail')),
-            INTERNAL_NOTE_TAB,
+            Tab('internal-note', _('Internal notes'), 'note-sticky'),
         ],
         # TODO Documents
     },
@@ -283,21 +280,14 @@ def get_valid_tab_tree(context, permission_obj, tab_tree):
     for (parent_tab, sub_tabs) in tab_tree.items():
         # Get the accessible sub tabs depending on the user permissions
         valid_sub_tabs = [tab for tab in sub_tabs if can_read_tab(context, tab.name, permission_obj)]
+
+        # Add dynamic badge on parent for internal notes
+        if Tab('internal-note') in valid_sub_tabs:
+            parent_tab.badge = permission_obj.internalnote_set.count()
+
         # Only add the parent tab if at least one sub tab is allowed
         if len(valid_sub_tabs) > 0:
             valid_tab_tree[parent_tab] = valid_sub_tabs
-
-    # Add dynamic badges
-    sub_tabs_internal_notes = valid_tab_tree.pop(INTERNAL_NOTE_TAB, None)
-    if sub_tabs_internal_notes:
-        valid_tab_tree[
-            Tab(
-                name=INTERNAL_NOTE_TAB.name,
-                label=INTERNAL_NOTE_TAB.label,
-                icon=INTERNAL_NOTE_TAB.icon,
-                badge=permission_obj.internalnote_set.count(),
-            )
-        ] = sub_tabs_internal_notes
 
     return valid_tab_tree
 
@@ -328,11 +318,6 @@ def doctorate_tabs_bar(context):
     tab_context = default_tab_context(context)
     admission = get_cached_admission_perm_obj(tab_context['admission_uuid'])
     current_tab_tree = get_valid_tab_tree(context, admission, TAB_TREES[get_current_context(admission)]).copy()
-
-    # Prevent showing message tab when candidate is not enrolled
-    if admission.post_enrolment_status == ChoixStatutDoctorat.ADMISSION_IN_PROGRESS.name:
-        current_tab_tree.pop(MESSAGE_TAB, None)
-
     tab_context['tab_tree'] = current_tab_tree
     return tab_context
 
