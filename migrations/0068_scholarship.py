@@ -7,7 +7,7 @@ import uuid
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('admission', '0066_training_contexts'),
+        ('admission', '0067_training_mail_templates'),
     ]
 
     operations = [
