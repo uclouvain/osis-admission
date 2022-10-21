@@ -77,8 +77,7 @@ person_tabs = [
     path('coordonnees', views.CoordonneesViewSet),
     path('secondary_studies', views.SecondaryStudiesViewSet),
     path('languages_knowledge', views.LanguagesKnowledgeViewSet),
-    path('curriculum/file', views.CurriculumFileView),
-    path('curriculum/', views.CurriculumView),
+    path('curriculum', views.CurriculumView),
     _path('', include(doctorate_view_set_router.urls)),
 ]
 
@@ -98,6 +97,7 @@ urlpatterns = [
     path('propositions/doctorate/<uuid:uuid>/cotutelle', views.CotutelleAPIView),
     path('propositions/doctorate/<uuid:uuid>/accounting', views.AccountingView),
     path('propositions/doctorate/<uuid:uuid>/training_choice', views.DoctorateUpdateAdmissionTypeAPIView),
+    path('propositions/doctorate/<uuid:uuid>/<str:tab>/specific-question', views.DoctorateSpecificQuestionListView),
     # Supervision
     path('propositions/doctorate/<uuid:uuid>/supervision', views.SupervisionAPIView),
     path(
@@ -129,8 +129,10 @@ urlpatterns = [
     path('propositions/general-education/<uuid:uuid>/person', views.GeneralPersonView),
     path('propositions/general-education/<uuid:uuid>/coordonnees', views.GeneralCoordonneesView),
     path('propositions/general-education/<uuid:uuid>/secondary-studies', views.GeneralSecondaryStudiesView),
-    path('propositions/general-education/<uuid:uuid>/curriculum/file', views.GeneralCurriculumFileView),
-    path('propositions/general-education/<uuid:uuid>/curriculum/', views.GeneralCurriculumView),
+    path('propositions/general-education/<uuid:uuid>/curriculum', views.GeneralCurriculumView),
+    path(
+        'propositions/general-education/<uuid:uuid>/<str:tab>/specific-question', views.GeneralSpecificQuestionListView
+    ),
     _path('propositions/general-education/<uuid:uuid>/', include(general_education_view_set_router.urls)),
     path('propositions/general-education/<uuid:uuid>/submit', views.SubmitGeneralEducationPropositionView),
     # > Continuing education
@@ -140,8 +142,11 @@ urlpatterns = [
     path('propositions/continuing-education/<uuid:uuid>/person', views.ContinuingPersonView),
     path('propositions/continuing-education/<uuid:uuid>/coordonnees', views.ContinuingCoordonneesView),
     path('propositions/continuing-education/<uuid:uuid>/secondary-studies', views.ContinuingSecondaryStudiesView),
-    path('propositions/continuing-education/<uuid:uuid>/curriculum/file', views.ContinuingCurriculumFileView),
-    path('propositions/continuing-education/<uuid:uuid>/curriculum/', views.ContinuingCurriculumView),
+    path('propositions/continuing-education/<uuid:uuid>/curriculum', views.ContinuingCurriculumView),
+    path(
+        'propositions/continuing-education/<uuid:uuid>/<str:tab>/specific-question',
+        views.ContinuingSpecificQuestionListView,
+    ),
     _path('propositions/continuing-education/<uuid:uuid>/', include(continuing_education_view_set_router.urls)),
     path('propositions/continuing-education/<uuid:uuid>/submit', views.SubmitContinuingEducationPropositionView),
     # Autocompletes

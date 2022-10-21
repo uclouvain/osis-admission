@@ -27,6 +27,7 @@ from functools import partial
 
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
+from django.core.serializers.json import DjangoJSONEncoder
 from django.urls.exceptions import NoReverseMatch
 from django.urls import reverse, resolve
 from django.utils.translation import get_language
@@ -158,6 +159,13 @@ AdmissionUuidField = partial(
 )
 
 
+AnswerToSpecificQuestionField = partial(
+    serializers.JSONField,
+    encoder=DjangoJSONEncoder,
+    default=dict,
+)
+
+
 # Available actions
 ACTION_LINKS = {
     # List
@@ -220,12 +228,12 @@ DOCTORATE_ACTION_LINKS = {
     },
     # Curriculum
     'retrieve_curriculum': {
-        'path_name': 'admission_api_v1:curriculum_file',
+        'path_name': 'admission_api_v1:curriculum',
         'method': 'GET',
         'params': ['uuid'],
     },
     'update_curriculum': {
-        'path_name': 'admission_api_v1:curriculum_file',
+        'path_name': 'admission_api_v1:curriculum',
         'method': 'PUT',
         'params': ['uuid'],
     },
@@ -429,12 +437,12 @@ GENERAL_EDUCATION_ACTION_LINKS = {
         'params': ['uuid'],
     },
     'retrieve_curriculum': {
-        'path_name': 'admission_api_v1:general_curriculum_file',
+        'path_name': 'admission_api_v1:general_curriculum',
         'method': 'GET',
         'params': ['uuid'],
     },
     'update_curriculum': {
-        'path_name': 'admission_api_v1:general_curriculum_file',
+        'path_name': 'admission_api_v1:general_curriculum',
         'method': 'PUT',
         'params': ['uuid'],
     },
@@ -497,12 +505,12 @@ CONTINUING_EDUCATION_ACTION_LINKS = {
         'params': ['uuid'],
     },
     'retrieve_curriculum': {
-        'path_name': 'admission_api_v1:continuing_curriculum_file',
+        'path_name': 'admission_api_v1:continuing_curriculum',
         'method': 'GET',
         'params': ['uuid'],
     },
     'update_curriculum': {
-        'path_name': 'admission_api_v1:continuing_curriculum_file',
+        'path_name': 'admission_api_v1:continuing_curriculum',
         'method': 'PUT',
         'params': ['uuid'],
     },

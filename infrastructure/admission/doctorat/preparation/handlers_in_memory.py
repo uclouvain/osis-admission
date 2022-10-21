@@ -38,6 +38,7 @@ from .domain.service.in_memory.historique import HistoriqueInMemory
 from .domain.service.in_memory.membre_CA import MembreCAInMemoryTranslator
 from .domain.service.in_memory.notification import NotificationInMemory
 from .domain.service.in_memory.promoteur import PromoteurInMemoryTranslator
+from .domain.service.in_memory.question_specifique import QuestionSpecifiqueInMemoryTranslator
 from .repository.in_memory.groupe_de_supervision import GroupeDeSupervisionInMemoryRepository
 from .repository.in_memory.proposition import PropositionInMemoryRepository
 from ..validation.repository.in_memory.demande import DemandeInMemoryRepository
@@ -105,12 +106,14 @@ COMMAND_HANDLERS = {
         profil_candidat_translator=_profil_candidat_translator,
         academic_year_repository=_academic_year_repository,
         titres_acces=_titres_acces,
+        questions_specifiques_translator=QuestionSpecifiqueInMemoryTranslator(),
     ),
     VerifierProjetCommand: lambda msg_bus, cmd: verifier_projet(
         cmd,
         proposition_repository=_proposition_repository,
         groupe_supervision_repository=_groupe_supervision_repository,
         promoteur_translator=_promoteur_translator,
+        questions_specifiques_translator=QuestionSpecifiqueInMemoryTranslator(),
     ),
     SupprimerPromoteurCommand: lambda msg_bus, cmd: supprimer_promoteur(
         cmd,
@@ -155,6 +158,7 @@ COMMAND_HANDLERS = {
         historique=_historique,
         notification=_notification,
         titres_acces=_titres_acces,
+        questions_specifiques_translator=QuestionSpecifiqueInMemoryTranslator(),
     ),
     DefinirCotutelleCommand: lambda msg_bus, cmd: definir_cotutelle(
         cmd,

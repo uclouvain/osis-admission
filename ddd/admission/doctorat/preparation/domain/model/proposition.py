@@ -25,7 +25,7 @@
 ##############################################################################
 import datetime
 import uuid
-from typing import List, Optional, Union
+from typing import List, Optional, Union, Dict
 
 import attr
 
@@ -103,6 +103,7 @@ class Proposition(interface.RootEntity):
     fiche_archive_signatures_envoyees: List[str] = attr.Factory(list)
     comptabilite: 'Comptabilite' = comptabilite_non_remplie
     bourse_erasmus_mundus_id: Optional[BourseIdentity] = None
+    reponses_questions_specifiques: Dict = attr.Factory(dict)
 
     @property
     def sigle_formation(self):
@@ -434,6 +435,7 @@ class Proposition(interface.RootEntity):
         type_admission: str,
         justification: Optional[str],
         bourse_erasmus_mundus: Optional[BourseIdentity],
+        reponses_questions_specifiques: Dict,
     ):
         ModifierTypeAdmissionValidatorList(
             type_admission=type_admission,
@@ -443,3 +445,4 @@ class Proposition(interface.RootEntity):
         self.type_admission = ChoixTypeAdmission[type_admission]
         self.justification = justification or ''
         self.bourse_erasmus_mundus_id = bourse_erasmus_mundus
+        self.reponses_questions_specifiques = reponses_questions_specifiques

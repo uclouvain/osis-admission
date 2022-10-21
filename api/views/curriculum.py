@@ -36,12 +36,14 @@ from rest_framework.viewsets import ModelViewSet, GenericViewSet
 
 from admission.api import serializers
 from admission.api.permissions import IsSelfPersonTabOrTabPermission
+from admission.api.schema import ResponseSpecificSchema
 from admission.api.serializers import ProfessionalExperienceSerializer
 from admission.api.serializers.curriculum import EducationalExperienceSerializer
 from admission.api.views.mixins import (
     PersonRelatedMixin,
     GeneralEducationPersonRelatedMixin,
     ContinuingEducationPersonRelatedMixin,
+    PersonRelatedSchema,
 )
 from osis_profile.models import ProfessionalExperience, EducationalExperience
 from osis_role.contrib.views import APIPermissionRequiredMixin
@@ -51,13 +53,10 @@ __all__ = [
     "ExperienceViewSet",
     "ProfessionalExperienceViewSet",
     "EducationalExperienceViewSet",
-    "CurriculumFileView",
     "GeneralCurriculumView",
-    "GeneralCurriculumFileView",
     "GeneralEducationalExperienceViewSet",
     "GeneralProfessionalExperienceViewSet",
     "ContinuingCurriculumView",
-    "ContinuingCurriculumFileView",
     "ContinuingEducationalExperienceViewSet",
     "ContinuingProfessionalExperienceViewSet",
 ]
@@ -77,10 +76,21 @@ CONTINUING_EDUCATION_PERMISSIONS_MAPPING = {
 }
 
 
-class BaseCurriculumView(APIPermissionRequiredMixin, RetrieveAPIView):
-    serializer_class = serializers.CurriculumSerializer
+class BaseCurriculumSchema(PersonRelatedSchema, ResponseSpecificSchema):
+    pass
+
+
+class BaseCurriculumView(APIPermissionRequiredMixin, UpdateModelMixin, RetrieveAPIView):
     pagination_class = None
     filter_backends = []
+
+    serializer_mapping = {
+        'GET': serializers.CurriculumDetailsSerializer,
+        'PUT': serializers.CurriculumSerializer,
+    }
+
+    def get_serializer_class(self):
+        return self.serializer_mapping.get(self.request.method)
 
     def get(self, request, *args, **kwargs):
         """Return the experiences and the curriculum pdf of a person and the mandatory years to complete."""
@@ -92,7 +102,7 @@ class BaseCurriculumView(APIPermissionRequiredMixin, RetrieveAPIView):
             'valuated_from_admission'
         )
 
-        serializer = serializers.CurriculumSerializer(
+        serializer = serializers.CurriculumDetailsSerializer(
             instance={
                 'professional_experiences': professional_experiences,
                 'educational_experiences': educational_experiences,
@@ -105,20 +115,32 @@ class BaseCurriculumView(APIPermissionRequiredMixin, RetrieveAPIView):
 
         return Response(serializer.data)
 
+    def put(self, request, *args, **kwargs):
+        response = self.update(request, *args, **kwargs)
+        current_admission = self.get_permission_object()
+        if current_admission:
+            current_admission.specific_question_answers = request.data.get('specific_question_answers')
+            current_admission.save(update_fields=['specific_question_answers'])
+            current_admission.update_detailed_status()
+        return response
+
 
 class CurriculumView(PersonRelatedMixin, BaseCurriculumView):
     name = "curriculum"
     permission_classes = [partial(IsSelfPersonTabOrTabPermission, permission_suffix="curriculum")]
+    schema = BaseCurriculumSchema()
 
 
 class GeneralCurriculumView(GeneralEducationPersonRelatedMixin, BaseCurriculumView):
     name = "general_curriculum"
     permission_mapping = GENERAL_EDUCATION_PERMISSIONS_MAPPING
+    schema = BaseCurriculumSchema(training_type='GeneralEducation')
 
 
 class ContinuingCurriculumView(ContinuingEducationPersonRelatedMixin, BaseCurriculumView):
     name = "continuing_curriculum"
     permission_mapping = CONTINUING_EDUCATION_PERMISSIONS_MAPPING
+    schema = BaseCurriculumSchema(training_type='ContinuingEducation')
 
 
 class ExperienceViewSet(
@@ -239,30 +261,3 @@ class ContinuingEducationalExperienceViewSet(ContinuingEducationPersonRelatedMix
 
     def get_object(self):
         return self.experience
-
-
-class BaseCurriculumFileView(APIPermissionRequiredMixin, UpdateModelMixin, RetrieveAPIView):
-    pagination_class = None
-    filter_backends = []
-    serializer_class = serializers.CurriculumFileSerializer
-
-    def put(self, request, *args, **kwargs):
-        response = self.update(request, *args, **kwargs)
-        if self.get_permission_object():
-            self.get_permission_object().update_detailed_status()
-        return response
-
-
-class CurriculumFileView(PersonRelatedMixin, BaseCurriculumFileView):
-    name = "curriculum_file"
-    permission_classes = [partial(IsSelfPersonTabOrTabPermission, permission_suffix="curriculum")]
-
-
-class GeneralCurriculumFileView(GeneralEducationPersonRelatedMixin, BaseCurriculumFileView):
-    name = "general_curriculum_file"
-    permission_mapping = GENERAL_EDUCATION_PERMISSIONS_MAPPING
-
-
-class ContinuingCurriculumFileView(ContinuingEducationPersonRelatedMixin, BaseCurriculumFileView):
-    name = "continuing_curriculum_file"
-    permission_mapping = CONTINUING_EDUCATION_PERMISSIONS_MAPPING

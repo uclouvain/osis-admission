@@ -1,5 +1,6 @@
 from functools import partial
 
+from django.core.serializers.json import DjangoJSONEncoder
 from rest_framework import serializers
 
 from base.api.serializers.academic_year import RelatedAcademicYearField
@@ -85,6 +86,7 @@ class HighSchoolDiplomaSerializer(serializers.Serializer):
     belgian_diploma = BelgianHighSchoolDiplomaSerializer(required=False, allow_null=True)
     foreign_diploma = ForeignHighSchoolDiplomaSerializer(required=False, allow_null=True)
     high_school_diploma_alternative = HighSchoolDiplomaAlternativeSerializer(required=False, allow_null=True)
+    specific_question_answers = serializers.JSONField(encoder=DjangoJSONEncoder, default=dict, write_only=True)
 
     @staticmethod
     def load_diploma(instance):

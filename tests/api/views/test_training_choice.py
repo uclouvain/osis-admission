@@ -24,9 +24,11 @@
 #
 # ##############################################################################
 import uuid
+from unittest.mock import patch
 
 from django.db.models import QuerySet
 from django.shortcuts import resolve_url
+from django.test import override_settings
 from rest_framework import status
 from rest_framework.test import APITestCase
 
@@ -37,6 +39,7 @@ from admission.contrib.models import (
     DoctorateAdmission,
 )
 from admission.ddd.admission.domain.validator.exceptions import BourseNonTrouveeException
+from admission.ddd.admission.enums.question_specifique import Onglets
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutProposition
 from admission.ddd.admission.formation_continue.domain.validator import exceptions as continuing_education_exceptions
 from admission.ddd.admission.formation_generale.domain.validator import exceptions as general_education_exceptions
@@ -46,11 +49,16 @@ from admission.tests.factories.continuing_education import (
     ContinuingEducationTrainingFactory,
     ContinuingEducationAdmissionFactory,
 )
+from admission.tests.factories.form_item import (
+    TextAdmissionFormItemFactory,
+    DocumentAdmissionFormItemFactory,
+    AdmissionFormItemInstantiationFactory,
+)
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.scholarship import (
-    ErasmusMundusScholarship,
-    InternationalScholarship,
-    DoubleDegreeScholarship,
+    ErasmusMundusScholarshipFactory,
+    InternationalScholarshipFactory,
+    DoubleDegreeScholarshipFactory,
 )
 from base.tests.factories.education_group_year import Master120TrainingFactory
 
@@ -62,9 +70,9 @@ class GeneralEducationAdmissionTrainingChoiceInitializationApiTestCase(APITestCa
     def setUpTestData(cls):
         cls.candidate = PersonFactory()
         cls.training = Master120TrainingFactory()
-        cls.erasmus_mundus_scholarship = ErasmusMundusScholarship()
-        cls.international_scholarship = InternationalScholarship()
-        cls.double_degree_scholarship = DoubleDegreeScholarship()
+        cls.erasmus_mundus_scholarship = ErasmusMundusScholarshipFactory()
+        cls.international_scholarship = InternationalScholarshipFactory()
+        cls.double_degree_scholarship = DoubleDegreeScholarshipFactory()
 
         cls.create_data = {
             'sigle_formation': cls.training.acronym,
@@ -162,15 +170,18 @@ class ContinuingEducationAdmissionTrainingChoiceInitializationApiTestCase(APITes
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
 
+@override_settings(OSIS_DOCUMENT_BASE_URL='http://dummyurl/')
 class GeneralEducationAdmissionTrainingChoiceUpdateApiTestCase(APITestCase):
+    file_uuid = str(uuid.uuid4())
+
     @classmethod
     def setUpTestData(cls):
         cls.admission = GeneralEducationAdmissionFactory()
         cls.candidate = cls.admission.candidate
         cls.training = Master120TrainingFactory()
-        cls.erasmus_mundus_scholarship = ErasmusMundusScholarship()
-        cls.international_scholarship = InternationalScholarship()
-        cls.double_degree_scholarship = DoubleDegreeScholarship()
+        cls.erasmus_mundus_scholarship = ErasmusMundusScholarshipFactory()
+        cls.international_scholarship = InternationalScholarshipFactory()
+        cls.double_degree_scholarship = DoubleDegreeScholarshipFactory()
 
         cls.update_data = {
             'sigle_formation': cls.training.acronym,
@@ -179,9 +190,50 @@ class GeneralEducationAdmissionTrainingChoiceUpdateApiTestCase(APITestCase):
             'bourse_erasmus_mundus': str(cls.erasmus_mundus_scholarship.uuid),
             'bourse_internationale': str(cls.international_scholarship.uuid),
             'bourse_double_diplome': str(cls.double_degree_scholarship.uuid),
+            'reponses_questions_specifiques': {
+                'fe254203-17c7-47d6-95e4-3c5c532da551': 'My response',
+                'fe254203-17c7-47d6-95e4-3c5c532da552': [cls.file_uuid, 'token:abcdef'],
+            },
         }
 
+        AdmissionFormItemInstantiationFactory(
+            form_item=TextAdmissionFormItemFactory(
+                uuid=uuid.UUID('fe254203-17c7-47d6-95e4-3c5c532da551'),
+                internal_label='text_item',
+            ),
+            academic_year=cls.training.academic_year,
+        )
+        AdmissionFormItemInstantiationFactory(
+            form_item=DocumentAdmissionFormItemFactory(
+                uuid=uuid.UUID('fe254203-17c7-47d6-95e4-3c5c532da552'),
+                internal_label='document_item_1',
+            ),
+            academic_year=cls.training.academic_year,
+        )
+        AdmissionFormItemInstantiationFactory(
+            form_item=DocumentAdmissionFormItemFactory(
+                uuid=uuid.UUID('fe254203-17c7-47d6-95e4-3c5c532da553'),
+                active=False,
+                internal_label='document_item_2',
+            ),
+            academic_year=cls.training.academic_year,
+        )
+
         cls.url = resolve_url('admission_api_v1:general_training_choice', uuid=str(cls.admission.uuid))
+
+    def setUp(self) -> None:
+        patcher = patch('osis_document.api.utils.get_remote_token', return_value='foobar')
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+        patcher = patch('osis_document.api.utils.get_remote_metadata', return_value={'name': 'myfile'})
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+        patcher = patch('osis_document.api.utils.confirm_remote_upload')
+        patched = patcher.start()
+        patched.return_value = '550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92'
+        self.addCleanup(patcher.stop)
 
     def test_training_choice_update_using_api_candidate(self):
         self.client.force_authenticate(user=self.candidate.user)
@@ -199,6 +251,10 @@ class GeneralEducationAdmissionTrainingChoiceUpdateApiTestCase(APITestCase):
         self.assertEqual(admission.erasmus_mundus_scholarship_id, self.erasmus_mundus_scholarship.pk)
         self.assertEqual(admission.double_degree_scholarship_id, self.double_degree_scholarship.pk)
         self.assertEqual(admission.status, ChoixStatutProposition.IN_PROGRESS.name)
+        self.assertEqual(admission.specific_question_answers, {
+            'fe254203-17c7-47d6-95e4-3c5c532da551': 'My response',
+            'fe254203-17c7-47d6-95e4-3c5c532da552': [self.file_uuid, '550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92'],
+        })
 
     def test_training_choice_update_using_api_candidate_with_wrong_proposition(self):
         self.client.force_authenticate(user=self.candidate.user)
@@ -233,7 +289,10 @@ class GeneralEducationAdmissionTrainingChoiceUpdateApiTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
 
+@override_settings(OSIS_DOCUMENT_BASE_URL='http://dummyurl/')
 class ContinuingEducationAdmissionTrainingChoiceUpdateApiTestCase(APITestCase):
+    file_uuid = str(uuid.uuid4())
+
     @classmethod
     def setUpTestData(cls):
         cls.admission = ContinuingEducationAdmissionFactory()
@@ -244,9 +303,50 @@ class ContinuingEducationAdmissionTrainingChoiceUpdateApiTestCase(APITestCase):
             'sigle_formation': cls.training.acronym,
             'annee_formation': cls.training.academic_year.year,
             'uuid_proposition': cls.admission.uuid,
+            'reponses_questions_specifiques': {
+                'fe254203-17c7-47d6-95e4-3c5c532da551': 'My response',
+                'fe254203-17c7-47d6-95e4-3c5c532da552': [cls.file_uuid, 'token:abcdef'],
+            },
         }
 
+        AdmissionFormItemInstantiationFactory(
+            form_item=TextAdmissionFormItemFactory(
+                uuid=uuid.UUID('fe254203-17c7-47d6-95e4-3c5c532da551'),
+                internal_label='text_item',
+            ),
+            academic_year=cls.training.academic_year,
+        )
+        AdmissionFormItemInstantiationFactory(
+            form_item=DocumentAdmissionFormItemFactory(
+                uuid=uuid.UUID('fe254203-17c7-47d6-95e4-3c5c532da552'),
+                internal_label='document_item_1',
+            ),
+            academic_year=cls.training.academic_year,
+        )
+        AdmissionFormItemInstantiationFactory(
+            form_item=DocumentAdmissionFormItemFactory(
+                uuid=uuid.UUID('fe254203-17c7-47d6-95e4-3c5c532da553'),
+                active=False,
+                internal_label='document_item_2',
+            ),
+            academic_year=cls.training.academic_year,
+        )
+
         cls.url = resolve_url('admission_api_v1:continuing_training_choice', uuid=str(cls.admission.uuid))
+
+    def setUp(self) -> None:
+        patcher = patch('osis_document.api.utils.get_remote_token', return_value='foobar')
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+        patcher = patch('osis_document.api.utils.get_remote_metadata', return_value={'name': 'myfile'})
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+        patcher = patch('osis_document.api.utils.confirm_remote_upload')
+        patched = patcher.start()
+        patched.return_value = '550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92'
+        self.addCleanup(patcher.stop)
 
     def test_training_choice_update_using_api_candidate(self):
         self.client.force_authenticate(user=self.candidate.user)
@@ -261,6 +361,10 @@ class ContinuingEducationAdmissionTrainingChoiceUpdateApiTestCase(APITestCase):
         self.assertEqual(admission.training_id, self.training.pk)
         self.assertEqual(admission.candidate_id, self.candidate.pk)
         self.assertEqual(admission.status, ChoixStatutProposition.IN_PROGRESS.name)
+        self.assertEqual(admission.specific_question_answers, {
+            'fe254203-17c7-47d6-95e4-3c5c532da551': 'My response',
+            'fe254203-17c7-47d6-95e4-3c5c532da552': [self.file_uuid, '550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92'],
+        })
 
     def test_training_choice_update_using_api_candidate_with_wrong_proposition(self):
         self.client.force_authenticate(user=self.candidate.user)
@@ -288,18 +392,63 @@ class ContinuingEducationAdmissionTrainingChoiceUpdateApiTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
 
+@override_settings(OSIS_DOCUMENT_BASE_URL='http://dummyurl/')
 class DoctorateEducationAdmissionTypeUpdateApiTestCase(DoctorateAdmissionApiTestCase):
+    file_uuid = str(uuid.uuid4())
+
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData()
-        cls.erasmus_mundus_scholarship = ErasmusMundusScholarship()
+        cls.erasmus_mundus_scholarship = ErasmusMundusScholarshipFactory()
         cls.update_data = {
             'uuid_proposition': cls.admission.uuid,
             'type_admission': AdmissionType.PRE_ADMISSION.name,
             'justification': 'Justification',
             'bourse_erasmus_mundus': str(cls.erasmus_mundus_scholarship.uuid),
+            'reponses_questions_specifiques': {
+                'fe254203-17c7-47d6-95e4-3c5c532da551': 'My response',
+                'fe254203-17c7-47d6-95e4-3c5c532da552': [cls.file_uuid, 'token:abcdef'],
+            },
         }
+
+        AdmissionFormItemInstantiationFactory(
+            form_item=TextAdmissionFormItemFactory(
+                uuid=uuid.UUID('fe254203-17c7-47d6-95e4-3c5c532da551'),
+                internal_label='text_item',
+            ),
+            academic_year=cls.admission.training.academic_year,
+        )
+        AdmissionFormItemInstantiationFactory(
+            form_item=DocumentAdmissionFormItemFactory(
+                uuid=uuid.UUID('fe254203-17c7-47d6-95e4-3c5c532da552'),
+                internal_label='document_item_1',
+            ),
+            academic_year=cls.admission.training.academic_year,
+        )
+        AdmissionFormItemInstantiationFactory(
+            form_item=DocumentAdmissionFormItemFactory(
+                uuid=uuid.UUID('fe254203-17c7-47d6-95e4-3c5c532da553'),
+                active=False,
+                internal_label='document_item_2',
+            ),
+            academic_year=cls.admission.training.academic_year,
+        )
+
         cls.url = resolve_url('admission_api_v1:doctorate_admission_type_update', uuid=str(cls.admission.uuid))
+
+    def setUp(self) -> None:
+        patcher = patch('osis_document.api.utils.get_remote_token', return_value='foobar')
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+        patcher = patch('osis_document.api.utils.get_remote_metadata', return_value={'name': 'myfile'})
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+        patcher = patch('osis_document.api.utils.confirm_remote_upload')
+        patched = patcher.start()
+        patched.return_value = '550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92'
+        self.addCleanup(patcher.stop)
 
     def test_admission_type_update_using_api_candidate(self):
         self.client.force_authenticate(user=self.candidate.user)
@@ -317,6 +466,10 @@ class DoctorateEducationAdmissionTypeUpdateApiTestCase(DoctorateAdmissionApiTest
         self.assertEqual(admission.type, AdmissionType.PRE_ADMISSION.name)
         self.assertEqual(admission.comment, 'Justification')
         self.assertEqual(admission.erasmus_mundus_scholarship_id, self.erasmus_mundus_scholarship.pk)
+        self.assertEqual(admission.specific_question_answers, {
+            'fe254203-17c7-47d6-95e4-3c5c532da551': 'My response',
+            'fe254203-17c7-47d6-95e4-3c5c532da552': [self.file_uuid, '550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92'],
+        })
 
     def test_admission_type_update_using_api_candidate_with_wrong_proposition(self):
         self.client.force_authenticate(user=self.candidate.user)

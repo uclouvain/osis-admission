@@ -23,7 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import Optional
+from typing import Optional, Dict
 
 import attr
 
@@ -59,6 +59,8 @@ class ModifierChoixFormationCommand(interface.CommandRequest):
 
     sigle_formation: str
     annee_formation: int
+
+    reponses_questions_specifiques: Dict = attr.Factory(dict)
 
 
 @attr.dataclass(frozen=True, slots=True)

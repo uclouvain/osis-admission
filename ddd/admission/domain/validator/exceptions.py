@@ -43,3 +43,33 @@ class ConditionsAccessNonRempliesException(BusinessException):
     def __init__(self, **kwargs):
         message = _("Admission conditions not met.")
         super().__init__(message, **kwargs)
+
+
+class QuestionsSpecifiquesChoixFormationNonCompleteesException(BusinessException):
+    status_code = "ADMISSION-3"
+
+    def __init__(self, **kwargs):
+        message = _("Mandatory fields are missing in the specific questions of the 'Training choice' tab")
+        super().__init__(message, **kwargs)
+
+
+class QuestionsSpecifiquesCurriculumNonCompleteesException(BusinessException):
+    status_code = "ADMISSION-4"
+
+    def __init__(self, **kwargs):
+        message = _(
+            "Mandatory fields are missing in the specific questions of the "
+            "'Previous Experience > Curriculum vitae' tab."
+        )
+        super().__init__(message, **kwargs)
+
+
+class QuestionsSpecifiquesEtudesSecondairesNonCompleteesException(BusinessException):
+    status_code = "ADMISSION-5"
+
+    def __init__(self, **kwargs):
+        message = _(
+            "Mandatory fields are missing in the specific questions of the "
+            "'Previous experience > Secondary studies' tab"
+        )
+        super().__init__(message, **kwargs)

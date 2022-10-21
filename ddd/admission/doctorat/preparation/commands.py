@@ -24,7 +24,7 @@
 #
 # ##############################################################################
 import datetime
-from typing import List, Optional
+from typing import List, Optional, Dict
 
 import attr
 
@@ -288,3 +288,5 @@ class ModifierTypeAdmissionCommand(interface.CommandRequest):
     justification: Optional[str] = ''
 
     bourse_erasmus_mundus: Optional[str] = ''
+
+    reponses_questions_specifiques: Dict = attr.Factory(dict)

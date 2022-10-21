@@ -25,6 +25,7 @@
 # ##############################################################################
 
 from django.contrib import admin
+from django import forms
 from django.utils.translation import gettext_lazy as _
 
 from admission.auth.roles.adre import AdreSecretary
@@ -44,8 +45,12 @@ from admission.contrib.models import (
 )
 from admission.contrib.models.cdd_config import CddConfiguration
 from admission.contrib.models.doctoral_training import Activity
+from admission.contrib.models.form_item import AdmissionFormItem, AdmissionFormItemInstantiation
 from admission.ddd.parcours_doctoral.formation.domain.model.enums import CategorieActivite
 from osis_mail_template.admin import MailTemplateAdmin
+
+from base.models.education_group_type import EducationGroupType
+from base.models.enums.education_group_categories import Categories
 from osis_role.contrib.admin import RoleModelAdmin
 
 
@@ -116,10 +121,63 @@ class ScholarshipAdmin(admin.ModelAdmin):
     ]
 
 
+class AdmissionFormItemAdmin(admin.ModelAdmin):
+    list_display = [
+        'id',
+        'internal_label',
+        'type',
+        'active',
+    ]
+    search_fields = [
+        'id',
+        'internal_label',
+    ]
+    list_filter = [
+        'type',
+        'active',
+    ]
+
+
+class AdmissionFormItemInstantiationForm(forms.ModelForm):
+    education_group_type = forms.ModelChoiceField(
+        queryset=EducationGroupType.objects.filter(category=Categories.TRAINING.name),
+        required=False,
+    )
+
+    class Meta:
+        model = AdmissionFormItemInstantiation
+        fields = '__all__'
+
+
+class AdmissionFormItemInstantiationAdmin(admin.ModelAdmin):
+    list_display = [
+        'academic_year',
+        'form_item',
+        'required',
+        'display_according_education',
+    ]
+    search_fields = ['form_item__id', 'form_item__internal_label', 'education_group__educationgroupyear__acronym']
+    list_filter = [
+        'required',
+        'form_item__active',
+        'display_according_education',
+        'education_group_type',
+        'tab',
+        'candidate_nationality',
+        'study_language',
+        'vip_candidate',
+        'academic_year',
+    ]
+    raw_id_fields = ['education_group']
+    form = AdmissionFormItemInstantiationForm
+
+
 admin.site.register(DoctorateAdmission, DoctorateAdmissionAdmin)
 admin.site.register(CddMailTemplate, CddMailTemplateAdmin)
 admin.site.register(CddConfiguration)
 admin.site.register(Scholarship, ScholarshipAdmin)
+admin.site.register(AdmissionFormItem, AdmissionFormItemAdmin)
+admin.site.register(AdmissionFormItemInstantiation, AdmissionFormItemInstantiationAdmin)
 
 
 class ActivityAdmin(admin.ModelAdmin):

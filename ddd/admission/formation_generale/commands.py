@@ -23,7 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import Optional
+from typing import Optional, Dict
 
 import attr
 
@@ -69,6 +69,7 @@ class ModifierChoixFormationCommand(interface.CommandRequest):
     bourse_internationale: Optional[str] = ''
     bourse_erasmus_mundus: Optional[str] = ''
 
+    reponses_questions_specifiques: Dict = attr.Factory(dict)
 
 @attr.dataclass(frozen=True, slots=True)
 class SupprimerPropositionCommand(interface.CommandRequest):

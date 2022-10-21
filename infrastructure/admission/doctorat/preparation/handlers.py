@@ -38,6 +38,7 @@ from .domain.service.historique import Historique
 from .domain.service.membre_CA import MembreCATranslator
 from .domain.service.notification import Notification
 from .domain.service.promoteur import PromoteurTranslator
+from .domain.service.question_specifique import QuestionSpecifiqueTranslator
 from .repository.groupe_de_supervision import GroupeDeSupervisionRepository
 from .repository.proposition import PropositionRepository
 from ..validation.repository.demande import DemandeRepository
@@ -91,12 +92,14 @@ COMMAND_HANDLERS = {
         profil_candidat_translator=ProfilCandidatTranslator(),
         academic_year_repository=AcademicYearRepository(),
         titres_acces=TitresAcces(),
+        questions_specifiques_translator=QuestionSpecifiqueTranslator(),
     ),
     VerifierProjetCommand: lambda msg_bus, cmd: verifier_projet(
         cmd,
         proposition_repository=PropositionRepository(),
         groupe_supervision_repository=GroupeDeSupervisionRepository(),
         promoteur_translator=PromoteurTranslator(),
+        questions_specifiques_translator=QuestionSpecifiqueTranslator(),
     ),
     SupprimerPromoteurCommand: lambda msg_bus, cmd: supprimer_promoteur(
         cmd,
@@ -141,6 +144,7 @@ COMMAND_HANDLERS = {
         historique=Historique(),
         notification=Notification(),
         titres_acces=TitresAcces(),
+        questions_specifiques_translator=QuestionSpecifiqueTranslator(),
     ),
     DefinirCotutelleCommand: lambda msg_bus, cmd: definir_cotutelle(
         cmd,

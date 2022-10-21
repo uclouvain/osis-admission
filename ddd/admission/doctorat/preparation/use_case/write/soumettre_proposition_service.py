@@ -31,6 +31,9 @@ from admission.ddd.admission.doctorat.preparation.domain.model.proposition impor
 from admission.ddd.admission.doctorat.preparation.domain.service.i_historique import IHistorique
 from admission.ddd.admission.doctorat.preparation.domain.service.i_notification import INotification
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
+from admission.ddd.admission.doctorat.preparation.domain.service.i_question_specifique import (
+    IQuestionSpecifiqueTranslator,
+)
 from admission.ddd.admission.doctorat.preparation.domain.service.verifier_proposition import VerifierProposition
 from admission.ddd.admission.doctorat.preparation.repository.i_groupe_de_supervision import (
     IGroupeDeSupervisionRepository,
@@ -39,6 +42,7 @@ from admission.ddd.admission.doctorat.preparation.repository.i_proposition impor
 from admission.ddd.admission.doctorat.validation.domain.service.demande import DemandeService
 from admission.ddd.admission.doctorat.validation.repository.i_demande import IDemandeRepository
 from admission.ddd.admission.domain.service.i_titres_acces import ITitresAcces
+from admission.ddd.admission.enums.question_specifique import Onglets
 from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import GetCurrentAcademicYear
 from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import IAcademicYearRepository
 
@@ -53,6 +57,7 @@ def soumettre_proposition(
     historique: 'IHistorique',
     notification: 'INotification',
     titres_acces: 'ITitresAcces',
+    questions_specifiques_translator: 'IQuestionSpecifiqueTranslator',
 ) -> 'PropositionIdentity':
     # GIVEN
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
@@ -66,6 +71,13 @@ def soumettre_proposition(
         )
         .year
     )
+    questions_specifiques = questions_specifiques_translator.search_by_proposition(
+        cmd.uuid_proposition,
+        onglets=[
+            Onglets.CURRICULUM.name,
+            Onglets.ETUDES_SECONDAIRES.name,
+        ],
+    )
 
     # WHEN
     VerifierProposition().verifier(
@@ -74,7 +86,9 @@ def soumettre_proposition(
         profil_candidat_translator,
         annee_courante,
         titres_acces,
+        questions_specifiques,
     )
+
     demande = DemandeService().initier(
         profil_candidat_translator,
         proposition_id,

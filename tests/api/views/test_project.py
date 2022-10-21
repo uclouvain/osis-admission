@@ -34,7 +34,7 @@ from django.test import override_settings
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from admission.contrib.models import AdmissionType, DoctorateAdmission
+from admission.contrib.models import AdmissionType, DoctorateAdmission, AdmissionFormItemInstantiation
 from admission.contrib.models.doctorate import REFERENCE_SEQ_NAME
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixCommissionProximiteCDEouCLSM,
@@ -52,16 +52,22 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
     PromoteurManquantException,
 )
 from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixStatutCDD
-from admission.ddd.admission.domain.validator.exceptions import BourseNonTrouveeException
+from admission.ddd.admission.domain.validator.exceptions import (
+    BourseNonTrouveeException,
+    QuestionsSpecifiquesChoixFormationNonCompleteesException,
+    QuestionsSpecifiquesCurriculumNonCompleteesException,
+)
+from admission.ddd.admission.enums.question_specifique import Onglets
 from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
 from admission.tests import QueriesAssertionsMixin, CheckActionLinksMixin
 from admission.tests.factories import DoctorateAdmissionFactory, WriteTokenFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
 from admission.tests.factories.doctorate import DoctorateFactory
+from admission.tests.factories.form_item import AdmissionFormItemInstantiationFactory, TextAdmissionFormItemFactory
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.person import CompletePersonFactory
 from admission.tests.factories.roles import CandidateFactory, CddManagerFactory
-from admission.tests.factories.scholarship import ErasmusMundusScholarship
+from admission.tests.factories.scholarship import ErasmusMundusScholarshipFactory
 from admission.tests.factories.supervision import CaMemberFactory, PromoterFactory, _ProcessFactory
 from base.models.enums.community import CommunityEnum
 from base.models.enums.entity_type import EntityType
@@ -344,7 +350,7 @@ class DoctorateAdmissionCreationApiTestCase(APITestCase):
             acronym='CDA',
         ).entity
         cls.doctorate = DoctorateFactory(management_entity=cls.commission)
-        cls.scholarship = ErasmusMundusScholarship()
+        cls.scholarship = ErasmusMundusScholarshipFactory()
 
         cls.create_data = {
             "type_admission": AdmissionType.PRE_ADMISSION.name,
@@ -424,6 +430,7 @@ class DoctorateAdmissionApiTestCase(QueriesAssertionsMixin, APITestCase):
         cls.admission = DoctorateAdmissionFactory(
             training__management_entity=cls.commission,
             supervision_group=promoter.process,
+            with_answers_to_specific_questions=True,
         )
 
         # Users
@@ -539,6 +546,13 @@ class DoctorateAdmissionGetApiTestCase(CheckActionLinksMixin, DoctorateAdmission
             response = self.client.get(self.url, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
         # Check response data
+        self.assertEqual(
+            response.json()['reponses_questions_specifiques'],
+            {
+                'fe254203-17c7-47d6-95e4-3c5c532da551': 'My response',
+                'fe254203-17c7-47d6-95e4-3c5c532da552': ['ae254203-17c7-47d6-95e4-3c5c532da550'],
+            },
+        )
         # Check links
         self.assertTrue('links' in response.data)
         allowed_actions = [
@@ -776,6 +790,109 @@ class DoctorateAdmissionVerifyProjectTestCase(APITestCase):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()[0]['status_code'], PromoteurDeReferenceManquantException.status_code)
+
+    @mock.patch(
+        'admission.infrastructure.admission.doctorat.preparation.domain.service.promoteur.PromoteurTranslator.est_externe',
+        return_value=False,
+    )
+    def test_verify_project_with_specific_questions(self, mock_is_external):
+        self.client.force_authenticate(user=self.candidate.user)
+
+        admission = DoctorateAdmission.objects.get(pk=self.admission.pk)
+
+        form_item_instantiation = AdmissionFormItemInstantiationFactory(
+            form_item=TextAdmissionFormItemFactory(
+                uuid=uuid.UUID('fe254203-17c7-47d6-95e4-3c5c532da551'),
+                internal_label='text_item',
+            ),
+            academic_year=self.admission.doctorate.academic_year,
+            tab=Onglets.CHOIX_FORMATION.name,
+            required=True,
+        )
+
+        form_item_instantiation = AdmissionFormItemInstantiation.objects.get(pk=form_item_instantiation.pk)
+
+        # The question is required for this admission and the field is not completed
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        status_codes = [e['status_code'] for e in response.json()]
+        self.assertIn(
+            QuestionsSpecifiquesChoixFormationNonCompleteesException.status_code,
+            status_codes,
+        )
+
+        # The question is for this admission but not required
+        form_item_instantiation.required = False
+        form_item_instantiation.save()
+
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        status_codes = [e['status_code'] for e in response.json()]
+        self.assertNotIn(
+            QuestionsSpecifiquesChoixFormationNonCompleteesException.status_code,
+            status_codes,
+        )
+
+        form_item_instantiation.required = True
+
+        # The question is required but for another year
+        form_item_instantiation.academic_year = AcademicYearFactory(
+            year=self.admission.doctorate.academic_year.year - 1
+        )
+        form_item_instantiation.save()
+
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        status_codes = [e['status_code'] for e in response.json()]
+        self.assertNotIn(
+            QuestionsSpecifiquesChoixFormationNonCompleteesException.status_code,
+            status_codes,
+        )
+
+        form_item_instantiation.academic_year = self.admission.doctorate.academic_year
+        form_item_instantiation.save()
+
+        # The question if for this admission but not active
+        form_item_instantiation.form_item.active = False
+        form_item_instantiation.form_item.save()
+
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        status_codes = [e['status_code'] for e in response.json()]
+        self.assertNotIn(
+            QuestionsSpecifiquesChoixFormationNonCompleteesException.status_code,
+            status_codes,
+        )
+
+        form_item_instantiation.form_item.active = True
+        form_item_instantiation.form_item.save()
+
+        # Required question for this admission but in unchecked tab
+        form_item_instantiation.tab = Onglets.CURRICULUM.name
+        form_item_instantiation.save()
+
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        status_codes = [e['status_code'] for e in response.json()]
+        self.assertNotIn(
+            QuestionsSpecifiquesChoixFormationNonCompleteesException.status_code,
+            status_codes,
+        )
+
+        form_item_instantiation.tab = Onglets.CHOIX_FORMATION.name
+        form_item_instantiation.save()
+
+        # The question is required for this admission and the field is completed
+        admission.specific_question_answers = {'fe254203-17c7-47d6-95e4-3c5c532da551': 'My response.'}
+        admission.save()
+
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        status_codes = [e['status_code'] for e in response.json()]
+        self.assertNotIn(
+            QuestionsSpecifiquesChoixFormationNonCompleteesException.status_code,
+            status_codes,
+        )
 
     def test_admission_doctorate_verify_project_no_role(self):
         self.client.force_authenticate(user=self.no_role_user)
@@ -1060,5 +1177,80 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
                 exception
                 for exception in errors
                 if exception['status_code'] == AbsenceDeDetteNonCompleteeException.status_code
+            )
+        )
+
+    @mock.patch(
+        'admission.infrastructure.admission.doctorat.preparation.domain.service.promoteur.PromoteurTranslator.est_externe',
+        return_value=False,
+    )
+    def test_submit_invalid_proposition_using_api_specific_questions(self, mock_is_external):
+        admission = DoctorateAdmissionFactory(
+            candidate=self.first_candidate,
+            status=ChoixStatutProposition.SIGNING_IN_PROGRESS.name,
+            supervision_group=self.first_invited_promoter.actor_ptr.process,
+        )
+        self.client.force_authenticate(user=admission.candidate.user)
+
+        CddManagerFactory(entity=admission.doctorate.management_entity)
+
+        admission = DoctorateAdmission.objects.get(pk=admission.pk)
+
+        url = resolve_url("admission_api_v1:submit-doctoral-proposition", uuid=admission.uuid)
+
+        form_item_instantiation = AdmissionFormItemInstantiationFactory(
+            form_item=TextAdmissionFormItemFactory(
+                uuid=uuid.UUID('fe254203-17c7-47d6-95e4-3c5c532da551'),
+                internal_label='text_item',
+            ),
+            academic_year=admission.doctorate.academic_year,
+            tab=Onglets.CURRICULUM.name,
+            required=True,
+        )
+
+        form_item_instantiation = AdmissionFormItemInstantiation.objects.get(pk=form_item_instantiation.pk)
+
+        # The question is required for this admission and the field is not completed
+        response = self.client.post(url)
+        errors = response.json().get('non_field_errors', [])
+        self.assertTrue(
+            any(
+                exception
+                for exception in errors
+                if exception['status_code']
+                == QuestionsSpecifiquesCurriculumNonCompleteesException.status_code
+            )
+        )
+
+        # Required question for this admission but in unchecked tab
+        form_item_instantiation.tab = Onglets.CHOIX_FORMATION.name
+        form_item_instantiation.save()
+
+        response = self.client.post(url)
+        errors = response.json().get('non_field_errors', [])
+        self.assertFalse(
+            any(
+                exception
+                for exception in errors
+                if exception['status_code']
+                == QuestionsSpecifiquesCurriculumNonCompleteesException.status_code
+            )
+        )
+
+        form_item_instantiation.tab = Onglets.CURRICULUM.name
+        form_item_instantiation.save()
+
+        # The question is required for this admission and the field is completed
+        admission.specific_question_answers = {'fe254203-17c7-47d6-95e4-3c5c532da551': 'My response.'}
+        admission.save()
+
+        response = self.client.post(url)
+        errors = response.json().get('non_field_errors', [])
+        self.assertFalse(
+            any(
+                exception
+                for exception in errors
+                if exception['status_code']
+                == QuestionsSpecifiquesCurriculumNonCompleteesException.status_code
             )
         )

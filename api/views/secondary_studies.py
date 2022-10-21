@@ -53,8 +53,11 @@ class BaseSecondaryStudiesViewSet(
 
     def put(self, request, *args, **kwargs):
         response = self.update(request, *args, **kwargs)
-        if self.get_permission_object():
-            self.get_permission_object().update_detailed_status()
+        current_admission = self.get_permission_object()
+        if current_admission:
+            current_admission.specific_question_answers = request.data.get('specific_question_answers')
+            current_admission.save(update_fields=['specific_question_answers'])
+            current_admission.update_detailed_status()
         return response
 
 

@@ -23,6 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import uuid
 
 import factory
 from django.db import connection
@@ -113,6 +114,12 @@ class DoctorateAdmissionFactory(factory.DjangoModelFactory):
         )
         with_thesis_institute = factory.Trait(
             thesis_institute=factory.SubFactory(EntityVersionFactory),
+        )
+        with_answers_to_specific_questions = factory.Trait(
+            specific_question_answers={
+                'fe254203-17c7-47d6-95e4-3c5c532da551': 'My response',
+                'fe254203-17c7-47d6-95e4-3c5c532da552': ['ae254203-17c7-47d6-95e4-3c5c532da550'],
+            },
         )
 
     @factory.post_generation
