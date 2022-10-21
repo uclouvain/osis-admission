@@ -141,6 +141,7 @@ def _instantiate_admission(admission: 'DoctorateAdmission') -> 'Proposition':
         creee_le=admission.created,
         modifiee_le=admission.modified,
         comptabilite=get_accounting_from_admission(admission=admission),
+        reponses_questions_specifiques=admission.specific_question_answers,
     )
 
 
@@ -237,6 +238,7 @@ class PropositionRepository(IPropositionRepository):
                 'phd_already_done_no_defense_reason': entity.experience_precedente_recherche.raison_non_soutenue,
                 'archived_record_signatures_sent': entity.fiche_archive_signatures_envoyees,
                 'erasmus_mundus_scholarship': erasmus_mundus_scholarship,
+                'specific_question_answers': entity.reponses_questions_specifiques,
             },
         )
         Candidate.objects.get_or_create(person=candidate)
@@ -450,4 +452,5 @@ class PropositionRepository(IPropositionRepository):
             bourse_erasmus_mundus=BourseTranslator.build_dto(admission.erasmus_mundus_scholarship)
             if admission.erasmus_mundus_scholarship
             else None,
+            reponses_questions_specifiques=admission.specific_question_answers,
         )

@@ -25,6 +25,7 @@
 # ##############################################################################
 from functools import partial
 
+from django.core.serializers.json import DjangoJSONEncoder
 from rest_framework import serializers
 
 from admission.api.serializers.fields import AdmissionUuidField
@@ -214,7 +215,18 @@ class CurriculumFileSerializer(serializers.ModelSerializer):
         ]
 
 
-class CurriculumSerializer(serializers.Serializer):
+class CurriculumSerializer(serializers.ModelSerializer):
+    specific_question_answers = serializers.JSONField(encoder=DjangoJSONEncoder, default=dict)
+
+    class Meta:
+        model = Person
+        fields = [
+            'curriculum',
+            'specific_question_answers',
+        ]
+
+
+class CurriculumDetailsSerializer(serializers.Serializer):
     professional_experiences = LiteProfessionalExperienceSerializer(many=True)
     educational_experiences = LiteEducationalExperienceSerializer(many=True)
     file = CurriculumFileSerializer()

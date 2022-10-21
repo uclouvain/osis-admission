@@ -35,8 +35,9 @@ from .supervision import *
 from .curriculum import (
     CurriculumFileSerializer,
     EducationalExperienceYearSerializer,
-    CurriculumSerializer,
+    CurriculumDetailsSerializer,
     ProfessionalExperienceSerializer,
+    CurriculumSerializer,
 )
 from .approvals import (
     ApprouverPropositionCommandSerializer,
@@ -55,3 +56,4 @@ from .training_choice import (
     ModifierTypeAdmissionDoctoraleCommandSerializer,
     ModifierChoixFormationGeneraleCommandSerializer,
 )
+from .specific_question import SpecificQuestionSerializer

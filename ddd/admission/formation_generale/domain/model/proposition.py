@@ -53,6 +53,8 @@ class Proposition(interface.RootEntity):
     bourse_internationale_id: Optional[BourseIdentity] = None
     bourse_erasmus_mundus_id: Optional[BourseIdentity] = None
 
+    reponses_questions_specifiques: Dict = attr.Factory(dict)
+
     def modifier_choix_formation(
         self,
         formation_id: FormationIdentity,
@@ -60,8 +62,10 @@ class Proposition(interface.RootEntity):
         bourse_double_diplome: Optional[str],
         bourse_internationale: Optional[str],
         bourse_erasmus_mundus: Optional[str],
+        reponses_questions_specifiques: Dict,
     ):
         self.formation_id = formation_id
+        self.reponses_questions_specifiques = reponses_questions_specifiques
 
         if bourse_double_diplome:
             self.bourse_double_diplome_id = bourses_ids.get(bourse_double_diplome)

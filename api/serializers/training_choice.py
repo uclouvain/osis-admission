@@ -23,6 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from admission.api.serializers.fields import AnswerToSpecificQuestionField
 from admission.ddd.admission.formation_continue import commands as continuing_education_commands
 from admission.ddd.admission.formation_generale import commands as general_education_commands
 from admission.ddd.admission.doctorat.preparation import commands as doctorate_education_commands
@@ -41,15 +42,21 @@ class InitierPropositionContinueCommandSerializer(DTOSerializer):
 
 
 class ModifierChoixFormationContinueCommandSerializer(DTOSerializer):
+    reponses_questions_specifiques = AnswerToSpecificQuestionField()
+
     class Meta:
         source = continuing_education_commands.ModifierChoixFormationCommand
 
 
 class ModifierChoixFormationGeneraleCommandSerializer(DTOSerializer):
+    reponses_questions_specifiques = AnswerToSpecificQuestionField()
+
     class Meta:
         source = general_education_commands.ModifierChoixFormationCommand
 
 
 class ModifierTypeAdmissionDoctoraleCommandSerializer(DTOSerializer):
+    reponses_questions_specifiques = AnswerToSpecificQuestionField()
+
     class Meta:
         source = doctorate_education_commands.ModifierTypeAdmissionCommand

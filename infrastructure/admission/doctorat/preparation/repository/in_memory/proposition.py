@@ -240,5 +240,6 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
             modifiee_le=proposition.modifiee_le,
             erreurs=[],
             comptabilite=get_dto_accounting_from_domain_model(proposition.comptabilite),
-            bourse_erasmus_mundus=proposition.bourse_erasmus_mundus_id and proposition.bourse_erasmus_mundus_id.uuid
+            bourse_erasmus_mundus=proposition.bourse_erasmus_mundus_id and proposition.bourse_erasmus_mundus_id.uuid,
+            reponses_questions_specifiques=proposition.reponses_questions_specifiques,
         )

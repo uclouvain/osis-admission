@@ -93,6 +93,7 @@ class PropositionRepository(IPropositionRepository):
                 'candidate': candidate,
                 'training': training,
                 'status': entity.statut.name,
+                'specific_question_answers': entity.reponses_questions_specifiques,
             },
         )
 
@@ -114,6 +115,7 @@ class PropositionRepository(IPropositionRepository):
                 sigle=admission.training.acronym,
                 annee=admission.training.academic_year.year,
             ),
+            reponses_questions_specifiques=admission.specific_question_answers,
         )
 
     @classmethod
@@ -135,4 +137,5 @@ class PropositionRepository(IPropositionRepository):
             matricule_candidat=admission.candidate.global_id,
             prenom_candidat=admission.candidate.first_name,
             nom_candidat=admission.candidate.last_name,
+            reponses_questions_specifiques=admission.specific_question_answers,
         )

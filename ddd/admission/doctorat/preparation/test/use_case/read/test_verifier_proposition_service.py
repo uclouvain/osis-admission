@@ -78,6 +78,10 @@ from admission.infrastructure.admission.domain.service.in_memory.profil_candidat
     ExperienceNonAcademique,
     ProfilCandidatInMemoryTranslator,
 )
+from admission.ddd.admission.domain.validator.exceptions import (
+    QuestionsSpecifiquesCurriculumNonCompleteesException,
+    QuestionsSpecifiquesEtudesSecondairesNonCompleteesException,
+)
 from admission.infrastructure.admission.doctorat.preparation.repository.in_memory.groupe_de_supervision import (
     GroupeDeSupervisionInMemoryRepository,
 )
@@ -288,6 +292,36 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
             with self.assertRaises(MultipleBusinessExceptions) as context:
                 self.message_bus.invoke(self.cmd)
             self.assertTrue(any(member for member in context.exception.exceptions if isinstance(member, exception)))
+
+    def test_should_retourner_erreur_si_questions_specifiques_pas_completees_pour_curriculum(self):
+        with mock.patch.multiple(
+            self.proposition,
+            reponses_questions_specifiques={
+                '06de0c3d-3c06-4c93-8eb4-c8648f04f140': 'My response 1',
+                '06de0c3d-3c06-4c93-8eb4-c8648f04f143': 'My response 3',
+            },
+        ):
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                self.message_bus.invoke(self.cmd)
+            self.assertIsInstance(
+                context.exception.exceptions.pop(),
+                QuestionsSpecifiquesCurriculumNonCompleteesException,
+            )
+
+    def test_should_retourner_erreur_si_questions_specifiques_pas_completees_pour_etudes_secondaires(self):
+        with mock.patch.multiple(
+            self.proposition,
+            reponses_questions_specifiques={
+                '06de0c3d-3c06-4c93-8eb4-c8648f04f140': 'My response 1',
+                '06de0c3d-3c06-4c93-8eb4-c8648f04f142': 'My response 2',
+            },
+        ):
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                self.message_bus.invoke(self.cmd)
+            self.assertIsInstance(
+                context.exception.exceptions.pop(),
+                QuestionsSpecifiquesEtudesSecondairesNonCompleteesException,
+            )
 
     def _test_should_retourner_erreur_si_assimilation_incomplete(self, comptabilite, exception):
         with mock.patch.object(self.candidat, 'pays_nationalite', 'CA'):

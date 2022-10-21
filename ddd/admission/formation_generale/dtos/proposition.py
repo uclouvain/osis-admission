@@ -24,7 +24,7 @@
 #
 ##############################################################################
 import datetime
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 
 import attr
 
@@ -49,3 +49,5 @@ class PropositionDTO(interface.DTO):
     bourse_double_diplome: Optional[BourseDTO]
     bourse_internationale: Optional[BourseDTO]
     bourse_erasmus_mundus: Optional[BourseDTO]
+
+    reponses_questions_specifiques: Dict[str, Union[str, List[str]]]

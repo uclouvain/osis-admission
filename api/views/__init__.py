@@ -57,3 +57,8 @@ from admission.api.views.training_choice import (
     GeneralUpdateTrainingChoiceAPIView,
 )
 from admission.api.views.proposition import GeneralPropositionView, ContinuingPropositionView
+from admission.api.views.specific_questions import (
+    GeneralSpecificQuestionListView,
+    DoctorateSpecificQuestionListView,
+    ContinuingSpecificQuestionListView,
+)

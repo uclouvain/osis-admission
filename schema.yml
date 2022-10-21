@@ -347,10 +347,11 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - person
-  /curriculum/file:
+  /curriculum:
     get:
-      operationId: retrieveCurriculumFile
-      description: ''
+      operationId: retrieveCurriculumDetails
+      description: Return the experiences and the curriculum pdf of a person and the
+        mandatory years to complete.
       parameters:
       - $ref: '#/components/parameters/Accept-Language'
       - $ref: '#/components/parameters/X-User-FirstName'
@@ -358,11 +359,11 @@ paths:
       - $ref: '#/components/parameters/X-User-Email'
       - $ref: '#/components/parameters/X-User-GlobalID'
       responses:
-        '200':
+        200:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CurriculumFile'
+                $ref: '#/components/schemas/CurriculumDetails'
           description: ''
         '400':
           $ref: '#/components/responses/BadRequest'
@@ -373,7 +374,7 @@ paths:
       tags:
       - person
     put:
-      operationId: updateCurriculumFile
+      operationId: updateCurriculum
       description: ''
       parameters:
       - $ref: '#/components/parameters/Accept-Language'
@@ -385,35 +386,9 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CurriculumFile'
+              $ref: '#/components/schemas/Curriculum'
       responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CurriculumFile'
-          description: ''
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-      tags:
-      - person
-  /curriculum/:
-    get:
-      operationId: retrieveCurriculum
-      description: Return the experiences and the curriculum pdf of a person and the
-        mandatory years to complete.
-      parameters:
-      - $ref: '#/components/parameters/Accept-Language'
-      - $ref: '#/components/parameters/X-User-FirstName'
-      - $ref: '#/components/parameters/X-User-LastName'
-      - $ref: '#/components/parameters/X-User-Email'
-      - $ref: '#/components/parameters/X-User-GlobalID'
-      responses:
-        '200':
+        200:
           content:
             application/json:
               schema:
@@ -977,10 +952,11 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - person
-  /propositions/doctorate/{uuid}/curriculum/file:
+  /propositions/doctorate/{uuid}/curriculum:
     get:
-      operationId: retrieveCurriculumFileAdmission
-      description: ''
+      operationId: retrieveCurriculumDetailsAdmission
+      description: Return the experiences and the curriculum pdf of a person and the
+        mandatory years to complete.
       parameters:
       - name: uuid
         in: path
@@ -994,11 +970,11 @@ paths:
       - $ref: '#/components/parameters/X-User-Email'
       - $ref: '#/components/parameters/X-User-GlobalID'
       responses:
-        '200':
+        200:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CurriculumFile'
+                $ref: '#/components/schemas/CurriculumDetails'
           description: ''
         '400':
           $ref: '#/components/responses/BadRequest'
@@ -1009,7 +985,7 @@ paths:
       tags:
       - person
     put:
-      operationId: updateCurriculumFileAdmission
+      operationId: updateCurriculumAdmission
       description: ''
       parameters:
       - name: uuid
@@ -1027,41 +1003,9 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CurriculumFile'
+              $ref: '#/components/schemas/Curriculum'
       responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CurriculumFile'
-          description: ''
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-      tags:
-      - person
-  /propositions/doctorate/{uuid}/curriculum/:
-    get:
-      operationId: retrieveCurriculumAdmission
-      description: Return the experiences and the curriculum pdf of a person and the
-        mandatory years to complete.
-      parameters:
-      - name: uuid
-        in: path
-        required: true
-        description: ''
-        schema:
-          type: string
-      - $ref: '#/components/parameters/Accept-Language'
-      - $ref: '#/components/parameters/X-User-FirstName'
-      - $ref: '#/components/parameters/X-User-LastName'
-      - $ref: '#/components/parameters/X-User-Email'
-      - $ref: '#/components/parameters/X-User-GlobalID'
-      responses:
-        '200':
+        200:
           content:
             application/json:
               schema:
@@ -1529,6 +1473,45 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PropositionIdentityDTO'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
+  /propositions/doctorate/{uuid}/{tab}/specific-question:
+    get:
+      operationId: list_doctorate_specific_questions
+      description: ''
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - name: tab
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SpecificQuestion'
           description: ''
         '400':
           $ref: '#/components/responses/BadRequest'
@@ -2370,10 +2353,11 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - person
-  /propositions/general-education/{uuid}/curriculum/file:
+  /propositions/general-education/{uuid}/curriculum:
     get:
-      operationId: retrieveCurriculumFileGeneralEducationAdmission
-      description: ''
+      operationId: retrieveCurriculumDetailsGeneralEducationAdmission
+      description: Return the experiences and the curriculum pdf of a person and the
+        mandatory years to complete.
       parameters:
       - name: uuid
         in: path
@@ -2387,11 +2371,11 @@ paths:
       - $ref: '#/components/parameters/X-User-Email'
       - $ref: '#/components/parameters/X-User-GlobalID'
       responses:
-        '200':
+        200:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CurriculumFile'
+                $ref: '#/components/schemas/CurriculumDetails'
           description: ''
         '400':
           $ref: '#/components/responses/BadRequest'
@@ -2402,7 +2386,7 @@ paths:
       tags:
       - person
     put:
-      operationId: updateCurriculumFileGeneralEducationAdmission
+      operationId: updateCurriculumGeneralEducationAdmission
       description: ''
       parameters:
       - name: uuid
@@ -2420,41 +2404,9 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CurriculumFile'
+              $ref: '#/components/schemas/Curriculum'
       responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CurriculumFile'
-          description: ''
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-      tags:
-      - person
-  /propositions/general-education/{uuid}/curriculum/:
-    get:
-      operationId: retrieveCurriculumGeneralEducationAdmission
-      description: Return the experiences and the curriculum pdf of a person and the
-        mandatory years to complete.
-      parameters:
-      - name: uuid
-        in: path
-        required: true
-        description: ''
-        schema:
-          type: string
-      - $ref: '#/components/parameters/Accept-Language'
-      - $ref: '#/components/parameters/X-User-FirstName'
-      - $ref: '#/components/parameters/X-User-LastName'
-      - $ref: '#/components/parameters/X-User-Email'
-      - $ref: '#/components/parameters/X-User-GlobalID'
-      responses:
-        '200':
+        200:
           content:
             application/json:
               schema:
@@ -2468,6 +2420,45 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - person
+  /propositions/general-education/{uuid}/{tab}/specific-question:
+    get:
+      operationId: list_general_specific_questions
+      description: ''
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - name: tab
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SpecificQuestion'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
   /propositions/general-education/{uuid}/curriculum/educational/{experience_id}:
     get:
       operationId: retrieveEducationalExperienceGeneralEducationAdmission
@@ -3020,10 +3011,11 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - person
-  /propositions/continuing-education/{uuid}/curriculum/file:
+  /propositions/continuing-education/{uuid}/curriculum:
     get:
-      operationId: retrieveCurriculumFileContinuingEducationAdmission
-      description: ''
+      operationId: retrieveCurriculumDetailsContinuingEducationAdmission
+      description: Return the experiences and the curriculum pdf of a person and the
+        mandatory years to complete.
       parameters:
       - name: uuid
         in: path
@@ -3037,11 +3029,11 @@ paths:
       - $ref: '#/components/parameters/X-User-Email'
       - $ref: '#/components/parameters/X-User-GlobalID'
       responses:
-        '200':
+        200:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CurriculumFile'
+                $ref: '#/components/schemas/CurriculumDetails'
           description: ''
         '400':
           $ref: '#/components/responses/BadRequest'
@@ -3052,7 +3044,7 @@ paths:
       tags:
       - person
     put:
-      operationId: updateCurriculumFileContinuingEducationAdmission
+      operationId: updateCurriculumContinuingEducationAdmission
       description: ''
       parameters:
       - name: uuid
@@ -3070,41 +3062,9 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CurriculumFile'
+              $ref: '#/components/schemas/Curriculum'
       responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CurriculumFile'
-          description: ''
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-      tags:
-      - person
-  /propositions/continuing-education/{uuid}/curriculum/:
-    get:
-      operationId: retrieveCurriculumContinuingEducationAdmission
-      description: Return the experiences and the curriculum pdf of a person and the
-        mandatory years to complete.
-      parameters:
-      - name: uuid
-        in: path
-        required: true
-        description: ''
-        schema:
-          type: string
-      - $ref: '#/components/parameters/Accept-Language'
-      - $ref: '#/components/parameters/X-User-FirstName'
-      - $ref: '#/components/parameters/X-User-LastName'
-      - $ref: '#/components/parameters/X-User-Email'
-      - $ref: '#/components/parameters/X-User-GlobalID'
-      responses:
-        '200':
+        200:
           content:
             application/json:
               schema:
@@ -3118,6 +3078,45 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - person
+  /propositions/continuing-education/{uuid}/{tab}/specific-question:
+    get:
+      operationId: list_continuing_specific_questions
+      description: ''
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - name: tab
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SpecificQuestion'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
   /propositions/continuing-education/{uuid}/curriculum/educational/{experience_id}:
     get:
       operationId: retrieveEducationalExperienceContinuingEducationAdmission
@@ -5459,6 +5458,9 @@ components:
                 type: string
               maxItems: 1
           nullable: true
+        specific_question_answers:
+          type: object
+          writeOnly: true
     DiplomaResults:
       enum:
       - NOT_KNOWN_YET_RESULT
@@ -5528,15 +5530,7 @@ components:
       - C1
       - C2
       type: string
-    CurriculumFile:
-      type: object
-      properties:
-        curriculum:
-          type: array
-          items:
-            type: string
-          nullable: true
-    Curriculum:
+    CurriculumDetails:
       type: object
       properties:
         professional_experiences:
@@ -6229,6 +6223,8 @@ components:
           - nom_long
           - type
           nullable: true
+        reponses_questions_specifiques:
+          type: object
       required:
       - uuid
       - type_admission
@@ -6297,6 +6293,30 @@ components:
                 type: string
           readOnly: true
           nullable: true
+    SpecificQuestion:
+      type: object
+      properties:
+        required:
+          type: boolean
+        uuid:
+          type: string
+        type:
+          type: string
+        title:
+          type: object
+        text:
+          type: object
+        help_text:
+          type: object
+        configuration:
+          type: object
+      required:
+      - uuid
+      - type
+      - title
+      - text
+      - help_text
+      - configuration
     SupervisionDTO:
       type: object
       properties:
@@ -7818,6 +7838,8 @@ components:
           - nom_long
           - type
           nullable: true
+        reponses_questions_specifiques:
+          type: object
       required:
       - uuid
       - formation
@@ -7897,6 +7919,8 @@ components:
                 type: string
               detail:
                 type: string
+        reponses_questions_specifiques:
+          type: object
       required:
       - uuid
       - formation
@@ -8189,6 +8213,16 @@ components:
       - sigle_formation
       - annee_formation
       - matricule_candidat
+    Curriculum:
+      type: object
+      properties:
+        curriculum:
+          type: array
+          items:
+            type: string
+          nullable: true
+        specific_question_answers:
+          type: object
     CompleterPropositionCommand:
       type: object
       properties:
@@ -8534,6 +8568,8 @@ components:
           type: string
         bourse_erasmus_mundus:
           type: string
+        reponses_questions_specifiques:
+          type: object
       required:
       - uuid_proposition
       - type_admission
@@ -8613,6 +8649,8 @@ components:
           type: string
         bourse_erasmus_mundus:
           type: string
+        reponses_questions_specifiques:
+          type: object
       required:
       - uuid_proposition
       - sigle_formation
@@ -8626,6 +8664,8 @@ components:
           type: string
         annee_formation:
           type: integer
+        reponses_questions_specifiques:
+          type: object
       required:
       - uuid_proposition
       - sigle_formation

@@ -27,19 +27,25 @@ import datetime
 from unittest.mock import ANY
 
 import mock
+import uuid
 from django.shortcuts import resolve_url
 from django.test import override_settings
 
 from rest_framework import status
+from rest_framework.status import HTTP_200_OK
 from rest_framework.test import APITestCase
 
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
+from admission.contrib.models.base import BaseAdmission
 from admission.tests.factories import DoctorateAdmissionFactory
+from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
 from admission.tests.factories.curriculum import (
     ProfessionalExperienceFactory,
     EducationalExperienceFactory,
     EducationalExperienceYearFactory,
 )
+from admission.tests.factories.form_item import AdmissionFormItemInstantiationFactory, TextAdmissionFormItemFactory
+from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.roles import CandidateFactory
 from admission.tests.factories.secondary_studies import BelgianHighSchoolDiplomaFactory, ForeignHighSchoolDiplomaFactory
 from base.models.enums.teaching_type import TeachingTypeEnum
@@ -59,10 +65,38 @@ from reference.tests.factories.language import LanguageFactory
 from reference.tests.factories.superior_non_university import SuperiorNonUniversityFactory
 
 
-@override_settings(ROOT_URLCONF='admission.api.url_v1')
-class GetCurriculumTestCase(APITestCase):
+class BaseCurriculumTestCase:
     @classmethod
     def setUpTestData(cls):
+        cls.today_date = datetime.date(2020, 11, 1)
+        cls.today_datetime = datetime.datetime(2020, 11, 1)
+
+    def setUp(self) -> None:
+        # Mock datetime to return the 2020 year as the current year
+        patcher = mock.patch('base.models.academic_year.timezone')
+        self.addCleanup(patcher.stop)
+        self.mock_foo = patcher.start()
+        self.mock_foo.now.return_value = self.today_datetime
+        # Mock files
+        patcher = mock.patch('osis_document.api.utils.get_remote_token', return_value='foobar')
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+        patcher = mock.patch('osis_document.api.utils.get_remote_metadata', return_value={'name': 'myfile'})
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+        patcher = mock.patch('osis_document.api.utils.confirm_remote_upload')
+        patched = patcher.start()
+        patched.return_value = '550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92'
+        self.addCleanup(patcher.stop)
+
+
+@override_settings(ROOT_URLCONF='admission.api.url_v1', OSIS_DOCUMENT_BASE_URL='http://dummyurl/')
+class DoctorateCurriculumTestCase(BaseCurriculumTestCase, APITestCase):
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
         # Mocked data
         cls.admission = DoctorateAdmissionFactory()
         cls.other_admission = DoctorateAdmissionFactory()
@@ -72,6 +106,21 @@ class GetCurriculumTestCase(APITestCase):
         cls.user = cls.admission.candidate.user
         cls.other_user = cls.other_admission.candidate.user
         cls.user_without_admission = CandidateFactory().person.user
+
+        AdmissionFormItemInstantiationFactory(
+            form_item=TextAdmissionFormItemFactory(
+                uuid=uuid.UUID('fe254203-17c7-47d6-95e4-3c5c532da551'),
+                internal_label='text_item',
+            ),
+            academic_year=cls.admission.doctorate.academic_year,
+        )
+
+        cls.put_data = {
+            'specific_question_answers': {
+                'fe254203-17c7-47d6-95e4-3c5c532da551': 'My answer !',
+            },
+            'curriculum': ['file1.pdf'],
+        }
 
         cls.professional_experiences = [
             ProfessionalExperienceFactory(
@@ -117,13 +166,6 @@ class GetCurriculumTestCase(APITestCase):
         # Targeted urls
         cls.agnostic_url = resolve_url('curriculum')
         cls.admission_url = resolve_url('curriculum', uuid=cls.admission.uuid)
-
-    def setUp(self) -> None:
-        # Mock datetime to return the 2020 year as the current year
-        patcher = mock.patch('base.models.academic_year.timezone')
-        self.addCleanup(patcher.stop)
-        self.mock_foo = patcher.start()
-        self.mock_foo.now.return_value = self.today_datetime
 
     def test_user_not_logged_assert_not_authorized(self):
         self.client.force_authenticate(user=None)
@@ -244,6 +286,101 @@ class GetCurriculumTestCase(APITestCase):
         )
 
         foreign_diploma.delete()
+
+    def test_put_curriculum(self):
+        self.client.force_authenticate(user=self.user)
+
+        response = self.client.put(self.admission_url, data=self.put_data)
+
+        self.assertEqual(response.status_code, HTTP_200_OK)
+        updated_admission = BaseAdmission.objects.get(uuid=self.admission.uuid)
+
+        self.assertEqual(updated_admission.specific_question_answers, {
+            'fe254203-17c7-47d6-95e4-3c5c532da551': 'My answer !',
+        })
+        self.assertEqual(updated_admission.candidate.curriculum, [uuid.UUID('550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92')])
+
+
+@override_settings(ROOT_URLCONF='admission.api.url_v1', OSIS_DOCUMENT_BASE_URL='http://dummyurl/')
+class GeneralEducationCurriculumTestCase(BaseCurriculumTestCase, APITestCase):
+    @classmethod
+    def setUpTestData(cls) -> None:
+        super().setUpTestData()
+        cls.admission = GeneralEducationAdmissionFactory()
+        AdmissionFormItemInstantiationFactory(
+            form_item=TextAdmissionFormItemFactory(
+                uuid=uuid.UUID('fe254203-17c7-47d6-95e4-3c5c532da551'),
+                internal_label='text_item',
+            ),
+            academic_year=cls.admission.training.academic_year,
+        )
+
+        cls.put_data = {
+            'specific_question_answers': {
+                'fe254203-17c7-47d6-95e4-3c5c532da551': 'My answer !',
+            },
+            'curriculum': ['file1.pdf'],
+        }
+
+        # Users
+        cls.user = cls.admission.candidate.user
+
+        # Targeted urls
+        cls.admission_url = resolve_url('general_curriculum', uuid=cls.admission.uuid)
+
+    def test_put_curriculum(self):
+        self.client.force_authenticate(user=self.user)
+
+        response = self.client.put(self.admission_url, data=self.put_data)
+
+        self.assertEqual(response.status_code, HTTP_200_OK)
+        updated_admission = BaseAdmission.objects.get(uuid=self.admission.uuid)
+
+        self.assertEqual(updated_admission.specific_question_answers, {
+            'fe254203-17c7-47d6-95e4-3c5c532da551': 'My answer !',
+        })
+        self.assertEqual(updated_admission.candidate.curriculum, [uuid.UUID('550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92')])
+
+
+@override_settings(ROOT_URLCONF='admission.api.url_v1', OSIS_DOCUMENT_BASE_URL='http://dummyurl/')
+class ContinuingEducationCurriculumTestCase(BaseCurriculumTestCase, APITestCase):
+    @classmethod
+    def setUpTestData(cls) -> None:
+        super().setUpTestData()
+        cls.admission = ContinuingEducationAdmissionFactory()
+        AdmissionFormItemInstantiationFactory(
+            form_item=TextAdmissionFormItemFactory(
+                uuid=uuid.UUID('fe254203-17c7-47d6-95e4-3c5c532da551'),
+                internal_label='text_item',
+            ),
+            academic_year=cls.admission.training.academic_year,
+        )
+
+        cls.put_data = {
+            'specific_question_answers': {
+                'fe254203-17c7-47d6-95e4-3c5c532da551': 'My answer !',
+            },
+            'curriculum': ['file1.pdf'],
+        }
+
+        # Users
+        cls.user = cls.admission.candidate.user
+
+        # Targeted urls
+        cls.admission_url = resolve_url('continuing_curriculum', uuid=cls.admission.uuid)
+
+    def test_put_curriculum(self):
+        self.client.force_authenticate(user=self.user)
+
+        response = self.client.put(self.admission_url, data=self.put_data)
+
+        self.assertEqual(response.status_code, HTTP_200_OK)
+        updated_admission = BaseAdmission.objects.get(uuid=self.admission.uuid)
+
+        self.assertEqual(updated_admission.specific_question_answers, {
+            'fe254203-17c7-47d6-95e4-3c5c532da551': 'My answer !',
+        })
+        self.assertEqual(updated_admission.candidate.curriculum, [uuid.UUID('550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92')])
 
 
 @override_settings(ROOT_URLCONF='admission.api.url_v1')

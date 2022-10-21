@@ -9,6 +9,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils.translation import gettext_lazy as _
 
+from admission.contrib.models.form_item import ConfigurableModelFormItemField
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
@@ -16,6 +17,15 @@ from base.models.education_group_year import EducationGroupYear
 from base.models.enums.education_group_categories import Categories
 from base.models.person import Person
 from program_management.models.education_group_version import EducationGroupVersion
+
+
+def admission_directory_path(admission: 'BaseAdmission', filename: str):
+    """Return the file upload directory path."""
+    return 'admission/{}/{}/{}'.format(
+        admission.candidate.uuid,
+        admission.uuid,
+        filename,
+    )
 
 
 class BaseAdmission(models.Model):
@@ -61,6 +71,14 @@ class BaseAdmission(models.Model):
         verbose_name=_("Training"),
         related_name="+",
         on_delete=models.CASCADE,
+    )
+
+    specific_question_answers = ConfigurableModelFormItemField(
+        blank=True,
+        default=dict,
+        encoder=DjangoJSONEncoder,
+        upload_to=admission_directory_path,
+        education_field_name='training',
     )
 
     def save(self, *args, **kwargs) -> None:
@@ -109,12 +127,3 @@ class BaseAdmissionQuerySet(models.QuerySet):
                 .values('campus_name')[:1]
             )
         )
-
-
-def admission_directory_path(admission: BaseAdmission, filename: str):
-    """Return the file upload directory path."""
-    return 'admission/{}/{}/{}'.format(
-        admission.candidate.uuid,
-        admission.uuid,
-        filename,
-    )

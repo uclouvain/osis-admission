@@ -44,7 +44,10 @@ def modifier_choix_formation(
     proposition = proposition_repository.get(PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition))
 
     # WHEN
-    proposition.modifier_choix_formation(formation_id=formation.entity_id)
+    proposition.modifier_choix_formation(
+        formation_id=formation.entity_id,
+        reponses_questions_specifiques=cmd.reponses_questions_specifiques,
+    )
 
     # THEN
     proposition_repository.save(proposition)

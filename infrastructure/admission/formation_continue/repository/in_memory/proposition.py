@@ -130,4 +130,5 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
                 intitule=formation.intitule,
                 campus=formation.campus,
             ),
+            reponses_questions_specifiques=proposition.reponses_questions_specifiques,
         )

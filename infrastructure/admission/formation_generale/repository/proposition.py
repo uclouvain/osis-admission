@@ -44,7 +44,6 @@ from admission.ddd.admission.formation_generale.domain.validator.exceptions impo
 from admission.ddd.admission.formation_generale.dtos import PropositionDTO
 from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
 from admission.infrastructure.admission.domain.service.bourse import BourseTranslator
-from admission.infrastructure.admission.formation_generale.domain.service.formation import FormationGeneraleTranslator
 from base.models.education_group_year import EducationGroupYear
 from base.models.person import Person
 from osis_common.ddd.interface import ApplicationService
@@ -120,6 +119,7 @@ class PropositionRepository(IPropositionRepository):
                 'international_scholarship': scholarships.get(TypeBourse.BOURSE_INTERNATIONALE_FORMATION_GENERALE.name),
                 'erasmus_mundus_scholarship': scholarships.get(TypeBourse.ERASMUS_MUNDUS.name),
                 'status': entity.statut.name,
+                'specific_question_answers': entity.reponses_questions_specifiques,
             },
         )
 
@@ -153,6 +153,7 @@ class PropositionRepository(IPropositionRepository):
             bourse_erasmus_mundus_id=BourseIdentity(uuid=str(admission.erasmus_mundus_scholarship.uuid))
             if admission.erasmus_mundus_scholarship
             else None,
+            reponses_questions_specifiques=admission.specific_question_answers,
         )
 
     @classmethod
@@ -183,4 +184,5 @@ class PropositionRepository(IPropositionRepository):
             bourse_erasmus_mundus=BourseTranslator.build_dto(admission.erasmus_mundus_scholarship)
             if admission.erasmus_mundus_scholarship
             else None,
+            reponses_questions_specifiques=admission.specific_question_answers,
         )

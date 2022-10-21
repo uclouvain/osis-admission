@@ -32,9 +32,9 @@ from admission.contrib.models import GeneralEducationAdmission
 from admission.tests.factories.person import CompletePersonFactory, CompletePersonForBachelorFactory
 from admission.tests.factories.roles import CandidateFactory
 from admission.tests.factories.scholarship import (
-    ErasmusMundusScholarship,
-    DoubleDegreeScholarship,
-    InternationalScholarship,
+    ErasmusMundusScholarshipFactory,
+    DoubleDegreeScholarshipFactory,
+    InternationalScholarshipFactory,
 )
 from base.models.enums import education_group_categories
 from base.models.enums.education_group_types import TrainingType
@@ -61,9 +61,9 @@ class GeneralEducationAdmissionFactory(factory.DjangoModelFactory):
 
     candidate = factory.SubFactory(PersonFactory)
     training = factory.SubFactory(GeneralEducationTrainingFactory)
-    erasmus_mundus_scholarship = factory.SubFactory(ErasmusMundusScholarship)
-    double_degree_scholarship = factory.SubFactory(DoubleDegreeScholarship)
-    international_scholarship = factory.SubFactory(InternationalScholarship)
+    erasmus_mundus_scholarship = factory.SubFactory(ErasmusMundusScholarshipFactory)
+    double_degree_scholarship = factory.SubFactory(DoubleDegreeScholarshipFactory)
+    international_scholarship = factory.SubFactory(InternationalScholarshipFactory)
 
     @factory.post_generation
     def create_candidate_role(self, create, extracted, **kwargs):

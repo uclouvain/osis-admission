@@ -144,4 +144,5 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
             bourse_internationale=BourseInMemoryTranslator.get_dto(proposition.bourse_internationale_id.uuid)
             if proposition.bourse_internationale_id
             else None,
+            reponses_questions_specifiques=proposition.reponses_questions_specifiques,
         )

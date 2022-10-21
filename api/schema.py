@@ -372,7 +372,11 @@ class ResponseSpecificSchema(DetailedAutoSchema):
             self.serializer_mapping = serializer_mapping
 
     def get_serializer(self, path, method, for_response=True):
-        serializer_class = self.serializer_mapping.get(method, None)
+        view_serializer_mapping = getattr(self.view, 'serializer_mapping', None)
+        if view_serializer_mapping is not None:
+            serializer_class = view_serializer_mapping.get(method)
+        else:
+            serializer_class = self.serializer_mapping.get(method, None)
         if serializer_class and isinstance(serializer_class, tuple):
             if for_response:
                 serializer_class = serializer_class[1]

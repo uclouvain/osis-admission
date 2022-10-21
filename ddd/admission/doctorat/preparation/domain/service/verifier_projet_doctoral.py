@@ -24,6 +24,7 @@
 #
 # ##############################################################################
 from functools import partial
+from typing import List
 
 from admission.ddd.admission.doctorat.preparation.domain.model.groupe_de_supervision import GroupeDeSupervision
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition
@@ -34,6 +35,8 @@ from admission.ddd.admission.doctorat.preparation.domain.service.verifier_cotute
 from admission.ddd.admission.doctorat.preparation.domain.service.verifier_promoteur import (
     GroupeDeSupervisionPossedeUnPromoteurMinimum,
 )
+from admission.ddd.admission.domain.model.question_specifique import QuestionSpecifique
+from admission.ddd.admission.domain.service.verifier_questions_specifiques import VerifierQuestionsSpecifiques
 from base.ddd.utils.business_validator import execute_functions_and_aggregate_exceptions
 from osis_common.ddd import interface
 
@@ -44,6 +47,7 @@ class VerifierProjetDoctoral(interface.DomainService):
         cls,
         proposition_candidat: Proposition,
         groupe_de_supervision: GroupeDeSupervision,
+        questions_specifiques: List[QuestionSpecifique],
         promoteur_translator: IPromoteurTranslator,
     ) -> None:
         execute_functions_and_aggregate_exceptions(
@@ -52,4 +56,9 @@ class VerifierProjetDoctoral(interface.DomainService):
             partial(GroupeDeSupervisionPossedeUnPromoteurMinimum.verifier, groupe_de_supervision, promoteur_translator),
             partial(CotutellePossedePromoteurExterne.verifier, groupe_de_supervision, promoteur_translator),
             groupe_de_supervision.verifier_signataires,
+            partial(
+                VerifierQuestionsSpecifiques.verifier_onglet_choix_formation,
+                proposition_candidat,
+                questions_specifiques,
+            ),
         )

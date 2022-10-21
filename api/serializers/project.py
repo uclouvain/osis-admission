@@ -23,7 +23,6 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
 from rest_framework import serializers
 
 from admission.api.serializers.fields import (
@@ -32,6 +31,7 @@ from admission.api.serializers.fields import (
     RelatedInstituteField,
     CONTINUING_EDUCATION_ACTION_LINKS,
     GENERAL_EDUCATION_ACTION_LINKS,
+    AnswerToSpecificQuestionField,
 )
 from admission.api.serializers.mixins import IncludedFieldsMixin
 from admission.contrib.models import AdmissionType, DoctorateAdmission
@@ -150,6 +150,7 @@ class DoctoratePropositionSearchDTOSerializer(IncludedFieldsMixin, DTOSerializer
 
     # This is to prevent schema from breaking on JSONField
     erreurs = None
+    reponses_questions_specifiques = None
 
     class Meta:
         source = DoctoratPropositionDTO
@@ -190,6 +191,7 @@ class GeneralEducationPropositionSearchDTOSerializer(IncludedFieldsMixin, DTOSer
 
     # This is to prevent schema from breaking on JSONField
     erreurs = None
+    reponses_questions_specifiques = None
 
     class Meta:
         source = FormationGeneralePropositionDTO
@@ -226,6 +228,7 @@ class ContinuingEducationPropositionSearchDTOSerializer(IncludedFieldsMixin, DTO
 
     # This is to prevent schema from breaking on JSONField
     erreurs = None
+    reponses_questions_specifiques = None
 
     class Meta:
         source = FormationContinuePropositionDTO
@@ -306,6 +309,8 @@ class DoctoratePropositionDTOSerializer(IncludedFieldsMixin, DTOSerializer):
             'retrieve_course_enrollment': DOCTORATE_ACTION_LINKS['retrieve_course_enrollment'],
         }
     )
+    reponses_questions_specifiques = AnswerToSpecificQuestionField()
+
     # The schema is explicit in PropositionSchema
     erreurs = serializers.JSONField()
 
@@ -350,6 +355,7 @@ class DoctoratePropositionDTOSerializer(IncludedFieldsMixin, DTOSerializer):
             'erreurs',
             'comptabilite',
             'bourse_erasmus_mundus',
+            'reponses_questions_specifiques',
         ]
 
 
@@ -376,6 +382,7 @@ class GeneralEducationPropositionDTOSerializer(IncludedFieldsMixin, DTOSerialize
             ]
         }
     )
+    reponses_questions_specifiques = AnswerToSpecificQuestionField()
     erreurs = serializers.JSONField()
 
     def __init__(self, **kwargs):
@@ -398,6 +405,7 @@ class GeneralEducationPropositionDTOSerializer(IncludedFieldsMixin, DTOSerialize
             'bourse_double_diplome',
             'bourse_internationale',
             'bourse_erasmus_mundus',
+            'reponses_questions_specifiques',
         ]
 
 
@@ -424,6 +432,8 @@ class ContinuingEducationPropositionDTOSerializer(IncludedFieldsMixin, DTOSerial
             ]
         }
     )
+    reponses_questions_specifiques = AnswerToSpecificQuestionField()
+
     erreurs = serializers.JSONField()
 
     def __init__(self, **kwargs):
@@ -442,6 +452,7 @@ class ContinuingEducationPropositionDTOSerializer(IncludedFieldsMixin, DTOSerial
             'statut',
             'links',
             'erreurs',
+            'reponses_questions_specifiques',
         ]
 
 

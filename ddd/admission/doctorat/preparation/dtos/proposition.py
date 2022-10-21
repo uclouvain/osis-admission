@@ -24,7 +24,7 @@
 #
 ##############################################################################
 import datetime
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 from uuid import UUID
 
 import attr
@@ -80,3 +80,4 @@ class PropositionDTO(interface.DTO):
     erreurs: List[Dict[str, str]]
     comptabilite: ComptabiliteDTO
     bourse_erasmus_mundus: Optional[BourseDTO]
+    reponses_questions_specifiques: Dict[str, Union[str, List[str]]]

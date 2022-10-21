@@ -27,6 +27,8 @@
 import attr
 from unittest import TestCase
 
+from mock import mock
+
 from admission.ddd.admission.doctorat.preparation.commands import VerifierProjetCommand
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     CotutelleDoitAvoirAuMoinsUnPromoteurExterneException,
@@ -39,6 +41,12 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
     PropositionNonTrouveeException,
 )
 from admission.ddd.admission.doctorat.preparation.test.factory.person import PersonneConnueUclDTOFactory
+from admission.ddd.admission.domain.validator.exceptions import (
+    QuestionsSpecifiquesChoixFormationNonCompleteesException,
+)
+from admission.infrastructure.admission.doctorat.preparation.repository.in_memory.proposition import (
+    PropositionInMemoryRepository,
+)
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from infrastructure.shared_kernel.personne_connue_ucl.in_memory.personne_connue_ucl import (
@@ -126,3 +134,16 @@ class TestVerifierPropositionService(TestCase):
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(cmd)
         self.assertIsInstance(context.exception.exceptions.pop(), MembreCAManquantException)
+
+    def test_should_retourner_erreur_si_questions_specifiques_pas_completees(self):
+        proposition = next(
+            (p for p in PropositionInMemoryRepository.entities if p.entity_id.uuid == self.uuid_proposition),
+            None,
+        )
+        with mock.patch.multiple(proposition, reponses_questions_specifiques={}):
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                self.message_bus.invoke(self.cmd)
+            self.assertIsInstance(
+                context.exception.exceptions.pop(),
+                QuestionsSpecifiquesChoixFormationNonCompleteesException,
+            )

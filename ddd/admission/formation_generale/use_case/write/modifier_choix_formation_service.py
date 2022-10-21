@@ -59,6 +59,7 @@ def modifier_choix_formation(
         bourse_double_diplome=cmd.bourse_double_diplome,
         bourse_internationale=cmd.bourse_internationale,
         bourse_erasmus_mundus=cmd.bourse_erasmus_mundus,
+        reponses_questions_specifiques=cmd.reponses_questions_specifiques,
     )
 
     # THEN
