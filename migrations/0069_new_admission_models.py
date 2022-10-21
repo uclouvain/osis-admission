@@ -11,7 +11,7 @@ class Migration(migrations.Migration):
     dependencies = [
         ('base', '0636_alter_academiccalendar_reference'),
         ('osis_profile', '0015_alter_educationalexperience_study_system'),
-        ('admission', '0067_scholarship'),
+        ('admission', '0068_scholarship'),
     ]
 
     operations = [
