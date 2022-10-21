@@ -1,4 +1,4 @@
-{% load i18n osis_document admission %}
+{% load i18n osis_document admission enums %}
 
 {% comment "License" %}
   * OSIS stands for Open Student Information System. It's an application
@@ -24,49 +24,30 @@
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
 
-{% url "admission:doctorate:training:edit" pk=view.kwargs.pk activity_id=activity.uuid as edit_url %}
-{% url "admission:doctorate:training:delete" pk=view.kwargs.pk activity_id=activity.uuid as delete_url %}
-
 {% if activity.website %}
-  {% firstof '<a href="'|safe|add:activity.website|add:'">'|safe|add:activity.website|add:'</a>'|safe "" as website %}
+  {% firstof '<a href="'|safe|add:activity.website|add:'" target="_blank">'|safe|add:activity.website|add:'</a>'|safe "" as website %}
 {% endif %}
 
-{% display '(' activity.city "," activity.country "," activity.start_date|date:"d/m/Y" ")" as location_period %}
+{% display activity.city "," activity.country as location %}
+{% display activity.start_date|date:"d/m/Y" as period %}
 
 <div class="panel-heading" role="tab" id="h-{{ activity.uuid }}">
   <h3 class="panel-title">
-    <a role="button" data-toggle="collapse" data-parent="#accordion" href="#a-{{ activity.uuid }}"
-       aria-expanded="false" aria-controls="a-{{ activity.uuid }}" class="collapsed"></a>
-    <span class="badge">{{ activity.get_status_display }}</span>
-    <div class="btn-group btn-group-sm pull-right">
-      <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
-              aria-expanded="false">
-        {% trans "Actions" %} <span class="caret"></span>
-      </button>
-      <ul class="dropdown-menu">
-        <li>
-          <a href="{{ edit_url }}">
-            {% trans "Edit" %}
-          </a>
-        <li>
-          <a href="{{ delete_url }}">
-            {% trans "Delete" %}
-          </a>
-        </li>
-      </ul>
-    </div>
-
-    {% display activity.title '-' location_period %}
+    {% include "admission/doctorate/details/training/_panel_title.html" with remove_batch_action=True %}
+    {% include "admission/doctorate/details/training/_activity_title.html" %}
     <div class="clearfix"></div>
   </h3>
 </div>
-<div id="a-{{ activity.uuid }}" class="panel-collapse collapse" role="tabpanel"
-     aria-labelledby="h-{{ activity.uuid }}">
+<div
+  id="a-{{ activity.uuid }}"
+  class="panel-collapse collapse"
+  role="tabpanel"
+  aria-labelledby="h-{{ activity.uuid }}"
+>
   <div class="panel-body">
     <p>
-      {% display activity.title " " location_period  "-" activity.get_is_online_display "-" website %}
-      <br/>
-      {% display activity.organizing_institution "," activity.authors %}
+      {% display activity.authors "<br/>"|safe activity.title "<br/>"|safe location "<br/>"|safe period "<br/>"|safe %}
+      {% display activity.is_online|format_is_online "-" website "<br/>"|safe activity.organizing_institution %}
     </p>
     {% if activity.participating_proof %}
       <div class="form-group">

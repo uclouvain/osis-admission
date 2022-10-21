@@ -30,31 +30,40 @@ from rest_framework.response import Response
 from rest_framework.settings import api_settings
 
 from admission.api import serializers
-from admission.api.permissions import IsListingOrHasNotAlreadyCreatedPermission, IsSupervisionMember
+from admission.api.permissions import IsListingOrHasNotAlreadyCreatedForDoctoratePermission, IsSupervisionMember
 from admission.api.schema import ResponseSpecificSchema
 from admission.contrib.models import DoctorateAdmission
-from admission.ddd.projet_doctoral.preparation.commands import (
+from admission.ddd.admission.doctorat.preparation.commands import (
     CompleterPropositionCommand,
     GetPropositionCommand,
     InitierPropositionCommand,
-    ListerPropositionsCandidatQuery,
+    ListerPropositionsCandidatQuery as ListerPropositionsDoctoralesCandidatQuery,
     ListerPropositionsSuperviseesQuery,
     SoumettrePropositionCommand,
     SupprimerPropositionCommand,
     VerifierProjetCommand,
     VerifierPropositionCommand,
 )
-from admission.ddd.projet_doctoral.preparation.domain.validator.exceptions import (
-    CommissionProximiteInconsistantException,
-    ContratTravailInconsistantException,
-    InstitutionInconsistanteException,
-    JustificationRequiseException,
+from admission.ddd.admission.formation_continue.commands import (
+    ListerPropositionsCandidatQuery as ListerPropositionsFormationContinueCandidatQuery,
 )
-from admission.ddd.projet_doctoral.validation.commands import ApprouverDemandeCddCommand
+from admission.ddd.admission.formation_generale.commands import (
+    ListerPropositionsCandidatQuery as ListerPropositionsFormationGeneraleCandidatQuery,
+)
+from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import JustificationRequiseException
+from admission.ddd.admission.doctorat.validation.commands import ApprouverDemandeCddCommand
 from admission.utils import gather_business_exceptions, get_cached_admission_perm_obj
 from backoffice.settings.rest_framework.common_views import DisplayExceptionsByFieldNameAPIMixin
 from infrastructure.messages_bus import message_bus_instance
 from osis_role.contrib.views import APIPermissionRequiredMixin
+
+__all__ = [
+    "PropositionListView",
+    "SupervisedPropositionListView",
+    "PropositionViewSet",
+    "VerifyProjectView",
+    "SubmitPropositionViewSet",
+]
 
 
 class PropositionListSchema(ResponseSpecificSchema):
@@ -81,26 +90,33 @@ class PropositionListView(APIPermissionRequiredMixin, DisplayExceptionsByFieldNa
     schema = PropositionListSchema()
     pagination_class = None
     filter_backends = []
-    permission_classes = [IsListingOrHasNotAlreadyCreatedPermission]
+    permission_classes = [IsListingOrHasNotAlreadyCreatedForDoctoratePermission]
 
     field_name_by_exception = {
         JustificationRequiseException: ['justification'],
-        InstitutionInconsistanteException: ['institution'],
-        ContratTravailInconsistantException: ['type_contrat_travail'],
-        CommissionProximiteInconsistantException: ['commission_proximite'],
     }
 
     def list(self, request, **kwargs):
         """List the propositions of the logged in user"""
-        proposition_list = message_bus_instance.invoke(
-            ListerPropositionsCandidatQuery(matricule_candidat=request.user.person.global_id),
+        candidate_global_id = request.user.person.global_id
+
+        doctorate_list, general_education_list, continuing_education_list = message_bus_instance.invoke_multiple(
+            [
+                ListerPropositionsDoctoralesCandidatQuery(matricule_candidat=candidate_global_id),
+                ListerPropositionsFormationGeneraleCandidatQuery(matricule_candidat=candidate_global_id),
+                ListerPropositionsFormationContinueCandidatQuery(matricule_candidat=candidate_global_id),
+            ]
         )
+
         serializer = serializers.PropositionSearchSerializer(
             instance={
-                "propositions": proposition_list,
+                "doctorate_propositions": doctorate_list,
+                "general_education_propositions": general_education_list,
+                "continuing_education_propositions": continuing_education_list,
             },
             context=self.get_serializer_context(),
         )
+
         return Response(serializer.data)
 
     def create(self, request, **kwargs):
@@ -116,7 +132,7 @@ class PropositionListView(APIPermissionRequiredMixin, DisplayExceptionsByFieldNa
 class SupervisedPropositionListSchema(ResponseSpecificSchema):
     operation_id_base = '_supervised_propositions'
     serializer_mapping = {
-        'GET': serializers.PropositionSearchDTOSerializer,
+        'GET': serializers.DoctoratePropositionSearchDTOSerializer,
     }
 
 
@@ -132,7 +148,7 @@ class SupervisedPropositionListView(APIPermissionRequiredMixin, ListAPIView):
         proposition_list = message_bus_instance.invoke(
             ListerPropositionsSuperviseesQuery(matricule_membre=request.user.person.global_id),
         )
-        serializer = serializers.PropositionSearchDTOSerializer(
+        serializer = serializers.DoctoratePropositionSearchDTOSerializer(
             instance=proposition_list,
             context=self.get_serializer_context(),
             many=True,
@@ -143,7 +159,7 @@ class SupervisedPropositionListView(APIPermissionRequiredMixin, ListAPIView):
 class PropositionSchema(ResponseSpecificSchema):
     operation_id_base = '_proposition'
     serializer_mapping = {
-        'GET': serializers.PropositionDTOSerializer,
+        'GET': serializers.DoctoratePropositionDTOSerializer,
         'PUT': (serializers.CompleterPropositionCommandSerializer, serializers.PropositionIdentityDTOSerializer),
         'DELETE': serializers.PropositionIdentityDTOSerializer,
     }
@@ -157,17 +173,7 @@ class PropositionSchema(ResponseSpecificSchema):
 
     def map_field(self, field):
         if field.field_name == 'erreurs':
-            return {
-                "type": "array",
-                "items": {
-                    "type": "object",
-                    "properties": {
-                        "status_code": {"type": "string"},
-                        "detail": {"type": "string"},
-                    },
-                },
-            }
-
+            return serializers.PROPOSITION_ERROR_SCHEMA
         return super().map_field(field)
 
 
@@ -195,7 +201,7 @@ class PropositionViewSet(
         proposition = message_bus_instance.invoke(
             GetPropositionCommand(uuid_proposition=kwargs.get('uuid')),
         )
-        serializer = serializers.PropositionDTOSerializer(
+        serializer = serializers.DoctoratePropositionDTOSerializer(
             instance=proposition,
             context=self.get_serializer_context(),
         )

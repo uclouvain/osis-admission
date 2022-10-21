@@ -23,11 +23,15 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
+from django.contrib import messages
+from django.utils.translation import gettext_lazy as _
+
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 
 
 class BusinessExceptionFormViewMixin:
     error_mapping = {}
+    message_on_success = _('Your data has been saved')
 
     def __init__(self, *args, **kwargs):
         self._error_mapping = {exc.value: field for exc, field in self.error_mapping.items()}
@@ -39,10 +43,12 @@ class BusinessExceptionFormViewMixin:
     def form_valid(self, form):
         try:
             self.call_command(form=form)
+            messages.success(self.request, self.message_on_success)
         except MultipleBusinessExceptions as multiple_exceptions:
+            messages.error(self.request, _("Some errors have been encountered."))
             for exception in multiple_exceptions.exceptions:
                 status_code = getattr(exception, 'status_code', None)
                 form.add_error(self._error_mapping.get(status_code), exception.message)
-            return self.form_invalid(form)
+            return self.form_invalid(form=form)
 
         return super().form_valid(form=form)

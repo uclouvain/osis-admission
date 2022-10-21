@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -38,10 +38,16 @@ from admission.auth.roles.promoter import Promoter
 from admission.auth.roles.sceb import Sceb
 from admission.auth.roles.sic_director import SicDirector
 from admission.auth.roles.sic_manager import SicManager
-from admission.contrib.models import CddMailTemplate, DoctorateAdmission
+from admission.contrib.models import (
+    CddMailTemplate,
+    DoctorateAdmission,
+    Scholarship,
+)
+from admission.contrib.models.cdd_config import CddConfiguration
+from admission.contrib.models.doctoral_training import Activity
+from admission.ddd.parcours_doctoral.formation.domain.model.enums import CategorieActivite
 from osis_mail_template.admin import MailTemplateAdmin
 
-from osis_profile.models.curriculum import CurriculumYear, Experience
 from osis_role.contrib.admin import RoleModelAdmin
 
 # ##############################################################################
@@ -63,21 +69,19 @@ class DoctorateAdmissionAdmin(admin.ModelAdmin):
         "cotutelle_convention",
         "cotutelle_other_documents",
         "detailed_status",
+        "submitted_profile",
+        "pre_admission_submission_date",
+        "admission_submission_date",
+        "professional_valuated_experiences",
+        "educational_valuated_experiences",
+        "scholarship_proof",
     ]
+    exclude = ["valuated_experiences"]
 
     def candidate_fmt(self, obj):
         return "{} ({global_id})".format(obj.candidate, global_id=obj.candidate.global_id)
 
     candidate_fmt.short_description = _("Candidate")
-
-
-class ExperienceInlineAdmin(admin.TabularInline):
-    model = Experience
-
-
-class CurriculumYearAdmin(admin.ModelAdmin):
-    inlines = [ExperienceInlineAdmin]
-    autocomplete_fields = ["person"]
 
 
 class CddMailTemplateAdmin(MailTemplateAdmin):
@@ -93,9 +97,119 @@ class CddMailTemplateAdmin(MailTemplateAdmin):
     ]
 
 
+class ScholarshipAdmin(admin.ModelAdmin):
+    list_display = [
+        'short_name',
+        'long_name',
+    ]
+    search_fields = [
+        'short_name',
+        'long_name',
+    ]
+    list_filter = [
+        'type',
+    ]
+    fields = [
+        'type',
+        'short_name',
+        'long_name',
+        'deleted',
+    ]
+
+
 admin.site.register(DoctorateAdmission, DoctorateAdmissionAdmin)
-admin.site.register(CurriculumYear, CurriculumYearAdmin)
 admin.site.register(CddMailTemplate, CddMailTemplateAdmin)
+admin.site.register(CddConfiguration)
+admin.site.register(Scholarship, ScholarshipAdmin)
+
+
+class ActivityAdmin(admin.ModelAdmin):
+    list_display = ('uuid', 'context', 'get_category', 'ects', 'modified_at', 'status', 'is_course_completed')
+    search_fields = ['doctorate__uuid', 'doctorate__reference']
+    list_filter = [
+        'context',
+        'category',
+        'status',
+    ]
+    fields = [
+        'doctorate',
+        'category',
+        'parent',
+        'ects',
+        'course_completed',
+        "type",
+        "title",
+        "participating_proof",
+        "comment",
+        "start_date",
+        "end_date",
+        "participating_days",
+        "is_online",
+        "country",
+        "city",
+        "organizing_institution",
+        "website",
+        "committee",
+        "dial_reference",
+        "acceptation_proof",
+        "summary",
+        "subtype",
+        "subtitle",
+        "authors",
+        "role",
+        "keywords",
+        "journal",
+        "publication_status",
+        "hour_volume",
+        "learning_unit_year",
+        "can_be_submitted",
+    ]
+    readonly_fields = [
+        'doctorate',
+        'category',
+        'parent',
+        "type",
+        "title",
+        "participating_proof",
+        "comment",
+        "start_date",
+        "end_date",
+        "participating_days",
+        "is_online",
+        "country",
+        "city",
+        "organizing_institution",
+        "website",
+        "committee",
+        "dial_reference",
+        "acceptation_proof",
+        "summary",
+        "subtype",
+        "subtitle",
+        "authors",
+        "role",
+        "keywords",
+        "journal",
+        "publication_status",
+        "hour_volume",
+        "learning_unit_year",
+        "can_be_submitted",
+    ]
+    list_select_related = ['doctorate', 'parent']
+
+    @admin.display(description=_('Course completed'), boolean=True)
+    def is_course_completed(self, obj: Activity):
+        if obj.category == CategorieActivite.UCL_COURSE.name:
+            return obj.course_completed
+
+    @admin.display(description=_('Category'))
+    def get_category(self, obj: Activity):
+        if obj.parent_id:
+            return f"({obj.parent.category}) {obj.category}"
+        return obj.category
+
+
+admin.site.register(Activity, ActivityAdmin)
 
 
 # ##############################################################################

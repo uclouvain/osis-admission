@@ -27,10 +27,15 @@
 
 
 {% block tab_content %}
+  {% url request.resolver_match.namespace uuid=view.kwargs.uuid as back_url %}
+  <h3>
+    {% blocktrans trimmed %}Are you sure you want to delete "{{ object }}"?{% endblocktrans %}
+  </h3>
+  <p>{% trans "This activity and potential sub-activities will be deleted" %}</p>
   <form action="" method="post">
     {% csrf_token %}
     <div class="text-right">
-      <a href="{% url "admission:doctorate:training" pk=view.kwargs.pk %}">
+      <a href="{{ back_url }}#{{ view.kwargs.activity_id }}">
         {% trans "Cancel" %}
       </a>
       <button type="submit" class="btn btn-danger">

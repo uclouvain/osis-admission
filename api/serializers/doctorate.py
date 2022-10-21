@@ -26,7 +26,7 @@
 from rest_framework import serializers
 
 from admission.api.serializers.fields import ActionLinksField, ACTION_LINKS
-from admission.ddd.projet_doctoral.doctorat.dtos import DoctoratDTO
+from admission.ddd.parcours_doctoral.dtos import DoctoratDTO
 from base.utils.serializers import DTOSerializer
 
 
@@ -48,9 +48,14 @@ class DoctorateDTOSerializer(DTOSerializer):
                 # Confirmation
                 'retrieve_confirmation',
                 'update_confirmation',
+                'update_confirmation_extension',
                 # Training
-                'retrieve_training',
+                'retrieve_doctoral_training',
+                'retrieve_complementary_training',
+                'retrieve_course_enrollment',
                 'add_training',
+                'submit_training',
+                'assent_training',
             ]
         }
     )

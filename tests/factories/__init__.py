@@ -34,6 +34,7 @@ from .doctorate import DoctorateAdmissionFactory
 
 __all__ = [
     "DoctorateAdmissionFactory",
+    "WriteTokenFactory",
 ]
 
 
@@ -45,7 +46,7 @@ class PdfUploadFactory(factory.django.DjangoModelFactory):
     size = 1024
     mimetype = 'application/pdf'
     metadata = {
-        'md5': '5eb63bbbe01eeed093cb22bb8f5acdc3',
+        'hash': 'b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9',
         'name': 'the_file.pdf',
     }
 

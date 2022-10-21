@@ -24,44 +24,55 @@
 #
 # ##############################################################################
 import datetime
+import uuid
 from unittest import mock
 from unittest.mock import patch
 
 from django.shortcuts import resolve_url
 from django.test import override_settings
-from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
 from admission.contrib.models import AdmissionType, DoctorateAdmission
-from admission.ddd.projet_doctoral.doctorat.domain.model.enums import ChoixStatutDoctorat
-from admission.ddd.projet_doctoral.preparation.domain.model._detail_projet import ChoixLangueRedactionThese
-from admission.ddd.projet_doctoral.preparation.domain.model._enums import (
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixCommissionProximiteCDEouCLSM,
     ChoixCommissionProximiteCDSS,
+    ChoixLangueRedactionThese,
     ChoixSousDomaineSciences,
     ChoixStatutProposition,
+    ChoixTypeFinancement,
 )
-from admission.ddd.projet_doctoral.preparation.domain.model._financement import ChoixTypeFinancement
-from admission.ddd.projet_doctoral.preparation.domain.validator.exceptions import (
+from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
+    AbsenceDeDetteNonCompleteeException,
     DoctoratNonTrouveException,
     MembreCAManquantException,
+    PromoteurDeReferenceManquantException,
     PromoteurManquantException,
 )
-from admission.ddd.projet_doctoral.validation.domain.model._enums import ChoixStatutCDD
-from admission.tests import QueriesAssertionsMixin
+from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixStatutCDD
+from admission.ddd.admission.domain.validator.exceptions import BourseNonTrouveeException
+from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
+from admission.tests import QueriesAssertionsMixin, CheckActionLinksMixin
 from admission.tests.factories import DoctorateAdmissionFactory, WriteTokenFactory
+from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
 from admission.tests.factories.doctorate import DoctorateFactory
+from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.person import CompletePersonFactory
 from admission.tests.factories.roles import CandidateFactory, CddManagerFactory
+from admission.tests.factories.scholarship import ErasmusMundusScholarship
 from admission.tests.factories.supervision import CaMemberFactory, PromoterFactory, _ProcessFactory
+from base.models.enums.community import CommunityEnum
 from base.models.enums.entity_type import EntityType
+from base.tests.factories.academic_year import AcademicYearFactory, get_current_year
 from base.tests.factories.entity_version import EntityVersionFactory
+from base.tests.factories.organization import OrganizationFactory
 from base.tests.factories.person import PersonFactory
+from osis_profile.tests.factories.curriculum import EducationalExperienceFactory, EducationalExperienceYearFactory
 from osis_signature.enums import SignatureState
+from reference.tests.factories.country import CountryFactory
 
 
-class DoctorateAdmissionListApiTestCase(APITestCase):
+class DoctorateAdmissionListApiTestCase(CheckActionLinksMixin, APITestCase):
     @classmethod
     def setUpTestData(cls):
         # Create supervision group members
@@ -88,6 +99,20 @@ class DoctorateAdmissionListApiTestCase(APITestCase):
         cls.other_admission = DoctorateAdmissionFactory(
             status=ChoixStatutProposition.IN_PROGRESS.name,
         )
+        cls.general_education_admission = GeneralEducationAdmissionFactory(
+            candidate=cls.admission.candidate,
+        )
+        cls.general_campus_name = (
+            cls.general_education_admission.training.educationgroupversion_set.first()
+            .root_group.main_teaching_campus.name
+        )
+        cls.continuing_education_admission = ContinuingEducationAdmissionFactory(
+            candidate=cls.admission.candidate,
+        )
+        cls.continuing_campus_name = (
+            cls.continuing_education_admission.training.educationgroupversion_set.first()
+            .root_group.main_teaching_campus.name
+        )
         # Users
         cls.candidate = cls.admission.candidate
         cls.other_candidate = cls.other_admission.candidate
@@ -98,36 +123,133 @@ class DoctorateAdmissionListApiTestCase(APITestCase):
 
         cls.url = resolve_url("admission_api_v1:propositions")
 
-    def test_list_propositions_candidate(self):
+    def test_list_propositions_candidate_for_global_links(self):
         self.client.force_authenticate(user=self.candidate.user)
+
         response = self.client.get(self.url, format="json")
+
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
+
         # Check response data
-        # Global links
         self.assertTrue('links' in response.data)
-        self.assertContains(response, 'SST')
-        self.assertTrue('create_proposition' in response.data['links'])
+
+        self.assertActionLinks(
+            response.data['links'],
+            allowed_actions=[
+                'create_doctorate_proposition',
+                'create_general_proposition',
+                'create_continuing_proposition',
+            ],
+            forbidden_actions=[],
+        )
+
+    def test_list_propositions_candidate_for_general_education(self):
+        self.client.force_authenticate(user=self.candidate.user)
+
+        response = self.client.get(self.url, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
+
+        # Check response data
+        self.assertTrue('general_education_propositions' in response.data)
+        self.assertEqual(len(response.data['general_education_propositions']), 1)
+        proposition = response.data['general_education_propositions'][0]
+
+        self.assertEqual(proposition['uuid'], str(self.general_education_admission.uuid))
+        self.assertEqual(proposition['matricule_candidat'], self.general_education_admission.candidate.global_id)
+        self.assertEqual(proposition['prenom_candidat'], self.general_education_admission.candidate.first_name)
+        self.assertEqual(proposition['nom_candidat'], self.general_education_admission.candidate.last_name)
+        self.assertEqual(proposition['statut'], ChoixStatutProposition.IN_PROGRESS.name)
         self.assertEqual(
-            response.data['links']['create_proposition'],
+            proposition['formation'],
             {
-                'method': 'POST',
-                'url': reverse('admission_api_v1:propositions'),
+                'sigle': self.general_education_admission.training.acronym,
+                'annee': self.general_education_admission.training.academic_year.year,
+                'intitule': self.general_education_admission.training.title,
+                'campus': self.general_campus_name,
             },
         )
 
-        # Check proposition links
+        self.assertActionLinks(
+            proposition['links'],
+            allowed_actions=[
+                'retrieve_person',
+                'retrieve_coordinates',
+                'retrieve_secondary_studies',
+                'retrieve_curriculum',
+                'retrieve_training_choice',
+                'destroy_proposition',
+            ],
+            forbidden_actions=[],
+        )
+
+    def test_list_propositions_candidate_for_continuing_education(self):
+        self.client.force_authenticate(user=self.candidate.user)
+
+        response = self.client.get(self.url, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
+
+        # Check continuing education propositions
+        self.assertTrue('continuing_education_propositions' in response.data)
+        self.assertEqual(len(response.data['continuing_education_propositions']), 1)
+        proposition = response.data['continuing_education_propositions'][0]
+
+        self.assertEqual(proposition['uuid'], str(self.continuing_education_admission.uuid))
+        self.assertEqual(proposition['matricule_candidat'], self.continuing_education_admission.candidate.global_id)
+        self.assertEqual(proposition['prenom_candidat'], self.continuing_education_admission.candidate.first_name)
+        self.assertEqual(proposition['nom_candidat'], self.continuing_education_admission.candidate.last_name)
+        self.assertEqual(proposition['statut'], ChoixStatutProposition.IN_PROGRESS.name)
+
+        self.assertEqual(
+            proposition['formation'],
+            {
+                'sigle': self.continuing_education_admission.training.acronym,
+                'annee': self.continuing_education_admission.training.academic_year.year,
+                'intitule': self.continuing_education_admission.training.title,
+                'campus': self.continuing_campus_name,
+            },
+        )
+
+        self.assertActionLinks(
+            proposition['links'],
+            allowed_actions=[
+                'retrieve_person',
+                'retrieve_coordinates',
+                'retrieve_secondary_studies',
+                'retrieve_curriculum',
+                'retrieve_training_choice',
+                'destroy_proposition',
+            ],
+            forbidden_actions=[],
+        )
+
+    def test_list_propositions_candidate_for_doctorate_education(self):
         self.client.force_authenticate(user=self.other_candidate.user)
 
         response = self.client.get(self.url, format="json")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
 
-        self.assertTrue('propositions' in response.data)
-        self.assertEqual(len(response.data['propositions']), 1)
+        # Check global links
+        self.assertActionLinks(
+            response.data['links'],
+            allowed_actions=[
+                'create_general_proposition',
+                'create_continuing_proposition',
+            ],
+            forbidden_actions=[
+                'create_doctorate_proposition',
+            ],
+        )
 
-        first_proposition = response.data['propositions'][0]
+        # Check doctorate proposition
+        self.assertTrue('doctorate_propositions' in response.data)
+        self.assertEqual(len(response.data['doctorate_propositions']), 1)
 
-        self.assertTrue('links' in first_proposition)
+        proposition = response.data['doctorate_propositions'][0]
+
+        self.assertTrue('links' in proposition)
         allowed_actions = [
             'retrieve_person',
             'retrieve_coordinates',
@@ -137,8 +259,7 @@ class DoctorateAdmissionListApiTestCase(APITestCase):
             'retrieve_cotutelle',
             'retrieve_supervision',
             'retrieve_curriculum',
-        ]
-        additional_actions = [
+            'retrieve_training_choice',
             'destroy_proposition',
             'update_person',
             'update_coordinates',
@@ -147,20 +268,19 @@ class DoctorateAdmissionListApiTestCase(APITestCase):
             'update_proposition',
             'update_cotutelle',
             'update_curriculum',
+            'retrieve_accounting',
+            'update_accounting',
+        ]
+        forbidden_actions = [
             'submit_proposition',
             'retrieve_confirmation',
             'update_confirmation',
-            'retrieve_training',
+            'retrieve_doctoral_training',
+            'retrieve_complementary_training',
+            'retrieve_course_enrollment',
         ]
-        self.assertCountEqual(
-            list(first_proposition['links']),
-            allowed_actions + additional_actions,
-        )
-        for action in allowed_actions:
-            # Check the url
-            self.assertTrue('url' in first_proposition['links'][action], '{} is not allowed'.format(action))
-            # Check the method type
-            self.assertTrue('method' in first_proposition['links'][action])
+
+        self.assertActionLinks(proposition['links'], allowed_actions, forbidden_actions)
 
     def test_list_propositions_no_role(self):
         self.client.force_authenticate(user=self.no_role_user)
@@ -218,9 +338,7 @@ class DoctorateAdmissionCreationApiTestCase(APITestCase):
             acronym='CDA',
         ).entity
         cls.doctorate = DoctorateFactory(management_entity=cls.commission)
-        cls.institute = EntityVersionFactory(
-            entity_type=EntityType.INSTITUTE.name,
-        )
+        cls.scholarship = ErasmusMundusScholarship()
 
         cls.create_data = {
             "type_admission": AdmissionType.PRE_ADMISSION.name,
@@ -229,12 +347,7 @@ class DoctorateAdmissionCreationApiTestCase(APITestCase):
             "annee_formation": cls.doctorate.academic_year.year,
             "matricule_candidat": cls.candidate.global_id,
             "commission_proximite": '',
-            "documents_projet": [],
-            "graphe_gantt": [],
-            "proposition_programme_doctoral": [],
-            "projet_formation_complementaire": [],
-            "lettres_recommandation": [],
-            "institut_these": str(cls.institute.uuid),
+            "bourse_erasmus_mundus": cls.scholarship.uuid,
         }
         cls.url = resolve_url("admission_api_v1:propositions")
 
@@ -247,9 +360,10 @@ class DoctorateAdmissionCreationApiTestCase(APITestCase):
         admission = admissions.get(uuid=response.data["uuid"])
         self.assertEqual(admission.type, self.create_data["type_admission"])
         self.assertEqual(admission.comment, self.create_data["justification"])
+        self.assertEqual(admission.erasmus_mundus_scholarship_id, self.scholarship.pk)
 
         response = self.client.get(self.url, format="json")
-        self.assertEqual(response.json()['propositions'][0]['sigle_doctorat'], self.doctorate.acronym)
+        self.assertEqual(response.json()['doctorate_propositions'][0]["doctorat"]['sigle'], self.doctorate.acronym)
         self.assertEqual(
             admission.reference,
             '{}-{}'.format(
@@ -264,6 +378,13 @@ class DoctorateAdmissionCreationApiTestCase(APITestCase):
         response = self.client.post(self.url, data=data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.json()['non_field_errors'][0]['status_code'], DoctoratNonTrouveException.status_code)
+
+    def test_admission_doctorate_creation_using_api_with_wrong_scholarship(self):
+        self.client.force_authenticate(user=self.candidate.user)
+        data = {**self.create_data, 'bourse_erasmus_mundus': str(uuid.uuid4())}
+        response = self.client.post(self.url, data=data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.json()['non_field_errors'][0]['status_code'], BourseNonTrouveeException.status_code)
 
     def test_user_not_logged_assert_not_authorized(self):
         self.client.force_authenticate(user=None)
@@ -368,7 +489,7 @@ class DoctorateAdmissionCancelApiTestCase(DoctorateAdmissionApiTestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
 
-class DoctorateAdmissionGetApiTestCase(DoctorateAdmissionApiTestCase):
+class DoctorateAdmissionGetApiTestCase(CheckActionLinksMixin, DoctorateAdmissionApiTestCase):
     def test_admission_doctorate_get_proximity_commission(self):
         self.client.force_authenticate(user=self.other_candidate_user)
         admission = DoctorateAdmissionFactory(
@@ -427,27 +548,27 @@ class DoctorateAdmissionGetApiTestCase(DoctorateAdmissionApiTestCase):
             'update_cotutelle',
             'add_member',
             'remove_member',
+            'set_reference_promoter',
             'retrieve_supervision',
             'update_curriculum',
             'retrieve_curriculum',
+            'retrieve_accounting',
+            'update_accounting',
+            'retrieve_training_choice',
+            'update_training_choice',
+            'request_signatures',
         ]
-        all_actions = allowed_actions + [
+        forbidden_actions = [
             'add_approval',
             'approve_by_pdf',
-            'request_signatures',
             'submit_proposition',
             'retrieve_confirmation',
             'update_confirmation',
+            'retrieve_doctoral_training',
+            'retrieve_complementary_training',
+            'retrieve_course_enrollment',
         ]
-        self.assertCountEqual(
-            list(response.data['links']),
-            all_actions,
-        )
-        for action in allowed_actions:
-            # Check the url
-            self.assertTrue('url' in response.data['links'][action], '{} is not allowed'.format(action))
-            # Check the method type
-            self.assertTrue('method' in response.data['links'][action])
+        self.assertActionLinks(response.data['links'], allowed_actions, forbidden_actions)
 
     def test_admission_doctorate_get_using_api_no_role(self):
         self.client.force_authenticate(user=self.no_role_user)
@@ -502,6 +623,7 @@ class DoctorateAdmissionUpdatingApiTestCase(DoctorateAdmissionApiTestCase):
             "type_admission": AdmissionType.ADMISSION.name,
             "titre_projet": "A new title",
             "commission_proximite": '',
+            "bourse_preuve": [],
             "documents_projet": [],
             "graphe_gantt": [],
             "proposition_programme_doctoral": [],
@@ -521,7 +643,7 @@ class DoctorateAdmissionUpdatingApiTestCase(DoctorateAdmissionApiTestCase):
         # But all the following should
         self.assertEqual(admission.type, self.update_data["type_admission"])
         response = self.client.get(self.url, format="json")
-        self.assertEqual(response.json()['sigle_doctorat'], self.admission.doctorate.acronym)
+        self.assertEqual(response.json()['doctorat']['sigle'], self.admission.doctorate.acronym)
         self.assertEqual(response.json()['titre_projet'], "A new title")
 
     def test_admission_doctorate_update_using_api_no_role(self):
@@ -602,7 +724,7 @@ class DoctorateAdmissionVerifyProjectTestCase(APITestCase):
         cls.url = resolve_url("verify-project", uuid=cls.admission.uuid)
 
     @mock.patch(
-        'admission.infrastructure.projet_doctoral.preparation.domain.service.promoteur.PromoteurTranslator.est_externe',
+        'admission.infrastructure.admission.doctorat.preparation.domain.service.promoteur.PromoteurTranslator.est_externe',
         return_value=False,
     )
     def test_verify_project_using_api(self, mock_is_external):
@@ -614,13 +736,13 @@ class DoctorateAdmissionVerifyProjectTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     @mock.patch(
-        'admission.infrastructure.projet_doctoral.preparation.domain.service.promoteur.PromoteurTranslator.est_externe',
+        'admission.infrastructure.admission.doctorat.preparation.domain.service.promoteur.PromoteurTranslator.est_externe',
         return_value=False,
     )
     def test_verify_project_using_api_without_ca_members_must_fail(self, mock_is_external):
         self.client.force_authenticate(user=self.candidate.user)
 
-        PromoterFactory(process=self.admission.supervision_group)
+        PromoterFactory(process=self.admission.supervision_group, is_reference_promoter=True)
 
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -633,7 +755,18 @@ class DoctorateAdmissionVerifyProjectTestCase(APITestCase):
 
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.json()[0]['status_code'], PromoteurManquantException.status_code)
+        status_codes = [e['status_code'] for e in response.json()]
+        self.assertIn(PromoteurManquantException.status_code, status_codes)
+
+    def test_verify_project_using_api_without_reference_promoter_must_fail(self):
+        self.client.force_authenticate(user=self.candidate.user)
+
+        CaMemberFactory(process=self.admission.supervision_group)
+        PromoterFactory(process=self.admission.supervision_group)
+
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.json()[0]['status_code'], PromoteurDeReferenceManquantException.status_code)
 
     def test_admission_doctorate_verify_project_no_role(self):
         self.client.force_authenticate(user=self.no_role_user)
@@ -815,3 +948,102 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIsNotNone(response.json().get('non_field_errors'))
+
+    def test_submit_invalid_proposition_using_api_accounting(self):
+
+        admission = DoctorateAdmissionFactory(
+            candidate=CandidateFactory().person,
+            status=ChoixStatutProposition.SIGNING_IN_PROGRESS.name,
+            supervision_group=self.first_invited_promoter.actor_ptr.process,
+        )
+        CddManagerFactory(entity=admission.doctorate.management_entity)
+
+        self.client.force_authenticate(user=admission.candidate.user)
+
+        # No academic experience -> the absence of debt certificate is not required
+        response = self.client.post(resolve_url("admission_api_v1:submit-proposition", uuid=admission.uuid))
+
+        errors = response.json().get('non_field_errors', [])
+        self.assertFalse(
+            any(
+                exception
+                for exception in errors
+                if exception['status_code'] == AbsenceDeDetteNonCompleteeException.status_code
+            )
+        )
+
+        # Experience in a french speaking community institute -> the absence of debt certificate is required
+        experience = EducationalExperienceFactory(
+            person=admission.candidate,
+            obtained_diploma=False,
+            country=CountryFactory(iso_code="BE"),
+            institute=OrganizationFactory(
+                community=CommunityEnum.FRENCH_SPEAKING.name,
+                code='INSTITUTE',
+                name='First institute',
+            ),
+        )
+        experience_year = EducationalExperienceYearFactory(
+            educational_experience=experience,
+            academic_year=AcademicYearFactory(year=get_current_year()),
+        )
+
+        response = self.client.post(resolve_url("admission_api_v1:submit-proposition", uuid=admission.uuid))
+
+        errors = response.json().get('non_field_errors', [])
+        self.assertTrue(
+            any(
+                exception
+                for exception in errors
+                if exception['status_code'] == AbsenceDeDetteNonCompleteeException.status_code
+            )
+        )
+
+        # Experience in UCL -> the absence of debt certificate is not required
+        experience.institute.code = "UCL"
+        experience.institute.save()
+
+        response = self.client.post(resolve_url("admission_api_v1:submit-proposition", uuid=admission.uuid))
+
+        errors = response.json().get('non_field_errors', [])
+        self.assertFalse(
+            any(
+                exception
+                for exception in errors
+                if exception['status_code'] == AbsenceDeDetteNonCompleteeException.status_code
+            )
+        )
+
+        # Experience in a german speaking community institute -> the absence of debt certificate is not required
+        experience.institute.code = "INSTITUTE"
+        experience.institute.community = CommunityEnum.GERMAN_SPEAKING.name
+        experience.institute.save()
+
+        response = self.client.post(resolve_url("admission_api_v1:submit-proposition", uuid=admission.uuid))
+
+        errors = response.json().get('non_field_errors', [])
+        self.assertFalse(
+            any(
+                exception
+                for exception in errors
+                if exception['status_code'] == AbsenceDeDetteNonCompleteeException.status_code
+            )
+        )
+
+        # Too old experience in a french speaking community institute -> the absence of debt certificate is not required
+        experience.institute.community = CommunityEnum.FRENCH_SPEAKING.name
+        experience.institute.save()
+
+        experience_year.academic_year = AcademicYearFactory(year=2000)
+        experience_year.save()
+
+        response = self.client.post(resolve_url("admission_api_v1:submit-proposition", uuid=admission.uuid))
+
+        errors = response.json().get('non_field_errors', [])
+        self.assertFalse(
+            any(
+                exception
+                for exception in errors
+                if exception['status_code'] == AbsenceDeDetteNonCompleteeException.status_code
+            )
+        )

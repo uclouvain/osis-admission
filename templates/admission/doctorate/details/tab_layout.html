@@ -25,13 +25,31 @@
 * see http://www.gnu.org/licenses/.
 {% endcomment %}
 
-{% block actions %}
-  {% update_tab_path_from_detail admission.uuid as update_url %}
-  {% if update_url %}
-  <li>
-    <a href="{{ update_url }}">
-      {% trans "Update" %}
-    </a>
-  </li>
+{% block actions-group %}
+  {% default_tab_context as tab_context %}
+  {% can_update_tab tab_context.active_tab as can_update_tab %}
+  {% update_tab_path_from_detail view.kwargs.uuid as update_url %}
+  {% if can_update_tab and update_url %}
+    <div class="btn-group">
+      <button
+          type="button"
+          class="btn btn-default"
+          data-toggle="dropdown"
+          aria-haspopup="true"
+          aria-expanded="false"
+      >
+        {% trans "Actions" %}
+        <span class="caret"></span>
+      </button>
+      <ul class="dropdown-menu pull-right">
+        {% block actions %}
+          <li>
+            <a href="{{ update_url }}">
+              {% trans "Update" %}
+            </a>
+          </li>
+        {% endblock %}
+      </ul>
+    </div>
   {% endif %}
 {% endblock %}

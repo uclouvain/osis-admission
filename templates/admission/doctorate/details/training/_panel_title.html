@@ -1,0 +1,212 @@
+{% load i18n osis_document admission enums %}
+
+{% comment "License" %}
+  * OSIS stands for Open Student Information System. It's an application
+  * designed to manage the core business of higher education institutions,
+  * such as universities, faculties, institutes and professional schools.
+  * The core business involves the administration of students, teachers,
+  * courses, programs and so on.
+  *
+  * Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+  *
+  * This program is free software: you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License as published by
+  * the Free Software Foundation, either version 3 of the License, or
+  * (at your option) any later version.
+  *
+  * This program is distributed in the hope that it will be useful,
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU General Public License for more details.
+  *
+  * A copy of this license - GNU General Public License - is available
+  * at the root of the source code of this program.  If not,
+  * see http://www.gnu.org/licenses/.
+{% endcomment %}
+
+
+{% display request.resolver_match.namespace|add:':'|add:request.resolver_match.url_name as namespace %}
+{% url namespace|add:":edit" uuid=view.kwargs.uuid activity_id=activity.uuid as edit_url %}
+{% url namespace|add:":refuse" uuid=view.kwargs.uuid activity_id=activity.uuid as refuse_url %}
+{% url namespace|add:":require-changes" uuid=view.kwargs.uuid activity_id=activity.uuid as require_changes_url %}
+{% url namespace|add:":restore" uuid=view.kwargs.uuid activity_id=activity.uuid as restore_url %}
+{% url namespace|add:":delete" uuid=view.kwargs.uuid activity_id=activity.uuid as delete_url %}
+{% if activity.category|safe == 'CONFERENCE' or activity.category|safe == 'SEMINAR' or activity.category|safe == 'RESIDENCY' %}
+  {% url namespace|add:":add" uuid=view.kwargs.uuid category="communication" as add_communication_url %}
+{% endif %}
+{% if activity.category|safe == 'CONFERENCE' %}
+  {% url namespace|add:":add" uuid=view.kwargs.uuid category="publication" as add_publication_url %}
+{% endif %}
+
+<a
+    role="button"
+    data-toggle="collapse"
+    data-parent="#accordion"
+    href="#a-{{ activity.uuid }}"
+    aria-expanded="false"
+    aria-controls="a-{{ activity.uuid }}"
+    class="collapsed"
+></a>
+<span class="badge">{{ activity.status|enum_display:'StatutActivite' }}</span>
+
+{% trans "Please check the details of the activity (and sub-activities) to fill in all mandatory fields" as not_complete_sub %}
+{% trans "Please check the details of the activity to fill in all mandatory fields" as not_complete %}
+
+<div style="width: auto" class="pull-right">
+  <div class="input-group input-group-sm{% if activity.uuid in form.activities_in_error %} has-error{% endif %}">
+    <div class="input-group-btn">
+      <button
+          type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
+          aria-expanded="false"
+      >
+        {% trans "Actions" %} <span class="caret"></span>
+      </button>
+      <ul class="dropdown-menu dropdown-menu-right">
+
+        {# Activity is unsubmitted : display edit/delete/submit/add-children #}
+        <li>
+          <a href="{{ edit_url }}">
+            {% trans "Edit" %}
+          </a>
+        </li>
+        {% if not remove_batch_action %}
+          {% if activity.status|safe == "SOUMISE" %}
+            <li>
+              <a href="{{ require_changes_url }}">
+                {% trans "Require changes" %}
+              </a>
+            </li>
+            <li>
+              <a href="{{ refuse_url }}">
+                {% trans "Refuse activity" %}
+              </a>
+            </li>
+          {% endif %}
+          {% if activity.status|safe == "ACCEPTEE" or activity.status|safe == "REFUSEE" %}
+            <li>
+              <a href="{{ restore_url }}">
+                {% trans "Restore activity to submitted" %}
+              </a>
+            </li>
+          {% endif %}
+          {% if activity.status|safe == "NON_SOUMISE" %}
+            <li
+                {% if not activity.can_be_submitted %}
+                  class="disabled"
+                  data-toggle="tooltip"
+                  data-container="body"
+                  {% if activity.category == 'SEMINAR' %}
+                  title="{{ not_complete_sub }}"
+                  {% else %}
+                  title="{{ not_complete }}"
+                  {% endif %}
+                {% endif %}
+            >
+              <a
+                  href="#"
+                  onclick="$('[name=activity_ids]').val(['{{ activity.uuid }}']);$('form#activities').submit();return false;"
+              >
+                {% trans "Submit" %}
+              </a>
+            </li>
+          {% endif %}
+        {% endif %}
+        {# Can't add a communication to seminar once submitted #}
+        {% if activity.category|safe == "SEMINAR" and activity.status|safe == "NON_SOUMISE" and add_communication_url %}
+          <li>
+            <a href="{{ add_communication_url }}?parent={{ activity.uuid }}">
+              {% trans "Add a communication" %}
+            </a>
+          </li>
+          {# Can add a communication to others once submitted #}
+          {% elif activity.category|safe != "SEMINAR" and add_communication_url %}
+          <li>
+            <a href="{{ add_communication_url }}?parent={{ activity.uuid }}">
+              {% trans "Add a communication" %}
+            </a>
+          </li>
+        {% endif %}
+        {% if add_publication_url %}
+          <li>
+            <a href="{{ add_publication_url }}?parent={{ activity.uuid }}">
+              {% trans "Add a publication" %}
+            </a>
+          </li>
+        {% endif %}
+        <li>
+          <a href="{{ delete_url }}">
+            {% trans "Delete" %}
+          </a>
+        </li>
+      </ul>
+    </div>
+    {% if not remove_batch_action and activity.status|safe == "NON_SOUMISE" %}
+      <label class="input-group-addon">
+        <input
+            type="checkbox" name="activity_ids" value="{{ activity.uuid }}"
+            {% if not activity.can_be_submitted %}
+            disabled="disabled"
+            data-toggle="tooltip"
+            data-container="body"
+              {% if activity.category == 'SEMINAR' %}
+            title="{{ not_complete_sub }}"
+              {% else %}
+            title="{{ not_complete }}"
+              {% endif %}
+            {% else %}
+            aria-label="{% trans "Select for batch action" %}"
+            {% endif %}
+        />
+      </label>
+    {% elif not remove_batch_action and activity.status|safe == "SOUMISE" %}
+      <label class="input-group-addon">
+        <input
+            type="checkbox" name="activity_ids" value="{{ activity.uuid }}"
+            aria-label="{% trans "Select for batch action" %}"
+        />
+      </label>
+    {% endif %}
+
+    {% if activity.reference_promoter_assent is not None or activity.cdd_comment %}
+      <div class="input-group-btn">
+        {% if activity.reference_promoter_assent is not None %}
+          <button
+            type="button"
+            data-trigger="focus"
+            data-content="{{ activity.reference_promoter_comment|linebreaksbr|force_escape }}"
+            data-html="true"
+            data-toggle="popover"
+            data-placement="auto left"
+            data-container="body"
+            {% if activity.reference_promoter_assent %}
+            title="{% trans "Assent from reference promoter" %}"
+            class="btn btn-sm btn-success"
+              >
+              <span class="glyphicon glyphicon-ok-circle"></span>
+            {% else %}
+              title="{% trans "Dissent from reference promoter" %}"
+              class="btn btn-sm btn-danger"
+              >
+              <span class="glyphicon glyphicon-remove-circle"></span>
+            {% endif %}
+          </button>
+        {% endif %}
+        {% if activity.cdd_comment %}
+          <button
+            type="button"
+            data-trigger="focus"
+            data-html="true"
+            data-content="{{ activity.cdd_comment|linebreaksbr|force_escape }}"
+            data-toggle="popover"
+            data-placement="auto left"
+            title="{% trans "Comment from CDD manager" %}"
+            data-container="body"
+            class="btn btn-sm btn-danger"
+          >
+            <span class="glyphicon glyphicon-info-sign"></span>
+          </button>
+        {% endif %}
+      </div>
+    {% endif %}
+  </div>
+</div>

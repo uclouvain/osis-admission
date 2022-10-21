@@ -30,9 +30,9 @@ from django.shortcuts import resolve_url
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from admission.ddd.projet_doctoral.doctorat.domain.model.enums import ChoixStatutDoctorat
-from admission.ddd.projet_doctoral.doctorat.domain.validator.exceptions import DoctoratNonTrouveException
-from admission.ddd.projet_doctoral.preparation.domain.model._enums import (
+from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
+from admission.ddd.parcours_doctoral.domain.validator.exceptions import DoctoratNonTrouveException
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixStatutProposition,
 )
 
@@ -115,13 +115,17 @@ class DoctorateAPIViewTestCase(APITestCase):
             'retrieve_proposition',
             'retrieve_confirmation',
             'update_confirmation',
-            'retrieve_training',
+            'update_confirmation_extension',
+            'retrieve_doctoral_training',
+            'retrieve_course_enrollment',
             'add_training',
+            'submit_training',
         ]
-        self.assertCountEqual(
-            json_response['links'],
-            allowed_actions,
-        )
+        forbidden_actions = [
+            'retrieve_complementary_training',
+            'assent_training',
+        ]
+        self.assertCountEqual(json_response['links'], allowed_actions + forbidden_actions)
         for action in allowed_actions:
             # Check the url
             self.assertTrue('url' in json_response['links'][action], '{} is not allowed'.format(action))

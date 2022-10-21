@@ -24,7 +24,7 @@
 #
 # ##############################################################################
 from admission.api.serializers.fields import RelatedInstituteField
-from admission.ddd.projet_doctoral.preparation.commands import (
+from admission.ddd.admission.doctorat.preparation.commands import (
     ApprouverPropositionCommand,
     ApprouverPropositionParPdfCommand,
     RefuserPropositionCommand,

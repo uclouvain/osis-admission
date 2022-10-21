@@ -82,7 +82,7 @@ class CddDoctorateSendMailForm(forms.Form):
         custom_templates = CddMailTemplate.objects.get_from_identifiers(
             identifiers=available_identifiers,
             language=self.admission.candidate.language,
-            cdd=self.admission.doctorate.management_entity_id,
+            cdd_id=self.admission.doctorate.management_entity_id,
         )
 
         # Regroup custom templates by their identifier and format into choices
@@ -96,9 +96,7 @@ class CddDoctorateSendMailForm(forms.Form):
         for identifier in available_identifiers:
             if grouped_custom[identifier]:
                 # Add a choice group with generic and custom templates
-                choices.append(
-                    (templates.get_description(identifier), [(identifier, _("Generic"))] + grouped_custom[identifier])
-                )
+                choices.append((templates.get_description(identifier), grouped_custom[identifier]))
             else:
                 # Add a simple choice
                 choices.append((identifier, templates.get_description(identifier)))

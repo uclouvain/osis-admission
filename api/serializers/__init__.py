@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -32,7 +32,12 @@ from .coordonnees import CoordonneesSerializer
 from .secondary_studies import HighSchoolDiplomaSerializer
 from .languages_knowledge import *
 from .supervision import *
-from .curriculum import ExperienceOutputSerializer, ExperienceInputSerializer, CurriculumFileSerializer
+from .curriculum import (
+    CurriculumFileSerializer,
+    EducationalExperienceYearSerializer,
+    CurriculumSerializer,
+    ProfessionalExperienceSerializer,
+)
 from .approvals import (
     ApprouverPropositionCommandSerializer,
     RefuserPropositionCommandSerializer,
@@ -40,3 +45,13 @@ from .approvals import (
 )
 from .confirmation import *
 from .doctorate import *
+from .accounting import CompleterComptabilitePropositionCommandSerializer, AccountingConditionsSerializer
+from .scholarship import ScholarshipSerializer
+from .campus import CampusSerializer
+from .training_choice import (
+    InitierPropositionContinueCommandSerializer,
+    InitierPropositionGeneraleCommandSerializer,
+    ModifierChoixFormationContinueCommandSerializer,
+    ModifierTypeAdmissionDoctoraleCommandSerializer,
+    ModifierChoixFormationGeneraleCommandSerializer,
+)

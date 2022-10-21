@@ -29,21 +29,23 @@ from uuid import UUID
 
 from django.shortcuts import resolve_url
 from django.test import override_settings
+from osis_notification.models import WebNotification
 from rest_framework import status
 from rest_framework.test import APITestCase
 
 from admission.contrib.models import ConfirmationPaper
-from admission.ddd.projet_doctoral.doctorat.domain.model.enums import ChoixStatutDoctorat
-from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.validators.exceptions import (
+from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
+from admission.ddd.parcours_doctoral.epreuve_confirmation.validators.exceptions import (
     EpreuveConfirmationDateIncorrecteException,
     EpreuveConfirmationNonTrouveeException,
 )
-from admission.ddd.projet_doctoral.preparation.domain.model._enums import (
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixStatutProposition,
 )
 
 from admission.tests.factories import DoctorateAdmissionFactory, WriteTokenFactory
 from admission.tests.factories.confirmation_paper import ConfirmationPaperFactory
+from admission.tests.factories.roles import CddManagerFactory
 from admission.tests.factories.supervision import PromoterFactory
 from base.models.enums.entity_type import EntityType
 from base.tests.factories.entity_version import EntityVersionFactory
@@ -91,6 +93,7 @@ class ConfirmationAPIViewTestCase(APITestCase):
         cls.other_student = other_doctorate.candidate
         cls.promoter = promoter.person.user
         cls.other_promoter = other_promoter.person.user
+        cls.cdd_person = CddManagerFactory(entity=commission).person
 
         cls.doctorate_url = resolve_url('admission_api_v1:confirmation', uuid=cls.doctorate.uuid)
         cls.other_doctorate_url = resolve_url('admission_api_v1:confirmation', uuid=other_doctorate.uuid)
@@ -223,6 +226,11 @@ class ConfirmationAPIViewTestCase(APITestCase):
         self.assertEqual(confirmation_paper.supervisor_panel_report, [token.upload.uuid])
         self.assertEqual(confirmation_paper.research_mandate_renewal_opinion, [token.upload.uuid])
 
+        # Check the notifications
+        self.assertEqual(WebNotification.objects.count(), 1)
+        notification = WebNotification.objects.first()
+        self.assertEqual(notification.person, self.cdd_person)
+
     def test_put_confirmation_by_promoter_with_invalid_doctorate_status(self):
         self.client.force_authenticate(user=self.promoter)
         response = self.client.put(
@@ -321,6 +329,7 @@ class LastConfirmationAPIViewTestCase(APITestCase):
         # Users
         cls.student = cls.doctorate.candidate
         cls.other_student = other_doctorate.candidate
+        cls.cdd_person = CddManagerFactory(entity=commission).person
 
         cls.doctorate_url = resolve_url('admission_api_v1:last_confirmation', uuid=cls.doctorate.uuid)
         cls.other_doctorate_url = resolve_url('admission_api_v1:last_confirmation', uuid=other_doctorate.uuid)
@@ -449,6 +458,11 @@ class LastConfirmationAPIViewTestCase(APITestCase):
         self.assertEqual(confirmation_paper.supervisor_panel_report, [token.upload.uuid])
         self.assertEqual(confirmation_paper.research_mandate_renewal_opinion, [token.upload.uuid])
 
+        # Check the notifications
+        self.assertEqual(WebNotification.objects.count(), 1)
+        notification = WebNotification.objects.first()
+        self.assertEqual(notification.person, self.cdd_person)
+
     def test_put_confirmation_with_doctorate_invalid_status(self):
         self.client.force_authenticate(user=self.student.user)
         response = self.client.put(
@@ -563,6 +577,11 @@ class LastConfirmationAPIViewTestCase(APITestCase):
         self.assertEqual(confirmation_paper.extended_deadline, datetime.date(2022, 5, 15))
         self.assertEqual(confirmation_paper.brief_justification, 'My reason')
         self.assertEqual(confirmation_paper.justification_letter, [token.upload.uuid])
+
+        # Check the notifications
+        self.assertEqual(WebNotification.objects.count(), 1)
+        notification = WebNotification.objects.first()
+        self.assertEqual(notification.person, self.cdd_person)
 
     def test_post_confirmation_with_doctorate_invalid_status(self):
         self.client.force_authenticate(user=self.student.user)

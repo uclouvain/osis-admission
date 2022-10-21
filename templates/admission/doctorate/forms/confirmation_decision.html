@@ -27,7 +27,6 @@
 
 {% block tab_content_header %}
   <h3>{{ page_title }}</h3>
-  <p><em>{% lorem 1 %}</em></p>
   <form method="get">
     {% csrf_token %}
     {% bootstrap_form select_template_form %}
@@ -35,7 +34,8 @@
 {% endblock %}
 
 {% block form_content %}
-  <div id="sendmail-form-content">
-    {% bootstrap_form form %}
-  </div>
+  {% include 'admission/doctorate/forms/send_mail_htmx_fields.html' with form=form %}
+  {% if form.date_limite %}
+    {% bootstrap_field form.date_limite %}
+  {% endif %}
 {% endblock %}

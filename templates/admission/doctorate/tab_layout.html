@@ -68,11 +68,11 @@
       <div>
         {% block panel-heading %}
           <div>
-          {% if doctorate %}
-            {% trans "Doctoral student:" %} {{ doctorate.prenom_doctorant }} {{ doctorate.nom_doctorant }}
-          {% else %}
-            {% trans "Candidate:" %} {{ admission.prenom_candidat }} {{ admission.nom_candidat }}
-          {% endif %}
+            {% if doctorate %}
+              {% trans "Doctoral student:" %} {{ doctorate.prenom_doctorant }} {{ doctorate.nom_doctorant }}
+            {% else %}
+              {% trans "Candidate:" %} {{ admission.prenom_candidat }} {{ admission.nom_candidat }}
+            {% endif %}
           </div>
           <div>
             {% trans "Status:" %}
@@ -80,12 +80,12 @@
               {{ doctorate.statut|enum_display:'ChoixStatutDoctorat' }}
             {% else %}
               {{ admission.statut|enum_display:'ChoixStatutProposition' }}
-            {% endif %}
-            {% if dossier %}
-              | {% trans "CDD:" %}
-              {{ dossier.statut_cdd|enum_display:'ChoixStatutCDD' }}
-              | {% trans "SIC:" %}
-              {{ dossier.statut_sic|enum_display:'ChoixStatutSIC' }}
+              {% if dossier %}
+                | {% trans "CDD:" %}
+                {{ dossier.statut_cdd|enum_display:'ChoixStatutCDD' }}
+                | {% trans "SIC:" %}
+                {{ dossier.statut_sic|enum_display:'ChoixStatutSIC' }}
+              {% endif %}
             {% endif %}
           </div>
         {% endblock %}
@@ -113,11 +113,11 @@
     </div>
     <div class="panel-body">
       {% doctorate_tabs_bar %}
-      {% current_subtabs as subtabs %}
-      {% if subtabs|length > 1 %}
+      {% current_subtabs as subtabs_context %}
+      {% if subtabs_context.subtabs|length > 1 %}
         <div class="row" style="display: flex">
         <div class="col-md-2 visible-md visible-lg border-right">
-          {% doctorate_subtabs_bar tabs=subtabs %}
+          {% doctorate_subtabs_bar %}
         </div>
         <div class="col-md-10">
       {% endif %}
@@ -141,11 +141,11 @@
   <link href="{% static "admission/admission.css" %}" rel="stylesheet"/>
 
   <style>
-      p {
-          margin-bottom: 20px;
-      }
-      h3 {
-          margin: 1em 0;
-      }
+    p {
+      margin-bottom: 20px;
+    }
+    h3 {
+      margin: 1em 0;
+    }
   </style>
 {% endblock %}

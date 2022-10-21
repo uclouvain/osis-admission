@@ -28,6 +28,7 @@ import datetime
 from django.test import TestCase
 from django.utils.translation import gettext as _
 
+from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
 from admission.forms.doctorate.confirmation import ConfirmationForm, ConfirmationRetakingForm
 
 
@@ -40,6 +41,14 @@ class ConfirmationTestCase(TestCase):
         # Mandatory fields
         self.assertIn('date_limite', form.errors)
         self.assertIn('date', form.errors)
+
+    def test_form_validation_with_no_data_when_admitted(self):
+        form = ConfirmationForm(data={}, doctorate_status=ChoixStatutDoctorat.ADMITTED.name)
+
+        self.assertFalse(form.is_valid())
+
+        # Mandatory fields
+        self.assertIn('date_limite', form.errors)
 
     def test_form_validation_with_valid_dates(self):
         form = ConfirmationForm(

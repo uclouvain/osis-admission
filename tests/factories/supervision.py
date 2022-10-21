@@ -46,8 +46,8 @@ class _ActorFactory(factory.django.DjangoModelFactory):
 
 
 class PromoterFactory(factory.DjangoModelFactory):
-    def __init__(self, process=None):
-        super().__init__()
+    def __init__(self, process=None, **kwargs):
+        super().__init__(**kwargs)
         if process:
             self.actor_ptr.process = process
 

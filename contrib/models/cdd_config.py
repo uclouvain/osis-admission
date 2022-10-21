@@ -25,9 +25,20 @@
 # ##############################################################################
 from django.conf import settings
 from django.db import models
+from django.utils import translation
 from django.utils.translation import gettext_lazy as _
 
+from admission.ddd.parcours_doctoral.formation.domain.model.enums import CategorieActivite
 from base.models.enums.entity_type import DOCTORAL_COMMISSION
+
+
+def default_category_labels():
+    choices = dict(CategorieActivite.choices()).values()
+    ret = {}
+    for lang in [settings.LANGUAGE_CODE_EN, settings.LANGUAGE_CODE_FR]:
+        with translation.override(lang):
+            ret[lang] = [str(choice) for choice in choices]
+    return ret
 
 
 def default_service_types():
@@ -68,6 +79,141 @@ def default_seminar_types():
     }
 
 
+def default_conference_types():
+    return {
+        settings.LANGUAGE_CODE_EN: [
+            "National conference",
+            "International conference",
+        ],
+        settings.LANGUAGE_CODE_FR: [
+            "Conférence nationale",
+            "Conférence internationale",
+        ],
+    }
+
+
+def default_conference_publication_types():
+    return {
+        settings.LANGUAGE_CODE_EN: [
+            "Article published in a peer-reviewed journal",
+            "Article published in a non-refereed journal",
+            "Book chapter",
+            "Monograph",
+            "Edition or co-publication",
+            "Working paper",
+            "Extended abstract",
+        ],
+        settings.LANGUAGE_CODE_FR: [
+            "Article publié dans une revue à comité de lecture",
+            "Article publié dans une revue sans comité de lecture",
+            "Chapitre de livre",
+            "Monographie",
+            "Édition ou coédition",
+            "Rapport de recherche",
+            "Extended abstract",
+        ],
+    }
+
+
+def default_communication_types():
+    return {
+        settings.LANGUAGE_CODE_EN: [
+            "Research seminar",
+            "PhD students' day",
+        ],
+        settings.LANGUAGE_CODE_FR: [
+            "Séminaire de recherche",
+            "Journée des doctorantes et des doctorants",
+        ],
+    }
+
+
+def default_publication_types():
+    return {
+        settings.LANGUAGE_CODE_EN: [
+            "Article for a peer-reviewed journal",
+            "Article for a non-refereed journal",
+            "Publication in an international scientific journal with peer review",
+            "Book chapter",
+            "Monograph",
+            "Publishing or co-publishing",
+            "Patent",
+            "Review of a scientific work",
+            "Working paper",
+        ],
+        settings.LANGUAGE_CODE_FR: [
+            "Article à destination d'une revue à comité de lecture",
+            "Article à destination d'une revue sans comité de lecture",
+            "Publication dans une revue scientifique internationale avec peer review",
+            "Chapitre de livre",
+            "Monographie",
+            "Édition ou coédition",
+            "Brevet",
+            "Compte - rendu d'un ouvrage scientifique",
+            "Rapport de recherche",
+        ],
+    }
+
+
+def default_residency_types():
+    return {
+        settings.LANGUAGE_CODE_EN: [
+            "Research residency (excluding cotutelle)",
+            "Documentary research residency",
+        ],
+        settings.LANGUAGE_CODE_FR: [
+            "Séjour de recherche (hors cotutelle)",
+            "Séjour de recherche documentaire",
+        ],
+    }
+
+
+def default_course_types():
+    return {
+        settings.LANGUAGE_CODE_EN: [
+            "Graduate course",
+            "Doctoral school (with/without assessment)",
+            "Continuing education",
+            "Transversal training",
+            "Summer school",
+            "Winter school",
+            "Language courses",
+            "Moocs (online / offline)",
+        ],
+        settings.LANGUAGE_CODE_FR: [
+            "Cours de 2e cycle",
+            "Ecole doctorale (avec/sans évaluation)",
+            "Formation continuée",
+            "Formation transversale",
+            "Summer school",
+            "Winter school",
+            "Cours de langue",
+            "Moocs (en ligne / pas en ligne)",
+        ],
+    }
+
+
+def default_complementary_course_types():
+    return {
+        settings.LANGUAGE_CODE_EN: [
+            "Graduate course",
+            "Doctoral school (with/without assessment)",
+            "Continuing education",
+            "Transversal training",
+            "Language courses",
+            "Moocs (online / offline)",
+        ],
+        settings.LANGUAGE_CODE_FR: [
+            "Cours de 2e cycle",
+            "Ecole doctorale (avec/sans évaluation)",
+            "Formation continuée",
+            "Formation transversale",
+            "Cours de langue",
+            "Moocs (en ligne / pas en ligne)",
+        ],
+    }
+
+
 class CddConfiguration(models.Model):
     cdd = models.OneToOneField(
         'base.Entity',
@@ -75,11 +221,51 @@ class CddConfiguration(models.Model):
         limit_choices_to={'entityversion__entity_type': DOCTORAL_COMMISSION},
         related_name='admission_config',
     )
-    service_types = models.JSONField(
-        verbose_name=_("Service types"),
-        default=default_service_types,
+    is_complementary_training_enabled = models.BooleanField(
+        verbose_name=_("Enable complementary training tab"),
+        default=False,
+        help_text=_('This adds a "Complementary training" tab on admissions concerning this CDD.'),
+    )
+    category_labels = models.JSONField(
+        verbose_name=_("Category labels"),
+        default=default_category_labels,
+    )
+    conference_types = models.JSONField(
+        verbose_name=_("CONFERENCE types"),
+        default=default_conference_types,
+    )
+    conference_publication_types = models.JSONField(
+        verbose_name=_("CONFERENCE PUBLICATION types"),
+        default=default_conference_publication_types,
+    )
+    communication_types = models.JSONField(
+        verbose_name=_("COMMUNICATION types"),
+        default=default_communication_types,
     )
     seminar_types = models.JSONField(
-        verbose_name=_("Seminar types"),
+        verbose_name=_("SEMINAR types"),
         default=default_seminar_types,
     )
+    publication_types = models.JSONField(
+        verbose_name=_("PUBLICATION types"),
+        default=default_publication_types,
+    )
+    service_types = models.JSONField(
+        verbose_name=_("SERVICE types"),
+        default=default_service_types,
+    )
+    residency_types = models.JSONField(
+        verbose_name=_("RESIDENCY types"),
+        default=default_residency_types,
+    )
+    course_types = models.JSONField(
+        verbose_name=_("COURSE types"),
+        default=default_course_types,
+    )
+    complementary_course_types = models.JSONField(
+        verbose_name=_("COURSE types for complementary training"),
+        default=default_complementary_course_types,
+    )
+
+    def __str__(self):  # pragma: no cover
+        return f"Configuration for {self.cdd}"

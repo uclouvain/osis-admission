@@ -30,10 +30,15 @@ from django.utils.translation import gettext_lazy as _, override
 from django.views.generic import FormView
 
 from admission.contrib.models import CddMailTemplate
-from admission.ddd.projet_doctoral.doctorat.commands import EnvoyerMessageDoctorantCommand
+from admission.ddd.parcours_doctoral.commands import EnvoyerMessageDoctorantCommand
 from admission.forms.doctorate.cdd.send_mail import CddDoctorateSendMailForm
-from admission.infrastructure.projet_doctoral.doctorat.domain.service.notification import Notification
-from admission.utils import get_cached_admission_perm_obj
+from admission.infrastructure.parcours_doctoral.domain.service.notification import (
+    Notification as NotificationDoctorat,
+)
+from admission.infrastructure.parcours_doctoral.epreuve_confirmation.domain.service.notification import (
+    Notification as NotificationEpreuveConfirmation,
+)
+from admission.mail_templates import CONFIRMATION_PAPER_TEMPLATES_IDENTIFIERS
 from admission.views.doctorate.mixins import LoadDossierViewMixin
 from base.utils.htmx import HtmxMixin
 from infrastructure.messages_bus import message_bus_instance
@@ -46,13 +51,6 @@ class DoctorateSendMailView(HtmxMixin, LoadDossierViewMixin, FormView):
     form_class = CddDoctorateSendMailForm
     permission_required = 'admission.send_message'
 
-    def get_permission_object(self):
-        return get_cached_admission_perm_obj(self.kwargs['pk'])
-
-    @property
-    def admission(self):
-        return get_cached_admission_perm_obj(self.kwargs.get('pk'))
-
     def get_success_url(self):
         return self.request.get_full_path()
 
@@ -61,19 +59,26 @@ class DoctorateSendMailView(HtmxMixin, LoadDossierViewMixin, FormView):
         kwargs['admission'] = self.admission
         return kwargs
 
+    def get_tokens(self, identifier):
+        if identifier in CONFIRMATION_PAPER_TEMPLATES_IDENTIFIERS:
+            return NotificationEpreuveConfirmation.get_common_tokens(self.admission, self.last_confirmation_paper)
+        return NotificationDoctorat.get_common_tokens(self.admission)
+
     def get_initial(self):
         identifier = self.request.GET.get('template')
         if identifier:
-            tokens = Notification.get_common_tokens(self.admission)
             if identifier.isnumeric():
                 # Template is a custom one
                 mail_template = CddMailTemplate.objects.get(pk=identifier)
+                identifier = mail_template.identifier
             else:
                 # Template is a generic one
                 mail_template = MailTemplate.objects.get(
                     identifier=identifier,
                     language=self.admission.candidate.language,
                 )
+            tokens = self.get_tokens(identifier)
+
             with override(language=self.admission.candidate.language):
                 return {
                     **self.request.GET,

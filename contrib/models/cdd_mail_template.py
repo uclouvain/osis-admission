@@ -23,7 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import Dict, List, Optional
+from typing import Dict, List
 
 from django.conf import settings
 from django.db import models
@@ -32,6 +32,7 @@ from django.utils.translation import gettext_lazy as _
 
 from admission.mail_templates import (
     ADMISSION_EMAIL_GENERIC_ONCE_ADMITTED,
+    ADMISSION_EMAIL_CONFIRMATION_PAPER_INFO_STUDENT,
     ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_FAILURE_STUDENT,
     ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_RETAKING_STUDENT,
 )
@@ -41,6 +42,7 @@ from osis_mail_template.utils import MissingTokenDict, transform_html_to_text
 
 ALLOWED_CUSTOM_IDENTIFIERS = [
     ADMISSION_EMAIL_GENERIC_ONCE_ADMITTED,
+    ADMISSION_EMAIL_CONFIRMATION_PAPER_INFO_STUDENT,
     ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_FAILURE_STUDENT,
     ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_RETAKING_STUDENT,
 ]
@@ -58,15 +60,13 @@ class CddMailTemplateManager(MailTemplateManager):
             .order_by('language')
         )
 
-    def get_from_identifiers(self, identifiers: List[str], language: str, cdd: Optional[int] = None):
+    def get_from_identifiers(self, identifiers: List[str], language: str, cdd_id: int):
         """Get a list of mail template instances by identifier and language"""
         qs = self.get_queryset().filter(
             identifier__in=identifiers,
             language=language,
+            cdd_id=cdd_id,
         )
-
-        if cdd:
-            qs = qs.filter(cdd=cdd)
 
         return list(qs)
 

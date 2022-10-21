@@ -33,7 +33,7 @@
     {% csrf_token %}
     {% include form.template_name %}
     <div class="text-right">
-      <a href="{% url "admission:doctorate:training" pk=view.kwargs.pk %}" class="text-danger">
+      <a href="{% url "admission:doctorate:doctoral-training" uuid=view.kwargs.uuid %}" class="text-danger">
         {% trans "Cancel" %}
       </a>
       <button type="submit" class="btn btn-primary">

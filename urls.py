@@ -38,6 +38,7 @@ autocomplete_paths = [
     path('candidates', autocomplete_views.CandidatesAutocomplete.as_view(), name='candidates'),
     path('countries', autocomplete_views.CountriesAutocomplete.as_view(), name='countries'),
     path('promoters', autocomplete_views.PromotersAutocomplete.as_view(), name='promoters'),
+    path('learning_unit_years', autocomplete_views.LearningUnitYearAutocomplete.as_view(), name='learning_unit_years'),
 ]
 
 # Doctorate
@@ -59,9 +60,13 @@ doctorate_update_paths = [
     path('confirmation', DoctorateAdmissionConfirmationFormView.as_view(), name='confirmation'),
     path('extension-request', DoctorateAdmissionExtensionRequestFormView.as_view(), name='extension-request'),
 ]
-doctorate_training_paths = [
-    path('add/<str:category>', DoctorateTrainingActivityAddView.as_view(), name='add'),
-    path('edit/<uuid:activity_id>', DoctorateTrainingActivityEditView.as_view(), name='edit'),
+training_paths = [
+    path('add/<str:category>', TrainingActivityAddView.as_view(), name='add'),
+    path('edit/<uuid:activity_id>', TrainingActivityEditView.as_view(), name='edit'),
+    path('refuse/<uuid:activity_id>', TrainingActivityRefuseView.as_view(), name='refuse'),
+    path('require-changes/<uuid:activity_id>', TrainingActivityRequireChangesView.as_view(), name='require-changes'),
+    path('restore/<uuid:activity_id>', TrainingActivityRestoreView.as_view(), name='restore'),
+    path('delete/<uuid:activity_id>', TrainingActivityDeleteView.as_view(), name='delete'),
 ]
 doctorate_detail_paths = [
     path('person', DoctorateAdmissionPersonDetailView.as_view(), name='person'),
@@ -83,9 +88,17 @@ doctorate_detail_paths = [
         DoctorateAdmissionConfirmationCanvasExportView.as_view(),
         name='confirmation-canvas',
     ),
+    path('history-api', DoctorateHistoryAPIView.as_view(), name='history-api'),
     path('update/', include((doctorate_update_paths, 'update'))),
-    path('training', DoctorateTrainingActivityView.as_view(), name='training'),
-    path('training/', include((doctorate_training_paths, 'training'))),
+    # Training
+    path('training', TrainingRedirectView.as_view(), name='training'),
+    path('doctoral-training', DoctoralTrainingActivityView.as_view(), name='doctoral-training'),
+    path('doctoral-training/', include((training_paths, 'doctoral-training'))),
+    path('complementary-training', ComplementaryTrainingView.as_view(), name='complementary-training'),
+    path('complementary-training/', include((training_paths, 'complementary-training'))),
+    path('course-enrollment', CourseEnrollmentView.as_view(), name='course-enrollment'),
+    path('course-enrollment/', include((training_paths, 'course-enrollment'))),
+    path('internal-note/', InternalNoteView.as_view(), name='internal-note'),
 ]
 
 doctorate_cdd_paths = [
@@ -94,8 +107,7 @@ doctorate_cdd_paths = [
 
 doctorate_paths = [
     # Common
-    path('<uuid:pk>/', include(doctorate_detail_paths)),
-    path('<uuid:uuid>/history-api', DoctorateHistoryAPIView.as_view(), name='history-api'),
+    path('<uuid:uuid>/', include(doctorate_detail_paths)),
     # Specific
     path('cdd/', include((doctorate_cdd_paths, 'cdd'))),
 ]

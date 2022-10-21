@@ -25,6 +25,29 @@
 # ##############################################################################
 
 
+class GetDefaultContextParam:
+    """
+    A default class that can be used to represent a context param.
+    For instance, we can use it with CreateOnlyDefault to set a default argument with the value from a parameter
+    specified in the context during create operations, e.g.:
+
+    param_field = serializers.HiddenField(
+        default=serializers.CreateOnlyDefault(GetDefaultContextParam('context_param_name')),
+    )
+    """
+
+    requires_context = True
+
+    def __init__(self, param):
+        self.param = param
+
+    def __call__(self, serializer_field):
+        return serializer_field.context.get(self.param)
+
+    def __repr__(self):  # pragma: no cover
+        return '%s()' % self.__class__.__name__
+
+
 class IncludedFieldsMixin:
     def get_fields(self) -> dict:
         """Filter source declared fields and order them by Meta.fields"""

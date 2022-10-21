@@ -48,7 +48,14 @@ class ApiSchemaTestCase(TestCase):
     def test_api_schema_matches_generation(self):
         with NamedTemporaryFile(mode='w+') as temp:
             call_command(
+                'compilemessages',
+                verbosity=0,
+                locale='fr_BE',
+                ignore_patterns=['*/node_modules', '.git', '*/__pycache__', 'uploads', 'ddd'],
+            )
+            call_command(
                 'generateschema',
+                '--skip-checks',
                 urlconf='admission.api.url_v1',
                 generator_class='admission.api.schema.AdmissionSchemaGenerator',
                 file=temp.name,

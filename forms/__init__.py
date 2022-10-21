@@ -23,5 +23,92 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from typing import List, Optional
+
+from django import forms
+from django.utils.translation import gettext_lazy as _
+
+from base.forms.utils.datefield import DATE_FORMAT
+
 EMPTY_CHOICE = (('', ' - '),)
 NONE_CHOICE = ((None, ' - '),)
+
+
+class SelectOrOtherWidget(forms.MultiWidget):
+    """Form widget to handle a configurable (from CDDConfiguration) list of choices, or other"""
+
+    template_name = 'admission/doctorate/forms/select_or_other_widget.html'
+    media = forms.Media(
+        js=[
+            'js/dependsOn.min.js',
+            'admission/select_or_other.js',
+        ]
+    )
+
+    def __init__(self, *args, **kwargs):
+        widgets = {
+            '': forms.Select(),
+            'other': forms.TextInput(),
+        }
+        super().__init__(widgets, *args, **kwargs)
+
+    def decompress(self, value):
+        # No value, no value to both fields
+        if not value:
+            return [None, None]
+        # Pass value to radios if part of choices
+        if value in dict(self.widgets[0].choices):
+            return [value, '']
+        # else pass value to textinput
+        return ['other', value]
+
+    def get_context(self, name: str, value, attrs):
+        context = super().get_context(name, value, attrs)
+        # Remove the required attribute on textinput
+        context['widget']['subwidgets'][1]['attrs']['required'] = False
+        return context
+
+
+class SelectOrOtherField(forms.MultiValueField):
+    """Form field to handle a list of choices, or other"""
+
+    widget = SelectOrOtherWidget
+    select_class = forms.ChoiceField
+
+    def __init__(self, choices: Optional[List[str]] = None, *args, **kwargs):
+        select_kwargs = {}
+        if choices is not None:
+            select_kwargs['choices'] = self.choices = list(zip(choices, choices)) + [('other', _("Other"))]
+        fields = [self.select_class(required=False, **select_kwargs), forms.CharField(required=False)]
+        super().__init__(fields, require_all_fields=False, *args, **kwargs)
+
+    def get_bound_field(self, form, field_name):
+        if not self.widget.widgets[0].choices:
+            self.widget.widgets[0].choices = self.choices
+        return super().get_bound_field(form, field_name)
+
+    def validate(self, value):
+        # We do require all fields, but we want to check the final (compressed value)
+        super(forms.MultiValueField, self).validate(value)
+
+    def compress(self, data_list):
+        # On save, take the other value if "other" is chosen
+        radio, other = data_list
+        return radio if radio != "other" else other
+
+    def clean(self, value):
+        # Dispatch the correct values to each field before regular cleaning
+        radio, other = value
+        if hasattr(self, 'choices') and radio not in self.choices and other is None:
+            value = ['other', radio]
+        return super().clean(value)
+
+
+class CustomDateInput(forms.DateInput):
+    def __init__(self, attrs=None, format=DATE_FORMAT):
+        if attrs is None:
+            attrs = {
+                'placeholder': _("dd/mm/yyyy"),
+                'data-mask': '00/00/0000',
+            }
+        super().__init__(attrs, format)

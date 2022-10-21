@@ -52,7 +52,7 @@ class SendMailDoctorateStudentTestCase(TestCase):
             supervision_group=process,
         )
         cls.user = CddManagerFactory(entity=doctoral_commission).person.user
-        cls.url = resolve_url('admission:doctorate:send-mail', pk=cls.admission.uuid)
+        cls.url = resolve_url('admission:doctorate:send-mail', uuid=cls.admission.uuid)
 
     def test_prefill_no_selection(self):
         self.client.force_login(self.user)

@@ -30,7 +30,7 @@ from admission.exports.utils import admission_generate_pdf
 from admission.contrib.models import AdmissionTask, ConfirmationPaper
 from base.models.enums.person_address_type import PersonAddressType
 from base.models.person_address import PersonAddress
-from reference.services.mandates import MandatesService, MandateFunctionEnum
+from reference.services.mandates import MandatesService, MandateFunctionEnum, MandatesException
 
 
 def format_address(address, language):
@@ -44,12 +44,15 @@ def format_address(address, language):
 
 
 def admission_confirmation_success_attestation(task_uuid, language=None):
-    admission_task = AdmissionTask.objects.select_related(
-        'task',
-        'admission__candidate',
-        'admission__doctorate__enrollment_campus',
-        'admission__doctorate__management_entity',
-    ).get(task__uuid=task_uuid)
+    admission_task = (
+        AdmissionTask.objects.select_related(
+            'task',
+            'admission__candidate',
+            'admission__doctorate__management_entity',
+        )
+        .annotate_campus()
+        .get(task__uuid=task_uuid)
+    )
 
     current_language = language or admission_task.admission.candidate.language
 
@@ -74,14 +77,13 @@ def admission_confirmation_success_attestation(task_uuid, language=None):
             else None
         )
 
-        cdd_president = (
-            MandatesService.get(
-                function=MandateFunctionEnum.PRESI,
-                entity_acronym=admission_task.admission.doctorate.management_entity.most_recent_entity_version.acronym,
-            )
-            if settings.ESB_API_URL
-            else {}
-        )
+        cdd_president = []
+        if settings.ESB_API_URL:
+            acronym = admission_task.admission.doctorate.management_entity.most_recent_entity_version.acronym
+            try:
+                cdd_president = MandatesService.get(function=MandateFunctionEnum.PRESI, entity_acronym=acronym)
+            except MandatesException:
+                pass
 
         # Generate the pdf
         save_token = admission_generate_pdf(
@@ -90,8 +92,9 @@ def admission_confirmation_success_attestation(task_uuid, language=None):
             filename='confirmation_attestation.pdf',
             context={
                 'contact_address': contact_address,
-                'cdd_president': cdd_president,
+                'cdd_president': cdd_president[0] if cdd_president else {},
                 'confirmation_paper': confirmation_paper,
+                'teaching_campus': admission_task.teaching_campus,
             },
         )
 

@@ -25,7 +25,7 @@
 # ##############################################################################
 from django.views.generic import RedirectView
 
-from admission.ddd.projet_doctoral.preparation.commands import GetGroupeDeSupervisionCommand
+from admission.ddd.admission.doctorat.preparation.commands import GetGroupeDeSupervisionCommand
 from admission.exports.admission_confirmation_canvas import admission_pdf_confirmation_canvas
 from admission.views.doctorate.forms.confirmation import DoctorateAdmissionLastConfirmationMixin
 from infrastructure.messages_bus import message_bus_instance
@@ -37,7 +37,12 @@ class DoctorateAdmissionConfirmationCanvasExportView(DoctorateAdmissionLastConfi
     def get_context_data(self, **kwargs):
         context_data = super().get_context_data()
         context_data['supervision_group'] = message_bus_instance.invoke(
-            GetGroupeDeSupervisionCommand(uuid_proposition=self.kwargs.get('pk')),
+            GetGroupeDeSupervisionCommand(uuid_proposition=self.admission_uuid),
+        )
+        context_data['supervision_people_nb'] = (
+            # total actor count
+            len(context_data['supervision_group'].signatures_promoteurs)
+            + len(context_data['supervision_group'].signatures_membres_CA)
         )
         return context_data
 

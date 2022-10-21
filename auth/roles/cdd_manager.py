@@ -27,7 +27,13 @@ import rules
 from django.utils.translation import gettext_lazy as _
 from rules import RuleSet
 
-from admission.auth.predicates import is_enrolled, is_part_of_doctoral_commission
+from admission.auth.predicates import (
+    complementary_training_enabled,
+    is_enrolled,
+    is_part_of_doctoral_commission,
+    is_pre_admission,
+    submitted_confirmation_paper,
+)
 from osis_role.contrib.models import EntityRoleModel
 
 
@@ -45,12 +51,12 @@ class CddManager(EntityRoleModel):
             'admission.delete_doctorateadmission': rules.always_deny,
             'admission.appose_cdd_notice': is_part_of_doctoral_commission,
             'admission.download_pdf_confirmation': is_part_of_doctoral_commission,
-            'admission.upload_pdf_confirmation': rules.always_deny,
             'admission.approve_confirmation_paper': is_part_of_doctoral_commission,
             'admission.validate_doctoral_training': is_part_of_doctoral_commission,
             'admission.fill_thesis': is_part_of_doctoral_commission,
             'admission.submit_thesis': is_part_of_doctoral_commission,
             'admission.upload_defense_report': is_part_of_doctoral_commission,
+            # Profile
             'admission.view_doctorateadmission_person': is_part_of_doctoral_commission,
             'admission.change_doctorateadmission_person': is_part_of_doctoral_commission,
             'admission.view_doctorateadmission_coordinates': is_part_of_doctoral_commission,
@@ -61,21 +67,37 @@ class CddManager(EntityRoleModel):
             'admission.change_doctorateadmission_languages': is_part_of_doctoral_commission,
             'admission.view_doctorateadmission_curriculum': is_part_of_doctoral_commission,
             'admission.change_doctorateadmission_curriculum': is_part_of_doctoral_commission,
+            # Project
             'admission.view_doctorateadmission_project': is_part_of_doctoral_commission,
             'admission.change_doctorateadmission_project': is_part_of_doctoral_commission,
             'admission.view_doctorateadmission_cotutelle': is_part_of_doctoral_commission,
             'admission.change_doctorateadmission_cotutelle': is_part_of_doctoral_commission,
+            # Supervision
             'admission.view_doctorateadmission_supervision': is_part_of_doctoral_commission,
             'admission.change_doctorateadmission_supervision': is_part_of_doctoral_commission,
-            'admission.view_doctorateadmission_confirmation': is_part_of_doctoral_commission,
-            'admission.change_doctorateadmission_confirmation': is_part_of_doctoral_commission,
             'admission.add_supervision_member': is_part_of_doctoral_commission,
             'admission.remove_supervision_member': is_part_of_doctoral_commission,
+            # Confirmation paper
+            'admission.view_doctorateadmission_confirmation': is_part_of_doctoral_commission & is_enrolled,
+            'admission.change_doctorateadmission_confirmation': is_part_of_doctoral_commission & is_enrolled,
+            'admission.change_doctorateadmission_confirmation_extension': is_part_of_doctoral_commission & is_enrolled,
+            'admission.make_confirmation_decision': is_part_of_doctoral_commission & submitted_confirmation_paper,
             'admission.change_cddmailtemplate': rules.always_allow,
             'admission.view_cdddossiers': rules.always_allow,
             'osis_history.view_historyentry': is_part_of_doctoral_commission,
             'admission.send_message': is_part_of_doctoral_commission & is_enrolled,
             'admission.change_cddconfiguration': rules.always_allow,
-            'admission.change_activity': is_part_of_doctoral_commission,
+            # Training
+            'admission.view_training': is_part_of_doctoral_commission & is_enrolled,
+            'admission.view_doctoral_training': is_part_of_doctoral_commission & is_enrolled & ~is_pre_admission,
+            'admission.view_complementary_training': is_part_of_doctoral_commission & complementary_training_enabled,
+            'admission.view_course_enrollment': is_part_of_doctoral_commission & is_enrolled,
+            'admission.change_activity': is_part_of_doctoral_commission & is_enrolled,
+            'admission.delete_activity': is_part_of_doctoral_commission & is_enrolled,
+            'admission.refuse_activity': is_part_of_doctoral_commission & is_enrolled,
+            'admission.restore_activity': is_part_of_doctoral_commission & is_enrolled,
+            # Internal notes
+            'admission.add_internalnote': is_part_of_doctoral_commission,
+            'admission.view_internalnote': is_part_of_doctoral_commission,
         }
         return RuleSet(ruleset)

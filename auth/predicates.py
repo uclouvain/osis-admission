@@ -28,12 +28,17 @@ from django.utils.translation import gettext_lazy as _
 from osis_signature.enums import SignatureState
 from rules import predicate
 
-from admission.ddd.projet_doctoral.doctorat.domain.model.enums import STATUTS_DOCTORAT_EPREUVE_CONFIRMATION_EN_COURS
-from admission.ddd.projet_doctoral.preparation.domain.model._enums import (
+from admission.ddd.parcours_doctoral.domain.model.enums import (
+    ChoixStatutDoctorat,
+    STATUTS_DOCTORAT_EPREUVE_CONFIRMATION_EN_COURS,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixStatutProposition,
+    ChoixTypeAdmission,
     STATUTS_PROPOSITION_AVANT_SOUMISSION,
     STATUTS_PROPOSITION_AVANT_INSCRIPTION,
 )
+from osis_role.cache import predicate_cache
 from osis_role.errors import predicate_failed_msg
 
 from admission.contrib.models import DoctorateAdmission
@@ -68,9 +73,13 @@ def unconfirmed_proposition(self, user: User, obj: DoctorateAdmission):
 @predicate(bind=True)
 @predicate_failed_msg(message=_("Must be enrolled"))
 def is_enrolled(self, user: User, obj: DoctorateAdmission):
-    return (
-        obj.status not in STATUTS_PROPOSITION_AVANT_INSCRIPTION and obj.status != ChoixStatutProposition.CANCELLED.name
-    )
+    return obj.status == ChoixStatutProposition.ENROLLED.name
+
+
+@predicate(bind=True)
+@predicate_failed_msg(message=_("Must not be pre-admission"))
+def is_pre_admission(self, user: User, obj: DoctorateAdmission):
+    return obj.type == ChoixTypeAdmission.PRE_ADMISSION.name
 
 
 @predicate(bind=True)
@@ -86,6 +95,21 @@ def confirmation_paper_in_progress(self, user: User, obj: DoctorateAdmission):
 
 
 @predicate(bind=True)
+@predicate_failed_msg(message=_("The confirmation paper is not in progress"))
+def submitted_confirmation_paper(self, user: User, obj: DoctorateAdmission):
+    return obj.post_enrolment_status == ChoixStatutDoctorat.SUBMITTED_CONFIRMATION.name
+
+
+@predicate(bind=True)
+@predicate_failed_msg(message=_("Complementary training not enabled"))
+def complementary_training_enabled(self, user: User, obj: DoctorateAdmission):
+    return (
+        hasattr(obj.doctorate.management_entity, 'admission_config')
+        and obj.doctorate.management_entity.admission_config.is_complementary_training_enabled
+    )
+
+
+@predicate(bind=True)
 @predicate_failed_msg(message=_("You must be the request promoter to access this admission"))
 def is_admission_request_promoter(self, user: User, obj: DoctorateAdmission):
     return obj.supervision_group and user.person.pk in obj.supervision_group.actors.filter(
@@ -94,7 +118,21 @@ def is_admission_request_promoter(self, user: User, obj: DoctorateAdmission):
 
 
 @predicate(bind=True)
+@predicate_failed_msg(message=_("You must be the reference promoter to access this admission"))
+def is_admission_reference_promoter(self, user: User, obj: DoctorateAdmission):
+    return (
+        obj.supervision_group
+        and obj.supervision_group.actors.filter(
+            supervisionactor__type=ActorType.PROMOTER.name,
+            supervisionactor__is_reference_promoter=True,
+            person_id=user.person.pk,
+        ).exists()
+    )
+
+
+@predicate(bind=True)
 @predicate_failed_msg(message=_("You must be a member of the doctoral commission to access this admission"))
+@predicate_cache(cache_key_fn=lambda obj: getattr(obj, 'pk', None))
 def is_part_of_doctoral_commission(self, user: User, obj: DoctorateAdmission):
     return obj.doctorate.management_entity_id in self.context['role_qs'].get_entities_ids()
 

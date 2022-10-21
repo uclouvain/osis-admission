@@ -26,17 +26,44 @@
 
 from rest_framework import status
 from rest_framework.generics import GenericAPIView
+from rest_framework.mixins import RetrieveModelMixin
 from rest_framework.response import Response
+from rest_framework.schemas.openapi import AutoSchema
+from rest_framework.settings import api_settings
 
 from admission.api.schema import ChoicesEnumSchema
-from admission.api.serializers.training import DoctoralTrainingActivitySerializer
+from admission.api.serializers.activity import (
+    DoctoralTrainingActivitySerializer,
+    DoctoralTrainingAssentSerializer,
+    DoctoralTrainingBatchSerializer,
+    DoctoralTrainingConfigSerializer,
+)
+from admission.contrib.models.cdd_config import CddConfiguration
 from admission.contrib.models.doctoral_training import Activity
+from admission.ddd.parcours_doctoral.formation.commands import (
+    DonnerAvisSurActiviteCommand,
+    SoumettreActivitesCommand,
+    SupprimerActiviteCommand,
+)
 from admission.utils import get_cached_admission_perm_obj
+from base.ddd.utils.business_validator import MultipleBusinessExceptions
+from infrastructure.messages_bus import message_bus_instance
 from osis_role.contrib.views import APIPermissionRequiredMixin
 
+__all__ = [
+    "DoctoralTrainingListView",
+    "TrainingConfigView",
+    "TrainingView",
+    "TrainingSubmitView",
+    "TrainingAssentView",
+    "ComplementaryTrainingListView",
+    "CourseEnrollmentListView",
+]
 
-class DoctoralTrainingSchema(ChoicesEnumSchema):
-    operation_id_base = "_doctoral_training"
+
+class TrainingListSchema(ChoicesEnumSchema):
+    def get_operation_id_base(self, path: str, method: str, action) -> str:
+        return f"_{self.view.name.replace('-', '_')}"
 
     def map_serializer(self, serializer):
         if isinstance(serializer, DoctoralTrainingActivitySerializer):
@@ -54,21 +81,12 @@ class DoctoralTrainingSchema(ChoicesEnumSchema):
         components = super().get_components(path, method)
         for mapping_key, serializer in DoctoralTrainingActivitySerializer.serializer_class_mapping.items():
             # Specify the children classes if needed, by looking for parent category in the mapping key
-            child_classes = self._get_child_classes(mapping_key)
+            child_classes = DoctoralTrainingActivitySerializer.get_child_classes(mapping_key)
 
             serializer_dummy_instance = serializer(child_classes=child_classes)
             component_name = self.get_component_name(serializer_dummy_instance)
             components.setdefault(component_name, self.map_serializer(serializer_dummy_instance))
         return components
-
-    @staticmethod
-    def _get_child_classes(mapping_key):
-        child_classes = []
-        for key, value in DoctoralTrainingActivitySerializer.serializer_class_mapping.items():
-            if not isinstance(mapping_key, tuple) and isinstance(key, tuple) and key[0] == mapping_key:
-                child_classes.append(value)
-        if child_classes:
-            return child_classes
 
 
 class DoctoralTrainingListView(APIPermissionRequiredMixin, GenericAPIView):
@@ -76,57 +94,85 @@ class DoctoralTrainingListView(APIPermissionRequiredMixin, GenericAPIView):
     pagination_class = None
     filter_backends = []
     serializer_class = DoctoralTrainingActivitySerializer
-    schema = DoctoralTrainingSchema()
+    schema = TrainingListSchema()
     lookup_field = 'uuid'
     lookup_url_kwarg = 'activity_id'
     permission_mapping = {
-        'GET': 'admission.view_doctorateadmission_doctoral_training',
-        'POST': 'admission.add_doctorateadmission_doctoral_training',
+        'GET': 'admission.view_doctoral_training',
+        'POST': 'admission.add_training',
     }
 
     def get_permission_object(self):
         return get_cached_admission_perm_obj(self.kwargs['uuid'])
 
     def get_queryset(self):
-        return Activity.objects.filter(doctorate__uuid=self.kwargs['uuid']).prefetch_related('children')
+        return Activity.objects.for_doctoral_training(self.kwargs['uuid'])
 
     def get(self, request, *args, **kwargs):
         serializer = self.get_serializer(self.get_queryset(), many=True)
         return Response(serializer.data)
 
     def post(self, request, *args, **kwargs):
+        admission = self.get_permission_object()
         data = {
             **request.data,
-            'doctorate': self.get_permission_object().pk,
+            'doctorate': admission.pk,
         }
-        serializer = DoctoralTrainingActivitySerializer(data=data)
+        serializer = DoctoralTrainingActivitySerializer(admission=admission, data=data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
-class DoctoralTrainingView(APIPermissionRequiredMixin, GenericAPIView):
-    name = "doctoral-training"
+class TrainingConfigView(APIPermissionRequiredMixin, RetrieveModelMixin, GenericAPIView):
+    name = "training-config"
+    pagination_class = None
+    filter_backends = []
+    serializer_class = DoctoralTrainingConfigSerializer
+    lookup_field = 'uuid'
+    permission_mapping = {
+        'GET': 'admission.view_training',
+    }
+
+    def get_permission_object(self):
+        return get_cached_admission_perm_obj(self.kwargs['uuid'])
+
+    def get_object(self):
+        management_entity_id = self.get_permission_object().doctorate.management_entity_id
+        return CddConfiguration.objects.get_or_create(cdd_id=management_entity_id)[0]
+
+    def get(self, request, *args, **kwargs):
+        serializer = self.get_serializer(self.get_object())
+        return Response(serializer.data)
+
+
+class TrainingView(APIPermissionRequiredMixin, GenericAPIView):
+    name = "training"
     pagination_class = None
     filter_backends = []
     serializer_class = DoctoralTrainingActivitySerializer
-    schema = DoctoralTrainingSchema()
+    schema = TrainingListSchema()
     lookup_field = 'uuid'
     lookup_url_kwarg = 'activity_id'
     permission_mapping = {
-        'GET': 'admission.view_doctorateadmission_doctoral_training',
-        'PUT': 'admission.view_doctorateadmission_doctoral_training',
+        'GET': 'admission.view_training',
+        'PUT': 'admission.update_training',
+        'DELETE': 'admission.delete_training',
     }
 
     def get_permission_object(self):
         return get_cached_admission_perm_obj(self.kwargs['uuid'])
 
     def get_queryset(self):
-        return Activity.objects.filter(doctorate__uuid=self.kwargs['uuid'])
+        return (
+            Activity.objects.filter(doctorate__uuid=self.kwargs['uuid'])
+            .prefetch_related('children')
+            .select_related('learning_unit_year')
+        )
 
     def get(self, request, *args, **kwargs):
         instance = self.get_object()
-        serializer = DoctoralTrainingActivitySerializer(instance)
+        serializer = DoctoralTrainingActivitySerializer(instance, admission=self.get_permission_object())
         return Response(serializer.data)
 
     def put(self, request, *args, **kwargs):
@@ -135,7 +181,121 @@ class DoctoralTrainingView(APIPermissionRequiredMixin, GenericAPIView):
             **request.data,
             'doctorate': self.get_permission_object().pk,
         }
-        serializer = DoctoralTrainingActivitySerializer(instance, data=data)
+        serializer = DoctoralTrainingActivitySerializer(instance, admission=self.get_permission_object(), data=data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
+
+    def delete(self, request, *args, **kwargs):
+        message_bus_instance.invoke(SupprimerActiviteCommand(activite_uuid=str(kwargs["activity_id"])))
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class TrainingBatchSchema(AutoSchema):
+    def get_operation_id(self, path, method):
+        return "submit_training"
+
+
+class TrainingSubmitView(APIPermissionRequiredMixin, GenericAPIView):
+    name = "training-submit"
+    pagination_class = None
+    filter_backends = []
+    serializer_class = DoctoralTrainingBatchSerializer
+    schema = TrainingBatchSchema()
+    lookup_field = 'uuid'
+    permission_mapping = {
+        'POST': 'admission.submit_training',
+    }
+
+    def get_permission_object(self):
+        return get_cached_admission_perm_obj(self.kwargs['uuid'])
+
+    def post(self, request, *args, **kwargs):
+        """Submit doctoral training activities."""
+        serializer = DoctoralTrainingBatchSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        cmd = SoumettreActivitesCommand(
+            doctorat_uuid=self.kwargs['uuid'],
+            activite_uuids=serializer.data['activity_uuids'],
+        )
+        try:
+            message_bus_instance.invoke(cmd)
+        except MultipleBusinessExceptions as exc:
+            # Bypass normal exception handling to add activity_id to each error
+            data = {
+                api_settings.NON_FIELD_ERRORS_KEY: [
+                    {
+                        "status_code": exception.status_code,
+                        "detail": exception.message,
+                        "activite_id": str(exception.activite_id.uuid),
+                    }
+                    for exception in exc.exceptions
+                ]
+            }
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class TrainingAssentSchema(AutoSchema):
+    def get_operation_id(self, path, method):
+        return "assent_training"
+
+    def get_operation(self, path: str, method: str):
+        operation = super().get_operation(path, method)
+        activity_id_param = {
+            "name": 'activity_id',
+            "in": "query",
+            "required": True,
+            'schema': {'type': 'string'},
+        }
+        operation['parameters'].append(activity_id_param)
+        return operation
+
+
+class TrainingAssentView(APIPermissionRequiredMixin, GenericAPIView):
+    name = "training-assent"
+    pagination_class = None
+    filter_backends = []
+    serializer_class = DoctoralTrainingAssentSerializer
+    schema = TrainingAssentSchema()
+    lookup_field = 'uuid'
+    permission_mapping = {
+        'POST': 'admission.assent_training',
+    }
+
+    def get_permission_object(self):
+        return get_cached_admission_perm_obj(self.kwargs['uuid'])
+
+    def post(self, request, *args, **kwargs):
+        """Assent on a doctoral training activity."""
+        serializer = DoctoralTrainingAssentSerializer(data=request.data)
+        serializer.is_valid(True)
+        cmd = DonnerAvisSurActiviteCommand(
+            doctorat_uuid=self.kwargs['uuid'],
+            activite_uuid=self.request.GET['activity_id'],
+            **serializer.data,
+        )
+        message_bus_instance.invoke(cmd)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class ComplementaryTrainingListView(DoctoralTrainingListView):
+    name = "complementary-training"
+    http_method_names = ['get']
+    permission_mapping = {
+        'GET': 'admission.view_complementary_training',
+    }
+
+    def get_queryset(self):
+        return Activity.objects.for_complementary_training(self.kwargs['uuid'])
+
+
+class CourseEnrollmentListView(DoctoralTrainingListView):
+    name = "course-enrollment"
+    http_method_names = ['get']
+    permission_mapping = {
+        'GET': 'admission.view_course_enrollment',
+    }
+
+    def get_queryset(self):
+        return Activity.objects.for_enrollment_courses(self.kwargs['uuid'])

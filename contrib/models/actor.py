@@ -69,6 +69,9 @@ class SupervisionActor(Actor):
         verbose_name=_("PDF file"),
         upload_to=actor_upload_directory_path,
     )
+    is_reference_promoter = models.BooleanField(
+        default=False,
+    )
 
 
 class ExternalActorMixin(models.Model):

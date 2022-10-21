@@ -27,11 +27,25 @@ from django.shortcuts import resolve_url
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from admission.ddd.projet_doctoral.doctorat.formation.domain.model._enums import CategorieActivite
+from admission.contrib.models.cdd_config import CddConfiguration
+from admission.contrib.models.doctoral_training import Activity
+from admission.ddd.parcours_doctoral.formation.domain.model.enums import (
+    CategorieActivite,
+    ContexteFormation,
+    StatutActivite,
+)
 from admission.tests import QueriesAssertionsMixin
 from admission.tests.factories import DoctorateAdmissionFactory
-from admission.tests.factories.activity import ActivityFactory, ConferenceFactory
+from admission.tests.factories.activity import (
+    ActivityFactory,
+    ConferenceCommunicationFactory,
+    ConferenceFactory,
+    CourseFactory,
+    ServiceFactory,
+    UclCourseFactory,
+)
 from admission.tests.factories.roles import CandidateFactory
+from admission.tests.factories.supervision import PromoterFactory
 from base.models.enums.entity_type import EntityType
 from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.person import PersonFactory
@@ -40,13 +54,35 @@ from base.tests.factories.person import PersonFactory
 class TrainingApiTestCase(QueriesAssertionsMixin, APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        cls.valid_data_for_conference = {
+            'object_type': 'Conference',
+            'context': ContexteFormation.DOCTORAL_TRAINING.name,
+            'ects': "0.0",
+            'category': 'CONFERENCE',
+            'parent': None,
+            'type': 'A great conference',
+            'title': '',
+            'participating_proof': [],
+            'comment': '',
+            'start_date': None,
+            'end_date': None,
+            'participating_days': 0.0,
+            'is_online': False,
+            'country': None,
+            'city': '',
+            'organizing_institution': '',
+            'website': '',
+        }
         cls.commission = EntityVersionFactory(
             entity_type=EntityType.DOCTORAL_COMMISSION.name,
             acronym='CDA',
         ).entity
+        CddConfiguration.objects.create(cdd=cls.commission, is_complementary_training_enabled=True)
+        cls.reference_promoter = PromoterFactory(is_reference_promoter=True)
         cls.admission = DoctorateAdmissionFactory(
             doctorate__management_entity=cls.commission,
             admitted=True,
+            supervision_group=cls.reference_promoter.process,
         )
         cls.candidate = cls.admission.candidate
         cls.other_candidate_user = CandidateFactory(person__first_name="Jim").person.user
@@ -54,10 +90,12 @@ class TrainingApiTestCase(QueriesAssertionsMixin, APITestCase):
         cls.url = resolve_url("admission_api_v1:doctoral-training", uuid=cls.admission.uuid)
         cls.activity = ConferenceFactory(doctorate=cls.admission)
         cls.activity_url = resolve_url(
-            "admission_api_v1:doctoral-training",
+            "admission_api_v1:training",
             uuid=cls.admission.uuid,
             activity_id=cls.activity.uuid,
         )
+        cls.complementary_url = resolve_url("admission_api_v1:complementary-training", uuid=cls.admission.uuid)
+        cls.enrollment_url = resolve_url("admission_api_v1:course-enrollment", uuid=cls.admission.uuid)
 
     def test_user_not_logged_assert_not_authorized(self):
         response = self.client.get(self.url)
@@ -79,6 +117,20 @@ class TrainingApiTestCase(QueriesAssertionsMixin, APITestCase):
         activities = response.json()
         self.assertEqual(len(activities), 1)
 
+        CourseFactory(doctorate=self.admission, context=ContexteFormation.COMPLEMENTARY_TRAINING.name)
+        with self.assertNumQueriesLessThan(8):
+            response = self.client.get(self.complementary_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        activities = response.json()
+        self.assertEqual(len(activities), 1)
+
+        UclCourseFactory(doctorate=self.admission, context=ContexteFormation.FREE_COURSE.name)
+        with self.assertNumQueriesLessThan(8):
+            response = self.client.get(self.enrollment_url)
+        activities = response.json()
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(activities), 1)
+
     def test_training_get_with_no_role(self):
         self.client.force_authenticate(user=self.no_role_user)
         response = self.client.get(self.url)
@@ -92,30 +144,25 @@ class TrainingApiTestCase(QueriesAssertionsMixin, APITestCase):
     def test_training_create_with_candidate(self):
         self.client.force_authenticate(user=self.candidate.user)
 
-        data = {
-            'object_type': 'Conference',
-            'ects': "0.0",
-            'category': 'CONFERENCE',
-            'parent': None,
-            'type': 'A great conference',
-            'title': '',
-            'participating_proof': [],
-            'comment': '',
-            'start_date': None,
-            'end_date': None,
-            'participating_days': 0,
-            'is_online': False,
-            'country': None,
-            'city': '',
-            'organizing_institution': '',
-            'website': '',
-        }
-        response = self.client.post(self.url, data)
+        response = self.client.post(self.url, self.valid_data_for_conference)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.json())
 
-        # Child activity
+    def test_training_create_errors_with_candidate(self):
+        self.client.force_authenticate(user=self.candidate.user)
+
+        data = {
+            **self.valid_data_for_conference,
+            'start_date': '02/01/2022',
+            'end_date': '01/01/2022',
+        }
+        response = self.client.post(self.url, data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.json())
+
+    def test_training_create_child_with_candidate(self):
+        self.client.force_authenticate(user=self.candidate.user)
         data = {
             'object_type': 'ConferenceCommunication',
+            'context': ContexteFormation.DOCTORAL_TRAINING.name,
             'ects': 0,
             'category': 'COMMUNICATION',
             'parent': self.activity.uuid,
@@ -139,11 +186,7 @@ class TrainingApiTestCase(QueriesAssertionsMixin, APITestCase):
             category=CategorieActivite.COMMUNICATION.name,
             parent=self.activity,
         )
-        activity_url = resolve_url(
-            "admission_api_v1:doctoral-training",
-            uuid=self.admission.uuid,
-            activity_id=subactivity.uuid,
-        )
+        activity_url = resolve_url("admission_api_v1:training", uuid=self.admission.uuid, activity_id=subactivity.uuid)
         response = self.client.get(activity_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -152,6 +195,7 @@ class TrainingApiTestCase(QueriesAssertionsMixin, APITestCase):
 
         data = {
             'object_type': 'Conference',
+            'context': ContexteFormation.DOCTORAL_TRAINING.name,
             'ects': "0.0",
             'category': 'CONFERENCE',
             'parent': None,
@@ -161,7 +205,7 @@ class TrainingApiTestCase(QueriesAssertionsMixin, APITestCase):
             'comment': '',
             'start_date': None,
             'end_date': None,
-            'participating_days': 0,
+            'participating_days': 0.0,
             'is_online': False,
             'country': None,
             'city': '',
@@ -170,3 +214,73 @@ class TrainingApiTestCase(QueriesAssertionsMixin, APITestCase):
         }
         response = self.client.put(self.activity_url, data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_training_config(self):
+        self.client.force_authenticate(user=self.candidate.user)
+        config_url = resolve_url("admission_api_v1:training-config", uuid=self.admission.uuid)
+        response = self.client.get(config_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_training_should_delete_unsubmitted(self):
+        service = ServiceFactory(doctorate=self.admission)
+        self.client.force_authenticate(user=self.candidate.user)
+        url = resolve_url("admission_api_v1:training", uuid=self.admission.uuid, activity_id=service.uuid)
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertIsNone(Activity.objects.filter(pk=service.pk).first())
+
+    def test_training_should_not_delete_submitted(self):
+        service = ServiceFactory(doctorate=self.admission, status=StatutActivite.SOUMISE.name)
+        self.client.force_authenticate(user=self.candidate.user)
+        url = resolve_url("admission_api_v1:training", uuid=self.admission.uuid, activity_id=service.uuid)
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIsNotNone(Activity.objects.filter(pk=service.pk).first())
+
+    def test_training_should_not_delete_parent_with_child_submitted(self):
+        communication = ConferenceCommunicationFactory(
+            doctorate=self.admission,
+            status=StatutActivite.SOUMISE.name,
+        )
+        self.client.force_authenticate(user=self.candidate.user)
+        url = resolve_url("admission_api_v1:training", uuid=self.admission.uuid, activity_id=communication.parent.uuid)
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIsNotNone(Activity.objects.filter(pk=communication.pk).first())
+        self.assertIsNotNone(Activity.objects.filter(pk=communication.parent.pk).first())
+
+    def test_training_should_delete_parent_unsubmitted_with_child(self):
+        communication = ConferenceCommunicationFactory(
+            doctorate=self.admission,
+            parent=self.activity,
+        )
+        self.client.force_authenticate(user=self.candidate.user)
+        response = self.client.delete(self.activity_url)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertIsNone(Activity.objects.filter(pk__in=[communication.pk, self.activity.pk]).first())
+
+    def test_training_submit(self):
+        service = ServiceFactory(doctorate=self.admission)
+        self.client.force_authenticate(user=self.candidate.user)
+        submit_url = resolve_url("admission_api_v1:training-submit", uuid=self.admission.uuid)
+        response = self.client.post(submit_url, {'activity_uuids': [service.uuid]})
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_training_submit_with_error(self):
+        self.client.force_authenticate(user=self.candidate.user)
+        service = ServiceFactory(doctorate=self.admission, title="")
+        submit_url = resolve_url("admission_api_v1:training-submit", uuid=self.admission.uuid)
+        response = self.client.post(submit_url, {'activity_uuids': [service.uuid]})
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_training_assent(self):
+        self.client.force_authenticate(user=self.reference_promoter.person.user)
+        submit_url = resolve_url("admission_api_v1:training-assent", uuid=self.admission.uuid)
+        data = {
+            'approbation': False,
+            'commentaire': 'Do not agree',
+        }
+        response = self.client.post(f"{submit_url}?activity_id={self.activity.uuid}", data)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.activity.refresh_from_db()
+        self.assertEqual(self.activity.reference_promoter_comment, "Do not agree")

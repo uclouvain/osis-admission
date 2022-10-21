@@ -29,7 +29,7 @@ from django.shortcuts import resolve_url
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from admission.ddd.projet_doctoral.preparation.domain.model._enums import ChoixStatutProposition
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutProposition
 from admission.tests.factories import DoctorateAdmissionFactory, WriteTokenFactory
 from admission.tests.factories.supervision import CaMemberFactory, PromoterFactory
 from osis_signature.enums import SignatureState

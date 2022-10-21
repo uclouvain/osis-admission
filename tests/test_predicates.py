@@ -36,8 +36,8 @@ from admission.auth.predicates import (
     confirmation_paper_in_progress,
 )
 from admission.auth.roles.cdd_manager import CddManager
-from admission.ddd.projet_doctoral.doctorat.domain.model.enums import ChoixStatutDoctorat
-from admission.ddd.projet_doctoral.preparation.domain.model._enums import ChoixStatutProposition
+from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutProposition
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.roles import CandidateFactory, CddManagerFactory, PromoterRoleFactory
 from admission.tests.factories.supervision import PromoterFactory as PromoterActorFactory, _ProcessFactory

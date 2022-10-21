@@ -39,6 +39,6 @@ class HistoryTestCase(TestCase):
             doctorate__management_entity=doctoral_commission,
         )
         self.client.force_login(CddManagerFactory(entity=doctoral_commission).person.user)
-        url = resolve_url('admission:doctorate:history', pk=admission.uuid)
+        url = resolve_url('admission:doctorate:history', uuid=admission.uuid)
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)

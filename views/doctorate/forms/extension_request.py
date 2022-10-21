@@ -26,7 +26,7 @@
 from django.urls import reverse
 from django.views.generic import FormView
 
-from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.commands import (
+from admission.ddd.parcours_doctoral.epreuve_confirmation.commands import (
     SoumettreAvisProlongationCommand,
 )
 from admission.forms.doctorate.extension_request import ExtensionRequestForm
@@ -41,7 +41,7 @@ class DoctorateAdmissionExtensionRequestFormView(
     FormView,
 ):
     template_name = 'admission/doctorate/forms/extension_request.html'
-    permission_required = 'admission.change_doctorateadmission_confirmation'
+    permission_required = 'admission.change_doctorateadmission_confirmation_extension'
     form_class = ExtensionRequestForm
 
     def get_initial(self):
@@ -62,4 +62,4 @@ class DoctorateAdmissionExtensionRequestFormView(
         )
 
     def get_success_url(self):
-        return reverse('admission:doctorate:extension-request', args=[self.kwargs.get('pk')])
+        return reverse('admission:doctorate:extension-request', args=[self.admission_uuid])

@@ -24,12 +24,31 @@
 #
 # ##############################################################################
 import factory
+from django.conf import settings
+from factory import SubFactory
 
 from admission.contrib.models.cdd_config import CddConfiguration
 from admission.contrib.models.doctoral_training import Activity
-from admission.ddd.projet_doctoral.doctorat.formation.domain.model._enums import CategorieActivite
-from admission.forms.doctorate.training.activity import ConferenceForm
+from admission.ddd.parcours_doctoral.formation.domain.model.enums import CategorieActivite
 from admission.tests.factories import DoctorateAdmissionFactory
+
+__all__ = [
+    "ActivityFactory",
+    "CommunicationFactory",
+    "ConferenceCommunicationFactory",
+    "ConferenceFactory",
+    "ConferencePublicationFactory",
+    "CourseFactory",
+    "PaperFactory",
+    "PublicationFactory",
+    "ResidencyCommunicationFactory",
+    "ResidencyFactory",
+    "SeminarCommunicationFactory",
+    "SeminarFactory",
+    "ServiceFactory",
+    "UclCourseFactory",
+    "VaeFactory",
+]
 
 
 class ActivityFactory(factory.DjangoModelFactory):
@@ -43,7 +62,7 @@ class ActivityFactory(factory.DjangoModelFactory):
 
 class ConferenceFactory(ActivityFactory):
     category = CategorieActivite.CONFERENCE.name
-    type = factory.Iterator(ConferenceForm.base_fields['type'].choices)
+    type = factory.Iterator(CddConfiguration.conference_types.field.default()[settings.LANGUAGE_CODE_FR])
     title = factory.Faker('catch_phrase')
     start_date = factory.Faker('date_between', start_date='-30d')
     end_date = factory.Faker('date_this_month')
@@ -58,10 +77,75 @@ class ConferenceFactory(ActivityFactory):
 
 class ServiceFactory(ActivityFactory):
     category = CategorieActivite.SERVICE.name
-    type = factory.Iterator(CddConfiguration.service_types.field.default()['fr-be'])
+    type = factory.Iterator(CddConfiguration.service_types.field.default()[settings.LANGUAGE_CODE_FR])
     title = factory.Faker('catch_phrase')
     start_date = factory.Faker('date_between', start_date='-30d')
     end_date = factory.Faker('date_this_month')
     hour_volume = factory.Faker('random_int', min=0, max=5)
     organizing_institution = factory.Faker('company')
     comment = factory.Faker('text', max_nb_chars=150)
+
+
+class SeminarFactory(ActivityFactory):
+    category = CategorieActivite.SEMINAR.name
+    type = factory.Iterator(CddConfiguration.seminar_types.field.default()[settings.LANGUAGE_CODE_FR])
+    title = factory.Faker('catch_phrase')
+    start_date = factory.Faker('date_between', start_date='-30d')
+    end_date = factory.Faker('date_this_month')
+    hour_volume = factory.Faker('random_int', min=0, max=5)
+    participating_proof = ['uuid']
+
+
+class ResidencyFactory(ActivityFactory):
+    category = CategorieActivite.RESIDENCY.name
+
+
+class ConferenceCommunicationFactory(ActivityFactory):
+    category = CategorieActivite.COMMUNICATION.name
+    parent = SubFactory(ConferenceFactory, doctorate=factory.SelfAttribute('..doctorate'))
+
+
+class ConferencePublicationFactory(ActivityFactory):
+    category = CategorieActivite.PUBLICATION.name
+    parent = SubFactory(ConferenceFactory, doctorate=factory.SelfAttribute('..doctorate'))
+
+
+class SeminarCommunicationFactory(ActivityFactory):
+    category = CategorieActivite.COMMUNICATION.name
+    parent = SubFactory(SeminarFactory, doctorate=factory.SelfAttribute('..doctorate'))
+    title = factory.Faker('catch_phrase')
+    start_date = factory.Faker('date_between', start_date='-30d')
+    country = factory.SubFactory('reference.tests.factories.country.CountryFactory')
+    city = factory.Faker('city')
+    organizing_institution = factory.Faker('company')
+    authors = factory.Faker('name')
+
+
+class ResidencyCommunicationFactory(ActivityFactory):
+    category = CategorieActivite.COMMUNICATION.name
+    parent = SubFactory(ResidencyFactory, doctorate=factory.SelfAttribute('..doctorate'))
+
+
+class CommunicationFactory(ActivityFactory):
+    category = CategorieActivite.COMMUNICATION.name
+
+
+class PublicationFactory(ActivityFactory):
+    category = CategorieActivite.PUBLICATION.name
+
+
+class VaeFactory(ActivityFactory):
+    category = CategorieActivite.VAE.name
+
+
+class CourseFactory(ActivityFactory):
+    category = CategorieActivite.COURSE.name
+
+
+class PaperFactory(ActivityFactory):
+    category = CategorieActivite.PAPER.name
+
+
+class UclCourseFactory(ActivityFactory):
+    category = CategorieActivite.UCL_COURSE.name
+    learning_unit_year = factory.SubFactory("base.tests.factories.learning_unit_year.LearningUnitYearFactory")

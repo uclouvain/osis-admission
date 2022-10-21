@@ -28,30 +28,27 @@ import re
 from dal import autocomplete
 from django import forms
 from django.conf import settings
-from django.utils.translation import gettext_lazy as _, get_language
+from django.utils.translation import get_language, gettext_lazy as _
 
 from admission.auth.roles.cdd_manager import CddManager
 from admission.contrib.models import EntityProxy
-from admission.ddd.projet_doctoral.preparation.domain.model._enums import (
-    ChoixTypeAdmission,
-    ChoixCommissionProximiteCDEouCLSM,
-    ChoixSousDomaineSciences,
-    ChoixCommissionProximiteCDSS,
-)
-from admission.ddd.projet_doctoral.preparation.domain.model._financement import (
-    ChoixTypeFinancement,
-    ChoixTypeContratTravail,
-    BourseRecherche,
-)
-from admission.ddd.projet_doctoral.preparation.domain.model.doctorat import (
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import (
     ENTITY_CDE,
+    ENTITY_CDSS,
     ENTITY_CLSM,
     SIGLE_SCIENCES,
-    ENTITY_CDSS,
 )
-from admission.ddd.projet_doctoral.validation.domain.model._enums import ChoixStatutCDD, ChoixStatutSIC
-from admission.forms import EMPTY_CHOICE
-from base.forms.utils.datefield import DatePickerInput
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    BourseRecherche,
+    ChoixCommissionProximiteCDEouCLSM,
+    ChoixCommissionProximiteCDSS,
+    ChoixSousDomaineSciences,
+    ChoixTypeAdmission,
+    ChoixTypeContratTravail,
+    ChoixTypeFinancement,
+)
+from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixStatutCDD, ChoixStatutSIC
+from admission.forms import CustomDateInput, EMPTY_CHOICE
 from base.models.academic_year import AcademicYear
 from base.models.education_group_year import EducationGroupYear
 from base.models.enums.education_group_types import TrainingType
@@ -127,45 +124,25 @@ class BaseFilterForm(forms.Form):
         disabled=True,
         label=_("From"),
         required=False,
-        widget=DatePickerInput(
-            attrs={
-                'placeholder': _("dd/mm/yyyy"),
-                **DatePickerInput.defaut_attrs,
-            },
-        ),
+        widget=CustomDateInput(),
     )
     date_pre_admission_fin = forms.DateField(
         disabled=True,
         label=_("To"),
         required=False,
-        widget=DatePickerInput(
-            attrs={
-                'placeholder': _("dd/mm/yyyy"),
-                **DatePickerInput.defaut_attrs,
-            },
-        ),
+        widget=CustomDateInput(),
     )
     date_admission_debut = forms.DateField(
         disabled=True,
         label=_("From"),
         required=False,
-        widget=DatePickerInput(
-            attrs={
-                'placeholder': _("dd/mm/yyyy"),
-                **DatePickerInput.defaut_attrs,
-            },
-        ),
+        widget=CustomDateInput(),
     )
     date_admission_fin = forms.DateField(
         disabled=True,
         label=_("To"),
         required=False,
-        widget=DatePickerInput(
-            attrs={
-                'placeholder': _("dd/mm/yyyy"),
-                **DatePickerInput.defaut_attrs,
-            },
-        ),
+        widget=CustomDateInput(),
     )
     annee_academique = forms.ChoiceField(
         label=_('Year'),
@@ -238,7 +215,7 @@ class BaseFilterForm(forms.Form):
             EMPTY_CHOICE[0],
             ['{} / {}'.format(ENTITY_CDE, ENTITY_CLSM), ChoixCommissionProximiteCDEouCLSM.choices()],
             [ENTITY_CDSS, ChoixCommissionProximiteCDSS.choices()],
-            [SIGLE_SCIENCES, ChoixSousDomaineSciences.choices()]
+            [SIGLE_SCIENCES, ChoixSousDomaineSciences.choices()],
         ]
 
     def __init__(self, user, load_labels=False, **kwargs):
@@ -246,8 +223,8 @@ class BaseFilterForm(forms.Form):
 
         self.user = user
 
-        # Initialize the CDDs field
         self.cdd_acronyms = (
+            # Initialize the CDDs field
             self.get_cdd_queryset()
             .with_acronym()
             .order_by('acronym')
@@ -257,11 +234,10 @@ class BaseFilterForm(forms.Form):
         self.fields['cdds'].choices = [(acronym, acronym) for acronym in self.cdd_acronyms]
 
         # Initialize the program field
-        title_field = 'title' if get_language() == settings.LANGUAGE_CODE else 'title_english'
         self.doctorates = (
             self.get_doctorate_queryset()
             .distinct('acronym')
-            .values_list('acronym', title_field)
+            .values_list('acronym', 'title' if get_language() == settings.LANGUAGE_CODE else 'title_english')
             .order_by('acronym')
         )
         self.fields['sigles_formations'].choices = [
@@ -285,9 +261,11 @@ class BaseFilterForm(forms.Form):
         if load_labels:
             nationality = self.data.get(self.add_prefix('nationalite'))
             if nationality:
-                country = Country.objects.filter(iso_code=nationality).values_list(
-                    'name' if get_language() == settings.LANGUAGE_CODE else 'name_end'
-                ).first()
+                country = (
+                    Country.objects.filter(iso_code=nationality)
+                    .values_list('name' if get_language() == settings.LANGUAGE_CODE else 'name_end')
+                    .first()
+                )
                 if country:
                     self.fields['nationalite'].widget.choices = ((nationality, country[0]),)
 
@@ -311,11 +289,6 @@ class BaseFilterForm(forms.Form):
         js = [
             # DependsOn
             'js/dependsOn.min.js',
-            # Dates
-            'js/moment.min.js',
-            'js/locales/moment-fr.js',
-            'js/bootstrap-datetimepicker.min.js',
-            'js/dates-input.js',
             # Mask
             'js/jquery.mask.min.js',
         ]
@@ -323,14 +296,10 @@ class BaseFilterForm(forms.Form):
 
 class CddFilterForm(BaseFilterForm):
     def get_cdd_queryset(self):
-        return super().get_cdd_queryset().filter(
-            pk__in=self.managed_cdds,
-        )
+        return super().get_cdd_queryset().filter(pk__in=self.managed_cdds)
 
     def get_doctorate_queryset(self):
-        return super().get_doctorate_queryset().filter(
-            management_entity_id__in=self.managed_cdds,
-        )
+        return super().get_doctorate_queryset().filter(management_entity_id__in=self.managed_cdds)
 
     def get_proximity_commission_choices(self):
         proximity_commission_choices = [EMPTY_CHOICE[0]]

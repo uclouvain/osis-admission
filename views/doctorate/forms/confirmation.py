@@ -23,69 +23,32 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import Http404
 from django.urls import reverse
-from django.utils.functional import cached_property
-from django.utils.translation import gettext as _
 from django.views.generic import FormView
 
-from admission.ddd.projet_doctoral.doctorat.commands import RecupererDoctoratQuery
-from admission.ddd.projet_doctoral.doctorat.domain.validator.exceptions import DoctoratNonTrouveException
-from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.commands import (
+from admission.ddd.parcours_doctoral.epreuve_confirmation.commands import (
     ModifierEpreuveConfirmationParCDDCommand,
-    RecupererDerniereEpreuveConfirmationQuery,
     TeleverserAvisRenouvellementMandatRechercheCommand,
 )
-from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.dtos import EpreuveConfirmationDTO
-from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.validators.exceptions import (
-    EpreuveConfirmationNonTrouveeException,
-)
 from admission.forms.doctorate.confirmation import ConfirmationForm, ConfirmationOpinionForm
-from admission.utils import get_cached_admission_perm_obj
+from admission.views.doctorate.mixins import DoctorateAdmissionLastConfirmationMixin
+from admission.views.mixins.business_exceptions_form_view_mixin import BusinessExceptionFormViewMixin
 from infrastructure.messages_bus import message_bus_instance
-from osis_role.contrib.views import PermissionRequiredMixin
 
 
-class DoctorateAdmissionLastConfirmationMixin(LoginRequiredMixin, PermissionRequiredMixin):
-    @cached_property
-    def admission(self):
-        return get_cached_admission_perm_obj(self.kwargs['pk'])
-
-    def get_permission_object(self):
-        return self.admission
-
-    @cached_property
-    def last_confirmation_paper(self) -> EpreuveConfirmationDTO:
-        try:
-            last_confirmation_paper = message_bus_instance.invoke(
-                RecupererDerniereEpreuveConfirmationQuery(self.kwargs.get('pk'))
-            )
-            if not last_confirmation_paper:
-                raise Http404(_('Confirmation paper not found.'))
-            return last_confirmation_paper
-        except (DoctoratNonTrouveException, EpreuveConfirmationNonTrouveeException) as e:
-            raise Http404(e.message)
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs) if hasattr(super(), 'get_context_data') else {}
-
-        try:
-            context['doctorate'] = message_bus_instance.invoke(
-                RecupererDoctoratQuery(self.kwargs.get('pk')),
-            )
-        except DoctoratNonTrouveException as e:
-            raise Http404(e.message)
-
-        context['confirmation_paper'] = self.last_confirmation_paper
-
-        return context
-
-
-class DoctorateAdmissionConfirmationFormView(DoctorateAdmissionLastConfirmationMixin, FormView):
+class DoctorateAdmissionConfirmationFormView(
+    DoctorateAdmissionLastConfirmationMixin,
+    BusinessExceptionFormViewMixin,
+    FormView,
+):
     template_name = 'admission/doctorate/forms/confirmation.html'
     form_class = ConfirmationForm
     permission_required = 'admission.change_doctorateadmission_confirmation'
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['doctorate_status'] = self.doctorate.statut
+        return kwargs
 
     def get_initial(self):
         return {
@@ -96,7 +59,7 @@ class DoctorateAdmissionConfirmationFormView(DoctorateAdmissionLastConfirmationM
             'avis_renouvellement_mandat_recherche': self.last_confirmation_paper.avis_renouvellement_mandat_recherche,
         }
 
-    def form_valid(self, form):
+    def call_command(self, form):
         # Save the confirmation paper
         message_bus_instance.invoke(
             ModifierEpreuveConfirmationParCDDCommand(
@@ -105,13 +68,15 @@ class DoctorateAdmissionConfirmationFormView(DoctorateAdmissionLastConfirmationM
             )
         )
 
-        return super().form_valid(form=form)
-
     def get_success_url(self):
-        return reverse('admission:doctorate:confirmation', args=[self.kwargs.get('pk')])
+        return reverse('admission:doctorate:confirmation', args=[self.admission_uuid])
 
 
-class DoctorateAdmissionConfirmationOpinionFormView(DoctorateAdmissionLastConfirmationMixin, FormView):
+class DoctorateAdmissionConfirmationOpinionFormView(
+    DoctorateAdmissionLastConfirmationMixin,
+    BusinessExceptionFormViewMixin,
+    FormView,
+):
     template_name = 'admission/doctorate/forms/confirmation_opinion.html'
     form_class = ConfirmationOpinionForm
     permission_required = 'admission.upload_pdf_confirmation'
@@ -121,7 +86,7 @@ class DoctorateAdmissionConfirmationOpinionFormView(DoctorateAdmissionLastConfir
             'avis_renouvellement_mandat_recherche': self.last_confirmation_paper.avis_renouvellement_mandat_recherche,
         }
 
-    def form_valid(self, form):
+    def call_command(self, form):
         # Save the confirmation paper
         message_bus_instance.invoke(
             TeleverserAvisRenouvellementMandatRechercheCommand(
@@ -130,7 +95,5 @@ class DoctorateAdmissionConfirmationOpinionFormView(DoctorateAdmissionLastConfir
             )
         )
 
-        return super().form_valid(form=form)
-
     def get_success_url(self):
-        return reverse('admission:doctorate:confirmation', args=[self.kwargs.get('pk')])
+        return reverse('admission:doctorate:confirmation', args=[self.admission_uuid])

@@ -26,6 +26,7 @@
 from collections import OrderedDict
 
 from rest_framework import status
+from rest_framework.fields import NullBooleanField
 from rest_framework.schemas.openapi import AutoSchema, SchemaGenerator
 from rest_framework.schemas.utils import is_list_view
 from rest_framework.serializers import Serializer
@@ -33,7 +34,7 @@ from rest_framework.serializers import Serializer
 from admission.api.serializers.fields import ActionLinksField
 from base.models.utils.utils import ChoiceEnum
 
-ADMISSION_SDK_VERSION = "1.0.25"
+ADMISSION_SDK_VERSION = "1.0.44"
 
 
 class AdmissionSchemaGenerator(SchemaGenerator):
@@ -50,7 +51,7 @@ class AdmissionSchemaGenerator(SchemaGenerator):
         schema["info"]["description"] = "This API delivers data for the Admission project."
         schema["info"]["contact"] = {
             "name": "UCLouvain - OSIS",
-            "url": "https://github.com/uclouvain/osis"
+            "url": "https://github.com/uclouvain/osis",
         }
         schema["servers"] = [
             {
@@ -61,15 +62,15 @@ class AdmissionSchemaGenerator(SchemaGenerator):
                         "enum": [
                             "dev",
                             "qa",
-                            "test"
-                        ]
+                            "test",
+                        ],
                     }
-                }
+                },
             },
             {
                 "url": "https://osis.uclouvain.be/api/v1/admission/",
-                "description": "Production server"
-            }
+                "description": "Production server",
+            },
         ]
         schema["security"] = [{"Token": []}]
         schema['components']["securitySchemes"] = {
@@ -77,7 +78,7 @@ class AdmissionSchemaGenerator(SchemaGenerator):
                 "type": "apiKey",
                 "in": "header",
                 "name": "Authorization",
-                "description": "Enter your token in the format **Token &lt;token>**"
+                "description": "Enter your token in the format **Token &lt;token>**",
             }
         }
         # Add extra global headers
@@ -85,46 +86,36 @@ class AdmissionSchemaGenerator(SchemaGenerator):
             "X-User-FirstName": {
                 "in": "header",
                 "name": "X-User-FirstName",
-                "schema": {
-                    "type": "string"
-                },
-                "required": False
+                "schema": {"type": "string"},
+                "required": False,
             },
             "X-User-LastName": {
                 "in": "header",
                 "name": "X-User-LastName",
-                "schema": {
-                    "type": "string"
-                },
-                "required": False
+                "schema": {"type": "string"},
+                "required": False,
             },
             "X-User-Email": {
                 "in": "header",
                 "name": "X-User-Email",
-                "schema": {
-                    "type": "string"
-                },
-                "required": False
+                "schema": {"type": "string"},
+                "required": False,
             },
             "X-User-GlobalID": {
                 "in": "header",
                 "name": "X-User-GlobalID",
-                "schema": {
-                    "type": "string"
-                },
-                "required": False
+                "schema": {"type": "string"},
+                "required": False,
             },
             "Accept-Language": {
                 "in": "header",
                 "name": "Accept-Language",
                 "description": "The header advertises which languages the client is able to understand, and which "
-                               "locale variant is preferred. (By languages, we mean natural languages, such as "
-                               "English, and not programming languages.)",
-                "schema": {
-                    "$ref": "#/components/schemas/AcceptedLanguageEnum"
-                },
-                "required": False
-            }
+                "locale variant is preferred. (By languages, we mean natural languages, such as "
+                "English, and not programming languages.)",
+                "schema": {"$ref": "#/components/schemas/AcceptedLanguageEnum"},
+                "required": False,
+            },
         }
         # Add error responses
         schema['components']['responses'] = {
@@ -132,77 +123,56 @@ class AdmissionSchemaGenerator(SchemaGenerator):
                 "description": "Unauthorized",
                 "content": {
                     "application/json": {
-                        "schema": {
-                            "$ref": "#/components/schemas/Error"
-                        }
+                        "schema": {"$ref": "#/components/schemas/Error"},
                     }
-                }
+                },
             },
             "BadRequest": {
                 "description": "Bad request",
                 "content": {
                     "application/json": {
-                        "schema": {
-                            "$ref": "#/components/schemas/Error"
-                        }
+                        "schema": {"$ref": "#/components/schemas/Error"},
                     }
-                }
+                },
             },
             "NotFound": {
                 "description": "The specified resource was not found",
                 "content": {
                     "application/json": {
-                        "schema": {
-                            "$ref": "#/components/schemas/Error"
-                        }
+                        "schema": {"$ref": "#/components/schemas/Error"},
                     }
-                }
-            }
+                },
+            },
         }
         schema['components']['schemas']['Error'] = {
             "type": "object",
             "properties": {
-                "code": {
-                    "type": "string"
-                },
-                "message": {
-                    "type": "string"
-                }
+                "code": {"type": "string"},
+                "message": {"type": "string"},
             },
-            "required": [
-                "code",
-                "message"
-            ]
+            "required": ["code", "message"],
         }
-        schema['components']['schemas']['AcceptedLanguageEnum'] = {
-            "type": "string",
-            "enum": [
-                "en",
-                "fr-be"
-            ]
-        }
+        schema['components']['schemas']['AcceptedLanguageEnum'] = {"type": "string", "enum": ["en", "fr-be"]}
         for path, path_content in schema['paths'].items():
             for method, method_content in path_content.items():
                 # Add extra global headers to each endpoint
-                method_content['parameters'].extend([
-                    {'$ref': '#/components/parameters/Accept-Language'},
-                    {'$ref': '#/components/parameters/X-User-FirstName'},
-                    {'$ref': '#/components/parameters/X-User-LastName'},
-                    {'$ref': '#/components/parameters/X-User-Email'},
-                    {'$ref': '#/components/parameters/X-User-GlobalID'},
-                ])
+                method_content['parameters'].extend(
+                    [
+                        {'$ref': '#/components/parameters/Accept-Language'},
+                        {'$ref': '#/components/parameters/X-User-FirstName'},
+                        {'$ref': '#/components/parameters/X-User-LastName'},
+                        {'$ref': '#/components/parameters/X-User-Email'},
+                        {'$ref': '#/components/parameters/X-User-GlobalID'},
+                    ]
+                )
                 # Add error responses to each endpoint
-                method_content['responses'].update({
-                    "400": {
-                        "$ref": "#/components/responses/BadRequest"
-                    },
-                    "401": {
-                        "$ref": "#/components/responses/Unauthorized"
-                    },
-                    "404": {
-                        "$ref": "#/components/responses/NotFound"
+                method_content['responses'].update(
+                    {
+                        "400": {"$ref": "#/components/responses/BadRequest"},
+                        "401": {"$ref": "#/components/responses/Unauthorized"},
+                        "404": {"$ref": "#/components/responses/NotFound"},
                     }
-                })
+                )
                 # Only allow application/json as content type
                 if 'requestBody' in method_content:
                     method_content['requestBody']['content'] = {
@@ -215,6 +185,9 @@ class ActionLinksFieldSchemaMixin:
     """This mixin allows to generate the schema related to an ActionLinksField"""
 
     def map_field(self, field):
+        if hasattr(field, 'field_schema'):
+            return field.field_schema
+
         if isinstance(field, ActionLinksField):
             properties = {}
 
@@ -279,14 +252,21 @@ class BetterChoicesSchema(ActionLinksFieldSchemaMixin, AutoSchema):
             schema['enum'] = [''] + schema['enum']
         return schema
 
+    def map_field(self, field):
+        if isinstance(field, NullBooleanField):
+            return {'type': 'boolean'}
+
+        return super().map_field(field)
+
 
 class ChoicesEnumSchema(BetterChoicesSchema):
     """This schema convert enums into schema components"""
+
     operation_id_base = None
 
     def __init__(self, *args, **kwargs):
-        kwargs.pop('operation_id_base', None)
-        super().__init__(operation_id_base=self.operation_id_base, *args, **kwargs)
+        operation_id_base = kwargs.pop('operation_id_base', self.operation_id_base)
+        super().__init__(operation_id_base=operation_id_base, *args, **kwargs)
         self.enums = {}
 
     def map_choicefield(self, field):
@@ -295,7 +275,7 @@ class ChoicesEnumSchema(BetterChoicesSchema):
             if OrderedDict(declared_enum.choices()) == field.choices:
                 self.enums[declared_enum.__name__] = super().map_choicefield(field)
                 return {
-                    '$ref': "#/components/schemas/{}".format(declared_enum.__name__)
+                    '$ref': "#/components/schemas/{}".format(declared_enum.__name__),
                 }
 
         return super().map_choicefield(field)
@@ -325,12 +305,7 @@ class DetailedAutoSchema(ChoicesEnumSchema):
         else:
             item_schema = self._get_reference(serializer)
 
-        return {
-            'content': {
-                ct: {'schema': item_schema}
-                for ct in self.request_media_types
-            }
-        }
+        return {'content': {ct: {'schema': item_schema} for ct in self.request_media_types}}
 
     def get_components(self, path, method):
         if method.lower() == 'delete':
@@ -377,21 +352,24 @@ class DetailedAutoSchema(ChoicesEnumSchema):
         status_code = status.HTTP_201_CREATED if method == 'POST' else status.HTTP_200_OK
         return {
             status_code: {
-                'content': {
-                    ct: {'schema': response_schema}
-                    for ct in self.response_media_types
-                },
+                'content': {ct: {'schema': response_schema} for ct in self.response_media_types},
                 # description is a mandatory property,
                 # https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#responseObject
                 # TODO: put something meaningful into it
-                'description': ""
+                'description': "",
             }
         }
 
 
 class ResponseSpecificSchema(DetailedAutoSchema):
     """This schema allow to map a request/response serializers given an HTTP verb"""
+
     serializer_mapping = {}
+
+    def __init__(self, serializer_mapping=None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if serializer_mapping:
+            self.serializer_mapping = serializer_mapping
 
     def get_serializer(self, path, method, for_response=True):
         serializer_class = self.serializer_mapping.get(method, None)

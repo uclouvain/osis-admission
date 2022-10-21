@@ -29,11 +29,16 @@ from celery.schedules import crontab
 
 from backoffice.celery import app as celery_app
 from . import process_admission_tasks
+from . import check_academic_calendar
 
 tasks = {
     'Generate admission files': {
         'task': 'admission.tasks.process_admission_tasks.run',
-        'schedule': crontab(minute=1),
+        'schedule': crontab(),  # this runs every minute
+    },
+    '|Admission| Check academic calendar': {
+        'task': 'admission.tasks.check_academic_calendar.run',
+        'schedule': crontab(minute=0, hour=0, day_of_month='*', month_of_year='*', day_of_week=0)
     },
 }
 celery_app.conf.beat_schedule.update(tasks)

@@ -30,7 +30,8 @@ from rest_framework.response import Response
 from admission.api import serializers
 from admission.api.schema import ResponseSpecificSchema
 from admission.contrib.models.enums.actor_type import ActorType
-from admission.ddd.projet_doctoral.preparation.commands import (
+from admission.ddd.admission.doctorat.preparation.commands import (
+    DesignerPromoteurReferenceCommand,
     GetGroupeDeSupervisionCommand,
     IdentifierMembreCACommand,
     IdentifierPromoteurCommand,
@@ -40,6 +41,11 @@ from admission.ddd.projet_doctoral.preparation.commands import (
 from admission.utils import get_cached_admission_perm_obj
 from infrastructure.messages_bus import message_bus_instance
 from osis_role.contrib.views import APIPermissionRequiredMixin
+
+__all__ = [
+    "SupervisionAPIView",
+    "SupervisionSetReferencePromoterAPIView",
+]
 
 
 class SupervisionSchema(ResponseSpecificSchema):
@@ -123,6 +129,36 @@ class SupervisionAPIView(
 
         serializer_cls(data=data).is_valid(raise_exception=True)
         result = message_bus_instance.invoke(cmd(**data))
+        self.get_permission_object().update_detailed_status()
+        serializer = serializers.PropositionIdentityDTOSerializer(instance=result)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class SupervisionSetReferencePromoterSchema(ResponseSpecificSchema):
+    serializer_mapping = {
+        'PUT': (serializers.DesignerPromoteurReferenceCommandSerializer, serializers.PropositionIdentityDTOSerializer),
+    }
+
+    def get_operation_id(self, path, method):
+        return 'set_reference_promoter'
+
+
+class SupervisionSetReferencePromoterAPIView(APIPermissionRequiredMixin, GenericAPIView):
+    name = "set-reference-promoter"
+    schema = SupervisionSetReferencePromoterSchema()
+    pagination_class = None
+    filter_backends = []
+    permission_mapping = {
+        'PUT': 'admission.set_reference_promoter',
+    }
+
+    def get_permission_object(self):
+        return get_cached_admission_perm_obj(self.kwargs['uuid'])
+
+    def put(self, request, *args, **kwargs):
+        """Set a supervision group member as reference promoter"""
+        serializers.DesignerPromoteurReferenceCommandSerializer(data=request.data).is_valid(raise_exception=True)
+        result = message_bus_instance.invoke(DesignerPromoteurReferenceCommand(**request.data))
         self.get_permission_object().update_detailed_status()
         serializer = serializers.PropositionIdentityDTOSerializer(instance=result)
         return Response(serializer.data, status=status.HTTP_200_OK)

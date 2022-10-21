@@ -50,4 +50,5 @@ class SicDirector(RoleModel):
             'admission.view_doctorateadmission_project': rules.always_allow,
             'admission.view_doctorateadmission_cotutelle': rules.always_allow,
             'admission.view_doctorateadmission_supervision': rules.always_allow,
+            'admission.view_internalnote': rules.always_allow,
         })

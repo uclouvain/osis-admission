@@ -1,4 +1,4 @@
-{% load i18n osis_document admission %}
+{% load i18n osis_document admission enums %}
 
 {% comment "License" %}
   * OSIS stands for Open Student Information System. It's an application
@@ -24,41 +24,24 @@
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
 
-{% url "admission:doctorate:training:edit" pk=view.kwargs.pk activity_id=activity.uuid as edit_url %}
-{% url "admission:doctorate:training:delete" pk=view.kwargs.pk activity_id=activity.uuid as delete_url %}
-
-<div class="panel panel-{{ activity|status_as_class }}" data-status="{{ activity.status }}"
-     data-type="{{ activity.category }}">
+<div
+  class="panel panel-{{ activity|status_as_class }}"
+  data-status="{{ activity.status }}"
+  data-type="{{ activity.category }}"
+>
   <div class="panel-heading" role="tab" id="h-{{ activity.uuid }}">
     <h3 class="panel-title">
-      <a role="button" data-toggle="collapse" data-parent="#accordion" href="#a-{{ activity.uuid }}"
-         aria-expanded="false" aria-controls="a-{{ activity.uuid }}" class="collapsed"></a>
-      <span class="badge">{{ activity.get_status_display }}</span>
-      <div class="btn-group btn-group-sm pull-right">
-        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
-                aria-expanded="false">
-          {% trans "Actions" %} <span class="caret"></span>
-        </button>
-        <ul class="dropdown-menu">
-          <li>
-            <a href="{{ edit_url }}">
-              {% trans "Edit" %}
-            </a>
-          <li>
-            <a href="{{ delete_url }}">
-              {% trans "Delete" %}
-            </a>
-          </li>
-        </ul>
-      </div>
-
-      {% display activity.ects|default:""|floatformat " ECTS" as ects %}
-      {% display activity.title '-' ects %}
+      {% include "admission/doctorate/details/training/_panel_title.html" %}
+      {% include "admission/doctorate/details/training/_activity_title.html" %}
       <div class="clearfix"></div>
     </h3>
   </div>
-  <div id="a-{{ activity.uuid }}" class="panel-collapse collapse" role="tabpanel"
-       aria-labelledby="h-{{ activity.uuid }}">
+  <div
+    id="a-{{ activity.uuid }}"
+    class="panel-collapse collapse"
+    role="tabpanel"
+    aria-labelledby="h-{{ activity.uuid }}"
+  >
     <div class="panel-body">
       <div class="form-group">
         <strong class="d-block">{% trans "Description" %}</strong>
@@ -68,7 +51,7 @@
         {% if activity.ects %}
           <p class="col-md-4">
             <strong class="d-block">{% trans "ECTS" %}</strong>
-            {{ activity.ects|floatformat }}
+            {{ activity.ects|floatformat:"-2" }}
           </p>
         {% endif %}
       </div>

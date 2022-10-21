@@ -28,8 +28,9 @@ from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 from osis_document.contrib import FileUploadField
 
+from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
+from admission.forms import CustomDateInput
 from admission.forms.doctorate.cdd.generic_send_mail import BaseEmailTemplateForm
-from base.forms.utils.datefield import DatePickerInput
 
 
 class ConfirmationOpinionForm(forms.Form):
@@ -44,22 +45,12 @@ class ConfirmationForm(ConfirmationOpinionForm):
     date_limite = forms.DateField(
         label=_('Deadline for confirmation'),
         required=True,
-        widget=DatePickerInput(
-            attrs={
-                'placeholder': _("dd/mm/yyyy"),
-                **DatePickerInput.defaut_attrs,
-            },
-        ),
+        widget=CustomDateInput(),
     )
     date = forms.DateField(
         label=_('Date of confirmation'),
         required=True,
-        widget=DatePickerInput(
-            attrs={
-                'placeholder': _("dd/mm/yyyy"),
-                **DatePickerInput.defaut_attrs,
-            },
-        ),
+        widget=CustomDateInput(),
     )
     rapport_recherche = FileUploadField(
         label=_('Research report'),
@@ -71,6 +62,11 @@ class ConfirmationForm(ConfirmationOpinionForm):
         required=False,
         max_files=1,
     )
+
+    def __init__(self, doctorate_status=None, **kwargs):
+        super().__init__(**kwargs)
+        if doctorate_status == ChoixStatutDoctorat.ADMITTED.name:
+            self.fields['date'].required = False
 
     def clean(self):
         cleaned_data = super().clean()
@@ -86,11 +82,7 @@ class ConfirmationForm(ConfirmationOpinionForm):
 
     class Media:
         js = [
-            # Dates
-            'js/moment.min.js',
-            'js/locales/moment-fr.js',
-            'js/bootstrap-datetimepicker.min.js',
-            'js/dates-input.js',
+            'js/jquery.mask.min.js',
         ]
 
 
@@ -98,19 +90,10 @@ class ConfirmationRetakingForm(BaseEmailTemplateForm):
     date_limite = forms.DateField(
         label=_('Deadline for confirmation'),
         required=True,
-        widget=DatePickerInput(
-            attrs={
-                'placeholder': _("dd/mm/yyyy"),
-                **DatePickerInput.defaut_attrs,
-            },
-        ),
+        widget=CustomDateInput(),
     )
 
     class Media:
         js = [
-            # Dates
-            'js/moment.min.js',
-            'js/locales/moment-fr.js',
-            'js/bootstrap-datetimepicker.min.js',
-            'js/dates-input.js',
+            'js/jquery.mask.min.js',
         ]

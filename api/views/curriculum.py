@@ -24,137 +24,263 @@
 #
 # ##############################################################################
 from functools import partial
-from typing import Optional
+from typing import Union
 
-from django.db.models import Exists, OuterRef
-from django.utils.translation import gettext as _
-from rest_framework import status
+from django.utils.functional import cached_property
+from django.utils.translation import gettext_lazy as _
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.generics import get_object_or_404, RetrieveAPIView
-from rest_framework.mixins import UpdateModelMixin
+from rest_framework.mixins import UpdateModelMixin, CreateModelMixin, RetrieveModelMixin, DestroyModelMixin
 from rest_framework.response import Response
-from rest_framework.views import APIView
+from rest_framework.viewsets import ModelViewSet, GenericViewSet
 
 from admission.api import serializers
 from admission.api.permissions import IsSelfPersonTabOrTabPermission
-from admission.api.schema import ResponseSpecificSchema
-from admission.api.views.mixins import PersonRelatedMixin, PersonRelatedSchema
-from admission.contrib.models import DoctorateAdmission
-from osis_profile.models import Experience
+from admission.api.serializers import ProfessionalExperienceSerializer
+from admission.api.serializers.curriculum import EducationalExperienceSerializer
+from admission.api.views.mixins import (
+    PersonRelatedMixin,
+    GeneralEducationPersonRelatedMixin,
+    ContinuingEducationPersonRelatedMixin,
+)
+from osis_profile.models import ProfessionalExperience, EducationalExperience
 from osis_role.contrib.views import APIPermissionRequiredMixin
 
+__all__ = [
+    "CurriculumView",
+    "ExperienceViewSet",
+    "ProfessionalExperienceViewSet",
+    "EducationalExperienceViewSet",
+    "CurriculumFileView",
+    "GeneralCurriculumView",
+    "GeneralCurriculumFileView",
+    "GeneralEducationalExperienceViewSet",
+    "GeneralProfessionalExperienceViewSet",
+    "ContinuingCurriculumView",
+    "ContinuingCurriculumFileView",
+    "ContinuingEducationalExperienceViewSet",
+    "ContinuingProfessionalExperienceViewSet",
+]
 
-class CurriculumExperienceSchema(ResponseSpecificSchema, PersonRelatedSchema):
-    operation_id_base = "_curriculum_experience"
 
-    serializer_mapping = {
-        "GET": serializers.ExperienceOutputSerializer,
-        "PUT": (
-            serializers.ExperienceInputSerializer,
-            serializers.ExperienceOutputSerializer,
-        ),
-        "POST": (
-            serializers.ExperienceInputSerializer,
-            serializers.ExperienceOutputSerializer,
-        ),
-        "DELETE": (),
-    }
+DOCTORATE_VALUATED_FROM_FIELD = 'valuated_from_doctorateadmission'
+CONTINUING_EDUCATION_VALUATED_FROM_FIELD = 'valuated_from_continuingeducationadmission'
+GENERAL_EDUCATION_VALUATED_FROM_FIELD = 'valuated_from_generaleducationadmission'
+
+CONTINUING_EDUCATION_PERMISSIONS_MAPPING = {
+    'GET': 'admission.view_generaleducationadmission_curriculum',
+    'POST': 'admission.change_generaleducationadmission_curriculum',
+    'PUT': 'admission.change_generaleducationadmission_curriculum',
+    'DELETE': 'admission.change_generaleducationadmission_curriculum',
+}
+
+GENERAL_EDUCATION_PERMISSIONS_MAPPING = {
+    'GET': 'admission.view_continuingeducationadmission_curriculum',
+    'POST': 'admission.change_continuingeducationadmission_curriculum',
+    'PUT': 'admission.change_continuingeducationadmission_curriculum',
+    'DELETE': 'admission.change_continuingeducationadmission_curriculum',
+}
 
 
-class CurriculumExperienceView(PersonRelatedMixin, APIPermissionRequiredMixin, APIView):
-    schema = CurriculumExperienceSchema()
-    permission_classes = [
-        partial(IsSelfPersonTabOrTabPermission, permission_suffix="curriculum"),
-    ]
+class BaseCurriculumView(APIPermissionRequiredMixin, RetrieveAPIView):
+    serializer_class = serializers.CurriculumSerializer
+    pagination_class = None
+    filter_backends = []
+    valuated_from_field = ''
+
+    def get(self, request, *args, **kwargs):
+        """Return the experiences and the curriculum pdf of a person and the mandatory years to complete."""
+        current_person = self.get_object()
+        professional_experiences = ProfessionalExperience.objects.filter(person=current_person).prefetch_related(
+            self.valuated_from_field
+        )
+        educational_experiences = EducationalExperience.objects.filter(person=current_person).prefetch_related(
+            self.valuated_from_field
+        )
+
+        serializer = serializers.CurriculumSerializer(
+            instance={
+                'professional_experiences': professional_experiences,
+                'educational_experiences': educational_experiences,
+                'file': current_person,
+            },
+            context={
+                'related_person': current_person,
+            },
+        )
+
+        return Response(serializer.data)
+
+
+class CurriculumView(PersonRelatedMixin, BaseCurriculumView):
     name = "curriculum"
+    valuated_from_field = DOCTORATE_VALUATED_FROM_FIELD
+    permission_classes = [partial(IsSelfPersonTabOrTabPermission, permission_suffix="curriculum")]
+
+
+class GeneralCurriculumView(GeneralEducationPersonRelatedMixin, BaseCurriculumView):
+    name = "general_curriculum"
+    valuated_from_field = GENERAL_EDUCATION_VALUATED_FROM_FIELD
+    permission_mapping = GENERAL_EDUCATION_PERMISSIONS_MAPPING
+
+
+class ContinuingCurriculumView(ContinuingEducationPersonRelatedMixin, BaseCurriculumView):
+    name = "continuing_curriculum"
+    valuated_from_field = CONTINUING_EDUCATION_VALUATED_FROM_FIELD
+    permission_mapping = CONTINUING_EDUCATION_PERMISSIONS_MAPPING
+
+
+class ExperienceViewSet(
+    APIPermissionRequiredMixin,
+    CreateModelMixin,
+    RetrieveModelMixin,
+    UpdateModelMixin,
+    DestroyModelMixin,
+    GenericViewSet,
+):
+    lookup_field = 'uuid'
+    lookup_url_kwarg = 'experience_id'
+    http_method_names = [m for m in ModelViewSet.http_method_names if m not in {'patch'}]
+
+    pagination_class = None
+    filter_backends = []
+    model = None
+    valuated_from_field = ''
 
     def get_queryset(self):
-        """Return the list of experiences of the person."""
         return (
-            Experience.objects.filter(curriculum_year__person=self.get_object())
-            .annotate(
-                is_valuated=Exists(
-                    DoctorateAdmission.valuated_experiences.through.objects.filter(
-                        experience_id=OuterRef("pk"),
-                    )
-                )
-            )
-            .order_by("curriculum_year__academic__year")
+            self.model.objects.filter(person=self.candidate).prefetch_related(self.valuated_from_field)
+            if self.request
+            else self.model.objects.none()
         )
 
-    def get_experience(self) -> Optional[Experience]:
+    @cached_property
+    def experience(self) -> Union[ProfessionalExperience, EducationalExperience]:
         """Get the current experience from its uuid."""
-        return get_object_or_404(self.get_queryset(), uuid=self.kwargs.get("xp"))
+        return get_object_or_404(queryset=self.get_queryset(), uuid=self.kwargs.get('experience_id'))
 
+    def get_object(self):
+        return self.experience
 
-class CurriculumExperienceListAndCreateView(CurriculumExperienceView):
-    def get(self, request, *args, **kwargs):
-        """Return the list of experiences from the person's CV."""
-        serializer = serializers.ExperienceOutputSerializer(self.get_queryset(), many=True)
-        return Response(serializer.data)
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        if self.request:
+            context['candidate'] = self.candidate
+        return context
 
-    def post(self, request, *args, **kwargs):
-        """Add an experience to the person's CV."""
-        serializer = serializers.ExperienceInputSerializer(data=request.data, related_person=self.get_object())
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
+    def create(self, request, *args, **kwargs):
+        response = super().create(request, *args, **kwargs)
         if self.get_permission_object():
             self.get_permission_object().update_detailed_status()
+        return response
 
-        output_data = serializers.ExperienceOutputSerializer(serializer.instance).data
-        return Response(output_data, status=status.HTTP_201_CREATED)
-
-
-class CurriculumExperienceDetailUpdateAndDeleteView(CurriculumExperienceView):
-    def get(self, request, *args, **kwargs):
-        """Return a specific experience from the person's CV."""
-        serializer = serializers.ExperienceOutputSerializer(self.get_experience())
-        return Response(serializer.data)
-
-    def put(self, request, *args, **kwargs):
-        """Update one of the experiences from the person's CV."""
-        experience_to_update = self.get_experience()
-
-        if experience_to_update.is_valuated:
+    def update(self, request, *args, **kwargs):
+        if getattr(self.experience, self.valuated_from_field).exists():
             raise PermissionDenied(_("This experience cannot be updated as it has already been valuated."))
 
-        serializer = serializers.ExperienceInputSerializer(
-            instance=experience_to_update,
-            data=request.data,
-            related_person=self.get_object(),
-        )
-
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-
-        output_data = serializers.ExperienceOutputSerializer(serializer.instance).data
-        return Response(output_data)
-
-    def delete(self, request, *args, **kwargs):
-        """Remove one of the experiences from the person's CV."""
-        experience_to_delete = self.get_experience()
-
-        if experience_to_delete.is_valuated:
-            raise PermissionDenied(_("This experience cannot be deleted as it has already been valuated."))
-
-        experience_to_delete.delete()
+        response = super().update(request, *args, **kwargs)
         if self.get_permission_object():
             self.get_permission_object().update_detailed_status()
+        return response
 
-        return Response(status=status.HTTP_204_NO_CONTENT)
+    def destroy(self, request, *args, **kwargs):
+        if getattr(self.experience, self.valuated_from_field).exists():
+            raise PermissionDenied(_("This experience cannot be updated as it has already been valuated."))
+
+        response = super().destroy(request, *args, **kwargs)
+        if self.get_permission_object():
+            self.get_permission_object().update_detailed_status()
+        return response
 
 
-class CurriculumFileView(PersonRelatedMixin, APIPermissionRequiredMixin, UpdateModelMixin, RetrieveAPIView):
-    name = "curriculum_file"
+class BaseProfessionalExperienceViewSet(ExperienceViewSet):
+    model = ProfessionalExperience
+    serializer_class = ProfessionalExperienceSerializer
+
+
+class ProfessionalExperienceViewSet(PersonRelatedMixin, BaseProfessionalExperienceViewSet):
+    name = "professional_experiences"
+    permission_classes = [partial(IsSelfPersonTabOrTabPermission, permission_suffix="curriculum")]
+    valuated_from_field = DOCTORATE_VALUATED_FROM_FIELD
+
+    def get_object(self):
+        return self.experience
+
+
+class GeneralProfessionalExperienceViewSet(GeneralEducationPersonRelatedMixin, BaseProfessionalExperienceViewSet):
+    name = "general_professional_experiences"
+    permission_mapping = GENERAL_EDUCATION_PERMISSIONS_MAPPING
+    valuated_from_field = GENERAL_EDUCATION_VALUATED_FROM_FIELD
+
+    def get_object(self):
+        return self.experience
+
+
+class ContinuingProfessionalExperienceViewSet(ContinuingEducationPersonRelatedMixin, BaseProfessionalExperienceViewSet):
+    name = "continuing_professional_experiences"
+    permission_mapping = CONTINUING_EDUCATION_PERMISSIONS_MAPPING
+    valuated_from_field = CONTINUING_EDUCATION_VALUATED_FROM_FIELD
+
+    def get_object(self):
+        return self.experience
+
+
+class BaseEducationalExperienceViewSet(ExperienceViewSet):
+    model = EducationalExperience
+    serializer_class = EducationalExperienceSerializer
+
+
+class EducationalExperienceViewSet(PersonRelatedMixin, BaseEducationalExperienceViewSet):
+    name = "educational_experiences"
+    permission_classes = [partial(IsSelfPersonTabOrTabPermission, permission_suffix="curriculum")]
+    valuated_from_field = DOCTORATE_VALUATED_FROM_FIELD
+
+    def get_object(self):
+        return self.experience
+
+
+class GeneralEducationalExperienceViewSet(GeneralEducationPersonRelatedMixin, BaseEducationalExperienceViewSet):
+    name = "general_educational_experiences"
+    permission_mapping = GENERAL_EDUCATION_PERMISSIONS_MAPPING
+    valuated_from_field = GENERAL_EDUCATION_VALUATED_FROM_FIELD
+
+    def get_object(self):
+        return self.experience
+
+
+class ContinuingEducationalExperienceViewSet(ContinuingEducationPersonRelatedMixin, BaseEducationalExperienceViewSet):
+    name = "continuing_educational_experiences"
+    permission_mapping = CONTINUING_EDUCATION_PERMISSIONS_MAPPING
+    valuated_from_field = CONTINUING_EDUCATION_VALUATED_FROM_FIELD
+
+    def get_object(self):
+        return self.experience
+
+
+class BaseCurriculumFileView(APIPermissionRequiredMixin, UpdateModelMixin, RetrieveAPIView):
     pagination_class = None
     filter_backends = []
     serializer_class = serializers.CurriculumFileSerializer
-    permission_classes = [
-        partial(IsSelfPersonTabOrTabPermission, permission_suffix="curriculum"),
-    ]
 
     def put(self, request, *args, **kwargs):
         response = self.update(request, *args, **kwargs)
         if self.get_permission_object():
             self.get_permission_object().update_detailed_status()
         return response
+
+
+class CurriculumFileView(PersonRelatedMixin, BaseCurriculumFileView):
+    name = "curriculum_file"
+    permission_classes = [partial(IsSelfPersonTabOrTabPermission, permission_suffix="curriculum")]
+
+
+class GeneralCurriculumFileView(GeneralEducationPersonRelatedMixin, BaseCurriculumFileView):
+    name = "general_curriculum_file"
+    valuated_from_field = GENERAL_EDUCATION_VALUATED_FROM_FIELD
+    permission_mapping = GENERAL_EDUCATION_PERMISSIONS_MAPPING
+
+
+class ContinuingCurriculumFileView(ContinuingEducationPersonRelatedMixin, BaseCurriculumFileView):
+    name = "continuing_curriculum_file"
+    valuated_from_field = CONTINUING_EDUCATION_VALUATED_FROM_FIELD
+    permission_mapping = CONTINUING_EDUCATION_PERMISSIONS_MAPPING

@@ -1,4 +1,4 @@
-{% extends "admission/doctorate/tab_layout.html" %}
+{% extends "admission/doctorate/details/tab_layout.html" %}
 {% load i18n admission %}
 {% load osis_document %}
 
@@ -26,25 +26,20 @@
 * see http://www.gnu.org/licenses/.
 {% endcomment %}
 
-{% block actions %}
-  {% if confirmation_paper and confirmation_paper.demande_prolongation %}
-    <li>
-      <a href="{% update_tab_path_from_detail doctorate.uuid %}">
-        {% trans "Update" %}
-      </a>
-    </li>
+{% block actions-group %}
+  {% if confirmation_paper.demande_prolongation %}
+    {{ block.super }}
   {% endif %}
 {% endblock %}
 
 {% block tab_content %}
   <h3>{% trans "Request of a new deadline for the confirmation paper" %}</h3>
-  <p><em>{% lorem 1 %}</em></p>
   {% if confirmation_paper.demande_prolongation %}
     <div>
       {% field_data _("Proposed new deadline") confirmation_paper.demande_prolongation.nouvelle_echeance inline=True %}
-      {% field_data _("Brief justification") confirmation_paper.demande_prolongation.justification_succincte %}
+      {% field_data _("Brief justification") confirmation_paper.demande_prolongation.justification_succincte html_tag="blockquote" %}
       {% field_data _("Justification letter") confirmation_paper.demande_prolongation.lettre_justification %}
-      {% field_data _("CDD opinion") confirmation_paper.demande_prolongation.avis_cdd %}
+      {% field_data _("CDD opinion") confirmation_paper.demande_prolongation.avis_cdd html_tag="blockquote" %}
     </div>
   {% else %}
     <p>

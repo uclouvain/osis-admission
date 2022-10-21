@@ -23,19 +23,32 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from django.db.models import JSONField
 from django.shortcuts import resolve_url
 from django.test import TestCase
+from django.utils.translation import gettext_lazy as _
 from rest_framework import status
 
 from admission.contrib.models.cdd_config import CddConfiguration
+from admission.ddd.parcours_doctoral.formation.domain.model.enums import CategorieActivite
 from admission.tests.factories.roles import CddManagerFactory
 from base.tests.factories.person import SuperUserPersonFactory
 
 
 class CddConfigTestCase(TestCase):
+    data = {}
+
     @classmethod
     def setUpTestData(cls):
         cls.manager = CddManagerFactory(entity__version__acronym="FOO")
+        for field in CddConfiguration._meta.fields:
+            if field.name == 'category_labels':
+                values = [str(v) for v in dict(CategorieActivite.choices()).values()]
+                cls.data[f'{field.name}_en'] = "\n".join(values)
+                cls.data[f'{field.name}_fr-be'] = "\n".join(values)
+            elif isinstance(field, JSONField):
+                cls.data[f'{field.name}_en'] = "Foo\nBarbaz"
+                cls.data[f'{field.name}_fr-be'] = "Bar\nBaz"
 
     def test_cdd_config_access(self):
         url = resolve_url('admission:config:cdd_config:list')
@@ -54,17 +67,17 @@ class CddConfigTestCase(TestCase):
         self.client.force_login(self.manager.person.user)
 
         self.assertEqual(CddConfiguration.objects.count(), 0)
-        data = {
-            'service_types_en': "Foo\nBarbaz",
-            'service_types_fr-be': "Bar\nBaz",
-            'seminar_types_en': "Foo\nBar",
-            'seminar_types_fr-be': "Bar\nBaz",
-        }
-        response = self.client.post(url, data, follow=True)
-        self.assertContains(response, "FOO")
+        response = self.client.post(url, self.data)
+        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
         expected = {
             'en': ['Foo', 'Barbaz'],
             'fr-be': ['Bar', 'Baz'],
         }
         config = CddConfiguration.objects.first()
         self.assertEqual(config.service_types, expected)
+
+        data = self.data.copy()
+        values = [str(v) for v in dict(CategorieActivite.choices()).values()][:-2]
+        data['category_labels_en'] = "\n".join(values)
+        response = self.client.post(url, data)
+        self.assertFormError(response, 'form', 'category_labels', _("Number of values mismatch"))

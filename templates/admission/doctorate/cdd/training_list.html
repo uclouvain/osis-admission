@@ -1,5 +1,5 @@
 {% extends "admission/doctorate/details/tab_layout.html" %}
-{% load i18n static admission enums %}
+{% load i18n static admission enums bootstrap3 %}
 
 {% comment "License" %}
   * OSIS stands for Open Student Information System. It's an application
@@ -34,11 +34,14 @@
     </button>
     <ul class="dropdown-menu dropdown-menu-right">
       {% for category_name, category_label in categories %}
-        <li>
-          <a href="{% url "admission:doctorate:training:add" pk=view.kwargs.pk category=category_name|lower %}">
-            {{ category_label }}
-          </a>
-        </li>
+        {% if category_name != 'UCL_COURSE' %}
+          <li>
+            {% url "admission:doctorate:doctoral-training:add" uuid=view.kwargs.uuid category=category_name|lower as add_url %}
+            <a href="{{ add_url }}">
+              {{ category_label }}
+            </a>
+          </li>
+        {% endif %}
       {% endfor %}
     </ul>
   </div>
@@ -50,45 +53,16 @@
 
   <p>{% lorem %}</p>
 
-  {% if activities and counts.total %}
-    <h4>{% trans "ECTS added" context "summary" %}</h4>
-    <p>
-      {% blocktrans with added=counts.total validated=counts.validated|default_if_none:0 trimmed %}
-        {{ added }} ECTS added with {{ validated }} validated by the CDD.
-      {% endblocktrans %}
-      <a data-toggle="collapse" href="#show-details" aria-expanded="false" aria-controls="show-details">
-        {% trans "Show details" %}
-      </a>
-    </p>
-
-    <div class="collapse" id="show-details">
-      <table class="table table-condensed table-bordered">
-        <thead>
-        <tr>
-          <th>{% trans "Category" %}</th>
-          <th>{% trans "Unsubmitted" %}</th>
-          <th>{% trans "Submitted" %}</th>
-          <th>{% trans "Validated" %}</th>
-        </tr>
-        {% for count in categories_count %}
-          <tr>
-            <th>{{ count.category|enum_display:"CategorieActivite" }}</th>
-            <td>{{ count.unsubmitted|default_if_none:0 }}</td>
-            <td>{{ count.submitted|default_if_none:0 }}</td>
-            <td>{{ count.validated|default_if_none:0 }}</td>
-          </tr>
-        {% endfor %}
-        </thead>
-      </table>
-    </div>
-  {% endif %}
+  {% training_categories activities.all %}
 
   <h4>{% trans "Activities" %}</h4>
   {% if activities %}
     <div class="filter-type form-group">
       <strong>{% trans "Type" %}</strong>
       <div class="btn-group btn-group-sm" role="radiogroup">
-        <button type="button" class="btn btn-default active" data-type="all">{% trans "All" context "filters" %}</button>
+        <button type="button" class="btn btn-default active" data-type="all">
+          {% trans "All" context "filters" %}
+        </button>
         {% for category_name, category_label in categories %}
           <button type="button" class="btn btn-default" data-type="{{ category_name }}">{{ category_label }}</button>
         {% endfor %}
@@ -97,7 +71,9 @@
     <div class="filter-status form-group">
       <strong>{% trans "Status" %}</strong>
       <div class="btn-group btn-group-sm" role="radiogroup">
-        <button type="button" class="btn btn-default active" data-status="all">{% trans "All" context "filters" %}</button>
+        <button type="button" class="btn btn-default active" data-status="all">
+          {% trans "All" context "filters" %}
+        </button>
         {% for status_name, status_label in statuses %}
           <button type="button"
                   class="btn btn-default btn-{{ status_name|status_as_class }}"
@@ -106,50 +82,81 @@
         {% endfor %}
       </div>
     </div>
-  {% endif %}
 
-  <div id="activities">
-    {% for activity in activities %}
-      {% if not activity.parent_id %}
-        {% include "admission/doctorate/details/training/"|add:activity.category|lower|add:'.html' %}
-      {% endif %}
-      {% empty %}
-      {% trans "This candidate has not created any activity yet" %}
-    {% endfor %}
-  </div>
+    {# Special error handling #}
+    {% if form.non_field_errors %}
+      <div class="alert alert-danger alert-dismissable alert-link">
+        {{ form.non_field_errors.0 }}
+      </div>
+    {% endif %}
+
+    <form id="activities" action="{% url 'admission:doctorate:doctoral-training' uuid=view.kwargs.uuid %}"
+          method="post">
+      {% csrf_token %}
+      {% for activity in activities %}
+        {% firstof 0 activity.category|lower|add:'.html' as template_name %}
+        {% if not activity.parent_id %}
+          {% include "admission/doctorate/details/training/"|add:template_name %}
+        {% endif %}
+      {% endfor %}
+      <button class="btn btn-default" type="submit" name="_submit" id="submit—activities">
+        {% trans "Submit these activities" %}
+      </button>
+      <button class="btn btn-default" type="submit" name="_accept">{% trans "Accept these activities" %}</button>
+
+      <div id="confirm-submit-modal" class="modal fade" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-body alert-danger">
+              {% trans "If you submit the activity, you will no longer be able to modify the seminar, nor the different activities within it." %}
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
+              <button id="confirm-button" class="btn btn-primary" type="submit" name="_submit">
+                {% trans "Confirm" %}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+  {% else %}
+    {% trans "This candidate has not created any activity yet" %}
+  {% endif %}
 {% endblock %}
+
 
 
 {% block style %}
   {{ block.super }}
   <style>
-      .panel {
-          margin-bottom: 2em;
-      }
+    .panel {
+      margin-bottom: 2em;
+    }
 
-      .panel-heading .panel-title {
-          line-height: 1.3em;
-      }
+    .panel-heading .panel-title {
+      line-height: 1.3em;
+    }
 
-      .panel-heading .panel-title > a {
-          float: left;
-          font-size: 1.5em;
-          padding-right: .3em;
-      }
+    .panel-heading .panel-title > a {
+      float: left;
+      font-size: 1.5em;
+      padding-right: .3em;
+    }
 
-      .panel-heading .panel-title > a:focus,
-      .panel-heading .panel-title > a:hover {
-          text-decoration: none;
-      }
+    .panel-heading .panel-title > a:focus,
+    .panel-heading .panel-title > a:hover {
+      text-decoration: none;
+    }
 
-      .panel-heading .panel-title > a:after {
-          font-family: 'Glyphicons Halflings';
-          content: "\e114";
-      }
+    .panel-heading .panel-title > a:after {
+      font-family: 'Glyphicons Halflings';
+      content: "\e114";
+    }
 
-      .panel-heading .panel-title > a.collapsed:after {
-          content: "\e080";
-      }
+    .panel-heading .panel-title > a.collapsed:after {
+      content: "\e080";
+    }
   </style>
 {% endblock %}
 
@@ -158,6 +165,29 @@
   <script src="{% static 'osis_document/osis-document.umd.min.js' %}"></script>
   <script>
     $(function () {
+      $('[data-toggle="popover"]').popover();
+
+      // USer must confirm submission of seminars
+      let confirmed = false;
+      let acceptedButtonClicked = true;
+      $('#submit—activities').on('click', function () {
+        acceptedButtonClicked = false;
+      });
+      $('form#activities').on('submit', function (e) {
+        const hasSeminar = !!(new FormData(e.target)).getAll("activity_ids").filter(
+          uuid => $(`#h-${uuid}`).parent().data('type') === "SEMINAR"
+        ).length;
+        if (hasSeminar && !confirmed && !acceptedButtonClicked) {
+          $('#confirm-button').on('click', function () {
+            confirmed = true;
+            e.target.submit()
+          });
+          $('#confirm-submit-modal').modal('show');
+          e.preventDefault();
+          return false;
+        }
+      });
+
       // Open the right panel depending on location hash
       if (document.location.hash) {
         const uuid = document.location.hash.slice(1);
@@ -171,26 +201,27 @@
       let current_filter_type = ALL_VALUES;
       $('.filter-type button').on('click', function () {
         current_filter_type = $(this).data('type');
-        $('.filter-type button').removeClass('active')
+        $('.filter-type button').removeClass('active');
         $(this).addClass('active');
         apply_filters();
       });
       let current_filter_status = ALL_VALUES;
       $('.filter-status button').on('click', function () {
         current_filter_status = $(this).data('status');
-        $('.filter-status button').removeClass('active')
+        $('.filter-status button').removeClass('active');
         $(this).addClass('active');
         apply_filters();
       });
 
-      function apply_filters() {
-        $('#activities .panel').each(function() {
-          $(this).show()
+      function apply_filters () {
+        const reStatus = new RegExp(`\\b${current_filter_status}\\b`);
+        $('#activities .panel').each(function () {
+          $(this).show();
           if ((current_filter_type !== ALL_VALUES && $(this).data('type') !== current_filter_type)
-            || (current_filter_status !== ALL_VALUES && $(this).data('status') !== current_filter_status)) {
-            $(this).hide()
+            || (current_filter_status !== ALL_VALUES && !$(this).data('status').match(reStatus))) {
+            $(this).hide();
           }
-        })
+        });
       }
     });
   </script>

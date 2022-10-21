@@ -23,43 +23,61 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.api.views.dashboard import *
+from admission.api.views.dashboard import DashboardViewSet
 from admission.api.views.autocomplete import *
-from admission.api.views.coordonnees import *
-from admission.api.views.curriculum import (
-    CurriculumExperienceListAndCreateView,
-    CurriculumExperienceDetailUpdateAndDeleteView,
-    CurriculumFileView,
+from admission.api.views.coordonnees import CoordonneesViewSet, GeneralCoordonneesViewSet, ContinuingCoordonneesViewSet
+from admission.api.views.curriculum import *
+from admission.api.views.secondary_studies import (
+    SecondaryStudiesViewSet,
+    GeneralSecondaryStudiesViewSet,
+    ContinuingSecondaryStudiesViewSet,
 )
-from admission.api.views.secondary_studies import *
-from admission.api.views.languages_knowledge import *
-from admission.api.views.cotutelle import *
-from admission.api.views.person import *
+from admission.api.views.languages_knowledge import LanguagesKnowledgeViewSet
+from admission.api.views.cotutelle import CotutelleAPIView
+from admission.api.views.person import (
+    PersonViewSet,
+    GeneralPersonViewSet,
+    ContinuingPersonViewSet,
+)
 from admission.api.views.project import *
 from admission.api.views.supervision import *
-from admission.api.views.signatures import *
+from admission.api.views.signatures import RequestSignaturesAPIView
 from admission.api.views.approvals import *
-from admission.api.views.confirmation import (
-    ConfirmationAPIView,
-    LastConfirmationAPIView,
-    SupervisedConfirmationAPIView,
-    LastConfirmationCanvasAPIView,
-)
+from admission.api.views.confirmation import *
 from admission.api.views.doctorate import DoctorateAPIView
-from admission.api.views.training import DoctoralTrainingView, DoctoralTrainingListView
+from admission.api.views.training import *
+from admission.api.views.accounting import AccountingView
+from admission.api.views.references import RetrieveScholarshipView, RetrieveCampusView, ListCampusView
+from admission.api.views.training_choice import (
+    ContinuingTrainingChoiceAPIView,
+    ContinuingUpdateTrainingChoiceAPIView,
+    DoctorateUpdateAdmissionTypeAPIView,
+    GeneralTrainingChoiceAPIView,
+    GeneralUpdateTrainingChoiceAPIView,
+)
+from admission.api.views.proposition import GeneralPropositionViewSet, ContinuingPropositionViewSet
 
 __all__ = [
     "CoordonneesViewSet",
-    "CurriculumExperienceListAndCreateView",
-    "CurriculumExperienceDetailUpdateAndDeleteView",
+    "GeneralCoordonneesViewSet",
+    "ContinuingCoordonneesViewSet",
+    "CurriculumView",
+    "EducationalExperienceViewSet",
+    "ProfessionalExperienceViewSet",
     "CurriculumFileView",
     "PersonViewSet",
+    "GeneralPersonViewSet",
+    "ContinuingPersonViewSet",
     "PropositionViewSet",
     "PropositionListView",
     "VerifyProjectView",
     "SubmitPropositionViewSet",
     "SecondaryStudiesViewSet",
+    "GeneralSecondaryStudiesViewSet",
+    "ContinuingSecondaryStudiesViewSet",
     "AutocompleteDoctoratView",
+    "AutocompleteGeneralEducationView",
+    "AutocompleteContinuingEducationView",
     "AutocompleteSectorView",
     "AutocompleteTutorView",
     "AutocompletePersonView",
@@ -76,5 +94,15 @@ __all__ = [
     "SupervisedConfirmationAPIView",
     "DoctorateAPIView",
     "DoctoralTrainingListView",
-    "DoctoralTrainingView",
+    "AutocompleteScholarshipView",
+    "ListCampusView",
+    "RetrieveScholarshipView",
+    "RetrieveCampusView",
+    "GeneralTrainingChoiceAPIView",
+    "ContinuingTrainingChoiceAPIView",
+    "GeneralPropositionViewSet",
+    "ContinuingPropositionViewSet",
+    "ContinuingUpdateTrainingChoiceAPIView",
+    "DoctorateUpdateAdmissionTypeAPIView",
+    "GeneralUpdateTrainingChoiceAPIView",
 ]

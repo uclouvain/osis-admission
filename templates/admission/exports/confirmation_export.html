@@ -116,7 +116,12 @@
       </h2>
     </div>
 
-    {% field_data _("Doctoral student") doctorate.nom_doctorant|add:" "|add:doctorate.prenom_doctorant inline=True %}
+    {% if doctorate.genre_doctorant == "F" %}
+      {% translate "The doctoral student" as student_title context "female gender" %}
+    {% else %}
+      {% translate "The doctoral student" as student_title context "male gender" %}
+    {% endif %}
+    {% field_data student_title doctorate.nom_doctorant|add:" "|add:doctorate.prenom_doctorant inline=True %}
     {% field_data _("Registration Id") doctorate.noma_doctorant inline=True %}
     {% field_data _("Definitive admission date to doctorate") doctorate.admission_acceptee_le inline=True %}
 
@@ -131,22 +136,22 @@
     {% field_data _("New thesis title (if applicable)") " " "to-complete" inline=True %}
     <hr class="dashed-line" />
 
-    <span class="list-title">{% blocktranslate with label="Promotion" %}{{ label }}:{% endblocktranslate %}</span>
+    <span class="list-title">{% blocktranslate with label=_("Promotion") %}{{ label }}:{% endblocktranslate %}</span>
     <ul>
       {% for signature_promoteur in supervision_group.signatures_promoteurs %}
         <li>
-          {{ signature_promoteur.promoteur.nom }} {{ signature_promoteur.promoteur.prenom }} -
-          {{ signature_promoteur.promoteur.institution|default:_("Institute not specified") }}
+          {{ signature_promoteur.promoteur.nom }} {{ signature_promoteur.promoteur.prenom }}
+          {% if signature_promoteur.promoteur.institution %} - {{ signature_promoteur.promoteur.institution }}{% endif %}
         </li>
       {% endfor %}
     </ul>
 
-    <span class="list-title">{% blocktranslate with label="Supervisory panel" %}{{ label }}:{% endblocktranslate %}</span>
+    <span class="list-title">{% blocktranslate with label=_("Supervisory panel") %}{{ label }}:{% endblocktranslate %}</span>
     <ul>
       {% for signature_membre_ca in supervision_group.signatures_membres_CA %}
         <li>
-          {{ signature_membre_ca.membre_CA.nom }} {{ signature_membre_ca.membre_CA.prenom }} -
-          {{ signature_membre_ca.membre_CA.institution|default:_("Institute not specified") }}
+          {{ signature_membre_ca.membre_CA.nom }} {{ signature_membre_ca.membre_CA.prenom }}
+          {% if signature_membre_ca.membre_CA.institution %} - {{ signature_membre_ca.membre_CA.institution }}{% endif %}
         </li>
       {% endfor %}
     </ul>
@@ -162,12 +167,12 @@
     <div class="avoid-break-inside">
       <p>
         {% if doctorate.genre_doctorant == "F" %}
-          {% blocktranslate context "female gender" %}
+          {% blocktranslate trimmed context "female gender" %}
             Following the presentation of the state of the research and the subsequent discussion with the candidate,
             the supervisory panel assessed the progress of the work and announces:
           {% endblocktranslate %}
         {% else %}
-          {% blocktranslate context "male gender" %}
+          {% blocktranslate trimmed context "male gender" %}
             Following the presentation of the state of the research and the subsequent discussion with the candidate,
             the supervisory panel assessed the progress of the work and announces:
           {% endblocktranslate %}
@@ -216,7 +221,7 @@
 
     <p>
       {# TODO should be replaced by the number of credits #}
-      {% blocktranslate with credits_nb="[CREDITS_NUMBER]" %}
+      {% blocktranslate trimmed with credits_nb="[CREDITS_NUMBER]" %}
         The number of acquired <strong>doctoral</strong> credits amounts to {{ credits_nb }} credits.
       {% endblocktranslate %}
     </p>
@@ -243,29 +248,32 @@
       </caption>
       <thead>
       <tr>
-        <th>{% translate "CA members" %}</th>
-        <th>
-          {% if doctorate.genre_doctorant == "F" %}
-            {% translate "The doctoral student" context "female gender" %}
-          {% else %}
-            {% translate "The doctoral student" context "male gender" %}
-          {% endif %}
-        </th>
+        <th>{% translate "The CA members" %}</th>
+        <th>{{ student_title }}</th>
       </tr>
       </thead>
       <tbody>
+      {% for signature_promoteur in supervision_group.signatures_promoteurs %}
+        <tr>
+          <td>
+            <span>
+              {{ signature_promoteur.promoteur.titre }} {{ signature_promoteur.promoteur.prenom }} {{ signature_promoteur.promoteur.nom }}
+            </span>
+          </td>
+          {% if forloop.first %}
+            <td rowspan="{{ supervision_people_nb }}">
+              {{ doctorate.prenom_doctorant }} {{ doctorate.nom_doctorant }}
+            </td>
+          {% endif %}
+        </tr>
+      {% endfor %}
       {% for signature_membre_ca in supervision_group.signatures_membres_CA %}
         <tr>
           <td>
             <span>
-              {% translate "Prof." %} {{ signature_membre_ca.membre_CA.prenom }} {{ signature_membre_ca.membre_CA.nom }}
+              {{ signature_membre_ca.membre_CA.titre }} {{ signature_membre_ca.membre_CA.prenom }} {{ signature_membre_ca.membre_CA.nom }}
             </span>
           </td>
-          {% if forloop.first %}
-            <td rowspan="{{ supervision_group.signatures_membres_CA|length|add:1 }}">
-              {{ doctorate.nom_doctorant }} {{ doctorate.prenom_doctorant }}
-            </td>
-          {% endif %}
         </tr>
       {% endfor %}
       </tbody>

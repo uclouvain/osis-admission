@@ -24,6 +24,7 @@
 #
 ##############################################################################
 from django import template
+from django.utils.translation import gettext_lazy as _
 
 from base.models.utils.utils import ChoiceEnum
 
@@ -37,3 +38,8 @@ def enum_display(value, enum_name):
             if enum.__name__ == enum_name:
                 return enum.get_value(value)
     return value or ''
+
+
+@register.filter
+def format_is_online(value):
+    return _("Online") if value else _("In person")

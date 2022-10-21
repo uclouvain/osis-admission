@@ -31,11 +31,23 @@ from inspect import getfullargspec
 from django import template
 from django.urls import NoReverseMatch, reverse
 from django.utils.safestring import SafeString
-from django.utils.translation import gettext_lazy as _
+from django.utils.translation import gettext_lazy as _, pgettext
+from rules.templatetags import rules
 
-from admission.ddd.projet_doctoral.doctorat.domain.model.enums import ChoixStatutDoctorat
-from admission.ddd.projet_doctoral.doctorat.formation.domain.model._enums import StatutActivite
+from admission.auth.constants import READ_ACTIONS_BY_TAB, UPDATE_ACTIONS_BY_TAB
+from admission.contrib.models import DoctorateAdmission
+from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
+from admission.ddd.parcours_doctoral.formation.domain.model.enums import (
+    CategorieActivite,
+    ChoixTypeEpreuve,
+    StatutActivite,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import STATUTS_PROPOSITION_AVANT_INSCRIPTION
 from admission.utils import get_cached_admission_perm_obj
+from osis_role.templatetags.osis_role import has_perm
+
+CONTEXT_ADMISSION = 'admission'
+CONTEXT_DOCTORATE = 'doctorate'
 
 register = template.Library()
 
@@ -173,24 +185,28 @@ def sortable_header_div(context, order_field_name, order_field_label):
 
 
 # Manage the tabs
-@dataclass(frozen=True)
+@dataclass
 class Tab:
     name: str
-    label: str
+    label: str = ''
     icon: str = ''
+    badge: str = ''
 
     def __hash__(self):
         # Only hash the name, as lazy strings have different memory addresses
         return hash(self.name)
 
+    def __eq__(self, other):
+        return self.name == other.name
 
-MESSAGE_TAB = Tab('messages', _('Send a mail'), 'envelope')
+
 TAB_TREES = {
-    'doctorate': {
+    CONTEXT_ADMISSION: {
         Tab('personal', _('Personal data'), 'user'): [
             Tab('person', _('Identification')),
             Tab('coordonnees', _('Contact details')),
         ],
+        # TODO Education choice
         Tab('experience', _('Previous experience'), 'list-alt'): [
             Tab('education', _('Secondary studies')),
             Tab('curriculum', _('Curriculum')),
@@ -200,17 +216,49 @@ TAB_TREES = {
             Tab('project', _('Doctoral project')),
             Tab('cotutelle', _('Cotutelle')),
             Tab('supervision', _('Supervision')),
+        ],
+        # TODO Specificities
+        # TODO Completion
+        Tab('management', pgettext('tab', 'Management'), 'gear'): [
+            Tab('history-all', _('All history')),
+            Tab('history', _('Status changes')),
+            Tab('send-mail', _('Send a mail')),
+            Tab('internal-note', _('Internal notes'), 'note-sticky'),
+        ],
+        # TODO Documents
+    },
+    CONTEXT_DOCTORATE: {
+        Tab('person', _('Personal data'), 'user'): [
+            Tab('person', _('Personal data'), 'user'),
+        ],
+        Tab('education', _('Previous experience'), 'list-alt'): [
+            Tab('education', _('Previous experience'), 'list-alt'),
+        ],
+        Tab('doctorate', pgettext('tab', 'Doctoral project'), 'graduation-cap'): [
+            Tab('project', pgettext('tab', 'Research project')),
+            Tab('cotutelle', _('Cotutelle')),
+            Tab('supervision', _('Supervision')),
+        ],
+        Tab('confirmation', pgettext('tab', 'Confirmation'), 'award'): [
             Tab('confirmation', _('Confirmation paper')),
             Tab('extension-request', _('New deadline')),
-            Tab('training', _('Training')),
         ],
-        Tab('history', _('History'), 'clock'): [
-            Tab('history', _('Status changes')),
+        Tab('training', _('Training'), 'book-open-reader'): [
+            Tab('doctoral-training', _('Doctoral training')),
+            Tab('complementary-training', _('Complementary training')),
+            Tab('course-enrollment', _('Course enrollment')),
+        ],
+        Tab('defense', pgettext('tab', 'Defense'), 'person-chalkboard'): [
+            # TODO
+            # Tab('jury', _('Jury')),
+        ],
+        Tab('management', pgettext('tab', 'Management'), 'gear'): [
             Tab('history-all', _('All history')),
-        ],
-        MESSAGE_TAB: [
+            Tab('history', _('Status changes')),
             Tab('send-mail', _('Send a mail')),
+            Tab('internal-note', _('Internal notes'), 'note-sticky'),
         ],
+        # TODO Documents
     },
 }
 
@@ -222,60 +270,78 @@ def get_active_parent(tab_tree, tab_name):
     )
 
 
-@register.inclusion_tag('admission/includes/doctorate_tabs_bar.html', takes_context=True)
-def doctorate_tabs_bar(context):
+def get_valid_tab_tree(context, permission_obj, tab_tree):
+    """
+    Return a tab tree based on the specified one but whose tabs depending on the permissions.
+    """
+    valid_tab_tree = {}
+
+    # Loop over the tabs of the original tab tree
+    for (parent_tab, sub_tabs) in tab_tree.items():
+        # Get the accessible sub tabs depending on the user permissions
+        valid_sub_tabs = [tab for tab in sub_tabs if can_read_tab(context, tab.name, permission_obj)]
+
+        # Add dynamic badge on parent for internal notes
+        if Tab('internal-note') in valid_sub_tabs:
+            parent_tab.badge = permission_obj.internalnote_set.count()
+
+        # Only add the parent tab if at least one sub tab is allowed
+        if len(valid_sub_tabs) > 0:
+            valid_tab_tree[parent_tab] = valid_sub_tabs
+
+    return valid_tab_tree
+
+
+@register.simple_tag(takes_context=True)
+def default_tab_context(context):
     match = context['request'].resolver_match
+    active_tab = match.url_name
 
-    current_tab_name = match.url_name
-    if len(match.namespaces) > 2:
-        current_tab_name = match.namespaces[2]
+    if len(match.namespaces) > 2 and match.namespaces[2] != 'update':
+        active_tab = match.namespaces[2]
 
-    current_tab_tree = TAB_TREES[match.namespaces[1]].copy()
-    admission = get_cached_admission_perm_obj(context['view'].kwargs.get('pk', ''))
-
-    # Prevent showing message tab when candidate is not enrolled
-    # TODO switch to a perm-based selection of the tabs
-    if admission.post_enrolment_status == ChoixStatutDoctorat.ADMISSION_IN_PROGRESS.name:
-        del current_tab_tree[MESSAGE_TAB]
-
-    parent = get_active_parent(current_tab_tree, current_tab_name)
+    tab_tree = TAB_TREES[get_current_context(context['view'].get_permission_object())]
+    active_parent = get_active_parent(tab_tree, active_tab)
 
     return {
-        'tab_tree': current_tab_tree,
-        'active_parent': parent,
-        'admission_uuid': context['view'].kwargs.get('pk', ''),
-        'namespace': match.namespace,
+        'active_parent': active_parent,
+        'active_tab': active_tab,
+        'admission_uuid': context['view'].kwargs.get('uuid', ''),
+        'namespace': ':'.join(match.namespaces[:2]),
         'request': context['request'],
         'view': context['view'],
     }
+
+
+@register.inclusion_tag('admission/includes/doctorate_tabs_bar.html', takes_context=True)
+def doctorate_tabs_bar(context):
+    tab_context = default_tab_context(context)
+    admission = get_cached_admission_perm_obj(tab_context['admission_uuid'])
+    current_tab_tree = get_valid_tab_tree(context, admission, TAB_TREES[get_current_context(admission)]).copy()
+    tab_context['tab_tree'] = current_tab_tree
+    return tab_context
 
 
 @register.simple_tag(takes_context=True)
 def current_subtabs(context):
-    # TODO switch to a perm-based selection of the subtabs, and hide parent tab if no tabs
-    match = context['request'].resolver_match
-    current_tab_name = match.url_name
-    if len(match.namespaces) > 2 and match.namespaces[2] != 'update':
-        current_tab_name = match.namespaces[2]
-    current_tab_tree = TAB_TREES[match.namespaces[1]]
-    return current_tab_tree.get(get_active_parent(current_tab_tree, current_tab_name), [])
+    tab_context = default_tab_context(context)
+    permission_obj = context['view'].get_permission_object()
+    tab_tree = TAB_TREES[get_current_context(admission=permission_obj)]
+    tab_context['subtabs'] = [
+        tab for tab in tab_tree[tab_context['active_parent']] if can_read_tab(context, tab.name, permission_obj)
+    ]
+    return tab_context
+
+
+def get_current_context(admission: DoctorateAdmission):
+    if admission.status in STATUTS_PROPOSITION_AVANT_INSCRIPTION:
+        return CONTEXT_ADMISSION
+    return CONTEXT_DOCTORATE
 
 
 @register.inclusion_tag('admission/includes/doctorate_subtabs_bar.html', takes_context=True)
-def doctorate_subtabs_bar(context, tabs=None):
-    match = context['request'].resolver_match
-    current_tab_name = match.url_name
-    if len(match.namespaces) > 2 and match.namespaces[2] != 'update':
-        current_tab_name = match.namespaces[2]
-
-    return {
-        'subtabs': tabs if tabs is not None else current_subtabs(context),
-        'admission_uuid': context['view'].kwargs.get('pk', ''),
-        'namespace': ':'.join(match.namespaces[:2]),
-        'request': context['request'],
-        'view': context['view'],
-        'active_tab': current_tab_name,
-    }
+def doctorate_subtabs_bar(context):
+    return current_subtabs(context)
 
 
 @register.simple_tag(takes_context=True)
@@ -312,7 +378,7 @@ def detail_tab_path_from_update(context, admission_uuid):
 
 
 @register.inclusion_tag('admission/includes/field_data.html')
-def field_data(name, data=None, css_class=None, hide_empty=False, translate_data=False, inline=False):
+def field_data(name, data=None, css_class=None, hide_empty=False, translate_data=False, inline=False, html_tag=''):
     if isinstance(data, list):
         if data:
             template_string = "{% load osis_document %}{% document_visualizer files %}"
@@ -332,6 +398,7 @@ def field_data(name, data=None, css_class=None, hide_empty=False, translate_data
         'data': data,
         'css_class': css_class,
         'hide_empty': hide_empty,
+        'html_tag': html_tag,
     }
 
 
@@ -353,6 +420,14 @@ def strip(value):
 
 
 @register.filter
+def status_list(admission):
+    statuses = {str(admission.status)}
+    for child in admission.children.all():
+        statuses.add(str(child.status))
+    return ','.join(statuses)
+
+
+@register.filter
 def status_as_class(activity):
     return {
         StatutActivite.SOUMISE.name: "warning",
@@ -367,4 +442,91 @@ def bootstrap_field_with_tooltip(field, classes='', show_help=False):
         'field': field,
         'classes': classes,
         'show_help': show_help,
+    }
+
+
+@register.simple_tag(takes_context=True)
+def has_perm(context, perm, obj=None):
+    if not obj:
+        obj = context['view'].get_permission_object()
+    return rules.has_perm(perm, context['request'].user, obj)
+
+
+@register.simple_tag(takes_context=True)
+def can_read_tab(context, tab_name, obj=None):
+    """Return true if the specified tab can be opened in reading mode for this admission, otherwise return False"""
+    return has_perm(context, READ_ACTIONS_BY_TAB[tab_name], obj)
+
+
+@register.simple_tag(takes_context=True)
+def can_update_tab(context, tab_name, obj=None):
+    """Return true if the specified tab can be opened in update mode for this admission, otherwise return False"""
+    return has_perm(context, UPDATE_ACTIONS_BY_TAB[tab_name], obj)
+
+
+@register.inclusion_tag('admission/doctorate/includes/training_categories.html')
+def training_categories(activities):
+    added, validated = 0, 0
+
+    categories = {
+        _("Participation"): [0, 0],
+        _("Scientific communication"): [0, 0],
+        _("Publication"): [0, 0],
+        _("Courses and training"): [0, 0],
+        _("Services"): [0, 0],
+        _("VAE"): [0, 0],
+        _("Scientific residencies"): [0, 0],
+        _("Confirmation paper"): [0, 0],
+        _("Thesis defences"): [0, 0],
+    }
+    for activity in activities:
+        # Increment global counts
+        if activity.status != StatutActivite.REFUSEE.name:
+            added += activity.ects
+        if activity.status == StatutActivite.ACCEPTEE.name:
+            validated += activity.ects
+        if activity.status not in [StatutActivite.SOUMISE.name, StatutActivite.ACCEPTEE.name]:
+            continue
+
+        # Increment category counts
+        index = int(activity.status == StatutActivite.ACCEPTEE.name)
+        if (
+            activity.category == CategorieActivite.CONFERENCE.name
+            or activity.category == CategorieActivite.SEMINAR.name
+        ):
+            categories[_("Participation")][index] += activity.ects
+        elif activity.category == CategorieActivite.COMMUNICATION.name and (
+            activity.parent_id is None or activity.parent.category == CategorieActivite.CONFERENCE.name
+        ):
+            categories[_("Scientific communication")][index] += activity.ects
+        elif activity.category == CategorieActivite.PUBLICATION.name and (
+            activity.parent_id is None or activity.parent.category == CategorieActivite.CONFERENCE.name
+        ):
+            categories[_("Publication")][index] += activity.ects
+        elif activity.category == CategorieActivite.SERVICE.name:
+            categories[_("Services")][index] += activity.ects
+        elif (
+            activity.category == CategorieActivite.RESIDENCY.name
+            or activity.parent_id
+            and activity.parent.category == CategorieActivite.RESIDENCY.name
+        ):
+            categories[_("Scientific residencies")][index] += activity.ects
+        elif activity.category == CategorieActivite.VAE.name:
+            categories[_("VAE")][index] += activity.ects
+        elif activity.category in [CategorieActivite.COURSE.name, CategorieActivite.UCL_COURSE.name]:
+            categories[_("Courses and training")][index] += activity.ects
+        elif (
+            activity.category == CategorieActivite.PAPER.name
+            and activity.type == ChoixTypeEpreuve.CONFIRMATION_PAPER.name
+        ):
+            categories[_("Confirmation paper")][index] += activity.ects
+        elif activity.category == CategorieActivite.PAPER.name:
+            categories[_("Thesis defences")][index] += activity.ects
+    if not added:
+        return {}
+    return {
+        'display_table': any(cat_added + cat_validated for cat_added, cat_validated in categories.values()),
+        'categories': categories,
+        'added': added,
+        'validated': validated,
     }

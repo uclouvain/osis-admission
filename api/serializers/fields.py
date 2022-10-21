@@ -23,6 +23,8 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from functools import partial
+
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.urls.exceptions import NoReverseMatch
@@ -144,6 +146,14 @@ class RelatedInstituteField(serializers.CharField, serializers.SlugRelatedField)
             return str(serializers.SlugRelatedField.to_representation(self, value))
 
 
+DoctorateAdmissionField = partial(
+    serializers.SlugRelatedField,
+    slug_field='uuid',
+    read_only=True,
+    allow_null=True,
+)
+
+
 # Available actions
 ACTION_LINKS = {
     # List
@@ -204,20 +214,30 @@ ACTION_LINKS = {
     },
     # Curriculum
     'retrieve_curriculum': {
-        'path_name': 'admission_api_v1:curriculum',
+        'path_name': 'admission_api_v1:curriculum_file',
         'method': 'GET',
         'params': ['uuid'],
     },
     'update_curriculum': {
-        'path_name': 'admission_api_v1:curriculum',
-        'method': 'POST',
+        'path_name': 'admission_api_v1:curriculum_file',
+        'method': 'PUT',
         'params': ['uuid'],
     },
     # Proposition
     # Project
-    'create_proposition': {
+    'create_doctorate_proposition': {
         'path_name': 'admission_api_v1:propositions',
         'method': 'POST',
+    },
+    'update_doctorate_training_choice': {
+        'path_name': 'admission_api_v1:doctorate_admission_type_update',
+        'method': 'PUT',
+        'params': ['uuid'],
+    },
+    'retrieve_doctorate_training_choice': {
+        'path_name': 'admission_api_v1:propositions',
+        'method': 'GET',
+        'params': ['uuid'],
     },
     'destroy_proposition': {
         'path_name': 'admission_api_v1:propositions',
@@ -253,6 +273,11 @@ ACTION_LINKS = {
     # Supervision
     'add_member': {
         'path_name': 'admission_api_v1:supervision',
+        'method': 'PUT',
+        'params': ['uuid'],
+    },
+    'set_reference_promoter': {
+        'path_name': 'admission_api_v1:set-reference-promoter',
         'method': 'PUT',
         'params': ['uuid'],
     },
@@ -292,15 +317,177 @@ ACTION_LINKS = {
         'method': 'PUT',
         'params': ['uuid'],
     },
+    'update_confirmation_extension': {
+        'path_name': 'admission_api_v1:last_confirmation',
+        'method': 'POST',
+        'params': ['uuid'],
+    },
     # Training
-    'retrieve_training': {
+    'add_training': {
+        'path_name': 'admission_api_v1:doctoral-training',
+        'method': 'POST',
+        'params': ['uuid'],
+    },
+    'assent_training': {
+        'path_name': 'admission_api_v1:training-assent',
+        'method': 'POST',
+        'params': ['uuid'],
+    },
+    'submit_training': {
+        'path_name': 'admission_api_v1:training-submit',
+        'method': 'POST',
+        'params': ['uuid'],
+    },
+    'retrieve_doctoral_training': {
         'path_name': 'admission_api_v1:doctoral-training',
         'method': 'GET',
         'params': ['uuid'],
     },
-    'add_training': {
-        'path_name': 'admission_api_v1:doctoral-training',
+    'retrieve_complementary_training': {
+        'path_name': 'admission_api_v1:complementary-training',
+        'method': 'GET',
+        'params': ['uuid'],
+    },
+    'retrieve_course_enrollment': {
+        'path_name': 'admission_api_v1:course-enrollment',
+        'method': 'GET',
+        'params': ['uuid'],
+    },
+    # Accounting
+    'retrieve_accounting': {
+        'path_name': 'admission_api_v1:accounting',
+        'method': 'GET',
+        'params': ['uuid'],
+    },
+    'update_accounting': {
+        'path_name': 'admission_api_v1:accounting',
+        'method': 'PUT',
+        'params': ['uuid'],
+    },
+}
+
+GENERAL_EDUCATION_ACTION_LINKS = {
+    # General education
+    'create_proposition': {
+        'path_name': 'admission_api_v1:general_training_choice',
         'method': 'POST',
+    },
+    'update_training_choice': {
+        'path_name': 'admission_api_v1:general_training_choice',
+        'method': 'PUT',
+        'params': ['uuid'],
+    },
+    'retrieve_training_choice': {
+        'path_name': 'admission_api_v1:general_propositions',
+        'method': 'GET',
+        'params': ['uuid'],
+    },
+    'destroy_proposition': {
+        'path_name': 'admission_api_v1:general_propositions',
+        'method': 'DELETE',
+        'params': ['uuid'],
+    },
+    'retrieve_person': {
+        'path_name': 'admission_api_v1:general_person',
+        'method': 'GET',
+        'params': ['uuid'],
+    },
+    'update_person': {
+        'path_name': 'admission_api_v1:general_person',
+        'method': 'PUT',
+        'params': ['uuid'],
+    },
+    'retrieve_coordinates': {
+        'path_name': 'admission_api_v1:general_coordinates',
+        'method': 'GET',
+        'params': ['uuid'],
+    },
+    'update_coordinates': {
+        'path_name': 'admission_api_v1:general_coordinates',
+        'method': 'PUT',
+        'params': ['uuid'],
+    },
+    'retrieve_secondary_studies': {
+        'path_name': 'admission_api_v1:general_secondary_studies',
+        'method': 'GET',
+        'params': ['uuid'],
+    },
+    'update_secondary_studies': {
+        'path_name': 'admission_api_v1:general_secondary_studies',
+        'method': 'PUT',
+        'params': ['uuid'],
+    },
+    'retrieve_curriculum': {
+        'path_name': 'admission_api_v1:general_curriculum_file',
+        'method': 'GET',
+        'params': ['uuid'],
+    },
+    'update_curriculum': {
+        'path_name': 'admission_api_v1:general_curriculum_file',
+        'method': 'PUT',
+        'params': ['uuid'],
+    },
+}
+
+CONTINUING_EDUCATION_ACTION_LINKS = {
+    # Continuing education
+    'create_proposition': {
+        'path_name': 'admission_api_v1:continuing_training_choice',
+        'method': 'POST',
+    },
+    'update_training_choice': {
+        'path_name': 'admission_api_v1:continuing_training_choice',
+        'method': 'PUT',
+        'params': ['uuid'],
+    },
+    'retrieve_training_choice': {
+        'path_name': 'admission_api_v1:continuing_propositions',
+        'method': 'GET',
+        'params': ['uuid'],
+    },
+    'destroy_proposition': {
+        'path_name': 'admission_api_v1:continuing_propositions',
+        'method': 'DELETE',
+        'params': ['uuid'],
+    },
+    'retrieve_person': {
+        'path_name': 'admission_api_v1:continuing_person',
+        'method': 'GET',
+        'params': ['uuid'],
+    },
+    'update_person': {
+        'path_name': 'admission_api_v1:continuing_person',
+        'method': 'PUT',
+        'params': ['uuid'],
+    },
+    'retrieve_coordinates': {
+        'path_name': 'admission_api_v1:continuing_coordinates',
+        'method': 'GET',
+        'params': ['uuid'],
+    },
+    'update_coordinates': {
+        'path_name': 'admission_api_v1:continuing_coordinates',
+        'method': 'PUT',
+        'params': ['uuid'],
+    },
+    'retrieve_secondary_studies': {
+        'path_name': 'admission_api_v1:continuing_secondary_studies',
+        'method': 'GET',
+        'params': ['uuid'],
+    },
+    'update_secondary_studies': {
+        'path_name': 'admission_api_v1:continuing_secondary_studies',
+        'method': 'PUT',
+        'params': ['uuid'],
+    },
+    'retrieve_curriculum': {
+        'path_name': 'admission_api_v1:continuing_curriculum_file',
+        'method': 'GET',
+        'params': ['uuid'],
+    },
+    'update_curriculum': {
+        'path_name': 'admission_api_v1:continuing_curriculum_file',
+        'method': 'PUT',
         'params': ['uuid'],
     },
 }

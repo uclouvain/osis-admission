@@ -25,29 +25,30 @@
 # ##############################################################################
 import uuid
 
+from ckeditor.fields import RichTextField
+from django.conf import settings
 from django.core.cache import cache
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db import models
-from django.db.models import OuterRef, F
+from django.db.models import OuterRef
+from django.db.models.functions import Cast
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils.datetime_safe import date
-from django.utils.translation import gettext_lazy as _
+from django.utils.translation import get_language, gettext_lazy as _
 from rest_framework.settings import api_settings
 
-from admission.ddd.projet_doctoral.doctorat.domain.model.enums import ChoixStatutDoctorat
-from admission.ddd.projet_doctoral.preparation.domain.model._detail_projet import ChoixLangueRedactionThese
-from admission.ddd.projet_doctoral.preparation.domain.model._enums import (
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixCommissionProximiteCDEouCLSM,
     ChoixCommissionProximiteCDSS,
+    ChoixDoctoratDejaRealise,
+    ChoixLangueRedactionThese,
     ChoixSousDomaineSciences,
     ChoixStatutProposition,
+    ChoixTypeFinancement,
 )
-from admission.ddd.projet_doctoral.preparation.domain.model._experience_precedente_recherche import (
-    ChoixDoctoratDejaRealise,
-)
-from admission.ddd.projet_doctoral.preparation.domain.model._financement import ChoixTypeFinancement
-from admission.ddd.projet_doctoral.validation.domain.model._enums import ChoixStatutCDD, ChoixStatutSIC
+from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixStatutCDD, ChoixStatutSIC
+from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
 from base.models.education_group_year import EducationGroupYear
 from base.models.entity_version import EntityVersion
 from base.models.enums.education_group_categories import Categories
@@ -57,10 +58,13 @@ from base.models.person import Person
 from base.utils.cte import CTESubquery
 from osis_document.contrib import FileField
 from osis_signature.contrib.fields import SignatureProcessField
-from .base import BaseAdmission, admission_directory_path
+from reference.models.country import Country
+from .base import BaseAdmission, admission_directory_path, BaseAdmissionQuerySet
+from .enums.admission_type import AdmissionType
 
 __all__ = [
     "DoctorateAdmission",
+    "DoctorateProxy",
     "ConfirmationPaper",
     "REFERENCE_SEQ_NAME",
 ]
@@ -75,6 +79,18 @@ class DoctorateAdmission(BaseAdmission):
         verbose_name=_("Doctorate"),
         related_name="+",
         on_delete=models.CASCADE,
+    )
+    type = models.CharField(
+        verbose_name=_("Type"),
+        max_length=255,
+        choices=AdmissionType.choices(),
+        db_index=True,
+        default=AdmissionType.ADMISSION.name,
+    )
+    valuated_experiences = models.ManyToManyField(
+        'osis_profile.Experience',
+        related_name='valuated_from',
+        verbose_name=_('The experiences that have been valuated from this admission.'),
     )
     proximity_commission = models.CharField(
         max_length=255,
@@ -117,6 +133,20 @@ class DoctorateAdmission(BaseAdmission):
         verbose_name=_("Scholarship grant"),
         default='',
         blank=True,
+    )
+    scholarship_start_date = models.DateField(
+        verbose_name=_("Scholarship start date"),
+        null=True,
+        blank=True,
+    )
+    scholarship_end_date = models.DateField(
+        verbose_name=_("Scholarship end date"),
+        null=True,
+        blank=True,
+    )
+    scholarship_proof = FileField(
+        verbose_name=_("Scholarship proof"),
+        upload_to=admission_directory_path,
     )
     planned_duration = models.PositiveSmallIntegerField(
         verbose_name=_("Planned duration"),
@@ -175,7 +205,7 @@ class DoctorateAdmission(BaseAdmission):
         upload_to=admission_directory_path,
     )
     additional_training_project = FileField(
-        verbose_name=_("Additional training project"),
+        verbose_name=_("Complementary training proposition"),
         upload_to=admission_directory_path,
     )
     recommendation_letters = FileField(
@@ -194,6 +224,12 @@ class DoctorateAdmission(BaseAdmission):
     phd_already_done_institution = models.CharField(
         max_length=255,
         verbose_name=_("Institution"),
+        default='',
+        blank=True,
+    )
+    phd_already_done_thesis_domain = models.CharField(
+        max_length=255,
+        verbose_name=_("Thesis domain"),
         default='',
         blank=True,
     )
@@ -243,11 +279,6 @@ class DoctorateAdmission(BaseAdmission):
         verbose_name=_("Other cotutelle-related documents"),
         upload_to=admission_directory_path,
     )
-
-    detailed_status = models.JSONField(
-        default=dict,
-        encoder=DjangoJSONEncoder,
-    )
     archived_record_signatures_sent = FileField(
         verbose_name=_("Archived record when signatures were sent"),
         max_files=1,
@@ -290,6 +321,15 @@ class DoctorateAdmission(BaseAdmission):
     )
 
     supervision_group = SignatureProcessField()
+
+    erasmus_mundus_scholarship = models.ForeignKey(
+        to="admission.Scholarship",
+        verbose_name=_("Erasmus Mundus scholarship"),
+        related_name="+",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+    )
 
     class Meta:
         verbose_name = _("Doctorate admission")
@@ -352,12 +392,18 @@ class DoctorateAdmission(BaseAdmission):
             ('submit_doctorateadmission', _("Can submit a doctorate admission proposition")),
         ]
 
+    def __str__(self):  # pragma: no cover
+        return self.reference
+
     def save(self, *args, **kwargs) -> None:
         super().save(*args, **kwargs)
         cache.delete('admission_permission_{}'.format(self.uuid))
 
     def update_detailed_status(self):
-        from admission.ddd.projet_doctoral.preparation.commands import VerifierProjetCommand, VerifierPropositionCommand
+        from admission.ddd.admission.doctorat.preparation.commands import (
+            VerifierProjetCommand,
+            VerifierPropositionCommand,
+        )
         from admission.utils import gather_business_exceptions
 
         error_key = api_settings.NON_FIELD_ERRORS_KEY
@@ -367,7 +413,11 @@ class DoctorateAdmission(BaseAdmission):
         self.save(update_fields=['detailed_status'])
 
 
-class PropositionManager(models.Manager):
+class DoctorateAdmissionQuerySet(BaseAdmissionQuerySet):
+    training_field_name = 'doctorate_id'
+
+
+class PropositionManager(models.Manager.from_queryset(DoctorateAdmissionQuerySet)):
     def get_queryset(self):
         cte = EntityVersion.objects.with_children(entity_id=OuterRef("doctorate__management_entity_id"))
         sector_subqs = (
@@ -378,22 +428,31 @@ class PropositionManager(models.Manager):
         )
 
         return (
-            DoctorateAdmission.objects.all()
+            super()
+            .get_queryset()
             .select_related(
                 "doctorate__academic_year",
                 "candidate__country_of_citizenship",
                 "thesis_institute",
+                "accounting",
+                "erasmus_mundus_scholarship",
             )
             .annotate(
                 code_secteur_formation=CTESubquery(sector_subqs.values("acronym")[:1]),
                 intitule_secteur_formation=CTESubquery(sector_subqs.values("title")[:1]),
+                sigle_entite_gestion=models.Subquery(
+                    EntityVersion.objects.filter(entity_id=OuterRef("doctorate__management_entity_id"))
+                    .order_by('-start_date')
+                    .values("acronym")[:1]
+                ),
             )
+            .annotate_campus()
         )
 
 
 @receiver(post_save, sender=EducationGroupYear)
 def _invalidate_doctorate_cache(sender, instance, **kwargs):
-    if (
+    if (  # pragma: no branch
         instance.education_group_type.category == Categories.TRAINING.name
         and instance.education_group_type.name == TrainingType.PHD.name
     ):
@@ -407,6 +466,7 @@ def _invalidate_doctorate_cache(sender, instance, **kwargs):
 
 @receiver(post_save, sender=Person)
 def _invalidate_candidate_cache(sender, instance, **kwargs):
+    # FIXME, the person is updated at authentication so this signal is often emitted
     keys = [
         f'admission_permission_{a_uuid}'
         for a_uuid in DoctorateAdmission.objects.filter(candidate_id=instance.pk).values_list('uuid', flat=True)
@@ -426,6 +486,7 @@ class PropositionProxy(DoctorateAdmission):
 
 class DemandeManager(models.Manager):
     def get_queryset(self):
+        country_title_field = 'name' if get_language() == settings.LANGUAGE_CODE_FR else 'name_en'
         return (
             super()
             .get_queryset()
@@ -437,6 +498,18 @@ class DemandeManager(models.Manager):
                 'modified',
                 'status_cdd',
                 'status_sic',
+            )
+            .annotate(
+                nationalite_iso_code=Cast(
+                    'submitted_profile__identification__country_of_citizenship', output_field=models.CharField()
+                ),
+                nom_pays_nationalite=models.Subquery(
+                    Country.objects.filter(iso_code=OuterRef('nationalite_iso_code')).values(country_title_field)[:1]
+                ),
+                pays_iso_code=Cast('submitted_profile__coordinates__country', models.CharField()),
+                nom_pays=models.Subquery(
+                    Country.objects.filter(iso_code=OuterRef('pays_iso_code')).values(country_title_field)[:1]
+                ),
             )
             .filter(
                 status__in=[
@@ -583,4 +656,28 @@ class ConfirmationPaper(models.Model):
     )
 
     class Meta:
-        ordering = [F("confirmation_date").desc(nulls_first=True)]
+        ordering = ["-id"]
+
+
+class InternalNote(models.Model):
+    admission = models.ForeignKey(
+        DoctorateAdmission,
+        on_delete=models.CASCADE,
+        verbose_name=_("Admission"),
+    )
+    author = models.ForeignKey(
+        'base.Person',
+        on_delete=models.SET_NULL,
+        verbose_name=_("Author"),
+        null=True,
+    )
+    created = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name=_('Created'),
+    )
+    text = RichTextField(
+        verbose_name=_("Text"),
+    )
+
+    class Meta:
+        ordering = ['-created']

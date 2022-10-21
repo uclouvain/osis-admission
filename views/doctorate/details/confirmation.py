@@ -25,20 +25,18 @@
 # ##############################################################################
 from typing import List
 
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import Http404
 from django.views.generic import TemplateView
 
-from admission.ddd.projet_doctoral.doctorat.commands import RecupererDoctoratQuery
-from admission.ddd.projet_doctoral.doctorat.domain.validator.exceptions import DoctoratNonTrouveException
-from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.commands import RecupererEpreuvesConfirmationQuery
-from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.dtos import EpreuveConfirmationDTO
-from admission.utils import get_cached_admission_perm_obj
+from admission.ddd.parcours_doctoral.domain.validator.exceptions import DoctoratNonTrouveException
+from admission.ddd.parcours_doctoral.epreuve_confirmation.commands import RecupererEpreuvesConfirmationQuery
+from admission.ddd.parcours_doctoral.epreuve_confirmation.dtos import EpreuveConfirmationDTO
+from admission.mail_templates import ADMISSION_EMAIL_CONFIRMATION_PAPER_INFO_STUDENT
+from admission.views.doctorate.mixins import LoadDossierViewMixin
 from infrastructure.messages_bus import message_bus_instance
-from osis_role.contrib.views import PermissionRequiredMixin
 
 
-class DoctorateAdmissionConfirmationDetailView(LoginRequiredMixin, PermissionRequiredMixin, TemplateView):
+class DoctorateAdmissionConfirmationDetailView(LoadDossierViewMixin, TemplateView):
     template_name = 'admission/doctorate/details/confirmation.html'
     permission_required = 'admission.view_doctorateadmission_confirmation'
     mandatory_fields_for_evaluation = [
@@ -46,24 +44,15 @@ class DoctorateAdmissionConfirmationDetailView(LoginRequiredMixin, PermissionReq
         'proces_verbal_ca',
     ]
 
-    def get_permission_object(self):
-        return get_cached_admission_perm_obj(self.kwargs['pk'])
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
         try:
-            results = message_bus_instance.invoke_multiple(
-                [
-                    RecupererDoctoratQuery(doctorat_uuid=kwargs.get('pk')),
-                    RecupererEpreuvesConfirmationQuery(doctorat_uuid=kwargs.get('pk')),
-                ]
+            all_confirmation_papers: List[EpreuveConfirmationDTO] = message_bus_instance.invoke(
+                RecupererEpreuvesConfirmationQuery(doctorat_uuid=self.admission_uuid),
             )
         except DoctoratNonTrouveException as e:
             raise Http404(e.message)
-
-        context['doctorate'] = results[0]
-        all_confirmation_papers: List[EpreuveConfirmationDTO] = results[1]
 
         if all_confirmation_papers:
             current_confirmation_paper = all_confirmation_papers.pop(0)
@@ -73,5 +62,6 @@ class DoctorateAdmissionConfirmationDetailView(LoginRequiredMixin, PermissionReq
             context['current_confirmation_paper'] = current_confirmation_paper
 
         context['previous_confirmation_papers'] = all_confirmation_papers
+        context['INFO_TEMPLATE_IDENTIFIER'] = ADMISSION_EMAIL_CONFIRMATION_PAPER_INFO_STUDENT
 
         return context

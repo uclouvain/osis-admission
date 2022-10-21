@@ -29,19 +29,26 @@ from rest_framework.response import Response
 
 from admission.api import serializers
 from admission.api.schema import ResponseSpecificSchema
-from admission.ddd.projet_doctoral.doctorat.commands import RecupererDoctoratQuery
-from admission.ddd.projet_doctoral.doctorat.epreuve_confirmation.commands import (
+from admission.ddd.parcours_doctoral.commands import RecupererDoctoratQuery
+from admission.ddd.parcours_doctoral.epreuve_confirmation.commands import (
     CompleterEpreuveConfirmationParPromoteurCommand,
     RecupererDerniereEpreuveConfirmationQuery,
     RecupererEpreuvesConfirmationQuery,
     SoumettreEpreuveConfirmationCommand,
     SoumettreReportDeDateCommand,
 )
-from admission.ddd.projet_doctoral.preparation.commands import GetGroupeDeSupervisionCommand
+from admission.ddd.admission.doctorat.preparation.commands import GetGroupeDeSupervisionCommand
 from admission.exports.admission_confirmation_canvas import admission_pdf_confirmation_canvas
 from admission.utils import get_cached_admission_perm_obj
 from infrastructure.messages_bus import message_bus_instance
 from osis_role.contrib.views import APIPermissionRequiredMixin
+
+__all__ = [
+    "ConfirmationAPIView",
+    "LastConfirmationAPIView",
+    "LastConfirmationCanvasAPIView",
+    "SupervisedConfirmationAPIView",
+]
 
 
 class ConfirmationSchema(ResponseSpecificSchema):
@@ -106,7 +113,7 @@ class LastConfirmationAPIView(APIPermissionRequiredMixin, mixins.RetrieveModelMi
     permission_mapping = {
         'GET': 'admission.view_doctorateadmission_confirmation',
         'PUT': 'admission.change_doctorateadmission_confirmation',
-        'POST': 'admission.change_doctorateadmission_confirmation',
+        'POST': 'admission.change_doctorateadmission_confirmation_extension',
     }
 
     def get_permission_object(self):
@@ -199,12 +206,13 @@ class LastConfirmationCanvasAPIView(APIPermissionRequiredMixin, mixins.RetrieveM
                 'doctorate': doctorate,
                 'confirmation_paper': confirmation_paper,
                 'supervision_group': supervision_group,
-            }
+                'supervision_people_nb': (
+                    len(supervision_group.signatures_promoteurs) + len(supervision_group.signatures_membres_CA)
+                ),
+            },
         )
 
-        serializer = serializers.ConfirmationPaperCanvasSerializer(instance={
-            'uuid': uuid,
-        })
+        serializer = serializers.ConfirmationPaperCanvasSerializer(instance={'uuid': uuid})
 
         return Response(serializer.data)
 

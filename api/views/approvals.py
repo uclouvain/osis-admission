@@ -29,7 +29,7 @@ from rest_framework.views import APIView
 
 from admission.api import serializers
 from admission.api.schema import ResponseSpecificSchema
-from admission.ddd.projet_doctoral.preparation.commands import (
+from admission.ddd.admission.doctorat.preparation.commands import (
     ApprouverPropositionCommand,
     ApprouverPropositionParPdfCommand,
     RefuserPropositionCommand,
@@ -37,6 +37,11 @@ from admission.ddd.projet_doctoral.preparation.commands import (
 from admission.utils import get_cached_admission_perm_obj
 from infrastructure.messages_bus import message_bus_instance
 from osis_role.contrib.views import APIPermissionRequiredMixin
+
+__all__ = [
+    "ApprovePropositionAPIView",
+    "ApproveByPdfPropositionAPIView",
+]
 
 
 class ApprovePropositionSchema(ResponseSpecificSchema):

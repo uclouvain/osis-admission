@@ -32,13 +32,12 @@ from django.urls import reverse
 from rest_framework.status import HTTP_200_OK, HTTP_404_NOT_FOUND
 
 from admission.contrib.models import ConfirmationPaper
-from admission.ddd.projet_doctoral.doctorat.domain.model.enums import ChoixStatutDoctorat
-from admission.ddd.projet_doctoral.preparation.domain.model._enums import ChoixTypeAdmission
-from admission.ddd.projet_doctoral.preparation.domain.model._financement import (
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE, ENTITY_CDSS
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    ChoixTypeAdmission,
     ChoixTypeContratTravail,
     ChoixTypeFinancement,
 )
-from admission.ddd.projet_doctoral.preparation.domain.model.doctorat import ENTITY_CDE, ENTITY_CDSS
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.confirmation_paper import ConfirmationPaperFactory
 from admission.tests.factories.roles import CddManagerFactory
@@ -76,7 +75,7 @@ class DoctorateAdmissionExtensionRequestFormViewTestCase(TestCase):
             financing_work_contract=ChoixTypeContratTravail.UCLOUVAIN_ASSISTANT.name,
             type=ChoixTypeAdmission.PRE_ADMISSION.name,
             pre_admission_submission_date=datetime.datetime.now(),
-            post_enrolment_status=ChoixStatutDoctorat.ADMITTED.name,
+            admitted=True,
         )
         cls.admission_with_confirmation_papers = DoctorateAdmissionFactory(
             doctorate__management_entity=first_doctoral_commission,
@@ -87,7 +86,7 @@ class DoctorateAdmissionExtensionRequestFormViewTestCase(TestCase):
             financing_work_contract=ChoixTypeContratTravail.UCLOUVAIN_ASSISTANT.name,
             type=ChoixTypeAdmission.PRE_ADMISSION.name,
             pre_admission_submission_date=datetime.datetime.now(),
-            post_enrolment_status=ChoixStatutDoctorat.ADMITTED.name,
+            admitted=True,
         )
 
         cls.candidate = cls.admission_without_confirmation_paper.candidate
@@ -171,7 +170,7 @@ class DoctorateAdmissionExtensionRequestFormViewTestCase(TestCase):
 
         response = self.client.post(url, data={'avis_cdd': 'My new opinion'})
 
-        self.assertRedirects(response, resolve_url(self.read_path, pk=self.admission_with_confirmation_papers.uuid))
+        self.assertRedirects(response, resolve_url(self.read_path, uuid=self.admission_with_confirmation_papers.uuid))
 
         updated_confirmation_paper = ConfirmationPaper.objects.get(
             uuid=self.confirmation_paper_with_extension_request.uuid,
@@ -187,13 +186,13 @@ class DoctorateAdmissionExtensionRequestFormViewTestCase(TestCase):
             confirmation_deadline=datetime.date(2022, 6, 5),
         )
 
-        url = reverse(self.update_path, kwargs={'pk': self.admission_with_confirmation_papers.uuid})
+        url = reverse(self.update_path, kwargs={'uuid': self.admission_with_confirmation_papers.uuid})
 
         response = self.client.post(url, data={'avis_cdd': 'My new opinion'})
 
         self.assertEqual(response.status_code, HTTP_200_OK)
         self.assertEqual(
             response.wsgi_request.path,
-            resolve_url(self.update_path, pk=self.admission_with_confirmation_papers.uuid),
+            resolve_url(self.update_path, uuid=self.admission_with_confirmation_papers.uuid),
         )
         self.assertFormError(response, 'form', None, ['Demande de prolongation non définie.'])

@@ -33,7 +33,7 @@
 {% endblock style %}
 
 {% block tab_content %}
-  <div class="history-viewer" data-url="{% url 'admission:doctorate:history-api' uuid=admission.uuid %}" data-tags="{{ tag }}"></div>
+  <div class="history-viewer" data-url="{% url 'admission:doctorate:history-api' uuid=view.kwargs.uuid %}" data-tags="{{ tag }}"></div>
 {% endblock %}
 
 {% block script %}

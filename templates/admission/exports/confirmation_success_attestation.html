@@ -20,7 +20,7 @@
 {% block content %}
   <div class="container">
     <div id="letter-header" class="text-right">
-      <p>{{ admission.doctorate.enrollment_campus.name }}, {% now "d/m/Y" %}</p>
+      <p>{{ teaching_campus }}, {% now "d/m/Y" %}</p>
       <p>{{ contact_address }}</p>
     </div>
 
@@ -33,19 +33,19 @@
 
     <div id="letter-content">
       <p>
-        {% blocktranslate with confirmation_date=confirmation_paper.confirmation_date %}
+        {% blocktranslate trimmed with confirmation_date=confirmation_paper.confirmation_date cdd_title=cdd_version.title %}
           After considering the opinion of your supervisory panel, which met on {{ confirmation_date }}, the
-          {{ cdd }} notes that your doctoral confirmation paper has been successfully completed.
+          {{ cdd_title }} notes that your doctoral confirmation paper has been successfully completed.
         {% endblocktranslate %}
       </p>
       <p>
-        {% blocktranslate with nb_credits='[NB_CREDITS]' %}
+        {% blocktranslate trimmed with nb_credits='[NB_CREDITS]' %}
           The committee also validates the activities carried out as part of your doctoral training, which now total
           {{ nb_credits }} ECTS.
         {% endblocktranslate %}
       </p>
       <p>
-        {% blocktranslate %}
+        {% blocktranslate trimmed %}
           We congratulate you on your successful completion of the paper and wish you every success in your
           doctoral training.
         {% endblocktranslate %}
@@ -53,12 +53,12 @@
     </div>
 
     <div id="letter-footer">
-      <p>{{ cdd_president.last_name }}</p>
+      <p>{{ cdd_president.firstname }} {{ cdd_president.lastname }}</p>
       <p>
         {% if cdd_president.function == 'Présidente' %}
-          {% blocktranslate context 'female gender' %}President of the {{ cdd }}{% endblocktranslate %}
+          {% blocktranslate context 'female gender' with cdd_title=cdd_version.title %}President of the {{ cdd_title }}{% endblocktranslate %}
         {% else %}
-          {% blocktranslate context 'male gender' %}President of the {{ cdd }}{% endblocktranslate %}
+          {% blocktranslate context 'male gender'  with cdd_title=cdd_version.title %}President of the {{ cdd_title }}{% endblocktranslate %}
         {% endif %}
       </p>
     </div>

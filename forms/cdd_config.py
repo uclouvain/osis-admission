@@ -29,9 +29,12 @@ from typing import Any
 from django import forms
 from django.conf import settings
 from django.contrib.postgres.forms import SimpleArrayField
+from django.core.exceptions import ValidationError
+from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from admission.contrib.models.cdd_config import CddConfiguration
+from admission.ddd.parcours_doctoral.formation.domain.model.enums import CategorieActivite
 
 TextareaArrayField = partial(
     SimpleArrayField,
@@ -44,6 +47,8 @@ TextareaArrayField = partial(
 
 class TranslatedListsValueWidget(forms.MultiWidget):
     """Widget of two textareas (one for each language)"""
+
+    template_name = 'admission/config/translated_lists_value_widget.html'
 
     def __init__(self, *args, **kwargs):
         widgets = {
@@ -64,7 +69,10 @@ class TranslatedListsValueField(forms.MultiValueField):
     widget = TranslatedListsValueWidget
 
     def __init__(self, *args, **kwargs):
-        kwargs['help_text'] = _('One choice per line, leave the "Other" value out')
+        # Remove arguments from JSONField
+        kwargs.pop("encoder", None)
+        kwargs.pop("decoder", None)
+        kwargs['help_text'] = kwargs['help_text'] or _('One choice per line, leave the "Other" value out')
         super().__init__((TextareaArrayField(), TextareaArrayField()), *args, **kwargs)
 
     def compress(self, data_list) -> Any:
@@ -75,10 +83,24 @@ class TranslatedListsValueField(forms.MultiValueField):
         }
 
 
+def map_translated_lists_value_field(field, **kwargs):
+    if isinstance(field, models.JSONField):
+        kwargs['form_class'] = TranslatedListsValueField
+    if field.name == 'category_labels':
+        kwargs['help_text'] = _("Do not reorder values, and keep the same count")
+    return field.formfield(**kwargs)
+
+
 class CddConfigForm(forms.ModelForm):
-    service_types = TranslatedListsValueField(label=_("Service types"))
-    seminar_types = TranslatedListsValueField(label=_("Seminar types"))
+    formfield_callback = map_translated_lists_value_field
 
     class Meta:
         model = CddConfiguration
-        exclude = ['cdd']
+        exclude = ['cdd', 'id']
+
+    def clean_category_labels(self):
+        data = self.cleaned_data['category_labels']
+        expected_length = len(CategorieActivite.choices())
+        if any(len(data[lang]) != expected_length for lang in dict(settings.LANGUAGES)):
+            raise ValidationError(_("Number of values mismatch"))
+        return data

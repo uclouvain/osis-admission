@@ -29,9 +29,10 @@ from django.db import connection
 
 from admission.contrib.models import DoctorateAdmission
 from admission.contrib.models.doctorate import REFERENCE_SEQ_NAME
-from admission.ddd.projet_doctoral.doctorat.domain.model.enums import ChoixStatutDoctorat
-from admission.ddd.projet_doctoral.preparation.domain.model._enums import ChoixStatutProposition
-from admission.ddd.projet_doctoral.preparation.domain.model.proposition import Proposition
+from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutProposition
+from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition
+from admission.tests.factories.accounting import AccountingFactory
 from admission.tests.factories.roles import CandidateFactory
 from base.models.enums.education_group_types import TrainingType
 from base.tests.factories.academic_year import AcademicYearFactory
@@ -40,11 +41,17 @@ from base.tests.factories.education_group_year import EducationGroupYearFactory
 from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.person import PersonFactory
 from base.tests.factories.student import StudentFactory
+from program_management.tests.factories.education_group_version import EducationGroupVersionFactory
 
 
 class DoctorateFactory(EducationGroupYearFactory):
     academic_year = factory.SubFactory(AcademicYearFactory, current=True)
     education_group_type = factory.SubFactory(EducationGroupTypeFactory, name=TrainingType.PHD.name)
+    primary_language = None
+
+    @factory.post_generation
+    def create_related_group_version_factory(self, create, extracted, **kwargs):
+        EducationGroupVersionFactory(offer=self, root_group__academic_year__year=self.academic_year.year)
 
 
 def _generate_reference(obj):
@@ -69,8 +76,9 @@ class DoctorateAdmissionFactory(factory.DjangoModelFactory):
 
     candidate = factory.SubFactory(PersonFactory)
     doctorate = factory.SubFactory(DoctorateFactory)
-    thesis_institute = factory.SubFactory(EntityVersionFactory)
     reference = factory.LazyAttribute(_generate_reference)
+    planned_duration = 10
+    dedicated_time = 10
 
     class Params:
         with_cotutelle = factory.Trait(
@@ -103,12 +111,19 @@ class DoctorateAdmissionFactory(factory.DjangoModelFactory):
                 },
             },
         )
+        with_thesis_institute = factory.Trait(
+            thesis_institute=factory.SubFactory(EntityVersionFactory),
+        )
 
     @factory.post_generation
     def create_candidate_role(self, create, extracted, **kwargs):
         CandidateFactory(person=self.candidate)
 
     @factory.post_generation
-    def create_student_if_admitted(self, create, extracted, *kwargs):
+    def create_student_if_admitted(self, create, extracted, **kwargs):
         if self.post_enrolment_status != ChoixStatutDoctorat.ADMISSION_IN_PROGRESS.name:
             StudentFactory(person=self.candidate)
+
+    @factory.post_generation
+    def create_accounting(self, create, extracted, **kwargs):
+        AccountingFactory(admission_id=self.pk)

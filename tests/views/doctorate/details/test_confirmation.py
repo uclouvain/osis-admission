@@ -25,19 +25,18 @@
 # ##############################################################################
 import datetime
 import uuid
-from typing import Optional, List
+from typing import List, Optional
 
 from django.test import TestCase, override_settings
 from django.urls import reverse
-from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_403_FORBIDDEN, HTTP_200_OK
+from rest_framework.status import HTTP_200_OK, HTTP_404_NOT_FOUND
 
-from admission.ddd.projet_doctoral.doctorat.domain.model.enums import ChoixStatutDoctorat
-from admission.ddd.projet_doctoral.preparation.domain.model._enums import ChoixTypeAdmission
-from admission.ddd.projet_doctoral.preparation.domain.model._financement import (
-    ChoixTypeFinancement,
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE, ENTITY_CDSS
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    ChoixTypeAdmission,
     ChoixTypeContratTravail,
+    ChoixTypeFinancement,
 )
-from admission.ddd.projet_doctoral.preparation.domain.model.doctorat import ENTITY_CDE, ENTITY_CDSS
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.confirmation_paper import ConfirmationPaperFactory
 from admission.tests.factories.roles import CddManagerFactory
@@ -78,7 +77,7 @@ class DoctorateAdmissionConfirmationDetailViewTestCase(TestCase):
             financing_work_contract=ChoixTypeContratTravail.UCLOUVAIN_ASSISTANT.name,
             type=ChoixTypeAdmission.PRE_ADMISSION.name,
             pre_admission_submission_date=datetime.datetime.now(),
-            post_enrolment_status=ChoixStatutDoctorat.ADMITTED.name,
+            admitted=True,
         )
         cls.admission_with_confirmation_papers = DoctorateAdmissionFactory(
             doctorate__management_entity=first_doctoral_commission,
@@ -89,7 +88,7 @@ class DoctorateAdmissionConfirmationDetailViewTestCase(TestCase):
             financing_work_contract=ChoixTypeContratTravail.UCLOUVAIN_ASSISTANT.name,
             type=ChoixTypeAdmission.PRE_ADMISSION.name,
             pre_admission_submission_date=datetime.datetime.now(),
-            post_enrolment_status=ChoixStatutDoctorat.ADMITTED.name,
+            admitted=True,
         )
         cls.confirmation_papers = [
             ConfirmationPaperFactory(
@@ -115,7 +114,7 @@ class DoctorateAdmissionConfirmationDetailViewTestCase(TestCase):
 
         response = self.client.get(url)
 
-        self.assertEqual(response.status_code, HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, HTTP_200_OK)
 
     def test_confirmation_detail_cdd_user_with_unknown_doctorate(self):
         self.client.force_login(user=self.cdd_person.user)

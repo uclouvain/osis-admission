@@ -27,9 +27,12 @@
 from django.db import models
 from rest_framework import serializers
 
+from admission.ddd.admission.doctorat.preparation.domain.validator import _should_identification_candidat_etre_completee
 from base.api.serializers.academic_year import RelatedAcademicYearField
-from reference.api.serializers.country import RelatedCountryField
+from base.models.enums.person_address_type import PersonAddressType
 from base.models.person import Person
+from base.models.person_address import PersonAddress
+from reference.api.serializers.country import RelatedCountryField
 
 __all__ = [
     "PersonIdentificationSerializer",
@@ -43,6 +46,19 @@ class PersonIdentificationSerializer(serializers.ModelSerializer):
     last_registration_year = RelatedAcademicYearField(required=False)
     birth_country = RelatedCountryField(required=False)
     country_of_citizenship = RelatedCountryField(required=False)
+
+    resides_in_belgium = serializers.BooleanField(read_only=True)
+
+    def check_residential_address(self, instance):
+        instance.resides_in_belgium = PersonAddress.objects.filter(
+            person=instance,
+            label=PersonAddressType.RESIDENTIAL.name,
+            country__iso_code=_should_identification_candidat_etre_completee.BE_ISO_CODE,
+        ).exists()
+
+    def to_representation(self, instance):
+        self.check_residential_address(instance)
+        return super().to_representation(instance)
 
     class Meta:
         model = Person
@@ -62,22 +78,18 @@ class PersonIdentificationSerializer(serializers.ModelSerializer):
             'gender',
             'civil_state',
             'id_photo',
-
+            'resides_in_belgium',
             # Pièce d'identité
             'id_card',
             'passport',
             'national_number',
             'id_card_number',
             'passport_number',
-            'passport_expiration_date',
-
             # Inscrit ?
             'last_registration_year',
             'last_registration_id',
         ]
-        extra_kwargs = {
-            'birth_year': {'min_value': 1900, 'max_value': 2999}
-        }
+        extra_kwargs = {'birth_year': {'min_value': 1900, 'max_value': 2999}}
 
     def include_extra_kwargs(self, kwargs, extra_kwargs):
         # Make all fields optional

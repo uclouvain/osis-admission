@@ -26,7 +26,7 @@
 {% endcomment %}
 
 {% block actions-group %}
-  <a class="btn btn-default" href="{% detail_tab_path_from_update view.kwargs.pk %}">{% trans 'Cancel' %}</a>
+  <a class="btn btn-default" href="{% detail_tab_path_from_update view.kwargs.uuid %}">{% trans 'Cancel' %}</a>
   <button class="btn btn-primary" type="submit" form="form">
     <span class="glyphicon glyphicon-floppy-save" aria-hidden="true"></span>
     {{ submit_label|default:_('Save') }}
@@ -43,7 +43,7 @@
       {% block form_content %}
       {% endblock %}
       <div class="text-right">
-        <a class="btn btn-default" href="{% detail_tab_path_from_update view.kwargs.pk %}">{% trans 'Cancel' %}</a>
+        <a class="btn btn-default" href="{% detail_tab_path_from_update view.kwargs.uuid %}">{% trans 'Cancel' %}</a>
         <button class="btn btn-primary" type="submit">
           <span class="glyphicon glyphicon-floppy-save" aria-hidden="true"></span>
           {{ submit_label|default:_('Save') }}

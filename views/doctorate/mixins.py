@@ -24,30 +24,91 @@
 #
 ##############################################################################
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.http import Http404
+from django.utils.functional import cached_property
+from django.utils.translation import gettext_lazy as _
 from django.views.generic.base import ContextMixin
 
-from admission.ddd.projet_doctoral.preparation.commands import GetPropositionCommand
-from admission.ddd.projet_doctoral.preparation.domain.model._enums import ChoixStatutProposition
-from admission.ddd.projet_doctoral.validation.commands import RecupererDemandeQuery
+from admission.contrib.models import DoctorateAdmission
+from admission.ddd.parcours_doctoral.commands import RecupererDoctoratQuery
+from admission.ddd.parcours_doctoral.domain.validator.exceptions import DoctoratNonTrouveException
+from admission.ddd.parcours_doctoral.dtos import DoctoratDTO
+from admission.ddd.parcours_doctoral.epreuve_confirmation.commands import (
+    RecupererDerniereEpreuveConfirmationQuery,
+)
+from admission.ddd.parcours_doctoral.epreuve_confirmation.dtos import EpreuveConfirmationDTO
+from admission.ddd.parcours_doctoral.epreuve_confirmation.validators.exceptions import (
+    EpreuveConfirmationNonTrouveeException,
+)
+from admission.ddd.admission.doctorat.preparation.commands import GetPropositionCommand
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutProposition
+from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import PropositionNonTrouveeException
+from admission.ddd.admission.doctorat.preparation.dtos import PropositionDTO
+from admission.ddd.admission.doctorat.validation.commands import RecupererDemandeQuery
+from admission.ddd.admission.doctorat.validation.domain.validator.exceptions import DemandeNonTrouveeException
+from admission.ddd.admission.doctorat.validation.dtos import DemandeDTO
 from admission.utils import get_cached_admission_perm_obj
 from infrastructure.messages_bus import message_bus_instance
 from osis_role.contrib.views import PermissionRequiredMixin
 
 
 class LoadDossierViewMixin(LoginRequiredMixin, PermissionRequiredMixin, ContextMixin):
+    @property
+    def admission_uuid(self):
+        return self.kwargs.get('uuid')
+
+    @property
+    def admission(self) -> DoctorateAdmission:
+        return get_cached_admission_perm_obj(self.admission_uuid)
+
+    @cached_property
+    def proposition(self) -> 'PropositionDTO':
+        return message_bus_instance.invoke(GetPropositionCommand(uuid_proposition=self.admission_uuid))
+
+    @cached_property
+    def dossier(self) -> 'DemandeDTO':
+        return message_bus_instance.invoke(RecupererDemandeQuery(uuid=self.admission_uuid))
+
+    @cached_property
+    def doctorate(self) -> 'DoctoratDTO':
+        return message_bus_instance.invoke(RecupererDoctoratQuery(doctorat_uuid=self.admission_uuid))
+
+    @cached_property
+    def last_confirmation_paper(self) -> EpreuveConfirmationDTO:
+        try:
+            last_confirmation_paper = message_bus_instance.invoke(
+                RecupererDerniereEpreuveConfirmationQuery(self.admission_uuid)
+            )
+            if not last_confirmation_paper:
+                raise Http404(_('Confirmation paper not found.'))
+            return last_confirmation_paper
+        except (DoctoratNonTrouveException, EpreuveConfirmationNonTrouveeException) as e:
+            raise Http404(e.message)
+
     def get_permission_object(self):
-        return get_cached_admission_perm_obj(self.kwargs['pk'])
+        return self.admission
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        admission_status = self.admission.status
 
-        # Get proposition information
-        proposition = message_bus_instance.invoke((GetPropositionCommand(uuid_proposition=self.kwargs.get('pk'))))
+        try:
+            if admission_status == ChoixStatutProposition.ENROLLED.name:
+                context['dossier'] = self.dossier
+                context['doctorate'] = self.doctorate
+            else:
+                if admission_status == ChoixStatutProposition.SUBMITTED.name:
+                    context['dossier'] = self.dossier
 
-        context['admission'] = proposition
+                context['admission'] = self.proposition
 
-        # Add the dossier information if there are some
-        if proposition.statut in [ChoixStatutProposition.SUBMITTED.name, ChoixStatutProposition.ENROLLED.name]:
-            context['dossier'] = message_bus_instance.invoke(RecupererDemandeQuery(uuid=self.kwargs.get('pk')))
+        except (PropositionNonTrouveeException, DemandeNonTrouveeException, DoctoratNonTrouveException) as e:
+            raise Http404(e.message)
+        return context
 
+
+class DoctorateAdmissionLastConfirmationMixin(LoadDossierViewMixin):
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs) if hasattr(super(), 'get_context_data') else {}
+        context['confirmation_paper'] = self.last_confirmation_paper
         return context
