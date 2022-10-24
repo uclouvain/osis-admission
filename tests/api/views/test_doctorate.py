@@ -77,17 +77,17 @@ class DoctorateAPIViewTestCase(APITestCase):
         cls.doctorate = DoctorateAdmissionFactory(
             status=ChoixStatutProposition.ENROLLED.name,
             post_enrolment_status=ChoixStatutDoctorat.ADMITTED.name,
-            doctorate__management_entity=cls.commission,
+            training__management_entity=cls.commission,
             supervision_group=promoter.process,
         )
         cls.admission = DoctorateAdmissionFactory(
-            doctorate__management_entity=cls.commission,
+            training__management_entity=cls.commission,
             candidate=cls.doctorate.candidate,
         )
         cls.other_doctorate = DoctorateAdmissionFactory(
             status=ChoixStatutProposition.ENROLLED.name,
             post_enrolment_status=ChoixStatutDoctorat.ADMITTED.name,
-            doctorate__management_entity=cls.commission,
+            training__management_entity=cls.commission,
         )
         # Users
         cls.student = cls.doctorate.candidate

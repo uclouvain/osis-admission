@@ -107,8 +107,8 @@ class CddDoctorateAdmissionConfirmationSuccessDecisionViewTestCase(TestCase):
 
         # Create admissions
         cls.admission_without_confirmation_paper = DoctorateAdmissionFactory(
-            doctorate__management_entity=first_doctoral_commission,
-            doctorate__academic_year=academic_years[0],
+            training__management_entity=first_doctoral_commission,
+            training__academic_year=academic_years[0],
             cotutelle=False,
             supervision_group=promoter.process,
             financing_type=ChoixTypeFinancement.WORK_CONTRACT.name,
@@ -119,8 +119,8 @@ class CddDoctorateAdmissionConfirmationSuccessDecisionViewTestCase(TestCase):
             post_enrolment_status=ChoixStatutDoctorat.SUBMITTED_CONFIRMATION.name,
         )
         cls.admission_with_confirmation_papers = DoctorateAdmissionFactory(
-            doctorate__management_entity=first_doctoral_commission,
-            doctorate__academic_year=academic_years[0],
+            training__management_entity=first_doctoral_commission,
+            training__academic_year=academic_years[0],
             cotutelle=False,
             supervision_group=promoter.process,
             financing_type=ChoixTypeFinancement.WORK_CONTRACT.name,
@@ -131,8 +131,8 @@ class CddDoctorateAdmissionConfirmationSuccessDecisionViewTestCase(TestCase):
             post_enrolment_status=ChoixStatutDoctorat.SUBMITTED_CONFIRMATION.name,
         )
         cls.admission_with_incomplete_confirmation_paper = DoctorateAdmissionFactory(
-            doctorate__management_entity=first_doctoral_commission,
-            doctorate__academic_year=academic_years[0],
+            training__management_entity=first_doctoral_commission,
+            training__academic_year=academic_years[0],
             cotutelle=False,
             supervision_group=promoter.process,
             financing_type=ChoixTypeFinancement.WORK_CONTRACT.name,
@@ -289,8 +289,8 @@ class CddDoctorateAdmissionConfirmationFailureDecisionViewTestCase(TestCase):
     def setUp(self):
         # Create admissions
         self.admission_without_confirmation_paper = DoctorateAdmissionFactory(
-            doctorate__management_entity=self.first_doctoral_commission,
-            doctorate__academic_year=self.academic_years[0],
+            training__management_entity=self.first_doctoral_commission,
+            training__academic_year=self.academic_years[0],
             cotutelle=False,
             supervision_group=self.promoter.process,
             financing_type=ChoixTypeFinancement.WORK_CONTRACT.name,
@@ -301,8 +301,8 @@ class CddDoctorateAdmissionConfirmationFailureDecisionViewTestCase(TestCase):
             post_enrolment_status=ChoixStatutDoctorat.SUBMITTED_CONFIRMATION.name,
         )
         self.admission_with_confirmation_papers = DoctorateAdmissionFactory(
-            doctorate__management_entity=self.first_doctoral_commission,
-            doctorate__academic_year=self.academic_years[0],
+            training__management_entity=self.first_doctoral_commission,
+            training__academic_year=self.academic_years[0],
             cotutelle=False,
             supervision_group=self.promoter.process,
             financing_type=ChoixTypeFinancement.WORK_CONTRACT.name,
@@ -313,8 +313,8 @@ class CddDoctorateAdmissionConfirmationFailureDecisionViewTestCase(TestCase):
             post_enrolment_status=ChoixStatutDoctorat.SUBMITTED_CONFIRMATION.name,
         )
         self.admission_with_incomplete_confirmation_paper = DoctorateAdmissionFactory(
-            doctorate__management_entity=self.first_doctoral_commission,
-            doctorate__academic_year=self.academic_years[0],
+            training__management_entity=self.first_doctoral_commission,
+            training__academic_year=self.academic_years[0],
             cotutelle=False,
             supervision_group=self.promoter.process,
             financing_type=ChoixTypeFinancement.WORK_CONTRACT.name,
@@ -555,8 +555,8 @@ class CddDoctorateAdmissionConfirmationRetakingDecisionViewTestCase(TestCase):
     def setUp(self):
         # Create admissions
         self.admission_without_confirmation_paper = DoctorateAdmissionFactory(
-            doctorate__management_entity=self.first_doctoral_commission,
-            doctorate__academic_year=self.academic_years[0],
+            training__management_entity=self.first_doctoral_commission,
+            training__academic_year=self.academic_years[0],
             cotutelle=False,
             supervision_group=self.promoter.process,
             financing_type=ChoixTypeFinancement.WORK_CONTRACT.name,
@@ -567,8 +567,8 @@ class CddDoctorateAdmissionConfirmationRetakingDecisionViewTestCase(TestCase):
             post_enrolment_status=ChoixStatutDoctorat.SUBMITTED_CONFIRMATION.name,
         )
         self.admission_with_confirmation_papers = DoctorateAdmissionFactory(
-            doctorate__management_entity=self.first_doctoral_commission,
-            doctorate__academic_year=self.academic_years[0],
+            training__management_entity=self.first_doctoral_commission,
+            training__academic_year=self.academic_years[0],
             cotutelle=False,
             supervision_group=self.promoter.process,
             financing_type=ChoixTypeFinancement.WORK_CONTRACT.name,
@@ -579,8 +579,8 @@ class CddDoctorateAdmissionConfirmationRetakingDecisionViewTestCase(TestCase):
             post_enrolment_status=ChoixStatutDoctorat.SUBMITTED_CONFIRMATION.name,
         )
         self.admission_with_incomplete_confirmation_paper = DoctorateAdmissionFactory(
-            doctorate__management_entity=self.first_doctoral_commission,
-            doctorate__academic_year=self.academic_years[0],
+            training__management_entity=self.first_doctoral_commission,
+            training__academic_year=self.academic_years[0],
             cotutelle=False,
             supervision_group=self.promoter.process,
             financing_type=ChoixTypeFinancement.WORK_CONTRACT.name,

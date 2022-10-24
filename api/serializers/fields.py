@@ -146,7 +146,7 @@ class RelatedInstituteField(serializers.CharField, serializers.SlugRelatedField)
             return str(serializers.SlugRelatedField.to_representation(self, value))
 
 
-DoctorateAdmissionField = partial(
+AdmissionUuidField = partial(
     serializers.SlugRelatedField,
     slug_field='uuid',
     read_only=True,

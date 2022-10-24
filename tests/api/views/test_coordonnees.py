@@ -70,7 +70,7 @@ class CoordonneesTestCase(APITestCase):
         admission = DoctorateAdmissionFactory(
             supervision_group=promoter.process,
             candidate=cls.address.person,
-            doctorate__management_entity=doctoral_commission,
+            training__management_entity=doctoral_commission,
         )
         cls.admission_url = resolve_url('coordonnees', uuid=admission.uuid)
         # Users

@@ -163,7 +163,7 @@ class GetCurriculumTestCase(APITestCase):
                     'start_date': '2020-01-01',
                     'end_date': '2021-01-01',
                     'type': ActivityType.WORK.name,
-                    'valuated_from_doctorateadmission': [],
+                    'valuated_from_admission': [],
                 },
                 {
                     'uuid': str(self.professional_experiences[1].uuid),
@@ -171,7 +171,7 @@ class GetCurriculumTestCase(APITestCase):
                     'start_date': '2020-01-01',
                     'end_date': '2020-09-01',
                     'type': ActivityType.WORK.name,
-                    'valuated_from_doctorateadmission': [],
+                    'valuated_from_admission': [],
                 },
             ],
         )
@@ -185,7 +185,7 @@ class GetCurriculumTestCase(APITestCase):
                     'program': None,
                     'education_name': 'Computer science',
                     'educationalexperienceyear_set': [{'academic_year': 2020}],
-                    'valuated_from_doctorateadmission': [],
+                    'valuated_from_admission': [],
                 }
             ],
         )
@@ -349,7 +349,7 @@ class ProfessionalExperienceTestCase(APITestCase):
                 'role': 'Librarian',
                 'sector': ActivitySector.PUBLIC.name,
                 'activity': 'Work - activity',
-                'valuated_from_doctorateadmission': [],
+                'valuated_from_admission': [],
             },
         )
 
@@ -387,7 +387,7 @@ class ProfessionalExperienceTestCase(APITestCase):
                 'role': 'Helper',
                 'sector': ActivitySector.PRIVATE.name,
                 'activity': 'Volunteering - activity',
-                'valuated_from_doctorateadmission': [],
+                'valuated_from_admission': [],
             },
         )
 
@@ -436,7 +436,7 @@ class ProfessionalExperienceTestCase(APITestCase):
     def test_put_valuated_professional_experience_is_forbidden(self):
         self.client.force_authenticate(user=self.user)
 
-        self.professional_experience.valuated_from_doctorateadmission.set([self.admission])
+        self.professional_experience.valuated_from_admission.set([self.admission])
 
         response = self.client.put(
             self.admission_details_url,
@@ -470,7 +470,7 @@ class ProfessionalExperienceTestCase(APITestCase):
     def test_delete_valuated_professional_experience_is_forbidden(self):
         self.client.force_authenticate(user=self.user)
 
-        self.professional_experience.valuated_from_doctorateadmission.set([self.admission])
+        self.professional_experience.valuated_from_admission.set([self.admission])
 
         response = self.client.delete(self.admission_details_url)
 
@@ -717,7 +717,7 @@ class EducationalExperienceTestCase(APITestCase):
         self.assertEqual(json_response.get('dissertation_title'), 'Title')
         self.assertEqual(json_response.get('dissertation_score'), '15/20')
         self.assertEqual(json_response.get('dissertation_summary'), [])
-        self.assertEqual(json_response.get('valuated_from_doctorateadmission'), [])
+        self.assertEqual(json_response.get('valuated_from_admission'), [])
 
         json_first_educational_experience_year = json_response.get('educationalexperienceyear_set')[0]
         self.assertEqual(json_first_educational_experience_year.get('academic_year'), 2020)
@@ -854,7 +854,7 @@ class EducationalExperienceTestCase(APITestCase):
     def test_put_valuated_educational_experience_is_forbidden(self):
         self.client.force_authenticate(user=self.user)
 
-        self.educational_experience.valuated_from_doctorateadmission.set([self.admission])
+        self.educational_experience.valuated_from_admission.set([self.admission])
 
         response = self.client.put(
             self.admission_details_url,
@@ -883,7 +883,7 @@ class EducationalExperienceTestCase(APITestCase):
     def test_delete_valuated_educational_experience_is_forbidden(self):
         self.client.force_authenticate(user=self.user)
 
-        self.educational_experience.valuated_from_doctorateadmission.set([self.admission])
+        self.educational_experience.valuated_from_admission.set([self.admission])
 
         response = self.client.delete(self.admission_details_url)
 

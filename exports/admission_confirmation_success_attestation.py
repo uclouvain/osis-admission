@@ -24,10 +24,11 @@
 #
 # ##############################################################################
 from django.conf import settings
+from django.db.models import Prefetch
 from django.utils import translation
 
 from admission.exports.utils import admission_generate_pdf
-from admission.contrib.models import AdmissionTask, ConfirmationPaper
+from admission.contrib.models import AdmissionTask, ConfirmationPaper, DoctorateAdmission
 from base.models.enums.person_address_type import PersonAddressType
 from base.models.person_address import PersonAddress
 from reference.services.mandates import MandatesService, MandateFunctionEnum, MandatesException
@@ -45,12 +46,16 @@ def format_address(address, language):
 
 def admission_confirmation_success_attestation(task_uuid, language=None):
     admission_task = (
-        AdmissionTask.objects.select_related(
-            'task',
-            'admission__candidate',
-            'admission__doctorate__management_entity',
+        AdmissionTask.objects.select_related('task')
+        .prefetch_related(
+            Prefetch(
+                'admission',
+                DoctorateAdmission.objects.select_related(
+                    'candidate',
+                    'training__management_entity',
+                ).annotate_campus(),
+            ),
         )
-        .annotate_campus()
         .get(task__uuid=task_uuid)
     )
 
@@ -94,7 +99,7 @@ def admission_confirmation_success_attestation(task_uuid, language=None):
                 'contact_address': contact_address,
                 'cdd_president': cdd_president[0] if cdd_president else {},
                 'confirmation_paper': confirmation_paper,
-                'teaching_campus': admission_task.teaching_campus,
+                'teaching_campus': admission_task.admission.teaching_campus,
             },
         )
 

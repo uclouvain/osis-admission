@@ -59,7 +59,7 @@ def _generate_reference(obj):
     cursor.execute("SELECT NEXTVAL('%(sequence)s')" % {'sequence': REFERENCE_SEQ_NAME})
     next_id = cursor.fetchone()[0]
     return "{}-{}".format(
-        obj.doctorate.academic_year.year % 100,
+        obj.training.academic_year.year % 100,
         Proposition.valeur_reference_base + next_id,
     )
 
@@ -75,7 +75,7 @@ class DoctorateAdmissionFactory(factory.DjangoModelFactory):
         model = DoctorateAdmission
 
     candidate = factory.SubFactory(PersonFactory)
-    doctorate = factory.SubFactory(DoctorateFactory)
+    training = factory.SubFactory(DoctorateFactory)
     reference = factory.LazyAttribute(_generate_reference)
     planned_duration = 10
     dedicated_time = 10

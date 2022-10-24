@@ -67,8 +67,8 @@ class DoctorateAdmissionExtensionRequestFormViewTestCase(TestCase):
 
         # Create admissions
         cls.admission_without_confirmation_paper = DoctorateAdmissionFactory(
-            doctorate__management_entity=first_doctoral_commission,
-            doctorate__academic_year=academic_years[0],
+            training__management_entity=first_doctoral_commission,
+            training__academic_year=academic_years[0],
             cotutelle=False,
             supervision_group=promoter.process,
             financing_type=ChoixTypeFinancement.WORK_CONTRACT.name,
@@ -78,8 +78,8 @@ class DoctorateAdmissionExtensionRequestFormViewTestCase(TestCase):
             admitted=True,
         )
         cls.admission_with_confirmation_papers = DoctorateAdmissionFactory(
-            doctorate__management_entity=first_doctoral_commission,
-            doctorate__academic_year=academic_years[0],
+            training__management_entity=first_doctoral_commission,
+            training__academic_year=academic_years[0],
             cotutelle=False,
             supervision_group=promoter.process,
             financing_type=ChoixTypeFinancement.WORK_CONTRACT.name,

@@ -351,9 +351,9 @@ class PropositionRepository(IPropositionRepository):
         if commission_proximite:
             qs = qs.filter(proximity_commission=commission_proximite)
         if annee_academique:
-            qs = qs.filter(doctorate__academic_year__year=annee_academique)
+            qs = qs.filter(training__academic_year__year=annee_academique)
         if sigles_formations:
-            qs = qs.filter(doctorate__acronym__in=sigles_formations)
+            qs = qs.filter(training__acronym__in=sigles_formations)
         if financement:
             qs = qs.filter(financing_type=financement)
         if type_contrat_travail:
@@ -374,7 +374,7 @@ class PropositionRepository(IPropositionRepository):
             qs = qs.alias(
                 cdd_acronym=Subquery(
                     EntityVersion.objects.current(date.today())
-                    .filter(entity_id=OuterRef('doctorate__management_entity_id'))
+                    .filter(entity_id=OuterRef('training__management_entity_id'))
                     .values('acronym')[:1]
                 )
             ).filter(cdd_acronym__in=cdds)

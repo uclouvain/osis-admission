@@ -62,9 +62,7 @@ class BelgianHighSchoolDiplomaTestCase(APITestCase):
         cls.academic_year = AcademicYearFactory(current=True)
         cls.high_school = HighSchoolFactory()
 
-        EntityVersionAddressFactory(
-            entity_version__entity=EntityFactory(organization=cls.high_school)
-        )
+        EntityVersionAddressFactory(entity_version__entity=EntityFactory(organization=cls.high_school))
 
         cls.agnostic_url = resolve_url("secondary-studies")
         cls.diploma_data = {
@@ -106,7 +104,7 @@ class BelgianHighSchoolDiplomaTestCase(APITestCase):
         promoter = PromoterFactory()
         admission = DoctorateAdmissionFactory(
             supervision_group=promoter.process,
-            doctorate__management_entity=doctoral_commission,
+            training__management_entity=doctoral_commission,
         )
         cls.admission_url = resolve_url("secondary-studies", uuid=admission.uuid)
         cls.candidate_user = admission.candidate.user
