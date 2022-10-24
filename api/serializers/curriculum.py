@@ -27,7 +27,7 @@ from functools import partial
 
 from rest_framework import serializers
 
-from admission.api.serializers.fields import DoctorateAdmissionField
+from admission.api.serializers.fields import AdmissionUuidField
 from admission.api.serializers.mixins import GetDefaultContextParam
 from admission.infrastructure.admission.doctorat.preparation.domain.service.profil_candidat import (
     ProfilCandidatTranslator,
@@ -47,7 +47,7 @@ class ProfessionalExperienceSerializer(serializers.ModelSerializer):
     person = serializers.HiddenField(
         default=serializers.CreateOnlyDefault(GetDefaultContextParam('candidate')),
     )
-    valuated_from_doctorateadmission = DoctorateAdmissionField(many=True)
+    valuated_from_admission = AdmissionUuidField(many=True)
 
     class Meta:
         model = ProfessionalExperience
@@ -65,7 +65,7 @@ class LiteProfessionalExperienceSerializer(ProfessionalExperienceSerializer):
             'start_date',
             'end_date',
             'type',
-            'valuated_from_doctorateadmission',
+            'valuated_from_admission',
         ]
 
 
@@ -103,7 +103,7 @@ class EducationalExperienceSerializer(serializers.ModelSerializer):
         default=serializers.CreateOnlyDefault(GetDefaultContextParam('candidate')),
     )
     program = RelatedDiplomaField(required=False)
-    valuated_from_doctorateadmission = DoctorateAdmissionField(many=True)
+    valuated_from_admission = AdmissionUuidField(many=True)
     institute = RelatedInstitute(required=False)
 
     YEAR_FIELDS_TO_UPDATE = [
@@ -202,7 +202,7 @@ class LiteEducationalExperienceSerializer(EducationalExperienceSerializer):
             'program',
             'education_name',
             'educationalexperienceyear_set',
-            'valuated_from_doctorateadmission',
+            'valuated_from_admission',
         ]
 
 

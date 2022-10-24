@@ -46,7 +46,7 @@ class SendMailDoctorateStudentTestCase(TestCase):
         process = PromoterFactory().process
         CaMemberFactory(process=process)
         cls.admission = DoctorateAdmissionFactory(
-            doctorate__management_entity=doctoral_commission,
+            training__management_entity=doctoral_commission,
             admitted=True,
             candidate__language=settings.LANGUAGE_CODE_EN,
             supervision_group=process,

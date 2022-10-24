@@ -27,7 +27,6 @@
 from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
 
-
 from admission.auth.roles.adre import AdreSecretary
 from admission.auth.roles.ca_member import CommitteeMember
 from admission.auth.roles.candidate import Candidate
@@ -47,15 +46,15 @@ from admission.contrib.models.cdd_config import CddConfiguration
 from admission.contrib.models.doctoral_training import Activity
 from admission.ddd.parcours_doctoral.formation.domain.model.enums import CategorieActivite
 from osis_mail_template.admin import MailTemplateAdmin
-
 from osis_role.contrib.admin import RoleModelAdmin
+
 
 # ##############################################################################
 # Models
 
 
 class DoctorateAdmissionAdmin(admin.ModelAdmin):
-    autocomplete_fields = ['doctorate', 'thesis_institute']
+    autocomplete_fields = ['training', 'thesis_institute']
     list_display = ['reference', 'candidate_fmt', 'doctorate', 'type', 'status']
     list_filter = ['status', 'type']
     list_select_related = ['candidate', 'doctorate']
@@ -125,7 +124,7 @@ admin.site.register(Scholarship, ScholarshipAdmin)
 
 class ActivityAdmin(admin.ModelAdmin):
     list_display = ('uuid', 'context', 'get_category', 'ects', 'modified_at', 'status', 'is_course_completed')
-    search_fields = ['doctorate__uuid', 'doctorate__reference']
+    search_fields = ['training__uuid', 'training__reference']
     list_filter = [
         'context',
         'category',

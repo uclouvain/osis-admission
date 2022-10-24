@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Admission API
-  version: 1.0.44
+  version: 1.0.45
   description: This API delivers data for the Admission project.
   contact:
     name: UCLouvain - OSIS
@@ -5412,7 +5412,7 @@ components:
                 format: date
               type:
                 $ref: '#/components/schemas/ActivityType'
-              valuated_from_doctorateadmission:
+              valuated_from_admission:
                 type: array
                 items:
                   type: string
@@ -5451,7 +5451,7 @@ components:
                       nullable: true
                   required:
                   - academic_year
-              valuated_from_doctorateadmission:
+              valuated_from_admission:
                 type: array
                 items:
                   type: string
@@ -5521,7 +5521,7 @@ components:
         program:
           type: string
           nullable: true
-        valuated_from_doctorateadmission:
+        valuated_from_admission:
           type: array
           items:
             type: string
@@ -5634,7 +5634,7 @@ components:
     ProfessionalExperience:
       type: object
       properties:
-        valuated_from_doctorateadmission:
+        valuated_from_admission:
           type: array
           items:
             type: string
@@ -6474,7 +6474,7 @@ components:
         context:
           $ref: '#/components/schemas/ContexteFormation'
         doctorate:
-          type: integer
+          type: string
           writeOnly: true
         reference_promoter_assent:
           type: boolean
@@ -6568,7 +6568,7 @@ components:
         context:
           $ref: '#/components/schemas/ContexteFormation'
         doctorate:
-          type: integer
+          type: string
           writeOnly: true
         reference_promoter_assent:
           type: boolean
@@ -6644,7 +6644,7 @@ components:
         context:
           $ref: '#/components/schemas/ContexteFormation'
         doctorate:
-          type: integer
+          type: string
           writeOnly: true
         reference_promoter_assent:
           type: boolean
@@ -6744,7 +6744,7 @@ components:
         context:
           $ref: '#/components/schemas/ContexteFormation'
         doctorate:
-          type: integer
+          type: string
           writeOnly: true
         reference_promoter_assent:
           type: boolean
@@ -6822,7 +6822,7 @@ components:
         context:
           $ref: '#/components/schemas/ContexteFormation'
         doctorate:
-          type: integer
+          type: string
           writeOnly: true
         reference_promoter_assent:
           type: boolean
@@ -6903,7 +6903,7 @@ components:
         context:
           $ref: '#/components/schemas/ContexteFormation'
         doctorate:
-          type: integer
+          type: string
           writeOnly: true
         reference_promoter_assent:
           type: boolean
@@ -7004,7 +7004,7 @@ components:
         context:
           $ref: '#/components/schemas/ContexteFormation'
         doctorate:
-          type: integer
+          type: string
           writeOnly: true
         reference_promoter_assent:
           type: boolean
@@ -7092,7 +7092,7 @@ components:
         context:
           $ref: '#/components/schemas/ContexteFormation'
         doctorate:
-          type: integer
+          type: string
           writeOnly: true
         reference_promoter_assent:
           type: boolean
@@ -7161,7 +7161,7 @@ components:
         context:
           $ref: '#/components/schemas/ContexteFormation'
         doctorate:
-          type: integer
+          type: string
           writeOnly: true
         reference_promoter_assent:
           type: boolean
@@ -7232,7 +7232,7 @@ components:
         context:
           $ref: '#/components/schemas/ContexteFormation'
         doctorate:
-          type: integer
+          type: string
           writeOnly: true
         reference_promoter_assent:
           type: boolean
@@ -7305,7 +7305,7 @@ components:
         context:
           $ref: '#/components/schemas/ContexteFormation'
         doctorate:
-          type: integer
+          type: string
           writeOnly: true
         reference_promoter_assent:
           type: boolean
@@ -7362,7 +7362,7 @@ components:
         context:
           $ref: '#/components/schemas/ContexteFormation'
         doctorate:
-          type: integer
+          type: string
           writeOnly: true
         reference_promoter_assent:
           type: boolean
@@ -7441,7 +7441,7 @@ components:
         context:
           $ref: '#/components/schemas/ContexteFormation'
         doctorate:
-          type: integer
+          type: string
           writeOnly: true
         reference_promoter_assent:
           type: boolean
@@ -7491,7 +7491,7 @@ components:
         context:
           $ref: '#/components/schemas/ContexteFormation'
         doctorate:
-          type: integer
+          type: string
           writeOnly: true
         reference_promoter_assent:
           type: boolean

@@ -40,13 +40,6 @@ from base.models.person import Person
 
 
 class GeneralEducationAdmission(BaseAdmission):
-    training = models.ForeignKey(
-        to="base.EducationGroupYear",
-        verbose_name=_("Training"),
-        related_name="+",
-        on_delete=models.CASCADE,
-    )
-
     status = models.CharField(
         choices=ChoixStatutProposition.choices(),
         max_length=30,
@@ -86,11 +79,7 @@ class GeneralEducationAdmission(BaseAdmission):
         pass
 
 
-class GeneralEducationAdmissionQuerySet(BaseAdmissionQuerySet):
-    training_field_name = 'training_id'
-
-
-class GeneralEducationAdmissionManager(models.Manager.from_queryset(GeneralEducationAdmissionQuerySet)):
+class GeneralEducationAdmissionManager(models.Manager.from_queryset(BaseAdmissionQuerySet)):
     def get_queryset(self):
         return (
             super()
@@ -101,7 +90,8 @@ class GeneralEducationAdmissionManager(models.Manager.from_queryset(GeneralEduca
                 "double_degree_scholarship",
                 "international_scholarship",
                 "erasmus_mundus_scholarship",
-            ).annotate_campus()
+            )
+            .annotate_campus()
         )
 
 

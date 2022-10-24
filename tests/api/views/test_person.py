@@ -40,9 +40,7 @@ class PersonTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
         cls.agnostic_url = resolve_url('person')
-        cls.updated_data = {
-            "first_name": "Jo"
-        }
+        cls.updated_data = {"first_name": "Jo"}
         doctoral_commission = EntityFactory()
         promoter = PromoterFactory(actor_ptr__person__first_name="Jane")
         cls.promoter_user = promoter.person.user
@@ -52,7 +50,7 @@ class PersonTestCase(APITestCase):
         ).person.user
         admission = DoctorateAdmissionFactory(
             candidate__first_name="John",
-            doctorate__management_entity=doctoral_commission,
+            training__management_entity=doctoral_commission,
         )
         cls.admission_url = resolve_url('person', uuid=admission.uuid)
         cls.candidate_user = admission.candidate.user

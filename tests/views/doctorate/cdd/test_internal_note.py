@@ -84,8 +84,8 @@ class InternalNoteTestCase(TestCase):
 
         # Create admissions
         cls.first_admission = DoctorateAdmissionFactory(
-            doctorate__management_entity=first_doctoral_commission,
-            doctorate__academic_year=academic_year,
+            training__management_entity=first_doctoral_commission,
+            training__academic_year=academic_year,
             cotutelle=False,
             supervision_group=promoter.process,
             financing_type=ChoixTypeFinancement.WORK_CONTRACT.name,
@@ -94,8 +94,8 @@ class InternalNoteTestCase(TestCase):
             pre_admission_submission_date=datetime.datetime.now(),
         )
         cls.second_admission = DoctorateAdmissionFactory(
-            doctorate__management_entity=first_doctoral_commission,
-            doctorate__academic_year=academic_year,
+            training__management_entity=first_doctoral_commission,
+            training__academic_year=academic_year,
             cotutelle=False,
             supervision_group=promoter.process,
             financing_type=ChoixTypeFinancement.WORK_CONTRACT.name,

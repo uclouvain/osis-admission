@@ -93,7 +93,7 @@ class DoctorateAdmissionListApiTestCase(CheckActionLinksMixin, APITestCase):
         ).entity
         cls.admission = DoctorateAdmissionFactory(
             status=ChoixStatutProposition.CANCELLED.name,  # set the status to cancelled so we have access to creation
-            doctorate__management_entity=cls.commission,
+            training__management_entity=cls.commission,
             supervision_group=promoter.process,
         )
         cls.other_admission = DoctorateAdmissionFactory(
@@ -103,15 +103,13 @@ class DoctorateAdmissionListApiTestCase(CheckActionLinksMixin, APITestCase):
             candidate=cls.admission.candidate,
         )
         cls.general_campus_name = (
-            cls.general_education_admission.training.educationgroupversion_set.first()
-            .root_group.main_teaching_campus.name
+            cls.general_education_admission.training.educationgroupversion_set.first().root_group.main_teaching_campus.name
         )
         cls.continuing_education_admission = ContinuingEducationAdmissionFactory(
             candidate=cls.admission.candidate,
         )
         cls.continuing_campus_name = (
-            cls.continuing_education_admission.training.educationgroupversion_set.first()
-            .root_group.main_teaching_campus.name
+            cls.continuing_education_admission.training.educationgroupversion_set.first().root_group.main_teaching_campus.name
         )
         # Users
         cls.candidate = cls.admission.candidate
@@ -413,7 +411,7 @@ class DoctorateAdmissionApiTestCase(QueriesAssertionsMixin, APITestCase):
             acronym='CDA',
         ).entity
         cls.admission = DoctorateAdmissionFactory(
-            doctorate__management_entity=cls.commission,
+            training__management_entity=cls.commission,
             supervision_group=promoter.process,
         )
 
@@ -494,7 +492,7 @@ class DoctorateAdmissionGetApiTestCase(CheckActionLinksMixin, DoctorateAdmission
         self.client.force_authenticate(user=self.other_candidate_user)
         admission = DoctorateAdmissionFactory(
             candidate=self.other_candidate_user.person,
-            doctorate__management_entity=self.commission,
+            training__management_entity=self.commission,
             proximity_commission=ChoixCommissionProximiteCDEouCLSM.ECONOMY.name,
         )
         response = self.client.get(resolve_url("admission_api_v1:propositions", uuid=admission.uuid), format="json")
@@ -504,7 +502,7 @@ class DoctorateAdmissionGetApiTestCase(CheckActionLinksMixin, DoctorateAdmission
 
         admission = DoctorateAdmissionFactory(
             candidate=self.other_candidate_user.person,
-            doctorate__management_entity=self.commission,
+            training__management_entity=self.commission,
             proximity_commission=ChoixCommissionProximiteCDSS.ECLI.name,
         )
         response = self.client.get(resolve_url("admission_api_v1:propositions", uuid=admission.uuid), format="json")
@@ -514,8 +512,8 @@ class DoctorateAdmissionGetApiTestCase(CheckActionLinksMixin, DoctorateAdmission
 
         admission = DoctorateAdmissionFactory(
             candidate=self.other_candidate_user.person,
-            doctorate__management_entity=self.commission,
-            doctorate__acronym="SC3DP",
+            training__management_entity=self.commission,
+            training__acronym="SC3DP",
             proximity_commission=ChoixSousDomaineSciences.CHEMISTRY.name,
         )
         response = self.client.get(resolve_url("admission_api_v1:propositions", uuid=admission.uuid), format="json")

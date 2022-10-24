@@ -36,7 +36,7 @@ class HistoryTestCase(TestCase):
     def test_history_view(self):
         doctoral_commission = EntityFactory()
         admission = DoctorateAdmissionFactory(
-            doctorate__management_entity=doctoral_commission,
+            training__management_entity=doctoral_commission,
         )
         self.client.force_login(CddManagerFactory(entity=doctoral_commission).person.user)
         url = resolve_url('admission:doctorate:history', uuid=admission.uuid)

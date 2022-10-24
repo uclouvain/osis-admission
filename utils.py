@@ -46,7 +46,7 @@ def get_cached_admission_perm_obj(admission_uuid):
     qs = DoctorateAdmission.objects.select_related(
         'supervision_group',
         'candidate',
-        'doctorate',
+        'training',
     )
     return cache.get_or_set(
         'admission_permission_{}'.format(admission_uuid),

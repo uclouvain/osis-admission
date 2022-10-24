@@ -62,19 +62,14 @@ __all__ = [
     "ContinuingProfessionalExperienceViewSet",
 ]
 
-
-DOCTORATE_VALUATED_FROM_FIELD = 'valuated_from_doctorateadmission'
-CONTINUING_EDUCATION_VALUATED_FROM_FIELD = 'valuated_from_continuingeducationadmission'
-GENERAL_EDUCATION_VALUATED_FROM_FIELD = 'valuated_from_generaleducationadmission'
-
-CONTINUING_EDUCATION_PERMISSIONS_MAPPING = {
+GENERAL_EDUCATION_PERMISSIONS_MAPPING = {
     'GET': 'admission.view_generaleducationadmission_curriculum',
     'POST': 'admission.change_generaleducationadmission_curriculum',
     'PUT': 'admission.change_generaleducationadmission_curriculum',
     'DELETE': 'admission.change_generaleducationadmission_curriculum',
 }
 
-GENERAL_EDUCATION_PERMISSIONS_MAPPING = {
+CONTINUING_EDUCATION_PERMISSIONS_MAPPING = {
     'GET': 'admission.view_continuingeducationadmission_curriculum',
     'POST': 'admission.change_continuingeducationadmission_curriculum',
     'PUT': 'admission.change_continuingeducationadmission_curriculum',
@@ -86,16 +81,15 @@ class BaseCurriculumView(APIPermissionRequiredMixin, RetrieveAPIView):
     serializer_class = serializers.CurriculumSerializer
     pagination_class = None
     filter_backends = []
-    valuated_from_field = ''
 
     def get(self, request, *args, **kwargs):
         """Return the experiences and the curriculum pdf of a person and the mandatory years to complete."""
         current_person = self.get_object()
         professional_experiences = ProfessionalExperience.objects.filter(person=current_person).prefetch_related(
-            self.valuated_from_field
+            'valuated_from_admission'
         )
         educational_experiences = EducationalExperience.objects.filter(person=current_person).prefetch_related(
-            self.valuated_from_field
+            'valuated_from_admission'
         )
 
         serializer = serializers.CurriculumSerializer(
@@ -114,19 +108,16 @@ class BaseCurriculumView(APIPermissionRequiredMixin, RetrieveAPIView):
 
 class CurriculumView(PersonRelatedMixin, BaseCurriculumView):
     name = "curriculum"
-    valuated_from_field = DOCTORATE_VALUATED_FROM_FIELD
     permission_classes = [partial(IsSelfPersonTabOrTabPermission, permission_suffix="curriculum")]
 
 
 class GeneralCurriculumView(GeneralEducationPersonRelatedMixin, BaseCurriculumView):
     name = "general_curriculum"
-    valuated_from_field = GENERAL_EDUCATION_VALUATED_FROM_FIELD
     permission_mapping = GENERAL_EDUCATION_PERMISSIONS_MAPPING
 
 
 class ContinuingCurriculumView(ContinuingEducationPersonRelatedMixin, BaseCurriculumView):
     name = "continuing_curriculum"
-    valuated_from_field = CONTINUING_EDUCATION_VALUATED_FROM_FIELD
     permission_mapping = CONTINUING_EDUCATION_PERMISSIONS_MAPPING
 
 
@@ -145,11 +136,10 @@ class ExperienceViewSet(
     pagination_class = None
     filter_backends = []
     model = None
-    valuated_from_field = ''
 
     def get_queryset(self):
         return (
-            self.model.objects.filter(person=self.candidate).prefetch_related(self.valuated_from_field)
+            self.model.objects.filter(person=self.candidate).prefetch_related('valuated_from_admission')
             if self.request
             else self.model.objects.none()
         )
@@ -175,7 +165,7 @@ class ExperienceViewSet(
         return response
 
     def update(self, request, *args, **kwargs):
-        if getattr(self.experience, self.valuated_from_field).exists():
+        if self.experience.valuated_from_admission.exists():
             raise PermissionDenied(_("This experience cannot be updated as it has already been valuated."))
 
         response = super().update(request, *args, **kwargs)
@@ -184,7 +174,7 @@ class ExperienceViewSet(
         return response
 
     def destroy(self, request, *args, **kwargs):
-        if getattr(self.experience, self.valuated_from_field).exists():
+        if self.experience.valuated_from_admission.exists():
             raise PermissionDenied(_("This experience cannot be updated as it has already been valuated."))
 
         response = super().destroy(request, *args, **kwargs)
@@ -201,7 +191,6 @@ class BaseProfessionalExperienceViewSet(ExperienceViewSet):
 class ProfessionalExperienceViewSet(PersonRelatedMixin, BaseProfessionalExperienceViewSet):
     name = "professional_experiences"
     permission_classes = [partial(IsSelfPersonTabOrTabPermission, permission_suffix="curriculum")]
-    valuated_from_field = DOCTORATE_VALUATED_FROM_FIELD
 
     def get_object(self):
         return self.experience
@@ -210,7 +199,6 @@ class ProfessionalExperienceViewSet(PersonRelatedMixin, BaseProfessionalExperien
 class GeneralProfessionalExperienceViewSet(GeneralEducationPersonRelatedMixin, BaseProfessionalExperienceViewSet):
     name = "general_professional_experiences"
     permission_mapping = GENERAL_EDUCATION_PERMISSIONS_MAPPING
-    valuated_from_field = GENERAL_EDUCATION_VALUATED_FROM_FIELD
 
     def get_object(self):
         return self.experience
@@ -219,7 +207,6 @@ class GeneralProfessionalExperienceViewSet(GeneralEducationPersonRelatedMixin, B
 class ContinuingProfessionalExperienceViewSet(ContinuingEducationPersonRelatedMixin, BaseProfessionalExperienceViewSet):
     name = "continuing_professional_experiences"
     permission_mapping = CONTINUING_EDUCATION_PERMISSIONS_MAPPING
-    valuated_from_field = CONTINUING_EDUCATION_VALUATED_FROM_FIELD
 
     def get_object(self):
         return self.experience
@@ -233,7 +220,6 @@ class BaseEducationalExperienceViewSet(ExperienceViewSet):
 class EducationalExperienceViewSet(PersonRelatedMixin, BaseEducationalExperienceViewSet):
     name = "educational_experiences"
     permission_classes = [partial(IsSelfPersonTabOrTabPermission, permission_suffix="curriculum")]
-    valuated_from_field = DOCTORATE_VALUATED_FROM_FIELD
 
     def get_object(self):
         return self.experience
@@ -242,7 +228,6 @@ class EducationalExperienceViewSet(PersonRelatedMixin, BaseEducationalExperience
 class GeneralEducationalExperienceViewSet(GeneralEducationPersonRelatedMixin, BaseEducationalExperienceViewSet):
     name = "general_educational_experiences"
     permission_mapping = GENERAL_EDUCATION_PERMISSIONS_MAPPING
-    valuated_from_field = GENERAL_EDUCATION_VALUATED_FROM_FIELD
 
     def get_object(self):
         return self.experience
@@ -251,7 +236,6 @@ class GeneralEducationalExperienceViewSet(GeneralEducationPersonRelatedMixin, Ba
 class ContinuingEducationalExperienceViewSet(ContinuingEducationPersonRelatedMixin, BaseEducationalExperienceViewSet):
     name = "continuing_educational_experiences"
     permission_mapping = CONTINUING_EDUCATION_PERMISSIONS_MAPPING
-    valuated_from_field = CONTINUING_EDUCATION_VALUATED_FROM_FIELD
 
     def get_object(self):
         return self.experience
@@ -276,11 +260,9 @@ class CurriculumFileView(PersonRelatedMixin, BaseCurriculumFileView):
 
 class GeneralCurriculumFileView(GeneralEducationPersonRelatedMixin, BaseCurriculumFileView):
     name = "general_curriculum_file"
-    valuated_from_field = GENERAL_EDUCATION_VALUATED_FROM_FIELD
     permission_mapping = GENERAL_EDUCATION_PERMISSIONS_MAPPING
 
 
 class ContinuingCurriculumFileView(ContinuingEducationPersonRelatedMixin, BaseCurriculumFileView):
     name = "continuing_curriculum_file"
-    valuated_from_field = CONTINUING_EDUCATION_VALUATED_FROM_FIELD
     permission_mapping = CONTINUING_EDUCATION_PERMISSIONS_MAPPING
