@@ -57,7 +57,7 @@ class DoctorateAdmissionAdmin(admin.ModelAdmin):
     autocomplete_fields = ['training', 'thesis_institute']
     list_display = ['reference', 'candidate_fmt', 'doctorate', 'type', 'status']
     list_filter = ['status', 'type']
-    list_select_related = ['candidate', 'doctorate']
+    list_select_related = ['candidate', 'training__academic_year']
     readonly_fields = [
         "project_document",
         "gantt_graph",
