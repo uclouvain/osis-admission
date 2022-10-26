@@ -106,7 +106,11 @@ class ActionLinksField(serializers.Field):
                 view = view_class(args=resolver_match.args, kwargs=resolver_match.kwargs)
 
                 # Check the permissions specified in the view via the 'permission_mapping' property
-                failed_permission_message = view.check_method_permissions(request.user, action.get('method'))
+                failed_permission_message = view.check_method_permissions(
+                    user=request.user,
+                    method=action.get('method'),
+                    obj=getattr(instance, '_perm_obj', None),
+                )
 
                 if failed_permission_message is None:
                     # If the user has the rights permissions we return the method type and the related endpoint

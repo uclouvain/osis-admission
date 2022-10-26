@@ -35,7 +35,7 @@ from .comptabilite import ComptabiliteDTO
 from .doctorat import DoctoratDTO
 
 
-@attr.dataclass(frozen=True, slots=True)
+@attr.dataclass(slots=True)
 class PropositionDTO(interface.DTO):
     uuid: str
     type_admission: str
