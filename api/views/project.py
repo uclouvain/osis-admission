@@ -23,7 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
+from django.db.models import Prefetch
 from rest_framework import mixins, status
 from rest_framework.generics import GenericAPIView, ListAPIView, ListCreateAPIView
 from rest_framework.response import Response
@@ -64,6 +64,8 @@ __all__ = [
     "VerifyProjectView",
     "SubmitPropositionViewSet",
 ]
+
+from osis_signature.models import Actor
 
 
 class PropositionListSchema(ResponseSpecificSchema):
@@ -148,6 +150,21 @@ class SupervisedPropositionListView(APIPermissionRequiredMixin, ListAPIView):
         proposition_list = message_bus_instance.invoke(
             ListerPropositionsSuperviseesQuery(matricule_membre=request.user.person.global_id),
         )
+        # Add a _perm_obj to each instance to optimize permission check performance
+        queryset = (
+            DoctorateAdmission.objects.select_related(
+                'supervision_group',
+                'candidate',
+                'training__management_entity__admission_config',
+            )
+            .prefetch_related(
+                Prefetch('supervision_group__actors', Actor.objects.select_related('supervisionactor').all())
+            )
+            .filter(uuid__in=[p.uuid for p in proposition_list])
+            .in_bulk(field_name='uuid')
+        )
+        for proposition in proposition_list:
+            proposition._perm_obj = queryset[proposition.uuid]
         serializer = serializers.DoctoratePropositionSearchDTOSerializer(
             instance=proposition_list,
             context=self.get_serializer_context(),

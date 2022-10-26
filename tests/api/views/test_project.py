@@ -74,12 +74,12 @@ from osis_signature.enums import SignatureState
 from reference.tests.factories.country import CountryFactory
 
 
-class DoctorateAdmissionListApiTestCase(CheckActionLinksMixin, APITestCase):
+class DoctorateAdmissionListApiTestCase(QueriesAssertionsMixin, CheckActionLinksMixin, APITestCase):
     @classmethod
     def setUpTestData(cls):
         # Create supervision group members
-        promoter = PromoterFactory()
-        committee_member = CaMemberFactory(process=promoter.process)
+        cls.promoter = PromoterFactory()
+        committee_member = CaMemberFactory(process=cls.promoter.process)
 
         # Create doctorate management entity
         root = EntityVersionFactory(parent=None).entity
@@ -96,7 +96,7 @@ class DoctorateAdmissionListApiTestCase(CheckActionLinksMixin, APITestCase):
         cls.admission = DoctorateAdmissionFactory(
             status=ChoixStatutProposition.CANCELLED.name,  # set the status to cancelled so we have access to creation
             training__management_entity=cls.commission,
-            supervision_group=promoter.process,
+            supervision_group=cls.promoter.process,
         )
         cls.other_admission = DoctorateAdmissionFactory(
             status=ChoixStatutProposition.IN_PROGRESS.name,
@@ -118,7 +118,7 @@ class DoctorateAdmissionListApiTestCase(CheckActionLinksMixin, APITestCase):
         cls.other_candidate = cls.other_admission.candidate
         cls.no_role_user = PersonFactory().user
         cls.cdd_manager_user = CddManagerFactory(entity=cls.commission).person.user
-        cls.promoter_user = promoter.person.user
+        cls.promoter_user = cls.promoter.person.user
         cls.committee_member_user = committee_member.person.user
 
         cls.url = resolve_url("admission_api_v1:propositions")
@@ -298,8 +298,13 @@ class DoctorateAdmissionListApiTestCase(CheckActionLinksMixin, APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
 
     def test_list_supervised_propositions_promoter(self):
+        DoctorateAdmissionFactory(
+            training__management_entity=self.commission,
+            supervision_group=self.promoter.process,
+        )
         self.client.force_authenticate(user=self.promoter_user)
-        response = self.client.get(resolve_url("admission_api_v1:supervised_propositions"), format="json")
+        with self.assertNumQueriesLessThan(12, verbose=True):
+            response = self.client.get(resolve_url("admission_api_v1:supervised_propositions"), format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
 
     def test_list_propositions_committee_member(self):
