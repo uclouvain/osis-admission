@@ -26,6 +26,8 @@
 from collections import defaultdict
 from typing import List, Optional, Union
 
+from django.db.models import Prefetch
+
 from admission.auth.roles.ca_member import CommitteeMember
 from admission.auth.roles.promoter import Promoter
 from admission.contrib.models import DoctorateAdmission, SupervisionActor
@@ -54,13 +56,13 @@ from admission.ddd.admission.doctorat.preparation.repository.i_groupe_de_supervi
 )
 from admission.ddd.parcours_doctoral.domain.model.doctorat import DoctoratIdentity
 from base.models.person import Person
-from osis_signature.models import Process, StateHistory
+from osis_signature.models import Actor, Process, StateHistory
 
 
 class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
     @classmethod
-    def get_by_proposition_id(cls, proposition_id: 'PropositionIdentity') -> 'GroupeDeSupervision':
-        proposition = (
+    def _get_queryset(cls):
+        return (
             DoctorateAdmission.objects.select_related('supervision_group')
             .only(
                 "uuid",
@@ -74,13 +76,17 @@ class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
                 "cotutelle_convention",
                 "cotutelle_other_documents",
             )
-            .get(uuid=proposition_id.uuid)
+            .prefetch_related(
+                Prefetch(
+                    'supervision_group__actors',
+                    Actor.objects.select_related('supervisionactor').order_by('person__last_name'),
+                    to_attr='ordered_members',
+                )
+            )
         )
-        if not proposition.supervision_group_id:
-            groupe = Process.objects.create()
-        else:
-            groupe = proposition.supervision_group
 
+    @classmethod
+    def _load(cls, proposition):
         if proposition.cotutelle is not None:
             cotutelle = Cotutelle(
                 motivation=proposition.cotutelle_motivation,
@@ -93,9 +99,13 @@ class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
         else:
             cotutelle = None
 
-        # Single, ordered query for all actors
+        if not proposition.supervision_group_id:
+            proposition.supervision_group = Process.objects.create()
+            proposition.save(update_fields=['supervision_group'])
+
+        groupe = proposition.supervision_group
         actors = defaultdict(list)
-        for actor in groupe.actors.select_related('supervisionactor', 'person').order_by('person__last_name'):
+        for actor in getattr(groupe, 'ordered_members', []):
             actors[actor.supervisionactor.type].append(actor)
 
         return GroupeDeSupervision(
@@ -139,6 +149,11 @@ class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
         )
 
     @classmethod
+    def get_by_proposition_id(cls, proposition_id: 'PropositionIdentity') -> 'GroupeDeSupervision':
+        proposition = cls._get_queryset().get(uuid=proposition_id.uuid)
+        return cls._load(proposition)
+
+    @classmethod
     def get_by_doctorat_id(cls, doctorat_id: 'DoctoratIdentity') -> 'GroupeDeSupervision':
         return cls.get_by_proposition_id(PropositionIdentityBuilder.build_from_uuid(doctorat_id.uuid))
 
@@ -169,11 +184,12 @@ class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
     ) -> List['GroupeDeSupervision']:
         if matricule_membre:
             propositions = (
-                DoctorateAdmission.objects.filter(supervision_group__actors__person__global_id=matricule_membre)
+                cls._get_queryset()
+                .filter(supervision_group__actors__person__global_id=matricule_membre)
                 .distinct('pk')
                 .order_by('-pk')
             )
-            return [cls.get_by_proposition_id(pid) for pid in propositions]
+            return [cls._load(proposition) for proposition in propositions]
         raise NotImplementedError
 
     @classmethod

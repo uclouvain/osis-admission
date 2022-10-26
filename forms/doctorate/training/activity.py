@@ -656,8 +656,12 @@ class UclCourseForm(ActivityFormMixin, forms.ModelForm):
         if self.initial.get('learning_unit_year'):
             learning_unit_year = LearningUnitYear.objects.get(pk=self.initial['learning_unit_year'])
             self.initial['academic_year'] = learning_unit_year.academic_year.year
+            self.initial['learning_unit_year'] = learning_unit_year.acronym
             self.fields['learning_unit_year'].widget.choices = [
-                (learning_unit_year.pk, f"{learning_unit_year.acronym} - {learning_unit_year.complete_title_i18n}"),
+                (
+                    learning_unit_year.acronym,
+                    f"{learning_unit_year.acronym} - {learning_unit_year.complete_title_i18n}",
+                ),
             ]
 
     def clean(self):

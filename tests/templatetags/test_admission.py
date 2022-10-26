@@ -306,6 +306,10 @@ class DisplayTagTestCase(TestCase):
         self.assertEqual(display('foo', '-', None, '-', ''), 'foo')
         self.assertEqual(display('foo', '-', None, '-', 'baz'), 'foo - baz')
         self.assertEqual(display('foo', '-', "bar", '-', 'baz'), 'foo - bar - baz')
+        self.assertEqual(display('-'), '')
+        self.assertEqual(display('', '-', ''), '')
+        self.assertEqual(display('-', '-'), '-')
+        self.assertEqual(display('-', '-', '-'), '-')
 
     def test_parenthesis(self):
         self.assertEqual(display('(', '', ")"), '')
