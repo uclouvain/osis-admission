@@ -28,12 +28,14 @@ import uuid
 from unittest import mock
 from unittest.mock import patch
 
+from django.db import connection
 from django.shortcuts import resolve_url
 from django.test import override_settings
 from rest_framework import status
 from rest_framework.test import APITestCase
 
 from admission.contrib.models import AdmissionType, DoctorateAdmission
+from admission.contrib.models.doctorate import REFERENCE_SEQ_NAME
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixCommissionProximiteCDEouCLSM,
     ChoixCommissionProximiteCDSS,
@@ -351,6 +353,9 @@ class DoctorateAdmissionCreationApiTestCase(APITestCase):
 
     def test_admission_doctorate_creation_using_api_candidate(self):
         self.client.force_authenticate(user=self.candidate.user)
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT last_value FROM %(sequence)s" % {'sequence': REFERENCE_SEQ_NAME})
+            seq_value = cursor.fetchone()[0]
         response = self.client.post(self.url, data=self.create_data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.content)
         admissions = DoctorateAdmission.objects.all()
@@ -366,7 +371,7 @@ class DoctorateAdmissionCreationApiTestCase(APITestCase):
             admission.reference,
             '{}-{}'.format(
                 self.doctorate.academic_year.year % 100,
-                300000 + admission.id,
+                300000 + seq_value + 1,
             ),
         )
 

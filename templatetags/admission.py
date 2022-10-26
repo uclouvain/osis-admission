@@ -104,11 +104,13 @@ def display(*args):
                 reduce_wrapping.append(next(iterargs, None))
             ret.append(reduce_wrapping_parenthesis(*reduce_wrapping[:-1]))
         elif nextarg == ",":
-            ret.append(reduce_list_separated(ret.pop(), next(iterargs, None)))
+            ret, val = ret[:-1], next(iter(ret[-1:]), '')
+            ret.append(reduce_list_separated(val, next(iterargs, None)))
         elif nextarg in ["-", ':']:
-            ret.append(reduce_list_separated(ret.pop(), next(iterargs, None), separator=f" {nextarg} "))
+            ret, val = ret[:-1], next(iter(ret[-1:]), '')
+            ret.append(reduce_list_separated(val, next(iterargs, None), separator=f" {nextarg} "))
         elif isinstance(nextarg, str) and len(nextarg) > 1 and re.match(r'\s', nextarg[0]):
-            suffixed_val = ret.pop()
+            ret, suffixed_val = ret[:-1], next(iter(ret[-1:]), '')
             ret.append(f"{suffixed_val}{nextarg}" if suffixed_val else "")
         else:
             ret.append(SafeString(nextarg) if nextarg else '')

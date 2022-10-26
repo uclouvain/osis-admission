@@ -100,6 +100,22 @@ msgstr ""
 
 #, python-format
 msgid ""
+"<a href=\"%(admission_link_front_complementary_training)s\">%(reference)s</"
+"a> - Some complementary training activities have been approved."
+msgstr ""
+"<a href=\"%(admission_link_front_complementary_training)s\">%(reference)s</a> - "
+"Des activités de formation complémentaire ont été approuvées."
+
+#, python-format
+msgid ""
+"<a href=\"%(admission_link_front_course_enrollment)s\">%(reference)s</a> - "
+"Some course enrollment have been approved."
+msgstr ""
+"<a href=\"%(admission_link_front_course_enrollment)s\">%(reference)s</a> - "
+"Des inscriptions aux cours ont été approuvées."
+
+#, python-format
+msgid ""
 "<a href=\"%(admission_link_front_doctoral_training)s\">%(reference)s</a> - "
 "Some doctoral training activities have been approved."
 msgstr ""

@@ -124,7 +124,7 @@ admin.site.register(Scholarship, ScholarshipAdmin)
 
 class ActivityAdmin(admin.ModelAdmin):
     list_display = ('uuid', 'context', 'get_category', 'ects', 'modified_at', 'status', 'is_course_completed')
-    search_fields = ['training__uuid', 'training__reference']
+    search_fields = ['doctorate__uuid', 'doctorate__reference']
     list_filter = [
         'context',
         'category',
