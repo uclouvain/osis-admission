@@ -25,26 +25,19 @@
 # ##############################################################################
 import attr
 
-from admission.ddd.admission.domain.enums import TypeFormation
-from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
-    AnneeInscriptionFormationTranslator,
-)
-from base.ddd.utils.converters import to_upper_case_converter
-from base.models.enums.education_group_types import TrainingType
 from osis_common.ddd import interface
 
 
-@attr.dataclass(frozen=True, slots=True)
-class FormationIdentity(interface.EntityIdentity):
-    sigle: str = attr.ib(converter=to_upper_case_converter)
-    annee: int
-
-
-@attr.dataclass(frozen=True, slots=True)
-class Formation(interface.Entity):
-    entity_id: FormationIdentity
-    type: TrainingType
-
-    @property
-    def type_formation(self) -> TypeFormation:
-        return TypeFormation[AnneeInscriptionFormationTranslator.ADMISSION_EDUCATION_TYPE_BY_OSIS_TYPE[self.type.name]]
+@attr.dataclass
+class AdmissionConditionsDTO(interface.DTO):
+    diplomation_secondaire_belge: bool
+    diplomation_secondaire_etranger: bool
+    alternative_etudes_secondaires: bool
+    potentiel_bachelier_belge_sans_diplomation: bool
+    diplomation_academique_belge: bool
+    diplomation_academique_etranger: bool
+    potentiel_master_belge_sans_diplomation: bool
+    diplomation_potentiel_master_belge: bool
+    diplomation_potentiel_master_etranger: bool
+    diplomation_potentiel_doctorat_belge: bool
+    potentiel_acces_vae: bool

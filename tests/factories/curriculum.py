@@ -38,6 +38,8 @@ class EducationalExperienceFactory(factory.DjangoModelFactory):
     class Meta:
         model = EducationalExperience
 
+    country = factory.SubFactory('reference.tests.factories.country.CountryFactory')
+
 
 class ProfessionalExperienceFactory(factory.DjangoModelFactory):
     class Meta:

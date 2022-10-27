@@ -29,6 +29,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.groupe_de_supervi
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition
 from admission.ddd.admission.doctorat.preparation.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.doctorat.preparation.domain.service.profil_candidat import ProfilCandidat
+from admission.ddd.admission.domain.service.i_titres_acces import ITitresAcces
 from base.ddd.utils.business_validator import execute_functions_and_aggregate_exceptions
 from osis_common.ddd import interface
 
@@ -41,6 +42,7 @@ class VerifierProposition(interface.DomainService):
         groupe_de_supervision: GroupeDeSupervision,
         profil_candidat_translator: IProfilCandidatTranslator,
         annee_courante: int,
+        titres_acces: ITitresAcces,
     ) -> None:
         profil_candidat_service = ProfilCandidat()
         execute_functions_and_aggregate_exceptions(
@@ -71,5 +73,9 @@ class VerifierProposition(interface.DomainService):
                 proposition_candidat,
                 profil_candidat_translator,
                 annee_courante,
+            ),
+            partial(
+                titres_acces.verifier_doctorat,
+                proposition_candidat.matricule_candidat,
             ),
         )

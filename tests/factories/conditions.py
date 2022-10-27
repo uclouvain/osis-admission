@@ -23,28 +23,24 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import attr
 
-from admission.ddd.admission.domain.enums import TypeFormation
-from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
-    AnneeInscriptionFormationTranslator,
-)
-from base.ddd.utils.converters import to_upper_case_converter
-from base.models.enums.education_group_types import TrainingType
-from osis_common.ddd import interface
+import factory
+
+from admission.ddd.admission.dtos.conditions import AdmissionConditionsDTO
 
 
-@attr.dataclass(frozen=True, slots=True)
-class FormationIdentity(interface.EntityIdentity):
-    sigle: str = attr.ib(converter=to_upper_case_converter)
-    annee: int
+class AdmissionConditionsDTOFactory(factory.Factory):
+    class Meta:
+        model = AdmissionConditionsDTO
 
-
-@attr.dataclass(frozen=True, slots=True)
-class Formation(interface.Entity):
-    entity_id: FormationIdentity
-    type: TrainingType
-
-    @property
-    def type_formation(self) -> TypeFormation:
-        return TypeFormation[AnneeInscriptionFormationTranslator.ADMISSION_EDUCATION_TYPE_BY_OSIS_TYPE[self.type.name]]
+    diplomation_secondaire_belge = False
+    diplomation_secondaire_etranger = False
+    alternative_etudes_secondaires = False
+    potentiel_bachelier_belge_sans_diplomation = False
+    diplomation_academique_belge = False
+    diplomation_academique_etranger = False
+    potentiel_master_belge_sans_diplomation = False
+    diplomation_potentiel_master_belge = False
+    diplomation_potentiel_master_etranger = False
+    diplomation_potentiel_doctorat_belge = False
+    potentiel_acces_vae = False

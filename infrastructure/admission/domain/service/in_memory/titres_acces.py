@@ -23,28 +23,23 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import attr
 
-from admission.ddd.admission.domain.enums import TypeFormation
-from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
-    AnneeInscriptionFormationTranslator,
-)
-from base.ddd.utils.converters import to_upper_case_converter
-from base.models.enums.education_group_types import TrainingType
-from osis_common.ddd import interface
+from admission.ddd.admission.domain.service.i_titres_acces import ITitresAcces
+from admission.ddd.admission.dtos.conditions import AdmissionConditionsDTO
+from admission.tests.factories.conditions import AdmissionConditionsDTOFactory
 
 
-@attr.dataclass(frozen=True, slots=True)
-class FormationIdentity(interface.EntityIdentity):
-    sigle: str = attr.ib(converter=to_upper_case_converter)
-    annee: int
+class TitresAccesInMemory(ITitresAcces):
+    results = {
+        '0123456789': AdmissionConditionsDTOFactory(
+            diplomation_potentiel_doctorat_belge=True,
+        ),
+        '0000000001': AdmissionConditionsDTOFactory(
+            diplomation_academique_belge=True,
+            potentiel_acces_vae=True,
+        ),
+    }
 
-
-@attr.dataclass(frozen=True, slots=True)
-class Formation(interface.Entity):
-    entity_id: FormationIdentity
-    type: TrainingType
-
-    @property
-    def type_formation(self) -> TypeFormation:
-        return TypeFormation[AnneeInscriptionFormationTranslator.ADMISSION_EDUCATION_TYPE_BY_OSIS_TYPE[self.type.name]]
+    @classmethod
+    def conditions_remplies(cls, matricule_candidat: str) -> AdmissionConditionsDTO:
+        return cls.results.get(matricule_candidat, AdmissionConditionsDTOFactory())

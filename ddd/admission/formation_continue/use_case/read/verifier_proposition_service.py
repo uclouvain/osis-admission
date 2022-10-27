@@ -23,28 +23,32 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import attr
-
-from admission.ddd.admission.domain.enums import TypeFormation
-from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
-    AnneeInscriptionFormationTranslator,
-)
-from base.ddd.utils.converters import to_upper_case_converter
-from base.models.enums.education_group_types import TrainingType
-from osis_common.ddd import interface
+from admission.ddd.admission.domain.service.i_titres_acces import ITitresAcces
+from ...commands import VerifierPropositionCommand
+from ...domain.builder.proposition_identity_builder import PropositionIdentityBuilder
+from ...domain.model.proposition import PropositionIdentity
+from ...domain.service.i_formation import IFormationContinueTranslator
+from ...domain.service.verifier_proposition import VerifierProposition
+from ...repository.i_proposition import IPropositionRepository
 
 
-@attr.dataclass(frozen=True, slots=True)
-class FormationIdentity(interface.EntityIdentity):
-    sigle: str = attr.ib(converter=to_upper_case_converter)
-    annee: int
+def verifier_proposition(
+    cmd: 'VerifierPropositionCommand',
+    proposition_repository: 'IPropositionRepository',
+    formation_translator: 'IFormationContinueTranslator',
+    titres_acces: 'ITitresAcces',
+) -> 'PropositionIdentity':
+    # GIVEN
+    proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
+    proposition = proposition_repository.get(entity_id=proposition_id)
 
+    # WHEN
+    VerifierProposition.verifier(
+        proposition,
+        formation_translator,
+        titres_acces,
+    )
 
-@attr.dataclass(frozen=True, slots=True)
-class Formation(interface.Entity):
-    entity_id: FormationIdentity
-    type: TrainingType
+    # THEN
 
-    @property
-    def type_formation(self) -> TypeFormation:
-        return TypeFormation[AnneeInscriptionFormationTranslator.ADMISSION_EDUCATION_TYPE_BY_OSIS_TYPE[self.type.name]]
+    return proposition_id

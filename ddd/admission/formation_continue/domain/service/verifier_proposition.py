@@ -23,28 +23,28 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import attr
+from functools import partial
 
-from admission.ddd.admission.domain.enums import TypeFormation
-from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
-    AnneeInscriptionFormationTranslator,
-)
-from base.ddd.utils.converters import to_upper_case_converter
-from base.models.enums.education_group_types import TrainingType
+from admission.ddd.admission.domain.service.i_titres_acces import ITitresAcces
+from admission.ddd.admission.formation_continue.domain.model.proposition import Proposition
+from admission.ddd.admission.formation_continue.domain.service.i_formation import IFormationContinueTranslator
+from base.ddd.utils.business_validator import execute_functions_and_aggregate_exceptions
 from osis_common.ddd import interface
 
 
-@attr.dataclass(frozen=True, slots=True)
-class FormationIdentity(interface.EntityIdentity):
-    sigle: str = attr.ib(converter=to_upper_case_converter)
-    annee: int
-
-
-@attr.dataclass(frozen=True, slots=True)
-class Formation(interface.Entity):
-    entity_id: FormationIdentity
-    type: TrainingType
-
-    @property
-    def type_formation(self) -> TypeFormation:
-        return TypeFormation[AnneeInscriptionFormationTranslator.ADMISSION_EDUCATION_TYPE_BY_OSIS_TYPE[self.type.name]]
+class VerifierProposition(interface.DomainService):
+    @classmethod
+    def verifier(
+        cls,
+        proposition_candidat: Proposition,
+        formation_translator: IFormationContinueTranslator,
+        titres_acces: ITitresAcces,
+    ) -> None:
+        execute_functions_and_aggregate_exceptions(
+            # TODO check other tabs
+            partial(
+                titres_acces.verifier,
+                proposition_candidat.matricule_candidat,
+                formation_translator.get(proposition_candidat.formation_id).type,
+            ),
+        )

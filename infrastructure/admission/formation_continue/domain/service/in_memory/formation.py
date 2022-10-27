@@ -31,6 +31,7 @@ from admission.ddd.admission.dtos.formation import FormationDTO
 from admission.ddd.admission.formation_continue.domain.service.i_formation import IFormationContinueTranslator
 from admission.ddd.admission.formation_continue.domain.validator.exceptions import FormationNonTrouveeException
 from admission.ddd.admission.test.factory.formation import FormationFactory
+from base.models.enums.education_group_types import TrainingType
 
 
 class FormationContinueInMemoryTranslator(IFormationContinueTranslator):
@@ -39,50 +40,57 @@ class FormationContinueInMemoryTranslator(IFormationContinueTranslator):
             intitule='Formation ECGE3DP',
             entity_id__sigle='ECGE3DP',
             entity_id__annee=2022,
-            type=TypeFormation.FORMATION_CONTINUE,
+            type=TrainingType.UNIVERSITY_SECOND_CYCLE_CERTIFICATE,
             campus='Mons',
         ),
         FormationFactory(
             intitule='Formation ECGE3DP',
             entity_id__sigle='ECGE3DP',
             entity_id__annee=2020,
-            type=TypeFormation.FORMATION_CONTINUE,
+            type=TrainingType.UNIVERSITY_SECOND_CYCLE_CERTIFICATE,
             campus='Louvain-La-Neuve',
         ),
         FormationFactory(
             intitule='Formation ECGM3DP',
             entity_id__sigle='ECGM3DP',
             entity_id__annee=2022,
-            type=TypeFormation.FORMATION_CONTINUE,
+            type=TrainingType.UNIVERSITY_SECOND_CYCLE_CERTIFICATE,
             campus='Louvain-La-Neuve',
         ),
         FormationFactory(
             intitule='Formation AGRO3DP',
             entity_id__sigle='AGRO3DP',
             entity_id__annee=2022,
-            type=TypeFormation.FORMATION_CONTINUE,
+            type=TrainingType.UNIVERSITY_SECOND_CYCLE_CERTIFICATE,
             campus='Charleroi',
         ),
         FormationFactory(
             intitule='Formation SC3DP',
             entity_id__sigle='SC3DP',
             entity_id__annee=2022,
-            type=TypeFormation.FORMATION_CONTINUE,
+            type=TrainingType.UNIVERSITY_SECOND_CYCLE_CERTIFICATE,
             campus='Louvain-La-Neuve',
         ),
         FormationFactory(
             intitule='Formation ESP3DP',
             entity_id__sigle='ESP3DP',
             entity_id__annee=2022,
-            type=TypeFormation.FORMATION_CONTINUE,
+            type=TrainingType.UNIVERSITY_SECOND_CYCLE_CERTIFICATE,
             campus='Charleroi',
         ),
         FormationFactory(
             intitule='Master ESP3DP',
             entity_id__sigle='ESP3DP-MASTER',
             entity_id__annee=2022,
-            type=TypeFormation.MASTER,
+            type=TrainingType.MASTER_M1,
             campus='Charleroi',
+        ),
+        FormationFactory(
+            intitule='Formation SC3DP',
+            entity_id__sigle='SC3DP',
+            entity_id__annee=2020,
+            type=TrainingType.UNIVERSITY_SECOND_CYCLE_CERTIFICATE,
+            campus='Louvain-La-Neuve',
         ),
     ]
 
@@ -102,7 +110,8 @@ class FormationContinueInMemoryTranslator(IFormationContinueTranslator):
             (
                 training
                 for training in cls.trainings
-                if training.entity_id == formation_entity_id and training.type == TypeFormation.FORMATION_CONTINUE
+                if training.entity_id == formation_entity_id
+                and training.type_formation == TypeFormation.FORMATION_CONTINUE
             ),
             None,
         )
@@ -114,7 +123,7 @@ class FormationContinueInMemoryTranslator(IFormationContinueTranslator):
             (
                 training
                 for training in cls.trainings
-                if training.entity_id == entity_id and training.type == TypeFormation.FORMATION_CONTINUE
+                if training.entity_id == entity_id and training.type_formation == TypeFormation.FORMATION_CONTINUE
             ),
             None,
         )

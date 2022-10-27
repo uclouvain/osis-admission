@@ -103,8 +103,8 @@ msgid ""
 "<a href=\"%(admission_link_front_complementary_training)s\">%(reference)s</"
 "a> - Some complementary training activities have been approved."
 msgstr ""
-"<a href=\"%(admission_link_front_complementary_training)s\">%(reference)s</a> - "
-"Des activités de formation complémentaire ont été approuvées."
+"<a href=\"%(admission_link_front_complementary_training)s\">%(reference)s</"
+"a> - Des activités de formation complémentaire ont été approuvées."
 
 #, python-format
 msgid ""
@@ -334,6 +334,9 @@ msgstr "Ajouter une note interne"
 
 msgid "Admission"
 msgstr "Admission"
+
+msgid "Admission conditions not met."
+msgstr "Conditions d'accès non remplies."
 
 msgid "Admission date"
 msgstr "Date admission"

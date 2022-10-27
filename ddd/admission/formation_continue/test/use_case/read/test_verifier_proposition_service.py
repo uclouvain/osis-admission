@@ -23,28 +23,25 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import attr
+from unittest import TestCase
 
-from admission.ddd.admission.domain.enums import TypeFormation
-from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
-    AnneeInscriptionFormationTranslator,
-)
-from base.ddd.utils.converters import to_upper_case_converter
-from base.models.enums.education_group_types import TrainingType
-from osis_common.ddd import interface
+from admission.ddd.admission.domain.validator.exceptions import ConditionsAccessNonRempliesException
+from admission.ddd.admission.formation_continue.commands import VerifierPropositionCommand
+from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
+from base.ddd.utils.business_validator import MultipleBusinessExceptions
 
 
-@attr.dataclass(frozen=True, slots=True)
-class FormationIdentity(interface.EntityIdentity):
-    sigle: str = attr.ib(converter=to_upper_case_converter)
-    annee: int
+class TestVerifierPropositionService(TestCase):
+    def setUp(self) -> None:
+        self.message_bus = message_bus_in_memory_instance
 
+    def test_should_verifier_etre_ok_si_complet(self):
+        cmd = VerifierPropositionCommand(uuid_proposition="uuid-ECGE3DP")
+        proposition_id = self.message_bus.invoke(cmd)
+        self.assertEqual(proposition_id.uuid, "uuid-ECGE3DP")
 
-@attr.dataclass(frozen=True, slots=True)
-class Formation(interface.Entity):
-    entity_id: FormationIdentity
-    type: TrainingType
-
-    @property
-    def type_formation(self) -> TypeFormation:
-        return TypeFormation[AnneeInscriptionFormationTranslator.ADMISSION_EDUCATION_TYPE_BY_OSIS_TYPE[self.type.name]]
+    def test_should_retourner_erreur_si_conditions_acces_non_remplies(self):
+        cmd = VerifierPropositionCommand(uuid_proposition='uuid-SC3DP')
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            self.message_bus.invoke(cmd)
+        self.assertIsInstance(context.exception.exceptions.pop(), ConditionsAccessNonRempliesException)

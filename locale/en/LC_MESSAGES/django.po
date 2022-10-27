@@ -292,6 +292,9 @@ msgstr ""
 msgid "Admission"
 msgstr ""
 
+msgid "Admission conditions not met."
+msgstr ""
+
 msgid "Admission date"
 msgstr ""
 

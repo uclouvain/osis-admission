@@ -27,11 +27,12 @@ from functools import partial
 
 from admission.ddd.admission.formation_generale.commands import *
 from admission.ddd.admission.formation_generale.use_case.read import *
+from admission.ddd.admission.formation_generale.use_case.write import *
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
-from admission.ddd.admission.formation_generale.use_case.write import *
 from admission.infrastructure.admission.domain.service.bourse import BourseTranslator
+from admission.infrastructure.admission.domain.service.titres_acces import TitresAcces
 from admission.infrastructure.admission.formation_generale.domain.service.formation import FormationGeneraleTranslator
 from admission.infrastructure.admission.formation_generale.repository.proposition import PropositionRepository
 
@@ -64,5 +65,11 @@ COMMAND_HANDLERS = {
     SupprimerPropositionCommand: partial(
         supprimer_proposition,
         proposition_repository=PropositionRepository(),
+    ),
+    VerifierPropositionCommand: partial(
+        verifier_proposition,
+        proposition_repository=PropositionRepository(),
+        formation_translator=FormationGeneraleTranslator(),
+        titres_acces=TitresAcces(),
     ),
 }

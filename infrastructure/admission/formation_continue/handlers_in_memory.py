@@ -31,6 +31,7 @@ from admission.infrastructure.admission.domain.service.in_memory.annee_inscripti
     AnneeInscriptionFormationInMemoryTranslator,
 )
 from admission.ddd.admission.formation_continue.use_case.write import *
+from admission.infrastructure.admission.domain.service.in_memory.titres_acces import TitresAccesInMemory
 from admission.infrastructure.admission.formation_continue.domain.service.in_memory.formation import (
     FormationContinueInMemoryTranslator,
 )
@@ -65,5 +66,11 @@ COMMAND_HANDLERS = {
     SupprimerPropositionCommand: partial(
         supprimer_proposition,
         proposition_repository=PropositionInMemoryRepository(),
+    ),
+    VerifierPropositionCommand: partial(
+        verifier_proposition,
+        proposition_repository=PropositionInMemoryRepository(),
+        formation_translator=FormationContinueInMemoryTranslator(),
+        titres_acces=TitresAccesInMemory(),
     ),
 }

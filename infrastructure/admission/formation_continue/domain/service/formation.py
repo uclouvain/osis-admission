@@ -36,6 +36,7 @@ from admission.ddd.admission.formation_continue.domain.validator.exceptions impo
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
+from base.models.enums.education_group_types import TrainingType
 from ddd.logic.formation_catalogue.commands import SearchFormationsCommand
 from ddd.logic.formation_catalogue.dtos.training import TrainingDto
 
@@ -80,9 +81,7 @@ class FormationContinueTranslator(IFormationContinueTranslator):
 
             return Formation(
                 entity_id=FormationIdentity(sigle=dto.acronym, annee=dto.year),
-                type=TypeFormation[
-                    AnneeInscriptionFormationTranslator.ADMISSION_EDUCATION_TYPE_BY_OSIS_TYPE.get(dto.type)
-                ],
+                type=TrainingType[dto.type],
             )
 
         raise FormationNonTrouveeException

@@ -31,6 +31,7 @@ from admission.ddd.admission.dtos.formation import FormationDTO
 from admission.ddd.admission.formation_generale.domain.service.i_formation import IFormationGeneraleTranslator
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import FormationNonTrouveeException
 from admission.ddd.admission.test.factory.formation import FormationFactory
+from base.models.enums.education_group_types import TrainingType
 
 
 class FormationGeneraleInMemoryTranslator(IFormationGeneraleTranslator):
@@ -39,56 +40,63 @@ class FormationGeneraleInMemoryTranslator(IFormationGeneraleTranslator):
             intitule='Formation ECGE3DP',
             entity_id__sigle='ECGE3DP',
             entity_id__annee=2022,
-            type=TypeFormation.BACHELIER,
+            type=TrainingType.BACHELOR,
             campus='Mons',
         ),
         FormationFactory(
             intitule='Formation ECGE3DP',
             entity_id__sigle='ECGE3DP',
             entity_id__annee=2020,
-            type=TypeFormation.BACHELIER,
+            type=TrainingType.BACHELOR,
             campus='Louvain-La-Neuve',
         ),
         FormationFactory(
             intitule='Formation ECGE3DP',
             entity_id__sigle='ECGE3DP',
             entity_id__annee=2020,
-            type=TypeFormation.BACHELIER,
+            type=TrainingType.BACHELOR,
             campus='Mons',
         ),
         FormationFactory(
             intitule='Formation ECGM3DP',
             entity_id__sigle='ECGM3DP',
             entity_id__annee=2022,
-            type=TypeFormation.MASTER,
+            type=TrainingType.MASTER_M1,
             campus='Louvain-La-Neuve',
         ),
         FormationFactory(
             intitule='Formation AGRO3DP',
             entity_id__sigle='AGRO3DP',
             entity_id__annee=2022,
-            type=TypeFormation.BACHELIER,
+            type=TrainingType.BACHELOR,
             campus='Charleroi',
         ),
         FormationFactory(
             intitule='Formation SC3DP',
             entity_id__sigle='SC3DP',
             entity_id__annee=2022,
-            type=TypeFormation.CERTIFICAT,
+            type=TrainingType.CERTIFICATE,
             campus='Louvain-La-Neuve',
         ),
         FormationFactory(
             intitule='Formation ESP3DP',
             entity_id__sigle='ESP3DP',
             entity_id__annee=2022,
-            type=TypeFormation.MASTER,
+            type=TrainingType.MASTER_M1,
             campus='Charleroi',
         ),
         FormationFactory(
             intitule='Formation continue ESP3DP',
             entity_id__sigle='ES3DP-CONTINUE',
             entity_id__annee=2022,
-            type=TypeFormation.FORMATION_CONTINUE,
+            type=TrainingType.UNIVERSITY_FIRST_CYCLE_CERTIFICATE,
+            campus='Charleroi',
+        ),
+        FormationFactory(
+            intitule='Master SC3DP',
+            entity_id__sigle='SC3DP',
+            entity_id__annee=2020,
+            type=TrainingType.MASTER_M1,
             campus='Charleroi',
         ),
     ]
@@ -109,7 +117,8 @@ class FormationGeneraleInMemoryTranslator(IFormationGeneraleTranslator):
             (
                 training
                 for training in cls.trainings
-                if training.entity_id == formation_entity_id and training.type.name in TYPES_FORMATION_GENERALE
+                if training.entity_id == formation_entity_id
+                and training.type_formation.name in TYPES_FORMATION_GENERALE
             ),
             None,
         )
@@ -121,7 +130,7 @@ class FormationGeneraleInMemoryTranslator(IFormationGeneraleTranslator):
             (
                 training
                 for training in cls.trainings
-                if training.entity_id == entity_id and training.type.name in TYPES_FORMATION_GENERALE
+                if training.entity_id == entity_id and training.type_formation.name in TYPES_FORMATION_GENERALE
             ),
             None,
         )
@@ -140,7 +149,7 @@ class FormationGeneraleInMemoryTranslator(IFormationGeneraleTranslator):
             cls._build_dto(entity=training)
             for training in cls.trainings
             if training.entity_id.annee == annee
-            and training.type.name == type
+            and training.type_formation.name == type
             and intitule in training.intitule
             and (not campus or training.campus == campus)
         ]

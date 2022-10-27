@@ -42,6 +42,7 @@ from .domain.service.in_memory.promoteur import PromoteurInMemoryTranslator
 from .repository.in_memory.groupe_de_supervision import GroupeDeSupervisionInMemoryRepository
 from .repository.in_memory.proposition import PropositionInMemoryRepository
 from ..validation.repository.in_memory.demande import DemandeInMemoryRepository
+from ...domain.service.in_memory.titres_acces import TitresAccesInMemory
 
 COMMAND_HANDLERS = {
     InitierPropositionCommand: partial(
@@ -90,6 +91,7 @@ COMMAND_HANDLERS = {
         groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
         profil_candidat_translator=ProfilCandidatInMemoryTranslator(),
         academic_year_repository=AcademicYearInMemoryRepository(),
+        titres_acces=TitresAccesInMemory(),
     ),
     VerifierProjetCommand: partial(
         verifier_projet,
@@ -139,6 +141,7 @@ COMMAND_HANDLERS = {
         academic_year_repository=AcademicYearInMemoryRepository(),
         historique=HistoriqueInMemory(),
         notification=NotificationInMemory(),
+        titres_acces=TitresAccesInMemory(),
     ),
     DefinirCotutelleCommand: partial(
         definir_cotutelle,

@@ -35,3 +35,11 @@ class BourseNonTrouveeException(BusinessException):
     def __init__(self, **kwargs):
         message = _("No scholarship found.")
         super().__init__(message, **kwargs)
+
+
+class ConditionsAccessNonRempliesException(BusinessException):
+    status_code = "ADMISSION-2"
+
+    def __init__(self, **kwargs):
+        message = _("Admission conditions not met.")
+        super().__init__(message, **kwargs)
