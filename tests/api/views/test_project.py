@@ -69,7 +69,8 @@ from base.tests.factories.academic_year import AcademicYearFactory, get_current_
 from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.organization import OrganizationFactory
 from base.tests.factories.person import PersonFactory
-from osis_profile.tests.factories.curriculum import EducationalExperienceFactory, EducationalExperienceYearFactory
+from admission.tests.factories.curriculum import EducationalExperienceFactory
+from osis_profile.tests.factories.curriculum import EducationalExperienceYearFactory
 from osis_signature.enums import SignatureState
 from reference.tests.factories.country import CountryFactory
 
@@ -805,6 +806,12 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
         cls.first_candidate.passport = [WriteTokenFactory().token]
         cls.first_candidate.curriculum = [WriteTokenFactory().token]
         cls.first_candidate.save()
+        EducationalExperienceFactory(
+            person_id=cls.first_candidate.pk,
+            education_name='A custom education',
+            country__iso_code="BE",
+            obtained_diploma=True,
+        )
         # Incomplete candidate
         cls.second_candidate = CandidateFactory(person__first_name="Jim").person
         # Create promoters

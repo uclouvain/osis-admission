@@ -37,6 +37,7 @@ from admission.ddd.admission.doctorat.preparation.repository.i_groupe_de_supervi
 from admission.ddd.admission.doctorat.preparation.repository.i_proposition import IPropositionRepository
 from admission.ddd.admission.doctorat.validation.domain.service.demande import DemandeService
 from admission.ddd.admission.doctorat.validation.repository.i_demande import IDemandeRepository
+from admission.ddd.admission.domain.service.i_titres_acces import ITitresAcces
 from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import GetCurrentAcademicYear
 from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import IAcademicYearRepository
 
@@ -50,6 +51,7 @@ def soumettre_proposition(
     academic_year_repository: 'IAcademicYearRepository',
     historique: 'IHistorique',
     notification: 'INotification',
+    titres_acces: 'ITitresAcces',
 ) -> 'PropositionIdentity':
     # GIVEN
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
@@ -65,7 +67,13 @@ def soumettre_proposition(
     )
 
     # WHEN
-    VerifierProposition().verifier(proposition, groupe_supervision, profil_candidat_translator, annee_courante)
+    VerifierProposition().verifier(
+        proposition,
+        groupe_supervision,
+        profil_candidat_translator,
+        annee_courante,
+        titres_acces,
+    )
     demande = DemandeService().initier(
         profil_candidat_translator,
         proposition_id,

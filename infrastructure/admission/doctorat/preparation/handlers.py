@@ -42,6 +42,7 @@ from .domain.service.promoteur import PromoteurTranslator
 from .repository.groupe_de_supervision import GroupeDeSupervisionRepository
 from .repository.proposition import PropositionRepository
 from ..validation.repository.demande import DemandeRepository
+from ...domain.service.titres_acces import TitresAcces
 
 COMMAND_HANDLERS = {
     InitierPropositionCommand: partial(
@@ -90,6 +91,7 @@ COMMAND_HANDLERS = {
         groupe_supervision_repository=GroupeDeSupervisionRepository(),
         profil_candidat_translator=ProfilCandidatTranslator(),
         academic_year_repository=AcademicYearRepository(),
+        titres_acces=TitresAcces(),
     ),
     VerifierProjetCommand: partial(
         verifier_projet,
@@ -139,6 +141,7 @@ COMMAND_HANDLERS = {
         academic_year_repository=AcademicYearRepository(),
         historique=Historique(),
         notification=Notification(),
+        titres_acces=TitresAcces(),
     ),
     DefinirCotutelleCommand: partial(
         definir_cotutelle,

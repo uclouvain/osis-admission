@@ -34,6 +34,7 @@ from admission.ddd.admission.doctorat.preparation.repository.i_groupe_de_supervi
     IGroupeDeSupervisionRepository,
 )
 from admission.ddd.admission.doctorat.preparation.repository.i_proposition import IPropositionRepository
+from admission.ddd.admission.domain.service.i_titres_acces import ITitresAcces
 from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import GetCurrentAcademicYear
 from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import IAcademicYearRepository
 
@@ -44,6 +45,7 @@ def verifier_proposition(
     groupe_supervision_repository: 'IGroupeDeSupervisionRepository',
     profil_candidat_translator: 'IProfilCandidatTranslator',
     academic_year_repository: 'IAcademicYearRepository',
+    titres_acces: 'ITitresAcces',
 ) -> 'PropositionIdentity':
     # GIVEN
     entity_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
@@ -64,6 +66,7 @@ def verifier_proposition(
         groupe_de_supervision,
         profil_candidat_translator,
         annee_courante,
+        titres_acces,
     )
 
     # THEN
