@@ -23,7 +23,30 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from .initier_proposition_service import initier_proposition
-from .modifier_choix_formation_service import modifier_choix_formation
-from .supprimer_proposition_service import supprimer_proposition
-from .soumettre_proposition_service import soumettre_proposition
+from unittest import TestCase
+
+from admission.ddd.admission.formation_continue.commands import SoumettrePropositionCommand
+from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutProposition
+from admission.infrastructure.admission.formation_continue.repository.in_memory.proposition import (
+    PropositionInMemoryRepository,
+)
+from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
+
+
+class TestSoumettrePropositionContinue(TestCase):
+    def setUp(self) -> None:
+        self.proposition_repository = PropositionInMemoryRepository()
+        self.addCleanup(self.proposition_repository.reset)
+        self.message_bus = message_bus_in_memory_instance
+
+    def test_should_soumettre_proposition_etre_ok_si_admission_complete(self):
+        proposition_id = self.message_bus.invoke(
+            SoumettrePropositionCommand(uuid_proposition="uuid-ECGE3DP"),
+        )
+
+        updated_proposition = self.proposition_repository.get(proposition_id)
+
+        # Command result
+        self.assertEqual(proposition_id.uuid, updated_proposition.entity_id.uuid)
+        # Updated proposition
+        self.assertEqual(updated_proposition.statut, ChoixStatutProposition.SUBMITTED)

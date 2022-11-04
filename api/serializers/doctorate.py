@@ -25,7 +25,7 @@
 # ##############################################################################
 from rest_framework import serializers
 
-from admission.api.serializers.fields import ActionLinksField, ACTION_LINKS
+from admission.api.serializers.fields import ActionLinksField, DOCTORATE_ACTION_LINKS
 from admission.ddd.parcours_doctoral.dtos import DoctoratDTO
 from base.utils.serializers import DTOSerializer
 
@@ -37,7 +37,7 @@ class DoctorateIdentityDTOSerializer(serializers.Serializer):
 class DoctorateDTOSerializer(DTOSerializer):
     links = ActionLinksField(
         actions={
-            key: ACTION_LINKS[key]
+            key: DOCTORATE_ACTION_LINKS[key]
             for key in [
                 # Project
                 'retrieve_proposition',

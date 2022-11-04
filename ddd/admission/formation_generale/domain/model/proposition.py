@@ -24,15 +24,10 @@
 #
 ##############################################################################
 import datetime
-from typing import Optional, Dict
+from typing import Dict, Optional
 
 import attr
 
-from admission.ddd.admission.domain.model.bourse import (
-    BourseIdentity,
-    BourseIdentity,
-    BourseIdentity,
-)
 from admission.ddd.admission.domain.model.formation import FormationIdentity
 from admission.ddd.admission.domain.service.i_bourse import BourseIdentity
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutProposition
@@ -79,3 +74,6 @@ class Proposition(interface.RootEntity):
 
     def supprimer(self):
         self.statut = ChoixStatutProposition.CANCELLED
+
+    def soumettre(self):
+        self.statut = ChoixStatutProposition.SUBMITTED

@@ -47,7 +47,7 @@ class GeneralPropositionSchema(ResponseSpecificSchema):
     }
 
 
-class GeneralPropositionViewSet(APIPermissionRequiredMixin, RetrieveAPIView):
+class GeneralPropositionView(APIPermissionRequiredMixin, RetrieveAPIView):
     name = "general_propositions"
     schema = GeneralPropositionSchema()
     pagination_class = None
@@ -88,7 +88,7 @@ class ContinuingPropositionSchema(ResponseSpecificSchema):
     }
 
 
-class ContinuingPropositionViewSet(APIPermissionRequiredMixin, RetrieveAPIView):
+class ContinuingPropositionView(APIPermissionRequiredMixin, RetrieveAPIView):
     name = "continuing_propositions"
     schema = ContinuingPropositionSchema()
     pagination_class = None

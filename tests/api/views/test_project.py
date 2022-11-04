@@ -843,15 +843,15 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
 
         # Targeted urls
         cls.first_admission_with_invitation_url = resolve_url(
-            "admission_api_v1:submit-proposition",
+            "admission_api_v1:submit-doctoral-proposition",
             uuid=cls.first_admission_with_invitation.uuid,
         )
         cls.first_admission_without_invitation_url = resolve_url(
-            "admission_api_v1:submit-proposition",
+            "admission_api_v1:submit-doctoral-proposition",
             uuid=cls.first_admission_without_invitation.uuid,
         )
         cls.second_admission_url = resolve_url(
-            "admission_api_v1:submit-proposition",
+            "admission_api_v1:submit-doctoral-proposition",
             uuid=cls.second_admission.uuid,
         )
 
@@ -861,7 +861,7 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
 
         for method in methods_not_allowed:
             response = getattr(self.client, method)(self.first_admission_with_invitation_url)
-            self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+            self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED, f"{method} is allowed")
 
     def test_verify_valid_proposition_using_api(self):
         self.client.force_authenticate(user=self.first_candidate.user)
@@ -909,7 +909,7 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
 
         self.client.force_authenticate(user=self.first_candidate.user)
 
-        response = self.client.post(resolve_url("admission_api_v1:submit-proposition", uuid=admission.uuid))
+        response = self.client.post(resolve_url("admission_api_v1:submit-doctoral-proposition", uuid=admission.uuid))
 
         updated_admission: DoctorateAdmission = DoctorateAdmission.objects.get(uuid=admission.uuid)
 
@@ -959,7 +959,7 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
 
         self.client.force_authenticate(user=self.second_candidate.user)
 
-        response = self.client.post(resolve_url("admission_api_v1:submit-proposition", uuid=admission.uuid))
+        response = self.client.post(resolve_url("admission_api_v1:submit-doctoral-proposition", uuid=admission.uuid))
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIsNotNone(response.json().get('non_field_errors'))
@@ -976,7 +976,7 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
         self.client.force_authenticate(user=admission.candidate.user)
 
         # No academic experience -> the absence of debt certificate is not required
-        response = self.client.post(resolve_url("admission_api_v1:submit-proposition", uuid=admission.uuid))
+        response = self.client.post(resolve_url("admission_api_v1:submit-doctoral-proposition", uuid=admission.uuid))
 
         errors = response.json().get('non_field_errors', [])
         self.assertFalse(
@@ -1003,7 +1003,7 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
             academic_year=AcademicYearFactory(year=get_current_year()),
         )
 
-        response = self.client.post(resolve_url("admission_api_v1:submit-proposition", uuid=admission.uuid))
+        response = self.client.post(resolve_url("admission_api_v1:submit-doctoral-proposition", uuid=admission.uuid))
 
         errors = response.json().get('non_field_errors', [])
         self.assertTrue(
@@ -1018,7 +1018,7 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
         experience.institute.code = "UCL"
         experience.institute.save()
 
-        response = self.client.post(resolve_url("admission_api_v1:submit-proposition", uuid=admission.uuid))
+        response = self.client.post(resolve_url("admission_api_v1:submit-doctoral-proposition", uuid=admission.uuid))
 
         errors = response.json().get('non_field_errors', [])
         self.assertFalse(
@@ -1034,7 +1034,7 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
         experience.institute.community = CommunityEnum.GERMAN_SPEAKING.name
         experience.institute.save()
 
-        response = self.client.post(resolve_url("admission_api_v1:submit-proposition", uuid=admission.uuid))
+        response = self.client.post(resolve_url("admission_api_v1:submit-doctoral-proposition", uuid=admission.uuid))
 
         errors = response.json().get('non_field_errors', [])
         self.assertFalse(
@@ -1052,7 +1052,7 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
         experience_year.academic_year = AcademicYearFactory(year=2000)
         experience_year.save()
 
-        response = self.client.post(resolve_url("admission_api_v1:submit-proposition", uuid=admission.uuid))
+        response = self.client.post(resolve_url("admission_api_v1:submit-doctoral-proposition", uuid=admission.uuid))
 
         errors = response.json().get('non_field_errors', [])
         self.assertFalse(

@@ -112,10 +112,62 @@ class CompletePersonFactory(PersonFactory):
         )
         EducationalExperienceYearFactory(
             educational_experience=experience,
-            academic_year=AcademicYearFactory(year=current_year-1),
+            academic_year=AcademicYearFactory(year=current_year - 1),
         )
 
         # Create highschool belgian diploma
         BelgianHighSchoolDiplomaFactory(
             person=self, academic_graduation_year=AcademicYearFactory(year=current_year - 1)
+        )
+
+
+class CompletePersonForBachelorFactory(CompletePersonFactory):
+    @factory.post_generation
+    def create_related_objects(self, create, extracted, **kwargs):
+        """Target is diplomation_secondaire_belge"""
+        current_year = get_current_year()
+        BelgianHighSchoolDiplomaFactory(
+            person=self, academic_graduation_year=AcademicYearFactory(year=current_year - 1)
+        )
+
+
+class CompletePersonForIUFCFactory(CompletePersonFactory):
+    @factory.post_generation
+    def create_related_objects(self, create, extracted, **kwargs):
+        """Target is diplomation_academique_belge"""
+        current_year = get_current_year()
+        experience = EducationalExperienceFactory(
+            person=self,
+            obtained_diploma=True,
+            country=CountryFactory(iso_code="BE"),
+        )
+        EducationalExperienceYearFactory(
+            educational_experience=experience,
+            academic_year=AcademicYearFactory(year=current_year - 1),
+        )
+
+
+class IncompletePersonForBachelorFactory(CompletePersonFactory):
+    @factory.post_generation
+    def create_related_objects(self, create, extracted, **kwargs):
+        """Target is diplomation_secondaire_belge"""
+        current_year = get_current_year()
+        BelgianHighSchoolDiplomaFactory(
+            person=self, academic_graduation_year=AcademicYearFactory(year=current_year - 1)
+        )
+
+
+class IncompletePersonForIUFCFactory(CompletePersonFactory):
+    @factory.post_generation
+    def create_related_objects(self, create, extracted, **kwargs):
+        """Target is diplomation_academique_belge"""
+        current_year = get_current_year()
+        experience = EducationalExperienceFactory(
+            person=self,
+            obtained_diploma=True,
+            country=CountryFactory(iso_code="BE"),
+        )
+        EducationalExperienceYearFactory(
+            educational_experience=experience,
+            academic_year=AcademicYearFactory(year=current_year - 1),
         )

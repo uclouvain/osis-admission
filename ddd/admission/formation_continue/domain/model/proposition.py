@@ -53,3 +53,6 @@ class Proposition(interface.RootEntity):
 
     def supprimer(self):
         self.statut = ChoixStatutProposition.CANCELLED
+
+    def soumettre(self):
+        self.statut = ChoixStatutProposition.SUBMITTED

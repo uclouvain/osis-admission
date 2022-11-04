@@ -26,8 +26,13 @@
 
 from rest_framework import serializers
 
-from admission.api.serializers.fields import ACTION_LINKS, ActionLinksField, RelatedInstituteField, \
-    CONTINUING_EDUCATION_ACTION_LINKS, GENERAL_EDUCATION_ACTION_LINKS
+from admission.api.serializers.fields import (
+    DOCTORATE_ACTION_LINKS,
+    ActionLinksField,
+    RelatedInstituteField,
+    CONTINUING_EDUCATION_ACTION_LINKS,
+    GENERAL_EDUCATION_ACTION_LINKS,
+)
 from admission.api.serializers.mixins import IncludedFieldsMixin
 from admission.contrib.models import AdmissionType, DoctorateAdmission
 from admission.ddd.admission.doctorat.preparation.commands import CompleterPropositionCommand, InitierPropositionCommand
@@ -103,43 +108,43 @@ class DoctoratePropositionSearchDTOSerializer(IncludedFieldsMixin, DTOSerializer
         actions={
             # Profile
             # Person
-            'retrieve_person': ACTION_LINKS['retrieve_person'],
-            'update_person': ACTION_LINKS['update_person'],
+            'retrieve_person': DOCTORATE_ACTION_LINKS['retrieve_person'],
+            'update_person': DOCTORATE_ACTION_LINKS['update_person'],
             # Coordinates
-            'retrieve_coordinates': ACTION_LINKS['retrieve_coordinates'],
-            'update_coordinates': ACTION_LINKS['update_coordinates'],
+            'retrieve_coordinates': DOCTORATE_ACTION_LINKS['retrieve_coordinates'],
+            'update_coordinates': DOCTORATE_ACTION_LINKS['update_coordinates'],
             # Secondary studies
-            'retrieve_secondary_studies': ACTION_LINKS['retrieve_secondary_studies'],
-            'update_secondary_studies': ACTION_LINKS['update_secondary_studies'],
+            'retrieve_secondary_studies': DOCTORATE_ACTION_LINKS['retrieve_secondary_studies'],
+            'update_secondary_studies': DOCTORATE_ACTION_LINKS['update_secondary_studies'],
             # Language knowledge
-            'retrieve_languages': ACTION_LINKS['retrieve_languages'],
-            'update_languages': ACTION_LINKS['update_languages'],
+            'retrieve_languages': DOCTORATE_ACTION_LINKS['retrieve_languages'],
+            'update_languages': DOCTORATE_ACTION_LINKS['update_languages'],
             # Proposition
-            'destroy_proposition': ACTION_LINKS['destroy_proposition'],
-            'submit_proposition': ACTION_LINKS['submit_proposition'],
+            'destroy_proposition': DOCTORATE_ACTION_LINKS['destroy_proposition'],
+            'submit_proposition': DOCTORATE_ACTION_LINKS['submit_proposition'],
             # Project
-            'retrieve_proposition': ACTION_LINKS['retrieve_proposition'],
-            'update_proposition': ACTION_LINKS['update_proposition'],
+            'retrieve_proposition': DOCTORATE_ACTION_LINKS['retrieve_proposition'],
+            'update_proposition': DOCTORATE_ACTION_LINKS['update_proposition'],
             # Cotutelle
-            'retrieve_cotutelle': ACTION_LINKS['retrieve_cotutelle'],
-            'update_cotutelle': ACTION_LINKS['update_cotutelle'],
+            'retrieve_cotutelle': DOCTORATE_ACTION_LINKS['retrieve_cotutelle'],
+            'update_cotutelle': DOCTORATE_ACTION_LINKS['update_cotutelle'],
             # Supervision
-            'retrieve_supervision': ACTION_LINKS['retrieve_supervision'],
+            'retrieve_supervision': DOCTORATE_ACTION_LINKS['retrieve_supervision'],
             # Curriculum
-            'retrieve_curriculum': ACTION_LINKS['retrieve_curriculum'],
-            'update_curriculum': ACTION_LINKS['update_curriculum'],
+            'retrieve_curriculum': DOCTORATE_ACTION_LINKS['retrieve_curriculum'],
+            'update_curriculum': DOCTORATE_ACTION_LINKS['update_curriculum'],
             # Confirmation
-            'retrieve_confirmation': ACTION_LINKS['retrieve_confirmation'],
-            'update_confirmation': ACTION_LINKS['update_confirmation'],
+            'retrieve_confirmation': DOCTORATE_ACTION_LINKS['retrieve_confirmation'],
+            'update_confirmation': DOCTORATE_ACTION_LINKS['update_confirmation'],
             # Accounting
-            'retrieve_accounting': ACTION_LINKS['retrieve_accounting'],
-            'update_accounting': ACTION_LINKS['update_accounting'],
+            'retrieve_accounting': DOCTORATE_ACTION_LINKS['retrieve_accounting'],
+            'update_accounting': DOCTORATE_ACTION_LINKS['update_accounting'],
             # Training
-            'retrieve_doctoral_training': ACTION_LINKS['retrieve_doctoral_training'],
-            'retrieve_complementary_training': ACTION_LINKS['retrieve_complementary_training'],
-            'retrieve_course_enrollment': ACTION_LINKS['retrieve_course_enrollment'],
+            'retrieve_doctoral_training': DOCTORATE_ACTION_LINKS['retrieve_doctoral_training'],
+            'retrieve_complementary_training': DOCTORATE_ACTION_LINKS['retrieve_complementary_training'],
+            'retrieve_course_enrollment': DOCTORATE_ACTION_LINKS['retrieve_course_enrollment'],
             # Training choice
-            'retrieve_training_choice': ACTION_LINKS['retrieve_doctorate_training_choice'],
+            'retrieve_training_choice': DOCTORATE_ACTION_LINKS['retrieve_doctorate_training_choice'],
         }
     )
 
@@ -168,7 +173,8 @@ class DoctoratePropositionSearchDTOSerializer(IncludedFieldsMixin, DTOSerializer
 class GeneralEducationPropositionSearchDTOSerializer(IncludedFieldsMixin, DTOSerializer):
     links = ActionLinksField(
         actions={
-            action: GENERAL_EDUCATION_ACTION_LINKS[action] for action in [
+            action: GENERAL_EDUCATION_ACTION_LINKS[action]
+            for action in [
                 # Profile
                 'retrieve_person',
                 'retrieve_coordinates',
@@ -203,7 +209,8 @@ class GeneralEducationPropositionSearchDTOSerializer(IncludedFieldsMixin, DTOSer
 class ContinuingEducationPropositionSearchDTOSerializer(IncludedFieldsMixin, DTOSerializer):
     links = ActionLinksField(
         actions={
-            action: CONTINUING_EDUCATION_ACTION_LINKS[action] for action in [
+            action: CONTINUING_EDUCATION_ACTION_LINKS[action]
+            for action in [
                 # Profile
                 'retrieve_person',
                 'retrieve_coordinates',
@@ -237,7 +244,7 @@ class ContinuingEducationPropositionSearchDTOSerializer(IncludedFieldsMixin, DTO
 class PropositionSearchSerializer(serializers.Serializer):
     links = ActionLinksField(
         actions={
-            'create_doctorate_proposition': ACTION_LINKS['create_doctorate_proposition'],
+            'create_doctorate_proposition': DOCTORATE_ACTION_LINKS['create_doctorate_proposition'],
             'create_general_proposition': GENERAL_EDUCATION_ACTION_LINKS['create_proposition'],
             'create_continuing_proposition': CONTINUING_EDUCATION_ACTION_LINKS['create_proposition'],
         }
@@ -253,50 +260,50 @@ class DoctoratePropositionDTOSerializer(IncludedFieldsMixin, DTOSerializer):
         actions={
             # Profile
             # Person
-            'retrieve_person': ACTION_LINKS['retrieve_person'],
-            'update_person': ACTION_LINKS['update_person'],
+            'retrieve_person': DOCTORATE_ACTION_LINKS['retrieve_person'],
+            'update_person': DOCTORATE_ACTION_LINKS['update_person'],
             # Coordinates
-            'retrieve_coordinates': ACTION_LINKS['retrieve_coordinates'],
-            'update_coordinates': ACTION_LINKS['update_coordinates'],
+            'retrieve_coordinates': DOCTORATE_ACTION_LINKS['retrieve_coordinates'],
+            'update_coordinates': DOCTORATE_ACTION_LINKS['update_coordinates'],
             # Secondary studies
-            'retrieve_secondary_studies': ACTION_LINKS['retrieve_secondary_studies'],
-            'update_secondary_studies': ACTION_LINKS['update_secondary_studies'],
+            'retrieve_secondary_studies': DOCTORATE_ACTION_LINKS['retrieve_secondary_studies'],
+            'update_secondary_studies': DOCTORATE_ACTION_LINKS['update_secondary_studies'],
             # Language knowledge
-            'retrieve_languages': ACTION_LINKS['retrieve_languages'],
-            'update_languages': ACTION_LINKS['update_languages'],
+            'retrieve_languages': DOCTORATE_ACTION_LINKS['retrieve_languages'],
+            'update_languages': DOCTORATE_ACTION_LINKS['update_languages'],
             # Proposition
-            'destroy_proposition': ACTION_LINKS['destroy_proposition'],
-            'submit_proposition': ACTION_LINKS['submit_proposition'],
+            'destroy_proposition': DOCTORATE_ACTION_LINKS['destroy_proposition'],
+            'submit_proposition': DOCTORATE_ACTION_LINKS['submit_proposition'],
             # Project
-            'retrieve_proposition': ACTION_LINKS['retrieve_proposition'],
-            'update_proposition': ACTION_LINKS['update_proposition'],
+            'retrieve_proposition': DOCTORATE_ACTION_LINKS['retrieve_proposition'],
+            'update_proposition': DOCTORATE_ACTION_LINKS['update_proposition'],
             # Training choice
-            'retrieve_training_choice': ACTION_LINKS['retrieve_doctorate_training_choice'],
-            'update_training_choice': ACTION_LINKS['update_doctorate_training_choice'],
+            'retrieve_training_choice': DOCTORATE_ACTION_LINKS['retrieve_doctorate_training_choice'],
+            'update_training_choice': DOCTORATE_ACTION_LINKS['update_doctorate_training_choice'],
             # Cotutelle
-            'retrieve_cotutelle': ACTION_LINKS['retrieve_cotutelle'],
-            'update_cotutelle': ACTION_LINKS['update_cotutelle'],
+            'retrieve_cotutelle': DOCTORATE_ACTION_LINKS['retrieve_cotutelle'],
+            'update_cotutelle': DOCTORATE_ACTION_LINKS['update_cotutelle'],
             # Supervision
-            'add_approval': ACTION_LINKS['add_approval'],
-            'add_member': ACTION_LINKS['add_member'],
-            'remove_member': ACTION_LINKS['remove_member'],
-            'set_reference_promoter': ACTION_LINKS['set_reference_promoter'],
-            'retrieve_supervision': ACTION_LINKS['retrieve_supervision'],
-            'request_signatures': ACTION_LINKS['request_signatures'],
-            'approve_by_pdf': ACTION_LINKS['approve_by_pdf'],
+            'add_approval': DOCTORATE_ACTION_LINKS['add_approval'],
+            'add_member': DOCTORATE_ACTION_LINKS['add_member'],
+            'remove_member': DOCTORATE_ACTION_LINKS['remove_member'],
+            'set_reference_promoter': DOCTORATE_ACTION_LINKS['set_reference_promoter'],
+            'retrieve_supervision': DOCTORATE_ACTION_LINKS['retrieve_supervision'],
+            'request_signatures': DOCTORATE_ACTION_LINKS['request_signatures'],
+            'approve_by_pdf': DOCTORATE_ACTION_LINKS['approve_by_pdf'],
             # Curriculum
-            'retrieve_curriculum': ACTION_LINKS['retrieve_curriculum'],
-            'update_curriculum': ACTION_LINKS['update_curriculum'],
+            'retrieve_curriculum': DOCTORATE_ACTION_LINKS['retrieve_curriculum'],
+            'update_curriculum': DOCTORATE_ACTION_LINKS['update_curriculum'],
             # Confirmation
-            'retrieve_confirmation': ACTION_LINKS['retrieve_confirmation'],
-            'update_confirmation': ACTION_LINKS['update_confirmation'],
+            'retrieve_confirmation': DOCTORATE_ACTION_LINKS['retrieve_confirmation'],
+            'update_confirmation': DOCTORATE_ACTION_LINKS['update_confirmation'],
             # Accounting
-            'retrieve_accounting': ACTION_LINKS['retrieve_accounting'],
-            'update_accounting': ACTION_LINKS['update_accounting'],
+            'retrieve_accounting': DOCTORATE_ACTION_LINKS['retrieve_accounting'],
+            'update_accounting': DOCTORATE_ACTION_LINKS['update_accounting'],
             # Training
-            'retrieve_doctoral_training': ACTION_LINKS['retrieve_doctoral_training'],
-            'retrieve_complementary_training': ACTION_LINKS['retrieve_complementary_training'],
-            'retrieve_course_enrollment': ACTION_LINKS['retrieve_course_enrollment'],
+            'retrieve_doctoral_training': DOCTORATE_ACTION_LINKS['retrieve_doctoral_training'],
+            'retrieve_complementary_training': DOCTORATE_ACTION_LINKS['retrieve_complementary_training'],
+            'retrieve_course_enrollment': DOCTORATE_ACTION_LINKS['retrieve_course_enrollment'],
         }
     )
     # The schema is explicit in PropositionSchema
@@ -349,7 +356,8 @@ class DoctoratePropositionDTOSerializer(IncludedFieldsMixin, DTOSerializer):
 class GeneralEducationPropositionDTOSerializer(IncludedFieldsMixin, DTOSerializer):
     links = ActionLinksField(
         actions={
-            action: GENERAL_EDUCATION_ACTION_LINKS[action] for action in [
+            action: GENERAL_EDUCATION_ACTION_LINKS[action]
+            for action in [
                 # Profile
                 'retrieve_person',
                 'update_person',
@@ -364,6 +372,7 @@ class GeneralEducationPropositionDTOSerializer(IncludedFieldsMixin, DTOSerialize
                 'update_training_choice',
                 # Proposition
                 'destroy_proposition',
+                'submit_proposition',
             ]
         }
     )
@@ -395,7 +404,8 @@ class GeneralEducationPropositionDTOSerializer(IncludedFieldsMixin, DTOSerialize
 class ContinuingEducationPropositionDTOSerializer(IncludedFieldsMixin, DTOSerializer):
     links = ActionLinksField(
         actions={
-            action: CONTINUING_EDUCATION_ACTION_LINKS[action] for action in [
+            action: CONTINUING_EDUCATION_ACTION_LINKS[action]
+            for action in [
                 # Profile
                 'retrieve_person',
                 'update_person',
@@ -410,6 +420,7 @@ class ContinuingEducationPropositionDTOSerializer(IncludedFieldsMixin, DTOSerial
                 'update_training_choice',
                 # Proposition
                 'destroy_proposition',
+                'submit_proposition',
             ]
         }
     )

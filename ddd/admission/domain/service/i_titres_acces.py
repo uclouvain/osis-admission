@@ -40,7 +40,7 @@ class Conditions:
         return any(self.get_valid_conditions())
 
     def __str__(self):  # pragma: no cover
-        return ','.join(self.get_valid_conditions())
+        return ','.join([name for name in self.condition_names if getattr(self.condition_obj, name, False)])
 
     def get_valid_conditions(self):
         return [getattr(self.condition_obj, name, False) for name in self.condition_names]
