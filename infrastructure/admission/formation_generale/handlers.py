@@ -47,7 +47,7 @@ COMMAND_HANDLERS = {
         formation_translator=FormationGeneraleTranslator(),
         bourse_translator=BourseTranslator(),
     ),
-    ListerPropositionsCandidatQuery: lambda msg_bus, cmd:  lister_propositions_candidat(
+    ListerPropositionsCandidatQuery: lambda msg_bus, cmd: lister_propositions_candidat(
         cmd,
         proposition_repository=PropositionRepository(),
     ),
@@ -70,5 +70,11 @@ COMMAND_HANDLERS = {
         proposition_repository=PropositionRepository(),
         formation_translator=FormationGeneraleTranslator(),
         titres_acces=TitresAcces(),
+    ),
+    SoumettrePropositionCommand: lambda msg_bus, cmd: soumettre_proposition(
+        cmd,
+        proposition_repository=PropositionRepository,
+        formation_translator=FormationGeneraleTranslator,
+        titres_acces=TitresAcces,
     ),
 }

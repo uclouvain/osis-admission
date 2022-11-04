@@ -78,3 +78,8 @@ class SupprimerPropositionCommand(interface.CommandRequest):
 @attr.dataclass(frozen=True, slots=True)
 class VerifierPropositionCommand(interface.QueryRequest):
     uuid_proposition: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class SoumettrePropositionCommand(interface.CommandRequest):
+    uuid_proposition: str

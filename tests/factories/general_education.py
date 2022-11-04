@@ -29,6 +29,7 @@ from admission.infrastructure.admission.domain.service.annee_inscription_formati
     AnneeInscriptionFormationTranslator,
 )
 from admission.contrib.models import GeneralEducationAdmission
+from admission.tests.factories.person import CompletePersonFactory, CompletePersonForBachelorFactory
 from admission.tests.factories.roles import CandidateFactory
 from admission.tests.factories.scholarship import (
     ErasmusMundusScholarship,
@@ -36,6 +37,7 @@ from admission.tests.factories.scholarship import (
     InternationalScholarship,
 )
 from base.models.enums import education_group_categories
+from base.models.enums.education_group_types import TrainingType
 from base.tests.factories.education_group_year import EducationGroupYearFactory
 from base.tests.factories.person import PersonFactory
 from program_management.tests.factories.education_group_version import EducationGroupVersionFactory
@@ -66,3 +68,9 @@ class GeneralEducationAdmissionFactory(factory.DjangoModelFactory):
     @factory.post_generation
     def create_candidate_role(self, create, extracted, **kwargs):
         CandidateFactory(person=self.candidate)
+
+    class Params:
+        bachelor_with_access_conditions_met = factory.Trait(
+            training__education_group_type__name=TrainingType.BACHELOR.name,
+            candidate=factory.SubFactory(CompletePersonForBachelorFactory),
+        )

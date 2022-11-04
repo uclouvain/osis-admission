@@ -63,7 +63,7 @@ class SecondaryStudiesViewSet(PersonRelatedMixin, BaseSecondaryStudiesViewSet):
     permission_classes = [partial(IsSelfPersonTabOrTabPermission, permission_suffix='secondary_studies')]
 
 
-class GeneralSecondaryStudiesViewSet(GeneralEducationPersonRelatedMixin, BaseSecondaryStudiesViewSet):
+class GeneralSecondaryStudiesView(GeneralEducationPersonRelatedMixin, BaseSecondaryStudiesViewSet):
     name = "general_secondary_studies"
     permission_mapping = {
         'GET': 'admission.view_generaleducationadmission_secondary_studies',
@@ -71,7 +71,7 @@ class GeneralSecondaryStudiesViewSet(GeneralEducationPersonRelatedMixin, BaseSec
     }
 
 
-class ContinuingSecondaryStudiesViewSet(ContinuingEducationPersonRelatedMixin, BaseSecondaryStudiesViewSet):
+class ContinuingSecondaryStudiesView(ContinuingEducationPersonRelatedMixin, BaseSecondaryStudiesViewSet):
     name = "continuing_secondary_studies"
     permission_mapping = {
         'GET': 'admission.view_continuingeducationadmission_secondary_studies',

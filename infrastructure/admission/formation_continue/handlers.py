@@ -68,4 +68,10 @@ COMMAND_HANDLERS = {
         formation_translator=FormationContinueTranslator(),
         titres_acces=TitresAcces(),
     ),
+    SoumettrePropositionCommand: lambda msg_bus, cmd: soumettre_proposition(
+        cmd,
+        proposition_repository=PropositionRepository(),
+        formation_translator=FormationContinueTranslator(),
+        titres_acces=TitresAcces(),
+    ),
 }

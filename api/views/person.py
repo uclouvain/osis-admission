@@ -63,7 +63,7 @@ class PersonViewSet(PersonRelatedMixin, BasePersonViewSet):
     permission_classes = [partial(IsSelfPersonTabOrTabPermission, permission_suffix='person')]
 
 
-class GeneralPersonViewSet(GeneralEducationPersonRelatedMixin, BasePersonViewSet):
+class GeneralPersonView(GeneralEducationPersonRelatedMixin, BasePersonViewSet):
     name = "general_person"
     permission_mapping = {
         'GET': 'admission.view_generaleducationadmission_person',
@@ -71,7 +71,7 @@ class GeneralPersonViewSet(GeneralEducationPersonRelatedMixin, BasePersonViewSet
     }
 
 
-class ContinuingPersonViewSet(ContinuingEducationPersonRelatedMixin, BasePersonViewSet):
+class ContinuingPersonView(ContinuingEducationPersonRelatedMixin, BasePersonViewSet):
     name = "continuing_person"
     permission_mapping = {
         'GET': 'admission.view_continuingeducationadmission_person',
