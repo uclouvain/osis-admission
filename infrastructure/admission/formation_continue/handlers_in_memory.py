@@ -38,38 +38,44 @@ from admission.infrastructure.admission.formation_continue.repository.in_memory.
     PropositionInMemoryRepository,
 )
 
+_proposition_repository = PropositionInMemoryRepository()
+_formation_continue_translator = FormationContinueInMemoryTranslator()
+_annee_inscription_formation_translator = AnneeInscriptionFormationInMemoryTranslator()
+_titres_acces = TitresAccesInMemory()
+
+
 COMMAND_HANDLERS = {
     RechercherFormationContinueQuery: lambda msg_bus, cmd: rechercher_formations(
         cmd,
-        formation_continue_translator=FormationContinueInMemoryTranslator(),
-        annee_inscription_formation_translator=AnneeInscriptionFormationInMemoryTranslator(),
+        formation_continue_translator=_formation_continue_translator,
+        annee_inscription_formation_translator=_annee_inscription_formation_translator,
     ),
     InitierPropositionCommand: lambda msg_bus, cmd: initier_proposition(
         cmd,
-        proposition_repository=PropositionInMemoryRepository(),
-        formation_translator=FormationContinueInMemoryTranslator(),
+        proposition_repository=_proposition_repository,
+        formation_translator=_formation_continue_translator,
     ),
     ListerPropositionsCandidatQuery: lambda msg_bus, cmd: lister_propositions_candidat(
         cmd,
-        proposition_repository=PropositionInMemoryRepository(),
+        proposition_repository=_proposition_repository,
     ),
     RecupererPropositionQuery: lambda msg_bus, cmd: recuperer_proposition(
         cmd,
-        proposition_repository=PropositionInMemoryRepository(),
+        proposition_repository=_proposition_repository,
     ),
     ModifierChoixFormationCommand: lambda msg_bus, cmd: modifier_choix_formation(
         cmd,
-        proposition_repository=PropositionInMemoryRepository(),
-        formation_translator=FormationContinueInMemoryTranslator(),
+        proposition_repository=_proposition_repository,
+        formation_translator=_formation_continue_translator,
     ),
     SupprimerPropositionCommand: lambda msg_bus, cmd: supprimer_proposition(
         cmd,
-        proposition_repository=PropositionInMemoryRepository(),
+        proposition_repository=_proposition_repository,
     ),
     VerifierPropositionCommand: lambda msg_bus, cmd: verifier_proposition(
         cmd,
-        proposition_repository=PropositionInMemoryRepository(),
-        formation_translator=FormationContinueInMemoryTranslator(),
-        titres_acces=TitresAccesInMemory(),
+        proposition_repository=_proposition_repository,
+        formation_translator=_formation_continue_translator,
+        titres_acces=_titres_acces,
     ),
 }

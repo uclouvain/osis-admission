@@ -33,36 +33,42 @@ from .domain.service.in_memory.notification import NotificationInMemory
 from .repository.in_memory.activite import ActiviteInMemoryRepository
 from ..repository.in_memory.doctorat import DoctoratInMemoryRepository
 
+_activite_repository = ActiviteInMemoryRepository()
+_doctorat_repository = DoctoratInMemoryRepository()
+_groupe_de_supervision_repository = GroupeDeSupervisionInMemoryRepository()
+_notification = NotificationInMemory()
+
+
 COMMAND_HANDLERS = {
     SupprimerActiviteCommand: lambda msg_bus, cmd: supprimer_activite(
         cmd,
-        activite_repository=ActiviteInMemoryRepository(),
+        activite_repository=_activite_repository,
     ),
     SoumettreActivitesCommand: lambda msg_bus, cmd: soumettre_activites(
         cmd,
-        activite_repository=ActiviteInMemoryRepository(),
-        doctorat_repository=DoctoratInMemoryRepository(),
-        groupe_de_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
-        notification=NotificationInMemory(),
+        activite_repository=_activite_repository,
+        doctorat_repository=_doctorat_repository,
+        groupe_de_supervision_repository=_groupe_de_supervision_repository,
+        notification=_notification,
     ),
     DonnerAvisSurActiviteCommand: lambda msg_bus, cmd: donner_avis_sur_activite(
         cmd,
-        activite_repository=ActiviteInMemoryRepository(),
+        activite_repository=_activite_repository,
     ),
     AccepterActivitesCommand: lambda msg_bus, cmd: accepter_activites(
         cmd,
-        activite_repository=ActiviteInMemoryRepository(),
-        doctorat_repository=DoctoratInMemoryRepository(),
-        notification=NotificationInMemory(),
+        activite_repository=_activite_repository,
+        doctorat_repository=_doctorat_repository,
+        notification=_notification,
     ),
     RefuserActiviteCommand: lambda msg_bus, cmd: refuser_activite(
         cmd,
-        activite_repository=ActiviteInMemoryRepository(),
-        doctorat_repository=DoctoratInMemoryRepository(),
-        notification=NotificationInMemory(),
+        activite_repository=_activite_repository,
+        doctorat_repository=_doctorat_repository,
+        notification=_notification,
     ),
     RevenirSurStatutActiviteCommand: lambda msg_bus, cmd: revenir_sur_statut_activite(
         cmd,
-        activite_repository=ActiviteInMemoryRepository(),
+        activite_repository=_activite_repository,
     ),
 }

@@ -34,25 +34,31 @@ from admission.infrastructure.parcours_doctoral.repository.in_memory.doctorat im
 from .repository.in_memory.demande import DemandeInMemoryRepository
 from ..preparation.repository.in_memory.proposition import PropositionInMemoryRepository
 
+_proposition_repository = PropositionInMemoryRepository()
+_demande_repository = DemandeInMemoryRepository()
+_epreuve_confirmation_repository = EpreuveConfirmationInMemoryRepository()
+_doctorat_repository = DoctoratInMemoryRepository()
+
+
 COMMAND_HANDLERS = {
     FiltrerDemandesQuery: lambda msg_bus, cmd: filtrer_demandes(
         cmd,
-        proposition_repository=PropositionInMemoryRepository(),
-        demande_repository=DemandeInMemoryRepository(),
+        proposition_repository=_proposition_repository,
+        demande_repository=_demande_repository,
     ),
     RecupererDemandeQuery: lambda msg_bus, cmd: recuperer_demande(
         cmd,
-        demande_repository=DemandeInMemoryRepository(),
+        demande_repository=_demande_repository,
     ),
     RefuserDemandeCddCommand: lambda msg_bus, cmd: refuser_demande_cdd(
         cmd,
-        demande_repository=DemandeInMemoryRepository(),
+        demande_repository=_demande_repository,
     ),
     ApprouverDemandeCddCommand: lambda msg_bus, cmd: approuver_demande_cdd(
         cmd,
-        demande_repository=DemandeInMemoryRepository(),
-        proposition_repository=PropositionInMemoryRepository(),
-        epreuve_confirmation_repository=EpreuveConfirmationInMemoryRepository(),
-        doctorat_repository=DoctoratInMemoryRepository(),
+        demande_repository=_demande_repository,
+        proposition_repository=_proposition_repository,
+        epreuve_confirmation_repository=_epreuve_confirmation_repository,
+        doctorat_repository=_doctorat_repository,
     ),
 }

@@ -31,15 +31,20 @@ from admission.infrastructure.parcours_doctoral.domain.service.in_memory.histori
 from admission.infrastructure.parcours_doctoral.domain.service.in_memory.notification import NotificationInMemory
 from admission.infrastructure.parcours_doctoral.repository.in_memory.doctorat import DoctoratInMemoryRepository
 
+_doctorat_repository = DoctoratInMemoryRepository()
+_notification = NotificationInMemory()
+_historique = HistoriqueInMemory()
+
+
 COMMAND_HANDLERS = {
     RecupererDoctoratQuery: lambda msg_bus, cmd: recuperer_doctorat(
         cmd,
-        doctorat_repository=DoctoratInMemoryRepository(),
+        doctorat_repository=_doctorat_repository,
     ),
     EnvoyerMessageDoctorantCommand: lambda msg_bus, cmd: envoyer_message_au_doctorant(
         cmd,
-        doctorat_repository=DoctoratInMemoryRepository(),
-        notification=NotificationInMemory(),
-        historique=HistoriqueInMemory(),
+        doctorat_repository=_doctorat_repository,
+        notification=_notification,
+        historique=_historique,
     ),
 }
