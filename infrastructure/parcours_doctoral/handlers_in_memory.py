@@ -23,7 +23,6 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
-from functools import partial
 
 from admission.ddd.parcours_doctoral.commands import *
 from admission.ddd.parcours_doctoral.use_case.read import *
@@ -33,12 +32,12 @@ from admission.infrastructure.parcours_doctoral.domain.service.in_memory.notific
 from admission.infrastructure.parcours_doctoral.repository.in_memory.doctorat import DoctoratInMemoryRepository
 
 COMMAND_HANDLERS = {
-    RecupererDoctoratQuery: partial(
-        recuperer_doctorat,
+    RecupererDoctoratQuery: lambda msg_bus, cmd: recuperer_doctorat(
+        cmd,
         doctorat_repository=DoctoratInMemoryRepository(),
     ),
-    EnvoyerMessageDoctorantCommand: partial(
-        envoyer_message_au_doctorant,
+    EnvoyerMessageDoctorantCommand: lambda msg_bus, cmd: envoyer_message_au_doctorant(
+        cmd,
         doctorat_repository=DoctoratInMemoryRepository(),
         notification=NotificationInMemory(),
         historique=HistoriqueInMemory(),

@@ -23,7 +23,6 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
-from functools import partial
 
 from admission.ddd.parcours_doctoral.formation.commands import *
 from admission.ddd.parcours_doctoral.formation.use_case.write import *
@@ -35,35 +34,35 @@ from .repository.in_memory.activite import ActiviteInMemoryRepository
 from ..repository.in_memory.doctorat import DoctoratInMemoryRepository
 
 COMMAND_HANDLERS = {
-    SupprimerActiviteCommand: partial(
-        supprimer_activite,
+    SupprimerActiviteCommand: lambda msg_bus, cmd: supprimer_activite(
+        cmd,
         activite_repository=ActiviteInMemoryRepository(),
     ),
-    SoumettreActivitesCommand: partial(
-        soumettre_activites,
+    SoumettreActivitesCommand: lambda msg_bus, cmd: soumettre_activites(
+        cmd,
         activite_repository=ActiviteInMemoryRepository(),
         doctorat_repository=DoctoratInMemoryRepository(),
         groupe_de_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
         notification=NotificationInMemory(),
     ),
-    DonnerAvisSurActiviteCommand: partial(
-        donner_avis_sur_activite,
+    DonnerAvisSurActiviteCommand: lambda msg_bus, cmd: donner_avis_sur_activite(
+        cmd,
         activite_repository=ActiviteInMemoryRepository(),
     ),
-    AccepterActivitesCommand: partial(
-        accepter_activites,
-        activite_repository=ActiviteInMemoryRepository(),
-        doctorat_repository=DoctoratInMemoryRepository(),
-        notification=NotificationInMemory(),
-    ),
-    RefuserActiviteCommand: partial(
-        refuser_activite,
+    AccepterActivitesCommand: lambda msg_bus, cmd: accepter_activites(
+        cmd,
         activite_repository=ActiviteInMemoryRepository(),
         doctorat_repository=DoctoratInMemoryRepository(),
         notification=NotificationInMemory(),
     ),
-    RevenirSurStatutActiviteCommand: partial(
-        revenir_sur_statut_activite,
+    RefuserActiviteCommand: lambda msg_bus, cmd: refuser_activite(
+        cmd,
+        activite_repository=ActiviteInMemoryRepository(),
+        doctorat_repository=DoctoratInMemoryRepository(),
+        notification=NotificationInMemory(),
+    ),
+    RevenirSurStatutActiviteCommand: lambda msg_bus, cmd: revenir_sur_statut_activite(
+        cmd,
         activite_repository=ActiviteInMemoryRepository(),
     ),
 }

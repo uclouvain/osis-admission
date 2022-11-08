@@ -23,7 +23,6 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
-from functools import partial
 
 from admission.ddd.admission.formation_generale.commands import *
 from admission.ddd.admission.formation_generale.use_case.read import *
@@ -41,37 +40,37 @@ from admission.infrastructure.admission.formation_generale.repository.in_memory.
 )
 
 COMMAND_HANDLERS = {
-    RechercherFormationGeneraleQuery: partial(
-        rechercher_formations,
+    RechercherFormationGeneraleQuery: lambda msg_bus, cmd: rechercher_formations(
+        cmd,
         formation_generale_translator=FormationGeneraleInMemoryTranslator(),
         annee_inscription_formation_translator=AnneeInscriptionFormationInMemoryTranslator(),
     ),
-    InitierPropositionCommand: partial(
-        initier_proposition,
+    InitierPropositionCommand: lambda msg_bus, cmd: initier_proposition(
+        cmd,
         proposition_repository=PropositionInMemoryRepository(),
         formation_translator=FormationGeneraleInMemoryTranslator(),
         bourse_translator=BourseInMemoryTranslator(),
     ),
-    ListerPropositionsCandidatQuery: partial(
-        lister_propositions_candidat,
+    ListerPropositionsCandidatQuery: lambda msg_bus, cmd: lister_propositions_candidat(
+        cmd,
         proposition_repository=PropositionInMemoryRepository(),
     ),
-    RecupererPropositionQuery: partial(
-        recuperer_proposition,
+    RecupererPropositionQuery: lambda msg_bus, cmd: recuperer_proposition(
+        cmd,
         proposition_repository=PropositionInMemoryRepository(),
     ),
-    ModifierChoixFormationCommand: partial(
-        modifier_choix_formation,
+    ModifierChoixFormationCommand: lambda msg_bus, cmd: modifier_choix_formation(
+        cmd,
         proposition_repository=PropositionInMemoryRepository(),
         formation_translator=FormationGeneraleInMemoryTranslator(),
         bourse_translator=BourseInMemoryTranslator(),
     ),
-    SupprimerPropositionCommand: partial(
-        supprimer_proposition,
+    SupprimerPropositionCommand: lambda msg_bus, cmd: supprimer_proposition(
+        cmd,
         proposition_repository=PropositionInMemoryRepository(),
     ),
-    VerifierPropositionCommand: partial(
-        verifier_proposition,
+    VerifierPropositionCommand: lambda msg_bus, cmd: verifier_proposition(
+        cmd,
         proposition_repository=PropositionInMemoryRepository(),
         formation_translator=FormationGeneraleInMemoryTranslator(),
         titres_acces=TitresAccesInMemory(),

@@ -23,7 +23,6 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
-from functools import partial
 
 from admission.ddd.admission.doctorat.preparation.commands import *
 from admission.ddd.admission.doctorat.preparation.use_case.read import *
@@ -45,95 +44,95 @@ from ..validation.repository.in_memory.demande import DemandeInMemoryRepository
 from ...domain.service.in_memory.titres_acces import TitresAccesInMemory
 
 COMMAND_HANDLERS = {
-    InitierPropositionCommand: partial(
-        initier_proposition,
+    InitierPropositionCommand: lambda msg_bus, cmd: initier_proposition(
+        cmd,
         proposition_repository=PropositionInMemoryRepository(),
         doctorat_translator=DoctoratInMemoryTranslator(),
         bourse_translator=BourseInMemoryTranslator(),
         historique=HistoriqueInMemory(),
     ),
-    CompleterPropositionCommand: partial(
-        completer_proposition,
+    CompleterPropositionCommand: lambda msg_bus, cmd: completer_proposition(
+        cmd,
         proposition_repository=PropositionInMemoryRepository(),
         doctorat_translator=DoctoratInMemoryTranslator(),
         historique=HistoriqueInMemory(),
     ),
-    RechercherDoctoratQuery: partial(
-        rechercher_doctorats,
+    RechercherDoctoratQuery: lambda msg_bus, cmd: rechercher_doctorats(
+        cmd,
         doctorat_translator=DoctoratInMemoryTranslator(),
         annee_inscription_formation_translator=AnneeInscriptionFormationInMemoryTranslator(),
     ),
-    IdentifierPromoteurCommand: partial(
-        identifier_promoteur,
+    IdentifierPromoteurCommand: lambda msg_bus, cmd: identifier_promoteur(
+        cmd,
         proposition_repository=PropositionInMemoryRepository(),
         groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
         promoteur_translator=PromoteurInMemoryTranslator(),
         historique=HistoriqueInMemory(),
     ),
-    IdentifierMembreCACommand: partial(
-        identifier_membre_CA,
+    IdentifierMembreCACommand: lambda msg_bus, cmd: identifier_membre_CA(
+        cmd,
         proposition_repository=PropositionInMemoryRepository(),
         groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
         membre_CA_translator=MembreCAInMemoryTranslator(),
         historique=HistoriqueInMemory(),
     ),
-    DemanderSignaturesCommand: partial(
-        demander_signatures,
+    DemanderSignaturesCommand: lambda msg_bus, cmd: demander_signatures(
+        cmd,
         proposition_repository=PropositionInMemoryRepository(),
         groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
         promoteur_translator=PromoteurInMemoryTranslator(),
         historique=HistoriqueInMemory(),
         notification=NotificationInMemory(),
     ),
-    VerifierPropositionCommand: partial(
-        verifier_proposition,
+    VerifierPropositionCommand: lambda msg_bus, cmd: verifier_proposition(
+        cmd,
         proposition_repository=PropositionInMemoryRepository(),
         groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
         profil_candidat_translator=ProfilCandidatInMemoryTranslator(),
         academic_year_repository=AcademicYearInMemoryRepository(),
         titres_acces=TitresAccesInMemory(),
     ),
-    VerifierProjetCommand: partial(
-        verifier_projet,
+    VerifierProjetCommand: lambda msg_bus, cmd: verifier_projet(
+        cmd,
         proposition_repository=PropositionInMemoryRepository(),
         groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
         promoteur_translator=PromoteurInMemoryTranslator(),
     ),
-    SupprimerPromoteurCommand: partial(
-        supprimer_promoteur,
+    SupprimerPromoteurCommand: lambda msg_bus, cmd: supprimer_promoteur(
+        cmd,
         proposition_repository=PropositionInMemoryRepository(),
         groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
         historique=HistoriqueInMemory(),
         notification=NotificationInMemory(),
     ),
-    DesignerPromoteurReferenceCommand: partial(
-        designer_promoteur_reference,
+    DesignerPromoteurReferenceCommand: lambda msg_bus, cmd: designer_promoteur_reference(
+        cmd,
         proposition_repository=PropositionInMemoryRepository(),
         groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
     ),
-    SupprimerMembreCACommand: partial(
-        supprimer_membre_CA,
-        proposition_repository=PropositionInMemoryRepository(),
-        groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
-        historique=HistoriqueInMemory(),
-        notification=NotificationInMemory(),
-    ),
-    ApprouverPropositionCommand: partial(
-        approuver_proposition,
+    SupprimerMembreCACommand: lambda msg_bus, cmd: supprimer_membre_CA(
+        cmd,
         proposition_repository=PropositionInMemoryRepository(),
         groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
         historique=HistoriqueInMemory(),
         notification=NotificationInMemory(),
     ),
-    RefuserPropositionCommand: partial(
-        refuser_proposition,
+    ApprouverPropositionCommand: lambda msg_bus, cmd: approuver_proposition(
+        cmd,
         proposition_repository=PropositionInMemoryRepository(),
         groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
         historique=HistoriqueInMemory(),
         notification=NotificationInMemory(),
     ),
-    SoumettrePropositionCommand: partial(
-        soumettre_proposition,
+    RefuserPropositionCommand: lambda msg_bus, cmd: refuser_proposition(
+        cmd,
+        proposition_repository=PropositionInMemoryRepository(),
+        groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
+        historique=HistoriqueInMemory(),
+        notification=NotificationInMemory(),
+    ),
+    SoumettrePropositionCommand: lambda msg_bus, cmd: soumettre_proposition(
+        cmd,
         proposition_repository=PropositionInMemoryRepository(),
         groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
         demande_repository=DemandeInMemoryRepository(),
@@ -143,52 +142,52 @@ COMMAND_HANDLERS = {
         notification=NotificationInMemory(),
         titres_acces=TitresAccesInMemory(),
     ),
-    DefinirCotutelleCommand: partial(
-        definir_cotutelle,
+    DefinirCotutelleCommand: lambda msg_bus, cmd: definir_cotutelle(
+        cmd,
         groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
         proposition_repository=PropositionInMemoryRepository(),
         historique=HistoriqueInMemory(),
     ),
-    ListerPropositionsCandidatQuery: partial(
-        lister_propositions_candidat,
+    ListerPropositionsCandidatQuery: lambda msg_bus, cmd: lister_propositions_candidat(
+        cmd,
         proposition_repository=PropositionInMemoryRepository(),
     ),
-    ListerPropositionsSuperviseesQuery: partial(
-        lister_propositions_supervisees,
+    ListerPropositionsSuperviseesQuery: lambda msg_bus, cmd: lister_propositions_supervisees(
+        cmd,
         proposition_repository=PropositionInMemoryRepository(),
         groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
     ),
-    GetPropositionCommand: partial(
-        recuperer_proposition,
+    GetPropositionCommand: lambda msg_bus, cmd: recuperer_proposition(
+        cmd,
         proposition_repository=PropositionInMemoryRepository(),
     ),
-    GetGroupeDeSupervisionCommand: partial(
-        recuperer_groupe_de_supervision,
+    GetGroupeDeSupervisionCommand: lambda msg_bus, cmd: recuperer_groupe_de_supervision(
+        cmd,
         groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
         promoteur_translator=PromoteurInMemoryTranslator(),
         membre_ca_translator=MembreCAInMemoryTranslator(),
     ),
-    GetCotutelleCommand: partial(
-        recuperer_cotutelle,
+    GetCotutelleCommand: lambda msg_bus, cmd: recuperer_cotutelle(
+        cmd,
         groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
     ),
-    SupprimerPropositionCommand: partial(
-        supprimer_proposition,
+    SupprimerPropositionCommand: lambda msg_bus, cmd: supprimer_proposition(
+        cmd,
         proposition_repository=PropositionInMemoryRepository(),
         historique=HistoriqueInMemory(),
     ),
-    ApprouverPropositionParPdfCommand: partial(
-        approuver_proposition_par_pdf,
+    ApprouverPropositionParPdfCommand: lambda msg_bus, cmd: approuver_proposition_par_pdf(
+        cmd,
         proposition_repository=PropositionInMemoryRepository(),
         groupe_supervision_repository=GroupeDeSupervisionInMemoryRepository(),
         historique=HistoriqueInMemory(),
     ),
-    CompleterComptabilitePropositionCommand: partial(
-        completer_comptabilite_proposition,
+    CompleterComptabilitePropositionCommand: lambda msg_bus, cmd: completer_comptabilite_proposition(
+        cmd,
         proposition_repository=PropositionInMemoryRepository(),
     ),
-    ModifierTypeAdmissionCommand: partial(
-        modifier_type_admission,
+    ModifierTypeAdmissionCommand: lambda msg_bus, cmd: modifier_type_admission(
+        cmd,
         proposition_repository=PropositionInMemoryRepository(),
         bourse_translator=BourseInMemoryTranslator(),
     ),

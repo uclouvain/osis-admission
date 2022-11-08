@@ -23,7 +23,6 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
-from functools import partial
 
 from admission.ddd.admission.doctorat.validation.commands import *
 from admission.ddd.admission.doctorat.validation.use_case.read import *
@@ -36,21 +35,21 @@ from .repository.in_memory.demande import DemandeInMemoryRepository
 from ..preparation.repository.in_memory.proposition import PropositionInMemoryRepository
 
 COMMAND_HANDLERS = {
-    FiltrerDemandesQuery: partial(
-        filtrer_demandes,
+    FiltrerDemandesQuery: lambda msg_bus, cmd: filtrer_demandes(
+        cmd,
         proposition_repository=PropositionInMemoryRepository(),
         demande_repository=DemandeInMemoryRepository(),
     ),
-    RecupererDemandeQuery: partial(
-        recuperer_demande,
+    RecupererDemandeQuery: lambda msg_bus, cmd: recuperer_demande(
+        cmd,
         demande_repository=DemandeInMemoryRepository(),
     ),
-    RefuserDemandeCddCommand: partial(
-        refuser_demande_cdd,
+    RefuserDemandeCddCommand: lambda msg_bus, cmd: refuser_demande_cdd(
+        cmd,
         demande_repository=DemandeInMemoryRepository(),
     ),
-    ApprouverDemandeCddCommand: partial(
-        approuver_demande_cdd,
+    ApprouverDemandeCddCommand: lambda msg_bus, cmd: approuver_demande_cdd(
+        cmd,
         demande_repository=DemandeInMemoryRepository(),
         proposition_repository=PropositionInMemoryRepository(),
         epreuve_confirmation_repository=EpreuveConfirmationInMemoryRepository(),
