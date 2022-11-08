@@ -54,6 +54,7 @@ _bourse_translator = BourseInMemoryTranslator()
 _historique = HistoriqueInMemory()
 _notification = NotificationInMemory()
 _titres_acces = TitresAccesInMemory()
+_membre_ca_translator = MembreCAInMemoryTranslator()
 
 
 COMMAND_HANDLERS = {
@@ -86,7 +87,7 @@ COMMAND_HANDLERS = {
         cmd,
         proposition_repository=_proposition_repository,
         groupe_supervision_repository=_groupe_supervision_repository,
-        membre_CA_translator=MembreCAInMemoryTranslator(),
+        membre_CA_translator=_membre_ca_translator,
         historique=_historique,
     ),
     DemanderSignaturesCommand: lambda msg_bus, cmd: demander_signatures(
@@ -178,7 +179,7 @@ COMMAND_HANDLERS = {
         cmd,
         groupe_supervision_repository=_groupe_supervision_repository,
         promoteur_translator=_promoteur_translator,
-        membre_ca_translator=MembreCAInMemoryTranslator(),
+        membre_ca_translator=_membre_ca_translator,
     ),
     GetCotutelleCommand: lambda msg_bus, cmd: recuperer_cotutelle(
         cmd,
