@@ -4611,6 +4611,42 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - propositions
+  /propositions/general-education/{uuid}/specific-question:
+    put:
+      operationId: update_general_specific_question
+      description: ''
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ModifierQuestionsSpecifiquesCommand'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PropositionIdentityDTO'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
   /propositions/continuing-education/{uuid}/training-choice:
     put:
       operationId: update_continuing_training_choice
@@ -4671,6 +4707,42 @@ paths:
           content:
             application/json:
               schema: {}
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
+  /propositions/continuing-education/{uuid}/specific-question:
+    put:
+      operationId: update_continuing_specific_question
+      description: ''
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ModifierQuestionsSpecifiquesCommand'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PropositionIdentityDTO'
           description: ''
         '400':
           $ref: '#/components/responses/BadRequest'
@@ -4867,6 +4939,8 @@ components:
                     $ref: '#/components/schemas/ActionLink'
                   retrieve_curriculum:
                     $ref: '#/components/schemas/ActionLink'
+                  retrieve_specific_question:
+                    $ref: '#/components/schemas/ActionLink'
                   retrieve_training_choice:
                     $ref: '#/components/schemas/ActionLink'
                   destroy_proposition:
@@ -4925,6 +4999,8 @@ components:
                   retrieve_secondary_studies:
                     $ref: '#/components/schemas/ActionLink'
                   retrieve_curriculum:
+                    $ref: '#/components/schemas/ActionLink'
+                  retrieve_specific_question:
                     $ref: '#/components/schemas/ActionLink'
                   retrieve_training_choice:
                     $ref: '#/components/schemas/ActionLink'
@@ -7772,6 +7848,10 @@ components:
               $ref: '#/components/schemas/ActionLink'
             update_training_choice:
               $ref: '#/components/schemas/ActionLink'
+            retrieve_specific_question:
+              $ref: '#/components/schemas/ActionLink'
+            update_specific_question:
+              $ref: '#/components/schemas/ActionLink'
             destroy_proposition:
               $ref: '#/components/schemas/ActionLink'
             submit_proposition:
@@ -7903,6 +7983,10 @@ components:
             retrieve_training_choice:
               $ref: '#/components/schemas/ActionLink'
             update_training_choice:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_specific_question:
+              $ref: '#/components/schemas/ActionLink'
+            update_specific_question:
               $ref: '#/components/schemas/ActionLink'
             destroy_proposition:
               $ref: '#/components/schemas/ActionLink'
@@ -8655,6 +8739,11 @@ components:
       - uuid_proposition
       - sigle_formation
       - annee_formation
+    ModifierQuestionsSpecifiquesCommand:
+      type: object
+      properties:
+        specific_question_answers:
+          type: object
     ModifierChoixFormationContinueCommand:
       type: object
       properties:

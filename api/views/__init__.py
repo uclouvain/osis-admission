@@ -61,4 +61,6 @@ from admission.api.views.specific_questions import (
     GeneralSpecificQuestionListView,
     DoctorateSpecificQuestionListView,
     ContinuingSpecificQuestionListView,
+    GeneralSpecificQuestionAPIView,
+    ContinuingSpecificQuestionAPIView,
 )

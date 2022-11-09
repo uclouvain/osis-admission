@@ -73,3 +73,14 @@ class QuestionsSpecifiquesEtudesSecondairesNonCompleteesException(BusinessExcept
             "'Previous experience > Secondary studies' tab"
         )
         super().__init__(message, **kwargs)
+
+
+class QuestionsSpecifiquesInformationsComplementairesNonCompleteesException(BusinessException):
+    status_code = "ADMISSION-6"
+
+    def __init__(self, **kwargs):
+        message = _(
+            "Mandatory fields are missing in the specific questions of the "
+            "'Additional information > Specific questions' tab"
+        )
+        super().__init__(message, **kwargs)

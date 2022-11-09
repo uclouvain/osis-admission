@@ -31,6 +31,7 @@ from admission.ddd.admission.domain.validator.exceptions import (
     QuestionsSpecifiquesCurriculumNonCompleteesException,
     QuestionsSpecifiquesEtudesSecondairesNonCompleteesException,
     QuestionsSpecifiquesChoixFormationNonCompleteesException,
+    QuestionsSpecifiquesInformationsComplementairesNonCompleteesException,
 )
 from admission.ddd.admission.enums.question_specifique import Onglets
 from admission.ddd.admission.formation_continue.domain.model.proposition import (
@@ -83,3 +84,16 @@ class VerifierQuestionsSpecifiques(interface.DomainService):
     ):
         if not cls._questions_requises_bien_specifiees(proposition, questions_specifiques, Onglets.CHOIX_FORMATION):
             raise QuestionsSpecifiquesChoixFormationNonCompleteesException
+
+    @classmethod
+    def verifier_onglet_questions_specifiques(
+        cls,
+        proposition: Union['PropositionDoctorale', 'PropositionFormationContinue', 'PropositionFormationGenerale'],
+        questions_specifiques: List['QuestionSpecifique'],
+    ):
+        if not cls._questions_requises_bien_specifiees(
+            proposition,
+            questions_specifiques,
+            Onglets.INFORMATIONS_ADDITIONNELLES
+        ):
+            raise QuestionsSpecifiquesInformationsComplementairesNonCompleteesException

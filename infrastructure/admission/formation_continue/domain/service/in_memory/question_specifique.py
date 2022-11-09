@@ -32,6 +32,7 @@ from admission.ddd.admission.formation_continue.domain.service.i_question_specif
 from admission.ddd.admission.formation_continue.domain.validator.exceptions import PropositionNonTrouveeException
 from admission.infrastructure.admission.domain.service.in_memory.question_specifique import (
     SuperQuestionSpecifiqueInMemoryTranslator,
+    QuestionSpecifiqueEtendue,
 )
 from admission.infrastructure.admission.formation_continue.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
@@ -42,13 +43,13 @@ class QuestionSpecifiqueInMemoryTranslator(IQuestionSpecifiqueTranslator, SuperQ
     proposition_repository = PropositionInMemoryRepository
 
     @classmethod
-    def _search_by_proposition_qs(
+    def _extended_search_by_proposition(
         cls,
         proposition_uuid: str,
         onglets: List[str] = None,
         type: Optional[str] = None,
         requis: Optional[bool] = None,
-    ):
+    ) -> List[QuestionSpecifiqueEtendue]:
         try:
             proposition = cls.proposition_repository.get(PropositionIdentity(uuid=proposition_uuid))
         except PropositionNonTrouveeException:
