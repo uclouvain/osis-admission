@@ -23,7 +23,6 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
-from functools import partial
 
 from admission.ddd.admission.doctorat.validation.commands import *
 from admission.ddd.admission.doctorat.validation.use_case.read import *
@@ -36,21 +35,21 @@ from .repository.demande import DemandeRepository
 from ..preparation.repository.proposition import PropositionRepository
 
 COMMAND_HANDLERS = {
-    FiltrerDemandesQuery: partial(
-        filtrer_demandes,
+    FiltrerDemandesQuery: lambda msg_bus, cmd: filtrer_demandes(
+        cmd,
         proposition_repository=PropositionRepository(),
         demande_repository=DemandeRepository(),
     ),
-    RecupererDemandeQuery: partial(
-        recuperer_demande,
+    RecupererDemandeQuery: lambda msg_bus, cmd: recuperer_demande(
+        cmd,
         demande_repository=DemandeRepository(),
     ),
-    RefuserDemandeCddCommand: partial(
-        refuser_demande_cdd,
+    RefuserDemandeCddCommand: lambda msg_bus, cmd: refuser_demande_cdd(
+        cmd,
         demande_repository=DemandeRepository(),
     ),
-    ApprouverDemandeCddCommand: partial(
-        approuver_demande_cdd,
+    ApprouverDemandeCddCommand: lambda msg_bus, cmd: approuver_demande_cdd(
+        cmd,
         demande_repository=DemandeRepository(),
         proposition_repository=PropositionRepository(),
         epreuve_confirmation_repository=EpreuveConfirmationRepository(),

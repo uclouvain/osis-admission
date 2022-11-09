@@ -23,7 +23,6 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
-from functools import partial
 
 from admission.ddd.parcours_doctoral.epreuve_confirmation.commands import *
 from admission.ddd.parcours_doctoral.epreuve_confirmation.use_case.read import *
@@ -32,61 +31,67 @@ from .domain.service.in_memory.notification import NotificationInMemory
 from .repository.in_memory.epreuve_confirmation import EpreuveConfirmationInMemoryRepository
 from ..repository.in_memory.doctorat import DoctoratInMemoryRepository
 
+_epreuve_confirmation_repository = EpreuveConfirmationInMemoryRepository()
+_doctorat_repository = DoctoratInMemoryRepository()
+_notification = NotificationInMemory()
+
+
 COMMAND_HANDLERS = {
-    RecupererEpreuvesConfirmationQuery: partial(
-        recuperer_epreuves_confirmation,
-        epreuve_confirmation_repository=EpreuveConfirmationInMemoryRepository(),
-        doctorat_repository=DoctoratInMemoryRepository(),
+    RecupererEpreuvesConfirmationQuery: lambda msg_bus, cmd: recuperer_epreuves_confirmation(
+        cmd,
+        epreuve_confirmation_repository=_epreuve_confirmation_repository,
+        doctorat_repository=_doctorat_repository,
     ),
-    RecupererDerniereEpreuveConfirmationQuery: partial(
-        recuperer_derniere_epreuve_confirmation,
-        epreuve_confirmation_repository=EpreuveConfirmationInMemoryRepository(),
-        doctorat_repository=DoctoratInMemoryRepository(),
+    RecupererDerniereEpreuveConfirmationQuery: lambda msg_bus, cmd: recuperer_derniere_epreuve_confirmation(
+        cmd,
+        epreuve_confirmation_repository=_epreuve_confirmation_repository,
+        doctorat_repository=_doctorat_repository,
     ),
-    ModifierEpreuveConfirmationParCDDCommand: partial(
-        modifier_epreuve_confirmation_par_cdd,
-        epreuve_confirmation_repository=EpreuveConfirmationInMemoryRepository(),
+    ModifierEpreuveConfirmationParCDDCommand: lambda msg_bus, cmd: modifier_epreuve_confirmation_par_cdd(
+        cmd,
+        epreuve_confirmation_repository=_epreuve_confirmation_repository,
     ),
-    SoumettreEpreuveConfirmationCommand: partial(
-        soumettre_epreuve_confirmation,
-        doctorat_repository=DoctoratInMemoryRepository(),
-        epreuve_confirmation_repository=EpreuveConfirmationInMemoryRepository(),
-        notification=NotificationInMemory(),
+    SoumettreEpreuveConfirmationCommand: lambda msg_bus, cmd: soumettre_epreuve_confirmation(
+        cmd,
+        doctorat_repository=_doctorat_repository,
+        epreuve_confirmation_repository=_epreuve_confirmation_repository,
+        notification=_notification,
     ),
-    CompleterEpreuveConfirmationParPromoteurCommand: partial(
-        completer_epreuve_confirmation_par_promoteur,
-        epreuve_confirmation_repository=EpreuveConfirmationInMemoryRepository(),
-        notification=NotificationInMemory(),
+    CompleterEpreuveConfirmationParPromoteurCommand: lambda msg_bus, cmd: completer_epreuve_confirmation_par_promoteur(
+        cmd,
+        epreuve_confirmation_repository=_epreuve_confirmation_repository,
+        notification=_notification,
     ),
-    SoumettreReportDeDateCommand: partial(
-        soumettre_report_de_date,
-        epreuve_confirmation_repository=EpreuveConfirmationInMemoryRepository(),
-        notification=NotificationInMemory(),
+    SoumettreReportDeDateCommand: lambda msg_bus, cmd: soumettre_report_de_date(
+        cmd,
+        epreuve_confirmation_repository=_epreuve_confirmation_repository,
+        notification=_notification,
     ),
-    SoumettreAvisProlongationCommand: partial(
-        soumettre_avis_prolongation,
-        epreuve_confirmation_repository=EpreuveConfirmationInMemoryRepository(),
+    SoumettreAvisProlongationCommand: lambda msg_bus, cmd: soumettre_avis_prolongation(
+        cmd,
+        epreuve_confirmation_repository=_epreuve_confirmation_repository,
     ),
-    ConfirmerReussiteCommand: partial(
-        confirmer_reussite,
-        epreuve_confirmation_repository=EpreuveConfirmationInMemoryRepository(),
-        doctorat_repository=DoctoratInMemoryRepository(),
-        notification=NotificationInMemory(),
+    ConfirmerReussiteCommand: lambda msg_bus, cmd: confirmer_reussite(
+        cmd,
+        epreuve_confirmation_repository=_epreuve_confirmation_repository,
+        doctorat_repository=_doctorat_repository,
+        notification=_notification,
     ),
-    ConfirmerEchecCommand: partial(
-        confirmer_echec,
-        epreuve_confirmation_repository=EpreuveConfirmationInMemoryRepository(),
-        doctorat_repository=DoctoratInMemoryRepository(),
-        notification=NotificationInMemory(),
+    ConfirmerEchecCommand: lambda msg_bus, cmd: confirmer_echec(
+        cmd,
+        epreuve_confirmation_repository=_epreuve_confirmation_repository,
+        doctorat_repository=_doctorat_repository,
+        notification=_notification,
     ),
-    ConfirmerRepassageCommand: partial(
-        confirmer_repassage,
-        epreuve_confirmation_repository=EpreuveConfirmationInMemoryRepository(),
-        doctorat_repository=DoctoratInMemoryRepository(),
-        notification=NotificationInMemory(),
+    ConfirmerRepassageCommand: lambda msg_bus, cmd: confirmer_repassage(
+        cmd,
+        epreuve_confirmation_repository=_epreuve_confirmation_repository,
+        doctorat_repository=_doctorat_repository,
+        notification=_notification,
     ),
-    TeleverserAvisRenouvellementMandatRechercheCommand: partial(
-        televerser_avis_renouvellement_mandat_recherche,
-        epreuve_confirmation_repository=EpreuveConfirmationInMemoryRepository(),
-    ),
+    TeleverserAvisRenouvellementMandatRechercheCommand: lambda msg_bus, cmd:
+        televerser_avis_renouvellement_mandat_recherche(
+            cmd,
+            epreuve_confirmation_repository=_epreuve_confirmation_repository,
+        ),
 }

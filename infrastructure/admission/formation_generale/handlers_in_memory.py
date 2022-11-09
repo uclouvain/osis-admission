@@ -23,7 +23,6 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
-from functools import partial
 
 from admission.ddd.admission.formation_generale.commands import *
 from admission.ddd.admission.formation_generale.use_case.read import *
@@ -40,40 +39,47 @@ from admission.infrastructure.admission.formation_generale.repository.in_memory.
     PropositionInMemoryRepository,
 )
 
+_formation_generale_translator = FormationGeneraleInMemoryTranslator()
+_annee_inscription_formation_translator = AnneeInscriptionFormationInMemoryTranslator()
+_proposition_repository = PropositionInMemoryRepository()
+_bourse_translator = BourseInMemoryTranslator()
+_titres_acces = TitresAccesInMemory()
+
+
 COMMAND_HANDLERS = {
-    RechercherFormationGeneraleQuery: partial(
-        rechercher_formations,
-        formation_generale_translator=FormationGeneraleInMemoryTranslator(),
-        annee_inscription_formation_translator=AnneeInscriptionFormationInMemoryTranslator(),
+    RechercherFormationGeneraleQuery: lambda msg_bus, cmd: rechercher_formations(
+        cmd,
+        formation_generale_translator=_formation_generale_translator,
+        annee_inscription_formation_translator=_annee_inscription_formation_translator,
     ),
-    InitierPropositionCommand: partial(
-        initier_proposition,
-        proposition_repository=PropositionInMemoryRepository(),
-        formation_translator=FormationGeneraleInMemoryTranslator(),
-        bourse_translator=BourseInMemoryTranslator(),
+    InitierPropositionCommand: lambda msg_bus, cmd: initier_proposition(
+        cmd,
+        proposition_repository=_proposition_repository,
+        formation_translator=_formation_generale_translator,
+        bourse_translator=_bourse_translator,
     ),
-    ListerPropositionsCandidatQuery: partial(
-        lister_propositions_candidat,
-        proposition_repository=PropositionInMemoryRepository(),
+    ListerPropositionsCandidatQuery: lambda msg_bus, cmd: lister_propositions_candidat(
+        cmd,
+        proposition_repository=_proposition_repository,
     ),
-    RecupererPropositionQuery: partial(
-        recuperer_proposition,
-        proposition_repository=PropositionInMemoryRepository(),
+    RecupererPropositionQuery: lambda msg_bus, cmd: recuperer_proposition(
+        cmd,
+        proposition_repository=_proposition_repository,
     ),
-    ModifierChoixFormationCommand: partial(
-        modifier_choix_formation,
-        proposition_repository=PropositionInMemoryRepository(),
-        formation_translator=FormationGeneraleInMemoryTranslator(),
-        bourse_translator=BourseInMemoryTranslator(),
+    ModifierChoixFormationCommand: lambda msg_bus, cmd: modifier_choix_formation(
+        cmd,
+        proposition_repository=_proposition_repository,
+        formation_translator=_formation_generale_translator,
+        bourse_translator=_bourse_translator,
     ),
-    SupprimerPropositionCommand: partial(
-        supprimer_proposition,
-        proposition_repository=PropositionInMemoryRepository(),
+    SupprimerPropositionCommand: lambda msg_bus, cmd: supprimer_proposition(
+        cmd,
+        proposition_repository=_proposition_repository,
     ),
-    VerifierPropositionCommand: partial(
-        verifier_proposition,
-        proposition_repository=PropositionInMemoryRepository(),
-        formation_translator=FormationGeneraleInMemoryTranslator(),
-        titres_acces=TitresAccesInMemory(),
+    VerifierPropositionCommand: lambda msg_bus, cmd: verifier_proposition(
+        cmd,
+        proposition_repository=_proposition_repository,
+        formation_translator=_formation_generale_translator,
+        titres_acces=_titres_acces,
     ),
 }

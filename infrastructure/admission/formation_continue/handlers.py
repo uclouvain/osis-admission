@@ -23,7 +23,6 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
-from functools import partial
 
 from admission.ddd.admission.formation_continue.commands import *
 from admission.ddd.admission.formation_continue.use_case.read import *
@@ -36,35 +35,35 @@ from admission.infrastructure.admission.formation_continue.domain.service.format
 from admission.infrastructure.admission.formation_continue.repository.proposition import PropositionRepository
 
 COMMAND_HANDLERS = {
-    RechercherFormationContinueQuery: partial(
-        rechercher_formations,
+    RechercherFormationContinueQuery: lambda msg_bus, cmd: rechercher_formations(
+        cmd,
         formation_continue_translator=FormationContinueTranslator(),
         annee_inscription_formation_translator=AnneeInscriptionFormationTranslator(),
     ),
-    InitierPropositionCommand: partial(
-        initier_proposition,
+    InitierPropositionCommand: lambda msg_bus, cmd: initier_proposition(
+        cmd,
         proposition_repository=PropositionRepository(),
         formation_translator=FormationContinueTranslator(),
     ),
-    ListerPropositionsCandidatQuery: partial(
-        lister_propositions_candidat,
+    ListerPropositionsCandidatQuery: lambda msg_bus, cmd: lister_propositions_candidat(
+        cmd,
         proposition_repository=PropositionRepository(),
     ),
-    RecupererPropositionQuery: partial(
-        recuperer_proposition,
+    RecupererPropositionQuery: lambda msg_bus, cmd: recuperer_proposition(
+        cmd,
         proposition_repository=PropositionRepository(),
     ),
-    ModifierChoixFormationCommand: partial(
-        modifier_choix_formation,
+    ModifierChoixFormationCommand: lambda msg_bus, cmd: modifier_choix_formation(
+        cmd,
         proposition_repository=PropositionRepository(),
         formation_translator=FormationContinueTranslator(),
     ),
-    SupprimerPropositionCommand: partial(
-        supprimer_proposition,
+    SupprimerPropositionCommand: lambda msg_bus, cmd: supprimer_proposition(
+        cmd,
         proposition_repository=PropositionRepository(),
     ),
-    VerifierPropositionCommand: partial(
-        verifier_proposition,
+    VerifierPropositionCommand: lambda msg_bus, cmd: verifier_proposition(
+        cmd,
         proposition_repository=PropositionRepository(),
         formation_translator=FormationContinueTranslator(),
         titres_acces=TitresAcces(),

@@ -23,8 +23,6 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
-from functools import partial
-
 from admission.ddd.parcours_doctoral.epreuve_confirmation.commands import *
 from admission.ddd.parcours_doctoral.epreuve_confirmation.use_case.read import *
 from admission.ddd.parcours_doctoral.epreuve_confirmation.use_case.write import *
@@ -33,60 +31,61 @@ from .repository.epreuve_confirmation import EpreuveConfirmationRepository
 from ..repository.doctorat import DoctoratRepository
 
 COMMAND_HANDLERS = {
-    RecupererEpreuvesConfirmationQuery: partial(
-        recuperer_epreuves_confirmation,
+    RecupererEpreuvesConfirmationQuery: lambda msg_bus, cmd: recuperer_epreuves_confirmation(
+        cmd,
         epreuve_confirmation_repository=EpreuveConfirmationRepository(),
         doctorat_repository=DoctoratRepository(),
     ),
-    RecupererDerniereEpreuveConfirmationQuery: partial(
-        recuperer_derniere_epreuve_confirmation,
+    RecupererDerniereEpreuveConfirmationQuery: lambda msg_bus, cmd: recuperer_derniere_epreuve_confirmation(
+        cmd,
         epreuve_confirmation_repository=EpreuveConfirmationRepository(),
         doctorat_repository=DoctoratRepository(),
     ),
-    ModifierEpreuveConfirmationParCDDCommand: partial(
-        modifier_epreuve_confirmation_par_cdd,
+    ModifierEpreuveConfirmationParCDDCommand: lambda msg_bus, cmd: modifier_epreuve_confirmation_par_cdd(
+        cmd,
         epreuve_confirmation_repository=EpreuveConfirmationRepository(),
     ),
-    SoumettreEpreuveConfirmationCommand: partial(
-        soumettre_epreuve_confirmation,
+    SoumettreEpreuveConfirmationCommand: lambda msg_bus, cmd: soumettre_epreuve_confirmation(
+        cmd,
         doctorat_repository=DoctoratRepository(),
         epreuve_confirmation_repository=EpreuveConfirmationRepository(),
         notification=Notification(),
     ),
-    CompleterEpreuveConfirmationParPromoteurCommand: partial(
-        completer_epreuve_confirmation_par_promoteur,
+    CompleterEpreuveConfirmationParPromoteurCommand: lambda msg_bus, cmd: completer_epreuve_confirmation_par_promoteur(
+        cmd,
         epreuve_confirmation_repository=EpreuveConfirmationRepository(),
         notification=Notification(),
     ),
-    SoumettreReportDeDateCommand: partial(
-        soumettre_report_de_date,
+    SoumettreReportDeDateCommand: lambda msg_bus, cmd: soumettre_report_de_date(
+        cmd,
         epreuve_confirmation_repository=EpreuveConfirmationRepository(),
         notification=Notification(),
     ),
-    SoumettreAvisProlongationCommand: partial(
-        soumettre_avis_prolongation,
+    SoumettreAvisProlongationCommand: lambda msg_bus, cmd: soumettre_avis_prolongation(
+        cmd,
         epreuve_confirmation_repository=EpreuveConfirmationRepository(),
     ),
-    ConfirmerReussiteCommand: partial(
-        confirmer_reussite,
+    ConfirmerReussiteCommand: lambda msg_bus, cmd: confirmer_reussite(
+        cmd,
         epreuve_confirmation_repository=EpreuveConfirmationRepository(),
         doctorat_repository=DoctoratRepository(),
         notification=Notification(),
     ),
-    ConfirmerEchecCommand: partial(
-        confirmer_echec,
+    ConfirmerEchecCommand: lambda msg_bus, cmd: confirmer_echec(
+        cmd,
         epreuve_confirmation_repository=EpreuveConfirmationRepository(),
         doctorat_repository=DoctoratRepository(),
         notification=Notification(),
     ),
-    ConfirmerRepassageCommand: partial(
-        confirmer_repassage,
+    ConfirmerRepassageCommand: lambda msg_bus, cmd: confirmer_repassage(
+        cmd,
         epreuve_confirmation_repository=EpreuveConfirmationRepository(),
         doctorat_repository=DoctoratRepository(),
         notification=Notification(),
     ),
-    TeleverserAvisRenouvellementMandatRechercheCommand: partial(
-        televerser_avis_renouvellement_mandat_recherche,
-        epreuve_confirmation_repository=EpreuveConfirmationRepository(),
-    ),
+    TeleverserAvisRenouvellementMandatRechercheCommand: lambda msg_bus, cmd:
+        televerser_avis_renouvellement_mandat_recherche(
+            cmd,
+            epreuve_confirmation_repository=EpreuveConfirmationRepository(),
+        ),
 }

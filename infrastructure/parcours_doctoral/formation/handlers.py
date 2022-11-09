@@ -23,7 +23,6 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
-from functools import partial
 
 from admission.ddd.parcours_doctoral.formation.commands import *
 from admission.ddd.parcours_doctoral.formation.use_case.write import *
@@ -35,35 +34,35 @@ from admission.infrastructure.parcours_doctoral.formation.repository.activite im
 from admission.infrastructure.parcours_doctoral.repository.doctorat import DoctoratRepository
 
 COMMAND_HANDLERS = {
-    SupprimerActiviteCommand: partial(
-        supprimer_activite,
+    SupprimerActiviteCommand: lambda msg_bus, cmd: supprimer_activite(
+        cmd,
         activite_repository=ActiviteRepository(),
     ),
-    SoumettreActivitesCommand: partial(
-        soumettre_activites,
+    SoumettreActivitesCommand: lambda msg_bus, cmd: soumettre_activites(
+        cmd,
         activite_repository=ActiviteRepository(),
         doctorat_repository=DoctoratRepository(),
         groupe_de_supervision_repository=GroupeDeSupervisionRepository(),
         notification=Notification(),
     ),
-    DonnerAvisSurActiviteCommand: partial(
-        donner_avis_sur_activite,
+    DonnerAvisSurActiviteCommand: lambda msg_bus, cmd: donner_avis_sur_activite(
+        cmd,
         activite_repository=ActiviteRepository(),
     ),
-    AccepterActivitesCommand: partial(
-        accepter_activites,
-        activite_repository=ActiviteRepository(),
-        doctorat_repository=DoctoratRepository(),
-        notification=Notification(),
-    ),
-    RefuserActiviteCommand: partial(
-        refuser_activite,
+    AccepterActivitesCommand: lambda msg_bus, cmd: accepter_activites(
+        cmd,
         activite_repository=ActiviteRepository(),
         doctorat_repository=DoctoratRepository(),
         notification=Notification(),
     ),
-    RevenirSurStatutActiviteCommand: partial(
-        revenir_sur_statut_activite,
+    RefuserActiviteCommand: lambda msg_bus, cmd: refuser_activite(
+        cmd,
+        activite_repository=ActiviteRepository(),
+        doctorat_repository=DoctoratRepository(),
+        notification=Notification(),
+    ),
+    RevenirSurStatutActiviteCommand: lambda msg_bus, cmd: revenir_sur_statut_activite(
+        cmd,
         activite_repository=ActiviteRepository(),
     ),
 }
