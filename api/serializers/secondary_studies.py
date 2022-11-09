@@ -1,8 +1,8 @@
 from functools import partial
 
-from django.core.serializers.json import DjangoJSONEncoder
 from rest_framework import serializers
 
+from admission.api.serializers.fields import AnswerToSpecificQuestionField
 from base.api.serializers.academic_year import RelatedAcademicYearField
 from base.models.enums.establishment_type import EstablishmentTypeEnum
 from base.models.organization import Organization
@@ -77,16 +77,14 @@ class ForeignHighSchoolDiplomaSerializer(serializers.ModelSerializer):
 class HighSchoolDiplomaAlternativeSerializer(serializers.ModelSerializer):
     class Meta:
         model = HighSchoolDiplomaAlternative
-        fields = (
-            "first_cycle_admission_exam",
-        )
+        fields = ("first_cycle_admission_exam",)
 
 
 class HighSchoolDiplomaSerializer(serializers.Serializer):
     belgian_diploma = BelgianHighSchoolDiplomaSerializer(required=False, allow_null=True)
     foreign_diploma = ForeignHighSchoolDiplomaSerializer(required=False, allow_null=True)
     high_school_diploma_alternative = HighSchoolDiplomaAlternativeSerializer(required=False, allow_null=True)
-    specific_question_answers = serializers.JSONField(encoder=DjangoJSONEncoder, default=dict, write_only=True)
+    specific_question_answers = AnswerToSpecificQuestionField(write_only=True)
 
     @staticmethod
     def load_diploma(instance):

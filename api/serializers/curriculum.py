@@ -25,10 +25,9 @@
 # ##############################################################################
 from functools import partial
 
-from django.core.serializers.json import DjangoJSONEncoder
 from rest_framework import serializers
 
-from admission.api.serializers.fields import AdmissionUuidField
+from admission.api.serializers.fields import AdmissionUuidField, AnswerToSpecificQuestionField
 from admission.api.serializers.mixins import GetDefaultContextParam
 from admission.infrastructure.admission.domain.service.profil_candidat import (
     ProfilCandidatTranslator,
@@ -216,7 +215,7 @@ class CurriculumFileSerializer(serializers.ModelSerializer):
 
 
 class CurriculumSerializer(serializers.ModelSerializer):
-    specific_question_answers = serializers.JSONField(encoder=DjangoJSONEncoder, default=dict)
+    specific_question_answers = AnswerToSpecificQuestionField()
 
     class Meta:
         model = Person

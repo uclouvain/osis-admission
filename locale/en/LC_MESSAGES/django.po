@@ -1625,6 +1625,11 @@ msgid "Mandatory fields are missing in the project details of the proposition."
 msgstr ""
 
 msgid ""
+"Mandatory fields are missing in the specific questions of the 'Additional "
+"information > Specific questions' tab"
+msgstr ""
+
+msgid ""
 "Mandatory fields are missing in the specific questions of the 'Previous "
 "Experience > Curriculum vitae' tab."
 msgstr ""

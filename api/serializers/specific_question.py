@@ -24,11 +24,16 @@
 #
 # ##############################################################################
 from rest_framework import serializers
+from rest_framework.serializers import ModelSerializer
 
+from admission.api.serializers.fields import AnswerToSpecificQuestionField
 from admission.contrib.models import AdmissionFormItemInstantiation
+from admission.contrib.models.base import BaseAdmission
+
 
 __all__ = [
     "SpecificQuestionSerializer",
+    "ModifierQuestionsSpecifiquesCommandSerializer",
 ]
 
 
@@ -52,4 +57,14 @@ class SpecificQuestionSerializer(serializers.ModelSerializer):
             'text',
             'help_text',
             'configuration',
+        ]
+
+
+class ModifierQuestionsSpecifiquesCommandSerializer(ModelSerializer):
+    specific_question_answers = AnswerToSpecificQuestionField()
+
+    class Meta:
+        model = BaseAdmission
+        fields = [
+            'specific_question_answers',
         ]

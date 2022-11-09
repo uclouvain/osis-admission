@@ -129,6 +129,7 @@ urlpatterns = [
     path('propositions/general-education/<uuid:uuid>/person', views.GeneralPersonView),
     path('propositions/general-education/<uuid:uuid>/coordonnees', views.GeneralCoordonneesView),
     path('propositions/general-education/<uuid:uuid>/secondary-studies', views.GeneralSecondaryStudiesView),
+    path('propositions/general-education/<uuid:uuid>/specific-question', views.GeneralSpecificQuestionAPIView),
     path('propositions/general-education/<uuid:uuid>/curriculum', views.GeneralCurriculumView),
     path(
         'propositions/general-education/<uuid:uuid>/<str:tab>/specific-question', views.GeneralSpecificQuestionListView
@@ -143,6 +144,7 @@ urlpatterns = [
     path('propositions/continuing-education/<uuid:uuid>/coordonnees', views.ContinuingCoordonneesView),
     path('propositions/continuing-education/<uuid:uuid>/secondary-studies', views.ContinuingSecondaryStudiesView),
     path('propositions/continuing-education/<uuid:uuid>/curriculum', views.ContinuingCurriculumView),
+    path('propositions/continuing-education/<uuid:uuid>/specific-question', views.ContinuingSpecificQuestionAPIView),
     path(
         'propositions/continuing-education/<uuid:uuid>/<str:tab>/specific-question',
         views.ContinuingSpecificQuestionListView,

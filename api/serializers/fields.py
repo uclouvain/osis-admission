@@ -446,6 +446,16 @@ GENERAL_EDUCATION_ACTION_LINKS = {
         'method': 'PUT',
         'params': ['uuid'],
     },
+    'retrieve_specific_question': {
+        'path_name': 'admission_api_v1:general_specific_question',
+        'method': 'GET',
+        'params': ['uuid'],
+    },
+    'update_specific_question': {
+        'path_name': 'admission_api_v1:general_specific_question',
+        'method': 'PUT',
+        'params': ['uuid'],
+    },
 }
 
 CONTINUING_EDUCATION_ACTION_LINKS = {
@@ -511,6 +521,16 @@ CONTINUING_EDUCATION_ACTION_LINKS = {
     },
     'update_curriculum': {
         'path_name': 'admission_api_v1:continuing_curriculum',
+        'method': 'PUT',
+        'params': ['uuid'],
+    },
+    'retrieve_specific_question': {
+        'path_name': 'admission_api_v1:continuing_specific_question',
+        'method': 'GET',
+        'params': ['uuid'],
+    },
+    'update_specific_question': {
+        'path_name': 'admission_api_v1:continuing_specific_question',
         'method': 'PUT',
         'params': ['uuid'],
     },
