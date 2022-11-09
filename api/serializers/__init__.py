@@ -56,4 +56,4 @@ from .training_choice import (
     ModifierTypeAdmissionDoctoraleCommandSerializer,
     ModifierChoixFormationGeneraleCommandSerializer,
 )
-from .specific_question import SpecificQuestionSerializer
+from .specific_question import SpecificQuestionSerializer, ModifierQuestionsSpecifiquesCommandSerializer

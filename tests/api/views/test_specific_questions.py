@@ -28,7 +28,9 @@ import uuid
 from django.shortcuts import resolve_url
 from rest_framework import status
 from rest_framework.test import APITestCase
+from uuid import UUID
 
+from admission.contrib.models.base import BaseAdmission
 from admission.ddd import BE_ISO_CODE, FR_ISO_CODE, EN_ISO_CODE
 from admission.ddd.admission.enums.question_specifique import (
     Onglets,
@@ -63,7 +65,7 @@ from reference.tests.factories.country import CountryFactory
 from reference.tests.factories.language import LanguageFactory
 
 
-class BaseDoctorateSpecificQuestionApiTestCase(APITestCase):
+class BaseDoctorateSpecificQuestionListApiTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
         # Data
@@ -132,7 +134,7 @@ class BaseDoctorateSpecificQuestionApiTestCase(APITestCase):
         )
 
 
-class DoctorateSpecificQuestionApiTestCase(BaseDoctorateSpecificQuestionApiTestCase):
+class DoctorateSpecificQuestionListApiTestCase(BaseDoctorateSpecificQuestionListApiTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.message_instantiation = AdmissionFormItemInstantiationFactory(
@@ -361,7 +363,9 @@ class DoctorateSpecificQuestionApiTestCase(BaseDoctorateSpecificQuestionApiTestC
         self.assertEqual(len(response.json()), 1)
 
 
-class DoctorateSpecificQuestionWithItemsRelatedToNoStudiesInFrenchApiTestCase(BaseDoctorateSpecificQuestionApiTestCase):
+class DoctorateSpecificQuestionListWithItemsRelatedToNoStudiesInFrenchApiTestCase(
+    BaseDoctorateSpecificQuestionListApiTestCase
+):
     def setUp(self) -> None:
         super().setUp()
 
@@ -434,8 +438,8 @@ class DoctorateSpecificQuestionWithItemsRelatedToNoStudiesInFrenchApiTestCase(Ba
         self.assertEqual(len(response.json()), 1)
 
 
-class DoctorateSpecificQuestionWithItemsRelatedToNoStudiesInEnglishApiTestCase(
-    BaseDoctorateSpecificQuestionApiTestCase
+class DoctorateSpecificQuestionListWithItemsRelatedToNoStudiesInEnglishApiTestCase(
+    BaseDoctorateSpecificQuestionListApiTestCase
 ):
     def setUp(self) -> None:
         super().setUp()
@@ -509,7 +513,9 @@ class DoctorateSpecificQuestionWithItemsRelatedToNoStudiesInEnglishApiTestCase(
         self.assertEqual(len(response.json()), 1)
 
 
-class DoctorateSpecificQuestionWithItemsRelatedToVIPCandidateApiTestCase(BaseDoctorateSpecificQuestionApiTestCase):
+class DoctorateSpecificQuestionListWithItemsRelatedToVIPCandidateApiTestCase(
+    BaseDoctorateSpecificQuestionListApiTestCase
+):
     def setUp(self) -> None:
         super().setUp()
 
@@ -536,7 +542,9 @@ class DoctorateSpecificQuestionWithItemsRelatedToVIPCandidateApiTestCase(BaseDoc
         self.assertEqual(len(response.json()), 1)
 
 
-class DoctorateSpecificQuestionWithItemsRelatedToNonVIPCandidateApiTestCase(BaseDoctorateSpecificQuestionApiTestCase):
+class DoctorateSpecificQuestionListWithItemsRelatedToNonVIPCandidateApiTestCase(
+    BaseDoctorateSpecificQuestionListApiTestCase
+):
     def setUp(self) -> None:
         super().setUp()
 
@@ -563,7 +571,9 @@ class DoctorateSpecificQuestionWithItemsRelatedToNonVIPCandidateApiTestCase(Base
         self.assertEqual(len(response.json()), 0)
 
 
-class DoctorateSpecificQuestionWithItemsRelatedToTheEducationApiTestCase(BaseDoctorateSpecificQuestionApiTestCase):
+class DoctorateSpecificQuestionListWithItemsRelatedToTheEducationApiTestCase(
+    BaseDoctorateSpecificQuestionListApiTestCase
+):
     def setUp(self) -> None:
         super().setUp()
 
@@ -614,7 +624,7 @@ class DoctorateSpecificQuestionWithItemsRelatedToTheEducationApiTestCase(BaseDoc
         self.assertEqual(len(response.json()), 0)
 
 
-class GeneralEducationSpecificQuestionApiTestCase(APITestCase):
+class GeneralEducationSpecificQuestionListApiTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
         # Data
@@ -687,7 +697,7 @@ class GeneralEducationSpecificQuestionApiTestCase(APITestCase):
         )
 
 
-class ContinuingEducationSpecificQuestionApiTestCase(APITestCase):
+class ContinuingEducationSpecificQuestionListApiTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
         # Data
@@ -757,4 +767,148 @@ class ContinuingEducationSpecificQuestionApiTestCase(APITestCase):
                     'configuration': {},
                 },
             ],
+        )
+
+
+class GeneralEducationSpecificQuestionUpdateApiTestCase(APITestCase):
+    @classmethod
+    def setUpTestData(cls):
+        # Data
+        cls.admission = GeneralEducationAdmissionFactory()
+
+        cls.message_instantiation = AdmissionFormItemInstantiationFactory(
+            form_item=TextAdmissionFormItemFactory(
+                uuid=uuid.UUID('fe254203-17c7-47d6-95e4-3c5c532da551'),
+                internal_label='text_item',
+            ),
+            academic_year=cls.admission.training.academic_year,
+            weight=1,
+            tab=Onglets.INFORMATIONS_ADDITIONNELLES.name,
+        )
+
+        cls.update_data = {
+            'specific_question_answers': {
+                'fe254203-17c7-47d6-95e4-3c5c532da551': 'My response',
+            },
+        }
+
+        # Users
+        cls.candidate = cls.admission.candidate
+        cls.other_candidate_user = CandidateFactory(person__first_name="Jim").person.user
+        cls.no_role_user = PersonFactory(first_name="Joe").user
+
+        # Target url
+        cls.url = resolve_url("admission_api_v1:general_specific_question", uuid=cls.admission.uuid)
+
+    def test_user_not_logged_assert_not_authorized(self):
+        self.client.force_authenticate(user=None)
+
+        response = self.client.put(self.url, data=self.update_data)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_assert_methods_not_allowed(self):
+        self.client.force_authenticate(user=self.candidate.user)
+        methods_not_allowed = ['delete', 'patch', 'post', 'get']
+
+        for method in methods_not_allowed:
+            response = getattr(self.client, method)(self.url, data=self.update_data)
+            self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    def test_with_other_candidate_user(self):
+        self.client.force_authenticate(user=self.other_candidate_user)
+        response = self.client.put(self.url, data=self.update_data)
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_with_valid_candidate_user(self):
+        self.client.force_authenticate(user=self.candidate.user)
+
+        response = self.client.put(self.url, data=self.update_data)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            response.json(),
+            {
+                'uuid': str(self.admission.uuid),
+            },
+        )
+
+        admission = BaseAdmission.objects.get(uuid=self.admission.uuid)
+        self.assertEqual(
+            admission.specific_question_answers,
+            {
+                'fe254203-17c7-47d6-95e4-3c5c532da551': 'My response',
+            },
+        )
+
+
+class ContinuingEducationSpecificQuestionUpdateApiTestCase(APITestCase):
+    @classmethod
+    def setUpTestData(cls):
+        # Data
+        cls.admission = ContinuingEducationAdmissionFactory()
+
+        cls.message_instantiation = AdmissionFormItemInstantiationFactory(
+            form_item=TextAdmissionFormItemFactory(
+                uuid=uuid.UUID('fe254203-17c7-47d6-95e4-3c5c532da551'),
+                internal_label='text_item',
+            ),
+            academic_year=cls.admission.training.academic_year,
+            weight=1,
+            tab=Onglets.INFORMATIONS_ADDITIONNELLES.name,
+        )
+
+        cls.update_data = {
+            'specific_question_answers': {
+                'fe254203-17c7-47d6-95e4-3c5c532da551': 'My response',
+            },
+        }
+
+        # Users
+        cls.candidate = cls.admission.candidate
+        cls.other_candidate_user = CandidateFactory(person__first_name="Jim").person.user
+        cls.no_role_user = PersonFactory(first_name="Joe").user
+
+        # Target url
+        cls.url = resolve_url("admission_api_v1:continuing_specific_question", uuid=cls.admission.uuid)
+
+    def test_user_not_logged_assert_not_authorized(self):
+        self.client.force_authenticate(user=None)
+
+        response = self.client.put(self.url, data=self.update_data)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_assert_methods_not_allowed(self):
+        self.client.force_authenticate(user=self.candidate.user)
+        methods_not_allowed = ['delete', 'patch', 'post', 'get']
+
+        for method in methods_not_allowed:
+            response = getattr(self.client, method)(self.url, data=self.update_data)
+            self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    def test_with_other_candidate_user(self):
+        self.client.force_authenticate(user=self.other_candidate_user)
+        response = self.client.put(self.url, data=self.update_data)
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_with_valid_candidate_user(self):
+        self.client.force_authenticate(user=self.candidate.user)
+
+        response = self.client.put(self.url, data=self.update_data)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            response.json(),
+            {
+                'uuid': str(self.admission.uuid),
+            },
+        )
+
+        admission = BaseAdmission.objects.get(uuid=self.admission.uuid)
+        self.assertEqual(
+            admission.specific_question_answers,
+            {
+                'fe254203-17c7-47d6-95e4-3c5c532da551': 'My response',
+            },
         )

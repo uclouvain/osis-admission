@@ -1772,6 +1772,13 @@ msgstr ""
 "Les champs requis des details du projet de la proposition sont manquants."
 
 msgid ""
+"Mandatory fields are missing in the specific questions of the 'Additional "
+"information > Specific questions' tab"
+msgstr ""
+"Les champs requis des questions spécifiques dans l'onglet 'Informations "
+"complémentaires > Questions spécifiques' sont manquants."
+
+msgid ""
 "Mandatory fields are missing in the specific questions of the 'Previous "
 "Experience > Curriculum vitae' tab."
 msgstr ""

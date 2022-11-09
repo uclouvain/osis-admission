@@ -83,13 +83,13 @@ class SuperQuestionSpecifiqueInMemoryTranslator(ISuperQuestionSpecifiqueTranslat
 
     @classmethod
     @abc.abstractmethod
-    def _search_by_proposition_qs(
+    def _extended_search_by_proposition(
         cls,
         proposition_uuid: str,
         onglets: List[str] = None,
         type: Optional[str] = None,
         requis: Optional[bool] = None,
-    ):
+    ) -> List[QuestionSpecifiqueEtendue]:
         raise NotImplementedError
 
     @classmethod
@@ -106,7 +106,7 @@ class SuperQuestionSpecifiqueInMemoryTranslator(ISuperQuestionSpecifiqueTranslat
                 onglet=question.onglet,
                 configuration=question.configuration,
             )
-            for question in cls._search_by_proposition_qs(
+            for question in cls._extended_search_by_proposition(
                 proposition_uuid=proposition_uuid,
                 onglets=onglets,
                 requis=True,

@@ -28,6 +28,7 @@ from typing import List, Optional
 
 import attr
 
+from admission.ddd import BE_ISO_CODE
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     CarteIdentiteeNonSpecifieeException,
     DateOuAnneeNaissanceNonSpecifieeException,
@@ -40,8 +41,6 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
 )
 from admission.ddd.admission.domain.model._candidat_signaletique import CandidatSignaletique
 from base.ddd.utils.business_validator import BusinessValidator
-
-BE_ISO_CODE = 'BE'
 
 
 @attr.dataclass(frozen=True, slots=True)
