@@ -28,7 +28,6 @@ import uuid
 from django.shortcuts import resolve_url
 from rest_framework import status
 from rest_framework.test import APITestCase
-from uuid import UUID
 
 from admission.contrib.models.base import BaseAdmission
 from admission.ddd import BE_ISO_CODE, FR_ISO_CODE, EN_ISO_CODE
@@ -53,6 +52,7 @@ from admission.tests.factories.roles import CandidateFactory, CddManagerFactory
 from admission.tests.factories.scholarship import ErasmusMundusScholarshipFactory
 from admission.tests.factories.secondary_studies import BelgianHighSchoolDiplomaFactory, ForeignHighSchoolDiplomaFactory
 from admission.tests.factories.supervision import PromoterFactory
+from base.models.enums.education_group_types import TrainingType
 from base.models.enums.entity_type import EntityType
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.education_group import EducationGroupFactory
@@ -601,7 +601,9 @@ class DoctorateSpecificQuestionListWithItemsRelatedToTheEducationApiTestCase(
         self.assertEqual(len(response.json()), 1)
 
         # Other education group type
-        self.message_instantiation.education_group_type = EducationGroupTypeFactory()
+        self.message_instantiation.education_group_type = EducationGroupTypeFactory(
+            name=TrainingType.MASTER_MA_120.name,
+        )
         self.message_instantiation.save()
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)

@@ -115,12 +115,6 @@ class DoctorateAdmission(BaseAdmission):
         blank=True,
         null=True,
     )
-    scholarship_grant = models.CharField(
-        max_length=255,
-        verbose_name=_("Scholarship grant"),
-        default='',
-        blank=True,
-    )
     scholarship_start_date = models.DateField(
         verbose_name=_("Scholarship start date"),
         null=True,
@@ -313,12 +307,26 @@ class DoctorateAdmission(BaseAdmission):
         to="admission.Scholarship",
         verbose_name=_("Erasmus Mundus scholarship"),
         related_name="+",
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+    )
+    other_international_scholarship = models.CharField(
+        max_length=255,
+        verbose_name=_("Other international scholarship"),
+        default='',
+        blank=True,
+    )
+    international_scholarship = models.ForeignKey(
+        to="admission.Scholarship",
+        verbose_name=_("International scholarship"),
+        related_name="+",
+        on_delete=models.PROTECT,
         null=True,
         blank=True,
     )
 
-    # The fllowing properties are here to alias the training_id field to doctorate_id
+    # The following properties are here to alias the training_id field to doctorate_id
     @property
     def doctorate(self):
         return self.training
@@ -438,6 +446,7 @@ class PropositionManager(models.Manager.from_queryset(BaseAdmissionQuerySet)):
                 "thesis_institute",
                 "accounting",
                 "erasmus_mundus_scholarship",
+                "international_scholarship",
             )
             .annotate(
                 code_secteur_formation=CTESubquery(sector_subqs.values("acronym")[:1]),
@@ -524,11 +533,13 @@ class DoctorateManager(models.Manager):
                 'uuid',
                 'project_title',
                 'financing_type',
-                'scholarship_grant',
+                'international_scholarship',
+                'other_international_scholarship',
             )
             .select_related(
                 'candidate',
                 'training__academic_year',
+                'international_scholarship',
             )
             .exclude(
                 post_enrolment_status=ChoixStatutDoctorat.ADMISSION_IN_PROGRESS.name,

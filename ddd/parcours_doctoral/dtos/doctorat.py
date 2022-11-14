@@ -28,6 +28,7 @@ from typing import Optional
 
 import attr
 
+from admission.ddd.admission.dtos.bourse import BourseDTO
 from osis_common.ddd import interface
 
 
@@ -43,7 +44,8 @@ class DoctoratDTO(interface.DTO):
 
     titre_these: str
     type_financement: str
-    bourse_recherche: Optional[str]
+    bourse_recherche: Optional[BourseDTO]
+    autre_bourse_recherche: Optional[str]
     admission_acceptee_le: Optional[datetime.datetime]
 
     matricule_doctorant: str

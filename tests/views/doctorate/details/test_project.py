@@ -91,7 +91,7 @@ class DoctorateAdmissionProjectDetailViewTestCase(TestCase):
                 status=ChoixStatutProposition.SUBMITTED.name,
                 candidate=candidate.person,
                 financing_type=ChoixTypeFinancement.SEARCH_SCHOLARSHIP.name,
-                scholarship_grant=BourseRecherche.ARC.name,
+                other_international_scholarship=BourseRecherche.ARC.name,
                 financing_work_contract=ChoixTypeContratTravail.UCLOUVAIN_ASSISTANT.name,
                 type=ChoixTypeAdmission.ADMISSION.name,
                 admission_submission_date=datetime.datetime.now(),

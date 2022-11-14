@@ -5936,6 +5936,23 @@ components:
           type: integer
           nullable: true
         bourse_recherche:
+          type: object
+          properties:
+            uuid:
+              type: string
+            nom_court:
+              type: string
+            nom_long:
+              type: string
+            type:
+              type: string
+          required:
+          - uuid
+          - nom_court
+          - nom_long
+          - type
+          nullable: true
+        autre_bourse_recherche:
           type: string
         bourse_date_debut:
           type: string
@@ -6599,6 +6616,23 @@ components:
         type_financement:
           type: string
         bourse_recherche:
+          type: object
+          properties:
+            uuid:
+              type: string
+            nom_court:
+              type: string
+            nom_long:
+              type: string
+            type:
+              type: string
+          required:
+          - uuid
+          - nom_court
+          - nom_long
+          - type
+          nullable: true
+        autre_bourse_recherche:
           type: string
         admission_acceptee_le:
           type: string
@@ -8326,6 +8360,8 @@ components:
           type: integer
           nullable: true
         bourse_recherche:
+          type: string
+        autre_bourse_recherche:
           type: string
         bourse_date_debut:
           type: string

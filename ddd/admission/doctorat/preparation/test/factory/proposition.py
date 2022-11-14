@@ -276,5 +276,5 @@ class PropositionPreAdmissionSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory(
     financement = factory.SubFactory(
         _FinancementFactory,
         type=ChoixTypeFinancement.SEARCH_SCHOLARSHIP,
-        bourse_recherche=BourseRecherche.ARC.name,
+        autre_bourse_recherche=BourseRecherche.ARC.name,
     )

@@ -58,6 +58,7 @@ class CompleterPropositionCommand(interface.CommandRequest):
     type_contrat_travail: Optional[str] = ''
     eft: Optional[int] = None
     bourse_recherche: Optional[str] = ''
+    autre_bourse_recherche: Optional[str] = ''
     bourse_date_debut: Optional[datetime.date] = None
     bourse_date_fin: Optional[datetime.date] = None
     bourse_preuve: List[str] = attr.Factory(list)

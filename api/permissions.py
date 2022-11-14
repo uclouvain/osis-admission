@@ -23,6 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from django.utils.translation import gettext_lazy as _
 from rest_framework.permissions import BasePermission, SAFE_METHODS
 
 from admission.contrib.models import DoctorateAdmission, SupervisionActor
@@ -43,7 +44,7 @@ class IsSelfPersonTabOrTabPermission(BasePermission):
                 request.user.person,
                 'has_ongoing_propositions',
                 DoctorateAdmission.objects.filter(candidate=request.user.person)
-                .exclude(status=ChoixStatutProposition.CANCELLED.name)
+                .exclude(status__in=[ChoixStatutProposition.CANCELLED.name, ChoixStatutProposition.IN_PROGRESS.name])
                 .exists(),
             )
         return not request.user.person.has_ongoing_propositions
@@ -57,6 +58,11 @@ class IsSelfPersonTabOrTabPermission(BasePermission):
 
 
 class IsListingOrHasNotAlreadyCreatedForDoctoratePermission(BasePermission):
+    message = _(
+        'You already have a doctorate admission in progress, please delete it before creating a newer one, '
+        'or contact your domain doctoral committee.'
+    )
+
     def has_permission(self, request, view):
         # No object means we are either listing or creating a new admission
         if request.method in SAFE_METHODS:

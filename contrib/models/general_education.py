@@ -51,7 +51,7 @@ class GeneralEducationAdmission(BaseAdmission):
         to="admission.Scholarship",
         verbose_name=_("Double degree scholarship"),
         related_name="+",
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         null=True,
     )
 
@@ -59,7 +59,7 @@ class GeneralEducationAdmission(BaseAdmission):
         to="admission.Scholarship",
         verbose_name=_("International scholarship"),
         related_name="+",
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         null=True,
     )
 
@@ -67,7 +67,7 @@ class GeneralEducationAdmission(BaseAdmission):
         to="admission.Scholarship",
         verbose_name=_("Erasmus Mundus scholarship"),
         related_name="+",
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         null=True,
     )
 

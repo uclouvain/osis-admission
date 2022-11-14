@@ -66,15 +66,9 @@ class Proposition(interface.RootEntity):
     ):
         self.formation_id = formation_id
         self.reponses_questions_specifiques = reponses_questions_specifiques
-
-        if bourse_double_diplome:
-            self.bourse_double_diplome_id = bourses_ids.get(bourse_double_diplome)
-
-        if bourse_internationale:
-            self.bourse_internationale_id = bourses_ids.get(bourse_internationale)
-
-        if bourse_erasmus_mundus:
-            self.bourse_erasmus_mundus_id = bourses_ids.get(bourse_erasmus_mundus)
+        self.bourse_double_diplome_id = bourses_ids.get(bourse_double_diplome)
+        self.bourse_internationale_id = bourses_ids.get(bourse_internationale)
+        self.bourse_erasmus_mundus_id = bourses_ids.get(bourse_erasmus_mundus)
 
     def supprimer(self):
         self.statut = ChoixStatutProposition.CANCELLED

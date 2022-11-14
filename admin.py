@@ -42,6 +42,8 @@ from admission.contrib.models import (
     CddMailTemplate,
     DoctorateAdmission,
     Scholarship,
+    GeneralEducationAdmission,
+    ContinuingEducationAdmission,
 )
 from admission.contrib.models.cdd_config import CddConfiguration
 from admission.contrib.models.doctoral_training import Activity
@@ -59,7 +61,12 @@ from osis_role.contrib.admin import RoleModelAdmin
 
 
 class DoctorateAdmissionAdmin(admin.ModelAdmin):
-    autocomplete_fields = ['training', 'thesis_institute']
+    autocomplete_fields = [
+        'training',
+        'thesis_institute',
+        'international_scholarship',
+        'erasmus_mundus_scholarship',
+    ]
     list_display = ['reference', 'candidate_fmt', 'doctorate', 'type', 'status']
     list_filter = ['status', 'type']
     list_select_related = ['candidate', 'training__academic_year']
@@ -88,6 +95,34 @@ class DoctorateAdmissionAdmin(admin.ModelAdmin):
     candidate_fmt.short_description = _("Candidate")
 
 
+class ContinuingEducationAdmissionAdmin(admin.ModelAdmin):
+    autocomplete_fields = ['training']
+    list_display = ['candidate_fmt', 'training', 'status']
+    list_filter = ['status']
+    list_select_related = ['candidate', 'training__academic_year']
+    readonly_fields = [
+        'detailed_status',
+    ]
+    exclude = [
+        'professional_valuated_experiences',
+        'educational_valuated_experiences',
+    ]
+
+    def candidate_fmt(self, obj):
+        return '{} ({global_id})'.format(obj.candidate, global_id=obj.candidate.global_id)
+
+    candidate_fmt.short_description = _('Candidate')
+
+
+class GeneralEducationAdmissionAdmin(ContinuingEducationAdmissionAdmin):
+    autocomplete_fields = [
+        'training',
+        'double_degree_scholarship',
+        'international_scholarship',
+        'erasmus_mundus_scholarship',
+    ]
+
+
 class CddMailTemplateAdmin(MailTemplateAdmin):
     list_display = ('name', 'identifier', 'language', 'cdd')
     search_fields = [
@@ -105,6 +140,7 @@ class ScholarshipAdmin(admin.ModelAdmin):
     list_display = [
         'short_name',
         'long_name',
+        'type',
     ]
     search_fields = [
         'short_name',
@@ -178,6 +214,8 @@ admin.site.register(CddConfiguration)
 admin.site.register(Scholarship, ScholarshipAdmin)
 admin.site.register(AdmissionFormItem, AdmissionFormItemAdmin)
 admin.site.register(AdmissionFormItemInstantiation, AdmissionFormItemInstantiationAdmin)
+admin.site.register(GeneralEducationAdmission, GeneralEducationAdmissionAdmin)
+admin.site.register(ContinuingEducationAdmission, ContinuingEducationAdmissionAdmin)
 
 
 class ActivityAdmin(admin.ModelAdmin):

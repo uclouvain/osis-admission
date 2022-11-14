@@ -62,3 +62,6 @@ class Scholarship(models.Model):
 
     class Meta:
         verbose_name = pgettext_lazy('admission model', 'Scholarship')
+
+    def __str__(self):
+        return self.short_name

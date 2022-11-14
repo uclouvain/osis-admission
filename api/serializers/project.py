@@ -331,6 +331,7 @@ class DoctoratePropositionDTOSerializer(IncludedFieldsMixin, DTOSerializer):
             'type_contrat_travail',
             'eft',
             'bourse_recherche',
+            'autre_bourse_recherche',
             'bourse_date_debut',
             'bourse_date_fin',
             'bourse_preuve',

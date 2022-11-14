@@ -28,7 +28,6 @@ from typing import Optional, List
 from django.conf import settings
 from django.utils.translation import get_language
 
-from admission.ddd.admission.domain.enums import TypeFormation
 from admission.ddd.admission.domain.model.formation import FormationIdentity, Formation
 from admission.ddd.admission.dtos.formation import FormationDTO
 from admission.ddd.admission.formation_generale.domain.service.i_formation import IFormationGeneraleTranslator
@@ -103,8 +102,12 @@ class FormationGeneraleTranslator(IFormationGeneraleTranslator):
                 campus=campus,
                 est_inscriptible=True,
                 intitule=intitule,
-                types=AnneeInscriptionFormationTranslator.OSIS_ADMISSION_EDUCATION_TYPES_MAPPING.get(type, []),
+                types=AnneeInscriptionFormationTranslator.OSIS_ADMISSION_EDUCATION_TYPES_MAPPING.get(
+                    type,
+                    list(AnneeInscriptionFormationTranslator.GENERAL_EDUCATION_TYPES),
+                ),
             )
         )
 
-        return [cls._build_dto(dto) for dto in dtos]
+        results = [cls._build_dto(dto) for dto in dtos]
+        return list(sorted(results, key=lambda formation: formation.intitule))
