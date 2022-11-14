@@ -77,7 +77,9 @@ class PropositionAvecDemande(interface.DomainService):
                 )
                 if proposition_dto.uuid in demande_dto_mapping
                 else None,
-                code_bourse=proposition_dto.bourse_recherche,
+                code_bourse=proposition_dto.bourse_recherche.nom_court
+                if proposition_dto.bourse_recherche
+                else proposition_dto.autre_bourse_recherche,
             )
             for proposition_dto in proposition_dtos
         ]

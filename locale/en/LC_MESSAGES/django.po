@@ -1864,6 +1864,9 @@ msgstr ""
 msgid "Other cotutelle-related documents"
 msgstr ""
 
+msgid "Other international scholarship"
+msgstr ""
+
 msgid "PAPER"
 msgstr "Examination"
 
@@ -2974,6 +2977,11 @@ msgid "Yes, only in Saint-Gilles (10 EUR)"
 msgstr ""
 
 msgid "Yes, only in Tournai (10 EUR)"
+msgstr ""
+
+msgid ""
+"You already have a doctorate admission in progress, please delete it before "
+"creating a newer one, or contact your domain doctoral committee."
 msgstr ""
 
 msgid "You cannot fill in a language more than once, please correct the form."

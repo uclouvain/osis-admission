@@ -31,7 +31,7 @@ from django.conf import settings
 from django.utils.translation import get_language, gettext_lazy as _
 
 from admission.auth.roles.cdd_manager import CddManager
-from admission.contrib.models import EntityProxy
+from admission.contrib.models import EntityProxy, Scholarship
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import (
     ENTITY_CDE,
     ENTITY_CDSS,
@@ -48,6 +48,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixTypeFinancement,
 )
 from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixStatutCDD, ChoixStatutSIC
+from admission.ddd.admission.enums.type_bourse import TypeBourse
 from admission.forms import CustomDateInput, EMPTY_CHOICE
 from base.models.academic_year import AcademicYear
 from base.models.education_group_year import EducationGroupYear
@@ -189,7 +190,6 @@ class BaseFilterForm(forms.Form):
     )
     bourse_recherche = forms.ChoiceField(
         label=_("Scholarship grant"),
-        choices=EMPTY_CHOICE + BourseRecherche.choices(),
         required=False,
     )
     page_size = forms.ChoiceField(
@@ -218,10 +218,23 @@ class BaseFilterForm(forms.Form):
             [SIGLE_SCIENCES, ChoixSousDomaineSciences.choices()],
         ]
 
+    def get_scholarship_choices(self):
+        doctorate_scholarships = Scholarship.objects.filter(
+            type=TypeBourse.BOURSE_INTERNATIONALE_DOCTORAT.name,
+        ).order_by('short_name')
+
+        return (
+            [EMPTY_CHOICE[0]]
+            + [(scholarship.uuid, scholarship.short_name) for scholarship in doctorate_scholarships]
+            + [(BourseRecherche.OTHER.name, BourseRecherche.OTHER.value)]
+        )
+
     def __init__(self, user, load_labels=False, **kwargs):
         super().__init__(**kwargs)
 
         self.user = user
+
+        self.fields['bourse_recherche'].choices = self.get_scholarship_choices()
 
         self.cdd_acronyms = (
             # Initialize the CDDs field

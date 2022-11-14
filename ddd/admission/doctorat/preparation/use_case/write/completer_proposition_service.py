@@ -30,6 +30,7 @@ from admission.ddd.admission.doctorat.preparation.domain.service.commission_prox
 from admission.ddd.admission.doctorat.preparation.domain.service.i_doctorat import IDoctoratTranslator
 from admission.ddd.admission.doctorat.preparation.domain.service.i_historique import IHistorique
 from admission.ddd.admission.doctorat.preparation.repository.i_proposition import IPropositionRepository
+from admission.ddd.admission.domain.builder.bourse_identity import BourseIdentityBuilder
 
 
 def completer_proposition(
@@ -43,6 +44,7 @@ def completer_proposition(
     proposition_candidat = proposition_repository.get(entity_id=entity_id)
     doctorat = doctorat_translator.get(proposition_candidat.sigle_formation, proposition_candidat.annee)
     CommissionProximite().verifier(doctorat, cmd.commission_proximite)
+    bourse_recherche_id = BourseIdentityBuilder.build_from_uuid(cmd.bourse_recherche) if cmd.bourse_recherche else None
 
     # WHEN
     proposition_candidat.completer(
@@ -52,7 +54,8 @@ def completer_proposition(
         type_financement=cmd.type_financement,
         type_contrat_travail=cmd.type_contrat_travail,
         eft=cmd.eft,
-        bourse_recherche=cmd.bourse_recherche,
+        bourse_recherche=bourse_recherche_id,
+        autre_bourse_recherche=cmd.autre_bourse_recherche,
         bourse_date_debut=cmd.bourse_date_debut,
         bourse_date_fin=cmd.bourse_date_fin,
         bourse_preuve=cmd.bourse_preuve,

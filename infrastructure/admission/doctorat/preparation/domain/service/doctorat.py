@@ -96,4 +96,6 @@ class DoctoratTranslator(IDoctoratTranslator):
                 campus=campus,
             )
         )
-        return [cls._build_dto(dto) for dto in dtos]
+
+        results = [cls._build_dto(dto) for dto in dtos]
+        return list(sorted(results, key=lambda formation: formation.intitule))

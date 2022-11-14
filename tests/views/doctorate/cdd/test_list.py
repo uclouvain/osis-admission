@@ -55,6 +55,7 @@ from reference.tests.factories.country import CountryFactory
 
 class CddDoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
     admissions = []
+    NB_MAX_QUERIES = 20
 
     @classmethod
     def setUpTestData(cls):
@@ -112,7 +113,7 @@ class CddDoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
                 status=ChoixStatutProposition.SUBMITTED.name,
                 candidate=candidate.person,
                 financing_type=ChoixTypeFinancement.SEARCH_SCHOLARSHIP.name,
-                scholarship_grant=BourseRecherche.ARC.name,
+                other_international_scholarship=BourseRecherche.ARC.name,
                 financing_work_contract=ChoixTypeContratTravail.UCLOUVAIN_ASSISTANT.name,
                 type=ChoixTypeAdmission.ADMISSION.name,
                 admission_submission_date=datetime.datetime.now(),
@@ -140,7 +141,7 @@ class CddDoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
             DoctorateAdmissionFactory(
                 training__management_entity=second_doctoral_commission,
                 training__academic_year=academic_years[0],
-                scholarship_grant='Custom grant',
+                other_international_scholarship='Custom grant',
                 financing_work_contract='Custom working contract',
             ),
         ]
@@ -158,7 +159,7 @@ class CddDoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
                 if cls.admissions[0].candidate.country_of_citizenship
                 else None,
                 derniere_modification=cls.admissions[0].modified,
-                code_bourse=cls.admissions[0].scholarship_grant,
+                code_bourse=cls.admissions[0].other_international_scholarship,
                 statut_cdd=None,
                 statut_sic=None,
                 date_confirmation=None,
@@ -178,7 +179,7 @@ class CddDoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
                 else None,
                 derniere_modification=cls.admissions[1].modified,
                 date_confirmation=cls.admissions[1].admission_submission_date,
-                code_bourse=cls.admissions[1].scholarship_grant,
+                code_bourse=cls.admissions[1].other_international_scholarship,
             ),
             DemandeRechercheDTO(
                 uuid=cls.admissions[2].uuid,
@@ -192,7 +193,7 @@ class CddDoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
                 if cls.admissions[2].candidate.country_of_citizenship
                 else None,
                 derniere_modification=cls.admissions[2].modified,
-                code_bourse=cls.admissions[2].scholarship_grant,
+                code_bourse=cls.admissions[2].other_international_scholarship,
                 statut_cdd=None,
                 statut_sic=None,
                 date_confirmation=None,
@@ -246,7 +247,7 @@ class CddDoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
             'page_size': 10,
         }
 
-        with self.assertNumQueriesLessThan(19):
+        with self.assertNumQueriesLessThan(self.NB_MAX_QUERIES):
             response = self.client.get(self.url, data)
 
         self.assertEqual(response.status_code, 200)
@@ -265,7 +266,7 @@ class CddDoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
             'o': 'numero_demande',
         }
 
-        with self.assertNumQueriesLessThan(19):
+        with self.assertNumQueriesLessThan(self.NB_MAX_QUERIES):
             response = self.client.get(self.url, data)
 
         self.assertEqual(response.status_code, 200)
@@ -276,7 +277,7 @@ class CddDoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
         # Revert sorting
         data['o'] = '-' + data['o']
 
-        with self.assertNumQueriesLessThan(19):
+        with self.assertNumQueriesLessThan(self.NB_MAX_QUERIES):
             response = self.client.get(self.url, data)
 
         self.assertEqual(response.status_code, 200)
@@ -301,7 +302,7 @@ class CddDoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
             'sigles_formations': [self.admissions[1].doctorate.acronym],
             'type_financement': self.admissions[1].financing_type,
             'type_contrat_travail': self.admissions[1].financing_work_contract,
-            'bourse_recherche': self.admissions[1].scholarship_grant,
+            'autre_bourse_recherche': self.admissions[1].other_international_scholarship,
         }
 
         response = self.client.get(self.url, data)
@@ -369,7 +370,7 @@ class CddDoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
             'page_size': 10,
         }
 
-        with self.assertNumQueriesLessThan(19):
+        with self.assertNumQueriesLessThan(self.NB_MAX_QUERIES):
             response = self.client.get(self.url, data)
 
         self.assertEqual(response.status_code, 200)
@@ -399,7 +400,7 @@ class CddDoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
     def test_list_doctorate_reader_user_without_any_query_param(self):
         self.client.force_login(user=self.doctorate_reader_user)
 
-        with self.assertNumQueriesLessThan(19):
+        with self.assertNumQueriesLessThan(self.NB_MAX_QUERIES):
             response = self.client.get(self.url, data={'page_size': 10})
 
         self.assertEqual(response.status_code, 200)

@@ -750,7 +750,7 @@ msgid "Category labels"
 msgstr "Libellés de catégories"
 
 msgid "Certificate"
-msgstr "Certificat"
+msgstr "Attestation"
 
 msgid "Certificate of achievement"
 msgstr "Attestation de réussite"
@@ -2025,6 +2025,9 @@ msgstr "Autre"
 msgid "Other cotutelle-related documents"
 msgstr "Autres documents relatifs à la cotutelle"
 
+msgid "Other international scholarship"
+msgstr "Autre bourse internationale"
+
 msgid "PAPER"
 msgstr "Épreuve"
 
@@ -3220,6 +3223,13 @@ msgstr "Oui, sur Saint-Gilles uniquement (10 EUR)"
 
 msgid "Yes, only in Tournai (10 EUR)"
 msgstr "Oui, sur Tournai uniquement (10 EUR)"
+
+msgid ""
+"You already have a doctorate admission in progress, please delete it before "
+"creating a newer one, or contact your domain doctoral committee."
+msgstr "Vous avez déjà une demande d’inscription en doctorat en cours, veuillez "
+"la supprimer avant de créer une nouvelle demande, ou contactez votre commission "
+"doctorale du domaine."
 
 msgid "You cannot fill in a language more than once, please correct the form."
 msgstr ""

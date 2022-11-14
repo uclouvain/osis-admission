@@ -104,7 +104,11 @@ class Notification(INotification):
     ) -> dict:
         """Return common tokens about a doctorate"""
         financing_type = (
-            BourseRecherche.get_value(doctorate.scholarship_grant)
+            (
+                str(doctorate.international_scholarship)
+                if doctorate.international_scholarship_id
+                else doctorate.other_international_scholarship
+            )
             if doctorate.financing_type == ChoixTypeFinancement.SEARCH_SCHOLARSHIP.name
             else ChoixTypeFinancement.get_value(doctorate.financing_type)
         )

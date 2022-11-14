@@ -29,12 +29,14 @@ from django.conf import settings
 from django.utils.translation import get_language
 
 from admission.contrib.models.doctorate import DoctorateAdmission, DoctorateProxy
+from admission.ddd.admission.domain.model.bourse import BourseIdentity
 from admission.ddd.parcours_doctoral.domain.model._formation import FormationIdentity
 from admission.ddd.parcours_doctoral.domain.model.doctorat import Doctorat, DoctoratIdentity
 from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
 from admission.ddd.parcours_doctoral.domain.validator.exceptions import DoctoratNonTrouveException
 from admission.ddd.parcours_doctoral.dtos import DoctoratDTO
 from admission.ddd.parcours_doctoral.repository.i_doctorat import IDoctoratRepository
+from admission.infrastructure.admission.domain.service.bourse import BourseTranslator
 from base.models.student import Student
 from osis_common.ddd.interface import ApplicationService, EntityIdentity, RootEntity
 
@@ -61,6 +63,10 @@ class DoctoratRepository(IDoctoratRepository):
             formation_id=FormationIdentity(doctorate.doctorate.acronym, doctorate.doctorate.academic_year.year),
             reference=doctorate.reference,
             matricule_doctorant=doctorate.candidate.global_id,
+            bourse_recherche=BourseIdentity(uuid=str(doctorate.international_scholarship_id))
+            if doctorate.international_scholarship_id
+            else None,
+            autre_bourse_recherche=doctorate.other_international_scholarship,
         )
 
     @classmethod
@@ -101,6 +107,9 @@ class DoctoratRepository(IDoctoratRepository):
             else doctorate.doctorate.title_english,
             titre_these=doctorate.project_title,
             type_financement=doctorate.financing_type,
-            bourse_recherche=doctorate.scholarship_grant,
+            autre_bourse_recherche=doctorate.other_international_scholarship,
+            bourse_recherche=BourseTranslator.build_dto(doctorate.international_scholarship)
+            if doctorate.international_scholarship
+            else None,
             admission_acceptee_le=None,  # TODO to add when the field will be added to the model
         )
