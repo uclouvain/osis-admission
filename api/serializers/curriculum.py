@@ -29,7 +29,7 @@ from rest_framework import serializers
 
 from admission.api.serializers.fields import AdmissionUuidField
 from admission.api.serializers.mixins import GetDefaultContextParam
-from admission.infrastructure.admission.doctorat.preparation.domain.service.profil_candidat import (
+from admission.infrastructure.admission.domain.service.profil_candidat import (
     ProfilCandidatTranslator,
 )
 from base.api.serializers.academic_year import RelatedAcademicYearField

@@ -27,7 +27,7 @@
 from django.db import models
 from rest_framework import serializers
 
-from admission.ddd.admission.doctorat.preparation.domain.validator import _should_identification_candidat_etre_completee
+from admission.ddd.admission.domain.validator import _should_identification_candidat_etre_completee
 from base.api.serializers.academic_year import RelatedAcademicYearField
 from base.models.enums.person_address_type import PersonAddressType
 from base.models.person import Person

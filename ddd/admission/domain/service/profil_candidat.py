@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,16 +23,18 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.ddd.admission.doctorat.preparation.domain.model._candidat_adresse import CandidatAdresse
-from admission.ddd.admission.doctorat.preparation.domain.model._candidat_signaletique import CandidatSignaletique
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition
-from admission.ddd.admission.doctorat.preparation.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.doctorat.preparation.domain.validator.validator_by_business_action import (
     ComptabiliteValidatorList,
-    CoordonneesValidatorList,
     CurriculumValidatorList,
-    IdentificationValidatorList,
     LanguesConnuesValidatorList,
+)
+from admission.ddd.admission.domain.model._candidat_adresse import CandidatAdresse
+from admission.ddd.admission.domain.model._candidat_signaletique import CandidatSignaletique
+from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
+from admission.ddd.admission.domain.validator.validator_by_business_action import (
+    CoordonneesValidatorList,
+    IdentificationValidatorList,
 )
 from osis_common.ddd import interface
 

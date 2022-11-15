@@ -31,12 +31,12 @@ from admission.infrastructure.admission.domain.service.in_memory.annee_inscripti
     AnneeInscriptionFormationInMemoryTranslator,
 )
 from admission.infrastructure.admission.domain.service.in_memory.bourse import BourseInMemoryTranslator
+from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
 from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
 from .domain.service.in_memory.doctorat import DoctoratInMemoryTranslator
 from .domain.service.in_memory.historique import HistoriqueInMemory
 from .domain.service.in_memory.membre_CA import MembreCAInMemoryTranslator
 from .domain.service.in_memory.notification import NotificationInMemory
-from .domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
 from .domain.service.in_memory.promoteur import PromoteurInMemoryTranslator
 from .repository.in_memory.groupe_de_supervision import GroupeDeSupervisionInMemoryRepository
 from .repository.in_memory.proposition import PropositionInMemoryRepository

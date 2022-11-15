@@ -1,3 +1,29 @@
+# ##############################################################################
+#
+#    OSIS stands for Open Student Information System. It's an application
+#    designed to manage the core business of higher education institutions,
+#    such as universities, faculties, institutes and professional schools.
+#    The core business involves the administration of students, teachers,
+#    courses, programs and so on.
+#
+#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    A copy of this license - GNU General Public License - is available
+#    at the root of the source code of this program.  If not,
+#    see http://www.gnu.org/licenses/.
+#
+# ##############################################################################
+
 from ._should_comptabilite_etre_completee import (
     ShouldAbsenceDeDetteEtreCompletee,
     ShouldAffiliationsEtreCompletees,
@@ -5,10 +31,6 @@ from ._should_comptabilite_etre_completee import (
     ShouldAutreFormatCarteBancaireRemboursementEtreCompletee,
     ShouldIBANCarteBancaireRemboursementEtreCompletee,
     ShouldReductionDesDroitsInscriptionEtreCompletee,
-)
-from ._should_coordonnees_candidat_etre_completees import (
-    ShouldAdresseCorrespondanceEtreCompleteeSiSpecifiee,
-    ShouldAdresseDomicileLegalCandidatEtreCompletee,
 )
 from ._should_cotutelle_etre_completee import ShouldCotutelleEtreComplete
 from ._should_curriculum_etre_complete import ShouldAnneesCVRequisesCompletees, ShouldCurriculumFichierEtreSpecifie
@@ -24,16 +46,6 @@ from ._should_groupe_de_supervision_avoir_un_promoteur_de_reference import (
 )
 from ._should_groupe_de_supervision_non_complet_pour_membres_CA import ShouldGroupeDeSupervisionNonCompletPourMembresCA
 from ._should_groupe_de_supervision_non_complet_pour_promoteurs import ShouldGroupeDeSupervisionNonCompletPourPromoteurs
-from ._should_identification_candidat_etre_completee import (
-    ShouldCandidatAuthentiquerIdentite,
-    ShouldCandidatAuthentiquerPasseport,
-    ShouldCandidatBelgeSpecifierNumeroRegistreNationalBelge,
-    ShouldCandidatSpecifierDateOuAnneeNaissance,
-    ShouldCandidatSpecifierNOMASiDejaInscrit,
-    ShouldCandidatSpecifierNomOuPrenom,
-    ShouldCandidatSpecifierNumeroIdentite,
-    ShouldSignaletiqueCandidatEtreCompletee,
-)
 from ._should_institution_dependre_doctorat_realise import ShouldInstitutionDependreDoctoratRealise
 from ._should_justification_donnee_si_preadmission import ShouldJustificationDonneeSiPreadmission
 from ._should_langues_connues_etre_completees import ShouldLanguesConnuesRequisesEtreSpecifiees
@@ -69,16 +81,6 @@ __all__ = [
     "ShouldCotutelleEtreComplete",
     "ShouldProjetEtreComplet",
     "ShouldGroupeDeSupervisionAvoirAuMoinsUnMembreCA",
-    "ShouldSignaletiqueCandidatEtreCompletee",
-    "ShouldCandidatSpecifierNumeroIdentite",
-    "ShouldCandidatBelgeSpecifierNumeroRegistreNationalBelge",
-    "ShouldCandidatSpecifierDateOuAnneeNaissance",
-    "ShouldCandidatSpecifierNOMASiDejaInscrit",
-    "ShouldCandidatSpecifierNomOuPrenom",
-    "ShouldCandidatAuthentiquerIdentite",
-    "ShouldCandidatAuthentiquerPasseport",
-    "ShouldAdresseDomicileLegalCandidatEtreCompletee",
-    "ShouldAdresseCorrespondanceEtreCompleteeSiSpecifiee",
     "ShouldLanguesConnuesRequisesEtreSpecifiees",
     "ShouldAnneesCVRequisesCompletees",
     "ShouldCurriculumFichierEtreSpecifie",

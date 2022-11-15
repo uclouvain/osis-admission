@@ -27,8 +27,8 @@ from functools import partial
 
 from admission.ddd.admission.doctorat.preparation.domain.model.groupe_de_supervision import GroupeDeSupervision
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition
-from admission.ddd.admission.doctorat.preparation.domain.service.i_profil_candidat import IProfilCandidatTranslator
-from admission.ddd.admission.doctorat.preparation.domain.service.profil_candidat import ProfilCandidat
+from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
+from admission.ddd.admission.domain.service.profil_candidat import ProfilCandidat
 from admission.ddd.admission.domain.service.i_titres_acces import ITitresAcces
 from base.ddd.utils.business_validator import execute_functions_and_aggregate_exceptions
 from osis_common.ddd import interface

@@ -27,6 +27,7 @@
 from admission.ddd.admission.formation_generale.commands import *
 from admission.ddd.admission.formation_generale.use_case.read import *
 from admission.ddd.admission.formation_generale.use_case.write import *
+from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
 from admission.infrastructure.admission.domain.service.in_memory.annee_inscription_formation import (
     AnneeInscriptionFormationInMemoryTranslator,
 )
@@ -44,6 +45,7 @@ _annee_inscription_formation_translator = AnneeInscriptionFormationInMemoryTrans
 _proposition_repository = PropositionInMemoryRepository()
 _bourse_translator = BourseInMemoryTranslator()
 _titres_acces = TitresAccesInMemory()
+_profil_candidat_translator = ProfilCandidatInMemoryTranslator()
 
 
 COMMAND_HANDLERS = {
@@ -81,11 +83,13 @@ COMMAND_HANDLERS = {
         proposition_repository=_proposition_repository,
         formation_translator=_formation_generale_translator,
         titres_acces=_titres_acces,
+        profil_candidat_translator=_profil_candidat_translator,
     ),
     SoumettrePropositionCommand: lambda msg_bus, cmd: soumettre_proposition(
         cmd,
         proposition_repository=_proposition_repository,
         formation_translator=_formation_generale_translator,
         titres_acces=_titres_acces,
+        profil_candidat_translator=_profil_candidat_translator,
     ),
 }

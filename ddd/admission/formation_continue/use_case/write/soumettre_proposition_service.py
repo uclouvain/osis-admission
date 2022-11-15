@@ -23,7 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
+from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.domain.service.i_titres_acces import ITitresAcces
 from admission.ddd.admission.formation_continue.commands import SoumettrePropositionCommand
 from admission.ddd.admission.formation_continue.domain.builder.proposition_identity_builder import (
@@ -40,6 +40,7 @@ def soumettre_proposition(
     proposition_repository: 'IPropositionRepository',
     formation_translator: 'IFormationContinueTranslator',
     titres_acces: 'ITitresAcces',
+    profil_candidat_translator: 'IProfilCandidatTranslator',
 ) -> 'PropositionIdentity':
     # GIVEN
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
@@ -50,6 +51,7 @@ def soumettre_proposition(
         proposition,
         formation_translator,
         titres_acces,
+        profil_candidat_translator,
     )
 
     # THEN

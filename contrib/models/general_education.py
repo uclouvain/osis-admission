@@ -28,6 +28,7 @@ from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils.translation import gettext_lazy as _
+from rest_framework.settings import api_settings
 
 from admission.contrib.models.base import BaseAdmission, BaseAdmissionQuerySet
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutProposition
@@ -76,7 +77,12 @@ class GeneralEducationAdmission(BaseAdmission):
         permissions = []
 
     def update_detailed_status(self):
-        pass
+        from admission.ddd.admission.formation_generale.commands import VerifierPropositionCommand
+        from admission.utils import gather_business_exceptions
+
+        error_key = api_settings.NON_FIELD_ERRORS_KEY
+        self.detailed_status = gather_business_exceptions(VerifierPropositionCommand(self.uuid)).get(error_key, [])
+        self.save(update_fields=['detailed_status'])
 
 
 class GeneralEducationAdmissionManager(models.Manager.from_queryset(BaseAdmissionQuerySet)):

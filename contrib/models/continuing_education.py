@@ -25,6 +25,7 @@
 # ##############################################################################
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from rest_framework.settings import api_settings
 
 from admission.contrib.models.base import BaseAdmission, BaseAdmissionQuerySet
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutProposition
@@ -43,7 +44,12 @@ class ContinuingEducationAdmission(BaseAdmission):
         permissions = []
 
     def update_detailed_status(self):
-        pass
+        from admission.ddd.admission.formation_continue.commands import VerifierPropositionCommand
+        from admission.utils import gather_business_exceptions
+
+        error_key = api_settings.NON_FIELD_ERRORS_KEY
+        self.detailed_status = gather_business_exceptions(VerifierPropositionCommand(self.uuid)).get(error_key, [])
+        self.save(update_fields=['detailed_status'])
 
 
 class ContinuingEducationAdmissionManager(models.Manager.from_queryset(BaseAdmissionQuerySet)):

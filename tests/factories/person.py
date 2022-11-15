@@ -27,26 +27,29 @@ import operator
 
 import factory
 
+from admission.tests.factories import PdfUploadFactory
 from admission.tests.factories.language import LanguageKnowledgeFactory
 from admission.tests.factories.secondary_studies import BelgianHighSchoolDiplomaFactory
-from base.models.enums.civil_state import CivilState
-from base.tests.factories.academic_year import get_current_year, AcademicYearFactory
 from base import models as mdl
+from base.models.enums.civil_state import CivilState
 from base.models.enums.person_address_type import PersonAddressType
-
+from base.tests.factories.academic_year import AcademicYearFactory, get_current_year
 from base.tests.factories.person import PersonFactory
 from base.tests.factories.person_address import PersonAddressFactory
-from osis_profile.tests.factories.curriculum import EducationalExperienceYearFactory, EducationalExperienceFactory
+from osis_profile.tests.factories.curriculum import EducationalExperienceFactory, EducationalExperienceYearFactory
 from reference.tests.factories.country import CountryFactory
-from reference.tests.factories.language import FrenchLanguageFactory, EnglishLanguageFactory
+from reference.tests.factories.language import EnglishLanguageFactory, FrenchLanguageFactory
 
 
 class CompletePersonFactory(PersonFactory):
     birth_date = factory.Faker('past_date')
-    birth_year = factory.Faker('pyint', min_value=1900, max_value=2005)
     sex = factory.Iterator(mdl.person.Person.SEX_CHOICES, getter=operator.itemgetter(0))
+    gender = factory.Iterator(mdl.person.Person.GENDER_CHOICES, getter=operator.itemgetter(0))
     country_of_citizenship = factory.SubFactory(CountryFactory)
     civil_state = CivilState.MARRIED.name
+    id_photo = factory.LazyFunction(lambda: [PdfUploadFactory().uuid])
+    id_card = factory.LazyFunction(lambda: [PdfUploadFactory().uuid])
+    passport = factory.LazyFunction(lambda: [PdfUploadFactory().uuid])
     birth_country = factory.SubFactory(CountryFactory)
     birth_place = factory.Faker('address')
     national_number = factory.Faker('pystr_format', string_format='##.##.##-###-##')
@@ -125,6 +128,15 @@ class CompletePersonForBachelorFactory(CompletePersonFactory):
     @factory.post_generation
     def create_related_objects(self, create, extracted, **kwargs):
         """Target is diplomation_secondaire_belge"""
+        PersonAddressFactory(
+            person=self,
+            label=PersonAddressType.RESIDENTIAL.name,
+            street='University street',
+            street_number='1',
+            postal_code='1348',
+            city='Louvain-La-Neuve',
+            country=CountryFactory(iso_code="BE"),
+        )
         current_year = get_current_year()
         BelgianHighSchoolDiplomaFactory(
             person=self, academic_graduation_year=AcademicYearFactory(year=current_year - 1)
@@ -135,6 +147,15 @@ class CompletePersonForIUFCFactory(CompletePersonFactory):
     @factory.post_generation
     def create_related_objects(self, create, extracted, **kwargs):
         """Target is diplomation_academique_belge"""
+        PersonAddressFactory(
+            person=self,
+            label=PersonAddressType.RESIDENTIAL.name,
+            street='University street',
+            street_number='1',
+            postal_code='1348',
+            city='Louvain-La-Neuve',
+            country=CountryFactory(iso_code="BE"),
+        )
         current_year = get_current_year()
         experience = EducationalExperienceFactory(
             person=self,
@@ -150,24 +171,26 @@ class CompletePersonForIUFCFactory(CompletePersonFactory):
 class IncompletePersonForBachelorFactory(CompletePersonFactory):
     @factory.post_generation
     def create_related_objects(self, create, extracted, **kwargs):
-        """Target is diplomation_secondaire_belge"""
-        current_year = get_current_year()
-        BelgianHighSchoolDiplomaFactory(
-            person=self, academic_graduation_year=AcademicYearFactory(year=current_year - 1)
+        PersonAddressFactory(
+            person=self,
+            label=PersonAddressType.RESIDENTIAL.name,
+            street='University street',
+            street_number='1',
+            postal_code='1348',
+            city='Louvain-La-Neuve',
+            country=CountryFactory(iso_code="BE"),
         )
 
 
 class IncompletePersonForIUFCFactory(CompletePersonFactory):
     @factory.post_generation
     def create_related_objects(self, create, extracted, **kwargs):
-        """Target is diplomation_academique_belge"""
-        current_year = get_current_year()
-        experience = EducationalExperienceFactory(
+        PersonAddressFactory(
             person=self,
-            obtained_diploma=True,
+            label=PersonAddressType.RESIDENTIAL.name,
+            street='University street',
+            street_number='1',
+            postal_code='1348',
+            city='Louvain-La-Neuve',
             country=CountryFactory(iso_code="BE"),
-        )
-        EducationalExperienceYearFactory(
-            educational_experience=experience,
-            academic_year=AcademicYearFactory(year=current_year - 1),
         )
