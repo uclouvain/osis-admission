@@ -31,6 +31,7 @@ from rest_framework.test import APITestCase
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutProposition
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
+from admission.tests.factories.person import IncompletePersonForBachelorFactory, IncompletePersonForIUFCFactory
 from base.models.enums.education_group_types import TrainingType
 
 
@@ -38,8 +39,12 @@ class GeneralPropositionSubmissionTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
         # Validation errors
-        cls.admission = GeneralEducationAdmissionFactory()
-        cls.candidate_errors = cls.admission.candidate
+        cls.candidate_errors = IncompletePersonForBachelorFactory()
+        cls.admission = GeneralEducationAdmissionFactory(
+            candidate=cls.candidate_errors,
+            # force type to have access conditions
+            training__education_group_type__name=TrainingType.BACHELOR.name,
+        )
         cls.error_url = resolve_url("admission_api_v1:submit-general-proposition", uuid=cls.admission.uuid)
 
         # Validation ok
@@ -81,11 +86,12 @@ class ContinuingPropositionSubmissionTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
         # Validation errors
+        cls.candidate_errors = IncompletePersonForIUFCFactory()
         cls.admission = ContinuingEducationAdmissionFactory(
-            # force type to have conditions
+            candidate=cls.candidate_errors,
+            # force type to have access conditions
             training__education_group_type__name=TrainingType.UNIVERSITY_FIRST_CYCLE_CERTIFICATE.name,
         )
-        cls.candidate_errors = cls.admission.candidate
         cls.error_url = resolve_url("admission_api_v1:submit-continuing-proposition", uuid=cls.admission.uuid)
 
         # Validation ok

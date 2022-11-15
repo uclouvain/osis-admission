@@ -73,7 +73,7 @@ from admission.ddd.admission.doctorat.preparation.test.factory.groupe_de_supervi
 from admission.ddd.admission.doctorat.preparation.test.factory.proposition import (
     _ComptabiliteFactory,
 )
-from admission.infrastructure.admission.doctorat.preparation.domain.service.in_memory.profil_candidat import (
+from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import (
     DiplomeEtudeSecondaire,
     ExperienceNonAcademique,
     ProfilCandidatInMemoryTranslator,

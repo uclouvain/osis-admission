@@ -27,11 +27,11 @@ from typing import Optional
 
 import attr
 
-from admission.ddd.admission.doctorat.preparation.domain.model._candidat_adresse import CandidatAdresse
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     AdresseCorrespondanceNonCompleteeException,
     AdresseDomicileLegalNonCompleteeException,
 )
+from admission.ddd.admission.domain.model._candidat_adresse import CandidatAdresse
 from base.ddd.utils.business_validator import BusinessValidator
 
 

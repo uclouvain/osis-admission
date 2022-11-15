@@ -26,7 +26,6 @@
 import datetime
 from typing import List
 
-from admission.ddd.admission.doctorat.preparation.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.doctorat.preparation.dtos import (
     AdressePersonnelleDTO,
     ConditionsComptabiliteDTO,
@@ -34,6 +33,7 @@ from admission.ddd.admission.doctorat.preparation.dtos import (
     CurriculumDTO,
     IdentificationDTO,
 )
+from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from base.models.enums.community import CommunityEnum
 from base.models.enums.person_address_type import PersonAddressType
 from base.models.person import Person

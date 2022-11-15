@@ -25,7 +25,9 @@
 # ##############################################################################
 from functools import partial
 
+from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.domain.service.i_titres_acces import ITitresAcces
+from admission.ddd.admission.domain.service.profil_candidat import ProfilCandidat
 from admission.ddd.admission.formation_continue.domain.model.proposition import Proposition
 from admission.ddd.admission.formation_continue.domain.service.i_formation import IFormationContinueTranslator
 from base.ddd.utils.business_validator import execute_functions_and_aggregate_exceptions
@@ -39,8 +41,20 @@ class VerifierProposition(interface.DomainService):
         proposition_candidat: Proposition,
         formation_translator: IFormationContinueTranslator,
         titres_acces: ITitresAcces,
+        profil_candidat_translator: IProfilCandidatTranslator,
     ) -> None:
+        profil_candidat_service = ProfilCandidat()
         execute_functions_and_aggregate_exceptions(
+            partial(
+                profil_candidat_service.verifier_identification,
+                proposition_candidat.matricule_candidat,
+                profil_candidat_translator,
+            ),
+            partial(
+                profil_candidat_service.verifier_coordonnees,
+                proposition_candidat.matricule_candidat,
+                profil_candidat_translator,
+            ),
             # TODO check other tabs
             partial(
                 titres_acces.verifier,

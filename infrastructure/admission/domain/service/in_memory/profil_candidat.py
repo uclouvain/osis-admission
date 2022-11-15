@@ -27,7 +27,6 @@ import datetime
 from dataclasses import dataclass
 from typing import List, Optional
 
-from admission.ddd.admission.doctorat.preparation.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import CandidatNonTrouveException
 from admission.ddd.admission.doctorat.preparation.dtos import (
     AdressePersonnelleDTO,
@@ -36,6 +35,7 @@ from admission.ddd.admission.doctorat.preparation.dtos import (
     CurriculumDTO,
     IdentificationDTO,
 )
+from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from base.models.enums.civil_state import CivilState
 from base.models.enums.person_address_type import PersonAddressType
 
@@ -194,6 +194,32 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 pays_naissance='BE',
                 etat_civil=CivilState.MARRIED.name,
             ),
+            ProfilCandidat(
+                matricule="0000000001",
+                nom='Smith',
+                prenom='Jane',
+                prenom_d_usage='',
+                autres_prenoms='',
+                date_naissance=datetime.date(1990, 1, 1),
+                annee_naissance=None,
+                lieu_naissance='Louvain-La-Neuve',
+                pays_nationalite='BE',
+                langue_contact='fr-be',
+                sexe='M',
+                genre='M',
+                photo_identite=['uuid11'],
+                carte_identite=['uuid12'],
+                passeport=['uuid13'],
+                numero_registre_national_belge='1001',
+                numero_carte_identite='1002',
+                numero_passeport='1003',
+                curriculum=['uuid14'],
+                annee_derniere_inscription_ucl=None,
+                noma_derniere_inscription_ucl='',
+                email='john.doe@ucl.be',
+                pays_naissance='BE',
+                etat_civil=CivilState.MARRIED.name,
+            ),
         ]
         cls.adresses_candidats = [
             AdressePersonnelle(
@@ -214,6 +240,17 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 pays='BE',
                 rue="Place de l'Université",
                 type='CONTACT',
+                lieu_dit='',
+                numero_rue='14',
+                boite_postale='B2',
+            ),
+            AdressePersonnelle(
+                personne="0000000001",
+                code_postal='1348',
+                ville='Louvain-La-Neuve',
+                pays='BE',
+                rue="Place de l'Université",
+                type='RESIDENTIAL',
                 lieu_dit='',
                 numero_rue='14',
                 boite_postale='B2',

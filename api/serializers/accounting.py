@@ -27,7 +27,7 @@ from rest_framework import serializers
 from rest_framework.fields import SerializerMethodField
 
 from admission.ddd.admission.doctorat.preparation.commands import CompleterComptabilitePropositionCommand
-from admission.infrastructure.admission.doctorat.preparation.domain.service.profil_candidat import (
+from admission.infrastructure.admission.domain.service.profil_candidat import (
     ProfilCandidatTranslator,
 )
 from admission.utils import takewhile_return_attribute_values

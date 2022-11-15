@@ -30,6 +30,7 @@ from admission.ddd.admission.formation_continue.use_case.write import *
 from admission.infrastructure.admission.domain.service.in_memory.annee_inscription_formation import (
     AnneeInscriptionFormationInMemoryTranslator,
 )
+from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
 from admission.infrastructure.admission.domain.service.in_memory.titres_acces import TitresAccesInMemory
 from admission.infrastructure.admission.formation_continue.domain.service.in_memory.formation import (
     FormationContinueInMemoryTranslator,
@@ -42,7 +43,7 @@ _proposition_repository = PropositionInMemoryRepository()
 _formation_continue_translator = FormationContinueInMemoryTranslator()
 _annee_inscription_formation_translator = AnneeInscriptionFormationInMemoryTranslator()
 _titres_acces = TitresAccesInMemory()
-
+_profil_candidat_translator = ProfilCandidatInMemoryTranslator()
 
 COMMAND_HANDLERS = {
     RechercherFormationContinueQuery: lambda msg_bus, cmd: rechercher_formations(
@@ -77,11 +78,13 @@ COMMAND_HANDLERS = {
         proposition_repository=_proposition_repository,
         formation_translator=_formation_continue_translator,
         titres_acces=_titres_acces,
+        profil_candidat_translator=_profil_candidat_translator,
     ),
     SoumettrePropositionCommand: lambda msg_bus, cmd: soumettre_proposition(
         cmd,
         proposition_repository=_proposition_repository,
         formation_translator=_formation_continue_translator,
         titres_acces=_titres_acces,
+        profil_candidat_translator=_profil_candidat_translator,
     ),
 }

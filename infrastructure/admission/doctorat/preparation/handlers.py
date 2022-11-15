@@ -31,12 +31,12 @@ from admission.infrastructure.admission.domain.service.annee_inscription_formati
     AnneeInscriptionFormationTranslator,
 )
 from admission.infrastructure.admission.domain.service.bourse import BourseTranslator
+from admission.infrastructure.admission.domain.service.profil_candidat import ProfilCandidatTranslator
 from infrastructure.shared_kernel.academic_year.repository.academic_year import AcademicYearRepository
 from .domain.service.doctorat import DoctoratTranslator
 from .domain.service.historique import Historique
 from .domain.service.membre_CA import MembreCATranslator
 from .domain.service.notification import Notification
-from .domain.service.profil_candidat import ProfilCandidatTranslator
 from .domain.service.promoteur import PromoteurTranslator
 from .repository.groupe_de_supervision import GroupeDeSupervisionRepository
 from .repository.proposition import PropositionRepository
