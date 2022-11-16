@@ -29,7 +29,10 @@ import factory
 
 from admission.tests.factories import PdfUploadFactory
 from admission.tests.factories.language import LanguageKnowledgeFactory
-from admission.tests.factories.secondary_studies import BelgianHighSchoolDiplomaFactory
+from admission.tests.factories.secondary_studies import (
+    BelgianHighSchoolDiplomaFactory,
+    HighSchoolDiplomaAlternativeFactory,
+)
 from base import models as mdl
 from base.models.enums.civil_state import CivilState
 from base.models.enums.person_address_type import PersonAddressType

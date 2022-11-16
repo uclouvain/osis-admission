@@ -36,6 +36,9 @@ from admission.ddd.admission.domain.validator.validator_by_business_action impor
     CoordonneesValidatorList,
     IdentificationValidatorList,
 )
+from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
+    EtudesSecondairesNonCompleteesException,
+)
 from osis_common.ddd import interface
 
 
@@ -102,6 +105,17 @@ class ProfilCandidat(interface.DomainService):
         LanguesConnuesValidatorList(
             codes_langues_connues=codes_langues_connues,
         ).validate()
+
+    @classmethod
+    def verifier_etudes_secondaires(
+        cls,
+        matricule: str,
+        profil_candidat_translator: 'IProfilCandidatTranslator',
+    ) -> None:
+        etudes_secondaires = profil_candidat_translator.get_etudes_secondaires(matricule)
+
+        if not etudes_secondaires:
+            raise EtudesSecondairesNonCompleteesException
 
     @classmethod
     def verifier_curriculum(

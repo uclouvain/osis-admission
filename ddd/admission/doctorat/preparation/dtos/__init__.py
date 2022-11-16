@@ -24,7 +24,6 @@
 #
 ##############################################################################
 from .comptabilite import ComptabiliteDTO, ConditionsComptabiliteDTO
-from .coordonnees import AdressePersonnelleDTO, CoordonneesDTO
 from .curriculum import CurriculumDTO
 from .doctorat import DoctoratDTO
 from .groupe_supervision import (
@@ -36,7 +35,6 @@ from .groupe_supervision import (
     MembreCADTO,
     PromoteurDTO,
 )
-from .identification import IdentificationDTO
 from .proposition import PropositionDTO
 from .superieur import (
     AutreOccupationDTO,
@@ -49,17 +47,14 @@ from .superieur import (
 __all__ = [
     "AvisDTO",
     "AutreOccupationDTO",
-    "AdressePersonnelleDTO",
     "ConditionsComptabiliteDTO",
     "ComptabiliteDTO",
-    "CoordonneesDTO",
     "CotutelleDTO",
     "CurriculumDTO",
     "DetailSignatureMembreCADTO",
     "DetailSignaturePromoteurDTO",
     "DoctoratDTO",
     "GroupeDeSupervisionDTO",
-    "IdentificationDTO",
     "MembreCADTO",
     "PromoteurDTO",
     "PropositionDTO",

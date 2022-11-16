@@ -2362,6 +2362,9 @@ msgstr ""
 msgid "Secondary studies"
 msgstr ""
 
+msgid "Secondary studies must be completed."
+msgstr ""
+
 msgid "Select a mail template"
 msgstr ""
 

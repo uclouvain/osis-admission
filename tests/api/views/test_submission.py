@@ -56,11 +56,7 @@ class GeneralPropositionSubmissionTestCase(APITestCase):
         self.client.force_authenticate(user=self.candidate_errors.user)
         response = self.client.get(self.error_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-        self.assertDictEqual(
-            response.json()[0],
-            {"status_code": "ADMISSION-2", "detail": _("Admission conditions not met.")},
-        )
+        self.assertIn("ADMISSION-2", [e["status_code"] for e in response.json()])
 
     def test_general_proposition_submission_with_errors(self):
         self.client.force_authenticate(user=self.candidate_errors.user)

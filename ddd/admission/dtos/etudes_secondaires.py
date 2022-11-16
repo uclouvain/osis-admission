@@ -1,4 +1,4 @@
-##############################################################################
+# ##############################################################################
 #
 #    OSIS stands for Open Student Information System. It's an application
 #    designed to manage the core business of higher education institutions,
@@ -22,32 +22,22 @@
 #    at the root of the source code of this program.  If not,
 #    see http://www.gnu.org/licenses/.
 #
-##############################################################################
+# ##############################################################################
 
-from django.utils.translation import gettext_lazy as _
+import attr
 
-from osis_common.ddd.interface import BusinessException
-
-
-class FormationNonTrouveeException(BusinessException):
-    status_code = "FORMATION-GENERALE-1"
-
-    def __init__(self, **kwargs):
-        message = _("No training found.")
-        super().__init__(message, **kwargs)
+from osis_common.ddd import interface
 
 
-class PropositionNonTrouveeException(BusinessException):
-    status_code = "FORMATION-GENERALE-2"
+@attr.dataclass(slots=True, frozen=True)
+class EtudesSecondairesDTO(interface.DTO):
+    presence_etudes_secondaires_belges: bool
+    presence_etudes_secondaires_etrangeres: bool
+    presence_examen_admission_premier_cycle: bool
 
-    def __init__(self, **kwargs):
-        message = _("Proposition not found.")
-        super().__init__(message, **kwargs)
-
-
-class EtudesSecondairesNonCompleteesException(BusinessException):
-    status_code = "FORMATION-GENERALE-3"
-
-    def __init__(self, **kwargs):
-        message = _("Secondary studies must be completed.")
-        super().__init__(message, **kwargs)
+    def __bool__(self):
+        return (
+            self.presence_etudes_secondaires_belges
+            or self.presence_etudes_secondaires_etrangeres
+            or self.presence_examen_admission_premier_cycle
+        )

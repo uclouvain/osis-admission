@@ -55,6 +55,11 @@ class VerifierProposition(interface.DomainService):
                 proposition_candidat.matricule_candidat,
                 profil_candidat_translator,
             ),
+            partial(
+                profil_candidat_service.verifier_etudes_secondaires,
+                proposition_candidat.matricule_candidat,
+                profil_candidat_translator,
+            ),
             # TODO check other tabs
             partial(
                 titres_acces.verifier,

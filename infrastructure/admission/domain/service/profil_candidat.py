@@ -26,21 +26,23 @@
 import datetime
 from typing import List
 
-from admission.ddd.admission.doctorat.preparation.dtos import (
-    AdressePersonnelleDTO,
-    ConditionsComptabiliteDTO,
-    CoordonneesDTO,
-    CurriculumDTO,
-    IdentificationDTO,
-)
+from django.db.models import Exists, OuterRef
+
+from admission.ddd.admission.doctorat.preparation.dtos import ConditionsComptabiliteDTO, CurriculumDTO
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
+from admission.ddd.admission.dtos import AdressePersonnelleDTO, CoordonneesDTO, EtudesSecondairesDTO, IdentificationDTO
 from base.models.enums.community import CommunityEnum
 from base.models.enums.person_address_type import PersonAddressType
 from base.models.person import Person
 from base.models.person_address import PersonAddress
 from base.tasks.synchronize_entities_addresses import UCLouvain_acronym
-from osis_profile.models import EducationalExperienceYear, ProfessionalExperience
-from osis_profile.models.education import LanguageKnowledge
+from osis_profile.models import (
+    BelgianHighSchoolDiploma,
+    EducationalExperienceYear,
+    ForeignHighSchoolDiploma,
+    ProfessionalExperience,
+)
+from osis_profile.models.education import HighSchoolDiplomaAlternative, LanguageKnowledge
 
 
 class ProfilCandidatTranslator(IProfilCandidatTranslator):
@@ -129,6 +131,29 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
         )
 
     @classmethod
+    def get_etudes_secondaires(cls, matricule: str) -> 'EtudesSecondairesDTO':
+        result = (
+            Person.objects.annotate(
+                presence_etudes_secondaires_belges=Exists(
+                    BelgianHighSchoolDiploma.objects.filter(person_id=OuterRef('pk'))
+                ),
+                presence_etudes_secondaires_etrangeres=Exists(
+                    ForeignHighSchoolDiploma.objects.filter(person_id=OuterRef('pk'))
+                ),
+                presence_examen_admission_premier_cycle=Exists(
+                    HighSchoolDiplomaAlternative.objects.filter(person_id=OuterRef('pk'))
+                ),
+            )
+            .values(
+                'presence_etudes_secondaires_belges',
+                'presence_etudes_secondaires_etrangeres',
+                'presence_examen_admission_premier_cycle',
+            )
+            .get(global_id=matricule)
+        )
+        return EtudesSecondairesDTO(**result)
+
+    @classmethod
     def get_curriculum(cls, matricule: str, annee_courante: int) -> 'CurriculumDTO':
         person = Person.objects.only('pk', 'curriculum').get(global_id=matricule)
 
@@ -202,7 +227,6 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
         matricule: str,
         annee_courante: int,
     ) -> 'ConditionsComptabiliteDTO':
-
         minimal_years = cls.get_annees_minimum_curriculum(
             global_id=matricule,
             current_year=annee_courante,
