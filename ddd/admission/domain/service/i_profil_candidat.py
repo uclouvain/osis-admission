@@ -26,12 +26,8 @@
 from abc import abstractmethod
 from typing import List, Optional
 
-from admission.ddd.admission.doctorat.preparation.dtos import (
-    ConditionsComptabiliteDTO,
-    CoordonneesDTO,
-    CurriculumDTO,
-    IdentificationDTO,
-)
+from admission.ddd.admission.doctorat.preparation.dtos import ConditionsComptabiliteDTO, CurriculumDTO
+from admission.ddd.admission.dtos import CoordonneesDTO, EtudesSecondairesDTO, IdentificationDTO
 from osis_common.ddd import interface
 
 
@@ -53,6 +49,11 @@ class IProfilCandidatTranslator(interface.DomainService):
     @classmethod
     @abstractmethod
     def get_langues_connues(cls, matricule: str) -> List[str]:
+        raise NotImplementedError
+
+    @classmethod
+    @abstractmethod
+    def get_etudes_secondaires(cls, matricule: str) -> 'EtudesSecondairesDTO':
         raise NotImplementedError
 
     @classmethod

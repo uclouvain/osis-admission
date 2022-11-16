@@ -28,14 +28,9 @@ from dataclasses import dataclass
 from typing import List, Optional
 
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import CandidatNonTrouveException
-from admission.ddd.admission.doctorat.preparation.dtos import (
-    AdressePersonnelleDTO,
-    ConditionsComptabiliteDTO,
-    CoordonneesDTO,
-    CurriculumDTO,
-    IdentificationDTO,
-)
+from admission.ddd.admission.doctorat.preparation.dtos import ConditionsComptabiliteDTO, CurriculumDTO
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
+from admission.ddd.admission.dtos import AdressePersonnelleDTO, CoordonneesDTO, EtudesSecondairesDTO, IdentificationDTO
 from base.models.enums.civil_state import CivilState
 from base.models.enums.person_address_type import PersonAddressType
 
@@ -129,6 +124,7 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
     connaissances_langues = []
     diplomes_etudes_secondaires_belges = []
     diplomes_etudes_secondaires_etrangers = []
+    etudes_secondaires = {}
     experiences_academiques = []
     experiences_non_academiques = []
     pays_union_europeenne = {
@@ -291,6 +287,11 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
 
         cls.diplomes_etudes_secondaires_belges = []
         cls.diplomes_etudes_secondaires_etrangers = []
+        cls.etudes_secondaires = {
+            cls.matricule_candidat: EtudesSecondairesDTO(True, False, False),
+            "0123456789": EtudesSecondairesDTO(True, False, False),
+            "0000000001": EtudesSecondairesDTO(True, False, False),
+        }
 
     @classmethod
     def get_identification(cls, matricule: str) -> 'IdentificationDTO':
@@ -371,6 +372,10 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
     @classmethod
     def get_langues_connues(cls, matricule: str) -> List[str]:
         return [c.langue.code_langue for c in cls.connaissances_langues if c.personne == matricule]
+
+    @classmethod
+    def get_etudes_secondaires(cls, matricule: str) -> 'EtudesSecondairesDTO':
+        return cls.etudes_secondaires.get(matricule) or EtudesSecondairesDTO(False, False, False)
 
     @classmethod
     def get_curriculum(cls, matricule: str, annee_courante: int) -> 'CurriculumDTO':

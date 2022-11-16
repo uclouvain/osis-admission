@@ -2556,6 +2556,9 @@ msgstr "Rechercher un code UE (hors UE du formulaire)"
 msgid "Secondary studies"
 msgstr "Études secondaires"
 
+msgid "Secondary studies must be completed."
+msgstr "Les études secondaires doivent être complétées."
+
 msgid "Select a mail template"
 msgstr "Sélectionner un template d'email"
 
