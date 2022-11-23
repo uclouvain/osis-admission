@@ -169,6 +169,7 @@ class _PropositionFactory(factory.Factory):
         '06de0c3d-3c06-4c93-8eb4-c8648f04f142': 'My response 2',
         '06de0c3d-3c06-4c93-8eb4-c8648f04f143': 'My response 3',
     }
+    curriculum = ['file_token.pdf']
 
 
 class PropositionAdmissionSC3DPMinimaleFactory(_PropositionFactory):

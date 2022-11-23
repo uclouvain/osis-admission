@@ -24,6 +24,7 @@
 #
 # ##############################################################################
 from datetime import timedelta
+from typing import List
 
 from django.db import models
 
@@ -42,7 +43,7 @@ from reference.models.enums.cycle import Cycle
 
 class TitresAcces(ITitresAcces):
     @classmethod
-    def conditions_remplies(cls, matricule_candidat: str) -> AdmissionConditionsDTO:
+    def conditions_remplies(cls, matricule_candidat: str, equivalence_diplome: List[str]) -> AdmissionConditionsDTO:
         result = (
             Person.objects.annotate(
                 # à la question sur la diplomation du secondaire, avoir répondu "oui" OU "en cours"
@@ -133,8 +134,6 @@ class TitresAcces(ITitresAcces):
                         models.Q(person_id=models.OuterRef('pk')),
                         # étranger
                         ~models.Q(country__iso_code="BE"),
-                        # présence de la PJ d'équivalence
-                        diploma_equivalence__len__gt=0,
                         # diplomé
                         obtained_diploma=True,
                     )
@@ -178,7 +177,8 @@ class TitresAcces(ITitresAcces):
             diplomation_academique_etranger=result.diplomation_academique_etranger,
             potentiel_master_belge_sans_diplomation=result.potentiel_master_belge_sans_diplomation,
             diplomation_potentiel_master_belge=result.diplomation_potentiel_master_belge,
-            diplomation_potentiel_master_etranger=result.diplomation_potentiel_master_etranger,
+            diplomation_potentiel_master_etranger=bool(equivalence_diplome)
+            and result.diplomation_potentiel_master_etranger,
             diplomation_potentiel_doctorat_belge=result.diplomation_potentiel_doctorat_belge,
             potentiel_acces_vae=result.potentiel_acces_vae,
         )

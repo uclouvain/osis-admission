@@ -44,8 +44,10 @@ class PersonRelatedSchema(ChoicesEnumSchema):
 
     def get_operation_id(self, path, method):
         operation_id = super().get_operation_id(path, method)
+        if self.training_type not in operation_id:
+            operation_id += self.training_type
         if 'uuid' in path:
-            operation_id += self.training_type + 'Admission'
+            operation_id += 'Admission'
         return operation_id
 
 

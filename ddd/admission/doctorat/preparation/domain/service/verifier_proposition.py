@@ -70,6 +70,7 @@ class VerifierProposition(interface.DomainService):
                 proposition_candidat.matricule_candidat,
                 profil_candidat_translator,
                 annee_courante,
+                proposition_candidat.curriculum,
             ),
             groupe_de_supervision.verifier_tout_le_monde_a_approuve,
             partial(

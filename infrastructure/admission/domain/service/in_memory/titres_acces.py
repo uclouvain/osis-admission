@@ -23,6 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from typing import List
 
 from admission.ddd.admission.domain.service.i_titres_acces import ITitresAcces
 from admission.ddd.admission.dtos.conditions import AdmissionConditionsDTO
@@ -41,5 +42,5 @@ class TitresAccesInMemory(ITitresAcces):
     }
 
     @classmethod
-    def conditions_remplies(cls, matricule_candidat: str) -> AdmissionConditionsDTO:
+    def conditions_remplies(cls, matricule_candidat: str, equivalence_diplome: List[str]) -> AdmissionConditionsDTO:
         return cls.results.get(matricule_candidat, AdmissionConditionsDTOFactory())

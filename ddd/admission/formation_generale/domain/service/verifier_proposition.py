@@ -47,7 +47,11 @@ class VerifierProposition(interface.DomainService):
     ) -> None:
         profil_candidat_service = ProfilCandidat()
         type_formation = formation_translator.get(proposition_candidat.formation_id).type
-        titres = titres_acces.recuperer_titres_access(proposition_candidat.matricule_candidat, type_formation)
+        titres = titres_acces.recuperer_titres_access(
+            proposition_candidat.matricule_candidat,
+            type_formation,
+            proposition_candidat.equivalence_diplome,
+        )
         execute_functions_and_aggregate_exceptions(
             partial(
                 profil_candidat_service.verifier_identification,

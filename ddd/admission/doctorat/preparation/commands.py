@@ -291,3 +291,11 @@ class ModifierTypeAdmissionCommand(interface.CommandRequest):
     bourse_erasmus_mundus: Optional[str] = ''
 
     reponses_questions_specifiques: Dict = attr.Factory(dict)
+
+
+@attr.dataclass(frozen=True, slots=True)
+class CompleterCurriculumCommand(interface.CommandRequest):
+    uuid_proposition: str
+
+    curriculum: List[str] = attr.Factory(list)
+    reponses_questions_specifiques: Dict = attr.Factory(dict)

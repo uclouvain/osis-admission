@@ -77,4 +77,8 @@ COMMAND_HANDLERS = {
         titres_acces=TitresAcces(),
         profil_candidat_translator=ProfilCandidatTranslator(),
     ),
+    CompleterCurriculumCommand: lambda msg_bus, cmd: completer_curriculum(
+        cmd,
+        proposition_repository=PropositionRepository(),
+    ),
 }

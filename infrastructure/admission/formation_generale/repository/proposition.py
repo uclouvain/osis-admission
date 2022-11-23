@@ -123,6 +123,10 @@ class PropositionRepository(IPropositionRepository):
                 'is_non_resident': entity.est_non_resident_au_sens_decret,
                 'status': entity.statut.name,
                 'specific_question_answers': entity.reponses_questions_specifiques,
+                'bachelor_cycle_continuation': entity.continuation_cycle_bachelier,
+                'bachelor_cycle_continuation_certificate': entity.attestation_continuation_cycle_bachelier,
+                'curriculum': entity.curriculum,
+                'diploma_equivalence': entity.equivalence_diplome,
             },
         )
 
@@ -160,6 +164,10 @@ class PropositionRepository(IPropositionRepository):
             est_reorientation_inscription_externe=admission.is_external_reorientation,
             est_modification_inscription_externe=admission.is_external_modification,
             est_non_resident_au_sens_decret=admission.is_non_resident,
+            curriculum=admission.curriculum,
+            equivalence_diplome=admission.diploma_equivalence,
+            continuation_cycle_bachelier=admission.bachelor_cycle_continuation,
+            attestation_continuation_cycle_bachelier=admission.bachelor_cycle_continuation_certificate,
         )
 
     @classmethod
@@ -177,6 +185,7 @@ class PropositionRepository(IPropositionRepository):
                 if get_language() == settings.LANGUAGE_CODE
                 else admission.training.title_english,
                 campus=admission.teaching_campus or '',
+                type=admission.training.education_group_type.name,
             ),
             matricule_candidat=admission.candidate.global_id,
             prenom_candidat=admission.candidate.first_name,
@@ -191,4 +200,8 @@ class PropositionRepository(IPropositionRepository):
             if admission.erasmus_mundus_scholarship
             else None,
             reponses_questions_specifiques=admission.specific_question_answers,
+            curriculum=admission.curriculum,
+            equivalence_diplome=admission.diploma_equivalence,
+            continuation_cycle_bachelier=admission.bachelor_cycle_continuation,
+            attestation_continuation_cycle_bachelier=admission.bachelor_cycle_continuation_certificate,
         )

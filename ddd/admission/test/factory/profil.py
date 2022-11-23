@@ -101,7 +101,6 @@ class CurriculumDTOFactory(factory.Factory):
         model = CurriculumDTO
         abstract = False
 
-    fichier_pdf = ['uuid11']
     dates_experiences_non_academiques: List[int] = []
     annees_experiences_academiques: List[int] = []
     annee_derniere_inscription_ucl = factory.Faker('year')

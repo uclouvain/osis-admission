@@ -60,5 +60,6 @@ class VerifierProposition(interface.DomainService):
                 titres_acces.verifier,
                 proposition_candidat.matricule_candidat,
                 formation_translator.get(proposition_candidat.formation_id).type,
+                equivalence_diplome=proposition_candidat.equivalence_diplome,
             ),
         )

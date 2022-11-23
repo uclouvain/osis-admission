@@ -28,23 +28,26 @@ from typing import Union
 
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
+from rest_framework import status
 from rest_framework.exceptions import PermissionDenied
-from rest_framework.generics import get_object_or_404, RetrieveAPIView
+from rest_framework.generics import get_object_or_404, RetrieveAPIView, UpdateAPIView, GenericAPIView
 from rest_framework.mixins import UpdateModelMixin, CreateModelMixin, RetrieveModelMixin, DestroyModelMixin
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, GenericViewSet
 
 from admission.api import serializers
 from admission.api.permissions import IsSelfPersonTabOrTabPermission
-from admission.api.schema import ResponseSpecificSchema
 from admission.api.serializers import ProfessionalExperienceSerializer
 from admission.api.serializers.curriculum import EducationalExperienceSerializer
 from admission.api.views.mixins import (
     PersonRelatedMixin,
     GeneralEducationPersonRelatedMixin,
     ContinuingEducationPersonRelatedMixin,
-    PersonRelatedSchema,
 )
+from admission.ddd.admission.doctorat.preparation import commands as doctorate_commands
+from admission.ddd.admission.formation_generale import commands as general_commands
+from admission.ddd.admission.formation_continue import commands as continuing_commands
+from infrastructure.messages_bus import message_bus_instance
 from osis_profile.models import ProfessionalExperience, EducationalExperience
 from osis_role.contrib.views import APIPermissionRequiredMixin
 
@@ -59,6 +62,9 @@ __all__ = [
     "ContinuingCurriculumView",
     "ContinuingEducationalExperienceViewSet",
     "ContinuingProfessionalExperienceViewSet",
+    "ContinuingCompleteCurriculumView",
+    "GeneralCompleteCurriculumView",
+    "DoctorateCompleteCurriculumView",
 ]
 
 GENERAL_EDUCATION_PERMISSIONS_MAPPING = {
@@ -75,22 +81,19 @@ CONTINUING_EDUCATION_PERMISSIONS_MAPPING = {
     'DELETE': 'admission.change_continuingeducationadmission_curriculum',
 }
 
+DOCTORATE_PERMISSIONS_MAPPING = {
+    'GET': 'admission.view_doctorateadmission_curriculum',
+    'POST': 'admission.change_doctorateadmission_curriculum',
+    'PUT': 'admission.change_doctorateadmission_curriculum',
+    'PATCH': 'admission.change_doctorateadmission_curriculum',
+    'DELETE': 'admission.change_doctorateadmission_curriculum',
+}
 
-class BaseCurriculumSchema(PersonRelatedSchema, ResponseSpecificSchema):
-    pass
 
-
-class BaseCurriculumView(APIPermissionRequiredMixin, UpdateModelMixin, RetrieveAPIView):
+class BaseCurriculumView(APIPermissionRequiredMixin, RetrieveAPIView):
+    serializer_class = serializers.CurriculumDetailsSerializer
     pagination_class = None
     filter_backends = []
-
-    serializer_mapping = {
-        'GET': serializers.CurriculumDetailsSerializer,
-        'PUT': serializers.CurriculumSerializer,
-    }
-
-    def get_serializer_class(self):
-        return self.serializer_mapping.get(self.request.method)
 
     def get(self, request, *args, **kwargs):
         """Return the experiences and the curriculum pdf of a person and the mandatory years to complete."""
@@ -115,32 +118,55 @@ class BaseCurriculumView(APIPermissionRequiredMixin, UpdateModelMixin, RetrieveA
 
         return Response(serializer.data)
 
-    def put(self, request, *args, **kwargs):
-        response = self.update(request, *args, **kwargs)
-        current_admission = self.get_permission_object()
-        if current_admission:
-            current_admission.specific_question_answers = request.data.get('specific_question_answers')
-            current_admission.save(update_fields=['specific_question_answers'])
-            current_admission.update_detailed_status()
-        return response
-
 
 class CurriculumView(PersonRelatedMixin, BaseCurriculumView):
     name = "curriculum"
     permission_classes = [partial(IsSelfPersonTabOrTabPermission, permission_suffix="curriculum")]
-    schema = BaseCurriculumSchema()
 
 
 class GeneralCurriculumView(GeneralEducationPersonRelatedMixin, BaseCurriculumView):
     name = "general_curriculum"
     permission_mapping = GENERAL_EDUCATION_PERMISSIONS_MAPPING
-    schema = BaseCurriculumSchema(training_type='GeneralEducation')
 
 
 class ContinuingCurriculumView(ContinuingEducationPersonRelatedMixin, BaseCurriculumView):
     name = "continuing_curriculum"
     permission_mapping = CONTINUING_EDUCATION_PERMISSIONS_MAPPING
-    schema = BaseCurriculumSchema(training_type='ContinuingEducation')
+
+
+class BaseCompleteCurriculumView(APIPermissionRequiredMixin, GenericAPIView):
+    pagination_class = None
+    filter_backends = []
+    serializer_class = None
+    command_class = None
+
+    def put(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        message_bus_instance.invoke(self.command_class(**serializer.data))
+        self.get_permission_object().update_detailed_status()
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class DoctorateCompleteCurriculumView(PersonRelatedMixin, BaseCompleteCurriculumView):
+    name = "doctorate_curriculum"
+    permission_mapping = DOCTORATE_PERMISSIONS_MAPPING
+    serializer_class = serializers.DoctoratCompleterCurriculumCommandSerializer
+    command_class = doctorate_commands.CompleterCurriculumCommand
+
+
+class GeneralCompleteCurriculumView(GeneralEducationPersonRelatedMixin, BaseCompleteCurriculumView):
+    name = "general_curriculum"
+    permission_mapping = GENERAL_EDUCATION_PERMISSIONS_MAPPING
+    serializer_class = serializers.GeneralEducationCompleterCurriculumCommandSerializer
+    command_class = general_commands.CompleterCurriculumCommand
+
+
+class ContinuingCompleteCurriculumView(ContinuingEducationPersonRelatedMixin, BaseCompleteCurriculumView):
+    name = "continuing_curriculum"
+    permission_mapping = CONTINUING_EDUCATION_PERMISSIONS_MAPPING
+    serializer_class = serializers.ContinuingEducationCompleterCurriculumCommandSerializer
+    command_class = continuing_commands.CompleterCurriculumCommand
 
 
 class ExperienceViewSet(

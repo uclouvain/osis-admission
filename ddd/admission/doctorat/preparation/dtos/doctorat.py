@@ -35,3 +35,4 @@ class DoctoratDTO(interface.DTO):
     intitule: str
     sigle_entite_gestion: str
     campus: str
+    type: str

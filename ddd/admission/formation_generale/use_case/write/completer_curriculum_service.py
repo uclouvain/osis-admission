@@ -23,36 +23,31 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
-import datetime
-from typing import Dict, List, Optional, Union
-
-import attr
-
-from admission.ddd.admission.dtos.bourse import BourseDTO
-from admission.ddd.admission.dtos.formation import FormationDTO
-from osis_common.ddd import interface
+from admission.ddd.admission.formation_generale.commands import CompleterCurriculumCommand
+from admission.ddd.admission.formation_generale.domain.builder.proposition_identity_builder import (
+    PropositionIdentityBuilder,
+)
+from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
+from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
 
 
-@attr.dataclass(frozen=True, slots=True)
-class PropositionDTO(interface.DTO):
-    uuid: str
-    formation: FormationDTO
-    creee_le: datetime.datetime
-    modifiee_le: datetime.datetime
-    erreurs: List[Dict[str, str]]
-    statut: str
+def completer_curriculum(
+    cmd: 'CompleterCurriculumCommand',
+    proposition_repository: 'IPropositionRepository',
+) -> 'PropositionIdentity':
+    # GIVEN
+    proposition = proposition_repository.get(PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition))
 
-    matricule_candidat: str
-    prenom_candidat: str
-    nom_candidat: str
+    # WHEN
+    proposition.completer_curriculum(
+        continuation_cycle_bachelier=cmd.continuation_cycle_bachelier,
+        attestation_continuation_cycle_bachelier=cmd.attestation_continuation_cycle_bachelier,
+        curriculum=cmd.curriculum,
+        equivalence_diplome=cmd.equivalence_diplome,
+        reponses_questions_specifiques=cmd.reponses_questions_specifiques,
+    )
 
-    bourse_double_diplome: Optional[BourseDTO]
-    bourse_internationale: Optional[BourseDTO]
-    bourse_erasmus_mundus: Optional[BourseDTO]
+    # THEN
+    proposition_repository.save(proposition)
 
-    reponses_questions_specifiques: Dict[str, Union[str, List[str]]]
-
-    continuation_cycle_bachelier: Optional[bool]
-    attestation_continuation_cycle_bachelier: List[str]
-    curriculum: List[str]
-    equivalence_diplome: List[str]
+    return proposition.entity_id

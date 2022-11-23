@@ -83,4 +83,8 @@ COMMAND_HANDLERS = {
         profil_candidat_translator=ProfilCandidatTranslator(),
         calendrier_inscription=CalendrierInscription(),
     ),
+    CompleterCurriculumCommand: lambda msg_bus, cmd: completer_curriculum(
+        cmd,
+        proposition_repository=PropositionRepository(),
+    ),
 }

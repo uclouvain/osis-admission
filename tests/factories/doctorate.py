@@ -80,6 +80,7 @@ class DoctorateAdmissionFactory(factory.DjangoModelFactory):
     reference = factory.LazyAttribute(_generate_reference)
     planned_duration = 10
     dedicated_time = 10
+    curriculum = factory.LazyFunction(lambda: [uuid.uuid4()])
 
     class Params:
         with_cotutelle = factory.Trait(

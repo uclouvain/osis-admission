@@ -46,3 +46,6 @@ class PropositionDTO(interface.DTO):
     nom_candidat: str
 
     reponses_questions_specifiques: Dict[str, Union[str, List[str]]]
+
+    curriculum: List[str]
+    equivalence_diplome: List[str]

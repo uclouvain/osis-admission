@@ -82,3 +82,4 @@ class PropositionDTO(interface.DTO):
     comptabilite: ComptabiliteDTO
     bourse_erasmus_mundus: Optional[BourseDTO]
     reponses_questions_specifiques: Dict[str, Union[str, List[str]]]
+    curriculum: List[str]

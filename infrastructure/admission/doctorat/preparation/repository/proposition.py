@@ -145,6 +145,7 @@ def _instantiate_admission(admission: 'DoctorateAdmission') -> 'Proposition':
         modifiee_le=admission.modified,
         comptabilite=get_accounting_from_admission(admission=admission),
         reponses_questions_specifiques=admission.specific_question_answers,
+        curriculum=admission.curriculum,
     )
 
 
@@ -240,6 +241,7 @@ class PropositionRepository(IPropositionRepository):
                 'erasmus_mundus_scholarship_id': entity.bourse_erasmus_mundus_id
                 and entity.bourse_erasmus_mundus_id.uuid,
                 'specific_question_answers': entity.reponses_questions_specifiques,
+                'curriculum': entity.curriculum,
             },
         )
         Candidate.objects.get_or_create(person=candidate)
@@ -407,6 +409,7 @@ class PropositionRepository(IPropositionRepository):
                 ),
                 sigle_entite_gestion=admission.sigle_entite_gestion,  # from PropositionManager annotation
                 campus=admission.teaching_campus or '',  # from PropositionManager annotation
+                type=admission.doctorate.education_group_type.name,
             ),
             matricule_candidat=admission.candidate.global_id,
             prenom_candidat=admission.candidate.first_name,
@@ -457,4 +460,5 @@ class PropositionRepository(IPropositionRepository):
             if admission.erasmus_mundus_scholarship
             else None,
             reponses_questions_specifiques=admission.specific_question_answers,
+            curriculum=admission.curriculum,
         )

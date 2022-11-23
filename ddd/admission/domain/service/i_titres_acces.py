@@ -125,20 +125,25 @@ class ITitresAcces(interface.DomainService):
     }
 
     @classmethod
-    def conditions_remplies(cls, matricule_candidat: str) -> AdmissionConditionsDTO:
+    def conditions_remplies(cls, matricule_candidat: str, equivalence_diplome: List[str]) -> AdmissionConditionsDTO:
         raise NotImplementedError
 
     @classmethod
-    def recuperer_titres_access(cls, matricule_candidat: str, type_formation: 'TrainingType') -> Titres:
-        conditions = cls.conditions_remplies(matricule_candidat)
+    def recuperer_titres_access(
+        cls,
+        matricule_candidat: str,
+        type_formation: 'TrainingType',
+        equivalence_diplome: List[str],
+    ) -> Titres:
+        conditions = cls.conditions_remplies(matricule_candidat, equivalence_diplome)
         titres_requis: List[ConditionAccess] = next(
             (titres for types, titres in cls.condition_matrix.items() if type_formation in types), []
         )
         return Titres(conditions, *titres_requis)
 
     @classmethod
-    def verifier(cls, matricule_candidat: str, type_formation: 'TrainingType'):
-        if not cls.recuperer_titres_access(matricule_candidat, type_formation):
+    def verifier(cls, matricule_candidat: str, type_formation: 'TrainingType', equivalence_diplome: List[str]):
+        if not cls.recuperer_titres_access(matricule_candidat, type_formation, equivalence_diplome):
             raise ConditionsAccessNonRempliesException
 
     @classmethod
@@ -148,4 +153,4 @@ class ITitresAcces(interface.DomainService):
 
     @classmethod
     def verifier_doctorat(cls, matricule_candidat: str):
-        cls.verifier(matricule_candidat, TrainingType.PHD)
+        cls.verifier(matricule_candidat, TrainingType.PHD, [])

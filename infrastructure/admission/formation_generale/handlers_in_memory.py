@@ -97,4 +97,8 @@ COMMAND_HANDLERS = {
         profil_candidat_translator=_profil_candidat_translator,
         calendrier_inscription=CalendrierInscriptionInMemory(),
     ),
+    CompleterCurriculumCommand: lambda msg_bus, cmd: completer_curriculum(
+        cmd,
+        proposition_repository=_proposition_repository,
+    ),
 }

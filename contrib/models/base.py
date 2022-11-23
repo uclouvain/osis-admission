@@ -8,6 +8,7 @@ from django.db.models import OuterRef, Subquery
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils.translation import gettext_lazy as _
+from osis_document.contrib import FileField
 
 from admission.contrib.models.form_item import ConfigurableModelFormItemField
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
@@ -79,6 +80,13 @@ class BaseAdmission(models.Model):
         encoder=DjangoJSONEncoder,
         upload_to=admission_directory_path,
         education_field_name='training',
+    )
+
+    curriculum = FileField(
+        blank=True,
+        mimetypes=['application/pdf'],
+        upload_to=admission_directory_path,
+        verbose_name=_('Curriculum'),
     )
 
     def save(self, *args, **kwargs) -> None:

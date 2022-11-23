@@ -104,6 +104,7 @@ class Proposition(interface.RootEntity):
     comptabilite: 'Comptabilite' = comptabilite_non_remplie
     bourse_erasmus_mundus_id: Optional[BourseIdentity] = None
     reponses_questions_specifiques: Dict = attr.Factory(dict)
+    curriculum: List[str] = attr.Factory(list)
 
     @property
     def sigle_formation(self):
@@ -288,6 +289,14 @@ class Proposition(interface.RootEntity):
                 date_soutenance=date_soutenance,
                 raison_non_soutenue=raison_non_soutenue or '',
             )
+
+    def completer_curriculum(
+        self,
+        curriculum: List[str],
+        reponses_questions_specifiques: Dict,
+    ):
+        self.curriculum = curriculum
+        self.reponses_questions_specifiques = reponses_questions_specifiques
 
     def completer_comptabilite(
         self,

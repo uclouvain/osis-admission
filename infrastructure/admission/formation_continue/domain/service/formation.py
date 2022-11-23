@@ -49,6 +49,7 @@ class FormationContinueTranslator(IFormationContinueTranslator):
             annee=dto.year,
             intitule=dto.title_fr if get_language() == settings.LANGUAGE_CODE else dto.title_en,
             campus=dto.main_teaching_campus_name or '',
+            type=dto.type,
         )
 
     @classmethod

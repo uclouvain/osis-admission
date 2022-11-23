@@ -39,6 +39,7 @@ from admission.ddd.admission.formation_generale.test.factory.proposition import 
 from admission.ddd.admission.test.factory.formation import _FormationIdentityFactory
 from admission.infrastructure.admission.domain.service.in_memory.bourse import BourseInMemoryTranslator
 from base.ddd.utils.in_memory_repository import InMemoryGenericRepository
+from base.models.enums.education_group_types import TrainingType
 
 
 @dataclass
@@ -52,6 +53,7 @@ class _Candidat:
 class _Formation:
     intitule: str
     campus: str
+    type: str
 
 
 class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepository):
@@ -59,14 +61,17 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
         ("SC3DP", 2020): _Formation(
             intitule="Doctorat en sciences",
             campus="Louvain-la-Neuve",
+            type=TrainingType.PHD.name,
         ),
         ("ECGE3DP", 2020): _Formation(
             intitule="Doctorat en sciences économiques et de gestion",
             campus="Louvain-la-Neuve",
+            type=TrainingType.PHD.name,
         ),
         ("ESP3DP", 2020): _Formation(
             intitule="Doctorat en sciences de la santé publique",
             campus="Mons",
+            type=TrainingType.PHD.name,
         ),
     }
     candidats = {
@@ -134,6 +139,7 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
                 annee=proposition.formation_id.annee,
                 intitule=formation.intitule,
                 campus=formation.campus,
+                type=formation.type,
             ),
             bourse_double_diplome=BourseInMemoryTranslator.get_dto(proposition.bourse_double_diplome_id.uuid)
             if proposition.bourse_double_diplome_id
@@ -145,4 +151,8 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
             if proposition.bourse_internationale_id
             else None,
             reponses_questions_specifiques=proposition.reponses_questions_specifiques,
+            continuation_cycle_bachelier=proposition.continuation_cycle_bachelier,
+            attestation_continuation_cycle_bachelier=proposition.attestation_continuation_cycle_bachelier,
+            equivalence_diplome=proposition.equivalence_diplome,
+            curriculum=proposition.curriculum,
         )

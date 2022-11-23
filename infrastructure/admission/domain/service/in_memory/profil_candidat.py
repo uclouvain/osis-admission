@@ -385,7 +385,6 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 annee_diplome_etudes_secondaires_belges=annee_diplome_belge,
                 annee_diplome_etudes_secondaires_etrangeres=annee_diplome_etranger,
                 annee_derniere_inscription_ucl=candidate.annee_derniere_inscription_ucl,
-                fichier_pdf=cls.cv_files.get(matricule, []),
                 dates_experiences_non_academiques=dates_experiences_non_academiques,
             )
         except StopIteration:

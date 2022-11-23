@@ -57,6 +57,7 @@ from admission.infrastructure.admission.doctorat.preparation.repository.in_memor
 )
 from admission.infrastructure.admission.domain.service.in_memory.bourse import BourseInMemoryTranslator
 from base.ddd.utils.in_memory_repository import InMemoryGenericRepository
+from base.models.enums.education_group_types import TrainingType
 
 
 @dataclass
@@ -72,6 +73,7 @@ class _Doctorat:
     code_secteur: str
     intitule_secteur: str
     campus: str
+    type: str
 
 
 class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepository):
@@ -81,18 +83,21 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
             code_secteur="SST",
             intitule_secteur="Secteur des sciences et technologies",
             campus="Louvain-la-Neuve",
+            type=TrainingType.PHD.name,
         ),
         ("ECGE3DP", 2020): _Doctorat(
             intitule="Doctorat en sciences économiques et de gestion",
             code_secteur="SSH",
             intitule_secteur="Secteur des sciences humaines",
             campus="Louvain-la-Neuve",
+            type=TrainingType.PHD.name,
         ),
         ("ESP3DP", 2020): _Doctorat(
             intitule="Doctorat en sciences de la santé publique",
             code_secteur="SSS",
             intitule_secteur="Secteur des sciences de la santé",
             campus="Mons",
+            type=TrainingType.PHD.name,
         ),
     }
     candidats = {
@@ -213,6 +218,7 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
                 doctorat.intitule,
                 doctorat.code_secteur,
                 doctorat.campus,
+                doctorat.type,
             ),
             matricule_candidat=proposition.matricule_candidat,
             justification=proposition.justification,
@@ -255,4 +261,5 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
             comptabilite=get_dto_accounting_from_domain_model(proposition.comptabilite),
             reponses_questions_specifiques=proposition.reponses_questions_specifiques,
             bourse_erasmus_mundus=bourse_erasmus_dto,
+            curriculum=proposition.curriculum,
         )

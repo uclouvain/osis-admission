@@ -209,4 +209,8 @@ COMMAND_HANDLERS = {
         proposition_repository=_proposition_repository,
         bourse_translator=_bourse_translator,
     ),
+    CompleterCurriculumCommand: lambda msg_bus, cmd: completer_curriculum(
+        cmd,
+        proposition_repository=_proposition_repository,
+    ),
 }
