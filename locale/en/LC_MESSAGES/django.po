@@ -698,6 +698,10 @@ msgstr ""
 msgid "Certificate"
 msgstr ""
 
+msgid ""
+"Certificate allowing the continuation of studies for a bachelor's degree"
+msgstr ""
+
 msgid "Certificate of achievement"
 msgstr ""
 
@@ -962,6 +966,9 @@ msgstr ""
 msgid "Diploma"
 msgstr ""
 
+msgid "Diploma equivalence"
+msgstr ""
+
 msgid "Display according education"
 msgstr ""
 
@@ -969,6 +976,11 @@ msgid "Dissent from reference promoter"
 msgstr ""
 
 msgid "Do not reorder values, and keep the same count"
+msgstr ""
+
+msgid ""
+"Do you want, on the basis of this training, to realize a cycle continuation "
+"for the bachelor you are registering for?"
 msgstr ""
 
 #, python-format

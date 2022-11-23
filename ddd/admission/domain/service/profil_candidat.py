@@ -23,6 +23,8 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from typing import List
+
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition
 from admission.ddd.admission.doctorat.preparation.domain.validator.validator_by_business_action import (
     ComptabiliteValidatorList,
@@ -123,6 +125,7 @@ class ProfilCandidat(interface.DomainService):
         matricule: str,
         profil_candidat_translator: 'IProfilCandidatTranslator',
         annee_courante: int,
+        curriculum_pdf: List[str],
     ) -> None:
         curriculum = profil_candidat_translator.get_curriculum(matricule, annee_courante=annee_courante)
 
@@ -132,7 +135,7 @@ class ProfilCandidat(interface.DomainService):
             annee_diplome_etudes_secondaires_belges=curriculum.annee_diplome_etudes_secondaires_belges,
             annee_diplome_etudes_secondaires_etrangeres=curriculum.annee_diplome_etudes_secondaires_etrangeres,
             annee_derniere_inscription_ucl=curriculum.annee_derniere_inscription_ucl,
-            fichier_pdf=curriculum.fichier_pdf,
+            fichier_pdf=curriculum_pdf,
             dates_experiences_non_academiques=curriculum.dates_experiences_non_academiques,
         ).validate()
 

@@ -156,17 +156,15 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
 
     @classmethod
     def get_curriculum(cls, matricule: str, annee_courante: int) -> 'CurriculumDTO':
-        person = Person.objects.only('pk', 'curriculum').get(global_id=matricule)
-
         minimal_years = cls.get_annees_minimum_curriculum(matricule, annee_courante)
 
         annees_experiences_academiques = EducationalExperienceYear.objects.filter(
-            educational_experience__person=person,
+            educational_experience__person__global_id=matricule,
             academic_year__year__gte=minimal_years.get('minimal_year'),
         ).values_list('academic_year__year', flat=True)
 
         dates_experiences_non_academiques = ProfessionalExperience.objects.filter(
-            person=person,
+            person__global_id=matricule,
             end_date__gte=datetime.date(minimal_years.get('minimal_year'), cls.MOIS_DEBUT_ANNEE_ACADEMIQUE, 1),
         ).values_list('start_date', 'end_date')
 
@@ -176,7 +174,6 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
             annee_diplome_etudes_secondaires_etrangeres=minimal_years.get('foreign_highschool_diploma_year'),
             annee_derniere_inscription_ucl=minimal_years.get('last_registration_year'),
             dates_experiences_non_academiques=list(dates_experiences_non_academiques),
-            fichier_pdf=person.curriculum,
         )
 
     @classmethod

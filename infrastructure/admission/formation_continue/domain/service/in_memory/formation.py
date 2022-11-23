@@ -101,6 +101,7 @@ class FormationContinueInMemoryTranslator(IFormationContinueTranslator):
             annee=entity.entity_id.annee,
             intitule=entity.intitule,
             campus=entity.campus,
+            type=entity.type,
         )
 
     @classmethod

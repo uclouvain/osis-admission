@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Admission API
-  version: 1.0.48
+  version: 1.0.49
   description: This API delivers data for the Admission project.
   contact:
     name: UCLouvain - OSIS
@@ -359,40 +359,11 @@ paths:
       - $ref: '#/components/parameters/X-User-Email'
       - $ref: '#/components/parameters/X-User-GlobalID'
       responses:
-        200:
+        '200':
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/CurriculumDetails'
-          description: ''
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-      tags:
-      - person
-    put:
-      operationId: updateCurriculum
-      description: ''
-      parameters:
-      - $ref: '#/components/parameters/Accept-Language'
-      - $ref: '#/components/parameters/X-User-FirstName'
-      - $ref: '#/components/parameters/X-User-LastName'
-      - $ref: '#/components/parameters/X-User-Email'
-      - $ref: '#/components/parameters/X-User-GlobalID'
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Curriculum'
-      responses:
-        200:
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Curriculum'
           description: ''
         '400':
           $ref: '#/components/responses/BadRequest'
@@ -970,46 +941,11 @@ paths:
       - $ref: '#/components/parameters/X-User-Email'
       - $ref: '#/components/parameters/X-User-GlobalID'
       responses:
-        200:
+        '200':
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/CurriculumDetails'
-          description: ''
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-      tags:
-      - person
-    put:
-      operationId: updateCurriculumAdmission
-      description: ''
-      parameters:
-      - name: uuid
-        in: path
-        required: true
-        description: ''
-        schema:
-          type: string
-      - $ref: '#/components/parameters/Accept-Language'
-      - $ref: '#/components/parameters/X-User-FirstName'
-      - $ref: '#/components/parameters/X-User-LastName'
-      - $ref: '#/components/parameters/X-User-Email'
-      - $ref: '#/components/parameters/X-User-GlobalID'
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Curriculum'
-      responses:
-        200:
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Curriculum'
           description: ''
         '400':
           $ref: '#/components/responses/BadRequest'
@@ -2371,46 +2307,11 @@ paths:
       - $ref: '#/components/parameters/X-User-Email'
       - $ref: '#/components/parameters/X-User-GlobalID'
       responses:
-        200:
+        '200':
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/CurriculumDetails'
-          description: ''
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-      tags:
-      - person
-    put:
-      operationId: updateCurriculumGeneralEducationAdmission
-      description: ''
-      parameters:
-      - name: uuid
-        in: path
-        required: true
-        description: ''
-        schema:
-          type: string
-      - $ref: '#/components/parameters/Accept-Language'
-      - $ref: '#/components/parameters/X-User-FirstName'
-      - $ref: '#/components/parameters/X-User-LastName'
-      - $ref: '#/components/parameters/X-User-Email'
-      - $ref: '#/components/parameters/X-User-GlobalID'
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Curriculum'
-      responses:
-        200:
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Curriculum'
           description: ''
         '400':
           $ref: '#/components/responses/BadRequest'
@@ -3029,46 +2930,11 @@ paths:
       - $ref: '#/components/parameters/X-User-Email'
       - $ref: '#/components/parameters/X-User-GlobalID'
       responses:
-        200:
+        '200':
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/CurriculumDetails'
-          description: ''
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-      tags:
-      - person
-    put:
-      operationId: updateCurriculumContinuingEducationAdmission
-      description: ''
-      parameters:
-      - name: uuid
-        in: path
-        required: true
-        description: ''
-        schema:
-          type: string
-      - $ref: '#/components/parameters/Accept-Language'
-      - $ref: '#/components/parameters/X-User-FirstName'
-      - $ref: '#/components/parameters/X-User-LastName'
-      - $ref: '#/components/parameters/X-User-Email'
-      - $ref: '#/components/parameters/X-User-GlobalID'
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Curriculum'
-      responses:
-        200:
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Curriculum'
           description: ''
         '400':
           $ref: '#/components/responses/BadRequest'
@@ -4401,6 +4267,42 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - person
+  /propositions/doctorate/{uuid}/complete-curriculum:
+    put:
+      operationId: updateDoctoratCompleterCurriculumCommandAdmission
+      description: ''
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DoctoratCompleterCurriculumCommand'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DoctoratCompleterCurriculumCommand'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - person
   /propositions/doctorate/{uuid}/training_choice:
     put:
       operationId: update_doctorate_training_choice
@@ -4647,6 +4549,42 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - propositions
+  /propositions/general-education/{uuid}/complete-curriculum:
+    put:
+      operationId: updateGeneralEducationCompleterCurriculumCommandAdmission
+      description: ''
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GeneralEducationCompleterCurriculumCommand'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GeneralEducationCompleterCurriculumCommand'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - person
   /propositions/continuing-education/{uuid}/training-choice:
     put:
       operationId: update_continuing_training_choice
@@ -4716,6 +4654,42 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - propositions
+  /propositions/continuing-education/{uuid}/complete-curriculum:
+    put:
+      operationId: updateContinuingEducationCompleterCurriculumCommandAdmission
+      description: ''
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContinuingEducationCompleterCurriculumCommand'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContinuingEducationCompleterCurriculumCommand'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - person
   /propositions/continuing-education/{uuid}/specific-question:
     put:
       operationId: update_continuing_specific_question
@@ -4804,12 +4778,15 @@ components:
                     type: string
                   campus:
                     type: string
+                  type:
+                    type: string
                 required:
                 - sigle
                 - annee
                 - intitule
                 - sigle_entite_gestion
                 - campus
+                - type
               matricule_candidat:
                 type: string
               prenom_candidat:
@@ -4912,11 +4889,14 @@ components:
                     type: string
                   campus:
                     type: string
+                  type:
+                    type: string
                 required:
                 - sigle
                 - annee
                 - intitule
                 - campus
+                - type
               matricule_candidat:
                 type: string
               prenom_candidat:
@@ -4973,11 +4953,14 @@ components:
                     type: string
                   campus:
                     type: string
+                  type:
+                    type: string
                 required:
                 - sigle
                 - annee
                 - intitule
                 - campus
+                - type
               matricule_candidat:
                 type: string
               prenom_candidat:
@@ -5042,12 +5025,15 @@ components:
               type: string
             campus:
               type: string
+            type:
+              type: string
           required:
           - sigle
           - annee
           - intitule
           - sigle_entite_gestion
           - campus
+          - type
         matricule_candidat:
           type: string
         prenom_candidat:
@@ -5514,7 +5500,7 @@ components:
               type: array
               items:
                 type: string
-              maxItems: 1
+              maxItems: 2
             equivalence_decision_proof:
               type: array
               items:
@@ -5672,23 +5658,18 @@ components:
                 items:
                   type: string
                 readOnly: true
+              country:
+                type: string
+                nullable: true
             required:
             - educationalexperienceyear_set
-        file:
-          type: object
-          properties:
-            curriculum:
-              type: array
-              items:
-                type: string
-              nullable: true
+            - country
         minimal_year:
           type: integer
           readOnly: true
       required:
       - professional_experiences
       - educational_experiences
-      - file
     ActivityType:
       enum:
       - WORK
@@ -5783,13 +5764,6 @@ components:
           type: array
           items:
             type: string
-        bachelor_cycle_continuation:
-          type: boolean
-          nullable: true
-        diploma_equivalence:
-          type: array
-          items:
-            type: string
         rank_in_diploma:
           type: string
           maxLength: 30
@@ -5815,10 +5789,10 @@ components:
     Result:
       enum:
       - ''
-      - FAILURE
-      - NO_RESULT
       - SUCCESS
       - SUCCESS_WITH_RESIDUAL_CREDITS
+      - FAILURE
+      - WAITING_RESULT
       type: string
     TeachingTypeEnum:
       enum:
@@ -5916,12 +5890,15 @@ components:
               type: string
             campus:
               type: string
+            type:
+              type: string
           required:
           - sigle
           - annee
           - intitule
           - sigle_entite_gestion
           - campus
+          - type
         matricule_candidat:
           type: string
         code_secteur_formation:
@@ -6318,6 +6295,10 @@ components:
           nullable: true
         reponses_questions_specifiques:
           type: object
+        curriculum:
+          type: array
+          items:
+            type: string
       required:
       - uuid
       - type_admission
@@ -6339,6 +6320,7 @@ components:
       - statut
       - erreurs
       - comptabilite
+      - curriculum
     CotutelleDTO:
       type: object
       properties:
@@ -7843,11 +7825,14 @@ components:
               type: string
             campus:
               type: string
+            type:
+              type: string
           required:
           - sigle
           - annee
           - intitule
           - campus
+          - type
         matricule_candidat:
           type: string
         prenom_candidat:
@@ -7954,6 +7939,21 @@ components:
           nullable: true
         reponses_questions_specifiques:
           type: object
+        continuation_cycle_bachelier:
+          type: boolean
+          nullable: true
+        attestation_continuation_cycle_bachelier:
+          type: array
+          items:
+            type: string
+        curriculum:
+          type: array
+          items:
+            type: string
+        equivalence_diplome:
+          type: array
+          items:
+            type: string
       required:
       - uuid
       - formation
@@ -7963,6 +7963,9 @@ components:
       - creee_le
       - statut
       - erreurs
+      - attestation_continuation_cycle_bachelier
+      - curriculum
+      - equivalence_diplome
     ContinuingEducationPropositionDTO:
       type: object
       properties:
@@ -7979,11 +7982,14 @@ components:
               type: string
             campus:
               type: string
+            type:
+              type: string
           required:
           - sigle
           - annee
           - intitule
           - campus
+          - type
         matricule_candidat:
           type: string
         prenom_candidat:
@@ -8039,6 +8045,14 @@ components:
                 type: string
         reponses_questions_specifiques:
           type: object
+        curriculum:
+          type: array
+          items:
+            type: string
+        equivalence_diplome:
+          type: array
+          items:
+            type: string
       required:
       - uuid
       - formation
@@ -8048,6 +8062,8 @@ components:
       - creee_le
       - statut
       - erreurs
+      - curriculum
+      - equivalence_diplome
     SectorDTO:
       type: object
       properties:
@@ -8070,12 +8086,15 @@ components:
           type: string
         campus:
           type: string
+        type:
+          type: string
       required:
       - sigle
       - annee
       - intitule
       - sigle_entite_gestion
       - campus
+      - type
     FormationGeneraleDTO:
       type: object
       properties:
@@ -8087,11 +8106,14 @@ components:
           type: string
         campus:
           type: string
+        type:
+          type: string
       required:
       - sigle
       - annee
       - intitule
       - campus
+      - type
     FormationContinueDTO:
       type: object
       properties:
@@ -8103,11 +8125,14 @@ components:
           type: string
         campus:
           type: string
+        type:
+          type: string
       required:
       - sigle
       - annee
       - intitule
       - campus
+      - type
     Tutor:
       type: object
       properties:
@@ -8331,16 +8356,6 @@ components:
       - sigle_formation
       - annee_formation
       - matricule_candidat
-    Curriculum:
-      type: object
-      properties:
-        curriculum:
-          type: array
-          items:
-            type: string
-          nullable: true
-        specific_question_answers:
-          type: object
     CompleterPropositionCommand:
       type: object
       properties:
@@ -8449,6 +8464,20 @@ components:
       - 'NO'
       - PARTIAL
       type: string
+    DoctoratCompleterCurriculumCommand:
+      type: object
+      properties:
+        uuid_proposition:
+          type: string
+        curriculum:
+          type: array
+          items:
+            type: string
+        reponses_questions_specifiques:
+          type: object
+      required:
+      - uuid_proposition
+      - curriculum
     DefinirCotutelleCommand:
       type: object
       properties:
@@ -8780,6 +8809,33 @@ components:
       properties:
         specific_question_answers:
           type: object
+    GeneralEducationCompleterCurriculumCommand:
+      type: object
+      properties:
+        uuid_proposition:
+          type: string
+        continuation_cycle_bachelier:
+          type: boolean
+          nullable: true
+        attestation_continuation_cycle_bachelier:
+          type: array
+          items:
+            type: string
+        curriculum:
+          type: array
+          items:
+            type: string
+        equivalence_diplome:
+          type: array
+          items:
+            type: string
+        reponses_questions_specifiques:
+          type: object
+      required:
+      - uuid_proposition
+      - attestation_continuation_cycle_bachelier
+      - curriculum
+      - equivalence_diplome
     ModifierChoixFormationContinueCommand:
       type: object
       properties:
@@ -8795,6 +8851,25 @@ components:
       - uuid_proposition
       - sigle_formation
       - annee_formation
+    ContinuingEducationCompleterCurriculumCommand:
+      type: object
+      properties:
+        uuid_proposition:
+          type: string
+        curriculum:
+          type: array
+          items:
+            type: string
+        equivalence_diplome:
+          type: array
+          items:
+            type: string
+        reponses_questions_specifiques:
+          type: object
+      required:
+      - uuid_proposition
+      - curriculum
+      - equivalence_diplome
     Error:
       type: object
       properties:

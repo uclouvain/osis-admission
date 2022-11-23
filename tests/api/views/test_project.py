@@ -174,6 +174,7 @@ class DoctorateAdmissionListApiTestCase(QueriesAssertionsMixin, CheckActionLinks
                 'annee': self.general_education_admission.training.academic_year.year,
                 'intitule': self.general_education_admission.training.title,
                 'campus': self.general_campus_name,
+                'type': self.general_education_admission.training.education_group_type.name,
             },
         )
 
@@ -216,6 +217,7 @@ class DoctorateAdmissionListApiTestCase(QueriesAssertionsMixin, CheckActionLinks
                 'annee': self.continuing_education_admission.training.academic_year.year,
                 'intitule': self.continuing_education_admission.training.title,
                 'campus': self.continuing_campus_name,
+                'type': self.continuing_education_admission.training.education_group_type.name,
             },
         )
 

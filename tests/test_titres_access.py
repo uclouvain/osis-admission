@@ -36,7 +36,7 @@ from osis_profile.models.enums.curriculum import ActivitySector, ActivityType
 class TitresAccesTestCase(TestCase):
     def test_pas_de_diplome(self):
         person = PersonFactory()
-        result = TitresAcces.conditions_remplies(person.global_id)
+        result = TitresAcces.conditions_remplies(person.global_id, [])
         self.assertFalse(result.diplomation_secondaire_belge)
         self.assertFalse(result.diplomation_secondaire_etranger)
         self.assertFalse(result.alternative_etudes_secondaires)
@@ -72,5 +72,5 @@ class TitresAccesTestCase(TestCase):
             activity='Work - activity',
         )
 
-        result = TitresAcces.conditions_remplies(person.global_id)
+        result = TitresAcces.conditions_remplies(person.global_id, [])
         self.assertTrue(result.potentiel_acces_vae)

@@ -752,6 +752,11 @@ msgstr "Libellés de catégories"
 msgid "Certificate"
 msgstr "Attestation"
 
+msgid ""
+"Certificate allowing the continuation of studies for a bachelor's degree"
+msgstr ""
+"Attestation autorisant à poursuivre les études de bachelier"
+
 msgid "Certificate of achievement"
 msgstr "Attestation de réussite"
 
@@ -1019,6 +1024,9 @@ msgstr "Curriculum vitae détaillé"
 msgid "Diploma"
 msgstr "Diplôme"
 
+msgid "Diploma equivalence"
+msgstr "Équivalence du diplôme"
+
 msgid "Display according education"
 msgstr "Affichage selon la formation"
 
@@ -1027,6 +1035,13 @@ msgstr "Avis négatif du promoteur de référence"
 
 msgid "Do not reorder values, and keep the same count"
 msgstr "Ne pas réordonner les valeurs, and garder le même nombre"
+
+msgid ""
+"Do you want, on the basis of this training, to realize a cycle continuation "
+"for the bachelor you are registering for?"
+msgstr ""
+"Demandez-vous, sur base de cette formation, de réaliser une poursuite de "
+"cycle pour le bachelier auquel vous vous inscrivez ?"
 
 #, python-format
 msgid "Do you wish to move the doctorate to the \"%(status)s\" state?"

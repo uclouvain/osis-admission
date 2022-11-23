@@ -93,6 +93,7 @@ urlpatterns = [
     path('propositions/doctorate/<uuid:uuid>', views.PropositionViewSet),
     _path('propositions/doctorate/<uuid:uuid>/', include(person_tabs)),
     path('propositions/doctorate/<uuid:uuid>/verify_project', admission.api.views.submission.VerifyDoctoralProjectView),
+    path('propositions/doctorate/<uuid:uuid>/complete-curriculum', views.DoctorateCompleteCurriculumView),
     path('propositions/doctorate/<uuid:uuid>/submit', admission.api.views.submission.SubmitDoctoralPropositionView),
     path('propositions/doctorate/<uuid:uuid>/cotutelle', views.CotutelleAPIView),
     path('propositions/doctorate/<uuid:uuid>/accounting', views.AccountingView),
@@ -131,6 +132,7 @@ urlpatterns = [
     path('propositions/general-education/<uuid:uuid>/secondary-studies', views.GeneralSecondaryStudiesView),
     path('propositions/general-education/<uuid:uuid>/specific-question', views.GeneralSpecificQuestionAPIView),
     path('propositions/general-education/<uuid:uuid>/curriculum', views.GeneralCurriculumView),
+    path('propositions/general-education/<uuid:uuid>/complete-curriculum', views.GeneralCompleteCurriculumView),
     path(
         'propositions/general-education/<uuid:uuid>/<str:tab>/specific-question', views.GeneralSpecificQuestionListView
     ),
@@ -144,6 +146,7 @@ urlpatterns = [
     path('propositions/continuing-education/<uuid:uuid>/coordonnees', views.ContinuingCoordonneesView),
     path('propositions/continuing-education/<uuid:uuid>/secondary-studies', views.ContinuingSecondaryStudiesView),
     path('propositions/continuing-education/<uuid:uuid>/curriculum', views.ContinuingCurriculumView),
+    path('propositions/continuing-education/<uuid:uuid>/complete-curriculum', views.ContinuingCompleteCurriculumView),
     path('propositions/continuing-education/<uuid:uuid>/specific-question', views.ContinuingSpecificQuestionAPIView),
     path(
         'propositions/continuing-education/<uuid:uuid>/<str:tab>/specific-question',

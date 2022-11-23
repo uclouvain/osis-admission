@@ -25,9 +25,10 @@
 # ##############################################################################
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from osis_document.contrib import FileField
 from rest_framework.settings import api_settings
 
-from admission.contrib.models.base import BaseAdmission, BaseAdmissionQuerySet
+from admission.contrib.models.base import BaseAdmission, BaseAdmissionQuerySet, admission_directory_path
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutProposition
 
 
@@ -36,6 +37,13 @@ class ContinuingEducationAdmission(BaseAdmission):
         choices=ChoixStatutProposition.choices(),
         max_length=30,
         default=ChoixStatutProposition.IN_PROGRESS.name,
+    )
+
+    diploma_equivalence = FileField(
+        blank=True,
+        mimetypes=['application/pdf'],
+        upload_to=admission_directory_path,
+        verbose_name=_('Diploma equivalence'),
     )
 
     class Meta:
@@ -60,6 +68,7 @@ class ContinuingEducationAdmissionManager(models.Manager.from_queryset(BaseAdmis
             .select_related(
                 "candidate__country_of_citizenship",
                 "training__academic_year",
+                "training__education_group_type",
             )
             .annotate_campus()
         )

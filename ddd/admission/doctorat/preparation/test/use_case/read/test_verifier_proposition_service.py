@@ -249,7 +249,7 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
             self.assertIsInstance(context.exception.exceptions.pop(), LanguesConnuesNonSpecifieesException)
 
     def test_should_retourner_erreur_si_fichier_curriculum_non_renseigne(self):
-        with mock.patch.object(ProfilCandidatInMemoryTranslator, 'cv_files', {}):
+        with mock.patch.object(self.proposition, 'curriculum', []):
             with self.assertRaises(MultipleBusinessExceptions) as context:
                 self.message_bus.invoke(self.cmd)
             self.assertIsInstance(context.exception.exceptions.pop(), FichierCurriculumNonRenseigneException)

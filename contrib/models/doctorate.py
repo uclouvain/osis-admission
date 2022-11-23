@@ -442,6 +442,7 @@ class PropositionManager(models.Manager.from_queryset(BaseAdmissionQuerySet)):
             .get_queryset()
             .select_related(
                 "training__academic_year",
+                "training__education_group_type",
                 "candidate__country_of_citizenship",
                 "thesis_institute",
                 "accounting",

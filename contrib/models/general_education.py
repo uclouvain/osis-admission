@@ -28,9 +28,10 @@ from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils.translation import gettext_lazy as _
+from osis_document.contrib import FileField
 from rest_framework.settings import api_settings
 
-from admission.contrib.models.base import BaseAdmission, BaseAdmissionQuerySet
+from admission.contrib.models.base import BaseAdmission, BaseAdmissionQuerySet, admission_directory_path
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutProposition
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
@@ -86,6 +87,29 @@ class GeneralEducationAdmission(BaseAdmission):
         null=True,
     )
 
+    bachelor_cycle_continuation = models.BooleanField(
+        blank=True,
+        null=True,
+        verbose_name=_(
+            'Do you want, on the basis of this training, to realize a cycle '
+            'continuation for the bachelor you are registering for?'
+        ),
+    )
+
+    bachelor_cycle_continuation_certificate = FileField(
+        blank=True,
+        mimetypes=['application/pdf'],
+        upload_to=admission_directory_path,
+        verbose_name=_("Certificate allowing the continuation of studies for a bachelor's degree"),
+    )
+
+    diploma_equivalence = FileField(
+        blank=True,
+        mimetypes=['application/pdf'],
+        upload_to=admission_directory_path,
+        verbose_name=_('Diploma equivalence'),
+    )
+
     class Meta:
         verbose_name = _("General education admission")
         ordering = ('-created',)
@@ -108,6 +132,7 @@ class GeneralEducationAdmissionManager(models.Manager.from_queryset(BaseAdmissio
             .select_related(
                 "candidate__country_of_citizenship",
                 "training__academic_year",
+                "training__education_group_type",
                 "double_degree_scholarship",
                 "international_scholarship",
                 "erasmus_mundus_scholarship",
