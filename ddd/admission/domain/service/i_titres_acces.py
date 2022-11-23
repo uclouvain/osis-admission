@@ -23,6 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from enum import Enum
 from typing import List, Mapping, Tuple
 
 from admission.ddd.admission.domain.validator.exceptions import ConditionsAccessNonRempliesException
@@ -31,95 +32,118 @@ from base.models.enums.education_group_types import TrainingType
 from osis_common.ddd import interface
 
 
-class Conditions:
-    def __init__(self, obj: AdmissionConditionsDTO, *conditions: str):
+class ConditionAccess(str, Enum):
+    DIPLOMATION_POTENTIEL_MASTER_BELGE = 'diplomation_potentiel_master_belge'
+    POTENTIEL_MASTER_BELGE_SANS_DIPLOMATION = 'potentiel_master_belge_sans_diplomation'
+    DIPLOMATION_POTENTIEL_MASTER_ETRANGER = 'diplomation_potentiel_master_etranger'
+    DIPLOMATION_SECONDAIRE_BELGE = 'diplomation_secondaire_belge'
+    DIPLOMATION_SECONDAIRE_ETRANGER = 'diplomation_secondaire_etranger'
+    ALTERNATIVE_ETUDES_SECONDAIRES = 'alternative_etudes_secondaires'
+    DIPLOMATION_ACADEMIQUE_BELGE = 'diplomation_academique_belge'
+    POTENTIEL_ACCES_VAE = 'potentiel_acces_vae'
+    DIPLOMATION_ACADEMIQUE_ETRANGER = 'diplomation_academique_etranger'
+    POTENTIEL_BACHELIER_BELGE_SANS_DIPLOMATION = 'potentiel_bachelier_belge_sans_diplomation'
+    DIPLOMATION_POTENTIEL_DOCTORAT_BELGE = 'diplomation_potentiel_doctorat_belge'
+
+
+class Titres:
+    def __init__(self, obj: AdmissionConditionsDTO, *conditions: ConditionAccess):
         self.condition_obj = obj
-        self.condition_names = conditions
+        self.condition_names = conditions or tuple(e for e in ConditionAccess)
 
     def __bool__(self):
         return any(self.get_valid_conditions())
 
     def __str__(self):  # pragma: no cover
-        return ','.join([name for name in self.condition_names if getattr(self.condition_obj, name, False)])
+        return ','.join([cond.name for cond in self.get_valid_conditions()])
 
     def get_valid_conditions(self):
-        return [getattr(self.condition_obj, name, False) for name in self.condition_names]
+        return [cond for cond in self.condition_names if getattr(self.condition_obj, cond.value, False)]
 
 
 class ITitresAcces(interface.DomainService):
+    condition_matrix: Mapping[Tuple[TrainingType, ...], List[ConditionAccess]] = {
+        (TrainingType.AGGREGATION,): [
+            ConditionAccess.DIPLOMATION_POTENTIEL_MASTER_BELGE,
+            ConditionAccess.POTENTIEL_MASTER_BELGE_SANS_DIPLOMATION,
+            ConditionAccess.DIPLOMATION_POTENTIEL_MASTER_ETRANGER,
+        ],
+        (TrainingType.CAPAES,): [
+            ConditionAccess.DIPLOMATION_POTENTIEL_MASTER_BELGE,
+            ConditionAccess.DIPLOMATION_POTENTIEL_MASTER_ETRANGER,
+        ],
+        (TrainingType.BACHELOR,): [
+            ConditionAccess.DIPLOMATION_SECONDAIRE_BELGE,
+            ConditionAccess.DIPLOMATION_SECONDAIRE_ETRANGER,
+            ConditionAccess.ALTERNATIVE_ETUDES_SECONDAIRES,
+            ConditionAccess.DIPLOMATION_ACADEMIQUE_BELGE,
+            ConditionAccess.POTENTIEL_ACCES_VAE,
+        ],
+        (
+            TrainingType.MASTER_MA_120,
+            TrainingType.MASTER_MD_120,
+            TrainingType.MASTER_MS_120,
+            TrainingType.MASTER_MA_180_240,
+            TrainingType.MASTER_MD_180_240,
+            TrainingType.MASTER_MS_180_240,
+            TrainingType.MASTER_M1,
+        ): [
+            ConditionAccess.DIPLOMATION_ACADEMIQUE_BELGE,
+            ConditionAccess.DIPLOMATION_ACADEMIQUE_ETRANGER,
+            ConditionAccess.POTENTIEL_BACHELIER_BELGE_SANS_DIPLOMATION,
+            ConditionAccess.POTENTIEL_ACCES_VAE,
+        ],
+        (TrainingType.MASTER_MC,): [
+            ConditionAccess.DIPLOMATION_POTENTIEL_MASTER_BELGE,
+            ConditionAccess.DIPLOMATION_POTENTIEL_DOCTORAT_BELGE,
+            ConditionAccess.DIPLOMATION_ACADEMIQUE_ETRANGER,
+            ConditionAccess.POTENTIEL_ACCES_VAE,
+        ],
+        (TrainingType.PHD,): [
+            ConditionAccess.DIPLOMATION_POTENTIEL_MASTER_BELGE,
+            ConditionAccess.DIPLOMATION_POTENTIEL_DOCTORAT_BELGE,
+            ConditionAccess.DIPLOMATION_ACADEMIQUE_ETRANGER,
+        ],
+        (TrainingType.UNIVERSITY_FIRST_CYCLE_CERTIFICATE,): [
+            ConditionAccess.DIPLOMATION_ACADEMIQUE_BELGE,
+            ConditionAccess.DIPLOMATION_ACADEMIQUE_ETRANGER,
+            ConditionAccess.POTENTIEL_ACCES_VAE,
+        ],
+        (TrainingType.UNIVERSITY_SECOND_CYCLE_CERTIFICATE,): [
+            ConditionAccess.DIPLOMATION_ACADEMIQUE_BELGE,
+            ConditionAccess.DIPLOMATION_ACADEMIQUE_ETRANGER,
+            ConditionAccess.POTENTIEL_ACCES_VAE,
+        ],
+        (
+            TrainingType.CERTIFICATE_OF_PARTICIPATION,
+            TrainingType.CERTIFICATE_OF_SUCCESS,
+        ): [],
+        (
+            TrainingType.CERTIFICATE,
+            TrainingType.RESEARCH_CERTIFICATE,
+        ): [],
+    }
+
     @classmethod
     def conditions_remplies(cls, matricule_candidat: str) -> AdmissionConditionsDTO:
         raise NotImplementedError
 
     @classmethod
-    def verifier(cls, matricule_candidat: str, type_formation: TrainingType):
-        # Condition matrix
+    def recuperer_titres_access(cls, matricule_candidat: str, type_formation: 'TrainingType') -> Titres:
         conditions = cls.conditions_remplies(matricule_candidat)
-        condition_matrix: Mapping[Tuple[TrainingType, ...], List[str]] = {
-            (TrainingType.AGGREGATION,): [
-                'diplomation_potentiel_master_belge',
-                'potentiel_master_belge_sans_diplomation',
-                'diplomation_potentiel_master_etranger',
-            ],
-            (TrainingType.CAPAES,): [
-                'diplomation_potentiel_master_belge',
-                'diplomation_potentiel_master_etranger',
-            ],
-            (TrainingType.BACHELOR,): [
-                'diplomation_secondaire_belge',
-                'diplomation_secondaire_etranger',
-                'alternative_etudes_secondaires',
-                'diplomation_academique_belge',
-                'potentiel_acces_vae',
-            ],
-            (
-                TrainingType.MASTER_MA_120,
-                TrainingType.MASTER_MD_120,
-                TrainingType.MASTER_MS_120,
-                TrainingType.MASTER_MA_180_240,
-                TrainingType.MASTER_MD_180_240,
-                TrainingType.MASTER_MS_180_240,
-                TrainingType.MASTER_M1,
-            ): [
-                'diplomation_academique_belge',
-                'diplomation_academique_etranger',
-                'potentiel_bachelier_belge_sans_diplomation',
-                'potentiel_acces_vae',
-            ],
-            (TrainingType.MASTER_MC,): [
-                'diplomation_potentiel_master_belge',
-                'diplomation_potentiel_doctorat_belge',
-                'diplomation_academique_etranger',
-                'potentiel_acces_vae',
-            ],
-            (TrainingType.PHD,): [
-                'diplomation_potentiel_master_belge',
-                'diplomation_potentiel_doctorat_belge',
-                'diplomation_academique_etranger',
-            ],
-            (TrainingType.UNIVERSITY_FIRST_CYCLE_CERTIFICATE,): [
-                'diplomation_academique_belge',
-                'diplomation_academique_etranger',
-                'potentiel_acces_vae',
-            ],
-            (TrainingType.UNIVERSITY_SECOND_CYCLE_CERTIFICATE,): [
-                'diplomation_academique_belge',
-                'diplomation_academique_etranger',
-                'potentiel_acces_vae',
-            ],
-            (
-                TrainingType.CERTIFICATE_OF_PARTICIPATION,
-                TrainingType.CERTIFICATE_OF_SUCCESS,
-            ): [],
-            (
-                TrainingType.CERTIFICATE,
-                TrainingType.RESEARCH_CERTIFICATE,
-            ): [],
-        }
-        titres_requis: List[str] = next(
-            (titres for types, titres in condition_matrix.items() if type_formation in types), []
+        titres_requis: List[ConditionAccess] = next(
+            (titres for types, titres in cls.condition_matrix.items() if type_formation in types), []
         )
-        if titres_requis and not Conditions(conditions, *titres_requis):
+        return Titres(conditions, *titres_requis)
+
+    @classmethod
+    def verifier(cls, matricule_candidat: str, type_formation: 'TrainingType'):
+        if not cls.recuperer_titres_access(matricule_candidat, type_formation):
+            raise ConditionsAccessNonRempliesException
+
+    @classmethod
+    def verifier_titres(cls, titres: 'Titres'):
+        if not titres:
             raise ConditionsAccessNonRempliesException
 
     @classmethod

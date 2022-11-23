@@ -39,7 +39,7 @@ def initier_proposition(
     bourse_translator: 'IBourseTranslator',
 ) -> 'PropositionIdentity':
     # GIVEN
-    formation_id = FormationIdentityBuilder.build_from_uuid(sigle=cmd.sigle_formation, annee=cmd.annee_formation)
+    formation_id = FormationIdentityBuilder.build(sigle=cmd.sigle_formation, annee=cmd.annee_formation)
     formation = formation_translator.get(formation_id)
     bourses_ids = bourse_translator.search(
         [

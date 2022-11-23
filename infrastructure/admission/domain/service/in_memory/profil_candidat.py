@@ -27,6 +27,8 @@ import datetime
 from dataclasses import dataclass
 from typing import List, Optional
 
+import attr
+
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import CandidatNonTrouveException
 from admission.ddd.admission.doctorat.preparation.dtos import ConditionsComptabiliteDTO, CurriculumDTO
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
@@ -35,34 +37,14 @@ from base.models.enums.civil_state import CivilState
 from base.models.enums.person_address_type import PersonAddressType
 
 
-@dataclass
-class ProfilCandidat:
-    matricule: str
-    nom: Optional[str]
-    prenom: Optional[str]
-    prenom_d_usage: Optional[str]
-    autres_prenoms: Optional[str]
-    date_naissance: Optional[datetime.date]
-    annee_naissance: Optional[int]
-    lieu_naissance: Optional[str]
-    pays_nationalite: Optional[str]
-    langue_contact: Optional[str]
-    sexe: Optional[str]
-    genre: Optional[str]
-    photo_identite: List[str]
-    curriculum: List[str]
-    annee_derniere_inscription_ucl: Optional[int]
-    noma_derniere_inscription_ucl: Optional[str]
-    email: Optional[str]
-    pays_naissance: Optional[str]
-    etat_civil: Optional[str]
+@attr.dataclass
+class _IdentificationDTO(IdentificationDTO):
+    # Trick to make this "unfrozen" just for tests
+    def __setattr__(self, key, value):
+        object.__setattr__(self, key, value)
 
-    # Pièces d'identité
-    carte_identite: List[str]
-    passeport: List[str]
-    numero_registre_national_belge: Optional[str]
-    numero_carte_identite: Optional[str]
-    numero_passeport: Optional[str]
+    def __delattr__(self, item):
+        object.__delattr__(self, item)
 
 
 @dataclass
@@ -127,6 +109,7 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
     etudes_secondaires = {}
     experiences_academiques = []
     experiences_non_academiques = []
+    cv_files = {"0123456789": ['uuid14']}
     pays_union_europeenne = {
         "AT",
         "BE",
@@ -164,12 +147,10 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
     @classmethod
     def reset(cls):
         cls.profil_candidats = [
-            ProfilCandidat(
+            _IdentificationDTO(
                 matricule=cls.matricule_candidat,
                 nom='Doe',
                 prenom='John',
-                prenom_d_usage='Jerry',
-                autres_prenoms='James',
                 date_naissance=datetime.date(1990, 1, 1),
                 annee_naissance=1990,
                 lieu_naissance='Louvain-La-Neuve',
@@ -183,19 +164,17 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 numero_registre_national_belge='1001',
                 numero_carte_identite='1002',
                 numero_passeport='1003',
-                curriculum=['uuid14'],
                 annee_derniere_inscription_ucl=None,
                 noma_derniere_inscription_ucl='',
                 email='john.doe@ucl.be',
                 pays_naissance='BE',
                 etat_civil=CivilState.MARRIED.name,
+                pays_residence="BE",
             ),
-            ProfilCandidat(
+            _IdentificationDTO(
                 matricule="0000000001",
                 nom='Smith',
                 prenom='Jane',
-                prenom_d_usage='',
-                autres_prenoms='',
                 date_naissance=datetime.date(1990, 1, 1),
                 annee_naissance=None,
                 lieu_naissance='Louvain-La-Neuve',
@@ -209,12 +188,12 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 numero_registre_national_belge='1001',
                 numero_carte_identite='1002',
                 numero_passeport='1003',
-                curriculum=['uuid14'],
                 annee_derniere_inscription_ucl=None,
                 noma_derniere_inscription_ucl='',
                 email='john.doe@ucl.be',
                 pays_naissance='BE',
                 etat_civil=CivilState.MARRIED.name,
+                pays_residence="BE",
             ),
         ]
         cls.adresses_candidats = [
@@ -406,7 +385,7 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 annee_diplome_etudes_secondaires_belges=annee_diplome_belge,
                 annee_diplome_etudes_secondaires_etrangeres=annee_diplome_etranger,
                 annee_derniere_inscription_ucl=candidate.annee_derniere_inscription_ucl,
-                fichier_pdf=candidate.curriculum,
+                fichier_pdf=cls.cv_files.get(matricule, []),
                 dates_experiences_non_academiques=dates_experiences_non_academiques,
             )
         except StopIteration:
@@ -432,3 +411,7 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
             )
         except StopIteration:
             raise CandidatNonTrouveException
+
+    @classmethod
+    def est_changement_etablissement(cls, matricule: str, annee_courante: int) -> bool:
+        return False

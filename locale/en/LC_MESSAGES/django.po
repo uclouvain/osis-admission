@@ -1196,6 +1196,13 @@ msgstr ""
 msgid "Form item"
 msgstr ""
 
+#, python-format
+msgid "Formation is not available for this year (%(sigle)s in %(annee)s)."
+msgstr ""
+
+msgid "Formation is not available for this year."
+msgstr ""
+
 msgid "French"
 msgstr ""
 
@@ -1397,6 +1404,15 @@ msgid "Invitations have not been sent"
 msgstr ""
 
 msgid "Invitations must have been sent"
+msgstr ""
+
+msgid "Is an external modification"
+msgstr ""
+
+msgid "Is an external reorientation"
+msgstr ""
+
+msgid "Is non-resident (as defined in decree)"
 msgstr ""
 
 msgid "Journal"
@@ -1792,6 +1808,9 @@ msgid "No doctorate enrolment"
 msgstr ""
 
 msgid "No doctorate found."
+msgstr ""
+
+msgid "No pool was found to match."
 msgstr ""
 
 msgid "No scholarship found."
@@ -2661,6 +2680,9 @@ msgstr ""
 msgid "The last name of the student"
 msgstr ""
 
+msgid "The limited training you are enrolling into is not opened yet."
+msgstr ""
+
 msgid "The maximum number of documents must be a positive number."
 msgstr ""
 
@@ -3001,6 +3023,15 @@ msgstr ""
 
 msgid ""
 "You must add at least one external promoter in order to request signatures."
+msgstr ""
+
+msgid "You must answer the question about external enrollement change."
+msgstr ""
+
+msgid "You must answer the question about reorientation."
+msgstr ""
+
+msgid "You must answer the question about residency."
 msgstr ""
 
 msgid "You must be a member of the committee to access this admission"

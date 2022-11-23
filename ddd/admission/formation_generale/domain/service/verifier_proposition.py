@@ -25,6 +25,7 @@
 # ##############################################################################
 from functools import partial
 
+from admission.ddd.admission.domain.service.i_calendrier_inscription import ICalendrierInscription
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.domain.service.i_titres_acces import ITitresAcces
 from admission.ddd.admission.domain.service.profil_candidat import ProfilCandidat
@@ -42,28 +43,39 @@ class VerifierProposition(interface.DomainService):
         formation_translator: IFormationGeneraleTranslator,
         titres_acces: ITitresAcces,
         profil_candidat_translator: IProfilCandidatTranslator,
+        calendrier_inscription: 'ICalendrierInscription',
     ) -> None:
         profil_candidat_service = ProfilCandidat()
+        type_formation = formation_translator.get(proposition_candidat.formation_id).type
+        titres = titres_acces.recuperer_titres_access(proposition_candidat.matricule_candidat, type_formation)
         execute_functions_and_aggregate_exceptions(
             partial(
                 profil_candidat_service.verifier_identification,
-                proposition_candidat.matricule_candidat,
-                profil_candidat_translator,
+                matricule=proposition_candidat.matricule_candidat,
+                profil_candidat_translator=profil_candidat_translator,
             ),
             partial(
                 profil_candidat_service.verifier_coordonnees,
-                proposition_candidat.matricule_candidat,
-                profil_candidat_translator,
+                matricule=proposition_candidat.matricule_candidat,
+                profil_candidat_translator=profil_candidat_translator,
             ),
             partial(
                 profil_candidat_service.verifier_etudes_secondaires,
-                proposition_candidat.matricule_candidat,
-                profil_candidat_translator,
+                matricule=proposition_candidat.matricule_candidat,
+                profil_candidat_translator=profil_candidat_translator,
             ),
-            # TODO check other tabs
             partial(
-                titres_acces.verifier,
-                proposition_candidat.matricule_candidat,
-                formation_translator.get(proposition_candidat.formation_id).type,
+                titres_acces.verifier_titres,
+                titres=titres,
+            ),
+            partial(
+                calendrier_inscription.verifier,
+                formation_id=proposition_candidat.formation_id,
+                proposition=proposition_candidat,
+                matricule_candidat=proposition_candidat.matricule_candidat,
+                titres_acces=titres,
+                type_formation=type_formation,
+                profil_candidat_translator=profil_candidat_translator,
+                formation_translator=formation_translator,
             ),
         )

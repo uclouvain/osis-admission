@@ -23,10 +23,10 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
-from typing import Optional, List
+from typing import List, Optional
 
-from admission.ddd.admission.domain.enums import TypeFormation, TYPES_FORMATION_GENERALE
-from admission.ddd.admission.domain.model.formation import FormationIdentity, Formation
+from admission.ddd.admission.domain.enums import TYPES_FORMATION_GENERALE
+from admission.ddd.admission.domain.model.formation import Formation, FormationIdentity
 from admission.ddd.admission.dtos.formation import FormationDTO
 from admission.ddd.admission.formation_generale.domain.service.i_formation import IFormationGeneraleTranslator
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import FormationNonTrouveeException
@@ -40,6 +40,13 @@ class FormationGeneraleInMemoryTranslator(IFormationGeneraleTranslator):
             intitule='Formation ECGE3DP',
             entity_id__sigle='ECGE3DP',
             entity_id__annee=2022,
+            type=TrainingType.BACHELOR,
+            campus='Mons',
+        ),
+        FormationFactory(
+            intitule='Formation ECGE3DP',
+            entity_id__sigle='ECGE3DP',
+            entity_id__annee=2021,
             type=TrainingType.BACHELOR,
             campus='Mons',
         ),
@@ -90,6 +97,13 @@ class FormationGeneraleInMemoryTranslator(IFormationGeneraleTranslator):
             entity_id__sigle='ES3DP-CONTINUE',
             entity_id__annee=2022,
             type=TrainingType.UNIVERSITY_FIRST_CYCLE_CERTIFICATE,
+            campus='Charleroi',
+        ),
+        FormationFactory(
+            intitule='Master SC3DP',
+            entity_id__sigle='SC3DP',
+            entity_id__annee=2021,
+            type=TrainingType.MASTER_M1,
             campus='Charleroi',
         ),
         FormationFactory(
@@ -153,3 +167,13 @@ class FormationGeneraleInMemoryTranslator(IFormationGeneraleTranslator):
             and intitule in training.intitule
             and (not campus or training.campus == campus)
         ]
+
+    @classmethod
+    def verifier_existence(cls, sigle: str, annee: int) -> bool:
+        return any(
+            training
+            for training in cls.trainings
+            if training.entity_id.sigle == sigle
+            and training.entity_id.annee == annee
+            and training.type_formation.name in TYPES_FORMATION_GENERALE
+        )

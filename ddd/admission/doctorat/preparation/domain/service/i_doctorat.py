@@ -28,10 +28,10 @@ from typing import List, Optional
 
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import Doctorat
 from admission.ddd.admission.doctorat.preparation.dtos import DoctoratDTO
-from osis_common.ddd import interface
+from admission.ddd.admission.domain.service.i_formation_translator import IFormationTranslator
 
 
-class IDoctoratTranslator(interface.DomainService):
+class IDoctoratTranslator(IFormationTranslator):
     @classmethod
     @abstractmethod
     def get(cls, sigle: str, annee: int) -> Doctorat:

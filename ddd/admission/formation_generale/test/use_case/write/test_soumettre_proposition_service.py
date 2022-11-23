@@ -25,6 +25,8 @@
 # ##############################################################################
 from unittest import TestCase
 
+import freezegun
+
 from admission.ddd.admission.formation_generale.commands import SoumettrePropositionCommand
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutProposition
 from admission.infrastructure.admission.formation_generale.repository.in_memory.proposition import (
@@ -33,12 +35,13 @@ from admission.infrastructure.admission.formation_generale.repository.in_memory.
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 
 
-class TestSoumettrePropositionContinue(TestCase):
+class TestSoumettrePropositionGenerale(TestCase):
     def setUp(self) -> None:
         self.proposition_repository = PropositionInMemoryRepository()
         self.addCleanup(self.proposition_repository.reset)
         self.message_bus = message_bus_in_memory_instance
 
+    @freezegun.freeze_time('01/03/2023')
     def test_should_soumettre_proposition_etre_ok_si_admission_complete(self):
         proposition_id = self.message_bus.invoke(
             SoumettrePropositionCommand(uuid_proposition="uuid-ECGE3DP"),

@@ -70,7 +70,7 @@ def is_valid_translated_json_field(value):
 
 class TranslatedJSONField(models.JSONField):
     def __init__(self, **kwargs):
-        kwargs.setdefault('default', {})
+        kwargs.setdefault('default', dict)
         kwargs.setdefault('validators', [is_valid_translated_json_field])
         super().__init__(**kwargs)
 

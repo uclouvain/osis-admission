@@ -52,6 +52,9 @@ class Proposition(interface.RootEntity):
     bourse_double_diplome_id: Optional[BourseIdentity] = None
     bourse_internationale_id: Optional[BourseIdentity] = None
     bourse_erasmus_mundus_id: Optional[BourseIdentity] = None
+    est_reorientation_inscription_externe: Optional[bool] = None
+    est_modification_inscription_externe: Optional[bool] = None
+    est_non_resident_au_sens_decret: Optional[bool] = None
 
     reponses_questions_specifiques: Dict = attr.Factory(dict)
 

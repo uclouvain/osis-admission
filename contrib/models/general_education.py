@@ -70,6 +70,18 @@ class GeneralEducationAdmission(BaseAdmission):
         on_delete=models.PROTECT,
         null=True,
     )
+    is_external_reorientation = models.BooleanField(
+        verbose_name=_("Is an external reorientation"),
+        null=True,
+    )
+    is_external_modification = models.BooleanField(
+        verbose_name=_("Is an external modification"),
+        null=True,
+    )
+    is_non_resident = models.BooleanField(
+        verbose_name=_("Is non-resident (as defined in decree)"),
+        null=True,
+    )
 
     class Meta:
         verbose_name = _("General education admission")

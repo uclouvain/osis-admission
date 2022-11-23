@@ -1257,6 +1257,14 @@ msgstr "Fondation St Luc"
 msgid "Form item"
 msgstr "Élément de formulaire"
 
+#, python-format
+msgid "Formation is not available for this year (%(sigle)s in %(annee)s)."
+msgstr ""
+"La formation n'est pas disponible pour cette année (%(sigle)s en %(annee)s)."
+
+msgid "Formation is not available for this year."
+msgstr "La formation n'est pas disponible pour cette année."
+
 msgid "French"
 msgstr "Français"
 
@@ -1491,6 +1499,15 @@ msgstr "Les invitations n'ont pas été envoyées"
 
 msgid "Invitations must have been sent"
 msgstr "Les invitations doivent avoir été envoyées"
+
+msgid "Is an external modification"
+msgstr "Est une modification externe"
+
+msgid "Is an external reorientation"
+msgstr "Est une réorientation externe"
+
+msgid "Is non-resident (as defined in decree)"
+msgstr "Est non-résident (au sens du décret)"
 
 msgid "Journal"
 msgstr "Nom de la revue ou de la maison d'édition"
@@ -1953,6 +1970,9 @@ msgstr "Aucune inscription en doctorat n'a été trouvée"
 
 msgid "No doctorate found."
 msgstr "Doctorat non trouvé."
+
+msgid "No pool was found to match."
+msgstr "Aucun pot ne correspond"
 
 msgid "No scholarship found."
 msgstr "Bourse non trouvée."
@@ -2883,6 +2903,11 @@ msgstr "Le nom du signataire"
 msgid "The last name of the student"
 msgstr "Le nom de l'étudiant"
 
+msgid "The limited training you are enrolling into is not opened yet."
+msgstr ""
+"La formation contingentée à laquelle vous vous inscrivez n'est pas encore "
+"ouverte."
+
 msgid "The maximum number of documents must be a positive number."
 msgstr "Le nombre maximum de documents doit être un nombre positif."
 
@@ -3230,8 +3255,9 @@ msgstr "Oui, sur Tournai uniquement (10 EUR)"
 msgid ""
 "You already have a doctorate admission in progress, please delete it before "
 "creating a newer one, or contact your domain doctoral committee."
-msgstr "Vous avez déjà une demande d’inscription en doctorat en cours, veuillez "
-"la supprimer avant de créer une nouvelle demande, ou contactez votre commission "
+msgstr ""
+"Vous avez déjà une demande d’inscription en doctorat en cours, veuillez la "
+"supprimer avant de créer une nouvelle demande, ou contactez votre commission "
 "doctorale du domaine."
 
 msgid "You cannot fill in a language more than once, please correct the form."
@@ -3255,6 +3281,16 @@ msgid ""
 msgstr ""
 "Vous devez ajouter au moins un promoteur externe afin de demander les "
 "signatures."
+
+msgid "You must answer the question about external enrollement change."
+msgstr ""
+"Vous devez répondre à la question sur la modification d'inscription externe."
+
+msgid "You must answer the question about reorientation."
+msgstr "Vous devez répondre à la question sur la réorientation."
+
+msgid "You must answer the question about residency."
+msgstr "Vous devez répondre à la question sur votre résidence."
 
 msgid "You must be a member of the committee to access this admission"
 msgstr "Vous devez être membre du comité pour accéder à cette admission"

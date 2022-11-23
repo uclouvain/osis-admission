@@ -90,3 +90,9 @@ class IProfilCandidatTranslator(interface.DomainService):
                 if annee
             ]
         )
+
+    @classmethod
+    def est_changement_etablissement(cls, matricule: str, annee_courante: int) -> bool:
+        """Inscrit à un autre établissement Belge en N-1
+        (informatiquement : curriculum / en N-1 supérieur belge non-diplômé)"""
+        raise NotImplementedError
