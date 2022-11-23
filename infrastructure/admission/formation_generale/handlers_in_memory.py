@@ -27,11 +27,14 @@
 from admission.ddd.admission.formation_generale.commands import *
 from admission.ddd.admission.formation_generale.use_case.read import *
 from admission.ddd.admission.formation_generale.use_case.write import *
-from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
 from admission.infrastructure.admission.domain.service.in_memory.annee_inscription_formation import (
     AnneeInscriptionFormationInMemoryTranslator,
 )
 from admission.infrastructure.admission.domain.service.in_memory.bourse import BourseInMemoryTranslator
+from admission.infrastructure.admission.domain.service.in_memory.calendrier_inscription import (
+    CalendrierInscriptionInMemory,
+)
+from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
 from admission.infrastructure.admission.domain.service.in_memory.titres_acces import TitresAccesInMemory
 from admission.infrastructure.admission.formation_generale.domain.service.in_memory.formation import (
     FormationGeneraleInMemoryTranslator,
@@ -84,6 +87,7 @@ COMMAND_HANDLERS = {
         formation_translator=_formation_generale_translator,
         titres_acces=_titres_acces,
         profil_candidat_translator=_profil_candidat_translator,
+        calendrier_inscription=CalendrierInscriptionInMemory(),
     ),
     SoumettrePropositionCommand: lambda msg_bus, cmd: soumettre_proposition(
         cmd,
@@ -91,5 +95,6 @@ COMMAND_HANDLERS = {
         formation_translator=_formation_generale_translator,
         titres_acces=_titres_acces,
         profil_candidat_translator=_profil_candidat_translator,
+        calendrier_inscription=CalendrierInscriptionInMemory(),
     ),
 }

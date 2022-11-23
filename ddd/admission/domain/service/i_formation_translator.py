@@ -24,25 +24,12 @@
 #
 # ##############################################################################
 from abc import abstractmethod
-from typing import List, Optional
 
-from admission.ddd.admission.domain.model.formation import Formation, FormationIdentity
-from admission.ddd.admission.domain.service.i_formation_translator import IFormationTranslator
-from admission.ddd.admission.dtos.formation import FormationDTO
+from osis_common.ddd import interface
 
 
-class IFormationContinueTranslator(IFormationTranslator):
+class IFormationTranslator(interface.DomainService):
     @classmethod
     @abstractmethod
-    def get(cls, entity_id: FormationIdentity) -> Formation:
-        raise NotImplementedError
-
-    @classmethod
-    @abstractmethod
-    def get_dto(cls, sigle: str, annee: int) -> FormationDTO:
-        raise NotImplementedError
-
-    @classmethod
-    @abstractmethod
-    def search(cls, annee: Optional[int], intitule: str, campus: Optional[str]) -> List['FormationDTO']:
+    def verifier_existence(cls, sigle: str, annee: int) -> bool:
         raise NotImplementedError

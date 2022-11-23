@@ -25,15 +25,15 @@
 # ##############################################################################
 import factory
 
+from admission.contrib.models import GeneralEducationAdmission
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
-from admission.contrib.models import GeneralEducationAdmission
-from admission.tests.factories.person import CompletePersonFactory, CompletePersonForBachelorFactory
+from admission.tests.factories.person import CompletePersonForBachelorFactory
 from admission.tests.factories.roles import CandidateFactory
 from admission.tests.factories.scholarship import (
-    ErasmusMundusScholarshipFactory,
     DoubleDegreeScholarshipFactory,
+    ErasmusMundusScholarshipFactory,
     InternationalScholarshipFactory,
 )
 from base.models.enums import education_group_categories
@@ -64,6 +64,8 @@ class GeneralEducationAdmissionFactory(factory.DjangoModelFactory):
     erasmus_mundus_scholarship = factory.SubFactory(ErasmusMundusScholarshipFactory)
     double_degree_scholarship = factory.SubFactory(DoubleDegreeScholarshipFactory)
     international_scholarship = factory.SubFactory(InternationalScholarshipFactory)
+    is_external_reorientation = False
+    is_external_modification = False
 
     @factory.post_generation
     def create_candidate_role(self, create, extracted, **kwargs):
@@ -71,6 +73,7 @@ class GeneralEducationAdmissionFactory(factory.DjangoModelFactory):
 
     class Params:
         bachelor_with_access_conditions_met = factory.Trait(
+            training__academic_year__current=True,
             training__education_group_type__name=TrainingType.BACHELOR.name,
             candidate=factory.SubFactory(CompletePersonForBachelorFactory),
         )

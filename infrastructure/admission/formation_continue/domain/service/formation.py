@@ -23,13 +23,13 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
-from typing import Optional, List
+from typing import List, Optional
 
 from django.conf import settings
 from django.utils.translation import get_language
 
 from admission.ddd.admission.domain.enums import TypeFormation
-from admission.ddd.admission.domain.model.formation import FormationIdentity, Formation
+from admission.ddd.admission.domain.model.formation import Formation, FormationIdentity
 from admission.ddd.admission.dtos.formation import FormationDTO
 from admission.ddd.admission.formation_continue.domain.service.i_formation import IFormationContinueTranslator
 from admission.ddd.admission.formation_continue.domain.validator.exceptions import FormationNonTrouveeException
@@ -107,3 +107,18 @@ class FormationContinueTranslator(IFormationContinueTranslator):
 
         results = [cls._build_dto(dto) for dto in dtos]
         return list(sorted(results, key=lambda formation: formation.intitule))
+
+    @classmethod
+    def verifier_existence(cls, sigle: str, annee: int) -> bool:  # pragma: no cover
+        from infrastructure.messages_bus import message_bus_instance
+
+        dtos = message_bus_instance.invoke(
+            SearchFormationsCommand(
+                sigle=sigle,
+                annee=annee,
+                type=AnneeInscriptionFormationTranslator.OSIS_ADMISSION_EDUCATION_TYPES_MAPPING.get(
+                    TypeFormation.FORMATION_CONTINUE.name
+                ),
+            )
+        )
+        return bool(dtos)

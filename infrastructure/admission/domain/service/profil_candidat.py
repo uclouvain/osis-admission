@@ -30,6 +30,7 @@ from django.db.models import Exists, OuterRef
 
 from admission.ddd.admission.doctorat.preparation.dtos import ConditionsComptabiliteDTO, CurriculumDTO
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
+from admission.ddd.admission.domain.validator._should_identification_candidat_etre_completee import BE_ISO_CODE
 from admission.ddd.admission.dtos import AdressePersonnelleDTO, CoordonneesDTO, EtudesSecondairesDTO, IdentificationDTO
 from base.models.enums.community import CommunityEnum
 from base.models.enums.person_address_type import PersonAddressType
@@ -254,3 +255,14 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
             pays_nationalite_ue=is_ue_country,
             a_frequente_recemment_etablissement_communaute_fr=has_attented_french_community_institute,
         )
+
+    @classmethod
+    def est_changement_etablissement(cls, matricule: str, annee_courante: int) -> bool:
+        """Inscrit à un autre établissement Belge en N-1
+        (informatiquement : curriculum / en N-1 supérieur belge non-diplômé)"""
+        return EducationalExperienceYear.objects.filter(
+            educational_experience__person__global_id=matricule,
+            educational_experience__country__iso_code=BE_ISO_CODE,
+            educational_experience__obtained_diploma=False,
+            academic_year__year=annee_courante - 1,
+        ).exists()

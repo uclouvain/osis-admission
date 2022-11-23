@@ -23,18 +23,26 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
+import freezegun
 from django.shortcuts import resolve_url
 from django.utils.translation import gettext_lazy as _
 from rest_framework import status
 from rest_framework.test import APITestCase
 
+from admission.calendar.admission_calendar import *
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutProposition
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
-from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
+from admission.tests.factories.general_education import (
+    GeneralEducationAdmissionFactory,
+    GeneralEducationTrainingFactory,
+)
 from admission.tests.factories.person import IncompletePersonForBachelorFactory, IncompletePersonForIUFCFactory
 from base.models.enums.education_group_types import TrainingType
+from base.tests.factories.academic_year import AcademicYearFactory
 
 
+@freezegun.freeze_time("1980-03-25")
 class GeneralPropositionSubmissionTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
@@ -44,13 +52,41 @@ class GeneralPropositionSubmissionTestCase(APITestCase):
             candidate=cls.candidate_errors,
             # force type to have access conditions
             training__education_group_type__name=TrainingType.BACHELOR.name,
+            training__academic_year__current=True,
         )
         cls.error_url = resolve_url("admission_api_v1:submit-general-proposition", uuid=cls.admission.uuid)
 
+        AcademicYearFactory.produce(number_future=6)
+        for pool in [
+            DoctorateAdmissionCalendar,
+            ContinuingEducationAdmissionCalendar,
+            AdmissionPoolExternalEnrollmentChangeCalendar,
+            AdmissionPoolExternalReorientationCalendar,
+            AdmissionPoolVipCalendar,
+            AdmissionPoolHueUclPathwayChangeCalendar,
+            AdmissionPoolInstituteChangeCalendar,
+            AdmissionPoolUe5BelgianCalendar,
+            AdmissionPoolUe5NonBelgianCalendar,
+            AdmissionPoolHue5BelgiumResidencyCalendar,
+            AdmissionPoolHue5ForeignResidencyCalendar,
+            AdmissionPoolNonResidentQuotaCalendar,
+        ]:
+            pool.ensure_consistency_until_n_plus_6()
+
         # Validation ok
-        cls.admission_ok = GeneralEducationAdmissionFactory(bachelor_with_access_conditions_met=True)
+        cls.admission_ok = GeneralEducationAdmissionFactory(
+            training__academic_year__current=True,
+            bachelor_with_access_conditions_met=True,
+        )
         cls.candidate_ok = cls.admission_ok.candidate
         cls.ok_url = resolve_url("admission_api_v1:submit-general-proposition", uuid=cls.admission_ok.uuid)
+        # Ensure we have this training available for the next acad
+        GeneralEducationTrainingFactory(
+            academic_year__year=1980,
+            education_group_type=cls.admission_ok.training.education_group_type,
+            acronym=cls.admission_ok.training.acronym,
+            partial_acronym=cls.admission_ok.training.partial_acronym,
+        )
 
     def test_general_proposition_verification_with_errors(self):
         self.client.force_authenticate(user=self.candidate_errors.user)
@@ -73,7 +109,7 @@ class GeneralPropositionSubmissionTestCase(APITestCase):
         self.client.force_authenticate(user=self.candidate_ok.user)
         self.assertEqual(self.admission_ok.status, ChoixStatutProposition.IN_PROGRESS.name)
         response = self.client.post(self.ok_url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
         self.admission_ok.refresh_from_db()
         self.assertEqual(self.admission_ok.status, ChoixStatutProposition.SUBMITTED.name)
 

@@ -23,26 +23,34 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from abc import abstractmethod
-from typing import List, Optional
+from datetime import date
+from typing import List
 
-from admission.ddd.admission.domain.model.formation import Formation, FormationIdentity
-from admission.ddd.admission.domain.service.i_formation_translator import IFormationTranslator
-from admission.ddd.admission.dtos.formation import FormationDTO
+from admission.ddd.admission.domain.service.i_calendrier_inscription import ICalendrierInscription
+from base.business.academic_calendar import AcademicEventSessionCalendarHelper
+from base.models.academic_calendar import AcademicCalendar
+from base.models.academic_year import AcademicYear
+from reference.models.country import Country
 
 
-class IFormationContinueTranslator(IFormationTranslator):
+class CalendrierInscription(ICalendrierInscription):
     @classmethod
-    @abstractmethod
-    def get(cls, entity_id: FormationIdentity) -> Formation:
-        raise NotImplementedError
-
-    @classmethod
-    @abstractmethod
-    def get_dto(cls, sigle: str, annee: int) -> FormationDTO:
-        raise NotImplementedError
+    def get_annees_academiques_pour_calcul(cls) -> List[int]:
+        current = AcademicYear.objects.current()
+        return [current.year, current.year - 1, current.year + 1]
 
     @classmethod
-    @abstractmethod
-    def search(cls, annee: Optional[int], intitule: str, campus: Optional[str]) -> List['FormationDTO']:
-        raise NotImplementedError
+    def pool_est_ouvert_pour_annee_academique(cls, pool: 'AcademicEventSessionCalendarHelper', annee: int) -> bool:
+        return AcademicCalendar.objects.filter(
+            reference=pool.event_reference,
+            data_year__year=annee,
+            start_date__lte=date.today(),
+            end_date__gte=date.today(),
+        ).exists()
+
+    @classmethod
+    def est_ue_plus_5(cls, pays_nationalite_iso_code: str) -> bool:
+        return (
+            pays_nationalite_iso_code in cls.PLUS_5_ISO_CODES
+            or Country.objects.get(iso_code=pays_nationalite_iso_code).european_union
+        )

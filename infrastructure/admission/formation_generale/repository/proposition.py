@@ -23,13 +23,13 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import Optional, List
+from typing import List, Optional
 
 from django.conf import settings
 from django.utils.translation import get_language
 
 from admission.auth.roles.candidate import Candidate
-from admission.contrib.models import Scholarship, GeneralEducationAdmissionProxy
+from admission.contrib.models import GeneralEducationAdmissionProxy, Scholarship
 from admission.contrib.models.general_education import GeneralEducationAdmission
 from admission.ddd.admission.domain.builder.formation_identity import FormationIdentityBuilder
 from admission.ddd.admission.domain.model.bourse import BourseIdentity
@@ -118,6 +118,9 @@ class PropositionRepository(IPropositionRepository):
                 'double_degree_scholarship': scholarships.get(TypeBourse.DOUBLE_TRIPLE_DIPLOMATION.name),
                 'international_scholarship': scholarships.get(TypeBourse.BOURSE_INTERNATIONALE_FORMATION_GENERALE.name),
                 'erasmus_mundus_scholarship': scholarships.get(TypeBourse.ERASMUS_MUNDUS.name),
+                'is_external_reorientation': entity.est_reorientation_inscription_externe,
+                'is_external_modification': entity.est_modification_inscription_externe,
+                'is_non_resident': entity.est_non_resident_au_sens_decret,
                 'status': entity.statut.name,
                 'specific_question_answers': entity.reponses_questions_specifiques,
             },
@@ -139,7 +142,7 @@ class PropositionRepository(IPropositionRepository):
             matricule_candidat=admission.candidate.global_id,
             creee_le=admission.created,
             modifiee_le=admission.modified,
-            formation_id=FormationIdentityBuilder.build_from_uuid(
+            formation_id=FormationIdentityBuilder.build(
                 sigle=admission.training.acronym,
                 annee=admission.training.academic_year.year,
             ),
@@ -154,6 +157,9 @@ class PropositionRepository(IPropositionRepository):
             if admission.erasmus_mundus_scholarship
             else None,
             reponses_questions_specifiques=admission.specific_question_answers,
+            est_reorientation_inscription_externe=admission.is_external_reorientation,
+            est_modification_inscription_externe=admission.is_external_modification,
+            est_non_resident_au_sens_decret=admission.is_non_resident,
         )
 
     @classmethod

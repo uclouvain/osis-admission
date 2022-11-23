@@ -24,9 +24,9 @@
 #
 # ##############################################################################
 import datetime
+from unittest import TestCase
 
 import mock
-from unittest import TestCase
 
 from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import PropositionIdentityBuilder
 from admission.ddd.admission.doctorat.preparation.commands import VerifierPropositionCommand
@@ -73,11 +73,6 @@ from admission.ddd.admission.doctorat.preparation.test.factory.groupe_de_supervi
 from admission.ddd.admission.doctorat.preparation.test.factory.proposition import (
     _ComptabiliteFactory,
 )
-from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import (
-    DiplomeEtudeSecondaire,
-    ExperienceNonAcademique,
-    ProfilCandidatInMemoryTranslator,
-)
 from admission.ddd.admission.domain.validator.exceptions import (
     QuestionsSpecifiquesCurriculumNonCompleteesException,
     QuestionsSpecifiquesEtudesSecondairesNonCompleteesException,
@@ -87,6 +82,11 @@ from admission.infrastructure.admission.doctorat.preparation.repository.in_memor
 )
 from admission.infrastructure.admission.doctorat.preparation.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
+)
+from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import (
+    DiplomeEtudeSecondaire,
+    ExperienceNonAcademique,
+    ProfilCandidatInMemoryTranslator,
 )
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
@@ -251,7 +251,7 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
             self.assertIsInstance(context.exception.exceptions.pop(), LanguesConnuesNonSpecifieesException)
 
     def test_should_retourner_erreur_si_fichier_curriculum_non_renseigne(self):
-        with mock.patch.object(self.candidat, 'curriculum', None):
+        with mock.patch.object(ProfilCandidatInMemoryTranslator, 'cv_files', {}):
             with self.assertRaises(MultipleBusinessExceptions) as context:
                 self.message_bus.invoke(self.cmd)
             self.assertIsInstance(context.exception.exceptions.pop(), FichierCurriculumNonRenseigneException)

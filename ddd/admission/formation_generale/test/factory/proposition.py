@@ -29,7 +29,7 @@ import uuid
 import factory
 from factory.fuzzy import FuzzyText
 
-from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity, Proposition
+from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition, PropositionIdentity
 from admission.ddd.admission.test.factory.bourse import BourseIdentityFactory
 from admission.ddd.admission.test.factory.formation import _FormationIdentityFactory
 
@@ -57,3 +57,5 @@ class PropositionFactory(factory.Factory):
     bourse_double_diplome_id = factory.SubFactory(BourseIdentityFactory)
     bourse_internationale_id = factory.SubFactory(BourseIdentityFactory)
     bourse_erasmus_mundus_id = factory.SubFactory(BourseIdentityFactory)
+    est_reorientation_inscription_externe = False
+    est_modification_inscription_externe = False

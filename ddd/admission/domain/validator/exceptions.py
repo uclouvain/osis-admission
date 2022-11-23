@@ -84,3 +84,56 @@ class QuestionsSpecifiquesInformationsComplementairesNonCompleteesException(Busi
             "'Additional information > Specific questions' tab"
         )
         super().__init__(message, **kwargs)
+
+
+class FormationNonTrouveeException(BusinessException):
+    status_code = "ADMISSION-7"
+
+    def __init__(self, sigle: str = None, annee: int = None, **kwargs):
+        message = _("Formation is not available for this year.")
+        if sigle and annee:
+            message = _("Formation is not available for this year (%(sigle)s in %(annee)s).") % {
+                'annee': annee,
+                'sigle': sigle,
+            }
+        super().__init__(message)
+
+
+class ReorientationInscriptionExterneNonConfirmeeException(BusinessException):
+    status_code = "ADMISSION-8"
+
+    def __init__(self, **kwargs):
+        message = _("You must answer the question about reorientation.")
+        super().__init__(message, **kwargs)
+
+
+class ModificationInscriptionExterneNonConfirmeeException(BusinessException):
+    status_code = "ADMISSION-9"
+
+    def __init__(self, **kwargs):
+        message = _("You must answer the question about external enrollement change.")
+        super().__init__(message, **kwargs)
+
+
+class PoolNonResidentContingenteNonOuvertException(BusinessException):
+    status_code = "ADMISSION-10"
+
+    def __init__(self, **kwargs):
+        message = _("The limited training you are enrolling into is not opened yet.")
+        super().__init__(message, **kwargs)
+
+
+class ResidenceAuSensDuDecretNonRenseigneeException(BusinessException):
+    status_code = "ADMISSION-11"
+
+    def __init__(self, **kwargs):
+        message = _("You must answer the question about residency.")
+        super().__init__(message, **kwargs)
+
+
+class AucunPoolCorrespondantException(BusinessException):
+    status_code = "ADMISSION-12"
+
+    def __init__(self, **kwargs):  # pragma: no cover
+        message = _("No pool was found to match.")
+        super().__init__(message, **kwargs)

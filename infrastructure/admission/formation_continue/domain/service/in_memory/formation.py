@@ -23,10 +23,10 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
-from typing import Optional, List
+from typing import List, Optional
 
 from admission.ddd.admission.domain.enums import TypeFormation
-from admission.ddd.admission.domain.model.formation import FormationIdentity, Formation
+from admission.ddd.admission.domain.model.formation import Formation, FormationIdentity
 from admission.ddd.admission.dtos.formation import FormationDTO
 from admission.ddd.admission.formation_continue.domain.service.i_formation import IFormationContinueTranslator
 from admission.ddd.admission.formation_continue.domain.validator.exceptions import FormationNonTrouveeException
@@ -145,3 +145,13 @@ class FormationContinueInMemoryTranslator(IFormationContinueTranslator):
             and intitule in training.intitule
             and (not campus or training.campus == campus)
         ]
+
+    @classmethod
+    def verifier_existence(cls, sigle: str, annee: int) -> bool:  # pragma: no cover
+        return any(
+            True
+            for training in cls.trainings
+            if training.entity_id.sigle == sigle
+            and training.entity_id.annee == annee
+            and training.type_formation == TypeFormation.FORMATION_CONTINUE
+        )
