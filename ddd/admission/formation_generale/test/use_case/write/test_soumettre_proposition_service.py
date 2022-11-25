@@ -41,7 +41,7 @@ class TestSoumettrePropositionGenerale(TestCase):
         self.addCleanup(self.proposition_repository.reset)
         self.message_bus = message_bus_in_memory_instance
 
-    @freezegun.freeze_time('01/03/2023')
+    @freezegun.freeze_time('01/03/2020')
     def test_should_soumettre_proposition_etre_ok_si_admission_complete(self):
         proposition_id = self.message_bus.invoke(
             SoumettrePropositionCommand(uuid_proposition="uuid-ECGE3DP"),

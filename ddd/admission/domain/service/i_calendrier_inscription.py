@@ -109,12 +109,12 @@ class ICalendrierInscription(interface.DomainService):
                 sigle=formation_id.sigle,
                 ue_plus_5=ue_plus_5,
                 access_diplomas=titres_acces.get_valid_conditions(),
-                program=type_formation,
+                training_type=type_formation,
                 residential_address=residential_address,
-                proposition=proposition,
                 annee_derniere_inscription_ucl=identification.annee_derniere_inscription_ucl,
                 matricule_candidat=matricule_candidat,
                 profil_candidat_translator=profil_candidat_translator,
+                proposition=proposition,
             )
             if pool:
                 return annee, pool

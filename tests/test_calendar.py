@@ -25,14 +25,14 @@
 # ##############################################################################
 import datetime
 from datetime import timedelta
-from unittest import mock
 
+import freezegun
 from django.db.models import QuerySet
 from django.test import TestCase
 
 from admission.calendar.admission_calendar import (
-    DoctorateAdmissionCalendar,
     ContinuingEducationAdmissionCalendar,
+    DoctorateAdmissionCalendar,
     GeneralEducationAdmissionCalendar,
 )
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
@@ -44,21 +44,12 @@ from base.tests.factories.academic_calendar import AcademicCalendarFactory
 from base.tests.factories.academic_year import AcademicYearFactory
 
 
+@freezegun.freeze_time('2020-12-01')
 class TestAdmissionCalendarGeneration(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
-        cls.today_date = datetime.date(2020, 12, 1)
-        cls.today_datetime = datetime.datetime(2020, 12, 1)
-
         for year in range(2019, 2026):
             AcademicYearFactory(year=year)
-
-    def setUp(self) -> None:
-        # Mock datetime to return the 2020 year as the current year
-        patcher = mock.patch('base.models.academic_year.timezone')
-        self.addCleanup(patcher.stop)
-        self.mock_date = patcher.start()
-        self.mock_date.now.return_value = self.today_datetime
 
     def test_creation_academic_calendar_for_doctorate(self):
         has_calendar_events = AcademicCalendar.objects.filter(
@@ -130,20 +121,12 @@ class TestAdmissionCalendarGeneration(TestCase):
         self.assertEqual(calendar_events[0].end_date, datetime.date(2019, 10, 31))
 
 
+@freezegun.freeze_time('2020-10-10')
 class TestAllowedRegistrationYear(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         cls.academic_year = AcademicYearFactory(year=2020)
         cls.today_date = datetime.date(2020, 10, 10)
-
-    def setUp(self) -> None:
-        # Mock datetime
-        patcher = mock.patch(
-            'admission.infrastructure.admission.domain.service.annee_inscription_formation.datetime'
-        )
-        self.addCleanup(patcher.stop)
-        self.mock_date = patcher.start()
-        self.mock_date.date.today.return_value = self.today_date
 
     def test_when_no_event(self):
         has_calendar_events = AcademicCalendar.objects.filter(

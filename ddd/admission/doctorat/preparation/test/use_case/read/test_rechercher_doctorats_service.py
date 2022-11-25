@@ -23,9 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import datetime
-
-import mock
+import freezegun
 from django.test import TestCase
 
 from admission.ddd.admission.doctorat.preparation.commands import RechercherDoctoratQuery
@@ -37,21 +35,19 @@ class TestRechercherDoctoratService(TestCase):
         self.cmd = RechercherDoctoratQuery(sigle_secteur_entite_gestion='SST')
         self.message_bus = message_bus_in_memory_instance
 
-    @mock.patch('admission.infrastructure.admission.domain.service.in_memory.annee_inscription_formation.today')
-    def test_should_rechercher_par_sigle_secteur_entite_gestion(self, mock_today):
-        mock_today.return_value = datetime.date(2020, 11, 1)
-        results = self.message_bus.invoke(self.cmd)
-        self.assertEqual(results[0].sigle_entite_gestion, 'CDSC')
-        self.assertEqual(results[0].annee, 2020)
+    def test_should_rechercher_par_sigle_secteur_entite_gestion(self):
+        with freezegun.freeze_time('2020-11-01'):
+            results = self.message_bus.invoke(self.cmd)
+            self.assertEqual(results[0].sigle_entite_gestion, 'CDSC')
+            self.assertEqual(results[0].annee, 2020)
 
-        mock_today.return_value = datetime.date(2022, 11, 1)
-        results = self.message_bus.invoke(self.cmd)
-        self.assertEqual(results[0].sigle_entite_gestion, 'CDSS')
-        self.assertEqual(results[0].annee, 2022)
+        with freezegun.freeze_time('2022-11-01'):
+            results = self.message_bus.invoke(self.cmd)
+            self.assertEqual(results[0].sigle_entite_gestion, 'CDSS')
+            self.assertEqual(results[0].annee, 2022)
 
-    @mock.patch('admission.infrastructure.admission.domain.service.in_memory.annee_inscription_formation.today')
-    def test_should_rechercher_par_sigle_secteur_entite_gestion_et_par_campus(self, mock_today):
-        mock_today.return_value = datetime.date(2020, 11, 1)
+    @freezegun.freeze_time("2020-11-1")
+    def test_should_rechercher_par_sigle_secteur_entite_gestion_et_par_campus(self):
         # Tous les campus
         results = self.message_bus.invoke(RechercherDoctoratQuery(sigle_secteur_entite_gestion='SST', campus=''))
         self.assertEqual(len(results), 2)

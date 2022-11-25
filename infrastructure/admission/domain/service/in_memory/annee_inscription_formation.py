@@ -24,7 +24,7 @@
 #
 ##############################################################################
 import datetime
-from datetime import timedelta
+from datetime import timedelta, date
 from typing import Optional
 
 from admission.ddd.admission.domain.service.i_annee_inscription_formation import (
@@ -33,8 +33,6 @@ from admission.ddd.admission.domain.service.i_annee_inscription_formation import
     Date,
 )
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
-
-today = datetime.date.today
 
 
 class AnneeInscriptionFormationInMemoryTranslator(IAnneeInscriptionFormationTranslator):
@@ -52,7 +50,7 @@ class AnneeInscriptionFormationInMemoryTranslator(IAnneeInscriptionFormationTran
 
     @classmethod
     def recuperer(cls, type_calendrier_academique: AcademicCalendarTypes) -> Optional[int]:
-        date_jour = today()
+        date_jour = date.today()
         calendriers = []
         if type_calendrier_academique == AcademicCalendarTypes.GENERAL_EDUCATION_ENROLLMENT:
             calendriers = cls._generer_calendriers_academiques(
