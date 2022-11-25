@@ -122,13 +122,13 @@ class PoolCalendar(AcademicEventSessionCalendarHelper, ABC):
         cls,
         annee_academique: int,
         sigle: str,
+        ue_plus_5: bool,
         access_diplomas: List[str],
-        program: 'TrainingType',
-        nationalite: 'Country',
-        annee_derniere_inscription_ucl: Optional[int],
-        profil_candidat_translator: 'IProfilCandidatTranslator',
-        profile: 'IdentificationDTO',
+        training_type: 'TrainingType',
         residential_address: 'AdressePersonnelleDTO',
+        annee_derniere_inscription_ucl: Optional[int],
+        matricule_candidat: str,
+        profil_candidat_translator: 'IProfilCandidatTranslator',
         proposition: 'PropositionGenerale' = None,
     ) -> bool:
         raise NotImplementedError
@@ -147,9 +147,9 @@ class DoctorateAdmissionCalendar(PoolCalendar):
         )
 
     @classmethod
-    def matches_criteria(cls, program: TrainingType, **kwargs) -> bool:
+    def matches_criteria(cls, training_type: TrainingType, **kwargs) -> bool:
         """Candidat inscrit en doctorat"""
-        return program == TrainingType.PHD
+        return training_type == TrainingType.PHD
 
 
 class GeneralEducationAdmissionCalendar(AcademicEventSessionCalendarHelper):
@@ -177,9 +177,9 @@ class ContinuingEducationAdmissionCalendar(PoolCalendar):
         )
 
     @classmethod
-    def matches_criteria(cls, program: TrainingType, **kwargs) -> bool:
+    def matches_criteria(cls, training_type: TrainingType, **kwargs) -> bool:
         """Candidat inscrit à la formation continue"""
-        return program.name in AnneeInscriptionFormationTranslator.CONTINUING_EDUCATION_TYPES
+        return training_type.name in AnneeInscriptionFormationTranslator.CONTINUING_EDUCATION_TYPES
 
 
 class AdmissionPoolExternalEnrollmentChangeCalendar(PoolCalendar):
@@ -197,11 +197,17 @@ class AdmissionPoolExternalEnrollmentChangeCalendar(PoolCalendar):
         )
 
     @classmethod
-    def matches_criteria(cls, program: TrainingType, sigle: str, proposition: 'PropositionGenerale', **kwargs) -> bool:
+    def matches_criteria(
+        cls,
+        training_type: TrainingType,
+        sigle: str,
+        proposition: 'PropositionGenerale',
+        **kwargs,
+    ) -> bool:
         """Candidat déjà inscrit l'année N à un autre établissement CF
         (informatiquement : a répondu "oui" à la question sur la modif)"""
         return bool(
-            program == TrainingType.BACHELOR
+            training_type == TrainingType.BACHELOR
             and proposition.est_modification_inscription_externe
             and not est_formation_contingentee_et_non_resident(sigle, proposition)
         )
@@ -222,11 +228,17 @@ class AdmissionPoolExternalReorientationCalendar(PoolCalendar):
         )
 
     @classmethod
-    def matches_criteria(cls, program: TrainingType, sigle: str, proposition: 'PropositionGenerale', **kwargs) -> bool:
+    def matches_criteria(
+        cls,
+        training_type: TrainingType,
+        sigle: str,
+        proposition: 'PropositionGenerale',
+        **kwargs,
+    ) -> bool:
         """Candidat déjà inscrit l'année N à un autre établissement CF
         (informatiquement : a répondu ""oui"" à la question sur la réori.)"""
         return bool(
-            program == TrainingType.BACHELOR
+            training_type == TrainingType.BACHELOR
             and proposition.est_reorientation_inscription_externe
             and not est_formation_contingentee_et_non_resident(sigle, proposition)
         )
@@ -247,7 +259,7 @@ class AdmissionPoolVipCalendar(PoolCalendar):
     @classmethod
     def matches_criteria(
         cls,
-        program: TrainingType,
+        training_type: TrainingType,
         proposition: PropositionGenerale,
         **kwargs,
     ) -> bool:
@@ -255,7 +267,7 @@ class AdmissionPoolVipCalendar(PoolCalendar):
         (informatiquement : a coché oui pour une des 3 questions)"""
         return (
             # 2e cycle
-            program.name in SECOND_CYCLE_TYPES
+            training_type.name in SECOND_CYCLE_TYPES
             # bourses
             and any(
                 [
@@ -283,7 +295,6 @@ class AdmissionPoolHueUclPathwayChangeCalendar(PoolCalendar):
     def matches_criteria(
         cls,
         ue_plus_5: bool,
-        matricule_candidat: str,
         annee_academique: int,
         annee_derniere_inscription_ucl: Optional[int],
         sigle: str,

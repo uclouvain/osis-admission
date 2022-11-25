@@ -23,9 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import datetime
-
-import mock
+import freezegun
 from django.test import TestCase
 
 from admission.ddd.admission.formation_continue.commands import RechercherFormationContinueQuery
@@ -39,22 +37,19 @@ class TestRechercherFormationService(TestCase):
         )
         self.message_bus = message_bus_in_memory_instance
 
-    @mock.patch('admission.infrastructure.admission.domain.service.in_memory.annee_inscription_formation.today')
-    def test_should_rechercher_par_intitule_formation(self, mock_today):
-        mock_today.return_value = datetime.date(2020, 11, 1)
-        results = self.message_bus.invoke(self.cmd)
-        self.assertEqual(results[0].sigle, 'ECGE3DP')
-        self.assertEqual(results[0].annee, 2020)
+    def test_should_rechercher_par_intitule_formation(self):
+        with freezegun.freeze_time('2020-11-01'):
+            results = self.message_bus.invoke(self.cmd)
+            self.assertEqual(results[0].sigle, 'ECGE3DP')
+            self.assertEqual(results[0].annee, 2020)
 
-        mock_today.return_value = datetime.date(2022, 11, 1)
-        results = self.message_bus.invoke(self.cmd)
-        self.assertEqual(results[0].sigle, 'ECGE3DP')
-        self.assertEqual(results[0].annee, 2022)
+        with freezegun.freeze_time('2022-11-01'):
+            results = self.message_bus.invoke(self.cmd)
+            self.assertEqual(results[0].sigle, 'ECGE3DP')
+            self.assertEqual(results[0].annee, 2022)
 
-    @mock.patch('admission.infrastructure.admission.domain.service.in_memory.annee_inscription_formation.today')
-    def test_should_rechercher_par_intitule_formation_et_par_campus(self, mock_today):
-        mock_today.return_value = datetime.date(2022, 11, 1)
-
+    @freezegun.freeze_time('2022-11-01')
+    def test_should_rechercher_par_intitule_formation_et_par_campus(self):
         # Tous les campus
         results = self.message_bus.invoke(RechercherFormationContinueQuery(intitule_formation='ECG'))
         self.assertEqual(len(results), 2)

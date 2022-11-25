@@ -37,13 +37,13 @@ class TestVerifierPropositionService(TestCase):
     def setUp(self) -> None:
         self.message_bus = message_bus_in_memory_instance
 
-    @freezegun.freeze_time('01/03/2023')
+    @freezegun.freeze_time('01/03/2022')
     def test_should_verifier_etre_ok_si_complet(self):
         cmd = VerifierPropositionCommand(uuid_proposition="uuid-ECGE3DP")
         proposition_id = self.message_bus.invoke(cmd)
         self.assertEqual(proposition_id.uuid, "uuid-ECGE3DP")
 
-    @freezegun.freeze_time('01/03/2023')
+    @freezegun.freeze_time('01/03/2022')
     def test_should_retourner_erreur_si_conditions_acces_non_remplies(self):
         cmd = VerifierPropositionCommand(uuid_proposition='uuid-SC3DP')
         with self.assertRaises(MultipleBusinessExceptions) as context:

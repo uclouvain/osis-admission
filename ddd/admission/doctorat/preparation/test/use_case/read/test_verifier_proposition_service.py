@@ -26,6 +26,7 @@
 import datetime
 from unittest import TestCase
 
+import freezegun
 import mock
 
 from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import PropositionIdentityBuilder
@@ -121,12 +122,9 @@ class TestVerifierPropositionServiceCommun(TestCase):
             )
 
         # Mock datetime to return the 2020 year as the current year
-        patcher = mock.patch(
-            'admission.ddd.admission.doctorat.preparation.use_case.read.verifier_proposition_service.datetime'
-        )
+        patcher = freezegun.freeze_time('2020-11-01')
+        patcher.start()
         self.addCleanup(patcher.stop)
-        self.mock_foo = patcher.start()
-        self.mock_foo.date.today.return_value = datetime.date(2020, 11, 1)
 
         self.cmd = VerifierPropositionCommand(uuid_proposition=self.proposition.entity_id.uuid)
 

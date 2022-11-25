@@ -69,6 +69,7 @@ class CalendrierInscriptionTestCase(TestCase):
         self.formation_translator = FormationGeneraleInMemoryTranslator()
         self.profil_candidat_translator.reset()
 
+    @freezegun.freeze_time('2023-03-15')
     def test_verification_calendrier_inscription_doctorat(self):
         proposition = PropositionAdmissionECGE3DPMinimaleFactory()
         annee, pool = CalendrierInscriptionInMemory.determiner_pool(
@@ -81,6 +82,7 @@ class CalendrierInscriptionTestCase(TestCase):
         )
         self.assertEqual(pool, AcademicCalendarTypes.DOCTORATE_EDUCATION_ENROLLMENT)
 
+    @freezegun.freeze_time('2023-03-15')
     def test_verification_calendrier_inscription_formation_continue(self):
         proposition = PropositionContinueFactory()
         profil = ProfilCandidatFactory(matricule=proposition.matricule_candidat)
@@ -330,7 +332,7 @@ class CalendrierInscriptionTestCase(TestCase):
         )
         self.assertEqual(pool, AcademicCalendarTypes.ADMISSION_POOL_VIP)
 
-    @freezegun.freeze_time('01/07/2021')
+    @freezegun.freeze_time('22/09/2022')
     def test_changement_etablissement(self):
         proposition = PropositionFactory()
         profil = ProfilCandidatFactory(matricule=proposition.matricule_candidat, coordonnees__domicile_legal__pays="BE")
@@ -347,13 +349,14 @@ class CalendrierInscriptionTestCase(TestCase):
         )
         self.assertEqual(pool, AcademicCalendarTypes.ADMISSION_POOL_INSTITUT_CHANGE)
 
-    @freezegun.freeze_time('22/10/2021')
+    @freezegun.freeze_time('22/10/2022')
     def test_changement_filiere(self):
         proposition = PropositionFactory()
         profil = ProfilCandidatFactory(
-            identification__annee_derniere_inscription_ucl=2020,
+            identification__annee_derniere_inscription_ucl=2021,
             matricule=proposition.matricule_candidat,
             coordonnees__domicile_legal__pays="AR",
+            identification__pays_nationalite="AR",
         )
         self.profil_candidat_translator.profil_candidats.append(profil.identification)
         self.profil_candidat_translator.get_coordonnees = lambda m: profil.coordonnees

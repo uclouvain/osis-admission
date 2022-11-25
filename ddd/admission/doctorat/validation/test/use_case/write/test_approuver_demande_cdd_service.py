@@ -28,6 +28,8 @@ from unittest.mock import patch
 
 from unittest import TestCase
 
+import freezegun
+
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutProposition
 from admission.ddd.admission.doctorat.validation.builder.demande_identity import DemandeIdentityBuilder
 from admission.ddd.admission.doctorat.validation.commands import ApprouverDemandeCddCommand
@@ -52,15 +54,9 @@ from admission.infrastructure.parcours_doctoral.repository.in_memory.doctorat im
 
 class TestApprouverDemandeCDD(TestCase):
     def setUp(self) -> None:
-        # Mock datetime to return the 2020 year as the current year
-        date_patcher = patch(
-            'admission.ddd.parcours_doctoral.epreuve_confirmation.domain.service.epreuve_confirmation.datetime',
-        )
-        mock_date = date_patcher.start()
-        self.addCleanup(date_patcher.stop)
-        mock_date.date.today.return_value = datetime.date(2020, 11, 1)
         self.message_bus = message_bus_in_memory_instance
 
+    @freezegun.freeze_time('2020-11-01')
     def test_should_approuver_demande_a_verifier(self):
         demande_approuvee_id = self.message_bus.invoke(ApprouverDemandeCddCommand('uuid-SC3DP'))
         demande_a_approuver_entity_id = DemandeIdentityBuilder.build_from_uuid('uuid-SC3DP')

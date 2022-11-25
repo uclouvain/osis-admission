@@ -25,6 +25,7 @@
 # ##############################################################################
 import datetime
 
+import freezegun
 import mock
 from unittest import TestCase
 
@@ -52,6 +53,7 @@ from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import Aca
 from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
 
 
+@freezegun.freeze_time('2020-11-01')
 class TestVerifierPropositionServiceCommun(TestCase):
     def setUp(self) -> None:
         self.candidat_translator = ProfilCandidatInMemoryTranslator()
@@ -71,17 +73,6 @@ class TestVerifierPropositionServiceCommun(TestCase):
                     end_date=datetime.date(annee + 1, 9, 30),
                 )
             )
-
-        # Mock datetime to return the 2020 year as the current year
-        for date_patch in [
-            'admission.ddd.admission.doctorat.preparation.use_case.write.soumettre_proposition_service.datetime',
-            'admission.ddd.admission.doctorat.preparation.domain.model.proposition.datetime',
-        ]:
-            patcher = mock.patch(date_patch)
-            self.addCleanup(patcher.stop)
-            self.mock_foo = patcher.start()
-            self.today_date = datetime.date(2020, 11, 1)
-            self.mock_foo.date.today.return_value = self.today_date
 
     def test_should_soumettre_proposition_etre_ok_si_admission_complete(self):
         proposition = PropositionAdmissionSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory()

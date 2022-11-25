@@ -29,6 +29,7 @@ from typing import List
 from admission.ddd.admission.domain.service.i_calendrier_inscription import ICalendrierInscription
 from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
 from base.business.academic_calendar import AcademicEventSessionCalendarHelper
+from base.tests.factories.academic_year import get_current_year
 
 
 class CalendrierInscriptionInMemory(ICalendrierInscription):
@@ -42,7 +43,7 @@ class CalendrierInscriptionInMemory(ICalendrierInscription):
 
     @classmethod
     def get_annees_academiques_pour_calcul(cls) -> List[int]:
-        current_year = 2022
+        current_year = get_current_year()
         return [current_year, current_year - 1, current_year + 1]
 
     @classmethod
