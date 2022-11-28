@@ -27,6 +27,10 @@ from django.views.generic import TemplateView
 
 from admission.views.doctorate.mixins import LoadDossierViewMixin
 
+__all__ = [
+    "DoctorateAdmissionCurriculumFormView",
+]
+
 
 class DoctorateAdmissionCurriculumFormView(LoadDossierViewMixin, TemplateView):
     template_name = 'admission/doctorate/forms/curriculum.html'

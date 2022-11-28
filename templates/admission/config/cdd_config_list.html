@@ -39,7 +39,7 @@
   </div>
   <ul class="list-group">
     {% for entity_id, acronym in object_list %}
-      {% url 'admission:config:cdd_config:edit' pk=entity_id as change_url %}
+      {% url 'admission:config:cdd-config:edit' pk=entity_id as change_url %}
       <li class="list-group-item container-fluid">
         {{ acronym }}
         <div class="pull-right">

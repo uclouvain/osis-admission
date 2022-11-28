@@ -44,6 +44,10 @@ from base.utils.htmx import HtmxMixin
 from infrastructure.messages_bus import message_bus_instance
 from osis_mail_template.models import MailTemplate
 
+__all__ = [
+    "DoctorateSendMailView",
+]
+
 
 class DoctorateSendMailView(HtmxMixin, LoadDossierViewMixin, FormView):
     template_name = 'admission/doctorate/forms/send_mail.html'

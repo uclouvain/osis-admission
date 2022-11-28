@@ -34,6 +34,10 @@ from admission.views.doctorate.forms.confirmation import DoctorateAdmissionLastC
 from admission.views.mixins.business_exceptions_form_view_mixin import BusinessExceptionFormViewMixin
 from infrastructure.messages_bus import message_bus_instance
 
+__all__ = [
+    "DoctorateAdmissionExtensionRequestFormView",
+]
+
 
 class DoctorateAdmissionExtensionRequestFormView(
     DoctorateAdmissionLastConfirmationMixin,

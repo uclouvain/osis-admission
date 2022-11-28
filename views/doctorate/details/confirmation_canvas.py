@@ -30,6 +30,10 @@ from admission.exports.admission_confirmation_canvas import admission_pdf_confir
 from admission.views.doctorate.forms.confirmation import DoctorateAdmissionLastConfirmationMixin
 from infrastructure.messages_bus import message_bus_instance
 
+__all__ = [
+    "DoctorateAdmissionConfirmationCanvasExportView",
+]
+
 
 class DoctorateAdmissionConfirmationCanvasExportView(DoctorateAdmissionLastConfirmationMixin, RedirectView):
     permission_required = 'admission.view_doctorateadmission_confirmation'

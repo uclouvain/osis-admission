@@ -28,12 +28,13 @@ from django.views.generic import FormView
 
 from admission.ddd.parcours_doctoral.epreuve_confirmation.commands import (
     ModifierEpreuveConfirmationParCDDCommand,
-    TeleverserAvisRenouvellementMandatRechercheCommand,
 )
-from admission.forms.doctorate.confirmation import ConfirmationForm, ConfirmationOpinionForm
+from admission.forms.doctorate.confirmation import ConfirmationForm
 from admission.views.doctorate.mixins import DoctorateAdmissionLastConfirmationMixin
 from admission.views.mixins.business_exceptions_form_view_mixin import BusinessExceptionFormViewMixin
 from infrastructure.messages_bus import message_bus_instance
+
+__all__ = ["DoctorateAdmissionConfirmationFormView"]
 
 
 class DoctorateAdmissionConfirmationFormView(
@@ -41,6 +42,7 @@ class DoctorateAdmissionConfirmationFormView(
     BusinessExceptionFormViewMixin,
     FormView,
 ):
+    urlpatterns = 'confirmation'
     template_name = 'admission/doctorate/forms/confirmation.html'
     form_class = ConfirmationForm
     permission_required = 'admission.change_doctorateadmission_confirmation'
@@ -63,33 +65,6 @@ class DoctorateAdmissionConfirmationFormView(
         # Save the confirmation paper
         message_bus_instance.invoke(
             ModifierEpreuveConfirmationParCDDCommand(
-                uuid=self.last_confirmation_paper.uuid,
-                **form.cleaned_data,
-            )
-        )
-
-    def get_success_url(self):
-        return reverse('admission:doctorate:confirmation', args=[self.admission_uuid])
-
-
-class DoctorateAdmissionConfirmationOpinionFormView(
-    DoctorateAdmissionLastConfirmationMixin,
-    BusinessExceptionFormViewMixin,
-    FormView,
-):
-    template_name = 'admission/doctorate/forms/confirmation_opinion.html'
-    form_class = ConfirmationOpinionForm
-    permission_required = 'admission.upload_pdf_confirmation'
-
-    def get_initial(self):
-        return {
-            'avis_renouvellement_mandat_recherche': self.last_confirmation_paper.avis_renouvellement_mandat_recherche,
-        }
-
-    def call_command(self, form):
-        # Save the confirmation paper
-        message_bus_instance.invoke(
-            TeleverserAvisRenouvellementMandatRechercheCommand(
                 uuid=self.last_confirmation_paper.uuid,
                 **form.cleaned_data,
             )

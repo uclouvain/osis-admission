@@ -32,90 +32,35 @@ from django.shortcuts import get_object_or_404, resolve_url
 from django.utils.functional import cached_property
 from django.views import generic
 from django.views.generic.detail import SingleObjectMixin
+from django.views.generic.edit import FormMixin
 
 from admission.contrib.models.doctoral_training import Activity
 from admission.ddd.parcours_doctoral.formation.commands import (
-    AccepterActivitesCommand,
     RefuserActiviteCommand,
     RevenirSurStatutActiviteCommand,
-    SoumettreActivitesCommand,
 )
 from admission.ddd.parcours_doctoral.formation.domain.model.enums import (
     CategorieActivite,
-    StatutActivite,
 )
 from admission.forms.doctorate.training.activity import *
-from admission.forms.doctorate.training.activity import ComplementaryCourseForm, get_category_labels
-from admission.forms.doctorate.training.processus import BatchActivityForm, RefuseForm
-from admission.templatetags.admission import CONTEXT_DOCTORATE, can_read_tab
+from admission.forms.doctorate.training.activity import ComplementaryCourseForm
+from admission.forms.doctorate.training.processus import RefuseForm
 from admission.views.doctorate.mixins import LoadDossierViewMixin
-from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from infrastructure.messages_bus import message_bus_instance
 
 __all__ = [
-    "ComplementaryTrainingView",
-    "CourseEnrollmentView",
-    "DoctoralTrainingActivityView",
     "TrainingActivityAddView",
     "TrainingActivityDeleteView",
     "TrainingActivityEditView",
     "TrainingActivityRefuseView",
     "TrainingActivityRequireChangesView",
-    "TrainingRedirectView",
     "TrainingActivityRestoreView",
 ]
-
-
-class TrainingRedirectView(LoadDossierViewMixin, generic.RedirectView):
-    """Redirect depending on the status of CDD and admission type"""
-
-    def get_redirect_url(self, *args, **kwargs):
-        if can_read_tab(CONTEXT_DOCTORATE, 'doctoral-training', self.admission):
-            return resolve_url('admission:doctorate:doctoral-training', uuid=self.admission_uuid)
-        if can_read_tab(CONTEXT_DOCTORATE, 'complementary-training', self.admission):
-            return resolve_url('admission:doctorate:complementary-training', uuid=self.admission_uuid)
-        return resolve_url('admission:doctorate:course-enrollment', uuid=self.admission_uuid)
-
-
-class TrainingListMixin(LoadDossierViewMixin, generic.FormView):
-    form_class = BatchActivityForm
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['activities'] = self.get_queryset()
-        context['categories'] = get_category_labels(self.admission.doctorate.management_entity_id)
-        context['statuses'] = StatutActivite.choices
-        return context
-
-    def get_success_url(self):
-        return self.request.get_full_path()
-
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs['doctorate_id'] = self.get_permission_object().pk
-        return kwargs
-
-    def form_valid(self, form):
-        activity_ids = [activite.uuid for activite in form.cleaned_data['activity_ids']]
-        if '_accept' in self.request.POST:
-            cmd = AccepterActivitesCommand(
-                doctorat_uuid=self.admission_uuid,
-                activite_uuids=activity_ids,
-            )
-        else:
-            cmd = SoumettreActivitesCommand(
-                doctorat_uuid=self.admission_uuid,
-                activite_uuids=activity_ids,
-            )
-        try:
-            form.activities_in_error = []
-            message_bus_instance.invoke(cmd)
-        except MultipleBusinessExceptions as multiple_exceptions:
-            for exception in multiple_exceptions.exceptions:
-                form.add_error(None, exception.message)
-                form.activities_in_error.append(exception.activite_id.uuid)
-            return super().form_invalid(form)
-        return super().form_valid(form)
+__namespace__ = {
+    'doctoral-training': 'doctoral-training',
+    'complementary-training': 'complementary-training',
+    'course-enrollment': 'course-enrollment',
+}
 
 
 class TrainingActivityFormMixin(LoadDossierViewMixin):
@@ -195,6 +140,7 @@ class TrainingActivityFormMixin(LoadDossierViewMixin):
 
 
 class TrainingActivityAddView(TrainingActivityFormMixin, generic.CreateView):
+    urlpatterns = {'add': 'add/<str:category>'}
     object = None
 
     def get_form_kwargs(self):
@@ -207,6 +153,7 @@ class TrainingActivityAddView(TrainingActivityFormMixin, generic.CreateView):
 
 
 class TrainingActivityEditView(TrainingActivityFormMixin, generic.UpdateView):
+    urlpatterns = {'edit': 'edit/<uuid:activity_id>'}
     slug_field = 'uuid'
     pk_url_kwarg = None
     slug_url_kwarg = 'activity_id'
@@ -218,6 +165,7 @@ class TrainingActivityEditView(TrainingActivityFormMixin, generic.UpdateView):
 
 
 class TrainingActivityDeleteView(LoadDossierViewMixin, generic.DeleteView):
+    urlpatterns = {'delete': 'delete/<uuid:activity_id>'}
     model = Activity
     slug_field = 'uuid'
     pk_url_kwarg = "NOT_TO_BE_USED"
@@ -240,7 +188,7 @@ class TrainingActivityDeleteView(LoadDossierViewMixin, generic.DeleteView):
         return resolve_url(':'.join(self.request.resolver_match.namespaces), uuid=self.admission_uuid)
 
 
-class TrainingActivityActionFormMixin(LoadDossierViewMixin, SingleObjectMixin, generic.FormView):
+class TrainingActivityActionFormMixin(LoadDossierViewMixin, SingleObjectMixin, FormMixin):
     model = Activity
     slug_field = 'uuid'
     pk_url_kwarg = "NOT_TO_BE_USED"
@@ -270,7 +218,8 @@ class TrainingActivityActionFormMixin(LoadDossierViewMixin, SingleObjectMixin, g
         return f"{base_url}#{self.object.uuid}"
 
 
-class TrainingActivityRefuseView(TrainingActivityActionFormMixin):
+class TrainingActivityRefuseView(TrainingActivityActionFormMixin, generic.FormView):
+    urlpatterns = {'refuse': 'refuse/<uuid:activity_id>'}
     permission_required = "admission.refuse_activity"
     template_name = "admission/doctorate/forms/training/activity_refuse.html"
     form_class = RefuseForm
@@ -289,11 +238,13 @@ class TrainingActivityRefuseView(TrainingActivityActionFormMixin):
 
 
 class TrainingActivityRequireChangesView(TrainingActivityRefuseView):
+    urlpatterns = {'require-changes': 'require-changes/<uuid:activity_id>'}
     avec_modification = True
     template_name = "admission/doctorate/forms/training/activity_require_changes.html"
 
 
-class TrainingActivityRestoreView(TrainingActivityActionFormMixin):
+class TrainingActivityRestoreView(TrainingActivityActionFormMixin, generic.FormView):
+    urlpatterns = {'restore': 'restore/<uuid:activity_id>'}
     permission_required = "admission.restore_activity"
     template_name = "admission/doctorate/forms/training/activity_restore.html"
     form_class = Form
@@ -301,29 +252,3 @@ class TrainingActivityRestoreView(TrainingActivityActionFormMixin):
     def form_valid(self, form):
         message_bus_instance.invoke(RevenirSurStatutActiviteCommand(activite_uuid=self.kwargs['activity_id']))
         return super().form_valid(form)
-
-
-class DoctoralTrainingActivityView(TrainingListMixin):  # pylint: disable=too-many-ancestors
-    """List view for doctoral training activities"""
-
-    template_name = "admission/doctorate/cdd/training_list.html"
-    permission_required = "admission.view_doctoral_training"
-
-    def get_queryset(self):
-        return Activity.objects.for_doctoral_training(self.admission_uuid)
-
-
-class ComplementaryTrainingView(TrainingListMixin):  # pylint: disable=too-many-ancestors
-    template_name = "admission/doctorate/cdd/complementary_training_list.html"
-    permission_required = 'admission.view_complementary_training'
-
-    def get_queryset(self):
-        return Activity.objects.for_complementary_training(self.admission_uuid)
-
-
-class CourseEnrollmentView(TrainingListMixin):  # pylint: disable=too-many-ancestors
-    template_name = "admission/doctorate/cdd/course_enrollment.html"
-    permission_required = 'admission.view_course_enrollment'
-
-    def get_queryset(self):
-        return Activity.objects.for_enrollment_courses(self.admission_uuid)

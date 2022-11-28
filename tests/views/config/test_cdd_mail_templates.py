@@ -45,7 +45,7 @@ class CddMailTemplatesTestCase(TestCase):
         self.cdd = manager.entity
         self.cdd_user = manager.person.user
 
-        self.list_url = resolve_url('admission:config:cdd_mail_template:list')
+        self.list_url = resolve_url('admission:config:cdd-mail-template:list')
 
         self.cdd_mail_template = CddMailTemplate.objects.create(
             identifier=ADMISSION_EMAIL_MEMBER_REMOVED,
@@ -64,21 +64,21 @@ class CddMailTemplatesTestCase(TestCase):
             body="Corps",
         ).save()
         self.preview_url = resolve_url(
-            'admission:config:cdd_mail_template:preview',
+            'admission:config:cdd-mail-template:preview',
             identifier=ADMISSION_EMAIL_MEMBER_REMOVED,
             pk=self.cdd_mail_template.pk,
         )
         self.add_url = resolve_url(
-            'admission:config:cdd_mail_template:add',
+            'admission:config:cdd-mail-template:add',
             identifier=ADMISSION_EMAIL_MEMBER_REMOVED,
         )
         self.edit_url = resolve_url(
-            'admission:config:cdd_mail_template:edit',
+            'admission:config:cdd-mail-template:edit',
             identifier=ADMISSION_EMAIL_MEMBER_REMOVED,
             pk=self.cdd_mail_template.pk,
         )
         self.delete_url = resolve_url(
-            'admission:config:cdd_mail_template:delete',
+            'admission:config:cdd-mail-template:delete',
             identifier=ADMISSION_EMAIL_MEMBER_REMOVED,
             pk=self.cdd_mail_template.pk,
         )

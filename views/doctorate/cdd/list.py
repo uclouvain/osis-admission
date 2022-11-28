@@ -36,6 +36,10 @@ from admission.forms.doctorate.cdd.filter import CddFilterForm, BaseFilterForm
 from base.utils.htmx import HtmxMixin
 from infrastructure.messages_bus import message_bus_instance
 
+__all__ = [
+    "CddDoctorateAdmissionList",
+]
+
 
 class CddDoctorateAdmissionList(LoginRequiredMixin, PermissionRequiredMixin, HtmxMixin, ListView):
     raise_exception = True

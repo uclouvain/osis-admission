@@ -31,6 +31,8 @@ from django.views.generic import CreateView
 from admission.contrib.models.doctorate import InternalNote
 from admission.views.doctorate.mixins import LoadDossierViewMixin
 
+__all__ = ["InternalNoteView"]
+
 
 class InternalNoteView(LoadDossierViewMixin, CreateView):
     model = InternalNote

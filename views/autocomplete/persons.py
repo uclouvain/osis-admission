@@ -31,8 +31,15 @@ from admission.auth.roles.promoter import Promoter
 from admission.auth.roles.candidate import Candidate
 from base.models.person import Person
 
+__all__ = [
+    'CandidatesAutocomplete',
+    'PromotersAutocomplete',
+]
 
-class PersonsAutocomplete(LoginRequiredMixin, autocomplete.Select2QuerySetView):
+__namespace__ = False
+
+
+class PersonsAutocomplete(LoginRequiredMixin):
     def get_results(self, context):
         return [
             {
@@ -43,7 +50,9 @@ class PersonsAutocomplete(LoginRequiredMixin, autocomplete.Select2QuerySetView):
         ]
 
 
-class CandidatesAutocomplete(PersonsAutocomplete):
+class CandidatesAutocomplete(PersonsAutocomplete, autocomplete.Select2QuerySetView):
+    urlpatterns = 'candidates'
+
     def get_queryset(self):
         q = self.request.GET.get('q', '')
 
@@ -65,7 +74,9 @@ class CandidatesAutocomplete(PersonsAutocomplete):
         return qs if q else []
 
 
-class PromotersAutocomplete(PersonsAutocomplete):
+class PromotersAutocomplete(PersonsAutocomplete, autocomplete.Select2QuerySetView):
+    urlpatterns = 'promoters'
+
     def get_queryset(self):
         q = self.request.GET.get('q', '')
 

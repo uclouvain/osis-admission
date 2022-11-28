@@ -27,7 +27,7 @@
 {% endcomment %}
 
 {% block breadcrumb %}
-  <li><a href="{% url 'admission:config:cdd_mail_template:list' %}">{% trans 'Custom mail templates' %}</a></li>
+  <li><a href="{% url 'admission:config:cdd-mail-template:list' %}">{% trans 'Custom mail templates' %}</a></li>
   <li class="active">{{ instances.0.name }}</li>
 {% endblock %}
 
@@ -69,6 +69,6 @@
     </div>
   {% endfor %}
 
-  {% url 'admission:config:cdd_mail_template:edit' identifier=instances.0.identifier pk=instances.0.pk as change_url %}
+  {% url 'admission:config:cdd-mail-template:edit' identifier=instances.0.identifier pk=instances.0.pk as change_url %}
   <a href="{{ change_url }}" class="btn btn-default"><span class="fa fa-edit"></span> {% trans "Edit" %}</a>
 {% endblock %}

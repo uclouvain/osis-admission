@@ -65,6 +65,7 @@ __all__ = [
     "PaperForm",
     "ComplementaryCourseForm",
     "UclCourseForm",
+    "get_category_labels",
 ]
 
 INSTITUTION_UCL = "UCLouvain"
@@ -631,7 +632,7 @@ class UclCourseForm(ActivityFormMixin, forms.ModelForm):
     learning_unit_year = forms.CharField(
         label=_("Learning unit"),
         widget=autocomplete.ListSelect2(
-            url='admission:autocomplete:learning_unit_years',
+            url='admission:autocomplete:learning-unit-years',
             attrs={
                 'data-html': True,
                 'data-minimum-input-length': 2,
