@@ -28,6 +28,8 @@ from django.views.generic import TemplateView
 
 from admission.views.doctorate.forms.confirmation import DoctorateAdmissionLastConfirmationMixin
 
+__all__ = ['DoctorateAdmissionExtensionRequestDetailView']
+
 
 class DoctorateAdmissionExtensionRequestDetailView(DoctorateAdmissionLastConfirmationMixin, TemplateView):
     template_name = 'admission/doctorate/details/extension_request.html'

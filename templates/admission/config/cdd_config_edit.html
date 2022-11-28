@@ -30,7 +30,7 @@
     Change <em>{{ name }}</em> configuration
   {% endblocktrans %}
   <li>{% trans 'Admission' %}</li>
-  <li><a href="{% url 'admission:config:cdd_config:list' %}">{% trans 'CDD configuration' %}</a></li>
+  <li><a href="{% url 'admission:config:cdd-config:list' %}">{% trans 'CDD configuration' %}</a></li>
   <li class="active">{{ title|safe }}</li>
 {% endblock %}
 
@@ -49,7 +49,7 @@
         <span class="glyphicon glyphicon-save" aria-hidden="true"></span>
         {% trans "Save" %}
       </button>
-      <a href="{% url 'admission:config:cdd_config:list' %}" class="btn btn-default">
+      <a href="{% url 'admission:config:cdd-config:list' %}" class="btn btn-default">
         <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
         {% trans "Cancel" %}
       </a>

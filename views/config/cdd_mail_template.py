@@ -52,6 +52,7 @@ __all__ = [
 
 
 class CddMailTemplateListView(PermissionRequiredMixin, generic.ListView):
+    urlpatterns = {'list': ''}
     template_name = 'admission/config/cdd_mail_template_list.html'
     permission_required = 'admission.change_cddmailtemplate'
 
@@ -79,6 +80,7 @@ class CddMailTemplateListView(PermissionRequiredMixin, generic.ListView):
 
 
 class CddMailTemplateChangeView(PermissionRequiredMixin, generic.FormView):
+    urlpatterns = {'add': 'add/<str:identifier>', 'edit': 'edit/<str:identifier>/<int:pk>'}
     forms = None
     template_name = 'admission/config/cdd_mail_template_change.html'
     permission_required = 'admission.change_cddmailtemplate'
@@ -149,11 +151,11 @@ class CddMailTemplateChangeView(PermissionRequiredMixin, generic.FormView):
     def get_success_url(self) -> str:
         if self.request.POST.get('_preview'):
             return resolve_url(
-                'admission:config:cdd_mail_template:preview',
+                'admission:config:cdd-mail-template:preview',
                 identifier=self.instance.identifier,
                 pk=self.instance.pk,
             )
-        return resolve_url('admission:config:cdd_mail_template:list')
+        return resolve_url('admission:config:cdd-mail-template:list')
 
     def form_invalid(self, forms):
         return self.render_to_response(self.get_context_data(forms=forms))
@@ -175,6 +177,7 @@ class CddMailTemplateChangeView(PermissionRequiredMixin, generic.FormView):
 
 
 class CddMailTemplatePreview(PermissionRequiredMixin, generic.TemplateView):
+    urlpatterns = {'preview': 'preview/<str:identifier>/<int:pk>'}
     template_name = 'admission/config/cdd_mail_template_preview.html'
     permission_required = 'admission.change_cddmailtemplate'
 
@@ -186,10 +189,11 @@ class CddMailTemplatePreview(PermissionRequiredMixin, generic.TemplateView):
 
 
 class CddMailTemplateDeleteView(PermissionRequiredMixin, generic.FormView):
+    urlpatterns = {'delete': 'delete/<str:identifier>/<int:pk>'}
     template_name = "admission/config/cdd_mail_template_delete.html"
     permission_required = 'admission.change_cddmailtemplate'
     form_class = forms.Form
-    success_url = reverse_lazy('admission:config:cdd_mail_template:list')
+    success_url = reverse_lazy('admission:config:cdd-mail-template:list')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

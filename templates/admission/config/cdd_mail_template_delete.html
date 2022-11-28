@@ -27,7 +27,7 @@
 {% endcomment %}
 
 {% block breadcrumb %}
-  <li><a href="{% url 'admission:config:cdd_mail_template:list' %}">{% trans 'Custom mail templates' %}</a></li>
+  <li><a href="{% url 'admission:config:cdd-mail-template:list' %}">{% trans 'Custom mail templates' %}</a></li>
   <li class="active">{{ instances.0.name }}</li>
 {% endblock %}
 
@@ -41,7 +41,7 @@
       <h2>Delete "{{ name }}" custom mail template?</h2>
       <p>Are you sure you want to delete the custom mail template? This cannot be undone.</p>
     {% endblocktrans %}
-    <a class="btn btn-default" href="{% url 'admission:config:cdd_mail_template:list' %}">{% trans 'Cancel' %}</a>
+    <a class="btn btn-default" href="{% url 'admission:config:cdd-mail-template:list' %}">{% trans 'Cancel' %}</a>
     <button type="submit" class="btn btn-danger">{% trans "Delete" %}</button>
   </form>
 {% endblock %}

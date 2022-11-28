@@ -28,6 +28,10 @@ from ddd.logic.learning_unit.commands import LearningUnitAndPartimSearchCommand,
 from infrastructure.messages_bus import message_bus_instance
 from learning_unit.views.autocomplete import LearningUnitYearAutoComplete
 
+__all__ = [
+    'LearningUnitYearAutocomplete',
+]
+
 
 class LearningUnitYearAutocomplete(LearningUnitYearAutoComplete):
     def get_list(self):

@@ -29,6 +29,7 @@ from django.urls import reverse
 from django.utils.translation import gettext_lazy as _, override
 from django.views import View
 from django.views.generic import FormView
+from django.views.generic.edit import FormMixin
 
 from admission.contrib.models import CddMailTemplate
 from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
@@ -36,9 +37,10 @@ from admission.ddd.parcours_doctoral.epreuve_confirmation.commands import (
     ConfirmerEchecCommand,
     ConfirmerRepassageCommand,
     ConfirmerReussiteCommand,
+    TeleverserAvisRenouvellementMandatRechercheCommand,
 )
 from admission.forms.doctorate.cdd.generic_send_mail import BaseEmailTemplateForm, SelectCddEmailTemplateForm
-from admission.forms.doctorate.confirmation import ConfirmationRetakingForm
+from admission.forms.doctorate.confirmation import ConfirmationOpinionForm, ConfirmationRetakingForm
 from admission.infrastructure.parcours_doctoral.epreuve_confirmation.domain.service.notification import (
     Notification,
 )
@@ -53,11 +55,20 @@ from base.utils.htmx import HtmxMixin
 from infrastructure.messages_bus import message_bus_instance
 from osis_mail_template.models import MailTemplate
 
+__all__ = [
+    "DoctorateAdmissionConfirmationFailureDecisionView",
+    "DoctorateAdmissionConfirmationRetakingDecisionView",
+    "DoctorateAdmissionConfirmationSuccessDecisionView",
+    "DoctorateAdmissionConfirmationOpinionFormView",
+]
+__namespace__ = 'confirmation'
+
 
 class DoctorateAdmissionConfirmationSuccessDecisionView(
     DoctorateAdmissionLastConfirmationMixin,
     View,
 ):
+    urlpatterns = 'success'
     permission_required = 'admission.make_confirmation_decision'
 
     def post(self, *args, **kwargs):
@@ -79,11 +90,11 @@ class DoctorateAdmissionConfirmationSuccessDecisionView(
         return HttpResponseRedirect(reverse('admission:doctorate:confirmation', args=[self.admission_uuid]))
 
 
-class DoctorateAdmissionConfirmationDecisionView(
+class DoctorateAdmissionConfirmationDecisionMixin(
     HtmxMixin,
     DoctorateAdmissionLastConfirmationMixin,
     BusinessExceptionFormViewMixin,
-    FormView,
+    FormMixin,
 ):
     permission_required = 'admission.make_confirmation_decision'
     htmx_template_name = 'admission/doctorate/forms/send_mail_htmx_fields.html'
@@ -138,7 +149,11 @@ class DoctorateAdmissionConfirmationDecisionView(
         return reverse('admission:doctorate:confirmation', args=[self.admission_uuid])
 
 
-class DoctorateAdmissionConfirmationFailureDecisionView(DoctorateAdmissionConfirmationDecisionView):
+class DoctorateAdmissionConfirmationFailureDecisionView(
+    DoctorateAdmissionConfirmationDecisionMixin,
+    FormView,
+):
+    urlpatterns = 'failure'
     form_class = BaseEmailTemplateForm
     identifier = ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_FAILURE_STUDENT
     page_title = _('Failure of the confirmation paper')
@@ -156,7 +171,11 @@ class DoctorateAdmissionConfirmationFailureDecisionView(DoctorateAdmissionConfir
         )
 
 
-class DoctorateAdmissionConfirmationRetakingDecisionView(DoctorateAdmissionConfirmationDecisionView):
+class DoctorateAdmissionConfirmationRetakingDecisionView(
+    DoctorateAdmissionConfirmationDecisionMixin,
+    FormView,
+):
+    urlpatterns = 'retaking'
     form_class = ConfirmationRetakingForm
     identifier = ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_RETAKING_STUDENT
     page_title = _('Retaking of the confirmation paper')
@@ -173,3 +192,31 @@ class DoctorateAdmissionConfirmationRetakingDecisionView(DoctorateAdmissionConfi
                 date_limite=form.cleaned_data['date_limite'],
             )
         )
+
+
+class DoctorateAdmissionConfirmationOpinionFormView(
+    DoctorateAdmissionLastConfirmationMixin,
+    BusinessExceptionFormViewMixin,
+    FormView,
+):
+    urlpatterns = 'opinion'
+    template_name = 'admission/doctorate/forms/confirmation_opinion.html'
+    form_class = ConfirmationOpinionForm
+    permission_required = 'admission.upload_pdf_confirmation'
+
+    def get_initial(self):
+        return {
+            'avis_renouvellement_mandat_recherche': self.last_confirmation_paper.avis_renouvellement_mandat_recherche,
+        }
+
+    def call_command(self, form):
+        # Save the confirmation paper
+        message_bus_instance.invoke(
+            TeleverserAvisRenouvellementMandatRechercheCommand(
+                uuid=self.last_confirmation_paper.uuid,
+                **form.cleaned_data,
+            )
+        )
+
+    def get_success_url(self):
+        return reverse('admission:doctorate:confirmation', args=[self.admission_uuid])

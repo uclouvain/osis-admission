@@ -23,119 +23,140 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from django.urls import include, path
+import importlib
+import inspect
+import logging
+from pathlib import Path
 
-import admission.views.autocomplete as autocomplete_views
-from admission.views.config.cdd_config import *
-from admission.views.config.cdd_mail_templates import *
-from admission.views.doctorate import *
-from admission.views.doctorate.cdd import *
+from django.conf import settings
+from django.urls import include, path
+from django.views import View
+
+logger = logging.getLogger(__name__)
 
 app_name = 'admission'
 
-# Autocomplete
-autocomplete_paths = [
-    path('candidates', autocomplete_views.CandidatesAutocomplete.as_view(), name='candidates'),
-    path('countries', autocomplete_views.CountriesAutocomplete.as_view(), name='countries'),
-    path('promoters', autocomplete_views.PromotersAutocomplete.as_view(), name='promoters'),
-    path('learning_unit_years', autocomplete_views.LearningUnitYearAutocomplete.as_view(), name='learning_unit_years'),
-]
 
-# Doctorate
-confirmation_tabs = [
-    path('opinion', DoctorateAdmissionConfirmationOpinionFormView.as_view(), name='opinion'),
-    path('success', DoctorateAdmissionConfirmationSuccessDecisionView.as_view(), name='success'),
-    path('failure', DoctorateAdmissionConfirmationFailureDecisionView.as_view(), name='failure'),
-    path('retaking', DoctorateAdmissionConfirmationRetakingDecisionView.as_view(), name='retaking'),
-]
-doctorate_update_paths = [
-    path('person', DoctorateAdmissionPersonFormView.as_view(), name='person'),
-    path('coordonnees', DoctorateAdmissionCoordonneesFormView.as_view(), name='coordonnees'),
-    path('curriculum', DoctorateAdmissionCurriculumFormView.as_view(), name='curriculum'),
-    path('education', DoctorateAdmissionEducationFormView.as_view(), name='education'),
-    path('languages', DoctorateAdmissionLanguagesFormView.as_view(), name='languages'),
-    path('project', DoctorateAdmissionProjectFormView.as_view(), name='project'),
-    path('cotutelle', DoctorateAdmissionCotutelleFormView.as_view(), name='cotutelle'),
-    path('supervision', DoctorateAdmissionSupervisionFormView.as_view(), name='supervision'),
-    path('confirmation', DoctorateAdmissionConfirmationFormView.as_view(), name='confirmation'),
-    path('extension-request', DoctorateAdmissionExtensionRequestFormView.as_view(), name='extension-request'),
-]
-training_paths = [
-    path('add/<str:category>', TrainingActivityAddView.as_view(), name='add'),
-    path('edit/<uuid:activity_id>', TrainingActivityEditView.as_view(), name='edit'),
-    path('refuse/<uuid:activity_id>', TrainingActivityRefuseView.as_view(), name='refuse'),
-    path('require-changes/<uuid:activity_id>', TrainingActivityRequireChangesView.as_view(), name='require-changes'),
-    path('restore/<uuid:activity_id>', TrainingActivityRestoreView.as_view(), name='restore'),
-    path('delete/<uuid:activity_id>', TrainingActivityDeleteView.as_view(), name='delete'),
-]
-doctorate_detail_paths = [
-    path('person', DoctorateAdmissionPersonDetailView.as_view(), name='person'),
-    path('coordonnees', DoctorateAdmissionCoordonneesDetailView.as_view(), name='coordonnees'),
-    path('curriculum', DoctorateAdmissionCurriculumDetailView.as_view(), name='curriculum'),
-    path('education', DoctorateAdmissionEducationDetailView.as_view(), name='education'),
-    path('languages', DoctorateAdmissionLanguagesDetailView.as_view(), name='languages'),
-    path('project', DoctorateAdmissionProjectDetailView.as_view(), name='project'),
-    path('cotutelle', DoctorateAdmissionCotutelleDetailView.as_view(), name='cotutelle'),
-    path('supervision', DoctorateAdmissionSupervisionDetailView.as_view(), name='supervision'),
-    path('history', DoctorateHistoryView.as_view(), name='history'),
-    path('history-all', DoctorateHistoryAllView.as_view(), name='history-all'),
-    path('send-mail', DoctorateSendMailView.as_view(), name='send-mail'),
-    path('confirmation', DoctorateAdmissionConfirmationDetailView.as_view(), name='confirmation'),
-    path('confirmation/', include((confirmation_tabs, 'confirmation'))),
-    path('extension-request', DoctorateAdmissionExtensionRequestDetailView.as_view(), name='extension-request'),
-    path(
-        'confirmation-canvas',
-        DoctorateAdmissionConfirmationCanvasExportView.as_view(),
-        name='confirmation-canvas',
-    ),
-    path('history-api', DoctorateHistoryAPIView.as_view(), name='history-api'),
-    path('update/', include((doctorate_update_paths, 'update'))),
-    # Training
-    path('training', TrainingRedirectView.as_view(), name='training'),
-    path('doctoral-training', DoctoralTrainingActivityView.as_view(), name='doctoral-training'),
-    path('doctoral-training/', include((training_paths, 'doctoral-training'))),
-    path('complementary-training', ComplementaryTrainingView.as_view(), name='complementary-training'),
-    path('complementary-training/', include((training_paths, 'complementary-training'))),
-    path('course-enrollment', CourseEnrollmentView.as_view(), name='course-enrollment'),
-    path('course-enrollment/', include((training_paths, 'course-enrollment'))),
-    path('internal-note/', InternalNoteView.as_view(), name='internal-note'),
-]
+def _patterns_from_views(module, stem):
+    """
+    Gather patterns from a module's views.
 
-doctorate_cdd_paths = [
-    path('', CddDoctorateAdmissionList.as_view(), name='list'),
-]
+    Views must implement `django.views.generic.View` (your mixins must not!) and
+    be referenced in the `__all__` variable of a module to be picked.
 
-doctorate_paths = [
-    # Common
-    path('<uuid:uuid>/', include(doctorate_detail_paths)),
-    # Specific
-    path('cdd/', include((doctorate_cdd_paths, 'cdd'))),
-]
+    In a view, you can specify a `urlpatterns` attribute:
+      - if it's a string, it will be taken as the name of the view and the url pattern
+            class MyView(View):
+                urlpatterns = 'something'
+        will give path('something', MyView.as_view(), name='something')
+      - if it's a dict, keys will be names, and values url patterns
+            class MyView(View):
+                urlpatterns = {'something': 'something/<int:pk>', 'add': 'new'}
+       will give:
+            `path('something/<int:pk>', MyView.as_view(), name='something'),`
+            `path('new', MyView.as_view(), name='add'),`
+      - if no attribute is set, and the view is alone in the module, the module name will be taken
+    """
+    subpatterns = []
+    for view_name in getattr(module, '__all__', []):
+        view_class = getattr(module, view_name)
+        if not inspect.isclass(view_class) or not issubclass(view_class, View):
+            continue
 
-cdd_mail_template_paths = [
-    path('', CddMailTemplateListView.as_view(), name='list'),
-    path('preview/<str:identifier>/<int:pk>', CddMailTemplatePreview.as_view(), name='preview'),
-    path('edit/<str:identifier>/<int:pk>', CddMailTemplateChangeView.as_view(), name='edit'),
-    path('delete/<str:identifier>/<int:pk>', CddMailTemplateDeleteView.as_view(), name='delete'),
-    path('add/<str:identifier>', CddMailTemplateChangeView.as_view(), name='add'),
-]
+        view_urlpatterns = getattr(view_class, 'urlpatterns', stem)
+        if isinstance(view_urlpatterns, str):
+            view_urlpatterns = {view_urlpatterns: view_urlpatterns}
 
-cdd_config_paths = [
-    path('', CddConfigListView.as_view(), name='list'),
-    path('edit/<int:pk>', CddConfigChangeView.as_view(), name='edit'),
-]
+        for name, url in view_urlpatterns.items():
+            subpatterns.append(
+                path(url, view_class.as_view(), name=name),
+            )
+    return subpatterns
 
-# Global
-config_paths = [
-    path('cdd_mail_template/', include((cdd_mail_template_paths, 'cdd_mail_template'))),
-    path('cdd/', include((cdd_config_paths, 'cdd_config'))),
-]
 
-urlpatterns = [
-    # Doctorate admissions
-    path('doctorate/', include((doctorate_paths, 'doctorate'))),
-    # Configuration
-    path('config/', include((config_paths, 'config'))),
-    # Autocomplete
-    path('autocomplete/', include((autocomplete_paths, 'autocomplete'))),
-]
+def patterns_from_tree(start_dir: Path):
+    """
+    Create urlpatterns from a directory structure.
+
+    By default, a package is considered a namespace, and a module with one view a pattern,
+    if a module has multiple views, it will also be considered a namespace.
+
+    You can alter this behavior by setting `__namespace__ = False` in a package's __init__.py
+    or in a module to disable producing a namespace. You can set `__namespace__ = 'foo'` to set the
+    namespace name, otherwise the package name or the module name will be picked.
+
+    You can set the url pattern for the package or module, for example:
+
+     - `__namespace__ = {'foo': '<uuid:uuid>'}` -> `path('<uuid:uuid>/', include((subpatterns_from_views, 'foo')),`
+     - `__namespace__ = 'bar' -> `path('bar', include((subpatterns_from_views, 'bar')),`
+     - `__namespace__ = {'': 'foobar' -> `path('foobar', include((subpatterns_from_views, '')),`
+     - `__namespace__ = False -> `path('', include((subpatterns_from_views, '')),`
+    """
+    patterns = []
+
+    for entry in start_dir.iterdir():
+        entry_name = entry.stem.replace('_', '-')
+        if entry.is_file() and entry.stem != '__init__':
+            # File is a module
+            module = importlib.import_module(str(entry).replace(".py", "").replace("/", "."))
+            views = getattr(module, '__all__', [])
+            if len(views) > 1 and getattr(module, '__namespace__', True):
+                # Module contains multiple views
+                subpatterns = _patterns_from_views(module, entry_name)
+                namespaces = getattr(module, '__namespace__', entry_name)
+                if isinstance(namespaces, str):
+                    namespaces = {namespaces: namespaces}
+                for namespace, url in namespaces.items():
+                    patterns.append(
+                        path(url + "/", include((subpatterns, namespace))),
+                    )
+            else:
+                # Module contains a single view
+                subpatterns = _patterns_from_views(module, entry_name)
+                patterns += subpatterns
+
+        elif entry.is_dir() and entry.name != "__pycache__":
+            # Directory is a package
+            package = importlib.import_module(str(entry).replace("/", "."))
+
+            subpatterns = patterns_from_tree(entry)
+            if subpatterns:
+                namespaces = getattr(package, '__namespace__', entry_name) or ''
+                if isinstance(namespaces, str):
+                    namespaces = {namespaces: namespaces}
+                for namespace, url in namespaces.items():
+                    patterns.append(
+                        path(url + "/", include((subpatterns, namespace))),
+                    )
+    return patterns
+
+
+urlpatterns = patterns_from_tree(Path('admission/views'))
+
+if settings.DEBUG:
+
+    def _debug(patterns, depth=0):
+        """
+        To debug the current urls configuration, add to your settings:
+        LOGGING['loggers']['admission.urls'] = {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+        }
+        """
+        msg: str = ''
+        line_prefix = '    '
+        for p in patterns:
+            if hasattr(p, 'namespace'):
+                msg += line_prefix * depth
+                msg += f"path('{p.pattern.regex.pattern}', include(([\n"
+                msg += _debug(p.url_patterns, depth + 1)
+                msg += line_prefix * depth
+                msg += f"], '{p.namespace}')),\n"
+            else:
+                msg += line_prefix * depth
+                msg += (
+                    f"path('{p.pattern.regex.pattern}', {p.callback.view_class.__name__}.as_view(), name='{p.name}'),\n"
+                )
+        return msg
+
+    logger.debug("\n" + _debug(urlpatterns))

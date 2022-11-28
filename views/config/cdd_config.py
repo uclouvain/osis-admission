@@ -42,6 +42,7 @@ __all__ = [
 
 
 class CddConfigListView(PermissionRequiredMixin, generic.ListView):
+    urlpatterns = {'list': ''}
     template_name = 'admission/config/cdd_config_list.html'
     permission_required = 'admission.change_cddconfiguration'
 
@@ -65,6 +66,7 @@ class CddConfigListView(PermissionRequiredMixin, generic.ListView):
 
 
 class CddConfigChangeView(PermissionRequiredMixin, SuccessMessageMixin, generic.UpdateView):
+    urlpatterns = {'edit': 'edit/<int:pk>'}
     template_name = 'admission/config/cdd_config_edit.html'
     permission_required = 'admission.change_cddconfiguration'
     model = CddConfiguration
