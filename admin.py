@@ -180,6 +180,10 @@ class AdmissionFormItemInstantiationForm(forms.ModelForm):
         required=False,
     )
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['form_item'].queryset = AdmissionFormItem.objects.filter(active=True)
+
     class Meta:
         model = AdmissionFormItemInstantiation
         fields = '__all__'
@@ -189,8 +193,15 @@ class AdmissionFormItemInstantiationAdmin(admin.ModelAdmin):
     list_display = [
         'academic_year',
         'form_item',
+        'weight',
         'required',
         'display_according_education',
+        'education_group_type',
+        'education_group',
+        'candidate_nationality',
+        'study_language',
+        'vip_candidate',
+        'tab',
     ]
     search_fields = ['form_item__id', 'form_item__internal_label', 'education_group__educationgroupyear__acronym']
     list_filter = [
