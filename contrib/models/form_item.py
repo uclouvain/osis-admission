@@ -76,12 +76,9 @@ class TranslatedJSONField(models.JSONField):
 
     def formfield(self, **kwargs):
         return super().formfield(
-            **{
-                'form_class': TranslatedValueField,
-                'encoder': self.encoder,
-                'decoder': self.decoder,
-                **kwargs,
-            }
+            form_class=TranslatedValueField,
+            show_hidden_initial=False,
+            **kwargs,
         )
 
 
