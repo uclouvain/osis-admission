@@ -53,6 +53,7 @@ class GeneralEducationAdmission(BaseAdmission):
         related_name="+",
         on_delete=models.PROTECT,
         null=True,
+        blank=True,
     )
 
     international_scholarship = models.ForeignKey(
@@ -61,6 +62,7 @@ class GeneralEducationAdmission(BaseAdmission):
         related_name="+",
         on_delete=models.PROTECT,
         null=True,
+        blank=True,
     )
 
     erasmus_mundus_scholarship = models.ForeignKey(
@@ -69,6 +71,7 @@ class GeneralEducationAdmission(BaseAdmission):
         related_name="+",
         on_delete=models.PROTECT,
         null=True,
+        blank=True,
     )
     is_external_reorientation = models.BooleanField(
         verbose_name=_("Is an external reorientation"),
