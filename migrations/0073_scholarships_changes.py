@@ -54,6 +54,7 @@ class Migration(migrations.Migration):
             model_name='generaleducationadmission',
             name='double_degree_scholarship',
             field=models.ForeignKey(
+                blank=True,
                 null=True,
                 on_delete=django.db.models.deletion.PROTECT,
                 related_name='+',
@@ -65,6 +66,7 @@ class Migration(migrations.Migration):
             model_name='generaleducationadmission',
             name='erasmus_mundus_scholarship',
             field=models.ForeignKey(
+                blank=True,
                 null=True,
                 on_delete=django.db.models.deletion.PROTECT,
                 related_name='+',
@@ -76,6 +78,7 @@ class Migration(migrations.Migration):
             model_name='generaleducationadmission',
             name='international_scholarship',
             field=models.ForeignKey(
+                blank=True,
                 null=True,
                 on_delete=django.db.models.deletion.PROTECT,
                 related_name='+',
