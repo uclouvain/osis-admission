@@ -39,6 +39,7 @@ from admission.infrastructure.admission.domain.service.annee_inscription_formati
 from base.models.education_group_year import EducationGroupYear
 from base.models.enums.education_group_categories import Categories
 from base.models.person import Person
+from osis_document.contrib import FileField
 
 
 class GeneralEducationAdmission(BaseAdmission):
@@ -74,13 +75,29 @@ class GeneralEducationAdmission(BaseAdmission):
         null=True,
         blank=True,
     )
+    is_belgian_bachelor = models.BooleanField(
+        verbose_name=_("Is belgian bachelor"),
+        null=True,
+    )
     is_external_reorientation = models.BooleanField(
         verbose_name=_("Is an external reorientation"),
         null=True,
     )
+    registration_change_form = FileField(
+        verbose_name=_("Registration change form"),
+        max_files=1,
+        upload_to=admission_directory_path,
+        blank=True,
+    )
     is_external_modification = models.BooleanField(
         verbose_name=_("Is an external modification"),
         null=True,
+    )
+    regular_registration_proof = FileField(
+        verbose_name=_("Proof of regular registration"),
+        max_files=1,
+        upload_to=admission_directory_path,
+        blank=True,
     )
     is_non_resident = models.BooleanField(
         verbose_name=_("Is non-resident (as defined in decree)"),

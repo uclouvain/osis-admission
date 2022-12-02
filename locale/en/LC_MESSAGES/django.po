@@ -1424,6 +1424,9 @@ msgstr ""
 msgid "Is an external reorientation"
 msgstr ""
 
+msgid "Is belgian bachelor"
+msgstr ""
+
 msgid "Is non-resident (as defined in decree)"
 msgstr ""
 
@@ -2129,6 +2132,9 @@ msgstr ""
 msgid "Proof of receipt of unemployment benefit, pension or compensation"
 msgstr ""
 
+msgid "Proof of regular registration"
+msgstr ""
+
 msgid "Proposed new deadline"
 msgstr ""
 
@@ -2220,6 +2226,9 @@ msgid "Registration Id"
 msgstr ""
 
 msgid "Registration certificate"
+msgstr ""
+
+msgid "Registration change form"
 msgstr ""
 
 msgid "Rejection reason"

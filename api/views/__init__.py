@@ -40,6 +40,7 @@ from admission.api.views.person import (
     ContinuingPersonView,
 )
 from admission.api.views.project import *
+from admission.api.views.pool_questions import PoolQuestionsView
 from admission.api.views.submission import *
 from admission.api.views.supervision import *
 from admission.api.views.signatures import RequestSignaturesAPIView

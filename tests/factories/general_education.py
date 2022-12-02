@@ -64,8 +64,6 @@ class GeneralEducationAdmissionFactory(factory.DjangoModelFactory):
     erasmus_mundus_scholarship = factory.SubFactory(ErasmusMundusScholarshipFactory)
     double_degree_scholarship = factory.SubFactory(DoubleDegreeScholarshipFactory)
     international_scholarship = factory.SubFactory(InternationalScholarshipFactory)
-    is_external_reorientation = False
-    is_external_modification = False
 
     @factory.post_generation
     def create_candidate_role(self, create, extracted, **kwargs):
@@ -76,4 +74,6 @@ class GeneralEducationAdmissionFactory(factory.DjangoModelFactory):
             training__academic_year__current=True,
             training__education_group_type__name=TrainingType.BACHELOR.name,
             candidate=factory.SubFactory(CompletePersonForBachelorFactory),
+            is_external_reorientation=False,
+            is_external_modification=False,
         )

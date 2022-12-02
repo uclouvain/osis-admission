@@ -133,6 +133,7 @@ urlpatterns = [
     path('propositions/general-education/<uuid:uuid>/specific-question', views.GeneralSpecificQuestionAPIView),
     path('propositions/general-education/<uuid:uuid>/curriculum', views.GeneralCurriculumView),
     path('propositions/general-education/<uuid:uuid>/complete-curriculum', views.GeneralCompleteCurriculumView),
+    path('propositions/general-education/<uuid:uuid>/pool-questions', views.PoolQuestionsView),
     path(
         'propositions/general-education/<uuid:uuid>/<str:tab>/specific-question', views.GeneralSpecificQuestionListView
     ),

@@ -1520,6 +1520,9 @@ msgstr "Est une modification externe"
 msgid "Is an external reorientation"
 msgstr "Est une réorientation externe"
 
+msgid "Is belgian bachelor"
+msgstr "Est bachelier belge"
+
 msgid "Is non-resident (as defined in decree)"
 msgstr "Est non-résident (au sens du décret)"
 
@@ -2313,6 +2316,9 @@ msgstr ""
 "Preuve de la perception d’allocations de chômage, de pension ou d’une "
 "indemnité de la mutuelle"
 
+msgid "Proof of regular registration"
+msgstr "Attestation d'inscription régulière'"
+
 msgid "Proposed new deadline"
 msgstr "Nouvelle échéance proposée"
 
@@ -2410,6 +2416,9 @@ msgstr "Noma"
 
 msgid "Registration certificate"
 msgstr "Attestation d’immatriculation"
+
+msgid "Registration change form"
+msgstr "Formulaire de modification d'inscription"
 
 msgid "Rejection reason"
 msgstr "Motif de refus"
