@@ -98,7 +98,9 @@ def patterns_from_tree(start_dir: Path):
         entry_name = entry.stem.replace('_', '-')
         if entry.is_file() and entry.stem != '__init__':
             # File is a module
-            module = importlib.import_module(str(entry).replace(".py", "").replace("/", "."))
+            module = importlib.import_module(
+                str(entry.relative_to(settings.BASE_DIR)).replace(".py", "").replace("/", ".")
+            )
             views = getattr(module, '__all__', [])
             if len(views) > 1 and getattr(module, '__namespace__', True):
                 # Module contains multiple views
@@ -117,7 +119,7 @@ def patterns_from_tree(start_dir: Path):
 
         elif entry.is_dir() and entry.name != "__pycache__":
             # Directory is a package
-            package = importlib.import_module(str(entry).replace("/", "."))
+            package = importlib.import_module(str(entry.relative_to(settings.BASE_DIR)).replace("/", "."))
 
             subpatterns = patterns_from_tree(entry)
             if subpatterns:
@@ -131,7 +133,7 @@ def patterns_from_tree(start_dir: Path):
     return patterns
 
 
-urlpatterns = patterns_from_tree((Path(__file__).parent / 'views').relative_to(settings.BASE_DIR))
+urlpatterns = patterns_from_tree((Path(__file__).parent / 'views'))
 
 if settings.DEBUG:
 
