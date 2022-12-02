@@ -131,7 +131,7 @@ def patterns_from_tree(start_dir: Path):
     return patterns
 
 
-urlpatterns = patterns_from_tree(Path('admission/views'))
+urlpatterns = patterns_from_tree((Path(__file__).parent / 'views').relative_to(settings.BASE_DIR))
 
 if settings.DEBUG:
 

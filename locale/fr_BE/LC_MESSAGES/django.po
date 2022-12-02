@@ -754,8 +754,7 @@ msgstr "Attestation"
 
 msgid ""
 "Certificate allowing the continuation of studies for a bachelor's degree"
-msgstr ""
-"Attestation autorisant à poursuivre les études de bachelier"
+msgstr "Attestation autorisant à poursuivre les études de bachelier"
 
 msgid "Certificate of achievement"
 msgstr "Attestation de réussite"
