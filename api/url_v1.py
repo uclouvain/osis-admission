@@ -136,6 +136,7 @@ urlpatterns = [
     path(
         'propositions/general-education/<uuid:uuid>/<str:tab>/specific-question', views.GeneralSpecificQuestionListView
     ),
+    path('propositions/general-education/<uuid:uuid>/accounting', views.GeneralAccountingView),
     _path('propositions/general-education/<uuid:uuid>/', include(general_education_view_set_router.urls)),
     path('propositions/general-education/<uuid:uuid>/submit', views.SubmitGeneralEducationPropositionView),
     # > Continuing education
@@ -152,6 +153,7 @@ urlpatterns = [
         'propositions/continuing-education/<uuid:uuid>/<str:tab>/specific-question',
         views.ContinuingSpecificQuestionListView,
     ),
+    path('propositions/continuing-education/<uuid:uuid>/accounting', views.ContinuingAccountingView),
     _path('propositions/continuing-education/<uuid:uuid>/', include(continuing_education_view_set_router.urls)),
     path('propositions/continuing-education/<uuid:uuid>/submit', views.SubmitContinuingEducationPropositionView),
     # Autocompletes

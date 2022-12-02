@@ -60,7 +60,7 @@ class BasePersonViewSet(
 
 class PersonViewSet(PersonRelatedMixin, BasePersonViewSet):
     name = "person"
-    permission_classes = [partial(IsSelfPersonTabOrTabPermission, permission_suffix='person')]
+    permission_classes = [partial(IsSelfPersonTabOrTabPermission, permission_suffix='person', can_edit=True)]
 
 
 class GeneralPersonView(GeneralEducationPersonRelatedMixin, BasePersonViewSet):

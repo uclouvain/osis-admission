@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Admission API
-  version: 1.0.49
+  version: 1.0.50
   description: This API delivers data for the Admission project.
   contact:
     name: UCLouvain - OSIS
@@ -2360,6 +2360,70 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - propositions
+  /propositions/general-education/{uuid}/accounting:
+    get:
+      operationId: retrieve_general_accounting
+      description: Get additional data conditioning the required accounting fields
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountingConditions'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
+    put:
+      operationId: update_general_accounting
+      description: Edit the accounting of a proposition
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema: {}
+      responses:
+        200:
+          content:
+            application/json:
+              schema: {}
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
   /propositions/general-education/{uuid}/curriculum/educational/{experience_id}:
     get:
       operationId: retrieveEducationalExperienceGeneralEducationAdmission
@@ -2974,6 +3038,70 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/SpecificQuestion'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
+  /propositions/continuing-education/{uuid}/accounting:
+    get:
+      operationId: retrieve_continuing_accounting
+      description: Get additional data conditioning the required accounting fields
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountingConditions'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
+    put:
+      operationId: update_continuing_accounting
+      description: Edit the accounting of a proposition
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema: {}
+      responses:
+        200:
+          content:
+            application/json:
+              schema: {}
           description: ''
         '400':
           $ref: '#/components/responses/BadRequest'
@@ -4923,6 +5051,8 @@ components:
                     $ref: '#/components/schemas/ActionLink'
                   retrieve_training_choice:
                     $ref: '#/components/schemas/ActionLink'
+                  retrieve_accounting:
+                    $ref: '#/components/schemas/ActionLink'
                   destroy_proposition:
                     $ref: '#/components/schemas/ActionLink'
                 readOnly: true
@@ -4986,6 +5116,8 @@ components:
                   retrieve_specific_question:
                     $ref: '#/components/schemas/ActionLink'
                   retrieve_training_choice:
+                    $ref: '#/components/schemas/ActionLink'
+                  retrieve_accounting:
                     $ref: '#/components/schemas/ActionLink'
                   destroy_proposition:
                     $ref: '#/components/schemas/ActionLink'
@@ -7871,6 +8003,10 @@ components:
               $ref: '#/components/schemas/ActionLink'
             update_specific_question:
               $ref: '#/components/schemas/ActionLink'
+            retrieve_accounting:
+              $ref: '#/components/schemas/ActionLink'
+            update_accounting:
+              $ref: '#/components/schemas/ActionLink'
             destroy_proposition:
               $ref: '#/components/schemas/ActionLink'
             submit_proposition:
@@ -8027,6 +8163,10 @@ components:
             retrieve_specific_question:
               $ref: '#/components/schemas/ActionLink'
             update_specific_question:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_accounting:
+              $ref: '#/components/schemas/ActionLink'
+            update_accounting:
               $ref: '#/components/schemas/ActionLink'
             destroy_proposition:
               $ref: '#/components/schemas/ActionLink'

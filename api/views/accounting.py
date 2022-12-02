@@ -32,9 +32,27 @@ from admission.api import serializers
 from admission.api.schema import ResponseSpecificSchema
 from admission.api.serializers import AccountingConditionsSerializer
 from admission.ddd.admission.doctorat.preparation.commands import CompleterComptabilitePropositionCommand
-from admission.utils import get_cached_admission_perm_obj
+from admission.utils import (
+    get_cached_admission_perm_obj,
+    get_cached_general_education_admission_perm_obj,
+    get_cached_continuing_education_admission_perm_obj,
+)
 from infrastructure.messages_bus import message_bus_instance
 from osis_role.contrib.views import APIPermissionRequiredMixin
+
+
+class GeneralAccountingSchema(ResponseSpecificSchema):
+    operation_id_base = '_general_accounting'
+    serializer_mapping = {
+        'GET': serializers.AccountingConditionsSerializer,
+    }
+
+
+class ContinuingAccountingSchema(ResponseSpecificSchema):
+    operation_id_base = '_continuing_accounting'
+    serializer_mapping = {
+        'GET': serializers.AccountingConditionsSerializer,
+    }
 
 
 class AccountingSchema(ResponseSpecificSchema):
@@ -75,3 +93,42 @@ class AccountingView(APIPermissionRequiredMixin, mixins.RetrieveModelMixin, mixi
         self.get_permission_object().update_detailed_status()
         serializer = serializers.PropositionIdentityDTOSerializer(instance=result)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class BaseAccountingView(APIPermissionRequiredMixin, mixins.RetrieveModelMixin, GenericAPIView):
+    pagination_class = None
+    filter_backends = []
+
+    def get(self, request, *args, **kwargs):
+        """Get additional data conditioning the required accounting fields"""
+        candidate = self.get_permission_object().candidate
+        serializer = AccountingConditionsSerializer(instance=candidate)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def put(self, request, *args, **kwargs):
+        """Edit the accounting of a proposition"""
+        return Response(status=status.HTTP_200_OK)
+
+
+class GeneralAccountingView(BaseAccountingView):
+    name = 'general_accounting'
+    schema = GeneralAccountingSchema()
+    permission_mapping = {
+        'GET': 'admission.view_generaleducationadmission_accounting',
+        'PUT': 'admission.change_generaleducationadmission_accounting',
+    }
+
+    def get_permission_object(self):
+        return get_cached_general_education_admission_perm_obj(self.kwargs['uuid'])
+
+
+class ContinuingAccountingView(BaseAccountingView):
+    name = 'continuing_accounting'
+    schema = ContinuingAccountingSchema()
+    permission_mapping = {
+        'GET': 'admission.view_continuingeducationadmission_accounting',
+        'PUT': 'admission.change_continuingeducationadmission_accounting',
+    }
+
+    def get_permission_object(self):
+        return get_cached_continuing_education_admission_perm_obj(self.kwargs['uuid'])
