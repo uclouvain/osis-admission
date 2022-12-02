@@ -115,6 +115,7 @@ _CANDIDATE_RULESET = {
     'change_generaleducationadmission_languages': is_admission_request_author & in_progress,
     'change_generaleducationadmission_accounting': always_deny,
     'change_generaleducationadmission_specific_question': is_admission_request_author & in_progress,
+    'change_generaleducationadmission': is_admission_request_author & in_progress,
     'delete_generaleducationadmission': is_admission_request_author & in_progress,
     'submit_generaleducationadmission': is_admission_request_author & in_progress,
     # Continuing admission

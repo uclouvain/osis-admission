@@ -100,7 +100,11 @@ class CalendrierInscriptionTestCase(TestCase):
     @freezegun.freeze_time('2022-10-15')
     def test_verification_calendrier_inscription_modification_non_renseignee(self):
         # Nous sommes dans la période modification, mais le candidat n'a pas renseigné sa réponse à la modification
-        proposition = PropositionFactory(est_modification_inscription_externe=None)
+        proposition = PropositionFactory(
+            formation_id__sigle='ECGE3DP',
+            formation_id__annee=2022,
+            est_modification_inscription_externe=None,
+        )
         profil = ProfilCandidatFactory(matricule=proposition.matricule_candidat)
         self.profil_candidat_translator.profil_candidats.append(profil.identification)
         self.profil_candidat_translator.get_coordonnees = lambda m: profil.coordonnees
@@ -151,7 +155,11 @@ class CalendrierInscriptionTestCase(TestCase):
     @freezegun.freeze_time('2022-12-15')
     def test_verification_calendrier_inscription_reorientation_non_renseignee(self):
         # Nous sommes dans la période réorientation, mais le candidat n'a pas renseigné sa réponse à la réorientation
-        proposition = PropositionFactory(est_reorientation_inscription_externe=None)
+        proposition = PropositionFactory(
+            formation_id__sigle='ECGE3DP',
+            formation_id__annee=2022,
+            est_reorientation_inscription_externe=None,
+        )
         profil = ProfilCandidatFactory(matricule=proposition.matricule_candidat)
         self.profil_candidat_translator.profil_candidats.append(profil.identification)
         self.profil_candidat_translator.get_coordonnees = lambda m: profil.coordonnees

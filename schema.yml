@@ -2321,6 +2321,72 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - person
+  /propositions/general-education/{uuid}/pool-questions:
+    get:
+      operationId: retrieve_pool_questions
+      description: Get relevant pool questions
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PoolQuestions'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
+    put:
+      operationId: update_pool_questions
+      description: Update pool questions
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PoolQuestions'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PoolQuestions'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
   /propositions/general-education/{uuid}/{tab}/specific-question:
     get:
       operationId: list_general_specific_questions
@@ -8104,6 +8170,41 @@ components:
       - attestation_continuation_cycle_bachelier
       - curriculum
       - equivalence_diplome
+    PoolQuestions:
+      type: object
+      properties:
+        is_belgian_bachelor:
+          type: boolean
+          nullable: true
+        is_external_reorientation:
+          type: boolean
+          nullable: true
+        regular_registration_proof:
+          type: array
+          items:
+            type: string
+          maxItems: 1
+        is_external_modification:
+          type: boolean
+          nullable: true
+        registration_change_form:
+          type: array
+          items:
+            type: string
+          maxItems: 1
+        is_non_resident:
+          type: boolean
+          nullable: true
+        reorientation_pool_end_date:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        modification_pool_end_date:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
     ContinuingEducationPropositionDTO:
       type: object
       properties:

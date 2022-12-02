@@ -147,8 +147,8 @@ class ICalendrierInscription(interface.DomainService):
         formation_translator: 'IFormationTranslator',
     ):
         cls.verifier_residence_au_sens_du_decret(formation_id.sigle, proposition)
-        cls.verifier_reorientation_renseignee_si_eligible(type_formation, formation_id.sigle, proposition)
-        cls.verifier_modification_renseignee_si_eligible(type_formation, formation_id.sigle, proposition)
+        cls.verifier_reorientation_renseignee_si_eligible(type_formation, formation_id, proposition)
+        cls.verifier_modification_renseignee_si_eligible(type_formation, formation_id, proposition)
         cls.verifier_formation_contingentee_ouvert(formation_id.sigle, proposition, formation_id.annee)
         annee, pool = cls.determiner_pool(
             formation_id,
@@ -176,13 +176,17 @@ class ICalendrierInscription(interface.DomainService):
     def verifier_reorientation_renseignee_si_eligible(
         cls,
         program: 'TrainingType',
-        sigle: str,
+        formation_id: 'FormationIdentity',
         proposition: 'Proposition',
     ):
         """Si le candidat pourrait tomber dans le pool de reorientation et n'a pas répondu à la question"""
         if (
             program == TrainingType.BACHELOR
-            and not est_formation_contingentee_et_non_resident(sigle, proposition)
+            and not est_formation_contingentee_et_non_resident(formation_id.sigle, proposition)
+            and cls.pool_est_ouvert_pour_annee_academique(
+                AdmissionPoolExternalReorientationCalendar(),
+                formation_id.annee,
+            )
             and proposition.est_reorientation_inscription_externe is None
         ):
             raise ReorientationInscriptionExterneNonConfirmeeException()
@@ -191,13 +195,17 @@ class ICalendrierInscription(interface.DomainService):
     def verifier_modification_renseignee_si_eligible(
         cls,
         program: 'TrainingType',
-        sigle: str,
+        formation_id: 'FormationIdentity',
         proposition: 'Proposition',
     ):
         """Si le candidat pourrait tomber dans le pool de modification et n'a pas répondu à la question"""
         if (
             program == TrainingType.BACHELOR
-            and not est_formation_contingentee_et_non_resident(sigle, proposition)
+            and not est_formation_contingentee_et_non_resident(formation_id.sigle, proposition)
+            and cls.pool_est_ouvert_pour_annee_academique(
+                AdmissionPoolExternalEnrollmentChangeCalendar(),
+                formation_id.annee,
+            )
             and proposition.est_modification_inscription_externe is None
         ):
             raise ModificationInscriptionExterneNonConfirmeeException()
