@@ -60,7 +60,7 @@ class BaseCoordonneesViewSet(
 
 class CoordonneesViewSet(PersonRelatedMixin, BaseCoordonneesViewSet):  # pylint: disable=too-many-ancestors
     name = "coordonnees"
-    permission_classes = [partial(IsSelfPersonTabOrTabPermission, permission_suffix='coordinates')]
+    permission_classes = [partial(IsSelfPersonTabOrTabPermission, permission_suffix='coordinates', can_edit=True)]
 
 
 class GeneralCoordonneesView(

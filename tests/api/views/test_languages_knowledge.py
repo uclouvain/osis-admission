@@ -40,7 +40,9 @@ class LanguagesKnowledgeTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
         cls.user = CandidateFactory().person.user
+        cls.admission = DoctorateAdmissionFactory()
         cls.url = resolve_url("languages-knowledge")
+        cls.admission_url = resolve_url("languages-knowledge", uuid=cls.admission.uuid)
         cls.french_knowledge_data = {
             "certificate": [],
             "language": "FR",
@@ -73,19 +75,23 @@ class LanguagesKnowledgeTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_assert_methods_not_allowed(self):
-        self.client.force_authenticate(user=self.user)
+        self.client.force_authenticate(user=self.admission.candidate.user)
         methods_not_allowed = ["delete", "put", "patch"]
 
         for method in methods_not_allowed:
-            response = getattr(self.client, method)(self.url)
+            response = getattr(self.client, method)(self.admission_url)
             self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 
     def create_languages_knowledge(self, data):
         self.client.force_authenticate(self.user)
         return self.client.post(self.url, data)
 
+    def create_languages_knowledge_with_admission(self, data):
+        self.client.force_authenticate(self.admission.candidate.user)
+        return self.client.post(self.admission_url, data)
+
     def test_languages_knowledge_get(self):
-        self.create_languages_knowledge([self.french_knowledge_data, self.english_knowledge_data])
+        self.create_languages_knowledge_with_admission([self.french_knowledge_data, self.english_knowledge_data])
         response = self.client.get(self.url)
         self.assertDictEqual(response.json()[0], self.english_knowledge_data)
         self.assertDictEqual(response.json()[1], self.french_knowledge_data)
@@ -94,28 +100,24 @@ class LanguagesKnowledgeTestCase(APITestCase):
         response = self.create_languages_knowledge(
             [self.french_knowledge_data, self.english_knowledge_data, self.germany_knowledge_data]
         )
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.json())
-        languages_knowledge = self.user.person.languages_knowledge.all()
-        self.assertEqual(languages_knowledge.count(), 3)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_languages_knowledge_update_from_admission(self):
-        admission = DoctorateAdmissionFactory()
-        admission_url = resolve_url("languages-knowledge", uuid=admission.uuid)
-        self.client.force_authenticate(admission.candidate.user)
+        self.client.force_authenticate(self.admission.candidate.user)
         response = self.client.post(
-            admission_url,
+            self.admission_url,
             [self.french_knowledge_data, self.english_knowledge_data, self.germany_knowledge_data],
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.json())
-        languages_knowledge = admission.candidate.languages_knowledge.all()
+        languages_knowledge = self.admission.candidate.languages_knowledge.all()
         self.assertEqual(languages_knowledge.count(), 3)
 
         response = self.client.post(
-            admission_url,
+            self.admission_url,
             [self.french_knowledge_data, self.english_knowledge_data, self.germany_knowledge_data],
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.json())
-        languages_knowledge = admission.candidate.languages_knowledge.all()
+        languages_knowledge = self.admission.candidate.languages_knowledge.all()
         self.assertEqual(languages_knowledge.count(), 3)
 
     def test_languages_knowledge_create_should_fail_if_language_set_more_than_once(self):
@@ -123,7 +125,7 @@ class LanguagesKnowledgeTestCase(APITestCase):
             ValidationError,
             msg=_("You cannot fill in a language more than once, please correct the form."),
         ):
-            self.create_languages_knowledge(
+            self.create_languages_knowledge_with_admission(
                 [
                     self.french_knowledge_data,
                     self.english_knowledge_data,
@@ -134,7 +136,7 @@ class LanguagesKnowledgeTestCase(APITestCase):
 
     def test_languages_knowledge_create_should_fail_if_mandatory_languages_not_set(self):
         with self.assertRaises(ValidationError, msg=_("Mandatory languages are missing.")):
-            self.create_languages_knowledge(
+            self.create_languages_knowledge_with_admission(
                 [
                     self.english_knowledge_data,
                     self.germany_knowledge_data,

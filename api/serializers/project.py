@@ -184,6 +184,7 @@ class GeneralEducationPropositionSearchDTOSerializer(IncludedFieldsMixin, DTOSer
                 'retrieve_specific_question',
                 # Project
                 'retrieve_training_choice',
+                'retrieve_accounting',
                 # Proposition
                 'destroy_proposition',
             ]
@@ -222,6 +223,7 @@ class ContinuingEducationPropositionSearchDTOSerializer(IncludedFieldsMixin, DTO
                 'retrieve_specific_question',
                 # Project
                 'retrieve_training_choice',
+                'retrieve_accounting',
                 # Proposition
                 'destroy_proposition',
             ]
@@ -382,6 +384,8 @@ class GeneralEducationPropositionDTOSerializer(IncludedFieldsMixin, DTOSerialize
                 'update_training_choice',
                 'retrieve_specific_question',
                 'update_specific_question',
+                'retrieve_accounting',
+                'update_accounting',
                 # Proposition
                 'destroy_proposition',
                 'submit_proposition',
@@ -438,6 +442,8 @@ class ContinuingEducationPropositionDTOSerializer(IncludedFieldsMixin, DTOSerial
                 'update_training_choice',
                 'retrieve_specific_question',
                 'update_specific_question',
+                'retrieve_accounting',
+                'update_accounting',
                 # Proposition
                 'destroy_proposition',
                 'submit_proposition',
