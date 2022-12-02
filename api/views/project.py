@@ -40,25 +40,24 @@ from admission.ddd.admission.doctorat.preparation.commands import (
     ListerPropositionsSuperviseesQuery,
     SupprimerPropositionCommand,
 )
+from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import JustificationRequiseException
 from admission.ddd.admission.formation_continue.commands import (
     ListerPropositionsCandidatQuery as ListerPropositionsFormationContinueCandidatQuery,
 )
 from admission.ddd.admission.formation_generale.commands import (
     ListerPropositionsCandidatQuery as ListerPropositionsFormationGeneraleCandidatQuery,
 )
-from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import JustificationRequiseException
 from admission.utils import get_cached_admission_perm_obj
 from backoffice.settings.rest_framework.common_views import DisplayExceptionsByFieldNameAPIMixin
 from infrastructure.messages_bus import message_bus_instance
 from osis_role.contrib.views import APIPermissionRequiredMixin
+from osis_signature.models import Actor
 
 __all__ = [
     "PropositionListView",
     "SupervisedPropositionListView",
     "PropositionViewSet",
 ]
-
-from osis_signature.models import Actor
 
 
 class PropositionListSchema(ResponseSpecificSchema):

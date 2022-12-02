@@ -54,7 +54,6 @@ __all__ = [
     "PropositionSearchSerializer",
     "InitierPropositionCommandSerializer",
     "CompleterPropositionCommandSerializer",
-    "DoctorateAdmissionReadSerializer",
     "DoctoratDTOSerializer",
     "SectorDTOSerializer",
     "DoctoratePropositionDTOSerializer",
@@ -79,24 +78,6 @@ PROPOSITION_ERROR_SCHEMA = {
         },
     },
 }
-
-
-class DoctorateAdmissionReadSerializer(serializers.ModelSerializer):
-    url = serializers.ReadOnlyField(source="get_absolute_url")
-    type = serializers.ReadOnlyField(source="get_type_display")
-    candidate = serializers.StringRelatedField()
-
-    class Meta:
-        model = DoctorateAdmission
-        fields = [
-            "uuid",
-            "url",
-            "type",
-            "candidate",
-            "comment",
-            "created",
-            "modified",
-        ]
 
 
 class PropositionIdentityDTOSerializer(serializers.Serializer):
