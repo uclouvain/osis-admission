@@ -138,6 +138,11 @@ msgid ""
 "to delete the custom mail template? This cannot be undone.</p>"
 msgstr ""
 
+msgid ""
+"A candidate is considered as VIP if he/she is in double degree or if he/she "
+"benefits from an international scholarship or if he/she is Erasmus Mundus."
+msgstr ""
+
 msgid "A comment is required."
 msgstr ""
 
@@ -358,6 +363,14 @@ msgid "Already a promoter."
 msgstr ""
 
 msgid "An education type"
+msgstr ""
+
+msgid ""
+"An integer greater than zero indicating the position of the item in relation "
+"to the others. Important point: the questions are displayed together "
+"according to the field \"Display according to training\" (the elements for "
+"all trainings, then the elements for a type of training, then the elements "
+"for a specific training)."
 msgstr ""
 
 msgid "Annex 25 or 26 for refugees and stateless persons"
@@ -1089,10 +1102,9 @@ msgstr ""
 msgid "Edit the publication of this conference"
 msgstr ""
 
-#, fuzzy
-#| msgid "Publication"
+msgctxt "admission"
 msgid "Education"
-msgstr "Publication"
+msgstr ""
 
 msgid "Email"
 msgstr ""
@@ -1203,6 +1215,22 @@ msgid "Fondation Mont Godinne"
 msgstr ""
 
 msgid "Fondation St Luc"
+msgstr ""
+
+msgid ""
+"For a message, it is possible to specify the CSS class that we want to apply "
+"on it by using the \"CLASSE_CSS\" property. This is a string which can "
+"contain several classes, separated with a space. <a href=\"https://"
+"getbootstrap.com/docs/3.3/css/#helper-classes\">Bootstrap classes</a> can be "
+"used here.<br>Full example: <code>{\"CLASSE_CSS\": \"bg-info\"}</code>."
+"<br><br>For a text field, it is possible to specify if the user can enter a "
+"short (\"COURT\", by default) or a long (\"LONG\") text by using the "
+"\"TAILLE_TEXTE\" property.<br>Full example: <code>{\"TAILLE_TEXTE\": \"LONG"
+"\"}</code>.<br><br>For a file field, it is possible to specify the maximum "
+"number (\"NOMBRE_MAX_DOCUMENT\", default to 1) and the MIME types "
+"(\"TYPES_MIME_FICHIER\") of the files that can be uploaded.<br>Full example: "
+"<code>{\"TYPES_MIME_FICHIER\": [\"application/pdf\"], \"NOMBRE_MAX_DOCUMENTS"
+"\": 3}</code>."
 msgstr ""
 
 msgid "Form item"
@@ -1373,6 +1401,9 @@ msgstr ""
 msgid "In review"
 msgstr ""
 
+msgid "Indicates if the item will be displayed to the user or not."
+msgstr ""
+
 msgid "Institute email"
 msgstr ""
 
@@ -1416,6 +1447,9 @@ msgid "Invitations have not been sent"
 msgstr ""
 
 msgid "Invitations must have been sent"
+msgstr ""
+
+msgid "Is active?"
 msgstr ""
 
 msgid "Is an external modification"
@@ -1973,6 +2007,11 @@ msgstr ""
 msgid "Place"
 msgstr ""
 
+msgid ""
+"Placeholder text for Text form elements. Not used for Document and Message "
+"elements."
+msgstr ""
+
 msgid "Plain text"
 msgstr ""
 
@@ -2175,6 +2214,16 @@ msgid "Publication status"
 msgstr ""
 
 msgid "Published"
+msgstr ""
+
+msgid ""
+"Question label for Document and Text form elements. Not used for Message "
+"elements."
+msgstr ""
+
+msgid ""
+"Question tooltip text for Document and Text form elements. Content of the "
+"message to be displayed for Message elements."
 msgstr ""
 
 msgid "REFUSED"
@@ -2565,6 +2614,11 @@ msgstr "To be verified"
 msgid "Tab"
 msgstr ""
 
+msgid ""
+"Takes into account the language of secondary and higher education. Studies "
+"in Belgium are considered as both French and English studies."
+msgstr ""
+
 msgid "Text"
 msgstr ""
 
@@ -2904,10 +2958,8 @@ msgstr ""
 msgid "Type of publication"
 msgstr ""
 
-#, fuzzy
-#| msgid "Courses and training"
 msgid "Type of training"
-msgstr "Courses and training"
+msgstr ""
 
 msgid "UCLOUVAIN_ASSISTANT"
 msgstr ""
@@ -3083,6 +3135,9 @@ msgstr ""
 msgid "Zip code"
 msgstr ""
 
+msgid "academic year"
+msgstr ""
+
 msgid "actions"
 msgstr ""
 
@@ -3090,6 +3145,9 @@ msgid "created"
 msgstr ""
 
 msgid "dd/mm/yyyy"
+msgstr ""
+
+msgid "education group type"
 msgstr ""
 
 #, python-format

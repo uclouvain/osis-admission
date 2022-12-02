@@ -23,6 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from collections import defaultdict
 from os.path import dirname
 
 import uuid as uuid
@@ -32,7 +33,7 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Q
-from django.utils.translation import gettext_lazy as _, ngettext_lazy
+from django.utils.translation import gettext_lazy as _, ngettext_lazy, pgettext
 from osis_document.utils import generate_filename, is_uuid
 
 from admission.constants import FIELD_REQUIRED_MESSAGE
@@ -66,6 +67,12 @@ def is_valid_translated_json_field(value):
                     _('This field must contain a translation for each of the following languages: %(languages)s.')
                     % {'languages': str(TRANSLATION_LANGUAGES)}
                 )
+
+
+def is_completed_translated_json_field(value):
+    if not value:
+        return False
+    return all(value.get(language) for language in TRANSLATION_LANGUAGES)
 
 
 class TranslatedJSONField(models.JSONField):
@@ -106,23 +113,43 @@ class AdmissionFormItem(models.Model):
     title = TranslatedJSONField(
         blank=True,
         verbose_name=_('Title'),
+        help_text=_('Question label for Document and Text form elements. Not used for Message elements.'),
     )
     text = TranslatedJSONField(
         blank=True,
         verbose_name=_('Text'),
+        help_text=_(
+            'Question tooltip text for Document and Text form elements. Content of the message to be displayed for '
+            'Message elements.'
+        ),
     )
     help_text = TranslatedJSONField(
         blank=True,
         verbose_name=_('Help text'),
+        help_text=_('Placeholder text for Text form elements. Not used for Document and Message elements.'),
     )
     active = models.BooleanField(
         default=True,
         verbose_name=_('Active'),
+        help_text=_('Indicates if the item will be displayed to the user or not.'),
     )
     configuration = models.JSONField(
         blank=True,
         default=dict,
         verbose_name=_('Configuration'),
+        help_text=_(
+            'For a message, it is possible to specify the CSS class that we want to apply on it by using the '
+            '"CLASSE_CSS" property. This is a string which can contain several classes, separated with a space. '
+            '<a href="https://getbootstrap.com/docs/3.3/css/#helper-classes">Bootstrap classes</a> can be used '
+            'here.<br>Full example: <code>{"CLASSE_CSS": "bg-info"}</code>.<br><br>'
+            'For a text field, it is possible to specify if the user can enter a short ("COURT", by default) or a '
+            'long ("LONG") text by using the "TAILLE_TEXTE" property.<br>'
+            'Full example: <code>{"TAILLE_TEXTE": "LONG"}</code>.<br><br>'
+            'For a file field, it is possible to specify the maximum number '
+            '("NOMBRE_MAX_DOCUMENT", default to 1) and the MIME types ("TYPES_MIME_FICHIER") of the files '
+            'that can be uploaded.<br>'
+            'Full example: <code>{"TYPES_MIME_FICHIER": ["application/pdf"], "NOMBRE_MAX_DOCUMENTS": 3}</code>.'
+        ),
     )
 
     def __str__(self):
@@ -148,13 +175,14 @@ class AdmissionFormItem(models.Model):
     valid_form_item_text_types = set(TypeChampTexteFormulaire.get_names())
 
     def clean(self):
-        config_errors = []
+        errors = defaultdict(list)
+
         invalid_config_keys = [
             key for key in self.configuration if key not in self.config_allowed_properties[self.type]
         ]
 
         if invalid_config_keys:
-            config_errors.append(
+            errors['configuration'].append(
                 ngettext_lazy(
                     'Invalid property: %(config_params)s',
                     'Invalid properties: %(config_params)s',
@@ -165,27 +193,41 @@ class AdmissionFormItem(models.Model):
 
         if self.type == TypeItemFormulaire.MESSAGE.name:
             css_class = self.configuration.get(CleConfigurationItemFormulaire.CLASSE_CSS.name)
+
             if css_class is not None and not isinstance(css_class, str):
-                config_errors.append(_('The css class must be a string.'))
+                errors['configuration'].append(_('The css class must be a string.'))
+
+            if not is_completed_translated_json_field(self.text):
+                errors['text'].append(FIELD_REQUIRED_MESSAGE)
 
         elif self.type == TypeItemFormulaire.TEXTE.name:
             text_size = self.configuration.get(CleConfigurationItemFormulaire.TAILLE_TEXTE.name)
+
             if text_size is not None and text_size not in self.valid_form_item_text_types:
-                config_errors.append(
+                errors['configuration'].append(
                     _('The text size must be one of the following values: %(values)s.')
                     % {'values': str(self.valid_form_item_text_types)}
                 )
 
+            if not is_completed_translated_json_field(self.title):
+                errors['title'].append(FIELD_REQUIRED_MESSAGE)
+
         elif self.type == TypeItemFormulaire.DOCUMENT.name:
             max_documents = self.configuration.get(CleConfigurationItemFormulaire.NOMBRE_MAX_DOCUMENTS.name)
-            if max_documents is not None and (not isinstance(max_documents, int) or max_documents < 1):
-                config_errors.append(_('The maximum number of documents must be a positive number.'))
-            mimetypes = self.configuration.get(CleConfigurationItemFormulaire.TYPES_MIME_FICHIER.name)
-            if mimetypes is not None and (not isinstance(mimetypes, list) or not mimetypes):
-                config_errors.append(_('The mimetypes must be a list with at least one mimetype.'))
 
-        if config_errors:
-            raise ValidationError({'configuration': config_errors})
+            if max_documents is not None and (not isinstance(max_documents, int) or max_documents < 1):
+                errors['configuration'].append(_('The maximum number of documents must be a positive number.'))
+
+            mimetypes = self.configuration.get(CleConfigurationItemFormulaire.TYPES_MIME_FICHIER.name)
+
+            if mimetypes is not None and (not isinstance(mimetypes, list) or not mimetypes):
+                errors['configuration'].append(_('The mimetypes must be a list with at least one mimetype.'))
+
+            if not is_completed_translated_json_field(self.title):
+                errors['title'].append(FIELD_REQUIRED_MESSAGE)
+
+        if errors:
+            raise ValidationError(errors)
 
 
 class AdmissionFormItemInstantiationManager(models.Manager):
@@ -317,6 +359,12 @@ class AdmissionFormItemInstantiation(models.Model):
     )
     weight = models.PositiveIntegerField(
         verbose_name=_('Weight'),
+        help_text=_(
+            'An integer greater than zero indicating the position of the item in relation to the others. Important '
+            'point: the questions are displayed together according to the field "Display according to training" (the '
+            'elements for all trainings, then the elements for a type of training, then the elements for a specific '
+            'training).'
+        ),
     )
     required = models.BooleanField(
         default=False,
@@ -339,7 +387,7 @@ class AdmissionFormItemInstantiation(models.Model):
         null=True,
         on_delete=models.CASCADE,
         to='base.EducationGroup',
-        verbose_name=_('Education'),
+        verbose_name=pgettext('admission', 'Education'),
     )
     candidate_nationality = models.CharField(
         choices=CritereItemFormulaireNationaliteCandidat.choices(),
@@ -352,12 +400,20 @@ class AdmissionFormItemInstantiation(models.Model):
         default=CritereItemFormulaireLangueEtudes.TOUS.name,
         max_length=30,
         verbose_name=_('Study language'),
+        help_text=_(
+            'Takes into account the language of secondary and higher education. Studies in Belgium are considered as '
+            'both French and English studies.'
+        ),
     )
     vip_candidate = models.CharField(
         choices=CritereItemFormulaireVIP.choices(),
         default=CritereItemFormulaireVIP.TOUS.name,
         max_length=30,
         verbose_name=_('VIP candidate'),
+        help_text=_(
+            'A candidate is considered as VIP if he/she is in double degree or if he/she benefits from an '
+            'international scholarship or if he/she is Erasmus Mundus.'
+        ),
     )
     tab = models.CharField(
         choices=Onglets.choices(),

@@ -26,7 +26,7 @@
 
 from django.contrib import admin
 from django import forms
-from django.utils.translation import gettext_lazy as _
+from django.utils.translation import gettext_lazy as _, pgettext
 
 from admission.auth.roles.adre import AdreSecretary
 from admission.auth.roles.ca_member import CommitteeMember
@@ -51,6 +51,7 @@ from admission.contrib.models.form_item import AdmissionFormItem, AdmissionFormI
 from admission.ddd.parcours_doctoral.formation.domain.model.enums import CategorieActivite
 from osis_mail_template.admin import MailTemplateAdmin
 
+from base.models.academic_year import AcademicYear
 from base.models.education_group_type import EducationGroupType
 from base.models.enums.education_group_categories import Categories
 from osis_role.contrib.admin import RoleModelAdmin
@@ -157,6 +158,43 @@ class ScholarshipAdmin(admin.ModelAdmin):
     ]
 
 
+FORM_ITEM_MIN_YEAR = 2022
+
+
+class EducationGroupTypeListFilter(admin.SimpleListFilter):
+    title = _('education group type')
+
+    parameter_name = 'education_group_type_id'
+
+    def lookups(self, request, model_admin):
+        return [
+            (education.id, str(education))
+            for education in EducationGroupType.objects.filter(
+                category=Categories.TRAINING.name
+            ).order_by_translated_name()
+        ]
+
+    def queryset(self, request, queryset):
+        value = self.value()
+        return queryset.filter(education_group_type__pk=value) if value else queryset
+
+
+class AcademicYearListFilter(admin.SimpleListFilter):
+    title = _('academic year')
+
+    parameter_name = 'academic_year_id'
+
+    def lookups(self, request, model_admin):
+        return [
+            (academic_year.id, str(academic_year))
+            for academic_year in AcademicYear.objects.filter(year__gte=FORM_ITEM_MIN_YEAR)
+        ]
+
+    def queryset(self, request, queryset):
+        value = self.value()
+        return queryset.filter(academic_year__pk=value) if value else queryset
+
+
 class AdmissionFormItemAdmin(admin.ModelAdmin):
     list_display = [
         'id',
@@ -175,14 +213,13 @@ class AdmissionFormItemAdmin(admin.ModelAdmin):
 
 
 class AdmissionFormItemInstantiationForm(forms.ModelForm):
-    education_group_type = forms.ModelChoiceField(
-        queryset=EducationGroupType.objects.filter(category=Categories.TRAINING.name),
-        required=False,
-    )
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['form_item'].queryset = AdmissionFormItem.objects.filter(active=True)
+        self.fields['form_item'].queryset = AdmissionFormItem.objects.filter(active=True).order_by('internal_label')
+        self.fields['academic_year'].queryset = AcademicYear.objects.filter(year__gte=FORM_ITEM_MIN_YEAR)
+        self.fields['education_group_type'].queryset = EducationGroupType.objects.filter(
+            category=Categories.TRAINING.name
+        ).order_by_translated_name()
 
     class Meta:
         model = AdmissionFormItemInstantiation
@@ -193,11 +230,12 @@ class AdmissionFormItemInstantiationAdmin(admin.ModelAdmin):
     list_display = [
         'academic_year',
         'form_item',
+        'is_active',
         'weight',
         'required',
         'display_according_education',
         'education_group_type',
-        'education_group',
+        'education_group_acronym',
         'candidate_nationality',
         'study_language',
         'vip_candidate',
@@ -208,15 +246,24 @@ class AdmissionFormItemInstantiationAdmin(admin.ModelAdmin):
         'required',
         'form_item__active',
         'display_according_education',
-        'education_group_type',
+        EducationGroupTypeListFilter,
         'tab',
         'candidate_nationality',
         'study_language',
         'vip_candidate',
-        'academic_year',
+        AcademicYearListFilter,
     ]
     raw_id_fields = ['education_group']
     form = AdmissionFormItemInstantiationForm
+
+    @admin.display(boolean=True, description=_('Is active?'))
+    def is_active(self, obj):
+        return obj.form_item.active
+
+    @admin.display(description=pgettext('admission', 'Education'))
+    def education_group_acronym(self, obj):
+        if obj.education_group_id:
+            return obj.education_group.most_recent_acronym
 
 
 admin.site.register(DoctorateAdmission, DoctorateAdmissionAdmin)
