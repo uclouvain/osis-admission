@@ -32,22 +32,14 @@ from admission.ddd.admission.doctorat.preparation.domain.service.initier_proposi
 
 
 class IsSelfPersonTabOrTabPermission(BasePermission):
-    def __init__(self, permission_suffix) -> None:
+    def __init__(self, permission_suffix, can_edit=False) -> None:
         super().__init__()
         self.permission_suffix = permission_suffix
+        self.can_edit = can_edit
 
     def has_permission(self, request, view):
         # No object means we are reading/editing our own profile.
-        # This is only allowed if the user does not have an admission in progress.
-        if not hasattr(request.user.person, 'has_ongoing_propositions'):
-            setattr(
-                request.user.person,
-                'has_ongoing_propositions',
-                DoctorateAdmission.objects.filter(candidate=request.user.person)
-                .exclude(status__in=[ChoixStatutProposition.CANCELLED.name, ChoixStatutProposition.IN_PROGRESS.name])
-                .exists(),
-            )
-        return not request.user.person.has_ongoing_propositions
+        return request.method in SAFE_METHODS or self.can_edit
 
     def has_object_permission(self, request, view, obj):
         if request.method in SAFE_METHODS:

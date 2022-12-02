@@ -150,11 +150,11 @@ class BelgianHighSchoolDiplomaTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_assert_methods_not_allowed(self):
-        self.client.force_authenticate(user=self.candidate_user_without_admission)
+        self.client.force_authenticate(user=self.candidate_user)
         methods_not_allowed = ["delete", "post", "patch"]
 
         for method in methods_not_allowed:
-            response = getattr(self.client, method)(self.agnostic_url)
+            response = getattr(self.client, method)(self.doctorate_admission_url)
             self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 
     def test_diploma_get_with_candidate(self):
@@ -315,7 +315,7 @@ class BelgianHighSchoolDiplomaTestCase(APITestCase):
         self.create_belgian_diploma_with_doctorate_admission(self.diploma_data)
         self.client.force_authenticate(user=self.no_role_user)
         response = self.client.put(self.agnostic_url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         response = self.client.put(self.doctorate_admission_url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
@@ -329,7 +329,7 @@ class BelgianHighSchoolDiplomaTestCase(APITestCase):
         self.create_belgian_diploma_with_doctorate_admission(self.diploma_data)
         self.client.force_authenticate(user=self.cdd_manager_user)
         response = self.client.put(self.agnostic_url, self.diploma_updated_data)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         response = self.client.put(self.doctorate_admission_url, self.diploma_updated_data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -356,8 +356,10 @@ class BelgianHighSchoolDiplomaTestCase(APITestCase):
 class ForeignHighSchoolDiplomaTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.user = CandidateFactory().person.user
+        cls.admission = DoctorateAdmissionFactory()
+        cls.user = cls.admission.candidate.user
         cls.url = reverse("secondary-studies")
+        cls.admission_url = resolve_url("secondary-studies", uuid=cls.admission.uuid)
         cls.academic_year = AcademicYearFactory(current=True)
         cls.language = LanguageFactory(code="FR")
         cls.country = CountryFactory(iso_code="FR")
@@ -372,7 +374,7 @@ class ForeignHighSchoolDiplomaTestCase(APITestCase):
 
     def create_foreign_diploma(self, data):
         self.client.force_authenticate(self.user)
-        return self.client.put(self.url, data)
+        return self.client.put(self.admission_url, data)
 
     def test_user_not_logged_assert_not_authorized(self):
         self.client.force_authenticate(user=None)
@@ -385,7 +387,7 @@ class ForeignHighSchoolDiplomaTestCase(APITestCase):
         methods_not_allowed = ["delete", "post", "patch"]
 
         for method in methods_not_allowed:
-            response = getattr(self.client, method)(self.url)
+            response = getattr(self.client, method)(self.admission_url)
             self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 
     def test_diploma_get(self):
@@ -431,7 +433,7 @@ class ForeignHighSchoolDiplomaTestCase(APITestCase):
             ForeignHighSchoolDiploma.objects.get(person__user_id=self.user.pk).other_linguistic_regime,
             "Français",
         )
-        self.client.put(self.url, {})
+        self.client.put(self.admission_url, {})
         response = self.client.get(self.url)
         self.assertEqual(
             response.json(),
@@ -448,8 +450,10 @@ class ForeignHighSchoolDiplomaTestCase(APITestCase):
 class HighSchoolDiplomaAlternativeTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.user = CandidateFactory().person.user
+        cls.admission = DoctorateAdmissionFactory()
+        cls.user = cls.admission.candidate.user
         cls.url = reverse("secondary-studies")
+        cls.admission_url = resolve_url("secondary-studies", uuid=cls.admission.uuid)
         cls.file_uuid = '4bdffb42-552d-415d-9e4c-725f10dce228'
         cls.high_school_diploma_alternative_data = {
             "high_school_diploma_alternative": {
@@ -473,7 +477,7 @@ class HighSchoolDiplomaAlternativeTestCase(APITestCase):
 
     def create_high_school_diploma_alternative(self, data):
         self.client.force_authenticate(self.user)
-        return self.client.put(self.url, data)
+        return self.client.put(self.admission_url, data)
 
     def test_diploma_get(self):
         self.create_high_school_diploma_alternative(self.high_school_diploma_alternative_data)
@@ -526,7 +530,7 @@ class HighSchoolDiplomaAlternativeTestCase(APITestCase):
             HighSchoolDiplomaAlternative.objects.get(person__user_id=self.user.pk).first_cycle_admission_exam,
             [UUID(self.file_uuid)],
         )
-        self.client.put(self.url, {})
+        self.client.put(self.admission_url, {})
         response = self.client.get(self.url)
         self.assertEqual(
             response.json(),

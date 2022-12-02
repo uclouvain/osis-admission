@@ -115,9 +115,12 @@ class GeneralPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase):
                 'submit_proposition',
                 'retrieve_specific_question',
                 'update_specific_question',
+                'retrieve_accounting',
                 'destroy_proposition',
             ],
-            forbidden_actions=[],
+            forbidden_actions=[
+                'update_accounting',
+            ],
         )
 
     def test_get_proposition_other_candidate_is_forbidden(self):
@@ -209,9 +212,12 @@ class ContinuingPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase
                 'submit_proposition',
                 'retrieve_specific_question',
                 'update_specific_question',
+                'retrieve_accounting',
                 'destroy_proposition',
             ],
-            forbidden_actions=[],
+            forbidden_actions=[
+                'update_accounting',
+            ],
         )
 
     def test_get_proposition_other_candidate_is_forbidden(self):
