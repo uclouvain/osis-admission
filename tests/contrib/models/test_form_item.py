@@ -53,8 +53,15 @@ class AdmissionFormItemTestCase(TestCase):
 
     @classmethod
     def setUpTestData(cls):
+        json_value = {
+            'en': 'Value',
+            'fr-be': 'Valeur',
+        }
         cls.default_form_item_properties = {
             'internal_label': 'field_1',
+            'title': json_value,
+            'text': json_value,
+            'help_text': json_value,
         }
 
     def test_is_valid_translated_json_field(self):
@@ -149,16 +156,63 @@ class AdmissionFormItemTestCase(TestCase):
         except ValidationError as error:
             self.fail(_('The configuration is not valid for a message: ') + error.message)
 
-    def test_text_is_valid_if_no_config(self):
-        try:
-            first_field = AdmissionFormItem.objects.create(
-                type=TypeItemFormulaire.TEXTE.name,
-                configuration={},
-                **self.default_form_item_properties,
-            )
+    def test_message_is_not_valid_if_missing_text_for_a_language(self):
+        first_field = AdmissionFormItem.objects.create(
+            internal_label='field_1',
+            type=TypeItemFormulaire.MESSAGE.name,
+            text={
+                'fr-be': 'Valeur',
+            },
+        )
+        with self.assertRaises(ValidationError) as error:
             first_field.clean()
-        except ValidationError as error:
-            self.fail(_('The configuration is not valid for a text field: ') + error.message)
+            self.assertIn(
+                ValidationError(FIELD_REQUIRED_MESSAGE),
+                error.error_dict['text'],
+            )
+
+    def test_message_is_not_valid_if_missing_text_for_all_languages(self):
+        first_field = AdmissionFormItem.objects.create(
+            internal_label='field_1',
+            type=TypeItemFormulaire.MESSAGE.name,
+            text={},
+        )
+        with self.assertRaises(ValidationError) as error:
+            first_field.clean()
+            self.assertIn(
+                ValidationError(FIELD_REQUIRED_MESSAGE),
+                error.error_dict['text'],
+            )
+
+    def test_text_is_not_valid_if_missing_title_for_a_language(self):
+        first_field = AdmissionFormItem.objects.create(
+            internal_label='field_1',
+            type=TypeItemFormulaire.TEXTE.name,
+            title={
+                'fr-be': 'Valeur',
+            },
+        )
+        with self.assertRaises(ValidationError) as error:
+            first_field.clean()
+            self.assertIn(
+                ValidationError(FIELD_REQUIRED_MESSAGE),
+                error.error_dict['title'],
+            )
+
+    def test_document_is_not_valid_if_missing_title_for_a_language(self):
+        first_field = AdmissionFormItem.objects.create(
+            internal_label='field_1',
+            type=TypeItemFormulaire.TEXTE.name,
+            title={
+                'fr-be': 'Valeur',
+            },
+        )
+        with self.assertRaises(ValidationError) as error:
+            first_field.clean()
+            self.assertIn(
+                ValidationError(FIELD_REQUIRED_MESSAGE),
+                error.error_dict['message'],
+            )
 
     def test_document_is_valid_if_no_config(self):
         try:

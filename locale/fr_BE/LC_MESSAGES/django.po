@@ -181,6 +181,13 @@ msgstr ""
 "vous sûr de vouloir supprimer ce template d'email personnalisé ? Cette "
 "action est irréversible.</p>"
 
+msgid ""
+"A candidate is considered as VIP if he/she is in double degree or if he/she "
+"benefits from an international scholarship or if he/she is Erasmus Mundus."
+msgstr ""
+"Un candidat est considéré VIP s'il est en double diplomation ou s'il "
+"bénéficie d'une bourse internationale ou s'il est Erasmus Mundus."
+
 msgid "A comment is required."
 msgstr "Un commentaire est requis."
 
@@ -406,6 +413,19 @@ msgstr "Déjà promoteur."
 
 msgid "An education type"
 msgstr "Un type de formation"
+
+msgid ""
+"An integer greater than zero indicating the position of the item in relation "
+"to the others. Important point: the questions are displayed together "
+"according to the field \"Display according to training\" (the elements for "
+"all trainings, then the elements for a type of training, then the elements "
+"for a specific training)."
+msgstr ""
+"Entier supérieur à zéro indiquant la position de l’élément par rapport aux "
+"autres. Point important : les questions sont affichées groupées suivant le "
+"champ \"Affichage selon la formation\" (les éléments pour toutes les "
+"formations, puis les éléments pour un type de formation, puis les éléments "
+"pour une formation spécifique)."
 
 msgid "Annex 25 or 26 for refugees and stateless persons"
 msgstr "Annexe 25 ou 26 pour les réfugiés et apatrides"
@@ -1148,6 +1168,7 @@ msgstr "Modifier la communication de ce séminaire"
 msgid "Edit the publication of this conference"
 msgstr "Modifier la publication de cette conférence"
 
+msgctxt "admission"
 msgid "Education"
 msgstr "Formation"
 
@@ -1267,6 +1288,36 @@ msgstr "Fondation Mont Godinne"
 
 msgid "Fondation St Luc"
 msgstr "Fondation St Luc"
+
+msgid ""
+"For a message, it is possible to specify the CSS class that we want to apply "
+"on it by using the \"CLASSE_CSS\" property. This is a string which can "
+"contain several classes, separated with a space. <a href=\"https://"
+"getbootstrap.com/docs/3.3/css/#helper-classes\">Bootstrap classes</a> can be "
+"used here.<br>Full example: <code>{\"CLASSE_CSS\": \"bg-info\"}</code>."
+"<br><br>For a text field, it is possible to specify if the user can enter a "
+"short (\"COURT\", by default) or a long (\"LONG\") text by using the "
+"\"TAILLE_TEXTE\" property.<br>Full example: <code>{\"TAILLE_TEXTE\": \"LONG"
+"\"}</code>.<br><br>For a file field, it is possible to specify the maximum "
+"number (\"NOMBRE_MAX_DOCUMENT\", default to 1) and the MIME types "
+"(\"TYPES_MIME_FICHIER\") of the files that can be uploaded.<br>Full example: "
+"<code>{\"TYPES_MIME_FICHIER\": [\"application/pdf\"], \"NOMBRE_MAX_DOCUMENTS"
+"\": 3}</code>."
+msgstr ""
+"Pour un message, il est possible de spécifier la classe CSS qu'on veut y "
+"appliquer en utilisant la propriété \"CLASSE_CSS\". C'est une chaîne de "
+"caractères qui peut contenir plusieurs classes, séparées par un espace. Des "
+"<a href=\"https://getbootstrap.com/docs/3.3/css/#helper-classes\">classes "
+"Bootstrap</a> peuvent être utilisées ici.<br>Exemple complet : "
+"<code>{\"CLASSE_CSS\": \"bg-info\"}</code>.<br><br>Pour un champ texte, il "
+"est possible de spécifier si l'utilisateur peut saisir un texte court "
+"(\"COURT\", par défaut) ou long (\"LONG\") en utilisant la propriété "
+"\"TAILLE_TEXTE\".<br>Exemple complet : <code>{\"TAILLE_TEXTE\": \"LONG\"}</"
+"code>.<br><br>Pour un champ fichier, il est possible de spécifier le nombre "
+"maximum (\"NOMBRE_MAX_DOCUMENT\", défaut à 1) et les types MIME "
+"(\"TYPES_MIME_FICHIER\") des fichiers téléversables.<br>Exemple complet : "
+"<code>{\"TYPES_MIME_FICHIER\": [\"application/pdf\"], \"NOMBRE_MAX_DOCUMENTS"
+"\": 3}</code>."
 
 msgid "Form item"
 msgstr "Élément de formulaire"
@@ -1467,6 +1518,9 @@ msgstr "En présentiel"
 msgid "In review"
 msgstr "En révision"
 
+msgid "Indicates if the item will be displayed to the user or not."
+msgstr "Indique si l'élément sera affiché ou non à l'utilisateur."
+
 msgid "Institute email"
 msgstr "Email de l'institut"
 
@@ -1513,6 +1567,9 @@ msgstr "Les invitations n'ont pas été envoyées"
 
 msgid "Invitations must have been sent"
 msgstr "Les invitations doivent avoir été envoyées"
+
+msgid "Is active?"
+msgstr "Actif ?"
 
 msgid "Is an external modification"
 msgstr "Est une modification externe"
@@ -2139,6 +2196,13 @@ msgstr "Doctorat déjà réalisé"
 msgid "Place"
 msgstr "Lieu-dit"
 
+msgid ""
+"Placeholder text for Text form elements. Not used for Document and Message "
+"elements."
+msgstr ""
+"Texte du placeholder pour les éléments de formulaire de type Texte. N'est "
+"pas utilisé pour les éléments de type Document et Message."
+
 msgid "Plain text"
 msgstr "Texte brut"
 
@@ -2364,6 +2428,21 @@ msgstr "Statut de publication"
 
 msgid "Published"
 msgstr "Publié"
+
+msgid ""
+"Question label for Document and Text form elements. Not used for Message "
+"elements."
+msgstr ""
+"Texte du placeholder pour les éléments de formulaire de type Texte. N'est "
+"pas utilisé pour les éléments de type Document et Message."
+
+msgid ""
+"Question tooltip text for Document and Text form elements. Content of the "
+"message to be displayed for Message elements."
+msgstr ""
+"Texte du tooltip de la question pour les éléments de formulaire de type "
+"Document et Texte. Contenu du message à afficher pour les éléments de type "
+"Message."
 
 msgid "REFUSED"
 msgstr "Refusé"
@@ -2774,6 +2853,14 @@ msgstr "Pour vérification"
 msgid "Tab"
 msgstr "Onglet"
 
+msgid ""
+"Takes into account the language of secondary and higher education. Studies "
+"in Belgium are considered as both French and English studies."
+msgstr ""
+"Prend en considération la langue des études secondaires et des études "
+"supérieures. Des études en Belgique sont considérées comme des études en "
+"français et en anglais."
+
 msgid "Text"
 msgstr "Texte"
 
@@ -2839,9 +2926,6 @@ msgstr "La configuration n'est pas valide pour un document : "
 
 msgid "The configuration is not valid for a message: "
 msgstr "La configuration n'est pas valide pour un message : "
-
-msgid "The configuration is not valid for a text field: "
-msgstr "La configuration n'est pas valide pour un champ texte : "
 
 msgid "The configuration is not valid for a text: "
 msgstr "La configuration n'est pas valide pour un texte : "
@@ -3348,6 +3432,9 @@ msgstr "Votre participation à l'événement"
 msgid "Zip code"
 msgstr "Code postal"
 
+msgid "academic year"
+msgstr "année académique"
+
 msgid "actions"
 msgstr "actions"
 
@@ -3356,6 +3443,9 @@ msgstr "créé"
 
 msgid "dd/mm/yyyy"
 msgstr "jj/mm/aaaa"
+
+msgid "education group type"
+msgstr "type de formation"
 
 #, python-format
 msgid "from %(start)s to %(end)s"
