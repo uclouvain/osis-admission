@@ -24,7 +24,7 @@
 #
 # ##############################################################################
 import datetime
-from typing import List, Optional
+from typing import List, Optional, Dict
 
 import attr
 
@@ -58,6 +58,7 @@ class CompleterPropositionCommand(interface.CommandRequest):
     type_contrat_travail: Optional[str] = ''
     eft: Optional[int] = None
     bourse_recherche: Optional[str] = ''
+    autre_bourse_recherche: Optional[str] = ''
     bourse_date_debut: Optional[datetime.date] = None
     bourse_date_fin: Optional[datetime.date] = None
     bourse_preuve: List[str] = attr.Factory(list)
@@ -288,3 +289,13 @@ class ModifierTypeAdmissionCommand(interface.CommandRequest):
     justification: Optional[str] = ''
 
     bourse_erasmus_mundus: Optional[str] = ''
+
+    reponses_questions_specifiques: Dict = attr.Factory(dict)
+
+
+@attr.dataclass(frozen=True, slots=True)
+class CompleterCurriculumCommand(interface.CommandRequest):
+    uuid_proposition: str
+
+    curriculum: List[str] = attr.Factory(list)
+    reponses_questions_specifiques: Dict = attr.Factory(dict)

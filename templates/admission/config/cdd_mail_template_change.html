@@ -27,7 +27,7 @@
 
 {% block breadcrumb %}
   <li>{% trans 'Admission' %}</li>
-  <li><a href="{% url 'admission:config:cdd_mail_template:list' %}">{% trans 'Custom mail templates' %}</a></li>
+  <li><a href="{% url 'admission:config:cdd-mail-template:list' %}">{% trans 'Custom mail templates' %}</a></li>
   {% if view.kwargs.pk %}
     <li class="active">{{ forms.1.instance.name }}</li>
   {% else %}
@@ -75,7 +75,7 @@
         <span class="glyphicon glyphicon-save" aria-hidden="true"></span>
         {% trans "Save and view result" %}
       </button>
-      <a href="{% url 'admission:config:cdd_mail_template:list' %}" class="btn btn-default">
+      <a href="{% url 'admission:config:cdd-mail-template:list' %}" class="btn btn-default">
         <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
         {% trans "Cancel" %}
       </a>

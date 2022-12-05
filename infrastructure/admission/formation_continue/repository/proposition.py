@@ -23,7 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import Optional, List
+from typing import List, Optional
 
 from django.conf import settings
 from django.utils.translation import get_language
@@ -93,6 +93,9 @@ class PropositionRepository(IPropositionRepository):
                 'candidate': candidate,
                 'training': training,
                 'status': entity.statut.name,
+                'specific_question_answers': entity.reponses_questions_specifiques,
+                'curriculum': entity.curriculum,
+                'diploma_equivalence': entity.equivalence_diplome,
             },
         )
 
@@ -110,10 +113,13 @@ class PropositionRepository(IPropositionRepository):
             statut=ChoixStatutProposition[admission.status],
             creee_le=admission.created,
             modifiee_le=admission.modified,
-            formation_id=FormationIdentityBuilder.build_from_uuid(
+            formation_id=FormationIdentityBuilder.build(
                 sigle=admission.training.acronym,
                 annee=admission.training.academic_year.year,
             ),
+            reponses_questions_specifiques=admission.specific_question_answers,
+            curriculum=admission.curriculum,
+            equivalence_diplome=admission.diploma_equivalence,
         )
 
     @classmethod
@@ -131,8 +137,12 @@ class PropositionRepository(IPropositionRepository):
                 if get_language() == settings.LANGUAGE_CODE
                 else admission.training.title_english,
                 campus=admission.teaching_campus or '',
+                type=admission.training.education_group_type.name
             ),
             matricule_candidat=admission.candidate.global_id,
             prenom_candidat=admission.candidate.first_name,
             nom_candidat=admission.candidate.last_name,
+            reponses_questions_specifiques=admission.specific_question_answers,
+            curriculum=admission.curriculum,
+            equivalence_diplome=admission.diploma_equivalence,
         )

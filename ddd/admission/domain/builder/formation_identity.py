@@ -24,7 +24,7 @@
 #
 # ##############################################################################
 from admission.ddd.admission.domain.model.formation import FormationIdentity
-from osis_common.ddd.interface import EntityIdentityBuilder, CommandRequest, DTO
+from osis_common.ddd.interface import CommandRequest, DTO, EntityIdentityBuilder
 
 
 class FormationIdentityBuilder(EntityIdentityBuilder):
@@ -37,5 +37,5 @@ class FormationIdentityBuilder(EntityIdentityBuilder):
         raise NotImplementedError
 
     @classmethod
-    def build_from_uuid(cls, sigle: str, annee: int) -> 'FormationIdentity':
+    def build(cls, sigle: str, annee: int) -> 'FormationIdentity':
         return FormationIdentity(sigle=sigle, annee=annee)

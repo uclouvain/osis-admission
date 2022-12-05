@@ -89,7 +89,11 @@ class Notification(INotification):
             "student_last_name": doctorate.candidate.last_name,
             "doctorate_title": cls._get_doctorate_title_translation(doctorate),
             "admission_link_front": cls.get_admission_link_front(doctorate.uuid),
-            "admission_link_front_doctoral_training": cls.get_admission_link_front(doctorate.uuid, 'training'),
+            "admission_link_front_doctoral_training": cls.get_admission_link_front(doctorate.uuid, 'doctoral-training'),
+            "admission_link_front_complementary_training": cls.get_admission_link_front(
+                doctorate.uuid, 'complementary-training'
+            ),
+            "admission_link_front_course_enrollment": cls.get_admission_link_front(doctorate.uuid, 'course-enrollment'),
             "admission_link_back": "{}{}".format(
                 settings.ADMISSION_BACKEND_LINK_PREFIX.rstrip('/'),
                 resolve_url('admission:doctorate:project', uuid=doctorate.uuid),
@@ -97,6 +101,14 @@ class Notification(INotification):
             "admission_link_back_doctoral_training": "{}{}".format(
                 settings.ADMISSION_BACKEND_LINK_PREFIX.rstrip('/'),
                 resolve_url('admission:doctorate:doctoral-training', uuid=doctorate.uuid),
+            ),
+            "admission_link_back_complementary_training": "{}{}".format(
+                settings.ADMISSION_BACKEND_LINK_PREFIX.rstrip('/'),
+                resolve_url('admission:doctorate:complementary-training', uuid=doctorate.uuid),
+            ),
+            "admission_link_back_course_enrollment": "{}{}".format(
+                settings.ADMISSION_BACKEND_LINK_PREFIX.rstrip('/'),
+                resolve_url('admission:doctorate:course-enrollment', uuid=doctorate.uuid),
             ),
             "reference": doctorate.reference,
         }
@@ -145,14 +157,23 @@ class Notification(INotification):
         doctorate: DoctorateProxy = DoctorateProxy.objects.get(uuid=doctorat.entity_id.uuid)
         candidat = Person.objects.get(global_id=doctorat.matricule_doctorant)
         common_tokens = cls.get_common_tokens(doctorate)
-        with translation.override(candidat.language):
-            content = (
-                _(
-                    '<a href="%(admission_link_front_doctoral_training)s">%(reference)s</a> - '
-                    'Some doctoral training activities have been approved.'
-                )
-                % common_tokens
+        if activites[0].categorie == CategorieActivite.UCL_COURSE:
+            msg = _(
+                '<a href="%(admission_link_front_course_enrollment)s">%(reference)s</a> - '
+                'Some course enrollment have been approved.'
             )
+        elif activites[0].contexte == ContexteFormation.COMPLEMENTARY_TRAINING:
+            msg = _(
+                '<a href="%(admission_link_front_complementary_training)s">%(reference)s</a> - '
+                'Some complementary training activities have been approved.'
+            )
+        else:
+            msg = _(
+                '<a href="%(admission_link_front_doctoral_training)s">%(reference)s</a> - '
+                'Some doctoral training activities have been approved.'
+            )
+        with translation.override(candidat.language):
+            content = msg % common_tokens
         web_notification = WebNotification(recipient=candidat, content=content)
         WebNotificationHandler.create(web_notification)
 

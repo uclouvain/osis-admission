@@ -111,3 +111,7 @@ class DoctoratInMemoryTranslator(IDoctoratTranslator):
             and doc.entity_id.annee == annee
             and (not campus or doc.campus == campus)
         ]
+
+    @classmethod
+    def verifier_existence(cls, sigle: str, annee: int) -> bool:  # pragma: no cover
+        return any(True for doc in cls.doctorats if doc.entity_id.sigle == sigle and doc.entity_id.annee == annee)

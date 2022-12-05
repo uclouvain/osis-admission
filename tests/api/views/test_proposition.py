@@ -69,6 +69,7 @@ class GeneralPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase):
             'annee': self.admission.training.academic_year.year,
             'intitule': self.admission.training.title,
             'campus': self.teaching_campus_name,
+            'type': self.admission.training.education_group_type.name,
         }
         double_degree_scholarship_json = {
             'uuid': str(self.admission.double_degree_scholarship.uuid),
@@ -111,6 +112,9 @@ class GeneralPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase):
                 'update_secondary_studies',
                 'update_curriculum',
                 'update_training_choice',
+                'submit_proposition',
+                'retrieve_specific_question',
+                'update_specific_question',
                 'destroy_proposition',
             ],
             forbidden_actions=[],
@@ -180,6 +184,7 @@ class ContinuingPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase
             'annee': self.admission.training.academic_year.year,
             'intitule': self.admission.training.title,
             'campus': self.teaching_campus_name,
+            'type': self.admission.training.education_group_type.name,
         }
         self.assertEqual(json_response['uuid'], str(self.admission.uuid))
         self.assertEqual(json_response['formation'], training_json)
@@ -201,6 +206,9 @@ class ContinuingPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase
                 'update_secondary_studies',
                 'update_curriculum',
                 'update_training_choice',
+                'submit_proposition',
+                'retrieve_specific_question',
+                'update_specific_question',
                 'destroy_proposition',
             ],
             forbidden_actions=[],

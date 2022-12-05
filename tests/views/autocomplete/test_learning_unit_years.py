@@ -40,7 +40,7 @@ class AutocompleteTestCase(TestCase):
             academic_year__year=2022,
             learning_container_year__container_type=LearningContainerYearType.EXTERNAL.name,
         )
-        url = resolve_url('admission:autocomplete:learning_unit_years')
+        url = resolve_url('admission:autocomplete:learning-unit-years')
         data = {'forward': '{"annee": "2022"}', 'q': 'FO'}
         response = self.client.get(url, format="json")
         self.assertEqual(response.status_code, 200)

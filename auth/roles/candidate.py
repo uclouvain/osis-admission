@@ -95,7 +95,6 @@ _CANDIDATE_RULESET = {
     'upload_pdf_confirmation': is_admission_request_author,
     'fill_thesis': is_admission_request_author,
     'upload_publication_authorisation': is_admission_request_author,
-
     # General admission
     # A candidate can view as long as he's the author
     'view_generaleducationadmission': is_admission_request_author,
@@ -105,6 +104,7 @@ _CANDIDATE_RULESET = {
     'view_generaleducationadmission_secondary_studies': is_admission_request_author,
     'view_generaleducationadmission_languages': is_admission_request_author,
     'view_generaleducationadmission_accounting': is_admission_request_author,
+    'view_generaleducationadmission_specific_question': is_admission_request_author,
     # A candidate can edit some tabs as long as the proposition is in progress
     'change_generaleducationadmission_training_choice': is_admission_request_author & in_progress,
     'change_generaleducationadmission_person': is_admission_request_author & in_progress,
@@ -113,7 +113,9 @@ _CANDIDATE_RULESET = {
     'change_generaleducationadmission_secondary_studies': is_admission_request_author & in_progress,
     'change_generaleducationadmission_languages': is_admission_request_author & in_progress,
     'change_generaleducationadmission_accounting': is_admission_request_author & in_progress,
+    'change_generaleducationadmission_specific_question': is_admission_request_author & in_progress,
     'delete_generaleducationadmission': is_admission_request_author & in_progress,
+    'submit_generaleducationadmission': is_admission_request_author & in_progress,
     # Continuing admission
     # A candidate can view as long as he's the author
     'view_continuingeducationadmission': is_admission_request_author,
@@ -123,6 +125,7 @@ _CANDIDATE_RULESET = {
     'view_continuingeducationadmission_secondary_studies': is_admission_request_author,
     'view_continuingeducationadmission_languages': is_admission_request_author,
     'view_continuingeducationadmission_accounting': is_admission_request_author,
+    'view_continuingeducationadmission_specific_question': is_admission_request_author,
     # A candidate can edit some tabs as long as the proposition is in progress
     'change_continuingeducationadmission_training_choice': is_admission_request_author & in_progress,
     'change_continuingeducationadmission_person': is_admission_request_author & in_progress,
@@ -132,6 +135,8 @@ _CANDIDATE_RULESET = {
     'change_continuingeducationadmission_languages': is_admission_request_author & in_progress,
     'change_continuingeducationadmission_accounting': is_admission_request_author & in_progress,
     'delete_continuingeducationadmission': is_admission_request_author & in_progress,
+    'submit_continuingeducationadmission': is_admission_request_author & in_progress,
+    'change_continuingeducationadmission_specific_question': is_admission_request_author & in_progress,
 }
 
 

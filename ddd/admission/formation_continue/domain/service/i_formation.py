@@ -24,14 +24,14 @@
 #
 # ##############################################################################
 from abc import abstractmethod
-from typing import Optional, List
+from typing import List, Optional
 
-from admission.ddd.admission.domain.model.formation import FormationIdentity, Formation
+from admission.ddd.admission.domain.model.formation import Formation, FormationIdentity
+from admission.ddd.admission.domain.service.i_formation_translator import IFormationTranslator
 from admission.ddd.admission.dtos.formation import FormationDTO
-from osis_common.ddd import interface
 
 
-class IFormationContinueTranslator(interface.DomainService):
+class IFormationContinueTranslator(IFormationTranslator):
     @classmethod
     @abstractmethod
     def get(cls, entity_id: FormationIdentity) -> Formation:

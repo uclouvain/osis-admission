@@ -24,7 +24,7 @@
 #
 ##############################################################################
 import datetime
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 from uuid import UUID
 
 import attr
@@ -35,7 +35,7 @@ from .comptabilite import ComptabiliteDTO
 from .doctorat import DoctoratDTO
 
 
-@attr.dataclass(frozen=True, slots=True)
+@attr.dataclass(slots=True)
 class PropositionDTO(interface.DTO):
     uuid: str
     type_admission: str
@@ -48,7 +48,8 @@ class PropositionDTO(interface.DTO):
     type_financement: Optional[str]
     type_contrat_travail: Optional[str]
     eft: Optional[int]
-    bourse_recherche: Optional[str]
+    bourse_recherche: Optional[BourseDTO]
+    autre_bourse_recherche: Optional[str]
     bourse_date_debut: Optional[datetime.date]
     bourse_date_fin: Optional[datetime.date]
     bourse_preuve: List[str]
@@ -80,3 +81,5 @@ class PropositionDTO(interface.DTO):
     erreurs: List[Dict[str, str]]
     comptabilite: ComptabiliteDTO
     bourse_erasmus_mundus: Optional[BourseDTO]
+    reponses_questions_specifiques: Dict[str, Union[str, List[str]]]
+    curriculum: List[str]

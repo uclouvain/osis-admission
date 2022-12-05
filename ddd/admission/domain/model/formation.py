@@ -26,7 +26,11 @@
 import attr
 
 from admission.ddd.admission.domain.enums import TypeFormation
+from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
+    AnneeInscriptionFormationTranslator,
+)
 from base.ddd.utils.converters import to_upper_case_converter
+from base.models.enums.education_group_types import TrainingType
 from osis_common.ddd import interface
 
 
@@ -39,4 +43,8 @@ class FormationIdentity(interface.EntityIdentity):
 @attr.dataclass(frozen=True, slots=True)
 class Formation(interface.Entity):
     entity_id: FormationIdentity
-    type: TypeFormation
+    type: TrainingType
+
+    @property
+    def type_formation(self) -> TypeFormation:
+        return TypeFormation[AnneeInscriptionFormationTranslator.ADMISSION_EDUCATION_TYPE_BY_OSIS_TYPE[self.type.name]]

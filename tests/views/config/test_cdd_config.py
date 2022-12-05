@@ -51,19 +51,19 @@ class CddConfigTestCase(TestCase):
                 cls.data[f'{field.name}_fr-be'] = "Bar\nBaz"
 
     def test_cdd_config_access(self):
-        url = resolve_url('admission:config:cdd_config:list')
+        url = resolve_url('admission:config:cdd-config:list')
         self.client.force_login(SuperUserPersonFactory().user)
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_cdd_config_list(self):
-        url = resolve_url('admission:config:cdd_config:list')
+        url = resolve_url('admission:config:cdd-config:list')
         self.client.force_login(self.manager.person.user)
         response = self.client.get(url)
         self.assertContains(response, "FOO")
 
     def test_cdd_config_edit(self):
-        url = resolve_url('admission:config:cdd_config:edit', pk=self.manager.entity_id)
+        url = resolve_url('admission:config:cdd-config:edit', pk=self.manager.entity_id)
         self.client.force_login(self.manager.person.user)
 
         self.assertEqual(CddConfiguration.objects.count(), 0)

@@ -30,11 +30,83 @@
 {% block style %}
   {{ block.super }}
   <link href="{% static 'osis_history/osis-history.css' %}" rel="stylesheet"/>
+  <style>
+    .history-viewer input {
+      opacity: 0;
+      position: absolute;
+      pointer-events: none;
+    }
+
+    .history-viewer .box {
+      display: -webkit-box;
+      -webkit-line-clamp: 4;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .history-viewer input:checked + .box {
+      -webkit-line-clamp: unset;
+    }
+
+    .history-viewer input:checked ~ label {
+      display: none;
+    }
+  </style>
 {% endblock style %}
 
+
 {% block tab_content %}
-  <div class="history-viewer" data-url="{% url 'admission:doctorate:history-api' uuid=view.kwargs.uuid %}" data-tags="{{ tag }}"></div>
+  <div class="history-viewer"
+       data-url="{% url 'admission:doctorate:history-api' uuid=view.kwargs.uuid %}"
+       data-tags="{{ tag }}"
+       data-on-item-render-vertical-timeline="renderList"
+       data-on-item-render-horizontal-timeline="renderList"
+       data-on-item-render-table="renderTable"
+  ></div>
+  <script>
+    let timelineEntryCounter = 0;
+
+    function wrapWithReadMore (entry) {
+      if (entry.tags.includes('message')) {
+        return `<input id="expanded-${++timelineEntryCounter}" type="checkbox">
+            <div class="box">
+                ${OsisHistory.filterXssAndFormat(entry.message)}
+            </div>
+            <label for="expanded-${timelineEntryCounter}" role="button" class="text-primary">
+                <span class="glyphicon glyphicon-collapse-down">
+            </label>`;
+      }
+      return OsisHistory.filterXssAndFormat(entry.message);
+    }
+
+    function renderList (entry) {
+      return `<li class="timeline-item">
+    <div class="timeline-badge"></div>
+    <div class="timeline-panel">
+        <div class="timeline-heading">
+            <h3 class="h4">
+                <span class="glyphicon glyphicon-time"></span>
+                ${entry.created}
+                -
+                <span class="glyphicon glyphicon-user"></span>
+                ${entry.author}
+            </h3>
+        </div>
+        <div class="timeline-body">${wrapWithReadMore(entry)}</div>
+    </div>
+</li>`;
+    }
+
+    function renderTable (entry) {
+      return `<tr>
+    <td>${entry.created}</td>
+    <td>${wrapWithReadMore(entry)}</td>
+    <td>${entry.author}</td>
+</tr>`;
+    }
+  </script>
 {% endblock %}
+
 
 {% block script %}
   <script type="text/javascript" src="{% static 'osis_history/osis-history.umd.min.js' %}"></script>

@@ -23,6 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import uuid
 from dataclasses import dataclass
 from typing import List, Optional
 
@@ -54,7 +55,9 @@ from admission.ddd.admission.doctorat.preparation.test.factory.proposition impor
 from admission.infrastructure.admission.doctorat.preparation.repository.in_memory._comptabilite import (
     get_dto_accounting_from_domain_model,
 )
+from admission.infrastructure.admission.domain.service.in_memory.bourse import BourseInMemoryTranslator
 from base.ddd.utils.in_memory_repository import InMemoryGenericRepository
+from base.models.enums.education_group_types import TrainingType
 
 
 @dataclass
@@ -70,6 +73,7 @@ class _Doctorat:
     code_secteur: str
     intitule_secteur: str
     campus: str
+    type: str
 
 
 class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepository):
@@ -79,18 +83,21 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
             code_secteur="SST",
             intitule_secteur="Secteur des sciences et technologies",
             campus="Louvain-la-Neuve",
+            type=TrainingType.PHD.name,
         ),
         ("ECGE3DP", 2020): _Doctorat(
             intitule="Doctorat en sciences économiques et de gestion",
             code_secteur="SSH",
             intitule_secteur="Secteur des sciences humaines",
             campus="Louvain-la-Neuve",
+            type=TrainingType.PHD.name,
         ),
         ("ESP3DP", 2020): _Doctorat(
             intitule="Doctorat en sciences de la santé publique",
             code_secteur="SSS",
             intitule_secteur="Secteur des sciences de la santé",
             campus="Mons",
+            type=TrainingType.PHD.name,
         ),
     }
     candidats = {
@@ -191,6 +198,16 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
     def _load_dto(cls, proposition):
         candidat = cls.candidats[proposition.matricule_candidat]
         doctorat = cls.doctorats[(proposition.doctorat_id.sigle, proposition.doctorat_id.annee)]
+        bourse_erasmus_dto = (
+            BourseInMemoryTranslator.get_dto(uuid=str(proposition.bourse_erasmus_mundus_id.uuid))
+            if proposition.bourse_erasmus_mundus_id
+            else None
+        )
+        bourse_recherche_dto = (
+            BourseInMemoryTranslator.get_dto(uuid=str(proposition.financement.bourse_recherche.uuid))
+            if proposition.financement.bourse_recherche
+            else None
+        )
         return PropositionDTO(
             uuid=proposition.entity_id.uuid,
             type_admission=proposition.type_admission.name,
@@ -201,6 +218,7 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
                 doctorat.intitule,
                 doctorat.code_secteur,
                 doctorat.campus,
+                doctorat.type,
             ),
             matricule_candidat=proposition.matricule_candidat,
             justification=proposition.justification,
@@ -209,7 +227,8 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
             type_financement=proposition.financement.type and proposition.financement.type.name or '',
             type_contrat_travail=proposition.financement.type_contrat_travail,
             eft=proposition.financement.eft,
-            bourse_recherche=proposition.financement.bourse_recherche,
+            autre_bourse_recherche=proposition.financement.autre_bourse_recherche,
+            bourse_recherche=bourse_recherche_dto,
             bourse_date_debut=proposition.financement.bourse_date_debut,
             bourse_date_fin=proposition.financement.bourse_date_fin,
             bourse_preuve=proposition.financement.bourse_preuve,
@@ -240,5 +259,7 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
             modifiee_le=proposition.modifiee_le,
             erreurs=[],
             comptabilite=get_dto_accounting_from_domain_model(proposition.comptabilite),
-            bourse_erasmus_mundus=proposition.bourse_erasmus_mundus_id and proposition.bourse_erasmus_mundus_id.uuid
+            reponses_questions_specifiques=proposition.reponses_questions_specifiques,
+            bourse_erasmus_mundus=bourse_erasmus_dto,
+            curriculum=proposition.curriculum,
         )

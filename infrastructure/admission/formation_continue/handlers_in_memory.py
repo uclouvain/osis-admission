@@ -23,14 +23,15 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
-from functools import partial
 
 from admission.ddd.admission.formation_continue.commands import *
 from admission.ddd.admission.formation_continue.use_case.read import *
+from admission.ddd.admission.formation_continue.use_case.write import *
 from admission.infrastructure.admission.domain.service.in_memory.annee_inscription_formation import (
     AnneeInscriptionFormationInMemoryTranslator,
 )
-from admission.ddd.admission.formation_continue.use_case.write import *
+from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
+from admission.infrastructure.admission.domain.service.in_memory.titres_acces import TitresAccesInMemory
 from admission.infrastructure.admission.formation_continue.domain.service.in_memory.formation import (
     FormationContinueInMemoryTranslator,
 )
@@ -38,32 +39,56 @@ from admission.infrastructure.admission.formation_continue.repository.in_memory.
     PropositionInMemoryRepository,
 )
 
+_proposition_repository = PropositionInMemoryRepository()
+_formation_continue_translator = FormationContinueInMemoryTranslator()
+_annee_inscription_formation_translator = AnneeInscriptionFormationInMemoryTranslator()
+_titres_acces = TitresAccesInMemory()
+_profil_candidat_translator = ProfilCandidatInMemoryTranslator()
+
 COMMAND_HANDLERS = {
-    RechercherFormationContinueQuery: partial(
-        rechercher_formations,
-        formation_continue_translator=FormationContinueInMemoryTranslator(),
-        annee_inscription_formation_translator=AnneeInscriptionFormationInMemoryTranslator(),
+    RechercherFormationContinueQuery: lambda msg_bus, cmd: rechercher_formations(
+        cmd,
+        formation_continue_translator=_formation_continue_translator,
+        annee_inscription_formation_translator=_annee_inscription_formation_translator,
     ),
-    InitierPropositionCommand: partial(
-        initier_proposition,
-        proposition_repository=PropositionInMemoryRepository(),
-        formation_translator=FormationContinueInMemoryTranslator(),
+    InitierPropositionCommand: lambda msg_bus, cmd: initier_proposition(
+        cmd,
+        proposition_repository=_proposition_repository,
+        formation_translator=_formation_continue_translator,
     ),
-    ListerPropositionsCandidatQuery: partial(
-        lister_propositions_candidat,
-        proposition_repository=PropositionInMemoryRepository(),
+    ListerPropositionsCandidatQuery: lambda msg_bus, cmd: lister_propositions_candidat(
+        cmd,
+        proposition_repository=_proposition_repository,
     ),
-    RecupererPropositionQuery: partial(
-        recuperer_proposition,
-        proposition_repository=PropositionInMemoryRepository(),
+    RecupererPropositionQuery: lambda msg_bus, cmd: recuperer_proposition(
+        cmd,
+        proposition_repository=_proposition_repository,
     ),
-    ModifierChoixFormationCommand: partial(
-        modifier_choix_formation,
-        proposition_repository=PropositionInMemoryRepository(),
-        formation_translator=FormationContinueInMemoryTranslator(),
+    ModifierChoixFormationCommand: lambda msg_bus, cmd: modifier_choix_formation(
+        cmd,
+        proposition_repository=_proposition_repository,
+        formation_translator=_formation_continue_translator,
     ),
-    SupprimerPropositionCommand: partial(
-        supprimer_proposition,
-        proposition_repository=PropositionInMemoryRepository(),
+    SupprimerPropositionCommand: lambda msg_bus, cmd: supprimer_proposition(
+        cmd,
+        proposition_repository=_proposition_repository,
+    ),
+    VerifierPropositionCommand: lambda msg_bus, cmd: verifier_proposition(
+        cmd,
+        proposition_repository=_proposition_repository,
+        formation_translator=_formation_continue_translator,
+        titres_acces=_titres_acces,
+        profil_candidat_translator=_profil_candidat_translator,
+    ),
+    SoumettrePropositionCommand: lambda msg_bus, cmd: soumettre_proposition(
+        cmd,
+        proposition_repository=_proposition_repository,
+        formation_translator=_formation_continue_translator,
+        titres_acces=_titres_acces,
+        profil_candidat_translator=_profil_candidat_translator,
+    ),
+    CompleterCurriculumCommand: lambda msg_bus, cmd: completer_curriculum(
+        cmd,
+        proposition_repository=_proposition_repository,
     ),
 }

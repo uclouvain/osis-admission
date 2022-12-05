@@ -32,8 +32,16 @@ from osis_history.contrib.mixins import HistoryEntryListAPIMixin
 
 from osis_role.contrib.views import APIPermissionRequiredMixin
 
+__all__ = [
+    "DoctorateHistoryAPIView",
+    "DoctorateHistoryView",
+    "DoctorateHistoryAllView",
+]
+__namespace__ = False
+
 
 class DoctorateHistoryAPIView(LoginRequiredMixin, APIPermissionRequiredMixin, HistoryEntryListAPIMixin):
+    urlpatterns = 'history-api'
     permission_mapping = {
         'GET': 'osis_history.view_historyentry',
     }
@@ -43,11 +51,13 @@ class DoctorateHistoryAPIView(LoginRequiredMixin, APIPermissionRequiredMixin, Hi
 
 
 class DoctorateHistoryView(LoadDossierViewMixin, TemplateView):
+    urlpatterns = 'history'
     template_name = 'admission/doctorate/details/history.html'
     permission_required = 'osis_history.view_historyentry'
     extra_context = {'tag': 'status-changed'}
 
 
 class DoctorateHistoryAllView(LoadDossierViewMixin, TemplateView):
+    urlpatterns = 'history-all'
     template_name = 'admission/doctorate/details/history.html'
     permission_required = 'osis_history.view_historyentry'

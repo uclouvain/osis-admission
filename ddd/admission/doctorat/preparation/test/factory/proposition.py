@@ -164,6 +164,12 @@ class _PropositionFactory(factory.Factory):
     experience_precedente_recherche = aucune_experience_precedente_recherche
     modifiee_le = factory.Faker('past_datetime')
     comptabilite = factory.SubFactory(_ComptabiliteFactory)
+    reponses_questions_specifiques = {
+        '06de0c3d-3c06-4c93-8eb4-c8648f04f140': 'My response 1',
+        '06de0c3d-3c06-4c93-8eb4-c8648f04f142': 'My response 2',
+        '06de0c3d-3c06-4c93-8eb4-c8648f04f143': 'My response 3',
+    }
+    curriculum = ['file_token.pdf']
 
 
 class PropositionAdmissionSC3DPMinimaleFactory(_PropositionFactory):
@@ -271,5 +277,5 @@ class PropositionPreAdmissionSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory(
     financement = factory.SubFactory(
         _FinancementFactory,
         type=ChoixTypeFinancement.SEARCH_SCHOLARSHIP,
-        bourse_recherche=BourseRecherche.ARC.name,
+        autre_bourse_recherche=BourseRecherche.ARC.name,
     )

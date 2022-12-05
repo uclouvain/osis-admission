@@ -23,7 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import Optional
+from typing import Optional, Dict, List
 
 import attr
 
@@ -60,7 +60,28 @@ class ModifierChoixFormationCommand(interface.CommandRequest):
     sigle_formation: str
     annee_formation: int
 
+    reponses_questions_specifiques: Dict = attr.Factory(dict)
+
 
 @attr.dataclass(frozen=True, slots=True)
 class SupprimerPropositionCommand(interface.CommandRequest):
     uuid_proposition: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class VerifierPropositionCommand(interface.QueryRequest):
+    uuid_proposition: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class SoumettrePropositionCommand(interface.CommandRequest):
+    uuid_proposition: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class CompleterCurriculumCommand(interface.CommandRequest):
+    uuid_proposition: str
+
+    curriculum: List[str] = attr.Factory(list)
+    equivalence_diplome: List[str] = attr.Factory(list)
+    reponses_questions_specifiques: Dict = attr.Factory(dict)

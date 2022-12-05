@@ -24,15 +24,10 @@
 #
 ##############################################################################
 import datetime
-from typing import Optional, Dict
+from typing import Dict, Optional, List
 
 import attr
 
-from admission.ddd.admission.domain.model.bourse import (
-    BourseIdentity,
-    BourseIdentity,
-    BourseIdentity,
-)
 from admission.ddd.admission.domain.model.formation import FormationIdentity
 from admission.ddd.admission.domain.service.i_bourse import BourseIdentity
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutProposition
@@ -57,6 +52,16 @@ class Proposition(interface.RootEntity):
     bourse_double_diplome_id: Optional[BourseIdentity] = None
     bourse_internationale_id: Optional[BourseIdentity] = None
     bourse_erasmus_mundus_id: Optional[BourseIdentity] = None
+    est_reorientation_inscription_externe: Optional[bool] = None
+    est_modification_inscription_externe: Optional[bool] = None
+    est_non_resident_au_sens_decret: Optional[bool] = None
+
+    reponses_questions_specifiques: Dict = attr.Factory(dict)
+
+    continuation_cycle_bachelier: Optional[bool] = None
+    attestation_continuation_cycle_bachelier: List[str] = attr.Factory(list)
+    curriculum: List[str] = attr.Factory(list)
+    equivalence_diplome: List[str] = attr.Factory(list)
 
     def modifier_choix_formation(
         self,
@@ -65,17 +70,30 @@ class Proposition(interface.RootEntity):
         bourse_double_diplome: Optional[str],
         bourse_internationale: Optional[str],
         bourse_erasmus_mundus: Optional[str],
+        reponses_questions_specifiques: Dict,
     ):
         self.formation_id = formation_id
-
-        if bourse_double_diplome:
-            self.bourse_double_diplome_id = bourses_ids.get(bourse_double_diplome)
-
-        if bourse_internationale:
-            self.bourse_internationale_id = bourses_ids.get(bourse_internationale)
-
-        if bourse_erasmus_mundus:
-            self.bourse_erasmus_mundus_id = bourses_ids.get(bourse_erasmus_mundus)
+        self.reponses_questions_specifiques = reponses_questions_specifiques
+        self.bourse_double_diplome_id = bourses_ids.get(bourse_double_diplome)
+        self.bourse_internationale_id = bourses_ids.get(bourse_internationale)
+        self.bourse_erasmus_mundus_id = bourses_ids.get(bourse_erasmus_mundus)
 
     def supprimer(self):
         self.statut = ChoixStatutProposition.CANCELLED
+
+    def soumettre(self):
+        self.statut = ChoixStatutProposition.SUBMITTED
+
+    def completer_curriculum(
+        self,
+        continuation_cycle_bachelier: Optional[bool],
+        attestation_continuation_cycle_bachelier: List[str],
+        curriculum: List[str],
+        equivalence_diplome: List[str],
+        reponses_questions_specifiques: Dict,
+    ):
+        self.continuation_cycle_bachelier = continuation_cycle_bachelier
+        self.attestation_continuation_cycle_bachelier = attestation_continuation_cycle_bachelier
+        self.curriculum = curriculum
+        self.equivalence_diplome = equivalence_diplome
+        self.reponses_questions_specifiques = reponses_questions_specifiques

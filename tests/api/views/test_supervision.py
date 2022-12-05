@@ -55,7 +55,7 @@ class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
         ).entity
         cls.promoter = PromoterFactory(actor_ptr__person__first_name="Joe")
         cls.admission = DoctorateAdmissionFactory(
-            doctorate__management_entity=cls.commission,
+            training__management_entity=cls.commission,
             supervision_group=cls.promoter.actor_ptr.process,
         )
         # Users
@@ -146,7 +146,7 @@ class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
     # Add member
     def test_supervision_ajouter_membre_process_inexistant(self):
         admission = DoctorateAdmissionFactory(
-            doctorate__management_entity=self.commission,
+            training__management_entity=self.commission,
             supervision_group=None,
         )
         self.client.force_authenticate(user=admission.candidate.user)

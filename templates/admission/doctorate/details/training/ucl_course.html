@@ -50,7 +50,7 @@
         {{ activity.learning_unit_year.complete_title_i18n }} -
         {{ activity.learning_unit_year.academic_year }}
         {% if activity.ects %}
-          <p class="col-md-4">
+          <p>
             <strong class="d-block">{% trans "ECTS" %}</strong>
             {{ activity.ects|floatformat:"-2" }}
           </p>

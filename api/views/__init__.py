@@ -25,21 +25,22 @@
 # ##############################################################################
 from admission.api.views.dashboard import DashboardViewSet
 from admission.api.views.autocomplete import *
-from admission.api.views.coordonnees import CoordonneesViewSet, GeneralCoordonneesViewSet, ContinuingCoordonneesViewSet
+from admission.api.views.coordonnees import CoordonneesViewSet, GeneralCoordonneesView, ContinuingCoordonneesView
 from admission.api.views.curriculum import *
 from admission.api.views.secondary_studies import (
     SecondaryStudiesViewSet,
-    GeneralSecondaryStudiesViewSet,
-    ContinuingSecondaryStudiesViewSet,
+    GeneralSecondaryStudiesView,
+    ContinuingSecondaryStudiesView,
 )
 from admission.api.views.languages_knowledge import LanguagesKnowledgeViewSet
 from admission.api.views.cotutelle import CotutelleAPIView
 from admission.api.views.person import (
     PersonViewSet,
-    GeneralPersonViewSet,
-    ContinuingPersonViewSet,
+    GeneralPersonView,
+    ContinuingPersonView,
 )
 from admission.api.views.project import *
+from admission.api.views.submission import *
 from admission.api.views.supervision import *
 from admission.api.views.signatures import RequestSignaturesAPIView
 from admission.api.views.approvals import *
@@ -55,54 +56,11 @@ from admission.api.views.training_choice import (
     GeneralTrainingChoiceAPIView,
     GeneralUpdateTrainingChoiceAPIView,
 )
-from admission.api.views.proposition import GeneralPropositionViewSet, ContinuingPropositionViewSet
-
-__all__ = [
-    "CoordonneesViewSet",
-    "GeneralCoordonneesViewSet",
-    "ContinuingCoordonneesViewSet",
-    "CurriculumView",
-    "EducationalExperienceViewSet",
-    "ProfessionalExperienceViewSet",
-    "CurriculumFileView",
-    "PersonViewSet",
-    "GeneralPersonViewSet",
-    "ContinuingPersonViewSet",
-    "PropositionViewSet",
-    "PropositionListView",
-    "VerifyProjectView",
-    "SubmitPropositionViewSet",
-    "SecondaryStudiesViewSet",
-    "GeneralSecondaryStudiesViewSet",
-    "ContinuingSecondaryStudiesViewSet",
-    "AutocompleteDoctoratView",
-    "AutocompleteGeneralEducationView",
-    "AutocompleteContinuingEducationView",
-    "AutocompleteSectorView",
-    "AutocompleteTutorView",
-    "AutocompletePersonView",
-    "CotutelleAPIView",
-    "SupervisionAPIView",
-    "RequestSignaturesAPIView",
-    "LanguagesKnowledgeViewSet",
-    "ApprovePropositionAPIView",
-    "ApproveByPdfPropositionAPIView",
-    "DashboardViewSet",
-    "ConfirmationAPIView",
-    "LastConfirmationAPIView",
-    "LastConfirmationCanvasAPIView",
-    "SupervisedConfirmationAPIView",
-    "DoctorateAPIView",
-    "DoctoralTrainingListView",
-    "AutocompleteScholarshipView",
-    "ListCampusView",
-    "RetrieveScholarshipView",
-    "RetrieveCampusView",
-    "GeneralTrainingChoiceAPIView",
-    "ContinuingTrainingChoiceAPIView",
-    "GeneralPropositionViewSet",
-    "ContinuingPropositionViewSet",
-    "ContinuingUpdateTrainingChoiceAPIView",
-    "DoctorateUpdateAdmissionTypeAPIView",
-    "GeneralUpdateTrainingChoiceAPIView",
-]
+from admission.api.views.proposition import GeneralPropositionView, ContinuingPropositionView
+from admission.api.views.specific_questions import (
+    GeneralSpecificQuestionListView,
+    DoctorateSpecificQuestionListView,
+    ContinuingSpecificQuestionListView,
+    GeneralSpecificQuestionAPIView,
+    ContinuingSpecificQuestionAPIView,
+)

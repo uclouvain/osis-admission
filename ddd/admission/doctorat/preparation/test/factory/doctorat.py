@@ -31,6 +31,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import D
 
 # FIXME import this factory from shared kernel when available
 from admission.ddd.admission.doctorat.preparation.dtos import DoctoratDTO
+from base.models.enums.education_group_types import TrainingType
 from ddd.logic.learning_unit.tests.factory.ucl_entity import UclEntityIdentityFactory
 
 
@@ -85,6 +86,7 @@ class _DoctoratDTOFactory(factory.Factory):
             "St-Gilles",
         ]
     )
+    type = TrainingType.PHD.name
 
 
 class DoctoratCDEFactory(_DoctoratFactory):

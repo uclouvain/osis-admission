@@ -34,3 +34,4 @@ class FormationDTO(interface.DTO):
     annee: int
     intitule: str
     campus: str
+    type: str

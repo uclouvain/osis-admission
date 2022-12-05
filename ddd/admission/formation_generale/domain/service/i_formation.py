@@ -27,11 +27,11 @@ from abc import abstractmethod
 from typing import List, Optional
 
 from admission.ddd.admission.domain.model.formation import Formation, FormationIdentity
+from admission.ddd.admission.domain.service.i_formation_translator import IFormationTranslator
 from admission.ddd.admission.dtos.formation import FormationDTO
-from osis_common.ddd import interface
 
 
-class IFormationGeneraleTranslator(interface.DomainService):
+class IFormationGeneraleTranslator(IFormationTranslator):
     @classmethod
     @abstractmethod
     def get(cls, entity_id: FormationIdentity) -> Formation:

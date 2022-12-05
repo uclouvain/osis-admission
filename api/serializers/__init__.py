@@ -33,10 +33,12 @@ from .secondary_studies import HighSchoolDiplomaSerializer
 from .languages_knowledge import *
 from .supervision import *
 from .curriculum import (
-    CurriculumFileSerializer,
     EducationalExperienceYearSerializer,
-    CurriculumSerializer,
+    CurriculumDetailsSerializer,
     ProfessionalExperienceSerializer,
+    DoctoratCompleterCurriculumCommandSerializer,
+    ContinuingEducationCompleterCurriculumCommandSerializer,
+    GeneralEducationCompleterCurriculumCommandSerializer,
 )
 from .approvals import (
     ApprouverPropositionCommandSerializer,
@@ -55,3 +57,4 @@ from .training_choice import (
     ModifierTypeAdmissionDoctoraleCommandSerializer,
     ModifierChoixFormationGeneraleCommandSerializer,
 )
+from .specific_question import SpecificQuestionSerializer, ModifierQuestionsSpecifiquesCommandSerializer

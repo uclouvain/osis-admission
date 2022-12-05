@@ -23,33 +23,27 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from django.core.cache import cache
 from django.db import models
-from django.db.models.signals import post_save
-from django.dispatch import receiver
 from django.utils.translation import gettext_lazy as _
+from osis_document.contrib import FileField
+from rest_framework.settings import api_settings
 
-from admission.contrib.models.base import BaseAdmission, BaseAdmissionQuerySet
+from admission.contrib.models.base import BaseAdmission, BaseAdmissionQuerySet, admission_directory_path
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutProposition
-from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
-    AnneeInscriptionFormationTranslator,
-)
-from base.models.education_group_year import EducationGroupYear
-from base.models.enums.education_group_categories import Categories
-from base.models.person import Person
 
 
 class ContinuingEducationAdmission(BaseAdmission):
-    training = models.ForeignKey(
-        to="base.EducationGroupYear",
-        verbose_name=_("Training"),
-        related_name="+",
-        on_delete=models.CASCADE,
-    )
     status = models.CharField(
         choices=ChoixStatutProposition.choices(),
         max_length=30,
         default=ChoixStatutProposition.IN_PROGRESS.name,
+    )
+
+    diploma_equivalence = FileField(
+        blank=True,
+        mimetypes=['application/pdf'],
+        upload_to=admission_directory_path,
+        verbose_name=_('Diploma equivalence'),
     )
 
     class Meta:
@@ -58,19 +52,26 @@ class ContinuingEducationAdmission(BaseAdmission):
         permissions = []
 
     def update_detailed_status(self):
-        pass
+        from admission.ddd.admission.formation_continue.commands import VerifierPropositionCommand
+        from admission.utils import gather_business_exceptions
+
+        error_key = api_settings.NON_FIELD_ERRORS_KEY
+        self.detailed_status = gather_business_exceptions(VerifierPropositionCommand(self.uuid)).get(error_key, [])
+        self.save(update_fields=['detailed_status'])
 
 
-class ContinuingEducationAdmissionQuerySet(BaseAdmissionQuerySet):
-    training_field_name = 'training_id'
-
-
-class ContinuingEducationAdmissionManager(models.Manager.from_queryset(ContinuingEducationAdmissionQuerySet)):
+class ContinuingEducationAdmissionManager(models.Manager.from_queryset(BaseAdmissionQuerySet)):
     def get_queryset(self):
-        return super().get_queryset().select_related(
-            "candidate__country_of_citizenship",
-            "training__academic_year",
-        ).annotate_campus()
+        return (
+            super()
+            .get_queryset()
+            .select_related(
+                "candidate__country_of_citizenship",
+                "training__academic_year",
+                "training__education_group_type",
+            )
+            .annotate_campus()
+        )
 
 
 class ContinuingEducationAdmissionProxy(ContinuingEducationAdmission):
@@ -80,33 +81,3 @@ class ContinuingEducationAdmissionProxy(ContinuingEducationAdmission):
 
     class Meta:
         proxy = True
-
-
-@receiver(post_save, sender=EducationGroupYear)
-def _invalidate_continuing_education_cache(sender, instance, **kwargs):
-    if (  # pragma: no branch
-        instance.education_group_type.category == Categories.TRAINING.name
-        and instance.education_group_type.name in AnneeInscriptionFormationTranslator.CONTINUING_EDUCATION_TYPES
-    ):
-        keys = [
-            f'admission_permission_{a_uuid}'
-            for a_uuid in ContinuingEducationAdmission.objects.filter(training_id=instance.pk).values_list(
-                'uuid',
-                flat=True,
-            )
-        ]
-        if keys:
-            cache.delete_many(keys)
-
-
-@receiver(post_save, sender=Person)
-def _invalidate_candidate_cache(sender, instance, **kwargs):
-    keys = [
-        f'admission_permission_{a_uuid}'
-        for a_uuid in ContinuingEducationAdmission.objects.filter(candidate_id=instance.pk).values_list(
-            'uuid',
-            flat=True,
-        )
-    ]
-    if keys:
-        cache.delete_many(keys)

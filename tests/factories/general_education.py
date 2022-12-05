@@ -25,17 +25,19 @@
 # ##############################################################################
 import factory
 
+from admission.contrib.models import GeneralEducationAdmission
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
-from admission.contrib.models import GeneralEducationAdmission
+from admission.tests.factories.person import CompletePersonForBachelorFactory
 from admission.tests.factories.roles import CandidateFactory
 from admission.tests.factories.scholarship import (
-    ErasmusMundusScholarship,
-    DoubleDegreeScholarship,
-    InternationalScholarship,
+    DoubleDegreeScholarshipFactory,
+    ErasmusMundusScholarshipFactory,
+    InternationalScholarshipFactory,
 )
 from base.models.enums import education_group_categories
+from base.models.enums.education_group_types import TrainingType
 from base.tests.factories.education_group_year import EducationGroupYearFactory
 from base.tests.factories.person import PersonFactory
 from program_management.tests.factories.education_group_version import EducationGroupVersionFactory
@@ -59,10 +61,19 @@ class GeneralEducationAdmissionFactory(factory.DjangoModelFactory):
 
     candidate = factory.SubFactory(PersonFactory)
     training = factory.SubFactory(GeneralEducationTrainingFactory)
-    erasmus_mundus_scholarship = factory.SubFactory(ErasmusMundusScholarship)
-    double_degree_scholarship = factory.SubFactory(DoubleDegreeScholarship)
-    international_scholarship = factory.SubFactory(InternationalScholarship)
+    erasmus_mundus_scholarship = factory.SubFactory(ErasmusMundusScholarshipFactory)
+    double_degree_scholarship = factory.SubFactory(DoubleDegreeScholarshipFactory)
+    international_scholarship = factory.SubFactory(InternationalScholarshipFactory)
+    is_external_reorientation = False
+    is_external_modification = False
 
     @factory.post_generation
     def create_candidate_role(self, create, extracted, **kwargs):
         CandidateFactory(person=self.candidate)
+
+    class Params:
+        bachelor_with_access_conditions_met = factory.Trait(
+            training__academic_year__current=True,
+            training__education_group_type__name=TrainingType.BACHELOR.name,
+            candidate=factory.SubFactory(CompletePersonForBachelorFactory),
+        )

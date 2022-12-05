@@ -35,6 +35,10 @@ from admission.mail_templates import ADMISSION_EMAIL_CONFIRMATION_PAPER_INFO_STU
 from admission.views.doctorate.mixins import LoadDossierViewMixin
 from infrastructure.messages_bus import message_bus_instance
 
+__all__ = [
+    "DoctorateAdmissionConfirmationDetailView",
+]
+
 
 class DoctorateAdmissionConfirmationDetailView(LoadDossierViewMixin, TemplateView):
     template_name = 'admission/doctorate/details/confirmation.html'

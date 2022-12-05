@@ -65,6 +65,7 @@ __all__ = [
     "PaperForm",
     "ComplementaryCourseForm",
     "UclCourseForm",
+    "get_category_labels",
 ]
 
 INSTITUTION_UCL = "UCLouvain"
@@ -631,7 +632,7 @@ class UclCourseForm(ActivityFormMixin, forms.ModelForm):
     learning_unit_year = forms.CharField(
         label=_("Learning unit"),
         widget=autocomplete.ListSelect2(
-            url='admission:autocomplete:learning_unit_years',
+            url='admission:autocomplete:learning-unit-years',
             attrs={
                 'data-html': True,
                 'data-minimum-input-length': 2,
@@ -656,8 +657,12 @@ class UclCourseForm(ActivityFormMixin, forms.ModelForm):
         if self.initial.get('learning_unit_year'):
             learning_unit_year = LearningUnitYear.objects.get(pk=self.initial['learning_unit_year'])
             self.initial['academic_year'] = learning_unit_year.academic_year.year
+            self.initial['learning_unit_year'] = learning_unit_year.acronym
             self.fields['learning_unit_year'].widget.choices = [
-                (learning_unit_year.pk, f"{learning_unit_year.acronym} - {learning_unit_year.complete_title_i18n}"),
+                (
+                    learning_unit_year.acronym,
+                    f"{learning_unit_year.acronym} - {learning_unit_year.complete_title_i18n}",
+                ),
             ]
 
     def clean(self):

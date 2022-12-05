@@ -44,7 +44,7 @@
     {% endif %}
     {% if perms.admission.change_cddmailtemplate %}
       <li>
-        <a href="{% url 'admission:config:cdd_mail_template:list' %}">
+        <a href="{% url 'admission:config:cdd-mail-template:list' %}">
           <span class="fa fa-tools"></span>
           {% trans 'CDD Mail template' %}
         </a>
@@ -52,7 +52,7 @@
     {% endif %}
     {% if perms.admission.change_cddconfiguration %}
       <li>
-        <a href="{% url 'admission:config:cdd_config:list' %}">
+        <a href="{% url 'admission:config:cdd-config:list' %}">
           <span class="fa fa-tools"></span>
           {% trans 'CDD configuration' %}
         </a>

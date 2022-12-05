@@ -24,7 +24,7 @@
 #
 ##############################################################################
 import datetime
-from typing import Dict, List
+from typing import Dict, List, Union
 
 import attr
 
@@ -44,3 +44,8 @@ class PropositionDTO(interface.DTO):
     matricule_candidat: str
     prenom_candidat: str
     nom_candidat: str
+
+    reponses_questions_specifiques: Dict[str, Union[str, List[str]]]
+
+    curriculum: List[str]
+    equivalence_diplome: List[str]

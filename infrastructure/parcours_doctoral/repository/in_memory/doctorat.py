@@ -41,6 +41,7 @@ from admission.ddd.parcours_doctoral.test.factory.doctorat import (
     DoctoratSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory,
     DoctoratSC3DPMinimaleFactory,
 )
+from admission.infrastructure.admission.domain.service.in_memory.bourse import BourseInMemoryTranslator
 from base.ddd.utils.in_memory_repository import InMemoryGenericRepository
 
 
@@ -91,6 +92,11 @@ class DoctoratInMemoryRepository(InMemoryGenericRepository, IDoctoratRepository)
         doctorat = cls.get(entity_id)
         doctorant = next(d for d in cls.doctorants if d.matricule == doctorat.matricule_doctorant)  # pragma: no branch
         formation = next(f for f in cls.formations if f.sigle == doctorat.formation_id.sigle)  # pragma: no branch
+        bourse_recherche_dto = (
+            BourseInMemoryTranslator.get_dto(uuid=str(doctorat.bourse_recherche.uuid))
+            if doctorat.bourse_recherche
+            else None
+        )
 
         return DoctoratDTO(
             uuid=str(entity_id.uuid),
@@ -104,7 +110,8 @@ class DoctoratInMemoryRepository(InMemoryGenericRepository, IDoctoratRepository)
             intitule_formation=formation.intitule,
             titre_these='',
             type_financement='',
-            bourse_recherche=None,
+            bourse_recherche=bourse_recherche_dto,
+            autre_bourse_recherche=doctorat.autre_bourse_recherche,
             admission_acceptee_le=None,  # TODO to add when the field will be added to the model
             noma_doctorant=doctorant.noma,
             genre_doctorant=doctorant.genre.name,

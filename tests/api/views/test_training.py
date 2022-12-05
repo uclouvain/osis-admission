@@ -80,7 +80,7 @@ class TrainingApiTestCase(QueriesAssertionsMixin, APITestCase):
         CddConfiguration.objects.create(cdd=cls.commission, is_complementary_training_enabled=True)
         cls.reference_promoter = PromoterFactory(is_reference_promoter=True)
         cls.admission = DoctorateAdmissionFactory(
-            doctorate__management_entity=cls.commission,
+            training__management_entity=cls.commission,
             admitted=True,
             supervision_group=cls.reference_promoter.process,
         )

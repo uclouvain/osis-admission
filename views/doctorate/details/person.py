@@ -27,6 +27,8 @@ from django.views.generic import TemplateView
 
 from admission.views.doctorate.mixins import LoadDossierViewMixin
 
+__all__ = ['DoctorateAdmissionPersonDetailView']
+
 
 class DoctorateAdmissionPersonDetailView(LoadDossierViewMixin, TemplateView):
     template_name = 'admission/doctorate/details/person.html'

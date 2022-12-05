@@ -37,7 +37,7 @@ def initier_proposition(
     formation_translator: 'IFormationContinueTranslator',
 ) -> 'PropositionIdentity':
     # GIVEN
-    formation_id = FormationIdentityBuilder.build_from_uuid(sigle=cmd.sigle_formation, annee=cmd.annee_formation)
+    formation_id = FormationIdentityBuilder.build(sigle=cmd.sigle_formation, annee=cmd.annee_formation)
     formation = formation_translator.get(formation_id)
 
     # WHEN

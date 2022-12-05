@@ -46,6 +46,7 @@ def modifier_type_admission(
         bourse_erasmus_mundus=bourse_erasmus_mundus,
         type_admission=cmd.type_admission,
         justification=cmd.justification,
+        reponses_questions_specifiques=cmd.reponses_questions_specifiques,
     )
 
     # THEN

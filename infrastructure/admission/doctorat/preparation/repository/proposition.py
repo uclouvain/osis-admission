@@ -124,7 +124,10 @@ def _instantiate_admission(admission: 'DoctorateAdmission') -> 'Proposition':
             type=ChoixTypeFinancement[admission.financing_type] if admission.financing_type else None,
             type_contrat_travail=admission.financing_work_contract,
             eft=admission.financing_eft,
-            bourse_recherche=admission.scholarship_grant,
+            bourse_recherche=BourseIdentity(uuid=str(admission.international_scholarship_id))
+            if admission.international_scholarship_id
+            else None,
+            autre_bourse_recherche=admission.other_international_scholarship,
             bourse_date_debut=admission.scholarship_start_date,
             bourse_date_fin=admission.scholarship_end_date,
             bourse_preuve=admission.scholarship_proof,
@@ -141,6 +144,8 @@ def _instantiate_admission(admission: 'DoctorateAdmission') -> 'Proposition':
         creee_le=admission.created,
         modifiee_le=admission.modified,
         comptabilite=get_accounting_from_admission(admission=admission),
+        reponses_questions_specifiques=admission.specific_question_answers,
+        curriculum=admission.curriculum,
     )
 
 
@@ -192,11 +197,6 @@ class PropositionRepository(IPropositionRepository):
             academic_year__year=entity.annee,
         )
         candidate = Person.objects.get(global_id=entity.matricule_candidat)
-        erasmus_mundus_scholarship = (
-            Scholarship.objects.get(pk=entity.bourse_erasmus_mundus_id.uuid)
-            if entity.bourse_erasmus_mundus_id
-            else None
-        )
         admission, _ = DoctorateAdmission.objects.update_or_create(
             uuid=entity.entity_id.uuid,
             defaults={
@@ -210,7 +210,9 @@ class PropositionRepository(IPropositionRepository):
                 'financing_type': entity.financement.type and entity.financement.type.name or '',
                 'financing_work_contract': entity.financement.type_contrat_travail,
                 'financing_eft': entity.financement.eft,
-                'scholarship_grant': entity.financement.bourse_recherche,
+                'international_scholarship_id': entity.financement.bourse_recherche
+                and entity.financement.bourse_recherche.uuid,
+                'other_international_scholarship': entity.financement.autre_bourse_recherche,
                 'scholarship_start_date': entity.financement.bourse_date_debut,
                 'scholarship_end_date': entity.financement.bourse_date_fin,
                 'scholarship_proof': entity.financement.bourse_preuve,
@@ -236,7 +238,10 @@ class PropositionRepository(IPropositionRepository):
                 'phd_already_done_defense_date': entity.experience_precedente_recherche.date_soutenance,
                 'phd_already_done_no_defense_reason': entity.experience_precedente_recherche.raison_non_soutenue,
                 'archived_record_signatures_sent': entity.fiche_archive_signatures_envoyees,
-                'erasmus_mundus_scholarship': erasmus_mundus_scholarship,
+                'erasmus_mundus_scholarship_id': entity.bourse_erasmus_mundus_id
+                and entity.bourse_erasmus_mundus_id.uuid,
+                'specific_question_answers': entity.reponses_questions_specifiques,
+                'curriculum': entity.curriculum,
             },
         )
         Candidate.objects.get_or_create(person=candidate)
@@ -351,9 +356,9 @@ class PropositionRepository(IPropositionRepository):
         if commission_proximite:
             qs = qs.filter(proximity_commission=commission_proximite)
         if annee_academique:
-            qs = qs.filter(doctorate__academic_year__year=annee_academique)
+            qs = qs.filter(training__academic_year__year=annee_academique)
         if sigles_formations:
-            qs = qs.filter(doctorate__acronym__in=sigles_formations)
+            qs = qs.filter(training__acronym__in=sigles_formations)
         if financement:
             qs = qs.filter(financing_type=financement)
         if type_contrat_travail:
@@ -363,9 +368,9 @@ class PropositionRepository(IPropositionRepository):
                 qs = qs.filter(financing_work_contract=type_contrat_travail)
         if bourse_recherche:
             if bourse_recherche == BourseRecherche.OTHER.name:
-                qs = qs.exclude(scholarship_grant__in=BourseRecherche.get_names())
+                qs = qs.filter(international_scholarship_id__isnull=True)
             else:
-                qs = qs.filter(scholarship_grant=bourse_recherche)
+                qs = qs.filter(international_scholarship_id=bourse_recherche)
         if matricule_promoteur:
             qs = qs.filter(supervision_group__actors__person__global_id=matricule_promoteur)
         if cotutelle is not None:
@@ -374,7 +379,7 @@ class PropositionRepository(IPropositionRepository):
             qs = qs.alias(
                 cdd_acronym=Subquery(
                     EntityVersion.objects.current(date.today())
-                    .filter(entity_id=OuterRef('doctorate__management_entity_id'))
+                    .filter(entity_id=OuterRef('training__management_entity_id'))
                     .values('acronym')[:1]
                 )
             ).filter(cdd_acronym__in=cdds)
@@ -404,6 +409,7 @@ class PropositionRepository(IPropositionRepository):
                 ),
                 sigle_entite_gestion=admission.sigle_entite_gestion,  # from PropositionManager annotation
                 campus=admission.teaching_campus or '',  # from PropositionManager annotation
+                type=admission.doctorate.education_group_type.name,
             ),
             matricule_candidat=admission.candidate.global_id,
             prenom_candidat=admission.candidate.first_name,
@@ -417,7 +423,10 @@ class PropositionRepository(IPropositionRepository):
             type_financement=admission.financing_type,
             type_contrat_travail=admission.financing_work_contract,
             eft=admission.financing_eft,
-            bourse_recherche=admission.scholarship_grant,
+            bourse_recherche=BourseTranslator.build_dto(admission.international_scholarship)
+            if admission.international_scholarship
+            else None,
+            autre_bourse_recherche=admission.other_international_scholarship,
             bourse_date_debut=admission.scholarship_start_date,
             bourse_date_fin=admission.scholarship_end_date,
             bourse_preuve=admission.scholarship_proof,
@@ -450,4 +459,6 @@ class PropositionRepository(IPropositionRepository):
             bourse_erasmus_mundus=BourseTranslator.build_dto(admission.erasmus_mundus_scholarship)
             if admission.erasmus_mundus_scholarship
             else None,
+            reponses_questions_specifiques=admission.specific_question_answers,
+            curriculum=admission.curriculum,
         )

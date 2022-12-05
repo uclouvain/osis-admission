@@ -38,6 +38,7 @@ from admission.ddd.admission.formation_continue.test.factory.proposition import 
 )
 from admission.ddd.admission.test.factory.formation import _FormationIdentityFactory
 from base.ddd.utils.in_memory_repository import InMemoryGenericRepository
+from base.models.enums.education_group_types import TrainingType
 
 
 @dataclass
@@ -51,6 +52,7 @@ class _Candidat:
 class _Formation:
     intitule: str
     campus: str
+    type: str
 
 
 class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepository):
@@ -58,14 +60,17 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
         ("SC3DP", 2020): _Formation(
             intitule="Doctorat en sciences",
             campus="Louvain-la-Neuve",
+            type=TrainingType.PHD.name,
         ),
         ("ECGE3DP", 2020): _Formation(
             intitule="Doctorat en sciences économiques et de gestion",
             campus="Louvain-la-Neuve",
+            type=TrainingType.PHD.name,
         ),
         ("ESP3DP", 2020): _Formation(
             intitule="Doctorat en sciences de la santé publique",
             campus="Mons",
+            type=TrainingType.PHD.name,
         ),
     }
     candidats = {
@@ -129,5 +134,9 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
                 annee=proposition.formation_id.annee,
                 intitule=formation.intitule,
                 campus=formation.campus,
+                type=formation.type,
             ),
+            reponses_questions_specifiques=proposition.reponses_questions_specifiques,
+            equivalence_diplome=proposition.equivalence_diplome,
+            curriculum=proposition.curriculum,
         )

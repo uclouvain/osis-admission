@@ -23,6 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import uuid
 
 import factory
 from django.db import connection
@@ -59,7 +60,7 @@ def _generate_reference(obj):
     cursor.execute("SELECT NEXTVAL('%(sequence)s')" % {'sequence': REFERENCE_SEQ_NAME})
     next_id = cursor.fetchone()[0]
     return "{}-{}".format(
-        obj.doctorate.academic_year.year % 100,
+        obj.training.academic_year.year % 100,
         Proposition.valeur_reference_base + next_id,
     )
 
@@ -75,10 +76,11 @@ class DoctorateAdmissionFactory(factory.DjangoModelFactory):
         model = DoctorateAdmission
 
     candidate = factory.SubFactory(PersonFactory)
-    doctorate = factory.SubFactory(DoctorateFactory)
+    training = factory.SubFactory(DoctorateFactory)
     reference = factory.LazyAttribute(_generate_reference)
     planned_duration = 10
     dedicated_time = 10
+    curriculum = factory.LazyFunction(lambda: [uuid.uuid4()])
 
     class Params:
         with_cotutelle = factory.Trait(
@@ -113,6 +115,12 @@ class DoctorateAdmissionFactory(factory.DjangoModelFactory):
         )
         with_thesis_institute = factory.Trait(
             thesis_institute=factory.SubFactory(EntityVersionFactory),
+        )
+        with_answers_to_specific_questions = factory.Trait(
+            specific_question_answers={
+                'fe254203-17c7-47d6-95e4-3c5c532da551': 'My response',
+                'fe254203-17c7-47d6-95e4-3c5c532da552': ['ae254203-17c7-47d6-95e4-3c5c532da550'],
+            },
         )
 
     @factory.post_generation

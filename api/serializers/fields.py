@@ -27,6 +27,7 @@ from functools import partial
 
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
+from django.core.serializers.json import DjangoJSONEncoder
 from django.urls.exceptions import NoReverseMatch
 from django.urls import reverse, resolve
 from django.utils.translation import get_language
@@ -106,7 +107,11 @@ class ActionLinksField(serializers.Field):
                 view = view_class(args=resolver_match.args, kwargs=resolver_match.kwargs)
 
                 # Check the permissions specified in the view via the 'permission_mapping' property
-                failed_permission_message = view.check_method_permissions(request.user, action.get('method'))
+                failed_permission_message = view.check_method_permissions(
+                    user=request.user,
+                    method=action.get('method'),
+                    obj=getattr(instance, '_perm_obj', None),
+                )
 
                 if failed_permission_message is None:
                     # If the user has the rights permissions we return the method type and the related endpoint
@@ -146,11 +151,18 @@ class RelatedInstituteField(serializers.CharField, serializers.SlugRelatedField)
             return str(serializers.SlugRelatedField.to_representation(self, value))
 
 
-DoctorateAdmissionField = partial(
+AdmissionUuidField = partial(
     serializers.SlugRelatedField,
     slug_field='uuid',
     read_only=True,
     allow_null=True,
+)
+
+
+AnswerToSpecificQuestionField = partial(
+    serializers.JSONField,
+    encoder=DjangoJSONEncoder,
+    default=dict,
 )
 
 
@@ -167,7 +179,9 @@ ACTION_LINKS = {
         'path_name': 'admission_api_v1:supervised_propositions',
         'method': 'GET',
     },
-    # Profile
+}
+
+DOCTORATE_ACTION_LINKS = {
     # Person
     'retrieve_person': {
         'path_name': 'admission_api_v1:person',
@@ -214,12 +228,12 @@ ACTION_LINKS = {
     },
     # Curriculum
     'retrieve_curriculum': {
-        'path_name': 'admission_api_v1:curriculum_file',
+        'path_name': 'admission_api_v1:curriculum',
         'method': 'GET',
         'params': ['uuid'],
     },
     'update_curriculum': {
-        'path_name': 'admission_api_v1:curriculum_file',
+        'path_name': 'admission_api_v1:curriculum',
         'method': 'PUT',
         'params': ['uuid'],
     },
@@ -250,7 +264,7 @@ ACTION_LINKS = {
         'params': ['uuid'],
     },
     'submit_proposition': {
-        'path_name': 'admission_api_v1:submit-proposition',
+        'path_name': 'admission_api_v1:submit-doctoral-proposition',
         'method': 'POST',
         'params': ['uuid'],
     },
@@ -387,6 +401,11 @@ GENERAL_EDUCATION_ACTION_LINKS = {
         'method': 'DELETE',
         'params': ['uuid'],
     },
+    'submit_proposition': {
+        'path_name': 'admission_api_v1:submit-general-proposition',
+        'method': 'POST',
+        'params': ['uuid'],
+    },
     'retrieve_person': {
         'path_name': 'admission_api_v1:general_person',
         'method': 'GET',
@@ -418,12 +437,22 @@ GENERAL_EDUCATION_ACTION_LINKS = {
         'params': ['uuid'],
     },
     'retrieve_curriculum': {
-        'path_name': 'admission_api_v1:general_curriculum_file',
+        'path_name': 'admission_api_v1:general_curriculum',
         'method': 'GET',
         'params': ['uuid'],
     },
     'update_curriculum': {
-        'path_name': 'admission_api_v1:general_curriculum_file',
+        'path_name': 'admission_api_v1:general_curriculum',
+        'method': 'PUT',
+        'params': ['uuid'],
+    },
+    'retrieve_specific_question': {
+        'path_name': 'admission_api_v1:general_specific_question',
+        'method': 'GET',
+        'params': ['uuid'],
+    },
+    'update_specific_question': {
+        'path_name': 'admission_api_v1:general_specific_question',
         'method': 'PUT',
         'params': ['uuid'],
     },
@@ -450,6 +479,11 @@ CONTINUING_EDUCATION_ACTION_LINKS = {
         'method': 'DELETE',
         'params': ['uuid'],
     },
+    'submit_proposition': {
+        'path_name': 'admission_api_v1:submit-continuing-proposition',
+        'method': 'POST',
+        'params': ['uuid'],
+    },
     'retrieve_person': {
         'path_name': 'admission_api_v1:continuing_person',
         'method': 'GET',
@@ -481,12 +515,22 @@ CONTINUING_EDUCATION_ACTION_LINKS = {
         'params': ['uuid'],
     },
     'retrieve_curriculum': {
-        'path_name': 'admission_api_v1:continuing_curriculum_file',
+        'path_name': 'admission_api_v1:continuing_curriculum',
         'method': 'GET',
         'params': ['uuid'],
     },
     'update_curriculum': {
-        'path_name': 'admission_api_v1:continuing_curriculum_file',
+        'path_name': 'admission_api_v1:continuing_curriculum',
+        'method': 'PUT',
+        'params': ['uuid'],
+    },
+    'retrieve_specific_question': {
+        'path_name': 'admission_api_v1:continuing_specific_question',
+        'method': 'GET',
+        'params': ['uuid'],
+    },
+    'update_specific_question': {
+        'path_name': 'admission_api_v1:continuing_specific_question',
         'method': 'PUT',
         'params': ['uuid'],
     },

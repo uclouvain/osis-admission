@@ -29,7 +29,7 @@ from django.shortcuts import resolve_url
 from django.test import override_settings
 from rest_framework.test import APITestCase
 
-from admission.tests.factories.scholarship import DoubleDegreeScholarship
+from admission.tests.factories.scholarship import DoubleDegreeScholarshipFactory
 from base.tests.factories.user import UserFactory
 
 
@@ -38,8 +38,8 @@ class ScholarshipReferenceTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
         cls.scholarships = [
-            DoubleDegreeScholarship(short_name='DDS-1', long_name='Double degree scholarship 1'),
-            DoubleDegreeScholarship(short_name='DDS-2', long_name='Double degree scholarship 2'),
+            DoubleDegreeScholarshipFactory(short_name='DDS-1', long_name='Double degree scholarship 1'),
+            DoubleDegreeScholarshipFactory(short_name='DDS-2', long_name='Double degree scholarship 2'),
         ]
         cls.user = UserFactory()
 

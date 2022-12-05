@@ -150,7 +150,10 @@ class SerializerFieldsTestCase(APITestCase):
         self.assertTrue('links' in serializer.data)
         self.assertEqual(serializer.data['links'], {
             'add_doctorateadmission': {
-                'error': "Method 'POST' not allowed",
+                'error': _(
+                    'You already have a doctorate admission in progress, please delete it before creating a newer one, '
+                    'or contact your domain doctoral committee.'
+                ),
             }
         })
 

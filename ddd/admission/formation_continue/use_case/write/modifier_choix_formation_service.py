@@ -39,12 +39,15 @@ def modifier_choix_formation(
     formation_translator: 'IFormationContinueTranslator',
 ) -> 'PropositionIdentity':
     # GIVEN
-    formation_id = FormationIdentityBuilder.build_from_uuid(sigle=cmd.sigle_formation, annee=cmd.annee_formation)
+    formation_id = FormationIdentityBuilder.build(sigle=cmd.sigle_formation, annee=cmd.annee_formation)
     formation = formation_translator.get(formation_id)
     proposition = proposition_repository.get(PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition))
 
     # WHEN
-    proposition.modifier_choix_formation(formation_id=formation.entity_id)
+    proposition.modifier_choix_formation(
+        formation_id=formation.entity_id,
+        reponses_questions_specifiques=cmd.reponses_questions_specifiques,
+    )
 
     # THEN
     proposition_repository.save(proposition)

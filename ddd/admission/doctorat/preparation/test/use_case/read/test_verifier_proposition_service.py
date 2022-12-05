@@ -24,9 +24,10 @@
 #
 # ##############################################################################
 import datetime
-
-import mock
 from unittest import TestCase
+
+import freezegun
+import mock
 
 from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import PropositionIdentityBuilder
 from admission.ddd.admission.doctorat.preparation.commands import VerifierPropositionCommand
@@ -73,16 +74,20 @@ from admission.ddd.admission.doctorat.preparation.test.factory.groupe_de_supervi
 from admission.ddd.admission.doctorat.preparation.test.factory.proposition import (
     _ComptabiliteFactory,
 )
-from admission.infrastructure.admission.doctorat.preparation.domain.service.in_memory.profil_candidat import (
-    DiplomeEtudeSecondaire,
-    ExperienceNonAcademique,
-    ProfilCandidatInMemoryTranslator,
+from admission.ddd.admission.domain.validator.exceptions import (
+    QuestionsSpecifiquesCurriculumNonCompleteesException,
+    QuestionsSpecifiquesEtudesSecondairesNonCompleteesException,
 )
 from admission.infrastructure.admission.doctorat.preparation.repository.in_memory.groupe_de_supervision import (
     GroupeDeSupervisionInMemoryRepository,
 )
 from admission.infrastructure.admission.doctorat.preparation.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
+)
+from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import (
+    DiplomeEtudeSecondaire,
+    ExperienceNonAcademique,
+    ProfilCandidatInMemoryTranslator,
 )
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
@@ -117,12 +122,9 @@ class TestVerifierPropositionServiceCommun(TestCase):
             )
 
         # Mock datetime to return the 2020 year as the current year
-        patcher = mock.patch(
-            'admission.ddd.admission.doctorat.preparation.use_case.read.verifier_proposition_service.datetime'
-        )
+        patcher = freezegun.freeze_time('2020-11-01')
+        patcher.start()
         self.addCleanup(patcher.stop)
-        self.mock_foo = patcher.start()
-        self.mock_foo.date.today.return_value = datetime.date(2020, 11, 1)
 
         self.cmd = VerifierPropositionCommand(uuid_proposition=self.proposition.entity_id.uuid)
 
@@ -247,7 +249,7 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
             self.assertIsInstance(context.exception.exceptions.pop(), LanguesConnuesNonSpecifieesException)
 
     def test_should_retourner_erreur_si_fichier_curriculum_non_renseigne(self):
-        with mock.patch.object(self.candidat, 'curriculum', None):
+        with mock.patch.object(self.proposition, 'curriculum', []):
             with self.assertRaises(MultipleBusinessExceptions) as context:
                 self.message_bus.invoke(self.cmd)
             self.assertIsInstance(context.exception.exceptions.pop(), FichierCurriculumNonRenseigneException)
@@ -288,6 +290,36 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
             with self.assertRaises(MultipleBusinessExceptions) as context:
                 self.message_bus.invoke(self.cmd)
             self.assertTrue(any(member for member in context.exception.exceptions if isinstance(member, exception)))
+
+    def test_should_retourner_erreur_si_questions_specifiques_pas_completees_pour_curriculum(self):
+        with mock.patch.multiple(
+            self.proposition,
+            reponses_questions_specifiques={
+                '06de0c3d-3c06-4c93-8eb4-c8648f04f140': 'My response 1',
+                '06de0c3d-3c06-4c93-8eb4-c8648f04f143': 'My response 3',
+            },
+        ):
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                self.message_bus.invoke(self.cmd)
+            self.assertIsInstance(
+                context.exception.exceptions.pop(),
+                QuestionsSpecifiquesCurriculumNonCompleteesException,
+            )
+
+    def test_should_retourner_erreur_si_questions_specifiques_pas_completees_pour_etudes_secondaires(self):
+        with mock.patch.multiple(
+            self.proposition,
+            reponses_questions_specifiques={
+                '06de0c3d-3c06-4c93-8eb4-c8648f04f140': 'My response 1',
+                '06de0c3d-3c06-4c93-8eb4-c8648f04f142': 'My response 2',
+            },
+        ):
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                self.message_bus.invoke(self.cmd)
+            self.assertIsInstance(
+                context.exception.exceptions.pop(),
+                QuestionsSpecifiquesEtudesSecondairesNonCompleteesException,
+            )
 
     def _test_should_retourner_erreur_si_assimilation_incomplete(self, comptabilite, exception):
         with mock.patch.object(self.candidat, 'pays_nationalite', 'CA'):

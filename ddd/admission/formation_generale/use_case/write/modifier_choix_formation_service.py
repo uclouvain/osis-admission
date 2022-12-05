@@ -41,7 +41,7 @@ def modifier_choix_formation(
     bourse_translator: 'IBourseTranslator',
 ) -> 'PropositionIdentity':
     # GIVEN
-    formation_id = FormationIdentityBuilder.build_from_uuid(sigle=cmd.sigle_formation, annee=cmd.annee_formation)
+    formation_id = FormationIdentityBuilder.build(sigle=cmd.sigle_formation, annee=cmd.annee_formation)
     formation = formation_translator.get(formation_id)
     proposition = proposition_repository.get(PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition))
     bourses_ids = bourse_translator.search(
@@ -59,6 +59,7 @@ def modifier_choix_formation(
         bourse_double_diplome=cmd.bourse_double_diplome,
         bourse_internationale=cmd.bourse_internationale,
         bourse_erasmus_mundus=cmd.bourse_erasmus_mundus,
+        reponses_questions_specifiques=cmd.reponses_questions_specifiques,
     )
 
     # THEN

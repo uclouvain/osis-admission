@@ -112,22 +112,21 @@ def complementary_training_enabled(self, user: User, obj: DoctorateAdmission):
 @predicate(bind=True)
 @predicate_failed_msg(message=_("You must be the request promoter to access this admission"))
 def is_admission_request_promoter(self, user: User, obj: DoctorateAdmission):
-    return obj.supervision_group and user.person.pk in obj.supervision_group.actors.filter(
-        supervisionactor__type=ActorType.PROMOTER.name,
-    ).values_list('person_id', flat=True)
+    return obj.supervision_group and user.person.pk in [
+        actor.person_id
+        for actor in obj.supervision_group.actors.all()
+        if actor.supervisionactor.type == ActorType.PROMOTER.name
+    ]
 
 
 @predicate(bind=True)
 @predicate_failed_msg(message=_("You must be the reference promoter to access this admission"))
 def is_admission_reference_promoter(self, user: User, obj: DoctorateAdmission):
-    return (
-        obj.supervision_group
-        and obj.supervision_group.actors.filter(
-            supervisionactor__type=ActorType.PROMOTER.name,
-            supervisionactor__is_reference_promoter=True,
-            person_id=user.person.pk,
-        ).exists()
-    )
+    return obj.supervision_group and user.person.pk in [
+        actor.person_id
+        for actor in obj.supervision_group.actors.all()
+        if actor.supervisionactor.type == ActorType.PROMOTER.name and actor.supervisionactor.is_reference_promoter
+    ]
 
 
 @predicate(bind=True)
@@ -140,12 +139,14 @@ def is_part_of_doctoral_commission(self, user: User, obj: DoctorateAdmission):
 @predicate(bind=True)
 @predicate_failed_msg(message=_("You must be a member of the committee to access this admission"))
 def is_part_of_committee(self, user: User, obj: DoctorateAdmission):
-    return obj.supervision_group and user.person.pk in obj.supervision_group.actors.values_list('person_id', flat=True)
+    return obj.supervision_group and user.person.pk in [actor.person_id for actor in obj.supervision_group.actors.all()]
 
 
 @predicate(bind=True)
 @predicate_failed_msg(message=_("You must be a member of the committee who has not yet given his answer"))
 def is_part_of_committee_and_invited(self, user: User, obj: DoctorateAdmission):
-    return obj.supervision_group and user.person.pk in obj.supervision_group.actors.filter(
-        last_state=SignatureState.INVITED.name,
-    ).values_list('person_id', flat=True)
+    return obj.supervision_group and user.person.pk in [
+        actor.person_id
+        for actor in obj.supervision_group.actors.all()
+        if actor.last_state == SignatureState.INVITED.name
+    ]

@@ -84,13 +84,13 @@ class AccountingAPIViewTestCase(APITestCase):
             acronym='CDA',
         ).entity
         cls.admission = DoctorateAdmissionFactory(
-            doctorate__management_entity=commission,
+            training__management_entity=commission,
             candidate=PersonFactory(country_of_citizenship=None),
         )
         other_admission = DoctorateAdmissionFactory(
             status=ChoixStatutProposition.ENROLLED.name,
             post_enrolment_status=ChoixStatutDoctorat.ADMITTED.name,
-            doctorate__management_entity=commission,
+            training__management_entity=commission,
             supervision_group=other_promoter.process,
         )
 

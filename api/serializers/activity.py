@@ -314,6 +314,7 @@ class UclCourseSerializer(ActivitySerializerBase):
     academic_year = serializers.IntegerField(source="learning_unit_year.academic_year.year")
     learning_unit_title = serializers.CharField(source="learning_unit_year.complete_title_i18n", read_only=True)
     academic_year_title = serializers.CharField(source="learning_unit_year.academic_year", read_only=True)
+    ects = serializers.FloatField(read_only=True)
 
     class Meta:
         form = activity_forms.UclCourseForm

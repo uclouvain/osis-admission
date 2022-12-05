@@ -36,7 +36,7 @@ class ScholarshipFactory(factory.DjangoModelFactory):
         model = Scholarship
 
 
-class DoubleDegreeScholarship(factory.DjangoModelFactory):
+class DoubleDegreeScholarshipFactory(factory.DjangoModelFactory):
     type = TypeBourse.DOUBLE_TRIPLE_DIPLOMATION.name
     short_name = FuzzyText(length=20)
     long_name = FuzzyText(length=40)
@@ -45,7 +45,7 @@ class DoubleDegreeScholarship(factory.DjangoModelFactory):
         model = Scholarship
 
 
-class InternationalScholarship(factory.DjangoModelFactory):
+class InternationalScholarshipFactory(factory.DjangoModelFactory):
     type = TypeBourse.BOURSE_INTERNATIONALE_FORMATION_GENERALE.name
     short_name = FuzzyText(length=20)
     long_name = FuzzyText(length=40)
@@ -54,7 +54,7 @@ class InternationalScholarship(factory.DjangoModelFactory):
         model = Scholarship
 
 
-class DoctorateScholarship(factory.DjangoModelFactory):
+class DoctorateScholarshipFactory(factory.DjangoModelFactory):
     type = TypeBourse.BOURSE_INTERNATIONALE_DOCTORAT.name
     short_name = FuzzyText(length=20)
     long_name = FuzzyText(length=40)
@@ -63,7 +63,7 @@ class DoctorateScholarship(factory.DjangoModelFactory):
         model = Scholarship
 
 
-class ErasmusMundusScholarship(factory.DjangoModelFactory):
+class ErasmusMundusScholarshipFactory(factory.DjangoModelFactory):
     type = TypeBourse.ERASMUS_MUNDUS.name
     short_name = FuzzyText(length=20)
     long_name = FuzzyText(length=40)

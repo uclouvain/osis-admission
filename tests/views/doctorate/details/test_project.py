@@ -76,8 +76,8 @@ class DoctorateAdmissionProjectDetailViewTestCase(TestCase):
         # Create admissions
         cls.admissions: List[DoctorateAdmission] = [
             DoctorateAdmissionFactory(
-                doctorate__management_entity=first_doctoral_commission,
-                doctorate__academic_year=academic_years[0],
+                training__management_entity=first_doctoral_commission,
+                training__academic_year=academic_years[0],
                 cotutelle=False,
                 supervision_group=promoter.process,
                 financing_type=ChoixTypeFinancement.WORK_CONTRACT.name,
@@ -86,12 +86,12 @@ class DoctorateAdmissionProjectDetailViewTestCase(TestCase):
                 pre_admission_submission_date=datetime.datetime.now(),
             ),
             DoctorateAdmissionFactory(
-                doctorate__management_entity=first_doctoral_commission,
-                doctorate__academic_year=academic_years[0],
+                training__management_entity=first_doctoral_commission,
+                training__academic_year=academic_years[0],
                 status=ChoixStatutProposition.SUBMITTED.name,
                 candidate=candidate.person,
                 financing_type=ChoixTypeFinancement.SEARCH_SCHOLARSHIP.name,
-                scholarship_grant=BourseRecherche.ARC.name,
+                other_international_scholarship=BourseRecherche.ARC.name,
                 financing_work_contract=ChoixTypeContratTravail.UCLOUVAIN_ASSISTANT.name,
                 type=ChoixTypeAdmission.ADMISSION.name,
                 admission_submission_date=datetime.datetime.now(),
@@ -117,8 +117,8 @@ class DoctorateAdmissionProjectDetailViewTestCase(TestCase):
                 },
             ),
             DoctorateAdmissionFactory(
-                doctorate__management_entity=second_doctoral_commission,
-                doctorate__academic_year=academic_years[0],
+                training__management_entity=second_doctoral_commission,
+                training__academic_year=academic_years[0],
             ),
         ]
 

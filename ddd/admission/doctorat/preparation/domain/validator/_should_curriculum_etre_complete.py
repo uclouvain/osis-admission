@@ -28,7 +28,7 @@ from typing import List, Optional, Tuple
 
 import attr
 
-from admission.ddd.admission.doctorat.preparation.domain.service.i_profil_candidat import IProfilCandidatTranslator
+from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     AnneesCurriculumNonSpecifieesException,
     FichierCurriculumNonRenseigneException,

@@ -27,19 +27,27 @@ import datetime
 from unittest.mock import ANY
 
 import mock
+import uuid
 from django.shortcuts import resolve_url
 from django.test import override_settings
 
 from rest_framework import status
+from rest_framework.status import HTTP_200_OK
 from rest_framework.test import APITestCase
 
-from admission.ddd.admission.doctorat.preparation.domain.service.i_profil_candidat import IProfilCandidatTranslator
+from admission.contrib.models import ContinuingEducationAdmission, DoctorateAdmission, GeneralEducationAdmission
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutProposition
+from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
+from admission.contrib.models.base import BaseAdmission
 from admission.tests.factories import DoctorateAdmissionFactory
+from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
 from admission.tests.factories.curriculum import (
     ProfessionalExperienceFactory,
     EducationalExperienceFactory,
     EducationalExperienceYearFactory,
 )
+from admission.tests.factories.form_item import AdmissionFormItemInstantiationFactory, TextAdmissionFormItemFactory
+from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.roles import CandidateFactory
 from admission.tests.factories.secondary_studies import BelgianHighSchoolDiplomaFactory, ForeignHighSchoolDiplomaFactory
 from base.models.enums.teaching_type import TeachingTypeEnum
@@ -59,12 +67,42 @@ from reference.tests.factories.language import LanguageFactory
 from reference.tests.factories.superior_non_university import SuperiorNonUniversityFactory
 
 
-@override_settings(ROOT_URLCONF='admission.api.url_v1')
-class GetCurriculumTestCase(APITestCase):
+class BaseCurriculumTestCase:
     @classmethod
     def setUpTestData(cls):
+        cls.today_date = datetime.date(2020, 11, 1)
+        cls.today_datetime = datetime.datetime(2020, 11, 1)
+
+    def setUp(self) -> None:
+        # Mock datetime to return the 2020 year as the current year
+        patcher = mock.patch('base.models.academic_year.timezone')
+        self.addCleanup(patcher.stop)
+        self.mock_foo = patcher.start()
+        self.mock_foo.now.return_value = self.today_datetime
+        # Mock files
+        patcher = mock.patch('osis_document.api.utils.get_remote_token', return_value='foobar')
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+        patcher = mock.patch('osis_document.api.utils.get_remote_metadata', return_value={'name': 'myfile'})
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+        patcher = mock.patch('osis_document.api.utils.confirm_remote_upload')
+        patched = patcher.start()
+        patched.return_value = '550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92'
+        self.addCleanup(patcher.stop)
+
+
+@override_settings(ROOT_URLCONF='admission.api.url_v1', OSIS_DOCUMENT_BASE_URL='http://dummyurl/')
+class DoctorateCurriculumTestCase(BaseCurriculumTestCase, APITestCase):
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
         # Mocked data
-        cls.admission = DoctorateAdmissionFactory()
+        cls.admission = DoctorateAdmissionFactory(
+            status=ChoixStatutProposition.IN_PROGRESS.name,
+        )
         cls.other_admission = DoctorateAdmissionFactory()
         cls.country = CountryFactory()
         cls.academic_year_2018 = AcademicYearFactory(year=2018)
@@ -72,6 +110,22 @@ class GetCurriculumTestCase(APITestCase):
         cls.user = cls.admission.candidate.user
         cls.other_user = cls.other_admission.candidate.user
         cls.user_without_admission = CandidateFactory().person.user
+
+        AdmissionFormItemInstantiationFactory(
+            form_item=TextAdmissionFormItemFactory(
+                uuid=uuid.UUID('fe254203-17c7-47d6-95e4-3c5c532da551'),
+                internal_label='text_item',
+            ),
+            academic_year=cls.admission.doctorate.academic_year,
+        )
+
+        cls.put_data = {
+            'reponses_questions_specifiques': {
+                'fe254203-17c7-47d6-95e4-3c5c532da551': 'My answer !',
+            },
+            'curriculum': ['file1.pdf'],
+            'uuid_proposition': cls.admission.uuid,
+        }
 
         cls.professional_experiences = [
             ProfessionalExperienceFactory(
@@ -117,13 +171,7 @@ class GetCurriculumTestCase(APITestCase):
         # Targeted urls
         cls.agnostic_url = resolve_url('curriculum')
         cls.admission_url = resolve_url('curriculum', uuid=cls.admission.uuid)
-
-    def setUp(self) -> None:
-        # Mock datetime to return the 2020 year as the current year
-        patcher = mock.patch('base.models.academic_year.timezone')
-        self.addCleanup(patcher.stop)
-        self.mock_foo = patcher.start()
-        self.mock_foo.now.return_value = self.today_datetime
+        cls.complete_admission_url = resolve_url('doctorate_curriculum', uuid=cls.admission.uuid)
 
     def test_user_not_logged_assert_not_authorized(self):
         self.client.force_authenticate(user=None)
@@ -149,7 +197,6 @@ class GetCurriculumTestCase(APITestCase):
 
         # Check response data
         response = response.json()
-        self.assertEqual(response.get('file'), {'curriculum': []})
         self.assertEqual(
             response.get('minimal_year'),
             1 + self.today_date.year - IProfilCandidatTranslator.NB_MAX_ANNEES_CV_REQUISES,
@@ -163,7 +210,7 @@ class GetCurriculumTestCase(APITestCase):
                     'start_date': '2020-01-01',
                     'end_date': '2021-01-01',
                     'type': ActivityType.WORK.name,
-                    'valuated_from_doctorateadmission': [],
+                    'valuated_from_admission': [],
                 },
                 {
                     'uuid': str(self.professional_experiences[1].uuid),
@@ -171,7 +218,7 @@ class GetCurriculumTestCase(APITestCase):
                     'start_date': '2020-01-01',
                     'end_date': '2020-09-01',
                     'type': ActivityType.WORK.name,
-                    'valuated_from_doctorateadmission': [],
+                    'valuated_from_admission': [],
                 },
             ],
         )
@@ -185,7 +232,8 @@ class GetCurriculumTestCase(APITestCase):
                     'program': None,
                     'education_name': 'Computer science',
                     'educationalexperienceyear_set': [{'academic_year': 2020}],
-                    'valuated_from_doctorateadmission': [],
+                    'valuated_from_admission': [],
+                    'country': self.country.iso_code,
                 }
             ],
         )
@@ -244,6 +292,120 @@ class GetCurriculumTestCase(APITestCase):
         )
 
         foreign_diploma.delete()
+
+    def test_put_curriculum(self):
+        self.client.force_authenticate(user=self.user)
+
+        response = self.client.put(self.complete_admission_url, data=self.put_data)
+
+        self.assertEqual(response.status_code, HTTP_200_OK)
+        updated_admission = BaseAdmission.objects.get(uuid=self.admission.uuid)
+
+        self.assertEqual(
+            updated_admission.specific_question_answers,
+            {
+                'fe254203-17c7-47d6-95e4-3c5c532da551': 'My answer !',
+            },
+        )
+        self.assertEqual(updated_admission.curriculum, [uuid.UUID('550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92')])
+
+
+@override_settings(ROOT_URLCONF='admission.api.url_v1', OSIS_DOCUMENT_BASE_URL='http://dummyurl/')
+class GeneralEducationCurriculumTestCase(BaseCurriculumTestCase, APITestCase):
+    @classmethod
+    def setUpTestData(cls) -> None:
+        super().setUpTestData()
+        cls.admission = GeneralEducationAdmissionFactory()
+        AdmissionFormItemInstantiationFactory(
+            form_item=TextAdmissionFormItemFactory(
+                uuid=uuid.UUID('fe254203-17c7-47d6-95e4-3c5c532da551'),
+                internal_label='text_item',
+            ),
+            academic_year=cls.admission.training.academic_year,
+        )
+
+        cls.put_data = {
+            'reponses_questions_specifiques': {
+                'fe254203-17c7-47d6-95e4-3c5c532da551': 'My answer !',
+            },
+            'curriculum': ['file1.pdf'],
+            'uuid_proposition': cls.admission.uuid,
+            'equivalence_diplome': ['file2.pdf'],
+            'continuation_cycle_bachelier': False,
+            'attestation_continuation_cycle_bachelier': [],
+        }
+
+        # Users
+        cls.user = cls.admission.candidate.user
+
+        # Targeted urls
+        cls.admission_url = resolve_url('general_curriculum', uuid=cls.admission.uuid)
+
+    def test_put_curriculum(self):
+        self.client.force_authenticate(user=self.user)
+
+        response = self.client.put(self.admission_url, data=self.put_data)
+
+        self.assertEqual(response.status_code, HTTP_200_OK)
+        updated_admission = GeneralEducationAdmission.objects.get(uuid=self.admission.uuid)
+
+        self.assertEqual(
+            updated_admission.specific_question_answers,
+            {
+                'fe254203-17c7-47d6-95e4-3c5c532da551': 'My answer !',
+            },
+        )
+        self.assertEqual(updated_admission.curriculum, [uuid.UUID('550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92')])
+        self.assertEqual(updated_admission.diploma_equivalence, [uuid.UUID('550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92')])
+        self.assertEqual(updated_admission.bachelor_cycle_continuation_certificate, [])
+        self.assertEqual(updated_admission.bachelor_cycle_continuation, False)
+
+
+@override_settings(ROOT_URLCONF='admission.api.url_v1', OSIS_DOCUMENT_BASE_URL='http://dummyurl/')
+class ContinuingEducationCurriculumTestCase(BaseCurriculumTestCase, APITestCase):
+    @classmethod
+    def setUpTestData(cls) -> None:
+        super().setUpTestData()
+        cls.admission = ContinuingEducationAdmissionFactory()
+        AdmissionFormItemInstantiationFactory(
+            form_item=TextAdmissionFormItemFactory(
+                uuid=uuid.UUID('fe254203-17c7-47d6-95e4-3c5c532da551'),
+                internal_label='text_item',
+            ),
+            academic_year=cls.admission.training.academic_year,
+        )
+
+        cls.put_data = {
+            'reponses_questions_specifiques': {
+                'fe254203-17c7-47d6-95e4-3c5c532da551': 'My answer !',
+            },
+            'curriculum': ['file1.pdf'],
+            'uuid_proposition': cls.admission.uuid,
+            'equivalence_diplome': ['file2.pdf'],
+        }
+
+        # Users
+        cls.user = cls.admission.candidate.user
+
+        # Targeted urls
+        cls.admission_url = resolve_url('continuing_curriculum', uuid=cls.admission.uuid)
+
+    def test_put_curriculum(self):
+        self.client.force_authenticate(user=self.user)
+
+        response = self.client.put(self.admission_url, data=self.put_data)
+
+        self.assertEqual(response.status_code, HTTP_200_OK)
+        updated_admission = ContinuingEducationAdmission.objects.get(uuid=self.admission.uuid)
+
+        self.assertEqual(
+            updated_admission.specific_question_answers,
+            {
+                'fe254203-17c7-47d6-95e4-3c5c532da551': 'My answer !',
+            },
+        )
+        self.assertEqual(updated_admission.curriculum, [uuid.UUID('550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92')])
+        self.assertEqual(updated_admission.diploma_equivalence, [uuid.UUID('550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92')])
 
 
 @override_settings(ROOT_URLCONF='admission.api.url_v1')
@@ -349,7 +511,7 @@ class ProfessionalExperienceTestCase(APITestCase):
                 'role': 'Librarian',
                 'sector': ActivitySector.PUBLIC.name,
                 'activity': 'Work - activity',
-                'valuated_from_doctorateadmission': [],
+                'valuated_from_admission': [],
             },
         )
 
@@ -387,7 +549,7 @@ class ProfessionalExperienceTestCase(APITestCase):
                 'role': 'Helper',
                 'sector': ActivitySector.PRIVATE.name,
                 'activity': 'Volunteering - activity',
-                'valuated_from_doctorateadmission': [],
+                'valuated_from_admission': [],
             },
         )
 
@@ -436,7 +598,7 @@ class ProfessionalExperienceTestCase(APITestCase):
     def test_put_valuated_professional_experience_is_forbidden(self):
         self.client.force_authenticate(user=self.user)
 
-        self.professional_experience.valuated_from_doctorateadmission.set([self.admission])
+        self.professional_experience.valuated_from_admission.set([self.admission])
 
         response = self.client.put(
             self.admission_details_url,
@@ -470,7 +632,7 @@ class ProfessionalExperienceTestCase(APITestCase):
     def test_delete_valuated_professional_experience_is_forbidden(self):
         self.client.force_authenticate(user=self.user)
 
-        self.professional_experience.valuated_from_doctorateadmission.set([self.admission])
+        self.professional_experience.valuated_from_admission.set([self.admission])
 
         response = self.client.delete(self.admission_details_url)
 
@@ -530,8 +692,6 @@ class EducationalExperienceTestCase(APITestCase):
             graduate_degree_translation=[],
             transcript=[],
             transcript_translation=[],
-            bachelor_cycle_continuation=True,
-            diploma_equivalence=[],
             rank_in_diploma='10 on 100',
             expected_graduation_date=datetime.date(2022, 8, 30),
             dissertation_title='Title',
@@ -630,8 +790,6 @@ class EducationalExperienceTestCase(APITestCase):
         self.assertEqual(json_response.get('graduate_degree_translation'), [])
         self.assertEqual(json_response.get('transcript'), [])
         self.assertEqual(json_response.get('transcript_translation'), [])
-        self.assertEqual(json_response.get('bachelor_cycle_continuation'), True)
-        self.assertEqual(json_response.get('diploma_equivalence'), [])
         self.assertEqual(json_response.get('rank_in_diploma'), '10 on 100')
         self.assertEqual(json_response.get('expected_graduation_date'), '2022-08-30')
         self.assertEqual(json_response.get('dissertation_title'), 'Title')
@@ -669,8 +827,6 @@ class EducationalExperienceTestCase(APITestCase):
                 'graduate_degree_translation': [],
                 'transcript': [],
                 'transcript_translation': [],
-                'bachelor_cycle_continuation': False,
-                'diploma_equivalence': [],
                 'rank_in_diploma': '10 on 100',
                 'expected_graduation_date': '2022-08-30',
                 'dissertation_title': 'Title',
@@ -710,14 +866,12 @@ class EducationalExperienceTestCase(APITestCase):
         self.assertEqual(json_response.get('graduate_degree_translation'), [])
         self.assertEqual(json_response.get('transcript'), [])
         self.assertEqual(json_response.get('transcript_translation'), [])
-        self.assertEqual(json_response.get('bachelor_cycle_continuation'), False)
-        self.assertEqual(json_response.get('diploma_equivalence'), [])
         self.assertEqual(json_response.get('rank_in_diploma'), '10 on 100')
         self.assertEqual(json_response.get('expected_graduation_date'), '2022-08-30')
         self.assertEqual(json_response.get('dissertation_title'), 'Title')
         self.assertEqual(json_response.get('dissertation_score'), '15/20')
         self.assertEqual(json_response.get('dissertation_summary'), [])
-        self.assertEqual(json_response.get('valuated_from_doctorateadmission'), [])
+        self.assertEqual(json_response.get('valuated_from_admission'), [])
 
         json_first_educational_experience_year = json_response.get('educationalexperienceyear_set')[0]
         self.assertEqual(json_first_educational_experience_year.get('academic_year'), 2020)
@@ -751,8 +905,6 @@ class EducationalExperienceTestCase(APITestCase):
         self.assertEqual(experience.graduate_degree_translation, [])
         self.assertEqual(experience.transcript, [])
         self.assertEqual(experience.transcript_translation, [])
-        self.assertEqual(experience.bachelor_cycle_continuation, False)
-        self.assertEqual(experience.diploma_equivalence, [])
         self.assertEqual(experience.rank_in_diploma, '10 on 100')
         self.assertEqual(experience.expected_graduation_date, datetime.date(2022, 8, 30))
         self.assertEqual(experience.dissertation_title, 'Title')
@@ -791,8 +943,6 @@ class EducationalExperienceTestCase(APITestCase):
                 'graduate_degree_translation': [],
                 'transcript': [],
                 'transcript_translation': [],
-                'bachelor_cycle_continuation': False,
-                'diploma_equivalence': [],
                 'rank_in_diploma': '10 on 100',
                 'expected_graduation_date': '2022-08-30',
                 'dissertation_title': 'Title',
@@ -854,7 +1004,7 @@ class EducationalExperienceTestCase(APITestCase):
     def test_put_valuated_educational_experience_is_forbidden(self):
         self.client.force_authenticate(user=self.user)
 
-        self.educational_experience.valuated_from_doctorateadmission.set([self.admission])
+        self.educational_experience.valuated_from_admission.set([self.admission])
 
         response = self.client.put(
             self.admission_details_url,
@@ -883,7 +1033,7 @@ class EducationalExperienceTestCase(APITestCase):
     def test_delete_valuated_educational_experience_is_forbidden(self):
         self.client.force_authenticate(user=self.user)
 
-        self.educational_experience.valuated_from_doctorateadmission.set([self.admission])
+        self.educational_experience.valuated_from_admission.set([self.admission])
 
         response = self.client.delete(self.admission_details_url)
 

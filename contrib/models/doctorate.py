@@ -28,12 +28,9 @@ import uuid
 from ckeditor.fields import RichTextField
 from django.conf import settings
 from django.core.cache import cache
-from django.core.serializers.json import DjangoJSONEncoder
 from django.db import models
 from django.db.models import OuterRef
 from django.db.models.functions import Cast
-from django.db.models.signals import post_save
-from django.dispatch import receiver
 from django.utils.datetime_safe import date
 from django.utils.translation import get_language, gettext_lazy as _
 from rest_framework.settings import api_settings
@@ -49,17 +46,13 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
 )
 from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixStatutCDD, ChoixStatutSIC
 from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
-from base.models.education_group_year import EducationGroupYear
 from base.models.entity_version import EntityVersion
-from base.models.enums.education_group_categories import Categories
-from base.models.enums.education_group_types import TrainingType
 from base.models.enums.entity_type import SECTOR
-from base.models.person import Person
 from base.utils.cte import CTESubquery
 from osis_document.contrib import FileField
 from osis_signature.contrib.fields import SignatureProcessField
 from reference.models.country import Country
-from .base import BaseAdmission, admission_directory_path, BaseAdmissionQuerySet
+from .base import BaseAdmission, BaseAdmissionQuerySet, admission_directory_path
 from .enums.admission_type import AdmissionType
 
 __all__ = [
@@ -74,12 +67,6 @@ REFERENCE_SEQ_NAME = 'admission_doctorateadmission_reference_seq'
 
 
 class DoctorateAdmission(BaseAdmission):
-    doctorate = models.ForeignKey(
-        to="base.EducationGroupYear",
-        verbose_name=_("Doctorate"),
-        related_name="+",
-        on_delete=models.CASCADE,
-    )
     type = models.CharField(
         verbose_name=_("Type"),
         max_length=255,
@@ -127,12 +114,6 @@ class DoctorateAdmission(BaseAdmission):
         verbose_name=_("EFT"),
         blank=True,
         null=True,
-    )
-    scholarship_grant = models.CharField(
-        max_length=255,
-        verbose_name=_("Scholarship grant"),
-        default='',
-        blank=True,
     )
     scholarship_start_date = models.DateField(
         verbose_name=_("Scholarship start date"),
@@ -326,10 +307,43 @@ class DoctorateAdmission(BaseAdmission):
         to="admission.Scholarship",
         verbose_name=_("Erasmus Mundus scholarship"),
         related_name="+",
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         null=True,
         blank=True,
     )
+    other_international_scholarship = models.CharField(
+        max_length=255,
+        verbose_name=_("Other international scholarship"),
+        default='',
+        blank=True,
+    )
+    international_scholarship = models.ForeignKey(
+        to="admission.Scholarship",
+        verbose_name=_("International scholarship"),
+        related_name="+",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+    )
+
+    # The following properties are here to alias the training_id field to doctorate_id
+    @property
+    def doctorate(self):
+        return self.training
+
+    @doctorate.setter
+    def doctorate(self, value):
+        self.training = value
+
+    @property
+    def doctorate_id(self):
+        return self.training_id
+
+    @doctorate_id.setter
+    def doctorate_id(self, value):
+        self.training_id = value
+
+    objects = BaseAdmissionQuerySet.as_manager()
 
     class Meta:
         verbose_name = _("Doctorate admission")
@@ -413,13 +427,9 @@ class DoctorateAdmission(BaseAdmission):
         self.save(update_fields=['detailed_status'])
 
 
-class DoctorateAdmissionQuerySet(BaseAdmissionQuerySet):
-    training_field_name = 'doctorate_id'
-
-
-class PropositionManager(models.Manager.from_queryset(DoctorateAdmissionQuerySet)):
+class PropositionManager(models.Manager.from_queryset(BaseAdmissionQuerySet)):
     def get_queryset(self):
-        cte = EntityVersion.objects.with_children(entity_id=OuterRef("doctorate__management_entity_id"))
+        cte = EntityVersion.objects.with_children(entity_id=OuterRef("training__management_entity_id"))
         sector_subqs = (
             cte.join(EntityVersion, id=cte.col.id)
             .with_cte(cte)
@@ -431,48 +441,25 @@ class PropositionManager(models.Manager.from_queryset(DoctorateAdmissionQuerySet
             super()
             .get_queryset()
             .select_related(
-                "doctorate__academic_year",
+                "training__academic_year",
+                "training__education_group_type",
                 "candidate__country_of_citizenship",
                 "thesis_institute",
                 "accounting",
                 "erasmus_mundus_scholarship",
+                "international_scholarship",
             )
             .annotate(
                 code_secteur_formation=CTESubquery(sector_subqs.values("acronym")[:1]),
                 intitule_secteur_formation=CTESubquery(sector_subqs.values("title")[:1]),
                 sigle_entite_gestion=models.Subquery(
-                    EntityVersion.objects.filter(entity_id=OuterRef("doctorate__management_entity_id"))
+                    EntityVersion.objects.filter(entity_id=OuterRef("training__management_entity_id"))
                     .order_by('-start_date')
                     .values("acronym")[:1]
                 ),
             )
             .annotate_campus()
         )
-
-
-@receiver(post_save, sender=EducationGroupYear)
-def _invalidate_doctorate_cache(sender, instance, **kwargs):
-    if (  # pragma: no branch
-        instance.education_group_type.category == Categories.TRAINING.name
-        and instance.education_group_type.name == TrainingType.PHD.name
-    ):
-        keys = [
-            f'admission_permission_{a_uuid}'
-            for a_uuid in DoctorateAdmission.objects.filter(doctorate_id=instance.pk).values_list('uuid', flat=True)
-        ]
-        if keys:
-            cache.delete_many(keys)
-
-
-@receiver(post_save, sender=Person)
-def _invalidate_candidate_cache(sender, instance, **kwargs):
-    # FIXME, the person is updated at authentication so this signal is often emitted
-    keys = [
-        f'admission_permission_{a_uuid}'
-        for a_uuid in DoctorateAdmission.objects.filter(candidate_id=instance.pk).values_list('uuid', flat=True)
-    ]
-    if keys:
-        cache.delete_many(keys)
 
 
 class PropositionProxy(DoctorateAdmission):
@@ -536,10 +523,10 @@ class DoctorateManager(models.Manager):
             .get_queryset()
             .only(
                 'candidate',
-                'doctorate',
-                'doctorate__academic_year__year',
-                'doctorate__title',
-                'doctorate__acronym',
+                'training',
+                'training__academic_year__year',
+                'training__title',
+                'training__acronym',
                 'post_enrolment_status',
                 'proximity_commission',
                 'reference',
@@ -547,12 +534,13 @@ class DoctorateManager(models.Manager):
                 'uuid',
                 'project_title',
                 'financing_type',
-                'scholarship_grant',
+                'international_scholarship',
+                'other_international_scholarship',
             )
             .select_related(
                 'candidate',
-                'doctorate',
-                'doctorate__academic_year',
+                'training__academic_year',
+                'international_scholarship',
             )
             .exclude(
                 post_enrolment_status=ChoixStatutDoctorat.ADMISSION_IN_PROGRESS.name,

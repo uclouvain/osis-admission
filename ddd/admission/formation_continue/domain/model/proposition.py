@@ -24,7 +24,7 @@
 #
 ##############################################################################
 import datetime
-from typing import Optional
+from typing import Optional, Dict, List
 
 import attr
 
@@ -48,8 +48,27 @@ class Proposition(interface.RootEntity):
     creee_le: Optional[datetime.datetime] = None
     modifiee_le: Optional[datetime.datetime] = None
 
-    def modifier_choix_formation(self, formation_id: FormationIdentity):
+    reponses_questions_specifiques: Dict = attr.Factory(dict)
+
+    curriculum: List[str] = attr.Factory(list)
+    equivalence_diplome: List[str] = attr.Factory(list)
+
+    def modifier_choix_formation(self, formation_id: FormationIdentity, reponses_questions_specifiques: Dict):
         self.formation_id = formation_id
+        self.reponses_questions_specifiques = reponses_questions_specifiques
 
     def supprimer(self):
         self.statut = ChoixStatutProposition.CANCELLED
+
+    def soumettre(self):
+        self.statut = ChoixStatutProposition.SUBMITTED
+
+    def completer_curriculum(
+        self,
+        curriculum: List[str],
+        equivalence_diplome: List[str],
+        reponses_questions_specifiques: Dict,
+    ):
+        self.curriculum = curriculum
+        self.equivalence_diplome = equivalence_diplome
+        self.reponses_questions_specifiques = reponses_questions_specifiques

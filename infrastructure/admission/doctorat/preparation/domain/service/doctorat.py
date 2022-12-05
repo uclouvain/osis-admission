@@ -47,6 +47,7 @@ class DoctoratTranslator(IDoctoratTranslator):
             intitule=dto.title_fr if get_language() == settings.LANGUAGE_CODE else dto.title_en,
             sigle_entite_gestion=dto.management_entity_acronym,
             campus=dto.main_teaching_campus_name,
+            type=dto.type,
         )
 
     @classmethod
@@ -96,4 +97,15 @@ class DoctoratTranslator(IDoctoratTranslator):
                 campus=campus,
             )
         )
-        return [cls._build_dto(dto) for dto in dtos]
+
+        results = [cls._build_dto(dto) for dto in dtos]
+        return list(sorted(results, key=lambda formation: formation.intitule))
+
+    @classmethod
+    def verifier_existence(cls, sigle: str, annee: int) -> bool:  # pragma: no cover
+        from infrastructure.messages_bus import message_bus_instance
+
+        dtos = message_bus_instance.invoke(
+            SearchFormationsCommand(sigle=sigle, annee=annee, type=TrainingType.PHD.name)
+        )
+        return bool(dtos)

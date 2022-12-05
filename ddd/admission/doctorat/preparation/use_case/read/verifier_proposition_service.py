@@ -28,12 +28,17 @@ import datetime
 from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import PropositionIdentityBuilder
 from admission.ddd.admission.doctorat.preparation.commands import VerifierPropositionCommand
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity
-from admission.ddd.admission.doctorat.preparation.domain.service.i_profil_candidat import IProfilCandidatTranslator
+from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
+from admission.ddd.admission.doctorat.preparation.domain.service.i_question_specifique import (
+    IQuestionSpecifiqueTranslator,
+)
 from admission.ddd.admission.doctorat.preparation.domain.service.verifier_proposition import VerifierProposition
 from admission.ddd.admission.doctorat.preparation.repository.i_groupe_de_supervision import (
     IGroupeDeSupervisionRepository,
 )
 from admission.ddd.admission.doctorat.preparation.repository.i_proposition import IPropositionRepository
+from admission.ddd.admission.domain.service.i_titres_acces import ITitresAcces
+from admission.ddd.admission.enums.question_specifique import Onglets
 from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import GetCurrentAcademicYear
 from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import IAcademicYearRepository
 
@@ -44,6 +49,8 @@ def verifier_proposition(
     groupe_supervision_repository: 'IGroupeDeSupervisionRepository',
     profil_candidat_translator: 'IProfilCandidatTranslator',
     academic_year_repository: 'IAcademicYearRepository',
+    titres_acces: 'ITitresAcces',
+    questions_specifiques_translator: 'IQuestionSpecifiqueTranslator',
 ) -> 'PropositionIdentity':
     # GIVEN
     entity_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
@@ -57,6 +64,13 @@ def verifier_proposition(
         )
         .year
     )
+    questions_specifiques = questions_specifiques_translator.search_by_proposition(
+        cmd.uuid_proposition,
+        onglets=[
+            Onglets.CURRICULUM.name,
+            Onglets.ETUDES_SECONDAIRES.name,
+        ],
+    )
 
     # WHEN
     VerifierProposition.verifier(
@@ -64,6 +78,8 @@ def verifier_proposition(
         groupe_de_supervision,
         profil_candidat_translator,
         annee_courante,
+        titres_acces,
+        questions_specifiques,
     )
 
     # THEN

@@ -23,11 +23,10 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
+from django.db.models import Prefetch
 from rest_framework import mixins, status
 from rest_framework.generics import GenericAPIView, ListAPIView, ListCreateAPIView
 from rest_framework.response import Response
-from rest_framework.settings import api_settings
 
 from admission.api import serializers
 from admission.api.permissions import IsListingOrHasNotAlreadyCreatedForDoctoratePermission, IsSupervisionMember
@@ -39,10 +38,7 @@ from admission.ddd.admission.doctorat.preparation.commands import (
     InitierPropositionCommand,
     ListerPropositionsCandidatQuery as ListerPropositionsDoctoralesCandidatQuery,
     ListerPropositionsSuperviseesQuery,
-    SoumettrePropositionCommand,
     SupprimerPropositionCommand,
-    VerifierProjetCommand,
-    VerifierPropositionCommand,
 )
 from admission.ddd.admission.formation_continue.commands import (
     ListerPropositionsCandidatQuery as ListerPropositionsFormationContinueCandidatQuery,
@@ -51,8 +47,7 @@ from admission.ddd.admission.formation_generale.commands import (
     ListerPropositionsCandidatQuery as ListerPropositionsFormationGeneraleCandidatQuery,
 )
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import JustificationRequiseException
-from admission.ddd.admission.doctorat.validation.commands import ApprouverDemandeCddCommand
-from admission.utils import gather_business_exceptions, get_cached_admission_perm_obj
+from admission.utils import get_cached_admission_perm_obj
 from backoffice.settings.rest_framework.common_views import DisplayExceptionsByFieldNameAPIMixin
 from infrastructure.messages_bus import message_bus_instance
 from osis_role.contrib.views import APIPermissionRequiredMixin
@@ -61,9 +56,9 @@ __all__ = [
     "PropositionListView",
     "SupervisedPropositionListView",
     "PropositionViewSet",
-    "VerifyProjectView",
-    "SubmitPropositionViewSet",
 ]
+
+from osis_signature.models import Actor
 
 
 class PropositionListSchema(ResponseSpecificSchema):
@@ -148,6 +143,21 @@ class SupervisedPropositionListView(APIPermissionRequiredMixin, ListAPIView):
         proposition_list = message_bus_instance.invoke(
             ListerPropositionsSuperviseesQuery(matricule_membre=request.user.person.global_id),
         )
+        # Add a _perm_obj to each instance to optimize permission check performance
+        queryset = (
+            DoctorateAdmission.objects.select_related(
+                'supervision_group',
+                'candidate',
+                'training__management_entity__admission_config',
+            )
+            .prefetch_related(
+                Prefetch('supervision_group__actors', Actor.objects.select_related('supervisionactor').all())
+            )
+            .filter(uuid__in=[p.uuid for p in proposition_list])
+            .in_bulk(field_name='uuid')
+        )
+        for proposition in proposition_list:
+            proposition._perm_obj = queryset[proposition.uuid]
         serializer = serializers.DoctoratePropositionSearchDTOSerializer(
             instance=proposition_list,
             context=self.get_serializer_context(),
@@ -222,103 +232,4 @@ class PropositionViewSet(
             SupprimerPropositionCommand(uuid_proposition=kwargs.get('uuid')),
         )
         serializer = serializers.PropositionIdentityDTOSerializer(instance=proposition_id)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-
-class VerifySchema(ResponseSpecificSchema):
-    response_description = "Verification errors"
-
-    def get_responses(self, path, method):
-        return (
-            {
-                status.HTTP_200_OK: {
-                    "description": self.response_description,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "type": "array",
-                                "items": {
-                                    "type": "object",
-                                    "properties": {
-                                        "status_code": {
-                                            "type": "string",
-                                        },
-                                        "detail": {
-                                            "type": "string",
-                                        },
-                                    },
-                                },
-                            }
-                        }
-                    },
-                }
-            }
-            if method == 'GET'
-            else super(VerifySchema, self).get_responses(path, method)
-        )
-
-
-class VerifyProjectSchema(VerifySchema):
-    operation_id_base = '_verify_project'
-    response_description = "Project verification errors"
-
-
-class VerifyProjectView(APIPermissionRequiredMixin, mixins.RetrieveModelMixin, GenericAPIView):
-    name = "verify-project"
-    schema = VerifyProjectSchema()
-    permission_mapping = {
-        'GET': 'admission.change_doctorateadmission_project',
-    }
-    pagination_class = None
-    filter_backends = []
-
-    def get_permission_object(self):
-        return get_cached_admission_perm_obj(self.kwargs['uuid'])
-
-    def get(self, request, *args, **kwargs):
-        """Check the project to be OK with all validators."""
-        data = gather_business_exceptions(VerifierProjetCommand(uuid_proposition=str(kwargs["uuid"])))
-        return Response(data.get(api_settings.NON_FIELD_ERRORS_KEY, []), status=status.HTTP_200_OK)
-
-
-class VerifyPropositionSchema(VerifySchema):
-    response_description = "Proposition verification errors"
-
-    serializer_mapping = {
-        'POST': serializers.PropositionIdentityDTOSerializer,
-    }
-
-    def get_operation_id(self, path, method):
-        if method == 'GET':
-            return 'verify_proposition'
-        elif method == 'POST':
-            return 'submit_proposition'
-        return super().get_operation_id(path, method)
-
-
-class SubmitPropositionViewSet(APIPermissionRequiredMixin, mixins.RetrieveModelMixin, GenericAPIView):
-    name = "submit-proposition"
-    schema = VerifyPropositionSchema()
-    pagination_class = None
-    filter_backends = []
-    permission_mapping = {
-        'GET': 'admission.submit_doctorateadmission',
-        'POST': 'admission.submit_doctorateadmission',
-    }
-
-    def get_permission_object(self):
-        return get_cached_admission_perm_obj(self.kwargs['uuid'])
-
-    def get(self, request, *args, **kwargs):
-        """Check the proposition to be OK with all validators."""
-        data = gather_business_exceptions(VerifierPropositionCommand(uuid_proposition=str(kwargs["uuid"])))
-        return Response(data.get(api_settings.NON_FIELD_ERRORS_KEY, []), status=status.HTTP_200_OK)
-
-    def post(self, request, *args, **kwargs):
-        """Submit the proposition."""
-        # Trigger the submit command
-        proposition_id = message_bus_instance.invoke(SoumettrePropositionCommand(uuid_proposition=str(kwargs["uuid"])))
-        serializer = serializers.PropositionIdentityDTOSerializer(instance=proposition_id)
-        # TODO To remove when the admission approval by CDD and SIC will be created
-        message_bus_instance.invoke(ApprouverDemandeCddCommand(uuid=str(kwargs["uuid"])))
         return Response(serializer.data, status=status.HTTP_200_OK)

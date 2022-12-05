@@ -35,6 +35,7 @@ try:
     from .scholarship import Scholarship
     from .continuing_education import ContinuingEducationAdmission, ContinuingEducationAdmissionProxy
     from .general_education import GeneralEducationAdmission, GeneralEducationAdmissionProxy
+    from .form_item import AdmissionFormItemInstantiation, AdmissionFormItem
 
     __all__ = [
         "DoctorateAdmission",
@@ -50,6 +51,8 @@ try:
         "ContinuingEducationAdmissionProxy",
         "GeneralEducationAdmission",
         "GeneralEducationAdmissionProxy",
+        "AdmissionFormItem",
+        "AdmissionFormItemInstantiation",
     ]
 
 except RuntimeError as e:  # pragma: no cover

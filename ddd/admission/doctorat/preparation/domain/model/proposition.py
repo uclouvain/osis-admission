@@ -25,7 +25,7 @@
 ##############################################################################
 import datetime
 import uuid
-from typing import List, Optional, Union
+from typing import List, Optional, Union, Dict
 
 import attr
 
@@ -103,6 +103,8 @@ class Proposition(interface.RootEntity):
     fiche_archive_signatures_envoyees: List[str] = attr.Factory(list)
     comptabilite: 'Comptabilite' = comptabilite_non_remplie
     bourse_erasmus_mundus_id: Optional[BourseIdentity] = None
+    reponses_questions_specifiques: Dict = attr.Factory(dict)
+    curriculum: List[str] = attr.Factory(list)
 
     @property
     def sigle_formation(self):
@@ -129,7 +131,8 @@ class Proposition(interface.RootEntity):
         type_financement: Optional[str],
         type_contrat_travail: Optional[str],
         eft: Optional[int],
-        bourse_recherche: Optional[str],
+        bourse_recherche: Optional[BourseIdentity],
+        autre_bourse_recherche: Optional[str],
         bourse_date_debut: Optional[datetime.date],
         bourse_date_fin: Optional[datetime.date],
         bourse_preuve: List[str],
@@ -166,6 +169,7 @@ class Proposition(interface.RootEntity):
             type_contrat_travail=type_contrat_travail,
             eft=eft,
             bourse_recherche=bourse_recherche,
+            autre_bourse_recherche=autre_bourse_recherche,
             bourse_date_debut=bourse_date_debut,
             bourse_date_fin=bourse_date_fin,
             bourse_preuve=bourse_preuve,
@@ -213,7 +217,8 @@ class Proposition(interface.RootEntity):
         type: Optional[str],
         type_contrat_travail: Optional[str],
         eft: Optional[int],
-        bourse_recherche: Optional[str],
+        bourse_recherche: Optional[BourseIdentity],
+        autre_bourse_recherche: Optional[str],
         bourse_date_debut: Optional[datetime.date],
         bourse_date_fin: Optional[datetime.date],
         bourse_preuve: List[str],
@@ -225,7 +230,8 @@ class Proposition(interface.RootEntity):
                 type=ChoixTypeFinancement[type],
                 type_contrat_travail=type_contrat_travail or '',
                 eft=eft,
-                bourse_recherche=bourse_recherche or '',
+                bourse_recherche=bourse_recherche,
+                autre_bourse_recherche=autre_bourse_recherche or '',
                 bourse_date_debut=bourse_date_debut,
                 bourse_date_fin=bourse_date_fin,
                 bourse_preuve=bourse_preuve or [],
@@ -283,6 +289,14 @@ class Proposition(interface.RootEntity):
                 date_soutenance=date_soutenance,
                 raison_non_soutenue=raison_non_soutenue or '',
             )
+
+    def completer_curriculum(
+        self,
+        curriculum: List[str],
+        reponses_questions_specifiques: Dict,
+    ):
+        self.curriculum = curriculum
+        self.reponses_questions_specifiques = reponses_questions_specifiques
 
     def completer_comptabilite(
         self,
@@ -434,6 +448,7 @@ class Proposition(interface.RootEntity):
         type_admission: str,
         justification: Optional[str],
         bourse_erasmus_mundus: Optional[BourseIdentity],
+        reponses_questions_specifiques: Dict,
     ):
         ModifierTypeAdmissionValidatorList(
             type_admission=type_admission,
@@ -443,3 +458,4 @@ class Proposition(interface.RootEntity):
         self.type_admission = ChoixTypeAdmission[type_admission]
         self.justification = justification or ''
         self.bourse_erasmus_mundus_id = bourse_erasmus_mundus
+        self.reponses_questions_specifiques = reponses_questions_specifiques

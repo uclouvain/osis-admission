@@ -100,6 +100,22 @@ msgstr ""
 
 #, python-format
 msgid ""
+"<a href=\"%(admission_link_front_complementary_training)s\">%(reference)s</"
+"a> - Some complementary training activities have been approved."
+msgstr ""
+"<a href=\"%(admission_link_front_complementary_training)s\">%(reference)s</"
+"a> - Des activités de formation complémentaire ont été approuvées."
+
+#, python-format
+msgid ""
+"<a href=\"%(admission_link_front_course_enrollment)s\">%(reference)s</a> - "
+"Some course enrollment have been approved."
+msgstr ""
+"<a href=\"%(admission_link_front_course_enrollment)s\">%(reference)s</a> - "
+"Des inscriptions aux cours ont été approuvées."
+
+#, python-format
+msgid ""
 "<a href=\"%(admission_link_front_doctoral_training)s\">%(reference)s</a> - "
 "Some doctoral training activities have been approved."
 msgstr ""
@@ -177,6 +193,9 @@ msgstr "Carte A ou B"
 msgid "A or B card with refugee mention"
 msgstr "Carte A ou B avec la mention de refugié"
 
+msgid "A specific education"
+msgstr "Une formation spécifique"
+
 msgid "ACCEPTED"
 msgstr "Accepté"
 
@@ -242,6 +261,9 @@ msgstr "Sigle / Intitulé"
 
 msgid "Actions"
 msgstr "Actions"
+
+msgid "Active"
+msgstr "Actif"
 
 msgid "Activities"
 msgstr "Activités"
@@ -316,11 +338,29 @@ msgstr "Ajouter une activité"
 msgid "Add an internal note"
 msgstr "Ajouter une note interne"
 
+msgid "Additional information"
+msgstr "Informations complémentaires"
+
 msgid "Admission"
 msgstr "Admission"
 
+msgid "Admission conditions not met."
+msgstr "Conditions d'accès non remplies."
+
 msgid "Admission date"
 msgstr "Date admission"
+
+msgid "Admission form item"
+msgstr "Élément de formulaire pour admission"
+
+msgid "Admission form item instantiation"
+msgstr "Instantiation d'un élément de formulaire pour admission"
+
+msgid "Admission form item instantiations"
+msgstr "Instantiations des éléments de formulaire pour admission"
+
+msgid "Admission form items"
+msgstr "Éléments de formulaire pour admission"
 
 msgid "Admission submission date"
 msgstr "Date de soumission Admission"
@@ -341,6 +381,9 @@ msgstr ""
 msgid "Aggregation and CAPAES"
 msgstr "Agrégation et CAPAES"
 
+msgid "All"
+msgstr "Tous"
+
 msgctxt "filters"
 msgid "All"
 msgstr "Tous"
@@ -360,6 +403,9 @@ msgstr "Déjà membre du comité d'accompagnement."
 
 msgid "Already a promoter."
 msgstr "Déjà promoteur."
+
+msgid "An education type"
+msgstr "Un type de formation"
 
 msgid "Annex 25 or 26 for refugees and stateless persons"
 msgstr "Annexe 25 ou 26 pour les réfugiés et apatrides"
@@ -440,6 +486,9 @@ msgstr "Bachelier"
 
 msgid "Back to the list"
 msgstr "Retour à la liste"
+
+msgid "Belgian"
+msgstr "Belge"
 
 msgid "Body"
 msgstr "Corps"
@@ -531,6 +580,9 @@ msgstr "Type de cours pour la formation complémentaire"
 
 msgid "CSC - China Scholarship Council"
 msgstr "CSC - China Scholarship Council"
+
+msgid "CSS class"
+msgstr "Classe CSS"
 
 msgid "Can add a member to the supervision group"
 msgstr "Peut ajouter un membre au groupe de supervision"
@@ -664,6 +716,9 @@ msgstr "Annuler"
 msgid "Candidate"
 msgstr "Candidat"
 
+msgid "Candidate nationality"
+msgstr "Nationalité du candidat"
+
 msgid "Candidate not found."
 msgstr "Candidat non trouvé."
 
@@ -695,7 +750,11 @@ msgid "Category labels"
 msgstr "Libellés de catégories"
 
 msgid "Certificate"
-msgstr "Certificat"
+msgstr "Attestation"
+
+msgid ""
+"Certificate allowing the continuation of studies for a bachelor's degree"
+msgstr "Attestation autorisant à poursuivre les études de bachelier"
 
 msgid "Certificate of achievement"
 msgstr "Attestation de réussite"
@@ -755,6 +814,9 @@ msgstr "Formation complémentaire non activée"
 
 msgid "Complementary training proposition"
 msgstr "Proposition de formation complémentaire"
+
+msgid "Configuration"
+msgstr "Configuration"
 
 msgid "Configuration saved."
 msgstr "Configuration enregistrée."
@@ -961,11 +1023,24 @@ msgstr "Curriculum vitae détaillé"
 msgid "Diploma"
 msgstr "Diplôme"
 
+msgid "Diploma equivalence"
+msgstr "Équivalence du diplôme"
+
+msgid "Display according education"
+msgstr "Affichage selon la formation"
+
 msgid "Dissent from reference promoter"
 msgstr "Avis négatif du promoteur de référence"
 
 msgid "Do not reorder values, and keep the same count"
 msgstr "Ne pas réordonner les valeurs, and garder le même nombre"
+
+msgid ""
+"Do you want, on the basis of this training, to realize a cycle continuation "
+"for the bachelor you are registering for?"
+msgstr ""
+"Demandez-vous, sur base de cette formation, de réaliser une poursuite de "
+"cycle pour le bachelier auquel vous vous inscrivez ?"
 
 #, python-format
 msgid "Do you wish to move the doctorate to the \"%(status)s\" state?"
@@ -1001,6 +1076,9 @@ msgstr "Lecteur doctorat"
 
 msgid "Doctorate readers"
 msgstr "Lecteurs doctorat"
+
+msgid "Document"
+msgstr "Document"
 
 msgid "Done in"
 msgstr "Fait à"
@@ -1070,6 +1148,9 @@ msgstr "Modifier la communication de ce séminaire"
 msgid "Edit the publication of this conference"
 msgstr "Modifier la publication de cette conférence"
 
+msgid "Education"
+msgstr "Formation"
+
 msgid "Email"
 msgstr "Email"
 
@@ -1078,6 +1159,9 @@ msgstr "Activer l'onglet Formation complémentaire"
 
 msgid "English"
 msgstr "Anglais"
+
+msgid "English value"
+msgstr "Valeur en anglais"
 
 msgid "English values"
 msgstr "Valeurs en anglais"
@@ -1099,6 +1183,9 @@ msgstr "Description de l'événement"
 
 msgid "Event website"
 msgstr "Site web de l'événement"
+
+msgid "Every education"
+msgstr "Toutes les formations"
 
 msgid "Example"
 msgstr "Exemple"
@@ -1143,6 +1230,9 @@ msgstr "Échec de l'épreuve de confirmation"
 msgid "Failure of the test"
 msgstr "Échec de l'épreuve"
 
+msgid "File MIME types"
+msgstr "Types de fichier MIME"
+
 msgid "Financing type"
 msgstr "Type de financement"
 
@@ -1178,8 +1268,22 @@ msgstr "Fondation Mont Godinne"
 msgid "Fondation St Luc"
 msgstr "Fondation St Luc"
 
+msgid "Form item"
+msgstr "Élément de formulaire"
+
+#, python-format
+msgid "Formation is not available for this year (%(sigle)s in %(annee)s)."
+msgstr ""
+"La formation n'est pas disponible pour cette année (%(sigle)s en %(annee)s)."
+
+msgid "Formation is not available for this year."
+msgstr "La formation n'est pas disponible pour cette année."
+
 msgid "French"
 msgstr "Français"
+
+msgid "French value"
+msgstr "Valeur en français"
 
 msgid "French values"
 msgstr "Valeurs en français"
@@ -1209,6 +1313,9 @@ msgstr ""
 
 msgid "HTML"
 msgstr "HTML"
+
+msgid "Help text"
+msgstr "Texte d'aide"
 
 msgid "Household composition or the birth certificate"
 msgstr "Composition de ménage ou acte de naissance"
@@ -1380,6 +1487,9 @@ msgstr ""
 msgid "Internal comment"
 msgstr "Commentaire interne"
 
+msgid "Internal label"
+msgstr "Label interne"
+
 msgid "Internal notes"
 msgstr "Notes internes"
 
@@ -1392,11 +1502,26 @@ msgstr "Internationale pour les formation générales"
 msgid "International scholarship"
 msgstr "Bourse internationale"
 
+#, python-format
+msgid "Invalid property: %(config_params)s"
+msgid_plural "Invalid properties: %(config_params)s"
+msgstr[0] "Propriété invalide : %(config_params)s"
+msgstr[1] "Propriétés invalides : %(config_params)s"
+
 msgid "Invitations have not been sent"
 msgstr "Les invitations n'ont pas été envoyées"
 
 msgid "Invitations must have been sent"
 msgstr "Les invitations doivent avoir été envoyées"
+
+msgid "Is an external modification"
+msgstr "Est une modification externe"
+
+msgid "Is an external reorientation"
+msgstr "Est une réorientation externe"
+
+msgid "Is non-resident (as defined in decree)"
+msgstr "Est non-résident (au sens du décret)"
 
 msgid "Journal"
 msgstr "Nom de la revue ou de la maison d'édition"
@@ -1463,6 +1588,9 @@ msgstr "Lien vers la page liée à la formation doctorale (back-office)"
 
 msgid "Link to the doctoral training panel (front-office)"
 msgstr "Lien vers la page liée à la formation doctorale (front-office)"
+
+msgid "Long"
+msgstr "Long"
 
 msgid "Long name"
 msgstr "Nom long"
@@ -1674,11 +1802,42 @@ msgid "Mandatory fields are missing in the project details of the proposition."
 msgstr ""
 "Les champs requis des details du projet de la proposition sont manquants."
 
+msgid ""
+"Mandatory fields are missing in the specific questions of the 'Additional "
+"information > Specific questions' tab"
+msgstr ""
+"Les champs requis des questions spécifiques dans l'onglet 'Informations "
+"complémentaires > Questions spécifiques' sont manquants."
+
+msgid ""
+"Mandatory fields are missing in the specific questions of the 'Previous "
+"Experience > Curriculum vitae' tab."
+msgstr ""
+"Les champs requis des questions spécifiques dans l'onglet 'Parcours "
+"antérieur > Curriculum' sont manquants."
+
+msgid ""
+"Mandatory fields are missing in the specific questions of the 'Previous "
+"experience > Secondary studies' tab"
+msgstr ""
+"Les champs requis des questions spécifiques dans l'onglet 'Parcours "
+"antérieur > Études secondaires' sont manquants."
+
+msgid ""
+"Mandatory fields are missing in the specific questions of the 'Training "
+"choice' tab"
+msgstr ""
+"Les champs requis des questions spécifiques dans l'onglet 'Choix de "
+"formation' sont manquants."
+
 msgid "Mandatory languages are missing."
 msgstr "Des langues obligatoires sont manquantes."
 
 msgid "Master"
 msgstr "Master"
+
+msgid "Maximum number of documents"
+msgstr "Nombre maximum de documents"
 
 msgid "Member of supervision group already invited."
 msgstr "Membre du groupe de supervision déjà invité."
@@ -1691,6 +1850,9 @@ msgstr "Membre du groupe de supervision non invité."
 
 msgid "Membre CA not found."
 msgstr "Membre du comité d'accompagnement non trouvé."
+
+msgid "Message"
+msgstr "Message"
 
 msgid "Message body"
 msgstr "Corps du message"
@@ -1719,6 +1881,9 @@ msgstr "Motivation"
 #, python-format
 msgid "Move the doctorate to the \"%(status)s\" state?"
 msgstr "Passer la demande dans l'état \"%(status)s\" ?"
+
+msgid "Must be a dictionary."
+msgstr "Doit être un dictionnaire."
 
 msgid "Must be enrolled"
 msgstr "Doit être inscrit"
@@ -1796,6 +1961,18 @@ msgstr "Nouveau titre de la thèse (le cas échéant)"
 msgid "No"
 msgstr "Non"
 
+msgid ""
+"No 'ValidationError' exception must be triggered with the the provided data."
+msgstr ""
+"Aucune erreur de validation ne doit être déclenchée avec les données "
+"spécifiées."
+
+msgid "No English studies"
+msgstr "Aucune étude en anglais"
+
+msgid "No French studies"
+msgstr "Aucune étude en français"
+
 msgid "No PhD found."
 msgstr "Pas de doctorat trouvé."
 
@@ -1808,6 +1985,9 @@ msgstr "Aucune inscription en doctorat n'a été trouvée"
 msgid "No doctorate found."
 msgstr "Doctorat non trouvé."
 
+msgid "No pool was found to match."
+msgstr "Aucun pot ne correspond"
+
 msgid "No scholarship found."
 msgstr "Bourse non trouvée."
 
@@ -1816,6 +1996,15 @@ msgstr "Formation non trouvée."
 
 msgid "None of these proposals are relevant to me"
 msgstr "Aucune de ces propositions ne me correspond"
+
+msgid "Not Belgian"
+msgstr "Non-Belge"
+
+msgid "Not UE"
+msgstr "Non-UE"
+
+msgid "Not VIP"
+msgstr "Non-VIP"
 
 msgid "Not specified"
 msgstr "Non renseigné(e)"
@@ -1869,6 +2058,9 @@ msgstr "Autre"
 
 msgid "Other cotutelle-related documents"
 msgstr "Autres documents relatifs à la cotutelle"
+
+msgid "Other international scholarship"
+msgstr "Autre bourse internationale"
 
 msgid "PAPER"
 msgstr "Épreuve"
@@ -2241,6 +2433,9 @@ msgstr "Demander des changements"
 msgid "Require changes for \"%(object)s\""
 msgstr "Demander des changements pour \"%(object)s\""
 
+msgid "Required"
+msgstr "Requis"
+
 msgctxt "tab"
 msgid "Research project"
 msgstr "Projet de recherche"
@@ -2395,6 +2590,9 @@ msgstr "Rechercher un code UE (hors UE du formulaire)"
 msgid "Secondary studies"
 msgstr "Études secondaires"
 
+msgid "Secondary studies must be completed."
+msgstr "Les études secondaires doivent être complétées."
+
 msgid "Select a mail template"
 msgstr "Sélectionner un template d'email"
 
@@ -2427,6 +2625,9 @@ msgstr "Services"
 
 msgid "Sex"
 msgstr "Sexe"
+
+msgid "Short"
+msgstr "Court"
 
 msgid "Short name"
 msgstr "Nom court"
@@ -2515,6 +2716,9 @@ msgstr "Rue"
 msgid "Street number"
 msgstr "Numéro de la rue"
 
+msgid "Study language"
+msgstr "Langue des études"
+
 msgid "Subject"
 msgstr "Sujet"
 
@@ -2567,8 +2771,14 @@ msgstr "Pour validation"
 msgid "TO_BE_VERIFIED"
 msgstr "Pour vérification"
 
+msgid "Tab"
+msgstr "Onglet"
+
 msgid "Text"
 msgstr "Texte"
+
+msgid "Text size"
+msgstr "Taille du texte"
 
 msgid "The <strong>additional training</strong> has been completed: yes / no."
 msgstr ""
@@ -2621,6 +2831,21 @@ msgstr ""
 "Le comité demande au candidat de présenter une <strong>nouvelle épreuve</"
 "strong> <u>avant</u> le :"
 
+msgid "The configuration is not valid for a document field: "
+msgstr "La configuration n'est pas valide pour un champ document : "
+
+msgid "The configuration is not valid for a document: "
+msgstr "La configuration n'est pas valide pour un document : "
+
+msgid "The configuration is not valid for a message: "
+msgstr "La configuration n'est pas valide pour un message : "
+
+msgid "The configuration is not valid for a text field: "
+msgstr "La configuration n'est pas valide pour un champ texte : "
+
+msgid "The configuration is not valid for a text: "
+msgstr "La configuration n'est pas valide pour un texte : "
+
 msgid ""
 "The confirmation paper is not completed: please be sure that the "
 "confirmation date and report have been specified."
@@ -2630,6 +2855,9 @@ msgstr ""
 
 msgid "The confirmation paper is not in progress"
 msgstr "L'épreuve de confirmation n'est pas en cours"
+
+msgid "The css class must be a string."
+msgstr "La classe css doit être une chaîne de caractères."
 
 msgid "The current training is attached to this document."
 msgstr ""
@@ -2689,6 +2917,19 @@ msgstr "Le nom du signataire"
 msgid "The last name of the student"
 msgstr "Le nom de l'étudiant"
 
+msgid "The limited training you are enrolling into is not opened yet."
+msgstr ""
+"La formation contingentée à laquelle vous vous inscrivez n'est pas encore "
+"ouverte."
+
+msgid "The maximum number of documents must be a positive number."
+msgstr "Le nombre maximum de documents doit être un nombre positif."
+
+msgid "The mimetypes must be a list with at least one mimetype."
+msgstr ""
+"Les types MIME doivent être spécifiés avec une liste contenant au-moins un "
+"type MIME."
+
 #, python-format
 msgid ""
 "The number of acquired <strong>doctoral</strong> credits amounts to "
@@ -2729,6 +2970,10 @@ msgstr "La date de début ne peut être postérieure à la date de fin"
 #, python-format
 msgid "The status has been changed to %(status)s."
 msgstr "Le statut a bien été modifié pour : %(status)s."
+
+#, python-format
+msgid "The text size must be one of the following values: %(values)s."
+msgstr "La taille du texte doit être une des valeurs suivantes : %(values)s."
 
 msgid "There can be no more CA members in the supervision group."
 msgstr ""
@@ -2829,6 +3074,17 @@ msgid "This experience cannot be updated as it has already been valuated."
 msgstr ""
 "Cette expérience ne peut être mise à jour car elle a déjà été valorisée."
 
+msgid "This field is required."
+msgstr "Ce champ est obligatoire."
+
+#, python-format
+msgid ""
+"This field must contain a translation for each of the following languages: "
+"%(languages)s."
+msgstr ""
+"Le champ doit contenir une traduction pour chacun des langages suivants : "
+"%(languages)s."
+
 msgid "This page is currently under construction."
 msgstr "Cette page est en cours de construction."
 
@@ -2875,6 +3131,9 @@ msgstr "Activités de formation"
 msgid "Training activity"
 msgstr "Ajouter une activité"
 
+msgid "Training choice"
+msgstr "Choix de formation"
+
 msgid "Tutorship act"
 msgstr "Acte de tutelle"
 
@@ -2893,11 +3152,17 @@ msgstr "Type d'épreuve"
 msgid "Type of publication"
 msgstr "Type de publication"
 
+msgid "Type of training"
+msgstr "Type de formation"
+
 msgid "UCLOUVAIN_ASSISTANT"
 msgstr "Assistant UCLouvain"
 
 msgid "UCL_COURSE"
 msgstr "Cours UCL"
+
+msgid "UE"
+msgstr "UE"
 
 msgid "UUID"
 msgstr "UUID"
@@ -2923,6 +3188,12 @@ msgstr "Valorisation des acquis de l'expérience"
 msgid "VALID"
 msgstr "Valide"
 
+msgid "VIP"
+msgstr "VIP"
+
+msgid "VIP candidate"
+msgstr "Candidat VIP"
+
 msgid "Validate these courses"
 msgstr "Valider ces cours"
 
@@ -2944,6 +3215,9 @@ msgstr ""
 
 msgid "Website"
 msgstr "Site web"
+
+msgid "Weight"
+msgstr "Poids"
 
 msgid "Work contract should be set when financing type is set to work contract"
 msgstr ""
@@ -2992,6 +3266,14 @@ msgstr "Oui, sur Saint-Gilles uniquement (10 EUR)"
 msgid "Yes, only in Tournai (10 EUR)"
 msgstr "Oui, sur Tournai uniquement (10 EUR)"
 
+msgid ""
+"You already have a doctorate admission in progress, please delete it before "
+"creating a newer one, or contact your domain doctoral committee."
+msgstr ""
+"Vous avez déjà une demande d’inscription en doctorat en cours, veuillez la "
+"supprimer avant de créer une nouvelle demande, ou contactez votre commission "
+"doctorale du domaine."
+
 msgid "You cannot fill in a language more than once, please correct the form."
 msgstr ""
 "Vous ne pouvez pas définir une langue plusieurs fois, merci de corriger le "
@@ -3013,6 +3295,16 @@ msgid ""
 msgstr ""
 "Vous devez ajouter au moins un promoteur externe afin de demander les "
 "signatures."
+
+msgid "You must answer the question about external enrollement change."
+msgstr ""
+"Vous devez répondre à la question sur la modification d'inscription externe."
+
+msgid "You must answer the question about reorientation."
+msgstr "Vous devez répondre à la question sur la réorientation."
+
+msgid "You must answer the question about residency."
+msgstr "Vous devez répondre à la question sur votre résidence."
 
 msgid "You must be a member of the committee to access this admission"
 msgstr "Vous devez être membre du comité pour accéder à cette admission"

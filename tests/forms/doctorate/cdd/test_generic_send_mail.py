@@ -53,7 +53,7 @@ class SelectCddEmailTemplateFormTestCase(TestCase):
         EntityVersionFactory(entity=cls.first_doctoral_commission, acronym=ENTITY_CDE)
 
         cls.admission_with_custom_email_templates = DoctorateAdmissionFactory(
-            doctorate__management_entity=cls.first_doctoral_commission,
+            training__management_entity=cls.first_doctoral_commission,
         )
 
         cls.cdd_mail_template = CddMailTemplateFactory(
@@ -67,7 +67,7 @@ class SelectCddEmailTemplateFormTestCase(TestCase):
         EntityVersionFactory(entity=cls.second_doctoral_commission, acronym=ENTITY_CDE)
 
         cls.admission_without_custom_email_template = DoctorateAdmissionFactory(
-            doctorate__management_entity=cls.second_doctoral_commission,
+            training__management_entity=cls.second_doctoral_commission,
         )
 
     def test_form_validation_with_no_data(self):

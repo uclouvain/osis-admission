@@ -24,11 +24,15 @@
 #
 # ##############################################################################
 from functools import partial
+from typing import List
 
 from admission.ddd.admission.doctorat.preparation.domain.model.groupe_de_supervision import GroupeDeSupervision
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition
-from admission.ddd.admission.doctorat.preparation.domain.service.i_profil_candidat import IProfilCandidatTranslator
-from admission.ddd.admission.doctorat.preparation.domain.service.profil_candidat import ProfilCandidat
+from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
+from admission.ddd.admission.domain.service.profil_candidat import ProfilCandidat
+from admission.ddd.admission.domain.service.i_titres_acces import ITitresAcces
+from admission.ddd.admission.domain.model.question_specifique import QuestionSpecifique
+from admission.ddd.admission.domain.service.verifier_questions_specifiques import VerifierQuestionsSpecifiques
 from base.ddd.utils.business_validator import execute_functions_and_aggregate_exceptions
 from osis_common.ddd import interface
 
@@ -41,6 +45,8 @@ class VerifierProposition(interface.DomainService):
         groupe_de_supervision: GroupeDeSupervision,
         profil_candidat_translator: IProfilCandidatTranslator,
         annee_courante: int,
+        titres_acces: ITitresAcces,
+        questions_specifiques: List[QuestionSpecifique],
     ) -> None:
         profil_candidat_service = ProfilCandidat()
         execute_functions_and_aggregate_exceptions(
@@ -64,6 +70,7 @@ class VerifierProposition(interface.DomainService):
                 proposition_candidat.matricule_candidat,
                 profil_candidat_translator,
                 annee_courante,
+                proposition_candidat.curriculum,
             ),
             groupe_de_supervision.verifier_tout_le_monde_a_approuve,
             partial(
@@ -71,5 +78,19 @@ class VerifierProposition(interface.DomainService):
                 proposition_candidat,
                 profil_candidat_translator,
                 annee_courante,
+            ),
+            partial(
+                titres_acces.verifier_doctorat,
+                proposition_candidat.matricule_candidat,
+            ),
+            partial(
+                VerifierQuestionsSpecifiques.verifier_onglet_curriculum,
+                proposition_candidat,
+                questions_specifiques,
+            ),
+            partial(
+                VerifierQuestionsSpecifiques.verifier_onglet_etudes_secondaires,
+                proposition_candidat,
+                questions_specifiques,
             ),
         )

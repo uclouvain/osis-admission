@@ -74,17 +74,17 @@ class ConfirmationAPIViewTestCase(APITestCase):
         cls.doctorate = DoctorateAdmissionFactory(
             status=ChoixStatutProposition.ENROLLED.name,
             post_enrolment_status=ChoixStatutDoctorat.ADMITTED.name,
-            doctorate__management_entity=commission,
+            training__management_entity=commission,
             supervision_group=promoter.process,
         )
         admission = DoctorateAdmissionFactory(
-            doctorate__management_entity=commission,
+            training__management_entity=commission,
             candidate=cls.doctorate.candidate,
         )
         other_doctorate = DoctorateAdmissionFactory(
             status=ChoixStatutProposition.ENROLLED.name,
             post_enrolment_status=ChoixStatutDoctorat.ADMITTED.name,
-            doctorate__management_entity=commission,
+            training__management_entity=commission,
             supervision_group=other_promoter.process,
         )
 
@@ -313,17 +313,17 @@ class LastConfirmationAPIViewTestCase(APITestCase):
         cls.doctorate = DoctorateAdmissionFactory(
             status=ChoixStatutProposition.ENROLLED.name,
             post_enrolment_status=ChoixStatutDoctorat.ADMITTED.name,
-            doctorate__management_entity=commission,
+            training__management_entity=commission,
             supervision_group=promoter.process,
         )
         admission = DoctorateAdmissionFactory(
-            doctorate__management_entity=commission,
+            training__management_entity=commission,
             candidate=cls.doctorate.candidate,
         )
         other_doctorate = DoctorateAdmissionFactory(
             status=ChoixStatutProposition.ENROLLED.name,
             post_enrolment_status=ChoixStatutDoctorat.ADMITTED.name,
-            doctorate__management_entity=commission,
+            training__management_entity=commission,
         )
 
         # Users
@@ -653,17 +653,17 @@ class LastConfirmationCanvasAPIViewTestCase(APITestCase):
         cls.doctorate = DoctorateAdmissionFactory(
             status=ChoixStatutProposition.ENROLLED.name,
             post_enrolment_status=ChoixStatutDoctorat.ADMITTED.name,
-            doctorate__management_entity=commission,
+            training__management_entity=commission,
             supervision_group=promoter.process,
         )
         admission = DoctorateAdmissionFactory(
-            doctorate__management_entity=commission,
+            training__management_entity=commission,
             candidate=cls.doctorate.candidate,
         )
         other_doctorate = DoctorateAdmissionFactory(
             status=ChoixStatutProposition.ENROLLED.name,
             post_enrolment_status=ChoixStatutDoctorat.ADMITTED.name,
-            doctorate__management_entity=commission,
+            training__management_entity=commission,
         )
 
         # Users

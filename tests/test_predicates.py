@@ -91,7 +91,7 @@ class PredicatesTestCase(TestCase):
 
     def test_is_part_of_doctoral_commission(self):
         doctoral_commission = EntityFactory()
-        request = DoctorateAdmissionFactory(doctorate__management_entity=doctoral_commission)
+        request = DoctorateAdmissionFactory(training__management_entity=doctoral_commission)
         manager1 = CddManagerFactory(entity=doctoral_commission)
         manager2 = CddManagerFactory()
 

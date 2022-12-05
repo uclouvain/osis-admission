@@ -27,16 +27,19 @@ from functools import partial
 
 from rest_framework import serializers
 
-from admission.api.serializers.fields import DoctorateAdmissionField
+from admission.api.serializers.fields import AdmissionUuidField, AnswerToSpecificQuestionField
 from admission.api.serializers.mixins import GetDefaultContextParam
-from admission.infrastructure.admission.doctorat.preparation.domain.service.profil_candidat import (
+from admission.ddd.admission.doctorat.preparation import commands as doctorate_commands
+from admission.ddd.admission.formation_generale import commands as general_commands
+from admission.ddd.admission.formation_continue import commands as continuing_commands
+from admission.infrastructure.admission.domain.service.profil_candidat import (
     ProfilCandidatTranslator,
 )
 from base.api.serializers.academic_year import RelatedAcademicYearField
 from base.models.academic_year import current_academic_year
 from base.models.enums.establishment_type import EstablishmentTypeEnum
 from base.models.organization import Organization
-from base.models.person import Person
+from base.utils.serializers import DTOSerializer
 from osis_profile.models import EducationalExperience, EducationalExperienceYear, ProfessionalExperience
 from reference.api.serializers.country import RelatedCountryField
 from reference.api.serializers.language import RelatedLanguageField
@@ -47,7 +50,7 @@ class ProfessionalExperienceSerializer(serializers.ModelSerializer):
     person = serializers.HiddenField(
         default=serializers.CreateOnlyDefault(GetDefaultContextParam('candidate')),
     )
-    valuated_from_doctorateadmission = DoctorateAdmissionField(many=True)
+    valuated_from_admission = AdmissionUuidField(many=True)
 
     class Meta:
         model = ProfessionalExperience
@@ -65,7 +68,7 @@ class LiteProfessionalExperienceSerializer(ProfessionalExperienceSerializer):
             'start_date',
             'end_date',
             'type',
-            'valuated_from_doctorateadmission',
+            'valuated_from_admission',
         ]
 
 
@@ -103,7 +106,7 @@ class EducationalExperienceSerializer(serializers.ModelSerializer):
         default=serializers.CreateOnlyDefault(GetDefaultContextParam('candidate')),
     )
     program = RelatedDiplomaField(required=False)
-    valuated_from_doctorateadmission = DoctorateAdmissionField(many=True)
+    valuated_from_admission = AdmissionUuidField(many=True)
     institute = RelatedInstitute(required=False)
 
     YEAR_FIELDS_TO_UPDATE = [
@@ -202,22 +205,51 @@ class LiteEducationalExperienceSerializer(EducationalExperienceSerializer):
             'program',
             'education_name',
             'educationalexperienceyear_set',
-            'valuated_from_doctorateadmission',
+            'valuated_from_admission',
+            'country',
         ]
 
 
-class CurriculumFileSerializer(serializers.ModelSerializer):
+class DoctoratCompleterCurriculumCommandSerializer(DTOSerializer):
+    reponses_questions_specifiques = AnswerToSpecificQuestionField()
+
     class Meta:
-        model = Person
+        source = doctorate_commands.CompleterCurriculumCommand
         fields = [
             'curriculum',
+            'reponses_questions_specifiques',
         ]
 
 
-class CurriculumSerializer(serializers.Serializer):
+class ContinuingEducationCompleterCurriculumCommandSerializer(DTOSerializer):
+    reponses_questions_specifiques = AnswerToSpecificQuestionField()
+
+    class Meta:
+        source = continuing_commands.CompleterCurriculumCommand
+        fields = [
+            'curriculum',
+            'equivalence_diplome',
+            'reponses_questions_specifiques',
+        ]
+
+
+class GeneralEducationCompleterCurriculumCommandSerializer(DTOSerializer):
+    reponses_questions_specifiques = AnswerToSpecificQuestionField()
+
+    class Meta:
+        source = general_commands.CompleterCurriculumCommand
+        fields = [
+            'continuation_cycle_bachelier',
+            'attestation_continuation_cycle_bachelier',
+            'curriculum',
+            'equivalence_diplome',
+            'reponses_questions_specifiques',
+        ]
+
+
+class CurriculumDetailsSerializer(serializers.Serializer):
     professional_experiences = LiteProfessionalExperienceSerializer(many=True)
     educational_experiences = LiteEducationalExperienceSerializer(many=True)
-    file = CurriculumFileSerializer()
     minimal_year = serializers.SerializerMethodField()
 
     def __init__(self, **kwargs):

@@ -23,9 +23,11 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from typing import Optional
 
 import attr
 
+from admission.ddd.admission.domain.model.bourse import BourseIdentity
 from admission.ddd.parcours_doctoral.domain.model._formation import FormationIdentity
 from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
 from osis_common.ddd import interface
@@ -44,6 +46,8 @@ class Doctorat(interface.RootEntity):
     formation_id: FormationIdentity
     matricule_doctorant: str
     reference: str
+    bourse_recherche: Optional[BourseIdentity] = None
+    autre_bourse_recherche: Optional[str] = ''
 
     def soumettre_epreuve_confirmation(self):
         self.statut = ChoixStatutDoctorat.SUBMITTED_CONFIRMATION

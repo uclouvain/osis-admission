@@ -28,8 +28,10 @@ from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils.translation import gettext_lazy as _
+from osis_document.contrib import FileField
+from rest_framework.settings import api_settings
 
-from admission.contrib.models.base import BaseAdmission, BaseAdmissionQuerySet
+from admission.contrib.models.base import BaseAdmission, BaseAdmissionQuerySet, admission_directory_path
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutProposition
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
@@ -40,13 +42,6 @@ from base.models.person import Person
 
 
 class GeneralEducationAdmission(BaseAdmission):
-    training = models.ForeignKey(
-        to="base.EducationGroupYear",
-        verbose_name=_("Training"),
-        related_name="+",
-        on_delete=models.CASCADE,
-    )
-
     status = models.CharField(
         choices=ChoixStatutProposition.choices(),
         max_length=30,
@@ -57,24 +52,62 @@ class GeneralEducationAdmission(BaseAdmission):
         to="admission.Scholarship",
         verbose_name=_("Double degree scholarship"),
         related_name="+",
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         null=True,
+        blank=True,
     )
 
     international_scholarship = models.ForeignKey(
         to="admission.Scholarship",
         verbose_name=_("International scholarship"),
         related_name="+",
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         null=True,
+        blank=True,
     )
 
     erasmus_mundus_scholarship = models.ForeignKey(
         to="admission.Scholarship",
         verbose_name=_("Erasmus Mundus scholarship"),
         related_name="+",
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         null=True,
+        blank=True,
+    )
+    is_external_reorientation = models.BooleanField(
+        verbose_name=_("Is an external reorientation"),
+        null=True,
+    )
+    is_external_modification = models.BooleanField(
+        verbose_name=_("Is an external modification"),
+        null=True,
+    )
+    is_non_resident = models.BooleanField(
+        verbose_name=_("Is non-resident (as defined in decree)"),
+        null=True,
+    )
+
+    bachelor_cycle_continuation = models.BooleanField(
+        blank=True,
+        null=True,
+        verbose_name=_(
+            'Do you want, on the basis of this training, to realize a cycle '
+            'continuation for the bachelor you are registering for?'
+        ),
+    )
+
+    bachelor_cycle_continuation_certificate = FileField(
+        blank=True,
+        mimetypes=['application/pdf'],
+        upload_to=admission_directory_path,
+        verbose_name=_("Certificate allowing the continuation of studies for a bachelor's degree"),
+    )
+
+    diploma_equivalence = FileField(
+        blank=True,
+        mimetypes=['application/pdf'],
+        upload_to=admission_directory_path,
+        verbose_name=_('Diploma equivalence'),
     )
 
     class Meta:
@@ -83,14 +116,15 @@ class GeneralEducationAdmission(BaseAdmission):
         permissions = []
 
     def update_detailed_status(self):
-        pass
+        from admission.ddd.admission.formation_generale.commands import VerifierPropositionCommand
+        from admission.utils import gather_business_exceptions
+
+        error_key = api_settings.NON_FIELD_ERRORS_KEY
+        self.detailed_status = gather_business_exceptions(VerifierPropositionCommand(self.uuid)).get(error_key, [])
+        self.save(update_fields=['detailed_status'])
 
 
-class GeneralEducationAdmissionQuerySet(BaseAdmissionQuerySet):
-    training_field_name = 'training_id'
-
-
-class GeneralEducationAdmissionManager(models.Manager.from_queryset(GeneralEducationAdmissionQuerySet)):
+class GeneralEducationAdmissionManager(models.Manager.from_queryset(BaseAdmissionQuerySet)):
     def get_queryset(self):
         return (
             super()
@@ -98,10 +132,12 @@ class GeneralEducationAdmissionManager(models.Manager.from_queryset(GeneralEduca
             .select_related(
                 "candidate__country_of_citizenship",
                 "training__academic_year",
+                "training__education_group_type",
                 "double_degree_scholarship",
                 "international_scholarship",
                 "erasmus_mundus_scholarship",
-            ).annotate_campus()
+            )
+            .annotate_campus()
         )
 
 
