@@ -231,7 +231,7 @@ class DoctorateCurriculumTestCase(BaseCurriculumTestCase, APITestCase):
                     'institute': None,
                     'program': None,
                     'education_name': 'Computer science',
-                    'educationalexperienceyear_set': [{'academic_year': 2020}],
+                    'educationalexperienceyear_set': [{'academic_year': 2020, 'result': Result.SUCCESS.name}],
                     'valuated_from_admission': [],
                     'country': self.country.iso_code,
                 }

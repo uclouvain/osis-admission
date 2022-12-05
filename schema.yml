@@ -5783,6 +5783,8 @@ components:
                     academic_year:
                       type: integer
                       nullable: true
+                    result:
+                      $ref: '#/components/schemas/Result'
                   required:
                   - academic_year
               valuated_from_admission:
@@ -5810,6 +5812,14 @@ components:
       - UNEMPLOYMENT
       - LANGUAGE_TRAVEL
       - OTHER
+      type: string
+    Result:
+      enum:
+      - ''
+      - SUCCESS
+      - SUCCESS_WITH_RESIDUAL_CREDITS
+      - FAILURE
+      - WAITING_RESULT
       type: string
     EducationalExperience:
       type: object
@@ -5918,14 +5928,6 @@ components:
       - country
       - transcript_type
       - obtained_diploma
-    Result:
-      enum:
-      - ''
-      - SUCCESS
-      - SUCCESS_WITH_RESIDUAL_CREDITS
-      - FAILURE
-      - WAITING_RESULT
-      type: string
     TeachingTypeEnum:
       enum:
       - ''
