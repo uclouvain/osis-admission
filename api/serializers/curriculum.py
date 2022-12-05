@@ -190,6 +190,7 @@ class LiteEducationalExperienceYearSerializer(EducationalExperienceYearSerialize
         model = EducationalExperienceYear
         fields = [
             'academic_year',
+            'result',
         ]
 
 
