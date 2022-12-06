@@ -32,9 +32,21 @@ from osis_common.ddd import interface
 
 
 @attr.dataclass(frozen=True, slots=True)
+class AnneeExperienceAcademiqueDTO(interface.DTO):
+    annee: int
+    resultat: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ExperienceAcademiqueDTO(interface.DTO):
+    pays: str
+    annees: List[AnneeExperienceAcademiqueDTO]
+
+
+@attr.dataclass(frozen=True, slots=True)
 class CurriculumDTO(interface.DTO):
     dates_experiences_non_academiques: List[Tuple[datetime.date, datetime.date]]
-    annees_experiences_academiques: List[int]
+    experiences_academiques: List[ExperienceAcademiqueDTO]
     annee_derniere_inscription_ucl: Optional[int]
     annee_diplome_etudes_secondaires_belges: Optional[int]
     annee_diplome_etudes_secondaires_etrangeres: Optional[int]

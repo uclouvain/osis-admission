@@ -26,11 +26,12 @@
 from functools import partial
 from typing import Union
 
+from django.db.models import Subquery, OuterRef
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 from rest_framework import status
 from rest_framework.exceptions import PermissionDenied
-from rest_framework.generics import get_object_or_404, RetrieveAPIView, UpdateAPIView, GenericAPIView
+from rest_framework.generics import get_object_or_404, RetrieveAPIView
 from rest_framework.mixins import UpdateModelMixin, CreateModelMixin, RetrieveModelMixin, DestroyModelMixin
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, GenericViewSet
@@ -43,16 +44,19 @@ from admission.api.views.mixins import (
     PersonRelatedMixin,
     GeneralEducationPersonRelatedMixin,
     ContinuingEducationPersonRelatedMixin,
+    SpecificPersonRelatedSchema,
 )
 from admission.ddd.admission.doctorat.preparation import commands as doctorate_commands
 from admission.ddd.admission.formation_generale import commands as general_commands
 from admission.ddd.admission.formation_continue import commands as continuing_commands
+from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from infrastructure.messages_bus import message_bus_instance
-from osis_profile.models import ProfessionalExperience, EducationalExperience
+from osis_profile.models import ProfessionalExperience, EducationalExperience, EducationalExperienceYear
 from osis_role.contrib.views import APIPermissionRequiredMixin
 
 __all__ = [
-    "CurriculumView",
+    "PersonCurriculumView",
+    "DoctorateCurriculumView",
     "ExperienceViewSet",
     "ProfessionalExperienceViewSet",
     "EducationalExperienceViewSet",
@@ -62,9 +66,6 @@ __all__ = [
     "ContinuingCurriculumView",
     "ContinuingEducationalExperienceViewSet",
     "ContinuingProfessionalExperienceViewSet",
-    "ContinuingCompleteCurriculumView",
-    "GeneralCompleteCurriculumView",
-    "DoctorateCompleteCurriculumView",
 ]
 
 GENERAL_EDUCATION_PERMISSIONS_MAPPING = {
@@ -91,25 +92,47 @@ DOCTORATE_PERMISSIONS_MAPPING = {
 
 
 class BaseCurriculumView(APIPermissionRequiredMixin, RetrieveAPIView):
-    serializer_class = serializers.CurriculumDetailsSerializer
     pagination_class = None
     filter_backends = []
+    queryset = []
+    check_command_class = None
 
     def get(self, request, *args, **kwargs):
-        """Return the experiences and the curriculum pdf of a person and the mandatory years to complete."""
+        """Return the curriculum experiences of a person with the mandatory years to complete."""
         current_person = self.get_object()
         professional_experiences = ProfessionalExperience.objects.filter(person=current_person).prefetch_related(
             'valuated_from_admission'
         )
-        educational_experiences = EducationalExperience.objects.filter(person=current_person).prefetch_related(
-            'valuated_from_admission'
+
+        educational_experiences = (
+            EducationalExperience.objects.filter(person=current_person)
+            .annotate(
+                last_academic_year=Subquery(
+                    EducationalExperienceYear.objects.filter(educational_experience_id=OuterRef("pk")).values(
+                        "academic_year__year"
+                    )[:1]
+                ),
+            )
+            .prefetch_related("valuated_from_admission")
+            .order_by("-last_academic_year")
         )
+
+        incomplete_periods = []
+        if self.check_command_class:
+            try:
+                message_bus_instance.invoke(self.check_command_class(uuid_proposition=self.kwargs.get('uuid')))
+            except MultipleBusinessExceptions as exc:
+                incomplete_periods = [
+                    e.message
+                    for e in sorted(list(exc.exceptions), key=lambda exception: exception.periode[0], reverse=True)
+                ]
 
         serializer = serializers.CurriculumDetailsSerializer(
             instance={
                 'professional_experiences': professional_experiences,
                 'educational_experiences': educational_experiences,
                 'file': current_person,
+                'incomplete_periods': incomplete_periods,
             },
             context={
                 'related_person': current_person,
@@ -119,54 +142,60 @@ class BaseCurriculumView(APIPermissionRequiredMixin, RetrieveAPIView):
         return Response(serializer.data)
 
 
-class CurriculumView(PersonRelatedMixin, BaseCurriculumView):
-    name = "curriculum"
+class PersonCurriculumView(PersonRelatedMixin, BaseCurriculumView):
+    name = 'curriculum'
     permission_classes = [partial(IsSelfPersonTabOrTabPermission, permission_suffix="curriculum")]
+    serializer_class = serializers.CurriculumDetailsSerializer
 
 
-class GeneralCurriculumView(GeneralEducationPersonRelatedMixin, BaseCurriculumView):
-    name = "general_curriculum"
-    permission_mapping = GENERAL_EDUCATION_PERMISSIONS_MAPPING
+class CurriculumView(BaseCurriculumView):
+    complete_command_class = None
+    serializer_mapping = {}
 
-
-class ContinuingCurriculumView(ContinuingEducationPersonRelatedMixin, BaseCurriculumView):
-    name = "continuing_curriculum"
-    permission_mapping = CONTINUING_EDUCATION_PERMISSIONS_MAPPING
-
-
-class BaseCompleteCurriculumView(APIPermissionRequiredMixin, GenericAPIView):
-    pagination_class = None
-    filter_backends = []
-    serializer_class = None
-    command_class = None
+    def get_serializer_class(self):
+        return self.serializer_mapping.get(self.request.method)
 
     def put(self, request, *args, **kwargs):
-        serializer = self.serializer_class(data=request.data)
+        serializer = self.get_serializer_class()(data=request.data)
         serializer.is_valid(raise_exception=True)
-        message_bus_instance.invoke(self.command_class(**serializer.data))
+        message_bus_instance.invoke(self.complete_command_class(**serializer.data))
         self.get_permission_object().update_detailed_status()
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-class DoctorateCompleteCurriculumView(PersonRelatedMixin, BaseCompleteCurriculumView):
+class DoctorateCurriculumView(PersonRelatedMixin, CurriculumView):
     name = "doctorate_curriculum"
     permission_mapping = DOCTORATE_PERMISSIONS_MAPPING
-    serializer_class = serializers.DoctoratCompleterCurriculumCommandSerializer
-    command_class = doctorate_commands.CompleterCurriculumCommand
+    check_command_class = doctorate_commands.VerifierCurriculumQuery
+    complete_command_class = doctorate_commands.CompleterCurriculumCommand
+    schema = SpecificPersonRelatedSchema()
+    serializer_mapping = {
+        'PUT': serializers.DoctoratCompleterCurriculumCommandSerializer,
+        'GET': serializers.CurriculumDetailsSerializer,
+    }
 
 
-class GeneralCompleteCurriculumView(GeneralEducationPersonRelatedMixin, BaseCompleteCurriculumView):
+class GeneralCurriculumView(GeneralEducationPersonRelatedMixin, CurriculumView):
     name = "general_curriculum"
     permission_mapping = GENERAL_EDUCATION_PERMISSIONS_MAPPING
-    serializer_class = serializers.GeneralEducationCompleterCurriculumCommandSerializer
-    command_class = general_commands.CompleterCurriculumCommand
+    check_command_class = general_commands.VerifierCurriculumQuery
+    complete_command_class = general_commands.CompleterCurriculumCommand
+    schema = SpecificPersonRelatedSchema(training_type='GeneralEducation')
+    serializer_mapping = {
+        'PUT': serializers.GeneralEducationCompleterCurriculumCommandSerializer,
+        'GET': serializers.CurriculumDetailsSerializer,
+    }
 
 
-class ContinuingCompleteCurriculumView(ContinuingEducationPersonRelatedMixin, BaseCompleteCurriculumView):
+class ContinuingCurriculumView(ContinuingEducationPersonRelatedMixin, CurriculumView):
     name = "continuing_curriculum"
     permission_mapping = CONTINUING_EDUCATION_PERMISSIONS_MAPPING
-    serializer_class = serializers.ContinuingEducationCompleterCurriculumCommandSerializer
-    command_class = continuing_commands.CompleterCurriculumCommand
+    complete_command_class = continuing_commands.CompleterCurriculumCommand
+    schema = SpecificPersonRelatedSchema(training_type='ContinuingEducation')
+    serializer_mapping = {
+        'PUT': serializers.ContinuingEducationCompleterCurriculumCommandSerializer,
+        'GET': serializers.CurriculumDetailsSerializer,
+    }
 
 
 class ExperienceViewSet(

@@ -42,14 +42,14 @@ class TestListerPropositionsCandidatService(SimpleTestCase):
     def test_should_rechercher_par_matricule(self):
         results: List[PropositionDTO] = self.message_bus.invoke(self.cmd)
         self.assertEqual(len(results), 1)
-        self.assertEqual(results[0].formation.sigle, 'SC3DP')
+        self.assertEqual(results[0].formation.sigle, 'BACHELIER-ECO')
         self.assertEqual(results[0].formation.annee, 2020)
-        self.assertEqual(results[0].formation.intitule, 'Doctorat en sciences')
-        self.assertEqual(results[0].formation.campus, 'Louvain-la-Neuve')
+        self.assertEqual(results[0].formation.intitule, 'Bachelier en sciences économiques et de gestion')
+        self.assertEqual(results[0].formation.campus, 'Louvain-La-Neuve')
         self.assertEqual(results[0].statut, ChoixStatutProposition.IN_PROGRESS.name)
         self.assertEqual(results[0].matricule_candidat, '0123456789')
-        self.assertEqual(results[0].prenom_candidat, 'Jean')
-        self.assertEqual(results[0].nom_candidat, 'Dupont')
+        self.assertEqual(results[0].prenom_candidat, 'John')
+        self.assertEqual(results[0].nom_candidat, 'Doe')
         self.assertEqual(
             results[0].bourse_internationale.type,
             TypeBourse.BOURSE_INTERNATIONALE_FORMATION_GENERALE.name,

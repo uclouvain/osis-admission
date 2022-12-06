@@ -23,8 +23,9 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
-
-from django.utils.translation import gettext_lazy as _, ngettext_lazy
+from django.utils import formats
+from django.utils.text import capfirst
+from django.utils.translation import gettext_lazy as _
 
 from osis_common.ddd.interface import BusinessException
 
@@ -306,15 +307,16 @@ class FichierCurriculumNonRenseigneException(BusinessException):
 class AnneesCurriculumNonSpecifieesException(BusinessException):
     status_code = "PROPOSITION-35"
 
-    def __init__(self, annees_manquantes, **kwargs):
+    def __init__(self, periode_manquante, **kwargs):
+        self.periode = periode_manquante
         message = (
-            ngettext_lazy(
-                "Please fill in the 'Previous Experience > Curriculum vitae' tab for the following year: ",
-                "Please fill in the 'Previous Experience > Curriculum vitae' tab for the following years: ",
-                len(annees_manquantes),
-            )
-            + ', '.join(annees_manquantes)
-            + '.'
+            _("From %(debut_periode)s to %(fin_periode)s")
+            % {
+                'debut_periode': capfirst(formats.date_format(periode_manquante[0], 'YEAR_MONTH_FORMAT')),
+                'fin_periode': capfirst(formats.date_format(periode_manquante[1], 'YEAR_MONTH_FORMAT')),
+            }
+            if periode_manquante[0] != periode_manquante[1]
+            else capfirst(formats.date_format(periode_manquante[0], "YEAR_MONTH_FORMAT"))
         )
         super().__init__(message, **kwargs)
 

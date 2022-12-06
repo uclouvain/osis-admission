@@ -26,6 +26,7 @@
 import datetime
 from unittest.mock import ANY
 
+import freezegun
 import mock
 import uuid
 from django.shortcuts import resolve_url
@@ -35,9 +36,8 @@ from rest_framework import status
 from rest_framework.status import HTTP_200_OK
 from rest_framework.test import APITestCase
 
-from admission.contrib.models import ContinuingEducationAdmission, DoctorateAdmission, GeneralEducationAdmission
+from admission.contrib.models import ContinuingEducationAdmission, GeneralEducationAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutProposition
-from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.contrib.models.base import BaseAdmission
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
@@ -72,6 +72,10 @@ class BaseCurriculumTestCase:
     def setUpTestData(cls):
         cls.today_date = datetime.date(2020, 11, 1)
         cls.today_datetime = datetime.datetime(2020, 11, 1)
+        cls.country = CountryFactory()
+        cls.academic_year_2018 = AcademicYearFactory(year=2018)
+        cls.academic_year_2019 = AcademicYearFactory(year=2019)
+        cls.academic_year_2020 = AcademicYearFactory(year=2020)
 
     def setUp(self) -> None:
         # Mock datetime to return the 2020 year as the current year
@@ -93,6 +97,56 @@ class BaseCurriculumTestCase:
         patched.return_value = '550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92'
         self.addCleanup(patcher.stop)
 
+        # Mock datetime to return the 2020 year as the current year
+        patcher = freezegun.freeze_time('2020-11-01')
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+
+def create_professional_experiences(person):
+    return [
+        ProfessionalExperienceFactory(
+            person=person,
+            institute_name='First institute',
+            start_date=datetime.date(2020, 1, 1),
+            end_date=datetime.date(2021, 1, 1),
+            type=ActivityType.WORK.name,
+            role='Librarian',
+            sector=ActivitySector.PUBLIC.name,
+            activity='Work - activity',
+        ),
+        ProfessionalExperienceFactory(
+            person=person,
+            institute_name='Second institute',
+            start_date=datetime.date(2020, 1, 1),
+            end_date=datetime.date(2020, 9, 1),
+            type=ActivityType.WORK.name,
+            role='Librarian',
+            sector=ActivitySector.PUBLIC.name,
+            activity='Work - activity',
+        ),
+    ]
+
+
+def create_educational_experiences(person, country):
+    experiences = [
+        EducationalExperienceFactory(
+            person=person,
+            country=country,
+            institute_name='UCL',
+            education_name='Computer science 3',
+            obtained_diploma=False,
+        ),
+    ]
+
+    EducationalExperienceYearFactory(
+        educational_experience=experiences[0],
+        academic_year=AcademicYearFactory(year=2020),
+        result=Result.SUCCESS.name,
+    )
+
+    return experiences
+
 
 @override_settings(ROOT_URLCONF='admission.api.url_v1', OSIS_DOCUMENT_BASE_URL='http://dummyurl/')
 class DoctorateCurriculumTestCase(BaseCurriculumTestCase, APITestCase):
@@ -104,9 +158,6 @@ class DoctorateCurriculumTestCase(BaseCurriculumTestCase, APITestCase):
             status=ChoixStatutProposition.IN_PROGRESS.name,
         )
         cls.other_admission = DoctorateAdmissionFactory()
-        cls.country = CountryFactory()
-        cls.academic_year_2018 = AcademicYearFactory(year=2018)
-        cls.academic_year_2020 = AcademicYearFactory(year=2020)
         cls.user = cls.admission.candidate.user
         cls.other_user = cls.other_admission.candidate.user
         cls.user_without_admission = CandidateFactory().person.user
@@ -127,57 +178,14 @@ class DoctorateCurriculumTestCase(BaseCurriculumTestCase, APITestCase):
             'uuid_proposition': cls.admission.uuid,
         }
 
-        cls.professional_experiences = [
-            ProfessionalExperienceFactory(
-                person=cls.admission.candidate,
-                institute_name='First institute',
-                start_date=datetime.date(2020, 1, 1),
-                end_date=datetime.date(2021, 1, 1),
-                type=ActivityType.WORK.name,
-                role='Librarian',
-                sector=ActivitySector.PUBLIC.name,
-                activity='Work - activity',
-            ),
-            ProfessionalExperienceFactory(
-                person=cls.admission.candidate,
-                institute_name='Second institute',
-                start_date=datetime.date(2020, 1, 1),
-                end_date=datetime.date(2020, 9, 1),
-                type=ActivityType.WORK.name,
-                role='Librarian',
-                sector=ActivitySector.PUBLIC.name,
-                activity='Work - activity',
-            ),
-        ]
-
-        cls.educational_experiences = [
-            EducationalExperienceFactory(
-                person=cls.admission.candidate,
-                country=cls.country,
-                institute_name='UCL',
-                education_name='Computer science',
-                obtained_diploma=False,
-            ),
-        ]
-
-        EducationalExperienceYearFactory(
-            educational_experience=cls.educational_experiences[0],
-            academic_year=cls.academic_year_2020,
-            result=Result.SUCCESS.name,
-        )
-        cls.today_date = datetime.date(2020, 11, 1)
-        cls.today_datetime = datetime.datetime(2020, 11, 1)
+        cls.professional_experiences = create_professional_experiences(person=cls.user.person)
+        cls.educational_experiences = create_educational_experiences(person=cls.user.person, country=cls.country)
 
         # Targeted urls
-        cls.agnostic_url = resolve_url('curriculum')
-        cls.admission_url = resolve_url('curriculum', uuid=cls.admission.uuid)
-        cls.complete_admission_url = resolve_url('doctorate_curriculum', uuid=cls.admission.uuid)
+        cls.admission_url = resolve_url('doctorate_curriculum', uuid=cls.admission.uuid)
 
     def test_user_not_logged_assert_not_authorized(self):
         self.client.force_authenticate(user=None)
-
-        response = self.client.get(self.agnostic_url)
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
         response = self.client.get(self.admission_url)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
@@ -197,10 +205,8 @@ class DoctorateCurriculumTestCase(BaseCurriculumTestCase, APITestCase):
 
         # Check response data
         response = response.json()
-        self.assertEqual(
-            response.get('minimal_year'),
-            1 + self.today_date.year - IProfilCandidatTranslator.NB_MAX_ANNEES_CV_REQUISES,
-        )
+        self.assertEqual(response.get('minimal_date'), '2016-09-01')
+        self.assertEqual(response.get('maximal_date'), '2020-10-01')
         self.assertEqual(
             response.get('professional_experiences'),
             [
@@ -230,11 +236,73 @@ class DoctorateCurriculumTestCase(BaseCurriculumTestCase, APITestCase):
                     'institute_name': 'UCL',
                     'institute': None,
                     'program': None,
-                    'education_name': 'Computer science',
+                    'education_name': 'Computer science 3',
                     'educationalexperienceyear_set': [{'academic_year': 2020, 'result': Result.SUCCESS.name}],
                     'valuated_from_admission': [],
                     'country': self.country.iso_code,
                 }
+            ],
+        )
+        self.assertEqual(
+            response.get('incomplete_periods'),
+            [
+                'De Septembre 2019 à Décembre 2019',
+                'De Septembre 2018 à Janvier 2019',
+                'De Septembre 2017 à Janvier 2018',
+                'De Septembre 2016 à Janvier 2017',
+            ],
+        )
+
+    def test_get_curriculum_several_educational_experiences(self):
+        self.client.force_authenticate(user=self.user)
+
+        experience_2018 = EducationalExperienceFactory(
+            person=self.admission.candidate,
+            country=self.country,
+            institute_name='UCL',
+            education_name='Computer science 1',
+            obtained_diploma=False,
+        )
+        experience_2019 = EducationalExperienceFactory(
+            person=self.admission.candidate,
+            country=self.country,
+            institute_name='UCL',
+            education_name='Computer science 2',
+            obtained_diploma=False,
+        )
+        EducationalExperienceYearFactory(
+            educational_experience=experience_2018,
+            academic_year=self.academic_year_2018,
+            result=Result.SUCCESS.name,
+        )
+        EducationalExperienceYearFactory(
+            educational_experience=experience_2019,
+            academic_year=self.academic_year_2019,
+            result=Result.SUCCESS.name,
+        )
+
+        response = self.client.get(self.admission_url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Check response data
+        response = response.json()
+
+        experiences = response.get('educational_experiences')
+        self.assertEqual(len(experiences), 3)
+        self.assertEqual(
+            [experience.get('education_name') for experience in experiences],
+            [
+                'Computer science 3',
+                'Computer science 2',
+                'Computer science 1',
+            ],
+        )
+        self.assertEqual(
+            response.get('incomplete_periods'),
+            [
+                'De Septembre 2017 à Janvier 2018',
+                'De Septembre 2016 à Janvier 2017',
             ],
         )
 
@@ -247,11 +315,8 @@ class DoctorateCurriculumTestCase(BaseCurriculumTestCase, APITestCase):
 
         # Check response data
         response = response.json()
-        self.assertEqual(
-            response.get('minimal_year'),
-            self.academic_year_2018.year + 1,
-        )
-
+        self.assertEqual(response.get('minimal_date'), '2019-09-01')
+        self.assertEqual(response.get('incomplete_periods'), ['De Septembre 2019 à Décembre 2019'])
         self.user.person.last_registration_year = None
         self.user.person.save()
 
@@ -267,10 +332,8 @@ class DoctorateCurriculumTestCase(BaseCurriculumTestCase, APITestCase):
 
         # Check response data
         response = response.json()
-        self.assertEqual(
-            response.get('minimal_year'),
-            self.academic_year_2018.year + 1,
-        )
+        self.assertEqual(response.get('minimal_date'), '2019-09-01')
+        self.assertEqual(response.get('incomplete_periods'), ['De Septembre 2019 à Décembre 2019'])
 
         belgian_diploma.delete()
 
@@ -286,17 +349,29 @@ class DoctorateCurriculumTestCase(BaseCurriculumTestCase, APITestCase):
 
         # Check response data
         response = response.json()
-        self.assertEqual(
-            response.get('minimal_year'),
-            self.academic_year_2018.year + 1,
-        )
+        self.assertEqual(response.get('minimal_date'), '2019-09-01')
+        self.assertEqual(response.get('incomplete_periods'), ['De Septembre 2019 à Décembre 2019'])
 
         foreign_diploma.delete()
+
+    def test_get_curriculum_when_completed(self):
+        self.client.force_authenticate(user=self.user)
+
+        self.user.person.last_registration_year = self.academic_year_2019
+        self.user.person.save()
+        response = self.client.get(self.admission_url)
+
+        # Check response data
+        response = response.json()
+        self.assertEqual(response.get('minimal_date'), '2020-09-01')
+        self.assertEqual(response.get('incomplete_periods'), [])
+        self.user.person.last_registration_year = None
+        self.user.person.save()
 
     def test_put_curriculum(self):
         self.client.force_authenticate(user=self.user)
 
-        response = self.client.put(self.complete_admission_url, data=self.put_data)
+        response = self.client.put(self.admission_url, data=self.put_data)
 
         self.assertEqual(response.status_code, HTTP_200_OK)
         updated_admission = BaseAdmission.objects.get(uuid=self.admission.uuid)
@@ -315,13 +390,13 @@ class GeneralEducationCurriculumTestCase(BaseCurriculumTestCase, APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        cls.admission = GeneralEducationAdmissionFactory()
+        cls.admission = GeneralEducationAdmissionFactory(training__academic_year__year=2020)
         AdmissionFormItemInstantiationFactory(
             form_item=TextAdmissionFormItemFactory(
                 uuid=uuid.UUID('fe254203-17c7-47d6-95e4-3c5c532da551'),
                 internal_label='text_item',
             ),
-            academic_year=cls.admission.training.academic_year,
+            academic_year__year=2020,
         )
 
         cls.put_data = {
@@ -338,8 +413,81 @@ class GeneralEducationCurriculumTestCase(BaseCurriculumTestCase, APITestCase):
         # Users
         cls.user = cls.admission.candidate.user
 
+        cls.professional_experiences = create_professional_experiences(person=cls.user.person)
+        cls.educational_experiences = create_educational_experiences(person=cls.user.person, country=cls.country)
+
         # Targeted urls
         cls.admission_url = resolve_url('general_curriculum', uuid=cls.admission.uuid)
+
+    def test_get_curriculum_with_last_registration(self):
+        self.client.force_authenticate(user=self.user)
+
+        self.user.person.last_registration_year = self.academic_year_2019
+        self.user.person.save()
+        response = self.client.get(self.admission_url)
+
+        self.assertEqual(response.status_code, HTTP_200_OK)
+
+        # Check response data
+        response = response.json()
+        self.assertEqual(
+            response.get('professional_experiences'),
+            [
+                {
+                    'uuid': str(self.professional_experiences[0].uuid),
+                    'institute_name': 'First institute',
+                    'start_date': '2020-01-01',
+                    'end_date': '2021-01-01',
+                    'type': ActivityType.WORK.name,
+                    'valuated_from_admission': [],
+                },
+                {
+                    'uuid': str(self.professional_experiences[1].uuid),
+                    'institute_name': 'Second institute',
+                    'start_date': '2020-01-01',
+                    'end_date': '2020-09-01',
+                    'type': ActivityType.WORK.name,
+                    'valuated_from_admission': [],
+                },
+            ],
+        )
+        self.assertEqual(
+            response.get('educational_experiences'),
+            [
+                {
+                    'uuid': ANY,
+                    'institute_name': 'UCL',
+                    'institute': None,
+                    'program': None,
+                    'education_name': 'Computer science 3',
+                    'educationalexperienceyear_set': [{'academic_year': 2020, 'result': Result.SUCCESS.name}],
+                    'valuated_from_admission': [],
+                    'country': self.country.iso_code,
+                }
+            ],
+        )
+        self.assertEqual(response.get('minimal_date'), '2020-09-01')
+        self.assertEqual(response.get('maximal_date'), '2020-10-01')
+        self.assertEqual(response.get('incomplete_periods'), [])
+        self.user.person.last_registration_year = None
+        self.user.person.save()
+
+    def test_get_curriculum_when_completed(self):
+        self.client.force_authenticate(user=self.user)
+
+        self.user.person.last_registration_year = self.academic_year_2020
+        self.user.person.save()
+        response = self.client.get(self.admission_url)
+
+        self.assertEqual(response.status_code, HTTP_200_OK)
+
+        # Check response data
+        response = response.json()
+        self.assertEqual(response.get('minimal_date'), '2021-09-01')
+        self.assertEqual(response.get('maximal_date'), '2020-10-01')
+        self.assertEqual(response.get('incomplete_periods'), [])
+        self.user.person.last_registration_year = None
+        self.user.person.save()
 
     def test_put_curriculum(self):
         self.client.force_authenticate(user=self.user)
@@ -387,6 +535,9 @@ class ContinuingEducationCurriculumTestCase(BaseCurriculumTestCase, APITestCase)
         # Users
         cls.user = cls.admission.candidate.user
 
+        cls.professional_experiences = create_professional_experiences(person=cls.user.person)
+        cls.educational_experiences = create_educational_experiences(person=cls.user.person, country=cls.country)
+
         # Targeted urls
         cls.admission_url = resolve_url('continuing_curriculum', uuid=cls.admission.uuid)
 
@@ -406,6 +557,128 @@ class ContinuingEducationCurriculumTestCase(BaseCurriculumTestCase, APITestCase)
         )
         self.assertEqual(updated_admission.curriculum, [uuid.UUID('550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92')])
         self.assertEqual(updated_admission.diploma_equivalence, [uuid.UUID('550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92')])
+
+    def test_get_curriculum_with_last_registration(self):
+        self.client.force_authenticate(user=self.user)
+
+        self.user.person.last_registration_year = self.academic_year_2019
+        self.user.person.save()
+        response = self.client.get(self.admission_url)
+
+        self.assertEqual(response.status_code, HTTP_200_OK)
+
+        # Check response data
+        response = response.json()
+        self.assertEqual(
+            response.get('professional_experiences'),
+            [
+                {
+                    'uuid': str(self.professional_experiences[0].uuid),
+                    'institute_name': 'First institute',
+                    'start_date': '2020-01-01',
+                    'end_date': '2021-01-01',
+                    'type': ActivityType.WORK.name,
+                    'valuated_from_admission': [],
+                },
+                {
+                    'uuid': str(self.professional_experiences[1].uuid),
+                    'institute_name': 'Second institute',
+                    'start_date': '2020-01-01',
+                    'end_date': '2020-09-01',
+                    'type': ActivityType.WORK.name,
+                    'valuated_from_admission': [],
+                },
+            ],
+        )
+        self.assertEqual(
+            response.get('educational_experiences'),
+            [
+                {
+                    'uuid': ANY,
+                    'institute_name': 'UCL',
+                    'institute': None,
+                    'program': None,
+                    'education_name': 'Computer science 3',
+                    'educationalexperienceyear_set': [{'academic_year': 2020, 'result': Result.SUCCESS.name}],
+                    'valuated_from_admission': [],
+                    'country': self.country.iso_code,
+                }
+            ],
+        )
+        self.assertEqual(response.get('minimal_date'), '2020-09-01')
+        self.assertEqual(response.get('maximal_date'), '2020-10-01')
+        self.assertEqual(response.get('incomplete_periods'), [])
+        self.user.person.last_registration_year = None
+        self.user.person.save()
+
+
+@override_settings(ROOT_URLCONF='admission.api.url_v1', OSIS_DOCUMENT_BASE_URL='http://dummyurl/')
+class PersonCurriculumTestCase(BaseCurriculumTestCase, APITestCase):
+    @classmethod
+    def setUpTestData(cls) -> None:
+        super().setUpTestData()
+
+        # Users
+        cls.user = CandidateFactory().person.user
+
+        cls.professional_experiences = create_professional_experiences(person=cls.user.person)
+        cls.educational_experiences = create_educational_experiences(person=cls.user.person, country=cls.country)
+
+        # Targeted url
+        cls.agnostic_url = resolve_url('curriculum')
+
+    def test_get_curriculum_with_last_registration(self):
+        self.client.force_authenticate(user=self.user)
+
+        self.user.person.last_registration_year = self.academic_year_2019
+        self.user.person.save()
+        response = self.client.get(self.agnostic_url)
+
+        self.assertEqual(response.status_code, HTTP_200_OK)
+
+        # Check response data
+        response = response.json()
+        self.assertEqual(
+            response.get('professional_experiences'),
+            [
+                {
+                    'uuid': str(self.professional_experiences[0].uuid),
+                    'institute_name': 'First institute',
+                    'start_date': '2020-01-01',
+                    'end_date': '2021-01-01',
+                    'type': ActivityType.WORK.name,
+                    'valuated_from_admission': [],
+                },
+                {
+                    'uuid': str(self.professional_experiences[1].uuid),
+                    'institute_name': 'Second institute',
+                    'start_date': '2020-01-01',
+                    'end_date': '2020-09-01',
+                    'type': ActivityType.WORK.name,
+                    'valuated_from_admission': [],
+                },
+            ],
+        )
+        self.assertEqual(
+            response.get('educational_experiences'),
+            [
+                {
+                    'uuid': ANY,
+                    'institute_name': 'UCL',
+                    'institute': None,
+                    'program': None,
+                    'education_name': 'Computer science 3',
+                    'educationalexperienceyear_set': [{'academic_year': 2020, 'result': Result.SUCCESS.name}],
+                    'valuated_from_admission': [],
+                    'country': self.country.iso_code,
+                }
+            ],
+        )
+        self.assertEqual(response.get('minimal_date'), '2020-09-01')
+        self.assertEqual(response.get('maximal_date'), '2020-10-01')
+        self.assertEqual(response.get('incomplete_periods'), [])
+        self.user.person.last_registration_year = None
+        self.user.person.save()
 
 
 @override_settings(ROOT_URLCONF='admission.api.url_v1')

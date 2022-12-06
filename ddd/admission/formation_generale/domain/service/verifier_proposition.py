@@ -24,11 +24,14 @@
 #
 # ##############################################################################
 from functools import partial
+from typing import List
 
+from admission.ddd.admission.domain.model.question_specifique import QuestionSpecifique
 from admission.ddd.admission.domain.service.i_calendrier_inscription import ICalendrierInscription
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.domain.service.i_titres_acces import ITitresAcces
 from admission.ddd.admission.domain.service.profil_candidat import ProfilCandidat
+from admission.ddd.admission.domain.service.verifier_questions_specifiques import VerifierQuestionsSpecifiques
 from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition
 from admission.ddd.admission.formation_generale.domain.service.i_formation import IFormationGeneraleTranslator
 from base.ddd.utils.business_validator import execute_functions_and_aggregate_exceptions
@@ -44,6 +47,8 @@ class VerifierProposition(interface.DomainService):
         titres_acces: ITitresAcces,
         profil_candidat_translator: IProfilCandidatTranslator,
         calendrier_inscription: 'ICalendrierInscription',
+        annee_courante: int,
+        questions_specifiques: List[QuestionSpecifique],
     ) -> None:
         profil_candidat_service = ProfilCandidat()
         type_formation = formation_translator.get(proposition_candidat.formation_id).type
@@ -67,6 +72,33 @@ class VerifierProposition(interface.DomainService):
                 profil_candidat_service.verifier_etudes_secondaires,
                 matricule=proposition_candidat.matricule_candidat,
                 profil_candidat_translator=profil_candidat_translator,
+            ),
+            partial(
+                profil_candidat_service.verifier_curriculum_formation_generale,
+                proposition_candidat,
+                type_formation,
+                profil_candidat_translator,
+                annee_courante,
+            ),
+            partial(
+                VerifierQuestionsSpecifiques.verifier_onglet_curriculum,
+                proposition_candidat,
+                questions_specifiques,
+            ),
+            partial(
+                VerifierQuestionsSpecifiques.verifier_onglet_etudes_secondaires,
+                proposition_candidat,
+                questions_specifiques,
+            ),
+            partial(
+                VerifierQuestionsSpecifiques.verifier_onglet_questions_specifiques,
+                proposition_candidat,
+                questions_specifiques,
+            ),
+            partial(
+                VerifierQuestionsSpecifiques.verifier_onglet_choix_formation,
+                proposition_candidat,
+                questions_specifiques,
             ),
             partial(
                 titres_acces.verifier_titres,

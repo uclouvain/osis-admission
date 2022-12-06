@@ -39,6 +39,8 @@ from admission.ddd.admission.doctorat.preparation.domain.model._promoteur import
 from admission.ddd.admission.doctorat.preparation.domain.model._signature_promoteur import SignaturePromoteur
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixDoctoratDejaRealise, ChoixTypeAdmission
 from admission.ddd.admission.doctorat.preparation.domain.validator import *
+from admission.ddd.admission.doctorat.preparation.dtos.curriculum import ExperienceAcademiqueDTO
+from admission.ddd.admission.domain.validator import ShouldAnneesCVRequisesCompletees
 from base.ddd.utils.business_validator import BusinessValidator, TwoStepsMultipleBusinessExceptionListValidator
 
 
@@ -236,7 +238,7 @@ class CurriculumValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
     annee_diplome_etudes_secondaires_belges: Optional[int]
     annee_diplome_etudes_secondaires_etrangeres: Optional[int]
     dates_experiences_non_academiques: List[Tuple[datetime.date, datetime.date]]
-    annees_experiences_academiques: List[int]
+    experiences_academiques: List[ExperienceAcademiqueDTO]
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
@@ -248,7 +250,7 @@ class CurriculumValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
             ),
             ShouldAnneesCVRequisesCompletees(
                 annee_courante=self.annee_courante,
-                annees_experiences_academiques=self.annees_experiences_academiques,
+                experiences_academiques=self.experiences_academiques,
                 annee_derniere_inscription_ucl=self.annee_derniere_inscription_ucl,
                 annee_diplome_etudes_secondaires_belges=self.annee_diplome_etudes_secondaires_belges,
                 annee_diplome_etudes_secondaires_etrangeres=self.annee_diplome_etudes_secondaires_etrangeres,

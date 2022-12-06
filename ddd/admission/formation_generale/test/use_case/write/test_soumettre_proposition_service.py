@@ -23,6 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import datetime
 from unittest import TestCase
 
 import freezegun
@@ -33,6 +34,8 @@ from admission.infrastructure.admission.formation_generale.repository.in_memory.
     PropositionInMemoryRepository,
 )
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
+from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import AcademicYear, AcademicYearIdentity
+from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
 
 
 class TestSoumettrePropositionGenerale(TestCase):
@@ -41,10 +44,21 @@ class TestSoumettrePropositionGenerale(TestCase):
         self.addCleanup(self.proposition_repository.reset)
         self.message_bus = message_bus_in_memory_instance
 
-    @freezegun.freeze_time('01/03/2020')
+        self.academic_year_repository = AcademicYearInMemoryRepository()
+
+        for annee in range(2016, 2023):
+            self.academic_year_repository.save(
+                AcademicYear(
+                    entity_id=AcademicYearIdentity(year=annee),
+                    start_date=datetime.date(annee, 9, 15),
+                    end_date=datetime.date(annee + 1, 9, 30),
+                )
+            )
+
+    @freezegun.freeze_time('2020-11-01')
     def test_should_soumettre_proposition_etre_ok_si_admission_complete(self):
         proposition_id = self.message_bus.invoke(
-            SoumettrePropositionCommand(uuid_proposition="uuid-ECGE3DP"),
+            SoumettrePropositionCommand(uuid_proposition="uuid-MASTER-SCI"),
         )
 
         updated_proposition = self.proposition_repository.get(proposition_id)

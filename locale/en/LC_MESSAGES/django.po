@@ -1255,6 +1255,10 @@ msgstr ""
 msgid "From"
 msgstr ""
 
+#, python-format
+msgid "From %(debut_periode)s to %(fin_periode)s"
+msgstr ""
+
 msgid "GEOGRAPHY"
 msgstr "Geography"
 
@@ -2053,15 +2057,21 @@ msgid "Please fill in at least your last or first name."
 msgstr ""
 
 msgid ""
-"Please fill in the 'Previous Experience > Curriculum vitae' tab for the "
-"following year: "
-msgid_plural ""
-"Please fill in the 'Previous Experience > Curriculum vitae' tab for the "
-"following years: "
-msgstr[0] ""
-msgstr[1] ""
+"Please indicate if you want, on the basis of this training, to realize a "
+"cycle continuation for the bachelor you are registering for."
+msgstr ""
+
+msgid ""
+"Please provide a copy of your certificate allowing the continuation of "
+"studies for the bachelor you are registering for."
+msgstr ""
 
 msgid "Please provide a copy of your curriculum."
+msgstr ""
+
+msgid ""
+"Please provide a copy of your decision of equivalence for your diploma(s) "
+"giving access to the training."
 msgstr ""
 
 msgid "Please provide a copy of your identity card."

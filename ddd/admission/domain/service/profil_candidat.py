@@ -36,11 +36,18 @@ from admission.ddd.admission.domain.model._candidat_signaletique import Candidat
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.domain.validator.validator_by_business_action import (
     CoordonneesValidatorList,
-    IdentificationValidatorList,
+    IdentificationValidatorList, AnneesCurriculumValidatorList,
+)
+from admission.ddd.admission.formation_generale.domain.model.proposition import (
+    Proposition as FormationGeneraleProposition,
 )
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
     EtudesSecondairesNonCompleteesException,
 )
+from admission.ddd.admission.formation_generale.domain.validator.validator_by_business_actions import (
+    FormationGeneraleCurriculumValidatorList,
+)
+from base.models.enums.education_group_types import TrainingType
 from osis_common.ddd import interface
 
 
@@ -131,11 +138,58 @@ class ProfilCandidat(interface.DomainService):
 
         CurriculumValidatorList(
             annee_courante=annee_courante,
-            annees_experiences_academiques=curriculum.annees_experiences_academiques,
+            experiences_academiques=curriculum.experiences_academiques,
             annee_diplome_etudes_secondaires_belges=curriculum.annee_diplome_etudes_secondaires_belges,
             annee_diplome_etudes_secondaires_etrangeres=curriculum.annee_diplome_etudes_secondaires_etrangeres,
             annee_derniere_inscription_ucl=curriculum.annee_derniere_inscription_ucl,
             fichier_pdf=curriculum_pdf,
+            dates_experiences_non_academiques=curriculum.dates_experiences_non_academiques,
+        ).validate()
+
+    @classmethod
+    def verifier_curriculum_formation_generale(
+        cls,
+        proposition: FormationGeneraleProposition,
+        type_formation: TrainingType,
+        profil_candidat_translator: 'IProfilCandidatTranslator',
+        annee_courante: int,
+    ) -> None:
+        curriculum = profil_candidat_translator.get_curriculum(
+            matricule=proposition.matricule_candidat,
+            annee_courante=annee_courante,
+        )
+        FormationGeneraleCurriculumValidatorList(
+            annee_courante=annee_courante,
+            experiences_academiques=curriculum.experiences_academiques,
+            annee_diplome_etudes_secondaires_belges=curriculum.annee_diplome_etudes_secondaires_belges,
+            annee_diplome_etudes_secondaires_etrangeres=curriculum.annee_diplome_etudes_secondaires_etrangeres,
+            annee_derniere_inscription_ucl=curriculum.annee_derniere_inscription_ucl,
+            fichier_pdf=proposition.curriculum,
+            dates_experiences_non_academiques=curriculum.dates_experiences_non_academiques,
+            type_formation=type_formation,
+            continuation_cycle_bachelier=proposition.continuation_cycle_bachelier,
+            attestation_continuation_cycle_bachelier=proposition.attestation_continuation_cycle_bachelier,
+            equivalence_diplome=proposition.equivalence_diplome,
+            sigle_formation=proposition.formation_id.sigle,
+        ).validate()
+
+    @classmethod
+    def verifier_annees_curriculum(
+        cls,
+        matricule_candidat: str,
+        annee_courante: int,
+        profil_candidat_translator: 'IProfilCandidatTranslator',
+    ) -> None:
+        curriculum = profil_candidat_translator.get_curriculum(
+            matricule=matricule_candidat,
+            annee_courante=annee_courante,
+        )
+        AnneesCurriculumValidatorList(
+            annee_courante=annee_courante,
+            experiences_academiques=curriculum.experiences_academiques,
+            annee_diplome_etudes_secondaires_belges=curriculum.annee_diplome_etudes_secondaires_belges,
+            annee_diplome_etudes_secondaires_etrangeres=curriculum.annee_diplome_etudes_secondaires_etrangeres,
+            annee_derniere_inscription_ucl=curriculum.annee_derniere_inscription_ucl,
             dates_experiences_non_academiques=curriculum.dates_experiences_non_academiques,
         ).validate()
 

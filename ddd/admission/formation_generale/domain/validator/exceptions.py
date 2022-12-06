@@ -51,3 +51,43 @@ class EtudesSecondairesNonCompleteesException(BusinessException):
     def __init__(self, **kwargs):
         message = _("Secondary studies must be completed.")
         super().__init__(message, **kwargs)
+
+
+class FichierCurriculumNonRenseigneException(BusinessException):
+    status_code = "FORMATION-GENERALE-4"
+
+    def __init__(self, **kwargs):
+        message = _("Please provide a copy of your curriculum.")
+        super().__init__(message, **kwargs)
+
+
+class EquivalenceNonRenseigneeException(BusinessException):
+    status_code = "FORMATION-GENERALE-5"
+
+    def __init__(self, **kwargs):
+        message = _(
+            "Please provide a copy of your decision of equivalence for your diploma(s) giving access to the training."
+        )
+        super().__init__(message, **kwargs)
+
+
+class ContinuationBachelierNonRenseigneeException(BusinessException):
+    status_code = "FORMATION-GENERALE-6"
+
+    def __init__(self, **kwargs):
+        message = _(
+            "Please indicate if you want, on the basis of this training, to realize a cycle continuation "
+            "for the bachelor you are registering for."
+        )
+        super().__init__(message, **kwargs)
+
+
+class AttestationContinuationBachelierNonRenseigneeException(BusinessException):
+    status_code = "FORMATION-GENERALE-7"
+
+    def __init__(self, **kwargs):
+        message = _(
+            "Please provide a copy of your certificate allowing the continuation of studies for the bachelor you are "
+            "registering for."
+        )
+        super().__init__(message, **kwargs)

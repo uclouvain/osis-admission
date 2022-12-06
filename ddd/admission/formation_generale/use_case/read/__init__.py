@@ -27,3 +27,4 @@ from .rechercher_formations_service import rechercher_formations
 from .lister_propositions_candidat_service import lister_propositions_candidat
 from .recuperer_proposition_service import recuperer_proposition
 from .verifier_proposition_service import verifier_proposition
+from .verifier_curriculum_service import verifier_curriculum

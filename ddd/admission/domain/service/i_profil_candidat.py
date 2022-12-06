@@ -23,6 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import datetime
 from abc import abstractmethod
 from typing import List, Optional
 
@@ -34,7 +35,7 @@ from osis_common.ddd import interface
 class IProfilCandidatTranslator(interface.DomainService):
     NB_MAX_ANNEES_CV_REQUISES = 5
     MOIS_DEBUT_ANNEE_ACADEMIQUE = 9
-    MOIS_FIN_ANNEE_ACADEMIQUE = 6
+    MOIS_FIN_ANNEE_ACADEMIQUE = 1
 
     @classmethod
     @abstractmethod
@@ -90,6 +91,11 @@ class IProfilCandidatTranslator(interface.DomainService):
                 if annee
             ]
         )
+
+    @classmethod
+    def get_date_maximale_curriculum(cls):
+        """Retourne la date de la dernière expérience à remplir dans le CV (mois précédent la date du jour)."""
+        return (datetime.date.today().replace(day=1) - datetime.timedelta(days=1)).replace(day=1)
 
     @classmethod
     def est_changement_etablissement(cls, matricule: str, annee_courante: int) -> bool:

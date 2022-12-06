@@ -39,9 +39,13 @@ from admission.infrastructure.admission.domain.service.in_memory.titres_acces im
 from admission.infrastructure.admission.formation_generale.domain.service.in_memory.formation import (
     FormationGeneraleInMemoryTranslator,
 )
+from admission.infrastructure.admission.formation_generale.domain.service.in_memory.question_specifique import (
+    QuestionSpecifiqueInMemoryTranslator,
+)
 from admission.infrastructure.admission.formation_generale.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
+from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
 
 _formation_generale_translator = FormationGeneraleInMemoryTranslator()
 _annee_inscription_formation_translator = AnneeInscriptionFormationInMemoryTranslator()
@@ -49,6 +53,8 @@ _proposition_repository = PropositionInMemoryRepository()
 _bourse_translator = BourseInMemoryTranslator()
 _titres_acces = TitresAccesInMemory()
 _profil_candidat_translator = ProfilCandidatInMemoryTranslator()
+_question_specific_translator = QuestionSpecifiqueInMemoryTranslator()
+_academic_year_repository = AcademicYearInMemoryRepository()
 
 
 COMMAND_HANDLERS = {
@@ -88,6 +94,8 @@ COMMAND_HANDLERS = {
         titres_acces=_titres_acces,
         profil_candidat_translator=_profil_candidat_translator,
         calendrier_inscription=CalendrierInscriptionInMemory(),
+        academic_year_repository=_academic_year_repository,
+        questions_specifiques_translator=_question_specific_translator,
     ),
     SoumettrePropositionCommand: lambda msg_bus, cmd: soumettre_proposition(
         cmd,
@@ -96,9 +104,17 @@ COMMAND_HANDLERS = {
         titres_acces=_titres_acces,
         profil_candidat_translator=_profil_candidat_translator,
         calendrier_inscription=CalendrierInscriptionInMemory(),
+        academic_year_repository=_academic_year_repository,
+        questions_specifiques_translator=_question_specific_translator,
     ),
     CompleterCurriculumCommand: lambda msg_bus, cmd: completer_curriculum(
         cmd,
         proposition_repository=_proposition_repository,
+    ),
+    VerifierCurriculumQuery: lambda msg_bus, cmd: verifier_curriculum(
+        cmd,
+        proposition_repository=_proposition_repository,
+        profil_candidat_translator=_profil_candidat_translator,
+        academic_year_repository=_academic_year_repository,
     ),
 }

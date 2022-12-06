@@ -25,10 +25,11 @@
 # ##############################################################################
 
 import datetime
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 import attr
 
+from admission.ddd.admission.doctorat.preparation.dtos.curriculum import ExperienceAcademiqueDTO
 from admission.ddd.admission.domain.model._candidat_adresse import CandidatAdresse
 from admission.ddd.admission.domain.model._candidat_signaletique import CandidatSignaletique
 from admission.ddd.admission.domain.validator import *
@@ -109,4 +110,29 @@ class CoordonneesValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
                 adresse=self.domicile_legal,
             ),
             ShouldAdresseCorrespondanceEtreCompleteeSiSpecifiee(adresse=self.adresse_correspondance),
+        ]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class AnneesCurriculumValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+    annee_courante: int
+    annee_derniere_inscription_ucl: Optional[int]
+    annee_diplome_etudes_secondaires_belges: Optional[int]
+    annee_diplome_etudes_secondaires_etrangeres: Optional[int]
+    dates_experiences_non_academiques: List[Tuple[datetime.date, datetime.date]]
+    experiences_academiques: List[ExperienceAcademiqueDTO]
+
+    def get_data_contract_validators(self) -> List[BusinessValidator]:
+        return []
+
+    def get_invariants_validators(self) -> List[BusinessValidator]:
+        return [
+            ShouldAnneesCVRequisesCompletees(
+                annee_courante=self.annee_courante,
+                experiences_academiques=self.experiences_academiques,
+                annee_derniere_inscription_ucl=self.annee_derniere_inscription_ucl,
+                annee_diplome_etudes_secondaires_belges=self.annee_diplome_etudes_secondaires_belges,
+                annee_diplome_etudes_secondaires_etrangeres=self.annee_diplome_etudes_secondaires_etrangeres,
+                dates_experiences_non_academiques=self.dates_experiences_non_academiques,
+            ),
         ]

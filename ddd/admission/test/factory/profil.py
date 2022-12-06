@@ -29,6 +29,10 @@ import factory
 from attr import dataclass
 
 from admission.ddd.admission.doctorat.preparation.dtos import ConditionsComptabiliteDTO, CurriculumDTO
+from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
+    ExperienceAcademiqueDTO,
+    AnneeExperienceAcademiqueDTO,
+)
 from admission.ddd.admission.dtos import AdressePersonnelleDTO, CoordonneesDTO, EtudesSecondairesDTO, IdentificationDTO
 from base.models.enums.civil_state import CivilState
 from base.tests.factories.person import generate_global_id
@@ -96,13 +100,27 @@ class EtudesSecondairesDTOFactory(factory.Factory):
     presence_examen_admission_premier_cycle = False
 
 
+class AnneeExperienceAcademiqueDTOFactory(factory.Factory):
+    class Meta:
+        model = AnneeExperienceAcademiqueDTO
+        abstract = False
+
+
+class ExperienceAcademiqueDTOFactory(factory.Factory):
+    annees: List[AnneeExperienceAcademiqueDTOFactory] = []
+
+    class Meta:
+        model = ExperienceAcademiqueDTO
+        abstract = False
+
+
 class CurriculumDTOFactory(factory.Factory):
     class Meta:
         model = CurriculumDTO
         abstract = False
 
     dates_experiences_non_academiques: List[int] = []
-    annees_experiences_academiques: List[int] = []
+    experiences_academiques: List[ExperienceAcademiqueDTOFactory] = []
     annee_derniere_inscription_ucl = factory.Faker('year')
     annee_diplome_etudes_secondaires_belges = factory.Faker('year')
     annee_diplome_etudes_secondaires_etrangeres = factory.Faker('year')

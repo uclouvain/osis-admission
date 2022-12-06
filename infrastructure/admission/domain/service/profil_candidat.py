@@ -24,11 +24,15 @@
 #
 # ##############################################################################
 import datetime
-from typing import List
+from typing import List, Dict
 
-from django.db.models import Exists, OuterRef
+from django.db.models import Exists, OuterRef, QuerySet
 
 from admission.ddd.admission.doctorat.preparation.dtos import ConditionsComptabiliteDTO, CurriculumDTO
+from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
+    ExperienceAcademiqueDTO,
+    AnneeExperienceAcademiqueDTO,
+)
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.domain.validator._should_identification_candidat_etre_completee import BE_ISO_CODE
 from admission.ddd.admission.dtos import AdressePersonnelleDTO, CoordonneesDTO, EtudesSecondairesDTO, IdentificationDTO
@@ -157,19 +161,37 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
     @classmethod
     def get_curriculum(cls, matricule: str, annee_courante: int) -> 'CurriculumDTO':
         minimal_years = cls.get_annees_minimum_curriculum(matricule, annee_courante)
+        date_maximale = cls.get_date_maximale_curriculum()
 
         annees_experiences_academiques = EducationalExperienceYear.objects.filter(
             educational_experience__person__global_id=matricule,
-            academic_year__year__gte=minimal_years.get('minimal_year'),
-        ).values_list('academic_year__year', flat=True)
+        ).select_related('educational_experience__country', 'academic_year')
+
+        experiences_academiques_dtos: Dict[int, ExperienceAcademiqueDTO] = {}
+
+        for annee_experience in annees_experiences_academiques:
+            annee_experience_dto = AnneeExperienceAcademiqueDTO(
+                resultat=annee_experience.result,
+                annee=annee_experience.academic_year.year,
+            )
+            if annee_experience.educational_experience.pk not in experiences_academiques_dtos:
+                experiences_academiques_dtos[annee_experience.educational_experience.pk] = ExperienceAcademiqueDTO(
+                    pays=annee_experience.educational_experience.country.iso_code,
+                    annees=[annee_experience_dto],
+                )
+            else:
+                experiences_academiques_dtos[annee_experience.educational_experience.pk].annees.append(
+                    annee_experience_dto
+                )
 
         dates_experiences_non_academiques = ProfessionalExperience.objects.filter(
             person__global_id=matricule,
-            end_date__gte=datetime.date(minimal_years.get('minimal_year'), cls.MOIS_DEBUT_ANNEE_ACADEMIQUE, 1),
+            start_date__lte=date_maximale,
+            end_date__gte=minimal_years.get('minimal_date'),
         ).values_list('start_date', 'end_date')
 
         return CurriculumDTO(
-            annees_experiences_academiques=list(annees_experiences_academiques),
+            experiences_academiques=list(experiences_academiques_dtos.values()),
             annee_diplome_etudes_secondaires_belges=minimal_years.get('belgian_highschool_diploma_year'),
             annee_diplome_etudes_secondaires_etrangeres=minimal_years.get('foreign_highschool_diploma_year'),
             annee_derniere_inscription_ucl=minimal_years.get('last_registration_year'),
@@ -213,7 +235,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
         )
 
         return {
-            'minimal_year': minimal_year,
+            'minimal_date': datetime.date(minimal_year, IProfilCandidatTranslator.MOIS_DEBUT_ANNEE_ACADEMIQUE, 1),
             'last_registration_year': last_registration_year,
             'belgian_highschool_diploma_year': belgian_highschool_diploma_year,
             'foreign_highschool_diploma_year': foreign_highschool_diploma_year,
@@ -240,7 +262,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
             EducationalExperienceYear.objects.filter(
                 educational_experience__person=person,
                 educational_experience__institute__community=CommunityEnum.FRENCH_SPEAKING.name,
-                academic_year__year__gte=minimal_years.get('minimal_year'),
+                academic_year__year__gte=minimal_years.get('minimal_date').year,
             )
             .exclude(
                 educational_experience__institute__code=UCLouvain_acronym,

@@ -299,3 +299,8 @@ class CompleterCurriculumCommand(interface.CommandRequest):
 
     curriculum: List[str] = attr.Factory(list)
     reponses_questions_specifiques: Dict = attr.Factory(dict)
+
+
+@attr.dataclass(frozen=True, slots=True)
+class VerifierCurriculumQuery(interface.QueryRequest):
+    uuid_proposition: str

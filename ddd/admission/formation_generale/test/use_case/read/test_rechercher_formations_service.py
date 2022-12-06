@@ -34,7 +34,7 @@ from admission.infrastructure.message_bus_in_memory import message_bus_in_memory
 class TestRechercherFormationService(TestCase):
     def setUp(self) -> None:
         self.cmd = RechercherFormationGeneraleQuery(
-            intitule_formation='ECGE3DP',
+            intitule_formation='Bachelier en sciences économiques',
             type_formation=TypeFormation.BACHELIER.name,
         )
         self.message_bus = message_bus_in_memory_instance
@@ -42,12 +42,12 @@ class TestRechercherFormationService(TestCase):
     def test_should_rechercher_par_intitule_formation_et_type(self):
         with freezegun.freeze_time('2019-11-01'):
             results = self.message_bus.invoke(self.cmd)
-            self.assertEqual(results[0].sigle, 'ECGE3DP')
+            self.assertEqual(results[0].sigle, 'BACHELIER-ECO')
             self.assertEqual(results[0].annee, 2020)
 
         with freezegun.freeze_time('2021-11-01'):
             results = self.message_bus.invoke(self.cmd)
-            self.assertEqual(results[0].sigle, 'ECGE3DP')
+            self.assertEqual(results[0].sigle, 'BACHELIER-ECO')
             self.assertEqual(results[0].annee, 2022)
 
     @freezegun.freeze_time('2019-11-01')
@@ -55,7 +55,7 @@ class TestRechercherFormationService(TestCase):
         # Tous les campus
         results = self.message_bus.invoke(
             RechercherFormationGeneraleQuery(
-                intitule_formation='ECGE3DP',
+                intitule_formation='Bachelier en sciences économiques',
                 type_formation=TypeFormation.BACHELIER.name,
             ),
         )
@@ -64,7 +64,7 @@ class TestRechercherFormationService(TestCase):
         # Un campus
         results = self.message_bus.invoke(
             RechercherFormationGeneraleQuery(
-                intitule_formation='ECGE3DP',
+                intitule_formation='Bachelier en sciences économiques',
                 type_formation=TypeFormation.BACHELIER.name,
                 campus='Mons',
             ),
