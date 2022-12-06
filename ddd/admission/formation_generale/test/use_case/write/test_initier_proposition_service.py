@@ -54,7 +54,7 @@ class TestInitierPropositionService(SimpleTestCase):
 
         self.message_bus = message_bus_in_memory_instance
         self.cmd = InitierPropositionCommand(
-            sigle_formation='ECGE3DP',
+            sigle_formation='MASTER-SCI',
             annee_formation=2020,
             matricule_candidat='01234567',
             bourse_erasmus_mundus=self._get_une_bourse_par_type(TypeBourse.ERASMUS_MUNDUS),

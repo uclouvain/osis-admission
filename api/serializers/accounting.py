@@ -77,7 +77,7 @@ class AccountingConditionsSerializer(serializers.ModelSerializer):
             EducationalExperienceYear.objects.filter(
                 educational_experience__person=instance,
                 educational_experience__institute__community=CommunityEnum.FRENCH_SPEAKING.name,
-                academic_year__year__gte=cv_minimal_years.get('minimal_year'),
+                academic_year__year__gte=cv_minimal_years.get('minimal_date').year,
             )
             .exclude(
                 educational_experience__institute__code=UCLouvain_acronym,

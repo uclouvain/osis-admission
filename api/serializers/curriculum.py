@@ -251,16 +251,23 @@ class GeneralEducationCompleterCurriculumCommandSerializer(DTOSerializer):
 class CurriculumDetailsSerializer(serializers.Serializer):
     professional_experiences = LiteProfessionalExperienceSerializer(many=True)
     educational_experiences = LiteEducationalExperienceSerializer(many=True)
-    minimal_year = serializers.SerializerMethodField()
+    minimal_date = serializers.SerializerMethodField()
+    maximal_date = serializers.SerializerMethodField()
+    incomplete_periods = serializers.ListField(child=serializers.CharField())
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         # Define a custom schema as the default schema type of a SerializerMethodField is string
-        self.fields['minimal_year'].field_schema = {'type': 'integer'}
+        self.fields['minimal_date'].field_schema = {'type': 'date'}
+        self.fields['maximal_date'].field_schema = {'type': 'date'}
 
-    def get_minimal_year(self, _):
+    def get_minimal_date(self, _):
         current_year = current_academic_year()
         return ProfilCandidatTranslator.get_annees_minimum_curriculum(
             global_id=self.context.get('related_person').global_id,
             current_year=current_year.year,
-        ).get('minimal_year')
+        ).get('minimal_date')
+
+    @staticmethod
+    def get_maximal_date(_):
+        return ProfilCandidatTranslator.get_date_maximale_curriculum()

@@ -876,17 +876,28 @@ class TestVerifierPropositionServiceCurriculumYears(TestVerifierPropositionServi
         ):
             experience.personne = 'other'
 
+    def assertAnneesCurriculum(self, exceptions, messages):
+        messages_renvoyes = []
+        for exception in exceptions:
+            self.assertIsInstance(exception, AnneesCurriculumNonSpecifieesException)
+            messages_renvoyes.append(exception.message)
+
+        self.assertCountEqual(messages, messages_renvoyes)
+
     def test_should_retourner_erreur_si_5_dernieres_annees_curriculum_non_saisies(self):
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.cmd)
 
-        exception = context.exception.exceptions.pop()
-        self.assertIsInstance(exception, AnneesCurriculumNonSpecifieesException)
-        self.assertIn('2020', exception.message)
-        self.assertIn('2019', exception.message)
-        self.assertIn('2018', exception.message)
-        self.assertIn('2017', exception.message)
-        self.assertIn('2016', exception.message)
+        self.assertAnneesCurriculum(
+            context.exception.exceptions,
+            [
+                'De Septembre 2016 à Janvier 2017',
+                'De Septembre 2017 à Janvier 2018',
+                'De Septembre 2018 à Janvier 2019',
+                'De Septembre 2019 à Janvier 2020',
+                'De Septembre 2020 à Octobre 2020',
+            ],
+        )
 
     def test_should_retourner_erreur_si_dernieres_annees_curriculum_non_saisies_avec_diplome_secondaire_belge(self):
         self.candidat_translator.diplomes_etudes_secondaires_belges.append(
@@ -896,10 +907,13 @@ class TestVerifierPropositionServiceCurriculumYears(TestVerifierPropositionServi
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.cmd)
 
-        exception = context.exception.exceptions.pop()
-        self.assertIsInstance(exception, AnneesCurriculumNonSpecifieesException)
-        self.assertIn('2020', exception.message)
-        self.assertIn('2019', exception.message)
+        self.assertAnneesCurriculum(
+            context.exception.exceptions,
+            [
+                'De Septembre 2019 à Janvier 2020',
+                'De Septembre 2020 à Octobre 2020',
+            ],
+        )
 
     def test_should_retourner_erreur_si_dernieres_annees_curriculum_non_saisies_avec_diplome_secondaire_etranger(self):
         self.candidat_translator.diplomes_etudes_secondaires_etrangers.append(
@@ -909,11 +923,14 @@ class TestVerifierPropositionServiceCurriculumYears(TestVerifierPropositionServi
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.cmd)
 
-        exception = context.exception.exceptions.pop()
-        self.assertIsInstance(exception, AnneesCurriculumNonSpecifieesException)
-        self.assertIn('2020', exception.message)
-        self.assertIn('2019', exception.message)
-        self.assertIn('2018', exception.message)
+        self.assertAnneesCurriculum(
+            context.exception.exceptions,
+            [
+                'De Septembre 2018 à Janvier 2019',
+                'De Septembre 2019 à Janvier 2020',
+                'De Septembre 2020 à Octobre 2020',
+            ],
+        )
 
     def test_should_retourner_erreur_si_dernieres_annees_curriculum_non_saisies_avec_ancienne_inscription_ucl(self):
         with mock.patch.multiple(
@@ -924,9 +941,7 @@ class TestVerifierPropositionServiceCurriculumYears(TestVerifierPropositionServi
             with self.assertRaises(MultipleBusinessExceptions) as context:
                 self.message_bus.invoke(self.cmd)
 
-        exception = context.exception.exceptions.pop()
-        self.assertIsInstance(exception, AnneesCurriculumNonSpecifieesException)
-        self.assertIn('2020', exception.message)
+        self.assertAnneesCurriculum(context.exception.exceptions, ['De Septembre 2020 à Octobre 2020'])
 
     def test_should_retourner_erreur_si_annees_curriculum_non_saisies_avec_diplome_et_ancienne_inscription(self):
         self.candidat_translator.diplomes_etudes_secondaires_belges.append(
@@ -941,10 +956,13 @@ class TestVerifierPropositionServiceCurriculumYears(TestVerifierPropositionServi
             with self.assertRaises(MultipleBusinessExceptions) as context:
                 self.message_bus.invoke(self.cmd)
 
-        exception = context.exception.exceptions.pop()
-        self.assertIsInstance(exception, AnneesCurriculumNonSpecifieesException)
-        self.assertIn('2020', exception.message)
-        self.assertIn('2019', exception.message)
+        self.assertAnneesCurriculum(
+            context.exception.exceptions,
+            [
+                'De Septembre 2019 à Janvier 2020',
+                'De Septembre 2020 à Octobre 2020',
+            ],
+        )
 
     def test_should_verification_etre_ok_si_une_experiences_professionnelles_couvre_exactement(self):
         self.candidat_translator.diplomes_etudes_secondaires_belges.append(
@@ -975,6 +993,27 @@ class TestVerifierPropositionServiceCurriculumYears(TestVerifierPropositionServi
         proposition_id = self.message_bus.invoke(self.cmd)
         self.assertEqual(proposition_id.uuid, self.proposition.entity_id.uuid)
 
+    def test_should_verification_etre_ok_si_une_des_experiences_professionnelles_couvre_davantage(self):
+        self.candidat_translator.diplomes_etudes_secondaires_belges.append(
+            DiplomeEtudeSecondaire(personne=self.candidat.matricule, annee=2017)
+        )
+        self.candidat_translator.experiences_non_academiques.extend(
+            [
+                ExperienceNonAcademique(
+                    personne=self.candidat.matricule,
+                    date_debut=datetime.date(2018, 8, 1),
+                    date_fin=datetime.date(2021, 7, 31),
+                ),
+                ExperienceNonAcademique(
+                    personne=self.candidat.matricule,
+                    date_debut=datetime.date(2017, 8, 1),
+                    date_fin=datetime.date(2018, 7, 31),
+                ),
+            ],
+        )
+        proposition_id = self.message_bus.invoke(self.cmd)
+        self.assertEqual(proposition_id.uuid, self.proposition.entity_id.uuid)
+
     def test_should_verification_renvoyer_exception_si_une_experiences_professionnelles_couvre_pas_debut(self):
         self.candidat_translator.diplomes_etudes_secondaires_belges.append(
             DiplomeEtudeSecondaire(personne=self.candidat.matricule, annee=2017)
@@ -990,9 +1029,7 @@ class TestVerifierPropositionServiceCurriculumYears(TestVerifierPropositionServi
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.cmd)
 
-        exception = context.exception.exceptions.pop()
-        self.assertIsInstance(exception, AnneesCurriculumNonSpecifieesException)
-        self.assertIn('2018', exception.message)
+        self.assertAnneesCurriculum(context.exception.exceptions, ['Septembre 2018'])
 
     def test_should_verification_renvoyer_exception_si_une_experiences_professionnelles_couvre_pas_fin(self):
         self.candidat_translator.diplomes_etudes_secondaires_belges.append(
@@ -1002,16 +1039,14 @@ class TestVerifierPropositionServiceCurriculumYears(TestVerifierPropositionServi
             ExperienceNonAcademique(
                 personne=self.candidat.matricule,
                 date_debut=datetime.date(2018, 9, 1),
-                date_fin=datetime.date(2021, 5, 31),
+                date_fin=datetime.date(2020, 9, 30),
             )
         )
 
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.cmd)
 
-        exception = context.exception.exceptions.pop()
-        self.assertIsInstance(exception, AnneesCurriculumNonSpecifieesException)
-        self.assertIn('2020', exception.message)
+        self.assertAnneesCurriculum(context.exception.exceptions, ['Octobre 2020'])
 
     def test_should_verification_etre_ok_si_experiences_professionnelles_couvrent_en_se_suivant_ou_chevauchant(self):
         self.candidat_translator.diplomes_etudes_secondaires_belges.append(
@@ -1070,7 +1105,7 @@ class TestVerifierPropositionServiceCurriculumYears(TestVerifierPropositionServi
         proposition_id = self.message_bus.invoke(self.cmd)
         self.assertEqual(proposition_id.uuid, self.proposition.entity_id.uuid)
 
-    def test_should_renvoyer_exception_si_experiences_professionnelles_ne_couvrent_pas_et_ne_se_chevauchent_pas(self):
+    def test_should_renvoyer_exception_si_experiences_professionnelles_trop_anciennes(self):
         self.candidat_translator.diplomes_etudes_secondaires_belges.append(
             DiplomeEtudeSecondaire(personne=self.candidat.matricule, annee=2017)
         )
@@ -1078,13 +1113,8 @@ class TestVerifierPropositionServiceCurriculumYears(TestVerifierPropositionServi
             [
                 ExperienceNonAcademique(
                     personne=self.candidat.matricule,
-                    date_debut=datetime.date(2019, 10, 1),
-                    date_fin=datetime.date(2021, 8, 31),
-                ),
-                ExperienceNonAcademique(
-                    personne=self.candidat.matricule,
-                    date_debut=datetime.date(2019, 10, 1),
-                    date_fin=datetime.date(2020, 5, 31),
+                    date_debut=datetime.date(2018, 10, 1),
+                    date_fin=datetime.date(2018, 12, 31),
                 ),
                 ExperienceNonAcademique(
                     personne=self.candidat.matricule,
@@ -1096,9 +1126,13 @@ class TestVerifierPropositionServiceCurriculumYears(TestVerifierPropositionServi
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.cmd)
 
-        exception = context.exception.exceptions.pop()
-        self.assertIsInstance(exception, AnneesCurriculumNonSpecifieesException)
-        self.assertIn('2019', exception.message)
+        self.assertAnneesCurriculum(
+            context.exception.exceptions,
+            [
+                'De Septembre 2019 à Janvier 2020',
+                'De Septembre 2020 à Octobre 2020',
+            ],
+        )
 
     def test_should_renvoyer_exception_si_experiences_professionnelles_ne_couvrent_pas_et_ne_se_chevauchent_pas_v2(
         self,
@@ -1133,9 +1167,7 @@ class TestVerifierPropositionServiceCurriculumYears(TestVerifierPropositionServi
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.cmd)
 
-        exception = context.exception.exceptions.pop()
-        self.assertIsInstance(exception, AnneesCurriculumNonSpecifieesException)
-        self.assertIn('2019', exception.message)
+        self.assertAnneesCurriculum(context.exception.exceptions, ['Septembre 2019'])
 
     def test_should_etre_ok_si_periode_couverte_avec_une_experience_professionnelle_continue_apres_future_experience(
         self,

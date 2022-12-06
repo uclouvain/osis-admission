@@ -25,6 +25,7 @@
 # ##############################################################################
 import uuid
 
+import freezegun
 from django.shortcuts import resolve_url
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -776,14 +777,14 @@ class GeneralEducationSpecificQuestionUpdateApiTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
         # Data
-        cls.admission = GeneralEducationAdmissionFactory()
+        cls.admission = GeneralEducationAdmissionFactory(training__academic_year__year=2020)
 
         cls.message_instantiation = AdmissionFormItemInstantiationFactory(
             form_item=TextAdmissionFormItemFactory(
                 uuid=uuid.UUID('fe254203-17c7-47d6-95e4-3c5c532da551'),
                 internal_label='text_item',
             ),
-            academic_year=cls.admission.training.academic_year,
+            academic_year__year=2020,
             weight=1,
             tab=Onglets.INFORMATIONS_ADDITIONNELLES.name,
         )
@@ -822,6 +823,7 @@ class GeneralEducationSpecificQuestionUpdateApiTestCase(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
+    @freezegun.freeze_time('2020-11-01')
     def test_with_valid_candidate_user(self):
         self.client.force_authenticate(user=self.candidate.user)
 
@@ -848,14 +850,14 @@ class ContinuingEducationSpecificQuestionUpdateApiTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
         # Data
-        cls.admission = ContinuingEducationAdmissionFactory()
+        cls.admission = ContinuingEducationAdmissionFactory(training__academic_year__year=2020)
 
         cls.message_instantiation = AdmissionFormItemInstantiationFactory(
             form_item=TextAdmissionFormItemFactory(
                 uuid=uuid.UUID('fe254203-17c7-47d6-95e4-3c5c532da551'),
                 internal_label='text_item',
             ),
-            academic_year=cls.admission.training.academic_year,
+            academic_year__year=2020,
             weight=1,
             tab=Onglets.INFORMATIONS_ADDITIONNELLES.name,
         )
@@ -894,6 +896,7 @@ class ContinuingEducationSpecificQuestionUpdateApiTestCase(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
+    @freezegun.freeze_time('2020-11-01')
     def test_with_valid_candidate_user(self):
         self.client.force_authenticate(user=self.candidate.user)
 

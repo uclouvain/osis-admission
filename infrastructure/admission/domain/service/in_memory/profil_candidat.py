@@ -29,12 +29,18 @@ from typing import List, Optional
 
 import attr
 
+from admission.ddd import BE_ISO_CODE
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import CandidatNonTrouveException
 from admission.ddd.admission.doctorat.preparation.dtos import ConditionsComptabiliteDTO, CurriculumDTO
+from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
+    ExperienceAcademiqueDTO,
+    AnneeExperienceAcademiqueDTO,
+)
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.dtos import AdressePersonnelleDTO, CoordonneesDTO, EtudesSecondairesDTO, IdentificationDTO
 from base.models.enums.civil_state import CivilState
 from base.models.enums.person_address_type import PersonAddressType
+from osis_profile.models.enums.curriculum import Result
 
 
 @attr.dataclass
@@ -84,10 +90,17 @@ class DiplomeEtudeSecondaire:
 
 
 @dataclass
+class AnneeExperienceAcademique:
+    annee: int
+    resultat: str
+
+
+@dataclass
 class ExperienceAcademique:
     personne: str
-    annee: int
     communaute_fr: bool
+    pays: str
+    annees: List[AnneeExperienceAcademique]
 
 
 @dataclass
@@ -109,7 +122,6 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
     etudes_secondaires = {}
     experiences_academiques = []
     experiences_non_academiques = []
-    cv_files = {"0123456789": ['uuid14']}
     pays_union_europeenne = {
         "AT",
         "BE",
@@ -195,6 +207,30 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 etat_civil=CivilState.MARRIED.name,
                 pays_residence="BE",
             ),
+            _IdentificationDTO(
+                matricule="0000000002",
+                nom='My',
+                prenom='Jim',
+                date_naissance=datetime.date(1990, 1, 1),
+                annee_naissance=None,
+                lieu_naissance='Louvain-La-Neuve',
+                pays_nationalite='BE',
+                langue_contact='fr-be',
+                sexe='M',
+                genre='M',
+                photo_identite=['uuid11'],
+                carte_identite=['uuid12'],
+                passeport=['uuid13'],
+                numero_registre_national_belge='1001',
+                numero_carte_identite='1002',
+                numero_passeport='1003',
+                annee_derniere_inscription_ucl=None,
+                noma_derniere_inscription_ucl='',
+                email='john.doe@ucl.be',
+                pays_naissance='BE',
+                etat_civil=CivilState.MARRIED.name,
+                pays_residence="BE",
+            ),
         ]
         cls.adresses_candidats = [
             AdressePersonnelle(
@@ -230,6 +266,17 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 numero_rue='14',
                 boite_postale='B2',
             ),
+            AdressePersonnelle(
+                personne="0000000002",
+                code_postal='1348',
+                ville='Louvain-La-Neuve',
+                pays='BE',
+                rue="Place de l'Université",
+                type='RESIDENTIAL',
+                lieu_dit='',
+                numero_rue='14',
+                boite_postale='B2',
+            ),
         ]
         cls.langues = [
             Langue(code_langue='FR'),
@@ -245,10 +292,54 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
         ]
 
         cls.experiences_academiques = [
-            ExperienceAcademique(personne=cls.matricule_candidat, annee=2016, communaute_fr=False),
-            ExperienceAcademique(personne=cls.matricule_candidat, annee=2017, communaute_fr=False),
-            ExperienceAcademique(personne=cls.matricule_candidat, annee=2019, communaute_fr=False),
-            ExperienceAcademique(personne=cls.matricule_candidat, annee=2020, communaute_fr=True),
+            ExperienceAcademique(
+                personne=cls.matricule_candidat,
+                communaute_fr=False,
+                pays='FR',
+                annees=[
+                    AnneeExperienceAcademique(annee=2016, resultat=Result.SUCCESS.name),
+                    AnneeExperienceAcademique(annee=2017, resultat=Result.SUCCESS.name),
+                    AnneeExperienceAcademique(annee=2019, resultat=Result.SUCCESS.name),
+                ],
+            ),
+            ExperienceAcademique(
+                personne=cls.matricule_candidat,
+                communaute_fr=True,
+                pays=BE_ISO_CODE,
+                annees=[
+                    AnneeExperienceAcademique(annee=2020, resultat=Result.SUCCESS.name),
+                ],
+            ),
+            ExperienceAcademique(
+                personne='0000000001',
+                communaute_fr=False,
+                pays='FR',
+                annees=[
+                    AnneeExperienceAcademique(annee=2016, resultat=Result.SUCCESS.name),
+                    AnneeExperienceAcademique(annee=2017, resultat=Result.SUCCESS.name),
+                    AnneeExperienceAcademique(annee=2019, resultat=Result.SUCCESS.name),
+                ],
+            ),
+            ExperienceAcademique(
+                personne='0000000001',
+                communaute_fr=True,
+                pays=BE_ISO_CODE,
+                annees=[
+                    AnneeExperienceAcademique(annee=2020, resultat=Result.SUCCESS.name),
+                ],
+            ),
+            ExperienceAcademique(
+                personne='0000000002',
+                communaute_fr=False,
+                pays='FR',
+                annees=[
+                    AnneeExperienceAcademique(annee=2016, resultat=Result.SUCCESS.name),
+                    AnneeExperienceAcademique(annee=2017, resultat=Result.SUCCESS.name),
+                    AnneeExperienceAcademique(annee=2018, resultat=Result.SUCCESS.name),
+                    AnneeExperienceAcademique(annee=2019, resultat=Result.SUCCESS.name),
+                    AnneeExperienceAcademique(annee=2020, resultat=Result.SUCCESS.name),
+                ],
+            ),
         ]
 
         cls.experiences_non_academiques = [
@@ -262,6 +353,16 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 date_debut=datetime.date(2018, 7, 1),
                 date_fin=datetime.date(2019, 4, 30),
             ),
+            ExperienceNonAcademique(
+                personne='0000000001',
+                date_debut=datetime.date(2019, 5, 1),
+                date_fin=datetime.date(2019, 8, 31),
+            ),
+            ExperienceNonAcademique(
+                personne='0000000001',
+                date_debut=datetime.date(2018, 7, 1),
+                date_fin=datetime.date(2019, 4, 30),
+            ),
         ]
 
         cls.diplomes_etudes_secondaires_belges = []
@@ -270,6 +371,7 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
             cls.matricule_candidat: EtudesSecondairesDTO(True, False, False),
             "0123456789": EtudesSecondairesDTO(True, False, False),
             "0000000001": EtudesSecondairesDTO(True, False, False),
+            "0000000002": EtudesSecondairesDTO(True, False, False),
         }
 
     @classmethod
@@ -361,9 +463,21 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
         try:
             candidate = next(c for c in cls.profil_candidats if c.matricule == matricule)
 
-            annees_experiences_academiques = [
-                experience.annee for experience in cls.experiences_academiques if experience.personne == matricule
-            ]
+            experiences_dtos = []
+            for experience in cls.experiences_academiques:
+                if experience.personne == matricule:
+                    experiences_dtos.append(
+                        ExperienceAcademiqueDTO(
+                            pays=experience.pays,
+                            annees=[
+                                AnneeExperienceAcademiqueDTO(
+                                    annee=annee.annee,
+                                    resultat=annee.resultat,
+                                )
+                                for annee in experience.annees
+                            ],
+                        ),
+                    )
 
             dates_experiences_non_academiques = [
                 (experience.date_debut, experience.date_fin)
@@ -381,7 +495,7 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
             )
 
             return CurriculumDTO(
-                annees_experiences_academiques=annees_experiences_academiques,
+                experiences_academiques=experiences_dtos,
                 annee_diplome_etudes_secondaires_belges=annee_diplome_belge,
                 annee_diplome_etudes_secondaires_etrangeres=annee_diplome_etranger,
                 annee_derniere_inscription_ucl=candidate.annee_derniere_inscription_ucl,

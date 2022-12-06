@@ -49,12 +49,12 @@ class TestModifierChoixFormationPropositionService(SimpleTestCase):
 
         self.message_bus = message_bus_in_memory_instance
         self.cmd = ModifierChoixFormationCommand(
-            sigle_formation='SC3DP',
+            sigle_formation='MASTER-SCI',
             annee_formation=2022,
             bourse_erasmus_mundus=BourseInMemoryTranslator.bourse_em_1.entity_id.uuid,
             bourse_internationale=BourseInMemoryTranslator.bourse_ifg_2.entity_id.uuid,
             bourse_double_diplome=BourseInMemoryTranslator.bourse_dd_2.entity_id.uuid,
-            uuid_proposition='uuid-ECGE3DP',
+            uuid_proposition='uuid-BACHELIER-ECO1',
         )
 
     def test_should_modifier_choix_formation(self):
@@ -79,7 +79,7 @@ class TestModifierChoixFormationPropositionService(SimpleTestCase):
             self.message_bus.invoke(cmd)
 
     def test_should_empecher_si_pas_formation_generale(self):
-        cmd = attr.evolve(self.cmd, sigle_formation='ES3DP-CONTINUE')
+        cmd = attr.evolve(self.cmd, sigle_formation='CERTIF-BUS')
         with self.assertRaises(FormationNonTrouveeException):
             self.message_bus.invoke(cmd)
 

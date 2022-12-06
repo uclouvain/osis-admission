@@ -27,6 +27,7 @@ import factory
 from dataclasses import dataclass
 from typing import List, Optional
 
+from admission.ddd import CODE_BACHELIER_VETERINAIRE
 from admission.ddd.admission.dtos.formation import FormationDTO
 from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition, PropositionIdentity
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import PropositionNonTrouveeException
@@ -38,8 +39,12 @@ from admission.ddd.admission.formation_generale.test.factory.proposition import 
 )
 from admission.ddd.admission.test.factory.formation import _FormationIdentityFactory
 from admission.infrastructure.admission.domain.service.in_memory.bourse import BourseInMemoryTranslator
+from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
+from admission.infrastructure.admission.domain.service.profil_candidat import ProfilCandidatTranslator
+from admission.infrastructure.admission.formation_generale.domain.service.in_memory.formation import (
+    FormationGeneraleInMemoryTranslator,
+)
 from base.ddd.utils.in_memory_repository import InMemoryGenericRepository
-from base.models.enums.education_group_types import TrainingType
 
 
 @dataclass
@@ -57,28 +62,6 @@ class _Formation:
 
 
 class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepository):
-    formations = {
-        ("SC3DP", 2020): _Formation(
-            intitule="Doctorat en sciences",
-            campus="Louvain-la-Neuve",
-            type=TrainingType.PHD.name,
-        ),
-        ("ECGE3DP", 2020): _Formation(
-            intitule="Doctorat en sciences économiques et de gestion",
-            campus="Louvain-la-Neuve",
-            type=TrainingType.PHD.name,
-        ),
-        ("ESP3DP", 2020): _Formation(
-            intitule="Doctorat en sciences de la santé publique",
-            campus="Mons",
-            type=TrainingType.PHD.name,
-        ),
-    }
-    candidats = {
-        "0123456789": _Candidat("Jean", "Dupont", "France"),
-        "0000000001": _Candidat("Michel", "Durand", "Belgique"),
-        "candidat": _Candidat("Pierre", "Dupond", "Belgique"),
-    }
     entities: List['Proposition'] = []
 
     @classmethod
@@ -101,18 +84,58 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
     def reset(cls):
         cls.entities = [
             PropositionFactory(
-                entity_id=factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-SC3DP'),
-                matricule_candidat='0123456789',
-                formation_id=_FormationIdentityFactory(sigle="SC3DP", annee=2020),
+                entity_id=factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-MASTER-SCI'),
+                matricule_candidat='0000000001',
+                formation_id=_FormationIdentityFactory(sigle="MASTER-SCI", annee=2020),
                 bourse_double_diplome_id=BourseInMemoryTranslator.bourse_dd_1.entity_id,
                 bourse_erasmus_mundus_id=BourseInMemoryTranslator.bourse_em_1.entity_id,
                 bourse_internationale_id=BourseInMemoryTranslator.bourse_ifg_1.entity_id,
+                curriculum=['file1.pdf'],
+                continuation_cycle_bachelier=['file1.pdf'],
+                attestation_continuation_cycle_bachelier=None,
+                reponses_questions_specifiques={
+                    '16de0c3d-3c06-4c93-8eb4-c8648f04f140': 'My response 0',
+                    '16de0c3d-3c06-4c93-8eb4-c8648f04f141': 'My response 1',
+                    '16de0c3d-3c06-4c93-8eb4-c8648f04f142': 'My response 2',
+                    '16de0c3d-3c06-4c93-8eb4-c8648f04f143': 'My response 3',
+                    '16de0c3d-3c06-4c93-8eb4-c8648f04f144': 'My response 4',
+                }
             ),
             PropositionFactory(
-                entity_id=factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-ECGE3DP'),
+                entity_id=factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-BACHELIER-ECO1'),
                 matricule_candidat='0000000001',
-                formation_id=_FormationIdentityFactory(sigle="ECGE3DP", annee=2020),
+                formation_id=_FormationIdentityFactory(sigle="BACHELIER-ECO", annee=2020),
+                continuation_cycle_bachelier=['file1.pdf'],
+                attestation_continuation_cycle_bachelier=None,
+            ),
+            PropositionFactory(
+                entity_id=factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-BACHELIER-VET'),
+                matricule_candidat='0000000001',
+                formation_id=_FormationIdentityFactory(sigle=CODE_BACHELIER_VETERINAIRE, annee=2020),
+                continuation_cycle_bachelier=['file1.pdf'],
+                attestation_continuation_cycle_bachelier=True,
+                est_non_resident_au_sens_decret=False,
+            ),
+            PropositionFactory(
+                entity_id=factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-AGGREGATION-ECO'),
+                matricule_candidat='0000000002',
+                formation_id=_FormationIdentityFactory(sigle="AGGREGATION-ECO", annee=2020),
+                curriculum=['file1.pdf'],
+                equivalence_diplome=['file1.pdf'],
+            ),
+            PropositionFactory(
+                entity_id=factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-CAPAES-ECO'),
+                matricule_candidat='0000000002',
+                formation_id=_FormationIdentityFactory(sigle="CAPAES-ECO", annee=2020),
+                curriculum=['file1.pdf'],
+                equivalence_diplome=['file1.pdf'],
+            ),
+            PropositionFactory(
+                entity_id=factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-BACHELIER-ECO2'),
+                matricule_candidat='0123456789',
+                formation_id=_FormationIdentityFactory(sigle="BACHELIER-ECO", annee=2020),
                 bourse_erasmus_mundus_id=BourseInMemoryTranslator.bourse_em_1.entity_id,
+                continuation_cycle_bachelier=False,
             ),
         ]
 
@@ -122,8 +145,11 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
 
     @classmethod
     def _load_dto(cls, proposition: Proposition) -> PropositionDTO:
-        candidat = cls.candidats[proposition.matricule_candidat]
-        formation = cls.formations[(proposition.formation_id.sigle, proposition.formation_id.annee)]
+        candidat = ProfilCandidatInMemoryTranslator.get_identification(proposition.matricule_candidat)
+        formation = FormationGeneraleInMemoryTranslator.get_dto(
+            proposition.formation_id.sigle,
+            proposition.formation_id.annee,
+        )
 
         return PropositionDTO(
             uuid=proposition.entity_id.uuid,

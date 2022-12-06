@@ -35,7 +35,11 @@ from admission.infrastructure.admission.domain.service.calendrier_inscription im
 from admission.infrastructure.admission.domain.service.profil_candidat import ProfilCandidatTranslator
 from admission.infrastructure.admission.domain.service.titres_acces import TitresAcces
 from admission.infrastructure.admission.formation_generale.domain.service.formation import FormationGeneraleTranslator
+from admission.infrastructure.admission.formation_generale.domain.service.question_specifique import (
+    QuestionSpecifiqueTranslator,
+)
 from admission.infrastructure.admission.formation_generale.repository.proposition import PropositionRepository
+from infrastructure.shared_kernel.academic_year.repository.academic_year import AcademicYearRepository
 
 COMMAND_HANDLERS = {
     RechercherFormationGeneraleQuery: lambda msg_bus, cmd: rechercher_formations(
@@ -74,6 +78,8 @@ COMMAND_HANDLERS = {
         titres_acces=TitresAcces(),
         profil_candidat_translator=ProfilCandidatTranslator(),
         calendrier_inscription=CalendrierInscription(),
+        academic_year_repository=AcademicYearRepository(),
+        questions_specifiques_translator=QuestionSpecifiqueTranslator(),
     ),
     SoumettrePropositionCommand: lambda msg_bus, cmd: soumettre_proposition(
         cmd,
@@ -82,9 +88,17 @@ COMMAND_HANDLERS = {
         titres_acces=TitresAcces(),
         profil_candidat_translator=ProfilCandidatTranslator(),
         calendrier_inscription=CalendrierInscription(),
+        academic_year_repository=AcademicYearRepository(),
+        questions_specifiques_translator=QuestionSpecifiqueTranslator(),
     ),
     CompleterCurriculumCommand: lambda msg_bus, cmd: completer_curriculum(
         cmd,
         proposition_repository=PropositionRepository(),
+    ),
+    VerifierCurriculumQuery: lambda msg_bus, cmd: verifier_curriculum(
+        cmd,
+        proposition_repository=PropositionRepository(),
+        profil_candidat_translator=ProfilCandidatTranslator(),
+        academic_year_repository=AcademicYearRepository(),
     ),
 }

@@ -46,7 +46,7 @@ class QuestionSpecifiqueEtendue(QuestionSpecifique):
 class SuperQuestionSpecifiqueInMemoryTranslator(ISuperQuestionSpecifiqueTranslator):
     proposition_repository = None
 
-    entities = [
+    _doctorate_entities = [
         QuestionSpecifiqueEtendue(
             entity_id=QuestionSpecifiqueIdentity(uuid='06de0c3d-3c06-4c93-8eb4-c8648f04f140'),
             type=TypeItemFormulaire.TEXTE,
@@ -56,7 +56,7 @@ class SuperQuestionSpecifiqueInMemoryTranslator(ISuperQuestionSpecifiqueTranslat
             formation=FormationIdentity(sigle='SC3DP', annee=2020),
         ),
         QuestionSpecifiqueEtendue(
-            entity_id=QuestionSpecifiqueIdentity(uuid="06de0c3d-3c06-4c93-8eb4-c8648f04f141"),
+            entity_id=QuestionSpecifiqueIdentity(uuid='06de0c3d-3c06-4c93-8eb4-c8648f04f141'),
             type=TypeItemFormulaire.TEXTE,
             requis=False,
             configuration={},
@@ -64,7 +64,7 @@ class SuperQuestionSpecifiqueInMemoryTranslator(ISuperQuestionSpecifiqueTranslat
             formation=FormationIdentity(sigle='SC3DP', annee=2020),
         ),
         QuestionSpecifiqueEtendue(
-            entity_id=QuestionSpecifiqueIdentity(uuid="06de0c3d-3c06-4c93-8eb4-c8648f04f142"),
+            entity_id=QuestionSpecifiqueIdentity(uuid='06de0c3d-3c06-4c93-8eb4-c8648f04f142'),
             type=TypeItemFormulaire.TEXTE,
             requis=True,
             configuration={},
@@ -72,7 +72,7 @@ class SuperQuestionSpecifiqueInMemoryTranslator(ISuperQuestionSpecifiqueTranslat
             formation=FormationIdentity(sigle='SC3DP', annee=2020),
         ),
         QuestionSpecifiqueEtendue(
-            entity_id=QuestionSpecifiqueIdentity(uuid="06de0c3d-3c06-4c93-8eb4-c8648f04f143"),
+            entity_id=QuestionSpecifiqueIdentity(uuid='06de0c3d-3c06-4c93-8eb4-c8648f04f143'),
             type=TypeItemFormulaire.TEXTE,
             requis=True,
             configuration={},
@@ -80,6 +80,51 @@ class SuperQuestionSpecifiqueInMemoryTranslator(ISuperQuestionSpecifiqueTranslat
             formation=FormationIdentity(sigle='SC3DP', annee=2020),
         ),
     ]
+
+    _general_entities = [
+        QuestionSpecifiqueEtendue(
+            entity_id=QuestionSpecifiqueIdentity(uuid='16de0c3d-3c06-4c93-8eb4-c8648f04f140'),
+            type=TypeItemFormulaire.TEXTE,
+            requis=True,
+            configuration={},
+            onglet=Onglets.CHOIX_FORMATION,
+            formation=FormationIdentity(sigle='MASTER-SCI', annee=2020),
+        ),
+        QuestionSpecifiqueEtendue(
+            entity_id=QuestionSpecifiqueIdentity(uuid='16de0c3d-3c06-4c93-8eb4-c8648f04f141'),
+            type=TypeItemFormulaire.TEXTE,
+            requis=False,
+            configuration={},
+            onglet=Onglets.CHOIX_FORMATION,
+            formation=FormationIdentity(sigle='MASTER-SCI', annee=2020),
+        ),
+        QuestionSpecifiqueEtendue(
+            entity_id=QuestionSpecifiqueIdentity(uuid='16de0c3d-3c06-4c93-8eb4-c8648f04f142'),
+            type=TypeItemFormulaire.TEXTE,
+            requis=True,
+            configuration={},
+            onglet=Onglets.CURRICULUM,
+            formation=FormationIdentity(sigle='MASTER-SCI', annee=2020),
+        ),
+        QuestionSpecifiqueEtendue(
+            entity_id=QuestionSpecifiqueIdentity(uuid='16de0c3d-3c06-4c93-8eb4-c8648f04f143'),
+            type=TypeItemFormulaire.TEXTE,
+            requis=True,
+            configuration={},
+            onglet=Onglets.ETUDES_SECONDAIRES,
+            formation=FormationIdentity(sigle='MASTER-SCI', annee=2020),
+        ),
+        QuestionSpecifiqueEtendue(
+            entity_id=QuestionSpecifiqueIdentity(uuid='16de0c3d-3c06-4c93-8eb4-c8648f04f144'),
+            type=TypeItemFormulaire.TEXTE,
+            requis=True,
+            configuration={},
+            onglet=Onglets.INFORMATIONS_ADDITIONNELLES,
+            formation=FormationIdentity(sigle='MASTER-SCI', annee=2020),
+        ),
+    ]
+
+    entities = _doctorate_entities + _general_entities
 
     @classmethod
     @abc.abstractmethod

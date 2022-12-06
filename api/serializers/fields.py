@@ -228,12 +228,12 @@ DOCTORATE_ACTION_LINKS = {
     },
     # Curriculum
     'retrieve_curriculum': {
-        'path_name': 'admission_api_v1:curriculum',
+        'path_name': 'admission_api_v1:doctorate_curriculum',
         'method': 'GET',
         'params': ['uuid'],
     },
     'update_curriculum': {
-        'path_name': 'admission_api_v1:curriculum',
+        'path_name': 'admission_api_v1:doctorate_curriculum',
         'method': 'PUT',
         'params': ['uuid'],
     },

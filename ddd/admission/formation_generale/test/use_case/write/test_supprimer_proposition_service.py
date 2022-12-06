@@ -42,7 +42,7 @@ class SupprimerPropositionTestCase(TestCase):
         self.addCleanup(self.proposition_repository.reset)
         self.message_bus = message_bus_in_memory_instance
         self.cmd = SupprimerPropositionCommand(
-            uuid_proposition='uuid-SC3DP',
+            uuid_proposition='uuid-MASTER-SCI',
         )
 
     def test_should_supprimer(self):

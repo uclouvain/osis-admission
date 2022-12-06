@@ -199,4 +199,10 @@ COMMAND_HANDLERS = {
         cmd,
         proposition_repository=PropositionRepository(),
     ),
+    VerifierCurriculumQuery: lambda msg_bus, cmd: verifier_curriculum(
+        cmd,
+        proposition_repository=PropositionRepository(),
+        profil_candidat_translator=ProfilCandidatTranslator(),
+        academic_year_repository=AcademicYearRepository(),
+    ),
 }

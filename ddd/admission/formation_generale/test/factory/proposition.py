@@ -54,8 +54,8 @@ class PropositionFactory(factory.Factory):
     creee_le = factory.Faker('past_datetime')
     modifiee_le = factory.Faker('past_datetime')
 
-    bourse_double_diplome_id = factory.SubFactory(BourseIdentityFactory)
-    bourse_internationale_id = factory.SubFactory(BourseIdentityFactory)
-    bourse_erasmus_mundus_id = factory.SubFactory(BourseIdentityFactory)
+    bourse_double_diplome_id = factory.SubFactory(BourseIdentityFactory, uuid='a0e94dd5-3715-49a1-8953-8cc0f99372cb')
+    bourse_internationale_id = factory.SubFactory(BourseIdentityFactory, uuid='c0e94dd5-3715-49a1-8953-8cc0f99372cb')
+    bourse_erasmus_mundus_id = factory.SubFactory(BourseIdentityFactory, uuid='e0e94dd5-3715-49a1-8953-8cc0f99372cb')
     est_reorientation_inscription_externe = False
     est_modification_inscription_externe = False

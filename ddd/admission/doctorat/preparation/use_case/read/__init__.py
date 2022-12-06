@@ -6,3 +6,4 @@ from .recuperer_groupe_de_supervision_service import recuperer_groupe_de_supervi
 from .recuperer_proposition_service import recuperer_proposition
 from .verifier_projet_service import verifier_projet
 from .verifier_proposition_service import verifier_proposition
+from .verifier_curriculum_service import verifier_curriculum

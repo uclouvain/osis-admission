@@ -44,31 +44,31 @@ class Bourse:
 
 class BourseInMemoryTranslator(IBourseTranslator):
     bourse_dd_1 = Bourse(
-        entity_id=BourseIdentity(uuid=str(uuid4())),
+        entity_id=BourseIdentity(uuid='a0e94dd5-3715-49a1-8953-8cc0f99372cb'),
         type=TypeBourse.DOUBLE_TRIPLE_DIPLOMATION,
         nom_court='AGRO DD UCLOUVAIN/GEM',
         nom_long='AGRO DD UCLOUVAIN/GEM --',
     )
     bourse_dd_2 = Bourse(
-        entity_id=BourseIdentity(uuid=str(uuid4())),
+        entity_id=BourseIdentity(uuid='b0e94dd5-3715-49a1-8953-8cc0f99372cb'),
         type=TypeBourse.DOUBLE_TRIPLE_DIPLOMATION,
         nom_court='CRIM DD UCL/LILLE',
         nom_long='CRIM DD UCL/LILLE --',
     )
     bourse_ifg_1 = Bourse(
-        entity_id=BourseIdentity(uuid=str(uuid4())),
+        entity_id=BourseIdentity(uuid='c0e94dd5-3715-49a1-8953-8cc0f99372cb'),
         type=TypeBourse.BOURSE_INTERNATIONALE_FORMATION_GENERALE,
         nom_court='AFEPA',
         nom_long='AFEPA --',
     )
     bourse_ifg_2 = Bourse(
-        entity_id=BourseIdentity(uuid=str(uuid4())),
+        entity_id=BourseIdentity(uuid='d0e94dd5-3715-49a1-8953-8cc0f99372cb'),
         type=TypeBourse.BOURSE_INTERNATIONALE_FORMATION_GENERALE,
         nom_court='WBI',
         nom_long='WBI --',
     )
     bourse_em_1 = Bourse(
-        entity_id=BourseIdentity(uuid=str(uuid4())),
+        entity_id=BourseIdentity(uuid='e0e94dd5-3715-49a1-8953-8cc0f99372cb'),
         type=TypeBourse.ERASMUS_MUNDUS,
         nom_court='EMDI',
         nom_long='EMDI --',

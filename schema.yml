@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Admission API
-  version: 1.0.50
+  version: 1.0.51
   description: This API delivers data for the Admission project.
   contact:
     name: UCLouvain - OSIS
@@ -347,32 +347,6 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - person
-  /curriculum:
-    get:
-      operationId: retrieveCurriculumDetails
-      description: Return the experiences and the curriculum pdf of a person and the
-        mandatory years to complete.
-      parameters:
-      - $ref: '#/components/parameters/Accept-Language'
-      - $ref: '#/components/parameters/X-User-FirstName'
-      - $ref: '#/components/parameters/X-User-LastName'
-      - $ref: '#/components/parameters/X-User-Email'
-      - $ref: '#/components/parameters/X-User-GlobalID'
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CurriculumDetails'
-          description: ''
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-      tags:
-      - person
   /curriculum/educational/{experience_id}:
     get:
       operationId: retrieveEducationalExperience
@@ -548,6 +522,32 @@ paths:
       - $ref: '#/components/parameters/X-User-GlobalID'
       responses:
         '204':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - person
+  /curriculum:
+    get:
+      operationId: retrieveCurriculumDetails
+      description: Return the curriculum experiences of a person with the mandatory
+        years to complete.
+      parameters:
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CurriculumDetails'
           description: ''
         '400':
           $ref: '#/components/responses/BadRequest'
@@ -923,38 +923,6 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - person
-  /propositions/doctorate/{uuid}/curriculum:
-    get:
-      operationId: retrieveCurriculumDetailsAdmission
-      description: Return the experiences and the curriculum pdf of a person and the
-        mandatory years to complete.
-      parameters:
-      - name: uuid
-        in: path
-        required: true
-        description: ''
-        schema:
-          type: string
-      - $ref: '#/components/parameters/Accept-Language'
-      - $ref: '#/components/parameters/X-User-FirstName'
-      - $ref: '#/components/parameters/X-User-LastName'
-      - $ref: '#/components/parameters/X-User-Email'
-      - $ref: '#/components/parameters/X-User-GlobalID'
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CurriculumDetails'
-          description: ''
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-      tags:
-      - person
   /propositions/doctorate/{uuid}/curriculum/educational/{experience_id}:
     get:
       operationId: retrieveEducationalExperienceAdmission
@@ -1213,6 +1181,73 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - propositions
+  /propositions/doctorate/{uuid}/curriculum:
+    get:
+      operationId: retrieveCurriculumDetailsAdmission
+      description: Return the curriculum experiences of a person with the mandatory
+        years to complete.
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CurriculumDetails'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - person
+    put:
+      operationId: updateDoctoratCompleterCurriculumCommandAdmission
+      description: ''
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DoctoratCompleterCurriculumCommand'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DoctoratCompleterCurriculumCommand'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - person
   /propositions/doctorate/{uuid}/submit:
     get:
       operationId: verify_proposition
@@ -2292,8 +2327,8 @@ paths:
   /propositions/general-education/{uuid}/curriculum:
     get:
       operationId: retrieveCurriculumDetailsGeneralEducationAdmission
-      description: Return the experiences and the curriculum pdf of a person and the
-        mandatory years to complete.
+      description: Return the curriculum experiences of a person with the mandatory
+        years to complete.
       parameters:
       - name: uuid
         in: path
@@ -2307,11 +2342,46 @@ paths:
       - $ref: '#/components/parameters/X-User-Email'
       - $ref: '#/components/parameters/X-User-GlobalID'
       responses:
-        '200':
+        200:
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/CurriculumDetails'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - person
+    put:
+      operationId: updateGeneralEducationCompleterCurriculumCommandAdmission
+      description: ''
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GeneralEducationCompleterCurriculumCommand'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GeneralEducationCompleterCurriculumCommand'
           description: ''
         '400':
           $ref: '#/components/responses/BadRequest'
@@ -3045,8 +3115,8 @@ paths:
   /propositions/continuing-education/{uuid}/curriculum:
     get:
       operationId: retrieveCurriculumDetailsContinuingEducationAdmission
-      description: Return the experiences and the curriculum pdf of a person and the
-        mandatory years to complete.
+      description: Return the curriculum experiences of a person with the mandatory
+        years to complete.
       parameters:
       - name: uuid
         in: path
@@ -3060,11 +3130,46 @@ paths:
       - $ref: '#/components/parameters/X-User-Email'
       - $ref: '#/components/parameters/X-User-GlobalID'
       responses:
-        '200':
+        200:
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/CurriculumDetails'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - person
+    put:
+      operationId: updateContinuingEducationCompleterCurriculumCommandAdmission
+      description: ''
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContinuingEducationCompleterCurriculumCommand'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContinuingEducationCompleterCurriculumCommand'
           description: ''
         '400':
           $ref: '#/components/responses/BadRequest'
@@ -4461,42 +4566,6 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - person
-  /propositions/doctorate/{uuid}/complete-curriculum:
-    put:
-      operationId: updateDoctoratCompleterCurriculumCommandAdmission
-      description: ''
-      parameters:
-      - name: uuid
-        in: path
-        required: true
-        description: ''
-        schema:
-          type: string
-      - $ref: '#/components/parameters/Accept-Language'
-      - $ref: '#/components/parameters/X-User-FirstName'
-      - $ref: '#/components/parameters/X-User-LastName'
-      - $ref: '#/components/parameters/X-User-Email'
-      - $ref: '#/components/parameters/X-User-GlobalID'
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/DoctoratCompleterCurriculumCommand'
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DoctoratCompleterCurriculumCommand'
-          description: ''
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-      tags:
-      - person
   /propositions/doctorate/{uuid}/training_choice:
     put:
       operationId: update_doctorate_training_choice
@@ -4743,42 +4812,6 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - propositions
-  /propositions/general-education/{uuid}/complete-curriculum:
-    put:
-      operationId: updateGeneralEducationCompleterCurriculumCommandAdmission
-      description: ''
-      parameters:
-      - name: uuid
-        in: path
-        required: true
-        description: ''
-        schema:
-          type: string
-      - $ref: '#/components/parameters/Accept-Language'
-      - $ref: '#/components/parameters/X-User-FirstName'
-      - $ref: '#/components/parameters/X-User-LastName'
-      - $ref: '#/components/parameters/X-User-Email'
-      - $ref: '#/components/parameters/X-User-GlobalID'
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/GeneralEducationCompleterCurriculumCommand'
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GeneralEducationCompleterCurriculumCommand'
-          description: ''
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-      tags:
-      - person
   /propositions/continuing-education/{uuid}/training-choice:
     put:
       operationId: update_continuing_training_choice
@@ -4848,42 +4881,6 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - propositions
-  /propositions/continuing-education/{uuid}/complete-curriculum:
-    put:
-      operationId: updateContinuingEducationCompleterCurriculumCommandAdmission
-      description: ''
-      parameters:
-      - name: uuid
-        in: path
-        required: true
-        description: ''
-        schema:
-          type: string
-      - $ref: '#/components/parameters/Accept-Language'
-      - $ref: '#/components/parameters/X-User-FirstName'
-      - $ref: '#/components/parameters/X-User-LastName'
-      - $ref: '#/components/parameters/X-User-Email'
-      - $ref: '#/components/parameters/X-User-GlobalID'
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ContinuingEducationCompleterCurriculumCommand'
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ContinuingEducationCompleterCurriculumCommand'
-          description: ''
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-      tags:
-      - person
   /propositions/continuing-education/{uuid}/specific-question:
     put:
       operationId: update_continuing_specific_question
@@ -5790,103 +5787,6 @@ components:
       - C1
       - C2
       type: string
-    CurriculumDetails:
-      type: object
-      properties:
-        professional_experiences:
-          type: array
-          items:
-            type: object
-            properties:
-              uuid:
-                type: string
-                readOnly: true
-              institute_name:
-                type: string
-                maxLength: 255
-              start_date:
-                type: string
-                format: date
-              end_date:
-                type: string
-                format: date
-              type:
-                $ref: '#/components/schemas/ActivityType'
-              valuated_from_admission:
-                type: array
-                items:
-                  type: string
-                readOnly: true
-            required:
-            - start_date
-            - end_date
-            - type
-        educational_experiences:
-          type: array
-          items:
-            type: object
-            properties:
-              uuid:
-                type: string
-                readOnly: true
-              institute_name:
-                type: string
-                maxLength: 255
-              institute:
-                type: string
-                nullable: true
-              program:
-                type: string
-                nullable: true
-              education_name:
-                type: string
-                maxLength: 255
-              educationalexperienceyear_set:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    academic_year:
-                      type: integer
-                      nullable: true
-                    result:
-                      $ref: '#/components/schemas/Result'
-                  required:
-                  - academic_year
-              valuated_from_admission:
-                type: array
-                items:
-                  type: string
-                readOnly: true
-              country:
-                type: string
-                nullable: true
-            required:
-            - educationalexperienceyear_set
-            - country
-        minimal_year:
-          type: integer
-          readOnly: true
-      required:
-      - professional_experiences
-      - educational_experiences
-    ActivityType:
-      enum:
-      - WORK
-      - INTERNSHIP
-      - VOLUNTEERING
-      - UNEMPLOYMENT
-      - LANGUAGE_TRAVEL
-      - OTHER
-      type: string
-    Result:
-      enum:
-      - ''
-      - SUCCESS
-      - SUCCESS_WITH_RESIDUAL_CREDITS
-      - FAILURE
-      - WAITING_RESULT
-      type: string
     EducationalExperience:
       type: object
       properties:
@@ -5994,6 +5894,14 @@ components:
       - country
       - transcript_type
       - obtained_diploma
+    Result:
+      enum:
+      - ''
+      - SUCCESS
+      - SUCCESS_WITH_RESIDUAL_CREDITS
+      - FAILURE
+      - WAITING_RESULT
+      type: string
     TeachingTypeEnum:
       enum:
       - ''
@@ -6059,6 +5967,15 @@ components:
       - start_date
       - end_date
       - type
+    ActivityType:
+      enum:
+      - WORK
+      - INTERNSHIP
+      - VOLUNTEERING
+      - UNEMPLOYMENT
+      - LANGUAGE_TRAVEL
+      - OTHER
+      type: string
     ActivitySector:
       enum:
       - ''
@@ -6066,6 +5983,94 @@ components:
       - PRIVATE
       - ASSOCIATIVE
       type: string
+    CurriculumDetails:
+      type: object
+      properties:
+        professional_experiences:
+          type: array
+          items:
+            type: object
+            properties:
+              uuid:
+                type: string
+                readOnly: true
+              institute_name:
+                type: string
+                maxLength: 255
+              start_date:
+                type: string
+                format: date
+              end_date:
+                type: string
+                format: date
+              type:
+                $ref: '#/components/schemas/ActivityType'
+              valuated_from_admission:
+                type: array
+                items:
+                  type: string
+                readOnly: true
+            required:
+            - start_date
+            - end_date
+            - type
+        educational_experiences:
+          type: array
+          items:
+            type: object
+            properties:
+              uuid:
+                type: string
+                readOnly: true
+              institute_name:
+                type: string
+                maxLength: 255
+              institute:
+                type: string
+                nullable: true
+              program:
+                type: string
+                nullable: true
+              education_name:
+                type: string
+                maxLength: 255
+              educationalexperienceyear_set:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    academic_year:
+                      type: integer
+                      nullable: true
+                    result:
+                      $ref: '#/components/schemas/Result'
+                  required:
+                  - academic_year
+              valuated_from_admission:
+                type: array
+                items:
+                  type: string
+                readOnly: true
+              country:
+                type: string
+                nullable: true
+            required:
+            - educationalexperienceyear_set
+            - country
+        minimal_date:
+          type: date
+          readOnly: true
+        maximal_date:
+          type: date
+          readOnly: true
+        incomplete_periods:
+          type: array
+          items:
+            type: string
+      required:
+      - professional_experiences
+      - educational_experiences
+      - incomplete_periods
     DoctoratePropositionDTO:
       type: object
       properties:

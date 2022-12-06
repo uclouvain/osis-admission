@@ -28,7 +28,7 @@ from typing import Optional
 from django.utils.functional import cached_property
 from rest_framework.generics import get_object_or_404
 
-from admission.api.schema import ChoicesEnumSchema
+from admission.api.schema import ChoicesEnumSchema, ResponseSpecificSchema
 from admission.contrib.models import DoctorateAdmission, GeneralEducationAdmission, ContinuingEducationAdmission
 from admission.utils import (
     get_cached_admission_perm_obj,
@@ -37,7 +37,7 @@ from admission.utils import (
 )
 
 
-class PersonRelatedSchema(ChoicesEnumSchema):
+class PersonRelatedSchemaMixin:
     def __init__(self, training_type='', *args, **kwargs):
         self.training_type = training_type
         super().__init__(tags=["person"], *args, **kwargs)
@@ -49,6 +49,14 @@ class PersonRelatedSchema(ChoicesEnumSchema):
         if 'uuid' in path:
             operation_id += 'Admission'
         return operation_id
+
+
+class PersonRelatedSchema(PersonRelatedSchemaMixin, ChoicesEnumSchema):
+    pass
+
+
+class SpecificPersonRelatedSchema(PersonRelatedSchemaMixin, ResponseSpecificSchema):
+    pass
 
 
 class PersonRelatedMixin:

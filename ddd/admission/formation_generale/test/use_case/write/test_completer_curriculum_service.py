@@ -43,7 +43,7 @@ class TestCompleterCurriculumService(SimpleTestCase):
 
         self.message_bus = message_bus_in_memory_instance
         self.cmd = CompleterCurriculumCommand(
-            uuid_proposition='uuid-ECGE3DP',
+            uuid_proposition='uuid-BACHELIER-ECO1',
             continuation_cycle_bachelier=True,
             attestation_continuation_cycle_bachelier=['new_file.pdf'],
             curriculum=['new_file.pdf'],

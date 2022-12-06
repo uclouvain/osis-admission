@@ -23,33 +23,21 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
+from admission.ddd.admission.domain.service.profil_candidat import ProfilCandidat
+from osis_common.ddd import interface
 
-from ._should_coordonnees_candidat_etre_completees import (
-    ShouldAdresseCorrespondanceEtreCompleteeSiSpecifiee,
-    ShouldAdresseDomicileLegalCandidatEtreCompletee,
-)
-from ._should_identification_candidat_etre_completee import (
-    ShouldCandidatAuthentiquerIdentite,
-    ShouldCandidatAuthentiquerPasseport,
-    ShouldCandidatBelgeSpecifierNumeroRegistreNationalBelge,
-    ShouldCandidatSpecifierDateOuAnneeNaissance,
-    ShouldCandidatSpecifierNOMASiDejaInscrit,
-    ShouldCandidatSpecifierNomOuPrenom,
-    ShouldCandidatSpecifierNumeroIdentite,
-    ShouldSignaletiqueCandidatEtreCompletee,
-)
-from ._should_curriculum_etre_complete import ShouldAnneesCVRequisesCompletees
 
-__all__ = [
-    "ShouldSignaletiqueCandidatEtreCompletee",
-    "ShouldCandidatSpecifierNumeroIdentite",
-    "ShouldCandidatBelgeSpecifierNumeroRegistreNationalBelge",
-    "ShouldCandidatSpecifierDateOuAnneeNaissance",
-    "ShouldCandidatSpecifierNOMASiDejaInscrit",
-    "ShouldCandidatSpecifierNomOuPrenom",
-    "ShouldCandidatAuthentiquerIdentite",
-    "ShouldCandidatAuthentiquerPasseport",
-    "ShouldAdresseDomicileLegalCandidatEtreCompletee",
-    "ShouldAdresseCorrespondanceEtreCompleteeSiSpecifiee",
-    "ShouldAnneesCVRequisesCompletees",
-]
+class VerifierAnneesCurriculum(interface.DomainService):
+    @classmethod
+    def verifier(
+        cls,
+        matricule_candidat: str,
+        profil_candidat_translator: IProfilCandidatTranslator,
+        annee_courante: int,
+    ) -> None:
+        ProfilCandidat().verifier_annees_curriculum(
+            matricule_candidat=matricule_candidat,
+            annee_courante=annee_courante,
+            profil_candidat_translator=profil_candidat_translator,
+        )
