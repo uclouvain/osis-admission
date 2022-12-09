@@ -23,13 +23,28 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from .determiner_annee_academique_et_pot_service import determiner_annee_academique_et_pot
-from .lister_propositions_candidat_service import lister_propositions_candidat
-from .lister_propositions_supervisees_service import lister_propositions_supervisees
-from .rechercher_doctorats_service import rechercher_doctorats
-from .recuperer_cotutelle_service import recuperer_cotutelle
-from .recuperer_groupe_de_supervision_service import recuperer_groupe_de_supervision
-from .recuperer_proposition_service import recuperer_proposition
-from .verifier_projet_service import verifier_projet
-from .verifier_proposition_service import verifier_proposition
-from .verifier_curriculum_service import verifier_curriculum
+from rest_framework import serializers
+
+from admission.ddd.admission.domain.service.i_calendrier_inscription import ICalendrierInscription
+
+__all__ = [
+    'PropositionErrorsSerializer',
+    'SubmitPropositionSerializer',
+]
+
+
+class ErrorSerializer(serializers.Serializer):
+    status_code = serializers.CharField()
+    detail = serializers.CharField()
+
+
+class PropositionErrorsSerializer(serializers.Serializer):
+    errors = ErrorSerializer(many=True)
+    pool_start_date = serializers.DateField(allow_null=True, required=False)
+    pool_end_date = serializers.DateField(allow_null=True, required=False)
+    access_conditions_url = serializers.CharField(allow_null=True, required=False)
+
+
+class SubmitPropositionSerializer(serializers.Serializer):
+    annee = serializers.IntegerField()
+    pool = serializers.ChoiceField(choices=[calendar.event_reference for calendar in ICalendrierInscription.pools])

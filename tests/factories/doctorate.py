@@ -31,7 +31,11 @@ from django.db import connection
 from admission.contrib.models import DoctorateAdmission
 from admission.contrib.models.doctorate import REFERENCE_SEQ_NAME
 from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutProposition
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    ChoixLangueRedactionThese,
+    ChoixStatutProposition,
+    ChoixTypeFinancement,
+)
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition
 from admission.tests.factories.accounting import AccountingFactory
 from admission.tests.factories.roles import CandidateFactory
@@ -78,8 +82,16 @@ class DoctorateAdmissionFactory(factory.DjangoModelFactory):
     candidate = factory.SubFactory(PersonFactory)
     training = factory.SubFactory(DoctorateFactory)
     reference = factory.LazyAttribute(_generate_reference)
+
+    cotutelle = False
+    financing_type = ChoixTypeFinancement.SELF_FUNDING.name
     planned_duration = 10
     dedicated_time = 10
+    project_title = 'Test'
+    project_abstract = 'Test'
+    project_document = factory.LazyFunction(lambda: [uuid.uuid4()])
+    program_proposition = factory.LazyFunction(lambda: [uuid.uuid4()])
+
     curriculum = factory.LazyFunction(lambda: [uuid.uuid4()])
 
     class Params:

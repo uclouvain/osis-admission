@@ -23,9 +23,10 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import factory
 from dataclasses import dataclass
 from typing import List, Optional
+
+import factory
 
 from admission.ddd.admission.dtos.formation import FormationDTO
 from admission.ddd.admission.formation_continue.domain.model.proposition import Proposition, PropositionIdentity
@@ -36,7 +37,7 @@ from admission.ddd.admission.formation_continue.test.factory.proposition import 
     PropositionFactory,
     _PropositionIdentityFactory,
 )
-from admission.ddd.admission.test.factory.formation import _FormationIdentityFactory
+from admission.ddd.admission.test.factory.formation import FormationIdentityFactory
 from base.ddd.utils.in_memory_repository import InMemoryGenericRepository
 from base.models.enums.education_group_types import TrainingType
 
@@ -102,12 +103,12 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
             PropositionFactory(
                 entity_id=factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-SC3DP'),
                 matricule_candidat='0123456789',
-                formation_id=_FormationIdentityFactory(sigle="SC3DP", annee=2020),
+                formation_id=FormationIdentityFactory(sigle="SC3DP", annee=2020),
             ),
             PropositionFactory(
                 entity_id=factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-ECGE3DP'),
                 matricule_candidat='0000000001',
-                formation_id=_FormationIdentityFactory(sigle="ECGE3DP", annee=2020),
+                formation_id=FormationIdentityFactory(sigle="ECGE3DP", annee=2020),
             ),
         ]
 
@@ -136,6 +137,8 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
                 campus=formation.campus,
                 type=formation.type,
             ),
+            annee_calculee=proposition.annee_calculee,
+            pot_calcule=proposition.pot_calcule,
             reponses_questions_specifiques=proposition.reponses_questions_specifiques,
             equivalence_diplome=proposition.equivalence_diplome,
             curriculum=proposition.curriculum,

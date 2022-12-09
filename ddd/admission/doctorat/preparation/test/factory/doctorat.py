@@ -25,19 +25,20 @@
 # ##############################################################################
 
 import attr
-import factory
+import factory.fuzzy
 
-from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import Doctorat, DoctoratIdentity
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import Doctorat
 
 # FIXME import this factory from shared kernel when available
 from admission.ddd.admission.doctorat.preparation.dtos import DoctoratDTO
+from admission.ddd.admission.test.factory.formation import FormationIdentityFactory
 from base.models.enums.education_group_types import TrainingType
 from ddd.logic.learning_unit.tests.factory.ucl_entity import UclEntityIdentityFactory
 
 
 class _DoctoratIdentityFactory(factory.Factory):
     class Meta:
-        model = DoctoratIdentity
+        model = FormationIdentityFactory
         abstract = False
 
     sigle = factory.Sequence(lambda n: 'SIGLE%02d' % n)
@@ -54,7 +55,7 @@ class _DoctoratFactory(factory.Factory):
         model = DoctoratEtendu
         abstract = False
 
-    entity_id = factory.SubFactory(_DoctoratIdentityFactory)
+    entity_id = factory.SubFactory(FormationIdentityFactory)
     entite_ucl_id = factory.SubFactory(UclEntityIdentityFactory)
     campus = factory.Iterator(
         [

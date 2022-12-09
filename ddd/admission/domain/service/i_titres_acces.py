@@ -24,7 +24,7 @@
 #
 # ##############################################################################
 from enum import Enum
-from typing import List, Mapping, Tuple
+from typing import List, Mapping, Optional, Tuple
 
 from admission.ddd.admission.domain.validator.exceptions import ConditionsAccessNonRempliesException
 from admission.ddd.admission.dtos.conditions import AdmissionConditionsDTO
@@ -133,16 +133,21 @@ class ITitresAcces(interface.DomainService):
         cls,
         matricule_candidat: str,
         type_formation: 'TrainingType',
-        equivalence_diplome: List[str],
+        equivalence_diplome: Optional[List[str]] = None,
     ) -> Titres:
-        conditions = cls.conditions_remplies(matricule_candidat, equivalence_diplome)
+        conditions = cls.conditions_remplies(matricule_candidat, equivalence_diplome or [])
         titres_requis: List[ConditionAccess] = next(
             (titres for types, titres in cls.condition_matrix.items() if type_formation in types), []
         )
         return Titres(conditions, *titres_requis)
 
     @classmethod
-    def verifier(cls, matricule_candidat: str, type_formation: 'TrainingType', equivalence_diplome: List[str]):
+    def verifier(
+        cls,
+        matricule_candidat: str,
+        type_formation: 'TrainingType',
+        equivalence_diplome: Optional[List[str]] = None,
+    ):
         if not cls.recuperer_titres_access(matricule_candidat, type_formation, equivalence_diplome):
             raise ConditionsAccessNonRempliesException
 
@@ -150,7 +155,3 @@ class ITitresAcces(interface.DomainService):
     def verifier_titres(cls, titres: 'Titres'):
         if not titres:
             raise ConditionsAccessNonRempliesException
-
-    @classmethod
-    def verifier_doctorat(cls, matricule_candidat: str):
-        cls.verifier(matricule_candidat, TrainingType.PHD, [])

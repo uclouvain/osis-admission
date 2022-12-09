@@ -23,9 +23,11 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
+from admission.ddd.admission.domain.service.i_calendrier_inscription import ICalendrierInscription
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.domain.service.i_titres_acces import ITitresAcces
-from ...commands import VerifierPropositionCommand
+from ...commands import VerifierPropositionQuery
 from ...domain.builder.proposition_identity_builder import PropositionIdentityBuilder
 from ...domain.model.proposition import PropositionIdentity
 from ...domain.service.i_formation import IFormationContinueTranslator
@@ -34,24 +36,24 @@ from ...repository.i_proposition import IPropositionRepository
 
 
 def verifier_proposition(
-    cmd: 'VerifierPropositionCommand',
+    cmd: 'VerifierPropositionQuery',
     proposition_repository: 'IPropositionRepository',
     formation_translator: 'IFormationContinueTranslator',
     titres_acces: 'ITitresAcces',
     profil_candidat_translator: 'IProfilCandidatTranslator',
+    calendrier_inscription: 'ICalendrierInscription',
 ) -> 'PropositionIdentity':
     # GIVEN
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
     proposition = proposition_repository.get(entity_id=proposition_id)
 
-    # WHEN
     VerifierProposition.verifier(
         proposition,
         formation_translator,
         titres_acces,
         profil_candidat_translator,
+        calendrier_inscription,
     )
 
     # THEN
-
     return proposition_id

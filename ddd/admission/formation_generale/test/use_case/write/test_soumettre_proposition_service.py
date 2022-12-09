@@ -34,6 +34,7 @@ from admission.infrastructure.admission.formation_generale.repository.in_memory.
     PropositionInMemoryRepository,
 )
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
+from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import AcademicYear, AcademicYearIdentity
 from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
 
@@ -58,7 +59,11 @@ class TestSoumettrePropositionGenerale(TestCase):
     @freezegun.freeze_time('2020-11-01')
     def test_should_soumettre_proposition_etre_ok_si_admission_complete(self):
         proposition_id = self.message_bus.invoke(
-            SoumettrePropositionCommand(uuid_proposition="uuid-MASTER-SCI"),
+            SoumettrePropositionCommand(
+                uuid_proposition="uuid-MASTER-SCI",
+                pool=AcademicCalendarTypes.ADMISSION_POOL_VIP.name,
+                annee=2021,
+            ),
         )
 
         updated_proposition = self.proposition_repository.get(proposition_id)

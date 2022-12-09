@@ -42,6 +42,7 @@ from .domain.service.question_specifique import QuestionSpecifiqueTranslator
 from .repository.groupe_de_supervision import GroupeDeSupervisionRepository
 from .repository.proposition import PropositionRepository
 from ..validation.repository.demande import DemandeRepository
+from ...domain.service.calendrier_inscription import CalendrierInscription
 from ...domain.service.titres_acces import TitresAcces
 
 COMMAND_HANDLERS = {
@@ -85,7 +86,7 @@ COMMAND_HANDLERS = {
         historique=Historique(),
         notification=Notification(),
     ),
-    VerifierPropositionCommand: lambda msg_bus, cmd: verifier_proposition(
+    VerifierPropositionQuery: lambda msg_bus, cmd: verifier_proposition(
         cmd,
         proposition_repository=PropositionRepository(),
         groupe_supervision_repository=GroupeDeSupervisionRepository(),
@@ -93,8 +94,10 @@ COMMAND_HANDLERS = {
         academic_year_repository=AcademicYearRepository(),
         titres_acces=TitresAcces(),
         questions_specifiques_translator=QuestionSpecifiqueTranslator(),
+        formation_translator=DoctoratTranslator(),
+        calendrier_inscription=CalendrierInscription(),
     ),
-    VerifierProjetCommand: lambda msg_bus, cmd: verifier_projet(
+    VerifierProjetQuery: lambda msg_bus, cmd: verifier_projet(
         cmd,
         proposition_repository=PropositionRepository(),
         groupe_supervision_repository=GroupeDeSupervisionRepository(),
@@ -145,6 +148,8 @@ COMMAND_HANDLERS = {
         notification=Notification(),
         titres_acces=TitresAcces(),
         questions_specifiques_translator=QuestionSpecifiqueTranslator(),
+        doctorat_translator=DoctoratTranslator(),
+        calendrier_inscription=CalendrierInscription(),
     ),
     DefinirCotutelleCommand: lambda msg_bus, cmd: definir_cotutelle(
         cmd,
@@ -204,5 +209,12 @@ COMMAND_HANDLERS = {
         proposition_repository=PropositionRepository(),
         profil_candidat_translator=ProfilCandidatTranslator(),
         academic_year_repository=AcademicYearRepository(),
+    ),
+    DeterminerAnneeAcademiqueEtPotQuery: lambda msg_bus, cmd: determiner_annee_academique_et_pot(
+        cmd,
+        proposition_repository=PropositionRepository(),
+        titres_acces=TitresAcces(),
+        profil_candidat_translator=ProfilCandidatTranslator(),
+        calendrier_inscription=CalendrierInscription(),
     ),
 }

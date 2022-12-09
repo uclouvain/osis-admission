@@ -31,7 +31,7 @@ from admission.ddd.admission.domain.service.i_titres_acces import ITitresAcces
 from admission.ddd.admission.enums.question_specifique import Onglets
 from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import GetCurrentAcademicYear
 from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import IAcademicYearRepository
-from ...commands import VerifierPropositionCommand
+from ...commands import VerifierPropositionQuery
 from ...domain.builder.proposition_identity_builder import PropositionIdentityBuilder
 from ...domain.model.proposition import PropositionIdentity
 from ...domain.service.i_formation import IFormationGeneraleTranslator
@@ -41,7 +41,7 @@ from ...repository.i_proposition import IPropositionRepository
 
 
 def verifier_proposition(
-    cmd: 'VerifierPropositionCommand',
+    cmd: 'VerifierPropositionQuery',
     proposition_repository: 'IPropositionRepository',
     formation_translator: 'IFormationGeneraleTranslator',
     titres_acces: 'ITitresAcces',
@@ -78,5 +78,4 @@ def verifier_proposition(
     )
 
     # THEN
-
     return proposition_id

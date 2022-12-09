@@ -3065,6 +3065,9 @@ msgstr "La raison de la demande de mise à jour"
 msgid "The reason for refusal"
 msgstr "La raison du refus"
 
+msgid "The resulting calculated academic year or pool is not consistent."
+msgstr "L'année académique et le pot déterminés ne concordent pas."
+
 msgid "The signature request procedure isn't in progress."
 msgstr "La procédure de demande de signature n'a pas été lancée."
 
@@ -3400,7 +3403,7 @@ msgstr ""
 "Vous devez ajouter au moins un promoteur externe afin de demander les "
 "signatures."
 
-msgid "You must answer the question about external enrollement change."
+msgid "You must answer the question about external enrollment change."
 msgstr ""
 "Vous devez répondre à la question sur la modification d'inscription externe."
 

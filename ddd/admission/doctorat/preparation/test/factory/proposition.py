@@ -54,7 +54,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     TypeSituationAssimilation,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition, PropositionIdentity
-from admission.ddd.admission.doctorat.preparation.test.factory.doctorat import _DoctoratIdentityFactory
+from admission.ddd.admission.test.factory.formation import FormationIdentityFactory
 
 
 class _PropositionIdentityFactory(factory.Factory):
@@ -156,7 +156,7 @@ class _PropositionFactory(factory.Factory):
     entity_id = factory.SubFactory(_PropositionIdentityFactory)
     reference = factory.Faker('pystr_format', string_format='2#-300###')
     matricule_candidat = factory.fuzzy.FuzzyText(length=10, chars=string.digits)
-    doctorat_id = factory.SubFactory(_DoctoratIdentityFactory)
+    doctorat_id = factory.SubFactory(FormationIdentityFactory)
     statut = ChoixStatutProposition.IN_PROGRESS
     projet = factory.SubFactory(_DetailProjetFactory)
     creee_le = factory.Faker('past_datetime')
@@ -176,21 +176,21 @@ class PropositionAdmissionSC3DPMinimaleFactory(_PropositionFactory):
     entity_id = factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-SC3DP')
     type_admission = ChoixTypeAdmission.ADMISSION
     commission_proximite = ChoixSousDomaineSciences.BIOLOGY
-    doctorat_id = factory.SubFactory(_DoctoratIdentityFactory, sigle='SC3DP', annee=2020)
+    doctorat_id = factory.SubFactory(FormationIdentityFactory, sigle='SC3DP', annee=2020)
     matricule_candidat = '0000000001'
 
 
 class PropositionAdmissionECGE3DPMinimaleFactory(_PropositionFactory):
     entity_id = factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-ECGE3DP')
     type_admission = ChoixTypeAdmission.ADMISSION
-    doctorat_id = factory.SubFactory(_DoctoratIdentityFactory, sigle='ECGE3DP', annee=2020)
+    doctorat_id = factory.SubFactory(FormationIdentityFactory, sigle='ECGE3DP', annee=2020)
     matricule_candidat = '0123456789'
 
 
 class PropositionAdmissionESP3DPMinimaleFactory(_PropositionFactory):
     entity_id = factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-ESP3DP')
     type_admission = ChoixTypeAdmission.ADMISSION
-    doctorat_id = factory.SubFactory(_DoctoratIdentityFactory, sigle='ESP3DP', annee=2020)
+    doctorat_id = factory.SubFactory(FormationIdentityFactory, sigle='ESP3DP', annee=2020)
     matricule_candidat = '0123456789'
 
 

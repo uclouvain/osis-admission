@@ -71,7 +71,7 @@ COMMAND_HANDLERS = {
         cmd,
         proposition_repository=PropositionRepository(),
     ),
-    VerifierPropositionCommand: lambda msg_bus, cmd: verifier_proposition(
+    VerifierPropositionQuery: lambda msg_bus, cmd: verifier_proposition(
         cmd,
         proposition_repository=PropositionRepository(),
         formation_translator=FormationGeneraleTranslator(),
@@ -100,5 +100,13 @@ COMMAND_HANDLERS = {
         proposition_repository=PropositionRepository(),
         profil_candidat_translator=ProfilCandidatTranslator(),
         academic_year_repository=AcademicYearRepository(),
+    ),
+    DeterminerAnneeAcademiqueEtPotQuery: lambda msg_bus, cmd: determiner_annee_academique_et_pot(
+        cmd,
+        proposition_repository=PropositionRepository(),
+        formation_translator=FormationGeneraleTranslator(),
+        titres_acces=TitresAcces(),
+        profil_candidat_translator=ProfilCandidatTranslator(),
+        calendrier_inscription=CalendrierInscription(),
     ),
 }

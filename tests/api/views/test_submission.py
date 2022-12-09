@@ -30,52 +30,37 @@ from django.utils.translation import gettext_lazy as _
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from admission.calendar.admission_calendar import *
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutProposition
+from admission.tests.factories.calendar import AdmissionAcademicCalendarFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
 from admission.tests.factories.general_education import (
     GeneralEducationAdmissionFactory,
     GeneralEducationTrainingFactory,
 )
 from admission.tests.factories.person import IncompletePersonForBachelorFactory, IncompletePersonForIUFCFactory
+from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.education_group_types import TrainingType
-from base.tests.factories.academic_year import AcademicYearFactory
 
 
 @freezegun.freeze_time("1980-03-25")
 class GeneralPropositionSubmissionTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
+        AdmissionAcademicCalendarFactory.produce_all_required()
+
         # Validation errors
         cls.candidate_errors = IncompletePersonForBachelorFactory()
         cls.admission = GeneralEducationAdmissionFactory(
             candidate=cls.candidate_errors,
             # force type to have access conditions
             training__education_group_type__name=TrainingType.BACHELOR.name,
-            training__academic_year__current=True,
+            training__acronym="FOOBAR",
         )
         cls.error_url = resolve_url("admission_api_v1:submit-general-proposition", uuid=cls.admission.uuid)
 
-        AcademicYearFactory.produce(number_future=6)
-        for pool in [
-            DoctorateAdmissionCalendar,
-            ContinuingEducationAdmissionCalendar,
-            AdmissionPoolExternalEnrollmentChangeCalendar,
-            AdmissionPoolExternalReorientationCalendar,
-            AdmissionPoolVipCalendar,
-            AdmissionPoolHueUclPathwayChangeCalendar,
-            AdmissionPoolInstituteChangeCalendar,
-            AdmissionPoolUe5BelgianCalendar,
-            AdmissionPoolUe5NonBelgianCalendar,
-            AdmissionPoolHue5BelgiumResidencyCalendar,
-            AdmissionPoolHue5ForeignResidencyCalendar,
-            AdmissionPoolNonResidentQuotaCalendar,
-        ]:
-            pool.ensure_consistency_until_n_plus_6()
-
         # Validation ok
         cls.admission_ok = GeneralEducationAdmissionFactory(
-            training__academic_year__current=True,
+            candidate__country_of_citizenship__european_union=True,
             bachelor_with_access_conditions_met=True,
         )
         cls.candidate_ok = cls.admission_ok.candidate
@@ -92,31 +77,72 @@ class GeneralPropositionSubmissionTestCase(APITestCase):
         self.client.force_authenticate(user=self.candidate_errors.user)
         response = self.client.get(self.error_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertIn("ADMISSION-2", [e["status_code"] for e in response.json()])
+        ret = response.json()
+        self.assertIn("ADMISSION-2", [e["status_code"] for e in ret['errors']])
+        self.assertEqual(ret['access_conditions_url'], 'https://uclouvain.be/prog-1979-FOOBAR-cond_adm')
 
     def test_general_proposition_submission_with_errors(self):
         self.client.force_authenticate(user=self.candidate_errors.user)
-        response = self.client.post(self.error_url)
+        data = {
+            'pool': AcademicCalendarTypes.ADMISSION_POOL_UE5_BELGIAN.name,
+            'annee': 1980,
+        }
+        response = self.client.post(self.error_url, data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_general_proposition_verification_ok(self):
         self.client.force_authenticate(user=self.candidate_ok.user)
         response = self.client.get(self.ok_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.json(), [])
+        ret = response.json()
+        self.assertEqual(len(ret['errors']), 0)
+        self.admission_ok.refresh_from_db()
+        self.assertIn('pool_end_date', ret, self.admission_ok.determined_pool)
+        self.assertIsNotNone(ret['pool_end_date'])
+
+    def test_general_proposition_verification_contingent_non_ouvert(self):
+        admission = GeneralEducationAdmissionFactory(
+            is_non_resident=True,
+            candidate=IncompletePersonForBachelorFactory(),
+            training__education_group_type__name=TrainingType.BACHELOR.name,
+            training__acronym="VETE1BA",
+        )
+        url = resolve_url("admission_api_v1:submit-general-proposition", uuid=admission.uuid)
+        self.client.force_authenticate(user=admission.candidate.user)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        ret = response.json()
+        self.assertIsNotNone(ret['pool_start_date'])
+        self.assertIsNotNone(ret['pool_end_date'])
 
     def test_general_proposition_submission_ok(self):
         self.client.force_authenticate(user=self.candidate_ok.user)
         self.assertEqual(self.admission_ok.status, ChoixStatutProposition.IN_PROGRESS.name)
-        response = self.client.post(self.ok_url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
+        data = {
+            'pool': AcademicCalendarTypes.ADMISSION_POOL_UE5_BELGIAN.name,
+            'annee': 1980,
+        }
+        response = self.client.post(self.ok_url, data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.admission_ok.refresh_from_db()
         self.assertEqual(self.admission_ok.status, ChoixStatutProposition.SUBMITTED.name)
 
+    def test_general_proposition_submission_bad_pool(self):
+        self.client.force_authenticate(user=self.candidate_ok.user)
+        data = {
+            'pool': AcademicCalendarTypes.ADMISSION_POOL_HUE5_BELGIUM_RESIDENCY.name,
+            'annee': 1980,
+        }
+        response = self.client.post(self.ok_url, data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
+
+@freezegun.freeze_time('2022-12-10')
 class ContinuingPropositionSubmissionTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
+        AdmissionAcademicCalendarFactory.produce_all_required()
+
         # Validation errors
         cls.candidate_errors = IncompletePersonForIUFCFactory()
         cls.admission = ContinuingEducationAdmissionFactory(
@@ -136,27 +162,35 @@ class ContinuingPropositionSubmissionTestCase(APITestCase):
         response = self.client.get(self.error_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         json_content = response.json()
-        self.assertEqual(len(json_content), 1, "Should have errors")
+        self.assertEqual(len(json_content['errors']), 1, "Should have errors")
         self.assertDictEqual(
-            json_content[0],
+            json_content['errors'][0],
             {"status_code": "ADMISSION-2", "detail": _("Admission conditions not met.")},
         )
 
     def test_continuing_proposition_submission_with_errors(self):
         self.client.force_authenticate(user=self.candidate_errors.user)
-        response = self.client.post(self.error_url)
+        data = {
+            'pool': AcademicCalendarTypes.CONTINUING_EDUCATION_ENROLLMENT.name,
+            'annee': 2022,
+        }
+        response = self.client.post(self.error_url, data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_continuing_proposition_verification_ok(self):
         self.client.force_authenticate(user=self.candidate_ok.user)
         response = self.client.get(self.ok_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.json(), [])
+        self.assertEqual(response.json()['errors'], [])
 
     def test_continuing_proposition_submission_ok(self):
         self.client.force_authenticate(user=self.candidate_ok.user)
         self.assertEqual(self.admission_ok.status, ChoixStatutProposition.IN_PROGRESS.name)
-        response = self.client.post(self.ok_url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = {
+            'pool': AcademicCalendarTypes.CONTINUING_EDUCATION_ENROLLMENT.name,
+            'annee': 2022,
+        }
+        response = self.client.post(self.ok_url, data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
         self.admission_ok.refresh_from_db()
         self.assertEqual(self.admission_ok.status, ChoixStatutProposition.SUBMITTED.name)

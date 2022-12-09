@@ -23,9 +23,11 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
+from typing import Optional
 
 from django.utils.translation import gettext_lazy as _
 
+from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from osis_common.ddd.interface import BusinessException
 
 
@@ -111,7 +113,7 @@ class ModificationInscriptionExterneNonConfirmeeException(BusinessException):
     status_code = "ADMISSION-9"
 
     def __init__(self, **kwargs):
-        message = _("You must answer the question about external enrollement change.")
+        message = _("You must answer the question about external enrollment change.")
         super().__init__(message, **kwargs)
 
 
@@ -136,4 +138,23 @@ class AucunPoolCorrespondantException(BusinessException):
 
     def __init__(self, **kwargs):  # pragma: no cover
         message = _("No pool was found to match.")
+        super().__init__(message, **kwargs)
+
+
+class PoolOuAnneeDifferentException(BusinessException):
+    status_code = "ADMISSION-13"
+
+    def __init__(
+        self,
+        annee_calculee: Optional[int],
+        pool_calcule: Optional['AcademicCalendarTypes'],
+        annee_soumise: int,
+        pool_soumis: 'AcademicCalendarTypes',
+        **kwargs,
+    ):
+        message = _("The resulting calculated academic year or pool is not consistent.")
+        self.annee_calculee = annee_calculee
+        self.pool_calcule = pool_calcule
+        self.annee_soumise = annee_soumise
+        self.pool_soumis = pool_soumis
         super().__init__(message, **kwargs)

@@ -42,7 +42,7 @@ class CotutelleApiTestCase(APITestCase):
     def setUpTestData(cls):
         # Data
         doctoral_commission = EntityFactory()
-        cls.admission = DoctorateAdmissionFactory(training__management_entity=doctoral_commission)
+        cls.admission = DoctorateAdmissionFactory(training__management_entity=doctoral_commission, cotutelle=None)
         cls.updated_data = {
             'motivation': "A good motive",
             'institution_fwb': False,

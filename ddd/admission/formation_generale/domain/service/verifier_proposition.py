@@ -35,6 +35,7 @@ from admission.ddd.admission.domain.service.verifier_questions_specifiques impor
 from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition
 from admission.ddd.admission.formation_generale.domain.service.i_formation import IFormationGeneraleTranslator
 from base.ddd.utils.business_validator import execute_functions_and_aggregate_exceptions
+from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from osis_common.ddd import interface
 
 
@@ -42,13 +43,15 @@ class VerifierProposition(interface.DomainService):
     @classmethod
     def verifier(
         cls,
-        proposition_candidat: Proposition,
-        formation_translator: IFormationGeneraleTranslator,
-        titres_acces: ITitresAcces,
-        profil_candidat_translator: IProfilCandidatTranslator,
+        proposition_candidat: 'Proposition',
+        formation_translator: 'IFormationGeneraleTranslator',
+        titres_acces: 'ITitresAcces',
+        profil_candidat_translator: 'IProfilCandidatTranslator',
         calendrier_inscription: 'ICalendrierInscription',
         annee_courante: int,
         questions_specifiques: List[QuestionSpecifique],
+        annee_soumise: int = None,
+        pool_soumis: 'AcademicCalendarTypes' = None,
     ) -> None:
         profil_candidat_service = ProfilCandidat()
         type_formation = formation_translator.get(proposition_candidat.formation_id).type
@@ -113,5 +116,7 @@ class VerifierProposition(interface.DomainService):
                 type_formation=type_formation,
                 profil_candidat_translator=profil_candidat_translator,
                 formation_translator=formation_translator,
+                annee_soumise=annee_soumise,
+                pool_soumis=pool_soumis,
             ),
         )

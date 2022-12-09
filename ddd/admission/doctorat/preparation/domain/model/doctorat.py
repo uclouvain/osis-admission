@@ -25,8 +25,7 @@
 # ##############################################################################
 import attr
 
-# FIXME should be imported from shared kernel when available
-from base.ddd.utils.converters import to_upper_case_converter
+from admission.ddd.admission.domain.model.formation import FormationIdentity
 from ddd.logic.learning_unit.domain.model.responsible_entity import UCLEntityIdentity
 from osis_common.ddd import interface
 
@@ -36,15 +35,9 @@ ENTITY_CLSM = 'CLSM'
 SIGLE_SCIENCES = 'SC3DP'
 
 
-@attr.dataclass(frozen=True, slots=True)
-class DoctoratIdentity(interface.EntityIdentity):
-    sigle: str = attr.ib(converter=to_upper_case_converter)
-    annee: int
-
-
 @attr.dataclass(slots=True)
 class Doctorat(interface.Entity):
-    entity_id: 'DoctoratIdentity'
+    entity_id: 'FormationIdentity'
     entite_ucl_id: 'UCLEntityIdentity'
 
     def est_entite_CDE(self):

@@ -24,12 +24,12 @@
 #
 # ##############################################################################
 import attr
-import factory
+import factory.fuzzy
 
-from admission.ddd.admission.domain.model.formation import FormationIdentity, Formation
+from admission.ddd.admission.domain.model.formation import Formation, FormationIdentity
 
 
-class _FormationIdentityFactory(factory.Factory):
+class FormationIdentityFactory(factory.Factory):
     class Meta:
         model = FormationIdentity
         abstract = False
@@ -49,7 +49,7 @@ class FormationFactory(factory.Factory):
         model = FormationEtendue
         abstract = False
 
-    entity_id = factory.SubFactory(_FormationIdentityFactory)
+    entity_id = factory.SubFactory(FormationIdentityFactory)
     intitule = factory.Faker('sentence')
     campus = factory.Iterator(
         [

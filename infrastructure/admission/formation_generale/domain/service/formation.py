@@ -121,6 +121,7 @@ class FormationGeneraleTranslator(IFormationGeneraleTranslator):
             SearchFormationsCommand(
                 sigle=sigle,
                 annee=annee,
+                est_inscriptible=True,
                 types=list(AnneeInscriptionFormationTranslator.GENERAL_EDUCATION_TYPES),
             )
         )

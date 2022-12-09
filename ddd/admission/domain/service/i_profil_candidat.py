@@ -25,7 +25,7 @@
 # ##############################################################################
 import datetime
 from abc import abstractmethod
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 from admission.ddd.admission.doctorat.preparation.dtos import ConditionsComptabiliteDTO, CurriculumDTO
 from admission.ddd.admission.dtos import CoordonneesDTO, EtudesSecondairesDTO, IdentificationDTO
@@ -98,7 +98,7 @@ class IProfilCandidatTranslator(interface.DomainService):
         return (datetime.date.today().replace(day=1) - datetime.timedelta(days=1)).replace(day=1)
 
     @classmethod
-    def est_changement_etablissement(cls, matricule: str, annee_courante: int) -> bool:
+    def get_changements_etablissement(cls, matricule: str, annees: List[int]) -> Dict[int, bool]:
         """Inscrit à un autre établissement Belge en N-1
         (informatiquement : curriculum / en N-1 supérieur belge non-diplômé)"""
         raise NotImplementedError

@@ -40,6 +40,7 @@ from admission.ddd.admission.formation_generale.domain.service.i_question_specif
 )
 from admission.ddd.admission.formation_generale.domain.service.verifier_proposition import VerifierProposition
 from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
+from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import GetCurrentAcademicYear
 from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import IAcademicYearRepository
 
@@ -79,10 +80,12 @@ def soumettre_proposition(
         calendrier_inscription=calendrier_inscription,
         annee_courante=annee_courante,
         questions_specifiques=questions_specifiques,
+        annee_soumise=cmd.annee,
+        pool_soumis=AcademicCalendarTypes[cmd.pool],
     )
 
     # THEN
-    proposition.soumettre()
+    proposition.soumettre(cmd.annee, AcademicCalendarTypes[cmd.pool])
     proposition_repository.save(proposition)
 
     return proposition_id

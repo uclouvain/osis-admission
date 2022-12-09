@@ -32,10 +32,9 @@ from django.db.models import OuterRef, Subquery
 from django.utils.translation import get_language
 
 from admission.auth.roles.candidate import Candidate
-from admission.contrib.models import Accounting, DoctorateAdmission, Scholarship
+from admission.contrib.models import Accounting, DoctorateAdmission
 from admission.contrib.models.doctorate import PropositionProxy, REFERENCE_SEQ_NAME
 from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import PropositionIdentityBuilder
-from admission.ddd.admission.domain.model.bourse import BourseIdentity
 from admission.ddd.admission.doctorat.preparation.domain.model._detail_projet import (
     DetailProjet,
 )
@@ -47,9 +46,6 @@ from admission.ddd.admission.doctorat.preparation.domain.model._financement impo
 )
 from admission.ddd.admission.doctorat.preparation.domain.model._institut import (
     InstitutIdentity,
-)
-from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import (
-    DoctoratIdentity,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     BourseRecherche,
@@ -77,11 +73,14 @@ from admission.ddd.admission.doctorat.preparation.dtos import (
 from admission.ddd.admission.doctorat.preparation.repository.i_proposition import (
     IPropositionRepository,
 )
+from admission.ddd.admission.domain.model.bourse import BourseIdentity
+from admission.ddd.admission.domain.model.formation import FormationIdentity
 from admission.infrastructure.admission.doctorat.preparation.repository._comptabilite import (
     get_accounting_from_admission,
     get_dto_accounting_from_admission,
 )
 from admission.infrastructure.admission.domain.service.bourse import BourseTranslator
+from base.models.academic_year import AcademicYear
 from base.models.education_group_year import EducationGroupYear
 from base.models.entity_version import EntityVersion
 from base.models.person import Person
@@ -100,7 +99,9 @@ def _instantiate_admission(admission: 'DoctorateAdmission') -> 'Proposition':
         entity_id=PropositionIdentityBuilder().build_from_uuid(admission.uuid),
         commission_proximite=commission_proximite,
         type_admission=ChoixTypeAdmission[admission.type],
-        doctorat_id=DoctoratIdentity(admission.doctorate.acronym, admission.doctorate.academic_year.year),
+        doctorat_id=FormationIdentity(admission.doctorate.acronym, admission.doctorate.academic_year.year),
+        annee_calculee=admission.determined_academic_year and admission.determined_academic_year.year,
+        pot_calcule=admission.determined_pool,
         matricule_candidat=admission.candidate.global_id,
         reference=admission.reference,
         projet=DetailProjet(
@@ -207,6 +208,10 @@ class PropositionRepository(IPropositionRepository):
                 'candidate': candidate,
                 'proximity_commission': entity.commission_proximite and entity.commission_proximite.name or '',
                 'doctorate': doctorate,
+                'determined_academic_year': (
+                    entity.annee_calculee and AcademicYear.objects.get(year=entity.annee_calculee)
+                ),
+                'determined_pool': entity.pot_calcule,
                 'financing_type': entity.financement.type and entity.financement.type.name or '',
                 'financing_work_contract': entity.financement.type_contrat_travail,
                 'financing_eft': entity.financement.eft,
@@ -411,6 +416,8 @@ class PropositionRepository(IPropositionRepository):
                 campus=admission.teaching_campus or '',  # from PropositionManager annotation
                 type=admission.doctorate.education_group_type.name,
             ),
+            annee_calculee=admission.determined_academic_year and admission.determined_academic_year.year,
+            pot_calcule=admission.determined_pool or '',
             matricule_candidat=admission.candidate.global_id,
             prenom_candidat=admission.candidate.first_name,
             nom_candidat=admission.candidate.last_name,

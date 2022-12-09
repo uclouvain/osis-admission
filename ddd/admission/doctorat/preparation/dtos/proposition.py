@@ -42,6 +42,8 @@ class PropositionDTO(interface.DTO):
     reference: str
     justification: Optional[str]
     doctorat: DoctoratDTO
+    annee_calculee: Optional[int]
+    pot_calcule: Optional[str]
     code_secteur_formation: str
     intitule_secteur_formation: str
     commission_proximite: Optional[str]

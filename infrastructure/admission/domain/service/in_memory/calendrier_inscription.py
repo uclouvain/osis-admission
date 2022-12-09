@@ -24,11 +24,10 @@
 #
 # ##############################################################################
 from datetime import date, timedelta
-from typing import List
+from typing import List, Tuple
 
 from admission.ddd.admission.domain.service.i_calendrier_inscription import ICalendrierInscription
 from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
-from base.business.academic_calendar import AcademicEventSessionCalendarHelper
 from base.tests.factories.academic_year import get_current_year
 
 
@@ -47,14 +46,20 @@ class CalendrierInscriptionInMemory(ICalendrierInscription):
         return [current_year, current_year - 1, current_year + 1]
 
     @classmethod
-    def pool_est_ouvert_pour_annee_academique(cls, pool: AcademicEventSessionCalendarHelper, annee: int) -> bool:
-        debut, fin = cls.periodes_ouvertes.get(pool.event_reference)
-        date_debut = date(annee + debut.annee, debut.mois, debut.jour)
-        if fin is None:
-            date_fin = date_debut.replace(year=date_debut.year + 1) - timedelta(days=1)
-        else:
-            date_fin = date(annee + fin.annee, fin.mois, fin.jour)
-        return date_debut <= date.today() <= date_fin
+    def get_pool_ouverts(cls) -> List[Tuple[str, int]]:
+        opened = []
+        today = date.today()
+        for pool_name, dates in cls.periodes_ouvertes.items():
+            for annee in cls.get_annees_academiques_pour_calcul():
+                debut, fin = dates
+                date_debut = date(annee + debut.annee, debut.mois, debut.jour)
+                if fin is None:
+                    date_fin = date_debut.replace(year=date_debut.year + 1) - timedelta(days=1)
+                else:
+                    date_fin = date(annee + fin.annee, fin.mois, fin.jour)
+                if date_debut <= today <= date_fin:
+                    opened.append((pool_name, annee))
+        return opened
 
     @classmethod
     def est_ue_plus_5(cls, pays_nationalite_iso_code: str) -> bool:

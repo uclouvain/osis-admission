@@ -28,9 +28,9 @@ import datetime
 from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import PropositionIdentityBuilder
 from admission.ddd.admission.doctorat.preparation.commands import SoumettrePropositionCommand
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity
+from admission.ddd.admission.doctorat.preparation.domain.service.i_doctorat import IDoctoratTranslator
 from admission.ddd.admission.doctorat.preparation.domain.service.i_historique import IHistorique
 from admission.ddd.admission.doctorat.preparation.domain.service.i_notification import INotification
-from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.doctorat.preparation.domain.service.i_question_specifique import (
     IQuestionSpecifiqueTranslator,
 )
@@ -41,8 +41,11 @@ from admission.ddd.admission.doctorat.preparation.repository.i_groupe_de_supervi
 from admission.ddd.admission.doctorat.preparation.repository.i_proposition import IPropositionRepository
 from admission.ddd.admission.doctorat.validation.domain.service.demande import DemandeService
 from admission.ddd.admission.doctorat.validation.repository.i_demande import IDemandeRepository
+from admission.ddd.admission.domain.service.i_calendrier_inscription import ICalendrierInscription
+from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.domain.service.i_titres_acces import ITitresAcces
 from admission.ddd.admission.enums.question_specifique import Onglets
+from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import GetCurrentAcademicYear
 from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import IAcademicYearRepository
 
@@ -58,6 +61,8 @@ def soumettre_proposition(
     notification: 'INotification',
     titres_acces: 'ITitresAcces',
     questions_specifiques_translator: 'IQuestionSpecifiqueTranslator',
+    doctorat_translator: 'IDoctoratTranslator',
+    calendrier_inscription: 'ICalendrierInscription',
 ) -> 'PropositionIdentity':
     # GIVEN
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
@@ -87,8 +92,11 @@ def soumettre_proposition(
         annee_courante,
         titres_acces,
         questions_specifiques,
+        doctorat_translator,
+        calendrier_inscription,
+        cmd.annee,
+        AcademicCalendarTypes[cmd.pool],
     )
-
     demande = DemandeService().initier(
         profil_candidat_translator,
         proposition_id,
@@ -97,7 +105,7 @@ def soumettre_proposition(
     )
 
     # THEN
-    proposition.finaliser()
+    proposition.finaliser(cmd.annee, AcademicCalendarTypes[cmd.pool])
     proposition_repository.save(proposition)
     demande_repository.save(demande)
     historique.historiser_soumission(proposition)

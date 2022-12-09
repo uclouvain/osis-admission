@@ -2799,6 +2799,9 @@ msgstr ""
 msgid "The reason for refusal"
 msgstr ""
 
+msgid "The resulting calculated academic year or pool is not consistent."
+msgstr ""
+
 msgid "The signature request procedure isn't in progress."
 msgstr ""
 
@@ -3105,7 +3108,7 @@ msgid ""
 "You must add at least one external promoter in order to request signatures."
 msgstr ""
 
-msgid "You must answer the question about external enrollement change."
+msgid "You must answer the question about external enrollment change."
 msgstr ""
 
 msgid "You must answer the question about reorientation."

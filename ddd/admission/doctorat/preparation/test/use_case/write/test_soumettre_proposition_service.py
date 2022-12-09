@@ -49,6 +49,7 @@ from admission.infrastructure.admission.doctorat.preparation.repository.in_memor
 )
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
+from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import AcademicYear, AcademicYearIdentity
 from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
 
@@ -78,7 +79,11 @@ class TestVerifierPropositionServiceCommun(TestCase):
         proposition = PropositionAdmissionSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory()
 
         proposition_id = self.message_bus.invoke(
-            SoumettrePropositionCommand(uuid_proposition=proposition.entity_id.uuid),
+            SoumettrePropositionCommand(
+                uuid_proposition=proposition.entity_id.uuid,
+                pool=AcademicCalendarTypes.DOCTORATE_EDUCATION_ENROLLMENT.name,
+                annee=2020,
+            ),
         )
 
         updated_proposition = self.proposition_repository.get(proposition_id)
@@ -92,7 +97,11 @@ class TestVerifierPropositionServiceCommun(TestCase):
         proposition = PropositionPreAdmissionSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory()
 
         proposition_id = self.message_bus.invoke(
-            SoumettrePropositionCommand(uuid_proposition=proposition.entity_id.uuid),
+            SoumettrePropositionCommand(
+                uuid_proposition=proposition.entity_id.uuid,
+                pool=AcademicCalendarTypes.DOCTORATE_EDUCATION_ENROLLMENT.name,
+                annee=2020,
+            ),
         )
 
         updated_proposition = self.proposition_repository.get(proposition_id)
@@ -109,7 +118,11 @@ class TestVerifierPropositionServiceCommun(TestCase):
             with self.assertRaises(MultipleBusinessExceptions) as context:
                 self.message_bus.invoke(
                     self.message_bus.invoke(
-                        SoumettrePropositionCommand(uuid_proposition=proposition.entity_id.uuid),
+                        SoumettrePropositionCommand(
+                            uuid_proposition=proposition.entity_id.uuid,
+                            pool=AcademicCalendarTypes.DOCTORATE_EDUCATION_ENROLLMENT.name,
+                            annee=2020,
+                        ),
                     )
                 )
             self.assertIsInstance(context.exception.exceptions.pop(), IdentificationNonCompleteeException)

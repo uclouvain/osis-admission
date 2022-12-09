@@ -8,6 +8,8 @@ from django.db.models import OuterRef, Subquery
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils.translation import gettext_lazy as _
+
+from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from osis_document.contrib import FileField
 
 from admission.contrib.models.form_item import ConfigurableModelFormItemField
@@ -72,6 +74,19 @@ class BaseAdmission(models.Model):
         verbose_name=_("Training"),
         related_name="+",
         on_delete=models.CASCADE,
+    )
+    determined_academic_year = models.ForeignKey(
+        to="base.AcademicYear",
+        related_name="+",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+    )
+    determined_pool = models.CharField(
+        choices=AcademicCalendarTypes.choices(),
+        max_length=70,
+        null=True,
+        blank=True,
     )
 
     specific_question_answers = ConfigurableModelFormItemField(

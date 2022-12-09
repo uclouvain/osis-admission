@@ -39,11 +39,12 @@ from admission.ddd.admission.domain.validator.exceptions import (
     FormationNonTrouveeException,
     ModificationInscriptionExterneNonConfirmeeException,
     PoolNonResidentContingenteNonOuvertException,
+    PoolOuAnneeDifferentException,
     ReorientationInscriptionExterneNonConfirmeeException,
     ResidenceAuSensDuDecretNonRenseigneeException,
 )
+from admission.ddd.admission.dtos.conditions import InfosDetermineesDTO
 from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition
-from base.business.academic_calendar import AcademicEventSessionCalendarHelper
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.education_group_types import TrainingType
 from osis_common.ddd import interface
@@ -75,20 +76,27 @@ class ICalendrierInscription(interface.DomainService):
     ]
 
     @classmethod
-    def determiner_pool(  # type: ignore[return]
+    def determiner_annee_academique_et_pot(
         cls,
         formation_id: 'FormationIdentity',
         matricule_candidat: str,
         titres_acces: 'Titres',
         type_formation: 'TrainingType',
         profil_candidat_translator: 'IProfilCandidatTranslator',
-        proposition: 'Proposition',
-    ) -> Tuple[int, AcademicCalendarTypes]:
+        proposition: Optional['Proposition'] = None,
+    ) -> 'InfosDetermineesDTO':
+        pool_ouverts = cls.get_pool_ouverts()
+        cls.verifier_residence_au_sens_du_decret(formation_id.sigle, proposition)
+        cls.verifier_reorientation_renseignee_si_eligible(type_formation, formation_id, proposition, pool_ouverts)
+        cls.verifier_modification_renseignee_si_eligible(type_formation, formation_id, proposition, pool_ouverts)
+        cls.verifier_formation_contingentee_ouvert(formation_id.sigle, proposition, formation_id.annee, pool_ouverts)
         identification = profil_candidat_translator.get_identification(matricule_candidat)
         residential_address = profil_candidat_translator.get_coordonnees(matricule_candidat).domicile_legal
         if identification.pays_nationalite is None:
             raise IdentificationNonCompleteeException()
         ue_plus_5 = cls.est_ue_plus_5(identification.pays_nationalite)
+        annees = cls.get_annees_academiques_pour_calcul()
+        changements_etablissement = profil_candidat_translator.get_changements_etablissement(matricule_candidat, annees)
         log_messages = [
             f"""
             --------- Pool determination ---------
@@ -102,9 +110,10 @@ class ICalendrierInscription(interface.DomainService):
             proposition={proposition},
         """,
         ]
-        for annee in cls.get_annees_academiques_pour_calcul():
+        for annee in annees:
             pool = cls.determiner_pool_pour_annee_academique(
                 log_messages,
+                pool_ouverts,
                 annee_academique=annee,
                 sigle=formation_id.sigle,
                 ue_plus_5=ue_plus_5,
@@ -113,25 +122,30 @@ class ICalendrierInscription(interface.DomainService):
                 residential_address=residential_address,
                 annee_derniere_inscription_ucl=identification.annee_derniere_inscription_ucl,
                 matricule_candidat=matricule_candidat,
-                profil_candidat_translator=profil_candidat_translator,
+                changements_etablissement=changements_etablissement,
                 proposition=proposition,
             )
             if pool:
-                return annee, pool
+                return InfosDetermineesDTO(annee, pool)
         else:  # pragma: no cover
             logger.debug('\n'.join(log_messages))
             raise AucunPoolCorrespondantException()
 
     @classmethod
-    def determiner_pool_pour_annee_academique(cls, logs: List[str], **kwargs) -> Optional['AcademicCalendarTypes']:
+    def determiner_pool_pour_annee_academique(
+        cls,
+        logs: List[str],
+        pool_ouverts: List[Tuple[str, int]],
+        **kwargs,
+    ) -> Optional['AcademicCalendarTypes']:
         for pool in cls.pools:
             annee = kwargs['annee_academique']
             logs.append(
                 f"{str(AcademicCalendarTypes.get_value(pool.event_reference)):<70} {annee}"
-                f" pool_est_ouvert: {cls.pool_est_ouvert_pour_annee_academique(pool, annee)} \t"
+                f" pool_est_ouvert: {(pool.event_reference, annee) in pool_ouverts} \t"
                 f"matches_criteria: {pool.matches_criteria(**kwargs)}"
             )
-            if cls.pool_est_ouvert_pour_annee_academique(pool, annee) and pool.matches_criteria(**kwargs):
+            if (pool.event_reference, annee) in pool_ouverts and pool.matches_criteria(**kwargs):
                 return AcademicCalendarTypes[pool.event_reference]
         return None  # pragma: no cover
 
@@ -145,12 +159,10 @@ class ICalendrierInscription(interface.DomainService):
         type_formation: 'TrainingType',
         profil_candidat_translator: 'IProfilCandidatTranslator',
         formation_translator: 'IFormationTranslator',
-    ):
-        cls.verifier_residence_au_sens_du_decret(formation_id.sigle, proposition)
-        cls.verifier_reorientation_renseignee_si_eligible(type_formation, formation_id, proposition)
-        cls.verifier_modification_renseignee_si_eligible(type_formation, formation_id, proposition)
-        cls.verifier_formation_contingentee_ouvert(formation_id.sigle, proposition, formation_id.annee)
-        annee, pool = cls.determiner_pool(
+        annee_soumise: int = None,
+        pool_soumis: 'AcademicCalendarTypes' = None,
+    ) -> None:
+        determination = cls.determiner_annee_academique_et_pot(
             formation_id,
             matricule_candidat,
             titres_acces,
@@ -158,36 +170,33 @@ class ICalendrierInscription(interface.DomainService):
             profil_candidat_translator,
             proposition,
         )
-        cls.verifier_formation_dispensee(annee, formation_id, formation_translator)
+        # Si le candidat s'inscrit pour une acad future, mais que la formation n'existe pas dans cette acad
+        if determination.annee != formation_id.annee:
+            if not formation_translator.verifier_existence(formation_id.sigle, determination.annee):
+                raise FormationNonTrouveeException(formation_id.sigle, determination.annee)
 
-    @classmethod
-    def verifier_formation_dispensee(
-        cls,
-        annee: int,
-        formation_id: 'FormationIdentity',
-        formation_translator: 'IFormationTranslator',
-    ):
-        """Si le candidat s'inscrit pour une acad future, mais que la formation n'existe pas dans cette acad"""
-        if annee != formation_id.annee:
-            if not formation_translator.verifier_existence(formation_id.sigle, annee):
-                raise FormationNonTrouveeException(annee, formation_id.sigle)
+        # Vérifier la concordance entre l'année/pool soumis et ceux calculés
+        if (
+            annee_soumise is not None
+            and pool_soumis is not None
+            and (determination.annee != annee_soumise or determination.pool != pool_soumis)
+        ):
+            raise PoolOuAnneeDifferentException(determination.annee, determination.pool, annee_soumise, pool_soumis)
 
     @classmethod
     def verifier_reorientation_renseignee_si_eligible(
         cls,
         program: 'TrainingType',
         formation_id: 'FormationIdentity',
-        proposition: 'Proposition',
+        proposition: Optional['Proposition'],
+        pool_ouverts: List[Tuple[str, int]],
     ):
         """Si le candidat pourrait tomber dans le pool de reorientation et n'a pas répondu à la question"""
         if (
             program == TrainingType.BACHELOR
             and not est_formation_contingentee_et_non_resident(formation_id.sigle, proposition)
-            and cls.pool_est_ouvert_pour_annee_academique(
-                AdmissionPoolExternalReorientationCalendar(),
-                formation_id.annee,
-            )
-            and proposition.est_reorientation_inscription_externe is None
+            and (AdmissionPoolExternalReorientationCalendar.event_reference, formation_id.annee) in pool_ouverts
+            and (proposition and proposition.est_reorientation_inscription_externe is None)
         ):
             raise ReorientationInscriptionExterneNonConfirmeeException()
 
@@ -196,39 +205,43 @@ class ICalendrierInscription(interface.DomainService):
         cls,
         program: 'TrainingType',
         formation_id: 'FormationIdentity',
-        proposition: 'Proposition',
+        proposition: Optional['Proposition'],
+        pool_ouverts: List[Tuple[str, int]],
     ):
         """Si le candidat pourrait tomber dans le pool de modification et n'a pas répondu à la question"""
         if (
             program == TrainingType.BACHELOR
             and not est_formation_contingentee_et_non_resident(formation_id.sigle, proposition)
-            and cls.pool_est_ouvert_pour_annee_academique(
-                AdmissionPoolExternalEnrollmentChangeCalendar(),
-                formation_id.annee,
-            )
-            and proposition.est_modification_inscription_externe is None
+            and (AdmissionPoolExternalEnrollmentChangeCalendar.event_reference, formation_id.annee) in pool_ouverts
+            and (proposition and proposition.est_modification_inscription_externe is None)
         ):
             raise ModificationInscriptionExterneNonConfirmeeException()
 
     @classmethod
-    def verifier_residence_au_sens_du_decret(cls, sigle: str, proposition: 'Proposition'):
+    def verifier_residence_au_sens_du_decret(cls, sigle: str, proposition: Optional['Proposition']):
         """Si le candidat s'inscrit dans une formation contingentée et n'a pas répondu à la question
         sur la résidence au sens du décret."""
-        if sigle in SIGLES_WITH_QUOTA and proposition.est_non_resident_au_sens_decret is None:
+        if sigle in SIGLES_WITH_QUOTA and proposition and proposition.est_non_resident_au_sens_decret is None:
             raise ResidenceAuSensDuDecretNonRenseigneeException()
 
     @classmethod
-    def verifier_formation_contingentee_ouvert(cls, sigle: str, proposition: 'Proposition', annee: int):
+    def verifier_formation_contingentee_ouvert(
+        cls,
+        sigle: str,
+        proposition: Optional['Proposition'],
+        annee: int,
+        pool_ouverts: List[Tuple[str, int]],
+    ):
         """Si le candidat s'inscrit dans une formation contingentée et ne tombe pas dans la bonne période."""
         if (
             est_formation_contingentee_et_non_resident(sigle, proposition)
             # hors periode
-            and not cls.pool_est_ouvert_pour_annee_academique(AdmissionPoolNonResidentQuotaCalendar(), annee)
+            and (AdmissionPoolNonResidentQuotaCalendar.event_reference, annee) not in pool_ouverts
         ):
             raise PoolNonResidentContingenteNonOuvertException()
 
     @classmethod
-    def pool_est_ouvert_pour_annee_academique(cls, pool: 'AcademicEventSessionCalendarHelper', annee: int) -> bool:
+    def get_pool_ouverts(cls) -> List[Tuple[str, int]]:
         raise NotImplementedError
 
     @classmethod

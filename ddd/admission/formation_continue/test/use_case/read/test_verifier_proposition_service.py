@@ -26,7 +26,7 @@
 from unittest import TestCase
 
 from admission.ddd.admission.domain.validator.exceptions import ConditionsAccessNonRempliesException
-from admission.ddd.admission.formation_continue.commands import VerifierPropositionCommand
+from admission.ddd.admission.formation_continue.commands import VerifierPropositionQuery
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 
@@ -36,12 +36,10 @@ class TestVerifierPropositionService(TestCase):
         self.message_bus = message_bus_in_memory_instance
 
     def test_should_verifier_etre_ok_si_complet(self):
-        cmd = VerifierPropositionCommand(uuid_proposition="uuid-ECGE3DP")
-        proposition_id = self.message_bus.invoke(cmd)
+        proposition_id = self.message_bus.invoke(VerifierPropositionQuery(uuid_proposition="uuid-ECGE3DP"))
         self.assertEqual(proposition_id.uuid, "uuid-ECGE3DP")
 
     def test_should_retourner_erreur_si_conditions_acces_non_remplies(self):
-        cmd = VerifierPropositionCommand(uuid_proposition='uuid-SC3DP')
         with self.assertRaises(MultipleBusinessExceptions) as context:
-            self.message_bus.invoke(cmd)
+            self.message_bus.invoke(VerifierPropositionQuery(uuid_proposition='uuid-SC3DP'))
         self.assertIsInstance(context.exception.exceptions.pop(), ConditionsAccessNonRempliesException)

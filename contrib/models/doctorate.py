@@ -24,6 +24,7 @@
 #
 # ##############################################################################
 import uuid
+from contextlib import suppress
 
 from ckeditor.fields import RichTextField
 from django.conf import settings
@@ -46,9 +47,11 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
 )
 from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixStatutCDD, ChoixStatutSIC
 from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
+from base.models.academic_year import AcademicYear
 from base.models.entity_version import EntityVersion
 from base.models.enums.entity_type import SECTOR
 from base.utils.cte import CTESubquery
+from osis_common.ddd.interface import BusinessException
 from osis_document.contrib import FileField
 from osis_signature.contrib.fields import SignatureProcessField
 from reference.models.country import Country
@@ -62,6 +65,7 @@ __all__ = [
     "REFERENCE_SEQ_NAME",
 ]
 
+from ...ddd.admission.dtos.conditions import InfosDetermineesDTO
 
 REFERENCE_SEQ_NAME = 'admission_doctorateadmission_reference_seq'
 
@@ -415,16 +419,23 @@ class DoctorateAdmission(BaseAdmission):
 
     def update_detailed_status(self):
         from admission.ddd.admission.doctorat.preparation.commands import (
-            VerifierProjetCommand,
-            VerifierPropositionCommand,
+            VerifierProjetQuery,
+            VerifierPropositionQuery,
+            DeterminerAnneeAcademiqueEtPotQuery,
         )
         from admission.utils import gather_business_exceptions
+        from infrastructure.messages_bus import message_bus_instance
 
         error_key = api_settings.NON_FIELD_ERRORS_KEY
-        project_errors = gather_business_exceptions(VerifierProjetCommand(self.uuid)).get(error_key, [])
-        submission_errors = gather_business_exceptions(VerifierPropositionCommand(self.uuid)).get(error_key, [])
+        project_errors = gather_business_exceptions(VerifierProjetQuery(self.uuid)).get(error_key, [])
+        submission_errors = gather_business_exceptions(VerifierPropositionQuery(self.uuid)).get(error_key, [])
         self.detailed_status = project_errors + submission_errors
-        self.save(update_fields=['detailed_status'])
+
+        with suppress(BusinessException):
+            dto: 'InfosDetermineesDTO' = message_bus_instance.invoke(DeterminerAnneeAcademiqueEtPotQuery(self.uuid))
+            self.determined_academic_year = AcademicYear.objects.get(year=dto.annee)
+            self.determined_pool = dto.pool.name
+        self.save(update_fields=['detailed_status', 'determined_academic_year', 'determined_pool'])
 
 
 class PropositionManager(models.Manager.from_queryset(BaseAdmissionQuerySet)):
@@ -444,6 +455,7 @@ class PropositionManager(models.Manager.from_queryset(BaseAdmissionQuerySet)):
                 "training__academic_year",
                 "training__education_group_type",
                 "candidate__country_of_citizenship",
+                "determined_academic_year",
                 "thesis_institute",
                 "accounting",
                 "erasmus_mundus_scholarship",

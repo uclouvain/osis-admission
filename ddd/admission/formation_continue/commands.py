@@ -23,7 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import Optional, Dict, List
+from typing import Dict, List, Optional
 
 import attr
 
@@ -69,13 +69,15 @@ class SupprimerPropositionCommand(interface.CommandRequest):
 
 
 @attr.dataclass(frozen=True, slots=True)
-class VerifierPropositionCommand(interface.QueryRequest):
+class VerifierPropositionQuery(interface.QueryRequest):
     uuid_proposition: str
 
 
 @attr.dataclass(frozen=True, slots=True)
 class SoumettrePropositionCommand(interface.CommandRequest):
     uuid_proposition: str
+    annee: int
+    pool: str
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -85,3 +87,8 @@ class CompleterCurriculumCommand(interface.CommandRequest):
     curriculum: List[str] = attr.Factory(list)
     equivalence_diplome: List[str] = attr.Factory(list)
     reponses_questions_specifiques: Dict = attr.Factory(dict)
+
+
+@attr.dataclass(frozen=True, slots=True)
+class DeterminerAnneeAcademiqueEtPotQuery(interface.QueryRequest):
+    uuid_proposition: str

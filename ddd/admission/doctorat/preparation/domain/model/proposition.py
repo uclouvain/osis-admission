@@ -25,7 +25,7 @@
 ##############################################################################
 import datetime
 import uuid
-from typing import List, Optional, Union, Dict
+from typing import Dict, List, Optional, Union
 
 import attr
 
@@ -45,7 +45,6 @@ from admission.ddd.admission.doctorat.preparation.domain.model._financement impo
     financement_non_rempli,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model._institut import InstitutIdentity
-from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import DoctoratIdentity
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixAffiliationSport,
     ChoixAssimilation1,
@@ -67,10 +66,12 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
 )
 from admission.ddd.admission.doctorat.preparation.domain.validator.validator_by_business_action import (
     CompletionPropositionValidatorList,
-    ProjetDoctoralValidatorList,
     ModifierTypeAdmissionValidatorList,
+    ProjetDoctoralValidatorList,
 )
 from admission.ddd.admission.domain.model.bourse import BourseIdentity
+from admission.ddd.admission.domain.model.formation import FormationIdentity
+from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from osis_common.ddd import interface
 
 
@@ -83,9 +84,11 @@ class PropositionIdentity(interface.EntityIdentity):
 class Proposition(interface.RootEntity):
     entity_id: 'PropositionIdentity'
     type_admission: ChoixTypeAdmission
-    doctorat_id: 'DoctoratIdentity'
+    doctorat_id: 'FormationIdentity'
     matricule_candidat: str
     projet: 'DetailProjet'
+    annee_calculee: Optional[int] = None
+    pot_calcule: Optional[AcademicCalendarTypes] = None
     reference: Optional[str] = None
     justification: Optional[str] = ''
     statut: ChoixStatutProposition = ChoixStatutProposition.IN_PROGRESS
@@ -427,8 +430,10 @@ class Proposition(interface.RootEntity):
         """Vérification de la validité du projet doctoral avant demande des signatures"""
         ProjetDoctoralValidatorList(self.type_admission, self.projet, self.financement).validate()
 
-    def finaliser(self):
+    def finaliser(self, annee: int, pool: 'AcademicCalendarTypes'):
         self.statut = ChoixStatutProposition.SUBMITTED
+        self.annee_calculee = annee
+        self.pot_calcule = pool
 
     def supprimer(self):
         self.statut = ChoixStatutProposition.CANCELLED

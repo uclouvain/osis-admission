@@ -72,7 +72,7 @@ class CalendrierInscriptionTestCase(TestCase):
     @freezegun.freeze_time('2023-03-15')
     def test_verification_calendrier_inscription_doctorat(self):
         proposition = PropositionAdmissionECGE3DPMinimaleFactory()
-        annee, pool = CalendrierInscriptionInMemory.determiner_pool(
+        dto = CalendrierInscriptionInMemory.determiner_annee_academique_et_pot(
             formation_id=FormationFactory(type=TrainingType.PHD).entity_id,
             proposition=proposition,
             matricule_candidat=proposition.matricule_candidat,
@@ -80,14 +80,14 @@ class CalendrierInscriptionTestCase(TestCase):
             type_formation=TrainingType.PHD,
             profil_candidat_translator=self.profil_candidat_translator,
         )
-        self.assertEqual(pool, AcademicCalendarTypes.DOCTORATE_EDUCATION_ENROLLMENT)
+        self.assertEqual(dto.pool, AcademicCalendarTypes.DOCTORATE_EDUCATION_ENROLLMENT)
 
     @freezegun.freeze_time('2023-03-15')
     def test_verification_calendrier_inscription_formation_continue(self):
         proposition = PropositionContinueFactory()
         profil = ProfilCandidatFactory(matricule=proposition.matricule_candidat)
         self.profil_candidat_translator.profil_candidats.append(profil.identification)
-        annee, pool = CalendrierInscriptionInMemory.determiner_pool(
+        dto = CalendrierInscriptionInMemory.determiner_annee_academique_et_pot(
             formation_id=FormationFactory(type=TrainingType.UNIVERSITY_FIRST_CYCLE_CERTIFICATE).entity_id,
             proposition=proposition,
             matricule_candidat=proposition.matricule_candidat,
@@ -95,7 +95,7 @@ class CalendrierInscriptionTestCase(TestCase):
             type_formation=TrainingType.UNIVERSITY_FIRST_CYCLE_CERTIFICATE,
             profil_candidat_translator=self.profil_candidat_translator,
         )
-        self.assertEqual(pool, AcademicCalendarTypes.CONTINUING_EDUCATION_ENROLLMENT)
+        self.assertEqual(dto.pool, AcademicCalendarTypes.CONTINUING_EDUCATION_ENROLLMENT)
 
     @freezegun.freeze_time('2022-10-15')
     def test_verification_calendrier_inscription_modification_non_renseignee(self):
@@ -125,7 +125,7 @@ class CalendrierInscriptionTestCase(TestCase):
         proposition = PropositionFactory(est_modification_inscription_externe=True)
         profil = ProfilCandidatFactory(matricule=proposition.matricule_candidat)
         self.profil_candidat_translator.profil_candidats.append(profil.identification)
-        annee, pool = CalendrierInscriptionInMemory.determiner_pool(
+        dto = CalendrierInscriptionInMemory.determiner_annee_academique_et_pot(
             formation_id=proposition.formation_id,
             proposition=proposition,
             matricule_candidat=proposition.matricule_candidat,
@@ -133,7 +133,7 @@ class CalendrierInscriptionTestCase(TestCase):
             type_formation=TrainingType.BACHELOR,
             profil_candidat_translator=self.profil_candidat_translator,
         )
-        self.assertEqual(pool, AcademicCalendarTypes.ADMISSION_POOL_EXTERNAL_ENROLLMENT_CHANGE)
+        self.assertEqual(dto.pool, AcademicCalendarTypes.ADMISSION_POOL_EXTERNAL_ENROLLMENT_CHANGE)
 
     @freezegun.freeze_time('2022-10-15')
     def test_verification_calendrier_inscription_modification_non_choisie(self):
@@ -142,7 +142,7 @@ class CalendrierInscriptionTestCase(TestCase):
         profil = ProfilCandidatFactory(matricule=proposition.matricule_candidat)
         self.profil_candidat_translator.profil_candidats.append(profil.identification)
         self.profil_candidat_translator.get_coordonnees = lambda m: profil.coordonnees
-        annee, pool = CalendrierInscriptionInMemory.determiner_pool(
+        dto = CalendrierInscriptionInMemory.determiner_annee_academique_et_pot(
             formation_id=proposition.formation_id,
             proposition=proposition,
             matricule_candidat=proposition.matricule_candidat,
@@ -150,7 +150,7 @@ class CalendrierInscriptionTestCase(TestCase):
             type_formation=TrainingType.BACHELOR,
             profil_candidat_translator=self.profil_candidat_translator,
         )
-        self.assertNotEqual(pool, AcademicCalendarTypes.ADMISSION_POOL_EXTERNAL_ENROLLMENT_CHANGE)
+        self.assertNotEqual(dto.pool, AcademicCalendarTypes.ADMISSION_POOL_EXTERNAL_ENROLLMENT_CHANGE)
 
     @freezegun.freeze_time('2022-12-15')
     def test_verification_calendrier_inscription_reorientation_non_renseignee(self):
@@ -180,7 +180,7 @@ class CalendrierInscriptionTestCase(TestCase):
         proposition = PropositionFactory(est_reorientation_inscription_externe=True)
         profil = ProfilCandidatFactory(matricule=proposition.matricule_candidat)
         self.profil_candidat_translator.profil_candidats.append(profil.identification)
-        annee, pool = CalendrierInscriptionInMemory.determiner_pool(
+        dto = CalendrierInscriptionInMemory.determiner_annee_academique_et_pot(
             formation_id=proposition.formation_id,
             proposition=proposition,
             matricule_candidat=proposition.matricule_candidat,
@@ -188,7 +188,7 @@ class CalendrierInscriptionTestCase(TestCase):
             type_formation=TrainingType.BACHELOR,
             profil_candidat_translator=self.profil_candidat_translator,
         )
-        self.assertEqual(pool, AcademicCalendarTypes.ADMISSION_POOL_EXTERNAL_REORIENTATION)
+        self.assertEqual(dto.pool, AcademicCalendarTypes.ADMISSION_POOL_EXTERNAL_REORIENTATION)
 
     @freezegun.freeze_time('2022-12-15')
     def test_verification_calendrier_inscription_reorientation_non_choisie(self):
@@ -197,7 +197,7 @@ class CalendrierInscriptionTestCase(TestCase):
         profil = ProfilCandidatFactory(matricule=proposition.matricule_candidat)
         self.profil_candidat_translator.profil_candidats.append(profil.identification)
         self.profil_candidat_translator.get_coordonnees = lambda m: profil.coordonnees
-        annee, pool = CalendrierInscriptionInMemory.determiner_pool(
+        dto = CalendrierInscriptionInMemory.determiner_annee_academique_et_pot(
             formation_id=proposition.formation_id,
             proposition=proposition,
             matricule_candidat=proposition.matricule_candidat,
@@ -205,7 +205,7 @@ class CalendrierInscriptionTestCase(TestCase):
             type_formation=TrainingType.BACHELOR,
             profil_candidat_translator=self.profil_candidat_translator,
         )
-        self.assertNotEqual(pool, AcademicCalendarTypes.ADMISSION_POOL_EXTERNAL_REORIENTATION)
+        self.assertNotEqual(dto.pool, AcademicCalendarTypes.ADMISSION_POOL_EXTERNAL_REORIENTATION)
 
     def test_formation_contigentee_mais_residence_non_choisie(self):
         # Inscription à une formation contingentée, mais le candidat n'a pas renseigné sa résidence
@@ -249,11 +249,15 @@ class CalendrierInscriptionTestCase(TestCase):
     @freezegun.freeze_time('2022-06-02')
     def test_formation_contigentee_et_non_residence_validee_dans_periode(self):
         # Inscription à une formation contingentée et le candidat a validé sa non-résidence
-        proposition = PropositionFactory(formation_id__sigle="VETE1BA", est_non_resident_au_sens_decret=True)
+        proposition = PropositionFactory(
+            formation_id__annee=2022,
+            formation_id__sigle="VETE1BA",
+            est_non_resident_au_sens_decret=True,
+        )
         profil = ProfilCandidatFactory(matricule=proposition.matricule_candidat)
         self.profil_candidat_translator.profil_candidats.append(profil.identification)
         self.profil_candidat_translator.get_coordonnees = lambda m: profil.coordonnees
-        annee, pool = CalendrierInscriptionInMemory.determiner_pool(
+        dto = CalendrierInscriptionInMemory.determiner_annee_academique_et_pot(
             formation_id=proposition.formation_id,
             proposition=proposition,
             matricule_candidat=proposition.matricule_candidat,
@@ -261,7 +265,7 @@ class CalendrierInscriptionTestCase(TestCase):
             type_formation=TrainingType.BACHELOR,
             profil_candidat_translator=self.profil_candidat_translator,
         )
-        self.assertEqual(pool, AcademicCalendarTypes.ADMISSION_POOL_NON_RESIDENT_QUOTA)
+        self.assertEqual(dto.pool, AcademicCalendarTypes.ADMISSION_POOL_NON_RESIDENT_QUOTA)
 
     def test_formation_contigentee_et_residence(self):
         # Inscription à une formation contingentée et le candidat est résident
@@ -269,7 +273,7 @@ class CalendrierInscriptionTestCase(TestCase):
         profil = ProfilCandidatFactory(matricule=proposition.matricule_candidat)
         self.profil_candidat_translator.profil_candidats.append(profil.identification)
         self.profil_candidat_translator.get_coordonnees = lambda m: profil.coordonnees
-        annee, pool = CalendrierInscriptionInMemory.determiner_pool(
+        dto = CalendrierInscriptionInMemory.determiner_annee_academique_et_pot(
             formation_id=proposition.formation_id,
             proposition=proposition,
             matricule_candidat=proposition.matricule_candidat,
@@ -277,14 +281,14 @@ class CalendrierInscriptionTestCase(TestCase):
             type_formation=TrainingType.BACHELOR,
             profil_candidat_translator=self.profil_candidat_translator,
         )
-        self.assertNotEqual(pool, AcademicCalendarTypes.ADMISSION_POOL_NON_RESIDENT_QUOTA)
+        self.assertNotEqual(dto.pool, AcademicCalendarTypes.ADMISSION_POOL_NON_RESIDENT_QUOTA)
 
     def test_determination_sans_adresse(self):
         proposition = PropositionFactory()
         profil = ProfilCandidatFactory(matricule=proposition.matricule_candidat)
         self.profil_candidat_translator.profil_candidats.append(profil.identification)
         with self.assertRaises(AdresseDomicileLegalNonCompleteeException):
-            CalendrierInscriptionInMemory.determiner_pool(
+            CalendrierInscriptionInMemory.determiner_annee_academique_et_pot(
                 formation_id=proposition.formation_id,
                 proposition=proposition,
                 matricule_candidat=proposition.matricule_candidat,
@@ -298,7 +302,7 @@ class CalendrierInscriptionTestCase(TestCase):
         profil = ProfilCandidatFactory(matricule=proposition.matricule_candidat, identification__pays_nationalite=None)
         self.profil_candidat_translator.profil_candidats.append(profil.identification)
         with self.assertRaises(IdentificationNonCompleteeException):
-            CalendrierInscriptionInMemory.determiner_pool(
+            CalendrierInscriptionInMemory.determiner_annee_academique_et_pot(
                 formation_id=proposition.formation_id,
                 proposition=proposition,
                 matricule_candidat=proposition.matricule_candidat,
@@ -330,7 +334,7 @@ class CalendrierInscriptionTestCase(TestCase):
         self.profil_candidat_translator.profil_candidats.append(profil.identification)
         self.profil_candidat_translator.get_coordonnees = lambda m: profil.coordonnees
         self.profil_candidat_translator.est_changement_etablissement = lambda *_: True
-        annee, pool = CalendrierInscriptionInMemory.determiner_pool(
+        dto = CalendrierInscriptionInMemory.determiner_annee_academique_et_pot(
             formation_id=proposition.formation_id,
             proposition=proposition,
             matricule_candidat=proposition.matricule_candidat,
@@ -338,7 +342,7 @@ class CalendrierInscriptionTestCase(TestCase):
             type_formation=TrainingType.MASTER_M1,
             profil_candidat_translator=self.profil_candidat_translator,
         )
-        self.assertEqual(pool, AcademicCalendarTypes.ADMISSION_POOL_VIP)
+        self.assertEqual(dto.pool, AcademicCalendarTypes.ADMISSION_POOL_VIP)
 
     @freezegun.freeze_time('22/09/2022')
     def test_changement_etablissement(self):
@@ -346,8 +350,8 @@ class CalendrierInscriptionTestCase(TestCase):
         profil = ProfilCandidatFactory(matricule=proposition.matricule_candidat, coordonnees__domicile_legal__pays="BE")
         self.profil_candidat_translator.profil_candidats.append(profil.identification)
         self.profil_candidat_translator.get_coordonnees = lambda m: profil.coordonnees
-        self.profil_candidat_translator.est_changement_etablissement = lambda *_: True
-        annee, pool = CalendrierInscriptionInMemory.determiner_pool(
+        self.profil_candidat_translator.get_changements_etablissement = lambda *_: {2022: True}
+        dto = CalendrierInscriptionInMemory.determiner_annee_academique_et_pot(
             formation_id=proposition.formation_id,
             proposition=proposition,
             matricule_candidat=proposition.matricule_candidat,
@@ -355,7 +359,7 @@ class CalendrierInscriptionTestCase(TestCase):
             type_formation=TrainingType.BACHELOR,
             profil_candidat_translator=self.profil_candidat_translator,
         )
-        self.assertEqual(pool, AcademicCalendarTypes.ADMISSION_POOL_INSTITUT_CHANGE)
+        self.assertEqual(dto.pool, AcademicCalendarTypes.ADMISSION_POOL_INSTITUT_CHANGE)
 
     @freezegun.freeze_time('22/10/2022')
     def test_changement_filiere(self):
@@ -368,7 +372,7 @@ class CalendrierInscriptionTestCase(TestCase):
         )
         self.profil_candidat_translator.profil_candidats.append(profil.identification)
         self.profil_candidat_translator.get_coordonnees = lambda m: profil.coordonnees
-        annee, pool = CalendrierInscriptionInMemory.determiner_pool(
+        dto = CalendrierInscriptionInMemory.determiner_annee_academique_et_pot(
             formation_id=proposition.formation_id,
             proposition=proposition,
             matricule_candidat=proposition.matricule_candidat,
@@ -376,7 +380,7 @@ class CalendrierInscriptionTestCase(TestCase):
             type_formation=TrainingType.BACHELOR,
             profil_candidat_translator=self.profil_candidat_translator,
         )
-        self.assertEqual(pool, AcademicCalendarTypes.ADMISSION_POOL_HUE_UCL_PATHWAY_CHANGE)
+        self.assertEqual(dto.pool, AcademicCalendarTypes.ADMISSION_POOL_HUE_UCL_PATHWAY_CHANGE)
 
     @freezegun.freeze_time('01/03/2022')
     def test_ue5_belge(self):
@@ -387,7 +391,7 @@ class CalendrierInscriptionTestCase(TestCase):
         )
         self.profil_candidat_translator.profil_candidats.append(profil.identification)
         self.profil_candidat_translator.get_coordonnees = lambda m: profil.coordonnees
-        annee, pool = CalendrierInscriptionInMemory.determiner_pool(
+        dto = CalendrierInscriptionInMemory.determiner_annee_academique_et_pot(
             formation_id=proposition.formation_id,
             proposition=proposition,
             matricule_candidat=proposition.matricule_candidat,
@@ -395,7 +399,7 @@ class CalendrierInscriptionTestCase(TestCase):
             type_formation=TrainingType.BACHELOR,
             profil_candidat_translator=self.profil_candidat_translator,
         )
-        self.assertEqual(pool, AcademicCalendarTypes.ADMISSION_POOL_UE5_BELGIAN)
+        self.assertEqual(dto.pool, AcademicCalendarTypes.ADMISSION_POOL_UE5_BELGIAN)
 
     @freezegun.freeze_time('22/10/2022')
     def test_ue5_non_belge(self):
@@ -406,7 +410,7 @@ class CalendrierInscriptionTestCase(TestCase):
         )
         self.profil_candidat_translator.profil_candidats.append(profil.identification)
         self.profil_candidat_translator.get_coordonnees = lambda m: profil.coordonnees
-        annee, pool = CalendrierInscriptionInMemory.determiner_pool(
+        dto = CalendrierInscriptionInMemory.determiner_annee_academique_et_pot(
             formation_id=proposition.formation_id,
             proposition=proposition,
             matricule_candidat=proposition.matricule_candidat,
@@ -414,7 +418,7 @@ class CalendrierInscriptionTestCase(TestCase):
             type_formation=TrainingType.BACHELOR,
             profil_candidat_translator=self.profil_candidat_translator,
         )
-        self.assertEqual(pool, AcademicCalendarTypes.ADMISSION_POOL_UE5_NON_BELGIAN)
+        self.assertEqual(dto.pool, AcademicCalendarTypes.ADMISSION_POOL_UE5_NON_BELGIAN)
 
     @freezegun.freeze_time('22/10/2022')
     def test_hors_ue5_residence_belge(self):
@@ -426,7 +430,7 @@ class CalendrierInscriptionTestCase(TestCase):
         )
         self.profil_candidat_translator.profil_candidats.append(profil.identification)
         self.profil_candidat_translator.get_coordonnees = lambda m: profil.coordonnees
-        annee, pool = CalendrierInscriptionInMemory.determiner_pool(
+        dto = CalendrierInscriptionInMemory.determiner_annee_academique_et_pot(
             formation_id=proposition.formation_id,
             proposition=proposition,
             matricule_candidat=proposition.matricule_candidat,
@@ -434,7 +438,7 @@ class CalendrierInscriptionTestCase(TestCase):
             type_formation=TrainingType.BACHELOR,
             profil_candidat_translator=self.profil_candidat_translator,
         )
-        self.assertEqual(pool, AcademicCalendarTypes.ADMISSION_POOL_HUE5_BELGIUM_RESIDENCY)
+        self.assertEqual(dto.pool, AcademicCalendarTypes.ADMISSION_POOL_HUE5_BELGIUM_RESIDENCY)
 
     def test_hors_ue5_residence_etranger(self):
         proposition = PropositionFactory()
@@ -445,7 +449,7 @@ class CalendrierInscriptionTestCase(TestCase):
         )
         self.profil_candidat_translator.profil_candidats.append(profil.identification)
         self.profil_candidat_translator.get_coordonnees = lambda m: profil.coordonnees
-        annee, pool = CalendrierInscriptionInMemory.determiner_pool(
+        dto = CalendrierInscriptionInMemory.determiner_annee_academique_et_pot(
             formation_id=proposition.formation_id,
             proposition=proposition,
             matricule_candidat=proposition.matricule_candidat,
@@ -453,4 +457,4 @@ class CalendrierInscriptionTestCase(TestCase):
             type_formation=TrainingType.BACHELOR,
             profil_candidat_translator=self.profil_candidat_translator,
         )
-        self.assertEqual(pool, AcademicCalendarTypes.ADMISSION_POOL_HUE5_FOREIGN_RESIDENCY)
+        self.assertEqual(dto.pool, AcademicCalendarTypes.ADMISSION_POOL_HUE5_FOREIGN_RESIDENCY)

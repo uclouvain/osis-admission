@@ -44,6 +44,7 @@ from admission.ddd.admission.formation_generale.domain.validator.exceptions impo
 from admission.ddd.admission.formation_generale.dtos import PropositionDTO
 from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
 from admission.infrastructure.admission.domain.service.bourse import BourseTranslator
+from base.models.academic_year import AcademicYear
 from base.models.education_group_year import EducationGroupYear
 from base.models.person import Person
 from osis_common.ddd.interface import ApplicationService
@@ -115,11 +116,18 @@ class PropositionRepository(IPropositionRepository):
             defaults={
                 'candidate': candidate,
                 'training': training,
+                'determined_academic_year': (
+                    entity.annee_calculee and AcademicYear.objects.get(year=entity.annee_calculee)
+                ),
+                'determined_pool': entity.pot_calcule,
                 'double_degree_scholarship': scholarships.get(TypeBourse.DOUBLE_TRIPLE_DIPLOMATION.name),
                 'international_scholarship': scholarships.get(TypeBourse.BOURSE_INTERNATIONALE_FORMATION_GENERALE.name),
                 'erasmus_mundus_scholarship': scholarships.get(TypeBourse.ERASMUS_MUNDUS.name),
+                'is_belgian_bachelor': entity.est_bachelier_belge,
                 'is_external_reorientation': entity.est_reorientation_inscription_externe,
+                'regular_registration_proof': entity.attestation_inscription_reguliere,
                 'is_external_modification': entity.est_modification_inscription_externe,
+                'registration_change_form': entity.formulaire_modification_inscription,
                 'is_non_resident': entity.est_non_resident_au_sens_decret,
                 'status': entity.statut.name,
                 'specific_question_answers': entity.reponses_questions_specifiques,
@@ -150,6 +158,8 @@ class PropositionRepository(IPropositionRepository):
                 sigle=admission.training.acronym,
                 annee=admission.training.academic_year.year,
             ),
+            annee_calculee=admission.determined_academic_year and admission.determined_academic_year.year,
+            pot_calcule=admission.determined_pool,
             statut=ChoixStatutProposition[admission.status],
             bourse_internationale_id=BourseIdentity(uuid=str(admission.international_scholarship.uuid))
             if admission.international_scholarship
@@ -161,8 +171,11 @@ class PropositionRepository(IPropositionRepository):
             if admission.erasmus_mundus_scholarship
             else None,
             reponses_questions_specifiques=admission.specific_question_answers,
+            est_bachelier_belge=admission.is_belgian_bachelor,
             est_reorientation_inscription_externe=admission.is_external_reorientation,
+            attestation_inscription_reguliere=admission.regular_registration_proof,
             est_modification_inscription_externe=admission.is_external_modification,
+            formulaire_modification_inscription=admission.registration_change_form,
             est_non_resident_au_sens_decret=admission.is_non_resident,
             curriculum=admission.curriculum,
             equivalence_diplome=admission.diploma_equivalence,
@@ -178,6 +191,8 @@ class PropositionRepository(IPropositionRepository):
             modifiee_le=admission.modified,
             erreurs=admission.detailed_status or [],
             statut=admission.status,
+            annee_calculee=admission.determined_academic_year and admission.determined_academic_year.year,
+            pot_calcule=admission.determined_pool or '',
             formation=FormationDTO(
                 sigle=admission.training.acronym,
                 annee=admission.training.academic_year.year,

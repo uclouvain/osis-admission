@@ -25,14 +25,18 @@
 # ##############################################################################
 from unittest import TestCase
 
+import freezegun
+
 from admission.ddd.admission.formation_continue.commands import SoumettrePropositionCommand
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutProposition
 from admission.infrastructure.admission.formation_continue.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
+from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 
 
+@freezegun.freeze_time('2020-11-01')
 class TestSoumettrePropositionContinue(TestCase):
     def setUp(self) -> None:
         self.proposition_repository = PropositionInMemoryRepository()
@@ -41,7 +45,11 @@ class TestSoumettrePropositionContinue(TestCase):
 
     def test_should_soumettre_proposition_etre_ok_si_admission_complete(self):
         proposition_id = self.message_bus.invoke(
-            SoumettrePropositionCommand(uuid_proposition="uuid-ECGE3DP"),
+            SoumettrePropositionCommand(
+                uuid_proposition="uuid-ECGE3DP",
+                pool=AcademicCalendarTypes.CONTINUING_EDUCATION_ENROLLMENT.name,
+                annee=2020,
+            ),
         )
 
         updated_proposition = self.proposition_repository.get(proposition_id)

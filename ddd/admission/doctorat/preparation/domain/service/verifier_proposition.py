@@ -28,12 +28,16 @@ from typing import List
 
 from admission.ddd.admission.doctorat.preparation.domain.model.groupe_de_supervision import GroupeDeSupervision
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition
-from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
-from admission.ddd.admission.domain.service.profil_candidat import ProfilCandidat
-from admission.ddd.admission.domain.service.i_titres_acces import ITitresAcces
+from admission.ddd.admission.doctorat.preparation.domain.service.i_doctorat import IDoctoratTranslator
 from admission.ddd.admission.domain.model.question_specifique import QuestionSpecifique
+from admission.ddd.admission.domain.service.i_calendrier_inscription import ICalendrierInscription
+from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
+from admission.ddd.admission.domain.service.i_titres_acces import ITitresAcces
+from admission.ddd.admission.domain.service.profil_candidat import ProfilCandidat
 from admission.ddd.admission.domain.service.verifier_questions_specifiques import VerifierQuestionsSpecifiques
 from base.ddd.utils.business_validator import execute_functions_and_aggregate_exceptions
+from base.models.enums.academic_calendar_type import AcademicCalendarTypes
+from base.models.enums.education_group_types import TrainingType
 from osis_common.ddd import interface
 
 
@@ -41,56 +45,74 @@ class VerifierProposition(interface.DomainService):
     @classmethod
     def verifier(
         cls,
-        proposition_candidat: Proposition,
-        groupe_de_supervision: GroupeDeSupervision,
-        profil_candidat_translator: IProfilCandidatTranslator,
+        proposition_candidat: 'Proposition',
+        groupe_de_supervision: 'GroupeDeSupervision',
+        profil_candidat_translator: 'IProfilCandidatTranslator',
         annee_courante: int,
-        titres_acces: ITitresAcces,
-        questions_specifiques: List[QuestionSpecifique],
+        titres_acces: 'ITitresAcces',
+        questions_specifiques: List['QuestionSpecifique'],
+        formation_translator: 'IDoctoratTranslator',
+        calendrier_inscription: 'ICalendrierInscription',
+        annee_soumise: int = None,
+        pool_soumis: 'AcademicCalendarTypes' = None,
     ) -> None:
         profil_candidat_service = ProfilCandidat()
+        doctorat_id = proposition_candidat.doctorat_id
+        titres = titres_acces.recuperer_titres_access(proposition_candidat.matricule_candidat, TrainingType.PHD)
         execute_functions_and_aggregate_exceptions(
             partial(
                 profil_candidat_service.verifier_identification,
-                proposition_candidat.matricule_candidat,
-                profil_candidat_translator,
+                matricule=proposition_candidat.matricule_candidat,
+                profil_candidat_translator=profil_candidat_translator,
             ),
             partial(
                 profil_candidat_service.verifier_coordonnees,
-                proposition_candidat.matricule_candidat,
-                profil_candidat_translator,
+                matricule=proposition_candidat.matricule_candidat,
+                profil_candidat_translator=profil_candidat_translator,
             ),
             partial(
                 profil_candidat_service.verifier_langues_connues,
-                proposition_candidat.matricule_candidat,
-                profil_candidat_translator,
+                matricule=proposition_candidat.matricule_candidat,
+                profil_candidat_translator=profil_candidat_translator,
             ),
             partial(
                 profil_candidat_service.verifier_curriculum,
-                proposition_candidat.matricule_candidat,
-                profil_candidat_translator,
-                annee_courante,
-                proposition_candidat.curriculum,
+                matricule=proposition_candidat.matricule_candidat,
+                profil_candidat_translator=profil_candidat_translator,
+                annee_courante=annee_courante,
+                curriculum_pdf=proposition_candidat.curriculum,
             ),
             groupe_de_supervision.verifier_tout_le_monde_a_approuve,
             partial(
                 profil_candidat_service.verifier_comptabilite,
-                proposition_candidat,
-                profil_candidat_translator,
-                annee_courante,
-            ),
-            partial(
-                titres_acces.verifier_doctorat,
-                proposition_candidat.matricule_candidat,
+                proposition=proposition_candidat,
+                profil_candidat_translator=profil_candidat_translator,
+                annee_courante=annee_courante,
             ),
             partial(
                 VerifierQuestionsSpecifiques.verifier_onglet_curriculum,
-                proposition_candidat,
-                questions_specifiques,
+                proposition=proposition_candidat,
+                questions_specifiques=questions_specifiques,
             ),
             partial(
                 VerifierQuestionsSpecifiques.verifier_onglet_etudes_secondaires,
-                proposition_candidat,
-                questions_specifiques,
+                proposition=proposition_candidat,
+                questions_specifiques=questions_specifiques,
+            ),
+            partial(
+                titres_acces.verifier_titres,
+                titres=titres,
+            ),
+            partial(
+                calendrier_inscription.verifier,
+                formation_id=doctorat_id,
+                proposition=None,
+                matricule_candidat=proposition_candidat.matricule_candidat,
+                titres_acces=titres,
+                type_formation=TrainingType.PHD,
+                profil_candidat_translator=profil_candidat_translator,
+                formation_translator=formation_translator,
+                annee_soumise=annee_soumise,
+                pool_soumis=pool_soumis,
             ),
         )
