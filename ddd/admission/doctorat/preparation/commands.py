@@ -24,7 +24,7 @@
 #
 # ##############################################################################
 import datetime
-from typing import List, Optional, Dict
+from typing import Dict, List, Optional
 
 import attr
 
@@ -105,12 +105,12 @@ class DemanderSignaturesCommand(interface.CommandRequest):
 
 
 @attr.dataclass(frozen=True, slots=True)
-class VerifierPropositionCommand(interface.QueryRequest):
+class VerifierPropositionQuery(interface.QueryRequest):
     uuid_proposition: str
 
 
 @attr.dataclass(frozen=True, slots=True)
-class VerifierProjetCommand(interface.QueryRequest):
+class VerifierProjetQuery(interface.QueryRequest):
     uuid_proposition: str
 
 
@@ -153,6 +153,8 @@ class RefuserPropositionCommand(interface.CommandRequest):
 @attr.dataclass(frozen=True, slots=True)
 class SoumettrePropositionCommand(interface.CommandRequest):
     uuid_proposition: str
+    annee: int
+    pool: str
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -303,4 +305,9 @@ class CompleterCurriculumCommand(interface.CommandRequest):
 
 @attr.dataclass(frozen=True, slots=True)
 class VerifierCurriculumQuery(interface.QueryRequest):
+    uuid_proposition: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class DeterminerAnneeAcademiqueEtPotQuery(interface.QueryRequest):
     uuid_proposition: str

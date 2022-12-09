@@ -30,6 +30,7 @@ from admission.ddd.admission.formation_continue.use_case.write import *
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
+from admission.infrastructure.admission.domain.service.calendrier_inscription import CalendrierInscription
 from admission.infrastructure.admission.domain.service.profil_candidat import ProfilCandidatTranslator
 from admission.infrastructure.admission.domain.service.titres_acces import TitresAcces
 from admission.infrastructure.admission.formation_continue.domain.service.formation import FormationContinueTranslator
@@ -63,12 +64,13 @@ COMMAND_HANDLERS = {
         cmd,
         proposition_repository=PropositionRepository(),
     ),
-    VerifierPropositionCommand: lambda msg_bus, cmd: verifier_proposition(
+    VerifierPropositionQuery: lambda msg_bus, cmd: verifier_proposition(
         cmd,
         proposition_repository=PropositionRepository(),
         formation_translator=FormationContinueTranslator(),
         titres_acces=TitresAcces(),
         profil_candidat_translator=ProfilCandidatTranslator(),
+        calendrier_inscription=CalendrierInscription(),
     ),
     SoumettrePropositionCommand: lambda msg_bus, cmd: soumettre_proposition(
         cmd,
@@ -76,9 +78,18 @@ COMMAND_HANDLERS = {
         formation_translator=FormationContinueTranslator(),
         titres_acces=TitresAcces(),
         profil_candidat_translator=ProfilCandidatTranslator(),
+        calendrier_inscription=CalendrierInscription(),
     ),
     CompleterCurriculumCommand: lambda msg_bus, cmd: completer_curriculum(
         cmd,
         proposition_repository=PropositionRepository(),
+    ),
+    DeterminerAnneeAcademiqueEtPotQuery: lambda msg_bus, cmd: determiner_annee_academique_et_pot(
+        cmd,
+        proposition_repository=PropositionRepository(),
+        formation_translator=FormationContinueTranslator(),
+        titres_acces=TitresAcces(),
+        profil_candidat_translator=ProfilCandidatTranslator(),
+        calendrier_inscription=CalendrierInscription(),
     ),
 }

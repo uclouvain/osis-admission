@@ -108,6 +108,7 @@ class CddDoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
                 pre_admission_submission_date=datetime.datetime.now(),
             ),
             DoctorateAdmissionFactory(
+                cotutelle=None,
                 training__management_entity=first_doctoral_commission,
                 training__academic_year=academic_years[0],
                 status=ChoixStatutProposition.SUBMITTED.name,
@@ -139,6 +140,7 @@ class CddDoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
                 },
             ),
             DoctorateAdmissionFactory(
+                cotutelle=None,
                 training__management_entity=second_doctoral_commission,
                 training__academic_year=academic_years[0],
                 other_international_scholarship='Custom grant',

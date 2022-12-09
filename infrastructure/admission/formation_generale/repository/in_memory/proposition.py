@@ -23,9 +23,10 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import factory
 from dataclasses import dataclass
 from typing import List, Optional
+
+import factory
 
 from admission.ddd import CODE_BACHELIER_VETERINAIRE
 from admission.ddd.admission.dtos.formation import FormationDTO
@@ -37,10 +38,9 @@ from admission.ddd.admission.formation_generale.test.factory.proposition import 
     PropositionFactory,
     _PropositionIdentityFactory,
 )
-from admission.ddd.admission.test.factory.formation import _FormationIdentityFactory
+from admission.ddd.admission.test.factory.formation import FormationIdentityFactory
 from admission.infrastructure.admission.domain.service.in_memory.bourse import BourseInMemoryTranslator
 from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
-from admission.infrastructure.admission.domain.service.profil_candidat import ProfilCandidatTranslator
 from admission.infrastructure.admission.formation_generale.domain.service.in_memory.formation import (
     FormationGeneraleInMemoryTranslator,
 )
@@ -86,7 +86,7 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
             PropositionFactory(
                 entity_id=factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-MASTER-SCI'),
                 matricule_candidat='0000000001',
-                formation_id=_FormationIdentityFactory(sigle="MASTER-SCI", annee=2020),
+                formation_id=FormationIdentityFactory(sigle="MASTER-SCI", annee=2020),
                 bourse_double_diplome_id=BourseInMemoryTranslator.bourse_dd_1.entity_id,
                 bourse_erasmus_mundus_id=BourseInMemoryTranslator.bourse_em_1.entity_id,
                 bourse_internationale_id=BourseInMemoryTranslator.bourse_ifg_1.entity_id,
@@ -104,14 +104,14 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
             PropositionFactory(
                 entity_id=factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-BACHELIER-ECO1'),
                 matricule_candidat='0000000001',
-                formation_id=_FormationIdentityFactory(sigle="BACHELIER-ECO", annee=2020),
+                formation_id=FormationIdentityFactory(sigle="BACHELIER-ECO", annee=2020),
                 continuation_cycle_bachelier=['file1.pdf'],
                 attestation_continuation_cycle_bachelier=None,
             ),
             PropositionFactory(
                 entity_id=factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-BACHELIER-VET'),
                 matricule_candidat='0000000001',
-                formation_id=_FormationIdentityFactory(sigle=CODE_BACHELIER_VETERINAIRE, annee=2020),
+                formation_id=FormationIdentityFactory(sigle=CODE_BACHELIER_VETERINAIRE, annee=2020),
                 continuation_cycle_bachelier=['file1.pdf'],
                 attestation_continuation_cycle_bachelier=True,
                 est_non_resident_au_sens_decret=False,
@@ -119,21 +119,21 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
             PropositionFactory(
                 entity_id=factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-AGGREGATION-ECO'),
                 matricule_candidat='0000000002',
-                formation_id=_FormationIdentityFactory(sigle="AGGREGATION-ECO", annee=2020),
+                formation_id=FormationIdentityFactory(sigle="AGGREGATION-ECO", annee=2020),
                 curriculum=['file1.pdf'],
                 equivalence_diplome=['file1.pdf'],
             ),
             PropositionFactory(
                 entity_id=factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-CAPAES-ECO'),
                 matricule_candidat='0000000002',
-                formation_id=_FormationIdentityFactory(sigle="CAPAES-ECO", annee=2020),
+                formation_id=FormationIdentityFactory(sigle="CAPAES-ECO", annee=2020),
                 curriculum=['file1.pdf'],
                 equivalence_diplome=['file1.pdf'],
             ),
             PropositionFactory(
                 entity_id=factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-BACHELIER-ECO2'),
                 matricule_candidat='0123456789',
-                formation_id=_FormationIdentityFactory(sigle="BACHELIER-ECO", annee=2020),
+                formation_id=FormationIdentityFactory(sigle="BACHELIER-ECO", annee=2020),
                 bourse_erasmus_mundus_id=BourseInMemoryTranslator.bourse_em_1.entity_id,
                 continuation_cycle_bachelier=False,
             ),
@@ -167,6 +167,8 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
                 campus=formation.campus,
                 type=formation.type,
             ),
+            annee_calculee=proposition.annee_calculee,
+            pot_calcule=proposition.pot_calcule,
             bourse_double_diplome=BourseInMemoryTranslator.get_dto(proposition.bourse_double_diplome_id.uuid)
             if proposition.bourse_double_diplome_id
             else None,

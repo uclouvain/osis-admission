@@ -89,7 +89,7 @@ class ShouldAnneesCVRequisesCompletees(BusinessValidator):
         for debut, fin in iterateur_dates_experiences_non_academiques:
             if (periode_valorisee[0] - fin).days <= 1:
                 # Extension de la période de valorisation
-                periode_valorisee = (debut, max(fin, periode_valorisee[1]))
+                periode_valorisee = [debut, max(fin, periode_valorisee[1])]
             else:
                 # Rupture dans la période couverte par les expériences -> vérifier si elle valorise des mois
                 for mois in iter(mois_a_valoriser):

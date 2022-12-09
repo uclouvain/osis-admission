@@ -23,7 +23,10 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from contextlib import suppress
+from operator import itemgetter
 
+from django.utils import timezone
 from rest_framework import mixins, status
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
@@ -33,16 +36,17 @@ from admission.api import serializers
 from admission.api.schema import ResponseSpecificSchema
 from admission.ddd.admission.doctorat.preparation.commands import (
     SoumettrePropositionCommand as SoumettrePropositionDoctoratCommand,
-    VerifierProjetCommand,
-    VerifierPropositionCommand as VerifierPropositionDoctoratCommand,
+    VerifierProjetQuery,
 )
 from admission.ddd.admission.doctorat.validation.commands import ApprouverDemandeCddCommand
+from admission.ddd.admission.domain.validator.exceptions import (
+    ConditionsAccessNonRempliesException,
+    PoolNonResidentContingenteNonOuvertException,
+)
 from admission.ddd.admission.formation_continue.commands import (
-    VerifierPropositionCommand as VerifierPropositionContinueCommand,
     SoumettrePropositionCommand as SoumettrePropositionContinueCommand,
 )
 from admission.ddd.admission.formation_generale.commands import (
-    VerifierPropositionCommand as VerifierPropositionGeneraleCommand,
     SoumettrePropositionCommand as SoumettrePropositionGeneraleCommand,
 )
 from admission.utils import (
@@ -51,6 +55,10 @@ from admission.utils import (
     get_cached_continuing_education_admission_perm_obj,
     get_cached_general_education_admission_perm_obj,
 )
+from base.models.academic_calendar import AcademicCalendar
+from base.models.education_group_year import EducationGroupYear
+from base.models.enums.academic_calendar_type import AcademicCalendarTypes
+from infrastructure.formation_catalogue.repository.program_tree import ProgramTreeRepository
 from infrastructure.messages_bus import message_bus_instance
 from osis_role.contrib.views import APIPermissionRequiredMixin
 
@@ -61,9 +69,16 @@ __all__ = [
     "SubmitContinuingEducationPropositionView",
 ]
 
+from program_management.ddd.domain.exception import ProgramTreeNotFoundException
+
 
 class VerifySchema(ResponseSpecificSchema):
     response_description = "Verification errors"
+
+
+class VerifyProjectSchema(VerifySchema):
+    operation_id_base = '_verify_project'
+    response_description = "Project verification errors"
 
     def get_responses(self, path, method):
         return (
@@ -95,11 +110,6 @@ class VerifySchema(ResponseSpecificSchema):
         )
 
 
-class VerifyProjectSchema(VerifySchema):
-    operation_id_base = '_verify_project'
-    response_description = "Project verification errors"
-
-
 class VerifyDoctoralProjectView(APIPermissionRequiredMixin, mixins.RetrieveModelMixin, GenericAPIView):
     name = "verify-project"
     schema = VerifyProjectSchema()
@@ -114,7 +124,7 @@ class VerifyDoctoralProjectView(APIPermissionRequiredMixin, mixins.RetrieveModel
 
     def get(self, request, *args, **kwargs):
         """Check the project to be OK with all validators."""
-        data = gather_business_exceptions(VerifierProjetCommand(uuid_proposition=str(kwargs["uuid"])))
+        data = gather_business_exceptions(VerifierProjetQuery(uuid_proposition=str(kwargs["uuid"])))
         return Response(data.get(api_settings.NON_FIELD_ERRORS_KEY, []), status=status.HTTP_200_OK)
 
 
@@ -122,7 +132,8 @@ class SubmitDoctoralPropositionSchema(VerifySchema):
     response_description = "Proposition verification errors"
 
     serializer_mapping = {
-        'POST': serializers.PropositionIdentityDTOSerializer,
+        'GET': serializers.PropositionErrorsSerializer,
+        'POST': (serializers.SubmitPropositionSerializer, serializers.PropositionIdentityDTOSerializer),
     }
 
     def get_operation_id(self, path, method):
@@ -133,11 +144,47 @@ class SubmitDoctoralPropositionSchema(VerifySchema):
         return super().get_operation_id(path, method)
 
 
-class SubmitDoctoralPropositionView(APIPermissionRequiredMixin, mixins.RetrieveModelMixin, GenericAPIView):
-    name = "submit-doctoral-proposition"
-    schema = SubmitDoctoralPropositionSchema()
+class SubmitPropositionMixin:
     pagination_class = None
     filter_backends = []
+
+    def add_access_conditions_url(self, data):
+        error_codes = [e['status_code'] for e in data['errors']]
+        if ConditionsAccessNonRempliesException.status_code in error_codes:
+            proposition = self.get_permission_object()
+
+            # Get the last year being published
+            today = timezone.now().today()
+            year = (
+                AcademicCalendar.objects.filter(
+                    reference=AcademicCalendarTypes.ADMISSION_ACCESS_CONDITIONS_URL.name,
+                    start_date__lte=today,
+                )
+                .order_by('-start_date')
+                .values_list('data_year__year', flat=True)
+                .first()
+            )
+
+            sigle = proposition.training.acronym
+            with suppress(ProgramTreeNotFoundException):  # pragma: no cover
+                # Try to get the acronym from the parent, if it exists
+                parent = ProgramTreeRepository.get_identite_parent_2M(proposition.training.partial_acronym, year)
+                sigle = EducationGroupYear.objects.get(
+                    partial_acronym=parent.code,
+                    academic_year__year=parent.year,
+                ).acronym
+
+            data['access_conditions_url'] = f"https://uclouvain.be/prog-{year}-{sigle}-cond_adm"
+
+
+class SubmitDoctoralPropositionView(
+    SubmitPropositionMixin,
+    APIPermissionRequiredMixin,
+    mixins.RetrieveModelMixin,
+    GenericAPIView,
+):
+    name = "submit-doctoral-proposition"
+    schema = SubmitDoctoralPropositionSchema()
     permission_mapping = {
         'GET': 'admission.submit_doctorateadmission',
         'POST': 'admission.submit_doctorateadmission',
@@ -148,15 +195,20 @@ class SubmitDoctoralPropositionView(APIPermissionRequiredMixin, mixins.RetrieveM
 
     def get(self, request, *args, **kwargs):
         """Check the proposition to be OK with all validators."""
-        data = gather_business_exceptions(VerifierPropositionDoctoratCommand(uuid_proposition=str(kwargs["uuid"])))
-        return Response(data.get(api_settings.NON_FIELD_ERRORS_KEY, []), status=status.HTTP_200_OK)
+        admission = self.get_permission_object()
+        admission.update_detailed_status()
+
+        data = {'errors': sorted(admission.detailed_status, key=itemgetter('status_code'))}
+        self.add_access_conditions_url(data)
+        return Response(data, status=status.HTTP_200_OK)
 
     def post(self, request, *args, **kwargs):
         """Submit the proposition."""
         # Trigger the submit command
-        proposition_id = message_bus_instance.invoke(
-            SoumettrePropositionDoctoratCommand(uuid_proposition=str(kwargs["uuid"]))
-        )
+        serializer = serializers.SubmitPropositionSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        cmd = SoumettrePropositionDoctoratCommand(**serializer.data, uuid_proposition=str(kwargs['uuid']))
+        proposition_id = message_bus_instance.invoke(cmd)
         serializer = serializers.PropositionIdentityDTOSerializer(instance=proposition_id)
         # TODO To remove when the admission approval by CDD and SIC will be created
         message_bus_instance.invoke(ApprouverDemandeCddCommand(uuid=str(kwargs["uuid"])))
@@ -166,18 +218,22 @@ class SubmitDoctoralPropositionView(APIPermissionRequiredMixin, mixins.RetrieveM
 class SubmitGeneralEducationPropositionSchema(VerifySchema):
     response_description = "Proposition verification errors"
     serializer_mapping = {
-        'POST': serializers.PropositionIdentityDTOSerializer,
+        'GET': serializers.PropositionErrorsSerializer,
+        'POST': (serializers.SubmitPropositionSerializer, serializers.PropositionIdentityDTOSerializer),
     }
 
     def get_operation_id(self, path, method):
         return 'verify_general_education_proposition' if method == 'GET' else 'submit_general_education_proposition'
 
 
-class SubmitGeneralEducationPropositionView(APIPermissionRequiredMixin, mixins.RetrieveModelMixin, GenericAPIView):
+class SubmitGeneralEducationPropositionView(
+    SubmitPropositionMixin,
+    APIPermissionRequiredMixin,
+    mixins.RetrieveModelMixin,
+    GenericAPIView,
+):
     name = "submit-general-proposition"
     schema = SubmitGeneralEducationPropositionSchema()
-    pagination_class = None
-    filter_backends = []
     permission_mapping = {
         'GET': 'admission.submit_generaleducationadmission',
         'POST': 'admission.submit_generaleducationadmission',
@@ -188,14 +244,47 @@ class SubmitGeneralEducationPropositionView(APIPermissionRequiredMixin, mixins.R
 
     def get(self, request, *args, **kwargs):
         """Check the proposition to be OK with all validators."""
-        data = gather_business_exceptions(VerifierPropositionGeneraleCommand(uuid_proposition=str(kwargs["uuid"])))
-        return Response(data.get(api_settings.NON_FIELD_ERRORS_KEY, []), status=status.HTTP_200_OK)
+        admission = self.get_permission_object()
+        admission.update_detailed_status()
+
+        data = {'errors': sorted(admission.detailed_status, key=itemgetter('status_code'))}
+        error_codes = [e['status_code'] for e in data['errors']]
+        if admission.determined_pool in [
+            AcademicCalendarTypes.ADMISSION_POOL_HUE_UCL_PATHWAY_CHANGE.name,
+            AcademicCalendarTypes.ADMISSION_POOL_UE5_BELGIAN.name,
+        ]:
+            # Pots avec message "tardif"
+            today = timezone.now().today()
+            data['pool_end_date'] = AcademicCalendar.objects.get(
+                reference=admission.determined_pool,
+                start_date__lte=today,
+                end_date__gte=today,
+            ).end_date
+        elif PoolNonResidentContingenteNonOuvertException.status_code in error_codes:
+            # Pots contigenté non-ouvert
+            today = timezone.now().today()
+            period = (
+                AcademicCalendar.objects.filter(
+                    reference=AcademicCalendarTypes.ADMISSION_POOL_NON_RESIDENT_QUOTA.name,
+                    start_date__gte=today,
+                    end_date__gte=today,
+                )
+                .order_by('start_date')
+                .first()
+            )
+            data['pool_start_date'] = period.start_date
+            data['pool_end_date'] = period.end_date
+
+        self.add_access_conditions_url(data)
+
+        return Response(data, status=status.HTTP_200_OK)
 
     def post(self, request, *args, **kwargs):
         """Submit the proposition."""
-        proposition_id = message_bus_instance.invoke(
-            SoumettrePropositionGeneraleCommand(uuid_proposition=str(kwargs["uuid"]))
-        )
+        serializer = serializers.SubmitPropositionSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        cmd = SoumettrePropositionGeneraleCommand(**serializer.data, uuid_proposition=str(kwargs['uuid']))
+        proposition_id = message_bus_instance.invoke(cmd)
         serializer = serializers.PropositionIdentityDTOSerializer(instance=proposition_id)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -203,7 +292,8 @@ class SubmitGeneralEducationPropositionView(APIPermissionRequiredMixin, mixins.R
 class SubmitContinuingEducationPropositionSchema(VerifySchema):
     response_description = "Proposition verification errors"
     serializer_mapping = {
-        'POST': serializers.PropositionIdentityDTOSerializer,
+        'GET': serializers.PropositionErrorsSerializer,
+        'POST': (serializers.SubmitPropositionSerializer, serializers.PropositionIdentityDTOSerializer),
     }
 
     def get_operation_id(self, path, method):
@@ -212,11 +302,14 @@ class SubmitContinuingEducationPropositionSchema(VerifySchema):
         )
 
 
-class SubmitContinuingEducationPropositionView(APIPermissionRequiredMixin, mixins.RetrieveModelMixin, GenericAPIView):
+class SubmitContinuingEducationPropositionView(
+    SubmitPropositionMixin,
+    APIPermissionRequiredMixin,
+    mixins.RetrieveModelMixin,
+    GenericAPIView,
+):
     name = "submit-continuing-proposition"
     schema = SubmitContinuingEducationPropositionSchema()
-    pagination_class = None
-    filter_backends = []
     permission_mapping = {
         'GET': 'admission.submit_continuingeducationadmission',
         'POST': 'admission.submit_continuingeducationadmission',
@@ -227,13 +320,18 @@ class SubmitContinuingEducationPropositionView(APIPermissionRequiredMixin, mixin
 
     def get(self, request, *args, **kwargs):
         """Check the proposition to be OK with all validators."""
-        data = gather_business_exceptions(VerifierPropositionContinueCommand(uuid_proposition=str(kwargs["uuid"])))
-        return Response(data.get(api_settings.NON_FIELD_ERRORS_KEY, []), status=status.HTTP_200_OK)
+        admission = self.get_permission_object()
+        admission.update_detailed_status()
+
+        data = {'errors': sorted(admission.detailed_status, key=itemgetter('status_code'))}
+        self.add_access_conditions_url(data)
+        return Response(data, status=status.HTTP_200_OK)
 
     def post(self, request, *args, **kwargs):
         """Submit the proposition."""
-        proposition_id = message_bus_instance.invoke(
-            SoumettrePropositionContinueCommand(uuid_proposition=str(kwargs["uuid"]))
-        )
+        serializer = serializers.SubmitPropositionSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        cmd = SoumettrePropositionContinueCommand(**serializer.data, uuid_proposition=str(kwargs['uuid']))
+        proposition_id = message_bus_instance.invoke(cmd)
         serializer = serializers.PropositionIdentityDTOSerializer(instance=proposition_id)
         return Response(serializer.data, status=status.HTTP_200_OK)

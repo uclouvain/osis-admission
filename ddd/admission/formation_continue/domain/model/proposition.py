@@ -30,6 +30,7 @@ import attr
 
 from admission.ddd.admission.domain.model.formation import FormationIdentity
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutProposition
+from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from osis_common.ddd import interface
 
 
@@ -43,6 +44,8 @@ class Proposition(interface.RootEntity):
     entity_id: 'PropositionIdentity'
     formation_id: 'FormationIdentity'
     matricule_candidat: str
+    annee_calculee: Optional[int] = None
+    pot_calcule: Optional[AcademicCalendarTypes] = None
     statut: ChoixStatutProposition = ChoixStatutProposition.IN_PROGRESS
 
     creee_le: Optional[datetime.datetime] = None
@@ -60,8 +63,10 @@ class Proposition(interface.RootEntity):
     def supprimer(self):
         self.statut = ChoixStatutProposition.CANCELLED
 
-    def soumettre(self):
+    def soumettre(self, annee: int, pool: 'AcademicCalendarTypes'):
         self.statut = ChoixStatutProposition.SUBMITTED
+        self.annee_calculee = annee
+        self.pot_calcule = pool
 
     def completer_curriculum(
         self,

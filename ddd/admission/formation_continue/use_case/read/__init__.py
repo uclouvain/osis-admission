@@ -23,6 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from .determiner_annee_academique_et_pot_service import determiner_annee_academique_et_pot
 from .rechercher_formations_service import rechercher_formations
 from .lister_propositions_candidat_service import lister_propositions_candidat
 from .recuperer_proposition_service import recuperer_proposition

@@ -25,6 +25,7 @@
 # ##############################################################################
 import attr
 
+from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from osis_common.ddd import interface
 
 
@@ -41,3 +42,9 @@ class AdmissionConditionsDTO(interface.DTO):
     diplomation_potentiel_master_etranger: bool
     diplomation_potentiel_doctorat_belge: bool
     potentiel_acces_vae: bool
+
+
+@attr.dataclass
+class InfosDetermineesDTO(interface.DTO):
+    annee: int
+    pool: 'AcademicCalendarTypes'

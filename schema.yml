@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Admission API
-  version: 1.0.51
+  version: 1.0.52
   description: This API delivers data for the Admission project.
   contact:
     name: UCLouvain - OSIS
@@ -1266,18 +1266,11 @@ paths:
       - $ref: '#/components/parameters/X-User-GlobalID'
       responses:
         200:
-          description: Proposition verification errors
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    status_code:
-                      type: string
-                    detail:
-                      type: string
+                $ref: '#/components/schemas/PropositionErrors'
+          description: ''
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -1305,7 +1298,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PropositionIdentityDTO'
+              $ref: '#/components/schemas/SubmitProposition'
       responses:
         201:
           content:
@@ -2798,18 +2791,11 @@ paths:
       - $ref: '#/components/parameters/X-User-GlobalID'
       responses:
         200:
-          description: Proposition verification errors
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    status_code:
-                      type: string
-                    detail:
-                      type: string
+                $ref: '#/components/schemas/PropositionErrors'
+          description: ''
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -2837,7 +2823,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PropositionIdentityDTO'
+              $ref: '#/components/schemas/SubmitProposition'
       responses:
         201:
           content:
@@ -3520,18 +3506,11 @@ paths:
       - $ref: '#/components/parameters/X-User-GlobalID'
       responses:
         200:
-          description: Proposition verification errors
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    status_code:
-                      type: string
-                    detail:
-                      type: string
+                $ref: '#/components/schemas/PropositionErrors'
+          description: ''
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -3559,7 +3538,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PropositionIdentityDTO'
+              $ref: '#/components/schemas/SubmitProposition'
       responses:
         201:
           content:
@@ -6104,6 +6083,11 @@ components:
           - sigle_entite_gestion
           - campus
           - type
+        annee_calculee:
+          type: integer
+          nullable: true
+        pot_calcule:
+          type: string
         matricule_candidat:
           type: string
         code_secteur_formation:
@@ -6526,6 +6510,34 @@ components:
       - erreurs
       - comptabilite
       - curriculum
+    PropositionErrors:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              status_code:
+                type: string
+              detail:
+                type: string
+            required:
+            - status_code
+            - detail
+        pool_start_date:
+          type: string
+          format: date
+          nullable: true
+        pool_end_date:
+          type: string
+          format: date
+          nullable: true
+        access_conditions_url:
+          type: string
+          nullable: true
+      required:
+      - errors
     CotutelleDTO:
       type: object
       properties:
@@ -8038,6 +8050,11 @@ components:
           - intitule
           - campus
           - type
+        annee_calculee:
+          type: integer
+          nullable: true
+        pot_calcule:
+          type: string
         matricule_candidat:
           type: string
         prenom_candidat:
@@ -8234,6 +8251,11 @@ components:
           - intitule
           - campus
           - type
+        annee_calculee:
+          type: integer
+          nullable: true
+        pot_calcule:
+          type: string
         matricule_candidat:
           type: string
         prenom_candidat:
@@ -8490,6 +8512,29 @@ components:
       - BIOLOGY
       - GEOGRAPHY
       type: string
+    SubmitProposition:
+      type: object
+      properties:
+        annee:
+          type: integer
+        pool:
+          enum:
+          - DOCTORATE_EDUCATION_ENROLLMENT
+          - CONTINUING_EDUCATION_ENROLLMENT
+          - ADMISSION_POOL_EXTERNAL_ENROLLMENT_CHANGE
+          - ADMISSION_POOL_EXTERNAL_REORIENTATION
+          - ADMISSION_POOL_VIP
+          - ADMISSION_POOL_HUE_UCL_PATHWAY_CHANGE
+          - ADMISSION_POOL_INSTITUT_CHANGE
+          - ADMISSION_POOL_UE5_BELGIAN
+          - ADMISSION_POOL_UE5_NON_BELGIAN
+          - ADMISSION_POOL_HUE5_BELGIUM_RESIDENCY
+          - ADMISSION_POOL_HUE5_FOREIGN_RESIDENCY
+          - ADMISSION_POOL_NON_RESIDENT_QUOTA
+          type: string
+      required:
+      - annee
+      - pool
     SupervisionActor:
       type: object
       properties:

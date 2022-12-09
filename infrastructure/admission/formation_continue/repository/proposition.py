@@ -41,6 +41,7 @@ from admission.ddd.admission.formation_continue.domain.model.proposition import 
 from admission.ddd.admission.formation_continue.domain.validator.exceptions import PropositionNonTrouveeException
 from admission.ddd.admission.formation_continue.dtos import PropositionDTO
 from admission.ddd.admission.formation_continue.repository.i_proposition import IPropositionRepository
+from base.models.academic_year import AcademicYear
 from base.models.education_group_year import EducationGroupYear
 from base.models.person import Person
 from osis_common.ddd.interface import ApplicationService
@@ -92,6 +93,10 @@ class PropositionRepository(IPropositionRepository):
             defaults={
                 'candidate': candidate,
                 'training': training,
+                'determined_academic_year': (
+                    entity.annee_calculee and AcademicYear.objects.get(year=entity.annee_calculee)
+                ),
+                'determined_pool': entity.pot_calcule,
                 'status': entity.statut.name,
                 'specific_question_answers': entity.reponses_questions_specifiques,
                 'curriculum': entity.curriculum,
@@ -117,6 +122,8 @@ class PropositionRepository(IPropositionRepository):
                 sigle=admission.training.acronym,
                 annee=admission.training.academic_year.year,
             ),
+            annee_calculee=admission.determined_academic_year and admission.determined_academic_year.year,
+            pot_calcule=admission.determined_pool,
             reponses_questions_specifiques=admission.specific_question_answers,
             curriculum=admission.curriculum,
             equivalence_diplome=admission.diploma_equivalence,
@@ -137,8 +144,10 @@ class PropositionRepository(IPropositionRepository):
                 if get_language() == settings.LANGUAGE_CODE
                 else admission.training.title_english,
                 campus=admission.teaching_campus or '',
-                type=admission.training.education_group_type.name
+                type=admission.training.education_group_type.name,
             ),
+            annee_calculee=admission.determined_academic_year and admission.determined_academic_year.year,
+            pot_calcule=admission.determined_pool or '',
             matricule_candidat=admission.candidate.global_id,
             prenom_candidat=admission.candidate.first_name,
             nom_candidat=admission.candidate.last_name,

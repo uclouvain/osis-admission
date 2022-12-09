@@ -42,6 +42,7 @@ from .domain.service.in_memory.question_specifique import QuestionSpecifiqueInMe
 from .repository.in_memory.groupe_de_supervision import GroupeDeSupervisionInMemoryRepository
 from .repository.in_memory.proposition import PropositionInMemoryRepository
 from ..validation.repository.in_memory.demande import DemandeInMemoryRepository
+from ...domain.service.in_memory.calendrier_inscription import CalendrierInscriptionInMemory
 from ...domain.service.in_memory.titres_acces import TitresAccesInMemory
 
 _proposition_repository = PropositionInMemoryRepository()
@@ -99,7 +100,7 @@ COMMAND_HANDLERS = {
         historique=_historique,
         notification=_notification,
     ),
-    VerifierPropositionCommand: lambda msg_bus, cmd: verifier_proposition(
+    VerifierPropositionQuery: lambda msg_bus, cmd: verifier_proposition(
         cmd,
         proposition_repository=_proposition_repository,
         groupe_supervision_repository=_groupe_supervision_repository,
@@ -107,8 +108,10 @@ COMMAND_HANDLERS = {
         academic_year_repository=_academic_year_repository,
         titres_acces=_titres_acces,
         questions_specifiques_translator=QuestionSpecifiqueInMemoryTranslator(),
+        formation_translator=_doctorat_translator,
+        calendrier_inscription=CalendrierInscriptionInMemory(),
     ),
-    VerifierProjetCommand: lambda msg_bus, cmd: verifier_projet(
+    VerifierProjetQuery: lambda msg_bus, cmd: verifier_projet(
         cmd,
         proposition_repository=_proposition_repository,
         groupe_supervision_repository=_groupe_supervision_repository,
@@ -159,6 +162,8 @@ COMMAND_HANDLERS = {
         notification=_notification,
         titres_acces=_titres_acces,
         questions_specifiques_translator=QuestionSpecifiqueInMemoryTranslator(),
+        doctorat_translator=_doctorat_translator,
+        calendrier_inscription=CalendrierInscriptionInMemory(),
     ),
     DefinirCotutelleCommand: lambda msg_bus, cmd: definir_cotutelle(
         cmd,

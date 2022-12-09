@@ -31,7 +31,7 @@ from factory.fuzzy import FuzzyText
 
 from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition, PropositionIdentity
 from admission.ddd.admission.test.factory.bourse import BourseIdentityFactory
-from admission.ddd.admission.test.factory.formation import _FormationIdentityFactory
+from admission.ddd.admission.test.factory.formation import FormationIdentityFactory
 
 
 class _PropositionIdentityFactory(factory.Factory):
@@ -49,7 +49,7 @@ class PropositionFactory(factory.Factory):
 
     entity_id = factory.SubFactory(_PropositionIdentityFactory)
     matricule_candidat = FuzzyText(length=10, chars=string.digits)
-    formation_id = factory.SubFactory(_FormationIdentityFactory)
+    formation_id = factory.SubFactory(FormationIdentityFactory)
 
     creee_le = factory.Faker('past_datetime')
     modifiee_le = factory.Faker('past_datetime')

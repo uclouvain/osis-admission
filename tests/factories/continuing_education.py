@@ -55,7 +55,7 @@ class ContinuingEducationAdmissionFactory(factory.DjangoModelFactory):
         model = ContinuingEducationAdmission
 
     candidate = factory.SubFactory(PersonFactory)
-    training = factory.SubFactory(ContinuingEducationTrainingFactory)
+    training = factory.SubFactory(ContinuingEducationTrainingFactory, academic_year__current=True)
 
     @factory.post_generation
     def create_candidate_role(self, create, extracted, **kwargs):

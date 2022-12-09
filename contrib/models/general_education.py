@@ -23,22 +23,26 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from contextlib import suppress
+
 from django.core.cache import cache
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils.translation import gettext_lazy as _
-from osis_document.contrib import FileField
 from rest_framework.settings import api_settings
 
 from admission.contrib.models.base import BaseAdmission, BaseAdmissionQuerySet, admission_directory_path
+from admission.ddd.admission.dtos.conditions import InfosDetermineesDTO
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutProposition
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
+from base.models.academic_year import AcademicYear
 from base.models.education_group_year import EducationGroupYear
 from base.models.enums.education_group_categories import Categories
 from base.models.person import Person
+from osis_common.ddd.interface import BusinessException
 from osis_document.contrib import FileField
 
 
@@ -133,12 +137,22 @@ class GeneralEducationAdmission(BaseAdmission):
         permissions = []
 
     def update_detailed_status(self):
-        from admission.ddd.admission.formation_generale.commands import VerifierPropositionCommand
+        """Gather exceptions from verification and update determined pool and academic year"""
+        from admission.ddd.admission.formation_generale.commands import (
+            VerifierPropositionQuery,
+            DeterminerAnneeAcademiqueEtPotQuery,
+        )
         from admission.utils import gather_business_exceptions
+        from infrastructure.messages_bus import message_bus_instance
 
         error_key = api_settings.NON_FIELD_ERRORS_KEY
-        self.detailed_status = gather_business_exceptions(VerifierPropositionCommand(self.uuid)).get(error_key, [])
-        self.save(update_fields=['detailed_status'])
+        self.detailed_status = gather_business_exceptions(VerifierPropositionQuery(self.uuid)).get(error_key, [])
+
+        with suppress(BusinessException):
+            dto: 'InfosDetermineesDTO' = message_bus_instance.invoke(DeterminerAnneeAcademiqueEtPotQuery(self.uuid))
+            self.determined_academic_year = AcademicYear.objects.get(year=dto.annee)
+            self.determined_pool = dto.pool.name
+        self.save(update_fields=['detailed_status', 'determined_academic_year', 'determined_pool'])
 
 
 class GeneralEducationAdmissionManager(models.Manager.from_queryset(BaseAdmissionQuerySet)):
@@ -150,6 +164,7 @@ class GeneralEducationAdmissionManager(models.Manager.from_queryset(BaseAdmissio
                 "candidate__country_of_citizenship",
                 "training__academic_year",
                 "training__education_group_type",
+                "determined_academic_year",
                 "double_degree_scholarship",
                 "international_scholarship",
                 "erasmus_mundus_scholarship",

@@ -24,12 +24,12 @@
 #
 # ##############################################################################
 
-import attr
 from unittest import TestCase
 
+import attr
 from mock import mock
 
-from admission.ddd.admission.doctorat.preparation.commands import VerifierProjetCommand
+from admission.ddd.admission.doctorat.preparation.commands import VerifierProjetQuery
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     CotutelleDoitAvoirAuMoinsUnPromoteurExterneException,
     CotutelleNonCompleteException,
@@ -63,7 +63,7 @@ class TestVerifierPropositionService(TestCase):
         }
 
         self.message_bus = message_bus_in_memory_instance
-        self.cmd = VerifierProjetCommand(uuid_proposition=self.uuid_proposition)
+        self.cmd = VerifierProjetQuery(uuid_proposition=self.uuid_proposition)
 
     def test_should_verifier_etre_ok(self):
         proposition_id = self.message_bus.invoke(self.cmd)

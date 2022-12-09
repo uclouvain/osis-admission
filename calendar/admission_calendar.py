@@ -25,7 +25,7 @@
 ##############################################################################
 import datetime
 from abc import ABC
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     AdresseDomicileLegalNonCompleteeException,
@@ -37,7 +37,7 @@ from admission.ddd.admission.domain.service.i_annee_inscription_formation import
 )
 from admission.ddd.admission.domain.service.i_titres_acces import ConditionAccess
 from admission.ddd.admission.domain.validator._should_identification_candidat_etre_completee import BE_ISO_CODE
-from admission.ddd.admission.dtos import AdressePersonnelleDTO, IdentificationDTO
+from admission.ddd.admission.dtos import AdressePersonnelleDTO
 from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition as PropositionGenerale
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
@@ -48,7 +48,6 @@ from base.models.academic_calendar import AcademicCalendar
 from base.models.academic_year import AcademicYear
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.education_group_types import TrainingType
-from reference.models.country import Country
 
 __all__ = [
     "AdmissionPoolExternalEnrollmentChangeCalendar",
@@ -64,6 +63,7 @@ __all__ = [
     "ContinuingEducationAdmissionCalendar",
     "DoctorateAdmissionCalendar",
     "GeneralEducationAdmissionCalendar",
+    "AdmissionAccessConditionsUrl",
     "SIGLES_WITH_QUOTA",
     "est_formation_contingentee_et_non_resident",
     "PoolCalendar",
@@ -86,17 +86,25 @@ SECOND_CYCLE_TYPES = [
     TrainingType.UNIVERSITY_SECOND_CYCLE_CERTIFICATE.name,
 ] + AnneeInscriptionFormationTranslator.OSIS_ADMISSION_EDUCATION_TYPES_MAPPING[TypeFormation.MASTER.name]
 
+DAY_BEFORE_NEXT = object()
 
-def ensure_consistency_until_n_plus_6(event_reference: str, cutover_date: Date, title: str, end_date: Date = None):
+
+def ensure_consistency_until_n_plus_6(
+    event_reference: str,
+    cutover_date: Date,
+    title: str,
+    end_date: Optional[Date] = DAY_BEFORE_NEXT,
+):
     current_academic_year = AcademicYear.objects.current()
     academic_years = AcademicYear.objects.min_max_years(current_academic_year.year - 1, current_academic_year.year + 6)
 
     for ac_year in academic_years:
-        if end_date is None:
+        ac_end_date = None
+        if end_date is DAY_BEFORE_NEXT:
             ac_end_date = datetime.date(
                 ac_year.year + 1 + cutover_date.annee, cutover_date.mois, cutover_date.jour
             ) - datetime.timedelta(days=1)
-        else:
+        elif end_date is not None:
             ac_end_date = datetime.date(ac_year.year + end_date.annee, end_date.mois, end_date.jour)
         AcademicCalendar.objects.get_or_create(
             reference=event_reference,
@@ -109,7 +117,22 @@ def ensure_consistency_until_n_plus_6(event_reference: str, cutover_date: Date, 
         )
 
 
-def est_formation_contingentee_et_non_resident(sigle: str, proposition: 'PropositionGenerale'):
+class AdmissionAccessConditionsUrl(AcademicEventSessionCalendarHelper):
+    event_reference = AcademicCalendarTypes.ADMISSION_ACCESS_CONDITIONS_URL.name
+    cutover_date = Date(jour=1, mois=6, annee=0)
+    end_date = None
+
+    @classmethod
+    def ensure_consistency_until_n_plus_6(cls):
+        ensure_consistency_until_n_plus_6(
+            event_reference=cls.event_reference,
+            cutover_date=cls.cutover_date,
+            end_date=cls.end_date,
+            title="Publication du catalogue de formation sur le site UCLouvain",
+        )
+
+
+def est_formation_contingentee_et_non_resident(sigle: str, proposition: Optional['PropositionGenerale']):
     return sigle in SIGLES_WITH_QUOTA and proposition.est_non_resident_au_sens_decret is True
 
 
@@ -330,7 +353,7 @@ class AdmissionPoolInstituteChangeCalendar(PoolCalendar):
         access_diplomas: List[str],
         residential_address: Optional[AdressePersonnelleDTO],
         matricule_candidat: str,
-        profil_candidat_translator: 'IProfilCandidatTranslator',
+        changements_etablissement: Dict[int, bool],
         sigle: str,
         proposition: 'PropositionGenerale',
         **kwargs,
@@ -342,7 +365,7 @@ class AdmissionPoolInstituteChangeCalendar(PoolCalendar):
         return (
             any(belgian_diploma in access_diplomas for belgian_diploma in DIPLOMES_ACCES_BELGE)
             and residential_address.pays == BE_ISO_CODE
-            and profil_candidat_translator.est_changement_etablissement(matricule_candidat, annee_academique)
+            and changements_etablissement.get(annee_academique, False)
             and not est_formation_contingentee_et_non_resident(sigle, proposition)
         )
 
@@ -379,7 +402,7 @@ class AdmissionPoolUe5BelgianCalendar(PoolCalendar):
 
 class AdmissionPoolUe5NonBelgianCalendar(PoolCalendar):
     event_reference = AcademicCalendarTypes.ADMISSION_POOL_UE5_NON_BELGIAN.name
-    cutover_date = Date(jour=1, mois=9, annee=0)
+    cutover_date = Date(jour=1, mois=9, annee=-1)
 
     @classmethod
     def ensure_consistency_until_n_plus_6(cls):
@@ -409,7 +432,7 @@ class AdmissionPoolUe5NonBelgianCalendar(PoolCalendar):
 
 class AdmissionPoolHue5BelgiumResidencyCalendar(PoolCalendar):
     event_reference = AcademicCalendarTypes.ADMISSION_POOL_HUE5_BELGIUM_RESIDENCY.name
-    cutover_date = Date(jour=1, mois=9, annee=0)
+    cutover_date = Date(jour=1, mois=9, annee=-1)
 
     @classmethod
     def ensure_consistency_until_n_plus_6(cls):
@@ -440,8 +463,8 @@ class AdmissionPoolHue5BelgiumResidencyCalendar(PoolCalendar):
 
 class AdmissionPoolHue5ForeignResidencyCalendar(PoolCalendar):
     event_reference = AcademicCalendarTypes.ADMISSION_POOL_HUE5_FOREIGN_RESIDENCY.name
-    cutover_date = Date(jour=1, mois=5, annee=0)
-    end_date = Date(jour=30, mois=4, annee=1)
+    cutover_date = Date(jour=1, mois=5, annee=-1)
+    end_date = Date(jour=30, mois=4, annee=0)
 
     @classmethod
     def ensure_consistency_until_n_plus_6(cls):

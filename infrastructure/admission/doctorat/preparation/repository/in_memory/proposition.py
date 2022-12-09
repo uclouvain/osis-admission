@@ -195,7 +195,7 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
         return cls._load_dto(cls.get(entity_id))
 
     @classmethod
-    def _load_dto(cls, proposition):
+    def _load_dto(cls, proposition: 'Proposition'):
         candidat = cls.candidats[proposition.matricule_candidat]
         doctorat = cls.doctorats[(proposition.doctorat_id.sigle, proposition.doctorat_id.annee)]
         bourse_erasmus_dto = (
@@ -220,6 +220,8 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
                 doctorat.campus,
                 doctorat.type,
             ),
+            annee_calculee=proposition.annee_calculee,
+            pot_calcule=proposition.pot_calcule,
             matricule_candidat=proposition.matricule_candidat,
             justification=proposition.justification,
             code_secteur_formation=doctorat.code_secteur,

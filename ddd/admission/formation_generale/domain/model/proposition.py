@@ -31,6 +31,7 @@ import attr
 from admission.ddd.admission.domain.model.formation import FormationIdentity
 from admission.ddd.admission.domain.service.i_bourse import BourseIdentity
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutProposition
+from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from osis_common.ddd import interface
 
 
@@ -44,6 +45,8 @@ class Proposition(interface.RootEntity):
     entity_id: 'PropositionIdentity'
     formation_id: 'FormationIdentity'
     matricule_candidat: str
+    annee_calculee: Optional[int] = None
+    pot_calcule: Optional[AcademicCalendarTypes] = None
     statut: ChoixStatutProposition = ChoixStatutProposition.IN_PROGRESS
 
     creee_le: Optional[datetime.datetime] = None
@@ -52,8 +55,14 @@ class Proposition(interface.RootEntity):
     bourse_double_diplome_id: Optional[BourseIdentity] = None
     bourse_internationale_id: Optional[BourseIdentity] = None
     bourse_erasmus_mundus_id: Optional[BourseIdentity] = None
+
+    est_bachelier_belge: Optional[bool] = None
     est_reorientation_inscription_externe: Optional[bool] = None
+    attestation_inscription_reguliere: List[str] = attr.Factory(list)
+
     est_modification_inscription_externe: Optional[bool] = None
+    formulaire_modification_inscription: List[str] = attr.Factory(list)
+
     est_non_resident_au_sens_decret: Optional[bool] = None
 
     reponses_questions_specifiques: Dict = attr.Factory(dict)
@@ -74,15 +83,30 @@ class Proposition(interface.RootEntity):
     ):
         self.formation_id = formation_id
         self.reponses_questions_specifiques = reponses_questions_specifiques
-        self.bourse_double_diplome_id = bourses_ids.get(bourse_double_diplome)
-        self.bourse_internationale_id = bourses_ids.get(bourse_internationale)
-        self.bourse_erasmus_mundus_id = bourses_ids.get(bourse_erasmus_mundus)
+        self.bourse_double_diplome_id = bourses_ids.get(bourse_double_diplome) if bourse_double_diplome else None
+        self.bourse_internationale_id = bourses_ids.get(bourse_internationale) if bourse_internationale else None
+        self.bourse_erasmus_mundus_id = bourses_ids.get(bourse_erasmus_mundus) if bourse_erasmus_mundus else None
 
     def supprimer(self):
         self.statut = ChoixStatutProposition.CANCELLED
 
-    def soumettre(self):
+    def soumettre(self, annee: int, pool: 'AcademicCalendarTypes'):
         self.statut = ChoixStatutProposition.SUBMITTED
+        self.annee_calculee = annee
+        self.pot_calcule = pool
+        if pool != AcademicCalendarTypes.ADMISSION_POOL_NON_RESIDENT_QUOTA:
+            self.est_non_resident_au_sens_decret = None
+        if pool not in [
+            AcademicCalendarTypes.ADMISSION_POOL_HUE_UCL_PATHWAY_CHANGE,
+            AcademicCalendarTypes.ADMISSION_POOL_EXTERNAL_ENROLLMENT_CHANGE,
+        ]:
+            self.est_bachelier_belge = None
+        if pool != AcademicCalendarTypes.ADMISSION_POOL_HUE_UCL_PATHWAY_CHANGE:
+            self.est_reorientation_inscription_externe = None
+            self.attestation_inscription_reguliere = []
+        if pool != AcademicCalendarTypes.ADMISSION_POOL_EXTERNAL_ENROLLMENT_CHANGE:
+            self.est_modification_inscription_externe = None
+            self.formulaire_modification_inscription = []
 
     def completer_curriculum(
         self,

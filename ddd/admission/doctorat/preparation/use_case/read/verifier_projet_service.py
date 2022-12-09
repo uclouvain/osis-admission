@@ -25,7 +25,7 @@
 # ##############################################################################
 
 from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import PropositionIdentityBuilder
-from admission.ddd.admission.doctorat.preparation.commands import VerifierProjetCommand
+from admission.ddd.admission.doctorat.preparation.commands import VerifierProjetQuery
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.doctorat.preparation.domain.service.i_promoteur import IPromoteurTranslator
 from admission.ddd.admission.doctorat.preparation.domain.service.i_question_specifique import (
@@ -40,7 +40,7 @@ from admission.ddd.admission.enums.question_specifique import Onglets
 
 
 def verifier_projet(
-    cmd: 'VerifierProjetCommand',
+    cmd: 'VerifierProjetQuery',
     proposition_repository: 'IPropositionRepository',
     groupe_supervision_repository: 'IGroupeDeSupervisionRepository',
     promoteur_translator: 'IPromoteurTranslator',
@@ -50,9 +50,10 @@ def verifier_projet(
     entity_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
     proposition_candidat = proposition_repository.get(entity_id=entity_id)
     groupe_de_supervision = groupe_supervision_repository.get_by_proposition_id(entity_id)
-    questions_specifiques = questions_specifiques_translator.search_by_proposition(cmd.uuid_proposition, onglets=[
-        Onglets.CHOIX_FORMATION.name,
-    ])
+    questions_specifiques = questions_specifiques_translator.search_by_proposition(
+        cmd.uuid_proposition,
+        onglets=[Onglets.CHOIX_FORMATION.name],
+    )
 
     # WHEN
     VerifierProjetDoctoral.verifier(

@@ -24,14 +24,14 @@
 #
 # ##############################################################################
 import datetime
-from typing import List, Dict
+from typing import Dict, List
 
-from django.db.models import Exists, OuterRef, QuerySet
+from django.db.models import Exists, OuterRef, Subquery
 
 from admission.ddd.admission.doctorat.preparation.dtos import ConditionsComptabiliteDTO, CurriculumDTO
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
-    ExperienceAcademiqueDTO,
     AnneeExperienceAcademiqueDTO,
+    ExperienceAcademiqueDTO,
 )
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.domain.validator._should_identification_candidat_etre_completee import BE_ISO_CODE
@@ -53,14 +53,17 @@ from osis_profile.models.education import HighSchoolDiplomaAlternative, Language
 class ProfilCandidatTranslator(IProfilCandidatTranslator):
     @classmethod
     def get_identification(cls, matricule: str) -> 'IdentificationDTO':
-        person = Person.objects.select_related(
-            'country_of_citizenship',
-        ).get(global_id=matricule)
-
-        residential_country = (
-            PersonAddress.objects.filter(label=PersonAddressType.RESIDENTIAL.name, person=person)
-            .values('country__iso_code')
-            .first()
+        person = (
+            Person.objects.select_related('country_of_citizenship', 'birth_country')
+            .annotate(
+                residential_country_iso_code=Subquery(
+                    PersonAddress.objects.filter(
+                        label=PersonAddressType.RESIDENTIAL.name,
+                        person_id=OuterRef('pk'),
+                    ).values('country__iso_code')[:1]
+                )
+            )
+            .get(global_id=matricule)
         )
 
         return IdentificationDTO(
@@ -69,7 +72,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
             prenom=person.first_name,
             date_naissance=person.birth_date,
             annee_naissance=person.birth_year,
-            pays_nationalite=person.country_of_citizenship.iso_code if person.country_of_citizenship else None,
+            pays_nationalite=person.country_of_citizenship.iso_code if person.country_of_citizenship_id else None,
             langue_contact=person.language,
             sexe=person.sex,
             genre=person.gender,
@@ -80,12 +83,12 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
             numero_carte_identite=person.id_card_number,
             numero_passeport=person.passport_number,
             email=person.email,
-            pays_naissance=person.birth_country,
+            pays_naissance=person.birth_country.iso_code if person.birth_country_id else None,
             lieu_naissance=person.birth_place,
             etat_civil=person.civil_state,
             annee_derniere_inscription_ucl=person.last_registration_year,
             noma_derniere_inscription_ucl=person.last_registration_id,
-            pays_residence=residential_country.get('country__iso_code') if residential_country else None,
+            pays_residence=person.residential_country_iso_code,
         )
 
     @classmethod
@@ -276,12 +279,21 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
         )
 
     @classmethod
-    def est_changement_etablissement(cls, matricule: str, annee_courante: int) -> bool:
+    def get_changements_etablissement(cls, matricule: str, annees: List[int]) -> Dict[int, bool]:
         """Inscrit à un autre établissement Belge en N-1
         (informatiquement : curriculum / en N-1 supérieur belge non-diplômé)"""
-        return EducationalExperienceYear.objects.filter(
-            educational_experience__person__global_id=matricule,
-            educational_experience__country__iso_code=BE_ISO_CODE,
-            educational_experience__obtained_diploma=False,
-            academic_year__year=annee_courante - 1,
-        ).exists()
+        qs = dict(
+            EducationalExperienceYear.objects.filter(academic_year__year__in=annees)
+            .annotate(
+                est_changement=Exists(
+                    EducationalExperienceYear.objects.filter(
+                        educational_experience__person__global_id=matricule,
+                        educational_experience__country__iso_code=BE_ISO_CODE,
+                        educational_experience__obtained_diploma=False,
+                        academic_year__year=OuterRef('academic_year__year') - 1,
+                    )
+                ),
+            )
+            .values('academic_year__year', 'est_changement')
+        )
+        return {annee: qs.get(annee) for annee in annees}

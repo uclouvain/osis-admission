@@ -30,6 +30,9 @@ from admission.ddd.admission.formation_continue.use_case.write import *
 from admission.infrastructure.admission.domain.service.in_memory.annee_inscription_formation import (
     AnneeInscriptionFormationInMemoryTranslator,
 )
+from admission.infrastructure.admission.domain.service.in_memory.calendrier_inscription import (
+    CalendrierInscriptionInMemory,
+)
 from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
 from admission.infrastructure.admission.domain.service.in_memory.titres_acces import TitresAccesInMemory
 from admission.infrastructure.admission.formation_continue.domain.service.in_memory.formation import (
@@ -73,12 +76,13 @@ COMMAND_HANDLERS = {
         cmd,
         proposition_repository=_proposition_repository,
     ),
-    VerifierPropositionCommand: lambda msg_bus, cmd: verifier_proposition(
+    VerifierPropositionQuery: lambda msg_bus, cmd: verifier_proposition(
         cmd,
         proposition_repository=_proposition_repository,
         formation_translator=_formation_continue_translator,
         titres_acces=_titres_acces,
         profil_candidat_translator=_profil_candidat_translator,
+        calendrier_inscription=CalendrierInscriptionInMemory(),
     ),
     SoumettrePropositionCommand: lambda msg_bus, cmd: soumettre_proposition(
         cmd,
@@ -86,9 +90,18 @@ COMMAND_HANDLERS = {
         formation_translator=_formation_continue_translator,
         titres_acces=_titres_acces,
         profil_candidat_translator=_profil_candidat_translator,
+        calendrier_inscription=CalendrierInscriptionInMemory(),
     ),
     CompleterCurriculumCommand: lambda msg_bus, cmd: completer_curriculum(
         cmd,
         proposition_repository=_proposition_repository,
+    ),
+    DeterminerAnneeAcademiqueEtPotQuery: lambda msg_bus, cmd: determiner_annee_academique_et_pot(
+        cmd,
+        proposition_repository=_proposition_repository,
+        formation_translator=_formation_continue_translator,
+        titres_acces=_titres_acces,
+        profil_candidat_translator=_profil_candidat_translator,
+        calendrier_inscription=CalendrierInscriptionInMemory(),
     ),
 }

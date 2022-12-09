@@ -326,6 +326,8 @@ class DoctoratePropositionDTOSerializer(IncludedFieldsMixin, DTOSerializer):
             'reference',
             'justification',
             'doctorat',
+            'annee_calculee',
+            'pot_calcule',
             'matricule_candidat',
             'code_secteur_formation',
             'commission_proximite',
@@ -405,6 +407,8 @@ class GeneralEducationPropositionDTOSerializer(IncludedFieldsMixin, DTOSerialize
         fields = [
             'uuid',
             'formation',
+            'annee_calculee',
+            'pot_calcule',
             'matricule_candidat',
             'prenom_candidat',
             'nom_candidat',
@@ -463,6 +467,8 @@ class ContinuingEducationPropositionDTOSerializer(IncludedFieldsMixin, DTOSerial
         fields = [
             'uuid',
             'formation',
+            'annee_calculee',
+            'pot_calcule',
             'matricule_candidat',
             'prenom_candidat',
             'nom_candidat',

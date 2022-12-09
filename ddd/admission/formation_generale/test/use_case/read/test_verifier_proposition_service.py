@@ -31,25 +31,25 @@ import freezegun
 from admission.ddd import BE_ISO_CODE
 from admission.ddd.admission.domain.validator.exceptions import (
     ConditionsAccessNonRempliesException,
+    QuestionsSpecifiquesChoixFormationNonCompleteesException,
     QuestionsSpecifiquesCurriculumNonCompleteesException,
     QuestionsSpecifiquesEtudesSecondairesNonCompleteesException,
     QuestionsSpecifiquesInformationsComplementairesNonCompleteesException,
-    QuestionsSpecifiquesChoixFormationNonCompleteesException,
 )
-from admission.ddd.admission.formation_generale.commands import VerifierPropositionCommand
+from admission.ddd.admission.formation_generale.commands import VerifierPropositionQuery
 from admission.ddd.admission.formation_generale.domain.builder.proposition_identity_builder import (
     PropositionIdentityBuilder,
 )
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
-    FichierCurriculumNonRenseigneException,
-    EquivalenceNonRenseigneeException,
-    ContinuationBachelierNonRenseigneeException,
     AttestationContinuationBachelierNonRenseigneeException,
+    ContinuationBachelierNonRenseigneeException,
+    EquivalenceNonRenseigneeException,
+    FichierCurriculumNonRenseigneException,
 )
 from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import (
-    ProfilCandidatInMemoryTranslator,
-    ExperienceAcademique,
     AnneeExperienceAcademique,
+    ExperienceAcademique,
+    ProfilCandidatInMemoryTranslator,
 )
 from admission.infrastructure.admission.formation_generale.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
@@ -99,7 +99,7 @@ class TestVerifierPropositionService(TestCase):
         patcher = freezegun.freeze_time('2020-11-01')
         patcher.start()
         self.addCleanup(patcher.stop)
-        self.cmd = lambda uuid: VerifierPropositionCommand(uuid_proposition=uuid)
+        self.cmd = lambda uuid: VerifierPropositionQuery(uuid_proposition=uuid)
 
     def test_should_verifier_etre_ok_si_complet_pour_master(self):
         proposition_id = self.message_bus.invoke(self.cmd(self.master_proposition.entity_id.uuid))

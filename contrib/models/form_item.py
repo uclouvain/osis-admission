@@ -326,7 +326,7 @@ class AdmissionFormItemInstantiationManager(models.Manager):
         return (
             qs.filter(
                 form_item__active=True,
-                academic_year_id=admission.training.academic_year_id,
+                academic_year_id=admission.determined_academic_year_id or admission.training.academic_year_id,
                 candidate_nationality__in=self.get_nationality_criteria_by_candidate(candidate),
                 study_language__in=self.get_study_language_criteria_by_candidate(candidate),
                 vip_candidate__in=self.get_vip_criteria(admission),

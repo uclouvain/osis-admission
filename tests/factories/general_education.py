@@ -60,7 +60,7 @@ class GeneralEducationAdmissionFactory(factory.DjangoModelFactory):
         model = GeneralEducationAdmission
 
     candidate = factory.SubFactory(PersonFactory)
-    training = factory.SubFactory(GeneralEducationTrainingFactory)
+    training = factory.SubFactory(GeneralEducationTrainingFactory, academic_year__current=True)
     erasmus_mundus_scholarship = factory.SubFactory(ErasmusMundusScholarshipFactory)
     double_degree_scholarship = factory.SubFactory(DoubleDegreeScholarshipFactory)
     international_scholarship = factory.SubFactory(InternationalScholarshipFactory)
@@ -71,7 +71,6 @@ class GeneralEducationAdmissionFactory(factory.DjangoModelFactory):
 
     class Params:
         bachelor_with_access_conditions_met = factory.Trait(
-            training__academic_year__current=True,
             training__education_group_type__name=TrainingType.BACHELOR.name,
             candidate=factory.SubFactory(CompletePersonForBachelorFactory),
             is_external_reorientation=False,

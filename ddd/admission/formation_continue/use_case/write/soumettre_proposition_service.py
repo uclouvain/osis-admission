@@ -23,6 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from admission.ddd.admission.domain.service.i_calendrier_inscription import ICalendrierInscription
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.domain.service.i_titres_acces import ITitresAcces
 from admission.ddd.admission.formation_continue.commands import SoumettrePropositionCommand
@@ -33,6 +34,7 @@ from admission.ddd.admission.formation_continue.domain.model.proposition import 
 from admission.ddd.admission.formation_continue.domain.service.i_formation import IFormationContinueTranslator
 from admission.ddd.admission.formation_continue.domain.service.verifier_proposition import VerifierProposition
 from admission.ddd.admission.formation_continue.repository.i_proposition import IPropositionRepository
+from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 
 
 def soumettre_proposition(
@@ -41,6 +43,7 @@ def soumettre_proposition(
     formation_translator: 'IFormationContinueTranslator',
     titres_acces: 'ITitresAcces',
     profil_candidat_translator: 'IProfilCandidatTranslator',
+    calendrier_inscription: 'ICalendrierInscription',
 ) -> 'PropositionIdentity':
     # GIVEN
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
@@ -52,10 +55,13 @@ def soumettre_proposition(
         formation_translator,
         titres_acces,
         profil_candidat_translator,
+        calendrier_inscription,
+        cmd.annee,
+        AcademicCalendarTypes[cmd.pool],
     )
 
     # THEN
-    proposition.soumettre()
+    proposition.soumettre(cmd.annee, AcademicCalendarTypes[cmd.pool])
     proposition_repository.save(proposition)
 
     return proposition_id

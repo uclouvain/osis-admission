@@ -30,7 +30,7 @@ import freezegun
 import mock
 
 from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import PropositionIdentityBuilder
-from admission.ddd.admission.doctorat.preparation.commands import VerifierPropositionCommand
+from admission.ddd.admission.doctorat.preparation.commands import VerifierPropositionQuery
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixAssimilation1,
     ChoixAssimilation2,
@@ -126,7 +126,7 @@ class TestVerifierPropositionServiceCommun(TestCase):
         patcher.start()
         self.addCleanup(patcher.stop)
 
-        self.cmd = VerifierPropositionCommand(uuid_proposition=self.proposition.entity_id.uuid)
+        self.cmd = VerifierPropositionQuery(uuid_proposition=self.proposition.entity_id.uuid)
 
 
 class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):

@@ -25,7 +25,7 @@
 # ##############################################################################
 import datetime
 from dataclasses import dataclass
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 import attr
 
@@ -526,5 +526,5 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
             raise CandidatNonTrouveException
 
     @classmethod
-    def est_changement_etablissement(cls, matricule: str, annee_courante: int) -> bool:
-        return False
+    def get_changements_etablissement(cls, matricule: str, annees: List[int]) -> Dict[int, bool]:
+        return {annee: False for annee in annees}

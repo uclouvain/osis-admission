@@ -58,3 +58,4 @@ from .training_choice import (
     ModifierChoixFormationGeneraleCommandSerializer,
 )
 from .specific_question import SpecificQuestionSerializer, ModifierQuestionsSpecifiquesCommandSerializer
+from .submission import PropositionErrorsSerializer, SubmitPropositionSerializer

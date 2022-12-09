@@ -24,7 +24,7 @@
 #
 ##############################################################################
 import datetime
-from typing import Dict, List, Union
+from typing import Dict, List, Optional, Union
 
 import attr
 
@@ -36,6 +36,8 @@ from osis_common.ddd import interface
 class PropositionDTO(interface.DTO):
     uuid: str
     formation: FormationDTO
+    annee_calculee: Optional[int]
+    pot_calcule: Optional[str]
     creee_le: datetime.datetime
     modifiee_le: datetime.datetime
     erreurs: List[Dict[str, str]]
