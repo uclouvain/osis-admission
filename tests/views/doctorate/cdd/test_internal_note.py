@@ -89,7 +89,7 @@ class InternalNoteTestCase(TestCase):
             cotutelle=False,
             supervision_group=promoter.process,
             financing_type=ChoixTypeFinancement.WORK_CONTRACT.name,
-            financing_work_contract=ChoixTypeContratTravail.UCLOUVAIN_ASSISTANT.name,
+            financing_work_contract=ChoixTypeContratTravail.UCLOUVAIN_SCIENTIFIC_STAFF.name,
             type=ChoixTypeAdmission.PRE_ADMISSION.name,
             pre_admission_submission_date=datetime.datetime.now(),
         )
@@ -99,7 +99,7 @@ class InternalNoteTestCase(TestCase):
             cotutelle=False,
             supervision_group=promoter.process,
             financing_type=ChoixTypeFinancement.WORK_CONTRACT.name,
-            financing_work_contract=ChoixTypeContratTravail.UCLOUVAIN_ASSISTANT.name,
+            financing_work_contract=ChoixTypeContratTravail.UCLOUVAIN_SCIENTIFIC_STAFF.name,
             type=ChoixTypeAdmission.PRE_ADMISSION.name,
             pre_admission_submission_date=datetime.datetime.now(),
         )

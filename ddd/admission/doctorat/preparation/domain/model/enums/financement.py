@@ -30,7 +30,7 @@ from base.models.utils.utils import ChoiceEnum
 
 
 class ChoixTypeContratTravail(ChoiceEnum):
-    UCLOUVAIN_ASSISTANT = _('UCLOUVAIN_ASSISTANT')
+    UCLOUVAIN_SCIENTIFIC_STAFF = _('UCLOUVAIN_SCIENTIFIC_STAFF')
     OTHER = _('OTHER')
 
 

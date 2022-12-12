@@ -2967,8 +2967,8 @@ msgstr ""
 msgid "Type of training"
 msgstr ""
 
-msgid "UCLOUVAIN_ASSISTANT"
-msgstr ""
+msgid "UCLOUVAIN_SCIENTIFIC_STAFF"
+msgstr "UCLouvain scientific staff"
 
 msgid "UCL_COURSE"
 msgstr "UCL Course"
