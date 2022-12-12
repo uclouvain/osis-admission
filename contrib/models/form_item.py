@@ -33,7 +33,7 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Q
-from django.utils.translation import gettext_lazy as _, ngettext_lazy, pgettext
+from django.utils.translation import gettext_lazy as _, ngettext_lazy, pgettext_lazy
 from osis_document.utils import generate_filename, is_uuid
 
 from admission.constants import FIELD_REQUIRED_MESSAGE
@@ -387,7 +387,7 @@ class AdmissionFormItemInstantiation(models.Model):
         null=True,
         on_delete=models.CASCADE,
         to='base.EducationGroup',
-        verbose_name=pgettext('admission', 'Education'),
+        verbose_name=pgettext_lazy('admission', 'Education'),
     )
     candidate_nationality = models.CharField(
         choices=CritereItemFormulaireNationaliteCandidat.choices(),
