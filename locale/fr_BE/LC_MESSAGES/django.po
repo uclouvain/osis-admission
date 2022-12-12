@@ -3248,8 +3248,8 @@ msgstr "Type de publication"
 msgid "Type of training"
 msgstr "Type de formation"
 
-msgid "UCLOUVAIN_ASSISTANT"
-msgstr "Assistant UCLouvain"
+msgid "UCLOUVAIN_SCIENTIFIC_STAFF"
+msgstr "Personnel scientifique UCLouvain"
 
 msgid "UCL_COURSE"
 msgstr "Cours UCL"
