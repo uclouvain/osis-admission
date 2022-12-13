@@ -29,7 +29,7 @@ from django.conf import settings
 from django.utils.translation import get_language
 
 from admission.auth.roles.candidate import Candidate
-from admission.contrib.models import GeneralEducationAdmissionProxy, Scholarship
+from admission.contrib.models import GeneralEducationAdmissionProxy, Scholarship, Accounting
 from admission.contrib.models.general_education import GeneralEducationAdmission
 from admission.ddd.admission.domain.builder.formation_identity import FormationIdentityBuilder
 from admission.ddd.admission.domain.model.bourse import BourseIdentity
@@ -45,6 +45,7 @@ from admission.ddd.admission.formation_generale.dtos import PropositionDTO
 from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
 from admission.infrastructure.admission.domain.service.bourse import BourseTranslator
 from base.models.academic_year import AcademicYear
+from admission.infrastructure.admission.formation_generale.repository._comptabilite import get_accounting_from_admission
 from base.models.education_group_year import EducationGroupYear
 from base.models.person import Person
 from osis_common.ddd.interface import ApplicationService
@@ -111,7 +112,7 @@ class PropositionRepository(IPropositionRepository):
         else:
             scholarships = {}
 
-        GeneralEducationAdmission.objects.update_or_create(
+        admission, _ = GeneralEducationAdmission.objects.update_or_create(
             uuid=entity.entity_id.uuid,
             defaults={
                 'candidate': candidate,
@@ -139,6 +140,85 @@ class PropositionRepository(IPropositionRepository):
         )
 
         Candidate.objects.get_or_create(person=candidate)
+        cls._sauvegarder_comptabilite(admission, entity)
+
+    @classmethod
+    def _sauvegarder_comptabilite(cls, admission, entity):
+        fr_study_allowance_application = entity.comptabilite.demande_allocation_d_etudes_communaute_francaise_belgique
+        unemployment_benefit_pension_proof = entity.comptabilite.preuve_allocations_chomage_pension_indemnite
+        parent_annex_25_26 = entity.comptabilite.annexe_25_26_refugies_apatrides_decision_protection_parent
+        Accounting.objects.update_or_create(
+            admission=admission,
+            defaults={
+                'institute_absence_debts_certificate': entity.comptabilite.attestation_absence_dette_etablissement,
+                'french_community_study_allowance_application': fr_study_allowance_application,
+                'is_staff_child': entity.comptabilite.enfant_personnel,
+                'staff_child_certificate': entity.comptabilite.attestation_enfant_personnel,
+                'assimilation_situation': entity.comptabilite.type_situation_assimilation.name
+                if entity.comptabilite.type_situation_assimilation
+                else '',
+                'assimilation_1_situation_type': entity.comptabilite.sous_type_situation_assimilation_1.name
+                if entity.comptabilite.sous_type_situation_assimilation_1
+                else '',
+                'long_term_resident_card': entity.comptabilite.carte_resident_longue_duree,
+                'cire_unlimited_stay_foreigner_card': entity.comptabilite.carte_cire_sejour_illimite_etranger,
+                'ue_family_member_residence_card': entity.comptabilite.carte_sejour_membre_ue,
+                'ue_family_member_permanent_residence_card': entity.comptabilite.carte_sejour_permanent_membre_ue,
+                'assimilation_2_situation_type': entity.comptabilite.sous_type_situation_assimilation_2.name
+                if entity.comptabilite.sous_type_situation_assimilation_2
+                else '',
+                'refugee_a_b_card': entity.comptabilite.carte_a_b_refugie,
+                'refugees_stateless_annex_25_26': entity.comptabilite.annexe_25_26_refugies_apatrides,
+                'registration_certificate': entity.comptabilite.attestation_immatriculation,
+                'a_b_card': entity.comptabilite.carte_a_b,
+                'subsidiary_protection_decision': entity.comptabilite.decision_protection_subsidiaire,
+                'temporary_protection_decision': entity.comptabilite.decision_protection_temporaire,
+                'assimilation_3_situation_type': entity.comptabilite.sous_type_situation_assimilation_3.name
+                if entity.comptabilite.sous_type_situation_assimilation_3
+                else '',
+                'professional_3_month_residence_permit': entity.comptabilite.titre_sejour_3_mois_professionel,
+                'salary_slips': entity.comptabilite.fiches_remuneration,
+                'replacement_3_month_residence_permit': entity.comptabilite.titre_sejour_3_mois_remplacement,
+                'unemployment_benefit_pension_compensation_proof': unemployment_benefit_pension_proof,
+                'cpas_certificate': entity.comptabilite.attestation_cpas,
+                'relationship': entity.comptabilite.relation_parente.name
+                if entity.comptabilite.relation_parente
+                else '',
+                'assimilation_5_situation_type': entity.comptabilite.sous_type_situation_assimilation_5.name
+                if entity.comptabilite.sous_type_situation_assimilation_5
+                else '',
+                'household_composition_or_birth_certificate': entity.comptabilite.composition_menage_acte_naissance,
+                'tutorship_act': entity.comptabilite.acte_tutelle,
+                'household_composition_or_marriage_certificate': entity.comptabilite.composition_menage_acte_mariage,
+                'legal_cohabitation_certificate': entity.comptabilite.attestation_cohabitation_legale,
+                'parent_identity_card': entity.comptabilite.carte_identite_parent,
+                'parent_long_term_residence_permit': entity.comptabilite.titre_sejour_longue_duree_parent,
+                'parent_refugees_stateless_annex_25_26_or_protection_decision': parent_annex_25_26,
+                'parent_3_month_residence_permit': entity.comptabilite.titre_sejour_3_mois_parent,
+                'parent_salary_slips': entity.comptabilite.fiches_remuneration_parent,
+                'parent_cpas_certificate': entity.comptabilite.attestation_cpas_parent,
+                'assimilation_6_situation_type': entity.comptabilite.sous_type_situation_assimilation_6.name
+                if entity.comptabilite.sous_type_situation_assimilation_6
+                else '',
+                'cfwb_scholarship_decision': entity.comptabilite.decision_bourse_cfwb,
+                'scholarship_certificate': entity.comptabilite.attestation_boursier,
+                'ue_long_term_stay_identity_document': entity.comptabilite.titre_identite_sejour_longue_duree_ue,
+                'belgium_residence_permit': entity.comptabilite.titre_sejour_belgique,
+                'sport_affiliation': entity.comptabilite.affiliation_sport.name
+                if entity.comptabilite.affiliation_sport
+                else '',
+                'solidarity_student': entity.comptabilite.etudiant_solidaire,
+                'account_number_type': entity.comptabilite.type_numero_compte.name
+                if entity.comptabilite.type_numero_compte
+                else '',
+                'iban_account_number': entity.comptabilite.numero_compte_iban,
+                'valid_iban': entity.comptabilite.iban_valide,
+                'other_format_account_number': entity.comptabilite.numero_compte_autre_format,
+                'bic_swift_code': entity.comptabilite.code_bic_swift_banque,
+                'account_holder_first_name': entity.comptabilite.prenom_titulaire_compte,
+                'account_holder_last_name': entity.comptabilite.nom_titulaire_compte,
+            },
+        )
 
     @classmethod
     def get_dto(cls, entity_id: 'PropositionIdentity') -> 'PropositionDTO':
@@ -181,6 +261,7 @@ class PropositionRepository(IPropositionRepository):
             equivalence_diplome=admission.diploma_equivalence,
             continuation_cycle_bachelier=admission.bachelor_cycle_continuation,
             attestation_continuation_cycle_bachelier=admission.bachelor_cycle_continuation_certificate,
+            comptabilite=get_accounting_from_admission(admission=admission),
         )
 
     @classmethod

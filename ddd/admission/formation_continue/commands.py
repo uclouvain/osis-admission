@@ -92,3 +92,25 @@ class CompleterCurriculumCommand(interface.CommandRequest):
 @attr.dataclass(frozen=True, slots=True)
 class DeterminerAnneeAcademiqueEtPotQuery(interface.QueryRequest):
     uuid_proposition: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class GetComptabiliteQuery(interface.QueryRequest):
+    uuid_proposition: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class CompleterComptabilitePropositionCommand(interface.CommandRequest):
+    uuid_proposition: str
+
+    # Affiliations
+    etudiant_solidaire: Optional[bool]
+
+    # Compte bancaire
+    type_numero_compte: Optional[str]
+    numero_compte_iban: Optional[str]
+    iban_valide: Optional[bool]
+    numero_compte_autre_format: Optional[str]
+    code_bic_swift_banque: Optional[str]
+    prenom_titulaire_compte: Optional[str]
+    nom_titulaire_compte: Optional[str]

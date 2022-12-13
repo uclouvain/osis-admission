@@ -33,6 +33,7 @@ from admission.infrastructure.admission.domain.service.annee_inscription_formati
 from admission.infrastructure.admission.domain.service.bourse import BourseTranslator
 from admission.infrastructure.admission.domain.service.profil_candidat import ProfilCandidatTranslator
 from infrastructure.shared_kernel.academic_year.repository.academic_year import AcademicYearRepository
+from .domain.service.comptabilite import ComptabiliteTranslator
 from .domain.service.doctorat import DoctoratTranslator
 from .domain.service.historique import Historique
 from .domain.service.membre_CA import MembreCATranslator
@@ -194,6 +195,10 @@ COMMAND_HANDLERS = {
     CompleterComptabilitePropositionCommand: lambda msg_bus, cmd: completer_comptabilite_proposition(
         cmd,
         proposition_repository=PropositionRepository(),
+    ),
+    GetComptabiliteQuery: lambda msg_bus, cmd: recuperer_comptabilite(
+        cmd,
+        comptabilite_translator=ComptabiliteTranslator(),
     ),
     ModifierTypeAdmissionCommand: lambda msg_bus, cmd: modifier_type_admission(
         cmd,

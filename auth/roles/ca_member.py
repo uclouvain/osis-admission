@@ -52,6 +52,7 @@ class CommitteeMember(ExternalActorMixin, RoleModel):
             'admission.view_doctorateadmission_secondary_studies': is_part_of_committee & is_being_enrolled,
             'admission.view_doctorateadmission_languages': is_part_of_committee & is_being_enrolled,
             'admission.view_doctorateadmission_curriculum': is_part_of_committee & is_being_enrolled,
+            'admission.view_doctorateadmission_accounting': is_part_of_committee & is_being_enrolled,
             # A ca member can view as long as he belongs to the committee
             'admission.view_doctorateadmission': is_part_of_committee,
             'admission.view_doctorateadmission_project': is_part_of_committee,

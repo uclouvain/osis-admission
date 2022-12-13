@@ -33,6 +33,7 @@ from admission.infrastructure.admission.domain.service.annee_inscription_formati
 from admission.infrastructure.admission.domain.service.calendrier_inscription import CalendrierInscription
 from admission.infrastructure.admission.domain.service.profil_candidat import ProfilCandidatTranslator
 from admission.infrastructure.admission.domain.service.titres_acces import TitresAcces
+from admission.infrastructure.admission.formation_continue.domain.service.comptabilite import ComptabiliteTranslator
 from admission.infrastructure.admission.formation_continue.domain.service.formation import FormationContinueTranslator
 from admission.infrastructure.admission.formation_continue.repository.proposition import PropositionRepository
 
@@ -91,5 +92,13 @@ COMMAND_HANDLERS = {
         titres_acces=TitresAcces(),
         profil_candidat_translator=ProfilCandidatTranslator(),
         calendrier_inscription=CalendrierInscription(),
+    ),
+    CompleterComptabilitePropositionCommand: lambda msg_bus, cmd: completer_comptabilite_proposition(
+        cmd,
+        proposition_repository=PropositionRepository(),
+    ),
+    GetComptabiliteQuery: lambda msg_bus, cmd: recuperer_comptabilite(
+        cmd,
+        comptabilite_translator=ComptabiliteTranslator(),
     ),
 }

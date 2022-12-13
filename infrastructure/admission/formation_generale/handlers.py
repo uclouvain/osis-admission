@@ -34,6 +34,7 @@ from admission.infrastructure.admission.domain.service.bourse import BourseTrans
 from admission.infrastructure.admission.domain.service.calendrier_inscription import CalendrierInscription
 from admission.infrastructure.admission.domain.service.profil_candidat import ProfilCandidatTranslator
 from admission.infrastructure.admission.domain.service.titres_acces import TitresAcces
+from admission.infrastructure.admission.formation_generale.domain.service.comptabilite import ComptabiliteTranslator
 from admission.infrastructure.admission.formation_generale.domain.service.formation import FormationGeneraleTranslator
 from admission.infrastructure.admission.formation_generale.domain.service.question_specifique import (
     QuestionSpecifiqueTranslator,
@@ -94,6 +95,14 @@ COMMAND_HANDLERS = {
     CompleterCurriculumCommand: lambda msg_bus, cmd: completer_curriculum(
         cmd,
         proposition_repository=PropositionRepository(),
+    ),
+    CompleterComptabilitePropositionCommand: lambda msg_bus, cmd: completer_comptabilite_proposition(
+        cmd,
+        proposition_repository=PropositionRepository(),
+    ),
+    GetComptabiliteQuery: lambda msg_bus, cmd: recuperer_comptabilite(
+        cmd,
+        comptabilite_translator=ComptabiliteTranslator(),
     ),
     VerifierCurriculumQuery: lambda msg_bus, cmd: verifier_curriculum(
         cmd,

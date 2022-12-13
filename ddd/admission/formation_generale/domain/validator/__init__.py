@@ -23,9 +23,14 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from ._should_comptabilite_etre_completee import (
+    ShouldAffiliationsEtreCompletees,
+    ShouldAssimilationEtreCompletee,
+    ShouldReductionDesDroitsInscriptionEtreCompletee,
+)
 from ._should_curriculum_etre_complete import (
+    ShouldAttestationContinuationCycleBachelierEtreSpecifiee,
+    ShouldContinuationCycleBachelierEtreSpecifiee,
     ShouldCurriculumFichierEtreSpecifie,
     ShouldEquivalenceEtreSpecifiee,
-    ShouldContinuationCycleBachelierEtreSpecifiee,
-    ShouldAttestationContinuationCycleBachelierEtreSpecifiee,
 )

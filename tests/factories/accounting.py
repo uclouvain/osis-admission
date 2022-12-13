@@ -27,7 +27,7 @@
 import factory
 
 from admission.contrib.models import Accounting
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+from admission.ddd.admission.enums import (
     ChoixAffiliationSport,
     ChoixTypeCompteBancaire,
     TypeSituationAssimilation,

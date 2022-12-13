@@ -40,7 +40,12 @@ from admission.ddd.admission.doctorat.preparation.domain.model._signature_promot
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixDoctoratDejaRealise, ChoixTypeAdmission
 from admission.ddd.admission.doctorat.preparation.domain.validator import *
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import ExperienceAcademiqueDTO
-from admission.ddd.admission.domain.validator import ShouldAnneesCVRequisesCompletees
+from admission.ddd.admission.domain.validator import (
+    ShouldAnneesCVRequisesCompletees,
+    ShouldAbsenceDeDetteEtreCompletee,
+    ShouldIBANCarteBancaireRemboursementEtreCompletee,
+    ShouldAutreFormatCarteBancaireRemboursementEtreCompletee,
+)
 from base.ddd.utils.business_validator import BusinessValidator, TwoStepsMultipleBusinessExceptionListValidator
 
 
@@ -261,7 +266,6 @@ class CurriculumValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
 
 @attr.dataclass(frozen=True, slots=True)
 class ComptabiliteValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
-    pays_nationalite_ue: Optional[bool]
     a_frequente_recemment_etablissement_communaute_fr: Optional[bool]
     comptabilite: Comptabilite
 
@@ -269,7 +273,6 @@ class ComptabiliteValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
         return []
 
     def get_invariants_validators(self) -> List[BusinessValidator]:
-        demande_allocation_etudes_fr_be = self.comptabilite.demande_allocation_d_etudes_communaute_francaise_belgique
         return [
             ShouldAbsenceDeDetteEtreCompletee(
                 attestation_absence_dette_etablissement=self.comptabilite.attestation_absence_dette_etablissement,
@@ -277,17 +280,7 @@ class ComptabiliteValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
                     self.a_frequente_recemment_etablissement_communaute_fr
                 ),
             ),
-            ShouldReductionDesDroitsInscriptionEtreCompletee(
-                demande_allocation_d_etudes_communaute_francaise_belgique=demande_allocation_etudes_fr_be,
-                enfant_personnel=self.comptabilite.enfant_personnel,
-                attestation_enfant_personnel=self.comptabilite.attestation_enfant_personnel,
-            ),
-            ShouldAssimilationEtreCompletee(
-                pays_nationalite_ue=self.pays_nationalite_ue,
-                comptabilite=self.comptabilite,
-            ),
             ShouldAffiliationsEtreCompletees(
-                affiliation_sport=self.comptabilite.affiliation_sport,
                 etudiant_solidaire=self.comptabilite.etudiant_solidaire,
             ),
             ShouldIBANCarteBancaireRemboursementEtreCompletee(

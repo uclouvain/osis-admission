@@ -23,7 +23,6 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import uuid
 from dataclasses import dataclass
 from typing import List, Optional
 
@@ -51,9 +50,6 @@ from admission.ddd.admission.doctorat.preparation.test.factory.proposition impor
     PropositionAdmissionSC3DPSansPromoteurReferenceFactory,
     PropositionPreAdmissionSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory,
     PropositionPreAdmissionSC3DPMinimaleFactory,
-)
-from admission.infrastructure.admission.doctorat.preparation.repository.in_memory._comptabilite import (
-    get_dto_accounting_from_domain_model,
 )
 from admission.infrastructure.admission.domain.service.in_memory.bourse import BourseInMemoryTranslator
 from base.ddd.utils.in_memory_repository import InMemoryGenericRepository
@@ -260,7 +256,6 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
             nationalite_candidat=candidat.nationalite,
             modifiee_le=proposition.modifiee_le,
             erreurs=[],
-            comptabilite=get_dto_accounting_from_domain_model(proposition.comptabilite),
             reponses_questions_specifiques=proposition.reponses_questions_specifiques,
             bourse_erasmus_mundus=bourse_erasmus_dto,
             curriculum=proposition.curriculum,

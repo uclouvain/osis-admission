@@ -84,7 +84,7 @@ class VerifierProposition(interface.DomainService):
             ),
             groupe_de_supervision.verifier_tout_le_monde_a_approuve,
             partial(
-                profil_candidat_service.verifier_comptabilite,
+                profil_candidat_service.verifier_comptabilite_doctorat,
                 proposition=proposition_candidat,
                 profil_candidat_translator=profil_candidat_translator,
                 annee_courante=annee_courante,

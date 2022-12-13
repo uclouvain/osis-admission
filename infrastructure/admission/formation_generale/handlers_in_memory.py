@@ -36,6 +36,9 @@ from admission.infrastructure.admission.domain.service.in_memory.calendrier_insc
 )
 from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
 from admission.infrastructure.admission.domain.service.in_memory.titres_acces import TitresAccesInMemory
+from admission.infrastructure.admission.formation_generale.domain.service.in_memory.comptabilite import (
+    ComptabiliteInMemoryTranslator,
+)
 from admission.infrastructure.admission.formation_generale.domain.service.in_memory.formation import (
     FormationGeneraleInMemoryTranslator,
 )
@@ -55,6 +58,7 @@ _titres_acces = TitresAccesInMemory()
 _profil_candidat_translator = ProfilCandidatInMemoryTranslator()
 _question_specific_translator = QuestionSpecifiqueInMemoryTranslator()
 _academic_year_repository = AcademicYearInMemoryRepository()
+_comptabilite_translator = ComptabiliteInMemoryTranslator()
 
 
 COMMAND_HANDLERS = {
@@ -110,6 +114,14 @@ COMMAND_HANDLERS = {
     CompleterCurriculumCommand: lambda msg_bus, cmd: completer_curriculum(
         cmd,
         proposition_repository=_proposition_repository,
+    ),
+    CompleterComptabilitePropositionCommand: lambda msg_bus, cmd: completer_comptabilite_proposition(
+        cmd,
+        proposition_repository=_proposition_repository,
+    ),
+    GetComptabiliteQuery: lambda msg_bus, cmd: recuperer_comptabilite(
+        cmd,
+        comptabilite_translator=_comptabilite_translator,
     ),
     VerifierCurriculumQuery: lambda msg_bus, cmd: verifier_curriculum(
         cmd,

@@ -35,6 +35,9 @@ from admission.infrastructure.admission.domain.service.in_memory.calendrier_insc
 )
 from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
 from admission.infrastructure.admission.domain.service.in_memory.titres_acces import TitresAccesInMemory
+from admission.infrastructure.admission.formation_continue.domain.service.in_memory.comptabilite import (
+    ComptabiliteInMemoryTranslator,
+)
 from admission.infrastructure.admission.formation_continue.domain.service.in_memory.formation import (
     FormationContinueInMemoryTranslator,
 )
@@ -47,6 +50,8 @@ _formation_continue_translator = FormationContinueInMemoryTranslator()
 _annee_inscription_formation_translator = AnneeInscriptionFormationInMemoryTranslator()
 _titres_acces = TitresAccesInMemory()
 _profil_candidat_translator = ProfilCandidatInMemoryTranslator()
+_comptabilite_translator = ComptabiliteInMemoryTranslator()
+
 
 COMMAND_HANDLERS = {
     RechercherFormationContinueQuery: lambda msg_bus, cmd: rechercher_formations(
@@ -103,5 +108,13 @@ COMMAND_HANDLERS = {
         titres_acces=_titres_acces,
         profil_candidat_translator=_profil_candidat_translator,
         calendrier_inscription=CalendrierInscriptionInMemory(),
+    ),
+    CompleterComptabilitePropositionCommand: lambda msg_bus, cmd: completer_comptabilite_proposition(
+        cmd,
+        proposition_repository=_proposition_repository,
+    ),
+    GetComptabiliteQuery: lambda msg_bus, cmd: recuperer_comptabilite(
+        cmd,
+        comptabilite_translator=_comptabilite_translator,
     ),
 }

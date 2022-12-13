@@ -25,7 +25,8 @@
 # ##############################################################################
 from typing import List
 
-from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition
+from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition as PropositionDoctorat
+from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition as PropositionGenerale
 from admission.ddd.admission.doctorat.preparation.domain.validator.validator_by_business_action import (
     ComptabiliteValidatorList,
     CurriculumValidatorList,
@@ -36,7 +37,8 @@ from admission.ddd.admission.domain.model._candidat_signaletique import Candidat
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.domain.validator.validator_by_business_action import (
     CoordonneesValidatorList,
-    IdentificationValidatorList, AnneesCurriculumValidatorList,
+    IdentificationValidatorList,
+    AnneesCurriculumValidatorList,
 )
 from admission.ddd.admission.formation_generale.domain.model.proposition import (
     Proposition as FormationGeneraleProposition,
@@ -46,6 +48,7 @@ from admission.ddd.admission.formation_generale.domain.validator.exceptions impo
 )
 from admission.ddd.admission.formation_generale.domain.validator.validator_by_business_actions import (
     FormationGeneraleCurriculumValidatorList,
+    FormationGeneraleComptabiliteValidatorList,
 )
 from base.models.enums.education_group_types import TrainingType
 from osis_common.ddd import interface
@@ -194,9 +197,9 @@ class ProfilCandidat(interface.DomainService):
         ).validate()
 
     @classmethod
-    def verifier_comptabilite(
+    def verifier_comptabilite_doctorat(
         cls,
-        proposition: Proposition,
+        proposition: PropositionDoctorat,
         profil_candidat_translator: 'IProfilCandidatTranslator',
         annee_courante: int,
     ):
@@ -206,6 +209,24 @@ class ProfilCandidat(interface.DomainService):
         )
 
         ComptabiliteValidatorList(
+            a_frequente_recemment_etablissement_communaute_fr=(
+                conditions_comptabilite.a_frequente_recemment_etablissement_communaute_fr
+            ),
+            comptabilite=proposition.comptabilite,
+        ).validate()
+
+    @classmethod
+    def verifier_comptabilite_formation_generale(
+        cls,
+        proposition: PropositionGenerale,
+        profil_candidat_translator: 'IProfilCandidatTranslator',
+        annee_courante: int,
+    ):
+        conditions_comptabilite = profil_candidat_translator.get_conditions_comptabilite(
+            matricule=proposition.matricule_candidat,
+            annee_courante=annee_courante,
+        )
+        FormationGeneraleComptabiliteValidatorList(
             pays_nationalite_ue=conditions_comptabilite.pays_nationalite_ue,
             a_frequente_recemment_etablissement_communaute_fr=(
                 conditions_comptabilite.a_frequente_recemment_etablissement_communaute_fr

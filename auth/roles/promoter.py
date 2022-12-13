@@ -62,6 +62,7 @@ class Promoter(ExternalActorMixin, RoleModel):
             'admission.view_doctorateadmission_secondary_studies': is_admission_request_promoter & is_being_enrolled,
             'admission.view_doctorateadmission_languages': is_admission_request_promoter & is_being_enrolled,
             'admission.view_doctorateadmission_curriculum': is_admission_request_promoter & is_being_enrolled,
+            'admission.view_doctorateadmission_accounting': is_admission_request_promoter & is_being_enrolled,
             # A promoter can view as long as he is one of the admission promoters
             'admission.view_doctorateadmission_project': is_admission_request_promoter,
             'admission.view_doctorateadmission_cotutelle': is_admission_request_promoter,
