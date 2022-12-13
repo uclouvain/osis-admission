@@ -47,6 +47,7 @@ from admission.ddd.admission.domain.validator.exceptions import (
     ResidenceAuSensDuDecretNonRenseigneeException,
 )
 from admission.ddd.admission.dtos.conditions import InfosDetermineesDTO
+from admission.ddd.admission.enums import TypeSituationAssimilation
 from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.education_group_types import TrainingType
@@ -99,7 +100,10 @@ class ICalendrierInscription(interface.DomainService):
         residential_address = profil_candidat_translator.get_coordonnees(matricule_candidat).domicile_legal
         if identification.pays_nationalite is None:
             raise IdentificationNonCompleteeException()
-        ue_plus_5 = cls.est_ue_plus_5(identification.pays_nationalite)
+        ue_plus_5 = cls.est_ue_plus_5(
+            identification.pays_nationalite,
+            getattr(proposition.comptabilite, 'type_situation_assimilation', None) if proposition else None,
+        )
         annees = cls.get_annees_academiques_pour_calcul()
         changements_etablissement = profil_candidat_translator.get_changements_etablissement(matricule_candidat, annees)
 
@@ -259,5 +263,9 @@ proposition={('Proposition(' + pformat(attr.asdict(proposition)) + ')') if propo
         raise NotImplementedError
 
     @classmethod
-    def est_ue_plus_5(cls, pays_nationalite_iso_code: str) -> bool:
+    def est_ue_plus_5(
+        cls,
+        pays_nationalite_iso_code: str,
+        situation_assimilation: TypeSituationAssimilation = None,
+    ) -> bool:
         raise NotImplementedError

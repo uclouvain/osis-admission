@@ -23,7 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from rules import RuleSet, always_deny
+from rules import RuleSet
 from django.utils.translation import gettext_lazy as _
 
 from admission.auth.predicates import (
@@ -113,7 +113,7 @@ _CANDIDATE_RULESET = {
     'change_generaleducationadmission_curriculum': is_admission_request_author & in_progress,
     'change_generaleducationadmission_secondary_studies': is_admission_request_author & in_progress,
     'change_generaleducationadmission_languages': is_admission_request_author & in_progress,
-    'change_generaleducationadmission_accounting': always_deny,
+    'change_generaleducationadmission_accounting': is_admission_request_author & in_progress,
     'change_generaleducationadmission_specific_question': is_admission_request_author & in_progress,
     'change_generaleducationadmission': is_admission_request_author & in_progress,
     'delete_generaleducationadmission': is_admission_request_author & in_progress,
@@ -135,7 +135,7 @@ _CANDIDATE_RULESET = {
     'change_continuingeducationadmission_curriculum': is_admission_request_author & in_progress,
     'change_continuingeducationadmission_secondary_studies': is_admission_request_author & in_progress,
     'change_continuingeducationadmission_languages': is_admission_request_author & in_progress,
-    'change_continuingeducationadmission_accounting': always_deny,
+    'change_continuingeducationadmission_accounting': is_admission_request_author & in_progress,
     'delete_continuingeducationadmission': is_admission_request_author & in_progress,
     'submit_continuingeducationadmission': is_admission_request_author & in_progress,
     'change_continuingeducationadmission_specific_question': is_admission_request_author & in_progress,

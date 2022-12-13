@@ -29,16 +29,19 @@ from admission.contrib.models import ContinuingEducationAdmission
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
+from admission.tests.factories.accounting import AccountingFactory
 from admission.tests.factories.person import CompletePersonForIUFCFactory
 from admission.tests.factories.roles import CandidateFactory
 from base.models.enums import education_group_categories
 from base.models.enums.education_group_types import TrainingType
+from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.education_group_year import EducationGroupYearFactory
 from base.tests.factories.person import PersonFactory
 from program_management.tests.factories.education_group_version import EducationGroupVersionFactory
 
 
 class ContinuingEducationTrainingFactory(EducationGroupYearFactory):
+    academic_year = factory.SubFactory(AcademicYearFactory, current=True)
     education_group_type = factory.SubFactory(
         'base.tests.factories.education_group_type.EducationGroupTypeFactory',
         category=education_group_categories.TRAINING,
@@ -66,3 +69,7 @@ class ContinuingEducationAdmissionFactory(factory.DjangoModelFactory):
             training__education_group_type__name=TrainingType.UNIVERSITY_FIRST_CYCLE_CERTIFICATE.name,
             candidate=factory.SubFactory(CompletePersonForIUFCFactory),
         )
+
+    @factory.post_generation
+    def create_accounting(self, create, extracted, **kwargs):
+        AccountingFactory(admission_id=self.pk)

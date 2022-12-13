@@ -33,6 +33,7 @@ from admission.infrastructure.admission.domain.service.in_memory.annee_inscripti
 from admission.infrastructure.admission.domain.service.in_memory.bourse import BourseInMemoryTranslator
 from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
 from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
+from .domain.service.in_memory.comptabilite import ComptabiliteInMemoryTranslator
 from .domain.service.in_memory.doctorat import DoctoratInMemoryTranslator
 from .domain.service.in_memory.historique import HistoriqueInMemory
 from .domain.service.in_memory.membre_CA import MembreCAInMemoryTranslator
@@ -57,6 +58,7 @@ _historique = HistoriqueInMemory()
 _notification = NotificationInMemory()
 _titres_acces = TitresAccesInMemory()
 _membre_ca_translator = MembreCAInMemoryTranslator()
+_comptabilite_translator = ComptabiliteInMemoryTranslator()
 
 
 COMMAND_HANDLERS = {
@@ -208,6 +210,10 @@ COMMAND_HANDLERS = {
     CompleterComptabilitePropositionCommand: lambda msg_bus, cmd: completer_comptabilite_proposition(
         cmd,
         proposition_repository=_proposition_repository,
+    ),
+    GetComptabiliteQuery: lambda msg_bus, cmd: recuperer_comptabilite(
+        cmd,
+        comptabilite_translator=_comptabilite_translator,
     ),
     ModifierTypeAdmissionCommand: lambda msg_bus, cmd: modifier_type_admission(
         cmd,

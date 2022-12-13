@@ -24,14 +24,7 @@
 #
 # ##############################################################################
 
-from ._should_comptabilite_etre_completee import (
-    ShouldAbsenceDeDetteEtreCompletee,
-    ShouldAffiliationsEtreCompletees,
-    ShouldAssimilationEtreCompletee,
-    ShouldAutreFormatCarteBancaireRemboursementEtreCompletee,
-    ShouldIBANCarteBancaireRemboursementEtreCompletee,
-    ShouldReductionDesDroitsInscriptionEtreCompletee,
-)
+from ._should_comptabilite_etre_completee import ShouldAffiliationsEtreCompletees
 from ._should_cotutelle_etre_completee import ShouldCotutelleEtreComplete
 from ._should_curriculum_etre_complete import ShouldCurriculumFichierEtreSpecifie
 from ._should_domaine_dependre_doctorat_realise import ShouldDomaineDependreDoctoratRealise
@@ -88,10 +81,5 @@ __all__ = [
     "ShouldMembresCAOntApprouve",
     "ShouldPremierPromoteurRenseignerInstitutThese",
     "ShouldGroupeDeSupervisionAvoirUnPromoteurDeReference",
-    "ShouldIBANCarteBancaireRemboursementEtreCompletee",
-    "ShouldAutreFormatCarteBancaireRemboursementEtreCompletee",
-    "ShouldAbsenceDeDetteEtreCompletee",
-    "ShouldReductionDesDroitsInscriptionEtreCompletee",
-    "ShouldAssimilationEtreCompletee",
     "ShouldAffiliationsEtreCompletees",
 ]

@@ -43,6 +43,7 @@ from admission.ddd.admission.domain.validator.exceptions import (
     ReorientationInscriptionExterneNonConfirmeeException,
     ResidenceAuSensDuDecretNonRenseigneeException,
 )
+from admission.ddd.admission.enums import TypeSituationAssimilation
 from admission.ddd.admission.formation_continue.test.factory.proposition import (
     PropositionFactory as PropositionContinueFactory,
 )
@@ -407,6 +408,28 @@ class CalendrierInscriptionTestCase(TestCase):
         profil = ProfilCandidatFactory(
             matricule=proposition.matricule_candidat,
             identification__pays_nationalite="FR",
+        )
+        self.profil_candidat_translator.profil_candidats.append(profil.identification)
+        self.profil_candidat_translator.get_coordonnees = lambda m: profil.coordonnees
+        dto = CalendrierInscriptionInMemory.determiner_annee_academique_et_pot(
+            formation_id=proposition.formation_id,
+            proposition=proposition,
+            matricule_candidat=proposition.matricule_candidat,
+            titres_acces=Titres(AdmissionConditionsDTOFactory()),
+            type_formation=TrainingType.BACHELOR,
+            profil_candidat_translator=self.profil_candidat_translator,
+        )
+        self.assertEqual(dto.pool, AcademicCalendarTypes.ADMISSION_POOL_UE5_NON_BELGIAN)
+
+    @freezegun.freeze_time('22/10/2022')
+    def test_hors_ue5_assimile(self):
+        proposition = PropositionFactory(
+            comptabilite__type_situation_assimilation=TypeSituationAssimilation.PRIS_EN_CHARGE_OU_DESIGNE_CPAS
+        )
+        profil = ProfilCandidatFactory(
+            matricule=proposition.matricule_candidat,
+            identification__pays_nationalite="AR",
+            coordonnees__domicile_legal__pays="AR",
         )
         self.profil_candidat_translator.profil_candidats.append(profil.identification)
         self.profil_candidat_translator.get_coordonnees = lambda m: profil.coordonnees

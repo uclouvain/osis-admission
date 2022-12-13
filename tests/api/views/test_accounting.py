@@ -29,27 +29,37 @@ from unittest.mock import patch
 from django.shortcuts import resolve_url
 from django.test import override_settings
 from rest_framework import status
-from rest_framework.status import HTTP_200_OK
+from rest_framework.status import HTTP_200_OK, HTTP_403_FORBIDDEN
 from rest_framework.test import APITestCase
 
 from admission.contrib.models import Accounting
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    ChoixStatutProposition as ChoixStatutPropositionGenerale,
+)
+from admission.ddd.admission.formation_continue.domain.model.enums import (
+    ChoixStatutProposition as ChoixStatutPropositionContinue,
+)
 from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+from admission.ddd.admission.enums import (
     ChoixAffiliationSport,
     ChoixAssimilation1,
     ChoixAssimilation2,
     ChoixAssimilation3,
     ChoixAssimilation5,
     ChoixAssimilation6,
-    ChoixStatutProposition,
     ChoixTypeCompteBancaire,
     LienParente,
     TypeSituationAssimilation,
 )
-
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    ChoixStatutProposition as ChoixStatutPropositionDoctorale,
+)
 from admission.tests.factories import DoctorateAdmissionFactory
+from admission.tests.factories.accounting import AccountingFactory
+from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
+from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.roles import CddManagerFactory
-from admission.tests.factories.supervision import PromoterFactory
+from admission.tests.factories.supervision import PromoterFactory, CaMemberFactory
 from base.models.enums.community import CommunityEnum
 from base.models.enums.entity_type import EntityType
 from base.tasks.synchronize_entities_addresses import UCLouvain_acronym
@@ -62,7 +72,7 @@ from reference.tests.factories.country import CountryFactory
 
 
 @override_settings(OSIS_DOCUMENT_BASE_URL='http://dummyurl/')
-class AccountingAPIViewTestCase(APITestCase):
+class DoctorateAccountingAPIViewTestCase(APITestCase):
     file_uuid = uuid.uuid4()
 
     @classmethod
@@ -70,6 +80,9 @@ class AccountingAPIViewTestCase(APITestCase):
         # Create supervision group members
         promoter = PromoterFactory()
         other_promoter = PromoterFactory()
+
+        cls.ca_member = CaMemberFactory(process=promoter.process).person.user
+        cls.other_ca_member = CaMemberFactory().person.user
 
         # Create doctorate management entity
         root = EntityVersionFactory(parent=None).entity
@@ -86,9 +99,10 @@ class AccountingAPIViewTestCase(APITestCase):
         cls.admission = DoctorateAdmissionFactory(
             training__management_entity=commission,
             candidate=PersonFactory(country_of_citizenship=None),
+            supervision_group=promoter.process,
         )
         other_admission = DoctorateAdmissionFactory(
-            status=ChoixStatutProposition.ENROLLED.name,
+            status=ChoixStatutPropositionDoctorale.ENROLLED.name,
             post_enrolment_status=ChoixStatutDoctorat.ADMITTED.name,
             training__management_entity=commission,
             supervision_group=other_promoter.process,
@@ -101,122 +115,60 @@ class AccountingAPIViewTestCase(APITestCase):
         cls.other_promoter = other_promoter.person.user
         cls.cdd_person = CddManagerFactory(entity=commission).person
 
-        cls.admission_url = resolve_url('admission_api_v1:accounting', uuid=cls.admission.uuid)
-        cls.other_admission_url = resolve_url('admission_api_v1:accounting', uuid=other_admission.uuid)
+        cls.admission_url = resolve_url('admission_api_v1:doctorate_accounting', uuid=cls.admission.uuid)
+        cls.other_admission_url = resolve_url('admission_api_v1:doctorate_accounting', uuid=other_admission.uuid)
 
         # Data
         cls.be_country = CountryFactory(iso_code='BE')
 
-        cls.file_uuids = {
-            field: uuid.uuid4()
-            for field in [
-                'attestation_absence_dette_etablissement',
-                'attestation_enfant_personnel',
-                'carte_resident_longue_duree',
-                'carte_cire_sejour_illimite_etranger',
-                'carte_sejour_membre_ue',
-                'carte_sejour_permanent_membre_ue',
-                'carte_a_b_refugie',
-                'annexe_25_26_refugies_apatrides',
-                'attestation_immatriculation',
-                'carte_a_b',
-                'decision_protection_subsidiaire',
-                'decision_protection_temporaire',
-                'titre_sejour_3_mois_professionel',
-                'fiches_remuneration',
-                'titre_sejour_3_mois_remplacement',
-                'preuve_allocations_chomage_pension_indemnite',
-                'attestation_cpas',
-                'composition_menage_acte_naissance',
-                'acte_tutelle',
-                'composition_menage_acte_mariage',
-                'attestation_cohabitation_legale',
-                'carte_identite_parent',
-                'titre_sejour_longue_duree_parent',
-                'annexe_25_26_refugies_apatrides_decision_protection_parent',
-                'titre_sejour_3_mois_parent',
-                'fiches_remuneration_parent',
-                'attestation_cpas_parent',
-                'decision_bourse_cfwb',
-                'attestation_boursier',
-                'titre_identite_sejour_longue_duree_ue',
-                'titre_sejour_belgique',
-            ]
-        }
+        cls.institute_absence_debts_certificate_file_uuid = uuid.uuid4()
+        cls.new_institute_absence_debts_certificate_file_uuid = uuid.uuid4()
 
         cls.default_api_data = {
             'uuid_proposition': cls.admission.uuid,
-            'attestation_absence_dette_etablissement': [str(cls.file_uuids['attestation_absence_dette_etablissement'])],
-            'demande_allocation_d_etudes_communaute_francaise_belgique': True,
-            'enfant_personnel': True,
-            'attestation_enfant_personnel': [str(cls.file_uuids['attestation_enfant_personnel'])],
-            'type_situation_assimilation': TypeSituationAssimilation.AUTORISATION_ETABLISSEMENT_OU_RESIDENT_LONGUE_DUREE.name,
-            'sous_type_situation_assimilation_1': ChoixAssimilation1.TITULAIRE_CARTE_RESIDENT_LONGUE_DUREE.name,
-            'carte_resident_longue_duree': [str(cls.file_uuids['carte_resident_longue_duree'])],
-            'carte_cire_sejour_illimite_etranger': [str(cls.file_uuids['carte_cire_sejour_illimite_etranger'])],
-            'carte_sejour_membre_ue': [str(cls.file_uuids['carte_sejour_membre_ue'])],
-            'carte_sejour_permanent_membre_ue': [str(cls.file_uuids['carte_sejour_permanent_membre_ue'])],
-            'sous_type_situation_assimilation_2': ChoixAssimilation2.DEMANDEUR_ASILE.name,
-            'carte_a_b_refugie': [str(cls.file_uuids['carte_a_b_refugie'])],
-            'annexe_25_26_refugies_apatrides': [str(cls.file_uuids['annexe_25_26_refugies_apatrides'])],
-            'attestation_immatriculation': [str(cls.file_uuids['attestation_immatriculation'])],
-            'carte_a_b': [str(cls.file_uuids['carte_a_b'])],
-            'decision_protection_subsidiaire': [str(cls.file_uuids['decision_protection_subsidiaire'])],
-            'decision_protection_temporaire': [str(cls.file_uuids['decision_protection_temporaire'])],
-            'sous_type_situation_assimilation_3': ChoixAssimilation3.AUTORISATION_SEJOUR_ET_REVENUS_DE_REMPLACEMENT.name,
-            'titre_sejour_3_mois_professionel': [str(cls.file_uuids['titre_sejour_3_mois_professionel'])],
-            'fiches_remuneration': [str(cls.file_uuids['fiches_remuneration'])],
-            'titre_sejour_3_mois_remplacement': [str(cls.file_uuids['titre_sejour_3_mois_remplacement'])],
-            'preuve_allocations_chomage_pension_indemnite': [
-                str(cls.file_uuids['preuve_allocations_chomage_pension_indemnite'])
-            ],
-            'attestation_cpas': [str(cls.file_uuids['attestation_cpas'])],
-            'relation_parente': LienParente.COHABITANT_LEGAL.name,
-            'composition_menage_acte_naissance': [str(cls.file_uuids['composition_menage_acte_naissance'])],
-            'acte_tutelle': [str(cls.file_uuids['acte_tutelle'])],
-            'composition_menage_acte_mariage': [str(cls.file_uuids['composition_menage_acte_mariage'])],
-            'attestation_cohabitation_legale': [str(cls.file_uuids['attestation_cohabitation_legale'])],
-            'sous_type_situation_assimilation_5': ChoixAssimilation5.A_NATIONALITE_UE.name,
-            'carte_identite_parent': [str(cls.file_uuids['carte_identite_parent'])],
-            'titre_sejour_longue_duree_parent': [str(cls.file_uuids['titre_sejour_longue_duree_parent'])],
-            'annexe_25_26_refugies_apatrides_decision_protection_parent': [
-                str(cls.file_uuids['annexe_25_26_refugies_apatrides_decision_protection_parent'])
-            ],
-            'titre_sejour_3_mois_parent': [str(cls.file_uuids['titre_sejour_3_mois_parent'])],
-            'fiches_remuneration_parent': [str(cls.file_uuids['fiches_remuneration_parent'])],
-            'attestation_cpas_parent': [str(cls.file_uuids['attestation_cpas_parent'])],
-            'sous_type_situation_assimilation_6': ChoixAssimilation6.A_BOURSE_ETUDES_COMMUNAUTE_FRANCAISE.name,
-            'decision_bourse_cfwb': [str(cls.file_uuids['decision_bourse_cfwb'])],
-            'attestation_boursier': [str(cls.file_uuids['attestation_boursier'])],
-            'titre_identite_sejour_longue_duree_ue': [str(cls.file_uuids['titre_identite_sejour_longue_duree_ue'])],
-            'titre_sejour_belgique': [str(cls.file_uuids['titre_sejour_belgique'])],
-            'affiliation_sport': ChoixAffiliationSport.TOURNAI_UCL.name,
-            'etudiant_solidaire': True,
-            'type_numero_compte': ChoixTypeCompteBancaire.IBAN.name,
+            'attestation_absence_dette_etablissement': [str(cls.new_institute_absence_debts_certificate_file_uuid)],
+            'etudiant_solidaire': False,
+            'type_numero_compte': ChoixTypeCompteBancaire.AUTRE_FORMAT.name,
             'numero_compte_iban': 'GB87BARC20658244971655',
-            'iban_valide': True,
-            'prenom_titulaire_compte': 'John',
-            'nom_titulaire_compte': 'Doe',
+            'iban_valide': False,
+            'prenom_titulaire_compte': 'Jim',
+            'nom_titulaire_compte': 'Foe',
             'numero_compte_autre_format': '0203040506',
-            'code_bic_swift_banque': 'GKCCBEBB',
+            'code_bic_swift_banque': 'GKCCBEBA',
         }
 
     def setUp(self):
+        # Mock documents
         patcher = patch("osis_document.api.utils.get_remote_token", return_value="foobar")
         patcher.start()
         self.addCleanup(patcher.stop)
+
         patcher = patch("osis_document.api.utils.get_remote_metadata", return_value={"name": "myfile"})
         patcher.start()
         self.addCleanup(patcher.stop)
-        patcher = patch(
-            "osis_document.api.utils.confirm_remote_upload",
-            side_effect=lambda token, upload_to: token,
-        )
+
+        patcher = patch("osis_document.api.utils.confirm_remote_upload", side_effect=lambda token, upload_to: token)
         patcher.start()
         self.addCleanup(patcher.stop)
+
+        # Reset student
         self.student.country_of_citizenship = None
         self.student.save()
+
+        # Reset accounting
         Accounting.objects.filter(admission_id=self.admission.pk).delete()
+        AccountingFactory(
+            admission_id=self.admission.pk,
+            institute_absence_debts_certificate=[self.institute_absence_debts_certificate_file_uuid],
+            solidarity_student=True,
+            account_number_type=ChoixTypeCompteBancaire.IBAN.name,
+            iban_account_number='BE43068999999501',
+            valid_iban=True,
+            other_format_account_number='123456789',
+            bic_swift_code='GKCCBEBB',
+            account_holder_first_name='John',
+            account_holder_last_name='Doe',
+        )
 
     def test_assert_methods_not_allowed(self):
         self.client.force_authenticate(user=self.student.user)
@@ -230,39 +182,75 @@ class AccountingAPIViewTestCase(APITestCase):
             response = getattr(self.client, method)(self.admission_url)
             self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 
-    def test_get_accounting_conditions_with_student_with_no_values(self):
+    def test_forbidden_request_with_other_student(self):
+        self.client.force_authenticate(user=self.other_student.user)
+        forbidden_methods = [
+            'get',
+            'put',
+        ]
+
+        for method in forbidden_methods:
+            response = getattr(self.client, method)(self.admission_url)
+            self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_get_with_submitted_admission_is_forbidden(self):
+        self.client.force_authenticate(user=self.other_student.user)
+
+        response = self.client.get(self.admission_url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_put_with_submitted_admission_is_forbidden(self):
+        self.client.force_authenticate(user=self.other_student.user)
+
+        response = self.client.put(self.admission_url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_get_accounting_with_invited_promoter_is_possible(self):
+        self.client.force_authenticate(user=self.promoter)
+
+        response = self.client.get(self.admission_url)
+        self.assertEqual(response.status_code, HTTP_200_OK)
+
+    def test_get_accounting_with_not_invited_promoter_is_not_possible(self):
+        self.client.force_authenticate(user=self.other_promoter)
+
+        response = self.client.get(self.admission_url)
+        self.assertEqual(response.status_code, HTTP_403_FORBIDDEN)
+
+    def test_get_accounting_with_invited_member_is_possible(self):
+        self.client.force_authenticate(user=self.ca_member)
+
+        response = self.client.get(self.admission_url)
+        self.assertEqual(response.status_code, HTTP_200_OK)
+
+    def test_get_accounting_with_not_invited_member_is_not_possible(self):
+        self.client.force_authenticate(user=self.other_ca_member)
+
+        response = self.client.get(self.admission_url)
+        self.assertEqual(response.status_code, HTTP_403_FORBIDDEN)
+
+    def test_get_accounting_with_student_without_any_academic_experience(self):
         self.client.force_authenticate(user=self.student.user)
 
-        # The candidate doesn't specify a country of citizenship or any academic experiences
         response = self.client.get(self.admission_url)
         self.assertEqual(response.status_code, HTTP_200_OK)
         self.assertEqual(
             response.json(),
             {
-                'has_ue_nationality': None,
-                'last_french_community_high_education_institutes_attended': None,
+                'derniers_etablissements_superieurs_communaute_fr_frequentes': None,
+                'attestation_absence_dette_etablissement': [str(self.institute_absence_debts_certificate_file_uuid)],
+                'etudiant_solidaire': True,
+                'type_numero_compte': ChoixTypeCompteBancaire.IBAN.name,
+                'numero_compte_iban': 'BE43068999999501',
+                'iban_valide': True,
+                'numero_compte_autre_format': '123456789',
+                'code_bic_swift_banque': 'GKCCBEBB',
+                'prenom_titulaire_compte': 'John',
+                'nom_titulaire_compte': 'Doe',
             },
         )
 
-    def test_get_accounting_conditions_with_country_of_citizenship_outside_ue(self):
-        # The candidate specifies a country of citizenship -> not UE
-        self.client.force_authenticate(user=self.student.user)
-        self.student.country_of_citizenship = CountryFactory(european_union=False)
-        self.student.save()
-        response = self.client.get(self.admission_url)
-        self.assertEqual(response.status_code, HTTP_200_OK)
-        self.assertEqual(response.json().get('has_ue_nationality'), False)
-
-    def test_get_accounting_conditions_with_country_of_citizenship_inside_ue(self):
-        # The candidate specifies a country of citizenship -> UE
-        self.client.force_authenticate(user=self.student.user)
-        self.student.country_of_citizenship = CountryFactory(european_union=True)
-        self.student.save()
-        response = self.client.get(self.admission_url)
-        self.assertEqual(response.status_code, HTTP_200_OK)
-        self.assertEqual(response.json().get('has_ue_nationality'), True)
-
-    def test_get_accounting_conditions_with_specified_educational_experiences(self):
+    def test_get_accounting_with_student_with_educational_experiences(self):
         self.client.force_authenticate(user=self.student.user)
         # The candidate attends some high education institute
         current_year = get_current_year()
@@ -335,10 +323,174 @@ class AccountingAPIViewTestCase(APITestCase):
         )
 
         response = self.client.get(self.admission_url)
-        last_institutes_attended = response.json().get('last_french_community_high_education_institutes_attended')
+        last_institutes_attended = response.json().get('derniers_etablissements_superieurs_communaute_fr_frequentes')
         self.assertIsNotNone(last_institutes_attended)
         self.assertEqual(last_institutes_attended.get('academic_year'), current_year)
         self.assertCountEqual(last_institutes_attended.get('names'), ['First institute', 'Third institute'])
+
+    def test_put_accounting_values_with_student(self):
+        self.client.force_authenticate(user=self.student.user)
+
+        response = self.client.put(self.admission_url, data=self.default_api_data)
+        self.assertEqual(response.status_code, HTTP_200_OK)
+
+        # Check updated data
+        response = self.client.get(self.admission_url)
+        self.assertEqual(response.status_code, HTTP_200_OK)
+
+        expected_response_data = self.default_api_data.copy()
+        expected_response_data.pop('uuid_proposition')
+        expected_response_data['derniers_etablissements_superieurs_communaute_fr_frequentes'] = None
+
+        self.assertEqual(response.json(), expected_response_data)
+
+
+@override_settings(OSIS_DOCUMENT_BASE_URL='http://dummyurl/')
+class GeneralAccountingAPIViewTestCase(APITestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.admission = GeneralEducationAdmissionFactory(
+            candidate=PersonFactory(country_of_citizenship=None),
+        )
+
+        other_admission = GeneralEducationAdmissionFactory(
+            status=ChoixStatutPropositionGenerale.ENROLLED.name,
+        )
+
+        # Users
+        cls.student = cls.admission.candidate
+        cls.other_student = other_admission.candidate
+
+        cls.admission_url = resolve_url('admission_api_v1:general_accounting', uuid=cls.admission.uuid)
+        cls.other_admission_url = resolve_url('admission_api_v1:general_accounting', uuid=other_admission.uuid)
+
+        # Data
+        cls.be_country = CountryFactory(iso_code='BE')
+
+        file_fields = [
+            ['institute_absence_debts_certificate', 'attestation_absence_dette_etablissement'],
+            ['staff_child_certificate', 'attestation_enfant_personnel'],
+            ['long_term_resident_card', 'carte_resident_longue_duree'],
+            ['cire_unlimited_stay_foreigner_card', 'carte_cire_sejour_illimite_etranger'],
+            ['ue_family_member_residence_card', 'carte_sejour_membre_ue'],
+            ['ue_family_member_permanent_residence_card', 'carte_sejour_permanent_membre_ue'],
+            ['refugee_a_b_card', 'carte_a_b_refugie'],
+            ['refugees_stateless_annex_25_26', 'annexe_25_26_refugies_apatrides'],
+            ['registration_certificate', 'attestation_immatriculation'],
+            ['a_b_card', 'carte_a_b'],
+            ['subsidiary_protection_decision', 'decision_protection_subsidiaire'],
+            ['temporary_protection_decision', 'decision_protection_temporaire'],
+            ['professional_3_month_residence_permit', 'titre_sejour_3_mois_professionel'],
+            ['salary_slips', 'fiches_remuneration'],
+            ['replacement_3_month_residence_permit', 'titre_sejour_3_mois_remplacement'],
+            ['unemployment_benefit_pension_compensation_proof', 'preuve_allocations_chomage_pension_indemnite'],
+            ['cpas_certificate', 'attestation_cpas'],
+            ['household_composition_or_birth_certificate', 'composition_menage_acte_naissance'],
+            ['tutorship_act', 'acte_tutelle'],
+            ['household_composition_or_marriage_certificate', 'composition_menage_acte_mariage'],
+            ['legal_cohabitation_certificate', 'attestation_cohabitation_legale'],
+            ['parent_identity_card', 'carte_identite_parent'],
+            ['parent_long_term_residence_permit', 'titre_sejour_longue_duree_parent'],
+            [
+                'parent_refugees_stateless_annex_25_26_or_protection_decision',
+                'annexe_25_26_refugies_apatrides_decision_protection_parent',
+            ],
+            ['parent_3_month_residence_permit', 'titre_sejour_3_mois_parent'],
+            ['parent_salary_slips', 'fiches_remuneration_parent'],
+            ['parent_cpas_certificate', 'attestation_cpas_parent'],
+            ['cfwb_scholarship_decision', 'decision_bourse_cfwb'],
+            ['scholarship_certificate', 'attestation_boursier'],
+            ['ue_long_term_stay_identity_document', 'titre_identite_sejour_longue_duree_ue'],
+            ['belgium_residence_permit', 'titre_sejour_belgique'],
+        ]
+
+        cls.original_file_uuids = {}
+        cls.dto_file_uuids = {}
+        cls.new_file_uuids = {}
+
+        for field in file_fields:
+            original_uuid = uuid.uuid4()
+            cls.original_file_uuids[field[0]] = [original_uuid]
+            cls.dto_file_uuids[field[1]] = [str(original_uuid)]
+            cls.new_file_uuids[field[1]] = [str(uuid.uuid4())]
+
+        cls.default_api_data = {
+            'uuid_proposition': cls.admission.uuid,
+            'demande_allocation_d_etudes_communaute_francaise_belgique': True,
+            'enfant_personnel': True,
+            'type_situation_assimilation': TypeSituationAssimilation.A_BOURSE_ARTICLE_105_PARAGRAPH_2.name,
+            'sous_type_situation_assimilation_1': ChoixAssimilation1.TITULAIRE_CARTE_RESIDENT_LONGUE_DUREE.name,
+            'sous_type_situation_assimilation_2': ChoixAssimilation2.DEMANDEUR_ASILE.name,
+            'sous_type_situation_assimilation_3': ChoixAssimilation3.AUTORISATION_SEJOUR_ET_REVENUS_DE_REMPLACEMENT.name,
+            'relation_parente': LienParente.COHABITANT_LEGAL.name,
+            'sous_type_situation_assimilation_5': ChoixAssimilation5.A_NATIONALITE_UE.name,
+            'sous_type_situation_assimilation_6': ChoixAssimilation6.A_BOURSE_ETUDES_COMMUNAUTE_FRANCAISE.name,
+            'affiliation_sport': ChoixAffiliationSport.TOURNAI_UCL.name,
+            'etudiant_solidaire': True,
+            'type_numero_compte': ChoixTypeCompteBancaire.AUTRE_FORMAT.name,
+            'numero_compte_iban': 'GB87BARC20658244971655',
+            'iban_valide': True,
+            'prenom_titulaire_compte': 'John',
+            'nom_titulaire_compte': 'Doe',
+            'numero_compte_autre_format': '0203040506',
+            'code_bic_swift_banque': 'GKCCBEBB',
+            **cls.new_file_uuids,
+        }
+
+    def setUp(self):
+        # Mock documents
+        patcher = patch("osis_document.api.utils.get_remote_token", return_value="foobar")
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+        patcher = patch("osis_document.api.utils.get_remote_metadata", return_value={"name": "myfile"})
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+        patcher = patch("osis_document.api.utils.confirm_remote_upload", side_effect=lambda token, upload_to: token)
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+        # Reset student
+        self.student.country_of_citizenship = None
+        self.student.save()
+
+        # Reset accounting
+        Accounting.objects.filter(admission_id=self.admission.pk).delete()
+        AccountingFactory(
+            admission_id=self.admission.pk,
+            french_community_study_allowance_application=False,
+            is_staff_child=False,
+            assimilation_situation=TypeSituationAssimilation.AUCUNE_ASSIMILATION.name,
+            assimilation_1_situation_type=ChoixAssimilation1.TITULAIRE_CARTE_ETRANGER.name,
+            assimilation_2_situation_type=ChoixAssimilation2.PROTECTION_SUBSIDIAIRE.name,
+            assimilation_3_situation_type=ChoixAssimilation3.AUTORISATION_SEJOUR_ET_REVENUS_PROFESSIONNELS.name,
+            relationship=LienParente.MERE.name,
+            assimilation_5_situation_type=ChoixAssimilation5.CANDIDATE_REFUGIE_OU_REFUGIE_OU_APATRIDE_OU_PROTECTION_SUBSIDIAIRE_TEMPORAIRE.name,
+            assimilation_6_situation_type=ChoixAssimilation6.A_BOURSE_COOPERATION_DEVELOPPEMENT.name,
+            sport_affiliation=ChoixAffiliationSport.LOUVAIN_WOLUWE.name,
+            solidarity_student=False,
+            account_number_type=ChoixTypeCompteBancaire.IBAN.name,
+            iban_account_number='BE43068999999501',
+            valid_iban=False,
+            other_format_account_number='123456789',
+            bic_swift_code='GKCCBEBB',
+            account_holder_first_name='John',
+            account_holder_last_name='Doe',
+            **self.original_file_uuids,
+        )
+
+    def test_assert_methods_not_allowed(self):
+        self.client.force_authenticate(user=self.student.user)
+        not_allowed_methods = [
+            'delete',
+            'patch',
+            'post',
+        ]
+
+        for method in not_allowed_methods:
+            response = getattr(self.client, method)(self.admission_url)
+            self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 
     def test_forbidden_request_with_other_student(self):
         self.client.force_authenticate(user=self.other_student.user)
@@ -351,293 +503,282 @@ class AccountingAPIViewTestCase(APITestCase):
             response = getattr(self.client, method)(self.admission_url)
             self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
+    def test_get_with_submitted_admission_is_forbidden(self):
+        self.client.force_authenticate(user=self.other_student.user)
+
+        response = self.client.get(self.admission_url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_put_with_submitted_admission_is_forbidden(self):
+        self.client.force_authenticate(user=self.other_student.user)
+
+        response = self.client.put(self.admission_url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_get_accounting_with_student_without_any_academic_experience(self):
+        self.client.force_authenticate(user=self.student.user)
+        response = self.client.get(self.admission_url)
+        self.assertEqual(response.status_code, HTTP_200_OK)
+        assimilation_5_choice = (
+            ChoixAssimilation5.CANDIDATE_REFUGIE_OU_REFUGIE_OU_APATRIDE_OU_PROTECTION_SUBSIDIAIRE_TEMPORAIRE.name
+        )
+        self.assertEqual(
+            response.json(),
+            {
+                'a_nationalite_ue': None,
+                'derniers_etablissements_superieurs_communaute_fr_frequentes': None,
+                'demande_allocation_d_etudes_communaute_francaise_belgique': False,
+                'enfant_personnel': False,
+                'type_situation_assimilation': TypeSituationAssimilation.AUCUNE_ASSIMILATION.name,
+                'sous_type_situation_assimilation_1': ChoixAssimilation1.TITULAIRE_CARTE_ETRANGER.name,
+                'sous_type_situation_assimilation_2': ChoixAssimilation2.PROTECTION_SUBSIDIAIRE.name,
+                'sous_type_situation_assimilation_3': (
+                    ChoixAssimilation3.AUTORISATION_SEJOUR_ET_REVENUS_PROFESSIONNELS.name
+                ),
+                'relation_parente': LienParente.MERE.name,
+                'sous_type_situation_assimilation_5': assimilation_5_choice,
+                'sous_type_situation_assimilation_6': ChoixAssimilation6.A_BOURSE_COOPERATION_DEVELOPPEMENT.name,
+                'affiliation_sport': ChoixAffiliationSport.LOUVAIN_WOLUWE.name,
+                'etudiant_solidaire': False,
+                'type_numero_compte': ChoixTypeCompteBancaire.IBAN.name,
+                'numero_compte_iban': 'BE43068999999501',
+                'iban_valide': False,
+                'prenom_titulaire_compte': 'John',
+                'nom_titulaire_compte': 'Doe',
+                'numero_compte_autre_format': '123456789',
+                'code_bic_swift_banque': 'GKCCBEBB',
+                **self.dto_file_uuids,
+            },
+        )
+
+    def test_get_accounting_with_student_with_educational_experiences(self):
+        self.client.force_authenticate(user=self.student.user)
+        # The candidate attends some high education institute
+        current_year = get_current_year()
+        experiences = [
+            # French community institute -> must be returned
+            EducationalExperienceFactory(
+                person=self.student,
+                obtained_diploma=False,
+                country=self.be_country,
+                institute=OrganizationFactory(
+                    community=CommunityEnum.FRENCH_SPEAKING.name,
+                    code='INSTITUTE',
+                    name='First institute',
+                ),
+            ),
+            # UCL Louvain -> must be excluded
+            EducationalExperienceFactory(
+                person=self.student,
+                obtained_diploma=False,
+                country=self.be_country,
+                institute=OrganizationFactory(
+                    community=CommunityEnum.FRENCH_SPEAKING.name,
+                    code=UCLouvain_acronym,
+                    name='Second institute',
+                ),
+            ),
+            # French community institute -> must be returned
+            EducationalExperienceFactory(
+                person=self.student,
+                obtained_diploma=False,
+                country=self.be_country,
+                institute=OrganizationFactory(
+                    community=CommunityEnum.FRENCH_SPEAKING.name,
+                    code='INSTITUTE',
+                    name='Third institute',
+                ),
+            ),
+            # German community institute -> must be excluded
+            EducationalExperienceFactory(
+                person=self.student,
+                obtained_diploma=False,
+                country=self.be_country,
+                institute=OrganizationFactory(
+                    community=CommunityEnum.GERMAN_SPEAKING.name,
+                    code='INSTITUTE',
+                    name='Fourth institute',
+                ),
+            ),
+        ]
+        for experience in experiences:
+            EducationalExperienceYearFactory(
+                educational_experience=experience,
+                academic_year=AcademicYearFactory(year=current_year),
+            )
+
+        # French community institute but out of the range of require years -> must be excluded
+        experience = EducationalExperienceFactory(
+            person=self.student,
+            obtained_diploma=False,
+            country=self.be_country,
+            institute=OrganizationFactory(
+                community=CommunityEnum.FRENCH_SPEAKING.name,
+                code='INSTITUTE',
+                name='Fourth institute',
+            ),
+        )
+        EducationalExperienceYearFactory(
+            educational_experience=experience,
+            academic_year=AcademicYearFactory(year=2000),
+        )
+
+        response = self.client.get(self.admission_url)
+        last_institutes_attended = response.json().get('derniers_etablissements_superieurs_communaute_fr_frequentes')
+        self.assertIsNotNone(last_institutes_attended)
+        self.assertEqual(last_institutes_attended.get('academic_year'), current_year)
+        self.assertCountEqual(last_institutes_attended.get('names'), ['First institute', 'Third institute'])
+
+    def test_get_accounting_with_student_with_ue_nationality(self):
+        self.client.force_authenticate(user=self.student.user)
+        self.student.country_of_citizenship = CountryFactory(european_union=True)
+        self.student.save()
+        response = self.client.get(self.admission_url)
+        self.assertTrue(response.json().get('a_nationalite_ue'))
+
+    def test_get_accounting_with_student_with_not_ue_nationality(self):
+        self.client.force_authenticate(user=self.student.user)
+        self.student.country_of_citizenship = CountryFactory(european_union=False)
+        self.student.save()
+        response = self.client.get(self.admission_url)
+        self.assertFalse(response.json().get('a_nationalite_ue'))
+
     def test_put_accounting_values_with_student(self):
         self.client.force_authenticate(user=self.student.user)
 
-        response = self.client.put(
-            self.admission_url,
-            data=self.default_api_data,
-        )
+        response = self.client.put(self.admission_url, data=self.default_api_data)
         self.assertEqual(response.status_code, HTTP_200_OK)
 
         # Check updated data
-        accounting = Accounting.objects.get(admission_id=self.admission.pk)
-
-        self.assertEqual(
-            accounting.institute_absence_debts_certificate,
-            [self.file_uuids['attestation_absence_dette_etablissement']],
-        )
-
-        self.assertEqual(
-            accounting.french_community_study_allowance_application,
-            True,
-        )
-        self.assertEqual(
-            accounting.is_staff_child,
-            True,
-        )
-        self.assertEqual(
-            accounting.staff_child_certificate,
-            [self.file_uuids['attestation_enfant_personnel']],
-        )
-
-        self.assertEqual(
-            accounting.assimilation_situation,
-            TypeSituationAssimilation.AUTORISATION_ETABLISSEMENT_OU_RESIDENT_LONGUE_DUREE.name,
-        )
-
-        self.assertEqual(
-            accounting.assimilation_1_situation_type,
-            ChoixAssimilation1.TITULAIRE_CARTE_RESIDENT_LONGUE_DUREE.name,
-        )
-        self.assertEqual(
-            accounting.long_term_resident_card,
-            [self.file_uuids['carte_resident_longue_duree']],
-        )
-        self.assertEqual(
-            accounting.cire_unlimited_stay_foreigner_card,
-            [self.file_uuids['carte_cire_sejour_illimite_etranger']],
-        )
-        self.assertEqual(
-            accounting.ue_family_member_residence_card,
-            [self.file_uuids['carte_sejour_membre_ue']],
-        )
-        self.assertEqual(
-            accounting.ue_family_member_permanent_residence_card,
-            [self.file_uuids['carte_sejour_permanent_membre_ue']],
-        )
-
-        self.assertEqual(
-            accounting.assimilation_2_situation_type,
-            ChoixAssimilation2.DEMANDEUR_ASILE.name,
-        )
-        self.assertEqual(
-            accounting.refugee_a_b_card,
-            [self.file_uuids['carte_a_b_refugie']],
-        )
-        self.assertEqual(
-            accounting.refugees_stateless_annex_25_26,
-            [self.file_uuids['annexe_25_26_refugies_apatrides']],
-        )
-        self.assertEqual(
-            accounting.registration_certificate,
-            [self.file_uuids['attestation_immatriculation']],
-        )
-        self.assertEqual(
-            accounting.a_b_card,
-            [self.file_uuids['carte_a_b']],
-        )
-        self.assertEqual(
-            accounting.subsidiary_protection_decision,
-            [self.file_uuids['decision_protection_subsidiaire']],
-        )
-        self.assertEqual(
-            accounting.temporary_protection_decision,
-            [self.file_uuids['decision_protection_temporaire']],
-        )
-
-        self.assertEqual(
-            accounting.assimilation_3_situation_type,
-            ChoixAssimilation3.AUTORISATION_SEJOUR_ET_REVENUS_DE_REMPLACEMENT.name,
-        )
-        self.assertEqual(
-            accounting.professional_3_month_residence_permit,
-            [self.file_uuids['titre_sejour_3_mois_professionel']],
-        )
-        self.assertEqual(
-            accounting.salary_slips,
-            [self.file_uuids['fiches_remuneration']],
-        )
-        self.assertEqual(
-            accounting.replacement_3_month_residence_permit,
-            [self.file_uuids['titre_sejour_3_mois_remplacement']],
-        )
-        self.assertEqual(
-            accounting.unemployment_benefit_pension_compensation_proof,
-            [self.file_uuids['preuve_allocations_chomage_pension_indemnite']],
-        )
-
-        self.assertEqual(
-            accounting.cpas_certificate,
-            [self.file_uuids['attestation_cpas']],
-        )
-
-        self.assertEqual(
-            accounting.relationship,
-            LienParente.COHABITANT_LEGAL.name,
-        )
-        self.assertEqual(
-            accounting.household_composition_or_birth_certificate,
-            [self.file_uuids['composition_menage_acte_naissance']],
-        )
-        self.assertEqual(
-            accounting.tutorship_act,
-            [self.file_uuids['acte_tutelle']],
-        )
-        self.assertEqual(
-            accounting.household_composition_or_marriage_certificate,
-            [self.file_uuids['composition_menage_acte_mariage']],
-        )
-        self.assertEqual(
-            accounting.legal_cohabitation_certificate,
-            [self.file_uuids['attestation_cohabitation_legale']],
-        )
-        self.assertEqual(
-            accounting.assimilation_5_situation_type,
-            ChoixAssimilation5.A_NATIONALITE_UE.name,
-        )
-        self.assertEqual(
-            accounting.parent_identity_card,
-            [self.file_uuids['carte_identite_parent']],
-        )
-        self.assertEqual(
-            accounting.parent_long_term_residence_permit,
-            [self.file_uuids['titre_sejour_longue_duree_parent']],
-        )
-        self.assertEqual(
-            accounting.parent_refugees_stateless_annex_25_26_or_protection_decision,
-            [self.file_uuids['annexe_25_26_refugies_apatrides_decision_protection_parent']],
-        )
-        self.assertEqual(
-            accounting.parent_3_month_residence_permit,
-            [self.file_uuids['titre_sejour_3_mois_parent']],
-        )
-        self.assertEqual(
-            accounting.parent_salary_slips,
-            [self.file_uuids['fiches_remuneration_parent']],
-        )
-        self.assertEqual(
-            accounting.parent_cpas_certificate,
-            [self.file_uuids['attestation_cpas_parent']],
-        )
-
-        self.assertEqual(
-            accounting.assimilation_6_situation_type,
-            ChoixAssimilation6.A_BOURSE_ETUDES_COMMUNAUTE_FRANCAISE.name,
-        )
-        self.assertEqual(
-            accounting.cfwb_scholarship_decision,
-            [self.file_uuids['decision_bourse_cfwb']],
-        )
-        self.assertEqual(
-            accounting.scholarship_certificate,
-            [self.file_uuids['attestation_boursier']],
-        )
-
-        self.assertEqual(
-            accounting.ue_long_term_stay_identity_document,
-            [self.file_uuids['titre_identite_sejour_longue_duree_ue']],
-        )
-        self.assertEqual(
-            accounting.belgium_residence_permit,
-            [self.file_uuids['titre_sejour_belgique']],
-        )
-
-        self.assertEqual(
-            accounting.sport_affiliation,
-            ChoixAffiliationSport.TOURNAI_UCL.name,
-        )
-        self.assertEqual(
-            accounting.solidarity_student,
-            True,
-        )
-
-        self.assertEqual(
-            accounting.account_number_type,
-            ChoixTypeCompteBancaire.IBAN.name,
-        )
-        self.assertEqual(
-            accounting.iban_account_number,
-            'GB87BARC20658244971655',
-        )
-        self.assertEqual(
-            accounting.account_holder_first_name,
-            'John',
-        )
-        self.assertEqual(
-            accounting.account_holder_last_name,
-            'Doe',
-        )
-        self.assertEqual(
-            accounting.other_format_account_number,
-            '0203040506',
-        )
-        self.assertEqual(
-            accounting.bic_swift_code,
-            'GKCCBEBB',
-        )
-
-        # Check output data
-        response = self.client.get(
-            resolve_url('admission_api_v1:propositions', uuid=self.admission.uuid),
-        )
+        response = self.client.get(self.admission_url)
         self.assertEqual(response.status_code, HTTP_200_OK)
 
-        dto_accounting = self.default_api_data.copy()
-        dto_accounting.pop('uuid_proposition', None)
+        expected_response_data = self.default_api_data.copy()
+        expected_response_data.pop('uuid_proposition')
+        expected_response_data['derniers_etablissements_superieurs_communaute_fr_frequentes'] = None
+        expected_response_data['a_nationalite_ue'] = None
 
-        self.assertEqual(response.json().get('comptabilite'), dto_accounting)
+        self.assertEqual(response.json(), expected_response_data)
 
-    def test_get_proposition_with_empty_accounting(self):
+
+@override_settings(OSIS_DOCUMENT_BASE_URL='http://dummyurl/')
+class ContinuingAccountingAPIViewTestCase(APITestCase):
+    file_uuid = uuid.uuid4()
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.admission = ContinuingEducationAdmissionFactory()
+        other_admission = DoctorateAdmissionFactory(
+            status=ChoixStatutPropositionContinue.ENROLLED.name,
+        )
+
+        # Users
+        cls.student = cls.admission.candidate
+        cls.other_student = other_admission.candidate
+
+        cls.admission_url = resolve_url('admission_api_v1:continuing_accounting', uuid=cls.admission.uuid)
+        cls.other_admission_url = resolve_url('admission_api_v1:continuing_accounting', uuid=other_admission.uuid)
+
+        # Data
+        cls.be_country = CountryFactory(iso_code='BE')
+
+        cls.default_api_data = {
+            'uuid_proposition': cls.admission.uuid,
+            'etudiant_solidaire': False,
+            'type_numero_compte': ChoixTypeCompteBancaire.AUTRE_FORMAT.name,
+            'numero_compte_iban': 'GB87BARC20658244971655',
+            'iban_valide': False,
+            'prenom_titulaire_compte': 'Jim',
+            'nom_titulaire_compte': 'Foe',
+            'numero_compte_autre_format': '0203040506',
+            'code_bic_swift_banque': 'GKCCBEBA',
+        }
+
+    def setUp(self):
+        # Mock documents
+        patcher = patch("osis_document.api.utils.get_remote_token", return_value="foobar")
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+        patcher = patch("osis_document.api.utils.get_remote_metadata", return_value={"name": "myfile"})
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+        patcher = patch("osis_document.api.utils.confirm_remote_upload", side_effect=lambda token, upload_to: token)
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+        # Reset student
+        self.student.country_of_citizenship = None
+        self.student.save()
+
+        # Reset accounting
+        Accounting.objects.filter(admission_id=self.admission.pk).delete()
+        AccountingFactory(
+            admission_id=self.admission.pk,
+            solidarity_student=True,
+            account_number_type=ChoixTypeCompteBancaire.IBAN.name,
+            iban_account_number='BE43068999999501',
+            valid_iban=True,
+            other_format_account_number='123456789',
+            bic_swift_code='GKCCBEBB',
+            account_holder_first_name='John',
+            account_holder_last_name='Doe',
+        )
+
+    def test_assert_methods_not_allowed(self):
+        self.client.force_authenticate(user=self.student.user)
+        not_allowed_methods = [
+            'delete',
+            'patch',
+            'post',
+        ]
+
+        for method in not_allowed_methods:
+            response = getattr(self.client, method)(self.admission_url)
+            self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    def test_forbidden_request_with_other_student(self):
+        self.client.force_authenticate(user=self.other_student.user)
+        forbidden_methods = [
+            'get',
+            'put',
+        ]
+
+        for method in forbidden_methods:
+            response = getattr(self.client, method)(self.admission_url)
+            self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_get_accounting_with_student(self):
         self.client.force_authenticate(user=self.student.user)
 
-        # Check output data
-        response = self.client.get(
-            resolve_url('admission_api_v1:propositions', uuid=self.admission.uuid),
-        )
-
+        response = self.client.get(self.admission_url)
         self.assertEqual(response.status_code, HTTP_200_OK)
         self.assertEqual(
-            response.json().get('comptabilite'),
+            response.json(),
             {
-                'attestation_absence_dette_etablissement': [],
-                'demande_allocation_d_etudes_communaute_francaise_belgique': None,
-                'enfant_personnel': None,
-                'attestation_enfant_personnel': [],
-                'type_situation_assimilation': '',
-                'sous_type_situation_assimilation_1': '',
-                'carte_resident_longue_duree': [],
-                'carte_cire_sejour_illimite_etranger': [],
-                'carte_sejour_membre_ue': [],
-                'carte_sejour_permanent_membre_ue': [],
-                'sous_type_situation_assimilation_2': '',
-                'carte_a_b_refugie': [],
-                'annexe_25_26_refugies_apatrides': [],
-                'attestation_immatriculation': [],
-                'carte_a_b': [],
-                'decision_protection_subsidiaire': [],
-                'decision_protection_temporaire': [],
-                'sous_type_situation_assimilation_3': '',
-                'titre_sejour_3_mois_professionel': [],
-                'fiches_remuneration': [],
-                'titre_sejour_3_mois_remplacement': [],
-                'preuve_allocations_chomage_pension_indemnite': [],
-                'attestation_cpas': [],
-                'relation_parente': '',
-                'sous_type_situation_assimilation_5': '',
-                'composition_menage_acte_naissance': [],
-                'acte_tutelle': [],
-                'composition_menage_acte_mariage': [],
-                'attestation_cohabitation_legale': [],
-                'carte_identite_parent': [],
-                'titre_sejour_longue_duree_parent': [],
-                'annexe_25_26_refugies_apatrides_decision_protection_parent': [],
-                'titre_sejour_3_mois_parent': [],
-                'fiches_remuneration_parent': [],
-                'attestation_cpas_parent': [],
-                'sous_type_situation_assimilation_6': '',
-                'decision_bourse_cfwb': [],
-                'attestation_boursier': [],
-                'titre_identite_sejour_longue_duree_ue': [],
-                'titre_sejour_belgique': [],
-                'affiliation_sport': '',
-                'etudiant_solidaire': None,
-                'type_numero_compte': '',
-                'numero_compte_iban': '',
-                'iban_valide': None,
-                'numero_compte_autre_format': '',
-                'code_bic_swift_banque': '',
-                'prenom_titulaire_compte': '',
-                'nom_titulaire_compte': '',
+                'etudiant_solidaire': True,
+                'type_numero_compte': ChoixTypeCompteBancaire.IBAN.name,
+                'numero_compte_iban': 'BE43068999999501',
+                'iban_valide': True,
+                'numero_compte_autre_format': '123456789',
+                'code_bic_swift_banque': 'GKCCBEBB',
+                'prenom_titulaire_compte': 'John',
+                'nom_titulaire_compte': 'Doe',
             },
         )
+
+    def test_put_accounting_values_with_student(self):
+        self.client.force_authenticate(user=self.student.user)
+
+        response = self.client.put(self.admission_url, data=self.default_api_data)
+        self.assertEqual(response.status_code, HTTP_200_OK)
+
+        # Check updated data
+        response = self.client.get(self.admission_url)
+        self.assertEqual(response.status_code, HTTP_200_OK)
+
+        expected_response_data = self.default_api_data.copy()
+        expected_response_data.pop('uuid_proposition')
+
+        self.assertEqual(response.json(), expected_response_data)

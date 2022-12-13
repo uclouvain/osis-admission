@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Admission API
-  version: 1.0.52
+  version: 1.0.53
   description: This API delivers data for the Admission project.
   contact:
     name: UCLouvain - OSIS
@@ -1401,7 +1401,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AccountingConditions'
+                $ref: '#/components/schemas/DoctorateEducationAccountingDTO'
           description: ''
         '400':
           $ref: '#/components/responses/BadRequest'
@@ -1430,7 +1430,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CompleterComptabilitePropositionCommand'
+              $ref: '#/components/schemas/CompleterComptabilitePropositionDoctoraleCommand'
       responses:
         200:
           content:
@@ -2510,7 +2510,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AccountingConditions'
+                $ref: '#/components/schemas/GeneralEducationAccountingDTO'
           description: ''
         '400':
           $ref: '#/components/responses/BadRequest'
@@ -2538,12 +2538,14 @@ paths:
       requestBody:
         content:
           application/json:
-            schema: {}
+            schema:
+              $ref: '#/components/schemas/CompleterComptabilitePropositionGeneraleCommand'
       responses:
         200:
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: '#/components/schemas/PropositionIdentityDTO'
           description: ''
         '400':
           $ref: '#/components/responses/BadRequest'
@@ -3225,7 +3227,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AccountingConditions'
+                $ref: '#/components/schemas/ContinuingEducationAccountingDTO'
           description: ''
         '400':
           $ref: '#/components/responses/BadRequest'
@@ -3253,12 +3255,14 @@ paths:
       requestBody:
         content:
           application/json:
-            schema: {}
+            schema:
+              $ref: '#/components/schemas/CompleterComptabilitePropositionContinueCommand'
       responses:
         200:
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: '#/components/schemas/PropositionIdentityDTO'
           description: ''
         '400':
           $ref: '#/components/responses/BadRequest'
@@ -6266,205 +6270,6 @@ components:
                 type: string
               detail:
                 type: string
-        comptabilite:
-          type: object
-          properties:
-            attestation_absence_dette_etablissement:
-              type: array
-              items:
-                type: string
-            demande_allocation_d_etudes_communaute_francaise_belgique:
-              type: boolean
-              nullable: true
-            enfant_personnel:
-              type: boolean
-              nullable: true
-            attestation_enfant_personnel:
-              type: array
-              items:
-                type: string
-            type_situation_assimilation:
-              type: string
-            sous_type_situation_assimilation_1:
-              type: string
-            carte_resident_longue_duree:
-              type: array
-              items:
-                type: string
-            carte_cire_sejour_illimite_etranger:
-              type: array
-              items:
-                type: string
-            carte_sejour_membre_ue:
-              type: array
-              items:
-                type: string
-            carte_sejour_permanent_membre_ue:
-              type: array
-              items:
-                type: string
-            sous_type_situation_assimilation_2:
-              type: string
-            carte_a_b_refugie:
-              type: array
-              items:
-                type: string
-            annexe_25_26_refugies_apatrides:
-              type: array
-              items:
-                type: string
-            attestation_immatriculation:
-              type: array
-              items:
-                type: string
-            carte_a_b:
-              type: array
-              items:
-                type: string
-            decision_protection_subsidiaire:
-              type: array
-              items:
-                type: string
-            decision_protection_temporaire:
-              type: array
-              items:
-                type: string
-            sous_type_situation_assimilation_3:
-              type: string
-            titre_sejour_3_mois_professionel:
-              type: array
-              items:
-                type: string
-            fiches_remuneration:
-              type: array
-              items:
-                type: string
-            titre_sejour_3_mois_remplacement:
-              type: array
-              items:
-                type: string
-            preuve_allocations_chomage_pension_indemnite:
-              type: array
-              items:
-                type: string
-            attestation_cpas:
-              type: array
-              items:
-                type: string
-            relation_parente:
-              type: string
-            sous_type_situation_assimilation_5:
-              type: string
-            composition_menage_acte_naissance:
-              type: array
-              items:
-                type: string
-            acte_tutelle:
-              type: array
-              items:
-                type: string
-            composition_menage_acte_mariage:
-              type: array
-              items:
-                type: string
-            attestation_cohabitation_legale:
-              type: array
-              items:
-                type: string
-            carte_identite_parent:
-              type: array
-              items:
-                type: string
-            titre_sejour_longue_duree_parent:
-              type: array
-              items:
-                type: string
-            annexe_25_26_refugies_apatrides_decision_protection_parent:
-              type: array
-              items:
-                type: string
-            titre_sejour_3_mois_parent:
-              type: array
-              items:
-                type: string
-            fiches_remuneration_parent:
-              type: array
-              items:
-                type: string
-            attestation_cpas_parent:
-              type: array
-              items:
-                type: string
-            sous_type_situation_assimilation_6:
-              type: string
-            decision_bourse_cfwb:
-              type: array
-              items:
-                type: string
-            attestation_boursier:
-              type: array
-              items:
-                type: string
-            titre_identite_sejour_longue_duree_ue:
-              type: array
-              items:
-                type: string
-            titre_sejour_belgique:
-              type: array
-              items:
-                type: string
-            affiliation_sport:
-              type: string
-            etudiant_solidaire:
-              type: boolean
-              nullable: true
-            type_numero_compte:
-              type: string
-            numero_compte_iban:
-              type: string
-            iban_valide:
-              type: boolean
-              nullable: true
-            numero_compte_autre_format:
-              type: string
-            code_bic_swift_banque:
-              type: string
-            prenom_titulaire_compte:
-              type: string
-            nom_titulaire_compte:
-              type: string
-          required:
-          - attestation_absence_dette_etablissement
-          - attestation_enfant_personnel
-          - carte_resident_longue_duree
-          - carte_cire_sejour_illimite_etranger
-          - carte_sejour_membre_ue
-          - carte_sejour_permanent_membre_ue
-          - carte_a_b_refugie
-          - annexe_25_26_refugies_apatrides
-          - attestation_immatriculation
-          - carte_a_b
-          - decision_protection_subsidiaire
-          - decision_protection_temporaire
-          - titre_sejour_3_mois_professionel
-          - fiches_remuneration
-          - titre_sejour_3_mois_remplacement
-          - preuve_allocations_chomage_pension_indemnite
-          - attestation_cpas
-          - composition_menage_acte_naissance
-          - acte_tutelle
-          - composition_menage_acte_mariage
-          - attestation_cohabitation_legale
-          - carte_identite_parent
-          - titre_sejour_longue_duree_parent
-          - annexe_25_26_refugies_apatrides_decision_protection_parent
-          - titre_sejour_3_mois_parent
-          - fiches_remuneration_parent
-          - attestation_cpas_parent
-          - decision_bourse_cfwb
-          - attestation_boursier
-          - titre_identite_sejour_longue_duree_ue
-          - titre_sejour_belgique
         bourse_erasmus_mundus:
           type: object
           properties:
@@ -6508,7 +6313,6 @@ components:
       - fiche_archive_signatures_envoyees
       - statut
       - erreurs
-      - comptabilite
       - curriculum
     PropositionErrors:
       type: object
@@ -6567,14 +6371,32 @@ components:
       - demande_ouverture
       - convention
       - autres_documents
-    AccountingConditions:
+    DoctorateEducationAccountingDTO:
       type: object
       properties:
-        has_ue_nationality:
+        attestation_absence_dette_etablissement:
+          type: array
+          items:
+            type: string
+        etudiant_solidaire:
           type: boolean
-          readOnly: true
           nullable: true
-        last_french_community_high_education_institutes_attended:
+        type_numero_compte:
+          type: string
+        numero_compte_iban:
+          type: string
+        iban_valide:
+          type: boolean
+          nullable: true
+        numero_compte_autre_format:
+          type: string
+        code_bic_swift_banque:
+          type: string
+        prenom_titulaire_compte:
+          type: string
+        nom_titulaire_compte:
+          type: string
+        derniers_etablissements_superieurs_communaute_fr_frequentes:
           type: object
           properties:
             academic_year:
@@ -6585,6 +6407,8 @@ components:
                 type: string
           readOnly: true
           nullable: true
+      required:
+      - attestation_absence_dette_etablissement
     SpecificQuestion:
       type: object
       properties:
@@ -8227,6 +8051,220 @@ components:
           format: date-time
           readOnly: true
           nullable: true
+    GeneralEducationAccountingDTO:
+      type: object
+      properties:
+        attestation_absence_dette_etablissement:
+          type: array
+          items:
+            type: string
+        demande_allocation_d_etudes_communaute_francaise_belgique:
+          type: boolean
+          nullable: true
+        enfant_personnel:
+          type: boolean
+          nullable: true
+        attestation_enfant_personnel:
+          type: array
+          items:
+            type: string
+        type_situation_assimilation:
+          type: string
+        sous_type_situation_assimilation_1:
+          type: string
+        carte_resident_longue_duree:
+          type: array
+          items:
+            type: string
+        carte_cire_sejour_illimite_etranger:
+          type: array
+          items:
+            type: string
+        carte_sejour_membre_ue:
+          type: array
+          items:
+            type: string
+        carte_sejour_permanent_membre_ue:
+          type: array
+          items:
+            type: string
+        sous_type_situation_assimilation_2:
+          type: string
+        carte_a_b_refugie:
+          type: array
+          items:
+            type: string
+        annexe_25_26_refugies_apatrides:
+          type: array
+          items:
+            type: string
+        attestation_immatriculation:
+          type: array
+          items:
+            type: string
+        carte_a_b:
+          type: array
+          items:
+            type: string
+        decision_protection_subsidiaire:
+          type: array
+          items:
+            type: string
+        decision_protection_temporaire:
+          type: array
+          items:
+            type: string
+        sous_type_situation_assimilation_3:
+          type: string
+        titre_sejour_3_mois_professionel:
+          type: array
+          items:
+            type: string
+        fiches_remuneration:
+          type: array
+          items:
+            type: string
+        titre_sejour_3_mois_remplacement:
+          type: array
+          items:
+            type: string
+        preuve_allocations_chomage_pension_indemnite:
+          type: array
+          items:
+            type: string
+        attestation_cpas:
+          type: array
+          items:
+            type: string
+        relation_parente:
+          type: string
+        sous_type_situation_assimilation_5:
+          type: string
+        composition_menage_acte_naissance:
+          type: array
+          items:
+            type: string
+        acte_tutelle:
+          type: array
+          items:
+            type: string
+        composition_menage_acte_mariage:
+          type: array
+          items:
+            type: string
+        attestation_cohabitation_legale:
+          type: array
+          items:
+            type: string
+        carte_identite_parent:
+          type: array
+          items:
+            type: string
+        titre_sejour_longue_duree_parent:
+          type: array
+          items:
+            type: string
+        annexe_25_26_refugies_apatrides_decision_protection_parent:
+          type: array
+          items:
+            type: string
+        titre_sejour_3_mois_parent:
+          type: array
+          items:
+            type: string
+        fiches_remuneration_parent:
+          type: array
+          items:
+            type: string
+        attestation_cpas_parent:
+          type: array
+          items:
+            type: string
+        sous_type_situation_assimilation_6:
+          type: string
+        decision_bourse_cfwb:
+          type: array
+          items:
+            type: string
+        attestation_boursier:
+          type: array
+          items:
+            type: string
+        titre_identite_sejour_longue_duree_ue:
+          type: array
+          items:
+            type: string
+        titre_sejour_belgique:
+          type: array
+          items:
+            type: string
+        affiliation_sport:
+          type: string
+        etudiant_solidaire:
+          type: boolean
+          nullable: true
+        type_numero_compte:
+          type: string
+        numero_compte_iban:
+          type: string
+        iban_valide:
+          type: boolean
+          nullable: true
+        numero_compte_autre_format:
+          type: string
+        code_bic_swift_banque:
+          type: string
+        prenom_titulaire_compte:
+          type: string
+        nom_titulaire_compte:
+          type: string
+        derniers_etablissements_superieurs_communaute_fr_frequentes:
+          type: object
+          properties:
+            academic_year:
+              type: integer
+            names:
+              type: array
+              items:
+                type: string
+          readOnly: true
+          nullable: true
+        a_nationalite_ue:
+          type: boolean
+          readOnly: true
+          nullable: true
+      required:
+      - attestation_absence_dette_etablissement
+      - attestation_enfant_personnel
+      - carte_resident_longue_duree
+      - carte_cire_sejour_illimite_etranger
+      - carte_sejour_membre_ue
+      - carte_sejour_permanent_membre_ue
+      - carte_a_b_refugie
+      - annexe_25_26_refugies_apatrides
+      - attestation_immatriculation
+      - carte_a_b
+      - decision_protection_subsidiaire
+      - decision_protection_temporaire
+      - titre_sejour_3_mois_professionel
+      - fiches_remuneration
+      - titre_sejour_3_mois_remplacement
+      - preuve_allocations_chomage_pension_indemnite
+      - attestation_cpas
+      - composition_menage_acte_naissance
+      - acte_tutelle
+      - composition_menage_acte_mariage
+      - attestation_cohabitation_legale
+      - carte_identite_parent
+      - titre_sejour_longue_duree_parent
+      - annexe_25_26_refugies_apatrides_decision_protection_parent
+      - titre_sejour_3_mois_parent
+      - fiches_remuneration_parent
+      - attestation_cpas_parent
+      - decision_bourse_cfwb
+      - attestation_boursier
+      - titre_identite_sejour_longue_duree_ue
+      - titre_sejour_belgique
     ContinuingEducationPropositionDTO:
       type: object
       properties:
@@ -8334,6 +8372,27 @@ components:
       - erreurs
       - curriculum
       - equivalence_diplome
+    ContinuingEducationAccountingDTO:
+      type: object
+      properties:
+        etudiant_solidaire:
+          type: boolean
+          nullable: true
+        type_numero_compte:
+          type: string
+        numero_compte_iban:
+          type: string
+        iban_valide:
+          type: boolean
+          nullable: true
+        numero_compte_autre_format:
+          type: string
+        code_bic_swift_banque:
+          type: string
+        prenom_titulaire_compte:
+          type: string
+        nom_titulaire_compte:
+          type: string
     SectorDTO:
       type: object
       properties:
@@ -8797,7 +8856,167 @@ components:
       - demande_ouverture
       - convention
       - autres_documents
-    CompleterComptabilitePropositionCommand:
+    CompleterComptabilitePropositionDoctoraleCommand:
+      type: object
+      properties:
+        uuid_proposition:
+          type: string
+        attestation_absence_dette_etablissement:
+          type: array
+          items:
+            type: string
+        etudiant_solidaire:
+          type: boolean
+          nullable: true
+        type_numero_compte:
+          type: string
+        numero_compte_iban:
+          type: string
+        iban_valide:
+          type: boolean
+          nullable: true
+        numero_compte_autre_format:
+          type: string
+        code_bic_swift_banque:
+          type: string
+        prenom_titulaire_compte:
+          type: string
+        nom_titulaire_compte:
+          type: string
+      required:
+      - uuid_proposition
+      - attestation_absence_dette_etablissement
+    ModifierTypeAdmissionDoctoraleCommand:
+      type: object
+      properties:
+        uuid_proposition:
+          type: string
+        type_admission:
+          type: string
+        justification:
+          type: string
+        bourse_erasmus_mundus:
+          type: string
+        reponses_questions_specifiques:
+          type: object
+      required:
+      - uuid_proposition
+      - type_admission
+    DesignerPromoteurReferenceCommand:
+      type: object
+      properties:
+        uuid_proposition:
+          type: string
+        matricule:
+          type: string
+      required:
+      - uuid_proposition
+      - matricule
+    RefuserPropositionCommand:
+      type: object
+      properties:
+        matricule:
+          type: string
+        motif_refus:
+          type: string
+        commentaire_interne:
+          type: string
+        commentaire_externe:
+          type: string
+      required:
+      - matricule
+      - motif_refus
+    SubmitConfirmationPaperCommand:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        rapport_recherche:
+          type: array
+          items:
+            type: string
+        proces_verbal_ca:
+          type: array
+          items:
+            type: string
+        avis_renouvellement_mandat_recherche:
+          type: array
+          items:
+            type: string
+      required:
+      - date
+      - rapport_recherche
+      - proces_verbal_ca
+      - avis_renouvellement_mandat_recherche
+    CompleteConfirmationPaperByPromoterCommand:
+      type: object
+      properties:
+        proces_verbal_ca:
+          type: array
+          items:
+            type: string
+        avis_renouvellement_mandat_recherche:
+          type: array
+          items:
+            type: string
+      required:
+      - proces_verbal_ca
+      - avis_renouvellement_mandat_recherche
+    ModifierChoixFormationGeneraleCommand:
+      type: object
+      properties:
+        uuid_proposition:
+          type: string
+        sigle_formation:
+          type: string
+        annee_formation:
+          type: integer
+        bourse_double_diplome:
+          type: string
+        bourse_internationale:
+          type: string
+        bourse_erasmus_mundus:
+          type: string
+        reponses_questions_specifiques:
+          type: object
+      required:
+      - uuid_proposition
+      - sigle_formation
+      - annee_formation
+    ModifierQuestionsSpecifiquesCommand:
+      type: object
+      properties:
+        specific_question_answers:
+          type: object
+    GeneralEducationCompleterCurriculumCommand:
+      type: object
+      properties:
+        uuid_proposition:
+          type: string
+        continuation_cycle_bachelier:
+          type: boolean
+          nullable: true
+        attestation_continuation_cycle_bachelier:
+          type: array
+          items:
+            type: string
+        curriculum:
+          type: array
+          items:
+            type: string
+        equivalence_diplome:
+          type: array
+          items:
+            type: string
+        reponses_questions_specifiques:
+          type: object
+      required:
+      - uuid_proposition
+      - attestation_continuation_cycle_bachelier
+      - curriculum
+      - equivalence_diplome
+    CompleterComptabilitePropositionGeneraleCommand:
       type: object
       properties:
         uuid_proposition:
@@ -8999,136 +9218,6 @@ components:
       - attestation_boursier
       - titre_identite_sejour_longue_duree_ue
       - titre_sejour_belgique
-    ModifierTypeAdmissionDoctoraleCommand:
-      type: object
-      properties:
-        uuid_proposition:
-          type: string
-        type_admission:
-          type: string
-        justification:
-          type: string
-        bourse_erasmus_mundus:
-          type: string
-        reponses_questions_specifiques:
-          type: object
-      required:
-      - uuid_proposition
-      - type_admission
-    DesignerPromoteurReferenceCommand:
-      type: object
-      properties:
-        uuid_proposition:
-          type: string
-        matricule:
-          type: string
-      required:
-      - uuid_proposition
-      - matricule
-    RefuserPropositionCommand:
-      type: object
-      properties:
-        matricule:
-          type: string
-        motif_refus:
-          type: string
-        commentaire_interne:
-          type: string
-        commentaire_externe:
-          type: string
-      required:
-      - matricule
-      - motif_refus
-    SubmitConfirmationPaperCommand:
-      type: object
-      properties:
-        date:
-          type: string
-          format: date
-        rapport_recherche:
-          type: array
-          items:
-            type: string
-        proces_verbal_ca:
-          type: array
-          items:
-            type: string
-        avis_renouvellement_mandat_recherche:
-          type: array
-          items:
-            type: string
-      required:
-      - date
-      - rapport_recherche
-      - proces_verbal_ca
-      - avis_renouvellement_mandat_recherche
-    CompleteConfirmationPaperByPromoterCommand:
-      type: object
-      properties:
-        proces_verbal_ca:
-          type: array
-          items:
-            type: string
-        avis_renouvellement_mandat_recherche:
-          type: array
-          items:
-            type: string
-      required:
-      - proces_verbal_ca
-      - avis_renouvellement_mandat_recherche
-    ModifierChoixFormationGeneraleCommand:
-      type: object
-      properties:
-        uuid_proposition:
-          type: string
-        sigle_formation:
-          type: string
-        annee_formation:
-          type: integer
-        bourse_double_diplome:
-          type: string
-        bourse_internationale:
-          type: string
-        bourse_erasmus_mundus:
-          type: string
-        reponses_questions_specifiques:
-          type: object
-      required:
-      - uuid_proposition
-      - sigle_formation
-      - annee_formation
-    ModifierQuestionsSpecifiquesCommand:
-      type: object
-      properties:
-        specific_question_answers:
-          type: object
-    GeneralEducationCompleterCurriculumCommand:
-      type: object
-      properties:
-        uuid_proposition:
-          type: string
-        continuation_cycle_bachelier:
-          type: boolean
-          nullable: true
-        attestation_continuation_cycle_bachelier:
-          type: array
-          items:
-            type: string
-        curriculum:
-          type: array
-          items:
-            type: string
-        equivalence_diplome:
-          type: array
-          items:
-            type: string
-        reponses_questions_specifiques:
-          type: object
-      required:
-      - uuid_proposition
-      - attestation_continuation_cycle_bachelier
-      - curriculum
-      - equivalence_diplome
     ModifierChoixFormationContinueCommand:
       type: object
       properties:
@@ -9163,6 +9252,31 @@ components:
       - uuid_proposition
       - curriculum
       - equivalence_diplome
+    CompleterComptabilitePropositionContinueCommand:
+      type: object
+      properties:
+        uuid_proposition:
+          type: string
+        etudiant_solidaire:
+          type: boolean
+          nullable: true
+        type_numero_compte:
+          type: string
+        numero_compte_iban:
+          type: string
+        iban_valide:
+          type: boolean
+          nullable: true
+        numero_compte_autre_format:
+          type: string
+        code_bic_swift_banque:
+          type: string
+        prenom_titulaire_compte:
+          type: string
+        nom_titulaire_compte:
+          type: string
+      required:
+      - uuid_proposition
     Error:
       type: object
       properties:

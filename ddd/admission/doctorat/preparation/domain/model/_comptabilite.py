@@ -26,17 +26,7 @@
 from typing import List, Optional
 
 import attr
-from admission.ddd.admission.doctorat.preparation.domain.model.enums.comptabilite import (
-    ChoixAffiliationSport,
-    ChoixAssimilation1,
-    ChoixAssimilation2,
-    ChoixAssimilation3,
-    ChoixAssimilation5,
-    ChoixAssimilation6,
-    ChoixTypeCompteBancaire,
-    LienParente,
-    TypeSituationAssimilation,
-)
+from admission.ddd.admission.enums.comptabilite import ChoixTypeCompteBancaire
 
 from osis_common.ddd import interface
 
@@ -46,65 +36,7 @@ class Comptabilite(interface.ValueObject):
     # Absence de dettes
     attestation_absence_dette_etablissement: List[str] = attr.Factory(list)
 
-    # Réduction des droits d'inscription
-    demande_allocation_d_etudes_communaute_francaise_belgique: Optional[bool] = None
-    enfant_personnel: Optional[bool] = None
-    attestation_enfant_personnel: List[str] = attr.Factory(list)
-
-    # Assimilation
-    type_situation_assimilation: Optional[TypeSituationAssimilation] = None
-
-    # Assimilation 1
-    sous_type_situation_assimilation_1: Optional[ChoixAssimilation1] = None
-    carte_resident_longue_duree: List[str] = attr.Factory(list)
-    carte_cire_sejour_illimite_etranger: List[str] = attr.Factory(list)
-    carte_sejour_membre_ue: List[str] = attr.Factory(list)
-    carte_sejour_permanent_membre_ue: List[str] = attr.Factory(list)
-
-    # Assimilation 2
-    sous_type_situation_assimilation_2: Optional[ChoixAssimilation2] = None
-    carte_a_b_refugie: List[str] = attr.Factory(list)
-    annexe_25_26_refugies_apatrides: List[str] = attr.Factory(list)
-    attestation_immatriculation: List[str] = attr.Factory(list)
-    carte_a_b: List[str] = attr.Factory(list)
-    decision_protection_subsidiaire: List[str] = attr.Factory(list)
-    decision_protection_temporaire: List[str] = attr.Factory(list)
-
-    # Assimilation 3
-    sous_type_situation_assimilation_3: Optional[ChoixAssimilation3] = None
-    titre_sejour_3_mois_professionel: List[str] = attr.Factory(list)
-    fiches_remuneration: List[str] = attr.Factory(list)
-    titre_sejour_3_mois_remplacement: List[str] = attr.Factory(list)
-    preuve_allocations_chomage_pension_indemnite: List[str] = attr.Factory(list)
-
-    # Assimilation 4
-    attestation_cpas: List[str] = attr.Factory(list)
-
-    # Assimilation 5
-    relation_parente: Optional[LienParente] = None
-    sous_type_situation_assimilation_5: Optional[ChoixAssimilation5] = None
-    composition_menage_acte_naissance: List[str] = attr.Factory(list)
-    acte_tutelle: List[str] = attr.Factory(list)
-    composition_menage_acte_mariage: List[str] = attr.Factory(list)
-    attestation_cohabitation_legale: List[str] = attr.Factory(list)
-    carte_identite_parent: List[str] = attr.Factory(list)
-    titre_sejour_longue_duree_parent: List[str] = attr.Factory(list)
-    annexe_25_26_refugies_apatrides_decision_protection_parent: List[str] = attr.Factory(list)
-    titre_sejour_3_mois_parent: List[str] = attr.Factory(list)
-    fiches_remuneration_parent: List[str] = attr.Factory(list)
-    attestation_cpas_parent: List[str] = attr.Factory(list)
-
-    # Assimilation 6
-    sous_type_situation_assimilation_6: Optional[ChoixAssimilation6] = None
-    decision_bourse_cfwb: List[str] = attr.Factory(list)
-    attestation_boursier: List[str] = attr.Factory(list)
-
-    # Assimilation 7
-    titre_identite_sejour_longue_duree_ue: List[str] = attr.Factory(list)
-    titre_sejour_belgique: List[str] = attr.Factory(list)
-
     # Affiliations
-    affiliation_sport: Optional[ChoixAffiliationSport] = None
     etudiant_solidaire: Optional[bool] = None
 
     # Compte bancaire

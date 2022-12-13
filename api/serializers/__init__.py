@@ -47,7 +47,14 @@ from .approvals import (
 )
 from .confirmation import *
 from .doctorate import *
-from .accounting import CompleterComptabilitePropositionCommandSerializer, AccountingConditionsSerializer
+from .accounting import (
+    ContinuingEducationAccountingDTOSerializer,
+    DoctorateEducationAccountingDTOSerializer,
+    GeneralEducationAccountingDTOSerializer,
+    CompleterComptabilitePropositionContinueCommandSerializer,
+    CompleterComptabilitePropositionDoctoraleCommandSerializer,
+    CompleterComptabilitePropositionGeneraleCommandSerializer,
+)
 from .scholarship import ScholarshipSerializer
 from .campus import CampusSerializer
 from .training_choice import (

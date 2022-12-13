@@ -117,9 +117,9 @@ class GeneralPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase):
                 'update_specific_question',
                 'retrieve_accounting',
                 'destroy_proposition',
+                'update_accounting',
             ],
             forbidden_actions=[
-                'update_accounting',
             ],
         )
 
@@ -214,9 +214,9 @@ class ContinuingPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase
                 'update_specific_question',
                 'retrieve_accounting',
                 'destroy_proposition',
+                'update_accounting',
             ],
             forbidden_actions=[
-                'update_accounting',
             ],
         )
 

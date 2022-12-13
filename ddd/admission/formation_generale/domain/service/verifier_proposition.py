@@ -89,6 +89,12 @@ class VerifierProposition(interface.DomainService):
                 questions_specifiques,
             ),
             partial(
+                profil_candidat_service.verifier_comptabilite_formation_generale,
+                proposition_candidat,
+                profil_candidat_translator,
+                annee_courante,
+            ),
+            partial(
                 VerifierQuestionsSpecifiques.verifier_onglet_etudes_secondaires,
                 proposition_candidat,
                 questions_specifiques,

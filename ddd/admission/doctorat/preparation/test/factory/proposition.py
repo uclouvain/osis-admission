@@ -44,15 +44,13 @@ from admission.ddd.admission.doctorat.preparation.domain.model._financement impo
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     BourseRecherche,
-    ChoixAffiliationSport,
     ChoixLangueRedactionThese,
     ChoixSousDomaineSciences,
     ChoixStatutProposition,
     ChoixTypeAdmission,
-    ChoixTypeCompteBancaire,
     ChoixTypeFinancement,
-    TypeSituationAssimilation,
 )
+from admission.ddd.admission.enums import ChoixTypeCompteBancaire
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition, PropositionIdentity
 from admission.ddd.admission.test.factory.formation import FormationIdentityFactory
 
@@ -93,53 +91,14 @@ class _ComptabiliteFactory(factory.Factory):
         model = Comptabilite
         abstract = False
 
-    demande_allocation_d_etudes_communaute_francaise_belgique = False
-    enfant_personnel = False
-    type_situation_assimilation = TypeSituationAssimilation.AUCUNE_ASSIMILATION
-    affiliation_sport = ChoixAffiliationSport.NON
-    etudiant_solidaire = False
-    type_numero_compte = ChoixTypeCompteBancaire.NON
-
+    # Absence de dettes
     attestation_absence_dette_etablissement = ['file_token.pdf']
 
-    attestation_enfant_personnel = ['file_token.pdf']
+    # Affiliations
+    etudiant_solidaire = False
 
-    carte_resident_longue_duree = ['file_token.pdf']
-    carte_cire_sejour_illimite_etranger = ['file_token.pdf']
-    carte_sejour_membre_ue = ['file_token.pdf']
-    carte_sejour_permanent_membre_ue = ['file_token.pdf']
-
-    carte_a_b_refugie = ['file_token.pdf']
-    annexe_25_26_refugies_apatrides = ['file_token.pdf']
-    attestation_immatriculation = ['file_token.pdf']
-    carte_a_b = ['file_token.pdf']
-    decision_protection_subsidiaire = ['file_token.pdf']
-    decision_protection_temporaire = ['file_token.pdf']
-
-    titre_sejour_3_mois_professionel = ['file_token.pdf']
-    fiches_remuneration = ['file_token.pdf']
-    titre_sejour_3_mois_remplacement = ['file_token.pdf']
-    preuve_allocations_chomage_pension_indemnite = ['file_token.pdf']
-
-    attestation_cpas = ['file_token.pdf']
-
-    composition_menage_acte_naissance = ['file_token.pdf']
-    acte_tutelle = ['file_token.pdf']
-    composition_menage_acte_mariage = ['file_token.pdf']
-    attestation_cohabitation_legale = ['file_token.pdf']
-    carte_identite_parent = ['file_token.pdf']
-    titre_sejour_longue_duree_parent = ['file_token.pdf']
-    annexe_25_26_refugies_apatrides_decision_protection_parent = ['file_token.pdf']
-    titre_sejour_3_mois_parent = ['file_token.pdf']
-    fiches_remuneration_parent = ['file_token.pdf']
-    attestation_cpas_parent = ['file_token.pdf']
-
-    decision_bourse_cfwb = ['file_token.pdf']
-    attestation_boursier = ['file_token.pdf']
-
-    titre_identite_sejour_longue_duree_ue = ['file_token.pdf']
-    titre_sejour_belgique = ['file_token.pdf']
-
+    # Compte bancaire
+    type_numero_compte = ChoixTypeCompteBancaire.NON
     numero_compte_iban = 'BE43068999999501'
     iban_valide = True
     numero_compte_autre_format = '123456'

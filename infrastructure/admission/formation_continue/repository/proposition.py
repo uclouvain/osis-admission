@@ -29,7 +29,7 @@ from django.conf import settings
 from django.utils.translation import get_language
 
 from admission.auth.roles.candidate import Candidate
-from admission.contrib.models import ContinuingEducationAdmissionProxy
+from admission.contrib.models import ContinuingEducationAdmissionProxy, Accounting
 from admission.contrib.models.continuing_education import ContinuingEducationAdmission
 from admission.ddd.admission.domain.builder.formation_identity import FormationIdentityBuilder
 from admission.ddd.admission.dtos.formation import FormationDTO
@@ -42,6 +42,7 @@ from admission.ddd.admission.formation_continue.domain.validator.exceptions impo
 from admission.ddd.admission.formation_continue.dtos import PropositionDTO
 from admission.ddd.admission.formation_continue.repository.i_proposition import IPropositionRepository
 from base.models.academic_year import AcademicYear
+from admission.infrastructure.admission.formation_continue.repository._comptabilite import get_accounting_from_admission
 from base.models.education_group_year import EducationGroupYear
 from base.models.person import Person
 from osis_common.ddd.interface import ApplicationService
@@ -88,7 +89,7 @@ class PropositionRepository(IPropositionRepository):
         )
         candidate = Person.objects.get(global_id=entity.matricule_candidat)
 
-        ContinuingEducationAdmission.objects.update_or_create(
+        admission, _ = ContinuingEducationAdmission.objects.update_or_create(
             uuid=entity.entity_id.uuid,
             defaults={
                 'candidate': candidate,
@@ -105,6 +106,25 @@ class PropositionRepository(IPropositionRepository):
         )
 
         Candidate.objects.get_or_create(person=candidate)
+        cls._sauvegarder_comptabilite(admission, entity)
+
+    @classmethod
+    def _sauvegarder_comptabilite(cls, admission: ContinuingEducationAdmission, entity: Proposition):
+        Accounting.objects.update_or_create(
+            admission=admission,
+            defaults={
+                'solidarity_student': entity.comptabilite.etudiant_solidaire,
+                'account_number_type': entity.comptabilite.type_numero_compte.name
+                if entity.comptabilite.type_numero_compte
+                else '',
+                'iban_account_number': entity.comptabilite.numero_compte_iban,
+                'valid_iban': entity.comptabilite.iban_valide,
+                'other_format_account_number': entity.comptabilite.numero_compte_autre_format,
+                'bic_swift_code': entity.comptabilite.code_bic_swift_banque,
+                'account_holder_first_name': entity.comptabilite.prenom_titulaire_compte,
+                'account_holder_last_name': entity.comptabilite.nom_titulaire_compte,
+            },
+        )
 
     @classmethod
     def get_dto(cls, entity_id: 'PropositionIdentity') -> 'PropositionDTO':
@@ -127,6 +147,7 @@ class PropositionRepository(IPropositionRepository):
             reponses_questions_specifiques=admission.specific_question_answers,
             curriculum=admission.curriculum,
             equivalence_diplome=admission.diploma_equivalence,
+            comptabilite=get_accounting_from_admission(admission=admission),
         )
 
     @classmethod

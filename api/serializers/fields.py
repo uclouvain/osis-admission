@@ -369,12 +369,12 @@ DOCTORATE_ACTION_LINKS = {
     },
     # Accounting
     'retrieve_accounting': {
-        'path_name': 'admission_api_v1:accounting',
+        'path_name': 'admission_api_v1:doctorate_accounting',
         'method': 'GET',
         'params': ['uuid'],
     },
     'update_accounting': {
-        'path_name': 'admission_api_v1:accounting',
+        'path_name': 'admission_api_v1:doctorate_accounting',
         'method': 'PUT',
         'params': ['uuid'],
     },

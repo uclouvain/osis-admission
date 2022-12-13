@@ -28,3 +28,4 @@ from .modifier_choix_formation_service import modifier_choix_formation
 from .supprimer_proposition_service import supprimer_proposition
 from .soumettre_proposition_service import soumettre_proposition
 from .completer_curriculum_service import completer_curriculum
+from .completer_comptabilite_proposition_service import completer_comptabilite_proposition

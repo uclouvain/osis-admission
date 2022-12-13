@@ -27,6 +27,7 @@ from datetime import date
 from typing import List, Tuple
 
 from admission.ddd.admission.domain.service.i_calendrier_inscription import ICalendrierInscription
+from admission.ddd.admission.enums import TypeSituationAssimilation
 from base.models.academic_calendar import AcademicCalendar
 from base.models.academic_year import AcademicYear
 from reference.models.country import Country
@@ -47,8 +48,13 @@ class CalendrierInscription(ICalendrierInscription):
         ).values_list('reference', 'data_year__year')
 
     @classmethod
-    def est_ue_plus_5(cls, pays_nationalite_iso_code: str) -> bool:
+    def est_ue_plus_5(
+        cls,
+        pays_nationalite_iso_code: str,
+        situation_assimilation: TypeSituationAssimilation = None,
+    ) -> bool:
         return (
             pays_nationalite_iso_code in cls.PLUS_5_ISO_CODES
+            or (situation_assimilation and situation_assimilation != TypeSituationAssimilation.AUCUNE_ASSIMILATION)
             or Country.objects.get(iso_code=pays_nationalite_iso_code).european_union
         )

@@ -29,12 +29,21 @@ from typing import List, Optional, Tuple
 import attr
 
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import ExperienceAcademiqueDTO
-from admission.ddd.admission.domain.validator import ShouldAnneesCVRequisesCompletees
+from admission.ddd.admission.domain.validator import (
+    ShouldAnneesCVRequisesCompletees,
+    ShouldAbsenceDeDetteEtreCompletee,
+    ShouldIBANCarteBancaireRemboursementEtreCompletee,
+    ShouldAutreFormatCarteBancaireRemboursementEtreCompletee,
+)
+from admission.ddd.admission.formation_generale.domain.model._comptabilite import Comptabilite
 from admission.ddd.admission.formation_generale.domain.validator import (
     ShouldCurriculumFichierEtreSpecifie,
     ShouldEquivalenceEtreSpecifiee,
     ShouldContinuationCycleBachelierEtreSpecifiee,
     ShouldAttestationContinuationCycleBachelierEtreSpecifiee,
+    ShouldReductionDesDroitsInscriptionEtreCompletee,
+    ShouldAssimilationEtreCompletee,
+    ShouldAffiliationsEtreCompletees,
 )
 from base.ddd.utils.business_validator import BusinessValidator, TwoStepsMultipleBusinessExceptionListValidator
 from base.models.enums.education_group_types import TrainingType
@@ -86,5 +95,52 @@ class FormationGeneraleCurriculumValidatorList(TwoStepsMultipleBusinessException
                 continuation_cycle_bachelier=self.continuation_cycle_bachelier,
                 attestation_continuation_cycle_bachelier=self.attestation_continuation_cycle_bachelier,
                 sigle_formation=self.sigle_formation,
+            ),
+        ]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class FormationGeneraleComptabiliteValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+    pays_nationalite_ue: Optional[bool]
+    a_frequente_recemment_etablissement_communaute_fr: Optional[bool]
+    comptabilite: Comptabilite
+
+    def get_data_contract_validators(self) -> List[BusinessValidator]:
+        return []
+
+    def get_invariants_validators(self) -> List[BusinessValidator]:
+        demande_allocation_etudes_fr_be = self.comptabilite.demande_allocation_d_etudes_communaute_francaise_belgique
+        return [
+            ShouldAbsenceDeDetteEtreCompletee(
+                attestation_absence_dette_etablissement=self.comptabilite.attestation_absence_dette_etablissement,
+                a_frequente_recemment_etablissement_communaute_fr=(
+                    self.a_frequente_recemment_etablissement_communaute_fr
+                ),
+            ),
+            ShouldReductionDesDroitsInscriptionEtreCompletee(
+                demande_allocation_d_etudes_communaute_francaise_belgique=demande_allocation_etudes_fr_be,
+                enfant_personnel=self.comptabilite.enfant_personnel,
+                attestation_enfant_personnel=self.comptabilite.attestation_enfant_personnel,
+            ),
+            ShouldAssimilationEtreCompletee(
+                pays_nationalite_ue=self.pays_nationalite_ue,
+                comptabilite=self.comptabilite,
+            ),
+            ShouldAffiliationsEtreCompletees(
+                affiliation_sport=self.comptabilite.affiliation_sport,
+                etudiant_solidaire=self.comptabilite.etudiant_solidaire,
+            ),
+            ShouldIBANCarteBancaireRemboursementEtreCompletee(
+                type_numero_compte=self.comptabilite.type_numero_compte,
+                numero_compte_iban=self.comptabilite.numero_compte_iban,
+                prenom_titulaire_compte=self.comptabilite.prenom_titulaire_compte,
+                nom_titulaire_compte=self.comptabilite.nom_titulaire_compte,
+            ),
+            ShouldAutreFormatCarteBancaireRemboursementEtreCompletee(
+                type_numero_compte=self.comptabilite.type_numero_compte,
+                numero_compte_autre_format=self.comptabilite.numero_compte_autre_format,
+                code_bic_swift_banque=self.comptabilite.code_bic_swift_banque,
+                prenom_titulaire_compte=self.comptabilite.prenom_titulaire_compte,
+                nom_titulaire_compte=self.comptabilite.nom_titulaire_compte,
             ),
         ]
