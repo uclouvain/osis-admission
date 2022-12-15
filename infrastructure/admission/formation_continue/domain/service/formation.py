@@ -23,6 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
+import unicodedata
 from typing import List, Optional
 
 from django.conf import settings
@@ -107,7 +108,12 @@ class FormationContinueTranslator(IFormationContinueTranslator):
         )
 
         results = [cls._build_dto(dto) for dto in dtos]
-        return list(sorted(results, key=lambda formation: formation.intitule))
+        return list(
+            sorted(
+                results,
+                key=lambda formation: f'{unicodedata.normalize("NFKD", formation.intitule)} {formation.campus}',
+            )
+        )
 
     @classmethod
     def verifier_existence(cls, sigle: str, annee: int) -> bool:  # pragma: no cover
