@@ -1342,6 +1342,7 @@ msgstr "Valeurs en français"
 msgid "From"
 msgstr "De"
 
+#, python-format
 msgid "From %(debut_periode)s to %(fin_periode)s"
 msgstr "De %(debut_periode)s à %(fin_periode)s"
 
@@ -2450,8 +2451,8 @@ msgid ""
 "Question label for Document and Text form elements. Not used for Message "
 "elements."
 msgstr ""
-"Libellé de la question pour les éléments de formulaire de type Document et Texte. "
-"N'est pas utilisé pour les éléments de type Message."
+"Libellé de la question pour les éléments de formulaire de type Document et "
+"Texte. N'est pas utilisé pour les éléments de type Message."
 
 msgid ""
 "Question tooltip text for Document and Text form elements. Content of the "
