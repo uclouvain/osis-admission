@@ -27,6 +27,7 @@ from datetime import date, timedelta
 from typing import List, Tuple
 
 from admission.ddd.admission.domain.service.i_calendrier_inscription import ICalendrierInscription
+from admission.ddd.admission.dtos import IdentificationDTO
 from admission.ddd.admission.enums import TypeSituationAssimilation
 from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
 from base.tests.factories.academic_year import get_current_year
@@ -65,9 +66,9 @@ class CalendrierInscriptionInMemory(ICalendrierInscription):
     @classmethod
     def est_ue_plus_5(
         cls,
-        pays_nationalite_iso_code: str,
+        identification: 'IdentificationDTO',
         situation_assimilation: TypeSituationAssimilation = None,
     ) -> bool:
-        return pays_nationalite_iso_code in (
+        return identification.pays_nationalite in (
             ProfilCandidatInMemoryTranslator.pays_union_europeenne | cls.PLUS_5_ISO_CODES
         ) or (situation_assimilation and situation_assimilation != TypeSituationAssimilation.AUCUNE_ASSIMILATION)

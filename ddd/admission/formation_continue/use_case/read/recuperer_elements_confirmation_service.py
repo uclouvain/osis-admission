@@ -24,33 +24,34 @@
 #
 # ##############################################################################
 
-from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import PropositionIdentityBuilder
-from admission.ddd.admission.doctorat.preparation.commands import DeterminerAnneeAcademiqueEtPotQuery
-from admission.ddd.admission.doctorat.preparation.repository.i_proposition import IPropositionRepository
-from admission.ddd.admission.domain.service.i_calendrier_inscription import ICalendrierInscription
+from typing import List
+
+from admission.ddd.admission.domain.service.i_elements_confirmation import ElementConfirmation, IElementsConfirmation
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
-from admission.ddd.admission.domain.service.i_titres_acces import ITitresAcces
-from admission.ddd.admission.dtos.conditions import InfosDetermineesDTO
-from base.models.enums.education_group_types import TrainingType
+from admission.ddd.admission.formation_continue.commands import RecupererElementsConfirmationQuery
+from admission.ddd.admission.formation_continue.domain.builder.proposition_identity_builder import (
+    PropositionIdentityBuilder,
+)
+from admission.ddd.admission.formation_continue.domain.service.i_formation import IFormationContinueTranslator
+from admission.ddd.admission.formation_continue.repository.i_proposition import IPropositionRepository
 
 
-def determiner_annee_academique_et_pot(
-    cmd: 'DeterminerAnneeAcademiqueEtPotQuery',
+def recuperer_elements_confirmation(
+    cmd: 'RecupererElementsConfirmationQuery',
     proposition_repository: 'IPropositionRepository',
-    titres_acces: 'ITitresAcces',
+    element_confirmation: 'IElementsConfirmation',
+    formation_translator: 'IFormationContinueTranslator',
     profil_candidat_translator: 'IProfilCandidatTranslator',
-    calendrier_inscription: 'ICalendrierInscription',
-) -> 'InfosDetermineesDTO':
+) -> List['ElementConfirmation']:
     # GIVEN
-    proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
-    proposition = proposition_repository.get(entity_id=proposition_id)
+    entity_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
+    proposition = proposition_repository.get(entity_id=entity_id)
+
+    # WHEN
 
     # THEN
-    titres = titres_acces.recuperer_titres_access(proposition.matricule_candidat, TrainingType.PHD)
-    return calendrier_inscription.determiner_annee_academique_et_pot(
-        formation_id=proposition.formation_id,
-        matricule_candidat=proposition.matricule_candidat,
-        titres_acces=titres,
-        type_formation=TrainingType.PHD,
+    return element_confirmation.recuperer(
+        proposition=proposition,
+        formation_translator=formation_translator,
         profil_candidat_translator=profil_candidat_translator,
     )

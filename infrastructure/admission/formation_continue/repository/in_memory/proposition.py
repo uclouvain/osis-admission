@@ -144,6 +144,7 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
             ),
             annee_calculee=proposition.annee_calculee,
             pot_calcule=proposition.pot_calcule,
+            date_fin_pot=None,
             reponses_questions_specifiques=proposition.reponses_questions_specifiques,
             equivalence_diplome=proposition.equivalence_diplome,
             curriculum=proposition.curriculum,

@@ -73,6 +73,9 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
             date_naissance=person.birth_date,
             annee_naissance=person.birth_year,
             pays_nationalite=person.country_of_citizenship.iso_code if person.country_of_citizenship_id else None,
+            pays_nationalite_europeen=(
+                person.country_of_citizenship.european_union if person.country_of_citizenship_id else False
+            ),
             langue_contact=person.language,
             sexe=person.sex,
             genre=person.gender,

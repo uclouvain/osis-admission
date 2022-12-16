@@ -95,8 +95,8 @@ class TestInitierPropositionService(TestCase):
         proposition = self.proposition_repository.get(proposition_id)  # type: Proposition
         self.assertEqual(proposition_id, proposition.entity_id)
         self.assertEqual(ChoixTypeAdmission[self.cmd.type_admission], proposition.type_admission)
-        self.assertEqual(self.cmd.sigle_formation, proposition.doctorat_id.sigle)
-        self.assertEqual(self.cmd.annee_formation, proposition.doctorat_id.annee)
+        self.assertEqual(self.cmd.sigle_formation, proposition.formation_id.sigle)
+        self.assertEqual(self.cmd.annee_formation, proposition.formation_id.annee)
         self.assertEqual(self.cmd.matricule_candidat, proposition.matricule_candidat)
         self.assertEqual(ChoixStatutProposition.IN_PROGRESS, proposition.statut)
         self.assertEqual(self.cmd.bourse_erasmus_mundus, proposition.bourse_erasmus_mundus_id.uuid)

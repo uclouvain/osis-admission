@@ -102,6 +102,7 @@ class PropositionRepository(IPropositionRepository):
                 'specific_question_answers': entity.reponses_questions_specifiques,
                 'curriculum': entity.curriculum,
                 'diploma_equivalence': entity.equivalence_diplome,
+                'confirmation_elements': entity.elements_confirmation,
             },
         )
 
@@ -148,6 +149,7 @@ class PropositionRepository(IPropositionRepository):
             curriculum=admission.curriculum,
             equivalence_diplome=admission.diploma_equivalence,
             comptabilite=get_accounting_from_admission(admission=admission),
+            elements_confirmation=admission.confirmation_elements,
         )
 
     @classmethod
@@ -158,6 +160,7 @@ class PropositionRepository(IPropositionRepository):
             creee_le=admission.created,
             modifiee_le=admission.modified,
             erreurs=admission.detailed_status or [],
+            date_fin_pot=admission.pool_end_date,  # from annotation
             formation=FormationDTO(
                 sigle=admission.training.acronym,
                 annee=admission.training.academic_year.year,

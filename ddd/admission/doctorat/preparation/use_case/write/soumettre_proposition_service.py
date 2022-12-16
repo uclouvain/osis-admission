@@ -42,6 +42,7 @@ from admission.ddd.admission.doctorat.preparation.repository.i_proposition impor
 from admission.ddd.admission.doctorat.validation.domain.service.demande import DemandeService
 from admission.ddd.admission.doctorat.validation.repository.i_demande import IDemandeRepository
 from admission.ddd.admission.domain.service.i_calendrier_inscription import ICalendrierInscription
+from admission.ddd.admission.domain.service.i_elements_confirmation import IElementsConfirmation
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.domain.service.i_titres_acces import ITitresAcces
 from admission.ddd.admission.enums.question_specifique import Onglets
@@ -63,6 +64,7 @@ def soumettre_proposition(
     questions_specifiques_translator: 'IQuestionSpecifiqueTranslator',
     doctorat_translator: 'IDoctoratTranslator',
     calendrier_inscription: 'ICalendrierInscription',
+    element_confirmation: 'IElementsConfirmation',
 ) -> 'PropositionIdentity':
     # GIVEN
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
@@ -86,26 +88,32 @@ def soumettre_proposition(
 
     # WHEN
     VerifierProposition().verifier(
-        proposition,
-        groupe_supervision,
-        profil_candidat_translator,
-        annee_courante,
-        titres_acces,
-        questions_specifiques,
-        doctorat_translator,
-        calendrier_inscription,
-        cmd.annee,
-        AcademicCalendarTypes[cmd.pool],
+        proposition_candidat=proposition,
+        groupe_de_supervision=groupe_supervision,
+        profil_candidat_translator=profil_candidat_translator,
+        annee_courante=annee_courante,
+        titres_acces=titres_acces,
+        questions_specifiques=questions_specifiques,
+        formation_translator=doctorat_translator,
+        calendrier_inscription=calendrier_inscription,
+        annee_soumise=cmd.annee,
+        pool_soumis=AcademicCalendarTypes[cmd.pool],
+    )
+    element_confirmation.valider(
+        cmd.elements_confirmation,
+        proposition=proposition,
+        formation_translator=doctorat_translator,
+        profil_candidat_translator=profil_candidat_translator,
     )
     demande = DemandeService().initier(
-        profil_candidat_translator,
-        proposition_id,
-        proposition.matricule_candidat,
-        proposition.type_admission,
+        profil_candidat_translator=profil_candidat_translator,
+        proposition_id=proposition_id,
+        matricule_candidat=proposition.matricule_candidat,
+        type_admission=proposition.type_admission,
     )
 
     # THEN
-    proposition.finaliser(cmd.annee, AcademicCalendarTypes[cmd.pool])
+    proposition.finaliser(cmd.annee, AcademicCalendarTypes[cmd.pool], cmd.elements_confirmation)
     proposition_repository.save(proposition)
     demande_repository.save(demande)
     historique.historiser_soumission(proposition)

@@ -7,8 +7,10 @@ from django.db import models
 from django.db.models import OuterRef, Subquery
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
+from base.models.academic_calendar import AcademicCalendar
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from osis_document.contrib import FileField
 
@@ -104,6 +106,12 @@ class BaseAdmission(models.Model):
         verbose_name=_('Curriculum'),
     )
 
+    confirmation_elements = models.JSONField(
+        blank=True,
+        default=dict,
+        encoder=DjangoJSONEncoder,
+    )
+
     def save(self, *args, **kwargs) -> None:
         super().save(*args, **kwargs)
         cache.delete('admission_permission_{}'.format(self.uuid))
@@ -148,5 +156,17 @@ class BaseAdmissionQuerySet(models.QuerySet):
                     )
                 )
                 .values('campus_name')[:1]
-            )
+            ),
+        )
+
+    def annotate_pool_end_date(self):
+        today = timezone.now().today()
+        return self.annotate(
+            pool_end_date=models.Subquery(
+                AcademicCalendar.objects.filter(
+                    reference=OuterRef('determined_pool'),
+                    start_date__lte=today,
+                    end_date__gte=today,
+                ).values('end_date')[:1],
+            ),
         )

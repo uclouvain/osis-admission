@@ -46,6 +46,7 @@ from admission.ddd.admission.domain.validator.exceptions import (
     ReorientationInscriptionExterneNonConfirmeeException,
     ResidenceAuSensDuDecretNonRenseigneeException,
 )
+from admission.ddd.admission.dtos import IdentificationDTO
 from admission.ddd.admission.dtos.conditions import InfosDetermineesDTO
 from admission.ddd.admission.enums import TypeSituationAssimilation
 from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition
@@ -101,7 +102,7 @@ class ICalendrierInscription(interface.DomainService):
         if identification.pays_nationalite is None:
             raise IdentificationNonCompleteeException()
         ue_plus_5 = cls.est_ue_plus_5(
-            identification.pays_nationalite,
+            identification,
             getattr(proposition.comptabilite, 'type_situation_assimilation', None) if proposition else None,
         )
         annees = cls.get_annees_academiques_pour_calcul()
@@ -265,7 +266,7 @@ proposition={('Proposition(' + pformat(attr.asdict(proposition)) + ')') if propo
     @classmethod
     def est_ue_plus_5(
         cls,
-        pays_nationalite_iso_code: str,
+        identification: 'IdentificationDTO',
         situation_assimilation: TypeSituationAssimilation = None,
     ) -> bool:
         raise NotImplementedError

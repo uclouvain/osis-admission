@@ -44,6 +44,7 @@ from .repository.in_memory.groupe_de_supervision import GroupeDeSupervisionInMem
 from .repository.in_memory.proposition import PropositionInMemoryRepository
 from ..validation.repository.in_memory.demande import DemandeInMemoryRepository
 from ...domain.service.in_memory.calendrier_inscription import CalendrierInscriptionInMemory
+from ...domain.service.in_memory.elements_confirmation import ElementsConfirmationInMemory
 from ...domain.service.in_memory.titres_acces import TitresAccesInMemory
 
 _proposition_repository = PropositionInMemoryRepository()
@@ -59,7 +60,6 @@ _notification = NotificationInMemory()
 _titres_acces = TitresAccesInMemory()
 _membre_ca_translator = MembreCAInMemoryTranslator()
 _comptabilite_translator = ComptabiliteInMemoryTranslator()
-
 
 COMMAND_HANDLERS = {
     InitierPropositionCommand: lambda msg_bus, cmd: initier_proposition(
@@ -166,6 +166,7 @@ COMMAND_HANDLERS = {
         questions_specifiques_translator=QuestionSpecifiqueInMemoryTranslator(),
         doctorat_translator=_doctorat_translator,
         calendrier_inscription=CalendrierInscriptionInMemory(),
+        element_confirmation=ElementsConfirmationInMemory(),
     ),
     DefinirCotutelleCommand: lambda msg_bus, cmd: definir_cotutelle(
         cmd,
@@ -229,5 +230,12 @@ COMMAND_HANDLERS = {
         proposition_repository=_proposition_repository,
         profil_candidat_translator=_profil_candidat_translator,
         academic_year_repository=_academic_year_repository,
+    ),
+    RecupererElementsConfirmationQuery: lambda msg_bus, cmd: recuperer_elements_confirmation(
+        cmd,
+        proposition_repository=_proposition_repository,
+        element_confirmation=ElementsConfirmationInMemory(),
+        formation_translator=_doctorat_translator,
+        profil_candidat_translator=_profil_candidat_translator,
     ),
 }

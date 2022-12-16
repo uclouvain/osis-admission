@@ -83,7 +83,7 @@ class Notification(INotification):
         return {
             "candidate_first_name": candidat.first_name,
             "candidate_last_name": candidat.last_name,
-            "doctorate_title": cls._get_doctorate_title_translation(proposition.doctorat_id),
+            "doctorate_title": cls._get_doctorate_title_translation(proposition.formation_id),
             "admission_link_front": frontend_link,
             "admission_link_front_supervision": "{}supervision".format(frontend_link),
             "admission_link_back": "{}{}".format(

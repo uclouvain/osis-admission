@@ -29,6 +29,9 @@ import freezegun
 
 from admission.ddd.admission.formation_continue.commands import SoumettrePropositionCommand
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutProposition
+from admission.infrastructure.admission.domain.service.in_memory.elements_confirmation import (
+    ElementsConfirmationInMemory,
+)
 from admission.infrastructure.admission.formation_continue.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
@@ -49,6 +52,7 @@ class TestSoumettrePropositionContinue(TestCase):
                 uuid_proposition="uuid-ECGE3DP",
                 pool=AcademicCalendarTypes.CONTINUING_EDUCATION_ENROLLMENT.name,
                 annee=2020,
+                elements_confirmation=ElementsConfirmationInMemory.get_elements_for_tests(),
             ),
         )
 

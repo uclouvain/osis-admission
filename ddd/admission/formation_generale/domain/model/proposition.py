@@ -85,6 +85,7 @@ class Proposition(interface.RootEntity):
     attestation_continuation_cycle_bachelier: List[str] = attr.Factory(list)
     curriculum: List[str] = attr.Factory(list)
     equivalence_diplome: List[str] = attr.Factory(list)
+    elements_confirmation: Dict[str, str] = attr.Factory(dict)
 
     def modifier_choix_formation(
         self,
@@ -104,22 +105,14 @@ class Proposition(interface.RootEntity):
     def supprimer(self):
         self.statut = ChoixStatutProposition.CANCELLED
 
-    def soumettre(self, annee: int, pool: 'AcademicCalendarTypes'):
+    def soumettre(self, annee: int, pool: 'AcademicCalendarTypes', elements_confirmation: Dict[str, str]):
         self.statut = ChoixStatutProposition.SUBMITTED
         self.annee_calculee = annee
         self.pot_calcule = pool
-        if pool != AcademicCalendarTypes.ADMISSION_POOL_NON_RESIDENT_QUOTA:
-            self.est_non_resident_au_sens_decret = None
-        if pool not in [
-            AcademicCalendarTypes.ADMISSION_POOL_HUE_UCL_PATHWAY_CHANGE,
-            AcademicCalendarTypes.ADMISSION_POOL_EXTERNAL_ENROLLMENT_CHANGE,
-        ]:
-            self.est_bachelier_belge = None
+        self.elements_confirmation = elements_confirmation
         if pool != AcademicCalendarTypes.ADMISSION_POOL_HUE_UCL_PATHWAY_CHANGE:
-            self.est_reorientation_inscription_externe = None
             self.attestation_inscription_reguliere = []
         if pool != AcademicCalendarTypes.ADMISSION_POOL_EXTERNAL_ENROLLMENT_CHANGE:
-            self.est_modification_inscription_externe = None
             self.formulaire_modification_inscription = []
 
     def completer_curriculum(

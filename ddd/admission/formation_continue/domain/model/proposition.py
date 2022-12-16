@@ -68,6 +68,7 @@ class Proposition(interface.RootEntity):
 
     curriculum: List[str] = attr.Factory(list)
     equivalence_diplome: List[str] = attr.Factory(list)
+    elements_confirmation: Dict[str, str] = attr.Factory(dict)
 
     def modifier_choix_formation(self, formation_id: FormationIdentity, reponses_questions_specifiques: Dict):
         self.formation_id = formation_id
@@ -76,10 +77,11 @@ class Proposition(interface.RootEntity):
     def supprimer(self):
         self.statut = ChoixStatutProposition.CANCELLED
 
-    def soumettre(self, annee: int, pool: 'AcademicCalendarTypes'):
+    def soumettre(self, annee: int, pool: 'AcademicCalendarTypes', elements_confirmation: Dict[str, str]):
         self.statut = ChoixStatutProposition.SUBMITTED
         self.annee_calculee = annee
         self.pot_calcule = pool
+        self.elements_confirmation = elements_confirmation
 
     def completer_curriculum(
         self,

@@ -38,6 +38,7 @@ class PropositionDTO(interface.DTO):
     formation: FormationDTO
     annee_calculee: Optional[int]
     pot_calcule: Optional[str]
+    date_fin_pot: Optional[datetime.date]
     creee_le: datetime.datetime
     modifiee_le: datetime.datetime
     erreurs: List[Dict[str, str]]

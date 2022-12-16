@@ -34,7 +34,9 @@ from rest_framework.settings import api_settings
 
 from admission.api import serializers
 from admission.api.schema import ResponseSpecificSchema
+from admission.api.serializers import PropositionErrorsSerializer
 from admission.ddd.admission.doctorat.preparation.commands import (
+    RecupererElementsConfirmationQuery as RecupererElementsConfirmationDoctoralQuery,
     SoumettrePropositionCommand as SoumettrePropositionDoctoratCommand,
     VerifierProjetQuery,
 )
@@ -44,9 +46,11 @@ from admission.ddd.admission.domain.validator.exceptions import (
     PoolNonResidentContingenteNonOuvertException,
 )
 from admission.ddd.admission.formation_continue.commands import (
+    RecupererElementsConfirmationQuery as RecupererElementsConfirmationContinueQuery,
     SoumettrePropositionCommand as SoumettrePropositionContinueCommand,
 )
 from admission.ddd.admission.formation_generale.commands import (
+    RecupererElementsConfirmationQuery as RecupererElementsConfirmationGeneralQuery,
     SoumettrePropositionCommand as SoumettrePropositionGeneraleCommand,
 )
 from admission.utils import (
@@ -199,7 +203,10 @@ class SubmitDoctoralPropositionView(
 
         data = {'errors': sorted(admission.detailed_status, key=itemgetter('status_code'))}
         self.add_access_conditions_url(data)
-        return Response(data, status=status.HTTP_200_OK)
+        if not data['errors']:
+            cmd = RecupererElementsConfirmationDoctoralQuery(self.kwargs['uuid'])
+            data['elements_confirmation'] = message_bus_instance.invoke(cmd)
+        return Response(PropositionErrorsSerializer(data).data, status=status.HTTP_200_OK)
 
     def post(self, request, *args, **kwargs):
         """Submit the proposition."""
@@ -248,18 +255,7 @@ class SubmitGeneralEducationPropositionView(
 
         data = {'errors': sorted(admission.detailed_status, key=itemgetter('status_code'))}
         error_codes = [e['status_code'] for e in data['errors']]
-        if admission.determined_pool in [
-            AcademicCalendarTypes.ADMISSION_POOL_HUE_UCL_PATHWAY_CHANGE.name,
-            AcademicCalendarTypes.ADMISSION_POOL_UE5_BELGIAN.name,
-        ]:
-            # Pots avec message "tardif"
-            today = timezone.now().today()
-            data['pool_end_date'] = AcademicCalendar.objects.get(
-                reference=admission.determined_pool,
-                start_date__lte=today,
-                end_date__gte=today,
-            ).end_date
-        elif PoolNonResidentContingenteNonOuvertException.status_code in error_codes:
+        if PoolNonResidentContingenteNonOuvertException.status_code in error_codes:
             # Pots contigenté non-ouvert
             today = timezone.now().today()
             period = (
@@ -275,8 +271,11 @@ class SubmitGeneralEducationPropositionView(
             data['pool_end_date'] = period.end_date
 
         self.add_access_conditions_url(data)
+        if not data['errors']:
+            cmd = RecupererElementsConfirmationGeneralQuery(self.kwargs['uuid'])
+            data['elements_confirmation'] = message_bus_instance.invoke(cmd)
 
-        return Response(data, status=status.HTTP_200_OK)
+        return Response(PropositionErrorsSerializer(data).data, status=status.HTTP_200_OK)
 
     def post(self, request, *args, **kwargs):
         """Submit the proposition."""
@@ -324,7 +323,10 @@ class SubmitContinuingEducationPropositionView(
 
         data = {'errors': sorted(admission.detailed_status, key=itemgetter('status_code'))}
         self.add_access_conditions_url(data)
-        return Response(data, status=status.HTTP_200_OK)
+        if not data['errors']:
+            cmd = RecupererElementsConfirmationContinueQuery(self.kwargs['uuid'])
+            data['elements_confirmation'] = message_bus_instance.invoke(cmd)
+        return Response(PropositionErrorsSerializer(data).data, status=status.HTTP_200_OK)
 
     def post(self, request, *args, **kwargs):
         """Submit the proposition."""

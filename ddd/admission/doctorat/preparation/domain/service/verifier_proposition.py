@@ -57,7 +57,7 @@ class VerifierProposition(interface.DomainService):
         pool_soumis: 'AcademicCalendarTypes' = None,
     ) -> None:
         profil_candidat_service = ProfilCandidat()
-        doctorat_id = proposition_candidat.doctorat_id
+        doctorat_id = proposition_candidat.formation_id
         titres = titres_acces.recuperer_titres_access(proposition_candidat.matricule_candidat, TrainingType.PHD)
         execute_functions_and_aggregate_exceptions(
             partial(

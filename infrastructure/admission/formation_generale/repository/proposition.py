@@ -136,6 +136,7 @@ class PropositionRepository(IPropositionRepository):
                 'bachelor_cycle_continuation_certificate': entity.attestation_continuation_cycle_bachelier,
                 'curriculum': entity.curriculum,
                 'diploma_equivalence': entity.equivalence_diplome,
+                'confirmation_elements': entity.elements_confirmation,
             },
         )
 
@@ -262,6 +263,7 @@ class PropositionRepository(IPropositionRepository):
             continuation_cycle_bachelier=admission.bachelor_cycle_continuation,
             attestation_continuation_cycle_bachelier=admission.bachelor_cycle_continuation_certificate,
             comptabilite=get_accounting_from_admission(admission=admission),
+            elements_confirmation=admission.confirmation_elements,
         )
 
     @classmethod
@@ -274,6 +276,7 @@ class PropositionRepository(IPropositionRepository):
             statut=admission.status,
             annee_calculee=admission.determined_academic_year and admission.determined_academic_year.year,
             pot_calcule=admission.determined_pool or '',
+            date_fin_pot=admission.pool_end_date,  # from annotation
             formation=FormationDTO(
                 sigle=admission.training.acronym,
                 annee=admission.training.academic_year.year,

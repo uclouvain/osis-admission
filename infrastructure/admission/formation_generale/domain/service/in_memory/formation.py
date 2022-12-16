@@ -174,7 +174,7 @@ class FormationGeneraleInMemoryTranslator(IFormationGeneraleTranslator):
             annee=entity.entity_id.annee,
             intitule=entity.intitule,
             campus=entity.campus,
-            type=entity.type,
+            type=entity.type.name,
             code_domaine=entity.code_domaine,
         )
 

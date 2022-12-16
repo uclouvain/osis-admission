@@ -47,6 +47,7 @@ class IdentificationDTO(interface.DTO):
     lieu_naissance: Optional[str]
     etat_civil: Optional[str]
     pays_residence: Optional[str]
+    pays_nationalite_europeen: bool
 
     carte_identite: List[str]
     passeport: List[str]

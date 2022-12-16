@@ -26,6 +26,8 @@
 from rest_framework import serializers
 
 from admission.ddd.admission.domain.service.i_calendrier_inscription import ICalendrierInscription
+from admission.ddd.admission.domain.service.i_elements_confirmation import ElementConfirmation
+from base.utils.serializers import DTOSerializer
 
 __all__ = [
     'PropositionErrorsSerializer',
@@ -38,13 +40,20 @@ class ErrorSerializer(serializers.Serializer):
     detail = serializers.CharField()
 
 
+class ElementConfirmationSerializer(DTOSerializer):
+    class Meta:
+        source = ElementConfirmation
+
+
 class PropositionErrorsSerializer(serializers.Serializer):
     errors = ErrorSerializer(many=True)
     pool_start_date = serializers.DateField(allow_null=True, required=False)
     pool_end_date = serializers.DateField(allow_null=True, required=False)
     access_conditions_url = serializers.CharField(allow_null=True, required=False)
+    elements_confirmation = ElementConfirmationSerializer(many=True, allow_null=True, required=False)
 
 
 class SubmitPropositionSerializer(serializers.Serializer):
     annee = serializers.IntegerField()
     pool = serializers.ChoiceField(choices=[calendar.event_reference for calendar in ICalendrierInscription.pools])
+    elements_confirmation = serializers.JSONField()

@@ -87,6 +87,7 @@ class ContinuingEducationAdmissionManager(models.Manager.from_queryset(BaseAdmis
                 "determined_academic_year",
             )
             .annotate_campus()
+            .annotate_pool_end_date()
         )
 
 

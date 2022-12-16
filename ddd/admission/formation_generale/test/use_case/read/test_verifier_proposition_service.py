@@ -300,13 +300,6 @@ class TestVerifierPropositionService(TestCase):
                 QuestionsSpecifiquesChoixFormationNonCompleteesException,
             )
 
-    def _test_should_retourner_erreur_si_assimilation_incomplete(self, comptabilite, exception):
-        with mock.patch.object(self.candidat, 'pays_nationalite', 'CA'):
-            self._test_should_retourner_erreur_si_comptabilite_incomplete(
-                comptabilite=comptabilite,
-                exception=exception,
-            )
-
     def test_should_retourner_erreur_si_comptabilite_incomplete_pour_document_enfant_personnel(self):
         self._test_should_retourner_erreur_si_comptabilite_incomplete(
             comptabilite=_ComptabiliteFactory(enfant_personnel=True, attestation_enfant_personnel=[]),

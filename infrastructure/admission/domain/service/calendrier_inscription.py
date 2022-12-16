@@ -27,10 +27,10 @@ from datetime import date
 from typing import List, Tuple
 
 from admission.ddd.admission.domain.service.i_calendrier_inscription import ICalendrierInscription
+from admission.ddd.admission.dtos import IdentificationDTO
 from admission.ddd.admission.enums import TypeSituationAssimilation
 from base.models.academic_calendar import AcademicCalendar
 from base.models.academic_year import AcademicYear
-from reference.models.country import Country
 
 
 class CalendrierInscription(ICalendrierInscription):
@@ -50,11 +50,11 @@ class CalendrierInscription(ICalendrierInscription):
     @classmethod
     def est_ue_plus_5(
         cls,
-        pays_nationalite_iso_code: str,
+        identification: 'IdentificationDTO',
         situation_assimilation: TypeSituationAssimilation = None,
     ) -> bool:
         return (
-            pays_nationalite_iso_code in cls.PLUS_5_ISO_CODES
+            identification.pays_nationalite_europeen
             or (situation_assimilation and situation_assimilation != TypeSituationAssimilation.AUCUNE_ASSIMILATION)
-            or Country.objects.get(iso_code=pays_nationalite_iso_code).european_union
+            or identification.pays_nationalite in cls.PLUS_5_ISO_CODES
         )

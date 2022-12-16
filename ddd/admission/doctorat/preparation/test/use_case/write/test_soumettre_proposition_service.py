@@ -25,6 +25,7 @@
 # ##############################################################################
 import datetime
 
+import attr
 import freezegun
 import mock
 from unittest import TestCase
@@ -37,6 +38,10 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
 from admission.ddd.admission.doctorat.preparation.test.factory.proposition import (
     PropositionAdmissionSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory,
     PropositionPreAdmissionSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory,
+)
+from admission.infrastructure.admission.domain.service.elements_confirmation import ElementsConfirmation
+from admission.infrastructure.admission.domain.service.in_memory.elements_confirmation import (
+    ElementsConfirmationInMemory,
 )
 from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import (
     ProfilCandidatInMemoryTranslator,
@@ -57,10 +62,8 @@ from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_ye
 @freezegun.freeze_time('2020-11-01')
 class TestVerifierPropositionServiceCommun(TestCase):
     def setUp(self) -> None:
-        self.candidat_translator = ProfilCandidatInMemoryTranslator()
         self.proposition_repository = PropositionInMemoryRepository()
         self.groupe_supervision_repository = GroupeDeSupervisionInMemoryRepository()
-        self.current_candidat = self.candidat_translator.profil_candidats[0]
         self.addCleanup(self.proposition_repository.reset)
         self.message_bus = message_bus_in_memory_instance
 
@@ -75,15 +78,18 @@ class TestVerifierPropositionServiceCommun(TestCase):
                 )
             )
 
+        self.base_cmd = SoumettrePropositionCommand(
+            uuid_proposition='',
+            pool=AcademicCalendarTypes.DOCTORATE_EDUCATION_ENROLLMENT.name,
+            annee=2020,
+            elements_confirmation=ElementsConfirmationInMemory.get_elements_for_tests(),
+        )
+
     def test_should_soumettre_proposition_etre_ok_si_admission_complete(self):
         proposition = PropositionAdmissionSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory()
 
         proposition_id = self.message_bus.invoke(
-            SoumettrePropositionCommand(
-                uuid_proposition=proposition.entity_id.uuid,
-                pool=AcademicCalendarTypes.DOCTORATE_EDUCATION_ENROLLMENT.name,
-                annee=2020,
-            ),
+            attr.evolve(self.base_cmd, uuid_proposition=proposition.entity_id.uuid),
         )
 
         updated_proposition = self.proposition_repository.get(proposition_id)
@@ -97,11 +103,7 @@ class TestVerifierPropositionServiceCommun(TestCase):
         proposition = PropositionPreAdmissionSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory()
 
         proposition_id = self.message_bus.invoke(
-            SoumettrePropositionCommand(
-                uuid_proposition=proposition.entity_id.uuid,
-                pool=AcademicCalendarTypes.DOCTORATE_EDUCATION_ENROLLMENT.name,
-                annee=2020,
-            ),
+            attr.evolve(self.base_cmd, uuid_proposition=proposition.entity_id.uuid),
         )
 
         updated_proposition = self.proposition_repository.get(proposition_id)
@@ -112,17 +114,11 @@ class TestVerifierPropositionServiceCommun(TestCase):
         self.assertEqual(updated_proposition.statut, ChoixStatutProposition.SUBMITTED)
 
     def test_should_retourner_erreur_si_identification_non_completee(self):
-        with mock.patch.multiple(self.current_candidat, pays_naissance=''):
+        with mock.patch.multiple(ProfilCandidatInMemoryTranslator.profil_candidats[0], pays_naissance=''):
             proposition = PropositionAdmissionSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory()
 
             with self.assertRaises(MultipleBusinessExceptions) as context:
                 self.message_bus.invoke(
-                    self.message_bus.invoke(
-                        SoumettrePropositionCommand(
-                            uuid_proposition=proposition.entity_id.uuid,
-                            pool=AcademicCalendarTypes.DOCTORATE_EDUCATION_ENROLLMENT.name,
-                            annee=2020,
-                        ),
-                    )
+                    attr.evolve(self.base_cmd, uuid_proposition=proposition.entity_id.uuid),
                 )
             self.assertIsInstance(context.exception.exceptions.pop(), IdentificationNonCompleteeException)

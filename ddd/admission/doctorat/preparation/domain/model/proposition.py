@@ -76,7 +76,7 @@ class PropositionIdentity(interface.EntityIdentity):
 class Proposition(interface.RootEntity):
     entity_id: 'PropositionIdentity'
     type_admission: ChoixTypeAdmission
-    doctorat_id: 'FormationIdentity'
+    formation_id: 'FormationIdentity'
     matricule_candidat: str
     projet: 'DetailProjet'
     annee_calculee: Optional[int] = None
@@ -100,14 +100,15 @@ class Proposition(interface.RootEntity):
     bourse_erasmus_mundus_id: Optional[BourseIdentity] = None
     reponses_questions_specifiques: Dict = attr.Factory(dict)
     curriculum: List[str] = attr.Factory(list)
+    elements_confirmation: Dict[str, str] = attr.Factory(dict)
 
     @property
     def sigle_formation(self):
-        return self.doctorat_id.sigle
+        return self.formation_id.sigle
 
     @property
     def annee(self):
-        return self.doctorat_id.annee
+        return self.formation_id.annee
 
     valeur_reference_base = 300000
 
@@ -330,10 +331,11 @@ class Proposition(interface.RootEntity):
         """Vérification de la validité du projet doctoral avant demande des signatures"""
         ProjetDoctoralValidatorList(self.type_admission, self.projet, self.financement).validate()
 
-    def finaliser(self, annee: int, pool: 'AcademicCalendarTypes'):
+    def finaliser(self, annee: int, pool: 'AcademicCalendarTypes', elements_confirmation: Dict[str, str]):
         self.statut = ChoixStatutProposition.SUBMITTED
         self.annee_calculee = annee
         self.pot_calcule = pool
+        self.elements_confirmation = elements_confirmation
 
     def supprimer(self):
         self.statut = ChoixStatutProposition.CANCELLED
