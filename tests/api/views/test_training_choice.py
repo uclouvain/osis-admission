@@ -45,6 +45,7 @@ from admission.ddd.admission.formation_continue.domain.validator import exceptio
 from admission.ddd.admission.formation_generale.domain.validator import exceptions as general_education_exceptions
 from admission.ddd.admission.doctorat.preparation.domain.validator import exceptions as doctorate_education_exceptions
 from admission.tests.api.views.test_project import DoctorateAdmissionApiTestCase
+from admission.tests.factories.calendar import AdmissionAcademicCalendarFactory
 from admission.tests.factories.continuing_education import (
     ContinuingEducationTrainingFactory,
     ContinuingEducationAdmissionFactory,
@@ -73,6 +74,7 @@ class GeneralEducationAdmissionTrainingChoiceInitializationApiTestCase(APITestCa
         cls.erasmus_mundus_scholarship = ErasmusMundusScholarshipFactory()
         cls.international_scholarship = InternationalScholarshipFactory()
         cls.double_degree_scholarship = DoubleDegreeScholarshipFactory()
+        AdmissionAcademicCalendarFactory.produce_all_required()
 
         cls.create_data = {
             'sigle_formation': cls.training.acronym,
@@ -251,10 +253,11 @@ class GeneralEducationAdmissionTrainingChoiceUpdateApiTestCase(APITestCase):
         self.assertEqual(admission.erasmus_mundus_scholarship_id, self.erasmus_mundus_scholarship.pk)
         self.assertEqual(admission.double_degree_scholarship_id, self.double_degree_scholarship.pk)
         self.assertEqual(admission.status, ChoixStatutProposition.IN_PROGRESS.name)
-        self.assertEqual(admission.specific_question_answers, {
+        expected = {
             'fe254203-17c7-47d6-95e4-3c5c532da551': 'My response',
             'fe254203-17c7-47d6-95e4-3c5c532da552': [self.file_uuid, '550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92'],
-        })
+        }
+        self.assertEqual(admission.specific_question_answers, expected)
 
     def test_training_choice_update_using_api_candidate_with_wrong_proposition(self):
         self.client.force_authenticate(user=self.candidate.user)
@@ -361,10 +364,11 @@ class ContinuingEducationAdmissionTrainingChoiceUpdateApiTestCase(APITestCase):
         self.assertEqual(admission.training_id, self.training.pk)
         self.assertEqual(admission.candidate_id, self.candidate.pk)
         self.assertEqual(admission.status, ChoixStatutProposition.IN_PROGRESS.name)
-        self.assertEqual(admission.specific_question_answers, {
+        expected = {
             'fe254203-17c7-47d6-95e4-3c5c532da551': 'My response',
             'fe254203-17c7-47d6-95e4-3c5c532da552': [self.file_uuid, '550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92'],
-        })
+        }
+        self.assertEqual(admission.specific_question_answers, expected)
 
     def test_training_choice_update_using_api_candidate_with_wrong_proposition(self):
         self.client.force_authenticate(user=self.candidate.user)
@@ -466,10 +470,11 @@ class DoctorateEducationAdmissionTypeUpdateApiTestCase(DoctorateAdmissionApiTest
         self.assertEqual(admission.type, AdmissionType.PRE_ADMISSION.name)
         self.assertEqual(admission.comment, 'Justification')
         self.assertEqual(admission.erasmus_mundus_scholarship_id, self.erasmus_mundus_scholarship.pk)
-        self.assertEqual(admission.specific_question_answers, {
+        expected = {
             'fe254203-17c7-47d6-95e4-3c5c532da551': 'My response',
             'fe254203-17c7-47d6-95e4-3c5c532da552': [self.file_uuid, '550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92'],
-        })
+        }
+        self.assertEqual(admission.specific_question_answers, expected)
 
     def test_admission_type_update_using_api_candidate_with_wrong_proposition(self):
         self.client.force_authenticate(user=self.candidate.user)

@@ -283,17 +283,18 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
         """Inscrit à un autre établissement Belge en N-1
         (informatiquement : curriculum / en N-1 supérieur belge non-diplômé)"""
         qs = dict(
-            EducationalExperienceYear.objects.filter(academic_year__year__in=annees)
+            EducationalExperienceYear.objects.filter(academic_year__year__in=[annee - 1 for annee in annees])
             .annotate(
                 est_changement=Exists(
                     EducationalExperienceYear.objects.filter(
                         educational_experience__person__global_id=matricule,
                         educational_experience__country__iso_code=BE_ISO_CODE,
                         educational_experience__obtained_diploma=False,
-                        academic_year__year=OuterRef('academic_year__year') - 1,
+                        academic_year__year=OuterRef('academic_year__year'),
                     )
                 ),
             )
-            .values('academic_year__year', 'est_changement')
+            .distinct('academic_year__year')
+            .values_list('academic_year__year', 'est_changement')
         )
-        return {annee: qs.get(annee) for annee in annees}
+        return {annee: qs.get(annee - 1) for annee in annees}

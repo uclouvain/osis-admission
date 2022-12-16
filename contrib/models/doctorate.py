@@ -661,7 +661,7 @@ class ConfirmationPaper(models.Model):
 
 class InternalNote(models.Model):
     admission = models.ForeignKey(
-        DoctorateAdmission,
+        BaseAdmission,
         on_delete=models.CASCADE,
         verbose_name=_("Admission"),
     )

@@ -997,6 +997,9 @@ msgstr "Date limite pour la confirmation :"
 msgid "Deadline of the confirmation paper (DD/MM/YYYY)"
 msgstr "Date limite pour la confirmation (JJ/MM/AAAA)"
 
+msgid "Debug"
+msgstr "Debug"
+
 msgid "Decision confirming the granting of subsidiary protection"
 msgstr "Décision confirmant l'octroi de la protection subsidiaire"
 
@@ -1357,6 +1360,9 @@ msgstr "Général"
 
 msgid "General education admission"
 msgstr "Admission en formation générale"
+
+msgid "General enrolments"
+msgstr "Inscriptions en formation générale"
 
 msgid "Generic"
 msgstr "Générique"
@@ -1859,6 +1865,9 @@ msgstr "Gestion"
 msgid "Management of the doctorate enrolments"
 msgstr "Gestion des inscriptions en doctorats"
 
+msgid "Management of the general enrolments"
+msgstr "Gestion des inscriptions en formation générale"
+
 msgid "Mandatory fields are missing in the cotutelle."
 msgstr "Les champs requis de la cotutelle sont manquants."
 
@@ -2048,6 +2057,9 @@ msgstr "Aucune inscription en doctorat n'a été trouvée"
 
 msgid "No doctorate found."
 msgstr "Doctorat non trouvé."
+
+msgid "No general enrolment"
+msgstr "Aucune inscription en formation générale n'a été trouvée"
 
 msgid "No pool was found to match."
 msgstr "Aucun pot ne correspond"

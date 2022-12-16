@@ -195,7 +195,7 @@ class BaseFilterForm(forms.Form):
     page_size = forms.ChoiceField(
         label=_("Page size"),
         choices=((size, size) for size in PAGINATOR_SIZE_LIST),
-        widget=forms.Select(attrs={'form': 'search_form'}),
+        widget=forms.Select(attrs={'form': 'search_form', 'autocomplete': 'off'}),
         help_text=_("items per page"),
         required=False,
     )

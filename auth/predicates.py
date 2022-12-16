@@ -27,6 +27,7 @@ from django.contrib.auth.models import User
 from django.utils.translation import gettext_lazy as _
 from osis_signature.enums import SignatureState
 from rules import predicate
+from waffle import switch_is_active
 
 from admission.ddd.parcours_doctoral.domain.model.enums import (
     ChoixStatutDoctorat,
@@ -150,3 +151,8 @@ def is_part_of_committee_and_invited(self, user: User, obj: DoctorateAdmission):
         for actor in obj.supervision_group.actors.all()
         if actor.last_state == SignatureState.INVITED.name
     ]
+
+
+@predicate
+def is_debug(*args):
+    return switch_is_active("debug")

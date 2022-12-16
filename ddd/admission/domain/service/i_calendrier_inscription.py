@@ -24,7 +24,10 @@
 #
 # ##############################################################################
 import logging
+from pprint import pformat
 from typing import List, Optional, Tuple
+
+import attr
 
 from admission.calendar.admission_calendar import *
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
@@ -85,11 +88,13 @@ class ICalendrierInscription(interface.DomainService):
         profil_candidat_translator: 'IProfilCandidatTranslator',
         proposition: Optional['Proposition'] = None,
     ) -> 'InfosDetermineesDTO':
+
         pool_ouverts = cls.get_pool_ouverts()
         cls.verifier_residence_au_sens_du_decret(formation_id.sigle, proposition)
         cls.verifier_reorientation_renseignee_si_eligible(type_formation, formation_id, proposition, pool_ouverts)
         cls.verifier_modification_renseignee_si_eligible(type_formation, formation_id, proposition, pool_ouverts)
         cls.verifier_formation_contingentee_ouvert(formation_id.sigle, proposition, formation_id.annee, pool_ouverts)
+
         identification = profil_candidat_translator.get_identification(matricule_candidat)
         residential_address = profil_candidat_translator.get_coordonnees(matricule_candidat).domicile_legal
         if identification.pays_nationalite is None:
@@ -97,17 +102,20 @@ class ICalendrierInscription(interface.DomainService):
         ue_plus_5 = cls.est_ue_plus_5(identification.pays_nationalite)
         annees = cls.get_annees_academiques_pour_calcul()
         changements_etablissement = profil_candidat_translator.get_changements_etablissement(matricule_candidat, annees)
+
         log_messages = [
             f"""
-            --------- Pool determination ---------
-            formation_id={formation_id},
-            ue_plus_5={ue_plus_5},
-            access_diplomas={titres_acces.get_valid_conditions()},
-            program={type_formation},
-            residential_address={residential_address},
-            annee_derniere_inscription_ucl={identification.annee_derniere_inscription_ucl},
-            matricule_candidat={matricule_candidat},
-            proposition={proposition},
+--------- Pool determination ---------
+annees_calcul={annees},
+formation_id={formation_id},
+ue_plus_5={ue_plus_5},
+access_diplomas={pformat(titres_acces.get_valid_conditions())},
+training_type={type_formation},
+residential_address={residential_address and pformat(attr.asdict(residential_address))},
+annee_derniere_inscription_ucl={identification.annee_derniere_inscription_ucl},
+matricule_candidat={matricule_candidat},
+changements_etablissement={changements_etablissement},
+proposition={('Proposition(' + pformat(attr.asdict(proposition)) + ')') if proposition else 'None'},
         """,
         ]
         for annee in annees:
@@ -126,7 +134,9 @@ class ICalendrierInscription(interface.DomainService):
                 proposition=proposition,
             )
             if pool:
+                logger.debug('\n'.join(log_messages))
                 return InfosDetermineesDTO(annee, pool)
+            log_messages.append("")
         else:  # pragma: no cover
             logger.debug('\n'.join(log_messages))
             raise AucunPoolCorrespondantException()
