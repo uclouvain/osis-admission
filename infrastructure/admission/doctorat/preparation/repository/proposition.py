@@ -98,7 +98,7 @@ def _instantiate_admission(admission: 'DoctorateAdmission') -> 'Proposition':
         entity_id=PropositionIdentityBuilder().build_from_uuid(admission.uuid),
         commission_proximite=commission_proximite,
         type_admission=ChoixTypeAdmission[admission.type],
-        doctorat_id=FormationIdentity(admission.doctorate.acronym, admission.doctorate.academic_year.year),
+        formation_id=FormationIdentity(admission.doctorate.acronym, admission.doctorate.academic_year.year),
         annee_calculee=admission.determined_academic_year and admission.determined_academic_year.year,
         pot_calcule=admission.determined_pool,
         matricule_candidat=admission.candidate.global_id,
@@ -146,6 +146,7 @@ def _instantiate_admission(admission: 'DoctorateAdmission') -> 'Proposition':
         comptabilite=get_accounting_from_admission(admission=admission),
         reponses_questions_specifiques=admission.specific_question_answers,
         curriculum=admission.curriculum,
+        elements_confirmation=admission.confirmation_elements,
     )
 
 
@@ -246,6 +247,7 @@ class PropositionRepository(IPropositionRepository):
                 and entity.bourse_erasmus_mundus_id.uuid,
                 'specific_question_answers': entity.reponses_questions_specifiques,
                 'curriculum': entity.curriculum,
+                'confirmation_elements': entity.elements_confirmation,
             },
         )
         Candidate.objects.get_or_create(person=candidate)
@@ -361,6 +363,7 @@ class PropositionRepository(IPropositionRepository):
             ),
             annee_calculee=admission.determined_academic_year and admission.determined_academic_year.year,
             pot_calcule=admission.determined_pool or '',
+            date_fin_pot=admission.pool_end_date,  # from annotation
             matricule_candidat=admission.candidate.global_id,
             prenom_candidat=admission.candidate.first_name,
             nom_candidat=admission.candidate.last_name,

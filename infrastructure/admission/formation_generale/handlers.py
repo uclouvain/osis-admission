@@ -27,6 +27,7 @@
 from admission.ddd.admission.formation_generale.commands import *
 from admission.ddd.admission.formation_generale.use_case.read import *
 from admission.ddd.admission.formation_generale.use_case.write import *
+from admission.infrastructure.admission.domain.service.elements_confirmation import ElementsConfirmation
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
@@ -91,6 +92,7 @@ COMMAND_HANDLERS = {
         calendrier_inscription=CalendrierInscription(),
         academic_year_repository=AcademicYearRepository(),
         questions_specifiques_translator=QuestionSpecifiqueTranslator(),
+        element_confirmation=ElementsConfirmation(),
     ),
     CompleterCurriculumCommand: lambda msg_bus, cmd: completer_curriculum(
         cmd,
@@ -117,5 +119,12 @@ COMMAND_HANDLERS = {
         titres_acces=TitresAcces(),
         profil_candidat_translator=ProfilCandidatTranslator(),
         calendrier_inscription=CalendrierInscription(),
+    ),
+    RecupererElementsConfirmationQuery: lambda msg_bus, cmd: recuperer_elements_confirmation(
+        cmd,
+        proposition_repository=PropositionRepository(),
+        element_confirmation=ElementsConfirmation(),
+        formation_translator=FormationGeneraleTranslator(),
+        profil_candidat_translator=ProfilCandidatTranslator(),
     ),
 }

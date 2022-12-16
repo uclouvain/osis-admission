@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Admission API
-  version: 1.0.54
+  version: 1.0.55
   description: This API delivers data for the Admission project.
   contact:
     name: UCLouvain - OSIS
@@ -6098,6 +6098,10 @@ components:
           nullable: true
         pot_calcule:
           type: string
+        date_fin_pot:
+          type: string
+          format: date
+          nullable: true
         matricule_candidat:
           type: string
         code_secteur_formation:
@@ -6345,6 +6349,29 @@ components:
           nullable: true
         access_conditions_url:
           type: string
+          nullable: true
+        elements_confirmation:
+          type: array
+          items:
+            type: object
+            properties:
+              nom:
+                type: string
+              texte:
+                type: string
+              reponses:
+                type: array
+                items: {}
+                nullable: true
+              titre:
+                type: string
+              type:
+                type: string
+            required:
+            - nom
+            - texte
+            - titre
+            - type
           nullable: true
       required:
       - errors
@@ -7888,6 +7915,10 @@ components:
           nullable: true
         pot_calcule:
           type: string
+        date_fin_pot:
+          type: string
+          format: date
+          nullable: true
         matricule_candidat:
           type: string
         prenom_candidat:
@@ -8306,6 +8337,10 @@ components:
           nullable: true
         pot_calcule:
           type: string
+        date_fin_pot:
+          type: string
+          format: date
+          nullable: true
         matricule_candidat:
           type: string
         prenom_candidat:
@@ -8609,9 +8644,12 @@ components:
           - ADMISSION_POOL_HUE5_FOREIGN_RESIDENCY
           - ADMISSION_POOL_NON_RESIDENT_QUOTA
           type: string
+        elements_confirmation:
+          type: object
       required:
       - annee
       - pool
+      - elements_confirmation
     SupervisionActor:
       type: object
       properties:

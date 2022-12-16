@@ -53,6 +53,7 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
     PromoteurManquantException,
 )
 from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixStatutCDD
+from admission.ddd.admission.domain.service.i_elements_confirmation import IElementsConfirmation
 from admission.ddd.admission.domain.validator.exceptions import (
     BourseNonTrouveeException,
     QuestionsSpecifiquesChoixFormationNonCompleteesException,
@@ -986,6 +987,18 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
             uuid=cls.second_admission.uuid,
         )
 
+        cls.submitted_data = {
+            'pool': AcademicCalendarTypes.DOCTORATE_EDUCATION_ENROLLMENT.name,
+            'annee': 2020,
+            'elements_confirmation': {
+                'reglement_general': IElementsConfirmation.REGLEMENT_GENERAL,
+                'protection_donnees': IElementsConfirmation.PROTECTION_DONNEES,
+                'professions_reglementees': IElementsConfirmation.PROFESSIONS_REGLEMENTEES,
+                'justificatifs': IElementsConfirmation.JUSTIFICATIFS,
+                'declaration_sur_lhonneur': IElementsConfirmation.DECLARATION_SUR_LHONNEUR,
+            },
+        }
+
     def assertInErrors(self, response, exception):
         errors = response.json().get('non_field_errors', [])
         self.assertTrue(any(exc for exc in errors if exc['status_code'] == exception.status_code))
@@ -1050,11 +1063,7 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
         self.client.force_authenticate(user=self.first_candidate.user)
 
         url = resolve_url("admission_api_v1:submit-doctoral-proposition", uuid=admission.uuid)
-        data = {
-            'pool': AcademicCalendarTypes.DOCTORATE_EDUCATION_ENROLLMENT.name,
-            'annee': 2020,
-        }
-        response = self.client.post(url, data)
+        response = self.client.post(url, self.submitted_data)
 
         updated_admission: DoctorateAdmission = DoctorateAdmission.objects.get(uuid=admission.uuid)
 
@@ -1105,11 +1114,7 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
         self.client.force_authenticate(user=self.second_candidate.user)
 
         url = resolve_url("admission_api_v1:submit-doctoral-proposition", uuid=admission.uuid)
-        data = {
-            'pool': AcademicCalendarTypes.DOCTORATE_EDUCATION_ENROLLMENT.name,
-            'annee': 2020,
-        }
-        response = self.client.post(url, data)
+        response = self.client.post(url, self.submitted_data)
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIsNotNone(response.json().get('non_field_errors'))
@@ -1120,16 +1125,12 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
             supervision_group=self.first_invited_promoter.actor_ptr.process,
         )
         url = resolve_url("admission_api_v1:submit-doctoral-proposition", uuid=admission.uuid)
-        data = {
-            'pool': AcademicCalendarTypes.DOCTORATE_EDUCATION_ENROLLMENT.name,
-            'annee': 2020,
-        }
         CddManagerFactory(entity=admission.doctorate.management_entity)
 
         self.client.force_authenticate(user=admission.candidate.user)
 
         # No academic experience -> the absence of debt certificate is not required
-        response = self.client.post(url, data)
+        response = self.client.post(url, self.submitted_data)
         self.assertNotInErrors(response, AbsenceDeDetteNonCompleteeException)
 
         # Experience in a french speaking community institute -> the absence of debt certificate is required
@@ -1148,14 +1149,14 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
             academic_year=AcademicYearFactory(year=get_current_year()),
         )
 
-        response = self.client.post(url, data)
+        response = self.client.post(url, self.submitted_data)
         self.assertInErrors(response, AbsenceDeDetteNonCompleteeException)
 
         # Experience in UCL -> the absence of debt certificate is not required
         experience.institute.code = "UCL"
         experience.institute.save()
 
-        response = self.client.post(url, data)
+        response = self.client.post(url, self.submitted_data)
         self.assertNotInErrors(response, AbsenceDeDetteNonCompleteeException)
 
         # Experience in a german speaking community institute -> the absence of debt certificate is not required
@@ -1163,7 +1164,7 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
         experience.institute.community = CommunityEnum.GERMAN_SPEAKING.name
         experience.institute.save()
 
-        response = self.client.post(url, data)
+        response = self.client.post(url, self.submitted_data)
         self.assertNotInErrors(response, AbsenceDeDetteNonCompleteeException)
 
         # Too old experience in a french speaking community institute -> the absence of debt certificate is not required
@@ -1173,7 +1174,7 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
         experience_year.academic_year = AcademicYearFactory(year=2000)
         experience_year.save()
 
-        response = self.client.post(url, data)
+        response = self.client.post(url, self.submitted_data)
         self.assertNotInErrors(response, AbsenceDeDetteNonCompleteeException)
 
     @mock.patch(
@@ -1194,10 +1195,6 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
         admission = DoctorateAdmission.objects.get(pk=admission.pk)
 
         url = resolve_url("admission_api_v1:submit-doctoral-proposition", uuid=admission.uuid)
-        data = {
-            'pool': AcademicCalendarTypes.DOCTORATE_EDUCATION_ENROLLMENT.name,
-            'annee': 2020,
-        }
 
         form_item_instantiation = AdmissionFormItemInstantiationFactory(
             form_item=TextAdmissionFormItemFactory(
@@ -1212,7 +1209,7 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
         form_item_instantiation = AdmissionFormItemInstantiation.objects.get(pk=form_item_instantiation.pk)
 
         # The question is required for this admission and the field is not completed
-        response = self.client.post(url, data)
+        response = self.client.post(url, self.submitted_data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertInErrors(response, QuestionsSpecifiquesCurriculumNonCompleteesException)
 
@@ -1220,7 +1217,7 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
         form_item_instantiation.tab = Onglets.CHOIX_FORMATION.name
         form_item_instantiation.save()
 
-        response = self.client.post(url, data)
+        response = self.client.post(url, self.submitted_data)
         self.assertNotInErrors(response, QuestionsSpecifiquesCurriculumNonCompleteesException)
 
         form_item_instantiation.tab = Onglets.CURRICULUM.name
@@ -1230,5 +1227,5 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
         admission.specific_question_answers = {'fe254203-17c7-47d6-95e4-3c5c532da551': 'My response.'}
         admission.save()
 
-        response = self.client.post(url, data)
+        response = self.client.post(url, self.submitted_data)
         self.assertNotInErrors(response, QuestionsSpecifiquesCurriculumNonCompleteesException)

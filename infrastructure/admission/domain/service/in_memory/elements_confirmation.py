@@ -23,15 +23,29 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from .determiner_annee_academique_et_pot_service import determiner_annee_academique_et_pot
-from .lister_propositions_candidat_service import lister_propositions_candidat
-from .lister_propositions_supervisees_service import lister_propositions_supervisees
-from .rechercher_doctorats_service import rechercher_doctorats
-from .recuperer_comptabilite_service import recuperer_comptabilite
-from .recuperer_cotutelle_service import recuperer_cotutelle
-from .recuperer_elements_confirmation_service import recuperer_elements_confirmation
-from .recuperer_groupe_de_supervision_service import recuperer_groupe_de_supervision
-from .recuperer_proposition_service import recuperer_proposition
-from .verifier_curriculum_service import verifier_curriculum
-from .verifier_projet_service import verifier_projet
-from .verifier_proposition_service import verifier_proposition
+from admission.ddd.admission.doctorat.preparation.test.factory.proposition import (
+    PropositionAdmissionSC3DPMinimaleFactory,
+)
+from admission.ddd.admission.domain.service.i_elements_confirmation import IElementsConfirmation
+from admission.infrastructure.admission.doctorat.preparation.domain.service.in_memory.doctorat import (
+    DoctoratInMemoryTranslator,
+)
+from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
+
+
+class ElementsConfirmationInMemory(IElementsConfirmation):
+    @classmethod
+    def est_candidat_avec_etudes_secondaires_belges_francophones(cls, matricule: str) -> bool:
+        return False
+
+    @classmethod
+    def get_elements_for_tests(cls, proposition=None, formation_translator=None, profil_translator=None):
+        elements = cls.recuperer(
+            proposition or PropositionAdmissionSC3DPMinimaleFactory(),
+            formation_translator or DoctoratInMemoryTranslator(),
+            profil_translator or ProfilCandidatInMemoryTranslator(),
+        )
+        return {
+            element.nom: (f"{element.reponses[0]} {element.texte}" if element.reponses else element.texte)
+            for element in elements
+        }

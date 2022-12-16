@@ -26,6 +26,7 @@
 import datetime
 
 from admission.ddd.admission.domain.service.i_calendrier_inscription import ICalendrierInscription
+from admission.ddd.admission.domain.service.i_elements_confirmation import IElementsConfirmation
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.domain.service.i_titres_acces import ITitresAcces
 from admission.ddd.admission.enums.question_specifique import Onglets
@@ -54,6 +55,7 @@ def soumettre_proposition(
     calendrier_inscription: 'ICalendrierInscription',
     academic_year_repository: 'IAcademicYearRepository',
     questions_specifiques_translator: 'IQuestionSpecifiqueTranslator',
+    element_confirmation: 'IElementsConfirmation',
 ) -> 'PropositionIdentity':
     # GIVEN
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
@@ -83,9 +85,15 @@ def soumettre_proposition(
         annee_soumise=cmd.annee,
         pool_soumis=AcademicCalendarTypes[cmd.pool],
     )
+    element_confirmation.valider(
+        soumis=cmd.elements_confirmation,
+        proposition=proposition,
+        formation_translator=formation_translator,
+        profil_candidat_translator=profil_candidat_translator,
+    )
 
     # THEN
-    proposition.soumettre(cmd.annee, AcademicCalendarTypes[cmd.pool])
+    proposition.soumettre(cmd.annee, AcademicCalendarTypes[cmd.pool], cmd.elements_confirmation)
     proposition_repository.save(proposition)
 
     return proposition_id

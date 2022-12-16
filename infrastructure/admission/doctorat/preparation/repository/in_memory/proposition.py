@@ -193,7 +193,7 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
     @classmethod
     def _load_dto(cls, proposition: 'Proposition'):
         candidat = cls.candidats[proposition.matricule_candidat]
-        doctorat = cls.doctorats[(proposition.doctorat_id.sigle, proposition.doctorat_id.annee)]
+        doctorat = cls.doctorats[(proposition.formation_id.sigle, proposition.formation_id.annee)]
         bourse_erasmus_dto = (
             BourseInMemoryTranslator.get_dto(uuid=str(proposition.bourse_erasmus_mundus_id.uuid))
             if proposition.bourse_erasmus_mundus_id
@@ -209,8 +209,8 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
             type_admission=proposition.type_admission.name,
             reference=proposition.reference,
             doctorat=DoctoratDTO(
-                proposition.doctorat_id.sigle,
-                proposition.doctorat_id.annee,
+                proposition.formation_id.sigle,
+                proposition.formation_id.annee,
                 doctorat.intitule,
                 doctorat.code_secteur,
                 doctorat.campus,
@@ -218,6 +218,7 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
             ),
             annee_calculee=proposition.annee_calculee,
             pot_calcule=proposition.pot_calcule,
+            date_fin_pot=None,
             matricule_candidat=proposition.matricule_candidat,
             justification=proposition.justification,
             code_secteur_formation=doctorat.code_secteur,

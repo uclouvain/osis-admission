@@ -33,6 +33,9 @@ from admission.infrastructure.admission.domain.service.in_memory.annee_inscripti
 from admission.infrastructure.admission.domain.service.in_memory.calendrier_inscription import (
     CalendrierInscriptionInMemory,
 )
+from admission.infrastructure.admission.domain.service.in_memory.elements_confirmation import (
+    ElementsConfirmationInMemory,
+)
 from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
 from admission.infrastructure.admission.domain.service.in_memory.titres_acces import TitresAccesInMemory
 from admission.infrastructure.admission.formation_continue.domain.service.in_memory.comptabilite import (
@@ -96,6 +99,7 @@ COMMAND_HANDLERS = {
         titres_acces=_titres_acces,
         profil_candidat_translator=_profil_candidat_translator,
         calendrier_inscription=CalendrierInscriptionInMemory(),
+        element_confirmation=ElementsConfirmationInMemory(),
     ),
     CompleterCurriculumCommand: lambda msg_bus, cmd: completer_curriculum(
         cmd,
@@ -116,5 +120,12 @@ COMMAND_HANDLERS = {
     GetComptabiliteQuery: lambda msg_bus, cmd: recuperer_comptabilite(
         cmd,
         comptabilite_translator=_comptabilite_translator,
+    ),
+    RecupererElementsConfirmationQuery: lambda msg_bus, cmd: recuperer_elements_confirmation(
+        cmd,
+        proposition_repository=_proposition_repository,
+        element_confirmation=ElementsConfirmationInMemory(),
+        formation_translator=_formation_continue_translator,
+        profil_candidat_translator=_profil_candidat_translator,
     ),
 }

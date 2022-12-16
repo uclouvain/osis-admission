@@ -87,6 +87,7 @@ class SoumettrePropositionCommand(interface.CommandRequest):
     uuid_proposition: str
     annee: int
     pool: str
+    elements_confirmation: Dict[str, str]
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -191,3 +192,8 @@ class CompleterComptabilitePropositionCommand(interface.CommandRequest):
     code_bic_swift_banque: Optional[str]
     prenom_titulaire_compte: Optional[str]
     nom_titulaire_compte: Optional[str]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RecupererElementsConfirmationQuery(interface.QueryRequest):
+    uuid_proposition: str

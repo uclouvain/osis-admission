@@ -155,6 +155,7 @@ class SoumettrePropositionCommand(interface.CommandRequest):
     uuid_proposition: str
     annee: int
     pool: str
+    elements_confirmation: Dict[str, str]
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -257,4 +258,9 @@ class VerifierCurriculumQuery(interface.QueryRequest):
 
 @attr.dataclass(frozen=True, slots=True)
 class DeterminerAnneeAcademiqueEtPotQuery(interface.QueryRequest):
+    uuid_proposition: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RecupererElementsConfirmationQuery(interface.QueryRequest):
     uuid_proposition: str

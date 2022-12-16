@@ -88,7 +88,7 @@ class PropositionBuilder(interface.RootEntityBuilder):
             statut=ChoixStatutProposition.IN_PROGRESS,
             justification=cmd.justification,
             type_admission=ChoixTypeAdmission[cmd.type_admission],
-            doctorat_id=doctorat_id,
+            formation_id=doctorat_id,
             matricule_candidat=cmd.matricule_candidat,
             commission_proximite=commission_proximite,
             projet=projet_non_rempli,

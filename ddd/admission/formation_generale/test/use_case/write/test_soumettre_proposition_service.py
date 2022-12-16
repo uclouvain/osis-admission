@@ -30,6 +30,13 @@ import freezegun
 
 from admission.ddd.admission.formation_generale.commands import SoumettrePropositionCommand
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutProposition
+from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
+from admission.infrastructure.admission.domain.service.in_memory.elements_confirmation import (
+    ElementsConfirmationInMemory,
+)
+from admission.infrastructure.admission.formation_generale.domain.service.in_memory.formation import (
+    FormationGeneraleInMemoryTranslator,
+)
 from admission.infrastructure.admission.formation_generale.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
@@ -58,11 +65,16 @@ class TestSoumettrePropositionGenerale(TestCase):
 
     @freezegun.freeze_time('2020-11-01')
     def test_should_soumettre_proposition_etre_ok_si_admission_complete(self):
+        elements_confirmation = ElementsConfirmationInMemory.get_elements_for_tests(
+            self.proposition_repository.get(PropositionIdentity("uuid-MASTER-SCI")),
+            FormationGeneraleInMemoryTranslator(),
+        )
         proposition_id = self.message_bus.invoke(
             SoumettrePropositionCommand(
                 uuid_proposition="uuid-MASTER-SCI",
                 pool=AcademicCalendarTypes.ADMISSION_POOL_VIP.name,
                 annee=2021,
+                elements_confirmation=elements_confirmation,
             ),
         )
 

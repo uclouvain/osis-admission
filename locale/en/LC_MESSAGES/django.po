@@ -139,6 +139,13 @@ msgid ""
 msgstr ""
 
 msgid ""
+"<ul><li>the information I have provided in this application is accurate and "
+"complete</li><li>I have uploaded all relevant documents confirming the "
+"information provided</li><li>I pledge to forward to the UCLouvain "
+"Registration Service any changes to the data in my file</li></ul>"
+msgstr ""
+
+msgid ""
 "A candidate is considered as VIP if he/she is in double degree or if he/she "
 "benefits from an international scholarship or if he/she is Erasmus Mundus."
 msgstr ""
@@ -207,6 +214,9 @@ msgid "Accept these courses"
 msgstr ""
 
 msgid "Accepted"
+msgstr ""
+
+msgid "Access to regulated professions"
 msgstr ""
 
 msgid "Account number"
@@ -379,6 +389,9 @@ msgstr ""
 msgid ""
 "Annex 25 or 26 or the A/B card mentioning the refugee status or the decision "
 "confirming the protection of the parent"
+msgstr ""
+
+msgid "Application fees"
 msgstr ""
 
 msgid "Application for a study allowance from the French Community of Belgium"
@@ -765,6 +778,12 @@ msgstr ""
 msgid "Communication attestation"
 msgstr ""
 
+msgid "Communication with Host Hospitals"
+msgstr ""
+
+msgid "Communication with your secondary school"
+msgstr ""
+
 msgid "Complementary training"
 msgstr ""
 
@@ -896,6 +915,9 @@ msgstr ""
 
 msgid "DOCTORAL_TRAINING"
 msgstr "Doctoral training"
+
+msgid "Data protection"
+msgstr ""
 
 msgid "Data related to the thesis"
 msgstr ""
@@ -1271,6 +1293,9 @@ msgstr ""
 msgid "General"
 msgstr ""
 
+msgid "General Study Regulations"
+msgstr ""
+
 msgid "General education admission"
 msgstr ""
 
@@ -1312,8 +1337,39 @@ msgid "I am an asylum seeker"
 msgstr ""
 
 msgid ""
+"I am aware that as a non-EU, non-assimilated student, I am required to pay a "
+"&euro;200 application fee via the online payment system. The application fee "
+"must be received by UCLouvain <strong>within 15 calendar days</strong>. If "
+"not, my application will be closed. For more information: <a href=\"https://"
+"uclouvain.be/en/study/inscriptions/tuition-fees-non-eu-students.html\" "
+"target=\"_blank\">www.uclouvain.be/application-fees</a>."
+msgstr ""
+
+msgid ""
+"I am aware that no additional documents specific to quota studies can be "
+"added after my online application has been confirmed."
+msgstr ""
+
+msgid ""
 "I am supported by the CPAS, or by a CPAS rest home or designated by the CPAS "
 "(assimilation 4)"
+msgstr ""
+
+msgid "I authorise"
+msgstr ""
+
+msgid ""
+"I authorise the Faculty of Medicine and Dentistry of UCLouvain to provide my "
+"personal details (surname(s), first name(s), NOMA, date of birth, place of "
+"birth, address) to the Host Hospitals with a view to establishing the "
+"various accesses that will be necessary for me in the context of my "
+"internship, and this in compliance with the General Data Protection "
+"Regulation (GDPR) and the law of 30 July 2018 on the protection of "
+"individuals with regard to the processing of personal data. My data is kept "
+"for the time necessary for the proper execution of the internship and is "
+"never passed on to parties other than those mentioned above. Appropriate "
+"technical and organisational measures are put in place to ensure an adequate "
+"level of protection of this data."
 msgstr ""
 
 msgid "I benefit from a Development Cooperation grant"
@@ -1333,6 +1389,12 @@ msgid "I benefit from subsidiary protection"
 msgstr ""
 
 msgid "I benefit from temporary protection"
+msgstr ""
+
+msgid "I declare on my honour that"
+msgstr ""
+
+msgid "I do not authorize"
 msgstr ""
 
 msgid "I have a foreigner's card"
@@ -1369,6 +1431,22 @@ msgid ""
 "(assimilation 1)"
 msgstr ""
 
+msgid ""
+"I have taken note of the latest version of the Internship framework "
+"agreement between UCLouvain and the Host Hospitals established within the "
+"framework of bachelor's or master's training in medicine organised by "
+"UCLouvain with a view to acquiring the corresponding teaching units, and I "
+"undertake to respect the terms thereof: <a href=\"https://cdn.uclouvain.be/"
+"groups/cms-editors-mede/ConventionStageMed.pdf\" target=\"_blank\">https://"
+"cdn.uclouvain.be/groups/cms-editors-mede/ConventionStageMed.pdf</a>"
+msgstr ""
+
+msgid ""
+"I undertake to send any supporting documents requested by the Enrolment "
+"Service <strong>within 15 calendar days</strong>. If I fail to do so, I take "
+"note and accept that my application will be closed."
+msgstr ""
+
 msgid "IBAN account number"
 msgstr ""
 
@@ -1403,6 +1481,39 @@ msgstr ""
 msgid ""
 "Impossible action: please be sure that the confirmation date and report are "
 "specified."
+msgstr ""
+
+msgid ""
+"In accordance with the information on the link <a target=\"_blank\" href="
+"\"https://uclouvain.be/en/study/inscriptions/reglementations.html\">www."
+"uclouvain.be/regulation-enrolment</a>, I declare that I have read the "
+"university regulations and accept their terms."
+msgstr ""
+
+msgid ""
+"In accordance with the information on the link <a target=\"_blank\" href="
+"\"https://uclouvain.be/en/study/inscriptions/vie-privee.html\">www.uclouvain."
+"be/privacy-enrolment</a>, I declare that I have read the data protection "
+"policy of UCLouvain and I accept its terms."
+msgstr ""
+
+msgid ""
+"In accordance with the information on the link, <a target=\"_blank\" href="
+"\"https://uclouvain.be/en/study/inscriptions/acces-aux-professions-"
+"reglementees.html\">www.uclouvain.be/regulated-professions</a>, I declare "
+"that I have received, if these studies concern me, information on the "
+"conditions of access to these studies or of access to the continuation of "
+"these studies and on the particular rules or restrictions of accreditation "
+"or professional establishment to which the professional or associate title "
+"is subject, and I accept the terms thereof."
+msgstr ""
+
+#, python-format
+msgid ""
+"In accordance with the registration calendar <a href=\"https://uclouvain.be/"
+"en/study/inscriptions/calendrier-inscriptions.html\" target=\"_blank\">www."
+"uclouvain.be/enrolment-calendar</a>, I confirm that I am applying for the "
+"academic year %(year)s."
 msgstr ""
 
 msgid "In person"
@@ -1445,6 +1556,9 @@ msgid "International for general education"
 msgstr ""
 
 msgid "International scholarship"
+msgstr ""
+
+msgid "Internship framework agreement"
 msgstr ""
 
 #, python-format
@@ -2563,6 +2677,9 @@ msgstr ""
 msgid "Speaker"
 msgstr ""
 
+msgid "Specific documents for quota studies"
+msgstr ""
+
 msgid "Sport affiliation"
 msgstr ""
 
@@ -2631,6 +2748,9 @@ msgid "Supervisory panel"
 msgstr ""
 
 msgid "Supervisory panel report of the confirmation paper"
+msgstr ""
+
+msgid "Supporting documents"
 msgstr ""
 
 msgid "TO_BE_COMPLETED"
@@ -2824,6 +2944,9 @@ msgstr ""
 msgid "The status has been changed to %(status)s."
 msgstr ""
 
+msgid "The submitted information is not consistent with information requested."
+msgstr ""
+
 #, python-format
 msgid "The text size must be one of the following values: %(values)s."
 msgstr ""
@@ -2997,6 +3120,12 @@ msgstr "UCLouvain scientific staff"
 
 msgid "UCL_COURSE"
 msgstr "UCL Course"
+
+msgid ""
+"UCLouvain to transmit, to the secondary school in which I obtained my CESS, "
+"the information relating to the successful completion of the 1st annual "
+"bachelor's degree and any academic degree obtained with the possible mention."
+msgstr ""
 
 msgid "UE"
 msgstr ""

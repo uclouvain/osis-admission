@@ -53,6 +53,7 @@ class IdentificationDTOFactory(factory.Factory):
     genre = "M"
     photo_identite = ['uuid14']
     pays_naissance = factory.Faker('country_code')
+    pays_nationalite_europeen = False
     lieu_naissance = factory.Faker('city')
     carte_identite = ['uuid12']
     passeport = ['uuid13']

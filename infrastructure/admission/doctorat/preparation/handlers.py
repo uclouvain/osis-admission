@@ -44,6 +44,7 @@ from .repository.groupe_de_supervision import GroupeDeSupervisionRepository
 from .repository.proposition import PropositionRepository
 from ..validation.repository.demande import DemandeRepository
 from ...domain.service.calendrier_inscription import CalendrierInscription
+from ...domain.service.elements_confirmation import ElementsConfirmation
 from ...domain.service.titres_acces import TitresAcces
 
 COMMAND_HANDLERS = {
@@ -151,6 +152,7 @@ COMMAND_HANDLERS = {
         questions_specifiques_translator=QuestionSpecifiqueTranslator(),
         doctorat_translator=DoctoratTranslator(),
         calendrier_inscription=CalendrierInscription(),
+        element_confirmation=ElementsConfirmation(),
     ),
     DefinirCotutelleCommand: lambda msg_bus, cmd: definir_cotutelle(
         cmd,
@@ -221,5 +223,12 @@ COMMAND_HANDLERS = {
         titres_acces=TitresAcces(),
         profil_candidat_translator=ProfilCandidatTranslator(),
         calendrier_inscription=CalendrierInscription(),
+    ),
+    RecupererElementsConfirmationQuery: lambda msg_bus, cmd: recuperer_elements_confirmation(
+        cmd,
+        proposition_repository=PropositionRepository(),
+        element_confirmation=ElementsConfirmation(),
+        formation_translator=DoctoratTranslator(),
+        profil_candidat_translator=ProfilCandidatTranslator(),
     ),
 }

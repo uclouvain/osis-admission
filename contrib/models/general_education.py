@@ -171,6 +171,7 @@ class GeneralEducationAdmissionManager(models.Manager.from_queryset(BaseAdmissio
                 "erasmus_mundus_scholarship",
             )
             .annotate_campus()
+            .annotate_pool_end_date()
         )
 
 

@@ -163,6 +163,7 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
             formation=formation,
             annee_calculee=proposition.annee_calculee,
             pot_calcule=proposition.pot_calcule,
+            date_fin_pot=None,
             bourse_double_diplome=BourseInMemoryTranslator.get_dto(proposition.bourse_double_diplome_id.uuid)
             if proposition.bourse_double_diplome_id
             else None,

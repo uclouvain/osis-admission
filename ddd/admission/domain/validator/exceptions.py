@@ -158,3 +158,11 @@ class PoolOuAnneeDifferentException(BusinessException):
         self.annee_soumise = annee_soumise
         self.pool_soumis = pool_soumis
         super().__init__(message, **kwargs)
+
+
+class ElementsConfirmationNonConcordants(BusinessException):
+    status_code = "ADMISSION-14"
+
+    def __init__(self, **kwargs):
+        message = _("The submitted information is not consistent with information requested.")
+        super().__init__(message, **kwargs)

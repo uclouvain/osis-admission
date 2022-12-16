@@ -23,15 +23,20 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from .determiner_annee_academique_et_pot_service import determiner_annee_academique_et_pot
-from .lister_propositions_candidat_service import lister_propositions_candidat
-from .lister_propositions_supervisees_service import lister_propositions_supervisees
-from .rechercher_doctorats_service import rechercher_doctorats
-from .recuperer_comptabilite_service import recuperer_comptabilite
-from .recuperer_cotutelle_service import recuperer_cotutelle
-from .recuperer_elements_confirmation_service import recuperer_elements_confirmation
-from .recuperer_groupe_de_supervision_service import recuperer_groupe_de_supervision
-from .recuperer_proposition_service import recuperer_proposition
-from .verifier_curriculum_service import verifier_curriculum
-from .verifier_projet_service import verifier_projet
-from .verifier_proposition_service import verifier_proposition
+from django.db.models import Q
+
+from admission.ddd.admission.domain.service.i_elements_confirmation import IElementsConfirmation
+from osis_profile.models import BelgianHighSchoolDiploma
+from osis_profile.models.enums.education import BelgianCommunitiesOfEducation
+
+
+class ElementsConfirmation(IElementsConfirmation):
+    @classmethod
+    def est_candidat_avec_etudes_secondaires_belges_francophones(cls, matricule: str) -> bool:
+        # Candidats ayant sélectionné des études secondaires belges dans un établissement de la communauté française
+        # OU candidats ayant sélectionné des études secondaires belges dans un établissement "autre"
+        return BelgianHighSchoolDiploma.objects.filter(
+            ~Q(institute_id=None) | ~Q(other_institute_name=''),
+            person__global_id=matricule,
+            community=BelgianCommunitiesOfEducation.FRENCH_SPEAKING.name,
+        ).exists()
