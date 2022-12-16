@@ -96,10 +96,6 @@ class EtudesSecondairesDTOFactory(factory.Factory):
         model = EtudesSecondairesDTO
         abstract = False
 
-    presence_etudes_secondaires_belges = False
-    presence_etudes_secondaires_etrangeres = False
-    presence_examen_admission_premier_cycle = False
-
 
 class AnneeExperienceAcademiqueDTOFactory(factory.Factory):
     class Meta:

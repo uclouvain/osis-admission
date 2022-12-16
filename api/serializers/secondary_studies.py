@@ -3,10 +3,18 @@ from functools import partial
 from rest_framework import serializers
 
 from admission.api.serializers.fields import AnswerToSpecificQuestionField
+from admission.ddd.admission.formation_generale.domain.model.enums import CHOIX_DIPLOME_OBTENU
+from admission.infrastructure.admission.domain.service.profil_candidat import ProfilCandidatTranslator
 from base.api.serializers.academic_year import RelatedAcademicYearField
 from base.models.enums.establishment_type import EstablishmentTypeEnum
+from base.models.enums.got_diploma import GotDiploma
+
 from base.models.organization import Organization
-from osis_profile.models import BelgianHighSchoolDiploma, ForeignHighSchoolDiploma, HighSchoolDiplomaAlternative
+from osis_profile.models import (
+    BelgianHighSchoolDiploma,
+    ForeignHighSchoolDiploma,
+    HighSchoolDiplomaAlternative,
+)
 from osis_profile.models.education import Schedule
 from osis_profile.models.enums.education import EducationalType
 from reference.api.serializers.country import RelatedCountryField
@@ -69,7 +77,8 @@ class ForeignHighSchoolDiplomaSerializer(serializers.ModelSerializer):
             "high_school_transcript_translation",
             "high_school_diploma_translation",
             "enrolment_certificate_translation",
-            "final_equivalence_decision",
+            "final_equivalence_decision_ue",
+            "final_equivalence_decision_not_ue",
             "equivalence_decision_proof",
         )
 
@@ -81,10 +90,20 @@ class HighSchoolDiplomaAlternativeSerializer(serializers.ModelSerializer):
 
 
 class HighSchoolDiplomaSerializer(serializers.Serializer):
+    graduated_from_high_school = serializers.ChoiceField(required=False, allow_blank=True, choices=GotDiploma.choices())
+    graduated_from_high_school_year = RelatedAcademicYearField(required=False, allow_null=True)
     belgian_diploma = BelgianHighSchoolDiplomaSerializer(required=False, allow_null=True)
     foreign_diploma = ForeignHighSchoolDiplomaSerializer(required=False, allow_null=True)
     high_school_diploma_alternative = HighSchoolDiplomaAlternativeSerializer(required=False, allow_null=True)
     specific_question_answers = AnswerToSpecificQuestionField(write_only=True)
+    is_vae_potential = serializers.SerializerMethodField(read_only=True)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['is_vae_potential'].field_schema = {'type': 'boolean'}
+
+    def get_is_vae_potential(self, person):
+        return ProfilCandidatTranslator.est_potentiel_vae(person.global_id)
 
     @staticmethod
     def load_diploma(instance):
@@ -152,6 +171,10 @@ class HighSchoolDiplomaSerializer(serializers.Serializer):
     def update(self, instance, validated_data):
         self.load_diploma(instance)
 
+        instance.graduated_from_high_school = validated_data.get('graduated_from_high_school')
+        instance.graduated_from_high_school_year = validated_data.get('graduated_from_high_school_year')
+        instance.save()
+
         belgian_diploma_data = validated_data.get("belgian_diploma")
         foreign_diploma_data = validated_data.get("foreign_diploma")
         high_school_diploma_alternative_data = validated_data.get("high_school_diploma_alternative")
@@ -162,8 +185,10 @@ class HighSchoolDiplomaSerializer(serializers.Serializer):
             self.update_foreign_diploma(instance, foreign_diploma_data)
         elif high_school_diploma_alternative_data:
             self.update_high_school_diploma_alternative(instance, high_school_diploma_alternative_data)
-        else:  # if no data given, it means that the user don't have a diploma, so delete any previously saved ones
-            self.clean_belgian_diploma(instance)
-            self.clean_foreign_diploma(instance)
-            self.clean_high_school_diploma_alternative(instance)
+        else:
+            if instance.graduated_from_high_school not in CHOIX_DIPLOME_OBTENU:
+                self.clean_belgian_diploma(instance)
+                self.clean_foreign_diploma(instance)
+            if instance.graduated_from_high_school != GotDiploma.NO.name:
+                self.clean_high_school_diploma_alternative(instance)
         return instance

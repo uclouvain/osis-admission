@@ -27,6 +27,7 @@ from typing import List
 
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition as PropositionDoctorat
 from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition as PropositionGenerale
+
 from admission.ddd.admission.doctorat.preparation.domain.validator.validator_by_business_action import (
     ComptabiliteValidatorList,
     CurriculumValidatorList,
@@ -34,6 +35,7 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.validator_by_
 )
 from admission.ddd.admission.domain.model._candidat_adresse import CandidatAdresse
 from admission.ddd.admission.domain.model._candidat_signaletique import CandidatSignaletique
+from admission.ddd.admission.domain.model.formation import Formation
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.domain.validator.validator_by_business_action import (
     CoordonneesValidatorList,
@@ -43,12 +45,11 @@ from admission.ddd.admission.domain.validator.validator_by_business_action impor
 from admission.ddd.admission.formation_generale.domain.model.proposition import (
     Proposition as FormationGeneraleProposition,
 )
-from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
-    EtudesSecondairesNonCompleteesException,
-)
 from admission.ddd.admission.formation_generale.domain.validator.validator_by_business_actions import (
     FormationGeneraleCurriculumValidatorList,
     FormationGeneraleComptabiliteValidatorList,
+    EtudesSecondairesValidatorList,
+    BachelierEtudesSecondairesValidatorList,
 )
 from base.models.enums.education_group_types import TrainingType
 from osis_common.ddd import interface
@@ -123,11 +124,26 @@ class ProfilCandidat(interface.DomainService):
         cls,
         matricule: str,
         profil_candidat_translator: 'IProfilCandidatTranslator',
+        formation: Formation,
     ) -> None:
-        etudes_secondaires = profil_candidat_translator.get_etudes_secondaires(matricule)
+        etudes_secondaires = profil_candidat_translator.get_etudes_secondaires(matricule, formation.type)
 
-        if not etudes_secondaires:
-            raise EtudesSecondairesNonCompleteesException
+        if formation.type == TrainingType.BACHELOR:
+            est_potentiel_vae = profil_candidat_translator.est_potentiel_vae(matricule)
+            BachelierEtudesSecondairesValidatorList(
+                diplome_etudes_secondaires=etudes_secondaires.diplome_etudes_secondaires,
+                annee_diplome_etudes_secondaires=etudes_secondaires.annee_diplome_etudes_secondaires,
+                diplome_belge=etudes_secondaires.diplome_belge,
+                diplome_etranger=etudes_secondaires.diplome_etranger,
+                alternative_secondaires=etudes_secondaires.alternative_secondaires,
+                est_potentiel_vae=est_potentiel_vae,
+                formation=formation,
+            ).validate()
+        else:
+            EtudesSecondairesValidatorList(
+                diplome_etudes_secondaires=etudes_secondaires.diplome_etudes_secondaires,
+                annee_diplome_etudes_secondaires=etudes_secondaires.annee_diplome_etudes_secondaires,
+            ).validate()
 
     @classmethod
     def verifier_curriculum(

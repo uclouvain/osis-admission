@@ -36,6 +36,12 @@ from admission.ddd.admission.domain.validator import (
     ShouldAutreFormatCarteBancaireRemboursementEtreCompletee,
 )
 from admission.ddd.admission.formation_generale.domain.model._comptabilite import Comptabilite
+from admission.ddd.admission.domain.model.formation import Formation
+from admission.ddd.admission.dtos.etudes_secondaires import (
+    DiplomeBelgeEtudesSecondairesDTO,
+    DiplomeEtrangerEtudesSecondairesDTO,
+    AlternativeSecondairesDTO,
+)
 from admission.ddd.admission.formation_generale.domain.validator import (
     ShouldCurriculumFichierEtreSpecifie,
     ShouldEquivalenceEtreSpecifiee,
@@ -44,6 +50,11 @@ from admission.ddd.admission.formation_generale.domain.validator import (
     ShouldReductionDesDroitsInscriptionEtreCompletee,
     ShouldAssimilationEtreCompletee,
     ShouldAffiliationsEtreCompletees,
+    ShouldSpecifieSiDiplomeEtudesSecondaires,
+    ShouldSpecifieSiDiplomeEtudesSecondairesPourBachelier,
+    ShouldDiplomeBelgesEtudesSecondairesEtreComplete,
+    ShouldDiplomeEtrangerEtudesSecondairesEtreComplete,
+    ShouldAlternativeSecondairesEtreCompletee,
 )
 from base.ddd.utils.business_validator import BusinessValidator, TwoStepsMultipleBusinessExceptionListValidator
 from base.models.enums.education_group_types import TrainingType
@@ -142,5 +153,62 @@ class FormationGeneraleComptabiliteValidatorList(TwoStepsMultipleBusinessExcepti
                 code_bic_swift_banque=self.comptabilite.code_bic_swift_banque,
                 prenom_titulaire_compte=self.comptabilite.prenom_titulaire_compte,
                 nom_titulaire_compte=self.comptabilite.nom_titulaire_compte,
+            ),
+        ]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class EtudesSecondairesValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+    diplome_etudes_secondaires: str
+    annee_diplome_etudes_secondaires: Optional[int]
+
+    def get_data_contract_validators(self) -> List[BusinessValidator]:
+        return []
+
+    def get_invariants_validators(self) -> List[BusinessValidator]:
+        return [
+            ShouldSpecifieSiDiplomeEtudesSecondaires(
+                diplome_etudes_secondaires=self.diplome_etudes_secondaires,
+                annee_diplome_etudes_secondaires=self.annee_diplome_etudes_secondaires,
+            ),
+        ]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class BachelierEtudesSecondairesValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+    diplome_belge: Optional[DiplomeBelgeEtudesSecondairesDTO]
+    diplome_etranger: Optional[DiplomeEtrangerEtudesSecondairesDTO]
+    alternative_secondaires: Optional[AlternativeSecondairesDTO]
+    diplome_etudes_secondaires: str
+    annee_diplome_etudes_secondaires: Optional[int]
+    est_potentiel_vae: bool
+    formation: Formation
+
+    def get_data_contract_validators(self) -> List[BusinessValidator]:
+        return []
+
+    def get_invariants_validators(self) -> List[BusinessValidator]:
+        return [
+            ShouldSpecifieSiDiplomeEtudesSecondairesPourBachelier(
+                diplome_etudes_secondaires=self.diplome_etudes_secondaires,
+                annee_diplome_etudes_secondaires=self.annee_diplome_etudes_secondaires,
+                diplome_belge=self.diplome_belge,
+                diplome_etranger=self.diplome_etranger,
+                alternative_secondaires=self.alternative_secondaires,
+                est_potentiel_vae=self.est_potentiel_vae,
+            ),
+            ShouldDiplomeBelgesEtudesSecondairesEtreComplete(
+                diplome_etudes_secondaires=self.diplome_etudes_secondaires,
+                diplome_belge=self.diplome_belge,
+            ),
+            ShouldDiplomeEtrangerEtudesSecondairesEtreComplete(
+                diplome_etudes_secondaires=self.diplome_etudes_secondaires,
+                diplome_etranger=self.diplome_etranger,
+                formation=self.formation,
+            ),
+            ShouldAlternativeSecondairesEtreCompletee(
+                diplome_etudes_secondaires=self.diplome_etudes_secondaires,
+                alternative_secondaires=self.alternative_secondaires,
+                est_potentiel_vae=self.est_potentiel_vae,
             ),
         ]

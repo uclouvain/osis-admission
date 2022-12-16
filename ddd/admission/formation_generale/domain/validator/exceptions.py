@@ -91,3 +91,27 @@ class AttestationContinuationBachelierNonRenseigneeException(BusinessException):
             "registering for."
         )
         super().__init__(message, **kwargs)
+
+
+class EtudesSecondairesNonCompleteesPourDiplomeBelgeException(BusinessException):
+    status_code = "FORMATION-GENERALE-8"
+
+    def __init__(self, **kwargs):
+        message = _("Some information about the Belgian diploma of the secondary studies are missing.")
+        super().__init__(message, **kwargs)
+
+
+class EtudesSecondairesNonCompleteesPourDiplomeEtrangerException(BusinessException):
+    status_code = "FORMATION-GENERALE-9"
+
+    def __init__(self, **kwargs):
+        message = _("Some information about the foreign diploma of the secondary studies are missing.")
+        super().__init__(message, **kwargs)
+
+
+class EtudesSecondairesNonCompleteesPourAlternativeException(BusinessException):
+    status_code = "FORMATION-GENERALE-10"
+
+    def __init__(self, **kwargs):
+        message = _("Some information about the alternative to the secondary studies are missing.")
+        super().__init__(message, **kwargs)

@@ -26,7 +26,9 @@
 import datetime
 from typing import Dict, List
 
+from django.db import models
 from django.db.models import Exists, OuterRef, Subquery
+from django.db.models.functions import ExtractYear, ExtractMonth
 
 from admission.ddd.admission.doctorat.preparation.dtos import ConditionsComptabiliteDTO, CurriculumDTO
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
@@ -36,18 +38,22 @@ from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.domain.validator._should_identification_candidat_etre_completee import BE_ISO_CODE
 from admission.ddd.admission.dtos import AdressePersonnelleDTO, CoordonneesDTO, EtudesSecondairesDTO, IdentificationDTO
+from admission.ddd.admission.dtos.etudes_secondaires import (
+    DiplomeBelgeEtudesSecondairesDTO,
+    DiplomeEtrangerEtudesSecondairesDTO,
+    AlternativeSecondairesDTO,
+)
 from base.models.enums.community import CommunityEnum
+from base.models.enums.education_group_types import TrainingType
 from base.models.enums.person_address_type import PersonAddressType
 from base.models.person import Person
 from base.models.person_address import PersonAddress
 from base.tasks.synchronize_entities_addresses import UCLouvain_acronym
 from osis_profile.models import (
-    BelgianHighSchoolDiploma,
     EducationalExperienceYear,
-    ForeignHighSchoolDiploma,
     ProfessionalExperience,
 )
-from osis_profile.models.education import HighSchoolDiplomaAlternative, LanguageKnowledge
+from osis_profile.models.education import LanguageKnowledge
 
 
 class ProfilCandidatTranslator(IProfilCandidatTranslator):
@@ -142,27 +148,63 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
         )
 
     @classmethod
-    def get_etudes_secondaires(cls, matricule: str) -> 'EtudesSecondairesDTO':
-        result = (
-            Person.objects.annotate(
-                presence_etudes_secondaires_belges=Exists(
-                    BelgianHighSchoolDiploma.objects.filter(person_id=OuterRef('pk'))
-                ),
-                presence_etudes_secondaires_etrangeres=Exists(
-                    ForeignHighSchoolDiploma.objects.filter(person_id=OuterRef('pk'))
-                ),
-                presence_examen_admission_premier_cycle=Exists(
-                    HighSchoolDiplomaAlternative.objects.filter(person_id=OuterRef('pk'))
-                ),
+    def get_etudes_secondaires(cls, matricule: str, type_formation: TrainingType) -> 'EtudesSecondairesDTO':
+        if type_formation != TrainingType.BACHELOR:
+            candidat: Person = Person.objects.select_related('graduated_from_high_school_year').get(global_id=matricule)
+            return EtudesSecondairesDTO(
+                diplome_etudes_secondaires=candidat.graduated_from_high_school,
+                annee_diplome_etudes_secondaires=candidat.graduated_from_high_school_year.year
+                if candidat.graduated_from_high_school_year
+                else None,
             )
-            .values(
-                'presence_etudes_secondaires_belges',
-                'presence_etudes_secondaires_etrangeres',
-                'presence_examen_admission_premier_cycle',
+
+        candidat: Person = Person.objects.select_related(
+            'highschooldiplomaalternative',
+            'belgianhighschooldiploma',
+            'foreignhighschooldiploma__country',
+            'foreignhighschooldiploma__linguistic_regime',
+            'graduated_from_high_school_year',
+        ).get(global_id=matricule)
+
+        return EtudesSecondairesDTO(
+            diplome_etudes_secondaires=candidat.graduated_from_high_school,
+            annee_diplome_etudes_secondaires=candidat.graduated_from_high_school_year.year
+            if candidat.graduated_from_high_school_year
+            else None,
+            diplome_belge=DiplomeBelgeEtudesSecondairesDTO(
+                diplome=candidat.belgianhighschooldiploma.high_school_diploma,
+                certificat_inscription=candidat.belgianhighschooldiploma.enrolment_certificate,
             )
-            .get(global_id=matricule)
+            if getattr(candidat, 'belgianhighschooldiploma', None)
+            else None,
+            diplome_etranger=DiplomeEtrangerEtudesSecondairesDTO(
+                type_diplome=candidat.foreignhighschooldiploma.foreign_diploma_type,
+                regime_linguistique=getattr(
+                    candidat.foreignhighschooldiploma.linguistic_regime,
+                    'code',
+                    candidat.foreignhighschooldiploma.other_linguistic_regime,
+                ),
+                pays_membre_ue=candidat.foreignhighschooldiploma.country.european_union,
+                pays_iso_code=candidat.foreignhighschooldiploma.country.iso_code,
+                releve_notes=candidat.foreignhighschooldiploma.high_school_transcript,
+                traduction_releve_notes=candidat.foreignhighschooldiploma.high_school_transcript_translation,
+                diplome=candidat.foreignhighschooldiploma.high_school_diploma,
+                traduction_diplome=candidat.foreignhighschooldiploma.high_school_diploma_translation,
+                certificat_inscription=candidat.foreignhighschooldiploma.enrolment_certificate,
+                traduction_certificat_inscription=candidat.foreignhighschooldiploma.enrolment_certificate_translation,
+                equivalence=candidat.foreignhighschooldiploma.equivalence,
+                decision_final_equivalence_ue=candidat.foreignhighschooldiploma.final_equivalence_decision_ue,
+                decision_final_equivalence_hors_ue=candidat.foreignhighschooldiploma.final_equivalence_decision_not_ue,
+                preuve_decision_equivalence=candidat.foreignhighschooldiploma.equivalence_decision_proof,
+            )
+            if getattr(candidat, 'foreignhighschooldiploma', None)
+            else None,
+            alternative_secondaires=AlternativeSecondairesDTO(
+                examen_admission_premier_cycle=candidat.highschooldiplomaalternative.first_cycle_admission_exam,
+            )
+            if getattr(candidat, 'highschooldiplomaalternative', None)
+            else None,
         )
-        return EtudesSecondairesDTO(**result)
 
     @classmethod
     def get_curriculum(cls, matricule: str, annee_courante: int) -> 'CurriculumDTO':
@@ -301,3 +343,16 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
             .values_list('academic_year__year', 'est_changement')
         )
         return {annee: qs.get(annee - 1) for annee in annees}
+
+    @classmethod
+    def est_potentiel_vae(cls, matricule: str) -> bool:
+        nombre_mois = (
+            ProfessionalExperience.objects.filter(person__global_id=matricule)
+            .annotate(
+                nombre_mois=(ExtractYear('end_date') - ExtractYear('start_date')) * 12
+                + (ExtractMonth('end_date') - ExtractMonth('start_date'))
+                + 1  # + 1 car la date de début est le premier jour du mois et la date de fin, le dernier jour du mois
+            )
+            .aggregate(total=models.Sum('nombre_mois'))
+        ).get('total')
+        return nombre_mois >= cls.NB_MOIS_MIN_VAE if nombre_mois else False
