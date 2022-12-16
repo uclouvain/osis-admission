@@ -30,17 +30,17 @@ from rest_framework.response import Response
 
 from admission.api import serializers
 from admission.api.permissions import (
-    IsListingOrHasNotAlreadyCreatedForGeneralEducationPermission,
     IsListingOrHasNotAlreadyCreatedForContinuingEducationPermission,
+    IsListingOrHasNotAlreadyCreatedForGeneralEducationPermission,
 )
 from admission.api.schema import ResponseSpecificSchema
-from admission.ddd.admission.formation_generale import commands as general_education_commands
-from admission.ddd.admission.formation_continue import commands as continuing_education_commands
 from admission.ddd.admission.doctorat.preparation import commands as doctorate_education_commands
+from admission.ddd.admission.formation_continue import commands as continuing_education_commands
+from admission.ddd.admission.formation_generale import commands as general_education_commands
 from admission.utils import (
+    get_cached_admission_perm_obj,
     get_cached_continuing_education_admission_perm_obj,
     get_cached_general_education_admission_perm_obj,
-    get_cached_admission_perm_obj,
 )
 from infrastructure.messages_bus import message_bus_instance
 from osis_role.contrib.views import APIPermissionRequiredMixin
@@ -76,6 +76,7 @@ class GeneralTrainingChoiceAPIView(
                 **serializer.data,
             )
         )
+        get_cached_general_education_admission_perm_obj(result.uuid).update_detailed_status()
         serializer = serializers.PropositionIdentityDTOSerializer(instance=result)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
@@ -110,6 +111,7 @@ class ContinuingTrainingChoiceAPIView(
                 **serializer.data,
             )
         )
+        get_cached_continuing_education_admission_perm_obj(result.uuid).update_detailed_status()
         serializer = serializers.PropositionIdentityDTOSerializer(instance=result)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 

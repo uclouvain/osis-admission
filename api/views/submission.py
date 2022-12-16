@@ -61,6 +61,7 @@ from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from infrastructure.formation_catalogue.repository.program_tree import ProgramTreeRepository
 from infrastructure.messages_bus import message_bus_instance
 from osis_role.contrib.views import APIPermissionRequiredMixin
+from program_management.ddd.domain.exception import ProgramTreeNotFoundException
 
 __all__ = [
     "VerifyDoctoralProjectView",
@@ -68,8 +69,6 @@ __all__ = [
     "SubmitGeneralEducationPropositionView",
     "SubmitContinuingEducationPropositionView",
 ]
-
-from program_management.ddd.domain.exception import ProgramTreeNotFoundException
 
 
 class VerifySchema(ResponseSpecificSchema):

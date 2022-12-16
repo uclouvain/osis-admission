@@ -40,25 +40,24 @@ from admission.ddd.admission.doctorat.preparation.commands import (
     ListerPropositionsSuperviseesQuery,
     SupprimerPropositionCommand,
 )
+from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import JustificationRequiseException
 from admission.ddd.admission.formation_continue.commands import (
     ListerPropositionsCandidatQuery as ListerPropositionsFormationContinueCandidatQuery,
 )
 from admission.ddd.admission.formation_generale.commands import (
     ListerPropositionsCandidatQuery as ListerPropositionsFormationGeneraleCandidatQuery,
 )
-from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import JustificationRequiseException
 from admission.utils import get_cached_admission_perm_obj
 from backoffice.settings.rest_framework.common_views import DisplayExceptionsByFieldNameAPIMixin
 from infrastructure.messages_bus import message_bus_instance
 from osis_role.contrib.views import APIPermissionRequiredMixin
+from osis_signature.models import Actor
 
 __all__ = [
     "PropositionListView",
     "SupervisedPropositionListView",
     "PropositionViewSet",
 ]
-
-from osis_signature.models import Actor
 
 
 class PropositionListSchema(ResponseSpecificSchema):
@@ -119,7 +118,7 @@ class PropositionListView(APIPermissionRequiredMixin, DisplayExceptionsByFieldNa
         serializer = serializers.InitierPropositionCommandSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         result = message_bus_instance.invoke(InitierPropositionCommand(**serializer.data))
-        DoctorateAdmission.objects.get(uuid=result.uuid).update_detailed_status()
+        get_cached_admission_perm_obj(result.uuid).update_detailed_status()
         serializer = serializers.PropositionIdentityDTOSerializer(instance=result)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 

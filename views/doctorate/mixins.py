@@ -47,7 +47,12 @@ from admission.ddd.admission.doctorat.preparation.dtos import PropositionDTO
 from admission.ddd.admission.doctorat.validation.commands import RecupererDemandeQuery
 from admission.ddd.admission.doctorat.validation.domain.validator.exceptions import DemandeNonTrouveeException
 from admission.ddd.admission.doctorat.validation.dtos import DemandeDTO
-from admission.utils import get_cached_admission_perm_obj
+from admission.templatetags.admission import CONTEXT_CONTINUING, CONTEXT_DOCTORATE, CONTEXT_GENERAL
+from admission.utils import (
+    get_cached_admission_perm_obj,
+    get_cached_continuing_education_admission_perm_obj,
+    get_cached_general_education_admission_perm_obj,
+)
 from infrastructure.messages_bus import message_bus_instance
 from osis_role.contrib.views import PermissionRequiredMixin
 
@@ -58,8 +63,16 @@ class LoadDossierViewMixin(LoginRequiredMixin, PermissionRequiredMixin, ContextM
         return self.kwargs.get('uuid')
 
     @property
+    def current_context(self):
+        return self.request.resolver_match.namespaces[1]
+
+    @property
     def admission(self) -> DoctorateAdmission:
-        return get_cached_admission_perm_obj(self.admission_uuid)
+        return {
+            CONTEXT_DOCTORATE: get_cached_admission_perm_obj,
+            CONTEXT_GENERAL: get_cached_general_education_admission_perm_obj,
+            CONTEXT_CONTINUING: get_cached_continuing_education_admission_perm_obj,
+        }[self.current_context](self.admission_uuid)
 
     @cached_property
     def proposition(self) -> 'PropositionDTO':
@@ -92,18 +105,21 @@ class LoadDossierViewMixin(LoginRequiredMixin, PermissionRequiredMixin, ContextM
         context = super().get_context_data(**kwargs)
         admission_status = self.admission.status
 
-        try:
-            if admission_status == ChoixStatutProposition.ENROLLED.name:
-                context['dossier'] = self.dossier
-                context['doctorate'] = self.doctorate
-            else:
-                if admission_status == ChoixStatutProposition.SUBMITTED.name:
+        if self.current_context == CONTEXT_DOCTORATE:
+            try:
+                if admission_status == ChoixStatutProposition.ENROLLED.name:
                     context['dossier'] = self.dossier
+                    context['doctorate'] = self.doctorate
+                else:
+                    if admission_status == ChoixStatutProposition.SUBMITTED.name:
+                        context['dossier'] = self.dossier
 
-                context['admission'] = self.proposition
+                    context['admission'] = self.proposition
 
-        except (PropositionNonTrouveeException, DemandeNonTrouveeException, DoctoratNonTrouveException) as e:
-            raise Http404(e.message)
+            except (PropositionNonTrouveeException, DemandeNonTrouveeException, DoctoratNonTrouveException) as e:
+                raise Http404(e.message)
+        else:
+            context['admission'] = self.admission
         return context
 
 

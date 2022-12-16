@@ -35,12 +35,20 @@
   </a>
   <ul class="dropdown-menu">
     {% if perms.admission.view_cdddossiers %}
-    <li>
-      <a href="{% url 'admission:doctorate:cdd:list' %}" id="lnk_dropdown_doctorateadmissions">
-        <span class="fa fa-graduation-cap"></span>
-        {% trans 'Doctorate enrolments' %}
-      </a>
-    </li>
+      <li>
+        <a href="{% url 'admission:doctorate:cdd:list' %}" id="lnk_dropdown_doctorateadmissions">
+          <span class="fa fa-graduation-cap"></span>
+          {% trans 'Doctorate enrolments' %}
+        </a>
+      </li>
+    {% endif %}
+    {% if perms.admission.view_general_dossiers %}
+      <li>
+        <a href="{% url 'admission:general-education:list' %}">
+          <span class="fa fa-chalkboard-user"></span>
+          {% trans 'General enrolments' %}
+        </a>
+      </li>
     {% endif %}
     {% if perms.admission.change_cddmailtemplate %}
       <li>

@@ -33,4 +33,13 @@
       <p>{% trans 'Management of the doctorate enrolments' %}</p>
     </div>
   {% endif %}
+  {% if perms.admission.view_general_dossiers %}
+    <div class="col-md-1"><i class="fa fa-chalkboard-user" style="font-size: 400%; color: #6699FF;"></i></div>
+    <div class="col-md-5">
+      <h4 class="media-heading">
+        <a href="{% url 'admission:general-education:list' %}" id="lnk_doctoral_admissions">{% trans 'General enrolments' %}</a>
+      </h4>
+      <p>{% trans 'Management of the general enrolments' %}</p>
+    </div>
+  {% endif %}
 </div>

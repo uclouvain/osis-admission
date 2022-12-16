@@ -933,6 +933,9 @@ msgstr ""
 msgid "Deadline of the confirmation paper (DD/MM/YYYY)"
 msgstr ""
 
+msgid "Debug"
+msgstr ""
+
 msgid "Decision confirming the granting of subsidiary protection"
 msgstr ""
 
@@ -1269,6 +1272,9 @@ msgid "General"
 msgstr ""
 
 msgid "General education admission"
+msgstr ""
+
+msgid "General enrolments"
 msgstr ""
 
 msgid "Generic"
@@ -1687,6 +1693,9 @@ msgstr ""
 msgid "Management of the doctorate enrolments"
 msgstr ""
 
+msgid "Management of the general enrolments"
+msgstr ""
+
 msgid "Mandatory fields are missing in the cotutelle."
 msgstr ""
 
@@ -1861,6 +1870,9 @@ msgid "No doctorate enrolment"
 msgstr ""
 
 msgid "No doctorate found."
+msgstr ""
+
+msgid "No general enrolment"
 msgstr ""
 
 msgid "No pool was found to match."
