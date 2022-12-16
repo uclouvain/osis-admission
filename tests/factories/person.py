@@ -31,10 +31,10 @@ from admission.tests.factories import PdfUploadFactory
 from admission.tests.factories.language import LanguageKnowledgeFactory
 from admission.tests.factories.secondary_studies import (
     BelgianHighSchoolDiplomaFactory,
-    HighSchoolDiplomaAlternativeFactory,
 )
 from base import models as mdl
 from base.models.enums.civil_state import CivilState
+from base.models.enums.got_diploma import GotDiploma
 from base.models.enums.person_address_type import PersonAddressType
 from base.tests.factories.academic_year import AcademicYearFactory, get_current_year
 from base.tests.factories.person import PersonFactory
@@ -62,6 +62,8 @@ class CompletePersonFactory(PersonFactory):
 
     last_registration_year = factory.LazyAttribute(lambda _: AcademicYearFactory(current=True))
     last_registration_id = '01234567'
+    graduated_from_high_school = GotDiploma.YES.name
+    graduated_from_high_school_year = factory.SubFactory(AcademicYearFactory)
 
     @factory.post_generation
     def create_related_objects(self, create, extracted, **kwargs):
@@ -123,7 +125,8 @@ class CompletePersonFactory(PersonFactory):
 
         # Create highschool belgian diploma
         BelgianHighSchoolDiplomaFactory(
-            person=self, academic_graduation_year=AcademicYearFactory(year=current_year - 1)
+            person=self,
+            academic_graduation_year=AcademicYearFactory(year=current_year - 1),
         )
 
 
@@ -131,6 +134,8 @@ class CompletePersonForBachelorFactory(CompletePersonFactory):
     @factory.post_generation
     def create_related_objects(self, create, extracted, **kwargs):
         """Target is diplomation_secondaire_belge"""
+        current_year = get_current_year()
+        academic_year = AcademicYearFactory(year=current_year - 1)
         PersonAddressFactory(
             person=self,
             label=PersonAddressType.RESIDENTIAL.name,
@@ -140,9 +145,10 @@ class CompletePersonForBachelorFactory(CompletePersonFactory):
             city='Louvain-La-Neuve',
             country=CountryFactory(iso_code="BE"),
         )
-        current_year = get_current_year()
+        self.graduated_from_high_school_year = academic_year
         BelgianHighSchoolDiplomaFactory(
-            person=self, academic_graduation_year=AcademicYearFactory(year=current_year - 1)
+            person=self,
+            academic_graduation_year=academic_year,
         )
 
 

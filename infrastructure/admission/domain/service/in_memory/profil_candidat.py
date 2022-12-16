@@ -25,9 +25,11 @@
 # ##############################################################################
 import datetime
 from dataclasses import dataclass
+from functools import reduce
 from typing import Dict, List, Optional
 
 import attr
+from dateutil import relativedelta
 
 from admission.ddd import BE_ISO_CODE
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import CandidatNonTrouveException
@@ -38,7 +40,10 @@ from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
 )
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.dtos import AdressePersonnelleDTO, CoordonneesDTO, EtudesSecondairesDTO, IdentificationDTO
+from admission.ddd.admission.dtos.etudes_secondaires import DiplomeBelgeEtudesSecondairesDTO
 from base.models.enums.civil_state import CivilState
+from base.models.enums.education_group_types import TrainingType
+from base.models.enums.got_diploma import GotDiploma
 from base.models.enums.person_address_type import PersonAddressType
 from osis_profile.models.enums.curriculum import Result
 
@@ -371,10 +376,38 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
         cls.diplomes_etudes_secondaires_belges = []
         cls.diplomes_etudes_secondaires_etrangers = []
         cls.etudes_secondaires = {
-            cls.matricule_candidat: EtudesSecondairesDTO(True, False, False),
-            "0123456789": EtudesSecondairesDTO(True, False, False),
-            "0000000001": EtudesSecondairesDTO(True, False, False),
-            "0000000002": EtudesSecondairesDTO(True, False, False),
+            cls.matricule_candidat: EtudesSecondairesDTO(
+                diplome_belge=DiplomeBelgeEtudesSecondairesDTO(
+                    certificat_inscription=['certificat_inscription.pdf'],
+                    diplome=['diplome.pdf'],
+                ),
+                diplome_etudes_secondaires=GotDiploma.YES.name,
+                annee_diplome_etudes_secondaires=2022,
+            ),
+            "0123456789": EtudesSecondairesDTO(
+                diplome_belge=DiplomeBelgeEtudesSecondairesDTO(
+                    certificat_inscription=['certificat_inscription.pdf'],
+                    diplome=['diplome.pdf'],
+                ),
+                diplome_etudes_secondaires=GotDiploma.YES.name,
+                annee_diplome_etudes_secondaires=2022,
+            ),
+            "0000000001": EtudesSecondairesDTO(
+                diplome_belge=DiplomeBelgeEtudesSecondairesDTO(
+                    certificat_inscription=['certificat_inscription.pdf'],
+                    diplome=['diplome.pdf'],
+                ),
+                diplome_etudes_secondaires=GotDiploma.YES.name,
+                annee_diplome_etudes_secondaires=2022,
+            ),
+            "0000000002": EtudesSecondairesDTO(
+                diplome_belge=DiplomeBelgeEtudesSecondairesDTO(
+                    certificat_inscription=['certificat_inscription.pdf'],
+                    diplome=['diplome.pdf'],
+                ),
+                diplome_etudes_secondaires=GotDiploma.YES.name,
+                annee_diplome_etudes_secondaires=2022,
+            ),
         }
 
     @classmethod
@@ -459,8 +492,8 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
         return [c.langue.code_langue for c in cls.connaissances_langues if c.personne == matricule]
 
     @classmethod
-    def get_etudes_secondaires(cls, matricule: str) -> 'EtudesSecondairesDTO':
-        return cls.etudes_secondaires.get(matricule) or EtudesSecondairesDTO(False, False, False)
+    def get_etudes_secondaires(cls, matricule: str, type_formation: TrainingType) -> 'EtudesSecondairesDTO':
+        return cls.etudes_secondaires.get(matricule) or EtudesSecondairesDTO()
 
     @classmethod
     def get_curriculum(cls, matricule: str, annee_courante: int) -> 'CurriculumDTO':
@@ -532,3 +565,16 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
     @classmethod
     def get_changements_etablissement(cls, matricule: str, annees: List[int]) -> Dict[int, bool]:
         return {annee: False for annee in annees}
+
+    @classmethod
+    def compte_nombre_mois(cls, nb_total_mois, experience_courante: ExperienceNonAcademique):
+        delta = relativedelta.relativedelta(experience_courante.date_fin, experience_courante.date_debut)
+        return nb_total_mois + (12 * delta.years + delta.months) + 1
+
+    @classmethod
+    def est_potentiel_vae(cls, matricule: str) -> bool:
+        experiences = [experience for experience in cls.experiences_non_academiques if experience.personne == matricule]
+        return (
+            reduce(lambda total, experience: cls.compte_nombre_mois(total, experience), experiences, 0)
+            >= cls.NB_MOIS_MIN_VAE
+        )

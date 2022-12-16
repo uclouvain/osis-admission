@@ -3010,6 +3010,26 @@ msgstr ""
 "Des champs relatifs au numéro de compte bancaire au format IBAN ne sont pas "
 "complétés dans l'onglet 'Finalisation > Comptabilité'"
 
+msgid ""
+"Some information about the Belgian diploma of the secondary studies are "
+"missing."
+msgstr ""
+"Des informations relatives au diplôme belge d'études secondaires sont "
+"manquantes."
+
+msgid ""
+"Some information about the alternative to the secondary studies are missing."
+msgstr ""
+"Des informations relatives à l'alternative aux études secondaires sont "
+"manquantes."
+
+msgid ""
+"Some information about the foreign diploma of the secondary studies are "
+"missing."
+msgstr ""
+"Des informations relatives au diplôme étranger d'études secondaires sont "
+"manquantes."
+
 msgid "Speaker"
 msgstr "Orateur ou oratrice"
 

@@ -2705,6 +2705,20 @@ msgid ""
 "the 'Finalization > Accounting' tab."
 msgstr ""
 
+msgid ""
+"Some information about the Belgian diploma of the secondary studies are "
+"missing."
+msgstr ""
+
+msgid ""
+"Some information about the alternative to the secondary studies are missing."
+msgstr ""
+
+msgid ""
+"Some information about the foreign diploma of the secondary studies are "
+"missing."
+msgstr ""
+
 msgid "Speaker"
 msgstr ""
 

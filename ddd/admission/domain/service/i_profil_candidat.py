@@ -29,6 +29,7 @@ from typing import Dict, List, Optional
 
 from admission.ddd.admission.doctorat.preparation.dtos import ConditionsComptabiliteDTO, CurriculumDTO
 from admission.ddd.admission.dtos import CoordonneesDTO, EtudesSecondairesDTO, IdentificationDTO
+from base.models.enums.education_group_types import TrainingType
 from osis_common.ddd import interface
 
 
@@ -36,6 +37,7 @@ class IProfilCandidatTranslator(interface.DomainService):
     NB_MAX_ANNEES_CV_REQUISES = 5
     MOIS_DEBUT_ANNEE_ACADEMIQUE = 9
     MOIS_FIN_ANNEE_ACADEMIQUE = 1
+    NB_MOIS_MIN_VAE = 36
 
     @classmethod
     @abstractmethod
@@ -54,7 +56,7 @@ class IProfilCandidatTranslator(interface.DomainService):
 
     @classmethod
     @abstractmethod
-    def get_etudes_secondaires(cls, matricule: str) -> 'EtudesSecondairesDTO':
+    def get_etudes_secondaires(cls, matricule: str, type_formation: TrainingType) -> 'EtudesSecondairesDTO':
         raise NotImplementedError
 
     @classmethod
@@ -101,4 +103,8 @@ class IProfilCandidatTranslator(interface.DomainService):
     def get_changements_etablissement(cls, matricule: str, annees: List[int]) -> Dict[int, bool]:
         """Inscrit à un autre établissement Belge en N-1
         (informatiquement : curriculum / en N-1 supérieur belge non-diplômé)"""
+        raise NotImplementedError
+
+    @classmethod
+    def est_potentiel_vae(cls, matricule: str) -> bool:
         raise NotImplementedError
