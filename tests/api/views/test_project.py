@@ -938,11 +938,16 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
         cls.first_candidate.passport = [WriteTokenFactory().token]
         cls.first_candidate.curriculum = [WriteTokenFactory().token]
         cls.first_candidate.save()
-        EducationalExperienceFactory(
+        experience = EducationalExperienceFactory(
             person_id=cls.first_candidate.pk,
             education_name='A custom education',
             country__iso_code="BE",
             obtained_diploma=True,
+            transcript=['transcript.pdf'],
+        )
+        EducationalExperienceYearFactory(
+            educational_experience=experience,
+            academic_year=AcademicYearFactory(year=get_current_year()),
         )
         # Incomplete candidate
         cls.second_candidate = PersonFactory(first_name="Jim")

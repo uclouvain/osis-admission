@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from collections import defaultdict
 from functools import partial
 from typing import Union
 
@@ -47,6 +48,10 @@ from admission.api.views.mixins import (
     SpecificPersonRelatedSchema,
 )
 from admission.ddd.admission.doctorat.preparation import commands as doctorate_commands
+from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
+    ExperiencesAcademiquesNonCompleteesException,
+    AnneesCurriculumNonSpecifieesException,
+)
 from admission.ddd.admission.formation_generale import commands as general_commands
 from admission.ddd.admission.formation_continue import commands as continuing_commands
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
@@ -118,13 +123,20 @@ class BaseCurriculumView(APIPermissionRequiredMixin, RetrieveAPIView):
         )
 
         incomplete_periods = []
+        incomplete_experiences = defaultdict(list)
         if self.check_command_class:
             try:
                 message_bus_instance.invoke(self.check_command_class(uuid_proposition=self.kwargs.get('uuid')))
             except MultipleBusinessExceptions as exc:
+                missing_year_exceptions = []
+                for exception in exc.exceptions:
+                    if isinstance(exception, ExperiencesAcademiquesNonCompleteesException):
+                        incomplete_experiences[exception.reference].append(exception.message)
+                    elif isinstance(exception, AnneesCurriculumNonSpecifieesException):
+                        missing_year_exceptions.append(exception)
                 incomplete_periods = [
                     e.message
-                    for e in sorted(list(exc.exceptions), key=lambda exception: exception.periode[0], reverse=True)
+                    for e in sorted(missing_year_exceptions, key=lambda exception: exception.periode[0], reverse=True)
                 ]
 
         serializer = serializers.CurriculumDetailsSerializer(
@@ -133,6 +145,7 @@ class BaseCurriculumView(APIPermissionRequiredMixin, RetrieveAPIView):
                 'educational_experiences': educational_experiences,
                 'file': current_person,
                 'incomplete_periods': incomplete_periods,
+                'incomplete_experiences': incomplete_experiences,
             },
             context={
                 'related_person': current_person,

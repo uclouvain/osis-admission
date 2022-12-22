@@ -428,3 +428,12 @@ class CarteBancaireRemboursementAutreFormatNonCompleteException(BusinessExceptio
     def __init__(self, **kwargs):
         message = _("Some fields related to the bank account are missing in the 'Finalization > Accounting' tab.")
         super().__init__(message, **kwargs)
+
+
+class ExperiencesAcademiquesNonCompleteesException(BusinessException):
+    status_code = "PROPOSITION-49"
+
+    def __init__(self, reference, **kwargs):
+        self.reference = reference
+        message = _("This educational experience is not completed.")
+        super().__init__(message, **kwargs)

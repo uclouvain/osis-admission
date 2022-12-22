@@ -3080,6 +3080,9 @@ msgstr ""
 msgid "This candidate has not created any course yet."
 msgstr ""
 
+msgid "This educational experience is not completed."
+msgstr ""
+
 msgid "This experience cannot be updated as it has already been valuated."
 msgstr ""
 

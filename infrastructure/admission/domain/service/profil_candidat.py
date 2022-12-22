@@ -211,9 +211,13 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
         minimal_years = cls.get_annees_minimum_curriculum(matricule, annee_courante)
         date_maximale = cls.get_date_maximale_curriculum()
 
-        annees_experiences_academiques = EducationalExperienceYear.objects.filter(
+        annees_experiences_academiques: List[EducationalExperienceYear] = EducationalExperienceYear.objects.filter(
             educational_experience__person__global_id=matricule,
-        ).select_related('educational_experience__country', 'academic_year')
+        ).select_related(
+            'academic_year',
+            'educational_experience__country',
+            'educational_experience__linguistic_regime',
+        )
 
         experiences_academiques_dtos: Dict[int, ExperienceAcademiqueDTO] = {}
 
@@ -221,10 +225,27 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
             annee_experience_dto = AnneeExperienceAcademiqueDTO(
                 resultat=annee_experience.result,
                 annee=annee_experience.academic_year.year,
+                releve_notes=annee_experience.transcript,
+                traduction_releve_notes=annee_experience.transcript_translation,
             )
             if annee_experience.educational_experience.pk not in experiences_academiques_dtos:
                 experiences_academiques_dtos[annee_experience.educational_experience.pk] = ExperienceAcademiqueDTO(
+                    uuid=annee_experience.educational_experience.uuid,
                     pays=annee_experience.educational_experience.country.iso_code,
+                    a_obtenu_diplome=annee_experience.educational_experience.obtained_diploma,
+                    rang_diplome=annee_experience.educational_experience.rank_in_diploma,
+                    date_prevue_delivrance_diplome=annee_experience.educational_experience.expected_graduation_date,
+                    titre_memoire=annee_experience.educational_experience.dissertation_title,
+                    note_memoire=annee_experience.educational_experience.dissertation_score,
+                    resume_memoire=annee_experience.educational_experience.dissertation_summary,
+                    regime_linguistique=annee_experience.educational_experience.linguistic_regime.code
+                    if annee_experience.educational_experience.linguistic_regime
+                    else '',
+                    releve_notes=annee_experience.educational_experience.transcript,
+                    traduction_releve_notes=annee_experience.educational_experience.transcript_translation,
+                    diplome=annee_experience.educational_experience.graduate_degree,
+                    traduction_diplome=annee_experience.educational_experience.graduate_degree_translation,
+                    type_releve_notes=annee_experience.educational_experience.transcript_type,
                     annees=[annee_experience_dto],
                 )
             else:

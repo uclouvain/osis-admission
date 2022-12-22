@@ -26,7 +26,9 @@
 
 from ._should_comptabilite_etre_completee import ShouldAffiliationsEtreCompletees
 from ._should_cotutelle_etre_completee import ShouldCotutelleEtreComplete
-from ._should_curriculum_etre_complete import ShouldCurriculumFichierEtreSpecifie
+from ._should_curriculum_etre_complete import (
+    ShouldCurriculumFichierEtreSpecifie,
+)
 from ._should_domaine_dependre_doctorat_realise import ShouldDomaineDependreDoctoratRealise
 from ._should_groupe_de_supervision_a_approuve import (
     ShouldDemandeSignatureLancee,

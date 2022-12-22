@@ -136,6 +136,7 @@ COMMAND_HANDLERS = {
         proposition_repository=_proposition_repository,
         profil_candidat_translator=_profil_candidat_translator,
         academic_year_repository=_academic_year_repository,
+        formation_translator=_formation_generale_translator,
     ),
     DeterminerAnneeAcademiqueEtPotQuery: lambda msg_bus, cmd: determiner_annee_academique_et_pot(
         cmd,

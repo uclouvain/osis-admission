@@ -26,12 +26,13 @@
 import datetime
 
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
-from admission.ddd.admission.domain.service.verifier_annees_curriculum import VerifierAnneesCurriculum
+from admission.ddd.admission.domain.service.profil_candidat import ProfilCandidat
 from admission.ddd.admission.formation_generale.commands import VerifierCurriculumQuery
 from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import GetCurrentAcademicYear
 from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import IAcademicYearRepository
 from ...domain.builder.proposition_identity_builder import PropositionIdentityBuilder
 from ...domain.model.proposition import PropositionIdentity
+from ...domain.service.i_formation import IFormationGeneraleTranslator
 from ...repository.i_proposition import IPropositionRepository
 
 
@@ -40,10 +41,12 @@ def verifier_curriculum(
     proposition_repository: 'IPropositionRepository',
     profil_candidat_translator: 'IProfilCandidatTranslator',
     academic_year_repository: 'IAcademicYearRepository',
+    formation_translator: 'IFormationGeneraleTranslator',
 ) -> 'PropositionIdentity':
     # GIVEN
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
     proposition = proposition_repository.get(entity_id=proposition_id)
+    formation = formation_translator.get(proposition.formation_id)
     annee_courante = (
         GetCurrentAcademicYear()
         .get_starting_academic_year(
@@ -54,10 +57,11 @@ def verifier_curriculum(
     )
 
     # WHEN
-    VerifierAnneesCurriculum.verifier(
-        matricule_candidat=proposition.matricule_candidat,
-        annee_courante=annee_courante,
+    ProfilCandidat().verifier_curriculum_formation_generale(
+        proposition=proposition,
+        type_formation=formation.type,
         profil_candidat_translator=profil_candidat_translator,
+        annee_courante=annee_courante,
     )
 
     # THEN

@@ -27,6 +27,7 @@ import operator
 
 import factory
 
+from admission.ddd import BE_ISO_CODE
 from admission.tests.factories import PdfUploadFactory
 from admission.tests.factories.language import LanguageKnowledgeFactory
 from admission.tests.factories.secondary_studies import (
@@ -112,7 +113,9 @@ class CompletePersonFactory(PersonFactory):
         experience = EducationalExperienceFactory(
             person=self,
             obtained_diploma=False,
-            country=self.country_of_citizenship,
+            country=CountryFactory(iso_code="BE"),
+            transcript=['transcript.pdf'],
+            transcript_translation=['transcript_translation.pdf'],
         )
         EducationalExperienceYearFactory(
             educational_experience=experience,

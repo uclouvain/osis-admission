@@ -40,7 +40,7 @@ class DiplomeBelgeEtudesSecondairesDTO(interface.DTO):
 class DiplomeEtrangerEtudesSecondairesDTO(interface.DTO):
     type_diplome: str = ''
     regime_linguistique: str = ''
-    pays_membre_ue: bool = None
+    pays_membre_ue: Optional[bool] = None
     pays_iso_code: str = ''
     releve_notes: List = attr.Factory(list)
     traduction_releve_notes: List = attr.Factory(list)
