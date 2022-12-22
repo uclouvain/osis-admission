@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Admission API
-  version: 1.0.53
+  version: 1.0.54
   description: This API delivers data for the Admission project.
   contact:
     name: UCLouvain - OSIS
@@ -5065,12 +5065,15 @@ components:
                     type: string
                   type:
                     type: string
+                  code_domaine:
+                    type: string
                 required:
                 - sigle
                 - annee
                 - intitule
                 - campus
                 - type
+                - code_domaine
               matricule_candidat:
                 type: string
               prenom_candidat:
@@ -5131,12 +5134,15 @@ components:
                     type: string
                   type:
                     type: string
+                  code_domaine:
+                    type: string
                 required:
                 - sigle
                 - annee
                 - intitule
                 - campus
                 - type
+                - code_domaine
               matricule_candidat:
                 type: string
               prenom_candidat:
@@ -7868,12 +7874,15 @@ components:
               type: string
             type:
               type: string
+            code_domaine:
+              type: string
           required:
           - sigle
           - annee
           - intitule
           - campus
           - type
+          - code_domaine
         annee_calculee:
           type: integer
           nullable: true
@@ -8283,12 +8292,15 @@ components:
               type: string
             type:
               type: string
+            code_domaine:
+              type: string
           required:
           - sigle
           - annee
           - intitule
           - campus
           - type
+          - code_domaine
         annee_calculee:
           type: integer
           nullable: true
@@ -8437,12 +8449,15 @@ components:
           type: string
         type:
           type: string
+        code_domaine:
+          type: string
       required:
       - sigle
       - annee
       - intitule
       - campus
       - type
+      - code_domaine
     FormationContinueDTO:
       type: object
       properties:
@@ -8456,12 +8471,15 @@ components:
           type: string
         type:
           type: string
+        code_domaine:
+          type: string
       required:
       - sigle
       - annee
       - intitule
       - campus
       - type
+      - code_domaine
     Tutor:
       type: object
       properties:

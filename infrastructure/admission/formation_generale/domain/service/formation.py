@@ -50,6 +50,7 @@ class FormationGeneraleTranslator(IFormationGeneraleTranslator):
             intitule=dto.title_fr if get_language() == settings.LANGUAGE_CODE else dto.title_en,
             campus=dto.main_teaching_campus_name or '',
             type=dto.type,
+            code_domaine=dto.main_domain_code,
         )
 
     @classmethod
@@ -81,6 +82,7 @@ class FormationGeneraleTranslator(IFormationGeneraleTranslator):
             return Formation(
                 entity_id=FormationIdentity(sigle=dto.acronym, annee=dto.year),
                 type=TrainingType[dto.type],
+                code_domaine=dto.main_domain_code,
             )
 
         raise FormationNonTrouveeException

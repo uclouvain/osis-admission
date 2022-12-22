@@ -47,6 +47,7 @@ class ContinuingEducationTrainingFactory(EducationGroupYearFactory):
         category=education_group_categories.TRAINING,
         name=factory.fuzzy.FuzzyChoice(AnneeInscriptionFormationTranslator.CONTINUING_EDUCATION_TYPES),
     )
+    main_domain = factory.SubFactory('reference.tests.factories.domain.DomainFactory')
 
     @factory.post_generation
     def create_related_group_version_factory(self, create, extracted, **kwargs):

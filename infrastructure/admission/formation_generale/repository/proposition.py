@@ -282,6 +282,7 @@ class PropositionRepository(IPropositionRepository):
                 else admission.training.title_english,
                 campus=admission.teaching_campus or '',
                 type=admission.training.education_group_type.name,
+                code_domaine=admission.training.main_domain.code if admission.training.main_domain else '',
             ),
             matricule_candidat=admission.candidate.global_id,
             prenom_candidat=admission.candidate.first_name,

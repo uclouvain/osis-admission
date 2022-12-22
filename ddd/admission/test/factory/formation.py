@@ -51,6 +51,7 @@ class FormationFactory(factory.Factory):
 
     entity_id = factory.SubFactory(FormationIdentityFactory)
     intitule = factory.Faker('sentence')
+    code_domaine = factory.Faker('pystr_format', string_format='##{{random_letter}}')
     campus = factory.Iterator(
         [
             "Louvain-la-Neuve",
