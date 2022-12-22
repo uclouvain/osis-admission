@@ -25,6 +25,7 @@
 # ##############################################################################
 import attr
 
+from admission.ddd import PREFIXES_DOMAINES_FORMATIONS_DENT_MED
 from admission.ddd.admission.domain.enums import TypeFormation
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
@@ -44,7 +45,12 @@ class FormationIdentity(interface.EntityIdentity):
 class Formation(interface.Entity):
     entity_id: FormationIdentity
     type: TrainingType
+    code_domaine: str
 
     @property
     def type_formation(self) -> TypeFormation:
         return TypeFormation[AnneeInscriptionFormationTranslator.ADMISSION_EDUCATION_TYPE_BY_OSIS_TYPE[self.type.name]]
+
+    @property
+    def est_formation_medecine_ou_dentisterie(self) -> bool:
+        return self.code_domaine[:2] in PREFIXES_DOMAINES_FORMATIONS_DENT_MED

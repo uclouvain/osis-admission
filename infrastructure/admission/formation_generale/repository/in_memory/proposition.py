@@ -99,7 +99,7 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
                     '16de0c3d-3c06-4c93-8eb4-c8648f04f142': 'My response 2',
                     '16de0c3d-3c06-4c93-8eb4-c8648f04f143': 'My response 3',
                     '16de0c3d-3c06-4c93-8eb4-c8648f04f144': 'My response 4',
-                }
+                },
             ),
             PropositionFactory(
                 entity_id=factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-BACHELIER-ECO1'),
@@ -160,13 +160,7 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
             modifiee_le=proposition.modifiee_le,
             statut=proposition.statut.name,
             erreurs=[],
-            formation=FormationDTO(
-                sigle=proposition.formation_id.sigle,
-                annee=proposition.formation_id.annee,
-                intitule=formation.intitule,
-                campus=formation.campus,
-                type=formation.type,
-            ),
+            formation=formation,
             annee_calculee=proposition.annee_calculee,
             pot_calcule=proposition.pot_calcule,
             bourse_double_diplome=BourseInMemoryTranslator.get_dto(proposition.bourse_double_diplome_id.uuid)

@@ -35,3 +35,4 @@ class FormationDTO(interface.DTO):
     intitule: str
     campus: str
     type: str
+    code_domaine: str

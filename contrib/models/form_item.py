@@ -255,7 +255,11 @@ class AdmissionFormItemInstantiationManager(models.Manager):
         if hasattr(candidate, 'belgianhighschooldiploma'):
             studied_in_french = True
             studied_in_english = True
-        elif hasattr(candidate, 'foreignhighschooldiploma'):
+        elif hasattr(candidate, 'foreignhighschooldiploma') and getattr(
+            candidate.foreignhighschooldiploma.linguistic_regime,
+            'code',
+            None,
+        ):
             if candidate.foreignhighschooldiploma.linguistic_regime.code == FR_ISO_CODE:
                 studied_in_french = True
             elif candidate.foreignhighschooldiploma.linguistic_regime.code == EN_ISO_CODE:

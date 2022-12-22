@@ -166,6 +166,7 @@ class PropositionRepository(IPropositionRepository):
                 else admission.training.title_english,
                 campus=admission.teaching_campus or '',
                 type=admission.training.education_group_type.name,
+                code_domaine=admission.training.main_domain.code if admission.training.main_domain else '',
             ),
             annee_calculee=admission.determined_academic_year and admission.determined_academic_year.year,
             pot_calcule=admission.determined_pool or '',

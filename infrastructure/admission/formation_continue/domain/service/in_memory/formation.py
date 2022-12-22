@@ -102,6 +102,7 @@ class FormationContinueInMemoryTranslator(IFormationContinueTranslator):
             intitule=entity.intitule,
             campus=entity.campus,
             type=entity.type,
+            code_domaine=entity.code_domaine,
         )
 
     @classmethod
@@ -133,6 +134,7 @@ class FormationContinueInMemoryTranslator(IFormationContinueTranslator):
             return Formation(
                 entity_id=training.entity_id,
                 type=training.type,
+                code_domaine=training.code_domaine,
             )
 
         raise FormationNonTrouveeException

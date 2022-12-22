@@ -71,6 +71,7 @@ class FormationGeneraleInMemoryTranslator(IFormationGeneraleTranslator):
             entity_id__annee=2020,
             type=TrainingType.BACHELOR,
             campus='Mons',
+            code_domaine='11A',
         ),
         FormationFactory(
             intitule='Master en sciences',
@@ -141,6 +142,7 @@ class FormationGeneraleInMemoryTranslator(IFormationGeneraleTranslator):
             entity_id__annee=2021,
             type=TrainingType.BACHELOR,
             campus='Mons',
+            code_domaine='11A',
         ),
         FormationFactory(
             intitule='Aggrégation en économie',
@@ -162,7 +164,7 @@ class FormationGeneraleInMemoryTranslator(IFormationGeneraleTranslator):
             entity_id__annee=2021,
             type=TrainingType.CERTIFICATE_OF_PARTICIPATION.name,
             campus='Charleroi',
-        )
+        ),
     ]
 
     @classmethod
@@ -173,6 +175,7 @@ class FormationGeneraleInMemoryTranslator(IFormationGeneraleTranslator):
             intitule=entity.intitule,
             campus=entity.campus,
             type=entity.type,
+            code_domaine=entity.code_domaine,
         )
 
     @classmethod
@@ -204,6 +207,7 @@ class FormationGeneraleInMemoryTranslator(IFormationGeneraleTranslator):
             return Formation(
                 entity_id=training.entity_id,
                 type=training.type,
+                code_domaine=training.code_domaine,
             )
 
         raise FormationNonTrouveeException

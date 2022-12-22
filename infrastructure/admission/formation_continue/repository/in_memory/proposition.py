@@ -54,6 +54,7 @@ class _Formation:
     intitule: str
     campus: str
     type: str
+    code_domaine: str
 
 
 class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepository):
@@ -62,16 +63,19 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
             intitule="Doctorat en sciences",
             campus="Louvain-la-Neuve",
             type=TrainingType.PHD.name,
+            code_domaine='',
         ),
         ("ECGE3DP", 2020): _Formation(
             intitule="Doctorat en sciences économiques et de gestion",
             campus="Louvain-la-Neuve",
             type=TrainingType.PHD.name,
+            code_domaine='',
         ),
         ("ESP3DP", 2020): _Formation(
             intitule="Doctorat en sciences de la santé publique",
             campus="Mons",
             type=TrainingType.PHD.name,
+            code_domaine='',
         ),
     }
     candidats = {
@@ -136,6 +140,7 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
                 intitule=formation.intitule,
                 campus=formation.campus,
                 type=formation.type,
+                code_domaine=formation.code_domaine,
             ),
             annee_calculee=proposition.annee_calculee,
             pot_calcule=proposition.pot_calcule,

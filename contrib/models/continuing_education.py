@@ -83,6 +83,7 @@ class ContinuingEducationAdmissionManager(models.Manager.from_queryset(BaseAdmis
                 "candidate__country_of_citizenship",
                 "training__academic_year",
                 "training__education_group_type",
+                "training__main_domain",
                 "determined_academic_year",
             )
             .annotate_campus()
