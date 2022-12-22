@@ -83,7 +83,7 @@ class ShouldSpecifieSiDiplomeEtudesSecondairesPourBachelier(BusinessValidator):
 
 
 @attr.dataclass(frozen=True, slots=True)
-class ShouldDiplomeBelgesEtudesSecondairesEtreComplete:
+class ShouldDiplomeBelgesEtudesSecondairesEtreComplete(BusinessValidator):
     diplome_belge: Optional[DiplomeBelgeEtudesSecondairesDTO]
     diplome_etudes_secondaires: str
 
@@ -100,7 +100,7 @@ class ShouldDiplomeBelgesEtudesSecondairesEtreComplete:
 
 
 @attr.dataclass(frozen=True, slots=True)
-class ShouldDiplomeEtrangerEtudesSecondairesEtreComplete:
+class ShouldDiplomeEtrangerEtudesSecondairesEtreComplete(BusinessValidator):
     diplome_etranger: Optional[DiplomeEtrangerEtudesSecondairesDTO]
     diplome_etudes_secondaires: str
     formation: Formation
@@ -155,7 +155,7 @@ class ShouldDiplomeEtrangerEtudesSecondairesEtreComplete:
 
 
 @attr.dataclass(frozen=True, slots=True)
-class ShouldAlternativeSecondairesEtreCompletee:
+class ShouldAlternativeSecondairesEtreCompletee(BusinessValidator):
     alternative_secondaires: Optional[AlternativeSecondairesDTO]
     diplome_etudes_secondaires: str
     est_potentiel_vae: bool

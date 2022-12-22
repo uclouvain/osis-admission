@@ -24,7 +24,7 @@
 #
 # ##############################################################################
 import datetime
-from typing import List, Optional, Tuple, Union
+from typing import List, Optional, Tuple, Union, Set
 
 import attr
 
@@ -45,6 +45,7 @@ from admission.ddd.admission.domain.validator import (
     ShouldAbsenceDeDetteEtreCompletee,
     ShouldIBANCarteBancaireRemboursementEtreCompletee,
     ShouldAutreFormatCarteBancaireRemboursementEtreCompletee,
+    ShouldExperiencesAcademiquesEtreCompletees,
 )
 from base.ddd.utils.business_validator import BusinessValidator, TwoStepsMultipleBusinessExceptionListValidator
 
@@ -244,6 +245,7 @@ class CurriculumValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
     annee_diplome_etudes_secondaires_etrangeres: Optional[int]
     dates_experiences_non_academiques: List[Tuple[datetime.date, datetime.date]]
     experiences_academiques: List[ExperienceAcademiqueDTO]
+    experiences_academiques_incompletes: Set[str]
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
@@ -253,9 +255,13 @@ class CurriculumValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
             ShouldCurriculumFichierEtreSpecifie(
                 fichier_pdf=self.fichier_pdf,
             ),
+            ShouldExperiencesAcademiquesEtreCompletees(
+                experiences_academiques_incompletes=self.experiences_academiques_incompletes,
+            ),
             ShouldAnneesCVRequisesCompletees(
                 annee_courante=self.annee_courante,
                 experiences_academiques=self.experiences_academiques,
+                experiences_academiques_incompletes=self.experiences_academiques_incompletes,
                 annee_derniere_inscription_ucl=self.annee_derniere_inscription_ucl,
                 annee_diplome_etudes_secondaires_belges=self.annee_diplome_etudes_secondaires_belges,
                 annee_diplome_etudes_secondaires_etrangeres=self.annee_diplome_etudes_secondaires_etrangeres,

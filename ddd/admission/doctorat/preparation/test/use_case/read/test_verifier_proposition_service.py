@@ -29,6 +29,7 @@ from unittest import TestCase
 import freezegun
 import mock
 
+from admission.ddd import BE_ISO_CODE, FR_ISO_CODE
 from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import PropositionIdentityBuilder
 from admission.ddd.admission.doctorat.preparation.commands import VerifierPropositionQuery
 from admission.ddd.admission.enums import ChoixTypeCompteBancaire
@@ -57,6 +58,7 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
     PropositionNonApprouveeParMembresCAException,
     PropositionNonApprouveeParPromoteurException,
     SpecifierNOMASiDejaInscritException,
+    ExperiencesAcademiquesNonCompleteesException,
 )
 from admission.ddd.admission.doctorat.preparation.test.factory.groupe_de_supervision import (
     _SignatureMembreCAFactory,
@@ -79,11 +81,14 @@ from admission.infrastructure.admission.domain.service.in_memory.profil_candidat
     DiplomeEtudeSecondaire,
     ExperienceNonAcademique,
     ProfilCandidatInMemoryTranslator,
+    ExperienceAcademique,
+    AnneeExperienceAcademique,
 )
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import AcademicYear, AcademicYearIdentity
 from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
+from osis_profile.models.enums.curriculum import Result, TranscriptType
 
 
 class TestVerifierPropositionServiceCommun(TestCase):
@@ -404,10 +409,67 @@ class TestVerifierPropositionServiceCurriculumYears(TestVerifierPropositionServi
         ):
             experience.personne = 'other'
 
+        self.experience_academiques_complete = ExperienceAcademique(
+            personne=self.candidat.matricule,
+            communaute_fr=True,
+            pays=BE_ISO_CODE,
+            annees=[
+                AnneeExperienceAcademique(
+                    annee=2016,
+                    resultat=Result.SUCCESS.name,
+                    releve_notes=['releve_notes.pdf'],
+                    traduction_releve_notes=['traduction_releve_notes.pdf'],
+                ),
+                AnneeExperienceAcademique(
+                    annee=2017,
+                    resultat=Result.SUCCESS.name,
+                    releve_notes=['releve_notes.pdf'],
+                    traduction_releve_notes=['traduction_releve_notes.pdf'],
+                ),
+                AnneeExperienceAcademique(
+                    annee=2018,
+                    resultat=Result.SUCCESS.name,
+                    releve_notes=['releve_notes.pdf'],
+                    traduction_releve_notes=['traduction_releve_notes.pdf'],
+                ),
+                AnneeExperienceAcademique(
+                    annee=2019,
+                    resultat=Result.SUCCESS.name,
+                    releve_notes=['releve_notes.pdf'],
+                    traduction_releve_notes=['traduction_releve_notes.pdf'],
+                ),
+                AnneeExperienceAcademique(
+                    annee=2020,
+                    resultat=Result.SUCCESS.name,
+                    releve_notes=['releve_notes.pdf'],
+                    traduction_releve_notes=['traduction_releve_notes.pdf'],
+                ),
+            ],
+            traduction_releve_notes=['traduction_releve_notes.pdf'],
+            releve_notes=['releve.pdf'],
+            type_releve_notes=TranscriptType.ONE_FOR_ALL_YEARS.name,
+            a_obtenu_diplome=False,
+            diplome=['diplome.pdf'],
+            traduction_diplome=['traduction_diplome.pdf'],
+            regime_linguistique='',
+            note_memoire='10',
+            rang_diplome='10',
+            resume_memoire=['resume.pdf'],
+            titre_memoire='Titre',
+            date_prevue_delivrance_diplome=datetime.date(2020, 9, 1),
+            uuid='9cbdf4db-2454-4cbf-9e48-55d2a9881ee6',
+        )
+
+    def assertHasInstance(self, container, cls, msg=None):
+        if not any(isinstance(obj, cls) for obj in container):
+            self.fail(msg or f"No instance of '{cls}' has been found")
+
     def assertAnneesCurriculum(self, exceptions, messages):
         messages_renvoyes = []
         for exception in exceptions:
-            self.assertIsInstance(exception, AnneesCurriculumNonSpecifieesException)
+            self.assertIsInstance(
+                exception, (AnneesCurriculumNonSpecifieesException, ExperiencesAcademiquesNonCompleteesException)
+            )
             messages_renvoyes.append(exception.message)
 
         self.assertCountEqual(messages, messages_renvoyes)
@@ -739,3 +801,121 @@ class TestVerifierPropositionServiceCurriculumYears(TestVerifierPropositionServi
         ):
             proposition_id = self.message_bus.invoke(self.cmd)
             self.assertEqual(proposition_id.uuid, self.proposition.entity_id.uuid)
+
+    def test_should_verification_etre_ok_si_experience_complete(self):
+        self.candidat_translator.experiences_academiques.append(self.experience_academiques_complete)
+        proposition_id = self.message_bus.invoke(self.cmd)
+        self.assertEqual(proposition_id.uuid, self.proposition.entity_id.uuid)
+
+    def test_should_verification_renvoyer_erreur_si_releve_notes_global_non_renseigne(self):
+        self.experience_academiques_complete.releve_notes = []
+        self.candidat_translator.experiences_academiques.append(self.experience_academiques_complete)
+
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            self.message_bus.invoke(self.cmd)
+
+        self.assertHasInstance(context.exception.exceptions, ExperiencesAcademiquesNonCompleteesException)
+
+        self.assertAnneesCurriculum(
+            context.exception.exceptions,
+            [
+                'Cette expérience académique est incomplète.',
+                'De Septembre 2016 à Janvier 2017',
+                'De Septembre 2017 à Janvier 2018',
+                'De Septembre 2018 à Janvier 2019',
+                'De Septembre 2019 à Janvier 2020',
+                'De Septembre 2020 à Octobre 2020',
+            ],
+        )
+
+    def test_should_verification_renvoyer_erreur_si_traduction_releve_notes_global_non_renseignee(self):
+        self.experience_academiques_complete.traduction_releve_notes = []
+        self.experience_academiques_complete.pays = FR_ISO_CODE
+        self.experience_academiques_complete.regime_linguistique = 'BR'
+        self.candidat_translator.experiences_academiques.append(self.experience_academiques_complete)
+
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            self.message_bus.invoke(self.cmd)
+        self.assertHasInstance(context.exception.exceptions, ExperiencesAcademiquesNonCompleteesException)
+
+    def test_should_verification_renvoyer_erreur_si_releve_notes_annuel_non_renseigne(self):
+        self.experience_academiques_complete.type_releve_notes = TranscriptType.ONE_A_YEAR.name
+        self.experience_academiques_complete.annees[0].releve_notes = []
+        self.candidat_translator.experiences_academiques.append(self.experience_academiques_complete)
+
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            self.message_bus.invoke(self.cmd)
+
+        self.assertHasInstance(context.exception.exceptions, ExperiencesAcademiquesNonCompleteesException)
+
+    def test_should_verification_renvoyer_erreur_si_traduction_releve_notes_annuel_non_renseignee(self):
+        self.experience_academiques_complete.annees[0].traduction_releve_notes = []
+        self.experience_academiques_complete.type_releve_notes = TranscriptType.ONE_A_YEAR.name
+        self.experience_academiques_complete.pays = FR_ISO_CODE
+        self.experience_academiques_complete.regime_linguistique = 'BR'
+        self.candidat_translator.experiences_academiques.append(self.experience_academiques_complete)
+
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            self.message_bus.invoke(self.cmd)
+
+        self.assertHasInstance(context.exception.exceptions, ExperiencesAcademiquesNonCompleteesException)
+
+    def test_should_verification_renvoyer_erreur_si_diplome_non_renseigne(self):
+        self.experience_academiques_complete.a_obtenu_diplome = True
+        self.experience_academiques_complete.diplome = []
+        self.candidat_translator.experiences_academiques.append(self.experience_academiques_complete)
+
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            self.message_bus.invoke(self.cmd)
+
+        self.assertHasInstance(context.exception.exceptions, ExperiencesAcademiquesNonCompleteesException)
+
+    def test_should_verification_renvoyer_erreur_si_rang_diplome_non_renseigne(self):
+        self.experience_academiques_complete.a_obtenu_diplome = True
+        self.experience_academiques_complete.rang_diplome = ''
+        self.candidat_translator.experiences_academiques.append(self.experience_academiques_complete)
+
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            self.message_bus.invoke(self.cmd)
+
+        self.assertHasInstance(context.exception.exceptions, ExperiencesAcademiquesNonCompleteesException)
+
+    def test_should_verification_renvoyer_erreur_si_date_prevue_delivrance_diplome_non_renseigne(self):
+        self.experience_academiques_complete.a_obtenu_diplome = True
+        self.experience_academiques_complete.date_prevue_delivrance_diplome = None
+        self.candidat_translator.experiences_academiques.append(self.experience_academiques_complete)
+
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            self.message_bus.invoke(self.cmd)
+
+        self.assertHasInstance(context.exception.exceptions, ExperiencesAcademiquesNonCompleteesException)
+
+    def test_should_verification_renvoyer_erreur_si_titre_memoire_non_renseigne(self):
+        self.experience_academiques_complete.a_obtenu_diplome = True
+        self.experience_academiques_complete.titre_memoire = ''
+        self.candidat_translator.experiences_academiques.append(self.experience_academiques_complete)
+
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            self.message_bus.invoke(self.cmd)
+
+        self.assertHasInstance(context.exception.exceptions, ExperiencesAcademiquesNonCompleteesException)
+
+    def test_should_verification_renvoyer_erreur_si_note_memoire_non_renseigne(self):
+        self.experience_academiques_complete.a_obtenu_diplome = True
+        self.experience_academiques_complete.note_memoire = ''
+        self.candidat_translator.experiences_academiques.append(self.experience_academiques_complete)
+
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            self.message_bus.invoke(self.cmd)
+
+        self.assertHasInstance(context.exception.exceptions, ExperiencesAcademiquesNonCompleteesException)
+
+    def test_should_verification_renvoyer_erreur_si_resume_memoire_non_renseigne(self):
+        self.experience_academiques_complete.a_obtenu_diplome = True
+        self.experience_academiques_complete.resume_memoire = []
+        self.candidat_translator.experiences_academiques.append(self.experience_academiques_complete)
+
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            self.message_bus.invoke(self.cmd)
+
+        self.assertHasInstance(context.exception.exceptions, ExperiencesAcademiquesNonCompleteesException)

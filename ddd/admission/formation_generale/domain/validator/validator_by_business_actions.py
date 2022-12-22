@@ -24,7 +24,7 @@
 #
 # ##############################################################################
 import datetime
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Set
 
 import attr
 
@@ -34,6 +34,7 @@ from admission.ddd.admission.domain.validator import (
     ShouldAbsenceDeDetteEtreCompletee,
     ShouldIBANCarteBancaireRemboursementEtreCompletee,
     ShouldAutreFormatCarteBancaireRemboursementEtreCompletee,
+    ShouldExperiencesAcademiquesEtreCompletees,
 )
 from admission.ddd.admission.formation_generale.domain.model._comptabilite import Comptabilite
 from admission.ddd.admission.domain.model.formation import Formation
@@ -69,6 +70,7 @@ class FormationGeneraleCurriculumValidatorList(TwoStepsMultipleBusinessException
     annee_diplome_etudes_secondaires_etrangeres: Optional[int]
     dates_experiences_non_academiques: List[Tuple[datetime.date, datetime.date]]
     experiences_academiques: List[ExperienceAcademiqueDTO]
+    experiences_academiques_incompletes: Set[str]
     type_formation: TrainingType
     continuation_cycle_bachelier: Optional[bool]
     attestation_continuation_cycle_bachelier: List[str]
@@ -87,10 +89,14 @@ class FormationGeneraleCurriculumValidatorList(TwoStepsMultipleBusinessException
             ShouldAnneesCVRequisesCompletees(
                 annee_courante=self.annee_courante,
                 experiences_academiques=self.experiences_academiques,
+                experiences_academiques_incompletes=self.experiences_academiques_incompletes,
                 annee_derniere_inscription_ucl=self.annee_derniere_inscription_ucl,
                 annee_diplome_etudes_secondaires_belges=self.annee_diplome_etudes_secondaires_belges,
                 annee_diplome_etudes_secondaires_etrangeres=self.annee_diplome_etudes_secondaires_etrangeres,
                 dates_experiences_non_academiques=self.dates_experiences_non_academiques,
+            ),
+            ShouldExperiencesAcademiquesEtreCompletees(
+                experiences_academiques_incompletes=self.experiences_academiques_incompletes,
             ),
             ShouldEquivalenceEtreSpecifiee(
                 equivalence=self.equivalence_diplome,

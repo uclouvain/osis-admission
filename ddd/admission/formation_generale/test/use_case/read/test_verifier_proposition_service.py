@@ -35,6 +35,7 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
     CarteBancaireRemboursementIbanNonCompleteException,
     CarteBancaireRemboursementAutreFormatNonCompleteException,
     AffiliationsNonCompleteesException,
+    ExperiencesAcademiquesNonCompleteesException,
 )
 from admission.ddd import BE_ISO_CODE, FR_ISO_CODE
 from admission.ddd.admission.domain.validator.exceptions import (
@@ -89,14 +90,68 @@ from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from base.models.enums.got_diploma import GotDiploma
 from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import AcademicYear, AcademicYearIdentity
 from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
-from osis_profile.models.enums.curriculum import Result
+from osis_profile.models.enums.curriculum import Result, TranscriptType
 from osis_profile.models.enums.education import ForeignDiplomaTypes, Equivalence
 
 
 class TestVerifierPropositionService(TestCase):
-    def assertInIsInstance(self, cls, container, msg=None):
+    def assertHasInstance(self, container, cls, msg=None):
         if not any(isinstance(obj, cls) for obj in container):
             self.fail(msg or f"No instance of '{cls}' has been found")
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        super().setUpClass()
+        cls.experience_academiques_complete = ExperienceAcademique(
+            personne='0000000001',
+            communaute_fr=True,
+            pays=BE_ISO_CODE,
+            annees=[
+                AnneeExperienceAcademique(
+                    annee=2016,
+                    resultat=Result.SUCCESS.name,
+                    releve_notes=['releve_notes.pdf'],
+                    traduction_releve_notes=['traduction_releve_notes.pdf'],
+                ),
+                AnneeExperienceAcademique(
+                    annee=2017,
+                    resultat=Result.SUCCESS.name,
+                    releve_notes=['releve_notes.pdf'],
+                    traduction_releve_notes=['traduction_releve_notes.pdf'],
+                ),
+                AnneeExperienceAcademique(
+                    annee=2018,
+                    resultat=Result.SUCCESS.name,
+                    releve_notes=['releve_notes.pdf'],
+                    traduction_releve_notes=['traduction_releve_notes.pdf'],
+                ),
+                AnneeExperienceAcademique(
+                    annee=2019,
+                    resultat=Result.SUCCESS.name,
+                    releve_notes=['releve_notes.pdf'],
+                    traduction_releve_notes=['traduction_releve_notes.pdf'],
+                ),
+                AnneeExperienceAcademique(
+                    annee=2020,
+                    resultat=Result.SUCCESS.name,
+                    releve_notes=['releve_notes.pdf'],
+                    traduction_releve_notes=['traduction_releve_notes.pdf'],
+                ),
+            ],
+            traduction_releve_notes=['traduction_releve_notes.pdf'],
+            releve_notes=['releve.pdf'],
+            type_releve_notes=TranscriptType.ONE_FOR_ALL_YEARS.name,
+            a_obtenu_diplome=False,
+            diplome=['diplome.pdf'],
+            traduction_diplome=['traduction_diplome.pdf'],
+            regime_linguistique='',
+            note_memoire='',
+            rang_diplome='',
+            resume_memoire=[],
+            titre_memoire='',
+            date_prevue_delivrance_diplome=None,
+            uuid='9cbdf4db-2454-4cbf-9e48-55d2a9881ee6',
+        )
 
     def setUp(self) -> None:
         self.message_bus = message_bus_in_memory_instance
@@ -142,18 +197,18 @@ class TestVerifierPropositionService(TestCase):
         self.addCleanup(patcher.stop)
         self.cmd = lambda uuid: VerifierPropositionQuery(uuid_proposition=uuid)
 
-    def _test_should_retourner_erreur_si_comptabilite_incomplete(self, comptabilite, exception):
-        with mock.patch.object(self.master_proposition, 'comptabilite', comptabilite):
-            with self.assertRaises(MultipleBusinessExceptions) as context:
-                self.message_bus.invoke(self.cmd(uuid='uuid-MASTER-SCI'))
-            self.assertTrue(any(member for member in context.exception.exceptions if isinstance(member, exception)))
-
     def _test_should_retourner_erreur_si_assimilation_incomplete(self, comptabilite, exception):
         with mock.patch.object(self.candidat, 'pays_nationalite', 'CA'):
             self._test_should_retourner_erreur_si_comptabilite_incomplete(
                 comptabilite=comptabilite,
                 exception=exception,
             )
+
+    def _test_should_retourner_erreur_si_comptabilite_incomplete(self, comptabilite, exception):
+        with mock.patch.object(self.master_proposition, 'comptabilite', comptabilite):
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                self.message_bus.invoke(self.cmd(uuid='uuid-MASTER-SCI'))
+            self.assertTrue(any(member for member in context.exception.exceptions if isinstance(member, exception)))
 
     def test_should_verifier_etre_ok_si_complet_pour_master(self):
         proposition_id = self.message_bus.invoke(self.cmd(self.master_proposition.entity_id.uuid))
@@ -209,8 +264,23 @@ class TestVerifierPropositionService(TestCase):
                 communaute_fr=True,
                 pays=BE_ISO_CODE,
                 annees=[
-                    AnneeExperienceAcademique(annee=2015, resultat=Result.SUCCESS.name),
+                    AnneeExperienceAcademique(
+                        annee=2015, resultat=Result.SUCCESS.name, releve_notes=[], traduction_releve_notes=[]
+                    ),
                 ],
+                traduction_releve_notes=[],
+                releve_notes=['releve.pdf'],
+                type_releve_notes=TranscriptType.ONE_FOR_ALL_YEARS.name,
+                a_obtenu_diplome=False,
+                diplome=[],
+                traduction_diplome=[],
+                regime_linguistique='',
+                note_memoire='10',
+                rang_diplome='10',
+                resume_memoire=['resume.pdf'],
+                titre_memoire='Titre',
+                date_prevue_delivrance_diplome=datetime.date(2020, 9, 1),
+                uuid='9cbdf4db-2454-4cbf-9e48-55d2a9881ee6',
             ),
         )
         with mock.patch.multiple(self.aggregation_proposition, equivalence_diplome=[]):
@@ -895,10 +965,7 @@ class TestVerifierPropositionService(TestCase):
         )
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.cmd(self.master_proposition.entity_id.uuid))
-        self.assertInIsInstance(
-            EtudesSecondairesNonCompleteesException,
-            context.exception.exceptions,
-        )
+        self.assertHasInstance(context.exception.exceptions, EtudesSecondairesNonCompleteesException)
 
     def test_should_retourner_erreur_si_indication_annee_diplome_etudes_secondaires_non_specifiee_pour_master(self):
         self.etudes_secondaires[self.master_proposition.matricule_candidat] = EtudesSecondairesDTO(
@@ -906,10 +973,7 @@ class TestVerifierPropositionService(TestCase):
         )
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.cmd(self.master_proposition.entity_id.uuid))
-        self.assertInIsInstance(
-            EtudesSecondairesNonCompleteesException,
-            context.exception.exceptions,
-        )
+        self.assertHasInstance(context.exception.exceptions, EtudesSecondairesNonCompleteesException)
 
     def test_should_etre_ok_si_indication_et_annee_diplome_etudes_secondaires_specifiees_pour_master(self):
         self.etudes_secondaires[self.master_proposition.matricule_candidat] = EtudesSecondairesDTO(
@@ -926,10 +990,7 @@ class TestVerifierPropositionService(TestCase):
         )
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.cmd(self.bachelier_proposition.entity_id.uuid))
-        self.assertInIsInstance(
-            EtudesSecondairesNonCompleteesException,
-            context.exception.exceptions,
-        )
+        self.assertHasInstance(context.exception.exceptions, EtudesSecondairesNonCompleteesException)
 
     def test_should_retourner_erreur_si_indication_annee_diplome_etudes_secondaires_non_specifiee_pour_bachelier(self):
         self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesDTO(
@@ -938,10 +999,7 @@ class TestVerifierPropositionService(TestCase):
         )
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.cmd(self.bachelier_proposition.entity_id.uuid))
-        self.assertInIsInstance(
-            EtudesSecondairesNonCompleteesException,
-            context.exception.exceptions,
-        )
+        self.assertHasInstance(context.exception.exceptions, EtudesSecondairesNonCompleteesException)
 
     def test_should_retourner_erreur_si_etudes_secondaires_et_diplome_non_specifie_pour_bachelier(self):
         self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesDTO(
@@ -950,10 +1008,7 @@ class TestVerifierPropositionService(TestCase):
         )
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.cmd(self.bachelier_proposition.entity_id.uuid))
-        self.assertInIsInstance(
-            EtudesSecondairesNonCompleteesException,
-            context.exception.exceptions,
-        )
+        self.assertHasInstance(context.exception.exceptions, EtudesSecondairesNonCompleteesException)
 
     def test_should_retourner_erreur_si_etudes_secondaires_en_cours_et_diplome_non_specifie_pour_bachelier(self):
         self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesDTO(
@@ -962,10 +1017,7 @@ class TestVerifierPropositionService(TestCase):
         )
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.cmd(self.bachelier_proposition.entity_id.uuid))
-        self.assertInIsInstance(
-            EtudesSecondairesNonCompleteesException,
-            context.exception.exceptions,
-        )
+        self.assertHasInstance(context.exception.exceptions, EtudesSecondairesNonCompleteesException)
 
     def test_should_retourner_erreur_si_pas_etudes_secondaires_et_alternative_non_specifiee_pour_bachelier(self):
         self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesDTO(
@@ -973,10 +1025,7 @@ class TestVerifierPropositionService(TestCase):
         )
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.cmd(self.bachelier_proposition.entity_id.uuid))
-        self.assertInIsInstance(
-            EtudesSecondairesNonCompleteesException,
-            context.exception.exceptions,
-        )
+        self.assertHasInstance(context.exception.exceptions, EtudesSecondairesNonCompleteesException)
 
     def test_should_etre_ok_si_pas_etudes_secondaires_et_alternative_non_specifiee_pour_bachelier_vae(self):
         self.experiences_non_academiques.append(
@@ -1000,10 +1049,7 @@ class TestVerifierPropositionService(TestCase):
         )
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.cmd(self.bachelier_proposition.entity_id.uuid))
-        self.assertInIsInstance(
-            EtudesSecondairesNonCompleteesPourDiplomeBelgeException,
-            context.exception.exceptions,
-        )
+        self.assertHasInstance(context.exception.exceptions, EtudesSecondairesNonCompleteesPourDiplomeBelgeException)
 
     def test_should_retourner_erreur_si_diplome_belge_etudes_secondaires_en_cours_incomplet_pour_bachelier(self):
         self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesDTO(
@@ -1013,10 +1059,7 @@ class TestVerifierPropositionService(TestCase):
         )
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.cmd(self.bachelier_proposition.entity_id.uuid))
-        self.assertInIsInstance(
-            EtudesSecondairesNonCompleteesPourDiplomeBelgeException,
-            context.exception.exceptions,
-        )
+        self.assertHasInstance(context.exception.exceptions, EtudesSecondairesNonCompleteesPourDiplomeBelgeException)
 
     def test_should_etre_ok_si_diplome_belge_etudes_secondaires_en_cours_avec_certificat_pour_bachelier(self):
         self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesDTO(
@@ -1034,10 +1077,7 @@ class TestVerifierPropositionService(TestCase):
         )
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.cmd(self.bachelier_proposition.entity_id.uuid))
-        self.assertInIsInstance(
-            EtudesSecondairesNonCompleteesPourAlternativeException,
-            context.exception.exceptions,
-        )
+        self.assertHasInstance(context.exception.exceptions, EtudesSecondairesNonCompleteesPourAlternativeException)
 
     def test_should_etre_ok_si_alternative_etudes_secondaires_complet_pour_bachelier(self):
         self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesDTO(
@@ -1091,10 +1131,7 @@ class TestVerifierPropositionService(TestCase):
         )
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.cmd(self.bachelier_proposition.entity_id.uuid))
-        self.assertInIsInstance(
-            EtudesSecondairesNonCompleteesPourDiplomeEtrangerException,
-            context.exception.exceptions,
-        )
+        self.assertHasInstance(context.exception.exceptions, EtudesSecondairesNonCompleteesPourDiplomeEtrangerException)
 
     def test_should_retourner_erreur_si_diplome_etranger_etudes_secondaires_incomplet_diplome_pour_bachelier(self):
         self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesDTO(
@@ -1110,10 +1147,7 @@ class TestVerifierPropositionService(TestCase):
         )
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.cmd(self.bachelier_proposition.entity_id.uuid))
-        self.assertInIsInstance(
-            EtudesSecondairesNonCompleteesPourDiplomeEtrangerException,
-            context.exception.exceptions,
-        )
+        self.assertHasInstance(context.exception.exceptions, EtudesSecondairesNonCompleteesPourDiplomeEtrangerException)
 
     def test_should_etre_ok_si_diplome_etranger_etudes_secondaires_en_cours_avec_certif_pour_bachelier(self):
         self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesDTO(
@@ -1145,10 +1179,7 @@ class TestVerifierPropositionService(TestCase):
         )
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.cmd(self.bachelier_proposition.entity_id.uuid))
-        self.assertInIsInstance(
-            EtudesSecondairesNonCompleteesPourDiplomeEtrangerException,
-            context.exception.exceptions,
-        )
+        self.assertHasInstance(context.exception.exceptions, EtudesSecondairesNonCompleteesPourDiplomeEtrangerException)
 
     def test_should_etre_ok_si_diplome_etranger_complet_equivalence_si_possedee_pour_bachelier(self):
         self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesDTO(
@@ -1184,10 +1215,7 @@ class TestVerifierPropositionService(TestCase):
         )
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.cmd(self.bachelier_proposition.entity_id.uuid))
-        self.assertInIsInstance(
-            EtudesSecondairesNonCompleteesPourDiplomeEtrangerException,
-            context.exception.exceptions,
-        )
+        self.assertHasInstance(context.exception.exceptions, EtudesSecondairesNonCompleteesPourDiplomeEtrangerException)
 
     def test_should_etre_ok_si_diplome_etranger_complet_equivalence_si_demandee_pour_bachelier(self):
         self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesDTO(
@@ -1223,10 +1251,7 @@ class TestVerifierPropositionService(TestCase):
         )
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.cmd(self.bachelier_proposition.entity_id.uuid))
-        self.assertInIsInstance(
-            EtudesSecondairesNonCompleteesPourDiplomeEtrangerException,
-            context.exception.exceptions,
-        )
+        self.assertHasInstance(context.exception.exceptions, EtudesSecondairesNonCompleteesPourDiplomeEtrangerException)
 
     def test_should_retourner_erreur_si_diplome_etranger_non_ue_incomplet_equivalence_si_demandee_pour_bachelier_med(
         self,
@@ -1246,10 +1271,7 @@ class TestVerifierPropositionService(TestCase):
         )
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.cmd(self.bachelier_veto_proposition.entity_id.uuid))
-        self.assertInIsInstance(
-            EtudesSecondairesNonCompleteesPourDiplomeEtrangerException,
-            context.exception.exceptions,
-        )
+        self.assertHasInstance(context.exception.exceptions, EtudesSecondairesNonCompleteesPourDiplomeEtrangerException)
 
     def test_should_etre_ok_si_diplome_etranger_complet_equivalence_si_pas_demandee_pour_bachelier(self):
         self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesDTO(
@@ -1283,10 +1305,7 @@ class TestVerifierPropositionService(TestCase):
         )
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.cmd(self.bachelier_proposition.entity_id.uuid))
-        self.assertInIsInstance(
-            EtudesSecondairesNonCompleteesPourDiplomeEtrangerException,
-            context.exception.exceptions,
-        )
+        self.assertHasInstance(context.exception.exceptions, EtudesSecondairesNonCompleteesPourDiplomeEtrangerException)
 
     def test_should_etre_ok_si_diplome_etranger_non_ue_complet_equivalence_pour_bachelier(self):
         self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesDTO(
@@ -1335,10 +1354,7 @@ class TestVerifierPropositionService(TestCase):
         )
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.cmd(self.bachelier_proposition.entity_id.uuid))
-        self.assertInIsInstance(
-            EtudesSecondairesNonCompleteesPourDiplomeEtrangerException,
-            context.exception.exceptions,
-        )
+        self.assertHasInstance(context.exception.exceptions, EtudesSecondairesNonCompleteesPourDiplomeEtrangerException)
 
     def test_should_retourner_erreur_si_diplome_etranger_incomplet_traduction_diplome_pour_bachelier(self):
         self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesDTO(
@@ -1356,10 +1372,7 @@ class TestVerifierPropositionService(TestCase):
         )
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.cmd(self.bachelier_proposition.entity_id.uuid))
-        self.assertInIsInstance(
-            EtudesSecondairesNonCompleteesPourDiplomeEtrangerException,
-            context.exception.exceptions,
-        )
+        self.assertHasInstance(context.exception.exceptions, EtudesSecondairesNonCompleteesPourDiplomeEtrangerException)
 
     def test_should_retourner_erreur_si_diplome_etranger_incomplet_traduction_releve_pour_bachelier(self):
         self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesDTO(
@@ -1377,10 +1390,7 @@ class TestVerifierPropositionService(TestCase):
         )
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.cmd(self.bachelier_proposition.entity_id.uuid))
-        self.assertInIsInstance(
-            EtudesSecondairesNonCompleteesPourDiplomeEtrangerException,
-            context.exception.exceptions,
-        )
+        self.assertHasInstance(context.exception.exceptions, EtudesSecondairesNonCompleteesPourDiplomeEtrangerException)
 
     def test_should_retourner_erreur_si_diplome_etranger_incomplet_traduction_certif_pour_bachelier(self):
         self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesDTO(
@@ -1398,10 +1408,7 @@ class TestVerifierPropositionService(TestCase):
         )
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.cmd(self.bachelier_proposition.entity_id.uuid))
-        self.assertInIsInstance(
-            EtudesSecondairesNonCompleteesPourDiplomeEtrangerException,
-            context.exception.exceptions,
-        )
+        self.assertHasInstance(context.exception.exceptions, EtudesSecondairesNonCompleteesPourDiplomeEtrangerException)
 
     def test_should_etre_ok_si_diplome_etranger_complet_avec_traductions_pour_bachelier(self):
         self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesDTO(
@@ -1422,3 +1429,73 @@ class TestVerifierPropositionService(TestCase):
         )
         id_proposition = self.message_bus.invoke(self.cmd(self.bachelier_proposition.entity_id.uuid))
         self.assertEqual(id_proposition, self.bachelier_proposition.entity_id)
+
+    def test_should_etre_ok_si_proposition_complete(self):
+        proposition_id = self.message_bus.invoke(self.cmd(self.master_proposition.entity_id.uuid))
+        self.assertEqual(proposition_id, self.master_proposition.entity_id)
+
+    def test_should_etre_ok_avec_experience_academique_complete(self):
+        self.experiences_academiques.append(self.experience_academiques_complete)
+        proposition_id = self.message_bus.invoke(self.cmd(self.master_proposition.entity_id.uuid))
+        self.assertEqual(proposition_id, self.master_proposition.entity_id)
+
+    def test_should_verification_renvoyer_erreur_si_releve_notes_global_non_renseigne(self):
+        with mock.patch.multiple(self.experience_academiques_complete, releve_notes=[]):
+            self.experiences_academiques.append(self.experience_academiques_complete)
+
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                self.message_bus.invoke(self.cmd(self.master_proposition.entity_id.uuid))
+
+            self.assertHasInstance(context.exception.exceptions, ExperiencesAcademiquesNonCompleteesException)
+
+    def test_should_verification_renvoyer_erreur_si_traduction_releve_notes_global_non_renseignee(self):
+        with mock.patch.multiple(
+            self.experience_academiques_complete,
+            releve_notes=[],
+            pays=FR_ISO_CODE,
+            regime_linguistique='BR',
+        ):
+            self.experiences_academiques.append(self.experience_academiques_complete)
+
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                self.message_bus.invoke(self.cmd(self.master_proposition.entity_id.uuid))
+
+            self.assertHasInstance(context.exception.exceptions, ExperiencesAcademiquesNonCompleteesException)
+
+    def test_should_verification_renvoyer_erreur_si_releve_notes_annuel_non_renseigne(self):
+        with mock.patch.multiple(
+            self.experience_academiques_complete,
+            type_releve_notes=TranscriptType.ONE_A_YEAR.name,
+        ):
+            with mock.patch.multiple(self.experience_academiques_complete.annees[0], releve_notes=[]):
+                self.experiences_academiques.append(self.experience_academiques_complete)
+
+                with self.assertRaises(MultipleBusinessExceptions) as context:
+                    self.message_bus.invoke(self.cmd(self.master_proposition.entity_id.uuid))
+
+                self.assertHasInstance(context.exception.exceptions, ExperiencesAcademiquesNonCompleteesException)
+
+    def test_should_verification_renvoyer_erreur_si_traduction_releve_notes_annuel_non_renseignee(self):
+        with mock.patch.multiple(
+            self.experience_academiques_complete,
+            type_releve_notes=TranscriptType.ONE_A_YEAR.name,
+            pays=FR_ISO_CODE,
+            regime_linguistique='BR',
+        ):
+            with mock.patch.multiple(self.experience_academiques_complete.annees[0], traduction_releve_notes=[]):
+                self.experiences_academiques.append(self.experience_academiques_complete)
+
+                with self.assertRaises(MultipleBusinessExceptions) as context:
+                    self.message_bus.invoke(self.cmd(self.master_proposition.entity_id.uuid))
+
+                self.assertHasInstance(context.exception.exceptions, ExperiencesAcademiquesNonCompleteesException)
+
+    def test_should_verification_renvoyer_erreur_si_diplome_non_renseigne(self):
+        with mock.patch.multiple(self.experience_academiques_complete, a_obtenu_diplome=True, diplome=[]):
+
+            self.experiences_academiques.append(self.experience_academiques_complete)
+
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                self.message_bus.invoke(self.cmd(self.master_proposition.entity_id.uuid))
+
+            self.assertHasInstance(context.exception.exceptions, ExperiencesAcademiquesNonCompleteesException)

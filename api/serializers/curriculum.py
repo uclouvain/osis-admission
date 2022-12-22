@@ -254,6 +254,7 @@ class CurriculumDetailsSerializer(serializers.Serializer):
     minimal_date = serializers.SerializerMethodField()
     maximal_date = serializers.SerializerMethodField()
     incomplete_periods = serializers.ListField(child=serializers.CharField())
+    incomplete_experiences = serializers.DictField(child=serializers.ListField(child=serializers.CharField()))
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

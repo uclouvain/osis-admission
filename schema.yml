@@ -6076,10 +6076,13 @@ components:
           type: array
           items:
             type: string
+        incomplete_experiences:
+          type: object
       required:
       - professional_experiences
       - educational_experiences
       - incomplete_periods
+      - incomplete_experiences
     DoctoratePropositionDTO:
       type: object
       properties:

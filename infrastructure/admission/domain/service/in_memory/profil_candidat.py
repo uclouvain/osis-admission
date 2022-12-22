@@ -45,7 +45,7 @@ from base.models.enums.civil_state import CivilState
 from base.models.enums.education_group_types import TrainingType
 from base.models.enums.got_diploma import GotDiploma
 from base.models.enums.person_address_type import PersonAddressType
-from osis_profile.models.enums.curriculum import Result
+from osis_profile.models.enums.curriculum import Result, TranscriptType
 
 
 @attr.dataclass
@@ -98,14 +98,29 @@ class DiplomeEtudeSecondaire:
 class AnneeExperienceAcademique:
     annee: int
     resultat: str
+    releve_notes: List[str]
+    traduction_releve_notes: List[str]
 
 
 @dataclass
 class ExperienceAcademique:
+    uuid: str
     personne: str
     communaute_fr: bool
     pays: str
     annees: List[AnneeExperienceAcademique]
+    regime_linguistique: str
+    type_releve_notes: str
+    releve_notes: List[str]
+    traduction_releve_notes: List[str]
+    diplome: List[str]
+    traduction_diplome: List[str]
+    a_obtenu_diplome: bool
+    rang_diplome: str
+    date_prevue_delivrance_diplome: Optional[datetime.date]
+    titre_memoire: str
+    note_memoire: str
+    resume_memoire: List[str]
 
 
 @dataclass
@@ -301,52 +316,182 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
 
         cls.experiences_academiques = [
             ExperienceAcademique(
+                uuid='9cbdf4db-2454-4cbf-9e48-55d2a9881ee1',
                 personne=cls.matricule_candidat,
                 communaute_fr=False,
                 pays='FR',
                 annees=[
-                    AnneeExperienceAcademique(annee=2016, resultat=Result.SUCCESS.name),
-                    AnneeExperienceAcademique(annee=2017, resultat=Result.SUCCESS.name),
-                    AnneeExperienceAcademique(annee=2019, resultat=Result.SUCCESS.name),
+                    AnneeExperienceAcademique(
+                        annee=2016,
+                        resultat=Result.SUCCESS.name,
+                        releve_notes=['releve1.pdf'],
+                        traduction_releve_notes=['traduction_releve1.pdf'],
+                    ),
+                    AnneeExperienceAcademique(
+                        annee=2017,
+                        resultat=Result.SUCCESS.name,
+                        releve_notes=['releve2.pdf'],
+                        traduction_releve_notes=['traduction_releve2.pdf'],
+                    ),
+                    AnneeExperienceAcademique(
+                        annee=2019,
+                        resultat=Result.SUCCESS.name,
+                        releve_notes=['releve3.pdf'],
+                        traduction_releve_notes=['traduction_releve3.pdf'],
+                    ),
                 ],
+                regime_linguistique='FR',
+                type_releve_notes=TranscriptType.ONE_FOR_ALL_YEARS.name,
+                releve_notes=['releve_notes.pdf'],
+                traduction_releve_notes=['traduction_releve_notes.pdf'],
+                diplome=['diplome.pdf'],
+                traduction_diplome=['traduction_diplome.pdf'],
+                a_obtenu_diplome=True,
+                rang_diplome='10',
+                date_prevue_delivrance_diplome=datetime.date(2020, 2, 2),
+                titre_memoire='Titre',
+                note_memoire='15 sur 20',
+                resume_memoire=['resume_memoire.pdf'],
             ),
             ExperienceAcademique(
+                uuid='9cbdf4db-2454-4cbf-9e48-55d2a9881ee2',
                 personne=cls.matricule_candidat,
                 communaute_fr=True,
                 pays=BE_ISO_CODE,
                 annees=[
-                    AnneeExperienceAcademique(annee=2020, resultat=Result.SUCCESS.name),
+                    AnneeExperienceAcademique(
+                        annee=2020,
+                        resultat=Result.SUCCESS.name,
+                        releve_notes=['releve1.pdf'],
+                        traduction_releve_notes=['traduction_releve1.pdf'],
+                    ),
                 ],
+                regime_linguistique='',
+                type_releve_notes=TranscriptType.ONE_FOR_ALL_YEARS.name,
+                releve_notes=['releve_notes.pdf'],
+                traduction_releve_notes=['traduction_releve_notes.pdf'],
+                diplome=['diplome.pdf'],
+                traduction_diplome=['traduction_diplome.pdf'],
+                a_obtenu_diplome=True,
+                rang_diplome='10',
+                date_prevue_delivrance_diplome=datetime.date(2020, 2, 2),
+                titre_memoire='Titre',
+                note_memoire='15 sur 20',
+                resume_memoire=['resume_memoire.pdf'],
             ),
             ExperienceAcademique(
+                uuid='9cbdf4db-2454-4cbf-9e48-55d2a9881ee3',
                 personne='0000000001',
                 communaute_fr=False,
                 pays='FR',
                 annees=[
-                    AnneeExperienceAcademique(annee=2016, resultat=Result.SUCCESS.name),
-                    AnneeExperienceAcademique(annee=2017, resultat=Result.SUCCESS.name),
-                    AnneeExperienceAcademique(annee=2019, resultat=Result.SUCCESS.name),
+                    AnneeExperienceAcademique(
+                        annee=2016,
+                        resultat=Result.SUCCESS.name,
+                        releve_notes=['releve1.pdf'],
+                        traduction_releve_notes=['traduction_releve1.pdf'],
+                    ),
+                    AnneeExperienceAcademique(
+                        annee=2017,
+                        resultat=Result.SUCCESS.name,
+                        releve_notes=['releve2.pdf'],
+                        traduction_releve_notes=['traduction_releve2.pdf'],
+                    ),
+                    AnneeExperienceAcademique(
+                        annee=2019,
+                        resultat=Result.SUCCESS.name,
+                        releve_notes=['releve3.pdf'],
+                        traduction_releve_notes=['traduction_releve3.pdf'],
+                    ),
                 ],
+                regime_linguistique='FR',
+                type_releve_notes=TranscriptType.ONE_FOR_ALL_YEARS.name,
+                releve_notes=['releve_notes.pdf'],
+                traduction_releve_notes=['traduction_releve_notes.pdf'],
+                diplome=['diplome.pdf'],
+                traduction_diplome=['traduction_diplome.pdf'],
+                a_obtenu_diplome=True,
+                rang_diplome='10',
+                date_prevue_delivrance_diplome=datetime.date(2020, 2, 2),
+                titre_memoire='Titre',
+                note_memoire='15 sur 20',
+                resume_memoire=['resume_memoire.pdf'],
             ),
             ExperienceAcademique(
+                uuid='9cbdf4db-2454-4cbf-9e48-55d2a9881ee4',
                 personne='0000000001',
                 communaute_fr=True,
                 pays=BE_ISO_CODE,
                 annees=[
-                    AnneeExperienceAcademique(annee=2020, resultat=Result.SUCCESS.name),
+                    AnneeExperienceAcademique(
+                        annee=2020,
+                        resultat=Result.SUCCESS.name,
+                        releve_notes=['releve1.pdf'],
+                        traduction_releve_notes=['traduction_releve1.pdf'],
+                    ),
                 ],
+                regime_linguistique='FR',
+                type_releve_notes=TranscriptType.ONE_FOR_ALL_YEARS.name,
+                releve_notes=['releve_notes.pdf'],
+                traduction_releve_notes=['traduction_releve_notes.pdf'],
+                diplome=['diplome.pdf'],
+                traduction_diplome=['traduction_diplome.pdf'],
+                a_obtenu_diplome=True,
+                rang_diplome='10',
+                date_prevue_delivrance_diplome=datetime.date(2020, 2, 2),
+                titre_memoire='Titre',
+                note_memoire='15 sur 20',
+                resume_memoire=['resume_memoire.pdf'],
             ),
             ExperienceAcademique(
+                uuid='9cbdf4db-2454-4cbf-9e48-55d2a9881ee5',
                 personne='0000000002',
                 communaute_fr=False,
                 pays='FR',
                 annees=[
-                    AnneeExperienceAcademique(annee=2016, resultat=Result.SUCCESS.name),
-                    AnneeExperienceAcademique(annee=2017, resultat=Result.SUCCESS.name),
-                    AnneeExperienceAcademique(annee=2018, resultat=Result.SUCCESS.name),
-                    AnneeExperienceAcademique(annee=2019, resultat=Result.SUCCESS.name),
-                    AnneeExperienceAcademique(annee=2020, resultat=Result.SUCCESS.name),
+                    AnneeExperienceAcademique(
+                        annee=2016,
+                        resultat=Result.SUCCESS.name,
+                        releve_notes=['releve1.pdf'],
+                        traduction_releve_notes=['traduction_releve1.pdf'],
+                    ),
+                    AnneeExperienceAcademique(
+                        annee=2017,
+                        resultat=Result.SUCCESS.name,
+                        releve_notes=['releve2.pdf'],
+                        traduction_releve_notes=['traduction_releve2.pdf'],
+                    ),
+                    AnneeExperienceAcademique(
+                        annee=2018,
+                        resultat=Result.SUCCESS.name,
+                        releve_notes=['releve3.pdf'],
+                        traduction_releve_notes=['traduction_releve3.pdf'],
+                    ),
+                    AnneeExperienceAcademique(
+                        annee=2019,
+                        resultat=Result.SUCCESS.name,
+                        releve_notes=['releve4.pdf'],
+                        traduction_releve_notes=['traduction_releve4.pdf'],
+                    ),
+                    AnneeExperienceAcademique(
+                        annee=2020,
+                        resultat=Result.SUCCESS.name,
+                        releve_notes=['releve5.pdf'],
+                        traduction_releve_notes=['traduction_releve5.pdf'],
+                    ),
                 ],
+                regime_linguistique='FR',
+                type_releve_notes=TranscriptType.ONE_FOR_ALL_YEARS.name,
+                releve_notes=['releve_notes.pdf'],
+                traduction_releve_notes=['traduction_releve_notes.pdf'],
+                diplome=['diplome.pdf'],
+                traduction_diplome=['traduction_diplome.pdf'],
+                a_obtenu_diplome=True,
+                rang_diplome='10',
+                date_prevue_delivrance_diplome=datetime.date(2020, 2, 2),
+                titre_memoire='Titre',
+                note_memoire='15 sur 20',
+                resume_memoire=['resume_memoire.pdf'],
             ),
         ]
 
@@ -505,14 +650,29 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 if experience.personne == matricule:
                     experiences_dtos.append(
                         ExperienceAcademiqueDTO(
+                            uuid=experience.uuid,
                             pays=experience.pays,
                             annees=[
                                 AnneeExperienceAcademiqueDTO(
                                     annee=annee.annee,
                                     resultat=annee.resultat,
+                                    releve_notes=annee.releve_notes,
+                                    traduction_releve_notes=annee.traduction_releve_notes,
                                 )
                                 for annee in experience.annees
                             ],
+                            regime_linguistique=experience.regime_linguistique,
+                            type_releve_notes=experience.type_releve_notes,
+                            releve_notes=experience.releve_notes,
+                            traduction_releve_notes=experience.traduction_releve_notes,
+                            diplome=experience.diplome,
+                            traduction_diplome=experience.traduction_diplome,
+                            a_obtenu_diplome=experience.a_obtenu_diplome,
+                            rang_diplome=experience.rang_diplome,
+                            date_prevue_delivrance_diplome=experience.date_prevue_delivrance_diplome,
+                            titre_memoire=experience.titre_memoire,
+                            note_memoire=experience.note_memoire,
+                            resume_memoire=experience.resume_memoire,
                         ),
                     )
 

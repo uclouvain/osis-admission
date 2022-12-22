@@ -37,6 +37,7 @@ from rest_framework.status import HTTP_200_OK
 from rest_framework.test import APITestCase
 
 from admission.contrib.models import ContinuingEducationAdmission, GeneralEducationAdmission
+from admission.ddd import FR_ISO_CODE
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutProposition
 from admission.contrib.models.base import BaseAdmission
 from admission.tests.factories import DoctorateAdmissionFactory
@@ -136,6 +137,7 @@ def create_educational_experiences(person, country):
             institute_name='UCL',
             education_name='Computer science 3',
             obtained_diploma=False,
+            linguistic_regime__code=FR_ISO_CODE,
         ),
     ]
 
@@ -161,6 +163,8 @@ class DoctorateCurriculumTestCase(BaseCurriculumTestCase, APITestCase):
         cls.user = cls.admission.candidate.user
         cls.other_user = cls.other_admission.candidate.user
         cls.user_without_admission = CandidateFactory().person.user
+        cls.linguistic_regime = LanguageFactory(code=FR_ISO_CODE)
+        cls.linguistic_regime_with_translation = LanguageFactory(code='BR')
 
         AdmissionFormItemInstantiationFactory(
             form_item=TextAdmissionFormItemFactory(
@@ -253,6 +257,11 @@ class DoctorateCurriculumTestCase(BaseCurriculumTestCase, APITestCase):
             ],
         )
 
+        self.assertEqual(
+            response.get('incomplete_experiences'),
+            {},
+        )
+
     def test_get_curriculum_several_educational_experiences(self):
         self.client.force_authenticate(user=self.user)
 
@@ -262,6 +271,7 @@ class DoctorateCurriculumTestCase(BaseCurriculumTestCase, APITestCase):
             institute_name='UCL',
             education_name='Computer science 1',
             obtained_diploma=False,
+            linguistic_regime__code=FR_ISO_CODE,
         )
         experience_2019 = EducationalExperienceFactory(
             person=self.admission.candidate,
@@ -269,6 +279,7 @@ class DoctorateCurriculumTestCase(BaseCurriculumTestCase, APITestCase):
             institute_name='UCL',
             education_name='Computer science 2',
             obtained_diploma=False,
+            linguistic_regime__code=FR_ISO_CODE,
         )
         EducationalExperienceYearFactory(
             educational_experience=experience_2018,
@@ -343,6 +354,7 @@ class DoctorateCurriculumTestCase(BaseCurriculumTestCase, APITestCase):
         foreign_diploma = ForeignHighSchoolDiplomaFactory(
             person=self.user.person,
             academic_graduation_year=self.academic_year_2018,
+            linguistic_regime__code=FR_ISO_CODE,
         )
 
         response = self.client.get(self.admission_url)
@@ -367,6 +379,149 @@ class DoctorateCurriculumTestCase(BaseCurriculumTestCase, APITestCase):
         self.assertEqual(response.get('incomplete_periods'), [])
         self.user.person.last_registration_year = None
         self.user.person.save()
+
+    def _test_get_curriculum_with_incomplete_educational_experience(self, experience_args, experience_year_args):
+        self.client.force_authenticate(user=self.user)
+
+        default_experience_args = {
+            'person': self.admission.candidate,
+            'country': self.country,
+            'institute_name': 'UCL',
+            'linguistic_regime': self.linguistic_regime,
+            'education_name': 'Computer science 1',
+        }
+        default_experience_args.update(experience_args)
+
+        experience_2018 = EducationalExperienceFactory(
+            **default_experience_args,
+        )
+
+        EducationalExperienceYearFactory(
+            educational_experience=experience_2018,
+            academic_year=AcademicYearFactory(year=2018),
+            result=Result.SUCCESS.name,
+            **experience_year_args,
+        )
+
+        # Transcript missing
+        response = self.client.get(self.admission_url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Check response data
+        json_response = response.json()
+
+        self.assertEqual(
+            json_response.get('incomplete_experiences'),
+            {
+                str(experience_2018.uuid): ['Cette expérience académique est incomplète.'],
+            },
+        )
+
+    def test_get_curriculum_with_incomplete_educational_experience_transcript_missing(self):
+        self._test_get_curriculum_with_incomplete_educational_experience(
+            experience_args={
+                'transcript': [],
+            },
+            experience_year_args={},
+        )
+
+    def test_get_curriculum_with_incomplete_educational_experience_transcript_translation_missing(self):
+        self._test_get_curriculum_with_incomplete_educational_experience(
+            experience_args={
+                'country__iso_code': 'FR',
+                'linguistic_regime': self.linguistic_regime_with_translation,
+                'transcript_translation': [],
+            },
+            experience_year_args={},
+        )
+
+    def test_get_curriculum_with_incomplete_educational_experience_annual_transcript_missing(self):
+        self._test_get_curriculum_with_incomplete_educational_experience(
+            experience_args={
+                'transcript_type': TranscriptType.ONE_A_YEAR.name,
+            },
+            experience_year_args={
+                'transcript': [],
+            },
+        )
+
+    def test_get_curriculum_with_incomplete_educational_experience_annual_transcript_translation_missing(self):
+        self._test_get_curriculum_with_incomplete_educational_experience(
+            experience_args={
+                'country__iso_code': 'FR',
+                'linguistic_regime': self.linguistic_regime_with_translation,
+                'transcript_type': TranscriptType.ONE_A_YEAR.name,
+            },
+            experience_year_args={
+                'transcript_translation': [],
+            },
+        )
+
+    def test_get_curriculum_with_incomplete_educational_experience_diploma_rank_missing(self):
+        self._test_get_curriculum_with_incomplete_educational_experience(
+            experience_args={
+                'obtained_diploma': True,
+                'rank_in_diploma': '',
+            },
+            experience_year_args={},
+        )
+
+    def test_get_curriculum_with_incomplete_educational_experience_diploma_date_missing(self):
+        self._test_get_curriculum_with_incomplete_educational_experience(
+            experience_args={
+                'obtained_diploma': True,
+                'expected_graduation_date': None,
+            },
+            experience_year_args={},
+        )
+
+    def test_get_curriculum_with_incomplete_educational_experience_dissertation_title_missing(self):
+        self._test_get_curriculum_with_incomplete_educational_experience(
+            experience_args={
+                'obtained_diploma': True,
+                'dissertation_title': '',
+            },
+            experience_year_args={},
+        )
+
+    def test_get_curriculum_with_incomplete_educational_experience_dissertation_score_missing(self):
+        self._test_get_curriculum_with_incomplete_educational_experience(
+            experience_args={
+                'obtained_diploma': True,
+                'dissertation_score': '',
+            },
+            experience_year_args={},
+        )
+
+    def test_get_curriculum_with_incomplete_educational_experience_dissertation_summary_missing(self):
+        self._test_get_curriculum_with_incomplete_educational_experience(
+            experience_args={
+                'obtained_diploma': True,
+                'dissertation_summary': [],
+            },
+            experience_year_args={},
+        )
+
+    def test_get_curriculum_with_incomplete_educational_experience_diploma_missing(self):
+        self._test_get_curriculum_with_incomplete_educational_experience(
+            experience_args={
+                'obtained_diploma': True,
+                'graduate_degree': [],
+            },
+            experience_year_args={},
+        )
+
+    def test_get_curriculum_with_incomplete_educational_experience_diploma_translation_missing(self):
+        self._test_get_curriculum_with_incomplete_educational_experience(
+            experience_args={
+                'country__iso_code': 'FR',
+                'linguistic_regime': self.linguistic_regime_with_translation,
+                'obtained_diploma': True,
+                'graduate_degree_translation': [],
+            },
+            experience_year_args={},
+        )
 
     def test_put_curriculum(self):
         self.client.force_authenticate(user=self.user)
@@ -398,6 +553,9 @@ class GeneralEducationCurriculumTestCase(BaseCurriculumTestCase, APITestCase):
             ),
             academic_year__year=2020,
         )
+
+        cls.linguistic_regime = LanguageFactory(code=FR_ISO_CODE)
+        cls.linguistic_regime_with_translation = LanguageFactory(code='BR')
 
         cls.put_data = {
             'reponses_questions_specifiques': {
@@ -486,8 +644,107 @@ class GeneralEducationCurriculumTestCase(BaseCurriculumTestCase, APITestCase):
         self.assertEqual(response.get('minimal_date'), '2021-09-01')
         self.assertEqual(response.get('maximal_date'), '2020-10-01')
         self.assertEqual(response.get('incomplete_periods'), [])
+        self.assertEqual(response.get('incomplete_experiences'), {})
         self.user.person.last_registration_year = None
         self.user.person.save()
+
+    def _test_get_curriculum_with_incomplete_educational_experience(self, experience_args, experience_year_args):
+        self.client.force_authenticate(user=self.user)
+
+        default_experience_args = {
+            'person': self.admission.candidate,
+            'country': self.country,
+            'institute_name': 'UCL',
+            'linguistic_regime': self.linguistic_regime,
+            'education_name': 'Computer science 1',
+        }
+        default_experience_args.update(experience_args)
+
+        experience_2018 = EducationalExperienceFactory(
+            **default_experience_args,
+        )
+
+        EducationalExperienceYearFactory(
+            educational_experience=experience_2018,
+            academic_year=AcademicYearFactory(year=2018),
+            result=Result.SUCCESS.name,
+            **experience_year_args,
+        )
+
+        # Transcript missing
+        response = self.client.get(self.admission_url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Check response data
+        json_response = response.json()
+
+        self.assertEqual(
+            json_response.get('incomplete_experiences'),
+            {
+                str(experience_2018.uuid): ['Cette expérience académique est incomplète.'],
+            },
+        )
+
+    def test_get_curriculum_with_incomplete_educational_experience_transcript_missing(self):
+        self._test_get_curriculum_with_incomplete_educational_experience(
+            experience_args={
+                'transcript': [],
+            },
+            experience_year_args={},
+        )
+
+    def test_get_curriculum_with_incomplete_educational_experience_transcript_translation_missing(self):
+        self._test_get_curriculum_with_incomplete_educational_experience(
+            experience_args={
+                'country__iso_code': 'FR',
+                'linguistic_regime': self.linguistic_regime_with_translation,
+                'transcript_translation': [],
+            },
+            experience_year_args={},
+        )
+
+    def test_get_curriculum_with_incomplete_educational_experience_annual_transcript_missing(self):
+        self._test_get_curriculum_with_incomplete_educational_experience(
+            experience_args={
+                'transcript_type': TranscriptType.ONE_A_YEAR.name,
+            },
+            experience_year_args={
+                'transcript': [],
+            },
+        )
+
+    def test_get_curriculum_with_incomplete_educational_experience_annual_transcript_translation_missing(self):
+        self._test_get_curriculum_with_incomplete_educational_experience(
+            experience_args={
+                'country__iso_code': 'FR',
+                'linguistic_regime': self.linguistic_regime_with_translation,
+                'transcript_type': TranscriptType.ONE_A_YEAR.name,
+            },
+            experience_year_args={
+                'transcript_translation': [],
+            },
+        )
+
+    def test_get_curriculum_with_incomplete_educational_experience_diploma_missing(self):
+        self._test_get_curriculum_with_incomplete_educational_experience(
+            experience_args={
+                'obtained_diploma': True,
+                'graduate_degree': [],
+            },
+            experience_year_args={},
+        )
+
+    def test_get_curriculum_with_incomplete_educational_experience_diploma_translation_missing(self):
+        self._test_get_curriculum_with_incomplete_educational_experience(
+            experience_args={
+                'country__iso_code': 'FR',
+                'linguistic_regime': self.linguistic_regime_with_translation,
+                'obtained_diploma': True,
+                'graduate_degree_translation': [],
+            },
+            experience_year_args={},
+        )
 
     def test_put_curriculum(self):
         self.client.force_authenticate(user=self.user)
@@ -928,7 +1185,7 @@ class EducationalExperienceTestCase(APITestCase):
         cls.user_without_admission = CandidateFactory().person.user
 
         cls.diploma = DiplomaTitleFactory()
-        cls.linguistic_regime = LanguageFactory()
+        cls.linguistic_regime = LanguageFactory(code=FR_ISO_CODE)
         cls.institute = SuperiorNonUniversityFactory(teaching_type=TeachingTypeEnum.SOCIAL_PROMOTION.name)
 
         cls.today_date = datetime.date(2020, 11, 1)

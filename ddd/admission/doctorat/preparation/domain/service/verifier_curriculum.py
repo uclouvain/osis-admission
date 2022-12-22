@@ -23,21 +23,14 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
-from admission.ddd.admission.domain.service.profil_candidat import ProfilCandidat
-from osis_common.ddd import interface
+from admission.ddd.admission.domain.service.verifier_curriculum import VerifierCurriculum
 
 
-class VerifierAnneesCurriculum(interface.DomainService):
-    @classmethod
-    def verifier(
-        cls,
-        matricule_candidat: str,
-        profil_candidat_translator: IProfilCandidatTranslator,
-        annee_courante: int,
-    ) -> None:
-        ProfilCandidat().verifier_annees_curriculum(
-            matricule_candidat=matricule_candidat,
-            annee_courante=annee_courante,
-            profil_candidat_translator=profil_candidat_translator,
-        )
+class VerifierCurriculumDoctorat(VerifierCurriculum):
+    CHAMPS_REQUIS_SI_DIPLOME_OBTENU = VerifierCurriculum.CHAMPS_REQUIS_SI_DIPLOME_OBTENU + [
+        'rang_diplome',
+        'date_prevue_delivrance_diplome',
+        'titre_memoire',
+        'note_memoire',
+        'resume_memoire',
+    ]

@@ -3429,6 +3429,9 @@ msgstr "Ce candidat n'a pas encore créé d'activité"
 msgid "This candidate has not created any course yet."
 msgstr "Ce candidat n'a pas encore créé de cours."
 
+msgid "This educational experience is not completed."
+msgstr "Cette expérience académique est incomplète."
+
 msgid "This experience cannot be updated as it has already been valuated."
 msgstr ""
 "Cette expérience ne peut être mise à jour car elle a déjà été valorisée."
