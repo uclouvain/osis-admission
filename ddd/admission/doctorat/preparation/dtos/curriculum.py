@@ -35,12 +35,27 @@ from osis_common.ddd import interface
 class AnneeExperienceAcademiqueDTO(interface.DTO):
     annee: int
     resultat: str
+    releve_notes: List[str]
+    traduction_releve_notes: List[str]
 
 
 @attr.dataclass(frozen=True, slots=True)
 class ExperienceAcademiqueDTO(interface.DTO):
+    uuid: str
     pays: str
+    regime_linguistique: str
+    type_releve_notes: str
+    releve_notes: List[str]
+    traduction_releve_notes: List[str]
     annees: List[AnneeExperienceAcademiqueDTO]
+    a_obtenu_diplome: bool
+    diplome: List[str]
+    traduction_diplome: List[str]
+    rang_diplome: str
+    date_prevue_delivrance_diplome: Optional[datetime.date]
+    titre_memoire: str
+    note_memoire: str
+    resume_memoire: List[str]
 
 
 @attr.dataclass(frozen=True, slots=True)

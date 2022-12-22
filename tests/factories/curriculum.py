@@ -23,10 +23,13 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import uuid
 
 import factory
 
 from osis_profile.models import EducationalExperienceYear, ProfessionalExperience, EducationalExperience
+from osis_profile.models.enums.curriculum import TranscriptType
+from reference.tests.factories.language import LanguageFactory
 
 
 class EducationalExperienceYearFactory(factory.DjangoModelFactory):
@@ -39,6 +42,16 @@ class EducationalExperienceFactory(factory.DjangoModelFactory):
         model = EducationalExperience
 
     country = factory.SubFactory('reference.tests.factories.country.CountryFactory')
+    transcript_type = TranscriptType.ONE_FOR_ALL_YEARS.name
+    transcript = factory.LazyFunction(lambda: [uuid.uuid4()])
+    rank_in_diploma = '10'
+    expected_graduation_date = factory.Faker('date')
+    dissertation_title = 'Title'
+    dissertation_score = '10'
+    dissertation_summary = factory.LazyFunction(lambda: [uuid.uuid4()])
+    graduate_degree = factory.LazyFunction(lambda: [uuid.uuid4()])
+    linguistic_regime = factory.SubFactory(LanguageFactory)
+    obtained_diploma = factory.Faker('boolean')
 
 
 class ProfessionalExperienceFactory(factory.DjangoModelFactory):

@@ -42,7 +42,10 @@ from ._should_identification_candidat_etre_completee import (
     ShouldCandidatSpecifierNumeroIdentite,
     ShouldSignaletiqueCandidatEtreCompletee,
 )
-from ._should_curriculum_etre_complete import ShouldAnneesCVRequisesCompletees
+from ._should_curriculum_etre_complete import (
+    ShouldAnneesCVRequisesCompletees,
+    ShouldExperiencesAcademiquesEtreCompletees,
+)
 
 __all__ = [
     "ShouldSignaletiqueCandidatEtreCompletee",
@@ -59,4 +62,5 @@ __all__ = [
     "ShouldAbsenceDeDetteEtreCompletee",
     "ShouldAutreFormatCarteBancaireRemboursementEtreCompletee",
     "ShouldIBANCarteBancaireRemboursementEtreCompletee",
+    "ShouldExperiencesAcademiquesEtreCompletees",
 ]

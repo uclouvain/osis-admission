@@ -30,7 +30,7 @@ from admission.ddd.admission.doctorat.preparation.commands import VerifierCurric
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.doctorat.preparation.repository.i_proposition import IPropositionRepository
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
-from admission.ddd.admission.domain.service.verifier_annees_curriculum import VerifierAnneesCurriculum
+from admission.ddd.admission.domain.service.profil_candidat import ProfilCandidat
 from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import GetCurrentAcademicYear
 from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import IAcademicYearRepository
 
@@ -54,10 +54,11 @@ def verifier_curriculum(
     )
 
     # WHEN
-    VerifierAnneesCurriculum.verifier(
-        matricule_candidat=proposition.matricule_candidat,
-        annee_courante=annee_courante,
+    ProfilCandidat().verifier_curriculum(
+        matricule=proposition.matricule_candidat,
         profil_candidat_translator=profil_candidat_translator,
+        annee_courante=annee_courante,
+        curriculum_pdf=proposition.curriculum,
     )
 
     # THEN

@@ -33,6 +33,7 @@ from admission.ddd.admission.doctorat.preparation.dtos.curriculum import Experie
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     AnneesCurriculumNonSpecifieesException,
+    ExperiencesAcademiquesNonCompleteesException,
 )
 from base.ddd.utils.business_validator import BusinessValidator, MultipleBusinessExceptions
 
@@ -45,6 +46,7 @@ class ShouldAnneesCVRequisesCompletees(BusinessValidator):
     annee_diplome_etudes_secondaires_etrangeres: Optional[int]
     dates_experiences_non_academiques: List[Tuple[datetime.date, datetime.date]]
     experiences_academiques: List[ExperienceAcademiqueDTO]
+    experiences_academiques_incompletes: Set[str]
 
     def validate(self, *args, **kwargs):
         annee_minimale = IProfilCandidatTranslator.get_annee_minimale_a_completer_cv(
@@ -54,7 +56,14 @@ class ShouldAnneesCVRequisesCompletees(BusinessValidator):
             annee_derniere_inscription_ucl=self.annee_derniere_inscription_ucl,
         )
 
-        annees_valorisees = set([annee.annee for xp in self.experiences_academiques for annee in xp.annees])
+        annees_valorisees = set(
+            [
+                annee.annee
+                for xp in self.experiences_academiques
+                if xp.uuid not in self.experiences_academiques_incompletes
+                for annee in xp.annees
+            ]
+        )
 
         dernier_mois_a_valoriser = IProfilCandidatTranslator.get_date_maximale_curriculum()
 
@@ -153,3 +162,17 @@ class ShouldAnneesCVRequisesCompletees(BusinessValidator):
                     )
                 )
         return mois_a_valoriser
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ShouldExperiencesAcademiquesEtreCompletees(BusinessValidator):
+    experiences_academiques_incompletes: Set[str]
+
+    def validate(self, *args, **kwargs):
+        if self.experiences_academiques_incompletes:
+            raise MultipleBusinessExceptions(
+                exceptions=set(
+                    ExperiencesAcademiquesNonCompleteesException(reference=experience)
+                    for experience in self.experiences_academiques_incompletes
+                )
+            )
