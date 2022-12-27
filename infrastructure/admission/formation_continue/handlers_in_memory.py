@@ -44,6 +44,9 @@ from admission.infrastructure.admission.formation_continue.domain.service.in_mem
 from admission.infrastructure.admission.formation_continue.domain.service.in_memory.formation import (
     FormationContinueInMemoryTranslator,
 )
+from admission.infrastructure.admission.formation_continue.domain.service.in_memory.notification import (
+    NotificationInMemory,
+)
 from admission.infrastructure.admission.formation_continue.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
@@ -100,6 +103,7 @@ COMMAND_HANDLERS = {
         profil_candidat_translator=_profil_candidat_translator,
         calendrier_inscription=CalendrierInscriptionInMemory(),
         element_confirmation=ElementsConfirmationInMemory(),
+        notification=NotificationInMemory(),
     ),
     CompleterCurriculumCommand: lambda msg_bus, cmd: completer_curriculum(
         cmd,

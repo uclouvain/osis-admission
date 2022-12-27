@@ -94,7 +94,7 @@ class Notification(INotification):
 
     @classmethod
     def get_admission_link_front(cls, uuid: UUID, tab='') -> str:
-        return settings.ADMISSION_FRONTEND_LINK.format(uuid=uuid) + tab
+        return settings.ADMISSION_FRONTEND_LINK.format(context='doctorate', uuid=uuid) + tab
 
     @classmethod
     def get_common_tokens(
@@ -116,7 +116,7 @@ class Notification(INotification):
         return {
             "student_first_name": doctorate.candidate.first_name,
             "student_last_name": doctorate.candidate.last_name,
-            "doctorate_title": cls._get_doctorate_title_translation(doctorate),
+            "training_title": cls._get_doctorate_title_translation(doctorate),
             "admission_link_front": cls.get_admission_link_front(doctorate.uuid),
             "admission_link_back": cls.get_admission_link_back(doctorate.uuid),
             "confirmation_paper_link_front": cls.get_admission_link_front(doctorate.uuid, 'confirmation'),
@@ -153,7 +153,7 @@ class Notification(INotification):
             manager_notification_content = _(
                 '<a href="%(confirmation_paper_link_back)s">%(reference)s</a> - '
                 '%(student_first_name)s %(student_last_name)s submitted new data '
-                'for the confirmation paper for %(doctorate_title)s'
+                'for the confirmation paper for %(training_title)s'
             )
 
         else:
@@ -161,7 +161,7 @@ class Notification(INotification):
             manager_notification_content = _(
                 '<a href="%(confirmation_paper_link_back)s">%(reference)s</a> - '
                 '%(student_first_name)s %(student_last_name)s submitted data '
-                'for the first time for the confirmation paper for %(doctorate_title)s'
+                'for the first time for the confirmation paper for %(training_title)s'
             )
 
             # Notify ADRE : email
@@ -191,7 +191,7 @@ class Notification(INotification):
             content=_(
                 '<a href="%(confirmation_paper_link_back)s">%(reference)s</a> - '
                 'A promoter submitted documents related to the confirmation paper of '
-                '%(student_first_name)s %(student_last_name)s for %(doctorate_title)s'
+                '%(student_first_name)s %(student_last_name)s for %(training_title)s'
             ),
             tokens=common_tokens,
         )
@@ -207,7 +207,7 @@ class Notification(INotification):
             content=_(
                 '<a href="%(confirmation_paper_link_back)s">%(reference)s</a> - '
                 '%(student_first_name)s %(student_last_name)s proposed a new deadline '
-                '(%(extension_request_proposed_date)s) for the confirmation paper for %(doctorate_title)s'
+                '(%(extension_request_proposed_date)s) for the confirmation paper for %(training_title)s'
             ),
             tokens=common_tokens,
         )

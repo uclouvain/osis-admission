@@ -23,41 +23,14 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from django.utils.translation import gettext_lazy as _
+from abc import abstractmethod
 
-from osis_mail_template import Token
+from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition
+from osis_common.ddd import interface
 
-common_tokens = [
-    Token(
-        name='training_title',
-        description=_("Title of the training"),
-        example="Doctorat en sciences de la santé publique",
-    ),
-    Token(
-        name='admission_link_front',
-        description=_("Link to the admission (front-office)"),
-        example="http://dev.studies.uclouvain.be/somewhere",
-    ),
-    Token(
-        name='admission_link_back',
-        description=_("Link to the admission (back-office)"),
-        example="http://dev.osis.uclouvain.be/somewhere",
-    ),
-]
 
-admission_common_tokens = common_tokens + [
-    Token(
-        name='candidate_first_name',
-        description=_("The first name of the candidate"),
-        example="John",
-    ),
-    Token(
-        name='candidate_last_name',
-        description=_("The last name of the candidate"),
-        example="Doe",
-    ),
-]
-
-DOCTORATE_ADMISSION_TAG = 'Admission Doctorat'
-GENERAL_ADMISSION_TAG = 'Admission générale'
-CONTINUING_ADMISSION_TAG = 'Admission formation continue'
+class INotification(interface.DomainService):
+    @classmethod
+    @abstractmethod
+    def confirmer_soumission(cls, proposition: Proposition) -> None:
+        raise NotImplementedError

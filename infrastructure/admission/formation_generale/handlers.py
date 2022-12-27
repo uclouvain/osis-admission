@@ -37,6 +37,7 @@ from admission.infrastructure.admission.domain.service.profil_candidat import Pr
 from admission.infrastructure.admission.domain.service.titres_acces import TitresAcces
 from admission.infrastructure.admission.formation_generale.domain.service.comptabilite import ComptabiliteTranslator
 from admission.infrastructure.admission.formation_generale.domain.service.formation import FormationGeneraleTranslator
+from admission.infrastructure.admission.formation_generale.domain.service.notification import Notification
 from admission.infrastructure.admission.formation_generale.domain.service.question_specifique import (
     QuestionSpecifiqueTranslator,
 )
@@ -93,6 +94,7 @@ COMMAND_HANDLERS = {
         academic_year_repository=AcademicYearRepository(),
         questions_specifiques_translator=QuestionSpecifiqueTranslator(),
         element_confirmation=ElementsConfirmation(),
+        notification=Notification(),
     ),
     CompleterCurriculumCommand: lambda msg_bus, cmd: completer_curriculum(
         cmd,

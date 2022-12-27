@@ -32,7 +32,7 @@ class Migration(migrations.Migration):
                 'en': '''<p>Hello,</p>
 
 <p>
-    {student_first_name} {student_last_name} has submitted his confirmation form for its {doctorate_title}.
+    {student_first_name} {student_last_name} has submitted his confirmation form for its {training_title}.
 </p>
 
 <p>
@@ -43,7 +43,7 @@ class Migration(migrations.Migration):
                 'fr-be': '''<p>Bonjour,</p>
 
 <p>
-    {student_first_name} {student_last_name} a soumis son formulaire de confirmation pour son {doctorate_title}.
+    {student_first_name} {student_last_name} a soumis son formulaire de confirmation pour son {training_title}.
 </p>
 
 <p>
@@ -63,7 +63,7 @@ class Migration(migrations.Migration):
                 'en': '''<p>Hello {student_first_name} {student_last_name},</p>
 
 <p>
-    You have recently taken the confirmation paper (on {confirmation_paper_date}) for your {doctorate_title}.
+    You have recently taken the confirmation paper (on {confirmation_paper_date}) for your {training_title}.
 </p>
 
 <p>
@@ -82,7 +82,7 @@ class Migration(migrations.Migration):
                 'fr-be': '''<p>Bonjour {student_first_name} {student_last_name},</p>
 
 <p>
-    Vous avez récemment passé l'épreuve de confirmation (le {confirmation_paper_date}) pour votre {doctorate_title}.
+    Vous avez récemment passé l'épreuve de confirmation (le {confirmation_paper_date}) pour votre {training_title}.
 </p>
 
 <p>
@@ -110,7 +110,7 @@ class Migration(migrations.Migration):
                 'en': '''<p>Hello {student_first_name} {student_last_name},</p>
 
 <p>
-    You have recently taken the confirmation paper (on {confirmation_paper_date}) for your {doctorate_title}.
+    You have recently taken the confirmation paper (on {confirmation_paper_date}) for your {training_title}.
 </p>
 
 <p>
@@ -125,7 +125,7 @@ class Migration(migrations.Migration):
                 'fr-be': '''<p>Bonjour {student_first_name} {student_last_name},</p>
 
 <p>
-    Vous avez récemment passé l'épreuve de confirmation (le {confirmation_paper_date}) pour votre {doctorate_title}.
+    Vous avez récemment passé l'épreuve de confirmation (le {confirmation_paper_date}) pour votre {training_title}.
 </p>
 
 <p>
@@ -149,7 +149,7 @@ class Migration(migrations.Migration):
                 'en': '''<p>Hello {student_first_name} {student_last_name},</p>
 
 <p>
-    You have recently taken the confirmation paper (on {confirmation_paper_date}) for your {doctorate_title}.
+    You have recently taken the confirmation paper (on {confirmation_paper_date}) for your {training_title}.
 </p>
 
 <p>
@@ -164,7 +164,7 @@ class Migration(migrations.Migration):
                 'fr-be': '''<p>Bonjour {student_first_name} {student_last_name},</p>
 
 <p>
-    Vous avez récemment passé l'épreuve de confirmation (le {confirmation_paper_date}) pour votre {doctorate_title}.
+    Vous avez récemment passé l'épreuve de confirmation (le {confirmation_paper_date}) pour votre {training_title}.
 </p>
 
 <p>
@@ -189,7 +189,7 @@ class Migration(migrations.Migration):
 
 <p>
     {student_first_name} {student_last_name} has recently taken the confirmation paper (on {confirmation_paper_date}) 
-    for its {doctorate_title}.
+    for its {training_title}.
 </p>
 
 <p>
@@ -205,7 +205,7 @@ class Migration(migrations.Migration):
 
 <p>
     {student_first_name} {student_last_name} a récemment passé l'épreuve de confirmation (le {confirmation_paper_date}) 
-    pour son {doctorate_title}.
+    pour son {training_title}.
 </p>
 
 <p>
@@ -230,7 +230,7 @@ class Migration(migrations.Migration):
 
 <p>
     {student_first_name} {student_last_name} has recently taken the confirmation paper (on {confirmation_paper_date}) 
-    for its {doctorate_title}.
+    for its {training_title}.
 </p>
 
 <p>
@@ -246,7 +246,7 @@ class Migration(migrations.Migration):
 
 <p>
     {student_first_name} {student_last_name} a récemment passé l'épreuve de confirmation (le {confirmation_paper_date}) 
-    pour son {doctorate_title}.
+    pour son {training_title}.
 </p>
 
 <p>
@@ -271,7 +271,7 @@ class Migration(migrations.Migration):
 
 <p>
     {student_first_name} {student_last_name} has recently taken the confirmation paper (on {confirmation_paper_date}) 
-    for its {doctorate_title}.
+    for its {training_title}.
 </p>
 
 <p>
@@ -287,7 +287,7 @@ class Migration(migrations.Migration):
 
 <p>
     {student_first_name} {student_last_name} a récemment passé l'épreuve de confirmation (le {confirmation_paper_date}) 
-    pour son {doctorate_title}.
+    pour son {training_title}.
 </p>
 
 <p>
@@ -312,7 +312,7 @@ class Migration(migrations.Migration):
 
 <p>
     {student_first_name} {student_last_name} has recently taken the confirmation paper (on {confirmation_paper_date}) 
-    for its {doctorate_title}.
+    for its {training_title}.
 </p>
 
 <p>
@@ -328,7 +328,7 @@ class Migration(migrations.Migration):
 
 <p>
     {student_first_name} {student_last_name} a récemment passé l'épreuve de confirmation (le {confirmation_paper_date}) 
-    pour son {doctorate_title}.
+    pour son {training_title}.
 </p>
 
 <p>
@@ -353,7 +353,7 @@ class Migration(migrations.Migration):
 
 <p>
     {student_first_name} {student_last_name} has recently taken the confirmation paper (on {confirmation_paper_date}) 
-    for its {doctorate_title}.
+    for its {training_title}.
 </p>
 
 <p>
@@ -369,7 +369,7 @@ class Migration(migrations.Migration):
 
 <p>
     {student_first_name} {student_last_name} a récemment passé l'épreuve de confirmation (le {confirmation_paper_date}) 
-    pour son {doctorate_title}.
+    pour son {training_title}.
 </p>
 
 <p>
@@ -394,7 +394,7 @@ class Migration(migrations.Migration):
 
 <p>
     {student_first_name} {student_last_name} has recently taken the confirmation paper (on {confirmation_paper_date}) 
-    for its {doctorate_title}.
+    for its {training_title}.
 </p>
 
 <p>
@@ -410,7 +410,7 @@ class Migration(migrations.Migration):
 
 <p>
     {student_first_name} {student_last_name} a récemment passé l'épreuve de confirmation (le {confirmation_paper_date}) 
-    pour son {doctorate_title}.</p>
+    pour son {training_title}.</p>
 <p>
     Nous tenons à vous informer qu'il n'a pas réussi cette épreuve mais qu'il pourra la repasser plus tard.
 </p>

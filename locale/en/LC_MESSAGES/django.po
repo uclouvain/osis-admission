@@ -62,14 +62,14 @@ msgstr ""
 msgid ""
 "<a href=\"%(admission_link_back)s\">%(reference)s</a> - "
 "%(candidate_first_name)s %(candidate_last_name)s requested signatures for "
-"%(doctorate_title)s"
+"%(training_title)s"
 msgstr ""
 
 #, python-format
 msgid ""
 "<a href=\"%(admission_link_back)s\">%(reference)s</a> - "
 "%(candidate_first_name)s %(candidate_last_name)s submitted request for "
-"%(doctorate_title)s"
+"%(training_title)s"
 msgstr ""
 
 #, python-format
@@ -102,28 +102,28 @@ msgid ""
 "<a href=\"%(confirmation_paper_link_back)s\">%(reference)s</a> - "
 "%(student_first_name)s %(student_last_name)s proposed a new deadline "
 "(%(extension_request_proposed_date)s) for the confirmation paper for "
-"%(doctorate_title)s"
+"%(training_title)s"
 msgstr ""
 
 #, python-format
 msgid ""
 "<a href=\"%(confirmation_paper_link_back)s\">%(reference)s</a> - "
 "%(student_first_name)s %(student_last_name)s submitted data for the first "
-"time for the confirmation paper for %(doctorate_title)s"
+"time for the confirmation paper for %(training_title)s"
 msgstr ""
 
 #, python-format
 msgid ""
 "<a href=\"%(confirmation_paper_link_back)s\">%(reference)s</a> - "
 "%(student_first_name)s %(student_last_name)s submitted new data for the "
-"confirmation paper for %(doctorate_title)s"
+"confirmation paper for %(training_title)s"
 msgstr ""
 
 #, python-format
 msgid ""
 "<a href=\"%(confirmation_paper_link_back)s\">%(reference)s</a> - A promoter "
 "submitted documents related to the confirmation paper of "
-"%(student_first_name)s %(student_last_name)s for %(doctorate_title)s"
+"%(student_first_name)s %(student_last_name)s for %(training_title)s"
 msgstr ""
 
 #, python-format
@@ -841,6 +841,9 @@ msgid "Continuing education"
 msgstr ""
 
 msgid "Continuing education admission"
+msgstr ""
+
+msgid "Continuing enrolments"
 msgstr ""
 
 msgid "Cotutelle"
@@ -1743,6 +1746,16 @@ msgid ""
 msgstr ""
 
 msgid ""
+"Mail sent to the candidate to confirm that his application for continuing "
+"education has been taken into account by UCLouvain"
+msgstr ""
+
+msgid ""
+"Mail sent to the candidate to confirm that his application for general "
+"education has been taken into account by UCLouvain"
+msgstr ""
+
+msgid ""
 "Mail sent to the candidate to confirm that his application has been taken "
 "into account by UCLouvain"
 msgstr ""
@@ -1802,6 +1815,9 @@ msgstr ""
 
 msgctxt "tab"
 msgid "Management"
+msgstr ""
+
+msgid "Management of the continuing enrolments"
 msgstr ""
 
 msgid "Management of the doctorate enrolments"
@@ -1975,6 +1991,9 @@ msgid "No French studies"
 msgstr ""
 
 msgid "No PhD found."
+msgstr ""
+
+msgid "No continuing enrolment"
 msgstr ""
 
 msgid "No defense reason"
@@ -3059,10 +3078,10 @@ msgstr ""
 msgid "Title of the communication"
 msgstr ""
 
-msgid "Title of the doctorate"
+msgid "Title of the publication"
 msgstr ""
 
-msgid "Title of the publication"
+msgid "Title of the training"
 msgstr ""
 
 msgid "To"

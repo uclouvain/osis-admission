@@ -27,20 +27,20 @@ from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMix
 from django.utils.functional import cached_property
 from django.views.generic import ListView
 
-from admission.contrib.models import GeneralEducationAdmission
+from admission.contrib.models import ContinuingEducationAdmissionProxy
 from admission.forms.doctorate.cdd.filter import BaseFilterForm
 from base.utils.htmx import HtmxMixin
 
 __all__ = [
-    "GeneralAdmissionList",
+    "ContinuingAdmissionList",
 ]
 
 
-class GeneralAdmissionList(LoginRequiredMixin, PermissionRequiredMixin, HtmxMixin, ListView):
+class ContinuingAdmissionList(LoginRequiredMixin, PermissionRequiredMixin, HtmxMixin, ListView):
     raise_exception = True
-    template_name = 'admission/general/list.html'
-    htmx_template_name = 'admission/general/list_block.html'
-    permission_required = 'admission.view_general_dossiers'
+    template_name = 'admission/continuing/list.html'
+    htmx_template_name = 'admission/continuing/list_block.html'
+    permission_required = 'admission.view_continuing_dossiers'
 
     @cached_property
     def form(self):
@@ -56,4 +56,4 @@ class GeneralAdmissionList(LoginRequiredMixin, PermissionRequiredMixin, HtmxMixi
 
     def get_queryset(self):
         # TODO Wait for GetAdmissionsQuery
-        return GeneralEducationAdmission.objects.all()
+        return ContinuingEducationAdmissionProxy.objects.all()

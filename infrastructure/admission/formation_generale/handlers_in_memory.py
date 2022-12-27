@@ -45,6 +45,9 @@ from admission.infrastructure.admission.formation_generale.domain.service.in_mem
 from admission.infrastructure.admission.formation_generale.domain.service.in_memory.formation import (
     FormationGeneraleInMemoryTranslator,
 )
+from admission.infrastructure.admission.formation_generale.domain.service.in_memory.notification import (
+    NotificationInMemory,
+)
 from admission.infrastructure.admission.formation_generale.domain.service.in_memory.question_specifique import (
     QuestionSpecifiqueInMemoryTranslator,
 )
@@ -114,6 +117,7 @@ COMMAND_HANDLERS = {
         academic_year_repository=_academic_year_repository,
         questions_specifiques_translator=_question_specific_translator,
         element_confirmation=ElementsConfirmationInMemory(),
+        notification=NotificationInMemory(),
     ),
     CompleterCurriculumCommand: lambda msg_bus, cmd: completer_curriculum(
         cmd,

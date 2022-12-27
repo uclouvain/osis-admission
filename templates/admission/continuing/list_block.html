@@ -1,0 +1,93 @@
+{% load enums i18n bootstrap3 admission %}
+
+{% comment "License" %}
+* OSIS stands for Open Student Information System. It's an application
+* designed to manage the core business of higher education institutions,
+* such as universities, faculties, institutes and professional schools.
+* The core business involves the administration of students, teachers,
+* courses, programs and so on.
+*
+* Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+*
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* A copy of this license - GNU General Public License - is available
+* at the root of the source code of this program.  If not,
+* see http://www.gnu.org/licenses/.
+{% endcomment %}
+
+{% if object_list %}
+<div class="flex-content">
+    <p>
+{#      {% blocktrans with start_index=page_obj.start_index end_index=page_obj.end_index count total_counts=paginator.count trimmed %}#}
+{#        One continuing enrolment#}
+{#      {% plural %}#}
+{#        {{ start_index }} to {{ end_index }} of {{ total_counts }} continuing enrolments#}
+{#      {% endblocktrans %}#}
+    </p>
+      <div class="text-right list-actions">
+        {% bootstrap_field filter_form.page_size show_label=False form_group_class="fit-content" show_help=False %}
+        <span>{% trans "items per page" %}</span>
+        <button
+            id="dLabel"
+            class="btn btn-default visible-lg-inline-block"
+            type="button"
+            data-toggle="dropdown"
+            aria-haspopup="true"
+            aria-expanded="false"
+            title="{% trans 'Export' %}"
+        >
+          <span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span>
+        </button>
+      </div>
+</div>
+<table
+    id="admission_result_list"
+    class="table table-striped table-hover "
+>
+  <thead>
+  <tr
+    hx-boost="true"
+    hx-indicator="#htmx-overlay"
+    hx-target="#table_continuing_admission"
+  >
+    {% sortable_header_div 'numero_demande' _('Dossier numero') %}
+    {% sortable_header_div 'nom_candidat' _('Name') %}
+    {% sortable_header_div 'formation' _('Training') %}
+    {% sortable_header_div 'nationalite' _('Nationality') %}
+    {% sortable_header_div 'statut_demande' _('Dossier status') %}
+    {% sortable_header_div 'derniere_modification' _('Last modification') %}
+  </tr>
+  </thead>
+  <tbody>
+  {% for admission in object_list %}
+  <tr>
+    <td><a href="{% url 'admission:continuing-education:debug' admission.uuid %}">{{ admission.uuid }}</a></td>
+    <td>{{ admission.candidate }}</td>
+    <td>{{ admission.training }}</td>
+    <td>{{ admission.candidate.country_of_citizenship|default_if_none:'' }}</td>
+    <td>{{ admission.status|enum_display:'ChoixStatutProposition' }}</td>
+    <td>{{ admission.modified|date:'d/m/Y H:i' }}</td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table>
+<div
+    class="text-center"
+    hx-boost="true"
+    hx-indicator="#htmx-overlay"
+    hx-target="#table_continuing_admission"
+>
+  {% bootstrap_pagination page_obj extra=request.GET.urlencode %}
+</div>
+{% elif filter_form.is_bound %}
+  <p>{% trans 'No continuing enrolment' %}</p>
+{% endif %}

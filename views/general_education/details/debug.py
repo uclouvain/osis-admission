@@ -46,6 +46,7 @@ class GeneralDebugView(PermissionRequiredMixin, DetailView):
     slug_field = "uuid"
     slug_url_kwarg = "uuid"
     permission_required = "admission.view_debug_info"
+    cmd = DeterminerAnneeAcademiqueEtPotQuery
 
     def get_context_data(self, **kwargs):
         from infrastructure.messages_bus import message_bus_instance
@@ -61,7 +62,7 @@ class GeneralDebugView(PermissionRequiredMixin, DetailView):
             logger.addHandler(handler)
 
             try:
-                cmd = DeterminerAnneeAcademiqueEtPotQuery(self.kwargs.get('uuid'))
+                cmd = self.cmd(self.kwargs.get('uuid'))
                 dto: 'InfosDetermineesDTO' = message_bus_instance.invoke(cmd)
                 data['determined_academic_year'] = dto.annee
                 data['determined_pool'] = dto.pool.name
