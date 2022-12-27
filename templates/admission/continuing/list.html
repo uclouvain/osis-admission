@@ -1,0 +1,195 @@
+{% extends "layout.html" %}
+{% load bootstrap3 i18n osis_role pagination static enums %}
+
+{% comment "License" %}
+* OSIS stands for Open Student Information System. It's an application
+* designed to manage the core business of higher education institutions,
+* such as universities, faculties, institutes and professional schools.
+* The core business involves the administration of students, teachers,
+* courses, programs and so on.
+*
+* Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+*
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* A copy of this license - GNU General Public License - is available
+* at the root of the source code of this program.  If not,
+* see http://www.gnu.org/licenses/.
+{% endcomment %}
+
+{% block breadcrumb %}
+<li>
+  <a href="{% url 'admissions' %}" id="lnk_admissions">
+    {% trans 'Enrolments' %}
+  </a>
+</li>
+<li class="active">
+  {% trans 'Continuing enrolments' %}
+</li>
+{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+  <h2 class="d-inline-block">{% trans "Continuing enrolments" %}</h2>
+</div>
+
+<div id="admission-search" class="panel panel-default">
+  <div class="panel-body">
+    <div id="form_errors">
+      {% bootstrap_form_errors filter_form %}
+    </div>
+    <form
+        id="search_form"
+        action="{% url 'admission:continuing-education:list' %}"
+        method="get"
+        hx-boost="true"
+        hx-target="#table_continuing_admission"
+        hx-indicator="#htmx-overlay"
+    >
+    {% comment %}
+      <div class="row">
+        <div class="col-md-9">
+          <div class="row">
+
+            {% bootstrap_field filter_form.numero form_group_class="form-group col-md-4" %}
+            {% bootstrap_field filter_form.matricule_candidat form_group_class="form-group col-md-4" %}
+            {% bootstrap_field filter_form.nationalite form_group_class="form-group col-md-4" %}
+          </div>
+          <div class="row">
+            {% bootstrap_field filter_form.commission_proximite form_group_class="form-group col-md-4" %}
+            {% bootstrap_field filter_form.annee_academique form_group_class="form-group col-md-4" %}
+            {% bootstrap_field filter_form.sigles_formations form_group_class="form-group col-md-4" %}
+          </div>
+        </div>
+        <div class="col-md-3">
+          <fieldset class="panel panel-default">
+            <legend>{% trans "Admission date" %}</legend>
+            {% bootstrap_field filter_form.date_admission_debut form_group_class="form-group col-md-6" %}
+            {% bootstrap_field filter_form.date_admission_fin form_group_class="form-group col-md-6" %}
+          </fieldset>
+        </div>
+      </div>
+      <label class="control-label">&nbsp;</label>
+    {% endcomment %}
+      <div class="text-right">
+        <button
+            type="submit"
+            id="bt_submit_admission_doctorate_groups_search"
+            class="btn btn-primary"
+            role="button"
+            aria-label="{% trans 'Search' %}"
+        >
+          <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+        </button>
+        <button
+            type="reset"
+            id="bt_reset_admission_doctorate_groups_search"
+            class="btn btn-default"
+            role="button"
+            aria-label="{% trans 'Reset' %}"
+        >
+          <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span>
+        </button>
+      </div>
+
+    </form>
+
+    <hr>
+
+    <div class="table-responsive mt-1" id="table_continuing_admission">
+      {% include 'admission/continuing/list_block.html' with object_list=object_list %}
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block style %}
+
+{{ block.super }}
+
+<link rel="stylesheet" href="{% static 'admission/admission.css' %}" type='text/css'>
+<link rel="stylesheet" href="{% static 'css/bootstrap-datepicker3.min.css' %}" type='text/css'>
+<style>
+  .mt-1 {
+    margin-top: 1em;
+  }
+
+  /* Customize the form inputs */
+  #search_form fieldset {
+    padding-bottom: 1em;
+  }
+
+  #search_form fieldset > legend {
+    font-size: 1em;
+    padding: 0 5px;
+    width: inherit;
+    border: none;
+    font-weight: bold;
+    margin-bottom: 0.5em;
+  }
+
+  #search_form .select2-container {
+    min-width: unset;
+  }
+  #search_form .select2-selection__rendered {
+    white-space: break-spaces;
+  }
+
+  /* Customize input and buttons above the list */
+  .list-actions {
+    display: flex;
+    justify-content: right;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .list-actions > * {
+    width: fit-content;
+  }
+
+</style>
+{% endblock %}
+
+{% block script %}
+
+{{ block.super }}
+
+{{ filter_form.media }}
+
+<script>
+  // Prevent to save the DOM in cache when using htmx requests
+  htmx.config.refreshOnHistoryMiss = true;
+  htmx.config.historyCacheSize = 0;
+
+  $(document).ready(function () {
+
+    // Clear inputs when the form is reset
+    $('#search_form').on('reset', function(evt) {
+      $('#search_form :input:not([type=hidden])').val(null).trigger('change');
+      evt.preventDefault();
+      $('#search_form button[type=submit]').click();
+      return false;
+    });
+
+    // Display / hide the form errors
+    $('#admission-search').on('htmx:beforeSend', function(evt) {
+      $('#form_errors').html('');
+    });
+
+    $(document).on('change', '#id_page_size', function(evt) {
+      $('#search_form button[type=submit]').click();
+    })
+  });
+</script>
+
+{% endblock %}

@@ -33,6 +33,7 @@ from admission.ddd.admission.formation_continue.domain.builder.proposition_ident
 )
 from admission.ddd.admission.formation_continue.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.formation_continue.domain.service.i_formation import IFormationContinueTranslator
+from admission.ddd.admission.formation_continue.domain.service.i_notification import INotification
 from admission.ddd.admission.formation_continue.domain.service.verifier_proposition import VerifierProposition
 from admission.ddd.admission.formation_continue.repository.i_proposition import IPropositionRepository
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
@@ -46,6 +47,7 @@ def soumettre_proposition(
     profil_candidat_translator: 'IProfilCandidatTranslator',
     calendrier_inscription: 'ICalendrierInscription',
     element_confirmation: 'IElementsConfirmation',
+    notification: 'INotification',
 ) -> 'PropositionIdentity':
     # GIVEN
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
@@ -71,5 +73,6 @@ def soumettre_proposition(
     # THEN
     proposition.soumettre(cmd.annee, AcademicCalendarTypes[cmd.pool], cmd.elements_confirmation)
     proposition_repository.save(proposition)
+    notification.confirmer_soumission(proposition)
 
     return proposition_id

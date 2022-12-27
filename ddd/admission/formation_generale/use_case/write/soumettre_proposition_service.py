@@ -36,6 +36,7 @@ from admission.ddd.admission.formation_generale.domain.builder.proposition_ident
 )
 from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.formation_generale.domain.service.i_formation import IFormationGeneraleTranslator
+from admission.ddd.admission.formation_generale.domain.service.i_notification import INotification
 from admission.ddd.admission.formation_generale.domain.service.i_question_specifique import (
     IQuestionSpecifiqueTranslator,
 )
@@ -56,6 +57,7 @@ def soumettre_proposition(
     academic_year_repository: 'IAcademicYearRepository',
     questions_specifiques_translator: 'IQuestionSpecifiqueTranslator',
     element_confirmation: 'IElementsConfirmation',
+    notification: 'INotification',
 ) -> 'PropositionIdentity':
     # GIVEN
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
@@ -95,5 +97,6 @@ def soumettre_proposition(
     # THEN
     proposition.soumettre(cmd.annee, AcademicCalendarTypes[cmd.pool], cmd.elements_confirmation)
     proposition_repository.save(proposition)
+    notification.confirmer_soumission(proposition)
 
     return proposition_id

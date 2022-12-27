@@ -56,7 +56,7 @@ class Migration(migrations.Migration):
                 'en': '''<p>Hello,</p>
 
     <p>
-        {student_first_name} {student_last_name} has submitted the confirmation form for the {doctorate_title} 
+        {student_first_name} {student_last_name} has submitted the confirmation form for the {training_title} 
         (Financing: {scholarship_grant_acronym}).
     </p>
 
@@ -68,7 +68,7 @@ class Migration(migrations.Migration):
                 'fr-be': '''<p>Bonjour,</p>
 
     <p>
-        {student_first_name} {student_last_name} a soumis son formulaire de confirmation pour son {doctorate_title} 
+        {student_first_name} {student_last_name} a soumis son formulaire de confirmation pour son {training_title} 
         (Financement : {scholarship_grant_acronym}).
     </p>
 
@@ -163,7 +163,7 @@ class Migration(migrations.Migration):
 
     <p>
         We would like to inform you that you have passed your confirmation paper taken on {confirmation_paper_date} 
-        for your {doctorate_title}.
+        for your {training_title}.
     </p>
 
     <p>
@@ -179,7 +179,7 @@ class Migration(migrations.Migration):
 
     <p>
         Nous tenons à vous informer que vous avez réussi votre épreuve de confirmation passée le 
-        {confirmation_paper_date} pour votre {doctorate_title}.
+        {confirmation_paper_date} pour votre {training_title}.
     </p>
 
     <p>
@@ -197,16 +197,16 @@ class Migration(migrations.Migration):
             ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_SUCCESS_ADRE,
             {
                 'en': '[OSIS] Success of the confirmation paper of {student_first_name} {student_last_name} '
-                '(Financing: {scholarship_grant_acronym}) - {doctorate_title}',
+                '(Financing: {scholarship_grant_acronym}) - {training_title}',
                 'fr-be': "[OSIS] Réussite de l'épreuve de confirmation de {student_first_name} "
-                "{student_last_name} (Financement : {scholarship_grant_acronym}) - {doctorate_title}",
+                "{student_last_name} (Financement : {scholarship_grant_acronym}) - {training_title}",
             },
             {
                 'en': '''<p>Hello,</p>
 
 <p>
     {student_first_name} {student_last_name} has passed the confirmation paper on {confirmation_paper_date} 
-    for the {doctorate_title} (Financing: {scholarship_grant_acronym}).
+    for the {training_title} (Financing: {scholarship_grant_acronym}).
 </p>
 
 <p>
@@ -218,7 +218,7 @@ class Migration(migrations.Migration):
 
 <p>
     {student_first_name} {student_last_name} a réussi son épreuve de confirmation le {confirmation_paper_date} 
-    pour son {doctorate_title} (Financement : {scholarship_grant_acronym}).
+    pour son {training_title} (Financement : {scholarship_grant_acronym}).
 </p>
 
 <p>
@@ -232,16 +232,16 @@ class Migration(migrations.Migration):
             ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_SUCCESS_ADRI,
             {
                 'en': '[OSIS] Success of the confirmation paper of {student_first_name} {student_last_name} '
-                '(Financing: {scholarship_grant_acronym}) - {doctorate_title}',
+                '(Financing: {scholarship_grant_acronym}) - {training_title}',
                 'fr-be': "[OSIS] Réussite de l'épreuve de confirmation de {student_first_name} "
-                "{student_last_name} (Financement : {scholarship_grant_acronym}) - {doctorate_title}",
+                "{student_last_name} (Financement : {scholarship_grant_acronym}) - {training_title}",
             },
             {
                 'en': '''<p>Hello,</p>
 
 <p>
     {student_first_name} {student_last_name} has passed the confirmation paper on {confirmation_paper_date} 
-    for the {doctorate_title} (Financing: {scholarship_grant_acronym}).
+    for the {training_title} (Financing: {scholarship_grant_acronym}).
 </p>
 
 <p>
@@ -253,7 +253,7 @@ class Migration(migrations.Migration):
 
 <p>
     {student_first_name} {student_last_name} a réussi son épreuve de confirmation le {confirmation_paper_date} 
-    pour son {doctorate_title} (Financement : {scholarship_grant_acronym}).
+    pour son {training_title} (Financement : {scholarship_grant_acronym}).
 </p>
 
 <p>
@@ -274,7 +274,7 @@ class Migration(migrations.Migration):
 
 <p>
     We would like to inform you that you have failed your confirmation paper taken on {confirmation_paper_date} 
-    for your {doctorate_title}.
+    for your {training_title}.
 </p>
 
 <p>
@@ -286,7 +286,7 @@ class Migration(migrations.Migration):
 
 <p>
     Nous tenons à vous informer que vous avez échoué à votre épreuve de confirmation passée le 
-    {confirmation_paper_date} pour votre {doctorate_title}.
+    {confirmation_paper_date} pour votre {training_title}.
 </p>
 
 <p>
@@ -300,16 +300,16 @@ class Migration(migrations.Migration):
             ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_FAILURE_ADRE,
             {
                 'en': '[OSIS] Failure of the confirmation paper of {student_first_name} {student_last_name} '
-                '(Financing: {scholarship_grant_acronym}) - {doctorate_title}',
+                '(Financing: {scholarship_grant_acronym}) - {training_title}',
                 'fr-be': "[OSIS] Échec de l'épreuve de confirmation de {student_first_name} "
-                "{student_last_name} (Financement : {scholarship_grant_acronym}) - {doctorate_title}",
+                "{student_last_name} (Financement : {scholarship_grant_acronym}) - {training_title}",
             },
             {
                 'en': '''<p>Hello,</p>
 
 <p>
     {student_first_name} {student_last_name} has failed the confirmation paper on {confirmation_paper_date} 
-    for the {doctorate_title} (Financing: {scholarship_grant_acronym}).
+    for the {training_title} (Financing: {scholarship_grant_acronym}).
 </p>
 
 <p>
@@ -321,7 +321,7 @@ class Migration(migrations.Migration):
 
 <p>
     {student_first_name} {student_last_name} a échoué à son épreuve de confirmation le {confirmation_paper_date} 
-    pour son {doctorate_title} (Financement : {scholarship_grant_acronym}).
+    pour son {training_title} (Financement : {scholarship_grant_acronym}).
 </p>
 
 <p>
@@ -335,16 +335,16 @@ class Migration(migrations.Migration):
             ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_FAILURE_ADRI,
             {
                 'en': '[OSIS] Failure of the confirmation paper of {student_first_name} {student_last_name} '
-                '(Financing: {scholarship_grant_acronym}) - {doctorate_title}',
+                '(Financing: {scholarship_grant_acronym}) - {training_title}',
                 'fr-be': "[OSIS] Échec de l'épreuve de confirmation de {student_first_name} "
-                "{student_last_name} (Financement : {scholarship_grant_acronym}) - {doctorate_title}",
+                "{student_last_name} (Financement : {scholarship_grant_acronym}) - {training_title}",
             },
             {
                 'en': '''<p>Hello,</p>
 
 <p>
     {student_first_name} {student_last_name} has failed the confirmation paper on {confirmation_paper_date} 
-    for the {doctorate_title} (Financing: {scholarship_grant_acronym}).
+    for the {training_title} (Financing: {scholarship_grant_acronym}).
 </p>
 
 <p>
@@ -356,7 +356,7 @@ class Migration(migrations.Migration):
 
 <p>
     {student_first_name} {student_last_name} a échoué à son épreuve de confirmation le {confirmation_paper_date} 
-    pour son {doctorate_title} (Financement : {scholarship_grant_acronym}).
+    pour son {training_title} (Financement : {scholarship_grant_acronym}).
 </p>
 
 <p>
@@ -376,7 +376,7 @@ class Migration(migrations.Migration):
                 'en': '''<p>Hello {student_first_name} {student_last_name},</p>
 
 <p>
-    As a result of your confirmation paper, taken on {confirmation_paper_date} for your {doctorate_title}, 
+    As a result of your confirmation paper, taken on {confirmation_paper_date} for your {training_title}, 
     the supervisory panel has decided that it is necessary for you to retake it.
 </p>
 
@@ -389,7 +389,7 @@ class Migration(migrations.Migration):
 
 <p>
     Nous tenons à vous informer que suite à votre épreuve de confirmation du {confirmation_paper_date} pour votre 
-    {doctorate_title}, le comité d’accompagnement a acté qu’il est nécessaire que vous repassiez à nouveau votre 
+    {training_title}, le comité d’accompagnement a acté qu’il est nécessaire que vous repassiez à nouveau votre 
     épreuve de confirmation.
 </p>
 
@@ -404,16 +404,16 @@ class Migration(migrations.Migration):
             ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_RETAKING_ADRE,
             {
                 'en': "[OSIS] {student_first_name} {student_last_name} must retake the confirmation paper "
-                "(Financing: {scholarship_grant_acronym}) - {doctorate_title})",
+                "(Financing: {scholarship_grant_acronym}) - {training_title})",
                 'fr-be': "[OSIS] {student_first_name} {student_last_name} doit repasser son épreuve de confirmation "
-                "(Financement : {scholarship_grant_acronym}) - {doctorate_title})",
+                "(Financement : {scholarship_grant_acronym}) - {training_title})",
             },
             {
                 'en': '''<p>Hello,</p>
 
 <p>
     As a result of the confirmation paper of {student_first_name} {student_last_name}, taken on 
-    {confirmation_paper_date} for the {doctorate_title} (Funding: {scholarship_grant_acronym}), the supervisory panel 
+    {confirmation_paper_date} for the {training_title} (Funding: {scholarship_grant_acronym}), the supervisory panel 
     has decided that it is necessary for the doctoral student to retake it.
 </p>
 
@@ -426,7 +426,7 @@ class Migration(migrations.Migration):
 
 <p>
     Suite à l’épreuve de confirmation de {student_first_name} {student_last_name}, réalisée le 
-    {confirmation_paper_date} pour son {doctorate_title} (Financement : {scholarship_grant_acronym}), le comité 
+    {confirmation_paper_date} pour son {training_title} (Financement : {scholarship_grant_acronym}), le comité 
     d’accompagnement a acté qu’il était nécessaire que le doctorand repasse son épreuve de confirmation.
 </p>
 
@@ -441,16 +441,16 @@ class Migration(migrations.Migration):
             ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_RETAKING_ADRI,
             {
                 'en': "[OSIS] {student_first_name} {student_last_name} must retake the confirmation paper "
-                "(Financing: {scholarship_grant_acronym}) - {doctorate_title})",
+                "(Financing: {scholarship_grant_acronym}) - {training_title})",
                 'fr-be': "[OSIS] {student_first_name} {student_last_name} doit repasser son épreuve de confirmation "
-                "(Financement : {scholarship_grant_acronym}) - {doctorate_title})",
+                "(Financement : {scholarship_grant_acronym}) - {training_title})",
             },
             {
                 'en': '''<p>Hello,</p>
 
 <p>
     As a result of the confirmation paper of {student_first_name} {student_last_name}, taken on 
-    {confirmation_paper_date} for the {doctorate_title} (Funding: {scholarship_grant_acronym}), the supervisory panel 
+    {confirmation_paper_date} for the {training_title} (Funding: {scholarship_grant_acronym}), the supervisory panel 
     has decided that it is necessary for the doctoral student to retake it.
 </p>
 
@@ -463,7 +463,7 @@ class Migration(migrations.Migration):
 
 <p>
     Suite à l’épreuve de confirmation de {student_first_name} {student_last_name}, réalisée le 
-    {confirmation_paper_date} pour son {doctorate_title} (Financement : {scholarship_grant_acronym}), le comité 
+    {confirmation_paper_date} pour son {training_title} (Financement : {scholarship_grant_acronym}), le comité 
     d’accompagnement a acté qu’il était nécessaire que le doctorand repasse son épreuve de confirmation.
 </p>
 

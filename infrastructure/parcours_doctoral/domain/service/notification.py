@@ -96,8 +96,8 @@ class Notification(INotification):
         return {
             "candidate_first_name": doctorat.candidate.first_name,
             "candidate_last_name": doctorat.candidate.last_name,
-            "doctorate_title": cls._get_doctorate_title_translation(doctorat),
-            "admission_link_front": settings.ADMISSION_FRONTEND_LINK.format(uuid=doctorat.uuid),
+            "training_title": cls._get_doctorate_title_translation(doctorat),
+            "admission_link_front": settings.ADMISSION_FRONTEND_LINK.format(context='doctorate', uuid=doctorat.uuid),
             "admission_link_back": "{}{}".format(
                 settings.ADMISSION_BACKEND_LINK_PREFIX.rstrip('/'),
                 resolve_url('admission:doctorate:project', uuid=doctorat.uuid),

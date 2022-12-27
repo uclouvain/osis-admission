@@ -46,7 +46,7 @@ class Migration(migrations.Migration):
                 'en': '''<p>Hello,</p>
 
     <p>
-        {student_first_name} {student_last_name} have submitted new doctoral training activities for {doctorate_title}, 
+        {student_first_name} {student_last_name} have submitted new doctoral training activities for {training_title}, 
         you can review them by following this link: {admission_link_front_doctoral_training}.
     </p>
 
@@ -59,7 +59,7 @@ class Migration(migrations.Migration):
 
     <p>
         {student_first_name} {student_last_name} a soumis de nouvelles activités de formation doctorale 
-        pour son {doctorate_title}, vous pouvez les consulter en suivant ce lien : {admission_link_front_doctoral_training}.
+        pour son {training_title}, vous pouvez les consulter en suivant ce lien : {admission_link_front_doctoral_training}.
     </p>
 
     <p>
@@ -79,7 +79,7 @@ class Migration(migrations.Migration):
                 'en': '''<p>Hello,</p>
 
     <p>
-        The submitted doctoral training activity entitled <em>{activity_title}</em> for your {doctorate_title} has been refused, 
+        The submitted doctoral training activity entitled <em>{activity_title}</em> for your {training_title} has been refused, 
         you can review all activities by following this link: {admission_link_front_doctoral_training}.
 
         Here's the reason for this refusal: {reason}
@@ -93,7 +93,7 @@ class Migration(migrations.Migration):
                 'fr-be': '''<p>Bonjour,</p>
 
     <p>
-        L'activité de formation doctorale soumise intitulée <em>{activity_title}</em> pour votre {doctorate_title} a été refusée,
+        L'activité de formation doctorale soumise intitulée <em>{activity_title}</em> pour votre {training_title} a été refusée,
         vous pouvez la consulter en suivant ce lien : {admission_link_front_doctoral_training}.
 
         La raison invoquée pour ce refus : {reason}
@@ -116,7 +116,7 @@ class Migration(migrations.Migration):
                 'en': '''<p>Hello,</p>
 
     <p>
-        The submitted doctoral training activity entitled <em>{activity_title}</em> for {doctorate_title} must be updated, 
+        The submitted doctoral training activity entitled <em>{activity_title}</em> for {training_title} must be updated, 
         you can review all activities by following this link: {admission_link_front_doctoral_training}.
 
         Here's why it needs to be updated: {reason}
@@ -131,7 +131,7 @@ class Migration(migrations.Migration):
 
     <p>
         L'activité de formation doctorale soumise intitulée <em>{activity_title}</em> doit être mise à jour 
-        pour {doctorate_title}, vous pouvez la consulter en suivant ce lien : {admission_link_front_doctoral_training}.
+        pour {training_title}, vous pouvez la consulter en suivant ce lien : {admission_link_front_doctoral_training}.
 
         Voici ce pourquoi vous devez la modifier : {reason}
     </p>
@@ -155,7 +155,7 @@ class Migration(migrations.Migration):
                 'en': '''<p>Hello,</p>
 
     <p>
-        {student_first_name} {student_last_name} have submitted new complementary training activities for {doctorate_title}, 
+        {student_first_name} {student_last_name} have submitted new complementary training activities for {training_title}, 
         you can review them by following this link: {admission_link_front_complementary_training}.
     </p>
 
@@ -167,7 +167,7 @@ class Migration(migrations.Migration):
                 'fr-be': '''<p>Bonjour,</p>
 
     <p>
-        {student_first_name} {student_last_name} a soumis de nouvelles activités de formation complémentaire pour son {doctorate_title},
+        {student_first_name} {student_last_name} a soumis de nouvelles activités de formation complémentaire pour son {training_title},
         vous pouvez les consulter en suivant ce lien : {admission_link_front_complementary_training}.
     </p>
 
@@ -188,7 +188,7 @@ class Migration(migrations.Migration):
                 'en': '''<p>Hello,</p>
 
     <p>
-        The submitted complementary training activity entitled <em>{activity_title}</em> for your {doctorate_title} has been refused, 
+        The submitted complementary training activity entitled <em>{activity_title}</em> for your {training_title} has been refused, 
         you can review all activities by following this link: {admission_link_front_complementary_training}.
 
         Here's the reason for this refusal: {reason}
@@ -202,7 +202,7 @@ class Migration(migrations.Migration):
                 'fr-be': '''<p>Bonjour,</p>
 
     <p>
-        L'activité de formation complémentaire soumise intitulée <em>{activity_title}</em> pour votre {doctorate_title} a été refusée,
+        L'activité de formation complémentaire soumise intitulée <em>{activity_title}</em> pour votre {training_title} a été refusée,
         vous pouvez la consulter en suivant ce lien : {admission_link_front_complementary_training}.
 
         La raison invoquée pour ce refus : {reason}
@@ -225,7 +225,7 @@ class Migration(migrations.Migration):
                 'en': '''<p>Hello,</p>
 
     <p>
-        The submitted complementary training activity entitled <em>{activity_title}</em> for {doctorate_title} must be updated, 
+        The submitted complementary training activity entitled <em>{activity_title}</em> for {training_title} must be updated, 
         you can review them by following this link: {admission_link_front_complementary_training}.
 
         Here's why it needs to be updated: {reason}
@@ -239,7 +239,7 @@ class Migration(migrations.Migration):
                 'fr-be': '''<p>Bonjour,</p>
 
     <p>
-        L'activité de formation complémentaire soumise intitulée <em>{activity_title}</em> doit être mise à jour pour {doctorate_title},
+        L'activité de formation complémentaire soumise intitulée <em>{activity_title}</em> doit être mise à jour pour {training_title},
         vous pouvez la consulter en suivant ce lien : {admission_link_front_complementary_training}.
 
         Voici ce pourquoi vous devez la modifier : {reason}
@@ -263,7 +263,7 @@ class Migration(migrations.Migration):
                 'en': '''<p>Hello,</p>
 
     <p>
-        {student_first_name} {student_last_name} have submitted new course enrollments for {doctorate_title}, 
+        {student_first_name} {student_last_name} have submitted new course enrollments for {training_title}, 
         you can review them by following this link: {admission_link_front_course_enrollment}.
     </p>
 
@@ -275,7 +275,7 @@ class Migration(migrations.Migration):
                 'fr-be': '''<p>Bonjour,</p>
 
     <p>
-        {student_first_name} {student_last_name} a soumis de nouvelles inscriptions aux cours pour son {doctorate_title},
+        {student_first_name} {student_last_name} a soumis de nouvelles inscriptions aux cours pour son {training_title},
         vous pouvez les consulter en suivant ce lien : {admission_link_front_course_enrollment}.
     </p>
 
@@ -296,7 +296,7 @@ class Migration(migrations.Migration):
                 'en': '''<p>Hello,</p>
 
     <p>
-        The submitted course enrollment entitled <em>{activity_title}</em> for your {doctorate_title} has been refused, 
+        The submitted course enrollment entitled <em>{activity_title}</em> for your {training_title} has been refused, 
         you can review all courses by following this link: {admission_link_front_course_enrollment}.
 
         Here's the reason for this refusal: {reason}
@@ -310,7 +310,7 @@ class Migration(migrations.Migration):
                 'fr-be': '''<p>Bonjour,</p>
 
     <p>
-        Une inscription à un cours intitulé <em>{activity_title}</em> pour votre {doctorate_title} a été refusée,
+        Une inscription à un cours intitulé <em>{activity_title}</em> pour votre {training_title} a été refusée,
         vous pouvez la consulter en suivant ce lien : {admission_link_front_course_enrollment}.
 
         La raison invoquée pour ce refus : {reason}
@@ -333,7 +333,7 @@ class Migration(migrations.Migration):
                 'en': '''<p>Hello,</p>
 
     <p>
-        The submitted course enrollment entitled <em>{activity_title}</em> for {doctorate_title} must be updated, 
+        The submitted course enrollment entitled <em>{activity_title}</em> for {training_title} must be updated, 
         you can review all courses by following this link: {admission_link_front_course_enrollment}.
 
         Here's why it needs to be updated: {reason}
@@ -347,7 +347,7 @@ class Migration(migrations.Migration):
                 'fr-be': '''<p>Bonjour,</p>
 
     <p>
-        Une inscription à un cours intitulé <em>{activity_title}</em> doit être mise à jour pour {doctorate_title},
+        Une inscription à un cours intitulé <em>{activity_title}</em> doit être mise à jour pour {training_title},
         vous pouvez la consulter en suivant ce lien : {admission_link_front_course_enrollment}.
 
         Voici ce pourquoi vous devez la modifier : {reason}

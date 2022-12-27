@@ -26,24 +26,48 @@
 from django.utils.translation import gettext_lazy as _
 
 from osis_mail_template import Token, templates
-from .tokens import DOCTORATE_ADMISSION_TAG, admission_common_tokens
+from .tokens import CONTINUING_ADMISSION_TAG, DOCTORATE_ADMISSION_TAG, GENERAL_ADMISSION_TAG, admission_common_tokens
 
 __all__ = [
     "ADMISSION_EMAIL_GENERIC_ONCE_ADMITTED",
     "ADMISSION_EMAIL_MEMBER_REMOVED",
-    "ADMISSION_EMAIL_SUBMISSION_CANDIDATE",
+    "ADMISSION_EMAIL_CONFIRM_SUBMISSION_DOCTORATE",
+    "ADMISSION_EMAIL_CONFIRM_SUBMISSION_GENERAL",
+    "ADMISSION_EMAIL_CONFIRM_SUBMISSION_CONTINUING",
     "ADMISSION_EMAIL_SUBMISSION_CDD",
     "ADMISSION_EMAIL_SUBMISSION_MEMBER",
 ]
 
-ADMISSION_EMAIL_SUBMISSION_CANDIDATE = 'osis-admission-submission-candidate'
+ADMISSION_EMAIL_CONFIRM_SUBMISSION_DOCTORATE = 'osis-admission-submission-candidate'
 templates.register(
-    ADMISSION_EMAIL_SUBMISSION_CANDIDATE,
+    ADMISSION_EMAIL_CONFIRM_SUBMISSION_DOCTORATE,
     description=_(
         "Mail sent to the candidate to confirm that his application has been taken into account by UCLouvain"
     ),
     tokens=admission_common_tokens,
     tag=DOCTORATE_ADMISSION_TAG,
+)
+
+ADMISSION_EMAIL_CONFIRM_SUBMISSION_GENERAL = 'osis-admission-confirm-submission-general'
+templates.register(
+    ADMISSION_EMAIL_CONFIRM_SUBMISSION_GENERAL,
+    description=_(
+        "Mail sent to the candidate to confirm that his application for general education has been taken "
+        "into account by UCLouvain"
+    ),
+    tokens=admission_common_tokens,
+    tag=GENERAL_ADMISSION_TAG,
+)
+
+ADMISSION_EMAIL_CONFIRM_SUBMISSION_CONTINUING = 'osis-admission-confirm-submission-continuing'
+templates.register(
+    ADMISSION_EMAIL_CONFIRM_SUBMISSION_CONTINUING,
+    description=_(
+        "Mail sent to the candidate to confirm that his application for continuing education has been taken "
+        "into account by UCLouvain"
+    ),
+    tokens=admission_common_tokens,
+    tag=CONTINUING_ADMISSION_TAG,
 )
 
 ADMISSION_EMAIL_SUBMISSION_CDD = 'osis-admission-submission-cdd'
