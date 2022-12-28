@@ -64,11 +64,13 @@
       <ul class="dropdown-menu dropdown-menu-right">
 
         {# Activity is unsubmitted : display edit/delete/submit/add-children #}
-        <li>
-          <a href="{{ edit_url }}">
-            {% trans "Edit" %}
-          </a>
-        </li>
+        {% if activity.category != "UCL_COURSE" or request.resolver_match.url_name == 'course-enrollment' %}
+          <li>
+            <a href="{{ edit_url }}">
+              {% trans "Edit" %}
+            </a>
+          </li>
+        {% endif %}
         {% if not remove_batch_action %}
           {% if activity.status|safe == "SOUMISE" %}
             <li>
@@ -79,6 +81,14 @@
             <li>
               <a href="{{ refuse_url }}">
                 {% trans "Refuse activity" %}
+              </a>
+            </li>
+            <li>
+              <a
+                  href="#"
+                  onclick="$('[name=activity_ids]').val(['{{ activity.uuid }}']);$('button[name=_accept]').click();return false;"
+              >
+                {% trans "Accept" %}
               </a>
             </li>
           {% endif %}
@@ -141,18 +151,21 @@
       </ul>
     </div>
     {% if not remove_batch_action and activity.status|safe == "NON_SOUMISE" %}
-      <label class="input-group-addon">
+      <label class="input-group-addon"
+          {% if not activity.can_be_submitted %}
+             data-toggle="tooltip"
+             data-container="body"
+            {% if activity.category == 'SEMINAR' %}
+             title="{{ not_complete_sub }}"
+            {% else %}
+             title="{{ not_complete }}"
+            {% endif %}
+          {% endif %}
+      >
         <input
             type="checkbox" name="activity_ids" value="{{ activity.uuid }}"
             {% if not activity.can_be_submitted %}
             disabled="disabled"
-            data-toggle="tooltip"
-            data-container="body"
-              {% if activity.category == 'SEMINAR' %}
-            title="{{ not_complete_sub }}"
-              {% else %}
-            title="{{ not_complete }}"
-              {% endif %}
             {% else %}
             aria-label="{% trans "Select for batch action" %}"
             {% endif %}

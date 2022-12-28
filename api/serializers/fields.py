@@ -249,7 +249,7 @@ DOCTORATE_ACTION_LINKS = {
         'params': ['uuid'],
     },
     'retrieve_doctorate_training_choice': {
-        'path_name': 'admission_api_v1:propositions',
+        'path_name': 'admission_api_v1:doctorate_admission_type_update',
         'method': 'GET',
         'params': ['uuid'],
     },

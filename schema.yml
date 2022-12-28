@@ -6667,6 +6667,8 @@ components:
           type: integer
         intitule_formation:
           type: string
+        type_admission:
+          type: string
         titre_these:
           type: string
         type_financement:
@@ -6740,6 +6742,7 @@ components:
       - sigle_formation
       - annee_formation
       - intitule_formation
+      - type_admission
       - titre_these
       - type_financement
       - matricule_doctorant

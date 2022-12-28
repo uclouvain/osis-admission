@@ -105,6 +105,7 @@ class DoctoratRepository(IDoctoratRepository):
             intitule_formation=doctorate.doctorate.title
             if get_language() == settings.LANGUAGE_CODE_FR
             else doctorate.doctorate.title_english,
+            type_admission=doctorate.type,
             titre_these=doctorate.project_title,
             type_financement=doctorate.financing_type,
             autre_bourse_recherche=doctorate.other_international_scholarship,
