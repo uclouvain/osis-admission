@@ -207,6 +207,9 @@ msgstr ""
 msgid "Academic year"
 msgstr ""
 
+msgid "Accept"
+msgstr ""
+
 msgid "Accept these activities"
 msgstr ""
 

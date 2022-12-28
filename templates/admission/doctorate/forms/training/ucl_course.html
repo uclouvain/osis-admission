@@ -33,3 +33,11 @@
 {% bootstrap_field form.context form_group_class="form-group required_field" %}
 {% bootstrap_field form.academic_year form_group_class="form-group required_field" %}
 {% bootstrap_field form.learning_unit_year form_group_class="form-group required_field" %}
+
+<script>
+  $(function () {
+    $('#id_academic_year').change(function () {
+      $('#id_learning_unit_year').val(null).trigger('change');
+    });
+  });
+</script>

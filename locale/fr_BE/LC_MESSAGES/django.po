@@ -257,6 +257,9 @@ msgstr "Résumé"
 msgid "Academic year"
 msgstr "Année académique"
 
+msgid "Accept"
+msgstr "Accepter"
+
 msgid "Accept these activities"
 msgstr "Accepter ces activités"
 
@@ -3315,7 +3318,7 @@ msgid "There is no request for a new deadline."
 msgstr "Il n'y a pas de demande de nouvelle échéance."
 
 msgid "Thesis defences"
-msgstr "Défense de thèse"
+msgstr "Défense et soutenance"
 
 msgid "Thesis domain"
 msgstr "Domaine de la thèse"

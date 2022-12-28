@@ -52,6 +52,7 @@ class CommunicationDTOFactory(factory.Factory):
     institution_organisatrice = 'test'
     titre = 'test'
     comite_selection = ChoixComiteSelection.NO
+    attestation_communication = ['test']
 
 
 class ConferenceDTOFactory(factory.Factory):

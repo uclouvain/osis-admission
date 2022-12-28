@@ -26,19 +26,16 @@
 from rest_framework import serializers
 
 from admission.api.serializers.fields import (
-    DOCTORATE_ACTION_LINKS,
     ActionLinksField,
-    RelatedInstituteField,
-    CONTINUING_EDUCATION_ACTION_LINKS,
-    GENERAL_EDUCATION_ACTION_LINKS,
     AnswerToSpecificQuestionField,
+    CONTINUING_EDUCATION_ACTION_LINKS,
+    DOCTORATE_ACTION_LINKS,
+    GENERAL_EDUCATION_ACTION_LINKS,
+    RelatedInstituteField,
 )
 from admission.api.serializers.mixins import IncludedFieldsMixin
 from admission.contrib.models import AdmissionType, DoctorateAdmission
 from admission.ddd.admission.doctorat.preparation.commands import CompleterPropositionCommand, InitierPropositionCommand
-from admission.ddd.admission.dtos.formation import FormationDTO
-from admission.ddd.admission.formation_generale.dtos import PropositionDTO as FormationGeneralePropositionDTO
-from admission.ddd.admission.formation_continue.dtos import PropositionDTO as FormationContinuePropositionDTO
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixCommissionProximiteCDEouCLSM,
     ChoixCommissionProximiteCDSS,
@@ -47,6 +44,9 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixSousDomaineSciences,
 )
 from admission.ddd.admission.doctorat.preparation.dtos import DoctoratDTO, PropositionDTO as DoctoratPropositionDTO
+from admission.ddd.admission.dtos.formation import FormationDTO
+from admission.ddd.admission.formation_continue.dtos import PropositionDTO as FormationContinuePropositionDTO
+from admission.ddd.admission.formation_generale.dtos import PropositionDTO as FormationGeneralePropositionDTO
 from base.utils.serializers import DTOSerializer
 
 __all__ = [
@@ -67,7 +67,6 @@ __all__ = [
     "ContinuingEducationPropositionDTOSerializer",
     "PROPOSITION_ERROR_SCHEMA",
 ]
-
 
 PROPOSITION_ERROR_SCHEMA = {
     "type": "array",

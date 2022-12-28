@@ -162,6 +162,7 @@ class DoctorateUpdateAdmissionTypeAPIView(
     name = "doctorate_admission_type_update"
     schema = DoctorateTrainingChoiceSchema()
     permission_mapping = {
+        'GET': 'admission.view_doctorateadmission_training_choice',
         'PUT': 'admission.change_doctorateadmission_training_choice',
     }
     pagination_class = None

@@ -42,6 +42,7 @@ class DoctoratDTO(interface.DTO):
     annee_formation: int
     intitule_formation: str
 
+    type_admission: str
     titre_these: str
     type_financement: str
     bourse_recherche: Optional[BourseDTO]
