@@ -109,11 +109,14 @@ class BooleanRadioSelect(forms.RadioSelect):
 class AcademicYearField(forms.ModelChoiceField):
     def __init__(self, *args, **kwargs):
         kwargs.setdefault('label', _("Academic year"))
+        kwargs.setdefault('queryset', AcademicYear.objects.order_by('-year'))
         if kwargs.pop('future_only', False):
-            kwargs.setdefault('queryset', AcademicYear.objects.filter(year__gte=date.today().year).order_by('-year'))
-        else:
-            kwargs.setdefault('queryset', AcademicYear.objects.order_by('-year'))
+            kwargs.setdefault('limit_choices_to', self.limit_to_future_years_choices)
         super().__init__(*args, **kwargs)
+
+    @staticmethod
+    def limit_to_future_years_choices():
+        return {'year__gte': date.today().year}
 
     def label_from_instance(self, obj: AcademicYear) -> str:
         return f"{obj.year}-{obj.year + 1}"
