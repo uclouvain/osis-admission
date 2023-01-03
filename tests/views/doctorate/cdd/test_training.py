@@ -26,6 +26,7 @@
 import uuid
 from unittest.mock import patch
 
+import freezegun
 from django.conf import settings
 from django.forms import Field
 from django.shortcuts import resolve_url
@@ -112,6 +113,7 @@ class DoctorateTrainingActivityViewTestCase(TestCase):
         )
         self.assertContains(response, default_input, html=True)
 
+    @freezegun.freeze_time('2022-11-01')
     def test_academic_year_field(self):
         AcademicYearFactory(year=2022)
         add_url = resolve_url(f'{self.namespace}:add', uuid=self.doctorate.uuid, category='course')
@@ -175,6 +177,7 @@ class DoctorateTrainingActivityViewTestCase(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.context['form'].fields['context'].widget.choices), 1)
 
+    @freezegun.freeze_time('2022-11-01')
     def test_complementary_training_course(self):
         url = resolve_url(
             f'admission:doctorate:course-enrollment:edit',
@@ -335,6 +338,7 @@ class DoctorateTrainingActivityViewTestCase(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIsNone(Activity.objects.filter(pk__in=[child.pk, self.conference.pk]).first())
 
+    @freezegun.freeze_time('2022-11-01')
     def test_course_dates(self):
         activity = CourseFactory(doctorate=self.doctorate)
         edit_url = resolve_url(f'{self.namespace}:edit', uuid=self.doctorate.uuid, activity_id=activity.uuid)
