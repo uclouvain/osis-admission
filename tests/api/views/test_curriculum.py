@@ -220,7 +220,7 @@ class DoctorateCurriculumTestCase(BaseCurriculumTestCase, APITestCase):
                     'start_date': '2020-01-01',
                     'end_date': '2021-01-01',
                     'type': ActivityType.WORK.name,
-                    'valuated_from_admission': [],
+                    'valuated_from_trainings': [],
                 },
                 {
                     'uuid': str(self.professional_experiences[1].uuid),
@@ -228,7 +228,7 @@ class DoctorateCurriculumTestCase(BaseCurriculumTestCase, APITestCase):
                     'start_date': '2020-01-01',
                     'end_date': '2020-09-01',
                     'type': ActivityType.WORK.name,
-                    'valuated_from_admission': [],
+                    'valuated_from_trainings': [],
                 },
             ],
         )
@@ -242,7 +242,7 @@ class DoctorateCurriculumTestCase(BaseCurriculumTestCase, APITestCase):
                     'program': None,
                     'education_name': 'Computer science 3',
                     'educationalexperienceyear_set': [{'academic_year': 2020, 'result': Result.SUCCESS.name}],
-                    'valuated_from_admission': [],
+                    'valuated_from_trainings': [],
                     'country': self.country.iso_code,
                 }
             ],
@@ -597,7 +597,7 @@ class GeneralEducationCurriculumTestCase(BaseCurriculumTestCase, APITestCase):
                     'start_date': '2020-01-01',
                     'end_date': '2021-01-01',
                     'type': ActivityType.WORK.name,
-                    'valuated_from_admission': [],
+                    'valuated_from_trainings': [],
                 },
                 {
                     'uuid': str(self.professional_experiences[1].uuid),
@@ -605,7 +605,7 @@ class GeneralEducationCurriculumTestCase(BaseCurriculumTestCase, APITestCase):
                     'start_date': '2020-01-01',
                     'end_date': '2020-09-01',
                     'type': ActivityType.WORK.name,
-                    'valuated_from_admission': [],
+                    'valuated_from_trainings': [],
                 },
             ],
         )
@@ -619,7 +619,7 @@ class GeneralEducationCurriculumTestCase(BaseCurriculumTestCase, APITestCase):
                     'program': None,
                     'education_name': 'Computer science 3',
                     'educationalexperienceyear_set': [{'academic_year': 2020, 'result': Result.SUCCESS.name}],
-                    'valuated_from_admission': [],
+                    'valuated_from_trainings': [],
                     'country': self.country.iso_code,
                 }
             ],
@@ -835,7 +835,7 @@ class ContinuingEducationCurriculumTestCase(BaseCurriculumTestCase, APITestCase)
                     'start_date': '2020-01-01',
                     'end_date': '2021-01-01',
                     'type': ActivityType.WORK.name,
-                    'valuated_from_admission': [],
+                    'valuated_from_trainings': [],
                 },
                 {
                     'uuid': str(self.professional_experiences[1].uuid),
@@ -843,7 +843,7 @@ class ContinuingEducationCurriculumTestCase(BaseCurriculumTestCase, APITestCase)
                     'start_date': '2020-01-01',
                     'end_date': '2020-09-01',
                     'type': ActivityType.WORK.name,
-                    'valuated_from_admission': [],
+                    'valuated_from_trainings': [],
                 },
             ],
         )
@@ -857,7 +857,7 @@ class ContinuingEducationCurriculumTestCase(BaseCurriculumTestCase, APITestCase)
                     'program': None,
                     'education_name': 'Computer science 3',
                     'educationalexperienceyear_set': [{'academic_year': 2020, 'result': Result.SUCCESS.name}],
-                    'valuated_from_admission': [],
+                    'valuated_from_trainings': [],
                     'country': self.country.iso_code,
                 }
             ],
@@ -904,7 +904,7 @@ class PersonCurriculumTestCase(BaseCurriculumTestCase, APITestCase):
                     'start_date': '2020-01-01',
                     'end_date': '2021-01-01',
                     'type': ActivityType.WORK.name,
-                    'valuated_from_admission': [],
+                    'valuated_from_trainings': [],
                 },
                 {
                     'uuid': str(self.professional_experiences[1].uuid),
@@ -912,7 +912,7 @@ class PersonCurriculumTestCase(BaseCurriculumTestCase, APITestCase):
                     'start_date': '2020-01-01',
                     'end_date': '2020-09-01',
                     'type': ActivityType.WORK.name,
-                    'valuated_from_admission': [],
+                    'valuated_from_trainings': [],
                 },
             ],
         )
@@ -926,7 +926,7 @@ class PersonCurriculumTestCase(BaseCurriculumTestCase, APITestCase):
                     'program': None,
                     'education_name': 'Computer science 3',
                     'educationalexperienceyear_set': [{'academic_year': 2020, 'result': Result.SUCCESS.name}],
-                    'valuated_from_admission': [],
+                    'valuated_from_trainings': [],
                     'country': self.country.iso_code,
                 }
             ],
@@ -1041,7 +1041,7 @@ class ProfessionalExperienceTestCase(APITestCase):
                 'role': 'Librarian',
                 'sector': ActivitySector.PUBLIC.name,
                 'activity': 'Work - activity',
-                'valuated_from_admission': [],
+                'valuated_from_trainings': [],
             },
         )
 
@@ -1079,7 +1079,7 @@ class ProfessionalExperienceTestCase(APITestCase):
                 'role': 'Helper',
                 'sector': ActivitySector.PRIVATE.name,
                 'activity': 'Volunteering - activity',
-                'valuated_from_admission': [],
+                'valuated_from_trainings': [],
             },
         )
 
@@ -1176,6 +1176,8 @@ class EducationalExperienceTestCase(APITestCase):
         # Mocked data
         cls.admission = DoctorateAdmissionFactory()
         cls.other_admission = DoctorateAdmissionFactory()
+        cls.general_admission = GeneralEducationAdmissionFactory(candidate=cls.admission.candidate)
+        cls.continuing_admission = ContinuingEducationAdmissionFactory(candidate=cls.admission.candidate)
 
         cls.academic_year_2018 = AcademicYearFactory(year=2018)
         cls.academic_year_2019 = AcademicYearFactory(year=2019)
@@ -1192,6 +1194,47 @@ class EducationalExperienceTestCase(APITestCase):
         cls.today_datetime = datetime.datetime(2020, 11, 1)
 
         cls.country = CountryFactory()
+
+        cls.educational_experience_data = {
+            'program': cls.diploma.uuid,
+            'education_name': 'Biology',
+            'institute_name': '',
+            'country': cls.country.iso_code,
+            'institute': cls.institute.uuid,
+            'institute_address': '',
+            'evaluation_type': EvaluationSystem.ECTS_CREDITS.name,
+            'linguistic_regime': cls.linguistic_regime.code,
+            'transcript_type': TranscriptType.ONE_FOR_ALL_YEARS.name,
+            'obtained_diploma': True,
+            'obtained_grade': Grade.GREATER_DISTINCTION.name,
+            'graduate_degree': [],
+            'graduate_degree_translation': [],
+            'transcript': [],
+            'transcript_translation': [],
+            'rank_in_diploma': '10 on 100',
+            'expected_graduation_date': '2022-08-30',
+            'dissertation_title': 'Title',
+            'dissertation_score': '15/20',
+            'dissertation_summary': [],
+            'educationalexperienceyear_set': [
+                {
+                    'academic_year': 2020,
+                    'result': Result.SUCCESS.name,
+                    'registered_credit_number': 25,
+                    'acquired_credit_number': 25,
+                    'transcript': [],
+                    'transcript_translation': [],
+                },
+                {
+                    'academic_year': 2019,
+                    'result': Result.SUCCESS.name,
+                    'registered_credit_number': 14,
+                    'acquired_credit_number': 14,
+                    'transcript': [],
+                    'transcript_translation': [],
+                },
+            ],
+        }
 
         # Targeted urls
         cls.agnostic_url = resolve_url('cv_educational_experiences-list')
@@ -1252,6 +1295,16 @@ class EducationalExperienceTestCase(APITestCase):
         self.admission_details_url = resolve_url(
             'cv_educational_experiences-detail',
             uuid=self.admission.uuid,
+            experience_id=self.educational_experience.uuid,
+        )
+        self.general_admission_details_url = resolve_url(
+            'general_cv_educational_experiences-detail',
+            uuid=self.general_admission.uuid,
+            experience_id=self.educational_experience.uuid,
+        )
+        self.continuing_admission_details_url = resolve_url(
+            'continuing_cv_educational_experiences-detail',
+            uuid=self.continuing_admission.uuid,
             experience_id=self.educational_experience.uuid,
         )
 
@@ -1401,7 +1454,7 @@ class EducationalExperienceTestCase(APITestCase):
         self.assertEqual(json_response.get('dissertation_title'), 'Title')
         self.assertEqual(json_response.get('dissertation_score'), '15/20')
         self.assertEqual(json_response.get('dissertation_summary'), [])
-        self.assertEqual(json_response.get('valuated_from_admission'), [])
+        self.assertEqual(json_response.get('valuated_from_trainings'), [])
 
         json_first_educational_experience_year = json_response.get('educationalexperienceyear_set')[0]
         self.assertEqual(json_first_educational_experience_year.get('academic_year'), 2020)
@@ -1457,46 +1510,7 @@ class EducationalExperienceTestCase(APITestCase):
 
         response = self.client.put(
             self.admission_details_url,
-            data={
-                'program': self.diploma.uuid,
-                'education_name': 'Biology',
-                'institute_name': '',
-                'country': self.country.iso_code,
-                'institute': self.institute.uuid,
-                'institute_address': '',
-                'evaluation_type': EvaluationSystem.ECTS_CREDITS.name,
-                'linguistic_regime': self.linguistic_regime.code,
-                'transcript_type': TranscriptType.ONE_FOR_ALL_YEARS.name,
-                'obtained_diploma': True,
-                'obtained_grade': Grade.GREATER_DISTINCTION.name,
-                'graduate_degree': [],
-                'graduate_degree_translation': [],
-                'transcript': [],
-                'transcript_translation': [],
-                'rank_in_diploma': '10 on 100',
-                'expected_graduation_date': '2022-08-30',
-                'dissertation_title': 'Title',
-                'dissertation_score': '15/20',
-                'dissertation_summary': [],
-                'educationalexperienceyear_set': [
-                    {
-                        'academic_year': 2020,
-                        'result': Result.SUCCESS.name,
-                        'registered_credit_number': 25,
-                        'acquired_credit_number': 25,
-                        'transcript': [],
-                        'transcript_translation': [],
-                    },
-                    {
-                        'academic_year': 2019,
-                        'result': Result.SUCCESS.name,
-                        'registered_credit_number': 14,
-                        'acquired_credit_number': 14,
-                        'transcript': [],
-                        'transcript_translation': [],
-                    },
-                ],
-            },
+            data=self.educational_experience_data,
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -1531,14 +1545,128 @@ class EducationalExperienceTestCase(APITestCase):
         self.assertEqual(educational_experience_years[1].registered_credit_number, 14)
         self.assertEqual(educational_experience_years[1].acquired_credit_number, 14)
 
-    def test_put_valuated_educational_experience_is_forbidden(self):
+    def test_put_valuated_educational_experience_is_forbidden_with_doctorate_if_valuation_with_doctorate(self):
         self.client.force_authenticate(user=self.user)
 
-        self.educational_experience.valuated_from_admission.set([self.admission])
+        self.educational_experience.valuated_from_admission.set(
+            [
+                self.admission,
+                self.general_admission,
+                self.continuing_admission,
+            ],
+        )
 
         response = self.client.put(
             self.admission_details_url,
             data={},
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_put_valuated_educational_experience_is_allowed_with_doctorate_if_valuation_with_general(self):
+        self.client.force_authenticate(user=self.user)
+
+        self.educational_experience.valuated_from_admission.set([self.general_admission])
+
+        response = self.client.put(
+            self.admission_details_url,
+            data=self.educational_experience_data,
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_put_valuated_educational_experience_is_forbidden_with_doctorate_if_valuation_with_continuing(self):
+        self.client.force_authenticate(user=self.user)
+
+        self.educational_experience.valuated_from_admission.set([self.continuing_admission])
+
+        response = self.client.put(
+            self.admission_details_url,
+            data=self.educational_experience_data,
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_put_valuated_educational_experience_is_forbidden_with_general_if_valuation_with_doctorate(self):
+        self.client.force_authenticate(user=self.user)
+
+        self.educational_experience.valuated_from_admission.set(
+            [
+                self.admission,
+                self.general_admission,
+                self.continuing_admission,
+            ],
+        )
+
+        response = self.client.put(
+            self.general_admission_details_url,
+            data={},
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_put_valuated_educational_experience_is_forbidden_with_general_if_valuation_with_general(self):
+        self.client.force_authenticate(user=self.user)
+
+        self.educational_experience.valuated_from_admission.set([self.general_admission])
+
+        response = self.client.put(
+            self.general_admission_details_url,
+            data=self.educational_experience_data,
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_put_valuated_educational_experience_is_forbidden_with_general_if_valuation_with_continuing(self):
+        self.client.force_authenticate(user=self.user)
+
+        self.educational_experience.valuated_from_admission.set([self.continuing_admission])
+
+        response = self.client.put(
+            self.general_admission_details_url,
+            data=self.educational_experience_data,
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_put_valuated_educational_experience_is_forbidden_with_continuing_if_valuation_with_doctorate(self):
+        self.client.force_authenticate(user=self.user)
+
+        self.educational_experience.valuated_from_admission.set(
+            [
+                self.admission,
+                self.general_admission,
+                self.continuing_admission,
+            ],
+        )
+
+        response = self.client.put(
+            self.continuing_admission_details_url,
+            data={},
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_put_valuated_educational_experience_is_forbidden_with_continuing_if_valuation_with_general(self):
+        self.client.force_authenticate(user=self.user)
+
+        self.educational_experience.valuated_from_admission.set([self.general_admission])
+
+        response = self.client.put(
+            self.continuing_admission_details_url,
+            data=self.educational_experience_data,
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_put_valuated_educational_experience_is_forbidden_with_continuing_if_valuation_with_continuing(self):
+        self.client.force_authenticate(user=self.user)
+
+        self.educational_experience.valuated_from_admission.set([self.continuing_admission])
+
+        response = self.client.put(
+            self.continuing_admission_details_url,
+            data=self.educational_experience_data,
         )
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)

@@ -97,6 +97,7 @@ class Migration(migrations.Migration):
                 (
                     'educational_valuated_experiences',
                     models.ManyToManyField(
+                        blank=True,
                         related_name='valuated_from_admission',
                         to='osis_profile.EducationalExperience',
                         verbose_name='The educational experiences that have been valuated from this admission.',
@@ -105,6 +106,7 @@ class Migration(migrations.Migration):
                 (
                     'professional_valuated_experiences',
                     models.ManyToManyField(
+                        blank=True,
                         related_name='valuated_from_admission',
                         to='osis_profile.ProfessionalExperience',
                         verbose_name='The professional experiences that have been valuated from this admission.',
