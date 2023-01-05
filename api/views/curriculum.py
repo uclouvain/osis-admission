@@ -27,7 +27,8 @@ from collections import defaultdict
 from functools import partial
 from typing import Union
 
-from django.db.models import Subquery, OuterRef
+from django.contrib.postgres.aggregates import ArrayAgg
+from django.db.models import Subquery, OuterRef, Q
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 from rest_framework import status
@@ -52,8 +53,12 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
     ExperiencesAcademiquesNonCompleteesException,
     AnneesCurriculumNonSpecifieesException,
 )
+from admission.ddd.admission.domain.enums import TypeFormation
 from admission.ddd.admission.formation_generale import commands as general_commands
 from admission.ddd.admission.formation_continue import commands as continuing_commands
+from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
+    AnneeInscriptionFormationTranslator,
+)
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from infrastructure.messages_bus import message_bus_instance
 from osis_profile.models import ProfessionalExperience, EducationalExperience, EducationalExperienceYear
@@ -105,8 +110,15 @@ class BaseCurriculumView(APIPermissionRequiredMixin, RetrieveAPIView):
     def get(self, request, *args, **kwargs):
         """Return the curriculum experiences of a person with the mandatory years to complete."""
         current_person = self.get_object()
-        professional_experiences = ProfessionalExperience.objects.filter(person=current_person).prefetch_related(
-            'valuated_from_admission'
+        professional_experiences = (
+            ProfessionalExperience.objects.filter(person=current_person)
+            .annotate(
+                valuated_from_trainings=ArrayAgg(
+                    'valuated_from_admission__training__education_group_type__name',
+                    filter=Q(valuated_from_admission__isnull=False),
+                ),
+            )
+            .order_by('-start_date', '-end_date')
         )
 
         educational_experiences = (
@@ -117,8 +129,11 @@ class BaseCurriculumView(APIPermissionRequiredMixin, RetrieveAPIView):
                         "academic_year__year"
                     )[:1]
                 ),
+                valuated_from_trainings=ArrayAgg(
+                    'valuated_from_admission__training__education_group_type__name',
+                    filter=Q(valuated_from_admission__isnull=False),
+                ),
             )
-            .prefetch_related("valuated_from_admission")
             .order_by("-last_academic_year")
         )
 
@@ -229,7 +244,12 @@ class ExperienceViewSet(
 
     def get_queryset(self):
         return (
-            self.model.objects.filter(person=self.candidate).prefetch_related('valuated_from_admission')
+            self.model.objects.filter(person=self.candidate).annotate(
+                valuated_from_trainings=ArrayAgg(
+                    'valuated_from_admission__training__education_group_type__name',
+                    filter=Q(valuated_from_admission__isnull=False),
+                ),
+            )
             if self.request
             else self.model.objects.none()
         )
@@ -254,17 +274,19 @@ class ExperienceViewSet(
             self.get_permission_object().update_detailed_status()
         return response
 
-    def update(self, request, *args, **kwargs):
-        if self.experience.valuated_from_admission.exists():
+    def _check_perms_update(self):
+        if self.experience.valuated_from_trainings:
             raise PermissionDenied(_("This experience cannot be updated as it has already been valuated."))
 
+    def update(self, request, *args, **kwargs):
+        self._check_perms_update()
         response = super().update(request, *args, **kwargs)
         if self.get_permission_object():
             self.get_permission_object().update_detailed_status()
         return response
 
     def destroy(self, request, *args, **kwargs):
-        if self.experience.valuated_from_admission.exists():
+        if self.experience.valuated_from_trainings:
             raise PermissionDenied(_("This experience cannot be updated as it has already been valuated."))
 
         response = super().destroy(request, *args, **kwargs)
@@ -310,6 +332,15 @@ class BaseEducationalExperienceViewSet(ExperienceViewSet):
 class EducationalExperienceViewSet(PersonRelatedMixin, BaseEducationalExperienceViewSet):
     name = "educational_experiences"
     permission_classes = [partial(IsSelfPersonTabOrTabPermission, permission_suffix="curriculum")]
+
+    def _check_perms_update(self):
+        # With doctorate
+        if any(
+            AnneeInscriptionFormationTranslator.ADMISSION_EDUCATION_TYPE_BY_OSIS_TYPE.get(training_type)
+            == TypeFormation.DOCTORAT.name
+            for training_type in self.experience.valuated_from_trainings
+        ):
+            raise PermissionDenied(_("This experience cannot be updated as it has already been valuated."))
 
     def get_object(self):
         return self.experience

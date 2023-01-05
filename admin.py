@@ -56,6 +56,7 @@ from base.models.education_group_type import EducationGroupType
 from base.models.entity_version import EntityVersion
 from base.models.enums.education_group_categories import Categories
 from osis_mail_template.admin import MailTemplateAdmin
+from osis_profile.models import EducationalExperience, ProfessionalExperience
 from osis_role.contrib.admin import RoleModelAdmin
 
 
@@ -63,7 +64,20 @@ from osis_role.contrib.admin import RoleModelAdmin
 # Models
 
 
+class AdmissionAdminForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['educational_valuated_experiences'].queryset = EducationalExperience.objects.filter(
+            person=self.instance.candidate
+        )
+        self.fields['professional_valuated_experiences'].queryset = ProfessionalExperience.objects.filter(
+            person=self.instance.candidate
+        )
+
+
 class DoctorateAdmissionAdmin(admin.ModelAdmin):
+    form = AdmissionAdminForm
+
     autocomplete_fields = [
         'training',
         'thesis_institute',
@@ -86,9 +100,11 @@ class DoctorateAdmissionAdmin(admin.ModelAdmin):
         "submitted_profile",
         "pre_admission_submission_date",
         "admission_submission_date",
+        "scholarship_proof",
+    ]
+    filter_horizontal = [
         "professional_valuated_experiences",
         "educational_valuated_experiences",
-        "scholarship_proof",
     ]
     exclude = ["valuated_experiences"]
 
@@ -99,6 +115,8 @@ class DoctorateAdmissionAdmin(admin.ModelAdmin):
 
 
 class ContinuingEducationAdmissionAdmin(admin.ModelAdmin):
+    form = AdmissionAdminForm
+
     autocomplete_fields = ['training']
     list_display = ['candidate_fmt', 'training', 'status']
     list_filter = ['status']
@@ -106,9 +124,9 @@ class ContinuingEducationAdmissionAdmin(admin.ModelAdmin):
     readonly_fields = [
         'detailed_status',
     ]
-    exclude = [
-        'professional_valuated_experiences',
-        'educational_valuated_experiences',
+    filter_horizontal = [
+        "professional_valuated_experiences",
+        "educational_valuated_experiences",
     ]
 
     def candidate_fmt(self, obj):
@@ -118,11 +136,17 @@ class ContinuingEducationAdmissionAdmin(admin.ModelAdmin):
 
 
 class GeneralEducationAdmissionAdmin(ContinuingEducationAdmissionAdmin):
+    form = AdmissionAdminForm
+
     autocomplete_fields = [
         'training',
         'double_degree_scholarship',
         'international_scholarship',
         'erasmus_mundus_scholarship',
+    ]
+    filter_horizontal = [
+        "professional_valuated_experiences",
+        "educational_valuated_experiences",
     ]
 
 
