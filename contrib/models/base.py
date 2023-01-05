@@ -58,11 +58,13 @@ class BaseAdmission(models.Model):
 
     professional_valuated_experiences = models.ManyToManyField(
         'osis_profile.ProfessionalExperience',
+        blank=True,
         related_name='valuated_from_admission',
         verbose_name=_('The professional experiences that have been valuated from this admission.'),
     )
     educational_valuated_experiences = models.ManyToManyField(
         'osis_profile.EducationalExperience',
+        blank=True,
         related_name='valuated_from_admission',
         verbose_name=_('The educational experiences that have been valuated from this admission.'),
     )

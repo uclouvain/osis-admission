@@ -5835,7 +5835,7 @@ components:
         program:
           type: string
           nullable: true
-        valuated_from_admission:
+        valuated_from_trainings:
           type: array
           items:
             type: string
@@ -5941,7 +5941,7 @@ components:
     ProfessionalExperience:
       type: object
       properties:
-        valuated_from_admission:
+        valuated_from_trainings:
           type: array
           items:
             type: string
@@ -6014,7 +6014,7 @@ components:
                 format: date
               type:
                 $ref: '#/components/schemas/ActivityType'
-              valuated_from_admission:
+              valuated_from_trainings:
                 type: array
                 items:
                   type: string
@@ -6055,7 +6055,7 @@ components:
                       $ref: '#/components/schemas/Result'
                   required:
                   - academic_year
-              valuated_from_admission:
+              valuated_from_trainings:
                 type: array
                 items:
                   type: string
