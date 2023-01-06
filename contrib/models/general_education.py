@@ -25,23 +25,14 @@
 # ##############################################################################
 from contextlib import suppress
 
-from django.core.cache import cache
 from django.db import models
-from django.db.models.signals import post_save
-from django.dispatch import receiver
 from django.utils.translation import gettext_lazy as _
 from rest_framework.settings import api_settings
 
 from admission.contrib.models.base import BaseAdmission, BaseAdmissionQuerySet, admission_directory_path
 from admission.ddd.admission.dtos.conditions import InfosDetermineesDTO
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutProposition
-from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
-    AnneeInscriptionFormationTranslator,
-)
 from base.models.academic_year import AcademicYear
-from base.models.education_group_year import EducationGroupYear
-from base.models.enums.education_group_categories import Categories
-from base.models.person import Person
 from osis_common.ddd.interface import BusinessException
 from osis_document.contrib import FileField
 
@@ -182,29 +173,3 @@ class GeneralEducationAdmissionProxy(GeneralEducationAdmission):
 
     class Meta:
         proxy = True
-
-
-@receiver(post_save, sender=EducationGroupYear)
-def _invalidate_general_education_cache(sender, instance, **kwargs):
-    if (  # pragma: no branch
-        instance.education_group_type.category == Categories.TRAINING.name
-        and instance.education_group_type.name in AnneeInscriptionFormationTranslator.GENERAL_EDUCATION_TYPES
-    ):
-        keys = [
-            f'admission_permission_{a_uuid}'
-            for a_uuid in GeneralEducationAdmission.objects.filter(training_id=instance.pk).values_list(
-                'uuid', flat=True
-            )
-        ]
-        if keys:
-            cache.delete_many(keys)
-
-
-@receiver(post_save, sender=Person)
-def _invalidate_candidate_cache(sender, instance, **kwargs):
-    keys = [
-        f'admission_permission_{a_uuid}'
-        for a_uuid in GeneralEducationAdmission.objects.filter(candidate_id=instance.pk).values_list('uuid', flat=True)
-    ]
-    if keys:
-        cache.delete_many(keys)

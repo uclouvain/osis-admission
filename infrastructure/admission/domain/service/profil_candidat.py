@@ -30,6 +30,7 @@ from django.db import models
 from django.db.models import Exists, OuterRef, Subquery
 from django.db.models.functions import ExtractYear, ExtractMonth
 
+from admission.contrib.models.base import BaseAdmission
 from admission.ddd.admission.doctorat.preparation.dtos import ConditionsComptabiliteDTO, CurriculumDTO
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
     AnneeExperienceAcademiqueDTO,
@@ -149,6 +150,8 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
 
     @classmethod
     def get_etudes_secondaires(cls, matricule: str, type_formation: TrainingType) -> 'EtudesSecondairesDTO':
+        etudes_secondaires_valorisees = cls.etudes_secondaires_valorisees(matricule)
+
         if type_formation != TrainingType.BACHELOR:
             candidat: Person = Person.objects.select_related('graduated_from_high_school_year').get(global_id=matricule)
             return EtudesSecondairesDTO(
@@ -156,6 +159,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                 annee_diplome_etudes_secondaires=candidat.graduated_from_high_school_year.year
                 if candidat.graduated_from_high_school_year
                 else None,
+                valorisees=etudes_secondaires_valorisees,
             )
 
         candidat: Person = Person.objects.select_related(
@@ -168,6 +172,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
 
         return EtudesSecondairesDTO(
             diplome_etudes_secondaires=candidat.graduated_from_high_school,
+            valorisees=etudes_secondaires_valorisees,
             annee_diplome_etudes_secondaires=candidat.graduated_from_high_school_year.year
             if candidat.graduated_from_high_school_year
             else None,
@@ -364,6 +369,10 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
             .values_list('academic_year__year', 'est_changement')
         )
         return {annee: qs.get(annee - 1) for annee in annees}
+
+    @classmethod
+    def etudes_secondaires_valorisees(cls, matricule: str) -> bool:
+        return BaseAdmission.objects.filter(valuated_secondary_studies_person__global_id=matricule).exists()
 
     @classmethod
     def est_potentiel_vae(cls, matricule: str) -> bool:

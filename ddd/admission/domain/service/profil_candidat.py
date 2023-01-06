@@ -132,6 +132,10 @@ class ProfilCandidat(interface.DomainService):
     ) -> None:
         etudes_secondaires = profil_candidat_translator.get_etudes_secondaires(matricule, formation.type)
 
+        if etudes_secondaires.valorisees:
+            # Des études secondaires valorisées par une admission sont considérées valides pour les futures admissions
+            return
+
         if formation.type == TrainingType.BACHELOR:
             est_potentiel_vae = profil_candidat_translator.est_potentiel_vae(matricule)
             BachelierEtudesSecondairesValidatorList(

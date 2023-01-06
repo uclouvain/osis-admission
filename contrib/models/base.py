@@ -107,12 +107,30 @@ class BaseAdmission(models.Model):
         upload_to=admission_directory_path,
         verbose_name=_('Curriculum'),
     )
+    valuated_secondary_studies_person = models.OneToOneField(
+        to='base.Person',
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+        verbose_name=_('The person whose the secondary studies have been valuated by this admission'),
+    )
 
     confirmation_elements = models.JSONField(
         blank=True,
         default=dict,
         encoder=DjangoJSONEncoder,
     )
+
+    class Meta:
+        constraints = [
+            models.CheckConstraint(
+                check=models.Q(
+                    # Only the candidate can be valuated
+                    valuated_secondary_studies_person_id=models.F("candidate_id"),
+                ),
+                name='only_candidate_can_be_valuated',
+            ),
+        ]
 
     def save(self, *args, **kwargs) -> None:
         super().save(*args, **kwargs)

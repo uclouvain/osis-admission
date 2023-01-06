@@ -25,6 +25,7 @@
 # ##############################################################################
 from contextlib import suppress
 from operator import itemgetter
+from typing import Union
 
 from django.utils import timezone
 from rest_framework import mixins, status
@@ -35,6 +36,11 @@ from rest_framework.settings import api_settings
 from admission.api import serializers
 from admission.api.schema import ResponseSpecificSchema
 from admission.api.serializers import PropositionErrorsSerializer
+from admission.contrib.models import (
+    GeneralEducationAdmission,
+    ContinuingEducationAdmission,
+    DoctorateAdmission,
+)
 from admission.ddd.admission.doctorat.preparation.commands import (
     RecupererElementsConfirmationQuery as RecupererElementsConfirmationDoctoralQuery,
     SoumettrePropositionCommand as SoumettrePropositionDoctoratCommand,
@@ -53,6 +59,7 @@ from admission.ddd.admission.formation_generale.commands import (
     RecupererElementsConfirmationQuery as RecupererElementsConfirmationGeneralQuery,
     SoumettrePropositionCommand as SoumettrePropositionGeneraleCommand,
 )
+from admission.infrastructure.admission.domain.service.profil_candidat import ProfilCandidatTranslator
 from admission.utils import (
     gather_business_exceptions,
     get_cached_admission_perm_obj,
@@ -64,6 +71,7 @@ from base.models.education_group_year import EducationGroupYear
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from infrastructure.formation_catalogue.repository.program_tree import ProgramTreeRepository
 from infrastructure.messages_bus import message_bus_instance
+from osis_profile.models import EducationalExperience, ProfessionalExperience
 from osis_role.contrib.views import APIPermissionRequiredMixin
 from program_management.ddd.domain.exception import ProgramTreeNotFoundException
 
@@ -73,6 +81,26 @@ __all__ = [
     "SubmitGeneralEducationPropositionView",
     "SubmitContinuingEducationPropositionView",
 ]
+
+
+def valuate_experiences(instance: Union[GeneralEducationAdmission, ContinuingEducationAdmission, DoctorateAdmission]):
+    # Valuate the secondary studies of the candidate if no admission already valuated them
+    if isinstance(
+        instance,
+        (GeneralEducationAdmission, ContinuingEducationAdmission),
+    ) and not ProfilCandidatTranslator.etudes_secondaires_valorisees(instance.candidate.global_id):
+        instance.valuated_secondary_studies_person_id = instance.candidate_id
+        instance.save(update_fields=['valuated_secondary_studies_person_id'])
+
+    # Valuate curriculum experiences
+    instance.educational_valuated_experiences.add(
+        *EducationalExperience.objects.filter(person_id=instance.candidate_id)
+    )
+
+    # Valuate curriculum experiences
+    instance.professional_valuated_experiences.add(
+        *ProfessionalExperience.objects.filter(person_id=instance.candidate_id)
+    )
 
 
 class VerifySchema(ResponseSpecificSchema):
@@ -215,6 +243,7 @@ class SubmitDoctoralPropositionView(
         serializer.is_valid(raise_exception=True)
         cmd = SoumettrePropositionDoctoratCommand(**serializer.data, uuid_proposition=str(kwargs['uuid']))
         proposition_id = message_bus_instance.invoke(cmd)
+        valuate_experiences(self.get_permission_object())
         serializer = serializers.PropositionIdentityDTOSerializer(instance=proposition_id)
         # TODO To remove when the admission approval by CDD and SIC will be created
         message_bus_instance.invoke(ApprouverDemandeCddCommand(uuid=str(kwargs["uuid"])))
@@ -283,6 +312,7 @@ class SubmitGeneralEducationPropositionView(
         serializer.is_valid(raise_exception=True)
         cmd = SoumettrePropositionGeneraleCommand(**serializer.data, uuid_proposition=str(kwargs['uuid']))
         proposition_id = message_bus_instance.invoke(cmd)
+        valuate_experiences(self.get_permission_object())
         serializer = serializers.PropositionIdentityDTOSerializer(instance=proposition_id)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -334,5 +364,6 @@ class SubmitContinuingEducationPropositionView(
         serializer.is_valid(raise_exception=True)
         cmd = SoumettrePropositionContinueCommand(**serializer.data, uuid_proposition=str(kwargs['uuid']))
         proposition_id = message_bus_instance.invoke(cmd)
+        valuate_experiences(self.get_permission_object())
         serializer = serializers.PropositionIdentityDTOSerializer(instance=proposition_id)
         return Response(serializer.data, status=status.HTTP_200_OK)
