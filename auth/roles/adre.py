@@ -33,8 +33,8 @@ from django.utils.translation import gettext_lazy as _
 
 class AdreSecretary(RoleModel):
     class Meta:
-        verbose_name = _("ADRE secretary")
-        verbose_name_plural = _("ADRE Secretaries")
+        verbose_name = _("Role: ADRE secretary")
+        verbose_name_plural = _("Role: ADRE Secretaries")
         group_name = "adre_secretary"
 
     @classmethod

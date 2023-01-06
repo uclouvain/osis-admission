@@ -33,8 +33,8 @@ from osis_role.contrib.models import RoleModel
 
 class SicManager(RoleModel):
     class Meta:
-        verbose_name = _("SIC manager")
-        verbose_name_plural = _("SIC managers")
+        verbose_name = _("Role: SIC manager")
+        verbose_name_plural = _("Role: SIC managers")
         group_name = "sic_managers"
 
     @classmethod

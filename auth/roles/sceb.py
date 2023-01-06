@@ -32,13 +32,14 @@ from osis_role.contrib.models import RoleModel
 
 class Sceb(RoleModel):
     class Meta:
-        verbose_name = _("SCEB")
-        verbose_name_plural = _("SCEBs")
+        verbose_name = _("Role: SCEB")
+        verbose_name_plural = _("Role: SCEBs")
         group_name = "sceb"
 
     @classmethod
     def rule_set(cls):
-        return RuleSet({
+        ruleset = {
             'admission.check_copyright': rules.always_allow,
             'admission.sign_diploma': rules.always_allow,
-        })
+        }
+        return RuleSet(ruleset)

@@ -144,8 +144,8 @@ _CANDIDATE_RULESET = {
 
 class Candidate(RoleModel):
     class Meta:
-        verbose_name = _("Candidate")
-        verbose_name_plural = _("Candidates")
+        verbose_name = _("Role: Candidate")
+        verbose_name_plural = _("Role: Candidates")
         group_name = "candidates"
 
     @classmethod

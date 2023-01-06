@@ -38,8 +38,8 @@ from osis_role.contrib.models import RoleModel
 
 class CommitteeMember(ExternalActorMixin, RoleModel):
     class Meta:
-        verbose_name = _("Committee member")
-        verbose_name_plural = _("Committee members")
+        verbose_name = _("Role: Committee member")
+        verbose_name_plural = _("Role: Committee members")
         group_name = "committee_members"
 
     @classmethod

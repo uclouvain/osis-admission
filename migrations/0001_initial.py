@@ -46,8 +46,8 @@ class Migration(migrations.Migration):
                 ('person', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='+', to='base.Person')),
             ],
             options={
-                'verbose_name': 'SIC manager',
-                'verbose_name_plural': 'SIC managers',
+                'verbose_name': 'Role: SIC manager',
+                'verbose_name_plural': 'Role: SIC managers',
             },
         ),
         migrations.CreateModel(
@@ -59,8 +59,8 @@ class Migration(migrations.Migration):
                 ('person', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='+', to='base.Person')),
             ],
             options={
-                'verbose_name': 'SIC director',
-                'verbose_name_plural': 'SIC directors',
+                'verbose_name': 'Role: SIC director',
+                'verbose_name_plural': 'Role: SIC directors',
             },
         ),
         migrations.CreateModel(
@@ -72,8 +72,8 @@ class Migration(migrations.Migration):
                 ('person', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='+', to='base.Person')),
             ],
             options={
-                'verbose_name': 'SCEB',
-                'verbose_name_plural': 'SCEBs',
+                'verbose_name': 'Role: SCEB',
+                'verbose_name_plural': 'Role: SCEBs',
             },
         ),
         migrations.CreateModel(
@@ -85,8 +85,8 @@ class Migration(migrations.Migration):
                 ('person', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='+', to='base.Person')),
             ],
             options={
-                'verbose_name': 'Promoter',
-                'verbose_name_plural': 'Promoters',
+                'verbose_name': 'Role: Promoter',
+                'verbose_name_plural': 'Role: Promoters',
             },
         ),
         migrations.CreateModel(
@@ -98,8 +98,8 @@ class Migration(migrations.Migration):
                 ('person', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='+', to='base.Person')),
             ],
             options={
-                'verbose_name': 'Jury secretary',
-                'verbose_name_plural': 'Jury secretaries',
+                'verbose_name': 'Role: Jury secretary',
+                'verbose_name_plural': 'Role: Jury secretaries',
             },
         ),
         migrations.CreateModel(
@@ -149,8 +149,8 @@ class Migration(migrations.Migration):
                 ('person', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='+', to='base.Person')),
             ],
             options={
-                'verbose_name': 'Committee member',
-                'verbose_name_plural': 'Committee members',
+                'verbose_name': 'Role: Committee member',
+                'verbose_name_plural': 'Role: Committee members',
             },
         ),
         migrations.CreateModel(
@@ -162,8 +162,8 @@ class Migration(migrations.Migration):
                 ('person', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='+', to='base.Person')),
             ],
             options={
-                'verbose_name': 'CDD manager',
-                'verbose_name_plural': 'CDD managers',
+                'verbose_name': 'Role: CDD manager',
+                'verbose_name_plural': 'Role: CDD managers',
             },
         ),
         migrations.CreateModel(
@@ -175,8 +175,8 @@ class Migration(migrations.Migration):
                 ('person', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='+', to='base.Person')),
             ],
             options={
-                'verbose_name': 'Candidate',
-                'verbose_name_plural': 'Candidates',
+                'verbose_name': 'Role: Candidate',
+                'verbose_name_plural': 'Role: Candidates',
             },
         ),
         migrations.CreateModel(
@@ -188,8 +188,8 @@ class Migration(migrations.Migration):
                 ('person', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='+', to='base.Person')),
             ],
             options={
-                'verbose_name': 'ADRE',
-                'verbose_name_plural': 'ADREs',
+                'verbose_name': 'Role: ADRE',
+                'verbose_name_plural': 'Role: ADREs',
             },
         ),
     ]

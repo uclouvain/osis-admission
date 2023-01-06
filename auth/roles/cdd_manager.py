@@ -40,8 +40,8 @@ from osis_role.contrib.models import EntityRoleModel
 
 class CddManager(EntityRoleModel):
     class Meta:
-        verbose_name = _("CDD manager")
-        verbose_name_plural = _("CDD managers")
+        verbose_name = _("Role: CDD manager")
+        verbose_name_plural = _("Role: CDD managers")
         group_name = "cdd_managers"
 
     @classmethod

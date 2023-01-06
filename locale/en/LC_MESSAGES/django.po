@@ -186,12 +186,6 @@ msgstr "Admission in progress"
 msgid "ADMITTED"
 msgstr "Admitted"
 
-msgid "ADRE Secretaries"
-msgstr ""
-
-msgid "ADRE secretary"
-msgstr ""
-
 msgid "APPROVED"
 msgstr "Approved"
 
@@ -493,13 +487,7 @@ msgstr ""
 msgid "CDD configuration"
 msgstr ""
 
-msgid "CDD manager"
-msgstr ""
-
 msgid "CDD manager comment"
-msgstr ""
-
-msgid "CDD managers"
 msgstr ""
 
 msgid "CDD opinion"
@@ -700,9 +688,6 @@ msgstr ""
 msgid "Candidate:"
 msgstr ""
 
-msgid "Candidates"
-msgstr ""
-
 msgid "Canvas"
 msgstr ""
 
@@ -770,12 +755,6 @@ msgid "Comment from CDD manager"
 msgstr ""
 
 msgid "Comments"
-msgstr ""
-
-msgid "Committee member"
-msgstr ""
-
-msgid "Committee members"
 msgstr ""
 
 msgid "Communication attestation"
@@ -1056,12 +1035,6 @@ msgstr ""
 msgid "Doctorate enrolments"
 msgstr ""
 
-msgid "Doctorate reader"
-msgstr ""
-
-msgid "Doctorate readers"
-msgstr ""
-
 msgid "Document"
 msgstr ""
 
@@ -1156,6 +1129,9 @@ msgid "Enroll in a course"
 msgstr ""
 
 msgid "Enrolments"
+msgstr ""
+
+msgid "Entity"
 msgstr ""
 
 msgid "Erasmus Mundus"
@@ -1595,12 +1571,6 @@ msgid "Is non-resident (as defined in decree)"
 msgstr ""
 
 msgid "Journal"
-msgstr ""
-
-msgid "Jury secretaries"
-msgstr ""
-
-msgid "Jury secretary"
 msgstr ""
 
 msgid "Justification letter"
@@ -2299,9 +2269,6 @@ msgstr ""
 msgid "Promoter not found."
 msgstr ""
 
-msgid "Promoters"
-msgstr ""
-
 msgid "Promotion"
 msgstr ""
 
@@ -2503,10 +2470,64 @@ msgstr ""
 msgid "Role of the signing actor"
 msgstr ""
 
-msgid "SCEB"
+msgid "Role: ADRE Secretaries"
 msgstr ""
 
-msgid "SCEBs"
+msgid "Role: ADRE secretary"
+msgstr ""
+
+msgid "Role: CDD manager"
+msgstr ""
+
+msgid "Role: CDD managers"
+msgstr ""
+
+msgid "Role: Candidate"
+msgstr ""
+
+msgid "Role: Candidates"
+msgstr ""
+
+msgid "Role: Committee member"
+msgstr ""
+
+msgid "Role: Committee members"
+msgstr ""
+
+msgid "Role: Doctorate reader"
+msgstr ""
+
+msgid "Role: Doctorate readers"
+msgstr ""
+
+msgid "Role: Jury secretaries"
+msgstr ""
+
+msgid "Role: Jury secretary"
+msgstr ""
+
+msgid "Role: Promoter"
+msgstr ""
+
+msgid "Role: Promoters"
+msgstr ""
+
+msgid "Role: SCEB"
+msgstr ""
+
+msgid "Role: SCEBs"
+msgstr ""
+
+msgid "Role: SIC director"
+msgstr ""
+
+msgid "Role: SIC directors"
+msgstr ""
+
+msgid "Role: SIC manager"
+msgstr ""
+
+msgid "Role: SIC managers"
 msgstr ""
 
 msgid "SEARCH_SCHOLARSHIP"
@@ -2525,18 +2546,6 @@ msgid "SERVICE"
 msgstr "Institutional, didactic and scientific expertise service"
 
 msgid "SERVICE types"
-msgstr ""
-
-msgid "SIC director"
-msgstr ""
-
-msgid "SIC directors"
-msgstr ""
-
-msgid "SIC manager"
-msgstr ""
-
-msgid "SIC managers"
 msgstr ""
 
 msgid "SIC status"
