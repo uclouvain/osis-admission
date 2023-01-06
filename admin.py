@@ -24,9 +24,11 @@
 #
 # ##############################################################################
 
-from django.contrib import admin
 from django import forms
+from django.contrib import admin
+from django.db import models
 from django.utils.translation import gettext_lazy as _, pgettext
+from hijack.contrib.admin import HijackUserAdminMixin
 
 from admission.auth.roles.adre import AdreSecretary
 from admission.auth.roles.ca_member import CommitteeMember
@@ -40,20 +42,20 @@ from admission.auth.roles.sic_director import SicDirector
 from admission.auth.roles.sic_manager import SicManager
 from admission.contrib.models import (
     CddMailTemplate,
-    DoctorateAdmission,
-    Scholarship,
-    GeneralEducationAdmission,
     ContinuingEducationAdmission,
+    DoctorateAdmission,
+    GeneralEducationAdmission,
+    Scholarship,
 )
 from admission.contrib.models.cdd_config import CddConfiguration
 from admission.contrib.models.doctoral_training import Activity
 from admission.contrib.models.form_item import AdmissionFormItem, AdmissionFormItemInstantiation
 from admission.ddd.parcours_doctoral.formation.domain.model.enums import CategorieActivite
-from osis_mail_template.admin import MailTemplateAdmin
-
 from base.models.academic_year import AcademicYear
 from base.models.education_group_type import EducationGroupType
+from base.models.entity_version import EntityVersion
 from base.models.enums.education_group_categories import Categories
+from osis_mail_template.admin import MailTemplateAdmin
 from osis_role.contrib.admin import RoleModelAdmin
 
 
@@ -369,28 +371,62 @@ admin.site.register(Activity, ActivityAdmin)
 # Roles
 
 
+class HijackRoleModelAdmin(HijackUserAdminMixin, RoleModelAdmin):
+    list_select_related = ['person__user']
+
+    def get_hijack_user(self, obj):
+        return obj.person.user
+
+
 class ExternalCommitteeMemberAdmin(RoleModelAdmin):
     list_display = ('person', 'is_external', 'title', 'institute', 'city', 'country')
     list_filter = ['is_external']
     list_select_related = ['person', 'country']
 
 
-class CDDRoleModelAdmin(RoleModelAdmin):
-    list_display = ('person', 'entity')
+class CDDRoleModelAdmin(HijackRoleModelAdmin):
+    list_display = ('person', 'most_recent_acronym')
     search_fields = [
         'person__first_name',
         'person__last_name',
         'entity__entityversion__acronym',
     ]
 
+    @admin.display(description=_('Entity'))
+    def most_recent_acronym(self, obj):
+        return obj.most_recent_acronym
+
+    def get_queryset(self, request):
+        return (
+            super()
+            .get_queryset(request)
+            .annotate(
+                most_recent_acronym=models.Subquery(
+                    EntityVersion.objects.filter(
+                        entity__id=models.OuterRef('entity_id'),
+                    )
+                    .order_by("-start_date")
+                    .values('acronym')[:1]
+                )
+            )
+        )
+
+
+class CandidateAdmin(RoleModelAdmin):
+    list_display = ('person', 'global_id')
+
+    @admin.display(description=_('Identifier'))
+    def global_id(self, obj):
+        return obj.person.global_id
+
 
 admin.site.register(Promoter, ExternalCommitteeMemberAdmin)
 admin.site.register(CommitteeMember, ExternalCommitteeMemberAdmin)
-admin.site.register(SicManager, RoleModelAdmin)
-admin.site.register(SicDirector, RoleModelAdmin)
-admin.site.register(AdreSecretary, RoleModelAdmin)
-admin.site.register(Candidate, RoleModelAdmin)
-admin.site.register(JurySecretary, RoleModelAdmin)
-admin.site.register(Sceb, RoleModelAdmin)
+admin.site.register(SicManager, HijackRoleModelAdmin)
+admin.site.register(SicDirector, HijackRoleModelAdmin)
+admin.site.register(AdreSecretary, HijackRoleModelAdmin)
+admin.site.register(Candidate, CandidateAdmin)
+admin.site.register(JurySecretary, HijackRoleModelAdmin)
+admin.site.register(Sceb, HijackRoleModelAdmin)
 admin.site.register(CddManager, CDDRoleModelAdmin)
-admin.site.register(DoctorateReader, RoleModelAdmin)
+admin.site.register(DoctorateReader, HijackRoleModelAdmin)

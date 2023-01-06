@@ -236,12 +236,6 @@ msgstr "Admission en cours"
 msgid "ADMITTED"
 msgstr "Admis"
 
-msgid "ADRE Secretaries"
-msgstr "Secrétaires ADRE"
-
-msgid "ADRE secretary"
-msgstr "Secrétaire ADRE"
-
 msgid "APPROVED"
 msgstr "Approuvé"
 
@@ -555,14 +549,8 @@ msgstr "Templates d'email de CDD"
 msgid "CDD configuration"
 msgstr "Configuration de la CDD"
 
-msgid "CDD manager"
-msgstr "Gestionnaire CDD"
-
 msgid "CDD manager comment"
 msgstr "Commentaire du gestionnaire CDD"
-
-msgid "CDD managers"
-msgstr "Gestionnaires CDD"
 
 msgid "CDD opinion"
 msgstr "Avis de la CDD"
@@ -766,9 +754,6 @@ msgstr "Candidat non trouvé."
 msgid "Candidate:"
 msgstr "Candidat :"
 
-msgid "Candidates"
-msgstr "Candidats"
-
 msgid "Canvas"
 msgstr "Canvas"
 
@@ -837,12 +822,6 @@ msgstr "Commentaire du gestionnaire CDD"
 
 msgid "Comments"
 msgstr "Commentaires"
-
-msgid "Committee member"
-msgstr "Membre du comité"
-
-msgid "Committee members"
-msgstr "Membres du comité"
 
 msgid "Communication attestation"
 msgstr "Attestation de communication"
@@ -1127,12 +1106,6 @@ msgstr "Admissions en doctorat"
 msgid "Doctorate enrolments"
 msgstr "Inscriptions en doctorat"
 
-msgid "Doctorate reader"
-msgstr "Lecteur doctorat"
-
-msgid "Doctorate readers"
-msgstr "Lecteurs doctorat"
-
 msgid "Document"
 msgstr "Document"
 
@@ -1228,6 +1201,9 @@ msgstr "S'inscrire à un cours"
 
 msgid "Enrolments"
 msgstr "Inscriptions"
+
+msgid "Entity"
+msgstr "Entité"
 
 msgid "Erasmus Mundus"
 msgstr "Erasmus Mundus"
@@ -1775,12 +1751,6 @@ msgstr "Est non-résident (au sens du décret)"
 
 msgid "Journal"
 msgstr "Nom de la revue ou de la maison d'édition"
-
-msgid "Jury secretaries"
-msgstr "Secrétaires de jury"
-
-msgid "Jury secretary"
-msgstr "Secrétaire de jury"
 
 msgid "Justification letter"
 msgstr "Lettre de justification"
@@ -2572,9 +2542,6 @@ msgstr "Promoteur"
 msgid "Promoter not found."
 msgstr "Promoteur non trouvé."
 
-msgid "Promoters"
-msgstr "Promoteurs"
-
 msgid "Promotion"
 msgstr "Promotion"
 
@@ -2794,11 +2761,65 @@ msgstr "Rôle"
 msgid "Role of the signing actor"
 msgstr "Rôle du signataire"
 
-msgid "SCEB"
-msgstr "SCEB"
+msgid "Role: ADRE Secretaries"
+msgstr "Rôle: Secrétaires ADRE"
 
-msgid "SCEBs"
-msgstr "SCEB"
+msgid "Role: ADRE secretary"
+msgstr "Rôle: Secrétaire ADRE"
+
+msgid "Role: CDD manager"
+msgstr "Rôle: Gestionnaire CDD"
+
+msgid "Role: CDD managers"
+msgstr "Rôle: Gestionnaires CDD"
+
+msgid "Role: Candidate"
+msgstr "Rôle: Candidat"
+
+msgid "Role: Candidates"
+msgstr "Candidats"
+
+msgid "Role: Committee member"
+msgstr "Rôle: Membre du comité"
+
+msgid "Role: Committee members"
+msgstr "Rôle: Membres du comité"
+
+msgid "Role: Doctorate reader"
+msgstr "Rôle: Lecteur doctorat"
+
+msgid "Role: Doctorate readers"
+msgstr "Rôle: Lecteurs doctorat"
+
+msgid "Role: Jury secretaries"
+msgstr "Rôle: Secrétaires de jury"
+
+msgid "Role: Jury secretary"
+msgstr "Rôle: Secrétaire de jury"
+
+msgid "Role: Promoter"
+msgstr "Rôle: Promoteur"
+
+msgid "Role: Promoters"
+msgstr "Rôle: Promoteurs"
+
+msgid "Role: SCEB"
+msgstr "Rôle: SCEB"
+
+msgid "Role: SCEBs"
+msgstr "Rôle: SCEBs"
+
+msgid "Role: SIC director"
+msgstr "Rôle: Directeur SIC"
+
+msgid "Role: SIC directors"
+msgstr "Rôle: Directeurs SIC"
+
+msgid "Role: SIC manager"
+msgstr "Rôle: Gestionnaire SIC"
+
+msgid "Role: SIC managers"
+msgstr "Rôle: Gestionnaires SIC"
 
 msgid "SEARCH_SCHOLARSHIP"
 msgstr "Bourse de recherche"
@@ -2819,18 +2840,6 @@ msgid "SERVICE types"
 msgstr ""
 "Types d'activité pour la catégorie Service institutionnel, didactique et "
 "d'expertise scientifique"
-
-msgid "SIC director"
-msgstr "Directeur SIC"
-
-msgid "SIC directors"
-msgstr "Directeurs SIC"
-
-msgid "SIC manager"
-msgstr "Gestionnaire SIC"
-
-msgid "SIC managers"
-msgstr "Gestionnaires SIC"
 
 msgid "SIC status"
 msgstr "Statut SIC"
@@ -3459,7 +3468,7 @@ msgid "Training activities"
 msgstr "Activités de formation"
 
 msgid "Training activity"
-msgstr "Ajouter une activité"
+msgstr "Activité for formation"
 
 msgid "Training choice"
 msgstr "Choix de formation"

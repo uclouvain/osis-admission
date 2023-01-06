@@ -31,13 +31,13 @@ from django.utils.translation import gettext_lazy as _
 
 class DoctorateReader(RoleModel):
     class Meta:
-        verbose_name = _("Doctorate reader")
-        verbose_name_plural = _("Doctorate readers")
+        verbose_name = _("Role: Doctorate reader")
+        verbose_name_plural = _("Role: Doctorate readers")
         group_name = "doctorate_reader"
 
     @classmethod
     def rule_set(cls):
-        return RuleSet({
+        ruleset = {
             'admission.view_doctorateadmission': always_allow,
             'admission.view_doctorateadmission_person': always_allow,
             'admission.view_doctorateadmission_coordinates': always_allow,
@@ -50,4 +50,5 @@ class DoctorateReader(RoleModel):
             'admission.view_doctorateadmission_confirmation': always_allow,
             'admission.view_cdddossiers': always_allow,
             'admission.view_internalnote': always_allow,
-        })
+        }
+        return RuleSet(ruleset)

@@ -42,8 +42,8 @@ from osis_role.contrib.models import RoleModel
 
 class Promoter(ExternalActorMixin, RoleModel):
     class Meta:
-        verbose_name = _("Promoter")
-        verbose_name_plural = _("Promoters")
+        verbose_name = _("Role: Promoter")
+        verbose_name_plural = _("Role: Promoters")
         group_name = "promoters"
 
     @classmethod
