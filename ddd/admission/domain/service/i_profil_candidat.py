@@ -108,3 +108,8 @@ class IProfilCandidatTranslator(interface.DomainService):
     @classmethod
     def est_potentiel_vae(cls, matricule: str) -> bool:
         raise NotImplementedError
+
+    @classmethod
+    def etudes_secondaires_valorisees(cls, matricule: str) -> bool:
+        """Spécifie si les études secondaires ont été valorisées."""
+        raise NotImplementedError

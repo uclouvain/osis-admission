@@ -1,9 +1,11 @@
 from functools import partial
 
 from rest_framework import serializers
+from rest_framework.exceptions import PermissionDenied
 
 from admission.api.serializers.fields import AnswerToSpecificQuestionField
 from admission.ddd.admission.formation_generale.domain.model.enums import CHOIX_DIPLOME_OBTENU
+from admission.contrib.models.base import BaseAdmission
 from admission.infrastructure.admission.domain.service.profil_candidat import ProfilCandidatTranslator
 from base.api.serializers.academic_year import RelatedAcademicYearField
 from base.models.enums.establishment_type import EstablishmentTypeEnum
@@ -97,13 +99,18 @@ class HighSchoolDiplomaSerializer(serializers.Serializer):
     high_school_diploma_alternative = HighSchoolDiplomaAlternativeSerializer(required=False, allow_null=True)
     specific_question_answers = AnswerToSpecificQuestionField(write_only=True)
     is_vae_potential = serializers.SerializerMethodField(read_only=True)
+    is_valuated = serializers.SerializerMethodField(read_only=True)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['is_vae_potential'].field_schema = {'type': 'boolean'}
+        self.fields['is_valuated'].field_schema = {'type': 'boolean'}
 
     def get_is_vae_potential(self, person):
         return ProfilCandidatTranslator.est_potentiel_vae(person.global_id)
+
+    def get_is_valuated(self, person):
+        return ProfilCandidatTranslator.etudes_secondaires_valorisees(person.global_id)
 
     @staticmethod
     def load_diploma(instance):
@@ -169,6 +176,9 @@ class HighSchoolDiplomaSerializer(serializers.Serializer):
             instance.high_school_diploma_alternative.delete()
 
     def update(self, instance, validated_data):
+        if self.get_is_valuated(instance):
+            return instance
+
         self.load_diploma(instance)
 
         instance.graduated_from_high_school = validated_data.get('graduated_from_high_school')

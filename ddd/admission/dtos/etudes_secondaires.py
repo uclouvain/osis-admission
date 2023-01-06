@@ -66,3 +66,4 @@ class EtudesSecondairesDTO(interface.DTO):
     alternative_secondaires: Optional[AlternativeSecondairesDTO] = None
     diplome_etudes_secondaires: str = ''
     annee_diplome_etudes_secondaires: Optional[int] = None
+    valorisees: bool = False

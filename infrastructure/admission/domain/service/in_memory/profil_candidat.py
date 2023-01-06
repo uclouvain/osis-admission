@@ -738,3 +738,10 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
             reduce(lambda total, experience: cls.compte_nombre_mois(total, experience), experiences, 0)
             >= cls.NB_MOIS_MIN_VAE
         )
+
+    @classmethod
+    def etudes_secondaires_valorisees(cls, matricule: str) -> bool:
+        etudes_secondaires = cls.etudes_secondaires.get(matricule)
+        if etudes_secondaires:
+            return etudes_secondaires.valorisees is True
+        return False

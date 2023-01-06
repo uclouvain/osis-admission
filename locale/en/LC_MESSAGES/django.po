@@ -2961,6 +2961,10 @@ msgid "The person concerned"
 msgstr ""
 
 msgid ""
+"The person whose the secondary studies have been valuated by this admission"
+msgstr ""
+
+msgid ""
 "The professional experiences that have been valuated from this admission."
 msgstr ""
 

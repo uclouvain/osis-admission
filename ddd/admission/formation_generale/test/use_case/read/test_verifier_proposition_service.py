@@ -24,6 +24,7 @@
 #
 # ##############################################################################
 import datetime
+from typing import Optional
 from unittest import TestCase, mock
 
 import freezegun
@@ -95,6 +96,8 @@ from osis_profile.models.enums.education import ForeignDiplomaTypes, Equivalence
 
 
 class TestVerifierPropositionService(TestCase):
+    experience_academiques_complete: Optional[ExperienceAcademique] = None
+
     def assertHasInstance(self, container, cls, msg=None):
         if not any(isinstance(obj, cls) for obj in container):
             self.fail(msg or f"No instance of '{cls}' has been found")
@@ -1009,6 +1012,16 @@ class TestVerifierPropositionService(TestCase):
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.cmd(self.bachelier_proposition.entity_id.uuid))
         self.assertHasInstance(context.exception.exceptions, EtudesSecondairesNonCompleteesException)
+
+    def test_should_etre_ok_si_etudes_secondaires_et_diplome_non_specifie_pour_bachelier_avec_valorisation(self):
+        self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesDTO(
+            diplome_etudes_secondaires=GotDiploma.YES.name,
+            annee_diplome_etudes_secondaires=2020,
+            valorisees=True,
+        )
+
+        id_proposition = self.message_bus.invoke(self.cmd(self.bachelier_proposition.entity_id.uuid))
+        self.assertEqual(id_proposition, self.bachelier_proposition.entity_id)
 
     def test_should_retourner_erreur_si_etudes_secondaires_en_cours_et_diplome_non_specifie_pour_bachelier(self):
         self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesDTO(

@@ -56,6 +56,8 @@ from base.models.education_group_type import EducationGroupType
 from base.models.entity_version import EntityVersion
 from base.models.enums.education_group_categories import Categories
 from osis_mail_template.admin import MailTemplateAdmin
+
+from base.models.person import Person
 from osis_profile.models import EducationalExperience, ProfessionalExperience
 from osis_role.contrib.admin import RoleModelAdmin
 
@@ -73,6 +75,7 @@ class AdmissionAdminForm(forms.ModelForm):
         self.fields['professional_valuated_experiences'].queryset = ProfessionalExperience.objects.filter(
             person=self.instance.candidate
         )
+        self.fields['valuated_secondary_studies_person'].queryset = Person.objects.filter(pk=self.instance.candidate.pk)
 
 
 class DoctorateAdmissionAdmin(admin.ModelAdmin):

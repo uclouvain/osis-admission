@@ -25,7 +25,7 @@
 # ##############################################################################
 from abc import abstractmethod
 
-from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition
+from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition
 from osis_common.ddd import interface
 
 

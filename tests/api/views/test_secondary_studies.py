@@ -23,6 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import datetime
 from unittest.mock import patch
 from uuid import UUID
 
@@ -54,6 +55,7 @@ from osis_profile.models import (
     HighSchoolDiplomaAlternative,
     Schedule,
 )
+from osis_profile.models.enums.education import EducationalType
 from reference.tests.factories.country import CountryFactory
 from reference.tests.factories.high_school import HighSchoolFactory
 from reference.tests.factories.language import LanguageFactory
@@ -351,6 +353,38 @@ class BelgianHighSchoolDiplomaTestCase(APITestCase):
         self.client.force_authenticate(user=self.cdd_manager_user)
         response = self.client.get(self.doctorate_admission_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_diploma_update_is_partially_working_if_already_valuated_by_admission(self):
+        self.create_belgian_diploma_with_general_admission(self.diploma_data)
+        diploma = BelgianHighSchoolDiploma.objects.get(person__user_id=self.candidate_user.pk)
+        self.assertEqual(diploma.educational_type, self.diploma_data['belgian_diploma']['educational_type'])
+        admission = BaseAdmission.objects.get(uuid=self.general_admission_uuid)
+        self.assertEqual(admission.specific_question_answers, self.diploma_data['specific_question_answers'])
+
+        # Valuate the secondary studies
+        ContinuingEducationAdmissionFactory(
+            candidate=self.candidate_user.person,
+            valuated_secondary_studies_person=self.candidate_user.person,
+        )
+
+        # Want to update the diploma and the specific question answers -> only update the specific question answers
+        updated_data = {
+            "graduated_from_high_school": GotDiploma.THIS_YEAR.name,
+            "belgian_diploma": {
+                "institute": self.high_school.uuid,
+                "academic_graduation_year": self.academic_year.year,
+                "educational_type": EducationalType.TRANSITION_METHOD.name,
+            },
+            "specific_question_answers": {
+                "fe254203-17c7-47d6-95e4-3c5c532da551": "My answer 2 !",
+            },
+        }
+        self.create_belgian_diploma_with_general_admission(updated_data)
+        diploma = BelgianHighSchoolDiploma.objects.get(person__user_id=self.candidate_user.pk)
+        self.assertEqual(diploma.educational_type, self.diploma_data['belgian_diploma']['educational_type'])
+        self.assertEqual(diploma.person.graduated_from_high_school, self.diploma_data['graduated_from_high_school'])
+        admission = BaseAdmission.objects.get(uuid=self.general_admission_uuid)
+        self.assertEqual(admission.specific_question_answers, updated_data['specific_question_answers'])
 
 
 @override_settings(ROOT_URLCONF='admission.api.url_v1')

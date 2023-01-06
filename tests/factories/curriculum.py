@@ -23,9 +23,12 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import datetime
+import random
 import uuid
 
 import factory
+from dateutil.relativedelta import relativedelta
 
 from osis_profile.models import EducationalExperienceYear, ProfessionalExperience, EducationalExperience
 from osis_profile.models.enums.curriculum import TranscriptType
@@ -57,3 +60,10 @@ class EducationalExperienceFactory(factory.DjangoModelFactory):
 class ProfessionalExperienceFactory(factory.DjangoModelFactory):
     class Meta:
         model = ProfessionalExperience
+
+    start_date = factory.LazyAttribute(
+        lambda experience: datetime.date(random.randint(2000, 2022), random.randint(1, 12), 1)
+    )
+    end_date = factory.LazyAttribute(
+        lambda experience: experience.start_date + relativedelta(months=2) - relativedelta(days=1)
+    )

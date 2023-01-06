@@ -32,11 +32,9 @@ from rest_framework.test import APITestCase
 
 from admission.ddd.admission.domain.service.i_elements_confirmation import IElementsConfirmation
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutProposition
-from admission.infrastructure.admission.domain.service.in_memory.elements_confirmation import (
-    ElementsConfirmationInMemory,
-)
 from admission.tests.factories.calendar import AdmissionAcademicCalendarFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
+from admission.tests.factories.curriculum import EducationalExperienceFactory, ProfessionalExperienceFactory
 from admission.tests.factories.general_education import (
     GeneralEducationAdmissionFactory,
     GeneralEducationTrainingFactory,
@@ -44,6 +42,7 @@ from admission.tests.factories.general_education import (
 from admission.tests.factories.person import IncompletePersonForBachelorFactory, IncompletePersonForIUFCFactory
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.education_group_types import TrainingType
+from osis_profile.models import EducationalExperience, ProfessionalExperience
 
 
 @freezegun.freeze_time("1980-03-25")
@@ -67,8 +66,27 @@ class GeneralPropositionSubmissionTestCase(APITestCase):
             candidate__country_of_citizenship__european_union=True,
             bachelor_with_access_conditions_met=True,
         )
+        cls.second_admission_ok = GeneralEducationAdmissionFactory(
+            candidate__country_of_citizenship__european_union=True,
+            bachelor_with_access_conditions_met=True,
+            training=cls.admission_ok.training,
+        )
+        cls.third_admission_ok = GeneralEducationAdmissionFactory(
+            candidate=cls.second_admission_ok.candidate,
+            bachelor_with_access_conditions_met=True,
+            training=cls.admission_ok.training,
+        )
         cls.candidate_ok = cls.admission_ok.candidate
+        cls.second_candidate_ok = cls.second_admission_ok.candidate
         cls.ok_url = resolve_url("admission_api_v1:submit-general-proposition", uuid=cls.admission_ok.uuid)
+        cls.second_ok_url = resolve_url(
+            "admission_api_v1:submit-general-proposition",
+            uuid=cls.second_admission_ok.uuid,
+        )
+        cls.third_ok_url = resolve_url(
+            "admission_api_v1:submit-general-proposition",
+            uuid=cls.third_admission_ok.uuid,
+        )
         # Ensure we have this training available for the next acad
         GeneralEducationTrainingFactory(
             academic_year__year=1980,
@@ -76,6 +94,17 @@ class GeneralPropositionSubmissionTestCase(APITestCase):
             acronym=cls.admission_ok.training.acronym,
             partial_acronym=cls.admission_ok.training.partial_acronym,
         )
+        cls.data_ok = {
+            'pool': AcademicCalendarTypes.ADMISSION_POOL_UE5_BELGIAN.name,
+            'annee': 1980,
+            'elements_confirmation': {
+                'reglement_general': IElementsConfirmation.REGLEMENT_GENERAL,
+                'protection_donnees': IElementsConfirmation.PROTECTION_DONNEES,
+                'professions_reglementees': IElementsConfirmation.PROFESSIONS_REGLEMENTEES,
+                'justificatifs': IElementsConfirmation.JUSTIFICATIFS,
+                'declaration_sur_lhonneur': IElementsConfirmation.DECLARATION_SUR_LHONNEUR,
+            },
+        }
 
     def test_general_proposition_verification_with_errors(self):
         self.client.force_authenticate(user=self.candidate_errors.user)
@@ -107,6 +136,54 @@ class GeneralPropositionSubmissionTestCase(APITestCase):
         self.assertEqual(ret['pot_calcule'], AcademicCalendarTypes.ADMISSION_POOL_UE5_BELGIAN.name)
         self.assertIsNotNone(ret['date_fin_pot'])
 
+    def test_general_proposition_verification_ok_valuate_experiences(self):
+        educational_experience = EducationalExperienceFactory(person=self.second_candidate_ok)
+        professional_experience = ProfessionalExperienceFactory(person=self.second_candidate_ok)
+
+        self.client.force_authenticate(user=self.second_candidate_ok.user)
+
+        # First submission
+        response = self.client.post(self.second_ok_url, data=self.data_ok)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.second_admission_ok.refresh_from_db()
+
+        # Valuation of the secondary studies
+        self.assertEqual(self.second_admission_ok.valuated_secondary_studies_person, self.second_candidate_ok)
+
+        # Valuation of the curriculum experiences
+        self.assertEqual(len(self.second_admission_ok.educational_valuated_experiences.all()), 1)
+        self.assertEqual(len(self.second_admission_ok.professional_valuated_experiences.all()), 1)
+        self.assertEqual(
+            self.second_admission_ok.educational_valuated_experiences.first().uuid,
+            educational_experience.uuid,
+        )
+        self.assertEqual(
+            self.second_admission_ok.professional_valuated_experiences.first().uuid,
+            professional_experience.uuid,
+        )
+
+        # Second submission
+        response = self.client.post(self.third_ok_url, data=self.data_ok)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.third_admission_ok.refresh_from_db()
+
+        # Valuation of the secondary studies
+        self.assertEqual(self.third_admission_ok.valuated_secondary_studies_person, None)
+
+        # Valuation of the curriculum experiences
+        self.assertEqual(len(self.third_admission_ok.educational_valuated_experiences.all()), 1)
+        self.assertEqual(len(self.third_admission_ok.professional_valuated_experiences.all()), 1)
+        self.assertEqual(
+            self.third_admission_ok.educational_valuated_experiences.first().uuid,
+            educational_experience.uuid,
+        )
+        self.assertEqual(
+            self.third_admission_ok.professional_valuated_experiences.first().uuid,
+            professional_experience.uuid,
+        )
+
     def test_general_proposition_verification_contingent_non_ouvert(self):
         admission = GeneralEducationAdmissionFactory(
             is_non_resident=True,
@@ -125,18 +202,7 @@ class GeneralPropositionSubmissionTestCase(APITestCase):
     def test_general_proposition_submission_ok(self):
         self.client.force_authenticate(user=self.candidate_ok.user)
         self.assertEqual(self.admission_ok.status, ChoixStatutProposition.IN_PROGRESS.name)
-        data = {
-            'pool': AcademicCalendarTypes.ADMISSION_POOL_UE5_BELGIAN.name,
-            'annee': 1980,
-            'elements_confirmation': {
-                'reglement_general': IElementsConfirmation.REGLEMENT_GENERAL,
-                'protection_donnees': IElementsConfirmation.PROTECTION_DONNEES,
-                'professions_reglementees': IElementsConfirmation.PROFESSIONS_REGLEMENTEES,
-                'justificatifs': IElementsConfirmation.JUSTIFICATIFS,
-                'declaration_sur_lhonneur': IElementsConfirmation.DECLARATION_SUR_LHONNEUR,
-            },
-        }
-        response = self.client.post(self.ok_url, data)
+        response = self.client.post(self.ok_url, self.data_ok)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
         self.admission_ok.refresh_from_db()
         self.assertEqual(self.admission_ok.status, ChoixStatutProposition.SUBMITTED.name)
@@ -170,6 +236,28 @@ class ContinuingPropositionSubmissionTestCase(APITestCase):
         cls.admission_ok = ContinuingEducationAdmissionFactory(with_access_conditions_met=True)
         cls.candidate_ok = cls.admission_ok.candidate
         cls.ok_url = resolve_url("admission_api_v1:submit-continuing-proposition", uuid=cls.admission_ok.uuid)
+
+        cls.second_admission_ok = ContinuingEducationAdmissionFactory(
+            with_access_conditions_met=True,
+            training=cls.admission_ok.training,
+        )
+        cls.third_admission_ok = ContinuingEducationAdmissionFactory(
+            candidate=cls.second_admission_ok.candidate,
+            with_access_conditions_met=True,
+            training=cls.admission_ok.training,
+        )
+
+        cls.second_candidate_ok = cls.second_admission_ok.candidate
+
+        cls.second_ok_url = resolve_url(
+            "admission_api_v1:submit-continuing-proposition",
+            uuid=cls.second_admission_ok.uuid,
+        )
+        cls.third_ok_url = resolve_url(
+            "admission_api_v1:submit-continuing-proposition",
+            uuid=cls.third_admission_ok.uuid,
+        )
+
         cls.submitted_data = {
             'pool': AcademicCalendarTypes.CONTINUING_EDUCATION_ENROLLMENT.name,
             'annee': 2022,
@@ -211,3 +299,51 @@ class ContinuingPropositionSubmissionTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
         self.admission_ok.refresh_from_db()
         self.assertEqual(self.admission_ok.status, ChoixStatutProposition.SUBMITTED.name)
+
+    def test_continuing_proposition_verification_ok_valuate_experiences(self):
+        educational_experience = EducationalExperience.objects.filter(person=self.second_candidate_ok).first()
+        professional_experience = ProfessionalExperienceFactory(person=self.second_candidate_ok)
+
+        self.client.force_authenticate(user=self.second_candidate_ok.user)
+
+        # First submission
+        response = self.client.post(self.second_ok_url, data=self.submitted_data)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.second_admission_ok.refresh_from_db()
+
+        # Valuation of the secondary studies
+        self.assertEqual(self.second_admission_ok.valuated_secondary_studies_person, self.second_candidate_ok)
+
+        # Valuation of the curriculum experiences
+        self.assertEqual(len(self.second_admission_ok.educational_valuated_experiences.all()), 1)
+        self.assertEqual(len(self.second_admission_ok.professional_valuated_experiences.all()), 1)
+        self.assertEqual(
+            self.second_admission_ok.educational_valuated_experiences.first().uuid,
+            educational_experience.uuid,
+        )
+        self.assertEqual(
+            self.second_admission_ok.professional_valuated_experiences.first().uuid,
+            professional_experience.uuid,
+        )
+
+        # Second submission
+        response = self.client.post(self.third_ok_url, data=self.submitted_data)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.third_admission_ok.refresh_from_db()
+
+        # Valuation of the secondary studies
+        self.assertEqual(self.third_admission_ok.valuated_secondary_studies_person, None)
+
+        # Valuation of the curriculum experiences
+        self.assertEqual(len(self.third_admission_ok.educational_valuated_experiences.all()), 1)
+        self.assertEqual(len(self.third_admission_ok.professional_valuated_experiences.all()), 1)
+        self.assertEqual(
+            self.third_admission_ok.educational_valuated_experiences.first().uuid,
+            educational_experience.uuid,
+        )
+        self.assertEqual(
+            self.third_admission_ok.professional_valuated_experiences.first().uuid,
+            professional_experience.uuid,
+        )

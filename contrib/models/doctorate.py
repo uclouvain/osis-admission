@@ -32,7 +32,6 @@ from django.core.cache import cache
 from django.db import models
 from django.db.models import OuterRef
 from django.db.models.functions import Cast
-from django.utils import timezone
 from django.utils.datetime_safe import date
 from django.utils.translation import get_language, gettext_lazy as _
 from rest_framework.settings import api_settings
@@ -48,7 +47,6 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
 )
 from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixStatutCDD, ChoixStatutSIC
 from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
-from base.models.academic_calendar import AcademicCalendar
 from base.models.academic_year import AcademicYear
 from base.models.entity_version import EntityVersion
 from base.models.enums.entity_type import SECTOR
