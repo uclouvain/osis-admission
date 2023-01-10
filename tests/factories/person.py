@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -27,7 +27,6 @@ import operator
 
 import factory
 
-from admission.ddd import BE_ISO_CODE
 from admission.tests.factories import PdfUploadFactory
 from admission.tests.factories.language import LanguageKnowledgeFactory
 from admission.tests.factories.secondary_studies import (
@@ -181,6 +180,8 @@ class CompletePersonForIUFCFactory(CompletePersonFactory):
 
 
 class IncompletePersonForBachelorFactory(CompletePersonFactory):
+    graduated_from_high_school = GotDiploma.NO.name
+
     @factory.post_generation
     def create_related_objects(self, create, extracted, **kwargs):
         PersonAddressFactory(

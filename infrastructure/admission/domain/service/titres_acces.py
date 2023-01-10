@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -30,6 +30,7 @@ from django.db import models
 
 from admission.ddd.admission.domain.service.i_titres_acces import ITitresAcces
 from admission.ddd.admission.dtos.conditions import AdmissionConditionsDTO
+from base.models.enums.got_diploma import GotDiploma
 from base.models.person import Person
 from osis_profile.models import (
     BelgianHighSchoolDiploma,
@@ -44,23 +45,39 @@ from reference.models.enums.cycle import Cycle
 class TitresAcces(ITitresAcces):
     @classmethod
     def conditions_remplies(cls, matricule_candidat: str, equivalence_diplome: List[str]) -> AdmissionConditionsDTO:
+        repondu_oui_ou_en_cours = models.Q(
+            graduated_from_high_school__in=[GotDiploma.YES.name, GotDiploma.THIS_YEAR.name]
+        )
         result = (
-            Person.objects.annotate(
+            Person.objects.alias(
+                diplome_belge=models.Exists(BelgianHighSchoolDiploma.objects.filter(person_id=models.OuterRef('pk'))),
+                diplome_etranger=models.Exists(
+                    ForeignHighSchoolDiploma.objects.filter(person_id=models.OuterRef('pk'))
+                ),
+                diplome_alternatif=models.Exists(
+                    HighSchoolDiplomaAlternative.objects.filter(person_id=models.OuterRef('pk'))
+                ),
+            )
+            .annotate(
                 # à la question sur la diplomation du secondaire, avoir répondu "oui" OU "en cours"
-                #     ET qu'il s'agisse d'études secondaires belges
-                diplomation_secondaire_belge=models.Exists(
-                    BelgianHighSchoolDiploma.objects.filter(person_id=models.OuterRef('pk'))
+                #     ET (qu'il s'agisse d'études secondaires belges OU que l'on n'a pas le détail du diplôme)
+                diplomation_secondaire_belge=models.ExpressionWrapper(
+                    repondu_oui_ou_en_cours
+                    & (models.Q(diplome_belge=True) | models.Q(diplome_etranger=False, diplome_alternatif=False)),
+                    output_field=models.BooleanField(),
                 ),
                 # à la question sur la diplomation du secondaire, avoir répondu "oui" OU "en cours"
                 #     ET qu'il s'agisse d'études secondaires étrangères
-                diplomation_secondaire_etranger=models.Exists(
-                    ForeignHighSchoolDiploma.objects.filter(person_id=models.OuterRef('pk'))
+                diplomation_secondaire_etranger=models.ExpressionWrapper(
+                    repondu_oui_ou_en_cours & models.Q(diplome_etranger=True),
+                    output_field=models.BooleanField(),
                 ),
                 # à la question sur la diplomation du secondaire, avoir répondu "non"
                 #     ET avoir fourni la PJ d'attestation de réussite de l'examen d'admission aux études de
                 #     premier cycle de l'enseignement supérieur
-                alternative_etudes_secondaires=models.Exists(
-                    HighSchoolDiplomaAlternative.objects.filter(person_id=models.OuterRef('pk'))
+                alternative_etudes_secondaires=models.ExpressionWrapper(
+                    models.Q(graduated_from_high_school=GotDiploma.NO.name, diplome_alternatif=True),
+                    output_field=models.BooleanField(),
                 ),
                 # avoir suivi, sans en être diplômé, une formation académique belge
                 #     de 1er cycle (c.-à-d. formation sélectionnée dans la liste déroulante ET étant de 1er cycle)
