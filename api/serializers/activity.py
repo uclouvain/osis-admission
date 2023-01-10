@@ -43,7 +43,7 @@ from admission.forms import SelectOrOtherField
 from admission.forms.doctorate.training import activity as activity_forms
 from admission.forms.doctorate.training.activity import AcademicYearField, ConfigurableActivityTypeField
 from base.api.serializers.academic_year import RelatedAcademicYearField
-from osis_document.contrib import FileUploadField
+from osis_document.contrib import FileUploadField, FileFieldSerializer
 from reference.api.serializers.country import RelatedCountryField
 
 FORM_SERIALIZER_FIELD_MAPPING = {
@@ -62,7 +62,7 @@ FORM_SERIALIZER_FIELD_MAPPING = {
     forms.TypedChoiceField: serializers.ChoiceField,  # "is_online" field
     forms.ModelChoiceField: serializers.Field,  # replaced correctly later
     forms.DecimalField: serializers.FloatField,
-    FileUploadField: serializers.ListField,
+    FileUploadField: FileFieldSerializer,
     AcademicYearField: RelatedAcademicYearField,
 }
 

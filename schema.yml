@@ -6035,6 +6035,7 @@ components:
           nullable: true
         uuid:
           type: string
+          format: uuid
           readOnly: true
         institute_name:
           type: string
@@ -6138,6 +6139,7 @@ components:
           readOnly: true
         uuid:
           type: string
+          format: uuid
           readOnly: true
         institute_name:
           type: string
@@ -6192,6 +6194,7 @@ components:
             properties:
               uuid:
                 type: string
+                format: uuid
                 readOnly: true
               institute_name:
                 type: string
@@ -6220,6 +6223,7 @@ components:
             properties:
               uuid:
                 type: string
+                format: uuid
                 readOnly: true
               institute_name:
                 type: string
@@ -9203,6 +9207,7 @@ components:
       properties:
         uuid:
           type: string
+          format: uuid
           readOnly: true
         short_name:
           type: string

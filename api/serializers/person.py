@@ -40,9 +40,6 @@ __all__ = [
 
 
 class PersonIdentificationSerializer(serializers.ModelSerializer):
-    serializer_field_mapping = serializers.ModelSerializer.serializer_field_mapping
-    serializer_field_mapping[models.UUIDField] = serializers.CharField
-
     last_registration_year = RelatedAcademicYearField(required=False)
     birth_country = RelatedCountryField(required=False)
     country_of_citizenship = RelatedCountryField(required=False)
