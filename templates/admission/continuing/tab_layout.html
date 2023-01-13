@@ -1,5 +1,5 @@
-{% extends base_template %}
-{% load static enums %}
+{% extends "admission/doctorate/tab_layout.html" %}
+{% load bootstrap3 i18n static admission enums %}
 
 {% comment "License" %}
   * OSIS stands for Open Student Information System. It's an application
@@ -25,20 +25,43 @@
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
 
-{% block actions-group %}{% endblock %}
+{% block breadcrumb %}
+  <li>
+    <a href="{% url 'admissions' %}" id="lnk_admissions">
+      {% trans 'Enrolments' %}
+    </a>
+  </li>
+  <li>
+    <a href="{% url 'admission:continuing-education:list' %}" id="lnk_admissions">
+      {% trans 'Continuing enrolments' %}
+    </a>
+  </li>
+  <li class="active">
+    {{ object.training.title }} ({{ object.reference }})
+  </li>
+{% endblock %}
 
-{% block tab_content %}
-  <h2>Calcul du pot</h2>
-  {% if exception %}
-    <p>
-      <strong>Exception</strong>: {{ exception.status_code }} ({{ exception.message }})<br/>
-    </p>
-  {% else %}
-    <p>
-      <strong>Date calcul</strong>: {{ date_calcul }}<br/>
-      <strong>Pot déterminé</strong>: {{ determined_pool|enum_display:'AcademicCalendarTypes' }}<br/>
-      <strong>Année déterminée</strong>: {{ determined_academic_year }}
-    </p>
-  {% endif %}
-  <pre>{{ pool_logs }}</pre>
+{% block page-header %}
+  <div class="page-header flex-content">
+    <h2>
+      {{ object.training.title }} ({{ object.reference }})
+    </h2>
+    <a
+        href="{% url 'admission:continuing-education:list' %}"
+        class="text-primary"
+    >
+      <span class="fa fa-stream"></span>
+      {% trans "Back to the list" %}
+    </a>
+  </div>
+{% endblock %}
+
+{% block panel-heading %}
+  <div>
+    {% trans "Candidate:" %} {{ object.candidate.first_name }} {{ object.candidate.last_name }}
+  </div>
+  <div>
+    {% trans "Status:" %}
+    {{ object.status|enum_display:'ChoixStatutProposition' }}
+  </div>
 {% endblock %}
