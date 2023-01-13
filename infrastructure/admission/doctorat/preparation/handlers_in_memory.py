@@ -45,6 +45,7 @@ from .repository.in_memory.proposition import PropositionInMemoryRepository
 from ..validation.repository.in_memory.demande import DemandeInMemoryRepository
 from ...domain.service.in_memory.calendrier_inscription import CalendrierInscriptionInMemory
 from ...domain.service.in_memory.elements_confirmation import ElementsConfirmationInMemory
+from ...domain.service.in_memory.maximum_propositions import MaximumPropositionsAutoriseesInMemory
 from ...domain.service.in_memory.titres_acces import TitresAccesInMemory
 
 _proposition_repository = PropositionInMemoryRepository()
@@ -60,6 +61,8 @@ _notification = NotificationInMemory()
 _titres_acces = TitresAccesInMemory()
 _membre_ca_translator = MembreCAInMemoryTranslator()
 _comptabilite_translator = ComptabiliteInMemoryTranslator()
+_maximum_propositions_autorisees = MaximumPropositionsAutoriseesInMemory()
+
 
 COMMAND_HANDLERS = {
     InitierPropositionCommand: lambda msg_bus, cmd: initier_proposition(
@@ -68,6 +71,7 @@ COMMAND_HANDLERS = {
         doctorat_translator=_doctorat_translator,
         bourse_translator=_bourse_translator,
         historique=_historique,
+        maximum_propositions_service=_maximum_propositions_autorisees,
     ),
     CompleterPropositionCommand: lambda msg_bus, cmd: completer_proposition(
         cmd,
@@ -112,6 +116,7 @@ COMMAND_HANDLERS = {
         questions_specifiques_translator=QuestionSpecifiqueInMemoryTranslator(),
         formation_translator=_doctorat_translator,
         calendrier_inscription=CalendrierInscriptionInMemory(),
+        maximum_propositions_service=_maximum_propositions_autorisees,
     ),
     VerifierProjetQuery: lambda msg_bus, cmd: verifier_projet(
         cmd,
@@ -167,6 +172,7 @@ COMMAND_HANDLERS = {
         doctorat_translator=_doctorat_translator,
         calendrier_inscription=CalendrierInscriptionInMemory(),
         element_confirmation=ElementsConfirmationInMemory(),
+        maximum_propositions_service=_maximum_propositions_autorisees,
     ),
     DefinirCotutelleCommand: lambda msg_bus, cmd: definir_cotutelle(
         cmd,

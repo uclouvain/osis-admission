@@ -174,6 +174,10 @@ ACTION_LINKS = {
         'path_name': 'admission_api_v1:propositions',
         'method': 'GET',
     },
+    'create_training_choice': {
+        'path_name': 'admission_api_v1:propositions',
+        'method': 'POST',
+    },
     # Supervised
     'list_supervised': {
         'path_name': 'admission_api_v1:supervised_propositions',
@@ -381,11 +385,6 @@ DOCTORATE_ACTION_LINKS = {
 }
 
 GENERAL_EDUCATION_ACTION_LINKS = {
-    # General education
-    'create_proposition': {
-        'path_name': 'admission_api_v1:general_training_choice',
-        'method': 'POST',
-    },
     'update_training_choice': {
         'path_name': 'admission_api_v1:general_training_choice',
         'method': 'PUT',

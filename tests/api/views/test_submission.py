@@ -30,8 +30,15 @@ from django.utils.translation import gettext_lazy as _
 from rest_framework import status
 from rest_framework.test import APITestCase
 
+from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import MaximumPropositionsAtteintException
 from admission.ddd.admission.domain.service.i_elements_confirmation import IElementsConfirmation
-from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutProposition
+from admission.ddd.admission.domain.validator.exceptions import NombrePropositionsSoumisesDepasseException
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    ChoixStatutProposition as ChoixStatutPropositionGenerale,
+)
+from admission.ddd.admission.formation_continue.domain.model.enums import (
+    ChoixStatutProposition as ChoixStatutPropositionContinue,
+)
 from admission.tests.factories.calendar import AdmissionAcademicCalendarFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
 from admission.tests.factories.curriculum import EducationalExperienceFactory, ProfessionalExperienceFactory
@@ -42,7 +49,7 @@ from admission.tests.factories.general_education import (
 from admission.tests.factories.person import IncompletePersonForBachelorFactory, IncompletePersonForIUFCFactory
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.education_group_types import TrainingType
-from osis_profile.models import EducationalExperience, ProfessionalExperience
+from osis_profile.models import EducationalExperience
 
 
 @freezegun.freeze_time("1980-03-25")
@@ -201,11 +208,11 @@ class GeneralPropositionSubmissionTestCase(APITestCase):
 
     def test_general_proposition_submission_ok(self):
         self.client.force_authenticate(user=self.candidate_ok.user)
-        self.assertEqual(self.admission_ok.status, ChoixStatutProposition.IN_PROGRESS.name)
+        self.assertEqual(self.admission_ok.status, ChoixStatutPropositionGenerale.IN_PROGRESS.name)
         response = self.client.post(self.ok_url, self.data_ok)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
         self.admission_ok.refresh_from_db()
-        self.assertEqual(self.admission_ok.status, ChoixStatutProposition.SUBMITTED.name)
+        self.assertEqual(self.admission_ok.status, ChoixStatutPropositionGenerale.SUBMITTED.name)
 
     def test_general_proposition_submission_bad_pool(self):
         self.client.force_authenticate(user=self.candidate_ok.user)
@@ -215,6 +222,21 @@ class GeneralPropositionSubmissionTestCase(APITestCase):
         }
         response = self.client.post(self.ok_url, data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_general_proposition_verification_too_much_submitted_propositions(self):
+        GeneralEducationAdmissionFactory(
+            candidate=self.candidate_ok,
+            status=ChoixStatutPropositionGenerale.SUBMITTED.name,
+        )
+        GeneralEducationAdmissionFactory(
+            candidate=self.candidate_ok,
+            status=ChoixStatutPropositionGenerale.SUBMITTED.name,
+        )
+        self.client.force_authenticate(user=self.candidate_ok.user)
+        response = self.client.get(self.ok_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        ret = response.json()
+        self.assertIn(NombrePropositionsSoumisesDepasseException.status_code, [e["status_code"] for e in ret['errors']])
 
 
 @freezegun.freeze_time('2022-12-10')
@@ -294,11 +316,11 @@ class ContinuingPropositionSubmissionTestCase(APITestCase):
 
     def test_continuing_proposition_submission_ok(self):
         self.client.force_authenticate(user=self.candidate_ok.user)
-        self.assertEqual(self.admission_ok.status, ChoixStatutProposition.IN_PROGRESS.name)
+        self.assertEqual(self.admission_ok.status, ChoixStatutPropositionContinue.IN_PROGRESS.name)
         response = self.client.post(self.ok_url, self.submitted_data)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
         self.admission_ok.refresh_from_db()
-        self.assertEqual(self.admission_ok.status, ChoixStatutProposition.SUBMITTED.name)
+        self.assertEqual(self.admission_ok.status, ChoixStatutPropositionContinue.SUBMITTED.name)
 
     def test_continuing_proposition_verification_ok_valuate_experiences(self):
         educational_experience = EducationalExperience.objects.filter(person=self.second_candidate_ok).first()
@@ -347,3 +369,18 @@ class ContinuingPropositionSubmissionTestCase(APITestCase):
             self.third_admission_ok.professional_valuated_experiences.first().uuid,
             professional_experience.uuid,
         )
+
+    def test_continuing_proposition_verification_too_much_submitted_propositions(self):
+        ContinuingEducationAdmissionFactory(
+            candidate=self.candidate_ok,
+            status=ChoixStatutPropositionContinue.SUBMITTED.name,
+        )
+        ContinuingEducationAdmissionFactory(
+            candidate=self.candidate_ok,
+            status=ChoixStatutPropositionContinue.SUBMITTED.name,
+        )
+        self.client.force_authenticate(user=self.candidate_ok.user)
+        response = self.client.get(self.ok_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        ret = response.json()
+        self.assertIn(NombrePropositionsSoumisesDepasseException.status_code, [e["status_code"] for e in ret['errors']])

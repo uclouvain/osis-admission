@@ -26,6 +26,7 @@
 from functools import partial
 
 from admission.ddd.admission.domain.service.i_calendrier_inscription import ICalendrierInscription
+from admission.ddd.admission.domain.service.i_maximum_propositions import IMaximumPropositionsAutorisees
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.domain.service.i_titres_acces import ITitresAcces
 from admission.ddd.admission.domain.service.profil_candidat import ProfilCandidat
@@ -45,6 +46,7 @@ class VerifierProposition(interface.DomainService):
         titres_acces: 'ITitresAcces',
         profil_candidat_translator: 'IProfilCandidatTranslator',
         calendrier_inscription: 'ICalendrierInscription',
+        maximum_propositions_service: 'IMaximumPropositionsAutorisees',
         annee_soumise: int = None,
         pool_soumis: 'AcademicCalendarTypes' = None,
     ) -> None:
@@ -82,5 +84,9 @@ class VerifierProposition(interface.DomainService):
                 formation_translator=formation_translator,
                 annee_soumise=annee_soumise,
                 pool_soumis=pool_soumis,
+            ),
+            partial(
+                maximum_propositions_service.verifier_nombre_propositions_envoyees_formation_continue,
+                matricule=proposition_candidat.matricule_candidat,
             ),
         )

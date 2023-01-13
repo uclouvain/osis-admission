@@ -45,6 +45,7 @@ from admission.ddd.admission.domain.validator.exceptions import (
     QuestionsSpecifiquesCurriculumNonCompleteesException,
     QuestionsSpecifiquesEtudesSecondairesNonCompleteesException,
     QuestionsSpecifiquesInformationsComplementairesNonCompleteesException,
+    NombrePropositionsSoumisesDepasseException,
 )
 from admission.ddd.admission.dtos import EtudesSecondairesDTO
 from admission.ddd.admission.dtos.etudes_secondaires import (
@@ -66,6 +67,7 @@ from admission.ddd.admission.enums import (
 from admission.ddd.admission.formation_generale.domain.builder.proposition_identity_builder import (
     PropositionIdentityBuilder,
 )
+from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutProposition
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
     AttestationContinuationBachelierNonRenseigneeException,
     ContinuationBachelierNonRenseigneeException,
@@ -161,6 +163,7 @@ class TestVerifierPropositionService(TestCase):
 
         self.academic_year_repository = AcademicYearInMemoryRepository()
         self.proposition_in_memory = PropositionInMemoryRepository()
+        self.addCleanup(self.proposition_in_memory.reset)
 
         self.candidat_translator = ProfilCandidatInMemoryTranslator()
         self.experiences_academiques = self.candidat_translator.experiences_academiques
@@ -1512,3 +1515,16 @@ class TestVerifierPropositionService(TestCase):
                 self.message_bus.invoke(self.cmd(self.master_proposition.entity_id.uuid))
 
             self.assertHasInstance(context.exception.exceptions, ExperiencesAcademiquesNonCompleteesException)
+
+    def test_should_verification_renvoyer_erreur_si_trop_de_demandes_envoyees(self):
+        propositions = self.proposition_in_memory.search(matricule_candidat='0000000001')
+        for proposition in propositions:
+            proposition.statut = ChoixStatutProposition.IN_PROGRESS
+
+        for proposition_index in range(2):
+            propositions[proposition_index].statut = ChoixStatutProposition.SUBMITTED
+
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            self.message_bus.invoke(VerifierPropositionQuery(uuid_proposition=propositions[2].entity_id.uuid))
+
+        self.assertHasInstance(context.exception.exceptions, NombrePropositionsSoumisesDepasseException)

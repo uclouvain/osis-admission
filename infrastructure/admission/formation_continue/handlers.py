@@ -32,6 +32,7 @@ from admission.infrastructure.admission.domain.service.annee_inscription_formati
 )
 from admission.infrastructure.admission.domain.service.calendrier_inscription import CalendrierInscription
 from admission.infrastructure.admission.domain.service.elements_confirmation import ElementsConfirmation
+from admission.infrastructure.admission.domain.service.maximum_propositions import MaximumPropositionsAutorisees
 from admission.infrastructure.admission.domain.service.profil_candidat import ProfilCandidatTranslator
 from admission.infrastructure.admission.domain.service.titres_acces import TitresAcces
 from admission.infrastructure.admission.formation_continue.domain.service.comptabilite import ComptabiliteTranslator
@@ -49,6 +50,7 @@ COMMAND_HANDLERS = {
         cmd,
         proposition_repository=PropositionRepository(),
         formation_translator=FormationContinueTranslator(),
+        maximum_propositions_service=MaximumPropositionsAutorisees(),
     ),
     ListerPropositionsCandidatQuery: lambda msg_bus, cmd: lister_propositions_candidat(
         cmd,
@@ -74,6 +76,7 @@ COMMAND_HANDLERS = {
         titres_acces=TitresAcces(),
         profil_candidat_translator=ProfilCandidatTranslator(),
         calendrier_inscription=CalendrierInscription(),
+        maximum_propositions_service=MaximumPropositionsAutorisees(),
     ),
     SoumettrePropositionCommand: lambda msg_bus, cmd: soumettre_proposition(
         cmd,
@@ -84,6 +87,7 @@ COMMAND_HANDLERS = {
         calendrier_inscription=CalendrierInscription(),
         element_confirmation=ElementsConfirmation(),
         notification=Notification(),
+        maximum_propositions_service=MaximumPropositionsAutorisees(),
     ),
     CompleterCurriculumCommand: lambda msg_bus, cmd: completer_curriculum(
         cmd,

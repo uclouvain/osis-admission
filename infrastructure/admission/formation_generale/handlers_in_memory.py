@@ -37,6 +37,9 @@ from admission.infrastructure.admission.domain.service.in_memory.calendrier_insc
 from admission.infrastructure.admission.domain.service.in_memory.elements_confirmation import (
     ElementsConfirmationInMemory,
 )
+from admission.infrastructure.admission.domain.service.in_memory.maximum_propositions import (
+    MaximumPropositionsAutoriseesInMemory,
+)
 from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
 from admission.infrastructure.admission.domain.service.in_memory.titres_acces import TitresAccesInMemory
 from admission.infrastructure.admission.formation_generale.domain.service.in_memory.comptabilite import (
@@ -65,6 +68,7 @@ _profil_candidat_translator = ProfilCandidatInMemoryTranslator()
 _question_specific_translator = QuestionSpecifiqueInMemoryTranslator()
 _academic_year_repository = AcademicYearInMemoryRepository()
 _comptabilite_translator = ComptabiliteInMemoryTranslator()
+_maximum_propositions_autorisees = MaximumPropositionsAutoriseesInMemory()
 
 
 COMMAND_HANDLERS = {
@@ -78,6 +82,7 @@ COMMAND_HANDLERS = {
         proposition_repository=_proposition_repository,
         formation_translator=_formation_generale_translator,
         bourse_translator=_bourse_translator,
+        maximum_propositions_service=_maximum_propositions_autorisees,
     ),
     ListerPropositionsCandidatQuery: lambda msg_bus, cmd: lister_propositions_candidat(
         cmd,
@@ -106,6 +111,7 @@ COMMAND_HANDLERS = {
         calendrier_inscription=CalendrierInscriptionInMemory(),
         academic_year_repository=_academic_year_repository,
         questions_specifiques_translator=_question_specific_translator,
+        maximum_propositions_service=_maximum_propositions_autorisees,
     ),
     SoumettrePropositionCommand: lambda msg_bus, cmd: soumettre_proposition(
         cmd,
@@ -118,6 +124,7 @@ COMMAND_HANDLERS = {
         questions_specifiques_translator=_question_specific_translator,
         element_confirmation=ElementsConfirmationInMemory(),
         notification=NotificationInMemory(),
+        maximum_propositions_service=_maximum_propositions_autorisees,
     ),
     CompleterCurriculumCommand: lambda msg_bus, cmd: completer_curriculum(
         cmd,

@@ -3280,13 +3280,43 @@ msgstr ""
 msgid "Yes, only in Tournai (10 EUR)"
 msgstr ""
 
-msgid ""
-"You already have a doctorate admission in progress, please delete it before "
-"creating a newer one, or contact your domain doctoral committee."
-msgstr ""
-
 msgid "You cannot fill in a language more than once, please correct the form."
 msgstr ""
+
+#, python-format
+msgid ""
+"You cannot have more than %(max)s applications in progress at the same time."
+msgstr ""
+
+#, python-format
+msgid ""
+"You cannot submit this admission for a continuing education as you already "
+"have submitted one."
+msgid_plural ""
+"You cannot submit this admission for a continuing education as you already "
+"have submitted %(maximum_number)s of them."
+msgstr[0] ""
+msgstr[1] ""
+
+#, python-format
+msgid ""
+"You cannot submit this admission for a doctorate education as you already "
+"have submitted one."
+msgid_plural ""
+"You cannot submit this admission for a doctorate education as you already "
+"have submitted %(maximum_number)s of them."
+msgstr[0] ""
+msgstr[1] ""
+
+#, python-format
+msgid ""
+"You cannot submit this admission for a general education as you already have "
+"submitted one."
+msgid_plural ""
+"You cannot submit this admission for a general education as you already have "
+"submitted %(maximum_number)s of them."
+msgstr[0] ""
+msgstr[1] ""
 
 msgid "You must add at least one CA member in order to request signatures."
 msgstr ""
@@ -3330,9 +3360,6 @@ msgid "You must be the request promoter to access this admission"
 msgstr ""
 
 msgid "You must set a reference promoter."
-msgstr ""
-
-msgid "You've reached the maximum authorized propositions."
 msgstr ""
 
 msgid "Your data has been saved"

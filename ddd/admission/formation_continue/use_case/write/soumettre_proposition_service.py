@@ -25,6 +25,7 @@
 # ##############################################################################
 from admission.ddd.admission.domain.service.i_calendrier_inscription import ICalendrierInscription
 from admission.ddd.admission.domain.service.i_elements_confirmation import IElementsConfirmation
+from admission.ddd.admission.domain.service.i_maximum_propositions import IMaximumPropositionsAutorisees
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.domain.service.i_titres_acces import ITitresAcces
 from admission.ddd.admission.formation_continue.commands import SoumettrePropositionCommand
@@ -48,6 +49,7 @@ def soumettre_proposition(
     calendrier_inscription: 'ICalendrierInscription',
     element_confirmation: 'IElementsConfirmation',
     notification: 'INotification',
+    maximum_propositions_service: 'IMaximumPropositionsAutorisees',
 ) -> 'PropositionIdentity':
     # GIVEN
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
@@ -62,6 +64,7 @@ def soumettre_proposition(
         calendrier_inscription=calendrier_inscription,
         annee_soumise=cmd.annee,
         pool_soumis=AcademicCalendarTypes[cmd.pool],
+        maximum_propositions_service=maximum_propositions_service,
     )
     element_confirmation.valider(
         soumis=cmd.elements_confirmation,

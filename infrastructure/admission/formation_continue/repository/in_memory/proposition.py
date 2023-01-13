@@ -102,10 +102,34 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
         return propositions
 
     @classmethod
+    def search(
+        cls,
+        entity_ids: Optional[List['PropositionIdentity']] = None,
+        matricule_candidat: str = None,
+        **kwargs,
+    ) -> List['Proposition']:
+        returned = cls.entities
+        if matricule_candidat:
+            returned = filter(lambda p: p.matricule_candidat == matricule_candidat, returned)
+        if entity_ids:  # pragma: no cover
+            returned = filter(lambda p: p.entity_id in entity_ids, returned)
+        return list(returned)
+
+    @classmethod
     def reset(cls):
         cls.entities = [
             PropositionFactory(
                 entity_id=factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-SC3DP'),
+                matricule_candidat='0123456789',
+                formation_id=FormationIdentityFactory(sigle="SC3DP", annee=2020),
+            ),
+            PropositionFactory(
+                entity_id=factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-SC3DP2'),
+                matricule_candidat='0123456789',
+                formation_id=FormationIdentityFactory(sigle="SC3DP", annee=2020),
+            ),
+            PropositionFactory(
+                entity_id=factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-SC3DP3'),
                 matricule_candidat='0123456789',
                 formation_id=FormationIdentityFactory(sigle="SC3DP", annee=2020),
             ),

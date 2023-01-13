@@ -29,7 +29,6 @@ from typing import List, Optional
 import factory
 
 from admission.ddd import CODE_BACHELIER_VETERINAIRE
-from admission.ddd.admission.dtos.formation import FormationDTO
 from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition, PropositionIdentity
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import PropositionNonTrouveeException
 from admission.ddd.admission.formation_generale.dtos import PropositionDTO
@@ -79,6 +78,20 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
             if proposition.matricule_candidat == matricule_candidat
         ]
         return propositions
+
+    @classmethod
+    def search(
+        cls,
+        entity_ids: Optional[List['PropositionIdentity']] = None,
+        matricule_candidat: str = None,
+        **kwargs,
+    ) -> List['Proposition']:
+        returned = cls.entities
+        if matricule_candidat:
+            returned = filter(lambda p: p.matricule_candidat == matricule_candidat, returned)
+        if entity_ids:  # pragma: no cover
+            returned = filter(lambda p: p.entity_id in entity_ids, returned)
+        return list(returned)
 
     @classmethod
     def reset(cls):

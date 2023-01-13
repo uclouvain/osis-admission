@@ -33,8 +33,8 @@ from osis_common.ddd.interface import BusinessException
 class MaximumPropositionsAtteintException(BusinessException):
     status_code = "PROPOSITION-1"
 
-    def __init__(self, **kwargs):
-        message = _("You've reached the maximum authorized propositions.")
+    def __init__(self, maximum, **kwargs):
+        message = _("You cannot have more than %(max)s applications in progress at the same time.") % {'max': maximum}
         super().__init__(message, **kwargs)
 
 

@@ -28,6 +28,7 @@ import uuid
 import attr
 from django.test import SimpleTestCase
 
+from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import MaximumPropositionsAtteintException
 from admission.ddd.admission.domain.validator.exceptions import BourseNonTrouveeException
 from admission.ddd.admission.enums.type_bourse import TypeBourse
 from admission.ddd.admission.formation_generale.commands import InitierPropositionCommand
@@ -94,3 +95,9 @@ class TestInitierPropositionService(SimpleTestCase):
         cmd = attr.evolve(self.cmd, bourse_internationale=str(uuid.uuid4()))
         with self.assertRaises(BourseNonTrouveeException):
             self.message_bus.invoke(cmd)
+
+    def test_should_empecher_si_trop_demandes_en_parallele(self):
+        for proposition_index in range(5):
+            self.message_bus.invoke(self.cmd)
+        with self.assertRaises(MaximumPropositionsAtteintException):
+            self.message_bus.invoke(self.cmd)

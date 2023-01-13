@@ -35,9 +35,10 @@ from rest_framework.serializers import Serializer
 from rest_framework.test import APIRequestFactory, APITestCase
 from rest_framework.views import APIView
 
-from admission.api.permissions import IsListingOrHasNotAlreadyCreatedForDoctoratePermission
+from admission.api.permissions import IsListingOrHasNotAlreadyCreatedPermission
 from admission.api.serializers.fields import ActionLinksField, RelatedInstituteField, TranslatedField
 from admission.contrib.models import DoctorateAdmission
+from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutProposition
 from admission.tests.factories import DoctorateAdmissionFactory
 from base.models.enums.entity_type import EntityType
 from base.tests.factories.entity_version import EntityVersionFactory
@@ -58,7 +59,7 @@ class TestAPIDetailViewWithPermissions(APIPermissionRequiredMixin, APIView):
 
 
 class TestAPIListAndCreateViewWithPermissions(APIPermissionRequiredMixin, APIView):
-    permission_classes = [IsListingOrHasNotAlreadyCreatedForDoctoratePermission]
+    permission_classes = [IsListingOrHasNotAlreadyCreatedPermission]
 
 
 class TestAPIViewWithoutPermission(APIView):
@@ -111,9 +112,7 @@ class SerializerFieldsTestCase(APITestCase):
         class SerializerWithActionLinks(Serializer):
             links = ActionLinksField(actions={})
 
-        serializer = SerializerWithActionLinks(
-            instance=self.first_doctorate_admission
-        )
+        serializer = SerializerWithActionLinks(instance=self.first_doctorate_admission)
         with self.assertRaisesMessage(ImproperlyConfigured, 'request'):
             assert serializer.data
 
@@ -133,13 +132,18 @@ class SerializerFieldsTestCase(APITestCase):
 
     def test_serializer_with_action_and_invalid_permission(self):
         # The list of actions contains one available action -> we return the related endpoint
+        for admission in range(5):
+            DoctorateAdmissionFactory(candidate=self.first_doctorate_admission.candidate)
+
         class SerializerWithActionLinks(Serializer):
-            links = ActionLinksField(actions={
-                'add_doctorateadmission': {
-                    'method': 'POST',
-                    'path_name': 'api_view_with_permissions',
+            links = ActionLinksField(
+                actions={
+                    'add_doctorateadmission': {
+                        'method': 'POST',
+                        'path_name': 'api_view_with_permissions',
+                    }
                 }
-            })
+            )
 
         serializer = SerializerWithActionLinks(
             instance=self.first_doctorate_admission,
@@ -148,23 +152,22 @@ class SerializerFieldsTestCase(APITestCase):
             },
         )
         self.assertTrue('links' in serializer.data)
-        self.assertEqual(serializer.data['links'], {
-            'add_doctorateadmission': {
-                'error': _(
-                    'You already have a doctorate admission in progress, please delete it before creating a newer one, '
-                    'or contact your domain doctoral committee.'
-                ),
-            }
-        })
+        self.assertEqual(
+            serializer.data['links'],
+            {'add_doctorateadmission': {'error': 'Vous ne pouvez pas avoir plus de 5 demandes ouvertes en parallèle.'}},
+        )
 
     def test_serializer_with_action_and_valid_permission(self):
         class SerializerWithActionLinks(Serializer):
-            links = ActionLinksField(actions={
-                'add_doctorateadmission': {
-                    'method': 'POST',
-                    'path_name': 'api_view_with_permissions',
+            links = ActionLinksField(
+                actions={
+                    'add_doctorateadmission': {
+                        'method': 'POST',
+                        'path_name': 'api_view_with_permissions',
+                    }
                 }
-            })
+            )
+
         serializer = SerializerWithActionLinks(
             instance=[],
             context={
@@ -172,23 +175,23 @@ class SerializerFieldsTestCase(APITestCase):
             },
         )
         self.assertTrue('links' in serializer.data)
-        self.assertEqual(serializer.data['links'], {
-            'add_doctorateadmission': {
-                'method': 'POST',
-                'url': reverse('api_view_with_permissions')
-            }
-        })
+        self.assertEqual(
+            serializer.data['links'],
+            {'add_doctorateadmission': {'method': 'POST', 'url': reverse('api_view_with_permissions')}},
+        )
 
     def test_serializer_with_action_and_valid_permission_and_param(self):
         # The list of actions contains one available action with a url parameter -> we return the related endpoint
         class SerializerWithActionLinks(Serializer):
-            links = ActionLinksField(actions={
-                'get_doctorateadmission': {
-                    'method': 'GET',
-                    'path_name': 'api_view_with_permissions_detail',
-                    'params': ['uuid']
+            links = ActionLinksField(
+                actions={
+                    'get_doctorateadmission': {
+                        'method': 'GET',
+                        'path_name': 'api_view_with_permissions_detail',
+                        'params': ['uuid'],
+                    }
                 }
-            })
+            )
 
         serializer = SerializerWithActionLinks(
             instance=self.first_doctorate_admission,
@@ -197,24 +200,29 @@ class SerializerFieldsTestCase(APITestCase):
             },
         )
         self.assertTrue('links' in serializer.data)
-        self.assertEqual(serializer.data['links'], {
-            'get_doctorateadmission': {
-                'method': 'GET',
-                'url': reverse('api_view_with_permissions_detail', args=[self.first_doctorate_admission.uuid]),
-            }
-        })
+        self.assertEqual(
+            serializer.data['links'],
+            {
+                'get_doctorateadmission': {
+                    'method': 'GET',
+                    'url': reverse('api_view_with_permissions_detail', args=[self.first_doctorate_admission.uuid]),
+                }
+            },
+        )
 
     def test_serializer_with_action_and_param_but_invalid_permission(self):
         # The list of actions contains one available action with a url parameter
         # But the user hasn't got access to this resource -> we return the related error
         class SerializerWithActionLinks(Serializer):
-            links = ActionLinksField(actions={
-                'update_doctorateadmission': {
-                    'method': 'PUT',
-                    'path_name': 'api_view_with_permissions_detail',
-                    'params': ['uuid']
+            links = ActionLinksField(
+                actions={
+                    'update_doctorateadmission': {
+                        'method': 'PUT',
+                        'path_name': 'api_view_with_permissions_detail',
+                        'params': ['uuid'],
+                    }
                 }
-            })
+            )
 
         serializer = SerializerWithActionLinks(
             instance=self.second_doctorate_admission,
@@ -223,22 +231,27 @@ class SerializerFieldsTestCase(APITestCase):
             },
         )
         self.assertTrue('links' in serializer.data)
-        self.assertEqual(serializer.data['links'], {
-            'update_doctorateadmission': {
-                'error': _("You must be the request author to access this admission"),
-            }
-        })
+        self.assertEqual(
+            serializer.data['links'],
+            {
+                'update_doctorateadmission': {
+                    'error': _("You must be the request author to access this admission"),
+                }
+            },
+        )
 
     def test_serializer_with_action_and_valid_permission_but_bad_params(self):
         # The list of actions contains one available action but with a bad url parameter -> we raise an exception
         class SerializerWithActionLinks(Serializer):
-            links = ActionLinksField(actions={
-                'get_doctorateadmission': {
-                    'method': 'GET',
-                    'path_name': 'api_view_with_permissions_detail',
-                    'params': ['incorrect_param']
+            links = ActionLinksField(
+                actions={
+                    'get_doctorateadmission': {
+                        'method': 'GET',
+                        'path_name': 'api_view_with_permissions_detail',
+                        'params': ['incorrect_param'],
+                    }
                 }
-            })
+            )
 
         serializer = SerializerWithActionLinks(
             instance=self.first_doctorate_admission,
@@ -252,12 +265,14 @@ class SerializerFieldsTestCase(APITestCase):
     def test_serializer_with_action_and_valid_permission_but_bad_path_name(self):
         # The list of actions contains one action with a bad path name -> we raise an exception
         class SerializerWithActionLinks(Serializer):
-            links = ActionLinksField(actions={
-                'add_doctorateadmission': {
-                    'method': 'POST',
-                    'path_name': 'invalid_api_view_with_permissions',
+            links = ActionLinksField(
+                actions={
+                    'add_doctorateadmission': {
+                        'method': 'POST',
+                        'path_name': 'invalid_api_view_with_permissions',
+                    }
                 }
-            })
+            )
 
         serializer = SerializerWithActionLinks(
             instance=self.first_doctorate_admission,
@@ -272,12 +287,14 @@ class SerializerFieldsTestCase(APITestCase):
         # The list of actions contains one action with a valid path name but related to a view which doesn't
         # implement the APIPermissionRequiredMixin mixin -> we raise an exception
         class SerializerWithActionLinks(Serializer):
-            links = ActionLinksField(actions={
-                'add_doctorateadmission': {
-                    'method': 'POST',
-                    'path_name': 'api_view_without_permission',
+            links = ActionLinksField(
+                actions={
+                    'add_doctorateadmission': {
+                        'method': 'POST',
+                        'path_name': 'api_view_without_permission',
+                    }
                 }
-            })
+            )
 
         serializer = SerializerWithActionLinks(
             instance=self.first_doctorate_admission,
@@ -295,13 +312,15 @@ class SerializerFieldsTestCase(APITestCase):
         doctorate_admissions = DoctorateAdmission.objects.all().order_by('created')
 
         class SerializerWithActionLinks(Serializer):
-            links = ActionLinksField(actions={
-                'get_doctorateadmission': {
-                    'method': 'GET',
-                    'path_name': 'api_view_with_permissions_detail',
-                    'params': ['uuid'],
+            links = ActionLinksField(
+                actions={
+                    'get_doctorateadmission': {
+                        'method': 'GET',
+                        'path_name': 'api_view_with_permissions_detail',
+                        'params': ['uuid'],
+                    }
                 }
-            })
+            )
 
         serializer = SerializerWithActionLinks(
             many=True,
@@ -313,19 +332,25 @@ class SerializerFieldsTestCase(APITestCase):
         self.assertEqual(len(serializer.data), 2)
         # First doctorate admission: the user has got the right permissions -> we return the related endpoint
         self.assertTrue('links' in serializer.data[0])
-        self.assertEqual(serializer.data[0]['links'], {
-            'get_doctorateadmission': {
-                'method': 'GET',
-                'url': reverse('api_view_with_permissions_detail', args=[self.first_doctorate_admission.uuid])
-            }
-        })
+        self.assertEqual(
+            serializer.data[0]['links'],
+            {
+                'get_doctorateadmission': {
+                    'method': 'GET',
+                    'url': reverse('api_view_with_permissions_detail', args=[self.first_doctorate_admission.uuid]),
+                }
+            },
+        )
         # Second doctorate admission: the user hasn't got the right permissions -> we return the error
         self.assertTrue('links' in serializer.data[1])
-        self.assertEqual(serializer.data[1]['links'], {
-            'get_doctorateadmission': {
-                'error': _("You must be the request author to access this admission"),
-            }
-        })
+        self.assertEqual(
+            serializer.data[1]['links'],
+            {
+                'get_doctorateadmission': {
+                    'error': _("You must be the request author to access this admission"),
+                }
+            },
+        )
 
 
 class TranslatedFieldTestCase(APITestCase):

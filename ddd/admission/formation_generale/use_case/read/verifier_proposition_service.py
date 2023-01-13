@@ -26,6 +26,7 @@
 import datetime
 
 from admission.ddd.admission.domain.service.i_calendrier_inscription import ICalendrierInscription
+from admission.ddd.admission.domain.service.i_maximum_propositions import IMaximumPropositionsAutorisees
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.domain.service.i_titres_acces import ITitresAcces
 from admission.ddd.admission.enums.question_specifique import Onglets
@@ -49,6 +50,7 @@ def verifier_proposition(
     calendrier_inscription: 'ICalendrierInscription',
     academic_year_repository: 'IAcademicYearRepository',
     questions_specifiques_translator: 'IQuestionSpecifiqueTranslator',
+    maximum_propositions_service: 'IMaximumPropositionsAutorisees',
 ) -> 'PropositionIdentity':
     # GIVEN
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
@@ -75,6 +77,7 @@ def verifier_proposition(
         calendrier_inscription=calendrier_inscription,
         annee_courante=annee_courante,
         questions_specifiques=questions_specifiques,
+        maximum_propositions_service=maximum_propositions_service,
     )
 
     # THEN
