@@ -29,14 +29,12 @@ from unittest import mock
 from unittest.mock import patch
 
 import freezegun
-from django.db import connection
 from django.shortcuts import resolve_url
 from django.test import override_settings
 from rest_framework import status
 from rest_framework.test import APITestCase
 
 from admission.contrib.models import AdmissionType, DoctorateAdmission, AdmissionFormItemInstantiation
-from admission.contrib.models.doctorate import REFERENCE_SEQ_NAME
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixCommissionProximiteCDEouCLSM,
     ChoixCommissionProximiteCDSS,
@@ -47,7 +45,6 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
 )
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     AbsenceDeDetteNonCompleteeException,
-    DoctoratNonTrouveException,
     MembreCAManquantException,
     PromoteurDeReferenceManquantException,
     PromoteurManquantException,
@@ -55,9 +52,9 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
 from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixStatutCDD
 from admission.ddd.admission.domain.service.i_elements_confirmation import IElementsConfirmation
 from admission.ddd.admission.domain.validator.exceptions import (
-    BourseNonTrouveeException,
     QuestionsSpecifiquesChoixFormationNonCompleteesException,
     QuestionsSpecifiquesCurriculumNonCompleteesException,
+    NombrePropositionsSoumisesDepasseException,
 )
 from admission.ddd.admission.enums.question_specifique import Onglets
 from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
@@ -65,12 +62,10 @@ from admission.tests import QueriesAssertionsMixin, CheckActionLinksMixin
 from admission.tests.factories import DoctorateAdmissionFactory, WriteTokenFactory
 from admission.tests.factories.calendar import AdmissionAcademicCalendarFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
-from admission.tests.factories.doctorate import DoctorateFactory
 from admission.tests.factories.form_item import AdmissionFormItemInstantiationFactory, TextAdmissionFormItemFactory
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.person import CompletePersonFactory
 from admission.tests.factories.roles import CandidateFactory, CddManagerFactory
-from admission.tests.factories.scholarship import ErasmusMundusScholarshipFactory
 from admission.tests.factories.supervision import CaMemberFactory, PromoterFactory, _ProcessFactory
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.community import CommunityEnum
@@ -147,9 +142,7 @@ class DoctorateAdmissionListApiTestCase(QueriesAssertionsMixin, CheckActionLinks
         self.assertActionLinks(
             response.data['links'],
             allowed_actions=[
-                'create_doctorate_proposition',
-                'create_general_proposition',
-                'create_continuing_proposition',
+                'create_training_choice',
             ],
             forbidden_actions=[],
         )
@@ -254,12 +247,9 @@ class DoctorateAdmissionListApiTestCase(QueriesAssertionsMixin, CheckActionLinks
         self.assertActionLinks(
             response.data['links'],
             allowed_actions=[
-                'create_general_proposition',
-                'create_continuing_proposition',
+                'create_training_choice',
             ],
-            forbidden_actions=[
-                'create_doctorate_proposition',
-            ],
+            forbidden_actions=[],
         )
 
         # Check doctorate proposition
@@ -344,80 +334,6 @@ class DoctorateAdmissionListApiTestCase(QueriesAssertionsMixin, CheckActionLinks
         for method in methods_not_allowed:
             response = getattr(self.client, method)(self.url)
             self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
-
-
-class DoctorateAdmissionCreationApiTestCase(APITestCase):
-    @classmethod
-    def setUpTestData(cls):
-        cls.candidate = PersonFactory()
-        root = EntityVersionFactory(parent=None).entity
-        cls.sector = EntityVersionFactory(
-            parent=root,
-            entity_type=EntityType.SECTOR.name,
-            acronym='SST',
-        ).entity
-        cls.commission = EntityVersionFactory(
-            parent=cls.sector,
-            entity_type=EntityType.DOCTORAL_COMMISSION.name,
-            acronym='CDA',
-        ).entity
-        cls.doctorate = DoctorateFactory(management_entity=cls.commission)
-        cls.scholarship = ErasmusMundusScholarshipFactory()
-
-        cls.create_data = {
-            "type_admission": AdmissionType.PRE_ADMISSION.name,
-            "justification": "Some justification",
-            "sigle_formation": cls.doctorate.acronym,
-            "annee_formation": cls.doctorate.academic_year.year,
-            "matricule_candidat": cls.candidate.global_id,
-            "commission_proximite": '',
-            "bourse_erasmus_mundus": cls.scholarship.uuid,
-        }
-        cls.url = resolve_url("admission_api_v1:propositions")
-
-    def test_admission_doctorate_creation_using_api_candidate(self):
-        self.client.force_authenticate(user=self.candidate.user)
-        with connection.cursor() as cursor:
-            cursor.execute("SELECT last_value FROM %(sequence)s" % {'sequence': REFERENCE_SEQ_NAME})
-            seq_value = cursor.fetchone()[0]
-        response = self.client.post(self.url, data=self.create_data)
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.content)
-        admissions = DoctorateAdmission.objects.all()
-        self.assertEqual(admissions.count(), 1)
-        admission = admissions.get(uuid=response.data["uuid"])
-        self.assertEqual(admission.type, self.create_data["type_admission"])
-        self.assertEqual(admission.comment, self.create_data["justification"])
-        self.assertEqual(admission.erasmus_mundus_scholarship_id, self.scholarship.pk)
-
-        response = self.client.get(self.url, format="json")
-        self.assertEqual(response.json()['doctorate_propositions'][0]["doctorat"]['sigle'], self.doctorate.acronym)
-        self.assertEqual(
-            admission.reference,
-            '{}-{}'.format(
-                self.doctorate.academic_year.year % 100,
-                300000 + seq_value + 1,
-            ),
-        )
-
-    def test_admission_doctorate_creation_using_api_with_wrong_doctorate(self):
-        self.client.force_authenticate(user=self.candidate.user)
-        data = {**self.create_data, "sigle_formation": "UNKONWN"}
-        response = self.client.post(self.url, data=data)
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.json()['non_field_errors'][0]['status_code'], DoctoratNonTrouveException.status_code)
-
-    def test_admission_doctorate_creation_using_api_with_wrong_scholarship(self):
-        self.client.force_authenticate(user=self.candidate.user)
-        data = {**self.create_data, 'bourse_erasmus_mundus': str(uuid.uuid4())}
-        response = self.client.post(self.url, data=data)
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.json()['non_field_errors'][0]['status_code'], BourseNonTrouveeException.status_code)
-
-    def test_user_not_logged_assert_not_authorized(self):
-        self.client.force_authenticate(user=None)
-
-        response = self.client.post(self.url)
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
 
 class DoctorateAdmissionApiTestCase(QueriesAssertionsMixin, APITestCase):
@@ -1107,6 +1023,33 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
                     'postal_box': 'B2',
                 },
             },
+        )
+
+    def test_submit_valid_proposition_using_api_but_too_much_submitted_propositions(self):
+        DoctorateAdmissionFactory(
+            training__academic_year__current=True,
+            candidate=self.first_candidate,
+            status=ChoixStatutProposition.SUBMITTED.name,
+            supervision_group=self.first_invited_promoter.actor_ptr.process,
+        )
+
+        admission = DoctorateAdmissionFactory(
+            training__academic_year__current=True,
+            candidate=self.first_candidate,
+            status=ChoixStatutProposition.SIGNING_IN_PROGRESS.name,
+            supervision_group=self.first_invited_promoter.actor_ptr.process,
+        )
+        CddManagerFactory(entity=admission.doctorate.management_entity)
+
+        self.client.force_authenticate(user=self.first_candidate.user)
+
+        url = resolve_url("admission_api_v1:submit-doctoral-proposition", uuid=admission.uuid)
+        response = self.client.post(url, self.submitted_data)
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        ret = response.json()
+        self.assertIn(
+            NombrePropositionsSoumisesDepasseException.status_code, [e["status_code"] for e in ret['non_field_errors']]
         )
 
     def test_submit_invalid_proposition_using_api(self):

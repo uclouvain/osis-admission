@@ -28,6 +28,7 @@ from typing import List
 
 from admission.ddd.admission.domain.model.question_specifique import QuestionSpecifique
 from admission.ddd.admission.domain.service.i_calendrier_inscription import ICalendrierInscription
+from admission.ddd.admission.domain.service.i_maximum_propositions import IMaximumPropositionsAutorisees
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.domain.service.i_titres_acces import ITitresAcces
 from admission.ddd.admission.domain.service.profil_candidat import ProfilCandidat
@@ -50,6 +51,7 @@ class VerifierProposition(interface.DomainService):
         calendrier_inscription: 'ICalendrierInscription',
         annee_courante: int,
         questions_specifiques: List[QuestionSpecifique],
+        maximum_propositions_service: 'IMaximumPropositionsAutorisees',
         annee_soumise: int = None,
         pool_soumis: 'AcademicCalendarTypes' = None,
     ) -> None:
@@ -125,5 +127,9 @@ class VerifierProposition(interface.DomainService):
                 formation_translator=formation_translator,
                 annee_soumise=annee_soumise,
                 pool_soumis=pool_soumis,
+            ),
+            partial(
+                maximum_propositions_service.verifier_nombre_propositions_envoyees_formation_generale,
+                matricule=proposition_candidat.matricule_candidat,
             ),
         )

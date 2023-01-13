@@ -25,6 +25,7 @@
 # ##############################################################################
 
 from admission.ddd.admission.domain.service.i_calendrier_inscription import ICalendrierInscription
+from admission.ddd.admission.domain.service.i_maximum_propositions import IMaximumPropositionsAutorisees
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.domain.service.i_titres_acces import ITitresAcces
 from ...commands import VerifierPropositionQuery
@@ -42,6 +43,7 @@ def verifier_proposition(
     titres_acces: 'ITitresAcces',
     profil_candidat_translator: 'IProfilCandidatTranslator',
     calendrier_inscription: 'ICalendrierInscription',
+    maximum_propositions_service: 'IMaximumPropositionsAutorisees',
 ) -> 'PropositionIdentity':
     # GIVEN
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
@@ -53,6 +55,7 @@ def verifier_proposition(
         titres_acces,
         profil_candidat_translator,
         calendrier_inscription,
+        maximum_propositions_service,
     )
 
     # THEN

@@ -32,6 +32,7 @@ from admission.api.serializers.fields import (
     DOCTORATE_ACTION_LINKS,
     GENERAL_EDUCATION_ACTION_LINKS,
     RelatedInstituteField,
+    ACTION_LINKS,
 )
 from admission.api.serializers.mixins import IncludedFieldsMixin
 from admission.contrib.models import AdmissionType, DoctorateAdmission
@@ -250,9 +251,7 @@ class ContinuingEducationPropositionSearchDTOSerializer(IncludedFieldsMixin, DTO
 class PropositionSearchSerializer(serializers.Serializer):
     links = ActionLinksField(
         actions={
-            'create_doctorate_proposition': DOCTORATE_ACTION_LINKS['create_doctorate_proposition'],
-            'create_general_proposition': GENERAL_EDUCATION_ACTION_LINKS['create_proposition'],
-            'create_continuing_proposition': CONTINUING_EDUCATION_ACTION_LINKS['create_proposition'],
+            'create_training_choice': ACTION_LINKS['create_training_choice'],
         }
     )
 

@@ -29,7 +29,7 @@ from rest_framework.generics import GenericAPIView, ListAPIView, ListCreateAPIVi
 from rest_framework.response import Response
 
 from admission.api import serializers
-from admission.api.permissions import IsListingOrHasNotAlreadyCreatedForDoctoratePermission, IsSupervisionMember
+from admission.api.permissions import IsListingOrHasNotAlreadyCreatedPermission, IsSupervisionMember
 from admission.api.schema import ResponseSpecificSchema
 from admission.contrib.models import DoctorateAdmission
 from admission.ddd.admission.doctorat.preparation.commands import (
@@ -84,7 +84,7 @@ class PropositionListView(APIPermissionRequiredMixin, DisplayExceptionsByFieldNa
     schema = PropositionListSchema()
     pagination_class = None
     filter_backends = []
-    permission_classes = [IsListingOrHasNotAlreadyCreatedForDoctoratePermission]
+    permission_classes = [IsListingOrHasNotAlreadyCreatedPermission]
 
     field_name_by_exception = {
         JustificationRequiseException: ['justification'],
@@ -114,13 +114,9 @@ class PropositionListView(APIPermissionRequiredMixin, DisplayExceptionsByFieldNa
         return Response(serializer.data)
 
     def create(self, request, **kwargs):
-        """Create a new proposition"""
-        serializer = serializers.InitierPropositionCommandSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        result = message_bus_instance.invoke(InitierPropositionCommand(**serializer.data))
-        get_cached_admission_perm_obj(result.uuid).update_detailed_status()
-        serializer = serializers.PropositionIdentityDTOSerializer(instance=result)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        """Not implemented"""
+        # Only used to know if the creation is possible whatever the context
+        raise NotImplementedError
 
 
 class SupervisedPropositionListSchema(ResponseSpecificSchema):

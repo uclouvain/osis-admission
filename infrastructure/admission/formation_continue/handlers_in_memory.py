@@ -36,6 +36,9 @@ from admission.infrastructure.admission.domain.service.in_memory.calendrier_insc
 from admission.infrastructure.admission.domain.service.in_memory.elements_confirmation import (
     ElementsConfirmationInMemory,
 )
+from admission.infrastructure.admission.domain.service.in_memory.maximum_propositions import (
+    MaximumPropositionsAutoriseesInMemory,
+)
 from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
 from admission.infrastructure.admission.domain.service.in_memory.titres_acces import TitresAccesInMemory
 from admission.infrastructure.admission.formation_continue.domain.service.in_memory.comptabilite import (
@@ -57,6 +60,7 @@ _annee_inscription_formation_translator = AnneeInscriptionFormationInMemoryTrans
 _titres_acces = TitresAccesInMemory()
 _profil_candidat_translator = ProfilCandidatInMemoryTranslator()
 _comptabilite_translator = ComptabiliteInMemoryTranslator()
+_maximum_propositions_autorisees = MaximumPropositionsAutoriseesInMemory()
 
 
 COMMAND_HANDLERS = {
@@ -69,6 +73,7 @@ COMMAND_HANDLERS = {
         cmd,
         proposition_repository=_proposition_repository,
         formation_translator=_formation_continue_translator,
+        maximum_propositions_service=_maximum_propositions_autorisees,
     ),
     ListerPropositionsCandidatQuery: lambda msg_bus, cmd: lister_propositions_candidat(
         cmd,
@@ -94,6 +99,7 @@ COMMAND_HANDLERS = {
         titres_acces=_titres_acces,
         profil_candidat_translator=_profil_candidat_translator,
         calendrier_inscription=CalendrierInscriptionInMemory(),
+        maximum_propositions_service=_maximum_propositions_autorisees,
     ),
     SoumettrePropositionCommand: lambda msg_bus, cmd: soumettre_proposition(
         cmd,
@@ -104,6 +110,7 @@ COMMAND_HANDLERS = {
         calendrier_inscription=CalendrierInscriptionInMemory(),
         element_confirmation=ElementsConfirmationInMemory(),
         notification=NotificationInMemory(),
+        maximum_propositions_service=_maximum_propositions_autorisees,
     ),
     CompleterCurriculumCommand: lambda msg_bus, cmd: completer_curriculum(
         cmd,

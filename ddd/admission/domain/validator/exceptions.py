@@ -166,3 +166,7 @@ class ElementsConfirmationNonConcordants(BusinessException):
     def __init__(self, **kwargs):
         message = _("The submitted information is not consistent with information requested.")
         super().__init__(message, **kwargs)
+
+
+class NombrePropositionsSoumisesDepasseException(BusinessException):
+    status_code = "ADMISSION-15"

@@ -45,6 +45,7 @@ from .repository.proposition import PropositionRepository
 from ..validation.repository.demande import DemandeRepository
 from ...domain.service.calendrier_inscription import CalendrierInscription
 from ...domain.service.elements_confirmation import ElementsConfirmation
+from ...domain.service.maximum_propositions import MaximumPropositionsAutorisees
 from ...domain.service.titres_acces import TitresAcces
 
 COMMAND_HANDLERS = {
@@ -54,6 +55,7 @@ COMMAND_HANDLERS = {
         doctorat_translator=DoctoratTranslator(),
         bourse_translator=BourseTranslator(),
         historique=Historique(),
+        maximum_propositions_service=MaximumPropositionsAutorisees(),
     ),
     CompleterPropositionCommand: lambda msg_bus, cmd: completer_proposition(
         cmd,
@@ -98,6 +100,7 @@ COMMAND_HANDLERS = {
         questions_specifiques_translator=QuestionSpecifiqueTranslator(),
         formation_translator=DoctoratTranslator(),
         calendrier_inscription=CalendrierInscription(),
+        maximum_propositions_service=MaximumPropositionsAutorisees(),
     ),
     VerifierProjetQuery: lambda msg_bus, cmd: verifier_projet(
         cmd,
@@ -153,6 +156,7 @@ COMMAND_HANDLERS = {
         doctorat_translator=DoctoratTranslator(),
         calendrier_inscription=CalendrierInscription(),
         element_confirmation=ElementsConfirmation(),
+        maximum_propositions_service=MaximumPropositionsAutorisees(),
     ),
     DefinirCotutelleCommand: lambda msg_bus, cmd: definir_cotutelle(
         cmd,

@@ -70,7 +70,9 @@ from admission.ddd.admission.doctorat.preparation.test.factory.proposition impor
 from admission.ddd.admission.domain.validator.exceptions import (
     QuestionsSpecifiquesCurriculumNonCompleteesException,
     QuestionsSpecifiquesEtudesSecondairesNonCompleteesException,
+    NombrePropositionsSoumisesDepasseException,
 )
+from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutProposition
 from admission.infrastructure.admission.doctorat.preparation.repository.in_memory.groupe_de_supervision import (
     GroupeDeSupervisionInMemoryRepository,
 )
@@ -92,6 +94,10 @@ from osis_profile.models.enums.curriculum import Result, TranscriptType
 
 
 class TestVerifierPropositionServiceCommun(TestCase):
+    def assertHasInstance(self, container, cls, msg=None):
+        if not any(isinstance(obj, cls) for obj in container):
+            self.fail(msg or f"No instance of '{cls}' has been found")
+
     def setUp(self) -> None:
         self.candidat_translator = ProfilCandidatInMemoryTranslator()
         self.proposition_repository = PropositionInMemoryRepository()
@@ -400,6 +406,17 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
             exception=CarteBancaireRemboursementAutreFormatNonCompleteException,
         )
 
+    def test_should_verification_renvoyer_erreur_si_trop_de_demandes_envoyees(self):
+        propositions = self.proposition_repository.search(matricule_candidat=self.candidat.matricule)
+        last_proposition = propositions.pop()
+        for proposition in propositions:
+            proposition.statut = ChoixStatutProposition.IN_PROGRESS
+        last_proposition.statut = ChoixStatutProposition.SUBMITTED
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            self.message_bus.invoke(self.cmd)
+
+        self.assertHasInstance(context.exception.exceptions, NombrePropositionsSoumisesDepasseException)
+
 
 class TestVerifierPropositionServiceCurriculumYears(TestVerifierPropositionServiceCommun):
     def setUp(self) -> None:
@@ -459,10 +476,6 @@ class TestVerifierPropositionServiceCurriculumYears(TestVerifierPropositionServi
             date_prevue_delivrance_diplome=datetime.date(2020, 9, 1),
             uuid='9cbdf4db-2454-4cbf-9e48-55d2a9881ee6',
         )
-
-    def assertHasInstance(self, container, cls, msg=None):
-        if not any(isinstance(obj, cls) for obj in container):
-            self.fail(msg or f"No instance of '{cls}' has been found")
 
     def assertAnneesCurriculum(self, exceptions, messages):
         messages_renvoyes = []

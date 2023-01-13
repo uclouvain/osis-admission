@@ -53,6 +53,7 @@ from admission.api.views.references import RetrieveScholarshipView, RetrieveCamp
 from admission.api.views.training_choice import (
     ContinuingTrainingChoiceAPIView,
     ContinuingUpdateTrainingChoiceAPIView,
+    DoctorateTrainingChoiceAPIView,
     DoctorateUpdateAdmissionTypeAPIView,
     GeneralTrainingChoiceAPIView,
     GeneralUpdateTrainingChoiceAPIView,
