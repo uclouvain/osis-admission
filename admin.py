@@ -240,11 +240,22 @@ class AdmissionFormItemAdmin(admin.ModelAdmin):
         'active',
     ]
 
+    def get_search_results(self, request, queryset, search_term):
+        queryset, use_distinct = super().get_search_results(request, queryset, search_term)
+
+        # Exclude inactive
+        if (
+            request.GET.get('model_name') == 'admissionformiteminstantiation'
+            and request.GET.get('field_name') == 'form_item'
+        ):
+            queryset = queryset.filter(active=True).order_by('internal_label')
+
+        return queryset, use_distinct
+
 
 class AdmissionFormItemInstantiationForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['form_item'].queryset = AdmissionFormItem.objects.filter(active=True).order_by('internal_label')
         self.fields['academic_year'].queryset = AcademicYear.objects.filter(year__gte=FORM_ITEM_MIN_YEAR)
         self.fields['education_group_type'].queryset = EducationGroupType.objects.filter(
             category=Categories.TRAINING.name
@@ -283,6 +294,7 @@ class AdmissionFormItemInstantiationAdmin(admin.ModelAdmin):
         AcademicYearListFilter,
     ]
     raw_id_fields = ['education_group']
+    autocomplete_fields = ['form_item']
     form = AdmissionFormItemInstantiationForm
 
     @admin.display(boolean=True, description=_('Is active?'))

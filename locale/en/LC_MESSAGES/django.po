@@ -739,6 +739,9 @@ msgstr ""
 msgid "Change <em>%(name)s</em> custom mail template"
 msgstr ""
 
+msgid "Checkboxes"
+msgstr ""
+
 msgid "Child of a member of the staff of the UCLouvain or the Martin V entity"
 msgstr ""
 
@@ -1237,7 +1240,12 @@ msgid ""
 "number (\"NOMBRE_MAX_DOCUMENT\", default to 1) and the MIME types "
 "(\"TYPES_MIME_FICHIER\") of the files that can be uploaded.<br>Full example: "
 "<code>{\"TYPES_MIME_FICHIER\": [\"application/pdf\"], \"NOMBRE_MAX_DOCUMENTS"
-"\": 3}</code>."
+"\": 3}</code>.<br><br>For a selection field, it is possible to specify if "
+"the selection is realised through a list (\"LISTE\", by default), checkboxes "
+"(\"CASES_A_COCHER\") or radio buttons (\"BOUTONS_RADIOS\") by using the "
+"\"TYPE_SELECTION\" property. The list and the radios buttons allow to select "
+"only one value whereas the checkboxes allow to select several values."
+"<br>Full example: <code>{\"TYPE_SELECTION\": \"CASES_A_COCHER\"}</code>."
 msgstr ""
 
 msgid "Form item"
@@ -1576,6 +1584,9 @@ msgstr ""
 msgid "Justification letter"
 msgstr ""
 
+msgid "Keys"
+msgstr ""
+
 msgid "Keywords"
 msgstr ""
 
@@ -1628,6 +1639,12 @@ msgid "Link to the doctoral training panel (back-office)"
 msgstr ""
 
 msgid "Link to the doctoral training panel (front-office)"
+msgstr ""
+
+msgid "List"
+msgstr ""
+
+msgid "List of the values that the Selection elements can take (one per row)."
 msgstr ""
 
 msgid "Long"
@@ -2133,8 +2150,8 @@ msgid "Place"
 msgstr ""
 
 msgid ""
-"Placeholder text for Text form elements. Not used for Document and Message "
-"elements."
+"Placeholder text for Text form elements. Not used for Document, Selection "
+"and Message elements."
 msgstr ""
 
 msgid "Plain text"
@@ -2348,13 +2365,13 @@ msgid "Published"
 msgstr ""
 
 msgid ""
-"Question label for Document and Text form elements. Not used for Message "
-"elements."
+"Question label for Document, Selection and Text form elements. Not used for "
+"Message elements."
 msgstr ""
 
 msgid ""
-"Question tooltip text for Document and Text form elements. Content of the "
-"message to be displayed for Message elements."
+"Question tooltip text for Document, Selection and Text form elements. "
+"Content of the message to be displayed for Message elements."
 msgstr ""
 
 msgid "REFUSED"
@@ -2370,6 +2387,9 @@ msgid "RESIDENCY"
 msgstr "Advanced research residency"
 
 msgid "RESIDENCY types"
+msgstr ""
+
+msgid "Radio buttons"
 msgstr ""
 
 msgid "Reason for exceeding the deadline"
@@ -2630,7 +2650,15 @@ msgstr ""
 msgid "Select for batch action"
 msgstr ""
 
+#, fuzzy
+#| msgid "Publication"
+msgid "Selection"
+msgstr "Publication"
+
 msgid "Selection committee"
+msgstr ""
+
+msgid "Selection type"
 msgstr ""
 
 msgid "Send a mail"
@@ -2957,6 +2985,12 @@ msgstr ""
 msgid "The opinion about the extension request is not completed."
 msgstr ""
 
+#, python-brace-format
+msgid ""
+"The option {index} must have an identifier and a translation for each "
+"required language."
+msgstr ""
+
 msgid "The person concerned"
 msgstr ""
 
@@ -2981,6 +3015,10 @@ msgid "The reason for refusal"
 msgstr ""
 
 msgid "The resulting calculated academic year or pool is not consistent."
+msgstr ""
+
+#, python-format
+msgid "The selection type must be one of the following values: %(values)s."
 msgstr ""
 
 msgid "The signature request procedure isn't in progress."
@@ -3216,6 +3254,9 @@ msgid "Validate these courses"
 msgstr ""
 
 msgid "Validated"
+msgstr ""
+
+msgid "Values"
 msgstr ""
 
 msgid "WBI - Wallonie Bruxelles International"

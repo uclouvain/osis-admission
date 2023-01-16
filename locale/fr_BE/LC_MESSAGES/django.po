@@ -805,6 +805,9 @@ msgstr "Modifier la configuration de <em>%(name)s</em>"
 msgid "Change <em>%(name)s</em> custom mail template"
 msgstr "Modifier le template d'email personnalisé <em>%(name)s</em>"
 
+msgid "Checkboxes"
+msgstr "Cases à cocher"
+
 msgid "Child of a member of the staff of the UCLouvain or the Martin V entity"
 msgstr "Enfant d'un membre du personnel de l'UCLouvain ou de l'entité Martin V"
 
@@ -1314,7 +1317,12 @@ msgid ""
 "number (\"NOMBRE_MAX_DOCUMENT\", default to 1) and the MIME types "
 "(\"TYPES_MIME_FICHIER\") of the files that can be uploaded.<br>Full example: "
 "<code>{\"TYPES_MIME_FICHIER\": [\"application/pdf\"], \"NOMBRE_MAX_DOCUMENTS"
-"\": 3}</code>."
+"\": 3}</code>.<br><br>For a selection field, it is possible to specify if "
+"the selection is realised through a list (\"LISTE\", by default), checkboxes "
+"(\"CASES_A_COCHER\") or radio buttons (\"BOUTONS_RADIOS\") by using the "
+"\"TYPE_SELECTION\" property. The list and the radios buttons allow to select "
+"only one value whereas the checkboxes allow to select several values."
+"<br>Full example: <code>{\"TYPE_SELECTION\": \"CASES_A_COCHER\"}</code>."
 msgstr ""
 "Pour un message, il est possible de spécifier la classe CSS qu'on veut y "
 "appliquer en utilisant la propriété \"CLASSE_CSS\". C'est une chaîne de "
@@ -1329,7 +1337,11 @@ msgstr ""
 "maximum (\"NOMBRE_MAX_DOCUMENT\", défaut à 1) et les types MIME "
 "(\"TYPES_MIME_FICHIER\") des fichiers téléversables.<br>Exemple complet : "
 "<code>{\"TYPES_MIME_FICHIER\": [\"application/pdf\"], \"NOMBRE_MAX_DOCUMENTS"
-"\": 3}</code>."
+"\": 3}</code>.<br><br>Pour un champ sélection, il est possible de spécifier "
+"si la sélection sera réalisée via une liste (\"LISTE\", par défaut) des "
+"cases à cocher (\"CASES_A_COCHER\") ou des boutons radios (\"BOUTONS_RADIOS"
+"\") en utilisant la propriété \"TYPE_SELECTION\".<br>Exemple complet : "
+"<code>{\"TYPE_SELECTION\": \"CASES_A_COCHER\"}</code>."
 
 msgid "Form item"
 msgstr "Élément de formulaire"
@@ -1755,6 +1767,9 @@ msgstr "Nom de la revue ou de la maison d'édition"
 msgid "Justification letter"
 msgstr "Lettre de justification"
 
+msgid "Keys"
+msgstr "Clés"
+
 msgid "Keywords"
 msgstr "Mots-clés"
 
@@ -1808,6 +1823,14 @@ msgstr "Lien vers la page liée à la formation doctorale (back-office)"
 
 msgid "Link to the doctoral training panel (front-office)"
 msgstr "Lien vers la page liée à la formation doctorale (front-office)"
+
+msgid "List"
+msgstr "Liste"
+
+msgid "List of the values that the Selection elements can take (one per row)."
+msgstr ""
+"Liste de valeurs que les éléments de type Sélection peuvent prendre (une par "
+"ligne)."
 
 msgid "Long"
 msgstr "Long"
@@ -2386,11 +2409,11 @@ msgid "Place"
 msgstr "Lieu-dit"
 
 msgid ""
-"Placeholder text for Text form elements. Not used for Document and Message "
-"elements."
+"Placeholder text for Text form elements. Not used for Document, Selection "
+"and Message elements."
 msgstr ""
 "Texte du placeholder pour les éléments de formulaire de type Texte. N'est "
-"pas utilisé pour les éléments de type Document et Message."
+"pas utilisé pour les éléments de type Document, Sélection et Message."
 
 msgid "Plain text"
 msgstr "Texte brut"
@@ -2627,19 +2650,19 @@ msgid "Published"
 msgstr "Publié"
 
 msgid ""
-"Question label for Document and Text form elements. Not used for Message "
-"elements."
+"Question label for Document, Selection and Text form elements. Not used for "
+"Message elements."
 msgstr ""
-"Libellé de la question pour les éléments de formulaire de type Document et "
-"Texte. N'est pas utilisé pour les éléments de type Message."
+"Libellé de la question pour les éléments de formulaire de type Document, "
+"Sélection et Texte. N'est pas utilisé pour les éléments de type Message."
 
 msgid ""
-"Question tooltip text for Document and Text form elements. Content of the "
-"message to be displayed for Message elements."
+"Question tooltip text for Document, Selection and Text form elements. "
+"Content of the message to be displayed for Message elements."
 msgstr ""
 "Texte du tooltip de la question pour les éléments de formulaire de type "
-"Document et Texte. Contenu du message à afficher pour les éléments de type "
-"Message."
+"Document, Sélection et Texte. Contenu du message à afficher pour les "
+"éléments de type Message."
 
 msgid "REFUSED"
 msgstr "Refusé"
@@ -2656,6 +2679,9 @@ msgstr "Séjour de perfectionnement de recherche"
 msgid "RESIDENCY types"
 msgstr ""
 "Types d'activité pour la catégorie Séjour de perfectionnement de recherche"
+
+msgid "Radio buttons"
+msgstr "Boutons radios"
 
 msgid "Reason for exceeding the deadline"
 msgstr "Motif du dépassement de l’échéance"
@@ -2923,8 +2949,14 @@ msgstr "Veuillez sélectionner au moins une activité"
 msgid "Select for batch action"
 msgstr "Sélectionner pour une action en masse"
 
+msgid "Selection"
+msgstr "Sélection"
+
 msgid "Selection committee"
 msgstr "Comité de sélection"
+
+msgid "Selection type"
+msgstr "Type de sélection"
 
 msgid "Send a mail"
 msgstr "Envoyer un e-mail"
@@ -3293,6 +3325,14 @@ msgstr ""
 msgid "The opinion about the extension request is not completed."
 msgstr "L'avis relatif à la demande d'une nouvelle échéance n'est pas complet."
 
+#, python-brace-format
+msgid ""
+"The option {index} must have an identifier and a translation for each "
+"required language."
+msgstr ""
+"L'option {index} doit avoir un identifiant et une traduction pour chaque "
+"langue requise."
+
 msgid "The person concerned"
 msgstr "La personne concernée"
 
@@ -3321,6 +3361,11 @@ msgstr "La raison du refus"
 
 msgid "The resulting calculated academic year or pool is not consistent."
 msgstr "L'année académique et le pot déterminés ne concordent pas."
+
+#, python-format
+msgid "The selection type must be one of the following values: %(values)s."
+msgstr ""
+"Le type de sélection doit être l'une des valeurs suivantes : %(values)s."
 
 msgid "The signature request procedure isn't in progress."
 msgstr "La procédure de demande de signature n'a pas été lancée."
@@ -3577,6 +3622,9 @@ msgstr "Valider ces cours"
 
 msgid "Validated"
 msgstr "Validé"
+
+msgid "Values"
+msgstr "Valeurs"
 
 msgid "WBI - Wallonie Bruxelles International"
 msgstr "WBI - Wallonie Bruxelles International"

@@ -6511,6 +6511,10 @@ components:
           type: object
         configuration:
           type: object
+        values:
+          type: array
+          items:
+            type: object
       required:
       - uuid
       - type
@@ -6518,6 +6522,7 @@ components:
       - text
       - help_text
       - configuration
+      - values
     SupervisionDTO:
       type: object
       properties:

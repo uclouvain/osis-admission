@@ -115,7 +115,9 @@ class AdmissionFormItemTestCase(TestCase):
         with self.assertRaises(ValidationError) as error:
             first_field.clean()
             self.assertIn(
-                ValidationError('Propriétés invalides : TAILLE_TEXTE,TYPES_MIME_FICHIER,NOMBRE_MAX_DOCUMENTS'),
+                ValidationError(
+                    'Propriétés invalides : TAILLE_TEXTE,TYPE_SELECTION,TYPES_MIME_FICHIER,NOMBRE_MAX_DOCUMENTS'
+                ),
                 error.error_dict['configuration'],
             )
 
@@ -128,7 +130,9 @@ class AdmissionFormItemTestCase(TestCase):
         with self.assertRaises(ValidationError) as error:
             first_field.clean()
             self.assertIn(
-                ValidationError('Propriétés invalides : CLASSE_CSS,TYPES_MIME_FICHIER,NOMBRE_MAX_DOCUMENTS'),
+                ValidationError(
+                    'Propriétés invalides : TYPE_SELECTION,CLASSE_CSS,TYPES_MIME_FICHIER,NOMBRE_MAX_DOCUMENTS'
+                ),
                 error.error_dict['configuration'],
             )
 
@@ -141,7 +145,22 @@ class AdmissionFormItemTestCase(TestCase):
         with self.assertRaises(ValidationError) as error:
             first_field.clean()
             self.assertIn(
-                ValidationError('Propriétés invalides : TAILLE_TEXTE,CLASSE_CSS'),
+                ValidationError('Propriétés invalides : TYPE_SELECTION,TAILLE_TEXTE,CLASSE_CSS'),
+                error.error_dict['configuration'],
+            )
+
+    def test_selection_is_invalid_because_of_incompatible_config_properties(self):
+        first_field = AdmissionFormItem.objects.create(
+            type=TypeItemFormulaire.SELECTION.name,
+            configuration={param: '' for param in self.config_params},
+            **self.default_form_item_properties,
+        )
+        with self.assertRaises(ValidationError) as error:
+            first_field.clean()
+            self.assertIn(
+                ValidationError(
+                    'Propriétés invalides : TAILLE_TEXTE,TYPE_SELECTION,TYPES_MIME_FICHIER,NOMBRE_MAX_DOCUMENTS'
+                ),
                 error.error_dict['configuration'],
             )
 
@@ -271,7 +290,7 @@ class AdmissionFormItemTestCase(TestCase):
                 error.error_dict['configuration'],
             )
 
-    def test_text_is_valid_if_the_text_size_is_one_a_the_valid_values(self):
+    def test_text_is_valid_if_the_text_size_is_one_of_the_valid_values(self):
         try:
             first_field = AdmissionFormItem.objects.create(
                 type=TypeItemFormulaire.TEXTE.name,
@@ -354,6 +373,68 @@ class AdmissionFormItemTestCase(TestCase):
             first_field.clean()
         except ValidationError as error:
             self.fail(_('The configuration is not valid for a document: ') + error.message)
+
+    def test_selection_is_invalid_if_the_selection_type_is_not_none_or_a_valid_value(self):
+        first_field = AdmissionFormItem.objects.create(
+            type=TypeItemFormulaire.SELECTION.name,
+            configuration={
+                'TYPE_SELECTION': 'UNKNOWN',
+            },
+            values=[{'key': '1', 'en': 'One', 'fr-be': 'Un'}],
+            **self.default_form_item_properties,
+        )
+        with self.assertRaises(ValidationError) as error:
+            first_field.clean()
+            self.assertIn(
+                ValidationError(
+                    _('The selection type must be one of the following values: %(values)s.')
+                    % {'values': str(AdmissionFormItem.valid_form_item_selection_types)},
+                ),
+                error.error_dict['configuration'],
+            )
+
+    def test_selection_is_valid_if_the_selection_type_is_one_of_the_valid_values(self):
+        try:
+            first_field = AdmissionFormItem.objects.create(
+                type=TypeItemFormulaire.SELECTION.name,
+                configuration={
+                    'TYPE_SELECTION': 'CASES_A_COCHER',
+                },
+                values=[{'key': '1', 'en': 'One', 'fr-be': 'Un'}],
+                **self.default_form_item_properties,
+            )
+            first_field.clean()
+        except ValidationError as error:
+            self.fail(_('The configuration is not valid for a text: ') + error.message)
+
+    def test_selection_is_not_valid_if_missing_title_for_a_language(self):
+        first_field = AdmissionFormItem.objects.create(
+            internal_label='field_1',
+            type=TypeItemFormulaire.SELECTION.name,
+            title={
+                'fr-be': 'Valeur',
+            },
+            values=[{'key': '1', 'en': 'One', 'fr-be': 'Un'}],
+        )
+        with self.assertRaises(ValidationError) as error:
+            first_field.clean()
+            self.assertIn(
+                ValidationError(FIELD_REQUIRED_MESSAGE),
+                error.error_dict['message'],
+            )
+
+    def test_selection_is_not_valid_if_no_value(self):
+        first_field = AdmissionFormItem.objects.create(
+            type=TypeItemFormulaire.SELECTION.name,
+            **self.default_form_item_properties,
+            values=[],
+        )
+        with self.assertRaises(ValidationError) as error:
+            first_field.clean()
+            self.assertIn(
+                ValidationError(FIELD_REQUIRED_MESSAGE),
+                error.error_dict['message'],
+            )
 
 
 class AdmissionFormItemInstantiationTestCase(TestCase):
