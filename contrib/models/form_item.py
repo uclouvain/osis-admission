@@ -30,6 +30,7 @@ import uuid as uuid
 from typing import List
 
 from django.conf import settings
+from django.contrib.postgres.fields import ArrayField
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Q
@@ -47,8 +48,9 @@ from admission.ddd.admission.enums.question_specifique import (
     CritereItemFormulaireVIP,
     Onglets,
     CritereItemFormulaireFormation,
+    TypeChampSelectionFormulaire,
 )
-from admission.forms.translation_field import TranslatedValueField
+from admission.forms.translation_field import TranslatedValueField, IdentifiedTranslatedListsValueField
 from base.models.person import Person
 from osis_profile.models import EducationalExperience
 
@@ -89,6 +91,20 @@ class TranslatedJSONField(models.JSONField):
         )
 
 
+class TranslatedListJSONField(ArrayField):
+    def __init__(self, **kwargs):
+        kwargs.setdefault('default', list)
+        kwargs['base_field'] = models.JSONField()
+        super().__init__(**kwargs)
+
+    def formfield(self, **kwargs):
+        return super().formfield(
+            form_class=IdentifiedTranslatedListsValueField,
+            show_hidden_initial=False,
+            **kwargs,
+        )
+
+
 class AdmissionFormItem(models.Model):
     """This model stores the configuration of a dynamic form field."""
 
@@ -113,20 +129,25 @@ class AdmissionFormItem(models.Model):
     title = TranslatedJSONField(
         blank=True,
         verbose_name=_('Title'),
-        help_text=_('Question label for Document and Text form elements. Not used for Message elements.'),
+        help_text=_('Question label for Document, Selection and Text form elements. Not used for Message elements.'),
     )
     text = TranslatedJSONField(
         blank=True,
         verbose_name=_('Text'),
         help_text=_(
-            'Question tooltip text for Document and Text form elements. Content of the message to be displayed for '
-            'Message elements.'
+            'Question tooltip text for Document, Selection and Text form elements. '
+            'Content of the message to be displayed for Message elements.'
         ),
     )
     help_text = TranslatedJSONField(
         blank=True,
         verbose_name=_('Help text'),
-        help_text=_('Placeholder text for Text form elements. Not used for Document and Message elements.'),
+        help_text=_('Placeholder text for Text form elements. Not used for Document, Selection and Message elements.'),
+    )
+    values = TranslatedListJSONField(
+        blank=True,
+        verbose_name=_('Values'),
+        help_text=_('List of the values that the Selection elements can take (one per row).'),
     )
     active = models.BooleanField(
         default=True,
@@ -148,7 +169,12 @@ class AdmissionFormItem(models.Model):
             'For a file field, it is possible to specify the maximum number '
             '("NOMBRE_MAX_DOCUMENT", default to 1) and the MIME types ("TYPES_MIME_FICHIER") of the files '
             'that can be uploaded.<br>'
-            'Full example: <code>{"TYPES_MIME_FICHIER": ["application/pdf"], "NOMBRE_MAX_DOCUMENTS": 3}</code>.'
+            'Full example: <code>{"TYPES_MIME_FICHIER": ["application/pdf"], "NOMBRE_MAX_DOCUMENTS": 3}</code>.<br><br>'
+            'For a selection field, it is possible to specify if the selection is realised through a list '
+            '("LISTE", by default), checkboxes ("CASES_A_COCHER") or radio buttons ("BOUTONS_RADIOS") '
+            'by using the "TYPE_SELECTION" property. The list and the radios buttons allow to select only one '
+            'value whereas the checkboxes allow to select several values.<br>'
+            'Full example: <code>{"TYPE_SELECTION": "CASES_A_COCHER"}</code>.'
         ),
     )
 
@@ -170,12 +196,19 @@ class AdmissionFormItem(models.Model):
             CleConfigurationItemFormulaire.NOMBRE_MAX_DOCUMENTS.name,
             CleConfigurationItemFormulaire.TYPES_MIME_FICHIER.name,
         },
+        TypeItemFormulaire.SELECTION.name: {
+            CleConfigurationItemFormulaire.TYPE_SELECTION.name,
+        },
     }
 
     valid_form_item_text_types = set(TypeChampTexteFormulaire.get_names())
+    valid_form_item_selection_types = set(TypeChampSelectionFormulaire.get_names())
 
     def clean(self):
         errors = defaultdict(list)
+
+        if not self.configuration:
+            self.configuration = {}
 
         invalid_config_keys = [
             key for key in self.configuration if key not in self.config_allowed_properties[self.type]
@@ -225,6 +258,21 @@ class AdmissionFormItem(models.Model):
 
             if not is_completed_translated_json_field(self.title):
                 errors['title'].append(FIELD_REQUIRED_MESSAGE)
+
+        elif self.type == TypeItemFormulaire.SELECTION.name:
+            selection_type = self.configuration.get(CleConfigurationItemFormulaire.TYPE_SELECTION.name)
+
+            if selection_type is not None and selection_type not in self.valid_form_item_selection_types:
+                errors['configuration'].append(
+                    _('The selection type must be one of the following values: %(values)s.')
+                    % {'values': str(self.valid_form_item_selection_types)}
+                )
+
+            if not is_completed_translated_json_field(self.title):
+                errors['title'].append(FIELD_REQUIRED_MESSAGE)
+
+            if not self.values:
+                errors['values'].append(FIELD_REQUIRED_MESSAGE)
 
         if errors:
             raise ValidationError(errors)

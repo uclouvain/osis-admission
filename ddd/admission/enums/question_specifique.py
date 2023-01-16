@@ -32,6 +32,7 @@ class TypeItemFormulaire(ChoiceEnum):
     MESSAGE = _('Message')
     TEXTE = _('Text')
     DOCUMENT = _('Document')
+    SELECTION = _('Selection')
 
 
 TYPES_ITEMS_LECTURE_SEULE = {
@@ -44,8 +45,15 @@ class TypeChampTexteFormulaire(ChoiceEnum):
     LONG = _('Long')
 
 
+class TypeChampSelectionFormulaire(ChoiceEnum):
+    CASES_A_COCHER = _('Checkboxes')
+    BOUTONS_RADIOS = _('Radio buttons')
+    LISTE = _('List')
+
+
 class CleConfigurationItemFormulaire(ChoiceEnum):
     TAILLE_TEXTE = _('Text size')
+    TYPE_SELECTION = _('Selection type')
     CLASSE_CSS = _('CSS class')
     TYPES_MIME_FICHIER = _('File MIME types')
     NOMBRE_MAX_DOCUMENTS = _('Maximum number of documents')

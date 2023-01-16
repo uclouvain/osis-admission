@@ -44,6 +44,7 @@ class SpecificQuestionSerializer(serializers.ModelSerializer):
     text = serializers.JSONField(source='form_item.text')
     help_text = serializers.JSONField(source='form_item.help_text')
     configuration = serializers.JSONField(source='form_item.configuration')
+    values = serializers.ListField(source='form_item.values', child=serializers.JSONField())
 
     class Meta:
         model = AdmissionFormItemInstantiation
@@ -57,6 +58,7 @@ class SpecificQuestionSerializer(serializers.ModelSerializer):
             'text',
             'help_text',
             'configuration',
+            'values',
         ]
 
 

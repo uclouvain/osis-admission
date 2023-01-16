@@ -182,6 +182,7 @@ class DoctorateSpecificQuestionListApiTestCase(BaseDoctorateSpecificQuestionList
                     'text': {'en': 'My very short message.', 'fr-be': 'Mon très court message.'},
                     'help_text': {},
                     'configuration': {},
+                    'values': [],
                 },
             ],
         )
@@ -695,6 +696,7 @@ class GeneralEducationSpecificQuestionListApiTestCase(APITestCase):
                     'text': {'en': 'My very short message.', 'fr-be': 'Mon très court message.'},
                     'help_text': {},
                     'configuration': {},
+                    'values': [],
                 },
             ],
         )
@@ -768,6 +770,7 @@ class ContinuingEducationSpecificQuestionListApiTestCase(APITestCase):
                     'text': {'en': 'My very short message.', 'fr-be': 'Mon très court message.'},
                     'help_text': {},
                     'configuration': {},
+                    'values': [],
                 },
             ],
         )
