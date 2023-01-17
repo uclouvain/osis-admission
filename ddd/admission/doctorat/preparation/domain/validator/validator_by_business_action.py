@@ -46,6 +46,7 @@ from admission.ddd.admission.domain.validator import (
     ShouldIBANCarteBancaireRemboursementEtreCompletee,
     ShouldAutreFormatCarteBancaireRemboursementEtreCompletee,
     ShouldExperiencesAcademiquesEtreCompletees,
+    ShouldTypeCompteBancaireRemboursementEtreComplete,
 )
 from base.ddd.utils.business_validator import BusinessValidator, TwoStepsMultipleBusinessExceptionListValidator
 
@@ -288,6 +289,9 @@ class ComptabiliteValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
             ),
             ShouldAffiliationsEtreCompletees(
                 etudiant_solidaire=self.comptabilite.etudiant_solidaire,
+            ),
+            ShouldTypeCompteBancaireRemboursementEtreComplete(
+                type_numero_compte=self.comptabilite.type_numero_compte,
             ),
             ShouldIBANCarteBancaireRemboursementEtreCompletee(
                 type_numero_compte=self.comptabilite.type_numero_compte,

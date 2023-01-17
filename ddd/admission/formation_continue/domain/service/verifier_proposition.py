@@ -74,6 +74,10 @@ class VerifierProposition(interface.DomainService):
                 formation=formation,
                 profil_candidat_translator=profil_candidat_translator,
             ),
+            partial(
+                profil_candidat_service.verifier_comptabilite_formation_continue,
+                proposition=proposition_candidat,
+            ),
             # TODO check other tabs
             partial(
                 titres_acces.verifier_titres,

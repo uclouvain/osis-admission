@@ -37,6 +37,7 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
     CarteBancaireRemboursementAutreFormatNonCompleteException,
     AffiliationsNonCompleteesException,
     ExperiencesAcademiquesNonCompleteesException,
+    TypeCompteBancaireRemboursementNonCompleteException,
 )
 from admission.ddd import BE_ISO_CODE, FR_ISO_CODE
 from admission.ddd.admission.domain.validator.exceptions import (
@@ -875,6 +876,15 @@ class TestVerifierPropositionService(TestCase):
         self._test_should_retourner_erreur_si_assimilation_incomplete(
             comptabilite=comptabilite,
             exception=AssimilationNonCompleteeException,
+        )
+
+    def test_should_retourner_erreur_si_type_compte_bancaire_non_renseigne(self):
+        comptabilite = _ComptabiliteFactory(
+            type_numero_compte=None,
+        )
+        self._test_should_retourner_erreur_si_comptabilite_incomplete(
+            comptabilite=comptabilite,
+            exception=TypeCompteBancaireRemboursementNonCompleteException,
         )
 
     def test_should_retourner_erreur_si_compte_bancaire_iban_incomplet(self):

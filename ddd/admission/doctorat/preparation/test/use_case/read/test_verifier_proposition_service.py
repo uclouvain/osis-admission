@@ -59,6 +59,7 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
     PropositionNonApprouveeParPromoteurException,
     SpecifierNOMASiDejaInscritException,
     ExperiencesAcademiquesNonCompleteesException,
+    TypeCompteBancaireRemboursementNonCompleteException,
 )
 from admission.ddd.admission.doctorat.preparation.test.factory.groupe_de_supervision import (
     _SignatureMembreCAFactory,
@@ -334,6 +335,15 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
         self._test_should_retourner_erreur_si_comptabilite_incomplete(
             comptabilite=_ComptabiliteFactory(attestation_absence_dette_etablissement=[]),
             exception=AbsenceDeDetteNonCompleteeException,
+        )
+
+    def test_should_retourner_erreur_si_type_compte_bancaire_non_renseigne(self):
+        comptabilite = _ComptabiliteFactory(
+            type_numero_compte=None,
+        )
+        self._test_should_retourner_erreur_si_comptabilite_incomplete(
+            comptabilite=comptabilite,
+            exception=TypeCompteBancaireRemboursementNonCompleteException,
         )
 
     def test_should_retourner_erreur_si_compte_bancaire_iban_incomplet(self):

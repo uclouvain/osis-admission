@@ -3745,6 +3745,13 @@ msgstr[1] ""
 "Vous ne pouvez pas soumettre cette demande pour une formation générale car "
 "vous en avez déjà soumises %(maximum_number)s."
 
+msgid ""
+"You haven't answered to the question about your bank account in the "
+"'Finalization > Accounting' tab."
+msgstr ""
+"Vous n'avez pas répondu à la question relative à votre compte bancaire dans "
+"l'onglet 'Finalisation > Comptabilité'"
+
 msgid "You must add at least one CA member in order to request signatures."
 msgstr ""
 "Vous devez ajouter au moins un membre du comité d'accompagnement afin de "
