@@ -30,7 +30,6 @@ from django.utils.translation import gettext_lazy as _
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import MaximumPropositionsAtteintException
 from admission.ddd.admission.domain.service.i_elements_confirmation import IElementsConfirmation
 from admission.ddd.admission.domain.validator.exceptions import NombrePropositionsSoumisesDepasseException
 from admission.ddd.admission.formation_generale.domain.model.enums import (
@@ -38,6 +37,9 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
 )
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixStatutProposition as ChoixStatutPropositionContinue,
+)
+from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
+    EtudesSecondairesNonCompleteesException,
 )
 from admission.tests.factories.calendar import AdmissionAcademicCalendarFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
@@ -49,6 +51,7 @@ from admission.tests.factories.general_education import (
 from admission.tests.factories.person import IncompletePersonForBachelorFactory, IncompletePersonForIUFCFactory
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.education_group_types import TrainingType
+from base.models.enums.got_diploma import GotDiploma
 from osis_profile.models import EducationalExperience
 
 
@@ -384,3 +387,26 @@ class ContinuingPropositionSubmissionTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         ret = response.json()
         self.assertIn(NombrePropositionsSoumisesDepasseException.status_code, [e["status_code"] for e in ret['errors']])
+
+    def test_continuing_proposition_submission_with_secondary_studies(self):
+        admission = ContinuingEducationAdmissionFactory(candidate__graduated_from_high_school=GotDiploma.YES.name)
+        url = resolve_url("admission_api_v1:submit-continuing-proposition", uuid=admission.uuid)
+        self.client.force_authenticate(user=admission.candidate.user)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        json_response = response.json()
+        self.assertIn(
+            EtudesSecondairesNonCompleteesException.status_code,
+            [e["status_code"] for e in json_response['errors']],
+        )
+
+        admission.candidate.graduated_from_high_school_year = self.candidate_ok.graduated_from_high_school_year
+        admission.candidate.save()
+        self.client.force_authenticate(user=admission.candidate.user)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        json_response = response.json()
+        self.assertNotIn(
+            EtudesSecondairesNonCompleteesException.status_code,
+            [e["status_code"] for e in json_response['errors']],
+        )

@@ -29,13 +29,19 @@ from admission.ddd.admission.domain.validator.exceptions import (
     ConditionsAccessNonRempliesException,
     NombrePropositionsSoumisesDepasseException,
 )
+from admission.ddd.admission.dtos import EtudesSecondairesDTO
 from admission.ddd.admission.formation_continue.commands import VerifierPropositionQuery
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutProposition
+from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
+    EtudesSecondairesNonCompleteesException,
+)
+from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
 from admission.infrastructure.admission.formation_continue.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
+from base.models.enums.got_diploma import GotDiploma
 
 
 class TestVerifierPropositionService(TestCase):
@@ -47,6 +53,8 @@ class TestVerifierPropositionService(TestCase):
         self.message_bus = message_bus_in_memory_instance
         self.proposition_repository = PropositionInMemoryRepository
         self.addCleanup(self.proposition_repository.reset)
+        self.candidat_translator = ProfilCandidatInMemoryTranslator()
+        self.etudes_secondaires = self.candidat_translator.etudes_secondaires
 
     def test_should_verifier_etre_ok_si_complet(self):
         proposition_id = self.message_bus.invoke(VerifierPropositionQuery(uuid_proposition="uuid-ECGE3DP"))
@@ -69,3 +77,53 @@ class TestVerifierPropositionService(TestCase):
             self.message_bus.invoke(VerifierPropositionQuery(uuid_proposition=propositions[2].entity_id.uuid))
 
         self.assertHasInstance(context.exception.exceptions, NombrePropositionsSoumisesDepasseException)
+
+    def test_should_retourner_erreur_si_indication_a_diplome_etudes_secondaires_non_specifiee(self):
+        with mock.patch.dict(
+            self.etudes_secondaires, {'0000000001': EtudesSecondairesDTO(annee_diplome_etudes_secondaires=2020)}
+        ):
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                self.message_bus.invoke(VerifierPropositionQuery(uuid_proposition="uuid-ECGE3DP"))
+            self.assertHasInstance(context.exception.exceptions, EtudesSecondairesNonCompleteesException)
+
+    def test_should_retourner_erreur_si_annee_diplome_etudes_secondaires_non_specifiee(self):
+        with mock.patch.dict(
+            self.etudes_secondaires,
+            {'0000000001': EtudesSecondairesDTO(diplome_etudes_secondaires=GotDiploma.YES.name)},
+        ):
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                self.message_bus.invoke(VerifierPropositionQuery(uuid_proposition="uuid-ECGE3DP"))
+            self.assertHasInstance(context.exception.exceptions, EtudesSecondairesNonCompleteesException)
+
+        with mock.patch.dict(
+            self.etudes_secondaires,
+            {'0000000001': EtudesSecondairesDTO(diplome_etudes_secondaires=GotDiploma.THIS_YEAR.name)},
+        ):
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                self.message_bus.invoke(VerifierPropositionQuery(uuid_proposition="uuid-ECGE3DP"))
+            self.assertHasInstance(context.exception.exceptions, EtudesSecondairesNonCompleteesException)
+
+    def test_should_etre_ok_si_indication_et_annee_diplome_etudes_secondaires_specifiees(self):
+        with mock.patch.dict(
+            self.etudes_secondaires,
+            {
+                '0000000001': EtudesSecondairesDTO(
+                    diplome_etudes_secondaires=GotDiploma.YES.name,
+                    annee_diplome_etudes_secondaires=2020,
+                )
+            },
+        ):
+            id_proposition = self.message_bus.invoke(VerifierPropositionQuery(uuid_proposition="uuid-ECGE3DP"))
+            self.assertEqual(id_proposition.uuid, 'uuid-ECGE3DP')
+
+    def test_should_etre_ok_si_indication_pas_etudes_secondaires(self):
+        with mock.patch.dict(
+            self.etudes_secondaires,
+            {
+                '0000000001': EtudesSecondairesDTO(
+                    diplome_etudes_secondaires=GotDiploma.NO.name,
+                )
+            },
+        ):
+            id_proposition = self.message_bus.invoke(VerifierPropositionQuery(uuid_proposition="uuid-ECGE3DP"))
+            self.assertEqual(id_proposition.uuid, 'uuid-ECGE3DP')
