@@ -51,10 +51,10 @@ class VerifierProposition(interface.DomainService):
         pool_soumis: 'AcademicCalendarTypes' = None,
     ) -> None:
         profil_candidat_service = ProfilCandidat()
-        type_formation = formation_translator.get(proposition_candidat.formation_id).type
+        formation = formation_translator.get(proposition_candidat.formation_id)
         titres = titres_acces.recuperer_titres_access(
             proposition_candidat.matricule_candidat,
-            type_formation,
+            formation.type,
             proposition_candidat.equivalence_diplome,
         )
         execute_functions_and_aggregate_exceptions(
@@ -68,6 +68,12 @@ class VerifierProposition(interface.DomainService):
                 matricule=proposition_candidat.matricule_candidat,
                 profil_candidat_translator=profil_candidat_translator,
             ),
+            partial(
+                profil_candidat_service.verifier_etudes_secondaires,
+                matricule=proposition_candidat.matricule_candidat,
+                formation=formation,
+                profil_candidat_translator=profil_candidat_translator,
+            ),
             # TODO check other tabs
             partial(
                 titres_acces.verifier_titres,
@@ -79,7 +85,7 @@ class VerifierProposition(interface.DomainService):
                 proposition=proposition_candidat,
                 matricule_candidat=proposition_candidat.matricule_candidat,
                 titres_acces=titres,
-                type_formation=type_formation,
+                type_formation=formation.type,
                 profil_candidat_translator=profil_candidat_translator,
                 formation_translator=formation_translator,
                 annee_soumise=annee_soumise,
