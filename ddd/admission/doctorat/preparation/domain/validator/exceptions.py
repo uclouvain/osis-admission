@@ -437,3 +437,13 @@ class ExperiencesAcademiquesNonCompleteesException(BusinessException):
         self.reference = reference
         message = _("This educational experience is not completed.")
         super().__init__(message, **kwargs)
+
+
+class TypeCompteBancaireRemboursementNonCompleteException(BusinessException):
+    status_code = "PROPOSITION-50"
+
+    def __init__(self, **kwargs):
+        message = _(
+            "You haven't answered to the question about your bank account in the 'Finalization > Accounting' tab."
+        )
+        super().__init__(message, **kwargs)

@@ -35,6 +35,7 @@ from admission.ddd.admission.domain.validator import (
     ShouldIBANCarteBancaireRemboursementEtreCompletee,
     ShouldAutreFormatCarteBancaireRemboursementEtreCompletee,
     ShouldExperiencesAcademiquesEtreCompletees,
+    ShouldTypeCompteBancaireRemboursementEtreComplete,
 )
 from admission.ddd.admission.formation_generale.domain.model._comptabilite import Comptabilite
 from admission.ddd.admission.domain.model.formation import Formation
@@ -146,6 +147,9 @@ class FormationGeneraleComptabiliteValidatorList(TwoStepsMultipleBusinessExcepti
             ShouldAffiliationsEtreCompletees(
                 affiliation_sport=self.comptabilite.affiliation_sport,
                 etudiant_solidaire=self.comptabilite.etudiant_solidaire,
+            ),
+            ShouldTypeCompteBancaireRemboursementEtreComplete(
+                type_numero_compte=self.comptabilite.type_numero_compte,
             ),
             ShouldIBANCarteBancaireRemboursementEtreCompletee(
                 type_numero_compte=self.comptabilite.type_numero_compte,

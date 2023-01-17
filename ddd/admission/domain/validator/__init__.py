@@ -27,6 +27,7 @@ from ._should_comptabilite_etre_completee import (
     ShouldAbsenceDeDetteEtreCompletee,
     ShouldAutreFormatCarteBancaireRemboursementEtreCompletee,
     ShouldIBANCarteBancaireRemboursementEtreCompletee,
+    ShouldTypeCompteBancaireRemboursementEtreComplete,
 )
 from ._should_coordonnees_candidat_etre_completees import (
     ShouldAdresseCorrespondanceEtreCompleteeSiSpecifiee,
@@ -63,4 +64,5 @@ __all__ = [
     "ShouldAutreFormatCarteBancaireRemboursementEtreCompletee",
     "ShouldIBANCarteBancaireRemboursementEtreCompletee",
     "ShouldExperiencesAcademiquesEtreCompletees",
+    "ShouldTypeCompteBancaireRemboursementEtreComplete",
 ]

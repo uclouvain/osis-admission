@@ -3359,6 +3359,11 @@ msgid_plural ""
 msgstr[0] ""
 msgstr[1] ""
 
+msgid ""
+"You haven't answered to the question about your bank account in the "
+"'Finalization > Accounting' tab."
+msgstr ""
+
 msgid "You must add at least one CA member in order to request signatures."
 msgstr ""
 "You must add at least one supervisory panel member in order to request "

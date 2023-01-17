@@ -32,6 +32,7 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
     AbsenceDeDetteNonCompleteeException,
     CarteBancaireRemboursementAutreFormatNonCompleteException,
     CarteBancaireRemboursementIbanNonCompleteException,
+    TypeCompteBancaireRemboursementNonCompleteException,
 )
 from base.ddd.utils.business_validator import BusinessValidator
 
@@ -44,6 +45,15 @@ class ShouldAbsenceDeDetteEtreCompletee(BusinessValidator):
     def validate(self, *args, **kwargs):
         if self.a_frequente_recemment_etablissement_communaute_fr and not self.attestation_absence_dette_etablissement:
             raise AbsenceDeDetteNonCompleteeException
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ShouldTypeCompteBancaireRemboursementEtreComplete(BusinessValidator):
+    type_numero_compte: Optional[ChoixTypeCompteBancaire]
+
+    def validate(self, *args, **kwargs):
+        if not self.type_numero_compte:
+            raise TypeCompteBancaireRemboursementNonCompleteException
 
 
 @attr.dataclass(frozen=True, slots=True)
