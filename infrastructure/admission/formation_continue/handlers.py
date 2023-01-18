@@ -38,6 +38,9 @@ from admission.infrastructure.admission.domain.service.titres_acces import Titre
 from admission.infrastructure.admission.formation_continue.domain.service.comptabilite import ComptabiliteTranslator
 from admission.infrastructure.admission.formation_continue.domain.service.formation import FormationContinueTranslator
 from admission.infrastructure.admission.formation_continue.domain.service.notification import Notification
+from admission.infrastructure.admission.formation_continue.domain.service.question_specifique import (
+    QuestionSpecifiqueTranslator,
+)
 from admission.infrastructure.admission.formation_continue.repository.proposition import PropositionRepository
 
 COMMAND_HANDLERS = {
@@ -77,6 +80,7 @@ COMMAND_HANDLERS = {
         profil_candidat_translator=ProfilCandidatTranslator(),
         calendrier_inscription=CalendrierInscription(),
         maximum_propositions_service=MaximumPropositionsAutorisees(),
+        questions_specifiques_translator=QuestionSpecifiqueTranslator(),
     ),
     SoumettrePropositionCommand: lambda msg_bus, cmd: soumettre_proposition(
         cmd,
@@ -88,6 +92,7 @@ COMMAND_HANDLERS = {
         element_confirmation=ElementsConfirmation(),
         notification=Notification(),
         maximum_propositions_service=MaximumPropositionsAutorisees(),
+        questions_specifiques_translator=QuestionSpecifiqueTranslator(),
     ),
     CompleterCurriculumCommand: lambda msg_bus, cmd: completer_curriculum(
         cmd,

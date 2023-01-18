@@ -35,8 +35,11 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
     CarteBancaireRemboursementIbanNonCompleteException,
 )
 from admission.ddd.admission.domain.service.i_elements_confirmation import IElementsConfirmation
-from admission.ddd.admission.domain.validator.exceptions import NombrePropositionsSoumisesDepasseException
-from admission.ddd.admission.enums import ChoixTypeCompteBancaire
+from admission.ddd.admission.domain.validator.exceptions import (
+    NombrePropositionsSoumisesDepasseException,
+    QuestionsSpecifiquesInformationsComplementairesNonCompleteesException,
+)
+from admission.ddd.admission.enums import ChoixTypeCompteBancaire, CritereItemFormulaireFormation, Onglets
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutProposition as ChoixStatutPropositionGenerale,
 )
@@ -49,6 +52,7 @@ from admission.ddd.admission.formation_generale.domain.validator.exceptions impo
 from admission.tests.factories.calendar import AdmissionAcademicCalendarFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
 from admission.tests.factories.curriculum import EducationalExperienceFactory, ProfessionalExperienceFactory
+from admission.tests.factories.form_item import TextAdmissionFormItemFactory, AdmissionFormItemInstantiationFactory
 from admission.tests.factories.general_education import (
     GeneralEducationAdmissionFactory,
     GeneralEducationTrainingFactory,
@@ -439,3 +443,36 @@ class ContinuingPropositionSubmissionTestCase(APITestCase):
         status_codes = [e["status_code"] for e in json_response['errors']]
         self.assertIn(AffiliationsNonCompleteesException.status_code, status_codes)
         self.assertIn(CarteBancaireRemboursementIbanNonCompleteException.status_code, status_codes)
+
+    def test_continuing_proposition_submission_with_specific_questions(self):
+        admission = ContinuingEducationAdmissionFactory()
+        admission_form_item = TextAdmissionFormItemFactory()
+        AdmissionFormItemInstantiationFactory(
+            form_item=admission_form_item,
+            required=True,
+            display_according_education=CritereItemFormulaireFormation.TOUTE_FORMATION.name,
+            tab=Onglets.INFORMATIONS_ADDITIONNELLES.name,
+            academic_year=admission.training.academic_year,
+        )
+        admission_form_item.refresh_from_db()
+
+        self.client.force_authenticate(user=admission.candidate.user)
+
+        url = resolve_url("admission_api_v1:submit-continuing-proposition", uuid=admission.uuid)
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        json_response = response.json()
+        status_codes = [e["status_code"] for e in json_response['errors']]
+        self.assertIn(QuestionsSpecifiquesInformationsComplementairesNonCompleteesException.status_code, status_codes)
+
+        admission.specific_question_answers = {str(admission_form_item.uuid): 'My answer'}
+        admission.save()
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        json_response = response.json()
+        status_codes = [e["status_code"] for e in json_response['errors']]
+        self.assertNotIn(
+            QuestionsSpecifiquesInformationsComplementairesNonCompleteesException.status_code, status_codes
+        )

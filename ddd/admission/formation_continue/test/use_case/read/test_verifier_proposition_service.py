@@ -34,6 +34,10 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
 from admission.ddd.admission.domain.validator.exceptions import (
     ConditionsAccessNonRempliesException,
     NombrePropositionsSoumisesDepasseException,
+    QuestionsSpecifiquesCurriculumNonCompleteesException,
+    QuestionsSpecifiquesEtudesSecondairesNonCompleteesException,
+    QuestionsSpecifiquesInformationsComplementairesNonCompleteesException,
+    QuestionsSpecifiquesChoixFormationNonCompleteesException,
 )
 from admission.ddd.admission.dtos import EtudesSecondairesDTO
 from admission.ddd.admission.enums import ChoixTypeCompteBancaire
@@ -62,7 +66,7 @@ class TestVerifierPropositionService(TestCase):
         self.message_bus = message_bus_in_memory_instance
         self.proposition_repository = PropositionInMemoryRepository
         self.addCleanup(self.proposition_repository.reset)
-        self.complete_proposition = self.proposition_repository.get(entity_id=PropositionIdentity(uuid='uuid-ECGE3DP'))
+        self.complete_proposition = self.proposition_repository.get(entity_id=PropositionIdentity(uuid='uuid-USCC1'))
         self.candidat_translator = ProfilCandidatInMemoryTranslator()
         self.etudes_secondaires = self.candidat_translator.etudes_secondaires
         self.verifier_commande = VerifierPropositionQuery(uuid_proposition=self.complete_proposition.entity_id.uuid)
@@ -83,7 +87,7 @@ class TestVerifierPropositionService(TestCase):
 
     def test_should_retourner_erreur_si_conditions_acces_non_remplies(self):
         with self.assertRaises(MultipleBusinessExceptions) as context:
-            self.message_bus.invoke(VerifierPropositionQuery(uuid_proposition='uuid-SC3DP'))
+            self.message_bus.invoke(VerifierPropositionQuery(uuid_proposition='uuid-USCC4'))
         self.assertHasInstance(context.exception.exceptions, ConditionsAccessNonRempliesException)
 
     def test_should_verification_renvoyer_erreur_si_trop_de_demandes_envoyees(self):
@@ -272,3 +276,60 @@ class TestVerifierPropositionService(TestCase):
             self.message_bus.invoke(self.verifier_commande),
             self.complete_proposition.entity_id,
         )
+
+    def test_should_retourner_erreur_si_questions_specifiques_pas_completees_pour_curriculum(self):
+        with mock.patch.multiple(
+            self.complete_proposition,
+            reponses_questions_specifiques={
+                **self.complete_proposition.reponses_questions_specifiques,
+                '26de0c3d-3c06-4c93-8eb4-c8648f04f143': '',
+            },
+        ):
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                self.message_bus.invoke(self.verifier_commande)
+            self.assertHasInstance(context.exception.exceptions, QuestionsSpecifiquesCurriculumNonCompleteesException)
+
+    def test_should_retourner_erreur_si_questions_specifiques_pas_completees_pour_etudes_secondaires(self):
+        with mock.patch.multiple(
+            self.complete_proposition,
+            reponses_questions_specifiques={
+                **self.complete_proposition.reponses_questions_specifiques,
+                '26de0c3d-3c06-4c93-8eb4-c8648f04f144': '',
+            },
+        ):
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                self.message_bus.invoke(self.verifier_commande)
+            self.assertHasInstance(
+                context.exception.exceptions,
+                QuestionsSpecifiquesEtudesSecondairesNonCompleteesException,
+            )
+
+    def test_should_retourner_erreur_si_questions_specifiques_pas_completees_pour_informations_additionnelles(self):
+        with mock.patch.multiple(
+            self.complete_proposition,
+            reponses_questions_specifiques={
+                **self.complete_proposition.reponses_questions_specifiques,
+                '26de0c3d-3c06-4c93-8eb4-c8648f04f145': '',
+            },
+        ):
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                self.message_bus.invoke(self.verifier_commande)
+            self.assertHasInstance(
+                context.exception.exceptions,
+                QuestionsSpecifiquesInformationsComplementairesNonCompleteesException,
+            )
+
+    def test_should_retourner_erreur_si_questions_specifiques_pas_completees_pour_choix_formation(self):
+        with mock.patch.multiple(
+            self.complete_proposition,
+            reponses_questions_specifiques={
+                **self.complete_proposition.reponses_questions_specifiques,
+                '26de0c3d-3c06-4c93-8eb4-c8648f04f140': '',
+            },
+        ):
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                self.message_bus.invoke(self.verifier_commande)
+            self.assertHasInstance(
+                context.exception.exceptions,
+                QuestionsSpecifiquesChoixFormationNonCompleteesException,
+            )

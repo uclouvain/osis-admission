@@ -49,7 +49,7 @@ class TestSoumettrePropositionContinue(TestCase):
     def test_should_soumettre_proposition_etre_ok_si_admission_complete(self):
         proposition_id = self.message_bus.invoke(
             SoumettrePropositionCommand(
-                uuid_proposition="uuid-ECGE3DP",
+                uuid_proposition="uuid-USCC1",
                 pool=AcademicCalendarTypes.CONTINUING_EDUCATION_ENROLLMENT.name,
                 annee=2020,
                 elements_confirmation=ElementsConfirmationInMemory.get_elements_for_tests(),

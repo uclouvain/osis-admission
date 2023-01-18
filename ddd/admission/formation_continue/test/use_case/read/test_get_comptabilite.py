@@ -35,7 +35,7 @@ from admission.infrastructure.message_bus_in_memory import message_bus_in_memory
 class GetComptabiliteTestCase(TestCase):
     def setUp(self):
         self.message_bus = message_bus_in_memory_instance
-        self.cmd = GetComptabiliteQuery(uuid_proposition='uuid-SC3DP')
+        self.cmd = GetComptabiliteQuery(uuid_proposition='uuid-USCC4')
 
     def test_get_comptabilite(self):
         result = self.message_bus.invoke(self.cmd)

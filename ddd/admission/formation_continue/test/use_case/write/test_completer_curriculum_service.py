@@ -43,7 +43,7 @@ class TestCompleterCurriculumService(SimpleTestCase):
 
         self.message_bus = message_bus_in_memory_instance
         self.cmd = CompleterCurriculumCommand(
-            uuid_proposition='uuid-ECGE3DP',
+            uuid_proposition='uuid-USCC1',
             curriculum=['new_file.pdf'],
             equivalence_diplome=['new_file.pdf'],
             reponses_questions_specifiques={
