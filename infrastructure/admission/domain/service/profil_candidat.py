@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -61,7 +61,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
     @classmethod
     def get_identification(cls, matricule: str) -> 'IdentificationDTO':
         person = (
-            Person.objects.select_related('country_of_citizenship', 'birth_country')
+            Person.objects.select_related('country_of_citizenship', 'birth_country', 'last_registration_year')
             .annotate(
                 residential_country_iso_code=Subquery(
                     PersonAddress.objects.filter(
@@ -96,7 +96,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
             pays_naissance=person.birth_country.iso_code if person.birth_country_id else None,
             lieu_naissance=person.birth_place,
             etat_civil=person.civil_state,
-            annee_derniere_inscription_ucl=person.last_registration_year,
+            annee_derniere_inscription_ucl=person.last_registration_year and person.last_registration_year.year,
             noma_derniere_inscription_ucl=person.last_registration_id,
             pays_residence=person.residential_country_iso_code,
         )
