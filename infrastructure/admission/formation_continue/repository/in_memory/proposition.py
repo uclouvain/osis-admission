@@ -38,6 +38,9 @@ from admission.ddd.admission.formation_continue.test.factory.proposition import 
     _PropositionIdentityFactory,
 )
 from admission.ddd.admission.test.factory.formation import FormationIdentityFactory
+from admission.infrastructure.admission.formation_continue.domain.service.in_memory.formation import (
+    FormationContinueInMemoryTranslator,
+)
 from base.ddd.utils.in_memory_repository import InMemoryGenericRepository
 from base.models.enums.education_group_types import TrainingType
 
@@ -58,26 +61,6 @@ class _Formation:
 
 
 class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepository):
-    formations = {
-        ("SC3DP", 2020): _Formation(
-            intitule="Doctorat en sciences",
-            campus="Louvain-la-Neuve",
-            type=TrainingType.PHD.name,
-            code_domaine='',
-        ),
-        ("ECGE3DP", 2020): _Formation(
-            intitule="Doctorat en sciences économiques et de gestion",
-            campus="Louvain-la-Neuve",
-            type=TrainingType.PHD.name,
-            code_domaine='',
-        ),
-        ("ESP3DP", 2020): _Formation(
-            intitule="Doctorat en sciences de la santé publique",
-            campus="Mons",
-            type=TrainingType.PHD.name,
-            code_domaine='',
-        ),
-    }
     candidats = {
         "0123456789": _Candidat("Jean", "Dupont", "France"),
         "0000000001": _Candidat("Michel", "Durand", "Belgique"),
@@ -119,24 +102,30 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
     def reset(cls):
         cls.entities = [
             PropositionFactory(
-                entity_id=factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-SC3DP'),
+                entity_id=factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-USCC4'),
                 matricule_candidat='0123456789',
-                formation_id=FormationIdentityFactory(sigle="SC3DP", annee=2020),
+                formation_id=FormationIdentityFactory(sigle="USCC4", annee=2020),
             ),
             PropositionFactory(
-                entity_id=factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-SC3DP2'),
+                entity_id=factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-USCC42'),
                 matricule_candidat='0123456789',
-                formation_id=FormationIdentityFactory(sigle="SC3DP", annee=2020),
+                formation_id=FormationIdentityFactory(sigle="USCC4", annee=2020),
             ),
             PropositionFactory(
-                entity_id=factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-SC3DP3'),
+                entity_id=factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-USCC43'),
                 matricule_candidat='0123456789',
-                formation_id=FormationIdentityFactory(sigle="SC3DP", annee=2020),
+                formation_id=FormationIdentityFactory(sigle="USCC4", annee=2020),
             ),
             PropositionFactory(
-                entity_id=factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-ECGE3DP'),
+                entity_id=factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-USCC1'),
                 matricule_candidat='0000000001',
-                formation_id=FormationIdentityFactory(sigle="ECGE3DP", annee=2020),
+                formation_id=FormationIdentityFactory(sigle="USCC1", annee=2020),
+                reponses_questions_specifiques={
+                    '26de0c3d-3c06-4c93-8eb4-c8648f04f140': 'My response 0',
+                    '26de0c3d-3c06-4c93-8eb4-c8648f04f143': 'My response 3',
+                    '26de0c3d-3c06-4c93-8eb4-c8648f04f144': 'My response 4',
+                    '26de0c3d-3c06-4c93-8eb4-c8648f04f145': 'My response 5',
+                },
             ),
         ]
 
@@ -147,7 +136,10 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
     @classmethod
     def _load_dto(cls, proposition: Proposition) -> PropositionDTO:
         candidat = cls.candidats[proposition.matricule_candidat]
-        formation = cls.formations[(proposition.formation_id.sigle, proposition.formation_id.annee)]
+        formation = FormationContinueInMemoryTranslator.get_dto(
+            proposition.formation_id.sigle,
+            proposition.formation_id.annee,
+        )
 
         return PropositionDTO(
             uuid=proposition.entity_id.uuid,

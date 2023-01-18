@@ -28,6 +28,7 @@ from admission.ddd.admission.domain.service.i_elements_confirmation import IElem
 from admission.ddd.admission.domain.service.i_maximum_propositions import IMaximumPropositionsAutorisees
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.domain.service.i_titres_acces import ITitresAcces
+from admission.ddd.admission.enums import Onglets
 from admission.ddd.admission.formation_continue.commands import SoumettrePropositionCommand
 from admission.ddd.admission.formation_continue.domain.builder.proposition_identity_builder import (
     PropositionIdentityBuilder,
@@ -35,6 +36,9 @@ from admission.ddd.admission.formation_continue.domain.builder.proposition_ident
 from admission.ddd.admission.formation_continue.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.formation_continue.domain.service.i_formation import IFormationContinueTranslator
 from admission.ddd.admission.formation_continue.domain.service.i_notification import INotification
+from admission.ddd.admission.formation_continue.domain.service.i_question_specifique import (
+    IQuestionSpecifiqueTranslator,
+)
 from admission.ddd.admission.formation_continue.domain.service.verifier_proposition import VerifierProposition
 from admission.ddd.admission.formation_continue.repository.i_proposition import IPropositionRepository
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
@@ -50,10 +54,15 @@ def soumettre_proposition(
     element_confirmation: 'IElementsConfirmation',
     notification: 'INotification',
     maximum_propositions_service: 'IMaximumPropositionsAutorisees',
+    questions_specifiques_translator: 'IQuestionSpecifiqueTranslator',
 ) -> 'PropositionIdentity':
     # GIVEN
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
     proposition = proposition_repository.get(entity_id=proposition_id)
+    questions_specifiques = questions_specifiques_translator.search_by_proposition(
+        cmd.uuid_proposition,
+        onglets=Onglets.get_names(),
+    )
 
     # WHEN
     VerifierProposition().verifier(
@@ -65,6 +74,7 @@ def soumettre_proposition(
         annee_soumise=cmd.annee,
         pool_soumis=AcademicCalendarTypes[cmd.pool],
         maximum_propositions_service=maximum_propositions_service,
+        questions_specifiques=questions_specifiques,
     )
     element_confirmation.valider(
         soumis=cmd.elements_confirmation,

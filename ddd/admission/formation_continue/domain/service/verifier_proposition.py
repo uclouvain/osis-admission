@@ -24,12 +24,15 @@
 #
 # ##############################################################################
 from functools import partial
+from typing import List
 
+from admission.ddd.admission.domain.model.question_specifique import QuestionSpecifique
 from admission.ddd.admission.domain.service.i_calendrier_inscription import ICalendrierInscription
 from admission.ddd.admission.domain.service.i_maximum_propositions import IMaximumPropositionsAutorisees
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.domain.service.i_titres_acces import ITitresAcces
 from admission.ddd.admission.domain.service.profil_candidat import ProfilCandidat
+from admission.ddd.admission.domain.service.verifier_questions_specifiques import VerifierQuestionsSpecifiques
 from admission.ddd.admission.formation_continue.domain.model.proposition import Proposition
 from admission.ddd.admission.formation_continue.domain.service.i_formation import IFormationContinueTranslator
 from base.ddd.utils.business_validator import execute_functions_and_aggregate_exceptions
@@ -47,6 +50,7 @@ class VerifierProposition(interface.DomainService):
         profil_candidat_translator: 'IProfilCandidatTranslator',
         calendrier_inscription: 'ICalendrierInscription',
         maximum_propositions_service: 'IMaximumPropositionsAutorisees',
+        questions_specifiques: List[QuestionSpecifique],
         annee_soumise: int = None,
         pool_soumis: 'AcademicCalendarTypes' = None,
     ) -> None:
@@ -77,6 +81,26 @@ class VerifierProposition(interface.DomainService):
             partial(
                 profil_candidat_service.verifier_comptabilite_formation_continue,
                 proposition=proposition_candidat,
+            ),
+            partial(
+                VerifierQuestionsSpecifiques.verifier_onglet_choix_formation,
+                proposition_candidat,
+                questions_specifiques,
+            ),
+            partial(
+                VerifierQuestionsSpecifiques.verifier_onglet_etudes_secondaires,
+                proposition_candidat,
+                questions_specifiques,
+            ),
+            partial(
+                VerifierQuestionsSpecifiques.verifier_onglet_curriculum,
+                proposition_candidat,
+                questions_specifiques,
+            ),
+            partial(
+                VerifierQuestionsSpecifiques.verifier_onglet_questions_specifiques,
+                proposition_candidat,
+                questions_specifiques,
             ),
             # TODO check other tabs
             partial(

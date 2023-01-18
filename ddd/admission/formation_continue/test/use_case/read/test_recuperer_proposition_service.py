@@ -34,15 +34,15 @@ from admission.infrastructure.message_bus_in_memory import message_bus_in_memory
 
 class RecupererPropositionServiceTestCase(TestCase):
     def setUp(self):
-        self.cmd = RecupererPropositionQuery(uuid_proposition='uuid-SC3DP')
+        self.cmd = RecupererPropositionQuery(uuid_proposition='uuid-USCC4')
         self.message_bus = message_bus_in_memory_instance
 
     def test_get_proposition(self):
         result = self.message_bus.invoke(self.cmd)
-        self.assertEqual(result.formation.sigle, 'SC3DP')
+        self.assertEqual(result.formation.sigle, 'USCC4')
         self.assertEqual(result.formation.annee, 2020)
-        self.assertEqual(result.formation.intitule, 'Doctorat en sciences')
-        self.assertEqual(result.formation.campus, 'Louvain-la-Neuve')
+        self.assertEqual(result.formation.intitule, 'Formation USCC4')
+        self.assertEqual(result.formation.campus, 'Louvain-La-Neuve')
         self.assertEqual(result.statut, ChoixStatutProposition.IN_PROGRESS.name)
         self.assertEqual(result.matricule_candidat, '0123456789')
         self.assertEqual(result.prenom_candidat, 'Jean')

@@ -43,7 +43,7 @@ class TestInitierPropositionService(SimpleTestCase):
 
         self.message_bus = message_bus_in_memory_instance
         self.cmd = InitierPropositionCommand(
-            sigle_formation='ECGE3DP',
+            sigle_formation='USCC1',
             annee_formation=2020,
             matricule_candidat='01234567',
         )

@@ -50,6 +50,9 @@ from admission.infrastructure.admission.formation_continue.domain.service.in_mem
 from admission.infrastructure.admission.formation_continue.domain.service.in_memory.notification import (
     NotificationInMemory,
 )
+from admission.infrastructure.admission.formation_continue.domain.service.in_memory.question_specifique import (
+    QuestionSpecifiqueInMemoryTranslator,
+)
 from admission.infrastructure.admission.formation_continue.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
@@ -59,6 +62,7 @@ _formation_continue_translator = FormationContinueInMemoryTranslator()
 _annee_inscription_formation_translator = AnneeInscriptionFormationInMemoryTranslator()
 _titres_acces = TitresAccesInMemory()
 _profil_candidat_translator = ProfilCandidatInMemoryTranslator()
+_question_specific_translator = QuestionSpecifiqueInMemoryTranslator()
 _comptabilite_translator = ComptabiliteInMemoryTranslator()
 _maximum_propositions_autorisees = MaximumPropositionsAutoriseesInMemory()
 
@@ -100,6 +104,7 @@ COMMAND_HANDLERS = {
         profil_candidat_translator=_profil_candidat_translator,
         calendrier_inscription=CalendrierInscriptionInMemory(),
         maximum_propositions_service=_maximum_propositions_autorisees,
+        questions_specifiques_translator=_question_specific_translator,
     ),
     SoumettrePropositionCommand: lambda msg_bus, cmd: soumettre_proposition(
         cmd,
@@ -111,6 +116,7 @@ COMMAND_HANDLERS = {
         element_confirmation=ElementsConfirmationInMemory(),
         notification=NotificationInMemory(),
         maximum_propositions_service=_maximum_propositions_autorisees,
+        questions_specifiques_translator=_question_specific_translator,
     ),
     CompleterCurriculumCommand: lambda msg_bus, cmd: completer_curriculum(
         cmd,

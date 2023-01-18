@@ -39,7 +39,7 @@ class TestCompleterComptabilitePropositionService(TestCase):
         self.message_bus = message_bus_in_memory_instance
         self.proposition_repository = PropositionInMemoryRepository()
         self.cmd = CompleterComptabilitePropositionCommand(
-            uuid_proposition='uuid-ECGE3DP',
+            uuid_proposition='uuid-USCC1',
             # Affiliations
             etudiant_solidaire=True,
             # Compte bancaire

@@ -28,6 +28,10 @@ from admission.ddd.admission.domain.service.i_calendrier_inscription import ICal
 from admission.ddd.admission.domain.service.i_maximum_propositions import IMaximumPropositionsAutorisees
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.domain.service.i_titres_acces import ITitresAcces
+from admission.ddd.admission.enums import Onglets
+from admission.ddd.admission.formation_continue.domain.service.i_question_specifique import (
+    IQuestionSpecifiqueTranslator,
+)
 from ...commands import VerifierPropositionQuery
 from ...domain.builder.proposition_identity_builder import PropositionIdentityBuilder
 from ...domain.model.proposition import PropositionIdentity
@@ -44,11 +48,17 @@ def verifier_proposition(
     profil_candidat_translator: 'IProfilCandidatTranslator',
     calendrier_inscription: 'ICalendrierInscription',
     maximum_propositions_service: 'IMaximumPropositionsAutorisees',
+    questions_specifiques_translator: 'IQuestionSpecifiqueTranslator',
 ) -> 'PropositionIdentity':
     # GIVEN
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
     proposition = proposition_repository.get(entity_id=proposition_id)
+    questions_specifiques = questions_specifiques_translator.search_by_proposition(
+        cmd.uuid_proposition,
+        onglets=Onglets.get_names(),
+    )
 
+    # WHEN
     VerifierProposition.verifier(
         proposition,
         formation_translator,
@@ -56,6 +66,7 @@ def verifier_proposition(
         profil_candidat_translator,
         calendrier_inscription,
         maximum_propositions_service,
+        questions_specifiques,
     )
 
     # THEN

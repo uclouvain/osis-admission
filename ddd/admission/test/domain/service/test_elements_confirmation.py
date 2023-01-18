@@ -79,7 +79,7 @@ class ElementsConfirmationTestCase(TestCase):
     def test_recuperer_elements_confirmation_formation_continue_hors_delai(self):
         with patch.object(PropositionContinueRepository.entities[0], 'annee_calculee', 2021):
             elements = message_bus_in_memory_instance.invoke(
-                RecupererElementsConfirmationContinueQuery(uuid_proposition="uuid-SC3DP")
+                RecupererElementsConfirmationContinueQuery(uuid_proposition="uuid-USCC4")
             )
             expected = [
                 'hors_delai',
@@ -176,7 +176,7 @@ class ElementsConfirmationTestCase(TestCase):
         with self.assertRaises(ElementsConfirmationNonConcordants):
             message_bus_in_memory_instance.invoke(
                 SoumettrePropositionContinueCommand(
-                    uuid_proposition="uuid-ECGE3DP",
+                    uuid_proposition="uuid-USCC1",
                     annee=2020,
                     pool=AcademicCalendarTypes.CONTINUING_EDUCATION_ENROLLMENT.name,
                     elements_confirmation={
@@ -189,7 +189,7 @@ class ElementsConfirmationTestCase(TestCase):
         with self.assertRaises(ElementsConfirmationNonConcordants):
             message_bus_in_memory_instance.invoke(
                 SoumettrePropositionContinueCommand(
-                    uuid_proposition="uuid-ECGE3DP",
+                    uuid_proposition="uuid-USCC1",
                     annee=2020,
                     pool=AcademicCalendarTypes.CONTINUING_EDUCATION_ENROLLMENT.name,
                     elements_confirmation={
