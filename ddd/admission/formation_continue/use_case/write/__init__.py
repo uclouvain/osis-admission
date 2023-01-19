@@ -29,3 +29,4 @@ from .supprimer_proposition_service import supprimer_proposition
 from .soumettre_proposition_service import soumettre_proposition
 from .completer_curriculum_service import completer_curriculum
 from .completer_comptabilite_proposition_service import completer_comptabilite_proposition
+from .completer_questions_specifiques_service import completer_questions_specifiques

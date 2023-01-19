@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Admission API
-  version: 1.0.59
+  version: 1.0.60
   description: This API delivers data for the Admission project.
   contact:
     name: UCLouvain - OSIS
@@ -4809,7 +4809,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ModifierQuestionsSpecifiquesCommand'
+              $ref: '#/components/schemas/ModifierQuestionsSpecifiquesFormationGeneraleCommand'
       responses:
         200:
           content:
@@ -4914,7 +4914,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ModifierQuestionsSpecifiquesCommand'
+              $ref: '#/components/schemas/ModifierQuestionsSpecifiquesFormationContinueCommand'
       responses:
         200:
           content:
@@ -8468,6 +8468,38 @@ components:
           type: array
           items:
             type: string
+        inscription_a_titre:
+          type: string
+        nom_siege_social:
+          type: string
+        numero_unique_entreprise:
+          type: string
+        numero_tva_entreprise:
+          type: string
+        adresse_mail_professionnelle:
+          type: string
+        type_adresse_facturation:
+          type: string
+        adresse_facturation:
+          type: object
+          properties:
+            rue:
+              type: string
+            code_postal:
+              type: string
+            ville:
+              type: string
+            pays:
+              type: string
+            lieu_dit:
+              type: string
+            numero_rue:
+              type: string
+            boite_postale:
+              type: string
+            destinataire:
+              type: string
+          nullable: true
       required:
       - uuid
       - formation
@@ -9118,7 +9150,7 @@ components:
       - uuid_proposition
       - sigle_formation
       - annee_formation
-    ModifierQuestionsSpecifiquesCommand:
+    ModifierQuestionsSpecifiquesFormationGeneraleCommand:
       type: object
       properties:
         specific_question_answers:
@@ -9386,6 +9418,39 @@ components:
       - uuid_proposition
       - curriculum
       - equivalence_diplome
+    ModifierQuestionsSpecifiquesFormationContinueCommand:
+      type: object
+      properties:
+        inscription_a_titre:
+          type: string
+        nom_siege_social:
+          type: string
+        numero_unique_entreprise:
+          type: string
+        numero_tva_entreprise:
+          type: string
+        adresse_mail_professionnelle:
+          type: string
+        type_adresse_facturation:
+          type: string
+        adresse_facturation_rue:
+          type: string
+        adresse_facturation_numero_rue:
+          type: string
+        adresse_facturation_code_postal:
+          type: string
+        adresse_facturation_ville:
+          type: string
+        adresse_facturation_pays:
+          type: string
+        adresse_facturation_destinataire:
+          type: string
+        adresse_facturation_boite_postale:
+          type: string
+        adresse_facturation_lieu_dit:
+          type: string
+        reponses_questions_specifiques:
+          type: object
     CompleterComptabilitePropositionContinueCommand:
       type: object
       properties:

@@ -388,6 +388,9 @@ msgid ""
 "confirming the protection of the parent"
 msgstr ""
 
+msgid "Another address"
+msgstr ""
+
 msgid "Application fees"
 msgstr ""
 
@@ -461,6 +464,33 @@ msgid "Back to the list"
 msgstr ""
 
 msgid "Belgian"
+msgstr ""
+
+msgid "Billing address city"
+msgstr ""
+
+msgid "Billing address country"
+msgstr ""
+
+msgid "Billing address place"
+msgstr ""
+
+msgid "Billing address postal box"
+msgstr ""
+
+msgid "Billing address postal code"
+msgstr ""
+
+msgid "Billing address recipient"
+msgstr ""
+
+msgid "Billing address street"
+msgstr ""
+
+msgid "Billing address street number"
+msgstr ""
+
+msgid "Billing address type"
 msgstr ""
 
 msgid "Body"
@@ -811,6 +841,9 @@ msgid "Confirmation paper not found."
 msgstr ""
 
 msgid "Confirmation success attestation"
+msgstr ""
+
+msgid "Contact address"
 msgstr ""
 
 msgid "Contact details"
@@ -1299,6 +1332,9 @@ msgid "Generic mail that can be manually sent once the candidate is admitted"
 msgstr ""
 
 msgid "HTML"
+msgstr ""
+
+msgid "Head office name"
 msgstr ""
 
 msgid "Help text"
@@ -2268,7 +2304,16 @@ msgstr ""
 msgid "Previous notes"
 msgstr ""
 
+msgid "Private"
+msgstr ""
+
 msgid "Prof."
+msgstr ""
+
+msgid "Professional"
+msgstr ""
+
+msgid "Professional email"
 msgstr ""
 
 msgid "Program proposition"
@@ -2419,6 +2464,9 @@ msgstr ""
 msgid "Registration Id"
 msgstr ""
 
+msgid "Registration as"
+msgstr ""
+
 msgid "Registration certificate"
 msgstr ""
 
@@ -2473,6 +2521,9 @@ msgid "Residence permit valid for more than 3 months with professional income"
 msgstr ""
 
 msgid "Residence permit valid for more than 3 months with replacement income"
+msgstr ""
+
+msgid "Residential address"
 msgstr ""
 
 msgid "Restore activity to submitted"
@@ -3226,6 +3277,9 @@ msgstr ""
 msgid "Undecided"
 msgstr ""
 
+msgid "Unique business number"
+msgstr ""
+
 msgid "Unsubmitted for publication"
 msgstr ""
 
@@ -3243,6 +3297,11 @@ msgstr "Valorisation of experience"
 
 msgid "VALID"
 msgstr "Valid"
+
+#, fuzzy
+#| msgid "CA Member"
+msgid "VAT number"
+msgstr "Supervisory panel member"
 
 msgid "VIP"
 msgstr ""

@@ -29,19 +29,14 @@ from typing import Optional, Dict, List
 import attr
 
 from admission.ddd.admission.domain.model.formation import FormationIdentity
-from admission.ddd.admission.enums import (
-    TypeSituationAssimilation,
-    ChoixAssimilation1,
-    ChoixAssimilation2,
-    ChoixAssimilation3,
-    LienParente,
-    ChoixAssimilation5,
-    ChoixAssimilation6,
-    ChoixAffiliationSport,
-    ChoixTypeCompteBancaire,
-)
+from admission.ddd.admission.enums import ChoixTypeCompteBancaire
+from admission.ddd.admission.formation_continue.domain.model._adresse import Adresse
 from admission.ddd.admission.formation_continue.domain.model._comptabilite import comptabilite_non_remplie, Comptabilite
-from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutProposition
+from admission.ddd.admission.formation_continue.domain.model.enums import (
+    ChoixStatutProposition,
+    ChoixInscriptionATitre,
+    ChoixTypeAdresseFacturation,
+)
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from osis_common.ddd import interface
 
@@ -69,6 +64,14 @@ class Proposition(interface.RootEntity):
     curriculum: List[str] = attr.Factory(list)
     equivalence_diplome: List[str] = attr.Factory(list)
     elements_confirmation: Dict[str, str] = attr.Factory(dict)
+
+    inscription_a_titre: Optional[ChoixInscriptionATitre] = None
+    nom_siege_social: Optional[str] = ''
+    numero_unique_entreprise: Optional[str] = ''
+    numero_tva_entreprise: Optional[str] = ''
+    adresse_mail_professionnelle: Optional[str] = ''
+    type_adresse_facturation: Optional[ChoixTypeAdresseFacturation] = None
+    adresse_facturation: Optional[Adresse] = None
 
     def modifier_choix_formation(self, formation_id: FormationIdentity, reponses_questions_specifiques: Dict):
         self.formation_id = formation_id
@@ -114,3 +117,45 @@ class Proposition(interface.RootEntity):
             prenom_titulaire_compte=prenom_titulaire_compte,
             nom_titulaire_compte=nom_titulaire_compte,
         )
+
+    def completer_informations_complementaires(
+        self,
+        inscription_a_titre: Optional[str],
+        nom_siege_social: Optional[str],
+        numero_unique_entreprise: Optional[str],
+        numero_tva_entreprise: Optional[str],
+        adresse_mail_professionnelle: Optional[str],
+        type_adresse_facturation: Optional[str],
+        adresse_facturation_rue: Optional[str],
+        adresse_facturation_numero_rue: Optional[str],
+        adresse_facturation_code_postal: Optional[str],
+        adresse_facturation_ville: Optional[str],
+        adresse_facturation_pays: Optional[str],
+        adresse_facturation_destinataire: Optional[str],
+        adresse_facturation_boite_postale: Optional[str],
+        adresse_facturation_lieu_dit: Optional[str],
+        reponses_questions_specifiques: Dict,
+    ):
+        self.inscription_a_titre = ChoixInscriptionATitre[inscription_a_titre] if inscription_a_titre else None
+        self.nom_siege_social = nom_siege_social or ''
+        self.numero_unique_entreprise = numero_unique_entreprise or ''
+        self.numero_tva_entreprise = numero_tva_entreprise or ''
+        self.adresse_mail_professionnelle = adresse_mail_professionnelle or ''
+        self.type_adresse_facturation = (
+            ChoixTypeAdresseFacturation[type_adresse_facturation] if type_adresse_facturation else None
+        )
+        self.adresse_facturation = (
+            Adresse(
+                rue=adresse_facturation_rue or '',
+                numero_rue=adresse_facturation_numero_rue or '',
+                code_postal=adresse_facturation_code_postal or '',
+                ville=adresse_facturation_ville or '',
+                pays=adresse_facturation_pays or '',
+                destinataire=adresse_facturation_destinataire,
+                boite_postale=adresse_facturation_boite_postale,
+                lieu_dit=adresse_facturation_lieu_dit,
+            )
+            if self.type_adresse_facturation == ChoixTypeAdresseFacturation.AUTRE
+            else None
+        )
+        self.reponses_questions_specifiques = reponses_questions_specifiques

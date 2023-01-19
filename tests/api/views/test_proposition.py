@@ -27,11 +27,14 @@ from django.shortcuts import resolve_url
 from rest_framework import status
 
 from admission.contrib.models import GeneralEducationAdmission, ContinuingEducationAdmission
+from admission.ddd import BE_ISO_CODE
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutProposition as ChoixStatutPropositionFormationGenerale,
 )
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixStatutProposition as ChoixStatutPropositionFormationContinue,
+    ChoixInscriptionATitre,
+    ChoixTypeAdresseFacturation,
 )
 from admission.tests import CheckActionLinksMixin
 from rest_framework.test import APITestCase
@@ -40,6 +43,7 @@ from admission.tests.factories.continuing_education import ContinuingEducationAd
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.roles import CandidateFactory
 from base.tests.factories.person import PersonFactory
+from reference.tests.factories.country import CountryFactory
 
 
 class GeneralPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase):
@@ -164,6 +168,22 @@ class ContinuingPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase
     @classmethod
     def setUpTestData(cls):
         cls.admission = ContinuingEducationAdmissionFactory()
+        cls.admission_with_billing_address = ContinuingEducationAdmissionFactory(
+            registration_as=ChoixInscriptionATitre.PROFESSIONNEL.name,
+            head_office_name='UCL',
+            unique_business_number='1',
+            vat_number='1A',
+            professional_email='john.doe@example.be',
+            billing_address_type=ChoixTypeAdresseFacturation.AUTRE.name,
+            billing_address_recipient='John Doe',
+            billing_address_street='rue du moulin',
+            billing_address_street_number='1',
+            billing_address_postal_box='PB1',
+            billing_address_postal_code='1348',
+            billing_address_city='Louvain-La-Neuve',
+            billing_address_country=CountryFactory(iso_code=BE_ISO_CODE),
+            billing_address_place='Avant',
+        )
         cls.teaching_campus_name = (
             cls.admission.training.educationgroupversion_set.first().root_group.main_teaching_campus.name
         )
@@ -173,6 +193,9 @@ class ContinuingPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase
         cls.no_role_user = PersonFactory().user
 
         cls.url = resolve_url("admission_api_v1:continuing_propositions", uuid=str(cls.admission.uuid))
+        cls.url_admission_with_address = resolve_url(
+            "admission_api_v1:continuing_propositions", uuid=str(cls.admission_with_billing_address.uuid)
+        )
 
     def test_get_proposition(self):
         self.client.force_authenticate(user=self.candidate.user)
@@ -197,6 +220,14 @@ class ContinuingPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase
         self.assertEqual(json_response['nom_candidat'], self.admission.candidate.last_name)
         self.assertEqual(json_response['statut'], self.admission.status)
         self.assertEqual(json_response['erreurs'], [])
+        self.assertEqual(json_response.get('inscription_a_titre'), self.admission.registration_as)
+        self.assertEqual(json_response.get('nom_siege_social'), self.admission.head_office_name)
+        self.assertEqual(json_response.get('numero_unique_entreprise'), self.admission.unique_business_number)
+        self.assertEqual(json_response.get('numero_tva_entreprise'), self.admission.vat_number)
+        self.assertEqual(json_response.get('adresse_mail_professionnelle'), self.admission.professional_email)
+        self.assertEqual(json_response.get('type_adresse_facturation'), self.admission.billing_address_type)
+        self.assertIsNone(json_response.get('adresse_facturation'))
+
         self.assertActionLinks(
             links=json_response['links'],
             allowed_actions=[
@@ -218,6 +249,73 @@ class ContinuingPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase
                 'update_accounting',
             ],
             forbidden_actions=[],
+        )
+
+    def test_get_proposition_with_custom_address(self):
+        self.client.force_authenticate(user=self.admission_with_billing_address.candidate.user)
+
+        response = self.client.get(self.url_admission_with_address, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
+
+        json_response = response.json()
+        adresse_facturation = json_response.get('adresse_facturation')
+        self.assertEqual(
+            json_response.get('inscription_a_titre'),
+            self.admission_with_billing_address.registration_as,
+        )
+        self.assertEqual(
+            json_response.get('nom_siege_social'),
+            self.admission_with_billing_address.head_office_name,
+        )
+        self.assertEqual(
+            json_response.get('numero_unique_entreprise'),
+            self.admission_with_billing_address.unique_business_number,
+        )
+        self.assertEqual(
+            json_response.get('numero_tva_entreprise'),
+            self.admission_with_billing_address.vat_number,
+        )
+        self.assertEqual(
+            json_response.get('adresse_mail_professionnelle'),
+            self.admission_with_billing_address.professional_email,
+        )
+        self.assertEqual(
+            json_response.get('type_adresse_facturation'),
+            self.admission_with_billing_address.billing_address_type,
+        )
+        self.assertIsNotNone(adresse_facturation)
+        self.assertEqual(
+            adresse_facturation.get('rue'),
+            self.admission_with_billing_address.billing_address_street,
+        )
+        self.assertEqual(
+            adresse_facturation.get('code_postal'),
+            self.admission_with_billing_address.billing_address_postal_code,
+        )
+        self.assertEqual(
+            adresse_facturation.get('ville'),
+            self.admission_with_billing_address.billing_address_city,
+        )
+        self.assertEqual(
+            adresse_facturation.get('pays'),
+            self.admission_with_billing_address.billing_address_country.iso_code,
+        )
+        self.assertEqual(
+            adresse_facturation.get('lieu_dit'),
+            self.admission_with_billing_address.billing_address_place,
+        )
+        self.assertEqual(
+            adresse_facturation.get('numero_rue'),
+            self.admission_with_billing_address.billing_address_street_number,
+        )
+        self.assertEqual(
+            adresse_facturation.get('boite_postale'),
+            self.admission_with_billing_address.billing_address_postal_box,
+        )
+        self.assertEqual(
+            adresse_facturation.get('destinataire'),
+            self.admission_with_billing_address.billing_address_recipient,
         )
 
     def test_get_proposition_other_candidate_is_forbidden(self):
