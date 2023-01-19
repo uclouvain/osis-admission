@@ -23,7 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from rest_framework import generics, mixins
+from rest_framework import generics, mixins, status
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 
@@ -31,6 +31,7 @@ from admission.api import serializers
 from admission.api.schema import ResponseSpecificSchema
 from admission.api.serializers import SpecificQuestionSerializer
 from admission.contrib.models import AdmissionFormItemInstantiation
+from admission.ddd.admission.formation_continue.commands import CompleterQuestionsSpecifiquesCommand
 
 from admission.utils import (
     get_cached_continuing_education_admission_perm_obj,
@@ -38,6 +39,7 @@ from admission.utils import (
     get_cached_admission_perm_obj,
 )
 from base.models.person import Person
+from infrastructure.messages_bus import message_bus_instance
 from osis_role.contrib.views import APIPermissionRequiredMixin
 
 
@@ -103,27 +105,39 @@ class DoctorateSpecificQuestionListView(SpecificQuestionListView):
         return get_cached_admission_perm_obj(self.kwargs['uuid'])
 
 
-class SpecificQuestionSchema(ResponseSpecificSchema):
+class GeneralSpecificQuestionSchema(ResponseSpecificSchema):
+    operation_id_base = '_general_specific_question'
     serializer_mapping = {
         'PUT': (
-            serializers.ModifierQuestionsSpecifiquesCommandSerializer,
+            serializers.ModifierQuestionsSpecifiquesFormationGeneraleCommandSerializer,
             serializers.PropositionIdentityDTOSerializer,
         ),
     }
 
 
-class GeneralSpecificQuestionSchema(SpecificQuestionSchema):
-    operation_id_base = '_general_specific_question'
-
-
-class ContinuingSpecificQuestionSchema(SpecificQuestionSchema):
+class ContinuingSpecificQuestionSchema(ResponseSpecificSchema):
     operation_id_base = '_continuing_specific_question'
+    serializer_mapping = {
+        'PUT': (
+            serializers.ModifierQuestionsSpecifiquesFormationContinueCommandSerializer,
+            serializers.PropositionIdentityDTOSerializer,
+        ),
+    }
 
 
-class BaseSpecificQuestionAPIView(APIPermissionRequiredMixin, mixins.UpdateModelMixin, GenericAPIView):
-    serializer_class = serializers.ModifierQuestionsSpecifiquesCommandSerializer
+class GeneralSpecificQuestionAPIView(APIPermissionRequiredMixin, mixins.UpdateModelMixin, GenericAPIView):
+    name = 'general_specific_question'
+    schema = GeneralSpecificQuestionSchema()
+    permission_mapping = {
+        'GET': 'admission.view_generaleducationadmission_specific_question',
+        'PUT': 'admission.change_generaleducationadmission_specific_question',
+    }
+    serializer_class = serializers.ModifierQuestionsSpecifiquesFormationGeneraleCommandSerializer
     filter_backends = []
     pagination_class = None
+
+    def get_permission_object(self):
+        return get_cached_general_education_admission_perm_obj(self.kwargs['uuid'])
 
     def get_object(self):
         return self.get_permission_object()
@@ -136,25 +150,29 @@ class BaseSpecificQuestionAPIView(APIPermissionRequiredMixin, mixins.UpdateModel
         return response
 
 
-class GeneralSpecificQuestionAPIView(BaseSpecificQuestionAPIView):
-    name = 'general_specific_question'
-    schema = GeneralSpecificQuestionSchema()
-    permission_mapping = {
-        'GET': 'admission.view_generaleducationadmission_specific_question',
-        'PUT': 'admission.change_generaleducationadmission_specific_question',
-    }
-
-    def get_permission_object(self):
-        return get_cached_general_education_admission_perm_obj(self.kwargs['uuid'])
-
-
-class ContinuingSpecificQuestionAPIView(BaseSpecificQuestionAPIView):
+class ContinuingSpecificQuestionAPIView(APIPermissionRequiredMixin, GenericAPIView):
     name = 'continuing_specific_question'
     schema = ContinuingSpecificQuestionSchema()
     permission_mapping = {
         'GET': 'admission.view_continuingeducationadmission_specific_question',
         'PUT': 'admission.change_continuingeducationadmission_specific_question',
     }
+    filter_backends = []
+    pagination_class = None
 
     def get_permission_object(self):
         return get_cached_continuing_education_admission_perm_obj(self.kwargs['uuid'])
+
+    def put(self, request, *args, **kwargs):
+        serializer = serializers.ModifierQuestionsSpecifiquesFormationContinueCommandSerializer(data=request.data)
+        serializer.is_valid(True)
+        result = message_bus_instance.invoke(
+            CompleterQuestionsSpecifiquesCommand(
+                uuid_proposition=self.kwargs['uuid'],
+                **serializer.data,
+            )
+        )
+        admission = self.get_permission_object()
+        admission.update_detailed_status()
+        serializer = serializers.PropositionIdentityDTOSerializer(instance=result)
+        return Response(serializer.data, status=status.HTTP_200_OK)

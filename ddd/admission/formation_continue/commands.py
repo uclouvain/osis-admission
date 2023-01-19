@@ -120,3 +120,27 @@ class CompleterComptabilitePropositionCommand(interface.CommandRequest):
 @attr.dataclass(frozen=True, slots=True)
 class RecupererElementsConfirmationQuery(interface.QueryRequest):
     uuid_proposition: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class CompleterQuestionsSpecifiquesCommand(interface.CommandRequest):
+    uuid_proposition: str
+
+    inscription_a_titre: Optional[str] = ''
+    nom_siege_social: Optional[str] = ''
+    numero_unique_entreprise: Optional[str] = ''
+    numero_tva_entreprise: Optional[str] = ''
+    adresse_mail_professionnelle: Optional[str] = ''
+
+    # Adresse facturation
+    type_adresse_facturation: Optional[str] = ''
+    adresse_facturation_rue: Optional[str] = ''
+    adresse_facturation_numero_rue: Optional[str] = ''
+    adresse_facturation_code_postal: Optional[str] = ''
+    adresse_facturation_ville: Optional[str] = ''
+    adresse_facturation_pays: Optional[str] = ''
+    adresse_facturation_destinataire: Optional[str] = ''
+    adresse_facturation_boite_postale: Optional[str] = ''
+    adresse_facturation_lieu_dit: Optional[str] = ''
+
+    reponses_questions_specifiques: Dict = attr.Factory(dict)

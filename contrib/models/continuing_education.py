@@ -31,7 +31,11 @@ from rest_framework.settings import api_settings
 
 from admission.contrib.models.base import BaseAdmission, BaseAdmissionQuerySet, admission_directory_path
 from admission.ddd.admission.dtos.conditions import InfosDetermineesDTO
-from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutProposition
+from admission.ddd.admission.formation_continue.domain.model.enums import (
+    ChoixStatutProposition,
+    ChoixInscriptionATitre,
+    ChoixTypeAdresseFacturation,
+)
 from base.models.academic_year import AcademicYear
 from osis_common.ddd.interface import BusinessException
 from osis_document.contrib import FileField
@@ -49,6 +53,107 @@ class ContinuingEducationAdmission(BaseAdmission):
         mimetypes=['application/pdf'],
         upload_to=admission_directory_path,
         verbose_name=_('Diploma equivalence'),
+    )
+
+    registration_as = models.CharField(
+        blank=True,
+        choices=ChoixInscriptionATitre.choices(),
+        default='',
+        max_length=30,
+        verbose_name=_('Registration as'),
+    )
+
+    head_office_name = models.CharField(
+        blank=True,
+        default='',
+        max_length=255,
+        verbose_name=_('Head office name'),
+    )
+
+    unique_business_number = models.CharField(
+        blank=True,
+        default='',
+        max_length=255,
+        verbose_name=_('Unique business number'),
+    )
+
+    vat_number = models.CharField(
+        blank=True,
+        default='',
+        max_length=255,
+        verbose_name=_('VAT number'),
+    )
+
+    professional_email = models.CharField(
+        blank=True,
+        default='',
+        max_length=255,
+        verbose_name=_('Professional email'),
+    )
+
+    billing_address_type = models.CharField(
+        blank=True,
+        choices=ChoixTypeAdresseFacturation.choices(),
+        default='',
+        max_length=30,
+        verbose_name=_('Billing address type'),
+    )
+
+    billing_address_recipient = models.CharField(
+        blank=True,
+        default='',
+        max_length=255,
+        verbose_name=_('Billing address recipient'),
+    )
+
+    billing_address_street = models.CharField(
+        blank=True,
+        default='',
+        max_length=255,
+        verbose_name=_('Billing address street'),
+    )
+
+    billing_address_street_number = models.CharField(
+        blank=True,
+        default='',
+        max_length=20,
+        verbose_name=_('Billing address street number'),
+    )
+
+    billing_address_postal_box = models.CharField(
+        blank=True,
+        default='',
+        max_length=20,
+        verbose_name=_('Billing address postal box'),
+    )
+
+    billing_address_postal_code = models.CharField(
+        blank=True,
+        default='',
+        max_length=20,
+        verbose_name=_('Billing address postal code'),
+    )
+
+    billing_address_city = models.CharField(
+        blank=True,
+        default='',
+        max_length=255,
+        verbose_name=_('Billing address city'),
+    )
+
+    billing_address_country = models.ForeignKey(
+        'reference.Country',
+        blank=True,
+        null=True,
+        on_delete=models.PROTECT,
+        verbose_name=_('Billing address country'),
+    )
+
+    billing_address_place = models.CharField(
+        blank=True,
+        default='',
+        max_length=255,
+        verbose_name=_('Billing address place'),
     )
 
     class Meta:

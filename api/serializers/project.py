@@ -480,6 +480,13 @@ class ContinuingEducationPropositionDTOSerializer(IncludedFieldsMixin, DTOSerial
             'reponses_questions_specifiques',
             'curriculum',
             'equivalence_diplome',
+            'inscription_a_titre',
+            'nom_siege_social',
+            'numero_unique_entreprise',
+            'numero_tva_entreprise',
+            'adresse_mail_professionnelle',
+            'type_adresse_facturation',
+            'adresse_facturation',
         ]
 
 

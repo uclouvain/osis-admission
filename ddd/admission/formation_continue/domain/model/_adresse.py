@@ -1,4 +1,4 @@
-# ##############################################################################
+##############################################################################
 #
 #    OSIS stands for Open Student Information System. It's an application
 #    designed to manage the core business of higher education institutions,
@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -22,28 +22,21 @@
 #    at the root of the source code of this program.  If not,
 #    see http://www.gnu.org/licenses/.
 #
-# ##############################################################################
+##############################################################################
+from typing import Optional
 
-from django.utils.translation import gettext_lazy as _
+import attr
 
-from base.models.utils.utils import ChoiceEnum
-
-
-class ChoixStatutProposition(ChoiceEnum):
-    CANCELLED = _('CANCELLED')
-    # During the enrolment step
-    IN_PROGRESS = _('IN_PROGRESS')
-    SUBMITTED = _('SUBMITTED')
-    # After the enrolment step
-    ENROLLED = _('ENROLLED')
+from osis_common.ddd import interface
 
 
-class ChoixInscriptionATitre(ChoiceEnum):
-    PRIVE = _('Private')
-    PROFESSIONNEL = _('Professional')
-
-
-class ChoixTypeAdresseFacturation(ChoiceEnum):
-    RESIDENTIEL = _("Residential address")
-    CONTACT = _("Contact address")
-    AUTRE = _("Another address")
+@attr.dataclass(frozen=True, slots=True)
+class Adresse(interface.ValueObject):
+    rue: str
+    numero_rue: str
+    code_postal: str
+    ville: str
+    pays: str
+    destinataire: Optional[str] = ''
+    boite_postale: Optional[str] = ''
+    lieu_dit: Optional[str] = ''

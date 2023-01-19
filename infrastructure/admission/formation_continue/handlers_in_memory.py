@@ -145,4 +145,8 @@ COMMAND_HANDLERS = {
         formation_translator=_formation_continue_translator,
         profil_candidat_translator=_profil_candidat_translator,
     ),
+    CompleterQuestionsSpecifiquesCommand: lambda msg_bus, cmd: completer_questions_specifiques(
+        cmd,
+        proposition_repository=_proposition_repository,
+    ),
 }
