@@ -28,6 +28,7 @@ from typing import List, Optional
 
 import factory
 
+from admission.ddd.admission.dtos import AdressePersonnelleDTO
 from admission.ddd.admission.dtos.formation import FormationDTO
 from admission.ddd.admission.formation_continue.domain.model.proposition import Proposition, PropositionIdentity
 from admission.ddd.admission.formation_continue.domain.validator.exceptions import PropositionNonTrouveeException
@@ -42,7 +43,6 @@ from admission.infrastructure.admission.formation_continue.domain.service.in_mem
     FormationContinueInMemoryTranslator,
 )
 from base.ddd.utils.in_memory_repository import InMemoryGenericRepository
-from base.models.enums.education_group_types import TrainingType
 
 
 @dataclass
@@ -50,14 +50,6 @@ class _Candidat:
     prenom: str
     nom: str
     nationalite: str
-
-
-@dataclass
-class _Formation:
-    intitule: str
-    campus: str
-    type: str
-    code_domaine: str
 
 
 class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepository):
@@ -164,4 +156,21 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
             reponses_questions_specifiques=proposition.reponses_questions_specifiques,
             equivalence_diplome=proposition.equivalence_diplome,
             curriculum=proposition.curriculum,
+            inscription_a_titre=proposition.inscription_a_titre,
+            nom_siege_social=proposition.nom_siege_social,
+            numero_unique_entreprise=proposition.numero_unique_entreprise,
+            numero_tva_entreprise=proposition.numero_tva_entreprise,
+            adresse_mail_professionnelle=proposition.adresse_mail_professionnelle,
+            type_adresse_facturation=proposition.type_adresse_facturation,
+            adresse_facturation=proposition.adresse_facturation
+            and AdressePersonnelleDTO(
+                rue=proposition.adresse_facturation.rue,
+                numero_rue=proposition.adresse_facturation.numero_rue,
+                code_postal=proposition.adresse_facturation.code_postal,
+                ville=proposition.adresse_facturation.ville,
+                pays=proposition.adresse_facturation.pays,
+                destinataire=proposition.adresse_facturation.destinataire,
+                boite_postale=proposition.adresse_facturation.boite_postale,
+                lieu_dit=proposition.adresse_facturation.lieu_dit,
+            ),
         )

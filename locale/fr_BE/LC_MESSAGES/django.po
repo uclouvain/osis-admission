@@ -449,6 +449,9 @@ msgstr ""
 "Annexe 26 ou 26 ou la carte A/B mentionnant le statut de réfugié ou la "
 "décision confirmant la protection du parent"
 
+msgid "Another address"
+msgstr "Une autre adresse"
+
 msgid "Application fees"
 msgstr "Frais de dossier"
 
@@ -524,6 +527,33 @@ msgstr "Retour à la liste"
 
 msgid "Belgian"
 msgstr "Belge"
+
+msgid "Billing address city"
+msgstr "La ville de l'adresse de facturation"
+
+msgid "Billing address country"
+msgstr "Le pays de l'adresse de facturation"
+
+msgid "Billing address place"
+msgstr "Le lieu-dit de l'adresse de facturation"
+
+msgid "Billing address postal box"
+msgstr "La boîte postale de l'adresse de facturation"
+
+msgid "Billing address postal code"
+msgstr "Le code postal de l'adresse de facturation"
+
+msgid "Billing address recipient"
+msgstr "Le destinataire de l'adresse de facturation"
+
+msgid "Billing address street"
+msgstr "La rue de l'adresse de facturation"
+
+msgid "Billing address street number"
+msgstr "Le numéro de rue de l'adresse de facturation"
+
+msgid "Billing address type"
+msgstr "Le type de l'adresse de facturation"
 
 msgid "Body"
 msgstr "Corps"
@@ -878,6 +908,9 @@ msgstr "Épreuve de confirmation non trouvée."
 
 msgid "Confirmation success attestation"
 msgstr "Attestation de réussite de l'épreuve de confirmation"
+
+msgid "Contact address"
+msgstr "Adresse de correspondance"
 
 msgid "Contact details"
 msgstr "Coordonnées"
@@ -1398,6 +1431,9 @@ msgstr ""
 
 msgid "HTML"
 msgstr "HTML"
+
+msgid "Head office name"
+msgstr "Nom du siège social"
 
 msgid "Help text"
 msgstr "Texte d'aide"
@@ -2547,8 +2583,17 @@ msgstr "Parcours antérieur"
 msgid "Previous notes"
 msgstr "Notes précédentes"
 
+msgid "Private"
+msgstr "Privé"
+
 msgid "Prof."
 msgstr "Prof."
+
+msgid "Professional"
+msgstr "Professionnel"
+
+msgid "Professional email"
+msgstr "Adresse e-mail professionnelle"
 
 msgid "Program proposition"
 msgstr "Proposition de programme"
@@ -2710,6 +2755,9 @@ msgstr "Refuser l'activité"
 msgid "Registration Id"
 msgstr "Noma"
 
+msgid "Registration as"
+msgstr "Inscription à titre"
+
 msgid "Registration certificate"
 msgstr "Attestation d’immatriculation"
 
@@ -2771,6 +2819,9 @@ msgid "Residence permit valid for more than 3 months with replacement income"
 msgstr ""
 "Titre de séjour d’une validité supérieure à 3 mois avec des revenus de "
 "remplacement"
+
+msgid "Residential address"
+msgstr "Domicile légal"
 
 msgid "Restore activity to submitted"
 msgstr "Remettre cette activité au statut soumise"
@@ -3593,6 +3644,9 @@ msgstr "UUID"
 msgid "Undecided"
 msgstr "Non décidé"
 
+msgid "Unique business number"
+msgstr "Numéro unique d'entreprise"
+
 msgid "Unsubmitted for publication"
 msgstr "Non soumis pour publication"
 
@@ -3610,6 +3664,9 @@ msgstr "Valorisation des acquis de l'expérience"
 
 msgid "VALID"
 msgstr "Valide"
+
+msgid "VAT number"
+msgstr "Numéro de TVA"
 
 msgid "VIP"
 msgstr "VIP"

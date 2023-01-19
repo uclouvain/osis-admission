@@ -48,3 +48,4 @@ class ProfilCandidat(interface.ValueObject):
     rue: Optional[str] = ''
     numero_rue: Optional[str] = ''
     boite_postale: Optional[str] = ''
+    destinataire: Optional[str] = ''

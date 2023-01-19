@@ -28,6 +28,7 @@ from typing import Dict, List, Optional, Union
 
 import attr
 
+from admission.ddd.admission.dtos import AdressePersonnelleDTO
 from admission.ddd.admission.dtos.formation import FormationDTO
 from osis_common.ddd import interface
 
@@ -52,3 +53,11 @@ class PropositionDTO(interface.DTO):
 
     curriculum: List[str]
     equivalence_diplome: List[str]
+
+    inscription_a_titre: Optional[str]
+    nom_siege_social: Optional[str]
+    numero_unique_entreprise: Optional[str]
+    numero_tva_entreprise: Optional[str]
+    adresse_mail_professionnelle: Optional[str]
+    type_adresse_facturation: Optional[str]
+    adresse_facturation: Optional[AdressePersonnelleDTO]
