@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Admission API
-  version: 1.0.60
+  version: 1.0.61
   description: This API delivers data for the Admission project.
   contact:
     name: UCLouvain - OSIS
@@ -5930,7 +5930,6 @@ components:
       required:
       - educationalexperienceyear_set
       - country
-      - transcript_type
       - obtained_diploma
     Result:
       enum:
@@ -5955,6 +5954,7 @@ components:
       type: string
     TranscriptType:
       enum:
+      - ''
       - ONE_A_YEAR
       - ONE_FOR_ALL_YEARS
       type: string

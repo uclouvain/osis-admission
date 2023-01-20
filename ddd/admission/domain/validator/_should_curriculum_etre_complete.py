@@ -24,7 +24,7 @@
 #
 # ##############################################################################
 import datetime
-from typing import List, Optional, Tuple, Set
+from typing import List, Optional, Tuple, Set, Dict
 
 import attr
 from dateutil.rrule import rrule, MONTHLY, rruleset
@@ -42,17 +42,15 @@ from base.ddd.utils.business_validator import BusinessValidator, MultipleBusines
 class ShouldAnneesCVRequisesCompletees(BusinessValidator):
     annee_courante: int
     annee_derniere_inscription_ucl: Optional[int]
-    annee_diplome_etudes_secondaires_belges: Optional[int]
-    annee_diplome_etudes_secondaires_etrangeres: Optional[int]
+    annee_diplome_etudes_secondaires: Optional[int]
     dates_experiences_non_academiques: List[Tuple[datetime.date, datetime.date]]
     experiences_academiques: List[ExperienceAcademiqueDTO]
-    experiences_academiques_incompletes: Set[str]
+    experiences_academiques_incompletes: Dict[str, str]
 
     def validate(self, *args, **kwargs):
         annee_minimale = IProfilCandidatTranslator.get_annee_minimale_a_completer_cv(
             annee_courante=self.annee_courante,
-            annee_diplome_etudes_secondaires_belges=self.annee_diplome_etudes_secondaires_belges,
-            annee_diplome_etudes_secondaires_etrangeres=self.annee_diplome_etudes_secondaires_etrangeres,
+            annee_diplome_etudes_secondaires=self.annee_diplome_etudes_secondaires,
             annee_derniere_inscription_ucl=self.annee_derniere_inscription_ucl,
         )
 
@@ -166,13 +164,16 @@ class ShouldAnneesCVRequisesCompletees(BusinessValidator):
 
 @attr.dataclass(frozen=True, slots=True)
 class ShouldExperiencesAcademiquesEtreCompletees(BusinessValidator):
-    experiences_academiques_incompletes: Set[str]
+    experiences_academiques_incompletes: Dict[str, str]
 
     def validate(self, *args, **kwargs):
         if self.experiences_academiques_incompletes:
             raise MultipleBusinessExceptions(
                 exceptions=set(
-                    ExperiencesAcademiquesNonCompleteesException(reference=experience)
-                    for experience in self.experiences_academiques_incompletes
+                    ExperiencesAcademiquesNonCompleteesException(
+                        reference=experience_uuid,
+                        name=experience_name,
+                    )
+                    for experience_uuid, experience_name in self.experiences_academiques_incompletes.items()
                 )
             )

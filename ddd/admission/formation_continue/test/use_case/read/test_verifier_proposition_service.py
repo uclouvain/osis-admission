@@ -45,6 +45,9 @@ from admission.ddd.admission.formation_continue.commands import VerifierProposit
 from admission.ddd.admission.formation_continue.domain.model._comptabilite import Comptabilite
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutProposition
 from admission.ddd.admission.formation_continue.domain.model.proposition import PropositionIdentity
+from admission.ddd.admission.formation_continue.domain.validator.exceptions import (
+    ExperiencesCurriculumNonRenseigneesException,
+)
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
     EtudesSecondairesNonCompleteesException,
 )
@@ -333,3 +336,23 @@ class TestVerifierPropositionService(TestCase):
                 context.exception.exceptions,
                 QuestionsSpecifiquesChoixFormationNonCompleteesException,
             )
+
+    def test_should_retourner_erreur_si_pas_experience_academique(self):
+        while self.candidat_translator.experiences_academiques:
+            self.candidat_translator.experiences_academiques.pop()
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            self.message_bus.invoke(self.verifier_commande)
+        self.assertHasInstance(
+            context.exception.exceptions,
+            ExperiencesCurriculumNonRenseigneesException,
+        )
+
+    def test_should_retourner_erreur_si_pas_experience_non_academique(self):
+        while self.candidat_translator.experiences_non_academiques:
+            self.candidat_translator.experiences_non_academiques.pop()
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            self.message_bus.invoke(self.verifier_commande)
+        self.assertHasInstance(
+            context.exception.exceptions,
+            ExperiencesCurriculumNonRenseigneesException,
+        )

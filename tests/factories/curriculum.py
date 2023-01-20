@@ -31,11 +31,15 @@ import factory
 from dateutil.relativedelta import relativedelta
 
 from osis_profile.models import EducationalExperienceYear, ProfessionalExperience, EducationalExperience
-from osis_profile.models.enums.curriculum import TranscriptType
+from osis_profile.models.enums.curriculum import TranscriptType, EvaluationSystem, Result, Grade
 from reference.tests.factories.language import LanguageFactory
 
 
 class EducationalExperienceYearFactory(factory.DjangoModelFactory):
+    registered_credit_number = 10
+    acquired_credit_number = 10
+    result = Result.WAITING_RESULT.name
+
     class Meta:
         model = EducationalExperienceYear
 
@@ -55,6 +59,8 @@ class EducationalExperienceFactory(factory.DjangoModelFactory):
     graduate_degree = factory.LazyFunction(lambda: [uuid.uuid4()])
     linguistic_regime = factory.SubFactory(LanguageFactory)
     obtained_diploma = factory.Faker('boolean')
+    evaluation_type = EvaluationSystem.NO_CREDIT_SYSTEM.name
+    obtained_grade = Grade.GREAT_DISTINCTION.name
 
 
 class ProfessionalExperienceFactory(factory.DjangoModelFactory):
