@@ -33,8 +33,9 @@ from admission.ddd.admission.domain.validator import (
     ShouldTypeCompteBancaireRemboursementEtreComplete,
 )
 from admission.ddd.admission.formation_continue.domain.model._comptabilite import Comptabilite
-from admission.ddd.admission.formation_continue.domain.validator._should_comptabilite_etre_completee import (
+from admission.ddd.admission.formation_continue.domain.validator import (
     ShouldAffiliationsEtreCompletees,
+    ShouldRenseignerExperiencesCurriculum,
 )
 from base.ddd.utils.business_validator import BusinessValidator, TwoStepsMultipleBusinessExceptionListValidator
 
@@ -66,5 +67,22 @@ class FormationContinueComptabiliteValidatorList(TwoStepsMultipleBusinessExcepti
                 code_bic_swift_banque=self.comptabilite.code_bic_swift_banque,
                 prenom_titulaire_compte=self.comptabilite.prenom_titulaire_compte,
                 nom_titulaire_compte=self.comptabilite.nom_titulaire_compte,
+            ),
+        ]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class FormationContinueCurriculumValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+    a_experience_academique: bool
+    a_experience_non_academique: bool
+
+    def get_data_contract_validators(self) -> List[BusinessValidator]:
+        return []
+
+    def get_invariants_validators(self) -> List[BusinessValidator]:
+        return [
+            ShouldRenseignerExperiencesCurriculum(
+                a_experience_academique=self.a_experience_academique,
+                a_experience_non_academique=self.a_experience_non_academique,
             ),
         ]

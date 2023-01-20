@@ -34,6 +34,18 @@ from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.education_group_types import TrainingType
 
 
+ADMISSION_EDUCATION_TYPE_BY_ADMISSION_CONTEXT = {
+    'general-education': {
+        TypeFormation.BACHELIER.name,
+        TypeFormation.MASTER.name,
+        TypeFormation.AGREGATION_CAPES.name,
+        TypeFormation.CERTIFICAT.name,
+    },
+    'continuing-education': {TypeFormation.FORMATION_CONTINUE.name},
+    'doctorate': {TypeFormation.DOCTORAT.name},
+}
+
+
 class AnneeInscriptionFormationTranslator(IAnneeInscriptionFormationTranslator):
     OSIS_ADMISSION_EDUCATION_TYPES_MAPPING = {
         TypeFormation.BACHELIER.name: [
@@ -66,22 +78,29 @@ class AnneeInscriptionFormationTranslator(IAnneeInscriptionFormationTranslator):
         ],
     }
 
-    GENERAL_EDUCATION_TYPES = set(
-        OSIS_ADMISSION_EDUCATION_TYPES_MAPPING.get(TypeFormation.BACHELIER.name)
-        + OSIS_ADMISSION_EDUCATION_TYPES_MAPPING.get(TypeFormation.MASTER.name)
-        + OSIS_ADMISSION_EDUCATION_TYPES_MAPPING.get(TypeFormation.AGREGATION_CAPES.name)
-        + OSIS_ADMISSION_EDUCATION_TYPES_MAPPING.get(TypeFormation.CERTIFICAT.name)
-    )
-
-    CONTINUING_EDUCATION_TYPES = set(OSIS_ADMISSION_EDUCATION_TYPES_MAPPING.get(TypeFormation.FORMATION_CONTINUE.name))
-
-    DOCTORATE_EDUCATION_TYPES = set(OSIS_ADMISSION_EDUCATION_TYPES_MAPPING.get(TypeFormation.DOCTORAT.name))
-
     ADMISSION_EDUCATION_TYPE_BY_OSIS_TYPE = {
         osis_type: admission_type
         for admission_type, osis_types in OSIS_ADMISSION_EDUCATION_TYPES_MAPPING.items()
         for osis_type in osis_types
     }
+
+    GENERAL_EDUCATION_TYPES = set(
+        osis_type
+        for osis_type, admission_type in ADMISSION_EDUCATION_TYPE_BY_OSIS_TYPE.items()
+        if admission_type in ADMISSION_EDUCATION_TYPE_BY_ADMISSION_CONTEXT['general-education']
+    )
+
+    CONTINUING_EDUCATION_TYPES = set(
+        osis_type
+        for osis_type, admission_type in ADMISSION_EDUCATION_TYPE_BY_OSIS_TYPE.items()
+        if admission_type in ADMISSION_EDUCATION_TYPE_BY_ADMISSION_CONTEXT['continuing-education']
+    )
+
+    DOCTORATE_EDUCATION_TYPES = set(
+        osis_type
+        for osis_type, admission_type in ADMISSION_EDUCATION_TYPE_BY_OSIS_TYPE.items()
+        if admission_type in ADMISSION_EDUCATION_TYPE_BY_ADMISSION_CONTEXT['doctorate']
+    )
 
     @classmethod
     def recuperer(cls, type_calendrier_academique: AcademicCalendarTypes) -> Optional[int]:

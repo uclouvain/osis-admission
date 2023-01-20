@@ -74,8 +74,7 @@ from base.tests.factories.academic_year import AcademicYearFactory, get_current_
 from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.organization import OrganizationFactory
 from base.tests.factories.person import PersonFactory
-from admission.tests.factories.curriculum import EducationalExperienceFactory
-from osis_profile.tests.factories.curriculum import EducationalExperienceYearFactory
+from admission.tests.factories.curriculum import EducationalExperienceFactory, EducationalExperienceYearFactory
 from osis_signature.enums import SignatureState
 from reference.tests.factories.country import CountryFactory
 

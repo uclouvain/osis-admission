@@ -35,6 +35,7 @@ from admission.ddd.admission.doctorat.preparation.dtos import ConditionsComptabi
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
     AnneeExperienceAcademiqueDTO,
     ExperienceAcademiqueDTO,
+    CurriculumAExperiencesDTO,
 )
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.domain.validator._should_identification_candidat_etre_completee import BE_ISO_CODE
@@ -53,6 +54,7 @@ from base.tasks.synchronize_entities_addresses import UCLouvain_acronym
 from osis_profile.models import (
     EducationalExperienceYear,
     ProfessionalExperience,
+    EducationalExperience,
 )
 from osis_profile.models.education import LanguageKnowledge
 
@@ -222,6 +224,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
             'academic_year',
             'educational_experience__country',
             'educational_experience__linguistic_regime',
+            'educational_experience__program',
         )
 
         experiences_academiques_dtos: Dict[int, ExperienceAcademiqueDTO] = {}
@@ -232,6 +235,8 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                 annee=annee_experience.academic_year.year,
                 releve_notes=annee_experience.transcript,
                 traduction_releve_notes=annee_experience.transcript_translation,
+                credits_inscrits=annee_experience.registered_credit_number,
+                credits_acquis=annee_experience.acquired_credit_number,
             )
             if annee_experience.educational_experience.pk not in experiences_academiques_dtos:
                 experiences_academiques_dtos[annee_experience.educational_experience.pk] = ExperienceAcademiqueDTO(
@@ -252,6 +257,11 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                     traduction_diplome=annee_experience.educational_experience.graduate_degree_translation,
                     type_releve_notes=annee_experience.educational_experience.transcript_type,
                     annees=[annee_experience_dto],
+                    grade_obtenu=annee_experience.educational_experience.obtained_grade,
+                    systeme_evaluation=annee_experience.educational_experience.evaluation_type,
+                    nom_formation=annee_experience.educational_experience.program.title
+                    if annee_experience.educational_experience.program
+                    else annee_experience.educational_experience.education_name,
                 )
             else:
                 experiences_academiques_dtos[annee_experience.educational_experience.pk].annees.append(
@@ -266,53 +276,59 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
 
         return CurriculumDTO(
             experiences_academiques=list(experiences_academiques_dtos.values()),
-            annee_diplome_etudes_secondaires_belges=minimal_years.get('belgian_highschool_diploma_year'),
-            annee_diplome_etudes_secondaires_etrangeres=minimal_years.get('foreign_highschool_diploma_year'),
+            annee_diplome_etudes_secondaires=minimal_years.get('highschool_diploma_year'),
             annee_derniere_inscription_ucl=minimal_years.get('last_registration_year'),
             dates_experiences_non_academiques=list(dates_experiences_non_academiques),
+        )
+
+    @classmethod
+    def get_existence_experiences_curriculum(cls, matricule: str) -> 'CurriculumAExperiencesDTO':
+        experiences_curriculum = (
+            Person.objects.annotate(
+                a_experience_academique=Exists(EducationalExperience.objects.filter(person_id=OuterRef('pk'))),
+                a_experience_non_academique=Exists(ProfessionalExperience.objects.filter(person_id=OuterRef('pk'))),
+            )
+            .values(
+                'a_experience_academique',
+                'a_experience_non_academique',
+            )
+            .get(global_id=matricule)
+        )
+
+        return CurriculumAExperiencesDTO(
+            a_experience_academique=experiences_curriculum.get('a_experience_academique'),
+            a_experience_non_academique=experiences_curriculum.get('a_experience_non_academique'),
         )
 
     @classmethod
     def get_annees_minimum_curriculum(cls, global_id, current_year):
         person = (
             Person.objects.select_related(
+                'graduated_from_high_school_year',
                 'last_registration_year',
-                'belgianhighschooldiploma__academic_graduation_year',
-                'foreignhighschooldiploma__academic_graduation_year',
             )
             .only(
-                'belgianhighschooldiploma__academic_graduation_year__year',
-                'foreignhighschooldiploma__academic_graduation_year__year',
+                'graduated_from_high_school_year__year',
                 'last_registration_year__year',
             )
             .get(global_id=global_id)
         )
 
-        belgian_highschool_diploma_year = (
-            person.belgianhighschooldiploma.academic_graduation_year.year
-            if hasattr(person, 'belgianhighschooldiploma')
-            else None
-        )
-        foreign_highschool_diploma_year = (
-            person.foreignhighschooldiploma.academic_graduation_year.year
-            if hasattr(person, 'foreignhighschooldiploma')
-            else None
-        )
-
         last_registration_year = person.last_registration_year.year if person.last_registration_year else None
+        graduated_from_high_school_year = (
+            person.graduated_from_high_school_year.year if person.graduated_from_high_school_year else None
+        )
 
         minimal_year = cls.get_annee_minimale_a_completer_cv(
             annee_courante=current_year,
             annee_derniere_inscription_ucl=last_registration_year,
-            annee_diplome_etudes_secondaires_belges=belgian_highschool_diploma_year,
-            annee_diplome_etudes_secondaires_etrangeres=foreign_highschool_diploma_year,
+            annee_diplome_etudes_secondaires=graduated_from_high_school_year,
         )
 
         return {
             'minimal_date': datetime.date(minimal_year, IProfilCandidatTranslator.MOIS_DEBUT_ANNEE_ACADEMIQUE, 1),
             'last_registration_year': last_registration_year,
-            'belgian_highschool_diploma_year': belgian_highschool_diploma_year,
-            'foreign_highschool_diploma_year': foreign_highschool_diploma_year,
+            'highschool_diploma_year': graduated_from_high_school_year,
         }
 
     @classmethod

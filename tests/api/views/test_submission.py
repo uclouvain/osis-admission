@@ -23,6 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from unittest.mock import patch
 
 import freezegun
 from django.shortcuts import resolve_url
@@ -61,7 +62,7 @@ from admission.tests.factories.person import IncompletePersonForBachelorFactory,
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.education_group_types import TrainingType
 from base.models.enums.got_diploma import GotDiploma
-from osis_profile.models import EducationalExperience
+from osis_profile.models import EducationalExperience, ProfessionalExperience
 
 
 @freezegun.freeze_time("1980-03-25")
@@ -254,7 +255,9 @@ class GeneralPropositionSubmissionTestCase(APITestCase):
 @freezegun.freeze_time('2022-12-10')
 class ContinuingPropositionSubmissionTestCase(APITestCase):
     @classmethod
-    def setUpTestData(cls):
+    @patch("osis_document.contrib.fields.FileField._confirm_upload")
+    def setUpTestData(cls, confirm_upload):
+        confirm_upload.return_value = "550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92"
         AdmissionAcademicCalendarFactory.produce_all_required()
 
         # Validation errors
@@ -309,10 +312,22 @@ class ContinuingPropositionSubmissionTestCase(APITestCase):
         response = self.client.get(self.error_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         json_content = response.json()
-        self.assertEqual(len(json_content['errors']), 1, "Should have errors")
-        self.assertDictEqual(
-            json_content['errors'][0],
-            {"status_code": "ADMISSION-2", "detail": _("Admission conditions not met.")},
+        self.assertTrue(len(json_content['errors']) > 0, "Should have errors")
+        self.assertCountEqual(
+            json_content['errors'],
+            [
+                {
+                    "status_code": "ADMISSION-2",
+                    "detail": _("Admission conditions not met."),
+                },
+                {
+                    "status_code": "FORMATION-CONTINUE-3",
+                    "detail": _(
+                        "Please specify the details of your most recent academic training and your most recent "
+                        "non-academic experience."
+                    ),
+                },
+            ],
         )
 
     def test_continuing_proposition_submission_with_errors(self):
@@ -336,7 +351,7 @@ class ContinuingPropositionSubmissionTestCase(APITestCase):
 
     def test_continuing_proposition_verification_ok_valuate_experiences(self):
         educational_experience = EducationalExperience.objects.filter(person=self.second_candidate_ok).first()
-        professional_experience = ProfessionalExperienceFactory(person=self.second_candidate_ok)
+        professional_experience = ProfessionalExperience.objects.filter(person=self.second_candidate_ok).first()
 
         self.client.force_authenticate(user=self.second_candidate_ok.user)
 

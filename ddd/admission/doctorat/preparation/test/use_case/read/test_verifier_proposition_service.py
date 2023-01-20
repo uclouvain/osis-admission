@@ -91,7 +91,7 @@ from admission.infrastructure.message_bus_in_memory import message_bus_in_memory
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import AcademicYear, AcademicYearIdentity
 from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
-from osis_profile.models.enums.curriculum import Result, TranscriptType
+from osis_profile.models.enums.curriculum import Result, TranscriptType, Grade, EvaluationSystem
 
 
 class TestVerifierPropositionServiceCommun(TestCase):
@@ -114,6 +114,8 @@ class TestVerifierPropositionServiceCommun(TestCase):
         self.addCleanup(self.proposition_repository.reset)
         self.message_bus = message_bus_in_memory_instance
         self.academic_year_repository = AcademicYearInMemoryRepository()
+        self.etudes_secondaires = self.candidat_translator.etudes_secondaires.get(self.candidat.matricule)
+        self.etudes_secondaires.annee_diplome_etudes_secondaires = None
 
         for annee in range(2016, 2021):
             self.academic_year_repository.save(
@@ -431,10 +433,11 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
 class TestVerifierPropositionServiceCurriculumYears(TestVerifierPropositionServiceCommun):
     def setUp(self) -> None:
         super().setUp()
-        for experience in (
-            self.candidat_translator.experiences_academiques + self.candidat_translator.experiences_non_academiques
-        ):
-            experience.personne = 'other'
+        for experience_acad in self.candidat_translator.experiences_academiques:
+            experience_acad.personne = 'other'
+
+        for experience_non_acad in self.candidat_translator.experiences_non_academiques:
+            experience_non_acad.personne = 'other'
 
         self.experience_academiques_complete = ExperienceAcademique(
             personne=self.candidat.matricule,
@@ -446,30 +449,40 @@ class TestVerifierPropositionServiceCurriculumYears(TestVerifierPropositionServi
                     resultat=Result.SUCCESS.name,
                     releve_notes=['releve_notes.pdf'],
                     traduction_releve_notes=['traduction_releve_notes.pdf'],
+                    credits_acquis=10,
+                    credits_inscrits=10,
                 ),
                 AnneeExperienceAcademique(
                     annee=2017,
                     resultat=Result.SUCCESS.name,
                     releve_notes=['releve_notes.pdf'],
                     traduction_releve_notes=['traduction_releve_notes.pdf'],
+                    credits_acquis=10,
+                    credits_inscrits=10,
                 ),
                 AnneeExperienceAcademique(
                     annee=2018,
                     resultat=Result.SUCCESS.name,
                     releve_notes=['releve_notes.pdf'],
                     traduction_releve_notes=['traduction_releve_notes.pdf'],
+                    credits_acquis=10,
+                    credits_inscrits=10,
                 ),
                 AnneeExperienceAcademique(
                     annee=2019,
                     resultat=Result.SUCCESS.name,
                     releve_notes=['releve_notes.pdf'],
                     traduction_releve_notes=['traduction_releve_notes.pdf'],
+                    credits_acquis=10,
+                    credits_inscrits=10,
                 ),
                 AnneeExperienceAcademique(
                     annee=2020,
                     resultat=Result.SUCCESS.name,
                     releve_notes=['releve_notes.pdf'],
                     traduction_releve_notes=['traduction_releve_notes.pdf'],
+                    credits_acquis=10,
+                    credits_inscrits=10,
                 ),
             ],
             traduction_releve_notes=['traduction_releve_notes.pdf'],
@@ -485,6 +498,9 @@ class TestVerifierPropositionServiceCurriculumYears(TestVerifierPropositionServi
             titre_memoire='Titre',
             date_prevue_delivrance_diplome=datetime.date(2020, 9, 1),
             uuid='9cbdf4db-2454-4cbf-9e48-55d2a9881ee6',
+            grade_obtenu=Grade.GREAT_DISTINCTION.name,
+            systeme_evaluation=EvaluationSystem.ECTS_CREDITS.name,
+            nom_formation='Formation AA',
         )
 
     def assertAnneesCurriculum(self, exceptions, messages):
@@ -513,9 +529,7 @@ class TestVerifierPropositionServiceCurriculumYears(TestVerifierPropositionServi
         )
 
     def test_should_retourner_erreur_si_dernieres_annees_curriculum_non_saisies_avec_diplome_secondaire_belge(self):
-        self.candidat_translator.diplomes_etudes_secondaires_belges.append(
-            DiplomeEtudeSecondaire(personne=self.candidat.matricule, annee=2018)
-        )
+        self.etudes_secondaires.annee_diplome_etudes_secondaires = 2018
 
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.cmd)
@@ -529,9 +543,7 @@ class TestVerifierPropositionServiceCurriculumYears(TestVerifierPropositionServi
         )
 
     def test_should_retourner_erreur_si_dernieres_annees_curriculum_non_saisies_avec_diplome_secondaire_etranger(self):
-        self.candidat_translator.diplomes_etudes_secondaires_etrangers.append(
-            DiplomeEtudeSecondaire(personne=self.candidat.matricule, annee=2017)
-        )
+        self.etudes_secondaires.annee_diplome_etudes_secondaires = 2017
 
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.cmd)
@@ -557,9 +569,7 @@ class TestVerifierPropositionServiceCurriculumYears(TestVerifierPropositionServi
         self.assertAnneesCurriculum(context.exception.exceptions, ['De Septembre 2020 à Octobre 2020'])
 
     def test_should_retourner_erreur_si_annees_curriculum_non_saisies_avec_diplome_et_ancienne_inscription(self):
-        self.candidat_translator.diplomes_etudes_secondaires_belges.append(
-            DiplomeEtudeSecondaire(personne=self.candidat.matricule, annee=2017)
-        )
+        self.etudes_secondaires.annee_diplome_etudes_secondaires = 2017
 
         with mock.patch.multiple(
             self.candidat,
@@ -578,9 +588,7 @@ class TestVerifierPropositionServiceCurriculumYears(TestVerifierPropositionServi
         )
 
     def test_should_verification_etre_ok_si_une_experiences_professionnelles_couvre_exactement(self):
-        self.candidat_translator.diplomes_etudes_secondaires_belges.append(
-            DiplomeEtudeSecondaire(personne=self.candidat.matricule, annee=2017)
-        )
+        self.etudes_secondaires.annee_diplome_etudes_secondaires = 2017
         self.candidat_translator.experiences_non_academiques.append(
             ExperienceNonAcademique(
                 personne=self.candidat.matricule,
@@ -593,9 +601,7 @@ class TestVerifierPropositionServiceCurriculumYears(TestVerifierPropositionServi
         self.candidat_translator.experiences_non_academiques.pop()
 
     def test_should_verification_etre_ok_si_une_experiences_professionnelles_couvre_davantage(self):
-        self.candidat_translator.diplomes_etudes_secondaires_belges.append(
-            DiplomeEtudeSecondaire(personne=self.candidat.matricule, annee=2017)
-        )
+        self.etudes_secondaires.annee_diplome_etudes_secondaires = 2017
         self.candidat_translator.experiences_non_academiques.append(
             ExperienceNonAcademique(
                 personne=self.candidat.matricule,
@@ -607,9 +613,7 @@ class TestVerifierPropositionServiceCurriculumYears(TestVerifierPropositionServi
         self.assertEqual(proposition_id.uuid, self.proposition.entity_id.uuid)
 
     def test_should_verification_etre_ok_si_une_des_experiences_professionnelles_couvre_davantage(self):
-        self.candidat_translator.diplomes_etudes_secondaires_belges.append(
-            DiplomeEtudeSecondaire(personne=self.candidat.matricule, annee=2017)
-        )
+        self.etudes_secondaires.annee_diplome_etudes_secondaires = 2017
         self.candidat_translator.experiences_non_academiques.extend(
             [
                 ExperienceNonAcademique(
@@ -628,9 +632,7 @@ class TestVerifierPropositionServiceCurriculumYears(TestVerifierPropositionServi
         self.assertEqual(proposition_id.uuid, self.proposition.entity_id.uuid)
 
     def test_should_verification_renvoyer_exception_si_une_experiences_professionnelles_couvre_pas_debut(self):
-        self.candidat_translator.diplomes_etudes_secondaires_belges.append(
-            DiplomeEtudeSecondaire(personne=self.candidat.matricule, annee=2017)
-        )
+        self.etudes_secondaires.annee_diplome_etudes_secondaires = 2017
         self.candidat_translator.experiences_non_academiques.append(
             ExperienceNonAcademique(
                 personne=self.candidat.matricule,
@@ -645,9 +647,7 @@ class TestVerifierPropositionServiceCurriculumYears(TestVerifierPropositionServi
         self.assertAnneesCurriculum(context.exception.exceptions, ['Septembre 2018'])
 
     def test_should_verification_renvoyer_exception_si_une_experiences_professionnelles_couvre_pas_fin(self):
-        self.candidat_translator.diplomes_etudes_secondaires_belges.append(
-            DiplomeEtudeSecondaire(personne=self.candidat.matricule, annee=2017)
-        )
+        self.etudes_secondaires.annee_diplome_etudes_secondaires = 2017
         self.candidat_translator.experiences_non_academiques.append(
             ExperienceNonAcademique(
                 personne=self.candidat.matricule,
@@ -662,9 +662,7 @@ class TestVerifierPropositionServiceCurriculumYears(TestVerifierPropositionServi
         self.assertAnneesCurriculum(context.exception.exceptions, ['Octobre 2020'])
 
     def test_should_verification_etre_ok_si_experiences_professionnelles_couvrent_en_se_suivant_ou_chevauchant(self):
-        self.candidat_translator.diplomes_etudes_secondaires_belges.append(
-            DiplomeEtudeSecondaire(personne=self.candidat.matricule, annee=2017)
-        )
+        self.etudes_secondaires.annee_diplome_etudes_secondaires = 2017
         self.candidat_translator.experiences_non_academiques.extend(
             [
                 ExperienceNonAcademique(
@@ -688,9 +686,7 @@ class TestVerifierPropositionServiceCurriculumYears(TestVerifierPropositionServi
         self.assertEqual(proposition_id.uuid, self.proposition.entity_id.uuid)
 
     def test_should_verification_etre_ok_si_experiences_professionnelles_couvrent_en_ne_se_chevauchant_pas(self):
-        self.candidat_translator.diplomes_etudes_secondaires_belges.append(
-            DiplomeEtudeSecondaire(personne=self.candidat.matricule, annee=2017)
-        )
+        self.etudes_secondaires.annee_diplome_etudes_secondaires = 2017
         self.candidat_translator.experiences_non_academiques.extend(
             [
                 ExperienceNonAcademique(
@@ -719,9 +715,7 @@ class TestVerifierPropositionServiceCurriculumYears(TestVerifierPropositionServi
         self.assertEqual(proposition_id.uuid, self.proposition.entity_id.uuid)
 
     def test_should_renvoyer_exception_si_experiences_professionnelles_trop_anciennes(self):
-        self.candidat_translator.diplomes_etudes_secondaires_belges.append(
-            DiplomeEtudeSecondaire(personne=self.candidat.matricule, annee=2017)
-        )
+        self.etudes_secondaires.annee_diplome_etudes_secondaires = 2017
         self.candidat_translator.experiences_non_academiques.extend(
             [
                 ExperienceNonAcademique(
@@ -750,9 +744,7 @@ class TestVerifierPropositionServiceCurriculumYears(TestVerifierPropositionServi
     def test_should_renvoyer_exception_si_experiences_professionnelles_ne_couvrent_pas_et_ne_se_chevauchent_pas_v2(
         self,
     ):
-        self.candidat_translator.diplomes_etudes_secondaires_belges.append(
-            DiplomeEtudeSecondaire(personne=self.candidat.matricule, annee=2017)
-        )
+        self.etudes_secondaires.annee_diplome_etudes_secondaires = 2017
         self.candidat_translator.experiences_non_academiques.extend(
             [
                 ExperienceNonAcademique(
@@ -785,9 +777,7 @@ class TestVerifierPropositionServiceCurriculumYears(TestVerifierPropositionServi
     def test_should_etre_ok_si_periode_couverte_avec_une_experience_professionnelle_continue_apres_future_experience(
         self,
     ):
-        self.candidat_translator.diplomes_etudes_secondaires_belges.append(
-            DiplomeEtudeSecondaire(personne=self.candidat.matricule, annee=2017)
-        )
+        self.etudes_secondaires.annee_diplome_etudes_secondaires = 2017
         self.candidat_translator.experiences_non_academiques.extend(
             [
                 ExperienceNonAcademique(
@@ -842,7 +832,7 @@ class TestVerifierPropositionServiceCurriculumYears(TestVerifierPropositionServi
         self.assertAnneesCurriculum(
             context.exception.exceptions,
             [
-                'Cette expérience académique est incomplète.',
+                "L'expérience académique 'Formation AA' est incomplète.",
                 'De Septembre 2016 à Janvier 2017',
                 'De Septembre 2017 à Janvier 2018',
                 'De Septembre 2018 à Janvier 2019',
@@ -886,16 +876,6 @@ class TestVerifierPropositionServiceCurriculumYears(TestVerifierPropositionServi
     def test_should_verification_renvoyer_erreur_si_diplome_non_renseigne(self):
         self.experience_academiques_complete.a_obtenu_diplome = True
         self.experience_academiques_complete.diplome = []
-        self.candidat_translator.experiences_academiques.append(self.experience_academiques_complete)
-
-        with self.assertRaises(MultipleBusinessExceptions) as context:
-            self.message_bus.invoke(self.cmd)
-
-        self.assertHasInstance(context.exception.exceptions, ExperiencesAcademiquesNonCompleteesException)
-
-    def test_should_verification_renvoyer_erreur_si_rang_diplome_non_renseigne(self):
-        self.experience_academiques_complete.a_obtenu_diplome = True
-        self.experience_academiques_complete.rang_diplome = ''
         self.candidat_translator.experiences_academiques.append(self.experience_academiques_complete)
 
         with self.assertRaises(MultipleBusinessExceptions) as context:

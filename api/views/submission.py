@@ -24,7 +24,6 @@
 #
 # ##############################################################################
 from contextlib import suppress
-from operator import itemgetter
 from typing import Union
 
 from django.utils import timezone
@@ -229,7 +228,7 @@ class SubmitDoctoralPropositionView(
         admission = self.get_permission_object()
         admission.update_detailed_status()
 
-        data = {'errors': sorted(admission.detailed_status, key=itemgetter('status_code'))}
+        data = {'errors': admission.detailed_status}
         self.add_access_conditions_url(data)
         if not data['errors']:
             cmd = RecupererElementsConfirmationDoctoralQuery(self.kwargs['uuid'])
@@ -282,7 +281,7 @@ class SubmitGeneralEducationPropositionView(
         admission = self.get_permission_object()
         admission.update_detailed_status()
 
-        data = {'errors': sorted(admission.detailed_status, key=itemgetter('status_code'))}
+        data = {'errors': admission.detailed_status}
         error_codes = [e['status_code'] for e in data['errors']]
         if PoolNonResidentContingenteNonOuvertException.status_code in error_codes:
             # Pots contigenté non-ouvert
@@ -351,7 +350,7 @@ class SubmitContinuingEducationPropositionView(
         admission = self.get_permission_object()
         admission.update_detailed_status()
 
-        data = {'errors': sorted(admission.detailed_status, key=itemgetter('status_code'))}
+        data = {'errors': admission.detailed_status}
         self.add_access_conditions_url(data)
         if not data['errors']:
             cmd = RecupererElementsConfirmationContinueQuery(self.kwargs['uuid'])

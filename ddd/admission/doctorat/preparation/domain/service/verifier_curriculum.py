@@ -28,7 +28,6 @@ from admission.ddd.admission.domain.service.verifier_curriculum import VerifierC
 
 class VerifierCurriculumDoctorat(VerifierCurriculum):
     CHAMPS_REQUIS_SI_DIPLOME_OBTENU = VerifierCurriculum.CHAMPS_REQUIS_SI_DIPLOME_OBTENU + [
-        'rang_diplome',
         'date_prevue_delivrance_diplome',
         'titre_memoire',
         'note_memoire',
