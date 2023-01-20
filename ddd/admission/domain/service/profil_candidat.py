@@ -33,6 +33,7 @@ from admission.ddd.admission.domain.service.verifier_curriculum import VerifierC
 from admission.ddd.admission.formation_continue.domain.model.proposition import Proposition as PropositionContinue
 from admission.ddd.admission.formation_continue.domain.validator.validator_by_business_actions import (
     FormationContinueComptabiliteValidatorList,
+    FormationContinueCurriculumValidatorList,
 )
 from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition as PropositionGenerale
 
@@ -164,7 +165,10 @@ class ProfilCandidat(interface.DomainService):
         annee_courante: int,
         curriculum_pdf: List[str],
     ) -> None:
-        curriculum = profil_candidat_translator.get_curriculum(matricule, annee_courante=annee_courante)
+        curriculum = profil_candidat_translator.get_curriculum(
+            matricule=matricule,
+            annee_courante=annee_courante,
+        )
 
         experiences_academiques_incompletes = VerifierCurriculumDoctorat.recuperer_experiences_academiques_incompletes(
             experiences=curriculum.experiences_academiques,
@@ -174,8 +178,7 @@ class ProfilCandidat(interface.DomainService):
             annee_courante=annee_courante,
             experiences_academiques=curriculum.experiences_academiques,
             experiences_academiques_incompletes=experiences_academiques_incompletes,
-            annee_diplome_etudes_secondaires_belges=curriculum.annee_diplome_etudes_secondaires_belges,
-            annee_diplome_etudes_secondaires_etrangeres=curriculum.annee_diplome_etudes_secondaires_etrangeres,
+            annee_diplome_etudes_secondaires=curriculum.annee_diplome_etudes_secondaires,
             annee_derniere_inscription_ucl=curriculum.annee_derniere_inscription_ucl,
             fichier_pdf=curriculum_pdf,
             dates_experiences_non_academiques=curriculum.dates_experiences_non_academiques,
@@ -201,8 +204,7 @@ class ProfilCandidat(interface.DomainService):
             annee_courante=annee_courante,
             experiences_academiques=curriculum.experiences_academiques,
             experiences_academiques_incompletes=experiences_academiques_incompletes,
-            annee_diplome_etudes_secondaires_belges=curriculum.annee_diplome_etudes_secondaires_belges,
-            annee_diplome_etudes_secondaires_etrangeres=curriculum.annee_diplome_etudes_secondaires_etrangeres,
+            annee_diplome_etudes_secondaires=curriculum.annee_diplome_etudes_secondaires,
             annee_derniere_inscription_ucl=curriculum.annee_derniere_inscription_ucl,
             fichier_pdf=proposition.curriculum,
             dates_experiences_non_academiques=curriculum.dates_experiences_non_academiques,
@@ -211,6 +213,19 @@ class ProfilCandidat(interface.DomainService):
             attestation_continuation_cycle_bachelier=proposition.attestation_continuation_cycle_bachelier,
             equivalence_diplome=proposition.equivalence_diplome,
             sigle_formation=proposition.formation_id.sigle,
+        ).validate()
+
+    @classmethod
+    def verifier_curriculum_formation_continue(
+        cls,
+        matricule: str,
+        profil_candidat_translator: 'IProfilCandidatTranslator',
+    ) -> None:
+        existence_experiences_cv = profil_candidat_translator.get_existence_experiences_curriculum(matricule=matricule)
+
+        FormationContinueCurriculumValidatorList(
+            a_experience_academique=existence_experiences_cv.a_experience_academique,
+            a_experience_non_academique=existence_experiences_cv.a_experience_non_academique,
         ).validate()
 
     @classmethod

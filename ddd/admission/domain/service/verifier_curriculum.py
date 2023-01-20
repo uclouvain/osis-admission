@@ -23,44 +23,71 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import List, Set
+from typing import List, Dict
 
 from admission.ddd import BE_ISO_CODE, REGIMES_LINGUISTIQUES_SANS_TRADUCTION
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import ExperienceAcademiqueDTO
 from osis_common.ddd import interface
-from osis_profile.models.enums.curriculum import TranscriptType
+from osis_profile.models.enums.curriculum import TranscriptType, EvaluationSystem
 
 
 class VerifierCurriculum(interface.DomainService):
-    CHAMPS_REQUIS_SI_DIPLOME_OBTENU = [
-        'diplome',
-    ]
+    CHAMPS_REQUIS_SI_DIPLOME_OBTENU = ['diplome', 'grade_obtenu']
+    SYSTEMES_EVALUATION_AVEC_CREDITS = {
+        EvaluationSystem.ECTS_CREDITS.name,
+        EvaluationSystem.NON_EUROPEAN_CREDITS.name,
+    }
+    PREMIERE_ANNEE_AVEC_CREDITS_ECTS_BE = 2004
 
     @classmethod
-    def recuperer_experiences_academiques_incompletes(cls, experiences: List[ExperienceAcademiqueDTO]) -> Set[str]:
-        experiences_incompletes = set()
+    def recuperer_experiences_academiques_incompletes(
+        cls,
+        experiences: List[ExperienceAcademiqueDTO],
+    ) -> Dict[str, str]:
+
+        experiences_incompletes = {}
 
         for experience in experiences:
+            pays_belge = experience.pays == BE_ISO_CODE
             traduction_necessaire = (
-                experience.pays != BE_ISO_CODE
-                and experience.regime_linguistique not in REGIMES_LINGUISTIQUES_SANS_TRADUCTION
+                not pays_belge and experience.regime_linguistique not in REGIMES_LINGUISTIQUES_SANS_TRADUCTION
             )
+            releve_global_necessaire = experience.type_releve_notes == TranscriptType.ONE_FOR_ALL_YEARS.name
 
-            # Vérifier le relevé de notes (annualisé ou global)
-            if experience.type_releve_notes == TranscriptType.ONE_A_YEAR.name:
-                if traduction_necessaire:
-                    if not all(annee.releve_notes and annee.traduction_releve_notes for annee in experience.annees):
-                        experiences_incompletes.add(experience.uuid)
-                elif not all(annee.releve_notes for annee in experience.annees):
-                    experiences_incompletes.add(experience.uuid)
-            elif not experience.releve_notes or traduction_necessaire and not experience.traduction_releve_notes:
-                experiences_incompletes.add(experience.uuid)
+            if (
+                not pays_belge
+                and not experience.regime_linguistique
+                or not experience.systeme_evaluation
+                or not experience.type_releve_notes
+                or releve_global_necessaire
+                and (not experience.releve_notes or traduction_necessaire and not experience.traduction_releve_notes)
+                or experience.a_obtenu_diplome
+                and (
+                    not all(getattr(experience, champ_requis) for champ_requis in cls.CHAMPS_REQUIS_SI_DIPLOME_OBTENU)
+                    or traduction_necessaire
+                    and not experience.traduction_diplome
+                )
+            ):
+                experiences_incompletes[experience.uuid] = str(experience)
+                continue
 
-            # Vérifier les champs requis lors de l'obtention du diplôme
-            if experience.a_obtenu_diplome:
-                if not all(
-                    getattr(experience, champ_requis) for champ_requis in cls.CHAMPS_REQUIS_SI_DIPLOME_OBTENU
-                ) or (traduction_necessaire and not experience.traduction_diplome):
-                    experiences_incompletes.add(experience.uuid)
+            credits_necessaires_etranger = experience.systeme_evaluation in cls.SYSTEMES_EVALUATION_AVEC_CREDITS
+            for annee in experience.annees:
+                releve_annuel_manquant = not releve_global_necessaire and (
+                    not annee.releve_notes or traduction_necessaire and not annee.traduction_releve_notes
+                )
+                doit_renseigner_credits = (
+                    annee.annee >= cls.PREMIERE_ANNEE_AVEC_CREDITS_ECTS_BE
+                    if pays_belge
+                    else credits_necessaires_etranger
+                )
+                if (
+                    not annee.resultat
+                    or releve_annuel_manquant
+                    or doit_renseigner_credits
+                    and (annee.credits_acquis is None or annee.credits_inscrits is None)
+                ):
+                    experiences_incompletes[experience.uuid] = str(experience)
+                    continue
 
         return experiences_incompletes

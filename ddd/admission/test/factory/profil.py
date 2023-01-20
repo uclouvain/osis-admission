@@ -119,8 +119,7 @@ class CurriculumDTOFactory(factory.Factory):
     dates_experiences_non_academiques: List[int] = []
     experiences_academiques: List[ExperienceAcademiqueDTOFactory] = []
     annee_derniere_inscription_ucl = factory.Faker('year')
-    annee_diplome_etudes_secondaires_belges = factory.Faker('year')
-    annee_diplome_etudes_secondaires_etrangeres = factory.Faker('year')
+    annee_diplome_etudes_secondaires = factory.Faker('year')
 
 
 class ConditionsComptabiliteDTOFactory(factory.Factory):

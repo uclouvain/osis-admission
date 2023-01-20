@@ -29,6 +29,7 @@ from django.contrib import admin
 from django.db import models
 from django.utils.translation import gettext_lazy as _, pgettext
 from hijack.contrib.admin import HijackUserAdminMixin
+from osis_document.contrib import FileField
 
 from admission.auth.roles.adre import AdreSecretary
 from admission.auth.roles.ca_member import CommitteeMember
@@ -78,9 +79,30 @@ class AdmissionAdminForm(forms.ModelForm):
         self.fields['valuated_secondary_studies_person'].queryset = Person.objects.filter(pk=self.instance.candidate.pk)
 
 
-class DoctorateAdmissionAdmin(admin.ModelAdmin):
+class BaseAdmissionAdmin(admin.ModelAdmin):
     form = AdmissionAdminForm
 
+    readonly_fields = []
+    filter_horizontal = [
+        "professional_valuated_experiences",
+        "educational_valuated_experiences",
+    ]
+    list_select_related = [
+        'candidate',
+        'training__academic_year',
+    ]
+
+    def get_readonly_fields(self, request, obj=None):
+        return self.readonly_fields + [
+            field.name for field in self.model._meta.get_fields(include_parents=True) if isinstance(field, FileField)
+        ]
+
+    @admin.display(description=_('Candidate'))
+    def candidate_fmt(self, obj):
+        return '{} ({global_id})'.format(obj.candidate, global_id=obj.candidate.global_id)
+
+
+class DoctorateAdmissionAdmin(BaseAdmissionAdmin):
     autocomplete_fields = [
         'training',
         'thesis_institute',
@@ -89,67 +111,30 @@ class DoctorateAdmissionAdmin(admin.ModelAdmin):
     ]
     list_display = ['reference', 'candidate_fmt', 'doctorate', 'type', 'status']
     list_filter = ['status', 'type']
-    list_select_related = ['candidate', 'training__academic_year']
     readonly_fields = [
-        "project_document",
-        "gantt_graph",
-        "program_proposition",
-        "additional_training_project",
-        "recommendation_letters",
-        "cotutelle_opening_request",
-        "cotutelle_convention",
-        "cotutelle_other_documents",
         "detailed_status",
         "submitted_profile",
         "pre_admission_submission_date",
         "admission_submission_date",
-        "scholarship_proof",
-    ]
-    filter_horizontal = [
-        "professional_valuated_experiences",
-        "educational_valuated_experiences",
     ]
     exclude = ["valuated_experiences"]
 
-    def candidate_fmt(self, obj):
-        return "{} ({global_id})".format(obj.candidate, global_id=obj.candidate.global_id)
 
-    candidate_fmt.short_description = _("Candidate")
-
-
-class ContinuingEducationAdmissionAdmin(admin.ModelAdmin):
-    form = AdmissionAdminForm
-
+class ContinuingEducationAdmissionAdmin(BaseAdmissionAdmin):
     autocomplete_fields = ['training']
     list_display = ['candidate_fmt', 'training', 'status']
     list_filter = ['status']
-    list_select_related = ['candidate', 'training__academic_year']
     readonly_fields = [
         'detailed_status',
     ]
-    filter_horizontal = [
-        "professional_valuated_experiences",
-        "educational_valuated_experiences",
-    ]
-
-    def candidate_fmt(self, obj):
-        return '{} ({global_id})'.format(obj.candidate, global_id=obj.candidate.global_id)
-
-    candidate_fmt.short_description = _('Candidate')
 
 
 class GeneralEducationAdmissionAdmin(ContinuingEducationAdmissionAdmin):
-    form = AdmissionAdminForm
-
     autocomplete_fields = [
         'training',
         'double_degree_scholarship',
         'international_scholarship',
         'erasmus_mundus_scholarship',
-    ]
-    filter_horizontal = [
-        "professional_valuated_experiences",
-        "educational_valuated_experiences",
     ]
 
 

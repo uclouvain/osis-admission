@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -24,42 +24,18 @@
 #
 # ##############################################################################
 import attr
-import factory.fuzzy
 
-from admission.ddd.admission.domain.model.formation import Formation, FormationIdentity
-
-
-class FormationIdentityFactory(factory.Factory):
-    class Meta:
-        model = FormationIdentity
-        abstract = False
-
-    sigle = factory.Sequence(lambda n: 'SIGLE%02d' % n)
-    annee = factory.fuzzy.FuzzyInteger(1999, 2099)
+from admission.ddd.admission.formation_continue.domain.validator.exceptions import (
+    ExperiencesCurriculumNonRenseigneesException,
+)
+from base.ddd.utils.business_validator import BusinessValidator
 
 
 @attr.dataclass(frozen=True, slots=True)
-class FormationEtendue(Formation):
-    intitule: str
-    campus: str
+class ShouldRenseignerExperiencesCurriculum(BusinessValidator):
+    a_experience_academique: bool
+    a_experience_non_academique: bool
 
-
-class FormationFactory(factory.Factory):
-    class Meta:
-        model = FormationEtendue
-        abstract = False
-
-    entity_id = factory.SubFactory(FormationIdentityFactory)
-    intitule = factory.Faker('sentence')
-    code_domaine = '01A'
-    campus = factory.Iterator(
-        [
-            "Louvain-la-Neuve",
-            "Mons",
-            "Bruxelles Woluwe",
-            "Namur",
-            "Charleroi",
-            "Tournai",
-            "St-Gilles",
-        ]
-    )
+    def validate(self, *args, **kwargs):
+        if not self.a_experience_academique or not self.a_experience_non_academique:
+            raise ExperiencesCurriculumNonRenseigneesException

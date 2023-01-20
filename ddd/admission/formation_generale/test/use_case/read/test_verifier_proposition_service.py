@@ -94,7 +94,7 @@ from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from base.models.enums.got_diploma import GotDiploma
 from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import AcademicYear, AcademicYearIdentity
 from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
-from osis_profile.models.enums.curriculum import Result, TranscriptType
+from osis_profile.models.enums.curriculum import Result, TranscriptType, Grade, EvaluationSystem
 from osis_profile.models.enums.education import ForeignDiplomaTypes, Equivalence
 
 
@@ -118,30 +118,40 @@ class TestVerifierPropositionService(TestCase):
                     resultat=Result.SUCCESS.name,
                     releve_notes=['releve_notes.pdf'],
                     traduction_releve_notes=['traduction_releve_notes.pdf'],
+                    credits_inscrits=10,
+                    credits_acquis=10,
                 ),
                 AnneeExperienceAcademique(
                     annee=2017,
                     resultat=Result.SUCCESS.name,
                     releve_notes=['releve_notes.pdf'],
                     traduction_releve_notes=['traduction_releve_notes.pdf'],
+                    credits_inscrits=10,
+                    credits_acquis=10,
                 ),
                 AnneeExperienceAcademique(
                     annee=2018,
                     resultat=Result.SUCCESS.name,
                     releve_notes=['releve_notes.pdf'],
                     traduction_releve_notes=['traduction_releve_notes.pdf'],
+                    credits_inscrits=10,
+                    credits_acquis=10,
                 ),
                 AnneeExperienceAcademique(
                     annee=2019,
                     resultat=Result.SUCCESS.name,
                     releve_notes=['releve_notes.pdf'],
                     traduction_releve_notes=['traduction_releve_notes.pdf'],
+                    credits_inscrits=10,
+                    credits_acquis=10,
                 ),
                 AnneeExperienceAcademique(
                     annee=2020,
                     resultat=Result.SUCCESS.name,
                     releve_notes=['releve_notes.pdf'],
                     traduction_releve_notes=['traduction_releve_notes.pdf'],
+                    credits_inscrits=10,
+                    credits_acquis=10,
                 ),
             ],
             traduction_releve_notes=['traduction_releve_notes.pdf'],
@@ -157,6 +167,9 @@ class TestVerifierPropositionService(TestCase):
             titre_memoire='',
             date_prevue_delivrance_diplome=None,
             uuid='9cbdf4db-2454-4cbf-9e48-55d2a9881ee6',
+            nom_formation='Formation AA',
+            grade_obtenu=Grade.GREAT_DISTINCTION.name,
+            systeme_evaluation=EvaluationSystem.ECTS_CREDITS.name,
         )
 
     def setUp(self) -> None:
@@ -272,7 +285,12 @@ class TestVerifierPropositionService(TestCase):
                 pays=BE_ISO_CODE,
                 annees=[
                     AnneeExperienceAcademique(
-                        annee=2015, resultat=Result.SUCCESS.name, releve_notes=[], traduction_releve_notes=[]
+                        annee=2015,
+                        resultat=Result.SUCCESS.name,
+                        releve_notes=[],
+                        traduction_releve_notes=[],
+                        credits_acquis=10,
+                        credits_inscrits=10,
                     ),
                 ],
                 traduction_releve_notes=[],
@@ -288,6 +306,9 @@ class TestVerifierPropositionService(TestCase):
                 titre_memoire='Titre',
                 date_prevue_delivrance_diplome=datetime.date(2020, 9, 1),
                 uuid='9cbdf4db-2454-4cbf-9e48-55d2a9881ee6',
+                nom_formation='Formation AA',
+                systeme_evaluation=EvaluationSystem.ECTS_CREDITS.name,
+                grade_obtenu=Grade.GREAT_DISTINCTION.name,
             ),
         )
         with mock.patch.multiple(self.aggregation_proposition, equivalence_diplome=[]):
@@ -1474,6 +1495,33 @@ class TestVerifierPropositionService(TestCase):
 
             self.assertHasInstance(context.exception.exceptions, ExperiencesAcademiquesNonCompleteesException)
 
+    def test_should_verification_renvoyer_erreur_si_regime_linguistique_non_renseigne_experience_etranger(self):
+        with mock.patch.multiple(self.experience_academiques_complete, regime_linguistique='', pays=FR_ISO_CODE):
+            self.experiences_academiques.append(self.experience_academiques_complete)
+
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                self.message_bus.invoke(self.cmd(self.master_proposition.entity_id.uuid))
+
+            self.assertHasInstance(context.exception.exceptions, ExperiencesAcademiquesNonCompleteesException)
+
+    def test_should_verification_renvoyer_erreur_si_systeme_evaluation_non_renseigne(self):
+        with mock.patch.multiple(self.experience_academiques_complete, systeme_evaluation=''):
+            self.experiences_academiques.append(self.experience_academiques_complete)
+
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                self.message_bus.invoke(self.cmd(self.master_proposition.entity_id.uuid))
+
+            self.assertHasInstance(context.exception.exceptions, ExperiencesAcademiquesNonCompleteesException)
+
+    def test_should_verification_renvoyer_erreur_si_type_releve_notes_non_renseigne(self):
+        with mock.patch.multiple(self.experience_academiques_complete, type_releve_notes=''):
+            self.experiences_academiques.append(self.experience_academiques_complete)
+
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                self.message_bus.invoke(self.cmd(self.master_proposition.entity_id.uuid))
+
+            self.assertHasInstance(context.exception.exceptions, ExperiencesAcademiquesNonCompleteesException)
+
     def test_should_verification_renvoyer_erreur_si_traduction_releve_notes_global_non_renseignee(self):
         with mock.patch.multiple(
             self.experience_academiques_complete,
@@ -1515,6 +1563,62 @@ class TestVerifierPropositionService(TestCase):
                     self.message_bus.invoke(self.cmd(self.master_proposition.entity_id.uuid))
 
                 self.assertHasInstance(context.exception.exceptions, ExperiencesAcademiquesNonCompleteesException)
+
+    def test_should_verification_renvoyer_erreur_si_resultat_annuel_non_renseigne(self):
+        with mock.patch.multiple(self.experience_academiques_complete.annees[0], resultat=''):
+            self.experiences_academiques.append(self.experience_academiques_complete)
+
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                self.message_bus.invoke(self.cmd(self.master_proposition.entity_id.uuid))
+
+            self.assertHasInstance(context.exception.exceptions, ExperiencesAcademiquesNonCompleteesException)
+
+    def test_should_verification_renvoyer_erreur_si_credits_inscrits_non_renseignes_etranger(self):
+        with mock.patch.multiple(
+            self.experience_academiques_complete,
+            pays=FR_ISO_CODE,
+            systeme_evaluation=EvaluationSystem.ECTS_CREDITS.name,
+        ):
+            with mock.patch.multiple(self.experience_academiques_complete.annees[0], credits_inscrits=None):
+                self.experiences_academiques.append(self.experience_academiques_complete)
+
+                with self.assertRaises(MultipleBusinessExceptions) as context:
+                    self.message_bus.invoke(self.cmd(self.master_proposition.entity_id.uuid))
+
+                self.assertHasInstance(context.exception.exceptions, ExperiencesAcademiquesNonCompleteesException)
+
+    def test_should_verification_renvoyer_erreur_si_credits_acquis_non_renseignes_etranger(self):
+        with mock.patch.multiple(
+            self.experience_academiques_complete,
+            pays=FR_ISO_CODE,
+            systeme_evaluation=EvaluationSystem.NON_EUROPEAN_CREDITS.name,
+        ):
+            with mock.patch.multiple(self.experience_academiques_complete.annees[0], credits_acquis=None):
+                self.experiences_academiques.append(self.experience_academiques_complete)
+
+                with self.assertRaises(MultipleBusinessExceptions) as context:
+                    self.message_bus.invoke(self.cmd(self.master_proposition.entity_id.uuid))
+
+                self.assertHasInstance(context.exception.exceptions, ExperiencesAcademiquesNonCompleteesException)
+
+    def test_should_verification_renvoyer_erreur_si_credits_acquis_non_renseignes_belgique_apres_2004(self):
+        with mock.patch.multiple(
+            self.experience_academiques_complete,
+            pays=BE_ISO_CODE,
+        ):
+            with mock.patch.multiple(self.experience_academiques_complete.annees[0], annee=2004, credits_acquis=None):
+                self.experiences_academiques.append(self.experience_academiques_complete)
+
+                with self.assertRaises(MultipleBusinessExceptions) as context:
+                    self.message_bus.invoke(self.cmd(self.master_proposition.entity_id.uuid))
+
+                self.assertHasInstance(context.exception.exceptions, ExperiencesAcademiquesNonCompleteesException)
+
+            with mock.patch.multiple(self.experience_academiques_complete.annees[0], annee=2003, credits_acquis=None):
+                self.experiences_academiques.append(self.experience_academiques_complete)
+
+                proposition_id = self.message_bus.invoke(self.cmd(self.master_proposition.entity_id.uuid))
+                self.assertEqual(proposition_id, self.master_proposition.entity_id)
 
     def test_should_verification_renvoyer_erreur_si_diplome_non_renseigne(self):
         with mock.patch.multiple(self.experience_academiques_complete, a_obtenu_diplome=True, diplome=[]):

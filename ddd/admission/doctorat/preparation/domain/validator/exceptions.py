@@ -433,9 +433,9 @@ class CarteBancaireRemboursementAutreFormatNonCompleteException(BusinessExceptio
 class ExperiencesAcademiquesNonCompleteesException(BusinessException):
     status_code = "PROPOSITION-49"
 
-    def __init__(self, reference, **kwargs):
+    def __init__(self, reference, name, **kwargs):
         self.reference = reference
-        message = _("This educational experience is not completed.")
+        message = _("The educational experience '%(education_name)s' is not completed.") % {'education_name': name}
         super().__init__(message, **kwargs)
 
 

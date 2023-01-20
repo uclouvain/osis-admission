@@ -43,3 +43,14 @@ class PropositionNonTrouveeException(BusinessException):
     def __init__(self, **kwargs):
         message = _("Proposition not found.")
         super().__init__(message, **kwargs)
+
+
+class ExperiencesCurriculumNonRenseigneesException(BusinessException):
+    status_code = "FORMATION-CONTINUE-3"
+
+    def __init__(self, **kwargs):
+        message = _(
+            "Please specify the details of your most recent academic training "
+            "and your most recent non-academic experience."
+        )
+        super().__init__(message, **kwargs)

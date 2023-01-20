@@ -24,7 +24,7 @@
 #
 # ##############################################################################
 import datetime
-from typing import List, Optional, Tuple, Union, Set
+from typing import List, Optional, Tuple, Union, Dict
 
 import attr
 
@@ -242,11 +242,10 @@ class CurriculumValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
     fichier_pdf: List[str]
     annee_courante: int
     annee_derniere_inscription_ucl: Optional[int]
-    annee_diplome_etudes_secondaires_belges: Optional[int]
-    annee_diplome_etudes_secondaires_etrangeres: Optional[int]
+    annee_diplome_etudes_secondaires: Optional[int]
     dates_experiences_non_academiques: List[Tuple[datetime.date, datetime.date]]
     experiences_academiques: List[ExperienceAcademiqueDTO]
-    experiences_academiques_incompletes: Set[str]
+    experiences_academiques_incompletes: Dict[str, str]
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
@@ -264,8 +263,7 @@ class CurriculumValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
                 experiences_academiques=self.experiences_academiques,
                 experiences_academiques_incompletes=self.experiences_academiques_incompletes,
                 annee_derniere_inscription_ucl=self.annee_derniere_inscription_ucl,
-                annee_diplome_etudes_secondaires_belges=self.annee_diplome_etudes_secondaires_belges,
-                annee_diplome_etudes_secondaires_etrangeres=self.annee_diplome_etudes_secondaires_etrangeres,
+                annee_diplome_etudes_secondaires=self.annee_diplome_etudes_secondaires,
                 dates_experiences_non_academiques=self.dates_experiences_non_academiques,
             ),
         ]

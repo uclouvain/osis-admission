@@ -53,7 +53,6 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
     ExperiencesAcademiquesNonCompleteesException,
     AnneesCurriculumNonSpecifieesException,
 )
-from admission.ddd.admission.domain.enums import TypeFormation
 from admission.ddd.admission.formation_generale import commands as general_commands
 from admission.ddd.admission.formation_continue import commands as continuing_commands
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
@@ -336,8 +335,7 @@ class EducationalExperienceViewSet(PersonRelatedMixin, BaseEducationalExperience
     def _check_perms_update(self):
         # With doctorate
         if any(
-            AnneeInscriptionFormationTranslator.ADMISSION_EDUCATION_TYPE_BY_OSIS_TYPE.get(training_type)
-            == TypeFormation.DOCTORAT.name
+            training_type in AnneeInscriptionFormationTranslator.DOCTORATE_EDUCATION_TYPES
             for training_type in self.experience.valuated_from_trainings
         ):
             raise PermissionDenied(_("This experience cannot be updated as it has already been valuated."))
@@ -349,6 +347,13 @@ class EducationalExperienceViewSet(PersonRelatedMixin, BaseEducationalExperience
 class GeneralEducationalExperienceViewSet(GeneralEducationPersonRelatedMixin, BaseEducationalExperienceViewSet):
     name = "general_educational_experiences"
     permission_mapping = GENERAL_EDUCATION_PERMISSIONS_MAPPING
+
+    def _check_perms_update(self):
+        if not all(
+            training_type in AnneeInscriptionFormationTranslator.CONTINUING_EDUCATION_TYPES
+            for training_type in self.experience.valuated_from_trainings
+        ):
+            raise PermissionDenied(_("This experience cannot be updated as it has already been valuated."))
 
     def get_object(self):
         return self.experience

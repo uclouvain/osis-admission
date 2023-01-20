@@ -2536,6 +2536,13 @@ msgstr "Merci de spécifier au-moins un numéro d'identité."
 msgid "Please specify either your date of birth or your year of birth."
 msgstr "Merci de spécifier votre date ou votre année de naissance."
 
+msgid ""
+"Please specify the details of your most recent academic training and your "
+"most recent non-academic experience."
+msgstr ""
+"Veuillez renseigner les détails de votre dernière formation académique ainsi "
+"que de votre expérience non-académique la plus récente."
+
 msgid "Please specify your Belgian national register number."
 msgstr "Merci de spécifier votre numéro de registre national belge."
 
@@ -3320,6 +3327,10 @@ msgstr "La demande a été confirmée sous le nom :"
 msgid "The dossier has been confirmed with the following contact address:"
 msgstr "La demande a été confirmée avec pour adresse de correspondance :"
 
+#, python-format
+msgid "The educational experience '%(education_name)s' is not completed."
+msgstr "L'expérience académique '%(education_name)s' est incomplète."
+
 msgid ""
 "The educational experiences that have been valuated from this admission."
 msgstr ""
@@ -3530,9 +3541,6 @@ msgstr "Ce candidat n'a pas encore créé d'activité"
 
 msgid "This candidate has not created any course yet."
 msgstr "Ce candidat n'a pas encore créé de cours."
-
-msgid "This educational experience is not completed."
-msgstr "Cette expérience académique est incomplète."
 
 msgid "This experience cannot be updated as it has already been valuated."
 msgstr ""

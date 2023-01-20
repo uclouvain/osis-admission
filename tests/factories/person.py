@@ -28,6 +28,11 @@ import operator
 import factory
 
 from admission.tests.factories import PdfUploadFactory
+from admission.tests.factories.curriculum import (
+    EducationalExperienceFactory,
+    EducationalExperienceYearFactory,
+    ProfessionalExperienceFactory,
+)
 from admission.tests.factories.language import LanguageKnowledgeFactory
 from admission.tests.factories.secondary_studies import (
     BelgianHighSchoolDiplomaFactory,
@@ -39,7 +44,7 @@ from base.models.enums.person_address_type import PersonAddressType
 from base.tests.factories.academic_year import AcademicYearFactory, get_current_year
 from base.tests.factories.person import PersonFactory
 from base.tests.factories.person_address import PersonAddressFactory
-from osis_profile.tests.factories.curriculum import EducationalExperienceFactory, EducationalExperienceYearFactory
+from osis_profile.models.enums.curriculum import EvaluationSystem, Grade, Result
 from reference.tests.factories.country import CountryFactory
 from reference.tests.factories.language import EnglishLanguageFactory, FrenchLanguageFactory
 
@@ -119,10 +124,16 @@ class CompletePersonFactory(PersonFactory):
         EducationalExperienceYearFactory(
             educational_experience=experience,
             academic_year=AcademicYearFactory(year=current_year),
+            result=Result.SUCCESS.name,
+            registered_credit_number=10,
+            acquired_credit_number=10,
         )
         EducationalExperienceYearFactory(
             educational_experience=experience,
             academic_year=AcademicYearFactory(year=current_year - 1),
+            result=Result.SUCCESS.name,
+            registered_credit_number=10,
+            acquired_credit_number=10,
         )
 
         # Create highschool belgian diploma
@@ -176,6 +187,9 @@ class CompletePersonForIUFCFactory(CompletePersonFactory):
         EducationalExperienceYearFactory(
             educational_experience=experience,
             academic_year=AcademicYearFactory(year=current_year - 1),
+        )
+        ProfessionalExperienceFactory(
+            person=self,
         )
 
 

@@ -28,6 +28,7 @@ from abc import abstractmethod
 from typing import Dict, List, Optional
 
 from admission.ddd.admission.doctorat.preparation.dtos import ConditionsComptabiliteDTO, CurriculumDTO
+from admission.ddd.admission.doctorat.preparation.dtos.curriculum import CurriculumAExperiencesDTO
 from admission.ddd.admission.dtos import CoordonneesDTO, EtudesSecondairesDTO, IdentificationDTO
 from base.models.enums.education_group_types import TrainingType
 from osis_common.ddd import interface
@@ -66,6 +67,11 @@ class IProfilCandidatTranslator(interface.DomainService):
 
     @classmethod
     @abstractmethod
+    def get_existence_experiences_curriculum(cls, matricule: str) -> 'CurriculumAExperiencesDTO':
+        raise NotImplementedError
+
+    @classmethod
+    @abstractmethod
     def get_conditions_comptabilite(
         cls,
         matricule: str,
@@ -77,8 +83,7 @@ class IProfilCandidatTranslator(interface.DomainService):
     def get_annee_minimale_a_completer_cv(
         cls,
         annee_courante: int,
-        annee_diplome_etudes_secondaires_belges: Optional[int] = None,
-        annee_diplome_etudes_secondaires_etrangeres: Optional[int] = None,
+        annee_diplome_etudes_secondaires: Optional[int] = None,
         annee_derniere_inscription_ucl: Optional[int] = None,
     ):
         return 1 + max(
@@ -86,8 +91,7 @@ class IProfilCandidatTranslator(interface.DomainService):
                 annee
                 for annee in [
                     annee_courante - cls.NB_MAX_ANNEES_CV_REQUISES,
-                    annee_diplome_etudes_secondaires_belges,
-                    annee_diplome_etudes_secondaires_etrangeres,
+                    annee_diplome_etudes_secondaires,
                     annee_derniere_inscription_ucl,
                 ]
                 if annee
