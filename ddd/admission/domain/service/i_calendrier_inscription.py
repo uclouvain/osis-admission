@@ -1,26 +1,26 @@
 # ##############################################################################
 #
-#    OSIS stands for Open Student Information System. It's an application
-#    designed to manage the core business of higher education institutions,
-#    such as universities, faculties, institutes and professional schools.
-#    The core business involves the administration of students, teachers,
-#    courses, programs and so on.
+#  OSIS stands for Open Student Information System. It's an application
+#  designed to manage the core business of higher education institutions,
+#  such as universities, faculties, institutes and professional schools.
+#  The core business involves the administration of students, teachers,
+#  courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
 #
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
 #
-#    A copy of this license - GNU General Public License - is available
-#    at the root of the source code of this program.  If not,
-#    see http://www.gnu.org/licenses/.
+#  A copy of this license - GNU General Public License - is available
+#  at the root of the source code of this program.  If not,
+#  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
 import logging
@@ -210,8 +210,8 @@ proposition={('Proposition(' + pformat(attr.asdict(proposition)) + ')') if propo
         if (
             program == TrainingType.BACHELOR
             and not est_formation_contingentee_et_non_resident(formation_id.sigle, proposition)
-            and (AdmissionPoolExternalReorientationCalendar.event_reference, formation_id.annee) in pool_ouverts
             and (proposition and proposition.est_reorientation_inscription_externe is None)
+            and AdmissionPoolExternalReorientationCalendar.event_reference in [pool for (pool, annee) in pool_ouverts]
         ):
             raise ReorientationInscriptionExterneNonConfirmeeException()
 
@@ -227,8 +227,9 @@ proposition={('Proposition(' + pformat(attr.asdict(proposition)) + ')') if propo
         if (
             program == TrainingType.BACHELOR
             and not est_formation_contingentee_et_non_resident(formation_id.sigle, proposition)
-            and (AdmissionPoolExternalEnrollmentChangeCalendar.event_reference, formation_id.annee) in pool_ouverts
             and (proposition and proposition.est_modification_inscription_externe is None)
+            and AdmissionPoolExternalEnrollmentChangeCalendar.event_reference
+            in [pool for (pool, annee) in pool_ouverts]
         ):
             raise ModificationInscriptionExterneNonConfirmeeException()
 
