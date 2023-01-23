@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -67,17 +67,11 @@ class PoolQuestionApiTestCase(APITestCase):
 
     @freezegun.freeze_time('2022-08-01')
     def test_pool_question_api_get_with_no_question(self):
-        admission = GeneralEducationAdmissionFactory(
-            training__education_group_type__name=TrainingType.BACHELOR.name,
-        )
+        admission = GeneralEducationAdmissionFactory(training__education_group_type__name=TrainingType.BACHELOR.name)
         self.client.force_authenticate(admission.candidate.user)
         url = resolve_url('admission_api_v1:pool-questions', uuid=admission.uuid)
         response = self.client.get(url)
-        expected = {
-            'modification_pool_end_date': None,
-            'reorientation_pool_end_date': None,
-        }
-        self.assertDictEqual(expected, response.json())
+        self.assertDictEqual({}, response.json())
 
     @freezegun.freeze_time('2022-08-01')
     def test_pool_question_api_get_with_residency(self):
@@ -104,6 +98,25 @@ class PoolQuestionApiTestCase(APITestCase):
         expected = {
             'modification_pool_end_date': None,
             'reorientation_pool_end_date': '2023-02-15T23:59:00',
+            'is_belgian_bachelor': None,
+            'is_external_reorientation': None,
+            'regular_registration_proof': [],
+        }
+        self.assertDictEqual(expected, response.json())
+
+    @freezegun.freeze_time('2023-01-15')
+    def test_pool_question_api_get_with_residency_and_reorientation(self):
+        admission = GeneralEducationAdmissionFactory(
+            training__education_group_type__name=TrainingType.BACHELOR.name,
+            training__acronym=SIGLES_WITH_QUOTA[0],
+        )
+        self.client.force_authenticate(admission.candidate.user)
+        url = resolve_url('admission_api_v1:pool-questions', uuid=admission.uuid)
+        response = self.client.get(url)
+        expected = {
+            'modification_pool_end_date': None,
+            'reorientation_pool_end_date': '2023-02-15T23:59:00',
+            'is_non_resident': None,
             'is_belgian_bachelor': None,
             'is_external_reorientation': None,
             'regular_registration_proof': [],

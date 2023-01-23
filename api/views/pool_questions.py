@@ -1,26 +1,26 @@
 # ##############################################################################
 #
-#    OSIS stands for Open Student Information System. It's an application
-#    designed to manage the core business of higher education institutions,
-#    such as universities, faculties, institutes and professional schools.
-#    The core business involves the administration of students, teachers,
-#    courses, programs and so on.
+#  OSIS stands for Open Student Information System. It's an application
+#  designed to manage the core business of higher education institutions,
+#  such as universities, faculties, institutes and professional schools.
+#  The core business involves the administration of students, teachers,
+#  courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
 #
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
 #
-#    A copy of this license - GNU General Public License - is available
-#    at the root of the source code of this program.  If not,
-#    see http://www.gnu.org/licenses/.
+#  A copy of this license - GNU General Public License - is available
+#  at the root of the source code of this program.  If not,
+#  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
 import datetime
@@ -28,12 +28,19 @@ import datetime
 from rest_framework import status
 from rest_framework.generics import RetrieveAPIView
 from rest_framework.response import Response
+from rest_framework.settings import api_settings
 
 from admission.api.schema import ChoicesEnumSchema
 from admission.api.serializers.pool_questions import PoolQuestionsSerializer
 from admission.calendar.admission_calendar import SIGLES_WITH_QUOTA
 from admission.contrib.models import GeneralEducationAdmission
-from admission.utils import get_cached_general_education_admission_perm_obj
+from admission.ddd.admission.domain.validator.exceptions import (
+    ModificationInscriptionExterneNonConfirmeeException,
+    ReorientationInscriptionExterneNonConfirmeeException,
+    ResidenceAuSensDuDecretNonRenseigneeException,
+)
+from admission.ddd.admission.formation_generale.commands import VerifierPropositionQuery
+from admission.utils import gather_business_exceptions, get_cached_general_education_admission_perm_obj
 from base.models.academic_calendar import AcademicCalendar
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.education_group_types import TrainingType
@@ -61,7 +68,29 @@ class PoolQuestionsView(APIPermissionRequiredMixin, RetrieveAPIView):
     def get(self, request, *args, **kwargs):
         """Get relevant pool questions"""
         admission = self.get_permission_object()
+
+        # Questions are only for bachelor
         if admission.training.education_group_type.name != TrainingType.BACHELOR.name:
+            return Response({})
+
+        # Trigger verification to get exceptions related to pool questions
+        error_key = api_settings.NON_FIELD_ERRORS_KEY
+        exception_to_check = [
+            ResidenceAuSensDuDecretNonRenseigneeException.status_code,
+            ReorientationInscriptionExterneNonConfirmeeException.status_code,
+            ModificationInscriptionExterneNonConfirmeeException.status_code,
+        ]
+        current_error_statuses = [
+            e['status_code']
+            for e in gather_business_exceptions(VerifierPropositionQuery(self.kwargs['uuid'])).get(error_key, [])
+        ]
+        if (
+            # Display nothing if no related exceptions was raised
+            not any(status_code in current_error_statuses for status_code in exception_to_check)
+            # And nothing was specified before
+            and admission.is_non_resident is None
+            and admission.is_belgian_bachelor is None
+        ):
             return Response({})
 
         # Load current reorientation and modification calendar for their finishing dates
@@ -87,7 +116,7 @@ class PoolQuestionsView(APIPermissionRequiredMixin, RetrieveAPIView):
         field_questions_to_display = list(pools.keys())
         if self.get_permission_object().training.acronym in SIGLES_WITH_QUOTA:
             field_questions_to_display.append('is_non_resident')
-        elif admission.reorientation_pool_end_date is not None:
+        if admission.reorientation_pool_end_date is not None:
             field_questions_to_display += [
                 'is_belgian_bachelor',
                 'is_external_reorientation',
