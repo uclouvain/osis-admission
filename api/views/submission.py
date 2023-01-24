@@ -1,32 +1,34 @@
 # ##############################################################################
 #
-#    OSIS stands for Open Student Information System. It's an application
-#    designed to manage the core business of higher education institutions,
-#    such as universities, faculties, institutes and professional schools.
-#    The core business involves the administration of students, teachers,
-#    courses, programs and so on.
+#  OSIS stands for Open Student Information System. It's an application
+#  designed to manage the core business of higher education institutions,
+#  such as universities, faculties, institutes and professional schools.
+#  The core business involves the administration of students, teachers,
+#  courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
 #
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
 #
-#    A copy of this license - GNU General Public License - is available
-#    at the root of the source code of this program.  If not,
-#    see http://www.gnu.org/licenses/.
+#  A copy of this license - GNU General Public License - is available
+#  at the root of the source code of this program.  If not,
+#  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
 from contextlib import suppress
 from typing import Union
 
+from django.conf import settings
 from django.utils import timezone
+from django.utils.translation import get_language
 from rest_framework import mixins, status
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
@@ -68,6 +70,7 @@ from admission.utils import (
 from base.models.academic_calendar import AcademicCalendar
 from base.models.education_group_year import EducationGroupYear
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
+from base.models.enums.education_group_types import TrainingType
 from infrastructure.formation_catalogue.repository.program_tree import ProgramTreeRepository
 from infrastructure.messages_bus import message_bus_instance
 from osis_profile.models import EducationalExperience, ProfessionalExperience
@@ -181,30 +184,37 @@ class SubmitPropositionMixin:
     def add_access_conditions_url(self, data):
         error_codes = [e['status_code'] for e in data['errors']]
         if ConditionsAccessNonRempliesException.status_code in error_codes:
-            proposition = self.get_permission_object()
+            admission = self.get_permission_object()
 
-            # Get the last year being published
-            today = timezone.now().today()
-            year = (
-                AcademicCalendar.objects.filter(
-                    reference=AcademicCalendarTypes.ADMISSION_ACCESS_CONDITIONS_URL.name,
-                    start_date__lte=today,
+            if admission.training.education_group_type.name == TrainingType.PHD.name:
+                data['access_conditions_url'] = (
+                    "https://uclouvain.be/en/study/inscriptions/doctorate-and-doctoral-training.html"
+                    if get_language() == settings.LANGUAGE_CODE_EN
+                    else "https://uclouvain.be/fr/etudier/inscriptions/conditions-doctorats.html"
                 )
-                .order_by('-start_date')
-                .values_list('data_year__year', flat=True)
-                .first()
-            )
+            else:
+                # Get the last year being published
+                today = timezone.now().today()
+                year = (
+                    AcademicCalendar.objects.filter(
+                        reference=AcademicCalendarTypes.ADMISSION_ACCESS_CONDITIONS_URL.name,
+                        start_date__lte=today,
+                    )
+                    .order_by('-start_date')
+                    .values_list('data_year__year', flat=True)
+                    .first()
+                )
 
-            sigle = proposition.training.acronym
-            with suppress(ProgramTreeNotFoundException):  # pragma: no cover
-                # Try to get the acronym from the parent, if it exists
-                parent = ProgramTreeRepository.get_identite_parent_2M(proposition.training.partial_acronym, year)
-                sigle = EducationGroupYear.objects.get(
-                    partial_acronym=parent.code,
-                    academic_year__year=parent.year,
-                ).acronym
+                sigle = admission.training.acronym
+                with suppress(ProgramTreeNotFoundException):  # pragma: no cover
+                    # Try to get the acronym from the parent, if it exists
+                    parent = ProgramTreeRepository.get_identite_parent_2M(admission.training.partial_acronym, year)
+                    sigle = EducationGroupYear.objects.get(
+                        partial_acronym=parent.code,
+                        academic_year__year=parent.year,
+                    ).acronym
 
-            data['access_conditions_url'] = f"https://uclouvain.be/prog-{year}-{sigle}-cond_adm"
+                data['access_conditions_url'] = f"https://uclouvain.be/prog-{year}-{sigle}-cond_adm"
 
 
 class SubmitDoctoralPropositionView(
