@@ -1,26 +1,26 @@
 # ##############################################################################
 #
-#    OSIS stands for Open Student Information System. It's an application
-#    designed to manage the core business of higher education institutions,
-#    such as universities, faculties, institutes and professional schools.
-#    The core business involves the administration of students, teachers,
-#    courses, programs and so on.
+#  OSIS stands for Open Student Information System. It's an application
+#  designed to manage the core business of higher education institutions,
+#  such as universities, faculties, institutes and professional schools.
+#  The core business involves the administration of students, teachers,
+#  courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
 #
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
 #
-#    A copy of this license - GNU General Public License - is available
-#    at the root of the source code of this program.  If not,
-#    see http://www.gnu.org/licenses/.
+#  A copy of this license - GNU General Public License - is available
+#  at the root of the source code of this program.  If not,
+#  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
 from typing import List, Optional
@@ -50,6 +50,7 @@ from admission.ddd.admission.formation_continue.repository.i_proposition import 
 from base.models.academic_year import AcademicYear
 from admission.infrastructure.admission.formation_continue.repository._comptabilite import get_accounting_from_admission
 from base.models.education_group_year import EducationGroupYear
+from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.person import Person
 from osis_common.ddd.interface import ApplicationService
 from reference.models.country import Country
@@ -136,7 +137,7 @@ class PropositionRepository(IPropositionRepository):
                 'determined_academic_year': (
                     entity.annee_calculee and AcademicYear.objects.get(year=entity.annee_calculee)
                 ),
-                'determined_pool': entity.pot_calcule,
+                'determined_pool': entity.pot_calcule and entity.pot_calcule.name,
                 'status': entity.statut.name,
                 'specific_question_answers': entity.reponses_questions_specifiques,
                 'curriculum': entity.curriculum,
@@ -190,7 +191,7 @@ class PropositionRepository(IPropositionRepository):
                 annee=admission.training.academic_year.year,
             ),
             annee_calculee=admission.determined_academic_year and admission.determined_academic_year.year,
-            pot_calcule=admission.determined_pool,
+            pot_calcule=admission.determined_pool and AcademicCalendarTypes[admission.determined_pool],
             reponses_questions_specifiques=admission.specific_question_answers,
             curriculum=admission.curriculum,
             equivalence_diplome=admission.diploma_equivalence,

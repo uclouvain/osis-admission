@@ -116,13 +116,13 @@ class IElementsConfirmation(interface.DomainService):
         'degree obtained with the possible mention.'
     )
     JUSTIFICATIFS = _(
-        'I undertake to send any supporting documents requested by the Enrolment Service <strong>within 15 calendar '
+        'I undertake to send any supporting documents requested %(by_service)s <strong>within 15 calendar '
         'days</strong>. If I fail to do so, I take note and accept that my application will be closed.'
     )
     DECLARATION_SUR_LHONNEUR = _(
         '<ul><li>the information I have provided in this application is accurate and complete</li>'
         '<li>I have uploaded all relevant documents confirming the information provided</li>'
-        '<li>I pledge to forward to the UCLouvain Registration Service any changes to the data in my file</li></ul>'
+        '<li>I pledge to forward %(to_service)s any changes to the data in my file</li></ul>'
     )
 
     @classmethod
@@ -233,18 +233,28 @@ class IElementsConfirmation(interface.DomainService):
                     type="radio",
                 )
             )
+        by_service = (
+            _("by the University Institute of Continuing Education")
+            if isinstance(proposition, PropositionContinue)
+            else _("by the UCLouvain Registration Service")
+        )
+        to_service = (
+            _("to the University Institute of Continuing Education")
+            if isinstance(proposition, PropositionContinue)
+            else _("to the UCLouvain Registration Service")
+        )
         elements += [
             # Justificatifs
             ElementConfirmation(
                 nom='justificatifs',
                 titre=_("Supporting documents"),
-                texte=cls.JUSTIFICATIFS,
+                texte=cls.JUSTIFICATIFS % {'by_service': by_service},
             ),
             # Déclaration sur l'honneur
             ElementConfirmation(
                 nom='declaration_sur_lhonneur',
                 titre=_("I declare on my honour that"),
-                texte=cls.DECLARATION_SUR_LHONNEUR,
+                texte=cls.DECLARATION_SUR_LHONNEUR % {'to_service': to_service},
             ),
         ]
         return elements

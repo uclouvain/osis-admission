@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,8 +23,6 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from django.db.models import Q
-
 from admission.ddd.admission.domain.service.i_elements_confirmation import IElementsConfirmation
 from osis_profile.models import BelgianHighSchoolDiploma
 from osis_profile.models.enums.education import BelgianCommunitiesOfEducation
@@ -34,9 +32,7 @@ class ElementsConfirmation(IElementsConfirmation):
     @classmethod
     def est_candidat_avec_etudes_secondaires_belges_francophones(cls, matricule: str) -> bool:
         # Candidats ayant sélectionné des études secondaires belges dans un établissement de la communauté française
-        # OU candidats ayant sélectionné des études secondaires belges dans un établissement "autre"
         return BelgianHighSchoolDiploma.objects.filter(
-            ~Q(institute_id=None) | ~Q(other_institute_name=''),
             person__global_id=matricule,
             community=BelgianCommunitiesOfEducation.FRENCH_SPEAKING.name,
         ).exists()
