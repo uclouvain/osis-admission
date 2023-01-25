@@ -1,26 +1,26 @@
 # ##############################################################################
 #
-#    OSIS stands for Open Student Information System. It's an application
-#    designed to manage the core business of higher education institutions,
-#    such as universities, faculties, institutes and professional schools.
-#    The core business involves the administration of students, teachers,
-#    courses, programs and so on.
+#  OSIS stands for Open Student Information System. It's an application
+#  designed to manage the core business of higher education institutions,
+#  such as universities, faculties, institutes and professional schools.
+#  The core business involves the administration of students, teachers,
+#  courses, programs and so on.
 #
-#    Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
 #
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
 #
-#    A copy of this license - GNU General Public License - is available
-#    at the root of the source code of this program.  If not,
-#    see http://www.gnu.org/licenses/.
+#  A copy of this license - GNU General Public License - is available
+#  at the root of the source code of this program.  If not,
+#  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
 import datetime
@@ -31,6 +31,7 @@ from unittest.mock import patch
 import freezegun
 from django.shortcuts import resolve_url
 from django.test import override_settings
+from django.utils.translation import gettext_lazy as _
 from rest_framework import status
 from rest_framework.test import APITestCase
 
@@ -186,6 +187,14 @@ class DoctorateAdmissionListApiTestCase(QueriesAssertionsMixin, CheckActionLinks
                 'retrieve_training_choice',
                 'retrieve_specific_question',
                 'retrieve_accounting',
+                'update_person',
+                'update_coordinates',
+                'update_secondary_studies',
+                'update_curriculum',
+                'update_training_choice',
+                'update_specific_question',
+                'update_accounting',
+                'submit_proposition',
                 'destroy_proposition',
             ],
             forbidden_actions=[],
@@ -231,6 +240,14 @@ class DoctorateAdmissionListApiTestCase(QueriesAssertionsMixin, CheckActionLinks
                 'retrieve_training_choice',
                 'retrieve_specific_question',
                 'retrieve_accounting',
+                'update_person',
+                'update_coordinates',
+                'update_secondary_studies',
+                'update_curriculum',
+                'update_training_choice',
+                'update_specific_question',
+                'update_accounting',
+                'submit_proposition',
                 'destroy_proposition',
             ],
             forbidden_actions=[],
@@ -279,9 +296,9 @@ class DoctorateAdmissionListApiTestCase(QueriesAssertionsMixin, CheckActionLinks
             'update_curriculum',
             'retrieve_accounting',
             'update_accounting',
+            'submit_proposition',
         ]
         forbidden_actions = [
-            'submit_proposition',
             'retrieve_confirmation',
             'update_confirmation',
             'retrieve_doctoral_training',
@@ -508,11 +525,11 @@ class DoctorateAdmissionGetApiTestCase(CheckActionLinksMixin, DoctorateAdmission
             'retrieve_training_choice',
             'update_training_choice',
             'request_signatures',
+            'submit_proposition',
         ]
         forbidden_actions = [
             'add_approval',
             'approve_by_pdf',
-            'submit_proposition',
             'retrieve_confirmation',
             'update_confirmation',
             'retrieve_doctoral_training',
@@ -915,8 +932,10 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
                 'reglement_general': IElementsConfirmation.REGLEMENT_GENERAL,
                 'protection_donnees': IElementsConfirmation.PROTECTION_DONNEES,
                 'professions_reglementees': IElementsConfirmation.PROFESSIONS_REGLEMENTEES,
-                'justificatifs': IElementsConfirmation.JUSTIFICATIFS,
-                'declaration_sur_lhonneur': IElementsConfirmation.DECLARATION_SUR_LHONNEUR,
+                'justificatifs': IElementsConfirmation.JUSTIFICATIFS
+                % {'by_service': _("by the UCLouvain Registration Service")},
+                'declaration_sur_lhonneur': IElementsConfirmation.DECLARATION_SUR_LHONNEUR
+                % {'to_service': _("to the UCLouvain Registration Service")},
             },
         }
 
@@ -954,17 +973,17 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
 
     def test_verify_no_role(self):
         self.client.force_authenticate(user=self.no_role_user)
-        response = self.client.get(self.first_admission_with_invitation_url, format="json")
+        response = self.client.get(self.first_admission_with_invitation_url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_verify_no_invited_promoters(self):
         self.client.force_authenticate(user=self.first_candidate.user)
-        response = self.client.get(self.first_admission_without_invitation_url, format="json")
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        response = self.client.get(self.first_admission_without_invitation_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_verify_other_candidate(self):
         self.client.force_authenticate(user=self.second_candidate.user)
-        response = self.client.get(self.first_admission_with_invitation_url, format="json")
+        response = self.client.get(self.first_admission_with_invitation_url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_user_not_logged_assert_not_authorized(self):
