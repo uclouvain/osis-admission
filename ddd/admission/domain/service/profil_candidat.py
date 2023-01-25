@@ -245,6 +245,7 @@ class ProfilCandidat(interface.DomainService):
                 conditions_comptabilite.a_frequente_recemment_etablissement_communaute_fr
             ),
             comptabilite=proposition.comptabilite,
+            pays_nationalite_ue=conditions_comptabilite.pays_nationalite_ue,
         ).validate()
 
     @classmethod

@@ -25,6 +25,7 @@
 # ##############################################################################
 from ._should_comptabilite_etre_completee import (
     ShouldAbsenceDeDetteEtreCompletee,
+    ShouldAssimilationEtreCompletee,
     ShouldAutreFormatCarteBancaireRemboursementEtreCompletee,
     ShouldIBANCarteBancaireRemboursementEtreCompletee,
     ShouldTypeCompteBancaireRemboursementEtreComplete,
@@ -60,6 +61,7 @@ __all__ = [
     "ShouldAdresseDomicileLegalCandidatEtreCompletee",
     "ShouldAdresseCorrespondanceEtreCompleteeSiSpecifiee",
     "ShouldAnneesCVRequisesCompletees",
+    "ShouldAssimilationEtreCompletee",
     "ShouldAbsenceDeDetteEtreCompletee",
     "ShouldAutreFormatCarteBancaireRemboursementEtreCompletee",
     "ShouldIBANCarteBancaireRemboursementEtreCompletee",

@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Admission API
-  version: 1.0.62
+  version: 1.0.63
   description: This API delivers data for the Admission project.
   contact:
     name: UCLouvain - OSIS
@@ -6493,6 +6493,136 @@ components:
           type: array
           items:
             type: string
+        type_situation_assimilation:
+          type: string
+        sous_type_situation_assimilation_1:
+          type: string
+        carte_resident_longue_duree:
+          type: array
+          items:
+            type: string
+        carte_cire_sejour_illimite_etranger:
+          type: array
+          items:
+            type: string
+        carte_sejour_membre_ue:
+          type: array
+          items:
+            type: string
+        carte_sejour_permanent_membre_ue:
+          type: array
+          items:
+            type: string
+        sous_type_situation_assimilation_2:
+          type: string
+        carte_a_b_refugie:
+          type: array
+          items:
+            type: string
+        annexe_25_26_refugies_apatrides:
+          type: array
+          items:
+            type: string
+        attestation_immatriculation:
+          type: array
+          items:
+            type: string
+        carte_a_b:
+          type: array
+          items:
+            type: string
+        decision_protection_subsidiaire:
+          type: array
+          items:
+            type: string
+        decision_protection_temporaire:
+          type: array
+          items:
+            type: string
+        sous_type_situation_assimilation_3:
+          type: string
+        titre_sejour_3_mois_professionel:
+          type: array
+          items:
+            type: string
+        fiches_remuneration:
+          type: array
+          items:
+            type: string
+        titre_sejour_3_mois_remplacement:
+          type: array
+          items:
+            type: string
+        preuve_allocations_chomage_pension_indemnite:
+          type: array
+          items:
+            type: string
+        attestation_cpas:
+          type: array
+          items:
+            type: string
+        relation_parente:
+          type: string
+        sous_type_situation_assimilation_5:
+          type: string
+        composition_menage_acte_naissance:
+          type: array
+          items:
+            type: string
+        acte_tutelle:
+          type: array
+          items:
+            type: string
+        composition_menage_acte_mariage:
+          type: array
+          items:
+            type: string
+        attestation_cohabitation_legale:
+          type: array
+          items:
+            type: string
+        carte_identite_parent:
+          type: array
+          items:
+            type: string
+        titre_sejour_longue_duree_parent:
+          type: array
+          items:
+            type: string
+        annexe_25_26_refugies_apatrides_decision_protection_parent:
+          type: array
+          items:
+            type: string
+        titre_sejour_3_mois_parent:
+          type: array
+          items:
+            type: string
+        fiches_remuneration_parent:
+          type: array
+          items:
+            type: string
+        attestation_cpas_parent:
+          type: array
+          items:
+            type: string
+        sous_type_situation_assimilation_6:
+          type: string
+        decision_bourse_cfwb:
+          type: array
+          items:
+            type: string
+        attestation_boursier:
+          type: array
+          items:
+            type: string
+        titre_identite_sejour_longue_duree_ue:
+          type: array
+          items:
+            type: string
+        titre_sejour_belgique:
+          type: array
+          items:
+            type: string
         etudiant_solidaire:
           type: boolean
           nullable: true
@@ -6522,8 +6652,41 @@ components:
                 type: string
           readOnly: true
           nullable: true
+        a_nationalite_ue:
+          type: boolean
+          readOnly: true
+          nullable: true
       required:
       - attestation_absence_dette_etablissement
+      - carte_resident_longue_duree
+      - carte_cire_sejour_illimite_etranger
+      - carte_sejour_membre_ue
+      - carte_sejour_permanent_membre_ue
+      - carte_a_b_refugie
+      - annexe_25_26_refugies_apatrides
+      - attestation_immatriculation
+      - carte_a_b
+      - decision_protection_subsidiaire
+      - decision_protection_temporaire
+      - titre_sejour_3_mois_professionel
+      - fiches_remuneration
+      - titre_sejour_3_mois_remplacement
+      - preuve_allocations_chomage_pension_indemnite
+      - attestation_cpas
+      - composition_menage_acte_naissance
+      - acte_tutelle
+      - composition_menage_acte_mariage
+      - attestation_cohabitation_legale
+      - carte_identite_parent
+      - titre_sejour_longue_duree_parent
+      - annexe_25_26_refugies_apatrides_decision_protection_parent
+      - titre_sejour_3_mois_parent
+      - fiches_remuneration_parent
+      - attestation_cpas_parent
+      - decision_bourse_cfwb
+      - attestation_boursier
+      - titre_identite_sejour_longue_duree_ue
+      - titre_sejour_belgique
     SpecificQuestion:
       type: object
       properties:
@@ -9061,6 +9224,136 @@ components:
           type: array
           items:
             type: string
+        type_situation_assimilation:
+          type: string
+        sous_type_situation_assimilation_1:
+          type: string
+        carte_resident_longue_duree:
+          type: array
+          items:
+            type: string
+        carte_cire_sejour_illimite_etranger:
+          type: array
+          items:
+            type: string
+        carte_sejour_membre_ue:
+          type: array
+          items:
+            type: string
+        carte_sejour_permanent_membre_ue:
+          type: array
+          items:
+            type: string
+        sous_type_situation_assimilation_2:
+          type: string
+        carte_a_b_refugie:
+          type: array
+          items:
+            type: string
+        annexe_25_26_refugies_apatrides:
+          type: array
+          items:
+            type: string
+        attestation_immatriculation:
+          type: array
+          items:
+            type: string
+        carte_a_b:
+          type: array
+          items:
+            type: string
+        decision_protection_subsidiaire:
+          type: array
+          items:
+            type: string
+        decision_protection_temporaire:
+          type: array
+          items:
+            type: string
+        sous_type_situation_assimilation_3:
+          type: string
+        titre_sejour_3_mois_professionel:
+          type: array
+          items:
+            type: string
+        fiches_remuneration:
+          type: array
+          items:
+            type: string
+        titre_sejour_3_mois_remplacement:
+          type: array
+          items:
+            type: string
+        preuve_allocations_chomage_pension_indemnite:
+          type: array
+          items:
+            type: string
+        attestation_cpas:
+          type: array
+          items:
+            type: string
+        relation_parente:
+          type: string
+        sous_type_situation_assimilation_5:
+          type: string
+        composition_menage_acte_naissance:
+          type: array
+          items:
+            type: string
+        acte_tutelle:
+          type: array
+          items:
+            type: string
+        composition_menage_acte_mariage:
+          type: array
+          items:
+            type: string
+        attestation_cohabitation_legale:
+          type: array
+          items:
+            type: string
+        carte_identite_parent:
+          type: array
+          items:
+            type: string
+        titre_sejour_longue_duree_parent:
+          type: array
+          items:
+            type: string
+        annexe_25_26_refugies_apatrides_decision_protection_parent:
+          type: array
+          items:
+            type: string
+        titre_sejour_3_mois_parent:
+          type: array
+          items:
+            type: string
+        fiches_remuneration_parent:
+          type: array
+          items:
+            type: string
+        attestation_cpas_parent:
+          type: array
+          items:
+            type: string
+        sous_type_situation_assimilation_6:
+          type: string
+        decision_bourse_cfwb:
+          type: array
+          items:
+            type: string
+        attestation_boursier:
+          type: array
+          items:
+            type: string
+        titre_identite_sejour_longue_duree_ue:
+          type: array
+          items:
+            type: string
+        titre_sejour_belgique:
+          type: array
+          items:
+            type: string
         etudiant_solidaire:
           type: boolean
           nullable: true
@@ -9082,6 +9375,35 @@ components:
       required:
       - uuid_proposition
       - attestation_absence_dette_etablissement
+      - carte_resident_longue_duree
+      - carte_cire_sejour_illimite_etranger
+      - carte_sejour_membre_ue
+      - carte_sejour_permanent_membre_ue
+      - carte_a_b_refugie
+      - annexe_25_26_refugies_apatrides
+      - attestation_immatriculation
+      - carte_a_b
+      - decision_protection_subsidiaire
+      - decision_protection_temporaire
+      - titre_sejour_3_mois_professionel
+      - fiches_remuneration
+      - titre_sejour_3_mois_remplacement
+      - preuve_allocations_chomage_pension_indemnite
+      - attestation_cpas
+      - composition_menage_acte_naissance
+      - acte_tutelle
+      - composition_menage_acte_mariage
+      - attestation_cohabitation_legale
+      - carte_identite_parent
+      - titre_sejour_longue_duree_parent
+      - annexe_25_26_refugies_apatrides_decision_protection_parent
+      - titre_sejour_3_mois_parent
+      - fiches_remuneration_parent
+      - attestation_cpas_parent
+      - decision_bourse_cfwb
+      - attestation_boursier
+      - titre_identite_sejour_longue_duree_ue
+      - titre_sejour_belgique
     ModifierTypeAdmissionDoctoraleCommand:
       type: object
       properties:

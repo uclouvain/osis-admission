@@ -71,6 +71,47 @@ from osis_profile.tests.factories.curriculum import EducationalExperienceFactory
 from reference.tests.factories.country import CountryFactory
 
 
+doctorate_file_fields = [
+    ['institute_absence_debts_certificate', 'attestation_absence_dette_etablissement'],
+    ['long_term_resident_card', 'carte_resident_longue_duree'],
+    ['cire_unlimited_stay_foreigner_card', 'carte_cire_sejour_illimite_etranger'],
+    ['ue_family_member_residence_card', 'carte_sejour_membre_ue'],
+    ['ue_family_member_permanent_residence_card', 'carte_sejour_permanent_membre_ue'],
+    ['refugee_a_b_card', 'carte_a_b_refugie'],
+    ['refugees_stateless_annex_25_26', 'annexe_25_26_refugies_apatrides'],
+    ['registration_certificate', 'attestation_immatriculation'],
+    ['a_b_card', 'carte_a_b'],
+    ['subsidiary_protection_decision', 'decision_protection_subsidiaire'],
+    ['temporary_protection_decision', 'decision_protection_temporaire'],
+    ['professional_3_month_residence_permit', 'titre_sejour_3_mois_professionel'],
+    ['salary_slips', 'fiches_remuneration'],
+    ['replacement_3_month_residence_permit', 'titre_sejour_3_mois_remplacement'],
+    ['unemployment_benefit_pension_compensation_proof', 'preuve_allocations_chomage_pension_indemnite'],
+    ['cpas_certificate', 'attestation_cpas'],
+    ['household_composition_or_birth_certificate', 'composition_menage_acte_naissance'],
+    ['tutorship_act', 'acte_tutelle'],
+    ['household_composition_or_marriage_certificate', 'composition_menage_acte_mariage'],
+    ['legal_cohabitation_certificate', 'attestation_cohabitation_legale'],
+    ['parent_identity_card', 'carte_identite_parent'],
+    ['parent_long_term_residence_permit', 'titre_sejour_longue_duree_parent'],
+    [
+        'parent_refugees_stateless_annex_25_26_or_protection_decision',
+        'annexe_25_26_refugies_apatrides_decision_protection_parent',
+    ],
+    ['parent_3_month_residence_permit', 'titre_sejour_3_mois_parent'],
+    ['parent_salary_slips', 'fiches_remuneration_parent'],
+    ['parent_cpas_certificate', 'attestation_cpas_parent'],
+    ['cfwb_scholarship_decision', 'decision_bourse_cfwb'],
+    ['scholarship_certificate', 'attestation_boursier'],
+    ['ue_long_term_stay_identity_document', 'titre_identite_sejour_longue_duree_ue'],
+    ['belgium_residence_permit', 'titre_sejour_belgique'],
+]
+
+general_file_fields = doctorate_file_fields + [
+    ['staff_child_certificate', 'attestation_enfant_personnel'],
+]
+
+
 @override_settings(OSIS_DOCUMENT_BASE_URL='http://dummyurl/')
 class DoctorateAccountingAPIViewTestCase(APITestCase):
     file_uuid = uuid.uuid4()
@@ -121,12 +162,18 @@ class DoctorateAccountingAPIViewTestCase(APITestCase):
         # Data
         cls.be_country = CountryFactory(iso_code='BE')
 
-        cls.institute_absence_debts_certificate_file_uuid = uuid.uuid4()
-        cls.new_institute_absence_debts_certificate_file_uuid = uuid.uuid4()
+        cls.doctorate_original_file_uuids = {}
+        cls.doctorate_dto_file_uuids = {}
+        cls.doctorate_new_file_uuids = {}
+
+        for field in doctorate_file_fields:
+            original_uuid = uuid.uuid4()
+            cls.doctorate_original_file_uuids[field[0]] = [original_uuid]
+            cls.doctorate_dto_file_uuids[field[1]] = [str(original_uuid)]
+            cls.doctorate_new_file_uuids[field[1]] = [str(uuid.uuid4())]
 
         cls.default_api_data = {
-            'uuid_proposition': cls.admission.uuid,
-            'attestation_absence_dette_etablissement': [str(cls.new_institute_absence_debts_certificate_file_uuid)],
+            '' 'uuid_proposition': cls.admission.uuid,
             'etudiant_solidaire': False,
             'type_numero_compte': ChoixTypeCompteBancaire.AUTRE_FORMAT.name,
             'numero_compte_iban': 'GB87BARC20658244971655',
@@ -135,6 +182,14 @@ class DoctorateAccountingAPIViewTestCase(APITestCase):
             'nom_titulaire_compte': 'Foe',
             'numero_compte_autre_format': '0203040506',
             'code_bic_swift_banque': 'GKCCBEBA',
+            'type_situation_assimilation': TypeSituationAssimilation.A_BOURSE_ARTICLE_105_PARAGRAPH_2.name,
+            'sous_type_situation_assimilation_1': ChoixAssimilation1.TITULAIRE_CARTE_RESIDENT_LONGUE_DUREE.name,
+            'sous_type_situation_assimilation_2': ChoixAssimilation2.DEMANDEUR_ASILE.name,
+            'sous_type_situation_assimilation_3': ChoixAssimilation3.AUTORISATION_SEJOUR_ET_REVENUS_DE_REMPLACEMENT.name,
+            'relation_parente': LienParente.COHABITANT_LEGAL.name,
+            'sous_type_situation_assimilation_5': ChoixAssimilation5.A_NATIONALITE_UE.name,
+            'sous_type_situation_assimilation_6': ChoixAssimilation6.A_BOURSE_ETUDES_COMMUNAUTE_FRANCAISE.name,
+            **cls.doctorate_new_file_uuids,
         }
 
     def setUp(self):
@@ -159,7 +214,6 @@ class DoctorateAccountingAPIViewTestCase(APITestCase):
         Accounting.objects.filter(admission_id=self.admission.pk).delete()
         AccountingFactory(
             admission_id=self.admission.pk,
-            institute_absence_debts_certificate=[self.institute_absence_debts_certificate_file_uuid],
             solidarity_student=True,
             account_number_type=ChoixTypeCompteBancaire.IBAN.name,
             iban_account_number='BE43068999999501',
@@ -168,6 +222,14 @@ class DoctorateAccountingAPIViewTestCase(APITestCase):
             bic_swift_code='GKCCBEBB',
             account_holder_first_name='John',
             account_holder_last_name='Doe',
+            assimilation_situation=TypeSituationAssimilation.AUCUNE_ASSIMILATION.name,
+            assimilation_1_situation_type=ChoixAssimilation1.TITULAIRE_CARTE_ETRANGER.name,
+            assimilation_2_situation_type=ChoixAssimilation2.PROTECTION_SUBSIDIAIRE.name,
+            assimilation_3_situation_type=ChoixAssimilation3.AUTORISATION_SEJOUR_ET_REVENUS_PROFESSIONNELS.name,
+            relationship=LienParente.MERE.name,
+            assimilation_5_situation_type=ChoixAssimilation5.CANDIDATE_REFUGIE_OU_REFUGIE_OU_APATRIDE_OU_PROTECTION_SUBSIDIAIRE_TEMPORAIRE.name,
+            assimilation_6_situation_type=ChoixAssimilation6.A_BOURSE_COOPERATION_DEVELOPPEMENT.name,
+            **self.doctorate_original_file_uuids,
         )
 
     def test_assert_methods_not_allowed(self):
@@ -231,14 +293,17 @@ class DoctorateAccountingAPIViewTestCase(APITestCase):
 
     def test_get_accounting_with_student_without_any_academic_experience(self):
         self.client.force_authenticate(user=self.student.user)
+        assimilation_5_choice = (
+            ChoixAssimilation5.CANDIDATE_REFUGIE_OU_REFUGIE_OU_APATRIDE_OU_PROTECTION_SUBSIDIAIRE_TEMPORAIRE.name
+        )
 
         response = self.client.get(self.admission_url)
         self.assertEqual(response.status_code, HTTP_200_OK)
         self.assertEqual(
             response.json(),
             {
+                'a_nationalite_ue': None,
                 'derniers_etablissements_superieurs_communaute_fr_frequentes': None,
-                'attestation_absence_dette_etablissement': [str(self.institute_absence_debts_certificate_file_uuid)],
                 'etudiant_solidaire': True,
                 'type_numero_compte': ChoixTypeCompteBancaire.IBAN.name,
                 'numero_compte_iban': 'BE43068999999501',
@@ -247,6 +312,16 @@ class DoctorateAccountingAPIViewTestCase(APITestCase):
                 'code_bic_swift_banque': 'GKCCBEBB',
                 'prenom_titulaire_compte': 'John',
                 'nom_titulaire_compte': 'Doe',
+                'type_situation_assimilation': TypeSituationAssimilation.AUCUNE_ASSIMILATION.name,
+                'sous_type_situation_assimilation_1': ChoixAssimilation1.TITULAIRE_CARTE_ETRANGER.name,
+                'sous_type_situation_assimilation_2': ChoixAssimilation2.PROTECTION_SUBSIDIAIRE.name,
+                'sous_type_situation_assimilation_3': (
+                    ChoixAssimilation3.AUTORISATION_SEJOUR_ET_REVENUS_PROFESSIONNELS.name
+                ),
+                'relation_parente': LienParente.MERE.name,
+                'sous_type_situation_assimilation_5': assimilation_5_choice,
+                'sous_type_situation_assimilation_6': ChoixAssimilation6.A_BOURSE_COOPERATION_DEVELOPPEMENT.name,
+                **self.doctorate_dto_file_uuids,
             },
         )
 
@@ -341,6 +416,7 @@ class DoctorateAccountingAPIViewTestCase(APITestCase):
         expected_response_data = self.default_api_data.copy()
         expected_response_data.pop('uuid_proposition')
         expected_response_data['derniers_etablissements_superieurs_communaute_fr_frequentes'] = None
+        expected_response_data['a_nationalite_ue'] = None
 
         self.assertEqual(response.json(), expected_response_data)
 
@@ -367,52 +443,15 @@ class GeneralAccountingAPIViewTestCase(APITestCase):
         # Data
         cls.be_country = CountryFactory(iso_code='BE')
 
-        file_fields = [
-            ['institute_absence_debts_certificate', 'attestation_absence_dette_etablissement'],
-            ['staff_child_certificate', 'attestation_enfant_personnel'],
-            ['long_term_resident_card', 'carte_resident_longue_duree'],
-            ['cire_unlimited_stay_foreigner_card', 'carte_cire_sejour_illimite_etranger'],
-            ['ue_family_member_residence_card', 'carte_sejour_membre_ue'],
-            ['ue_family_member_permanent_residence_card', 'carte_sejour_permanent_membre_ue'],
-            ['refugee_a_b_card', 'carte_a_b_refugie'],
-            ['refugees_stateless_annex_25_26', 'annexe_25_26_refugies_apatrides'],
-            ['registration_certificate', 'attestation_immatriculation'],
-            ['a_b_card', 'carte_a_b'],
-            ['subsidiary_protection_decision', 'decision_protection_subsidiaire'],
-            ['temporary_protection_decision', 'decision_protection_temporaire'],
-            ['professional_3_month_residence_permit', 'titre_sejour_3_mois_professionel'],
-            ['salary_slips', 'fiches_remuneration'],
-            ['replacement_3_month_residence_permit', 'titre_sejour_3_mois_remplacement'],
-            ['unemployment_benefit_pension_compensation_proof', 'preuve_allocations_chomage_pension_indemnite'],
-            ['cpas_certificate', 'attestation_cpas'],
-            ['household_composition_or_birth_certificate', 'composition_menage_acte_naissance'],
-            ['tutorship_act', 'acte_tutelle'],
-            ['household_composition_or_marriage_certificate', 'composition_menage_acte_mariage'],
-            ['legal_cohabitation_certificate', 'attestation_cohabitation_legale'],
-            ['parent_identity_card', 'carte_identite_parent'],
-            ['parent_long_term_residence_permit', 'titre_sejour_longue_duree_parent'],
-            [
-                'parent_refugees_stateless_annex_25_26_or_protection_decision',
-                'annexe_25_26_refugies_apatrides_decision_protection_parent',
-            ],
-            ['parent_3_month_residence_permit', 'titre_sejour_3_mois_parent'],
-            ['parent_salary_slips', 'fiches_remuneration_parent'],
-            ['parent_cpas_certificate', 'attestation_cpas_parent'],
-            ['cfwb_scholarship_decision', 'decision_bourse_cfwb'],
-            ['scholarship_certificate', 'attestation_boursier'],
-            ['ue_long_term_stay_identity_document', 'titre_identite_sejour_longue_duree_ue'],
-            ['belgium_residence_permit', 'titre_sejour_belgique'],
-        ]
+        cls.general_original_file_uuids = {}
+        cls.general_dto_file_uuids = {}
+        cls.general_new_file_uuids = {}
 
-        cls.original_file_uuids = {}
-        cls.dto_file_uuids = {}
-        cls.new_file_uuids = {}
-
-        for field in file_fields:
+        for field in general_file_fields:
             original_uuid = uuid.uuid4()
-            cls.original_file_uuids[field[0]] = [original_uuid]
-            cls.dto_file_uuids[field[1]] = [str(original_uuid)]
-            cls.new_file_uuids[field[1]] = [str(uuid.uuid4())]
+            cls.general_original_file_uuids[field[0]] = [original_uuid]
+            cls.general_dto_file_uuids[field[1]] = [str(original_uuid)]
+            cls.general_new_file_uuids[field[1]] = [str(uuid.uuid4())]
 
         cls.default_api_data = {
             'uuid_proposition': cls.admission.uuid,
@@ -434,7 +473,7 @@ class GeneralAccountingAPIViewTestCase(APITestCase):
             'nom_titulaire_compte': 'Doe',
             'numero_compte_autre_format': '0203040506',
             'code_bic_swift_banque': 'GKCCBEBB',
-            **cls.new_file_uuids,
+            **cls.general_new_file_uuids,
         }
 
     def setUp(self):
@@ -477,7 +516,7 @@ class GeneralAccountingAPIViewTestCase(APITestCase):
             bic_swift_code='GKCCBEBB',
             account_holder_first_name='John',
             account_holder_last_name='Doe',
-            **self.original_file_uuids,
+            **self.general_original_file_uuids,
         )
 
     def test_assert_methods_not_allowed(self):
@@ -547,7 +586,7 @@ class GeneralAccountingAPIViewTestCase(APITestCase):
                 'nom_titulaire_compte': 'Doe',
                 'numero_compte_autre_format': '123456789',
                 'code_bic_swift_banque': 'GKCCBEBB',
-                **self.dto_file_uuids,
+                **self.general_dto_file_uuids,
             },
         )
 

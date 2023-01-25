@@ -23,18 +23,31 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import List, Optional
+from typing import List, Optional, Union, Dict
 
 import attr
 
-from admission.ddd.admission.enums import ChoixTypeCompteBancaire
+from admission.ddd.admission.doctorat.preparation.domain.model._comptabilite import Comptabilite as ComptabiliteDoctorat
+from admission.ddd.admission.enums import (
+    ChoixTypeCompteBancaire,
+    ChoixAssimilation1,
+    ChoixAssimilation2,
+    ChoixAssimilation3,
+    ChoixAssimilation5,
+    ChoixAssimilation6,
+    LienParente,
+    TypeSituationAssimilation,
+)
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     AbsenceDeDetteNonCompleteeException,
     CarteBancaireRemboursementAutreFormatNonCompleteException,
     CarteBancaireRemboursementIbanNonCompleteException,
     TypeCompteBancaireRemboursementNonCompleteException,
+    AssimilationNonCompleteeException,
 )
+from admission.ddd.admission.formation_generale.domain.model._comptabilite import Comptabilite as ComptabiliteGenerale
 from base.ddd.utils.business_validator import BusinessValidator
+from base.models.utils.utils import ChoiceEnum
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -94,3 +107,138 @@ class ShouldAutreFormatCarteBancaireRemboursementEtreCompletee(BusinessValidator
             ]
         ):
             raise CarteBancaireRemboursementAutreFormatNonCompleteException
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ShouldAssimilationEtreCompletee(BusinessValidator):
+    pays_nationalite_ue: Optional[bool]
+    comptabilite: Union[ComptabiliteGenerale, ComptabiliteDoctorat]
+
+    DEPENDANCES_CHAMPS_ASSIMILATION: Dict[str, Dict[ChoiceEnum, List[str]]] = {
+        'type_situation_assimilation': {
+            TypeSituationAssimilation.AUTORISATION_ETABLISSEMENT_OU_RESIDENT_LONGUE_DUREE: [
+                'sous_type_situation_assimilation_1',
+            ],
+            TypeSituationAssimilation.REFUGIE_OU_APATRIDE_OU_PROTECTION_SUBSIDIAIRE_TEMPORAIRE: [
+                'sous_type_situation_assimilation_2',
+            ],
+            TypeSituationAssimilation.AUTORISATION_SEJOUR_ET_REVENUS_PROFESSIONNELS_OU_REMPLACEMENT: [
+                'sous_type_situation_assimilation_3',
+            ],
+            TypeSituationAssimilation.PRIS_EN_CHARGE_OU_DESIGNE_CPAS: [
+                'attestation_cpas',
+            ],
+            TypeSituationAssimilation.PROCHE_A_NATIONALITE_UE_OU_RESPECTE_ASSIMILATIONS_1_A_4: [
+                'relation_parente',
+                'sous_type_situation_assimilation_5',
+            ],
+            TypeSituationAssimilation.A_BOURSE_ARTICLE_105_PARAGRAPH_2: [
+                'sous_type_situation_assimilation_6',
+            ],
+            TypeSituationAssimilation.RESIDENT_LONGUE_DUREE_UE_HORS_BELGIQUE: [
+                'titre_identite_sejour_longue_duree_ue',
+                'titre_sejour_belgique',
+            ],
+        },
+        'sous_type_situation_assimilation_1': {
+            ChoixAssimilation1.TITULAIRE_CARTE_RESIDENT_LONGUE_DUREE: [
+                'carte_resident_longue_duree',
+            ],
+            ChoixAssimilation1.TITULAIRE_CARTE_ETRANGER: [
+                'carte_cire_sejour_illimite_etranger',
+            ],
+            ChoixAssimilation1.TITULAIRE_CARTE_SEJOUR_MEMBRE_UE: [
+                'carte_sejour_membre_ue',
+            ],
+            ChoixAssimilation1.TITULAIRE_CARTE_SEJOUR_PERMANENT_MEMBRE_UE: [
+                'carte_sejour_permanent_membre_ue',
+            ],
+        },
+        'sous_type_situation_assimilation_2': {
+            ChoixAssimilation2.REFUGIE: [
+                'carte_a_b_refugie',
+            ],
+            ChoixAssimilation2.DEMANDEUR_ASILE: [
+                'annexe_25_26_refugies_apatrides',
+                'attestation_immatriculation',
+            ],
+            ChoixAssimilation2.PROTECTION_SUBSIDIAIRE: [
+                'carte_a_b',
+                'decision_protection_subsidiaire',
+            ],
+            ChoixAssimilation2.PROTECTION_TEMPORAIRE: [
+                'decision_protection_temporaire',
+            ],
+        },
+        'sous_type_situation_assimilation_3': {
+            ChoixAssimilation3.AUTORISATION_SEJOUR_ET_REVENUS_PROFESSIONNELS: [
+                'titre_sejour_3_mois_professionel',
+                'fiches_remuneration',
+            ],
+            ChoixAssimilation3.AUTORISATION_SEJOUR_ET_REVENUS_DE_REMPLACEMENT: [
+                'titre_sejour_3_mois_remplacement',
+                'preuve_allocations_chomage_pension_indemnite',
+            ],
+        },
+        'relation_parente': {
+            LienParente.PERE: [
+                'composition_menage_acte_naissance',
+            ],
+            LienParente.MERE: [
+                'composition_menage_acte_naissance',
+            ],
+            LienParente.TUTEUR_LEGAL: [
+                'acte_tutelle',
+            ],
+            LienParente.CONJOINT: [
+                'composition_menage_acte_mariage',
+            ],
+            LienParente.COHABITANT_LEGAL: [
+                'attestation_cohabitation_legale',
+            ],
+        },
+        'sous_type_situation_assimilation_5': {
+            ChoixAssimilation5.A_NATIONALITE_UE: ['carte_identite_parent'],
+            ChoixAssimilation5.TITULAIRE_TITRE_SEJOUR_LONGUE_DUREE: ['titre_sejour_longue_duree_parent'],
+            ChoixAssimilation5.CANDIDATE_REFUGIE_OU_REFUGIE_OU_APATRIDE_OU_PROTECTION_SUBSIDIAIRE_TEMPORAIRE: [
+                'annexe_25_26_refugies_apatrides_decision_protection_parent'
+            ],
+            ChoixAssimilation5.AUTORISATION_SEJOUR_ET_REVENUS_PROFESSIONNELS_OU_REMPLACEMENT: [
+                'titre_sejour_3_mois_parent',
+                'fiches_remuneration_parent',
+            ],
+            ChoixAssimilation5.PRIS_EN_CHARGE_OU_DESIGNE_CPAS: [
+                'attestation_cpas_parent',
+            ],
+        },
+        'sous_type_situation_assimilation_6': {
+            ChoixAssimilation6.A_BOURSE_ETUDES_COMMUNAUTE_FRANCAISE: [
+                'decision_bourse_cfwb',
+            ],
+            ChoixAssimilation6.A_BOURSE_COOPERATION_DEVELOPPEMENT: [
+                'attestation_boursier',
+            ],
+        },
+    }
+
+    def recuperer_champs_requis(self, nom_champ) -> List[str]:
+        champs_requis = self.DEPENDANCES_CHAMPS_ASSIMILATION.get(nom_champ, {}).get(
+            getattr(self.comptabilite, nom_champ),
+            [],
+        )
+        nouveaux_champs_requis = []
+        for champ in champs_requis:
+            if champ in self.DEPENDANCES_CHAMPS_ASSIMILATION:
+                nouveaux_champs_requis += self.recuperer_champs_requis(champ)
+        return champs_requis + nouveaux_champs_requis
+
+    def validate(self, *args, **kwargs):
+        if self.pays_nationalite_ue is False:
+
+            if not self.comptabilite.type_situation_assimilation:
+                raise AssimilationNonCompleteeException
+
+            champs_requis = self.recuperer_champs_requis('type_situation_assimilation')
+
+            if any(not getattr(self.comptabilite, champ) for champ in champs_requis):
+                raise AssimilationNonCompleteeException
