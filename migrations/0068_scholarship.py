@@ -17,7 +17,7 @@ class Migration(migrations.Migration):
                 ('uuid', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
                 ('short_name', models.CharField(max_length=50, verbose_name='Short name')),
                 ('long_name', models.CharField(blank=True, default='', max_length=255, verbose_name='Long name')),
-                ('deleted', models.BooleanField(default=False, verbose_name='Deleted')),
+                ('deleted', models.BooleanField(default=False, verbose_name='Disabled')),
                 (
                     'type',
                     models.CharField(
