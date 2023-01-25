@@ -47,16 +47,20 @@ class DoctorateEducationAccountingDTOSerializer(DTOSerializer):
     derniers_etablissements_superieurs_communaute_fr_frequentes = SerializerMethodField(
         allow_null=True,
     )
+    a_nationalite_ue = serializers.SerializerMethodField(allow_null=True)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        # Define a custom schema as the default schema type of a SerializerMethodField is string
+        # Define custom schemas as the default schema type of a SerializerMethodField is string
         self.fields['derniers_etablissements_superieurs_communaute_fr_frequentes'].field_schema = {
             'type': 'object',
             'properties': {
                 'academic_year': {'type': 'integer'},
                 'names': {'type': 'array', 'items': {'type': 'string'}},
             },
+        }
+        self.fields['a_nationalite_ue'].field_schema = {
+            'type': 'boolean',
         }
 
     def get_derniers_etablissements_superieurs_communaute_fr_frequentes(self, _):
@@ -93,24 +97,15 @@ class DoctorateEducationAccountingDTOSerializer(DTOSerializer):
                 'names': names,
             }
 
+    def get_a_nationalite_ue(self, _):
+        country = getattr(self.context['candidate'], 'country_of_citizenship')
+        return country.european_union if country else None
+
     class Meta:
         source = DoctorateAccountingDTO
 
 
 class GeneralEducationAccountingDTOSerializer(DoctorateEducationAccountingDTOSerializer):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        # Define a custom schema as the default schema type of a SerializerMethodField is string
-        self.fields['a_nationalite_ue'].field_schema = {
-            'type': 'boolean',
-        }
-
-    a_nationalite_ue = serializers.SerializerMethodField(allow_null=True)
-
-    def get_a_nationalite_ue(self, _):
-        country = getattr(self.context['candidate'], 'country_of_citizenship')
-        return country.european_union if country else None
-
     class Meta:
         source = GeneralAccountingDTO
 

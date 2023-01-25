@@ -25,7 +25,6 @@
 # ##############################################################################
 from ._should_comptabilite_etre_completee import (
     ShouldAffiliationsEtreCompletees,
-    ShouldAssimilationEtreCompletee,
     ShouldReductionDesDroitsInscriptionEtreCompletee,
 )
 from ._should_curriculum_etre_complete import (

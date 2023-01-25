@@ -36,6 +36,7 @@ from admission.ddd.admission.domain.validator import (
     ShouldAutreFormatCarteBancaireRemboursementEtreCompletee,
     ShouldExperiencesAcademiquesEtreCompletees,
     ShouldTypeCompteBancaireRemboursementEtreComplete,
+    ShouldAssimilationEtreCompletee,
 )
 from admission.ddd.admission.formation_generale.domain.model._comptabilite import Comptabilite
 from admission.ddd.admission.domain.model.formation import Formation
@@ -50,7 +51,6 @@ from admission.ddd.admission.formation_generale.domain.validator import (
     ShouldContinuationCycleBachelierEtreSpecifiee,
     ShouldAttestationContinuationCycleBachelierEtreSpecifiee,
     ShouldReductionDesDroitsInscriptionEtreCompletee,
-    ShouldAssimilationEtreCompletee,
     ShouldAffiliationsEtreCompletees,
     ShouldSpecifieSiDiplomeEtudesSecondaires,
     ShouldSpecifieSiDiplomeEtudesSecondairesPourBachelier,
