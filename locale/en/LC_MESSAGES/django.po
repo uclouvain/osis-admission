@@ -1007,9 +1007,6 @@ msgstr ""
 msgid "Delete?"
 msgstr ""
 
-msgid "Deleted"
-msgstr ""
-
 msgid "Description"
 msgstr ""
 
@@ -1026,6 +1023,9 @@ msgid "Diploma"
 msgstr ""
 
 msgid "Diploma equivalence"
+msgstr ""
+
+msgid "Disabled"
 msgstr ""
 
 msgid "Display according education"

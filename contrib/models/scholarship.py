@@ -49,8 +49,8 @@ class Scholarship(models.Model):
         default='',
     )
 
-    deleted = models.BooleanField(
-        verbose_name=_('Deleted'),
+    disabled = models.BooleanField(
+        verbose_name=_('Disabled'),
         default=False,
     )
 

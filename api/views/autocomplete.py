@@ -279,7 +279,7 @@ class AutocompleteScholarshipView(ListAPIView):
 
     filter_backends = [ScholarshipSearchBackend]
     serializer_class = serializers.ScholarshipSerializer
-    queryset = Scholarship.objects.exclude(deleted=True)
+    queryset = Scholarship.objects.exclude(disabled=True)
 
 
 class CampusSearchBackend(BaseFilterBackend):

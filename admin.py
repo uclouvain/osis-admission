@@ -168,7 +168,7 @@ class ScholarshipAdmin(admin.ModelAdmin):
         'type',
         'short_name',
         'long_name',
-        'deleted',
+        'disabled',
     ]
 
 
