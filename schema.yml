@@ -81,14 +81,12 @@ paths:
       requestBody:
         content:
           application/json:
-            schema:
-              $ref: '#/components/schemas/InitierPropositionCommand'
+            schema: {}
       responses:
         201:
           content:
             application/json:
-              schema:
-                $ref: '#/components/schemas/PropositionIdentityDTO'
+              schema: {}
           description: ''
         '400':
           $ref: '#/components/responses/BadRequest'
@@ -5007,6 +5005,8 @@ components:
               links:
                 type: object
                 properties:
+                  retrieve_training_choice:
+                    $ref: '#/components/schemas/ActionLink'
                   retrieve_person:
                     $ref: '#/components/schemas/ActionLink'
                   update_person:
@@ -5054,8 +5054,6 @@ components:
                   retrieve_complementary_training:
                     $ref: '#/components/schemas/ActionLink'
                   retrieve_course_enrollment:
-                    $ref: '#/components/schemas/ActionLink'
-                  retrieve_training_choice:
                     $ref: '#/components/schemas/ActionLink'
                 readOnly: true
                 default: {}
@@ -5116,17 +5114,33 @@ components:
                 properties:
                   retrieve_person:
                     $ref: '#/components/schemas/ActionLink'
+                  update_person:
+                    $ref: '#/components/schemas/ActionLink'
                   retrieve_coordinates:
+                    $ref: '#/components/schemas/ActionLink'
+                  update_coordinates:
                     $ref: '#/components/schemas/ActionLink'
                   retrieve_secondary_studies:
                     $ref: '#/components/schemas/ActionLink'
+                  update_secondary_studies:
+                    $ref: '#/components/schemas/ActionLink'
                   retrieve_curriculum:
+                    $ref: '#/components/schemas/ActionLink'
+                  update_curriculum:
                     $ref: '#/components/schemas/ActionLink'
                   retrieve_specific_question:
                     $ref: '#/components/schemas/ActionLink'
+                  update_specific_question:
+                    $ref: '#/components/schemas/ActionLink'
                   retrieve_training_choice:
                     $ref: '#/components/schemas/ActionLink'
+                  update_training_choice:
+                    $ref: '#/components/schemas/ActionLink'
                   retrieve_accounting:
+                    $ref: '#/components/schemas/ActionLink'
+                  update_accounting:
+                    $ref: '#/components/schemas/ActionLink'
+                  submit_proposition:
                     $ref: '#/components/schemas/ActionLink'
                   destroy_proposition:
                     $ref: '#/components/schemas/ActionLink'
@@ -5185,17 +5199,33 @@ components:
                 properties:
                   retrieve_person:
                     $ref: '#/components/schemas/ActionLink'
+                  update_person:
+                    $ref: '#/components/schemas/ActionLink'
                   retrieve_coordinates:
+                    $ref: '#/components/schemas/ActionLink'
+                  update_coordinates:
                     $ref: '#/components/schemas/ActionLink'
                   retrieve_secondary_studies:
                     $ref: '#/components/schemas/ActionLink'
+                  update_secondary_studies:
+                    $ref: '#/components/schemas/ActionLink'
                   retrieve_curriculum:
+                    $ref: '#/components/schemas/ActionLink'
+                  update_curriculum:
                     $ref: '#/components/schemas/ActionLink'
                   retrieve_specific_question:
                     $ref: '#/components/schemas/ActionLink'
+                  update_specific_question:
+                    $ref: '#/components/schemas/ActionLink'
                   retrieve_training_choice:
                     $ref: '#/components/schemas/ActionLink'
+                  update_training_choice:
+                    $ref: '#/components/schemas/ActionLink'
                   retrieve_accounting:
+                    $ref: '#/components/schemas/ActionLink'
+                  update_accounting:
+                    $ref: '#/components/schemas/ActionLink'
+                  submit_proposition:
                     $ref: '#/components/schemas/ActionLink'
                   destroy_proposition:
                     $ref: '#/components/schemas/ActionLink'
@@ -5264,6 +5294,8 @@ components:
         links:
           type: object
           properties:
+            retrieve_training_choice:
+              $ref: '#/components/schemas/ActionLink'
             retrieve_person:
               $ref: '#/components/schemas/ActionLink'
             update_person:
@@ -5311,8 +5343,6 @@ components:
             retrieve_complementary_training:
               $ref: '#/components/schemas/ActionLink'
             retrieve_course_enrollment:
-              $ref: '#/components/schemas/ActionLink'
-            retrieve_training_choice:
               $ref: '#/components/schemas/ActionLink'
           readOnly: true
           default: {}
@@ -8714,26 +8744,6 @@ components:
       - ADMISSION
       - PRE_ADMISSION
       type: string
-    ChoixCommissionProximite:
-      enum:
-      - ''
-      - ECONOMY
-      - MANAGEMENT
-      - ECLI
-      - GIM
-      - NRSC
-      - BCM
-      - SPSS
-      - DENT
-      - DFAR
-      - MOTR
-      - PHYSICS
-      - CHEMISTRY
-      - MATHEMATICS
-      - STATISTICS
-      - BIOLOGY
-      - GEOGRAPHY
-      type: string
     SubmitProposition:
       type: object
       properties:
@@ -8969,6 +8979,26 @@ components:
       - proposition_programme_doctoral
       - projet_formation_complementaire
       - lettres_recommandation
+    ChoixCommissionProximite:
+      enum:
+      - ''
+      - ECONOMY
+      - MANAGEMENT
+      - ECLI
+      - GIM
+      - NRSC
+      - BCM
+      - SPSS
+      - DENT
+      - DFAR
+      - MOTR
+      - PHYSICS
+      - CHEMISTRY
+      - MATHEMATICS
+      - STATISTICS
+      - BIOLOGY
+      - GEOGRAPHY
+      type: string
     ChoixLangueRedactionThese:
       enum:
       - FRENCH

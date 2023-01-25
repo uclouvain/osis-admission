@@ -1,26 +1,26 @@
 # ##############################################################################
 #
-#    OSIS stands for Open Student Information System. It's an application
-#    designed to manage the core business of higher education institutions,
-#    such as universities, faculties, institutes and professional schools.
-#    The core business involves the administration of students, teachers,
-#    courses, programs and so on.
+#  OSIS stands for Open Student Information System. It's an application
+#  designed to manage the core business of higher education institutions,
+#  such as universities, faculties, institutes and professional schools.
+#  The core business involves the administration of students, teachers,
+#  courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
 #
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
 #
-#    A copy of this license - GNU General Public License - is available
-#    at the root of the source code of this program.  If not,
-#    see http://www.gnu.org/licenses/.
+#  A copy of this license - GNU General Public License - is available
+#  at the root of the source code of this program.  If not,
+#  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
 from unittest.mock import patch
@@ -65,7 +65,7 @@ from base.models.enums.got_diploma import GotDiploma
 from osis_profile.models import EducationalExperience, ProfessionalExperience
 
 
-@freezegun.freeze_time("1980-03-25")
+@freezegun.freeze_time("1980-02-25")
 class GeneralPropositionSubmissionTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
@@ -121,8 +121,10 @@ class GeneralPropositionSubmissionTestCase(APITestCase):
                 'reglement_general': IElementsConfirmation.REGLEMENT_GENERAL,
                 'protection_donnees': IElementsConfirmation.PROTECTION_DONNEES,
                 'professions_reglementees': IElementsConfirmation.PROFESSIONS_REGLEMENTEES,
-                'justificatifs': IElementsConfirmation.JUSTIFICATIFS,
-                'declaration_sur_lhonneur': IElementsConfirmation.DECLARATION_SUR_LHONNEUR,
+                'justificatifs': IElementsConfirmation.JUSTIFICATIFS
+                % {'by_service': _("by the UCLouvain Registration Service")},
+                'declaration_sur_lhonneur': IElementsConfirmation.DECLARATION_SUR_LHONNEUR
+                % {'to_service': _("to the UCLouvain Registration Service")},
             },
         }
 
@@ -302,8 +304,10 @@ class ContinuingPropositionSubmissionTestCase(APITestCase):
                 'reglement_general': IElementsConfirmation.REGLEMENT_GENERAL,
                 'protection_donnees': IElementsConfirmation.PROTECTION_DONNEES,
                 'professions_reglementees': IElementsConfirmation.PROFESSIONS_REGLEMENTEES,
-                'justificatifs': IElementsConfirmation.JUSTIFICATIFS,
-                'declaration_sur_lhonneur': IElementsConfirmation.DECLARATION_SUR_LHONNEUR,
+                'justificatifs': IElementsConfirmation.JUSTIFICATIFS
+                % {'by_service': _("by the University Institute of Continuing Education")},
+                'declaration_sur_lhonneur': IElementsConfirmation.DECLARATION_SUR_LHONNEUR
+                % {'to_service': _("to the University Institute of Continuing Education")},
             },
         }
 
