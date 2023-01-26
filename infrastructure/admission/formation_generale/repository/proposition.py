@@ -240,8 +240,8 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
         return Proposition(
             entity_id=PropositionIdentityBuilder().build_from_uuid(admission.uuid),
             matricule_candidat=admission.candidate.global_id,
-            creee_le=admission.created,
-            modifiee_le=admission.modified,
+            creee_le=admission.created_at,
+            modifiee_le=admission.modified_at,
             reference=admission.reference,
             formation_id=FormationIdentityBuilder.build(
                 sigle=admission.training.acronym,
@@ -280,8 +280,8 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
     def _load_dto(cls, admission: GeneralEducationAdmission) -> 'PropositionDTO':
         return PropositionDTO(
             uuid=admission.uuid,
-            creee_le=admission.created,
-            modifiee_le=admission.modified,
+            creee_le=admission.created_at,
+            modifiee_le=admission.modified_at,
             reference=formater_reference(
                 reference=admission.reference,
                 nom_campus_inscription=admission.training.enrollment_campus.name,

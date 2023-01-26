@@ -90,8 +90,8 @@ class BaseAdmission(models.Model):
         blank=True,
     )
 
-    created = models.DateTimeField(verbose_name=_('Created'), auto_now_add=True)
-    modified = models.DateTimeField(verbose_name=_('Modified'), auto_now=True)
+    created_at = models.DateTimeField(verbose_name=_('Created'), auto_now_add=True)
+    modified_at = models.DateTimeField(verbose_name=_('Modified'), auto_now=True)
 
     professional_valuated_experiences = models.ManyToManyField(
         'osis_profile.ProfessionalExperience',

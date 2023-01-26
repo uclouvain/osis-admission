@@ -95,8 +95,8 @@ class DoctorateAdmissionReadSerializer(serializers.ModelSerializer):
             "type",
             "candidate",
             "comment",
-            "created",
-            "modified",
+            "created_at",
+            "modified_at",
         ]
 
 

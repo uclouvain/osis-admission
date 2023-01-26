@@ -81,7 +81,7 @@ class DemandeRepository(IDemandeRepository):
             proposition_id=PropositionIdentityTranslator.convertir_depuis_demande(entity_id),
             statut_cdd=ChoixStatutCDD[admission.status_cdd],
             statut_sic=ChoixStatutSIC[admission.status_sic],
-            modifiee_le=admission.modified,
+            modifiee_le=admission.modified_at,
             pre_admission_confirmee_le=admission.pre_admission_submission_date,
             admission_confirmee_le=admission.submitted_at,
         )
@@ -134,7 +134,7 @@ class DemandeRepository(IDemandeRepository):
             uuid=demande.uuid,
             statut_cdd=demande.status_cdd,
             statut_sic=demande.status_sic,
-            derniere_modification=demande.modified,
+            derniere_modification=demande.modified_at,
             pre_admission_confirmee_le=demande.pre_admission_submission_date,
             admission_confirmee_le=demande.submitted_at,
             profil_candidat=ProfilCandidatDTO(

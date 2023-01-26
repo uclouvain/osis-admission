@@ -168,7 +168,7 @@ class CddDoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
                 nationalite=cls.admissions[0].candidate.country_of_citizenship.name
                 if cls.admissions[0].candidate.country_of_citizenship
                 else None,
-                derniere_modification=cls.admissions[0].modified,
+                derniere_modification=cls.admissions[0].modified_at,
                 code_bourse=cls.admissions[0].other_international_scholarship,
                 statut_cdd=None,
                 statut_sic=None,
@@ -187,7 +187,7 @@ class CddDoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
                 nationalite=cls.admissions[1].candidate.country_of_citizenship.name
                 if cls.admissions[1].candidate.country_of_citizenship
                 else None,
-                derniere_modification=cls.admissions[1].modified,
+                derniere_modification=cls.admissions[1].modified_at,
                 date_confirmation=cls.admissions[1].submitted_at,
                 code_bourse=cls.admissions[1].other_international_scholarship,
             ),
@@ -202,7 +202,7 @@ class CddDoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
                 nationalite=cls.admissions[2].candidate.country_of_citizenship.name
                 if cls.admissions[2].candidate.country_of_citizenship
                 else None,
-                derniere_modification=cls.admissions[2].modified,
+                derniere_modification=cls.admissions[2].modified_at,
                 code_bourse=cls.admissions[2].other_international_scholarship,
                 statut_cdd=None,
                 statut_sic=None,

@@ -187,8 +187,8 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             entity_id=PropositionIdentityBuilder().build_from_uuid(admission.uuid),
             matricule_candidat=admission.candidate.global_id,
             statut=ChoixStatutProposition[admission.status],
-            creee_le=admission.created,
-            modifiee_le=admission.modified,
+            creee_le=admission.created_at,
+            modifiee_le=admission.modified_at,
             reference=admission.reference,
             formation_id=FormationIdentityBuilder.build(
                 sigle=admission.training.acronym,
@@ -230,8 +230,8 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
         return PropositionDTO(
             uuid=admission.uuid,
             statut=admission.status,
-            creee_le=admission.created,
-            modifiee_le=admission.modified,
+            creee_le=admission.created_at,
+            modifiee_le=admission.modified_at,
             soumise_le=admission.submitted_at,
             erreurs=admission.detailed_status or [],
             date_fin_pot=admission.pool_end_date,  # from annotation

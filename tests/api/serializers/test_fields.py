@@ -1,36 +1,37 @@
 # ##############################################################################
 #
-#    OSIS stands for Open Student Information System. It's an application
-#    designed to manage the core business of higher education institutions,
-#    such as universities, faculties, institutes and professional schools.
-#    The core business involves the administration of students, teachers,
-#    courses, programs and so on.
+#  OSIS stands for Open Student Information System. It's an application
+#  designed to manage the core business of higher education institutions,
+#  such as universities, faculties, institutes and professional schools.
+#  The core business involves the administration of students, teachers,
+#  courses, programs and so on.
 #
-#    Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
 #
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
 #
-#    A copy of this license - GNU General Public License - is available
-#    at the root of the source code of this program.  If not,
-#    see http://www.gnu.org/licenses/.
+#  A copy of this license - GNU General Public License - is available
+#  at the root of the source code of this program.  If not,
+#  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from unittest.mock import Mock
+
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.shortcuts import get_object_or_404
 from django.test.utils import override_settings
 from django.urls.base import reverse
 from django.urls.conf import path
-from django.utils.translation import gettext as _, get_language
-from unittest.mock import Mock
+from django.utils.translation import get_language, gettext as _
 from rest_framework.serializers import Serializer
 from rest_framework.test import APIRequestFactory, APITestCase
 from rest_framework.views import APIView
@@ -38,7 +39,6 @@ from rest_framework.views import APIView
 from admission.api.permissions import IsListingOrHasNotAlreadyCreatedPermission
 from admission.api.serializers.fields import ActionLinksField, RelatedInstituteField, TranslatedField
 from admission.contrib.models import DoctorateAdmission
-from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutProposition
 from admission.tests.factories import DoctorateAdmissionFactory
 from base.models.enums.entity_type import EntityType
 from base.tests.factories.entity_version import EntityVersionFactory
@@ -309,7 +309,7 @@ class SerializerFieldsTestCase(APITestCase):
         # The list of actions contains one available action with a url parameter. We pass two instances and the user
         # only has access to one of these instances -> we return two different results depending on the permissions.
 
-        doctorate_admissions = DoctorateAdmission.objects.all().order_by('created')
+        doctorate_admissions = DoctorateAdmission.objects.all().order_by('created_at')
 
         class SerializerWithActionLinks(Serializer):
             links = ActionLinksField(
