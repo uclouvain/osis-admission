@@ -34,7 +34,7 @@ from osis_common.ddd import interface
 
 @attr.dataclass(frozen=True, slots=True)
 class FiltrerDemandesQuery(SortedQueryRequest):
-    numero: Optional[str] = ''
+    numero: Optional[int] = None
     etat_cdd: Optional[str] = ''
     etat_sic: Optional[str] = ''
     matricule_candidat: Optional[str] = ''

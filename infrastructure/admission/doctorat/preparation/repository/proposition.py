@@ -33,7 +33,8 @@ from django.utils.translation import get_language
 
 from admission.auth.roles.candidate import Candidate
 from admission.contrib.models import Accounting, DoctorateAdmission
-from admission.contrib.models.doctorate import PropositionProxy, REFERENCE_SEQ_NAME
+from admission.contrib.models.doctorate import PropositionProxy
+from admission.contrib.models.base import REFERENCE_SEQ_NAME
 from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import PropositionIdentityBuilder
 from admission.ddd.admission.doctorat.preparation.domain.model._detail_projet import (
     DetailProjet,
@@ -75,10 +76,12 @@ from admission.ddd.admission.doctorat.preparation.repository.i_proposition impor
 )
 from admission.ddd.admission.domain.model.bourse import BourseIdentity
 from admission.ddd.admission.domain.model.formation import FormationIdentity
+from admission.ddd.admission.repository.i_proposition import formater_reference
 from admission.infrastructure.admission.doctorat.preparation.repository._comptabilite import (
     get_accounting_from_admission,
 )
 from admission.infrastructure.admission.domain.service.bourse import BourseTranslator
+from admission.infrastructure.admission.repository.proposition import GlobalPropositionRepository
 from base.models.academic_year import AcademicYear
 from base.models.education_group_year import EducationGroupYear
 from base.models.entity_version import EntityVersion
@@ -161,7 +164,7 @@ def load_admissions(matricule: Optional[str] = None, ids: Optional[List[str]] = 
     return [_instantiate_admission(a) for a in qs]
 
 
-class PropositionRepository(IPropositionRepository):
+class PropositionRepository(GlobalPropositionRepository, IPropositionRepository):
     @classmethod
     def get(cls, entity_id: 'PropositionIdentity') -> 'Proposition':
         try:
@@ -185,12 +188,6 @@ class PropositionRepository(IPropositionRepository):
     @classmethod
     def delete(cls, entity_id: 'PropositionIdentity', **kwargs: ApplicationService) -> None:
         raise NotImplementedError
-
-    @classmethod
-    def get_next_reference(cls) -> int:
-        cursor = connection.cursor()
-        cursor.execute("SELECT NEXTVAL('%(sequence)s')" % {'sequence': REFERENCE_SEQ_NAME})
-        return cursor.fetchone()[0]
 
     @classmethod
     def save(cls, entity: 'Proposition') -> None:
@@ -329,7 +326,7 @@ class PropositionRepository(IPropositionRepository):
     @classmethod
     def search_dto(
         cls,
-        numero: Optional[str] = '',
+        numero: Optional[int] = None,
         matricule_candidat: Optional[str] = '',
         etat: Optional[str] = '',
         nationalite: Optional[str] = '',
@@ -346,7 +343,7 @@ class PropositionRepository(IPropositionRepository):
         entity_ids: Optional[List['PropositionIdentity']] = None,
     ) -> List['PropositionDTO']:
         qs = PropositionProxy.objects.all()
-        if numero:
+        if numero is not None:
             qs = qs.filter(reference=numero)
         if matricule_candidat:
             qs = qs.filter(candidate__global_id=matricule_candidat)
@@ -400,7 +397,12 @@ class PropositionRepository(IPropositionRepository):
     def _load_dto(cls, admission: DoctorateAdmission) -> 'PropositionDTO':
         return PropositionDTO(
             uuid=admission.uuid,
-            reference=admission.reference,
+            reference=formater_reference(
+                reference=admission.reference,
+                nom_campus_inscription=admission.training.enrollment_campus.name,
+                sigle_entite_gestion=admission.sigle_entite_gestion,  # From annotation
+                annee=admission.training.academic_year.year,
+            ),
             type_admission=admission.type,
             doctorat=DoctoratDTO(
                 sigle=admission.doctorate.acronym,
@@ -413,6 +415,7 @@ class PropositionRepository(IPropositionRepository):
                 sigle_entite_gestion=admission.sigle_entite_gestion,  # from PropositionManager annotation
                 campus=admission.teaching_campus or '',  # from PropositionManager annotation
                 type=admission.doctorate.education_group_type.name,
+                campus_inscription=admission.doctorate.enrollment_campus.name,
             ),
             annee_calculee=admission.determined_academic_year and admission.determined_academic_year.year,
             pot_calcule=admission.determined_pool or '',

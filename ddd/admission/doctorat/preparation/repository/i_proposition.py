@@ -28,11 +28,11 @@ from typing import List, Optional
 
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition, PropositionIdentity
 from admission.ddd.admission.doctorat.preparation.dtos import PropositionDTO
-from osis_common.ddd import interface
+from admission.ddd.admission.repository.i_proposition import IGlobalPropositionRepository
 from osis_common.ddd.interface import ApplicationService
 
 
-class IPropositionRepository(interface.AbstractRepository):
+class IPropositionRepository(IGlobalPropositionRepository):
     @classmethod
     @abc.abstractmethod
     def get(cls, entity_id: 'PropositionIdentity') -> 'Proposition':  # type: ignore[override]
@@ -58,7 +58,7 @@ class IPropositionRepository(interface.AbstractRepository):
     @abc.abstractmethod
     def search_dto(
         cls,
-        numero: Optional[str] = '',
+        numero: Optional[int] = None,
         matricule_candidat: Optional[str] = '',
         etat: Optional[str] = '',
         nationalite: Optional[str] = '',
@@ -84,9 +84,4 @@ class IPropositionRepository(interface.AbstractRepository):
     @classmethod
     @abc.abstractmethod
     def save(cls, entity: 'Proposition') -> None:  # type: ignore[override]
-        raise NotImplementedError
-
-    @classmethod
-    @abc.abstractmethod
-    def get_next_reference(cls):
         raise NotImplementedError

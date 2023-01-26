@@ -26,17 +26,14 @@
 import uuid
 
 import factory
-from django.db import connection
 
 from admission.contrib.models import DoctorateAdmission
-from admission.contrib.models.doctorate import REFERENCE_SEQ_NAME
 from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
-    ChoixLangueRedactionThese,
     ChoixStatutProposition,
     ChoixTypeFinancement,
 )
-from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition
+from admission.tests.factories.utils import generate_proposition_reference
 from admission.tests.factories.accounting import AccountingFactory
 from admission.tests.factories.roles import CandidateFactory
 from base.models.enums.education_group_types import TrainingType
@@ -59,16 +56,6 @@ class DoctorateFactory(EducationGroupYearFactory):
         EducationGroupVersionFactory(offer=self, root_group__academic_year__year=self.academic_year.year)
 
 
-def _generate_reference(obj):
-    cursor = connection.cursor()
-    cursor.execute("SELECT NEXTVAL('%(sequence)s')" % {'sequence': REFERENCE_SEQ_NAME})
-    next_id = cursor.fetchone()[0]
-    return "{}-{}".format(
-        obj.training.academic_year.year % 100,
-        Proposition.valeur_reference_base + next_id,
-    )
-
-
 def generate_token():
     from admission.tests.factories import WriteTokenFactory
 
@@ -80,8 +67,11 @@ class DoctorateAdmissionFactory(factory.DjangoModelFactory):
         model = DoctorateAdmission
 
     candidate = factory.SubFactory(PersonFactory)
-    training = factory.SubFactory(DoctorateFactory)
-    reference = factory.LazyAttribute(_generate_reference)
+    training = factory.SubFactory(
+        DoctorateFactory,
+        enrollment_campus__name='Mons',
+    )
+    reference = factory.LazyAttribute(generate_proposition_reference)
 
     cotutelle = False
     financing_type = ChoixTypeFinancement.SELF_FUNDING.name

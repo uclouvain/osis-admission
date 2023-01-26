@@ -43,7 +43,9 @@ from admission.ddd.admission.formation_generale.domain.model.proposition import 
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import PropositionNonTrouveeException
 from admission.ddd.admission.formation_generale.dtos import PropositionDTO
 from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
+from admission.ddd.admission.repository.i_proposition import formater_reference
 from admission.infrastructure.admission.domain.service.bourse import BourseTranslator
+from admission.infrastructure.admission.repository.proposition import GlobalPropositionRepository
 from base.models.academic_year import AcademicYear
 from admission.infrastructure.admission.formation_generale.repository._comptabilite import get_accounting_from_admission
 from base.models.education_group_year import EducationGroupYear
@@ -52,7 +54,7 @@ from base.models.person import Person
 from osis_common.ddd.interface import ApplicationService
 
 
-class PropositionRepository(IPropositionRepository):
+class PropositionRepository(GlobalPropositionRepository, IPropositionRepository):
     @classmethod
     def search(
         cls,
@@ -122,6 +124,7 @@ class PropositionRepository(IPropositionRepository):
                     entity.annee_calculee and AcademicYear.objects.get(year=entity.annee_calculee)
                 ),
                 'determined_pool': entity.pot_calcule and entity.pot_calcule.name,
+                'reference': entity.reference,
                 'double_degree_scholarship': scholarships.get(TypeBourse.DOUBLE_TRIPLE_DIPLOMATION.name),
                 'international_scholarship': scholarships.get(TypeBourse.BOURSE_INTERNATIONALE_FORMATION_GENERALE.name),
                 'erasmus_mundus_scholarship': scholarships.get(TypeBourse.ERASMUS_MUNDUS.name),
@@ -236,6 +239,7 @@ class PropositionRepository(IPropositionRepository):
             matricule_candidat=admission.candidate.global_id,
             creee_le=admission.created,
             modifiee_le=admission.modified,
+            reference=admission.reference,
             formation_id=FormationIdentityBuilder.build(
                 sigle=admission.training.acronym,
                 annee=admission.training.academic_year.year,
@@ -273,6 +277,12 @@ class PropositionRepository(IPropositionRepository):
             uuid=admission.uuid,
             creee_le=admission.created,
             modifiee_le=admission.modified,
+            reference=formater_reference(
+                reference=admission.reference,
+                nom_campus_inscription=admission.training.enrollment_campus.name,
+                sigle_entite_gestion=admission.sigle_entite_gestion,  # From annotation
+                annee=admission.training.academic_year.year,
+            ),
             erreurs=admission.detailed_status or [],
             statut=admission.status,
             annee_calculee=admission.determined_academic_year and admission.determined_academic_year.year,
@@ -284,9 +294,11 @@ class PropositionRepository(IPropositionRepository):
                 intitule=admission.training.title
                 if get_language() == settings.LANGUAGE_CODE
                 else admission.training.title_english,
-                campus=admission.teaching_campus or '',
+                campus=admission.teaching_campus or '',  # from annotation
                 type=admission.training.education_group_type.name,
                 code_domaine=admission.training.main_domain.code if admission.training.main_domain else '',
+                campus_inscription=admission.training.enrollment_campus.name,
+                sigle_entite_gestion=admission.sigle_entite_gestion,  # from annotation
             ),
             matricule_candidat=admission.candidate.global_id,
             prenom_candidat=admission.candidate.first_name,

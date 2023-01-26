@@ -42,6 +42,8 @@ class FormationIdentityFactory(factory.Factory):
 class FormationEtendue(Formation):
     intitule: str
     campus: str
+    campus_inscription: str
+    sigle_entite_gestion: str
 
 
 class FormationFactory(factory.Factory):
@@ -63,3 +65,15 @@ class FormationFactory(factory.Factory):
             "St-Gilles",
         ]
     )
+    campus_inscription = factory.Iterator(
+        [
+            "Louvain-la-Neuve",
+            "Mons",
+            "Bruxelles Woluwe",
+            "Namur",
+            "Charleroi",
+            "Tournai",
+            "St-Gilles",
+        ]
+    )
+    sigle_entite_gestion = factory.Sequence(lambda n: 'SIGLE%02d' % n)

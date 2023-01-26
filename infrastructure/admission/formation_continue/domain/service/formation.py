@@ -52,6 +52,8 @@ class FormationContinueTranslator(IFormationContinueTranslator):
             campus=dto.main_teaching_campus_name or '',
             type=dto.type,
             code_domaine=dto.main_domain_code or '',
+            campus_inscription=dto.enrollment_campus_name or '',
+            sigle_entite_gestion=dto.management_entity_acronym or '',
         )
 
     @classmethod

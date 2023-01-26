@@ -87,6 +87,17 @@ class _DoctoratDTOFactory(factory.Factory):
             "St-Gilles",
         ]
     )
+    campus_inscription = factory.Iterator(
+        [
+            "Louvain-la-Neuve",
+            "Mons",
+            "Bruxelles Woluwe",
+            "Namur",
+            "Charleroi",
+            "Tournai",
+            "St-Gilles",
+        ]
+    )
     type = TrainingType.PHD.name
 
 

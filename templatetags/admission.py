@@ -36,14 +36,14 @@ from rules.templatetags import rules
 
 from admission.auth.constants import READ_ACTIONS_BY_TAB, UPDATE_ACTIONS_BY_TAB
 from admission.contrib.models import DoctorateAdmission
-from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
+from admission.contrib.models.base import BaseAdmission
+from admission.ddd.admission.repository.i_proposition import formater_reference
 from admission.ddd.parcours_doctoral.formation.domain.model.enums import (
     CategorieActivite,
     ChoixTypeEpreuve,
     StatutActivite,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import STATUTS_PROPOSITION_AVANT_INSCRIPTION
-from admission.utils import get_cached_admission_perm_obj
 from osis_role.templatetags.osis_role import has_perm
 
 CONTEXT_ADMISSION = 'admission'
@@ -551,3 +551,13 @@ def training_categories(activities):
         'added': added,
         'validated': validated,
     }
+
+
+@register.filter
+def formatted_reference(admission: BaseAdmission):
+    return formater_reference(
+        reference=admission.reference,
+        nom_campus_inscription=admission.training.enrollment_campus.name,
+        sigle_entite_gestion=admission.sigle_entite_gestion,  # From annotation
+        annee=admission.training.academic_year.year,
+    )

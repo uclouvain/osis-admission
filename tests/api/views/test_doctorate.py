@@ -25,6 +25,7 @@
 # ##############################################################################
 from typing import Optional
 
+import freezegun
 from django.contrib.auth.models import User
 from django.shortcuts import resolve_url
 from rest_framework import status
@@ -79,6 +80,7 @@ class DoctorateAPIViewTestCase(APITestCase):
             post_enrolment_status=ChoixStatutDoctorat.ADMITTED.name,
             training__management_entity=cls.commission,
             supervision_group=promoter.process,
+            training__enrollment_campus__name='Mons',
         )
         cls.admission = DoctorateAdmissionFactory(
             training__management_entity=cls.commission,
@@ -98,6 +100,7 @@ class DoctorateAPIViewTestCase(APITestCase):
         cls.other_doctorate_url = resolve_url('admission_api_v1:doctorate', uuid=cls.other_doctorate.uuid)
         cls.admission_url = resolve_url('admission_api_v1:doctorate', uuid=cls.admission.uuid)
 
+    @freezegun.freeze_time('2023-01-01')
     def test_get_doctorate_student(self):
         self.client.force_authenticate(user=self.student.user)
         response = self.client.get(self.doctorate_url, format='json')
@@ -134,7 +137,7 @@ class DoctorateAPIViewTestCase(APITestCase):
 
         # Check doctorate properties
         self.assertEqual(json_response['uuid'], str(self.doctorate.uuid))
-        self.assertEqual(json_response['reference'], self.doctorate.reference)
+        self.assertEqual(json_response['reference'], f'M-CDA22-{str(self.doctorate)}')
         self.assertEqual(json_response['statut'], self.doctorate.post_enrolment_status)
         self.assertEqual(json_response['sigle_formation'], self.doctorate.doctorate.acronym)
         self.assertEqual(json_response['annee_formation'], self.doctorate.doctorate.academic_year.year)

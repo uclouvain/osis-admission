@@ -24,12 +24,10 @@
 #
 # ##############################################################################
 from collections import defaultdict
-from operator import itemgetter, attrgetter
-from typing import Dict, Set
+from typing import Dict
 
 from django.core.cache import cache
 from rest_framework.generics import get_object_or_404
-from rest_framework.settings import api_settings
 
 from admission.contrib.models import DoctorateAdmission, GeneralEducationAdmission, ContinuingEducationAdmission
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (

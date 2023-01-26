@@ -45,7 +45,7 @@ class Doctorat(interface.RootEntity):
 
     formation_id: FormationIdentity
     matricule_doctorant: str
-    reference: str
+    reference: int
     bourse_recherche: Optional[BourseIdentity] = None
     autre_bourse_recherche: Optional[str] = ''
 

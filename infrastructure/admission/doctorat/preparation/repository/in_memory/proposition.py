@@ -51,7 +51,9 @@ from admission.ddd.admission.doctorat.preparation.test.factory.proposition impor
     PropositionPreAdmissionSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory,
     PropositionPreAdmissionSC3DPMinimaleFactory,
 )
+from admission.ddd.admission.repository.i_proposition import formater_reference
 from admission.infrastructure.admission.domain.service.in_memory.bourse import BourseInMemoryTranslator
+from admission.infrastructure.admission.repository.in_memory.proposition import GlobalPropositionInMemoryRepository
 from base.ddd.utils.in_memory_repository import InMemoryGenericRepository
 from base.models.enums.education_group_types import TrainingType
 
@@ -70,9 +72,14 @@ class _Doctorat:
     intitule_secteur: str
     campus: str
     type: str
+    campus_inscription: str
 
 
-class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepository):
+class PropositionInMemoryRepository(
+    GlobalPropositionInMemoryRepository,
+    InMemoryGenericRepository,
+    IPropositionRepository,
+):
     doctorats = {
         ("SC3DP", 2020): _Doctorat(
             intitule="Doctorat en sciences",
@@ -80,6 +87,7 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
             intitule_secteur="Secteur des sciences et technologies",
             campus="Louvain-la-Neuve",
             type=TrainingType.PHD.name,
+            campus_inscription="Louvain-la-Neuve",
         ),
         ("ECGE3DP", 2020): _Doctorat(
             intitule="Doctorat en sciences économiques et de gestion",
@@ -87,6 +95,7 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
             intitule_secteur="Secteur des sciences humaines",
             campus="Louvain-la-Neuve",
             type=TrainingType.PHD.name,
+            campus_inscription="Louvain-la-Neuve",
         ),
         ("ESP3DP", 2020): _Doctorat(
             intitule="Doctorat en sciences de la santé publique",
@@ -94,6 +103,7 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
             intitule_secteur="Secteur des sciences de la santé",
             campus="Mons",
             type=TrainingType.PHD.name,
+            campus_inscription="Mons",
         ),
     }
     candidats = {
@@ -153,13 +163,9 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
         return list(returned)
 
     @classmethod
-    def get_next_reference(cls):
-        return len(cls.entities) + 1
-
-    @classmethod
     def search_dto(
         cls,
-        numero: Optional[str] = '',
+        numero: Optional[int] = None,
         matricule_candidat: Optional[str] = '',
         etat: Optional[str] = '',
         nationalite: Optional[str] = '',
@@ -178,7 +184,7 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
         returned = cls.entities
         if matricule_candidat:
             returned = filter(lambda p: p.matricule_candidat == matricule_candidat, returned)
-        if numero:
+        if numero is not None:
             returned = filter(lambda p: p.reference == numero, returned)
         if type:
             returned = filter(lambda p: p.type_admission.name == type, returned)
@@ -207,14 +213,20 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
         return PropositionDTO(
             uuid=proposition.entity_id.uuid,
             type_admission=proposition.type_admission.name,
-            reference=proposition.reference,
+            reference=formater_reference(
+                reference=proposition.reference,
+                nom_campus_inscription=doctorat.campus_inscription,
+                sigle_entite_gestion=doctorat.code_secteur,
+                annee=proposition.formation_id.annee,
+            ),
             doctorat=DoctoratDTO(
-                proposition.formation_id.sigle,
-                proposition.formation_id.annee,
-                doctorat.intitule,
-                doctorat.code_secteur,
-                doctorat.campus,
-                doctorat.type,
+                sigle=proposition.formation_id.sigle,
+                annee=proposition.formation_id.annee,
+                intitule=doctorat.intitule,
+                sigle_entite_gestion=doctorat.code_secteur,
+                campus=doctorat.campus,
+                type=doctorat.type,
+                campus_inscription=doctorat.campus_inscription,
             ),
             annee_calculee=proposition.annee_calculee,
             pot_calcule=proposition.pot_calcule and proposition.pot_calcule.name or '',

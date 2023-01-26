@@ -77,10 +77,7 @@ class PropositionBuilder(interface.RootEntityBuilder):
             commission_proximite = ChoixCommissionProximiteCDSS[cmd.commission_proximite]
         elif cmd.commission_proximite and cmd.commission_proximite in ChoixSousDomaineSciences.get_names():
             commission_proximite = ChoixSousDomaineSciences[cmd.commission_proximite]
-        reference = "{}-{}".format(
-            doctorat_id.annee % 100,
-            Proposition.valeur_reference_base + proposition_repository.get_next_reference(),
-        )
+        reference = proposition_repository.recuperer_reference_suivante()
         bourse_erasmus = bourse_translator.get(cmd.bourse_erasmus_mundus) if cmd.bourse_erasmus_mundus else None
         return Proposition(
             entity_id=PropositionIdentityBuilder.build(),
