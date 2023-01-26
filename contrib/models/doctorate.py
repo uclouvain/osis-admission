@@ -338,7 +338,7 @@ class DoctorateAdmission(BaseAdmission):
 
     class Meta:
         verbose_name = _("Doctorate admission")
-        ordering = ('-created',)
+        ordering = ('-created_at',)
         permissions = [
             ('download_jury_approved_pdf', _("Can download jury-approved PDF")),
             ('upload_jury_approved_pdf', _("Can upload jury-approved PDF")),
@@ -476,7 +476,7 @@ class DemandeManager(models.Manager):
                 'pre_admission_submission_date',
                 'submitted_at',
                 'submitted_profile',
-                'modified',
+                'modified_at',
                 'status_cdd',
                 'status_sic',
             )
@@ -656,7 +656,7 @@ class InternalNote(models.Model):
         verbose_name=_("Author"),
         null=True,
     )
-    created = models.DateTimeField(
+    created_at = models.DateTimeField(
         auto_now_add=True,
         verbose_name=_('Created'),
     )
@@ -665,4 +665,4 @@ class InternalNote(models.Model):
     )
 
     class Meta:
-        ordering = ['-created']
+        ordering = ['-created_at']

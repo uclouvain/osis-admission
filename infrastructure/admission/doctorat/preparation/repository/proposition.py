@@ -145,8 +145,8 @@ def _instantiate_admission(admission: 'DoctorateAdmission') -> 'Proposition':
             date_soutenance=admission.phd_already_done_defense_date,
             raison_non_soutenue=admission.phd_already_done_no_defense_reason,
         ),
-        creee_le=admission.created,
-        modifiee_le=admission.modified,
+        creee_le=admission.created_at,
+        modifiee_le=admission.modified_at,
         comptabilite=get_accounting_from_admission(admission=admission),
         reponses_questions_specifiques=admission.specific_question_answers,
         curriculum=admission.curriculum,
@@ -426,7 +426,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             code_secteur_formation=admission.code_secteur_formation,  # from PropositionManager annotation
             intitule_secteur_formation=admission.intitule_secteur_formation,  # from PropositionManager annotation
             commission_proximite=admission.proximity_commission,
-            creee_le=admission.created,
+            creee_le=admission.created_at,
             statut=admission.status,
             justification=admission.comment,
             type_financement=admission.financing_type,
@@ -461,7 +461,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 admission.candidate.country_of_citizenship,
                 'name' if get_language() == settings.LANGUAGE_CODE else 'name_en',
             ),
-            modifiee_le=admission.modified,
+            modifiee_le=admission.modified_at,
             fiche_archive_signatures_envoyees=admission.archived_record_signatures_sent,
             erreurs=admission.detailed_status or [],
             bourse_erasmus_mundus=BourseTranslator.build_dto(admission.erasmus_mundus_scholarship)
