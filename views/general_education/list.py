@@ -27,7 +27,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMix
 from django.utils.functional import cached_property
 from django.views.generic import ListView
 
-from admission.contrib.models import GeneralEducationAdmission
+from admission.contrib.models import GeneralEducationAdmissionProxy
 from admission.forms.doctorate.cdd.filter import BaseFilterForm
 from base.utils.htmx import HtmxMixin
 
@@ -56,4 +56,4 @@ class GeneralAdmissionList(LoginRequiredMixin, PermissionRequiredMixin, HtmxMixi
 
     def get_queryset(self):
         # TODO Wait for GetAdmissionsQuery
-        return GeneralEducationAdmission.objects.all()
+        return GeneralEducationAdmissionProxy.objects.all()

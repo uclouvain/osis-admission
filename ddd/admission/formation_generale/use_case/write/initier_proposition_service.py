@@ -53,7 +53,12 @@ def initier_proposition(
     )
 
     # WHEN
-    proposition = PropositionBuilder().initier_proposition(cmd, formation.entity_id, bourses_ids)
+    proposition = PropositionBuilder().initier_proposition(
+        cmd=cmd,
+        proposition_repository=proposition_repository,
+        formation_id=formation.entity_id,
+        bourses_ids=bourses_ids,
+    )
 
     # THEN
     proposition_repository.save(proposition)

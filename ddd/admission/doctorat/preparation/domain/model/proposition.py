@@ -87,10 +87,10 @@ class Proposition(interface.RootEntity):
     type_admission: ChoixTypeAdmission
     formation_id: 'FormationIdentity'
     matricule_candidat: str
+    reference: int
     projet: 'DetailProjet'
     annee_calculee: Optional[int] = None
     pot_calcule: Optional[AcademicCalendarTypes] = None
-    reference: Optional[str] = None
     justification: Optional[str] = ''
     statut: ChoixStatutProposition = ChoixStatutProposition.IN_PROGRESS
     commission_proximite: Optional[

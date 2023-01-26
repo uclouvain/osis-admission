@@ -156,6 +156,7 @@ class GeneralEducationAdmissionManager(models.Manager.from_queryset(BaseAdmissio
                 "training__academic_year",
                 "training__education_group_type",
                 "training__main_domain",
+                "training__enrollment_campus",
                 "determined_academic_year",
                 "double_degree_scholarship",
                 "international_scholarship",
@@ -163,6 +164,7 @@ class GeneralEducationAdmissionManager(models.Manager.from_queryset(BaseAdmissio
             )
             .annotate_campus()
             .annotate_pool_end_date()
+            .annotate_training_management_entity()
         )
 
 

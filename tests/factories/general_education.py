@@ -29,6 +29,7 @@ from admission.contrib.models import GeneralEducationAdmission
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
+from admission.tests.factories.utils import generate_proposition_reference
 from admission.tests.factories.accounting import AccountingFactory
 from admission.tests.factories.person import CompletePersonForBachelorFactory
 from admission.tests.factories.roles import CandidateFactory
@@ -64,7 +65,12 @@ class GeneralEducationAdmissionFactory(factory.DjangoModelFactory):
         model = GeneralEducationAdmission
 
     candidate = factory.SubFactory(PersonFactory)
-    training = factory.SubFactory(GeneralEducationTrainingFactory, academic_year__current=True)
+    reference = factory.LazyAttribute(generate_proposition_reference)
+    training = factory.SubFactory(
+        GeneralEducationTrainingFactory,
+        academic_year__current=True,
+        enrollment_campus__name='Mons',
+    )
     erasmus_mundus_scholarship = factory.SubFactory(ErasmusMundusScholarshipFactory)
     double_degree_scholarship = factory.SubFactory(DoubleDegreeScholarshipFactory)
     international_scholarship = factory.SubFactory(InternationalScholarshipFactory)

@@ -125,7 +125,8 @@ class TestVerifierPropositionServiceCommun(TestCase):
         self.message_bus = message_bus_in_memory_instance
         self.academic_year_repository = AcademicYearInMemoryRepository()
         self.etudes_secondaires = self.candidat_translator.etudes_secondaires.get(self.candidat.matricule)
-        self.etudes_secondaires.annee_diplome_etudes_secondaires = None
+        if self.etudes_secondaires:
+            self.etudes_secondaires.annee_diplome_etudes_secondaires = None
 
         for annee in range(2016, 2021):
             self.academic_year_repository.save(

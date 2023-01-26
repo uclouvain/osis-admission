@@ -62,12 +62,9 @@ __all__ = [
     "DoctorateAdmission",
     "DoctorateProxy",
     "ConfirmationPaper",
-    "REFERENCE_SEQ_NAME",
 ]
 
 from ...ddd.admission.dtos.conditions import InfosDetermineesDTO
-
-REFERENCE_SEQ_NAME = 'admission_doctorateadmission_reference_seq'
 
 
 class DoctorateAdmission(BaseAdmission):
@@ -92,14 +89,6 @@ class DoctorateAdmission(BaseAdmission):
         default='',
         blank=True,
     )
-    reference = models.CharField(
-        max_length=32,
-        verbose_name=_("Reference"),
-        unique=True,
-        editable=False,
-        null=True,
-    )
-
     # Financement
     financing_type = models.CharField(
         max_length=255,
@@ -410,9 +399,6 @@ class DoctorateAdmission(BaseAdmission):
             ('submit_doctorateadmission', _("Can submit a doctorate admission proposition")),
         ]
 
-    def __str__(self):  # pragma: no cover
-        return self.reference
-
     def save(self, *args, **kwargs) -> None:
         super().save(*args, **kwargs)
         cache.delete('admission_permission_{}'.format(self.uuid))
@@ -454,6 +440,7 @@ class PropositionManager(models.Manager.from_queryset(BaseAdmissionQuerySet)):
             .select_related(
                 "training__academic_year",
                 "training__education_group_type",
+                "training__enrollment_campus",
                 "candidate__country_of_citizenship",
                 "determined_academic_year",
                 "thesis_institute",
@@ -464,14 +451,10 @@ class PropositionManager(models.Manager.from_queryset(BaseAdmissionQuerySet)):
             .annotate(
                 code_secteur_formation=CTESubquery(sector_subqs.values("acronym")[:1]),
                 intitule_secteur_formation=CTESubquery(sector_subqs.values("title")[:1]),
-                sigle_entite_gestion=models.Subquery(
-                    EntityVersion.objects.filter(entity_id=OuterRef("training__management_entity_id"))
-                    .order_by('-start_date')
-                    .values("acronym")[:1]
-                ),
             )
             .annotate_campus()
             .annotate_pool_end_date()
+            .annotate_training_management_entity()
         )
 
 
@@ -529,7 +512,7 @@ class DemandeProxy(DoctorateAdmission):
         proxy = True
 
 
-class DoctorateManager(models.Manager):
+class DoctorateManager(models.Manager.from_queryset(BaseAdmissionQuerySet)):
     def get_queryset(self):
         return (
             super()
@@ -540,6 +523,7 @@ class DoctorateManager(models.Manager):
                 'training__academic_year__year',
                 'training__title',
                 'training__acronym',
+                'training__enrollment_campus__name',
                 'post_enrolment_status',
                 'proximity_commission',
                 'reference',
@@ -553,11 +537,13 @@ class DoctorateManager(models.Manager):
             .select_related(
                 'candidate',
                 'training__academic_year',
+                "training__enrollment_campus",
                 'international_scholarship',
             )
             .exclude(
                 post_enrolment_status=ChoixStatutDoctorat.ADMISSION_IN_PROGRESS.name,
             )
+            .annotate_training_management_entity()
         )
 
 

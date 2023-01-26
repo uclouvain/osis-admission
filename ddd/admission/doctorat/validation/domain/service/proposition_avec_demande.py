@@ -103,7 +103,6 @@ class PropositionAvecDemande(interface.DomainService):
         demande_repository: 'IDemandeRepository',
     ) -> List['PropositionIdentity']:
         proposition_criteria = [
-            "numero",
             "matricule_candidat",
             "nationalite",
             "type",
@@ -123,7 +122,9 @@ class PropositionAvecDemande(interface.DomainService):
             "date_pre_admission_fin",
         ]
         has_proposition_criteria = (
-            any(getattr(cmd, criterion) for criterion in proposition_criteria) or cmd.cotutelle is not None
+            any(getattr(cmd, criterion) for criterion in proposition_criteria)
+            or cmd.cotutelle is not None
+            or cmd.numero is not None
         )
         has_demande_criteria = any(getattr(cmd, criterion) for criterion in demande_criteria)
 

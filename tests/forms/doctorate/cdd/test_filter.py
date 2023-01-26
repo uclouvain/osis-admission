@@ -230,7 +230,7 @@ class FilterTestCase(TestCase):
             data={
                 'page_size': PAGINATOR_SIZE_LIST[0],
                 'cdds': [ENTITY_CDE],
-                'numero': '20-300000',
+                'numero': '000.000',
             },
         )
         self.assertTrue(form.is_valid())
@@ -257,7 +257,7 @@ class FilterTestCase(TestCase):
             data={
                 'page_size': PAGINATOR_SIZE_LIST[0],
                 'cdds': [ENTITY_CDE],
-                'numero': '20-300000',
+                'numero': '000.000',
                 'nationalite': self.country.iso_code,
                 'matricule_candidat': self.candidate.global_id,
                 'matricule_promoteur': self.promoter.global_id,
@@ -281,7 +281,7 @@ class FilterTestCase(TestCase):
             data={
                 'page_size': PAGINATOR_SIZE_LIST[0],
                 'cdds': [ENTITY_CDE],
-                'numero': '20-300000',
+                'numero': '000.000',
                 'nationalite': 'FR',
                 'matricule_candidat': '123456',
                 'matricule_promoteur': '654321',
@@ -299,7 +299,7 @@ class FilterTestCase(TestCase):
             data={
                 'page_size': PAGINATOR_SIZE_LIST[0],
                 'cdds': [ENTITY_CDE],
-                'numero': '20-300000',
+                'numero': '000.001',
             },
             load_labels=True,
         )

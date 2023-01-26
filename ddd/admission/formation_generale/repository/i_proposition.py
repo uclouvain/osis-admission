@@ -31,11 +31,11 @@ from admission.ddd.admission.formation_generale.domain.model.proposition import 
     PropositionIdentity,
 )
 from admission.ddd.admission.formation_generale.dtos import PropositionDTO
-from osis_common.ddd import interface
+from admission.ddd.admission.repository.i_proposition import IGlobalPropositionRepository
 from osis_common.ddd.interface import ApplicationService
 
 
-class IPropositionRepository(interface.AbstractRepository):
+class IPropositionRepository(IGlobalPropositionRepository):
     @classmethod
     @abc.abstractmethod
     def get(cls, entity_id: 'PropositionIdentity') -> 'Proposition':  # type: ignore[override]

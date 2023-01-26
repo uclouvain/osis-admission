@@ -36,6 +36,7 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from base.models.academic_calendar import AcademicCalendar
+from base.models.entity_version import EntityVersion
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from osis_document.contrib import FileField
 
@@ -47,6 +48,9 @@ from base.models.education_group_year import EducationGroupYear
 from base.models.enums.education_group_categories import Categories
 from base.models.person import Person
 from program_management.models.education_group_version import EducationGroupVersion
+
+
+REFERENCE_SEQ_NAME = 'admission_baseadmission_reference_seq'
 
 
 def admission_directory_path(admission: 'BaseAdmission', filename: str):
@@ -146,6 +150,13 @@ class BaseAdmission(models.Model):
         encoder=DjangoJSONEncoder,
     )
 
+    reference = models.BigIntegerField(
+        verbose_name=_("Reference"),
+        unique=True,
+        editable=False,
+        null=True,
+    )
+
     class Meta:
         constraints = [
             models.CheckConstraint(
@@ -160,6 +171,9 @@ class BaseAdmission(models.Model):
     def save(self, *args, **kwargs) -> None:
         super().save(*args, **kwargs)
         cache.delete('admission_permission_{}'.format(self.uuid))
+
+    def __str__(self):
+        return '{:07,}'.format(self.reference).replace(',', '.')
 
 
 @receiver(post_save, sender=EducationGroupYear)
@@ -214,4 +228,13 @@ class BaseAdmissionQuerySet(models.QuerySet):
                     end_date__gte=today,
                 ).values('end_date')[:1],
             ),
+        )
+
+    def annotate_training_management_entity(self):
+        return self.annotate(
+            sigle_entite_gestion=models.Subquery(
+                EntityVersion.objects.filter(entity_id=OuterRef("training__management_entity_id"))
+                .order_by('-start_date')
+                .values("acronym")[:1]
+            )
         )

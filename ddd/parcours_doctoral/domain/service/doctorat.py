@@ -37,6 +37,6 @@ class DoctoratService(interface.DomainService):
             entity_id=entity_id,
             formation_id=FormationIdentity(sigle=proposition.sigle_formation, annee=proposition.annee),
             matricule_doctorant=proposition.matricule_candidat,
-            reference=proposition.reference or '',
+            reference=proposition.reference,
             statut=ChoixStatutDoctorat.ADMITTED,
         )
