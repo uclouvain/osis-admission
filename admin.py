@@ -1,26 +1,26 @@
 # ##############################################################################
 #
-#    OSIS stands for Open Student Information System. It's an application
-#    designed to manage the core business of higher education institutions,
-#    such as universities, faculties, institutes and professional schools.
-#    The core business involves the administration of students, teachers,
-#    courses, programs and so on.
+#  OSIS stands for Open Student Information System. It's an application
+#  designed to manage the core business of higher education institutions,
+#  such as universities, faculties, institutes and professional schools.
+#  The core business involves the administration of students, teachers,
+#  courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
 #
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
 #
-#    A copy of this license - GNU General Public License - is available
-#    at the root of the source code of this program.  If not,
-#    see http://www.gnu.org/licenses/.
+#  A copy of this license - GNU General Public License - is available
+#  at the root of the source code of this program.  If not,
+#  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
 
@@ -82,9 +82,11 @@ class AdmissionAdminForm(forms.ModelForm):
 class BaseAdmissionAdmin(admin.ModelAdmin):
     form = AdmissionAdminForm
 
-    readonly_fields = []
     search_fields = [
         'reference',
+    ]
+    readonly_fields = [
+        "submitted_at",
     ]
     filter_horizontal = [
         "professional_valuated_experiences",
@@ -118,7 +120,7 @@ class DoctorateAdmissionAdmin(BaseAdmissionAdmin):
         "detailed_status",
         "submitted_profile",
         "pre_admission_submission_date",
-        "admission_submission_date",
+        "submitted_at",
     ]
     exclude = ["valuated_experiences"]
 
@@ -129,6 +131,7 @@ class ContinuingEducationAdmissionAdmin(BaseAdmissionAdmin):
     list_filter = ['status']
     readonly_fields = [
         'detailed_status',
+        "submitted_at",
     ]
 
 
@@ -138,6 +141,9 @@ class GeneralEducationAdmissionAdmin(ContinuingEducationAdmissionAdmin):
         'double_degree_scholarship',
         'international_scholarship',
         'erasmus_mundus_scholarship',
+    ]
+    readonly_fields = [
+        "submitted_at",
     ]
 
 

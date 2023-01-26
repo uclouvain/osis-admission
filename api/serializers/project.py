@@ -26,16 +26,16 @@
 from rest_framework import serializers
 
 from admission.api.serializers.fields import (
+    ACTION_LINKS,
     ActionLinksField,
     AnswerToSpecificQuestionField,
     CONTINUING_EDUCATION_ACTION_LINKS,
     DOCTORATE_ACTION_LINKS,
     GENERAL_EDUCATION_ACTION_LINKS,
     RelatedInstituteField,
-    ACTION_LINKS,
 )
 from admission.api.serializers.mixins import IncludedFieldsMixin
-from admission.contrib.models import AdmissionType, DoctorateAdmission
+from admission.contrib.models import DoctorateAdmission
 from admission.ddd.admission.doctorat.preparation.commands import CompleterPropositionCommand, InitierPropositionCommand
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixCommissionProximiteCDEouCLSM,
@@ -43,6 +43,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixDoctoratDejaRealise,
     ChoixLangueRedactionThese,
     ChoixSousDomaineSciences,
+    ChoixTypeAdmission,
 )
 from admission.ddd.admission.doctorat.preparation.dtos import DoctoratDTO, PropositionDTO as DoctoratPropositionDTO
 from admission.ddd.admission.dtos.formation import FormationDTO
@@ -507,7 +508,7 @@ class InitierPropositionCommandSerializer(DTOSerializer):
     class Meta:
         source = InitierPropositionCommand
 
-    type_admission = serializers.ChoiceField(choices=AdmissionType.choices())
+    type_admission = serializers.ChoiceField(choices=ChoixTypeAdmission.choices())
     commission_proximite = serializers.ChoiceField(
         choices=ChoixCommissionProximiteCDEouCLSM.choices()
         + ChoixCommissionProximiteCDSS.choices()

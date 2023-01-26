@@ -1,26 +1,26 @@
 # ##############################################################################
 #
-#    OSIS stands for Open Student Information System. It's an application
-#    designed to manage the core business of higher education institutions,
-#    such as universities, faculties, institutes and professional schools.
-#    The core business involves the administration of students, teachers,
-#    courses, programs and so on.
+#  OSIS stands for Open Student Information System. It's an application
+#  designed to manage the core business of higher education institutions,
+#  such as universities, faculties, institutes and professional schools.
+#  The core business involves the administration of students, teachers,
+#  courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
 #
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
 #
-#    A copy of this license - GNU General Public License - is available
-#    at the root of the source code of this program.  If not,
-#    see http://www.gnu.org/licenses/.
+#  A copy of this license - GNU General Public License - is available
+#  at the root of the source code of this program.  If not,
+#  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
 import uuid
@@ -34,19 +34,15 @@ from django.test import override_settings
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from admission.contrib.models import (
-    GeneralEducationAdmission,
-    ContinuingEducationAdmission,
-    AdmissionType,
-    DoctorateAdmission,
-)
+from admission.contrib.models import ContinuingEducationAdmission, DoctorateAdmission, GeneralEducationAdmission
 from admission.contrib.models.base import REFERENCE_SEQ_NAME
-from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
-    DoctoratNonTrouveException,
-    MaximumPropositionsAtteintException,
-)
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixStatutProposition as ChoixStatutPropositionDoctorale,
+    ChoixTypeAdmission,
+)
+from admission.ddd.admission.doctorat.preparation.domain.validator import exceptions as doctorate_education_exceptions
+from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
+    DoctoratNonTrouveException,
 )
 from admission.ddd.admission.domain.validator.exceptions import BourseNonTrouveeException
 from admission.ddd.admission.formation_continue.domain.model.enums import (
@@ -57,30 +53,28 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutProposition as ChoixStatutPropositionGenerale,
 )
 from admission.ddd.admission.formation_generale.domain.validator import exceptions as general_education_exceptions
-from admission.ddd.admission.doctorat.preparation.domain.validator import exceptions as doctorate_education_exceptions
 from admission.tests.api.views.test_project import DoctorateAdmissionApiTestCase
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.calendar import AdmissionAcademicCalendarFactory
 from admission.tests.factories.continuing_education import (
-    ContinuingEducationTrainingFactory,
     ContinuingEducationAdmissionFactory,
+    ContinuingEducationTrainingFactory,
 )
 from admission.tests.factories.doctorate import DoctorateFactory
 from admission.tests.factories.form_item import (
-    TextAdmissionFormItemFactory,
-    DocumentAdmissionFormItemFactory,
     AdmissionFormItemInstantiationFactory,
+    DocumentAdmissionFormItemFactory,
+    TextAdmissionFormItemFactory,
 )
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.scholarship import (
+    DoubleDegreeScholarshipFactory,
     ErasmusMundusScholarshipFactory,
     InternationalScholarshipFactory,
-    DoubleDegreeScholarshipFactory,
 )
 from base.models.enums.entity_type import EntityType
 from base.tests.factories.education_group_year import Master120TrainingFactory
 from base.tests.factories.entity_version import EntityVersionFactory
-
 from base.tests.factories.person import PersonFactory
 
 
@@ -114,7 +108,7 @@ class DoctorateAdmissionTrainingChoiceInitializationApiTestCase(APITestCase):
         cls.scholarship = ErasmusMundusScholarshipFactory()
 
         cls.create_data = {
-            "type_admission": AdmissionType.PRE_ADMISSION.name,
+            "type_admission": ChoixTypeAdmission.PRE_ADMISSION.name,
             "justification": "Some justification",
             "sigle_formation": cls.doctorate.acronym,
             "annee_formation": cls.doctorate.academic_year.year,
@@ -530,7 +524,7 @@ class DoctorateEducationAdmissionTypeUpdateApiTestCase(DoctorateAdmissionApiTest
         cls.erasmus_mundus_scholarship = ErasmusMundusScholarshipFactory()
         cls.update_data = {
             'uuid_proposition': cls.admission.uuid,
-            'type_admission': AdmissionType.PRE_ADMISSION.name,
+            'type_admission': ChoixTypeAdmission.PRE_ADMISSION.name,
             'justification': 'Justification',
             'bourse_erasmus_mundus': str(cls.erasmus_mundus_scholarship.uuid),
             'reponses_questions_specifiques': {
@@ -591,7 +585,7 @@ class DoctorateEducationAdmissionTypeUpdateApiTestCase(DoctorateAdmissionApiTest
 
         self.assertEqual(admission.candidate_id, self.candidate.pk)
         self.assertEqual(admission.status, ChoixStatutPropositionDoctorale.IN_PROGRESS.name)
-        self.assertEqual(admission.type, AdmissionType.PRE_ADMISSION.name)
+        self.assertEqual(admission.type, ChoixTypeAdmission.PRE_ADMISSION.name)
         self.assertEqual(admission.comment, 'Justification')
         self.assertEqual(admission.erasmus_mundus_scholarship_id, self.erasmus_mundus_scholarship.pk)
         expected = {

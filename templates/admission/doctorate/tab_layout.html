@@ -90,6 +90,12 @@
               {% endif %}
             {% endif %}
           </div>
+          {% if object.submitted_at %}
+            <div>
+              {% trans "Submission date:" %}
+              {{ object.submitted_at|date:'d/m/Y H:i' }}
+            </div>
+          {% endif %}
         {% endblock %}
       </div>
       <div>

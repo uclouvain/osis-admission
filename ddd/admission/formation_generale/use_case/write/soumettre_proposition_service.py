@@ -1,30 +1,31 @@
 # ##############################################################################
 #
-#    OSIS stands for Open Student Information System. It's an application
-#    designed to manage the core business of higher education institutions,
-#    such as universities, faculties, institutes and professional schools.
-#    The core business involves the administration of students, teachers,
-#    courses, programs and so on.
+#  OSIS stands for Open Student Information System. It's an application
+#  designed to manage the core business of higher education institutions,
+#  such as universities, faculties, institutes and professional schools.
+#  The core business involves the administration of students, teachers,
+#  courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
 #
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
 #
-#    A copy of this license - GNU General Public License - is available
-#    at the root of the source code of this program.  If not,
-#    see http://www.gnu.org/licenses/.
+#  A copy of this license - GNU General Public License - is available
+#  at the root of the source code of this program.  If not,
+#  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
 import datetime
 
+from admission.calendar.admission_calendar import DIPLOMES_ACCES_BELGE
 from admission.ddd.admission.domain.service.i_calendrier_inscription import ICalendrierInscription
 from admission.ddd.admission.domain.service.i_elements_confirmation import IElementsConfirmation
 from admission.ddd.admission.domain.service.i_maximum_propositions import IMaximumPropositionsAutorisees
@@ -76,9 +77,21 @@ def soumettre_proposition(
         cmd.uuid_proposition,
         onglets=Onglets.get_names(),
     )
+    formation = formation_translator.get(proposition.formation_id)
+    titres = titres_acces.recuperer_titres_access(
+        proposition.matricule_candidat,
+        formation.type,
+        proposition.equivalence_diplome,
+    )
+    type_demande = VerifierProposition.determiner_type_demande(
+        proposition,
+        titres,
+        calendrier_inscription,
+        profil_candidat_translator,
+    )
 
     # WHEN
-    VerifierProposition().verifier(
+    VerifierProposition.verifier(
         proposition_candidat=proposition,
         formation_translator=formation_translator,
         titres_acces=titres_acces,
@@ -89,6 +102,8 @@ def soumettre_proposition(
         annee_soumise=cmd.annee,
         pool_soumis=AcademicCalendarTypes[cmd.pool],
         maximum_propositions_service=maximum_propositions_service,
+        formation=formation,
+        titres=titres,
     )
     element_confirmation.valider(
         soumis=cmd.elements_confirmation,
@@ -98,7 +113,7 @@ def soumettre_proposition(
     )
 
     # THEN
-    proposition.soumettre(cmd.annee, AcademicCalendarTypes[cmd.pool], cmd.elements_confirmation)
+    proposition.soumettre(cmd.annee, AcademicCalendarTypes[cmd.pool], cmd.elements_confirmation, type_demande)
     proposition_repository.save(proposition)
     notification.confirmer_soumission(proposition)
 

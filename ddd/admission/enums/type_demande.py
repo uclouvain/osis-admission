@@ -23,43 +23,12 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import datetime
-from typing import Dict, List, Optional, Union
 
-import attr
+from base.models.utils.utils import ChoiceEnum
 
-from admission.ddd.admission.dtos import AdressePersonnelleDTO
-from admission.ddd.admission.dtos.formation import FormationDTO
-from osis_common.ddd import interface
+from django.utils.translation import gettext_lazy as _
 
 
-@attr.dataclass(frozen=True, slots=True)
-class PropositionDTO(interface.DTO):
-    uuid: str
-    formation: FormationDTO
-    reference: str
-    annee_calculee: Optional[int]
-    pot_calcule: Optional[str]
-    date_fin_pot: Optional[datetime.date]
-    creee_le: datetime.datetime
-    modifiee_le: datetime.datetime
-    soumise_le: Optional[datetime.datetime]
-    erreurs: List[Dict[str, str]]
-    statut: str
-
-    matricule_candidat: str
-    prenom_candidat: str
-    nom_candidat: str
-
-    reponses_questions_specifiques: Dict[str, Union[str, List[str]]]
-
-    curriculum: List[str]
-    equivalence_diplome: List[str]
-
-    inscription_a_titre: Optional[str]
-    nom_siege_social: Optional[str]
-    numero_unique_entreprise: Optional[str]
-    numero_tva_entreprise: Optional[str]
-    adresse_mail_professionnelle: Optional[str]
-    type_adresse_facturation: Optional[str]
-    adresse_facturation: Optional[AdressePersonnelleDTO]
+class TypeDemande(ChoiceEnum):
+    ADMISSION = _("ADMISSION")
+    INSCRIPTION = _("INSCRIPTION")

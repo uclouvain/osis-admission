@@ -232,6 +232,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             statut=admission.status,
             creee_le=admission.created,
             modifiee_le=admission.modified,
+            soumise_le=admission.submitted_at,
             erreurs=admission.detailed_status or [],
             date_fin_pot=admission.pool_end_date,  # from annotation
             formation=FormationDTO(

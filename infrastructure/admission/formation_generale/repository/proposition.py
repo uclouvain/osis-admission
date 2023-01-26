@@ -35,6 +35,7 @@ from admission.ddd.admission.domain.builder.formation_identity import FormationI
 from admission.ddd.admission.domain.model.bourse import BourseIdentity
 from admission.ddd.admission.dtos.formation import FormationDTO
 from admission.ddd.admission.enums.type_bourse import TypeBourse
+from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_generale.domain.builder.proposition_identity_builder import (
     PropositionIdentityBuilder,
 )
@@ -125,6 +126,8 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 ),
                 'determined_pool': entity.pot_calcule and entity.pot_calcule.name,
                 'reference': entity.reference,
+                'type_demande': entity.type_demande.name,
+                'submitted_at': entity.soumise_le,
                 'double_degree_scholarship': scholarships.get(TypeBourse.DOUBLE_TRIPLE_DIPLOMATION.name),
                 'international_scholarship': scholarships.get(TypeBourse.BOURSE_INTERNATIONALE_FORMATION_GENERALE.name),
                 'erasmus_mundus_scholarship': scholarships.get(TypeBourse.ERASMUS_MUNDUS.name),
@@ -244,6 +247,8 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 sigle=admission.training.acronym,
                 annee=admission.training.academic_year.year,
             ),
+            type_demande=TypeDemande[admission.type_demande],
+            soumise_le=admission.submitted_at,
             annee_calculee=admission.determined_academic_year and admission.determined_academic_year.year,
             pot_calcule=admission.determined_pool and AcademicCalendarTypes[admission.determined_pool],
             statut=ChoixStatutProposition[admission.status],
@@ -283,6 +288,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 sigle_entite_gestion=admission.sigle_entite_gestion,  # From annotation
                 annee=admission.training.academic_year.year,
             ),
+            soumise_le=admission.submitted_at,
             erreurs=admission.detailed_status or [],
             statut=admission.status,
             annee_calculee=admission.determined_academic_year and admission.determined_academic_year.year,

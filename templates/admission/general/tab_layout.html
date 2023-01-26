@@ -64,4 +64,14 @@
     {% trans "Status:" %}
     {{ object.status|enum_display:'ChoixStatutProposition' }}
   </div>
+  <div>
+    {% trans "Type:" %}
+    {{ object.type_demande|enum_display:'TypeDemande' }}
+  </div>
+  {% if object.submitted_at %}
+    <div>
+      {% trans "Submission date:" %}
+      {{ object.submitted_at|date:'d/m/Y H:i' }}
+    </div>
+  {% endif %}
 {% endblock %}
