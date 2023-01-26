@@ -189,6 +189,7 @@ class PropositionInMemoryRepository(
             annee_calculee=proposition.annee_calculee,
             pot_calcule=proposition.pot_calcule and proposition.pot_calcule.name or '',
             date_fin_pot=None,
+            soumise_le=None,
             bourse_double_diplome=BourseInMemoryTranslator.get_dto(proposition.bourse_double_diplome_id.uuid)
             if proposition.bourse_double_diplome_id
             else None,

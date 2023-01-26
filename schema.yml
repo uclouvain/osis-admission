@@ -8925,7 +8925,7 @@ components:
       type: object
       properties:
         type_admission:
-          $ref: '#/components/schemas/AdmissionType'
+          $ref: '#/components/schemas/ChoixTypeAdmission'
         sigle_formation:
           type: string
         annee_formation:
@@ -8962,7 +8962,7 @@ components:
       - annee_formation
       - matricule_candidat
       - commission_proximite
-    AdmissionType:
+    ChoixTypeAdmission:
       enum:
       - ADMISSION
       - PRE_ADMISSION
@@ -9113,7 +9113,7 @@ components:
         uuid:
           type: string
         type_admission:
-          $ref: '#/components/schemas/AdmissionType'
+          $ref: '#/components/schemas/ChoixTypeAdmission'
         justification:
           type: string
         commission_proximite:

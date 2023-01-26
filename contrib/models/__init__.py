@@ -27,7 +27,7 @@
 try:
     from .doctorate import DoctorateAdmission, ConfirmationPaper
     from .actor import SupervisionActor
-    from .enums.admission_type import AdmissionType
+    from admission.ddd.admission.enums.type_demande import TypeDemande
     from .entity_proxy import EntityProxy
     from .cdd_mail_template import CddMailTemplate
     from .task import AdmissionTask
@@ -39,7 +39,7 @@ try:
 
     __all__ = [
         "DoctorateAdmission",
-        "AdmissionType",
+        "TypeDemande",
         "SupervisionActor",
         "EntityProxy",
         "CddMailTemplate",

@@ -35,13 +35,14 @@ from django.utils.translation import gettext_lazy as _
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from admission.contrib.models import AdmissionType, DoctorateAdmission, AdmissionFormItemInstantiation
+from admission.contrib.models import AdmissionFormItemInstantiation, DoctorateAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixCommissionProximiteCDEouCLSM,
     ChoixCommissionProximiteCDSS,
     ChoixLangueRedactionThese,
     ChoixSousDomaineSciences,
     ChoixStatutProposition,
+    ChoixTypeAdmission,
     ChoixTypeFinancement,
 )
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
@@ -53,16 +54,17 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
 from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixStatutCDD
 from admission.ddd.admission.domain.service.i_elements_confirmation import IElementsConfirmation
 from admission.ddd.admission.domain.validator.exceptions import (
+    NombrePropositionsSoumisesDepasseException,
     QuestionsSpecifiquesChoixFormationNonCompleteesException,
     QuestionsSpecifiquesCurriculumNonCompleteesException,
-    NombrePropositionsSoumisesDepasseException,
 )
 from admission.ddd.admission.enums.question_specifique import Onglets
 from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
-from admission.tests import QueriesAssertionsMixin, CheckActionLinksMixin
+from admission.tests import CheckActionLinksMixin, QueriesAssertionsMixin
 from admission.tests.factories import DoctorateAdmissionFactory, WriteTokenFactory
 from admission.tests.factories.calendar import AdmissionAcademicCalendarFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
+from admission.tests.factories.curriculum import EducationalExperienceFactory, EducationalExperienceYearFactory
 from admission.tests.factories.form_item import AdmissionFormItemInstantiationFactory, TextAdmissionFormItemFactory
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.person import CompletePersonFactory
@@ -75,7 +77,6 @@ from base.tests.factories.academic_year import AcademicYearFactory, get_current_
 from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.organization import OrganizationFactory
 from base.tests.factories.person import PersonFactory
-from admission.tests.factories.curriculum import EducationalExperienceFactory, EducationalExperienceYearFactory
 from osis_signature.enums import SignatureState
 from reference.tests.factories.country import CountryFactory
 
@@ -598,7 +599,7 @@ class DoctorateAdmissionUpdatingApiTestCase(DoctorateAdmissionApiTestCase):
     def setUp(self):
         self.update_data = {
             "uuid": self.admission.uuid,
-            "type_admission": AdmissionType.ADMISSION.name,
+            "type_admission": ChoixTypeAdmission.ADMISSION.name,
             "titre_projet": "A new title",
             "commission_proximite": '',
             "bourse_preuve": [],
@@ -1031,7 +1032,7 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
         # self.assertEqual(updated_admission.status_cdd, ChoixStatutSIC.TO_BE_VERIFIED.name)
         # self.assertEqual(updated_admission.post_enrolment_status, ChoixStatutDoctorat.ADMISSION_IN_PROGRESS.name)
 
-        self.assertEqual(updated_admission.admission_submission_date.date(), datetime.date.today())
+        self.assertEqual(updated_admission.submitted_at.date(), datetime.date.today())
         self.assertEqual(
             updated_admission.submitted_profile,
             {

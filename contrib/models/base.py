@@ -35,6 +35,7 @@ from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
+from admission.ddd.admission.enums.type_demande import TypeDemande
 from base.models.academic_calendar import AcademicCalendar
 from base.models.entity_version import EntityVersion
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
@@ -75,6 +76,13 @@ class BaseAdmission(models.Model):
         related_name="%(class)ss",
         on_delete=models.PROTECT,
         editable=False,
+    )
+    type_demande = models.CharField(
+        verbose_name=_("Type"),
+        max_length=255,
+        choices=TypeDemande.choices(),
+        db_index=True,
+        default=TypeDemande.ADMISSION.name,
     )
     comment = models.TextField(
         default='',
@@ -148,6 +156,10 @@ class BaseAdmission(models.Model):
         blank=True,
         default=dict,
         encoder=DjangoJSONEncoder,
+    )
+    submitted_at = models.DateTimeField(
+        verbose_name=_("Submission date"),
+        null=True,
     )
 
     reference = models.BigIntegerField(

@@ -167,6 +167,7 @@ class PropositionInMemoryRepository(
             formation=formation_dto,
             annee_calculee=proposition.annee_calculee,
             pot_calcule=proposition.pot_calcule and proposition.pot_calcule.name or '',
+            soumise_le=None,
             date_fin_pot=None,
             reponses_questions_specifiques=proposition.reponses_questions_specifiques,
             equivalence_diplome=proposition.equivalence_diplome,
