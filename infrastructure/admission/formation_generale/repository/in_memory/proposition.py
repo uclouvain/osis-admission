@@ -37,12 +37,14 @@ from admission.ddd.admission.formation_generale.test.factory.proposition import 
     PropositionFactory,
     _PropositionIdentityFactory,
 )
+from admission.ddd.admission.repository.i_proposition import formater_reference
 from admission.ddd.admission.test.factory.formation import FormationIdentityFactory
 from admission.infrastructure.admission.domain.service.in_memory.bourse import BourseInMemoryTranslator
 from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
 from admission.infrastructure.admission.formation_generale.domain.service.in_memory.formation import (
     FormationGeneraleInMemoryTranslator,
 )
+from admission.infrastructure.admission.repository.in_memory.proposition import GlobalPropositionInMemoryRepository
 from base.ddd.utils.in_memory_repository import InMemoryGenericRepository
 
 
@@ -60,7 +62,11 @@ class _Formation:
     type: str
 
 
-class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepository):
+class PropositionInMemoryRepository(
+    GlobalPropositionInMemoryRepository,
+    InMemoryGenericRepository,
+    IPropositionRepository,
+):
     entities: List['Proposition'] = []
 
     @classmethod
@@ -166,6 +172,12 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
 
         return PropositionDTO(
             uuid=proposition.entity_id.uuid,
+            reference=formater_reference(
+                reference=proposition.reference,
+                nom_campus_inscription=formation.campus_inscription,
+                sigle_entite_gestion=formation.sigle_entite_gestion,
+                annee=proposition.formation_id.annee,
+            ),
             matricule_candidat=proposition.matricule_candidat,
             prenom_candidat=candidat.prenom,
             nom_candidat=candidat.nom,

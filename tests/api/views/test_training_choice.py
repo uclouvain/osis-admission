@@ -26,6 +26,7 @@
 import uuid
 from unittest.mock import patch
 
+import freezegun
 from django.db import connection
 from django.db.models import QuerySet
 from django.shortcuts import resolve_url
@@ -39,7 +40,7 @@ from admission.contrib.models import (
     AdmissionType,
     DoctorateAdmission,
 )
-from admission.contrib.models.doctorate import REFERENCE_SEQ_NAME
+from admission.contrib.models.base import REFERENCE_SEQ_NAME
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     DoctoratNonTrouveException,
     MaximumPropositionsAtteintException,
@@ -106,7 +107,10 @@ class DoctorateAdmissionTrainingChoiceInitializationApiTestCase(APITestCase):
             entity_type=EntityType.DOCTORAL_COMMISSION.name,
             acronym='CDA',
         ).entity
-        cls.doctorate = DoctorateFactory(management_entity=cls.commission)
+        cls.doctorate = DoctorateFactory(
+            management_entity=cls.commission,
+            enrollment_campus__name='Mons',
+        )
         cls.scholarship = ErasmusMundusScholarshipFactory()
 
         cls.create_data = {
@@ -121,6 +125,7 @@ class DoctorateAdmissionTrainingChoiceInitializationApiTestCase(APITestCase):
         cls.url = resolve_url("admission_api_v1:doctorate_training_choice")
         cls.list_url = resolve_url("admission_api_v1:propositions")
 
+    @freezegun.freeze_time('2023-01-01')
     def test_admission_doctorate_creation_using_api_candidate(self):
         self.client.force_authenticate(user=self.candidate.user)
         with connection.cursor() as cursor:
@@ -142,11 +147,9 @@ class DoctorateAdmissionTrainingChoiceInitializationApiTestCase(APITestCase):
         self.assertEqual(response.json()['doctorate_propositions'][0]["doctorat"]['sigle'], self.doctorate.acronym)
         self.assertEqual(
             admission.reference,
-            '{}-{}'.format(
-                self.doctorate.academic_year.year % 100,
-                300000 + seq_value + 1,
-            ),
+            seq_value + 1,
         )
+        self.assertEqual(response.json()['doctorate_propositions'][0]["reference"], f'M-CDA22-{str(admission)}')
 
     def test_admission_doctorate_creation_using_api_with_wrong_doctorate(self):
         self.client.force_authenticate(user=self.candidate.user)

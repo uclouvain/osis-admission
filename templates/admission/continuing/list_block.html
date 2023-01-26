@@ -70,7 +70,7 @@
   <tbody>
   {% for admission in object_list %}
   <tr>
-    <td><a href="{% url 'admission:continuing-education:debug' admission.uuid %}">{{ admission.uuid }}</a></td>
+    <td><a href="{% url 'admission:continuing-education:debug' admission.uuid %}">{{ admission|formatted_reference }}</a></td>
     <td>{{ admission.candidate }}</td>
     <td>{{ admission.training }}</td>
     <td>{{ admission.candidate.country_of_citizenship|default_if_none:'' }}</td>

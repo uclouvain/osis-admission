@@ -65,12 +65,12 @@ MAXIMUM_SELECTABLE_YEAR = 2031
 class BaseFilterForm(forms.Form):
     numero = forms.RegexField(
         label=_('Dossier numero'),
-        regex=re.compile(r'^\d{2}\-\d{6}$'),
+        regex=re.compile(r'^\d{3}\.\d{3}$'),
         required=False,
         widget=forms.TextInput(
             attrs={
-                'data-mask': '00-000000',
-                'placeholder': '00-000000',
+                'data-mask': '000.000',
+                'placeholder': '000.000',
             },
         ),
     )
@@ -297,6 +297,11 @@ class BaseFilterForm(forms.Form):
                     self.fields['matricule_promoteur'].widget.choices = (
                         (promoter, '{}, {}'.format(person['last_name'], person['first_name'])),
                     )
+
+    def clean_numero(self):
+        numero = self.cleaned_data.get('numero')
+        if numero != '':
+            return int(numero.replace('.', ''))
 
     class Media:
         js = [

@@ -30,6 +30,7 @@ from django.utils.translation import get_language
 
 from admission.contrib.models.doctorate import DoctorateAdmission, DoctorateProxy
 from admission.ddd.admission.domain.model.bourse import BourseIdentity
+from admission.ddd.admission.repository.i_proposition import formater_reference
 from admission.ddd.parcours_doctoral.domain.model._formation import FormationIdentity
 from admission.ddd.parcours_doctoral.domain.model.doctorat import Doctorat, DoctoratIdentity
 from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
@@ -94,7 +95,12 @@ class DoctoratRepository(IDoctoratRepository):
         return DoctoratDTO(
             uuid=str(entity_id.uuid),
             statut=ChoixStatutDoctorat[doctorate.post_enrolment_status].name,
-            reference=doctorate.reference,
+            reference=formater_reference(
+                reference=doctorate.reference,
+                nom_campus_inscription=doctorate.training.enrollment_campus.name,
+                sigle_entite_gestion=doctorate.sigle_entite_gestion,  # From annotation
+                annee=doctorate.training.academic_year.year,
+            ),
             matricule_doctorant=doctorate.candidate.global_id,
             nom_doctorant=doctorate.candidate.last_name,
             prenom_doctorant=doctorate.candidate.first_name,

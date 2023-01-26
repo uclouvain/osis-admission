@@ -37,6 +37,7 @@ from osis_common.ddd import interface
 class PropositionDTO(interface.DTO):
     uuid: str
     formation: FormationDTO
+    reference: str
     annee_calculee: Optional[int]
     pot_calcule: Optional[str]
     date_fin_pot: Optional[datetime.date]

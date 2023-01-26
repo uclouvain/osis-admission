@@ -29,6 +29,7 @@ from admission.contrib.models import ContinuingEducationAdmission
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
+from admission.tests.factories.utils import generate_proposition_reference
 from admission.tests.factories.accounting import AccountingFactory
 from admission.tests.factories.person import CompletePersonForIUFCFactory
 from admission.tests.factories.roles import CandidateFactory
@@ -59,7 +60,12 @@ class ContinuingEducationAdmissionFactory(factory.DjangoModelFactory):
         model = ContinuingEducationAdmission
 
     candidate = factory.SubFactory(PersonFactory)
-    training = factory.SubFactory(ContinuingEducationTrainingFactory, academic_year__current=True)
+    training = factory.SubFactory(
+        ContinuingEducationTrainingFactory,
+        academic_year__current=True,
+        enrollment_campus__name='Mons',
+    )
+    reference = factory.LazyAttribute(generate_proposition_reference)
 
     @factory.post_generation
     def create_candidate_role(self, create, extracted, **kwargs):

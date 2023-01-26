@@ -29,6 +29,7 @@ from admission.ddd.admission.formation_continue.domain.builder.proposition_ident
     PropositionIdentityBuilder,
 )
 from admission.ddd.admission.formation_continue.domain.model.proposition import Proposition
+from admission.ddd.admission.formation_continue.repository.i_proposition import IPropositionRepository
 from osis_common.ddd import interface
 
 
@@ -42,9 +43,15 @@ class PropositionBuilder(interface.RootEntityBuilder):
         raise NotImplementedError
 
     @classmethod
-    def initier_proposition(cls, cmd: 'InitierPropositionCommand', formation_id: 'FormationIdentity') -> 'Proposition':
+    def initier_proposition(
+        cls,
+        cmd: 'InitierPropositionCommand',
+        formation_id: 'FormationIdentity',
+        proposition_repository: 'IPropositionRepository',
+    ) -> 'Proposition':
         return Proposition(
             entity_id=PropositionIdentityBuilder.build(),
             matricule_candidat=cmd.matricule_candidat,
             formation_id=formation_id,
+            reference=proposition_repository.recuperer_reference_suivante(),
         )

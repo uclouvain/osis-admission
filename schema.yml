@@ -4978,6 +4978,8 @@ components:
                     type: string
                   type:
                     type: string
+                  campus_inscription:
+                    type: string
                 required:
                 - sigle
                 - annee
@@ -4985,6 +4987,7 @@ components:
                 - sigle_entite_gestion
                 - campus
                 - type
+                - campus_inscription
               matricule_candidat:
                 type: string
               prenom_candidat:
@@ -5091,6 +5094,10 @@ components:
                     type: string
                   code_domaine:
                     type: string
+                  campus_inscription:
+                    type: string
+                  sigle_entite_gestion:
+                    type: string
                 required:
                 - sigle
                 - annee
@@ -5098,6 +5105,10 @@ components:
                 - campus
                 - type
                 - code_domaine
+                - campus_inscription
+                - sigle_entite_gestion
+              reference:
+                type: string
               matricule_candidat:
                 type: string
               prenom_candidat:
@@ -5149,6 +5160,7 @@ components:
             required:
             - uuid
             - formation
+            - reference
             - matricule_candidat
             - prenom_candidat
             - nom_candidat
@@ -5160,6 +5172,8 @@ components:
             type: object
             properties:
               uuid:
+                type: string
+              reference:
                 type: string
               formation:
                 type: object
@@ -5176,6 +5190,10 @@ components:
                     type: string
                   code_domaine:
                     type: string
+                  campus_inscription:
+                    type: string
+                  sigle_entite_gestion:
+                    type: string
                 required:
                 - sigle
                 - annee
@@ -5183,6 +5201,8 @@ components:
                 - campus
                 - type
                 - code_domaine
+                - campus_inscription
+                - sigle_entite_gestion
               matricule_candidat:
                 type: string
               prenom_candidat:
@@ -5233,6 +5253,7 @@ components:
                 default: {}
             required:
             - uuid
+            - reference
             - formation
             - matricule_candidat
             - prenom_candidat
@@ -5267,6 +5288,8 @@ components:
               type: string
             type:
               type: string
+            campus_inscription:
+              type: string
           required:
           - sigle
           - annee
@@ -5274,6 +5297,7 @@ components:
           - sigle_entite_gestion
           - campus
           - type
+          - campus_inscription
         matricule_candidat:
           type: string
         prenom_candidat:
@@ -6168,6 +6192,8 @@ components:
               type: string
             type:
               type: string
+            campus_inscription:
+              type: string
           required:
           - sigle
           - annee
@@ -6175,6 +6201,7 @@ components:
           - sigle_entite_gestion
           - campus
           - type
+          - campus_inscription
         annee_calculee:
           type: integer
           nullable: true
@@ -8141,6 +8168,8 @@ components:
       properties:
         uuid:
           type: string
+        reference:
+          type: string
         formation:
           type: object
           properties:
@@ -8156,6 +8185,10 @@ components:
               type: string
             code_domaine:
               type: string
+            campus_inscription:
+              type: string
+            sigle_entite_gestion:
+              type: string
           required:
           - sigle
           - annee
@@ -8163,6 +8196,8 @@ components:
           - campus
           - type
           - code_domaine
+          - campus_inscription
+          - sigle_entite_gestion
         annee_calculee:
           type: integer
           nullable: true
@@ -8299,6 +8334,7 @@ components:
             type: string
       required:
       - uuid
+      - reference
       - formation
       - matricule_candidat
       - prenom_candidat
@@ -8563,6 +8599,8 @@ components:
       properties:
         uuid:
           type: string
+        reference:
+          type: string
         formation:
           type: object
           properties:
@@ -8578,6 +8616,10 @@ components:
               type: string
             code_domaine:
               type: string
+            campus_inscription:
+              type: string
+            sigle_entite_gestion:
+              type: string
           required:
           - sigle
           - annee
@@ -8585,6 +8627,8 @@ components:
           - campus
           - type
           - code_domaine
+          - campus_inscription
+          - sigle_entite_gestion
         annee_calculee:
           type: integer
           nullable: true
@@ -8695,6 +8739,7 @@ components:
           nullable: true
       required:
       - uuid
+      - reference
       - formation
       - matricule_candidat
       - prenom_candidat
@@ -8749,6 +8794,8 @@ components:
           type: string
         type:
           type: string
+        campus_inscription:
+          type: string
       required:
       - sigle
       - annee
@@ -8756,6 +8803,7 @@ components:
       - sigle_entite_gestion
       - campus
       - type
+      - campus_inscription
     FormationGeneraleDTO:
       type: object
       properties:
@@ -8771,6 +8819,10 @@ components:
           type: string
         code_domaine:
           type: string
+        campus_inscription:
+          type: string
+        sigle_entite_gestion:
+          type: string
       required:
       - sigle
       - annee
@@ -8778,6 +8830,8 @@ components:
       - campus
       - type
       - code_domaine
+      - campus_inscription
+      - sigle_entite_gestion
     FormationContinueDTO:
       type: object
       properties:
@@ -8793,6 +8847,10 @@ components:
           type: string
         code_domaine:
           type: string
+        campus_inscription:
+          type: string
+        sigle_entite_gestion:
+          type: string
       required:
       - sigle
       - annee
@@ -8800,6 +8858,8 @@ components:
       - campus
       - type
       - code_domaine
+      - campus_inscription
+      - sigle_entite_gestion
     Tutor:
       type: object
       properties:

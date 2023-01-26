@@ -23,6 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import freezegun
 from django.shortcuts import resolve_url
 from rest_framework import status
 
@@ -42,14 +43,21 @@ from rest_framework.test import APITestCase
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.roles import CandidateFactory
+from base.models.enums.entity_type import EntityType
+from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.person import PersonFactory
 from reference.tests.factories.country import CountryFactory
 
 
 class GeneralPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase):
     @classmethod
+    @freezegun.freeze_time('2023-01-01')
     def setUpTestData(cls):
-        cls.admission = GeneralEducationAdmissionFactory()
+        cls.commission = EntityVersionFactory(
+            entity_type=EntityType.FACULTY.name,
+            acronym='CMC',
+        )
+        cls.admission = GeneralEducationAdmissionFactory(training__management_entity=cls.commission.entity)
         cls.teaching_campus_name = (
             cls.admission.training.educationgroupversion_set.first().root_group.main_teaching_campus.name
         )
@@ -75,6 +83,8 @@ class GeneralPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase):
             'campus': self.teaching_campus_name,
             'type': self.admission.training.education_group_type.name,
             'code_domaine': self.admission.training.main_domain.code,
+            'campus_inscription': self.admission.training.enrollment_campus.name,
+            'sigle_entite_gestion': self.commission.acronym,
         }
         double_degree_scholarship_json = {
             'uuid': str(self.admission.double_degree_scholarship.uuid),
@@ -95,6 +105,7 @@ class GeneralPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase):
             'type': self.admission.erasmus_mundus_scholarship.type,
         }
         self.assertEqual(json_response['uuid'], str(self.admission.uuid))
+        self.assertEqual(json_response['reference'], f'M-CMC22-{str(self.admission)}')
         self.assertEqual(json_response['formation'], training_json)
         self.assertEqual(json_response['matricule_candidat'], self.admission.candidate.global_id)
         self.assertEqual(json_response['prenom_candidat'], self.admission.candidate.first_name)
@@ -166,8 +177,13 @@ class GeneralPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase):
 
 class ContinuingPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase):
     @classmethod
+    @freezegun.freeze_time('2023-01-01')
     def setUpTestData(cls):
-        cls.admission = ContinuingEducationAdmissionFactory()
+        cls.commission = EntityVersionFactory(
+            entity_type=EntityType.FACULTY.name,
+            acronym='CMC',
+        )
+        cls.admission = ContinuingEducationAdmissionFactory(training__management_entity=cls.commission.entity)
         cls.admission_with_billing_address = ContinuingEducationAdmissionFactory(
             registration_as=ChoixInscriptionATitre.PROFESSIONNEL.name,
             head_office_name='UCL',
@@ -183,6 +199,7 @@ class ContinuingPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase
             billing_address_city='Louvain-La-Neuve',
             billing_address_country=CountryFactory(iso_code=BE_ISO_CODE),
             billing_address_place='Avant',
+            training__management_entity=cls.commission.entity,
         )
         cls.teaching_campus_name = (
             cls.admission.training.educationgroupversion_set.first().root_group.main_teaching_campus.name
@@ -212,8 +229,11 @@ class ContinuingPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase
             'campus': self.teaching_campus_name,
             'type': self.admission.training.education_group_type.name,
             'code_domaine': self.admission.training.main_domain.code,
+            'campus_inscription': self.admission.training.enrollment_campus.name,
+            'sigle_entite_gestion': self.commission.acronym,
         }
         self.assertEqual(json_response['uuid'], str(self.admission.uuid))
+        self.assertEqual(json_response['reference'], f'M-CMC22-{str(self.admission)}')
         self.assertEqual(json_response['formation'], training_json)
         self.assertEqual(json_response['matricule_candidat'], self.admission.candidate.global_id)
         self.assertEqual(json_response['prenom_candidat'], self.admission.candidate.first_name)

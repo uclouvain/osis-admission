@@ -83,6 +83,9 @@ class BaseAdmissionAdmin(admin.ModelAdmin):
     form = AdmissionAdminForm
 
     readonly_fields = []
+    search_fields = [
+        'reference',
+    ]
     filter_horizontal = [
         "professional_valuated_experiences",
         "educational_valuated_experiences",
@@ -122,7 +125,7 @@ class DoctorateAdmissionAdmin(BaseAdmissionAdmin):
 
 class ContinuingEducationAdmissionAdmin(BaseAdmissionAdmin):
     autocomplete_fields = ['training']
-    list_display = ['candidate_fmt', 'training', 'status']
+    list_display = ['reference', 'candidate_fmt', 'training', 'status']
     list_filter = ['status']
     readonly_fields = [
         'detailed_status',

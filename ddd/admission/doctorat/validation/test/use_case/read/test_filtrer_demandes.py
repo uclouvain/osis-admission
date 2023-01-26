@@ -41,6 +41,7 @@ from admission.ddd.admission.doctorat.validation.test.factory.demande import (
     DemandeAdmissionSC3DPMinimaleFactory,
     DemandePreAdmissionSC3DPAvecPromoteursEtMembresCADejaApprouvesAccepteeFactory,
 )
+from admission.ddd.admission.test.factory.reference import REFERENCE_MEMORY_ITERATOR
 from admission.infrastructure.admission.doctorat.preparation.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
@@ -99,10 +100,12 @@ class TestFiltrerDemandes(TestCase):
             )
         )
         self.assertEqual(len(resultats), 1)
-        self.assertEqual(resultats[0].numero_demande, proposition_recherchee.reference)
+        self.assertEqual(
+            resultats[0].numero_demande,
+            'L-SST20-' + '{:07,}'.format(proposition_recherchee.reference).replace(',', '.'),
+        )
         self.assertEqual(resultats[0].statut_cdd, demande_recherchee.statut_cdd.name)
         self.assertEqual(resultats[0].uuid, proposition_recherchee.entity_id.uuid)
-        self.assertEqual(resultats[0].numero_demande, proposition_recherchee.reference)
         self.assertEqual(resultats[0].statut_cdd, demande_recherchee.statut_cdd.name)
         self.assertEqual(resultats[0].statut_sic, demande_recherchee.statut_sic.name)
         self.assertEqual(resultats[0].statut_demande, proposition_recherchee.statut.name)
@@ -122,7 +125,7 @@ class TestFiltrerDemandes(TestCase):
     def test_should_rechercher_sans_resultat(self):
         results: List[DemandeRechercheDTO] = self.message_bus.invoke(
             FiltrerDemandesQuery(
-                numero='numero_inconnu',
+                numero=next(REFERENCE_MEMORY_ITERATOR),
             )
         )
         self.assertEqual(len(results), 0)

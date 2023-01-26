@@ -44,7 +44,11 @@ def initier_proposition(
     maximum_propositions_service.verifier_nombre_propositions_en_cours(cmd.matricule_candidat)
 
     # WHEN
-    proposition = PropositionBuilder().initier_proposition(cmd, formation.entity_id)
+    proposition = PropositionBuilder().initier_proposition(
+        cmd=cmd,
+        formation_id=formation.entity_id,
+        proposition_repository=proposition_repository,
+    )
 
     # THEN
     proposition_repository.save(proposition)

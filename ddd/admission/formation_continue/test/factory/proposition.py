@@ -33,6 +33,7 @@ from admission.ddd.admission.test.factory.formation import FormationIdentityFact
 from admission.ddd.admission.enums import ChoixTypeCompteBancaire
 from admission.ddd.admission.formation_continue.domain.model._comptabilite import Comptabilite
 from admission.ddd.admission.formation_continue.domain.model.proposition import PropositionIdentity, Proposition
+from admission.ddd.admission.test.factory.reference import REFERENCE_MEMORY_ITERATOR
 
 
 class _ComptabiliteFactory(factory.Factory):
@@ -66,6 +67,7 @@ class PropositionFactory(factory.Factory):
         model = Proposition
         abstract = False
 
+    reference = factory.Iterator(REFERENCE_MEMORY_ITERATOR)
     entity_id = factory.SubFactory(_PropositionIdentityFactory)
     matricule_candidat = FuzzyText(length=10, chars=string.digits)
     formation_id = factory.SubFactory(FormationIdentityFactory)

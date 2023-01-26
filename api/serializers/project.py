@@ -202,6 +202,7 @@ class GeneralEducationPropositionSearchDTOSerializer(IncludedFieldsMixin, DTOSer
         fields = [
             'uuid',
             'formation',
+            'reference',
             'matricule_candidat',
             'prenom_candidat',
             'nom_candidat',
@@ -247,6 +248,7 @@ class ContinuingEducationPropositionSearchDTOSerializer(IncludedFieldsMixin, DTO
         source = FormationContinuePropositionDTO
         fields = [
             'uuid',
+            'reference',
             'formation',
             'matricule_candidat',
             'prenom_candidat',
@@ -414,6 +416,7 @@ class GeneralEducationPropositionDTOSerializer(IncludedFieldsMixin, DTOSerialize
 
         fields = [
             'uuid',
+            'reference',
             'formation',
             'annee_calculee',
             'pot_calcule',
@@ -475,6 +478,7 @@ class ContinuingEducationPropositionDTOSerializer(IncludedFieldsMixin, DTOSerial
         source = FormationContinuePropositionDTO
         fields = [
             'uuid',
+            'reference',
             'formation',
             'annee_calculee',
             'pot_calcule',

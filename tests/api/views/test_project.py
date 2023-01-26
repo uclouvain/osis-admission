@@ -82,6 +82,7 @@ from reference.tests.factories.country import CountryFactory
 
 class DoctorateAdmissionListApiTestCase(QueriesAssertionsMixin, CheckActionLinksMixin, APITestCase):
     @classmethod
+    @freezegun.freeze_time('2023-01-01')
     def setUpTestData(cls):
         # Create supervision group members
         cls.promoter = PromoterFactory()
@@ -107,14 +108,20 @@ class DoctorateAdmissionListApiTestCase(QueriesAssertionsMixin, CheckActionLinks
         cls.other_admission = DoctorateAdmissionFactory(
             status=ChoixStatutProposition.IN_PROGRESS.name,
         )
+        cls.other_commission = EntityVersionFactory(
+            entity_type=EntityType.FACULTY.name,
+            acronym='CMC',
+        )
         cls.general_education_admission = GeneralEducationAdmissionFactory(
             candidate=cls.admission.candidate,
+            training__management_entity=cls.other_commission.entity,
         )
         cls.general_campus_name = (
             cls.general_education_admission.training.educationgroupversion_set.first().root_group.main_teaching_campus.name
         )
         cls.continuing_education_admission = ContinuingEducationAdmissionFactory(
             candidate=cls.admission.candidate,
+            training__management_entity=cls.other_commission.entity,
         )
         cls.continuing_campus_name = (
             cls.continuing_education_admission.training.educationgroupversion_set.first().root_group.main_teaching_campus.name
@@ -173,6 +180,8 @@ class DoctorateAdmissionListApiTestCase(QueriesAssertionsMixin, CheckActionLinks
                 'campus': self.general_campus_name,
                 'type': self.general_education_admission.training.education_group_type.name,
                 'code_domaine': self.general_education_admission.training.main_domain.code,
+                'campus_inscription': self.general_education_admission.training.enrollment_campus.name,
+                'sigle_entite_gestion': self.other_commission.acronym,
             },
         )
 
@@ -226,6 +235,8 @@ class DoctorateAdmissionListApiTestCase(QueriesAssertionsMixin, CheckActionLinks
                 'campus': self.continuing_campus_name,
                 'type': self.continuing_education_admission.training.education_group_type.name,
                 'code_domaine': self.continuing_education_admission.training.main_domain.code,
+                'campus_inscription': self.continuing_education_admission.training.enrollment_campus.name,
+                'sigle_entite_gestion': self.other_commission.acronym,
             },
         )
 

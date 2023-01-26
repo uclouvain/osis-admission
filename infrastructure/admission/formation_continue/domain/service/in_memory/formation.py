@@ -42,6 +42,8 @@ class FormationContinueInMemoryTranslator(IFormationContinueTranslator):
             entity_id__annee=2022,
             type=TrainingType.UNIVERSITY_SECOND_CYCLE_CERTIFICATE,
             campus='Mons',
+            campus_inscription='Mons',
+            sigle_entite_gestion='FC1',
         ),
         FormationFactory(
             intitule='Formation USCC1',
@@ -49,6 +51,8 @@ class FormationContinueInMemoryTranslator(IFormationContinueTranslator):
             entity_id__annee=2020,
             type=TrainingType.UNIVERSITY_SECOND_CYCLE_CERTIFICATE,
             campus='Louvain-La-Neuve',
+            campus_inscription='Louvain-La-Neuve',
+            sigle_entite_gestion='FC1',
         ),
         FormationFactory(
             intitule='Formation USCC2',
@@ -56,6 +60,8 @@ class FormationContinueInMemoryTranslator(IFormationContinueTranslator):
             entity_id__annee=2022,
             type=TrainingType.UNIVERSITY_SECOND_CYCLE_CERTIFICATE,
             campus='Louvain-La-Neuve',
+            campus_inscription='Louvain-La-Neuve',
+            sigle_entite_gestion='FC1',
         ),
         FormationFactory(
             intitule='Formation USCC3',
@@ -63,6 +69,8 @@ class FormationContinueInMemoryTranslator(IFormationContinueTranslator):
             entity_id__annee=2022,
             type=TrainingType.UNIVERSITY_SECOND_CYCLE_CERTIFICATE,
             campus='Charleroi',
+            campus_inscription='Charleroi',
+            sigle_entite_gestion='FC1',
         ),
         FormationFactory(
             intitule='Formation USCC4',
@@ -70,6 +78,8 @@ class FormationContinueInMemoryTranslator(IFormationContinueTranslator):
             entity_id__annee=2022,
             type=TrainingType.UNIVERSITY_SECOND_CYCLE_CERTIFICATE,
             campus='Louvain-La-Neuve',
+            campus_inscription='Louvain-La-Neuve',
+            sigle_entite_gestion='FC1',
         ),
         FormationFactory(
             intitule='Formation USCC5',
@@ -77,6 +87,8 @@ class FormationContinueInMemoryTranslator(IFormationContinueTranslator):
             entity_id__annee=2022,
             type=TrainingType.UNIVERSITY_SECOND_CYCLE_CERTIFICATE,
             campus='Charleroi',
+            campus_inscription='Charleroi',
+            sigle_entite_gestion='FC1',
         ),
         FormationFactory(
             intitule='Master ESP3DP',
@@ -84,6 +96,8 @@ class FormationContinueInMemoryTranslator(IFormationContinueTranslator):
             entity_id__annee=2022,
             type=TrainingType.MASTER_M1,
             campus='Charleroi',
+            campus_inscription='Charleroi',
+            sigle_entite_gestion='FC2',
         ),
         FormationFactory(
             intitule='Formation USCC4',
@@ -91,6 +105,8 @@ class FormationContinueInMemoryTranslator(IFormationContinueTranslator):
             entity_id__annee=2020,
             type=TrainingType.UNIVERSITY_SECOND_CYCLE_CERTIFICATE,
             campus='Louvain-La-Neuve',
+            campus_inscription='Louvain-La-Neuve',
+            sigle_entite_gestion='FC1',
         ),
     ]
 
@@ -103,6 +119,8 @@ class FormationContinueInMemoryTranslator(IFormationContinueTranslator):
             campus=entity.campus,
             type=entity.type,
             code_domaine=entity.code_domaine,
+            sigle_entite_gestion=entity.sigle_entite_gestion,
+            campus_inscription=entity.campus_inscription,
         )
 
     @classmethod

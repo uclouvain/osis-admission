@@ -57,6 +57,7 @@ class Proposition(interface.RootEntity):
     entity_id: 'PropositionIdentity'
     formation_id: 'FormationIdentity'
     matricule_candidat: str
+    reference: int
     annee_calculee: Optional[int] = None
     pot_calcule: Optional[AcademicCalendarTypes] = None
     statut: ChoixStatutProposition = ChoixStatutProposition.IN_PROGRESS

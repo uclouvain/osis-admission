@@ -38,10 +38,12 @@ from admission.ddd.admission.formation_continue.test.factory.proposition import 
     PropositionFactory,
     _PropositionIdentityFactory,
 )
+from admission.ddd.admission.repository.i_proposition import formater_reference
 from admission.ddd.admission.test.factory.formation import FormationIdentityFactory
 from admission.infrastructure.admission.formation_continue.domain.service.in_memory.formation import (
     FormationContinueInMemoryTranslator,
 )
+from admission.infrastructure.admission.repository.in_memory.proposition import GlobalPropositionInMemoryRepository
 from base.ddd.utils.in_memory_repository import InMemoryGenericRepository
 
 
@@ -52,7 +54,11 @@ class _Candidat:
     nationalite: str
 
 
-class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepository):
+class PropositionInMemoryRepository(
+    GlobalPropositionInMemoryRepository,
+    InMemoryGenericRepository,
+    IPropositionRepository,
+):
     candidats = {
         "0123456789": _Candidat("Jean", "Dupont", "France"),
         "0000000001": _Candidat("Michel", "Durand", "Belgique"),
@@ -133,8 +139,24 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
             proposition.formation_id.annee,
         )
 
+        formation_dto = FormationDTO(
+            sigle=proposition.formation_id.sigle,
+            annee=proposition.formation_id.annee,
+            intitule=formation.intitule,
+            campus=formation.campus,
+            type=formation.type,
+            code_domaine=formation.code_domaine,
+            sigle_entite_gestion=formation.sigle_entite_gestion,
+            campus_inscription=formation.campus_inscription,
+        )
         return PropositionDTO(
             uuid=proposition.entity_id.uuid,
+            reference=formater_reference(
+                reference=proposition.reference,
+                nom_campus_inscription=formation.campus_inscription,
+                sigle_entite_gestion=formation.sigle_entite_gestion,
+                annee=proposition.formation_id.annee,
+            ),
             matricule_candidat=proposition.matricule_candidat,
             prenom_candidat=candidat.prenom,
             nom_candidat=candidat.nom,
@@ -142,14 +164,7 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
             creee_le=proposition.creee_le,
             modifiee_le=proposition.modifiee_le,
             erreurs=[],
-            formation=FormationDTO(
-                sigle=proposition.formation_id.sigle,
-                annee=proposition.formation_id.annee,
-                intitule=formation.intitule,
-                campus=formation.campus,
-                type=formation.type,
-                code_domaine=formation.code_domaine,
-            ),
+            formation=formation_dto,
             annee_calculee=proposition.annee_calculee,
             pot_calcule=proposition.pot_calcule and proposition.pot_calcule.name or '',
             date_fin_pot=None,

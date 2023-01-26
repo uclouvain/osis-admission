@@ -1,4 +1,4 @@
-##############################################################################
+# ##############################################################################
 #
 #    OSIS stands for Open Student Information System. It's an application
 #    designed to manage the core business of higher education institutions,
@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -22,19 +22,14 @@
 #    at the root of the source code of this program.  If not,
 #    see http://www.gnu.org/licenses/.
 #
-##############################################################################
-import attr
+# ##############################################################################
+from abc import ABCMeta
 
-from osis_common.ddd import interface
+from admission.ddd.admission.repository.i_proposition import IGlobalPropositionRepository
+from admission.ddd.admission.test.factory.reference import REFERENCE_MEMORY_ITERATOR
 
 
-@attr.dataclass(frozen=True, slots=True)
-class FormationDTO(interface.DTO):
-    sigle: str
-    annee: int
-    intitule: str
-    campus: str
-    type: str
-    code_domaine: str
-    campus_inscription: str
-    sigle_entite_gestion: str
+class GlobalPropositionInMemoryRepository(IGlobalPropositionRepository, metaclass=ABCMeta):
+    @classmethod
+    def recuperer_reference_suivante(cls) -> int:
+        return next(REFERENCE_MEMORY_ITERATOR)

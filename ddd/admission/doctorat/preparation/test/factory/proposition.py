@@ -62,6 +62,7 @@ from admission.ddd.admission.enums import (
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition, PropositionIdentity
 from admission.ddd.admission.test.factory.formation import FormationIdentityFactory
+from admission.ddd.admission.test.factory.reference import REFERENCE_MEMORY_ITERATOR
 
 
 class _PropositionIdentityFactory(factory.Factory):
@@ -162,8 +163,8 @@ class _PropositionFactory(factory.Factory):
         model = Proposition
         abstract = False
 
+    reference = factory.Iterator(REFERENCE_MEMORY_ITERATOR)
     entity_id = factory.SubFactory(_PropositionIdentityFactory)
-    reference = factory.Faker('pystr_format', string_format='2#-300###')
     matricule_candidat = factory.fuzzy.FuzzyText(length=10, chars=string.digits)
     formation_id = factory.SubFactory(FormationIdentityFactory)
     statut = ChoixStatutProposition.IN_PROGRESS
