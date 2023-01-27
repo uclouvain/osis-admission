@@ -210,7 +210,14 @@ proposition={('Proposition(' + pformat(attr.asdict(proposition)) + ')') if propo
         if (
             program == TrainingType.BACHELOR
             and not est_formation_contingentee_et_non_resident(formation_id.sigle, proposition)
-            and (proposition and proposition.est_reorientation_inscription_externe is None)
+            and (
+                proposition
+                and (
+                    proposition.est_reorientation_inscription_externe is None
+                    or proposition.est_reorientation_inscription_externe
+                    and not proposition.attestation_inscription_reguliere
+                )
+            )
             and AdmissionPoolExternalReorientationCalendar.event_reference in [pool for (pool, annee) in pool_ouverts]
         ):
             raise ReorientationInscriptionExterneNonConfirmeeException()
@@ -227,7 +234,14 @@ proposition={('Proposition(' + pformat(attr.asdict(proposition)) + ')') if propo
         if (
             program == TrainingType.BACHELOR
             and not est_formation_contingentee_et_non_resident(formation_id.sigle, proposition)
-            and (proposition and proposition.est_modification_inscription_externe is None)
+            and (
+                proposition
+                and (
+                    proposition.est_modification_inscription_externe is None
+                    or proposition.est_modification_inscription_externe
+                    and not proposition.formulaire_modification_inscription
+                )
+            )
             and AdmissionPoolExternalEnrollmentChangeCalendar.event_reference
             in [pool for (pool, annee) in pool_ouverts]
         ):
