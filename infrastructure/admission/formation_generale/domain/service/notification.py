@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -41,13 +41,13 @@ class Notification(INotification):
     def get_common_tokens(cls, proposition: Proposition, candidat):
         """Return common tokens about a submission"""
         frontend_link = settings.ADMISSION_FRONTEND_LINK.format(
-            context='continuing-education',
+            context='general-education',
             uuid=proposition.entity_id.uuid,
         )
         formation_id = proposition.formation_id
         backend_link = "{}{}".format(
             settings.ADMISSION_BACKEND_LINK_PREFIX.rstrip('/'),
-            resolve_url('admission:continuing-education', uuid=proposition.entity_id.uuid),
+            resolve_url('admission:general-education', uuid=proposition.entity_id.uuid),
         )
         return {
             "candidate_first_name": candidat.first_name,

@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@ from django.utils import translation
 
 from admission.ddd.admission.formation_continue.domain.model.proposition import Proposition
 from admission.ddd.admission.formation_continue.domain.service.i_notification import INotification
-from admission.infrastructure.admission.formation_generale.domain.service.formation import FormationGeneraleTranslator
+from admission.infrastructure.admission.formation_continue.domain.service.formation import FormationContinueTranslator
 from admission.mail_templates.submission import ADMISSION_EMAIL_CONFIRM_SUBMISSION_CONTINUING
 from base.models.person import Person
 from osis_mail_template import generate_email
@@ -52,7 +52,7 @@ class Notification(INotification):
         return {
             "candidate_first_name": candidat.first_name,
             "candidate_last_name": candidat.last_name,
-            "training_title": FormationGeneraleTranslator().get_dto(formation_id.sigle, formation_id.annee).intitule,
+            "training_title": FormationContinueTranslator().get_dto(formation_id.sigle, formation_id.annee).intitule,
             "admission_link_front": frontend_link,
             "admission_link_back": backend_link,
         }
