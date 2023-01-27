@@ -111,14 +111,15 @@ class Proposition(interface.RootEntity):
 
     def soumettre(
         self,
-        annee: int,
+        formation_id: FormationIdentity,
         pool: 'AcademicCalendarTypes',
         elements_confirmation: Dict[str, str],
         type_demande: TypeDemande,
     ):
         self.statut = ChoixStatutProposition.SUBMITTED
         self.type_demande = type_demande
-        self.annee_calculee = annee
+        self.annee_calculee = formation_id.annee
+        self.formation_id = formation_id
         self.pot_calcule = pool
         self.elements_confirmation = elements_confirmation
         if pool != AcademicCalendarTypes.ADMISSION_POOL_HUE_UCL_PATHWAY_CHANGE:

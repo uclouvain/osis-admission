@@ -29,6 +29,7 @@ from typing import Optional, Dict, List
 import attr
 
 from admission.ddd.admission.domain.model.formation import FormationIdentity
+from admission.ddd.admission.dtos.formation import FormationDTO
 from admission.ddd.admission.enums import ChoixTypeCompteBancaire
 from admission.ddd.admission.formation_continue.domain.model._adresse import Adresse
 from admission.ddd.admission.formation_continue.domain.model._comptabilite import comptabilite_non_remplie, Comptabilite
@@ -82,9 +83,15 @@ class Proposition(interface.RootEntity):
     def supprimer(self):
         self.statut = ChoixStatutProposition.CANCELLED
 
-    def soumettre(self, annee: int, pool: 'AcademicCalendarTypes', elements_confirmation: Dict[str, str]):
+    def soumettre(
+        self,
+        formation_id: FormationIdentity,
+        pool: 'AcademicCalendarTypes',
+        elements_confirmation: Dict[str, str],
+    ):
         self.statut = ChoixStatutProposition.SUBMITTED
-        self.annee_calculee = annee
+        self.annee_calculee = formation_id.annee
+        self.formation_id = formation_id
         self.pot_calcule = pool
         self.elements_confirmation = elements_confirmation
 

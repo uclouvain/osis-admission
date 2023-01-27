@@ -26,6 +26,7 @@
 import datetime
 
 from admission.calendar.admission_calendar import DIPLOMES_ACCES_BELGE
+from admission.ddd.admission.domain.builder.formation_identity import FormationIdentityBuilder
 from admission.ddd.admission.domain.service.i_calendrier_inscription import ICalendrierInscription
 from admission.ddd.admission.domain.service.i_elements_confirmation import IElementsConfirmation
 from admission.ddd.admission.domain.service.i_maximum_propositions import IMaximumPropositionsAutorisees
@@ -78,6 +79,7 @@ def soumettre_proposition(
         onglets=Onglets.get_names(),
     )
     formation = formation_translator.get(proposition.formation_id)
+    formation_id = FormationIdentityBuilder.build(sigle=proposition.formation_id.sigle, annee=cmd.annee)
     titres = titres_acces.recuperer_titres_access(
         proposition.matricule_candidat,
         formation.type,
@@ -108,12 +110,13 @@ def soumettre_proposition(
     element_confirmation.valider(
         soumis=cmd.elements_confirmation,
         proposition=proposition,
+        annee_soumise=cmd.annee,
         formation_translator=formation_translator,
         profil_candidat_translator=profil_candidat_translator,
     )
 
     # THEN
-    proposition.soumettre(cmd.annee, AcademicCalendarTypes[cmd.pool], cmd.elements_confirmation, type_demande)
+    proposition.soumettre(formation_id, AcademicCalendarTypes[cmd.pool], cmd.elements_confirmation, type_demande)
     proposition_repository.save(proposition)
     notification.confirmer_soumission(proposition)
 
