@@ -411,12 +411,6 @@ class HijackRoleModelAdmin(HijackUserAdminMixin, RoleModelAdmin):
         return obj.person.user
 
 
-class ExternalCommitteeMemberAdmin(RoleModelAdmin):
-    list_display = ('person', 'is_external', 'title', 'institute', 'city', 'country')
-    list_filter = ['is_external']
-    list_select_related = ['person', 'country']
-
-
 class CDDRoleModelAdmin(HijackRoleModelAdmin):
     list_display = ('person', 'most_recent_acronym')
     search_fields = [
@@ -453,8 +447,8 @@ class CandidateAdmin(RoleModelAdmin):
         return obj.person.global_id
 
 
-admin.site.register(Promoter, ExternalCommitteeMemberAdmin)
-admin.site.register(CommitteeMember, ExternalCommitteeMemberAdmin)
+admin.site.register(Promoter, RoleModelAdmin)
+admin.site.register(CommitteeMember, RoleModelAdmin)
 admin.site.register(SicManager, HijackRoleModelAdmin)
 admin.site.register(SicDirector, HijackRoleModelAdmin)
 admin.site.register(AdreSecretary, HijackRoleModelAdmin)

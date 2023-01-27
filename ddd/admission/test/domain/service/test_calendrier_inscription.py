@@ -358,6 +358,7 @@ class CalendrierInscriptionTestCase(TestCase):
                 profil_candidat_translator=self.profil_candidat_translator,
             )
 
+    @freezegun.freeze_time('22/09/2022')
     def test_formation_non_dispensee_annee_suivante(self):
         proposition = PropositionFactory()
         profil = ProfilCandidatFactory(matricule=proposition.matricule_candidat)

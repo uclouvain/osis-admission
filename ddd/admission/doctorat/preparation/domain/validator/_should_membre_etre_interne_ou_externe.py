@@ -23,34 +23,35 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
-from typing import List, Optional, Union
+from typing import Optional
 
 import attr
 
-from admission.ddd.admission.doctorat.preparation.domain.model._institut import InstitutIdentity
-from admission.ddd.admission.doctorat.preparation.domain.model._membre_CA import MembreCAIdentity
-from admission.ddd.admission.doctorat.preparation.domain.model._promoteur import PromoteurIdentity
-from admission.ddd.admission.doctorat.preparation.domain.model._signature_promoteur import (
-    SignaturePromoteur,
+from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
+    MembreSoitInterneSoitExterneException,
 )
-from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import InstitutTheseObligatoireException
 from base.ddd.utils.business_validator import BusinessValidator
 
 
 @attr.dataclass(frozen=True, slots=True)
-class ShouldPromoteurReferenceRenseignerInstitutThese(BusinessValidator):
-    signatures_promoteurs: List[SignaturePromoteur]
-    signataire: Union['PromoteurIdentity', 'MembreCAIdentity']
-    promoteur_reference: Optional['PromoteurIdentity']
-    proposition_institut_these: Optional[InstitutIdentity]
-    institut_these: Optional[str]
+class ShouldMembreEtreInterneOuExterne(BusinessValidator):
+    matricule: Optional[str]
+    prenom: Optional[str]
+    nom: Optional[str]
+    email: Optional[str]
+    institution: Optional[str]
+    ville: Optional[str]
+    pays: Optional[str]
+    langue: Optional[str]
 
     def validate(self, *args, **kwargs):
+        champs_externes = ['prenom', 'nom', 'email', 'institution', 'ville', 'pays', 'langue']
         if (
-            isinstance(self.signataire, PromoteurIdentity)
-            and self.signataire == self.promoteur_reference
-            and not self.proposition_institut_these
-            and not self.institut_these
+            # Can't be internal and have external data
+            self.matricule
+            and any(getattr(self, champ) for champ in champs_externes)
+            # Can't be a partially defined external
+            or not self.matricule
+            and not all(getattr(self, champ) for champ in champs_externes)
         ):
-            raise InstitutTheseObligatoireException()
+            raise MembreSoitInterneSoitExterneException

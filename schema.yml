@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Admission API
-  version: 1.0.64
+  version: 1.0.65
   description: This API delivers data for the Admission project.
   contact:
     name: UCLouvain - OSIS
@@ -1533,7 +1533,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/SupervisionActor'
+              $ref: '#/components/schemas/SupervisionActorReference'
       responses:
         201:
           content:
@@ -1568,7 +1568,114 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/SupervisionActor'
+              $ref: '#/components/schemas/IdentifierSupervisionActor'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PropositionIdentityDTO'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
+  /propositions/doctorate/{uuid}/supervision/external/{token}:
+    get:
+      operationId: get_external_proposition
+      description: Returns necessary info about proposition while checking token.
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - name: token
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExternalSupervisionDTO'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
+    post:
+      operationId: approve_external_proposition
+      description: Approve the proposition.
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - name: token
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApprouverPropositionCommand'
+      responses:
+        201:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PropositionIdentityDTO'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
+    put:
+      operationId: reject_external_proposition
+      description: Reject the proposition.
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - name: token
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefuserPropositionCommand'
       responses:
         200:
           content:
@@ -6757,6 +6864,8 @@ components:
               promoteur:
                 type: object
                 properties:
+                  uuid:
+                    type: string
                   matricule:
                     type: string
                   nom:
@@ -6765,23 +6874,26 @@ components:
                     type: string
                   email:
                     type: string
-                  titre:
-                    type: string
+                  est_docteur:
+                    type: boolean
                   institution:
                     type: string
                   ville:
                     type: string
                   pays:
                     type: string
+                  est_externe:
+                    type: boolean
                 required:
-                - matricule
+                - uuid
                 - nom
                 - prenom
                 - email
-                - titre
+                - est_docteur
                 - institution
                 - ville
                 - pays
+                - est_externe
               statut:
                 type: string
               date:
@@ -6810,6 +6922,8 @@ components:
               membre_CA:
                 type: object
                 properties:
+                  uuid:
+                    type: string
                   matricule:
                     type: string
                   nom:
@@ -6818,23 +6932,26 @@ components:
                     type: string
                   email:
                     type: string
-                  titre:
-                    type: string
+                  est_docteur:
+                    type: boolean
                   institution:
                     type: string
                   ville:
                     type: string
                   pays:
                     type: string
+                  est_externe:
+                    type: boolean
                 required:
-                - matricule
+                - uuid
                 - nom
                 - prenom
                 - email
-                - titre
+                - est_docteur
                 - institution
                 - ville
                 - pays
+                - est_externe
               statut:
                 type: string
               date:
@@ -6860,6 +6977,200 @@ components:
       required:
       - signatures_promoteurs
       - signatures_membres_CA
+    ExternalSupervisionDTO:
+      type: object
+      properties:
+        proposition:
+          type: object
+          properties:
+            uuid:
+              type: string
+            type_admission:
+              type: string
+            reference:
+              type: string
+            doctorat:
+              type: object
+              properties:
+                sigle:
+                  type: string
+                annee:
+                  type: integer
+                intitule:
+                  type: string
+                sigle_entite_gestion:
+                  type: string
+                campus:
+                  type: string
+                type:
+                  type: string
+                campus_inscription:
+                  type: string
+              required:
+              - sigle
+              - annee
+              - intitule
+              - sigle_entite_gestion
+              - campus
+              - type
+              - campus_inscription
+            matricule_candidat:
+              type: string
+            code_secteur_formation:
+              type: string
+            commission_proximite:
+              type: string
+            institut_these:
+              type: string
+              format: uuid
+              nullable: true
+            institution:
+              type: string
+            domaine_these:
+              type: string
+            fiche_archive_signatures_envoyees:
+              type: array
+              items:
+                type: string
+            statut:
+              type: string
+          required:
+          - uuid
+          - type_admission
+          - reference
+          - doctorat
+          - matricule_candidat
+          - code_secteur_formation
+          - domaine_these
+          - fiche_archive_signatures_envoyees
+          - statut
+        supervision:
+          type: object
+          properties:
+            signatures_promoteurs:
+              type: array
+              items:
+                type: object
+                properties:
+                  promoteur:
+                    type: object
+                    properties:
+                      uuid:
+                        type: string
+                      matricule:
+                        type: string
+                      nom:
+                        type: string
+                      prenom:
+                        type: string
+                      email:
+                        type: string
+                      est_docteur:
+                        type: boolean
+                      institution:
+                        type: string
+                      ville:
+                        type: string
+                      pays:
+                        type: string
+                      est_externe:
+                        type: boolean
+                    required:
+                    - uuid
+                    - nom
+                    - prenom
+                    - email
+                    - est_docteur
+                    - institution
+                    - ville
+                    - pays
+                    - est_externe
+                  statut:
+                    type: string
+                  date:
+                    type: string
+                    format: date-time
+                    nullable: true
+                  commentaire_externe:
+                    type: string
+                  commentaire_interne:
+                    type: string
+                  motif_refus:
+                    type: string
+                  pdf:
+                    type: array
+                    items:
+                      type: string
+                required:
+                - promoteur
+                - statut
+                - pdf
+            signatures_membres_CA:
+              type: array
+              items:
+                type: object
+                properties:
+                  membre_CA:
+                    type: object
+                    properties:
+                      uuid:
+                        type: string
+                      matricule:
+                        type: string
+                      nom:
+                        type: string
+                      prenom:
+                        type: string
+                      email:
+                        type: string
+                      est_docteur:
+                        type: boolean
+                      institution:
+                        type: string
+                      ville:
+                        type: string
+                      pays:
+                        type: string
+                      est_externe:
+                        type: boolean
+                    required:
+                    - uuid
+                    - nom
+                    - prenom
+                    - email
+                    - est_docteur
+                    - institution
+                    - ville
+                    - pays
+                    - est_externe
+                  statut:
+                    type: string
+                  date:
+                    type: string
+                    format: date-time
+                    nullable: true
+                  commentaire_externe:
+                    type: string
+                  commentaire_interne:
+                    type: string
+                  motif_refus:
+                    type: string
+                  pdf:
+                    type: array
+                    items:
+                      type: string
+                required:
+                - membre_CA
+                - statut
+                - pdf
+            promoteur_reference:
+              type: string
+          required:
+          - signatures_promoteurs
+          - signatures_membres_CA
+      required:
+      - proposition
+      - supervision
     ConfirmationPaperDTO:
       type: object
       properties:
@@ -8996,16 +9307,16 @@ components:
       - annee
       - pool
       - elements_confirmation
-    SupervisionActor:
+    SupervisionActorReference:
       type: object
       properties:
         type:
           $ref: '#/components/schemas/ActorType'
-        member:
+        uuid_membre:
           type: string
       required:
       - type
-      - member
+      - uuid_membre
     ActorType:
       enum:
       - PROMOTER
@@ -9014,7 +9325,7 @@ components:
     ApprouverPropositionCommand:
       type: object
       properties:
-        matricule:
+        uuid_membre:
           type: string
         institut_these:
           type: string
@@ -9024,18 +9335,18 @@ components:
         commentaire_externe:
           type: string
       required:
-      - matricule
+      - uuid_membre
     ApprouverPropositionParPdfCommand:
       type: object
       properties:
-        matricule:
+        uuid_membre:
           type: string
         pdf:
           type: array
           items:
             type: string
       required:
-      - matricule
+      - uuid_membre
       - pdf
     DoctorateIdentityDTO:
       type: object
@@ -9483,20 +9794,46 @@ components:
       required:
       - uuid_proposition
       - type_admission
+    IdentifierSupervisionActor:
+      type: object
+      properties:
+        matricule:
+          type: string
+        prenom:
+          type: string
+        nom:
+          type: string
+        email:
+          type: string
+        est_docteur:
+          type: boolean
+          nullable: true
+        institution:
+          type: string
+        ville:
+          type: string
+        pays:
+          type: string
+        langue:
+          type: string
+        type:
+          $ref: '#/components/schemas/ActorType'
+      required:
+      - type
     DesignerPromoteurReferenceCommand:
       type: object
       properties:
         uuid_proposition:
           type: string
-        matricule:
+        uuid_promoteur:
           type: string
       required:
       - uuid_proposition
-      - matricule
+      - uuid_promoteur
     RefuserPropositionCommand:
       type: object
       properties:
-        matricule:
+        uuid_membre:
           type: string
         motif_refus:
           type: string
@@ -9505,7 +9842,7 @@ components:
         commentaire_externe:
           type: string
       required:
-      - matricule
+      - uuid_membre
       - motif_refus
     SubmitConfirmationPaperCommand:
       type: object

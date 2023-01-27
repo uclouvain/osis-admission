@@ -1,26 +1,26 @@
 # ##############################################################################
 #
-#    OSIS stands for Open Student Information System. It's an application
-#    designed to manage the core business of higher education institutions,
-#    such as universities, faculties, institutes and professional schools.
-#    The core business involves the administration of students, teachers,
-#    courses, programs and so on.
+#  OSIS stands for Open Student Information System. It's an application
+#  designed to manage the core business of higher education institutions,
+#  such as universities, faculties, institutes and professional schools.
+#  The core business involves the administration of students, teachers,
+#  courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
 #
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
 #
-#    A copy of this license - GNU General Public License - is available
-#    at the root of the source code of this program.  If not,
-#    see http://www.gnu.org/licenses/.
+#  A copy of this license - GNU General Public License - is available
+#  at the root of the source code of this program.  If not,
+#  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
 from django.db.models import Exists, F, OuterRef, Q, TextField
@@ -31,6 +31,7 @@ from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
 
 from admission.api import serializers
+from admission.api.schema import AuthorizationAwareSchema
 from admission.api.serializers import PersonSerializer
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
@@ -67,6 +68,7 @@ class AutocompleteSectorView(ListAPIView):
     """Autocomplete sectors"""
 
     name = "autocomplete-sector"
+    schema = AuthorizationAwareSchema()
     pagination_class = None
     filter_backends = []
     serializer_class = serializers.SectorDTOSerializer
@@ -151,6 +153,7 @@ class AutocompleteDoctoratView(ListAPIView):
     """Autocomplete doctorates given a sector"""
 
     name = "autocomplete-doctorate"
+    schema = AuthorizationAwareSchema()
     pagination_class = None
     filter_backends = [DoctorateEducationSearchingBackend]
     serializer_class = serializers.DoctoratDTOSerializer
@@ -187,6 +190,7 @@ class AutocompleteGeneralEducationView(ListAPIView):
     """Autocomplete to find a general education"""
 
     name = "autocomplete-general-education"
+    schema = AuthorizationAwareSchema()
     serializer_class = serializers.FormationGeneraleDTOSerializer
     filter_backends = [GeneralEducationSearchingBackend]
     pagination_class = None
@@ -207,6 +211,7 @@ class AutocompleteContinuingEducationView(ListAPIView):
     """Autocomplete to find a continuing education"""
 
     name = "autocomplete-continuing-education"
+    schema = AuthorizationAwareSchema()
     serializer_class = serializers.FormationContinueDTOSerializer
     filter_backends = [ContinuingEducationSearchingBackend]
     pagination_class = None
@@ -276,7 +281,7 @@ class AutocompleteScholarshipView(ListAPIView):
     """Autocomplete scholarships"""
 
     name = 'autocomplete-scholarships'
-
+    schema = AuthorizationAwareSchema()
     filter_backends = [ScholarshipSearchBackend]
     serializer_class = serializers.ScholarshipSerializer
     queryset = Scholarship.objects.exclude(disabled=True)
@@ -308,6 +313,7 @@ class AutocompleteTutorView(ListAPIView):
     """Autocomplete tutors"""
 
     name = "autocomplete-tutor"
+    schema = AuthorizationAwareSchema()
     filter_backends = [PersonSearchingBackend]
     serializer_class = serializers.TutorSerializer
     queryset = (
@@ -326,6 +332,7 @@ class AutocompletePersonView(ListAPIView):
     """Autocomplete person"""
 
     name = "autocomplete-person"
+    schema = AuthorizationAwareSchema()
     filter_backends = [PersonSearchingBackend]
     serializer_class = PersonSerializer
     queryset = (

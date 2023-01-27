@@ -282,7 +282,7 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
 
     def test_should_retourner_erreur_si_tous_promoteurs_n_ont_pas_approuve(self):
         self.groupe_supervision.signatures_promoteurs.append(
-            _SignaturePromoteurFactory(promoteur_id__matricule='promoteur-SC3DP', etat=ChoixEtatSignature.DECLINED),
+            _SignaturePromoteurFactory(promoteur_id__uuid='promoteur-SC3DP', etat=ChoixEtatSignature.DECLINED),
         )
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.cmd)
@@ -292,7 +292,7 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
 
     def test_should_retourner_erreur_si_tous_membres_ca_n_ont_pas_approuve(self):
         self.groupe_supervision.signatures_membres_CA.append(
-            _SignatureMembreCAFactory(membre_CA_id__matricule='membre-ca-SC3DP', etat=ChoixEtatSignature.INVITED),
+            _SignatureMembreCAFactory(membre_CA_id__uuid='membre-ca-SC3DP', etat=ChoixEtatSignature.INVITED),
         )
 
         with self.assertRaises(MultipleBusinessExceptions) as context:

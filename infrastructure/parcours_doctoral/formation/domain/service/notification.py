@@ -1,26 +1,26 @@
 # ##############################################################################
 #
-#    OSIS stands for Open Student Information System. It's an application
-#    designed to manage the core business of higher education institutions,
-#    such as universities, faculties, institutes and professional schools.
-#    The core business involves the administration of students, teachers,
-#    courses, programs and so on.
+#  OSIS stands for Open Student Information System. It's an application
+#  designed to manage the core business of higher education institutions,
+#  such as universities, faculties, institutes and professional schools.
+#  The core business involves the administration of students, teachers,
+#  courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
 #
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
 #
-#    A copy of this license - GNU General Public License - is available
-#    at the root of the source code of this program.  If not,
-#    see http://www.gnu.org/licenses/.
+#  A copy of this license - GNU General Public License - is available
+#  at the root of the source code of this program.  If not,
+#  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
 from typing import List, Union
@@ -59,6 +59,7 @@ from base.models.person import Person
 from osis_mail_template import generate_email
 from osis_notification.contrib.handlers import EmailNotificationHandler, WebNotificationHandler
 from osis_notification.contrib.notification import WebNotification
+from osis_signature.models import Actor
 
 
 class Notification(INotification):
@@ -142,15 +143,15 @@ class Notification(INotification):
     ) -> None:
         doctorate: DoctorateProxy = DoctorateProxy.objects.get(uuid=doctorat.entity_id.uuid)
         common_tokens = cls.get_common_tokens(doctorate)
-        promoteur = Person.objects.get(global_id=promoteur_de_reference_id.matricule)
+        promoteur = Actor.objects.get(uuid=promoteur_de_reference_id.uuid)
 
         email_message = generate_email(
             cls._get_mail_template_ids(activites[0])['submitted'],
             promoteur.language,
             common_tokens,
-            recipients=[promoteur],
+            recipients=[promoteur.email],
         )
-        EmailNotificationHandler.create(email_message, person=promoteur)
+        EmailNotificationHandler.create(email_message, person=promoteur.person_id and promoteur.person)
 
     @classmethod
     def notifier_validation_au_candidat(cls, doctorat: Doctorat, activites: List[Activite]) -> None:

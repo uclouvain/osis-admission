@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -90,13 +90,29 @@ class RechercherDoctoratQuery(interface.QueryRequest):
 @attr.dataclass(frozen=True, slots=True)
 class IdentifierPromoteurCommand(interface.CommandRequest):
     uuid_proposition: str
-    matricule: str
+    matricule: Optional[str]
+    prenom: Optional[str]
+    nom: Optional[str]
+    email: Optional[str]
+    est_docteur: Optional[bool]
+    institution: Optional[str]
+    ville: Optional[str]
+    pays: Optional[str]
+    langue: Optional[str]
 
 
 @attr.dataclass(frozen=True, slots=True)
 class IdentifierMembreCACommand(interface.CommandRequest):
     uuid_proposition: str
-    matricule: str
+    matricule: Optional[str]
+    prenom: Optional[str]
+    nom: Optional[str]
+    email: Optional[str]
+    est_docteur: Optional[bool]
+    institution: Optional[str]
+    ville: Optional[str]
+    pays: Optional[str]
+    langue: Optional[str]
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -117,25 +133,25 @@ class VerifierProjetQuery(interface.QueryRequest):
 @attr.dataclass(frozen=True, slots=True)
 class SupprimerPromoteurCommand(interface.CommandRequest):
     uuid_proposition: str
-    matricule: str
+    uuid_promoteur: str
 
 
 @attr.dataclass(frozen=True, slots=True)
 class DesignerPromoteurReferenceCommand(interface.CommandRequest):
     uuid_proposition: str
-    matricule: str
+    uuid_promoteur: str
 
 
 @attr.dataclass(frozen=True, slots=True)
 class SupprimerMembreCACommand(interface.CommandRequest):
     uuid_proposition: str
-    matricule: str
+    uuid_membre_ca: str
 
 
 @attr.dataclass(frozen=True, slots=True)
 class ApprouverPropositionCommand(interface.CommandRequest):
     uuid_proposition: str
-    matricule: str
+    uuid_membre: str
     institut_these: Optional[str] = ''
     commentaire_interne: Optional[str] = ''
     commentaire_externe: Optional[str] = ''
@@ -144,7 +160,7 @@ class ApprouverPropositionCommand(interface.CommandRequest):
 @attr.dataclass(frozen=True, slots=True)
 class RefuserPropositionCommand(interface.CommandRequest):
     uuid_proposition: str
-    matricule: str
+    uuid_membre: str
     motif_refus: str
     commentaire_interne: Optional[str] = ''
     commentaire_externe: Optional[str] = ''
@@ -202,7 +218,7 @@ class SupprimerPropositionCommand(interface.CommandRequest):
 @attr.dataclass(frozen=True, slots=True)
 class ApprouverPropositionParPdfCommand(interface.CommandRequest):
     uuid_proposition: str
-    matricule: str
+    uuid_membre: str
     pdf: List[str] = attr.Factory(list)
 
 

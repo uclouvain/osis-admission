@@ -1,32 +1,34 @@
 # ##############################################################################
 #
-#    OSIS stands for Open Student Information System. It's an application
-#    designed to manage the core business of higher education institutions,
-#    such as universities, faculties, institutes and professional schools.
-#    The core business involves the administration of students, teachers,
-#    courses, programs and so on.
+#  OSIS stands for Open Student Information System. It's an application
+#  designed to manage the core business of higher education institutions,
+#  such as universities, faculties, institutes and professional schools.
+#  The core business involves the administration of students, teachers,
+#  courses, programs and so on.
 #
-#    Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
 #
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
 #
-#    A copy of this license - GNU General Public License - is available
-#    at the root of the source code of this program.  If not,
-#    see http://www.gnu.org/licenses/.
+#  A copy of this license - GNU General Public License - is available
+#  at the root of the source code of this program.  If not,
+#  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
 from collections import defaultdict
 from typing import List, Optional, Union
 
-from django.db.models import Prefetch
+from django.db.models import F, Prefetch
+from django.db.models.functions import Coalesce
+from django.utils.translation import get_language, gettext_lazy as _
 
 from admission.auth.roles.ca_member import CommitteeMember
 from admission.auth.roles.promoter import Promoter
@@ -48,15 +50,18 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
 from admission.ddd.admission.doctorat.preparation.domain.model.groupe_de_supervision import (
     GroupeDeSupervision,
     GroupeDeSupervisionIdentity,
+    SignataireIdentity,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity
-from admission.ddd.admission.doctorat.preparation.dtos import CotutelleDTO
+from admission.ddd.admission.doctorat.preparation.dtos import CotutelleDTO, MembreCADTO, PromoteurDTO
 from admission.ddd.admission.doctorat.preparation.repository.i_groupe_de_supervision import (
     IGroupeDeSupervisionRepository,
 )
 from admission.ddd.parcours_doctoral.domain.model.doctorat import DoctoratIdentity
 from base.models.person import Person
+from osis_role.contrib.permissions import _get_roles_assigned_to_user
 from osis_signature.models import Actor, Process, StateHistory
+from reference.models.country import Country
 
 
 class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
@@ -79,7 +84,9 @@ class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
             .prefetch_related(
                 Prefetch(
                     'supervision_group__actors',
-                    Actor.objects.select_related('supervisionactor').order_by('person__last_name'),
+                    Actor.objects.alias(dynamic_last_name=Coalesce(F('last_name'), F('person__last_name')))
+                    .select_related('supervisionactor')
+                    .order_by('dynamic_last_name'),
                     to_attr='ordered_members',
                 )
             )
@@ -113,7 +120,7 @@ class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
             proposition_id=PropositionIdentityBuilder.build_from_uuid(proposition.uuid),
             signatures_promoteurs=[
                 SignaturePromoteur(
-                    promoteur_id=PromoteurIdentity(actor.person.global_id),
+                    promoteur_id=PromoteurIdentity(str(actor.uuid)),
                     etat=ChoixEtatSignature[actor.state],
                     date=actor.last_state_date,
                     commentaire_externe=actor.comment,
@@ -125,7 +132,7 @@ class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
             ],
             signatures_membres_CA=[
                 SignatureMembreCA(
-                    membre_CA_id=MembreCAIdentity(actor.person.global_id),
+                    membre_CA_id=MembreCAIdentity(str(actor.uuid)),
                     etat=ChoixEtatSignature[actor.state],
                     date=actor.last_state_date,
                     commentaire_externe=actor.comment,
@@ -136,7 +143,7 @@ class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
             ],
             promoteur_reference_id=next(
                 (
-                    PromoteurIdentity(actor.person.global_id)
+                    PromoteurIdentity(actor.uuid)
                     for actor in actors.get(ActorType.PROMOTER.name, [])
                     if actor.supervisionactor.is_reference_promoter
                 ),
@@ -204,46 +211,15 @@ class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
         else:
             groupe = proposition.supervision_group
 
-        # Delete actors not in the current signatures
-        new_promoteurs_persons = Person.objects.filter(
-            global_id__in=[a.promoteur_id.matricule for a in entity.signatures_promoteurs],
-        )
         current_promoteurs = groupe.actors.filter(supervisionactor__type=ActorType.PROMOTER.name)
-        current_promoteurs.exclude(person__in=new_promoteurs_persons).delete()
-
-        new_membre_CA_persons = Person.objects.filter(
-            global_id__in=[a.membre_CA_id.matricule for a in entity.signatures_membres_CA],
-        )
         current_members = groupe.actors.filter(supervisionactor__type=ActorType.CA_MEMBER.name)
-        current_members.exclude(person__in=new_membre_CA_persons).delete()
+
+        # Remove old CA members (deleted by refusal)
+        current_members.exclude(uuid__in=[s.membre_CA_id.uuid for s in entity.signatures_membres_CA]).delete()
 
         # Update existing actors
         cls._update_members(current_promoteurs, entity.signatures_promoteurs, entity.promoteur_reference_id)
         cls._update_members(current_members, entity.signatures_membres_CA)
-
-        # Add missing actors
-        promoteurs_ids = current_promoteurs.values_list('person__global_id', flat=True)
-        for person in new_promoteurs_persons:
-            if person.global_id not in promoteurs_ids:
-                SupervisionActor.objects.create(
-                    person=person,
-                    type=ActorType.PROMOTER.name,
-                    process_id=groupe.uuid,
-                    is_reference_promoter=bool(
-                        entity.promoteur_reference_id and entity.promoteur_reference_id.matricule == person.global_id
-                    ),
-                )
-                Promoter.objects.get_or_create(person=person)
-
-        membre_CA_ids = current_members.values_list('person__global_id', flat=True)
-        for person in new_membre_CA_persons:
-            if person.global_id not in membre_CA_ids:
-                SupervisionActor.objects.create(
-                    person=person,
-                    type=ActorType.CA_MEMBER.name,
-                    process_id=groupe.uuid,
-                )
-                CommitteeMember.objects.get_or_create(person=person)
 
         proposition.cotutelle = None if entity.cotutelle is None else bool(entity.cotutelle.motivation)
         if entity.cotutelle:
@@ -263,7 +239,7 @@ class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
         reference_promoter: Optional[PromoteurIdentity] = None,
     ):
         for actor in member_list:
-            membre = cls._get_member_from_matricule(signature_list, actor.person.global_id)
+            membre = cls._get_member(signature_list, str(actor.uuid))
             if actor.state != membre.etat.name:
                 StateHistory.objects.create(state=membre.etat.name, actor_id=actor.id)
                 if membre.etat.name in [ChoixEtatSignature.APPROVED.name, ChoixEtatSignature.DECLINED.name]:
@@ -272,13 +248,14 @@ class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
                     actor.supervisionactor.internal_comment = membre.commentaire_interne
                     actor.supervisionactor.rejection_reason = membre.motif_refus
                     actor.supervisionactor.is_reference_promoter = bool(
-                        reference_promoter and membre.promoteur_id == reference_promoter
+                        reference_promoter and str(actor.uuid) == str(reference_promoter.uuid)
                     )
                     actor.supervisionactor.save()
                     actor.save()
-            # Actor is no longer the reference promoter
-            if actor.supervisionactor.is_reference_promoter and (
-                not reference_promoter or actor.person.global_id != reference_promoter.matricule
+            if (
+                # Actor is no longer the reference promoter
+                actor.supervisionactor.is_reference_promoter
+                and (not reference_promoter or str(actor.uuid) != str(reference_promoter.uuid))
             ):
                 actor.supervisionactor.is_reference_promoter = False
                 actor.supervisionactor.save()
@@ -286,13 +263,84 @@ class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
                 # Actor is the reference promoter and need to be updated
                 reference_promoter
                 and not actor.supervisionactor.is_reference_promoter
-                and actor.person.global_id == reference_promoter.matricule
+                and str(actor.uuid) == str(reference_promoter.uuid)
             ):
                 actor.supervisionactor.is_reference_promoter = True
                 actor.supervisionactor.save()
 
     @classmethod
-    def _get_member_from_matricule(cls, signatures: list, matricule) -> Union[SignaturePromoteur, SignatureMembreCA]:
+    def _get_member(cls, signatures: list, uuid: str) -> Union[SignaturePromoteur, SignatureMembreCA]:
         if isinstance(signatures[0], SignaturePromoteur):
-            return next(a for a in signatures if a.promoteur_id.matricule == matricule)  # pragma: no branch
-        return next(a for a in signatures if a.membre_CA_id.matricule == matricule)  # pragma: no branch
+            return next(s for s in signatures if s.promoteur_id.uuid == uuid)  # pragma: no branch
+        return next(s for s in signatures if s.membre_CA_id.uuid == uuid)  # pragma: no branch
+
+    @classmethod
+    def add_member(
+        cls,
+        groupe_id: 'GroupeDeSupervisionIdentity',
+        type: Optional[ActorType] = None,
+        matricule: Optional[str] = '',
+        first_name: Optional[str] = '',
+        last_name: Optional[str] = '',
+        email: Optional[str] = '',
+        is_doctor: bool = False,
+        institute: Optional[str] = '',
+        city: Optional[str] = '',
+        country_code: Optional[str] = '',
+        language: Optional[str] = '',
+    ) -> 'SignataireIdentity':
+        groupe = Process.objects.get(uuid=groupe_id.uuid)
+        person = Person.objects.get(global_id=matricule) if matricule else None
+        new_actor = SupervisionActor.objects.create(
+            process=groupe,
+            person=person,
+            type=type.name,
+            first_name=first_name,
+            last_name=last_name,
+            email=email,
+            is_doctor=is_doctor,
+            institute=institute,
+            city=city,
+            country=Country.objects.get(iso_code=country_code) if country_code else None,
+            language=language,
+        )
+        if type == ActorType.PROMOTER:
+            group_name, model = 'promoters', Promoter
+            signataire_id = PromoteurIdentity(str(new_actor.uuid))
+        else:
+            group_name, model = 'committee_members', CommitteeMember
+            signataire_id = MembreCAIdentity(str(new_actor.uuid))
+        # Make sure the person has relevant role and group
+        if person and group_name not in _get_roles_assigned_to_user(person.user):
+            model.objects.update_or_create(person=person)
+        return signataire_id
+
+    @classmethod
+    def remove_member(cls, groupe_id: 'GroupeDeSupervisionIdentity', signataire: 'SignataireIdentity') -> None:
+        SupervisionActor.objects.filter(process__uuid=groupe_id.uuid, uuid=signataire.uuid).delete()
+
+    @classmethod
+    def get_members(cls, groupe_id: 'GroupeDeSupervisionIdentity') -> List[Union['PromoteurDTO', 'MembreCADTO']]:
+        actors = SupervisionActor.objects.select_related('person__tutor').filter(
+            process__uuid=groupe_id.uuid,
+        )
+        members = []
+        for actor in actors:
+            klass = PromoteurDTO if actor.type == ActorType.PROMOTER.name else MembreCADTO
+            members.append(
+                klass(
+                    uuid=actor.uuid,
+                    matricule=actor.person and actor.person.global_id,
+                    nom=actor.last_name,
+                    prenom=actor.first_name,
+                    email=actor.email,
+                    est_docteur=True if not actor.is_external and hasattr(actor.person, 'tutor') else actor.is_doctor,
+                    institution=_('ucl') if not actor.is_external else actor.institute,
+                    ville=actor.city,
+                    pays=actor.country_id
+                    and getattr(actor.country, 'name_en' if get_language() == 'en' else 'name')
+                    or '',
+                    est_externe=actor.is_external,
+                )
+            )
+        return members
