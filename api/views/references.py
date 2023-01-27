@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -28,6 +28,7 @@ from rest_framework.generics import RetrieveAPIView, ListAPIView
 from rest_framework.response import Response
 
 from admission.api import serializers
+from admission.api.schema import AuthorizationAwareSchema
 from admission.contrib.models import Scholarship
 from base.models.campus import Campus
 from ddd.logic.shared_kernel.campus.commands import SearchUclouvainCampusesCommand, GetCampusCommand
@@ -38,7 +39,7 @@ class RetrieveScholarshipView(RetrieveAPIView):
     """Retrieves a scholarship"""
 
     name = 'retrieve-scholarship'
-
+    schema = AuthorizationAwareSchema()
     filter_backends = []
     serializer_class = serializers.ScholarshipSerializer
     queryset = Scholarship.objects.all()
@@ -49,6 +50,7 @@ class RetrieveCampusView(RetrieveAPIView):
     """Retrieves a campus"""
 
     name = 'retrieve-campus'
+    schema = AuthorizationAwareSchema()
     filter_backends = []
     serializer_class = serializers.CampusSerializer
 
@@ -65,6 +67,7 @@ class ListCampusView(ListAPIView):
     """Retrieves the UCLouvain campuses"""
 
     name = 'list-campuses'
+    schema = AuthorizationAwareSchema()
     filter_backends = []
     pagination_class = None
     serializer_class = serializers.CampusSerializer

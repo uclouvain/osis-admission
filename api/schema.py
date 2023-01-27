@@ -34,7 +34,7 @@ from rest_framework.serializers import Serializer
 from admission.api.serializers.fields import ActionLinksField
 from base.models.utils.utils import ChoiceEnum
 
-ADMISSION_SDK_VERSION = "1.0.64"
+ADMISSION_SDK_VERSION = "1.0.65"
 
 
 class AdmissionSchemaGenerator(SchemaGenerator):
@@ -155,24 +155,13 @@ class AdmissionSchemaGenerator(SchemaGenerator):
         schema['components']['schemas']['AcceptedLanguageEnum'] = {"type": "string", "enum": ["en", "fr-be"]}
         for path, path_content in schema['paths'].items():
             for method, method_content in path_content.items():
-                # Add extra global headers to each endpoint
-                method_content['parameters'].extend(
-                    [
-                        {'$ref': '#/components/parameters/Accept-Language'},
-                        {'$ref': '#/components/parameters/X-User-FirstName'},
-                        {'$ref': '#/components/parameters/X-User-LastName'},
-                        {'$ref': '#/components/parameters/X-User-Email'},
-                        {'$ref': '#/components/parameters/X-User-GlobalID'},
-                    ]
-                )
                 # Add error responses to each endpoint
-                method_content['responses'].update(
-                    {
-                        "400": {"$ref": "#/components/responses/BadRequest"},
-                        "401": {"$ref": "#/components/responses/Unauthorized"},
-                        "404": {"$ref": "#/components/responses/NotFound"},
-                    }
-                )
+                error_reponses = {
+                    "400": {"$ref": "#/components/responses/BadRequest"},
+                    "401": {"$ref": "#/components/responses/Unauthorized"},
+                    "404": {"$ref": "#/components/responses/NotFound"},
+                }
+                method_content['responses'].update(error_reponses)
                 # Only allow application/json as content type
                 if 'requestBody' in method_content:
                     method_content['requestBody']['content'] = {
@@ -243,7 +232,36 @@ class ActionLinksFieldSchemaMixin:
         return components
 
 
-class BetterChoicesSchema(ActionLinksFieldSchemaMixin, AutoSchema):
+class AuthorizationAwareSchemaMixin:
+    """This mixin allows to add auomatically the path parameters depending on the view authorization method"""
+
+    authorization_method = 'ESB'
+
+    def get_operation(self, path, method):
+        operation = super().get_operation(path, method)
+        operation['parameters'] += self.get_authorization_params()
+        return operation
+
+    def get_authorization_params(self):
+        # Add extra global headers to each endpoint
+        extra_params = [
+            {'$ref': '#/components/parameters/Accept-Language'},
+        ]
+        if self.authorization_method == 'ESB':
+            extra_params += [
+                {'$ref': '#/components/parameters/X-User-FirstName'},
+                {'$ref': '#/components/parameters/X-User-LastName'},
+                {'$ref': '#/components/parameters/X-User-Email'},
+                {'$ref': '#/components/parameters/X-User-GlobalID'},
+            ]
+        return extra_params
+
+
+class AuthorizationAwareSchema(AuthorizationAwareSchemaMixin, AutoSchema):
+    pass
+
+
+class BetterChoicesSchema(AuthorizationAwareSchemaMixin, ActionLinksFieldSchemaMixin, AutoSchema):
     """This schema prevents a bug with blank choicefields"""
 
     def map_choicefield(self, field):

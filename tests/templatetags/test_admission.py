@@ -1,28 +1,28 @@
-##############################################################################
+# ##############################################################################
 #
-#    OSIS stands for Open Student Information System. It's an application
-#    designed to manage the core business of higher education institutions,
-#    such as universities, faculties, institutes and professional schools.
-#    The core business involves the administration of students, teachers,
-#    courses, programs and so on.
+#  OSIS stands for Open Student Information System. It's an application
+#  designed to manage the core business of higher education institutions,
+#  such as universities, faculties, institutes and professional schools.
+#  The core business involves the administration of students, teachers,
+#  courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
 #
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
 #
-#    A copy of this license - GNU General Public License - is available
-#    at the root of the source code of this program.  If not,
-#    see http://www.gnu.org/licenses/.
+#  A copy of this license - GNU General Public License - is available
+#  at the root of the source code of this program.  If not,
+#  see http://www.gnu.org/licenses/.
 #
-##############################################################################
+# ##############################################################################
 import uuid
 from unittest.mock import Mock
 
@@ -44,15 +44,15 @@ from admission.templatetags.admission import (
     detail_tab_path_from_update,
     display,
     field_data,
+    formatted_reference,
     get_active_parent,
     sortable_header_div,
     strip,
     update_tab_path_from_detail,
-    formatted_reference,
 )
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
 from base.models.enums.entity_type import EntityType
-from base.tests.factories.entity_version import EntityVersionFactory
+from base.tests.factories.entity_version import MainEntityVersionFactory
 
 
 # Mock views
@@ -343,10 +343,12 @@ class DisplayTagTestCase(TestCase):
 
     @freezegun.freeze_time('2023-01-01')
     def test_formatted_reference(self):
+        root = MainEntityVersionFactory(parent=None).entity
         # With school as management entity
-        school = EntityVersionFactory(
+        school = MainEntityVersionFactory(
             entity_type=EntityType.FACULTY.name,
             acronym='CMC',
+            parent=root,
         )
         created_admission = ContinuingEducationAdmissionFactory(training__management_entity=school.entity)
         admission = ContinuingEducationAdmissionProxy.objects.for_dto().get(uuid=created_admission.uuid)
@@ -354,9 +356,10 @@ class DisplayTagTestCase(TestCase):
         self.assertEqual(reference, f'M-CMC22-{str(admission)}')
 
         # With faculty as parent entity of the school
-        school.parent = EntityVersionFactory(
+        school.parent = MainEntityVersionFactory(
             entity_type=EntityType.FACULTY.name,
             acronym='FFC',
+            parent=root,
         ).entity
         school.save()
         admission = ContinuingEducationAdmissionProxy.objects.for_dto().get(uuid=created_admission.uuid)

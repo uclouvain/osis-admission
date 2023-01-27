@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@ from rest_framework.response import Response
 from rest_framework.schemas.openapi import AutoSchema
 from rest_framework.settings import api_settings
 
-from admission.api.schema import ChoicesEnumSchema
+from admission.api.schema import AuthorizationAwareSchema, AuthorizationAwareSchemaMixin, ChoicesEnumSchema
 from admission.api.serializers.activity import (
     DoctoralTrainingActivitySerializer,
     DoctoralTrainingAssentSerializer,
@@ -126,6 +126,7 @@ class DoctoralTrainingListView(APIPermissionRequiredMixin, GenericAPIView):
 
 class TrainingConfigView(APIPermissionRequiredMixin, RetrieveModelMixin, GenericAPIView):
     name = "training-config"
+    schema = AuthorizationAwareSchema()
     pagination_class = None
     filter_backends = []
     serializer_class = DoctoralTrainingConfigSerializer
@@ -191,7 +192,7 @@ class TrainingView(APIPermissionRequiredMixin, GenericAPIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class TrainingBatchSchema(AutoSchema):
+class TrainingBatchSchema(AuthorizationAwareSchemaMixin, AutoSchema):
     def get_operation_id(self, path, method):
         return "submit_training"
 
@@ -236,20 +237,19 @@ class TrainingSubmitView(APIPermissionRequiredMixin, GenericAPIView):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
-class TrainingAssentSchema(AutoSchema):
+class TrainingAssentSchema(AuthorizationAwareSchemaMixin, AutoSchema):
     def get_operation_id(self, path, method):
         return "assent_training"
 
-    def get_operation(self, path: str, method: str):
-        operation = super().get_operation(path, method)
-        activity_id_param = {
-            "name": 'activity_id',
-            "in": "query",
-            "required": True,
-            'schema': {'type': 'string'},
-        }
-        operation['parameters'].append(activity_id_param)
-        return operation
+    def get_path_parameters(self, path, method):
+        return super().get_path_parameters(path, method) + [
+            {
+                "name": 'activity_id',
+                "in": "query",
+                "required": True,
+                'schema': {'type': 'string'},
+            }
+        ]
 
 
 class TrainingAssentView(APIPermissionRequiredMixin, GenericAPIView):

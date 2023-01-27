@@ -1,26 +1,26 @@
 # ##############################################################################
 #
-#    OSIS stands for Open Student Information System. It's an application
-#    designed to manage the core business of higher education institutions,
-#    such as universities, faculties, institutes and professional schools.
-#    The core business involves the administration of students, teachers,
-#    courses, programs and so on.
+#  OSIS stands for Open Student Information System. It's an application
+#  designed to manage the core business of higher education institutions,
+#  such as universities, faculties, institutes and professional schools.
+#  The core business involves the administration of students, teachers,
+#  courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
 #
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
 #
-#    A copy of this license - GNU General Public License - is available
-#    at the root of the source code of this program.  If not,
-#    see http://www.gnu.org/licenses/.
+#  A copy of this license - GNU General Public License - is available
+#  at the root of the source code of this program.  If not,
+#  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
 from typing import Union
@@ -34,11 +34,19 @@ from admission.ddd.admission.doctorat.preparation.domain.model.groupe_de_supervi
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition
 from admission.ddd.admission.doctorat.preparation.domain.service.i_historique import IHistorique
 from admission.ddd.admission.doctorat.preparation.dtos import AvisDTO
+from admission.infrastructure.admission.doctorat.preparation.domain.service.membre_CA import MembreCATranslator
+from admission.infrastructure.admission.doctorat.preparation.domain.service.promoteur import PromoteurTranslator
 from infrastructure.shared_kernel.personne_connue_ucl.personne_connue_ucl import PersonneConnueUclTranslator
 from osis_history.utilities import add_history_entry
 
 
 class Historique(IHistorique):
+    @classmethod
+    def get_signataire(cls, signataire_id):
+        if isinstance(signataire_id, PromoteurIdentity):
+            return PromoteurTranslator.get_dto(signataire_id)
+        return MembreCATranslator.get_dto(signataire_id)
+
     @classmethod
     def historiser_initiation(cls, proposition: Proposition):
         candidat = PersonneConnueUclTranslator().get(proposition.matricule_candidat)
@@ -79,10 +87,10 @@ class Historique(IHistorique):
         signataire_id: Union[PromoteurIdentity, MembreCAIdentity],
         avis: AvisDTO,
     ):
-        signataire = PersonneConnueUclTranslator().get(signataire_id.matricule)
+        signataire = cls.get_signataire(signataire_id)
         auteur = PersonneConnueUclTranslator().get(proposition.matricule_candidat) if avis.pdf else signataire
 
-        # Basculer en Français pour la traduction de l'état
+        # Basculer en français pour la traduction de l'état
         with translation.override(settings.LANGUAGE_CODE_FR):
             message_fr = (
                 "{signataire.prenom} {signataire.nom} a {action} la proposition {via_pdf}en tant que {role}".format(
@@ -136,7 +144,7 @@ class Historique(IHistorique):
         signataire_id: Union[PromoteurIdentity, MembreCAIdentity],
     ):
         candidat = PersonneConnueUclTranslator().get(proposition.matricule_candidat)
-        signataire = PersonneConnueUclTranslator().get(signataire_id.matricule)
+        signataire = cls.get_signataire(signataire_id)
         add_history_entry(
             proposition.entity_id.uuid,
             "{membre.prenom} {membre.nom} a été ajouté en tant que {}.".format(
@@ -159,7 +167,7 @@ class Historique(IHistorique):
         signataire_id: Union[PromoteurIdentity, MembreCAIdentity],
     ):
         candidat = PersonneConnueUclTranslator().get(proposition.matricule_candidat)
-        signataire = PersonneConnueUclTranslator().get(signataire_id.matricule)
+        signataire = cls.get_signataire(signataire_id)
         add_history_entry(
             proposition.entity_id.uuid,
             "{membre.prenom} {membre.nom} a été retiré des {}.".format(

@@ -1,26 +1,26 @@
 # ##############################################################################
 #
-#    OSIS stands for Open Student Information System. It's an application
-#    designed to manage the core business of higher education institutions,
-#    such as universities, faculties, institutes and professional schools.
-#    The core business involves the administration of students, teachers,
-#    courses, programs and so on.
+#  OSIS stands for Open Student Information System. It's an application
+#  designed to manage the core business of higher education institutions,
+#  such as universities, faculties, institutes and professional schools.
+#  The core business involves the administration of students, teachers,
+#  courses, programs and so on.
 #
-#    Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
 #
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
 #
-#    A copy of this license - GNU General Public License - is available
-#    at the root of the source code of this program.  If not,
-#    see http://www.gnu.org/licenses/.
+#  A copy of this license - GNU General Public License - is available
+#  at the root of the source code of this program.  If not,
+#  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
 from rest_framework import mixins, status
@@ -51,8 +51,8 @@ __all__ = [
 class SupervisionSchema(ResponseSpecificSchema):
     serializer_mapping = {
         'GET': serializers.SupervisionDTOSerializer,
-        'PUT': (serializers.SupervisionActorSerializer, serializers.PropositionIdentityDTOSerializer),
-        'POST': (serializers.SupervisionActorSerializer, serializers.PropositionIdentityDTOSerializer),
+        'PUT': (serializers.IdentifierSupervisionActorSerializer, serializers.PropositionIdentityDTOSerializer),
+        'POST': (serializers.SupervisionActorReferenceSerializer, serializers.PropositionIdentityDTOSerializer),
     }
 
     method_mapping = {
@@ -95,12 +95,9 @@ class SupervisionAPIView(
 
     def put(self, request, *args, **kwargs):
         """Add a supervision group member for a proposition"""
-        serializers.SupervisionActorSerializer(data=request.data).is_valid(raise_exception=True)
-        data = {
-            'uuid_proposition': str(self.kwargs['uuid']),
-            'matricule': request.data['member'],
-        }
-        if request.data['type'] == ActorType.CA_MEMBER.name:
+        data = {'uuid_proposition': str(self.kwargs['uuid']), **request.data}
+        serializers.IdentifierSupervisionActorSerializer(data=data).is_valid(raise_exception=True)
+        if data.pop('type') == ActorType.CA_MEMBER.name:
             serializer_cls = serializers.IdentifierMembreCACommandSerializer
             cmd = IdentifierMembreCACommand
         else:
@@ -115,16 +112,17 @@ class SupervisionAPIView(
 
     def post(self, request, *args, **kwargs):
         """Remove a supervision group member for a proposition"""
-        serializers.SupervisionActorSerializer(data=request.data).is_valid(raise_exception=True)
+        serializers.SupervisionActorReferenceSerializer(data=request.data).is_valid(raise_exception=True)
         data = {
             'uuid_proposition': str(self.kwargs['uuid']),
-            'matricule': request.data['member'],
         }
         if request.data['type'] == ActorType.CA_MEMBER.name:
             serializer_cls = serializers.SupprimerMembreCACommandSerializer
+            data['uuid_membre_ca'] = request.data['uuid_membre']
             cmd = SupprimerMembreCACommand
         else:
             serializer_cls = serializers.SupprimerPromoteurCommandSerializer
+            data['uuid_promoteur'] = request.data['uuid_membre']
             cmd = SupprimerPromoteurCommand
 
         serializer_cls(data=data).is_valid(raise_exception=True)

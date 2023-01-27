@@ -1,26 +1,26 @@
 # ##############################################################################
 #
-#    OSIS stands for Open Student Information System. It's an application
-#    designed to manage the core business of higher education institutions,
-#    such as universities, faculties, institutes and professional schools.
-#    The core business involves the administration of students, teachers,
-#    courses, programs and so on.
+#  OSIS stands for Open Student Information System. It's an application
+#  designed to manage the core business of higher education institutions,
+#  such as universities, faculties, institutes and professional schools.
+#  The core business involves the administration of students, teachers,
+#  courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
 #
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
 #
-#    A copy of this license - GNU General Public License - is available
-#    at the root of the source code of this program.  If not,
-#    see http://www.gnu.org/licenses/.
+#  A copy of this license - GNU General Public License - is available
+#  at the root of the source code of this program.  If not,
+#  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
 
@@ -45,28 +45,21 @@ from ._should_institution_dependre_doctorat_realise import ShouldInstitutionDepe
 from ._should_justification_donnee_si_preadmission import ShouldJustificationDonneeSiPreadmission
 from ._should_langues_connues_etre_completees import ShouldLanguesConnuesRequisesEtreSpecifiees
 from ._should_membre_CA_etre_dans_groupe_de_supervision import ShouldMembreCAEtreDansGroupeDeSupervision
-from ._should_membre_CA_pas_deja_present_dans_groupe_de_supervision import (
-    ShouldMembreCAPasDejaPresentDansGroupeDeSupervision,
-)
-from ._should_premier_promoteur_renseigner_institut_these import ShouldPremierPromoteurRenseignerInstitutThese
+from ._should_premier_promoteur_renseigner_institut_these import ShouldPromoteurReferenceRenseignerInstitutThese
 from ._should_projet_etre_complet import ShouldProjetEtreComplet
 from ._should_promoteur_etre_dans_groupe_de_supervision import ShouldPromoteurEtreDansGroupeDeSupervision
-from ._should_promoteur_pas_deja_present_dans_groupe_de_supervision import (
-    ShouldPromoteurPasDejaPresentDansGroupeDeSupervision,
-)
 from ._should_signataire_etre_dans_groupe_de_supervision import ShouldSignataireEtreDansGroupeDeSupervision
 from ._should_signataire_etre_invite import ShouldSignataireEtreInvite
 from ._should_signataire_pas_invite import ShouldSignatairePasDejaInvite
 from ._should_type_contrat_travail_dependre_type_financement import ShouldTypeContratTravailDependreTypeFinancement
+from ._should_membre_etre_interne_ou_externe import ShouldMembreEtreInterneOuExterne
 
 __all__ = [
     "ShouldInstitutionDependreDoctoratRealise",
     "ShouldDomaineDependreDoctoratRealise",
     "ShouldJustificationDonneeSiPreadmission",
     "ShouldMembreCAEtreDansGroupeDeSupervision",
-    "ShouldMembreCAPasDejaPresentDansGroupeDeSupervision",
     "ShouldPromoteurEtreDansGroupeDeSupervision",
-    "ShouldPromoteurPasDejaPresentDansGroupeDeSupervision",
     "ShouldSignataireEtreDansGroupeDeSupervision",
     "ShouldSignataireEtreInvite",
     "ShouldSignatairePasDejaInvite",
@@ -81,7 +74,8 @@ __all__ = [
     "ShouldDemandeSignatureLancee",
     "ShouldPromoteursOntApprouve",
     "ShouldMembresCAOntApprouve",
-    "ShouldPremierPromoteurRenseignerInstitutThese",
+    "ShouldPromoteurReferenceRenseignerInstitutThese",
     "ShouldGroupeDeSupervisionAvoirUnPromoteurDeReference",
     "ShouldAffiliationsEtreCompletees",
+    "ShouldMembreEtreInterneOuExterne",
 ]

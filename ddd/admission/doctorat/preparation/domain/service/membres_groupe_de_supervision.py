@@ -23,11 +23,35 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import attr
+from typing import Optional
 
+from admission.ddd.admission.doctorat.preparation.domain.model.groupe_de_supervision import (
+    GroupeDeSupervisionIdentity,
+)
+from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import DejaMembreException
+from admission.ddd.admission.doctorat.preparation.repository.i_groupe_de_supervision import (
+    IGroupeDeSupervisionRepository,
+)
 from osis_common.ddd import interface
 
 
-@attr.dataclass(slots=True)
-class PromoteurIdentity(interface.EntityIdentity):
-    uuid: str
+class MembresGroupeDeSupervision(interface.DomainService):
+    @classmethod
+    def verifier_pas_deja_present(
+        cls,
+        groupe_id: 'GroupeDeSupervisionIdentity',
+        groupe_de_supervision_repository: 'IGroupeDeSupervisionRepository',
+        matricule: Optional[str],
+        email: Optional[str],
+    ):
+        membres = groupe_de_supervision_repository.get_members(groupe_id)
+        for membre in membres:
+            if (
+                # Matricule déjà référencé
+                matricule
+                and matricule == membre.matricule
+                # E-mail déjà référencé
+                or not matricule
+                and membre.email == email
+            ):
+                raise DejaMembreException

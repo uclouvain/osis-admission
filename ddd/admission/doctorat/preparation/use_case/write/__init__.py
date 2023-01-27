@@ -5,7 +5,7 @@ from .completer_proposition_service import completer_proposition
 from .definir_cotutelle_service import definir_cotutelle
 from .demander_signatures_service import demander_signatures
 from .designer_promoteur_reference_service import designer_promoteur_reference
-from .identifier_membre_CA_service import identifier_membre_CA
+from .identifier_membre_CA_service import identifier_membre_ca
 from .identifier_promoteur_service import identifier_promoteur
 from .initier_proposition_service import initier_proposition
 from .refuser_proposition_service import refuser_proposition

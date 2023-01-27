@@ -107,7 +107,6 @@ class TestVerifierPropositionService(TestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
-        super().setUpClass()
         cls.experience_academiques_complete = ExperienceAcademique(
             personne='0000000001',
             communaute_fr=True,
