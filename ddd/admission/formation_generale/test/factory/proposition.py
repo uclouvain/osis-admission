@@ -140,3 +140,15 @@ class PropositionFactory(factory.Factory):
     bourse_erasmus_mundus_id = factory.SubFactory(BourseIdentityFactory, uuid='e0e94dd5-3715-49a1-8953-8cc0f99372cb')
     est_reorientation_inscription_externe = False
     est_modification_inscription_externe = False
+
+    class Params:
+        est_bachelier_en_reorientation = factory.Trait(
+            est_bachelier_belge=True,
+            est_reorientation_inscription_externe=True,
+            attestation_inscription_reguliere=['uuid-attestation_inscription_reguliere'],
+        )
+        est_bachelier_en_modification = factory.Trait(
+            est_bachelier_belge=True,
+            est_modification_inscription_externe=True,
+            formulaire_modification_inscription=['uuid-formulaire_modification_inscription'],
+        )
