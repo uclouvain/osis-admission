@@ -131,14 +131,16 @@ class IElementsConfirmation(interface.DomainService):
         proposition: Union['PropositionDoctorale', 'PropositionGenerale', 'PropositionContinue'],
         formation_translator: 'IFormationTranlator',
         profil_candidat_translator: 'IProfilCandidatTranslator',
+        annee_soumise: int = None,
     ) -> List['ElementConfirmation']:
         elements = []
         # Confirmation de l'année académique concernée
-        if proposition.annee_calculee and proposition.annee_calculee > proposition.formation_id.annee:
+        annee_a_prendre_en_compte = annee_soumise if annee_soumise is not None else proposition.annee_calculee
+        if annee_a_prendre_en_compte and annee_a_prendre_en_compte > proposition.formation_id.annee:
             elements.append(
                 ElementConfirmation(
                     nom='hors_delai',
-                    texte=cls.HORS_DELAI % {'year': f"{proposition.annee_calculee}-{proposition.annee_calculee + 1}"},
+                    texte=cls.HORS_DELAI % {'year': f"{annee_a_prendre_en_compte}-{annee_a_prendre_en_compte + 1}"},
                 )
             )
         elements += [
@@ -268,10 +270,11 @@ class IElementsConfirmation(interface.DomainService):
         cls,
         soumis: Dict[str, str],
         proposition: Union['PropositionDoctorale', 'PropositionGenerale', 'PropositionContinue'],
+        annee_soumise: int,
         formation_translator: 'IFormationTranlator',
         profil_candidat_translator: 'IProfilCandidatTranslator',
     ) -> None:
-        attendu = cls.recuperer(proposition, formation_translator, profil_candidat_translator)
+        attendu = cls.recuperer(proposition, formation_translator, profil_candidat_translator, annee_soumise)
         if len(soumis) != len(attendu):
             raise ElementsConfirmationNonConcordants
         for element in attendu:

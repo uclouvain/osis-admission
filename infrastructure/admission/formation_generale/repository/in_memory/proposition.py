@@ -105,7 +105,7 @@ class PropositionInMemoryRepository(
             PropositionFactory(
                 entity_id=factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-MASTER-SCI'),
                 matricule_candidat='0000000001',
-                formation_id=FormationIdentityFactory(sigle="MASTER-SCI", annee=2020),
+                formation_id=FormationIdentityFactory(sigle="MASTER-SCI", annee=2021),
                 bourse_double_diplome_id=BourseInMemoryTranslator.bourse_dd_1.entity_id,
                 bourse_erasmus_mundus_id=BourseInMemoryTranslator.bourse_em_1.entity_id,
                 bourse_internationale_id=BourseInMemoryTranslator.bourse_ifg_1.entity_id,

@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import datetime
 from unittest.mock import patch
 
 import freezegun
@@ -41,19 +42,22 @@ from admission.ddd.admission.domain.validator.exceptions import (
     QuestionsSpecifiquesInformationsComplementairesNonCompleteesException,
 )
 from admission.ddd.admission.enums import ChoixTypeCompteBancaire, CritereItemFormulaireFormation, Onglets
-from admission.ddd.admission.formation_generale.domain.model.enums import (
-    ChoixStatutProposition as ChoixStatutPropositionGenerale,
-)
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixStatutProposition as ChoixStatutPropositionContinue,
+)
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    ChoixStatutProposition as ChoixStatutPropositionGenerale,
 )
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
     EtudesSecondairesNonCompleteesException,
 )
 from admission.tests.factories.calendar import AdmissionAcademicCalendarFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
-from admission.tests.factories.curriculum import EducationalExperienceFactory, ProfessionalExperienceFactory
-from admission.tests.factories.form_item import TextAdmissionFormItemFactory, AdmissionFormItemInstantiationFactory
+from admission.tests.factories.curriculum import (
+    EducationalExperienceFactory,
+    ProfessionalExperienceFactory,
+)
+from admission.tests.factories.form_item import AdmissionFormItemInstantiationFactory, TextAdmissionFormItemFactory
 from admission.tests.factories.general_education import (
     GeneralEducationAdmissionFactory,
     GeneralEducationTrainingFactory,
@@ -69,7 +73,7 @@ from osis_profile.models import EducationalExperience, ProfessionalExperience
 class GeneralPropositionSubmissionTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
-        AdmissionAcademicCalendarFactory.produce_all_required()
+        AdmissionAcademicCalendarFactory.produce_all_required(quantity=6)
 
         # Validation errors
         cls.candidate_errors = IncompletePersonForBachelorFactory()
@@ -83,6 +87,7 @@ class GeneralPropositionSubmissionTestCase(APITestCase):
 
         # Validation ok
         cls.admission_ok = GeneralEducationAdmissionFactory(
+            training__academic_year__year=1980,
             candidate__country_of_citizenship__european_union=True,
             bachelor_with_access_conditions_met=True,
         )
@@ -228,6 +233,41 @@ class GeneralPropositionSubmissionTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
         self.admission_ok.refresh_from_db()
         self.assertEqual(self.admission_ok.status, ChoixStatutPropositionGenerale.SUBMITTED.name)
+
+    @freezegun.freeze_time("1980-11-25")
+    def test_general_proposition_submission_ok_hors_delai(self):
+        ProfessionalExperienceFactory(
+            person=self.candidate_ok,
+            start_date=datetime.date(1979, 1, 25),
+            end_date=datetime.date(1980, 11, 25),
+        )
+        training = GeneralEducationTrainingFactory(
+            academic_year__year=1981,
+            education_group_type=self.admission_ok.training.education_group_type,
+            acronym=self.admission_ok.training.acronym,
+            partial_acronym=self.admission_ok.training.partial_acronym,
+        )
+        data_ok = {
+            'pool': AcademicCalendarTypes.ADMISSION_POOL_UE5_BELGIAN.name,
+            'annee': 1981,
+            'elements_confirmation': {
+                'hors_delai': IElementsConfirmation.HORS_DELAI % {'year': '1981-1982'},
+                'reglement_general': IElementsConfirmation.REGLEMENT_GENERAL,
+                'protection_donnees': IElementsConfirmation.PROTECTION_DONNEES,
+                'professions_reglementees': IElementsConfirmation.PROFESSIONS_REGLEMENTEES,
+                'justificatifs': IElementsConfirmation.JUSTIFICATIFS
+                % {'by_service': _("by the UCLouvain Registration Service")},
+                'declaration_sur_lhonneur': IElementsConfirmation.DECLARATION_SUR_LHONNEUR
+                % {'to_service': _("to the UCLouvain Registration Service")},
+            },
+        }
+        self.client.force_authenticate(user=self.candidate_ok.user)
+        self.assertNotEqual(self.admission_ok.training, training)
+        response = self.client.post(self.ok_url, data_ok)
+        self.admission_ok.refresh_from_db()
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
+        self.assertEqual(self.admission_ok.status, ChoixStatutPropositionGenerale.SUBMITTED.name)
+        self.assertEqual(self.admission_ok.training, training)
 
     def test_general_proposition_submission_bad_pool(self):
         self.client.force_authenticate(user=self.candidate_ok.user)
