@@ -29,7 +29,7 @@ from django.contrib.postgres.aggregates import StringAgg
 from django.core.cache import cache
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db import models
-from django.db.models import OuterRef, Subquery
+from django.db.models import OuterRef, Subquery, Q
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils import timezone
@@ -37,8 +37,10 @@ from django.utils.translation import gettext_lazy as _
 
 from admission.ddd.admission.enums.type_demande import TypeDemande
 from base.models.academic_calendar import AcademicCalendar
-from base.models.entity_version import EntityVersion
+from base.models.entity_version import EntityVersion, PEDAGOGICAL_ENTITY_ADDED_EXCEPTIONS
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
+from base.models.enums.entity_type import EntityType
+from base.utils.cte import CTESubquery
 from osis_document.contrib import FileField
 
 from admission.contrib.models.form_item import ConfigurableModelFormItemField
@@ -250,3 +252,15 @@ class BaseAdmissionQuerySet(models.QuerySet):
                 .values("acronym")[:1]
             )
         )
+
+    def annotate_training_management_faculty(self):
+        today = timezone.now().today()
+        cte = EntityVersion.objects.with_children(entity_id=OuterRef("training__management_entity_id"))
+        faculty = (
+            cte.join(EntityVersion, id=cte.col.id)
+            .with_cte(cte)
+            .filter(Q(entity_type=EntityType.FACULTY.name) | Q(acronym__in=PEDAGOGICAL_ENTITY_ADDED_EXCEPTIONS))
+            .exclude(end_date__lte=today)
+        )
+
+        return self.annotate(training_management_faculty=CTESubquery(faculty.values("acronym")[:1]))

@@ -56,4 +56,4 @@ class ContinuingAdmissionList(LoginRequiredMixin, PermissionRequiredMixin, HtmxM
 
     def get_queryset(self):
         # TODO Wait for GetAdmissionsQuery
-        return ContinuingEducationAdmissionProxy.objects.all()
+        return ContinuingEducationAdmissionProxy.objects.for_dto().all()

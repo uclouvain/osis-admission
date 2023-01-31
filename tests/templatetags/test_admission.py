@@ -343,11 +343,22 @@ class DisplayTagTestCase(TestCase):
 
     @freezegun.freeze_time('2023-01-01')
     def test_formatted_reference(self):
-        commission = EntityVersionFactory(
+        # With school as management entity
+        school = EntityVersionFactory(
             entity_type=EntityType.FACULTY.name,
             acronym='CMC',
         )
-        created_admission = ContinuingEducationAdmissionFactory(training__management_entity=commission.entity)
-        admission = ContinuingEducationAdmissionProxy.objects.get(uuid=created_admission.uuid)
+        created_admission = ContinuingEducationAdmissionFactory(training__management_entity=school.entity)
+        admission = ContinuingEducationAdmissionProxy.objects.for_dto().get(uuid=created_admission.uuid)
         reference = formatted_reference(admission)
         self.assertEqual(reference, f'M-CMC22-{str(admission)}')
+
+        # With faculty as parent entity of the school
+        school.parent = EntityVersionFactory(
+            entity_type=EntityType.FACULTY.name,
+            acronym='FFC',
+        ).entity
+        school.save()
+        admission = ContinuingEducationAdmissionProxy.objects.for_dto().get(uuid=created_admission.uuid)
+        reference = formatted_reference(admission)
+        self.assertEqual(reference, f'M-FFC22-{str(admission)}')
