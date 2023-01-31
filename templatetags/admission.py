@@ -558,6 +558,6 @@ def formatted_reference(admission: BaseAdmission):
     return formater_reference(
         reference=admission.reference,
         nom_campus_inscription=admission.training.enrollment_campus.name,
-        sigle_entite_gestion=admission.sigle_entite_gestion,  # From annotation
+        sigle_entite_gestion=admission.training_management_faculty or admission.sigle_entite_gestion,  # From annotation
         annee=admission.training.academic_year.year,
     )

@@ -71,7 +71,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
     @classmethod
     def search_dto(cls, matricule_candidat: Optional[str] = '') -> List['PropositionDTO']:
         # Default queryset
-        qs = ContinuingEducationAdmissionProxy.objects.all()
+        qs = ContinuingEducationAdmissionProxy.objects.for_dto().all()
 
         # Add filters
         if matricule_candidat:
@@ -179,7 +179,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
 
     @classmethod
     def get_dto(cls, entity_id: 'PropositionIdentity') -> 'PropositionDTO':
-        return cls._load_dto(ContinuingEducationAdmissionProxy.objects.get(uuid=entity_id.uuid))
+        return cls._load_dto(ContinuingEducationAdmissionProxy.objects.for_dto().get(uuid=entity_id.uuid))
 
     @classmethod
     def _load(cls, admission: 'ContinuingEducationAdmission') -> 'Proposition':
@@ -250,7 +250,8 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             reference=formater_reference(
                 reference=admission.reference,
                 nom_campus_inscription=admission.training.enrollment_campus.name,
-                sigle_entite_gestion=admission.sigle_entite_gestion,  # From annotation
+                sigle_entite_gestion=admission.training_management_faculty
+                or admission.sigle_entite_gestion,  # From annotation
                 annee=admission.training.academic_year.year,
             ),
             annee_calculee=admission.determined_academic_year and admission.determined_academic_year.year,

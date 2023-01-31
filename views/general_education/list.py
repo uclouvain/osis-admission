@@ -56,4 +56,4 @@ class GeneralAdmissionList(LoginRequiredMixin, PermissionRequiredMixin, HtmxMixi
 
     def get_queryset(self):
         # TODO Wait for GetAdmissionsQuery
-        return GeneralEducationAdmissionProxy.objects.all()
+        return GeneralEducationAdmissionProxy.objects.for_dto().all()
