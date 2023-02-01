@@ -5644,14 +5644,15 @@ components:
               type: string
               maxLength: 255
           nullable: true
-        email:
+        private_email:
           type: string
-          readOnly: true
+          format: email
         phone_mobile:
           type: string
       required:
       - contact
       - residential
+      - private_email
       - phone_mobile
     HighSchoolDiploma:
       type: object

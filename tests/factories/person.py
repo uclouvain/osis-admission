@@ -44,7 +44,7 @@ from base.models.enums.person_address_type import PersonAddressType
 from base.tests.factories.academic_year import AcademicYearFactory, get_current_year
 from base.tests.factories.person import PersonFactory
 from base.tests.factories.person_address import PersonAddressFactory
-from osis_profile.models.enums.curriculum import EvaluationSystem, Grade, Result
+from osis_profile.models.enums.curriculum import Result
 from reference.tests.factories.country import CountryFactory
 from reference.tests.factories.language import EnglishLanguageFactory, FrenchLanguageFactory
 
@@ -69,6 +69,7 @@ class CompletePersonFactory(PersonFactory):
     last_registration_id = '01234567'
     graduated_from_high_school = GotDiploma.YES.name
     graduated_from_high_school_year = factory.SubFactory(AcademicYearFactory)
+    private_email = factory.Faker('email')
 
     @factory.post_generation
     def create_related_objects(self, create, extracted, **kwargs):

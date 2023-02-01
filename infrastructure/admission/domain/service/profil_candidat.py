@@ -27,7 +27,7 @@ import datetime
 from typing import Dict, List
 
 from django.db import models
-from django.db.models import Exists, OuterRef, Subquery
+from django.db.models import Exists, OuterRef, Subquery, Prefetch
 from django.db.models.functions import ExtractYear, ExtractMonth
 
 from admission.contrib.models.base import BaseAdmission
@@ -105,17 +105,26 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
 
     @classmethod
     def get_coordonnees(cls, matricule: str) -> 'CoordonneesDTO':
-        adresses = {
-            a.label: a
-            for a in PersonAddress.objects.select_related('country').filter(
-                person__global_id=matricule,
-                label__in=[PersonAddressType.CONTACT.name, PersonAddressType.RESIDENTIAL.name],
+        candidat = (
+            Person.objects.prefetch_related(
+                Prefetch(
+                    "personaddress_set",
+                    queryset=PersonAddress.objects.filter(
+                        label__in=[PersonAddressType.CONTACT.name, PersonAddressType.RESIDENTIAL.name]
+                    ).select_related("country"),
+                )
             )
-        }
+            .only('private_email')
+            .get(global_id=matricule)
+        )
+
+        adresses = {a.label: a for a in candidat.personaddress_set.all()}
+
         domicile_legal = adresses.get(PersonAddressType.RESIDENTIAL.name)
         adresse_correspondance = adresses.get(PersonAddressType.CONTACT.name)
 
         return CoordonneesDTO(
+            adresse_email_privee=candidat.private_email,
             domicile_legal=AdressePersonnelleDTO(
                 rue=domicile_legal.street,
                 code_postal=domicile_legal.postal_code,
@@ -342,7 +351,11 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
             current_year=annee_courante,
         )
 
-        person = Person.objects.only('pk', 'country_of_citizenship').get(global_id=matricule)
+        person = (
+            Person.objects.only('pk', 'country_of_citizenship')
+            .select_related('country_of_citizenship')
+            .get(global_id=matricule)
+        )
 
         is_ue_country = (
             person.country_of_citizenship.european_union if getattr(person, 'country_of_citizenship') else None

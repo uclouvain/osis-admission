@@ -46,3 +46,4 @@ class AdressePersonnelleDTO(interface.DTO):
 class CoordonneesDTO(interface.DTO):
     domicile_legal: Optional[AdressePersonnelleDTO]
     adresse_correspondance: Optional[AdressePersonnelleDTO]
+    adresse_email_privee: str = ''

@@ -38,6 +38,7 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
     AffiliationsNonCompleteesException,
     ExperiencesAcademiquesNonCompleteesException,
     TypeCompteBancaireRemboursementNonCompleteException,
+    CoordonneesNonCompleteesException,
 )
 from admission.ddd import BE_ISO_CODE, FR_ISO_CODE
 from admission.ddd.admission.domain.validator.exceptions import (
@@ -1613,3 +1614,12 @@ class TestVerifierPropositionService(TestCase):
             self.message_bus.invoke(VerifierPropositionQuery(uuid_proposition=propositions[2].entity_id.uuid))
 
         self.assertHasInstance(context.exception.exceptions, NombrePropositionsSoumisesDepasseException)
+
+    def test_should_verification_renvoyer_erreur_si_adresse_email_privee_non_renseignee(self):
+        with mock.patch.multiple(self.candidat_translator.coordonnees_candidats[1], adresse_email_privee=''):
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                self.message_bus.invoke(
+                    VerifierPropositionQuery(uuid_proposition=self.master_proposition.entity_id.uuid)
+                )
+
+            self.assertHasInstance(context.exception.exceptions, CoordonneesNonCompleteesException)
