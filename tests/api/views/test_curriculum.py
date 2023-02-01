@@ -214,6 +214,7 @@ class BaseCurriculumTestCase:
                     'educationalexperienceyear_set': [{'academic_year': 2020, 'result': Result.SUCCESS.name}],
                     'valuated_from_trainings': [],
                     'country': self.country.iso_code,
+                    'obtained_diploma': False,
                 }
             ],
         )

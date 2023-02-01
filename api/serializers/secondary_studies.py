@@ -199,6 +199,12 @@ class HighSchoolDiplomaSerializer(serializers.Serializer):
             if instance.graduated_from_high_school not in CHOIX_DIPLOME_OBTENU:
                 self.clean_belgian_diploma(instance)
                 self.clean_foreign_diploma(instance)
+            else:
+                for diploma in [instance.belgian_diploma, instance.foreign_diploma]:
+                    if diploma and diploma.academic_graduation_year != instance.graduated_from_high_school_year:
+                        diploma.academic_graduation_year = instance.graduated_from_high_school_year
+                        diploma.save(update_fields=['academic_graduation_year'])
+
             if instance.graduated_from_high_school != GotDiploma.NO.name:
                 self.clean_high_school_diploma_alternative(instance)
         return instance

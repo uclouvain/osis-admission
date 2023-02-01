@@ -235,6 +235,7 @@ class LiteEducationalExperienceSerializer(EducationalExperienceSerializer):
             'educationalexperienceyear_set',
             'valuated_from_trainings',
             'country',
+            'obtained_diploma',
         ]
 
 

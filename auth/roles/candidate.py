@@ -50,7 +50,7 @@ _CANDIDATE_RULESET = {
     'view_doctorateadmission_cotutelle': is_admission_request_author,
     'view_doctorateadmission_supervision': is_admission_request_author,
     # A candidate can view as long as he's the author and he is being enrolled
-    'view_doctorateadmission_training_choice': is_admission_request_author & in_progress,
+    'view_doctorateadmission_training_choice': is_admission_request_author & is_being_enrolled,
     'view_doctorateadmission_person': is_admission_request_author & is_being_enrolled,
     'view_doctorateadmission_coordinates': is_admission_request_author & is_being_enrolled,
     'view_doctorateadmission_curriculum': is_admission_request_author & is_being_enrolled,

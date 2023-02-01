@@ -115,14 +115,14 @@ class ShouldDiplomeEtrangerEtudesSecondairesEtreComplete(BusinessValidator):
         if self.diplome_etranger.pays_membre_ue or self.formation.est_formation_medecine_ou_dentisterie:
             # UE ou MED/DENT
             # Equivalence
-            if equivalence_requise:
-                if self.diplome_etranger.equivalence == Equivalence.YES.name:
-                    if not self.diplome_etranger.decision_final_equivalence_ue:
-                        raise EtudesSecondairesNonCompleteesPourDiplomeEtrangerException
-
-                elif self.diplome_etranger.equivalence == Equivalence.PENDING.name:
-                    if not self.diplome_etranger.preuve_decision_equivalence:
-                        raise EtudesSecondairesNonCompleteesPourDiplomeEtrangerException
+            if equivalence_requise and (
+                not self.diplome_etranger.equivalence
+                or self.diplome_etranger.equivalence == Equivalence.YES.name
+                and not self.diplome_etranger.decision_final_equivalence_ue
+                or self.diplome_etranger.equivalence == Equivalence.PENDING.name
+                and not self.diplome_etranger.preuve_decision_equivalence
+            ):
+                raise EtudesSecondairesNonCompleteesPourDiplomeEtrangerException
 
             # Diplôme
             if self.diplome_etudes_secondaires == GotDiploma.THIS_YEAR.name:

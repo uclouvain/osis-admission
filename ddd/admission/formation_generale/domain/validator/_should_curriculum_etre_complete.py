@@ -57,11 +57,14 @@ class ShouldEquivalenceEtreSpecifiee(BusinessValidator):
     experiences_academiques: List[ExperienceAcademiqueDTO]
 
     def validate(self, *args, **kwargs):
+        experiences_avec_diplome = [
+            experience for experience in self.experiences_academiques if experience.a_obtenu_diplome
+        ]
         if (
             self.type_formation in [TrainingType.AGGREGATION, TrainingType.CAPAES]
             and not self.equivalence
-            and self.experiences_academiques
-            and all(experience.pays != BE_ISO_CODE for experience in self.experiences_academiques)
+            and experiences_avec_diplome
+            and all(experience.pays != BE_ISO_CODE for experience in experiences_avec_diplome)
         ):
             raise EquivalenceNonRenseigneeException
 
