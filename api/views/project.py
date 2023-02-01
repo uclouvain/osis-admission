@@ -1,26 +1,26 @@
 # ##############################################################################
 #
-#    OSIS stands for Open Student Information System. It's an application
-#    designed to manage the core business of higher education institutions,
-#    such as universities, faculties, institutes and professional schools.
-#    The core business involves the administration of students, teachers,
-#    courses, programs and so on.
+#  OSIS stands for Open Student Information System. It's an application
+#  designed to manage the core business of higher education institutions,
+#  such as universities, faculties, institutes and professional schools.
+#  The core business involves the administration of students, teachers,
+#  courses, programs and so on.
 #
-#    Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
 #
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
 #
-#    A copy of this license - GNU General Public License - is available
-#    at the root of the source code of this program.  If not,
-#    see http://www.gnu.org/licenses/.
+#  A copy of this license - GNU General Public License - is available
+#  at the root of the source code of this program.  If not,
+#  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
 from django.db.models import Prefetch
@@ -29,28 +29,28 @@ from rest_framework.generics import GenericAPIView, ListAPIView, ListCreateAPIVi
 from rest_framework.response import Response
 
 from admission.api import serializers
-from admission.api.permissions import IsListingOrHasNotAlreadyCreatedForDoctoratePermission, IsSupervisionMember
+from admission.api.permissions import IsListingOrHasNotAlreadyCreatedPermission, IsSupervisionMember
 from admission.api.schema import ResponseSpecificSchema
 from admission.contrib.models import DoctorateAdmission
 from admission.ddd.admission.doctorat.preparation.commands import (
     CompleterPropositionCommand,
     GetPropositionCommand,
-    InitierPropositionCommand,
     ListerPropositionsCandidatQuery as ListerPropositionsDoctoralesCandidatQuery,
     ListerPropositionsSuperviseesQuery,
     SupprimerPropositionCommand,
 )
+from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import JustificationRequiseException
 from admission.ddd.admission.formation_continue.commands import (
     ListerPropositionsCandidatQuery as ListerPropositionsFormationContinueCandidatQuery,
 )
 from admission.ddd.admission.formation_generale.commands import (
     ListerPropositionsCandidatQuery as ListerPropositionsFormationGeneraleCandidatQuery,
 )
-from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import JustificationRequiseException
 from admission.utils import get_cached_admission_perm_obj
 from backoffice.settings.rest_framework.common_views import DisplayExceptionsByFieldNameAPIMixin
 from infrastructure.messages_bus import message_bus_instance
 from osis_role.contrib.views import APIPermissionRequiredMixin
+from osis_signature.models import Actor
 
 __all__ = [
     "PropositionListView",
@@ -58,13 +58,10 @@ __all__ = [
     "PropositionViewSet",
 ]
 
-from osis_signature.models import Actor
-
 
 class PropositionListSchema(ResponseSpecificSchema):
     serializer_mapping = {
         'GET': serializers.PropositionSearchSerializer,
-        'POST': (serializers.InitierPropositionCommandSerializer, serializers.PropositionIdentityDTOSerializer),
     }
     # Force schema to return an object (so that we have the results and the links)
     list_force_object = True
@@ -72,20 +69,13 @@ class PropositionListSchema(ResponseSpecificSchema):
     def get_operation_id_base(self, path, method, action):
         return '_proposition' if method == 'POST' else '_propositions'
 
-    def map_choicefield(self, field):
-        schema = super().map_choicefield(field)
-        if field.field_name == "commission_proximite":
-            self.enums["ChoixCommissionProximite"] = schema
-            return {'$ref': "#/components/schemas/ChoixCommissionProximite"}
-        return schema
-
 
 class PropositionListView(APIPermissionRequiredMixin, DisplayExceptionsByFieldNameAPIMixin, ListCreateAPIView):
     name = "propositions"
     schema = PropositionListSchema()
     pagination_class = None
     filter_backends = []
-    permission_classes = [IsListingOrHasNotAlreadyCreatedForDoctoratePermission]
+    permission_classes = [IsListingOrHasNotAlreadyCreatedPermission]
 
     field_name_by_exception = {
         JustificationRequiseException: ['justification'],
@@ -115,13 +105,9 @@ class PropositionListView(APIPermissionRequiredMixin, DisplayExceptionsByFieldNa
         return Response(serializer.data)
 
     def create(self, request, **kwargs):
-        """Create a new proposition"""
-        serializer = serializers.InitierPropositionCommandSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        result = message_bus_instance.invoke(InitierPropositionCommand(**serializer.data))
-        DoctorateAdmission.objects.get(uuid=result.uuid).update_detailed_status()
-        serializer = serializers.PropositionIdentityDTOSerializer(instance=result)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        """Not implemented"""
+        # Only used to know if the creation is possible whatever the context
+        raise NotImplementedError
 
 
 class SupervisedPropositionListSchema(ResponseSpecificSchema):

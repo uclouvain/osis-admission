@@ -23,12 +23,15 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import uuid
 
 import factory
 
+from admission.tests.factories import PdfUploadFactory
 from base.tests.factories.academic_year import AcademicYearFactory
 from osis_profile.models import BelgianHighSchoolDiploma, ForeignHighSchoolDiploma, HighSchoolDiplomaAlternative
 from osis_profile.models.education import Schedule
+from osis_profile.models.enums.education import DiplomaResults, BelgianCommunitiesOfEducation, EducationalType
 from reference.tests.factories.country import CountryFactory
 from reference.tests.factories.language import LanguageFactory
 
@@ -45,6 +48,13 @@ class ScheduleFactory(factory.DjangoModelFactory):
 
 class BelgianHighSchoolDiplomaFactory(HighSchoolDiplomaFactory):
     schedule = factory.SubFactory(ScheduleFactory)
+    result = (DiplomaResults.GT_75_RESULT.name,)
+    high_school_diploma = factory.LazyAttribute(lambda _: [PdfUploadFactory().uuid])
+    enrolment_certificate = factory.LazyAttribute(lambda _: [PdfUploadFactory().uuid])
+    community = (BelgianCommunitiesOfEducation.FRENCH_SPEAKING.name,)
+    educational_type = (EducationalType.PROFESSIONAL_EDUCATION.name,)
+    other_institute_name = ('HS UCL',)
+    other_institute_address = ('Louvain-La-Neuve',)
 
     class Meta:
         model = BelgianHighSchoolDiploma

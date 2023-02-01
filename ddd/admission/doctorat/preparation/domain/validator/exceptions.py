@@ -23,8 +23,9 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
-
-from django.utils.translation import gettext_lazy as _, ngettext_lazy
+from django.utils import formats
+from django.utils.text import capfirst
+from django.utils.translation import gettext_lazy as _
 
 from osis_common.ddd.interface import BusinessException
 
@@ -32,8 +33,8 @@ from osis_common.ddd.interface import BusinessException
 class MaximumPropositionsAtteintException(BusinessException):
     status_code = "PROPOSITION-1"
 
-    def __init__(self, **kwargs):
-        message = _("You've reached the maximum authorized propositions.")
+    def __init__(self, maximum, **kwargs):
+        message = _("You cannot have more than %(max)s applications in progress at the same time.") % {'max': maximum}
         super().__init__(message, **kwargs)
 
 
@@ -306,15 +307,16 @@ class FichierCurriculumNonRenseigneException(BusinessException):
 class AnneesCurriculumNonSpecifieesException(BusinessException):
     status_code = "PROPOSITION-35"
 
-    def __init__(self, annees_manquantes, **kwargs):
+    def __init__(self, periode_manquante, **kwargs):
+        self.periode = periode_manquante
         message = (
-            ngettext_lazy(
-                "Please fill in the 'Previous Experience > Curriculum vitae' tab for the following year: ",
-                "Please fill in the 'Previous Experience > Curriculum vitae' tab for the following years: ",
-                len(annees_manquantes),
-            )
-            + ', '.join(annees_manquantes)
-            + '.'
+            _("From %(debut_periode)s to %(fin_periode)s")
+            % {
+                'debut_periode': capfirst(formats.date_format(periode_manquante[0], 'YEAR_MONTH_FORMAT')),
+                'fin_periode': capfirst(formats.date_format(periode_manquante[1], 'YEAR_MONTH_FORMAT')),
+            }
+            if periode_manquante[0] != periode_manquante[1]
+            else capfirst(formats.date_format(periode_manquante[0], "YEAR_MONTH_FORMAT"))
         )
         super().__init__(message, **kwargs)
 
@@ -425,4 +427,23 @@ class CarteBancaireRemboursementAutreFormatNonCompleteException(BusinessExceptio
 
     def __init__(self, **kwargs):
         message = _("Some fields related to the bank account are missing in the 'Finalization > Accounting' tab.")
+        super().__init__(message, **kwargs)
+
+
+class ExperiencesAcademiquesNonCompleteesException(BusinessException):
+    status_code = "PROPOSITION-49"
+
+    def __init__(self, reference, name, **kwargs):
+        self.reference = reference
+        message = _("The educational experience '%(education_name)s' is not completed.") % {'education_name': name}
+        super().__init__(message, **kwargs)
+
+
+class TypeCompteBancaireRemboursementNonCompleteException(BusinessException):
+    status_code = "PROPOSITION-50"
+
+    def __init__(self, **kwargs):
+        message = _(
+            "You haven't answered to the question about your bank account in the 'Finalization > Accounting' tab."
+        )
         super().__init__(message, **kwargs)

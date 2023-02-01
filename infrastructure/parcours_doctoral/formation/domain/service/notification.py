@@ -64,7 +64,7 @@ from osis_notification.contrib.notification import WebNotification
 class Notification(INotification):
     @classmethod
     def get_admission_link_front(cls, uuid: UUID, tab='') -> str:
-        return settings.ADMISSION_FRONTEND_LINK.format(uuid=uuid) + tab
+        return settings.ADMISSION_FRONTEND_LINK.format(context='doctorate', uuid=uuid) + tab
 
     @classmethod
     def _get_doctorate_title_translation(cls, doctorate: Union[DoctorateProxy, DoctorateAdmission]) -> Promise:
@@ -87,7 +87,7 @@ class Notification(INotification):
         return {
             "student_first_name": doctorate.candidate.first_name,
             "student_last_name": doctorate.candidate.last_name,
-            "doctorate_title": cls._get_doctorate_title_translation(doctorate),
+            "training_title": cls._get_doctorate_title_translation(doctorate),
             "admission_link_front": cls.get_admission_link_front(doctorate.uuid),
             "admission_link_front_doctoral_training": cls.get_admission_link_front(doctorate.uuid, 'doctoral-training'),
             "admission_link_front_complementary_training": cls.get_admission_link_front(

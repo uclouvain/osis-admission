@@ -35,3 +35,6 @@ class FormationDTO(interface.DTO):
     intitule: str
     campus: str
     type: str
+    code_domaine: str
+    campus_inscription: str
+    sigle_entite_gestion: str

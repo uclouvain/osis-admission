@@ -26,6 +26,7 @@
 import attr
 from django.test import SimpleTestCase
 
+from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import MaximumPropositionsAtteintException
 from admission.ddd.admission.formation_continue.commands import InitierPropositionCommand
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutProposition
 from admission.ddd.admission.formation_continue.domain.validator.exceptions import FormationNonTrouveeException
@@ -42,7 +43,7 @@ class TestInitierPropositionService(SimpleTestCase):
 
         self.message_bus = message_bus_in_memory_instance
         self.cmd = InitierPropositionCommand(
-            sigle_formation='ECGE3DP',
+            sigle_formation='USCC1',
             annee_formation=2020,
             matricule_candidat='01234567',
         )
@@ -61,3 +62,9 @@ class TestInitierPropositionService(SimpleTestCase):
         cmd = attr.evolve(self.cmd, sigle_formation=pas_formation_continue)
         with self.assertRaises(FormationNonTrouveeException):
             self.message_bus.invoke(cmd)
+
+    def test_should_empecher_si_trop_demandes_en_parallele(self):
+        for proposition_index in range(5):
+            self.message_bus.invoke(self.cmd)
+        with self.assertRaises(MaximumPropositionsAtteintException):
+            self.message_bus.invoke(self.cmd)

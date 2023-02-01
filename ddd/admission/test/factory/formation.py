@@ -24,12 +24,12 @@
 #
 # ##############################################################################
 import attr
-import factory
+import factory.fuzzy
 
-from admission.ddd.admission.domain.model.formation import FormationIdentity, Formation
+from admission.ddd.admission.domain.model.formation import Formation, FormationIdentity
 
 
-class _FormationIdentityFactory(factory.Factory):
+class FormationIdentityFactory(factory.Factory):
     class Meta:
         model = FormationIdentity
         abstract = False
@@ -42,6 +42,8 @@ class _FormationIdentityFactory(factory.Factory):
 class FormationEtendue(Formation):
     intitule: str
     campus: str
+    campus_inscription: str
+    sigle_entite_gestion: str
 
 
 class FormationFactory(factory.Factory):
@@ -49,8 +51,9 @@ class FormationFactory(factory.Factory):
         model = FormationEtendue
         abstract = False
 
-    entity_id = factory.SubFactory(_FormationIdentityFactory)
+    entity_id = factory.SubFactory(FormationIdentityFactory)
     intitule = factory.Faker('sentence')
+    code_domaine = '01A'
     campus = factory.Iterator(
         [
             "Louvain-la-Neuve",
@@ -62,3 +65,15 @@ class FormationFactory(factory.Factory):
             "St-Gilles",
         ]
     )
+    campus_inscription = factory.Iterator(
+        [
+            "Louvain-la-Neuve",
+            "Mons",
+            "Bruxelles Woluwe",
+            "Namur",
+            "Charleroi",
+            "Tournai",
+            "St-Gilles",
+        ]
+    )
+    sigle_entite_gestion = factory.Sequence(lambda n: 'SIGLE%02d' % n)

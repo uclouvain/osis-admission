@@ -24,6 +24,7 @@
 #
 ##############################################################################
 from admission.ddd.admission.domain.builder.formation_identity import FormationIdentityBuilder
+from admission.ddd.admission.domain.service.i_maximum_propositions import IMaximumPropositionsAutorisees
 from admission.ddd.admission.formation_continue.commands import InitierPropositionCommand
 from admission.ddd.admission.formation_continue.domain.builder.proposition_builder import PropositionBuilder
 from admission.ddd.admission.formation_continue.domain.model.proposition import PropositionIdentity
@@ -35,13 +36,19 @@ def initier_proposition(
     cmd: 'InitierPropositionCommand',
     proposition_repository: 'IPropositionRepository',
     formation_translator: 'IFormationContinueTranslator',
+    maximum_propositions_service: 'IMaximumPropositionsAutorisees',
 ) -> 'PropositionIdentity':
     # GIVEN
     formation_id = FormationIdentityBuilder.build(sigle=cmd.sigle_formation, annee=cmd.annee_formation)
     formation = formation_translator.get(formation_id)
+    maximum_propositions_service.verifier_nombre_propositions_en_cours(cmd.matricule_candidat)
 
     # WHEN
-    proposition = PropositionBuilder().initier_proposition(cmd, formation.entity_id)
+    proposition = PropositionBuilder().initier_proposition(
+        cmd=cmd,
+        formation_id=formation.entity_id,
+        proposition_repository=proposition_repository,
+    )
 
     # THEN
     proposition_repository.save(proposition)

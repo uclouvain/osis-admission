@@ -1,26 +1,26 @@
 # ##############################################################################
 #
-#    OSIS stands for Open Student Information System. It's an application
-#    designed to manage the core business of higher education institutions,
-#    such as universities, faculties, institutes and professional schools.
-#    The core business involves the administration of students, teachers,
-#    courses, programs and so on.
+#  OSIS stands for Open Student Information System. It's an application
+#  designed to manage the core business of higher education institutions,
+#  such as universities, faculties, institutes and professional schools.
+#  The core business involves the administration of students, teachers,
+#  courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
 #
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
 #
-#    A copy of this license - GNU General Public License - is available
-#    at the root of the source code of this program.  If not,
-#    see http://www.gnu.org/licenses/.
+#  A copy of this license - GNU General Public License - is available
+#  at the root of the source code of this program.  If not,
+#  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
 import datetime
@@ -100,23 +100,26 @@ class CddDoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
             DoctorateAdmissionFactory(
                 training__management_entity=first_doctoral_commission,
                 training__academic_year=academic_years[0],
+                training__enrollment_campus__name='Mons',
                 cotutelle=False,
                 supervision_group=promoter.process,
                 financing_type=ChoixTypeFinancement.WORK_CONTRACT.name,
-                financing_work_contract=ChoixTypeContratTravail.UCLOUVAIN_ASSISTANT.name,
+                financing_work_contract=ChoixTypeContratTravail.UCLOUVAIN_SCIENTIFIC_STAFF.name,
                 type=ChoixTypeAdmission.PRE_ADMISSION.name,
                 pre_admission_submission_date=datetime.datetime.now(),
             ),
             DoctorateAdmissionFactory(
+                cotutelle=None,
                 training__management_entity=first_doctoral_commission,
                 training__academic_year=academic_years[0],
+                training__enrollment_campus__name='Mons',
                 status=ChoixStatutProposition.SUBMITTED.name,
                 candidate=candidate.person,
                 financing_type=ChoixTypeFinancement.SEARCH_SCHOLARSHIP.name,
                 other_international_scholarship=BourseRecherche.ARC.name,
-                financing_work_contract=ChoixTypeContratTravail.UCLOUVAIN_ASSISTANT.name,
+                financing_work_contract=ChoixTypeContratTravail.UCLOUVAIN_SCIENTIFIC_STAFF.name,
                 type=ChoixTypeAdmission.ADMISSION.name,
-                admission_submission_date=datetime.datetime.now(),
+                submitted_at=datetime.datetime.now(),
                 status_cdd=ChoixStatutCDD.TO_BE_VERIFIED.name,
                 status_sic=ChoixStatutSIC.VALID.name,
                 submitted_profile={
@@ -139,17 +142,24 @@ class CddDoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
                 },
             ),
             DoctorateAdmissionFactory(
+                cotutelle=None,
                 training__management_entity=second_doctoral_commission,
                 training__academic_year=academic_years[0],
+                training__enrollment_campus__name='Mons',
                 other_international_scholarship='Custom grant',
                 financing_work_contract='Custom working contract',
             ),
+        ]
+        cls.admission_references = [
+            f'M-{ENTITY_CDE}21-{str(cls.admissions[0])}',
+            f'M-{ENTITY_CDE}21-{str(cls.admissions[1])}',
+            f'M-{ENTITY_CDSS}21-{str(cls.admissions[2])}',
         ]
 
         cls.results = [
             DemandeRechercheDTO(
                 uuid=cls.admissions[0].uuid,
-                numero_demande=cls.admissions[0].reference,
+                numero_demande=cls.admission_references[0],
                 statut_demande=cls.admissions[0].status,
                 nom_candidat='{}, {}'.format(
                     cls.admissions[0].candidate.last_name, cls.admissions[0].candidate.first_name
@@ -158,7 +168,7 @@ class CddDoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
                 nationalite=cls.admissions[0].candidate.country_of_citizenship.name
                 if cls.admissions[0].candidate.country_of_citizenship
                 else None,
-                derniere_modification=cls.admissions[0].modified,
+                derniere_modification=cls.admissions[0].modified_at,
                 code_bourse=cls.admissions[0].other_international_scholarship,
                 statut_cdd=None,
                 statut_sic=None,
@@ -166,7 +176,7 @@ class CddDoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
             ),
             DemandeRechercheDTO(
                 uuid=cls.admissions[1].uuid,
-                numero_demande=cls.admissions[1].reference,
+                numero_demande=cls.admission_references[1],
                 statut_cdd=cls.admissions[1].status_cdd,
                 statut_sic=cls.admissions[1].status_sic,
                 statut_demande=cls.admissions[1].status,
@@ -177,13 +187,13 @@ class CddDoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
                 nationalite=cls.admissions[1].candidate.country_of_citizenship.name
                 if cls.admissions[1].candidate.country_of_citizenship
                 else None,
-                derniere_modification=cls.admissions[1].modified,
-                date_confirmation=cls.admissions[1].admission_submission_date,
+                derniere_modification=cls.admissions[1].modified_at,
+                date_confirmation=cls.admissions[1].submitted_at,
                 code_bourse=cls.admissions[1].other_international_scholarship,
             ),
             DemandeRechercheDTO(
                 uuid=cls.admissions[2].uuid,
-                numero_demande=cls.admissions[2].reference,
+                numero_demande=cls.admission_references[2],
                 statut_demande=cls.admissions[2].status,
                 nom_candidat='{}, {}'.format(
                     cls.admissions[2].candidate.last_name, cls.admissions[2].candidate.first_name
@@ -192,7 +202,7 @@ class CddDoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
                 nationalite=cls.admissions[2].candidate.country_of_citizenship.name
                 if cls.admissions[2].candidate.country_of_citizenship
                 else None,
-                derniere_modification=cls.admissions[2].modified,
+                derniere_modification=cls.admissions[2].modified_at,
                 code_bourse=cls.admissions[2].other_international_scholarship,
                 statut_cdd=None,
                 statut_sic=None,
@@ -291,7 +301,7 @@ class CddDoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
         data = {
             'cdds': [ENTITY_CDE],
             'page_size': 10,
-            'numero': self.admissions[1].reference,
+            'numero': str(self.admissions[1]),
             'etat_cdd': self.admissions[1].status_cdd,
             'etat_sic': self.admissions[1].status_sic,
             'matricule_candidat': self.admissions[1].candidate.global_id,

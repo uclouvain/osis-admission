@@ -15,19 +15,19 @@ class Migration(migrations.Migration):
         MailTemplateMigration(
             ADMISSION_EMAIL_GENERIC_ONCE_ADMITTED,
             {
-                'en': "Information about your {doctorate_title} enrollment",
-                'fr-be': "Informations sur votre inscription au doctorat {doctorate_title}",
+                'en': "Information about your {training_title} enrollment",
+                'fr-be': "Informations sur votre inscription au doctorat {training_title}",
             },
             {
                 'en': '''<p>Hello {candidate_first_name} {candidate_last_name},</p>
 
-<p>Here are some information about you enrollment in {doctorate_title}.</p>
+<p>Here are some information about you enrollment in {training_title}.</p>
 
 <p>---<br/>
 The OSIS Team</p>''',
                 'fr-be': '''<p>Bonjour {candidate_first_name} {candidate_last_name},</p>
 
-<p>Voici quelques informations à propos de votre inscription en {doctorate_title}.</p>
+<p>Voici quelques informations à propos de votre inscription en {training_title}.</p>
 
 <p>---<br/>
 L'équipe OSIS</p>''',

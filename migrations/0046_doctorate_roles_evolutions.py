@@ -18,7 +18,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterModelOptions(
             name='adresecretary',
-            options={'verbose_name': 'ADRE secretary', 'verbose_name_plural': 'ADRE Secretaries'},
+            options={'verbose_name': 'Role: ADRE secretary', 'verbose_name_plural': 'Role: ADRE Secretaries'},
         ),
         migrations.CreateModel(
             name='DoctorateReader',
@@ -27,8 +27,8 @@ class Migration(migrations.Migration):
                 ('person', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='+', to='base.person')),
             ],
             options={
-                'verbose_name': 'Doctorate reader',
-                'verbose_name_plural': 'Doctorate readers',
+                'verbose_name': 'Role: Doctorate reader',
+                'verbose_name_plural': 'Role: Doctorate readers',
             },
         ),
     ]

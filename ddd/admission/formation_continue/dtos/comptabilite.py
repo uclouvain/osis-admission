@@ -1,4 +1,4 @@
-# ##############################################################################
+##############################################################################
 #
 #    OSIS stands for Open Student Information System. It's an application
 #    designed to manage the core business of higher education institutions,
@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -22,13 +22,24 @@
 #    at the root of the source code of this program.  If not,
 #    see http://www.gnu.org/licenses/.
 #
-# ##############################################################################
+##############################################################################
+from typing import Optional
 
-from base.models.utils.utils import ChoiceEnum
+import attr
 
-from django.utils.translation import gettext_lazy as _
+from osis_common.ddd import interface
 
 
-class AdmissionType(ChoiceEnum):
-    ADMISSION = _("Admission")
-    PRE_ADMISSION = _("Pre-Admission")
+@attr.dataclass(frozen=True, slots=True)
+class ComptabiliteDTO(interface.DTO):
+    # Affiliations
+    etudiant_solidaire: Optional[bool]
+
+    # Compte bancaire
+    type_numero_compte: Optional[str]
+    numero_compte_iban: Optional[str]
+    iban_valide: Optional[bool]
+    numero_compte_autre_format: Optional[str]
+    code_bic_swift_banque: Optional[str]
+    prenom_titulaire_compte: Optional[str]
+    nom_titulaire_compte: Optional[str]

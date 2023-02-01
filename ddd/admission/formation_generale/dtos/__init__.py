@@ -23,8 +23,10 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
+from admission.ddd.admission.formation_generale.dtos.comptabilite import ComptabiliteDTO
 from admission.ddd.admission.formation_generale.dtos.proposition import PropositionDTO
 
 __all__ = [
     "PropositionDTO",
+    "ComptabiliteDTO"
 ]

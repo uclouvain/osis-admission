@@ -34,14 +34,30 @@ from admission.infrastructure.admission.domain.service.in_memory.bourse import B
 from admission.infrastructure.admission.domain.service.in_memory.calendrier_inscription import (
     CalendrierInscriptionInMemory,
 )
+from admission.infrastructure.admission.domain.service.in_memory.elements_confirmation import (
+    ElementsConfirmationInMemory,
+)
+from admission.infrastructure.admission.domain.service.in_memory.maximum_propositions import (
+    MaximumPropositionsAutoriseesInMemory,
+)
 from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
 from admission.infrastructure.admission.domain.service.in_memory.titres_acces import TitresAccesInMemory
+from admission.infrastructure.admission.formation_generale.domain.service.in_memory.comptabilite import (
+    ComptabiliteInMemoryTranslator,
+)
 from admission.infrastructure.admission.formation_generale.domain.service.in_memory.formation import (
     FormationGeneraleInMemoryTranslator,
+)
+from admission.infrastructure.admission.formation_generale.domain.service.in_memory.notification import (
+    NotificationInMemory,
+)
+from admission.infrastructure.admission.formation_generale.domain.service.in_memory.question_specifique import (
+    QuestionSpecifiqueInMemoryTranslator,
 )
 from admission.infrastructure.admission.formation_generale.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
+from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
 
 _formation_generale_translator = FormationGeneraleInMemoryTranslator()
 _annee_inscription_formation_translator = AnneeInscriptionFormationInMemoryTranslator()
@@ -49,6 +65,10 @@ _proposition_repository = PropositionInMemoryRepository()
 _bourse_translator = BourseInMemoryTranslator()
 _titres_acces = TitresAccesInMemory()
 _profil_candidat_translator = ProfilCandidatInMemoryTranslator()
+_question_specific_translator = QuestionSpecifiqueInMemoryTranslator()
+_academic_year_repository = AcademicYearInMemoryRepository()
+_comptabilite_translator = ComptabiliteInMemoryTranslator()
+_maximum_propositions_autorisees = MaximumPropositionsAutoriseesInMemory()
 
 
 COMMAND_HANDLERS = {
@@ -62,6 +82,7 @@ COMMAND_HANDLERS = {
         proposition_repository=_proposition_repository,
         formation_translator=_formation_generale_translator,
         bourse_translator=_bourse_translator,
+        maximum_propositions_service=_maximum_propositions_autorisees,
     ),
     ListerPropositionsCandidatQuery: lambda msg_bus, cmd: lister_propositions_candidat(
         cmd,
@@ -81,13 +102,16 @@ COMMAND_HANDLERS = {
         cmd,
         proposition_repository=_proposition_repository,
     ),
-    VerifierPropositionCommand: lambda msg_bus, cmd: verifier_proposition(
+    VerifierPropositionQuery: lambda msg_bus, cmd: verifier_proposition(
         cmd,
         proposition_repository=_proposition_repository,
         formation_translator=_formation_generale_translator,
         titres_acces=_titres_acces,
         profil_candidat_translator=_profil_candidat_translator,
         calendrier_inscription=CalendrierInscriptionInMemory(),
+        academic_year_repository=_academic_year_repository,
+        questions_specifiques_translator=_question_specific_translator,
+        maximum_propositions_service=_maximum_propositions_autorisees,
     ),
     SoumettrePropositionCommand: lambda msg_bus, cmd: soumettre_proposition(
         cmd,
@@ -96,9 +120,44 @@ COMMAND_HANDLERS = {
         titres_acces=_titres_acces,
         profil_candidat_translator=_profil_candidat_translator,
         calendrier_inscription=CalendrierInscriptionInMemory(),
+        academic_year_repository=_academic_year_repository,
+        questions_specifiques_translator=_question_specific_translator,
+        element_confirmation=ElementsConfirmationInMemory(),
+        notification=NotificationInMemory(),
+        maximum_propositions_service=_maximum_propositions_autorisees,
     ),
     CompleterCurriculumCommand: lambda msg_bus, cmd: completer_curriculum(
         cmd,
         proposition_repository=_proposition_repository,
+    ),
+    CompleterComptabilitePropositionCommand: lambda msg_bus, cmd: completer_comptabilite_proposition(
+        cmd,
+        proposition_repository=_proposition_repository,
+    ),
+    GetComptabiliteQuery: lambda msg_bus, cmd: recuperer_comptabilite(
+        cmd,
+        comptabilite_translator=_comptabilite_translator,
+    ),
+    VerifierCurriculumQuery: lambda msg_bus, cmd: verifier_curriculum(
+        cmd,
+        proposition_repository=_proposition_repository,
+        profil_candidat_translator=_profil_candidat_translator,
+        academic_year_repository=_academic_year_repository,
+        formation_translator=_formation_generale_translator,
+    ),
+    DeterminerAnneeAcademiqueEtPotQuery: lambda msg_bus, cmd: determiner_annee_academique_et_pot(
+        cmd,
+        proposition_repository=_proposition_repository,
+        formation_translator=_formation_generale_translator,
+        titres_acces=_titres_acces,
+        profil_candidat_translator=_profil_candidat_translator,
+        calendrier_inscription=CalendrierInscriptionInMemory(),
+    ),
+    RecupererElementsConfirmationQuery: lambda msg_bus, cmd: recuperer_elements_confirmation(
+        cmd,
+        proposition_repository=_proposition_repository,
+        element_confirmation=ElementsConfirmationInMemory(),
+        formation_translator=_formation_generale_translator,
+        profil_candidat_translator=_profil_candidat_translator,
     ),
 }

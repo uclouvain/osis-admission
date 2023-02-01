@@ -43,7 +43,7 @@ class ScholarshipAutocompleteTestCase(APITestCase):
         cls.scholarships = [
             DoubleDegreeScholarshipFactory(short_name='DDS-1', long_name='Double degree scholarship 1'),
             DoubleDegreeScholarshipFactory(short_name='DDS-2', long_name='Double degree scholarship 2'),
-            DoctorateScholarshipFactory(short_name='DS-1', long_name='Doctorate scholarship 1', deleted=True),
+            DoctorateScholarshipFactory(short_name='DS-1', long_name='Doctorate scholarship 1', disabled=True),
             DoctorateScholarshipFactory(short_name='DS-1bis', long_name='Doctorate scholarship 1bis'),
             DoctorateScholarshipFactory(short_name='DS-2', long_name='Doctorate scholarship 2'),
             DoctorateScholarshipFactory(short_name='DS-2bis', long_name='Doctorate scholarship 2bis'),
@@ -81,7 +81,7 @@ class ScholarshipAutocompleteTestCase(APITestCase):
             format='json',
             data={
                 'search': '2',
-            }
+            },
         )
         self.assertEqual(response.status_code, 200, response.content)
         self.assertEqual(response.json()['count'], 2)

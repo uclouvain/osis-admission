@@ -26,12 +26,12 @@
 
 import abc
 
+from admission.ddd.admission.repository.i_proposition import IGlobalPropositionRepository
 from admission.ddd.parcours_doctoral.domain.model.doctorat import Doctorat, DoctoratIdentity
 from admission.ddd.parcours_doctoral.dtos import DoctoratDTO
-from osis_common.ddd import interface
 
 
-class IDoctoratRepository(interface.AbstractRepository):
+class IDoctoratRepository(IGlobalPropositionRepository):
     @classmethod
     @abc.abstractmethod
     def get(cls, entity_id: 'DoctoratIdentity') -> 'Doctorat':  # type: ignore[override]

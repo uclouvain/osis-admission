@@ -39,6 +39,9 @@ class TitresAccesInMemory(ITitresAcces):
             diplomation_academique_belge=True,
             potentiel_acces_vae=True,
         ),
+        '0000000002': AdmissionConditionsDTOFactory(
+            diplomation_potentiel_master_belge=True,
+        ),
     }
 
     @classmethod

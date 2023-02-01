@@ -25,6 +25,7 @@
 ##############################################################################
 from admission.ddd.admission.domain.builder.formation_identity import FormationIdentityBuilder
 from admission.ddd.admission.domain.service.i_bourse import IBourseTranslator
+from admission.ddd.admission.domain.service.i_maximum_propositions import IMaximumPropositionsAutorisees
 from admission.ddd.admission.formation_generale.commands import InitierPropositionCommand
 from admission.ddd.admission.formation_generale.domain.builder.proposition_builder import PropositionBuilder
 from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
@@ -37,10 +38,12 @@ def initier_proposition(
     proposition_repository: 'IPropositionRepository',
     formation_translator: 'IFormationGeneraleTranslator',
     bourse_translator: 'IBourseTranslator',
+    maximum_propositions_service: 'IMaximumPropositionsAutorisees',
 ) -> 'PropositionIdentity':
     # GIVEN
     formation_id = FormationIdentityBuilder.build(sigle=cmd.sigle_formation, annee=cmd.annee_formation)
     formation = formation_translator.get(formation_id)
+    maximum_propositions_service.verifier_nombre_propositions_en_cours(cmd.matricule_candidat)
     bourses_ids = bourse_translator.search(
         [
             scholarship
@@ -50,7 +53,12 @@ def initier_proposition(
     )
 
     # WHEN
-    proposition = PropositionBuilder().initier_proposition(cmd, formation.entity_id, bourses_ids)
+    proposition = PropositionBuilder().initier_proposition(
+        cmd=cmd,
+        proposition_repository=proposition_repository,
+        formation_id=formation.entity_id,
+        bourses_ids=bourses_ids,
+    )
 
     # THEN
     proposition_repository.save(proposition)

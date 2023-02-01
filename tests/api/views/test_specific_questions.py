@@ -25,10 +25,12 @@
 # ##############################################################################
 import uuid
 
+import freezegun
 from django.shortcuts import resolve_url
 from rest_framework import status
 from rest_framework.test import APITestCase
 
+from admission.contrib.models import ContinuingEducationAdmission
 from admission.contrib.models.base import BaseAdmission
 from admission.ddd import BE_ISO_CODE, FR_ISO_CODE, EN_ISO_CODE
 from admission.ddd.admission.enums.question_specifique import (
@@ -38,6 +40,10 @@ from admission.ddd.admission.enums.question_specifique import (
     CritereItemFormulaireLangueEtudes,
     CritereItemFormulaireVIP,
     TypeItemFormulaire,
+)
+from admission.ddd.admission.formation_continue.domain.model.enums import (
+    ChoixInscriptionATitre,
+    ChoixTypeAdresseFacturation,
 )
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
@@ -181,6 +187,7 @@ class DoctorateSpecificQuestionListApiTestCase(BaseDoctorateSpecificQuestionList
                     'text': {'en': 'My very short message.', 'fr-be': 'Mon très court message.'},
                     'help_text': {},
                     'configuration': {},
+                    'values': [],
                 },
             ],
         )
@@ -694,6 +701,7 @@ class GeneralEducationSpecificQuestionListApiTestCase(APITestCase):
                     'text': {'en': 'My very short message.', 'fr-be': 'Mon très court message.'},
                     'help_text': {},
                     'configuration': {},
+                    'values': [],
                 },
             ],
         )
@@ -767,6 +775,7 @@ class ContinuingEducationSpecificQuestionListApiTestCase(APITestCase):
                     'text': {'en': 'My very short message.', 'fr-be': 'Mon très court message.'},
                     'help_text': {},
                     'configuration': {},
+                    'values': [],
                 },
             ],
         )
@@ -776,14 +785,14 @@ class GeneralEducationSpecificQuestionUpdateApiTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
         # Data
-        cls.admission = GeneralEducationAdmissionFactory()
+        cls.admission = GeneralEducationAdmissionFactory(training__academic_year__year=2020)
 
         cls.message_instantiation = AdmissionFormItemInstantiationFactory(
             form_item=TextAdmissionFormItemFactory(
                 uuid=uuid.UUID('fe254203-17c7-47d6-95e4-3c5c532da551'),
                 internal_label='text_item',
             ),
-            academic_year=cls.admission.training.academic_year,
+            academic_year__year=2020,
             weight=1,
             tab=Onglets.INFORMATIONS_ADDITIONNELLES.name,
         )
@@ -822,6 +831,7 @@ class GeneralEducationSpecificQuestionUpdateApiTestCase(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
+    @freezegun.freeze_time('2020-11-01')
     def test_with_valid_candidate_user(self):
         self.client.force_authenticate(user=self.candidate.user)
 
@@ -848,22 +858,46 @@ class ContinuingEducationSpecificQuestionUpdateApiTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
         # Data
-        cls.admission = ContinuingEducationAdmissionFactory()
+        cls.admission = ContinuingEducationAdmissionFactory(training__academic_year__year=2020)
+        be_country = CountryFactory(iso_code=BE_ISO_CODE)
 
         cls.message_instantiation = AdmissionFormItemInstantiationFactory(
             form_item=TextAdmissionFormItemFactory(
                 uuid=uuid.UUID('fe254203-17c7-47d6-95e4-3c5c532da551'),
                 internal_label='text_item',
             ),
-            academic_year=cls.admission.training.academic_year,
+            academic_year__year=2020,
             weight=1,
             tab=Onglets.INFORMATIONS_ADDITIONNELLES.name,
         )
 
         cls.update_data = {
-            'specific_question_answers': {
+            'reponses_questions_specifiques': {
                 'fe254203-17c7-47d6-95e4-3c5c532da551': 'My response',
             },
+        }
+
+        cls.update_data_without_custom_address = {
+            **cls.update_data,
+            'inscription_a_titre': ChoixInscriptionATitre.PROFESSIONNEL.name,
+            'nom_siege_social': 'UCL',
+            'numero_unique_entreprise': '1234',
+            'numero_tva_entreprise': '1234A',
+            'adresse_mail_professionnelle': 'john.doe@example.be',
+            'type_adresse_facturation': ChoixTypeAdresseFacturation.RESIDENTIEL.name,
+        }
+
+        cls.update_data_with_custom_address = {
+            **cls.update_data_without_custom_address,
+            'type_adresse_facturation': ChoixTypeAdresseFacturation.AUTRE.name,
+            'adresse_facturation_rue': 'rue du moulin',
+            'adresse_facturation_numero_rue': '1',
+            'adresse_facturation_code_postal': '1348',
+            'adresse_facturation_ville': 'Louvain-La-Neuve',
+            'adresse_facturation_pays': 'BE',
+            'adresse_facturation_destinataire': 'John Doe',
+            'adresse_facturation_boite_postale': 'B1',
+            'adresse_facturation_lieu_dit': 'Avant',
         }
 
         # Users
@@ -894,7 +928,8 @@ class ContinuingEducationSpecificQuestionUpdateApiTestCase(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    def test_with_valid_candidate_user(self):
+    @freezegun.freeze_time('2020-11-01')
+    def test_with_valid_candidate_user_lite_data(self):
         self.client.force_authenticate(user=self.candidate.user)
 
         response = self.client.put(self.url, data=self.update_data)
@@ -913,4 +948,108 @@ class ContinuingEducationSpecificQuestionUpdateApiTestCase(APITestCase):
             {
                 'fe254203-17c7-47d6-95e4-3c5c532da551': 'My response',
             },
+        )
+
+    @freezegun.freeze_time('2020-11-01')
+    def test_with_valid_candidate_user_full_data_without_custom_billing_address(self):
+        self.client.force_authenticate(user=self.candidate.user)
+
+        response = self.client.put(self.url, data=self.update_data_without_custom_address)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.json(), {'uuid': str(self.admission.uuid)})
+
+        admission = ContinuingEducationAdmission.objects.get(uuid=self.admission.uuid)
+
+        self.assertEqual(
+            admission.registration_as,
+            self.update_data_without_custom_address['inscription_a_titre'],
+        )
+        self.assertEqual(
+            admission.head_office_name,
+            self.update_data_without_custom_address['nom_siege_social'],
+        )
+        self.assertEqual(
+            admission.unique_business_number,
+            self.update_data_without_custom_address['numero_unique_entreprise'],
+        )
+        self.assertEqual(
+            admission.vat_number,
+            self.update_data_without_custom_address['numero_tva_entreprise'],
+        )
+        self.assertEqual(
+            admission.professional_email,
+            self.update_data_without_custom_address['adresse_mail_professionnelle'],
+        )
+        self.assertEqual(
+            admission.billing_address_type,
+            self.update_data_without_custom_address['type_adresse_facturation'],
+        )
+
+    @freezegun.freeze_time('2020-11-01')
+    def test_with_valid_candidate_user_full_data_with_custom_billing_address(self):
+        self.client.force_authenticate(user=self.candidate.user)
+
+        response = self.client.put(self.url, data=self.update_data_with_custom_address)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.json(), {'uuid': str(self.admission.uuid)})
+
+        admission = ContinuingEducationAdmission.objects.get(uuid=self.admission.uuid)
+
+        self.assertEqual(
+            admission.registration_as,
+            self.update_data_with_custom_address['inscription_a_titre'],
+        )
+        self.assertEqual(
+            admission.head_office_name,
+            self.update_data_with_custom_address['nom_siege_social'],
+        )
+        self.assertEqual(
+            admission.unique_business_number,
+            self.update_data_with_custom_address['numero_unique_entreprise'],
+        )
+        self.assertEqual(
+            admission.vat_number,
+            self.update_data_with_custom_address['numero_tva_entreprise'],
+        )
+        self.assertEqual(
+            admission.professional_email,
+            self.update_data_with_custom_address['adresse_mail_professionnelle'],
+        )
+        self.assertEqual(
+            admission.billing_address_type,
+            self.update_data_with_custom_address['type_adresse_facturation'],
+        )
+        self.assertEqual(
+            admission.billing_address_recipient,
+            self.update_data_with_custom_address['adresse_facturation_destinataire'],
+        )
+        self.assertEqual(
+            admission.billing_address_street,
+            self.update_data_with_custom_address['adresse_facturation_rue'],
+        )
+        self.assertEqual(
+            admission.billing_address_street_number,
+            self.update_data_with_custom_address['adresse_facturation_numero_rue'],
+        )
+        self.assertEqual(
+            admission.billing_address_postal_box,
+            self.update_data_with_custom_address['adresse_facturation_boite_postale'],
+        )
+        self.assertEqual(
+            admission.billing_address_postal_code,
+            self.update_data_with_custom_address['adresse_facturation_code_postal'],
+        )
+        self.assertEqual(
+            admission.billing_address_city,
+            self.update_data_with_custom_address['adresse_facturation_ville'],
+        )
+        self.assertEqual(
+            admission.billing_address_country.iso_code,
+            self.update_data_with_custom_address['adresse_facturation_pays'],
+        )
+        self.assertEqual(
+            admission.billing_address_place,
+            self.update_data_with_custom_address['adresse_facturation_lieu_dit'],
         )

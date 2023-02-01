@@ -26,6 +26,7 @@
 
 from django.utils.translation import gettext_lazy as _
 
+from base.models.enums.got_diploma import GotDiploma
 from base.models.utils.utils import ChoiceEnum
 
 
@@ -36,3 +37,6 @@ class ChoixStatutProposition(ChoiceEnum):
     SUBMITTED = _('SUBMITTED')
     # After the enrolment step
     ENROLLED = _('ENROLLED')
+
+
+CHOIX_DIPLOME_OBTENU = {GotDiploma.YES.name, GotDiploma.THIS_YEAR.name}

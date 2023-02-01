@@ -30,9 +30,17 @@ from admission.ddd.admission.formation_continue.use_case.write import *
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
+from admission.infrastructure.admission.domain.service.calendrier_inscription import CalendrierInscription
+from admission.infrastructure.admission.domain.service.elements_confirmation import ElementsConfirmation
+from admission.infrastructure.admission.domain.service.maximum_propositions import MaximumPropositionsAutorisees
 from admission.infrastructure.admission.domain.service.profil_candidat import ProfilCandidatTranslator
 from admission.infrastructure.admission.domain.service.titres_acces import TitresAcces
+from admission.infrastructure.admission.formation_continue.domain.service.comptabilite import ComptabiliteTranslator
 from admission.infrastructure.admission.formation_continue.domain.service.formation import FormationContinueTranslator
+from admission.infrastructure.admission.formation_continue.domain.service.notification import Notification
+from admission.infrastructure.admission.formation_continue.domain.service.question_specifique import (
+    QuestionSpecifiqueTranslator,
+)
 from admission.infrastructure.admission.formation_continue.repository.proposition import PropositionRepository
 
 COMMAND_HANDLERS = {
@@ -45,6 +53,7 @@ COMMAND_HANDLERS = {
         cmd,
         proposition_repository=PropositionRepository(),
         formation_translator=FormationContinueTranslator(),
+        maximum_propositions_service=MaximumPropositionsAutorisees(),
     ),
     ListerPropositionsCandidatQuery: lambda msg_bus, cmd: lister_propositions_candidat(
         cmd,
@@ -63,12 +72,15 @@ COMMAND_HANDLERS = {
         cmd,
         proposition_repository=PropositionRepository(),
     ),
-    VerifierPropositionCommand: lambda msg_bus, cmd: verifier_proposition(
+    VerifierPropositionQuery: lambda msg_bus, cmd: verifier_proposition(
         cmd,
         proposition_repository=PropositionRepository(),
         formation_translator=FormationContinueTranslator(),
         titres_acces=TitresAcces(),
         profil_candidat_translator=ProfilCandidatTranslator(),
+        calendrier_inscription=CalendrierInscription(),
+        maximum_propositions_service=MaximumPropositionsAutorisees(),
+        questions_specifiques_translator=QuestionSpecifiqueTranslator(),
     ),
     SoumettrePropositionCommand: lambda msg_bus, cmd: soumettre_proposition(
         cmd,
@@ -76,8 +88,40 @@ COMMAND_HANDLERS = {
         formation_translator=FormationContinueTranslator(),
         titres_acces=TitresAcces(),
         profil_candidat_translator=ProfilCandidatTranslator(),
+        calendrier_inscription=CalendrierInscription(),
+        element_confirmation=ElementsConfirmation(),
+        notification=Notification(),
+        maximum_propositions_service=MaximumPropositionsAutorisees(),
+        questions_specifiques_translator=QuestionSpecifiqueTranslator(),
     ),
     CompleterCurriculumCommand: lambda msg_bus, cmd: completer_curriculum(
+        cmd,
+        proposition_repository=PropositionRepository(),
+    ),
+    DeterminerAnneeAcademiqueEtPotQuery: lambda msg_bus, cmd: determiner_annee_academique_et_pot(
+        cmd,
+        proposition_repository=PropositionRepository(),
+        formation_translator=FormationContinueTranslator(),
+        titres_acces=TitresAcces(),
+        profil_candidat_translator=ProfilCandidatTranslator(),
+        calendrier_inscription=CalendrierInscription(),
+    ),
+    CompleterComptabilitePropositionCommand: lambda msg_bus, cmd: completer_comptabilite_proposition(
+        cmd,
+        proposition_repository=PropositionRepository(),
+    ),
+    GetComptabiliteQuery: lambda msg_bus, cmd: recuperer_comptabilite(
+        cmd,
+        comptabilite_translator=ComptabiliteTranslator(),
+    ),
+    RecupererElementsConfirmationQuery: lambda msg_bus, cmd: recuperer_elements_confirmation(
+        cmd,
+        proposition_repository=PropositionRepository(),
+        element_confirmation=ElementsConfirmation(),
+        formation_translator=FormationContinueTranslator(),
+        profil_candidat_translator=ProfilCandidatTranslator(),
+    ),
+    CompleterQuestionsSpecifiquesCommand: lambda msg_bus, cmd: completer_questions_specifiques(
         cmd,
         proposition_repository=PropositionRepository(),
     ),

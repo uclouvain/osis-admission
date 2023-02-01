@@ -33,8 +33,13 @@ from admission.contrib.models.base import BaseAdmission
 
 __all__ = [
     "SpecificQuestionSerializer",
-    "ModifierQuestionsSpecifiquesCommandSerializer",
+    "ModifierQuestionsSpecifiquesFormationGeneraleCommandSerializer",
+    "ModifierQuestionsSpecifiquesFormationContinueCommandSerializer",
 ]
+
+from admission.ddd.admission.formation_continue.commands import CompleterQuestionsSpecifiquesCommand
+
+from base.utils.serializers import DTOSerializer
 
 
 class SpecificQuestionSerializer(serializers.ModelSerializer):
@@ -44,6 +49,7 @@ class SpecificQuestionSerializer(serializers.ModelSerializer):
     text = serializers.JSONField(source='form_item.text')
     help_text = serializers.JSONField(source='form_item.help_text')
     configuration = serializers.JSONField(source='form_item.configuration')
+    values = serializers.ListField(source='form_item.values', child=serializers.JSONField())
 
     class Meta:
         model = AdmissionFormItemInstantiation
@@ -57,10 +63,11 @@ class SpecificQuestionSerializer(serializers.ModelSerializer):
             'text',
             'help_text',
             'configuration',
+            'values',
         ]
 
 
-class ModifierQuestionsSpecifiquesCommandSerializer(ModelSerializer):
+class ModifierQuestionsSpecifiquesFormationGeneraleCommandSerializer(ModelSerializer):
     specific_question_answers = AnswerToSpecificQuestionField()
 
     class Meta:
@@ -68,3 +75,11 @@ class ModifierQuestionsSpecifiquesCommandSerializer(ModelSerializer):
         fields = [
             'specific_question_answers',
         ]
+
+
+class ModifierQuestionsSpecifiquesFormationContinueCommandSerializer(DTOSerializer):
+    reponses_questions_specifiques = AnswerToSpecificQuestionField()
+    uuid_proposition = None
+
+    class Meta:
+        source = CompleterQuestionsSpecifiquesCommand

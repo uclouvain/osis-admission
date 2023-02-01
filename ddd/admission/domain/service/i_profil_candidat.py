@@ -23,18 +23,22 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import datetime
 from abc import abstractmethod
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 from admission.ddd.admission.doctorat.preparation.dtos import ConditionsComptabiliteDTO, CurriculumDTO
+from admission.ddd.admission.doctorat.preparation.dtos.curriculum import CurriculumAExperiencesDTO
 from admission.ddd.admission.dtos import CoordonneesDTO, EtudesSecondairesDTO, IdentificationDTO
+from base.models.enums.education_group_types import TrainingType
 from osis_common.ddd import interface
 
 
 class IProfilCandidatTranslator(interface.DomainService):
     NB_MAX_ANNEES_CV_REQUISES = 5
     MOIS_DEBUT_ANNEE_ACADEMIQUE = 9
-    MOIS_FIN_ANNEE_ACADEMIQUE = 6
+    MOIS_FIN_ANNEE_ACADEMIQUE = 1
+    NB_MOIS_MIN_VAE = 36
 
     @classmethod
     @abstractmethod
@@ -53,12 +57,17 @@ class IProfilCandidatTranslator(interface.DomainService):
 
     @classmethod
     @abstractmethod
-    def get_etudes_secondaires(cls, matricule: str) -> 'EtudesSecondairesDTO':
+    def get_etudes_secondaires(cls, matricule: str, type_formation: TrainingType) -> 'EtudesSecondairesDTO':
         raise NotImplementedError
 
     @classmethod
     @abstractmethod
     def get_curriculum(cls, matricule: str, annee_courante: int) -> 'CurriculumDTO':
+        raise NotImplementedError
+
+    @classmethod
+    @abstractmethod
+    def get_existence_experiences_curriculum(cls, matricule: str) -> 'CurriculumAExperiencesDTO':
         raise NotImplementedError
 
     @classmethod
@@ -74,8 +83,7 @@ class IProfilCandidatTranslator(interface.DomainService):
     def get_annee_minimale_a_completer_cv(
         cls,
         annee_courante: int,
-        annee_diplome_etudes_secondaires_belges: Optional[int] = None,
-        annee_diplome_etudes_secondaires_etrangeres: Optional[int] = None,
+        annee_diplome_etudes_secondaires: Optional[int] = None,
         annee_derniere_inscription_ucl: Optional[int] = None,
     ):
         return 1 + max(
@@ -83,8 +91,7 @@ class IProfilCandidatTranslator(interface.DomainService):
                 annee
                 for annee in [
                     annee_courante - cls.NB_MAX_ANNEES_CV_REQUISES,
-                    annee_diplome_etudes_secondaires_belges,
-                    annee_diplome_etudes_secondaires_etrangeres,
+                    annee_diplome_etudes_secondaires,
                     annee_derniere_inscription_ucl,
                 ]
                 if annee
@@ -92,7 +99,21 @@ class IProfilCandidatTranslator(interface.DomainService):
         )
 
     @classmethod
-    def est_changement_etablissement(cls, matricule: str, annee_courante: int) -> bool:
+    def get_date_maximale_curriculum(cls):
+        """Retourne la date de la dernière expérience à remplir dans le CV (mois précédent la date du jour)."""
+        return (datetime.date.today().replace(day=1) - datetime.timedelta(days=1)).replace(day=1)
+
+    @classmethod
+    def get_changements_etablissement(cls, matricule: str, annees: List[int]) -> Dict[int, bool]:
         """Inscrit à un autre établissement Belge en N-1
         (informatiquement : curriculum / en N-1 supérieur belge non-diplômé)"""
+        raise NotImplementedError
+
+    @classmethod
+    def est_potentiel_vae(cls, matricule: str) -> bool:
+        raise NotImplementedError
+
+    @classmethod
+    def etudes_secondaires_valorisees(cls, matricule: str) -> bool:
+        """Spécifie si les études secondaires ont été valorisées."""
         raise NotImplementedError

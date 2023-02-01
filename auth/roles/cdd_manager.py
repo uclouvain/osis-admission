@@ -29,6 +29,7 @@ from rules import RuleSet
 
 from admission.auth.predicates import (
     complementary_training_enabled,
+    is_debug,
     is_enrolled,
     is_part_of_doctoral_commission,
     is_pre_admission,
@@ -39,8 +40,8 @@ from osis_role.contrib.models import EntityRoleModel
 
 class CddManager(EntityRoleModel):
     class Meta:
-        verbose_name = _("CDD manager")
-        verbose_name_plural = _("CDD managers")
+        verbose_name = _("Role: CDD manager")
+        verbose_name_plural = _("Role: CDD managers")
         group_name = "cdd_managers"
 
     @classmethod
@@ -96,8 +97,9 @@ class CddManager(EntityRoleModel):
             'admission.delete_activity': is_part_of_doctoral_commission & is_enrolled,
             'admission.refuse_activity': is_part_of_doctoral_commission & is_enrolled,
             'admission.restore_activity': is_part_of_doctoral_commission & is_enrolled,
-            # Internal notes
+            # Management
             'admission.add_internalnote': is_part_of_doctoral_commission,
             'admission.view_internalnote': is_part_of_doctoral_commission,
+            'admission.view_debug_info': is_debug,
         }
         return RuleSet(ruleset)

@@ -25,6 +25,7 @@
 ##############################################################################
 from typing import List, Optional
 
+from admission.ddd import CODE_BACHELIER_VETERINAIRE
 from admission.ddd.admission.domain.enums import TYPES_FORMATION_GENERALE
 from admission.ddd.admission.domain.model.formation import Formation, FormationIdentity
 from admission.ddd.admission.dtos.formation import FormationDTO
@@ -37,43 +38,51 @@ from base.models.enums.education_group_types import TrainingType
 class FormationGeneraleInMemoryTranslator(IFormationGeneraleTranslator):
     trainings = [
         FormationFactory(
-            intitule='Formation ECGE3DP',
-            entity_id__sigle='ECGE3DP',
+            intitule='Bachelier en sciences économiques et de gestion',
+            entity_id__sigle='BACHELIER-ECO',
             entity_id__annee=2022,
             type=TrainingType.BACHELOR,
             campus='Mons',
         ),
         FormationFactory(
-            intitule='Formation ECGE3DP',
-            entity_id__sigle='ECGE3DP',
+            intitule='Bachelier en sciences économiques et de gestion',
+            entity_id__sigle='BACHELIER-ECO',
             entity_id__annee=2021,
             type=TrainingType.BACHELOR,
             campus='Mons',
         ),
         FormationFactory(
-            intitule='Formation ECGE3DP',
-            entity_id__sigle='ECGE3DP',
+            intitule='Bachelier en sciences économiques et de gestion',
+            entity_id__sigle='BACHELIER-ECO',
             entity_id__annee=2020,
             type=TrainingType.BACHELOR,
             campus='Louvain-La-Neuve',
         ),
         FormationFactory(
-            intitule='Formation ECGE3DP',
-            entity_id__sigle='ECGE3DP',
+            intitule='Bachelier en sciences économiques et de gestion',
+            entity_id__sigle='BACHELIER-ECO',
             entity_id__annee=2020,
             type=TrainingType.BACHELOR,
             campus='Mons',
         ),
         FormationFactory(
-            intitule='Formation ECGM3DP',
-            entity_id__sigle='ECGM3DP',
+            intitule='Bachelier vétérinaire',
+            entity_id__sigle=CODE_BACHELIER_VETERINAIRE,
+            entity_id__annee=2020,
+            type=TrainingType.BACHELOR,
+            campus='Mons',
+            code_domaine='11A',
+        ),
+        FormationFactory(
+            intitule='Master en sciences',
+            entity_id__sigle='MASTER-SCI',
             entity_id__annee=2022,
             type=TrainingType.MASTER_M1,
             campus='Louvain-La-Neuve',
         ),
         FormationFactory(
-            intitule='Formation AGRO3DP',
-            entity_id__sigle='AGRO3DP',
+            intitule='Bachelier en sciences économiques et de gestion',
+            entity_id__sigle='BACHELIER-ECO',
             entity_id__annee=2022,
             type=TrainingType.BACHELOR,
             campus='Charleroi',
@@ -100,17 +109,60 @@ class FormationGeneraleInMemoryTranslator(IFormationGeneraleTranslator):
             campus='Charleroi',
         ),
         FormationFactory(
-            intitule='Master SC3DP',
-            entity_id__sigle='SC3DP',
+            intitule='Master en sciences',
+            entity_id__sigle='MASTER-SCI',
             entity_id__annee=2021,
             type=TrainingType.MASTER_M1,
+            campus='Louvain-La-Neuve',
+        ),
+        FormationFactory(
+            intitule='Master en sciences',
+            entity_id__sigle='MASTER-SCI',
+            entity_id__annee=2020,
+            type=TrainingType.MASTER_M1,
+            campus='Louvain-La-Neuve',
+        ),
+        FormationFactory(
+            intitule='Aggrégation en économie',
+            entity_id__sigle='AGGREGATION-ECO',
+            entity_id__annee=2020,
+            type=TrainingType.AGGREGATION,
             campus='Charleroi',
         ),
         FormationFactory(
-            intitule='Master SC3DP',
-            entity_id__sigle='SC3DP',
+            intitule='CAPAES en économie',
+            entity_id__sigle='CAPAES-ECO',
             entity_id__annee=2020,
-            type=TrainingType.MASTER_M1,
+            type=TrainingType.CAPAES,
+            campus='Charleroi',
+        ),
+        FormationFactory(
+            intitule='Bachelier vétérinaire',
+            entity_id__sigle=CODE_BACHELIER_VETERINAIRE,
+            entity_id__annee=2021,
+            type=TrainingType.BACHELOR,
+            campus='Mons',
+            code_domaine='11A',
+        ),
+        FormationFactory(
+            intitule='Aggrégation en économie',
+            entity_id__sigle='AGGREGATION-ECO',
+            entity_id__annee=2021,
+            type=TrainingType.AGGREGATION,
+            campus='Charleroi',
+        ),
+        FormationFactory(
+            intitule='CAPAES en économie',
+            entity_id__sigle='CAPAES-ECO',
+            entity_id__annee=2021,
+            type=TrainingType.CAPAES,
+            campus='Charleroi',
+        ),
+        FormationFactory(
+            intitule='Certificate of participation in business',
+            entity_id__sigle='CERTIF-BUS',
+            entity_id__annee=2021,
+            type=TrainingType.CERTIFICATE_OF_PARTICIPATION.name,
             campus='Charleroi',
         ),
     ]
@@ -122,7 +174,10 @@ class FormationGeneraleInMemoryTranslator(IFormationGeneraleTranslator):
             annee=entity.entity_id.annee,
             intitule=entity.intitule,
             campus=entity.campus,
-            type=entity.type,
+            type=entity.type.name,
+            code_domaine=entity.code_domaine,
+            campus_inscription=entity.campus_inscription,
+            sigle_entite_gestion=entity.sigle_entite_gestion,
         )
 
     @classmethod
@@ -154,6 +209,7 @@ class FormationGeneraleInMemoryTranslator(IFormationGeneraleTranslator):
             return Formation(
                 entity_id=training.entity_id,
                 type=training.type,
+                code_domaine=training.code_domaine,
             )
 
         raise FormationNonTrouveeException

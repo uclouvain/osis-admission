@@ -29,8 +29,8 @@ from osis_mail_template import Token
 
 common_tokens = [
     Token(
-        name='doctorate_title',
-        description=_("Title of the doctorate"),
+        name='training_title',
+        description=_("Title of the training"),
         example="Doctorat en sciences de la santé publique",
     ),
     Token(
@@ -59,3 +59,5 @@ admission_common_tokens = common_tokens + [
 ]
 
 DOCTORATE_ADMISSION_TAG = 'Admission Doctorat'
+GENERAL_ADMISSION_TAG = 'Admission générale'
+CONTINUING_ADMISSION_TAG = 'Admission formation continue'

@@ -23,15 +23,17 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import unicodedata
 from typing import List, Optional
 
 from django.conf import settings
 from django.utils.translation import get_language
 
-from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import Doctorat, DoctoratIdentity
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import Doctorat
 from admission.ddd.admission.doctorat.preparation.domain.service.i_doctorat import IDoctoratTranslator
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import DoctoratNonTrouveException
 from admission.ddd.admission.doctorat.preparation.dtos import DoctoratDTO
+from admission.ddd.admission.domain.model.formation import FormationIdentity
 from base.models.enums.education_group_types import TrainingType
 from ddd.logic.formation_catalogue.commands import SearchFormationsCommand
 from ddd.logic.formation_catalogue.dtos.training import TrainingDto
@@ -46,6 +48,7 @@ class DoctoratTranslator(IDoctoratTranslator):
             annee=dto.year,
             intitule=dto.title_fr if get_language() == settings.LANGUAGE_CODE else dto.title_en,
             sigle_entite_gestion=dto.management_entity_acronym,
+            campus_inscription=dto.enrollment_campus_name,
             campus=dto.main_teaching_campus_name,
             type=dto.type,
         )
@@ -71,7 +74,7 @@ class DoctoratTranslator(IDoctoratTranslator):
         if dtos:
             dto: TrainingDto = dtos[0]
             return Doctorat(
-                entity_id=DoctoratIdentity(sigle=dto.acronym, annee=dto.year),
+                entity_id=FormationIdentity(sigle=dto.acronym, annee=dto.year),
                 entite_ucl_id=UCLEntityIdentity(code=dto.management_entity_acronym),
             )
         raise DoctoratNonTrouveException()
@@ -99,7 +102,12 @@ class DoctoratTranslator(IDoctoratTranslator):
         )
 
         results = [cls._build_dto(dto) for dto in dtos]
-        return list(sorted(results, key=lambda formation: formation.intitule))
+        return list(
+            sorted(
+                results,
+                key=lambda formation: f'{unicodedata.normalize("NFKD", formation.intitule)} {formation.campus}',
+            )
+        )
 
     @classmethod
     def verifier_existence(cls, sigle: str, annee: int) -> bool:  # pragma: no cover

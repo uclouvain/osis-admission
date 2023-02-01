@@ -38,13 +38,8 @@ def completer_comptabilite_proposition(
     proposition_candidat = proposition_repository.get(entity_id=proposition_entity_id)
 
     # WHEN
-    demande_allocation_etudes_fr_be = cmd.demande_allocation_d_etudes_communaute_francaise_belgique
-    annexe_25_26_parent = cmd.annexe_25_26_refugies_apatrides_decision_protection_parent
     proposition_candidat.completer_comptabilite(
         attestation_absence_dette_etablissement=cmd.attestation_absence_dette_etablissement,
-        demande_allocation_etudes_fr_be=demande_allocation_etudes_fr_be,
-        enfant_personnel=cmd.enfant_personnel,
-        attestation_enfant_personnel=cmd.attestation_enfant_personnel,
         type_situation_assimilation=cmd.type_situation_assimilation,
         sous_type_situation_assimilation_1=cmd.sous_type_situation_assimilation_1,
         carte_resident_longue_duree=cmd.carte_resident_longue_duree,
@@ -72,7 +67,7 @@ def completer_comptabilite_proposition(
         attestation_cohabitation_legale=cmd.attestation_cohabitation_legale,
         carte_identite_parent=cmd.carte_identite_parent,
         titre_sejour_longue_duree_parent=cmd.titre_sejour_longue_duree_parent,
-        annexe_25_26_protection_parent=annexe_25_26_parent,
+        annexe_25_26_protection_parent=cmd.annexe_25_26_refugies_apatrides_decision_protection_parent,
         titre_sejour_3_mois_parent=cmd.titre_sejour_3_mois_parent,
         fiches_remuneration_parent=cmd.fiches_remuneration_parent,
         attestation_cpas_parent=cmd.attestation_cpas_parent,
@@ -81,7 +76,6 @@ def completer_comptabilite_proposition(
         attestation_boursier=cmd.attestation_boursier,
         titre_identite_sejour_longue_duree_ue=cmd.titre_identite_sejour_longue_duree_ue,
         titre_sejour_belgique=cmd.titre_sejour_belgique,
-        affiliation_sport=cmd.affiliation_sport,
         etudiant_solidaire=cmd.etudiant_solidaire,
         type_numero_compte=cmd.type_numero_compte,
         numero_compte_iban=cmd.numero_compte_iban,

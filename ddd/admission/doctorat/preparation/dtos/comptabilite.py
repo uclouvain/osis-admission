@@ -35,11 +35,6 @@ class ComptabiliteDTO(interface.DTO):
     # Absence de dettes
     attestation_absence_dette_etablissement: List[str]
 
-    # Réduction des droits d'inscription
-    demande_allocation_d_etudes_communaute_francaise_belgique: Optional[bool]
-    enfant_personnel: Optional[bool]
-    attestation_enfant_personnel: List[str]
-
     # Assimilation
     type_situation_assimilation: Optional[str]
 
@@ -93,7 +88,6 @@ class ComptabiliteDTO(interface.DTO):
     titre_sejour_belgique: List[str]
 
     # Affiliations
-    affiliation_sport: Optional[str]
     etudiant_solidaire: Optional[bool]
 
     # Compte bancaire

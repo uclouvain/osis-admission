@@ -1,31 +1,32 @@
 # ##############################################################################
 #
-#    OSIS stands for Open Student Information System. It's an application
-#    designed to manage the core business of higher education institutions,
-#    such as universities, faculties, institutes and professional schools.
-#    The core business involves the administration of students, teachers,
-#    courses, programs and so on.
+#  OSIS stands for Open Student Information System. It's an application
+#  designed to manage the core business of higher education institutions,
+#  such as universities, faculties, institutes and professional schools.
+#  The core business involves the administration of students, teachers,
+#  courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
 #
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
 #
-#    A copy of this license - GNU General Public License - is available
-#    at the root of the source code of this program.  If not,
-#    see http://www.gnu.org/licenses/.
+#  A copy of this license - GNU General Public License - is available
+#  at the root of the source code of this program.  If not,
+#  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
 import datetime
 from unittest.mock import ANY
 
+import freezegun
 import mock
 import uuid
 from django.shortcuts import resolve_url
@@ -35,9 +36,9 @@ from rest_framework import status
 from rest_framework.status import HTTP_200_OK
 from rest_framework.test import APITestCase
 
-from admission.contrib.models import ContinuingEducationAdmission, DoctorateAdmission, GeneralEducationAdmission
+from admission.contrib.models import ContinuingEducationAdmission, GeneralEducationAdmission
+from admission.ddd import FR_ISO_CODE
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutProposition
-from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.contrib.models.base import BaseAdmission
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
@@ -49,7 +50,7 @@ from admission.tests.factories.curriculum import (
 from admission.tests.factories.form_item import AdmissionFormItemInstantiationFactory, TextAdmissionFormItemFactory
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.roles import CandidateFactory
-from admission.tests.factories.secondary_studies import BelgianHighSchoolDiplomaFactory, ForeignHighSchoolDiplomaFactory
+from base.models.enums.got_diploma import GotDiploma
 from base.models.enums.teaching_type import TeachingTypeEnum
 from base.tests.factories.academic_year import AcademicYearFactory
 from osis_profile.models import ProfessionalExperience, EducationalExperience, EducationalExperienceYear
@@ -67,18 +68,75 @@ from reference.tests.factories.language import LanguageFactory
 from reference.tests.factories.superior_non_university import SuperiorNonUniversityFactory
 
 
+def create_professional_experiences(person):
+    return [
+        ProfessionalExperienceFactory(
+            person=person,
+            institute_name='First institute',
+            start_date=datetime.date(2020, 1, 1),
+            end_date=datetime.date(2021, 1, 1),
+            type=ActivityType.WORK.name,
+            role='Librarian',
+            sector=ActivitySector.PUBLIC.name,
+            activity='Work - activity',
+        ),
+        ProfessionalExperienceFactory(
+            person=person,
+            institute_name='Second institute',
+            start_date=datetime.date(2020, 1, 1),
+            end_date=datetime.date(2020, 9, 1),
+            type=ActivityType.WORK.name,
+            role='Librarian',
+            sector=ActivitySector.PUBLIC.name,
+            activity='Work - activity',
+        ),
+    ]
+
+
+def create_educational_experiences(person, country):
+    experiences = [
+        EducationalExperienceFactory(
+            person=person,
+            country=country,
+            institute_name='UCL',
+            education_name='Computer science 3',
+            obtained_diploma=False,
+            linguistic_regime__code=FR_ISO_CODE,
+        ),
+    ]
+
+    EducationalExperienceYearFactory(
+        educational_experience=experiences[0],
+        academic_year=AcademicYearFactory(year=2020),
+        result=Result.SUCCESS.name,
+    )
+
+    return experiences
+
+
 class BaseCurriculumTestCase:
+    with_incomplete_periods = True
+    with_incomplete_experiences = True
+
     @classmethod
     def setUpTestData(cls):
-        cls.today_date = datetime.date(2020, 11, 1)
-        cls.today_datetime = datetime.datetime(2020, 11, 1)
+        cls.country = CountryFactory()
+        cls.foreign_country = CountryFactory(iso_code=FR_ISO_CODE)
+        cls.academic_year_2018 = AcademicYearFactory(year=2018)
+        cls.academic_year_2019 = AcademicYearFactory(year=2019)
+        cls.academic_year_2020 = AcademicYearFactory(year=2020)
+        cls.linguistic_regime = LanguageFactory(code=FR_ISO_CODE)
+        cls.linguistic_regime_with_translation = LanguageFactory(code='SV')
+        cls.admission_form_item = TextAdmissionFormItemFactory(
+            uuid=uuid.UUID('fe254203-17c7-47d6-95e4-3c5c532da551'),
+            internal_label='text_item',
+        )
+        cls.admission_form_item_instantiation = AdmissionFormItemInstantiationFactory(
+            form_item=cls.admission_form_item,
+            academic_year=cls.academic_year_2018,
+        )
 
-    def setUp(self) -> None:
-        # Mock datetime to return the 2020 year as the current year
-        patcher = mock.patch('base.models.academic_year.timezone')
-        self.addCleanup(patcher.stop)
-        self.mock_foo = patcher.start()
-        self.mock_foo.now.return_value = self.today_datetime
+    def setUp(self):
         # Mock files
         patcher = mock.patch('osis_document.api.utils.get_remote_token', return_value='foobar')
         patcher.start()
@@ -93,132 +151,54 @@ class BaseCurriculumTestCase:
         patched.return_value = '550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92'
         self.addCleanup(patcher.stop)
 
+        # Mock datetime to return the 2020 year as the current year
+        patcher = freezegun.freeze_time('2020-11-01')
+        patcher.start()
+        self.addCleanup(patcher.stop)
 
-@override_settings(ROOT_URLCONF='admission.api.url_v1', OSIS_DOCUMENT_BASE_URL='http://dummyurl/')
-class DoctorateCurriculumTestCase(BaseCurriculumTestCase, APITestCase):
-    @classmethod
-    def setUpTestData(cls):
-        super().setUpTestData()
-        # Mocked data
-        cls.admission = DoctorateAdmissionFactory(
-            status=ChoixStatutProposition.IN_PROGRESS.name,
-        )
-        cls.other_admission = DoctorateAdmissionFactory()
-        cls.country = CountryFactory()
-        cls.academic_year_2018 = AcademicYearFactory(year=2018)
-        cls.academic_year_2020 = AcademicYearFactory(year=2020)
-        cls.user = cls.admission.candidate.user
-        cls.other_user = cls.other_admission.candidate.user
-        cls.user_without_admission = CandidateFactory().person.user
-
-        AdmissionFormItemInstantiationFactory(
-            form_item=TextAdmissionFormItemFactory(
-                uuid=uuid.UUID('fe254203-17c7-47d6-95e4-3c5c532da551'),
-                internal_label='text_item',
-            ),
-            academic_year=cls.admission.doctorate.academic_year,
-        )
-
-        cls.put_data = {
-            'reponses_questions_specifiques': {
-                'fe254203-17c7-47d6-95e4-3c5c532da551': 'My answer !',
-            },
-            'curriculum': ['file1.pdf'],
-            'uuid_proposition': cls.admission.uuid,
-        }
-
-        cls.professional_experiences = [
-            ProfessionalExperienceFactory(
-                person=cls.admission.candidate,
-                institute_name='First institute',
-                start_date=datetime.date(2020, 1, 1),
-                end_date=datetime.date(2021, 1, 1),
-                type=ActivityType.WORK.name,
-                role='Librarian',
-                sector=ActivitySector.PUBLIC.name,
-                activity='Work - activity',
-            ),
-            ProfessionalExperienceFactory(
-                person=cls.admission.candidate,
-                institute_name='Second institute',
-                start_date=datetime.date(2020, 1, 1),
-                end_date=datetime.date(2020, 9, 1),
-                type=ActivityType.WORK.name,
-                role='Librarian',
-                sector=ActivitySector.PUBLIC.name,
-                activity='Work - activity',
-            ),
-        ]
-
-        cls.educational_experiences = [
-            EducationalExperienceFactory(
-                person=cls.admission.candidate,
-                country=cls.country,
-                institute_name='UCL',
-                education_name='Computer science',
-                obtained_diploma=False,
-            ),
-        ]
-
-        EducationalExperienceYearFactory(
-            educational_experience=cls.educational_experiences[0],
-            academic_year=cls.academic_year_2020,
-            result=Result.SUCCESS.name,
-        )
-        cls.today_date = datetime.date(2020, 11, 1)
-        cls.today_datetime = datetime.datetime(2020, 11, 1)
-
-        # Targeted urls
-        cls.agnostic_url = resolve_url('curriculum')
-        cls.admission_url = resolve_url('curriculum', uuid=cls.admission.uuid)
-        cls.complete_admission_url = resolve_url('doctorate_curriculum', uuid=cls.admission.uuid)
+        self.user.person.graduated_from_high_school = ''
+        self.user.person.graduated_from_high_school_year = None
+        self.user.person.last_registration_year = None
+        self.user.person.save()
 
     def test_user_not_logged_assert_not_authorized(self):
         self.client.force_authenticate(user=None)
 
-        response = self.client.get(self.agnostic_url)
+        response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-
-        response = self.client.get(self.admission_url)
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-
-    def test_other_candidate_assert_not_authorized(self):
-        self.client.force_authenticate(user=self.other_user)
-
-        response = self.client.get(self.admission_url)
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_get_curriculum(self):
         self.client.force_authenticate(user=self.user)
 
-        response = self.client.get(self.admission_url)
+        professional_experiences = create_professional_experiences(person=self.user.person)
+        create_educational_experiences(person=self.user.person, country=self.country)
+
+        response = self.client.get(self.url)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         # Check response data
         response = response.json()
-        self.assertEqual(
-            response.get('minimal_year'),
-            1 + self.today_date.year - IProfilCandidatTranslator.NB_MAX_ANNEES_CV_REQUISES,
-        )
+        self.assertEqual(response.get('minimal_date'), '2016-09-01')
+        self.assertEqual(response.get('maximal_date'), '2020-10-01')
         self.assertEqual(
             response.get('professional_experiences'),
             [
                 {
-                    'uuid': str(self.professional_experiences[0].uuid),
+                    'uuid': str(professional_experiences[0].uuid),
                     'institute_name': 'First institute',
                     'start_date': '2020-01-01',
                     'end_date': '2021-01-01',
                     'type': ActivityType.WORK.name,
-                    'valuated_from_admission': [],
+                    'valuated_from_trainings': [],
                 },
                 {
-                    'uuid': str(self.professional_experiences[1].uuid),
+                    'uuid': str(professional_experiences[1].uuid),
                     'institute_name': 'Second institute',
                     'start_date': '2020-01-01',
                     'end_date': '2020-09-01',
                     'type': ActivityType.WORK.name,
-                    'valuated_from_admission': [],
+                    'valuated_from_trainings': [],
                 },
             ],
         )
@@ -230,73 +210,366 @@ class DoctorateCurriculumTestCase(BaseCurriculumTestCase, APITestCase):
                     'institute_name': 'UCL',
                     'institute': None,
                     'program': None,
-                    'education_name': 'Computer science',
-                    'educationalexperienceyear_set': [{'academic_year': 2020}],
-                    'valuated_from_admission': [],
+                    'education_name': 'Computer science 3',
+                    'educationalexperienceyear_set': [{'academic_year': 2020, 'result': Result.SUCCESS.name}],
+                    'valuated_from_trainings': [],
                     'country': self.country.iso_code,
                 }
             ],
         )
+        self.assertEqual(
+            response.get('incomplete_periods'),
+            [
+                'De Septembre 2019 à Décembre 2019',
+                'De Septembre 2018 à Janvier 2019',
+                'De Septembre 2017 à Janvier 2018',
+                'De Septembre 2016 à Janvier 2017',
+            ]
+            if self.with_incomplete_periods
+            else [],
+        )
+
+        self.assertEqual(
+            response.get('incomplete_experiences'),
+            {},
+        )
+
+    def test_get_curriculum_several_educational_experiences(self):
+        create_educational_experiences(person=self.user.person, country=self.country)
+
+        self.client.force_authenticate(user=self.user)
+
+        experience_2018 = EducationalExperienceFactory(
+            person=self.user.person,
+            country=self.country,
+            institute_name='UCL',
+            education_name='Computer science 1',
+            obtained_diploma=False,
+            linguistic_regime__code=FR_ISO_CODE,
+        )
+        experience_2019 = EducationalExperienceFactory(
+            person=self.user.person,
+            country=self.country,
+            institute_name='UCL',
+            education_name='Computer science 2',
+            obtained_diploma=False,
+            linguistic_regime__code=FR_ISO_CODE,
+        )
+        EducationalExperienceYearFactory(
+            educational_experience=experience_2018,
+            academic_year=self.academic_year_2018,
+            result=Result.SUCCESS.name,
+        )
+        EducationalExperienceYearFactory(
+            educational_experience=experience_2019,
+            academic_year=self.academic_year_2019,
+            result=Result.SUCCESS.name,
+        )
+
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Check response data
+        response = response.json()
+
+        experiences = response.get('educational_experiences')
+        self.assertEqual(len(experiences), 3)
+        self.assertEqual(
+            [experience.get('education_name') for experience in experiences],
+            [
+                'Computer science 3',
+                'Computer science 2',
+                'Computer science 1',
+            ],
+        )
+        self.assertEqual(
+            response.get('incomplete_periods'),
+            [
+                'De Septembre 2017 à Janvier 2018',
+                'De Septembre 2016 à Janvier 2017',
+            ]
+            if self.with_incomplete_periods
+            else [],
+        )
 
     def test_get_curriculum_minimal_year_with_last_registration(self):
+        create_educational_experiences(person=self.user.person, country=self.country)
+        create_professional_experiences(person=self.user.person)
+
         self.client.force_authenticate(user=self.user)
 
         self.user.person.last_registration_year = self.academic_year_2018
         self.user.person.save()
-        response = self.client.get(self.admission_url)
+        response = self.client.get(self.url)
 
         # Check response data
         response = response.json()
+        self.assertEqual(response.get('minimal_date'), '2019-09-01')
         self.assertEqual(
-            response.get('minimal_year'),
-            self.academic_year_2018.year + 1,
+            response.get('incomplete_periods'),
+            ['De Septembre 2019 à Décembre 2019'] if self.with_incomplete_periods else [],
         )
 
-        self.user.person.last_registration_year = None
+    def test_get_curriculum_minimal_year_with_diploma(self):
+        self.client.force_authenticate(user=self.user)
+
+        create_educational_experiences(person=self.user.person, country=self.country)
+        create_professional_experiences(person=self.user.person)
+
+        self.user.person.graduated_from_high_school = GotDiploma.YES.name
+        self.user.person.graduated_from_high_school_year = self.academic_year_2018
         self.user.person.save()
 
-    def test_get_curriculum_minimal_year_with_belgian_diploma(self):
-        self.client.force_authenticate(user=self.user)
-
-        belgian_diploma = BelgianHighSchoolDiplomaFactory(
-            person=self.user.person,
-            academic_graduation_year=self.academic_year_2018,
-        )
-
-        response = self.client.get(self.admission_url)
+        response = self.client.get(self.url)
 
         # Check response data
         response = response.json()
+        self.assertEqual(response.get('minimal_date'), '2019-09-01')
+        self.assertEqual(response.get('maximal_date'), '2020-10-01')
         self.assertEqual(
-            response.get('minimal_year'),
-            self.academic_year_2018.year + 1,
+            response.get('incomplete_periods'),
+            ['De Septembre 2019 à Décembre 2019'] if self.with_incomplete_periods else [],
         )
 
-        belgian_diploma.delete()
+    def test_get_curriculum_when_completed(self):
+        create_educational_experiences(person=self.user.person, country=self.country)
+        create_professional_experiences(person=self.user.person)
 
-    def test_get_curriculum_minimal_year_with_foreign_diploma(self):
         self.client.force_authenticate(user=self.user)
 
-        foreign_diploma = ForeignHighSchoolDiplomaFactory(
-            person=self.user.person,
-            academic_graduation_year=self.academic_year_2018,
-        )
-
-        response = self.client.get(self.admission_url)
+        self.user.person.last_registration_year = self.academic_year_2019
+        self.user.person.save()
+        response = self.client.get(self.url)
 
         # Check response data
         response = response.json()
-        self.assertEqual(
-            response.get('minimal_year'),
-            self.academic_year_2018.year + 1,
+        self.assertEqual(response.get('minimal_date'), '2020-09-01')
+        self.assertEqual(response.get('maximal_date'), '2020-10-01')
+        self.assertEqual(response.get('incomplete_periods'), [])
+
+
+class BaseIncompleteCurriculumExperiencesTestCase:
+    def _test_get_curriculum_with_incomplete_educational_experience(self, experience_args, experience_year_args):
+        self.client.force_authenticate(user=self.user)
+
+        default_experience_args = {
+            'person': self.user.person,
+            'country': self.country,
+            'institute_name': 'UCL',
+            'linguistic_regime': self.linguistic_regime,
+            'education_name': 'Computer science 1',
+        }
+        default_experience_args.update(experience_args)
+
+        experience_2018 = EducationalExperienceFactory(
+            **default_experience_args,
         )
 
-        foreign_diploma.delete()
+        default_experience_year_args = {
+            'educational_experience': experience_2018,
+            'academic_year': AcademicYearFactory(year=2018),
+            'result': Result.SUCCESS.name,
+        }
+
+        default_experience_year_args.update(experience_year_args)
+
+        EducationalExperienceYearFactory(
+            **default_experience_year_args,
+        )
+
+        # Transcript missing
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Check response data
+        json_response = response.json()
+        program_name = experience_2018.program.title if experience_2018.program else experience_2018.education_name
+
+        self.assertEqual(
+            json_response.get('incomplete_experiences'),
+            {
+                str(experience_2018.uuid): [f"L'expérience académique '{program_name}' " f"est incomplète."],
+            },
+        )
+
+    def test_get_curriculum_with_incomplete_educational_experience_transcript_missing(self):
+        self._test_get_curriculum_with_incomplete_educational_experience(
+            experience_args={
+                'transcript': [],
+            },
+            experience_year_args={},
+        )
+
+    def test_get_curriculum_with_incomplete_educational_experience_evaluation_type_missing(self):
+        self._test_get_curriculum_with_incomplete_educational_experience(
+            experience_args={
+                'evaluation_type': '',
+            },
+            experience_year_args={},
+        )
+
+    def test_get_curriculum_with_incomplete_educational_experience_transcript_type_missing(self):
+        self._test_get_curriculum_with_incomplete_educational_experience(
+            experience_args={
+                'transcript_type': '',
+            },
+            experience_year_args={},
+        )
+
+    def test_get_curriculum_with_incomplete_educational_experience_diploma_missing(self):
+        self._test_get_curriculum_with_incomplete_educational_experience(
+            experience_args={
+                'obtained_diploma': True,
+                'graduate_degree': [],
+            },
+            experience_year_args={},
+        )
+
+    def test_get_curriculum_with_incomplete_educational_experience_linguistic_regime_missing_for_foreign(self):
+        self._test_get_curriculum_with_incomplete_educational_experience(
+            experience_args={
+                'linguistic_regime': None,
+                'country': self.foreign_country,
+            },
+            experience_year_args={},
+        )
+
+    def test_get_curriculum_with_incomplete_educational_experience_diploma_translation_missing(self):
+        self._test_get_curriculum_with_incomplete_educational_experience(
+            experience_args={
+                'country__iso_code': self.foreign_country.iso_code,
+                'linguistic_regime': self.linguistic_regime_with_translation,
+                'obtained_diploma': True,
+                'graduate_degree_translation': [],
+            },
+            experience_year_args={},
+        )
+
+    def test_get_curriculum_with_incomplete_educational_experience_transcript_translation_missing(self):
+        self._test_get_curriculum_with_incomplete_educational_experience(
+            experience_args={
+                'country__iso_code': self.foreign_country.iso_code,
+                'linguistic_regime': self.linguistic_regime_with_translation,
+                'transcript_translation': [],
+            },
+            experience_year_args={},
+        )
+
+    def test_get_curriculum_with_incomplete_educational_experience_annual_result_missing(self):
+        self._test_get_curriculum_with_incomplete_educational_experience(
+            experience_args={},
+            experience_year_args={
+                'result': '',
+            },
+        )
+
+    def test_get_curriculum_with_incomplete_educational_experience_annual_transcript_missing(self):
+        self._test_get_curriculum_with_incomplete_educational_experience(
+            experience_args={
+                'transcript_type': TranscriptType.ONE_A_YEAR.name,
+            },
+            experience_year_args={
+                'transcript': [],
+            },
+        )
+
+    def test_get_curriculum_with_incomplete_educational_experience_annual_transcript_translation_missing(self):
+        self._test_get_curriculum_with_incomplete_educational_experience(
+            experience_args={
+                'country__iso_code': self.foreign_country.iso_code,
+                'linguistic_regime': self.linguistic_regime_with_translation,
+                'transcript_type': TranscriptType.ONE_A_YEAR.name,
+            },
+            experience_year_args={
+                'transcript_translation': [],
+            },
+        )
+
+    def test_get_curriculum_with_incomplete_educational_experience_annual_credit_missing(self):
+        self._test_get_curriculum_with_incomplete_educational_experience(
+            experience_args={
+                'evaluation_type': EvaluationSystem.NON_EUROPEAN_CREDITS.name,
+            },
+            experience_year_args={
+                'registered_credit_number': None,
+                'acquired_credit_number': None,
+            },
+        )
+
+
+@override_settings(ROOT_URLCONF='admission.api.url_v1', OSIS_DOCUMENT_BASE_URL='http://dummyurl/')
+class DoctorateCurriculumTestCase(BaseCurriculumTestCase, BaseIncompleteCurriculumExperiencesTestCase, APITestCase):
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        # Mocked data
+        cls.admission = DoctorateAdmissionFactory(
+            status=ChoixStatutProposition.IN_PROGRESS.name,
+            training__academic_year=cls.academic_year_2018,
+        )
+        cls.other_admission = DoctorateAdmissionFactory()
+        cls.user = cls.admission.candidate.user
+        cls.other_user = cls.other_admission.candidate.user
+
+        cls.put_data = {
+            'reponses_questions_specifiques': {
+                str(cls.admission_form_item.uuid): 'My answer !',
+            },
+            'curriculum': ['file1.pdf'],
+            'uuid_proposition': cls.admission.uuid,
+        }
+
+        # Targeted urls
+        cls.url = resolve_url('doctorate_curriculum', uuid=cls.admission.uuid)
+
+    def test_other_candidate_assert_not_authorized(self):
+        self.client.force_authenticate(user=self.other_user)
+
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_get_curriculum_with_incomplete_educational_experience_diploma_date_missing(self):
+        self._test_get_curriculum_with_incomplete_educational_experience(
+            experience_args={
+                'obtained_diploma': True,
+                'expected_graduation_date': None,
+            },
+            experience_year_args={},
+        )
+
+    def test_get_curriculum_with_incomplete_educational_experience_dissertation_title_missing(self):
+        self._test_get_curriculum_with_incomplete_educational_experience(
+            experience_args={
+                'obtained_diploma': True,
+                'dissertation_title': '',
+            },
+            experience_year_args={},
+        )
+
+    def test_get_curriculum_with_incomplete_educational_experience_dissertation_score_missing(self):
+        self._test_get_curriculum_with_incomplete_educational_experience(
+            experience_args={
+                'obtained_diploma': True,
+                'dissertation_score': '',
+            },
+            experience_year_args={},
+        )
+
+    def test_get_curriculum_with_incomplete_educational_experience_dissertation_summary_missing(self):
+        self._test_get_curriculum_with_incomplete_educational_experience(
+            experience_args={
+                'obtained_diploma': True,
+                'dissertation_summary': [],
+            },
+            experience_year_args={},
+        )
 
     def test_put_curriculum(self):
         self.client.force_authenticate(user=self.user)
 
-        response = self.client.put(self.complete_admission_url, data=self.put_data)
+        response = self.client.put(self.url, data=self.put_data)
 
         self.assertEqual(response.status_code, HTTP_200_OK)
         updated_admission = BaseAdmission.objects.get(uuid=self.admission.uuid)
@@ -304,29 +577,27 @@ class DoctorateCurriculumTestCase(BaseCurriculumTestCase, APITestCase):
         self.assertEqual(
             updated_admission.specific_question_answers,
             {
-                'fe254203-17c7-47d6-95e4-3c5c532da551': 'My answer !',
+                str(self.admission_form_item.uuid): 'My answer !',
             },
         )
         self.assertEqual(updated_admission.curriculum, [uuid.UUID('550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92')])
 
 
 @override_settings(ROOT_URLCONF='admission.api.url_v1', OSIS_DOCUMENT_BASE_URL='http://dummyurl/')
-class GeneralEducationCurriculumTestCase(BaseCurriculumTestCase, APITestCase):
+class GeneralEducationCurriculumTestCase(
+    BaseCurriculumTestCase, BaseIncompleteCurriculumExperiencesTestCase, APITestCase
+):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        cls.admission = GeneralEducationAdmissionFactory()
-        AdmissionFormItemInstantiationFactory(
-            form_item=TextAdmissionFormItemFactory(
-                uuid=uuid.UUID('fe254203-17c7-47d6-95e4-3c5c532da551'),
-                internal_label='text_item',
-            ),
-            academic_year=cls.admission.training.academic_year,
+        cls.admission = GeneralEducationAdmissionFactory(
+            training__academic_year=cls.academic_year_2018,
         )
+        cls.other_admission = GeneralEducationAdmissionFactory()
 
         cls.put_data = {
             'reponses_questions_specifiques': {
-                'fe254203-17c7-47d6-95e4-3c5c532da551': 'My answer !',
+                str(cls.admission_form_item.uuid): 'My answer !',
             },
             'curriculum': ['file1.pdf'],
             'uuid_proposition': cls.admission.uuid,
@@ -337,14 +608,21 @@ class GeneralEducationCurriculumTestCase(BaseCurriculumTestCase, APITestCase):
 
         # Users
         cls.user = cls.admission.candidate.user
+        cls.other_user = cls.other_admission.candidate.user
 
         # Targeted urls
-        cls.admission_url = resolve_url('general_curriculum', uuid=cls.admission.uuid)
+        cls.url = resolve_url('general_curriculum', uuid=cls.admission.uuid)
+
+    def test_other_candidate_assert_not_authorized(self):
+        self.client.force_authenticate(user=self.other_user)
+
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_put_curriculum(self):
         self.client.force_authenticate(user=self.user)
 
-        response = self.client.put(self.admission_url, data=self.put_data)
+        response = self.client.put(self.url, data=self.put_data)
 
         self.assertEqual(response.status_code, HTTP_200_OK)
         updated_admission = GeneralEducationAdmission.objects.get(uuid=self.admission.uuid)
@@ -352,7 +630,7 @@ class GeneralEducationCurriculumTestCase(BaseCurriculumTestCase, APITestCase):
         self.assertEqual(
             updated_admission.specific_question_answers,
             {
-                'fe254203-17c7-47d6-95e4-3c5c532da551': 'My answer !',
+                str(self.admission_form_item.uuid): 'My answer !',
             },
         )
         self.assertEqual(updated_admission.curriculum, [uuid.UUID('550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92')])
@@ -363,21 +641,20 @@ class GeneralEducationCurriculumTestCase(BaseCurriculumTestCase, APITestCase):
 
 @override_settings(ROOT_URLCONF='admission.api.url_v1', OSIS_DOCUMENT_BASE_URL='http://dummyurl/')
 class ContinuingEducationCurriculumTestCase(BaseCurriculumTestCase, APITestCase):
+    with_incomplete_experiences = False
+    with_incomplete_periods = False
+
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        cls.admission = ContinuingEducationAdmissionFactory()
-        AdmissionFormItemInstantiationFactory(
-            form_item=TextAdmissionFormItemFactory(
-                uuid=uuid.UUID('fe254203-17c7-47d6-95e4-3c5c532da551'),
-                internal_label='text_item',
-            ),
-            academic_year=cls.admission.training.academic_year,
+        cls.admission = ContinuingEducationAdmissionFactory(
+            training__academic_year=cls.academic_year_2018,
         )
+        cls.other_admission = ContinuingEducationAdmissionFactory()
 
         cls.put_data = {
             'reponses_questions_specifiques': {
-                'fe254203-17c7-47d6-95e4-3c5c532da551': 'My answer !',
+                str(cls.admission_form_item.uuid): 'My answer !',
             },
             'curriculum': ['file1.pdf'],
             'uuid_proposition': cls.admission.uuid,
@@ -386,14 +663,21 @@ class ContinuingEducationCurriculumTestCase(BaseCurriculumTestCase, APITestCase)
 
         # Users
         cls.user = cls.admission.candidate.user
+        cls.other_user = cls.other_admission.candidate.user
 
         # Targeted urls
-        cls.admission_url = resolve_url('continuing_curriculum', uuid=cls.admission.uuid)
+        cls.url = resolve_url('continuing_curriculum', uuid=cls.admission.uuid)
+
+    def test_other_candidate_assert_not_authorized(self):
+        self.client.force_authenticate(user=self.other_user)
+
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_put_curriculum(self):
         self.client.force_authenticate(user=self.user)
 
-        response = self.client.put(self.admission_url, data=self.put_data)
+        response = self.client.put(self.url, data=self.put_data)
 
         self.assertEqual(response.status_code, HTTP_200_OK)
         updated_admission = ContinuingEducationAdmission.objects.get(uuid=self.admission.uuid)
@@ -401,11 +685,28 @@ class ContinuingEducationCurriculumTestCase(BaseCurriculumTestCase, APITestCase)
         self.assertEqual(
             updated_admission.specific_question_answers,
             {
-                'fe254203-17c7-47d6-95e4-3c5c532da551': 'My answer !',
+                str(self.admission_form_item.uuid): 'My answer !',
             },
         )
         self.assertEqual(updated_admission.curriculum, [uuid.UUID('550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92')])
         self.assertEqual(updated_admission.diploma_equivalence, [uuid.UUID('550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92')])
+
+
+@override_settings(ROOT_URLCONF='admission.api.url_v1', OSIS_DOCUMENT_BASE_URL='http://dummyurl/')
+class PersonCurriculumTestCase(BaseCurriculumTestCase, APITestCase):
+    with_incomplete_periods = False
+    with_incomplete_experiences = False
+
+    @classmethod
+    def setUpTestData(cls) -> None:
+        super().setUpTestData()
+
+        # Users
+        cls.user = CandidateFactory().person.user
+        cls.other_user = CandidateFactory().person.user
+
+        # Targeted url
+        cls.url = resolve_url('curriculum')
 
 
 @override_settings(ROOT_URLCONF='admission.api.url_v1')
@@ -511,7 +812,7 @@ class ProfessionalExperienceTestCase(APITestCase):
                 'role': 'Librarian',
                 'sector': ActivitySector.PUBLIC.name,
                 'activity': 'Work - activity',
-                'valuated_from_admission': [],
+                'valuated_from_trainings': [],
             },
         )
 
@@ -549,7 +850,7 @@ class ProfessionalExperienceTestCase(APITestCase):
                 'role': 'Helper',
                 'sector': ActivitySector.PRIVATE.name,
                 'activity': 'Volunteering - activity',
-                'valuated_from_admission': [],
+                'valuated_from_trainings': [],
             },
         )
 
@@ -646,6 +947,8 @@ class EducationalExperienceTestCase(APITestCase):
         # Mocked data
         cls.admission = DoctorateAdmissionFactory()
         cls.other_admission = DoctorateAdmissionFactory()
+        cls.general_admission = GeneralEducationAdmissionFactory(candidate=cls.admission.candidate)
+        cls.continuing_admission = ContinuingEducationAdmissionFactory(candidate=cls.admission.candidate)
 
         cls.academic_year_2018 = AcademicYearFactory(year=2018)
         cls.academic_year_2019 = AcademicYearFactory(year=2019)
@@ -655,13 +958,54 @@ class EducationalExperienceTestCase(APITestCase):
         cls.user_without_admission = CandidateFactory().person.user
 
         cls.diploma = DiplomaTitleFactory()
-        cls.linguistic_regime = LanguageFactory()
+        cls.linguistic_regime = LanguageFactory(code=FR_ISO_CODE)
         cls.institute = SuperiorNonUniversityFactory(teaching_type=TeachingTypeEnum.SOCIAL_PROMOTION.name)
 
         cls.today_date = datetime.date(2020, 11, 1)
         cls.today_datetime = datetime.datetime(2020, 11, 1)
 
         cls.country = CountryFactory()
+
+        cls.educational_experience_data = {
+            'program': cls.diploma.uuid,
+            'education_name': 'Biology',
+            'institute_name': '',
+            'country': cls.country.iso_code,
+            'institute': cls.institute.uuid,
+            'institute_address': '',
+            'evaluation_type': EvaluationSystem.ECTS_CREDITS.name,
+            'linguistic_regime': cls.linguistic_regime.code,
+            'transcript_type': TranscriptType.ONE_FOR_ALL_YEARS.name,
+            'obtained_diploma': True,
+            'obtained_grade': Grade.GREATER_DISTINCTION.name,
+            'graduate_degree': [],
+            'graduate_degree_translation': [],
+            'transcript': [],
+            'transcript_translation': [],
+            'rank_in_diploma': '10 on 100',
+            'expected_graduation_date': '2022-08-30',
+            'dissertation_title': 'Title',
+            'dissertation_score': '15/20',
+            'dissertation_summary': [],
+            'educationalexperienceyear_set': [
+                {
+                    'academic_year': 2020,
+                    'result': Result.SUCCESS.name,
+                    'registered_credit_number': 25,
+                    'acquired_credit_number': 25,
+                    'transcript': [],
+                    'transcript_translation': [],
+                },
+                {
+                    'academic_year': 2019,
+                    'result': Result.SUCCESS.name,
+                    'registered_credit_number': 14,
+                    'acquired_credit_number': 14,
+                    'transcript': [],
+                    'transcript_translation': [],
+                },
+            ],
+        }
 
         # Targeted urls
         cls.agnostic_url = resolve_url('cv_educational_experiences-list')
@@ -722,6 +1066,16 @@ class EducationalExperienceTestCase(APITestCase):
         self.admission_details_url = resolve_url(
             'cv_educational_experiences-detail',
             uuid=self.admission.uuid,
+            experience_id=self.educational_experience.uuid,
+        )
+        self.general_admission_details_url = resolve_url(
+            'general_cv_educational_experiences-detail',
+            uuid=self.general_admission.uuid,
+            experience_id=self.educational_experience.uuid,
+        )
+        self.continuing_admission_details_url = resolve_url(
+            'continuing_cv_educational_experiences-detail',
+            uuid=self.continuing_admission.uuid,
             experience_id=self.educational_experience.uuid,
         )
 
@@ -871,7 +1225,7 @@ class EducationalExperienceTestCase(APITestCase):
         self.assertEqual(json_response.get('dissertation_title'), 'Title')
         self.assertEqual(json_response.get('dissertation_score'), '15/20')
         self.assertEqual(json_response.get('dissertation_summary'), [])
-        self.assertEqual(json_response.get('valuated_from_admission'), [])
+        self.assertEqual(json_response.get('valuated_from_trainings'), [])
 
         json_first_educational_experience_year = json_response.get('educationalexperienceyear_set')[0]
         self.assertEqual(json_first_educational_experience_year.get('academic_year'), 2020)
@@ -927,46 +1281,7 @@ class EducationalExperienceTestCase(APITestCase):
 
         response = self.client.put(
             self.admission_details_url,
-            data={
-                'program': self.diploma.uuid,
-                'education_name': 'Biology',
-                'institute_name': '',
-                'country': self.country.iso_code,
-                'institute': self.institute.uuid,
-                'institute_address': '',
-                'evaluation_type': EvaluationSystem.ECTS_CREDITS.name,
-                'linguistic_regime': self.linguistic_regime.code,
-                'transcript_type': TranscriptType.ONE_FOR_ALL_YEARS.name,
-                'obtained_diploma': True,
-                'obtained_grade': Grade.GREATER_DISTINCTION.name,
-                'graduate_degree': [],
-                'graduate_degree_translation': [],
-                'transcript': [],
-                'transcript_translation': [],
-                'rank_in_diploma': '10 on 100',
-                'expected_graduation_date': '2022-08-30',
-                'dissertation_title': 'Title',
-                'dissertation_score': '15/20',
-                'dissertation_summary': [],
-                'educationalexperienceyear_set': [
-                    {
-                        'academic_year': 2020,
-                        'result': Result.SUCCESS.name,
-                        'registered_credit_number': 25,
-                        'acquired_credit_number': 25,
-                        'transcript': [],
-                        'transcript_translation': [],
-                    },
-                    {
-                        'academic_year': 2019,
-                        'result': Result.SUCCESS.name,
-                        'registered_credit_number': 14,
-                        'acquired_credit_number': 14,
-                        'transcript': [],
-                        'transcript_translation': [],
-                    },
-                ],
-            },
+            data=self.educational_experience_data,
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -1001,14 +1316,128 @@ class EducationalExperienceTestCase(APITestCase):
         self.assertEqual(educational_experience_years[1].registered_credit_number, 14)
         self.assertEqual(educational_experience_years[1].acquired_credit_number, 14)
 
-    def test_put_valuated_educational_experience_is_forbidden(self):
+    def test_put_valuated_educational_experience_is_forbidden_with_doctorate_if_valuation_with_doctorate(self):
         self.client.force_authenticate(user=self.user)
 
-        self.educational_experience.valuated_from_admission.set([self.admission])
+        self.educational_experience.valuated_from_admission.set(
+            [
+                self.admission,
+                self.general_admission,
+                self.continuing_admission,
+            ],
+        )
 
         response = self.client.put(
             self.admission_details_url,
             data={},
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_put_valuated_educational_experience_is_allowed_with_doctorate_if_valuation_with_general(self):
+        self.client.force_authenticate(user=self.user)
+
+        self.educational_experience.valuated_from_admission.set([self.general_admission])
+
+        response = self.client.put(
+            self.admission_details_url,
+            data=self.educational_experience_data,
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_put_valuated_educational_experience_is_allowed_with_doctorate_if_valuation_with_continuing(self):
+        self.client.force_authenticate(user=self.user)
+
+        self.educational_experience.valuated_from_admission.set([self.continuing_admission])
+
+        response = self.client.put(
+            self.admission_details_url,
+            data=self.educational_experience_data,
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_put_valuated_educational_experience_is_forbidden_with_general_if_valuation_with_doctorate(self):
+        self.client.force_authenticate(user=self.user)
+
+        self.educational_experience.valuated_from_admission.set(
+            [
+                self.admission,
+                self.general_admission,
+                self.continuing_admission,
+            ],
+        )
+
+        response = self.client.put(
+            self.general_admission_details_url,
+            data={},
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_put_valuated_educational_experience_is_forbidden_with_general_if_valuation_with_general(self):
+        self.client.force_authenticate(user=self.user)
+
+        self.educational_experience.valuated_from_admission.set([self.general_admission])
+
+        response = self.client.put(
+            self.general_admission_details_url,
+            data=self.educational_experience_data,
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_put_valuated_educational_experience_is_allowed_with_general_if_valuation_with_continuing(self):
+        self.client.force_authenticate(user=self.user)
+
+        self.educational_experience.valuated_from_admission.set([self.continuing_admission])
+
+        response = self.client.put(
+            self.general_admission_details_url,
+            data=self.educational_experience_data,
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_put_valuated_educational_experience_is_forbidden_with_continuing_if_valuation_with_doctorate(self):
+        self.client.force_authenticate(user=self.user)
+
+        self.educational_experience.valuated_from_admission.set(
+            [
+                self.admission,
+                self.general_admission,
+                self.continuing_admission,
+            ],
+        )
+
+        response = self.client.put(
+            self.continuing_admission_details_url,
+            data={},
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_put_valuated_educational_experience_is_forbidden_with_continuing_if_valuation_with_general(self):
+        self.client.force_authenticate(user=self.user)
+
+        self.educational_experience.valuated_from_admission.set([self.general_admission])
+
+        response = self.client.put(
+            self.continuing_admission_details_url,
+            data=self.educational_experience_data,
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_put_valuated_educational_experience_is_forbidden_with_continuing_if_valuation_with_continuing(self):
+        self.client.force_authenticate(user=self.user)
+
+        self.educational_experience.valuated_from_admission.set([self.continuing_admission])
+
+        response = self.client.put(
+            self.continuing_admission_details_url,
+            data=self.educational_experience_data,
         )
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)

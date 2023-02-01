@@ -44,17 +44,25 @@ from admission.ddd.admission.doctorat.preparation.domain.model._financement impo
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     BourseRecherche,
-    ChoixAffiliationSport,
     ChoixLangueRedactionThese,
     ChoixSousDomaineSciences,
     ChoixStatutProposition,
     ChoixTypeAdmission,
-    ChoixTypeCompteBancaire,
     ChoixTypeFinancement,
+)
+from admission.ddd.admission.enums import (
+    ChoixTypeCompteBancaire,
+    ChoixAssimilation1,
+    ChoixAssimilation2,
+    ChoixAssimilation3,
+    ChoixAssimilation5,
+    ChoixAssimilation6,
+    LienParente,
     TypeSituationAssimilation,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition, PropositionIdentity
-from admission.ddd.admission.doctorat.preparation.test.factory.doctorat import _DoctoratIdentityFactory
+from admission.ddd.admission.test.factory.formation import FormationIdentityFactory
+from admission.ddd.admission.test.factory.reference import REFERENCE_MEMORY_ITERATOR
 
 
 class _PropositionIdentityFactory(factory.Factory):
@@ -93,16 +101,18 @@ class _ComptabiliteFactory(factory.Factory):
         model = Comptabilite
         abstract = False
 
-    demande_allocation_d_etudes_communaute_francaise_belgique = False
-    enfant_personnel = False
     type_situation_assimilation = TypeSituationAssimilation.AUCUNE_ASSIMILATION
-    affiliation_sport = ChoixAffiliationSport.NON
     etudiant_solidaire = False
     type_numero_compte = ChoixTypeCompteBancaire.NON
 
     attestation_absence_dette_etablissement = ['file_token.pdf']
 
-    attestation_enfant_personnel = ['file_token.pdf']
+    sous_type_situation_assimilation_1 = ChoixAssimilation1.TITULAIRE_CARTE_ETRANGER
+    sous_type_situation_assimilation_2 = ChoixAssimilation2.PROTECTION_SUBSIDIAIRE
+    sous_type_situation_assimilation_3 = ChoixAssimilation3.AUTORISATION_SEJOUR_ET_REVENUS_PROFESSIONNELS
+    relation_parente = LienParente.MERE
+    sous_type_situation_assimilation_5 = ChoixAssimilation5.PRIS_EN_CHARGE_OU_DESIGNE_CPAS
+    sous_type_situation_assimilation_6 = ChoixAssimilation6.A_BOURSE_COOPERATION_DEVELOPPEMENT
 
     carte_resident_longue_duree = ['file_token.pdf']
     carte_cire_sejour_illimite_etranger = ['file_token.pdf']
@@ -153,10 +163,10 @@ class _PropositionFactory(factory.Factory):
         model = Proposition
         abstract = False
 
+    reference = factory.Iterator(REFERENCE_MEMORY_ITERATOR)
     entity_id = factory.SubFactory(_PropositionIdentityFactory)
-    reference = factory.Faker('pystr_format', string_format='2#-300###')
     matricule_candidat = factory.fuzzy.FuzzyText(length=10, chars=string.digits)
-    doctorat_id = factory.SubFactory(_DoctoratIdentityFactory)
+    formation_id = factory.SubFactory(FormationIdentityFactory)
     statut = ChoixStatutProposition.IN_PROGRESS
     projet = factory.SubFactory(_DetailProjetFactory)
     creee_le = factory.Faker('past_datetime')
@@ -176,21 +186,21 @@ class PropositionAdmissionSC3DPMinimaleFactory(_PropositionFactory):
     entity_id = factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-SC3DP')
     type_admission = ChoixTypeAdmission.ADMISSION
     commission_proximite = ChoixSousDomaineSciences.BIOLOGY
-    doctorat_id = factory.SubFactory(_DoctoratIdentityFactory, sigle='SC3DP', annee=2020)
+    formation_id = factory.SubFactory(FormationIdentityFactory, sigle='SC3DP', annee=2020)
     matricule_candidat = '0000000001'
 
 
 class PropositionAdmissionECGE3DPMinimaleFactory(_PropositionFactory):
     entity_id = factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-ECGE3DP')
     type_admission = ChoixTypeAdmission.ADMISSION
-    doctorat_id = factory.SubFactory(_DoctoratIdentityFactory, sigle='ECGE3DP', annee=2020)
+    formation_id = factory.SubFactory(FormationIdentityFactory, sigle='ECGE3DP', annee=2020)
     matricule_candidat = '0123456789'
 
 
 class PropositionAdmissionESP3DPMinimaleFactory(_PropositionFactory):
     entity_id = factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-ESP3DP')
     type_admission = ChoixTypeAdmission.ADMISSION
-    doctorat_id = factory.SubFactory(_DoctoratIdentityFactory, sigle='ESP3DP', annee=2020)
+    formation_id = factory.SubFactory(FormationIdentityFactory, sigle='ESP3DP', annee=2020)
     matricule_candidat = '0123456789'
 
 

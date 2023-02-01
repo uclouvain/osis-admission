@@ -26,17 +26,17 @@
 from typing import List, Optional
 
 import attr
-from admission.ddd.admission.doctorat.preparation.domain.model.enums.comptabilite import (
-    ChoixAffiliationSport,
+
+from admission.ddd.admission.enums import (
     ChoixAssimilation1,
     ChoixAssimilation2,
     ChoixAssimilation3,
     ChoixAssimilation5,
     ChoixAssimilation6,
-    ChoixTypeCompteBancaire,
     LienParente,
     TypeSituationAssimilation,
 )
+from admission.ddd.admission.enums.comptabilite import ChoixTypeCompteBancaire
 
 from osis_common.ddd import interface
 
@@ -45,11 +45,6 @@ from osis_common.ddd import interface
 class Comptabilite(interface.ValueObject):
     # Absence de dettes
     attestation_absence_dette_etablissement: List[str] = attr.Factory(list)
-
-    # Réduction des droits d'inscription
-    demande_allocation_d_etudes_communaute_francaise_belgique: Optional[bool] = None
-    enfant_personnel: Optional[bool] = None
-    attestation_enfant_personnel: List[str] = attr.Factory(list)
 
     # Assimilation
     type_situation_assimilation: Optional[TypeSituationAssimilation] = None
@@ -104,7 +99,6 @@ class Comptabilite(interface.ValueObject):
     titre_sejour_belgique: List[str] = attr.Factory(list)
 
     # Affiliations
-    affiliation_sport: Optional[ChoixAffiliationSport] = None
     etudiant_solidaire: Optional[bool] = None
 
     # Compte bancaire

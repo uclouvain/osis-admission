@@ -33,6 +33,7 @@ from admission.infrastructure.admission.domain.service.annee_inscription_formati
 from admission.infrastructure.admission.domain.service.bourse import BourseTranslator
 from admission.infrastructure.admission.domain.service.profil_candidat import ProfilCandidatTranslator
 from infrastructure.shared_kernel.academic_year.repository.academic_year import AcademicYearRepository
+from .domain.service.comptabilite import ComptabiliteTranslator
 from .domain.service.doctorat import DoctoratTranslator
 from .domain.service.historique import Historique
 from .domain.service.membre_CA import MembreCATranslator
@@ -42,6 +43,9 @@ from .domain.service.question_specifique import QuestionSpecifiqueTranslator
 from .repository.groupe_de_supervision import GroupeDeSupervisionRepository
 from .repository.proposition import PropositionRepository
 from ..validation.repository.demande import DemandeRepository
+from ...domain.service.calendrier_inscription import CalendrierInscription
+from ...domain.service.elements_confirmation import ElementsConfirmation
+from ...domain.service.maximum_propositions import MaximumPropositionsAutorisees
 from ...domain.service.titres_acces import TitresAcces
 
 COMMAND_HANDLERS = {
@@ -51,6 +55,7 @@ COMMAND_HANDLERS = {
         doctorat_translator=DoctoratTranslator(),
         bourse_translator=BourseTranslator(),
         historique=Historique(),
+        maximum_propositions_service=MaximumPropositionsAutorisees(),
     ),
     CompleterPropositionCommand: lambda msg_bus, cmd: completer_proposition(
         cmd,
@@ -85,7 +90,7 @@ COMMAND_HANDLERS = {
         historique=Historique(),
         notification=Notification(),
     ),
-    VerifierPropositionCommand: lambda msg_bus, cmd: verifier_proposition(
+    VerifierPropositionQuery: lambda msg_bus, cmd: verifier_proposition(
         cmd,
         proposition_repository=PropositionRepository(),
         groupe_supervision_repository=GroupeDeSupervisionRepository(),
@@ -93,8 +98,11 @@ COMMAND_HANDLERS = {
         academic_year_repository=AcademicYearRepository(),
         titres_acces=TitresAcces(),
         questions_specifiques_translator=QuestionSpecifiqueTranslator(),
+        formation_translator=DoctoratTranslator(),
+        calendrier_inscription=CalendrierInscription(),
+        maximum_propositions_service=MaximumPropositionsAutorisees(),
     ),
-    VerifierProjetCommand: lambda msg_bus, cmd: verifier_projet(
+    VerifierProjetQuery: lambda msg_bus, cmd: verifier_projet(
         cmd,
         proposition_repository=PropositionRepository(),
         groupe_supervision_repository=GroupeDeSupervisionRepository(),
@@ -145,6 +153,10 @@ COMMAND_HANDLERS = {
         notification=Notification(),
         titres_acces=TitresAcces(),
         questions_specifiques_translator=QuestionSpecifiqueTranslator(),
+        doctorat_translator=DoctoratTranslator(),
+        calendrier_inscription=CalendrierInscription(),
+        element_confirmation=ElementsConfirmation(),
+        maximum_propositions_service=MaximumPropositionsAutorisees(),
     ),
     DefinirCotutelleCommand: lambda msg_bus, cmd: definir_cotutelle(
         cmd,
@@ -190,6 +202,10 @@ COMMAND_HANDLERS = {
         cmd,
         proposition_repository=PropositionRepository(),
     ),
+    GetComptabiliteQuery: lambda msg_bus, cmd: recuperer_comptabilite(
+        cmd,
+        comptabilite_translator=ComptabiliteTranslator(),
+    ),
     ModifierTypeAdmissionCommand: lambda msg_bus, cmd: modifier_type_admission(
         cmd,
         proposition_repository=PropositionRepository(),
@@ -198,5 +214,25 @@ COMMAND_HANDLERS = {
     CompleterCurriculumCommand: lambda msg_bus, cmd: completer_curriculum(
         cmd,
         proposition_repository=PropositionRepository(),
+    ),
+    VerifierCurriculumQuery: lambda msg_bus, cmd: verifier_curriculum(
+        cmd,
+        proposition_repository=PropositionRepository(),
+        profil_candidat_translator=ProfilCandidatTranslator(),
+        academic_year_repository=AcademicYearRepository(),
+    ),
+    DeterminerAnneeAcademiqueEtPotQuery: lambda msg_bus, cmd: determiner_annee_academique_et_pot(
+        cmd,
+        proposition_repository=PropositionRepository(),
+        titres_acces=TitresAcces(),
+        profil_candidat_translator=ProfilCandidatTranslator(),
+        calendrier_inscription=CalendrierInscription(),
+    ),
+    RecupererElementsConfirmationQuery: lambda msg_bus, cmd: recuperer_elements_confirmation(
+        cmd,
+        proposition_repository=PropositionRepository(),
+        element_confirmation=ElementsConfirmation(),
+        formation_translator=DoctoratTranslator(),
+        profil_candidat_translator=ProfilCandidatTranslator(),
     ),
 }

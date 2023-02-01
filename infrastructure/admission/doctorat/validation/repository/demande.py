@@ -1,32 +1,29 @@
 # ##############################################################################
 #
-#    OSIS stands for Open Student Information System. It's an application
-#    designed to manage the core business of higher education institutions,
-#    such as universities, faculties, institutes and professional schools.
-#    The core business involves the administration of students, teachers,
-#    courses, programs and so on.
+#  OSIS stands for Open Student Information System. It's an application
+#  designed to manage the core business of higher education institutions,
+#  such as universities, faculties, institutes and professional schools.
+#  The core business involves the administration of students, teachers,
+#  courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
 #
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
 #
-#    A copy of this license - GNU General Public License - is available
-#    at the root of the source code of this program.  If not,
-#    see http://www.gnu.org/licenses/.
+#  A copy of this license - GNU General Public License - is available
+#  at the root of the source code of this program.  If not,
+#  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
 from typing import List, Optional
-
-from django.conf import settings
-from django.utils.translation import get_language
 
 from admission.contrib.models import DoctorateAdmission
 from admission.contrib.models.doctorate import DemandeProxy
@@ -39,7 +36,6 @@ from admission.ddd.admission.doctorat.validation.domain.service.proposition_iden
 from admission.ddd.admission.doctorat.validation.domain.validator.exceptions import DemandeNonTrouveeException
 from admission.ddd.admission.doctorat.validation.dtos import DemandeDTO, ProfilCandidatDTO
 from admission.ddd.admission.doctorat.validation.repository.i_demande import IDemandeRepository
-from reference.models.country import Country
 
 
 class DemandeRepository(IDemandeRepository):
@@ -85,9 +81,9 @@ class DemandeRepository(IDemandeRepository):
             proposition_id=PropositionIdentityTranslator.convertir_depuis_demande(entity_id),
             statut_cdd=ChoixStatutCDD[admission.status_cdd],
             statut_sic=ChoixStatutSIC[admission.status_sic],
-            modifiee_le=admission.modified,
+            modifiee_le=admission.modified_at,
             pre_admission_confirmee_le=admission.pre_admission_submission_date,
-            admission_confirmee_le=admission.admission_submission_date,
+            admission_confirmee_le=admission.submitted_at,
         )
 
     @classmethod
@@ -122,7 +118,7 @@ class DemandeRepository(IDemandeRepository):
                     },
                 },
                 'pre_admission_submission_date': entity.pre_admission_confirmee_le,
-                'admission_submission_date': entity.admission_confirmee_le,
+                'submitted_at': entity.admission_confirmee_le,
                 'status_cdd': entity.statut_cdd.name,
                 'status_sic': entity.statut_sic.name,
             },
@@ -138,9 +134,9 @@ class DemandeRepository(IDemandeRepository):
             uuid=demande.uuid,
             statut_cdd=demande.status_cdd,
             statut_sic=demande.status_sic,
-            derniere_modification=demande.modified,
+            derniere_modification=demande.modified_at,
             pre_admission_confirmee_le=demande.pre_admission_submission_date,
-            admission_confirmee_le=demande.admission_submission_date,
+            admission_confirmee_le=demande.submitted_at,
             profil_candidat=ProfilCandidatDTO(
                 prenom=demande.submitted_profile.get('identification').get('first_name'),
                 nom=demande.submitted_profile.get('identification').get('last_name'),

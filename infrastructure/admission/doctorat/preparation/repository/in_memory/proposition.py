@@ -1,29 +1,28 @@
 # ##############################################################################
 #
-#    OSIS stands for Open Student Information System. It's an application
-#    designed to manage the core business of higher education institutions,
-#    such as universities, faculties, institutes and professional schools.
-#    The core business involves the administration of students, teachers,
-#    courses, programs and so on.
+#  OSIS stands for Open Student Information System. It's an application
+#  designed to manage the core business of higher education institutions,
+#  such as universities, faculties, institutes and professional schools.
+#  The core business involves the administration of students, teachers,
+#  courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
 #
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
 #
-#    A copy of this license - GNU General Public License - is available
-#    at the root of the source code of this program.  If not,
-#    see http://www.gnu.org/licenses/.
+#  A copy of this license - GNU General Public License - is available
+#  at the root of the source code of this program.  If not,
+#  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import uuid
 from dataclasses import dataclass
 from typing import List, Optional
 
@@ -52,10 +51,9 @@ from admission.ddd.admission.doctorat.preparation.test.factory.proposition impor
     PropositionPreAdmissionSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory,
     PropositionPreAdmissionSC3DPMinimaleFactory,
 )
-from admission.infrastructure.admission.doctorat.preparation.repository.in_memory._comptabilite import (
-    get_dto_accounting_from_domain_model,
-)
+from admission.ddd.admission.repository.i_proposition import formater_reference
 from admission.infrastructure.admission.domain.service.in_memory.bourse import BourseInMemoryTranslator
+from admission.infrastructure.admission.repository.in_memory.proposition import GlobalPropositionInMemoryRepository
 from base.ddd.utils.in_memory_repository import InMemoryGenericRepository
 from base.models.enums.education_group_types import TrainingType
 
@@ -74,9 +72,14 @@ class _Doctorat:
     intitule_secteur: str
     campus: str
     type: str
+    campus_inscription: str
 
 
-class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepository):
+class PropositionInMemoryRepository(
+    GlobalPropositionInMemoryRepository,
+    InMemoryGenericRepository,
+    IPropositionRepository,
+):
     doctorats = {
         ("SC3DP", 2020): _Doctorat(
             intitule="Doctorat en sciences",
@@ -84,6 +87,7 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
             intitule_secteur="Secteur des sciences et technologies",
             campus="Louvain-la-Neuve",
             type=TrainingType.PHD.name,
+            campus_inscription="Louvain-la-Neuve",
         ),
         ("ECGE3DP", 2020): _Doctorat(
             intitule="Doctorat en sciences économiques et de gestion",
@@ -91,6 +95,7 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
             intitule_secteur="Secteur des sciences humaines",
             campus="Louvain-la-Neuve",
             type=TrainingType.PHD.name,
+            campus_inscription="Louvain-la-Neuve",
         ),
         ("ESP3DP", 2020): _Doctorat(
             intitule="Doctorat en sciences de la santé publique",
@@ -98,6 +103,7 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
             intitule_secteur="Secteur des sciences de la santé",
             campus="Mons",
             type=TrainingType.PHD.name,
+            campus_inscription="Mons",
         ),
     }
     candidats = {
@@ -157,13 +163,9 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
         return list(returned)
 
     @classmethod
-    def get_next_reference(cls):
-        return len(cls.entities) + 1
-
-    @classmethod
     def search_dto(
         cls,
-        numero: Optional[str] = '',
+        numero: Optional[int] = None,
         matricule_candidat: Optional[str] = '',
         etat: Optional[str] = '',
         nationalite: Optional[str] = '',
@@ -182,7 +184,7 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
         returned = cls.entities
         if matricule_candidat:
             returned = filter(lambda p: p.matricule_candidat == matricule_candidat, returned)
-        if numero:
+        if numero is not None:
             returned = filter(lambda p: p.reference == numero, returned)
         if type:
             returned = filter(lambda p: p.type_admission.name == type, returned)
@@ -195,9 +197,9 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
         return cls._load_dto(cls.get(entity_id))
 
     @classmethod
-    def _load_dto(cls, proposition):
+    def _load_dto(cls, proposition: 'Proposition'):
         candidat = cls.candidats[proposition.matricule_candidat]
-        doctorat = cls.doctorats[(proposition.doctorat_id.sigle, proposition.doctorat_id.annee)]
+        doctorat = cls.doctorats[(proposition.formation_id.sigle, proposition.formation_id.annee)]
         bourse_erasmus_dto = (
             BourseInMemoryTranslator.get_dto(uuid=str(proposition.bourse_erasmus_mundus_id.uuid))
             if proposition.bourse_erasmus_mundus_id
@@ -211,15 +213,24 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
         return PropositionDTO(
             uuid=proposition.entity_id.uuid,
             type_admission=proposition.type_admission.name,
-            reference=proposition.reference,
-            doctorat=DoctoratDTO(
-                proposition.doctorat_id.sigle,
-                proposition.doctorat_id.annee,
-                doctorat.intitule,
-                doctorat.code_secteur,
-                doctorat.campus,
-                doctorat.type,
+            reference=formater_reference(
+                reference=proposition.reference,
+                nom_campus_inscription=doctorat.campus_inscription,
+                sigle_entite_gestion=doctorat.code_secteur,
+                annee=proposition.formation_id.annee,
             ),
+            doctorat=DoctoratDTO(
+                sigle=proposition.formation_id.sigle,
+                annee=proposition.formation_id.annee,
+                intitule=doctorat.intitule,
+                sigle_entite_gestion=doctorat.code_secteur,
+                campus=doctorat.campus,
+                type=doctorat.type,
+                campus_inscription=doctorat.campus_inscription,
+            ),
+            annee_calculee=proposition.annee_calculee,
+            pot_calcule=proposition.pot_calcule and proposition.pot_calcule.name or '',
+            date_fin_pot=None,
             matricule_candidat=proposition.matricule_candidat,
             justification=proposition.justification,
             code_secteur_formation=doctorat.code_secteur,
@@ -258,7 +269,6 @@ class PropositionInMemoryRepository(InMemoryGenericRepository, IPropositionRepos
             nationalite_candidat=candidat.nationalite,
             modifiee_le=proposition.modifiee_le,
             erreurs=[],
-            comptabilite=get_dto_accounting_from_domain_model(proposition.comptabilite),
             reponses_questions_specifiques=proposition.reponses_questions_specifiques,
             bourse_erasmus_mundus=bourse_erasmus_dto,
             curriculum=proposition.curriculum,

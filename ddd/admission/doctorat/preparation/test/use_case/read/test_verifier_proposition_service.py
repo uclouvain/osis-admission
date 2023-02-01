@@ -1,26 +1,26 @@
 # ##############################################################################
 #
-#    OSIS stands for Open Student Information System. It's an application
-#    designed to manage the core business of higher education institutions,
-#    such as universities, faculties, institutes and professional schools.
-#    The core business involves the administration of students, teachers,
-#    courses, programs and so on.
+#  OSIS stands for Open Student Information System. It's an application
+#  designed to manage the core business of higher education institutions,
+#  such as universities, faculties, institutes and professional schools.
+#  The core business involves the administration of students, teachers,
+#  courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
 #
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
 #
-#    A copy of this license - GNU General Public License - is available
-#    at the root of the source code of this program.  If not,
-#    see http://www.gnu.org/licenses/.
+#  A copy of this license - GNU General Public License - is available
+#  at the root of the source code of this program.  If not,
+#  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
 import datetime
@@ -29,26 +29,28 @@ from unittest import TestCase
 import freezegun
 import mock
 
+from admission.ddd import BE_ISO_CODE, FR_ISO_CODE
 from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import PropositionIdentityBuilder
-from admission.ddd.admission.doctorat.preparation.commands import VerifierPropositionCommand
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
-    ChoixAssimilation1,
-    ChoixAssimilation2,
-    ChoixAssimilation3,
-    ChoixAssimilation5,
+from admission.ddd.admission.doctorat.preparation.commands import VerifierPropositionQuery
+from admission.ddd.admission.enums import (
+    ChoixTypeCompteBancaire,
+    TypeSituationAssimilation,
     ChoixAssimilation6,
+    ChoixAssimilation5,
+    LienParente,
+    ChoixAssimilation3,
+    ChoixAssimilation2,
+    ChoixAssimilation1,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixEtatSignature,
     ChoixStatutSignatureGroupeDeSupervision,
-    ChoixTypeCompteBancaire,
-    LienParente,
-    TypeSituationAssimilation,
 )
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     AbsenceDeDetteNonCompleteeException,
     AdresseCorrespondanceNonCompleteeException,
     AdresseDomicileLegalNonCompleteeException,
     AnneesCurriculumNonSpecifieesException,
-    AssimilationNonCompleteeException,
     CandidatNonTrouveException,
     CarteBancaireRemboursementAutreFormatNonCompleteException,
     CarteBancaireRemboursementIbanNonCompleteException,
@@ -64,8 +66,10 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
     ProcedureDemandeSignatureNonLanceeException,
     PropositionNonApprouveeParMembresCAException,
     PropositionNonApprouveeParPromoteurException,
-    ReductionDesDroitsInscriptionNonCompleteeException,
     SpecifierNOMASiDejaInscritException,
+    ExperiencesAcademiquesNonCompleteesException,
+    TypeCompteBancaireRemboursementNonCompleteException,
+    AssimilationNonCompleteeException,
 )
 from admission.ddd.admission.doctorat.preparation.test.factory.groupe_de_supervision import (
     _SignatureMembreCAFactory,
@@ -77,7 +81,9 @@ from admission.ddd.admission.doctorat.preparation.test.factory.proposition impor
 from admission.ddd.admission.domain.validator.exceptions import (
     QuestionsSpecifiquesCurriculumNonCompleteesException,
     QuestionsSpecifiquesEtudesSecondairesNonCompleteesException,
+    NombrePropositionsSoumisesDepasseException,
 )
+from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutProposition
 from admission.infrastructure.admission.doctorat.preparation.repository.in_memory.groupe_de_supervision import (
     GroupeDeSupervisionInMemoryRepository,
 )
@@ -88,14 +94,21 @@ from admission.infrastructure.admission.domain.service.in_memory.profil_candidat
     DiplomeEtudeSecondaire,
     ExperienceNonAcademique,
     ProfilCandidatInMemoryTranslator,
+    ExperienceAcademique,
+    AnneeExperienceAcademique,
 )
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import AcademicYear, AcademicYearIdentity
 from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
+from osis_profile.models.enums.curriculum import Result, TranscriptType, Grade, EvaluationSystem
 
 
 class TestVerifierPropositionServiceCommun(TestCase):
+    def assertHasInstance(self, container, cls, msg=None):
+        if not any(isinstance(obj, cls) for obj in container):
+            self.fail(msg or f"No instance of '{cls}' has been found")
+
     def setUp(self) -> None:
         self.candidat_translator = ProfilCandidatInMemoryTranslator()
         self.proposition_repository = PropositionInMemoryRepository()
@@ -111,6 +124,9 @@ class TestVerifierPropositionServiceCommun(TestCase):
         self.addCleanup(self.proposition_repository.reset)
         self.message_bus = message_bus_in_memory_instance
         self.academic_year_repository = AcademicYearInMemoryRepository()
+        self.etudes_secondaires = self.candidat_translator.etudes_secondaires.get(self.candidat.matricule)
+        if self.etudes_secondaires:
+            self.etudes_secondaires.annee_diplome_etudes_secondaires = None
 
         for annee in range(2016, 2021):
             self.academic_year_repository.save(
@@ -126,7 +142,7 @@ class TestVerifierPropositionServiceCommun(TestCase):
         patcher.start()
         self.addCleanup(patcher.stop)
 
-        self.cmd = VerifierPropositionCommand(uuid_proposition=self.proposition.entity_id.uuid)
+        self.cmd = VerifierPropositionQuery(uuid_proposition=self.proposition.entity_id.uuid)
 
 
 class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
@@ -291,6 +307,13 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
                 self.message_bus.invoke(self.cmd)
             self.assertTrue(any(member for member in context.exception.exceptions if isinstance(member, exception)))
 
+    def _test_should_retourner_erreur_si_assimilation_incomplete(self, comptabilite, exception):
+        with mock.patch.object(self.candidat, 'pays_nationalite', 'CA'):
+            self._test_should_retourner_erreur_si_comptabilite_incomplete(
+                comptabilite=comptabilite,
+                exception=exception,
+            )
+
     def test_should_retourner_erreur_si_questions_specifiques_pas_completees_pour_curriculum(self):
         with mock.patch.multiple(
             self.proposition,
@@ -321,35 +344,10 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
                 QuestionsSpecifiquesEtudesSecondairesNonCompleteesException,
             )
 
-    def _test_should_retourner_erreur_si_assimilation_incomplete(self, comptabilite, exception):
-        with mock.patch.object(self.candidat, 'pays_nationalite', 'CA'):
-            self._test_should_retourner_erreur_si_comptabilite_incomplete(
-                comptabilite=comptabilite,
-                exception=exception,
-            )
-
-    def test_should_retourner_erreur_si_comptabilite_incomplete_pour_document_enfant_personnel(self):
-        self._test_should_retourner_erreur_si_comptabilite_incomplete(
-            comptabilite=_ComptabiliteFactory(enfant_personnel=True, attestation_enfant_personnel=[]),
-            exception=ReductionDesDroitsInscriptionNonCompleteeException,
-        )
-
     def test_should_retourner_erreur_si_absence_dettes_incomplet(self):
         self._test_should_retourner_erreur_si_comptabilite_incomplete(
             comptabilite=_ComptabiliteFactory(attestation_absence_dette_etablissement=[]),
             exception=AbsenceDeDetteNonCompleteeException,
-        )
-
-    def test_should_retourner_erreur_si_comptabilite_incomplete_pour_indication_enfant_personnel(self):
-        self._test_should_retourner_erreur_si_comptabilite_incomplete(
-            comptabilite=_ComptabiliteFactory(enfant_personnel=None),
-            exception=ReductionDesDroitsInscriptionNonCompleteeException,
-        )
-
-    def test_should_retourner_erreur_si_comptabilite_incomplete_pour_indication_demande_allocation_fr_be(self):
-        self._test_should_retourner_erreur_si_comptabilite_incomplete(
-            comptabilite=_ComptabiliteFactory(demande_allocation_d_etudes_communaute_francaise_belgique=None),
-            exception=ReductionDesDroitsInscriptionNonCompleteeException,
         )
 
     def test_should_retourner_erreur_si_assimilation_incomplete_pour_type_situation(self):
@@ -361,6 +359,7 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
     def test_should_retourner_erreur_si_assimilation_incomplete_pour_type_assimilation_1(self):
         comptabilite = _ComptabiliteFactory(
             type_situation_assimilation=TypeSituationAssimilation.AUTORISATION_ETABLISSEMENT_OU_RESIDENT_LONGUE_DUREE,
+            sous_type_situation_assimilation_1='',
         )
         self._test_should_retourner_erreur_si_assimilation_incomplete(
             comptabilite=comptabilite,
@@ -412,10 +411,10 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
         )
 
     def test_should_retourner_erreur_si_assimilation_incomplete_pour_type_assimilation_2(self):
+        situation = TypeSituationAssimilation.REFUGIE_OU_APATRIDE_OU_PROTECTION_SUBSIDIAIRE_TEMPORAIRE
         comptabilite = _ComptabiliteFactory(
-            type_situation_assimilation=TypeSituationAssimilation[
-                'REFUGIE_OU_APATRIDE_OU_PROTECTION_SUBSIDIAIRE_TEMPORAIRE'
-            ],
+            type_situation_assimilation=situation,
+            sous_type_situation_assimilation_2='',
         )
         self._test_should_retourner_erreur_si_assimilation_incomplete(
             comptabilite=comptabilite,
@@ -423,8 +422,9 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
         )
 
     def test_should_retourner_erreur_si_assimilation_2_incomplete_pour_refugie(self):
+        situation = TypeSituationAssimilation.REFUGIE_OU_APATRIDE_OU_PROTECTION_SUBSIDIAIRE_TEMPORAIRE
         comptabilite = _ComptabiliteFactory(
-            type_situation_assimilation=TypeSituationAssimilation.AUTORISATION_ETABLISSEMENT_OU_RESIDENT_LONGUE_DUREE,
+            type_situation_assimilation=situation,
             sous_type_situation_assimilation_2=ChoixAssimilation2.REFUGIE,
             carte_a_b_refugie=[],
         )
@@ -434,8 +434,9 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
         )
 
     def test_should_retourner_erreur_si_assimilation_2_incomplete_pour_demandeur_asile_annexe(self):
+        situation = TypeSituationAssimilation.REFUGIE_OU_APATRIDE_OU_PROTECTION_SUBSIDIAIRE_TEMPORAIRE
         comptabilite = _ComptabiliteFactory(
-            type_situation_assimilation=TypeSituationAssimilation.AUTORISATION_ETABLISSEMENT_OU_RESIDENT_LONGUE_DUREE,
+            type_situation_assimilation=situation,
             sous_type_situation_assimilation_2=ChoixAssimilation2.DEMANDEUR_ASILE,
             annexe_25_26_refugies_apatrides=[],
         )
@@ -445,8 +446,9 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
         )
 
     def test_should_retourner_erreur_si_assimilation_2_incomplete_pour_demandeur_asile_attestation(self):
+        situation = TypeSituationAssimilation.REFUGIE_OU_APATRIDE_OU_PROTECTION_SUBSIDIAIRE_TEMPORAIRE
         comptabilite = _ComptabiliteFactory(
-            type_situation_assimilation=TypeSituationAssimilation.AUTORISATION_ETABLISSEMENT_OU_RESIDENT_LONGUE_DUREE,
+            type_situation_assimilation=situation,
             sous_type_situation_assimilation_2=ChoixAssimilation2.DEMANDEUR_ASILE,
             attestation_immatriculation=[],
         )
@@ -456,8 +458,9 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
         )
 
     def test_should_retourner_erreur_si_assimilation_2_incomplete_pour_protection_subsidiaire_carte_a_b(self):
+        situation = TypeSituationAssimilation.REFUGIE_OU_APATRIDE_OU_PROTECTION_SUBSIDIAIRE_TEMPORAIRE
         comptabilite = _ComptabiliteFactory(
-            type_situation_assimilation=TypeSituationAssimilation.AUTORISATION_ETABLISSEMENT_OU_RESIDENT_LONGUE_DUREE,
+            type_situation_assimilation=situation,
             sous_type_situation_assimilation_2=ChoixAssimilation2.PROTECTION_SUBSIDIAIRE,
             carte_a_b=[],
         )
@@ -467,8 +470,9 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
         )
 
     def test_should_retourner_erreur_si_assimilation_2_incomplete_pour_protection_subsidiaire_decision(self):
+        situation = TypeSituationAssimilation.REFUGIE_OU_APATRIDE_OU_PROTECTION_SUBSIDIAIRE_TEMPORAIRE
         comptabilite = _ComptabiliteFactory(
-            type_situation_assimilation=TypeSituationAssimilation.AUTORISATION_ETABLISSEMENT_OU_RESIDENT_LONGUE_DUREE,
+            type_situation_assimilation=situation,
             sous_type_situation_assimilation_2=ChoixAssimilation2.PROTECTION_SUBSIDIAIRE,
             decision_protection_subsidiaire=[],
         )
@@ -478,8 +482,9 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
         )
 
     def test_should_retourner_erreur_si_assimilation_2_incomplete_pour_protection_temporaire(self):
+        situation = TypeSituationAssimilation.REFUGIE_OU_APATRIDE_OU_PROTECTION_SUBSIDIAIRE_TEMPORAIRE
         comptabilite = _ComptabiliteFactory(
-            type_situation_assimilation=TypeSituationAssimilation.AUTORISATION_ETABLISSEMENT_OU_RESIDENT_LONGUE_DUREE,
+            type_situation_assimilation=situation,
             sous_type_situation_assimilation_2=ChoixAssimilation2.PROTECTION_TEMPORAIRE,
             decision_protection_temporaire=[],
         )
@@ -493,6 +498,7 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
             type_situation_assimilation=TypeSituationAssimilation[
                 'AUTORISATION_SEJOUR_ET_REVENUS_PROFESSIONNELS_OU_REMPLACEMENT'
             ],
+            sous_type_situation_assimilation_3='',
         )
         self._test_should_retourner_erreur_si_assimilation_incomplete(
             comptabilite=comptabilite,
@@ -567,6 +573,7 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
                 'PROCHE_A_NATIONALITE_UE_OU_RESPECTE_ASSIMILATIONS_1_A_4'
             ],
             relation_parente=LienParente.COHABITANT_LEGAL,
+            sous_type_situation_assimilation_5='',
         )
         self._test_should_retourner_erreur_si_assimilation_incomplete(
             comptabilite=comptabilite,
@@ -579,6 +586,7 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
                 'PROCHE_A_NATIONALITE_UE_OU_RESPECTE_ASSIMILATIONS_1_A_4'
             ],
             sous_type_situation_assimilation_5=ChoixAssimilation5.A_NATIONALITE_UE,
+            relation_parente='',
         )
         self._test_should_retourner_erreur_si_assimilation_incomplete(
             comptabilite=comptabilite,
@@ -748,6 +756,7 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
     def test_should_retourner_erreur_si_assimilation_incomplete_pour_type_assimilation_6(self):
         comptabilite = _ComptabiliteFactory(
             type_situation_assimilation=TypeSituationAssimilation.A_BOURSE_ARTICLE_105_PARAGRAPH_2,
+            sous_type_situation_assimilation_6='',
         )
         self._test_should_retourner_erreur_si_assimilation_incomplete(
             comptabilite=comptabilite,
@@ -757,7 +766,7 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
     def test_should_retourner_erreur_si_assimilation_6_incomplete_bourse_communaute_francaise(self):
         comptabilite = _ComptabiliteFactory(
             type_situation_assimilation=TypeSituationAssimilation.A_BOURSE_ARTICLE_105_PARAGRAPH_2,
-            sous_type_situation_assimilation_5=ChoixAssimilation6.A_BOURSE_ETUDES_COMMUNAUTE_FRANCAISE,
+            sous_type_situation_assimilation_6=ChoixAssimilation6.A_BOURSE_ETUDES_COMMUNAUTE_FRANCAISE,
             decision_bourse_cfwb=[],
         )
         self._test_should_retourner_erreur_si_assimilation_incomplete(
@@ -768,7 +777,7 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
     def test_should_retourner_erreur_si_assimilation_6_incomplete_bourse_cooperation_developpement(self):
         comptabilite = _ComptabiliteFactory(
             type_situation_assimilation=TypeSituationAssimilation.A_BOURSE_ARTICLE_105_PARAGRAPH_2,
-            sous_type_situation_assimilation_5=ChoixAssimilation6.A_BOURSE_COOPERATION_DEVELOPPEMENT,
+            sous_type_situation_assimilation_6=ChoixAssimilation6.A_BOURSE_COOPERATION_DEVELOPPEMENT,
             attestation_boursier=[],
         )
         self._test_should_retourner_erreur_si_assimilation_incomplete(
@@ -778,7 +787,7 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
 
     def test_should_retourner_erreur_si_assimilation_7_incomplete_titre_identite_sejour_longue_duree_ue(self):
         comptabilite = _ComptabiliteFactory(
-            type_situation_assimilation=TypeSituationAssimilation.AUTORISATION_ETABLISSEMENT_OU_RESIDENT_LONGUE_DUREE,
+            type_situation_assimilation=TypeSituationAssimilation.RESIDENT_LONGUE_DUREE_UE_HORS_BELGIQUE,
             titre_identite_sejour_longue_duree_ue=[],
         )
         self._test_should_retourner_erreur_si_assimilation_incomplete(
@@ -788,13 +797,22 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
 
     def test_should_retourner_erreur_si_assimilation_7_incomplete_titre_sejour_belgique(self):
         comptabilite = _ComptabiliteFactory(
-            type_situation_assimilation=TypeSituationAssimilation.AUTORISATION_ETABLISSEMENT_OU_RESIDENT_LONGUE_DUREE,
+            type_situation_assimilation=TypeSituationAssimilation.RESIDENT_LONGUE_DUREE_UE_HORS_BELGIQUE,
             type_numero_compte=ChoixTypeCompteBancaire.AUTRE_FORMAT,
             titre_sejour_belgique=[],
         )
         self._test_should_retourner_erreur_si_assimilation_incomplete(
             comptabilite=comptabilite,
             exception=AssimilationNonCompleteeException,
+        )
+
+    def test_should_retourner_erreur_si_type_compte_bancaire_non_renseigne(self):
+        comptabilite = _ComptabiliteFactory(
+            type_numero_compte=None,
+        )
+        self._test_should_retourner_erreur_si_comptabilite_incomplete(
+            comptabilite=comptabilite,
+            exception=TypeCompteBancaireRemboursementNonCompleteException,
         )
 
     def test_should_retourner_erreur_si_compte_bancaire_iban_incomplet(self):
@@ -867,53 +885,144 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
             exception=CarteBancaireRemboursementAutreFormatNonCompleteException,
         )
 
+    def test_should_verification_renvoyer_erreur_si_trop_de_demandes_envoyees(self):
+        propositions = self.proposition_repository.search(matricule_candidat=self.candidat.matricule)
+        last_proposition = propositions.pop()
+        for proposition in propositions:
+            proposition.statut = ChoixStatutProposition.IN_PROGRESS
+        last_proposition.statut = ChoixStatutProposition.SUBMITTED
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            self.message_bus.invoke(self.cmd)
+
+        self.assertHasInstance(context.exception.exceptions, NombrePropositionsSoumisesDepasseException)
+
 
 class TestVerifierPropositionServiceCurriculumYears(TestVerifierPropositionServiceCommun):
     def setUp(self) -> None:
         super().setUp()
-        for experience in (
-            self.candidat_translator.experiences_academiques + self.candidat_translator.experiences_non_academiques
-        ):
-            experience.personne = 'other'
+        for experience_acad in self.candidat_translator.experiences_academiques:
+            experience_acad.personne = 'other'
+
+        for experience_non_acad in self.candidat_translator.experiences_non_academiques:
+            experience_non_acad.personne = 'other'
+
+        self.experience_academiques_complete = ExperienceAcademique(
+            personne=self.candidat.matricule,
+            communaute_fr=True,
+            pays=BE_ISO_CODE,
+            annees=[
+                AnneeExperienceAcademique(
+                    annee=2016,
+                    resultat=Result.SUCCESS.name,
+                    releve_notes=['releve_notes.pdf'],
+                    traduction_releve_notes=['traduction_releve_notes.pdf'],
+                    credits_acquis=10,
+                    credits_inscrits=10,
+                ),
+                AnneeExperienceAcademique(
+                    annee=2017,
+                    resultat=Result.SUCCESS.name,
+                    releve_notes=['releve_notes.pdf'],
+                    traduction_releve_notes=['traduction_releve_notes.pdf'],
+                    credits_acquis=10,
+                    credits_inscrits=10,
+                ),
+                AnneeExperienceAcademique(
+                    annee=2018,
+                    resultat=Result.SUCCESS.name,
+                    releve_notes=['releve_notes.pdf'],
+                    traduction_releve_notes=['traduction_releve_notes.pdf'],
+                    credits_acquis=10,
+                    credits_inscrits=10,
+                ),
+                AnneeExperienceAcademique(
+                    annee=2019,
+                    resultat=Result.SUCCESS.name,
+                    releve_notes=['releve_notes.pdf'],
+                    traduction_releve_notes=['traduction_releve_notes.pdf'],
+                    credits_acquis=10,
+                    credits_inscrits=10,
+                ),
+                AnneeExperienceAcademique(
+                    annee=2020,
+                    resultat=Result.SUCCESS.name,
+                    releve_notes=['releve_notes.pdf'],
+                    traduction_releve_notes=['traduction_releve_notes.pdf'],
+                    credits_acquis=10,
+                    credits_inscrits=10,
+                ),
+            ],
+            traduction_releve_notes=['traduction_releve_notes.pdf'],
+            releve_notes=['releve.pdf'],
+            type_releve_notes=TranscriptType.ONE_FOR_ALL_YEARS.name,
+            a_obtenu_diplome=False,
+            diplome=['diplome.pdf'],
+            traduction_diplome=['traduction_diplome.pdf'],
+            regime_linguistique='',
+            note_memoire='10',
+            rang_diplome='10',
+            resume_memoire=['resume.pdf'],
+            titre_memoire='Titre',
+            date_prevue_delivrance_diplome=datetime.date(2020, 9, 1),
+            uuid='9cbdf4db-2454-4cbf-9e48-55d2a9881ee6',
+            grade_obtenu=Grade.GREAT_DISTINCTION.name,
+            systeme_evaluation=EvaluationSystem.ECTS_CREDITS.name,
+            nom_formation='Formation AA',
+        )
+
+    def assertAnneesCurriculum(self, exceptions, messages):
+        messages_renvoyes = []
+        for exception in exceptions:
+            self.assertIsInstance(
+                exception, (AnneesCurriculumNonSpecifieesException, ExperiencesAcademiquesNonCompleteesException)
+            )
+            messages_renvoyes.append(exception.message)
+
+        self.assertCountEqual(messages, messages_renvoyes)
 
     def test_should_retourner_erreur_si_5_dernieres_annees_curriculum_non_saisies(self):
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.cmd)
 
-        exception = context.exception.exceptions.pop()
-        self.assertIsInstance(exception, AnneesCurriculumNonSpecifieesException)
-        self.assertIn('2020', exception.message)
-        self.assertIn('2019', exception.message)
-        self.assertIn('2018', exception.message)
-        self.assertIn('2017', exception.message)
-        self.assertIn('2016', exception.message)
+        self.assertAnneesCurriculum(
+            context.exception.exceptions,
+            [
+                'De Septembre 2016 à Janvier 2017',
+                'De Septembre 2017 à Janvier 2018',
+                'De Septembre 2018 à Janvier 2019',
+                'De Septembre 2019 à Janvier 2020',
+                'De Septembre 2020 à Octobre 2020',
+            ],
+        )
 
     def test_should_retourner_erreur_si_dernieres_annees_curriculum_non_saisies_avec_diplome_secondaire_belge(self):
-        self.candidat_translator.diplomes_etudes_secondaires_belges.append(
-            DiplomeEtudeSecondaire(personne=self.candidat.matricule, annee=2018)
-        )
+        self.etudes_secondaires.annee_diplome_etudes_secondaires = 2018
 
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.cmd)
 
-        exception = context.exception.exceptions.pop()
-        self.assertIsInstance(exception, AnneesCurriculumNonSpecifieesException)
-        self.assertIn('2020', exception.message)
-        self.assertIn('2019', exception.message)
+        self.assertAnneesCurriculum(
+            context.exception.exceptions,
+            [
+                'De Septembre 2019 à Janvier 2020',
+                'De Septembre 2020 à Octobre 2020',
+            ],
+        )
 
     def test_should_retourner_erreur_si_dernieres_annees_curriculum_non_saisies_avec_diplome_secondaire_etranger(self):
-        self.candidat_translator.diplomes_etudes_secondaires_etrangers.append(
-            DiplomeEtudeSecondaire(personne=self.candidat.matricule, annee=2017)
-        )
+        self.etudes_secondaires.annee_diplome_etudes_secondaires = 2017
 
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.cmd)
 
-        exception = context.exception.exceptions.pop()
-        self.assertIsInstance(exception, AnneesCurriculumNonSpecifieesException)
-        self.assertIn('2020', exception.message)
-        self.assertIn('2019', exception.message)
-        self.assertIn('2018', exception.message)
+        self.assertAnneesCurriculum(
+            context.exception.exceptions,
+            [
+                'De Septembre 2018 à Janvier 2019',
+                'De Septembre 2019 à Janvier 2020',
+                'De Septembre 2020 à Octobre 2020',
+            ],
+        )
 
     def test_should_retourner_erreur_si_dernieres_annees_curriculum_non_saisies_avec_ancienne_inscription_ucl(self):
         with mock.patch.multiple(
@@ -924,14 +1033,10 @@ class TestVerifierPropositionServiceCurriculumYears(TestVerifierPropositionServi
             with self.assertRaises(MultipleBusinessExceptions) as context:
                 self.message_bus.invoke(self.cmd)
 
-        exception = context.exception.exceptions.pop()
-        self.assertIsInstance(exception, AnneesCurriculumNonSpecifieesException)
-        self.assertIn('2020', exception.message)
+        self.assertAnneesCurriculum(context.exception.exceptions, ['De Septembre 2020 à Octobre 2020'])
 
     def test_should_retourner_erreur_si_annees_curriculum_non_saisies_avec_diplome_et_ancienne_inscription(self):
-        self.candidat_translator.diplomes_etudes_secondaires_belges.append(
-            DiplomeEtudeSecondaire(personne=self.candidat.matricule, annee=2017)
-        )
+        self.etudes_secondaires.annee_diplome_etudes_secondaires = 2017
 
         with mock.patch.multiple(
             self.candidat,
@@ -941,15 +1046,16 @@ class TestVerifierPropositionServiceCurriculumYears(TestVerifierPropositionServi
             with self.assertRaises(MultipleBusinessExceptions) as context:
                 self.message_bus.invoke(self.cmd)
 
-        exception = context.exception.exceptions.pop()
-        self.assertIsInstance(exception, AnneesCurriculumNonSpecifieesException)
-        self.assertIn('2020', exception.message)
-        self.assertIn('2019', exception.message)
+        self.assertAnneesCurriculum(
+            context.exception.exceptions,
+            [
+                'De Septembre 2019 à Janvier 2020',
+                'De Septembre 2020 à Octobre 2020',
+            ],
+        )
 
     def test_should_verification_etre_ok_si_une_experiences_professionnelles_couvre_exactement(self):
-        self.candidat_translator.diplomes_etudes_secondaires_belges.append(
-            DiplomeEtudeSecondaire(personne=self.candidat.matricule, annee=2017)
-        )
+        self.etudes_secondaires.annee_diplome_etudes_secondaires = 2017
         self.candidat_translator.experiences_non_academiques.append(
             ExperienceNonAcademique(
                 personne=self.candidat.matricule,
@@ -962,9 +1068,7 @@ class TestVerifierPropositionServiceCurriculumYears(TestVerifierPropositionServi
         self.candidat_translator.experiences_non_academiques.pop()
 
     def test_should_verification_etre_ok_si_une_experiences_professionnelles_couvre_davantage(self):
-        self.candidat_translator.diplomes_etudes_secondaires_belges.append(
-            DiplomeEtudeSecondaire(personne=self.candidat.matricule, annee=2017)
-        )
+        self.etudes_secondaires.annee_diplome_etudes_secondaires = 2017
         self.candidat_translator.experiences_non_academiques.append(
             ExperienceNonAcademique(
                 personne=self.candidat.matricule,
@@ -975,10 +1079,27 @@ class TestVerifierPropositionServiceCurriculumYears(TestVerifierPropositionServi
         proposition_id = self.message_bus.invoke(self.cmd)
         self.assertEqual(proposition_id.uuid, self.proposition.entity_id.uuid)
 
-    def test_should_verification_renvoyer_exception_si_une_experiences_professionnelles_couvre_pas_debut(self):
-        self.candidat_translator.diplomes_etudes_secondaires_belges.append(
-            DiplomeEtudeSecondaire(personne=self.candidat.matricule, annee=2017)
+    def test_should_verification_etre_ok_si_une_des_experiences_professionnelles_couvre_davantage(self):
+        self.etudes_secondaires.annee_diplome_etudes_secondaires = 2017
+        self.candidat_translator.experiences_non_academiques.extend(
+            [
+                ExperienceNonAcademique(
+                    personne=self.candidat.matricule,
+                    date_debut=datetime.date(2018, 8, 1),
+                    date_fin=datetime.date(2021, 7, 31),
+                ),
+                ExperienceNonAcademique(
+                    personne=self.candidat.matricule,
+                    date_debut=datetime.date(2017, 8, 1),
+                    date_fin=datetime.date(2018, 7, 31),
+                ),
+            ],
         )
+        proposition_id = self.message_bus.invoke(self.cmd)
+        self.assertEqual(proposition_id.uuid, self.proposition.entity_id.uuid)
+
+    def test_should_verification_renvoyer_exception_si_une_experiences_professionnelles_couvre_pas_debut(self):
+        self.etudes_secondaires.annee_diplome_etudes_secondaires = 2017
         self.candidat_translator.experiences_non_academiques.append(
             ExperienceNonAcademique(
                 personne=self.candidat.matricule,
@@ -990,33 +1111,25 @@ class TestVerifierPropositionServiceCurriculumYears(TestVerifierPropositionServi
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.cmd)
 
-        exception = context.exception.exceptions.pop()
-        self.assertIsInstance(exception, AnneesCurriculumNonSpecifieesException)
-        self.assertIn('2018', exception.message)
+        self.assertAnneesCurriculum(context.exception.exceptions, ['Septembre 2018'])
 
     def test_should_verification_renvoyer_exception_si_une_experiences_professionnelles_couvre_pas_fin(self):
-        self.candidat_translator.diplomes_etudes_secondaires_belges.append(
-            DiplomeEtudeSecondaire(personne=self.candidat.matricule, annee=2017)
-        )
+        self.etudes_secondaires.annee_diplome_etudes_secondaires = 2017
         self.candidat_translator.experiences_non_academiques.append(
             ExperienceNonAcademique(
                 personne=self.candidat.matricule,
                 date_debut=datetime.date(2018, 9, 1),
-                date_fin=datetime.date(2021, 5, 31),
+                date_fin=datetime.date(2020, 9, 30),
             )
         )
 
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.cmd)
 
-        exception = context.exception.exceptions.pop()
-        self.assertIsInstance(exception, AnneesCurriculumNonSpecifieesException)
-        self.assertIn('2020', exception.message)
+        self.assertAnneesCurriculum(context.exception.exceptions, ['Octobre 2020'])
 
     def test_should_verification_etre_ok_si_experiences_professionnelles_couvrent_en_se_suivant_ou_chevauchant(self):
-        self.candidat_translator.diplomes_etudes_secondaires_belges.append(
-            DiplomeEtudeSecondaire(personne=self.candidat.matricule, annee=2017)
-        )
+        self.etudes_secondaires.annee_diplome_etudes_secondaires = 2017
         self.candidat_translator.experiences_non_academiques.extend(
             [
                 ExperienceNonAcademique(
@@ -1040,9 +1153,7 @@ class TestVerifierPropositionServiceCurriculumYears(TestVerifierPropositionServi
         self.assertEqual(proposition_id.uuid, self.proposition.entity_id.uuid)
 
     def test_should_verification_etre_ok_si_experiences_professionnelles_couvrent_en_ne_se_chevauchant_pas(self):
-        self.candidat_translator.diplomes_etudes_secondaires_belges.append(
-            DiplomeEtudeSecondaire(personne=self.candidat.matricule, annee=2017)
-        )
+        self.etudes_secondaires.annee_diplome_etudes_secondaires = 2017
         self.candidat_translator.experiences_non_academiques.extend(
             [
                 ExperienceNonAcademique(
@@ -1070,21 +1181,14 @@ class TestVerifierPropositionServiceCurriculumYears(TestVerifierPropositionServi
         proposition_id = self.message_bus.invoke(self.cmd)
         self.assertEqual(proposition_id.uuid, self.proposition.entity_id.uuid)
 
-    def test_should_renvoyer_exception_si_experiences_professionnelles_ne_couvrent_pas_et_ne_se_chevauchent_pas(self):
-        self.candidat_translator.diplomes_etudes_secondaires_belges.append(
-            DiplomeEtudeSecondaire(personne=self.candidat.matricule, annee=2017)
-        )
+    def test_should_renvoyer_exception_si_experiences_professionnelles_trop_anciennes(self):
+        self.etudes_secondaires.annee_diplome_etudes_secondaires = 2017
         self.candidat_translator.experiences_non_academiques.extend(
             [
                 ExperienceNonAcademique(
                     personne=self.candidat.matricule,
-                    date_debut=datetime.date(2019, 10, 1),
-                    date_fin=datetime.date(2021, 8, 31),
-                ),
-                ExperienceNonAcademique(
-                    personne=self.candidat.matricule,
-                    date_debut=datetime.date(2019, 10, 1),
-                    date_fin=datetime.date(2020, 5, 31),
+                    date_debut=datetime.date(2018, 10, 1),
+                    date_fin=datetime.date(2018, 12, 31),
                 ),
                 ExperienceNonAcademique(
                     personne=self.candidat.matricule,
@@ -1096,16 +1200,18 @@ class TestVerifierPropositionServiceCurriculumYears(TestVerifierPropositionServi
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.cmd)
 
-        exception = context.exception.exceptions.pop()
-        self.assertIsInstance(exception, AnneesCurriculumNonSpecifieesException)
-        self.assertIn('2019', exception.message)
+        self.assertAnneesCurriculum(
+            context.exception.exceptions,
+            [
+                'De Septembre 2019 à Janvier 2020',
+                'De Septembre 2020 à Octobre 2020',
+            ],
+        )
 
     def test_should_renvoyer_exception_si_experiences_professionnelles_ne_couvrent_pas_et_ne_se_chevauchent_pas_v2(
         self,
     ):
-        self.candidat_translator.diplomes_etudes_secondaires_belges.append(
-            DiplomeEtudeSecondaire(personne=self.candidat.matricule, annee=2017)
-        )
+        self.etudes_secondaires.annee_diplome_etudes_secondaires = 2017
         self.candidat_translator.experiences_non_academiques.extend(
             [
                 ExperienceNonAcademique(
@@ -1133,16 +1239,12 @@ class TestVerifierPropositionServiceCurriculumYears(TestVerifierPropositionServi
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.cmd)
 
-        exception = context.exception.exceptions.pop()
-        self.assertIsInstance(exception, AnneesCurriculumNonSpecifieesException)
-        self.assertIn('2019', exception.message)
+        self.assertAnneesCurriculum(context.exception.exceptions, ['Septembre 2019'])
 
     def test_should_etre_ok_si_periode_couverte_avec_une_experience_professionnelle_continue_apres_future_experience(
         self,
     ):
-        self.candidat_translator.diplomes_etudes_secondaires_belges.append(
-            DiplomeEtudeSecondaire(personne=self.candidat.matricule, annee=2017)
-        )
+        self.etudes_secondaires.annee_diplome_etudes_secondaires = 2017
         self.candidat_translator.experiences_non_academiques.extend(
             [
                 ExperienceNonAcademique(
@@ -1179,3 +1281,111 @@ class TestVerifierPropositionServiceCurriculumYears(TestVerifierPropositionServi
         ):
             proposition_id = self.message_bus.invoke(self.cmd)
             self.assertEqual(proposition_id.uuid, self.proposition.entity_id.uuid)
+
+    def test_should_verification_etre_ok_si_experience_complete(self):
+        self.candidat_translator.experiences_academiques.append(self.experience_academiques_complete)
+        proposition_id = self.message_bus.invoke(self.cmd)
+        self.assertEqual(proposition_id.uuid, self.proposition.entity_id.uuid)
+
+    def test_should_verification_renvoyer_erreur_si_releve_notes_global_non_renseigne(self):
+        self.experience_academiques_complete.releve_notes = []
+        self.candidat_translator.experiences_academiques.append(self.experience_academiques_complete)
+
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            self.message_bus.invoke(self.cmd)
+
+        self.assertHasInstance(context.exception.exceptions, ExperiencesAcademiquesNonCompleteesException)
+
+        self.assertAnneesCurriculum(
+            context.exception.exceptions,
+            [
+                "L'expérience académique 'Formation AA' est incomplète.",
+                'De Septembre 2016 à Janvier 2017',
+                'De Septembre 2017 à Janvier 2018',
+                'De Septembre 2018 à Janvier 2019',
+                'De Septembre 2019 à Janvier 2020',
+                'De Septembre 2020 à Octobre 2020',
+            ],
+        )
+
+    def test_should_verification_renvoyer_erreur_si_traduction_releve_notes_global_non_renseignee(self):
+        self.experience_academiques_complete.traduction_releve_notes = []
+        self.experience_academiques_complete.pays = FR_ISO_CODE
+        self.experience_academiques_complete.regime_linguistique = 'SV'
+        self.candidat_translator.experiences_academiques.append(self.experience_academiques_complete)
+
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            self.message_bus.invoke(self.cmd)
+        self.assertHasInstance(context.exception.exceptions, ExperiencesAcademiquesNonCompleteesException)
+
+    def test_should_verification_renvoyer_erreur_si_releve_notes_annuel_non_renseigne(self):
+        self.experience_academiques_complete.type_releve_notes = TranscriptType.ONE_A_YEAR.name
+        self.experience_academiques_complete.annees[0].releve_notes = []
+        self.candidat_translator.experiences_academiques.append(self.experience_academiques_complete)
+
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            self.message_bus.invoke(self.cmd)
+
+        self.assertHasInstance(context.exception.exceptions, ExperiencesAcademiquesNonCompleteesException)
+
+    def test_should_verification_renvoyer_erreur_si_traduction_releve_notes_annuel_non_renseignee(self):
+        self.experience_academiques_complete.annees[0].traduction_releve_notes = []
+        self.experience_academiques_complete.type_releve_notes = TranscriptType.ONE_A_YEAR.name
+        self.experience_academiques_complete.pays = FR_ISO_CODE
+        self.experience_academiques_complete.regime_linguistique = 'SV'
+        self.candidat_translator.experiences_academiques.append(self.experience_academiques_complete)
+
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            self.message_bus.invoke(self.cmd)
+
+        self.assertHasInstance(context.exception.exceptions, ExperiencesAcademiquesNonCompleteesException)
+
+    def test_should_verification_renvoyer_erreur_si_diplome_non_renseigne(self):
+        self.experience_academiques_complete.a_obtenu_diplome = True
+        self.experience_academiques_complete.diplome = []
+        self.candidat_translator.experiences_academiques.append(self.experience_academiques_complete)
+
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            self.message_bus.invoke(self.cmd)
+
+        self.assertHasInstance(context.exception.exceptions, ExperiencesAcademiquesNonCompleteesException)
+
+    def test_should_verification_renvoyer_erreur_si_date_prevue_delivrance_diplome_non_renseigne(self):
+        self.experience_academiques_complete.a_obtenu_diplome = True
+        self.experience_academiques_complete.date_prevue_delivrance_diplome = None
+        self.candidat_translator.experiences_academiques.append(self.experience_academiques_complete)
+
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            self.message_bus.invoke(self.cmd)
+
+        self.assertHasInstance(context.exception.exceptions, ExperiencesAcademiquesNonCompleteesException)
+
+    def test_should_verification_renvoyer_erreur_si_titre_memoire_non_renseigne(self):
+        self.experience_academiques_complete.a_obtenu_diplome = True
+        self.experience_academiques_complete.titre_memoire = ''
+        self.candidat_translator.experiences_academiques.append(self.experience_academiques_complete)
+
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            self.message_bus.invoke(self.cmd)
+
+        self.assertHasInstance(context.exception.exceptions, ExperiencesAcademiquesNonCompleteesException)
+
+    def test_should_verification_renvoyer_erreur_si_note_memoire_non_renseigne(self):
+        self.experience_academiques_complete.a_obtenu_diplome = True
+        self.experience_academiques_complete.note_memoire = ''
+        self.candidat_translator.experiences_academiques.append(self.experience_academiques_complete)
+
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            self.message_bus.invoke(self.cmd)
+
+        self.assertHasInstance(context.exception.exceptions, ExperiencesAcademiquesNonCompleteesException)
+
+    def test_should_verification_renvoyer_erreur_si_resume_memoire_non_renseigne(self):
+        self.experience_academiques_complete.a_obtenu_diplome = True
+        self.experience_academiques_complete.resume_memoire = []
+        self.candidat_translator.experiences_academiques.append(self.experience_academiques_complete)
+
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            self.message_bus.invoke(self.cmd)
+
+        self.assertHasInstance(context.exception.exceptions, ExperiencesAcademiquesNonCompleteesException)

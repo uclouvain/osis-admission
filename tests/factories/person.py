@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -28,18 +28,23 @@ import operator
 import factory
 
 from admission.tests.factories import PdfUploadFactory
+from admission.tests.factories.curriculum import (
+    EducationalExperienceFactory,
+    EducationalExperienceYearFactory,
+    ProfessionalExperienceFactory,
+)
 from admission.tests.factories.language import LanguageKnowledgeFactory
 from admission.tests.factories.secondary_studies import (
     BelgianHighSchoolDiplomaFactory,
-    HighSchoolDiplomaAlternativeFactory,
 )
 from base import models as mdl
 from base.models.enums.civil_state import CivilState
+from base.models.enums.got_diploma import GotDiploma
 from base.models.enums.person_address_type import PersonAddressType
 from base.tests.factories.academic_year import AcademicYearFactory, get_current_year
 from base.tests.factories.person import PersonFactory
 from base.tests.factories.person_address import PersonAddressFactory
-from osis_profile.tests.factories.curriculum import EducationalExperienceFactory, EducationalExperienceYearFactory
+from osis_profile.models.enums.curriculum import EvaluationSystem, Grade, Result
 from reference.tests.factories.country import CountryFactory
 from reference.tests.factories.language import EnglishLanguageFactory, FrenchLanguageFactory
 
@@ -62,6 +67,8 @@ class CompletePersonFactory(PersonFactory):
 
     last_registration_year = factory.LazyAttribute(lambda _: AcademicYearFactory(current=True))
     last_registration_id = '01234567'
+    graduated_from_high_school = GotDiploma.YES.name
+    graduated_from_high_school_year = factory.SubFactory(AcademicYearFactory)
 
     @factory.post_generation
     def create_related_objects(self, create, extracted, **kwargs):
@@ -110,20 +117,29 @@ class CompletePersonFactory(PersonFactory):
         experience = EducationalExperienceFactory(
             person=self,
             obtained_diploma=False,
-            country=self.country_of_citizenship,
+            country=CountryFactory(iso_code="BE"),
+            transcript=['transcript.pdf'],
+            transcript_translation=['transcript_translation.pdf'],
         )
         EducationalExperienceYearFactory(
             educational_experience=experience,
             academic_year=AcademicYearFactory(year=current_year),
+            result=Result.SUCCESS.name,
+            registered_credit_number=10,
+            acquired_credit_number=10,
         )
         EducationalExperienceYearFactory(
             educational_experience=experience,
             academic_year=AcademicYearFactory(year=current_year - 1),
+            result=Result.SUCCESS.name,
+            registered_credit_number=10,
+            acquired_credit_number=10,
         )
 
         # Create highschool belgian diploma
         BelgianHighSchoolDiplomaFactory(
-            person=self, academic_graduation_year=AcademicYearFactory(year=current_year - 1)
+            person=self,
+            academic_graduation_year=AcademicYearFactory(year=current_year - 1),
         )
 
 
@@ -131,6 +147,8 @@ class CompletePersonForBachelorFactory(CompletePersonFactory):
     @factory.post_generation
     def create_related_objects(self, create, extracted, **kwargs):
         """Target is diplomation_secondaire_belge"""
+        current_year = get_current_year()
+        academic_year = AcademicYearFactory(year=current_year - 1)
         PersonAddressFactory(
             person=self,
             label=PersonAddressType.RESIDENTIAL.name,
@@ -140,9 +158,10 @@ class CompletePersonForBachelorFactory(CompletePersonFactory):
             city='Louvain-La-Neuve',
             country=CountryFactory(iso_code="BE"),
         )
-        current_year = get_current_year()
+        self.graduated_from_high_school_year = academic_year
         BelgianHighSchoolDiplomaFactory(
-            person=self, academic_graduation_year=AcademicYearFactory(year=current_year - 1)
+            person=self,
+            academic_graduation_year=academic_year,
         )
 
 
@@ -169,9 +188,14 @@ class CompletePersonForIUFCFactory(CompletePersonFactory):
             educational_experience=experience,
             academic_year=AcademicYearFactory(year=current_year - 1),
         )
+        ProfessionalExperienceFactory(
+            person=self,
+        )
 
 
 class IncompletePersonForBachelorFactory(CompletePersonFactory):
+    graduated_from_high_school = GotDiploma.NO.name
+
     @factory.post_generation
     def create_related_objects(self, create, extracted, **kwargs):
         PersonAddressFactory(

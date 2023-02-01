@@ -25,26 +25,48 @@
 # ##############################################################################
 import datetime
 from dataclasses import dataclass
-from typing import List, Optional
+from functools import reduce
+from typing import Dict, List, Optional
 
 import attr
+from dateutil import relativedelta
 
+from admission.ddd import BE_ISO_CODE
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import CandidatNonTrouveException
-from admission.ddd.admission.doctorat.preparation.dtos import ConditionsComptabiliteDTO, CurriculumDTO
+from admission.ddd.admission.doctorat.preparation.dtos import (
+    AnneeExperienceAcademiqueDTO,
+    ConditionsComptabiliteDTO,
+    CurriculumAExperiencesDTO,
+    CurriculumDTO,
+    ExperienceAcademiqueDTO,
+)
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.dtos import AdressePersonnelleDTO, CoordonneesDTO, EtudesSecondairesDTO, IdentificationDTO
+from admission.ddd.admission.dtos.etudes_secondaires import DiplomeBelgeEtudesSecondairesDTO
 from base.models.enums.civil_state import CivilState
+from base.models.enums.education_group_types import TrainingType
+from base.models.enums.got_diploma import GotDiploma
 from base.models.enums.person_address_type import PersonAddressType
+from osis_profile.models.enums.curriculum import Result, TranscriptType, Grade, EvaluationSystem
 
 
-@attr.dataclass
-class _IdentificationDTO(IdentificationDTO):
+class UnfrozenDTO:
     # Trick to make this "unfrozen" just for tests
     def __setattr__(self, key, value):
         object.__setattr__(self, key, value)
 
     def __delattr__(self, item):
         object.__delattr__(self, item)
+
+
+@attr.dataclass
+class _IdentificationDTO(UnfrozenDTO, IdentificationDTO):
+    pass
+
+
+@attr.dataclass
+class _EtudesSecondairesDTO(UnfrozenDTO, EtudesSecondairesDTO):
+    pass
 
 
 @dataclass
@@ -84,10 +106,37 @@ class DiplomeEtudeSecondaire:
 
 
 @dataclass
-class ExperienceAcademique:
-    personne: str
+class AnneeExperienceAcademique:
     annee: int
+    resultat: str
+    releve_notes: List[str]
+    traduction_releve_notes: List[str]
+    credits_inscrits: Optional[float]
+    credits_acquis: Optional[float]
+
+
+@dataclass
+class ExperienceAcademique:
+    uuid: str
+    personne: str
     communaute_fr: bool
+    pays: str
+    annees: List[AnneeExperienceAcademique]
+    regime_linguistique: str
+    type_releve_notes: str
+    releve_notes: List[str]
+    traduction_releve_notes: List[str]
+    diplome: List[str]
+    traduction_diplome: List[str]
+    a_obtenu_diplome: bool
+    rang_diplome: str
+    date_prevue_delivrance_diplome: Optional[datetime.date]
+    titre_memoire: str
+    note_memoire: str
+    resume_memoire: List[str]
+    grade_obtenu: str
+    systeme_evaluation: str
+    nom_formation: str
 
 
 @dataclass
@@ -100,16 +149,15 @@ class ExperienceNonAcademique:
 class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
     matricule_candidat = '0123456789'
     annee_reference = 2020
-    profil_candidats = []
-    adresses_candidats = []
-    langues = []
-    connaissances_langues = []
-    diplomes_etudes_secondaires_belges = []
-    diplomes_etudes_secondaires_etrangers = []
+    profil_candidats: List[_IdentificationDTO] = []
+    adresses_candidats: List[AdressePersonnelle] = []
+    langues: List[Langue] = []
+    connaissances_langues: List[ConnaissanceLangue] = []
+    diplomes_etudes_secondaires_belges: List[DiplomeEtudeSecondaire] = []
+    diplomes_etudes_secondaires_etrangers: List[DiplomeEtudeSecondaire] = []
     etudes_secondaires = {}
-    experiences_academiques = []
-    experiences_non_academiques = []
-    cv_files = {"0123456789": ['uuid14']}
+    experiences_academiques: List[ExperienceAcademique] = []
+    experiences_non_academiques: List[ExperienceNonAcademique] = []
     pays_union_europeenne = {
         "AT",
         "BE",
@@ -155,6 +203,7 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 annee_naissance=1990,
                 lieu_naissance='Louvain-La-Neuve',
                 pays_nationalite='BE',
+                pays_nationalite_europeen=True,
                 langue_contact='fr-be',
                 sexe='M',
                 genre='M',
@@ -178,6 +227,32 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 date_naissance=datetime.date(1990, 1, 1),
                 annee_naissance=None,
                 lieu_naissance='Louvain-La-Neuve',
+                pays_nationalite='BE',
+                pays_nationalite_europeen=True,
+                langue_contact='fr-be',
+                sexe='M',
+                genre='M',
+                photo_identite=['uuid11'],
+                carte_identite=['uuid12'],
+                passeport=['uuid13'],
+                numero_registre_national_belge='1001',
+                numero_carte_identite='1002',
+                numero_passeport='1003',
+                annee_derniere_inscription_ucl=None,
+                noma_derniere_inscription_ucl='',
+                email='john.doe@ucl.be',
+                pays_naissance='BE',
+                etat_civil=CivilState.MARRIED.name,
+                pays_residence="BE",
+            ),
+            _IdentificationDTO(
+                matricule="0000000002",
+                nom='My',
+                prenom='Jim',
+                date_naissance=datetime.date(1990, 1, 1),
+                annee_naissance=None,
+                lieu_naissance='Louvain-La-Neuve',
+                pays_nationalite_europeen=True,
                 pays_nationalite='BE',
                 langue_contact='fr-be',
                 sexe='M',
@@ -230,6 +305,17 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 numero_rue='14',
                 boite_postale='B2',
             ),
+            AdressePersonnelle(
+                personne="0000000002",
+                code_postal='1348',
+                ville='Louvain-La-Neuve',
+                pays='BE',
+                rue="Place de l'Université",
+                type='RESIDENTIAL',
+                lieu_dit='',
+                numero_rue='14',
+                boite_postale='B2',
+            ),
         ]
         cls.langues = [
             Langue(code_langue='FR'),
@@ -245,10 +331,225 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
         ]
 
         cls.experiences_academiques = [
-            ExperienceAcademique(personne=cls.matricule_candidat, annee=2016, communaute_fr=False),
-            ExperienceAcademique(personne=cls.matricule_candidat, annee=2017, communaute_fr=False),
-            ExperienceAcademique(personne=cls.matricule_candidat, annee=2019, communaute_fr=False),
-            ExperienceAcademique(personne=cls.matricule_candidat, annee=2020, communaute_fr=True),
+            ExperienceAcademique(
+                uuid='9cbdf4db-2454-4cbf-9e48-55d2a9881ee1',
+                personne=cls.matricule_candidat,
+                communaute_fr=False,
+                pays='FR',
+                annees=[
+                    AnneeExperienceAcademique(
+                        annee=2016,
+                        resultat=Result.SUCCESS.name,
+                        releve_notes=['releve1.pdf'],
+                        traduction_releve_notes=['traduction_releve1.pdf'],
+                        credits_acquis=10,
+                        credits_inscrits=10,
+                    ),
+                    AnneeExperienceAcademique(
+                        annee=2017,
+                        resultat=Result.SUCCESS.name,
+                        releve_notes=['releve2.pdf'],
+                        traduction_releve_notes=['traduction_releve2.pdf'],
+                        credits_acquis=10,
+                        credits_inscrits=10,
+                    ),
+                    AnneeExperienceAcademique(
+                        annee=2019,
+                        resultat=Result.SUCCESS.name,
+                        releve_notes=['releve3.pdf'],
+                        traduction_releve_notes=['traduction_releve3.pdf'],
+                        credits_acquis=10,
+                        credits_inscrits=10,
+                    ),
+                ],
+                regime_linguistique='FR',
+                type_releve_notes=TranscriptType.ONE_FOR_ALL_YEARS.name,
+                releve_notes=['releve_notes.pdf'],
+                traduction_releve_notes=['traduction_releve_notes.pdf'],
+                diplome=['diplome.pdf'],
+                traduction_diplome=['traduction_diplome.pdf'],
+                a_obtenu_diplome=True,
+                rang_diplome='10',
+                date_prevue_delivrance_diplome=datetime.date(2020, 2, 2),
+                titre_memoire='Titre',
+                note_memoire='15 sur 20',
+                resume_memoire=['resume_memoire.pdf'],
+                grade_obtenu=Grade.GREAT_DISTINCTION.name,
+                systeme_evaluation=EvaluationSystem.NO_CREDIT_SYSTEM.name,
+                nom_formation='Formation A',
+            ),
+            ExperienceAcademique(
+                uuid='9cbdf4db-2454-4cbf-9e48-55d2a9881ee2',
+                personne=cls.matricule_candidat,
+                communaute_fr=True,
+                pays=BE_ISO_CODE,
+                annees=[
+                    AnneeExperienceAcademique(
+                        annee=2020,
+                        resultat=Result.SUCCESS.name,
+                        releve_notes=['releve1.pdf'],
+                        traduction_releve_notes=['traduction_releve1.pdf'],
+                        credits_acquis=10,
+                        credits_inscrits=10,
+                    ),
+                ],
+                regime_linguistique='',
+                type_releve_notes=TranscriptType.ONE_FOR_ALL_YEARS.name,
+                releve_notes=['releve_notes.pdf'],
+                traduction_releve_notes=['traduction_releve_notes.pdf'],
+                diplome=['diplome.pdf'],
+                traduction_diplome=['traduction_diplome.pdf'],
+                a_obtenu_diplome=True,
+                rang_diplome='10',
+                date_prevue_delivrance_diplome=datetime.date(2020, 2, 2),
+                titre_memoire='Titre',
+                note_memoire='15 sur 20',
+                resume_memoire=['resume_memoire.pdf'],
+                grade_obtenu=Grade.GREAT_DISTINCTION.name,
+                systeme_evaluation=EvaluationSystem.NO_CREDIT_SYSTEM.name,
+                nom_formation='Formation B',
+            ),
+            ExperienceAcademique(
+                uuid='9cbdf4db-2454-4cbf-9e48-55d2a9881ee3',
+                personne='0000000001',
+                communaute_fr=False,
+                pays='FR',
+                annees=[
+                    AnneeExperienceAcademique(
+                        annee=2016,
+                        resultat=Result.SUCCESS.name,
+                        releve_notes=['releve1.pdf'],
+                        traduction_releve_notes=['traduction_releve1.pdf'],
+                        credits_acquis=10,
+                        credits_inscrits=10,
+                    ),
+                    AnneeExperienceAcademique(
+                        annee=2017,
+                        resultat=Result.SUCCESS.name,
+                        releve_notes=['releve2.pdf'],
+                        traduction_releve_notes=['traduction_releve2.pdf'],
+                        credits_acquis=10,
+                        credits_inscrits=10,
+                    ),
+                    AnneeExperienceAcademique(
+                        annee=2019,
+                        resultat=Result.SUCCESS.name,
+                        releve_notes=['releve3.pdf'],
+                        traduction_releve_notes=['traduction_releve3.pdf'],
+                        credits_acquis=10,
+                        credits_inscrits=10,
+                    ),
+                ],
+                regime_linguistique='FR',
+                type_releve_notes=TranscriptType.ONE_FOR_ALL_YEARS.name,
+                releve_notes=['releve_notes.pdf'],
+                traduction_releve_notes=['traduction_releve_notes.pdf'],
+                diplome=['diplome.pdf'],
+                traduction_diplome=['traduction_diplome.pdf'],
+                a_obtenu_diplome=True,
+                rang_diplome='10',
+                date_prevue_delivrance_diplome=datetime.date(2020, 2, 2),
+                titre_memoire='Titre',
+                note_memoire='15 sur 20',
+                resume_memoire=['resume_memoire.pdf'],
+                grade_obtenu=Grade.GREAT_DISTINCTION.name,
+                systeme_evaluation=EvaluationSystem.NO_CREDIT_SYSTEM.name,
+                nom_formation='Formation C',
+            ),
+            ExperienceAcademique(
+                uuid='9cbdf4db-2454-4cbf-9e48-55d2a9881ee4',
+                personne='0000000001',
+                communaute_fr=True,
+                pays=BE_ISO_CODE,
+                annees=[
+                    AnneeExperienceAcademique(
+                        annee=2020,
+                        resultat=Result.SUCCESS.name,
+                        releve_notes=['releve1.pdf'],
+                        traduction_releve_notes=['traduction_releve1.pdf'],
+                        credits_acquis=10,
+                        credits_inscrits=10,
+                    ),
+                ],
+                regime_linguistique='FR',
+                type_releve_notes=TranscriptType.ONE_FOR_ALL_YEARS.name,
+                releve_notes=['releve_notes.pdf'],
+                traduction_releve_notes=['traduction_releve_notes.pdf'],
+                diplome=['diplome.pdf'],
+                traduction_diplome=['traduction_diplome.pdf'],
+                a_obtenu_diplome=True,
+                rang_diplome='10',
+                date_prevue_delivrance_diplome=datetime.date(2020, 2, 2),
+                titre_memoire='Titre',
+                note_memoire='15 sur 20',
+                resume_memoire=['resume_memoire.pdf'],
+                grade_obtenu=Grade.GREAT_DISTINCTION.name,
+                systeme_evaluation=EvaluationSystem.NO_CREDIT_SYSTEM.name,
+                nom_formation='Formation D',
+            ),
+            ExperienceAcademique(
+                uuid='9cbdf4db-2454-4cbf-9e48-55d2a9881ee5',
+                personne='0000000002',
+                communaute_fr=False,
+                pays='FR',
+                annees=[
+                    AnneeExperienceAcademique(
+                        annee=2016,
+                        resultat=Result.SUCCESS.name,
+                        releve_notes=['releve1.pdf'],
+                        traduction_releve_notes=['traduction_releve1.pdf'],
+                        credits_acquis=10,
+                        credits_inscrits=10,
+                    ),
+                    AnneeExperienceAcademique(
+                        annee=2017,
+                        resultat=Result.SUCCESS.name,
+                        releve_notes=['releve2.pdf'],
+                        traduction_releve_notes=['traduction_releve2.pdf'],
+                        credits_acquis=10,
+                        credits_inscrits=10,
+                    ),
+                    AnneeExperienceAcademique(
+                        annee=2018,
+                        resultat=Result.SUCCESS.name,
+                        releve_notes=['releve3.pdf'],
+                        traduction_releve_notes=['traduction_releve3.pdf'],
+                        credits_acquis=10,
+                        credits_inscrits=10,
+                    ),
+                    AnneeExperienceAcademique(
+                        annee=2019,
+                        resultat=Result.SUCCESS.name,
+                        releve_notes=['releve4.pdf'],
+                        traduction_releve_notes=['traduction_releve4.pdf'],
+                        credits_acquis=10,
+                        credits_inscrits=10,
+                    ),
+                    AnneeExperienceAcademique(
+                        annee=2020,
+                        resultat=Result.SUCCESS.name,
+                        releve_notes=['releve5.pdf'],
+                        traduction_releve_notes=['traduction_releve5.pdf'],
+                        credits_acquis=10,
+                        credits_inscrits=10,
+                    ),
+                ],
+                regime_linguistique='FR',
+                type_releve_notes=TranscriptType.ONE_FOR_ALL_YEARS.name,
+                releve_notes=['releve_notes.pdf'],
+                traduction_releve_notes=['traduction_releve_notes.pdf'],
+                diplome=['diplome.pdf'],
+                traduction_diplome=['traduction_diplome.pdf'],
+                a_obtenu_diplome=True,
+                rang_diplome='10',
+                date_prevue_delivrance_diplome=datetime.date(2020, 2, 2),
+                titre_memoire='Titre',
+                note_memoire='15 sur 20',
+                resume_memoire=['resume_memoire.pdf'],
+                grade_obtenu=Grade.GREAT_DISTINCTION.name,
+                systeme_evaluation=EvaluationSystem.NO_CREDIT_SYSTEM.name,
+                nom_formation='Formation E',
+            ),
         ]
 
         cls.experiences_non_academiques = [
@@ -262,14 +563,53 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 date_debut=datetime.date(2018, 7, 1),
                 date_fin=datetime.date(2019, 4, 30),
             ),
+            ExperienceNonAcademique(
+                personne='0000000001',
+                date_debut=datetime.date(2019, 5, 1),
+                date_fin=datetime.date(2019, 8, 31),
+            ),
+            ExperienceNonAcademique(
+                personne='0000000001',
+                date_debut=datetime.date(2018, 7, 1),
+                date_fin=datetime.date(2019, 4, 30),
+            ),
         ]
 
         cls.diplomes_etudes_secondaires_belges = []
         cls.diplomes_etudes_secondaires_etrangers = []
         cls.etudes_secondaires = {
-            cls.matricule_candidat: EtudesSecondairesDTO(True, False, False),
-            "0123456789": EtudesSecondairesDTO(True, False, False),
-            "0000000001": EtudesSecondairesDTO(True, False, False),
+            cls.matricule_candidat: _EtudesSecondairesDTO(
+                diplome_belge=DiplomeBelgeEtudesSecondairesDTO(
+                    certificat_inscription=['certificat_inscription.pdf'],
+                    diplome=['diplome.pdf'],
+                ),
+                diplome_etudes_secondaires=GotDiploma.YES.name,
+                annee_diplome_etudes_secondaires=2022,
+            ),
+            "0123456789": _EtudesSecondairesDTO(
+                diplome_belge=DiplomeBelgeEtudesSecondairesDTO(
+                    certificat_inscription=['certificat_inscription.pdf'],
+                    diplome=['diplome.pdf'],
+                ),
+                diplome_etudes_secondaires=GotDiploma.YES.name,
+                annee_diplome_etudes_secondaires=2022,
+            ),
+            "0000000001": _EtudesSecondairesDTO(
+                diplome_belge=DiplomeBelgeEtudesSecondairesDTO(
+                    certificat_inscription=['certificat_inscription.pdf'],
+                    diplome=['diplome.pdf'],
+                ),
+                diplome_etudes_secondaires=GotDiploma.YES.name,
+                annee_diplome_etudes_secondaires=2022,
+            ),
+            "0000000002": _EtudesSecondairesDTO(
+                diplome_belge=DiplomeBelgeEtudesSecondairesDTO(
+                    certificat_inscription=['certificat_inscription.pdf'],
+                    diplome=['diplome.pdf'],
+                ),
+                diplome_etudes_secondaires=GotDiploma.YES.name,
+                annee_diplome_etudes_secondaires=2022,
+            ),
         }
 
     @classmethod
@@ -292,6 +632,7 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 date_naissance=candidate.date_naissance,
                 annee_naissance=candidate.annee_naissance,
                 pays_nationalite=candidate.pays_nationalite,
+                pays_nationalite_europeen=candidate.pays_nationalite in cls.pays_union_europeenne,
                 langue_contact=candidate.langue_contact,
                 sexe=candidate.sexe,
                 genre=candidate.genre,
@@ -353,17 +694,49 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
         return [c.langue.code_langue for c in cls.connaissances_langues if c.personne == matricule]
 
     @classmethod
-    def get_etudes_secondaires(cls, matricule: str) -> 'EtudesSecondairesDTO':
-        return cls.etudes_secondaires.get(matricule) or EtudesSecondairesDTO(False, False, False)
+    def get_etudes_secondaires(cls, matricule: str, type_formation: TrainingType) -> 'EtudesSecondairesDTO':
+        return cls.etudes_secondaires.get(matricule) or EtudesSecondairesDTO()
 
     @classmethod
     def get_curriculum(cls, matricule: str, annee_courante: int) -> 'CurriculumDTO':
         try:
             candidate = next(c for c in cls.profil_candidats if c.matricule == matricule)
 
-            annees_experiences_academiques = [
-                experience.annee for experience in cls.experiences_academiques if experience.personne == matricule
-            ]
+            experiences_dtos = []
+            for experience in cls.experiences_academiques:
+                if experience.personne == matricule:
+                    experiences_dtos.append(
+                        ExperienceAcademiqueDTO(
+                            uuid=experience.uuid,
+                            pays=experience.pays,
+                            annees=[
+                                AnneeExperienceAcademiqueDTO(
+                                    annee=annee.annee,
+                                    resultat=annee.resultat,
+                                    releve_notes=annee.releve_notes,
+                                    traduction_releve_notes=annee.traduction_releve_notes,
+                                    credits_acquis=annee.credits_inscrits,
+                                    credits_inscrits=annee.credits_acquis,
+                                )
+                                for annee in experience.annees
+                            ],
+                            regime_linguistique=experience.regime_linguistique,
+                            type_releve_notes=experience.type_releve_notes,
+                            releve_notes=experience.releve_notes,
+                            traduction_releve_notes=experience.traduction_releve_notes,
+                            diplome=experience.diplome,
+                            traduction_diplome=experience.traduction_diplome,
+                            a_obtenu_diplome=experience.a_obtenu_diplome,
+                            rang_diplome=experience.rang_diplome,
+                            date_prevue_delivrance_diplome=experience.date_prevue_delivrance_diplome,
+                            titre_memoire=experience.titre_memoire,
+                            note_memoire=experience.note_memoire,
+                            resume_memoire=experience.resume_memoire,
+                            grade_obtenu=experience.grade_obtenu,
+                            systeme_evaluation=experience.systeme_evaluation,
+                            nom_formation=experience.nom_formation,
+                        ),
+                    )
 
             dates_experiences_non_academiques = [
                 (experience.date_debut, experience.date_fin)
@@ -371,24 +744,27 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 if experience.personne == matricule
             ]
 
-            annee_diplome_belge = next(
-                (d.annee for d in cls.diplomes_etudes_secondaires_belges if d.personne == matricule),
-                None,
-            )
-            annee_diplome_etranger = next(
-                (d.annee for d in cls.diplomes_etudes_secondaires_etrangers if d.personne == matricule),
-                None,
-            )
+            etudes_secondaires = cls.etudes_secondaires.get(matricule)
 
             return CurriculumDTO(
-                annees_experiences_academiques=annees_experiences_academiques,
-                annee_diplome_etudes_secondaires_belges=annee_diplome_belge,
-                annee_diplome_etudes_secondaires_etrangeres=annee_diplome_etranger,
+                experiences_academiques=experiences_dtos,
+                annee_diplome_etudes_secondaires=etudes_secondaires.annee_diplome_etudes_secondaires
+                if etudes_secondaires
+                else None,
                 annee_derniere_inscription_ucl=candidate.annee_derniere_inscription_ucl,
                 dates_experiences_non_academiques=dates_experiences_non_academiques,
             )
         except StopIteration:
             raise CandidatNonTrouveException
+
+    @classmethod
+    def get_existence_experiences_curriculum(cls, matricule: str) -> 'CurriculumAExperiencesDTO':
+        return CurriculumAExperiencesDTO(
+            a_experience_non_academique=any(
+                experience.personne == matricule for experience in cls.experiences_non_academiques
+            ),
+            a_experience_academique=any(experience.personne == matricule for experience in cls.experiences_academiques),
+        )
 
     @classmethod
     def get_conditions_comptabilite(
@@ -412,5 +788,25 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
             raise CandidatNonTrouveException
 
     @classmethod
-    def est_changement_etablissement(cls, matricule: str, annee_courante: int) -> bool:
+    def get_changements_etablissement(cls, matricule: str, annees: List[int]) -> Dict[int, bool]:
+        return {annee: False for annee in annees}
+
+    @classmethod
+    def compte_nombre_mois(cls, nb_total_mois, experience_courante: ExperienceNonAcademique):
+        delta = relativedelta.relativedelta(experience_courante.date_fin, experience_courante.date_debut)
+        return nb_total_mois + (12 * delta.years + delta.months) + 1
+
+    @classmethod
+    def est_potentiel_vae(cls, matricule: str) -> bool:
+        experiences = [experience for experience in cls.experiences_non_academiques if experience.personne == matricule]
+        return (
+            reduce(lambda total, experience: cls.compte_nombre_mois(total, experience), experiences, 0)
+            >= cls.NB_MOIS_MIN_VAE
+        )
+
+    @classmethod
+    def etudes_secondaires_valorisees(cls, matricule: str) -> bool:
+        etudes_secondaires = cls.etudes_secondaires.get(matricule)
+        if etudes_secondaires:
+            return etudes_secondaires.valorisees is True
         return False

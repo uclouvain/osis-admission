@@ -27,8 +27,8 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from osis_document.contrib import FileField
 
-from admission.contrib.models import DoctorateAdmission
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+from admission.contrib.models.base import BaseAdmission
+from admission.ddd.admission.enums import (
     ChoixAffiliationSport,
     ChoixAssimilation1,
     ChoixAssimilation2,
@@ -52,7 +52,7 @@ def admission_accounting_directory_path(accounting, filename: str):
 
 class Accounting(models.Model):
     admission = models.OneToOneField(
-        DoctorateAdmission,
+        BaseAdmission,
         on_delete=models.CASCADE,
         related_name='accounting',
         unique=True,

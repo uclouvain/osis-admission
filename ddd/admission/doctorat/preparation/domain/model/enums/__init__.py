@@ -24,7 +24,6 @@
 #
 # ##############################################################################
 
-from .comptabilite import *
 from .financement import *
 from .projet import *
 from .signatures import *

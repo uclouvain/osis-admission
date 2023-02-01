@@ -50,10 +50,11 @@ class ShouldCommunicationEtreComplete(BusinessValidator):
                 self.communication.institution_organisatrice,
                 self.communication.titre,
                 self.communication.comite_selection,
+                self.communication.attestation_communication,
                 self.activite.ects,
             ]
         ) or (
-            self.communication.comite_selection == ChoixComiteSelection.YES
+            self.communication.comite_selection == ChoixComiteSelection.YES.name
             and not self.communication.preuve_acceptation
         ):
             raise ActiviteNonComplete(activite_id=self.activite.entity_id)

@@ -21,12 +21,72 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('uuid', models.UUIDField(default=uuid.uuid4, editable=False, unique=True)),
                 ('internal_label', models.CharField(max_length=255, verbose_name='Internal label')),
-                ('type', models.CharField(choices=[('MESSAGE', 'Message'), ('TEXTE', 'Text'), ('DOCUMENT', 'Document')], max_length=30)),
-                ('title', admission.contrib.models.form_item.TranslatedJSONField(blank=True, default=dict, validators=[admission.contrib.models.form_item.is_valid_translated_json_field], verbose_name='Title')),
-                ('text', admission.contrib.models.form_item.TranslatedJSONField(blank=True, default=dict, validators=[admission.contrib.models.form_item.is_valid_translated_json_field], verbose_name='Text')),
-                ('help_text', admission.contrib.models.form_item.TranslatedJSONField(blank=True, default=dict, validators=[admission.contrib.models.form_item.is_valid_translated_json_field], verbose_name='Help text')),
-                ('active', models.BooleanField(default=True, verbose_name='Active')),
-                ('configuration', models.JSONField(blank=True, default=dict, verbose_name='Configuration')),
+                (
+                    'type',
+                    models.CharField(
+                        choices=[('MESSAGE', 'Message'), ('TEXTE', 'Text'), ('DOCUMENT', 'Document')], max_length=30
+                    ),
+                ),
+                (
+                    'title',
+                    admission.contrib.models.form_item.TranslatedJSONField(
+                        blank=True,
+                        default=dict,
+                        help_text='Question label for Document and Text form elements. Not used for Message elements.',
+                        validators=[admission.contrib.models.form_item.is_valid_translated_json_field],
+                        verbose_name='Title',
+                    ),
+                ),
+                (
+                    'text',
+                    admission.contrib.models.form_item.TranslatedJSONField(
+                        blank=True,
+                        default=dict,
+                        validators=[admission.contrib.models.form_item.is_valid_translated_json_field],
+                        help_text='Question tooltip text for Document and Text form elements. Content of the message to'
+                                  ' be displayed for Message elements.',
+                        verbose_name='Text',
+                    ),
+                ),
+                (
+                    'help_text',
+                    admission.contrib.models.form_item.TranslatedJSONField(
+                        blank=True,
+                        default=dict,
+                        help_text='Placeholder text for Text form elements. Not used for Document '
+                                  'and Message elements.',
+                        validators=[admission.contrib.models.form_item.is_valid_translated_json_field],
+                        verbose_name='Help text',
+                    ),
+                ),
+                (
+                    'active',
+                    models.BooleanField(
+                        default=True,
+                        help_text='Indicates if the item will be displayed to the user or not.',
+                        verbose_name='Active',
+                    ),
+                ),
+                (
+                    'configuration',
+                    models.JSONField(
+                        blank=True,
+                        default=dict,
+                        help_text='For a message, it is possible to specify the CSS class that we want to apply on it '
+                                  'by using the "CLASSE_CSS" property. This is a string which can contain several '
+                                  'classes, separated with a space. '
+                                  '<a href="https://getbootstrap.com/docs/3.3/css/#helper-classes">Bootstrap '
+                                  'classes</a> can be used here.<br>Full example: <code>{"CLASSE_CSS": "bg-info"}'
+                                  '</code>.<br><br>For a text field, it is possible to specify if the user can enter '
+                                  'a short ("COURT", by default) or a long ("LONG") text by using the "TAILLE_TEXTE" '
+                                  'property.<br>Full example: <code>{"TAILLE_TEXTE": "LONG"}</code>.<br><br>For a file '
+                                  'field, it is possible to specify the maximum number ("NOMBRE_MAX_DOCUMENT", default '
+                                  'to 1) and the MIME types ("TYPES_MIME_FICHIER") of the files that can be uploaded.'
+                                  '<br>Full example: <code>{"TYPES_MIME_FICHIER": ["application/pdf"], '
+                                  '"NOMBRE_MAX_DOCUMENTS": 3}</code>.',
+                        verbose_name='Configuration',
+                    ),
+                ),
             ],
             options={
                 'verbose_name': 'Admission form item',
@@ -36,23 +96,128 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='baseadmission',
             name='specific_question_answers',
-            field=admission.contrib.models.form_item.ConfigurableModelFormItemField(blank=True, default=dict, encoder=django.core.serializers.json.DjangoJSONEncoder),
+            field=admission.contrib.models.form_item.ConfigurableModelFormItemField(
+                blank=True, default=dict, encoder=django.core.serializers.json.DjangoJSONEncoder
+            ),
         ),
         migrations.CreateModel(
             name='AdmissionFormItemInstantiation',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('weight', models.PositiveIntegerField(verbose_name='Weight')),
+                (
+                    'weight',
+                    models.PositiveIntegerField(
+                        verbose_name='Weight',
+                        help_text='An integer greater than zero indicating the position of the item in relation to the '
+                                  'others. Important point: the questions are displayed together according to the '
+                                  'field "Display according to training" (the elements for all trainings, then the '
+                                  'elements for a type of training, then the elements for a specific training).',
+                    ),
+                ),
                 ('required', models.BooleanField(default=False, verbose_name='Required')),
-                ('display_according_education', models.CharField(choices=[('TOUTE_FORMATION', 'Every education'), ('TYPE_DE_FORMATION', 'An education type'), ('UNE_FORMATION', 'A specific education')], max_length=30, verbose_name='Display according education')),
-                ('candidate_nationality', models.CharField(choices=[('BELGE', 'Belgian'), ('NON_BELGE', 'Not Belgian'), ('UE', 'UE'), ('NON_UE', 'Not UE'), ('TOUS', 'All')], default='TOUS', max_length=30, verbose_name='Candidate nationality')),
-                ('study_language', models.CharField(choices=[('AUCUNE_ETUDE_FR', 'No French studies'), ('AUCUNE_ETUDE_EN', 'No English studies'), ('TOUS', 'All')], default='TOUS', max_length=30, verbose_name='Study language')),
-                ('vip_candidate', models.CharField(choices=[('VIP', 'VIP'), ('NON_VIP', 'Not VIP'), ('TOUS', 'All')], default='TOUS', max_length=30, verbose_name='VIP candidate')),
-                ('tab', models.CharField(choices=[('ETUDES_SECONDAIRES', 'Secondary studies'), ('CURRICULUM', 'Curriculum'), ('CHOIX_FORMATION', 'Training choice'), ('INFORMATIONS_ADDITIONNELLES', 'Additional information')], max_length=30, verbose_name='Tab')),
-                ('academic_year', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='+', to='base.academicyear', verbose_name='Academic year')),
-                ('education_group', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='base.educationgroup', verbose_name='Education')),
-                ('education_group_type', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='base.educationgrouptype', verbose_name='Type of training')),
-                ('form_item', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='admission.admissionformitem', verbose_name='Form item')),
+                (
+                    'display_according_education',
+                    models.CharField(
+                        choices=[
+                            ('TOUTE_FORMATION', 'Every education'),
+                            ('TYPE_DE_FORMATION', 'An education type'),
+                            ('UNE_FORMATION', 'A specific education'),
+                        ],
+                        max_length=30,
+                        verbose_name='Display according education',
+                    ),
+                ),
+                (
+                    'candidate_nationality',
+                    models.CharField(
+                        choices=[
+                            ('BELGE', 'Belgian'),
+                            ('NON_BELGE', 'Not Belgian'),
+                            ('UE', 'UE'),
+                            ('NON_UE', 'Not UE'),
+                            ('TOUS', 'All'),
+                        ],
+                        default='TOUS',
+                        max_length=30,
+                        verbose_name='Candidate nationality',
+                    ),
+                ),
+                (
+                    'study_language',
+                    models.CharField(
+                        choices=[
+                            ('AUCUNE_ETUDE_FR', 'No French studies'),
+                            ('AUCUNE_ETUDE_EN', 'No English studies'),
+                            ('TOUS', 'All'),
+                        ],
+                        default='TOUS',
+                        max_length=30,
+                        help_text='Takes into account the language of secondary and higher education. Studies in '
+                                  'Belgium are considered as both French and English studies.',
+                        verbose_name='Study language',
+                    ),
+                ),
+                (
+                    'vip_candidate',
+                    models.CharField(
+                        choices=[('VIP', 'VIP'), ('NON_VIP', 'Not VIP'), ('TOUS', 'All')],
+                        default='TOUS',
+                        max_length=30,
+                        help_text='A candidate is considered as VIP if he/she is in double degree or if he/she '
+                                  'benefits from an international scholarship or if he/she is Erasmus Mundus.',
+                        verbose_name='VIP candidate',
+                    ),
+                ),
+                (
+                    'tab',
+                    models.CharField(
+                        choices=[
+                            ('ETUDES_SECONDAIRES', 'Secondary studies'),
+                            ('CURRICULUM', 'Curriculum'),
+                            ('CHOIX_FORMATION', 'Training choice'),
+                            ('INFORMATIONS_ADDITIONNELLES', 'Additional information'),
+                        ],
+                        max_length=30,
+                        verbose_name='Tab',
+                    ),
+                ),
+                (
+                    'academic_year',
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name='+',
+                        to='base.academicyear',
+                        verbose_name='Academic year',
+                    ),
+                ),
+                (
+                    'education_group',
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to='base.educationgroup',
+                        verbose_name='Education',
+                    ),
+                ),
+                (
+                    'education_group_type',
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to='base.educationgrouptype',
+                        verbose_name='Type of training',
+                    ),
+                ),
+                (
+                    'form_item',
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.PROTECT,
+                        to='admission.admissionformitem',
+                        verbose_name='Form item',
+                    ),
+                ),
             ],
             options={
                 'verbose_name': 'Admission form item instantiation',
@@ -62,6 +227,10 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='admissionformitem',
             name='academic_years',
-            field=models.ManyToManyField(related_name='_admission_admissionformitem_academic_years_+', through='admission.AdmissionFormItemInstantiation', to='base.AcademicYear'),
+            field=models.ManyToManyField(
+                related_name='_admission_admissionformitem_academic_years_+',
+                through='admission.AdmissionFormItemInstantiation',
+                to='base.AcademicYear',
+            ),
         ),
     ]

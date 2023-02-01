@@ -72,21 +72,21 @@ msgstr ", le"
 msgid ""
 "<a href=\"%(admission_link_back)s\">%(reference)s</a> - "
 "%(candidate_first_name)s %(candidate_last_name)s requested signatures for "
-"%(doctorate_title)s"
+"%(training_title)s"
 msgstr ""
 "<a href=\"%(admission_link_back)s\">%(reference)s</a> - "
 "%(candidate_first_name)s %(candidate_last_name)s a demandé les signatures "
-"pour %(doctorate_title)s"
+"pour %(training_title)s"
 
 #, python-format
 msgid ""
 "<a href=\"%(admission_link_back)s\">%(reference)s</a> - "
 "%(candidate_first_name)s %(candidate_last_name)s submitted request for "
-"%(doctorate_title)s"
+"%(training_title)s"
 msgstr ""
 "<a href=\"%(admission_link_back)s\">%(reference)s</a> - "
 "%(candidate_first_name)s %(candidate_last_name)s a soumis une demande pour "
-"%(doctorate_title)s"
+"%(training_title)s"
 
 #, python-format
 msgid ""
@@ -127,47 +127,47 @@ msgid ""
 "<a href=\"%(confirmation_paper_link_back)s\">%(reference)s</a> - "
 "%(student_first_name)s %(student_last_name)s proposed a new deadline "
 "(%(extension_request_proposed_date)s) for the confirmation paper for "
-"%(doctorate_title)s"
+"%(training_title)s"
 msgstr ""
 "<a href=\"%(confirmation_paper_link_back)s\">%(reference)s</a> - "
 "%(student_first_name)s %(student_last_name)s a proposé une nouvelle échéance "
 "(%(extension_request_proposed_date)s) pour son épreuve de confirmation pour "
-"%(doctorate_title)s"
+"%(training_title)s"
 
 #, python-format
 msgid ""
 "<a href=\"%(confirmation_paper_link_back)s\">%(reference)s</a> - "
 "%(student_first_name)s %(student_last_name)s submitted data for the first "
-"time for the confirmation paper for %(doctorate_title)s"
+"time for the confirmation paper for %(training_title)s"
 msgstr ""
 "<a href=\"%(confirmation_paper_link_back)s\">%(reference)s</a> - "
 "%(student_first_name)s %(student_last_name)s a soumis pour la première fois "
-"des données pour son épreuve de confirmation pour %(doctorate_title)s"
+"des données pour son épreuve de confirmation pour %(training_title)s"
 
 #, python-format
 msgid ""
 "<a href=\"%(confirmation_paper_link_back)s\">%(reference)s</a> - "
 "%(student_first_name)s %(student_last_name)s submitted new data for the "
-"confirmation paper for %(doctorate_title)s"
+"confirmation paper for %(training_title)s"
 msgstr ""
 "<a href=\"%(confirmation_paper_link_back)s\">%(reference)s</a> - "
 "%(student_first_name)s %(student_last_name)s a soumis de nouvelles données "
-"pour son épreuve de confirmation pour %(doctorate_title)s"
+"pour son épreuve de confirmation pour %(training_title)s"
 
 #, python-format
 msgid ""
 "<a href=\"%(confirmation_paper_link_back)s\">%(reference)s</a> - A promoter "
 "submitted documents related to the confirmation paper of "
-"%(student_first_name)s %(student_last_name)s for %(doctorate_title)s"
+"%(student_first_name)s %(student_last_name)s for %(training_title)s"
 msgstr ""
 "<a href=\"%(confirmation_paper_link_back)s\">%(reference)s</a> - Un "
 "promoteur a soumis des documents relatifs à l'épreuve de confirmation de "
-"%(student_first_name)s %(student_last_name)s pour %(doctorate_title)s"
+"%(student_first_name)s %(student_last_name)s pour %(training_title)s"
 
 #, python-format
 msgid ""
-"<a href=\"%(enrollment_url)s\">Go to course enrollment</a> or <a href="
-"\"%(add_url)s\">add a course</a>"
+"<a href=\"%(enrollment_url)s\">Go to course enrollment</a> or <a "
+"href=\"%(add_url)s\">add a course</a>"
 msgstr ""
 "<a href=\"%(enrollment_url)s\">Aller à l'inscription aux cours</a> ou <a "
 "href=\"%(add_url)s\">ajouter un cours</a>"
@@ -180,6 +180,25 @@ msgstr ""
 "<h2>Supprimer le template d'email personnalisé \"%(name)s\" ?</h2><p>Êtes-"
 "vous sûr de vouloir supprimer ce template d'email personnalisé ? Cette "
 "action est irréversible.</p>"
+
+#, python-format
+msgid ""
+"<ul><li>the information I have provided in this application is accurate and "
+"complete</li><li>I have uploaded all relevant documents confirming the "
+"information provided</li><li>I pledge to forward %(to_service)s any changes "
+"to the data in my file</li></ul>"
+msgstr ""
+"<ul><li>les renseignements que j'ai fournis dans ce cadre sont exacts et "
+"complets</li><li>j'ai téléversé tous les documents utiles confirmant les "
+"renseignements fournis</li><li>je m'engage à transmettre %(to_service)s "
+"toutes les modifications de données reprises dans mon dossier</li></ul>"
+
+msgid ""
+"A candidate is considered as VIP if he/she is in double degree or if he/she "
+"benefits from an international scholarship or if he/she is Erasmus Mundus."
+msgstr ""
+"Un candidat est considéré VIP s'il est en double diplomation ou s'il "
+"bénéficie d'une bourse internationale ou s'il est Erasmus Mundus."
 
 msgid "A comment is required."
 msgstr "Un commentaire est requis."
@@ -217,12 +236,6 @@ msgstr "Admission en cours"
 msgid "ADMITTED"
 msgstr "Admis"
 
-msgid "ADRE Secretaries"
-msgstr "Secrétaires ADRE"
-
-msgid "ADRE secretary"
-msgstr "Secrétaire ADRE"
-
 msgid "APPROVED"
 msgstr "Approuvé"
 
@@ -238,6 +251,9 @@ msgstr "Résumé"
 msgid "Academic year"
 msgstr "Année académique"
 
+msgid "Accept"
+msgstr "Accepter"
+
 msgid "Accept these activities"
 msgstr "Accepter ces activités"
 
@@ -246,6 +262,9 @@ msgstr "Accepter ces cours"
 
 msgid "Accepted"
 msgstr "Acceptée"
+
+msgid "Access to regulated professions"
+msgstr "Accès aux professions réglementées"
 
 msgid "Account number"
 msgstr "Numéro de compte"
@@ -362,9 +381,6 @@ msgstr "Instantiations des éléments de formulaire pour admission"
 msgid "Admission form items"
 msgstr "Éléments de formulaire pour admission"
 
-msgid "Admission submission date"
-msgstr "Date de soumission Admission"
-
 msgid "Admission type"
 msgstr "Type de l'admission"
 
@@ -407,6 +423,19 @@ msgstr "Déjà promoteur."
 msgid "An education type"
 msgstr "Un type de formation"
 
+msgid ""
+"An integer greater than zero indicating the position of the item in relation "
+"to the others. Important point: the questions are displayed together "
+"according to the field \"Display according to training\" (the elements for "
+"all trainings, then the elements for a type of training, then the elements "
+"for a specific training)."
+msgstr ""
+"Entier supérieur à zéro indiquant la position de l’élément par rapport aux "
+"autres. Point important : les questions sont affichées groupées suivant le "
+"champ \"Affichage selon la formation\" (les éléments pour toutes les "
+"formations, puis les éléments pour un type de formation, puis les éléments "
+"pour une formation spécifique)."
+
 msgid "Annex 25 or 26 for refugees and stateless persons"
 msgstr "Annexe 25 ou 26 pour les réfugiés et apatrides"
 
@@ -416,6 +445,12 @@ msgid ""
 msgstr ""
 "Annexe 26 ou 26 ou la carte A/B mentionnant le statut de réfugié ou la "
 "décision confirmant la protection du parent"
+
+msgid "Another address"
+msgstr "Une autre adresse"
+
+msgid "Application fees"
+msgstr "Frais de dossier"
 
 msgid "Application for a study allowance from the French Community of Belgium"
 msgstr ""
@@ -490,6 +525,33 @@ msgstr "Retour à la liste"
 msgid "Belgian"
 msgstr "Belge"
 
+msgid "Billing address city"
+msgstr "La ville de l'adresse de facturation"
+
+msgid "Billing address country"
+msgstr "Le pays de l'adresse de facturation"
+
+msgid "Billing address place"
+msgstr "Le lieu-dit de l'adresse de facturation"
+
+msgid "Billing address postal box"
+msgstr "La boîte postale de l'adresse de facturation"
+
+msgid "Billing address postal code"
+msgstr "Le code postal de l'adresse de facturation"
+
+msgid "Billing address recipient"
+msgstr "Le destinataire de l'adresse de facturation"
+
+msgid "Billing address street"
+msgstr "La rue de l'adresse de facturation"
+
+msgid "Billing address street number"
+msgstr "Le numéro de rue de l'adresse de facturation"
+
+msgid "Billing address type"
+msgstr "Le type de l'adresse de facturation"
+
 msgid "Body"
 msgstr "Corps"
 
@@ -514,14 +576,8 @@ msgstr "Templates d'email de CDD"
 msgid "CDD configuration"
 msgstr "Configuration de la CDD"
 
-msgid "CDD manager"
-msgstr "Gestionnaire CDD"
-
 msgid "CDD manager comment"
 msgstr "Commentaire du gestionnaire CDD"
-
-msgid "CDD managers"
-msgstr "Gestionnaires CDD"
 
 msgid "CDD opinion"
 msgstr "Avis de la CDD"
@@ -725,9 +781,6 @@ msgstr "Candidat non trouvé."
 msgid "Candidate:"
 msgstr "Candidat :"
 
-msgid "Candidates"
-msgstr "Candidats"
-
 msgid "Canvas"
 msgstr "Canvas"
 
@@ -779,6 +832,9 @@ msgstr "Modifier la configuration de <em>%(name)s</em>"
 msgid "Change <em>%(name)s</em> custom mail template"
 msgstr "Modifier le template d'email personnalisé <em>%(name)s</em>"
 
+msgid "Checkboxes"
+msgstr "Cases à cocher"
+
 msgid "Child of a member of the staff of the UCLouvain or the Martin V entity"
 msgstr "Enfant d'un membre du personnel de l'UCLouvain ou de l'entité Martin V"
 
@@ -797,14 +853,14 @@ msgstr "Commentaire du gestionnaire CDD"
 msgid "Comments"
 msgstr "Commentaires"
 
-msgid "Committee member"
-msgstr "Membre du comité"
-
-msgid "Committee members"
-msgstr "Membres du comité"
-
 msgid "Communication attestation"
 msgstr "Attestation de communication"
+
+msgid "Communication with Host Hospitals"
+msgstr "Communication avec les Hôpitaux d'Accueil"
+
+msgid "Communication with your secondary school"
+msgstr "Communication avec votre école secondaire"
 
 msgid "Complementary training"
 msgstr "Formation complémentaire"
@@ -850,6 +906,9 @@ msgstr "Épreuve de confirmation non trouvée."
 msgid "Confirmation success attestation"
 msgstr "Attestation de réussite de l'épreuve de confirmation"
 
+msgid "Contact address"
+msgstr "Adresse de correspondance"
+
 msgid "Contact details"
 msgstr "Coordonnées"
 
@@ -864,6 +923,9 @@ msgstr "Formation continue"
 
 msgid "Continuing education admission"
 msgstr "Admission en formation continue"
+
+msgid "Continuing enrolments"
+msgstr "Inscriptions en formation continue"
 
 msgid "Cotutelle"
 msgstr "Cotutelle"
@@ -941,6 +1003,9 @@ msgstr "Templates d'email personnalisé"
 msgid "DOCTORAL_TRAINING"
 msgstr "Formation doctorale"
 
+msgid "Data protection"
+msgstr "Protection des données"
+
 msgid "Data related to the thesis"
 msgstr "Données relatives à la thèse"
 
@@ -977,6 +1042,9 @@ msgstr "Date limite pour la confirmation :"
 msgid "Deadline of the confirmation paper (DD/MM/YYYY)"
 msgstr "Date limite pour la confirmation (JJ/MM/AAAA)"
 
+msgid "Debug"
+msgstr "Debug"
+
 msgid "Decision confirming the granting of subsidiary protection"
 msgstr "Décision confirmant l'octroi de la protection subsidiaire"
 
@@ -1005,9 +1073,6 @@ msgstr "Supprimer"
 msgid "Delete?"
 msgstr "Supprimer ?"
 
-msgid "Deleted"
-msgstr "Supprimé"
-
 msgid "Description"
 msgstr "Description"
 
@@ -1025,6 +1090,9 @@ msgstr "Diplôme"
 
 msgid "Diploma equivalence"
 msgstr "Équivalence du diplôme"
+
+msgid "Disabled"
+msgstr "Désactivé"
 
 msgid "Display according education"
 msgstr "Affichage selon la formation"
@@ -1070,12 +1138,6 @@ msgstr "Admissions en doctorat"
 
 msgid "Doctorate enrolments"
 msgstr "Inscriptions en doctorat"
-
-msgid "Doctorate reader"
-msgstr "Lecteur doctorat"
-
-msgid "Doctorate readers"
-msgstr "Lecteurs doctorat"
 
 msgid "Document"
 msgstr "Document"
@@ -1148,6 +1210,7 @@ msgstr "Modifier la communication de ce séminaire"
 msgid "Edit the publication of this conference"
 msgstr "Modifier la publication de cette conférence"
 
+msgctxt "admission"
 msgid "Education"
 msgstr "Formation"
 
@@ -1171,6 +1234,9 @@ msgstr "S'inscrire à un cours"
 
 msgid "Enrolments"
 msgstr "Inscriptions"
+
+msgid "Entity"
+msgstr "Entité"
 
 msgid "Erasmus Mundus"
 msgstr "Erasmus Mundus"
@@ -1268,6 +1334,47 @@ msgstr "Fondation Mont Godinne"
 msgid "Fondation St Luc"
 msgstr "Fondation St Luc"
 
+msgid ""
+"For a message, it is possible to specify the CSS class that we want to apply "
+"on it by using the \"CLASSE_CSS\" property. This is a string which can "
+"contain several classes, separated with a space. <a href=\"https://"
+"getbootstrap.com/docs/3.3/css/#helper-classes\">Bootstrap classes</a> can be "
+"used here.<br>Full example: <code>{\"CLASSE_CSS\": \"bg-info\"}</code>."
+"<br><br>For a text field, it is possible to specify if the user can enter a "
+"short (\"COURT\", by default) or a long (\"LONG\") text by using the "
+"\"TAILLE_TEXTE\" property.<br>Full example: <code>{\"TAILLE_TEXTE\": "
+"\"LONG\"}</code>.<br><br>For a file field, it is possible to specify the "
+"maximum number (\"NOMBRE_MAX_DOCUMENT\", default to 1) and the MIME types "
+"(\"TYPES_MIME_FICHIER\") of the files that can be uploaded.<br>Full example: "
+"<code>{\"TYPES_MIME_FICHIER\": [\"application/pdf\"], "
+"\"NOMBRE_MAX_DOCUMENTS\": 3}</code>.<br><br>For a selection field, it is "
+"possible to specify if the selection is realised through a list (\"LISTE\", "
+"by default), checkboxes (\"CASES_A_COCHER\") or radio buttons "
+"(\"BOUTONS_RADIOS\") by using the \"TYPE_SELECTION\" property. The list and "
+"the radios buttons allow to select only one value whereas the checkboxes "
+"allow to select several values.<br>Full example: <code>{\"TYPE_SELECTION\": "
+"\"CASES_A_COCHER\"}</code>."
+msgstr ""
+"Pour un message, il est possible de spécifier la classe CSS qu'on veut y "
+"appliquer en utilisant la propriété \"CLASSE_CSS\". C'est une chaîne de "
+"caractères qui peut contenir plusieurs classes, séparées par un espace. Des "
+"<a href=\"https://getbootstrap.com/docs/3.3/css/#helper-classes\">classes "
+"Bootstrap</a> peuvent être utilisées ici.<br>Exemple complet : "
+"<code>{\"CLASSE_CSS\": \"bg-info\"}</code>.<br><br>Pour un champ texte, il "
+"est possible de spécifier si l'utilisateur peut saisir un texte court "
+"(\"COURT\", par défaut) ou long (\"LONG\") en utilisant la propriété "
+"\"TAILLE_TEXTE\".<br>Exemple complet : <code>{\"TAILLE_TEXTE\": \"LONG\"}</"
+"code>.<br><br>Pour un champ fichier, il est possible de spécifier le nombre "
+"maximum (\"NOMBRE_MAX_DOCUMENT\", défaut à 1) et les types MIME "
+"(\"TYPES_MIME_FICHIER\") des fichiers téléversables.<br>Exemple complet : "
+"<code>{\"TYPES_MIME_FICHIER\": [\"application/pdf\"], "
+"\"NOMBRE_MAX_DOCUMENTS\": 3}</code>.<br><br>Pour un champ sélection, il est "
+"possible de spécifier si la sélection sera réalisée via une liste "
+"(\"LISTE\", par défaut) des cases à cocher (\"CASES_A_COCHER\") ou des "
+"boutons radios (\"BOUTONS_RADIOS\") en utilisant la propriété "
+"\"TYPE_SELECTION\".<br>Exemple complet : <code>{\"TYPE_SELECTION\": "
+"\"CASES_A_COCHER\"}</code>."
+
 msgid "Form item"
 msgstr "Élément de formulaire"
 
@@ -1291,6 +1398,10 @@ msgstr "Valeurs en français"
 msgid "From"
 msgstr "De"
 
+#, python-format
+msgid "From %(debut_periode)s to %(fin_periode)s"
+msgstr "De %(debut_periode)s à %(fin_periode)s"
+
 msgid "GEOGRAPHY"
 msgstr "Géographie"
 
@@ -1300,8 +1411,14 @@ msgstr "Graphe de Gantt"
 msgid "General"
 msgstr "Général"
 
+msgid "General Study Regulations"
+msgstr "Règlement général des études"
+
 msgid "General education admission"
 msgstr "Admission en formation générale"
+
+msgid "General enrolments"
+msgstr "Inscriptions en formation générale"
 
 msgid "Generic"
 msgstr "Générique"
@@ -1313,6 +1430,9 @@ msgstr ""
 
 msgid "HTML"
 msgstr "HTML"
+
+msgid "Head office name"
+msgstr "Nom du siège social"
 
 msgid "Help text"
 msgstr "Texte d'aide"
@@ -1344,11 +1464,65 @@ msgid "I am an asylum seeker"
 msgstr "Je suis demandeur d’asile"
 
 msgid ""
+"I am aware that as a non-EU, non-assimilated student, I am required to pay a "
+"&euro;200 application fee via the online payment system. The application fee "
+"must be received by UCLouvain <strong>within 15 calendar days</strong>. If "
+"not, my application will be closed. For more information: <a href=\"https://"
+"uclouvain.be/en/study/inscriptions/tuition-fees-non-eu-students.html\" "
+"target=\"_blank\">www.uclouvain.be/application-fees</a>."
+msgstr ""
+"J'ai pris connaissance qu'en tant qu'étudiant de nationalité hors Union "
+"européenne, non-assimilé, je suis tenu de verser 200 € de frais de dossier "
+"via le paiement en ligne. Le montant des frais de dossier devra parvenir à "
+"l'UCLouvain <strong>impérativement dans les 15 jours calendrier</strong>. A "
+"défaut, ma demande sera clôturée. Pour plus d'informations : <a "
+"target=\"_blank\" href=\"https://uclouvain.be/fr/etudier/inscriptions/droits-"
+"d-inscription-etudiants-de-nationalite-hors-union-europeenne.html\">www."
+"uclouvain.be/frais-dossier</a>."
+
+msgid ""
+"I am aware that no additional documents specific to quota studies can be "
+"added after my online application has been confirmed."
+msgstr ""
+"J'ai pris connaissance qu'aucun document supplémentaire spécifique aux "
+"études contingentées ne pourra être ajouté après la confirmation de ma "
+"demande en ligne."
+
+msgid ""
 "I am supported by the CPAS, or by a CPAS rest home or designated by the CPAS "
 "(assimilation 4)"
 msgstr ""
 "Je suis pris en charge par le CPAS, ou par un home du CPAS ou désigné par le "
 "CPAS (assimilation 4)"
+
+msgid "I authorise"
+msgstr "J'autorise"
+
+msgid ""
+"I authorise the Faculty of Medicine and Dentistry of UCLouvain to provide my "
+"personal details (surname(s), first name(s), NOMA, date of birth, place of "
+"birth, address) to the Host Hospitals with a view to establishing the "
+"various accesses that will be necessary for me in the context of my "
+"internship, and this in compliance with the General Data Protection "
+"Regulation (GDPR) and the law of 30 July 2018 on the protection of "
+"individuals with regard to the processing of personal data. My data is kept "
+"for the time necessary for the proper execution of the internship and is "
+"never passed on to parties other than those mentioned above. Appropriate "
+"technical and organisational measures are put in place to ensure an adequate "
+"level of protection of this data."
+msgstr ""
+"J'autorise la faculté de médecine et médecine dentaire de l'UCLouvain à "
+"fournir mes coordonnées personnelles (nom(s), prénom(s), NOMA, date de "
+"naissance, lieu de naissance, adresse) aux Hôpitaux d'Accueil en vue "
+"d'établir les différents accès qui me seront nécessaires dans le cadre de "
+"mes stages, et ce, dans le respect du Règlement général sur la Protection "
+"des Données (RGDP) et la loi du 30 juillet 2018 relative à la protection des "
+"personnes physiques à l'égard des traitements de données à caractère "
+"personnel. Mes données sont conservées pour la durée nécessaire à la bonne "
+"exécution du stage et ne sont jamais transmises à d'autres parties que "
+"celles susmentionnées. Des mesures techniques et organisationnelles "
+"appropriées sont mises en place afin d'assurer un niveau de protection "
+"adéquat de ces données."
 
 msgid "I benefit from a Development Cooperation grant"
 msgstr "Je bénéficie d’une bourse de la Coopération au développement"
@@ -1373,6 +1547,12 @@ msgstr "Je bénéficie de la protection subsidiaire"
 msgid "I benefit from temporary protection"
 msgstr "Je bénéficie de la protection temporaire"
 
+msgid "I declare on my honour that"
+msgstr "Je déclare sur l'honneur que"
+
+msgid "I do not authorize"
+msgstr "Je n'autorise pas"
+
 msgid "I have a foreigner's card"
 msgstr "Je suis titulaire d’une carte d’étranger"
 
@@ -1389,7 +1569,7 @@ msgstr ""
 msgid "I have a residence card as a family member of an EU citizen."
 msgstr ""
 "Je suis titulaire d’une carte de séjour de membre de la famille d’un citoyen "
-"de l'Union européenne"
+"de l'Union européenne."
 
 msgid ""
 "I have a residence permit for more than 3 months, and I also have "
@@ -1419,8 +1599,38 @@ msgstr ""
 "J’ai une autorisation d’établissement, ou je suis résident de longue durée "
 "en Belgique (assimilation 1)"
 
+msgid ""
+"I have taken note of the latest version of the Internship framework "
+"agreement between UCLouvain and the Host Hospitals established within the "
+"framework of bachelor's or master's training in medicine organised by "
+"UCLouvain with a view to acquiring the corresponding teaching units, and I "
+"undertake to respect the terms thereof: <a href=\"https://cdn.uclouvain.be/"
+"groups/cms-editors-mede/ConventionStageMed.pdf\" target=\"_blank\">https://"
+"cdn.uclouvain.be/groups/cms-editors-mede/ConventionStageMed.pdf</a>"
+msgstr ""
+"J'ai bien pris connaissance de la dernière version de la Convention cadre de "
+"Stage entre l'UCLouvain et les Hôpitaux d'Accueil établie dans le cadre de "
+"la formation de bachelier ou de master en médecine organisée par l'UCLouvain "
+"en vue d'acquérir les unités d'enseignement correspondantes, et m'engage à "
+"en respecter les termes : <a href=\"https://cdn.uclouvain.be/groups/cms-"
+"editors-mede/ConventionStageMed.pdf\" target=\"_blank\">https://cdn."
+"uclouvain.be/groups/cms-editors-mede/ConventionStageMed.pdf</a>"
+
+#, python-format
+msgid ""
+"I undertake to send any supporting documents requested %(by_service)s "
+"<strong>within 15 calendar days</strong>. If I fail to do so, I take note "
+"and accept that my application will be closed."
+msgstr ""
+"Je m'engage à faire parvenir <strong>impérativement dans les 15 jours "
+"calendrier</strong> tout justificatif demandé %(by_service)s. A défaut, je "
+"prends bonne note et accepte que ma demande sera clôturée."
+
 msgid "IBAN account number"
 msgstr "Numéro de compte IBAN"
+
+msgid "INSCRIPTION"
+msgstr "Inscription"
 
 msgid "INVALID"
 msgstr "Invalide"
@@ -1461,11 +1671,68 @@ msgstr ""
 "Action impossible : veuillez-vous assurer que la date et le procès-verbal de "
 "l'épreuve ont bien été complétés."
 
+msgid ""
+"In accordance with the information on the link <a target=\"_blank\" "
+"href=\"https://uclouvain.be/en/study/inscriptions/reglementations.html\">www."
+"uclouvain.be/regulation-enrolment</a>, I declare that I have read the "
+"university regulations and accept their terms."
+msgstr ""
+"Conformément aux informations reprises sur le lien <a target=\"_blank\" "
+"href=\"https://uclouvain.be/fr/etudier/inscriptions/reglementations."
+"html\">www.uclouvain.be/reglementation-inscriptions</a>, je déclare avoir lu "
+"le règlement de l'université et j'en accepte les termes."
+
+msgid ""
+"In accordance with the information on the link <a target=\"_blank\" "
+"href=\"https://uclouvain.be/en/study/inscriptions/vie-privee.html\">www."
+"uclouvain.be/privacy-enrolment</a>, I declare that I have read the data "
+"protection policy of UCLouvain and I accept its terms."
+msgstr ""
+"Conformément aux informations reprises sur le lien <a target=\"_blank\" "
+"href=\"https://uclouvain.be/fr/etudier/inscriptions/vie-privee.html\">www."
+"uclouvain.be/vie-privee-inscriptions</a>, je déclare avoir lu la politique "
+"de protection des données de l'Université catholique de Louvain et j'en "
+"accepte les termes."
+
+msgid ""
+"In accordance with the information on the link, <a target=\"_blank\" "
+"href=\"https://uclouvain.be/en/study/inscriptions/acces-aux-professions-"
+"reglementees.html\">www.uclouvain.be/regulated-professions</a>, I declare "
+"that I have received, if these studies concern me, information on the "
+"conditions of access to these studies or of access to the continuation of "
+"these studies and on the particular rules or restrictions of accreditation "
+"or professional establishment to which the professional or associate title "
+"is subject, and I accept the terms thereof."
+msgstr ""
+"Conformément aux informations reprises sur le lien <a target=\"_blank\" "
+"href=\"https://uclouvain.be/fr/etudier/inscriptions/acces-aux-professions-"
+"reglementees.html\">www.uclouvain.be/professions-reglementees</a>, je "
+"déclare avoir reçu, si ces études me concernent, les informations relatives "
+"aux conditions d'accès à ces études ou d'accès à la suite de ces études et "
+"aux règles ou restrictions d'agrément ou d'établissement professionnel "
+"particulières auxquelles le titre professionnel ou d'agrégé est soumis et "
+"j'en accepte les termes."
+
+#, python-format
+msgid ""
+"In accordance with the registration calendar <a href=\"https://uclouvain.be/"
+"en/study/inscriptions/calendrier-inscriptions.html\" target=\"_blank\">www."
+"uclouvain.be/enrolment-calendar</a>, I confirm that I am applying for the "
+"academic year %(year)s."
+msgstr ""
+"Conformément au calendrier des inscriptions <a href=\"https://uclouvain.be/"
+"fr/etudier/inscriptions/calendrier-inscriptions.html\" target=\"_blank\">www."
+"uclouvain.be/calendrier-inscriptions</a>, je confirme postuler pour l'année "
+"académique %(year)s."
+
 msgid "In person"
 msgstr "En présentiel"
 
 msgid "In review"
 msgstr "En révision"
+
+msgid "Indicates if the item will be displayed to the user or not."
+msgstr "Indique si l'élément sera affiché ou non à l'utilisateur."
 
 msgid "Institute email"
 msgstr "Email de l'institut"
@@ -1502,6 +1769,9 @@ msgstr "Internationale pour les formation générales"
 msgid "International scholarship"
 msgstr "Bourse internationale"
 
+msgid "Internship framework agreement"
+msgstr "Convention cadre de stages"
+
 #, python-format
 msgid "Invalid property: %(config_params)s"
 msgid_plural "Invalid properties: %(config_params)s"
@@ -1514,11 +1784,17 @@ msgstr "Les invitations n'ont pas été envoyées"
 msgid "Invitations must have been sent"
 msgstr "Les invitations doivent avoir été envoyées"
 
+msgid "Is active?"
+msgstr "Actif ?"
+
 msgid "Is an external modification"
 msgstr "Est une modification externe"
 
 msgid "Is an external reorientation"
 msgstr "Est une réorientation externe"
+
+msgid "Is belgian bachelor"
+msgstr "Est bachelier belge"
 
 msgid "Is non-resident (as defined in decree)"
 msgstr "Est non-résident (au sens du décret)"
@@ -1526,14 +1802,11 @@ msgstr "Est non-résident (au sens du décret)"
 msgid "Journal"
 msgstr "Nom de la revue ou de la maison d'édition"
 
-msgid "Jury secretaries"
-msgstr "Secrétaires de jury"
-
-msgid "Jury secretary"
-msgstr "Secrétaire de jury"
-
 msgid "Justification letter"
 msgstr "Lettre de justification"
+
+msgid "Keys"
+msgstr "Clés"
 
 msgid "Keywords"
 msgstr "Mots-clés"
@@ -1588,6 +1861,14 @@ msgstr "Lien vers la page liée à la formation doctorale (back-office)"
 
 msgid "Link to the doctoral training panel (front-office)"
 msgstr "Lien vers la page liée à la formation doctorale (front-office)"
+
+msgid "List"
+msgstr "Liste"
+
+msgid "List of the values that the Selection elements can take (one per row)."
+msgstr ""
+"Liste de valeurs que les éléments de type Sélection peuvent prendre (une par "
+"ligne)."
 
 msgid "Long"
 msgstr "Long"
@@ -1706,6 +1987,20 @@ msgstr ""
 "E-mail envoyé au candidat pour confirmer l'envoi des demandes de signature"
 
 msgid ""
+"Mail sent to the candidate to confirm that his application for continuing "
+"education has been taken into account by UCLouvain"
+msgstr ""
+"E-mail envoyé au candidat pour lui confirmer que sa demande d'admission en "
+"formation continue est prise en compte par l'UCLouvain"
+
+msgid ""
+"Mail sent to the candidate to confirm that his application for general "
+"education has been taken into account by UCLouvain"
+msgstr ""
+"E-mail envoyé au candidat pour lui confirmer que sa demande d'admission en "
+"formation générale est prise en compte par l'UCLouvain"
+
+msgid ""
 "Mail sent to the candidate to confirm that his application has been taken "
 "into account by UCLouvain"
 msgstr ""
@@ -1792,8 +2087,14 @@ msgctxt "tab"
 msgid "Management"
 msgstr "Gestion"
 
+msgid "Management of the continuing enrolments"
+msgstr "Gestion des inscriptions en formation continue"
+
 msgid "Management of the doctorate enrolments"
 msgstr "Gestion des inscriptions en doctorats"
+
+msgid "Management of the general enrolments"
+msgstr "Gestion des inscriptions en formation générale"
 
 msgid "Mandatory fields are missing in the cotutelle."
 msgstr "Les champs requis de la cotutelle sont manquants."
@@ -1976,6 +2277,9 @@ msgstr "Aucune étude en français"
 msgid "No PhD found."
 msgstr "Pas de doctorat trouvé."
 
+msgid "No continuing enrolment"
+msgstr "Aucune inscription en formation continue n'a été trouvée"
+
 msgid "No defense reason"
 msgstr "Raison de non-soutenance"
 
@@ -1985,8 +2289,11 @@ msgstr "Aucune inscription en doctorat n'a été trouvée"
 msgid "No doctorate found."
 msgstr "Doctorat non trouvé."
 
+msgid "No general enrolment"
+msgstr "Aucune inscription en formation générale n'a été trouvée"
+
 msgid "No pool was found to match."
-msgstr "Aucun pot ne correspond"
+msgstr "Aucun pot ne correspond."
 
 msgid "No scholarship found."
 msgstr "Bourse non trouvée."
@@ -2139,6 +2446,13 @@ msgstr "Doctorat déjà réalisé"
 msgid "Place"
 msgstr "Lieu-dit"
 
+msgid ""
+"Placeholder text for Text form elements. Not used for Document, Selection "
+"and Message elements."
+msgstr ""
+"Texte du placeholder pour les éléments de formulaire de type Texte. N'est "
+"pas utilisé pour les éléments de type Document, Sélection et Message."
+
 msgid "Plain text"
 msgstr "Texte brut"
 
@@ -2189,20 +2503,28 @@ msgid "Please fill in at least your last or first name."
 msgstr "Merci de spécifier au-moins votre nom ou votre prénom."
 
 msgid ""
-"Please fill in the 'Previous Experience > Curriculum vitae' tab for the "
-"following year: "
-msgid_plural ""
-"Please fill in the 'Previous Experience > Curriculum vitae' tab for the "
-"following years: "
-msgstr[0] ""
-"Merci de compléter l'onglet 'Parcours antérieur > Curriculum' pour l'année "
-"suivante : "
-msgstr[1] ""
-"Merci de compléter l'onglet 'Parcours antérieur > Curriculum' pour les "
-"années suivantes : "
+"Please indicate if you want, on the basis of this training, to realize a "
+"cycle continuation for the bachelor you are registering for."
+msgstr ""
+"Merci de préciser si vous souhaitez, sur base de cette formation, réaliser "
+"une poursuite de cycle pour le bachelier auquel vous vous inscrivez."
+
+msgid ""
+"Please provide a copy of your certificate allowing the continuation of "
+"studies for the bachelor you are registering for."
+msgstr ""
+"Merci de fournir une copie de votre attestation autorisant à poursuivre les "
+"études du bachelier auquel vous vous inscrivez."
 
 msgid "Please provide a copy of your curriculum."
 msgstr "Merci de fournir une copie de votre curriculum."
+
+msgid ""
+"Please provide a copy of your decision of equivalence for your diploma(s) "
+"giving access to the training."
+msgstr ""
+"Merci de fournir une copie de votre décision d'équivalence pour votre/vos "
+"diplôme(s) donnant accès à la formation."
 
 msgid "Please provide a copy of your identity card."
 msgstr "Merci de fournir une copie de votre carte d'identité."
@@ -2215,6 +2537,13 @@ msgstr "Merci de spécifier au-moins un numéro d'identité."
 
 msgid "Please specify either your date of birth or your year of birth."
 msgstr "Merci de spécifier votre date ou votre année de naissance."
+
+msgid ""
+"Please specify the details of your most recent academic training and your "
+"most recent non-academic experience."
+msgstr ""
+"Veuillez renseigner les détails de votre dernière formation académique ainsi "
+"que de votre expérience non-académique la plus récente."
 
 msgid "Please specify your Belgian national register number."
 msgstr "Merci de spécifier votre numéro de registre national belge."
@@ -2230,9 +2559,6 @@ msgstr "Boîte"
 
 msgid "Poster"
 msgstr "Poster"
-
-msgid "Pre-Admission"
-msgstr "Pré-Admission"
 
 msgid "Pre-admission date"
 msgstr "Date de pré-admission"
@@ -2263,8 +2589,17 @@ msgstr "Parcours antérieur"
 msgid "Previous notes"
 msgstr "Notes précédentes"
 
+msgid "Private"
+msgstr "Privé"
+
 msgid "Prof."
 msgstr "Prof."
+
+msgid "Professional"
+msgstr "Professionnel"
+
+msgid "Professional email"
+msgstr "Adresse e-mail professionnelle"
 
 msgid "Program proposition"
 msgstr "Proposition de programme"
@@ -2280,9 +2615,6 @@ msgstr "Promoteur"
 
 msgid "Promoter not found."
 msgstr "Promoteur non trouvé."
-
-msgid "Promoters"
-msgstr "Promoteurs"
 
 msgid "Promotion"
 msgstr "Promotion"
@@ -2312,6 +2644,9 @@ msgid "Proof of receipt of unemployment benefit, pension or compensation"
 msgstr ""
 "Preuve de la perception d’allocations de chômage, de pension ou d’une "
 "indemnité de la mutuelle"
+
+msgid "Proof of regular registration"
+msgstr "Attestation d'inscription régulière'"
 
 msgid "Proposed new deadline"
 msgstr "Nouvelle échéance proposée"
@@ -2365,6 +2700,21 @@ msgstr "Statut de publication"
 msgid "Published"
 msgstr "Publié"
 
+msgid ""
+"Question label for Document, Selection and Text form elements. Not used for "
+"Message elements."
+msgstr ""
+"Libellé de la question pour les éléments de formulaire de type Document, "
+"Sélection et Texte. N'est pas utilisé pour les éléments de type Message."
+
+msgid ""
+"Question tooltip text for Document, Selection and Text form elements. "
+"Content of the message to be displayed for Message elements."
+msgstr ""
+"Texte du tooltip de la question pour les éléments de formulaire de type "
+"Document, Sélection et Texte. Contenu du message à afficher pour les "
+"éléments de type Message."
+
 msgid "REFUSED"
 msgstr "Refusé"
 
@@ -2380,6 +2730,9 @@ msgstr "Séjour de perfectionnement de recherche"
 msgid "RESIDENCY types"
 msgstr ""
 "Types d'activité pour la catégorie Séjour de perfectionnement de recherche"
+
+msgid "Radio buttons"
+msgstr "Boutons radios"
 
 msgid "Reason for exceeding the deadline"
 msgstr "Motif du dépassement de l’échéance"
@@ -2408,8 +2761,14 @@ msgstr "Refuser l'activité"
 msgid "Registration Id"
 msgstr "Noma"
 
+msgid "Registration as"
+msgstr "Inscription à titre"
+
 msgid "Registration certificate"
 msgstr "Attestation d’immatriculation"
+
+msgid "Registration change form"
+msgstr "Formulaire de modification d'inscription"
 
 msgid "Rejection reason"
 msgstr "Motif de refus"
@@ -2467,6 +2826,9 @@ msgstr ""
 "Titre de séjour d’une validité supérieure à 3 mois avec des revenus de "
 "remplacement"
 
+msgid "Residential address"
+msgstr "Domicile légal"
+
 msgid "Restore activity to submitted"
 msgstr "Remettre cette activité au statut soumise"
 
@@ -2482,11 +2844,65 @@ msgstr "Rôle"
 msgid "Role of the signing actor"
 msgstr "Rôle du signataire"
 
-msgid "SCEB"
-msgstr "SCEB"
+msgid "Role: ADRE Secretaries"
+msgstr "Rôle: Secrétaires ADRE"
 
-msgid "SCEBs"
-msgstr "SCEB"
+msgid "Role: ADRE secretary"
+msgstr "Rôle: Secrétaire ADRE"
+
+msgid "Role: CDD manager"
+msgstr "Rôle: Gestionnaire CDD"
+
+msgid "Role: CDD managers"
+msgstr "Rôle: Gestionnaires CDD"
+
+msgid "Role: Candidate"
+msgstr "Rôle: Candidat"
+
+msgid "Role: Candidates"
+msgstr "Candidats"
+
+msgid "Role: Committee member"
+msgstr "Rôle: Membre du comité"
+
+msgid "Role: Committee members"
+msgstr "Rôle: Membres du comité"
+
+msgid "Role: Doctorate reader"
+msgstr "Rôle: Lecteur doctorat"
+
+msgid "Role: Doctorate readers"
+msgstr "Rôle: Lecteurs doctorat"
+
+msgid "Role: Jury secretaries"
+msgstr "Rôle: Secrétaires de jury"
+
+msgid "Role: Jury secretary"
+msgstr "Rôle: Secrétaire de jury"
+
+msgid "Role: Promoter"
+msgstr "Rôle: Promoteur"
+
+msgid "Role: Promoters"
+msgstr "Rôle: Promoteurs"
+
+msgid "Role: SCEB"
+msgstr "Rôle: SCEB"
+
+msgid "Role: SCEBs"
+msgstr "Rôle: SCEBs"
+
+msgid "Role: SIC director"
+msgstr "Rôle: Directeur SIC"
+
+msgid "Role: SIC directors"
+msgstr "Rôle: Directeurs SIC"
+
+msgid "Role: SIC manager"
+msgstr "Rôle: Gestionnaire SIC"
+
+msgid "Role: SIC managers"
+msgstr "Rôle: Gestionnaires SIC"
 
 msgid "SEARCH_SCHOLARSHIP"
 msgstr "Bourse de recherche"
@@ -2507,18 +2923,6 @@ msgid "SERVICE types"
 msgstr ""
 "Types d'activité pour la catégorie Service institutionnel, didactique et "
 "d'expertise scientifique"
-
-msgid "SIC director"
-msgstr "Directeur SIC"
-
-msgid "SIC directors"
-msgstr "Directeurs SIC"
-
-msgid "SIC manager"
-msgstr "Gestionnaire SIC"
-
-msgid "SIC managers"
-msgstr "Gestionnaires SIC"
 
 msgid "SIC status"
 msgstr "Statut SIC"
@@ -2602,8 +3006,14 @@ msgstr "Veuillez sélectionner au moins une activité"
 msgid "Select for batch action"
 msgstr "Sélectionner pour une action en masse"
 
+msgid "Selection"
+msgstr "Sélection"
+
 msgid "Selection committee"
 msgstr "Comité de sélection"
+
+msgid "Selection type"
+msgstr "Type de sélection"
 
 msgid "Send a mail"
 msgstr "Envoyer un e-mail"
@@ -2652,45 +3062,68 @@ msgid ""
 "> Accounting' tab."
 msgstr ""
 "Des champs ne sont pas complétés dans la partie 'Absence de dettes' de "
-"l'onglet 'Finalisation > Comptabilité'"
+"l'onglet 'Finalisation > Comptabilité'."
 
 msgid ""
 "Some fields are missing in the 'Affiliations' block in the 'Finalization > "
 "Accounting' tab."
 msgstr ""
 "Des champs ne sont pas complétés dans la partie 'Affiliations' de l'onglet "
-"'Finalisation > Comptabilité'"
+"'Finalisation > Comptabilité'."
 
 msgid ""
 "Some fields are missing in the 'Assimilation' block in the 'Finalization > "
 "Accounting' tab."
 msgstr ""
 "Des champs ne sont pas complétés dans la partie 'Assimilation' de l'onglet "
-"'Finalisation > Comptabilité'"
+"'Finalisation > Comptabilité'."
 
 msgid ""
 "Some fields are missing in the 'Reduced registration fees' block in the "
 "'Finalization > Accounting' tab."
 msgstr ""
 "Des champs ne sont pas complétés dans la partie 'Réduction des frais "
-"d'inscription' de l'onglet 'Finalisation > Comptabilité'"
+"d'inscription' de l'onglet 'Finalisation > Comptabilité'."
 
 msgid ""
 "Some fields related to the bank account are missing in the 'Finalization > "
 "Accounting' tab."
 msgstr ""
 "Des champs relatifs au numéro de compte bancaire ne sont pas complétés dans "
-"l'onglet 'Finalisation > Comptabilité'"
+"l'onglet 'Finalisation > Comptabilité'."
 
 msgid ""
 "Some fields related to the bank account number in IBAN format are missing in "
 "the 'Finalization > Accounting' tab."
 msgstr ""
 "Des champs relatifs au numéro de compte bancaire au format IBAN ne sont pas "
-"complétés dans l'onglet 'Finalisation > Comptabilité'"
+"complétés dans l'onglet 'Finalisation > Comptabilité'."
+
+msgid ""
+"Some information about the Belgian diploma of the secondary studies are "
+"missing."
+msgstr ""
+"Des informations relatives au diplôme belge d'études secondaires sont "
+"manquantes."
+
+msgid ""
+"Some information about the alternative to the secondary studies are missing."
+msgstr ""
+"Des informations relatives à l'alternative aux études secondaires sont "
+"manquantes."
+
+msgid ""
+"Some information about the foreign diploma of the secondary studies are "
+"missing."
+msgstr ""
+"Des informations relatives au diplôme étranger d'études secondaires sont "
+"manquantes."
 
 msgid "Speaker"
 msgstr "Orateur ou oratrice"
+
+msgid "Specific documents for quota studies"
+msgstr "Documents spécifiques aux études contingentées"
 
 msgid "Sport affiliation"
 msgstr "Affiliation sportive"
@@ -2721,6 +3154,12 @@ msgstr "Langue des études"
 
 msgid "Subject"
 msgstr "Sujet"
+
+msgid "Submission date"
+msgstr "Date de soumission"
+
+msgid "Submission date:"
+msgstr "Date de soumission :"
 
 msgid "Submit"
 msgstr "Soumettre"
@@ -2762,6 +3201,9 @@ msgstr "Comité d'accompagnement"
 msgid "Supervisory panel report of the confirmation paper"
 msgstr "Procès-verbal de l'épreuve de confirmation"
 
+msgid "Supporting documents"
+msgstr "Justificatifs"
+
 msgid "TO_BE_COMPLETED"
 msgstr "À compléter"
 
@@ -2773,6 +3215,14 @@ msgstr "Pour vérification"
 
 msgid "Tab"
 msgstr "Onglet"
+
+msgid ""
+"Takes into account the language of secondary and higher education. Studies "
+"in Belgium are considered as both French and English studies."
+msgstr ""
+"Prend en considération la langue des études secondaires et des études "
+"supérieures. Des études en Belgique sont considérées comme des études en "
+"français et en anglais."
 
 msgid "Text"
 msgstr "Texte"
@@ -2840,9 +3290,6 @@ msgstr "La configuration n'est pas valide pour un document : "
 msgid "The configuration is not valid for a message: "
 msgstr "La configuration n'est pas valide pour un message : "
 
-msgid "The configuration is not valid for a text field: "
-msgstr "La configuration n'est pas valide pour un champ texte : "
-
 msgid "The configuration is not valid for a text: "
 msgstr "La configuration n'est pas valide pour un texte : "
 
@@ -2884,6 +3331,10 @@ msgstr "La demande a été confirmée sous le nom :"
 
 msgid "The dossier has been confirmed with the following contact address:"
 msgstr "La demande a été confirmée avec pour adresse de correspondance :"
+
+#, python-format
+msgid "The educational experience '%(education_name)s' is not completed."
+msgstr "L'expérience académique '%(education_name)s' est incomplète."
 
 msgid ""
 "The educational experiences that have been valuated from this admission."
@@ -2941,8 +3392,22 @@ msgstr ""
 msgid "The opinion about the extension request is not completed."
 msgstr "L'avis relatif à la demande d'une nouvelle échéance n'est pas complet."
 
+#, python-brace-format
+msgid ""
+"The option {index} must have an identifier and a translation for each "
+"required language."
+msgstr ""
+"L'option {index} doit avoir un identifiant et une traduction pour chaque "
+"langue requise."
+
 msgid "The person concerned"
 msgstr "La personne concernée"
+
+msgid ""
+"The person whose the secondary studies have been valuated by this admission"
+msgstr ""
+"La personne dont les études secondaires ont été valorisées par cette "
+"admission"
 
 msgid ""
 "The professional experiences that have been valuated from this admission."
@@ -2961,6 +3426,14 @@ msgstr "La raison de la demande de mise à jour"
 msgid "The reason for refusal"
 msgstr "La raison du refus"
 
+msgid "The resulting calculated academic year or pool is not consistent."
+msgstr "L'année académique et le pot déterminés ne concordent pas."
+
+#, python-format
+msgid "The selection type must be one of the following values: %(values)s."
+msgstr ""
+"Le type de sélection doit être l'une des valeurs suivantes : %(values)s."
+
 msgid "The signature request procedure isn't in progress."
 msgstr "La procédure de demande de signature n'a pas été lancée."
 
@@ -2970,6 +3443,10 @@ msgstr "La date de début ne peut être postérieure à la date de fin"
 #, python-format
 msgid "The status has been changed to %(status)s."
 msgstr "Le statut a bien été modifié pour : %(status)s."
+
+msgid "The submitted information is not consistent with information requested."
+msgstr ""
+"Les informations soumises ne correspondent pas aux informations requises."
 
 #, python-format
 msgid "The text size must be one of the following values: %(values)s."
@@ -2988,7 +3465,7 @@ msgid "There is no request for a new deadline."
 msgstr "Il n'y a pas de demande de nouvelle échéance."
 
 msgid "Thesis defences"
-msgstr "Défense de thèse"
+msgstr "Défense et soutenance"
 
 msgid "Thesis domain"
 msgstr "Domaine de la thèse"
@@ -3097,11 +3574,11 @@ msgstr "Nom du diplôme ou de la formation"
 msgid "Title of the communication"
 msgstr "Titre de la communication"
 
-msgid "Title of the doctorate"
-msgstr "Titre du doctorat"
-
 msgid "Title of the publication"
 msgstr "Intitulé de la publication"
+
+msgid "Title of the training"
+msgstr "Intitulé de la formation"
 
 msgid "To"
 msgstr "À"
@@ -3129,7 +3606,7 @@ msgid "Training activities"
 msgstr "Activités de formation"
 
 msgid "Training activity"
-msgstr "Ajouter une activité"
+msgstr "Activité for formation"
 
 msgid "Training choice"
 msgstr "Choix de formation"
@@ -3155,11 +3632,24 @@ msgstr "Type de publication"
 msgid "Type of training"
 msgstr "Type de formation"
 
-msgid "UCLOUVAIN_ASSISTANT"
-msgstr "Assistant UCLouvain"
+msgid "Type:"
+msgstr "Type :"
+
+msgid "UCLOUVAIN_SCIENTIFIC_STAFF"
+msgstr "Personnel scientifique UCLouvain"
 
 msgid "UCL_COURSE"
 msgstr "Cours UCL"
+
+msgid ""
+"UCLouvain to transmit, to the secondary school in which I obtained my CESS, "
+"the information relating to the successful completion of the 1st annual "
+"bachelor's degree and any academic degree obtained with the possible mention."
+msgstr ""
+"l'UCLouvain à transmettre, à l'école secondaire au sein de laquelle j'ai "
+"obtenu mon CESS, les informations relatives à la réussite du 1er bloc annuel "
+"de bachelier et toute obtention d'un grade académique avec la mention "
+"éventuelle."
 
 msgid "UE"
 msgstr "UE"
@@ -3169,6 +3659,9 @@ msgstr "UUID"
 
 msgid "Undecided"
 msgstr "Non décidé"
+
+msgid "Unique business number"
+msgstr "Numéro unique d'entreprise"
 
 msgid "Unsubmitted for publication"
 msgstr "Non soumis pour publication"
@@ -3188,6 +3681,9 @@ msgstr "Valorisation des acquis de l'expérience"
 msgid "VALID"
 msgstr "Valide"
 
+msgid "VAT number"
+msgstr "Numéro de TVA"
+
 msgid "VIP"
 msgstr "VIP"
 
@@ -3199,6 +3695,9 @@ msgstr "Valider ces cours"
 
 msgid "Validated"
 msgstr "Validé"
+
+msgid "Values"
+msgstr "Valeurs"
 
 msgid "WBI - Wallonie Bruxelles International"
 msgstr "WBI - Wallonie Bruxelles International"
@@ -3266,18 +3765,65 @@ msgstr "Oui, sur Saint-Gilles uniquement (10 EUR)"
 msgid "Yes, only in Tournai (10 EUR)"
 msgstr "Oui, sur Tournai uniquement (10 EUR)"
 
-msgid ""
-"You already have a doctorate admission in progress, please delete it before "
-"creating a newer one, or contact your domain doctoral committee."
-msgstr ""
-"Vous avez déjà une demande d’inscription en doctorat en cours, veuillez la "
-"supprimer avant de créer une nouvelle demande, ou contactez votre commission "
-"doctorale du domaine."
-
 msgid "You cannot fill in a language more than once, please correct the form."
 msgstr ""
 "Vous ne pouvez pas définir une langue plusieurs fois, merci de corriger le "
 "formulaire."
+
+#, python-format
+msgid ""
+"You cannot have more than %(max)s applications in progress at the same time."
+msgstr ""
+"Vous ne pouvez pas avoir plus de %(max)s demandes ouvertes en parallèle."
+
+#, python-format
+msgid ""
+"You cannot submit this admission for a continuing education as you already "
+"have submitted one."
+msgid_plural ""
+"You cannot submit this admission for a continuing education as you already "
+"have submitted %(maximum_number)s of them."
+msgstr[0] ""
+"Vous ne pouvez pas soumettre cette demande pour une formation continue car "
+"vous en avez déjà soumise une."
+msgstr[1] ""
+"Vous ne pouvez pas soumettre cette demande pour une formation continue car "
+"vous en avez déjà soumises %(maximum_number)s."
+
+#, python-format
+msgid ""
+"You cannot submit this admission for a doctorate education as you already "
+"have submitted one."
+msgid_plural ""
+"You cannot submit this admission for a doctorate education as you already "
+"have submitted %(maximum_number)s of them."
+msgstr[0] ""
+"Vous ne pouvez pas soumettre cette demande pour une formation doctorale car "
+"vous en avez déjà soumise une."
+msgstr[1] ""
+"Vous ne pouvez pas soumettre cette demande pour une formation doctorale car "
+"vous en avez déjà soumises %(maximum_number)s."
+
+#, python-format
+msgid ""
+"You cannot submit this admission for a general education as you already have "
+"submitted one."
+msgid_plural ""
+"You cannot submit this admission for a general education as you already have "
+"submitted %(maximum_number)s of them."
+msgstr[0] ""
+"Vous ne pouvez pas soumettre cette demande pour une formation générale car "
+"vous en avez déjà soumise une."
+msgstr[1] ""
+"Vous ne pouvez pas soumettre cette demande pour une formation générale car "
+"vous en avez déjà soumises %(maximum_number)s."
+
+msgid ""
+"You haven't answered to the question about your bank account in the "
+"'Finalization > Accounting' tab."
+msgstr ""
+"Vous n'avez pas répondu à la question relative à votre compte bancaire dans "
+"l'onglet 'Finalisation > Comptabilité'."
 
 msgid "You must add at least one CA member in order to request signatures."
 msgstr ""
@@ -3296,7 +3842,7 @@ msgstr ""
 "Vous devez ajouter au moins un promoteur externe afin de demander les "
 "signatures."
 
-msgid "You must answer the question about external enrollement change."
+msgid "You must answer the question about external enrollment change."
 msgstr ""
 "Vous devez répondre à la question sur la modification d'inscription externe."
 
@@ -3333,9 +3879,6 @@ msgstr ""
 msgid "You must set a reference promoter."
 msgstr "Vous devez désigner un promoteur de référence."
 
-msgid "You've reached the maximum authorized propositions."
-msgstr "Vous avez atteint le maximum de propositions."
-
 msgid "Your data has been saved"
 msgstr "Vos données ont été sauvegardées"
 
@@ -3348,14 +3891,26 @@ msgstr "Votre participation à l'événement"
 msgid "Zip code"
 msgstr "Code postal"
 
+msgid "academic year"
+msgstr "année académique"
+
 msgid "actions"
 msgstr "actions"
+
+msgid "by the UCLouvain Registration Service"
+msgstr "par le Service des Inscriptions de l'UCLouvain"
+
+msgid "by the University Institute of Continuing Education"
+msgstr "par l'Institut Universitaire de Formation Continue (IUFC)"
 
 msgid "created"
 msgstr "créé"
 
 msgid "dd/mm/yyyy"
 msgstr "jj/mm/aaaa"
+
+msgid "education group type"
+msgstr "type de formation"
 
 #, python-format
 msgid "from %(start)s to %(end)s"
@@ -3382,6 +3937,12 @@ msgstr "la <strong>réussite</strong> de l'épreuve de confirmation."
 
 msgid "the person concerned"
 msgstr "la personne concernée"
+
+msgid "to the UCLouvain Registration Service"
+msgstr "au Service des Inscriptions de l'UCLouvain"
+
+msgid "to the University Institute of Continuing Education"
+msgstr "à l'Institut Universitaire de Formation Continue (IUFC)"
 
 msgid "ucl"
 msgstr "UCLouvain"

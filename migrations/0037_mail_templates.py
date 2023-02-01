@@ -8,7 +8,7 @@ from admission.mail_templates import (
     ADMISSION_EMAIL_SIGNATURE_REFUSAL,
     ADMISSION_EMAIL_SIGNATURE_REQUESTS_ACTOR,
     ADMISSION_EMAIL_SIGNATURE_REQUESTS_CANDIDATE,
-    ADMISSION_EMAIL_SUBMISSION_CANDIDATE,
+    ADMISSION_EMAIL_CONFIRM_SUBMISSION_DOCTORATE,
     ADMISSION_EMAIL_SUBMISSION_CDD,
     ADMISSION_EMAIL_SUBMISSION_MEMBER,
 )
@@ -31,7 +31,7 @@ class Migration(migrations.Migration):
             {
                 'en': '''<p>Hello {candidate_first_name} {candidate_last_name},</p>
 
-<p>Requests for signatures concerning your application to {doctorate_title} have been sent.</p>
+<p>Requests for signatures concerning your application to {training_title} have been sent.</p>
 
 <ul>
 <li>{actors_as_list_items}</li> 
@@ -44,7 +44,7 @@ The OSIS Team</p>
 ''',
                 'fr-be': '''<p>Bonjour {candidate_first_name} {candidate_last_name},</p>
 
-<p>Les demandes de signatures concernant votre demande d'admission en {doctorate_title} ont bien été envoyées.</p>
+<p>Les demandes de signatures concernant votre demande d'admission en {training_title} ont bien été envoyées.</p>
 
 <ul>
 <li>{actors_as_list_items}</li>
@@ -61,14 +61,14 @@ L'équipe OSIS</p>
         MailTemplateMigration(
             ADMISSION_EMAIL_SIGNATURE_REQUESTS_ACTOR,
             {
-                'en': '[OSIS] Invite to supervise {candidate_first_name} {candidate_last_name} for {doctorate_title}',
+                'en': '[OSIS] Invite to supervise {candidate_first_name} {candidate_last_name} for {training_title}',
                 'fr-be': '[OSIS] Invitation à superviser {candidate_first_name} {candidate_last_name} '
-                'pour un {doctorate_title}',
+                'pour un {training_title}',
             },
             {
                 'en': '''<p>Hello {signataire_first_name} {signataire_last_name},</p>
 
-<p>{candidate_first_name} {candidate_last_name} has added you as {signataire_role} for {doctorate_title}.</p>
+<p>{candidate_first_name} {candidate_last_name} has added you as {signataire_role} for {training_title}.</p>
 
 <p>Please indicate your approval or refusal and view the admission request by clicking 
 on the {admission_link_front} link.</p>
@@ -79,7 +79,7 @@ The OSIS Team</p>
                 'fr-be': '''<p>Bonjour {signataire_first_name} {signataire_last_name},</p>
 
 <p>{candidate_first_name} {candidate_last_name} vous a ajouté en tant que {signataire_role} 
-pour son {doctorate_title}.</p>
+pour son {training_title}.</p>
 
 <p>Merci d'indiquer votre approbation ou refus et visualiser sa demande en cliquer sur le lien {admission_link_front}.
 
@@ -91,13 +91,13 @@ L'équipe OSIS</p>
         MailTemplateMigration(
             ADMISSION_EMAIL_SIGNATURE_CANDIDATE,
             {
-                'en': '[OSIS] Answer from {signataire_first_name} {signataire_last_name} for {doctorate_title}',
-                'fr-be': '[OSIS] Réponse de {signataire_first_name} {signataire_last_name} pour un {doctorate_title}',
+                'en': '[OSIS] Answer from {signataire_first_name} {signataire_last_name} for {training_title}',
+                'fr-be': '[OSIS] Réponse de {signataire_first_name} {signataire_last_name} pour un {training_title}',
             },
             {
                 'en': '''<p>Hello {candidate_first_name} {candidate_last_name},</p>
 
-<p>{signataire_first_name} {signataire_last_name} ({signataire_role}) has answered your request for {doctorate_title} 
+<p>{signataire_first_name} {signataire_last_name} ({signataire_role}) has answered your request for {training_title} 
 with the following : {decision}.</p>
 
 <p>---<br/>
@@ -105,7 +105,7 @@ The OSIS Team</p>
 ''',
                 'fr-be': '''<p>Bonjour {candidate_first_name} {candidate_last_name},</p>
 
-<p>{signataire_first_name} {signataire_last_name} ({signataire_role}) a répondu à votre demande de {doctorate_title} 
+<p>{signataire_first_name} {signataire_last_name} ({signataire_role}) a répondu à votre demande de {training_title} 
 avec ce qui suit : {decision}.</p>
 
 <p>---<br/>
@@ -116,16 +116,16 @@ L'équipe OSIS</p>
         MailTemplateMigration(
             ADMISSION_EMAIL_SIGNATURE_REFUSAL,
             {
-                'en': "[OSIS] Refusal from a member of the supervision group for the {doctorate_title} "
+                'en': "[OSIS] Refusal from a member of the supervision group for the {training_title} "
                       "of {candidate_first_name} {candidate_last_name}",
-                'fr-be': "[OSIS] Refus d'un membre du groupe de supervision pour le {doctorate_title} "
+                'fr-be': "[OSIS] Refus d'un membre du groupe de supervision pour le {training_title} "
                          "de {candidate_first_name} {candidate_last_name}",
             },
             {
                 'en': '''<p>Hello {actor_first_name} {actor_last_name},</p>
 
 <p>{signataire_first_name} {signataire_last_name} has refused being a member of the supervision group 
-for {candidate_first_name} {candidate_last_name} ({doctorate_title}) with the following reason: {reason}.</p>
+for {candidate_first_name} {candidate_last_name} ({training_title}) with the following reason: {reason}.</p>
 
 <p>Your decision is now on hold and you may be requested again once the candidate has made some changes.</p>
 
@@ -135,7 +135,7 @@ The OSIS Team</p>
                 'fr-be': '''<p>Bonjour {actor_first_name} {actor_last_name},</p>
 
 <p>{signataire_first_name} {signataire_last_name} a refusé de faire partie du groupe de supervision 
-pour {candidate_first_name} {candidate_last_name} ({doctorate_title}) avec la raison suivante : {reason}.</p>
+pour {candidate_first_name} {candidate_last_name} ({training_title}) avec la raison suivante : {reason}.</p>
 
 <p>Votre décision est maintenant en suspens et vous pourriez être sollicité à nouveau une fois que le candidat 
 aura modifié le groupe de supervision.</p>
@@ -146,7 +146,7 @@ L'équipe OSIS</p>
             },
         ),
         MailTemplateMigration(
-            ADMISSION_EMAIL_SUBMISSION_CANDIDATE,
+            ADMISSION_EMAIL_CONFIRM_SUBMISSION_DOCTORATE,
             {
                 'en': '[OSIS] Admission request submitted successfully',
                 'fr-be': "[OSIS] Demande d'admission soumise avec succès",
@@ -154,14 +154,14 @@ L'équipe OSIS</p>
             {
                 'en': '''<p>Hello {candidate_first_name} {candidate_last_name},</p>
 
-<p>Your application to {doctorate_title} have been submitted successfully.</p>
+<p>Your application to {training_title} have been submitted successfully.</p>
 
 <p>---<br/>
 The OSIS Team</p>
 ''',
                 'fr-be': '''<p>Bonjour {candidate_first_name} {candidate_last_name},</p>
 
-<p>Votre demande d'admission en {doctorate_title} a été soumise avec succès.</p>
+<p>Votre demande d'admission en {training_title} a été soumise avec succès.</p>
 
 <p>---<br/>
 L'équipe OSIS</p>
@@ -177,14 +177,14 @@ L'équipe OSIS</p>
             {
                 'en': '''<p>Hello {actor_first_name} {actor_last_name},</p>
 
-<p>{candidate_first_name} {candidate_last_name} has submitted an application to {doctorate_title}.</p>
+<p>{candidate_first_name} {candidate_last_name} has submitted an application to {training_title}.</p>
 
 <p>---<br/>
 The OSIS Team</p>
 ''',
                 'fr-be': '''<p>Bonjour {actor_first_name} {actor_last_name},</p>
 
-<p>{candidate_first_name} {candidate_last_name} a soumis une demande d'admission en {doctorate_title}.</p>
+<p>{candidate_first_name} {candidate_last_name} a soumis une demande d'admission en {training_title}.</p>
 
 <p>---<br/>
 L'équipe OSIS</p>
@@ -200,14 +200,14 @@ L'équipe OSIS</p>
             {
                 'en': '''<p>Hello {actor_first_name} {actor_last_name},</p>
 
-<p>{candidate_first_name} {candidate_last_name} has submitted an application to {doctorate_title}.</p>
+<p>{candidate_first_name} {candidate_last_name} has submitted an application to {training_title}.</p>
 
 <p>---<br/>
 The OSIS Team</p>
 ''',
                 'fr-be': '''<p>Bonjour {actor_first_name} {actor_last_name},</p>
 
-<p>{candidate_first_name} {candidate_last_name} a soumis une demande d'admission en {doctorate_title}.</p>
+<p>{candidate_first_name} {candidate_last_name} a soumis une demande d'admission en {training_title}.</p>
 
 <p>---<br/>
 L'équipe OSIS</p>
@@ -224,7 +224,7 @@ L'équipe OSIS</p>
                 'en': '''<p>Hello {actor_first_name} {actor_last_name},</p>
 
 <p>{candidate_first_name} {candidate_last_name} has removed you from 
-the supervision group concerning {doctorate_title}.</p>
+the supervision group concerning {training_title}.</p>
 
 <p>---<br/>
 The OSIS Team</p>
@@ -232,7 +232,7 @@ The OSIS Team</p>
                 'fr-be': '''<p>Bonjour {actor_first_name} {actor_last_name},</p>
 
 <p>{candidate_first_name} {candidate_last_name} vous a retiré du groupe de supervision 
-concernant son {doctorate_title}.</p>
+concernant son {training_title}.</p>
 
 <p>---<br/>
 L'équipe OSIS</p>

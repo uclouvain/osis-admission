@@ -108,6 +108,7 @@ class DoctoratInMemoryRepository(InMemoryGenericRepository, IDoctoratRepository)
             annee_formation=formation.annee,
             sigle_formation=formation.sigle,
             intitule_formation=formation.intitule,
+            type_admission='ADMISSION',
             titre_these='',
             type_financement='',
             bourse_recherche=bourse_recherche_dto,

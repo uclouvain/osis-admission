@@ -30,48 +30,124 @@ from rest_framework.response import Response
 
 from admission.api import serializers
 from admission.api.schema import ResponseSpecificSchema
-from admission.api.serializers import AccountingConditionsSerializer
-from admission.ddd.admission.doctorat.preparation.commands import CompleterComptabilitePropositionCommand
-from admission.utils import get_cached_admission_perm_obj
+from admission.ddd.admission.doctorat.preparation import commands as doctorate_commands
+from admission.ddd.admission.formation_generale import commands as general_commands
+from admission.ddd.admission.formation_continue import commands as continuing_commands
+from admission.utils import (
+    get_cached_admission_perm_obj,
+    get_cached_general_education_admission_perm_obj,
+    get_cached_continuing_education_admission_perm_obj,
+)
 from infrastructure.messages_bus import message_bus_instance
 from osis_role.contrib.views import APIPermissionRequiredMixin
 
 
-class AccountingSchema(ResponseSpecificSchema):
-    operation_id_base = '_accounting'
+class GeneralAccountingSchema(ResponseSpecificSchema):
+    operation_id_base = '_general_accounting'
     serializer_mapping = {
-        'GET': serializers.AccountingConditionsSerializer,
+        'GET': serializers.GeneralEducationAccountingDTOSerializer,
         'PUT': (
-            serializers.CompleterComptabilitePropositionCommandSerializer,
+            serializers.CompleterComptabilitePropositionGeneraleCommandSerializer,
             serializers.PropositionIdentityDTOSerializer,
         ),
     }
 
 
-class AccountingView(APIPermissionRequiredMixin, mixins.RetrieveModelMixin, mixins.UpdateModelMixin, GenericAPIView):
-    name = 'accounting'
-    schema = AccountingSchema()
-    pagination_class = None
-    filter_backends = []
-    permission_mapping = {
-        'GET': 'admission.view_doctorateadmission_accounting',
-        'PUT': 'admission.change_doctorateadmission_accounting',
+class ContinuingAccountingSchema(ResponseSpecificSchema):
+    operation_id_base = '_continuing_accounting'
+    serializer_mapping = {
+        'GET': serializers.ContinuingEducationAccountingDTOSerializer,
+        'PUT': (
+            serializers.CompleterComptabilitePropositionContinueCommandSerializer,
+            serializers.PropositionIdentityDTOSerializer,
+        ),
     }
 
-    def get_permission_object(self):
-        return get_cached_admission_perm_obj(self.kwargs['uuid'])
+
+class DoctorateAccountingSchema(ResponseSpecificSchema):
+    operation_id_base = '_accounting'
+    serializer_mapping = {
+        'GET': serializers.DoctorateEducationAccountingDTOSerializer,
+        'PUT': (
+            serializers.CompleterComptabilitePropositionDoctoraleCommandSerializer,
+            serializers.PropositionIdentityDTOSerializer,
+        ),
+    }
+
+
+class BaseAccountingView(
+    APIPermissionRequiredMixin,
+    mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
+    GenericAPIView,
+):
+    pagination_class = None
+    filter_backends = []
+    get_serializer_class = None
+    put_serializer_class = None
+    get_accounting_cmd_class = None
+    put_accounting_cmd_class = None
 
     def get(self, request, *args, **kwargs):
         """Get additional data conditioning the required accounting fields"""
+        comptabilite = message_bus_instance.invoke(self.get_accounting_cmd_class(uuid_proposition=self.kwargs['uuid']))
         candidate = self.get_permission_object().candidate
-        serializer = AccountingConditionsSerializer(instance=candidate)
+        serializer = self.get_serializer_class(instance=comptabilite, context={'candidate': candidate})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def put(self, request, *args, **kwargs):
         """Edit the accounting of a proposition"""
-        serializer = serializers.CompleterComptabilitePropositionCommandSerializer(data=request.data)
+        serializer = self.put_serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
-        result = message_bus_instance.invoke(CompleterComptabilitePropositionCommand(**serializer.data))
+        result = message_bus_instance.invoke(self.put_accounting_cmd_class(**serializer.data))
         self.get_permission_object().update_detailed_status()
         serializer = serializers.PropositionIdentityDTOSerializer(instance=result)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class DoctorateAccountingView(BaseAccountingView):
+    name = 'doctorate_accounting'
+    schema = DoctorateAccountingSchema()
+    permission_mapping = {
+        'GET': 'admission.view_doctorateadmission_accounting',
+        'PUT': 'admission.change_doctorateadmission_accounting',
+    }
+    get_serializer_class = serializers.DoctorateEducationAccountingDTOSerializer
+    put_serializer_class = serializers.CompleterComptabilitePropositionDoctoraleCommandSerializer
+    get_accounting_cmd_class = doctorate_commands.GetComptabiliteQuery
+    put_accounting_cmd_class = doctorate_commands.CompleterComptabilitePropositionCommand
+
+    def get_permission_object(self):
+        return get_cached_admission_perm_obj(self.kwargs['uuid'])
+
+
+class GeneralAccountingView(BaseAccountingView):
+    name = 'general_accounting'
+    schema = GeneralAccountingSchema()
+    permission_mapping = {
+        'GET': 'admission.view_generaleducationadmission_accounting',
+        'PUT': 'admission.change_generaleducationadmission_accounting',
+    }
+    get_serializer_class = serializers.GeneralEducationAccountingDTOSerializer
+    put_serializer_class = serializers.CompleterComptabilitePropositionGeneraleCommandSerializer
+    get_accounting_cmd_class = general_commands.GetComptabiliteQuery
+    put_accounting_cmd_class = general_commands.CompleterComptabilitePropositionCommand
+
+    def get_permission_object(self):
+        return get_cached_general_education_admission_perm_obj(self.kwargs['uuid'])
+
+
+class ContinuingAccountingView(BaseAccountingView):
+    name = 'continuing_accounting'
+    schema = ContinuingAccountingSchema()
+    permission_mapping = {
+        'GET': 'admission.view_continuingeducationadmission_accounting',
+        'PUT': 'admission.change_continuingeducationadmission_accounting',
+    }
+    get_serializer_class = serializers.ContinuingEducationAccountingDTOSerializer
+    put_serializer_class = serializers.CompleterComptabilitePropositionContinueCommandSerializer
+    get_accounting_cmd_class = continuing_commands.GetComptabiliteQuery
+    put_accounting_cmd_class = continuing_commands.CompleterComptabilitePropositionCommand
+
+    def get_permission_object(self):
+        return get_cached_continuing_education_admission_perm_obj(self.kwargs['uuid'])

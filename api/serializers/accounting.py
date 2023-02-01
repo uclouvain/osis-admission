@@ -26,58 +26,56 @@
 from rest_framework import serializers
 from rest_framework.fields import SerializerMethodField
 
-from admission.ddd.admission.doctorat.preparation.commands import CompleterComptabilitePropositionCommand
+from admission.ddd.admission.formation_continue import commands as continuing_education_commands
+from admission.ddd.admission.formation_generale import commands as general_education_commands
+from admission.ddd.admission.doctorat.preparation import commands as doctorate_education_commands
+from admission.ddd.admission.doctorat.preparation.dtos import ComptabiliteDTO as DoctorateAccountingDTO
+from admission.ddd.admission.formation_continue.dtos import ComptabiliteDTO as ContinuningAccountingDTO
+from admission.ddd.admission.formation_generale.dtos import ComptabiliteDTO as GeneralAccountingDTO
 from admission.infrastructure.admission.domain.service.profil_candidat import (
     ProfilCandidatTranslator,
 )
 from admission.utils import takewhile_return_attribute_values
 from base.models.academic_year import current_academic_year
 from base.models.enums.community import CommunityEnum
-from base.models.person import Person
 from base.tasks.synchronize_entities_addresses import UCLouvain_acronym
 from base.utils.serializers import DTOSerializer
 from osis_profile.models import EducationalExperienceYear
 
 
-class CompleterComptabilitePropositionCommandSerializer(DTOSerializer):
-    class Meta:
-        source = CompleterComptabilitePropositionCommand
-
-
-class AccountingConditionsSerializer(serializers.ModelSerializer):
-    has_ue_nationality = serializers.BooleanField(
-        source='country_of_citizenship.european_union',
-        allow_null=True,
-        read_only=True,
-    )
-    last_french_community_high_education_institutes_attended = SerializerMethodField(
+class DoctorateEducationAccountingDTOSerializer(DTOSerializer):
+    derniers_etablissements_superieurs_communaute_fr_frequentes = SerializerMethodField(
         allow_null=True,
     )
+    a_nationalite_ue = serializers.SerializerMethodField(allow_null=True)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        # Define a custom schema as the default schema type of a SerializerMethodField is string
-        self.fields['last_french_community_high_education_institutes_attended'].field_schema = {
+        # Define custom schemas as the default schema type of a SerializerMethodField is string
+        self.fields['derniers_etablissements_superieurs_communaute_fr_frequentes'].field_schema = {
             'type': 'object',
             'properties': {
                 'academic_year': {'type': 'integer'},
                 'names': {'type': 'array', 'items': {'type': 'string'}},
             },
         }
+        self.fields['a_nationalite_ue'].field_schema = {
+            'type': 'boolean',
+        }
 
-    def get_last_french_community_high_education_institutes_attended(self, instance: Person):
+    def get_derniers_etablissements_superieurs_communaute_fr_frequentes(self, _):
         # Absence of debts conditions -> check, on the basis of the CV, the absence of debt to the last high
         # education establishment of the French community attended by the candidate, when it is not UCLouvain, and
         # only within the scope of the academic years that must be justified
         cv_minimal_years = ProfilCandidatTranslator.get_annees_minimum_curriculum(
-            global_id=instance.global_id,
+            global_id=self.context['candidate'].global_id,
             current_year=current_academic_year().year,
         )
         last_institutes = (
             EducationalExperienceYear.objects.filter(
-                educational_experience__person=instance,
+                educational_experience__person=self.context['candidate'],
                 educational_experience__institute__community=CommunityEnum.FRENCH_SPEAKING.name,
-                academic_year__year__gte=cv_minimal_years.get('minimal_year'),
+                academic_year__year__gte=cv_minimal_years.get('minimal_date').year,
             )
             .exclude(
                 educational_experience__institute__code=UCLouvain_acronym,
@@ -99,9 +97,34 @@ class AccountingConditionsSerializer(serializers.ModelSerializer):
                 'names': names,
             }
 
+    def get_a_nationalite_ue(self, _):
+        country = getattr(self.context['candidate'], 'country_of_citizenship')
+        return country.european_union if country else None
+
     class Meta:
-        model = Person
-        fields = [
-            'has_ue_nationality',
-            'last_french_community_high_education_institutes_attended',
-        ]
+        source = DoctorateAccountingDTO
+
+
+class GeneralEducationAccountingDTOSerializer(DoctorateEducationAccountingDTOSerializer):
+    class Meta:
+        source = GeneralAccountingDTO
+
+
+class ContinuingEducationAccountingDTOSerializer(DTOSerializer):
+    class Meta:
+        source = ContinuningAccountingDTO
+
+
+class CompleterComptabilitePropositionDoctoraleCommandSerializer(DTOSerializer):
+    class Meta:
+        source = doctorate_education_commands.CompleterComptabilitePropositionCommand
+
+
+class CompleterComptabilitePropositionGeneraleCommandSerializer(DTOSerializer):
+    class Meta:
+        source = general_education_commands.CompleterComptabilitePropositionCommand
+
+
+class CompleterComptabilitePropositionContinueCommandSerializer(DTOSerializer):
+    class Meta:
+        source = continuing_education_commands.CompleterComptabilitePropositionCommand

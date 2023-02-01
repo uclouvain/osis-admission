@@ -23,6 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
+import unicodedata
 from typing import List, Optional
 
 from django.conf import settings
@@ -50,6 +51,9 @@ class FormationContinueTranslator(IFormationContinueTranslator):
             intitule=dto.title_fr if get_language() == settings.LANGUAGE_CODE else dto.title_en,
             campus=dto.main_teaching_campus_name or '',
             type=dto.type,
+            code_domaine=dto.main_domain_code or '',
+            campus_inscription=dto.enrollment_campus_name or '',
+            sigle_entite_gestion=dto.management_entity_acronym or '',
         )
 
     @classmethod
@@ -83,6 +87,7 @@ class FormationContinueTranslator(IFormationContinueTranslator):
             return Formation(
                 entity_id=FormationIdentity(sigle=dto.acronym, annee=dto.year),
                 type=TrainingType[dto.type],
+                code_domaine=dto.main_domain_code or '',
             )
 
         raise FormationNonTrouveeException
@@ -107,7 +112,12 @@ class FormationContinueTranslator(IFormationContinueTranslator):
         )
 
         results = [cls._build_dto(dto) for dto in dtos]
-        return list(sorted(results, key=lambda formation: formation.intitule))
+        return list(
+            sorted(
+                results,
+                key=lambda formation: f'{unicodedata.normalize("NFKD", formation.intitule)} {formation.campus}',
+            )
+        )
 
     @classmethod
     def verifier_existence(cls, sigle: str, annee: int) -> bool:  # pragma: no cover

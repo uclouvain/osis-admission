@@ -30,6 +30,9 @@ from django.core.cache import cache
 from rest_framework.generics import get_object_or_404
 
 from admission.contrib.models import DoctorateAdmission, GeneralEducationAdmission, ContinuingEducationAdmission
+from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
+    AnneesCurriculumNonSpecifieesException,
+)
 from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
 
 from admission.mail_templates import (
@@ -39,14 +42,14 @@ from admission.mail_templates import (
 from backoffice.settings.rest_framework.exception_handler import get_error_data
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from infrastructure.messages_bus import message_bus_instance
-from osis_common.ddd.interface import QueryRequest
+from osis_common.ddd.interface import QueryRequest, BusinessException
 
 
 def get_cached_admission_perm_obj(admission_uuid):
     qs = DoctorateAdmission.objects.select_related(
         'supervision_group',
         'candidate',
-        'training',
+        'training__academic_year',
     )
     return cache.get_or_set(
         'admission_permission_{}'.format(admission_uuid),
@@ -55,7 +58,7 @@ def get_cached_admission_perm_obj(admission_uuid):
 
 
 def get_cached_general_education_admission_perm_obj(admission_uuid):
-    qs = GeneralEducationAdmission.objects.select_related('candidate')
+    qs = GeneralEducationAdmission.objects.select_related('candidate', 'training__academic_year')
     return cache.get_or_set(
         'admission_permission_{}'.format(admission_uuid),
         lambda: get_object_or_404(qs, uuid=admission_uuid),
@@ -70,6 +73,12 @@ def get_cached_continuing_education_admission_perm_obj(admission_uuid):
     )
 
 
+def sort_business_exceptions(exception: BusinessException):
+    if isinstance(exception, AnneesCurriculumNonSpecifieesException):
+        return exception.status_code, exception.periode
+    return getattr(exception, 'status_code', ''), None
+
+
 def gather_business_exceptions(command: QueryRequest) -> Dict[str, list]:
     data = defaultdict(list)
     try:
@@ -77,8 +86,11 @@ def gather_business_exceptions(command: QueryRequest) -> Dict[str, list]:
         message_bus_instance.invoke(command)
     except MultipleBusinessExceptions as exc:
         # Gather all errors for output
-        for exception in exc.exceptions:
+        sorted_exceptions = sorted(exc.exceptions, key=sort_business_exceptions)
+
+        for exception in sorted_exceptions:
             data = get_error_data(data, exception, {})
+
     return data
 
 

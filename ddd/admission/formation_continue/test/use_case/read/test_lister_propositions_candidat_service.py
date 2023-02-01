@@ -38,11 +38,11 @@ class TestListerPropositionsCandidatService(SimpleTestCase):
 
     def test_should_rechercher_par_matricule(self):
         results = self.message_bus.invoke(self.cmd)
-        self.assertEqual(len(results), 1)
-        self.assertEqual(results[0].formation.sigle, 'SC3DP')
+        self.assertEqual(len(results), 3)
+        self.assertEqual(results[0].formation.sigle, 'USCC4')
         self.assertEqual(results[0].formation.annee, 2020)
-        self.assertEqual(results[0].formation.intitule, 'Doctorat en sciences')
-        self.assertEqual(results[0].formation.campus, 'Louvain-la-Neuve')
+        self.assertEqual(results[0].formation.intitule, 'Formation USCC4')
+        self.assertEqual(results[0].formation.campus, 'Louvain-La-Neuve')
         self.assertEqual(results[0].statut, ChoixStatutProposition.IN_PROGRESS.name)
         self.assertEqual(results[0].matricule_candidat, '0123456789')
         self.assertEqual(results[0].prenom_candidat, 'Jean')

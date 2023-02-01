@@ -53,6 +53,7 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
 from admission.ddd.admission.doctorat.preparation.test.factory.proposition import (
     PropositionAdmissionSC3DPMinimaleAnnuleeFactory,
 )
+from admission.ddd.admission.domain.service.i_maximum_propositions import MAXIMUM_PROPOSITIONS_EN_COURS
 from admission.ddd.admission.domain.validator.exceptions import BourseNonTrouveeException
 from admission.ddd.admission.enums.type_bourse import TypeBourse
 from admission.infrastructure.admission.doctorat.preparation.repository.in_memory.proposition import (
@@ -95,8 +96,8 @@ class TestInitierPropositionService(TestCase):
         proposition = self.proposition_repository.get(proposition_id)  # type: Proposition
         self.assertEqual(proposition_id, proposition.entity_id)
         self.assertEqual(ChoixTypeAdmission[self.cmd.type_admission], proposition.type_admission)
-        self.assertEqual(self.cmd.sigle_formation, proposition.doctorat_id.sigle)
-        self.assertEqual(self.cmd.annee_formation, proposition.doctorat_id.annee)
+        self.assertEqual(self.cmd.sigle_formation, proposition.formation_id.sigle)
+        self.assertEqual(self.cmd.annee_formation, proposition.formation_id.annee)
         self.assertEqual(self.cmd.matricule_candidat, proposition.matricule_candidat)
         self.assertEqual(ChoixStatutProposition.IN_PROGRESS, proposition.statut)
         self.assertEqual(self.cmd.bourse_erasmus_mundus, proposition.bourse_erasmus_mundus_id.uuid)
@@ -230,3 +231,9 @@ class TestInitierPropositionService(TestCase):
         cmd = attr.evolve(self.cmd, bourse_erasmus_mundus=str(uuid.uuid4()))
         with self.assertRaises(BourseNonTrouveeException):
             self.message_bus.invoke(cmd)
+
+    def test_should_empecher_si_trop_demandes_en_parallele(self):
+        for proposition_index in range(MAXIMUM_PROPOSITIONS_EN_COURS):
+            self.message_bus.invoke(self.cmd)
+        with self.assertRaises(MaximumPropositionsAtteintException):
+            self.message_bus.invoke(self.cmd)

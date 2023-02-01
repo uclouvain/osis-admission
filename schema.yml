@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Admission API
-  version: 1.0.49
+  version: 1.0.63
   description: This API delivers data for the Admission project.
   contact:
     name: UCLouvain - OSIS
@@ -81,14 +81,12 @@ paths:
       requestBody:
         content:
           application/json:
-            schema:
-              $ref: '#/components/schemas/InitierPropositionCommand'
+            schema: {}
       responses:
         201:
           content:
             application/json:
-              schema:
-                $ref: '#/components/schemas/PropositionIdentityDTO'
+              schema: {}
           description: ''
         '400':
           $ref: '#/components/responses/BadRequest'
@@ -347,32 +345,6 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - person
-  /curriculum:
-    get:
-      operationId: retrieveCurriculumDetails
-      description: Return the experiences and the curriculum pdf of a person and the
-        mandatory years to complete.
-      parameters:
-      - $ref: '#/components/parameters/Accept-Language'
-      - $ref: '#/components/parameters/X-User-FirstName'
-      - $ref: '#/components/parameters/X-User-LastName'
-      - $ref: '#/components/parameters/X-User-Email'
-      - $ref: '#/components/parameters/X-User-GlobalID'
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CurriculumDetails'
-          description: ''
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-      tags:
-      - person
   /curriculum/educational/{experience_id}:
     get:
       operationId: retrieveEducationalExperience
@@ -548,6 +520,32 @@ paths:
       - $ref: '#/components/parameters/X-User-GlobalID'
       responses:
         '204':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - person
+  /curriculum:
+    get:
+      operationId: retrieveCurriculumDetails
+      description: Return the curriculum experiences of a person with the mandatory
+        years to complete.
+      parameters:
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CurriculumDetails'
           description: ''
         '400':
           $ref: '#/components/responses/BadRequest'
@@ -923,38 +921,6 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - person
-  /propositions/doctorate/{uuid}/curriculum:
-    get:
-      operationId: retrieveCurriculumDetailsAdmission
-      description: Return the experiences and the curriculum pdf of a person and the
-        mandatory years to complete.
-      parameters:
-      - name: uuid
-        in: path
-        required: true
-        description: ''
-        schema:
-          type: string
-      - $ref: '#/components/parameters/Accept-Language'
-      - $ref: '#/components/parameters/X-User-FirstName'
-      - $ref: '#/components/parameters/X-User-LastName'
-      - $ref: '#/components/parameters/X-User-Email'
-      - $ref: '#/components/parameters/X-User-GlobalID'
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CurriculumDetails'
-          description: ''
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-      tags:
-      - person
   /propositions/doctorate/{uuid}/curriculum/educational/{experience_id}:
     get:
       operationId: retrieveEducationalExperienceAdmission
@@ -1213,6 +1179,73 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - propositions
+  /propositions/doctorate/{uuid}/curriculum:
+    get:
+      operationId: retrieveCurriculumDetailsAdmission
+      description: Return the curriculum experiences of a person with the mandatory
+        years to complete.
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CurriculumDetails'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - person
+    put:
+      operationId: updateDoctoratCompleterCurriculumCommandAdmission
+      description: ''
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DoctoratCompleterCurriculumCommand'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DoctoratCompleterCurriculumCommand'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - person
   /propositions/doctorate/{uuid}/submit:
     get:
       operationId: verify_proposition
@@ -1231,18 +1264,11 @@ paths:
       - $ref: '#/components/parameters/X-User-GlobalID'
       responses:
         200:
-          description: Proposition verification errors
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    status_code:
-                      type: string
-                    detail:
-                      type: string
+                $ref: '#/components/schemas/PropositionErrors'
+          description: ''
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -1270,7 +1296,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PropositionIdentityDTO'
+              $ref: '#/components/schemas/SubmitProposition'
       responses:
         201:
           content:
@@ -1373,7 +1399,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AccountingConditions'
+                $ref: '#/components/schemas/DoctorateEducationAccountingDTO'
           description: ''
         '400':
           $ref: '#/components/responses/BadRequest'
@@ -1402,7 +1428,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CompleterComptabilitePropositionCommand'
+              $ref: '#/components/schemas/CompleterComptabilitePropositionDoctoraleCommand'
       responses:
         200:
           content:
@@ -2292,8 +2318,74 @@ paths:
   /propositions/general-education/{uuid}/curriculum:
     get:
       operationId: retrieveCurriculumDetailsGeneralEducationAdmission
-      description: Return the experiences and the curriculum pdf of a person and the
-        mandatory years to complete.
+      description: Return the curriculum experiences of a person with the mandatory
+        years to complete.
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CurriculumDetails'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - person
+    put:
+      operationId: updateGeneralEducationCompleterCurriculumCommandAdmission
+      description: ''
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GeneralEducationCompleterCurriculumCommand'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GeneralEducationCompleterCurriculumCommand'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - person
+  /propositions/general-education/{uuid}/pool-questions:
+    get:
+      operationId: retrieve_pool_questions
+      description: Get relevant pool questions
       parameters:
       - name: uuid
         in: path
@@ -2311,7 +2403,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CurriculumDetails'
+                $ref: '#/components/schemas/PoolQuestions'
           description: ''
         '400':
           $ref: '#/components/responses/BadRequest'
@@ -2320,7 +2412,42 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
       tags:
-      - person
+      - propositions
+    put:
+      operationId: update_pool_questions
+      description: Update pool questions
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PoolQuestions'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PoolQuestions'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
   /propositions/general-education/{uuid}/{tab}/specific-question:
     get:
       operationId: list_general_specific_questions
@@ -2351,6 +2478,72 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/SpecificQuestion'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
+  /propositions/general-education/{uuid}/accounting:
+    get:
+      operationId: retrieve_general_accounting
+      description: Get additional data conditioning the required accounting fields
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GeneralEducationAccountingDTO'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
+    put:
+      operationId: update_general_accounting
+      description: Edit the accounting of a proposition
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CompleterComptabilitePropositionGeneraleCommand'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PropositionIdentityDTO'
           description: ''
         '400':
           $ref: '#/components/responses/BadRequest'
@@ -2598,18 +2791,11 @@ paths:
       - $ref: '#/components/parameters/X-User-GlobalID'
       responses:
         200:
-          description: Proposition verification errors
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    status_code:
-                      type: string
-                    detail:
-                      type: string
+                $ref: '#/components/schemas/PropositionErrors'
+          description: ''
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -2637,7 +2823,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PropositionIdentityDTO'
+              $ref: '#/components/schemas/SubmitProposition'
       responses:
         201:
           content:
@@ -2915,8 +3101,8 @@ paths:
   /propositions/continuing-education/{uuid}/curriculum:
     get:
       operationId: retrieveCurriculumDetailsContinuingEducationAdmission
-      description: Return the experiences and the curriculum pdf of a person and the
-        mandatory years to complete.
+      description: Return the curriculum experiences of a person with the mandatory
+        years to complete.
       parameters:
       - name: uuid
         in: path
@@ -2930,11 +3116,46 @@ paths:
       - $ref: '#/components/parameters/X-User-Email'
       - $ref: '#/components/parameters/X-User-GlobalID'
       responses:
-        '200':
+        200:
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/CurriculumDetails'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - person
+    put:
+      operationId: updateContinuingEducationCompleterCurriculumCommandAdmission
+      description: ''
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContinuingEducationCompleterCurriculumCommand'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContinuingEducationCompleterCurriculumCommand'
           description: ''
         '400':
           $ref: '#/components/responses/BadRequest'
@@ -2974,6 +3195,72 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/SpecificQuestion'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
+  /propositions/continuing-education/{uuid}/accounting:
+    get:
+      operationId: retrieve_continuing_accounting
+      description: Get additional data conditioning the required accounting fields
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContinuingEducationAccountingDTO'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
+    put:
+      operationId: update_continuing_accounting
+      description: Edit the accounting of a proposition
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CompleterComptabilitePropositionContinueCommand'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PropositionIdentityDTO'
           description: ''
         '400':
           $ref: '#/components/responses/BadRequest'
@@ -3221,18 +3508,11 @@ paths:
       - $ref: '#/components/parameters/X-User-GlobalID'
       responses:
         200:
-          description: Proposition verification errors
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    status_code:
-                      type: string
-                    detail:
-                      type: string
+                $ref: '#/components/schemas/PropositionErrors'
+          description: ''
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -3260,7 +3540,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PropositionIdentityDTO'
+              $ref: '#/components/schemas/SubmitProposition'
       responses:
         201:
           content:
@@ -3771,6 +4051,36 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - person
+  /propositions/doctorate:
+    post:
+      operationId: create_doctorate_training_choice
+      description: ''
+      parameters:
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InitierPropositionCommand'
+      responses:
+        201:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PropositionIdentityDTO'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
   /propositions/doctorate/{uuid}/curriculum/educational:
     post:
       operationId: createEducationalExperienceAdmission
@@ -4267,42 +4577,6 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - person
-  /propositions/doctorate/{uuid}/complete-curriculum:
-    put:
-      operationId: updateDoctoratCompleterCurriculumCommandAdmission
-      description: ''
-      parameters:
-      - name: uuid
-        in: path
-        required: true
-        description: ''
-        schema:
-          type: string
-      - $ref: '#/components/parameters/Accept-Language'
-      - $ref: '#/components/parameters/X-User-FirstName'
-      - $ref: '#/components/parameters/X-User-LastName'
-      - $ref: '#/components/parameters/X-User-Email'
-      - $ref: '#/components/parameters/X-User-GlobalID'
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/DoctoratCompleterCurriculumCommand'
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DoctoratCompleterCurriculumCommand'
-          description: ''
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-      tags:
-      - person
   /propositions/doctorate/{uuid}/training_choice:
     put:
       operationId: update_doctorate_training_choice
@@ -4533,7 +4807,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ModifierQuestionsSpecifiquesCommand'
+              $ref: '#/components/schemas/ModifierQuestionsSpecifiquesFormationGeneraleCommand'
       responses:
         200:
           content:
@@ -4549,42 +4823,6 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - propositions
-  /propositions/general-education/{uuid}/complete-curriculum:
-    put:
-      operationId: updateGeneralEducationCompleterCurriculumCommandAdmission
-      description: ''
-      parameters:
-      - name: uuid
-        in: path
-        required: true
-        description: ''
-        schema:
-          type: string
-      - $ref: '#/components/parameters/Accept-Language'
-      - $ref: '#/components/parameters/X-User-FirstName'
-      - $ref: '#/components/parameters/X-User-LastName'
-      - $ref: '#/components/parameters/X-User-Email'
-      - $ref: '#/components/parameters/X-User-GlobalID'
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/GeneralEducationCompleterCurriculumCommand'
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GeneralEducationCompleterCurriculumCommand'
-          description: ''
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-      tags:
-      - person
   /propositions/continuing-education/{uuid}/training-choice:
     put:
       operationId: update_continuing_training_choice
@@ -4654,42 +4892,6 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - propositions
-  /propositions/continuing-education/{uuid}/complete-curriculum:
-    put:
-      operationId: updateContinuingEducationCompleterCurriculumCommandAdmission
-      description: ''
-      parameters:
-      - name: uuid
-        in: path
-        required: true
-        description: ''
-        schema:
-          type: string
-      - $ref: '#/components/parameters/Accept-Language'
-      - $ref: '#/components/parameters/X-User-FirstName'
-      - $ref: '#/components/parameters/X-User-LastName'
-      - $ref: '#/components/parameters/X-User-Email'
-      - $ref: '#/components/parameters/X-User-GlobalID'
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ContinuingEducationCompleterCurriculumCommand'
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ContinuingEducationCompleterCurriculumCommand'
-          description: ''
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-      tags:
-      - person
   /propositions/continuing-education/{uuid}/specific-question:
     put:
       operationId: update_continuing_specific_question
@@ -4710,7 +4912,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ModifierQuestionsSpecifiquesCommand'
+              $ref: '#/components/schemas/ModifierQuestionsSpecifiquesFormationContinueCommand'
       responses:
         200:
           content:
@@ -4746,11 +4948,7 @@ components:
         links:
           type: object
           properties:
-            create_doctorate_proposition:
-              $ref: '#/components/schemas/ActionLink'
-            create_general_proposition:
-              $ref: '#/components/schemas/ActionLink'
-            create_continuing_proposition:
+            create_training_choice:
               $ref: '#/components/schemas/ActionLink'
           readOnly: true
           default: {}
@@ -4780,6 +4978,8 @@ components:
                     type: string
                   type:
                     type: string
+                  campus_inscription:
+                    type: string
                 required:
                 - sigle
                 - annee
@@ -4787,6 +4987,7 @@ components:
                 - sigle_entite_gestion
                 - campus
                 - type
+                - campus_inscription
               matricule_candidat:
                 type: string
               prenom_candidat:
@@ -4807,6 +5008,8 @@ components:
               links:
                 type: object
                 properties:
+                  retrieve_training_choice:
+                    $ref: '#/components/schemas/ActionLink'
                   retrieve_person:
                     $ref: '#/components/schemas/ActionLink'
                   update_person:
@@ -4855,8 +5058,6 @@ components:
                     $ref: '#/components/schemas/ActionLink'
                   retrieve_course_enrollment:
                     $ref: '#/components/schemas/ActionLink'
-                  retrieve_training_choice:
-                    $ref: '#/components/schemas/ActionLink'
                 readOnly: true
                 default: {}
             required:
@@ -4891,12 +5092,23 @@ components:
                     type: string
                   type:
                     type: string
+                  code_domaine:
+                    type: string
+                  campus_inscription:
+                    type: string
+                  sigle_entite_gestion:
+                    type: string
                 required:
                 - sigle
                 - annee
                 - intitule
                 - campus
                 - type
+                - code_domaine
+                - campus_inscription
+                - sigle_entite_gestion
+              reference:
+                type: string
               matricule_candidat:
                 type: string
               prenom_candidat:
@@ -4913,15 +5125,33 @@ components:
                 properties:
                   retrieve_person:
                     $ref: '#/components/schemas/ActionLink'
+                  update_person:
+                    $ref: '#/components/schemas/ActionLink'
                   retrieve_coordinates:
+                    $ref: '#/components/schemas/ActionLink'
+                  update_coordinates:
                     $ref: '#/components/schemas/ActionLink'
                   retrieve_secondary_studies:
                     $ref: '#/components/schemas/ActionLink'
+                  update_secondary_studies:
+                    $ref: '#/components/schemas/ActionLink'
                   retrieve_curriculum:
+                    $ref: '#/components/schemas/ActionLink'
+                  update_curriculum:
                     $ref: '#/components/schemas/ActionLink'
                   retrieve_specific_question:
                     $ref: '#/components/schemas/ActionLink'
+                  update_specific_question:
+                    $ref: '#/components/schemas/ActionLink'
                   retrieve_training_choice:
+                    $ref: '#/components/schemas/ActionLink'
+                  update_training_choice:
+                    $ref: '#/components/schemas/ActionLink'
+                  retrieve_accounting:
+                    $ref: '#/components/schemas/ActionLink'
+                  update_accounting:
+                    $ref: '#/components/schemas/ActionLink'
+                  submit_proposition:
                     $ref: '#/components/schemas/ActionLink'
                   destroy_proposition:
                     $ref: '#/components/schemas/ActionLink'
@@ -4930,6 +5160,7 @@ components:
             required:
             - uuid
             - formation
+            - reference
             - matricule_candidat
             - prenom_candidat
             - nom_candidat
@@ -4941,6 +5172,8 @@ components:
             type: object
             properties:
               uuid:
+                type: string
+              reference:
                 type: string
               formation:
                 type: object
@@ -4955,12 +5188,21 @@ components:
                     type: string
                   type:
                     type: string
+                  code_domaine:
+                    type: string
+                  campus_inscription:
+                    type: string
+                  sigle_entite_gestion:
+                    type: string
                 required:
                 - sigle
                 - annee
                 - intitule
                 - campus
                 - type
+                - code_domaine
+                - campus_inscription
+                - sigle_entite_gestion
               matricule_candidat:
                 type: string
               prenom_candidat:
@@ -4977,15 +5219,33 @@ components:
                 properties:
                   retrieve_person:
                     $ref: '#/components/schemas/ActionLink'
+                  update_person:
+                    $ref: '#/components/schemas/ActionLink'
                   retrieve_coordinates:
+                    $ref: '#/components/schemas/ActionLink'
+                  update_coordinates:
                     $ref: '#/components/schemas/ActionLink'
                   retrieve_secondary_studies:
                     $ref: '#/components/schemas/ActionLink'
+                  update_secondary_studies:
+                    $ref: '#/components/schemas/ActionLink'
                   retrieve_curriculum:
+                    $ref: '#/components/schemas/ActionLink'
+                  update_curriculum:
                     $ref: '#/components/schemas/ActionLink'
                   retrieve_specific_question:
                     $ref: '#/components/schemas/ActionLink'
+                  update_specific_question:
+                    $ref: '#/components/schemas/ActionLink'
                   retrieve_training_choice:
+                    $ref: '#/components/schemas/ActionLink'
+                  update_training_choice:
+                    $ref: '#/components/schemas/ActionLink'
+                  retrieve_accounting:
+                    $ref: '#/components/schemas/ActionLink'
+                  update_accounting:
+                    $ref: '#/components/schemas/ActionLink'
+                  submit_proposition:
                     $ref: '#/components/schemas/ActionLink'
                   destroy_proposition:
                     $ref: '#/components/schemas/ActionLink'
@@ -4993,6 +5253,7 @@ components:
                 default: {}
             required:
             - uuid
+            - reference
             - formation
             - matricule_candidat
             - prenom_candidat
@@ -5027,6 +5288,8 @@ components:
               type: string
             type:
               type: string
+            campus_inscription:
+              type: string
           required:
           - sigle
           - annee
@@ -5034,6 +5297,7 @@ components:
           - sigle_entite_gestion
           - campus
           - type
+          - campus_inscription
         matricule_candidat:
           type: string
         prenom_candidat:
@@ -5054,6 +5318,8 @@ components:
         links:
           type: object
           properties:
+            retrieve_training_choice:
+              $ref: '#/components/schemas/ActionLink'
             retrieve_person:
               $ref: '#/components/schemas/ActionLink'
             update_person:
@@ -5101,8 +5367,6 @@ components:
             retrieve_complementary_training:
               $ref: '#/components/schemas/ActionLink'
             retrieve_course_enrollment:
-              $ref: '#/components/schemas/ActionLink'
-            retrieve_training_choice:
               $ref: '#/components/schemas/ActionLink'
           readOnly: true
           default: {}
@@ -5320,6 +5584,11 @@ components:
     HighSchoolDiploma:
       type: object
       properties:
+        graduated_from_high_school:
+          $ref: '#/components/schemas/GotDiploma'
+        graduated_from_high_school_year:
+          type: integer
+          nullable: true
         belgian_diploma:
           type: object
           properties:
@@ -5496,7 +5765,12 @@ components:
               items:
                 type: string
               maxItems: 1
-            final_equivalence_decision:
+            final_equivalence_decision_ue:
+              type: array
+              items:
+                type: string
+              maxItems: 2
+            final_equivalence_decision_not_ue:
               type: array
               items:
                 type: string
@@ -5523,6 +5797,19 @@ components:
         specific_question_answers:
           type: object
           writeOnly: true
+        is_vae_potential:
+          type: boolean
+          readOnly: true
+        is_valuated:
+          type: boolean
+          readOnly: true
+    GotDiploma:
+      enum:
+      - ''
+      - 'YES'
+      - THIS_YEAR
+      - 'NO'
+      type: string
     DiplomaResults:
       enum:
       - NOT_KNOWN_YET_RESULT
@@ -5592,93 +5879,6 @@ components:
       - C1
       - C2
       type: string
-    CurriculumDetails:
-      type: object
-      properties:
-        professional_experiences:
-          type: array
-          items:
-            type: object
-            properties:
-              uuid:
-                type: string
-                readOnly: true
-              institute_name:
-                type: string
-                maxLength: 255
-              start_date:
-                type: string
-                format: date
-              end_date:
-                type: string
-                format: date
-              type:
-                $ref: '#/components/schemas/ActivityType'
-              valuated_from_admission:
-                type: array
-                items:
-                  type: string
-                readOnly: true
-            required:
-            - start_date
-            - end_date
-            - type
-        educational_experiences:
-          type: array
-          items:
-            type: object
-            properties:
-              uuid:
-                type: string
-                readOnly: true
-              institute_name:
-                type: string
-                maxLength: 255
-              institute:
-                type: string
-                nullable: true
-              program:
-                type: string
-                nullable: true
-              education_name:
-                type: string
-                maxLength: 255
-              educationalexperienceyear_set:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    academic_year:
-                      type: integer
-                      nullable: true
-                  required:
-                  - academic_year
-              valuated_from_admission:
-                type: array
-                items:
-                  type: string
-                readOnly: true
-              country:
-                type: string
-                nullable: true
-            required:
-            - educationalexperienceyear_set
-            - country
-        minimal_year:
-          type: integer
-          readOnly: true
-      required:
-      - professional_experiences
-      - educational_experiences
-    ActivityType:
-      enum:
-      - WORK
-      - INTERNSHIP
-      - VOLUNTEERING
-      - UNEMPLOYMENT
-      - LANGUAGE_TRAVEL
-      - OTHER
-      type: string
     EducationalExperience:
       type: object
       properties:
@@ -5718,7 +5918,7 @@ components:
         program:
           type: string
           nullable: true
-        valuated_from_admission:
+        valuated_from_trainings:
           type: array
           items:
             type: string
@@ -5784,7 +5984,6 @@ components:
       required:
       - educationalexperienceyear_set
       - country
-      - transcript_type
       - obtained_diploma
     Result:
       enum:
@@ -5809,6 +6008,7 @@ components:
       type: string
     TranscriptType:
       enum:
+      - ''
       - ONE_A_YEAR
       - ONE_FOR_ALL_YEARS
       type: string
@@ -5824,7 +6024,7 @@ components:
     ProfessionalExperience:
       type: object
       properties:
-        valuated_from_admission:
+        valuated_from_trainings:
           type: array
           items:
             type: string
@@ -5859,6 +6059,15 @@ components:
       - start_date
       - end_date
       - type
+    ActivityType:
+      enum:
+      - WORK
+      - INTERNSHIP
+      - VOLUNTEERING
+      - UNEMPLOYMENT
+      - LANGUAGE_TRAVEL
+      - OTHER
+      type: string
     ActivitySector:
       enum:
       - ''
@@ -5866,6 +6075,97 @@ components:
       - PRIVATE
       - ASSOCIATIVE
       type: string
+    CurriculumDetails:
+      type: object
+      properties:
+        professional_experiences:
+          type: array
+          items:
+            type: object
+            properties:
+              uuid:
+                type: string
+                readOnly: true
+              institute_name:
+                type: string
+                maxLength: 255
+              start_date:
+                type: string
+                format: date
+              end_date:
+                type: string
+                format: date
+              type:
+                $ref: '#/components/schemas/ActivityType'
+              valuated_from_trainings:
+                type: array
+                items:
+                  type: string
+                readOnly: true
+            required:
+            - start_date
+            - end_date
+            - type
+        educational_experiences:
+          type: array
+          items:
+            type: object
+            properties:
+              uuid:
+                type: string
+                readOnly: true
+              institute_name:
+                type: string
+                maxLength: 255
+              institute:
+                type: string
+                nullable: true
+              program:
+                type: string
+                nullable: true
+              education_name:
+                type: string
+                maxLength: 255
+              educationalexperienceyear_set:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    academic_year:
+                      type: integer
+                      nullable: true
+                    result:
+                      $ref: '#/components/schemas/Result'
+                  required:
+                  - academic_year
+              valuated_from_trainings:
+                type: array
+                items:
+                  type: string
+                readOnly: true
+              country:
+                type: string
+                nullable: true
+            required:
+            - educationalexperienceyear_set
+            - country
+        minimal_date:
+          type: date
+          readOnly: true
+        maximal_date:
+          type: date
+          readOnly: true
+        incomplete_periods:
+          type: array
+          items:
+            type: string
+        incomplete_experiences:
+          type: object
+      required:
+      - professional_experiences
+      - educational_experiences
+      - incomplete_periods
+      - incomplete_experiences
     DoctoratePropositionDTO:
       type: object
       properties:
@@ -5892,6 +6192,8 @@ components:
               type: string
             type:
               type: string
+            campus_inscription:
+              type: string
           required:
           - sigle
           - annee
@@ -5899,6 +6201,16 @@ components:
           - sigle_entite_gestion
           - campus
           - type
+          - campus_inscription
+        annee_calculee:
+          type: integer
+          nullable: true
+        pot_calcule:
+          type: string
+        date_fin_pot:
+          type: string
+          format: date
+          nullable: true
         matricule_candidat:
           type: string
         code_secteur_formation:
@@ -6077,205 +6389,6 @@ components:
                 type: string
               detail:
                 type: string
-        comptabilite:
-          type: object
-          properties:
-            attestation_absence_dette_etablissement:
-              type: array
-              items:
-                type: string
-            demande_allocation_d_etudes_communaute_francaise_belgique:
-              type: boolean
-              nullable: true
-            enfant_personnel:
-              type: boolean
-              nullable: true
-            attestation_enfant_personnel:
-              type: array
-              items:
-                type: string
-            type_situation_assimilation:
-              type: string
-            sous_type_situation_assimilation_1:
-              type: string
-            carte_resident_longue_duree:
-              type: array
-              items:
-                type: string
-            carte_cire_sejour_illimite_etranger:
-              type: array
-              items:
-                type: string
-            carte_sejour_membre_ue:
-              type: array
-              items:
-                type: string
-            carte_sejour_permanent_membre_ue:
-              type: array
-              items:
-                type: string
-            sous_type_situation_assimilation_2:
-              type: string
-            carte_a_b_refugie:
-              type: array
-              items:
-                type: string
-            annexe_25_26_refugies_apatrides:
-              type: array
-              items:
-                type: string
-            attestation_immatriculation:
-              type: array
-              items:
-                type: string
-            carte_a_b:
-              type: array
-              items:
-                type: string
-            decision_protection_subsidiaire:
-              type: array
-              items:
-                type: string
-            decision_protection_temporaire:
-              type: array
-              items:
-                type: string
-            sous_type_situation_assimilation_3:
-              type: string
-            titre_sejour_3_mois_professionel:
-              type: array
-              items:
-                type: string
-            fiches_remuneration:
-              type: array
-              items:
-                type: string
-            titre_sejour_3_mois_remplacement:
-              type: array
-              items:
-                type: string
-            preuve_allocations_chomage_pension_indemnite:
-              type: array
-              items:
-                type: string
-            attestation_cpas:
-              type: array
-              items:
-                type: string
-            relation_parente:
-              type: string
-            sous_type_situation_assimilation_5:
-              type: string
-            composition_menage_acte_naissance:
-              type: array
-              items:
-                type: string
-            acte_tutelle:
-              type: array
-              items:
-                type: string
-            composition_menage_acte_mariage:
-              type: array
-              items:
-                type: string
-            attestation_cohabitation_legale:
-              type: array
-              items:
-                type: string
-            carte_identite_parent:
-              type: array
-              items:
-                type: string
-            titre_sejour_longue_duree_parent:
-              type: array
-              items:
-                type: string
-            annexe_25_26_refugies_apatrides_decision_protection_parent:
-              type: array
-              items:
-                type: string
-            titre_sejour_3_mois_parent:
-              type: array
-              items:
-                type: string
-            fiches_remuneration_parent:
-              type: array
-              items:
-                type: string
-            attestation_cpas_parent:
-              type: array
-              items:
-                type: string
-            sous_type_situation_assimilation_6:
-              type: string
-            decision_bourse_cfwb:
-              type: array
-              items:
-                type: string
-            attestation_boursier:
-              type: array
-              items:
-                type: string
-            titre_identite_sejour_longue_duree_ue:
-              type: array
-              items:
-                type: string
-            titre_sejour_belgique:
-              type: array
-              items:
-                type: string
-            affiliation_sport:
-              type: string
-            etudiant_solidaire:
-              type: boolean
-              nullable: true
-            type_numero_compte:
-              type: string
-            numero_compte_iban:
-              type: string
-            iban_valide:
-              type: boolean
-              nullable: true
-            numero_compte_autre_format:
-              type: string
-            code_bic_swift_banque:
-              type: string
-            prenom_titulaire_compte:
-              type: string
-            nom_titulaire_compte:
-              type: string
-          required:
-          - attestation_absence_dette_etablissement
-          - attestation_enfant_personnel
-          - carte_resident_longue_duree
-          - carte_cire_sejour_illimite_etranger
-          - carte_sejour_membre_ue
-          - carte_sejour_permanent_membre_ue
-          - carte_a_b_refugie
-          - annexe_25_26_refugies_apatrides
-          - attestation_immatriculation
-          - carte_a_b
-          - decision_protection_subsidiaire
-          - decision_protection_temporaire
-          - titre_sejour_3_mois_professionel
-          - fiches_remuneration
-          - titre_sejour_3_mois_remplacement
-          - preuve_allocations_chomage_pension_indemnite
-          - attestation_cpas
-          - composition_menage_acte_naissance
-          - acte_tutelle
-          - composition_menage_acte_mariage
-          - attestation_cohabitation_legale
-          - carte_identite_parent
-          - titre_sejour_longue_duree_parent
-          - annexe_25_26_refugies_apatrides_decision_protection_parent
-          - titre_sejour_3_mois_parent
-          - fiches_remuneration_parent
-          - attestation_cpas_parent
-          - decision_bourse_cfwb
-          - attestation_boursier
-          - titre_identite_sejour_longue_duree_ue
-          - titre_sejour_belgique
         bourse_erasmus_mundus:
           type: object
           properties:
@@ -6319,8 +6432,58 @@ components:
       - fiche_archive_signatures_envoyees
       - statut
       - erreurs
-      - comptabilite
       - curriculum
+    PropositionErrors:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              status_code:
+                type: string
+              detail:
+                type: string
+            required:
+            - status_code
+            - detail
+        pool_start_date:
+          type: string
+          format: date
+          nullable: true
+        pool_end_date:
+          type: string
+          format: date
+          nullable: true
+        access_conditions_url:
+          type: string
+          nullable: true
+        elements_confirmation:
+          type: array
+          items:
+            type: object
+            properties:
+              nom:
+                type: string
+              texte:
+                type: string
+              reponses:
+                type: array
+                items: {}
+                nullable: true
+              titre:
+                type: string
+              type:
+                type: string
+            required:
+            - nom
+            - texte
+            - titre
+            - type
+          nullable: true
+      required:
+      - errors
     CotutelleDTO:
       type: object
       properties:
@@ -6350,14 +6513,162 @@ components:
       - demande_ouverture
       - convention
       - autres_documents
-    AccountingConditions:
+    DoctorateEducationAccountingDTO:
       type: object
       properties:
-        has_ue_nationality:
+        attestation_absence_dette_etablissement:
+          type: array
+          items:
+            type: string
+        type_situation_assimilation:
+          type: string
+        sous_type_situation_assimilation_1:
+          type: string
+        carte_resident_longue_duree:
+          type: array
+          items:
+            type: string
+        carte_cire_sejour_illimite_etranger:
+          type: array
+          items:
+            type: string
+        carte_sejour_membre_ue:
+          type: array
+          items:
+            type: string
+        carte_sejour_permanent_membre_ue:
+          type: array
+          items:
+            type: string
+        sous_type_situation_assimilation_2:
+          type: string
+        carte_a_b_refugie:
+          type: array
+          items:
+            type: string
+        annexe_25_26_refugies_apatrides:
+          type: array
+          items:
+            type: string
+        attestation_immatriculation:
+          type: array
+          items:
+            type: string
+        carte_a_b:
+          type: array
+          items:
+            type: string
+        decision_protection_subsidiaire:
+          type: array
+          items:
+            type: string
+        decision_protection_temporaire:
+          type: array
+          items:
+            type: string
+        sous_type_situation_assimilation_3:
+          type: string
+        titre_sejour_3_mois_professionel:
+          type: array
+          items:
+            type: string
+        fiches_remuneration:
+          type: array
+          items:
+            type: string
+        titre_sejour_3_mois_remplacement:
+          type: array
+          items:
+            type: string
+        preuve_allocations_chomage_pension_indemnite:
+          type: array
+          items:
+            type: string
+        attestation_cpas:
+          type: array
+          items:
+            type: string
+        relation_parente:
+          type: string
+        sous_type_situation_assimilation_5:
+          type: string
+        composition_menage_acte_naissance:
+          type: array
+          items:
+            type: string
+        acte_tutelle:
+          type: array
+          items:
+            type: string
+        composition_menage_acte_mariage:
+          type: array
+          items:
+            type: string
+        attestation_cohabitation_legale:
+          type: array
+          items:
+            type: string
+        carte_identite_parent:
+          type: array
+          items:
+            type: string
+        titre_sejour_longue_duree_parent:
+          type: array
+          items:
+            type: string
+        annexe_25_26_refugies_apatrides_decision_protection_parent:
+          type: array
+          items:
+            type: string
+        titre_sejour_3_mois_parent:
+          type: array
+          items:
+            type: string
+        fiches_remuneration_parent:
+          type: array
+          items:
+            type: string
+        attestation_cpas_parent:
+          type: array
+          items:
+            type: string
+        sous_type_situation_assimilation_6:
+          type: string
+        decision_bourse_cfwb:
+          type: array
+          items:
+            type: string
+        attestation_boursier:
+          type: array
+          items:
+            type: string
+        titre_identite_sejour_longue_duree_ue:
+          type: array
+          items:
+            type: string
+        titre_sejour_belgique:
+          type: array
+          items:
+            type: string
+        etudiant_solidaire:
           type: boolean
-          readOnly: true
           nullable: true
-        last_french_community_high_education_institutes_attended:
+        type_numero_compte:
+          type: string
+        numero_compte_iban:
+          type: string
+        iban_valide:
+          type: boolean
+          nullable: true
+        numero_compte_autre_format:
+          type: string
+        code_bic_swift_banque:
+          type: string
+        prenom_titulaire_compte:
+          type: string
+        nom_titulaire_compte:
+          type: string
+        derniers_etablissements_superieurs_communaute_fr_frequentes:
           type: object
           properties:
             academic_year:
@@ -6368,6 +6679,41 @@ components:
                 type: string
           readOnly: true
           nullable: true
+        a_nationalite_ue:
+          type: boolean
+          readOnly: true
+          nullable: true
+      required:
+      - attestation_absence_dette_etablissement
+      - carte_resident_longue_duree
+      - carte_cire_sejour_illimite_etranger
+      - carte_sejour_membre_ue
+      - carte_sejour_permanent_membre_ue
+      - carte_a_b_refugie
+      - annexe_25_26_refugies_apatrides
+      - attestation_immatriculation
+      - carte_a_b
+      - decision_protection_subsidiaire
+      - decision_protection_temporaire
+      - titre_sejour_3_mois_professionel
+      - fiches_remuneration
+      - titre_sejour_3_mois_remplacement
+      - preuve_allocations_chomage_pension_indemnite
+      - attestation_cpas
+      - composition_menage_acte_naissance
+      - acte_tutelle
+      - composition_menage_acte_mariage
+      - attestation_cohabitation_legale
+      - carte_identite_parent
+      - titre_sejour_longue_duree_parent
+      - annexe_25_26_refugies_apatrides_decision_protection_parent
+      - titre_sejour_3_mois_parent
+      - fiches_remuneration_parent
+      - attestation_cpas_parent
+      - decision_bourse_cfwb
+      - attestation_boursier
+      - titre_identite_sejour_longue_duree_ue
+      - titre_sejour_belgique
     SpecificQuestion:
       type: object
       properties:
@@ -6385,6 +6731,10 @@ components:
           type: object
         configuration:
           type: object
+        values:
+          type: array
+          items:
+            type: object
       required:
       - uuid
       - type
@@ -6392,6 +6742,7 @@ components:
       - text
       - help_text
       - configuration
+      - values
     SupervisionDTO:
       type: object
       properties:
@@ -6593,6 +6944,8 @@ components:
           type: integer
         intitule_formation:
           type: string
+        type_admission:
+          type: string
         titre_these:
           type: string
         type_financement:
@@ -6666,6 +7019,7 @@ components:
       - sigle_formation
       - annee_formation
       - intitule_formation
+      - type_admission
       - titre_these
       - type_financement
       - matricule_doctorant
@@ -7814,6 +8168,8 @@ components:
       properties:
         uuid:
           type: string
+        reference:
+          type: string
         formation:
           type: object
           properties:
@@ -7827,12 +8183,30 @@ components:
               type: string
             type:
               type: string
+            code_domaine:
+              type: string
+            campus_inscription:
+              type: string
+            sigle_entite_gestion:
+              type: string
           required:
           - sigle
           - annee
           - intitule
           - campus
           - type
+          - code_domaine
+          - campus_inscription
+          - sigle_entite_gestion
+        annee_calculee:
+          type: integer
+          nullable: true
+        pot_calcule:
+          type: string
+        date_fin_pot:
+          type: string
+          format: date
+          nullable: true
         matricule_candidat:
           type: string
         prenom_candidat:
@@ -7870,6 +8244,10 @@ components:
             retrieve_specific_question:
               $ref: '#/components/schemas/ActionLink'
             update_specific_question:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_accounting:
+              $ref: '#/components/schemas/ActionLink'
+            update_accounting:
               $ref: '#/components/schemas/ActionLink'
             destroy_proposition:
               $ref: '#/components/schemas/ActionLink'
@@ -7956,6 +8334,7 @@ components:
             type: string
       required:
       - uuid
+      - reference
       - formation
       - matricule_candidat
       - prenom_candidat
@@ -7966,10 +8345,261 @@ components:
       - attestation_continuation_cycle_bachelier
       - curriculum
       - equivalence_diplome
+    PoolQuestions:
+      type: object
+      properties:
+        is_belgian_bachelor:
+          type: boolean
+          nullable: true
+        is_external_reorientation:
+          type: boolean
+          nullable: true
+        regular_registration_proof:
+          type: array
+          items:
+            type: string
+          maxItems: 1
+        is_external_modification:
+          type: boolean
+          nullable: true
+        registration_change_form:
+          type: array
+          items:
+            type: string
+          maxItems: 1
+        is_non_resident:
+          type: boolean
+          nullable: true
+        reorientation_pool_end_date:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        modification_pool_end_date:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+    GeneralEducationAccountingDTO:
+      type: object
+      properties:
+        attestation_absence_dette_etablissement:
+          type: array
+          items:
+            type: string
+        demande_allocation_d_etudes_communaute_francaise_belgique:
+          type: boolean
+          nullable: true
+        enfant_personnel:
+          type: boolean
+          nullable: true
+        attestation_enfant_personnel:
+          type: array
+          items:
+            type: string
+        type_situation_assimilation:
+          type: string
+        sous_type_situation_assimilation_1:
+          type: string
+        carte_resident_longue_duree:
+          type: array
+          items:
+            type: string
+        carte_cire_sejour_illimite_etranger:
+          type: array
+          items:
+            type: string
+        carte_sejour_membre_ue:
+          type: array
+          items:
+            type: string
+        carte_sejour_permanent_membre_ue:
+          type: array
+          items:
+            type: string
+        sous_type_situation_assimilation_2:
+          type: string
+        carte_a_b_refugie:
+          type: array
+          items:
+            type: string
+        annexe_25_26_refugies_apatrides:
+          type: array
+          items:
+            type: string
+        attestation_immatriculation:
+          type: array
+          items:
+            type: string
+        carte_a_b:
+          type: array
+          items:
+            type: string
+        decision_protection_subsidiaire:
+          type: array
+          items:
+            type: string
+        decision_protection_temporaire:
+          type: array
+          items:
+            type: string
+        sous_type_situation_assimilation_3:
+          type: string
+        titre_sejour_3_mois_professionel:
+          type: array
+          items:
+            type: string
+        fiches_remuneration:
+          type: array
+          items:
+            type: string
+        titre_sejour_3_mois_remplacement:
+          type: array
+          items:
+            type: string
+        preuve_allocations_chomage_pension_indemnite:
+          type: array
+          items:
+            type: string
+        attestation_cpas:
+          type: array
+          items:
+            type: string
+        relation_parente:
+          type: string
+        sous_type_situation_assimilation_5:
+          type: string
+        composition_menage_acte_naissance:
+          type: array
+          items:
+            type: string
+        acte_tutelle:
+          type: array
+          items:
+            type: string
+        composition_menage_acte_mariage:
+          type: array
+          items:
+            type: string
+        attestation_cohabitation_legale:
+          type: array
+          items:
+            type: string
+        carte_identite_parent:
+          type: array
+          items:
+            type: string
+        titre_sejour_longue_duree_parent:
+          type: array
+          items:
+            type: string
+        annexe_25_26_refugies_apatrides_decision_protection_parent:
+          type: array
+          items:
+            type: string
+        titre_sejour_3_mois_parent:
+          type: array
+          items:
+            type: string
+        fiches_remuneration_parent:
+          type: array
+          items:
+            type: string
+        attestation_cpas_parent:
+          type: array
+          items:
+            type: string
+        sous_type_situation_assimilation_6:
+          type: string
+        decision_bourse_cfwb:
+          type: array
+          items:
+            type: string
+        attestation_boursier:
+          type: array
+          items:
+            type: string
+        titre_identite_sejour_longue_duree_ue:
+          type: array
+          items:
+            type: string
+        titre_sejour_belgique:
+          type: array
+          items:
+            type: string
+        affiliation_sport:
+          type: string
+        etudiant_solidaire:
+          type: boolean
+          nullable: true
+        type_numero_compte:
+          type: string
+        numero_compte_iban:
+          type: string
+        iban_valide:
+          type: boolean
+          nullable: true
+        numero_compte_autre_format:
+          type: string
+        code_bic_swift_banque:
+          type: string
+        prenom_titulaire_compte:
+          type: string
+        nom_titulaire_compte:
+          type: string
+        derniers_etablissements_superieurs_communaute_fr_frequentes:
+          type: object
+          properties:
+            academic_year:
+              type: integer
+            names:
+              type: array
+              items:
+                type: string
+          readOnly: true
+          nullable: true
+        a_nationalite_ue:
+          type: boolean
+          readOnly: true
+          nullable: true
+      required:
+      - attestation_absence_dette_etablissement
+      - attestation_enfant_personnel
+      - carte_resident_longue_duree
+      - carte_cire_sejour_illimite_etranger
+      - carte_sejour_membre_ue
+      - carte_sejour_permanent_membre_ue
+      - carte_a_b_refugie
+      - annexe_25_26_refugies_apatrides
+      - attestation_immatriculation
+      - carte_a_b
+      - decision_protection_subsidiaire
+      - decision_protection_temporaire
+      - titre_sejour_3_mois_professionel
+      - fiches_remuneration
+      - titre_sejour_3_mois_remplacement
+      - preuve_allocations_chomage_pension_indemnite
+      - attestation_cpas
+      - composition_menage_acte_naissance
+      - acte_tutelle
+      - composition_menage_acte_mariage
+      - attestation_cohabitation_legale
+      - carte_identite_parent
+      - titre_sejour_longue_duree_parent
+      - annexe_25_26_refugies_apatrides_decision_protection_parent
+      - titre_sejour_3_mois_parent
+      - fiches_remuneration_parent
+      - attestation_cpas_parent
+      - decision_bourse_cfwb
+      - attestation_boursier
+      - titre_identite_sejour_longue_duree_ue
+      - titre_sejour_belgique
     ContinuingEducationPropositionDTO:
       type: object
       properties:
         uuid:
+          type: string
+        reference:
           type: string
         formation:
           type: object
@@ -7984,12 +8614,30 @@ components:
               type: string
             type:
               type: string
+            code_domaine:
+              type: string
+            campus_inscription:
+              type: string
+            sigle_entite_gestion:
+              type: string
           required:
           - sigle
           - annee
           - intitule
           - campus
           - type
+          - code_domaine
+          - campus_inscription
+          - sigle_entite_gestion
+        annee_calculee:
+          type: integer
+          nullable: true
+        pot_calcule:
+          type: string
+        date_fin_pot:
+          type: string
+          format: date
+          nullable: true
         matricule_candidat:
           type: string
         prenom_candidat:
@@ -8028,6 +8676,10 @@ components:
               $ref: '#/components/schemas/ActionLink'
             update_specific_question:
               $ref: '#/components/schemas/ActionLink'
+            retrieve_accounting:
+              $ref: '#/components/schemas/ActionLink'
+            update_accounting:
+              $ref: '#/components/schemas/ActionLink'
             destroy_proposition:
               $ref: '#/components/schemas/ActionLink'
             submit_proposition:
@@ -8053,8 +8705,41 @@ components:
           type: array
           items:
             type: string
+        inscription_a_titre:
+          type: string
+        nom_siege_social:
+          type: string
+        numero_unique_entreprise:
+          type: string
+        numero_tva_entreprise:
+          type: string
+        adresse_mail_professionnelle:
+          type: string
+        type_adresse_facturation:
+          type: string
+        adresse_facturation:
+          type: object
+          properties:
+            rue:
+              type: string
+            code_postal:
+              type: string
+            ville:
+              type: string
+            pays:
+              type: string
+            lieu_dit:
+              type: string
+            numero_rue:
+              type: string
+            boite_postale:
+              type: string
+            destinataire:
+              type: string
+          nullable: true
       required:
       - uuid
+      - reference
       - formation
       - matricule_candidat
       - prenom_candidat
@@ -8064,6 +8749,27 @@ components:
       - erreurs
       - curriculum
       - equivalence_diplome
+    ContinuingEducationAccountingDTO:
+      type: object
+      properties:
+        etudiant_solidaire:
+          type: boolean
+          nullable: true
+        type_numero_compte:
+          type: string
+        numero_compte_iban:
+          type: string
+        iban_valide:
+          type: boolean
+          nullable: true
+        numero_compte_autre_format:
+          type: string
+        code_bic_swift_banque:
+          type: string
+        prenom_titulaire_compte:
+          type: string
+        nom_titulaire_compte:
+          type: string
     SectorDTO:
       type: object
       properties:
@@ -8088,6 +8794,8 @@ components:
           type: string
         type:
           type: string
+        campus_inscription:
+          type: string
       required:
       - sigle
       - annee
@@ -8095,6 +8803,7 @@ components:
       - sigle_entite_gestion
       - campus
       - type
+      - campus_inscription
     FormationGeneraleDTO:
       type: object
       properties:
@@ -8108,12 +8817,21 @@ components:
           type: string
         type:
           type: string
+        code_domaine:
+          type: string
+        campus_inscription:
+          type: string
+        sigle_entite_gestion:
+          type: string
       required:
       - sigle
       - annee
       - intitule
       - campus
       - type
+      - code_domaine
+      - campus_inscription
+      - sigle_entite_gestion
     FormationContinueDTO:
       type: object
       properties:
@@ -8127,12 +8845,21 @@ components:
           type: string
         type:
           type: string
+        code_domaine:
+          type: string
+        campus_inscription:
+          type: string
+        sigle_entite_gestion:
+          type: string
       required:
       - sigle
       - annee
       - intitule
       - campus
       - type
+      - code_domaine
+      - campus_inscription
+      - sigle_entite_gestion
     Tutor:
       type: object
       properties:
@@ -8198,7 +8925,7 @@ components:
       type: object
       properties:
         type_admission:
-          $ref: '#/components/schemas/AdmissionType'
+          $ref: '#/components/schemas/ChoixTypeAdmission'
         sigle_formation:
           type: string
         annee_formation:
@@ -8208,7 +8935,25 @@ components:
         justification:
           type: string
         commission_proximite:
-          $ref: '#/components/schemas/ChoixCommissionProximite'
+          enum:
+          - ''
+          - ECONOMY
+          - MANAGEMENT
+          - ECLI
+          - GIM
+          - NRSC
+          - BCM
+          - SPSS
+          - DENT
+          - DFAR
+          - MOTR
+          - PHYSICS
+          - CHEMISTRY
+          - MATHEMATICS
+          - STATISTICS
+          - BIOLOGY
+          - GEOGRAPHY
+          type: string
         bourse_erasmus_mundus:
           type: string
       required:
@@ -8217,31 +8962,37 @@ components:
       - annee_formation
       - matricule_candidat
       - commission_proximite
-    AdmissionType:
+    ChoixTypeAdmission:
       enum:
       - ADMISSION
       - PRE_ADMISSION
       type: string
-    ChoixCommissionProximite:
-      enum:
-      - ''
-      - ECONOMY
-      - MANAGEMENT
-      - ECLI
-      - GIM
-      - NRSC
-      - BCM
-      - SPSS
-      - DENT
-      - DFAR
-      - MOTR
-      - PHYSICS
-      - CHEMISTRY
-      - MATHEMATICS
-      - STATISTICS
-      - BIOLOGY
-      - GEOGRAPHY
-      type: string
+    SubmitProposition:
+      type: object
+      properties:
+        annee:
+          type: integer
+        pool:
+          enum:
+          - DOCTORATE_EDUCATION_ENROLLMENT
+          - CONTINUING_EDUCATION_ENROLLMENT
+          - ADMISSION_POOL_EXTERNAL_ENROLLMENT_CHANGE
+          - ADMISSION_POOL_EXTERNAL_REORIENTATION
+          - ADMISSION_POOL_VIP
+          - ADMISSION_POOL_HUE_UCL_PATHWAY_CHANGE
+          - ADMISSION_POOL_INSTITUT_CHANGE
+          - ADMISSION_POOL_UE5_BELGIAN
+          - ADMISSION_POOL_UE5_NON_BELGIAN
+          - ADMISSION_POOL_HUE5_BELGIUM_RESIDENCY
+          - ADMISSION_POOL_HUE5_FOREIGN_RESIDENCY
+          - ADMISSION_POOL_NON_RESIDENT_QUOTA
+          type: string
+        elements_confirmation:
+          type: object
+      required:
+      - annee
+      - pool
+      - elements_confirmation
     SupervisionActor:
       type: object
       properties:
@@ -8362,7 +9113,7 @@ components:
         uuid:
           type: string
         type_admission:
-          $ref: '#/components/schemas/AdmissionType'
+          $ref: '#/components/schemas/ChoixTypeAdmission'
         justification:
           type: string
         commission_proximite:
@@ -8451,6 +9202,26 @@ components:
       - proposition_programme_doctoral
       - projet_formation_complementaire
       - lettres_recommandation
+    ChoixCommissionProximite:
+      enum:
+      - ''
+      - ECONOMY
+      - MANAGEMENT
+      - ECLI
+      - GIM
+      - NRSC
+      - BCM
+      - SPSS
+      - DENT
+      - DFAR
+      - MOTR
+      - PHYSICS
+      - CHEMISTRY
+      - MATHEMATICS
+      - STATISTICS
+      - BIOLOGY
+      - GEOGRAPHY
+      type: string
     ChoixLangueRedactionThese:
       enum:
       - FRENCH
@@ -8504,7 +9275,326 @@ components:
       - demande_ouverture
       - convention
       - autres_documents
-    CompleterComptabilitePropositionCommand:
+    CompleterComptabilitePropositionDoctoraleCommand:
+      type: object
+      properties:
+        uuid_proposition:
+          type: string
+        attestation_absence_dette_etablissement:
+          type: array
+          items:
+            type: string
+        type_situation_assimilation:
+          type: string
+        sous_type_situation_assimilation_1:
+          type: string
+        carte_resident_longue_duree:
+          type: array
+          items:
+            type: string
+        carte_cire_sejour_illimite_etranger:
+          type: array
+          items:
+            type: string
+        carte_sejour_membre_ue:
+          type: array
+          items:
+            type: string
+        carte_sejour_permanent_membre_ue:
+          type: array
+          items:
+            type: string
+        sous_type_situation_assimilation_2:
+          type: string
+        carte_a_b_refugie:
+          type: array
+          items:
+            type: string
+        annexe_25_26_refugies_apatrides:
+          type: array
+          items:
+            type: string
+        attestation_immatriculation:
+          type: array
+          items:
+            type: string
+        carte_a_b:
+          type: array
+          items:
+            type: string
+        decision_protection_subsidiaire:
+          type: array
+          items:
+            type: string
+        decision_protection_temporaire:
+          type: array
+          items:
+            type: string
+        sous_type_situation_assimilation_3:
+          type: string
+        titre_sejour_3_mois_professionel:
+          type: array
+          items:
+            type: string
+        fiches_remuneration:
+          type: array
+          items:
+            type: string
+        titre_sejour_3_mois_remplacement:
+          type: array
+          items:
+            type: string
+        preuve_allocations_chomage_pension_indemnite:
+          type: array
+          items:
+            type: string
+        attestation_cpas:
+          type: array
+          items:
+            type: string
+        relation_parente:
+          type: string
+        sous_type_situation_assimilation_5:
+          type: string
+        composition_menage_acte_naissance:
+          type: array
+          items:
+            type: string
+        acte_tutelle:
+          type: array
+          items:
+            type: string
+        composition_menage_acte_mariage:
+          type: array
+          items:
+            type: string
+        attestation_cohabitation_legale:
+          type: array
+          items:
+            type: string
+        carte_identite_parent:
+          type: array
+          items:
+            type: string
+        titre_sejour_longue_duree_parent:
+          type: array
+          items:
+            type: string
+        annexe_25_26_refugies_apatrides_decision_protection_parent:
+          type: array
+          items:
+            type: string
+        titre_sejour_3_mois_parent:
+          type: array
+          items:
+            type: string
+        fiches_remuneration_parent:
+          type: array
+          items:
+            type: string
+        attestation_cpas_parent:
+          type: array
+          items:
+            type: string
+        sous_type_situation_assimilation_6:
+          type: string
+        decision_bourse_cfwb:
+          type: array
+          items:
+            type: string
+        attestation_boursier:
+          type: array
+          items:
+            type: string
+        titre_identite_sejour_longue_duree_ue:
+          type: array
+          items:
+            type: string
+        titre_sejour_belgique:
+          type: array
+          items:
+            type: string
+        etudiant_solidaire:
+          type: boolean
+          nullable: true
+        type_numero_compte:
+          type: string
+        numero_compte_iban:
+          type: string
+        iban_valide:
+          type: boolean
+          nullable: true
+        numero_compte_autre_format:
+          type: string
+        code_bic_swift_banque:
+          type: string
+        prenom_titulaire_compte:
+          type: string
+        nom_titulaire_compte:
+          type: string
+      required:
+      - uuid_proposition
+      - attestation_absence_dette_etablissement
+      - carte_resident_longue_duree
+      - carte_cire_sejour_illimite_etranger
+      - carte_sejour_membre_ue
+      - carte_sejour_permanent_membre_ue
+      - carte_a_b_refugie
+      - annexe_25_26_refugies_apatrides
+      - attestation_immatriculation
+      - carte_a_b
+      - decision_protection_subsidiaire
+      - decision_protection_temporaire
+      - titre_sejour_3_mois_professionel
+      - fiches_remuneration
+      - titre_sejour_3_mois_remplacement
+      - preuve_allocations_chomage_pension_indemnite
+      - attestation_cpas
+      - composition_menage_acte_naissance
+      - acte_tutelle
+      - composition_menage_acte_mariage
+      - attestation_cohabitation_legale
+      - carte_identite_parent
+      - titre_sejour_longue_duree_parent
+      - annexe_25_26_refugies_apatrides_decision_protection_parent
+      - titre_sejour_3_mois_parent
+      - fiches_remuneration_parent
+      - attestation_cpas_parent
+      - decision_bourse_cfwb
+      - attestation_boursier
+      - titre_identite_sejour_longue_duree_ue
+      - titre_sejour_belgique
+    ModifierTypeAdmissionDoctoraleCommand:
+      type: object
+      properties:
+        uuid_proposition:
+          type: string
+        type_admission:
+          type: string
+        justification:
+          type: string
+        bourse_erasmus_mundus:
+          type: string
+        reponses_questions_specifiques:
+          type: object
+      required:
+      - uuid_proposition
+      - type_admission
+    DesignerPromoteurReferenceCommand:
+      type: object
+      properties:
+        uuid_proposition:
+          type: string
+        matricule:
+          type: string
+      required:
+      - uuid_proposition
+      - matricule
+    RefuserPropositionCommand:
+      type: object
+      properties:
+        matricule:
+          type: string
+        motif_refus:
+          type: string
+        commentaire_interne:
+          type: string
+        commentaire_externe:
+          type: string
+      required:
+      - matricule
+      - motif_refus
+    SubmitConfirmationPaperCommand:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        rapport_recherche:
+          type: array
+          items:
+            type: string
+        proces_verbal_ca:
+          type: array
+          items:
+            type: string
+        avis_renouvellement_mandat_recherche:
+          type: array
+          items:
+            type: string
+      required:
+      - date
+      - rapport_recherche
+      - proces_verbal_ca
+      - avis_renouvellement_mandat_recherche
+    CompleteConfirmationPaperByPromoterCommand:
+      type: object
+      properties:
+        proces_verbal_ca:
+          type: array
+          items:
+            type: string
+        avis_renouvellement_mandat_recherche:
+          type: array
+          items:
+            type: string
+      required:
+      - proces_verbal_ca
+      - avis_renouvellement_mandat_recherche
+    ModifierChoixFormationGeneraleCommand:
+      type: object
+      properties:
+        uuid_proposition:
+          type: string
+        sigle_formation:
+          type: string
+        annee_formation:
+          type: integer
+        bourse_double_diplome:
+          type: string
+        bourse_internationale:
+          type: string
+        bourse_erasmus_mundus:
+          type: string
+        reponses_questions_specifiques:
+          type: object
+      required:
+      - uuid_proposition
+      - sigle_formation
+      - annee_formation
+    ModifierQuestionsSpecifiquesFormationGeneraleCommand:
+      type: object
+      properties:
+        specific_question_answers:
+          type: object
+    GeneralEducationCompleterCurriculumCommand:
+      type: object
+      properties:
+        uuid_proposition:
+          type: string
+        continuation_cycle_bachelier:
+          type: boolean
+          nullable: true
+        attestation_continuation_cycle_bachelier:
+          type: array
+          items:
+            type: string
+        curriculum:
+          type: array
+          items:
+            type: string
+        equivalence_diplome:
+          type: array
+          items:
+            type: string
+        reponses_questions_specifiques:
+          type: object
+      required:
+      - uuid_proposition
+      - attestation_continuation_cycle_bachelier
+      - curriculum
+      - equivalence_diplome
+    CompleterComptabilitePropositionGeneraleCommand:
       type: object
       properties:
         uuid_proposition:
@@ -8706,136 +9796,6 @@ components:
       - attestation_boursier
       - titre_identite_sejour_longue_duree_ue
       - titre_sejour_belgique
-    ModifierTypeAdmissionDoctoraleCommand:
-      type: object
-      properties:
-        uuid_proposition:
-          type: string
-        type_admission:
-          type: string
-        justification:
-          type: string
-        bourse_erasmus_mundus:
-          type: string
-        reponses_questions_specifiques:
-          type: object
-      required:
-      - uuid_proposition
-      - type_admission
-    DesignerPromoteurReferenceCommand:
-      type: object
-      properties:
-        uuid_proposition:
-          type: string
-        matricule:
-          type: string
-      required:
-      - uuid_proposition
-      - matricule
-    RefuserPropositionCommand:
-      type: object
-      properties:
-        matricule:
-          type: string
-        motif_refus:
-          type: string
-        commentaire_interne:
-          type: string
-        commentaire_externe:
-          type: string
-      required:
-      - matricule
-      - motif_refus
-    SubmitConfirmationPaperCommand:
-      type: object
-      properties:
-        date:
-          type: string
-          format: date
-        rapport_recherche:
-          type: array
-          items:
-            type: string
-        proces_verbal_ca:
-          type: array
-          items:
-            type: string
-        avis_renouvellement_mandat_recherche:
-          type: array
-          items:
-            type: string
-      required:
-      - date
-      - rapport_recherche
-      - proces_verbal_ca
-      - avis_renouvellement_mandat_recherche
-    CompleteConfirmationPaperByPromoterCommand:
-      type: object
-      properties:
-        proces_verbal_ca:
-          type: array
-          items:
-            type: string
-        avis_renouvellement_mandat_recherche:
-          type: array
-          items:
-            type: string
-      required:
-      - proces_verbal_ca
-      - avis_renouvellement_mandat_recherche
-    ModifierChoixFormationGeneraleCommand:
-      type: object
-      properties:
-        uuid_proposition:
-          type: string
-        sigle_formation:
-          type: string
-        annee_formation:
-          type: integer
-        bourse_double_diplome:
-          type: string
-        bourse_internationale:
-          type: string
-        bourse_erasmus_mundus:
-          type: string
-        reponses_questions_specifiques:
-          type: object
-      required:
-      - uuid_proposition
-      - sigle_formation
-      - annee_formation
-    ModifierQuestionsSpecifiquesCommand:
-      type: object
-      properties:
-        specific_question_answers:
-          type: object
-    GeneralEducationCompleterCurriculumCommand:
-      type: object
-      properties:
-        uuid_proposition:
-          type: string
-        continuation_cycle_bachelier:
-          type: boolean
-          nullable: true
-        attestation_continuation_cycle_bachelier:
-          type: array
-          items:
-            type: string
-        curriculum:
-          type: array
-          items:
-            type: string
-        equivalence_diplome:
-          type: array
-          items:
-            type: string
-        reponses_questions_specifiques:
-          type: object
-      required:
-      - uuid_proposition
-      - attestation_continuation_cycle_bachelier
-      - curriculum
-      - equivalence_diplome
     ModifierChoixFormationContinueCommand:
       type: object
       properties:
@@ -8870,6 +9830,64 @@ components:
       - uuid_proposition
       - curriculum
       - equivalence_diplome
+    ModifierQuestionsSpecifiquesFormationContinueCommand:
+      type: object
+      properties:
+        inscription_a_titre:
+          type: string
+        nom_siege_social:
+          type: string
+        numero_unique_entreprise:
+          type: string
+        numero_tva_entreprise:
+          type: string
+        adresse_mail_professionnelle:
+          type: string
+        type_adresse_facturation:
+          type: string
+        adresse_facturation_rue:
+          type: string
+        adresse_facturation_numero_rue:
+          type: string
+        adresse_facturation_code_postal:
+          type: string
+        adresse_facturation_ville:
+          type: string
+        adresse_facturation_pays:
+          type: string
+        adresse_facturation_destinataire:
+          type: string
+        adresse_facturation_boite_postale:
+          type: string
+        adresse_facturation_lieu_dit:
+          type: string
+        reponses_questions_specifiques:
+          type: object
+    CompleterComptabilitePropositionContinueCommand:
+      type: object
+      properties:
+        uuid_proposition:
+          type: string
+        etudiant_solidaire:
+          type: boolean
+          nullable: true
+        type_numero_compte:
+          type: string
+        numero_compte_iban:
+          type: string
+        iban_valide:
+          type: boolean
+          nullable: true
+        numero_compte_autre_format:
+          type: string
+        code_bic_swift_banque:
+          type: string
+        prenom_titulaire_compte:
+          type: string
+        nom_titulaire_compte:
+          type: string
+      required:
+      - uuid_proposition
     Error:
       type: object
       properties:

@@ -33,7 +33,7 @@ from admission.ddd.admission.domain.validator.exceptions import (
     QuestionsSpecifiquesChoixFormationNonCompleteesException,
     QuestionsSpecifiquesInformationsComplementairesNonCompleteesException,
 )
-from admission.ddd.admission.enums.question_specifique import Onglets
+from admission.ddd.admission.enums.question_specifique import Onglets, TypeItemFormulaire
 from admission.ddd.admission.formation_continue.domain.model.proposition import (
     Proposition as PropositionFormationContinue,
 )
@@ -55,7 +55,7 @@ class VerifierQuestionsSpecifiques(interface.DomainService):
         return all(
             proposition.reponses_questions_specifiques.get(str(question.entity_id.uuid))
             for question in questions_specifiques
-            if question.requis and question.onglet == onglet
+            if question.requis and question.type != TypeItemFormulaire.MESSAGE and question.onglet == onglet
         )
 
     @classmethod
@@ -94,6 +94,6 @@ class VerifierQuestionsSpecifiques(interface.DomainService):
         if not cls._questions_requises_bien_specifiees(
             proposition,
             questions_specifiques,
-            Onglets.INFORMATIONS_ADDITIONNELLES
+            Onglets.INFORMATIONS_ADDITIONNELLES,
         ):
             raise QuestionsSpecifiquesInformationsComplementairesNonCompleteesException

@@ -25,10 +25,11 @@
 # ##############################################################################
 
 import datetime
-from typing import List, Optional
+from typing import List, Optional, Tuple, Set
 
 import attr
 
+from admission.ddd.admission.doctorat.preparation.dtos.curriculum import ExperienceAcademiqueDTO
 from admission.ddd.admission.domain.model._candidat_adresse import CandidatAdresse
 from admission.ddd.admission.domain.model._candidat_signaletique import CandidatSignaletique
 from admission.ddd.admission.domain.validator import *

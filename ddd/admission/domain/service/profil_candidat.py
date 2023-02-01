@@ -25,7 +25,18 @@
 # ##############################################################################
 from typing import List
 
-from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition
+from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition as PropositionDoctorat
+from admission.ddd.admission.doctorat.preparation.domain.service.verifier_curriculum import (
+    VerifierCurriculumDoctorat,
+)
+from admission.ddd.admission.domain.service.verifier_curriculum import VerifierCurriculum
+from admission.ddd.admission.formation_continue.domain.model.proposition import Proposition as PropositionContinue
+from admission.ddd.admission.formation_continue.domain.validator.validator_by_business_actions import (
+    FormationContinueComptabiliteValidatorList,
+    FormationContinueCurriculumValidatorList,
+)
+from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition as PropositionGenerale
+
 from admission.ddd.admission.doctorat.preparation.domain.validator.validator_by_business_action import (
     ComptabiliteValidatorList,
     CurriculumValidatorList,
@@ -33,14 +44,22 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.validator_by_
 )
 from admission.ddd.admission.domain.model._candidat_adresse import CandidatAdresse
 from admission.ddd.admission.domain.model._candidat_signaletique import CandidatSignaletique
+from admission.ddd.admission.domain.model.formation import Formation
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.domain.validator.validator_by_business_action import (
     CoordonneesValidatorList,
     IdentificationValidatorList,
 )
-from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
-    EtudesSecondairesNonCompleteesException,
+from admission.ddd.admission.formation_generale.domain.model.proposition import (
+    Proposition as FormationGeneraleProposition,
 )
+from admission.ddd.admission.formation_generale.domain.validator.validator_by_business_actions import (
+    FormationGeneraleCurriculumValidatorList,
+    FormationGeneraleComptabiliteValidatorList,
+    EtudesSecondairesValidatorList,
+    BachelierEtudesSecondairesValidatorList,
+)
+from base.models.enums.education_group_types import TrainingType
 from osis_common.ddd import interface
 
 
@@ -113,11 +132,30 @@ class ProfilCandidat(interface.DomainService):
         cls,
         matricule: str,
         profil_candidat_translator: 'IProfilCandidatTranslator',
+        formation: Formation,
     ) -> None:
-        etudes_secondaires = profil_candidat_translator.get_etudes_secondaires(matricule)
+        etudes_secondaires = profil_candidat_translator.get_etudes_secondaires(matricule, formation.type)
 
-        if not etudes_secondaires:
-            raise EtudesSecondairesNonCompleteesException
+        if etudes_secondaires.valorisees:
+            # Des études secondaires valorisées par une admission sont considérées valides pour les futures admissions
+            return
+
+        if formation.type == TrainingType.BACHELOR:
+            est_potentiel_vae = profil_candidat_translator.est_potentiel_vae(matricule)
+            BachelierEtudesSecondairesValidatorList(
+                diplome_etudes_secondaires=etudes_secondaires.diplome_etudes_secondaires,
+                annee_diplome_etudes_secondaires=etudes_secondaires.annee_diplome_etudes_secondaires,
+                diplome_belge=etudes_secondaires.diplome_belge,
+                diplome_etranger=etudes_secondaires.diplome_etranger,
+                alternative_secondaires=etudes_secondaires.alternative_secondaires,
+                est_potentiel_vae=est_potentiel_vae,
+                formation=formation,
+            ).validate()
+        else:
+            EtudesSecondairesValidatorList(
+                diplome_etudes_secondaires=etudes_secondaires.diplome_etudes_secondaires,
+                annee_diplome_etudes_secondaires=etudes_secondaires.annee_diplome_etudes_secondaires,
+            ).validate()
 
     @classmethod
     def verifier_curriculum(
@@ -127,22 +165,73 @@ class ProfilCandidat(interface.DomainService):
         annee_courante: int,
         curriculum_pdf: List[str],
     ) -> None:
-        curriculum = profil_candidat_translator.get_curriculum(matricule, annee_courante=annee_courante)
+        curriculum = profil_candidat_translator.get_curriculum(
+            matricule=matricule,
+            annee_courante=annee_courante,
+        )
+
+        experiences_academiques_incompletes = VerifierCurriculumDoctorat.recuperer_experiences_academiques_incompletes(
+            experiences=curriculum.experiences_academiques,
+        )
 
         CurriculumValidatorList(
             annee_courante=annee_courante,
-            annees_experiences_academiques=curriculum.annees_experiences_academiques,
-            annee_diplome_etudes_secondaires_belges=curriculum.annee_diplome_etudes_secondaires_belges,
-            annee_diplome_etudes_secondaires_etrangeres=curriculum.annee_diplome_etudes_secondaires_etrangeres,
+            experiences_academiques=curriculum.experiences_academiques,
+            experiences_academiques_incompletes=experiences_academiques_incompletes,
+            annee_diplome_etudes_secondaires=curriculum.annee_diplome_etudes_secondaires,
             annee_derniere_inscription_ucl=curriculum.annee_derniere_inscription_ucl,
             fichier_pdf=curriculum_pdf,
             dates_experiences_non_academiques=curriculum.dates_experiences_non_academiques,
         ).validate()
 
     @classmethod
-    def verifier_comptabilite(
+    def verifier_curriculum_formation_generale(
         cls,
-        proposition: Proposition,
+        proposition: FormationGeneraleProposition,
+        type_formation: TrainingType,
+        profil_candidat_translator: 'IProfilCandidatTranslator',
+        annee_courante: int,
+    ) -> None:
+        curriculum = profil_candidat_translator.get_curriculum(
+            matricule=proposition.matricule_candidat,
+            annee_courante=annee_courante,
+        )
+        experiences_academiques_incompletes = VerifierCurriculum.recuperer_experiences_academiques_incompletes(
+            experiences=curriculum.experiences_academiques,
+        )
+
+        FormationGeneraleCurriculumValidatorList(
+            annee_courante=annee_courante,
+            experiences_academiques=curriculum.experiences_academiques,
+            experiences_academiques_incompletes=experiences_academiques_incompletes,
+            annee_diplome_etudes_secondaires=curriculum.annee_diplome_etudes_secondaires,
+            annee_derniere_inscription_ucl=curriculum.annee_derniere_inscription_ucl,
+            fichier_pdf=proposition.curriculum,
+            dates_experiences_non_academiques=curriculum.dates_experiences_non_academiques,
+            type_formation=type_formation,
+            continuation_cycle_bachelier=proposition.continuation_cycle_bachelier,
+            attestation_continuation_cycle_bachelier=proposition.attestation_continuation_cycle_bachelier,
+            equivalence_diplome=proposition.equivalence_diplome,
+            sigle_formation=proposition.formation_id.sigle,
+        ).validate()
+
+    @classmethod
+    def verifier_curriculum_formation_continue(
+        cls,
+        matricule: str,
+        profil_candidat_translator: 'IProfilCandidatTranslator',
+    ) -> None:
+        existence_experiences_cv = profil_candidat_translator.get_existence_experiences_curriculum(matricule=matricule)
+
+        FormationContinueCurriculumValidatorList(
+            a_experience_academique=existence_experiences_cv.a_experience_academique,
+            a_experience_non_academique=existence_experiences_cv.a_experience_non_academique,
+        ).validate()
+
+    @classmethod
+    def verifier_comptabilite_doctorat(
+        cls,
+        proposition: PropositionDoctorat,
         profil_candidat_translator: 'IProfilCandidatTranslator',
         annee_courante: int,
     ):
@@ -152,9 +241,32 @@ class ProfilCandidat(interface.DomainService):
         )
 
         ComptabiliteValidatorList(
+            a_frequente_recemment_etablissement_communaute_fr=(
+                conditions_comptabilite.a_frequente_recemment_etablissement_communaute_fr
+            ),
+            comptabilite=proposition.comptabilite,
+            pays_nationalite_ue=conditions_comptabilite.pays_nationalite_ue,
+        ).validate()
+
+    @classmethod
+    def verifier_comptabilite_formation_generale(
+        cls,
+        proposition: PropositionGenerale,
+        profil_candidat_translator: 'IProfilCandidatTranslator',
+        annee_courante: int,
+    ):
+        conditions_comptabilite = profil_candidat_translator.get_conditions_comptabilite(
+            matricule=proposition.matricule_candidat,
+            annee_courante=annee_courante,
+        )
+        FormationGeneraleComptabiliteValidatorList(
             pays_nationalite_ue=conditions_comptabilite.pays_nationalite_ue,
             a_frequente_recemment_etablissement_communaute_fr=(
                 conditions_comptabilite.a_frequente_recemment_etablissement_communaute_fr
             ),
             comptabilite=proposition.comptabilite,
         ).validate()
+
+    @classmethod
+    def verifier_comptabilite_formation_continue(cls, proposition: PropositionContinue):
+        FormationContinueComptabiliteValidatorList(comptabilite=proposition.comptabilite).validate()

@@ -1,0 +1,73 @@
+{% extends "admission/doctorate/tab_layout.html" %}
+{% load bootstrap3 i18n static admission enums %}
+
+{% comment "License" %}
+  * OSIS stands for Open Student Information System. It's an application
+  * designed to manage the core business of higher education institutions,
+  * such as universities, faculties, institutes and professional schools.
+  * The core business involves the administration of students, teachers,
+  * courses, programs and so on.
+  *
+  * Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+  *
+  * This program is free software: you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License as published by
+  * the Free Software Foundation, either version 3 of the License, or
+  * (at your option) any later version.
+  *
+  * This program is distributed in the hope that it will be useful,
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU General Public License for more details.
+  *
+  * A copy of this license - GNU General Public License - is available
+  * at the root of the source code of this program.  If not,
+  * see http://www.gnu.org/licenses/.
+{% endcomment %}
+
+{% block breadcrumb %}
+  <li>
+    <a href="{% url 'admissions' %}" id="lnk_admissions">
+      {% trans 'Enrolments' %}
+    </a>
+  </li>
+  <li>
+    <a href="{% url 'admission:continuing-education:list' %}" id="lnk_admissions">
+      {% trans 'Continuing enrolments' %}
+    </a>
+  </li>
+  <li class="active">
+    {{ object.training.title }} ({{ object.reference }})
+  </li>
+{% endblock %}
+
+{% block page-header %}
+  <div class="page-header flex-content">
+    <h2>
+      {{ object.training.title }} ({{ object.reference }})
+    </h2>
+    <a
+        href="{% url 'admission:continuing-education:list' %}"
+        class="text-primary"
+    >
+      <span class="fa fa-stream"></span>
+      {% trans "Back to the list" %}
+    </a>
+  </div>
+{% endblock %}
+
+{% block panel-heading %}
+  <div>
+    {% trans "Candidate:" %} {{ object.candidate.first_name }} {{ object.candidate.last_name }}
+  </div>
+  <div>
+    {% trans "Status:" %}
+    {{ object.status|enum_display:'ChoixStatutProposition' }}
+  </div>
+  {% if object.submitted_at %}
+    <div>
+      {% trans "Submission date:" %}
+      {{ object.submitted_at|date:'d/m/Y H:i' }}
+    </div>
+  {% endif %}
+{% endblock %}

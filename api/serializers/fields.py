@@ -174,6 +174,10 @@ ACTION_LINKS = {
         'path_name': 'admission_api_v1:propositions',
         'method': 'GET',
     },
+    'create_training_choice': {
+        'path_name': 'admission_api_v1:propositions',
+        'method': 'POST',
+    },
     # Supervised
     'list_supervised': {
         'path_name': 'admission_api_v1:supervised_propositions',
@@ -228,12 +232,12 @@ DOCTORATE_ACTION_LINKS = {
     },
     # Curriculum
     'retrieve_curriculum': {
-        'path_name': 'admission_api_v1:curriculum',
+        'path_name': 'admission_api_v1:doctorate_curriculum',
         'method': 'GET',
         'params': ['uuid'],
     },
     'update_curriculum': {
-        'path_name': 'admission_api_v1:curriculum',
+        'path_name': 'admission_api_v1:doctorate_curriculum',
         'method': 'PUT',
         'params': ['uuid'],
     },
@@ -249,7 +253,7 @@ DOCTORATE_ACTION_LINKS = {
         'params': ['uuid'],
     },
     'retrieve_doctorate_training_choice': {
-        'path_name': 'admission_api_v1:propositions',
+        'path_name': 'admission_api_v1:doctorate_admission_type_update',
         'method': 'GET',
         'params': ['uuid'],
     },
@@ -369,23 +373,18 @@ DOCTORATE_ACTION_LINKS = {
     },
     # Accounting
     'retrieve_accounting': {
-        'path_name': 'admission_api_v1:accounting',
+        'path_name': 'admission_api_v1:doctorate_accounting',
         'method': 'GET',
         'params': ['uuid'],
     },
     'update_accounting': {
-        'path_name': 'admission_api_v1:accounting',
+        'path_name': 'admission_api_v1:doctorate_accounting',
         'method': 'PUT',
         'params': ['uuid'],
     },
 }
 
 GENERAL_EDUCATION_ACTION_LINKS = {
-    # General education
-    'create_proposition': {
-        'path_name': 'admission_api_v1:general_training_choice',
-        'method': 'POST',
-    },
     'update_training_choice': {
         'path_name': 'admission_api_v1:general_training_choice',
         'method': 'PUT',
@@ -453,6 +452,17 @@ GENERAL_EDUCATION_ACTION_LINKS = {
     },
     'update_specific_question': {
         'path_name': 'admission_api_v1:general_specific_question',
+        'method': 'PUT',
+        'params': ['uuid'],
+    },
+    # Accounting
+    'retrieve_accounting': {
+        'path_name': 'admission_api_v1:general_accounting',
+        'method': 'GET',
+        'params': ['uuid'],
+    },
+    'update_accounting': {
+        'path_name': 'admission_api_v1:general_accounting',
         'method': 'PUT',
         'params': ['uuid'],
     },
@@ -531,6 +541,17 @@ CONTINUING_EDUCATION_ACTION_LINKS = {
     },
     'update_specific_question': {
         'path_name': 'admission_api_v1:continuing_specific_question',
+        'method': 'PUT',
+        'params': ['uuid'],
+    },
+    # Accounting
+    'retrieve_accounting': {
+        'path_name': 'admission_api_v1:continuing_accounting',
+        'method': 'GET',
+        'params': ['uuid'],
+    },
+    'update_accounting': {
+        'path_name': 'admission_api_v1:continuing_accounting',
         'method': 'PUT',
         'params': ['uuid'],
     },

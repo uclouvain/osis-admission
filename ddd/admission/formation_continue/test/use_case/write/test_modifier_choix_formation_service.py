@@ -29,7 +29,8 @@ from django.test import SimpleTestCase
 from admission.ddd.admission.formation_continue.commands import ModifierChoixFormationCommand
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutProposition
 from admission.ddd.admission.formation_continue.domain.validator.exceptions import (
-    PropositionNonTrouveeException, FormationNonTrouveeException,
+    PropositionNonTrouveeException,
+    FormationNonTrouveeException,
 )
 from admission.infrastructure.admission.formation_continue.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
@@ -44,9 +45,9 @@ class TestModifierChoixFormationPropositionService(SimpleTestCase):
 
         self.message_bus = message_bus_in_memory_instance
         self.cmd = ModifierChoixFormationCommand(
-            sigle_formation='SC3DP',
+            sigle_formation='USCC4',
             annee_formation=2022,
-            uuid_proposition='uuid-ECGE3DP',
+            uuid_proposition='uuid-USCC1',
         )
 
     def test_should_modifier_choix_formation(self):

@@ -23,7 +23,13 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
+from ._should_comptabilite_etre_completee import (
+    ShouldAbsenceDeDetteEtreCompletee,
+    ShouldAssimilationEtreCompletee,
+    ShouldAutreFormatCarteBancaireRemboursementEtreCompletee,
+    ShouldIBANCarteBancaireRemboursementEtreCompletee,
+    ShouldTypeCompteBancaireRemboursementEtreComplete,
+)
 from ._should_coordonnees_candidat_etre_completees import (
     ShouldAdresseCorrespondanceEtreCompleteeSiSpecifiee,
     ShouldAdresseDomicileLegalCandidatEtreCompletee,
@@ -38,6 +44,10 @@ from ._should_identification_candidat_etre_completee import (
     ShouldCandidatSpecifierNumeroIdentite,
     ShouldSignaletiqueCandidatEtreCompletee,
 )
+from ._should_curriculum_etre_complete import (
+    ShouldAnneesCVRequisesCompletees,
+    ShouldExperiencesAcademiquesEtreCompletees,
+)
 
 __all__ = [
     "ShouldSignaletiqueCandidatEtreCompletee",
@@ -50,4 +60,11 @@ __all__ = [
     "ShouldCandidatAuthentiquerPasseport",
     "ShouldAdresseDomicileLegalCandidatEtreCompletee",
     "ShouldAdresseCorrespondanceEtreCompleteeSiSpecifiee",
+    "ShouldAnneesCVRequisesCompletees",
+    "ShouldAssimilationEtreCompletee",
+    "ShouldAbsenceDeDetteEtreCompletee",
+    "ShouldAutreFormatCarteBancaireRemboursementEtreCompletee",
+    "ShouldIBANCarteBancaireRemboursementEtreCompletee",
+    "ShouldExperiencesAcademiquesEtreCompletees",
+    "ShouldTypeCompteBancaireRemboursementEtreComplete",
 ]

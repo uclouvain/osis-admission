@@ -23,6 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from typing import Optional, List
 
 import attr
 
@@ -30,14 +31,39 @@ from osis_common.ddd import interface
 
 
 @attr.dataclass(slots=True, frozen=True)
-class EtudesSecondairesDTO(interface.DTO):
-    presence_etudes_secondaires_belges: bool
-    presence_etudes_secondaires_etrangeres: bool
-    presence_examen_admission_premier_cycle: bool
+class DiplomeBelgeEtudesSecondairesDTO(interface.DTO):
+    certificat_inscription: List = attr.Factory(list)
+    diplome: List = attr.Factory(list)
 
-    def __bool__(self):
-        return (
-            self.presence_etudes_secondaires_belges
-            or self.presence_etudes_secondaires_etrangeres
-            or self.presence_examen_admission_premier_cycle
-        )
+
+@attr.dataclass(slots=True, frozen=True)
+class DiplomeEtrangerEtudesSecondairesDTO(interface.DTO):
+    type_diplome: str = ''
+    regime_linguistique: str = ''
+    pays_membre_ue: Optional[bool] = None
+    pays_iso_code: str = ''
+    releve_notes: List = attr.Factory(list)
+    traduction_releve_notes: List = attr.Factory(list)
+    diplome: List = attr.Factory(list)
+    traduction_diplome: List = attr.Factory(list)
+    certificat_inscription: List = attr.Factory(list)
+    traduction_certificat_inscription: List = attr.Factory(list)
+    equivalence: str = ''
+    decision_final_equivalence_ue: List = attr.Factory(list)
+    decision_final_equivalence_hors_ue: List = attr.Factory(list)
+    preuve_decision_equivalence: List = attr.Factory(list)
+
+
+@attr.dataclass(slots=True, frozen=True)
+class AlternativeSecondairesDTO(interface.DTO):
+    examen_admission_premier_cycle: List = attr.Factory(list)
+
+
+@attr.dataclass(slots=True, frozen=True)
+class EtudesSecondairesDTO(interface.DTO):
+    diplome_belge: Optional[DiplomeBelgeEtudesSecondairesDTO] = None
+    diplome_etranger: Optional[DiplomeEtrangerEtudesSecondairesDTO] = None
+    alternative_secondaires: Optional[AlternativeSecondairesDTO] = None
+    diplome_etudes_secondaires: str = ''
+    annee_diplome_etudes_secondaires: Optional[int] = None
+    valorisees: bool = False

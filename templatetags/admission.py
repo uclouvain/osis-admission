@@ -36,18 +36,20 @@ from rules.templatetags import rules
 
 from admission.auth.constants import READ_ACTIONS_BY_TAB, UPDATE_ACTIONS_BY_TAB
 from admission.contrib.models import DoctorateAdmission
-from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
+from admission.contrib.models.base import BaseAdmission
+from admission.ddd.admission.repository.i_proposition import formater_reference
 from admission.ddd.parcours_doctoral.formation.domain.model.enums import (
     CategorieActivite,
     ChoixTypeEpreuve,
     StatutActivite,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import STATUTS_PROPOSITION_AVANT_INSCRIPTION
-from admission.utils import get_cached_admission_perm_obj
 from osis_role.templatetags.osis_role import has_perm
 
 CONTEXT_ADMISSION = 'admission'
 CONTEXT_DOCTORATE = 'doctorate'
+CONTEXT_GENERAL = 'general-education'
+CONTEXT_CONTINUING = 'continuing-education'
 
 register = template.Library()
 
@@ -226,6 +228,7 @@ TAB_TREES = {
             Tab('history', _('Status changes')),
             Tab('send-mail', _('Send a mail')),
             Tab('internal-note', _('Internal notes'), 'note-sticky'),
+            Tab('debug', _('Debug'), 'bug'),
         ],
         # TODO Documents
     },
@@ -259,8 +262,24 @@ TAB_TREES = {
             Tab('history', _('Status changes')),
             Tab('send-mail', _('Send a mail')),
             Tab('internal-note', _('Internal notes'), 'note-sticky'),
+            Tab('debug', _('Debug'), 'bug'),
         ],
         # TODO Documents
+    },
+    CONTEXT_GENERAL: {
+        Tab('person', _('Personal data'), 'user'): [
+            Tab('person', _('Personal data'), 'user'),
+        ],
+        Tab('education', _('Previous experience'), 'list-alt'): [
+            Tab('education', _('Previous experience'), 'list-alt'),
+        ],
+        Tab('management', pgettext('tab', 'Management'), 'gear'): [
+            Tab('history-all', _('All history')),
+            Tab('history', _('Status changes')),
+            Tab('send-mail', _('Send a mail')),
+            Tab('internal-note', _('Internal notes'), 'note-sticky'),
+            Tab('debug', _('Debug'), 'bug'),
+        ],
     },
 }
 
@@ -315,10 +334,10 @@ def default_tab_context(context):
     }
 
 
-@register.inclusion_tag('admission/includes/doctorate_tabs_bar.html', takes_context=True)
-def doctorate_tabs_bar(context):
+@register.inclusion_tag('admission/includes/admission_tabs_bar.html', takes_context=True)
+def admission_tabs(context):
     tab_context = default_tab_context(context)
-    admission = get_cached_admission_perm_obj(tab_context['admission_uuid'])
+    admission = context['view'].get_permission_object()
     current_tab_tree = get_valid_tab_tree(context, admission, TAB_TREES[get_current_context(admission)]).copy()
     tab_context['tab_tree'] = current_tab_tree
     return tab_context
@@ -532,3 +551,13 @@ def training_categories(activities):
         'added': added,
         'validated': validated,
     }
+
+
+@register.filter
+def formatted_reference(admission: BaseAdmission):
+    return formater_reference(
+        reference=admission.reference,
+        nom_campus_inscription=admission.training.enrollment_campus.name,
+        sigle_entite_gestion=admission.sigle_entite_gestion,  # From annotation
+        annee=admission.training.academic_year.year,
+    )

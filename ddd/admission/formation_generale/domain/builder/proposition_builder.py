@@ -32,6 +32,7 @@ from admission.ddd.admission.formation_generale.domain.builder.proposition_ident
     PropositionIdentityBuilder,
 )
 from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition
+from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
 from osis_common.ddd import interface
 
 
@@ -48,6 +49,7 @@ class PropositionBuilder(interface.RootEntityBuilder):
     def initier_proposition(
         cls,
         cmd: 'InitierPropositionCommand',
+        proposition_repository: 'IPropositionRepository',
         formation_id: 'FormationIdentity',
         bourses_ids: Dict[str, BourseIdentity],
     ) -> 'Proposition':
@@ -58,4 +60,5 @@ class PropositionBuilder(interface.RootEntityBuilder):
             bourse_double_diplome_id=bourses_ids.get(cmd.bourse_double_diplome) if cmd.bourse_double_diplome else None,
             bourse_internationale_id=bourses_ids.get(cmd.bourse_internationale) if cmd.bourse_internationale else None,
             bourse_erasmus_mundus_id=bourses_ids.get(cmd.bourse_erasmus_mundus) if cmd.bourse_erasmus_mundus else None,
+            reference=proposition_repository.recuperer_reference_suivante(),
         )

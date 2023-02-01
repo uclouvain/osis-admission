@@ -26,6 +26,7 @@
 import uuid
 from unittest.mock import Mock
 
+import freezegun
 import mock
 from django.http import HttpResponse
 from django.template import Context, Template
@@ -35,6 +36,7 @@ from django.urls import path, reverse
 from django.utils.translation import gettext as _
 from django.views import View
 
+from admission.contrib.models import ContinuingEducationAdmissionProxy
 from admission.templatetags.admission import (
     TAB_TREES,
     Tab,
@@ -46,7 +48,11 @@ from admission.templatetags.admission import (
     sortable_header_div,
     strip,
     update_tab_path_from_detail,
+    formatted_reference,
 )
+from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
+from base.models.enums.entity_type import EntityType
+from base.tests.factories.entity_version import EntityVersionFactory
 
 
 # Mock views
@@ -334,3 +340,14 @@ class DisplayTagTestCase(TestCase):
         self.assertEqual(strip(' coucou '), 'coucou')
         self.assertEqual(strip(0), 0)
         self.assertEqual(strip(None), None)
+
+    @freezegun.freeze_time('2023-01-01')
+    def test_formatted_reference(self):
+        commission = EntityVersionFactory(
+            entity_type=EntityType.FACULTY.name,
+            acronym='CMC',
+        )
+        created_admission = ContinuingEducationAdmissionFactory(training__management_entity=commission.entity)
+        admission = ContinuingEducationAdmissionProxy.objects.get(uuid=created_admission.uuid)
+        reference = formatted_reference(admission)
+        self.assertEqual(reference, f'M-CMC22-{str(admission)}')

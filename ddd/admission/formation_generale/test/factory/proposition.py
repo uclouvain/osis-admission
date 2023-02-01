@@ -29,9 +29,88 @@ import uuid
 import factory
 from factory.fuzzy import FuzzyText
 
+from admission.ddd.admission.enums import (
+    TypeSituationAssimilation,
+    ChoixAffiliationSport,
+    ChoixTypeCompteBancaire,
+    ChoixAssimilation1,
+    LienParente,
+    ChoixAssimilation6,
+    ChoixAssimilation5,
+    ChoixAssimilation3,
+    ChoixAssimilation2,
+)
+from admission.ddd.admission.formation_generale.domain.model._comptabilite import Comptabilite
 from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition, PropositionIdentity
 from admission.ddd.admission.test.factory.bourse import BourseIdentityFactory
-from admission.ddd.admission.test.factory.formation import _FormationIdentityFactory
+from admission.ddd.admission.test.factory.formation import FormationIdentityFactory
+from admission.ddd.admission.test.factory.reference import REFERENCE_MEMORY_ITERATOR
+
+
+class _ComptabiliteFactory(factory.Factory):
+    class Meta:
+        model = Comptabilite
+        abstract = False
+
+    demande_allocation_d_etudes_communaute_francaise_belgique = False
+    enfant_personnel = False
+    type_situation_assimilation = TypeSituationAssimilation.AUCUNE_ASSIMILATION
+    affiliation_sport = ChoixAffiliationSport.NON
+    etudiant_solidaire = False
+    type_numero_compte = ChoixTypeCompteBancaire.NON
+
+    attestation_absence_dette_etablissement = ['file_token.pdf']
+
+    attestation_enfant_personnel = ['file_token.pdf']
+    sous_type_situation_assimilation_1 = ChoixAssimilation1.TITULAIRE_CARTE_ETRANGER
+    sous_type_situation_assimilation_2 = ChoixAssimilation2.PROTECTION_SUBSIDIAIRE
+    sous_type_situation_assimilation_3 = ChoixAssimilation3.AUTORISATION_SEJOUR_ET_REVENUS_PROFESSIONNELS
+    relation_parente = LienParente.MERE
+    sous_type_situation_assimilation_5 = ChoixAssimilation5.PRIS_EN_CHARGE_OU_DESIGNE_CPAS
+    sous_type_situation_assimilation_6 = ChoixAssimilation6.A_BOURSE_COOPERATION_DEVELOPPEMENT
+
+    carte_resident_longue_duree = ['file_token.pdf']
+    carte_cire_sejour_illimite_etranger = ['file_token.pdf']
+    carte_sejour_membre_ue = ['file_token.pdf']
+    carte_sejour_permanent_membre_ue = ['file_token.pdf']
+
+    carte_a_b_refugie = ['file_token.pdf']
+    annexe_25_26_refugies_apatrides = ['file_token.pdf']
+    attestation_immatriculation = ['file_token.pdf']
+    carte_a_b = ['file_token.pdf']
+    decision_protection_subsidiaire = ['file_token.pdf']
+    decision_protection_temporaire = ['file_token.pdf']
+
+    titre_sejour_3_mois_professionel = ['file_token.pdf']
+    fiches_remuneration = ['file_token.pdf']
+    titre_sejour_3_mois_remplacement = ['file_token.pdf']
+    preuve_allocations_chomage_pension_indemnite = ['file_token.pdf']
+
+    attestation_cpas = ['file_token.pdf']
+
+    composition_menage_acte_naissance = ['file_token.pdf']
+    acte_tutelle = ['file_token.pdf']
+    composition_menage_acte_mariage = ['file_token.pdf']
+    attestation_cohabitation_legale = ['file_token.pdf']
+    carte_identite_parent = ['file_token.pdf']
+    titre_sejour_longue_duree_parent = ['file_token.pdf']
+    annexe_25_26_refugies_apatrides_decision_protection_parent = ['file_token.pdf']
+    titre_sejour_3_mois_parent = ['file_token.pdf']
+    fiches_remuneration_parent = ['file_token.pdf']
+    attestation_cpas_parent = ['file_token.pdf']
+
+    decision_bourse_cfwb = ['file_token.pdf']
+    attestation_boursier = ['file_token.pdf']
+
+    titre_identite_sejour_longue_duree_ue = ['file_token.pdf']
+    titre_sejour_belgique = ['file_token.pdf']
+
+    numero_compte_iban = 'BE43068999999501'
+    iban_valide = True
+    numero_compte_autre_format = '123456'
+    code_bic_swift_banque = 'GKCCBEBB'
+    prenom_titulaire_compte = 'John'
+    nom_titulaire_compte = 'Doe'
 
 
 class _PropositionIdentityFactory(factory.Factory):
@@ -47,15 +126,17 @@ class PropositionFactory(factory.Factory):
         model = Proposition
         abstract = False
 
+    reference = factory.Iterator(REFERENCE_MEMORY_ITERATOR)
     entity_id = factory.SubFactory(_PropositionIdentityFactory)
     matricule_candidat = FuzzyText(length=10, chars=string.digits)
-    formation_id = factory.SubFactory(_FormationIdentityFactory)
+    formation_id = factory.SubFactory(FormationIdentityFactory)
+    comptabilite = factory.SubFactory(_ComptabiliteFactory)
 
     creee_le = factory.Faker('past_datetime')
     modifiee_le = factory.Faker('past_datetime')
 
-    bourse_double_diplome_id = factory.SubFactory(BourseIdentityFactory)
-    bourse_internationale_id = factory.SubFactory(BourseIdentityFactory)
-    bourse_erasmus_mundus_id = factory.SubFactory(BourseIdentityFactory)
+    bourse_double_diplome_id = factory.SubFactory(BourseIdentityFactory, uuid='a0e94dd5-3715-49a1-8953-8cc0f99372cb')
+    bourse_internationale_id = factory.SubFactory(BourseIdentityFactory, uuid='c0e94dd5-3715-49a1-8953-8cc0f99372cb')
+    bourse_erasmus_mundus_id = factory.SubFactory(BourseIdentityFactory, uuid='e0e94dd5-3715-49a1-8953-8cc0f99372cb')
     est_reorientation_inscription_externe = False
     est_modification_inscription_externe = False

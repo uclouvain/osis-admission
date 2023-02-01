@@ -1,52 +1,54 @@
 # ##############################################################################
 #
-#    OSIS stands for Open Student Information System. It's an application
-#    designed to manage the core business of higher education institutions,
-#    such as universities, faculties, institutes and professional schools.
-#    The core business involves the administration of students, teachers,
-#    courses, programs and so on.
+#  OSIS stands for Open Student Information System. It's an application
+#  designed to manage the core business of higher education institutions,
+#  such as universities, faculties, institutes and professional schools.
+#  The core business involves the administration of students, teachers,
+#  courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
 #
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
 #
-#    A copy of this license - GNU General Public License - is available
-#    at the root of the source code of this program.  If not,
-#    see http://www.gnu.org/licenses/.
+#  A copy of this license - GNU General Public License - is available
+#  at the root of the source code of this program.  If not,
+#  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
 from rest_framework import serializers
 
 from admission.api.serializers.fields import (
-    DOCTORATE_ACTION_LINKS,
+    ACTION_LINKS,
     ActionLinksField,
-    RelatedInstituteField,
-    CONTINUING_EDUCATION_ACTION_LINKS,
-    GENERAL_EDUCATION_ACTION_LINKS,
     AnswerToSpecificQuestionField,
+    CONTINUING_EDUCATION_ACTION_LINKS,
+    DOCTORATE_ACTION_LINKS,
+    GENERAL_EDUCATION_ACTION_LINKS,
+    RelatedInstituteField,
 )
 from admission.api.serializers.mixins import IncludedFieldsMixin
-from admission.contrib.models import AdmissionType, DoctorateAdmission
+from admission.contrib.models import DoctorateAdmission
 from admission.ddd.admission.doctorat.preparation.commands import CompleterPropositionCommand, InitierPropositionCommand
-from admission.ddd.admission.dtos.formation import FormationDTO
-from admission.ddd.admission.formation_generale.dtos import PropositionDTO as FormationGeneralePropositionDTO
-from admission.ddd.admission.formation_continue.dtos import PropositionDTO as FormationContinuePropositionDTO
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixCommissionProximiteCDEouCLSM,
     ChoixCommissionProximiteCDSS,
     ChoixDoctoratDejaRealise,
     ChoixLangueRedactionThese,
     ChoixSousDomaineSciences,
+    ChoixTypeAdmission,
 )
 from admission.ddd.admission.doctorat.preparation.dtos import DoctoratDTO, PropositionDTO as DoctoratPropositionDTO
+from admission.ddd.admission.dtos.formation import FormationDTO
+from admission.ddd.admission.formation_continue.dtos import PropositionDTO as FormationContinuePropositionDTO
+from admission.ddd.admission.formation_generale.dtos import PropositionDTO as FormationGeneralePropositionDTO
 from base.utils.serializers import DTOSerializer
 
 __all__ = [
@@ -67,7 +69,6 @@ __all__ = [
     "ContinuingEducationPropositionDTOSerializer",
     "PROPOSITION_ERROR_SCHEMA",
 ]
-
 
 PROPOSITION_ERROR_SCHEMA = {
     "type": "array",
@@ -94,8 +95,8 @@ class DoctorateAdmissionReadSerializer(serializers.ModelSerializer):
             "type",
             "candidate",
             "comment",
-            "created",
-            "modified",
+            "created_at",
+            "modified_at",
         ]
 
 
@@ -106,45 +107,38 @@ class PropositionIdentityDTOSerializer(serializers.Serializer):
 class DoctoratePropositionSearchDTOSerializer(IncludedFieldsMixin, DTOSerializer):
     links = ActionLinksField(
         actions={
-            # Profile
-            # Person
-            'retrieve_person': DOCTORATE_ACTION_LINKS['retrieve_person'],
-            'update_person': DOCTORATE_ACTION_LINKS['update_person'],
-            # Coordinates
-            'retrieve_coordinates': DOCTORATE_ACTION_LINKS['retrieve_coordinates'],
-            'update_coordinates': DOCTORATE_ACTION_LINKS['update_coordinates'],
-            # Secondary studies
-            'retrieve_secondary_studies': DOCTORATE_ACTION_LINKS['retrieve_secondary_studies'],
-            'update_secondary_studies': DOCTORATE_ACTION_LINKS['update_secondary_studies'],
-            # Language knowledge
-            'retrieve_languages': DOCTORATE_ACTION_LINKS['retrieve_languages'],
-            'update_languages': DOCTORATE_ACTION_LINKS['update_languages'],
-            # Proposition
-            'destroy_proposition': DOCTORATE_ACTION_LINKS['destroy_proposition'],
-            'submit_proposition': DOCTORATE_ACTION_LINKS['submit_proposition'],
-            # Project
-            'retrieve_proposition': DOCTORATE_ACTION_LINKS['retrieve_proposition'],
-            'update_proposition': DOCTORATE_ACTION_LINKS['update_proposition'],
-            # Cotutelle
-            'retrieve_cotutelle': DOCTORATE_ACTION_LINKS['retrieve_cotutelle'],
-            'update_cotutelle': DOCTORATE_ACTION_LINKS['update_cotutelle'],
-            # Supervision
-            'retrieve_supervision': DOCTORATE_ACTION_LINKS['retrieve_supervision'],
-            # Curriculum
-            'retrieve_curriculum': DOCTORATE_ACTION_LINKS['retrieve_curriculum'],
-            'update_curriculum': DOCTORATE_ACTION_LINKS['update_curriculum'],
-            # Confirmation
-            'retrieve_confirmation': DOCTORATE_ACTION_LINKS['retrieve_confirmation'],
-            'update_confirmation': DOCTORATE_ACTION_LINKS['update_confirmation'],
-            # Accounting
-            'retrieve_accounting': DOCTORATE_ACTION_LINKS['retrieve_accounting'],
-            'update_accounting': DOCTORATE_ACTION_LINKS['update_accounting'],
-            # Training
-            'retrieve_doctoral_training': DOCTORATE_ACTION_LINKS['retrieve_doctoral_training'],
-            'retrieve_complementary_training': DOCTORATE_ACTION_LINKS['retrieve_complementary_training'],
-            'retrieve_course_enrollment': DOCTORATE_ACTION_LINKS['retrieve_course_enrollment'],
-            # Training choice
             'retrieve_training_choice': DOCTORATE_ACTION_LINKS['retrieve_doctorate_training_choice'],
+            **{
+                action: DOCTORATE_ACTION_LINKS[action]
+                for action in [
+                    # Profile
+                    'retrieve_person',
+                    'update_person',
+                    'retrieve_coordinates',
+                    'update_coordinates',
+                    'retrieve_secondary_studies',
+                    'update_secondary_studies',
+                    'retrieve_languages',
+                    'update_languages',
+                    'destroy_proposition',
+                    'submit_proposition',
+                    'retrieve_proposition',
+                    'update_proposition',
+                    'retrieve_cotutelle',
+                    'update_cotutelle',
+                    'retrieve_supervision',
+                    'retrieve_curriculum',
+                    'update_curriculum',
+                    'retrieve_confirmation',
+                    'update_confirmation',
+                    'retrieve_accounting',
+                    'update_accounting',
+                    'retrieve_doctoral_training',
+                    'retrieve_complementary_training',
+                    'retrieve_course_enrollment',
+                    'destroy_proposition',
+                ]
+            },
         }
     )
 
@@ -178,12 +172,21 @@ class GeneralEducationPropositionSearchDTOSerializer(IncludedFieldsMixin, DTOSer
             for action in [
                 # Profile
                 'retrieve_person',
+                'update_person',
                 'retrieve_coordinates',
+                'update_coordinates',
                 'retrieve_secondary_studies',
+                'update_secondary_studies',
                 'retrieve_curriculum',
+                'update_curriculum',
                 'retrieve_specific_question',
+                'update_specific_question',
                 # Project
                 'retrieve_training_choice',
+                'update_training_choice',
+                'retrieve_accounting',
+                'update_accounting',
+                'submit_proposition',
                 # Proposition
                 'destroy_proposition',
             ]
@@ -200,6 +203,7 @@ class GeneralEducationPropositionSearchDTOSerializer(IncludedFieldsMixin, DTOSer
         fields = [
             'uuid',
             'formation',
+            'reference',
             'matricule_candidat',
             'prenom_candidat',
             'nom_candidat',
@@ -216,12 +220,21 @@ class ContinuingEducationPropositionSearchDTOSerializer(IncludedFieldsMixin, DTO
             for action in [
                 # Profile
                 'retrieve_person',
+                'update_person',
                 'retrieve_coordinates',
+                'update_coordinates',
                 'retrieve_secondary_studies',
+                'update_secondary_studies',
                 'retrieve_curriculum',
+                'update_curriculum',
                 'retrieve_specific_question',
+                'update_specific_question',
                 # Project
                 'retrieve_training_choice',
+                'update_training_choice',
+                'retrieve_accounting',
+                'update_accounting',
+                'submit_proposition',
                 # Proposition
                 'destroy_proposition',
             ]
@@ -236,6 +249,7 @@ class ContinuingEducationPropositionSearchDTOSerializer(IncludedFieldsMixin, DTO
         source = FormationContinuePropositionDTO
         fields = [
             'uuid',
+            'reference',
             'formation',
             'matricule_candidat',
             'prenom_candidat',
@@ -249,9 +263,7 @@ class ContinuingEducationPropositionSearchDTOSerializer(IncludedFieldsMixin, DTO
 class PropositionSearchSerializer(serializers.Serializer):
     links = ActionLinksField(
         actions={
-            'create_doctorate_proposition': DOCTORATE_ACTION_LINKS['create_doctorate_proposition'],
-            'create_general_proposition': GENERAL_EDUCATION_ACTION_LINKS['create_proposition'],
-            'create_continuing_proposition': CONTINUING_EDUCATION_ACTION_LINKS['create_proposition'],
+            'create_training_choice': ACTION_LINKS['create_training_choice'],
         }
     )
 
@@ -324,6 +336,9 @@ class DoctoratePropositionDTOSerializer(IncludedFieldsMixin, DTOSerializer):
             'reference',
             'justification',
             'doctorat',
+            'annee_calculee',
+            'pot_calcule',
+            'date_fin_pot',
             'matricule_candidat',
             'code_secteur_formation',
             'commission_proximite',
@@ -382,6 +397,8 @@ class GeneralEducationPropositionDTOSerializer(IncludedFieldsMixin, DTOSerialize
                 'update_training_choice',
                 'retrieve_specific_question',
                 'update_specific_question',
+                'retrieve_accounting',
+                'update_accounting',
                 # Proposition
                 'destroy_proposition',
                 'submit_proposition',
@@ -400,7 +417,11 @@ class GeneralEducationPropositionDTOSerializer(IncludedFieldsMixin, DTOSerialize
 
         fields = [
             'uuid',
+            'reference',
             'formation',
+            'annee_calculee',
+            'pot_calcule',
+            'date_fin_pot',
             'matricule_candidat',
             'prenom_candidat',
             'nom_candidat',
@@ -438,6 +459,8 @@ class ContinuingEducationPropositionDTOSerializer(IncludedFieldsMixin, DTOSerial
                 'update_training_choice',
                 'retrieve_specific_question',
                 'update_specific_question',
+                'retrieve_accounting',
+                'update_accounting',
                 # Proposition
                 'destroy_proposition',
                 'submit_proposition',
@@ -456,7 +479,11 @@ class ContinuingEducationPropositionDTOSerializer(IncludedFieldsMixin, DTOSerial
         source = FormationContinuePropositionDTO
         fields = [
             'uuid',
+            'reference',
             'formation',
+            'annee_calculee',
+            'pot_calcule',
+            'date_fin_pot',
             'matricule_candidat',
             'prenom_candidat',
             'nom_candidat',
@@ -467,6 +494,13 @@ class ContinuingEducationPropositionDTOSerializer(IncludedFieldsMixin, DTOSerial
             'reponses_questions_specifiques',
             'curriculum',
             'equivalence_diplome',
+            'inscription_a_titre',
+            'nom_siege_social',
+            'numero_unique_entreprise',
+            'numero_tva_entreprise',
+            'adresse_mail_professionnelle',
+            'type_adresse_facturation',
+            'adresse_facturation',
         ]
 
 
@@ -474,7 +508,7 @@ class InitierPropositionCommandSerializer(DTOSerializer):
     class Meta:
         source = InitierPropositionCommand
 
-    type_admission = serializers.ChoiceField(choices=AdmissionType.choices())
+    type_admission = serializers.ChoiceField(choices=ChoixTypeAdmission.choices())
     commission_proximite = serializers.ChoiceField(
         choices=ChoixCommissionProximiteCDEouCLSM.choices()
         + ChoixCommissionProximiteCDSS.choices()

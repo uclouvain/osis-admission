@@ -28,16 +28,15 @@ from unittest import TestCase
 from admission.ddd.admission.doctorat.preparation.commands import (
     CompleterComptabilitePropositionCommand,
 )
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
-    ChoixAffiliationSport,
+from admission.ddd.admission.enums import (
+    ChoixTypeCompteBancaire,
+    TypeSituationAssimilation,
     ChoixAssimilation1,
     ChoixAssimilation2,
     ChoixAssimilation3,
     ChoixAssimilation5,
     ChoixAssimilation6,
-    ChoixTypeCompteBancaire,
     LienParente,
-    TypeSituationAssimilation,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition
 from admission.ddd.admission.doctorat.preparation.test.factory.proposition import (
@@ -63,10 +62,6 @@ class TestCompleterComptabilitePropositionService(TestCase):
             uuid_proposition=self.proposition_existante.entity_id.uuid,
             # Absence de dettes
             attestation_absence_dette_etablissement=['attestation_absence_dette_etablissement.pdf'],
-            # Réduction des droits d'inscription
-            demande_allocation_d_etudes_communaute_francaise_belgique=True,
-            enfant_personnel=True,
-            attestation_enfant_personnel=['attestation_enfant_personnel.pdf2'],
             # Assimilation
             type_situation_assimilation=TypeSituationAssimilation.PRIS_EN_CHARGE_OU_DESIGNE_CPAS.name,
             # Assimilation 1
@@ -114,7 +109,6 @@ class TestCompleterComptabilitePropositionService(TestCase):
             titre_identite_sejour_longue_duree_ue=['titre_identite_sejour_longue_duree_ue.pdf'],
             titre_sejour_belgique=['titre_sejour_belgique.pdf'],
             # Affiliations
-            affiliation_sport=ChoixAffiliationSport.TOURNAI_UCL.name,
             etudiant_solidaire=True,
             # Compte bancaire
             type_numero_compte=ChoixTypeCompteBancaire.IBAN.name,
@@ -135,18 +129,6 @@ class TestCompleterComptabilitePropositionService(TestCase):
             self.cmd.attestation_absence_dette_etablissement,
         )
         self.assertEqual(
-            proposition.comptabilite.demande_allocation_d_etudes_communaute_francaise_belgique,
-            self.cmd.demande_allocation_d_etudes_communaute_francaise_belgique,
-        )
-        self.assertEqual(
-            proposition.comptabilite.enfant_personnel,
-            self.cmd.enfant_personnel,
-        )
-        self.assertEqual(
-            proposition.comptabilite.attestation_enfant_personnel,
-            self.cmd.attestation_enfant_personnel,
-        )
-        self.assertEqual(
             proposition.comptabilite.type_situation_assimilation,
             TypeSituationAssimilation[self.cmd.type_situation_assimilation],
         )
@@ -154,18 +136,11 @@ class TestCompleterComptabilitePropositionService(TestCase):
             proposition.comptabilite.sous_type_situation_assimilation_1,
             ChoixAssimilation1[self.cmd.sous_type_situation_assimilation_1],
         )
+        self.assertEqual(proposition.comptabilite.carte_resident_longue_duree, self.cmd.carte_resident_longue_duree)
         self.assertEqual(
-            proposition.comptabilite.carte_resident_longue_duree,
-            self.cmd.carte_resident_longue_duree,
+            proposition.comptabilite.carte_cire_sejour_illimite_etranger, self.cmd.carte_cire_sejour_illimite_etranger
         )
-        self.assertEqual(
-            proposition.comptabilite.carte_cire_sejour_illimite_etranger,
-            self.cmd.carte_cire_sejour_illimite_etranger,
-        )
-        self.assertEqual(
-            proposition.comptabilite.carte_sejour_membre_ue,
-            self.cmd.carte_sejour_membre_ue,
-        )
+        self.assertEqual(proposition.comptabilite.carte_sejour_membre_ue, self.cmd.carte_sejour_membre_ue)
         self.assertEqual(
             proposition.comptabilite.carte_sejour_permanent_membre_ue,
             self.cmd.carte_sejour_permanent_membre_ue,
@@ -174,22 +149,13 @@ class TestCompleterComptabilitePropositionService(TestCase):
             proposition.comptabilite.sous_type_situation_assimilation_2,
             ChoixAssimilation2[self.cmd.sous_type_situation_assimilation_2],
         )
-        self.assertEqual(
-            proposition.comptabilite.carte_a_b_refugie,
-            self.cmd.carte_a_b_refugie,
-        )
+        self.assertEqual(proposition.comptabilite.carte_a_b_refugie, self.cmd.carte_a_b_refugie)
         self.assertEqual(
             proposition.comptabilite.annexe_25_26_refugies_apatrides,
             self.cmd.annexe_25_26_refugies_apatrides,
         )
-        self.assertEqual(
-            proposition.comptabilite.attestation_immatriculation,
-            self.cmd.attestation_immatriculation,
-        )
-        self.assertEqual(
-            proposition.comptabilite.carte_a_b,
-            self.cmd.carte_a_b,
-        )
+        self.assertEqual(proposition.comptabilite.attestation_immatriculation, self.cmd.attestation_immatriculation)
+        self.assertEqual(proposition.comptabilite.carte_a_b, self.cmd.carte_a_b)
         self.assertEqual(
             proposition.comptabilite.decision_protection_subsidiaire,
             self.cmd.decision_protection_subsidiaire,
@@ -206,10 +172,7 @@ class TestCompleterComptabilitePropositionService(TestCase):
             proposition.comptabilite.titre_sejour_3_mois_professionel,
             self.cmd.titre_sejour_3_mois_professionel,
         )
-        self.assertEqual(
-            proposition.comptabilite.fiches_remuneration,
-            self.cmd.fiches_remuneration,
-        )
+        self.assertEqual(proposition.comptabilite.fiches_remuneration, self.cmd.fiches_remuneration)
         self.assertEqual(
             proposition.comptabilite.titre_sejour_3_mois_remplacement,
             self.cmd.titre_sejour_3_mois_remplacement,
@@ -218,14 +181,8 @@ class TestCompleterComptabilitePropositionService(TestCase):
             proposition.comptabilite.preuve_allocations_chomage_pension_indemnite,
             self.cmd.preuve_allocations_chomage_pension_indemnite,
         )
-        self.assertEqual(
-            proposition.comptabilite.attestation_cpas,
-            self.cmd.attestation_cpas,
-        )
-        self.assertEqual(
-            proposition.comptabilite.relation_parente,
-            LienParente[self.cmd.relation_parente],
-        )
+        self.assertEqual(proposition.comptabilite.attestation_cpas, self.cmd.attestation_cpas)
+        self.assertEqual(proposition.comptabilite.relation_parente, LienParente[self.cmd.relation_parente])
         self.assertEqual(
             proposition.comptabilite.sous_type_situation_assimilation_5,
             ChoixAssimilation5[self.cmd.sous_type_situation_assimilation_5],
@@ -234,22 +191,15 @@ class TestCompleterComptabilitePropositionService(TestCase):
             proposition.comptabilite.composition_menage_acte_naissance,
             self.cmd.composition_menage_acte_naissance,
         )
-        self.assertEqual(
-            proposition.comptabilite.acte_tutelle,
-            self.cmd.acte_tutelle,
-        )
+        self.assertEqual(proposition.comptabilite.acte_tutelle, self.cmd.acte_tutelle)
         self.assertEqual(
             proposition.comptabilite.composition_menage_acte_mariage,
             self.cmd.composition_menage_acte_mariage,
         )
         self.assertEqual(
-            proposition.comptabilite.attestation_cohabitation_legale,
-            self.cmd.attestation_cohabitation_legale,
+            proposition.comptabilite.attestation_cohabitation_legale, self.cmd.attestation_cohabitation_legale
         )
-        self.assertEqual(
-            proposition.comptabilite.carte_identite_parent,
-            self.cmd.carte_identite_parent,
-        )
+        self.assertEqual(proposition.comptabilite.carte_identite_parent, self.cmd.carte_identite_parent)
         self.assertEqual(
             proposition.comptabilite.titre_sejour_longue_duree_parent,
             self.cmd.titre_sejour_longue_duree_parent,
@@ -258,68 +208,27 @@ class TestCompleterComptabilitePropositionService(TestCase):
             proposition.comptabilite.annexe_25_26_refugies_apatrides_decision_protection_parent,
             self.cmd.annexe_25_26_refugies_apatrides_decision_protection_parent,
         )
-        self.assertEqual(
-            proposition.comptabilite.titre_sejour_3_mois_parent,
-            self.cmd.titre_sejour_3_mois_parent,
-        )
-        self.assertEqual(
-            proposition.comptabilite.fiches_remuneration_parent,
-            self.cmd.fiches_remuneration_parent,
-        )
-        self.assertEqual(
-            proposition.comptabilite.attestation_cpas_parent,
-            self.cmd.attestation_cpas_parent,
-        )
+        self.assertEqual(proposition.comptabilite.titre_sejour_3_mois_parent, self.cmd.titre_sejour_3_mois_parent)
+        self.assertEqual(proposition.comptabilite.fiches_remuneration_parent, self.cmd.fiches_remuneration_parent)
+        self.assertEqual(proposition.comptabilite.attestation_cpas_parent, self.cmd.attestation_cpas_parent)
         self.assertEqual(
             proposition.comptabilite.sous_type_situation_assimilation_6,
             ChoixAssimilation6[self.cmd.sous_type_situation_assimilation_6],
         )
-        self.assertEqual(
-            proposition.comptabilite.decision_bourse_cfwb,
-            self.cmd.decision_bourse_cfwb,
-        )
-        self.assertEqual(
-            proposition.comptabilite.attestation_boursier,
-            self.cmd.attestation_boursier,
-        )
+        self.assertEqual(proposition.comptabilite.decision_bourse_cfwb, self.cmd.decision_bourse_cfwb)
+        self.assertEqual(proposition.comptabilite.attestation_boursier, self.cmd.attestation_boursier)
         self.assertEqual(
             proposition.comptabilite.titre_identite_sejour_longue_duree_ue,
             self.cmd.titre_identite_sejour_longue_duree_ue,
         )
+        self.assertEqual(proposition.comptabilite.titre_sejour_belgique, self.cmd.titre_sejour_belgique)
+        self.assertEqual(proposition.comptabilite.etudiant_solidaire, self.cmd.etudiant_solidaire)
         self.assertEqual(
-            proposition.comptabilite.titre_sejour_belgique,
-            self.cmd.titre_sejour_belgique,
+            proposition.comptabilite.type_numero_compte, ChoixTypeCompteBancaire[self.cmd.type_numero_compte]
         )
-        self.assertEqual(
-            proposition.comptabilite.affiliation_sport,
-            ChoixAffiliationSport[self.cmd.affiliation_sport],
-        )
-        self.assertEqual(
-            proposition.comptabilite.etudiant_solidaire,
-            self.cmd.etudiant_solidaire,
-        )
-        self.assertEqual(
-            proposition.comptabilite.type_numero_compte,
-            ChoixTypeCompteBancaire[self.cmd.type_numero_compte],
-        )
-        self.assertEqual(
-            proposition.comptabilite.numero_compte_iban,
-            self.cmd.numero_compte_iban,
-        )
-        self.assertEqual(
-            proposition.comptabilite.iban_valide,
-            self.cmd.iban_valide,
-        )
-        self.assertEqual(
-            proposition.comptabilite.numero_compte_autre_format,
-            self.cmd.numero_compte_autre_format,
-        )
-        self.assertEqual(
-            proposition.comptabilite.code_bic_swift_banque,
-            self.cmd.code_bic_swift_banque,
-        )
-        self.assertEqual(
-            proposition.comptabilite.prenom_titulaire_compte,
-            self.cmd.prenom_titulaire_compte,
-        )
+        self.assertEqual(proposition.comptabilite.numero_compte_iban, self.cmd.numero_compte_iban)
+        self.assertEqual(proposition.comptabilite.iban_valide, self.cmd.iban_valide)
+        self.assertEqual(proposition.comptabilite.numero_compte_autre_format, self.cmd.numero_compte_autre_format)
+        self.assertEqual(proposition.comptabilite.code_bic_swift_banque, self.cmd.code_bic_swift_banque)
+        self.assertEqual(proposition.comptabilite.prenom_titulaire_compte, self.cmd.prenom_titulaire_compte)
         self.assertEqual(proposition.comptabilite.nom_titulaire_compte, self.cmd.nom_titulaire_compte)

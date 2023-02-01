@@ -33,31 +33,31 @@ from admission.infrastructure.message_bus_in_memory import message_bus_in_memory
 class TestRechercherFormationService(TestCase):
     def setUp(self) -> None:
         self.cmd = RechercherFormationContinueQuery(
-            intitule_formation='ECGE3DP',
+            intitule_formation='USCC1',
         )
         self.message_bus = message_bus_in_memory_instance
 
     def test_should_rechercher_par_intitule_formation(self):
         with freezegun.freeze_time('2020-11-01'):
             results = self.message_bus.invoke(self.cmd)
-            self.assertEqual(results[0].sigle, 'ECGE3DP')
+            self.assertEqual(results[0].sigle, 'USCC1')
             self.assertEqual(results[0].annee, 2020)
 
         with freezegun.freeze_time('2022-11-01'):
             results = self.message_bus.invoke(self.cmd)
-            self.assertEqual(results[0].sigle, 'ECGE3DP')
+            self.assertEqual(results[0].sigle, 'USCC1')
             self.assertEqual(results[0].annee, 2022)
 
     @freezegun.freeze_time('2022-11-01')
     def test_should_rechercher_par_intitule_formation_et_par_campus(self):
         # Tous les campus
-        results = self.message_bus.invoke(RechercherFormationContinueQuery(intitule_formation='ECG'))
-        self.assertEqual(len(results), 2)
+        results = self.message_bus.invoke(RechercherFormationContinueQuery(intitule_formation='USCC'))
+        self.assertEqual(len(results), 5)
 
         # Un campus
         results = self.message_bus.invoke(
             RechercherFormationContinueQuery(
-                intitule_formation='ECG',
+                intitule_formation='USCC',
                 campus='Mons',
             )
         )

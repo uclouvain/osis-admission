@@ -26,9 +26,9 @@
 import datetime
 
 from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import PropositionIdentityBuilder
-from admission.ddd.admission.doctorat.preparation.commands import VerifierPropositionCommand
+from admission.ddd.admission.doctorat.preparation.commands import VerifierPropositionQuery
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity
-from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
+from admission.ddd.admission.doctorat.preparation.domain.service.i_doctorat import IDoctoratTranslator
 from admission.ddd.admission.doctorat.preparation.domain.service.i_question_specifique import (
     IQuestionSpecifiqueTranslator,
 )
@@ -37,6 +37,9 @@ from admission.ddd.admission.doctorat.preparation.repository.i_groupe_de_supervi
     IGroupeDeSupervisionRepository,
 )
 from admission.ddd.admission.doctorat.preparation.repository.i_proposition import IPropositionRepository
+from admission.ddd.admission.domain.service.i_calendrier_inscription import ICalendrierInscription
+from admission.ddd.admission.domain.service.i_maximum_propositions import IMaximumPropositionsAutorisees
+from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.domain.service.i_titres_acces import ITitresAcces
 from admission.ddd.admission.enums.question_specifique import Onglets
 from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import GetCurrentAcademicYear
@@ -44,13 +47,16 @@ from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import IAc
 
 
 def verifier_proposition(
-    cmd: 'VerifierPropositionCommand',
+    cmd: 'VerifierPropositionQuery',
     proposition_repository: 'IPropositionRepository',
     groupe_supervision_repository: 'IGroupeDeSupervisionRepository',
     profil_candidat_translator: 'IProfilCandidatTranslator',
     academic_year_repository: 'IAcademicYearRepository',
     titres_acces: 'ITitresAcces',
     questions_specifiques_translator: 'IQuestionSpecifiqueTranslator',
+    formation_translator: 'IDoctoratTranslator',
+    calendrier_inscription: 'ICalendrierInscription',
+    maximum_propositions_service: 'IMaximumPropositionsAutorisees',
 ) -> 'PropositionIdentity':
     # GIVEN
     entity_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
@@ -80,6 +86,9 @@ def verifier_proposition(
         annee_courante,
         titres_acces,
         questions_specifiques,
+        formation_translator,
+        calendrier_inscription,
+        maximum_propositions_service,
     )
 
     # THEN

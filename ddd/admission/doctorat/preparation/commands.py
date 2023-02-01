@@ -24,7 +24,7 @@
 #
 # ##############################################################################
 import datetime
-from typing import List, Optional, Dict
+from typing import Dict, List, Optional
 
 import attr
 
@@ -105,12 +105,12 @@ class DemanderSignaturesCommand(interface.CommandRequest):
 
 
 @attr.dataclass(frozen=True, slots=True)
-class VerifierPropositionCommand(interface.QueryRequest):
+class VerifierPropositionQuery(interface.QueryRequest):
     uuid_proposition: str
 
 
 @attr.dataclass(frozen=True, slots=True)
-class VerifierProjetCommand(interface.QueryRequest):
+class VerifierProjetQuery(interface.QueryRequest):
     uuid_proposition: str
 
 
@@ -153,6 +153,9 @@ class RefuserPropositionCommand(interface.CommandRequest):
 @attr.dataclass(frozen=True, slots=True)
 class SoumettrePropositionCommand(interface.CommandRequest):
     uuid_proposition: str
+    annee: int
+    pool: str
+    elements_confirmation: Dict[str, str]
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -204,16 +207,16 @@ class ApprouverPropositionParPdfCommand(interface.CommandRequest):
 
 
 @attr.dataclass(frozen=True, slots=True)
+class GetComptabiliteQuery(interface.QueryRequest):
+    uuid_proposition: str
+
+
+@attr.dataclass(frozen=True, slots=True)
 class CompleterComptabilitePropositionCommand(interface.CommandRequest):
     uuid_proposition: str
 
     # Absence de dettes
     attestation_absence_dette_etablissement: List[str]
-
-    # Réduction des droits d'inscription
-    demande_allocation_d_etudes_communaute_francaise_belgique: Optional[bool]
-    enfant_personnel: Optional[bool]
-    attestation_enfant_personnel: List[str]
 
     # Assimilation
     type_situation_assimilation: Optional[str]
@@ -268,7 +271,6 @@ class CompleterComptabilitePropositionCommand(interface.CommandRequest):
     titre_sejour_belgique: List[str]
 
     # Affiliations
-    affiliation_sport: Optional[str]
     etudiant_solidaire: Optional[bool]
 
     # Compte bancaire
@@ -299,3 +301,18 @@ class CompleterCurriculumCommand(interface.CommandRequest):
 
     curriculum: List[str] = attr.Factory(list)
     reponses_questions_specifiques: Dict = attr.Factory(dict)
+
+
+@attr.dataclass(frozen=True, slots=True)
+class VerifierCurriculumQuery(interface.QueryRequest):
+    uuid_proposition: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class DeterminerAnneeAcademiqueEtPotQuery(interface.QueryRequest):
+    uuid_proposition: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RecupererElementsConfirmationQuery(interface.QueryRequest):
+    uuid_proposition: str

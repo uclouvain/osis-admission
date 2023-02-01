@@ -29,19 +29,17 @@ from rest_framework.generics import CreateAPIView, UpdateAPIView
 from rest_framework.response import Response
 
 from admission.api import serializers
-from admission.api.permissions import (
-    IsListingOrHasNotAlreadyCreatedForGeneralEducationPermission,
-    IsListingOrHasNotAlreadyCreatedForContinuingEducationPermission,
-)
+from admission.api.permissions import IsListingOrHasNotAlreadyCreatedPermission
 from admission.api.schema import ResponseSpecificSchema
-from admission.ddd.admission.formation_generale import commands as general_education_commands
-from admission.ddd.admission.formation_continue import commands as continuing_education_commands
 from admission.ddd.admission.doctorat.preparation import commands as doctorate_education_commands
+from admission.ddd.admission.formation_continue import commands as continuing_education_commands
+from admission.ddd.admission.formation_generale import commands as general_education_commands
 from admission.utils import (
+    get_cached_admission_perm_obj,
     get_cached_continuing_education_admission_perm_obj,
     get_cached_general_education_admission_perm_obj,
-    get_cached_admission_perm_obj,
 )
+from backoffice.settings.rest_framework.common_views import DisplayExceptionsByFieldNameAPIMixin
 from infrastructure.messages_bus import message_bus_instance
 from osis_role.contrib.views import APIPermissionRequiredMixin
 
@@ -66,7 +64,7 @@ class GeneralTrainingChoiceAPIView(
 ):
     name = "general_training_choice"
     schema = GeneralTrainingChoiceSchema()
-    permission_classes = [IsListingOrHasNotAlreadyCreatedForGeneralEducationPermission]
+    permission_classes = [IsListingOrHasNotAlreadyCreatedPermission]
 
     def post(self, request, *args, **kwargs):
         serializer = serializers.InitierPropositionGeneraleCommandSerializer(data=request.data)
@@ -76,6 +74,7 @@ class GeneralTrainingChoiceAPIView(
                 **serializer.data,
             )
         )
+        get_cached_general_education_admission_perm_obj(result.uuid).update_detailed_status()
         serializer = serializers.PropositionIdentityDTOSerializer(instance=result)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
@@ -100,7 +99,7 @@ class ContinuingTrainingChoiceAPIView(
 ):
     name = "continuing_training_choice"
     schema = ContinuingTrainingChoiceSchema()
-    permission_classes = [IsListingOrHasNotAlreadyCreatedForContinuingEducationPermission]
+    permission_classes = [IsListingOrHasNotAlreadyCreatedPermission]
 
     def post(self, request, *args, **kwargs):
         serializer = serializers.InitierPropositionContinueCommandSerializer(data=request.data)
@@ -110,6 +109,7 @@ class ContinuingTrainingChoiceAPIView(
                 **serializer.data,
             )
         )
+        get_cached_continuing_education_admission_perm_obj(result.uuid).update_detailed_status()
         serializer = serializers.PropositionIdentityDTOSerializer(instance=result)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
@@ -117,11 +117,33 @@ class ContinuingTrainingChoiceAPIView(
 class DoctorateTrainingChoiceSchema(ResponseSpecificSchema):
     operation_id_base = '_doctorate_training_choice'
     serializer_mapping = {
+        'POST': (
+            serializers.InitierPropositionCommandSerializer,
+            serializers.PropositionIdentityDTOSerializer,
+        ),
         'PUT': (
             serializers.ModifierTypeAdmissionDoctoraleCommandSerializer,
             serializers.PropositionIdentityDTOSerializer,
         ),
     }
+
+
+class DoctorateTrainingChoiceAPIView(
+    APIPermissionRequiredMixin,
+    DisplayExceptionsByFieldNameAPIMixin,
+    CreateAPIView,
+):
+    name = "doctorate_training_choice"
+    schema = DoctorateTrainingChoiceSchema()
+    permission_classes = [IsListingOrHasNotAlreadyCreatedPermission]
+
+    def post(self, request, *args, **kwargs):
+        serializer = serializers.InitierPropositionCommandSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        result = message_bus_instance.invoke(doctorate_education_commands.InitierPropositionCommand(**serializer.data))
+        get_cached_admission_perm_obj(result.uuid).update_detailed_status()
+        serializer = serializers.PropositionIdentityDTOSerializer(instance=result)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class GeneralUpdateTrainingChoiceAPIView(
@@ -130,7 +152,7 @@ class GeneralUpdateTrainingChoiceAPIView(
 ):
     name = "general_training_choice"
     schema = GeneralTrainingChoiceSchema()
-    permission_classes = [IsListingOrHasNotAlreadyCreatedForGeneralEducationPermission]
+    permission_classes = [IsListingOrHasNotAlreadyCreatedPermission]
     permission_mapping = {
         'PUT': 'admission.change_generaleducationadmission_training_choice',
     }
@@ -148,6 +170,7 @@ class GeneralUpdateTrainingChoiceAPIView(
                 **serializer.data,
             )
         )
+        self.get_permission_object().update_detailed_status()
         serializer = serializers.PropositionIdentityDTOSerializer(instance=result)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -159,6 +182,7 @@ class DoctorateUpdateAdmissionTypeAPIView(
     name = "doctorate_admission_type_update"
     schema = DoctorateTrainingChoiceSchema()
     permission_mapping = {
+        'GET': 'admission.view_doctorateadmission_training_choice',
         'PUT': 'admission.change_doctorateadmission_training_choice',
     }
     pagination_class = None
@@ -203,5 +227,6 @@ class ContinuingUpdateTrainingChoiceAPIView(
                 **serializer.data,
             )
         )
+        self.get_permission_object().update_detailed_status()
         serializer = serializers.PropositionIdentityDTOSerializer(instance=result)
         return Response(serializer.data, status=status.HTTP_200_OK)

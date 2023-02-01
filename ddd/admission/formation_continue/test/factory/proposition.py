@@ -29,8 +29,29 @@ import uuid
 import factory
 from factory.fuzzy import FuzzyText
 
+from admission.ddd.admission.test.factory.formation import FormationIdentityFactory
+from admission.ddd.admission.enums import ChoixTypeCompteBancaire
+from admission.ddd.admission.formation_continue.domain.model._comptabilite import Comptabilite
 from admission.ddd.admission.formation_continue.domain.model.proposition import PropositionIdentity, Proposition
-from admission.ddd.admission.test.factory.formation import _FormationIdentityFactory
+from admission.ddd.admission.test.factory.reference import REFERENCE_MEMORY_ITERATOR
+
+
+class _ComptabiliteFactory(factory.Factory):
+    class Meta:
+        model = Comptabilite
+        abstract = False
+
+    # Affiliations
+    etudiant_solidaire = False
+    type_numero_compte = ChoixTypeCompteBancaire.NON
+
+    # Compte bancaire
+    numero_compte_iban = 'BE43068999999501'
+    iban_valide = True
+    numero_compte_autre_format = '123456'
+    code_bic_swift_banque = 'GKCCBEBB'
+    prenom_titulaire_compte = 'John'
+    nom_titulaire_compte = 'Doe'
 
 
 class _PropositionIdentityFactory(factory.Factory):
@@ -46,8 +67,10 @@ class PropositionFactory(factory.Factory):
         model = Proposition
         abstract = False
 
+    reference = factory.Iterator(REFERENCE_MEMORY_ITERATOR)
     entity_id = factory.SubFactory(_PropositionIdentityFactory)
     matricule_candidat = FuzzyText(length=10, chars=string.digits)
-    formation_id = factory.SubFactory(_FormationIdentityFactory)
+    formation_id = factory.SubFactory(FormationIdentityFactory)
     creee_le = factory.Faker('past_datetime')
     modifiee_le = factory.Faker('past_datetime')
+    comptabilite = factory.SubFactory(_ComptabiliteFactory)

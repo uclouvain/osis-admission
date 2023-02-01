@@ -29,9 +29,9 @@ from admission.ddd.admission.doctorat.preparation.domain.model.proposition impor
 from admission.ddd.admission.doctorat.preparation.domain.service.commission_proximite import CommissionProximite
 from admission.ddd.admission.doctorat.preparation.domain.service.i_doctorat import IDoctoratTranslator
 from admission.ddd.admission.doctorat.preparation.domain.service.i_historique import IHistorique
-from admission.ddd.admission.doctorat.preparation.domain.service.initier_proposition import MaximumPropositionAutorisee
 from admission.ddd.admission.doctorat.preparation.repository.i_proposition import IPropositionRepository
 from admission.ddd.admission.domain.service.i_bourse import IBourseTranslator
+from admission.ddd.admission.domain.service.i_maximum_propositions import IMaximumPropositionsAutorisees
 
 
 def initier_proposition(
@@ -40,11 +40,11 @@ def initier_proposition(
     doctorat_translator: 'IDoctoratTranslator',
     bourse_translator: 'IBourseTranslator',
     historique: 'IHistorique',
+    maximum_propositions_service: 'IMaximumPropositionsAutorisees',
 ) -> 'PropositionIdentity':
     # GIVEN
     doctorat = doctorat_translator.get(cmd.sigle_formation, cmd.annee_formation)
-    propositions_candidat = proposition_repository.search(matricule_candidat=cmd.matricule_candidat)
-    MaximumPropositionAutorisee().verifier(propositions_candidat)
+    maximum_propositions_service.verifier_nombre_propositions_en_cours(cmd.matricule_candidat)
     CommissionProximite().verifier(doctorat, cmd.commission_proximite)
 
     # WHEN

@@ -37,46 +37,58 @@ from base.models.enums.education_group_types import TrainingType
 class FormationContinueInMemoryTranslator(IFormationContinueTranslator):
     trainings = [
         FormationFactory(
-            intitule='Formation ECGE3DP',
-            entity_id__sigle='ECGE3DP',
+            intitule='Formation USCC1',
+            entity_id__sigle='USCC1',
             entity_id__annee=2022,
             type=TrainingType.UNIVERSITY_SECOND_CYCLE_CERTIFICATE,
             campus='Mons',
+            campus_inscription='Mons',
+            sigle_entite_gestion='FC1',
         ),
         FormationFactory(
-            intitule='Formation ECGE3DP',
-            entity_id__sigle='ECGE3DP',
+            intitule='Formation USCC1',
+            entity_id__sigle='USCC1',
             entity_id__annee=2020,
             type=TrainingType.UNIVERSITY_SECOND_CYCLE_CERTIFICATE,
             campus='Louvain-La-Neuve',
+            campus_inscription='Louvain-La-Neuve',
+            sigle_entite_gestion='FC1',
         ),
         FormationFactory(
-            intitule='Formation ECGM3DP',
-            entity_id__sigle='ECGM3DP',
+            intitule='Formation USCC2',
+            entity_id__sigle='USCC2',
             entity_id__annee=2022,
             type=TrainingType.UNIVERSITY_SECOND_CYCLE_CERTIFICATE,
             campus='Louvain-La-Neuve',
+            campus_inscription='Louvain-La-Neuve',
+            sigle_entite_gestion='FC1',
         ),
         FormationFactory(
-            intitule='Formation AGRO3DP',
-            entity_id__sigle='AGRO3DP',
+            intitule='Formation USCC3',
+            entity_id__sigle='USCC3',
             entity_id__annee=2022,
             type=TrainingType.UNIVERSITY_SECOND_CYCLE_CERTIFICATE,
             campus='Charleroi',
+            campus_inscription='Charleroi',
+            sigle_entite_gestion='FC1',
         ),
         FormationFactory(
-            intitule='Formation SC3DP',
-            entity_id__sigle='SC3DP',
+            intitule='Formation USCC4',
+            entity_id__sigle='USCC4',
             entity_id__annee=2022,
             type=TrainingType.UNIVERSITY_SECOND_CYCLE_CERTIFICATE,
             campus='Louvain-La-Neuve',
+            campus_inscription='Louvain-La-Neuve',
+            sigle_entite_gestion='FC1',
         ),
         FormationFactory(
-            intitule='Formation ESP3DP',
-            entity_id__sigle='ESP3DP',
+            intitule='Formation USCC5',
+            entity_id__sigle='USCC5',
             entity_id__annee=2022,
             type=TrainingType.UNIVERSITY_SECOND_CYCLE_CERTIFICATE,
             campus='Charleroi',
+            campus_inscription='Charleroi',
+            sigle_entite_gestion='FC1',
         ),
         FormationFactory(
             intitule='Master ESP3DP',
@@ -84,13 +96,17 @@ class FormationContinueInMemoryTranslator(IFormationContinueTranslator):
             entity_id__annee=2022,
             type=TrainingType.MASTER_M1,
             campus='Charleroi',
+            campus_inscription='Charleroi',
+            sigle_entite_gestion='FC2',
         ),
         FormationFactory(
-            intitule='Formation SC3DP',
-            entity_id__sigle='SC3DP',
+            intitule='Formation USCC4',
+            entity_id__sigle='USCC4',
             entity_id__annee=2020,
             type=TrainingType.UNIVERSITY_SECOND_CYCLE_CERTIFICATE,
             campus='Louvain-La-Neuve',
+            campus_inscription='Louvain-La-Neuve',
+            sigle_entite_gestion='FC1',
         ),
     ]
 
@@ -102,6 +118,9 @@ class FormationContinueInMemoryTranslator(IFormationContinueTranslator):
             intitule=entity.intitule,
             campus=entity.campus,
             type=entity.type,
+            code_domaine=entity.code_domaine,
+            sigle_entite_gestion=entity.sigle_entite_gestion,
+            campus_inscription=entity.campus_inscription,
         )
 
     @classmethod
@@ -133,6 +152,7 @@ class FormationContinueInMemoryTranslator(IFormationContinueTranslator):
             return Formation(
                 entity_id=training.entity_id,
                 type=training.type,
+                code_domaine=training.code_domaine,
             )
 
         raise FormationNonTrouveeException

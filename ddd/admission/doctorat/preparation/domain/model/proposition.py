@@ -1,31 +1,31 @@
-##############################################################################
+# ##############################################################################
 #
-#    OSIS stands for Open Student Information System. It's an application
-#    designed to manage the core business of higher education institutions,
-#    such as universities, faculties, institutes and professional schools.
-#    The core business involves the administration of students, teachers,
-#    courses, programs and so on.
+#  OSIS stands for Open Student Information System. It's an application
+#  designed to manage the core business of higher education institutions,
+#  such as universities, faculties, institutes and professional schools.
+#  The core business involves the administration of students, teachers,
+#  courses, programs and so on.
 #
-#    Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
 #
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
 #
-#    A copy of this license - GNU General Public License - is available
-#    at the root of the source code of this program.  If not,
-#    see http://www.gnu.org/licenses/.
+#  A copy of this license - GNU General Public License - is available
+#  at the root of the source code of this program.  If not,
+#  see http://www.gnu.org/licenses/.
 #
-##############################################################################
+# ##############################################################################
 import datetime
 import uuid
-from typing import List, Optional, Union, Dict
+from typing import Dict, List, Optional, Union
 
 import attr
 
@@ -45,14 +45,17 @@ from admission.ddd.admission.doctorat.preparation.domain.model._financement impo
     financement_non_rempli,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model._institut import InstitutIdentity
-from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import DoctoratIdentity
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
-    ChoixAffiliationSport,
+from admission.ddd.admission.enums import (
     ChoixAssimilation1,
     ChoixAssimilation2,
     ChoixAssimilation3,
     ChoixAssimilation5,
     ChoixAssimilation6,
+    ChoixTypeCompteBancaire,
+    LienParente,
+    TypeSituationAssimilation,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixCommissionProximiteCDEouCLSM,
     ChoixCommissionProximiteCDSS,
     ChoixDoctoratDejaRealise,
@@ -60,17 +63,16 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixSousDomaineSciences,
     ChoixStatutProposition,
     ChoixTypeAdmission,
-    ChoixTypeCompteBancaire,
     ChoixTypeFinancement,
-    LienParente,
-    TypeSituationAssimilation,
 )
 from admission.ddd.admission.doctorat.preparation.domain.validator.validator_by_business_action import (
     CompletionPropositionValidatorList,
-    ProjetDoctoralValidatorList,
     ModifierTypeAdmissionValidatorList,
+    ProjetDoctoralValidatorList,
 )
 from admission.ddd.admission.domain.model.bourse import BourseIdentity
+from admission.ddd.admission.domain.model.formation import FormationIdentity
+from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from osis_common.ddd import interface
 
 
@@ -83,10 +85,12 @@ class PropositionIdentity(interface.EntityIdentity):
 class Proposition(interface.RootEntity):
     entity_id: 'PropositionIdentity'
     type_admission: ChoixTypeAdmission
-    doctorat_id: 'DoctoratIdentity'
+    formation_id: 'FormationIdentity'
     matricule_candidat: str
+    reference: int
     projet: 'DetailProjet'
-    reference: Optional[str] = None
+    annee_calculee: Optional[int] = None
+    pot_calcule: Optional[AcademicCalendarTypes] = None
     justification: Optional[str] = ''
     statut: ChoixStatutProposition = ChoixStatutProposition.IN_PROGRESS
     commission_proximite: Optional[
@@ -105,14 +109,15 @@ class Proposition(interface.RootEntity):
     bourse_erasmus_mundus_id: Optional[BourseIdentity] = None
     reponses_questions_specifiques: Dict = attr.Factory(dict)
     curriculum: List[str] = attr.Factory(list)
+    elements_confirmation: Dict[str, str] = attr.Factory(dict)
 
     @property
     def sigle_formation(self):
-        return self.doctorat_id.sigle
+        return self.formation_id.sigle
 
     @property
     def annee(self):
-        return self.doctorat_id.annee
+        return self.formation_id.annee
 
     valeur_reference_base = 300000
 
@@ -301,9 +306,6 @@ class Proposition(interface.RootEntity):
     def completer_comptabilite(
         self,
         attestation_absence_dette_etablissement: List[str],
-        demande_allocation_etudes_fr_be: Optional[bool],
-        enfant_personnel: Optional[bool],
-        attestation_enfant_personnel: List[str],
         type_situation_assimilation: Optional[str],
         sous_type_situation_assimilation_1: Optional[str],
         carte_resident_longue_duree: List[str],
@@ -340,7 +342,6 @@ class Proposition(interface.RootEntity):
         attestation_boursier: List[str],
         titre_identite_sejour_longue_duree_ue: List[str],
         titre_sejour_belgique: List[str],
-        affiliation_sport: Optional[str],
         etudiant_solidaire: Optional[bool],
         type_numero_compte: Optional[str],
         numero_compte_iban: Optional[str],
@@ -352,9 +353,6 @@ class Proposition(interface.RootEntity):
     ):
         self.comptabilite = Comptabilite(
             attestation_absence_dette_etablissement=attestation_absence_dette_etablissement,
-            demande_allocation_d_etudes_communaute_francaise_belgique=demande_allocation_etudes_fr_be,
-            enfant_personnel=enfant_personnel,
-            attestation_enfant_personnel=attestation_enfant_personnel,
             type_situation_assimilation=TypeSituationAssimilation[type_situation_assimilation]
             if type_situation_assimilation
             else None,
@@ -403,7 +401,6 @@ class Proposition(interface.RootEntity):
             attestation_boursier=attestation_boursier,
             titre_identite_sejour_longue_duree_ue=titre_identite_sejour_longue_duree_ue,
             titre_sejour_belgique=titre_sejour_belgique,
-            affiliation_sport=ChoixAffiliationSport[affiliation_sport] if affiliation_sport else None,
             etudiant_solidaire=etudiant_solidaire,
             type_numero_compte=ChoixTypeCompteBancaire[type_numero_compte] if type_numero_compte else None,
             numero_compte_iban=numero_compte_iban,
@@ -427,8 +424,17 @@ class Proposition(interface.RootEntity):
         """Vérification de la validité du projet doctoral avant demande des signatures"""
         ProjetDoctoralValidatorList(self.type_admission, self.projet, self.financement).validate()
 
-    def finaliser(self):
+    def finaliser(
+        self,
+        formation_id: FormationIdentity,
+        pool: 'AcademicCalendarTypes',
+        elements_confirmation: Dict[str, str],
+    ):
         self.statut = ChoixStatutProposition.SUBMITTED
+        self.annee_calculee = formation_id.annee
+        self.formation_id = formation_id
+        self.pot_calcule = pool
+        self.elements_confirmation = elements_confirmation
 
     def supprimer(self):
         self.statut = ChoixStatutProposition.CANCELLED

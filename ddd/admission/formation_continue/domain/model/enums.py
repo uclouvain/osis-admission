@@ -36,3 +36,14 @@ class ChoixStatutProposition(ChoiceEnum):
     SUBMITTED = _('SUBMITTED')
     # After the enrolment step
     ENROLLED = _('ENROLLED')
+
+
+class ChoixInscriptionATitre(ChoiceEnum):
+    PRIVE = _('Private')
+    PROFESSIONNEL = _('Professional')
+
+
+class ChoixTypeAdresseFacturation(ChoiceEnum):
+    RESIDENTIEL = _("Residential address")
+    CONTACT = _("Contact address")
+    AUTRE = _("Another address")

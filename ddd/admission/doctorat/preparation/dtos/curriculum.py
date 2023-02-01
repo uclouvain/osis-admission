@@ -32,9 +32,49 @@ from osis_common.ddd import interface
 
 
 @attr.dataclass(frozen=True, slots=True)
+class AnneeExperienceAcademiqueDTO(interface.DTO):
+    annee: int
+    resultat: str
+    releve_notes: List[str]
+    traduction_releve_notes: List[str]
+    credits_inscrits: Optional[float]
+    credits_acquis: Optional[float]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ExperienceAcademiqueDTO(interface.DTO):
+    uuid: str
+    pays: str
+    regime_linguistique: str
+    type_releve_notes: str
+    releve_notes: List[str]
+    traduction_releve_notes: List[str]
+    annees: List[AnneeExperienceAcademiqueDTO]
+    a_obtenu_diplome: bool
+    diplome: List[str]
+    traduction_diplome: List[str]
+    rang_diplome: str
+    date_prevue_delivrance_diplome: Optional[datetime.date]
+    titre_memoire: str
+    note_memoire: str
+    resume_memoire: List[str]
+    grade_obtenu: str
+    systeme_evaluation: str
+    nom_formation: str
+
+    def __str__(self):
+        return self.nom_formation
+
+
+@attr.dataclass(frozen=True, slots=True)
 class CurriculumDTO(interface.DTO):
     dates_experiences_non_academiques: List[Tuple[datetime.date, datetime.date]]
-    annees_experiences_academiques: List[int]
+    experiences_academiques: List[ExperienceAcademiqueDTO]
     annee_derniere_inscription_ucl: Optional[int]
-    annee_diplome_etudes_secondaires_belges: Optional[int]
-    annee_diplome_etudes_secondaires_etrangeres: Optional[int]
+    annee_diplome_etudes_secondaires: Optional[int]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class CurriculumAExperiencesDTO(interface.DTO):
+    a_experience_academique: bool
+    a_experience_non_academique: bool

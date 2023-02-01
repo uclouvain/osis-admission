@@ -1,29 +1,30 @@
 # ##############################################################################
 #
-#    OSIS stands for Open Student Information System. It's an application
-#    designed to manage the core business of higher education institutions,
-#    such as universities, faculties, institutes and professional schools.
-#    The core business involves the administration of students, teachers,
-#    courses, programs and so on.
+#  OSIS stands for Open Student Information System. It's an application
+#  designed to manage the core business of higher education institutions,
+#  such as universities, faculties, institutes and professional schools.
+#  The core business involves the administration of students, teachers,
+#  courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
 #
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
 #
-#    A copy of this license - GNU General Public License - is available
-#    at the root of the source code of this program.  If not,
-#    see http://www.gnu.org/licenses/.
+#  A copy of this license - GNU General Public License - is available
+#  at the root of the source code of this program.  If not,
+#  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
 import uuid
+from contextlib import suppress
 
 from ckeditor.fields import RichTextField
 from django.conf import settings
@@ -42,38 +43,39 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixLangueRedactionThese,
     ChoixSousDomaineSciences,
     ChoixStatutProposition,
+    ChoixTypeAdmission,
     ChoixTypeFinancement,
 )
 from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixStatutCDD, ChoixStatutSIC
 from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
+from base.models.academic_year import AcademicYear
 from base.models.entity_version import EntityVersion
 from base.models.enums.entity_type import SECTOR
 from base.utils.cte import CTESubquery
+from osis_common.ddd.interface import BusinessException
 from osis_document.contrib import FileField
 from osis_signature.contrib.fields import SignatureProcessField
 from reference.models.country import Country
 from .base import BaseAdmission, BaseAdmissionQuerySet, admission_directory_path
-from .enums.admission_type import AdmissionType
 
 __all__ = [
     "DoctorateAdmission",
     "DoctorateProxy",
     "ConfirmationPaper",
-    "REFERENCE_SEQ_NAME",
 ]
 
-
-REFERENCE_SEQ_NAME = 'admission_doctorateadmission_reference_seq'
+from ...ddd.admission.dtos.conditions import InfosDetermineesDTO
 
 
 class DoctorateAdmission(BaseAdmission):
     type = models.CharField(
         verbose_name=_("Type"),
         max_length=255,
-        choices=AdmissionType.choices(),
+        choices=ChoixTypeAdmission.choices(),
         db_index=True,
-        default=AdmissionType.ADMISSION.name,
+        default=ChoixTypeAdmission.ADMISSION.name,
     )
+    # TODO: remove this field in the future
     valuated_experiences = models.ManyToManyField(
         'osis_profile.Experience',
         related_name='valuated_from',
@@ -88,14 +90,6 @@ class DoctorateAdmission(BaseAdmission):
         default='',
         blank=True,
     )
-    reference = models.CharField(
-        max_length=32,
-        verbose_name=_("Reference"),
-        unique=True,
-        editable=False,
-        null=True,
-    )
-
     # Financement
     financing_type = models.CharField(
         max_length=255,
@@ -292,10 +286,7 @@ class DoctorateAdmission(BaseAdmission):
         verbose_name=_("Pre-admission submission date"),
         null=True,
     )
-    admission_submission_date = models.DateTimeField(
-        verbose_name=_("Admission submission date"),
-        null=True,
-    )
+    # TODO: make this common to the 3 contexts?
     submitted_profile = models.JSONField(
         verbose_name=_("Submitted profile"),
         default=dict,
@@ -347,7 +338,7 @@ class DoctorateAdmission(BaseAdmission):
 
     class Meta:
         verbose_name = _("Doctorate admission")
-        ordering = ('-created',)
+        ordering = ('-created_at',)
         permissions = [
             ('download_jury_approved_pdf', _("Can download jury-approved PDF")),
             ('upload_jury_approved_pdf', _("Can upload jury-approved PDF")),
@@ -406,25 +397,29 @@ class DoctorateAdmission(BaseAdmission):
             ('submit_doctorateadmission', _("Can submit a doctorate admission proposition")),
         ]
 
-    def __str__(self):  # pragma: no cover
-        return self.reference
-
     def save(self, *args, **kwargs) -> None:
         super().save(*args, **kwargs)
         cache.delete('admission_permission_{}'.format(self.uuid))
 
     def update_detailed_status(self):
         from admission.ddd.admission.doctorat.preparation.commands import (
-            VerifierProjetCommand,
-            VerifierPropositionCommand,
+            VerifierProjetQuery,
+            VerifierPropositionQuery,
+            DeterminerAnneeAcademiqueEtPotQuery,
         )
         from admission.utils import gather_business_exceptions
+        from infrastructure.messages_bus import message_bus_instance
 
         error_key = api_settings.NON_FIELD_ERRORS_KEY
-        project_errors = gather_business_exceptions(VerifierProjetCommand(self.uuid)).get(error_key, [])
-        submission_errors = gather_business_exceptions(VerifierPropositionCommand(self.uuid)).get(error_key, [])
+        project_errors = gather_business_exceptions(VerifierProjetQuery(self.uuid)).get(error_key, [])
+        submission_errors = gather_business_exceptions(VerifierPropositionQuery(self.uuid)).get(error_key, [])
         self.detailed_status = project_errors + submission_errors
-        self.save(update_fields=['detailed_status'])
+
+        with suppress(BusinessException):
+            dto: 'InfosDetermineesDTO' = message_bus_instance.invoke(DeterminerAnneeAcademiqueEtPotQuery(self.uuid))
+            self.determined_academic_year = AcademicYear.objects.get(year=dto.annee)
+            self.determined_pool = dto.pool.name
+        self.save(update_fields=['detailed_status', 'determined_academic_year', 'determined_pool'])
 
 
 class PropositionManager(models.Manager.from_queryset(BaseAdmissionQuerySet)):
@@ -443,7 +438,9 @@ class PropositionManager(models.Manager.from_queryset(BaseAdmissionQuerySet)):
             .select_related(
                 "training__academic_year",
                 "training__education_group_type",
+                "training__enrollment_campus",
                 "candidate__country_of_citizenship",
+                "determined_academic_year",
                 "thesis_institute",
                 "accounting",
                 "erasmus_mundus_scholarship",
@@ -452,13 +449,10 @@ class PropositionManager(models.Manager.from_queryset(BaseAdmissionQuerySet)):
             .annotate(
                 code_secteur_formation=CTESubquery(sector_subqs.values("acronym")[:1]),
                 intitule_secteur_formation=CTESubquery(sector_subqs.values("title")[:1]),
-                sigle_entite_gestion=models.Subquery(
-                    EntityVersion.objects.filter(entity_id=OuterRef("training__management_entity_id"))
-                    .order_by('-start_date')
-                    .values("acronym")[:1]
-                ),
             )
             .annotate_campus()
+            .annotate_pool_end_date()
+            .annotate_training_management_entity()
         )
 
 
@@ -480,9 +474,9 @@ class DemandeManager(models.Manager):
             .only(
                 'uuid',
                 'pre_admission_submission_date',
-                'admission_submission_date',
+                'submitted_at',
                 'submitted_profile',
-                'modified',
+                'modified_at',
                 'status_cdd',
                 'status_sic',
             )
@@ -516,7 +510,7 @@ class DemandeProxy(DoctorateAdmission):
         proxy = True
 
 
-class DoctorateManager(models.Manager):
+class DoctorateManager(models.Manager.from_queryset(BaseAdmissionQuerySet)):
     def get_queryset(self):
         return (
             super()
@@ -527,6 +521,7 @@ class DoctorateManager(models.Manager):
                 'training__academic_year__year',
                 'training__title',
                 'training__acronym',
+                'training__enrollment_campus__name',
                 'post_enrolment_status',
                 'proximity_commission',
                 'reference',
@@ -540,11 +535,13 @@ class DoctorateManager(models.Manager):
             .select_related(
                 'candidate',
                 'training__academic_year',
+                "training__enrollment_campus",
                 'international_scholarship',
             )
             .exclude(
                 post_enrolment_status=ChoixStatutDoctorat.ADMISSION_IN_PROGRESS.name,
             )
+            .annotate_training_management_entity()
         )
 
 
@@ -649,7 +646,7 @@ class ConfirmationPaper(models.Model):
 
 class InternalNote(models.Model):
     admission = models.ForeignKey(
-        DoctorateAdmission,
+        BaseAdmission,
         on_delete=models.CASCADE,
         verbose_name=_("Admission"),
     )
@@ -659,7 +656,7 @@ class InternalNote(models.Model):
         verbose_name=_("Author"),
         null=True,
     )
-    created = models.DateTimeField(
+    created_at = models.DateTimeField(
         auto_now_add=True,
         verbose_name=_('Created'),
     )
@@ -668,4 +665,4 @@ class InternalNote(models.Model):
     )
 
     class Meta:
-        ordering = ['-created']
+        ordering = ['-created_at']

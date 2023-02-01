@@ -47,7 +47,14 @@ from .approvals import (
 )
 from .confirmation import *
 from .doctorate import *
-from .accounting import CompleterComptabilitePropositionCommandSerializer, AccountingConditionsSerializer
+from .accounting import (
+    ContinuingEducationAccountingDTOSerializer,
+    DoctorateEducationAccountingDTOSerializer,
+    GeneralEducationAccountingDTOSerializer,
+    CompleterComptabilitePropositionContinueCommandSerializer,
+    CompleterComptabilitePropositionDoctoraleCommandSerializer,
+    CompleterComptabilitePropositionGeneraleCommandSerializer,
+)
 from .scholarship import ScholarshipSerializer
 from .campus import CampusSerializer
 from .training_choice import (
@@ -57,4 +64,9 @@ from .training_choice import (
     ModifierTypeAdmissionDoctoraleCommandSerializer,
     ModifierChoixFormationGeneraleCommandSerializer,
 )
-from .specific_question import SpecificQuestionSerializer, ModifierQuestionsSpecifiquesCommandSerializer
+from .specific_question import (
+    SpecificQuestionSerializer,
+    ModifierQuestionsSpecifiquesFormationGeneraleCommandSerializer,
+    ModifierQuestionsSpecifiquesFormationContinueCommandSerializer,
+)
+from .submission import PropositionErrorsSerializer, SubmitPropositionSerializer

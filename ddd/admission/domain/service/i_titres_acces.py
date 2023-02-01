@@ -1,30 +1,30 @@
 # ##############################################################################
 #
-#    OSIS stands for Open Student Information System. It's an application
-#    designed to manage the core business of higher education institutions,
-#    such as universities, faculties, institutes and professional schools.
-#    The core business involves the administration of students, teachers,
-#    courses, programs and so on.
+#  OSIS stands for Open Student Information System. It's an application
+#  designed to manage the core business of higher education institutions,
+#  such as universities, faculties, institutes and professional schools.
+#  The core business involves the administration of students, teachers,
+#  courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
 #
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
 #
-#    A copy of this license - GNU General Public License - is available
-#    at the root of the source code of this program.  If not,
-#    see http://www.gnu.org/licenses/.
+#  A copy of this license - GNU General Public License - is available
+#  at the root of the source code of this program.  If not,
+#  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
 from enum import Enum
-from typing import List, Mapping, Tuple
+from typing import List, Mapping, Optional, Tuple
 
 from admission.ddd.admission.domain.validator.exceptions import ConditionsAccessNonRempliesException
 from admission.ddd.admission.dtos.conditions import AdmissionConditionsDTO
@@ -49,10 +49,10 @@ class ConditionAccess(str, Enum):
 class Titres:
     def __init__(self, obj: AdmissionConditionsDTO, *conditions: ConditionAccess):
         self.condition_obj = obj
-        self.condition_names = conditions or tuple(e for e in ConditionAccess)
+        self.condition_names = conditions
 
     def __bool__(self):
-        return any(self.get_valid_conditions())
+        return not self.condition_names or any(self.get_valid_conditions())
 
     def __str__(self):  # pragma: no cover
         return ','.join([cond.name for cond in self.get_valid_conditions()])
@@ -133,16 +133,21 @@ class ITitresAcces(interface.DomainService):
         cls,
         matricule_candidat: str,
         type_formation: 'TrainingType',
-        equivalence_diplome: List[str],
+        equivalence_diplome: Optional[List[str]] = None,
     ) -> Titres:
-        conditions = cls.conditions_remplies(matricule_candidat, equivalence_diplome)
+        conditions = cls.conditions_remplies(matricule_candidat, equivalence_diplome or [])
         titres_requis: List[ConditionAccess] = next(
             (titres for types, titres in cls.condition_matrix.items() if type_formation in types), []
         )
         return Titres(conditions, *titres_requis)
 
     @classmethod
-    def verifier(cls, matricule_candidat: str, type_formation: 'TrainingType', equivalence_diplome: List[str]):
+    def verifier(
+        cls,
+        matricule_candidat: str,
+        type_formation: 'TrainingType',
+        equivalence_diplome: Optional[List[str]] = None,
+    ):
         if not cls.recuperer_titres_access(matricule_candidat, type_formation, equivalence_diplome):
             raise ConditionsAccessNonRempliesException
 
@@ -150,7 +155,3 @@ class ITitresAcces(interface.DomainService):
     def verifier_titres(cls, titres: 'Titres'):
         if not titres:
             raise ConditionsAccessNonRempliesException
-
-    @classmethod
-    def verifier_doctorat(cls, matricule_candidat: str):
-        cls.verifier(matricule_candidat, TrainingType.PHD, [])

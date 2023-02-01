@@ -32,13 +32,13 @@ from osis_role.contrib.models import RoleModel
 
 class JurySecretary(RoleModel):
     class Meta:
-        verbose_name = _("Jury secretary")
-        verbose_name_plural = _("Jury secretaries")
+        verbose_name = _("Role: Jury secretary")
+        verbose_name_plural = _("Role: Jury secretaries")
         group_name = "jury_secretary"
 
     @classmethod
     def rule_set(cls):
-        return RuleSet({
+        ruleset = {
             'admission.upload_defense_report': rules.always_allow,
             'admission.view_doctorateadmission': rules.always_allow,
             'admission.view_doctorateadmission_person': rules.always_allow,
@@ -48,4 +48,5 @@ class JurySecretary(RoleModel):
             'admission.view_doctorateadmission_project': rules.always_allow,
             'admission.view_doctorateadmission_cotutelle': rules.always_allow,
             'admission.view_doctorateadmission_supervision': rules.always_allow,
-        })
+        }
+        return RuleSet(ruleset)

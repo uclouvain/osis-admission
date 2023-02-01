@@ -33,6 +33,7 @@ from admission.infrastructure.admission.domain.service.in_memory.annee_inscripti
 from admission.infrastructure.admission.domain.service.in_memory.bourse import BourseInMemoryTranslator
 from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
 from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
+from .domain.service.in_memory.comptabilite import ComptabiliteInMemoryTranslator
 from .domain.service.in_memory.doctorat import DoctoratInMemoryTranslator
 from .domain.service.in_memory.historique import HistoriqueInMemory
 from .domain.service.in_memory.membre_CA import MembreCAInMemoryTranslator
@@ -42,6 +43,9 @@ from .domain.service.in_memory.question_specifique import QuestionSpecifiqueInMe
 from .repository.in_memory.groupe_de_supervision import GroupeDeSupervisionInMemoryRepository
 from .repository.in_memory.proposition import PropositionInMemoryRepository
 from ..validation.repository.in_memory.demande import DemandeInMemoryRepository
+from ...domain.service.in_memory.calendrier_inscription import CalendrierInscriptionInMemory
+from ...domain.service.in_memory.elements_confirmation import ElementsConfirmationInMemory
+from ...domain.service.in_memory.maximum_propositions import MaximumPropositionsAutoriseesInMemory
 from ...domain.service.in_memory.titres_acces import TitresAccesInMemory
 
 _proposition_repository = PropositionInMemoryRepository()
@@ -56,6 +60,8 @@ _historique = HistoriqueInMemory()
 _notification = NotificationInMemory()
 _titres_acces = TitresAccesInMemory()
 _membre_ca_translator = MembreCAInMemoryTranslator()
+_comptabilite_translator = ComptabiliteInMemoryTranslator()
+_maximum_propositions_autorisees = MaximumPropositionsAutoriseesInMemory()
 
 
 COMMAND_HANDLERS = {
@@ -65,6 +71,7 @@ COMMAND_HANDLERS = {
         doctorat_translator=_doctorat_translator,
         bourse_translator=_bourse_translator,
         historique=_historique,
+        maximum_propositions_service=_maximum_propositions_autorisees,
     ),
     CompleterPropositionCommand: lambda msg_bus, cmd: completer_proposition(
         cmd,
@@ -99,7 +106,7 @@ COMMAND_HANDLERS = {
         historique=_historique,
         notification=_notification,
     ),
-    VerifierPropositionCommand: lambda msg_bus, cmd: verifier_proposition(
+    VerifierPropositionQuery: lambda msg_bus, cmd: verifier_proposition(
         cmd,
         proposition_repository=_proposition_repository,
         groupe_supervision_repository=_groupe_supervision_repository,
@@ -107,8 +114,11 @@ COMMAND_HANDLERS = {
         academic_year_repository=_academic_year_repository,
         titres_acces=_titres_acces,
         questions_specifiques_translator=QuestionSpecifiqueInMemoryTranslator(),
+        formation_translator=_doctorat_translator,
+        calendrier_inscription=CalendrierInscriptionInMemory(),
+        maximum_propositions_service=_maximum_propositions_autorisees,
     ),
-    VerifierProjetCommand: lambda msg_bus, cmd: verifier_projet(
+    VerifierProjetQuery: lambda msg_bus, cmd: verifier_projet(
         cmd,
         proposition_repository=_proposition_repository,
         groupe_supervision_repository=_groupe_supervision_repository,
@@ -159,6 +169,10 @@ COMMAND_HANDLERS = {
         notification=_notification,
         titres_acces=_titres_acces,
         questions_specifiques_translator=QuestionSpecifiqueInMemoryTranslator(),
+        doctorat_translator=_doctorat_translator,
+        calendrier_inscription=CalendrierInscriptionInMemory(),
+        element_confirmation=ElementsConfirmationInMemory(),
+        maximum_propositions_service=_maximum_propositions_autorisees,
     ),
     DefinirCotutelleCommand: lambda msg_bus, cmd: definir_cotutelle(
         cmd,
@@ -204,6 +218,10 @@ COMMAND_HANDLERS = {
         cmd,
         proposition_repository=_proposition_repository,
     ),
+    GetComptabiliteQuery: lambda msg_bus, cmd: recuperer_comptabilite(
+        cmd,
+        comptabilite_translator=_comptabilite_translator,
+    ),
     ModifierTypeAdmissionCommand: lambda msg_bus, cmd: modifier_type_admission(
         cmd,
         proposition_repository=_proposition_repository,
@@ -212,5 +230,18 @@ COMMAND_HANDLERS = {
     CompleterCurriculumCommand: lambda msg_bus, cmd: completer_curriculum(
         cmd,
         proposition_repository=_proposition_repository,
+    ),
+    VerifierCurriculumQuery: lambda msg_bus, cmd: verifier_curriculum(
+        cmd,
+        proposition_repository=_proposition_repository,
+        profil_candidat_translator=_profil_candidat_translator,
+        academic_year_repository=_academic_year_repository,
+    ),
+    RecupererElementsConfirmationQuery: lambda msg_bus, cmd: recuperer_elements_confirmation(
+        cmd,
+        proposition_repository=_proposition_repository,
+        element_confirmation=ElementsConfirmationInMemory(),
+        formation_translator=_doctorat_translator,
+        profil_candidat_translator=_profil_candidat_translator,
     ),
 }

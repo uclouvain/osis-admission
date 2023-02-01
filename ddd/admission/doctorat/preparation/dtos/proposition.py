@@ -31,7 +31,6 @@ import attr
 
 from admission.ddd.admission.dtos.bourse import BourseDTO
 from osis_common.ddd import interface
-from .comptabilite import ComptabiliteDTO
 from .doctorat import DoctoratDTO
 
 
@@ -42,6 +41,9 @@ class PropositionDTO(interface.DTO):
     reference: str
     justification: Optional[str]
     doctorat: DoctoratDTO
+    annee_calculee: Optional[int]
+    pot_calcule: Optional[str]
+    date_fin_pot: Optional[datetime.date]
     code_secteur_formation: str
     intitule_secteur_formation: str
     commission_proximite: Optional[str]
@@ -79,7 +81,6 @@ class PropositionDTO(interface.DTO):
     creee_le: datetime.datetime
     modifiee_le: datetime.datetime
     erreurs: List[Dict[str, str]]
-    comptabilite: ComptabiliteDTO
     bourse_erasmus_mundus: Optional[BourseDTO]
     reponses_questions_specifiques: Dict[str, Union[str, List[str]]]
     curriculum: List[str]

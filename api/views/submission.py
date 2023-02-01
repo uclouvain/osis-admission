@@ -1,29 +1,34 @@
 # ##############################################################################
 #
-#    OSIS stands for Open Student Information System. It's an application
-#    designed to manage the core business of higher education institutions,
-#    such as universities, faculties, institutes and professional schools.
-#    The core business involves the administration of students, teachers,
-#    courses, programs and so on.
+#  OSIS stands for Open Student Information System. It's an application
+#  designed to manage the core business of higher education institutions,
+#  such as universities, faculties, institutes and professional schools.
+#  The core business involves the administration of students, teachers,
+#  courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
 #
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
 #
-#    A copy of this license - GNU General Public License - is available
-#    at the root of the source code of this program.  If not,
-#    see http://www.gnu.org/licenses/.
+#  A copy of this license - GNU General Public License - is available
+#  at the root of the source code of this program.  If not,
+#  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from contextlib import suppress
+from typing import Union
 
+from django.conf import settings
+from django.utils import timezone
+from django.utils.translation import get_language
 from rest_framework import mixins, status
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
@@ -31,28 +36,46 @@ from rest_framework.settings import api_settings
 
 from admission.api import serializers
 from admission.api.schema import ResponseSpecificSchema
+from admission.api.serializers import PropositionErrorsSerializer
+from admission.contrib.models import (
+    GeneralEducationAdmission,
+    ContinuingEducationAdmission,
+    DoctorateAdmission,
+)
 from admission.ddd.admission.doctorat.preparation.commands import (
+    RecupererElementsConfirmationQuery as RecupererElementsConfirmationDoctoralQuery,
     SoumettrePropositionCommand as SoumettrePropositionDoctoratCommand,
-    VerifierProjetCommand,
-    VerifierPropositionCommand as VerifierPropositionDoctoratCommand,
+    VerifierProjetQuery,
 )
 from admission.ddd.admission.doctorat.validation.commands import ApprouverDemandeCddCommand
+from admission.ddd.admission.domain.validator.exceptions import (
+    ConditionsAccessNonRempliesException,
+    PoolNonResidentContingenteNonOuvertException,
+)
 from admission.ddd.admission.formation_continue.commands import (
-    VerifierPropositionCommand as VerifierPropositionContinueCommand,
+    RecupererElementsConfirmationQuery as RecupererElementsConfirmationContinueQuery,
     SoumettrePropositionCommand as SoumettrePropositionContinueCommand,
 )
 from admission.ddd.admission.formation_generale.commands import (
-    VerifierPropositionCommand as VerifierPropositionGeneraleCommand,
+    RecupererElementsConfirmationQuery as RecupererElementsConfirmationGeneralQuery,
     SoumettrePropositionCommand as SoumettrePropositionGeneraleCommand,
 )
+from admission.infrastructure.admission.domain.service.profil_candidat import ProfilCandidatTranslator
 from admission.utils import (
     gather_business_exceptions,
     get_cached_admission_perm_obj,
     get_cached_continuing_education_admission_perm_obj,
     get_cached_general_education_admission_perm_obj,
 )
+from base.models.academic_calendar import AcademicCalendar
+from base.models.education_group_year import EducationGroupYear
+from base.models.enums.academic_calendar_type import AcademicCalendarTypes
+from base.models.enums.education_group_types import TrainingType
+from infrastructure.formation_catalogue.repository.program_tree import ProgramTreeRepository
 from infrastructure.messages_bus import message_bus_instance
+from osis_profile.models import EducationalExperience, ProfessionalExperience
 from osis_role.contrib.views import APIPermissionRequiredMixin
+from program_management.ddd.domain.exception import ProgramTreeNotFoundException
 
 __all__ = [
     "VerifyDoctoralProjectView",
@@ -62,8 +85,33 @@ __all__ = [
 ]
 
 
+def valuate_experiences(instance: Union[GeneralEducationAdmission, ContinuingEducationAdmission, DoctorateAdmission]):
+    # Valuate the secondary studies of the candidate if no admission already valuated them
+    if isinstance(
+        instance,
+        (GeneralEducationAdmission, ContinuingEducationAdmission),
+    ) and not ProfilCandidatTranslator.etudes_secondaires_valorisees(instance.candidate.global_id):
+        instance.valuated_secondary_studies_person_id = instance.candidate_id
+        instance.save(update_fields=['valuated_secondary_studies_person_id'])
+
+    # Valuate curriculum experiences
+    instance.educational_valuated_experiences.add(
+        *EducationalExperience.objects.filter(person_id=instance.candidate_id)
+    )
+
+    # Valuate curriculum experiences
+    instance.professional_valuated_experiences.add(
+        *ProfessionalExperience.objects.filter(person_id=instance.candidate_id)
+    )
+
+
 class VerifySchema(ResponseSpecificSchema):
     response_description = "Verification errors"
+
+
+class VerifyProjectSchema(VerifySchema):
+    operation_id_base = '_verify_project'
+    response_description = "Project verification errors"
 
     def get_responses(self, path, method):
         return (
@@ -95,11 +143,6 @@ class VerifySchema(ResponseSpecificSchema):
         )
 
 
-class VerifyProjectSchema(VerifySchema):
-    operation_id_base = '_verify_project'
-    response_description = "Project verification errors"
-
-
 class VerifyDoctoralProjectView(APIPermissionRequiredMixin, mixins.RetrieveModelMixin, GenericAPIView):
     name = "verify-project"
     schema = VerifyProjectSchema()
@@ -114,7 +157,7 @@ class VerifyDoctoralProjectView(APIPermissionRequiredMixin, mixins.RetrieveModel
 
     def get(self, request, *args, **kwargs):
         """Check the project to be OK with all validators."""
-        data = gather_business_exceptions(VerifierProjetCommand(uuid_proposition=str(kwargs["uuid"])))
+        data = gather_business_exceptions(VerifierProjetQuery(uuid_proposition=str(kwargs["uuid"])))
         return Response(data.get(api_settings.NON_FIELD_ERRORS_KEY, []), status=status.HTTP_200_OK)
 
 
@@ -122,7 +165,8 @@ class SubmitDoctoralPropositionSchema(VerifySchema):
     response_description = "Proposition verification errors"
 
     serializer_mapping = {
-        'POST': serializers.PropositionIdentityDTOSerializer,
+        'GET': serializers.PropositionErrorsSerializer,
+        'POST': (serializers.SubmitPropositionSerializer, serializers.PropositionIdentityDTOSerializer),
     }
 
     def get_operation_id(self, path, method):
@@ -133,11 +177,54 @@ class SubmitDoctoralPropositionSchema(VerifySchema):
         return super().get_operation_id(path, method)
 
 
-class SubmitDoctoralPropositionView(APIPermissionRequiredMixin, mixins.RetrieveModelMixin, GenericAPIView):
-    name = "submit-doctoral-proposition"
-    schema = SubmitDoctoralPropositionSchema()
+class SubmitPropositionMixin:
     pagination_class = None
     filter_backends = []
+
+    def add_access_conditions_url(self, data):
+        error_codes = [e['status_code'] for e in data['errors']]
+        if ConditionsAccessNonRempliesException.status_code in error_codes:
+            admission = self.get_permission_object()
+
+            if admission.training.education_group_type.name == TrainingType.PHD.name:
+                data['access_conditions_url'] = (
+                    "https://uclouvain.be/en/study/inscriptions/doctorate-and-doctoral-training.html"
+                    if get_language() == settings.LANGUAGE_CODE_EN
+                    else "https://uclouvain.be/fr/etudier/inscriptions/conditions-doctorats.html"
+                )
+            else:
+                # Get the last year being published
+                today = timezone.now().today()
+                year = (
+                    AcademicCalendar.objects.filter(
+                        reference=AcademicCalendarTypes.ADMISSION_ACCESS_CONDITIONS_URL.name,
+                        start_date__lte=today,
+                    )
+                    .order_by('-start_date')
+                    .values_list('data_year__year', flat=True)
+                    .first()
+                )
+
+                sigle = admission.training.acronym
+                with suppress(ProgramTreeNotFoundException):  # pragma: no cover
+                    # Try to get the acronym from the parent, if it exists
+                    parent = ProgramTreeRepository.get_identite_parent_2M(admission.training.partial_acronym, year)
+                    sigle = EducationGroupYear.objects.get(
+                        partial_acronym=parent.code,
+                        academic_year__year=parent.year,
+                    ).acronym
+
+                data['access_conditions_url'] = f"https://uclouvain.be/prog-{year}-{sigle}-cond_adm"
+
+
+class SubmitDoctoralPropositionView(
+    SubmitPropositionMixin,
+    APIPermissionRequiredMixin,
+    mixins.RetrieveModelMixin,
+    GenericAPIView,
+):
+    name = "submit-doctoral-proposition"
+    schema = SubmitDoctoralPropositionSchema()
     permission_mapping = {
         'GET': 'admission.submit_doctorateadmission',
         'POST': 'admission.submit_doctorateadmission',
@@ -148,15 +235,24 @@ class SubmitDoctoralPropositionView(APIPermissionRequiredMixin, mixins.RetrieveM
 
     def get(self, request, *args, **kwargs):
         """Check the proposition to be OK with all validators."""
-        data = gather_business_exceptions(VerifierPropositionDoctoratCommand(uuid_proposition=str(kwargs["uuid"])))
-        return Response(data.get(api_settings.NON_FIELD_ERRORS_KEY, []), status=status.HTTP_200_OK)
+        admission = self.get_permission_object()
+        admission.update_detailed_status()
+
+        data = {'errors': admission.detailed_status}
+        self.add_access_conditions_url(data)
+        if not data['errors']:
+            cmd = RecupererElementsConfirmationDoctoralQuery(self.kwargs['uuid'])
+            data['elements_confirmation'] = message_bus_instance.invoke(cmd)
+        return Response(PropositionErrorsSerializer(data).data, status=status.HTTP_200_OK)
 
     def post(self, request, *args, **kwargs):
         """Submit the proposition."""
         # Trigger the submit command
-        proposition_id = message_bus_instance.invoke(
-            SoumettrePropositionDoctoratCommand(uuid_proposition=str(kwargs["uuid"]))
-        )
+        serializer = serializers.SubmitPropositionSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        cmd = SoumettrePropositionDoctoratCommand(**serializer.data, uuid_proposition=str(kwargs['uuid']))
+        proposition_id = message_bus_instance.invoke(cmd)
+        valuate_experiences(self.get_permission_object())
         serializer = serializers.PropositionIdentityDTOSerializer(instance=proposition_id)
         # TODO To remove when the admission approval by CDD and SIC will be created
         message_bus_instance.invoke(ApprouverDemandeCddCommand(uuid=str(kwargs["uuid"])))
@@ -166,18 +262,22 @@ class SubmitDoctoralPropositionView(APIPermissionRequiredMixin, mixins.RetrieveM
 class SubmitGeneralEducationPropositionSchema(VerifySchema):
     response_description = "Proposition verification errors"
     serializer_mapping = {
-        'POST': serializers.PropositionIdentityDTOSerializer,
+        'GET': serializers.PropositionErrorsSerializer,
+        'POST': (serializers.SubmitPropositionSerializer, serializers.PropositionIdentityDTOSerializer),
     }
 
     def get_operation_id(self, path, method):
         return 'verify_general_education_proposition' if method == 'GET' else 'submit_general_education_proposition'
 
 
-class SubmitGeneralEducationPropositionView(APIPermissionRequiredMixin, mixins.RetrieveModelMixin, GenericAPIView):
+class SubmitGeneralEducationPropositionView(
+    SubmitPropositionMixin,
+    APIPermissionRequiredMixin,
+    mixins.RetrieveModelMixin,
+    GenericAPIView,
+):
     name = "submit-general-proposition"
     schema = SubmitGeneralEducationPropositionSchema()
-    pagination_class = None
-    filter_backends = []
     permission_mapping = {
         'GET': 'admission.submit_generaleducationadmission',
         'POST': 'admission.submit_generaleducationadmission',
@@ -188,14 +288,40 @@ class SubmitGeneralEducationPropositionView(APIPermissionRequiredMixin, mixins.R
 
     def get(self, request, *args, **kwargs):
         """Check the proposition to be OK with all validators."""
-        data = gather_business_exceptions(VerifierPropositionGeneraleCommand(uuid_proposition=str(kwargs["uuid"])))
-        return Response(data.get(api_settings.NON_FIELD_ERRORS_KEY, []), status=status.HTTP_200_OK)
+        admission = self.get_permission_object()
+        admission.update_detailed_status()
+
+        data = {'errors': admission.detailed_status}
+        error_codes = [e['status_code'] for e in data['errors']]
+        if PoolNonResidentContingenteNonOuvertException.status_code in error_codes:
+            # Pots contigenté non-ouvert
+            today = timezone.now().today()
+            period = (
+                AcademicCalendar.objects.filter(
+                    reference=AcademicCalendarTypes.ADMISSION_POOL_NON_RESIDENT_QUOTA.name,
+                    start_date__gte=today,
+                    end_date__gte=today,
+                )
+                .order_by('start_date')
+                .first()
+            )
+            data['pool_start_date'] = period.start_date
+            data['pool_end_date'] = period.end_date
+
+        self.add_access_conditions_url(data)
+        if not data['errors']:
+            cmd = RecupererElementsConfirmationGeneralQuery(self.kwargs['uuid'])
+            data['elements_confirmation'] = message_bus_instance.invoke(cmd)
+
+        return Response(PropositionErrorsSerializer(data).data, status=status.HTTP_200_OK)
 
     def post(self, request, *args, **kwargs):
         """Submit the proposition."""
-        proposition_id = message_bus_instance.invoke(
-            SoumettrePropositionGeneraleCommand(uuid_proposition=str(kwargs["uuid"]))
-        )
+        serializer = serializers.SubmitPropositionSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        cmd = SoumettrePropositionGeneraleCommand(**serializer.data, uuid_proposition=str(kwargs['uuid']))
+        proposition_id = message_bus_instance.invoke(cmd)
+        valuate_experiences(self.get_permission_object())
         serializer = serializers.PropositionIdentityDTOSerializer(instance=proposition_id)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -203,7 +329,8 @@ class SubmitGeneralEducationPropositionView(APIPermissionRequiredMixin, mixins.R
 class SubmitContinuingEducationPropositionSchema(VerifySchema):
     response_description = "Proposition verification errors"
     serializer_mapping = {
-        'POST': serializers.PropositionIdentityDTOSerializer,
+        'GET': serializers.PropositionErrorsSerializer,
+        'POST': (serializers.SubmitPropositionSerializer, serializers.PropositionIdentityDTOSerializer),
     }
 
     def get_operation_id(self, path, method):
@@ -212,11 +339,14 @@ class SubmitContinuingEducationPropositionSchema(VerifySchema):
         )
 
 
-class SubmitContinuingEducationPropositionView(APIPermissionRequiredMixin, mixins.RetrieveModelMixin, GenericAPIView):
+class SubmitContinuingEducationPropositionView(
+    SubmitPropositionMixin,
+    APIPermissionRequiredMixin,
+    mixins.RetrieveModelMixin,
+    GenericAPIView,
+):
     name = "submit-continuing-proposition"
     schema = SubmitContinuingEducationPropositionSchema()
-    pagination_class = None
-    filter_backends = []
     permission_mapping = {
         'GET': 'admission.submit_continuingeducationadmission',
         'POST': 'admission.submit_continuingeducationadmission',
@@ -227,13 +357,22 @@ class SubmitContinuingEducationPropositionView(APIPermissionRequiredMixin, mixin
 
     def get(self, request, *args, **kwargs):
         """Check the proposition to be OK with all validators."""
-        data = gather_business_exceptions(VerifierPropositionContinueCommand(uuid_proposition=str(kwargs["uuid"])))
-        return Response(data.get(api_settings.NON_FIELD_ERRORS_KEY, []), status=status.HTTP_200_OK)
+        admission = self.get_permission_object()
+        admission.update_detailed_status()
+
+        data = {'errors': admission.detailed_status}
+        self.add_access_conditions_url(data)
+        if not data['errors']:
+            cmd = RecupererElementsConfirmationContinueQuery(self.kwargs['uuid'])
+            data['elements_confirmation'] = message_bus_instance.invoke(cmd)
+        return Response(PropositionErrorsSerializer(data).data, status=status.HTTP_200_OK)
 
     def post(self, request, *args, **kwargs):
         """Submit the proposition."""
-        proposition_id = message_bus_instance.invoke(
-            SoumettrePropositionContinueCommand(uuid_proposition=str(kwargs["uuid"]))
-        )
+        serializer = serializers.SubmitPropositionSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        cmd = SoumettrePropositionContinueCommand(**serializer.data, uuid_proposition=str(kwargs['uuid']))
+        proposition_id = message_bus_instance.invoke(cmd)
+        valuate_experiences(self.get_permission_object())
         serializer = serializers.PropositionIdentityDTOSerializer(instance=proposition_id)
         return Response(serializer.data, status=status.HTTP_200_OK)

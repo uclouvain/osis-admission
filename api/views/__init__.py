@@ -40,6 +40,7 @@ from admission.api.views.person import (
     ContinuingPersonView,
 )
 from admission.api.views.project import *
+from admission.api.views.pool_questions import PoolQuestionsView
 from admission.api.views.submission import *
 from admission.api.views.supervision import *
 from admission.api.views.signatures import RequestSignaturesAPIView
@@ -47,11 +48,12 @@ from admission.api.views.approvals import *
 from admission.api.views.confirmation import *
 from admission.api.views.doctorate import DoctorateAPIView
 from admission.api.views.training import *
-from admission.api.views.accounting import AccountingView
+from admission.api.views.accounting import DoctorateAccountingView, GeneralAccountingView, ContinuingAccountingView
 from admission.api.views.references import RetrieveScholarshipView, RetrieveCampusView, ListCampusView
 from admission.api.views.training_choice import (
     ContinuingTrainingChoiceAPIView,
     ContinuingUpdateTrainingChoiceAPIView,
+    DoctorateTrainingChoiceAPIView,
     DoctorateUpdateAdmissionTypeAPIView,
     GeneralTrainingChoiceAPIView,
     GeneralUpdateTrainingChoiceAPIView,

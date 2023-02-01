@@ -24,21 +24,22 @@
 #
 # ##############################################################################
 import rules
-from rules import RuleSet
 from django.utils.translation import gettext_lazy as _
+from rules import RuleSet
 
+from admission.auth.predicates import is_debug
 from osis_role.contrib.models import RoleModel
 
 
 class SicManager(RoleModel):
     class Meta:
-        verbose_name = _("SIC manager")
-        verbose_name_plural = _("SIC managers")
+        verbose_name = _("Role: SIC manager")
+        verbose_name_plural = _("Role: SIC managers")
         group_name = "sic_managers"
 
     @classmethod
     def rule_set(cls):
-        return RuleSet({
+        ruleset = {
             'admission.change_doctorateadmission': rules.always_allow,
             'admission.delete_doctorateadmission': rules.always_deny,
             'admission.view_doctorateadmission': rules.always_allow,
@@ -59,4 +60,6 @@ class SicManager(RoleModel):
             'admission.add_supervision_member': rules.always_allow,
             'admission.remove_supervision_member': rules.always_allow,
             'admission.view_internalnote': rules.always_allow,
-        })
+            'admission.view_debug_info': is_debug,
+        }
+        return RuleSet(ruleset)

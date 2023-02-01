@@ -1,4 +1,4 @@
-##############################################################################
+# ##############################################################################
 #
 #    OSIS stands for Open Student Information System. It's an application
 #    designed to manage the core business of higher education institutions,
@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -22,18 +22,15 @@
 #    at the root of the source code of this program.  If not,
 #    see http://www.gnu.org/licenses/.
 #
-##############################################################################
-from typing import List
+# ##############################################################################
+from abc import abstractmethod
 
-from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition
-from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import MaximumPropositionsAtteintException
+from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition
 from osis_common.ddd import interface
 
-MAXIMUM_AUTORISE = 1
 
-
-class MaximumPropositionAutorisee(interface.DomainService):
+class INotification(interface.DomainService):
     @classmethod
-    def verifier(cls, propositions_candidat: List['Proposition']) -> None:
-        if len([prop for prop in propositions_candidat if prop.est_en_cours()]) >= MAXIMUM_AUTORISE:
-            raise MaximumPropositionsAtteintException()
+    @abstractmethod
+    def confirmer_soumission(cls, proposition: Proposition) -> None:
+        raise NotImplementedError

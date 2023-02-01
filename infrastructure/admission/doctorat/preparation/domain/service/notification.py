@@ -38,12 +38,12 @@ from admission.contrib.models.doctorate import PropositionProxy
 from admission.contrib.models.enums.actor_type import ActorType
 from admission.ddd.admission.doctorat.preparation.domain.model._membre_CA import MembreCAIdentity
 from admission.ddd.admission.doctorat.preparation.domain.model._promoteur import PromoteurIdentity
-from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import DoctoratIdentity
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixEtatSignature
 from admission.ddd.admission.doctorat.preparation.domain.model.groupe_de_supervision import GroupeDeSupervision
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition
 from admission.ddd.admission.doctorat.preparation.domain.service.i_notification import INotification
 from admission.ddd.admission.doctorat.preparation.dtos import AvisDTO
+from admission.ddd.admission.domain.model.formation import FormationIdentity
 from admission.infrastructure.admission.doctorat.preparation.domain.service.doctorat import DoctoratTranslator
 from admission.mail_templates import (
     ADMISSION_EMAIL_MEMBER_REMOVED,
@@ -51,7 +51,7 @@ from admission.mail_templates import (
     ADMISSION_EMAIL_SIGNATURE_REFUSAL,
     ADMISSION_EMAIL_SIGNATURE_REQUESTS_ACTOR,
     ADMISSION_EMAIL_SIGNATURE_REQUESTS_CANDIDATE,
-    ADMISSION_EMAIL_SUBMISSION_CANDIDATE,
+    ADMISSION_EMAIL_CONFIRM_SUBMISSION_DOCTORATE,
     ADMISSION_EMAIL_SUBMISSION_CDD,
     ADMISSION_EMAIL_SUBMISSION_MEMBER,
 )
@@ -65,7 +65,7 @@ from osis_signature.enums import SignatureState
 
 class Notification(INotification):
     @classmethod
-    def _get_doctorate_title_translation(cls, doctorat_id: DoctoratIdentity):
+    def _get_doctorate_title_translation(cls, doctorat_id: 'FormationIdentity'):
         """Populate the translations of doctorate title and lazy return them"""
         # Create a dict to cache the translations of the doctorate title
         doctorate_title = {}
@@ -79,11 +79,11 @@ class Notification(INotification):
     @classmethod
     def get_common_tokens(cls, proposition, candidat):
         """Return common tokens about a submission"""
-        frontend_link = settings.ADMISSION_FRONTEND_LINK.format(uuid=proposition.entity_id.uuid)
+        frontend_link = settings.ADMISSION_FRONTEND_LINK.format(context='doctorate', uuid=proposition.entity_id.uuid)
         return {
             "candidate_first_name": candidat.first_name,
             "candidate_last_name": candidat.last_name,
-            "doctorate_title": cls._get_doctorate_title_translation(proposition.doctorat_id),
+            "training_title": cls._get_doctorate_title_translation(proposition.formation_id),
             "admission_link_front": frontend_link,
             "admission_link_front_supervision": "{}supervision".format(frontend_link),
             "admission_link_back": "{}{}".format(
@@ -129,7 +129,7 @@ class Notification(INotification):
                     _(
                         '<a href="%(admission_link_back)s">%(reference)s</a> - '
                         '%(candidate_first_name)s %(candidate_last_name)s requested '
-                        'signatures for %(doctorate_title)s'
+                        'signatures for %(training_title)s'
                     )
                     % common_tokens
                 )
@@ -258,7 +258,7 @@ class Notification(INotification):
         # Notifier le doctorant via mail
         common_tokens = cls.get_common_tokens(proposition, candidat)
         email_message = generate_email(
-            ADMISSION_EMAIL_SUBMISSION_CANDIDATE,
+            ADMISSION_EMAIL_CONFIRM_SUBMISSION_DOCTORATE,
             candidat.language,
             common_tokens,
             recipients=[candidat],
@@ -287,7 +287,7 @@ class Notification(INotification):
                     _(
                         '<a href="%(admission_link_back)s">%(reference)s</a> - '
                         '%(candidate_first_name)s %(candidate_last_name)s '
-                        'submitted request for %(doctorate_title)s'
+                        'submitted request for %(training_title)s'
                     )
                     % common_tokens
                 )

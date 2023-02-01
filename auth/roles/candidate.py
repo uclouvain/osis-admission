@@ -1,26 +1,26 @@
 # ##############################################################################
 #
-#    OSIS stands for Open Student Information System. It's an application
-#    designed to manage the core business of higher education institutions,
-#    such as universities, faculties, institutes and professional schools.
-#    The core business involves the administration of students, teachers,
-#    courses, programs and so on.
+#  OSIS stands for Open Student Information System. It's an application
+#  designed to manage the core business of higher education institutions,
+#  such as universities, faculties, institutes and professional schools.
+#  The core business involves the administration of students, teachers,
+#  courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
 #
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
 #
-#    A copy of this license - GNU General Public License - is available
-#    at the root of the source code of this program.  If not,
-#    see http://www.gnu.org/licenses/.
+#  A copy of this license - GNU General Public License - is available
+#  at the root of the source code of this program.  If not,
+#  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
 from rules import RuleSet
@@ -39,17 +39,18 @@ from admission.auth.predicates import (
 )
 from osis_role.contrib.models import RoleModel
 
+
 author_and_enrolled = is_admission_request_author & is_enrolled
 
 _CANDIDATE_RULESET = {
     # Doctorate
     # A candidate can view as long as it's the author
     'view_doctorateadmission': is_admission_request_author,
-    'view_doctorateadmission_training_choice': is_admission_request_author,
     'view_doctorateadmission_project': is_admission_request_author,
     'view_doctorateadmission_cotutelle': is_admission_request_author,
     'view_doctorateadmission_supervision': is_admission_request_author,
     # A candidate can view as long as he's the author and he is being enrolled
+    'view_doctorateadmission_training_choice': is_admission_request_author & in_progress,
     'view_doctorateadmission_person': is_admission_request_author & is_being_enrolled,
     'view_doctorateadmission_coordinates': is_admission_request_author & is_being_enrolled,
     'view_doctorateadmission_curriculum': is_admission_request_author & is_being_enrolled,
@@ -76,7 +77,7 @@ _CANDIDATE_RULESET = {
     'set_reference_promoter': is_admission_request_author & unconfirmed_proposition,
     # Once supervision group is signing, he can
     'approve_proposition_by_pdf': is_admission_request_author & signing_in_progress,
-    'submit_doctorateadmission': is_admission_request_author & signing_in_progress,
+    'submit_doctorateadmission': is_admission_request_author & unconfirmed_proposition,
     # Once the candidate is enrolling, he can
     'view_doctorateadmission_confirmation': author_and_enrolled,
     'view_doctoral_training': author_and_enrolled & ~is_pre_admission,
@@ -114,6 +115,7 @@ _CANDIDATE_RULESET = {
     'change_generaleducationadmission_languages': is_admission_request_author & in_progress,
     'change_generaleducationadmission_accounting': is_admission_request_author & in_progress,
     'change_generaleducationadmission_specific_question': is_admission_request_author & in_progress,
+    'change_generaleducationadmission': is_admission_request_author & in_progress,
     'delete_generaleducationadmission': is_admission_request_author & in_progress,
     'submit_generaleducationadmission': is_admission_request_author & in_progress,
     # Continuing admission
@@ -142,8 +144,8 @@ _CANDIDATE_RULESET = {
 
 class Candidate(RoleModel):
     class Meta:
-        verbose_name = _("Candidate")
-        verbose_name_plural = _("Candidates")
+        verbose_name = _("Role: Candidate")
+        verbose_name_plural = _("Role: Candidates")
         group_name = "candidates"
 
     @classmethod

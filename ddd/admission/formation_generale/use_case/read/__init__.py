@@ -23,7 +23,11 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from .rechercher_formations_service import rechercher_formations
+from .determiner_annee_academique_et_pot_service import determiner_annee_academique_et_pot
 from .lister_propositions_candidat_service import lister_propositions_candidat
+from .rechercher_formations_service import rechercher_formations, rechercher_formations
+from .recuperer_comptabilite_service import recuperer_comptabilite
+from .recuperer_elements_confirmation_service import recuperer_elements_confirmation
 from .recuperer_proposition_service import recuperer_proposition
+from .verifier_curriculum_service import verifier_curriculum
 from .verifier_proposition_service import verifier_proposition

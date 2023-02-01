@@ -1,3 +1,28 @@
+##############################################################################
+#
+#    OSIS stands for Open Student Information System. It's an application
+#    designed to manage the core business of higher education institutions,
+#    such as universities, faculties, institutes and professional schools.
+#    The core business involves the administration of students, teachers,
+#    courses, programs and so on.
+#
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    A copy of this license - GNU General Public License - is available
+#    at the root of the source code of this program.  If not,
+#    see http://www.gnu.org/licenses/.
+#
+##############################################################################
 import uuid
 
 from django.contrib.postgres.aggregates import StringAgg
@@ -7,7 +32,13 @@ from django.db import models
 from django.db.models import OuterRef, Subquery
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+
+from admission.ddd.admission.enums.type_demande import TypeDemande
+from base.models.academic_calendar import AcademicCalendar
+from base.models.entity_version import EntityVersion
+from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from osis_document.contrib import FileField
 
 from admission.contrib.models.form_item import ConfigurableModelFormItemField
@@ -18,6 +49,9 @@ from base.models.education_group_year import EducationGroupYear
 from base.models.enums.education_group_categories import Categories
 from base.models.person import Person
 from program_management.models.education_group_version import EducationGroupVersion
+
+
+REFERENCE_SEQ_NAME = 'admission_baseadmission_reference_seq'
 
 
 def admission_directory_path(admission: 'BaseAdmission', filename: str):
@@ -43,22 +77,31 @@ class BaseAdmission(models.Model):
         on_delete=models.PROTECT,
         editable=False,
     )
+    type_demande = models.CharField(
+        verbose_name=_("Type"),
+        max_length=255,
+        choices=TypeDemande.choices(),
+        db_index=True,
+        default=TypeDemande.ADMISSION.name,
+    )
     comment = models.TextField(
         default='',
         verbose_name=_("Comment"),
         blank=True,
     )
 
-    created = models.DateTimeField(verbose_name=_('Created'), auto_now_add=True)
-    modified = models.DateTimeField(verbose_name=_('Modified'), auto_now=True)
+    created_at = models.DateTimeField(verbose_name=_('Created'), auto_now_add=True)
+    modified_at = models.DateTimeField(verbose_name=_('Modified'), auto_now=True)
 
     professional_valuated_experiences = models.ManyToManyField(
         'osis_profile.ProfessionalExperience',
+        blank=True,
         related_name='valuated_from_admission',
         verbose_name=_('The professional experiences that have been valuated from this admission.'),
     )
     educational_valuated_experiences = models.ManyToManyField(
         'osis_profile.EducationalExperience',
+        blank=True,
         related_name='valuated_from_admission',
         verbose_name=_('The educational experiences that have been valuated from this admission.'),
     )
@@ -72,6 +115,19 @@ class BaseAdmission(models.Model):
         verbose_name=_("Training"),
         related_name="+",
         on_delete=models.CASCADE,
+    )
+    determined_academic_year = models.ForeignKey(
+        to="base.AcademicYear",
+        related_name="+",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+    )
+    determined_pool = models.CharField(
+        choices=AcademicCalendarTypes.choices(),
+        max_length=70,
+        null=True,
+        blank=True,
     )
 
     specific_question_answers = ConfigurableModelFormItemField(
@@ -88,10 +144,48 @@ class BaseAdmission(models.Model):
         upload_to=admission_directory_path,
         verbose_name=_('Curriculum'),
     )
+    valuated_secondary_studies_person = models.OneToOneField(
+        to='base.Person',
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+        verbose_name=_('The person whose the secondary studies have been valuated by this admission'),
+    )
+
+    confirmation_elements = models.JSONField(
+        blank=True,
+        default=dict,
+        encoder=DjangoJSONEncoder,
+    )
+    submitted_at = models.DateTimeField(
+        verbose_name=_("Submission date"),
+        null=True,
+    )
+
+    reference = models.BigIntegerField(
+        verbose_name=_("Reference"),
+        unique=True,
+        editable=False,
+        null=True,
+    )
+
+    class Meta:
+        constraints = [
+            models.CheckConstraint(
+                check=models.Q(
+                    # Only the candidate can be valuated
+                    valuated_secondary_studies_person_id=models.F("candidate_id"),
+                ),
+                name='only_candidate_can_be_valuated',
+            ),
+        ]
 
     def save(self, *args, **kwargs) -> None:
         super().save(*args, **kwargs)
         cache.delete('admission_permission_{}'.format(self.uuid))
+
+    def __str__(self):
+        return '{:07,}'.format(self.reference).replace(',', '.')
 
 
 @receiver(post_save, sender=EducationGroupYear)
@@ -133,5 +227,26 @@ class BaseAdmissionQuerySet(models.QuerySet):
                     )
                 )
                 .values('campus_name')[:1]
+            ),
+        )
+
+    def annotate_pool_end_date(self):
+        today = timezone.now().today()
+        return self.annotate(
+            pool_end_date=models.Subquery(
+                AcademicCalendar.objects.filter(
+                    reference=OuterRef('determined_pool'),
+                    start_date__lte=today,
+                    end_date__gte=today,
+                ).values('end_date')[:1],
+            ),
+        )
+
+    def annotate_training_management_entity(self):
+        return self.annotate(
+            sigle_entite_gestion=models.Subquery(
+                EntityVersion.objects.filter(entity_id=OuterRef("training__management_entity_id"))
+                .order_by('-start_date')
+                .values("acronym")[:1]
             )
         )

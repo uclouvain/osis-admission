@@ -24,7 +24,7 @@
 #
 # ##############################################################################
 import datetime
-from typing import List, Optional, Tuple, Union
+from typing import List, Optional, Tuple, Union, Dict
 
 import attr
 
@@ -39,6 +39,16 @@ from admission.ddd.admission.doctorat.preparation.domain.model._promoteur import
 from admission.ddd.admission.doctorat.preparation.domain.model._signature_promoteur import SignaturePromoteur
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixDoctoratDejaRealise, ChoixTypeAdmission
 from admission.ddd.admission.doctorat.preparation.domain.validator import *
+from admission.ddd.admission.doctorat.preparation.dtos.curriculum import ExperienceAcademiqueDTO
+from admission.ddd.admission.domain.validator import (
+    ShouldAnneesCVRequisesCompletees,
+    ShouldAbsenceDeDetteEtreCompletee,
+    ShouldIBANCarteBancaireRemboursementEtreCompletee,
+    ShouldAutreFormatCarteBancaireRemboursementEtreCompletee,
+    ShouldExperiencesAcademiquesEtreCompletees,
+    ShouldTypeCompteBancaireRemboursementEtreComplete,
+    ShouldAssimilationEtreCompletee,
+)
 from base.ddd.utils.business_validator import BusinessValidator, TwoStepsMultipleBusinessExceptionListValidator
 
 
@@ -233,10 +243,10 @@ class CurriculumValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
     fichier_pdf: List[str]
     annee_courante: int
     annee_derniere_inscription_ucl: Optional[int]
-    annee_diplome_etudes_secondaires_belges: Optional[int]
-    annee_diplome_etudes_secondaires_etrangeres: Optional[int]
+    annee_diplome_etudes_secondaires: Optional[int]
     dates_experiences_non_academiques: List[Tuple[datetime.date, datetime.date]]
-    annees_experiences_academiques: List[int]
+    experiences_academiques: List[ExperienceAcademiqueDTO]
+    experiences_academiques_incompletes: Dict[str, str]
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
@@ -246,12 +256,15 @@ class CurriculumValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
             ShouldCurriculumFichierEtreSpecifie(
                 fichier_pdf=self.fichier_pdf,
             ),
+            ShouldExperiencesAcademiquesEtreCompletees(
+                experiences_academiques_incompletes=self.experiences_academiques_incompletes,
+            ),
             ShouldAnneesCVRequisesCompletees(
                 annee_courante=self.annee_courante,
-                annees_experiences_academiques=self.annees_experiences_academiques,
+                experiences_academiques=self.experiences_academiques,
+                experiences_academiques_incompletes=self.experiences_academiques_incompletes,
                 annee_derniere_inscription_ucl=self.annee_derniere_inscription_ucl,
-                annee_diplome_etudes_secondaires_belges=self.annee_diplome_etudes_secondaires_belges,
-                annee_diplome_etudes_secondaires_etrangeres=self.annee_diplome_etudes_secondaires_etrangeres,
+                annee_diplome_etudes_secondaires=self.annee_diplome_etudes_secondaires,
                 dates_experiences_non_academiques=self.dates_experiences_non_academiques,
             ),
         ]
@@ -267,7 +280,6 @@ class ComptabiliteValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
         return []
 
     def get_invariants_validators(self) -> List[BusinessValidator]:
-        demande_allocation_etudes_fr_be = self.comptabilite.demande_allocation_d_etudes_communaute_francaise_belgique
         return [
             ShouldAbsenceDeDetteEtreCompletee(
                 attestation_absence_dette_etablissement=self.comptabilite.attestation_absence_dette_etablissement,
@@ -275,18 +287,15 @@ class ComptabiliteValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
                     self.a_frequente_recemment_etablissement_communaute_fr
                 ),
             ),
-            ShouldReductionDesDroitsInscriptionEtreCompletee(
-                demande_allocation_d_etudes_communaute_francaise_belgique=demande_allocation_etudes_fr_be,
-                enfant_personnel=self.comptabilite.enfant_personnel,
-                attestation_enfant_personnel=self.comptabilite.attestation_enfant_personnel,
-            ),
             ShouldAssimilationEtreCompletee(
                 pays_nationalite_ue=self.pays_nationalite_ue,
                 comptabilite=self.comptabilite,
             ),
             ShouldAffiliationsEtreCompletees(
-                affiliation_sport=self.comptabilite.affiliation_sport,
                 etudiant_solidaire=self.comptabilite.etudiant_solidaire,
+            ),
+            ShouldTypeCompteBancaireRemboursementEtreComplete(
+                type_numero_compte=self.comptabilite.type_numero_compte,
             ),
             ShouldIBANCarteBancaireRemboursementEtreCompletee(
                 type_numero_compte=self.comptabilite.type_numero_compte,

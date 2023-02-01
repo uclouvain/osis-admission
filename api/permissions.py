@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,31 +23,22 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from django.utils.translation import gettext_lazy as _
 from rest_framework.permissions import BasePermission, SAFE_METHODS
 
-from admission.contrib.models import DoctorateAdmission, SupervisionActor
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutProposition
-from admission.ddd.admission.doctorat.preparation.domain.service.initier_proposition import MAXIMUM_AUTORISE
+from admission.contrib.models import SupervisionActor
+from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import MaximumPropositionsAtteintException
+from admission.infrastructure.admission.domain.service.maximum_propositions import MaximumPropositionsAutorisees
 
 
 class IsSelfPersonTabOrTabPermission(BasePermission):
-    def __init__(self, permission_suffix) -> None:
+    def __init__(self, permission_suffix, can_edit=False) -> None:
         super().__init__()
         self.permission_suffix = permission_suffix
+        self.can_edit = can_edit
 
     def has_permission(self, request, view):
         # No object means we are reading/editing our own profile.
-        # This is only allowed if the user does not have an admission in progress.
-        if not hasattr(request.user.person, 'has_ongoing_propositions'):
-            setattr(
-                request.user.person,
-                'has_ongoing_propositions',
-                DoctorateAdmission.objects.filter(candidate=request.user.person)
-                .exclude(status__in=[ChoixStatutProposition.CANCELLED.name, ChoixStatutProposition.IN_PROGRESS.name])
-                .exists(),
-            )
-        return not request.user.person.has_ongoing_propositions
+        return request.method in SAFE_METHODS or self.can_edit
 
     def has_object_permission(self, request, view, obj):
         if request.method in SAFE_METHODS:
@@ -57,31 +48,19 @@ class IsSelfPersonTabOrTabPermission(BasePermission):
         return request.user.has_perm(permission, obj)
 
 
-class IsListingOrHasNotAlreadyCreatedForDoctoratePermission(BasePermission):
-    message = _(
-        'You already have a doctorate admission in progress, please delete it before creating a newer one, '
-        'or contact your domain doctoral committee.'
-    )
+class IsListingOrHasNotAlreadyCreatedPermission(BasePermission):
+    def __init__(self):
+        self.message = ''
 
     def has_permission(self, request, view):
         # No object means we are either listing or creating a new admission
         if request.method in SAFE_METHODS:
             return True
-        admission_count = (
-            DoctorateAdmission.objects.filter(candidate=request.user.person)
-            .exclude(status=ChoixStatutProposition.CANCELLED.name)
-            .count()
-        )
-        return admission_count < MAXIMUM_AUTORISE
-
-
-class IsListingOrHasNotAlreadyCreatedForGeneralEducationPermission(BasePermission):
-    def has_permission(self, request, view):
-        return True
-
-
-class IsListingOrHasNotAlreadyCreatedForContinuingEducationPermission(BasePermission):
-    def has_permission(self, request, view):
+        try:
+            MaximumPropositionsAutorisees.verifier_nombre_propositions_en_cours(request.user.person.global_id)
+        except MaximumPropositionsAtteintException as e:
+            self.message = e.message
+            return False
         return True
 
 

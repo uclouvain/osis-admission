@@ -1,26 +1,26 @@
 # ##############################################################################
 #
-#    OSIS stands for Open Student Information System. It's an application
-#    designed to manage the core business of higher education institutions,
-#    such as universities, faculties, institutes and professional schools.
-#    The core business involves the administration of students, teachers,
-#    courses, programs and so on.
+#  OSIS stands for Open Student Information System. It's an application
+#  designed to manage the core business of higher education institutions,
+#  such as universities, faculties, institutes and professional schools.
+#  The core business involves the administration of students, teachers,
+#  courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
 #
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
 #
-#    A copy of this license - GNU General Public License - is available
-#    at the root of the source code of this program.  If not,
-#    see http://www.gnu.org/licenses/.
+#  A copy of this license - GNU General Public License - is available
+#  at the root of the source code of this program.  If not,
+#  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
 from datetime import date
@@ -32,10 +32,10 @@ from django.db.models import OuterRef, Subquery
 from django.utils.translation import get_language
 
 from admission.auth.roles.candidate import Candidate
-from admission.contrib.models import Accounting, DoctorateAdmission, Scholarship
-from admission.contrib.models.doctorate import PropositionProxy, REFERENCE_SEQ_NAME
+from admission.contrib.models import Accounting, DoctorateAdmission
+from admission.contrib.models.doctorate import PropositionProxy
+from admission.contrib.models.base import REFERENCE_SEQ_NAME
 from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import PropositionIdentityBuilder
-from admission.ddd.admission.domain.model.bourse import BourseIdentity
 from admission.ddd.admission.doctorat.preparation.domain.model._detail_projet import (
     DetailProjet,
 )
@@ -47,9 +47,6 @@ from admission.ddd.admission.doctorat.preparation.domain.model._financement impo
 )
 from admission.ddd.admission.doctorat.preparation.domain.model._institut import (
     InstitutIdentity,
-)
-from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import (
-    DoctoratIdentity,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     BourseRecherche,
@@ -77,13 +74,18 @@ from admission.ddd.admission.doctorat.preparation.dtos import (
 from admission.ddd.admission.doctorat.preparation.repository.i_proposition import (
     IPropositionRepository,
 )
+from admission.ddd.admission.domain.model.bourse import BourseIdentity
+from admission.ddd.admission.domain.model.formation import FormationIdentity
+from admission.ddd.admission.repository.i_proposition import formater_reference
 from admission.infrastructure.admission.doctorat.preparation.repository._comptabilite import (
     get_accounting_from_admission,
-    get_dto_accounting_from_admission,
 )
 from admission.infrastructure.admission.domain.service.bourse import BourseTranslator
+from admission.infrastructure.admission.repository.proposition import GlobalPropositionRepository
+from base.models.academic_year import AcademicYear
 from base.models.education_group_year import EducationGroupYear
 from base.models.entity_version import EntityVersion
+from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.person import Person
 from osis_common.ddd.interface import ApplicationService
 
@@ -100,7 +102,9 @@ def _instantiate_admission(admission: 'DoctorateAdmission') -> 'Proposition':
         entity_id=PropositionIdentityBuilder().build_from_uuid(admission.uuid),
         commission_proximite=commission_proximite,
         type_admission=ChoixTypeAdmission[admission.type],
-        doctorat_id=DoctoratIdentity(admission.doctorate.acronym, admission.doctorate.academic_year.year),
+        formation_id=FormationIdentity(admission.doctorate.acronym, admission.doctorate.academic_year.year),
+        annee_calculee=admission.determined_academic_year and admission.determined_academic_year.year,
+        pot_calcule=admission.determined_pool and AcademicCalendarTypes[admission.determined_pool],
         matricule_candidat=admission.candidate.global_id,
         reference=admission.reference,
         projet=DetailProjet(
@@ -141,11 +145,12 @@ def _instantiate_admission(admission: 'DoctorateAdmission') -> 'Proposition':
             date_soutenance=admission.phd_already_done_defense_date,
             raison_non_soutenue=admission.phd_already_done_no_defense_reason,
         ),
-        creee_le=admission.created,
-        modifiee_le=admission.modified,
+        creee_le=admission.created_at,
+        modifiee_le=admission.modified_at,
         comptabilite=get_accounting_from_admission(admission=admission),
         reponses_questions_specifiques=admission.specific_question_answers,
         curriculum=admission.curriculum,
+        elements_confirmation=admission.confirmation_elements,
     )
 
 
@@ -159,7 +164,7 @@ def load_admissions(matricule: Optional[str] = None, ids: Optional[List[str]] = 
     return [_instantiate_admission(a) for a in qs]
 
 
-class PropositionRepository(IPropositionRepository):
+class PropositionRepository(GlobalPropositionRepository, IPropositionRepository):
     @classmethod
     def get(cls, entity_id: 'PropositionIdentity') -> 'Proposition':
         try:
@@ -185,12 +190,6 @@ class PropositionRepository(IPropositionRepository):
         raise NotImplementedError
 
     @classmethod
-    def get_next_reference(cls) -> int:
-        cursor = connection.cursor()
-        cursor.execute("SELECT NEXTVAL('%(sequence)s')" % {'sequence': REFERENCE_SEQ_NAME})
-        return cursor.fetchone()[0]
-
-    @classmethod
     def save(cls, entity: 'Proposition') -> None:
         doctorate = EducationGroupYear.objects.get(
             acronym=entity.sigle_formation,
@@ -207,6 +206,10 @@ class PropositionRepository(IPropositionRepository):
                 'candidate': candidate,
                 'proximity_commission': entity.commission_proximite and entity.commission_proximite.name or '',
                 'doctorate': doctorate,
+                'determined_academic_year': (
+                    entity.annee_calculee and AcademicYear.objects.get(year=entity.annee_calculee)
+                ),
+                'determined_pool': entity.pot_calcule and entity.pot_calcule.name,
                 'financing_type': entity.financement.type and entity.financement.type.name or '',
                 'financing_work_contract': entity.financement.type_contrat_travail,
                 'financing_eft': entity.financement.eft,
@@ -242,21 +245,21 @@ class PropositionRepository(IPropositionRepository):
                 and entity.bourse_erasmus_mundus_id.uuid,
                 'specific_question_answers': entity.reponses_questions_specifiques,
                 'curriculum': entity.curriculum,
+                'confirmation_elements': entity.elements_confirmation,
             },
         )
         Candidate.objects.get_or_create(person=candidate)
 
-        fr_study_allowance_application = entity.comptabilite.demande_allocation_d_etudes_communaute_francaise_belgique
+        cls._sauvegarder_comptabilite(admission, entity)
+
+    @classmethod
+    def _sauvegarder_comptabilite(cls, admission: DoctorateAdmission, entity: Proposition):
         unemployment_benefit_pension_proof = entity.comptabilite.preuve_allocations_chomage_pension_indemnite
         parent_annex_25_26 = entity.comptabilite.annexe_25_26_refugies_apatrides_decision_protection_parent
-
         Accounting.objects.update_or_create(
             admission=admission,
             defaults={
                 'institute_absence_debts_certificate': entity.comptabilite.attestation_absence_dette_etablissement,
-                'french_community_study_allowance_application': fr_study_allowance_application,
-                'is_staff_child': entity.comptabilite.enfant_personnel,
-                'staff_child_certificate': entity.comptabilite.attestation_enfant_personnel,
                 'assimilation_situation': entity.comptabilite.type_situation_assimilation.name
                 if entity.comptabilite.type_situation_assimilation
                 else '',
@@ -307,9 +310,6 @@ class PropositionRepository(IPropositionRepository):
                 'scholarship_certificate': entity.comptabilite.attestation_boursier,
                 'ue_long_term_stay_identity_document': entity.comptabilite.titre_identite_sejour_longue_duree_ue,
                 'belgium_residence_permit': entity.comptabilite.titre_sejour_belgique,
-                'sport_affiliation': entity.comptabilite.affiliation_sport.name
-                if entity.comptabilite.affiliation_sport
-                else '',
                 'solidarity_student': entity.comptabilite.etudiant_solidaire,
                 'account_number_type': entity.comptabilite.type_numero_compte.name
                 if entity.comptabilite.type_numero_compte
@@ -326,7 +326,7 @@ class PropositionRepository(IPropositionRepository):
     @classmethod
     def search_dto(
         cls,
-        numero: Optional[str] = '',
+        numero: Optional[int] = None,
         matricule_candidat: Optional[str] = '',
         etat: Optional[str] = '',
         nationalite: Optional[str] = '',
@@ -343,7 +343,7 @@ class PropositionRepository(IPropositionRepository):
         entity_ids: Optional[List['PropositionIdentity']] = None,
     ) -> List['PropositionDTO']:
         qs = PropositionProxy.objects.all()
-        if numero:
+        if numero is not None:
             qs = qs.filter(reference=numero)
         if matricule_candidat:
             qs = qs.filter(candidate__global_id=matricule_candidat)
@@ -397,7 +397,12 @@ class PropositionRepository(IPropositionRepository):
     def _load_dto(cls, admission: DoctorateAdmission) -> 'PropositionDTO':
         return PropositionDTO(
             uuid=admission.uuid,
-            reference=admission.reference,
+            reference=formater_reference(
+                reference=admission.reference,
+                nom_campus_inscription=admission.training.enrollment_campus.name,
+                sigle_entite_gestion=admission.sigle_entite_gestion,  # From annotation
+                annee=admission.training.academic_year.year,
+            ),
             type_admission=admission.type,
             doctorat=DoctoratDTO(
                 sigle=admission.doctorate.acronym,
@@ -410,14 +415,18 @@ class PropositionRepository(IPropositionRepository):
                 sigle_entite_gestion=admission.sigle_entite_gestion,  # from PropositionManager annotation
                 campus=admission.teaching_campus or '',  # from PropositionManager annotation
                 type=admission.doctorate.education_group_type.name,
+                campus_inscription=admission.doctorate.enrollment_campus.name,
             ),
+            annee_calculee=admission.determined_academic_year and admission.determined_academic_year.year,
+            pot_calcule=admission.determined_pool or '',
+            date_fin_pot=admission.pool_end_date,  # from annotation
             matricule_candidat=admission.candidate.global_id,
             prenom_candidat=admission.candidate.first_name,
             nom_candidat=admission.candidate.last_name,
             code_secteur_formation=admission.code_secteur_formation,  # from PropositionManager annotation
             intitule_secteur_formation=admission.intitule_secteur_formation,  # from PropositionManager annotation
             commission_proximite=admission.proximity_commission,
-            creee_le=admission.created,
+            creee_le=admission.created_at,
             statut=admission.status,
             justification=admission.comment,
             type_financement=admission.financing_type,
@@ -452,10 +461,9 @@ class PropositionRepository(IPropositionRepository):
                 admission.candidate.country_of_citizenship,
                 'name' if get_language() == settings.LANGUAGE_CODE else 'name_en',
             ),
-            modifiee_le=admission.modified,
+            modifiee_le=admission.modified_at,
             fiche_archive_signatures_envoyees=admission.archived_record_signatures_sent,
             erreurs=admission.detailed_status or [],
-            comptabilite=get_dto_accounting_from_admission(admission=admission),
             bourse_erasmus_mundus=BourseTranslator.build_dto(admission.erasmus_mundus_scholarship)
             if admission.erasmus_mundus_scholarship
             else None,

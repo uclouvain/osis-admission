@@ -28,7 +28,6 @@ from typing import Optional, Union
 from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import PropositionIdentityBuilder
 from admission.ddd.admission.doctorat.preparation.commands import InitierPropositionCommand
 from admission.ddd.admission.doctorat.preparation.domain.model._detail_projet import projet_non_rempli
-from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import DoctoratIdentity
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixCommissionProximiteCDEouCLSM,
     ChoixCommissionProximiteCDSS,
@@ -36,7 +35,6 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixStatutProposition,
     ChoixTypeAdmission,
 )
-from admission.ddd.admission.domain.service.i_bourse import IBourseTranslator
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import (
     Proposition,
 )
@@ -44,6 +42,8 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.validator_by_
     InitierPropositionValidatorList,
 )
 from admission.ddd.admission.doctorat.preparation.repository.i_proposition import IPropositionRepository
+from admission.ddd.admission.domain.model.formation import FormationIdentity
+from admission.ddd.admission.domain.service.i_bourse import IBourseTranslator
 from osis_common.ddd import interface
 
 
@@ -60,7 +60,7 @@ class PropositionBuilder(interface.RootEntityBuilder):
     def initier_proposition(
         cls,
         cmd: 'InitierPropositionCommand',
-        doctorat_id: 'DoctoratIdentity',
+        doctorat_id: 'FormationIdentity',
         proposition_repository: 'IPropositionRepository',
         bourse_translator: 'IBourseTranslator',
     ) -> 'Proposition':
@@ -77,10 +77,7 @@ class PropositionBuilder(interface.RootEntityBuilder):
             commission_proximite = ChoixCommissionProximiteCDSS[cmd.commission_proximite]
         elif cmd.commission_proximite and cmd.commission_proximite in ChoixSousDomaineSciences.get_names():
             commission_proximite = ChoixSousDomaineSciences[cmd.commission_proximite]
-        reference = "{}-{}".format(
-            doctorat_id.annee % 100,
-            Proposition.valeur_reference_base + proposition_repository.get_next_reference(),
-        )
+        reference = proposition_repository.recuperer_reference_suivante()
         bourse_erasmus = bourse_translator.get(cmd.bourse_erasmus_mundus) if cmd.bourse_erasmus_mundus else None
         return Proposition(
             entity_id=PropositionIdentityBuilder.build(),
@@ -88,7 +85,7 @@ class PropositionBuilder(interface.RootEntityBuilder):
             statut=ChoixStatutProposition.IN_PROGRESS,
             justification=cmd.justification,
             type_admission=ChoixTypeAdmission[cmd.type_admission],
-            doctorat_id=doctorat_id,
+            formation_id=doctorat_id,
             matricule_candidat=cmd.matricule_candidat,
             commission_proximite=commission_proximite,
             projet=projet_non_rempli,

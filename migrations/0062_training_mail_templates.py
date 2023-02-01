@@ -27,7 +27,7 @@ class Migration(migrations.Migration):
                 'en': '''<p>Hello,</p>
 
         <p>
-            {student_first_name} {student_last_name} have submitted new doctoral training activities {doctorate_title}, 
+            {student_first_name} {student_last_name} have submitted new doctoral training activities {training_title}, 
             you can review them by following this link: {admission_link_front_doctoral_training}.
         </p>
 
@@ -39,7 +39,7 @@ class Migration(migrations.Migration):
                 'fr-be': '''<p>Bonjour,</p>
 
         <p>
-            {student_first_name} {student_last_name} a soumis de nouvelles activités de formation doctorale pour son {doctorate_title},
+            {student_first_name} {student_last_name} a soumis de nouvelles activités de formation doctorale pour son {training_title},
             vous pouvez les consulter en suivant ce lien : {admission_link_front_doctoral_training}.
         </p>
 
@@ -60,7 +60,7 @@ class Migration(migrations.Migration):
                 'en': '''<p>Hello,</p>
 
         <p>
-            A submitted doctoral training activity for your {doctorate_title} has been refused, 
+            A submitted doctoral training activity for your {training_title} has been refused, 
             you can review all activities by following this link: {admission_link_front_doctoral_training}.
             
             Here's the reason for this refusal: {reason}
@@ -74,7 +74,7 @@ class Migration(migrations.Migration):
                 'fr-be': '''<p>Bonjour,</p>
 
         <p>
-            Un activité activité de formation doctorale soumis pour votre {doctorate_title} a été refusée,
+            Un activité activité de formation doctorale soumis pour votre {training_title} a été refusée,
             vous pouvez les consulter en suivant ce lien : {admission_link_front_doctoral_training}.
             
             La raison invoquée pour ce refus : {reason}
@@ -97,7 +97,7 @@ class Migration(migrations.Migration):
                 'en': '''<p>Hello,</p>
 
         <p>
-            A submitted doctoral training activity for {doctorate_title} must be updated, 
+            A submitted doctoral training activity for {training_title} must be updated, 
             you can review them by following this link: {admission_link_front_doctoral_training}.
             
             Here's  why it need to be updated: {reason}
@@ -111,7 +111,7 @@ class Migration(migrations.Migration):
                 'fr-be': '''<p>Bonjour,</p>
 
         <p>
-            Une activité de formation doctorale doit être mise à jour pour {doctorate_title},
+            Une activité de formation doctorale doit être mise à jour pour {training_title},
             vous pouvez les consulter en suivant ce lien : {admission_link_front_doctoral_training}.
 
             Voici ce pourquoi vous devez la modifier : {reason}
