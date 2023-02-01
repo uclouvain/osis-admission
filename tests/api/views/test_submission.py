@@ -51,6 +51,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
     EtudesSecondairesNonCompleteesException,
 )
+from admission.tests import QueriesAssertionsMixin
 from admission.tests.factories.calendar import AdmissionAcademicCalendarFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
 from admission.tests.factories.curriculum import (
@@ -70,7 +71,7 @@ from osis_profile.models import EducationalExperience, ProfessionalExperience
 
 
 @freezegun.freeze_time("1980-02-25")
-class GeneralPropositionSubmissionTestCase(APITestCase):
+class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
     @classmethod
     def setUpTestData(cls):
         AdmissionAcademicCalendarFactory.produce_all_required(quantity=6)
@@ -152,7 +153,8 @@ class GeneralPropositionSubmissionTestCase(APITestCase):
 
     def test_general_proposition_verification_ok(self):
         self.client.force_authenticate(user=self.candidate_ok.user)
-        response = self.client.get(self.ok_url)
+        with self.assertNumQueriesLessThan(61):
+            response = self.client.get(self.ok_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         ret = response.json()
         self.assertEqual(len(ret['errors']), 0)
