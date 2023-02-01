@@ -50,11 +50,13 @@ class CoordonneesTestCase(APITestCase):
             "residential": {'street': "Rue de la sobriété"},
             "contact": {},
             "phone_mobile": "",
+            "private_email": "joe.poe@example.be",
         }
         cls.updated_data_with_contact_address = {
             "residential": {'street': "Rue de la sobriété"},
             "contact": {'street': "Rue du pin"},
             "phone_mobile": "",
+            "private_email": "joe.poe@example.be",
         }
         cls.address = PersonAddressFactory(
             label=PersonAddressType.CONTACT.name,
@@ -64,6 +66,8 @@ class CoordonneesTestCase(APITestCase):
             label=PersonAddressType.CONTACT.name,
             street="Rue de la faim",
         )
+        cls.address.person.private_email = "john.doe@example.be"
+        cls.address.person.save()
         doctoral_commission = EntityFactory()
         promoter = PromoterFactory()
         cls.promoter_user = promoter.person.user
@@ -107,6 +111,7 @@ class CoordonneesTestCase(APITestCase):
         self.client.force_authenticate(self.candidate_user)
         response = self.client.get(self.admission_url)
         self.assertEqual(response.json()['contact']['street'], "Rue de la soif")
+        self.assertEqual(response.json()['private_email'], "john.doe@example.be")
         response = self.client.get(self.agnostic_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -124,6 +129,7 @@ class CoordonneesTestCase(APITestCase):
             label=PersonAddressType.RESIDENTIAL.name,
         )
         self.assertEqual(address.street, "Rue de la sobriété")
+        self.assertEqual(address.person.private_email, "joe.poe@example.be")
 
     def test_coordonnees_update_candidate_with_admission(self):
         self.client.force_authenticate(self.candidate_user)
@@ -134,6 +140,7 @@ class CoordonneesTestCase(APITestCase):
             label=PersonAddressType.RESIDENTIAL.name,
         )
         self.assertEqual(address.street, "Rue de la sobriété")
+        self.assertEqual(address.person.private_email, "joe.poe@example.be")
 
     def test_coordonnees_update_candidate_with_contact(self):
         self.client.force_authenticate(self.candidate_user)

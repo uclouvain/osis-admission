@@ -85,8 +85,10 @@ class AdressePersonnelle:
 
 @dataclass
 class CoordonneesCandidat:
-    domicile_legal: Optional[AdressePersonnelle]
-    adresse_correspondance = Optional[AdressePersonnelle]
+    personne: str
+    domicile_legal: Optional[AdressePersonnelle] = None
+    adresse_correspondance: Optional[AdressePersonnelle] = None
+    adresse_email_privee: str = ''
 
 
 @dataclass
@@ -152,6 +154,7 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
     annee_reference = 2020
     profil_candidats: List[_IdentificationDTO] = []
     adresses_candidats: List[AdressePersonnelle] = []
+    coordonnees_candidats: List[CoordonneesCandidat] = []
     langues: List[Langue] = []
     connaissances_langues: List[ConnaissanceLangue] = []
     diplomes_etudes_secondaires_belges: List[DiplomeEtudeSecondaire] = []
@@ -341,6 +344,24 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 lieu_dit='',
                 numero_rue='14',
                 boite_postale='B2',
+            ),
+        ]
+        cls.coordonnees_candidats = [
+            CoordonneesCandidat(
+                personne=cls.matricule_candidat,
+                domicile_legal=cls.adresses_candidats[0],
+                adresse_correspondance=cls.adresses_candidats[1],
+                adresse_email_privee='john.doe@example.be.',
+            ),
+            CoordonneesCandidat(
+                personne='0000000001',
+                domicile_legal=cls.adresses_candidats[2],
+                adresse_email_privee='john.doe@example.be.',
+            ),
+            CoordonneesCandidat(
+                personne='0000000002',
+                domicile_legal=cls.adresses_candidats[3],
+                adresse_email_privee='john.doe@example.be.',
             ),
         ]
         cls.langues = [
@@ -681,14 +702,17 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
 
     @classmethod
     def get_coordonnees(cls, matricule: str) -> 'CoordonneesDTO':
-        domicile_legal = next(
-            (a for a in cls.adresses_candidats if a.personne == matricule and a.type == 'RESIDENTIAL'),
+        coordonnees = next(
+            (coord for coord in cls.coordonnees_candidats if coord.personne == matricule),
             None,
         )
-        adresse_correspondance = next(
-            (a for a in cls.adresses_candidats if a.personne == matricule and a.type == 'CONTACT'),
-            None,
-        )
+
+        if not coordonnees:
+            return CoordonneesDTO(None, None)
+
+        domicile_legal = coordonnees.domicile_legal
+        adresse_correspondance = coordonnees.adresse_correspondance
+        adresse_email_privee = coordonnees.adresse_email_privee
 
         return CoordonneesDTO(
             domicile_legal=AdressePersonnelleDTO(
@@ -713,6 +737,7 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
             )
             if adresse_correspondance
             else None,
+            adresse_email_privee=adresse_email_privee,
         )
 
     @classmethod

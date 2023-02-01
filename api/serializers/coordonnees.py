@@ -8,7 +8,7 @@ from base.models.person_address import PersonAddress
 class CoordonneesSerializer(serializers.Serializer):
     contact = PersonAddressSerializer(allow_null=True)
     residential = PersonAddressSerializer(allow_null=True)
-    email = serializers.CharField(read_only=True)
+    private_email = serializers.EmailField(allow_blank=True)
     phone_mobile = serializers.CharField(allow_blank=True)
 
     def load_addresses(self, instance):
@@ -47,7 +47,9 @@ class CoordonneesSerializer(serializers.Serializer):
                 label=PersonAddressType.CONTACT.name,
             ).delete()
 
-        person.phone_mobile = validated_data["phone_mobile"]
-        person.save()
+        person_fields = ["phone_mobile", "private_email"]
+        for field in person_fields:
+            setattr(person, field, validated_data[field])
+        person.save(update_fields=person_fields)
         self.load_addresses(person)
         return person

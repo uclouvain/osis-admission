@@ -96,6 +96,7 @@ class ProfilCandidat(interface.DomainService):
         coordonnees = profil_candidat_translator.get_coordonnees(matricule)
 
         CoordonneesValidatorList(
+            adresse_email_privee=coordonnees.adresse_email_privee,
             domicile_legal=CandidatAdresse(
                 code_postal=coordonnees.domicile_legal.code_postal,
                 ville=coordonnees.domicile_legal.ville,

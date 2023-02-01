@@ -457,3 +457,11 @@ class TypeCompteBancaireRemboursementNonCompleteException(BusinessException):
             "Accounting' tab."
         )
         super().__init__(message, **kwargs)
+
+
+class CoordonneesNonCompleteesException(BusinessException):
+    status_code = "PROPOSITION-51"
+
+    def __init__(self, **kwargs):
+        message = _("Please fill in all the required information in the 'Personal Data > Coordinates' tab.")
+        super().__init__(message, **kwargs)

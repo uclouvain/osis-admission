@@ -232,7 +232,7 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
             self.assertIsInstance(context.exception.exceptions.pop(), CarteIdentiteeNonSpecifieeException)
 
     def test_should_retourner_erreur_si_adresse_domicile_legal_non_renseignee(self):
-        with mock.patch.object(self.adresse_domicile_legal, 'personne', 'unknown_user_id'):
+        with mock.patch.object(self.candidat_translator.coordonnees_candidats[0], 'domicile_legal', None):
             with self.assertRaises(MultipleBusinessExceptions) as context:
                 self.message_bus.invoke(self.cmd)
             self.assertIsInstance(context.exception.exceptions.pop(), AdresseDomicileLegalNonCompleteeException)

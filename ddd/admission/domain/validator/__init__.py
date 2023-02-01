@@ -33,6 +33,7 @@ from ._should_comptabilite_etre_completee import (
 from ._should_coordonnees_candidat_etre_completees import (
     ShouldAdresseCorrespondanceEtreCompleteeSiSpecifiee,
     ShouldAdresseDomicileLegalCandidatEtreCompletee,
+    ShouldAdresseEmailPriveeEtreCompletee,
 )
 from ._should_identification_candidat_etre_completee import (
     ShouldCandidatAuthentiquerIdentite,
@@ -61,6 +62,7 @@ __all__ = [
     "ShouldAdresseDomicileLegalCandidatEtreCompletee",
     "ShouldAdresseCorrespondanceEtreCompleteeSiSpecifiee",
     "ShouldAnneesCVRequisesCompletees",
+    "ShouldAdresseEmailPriveeEtreCompletee",
     "ShouldAssimilationEtreCompletee",
     "ShouldAbsenceDeDetteEtreCompletee",
     "ShouldAutreFormatCarteBancaireRemboursementEtreCompletee",
