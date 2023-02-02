@@ -31,7 +31,7 @@ import factory
 from dateutil.relativedelta import relativedelta
 
 from osis_profile.models import EducationalExperienceYear, ProfessionalExperience, EducationalExperience
-from osis_profile.models.enums.curriculum import TranscriptType, EvaluationSystem, Result, Grade
+from osis_profile.models.enums.curriculum import TranscriptType, EvaluationSystem, Result, Grade, ActivityType
 from reference.tests.factories.language import LanguageFactory
 
 
@@ -61,6 +61,7 @@ class EducationalExperienceFactory(factory.DjangoModelFactory):
     obtained_diploma = factory.Faker('boolean')
     evaluation_type = EvaluationSystem.NO_CREDIT_SYSTEM.name
     obtained_grade = Grade.GREAT_DISTINCTION.name
+    education_name = 'Computer science'
 
 
 class ProfessionalExperienceFactory(factory.DjangoModelFactory):
@@ -73,3 +74,4 @@ class ProfessionalExperienceFactory(factory.DjangoModelFactory):
     end_date = factory.LazyAttribute(
         lambda experience: experience.start_date + relativedelta(months=2) - relativedelta(days=1)
     )
+    type = ActivityType.WORK.name

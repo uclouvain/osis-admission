@@ -29,6 +29,7 @@ from base.models.person import Person
 from base.models.utils.utils import ChoiceEnum
 
 ChoixGenre = ChoiceEnum('ChoixGenre', Person.GENDER_CHOICES)  # type: ignore
+ChoixSexe = ChoiceEnum('ChoixSexe', Person.SEX_CHOICES)  # type: ignore
 
 
 class ChoixStatutCDD(ChoiceEnum):

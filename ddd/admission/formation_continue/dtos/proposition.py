@@ -66,3 +66,5 @@ class PropositionDTO(interface.DTO):
     adresse_mail_professionnelle: Optional[str]
     type_adresse_facturation: Optional[str]
     adresse_facturation: Optional[AdressePersonnelleDTO]
+    elements_confirmation: Dict[str, str]
+    pdf_recapitulatif: List[str]

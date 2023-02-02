@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import datetime
 import uuid
 from unittest.mock import Mock
 
@@ -37,6 +38,7 @@ from django.utils.translation import gettext as _
 from django.views import View
 
 from admission.contrib.models import ContinuingEducationAdmissionProxy
+from admission.ddd.admission.domain.enums import TypeFormation
 from admission.templatetags.admission import (
     TAB_TREES,
     Tab,
@@ -49,10 +51,24 @@ from admission.templatetags.admission import (
     sortable_header_div,
     strip,
     update_tab_path_from_detail,
+    multiple_field_data,
+    get_first_truthy_value,
+    get_item,
+    interpolate, admission_training_type,
 )
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
+from admission.tests.factories.form_item import (
+    DocumentAdmissionFormItemFactory,
+    AdmissionFormItemInstantiationFactory,
+    MessageAdmissionFormItemFactory,
+    TextAdmissionFormItemFactory,
+    RadioButtonSelectionAdmissionFormItemFactory,
+    CheckboxSelectionAdmissionFormItemFactory,
+)
+from base.models.entity_version import EntityVersion
+from base.models.enums.education_group_types import TrainingType
 from base.models.enums.entity_type import EntityType
-from base.tests.factories.entity_version import MainEntityVersionFactory
+from base.tests.factories.entity_version import EntityVersionFactory, MainEntityVersionFactory
 
 
 # Mock views
@@ -274,6 +290,7 @@ class AdmissionPanelTagTestCase(TestCase):
 class AdmissionFieldsDataTestCase(TestCase):
     def test_field_data_with_string_value_default_params(self):
         result = field_data(
+            context={},
             name='My field label',
             data='value',
         )
@@ -284,6 +301,7 @@ class AdmissionFieldsDataTestCase(TestCase):
 
     def test_field_data_with_translated_string_value(self):
         result = field_data(
+            context={},
             name='My field label',
             data='From',
             translate_data=True,
@@ -293,6 +311,7 @@ class AdmissionFieldsDataTestCase(TestCase):
 
     def test_field_data_with_empty_list_value(self):
         result = field_data(
+            context={},
             name='My field label',
             data=[],
         )
@@ -343,25 +362,118 @@ class DisplayTagTestCase(TestCase):
 
     @freezegun.freeze_time('2023-01-01')
     def test_formatted_reference(self):
-        root = MainEntityVersionFactory(entity_type='', parent=None).entity
+        root = MainEntityVersionFactory(parent=None, entity_type='')
         # With school as management entity
-        school = MainEntityVersionFactory(
-            entity_type=EntityType.SCHOOL.name,
-            acronym='CMC',
-            parent=root,
-        )
-        created_admission = ContinuingEducationAdmissionFactory(training__management_entity=school.entity)
-        admission = ContinuingEducationAdmissionProxy.objects.for_dto().get(uuid=created_admission.uuid)
-        reference = formatted_reference(admission)
-        self.assertEqual(reference, f'M-CMC22-{str(admission)}')
-
-        # With faculty as parent entity of the school
-        school.parent = MainEntityVersionFactory(
+        faculty = EntityVersionFactory(
             entity_type=EntityType.FACULTY.name,
             acronym='FFC',
-            parent=root,
-        ).entity
-        school.save()
+            parent=root.entity,
+            end_date=datetime.date(2023, 1, 2),
+        )
+        school = EntityVersionFactory(
+            entity_type=EntityType.SCHOOL.name,
+            acronym='SFC',
+            parent=root.entity,
+            end_date=datetime.date(2023, 1, 2),
+        )
+
+        # With school as management entity
+        created_admission = ContinuingEducationAdmissionFactory(training__management_entity=school.entity)
         admission = ContinuingEducationAdmissionProxy.objects.for_dto().get(uuid=created_admission.uuid)
-        reference = formatted_reference(admission)
-        self.assertEqual(reference, f'M-FFC22-{str(admission)}')
+        self.assertEqual(admission.sigle_entite_gestion, 'SFC')
+        self.assertEqual(admission.training_management_faculty, None)
+        self.assertEqual(formatted_reference(admission), f'M-SFC22-{str(admission)}')
+
+        # With faculty as parent entity of the school
+        school.parent = faculty.entity
+        school.save()
+        EntityVersion.objects.filter(uuid=school.uuid).update(parent=faculty.entity)
+        admission = ContinuingEducationAdmissionProxy.objects.for_dto().get(uuid=created_admission.uuid)
+        self.assertEqual(admission.sigle_entite_gestion, 'SFC')
+        self.assertEqual(admission.training_management_faculty, 'FFC')
+        self.assertEqual(formatted_reference(admission), f'M-FFC22-{str(admission)}')
+
+
+@override_settings(OSIS_DOCUMENT_BASE_URL='http://dummyurl.com/document/', LANGUAGE_CODE='en')
+class MultipleFieldDataTestCase(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.configurations = [
+            AdmissionFormItemInstantiationFactory(
+                form_item=MessageAdmissionFormItemFactory(),
+            ),
+            AdmissionFormItemInstantiationFactory(
+                form_item=TextAdmissionFormItemFactory(),
+            ),
+            AdmissionFormItemInstantiationFactory(
+                form_item=DocumentAdmissionFormItemFactory(),
+            ),
+            AdmissionFormItemInstantiationFactory(
+                form_item=RadioButtonSelectionAdmissionFormItemFactory(),
+            ),
+            AdmissionFormItemInstantiationFactory(
+                form_item=CheckboxSelectionAdmissionFormItemFactory(),
+            ),
+        ]
+
+    def test_multiple_field_data_return_right_values_with_valid_data(self):
+        first_uuid = uuid.uuid4()
+        result = multiple_field_data(
+            context={'for_pdf': False},
+            configurations=self.configurations,
+            data={
+                str(self.configurations[1].form_item.uuid): 'My response',
+                str(self.configurations[2].form_item.uuid): [str(first_uuid), 'other-token'],
+                str(self.configurations[3].form_item.uuid): '1',
+                str(self.configurations[4].form_item.uuid): ['1', '2'],
+            },
+        )
+        self.assertEqual(result['fields'][0].form_item.value, 'My very short message.')
+        self.assertEqual(result['fields'][1].form_item.value, 'My response')
+        self.assertEqual(result['fields'][2].form_item.value, [first_uuid, 'other-token'])
+        self.assertEqual(result['fields'][3].form_item.value, 'One')
+        self.assertEqual(result['fields'][4].form_item.value, 'One, Two')
+
+    def test_multiple_field_data_return_right_values_with_empty_data(self):
+        result = multiple_field_data(
+            context={'for_pdf': False},
+            configurations=self.configurations,
+            data={},
+        )
+        self.assertEqual(result['fields'][0].form_item.value, 'My very short message.')
+        self.assertEqual(result['fields'][1].form_item.value, None)
+        self.assertEqual(result['fields'][2].form_item.value, [])
+        self.assertEqual(result['fields'][3].form_item.value, '')
+        self.assertEqual(result['fields'][4].form_item.value, '')
+
+
+class SimpleAdmissionTemplateTagsTestCase(TestCase):
+    def test_get_first_truthy_value_with_no_arg_returns_none(self):
+        self.assertIsNone(get_first_truthy_value())
+
+    def test_get_first_truthy_value_with_no_truthy_value_returns_none(self):
+        self.assertIsNone(get_first_truthy_value(False, 0, ''))
+
+    def test_get_first_truthy_value_with_one_truthy_value_returns_it(self):
+        self.assertEqual(get_first_truthy_value(False, 1, ''), 1)
+
+    def test_get_first_truthy_value_with_two_truthy_values_returns_the_first_one(self):
+        self.assertEqual(get_first_truthy_value(False, 1, 2, None), 1)
+
+    def test_get_item_with_key_in_dict_returns_the_related_value(self):
+        self.assertEqual(get_item({'key': 'value'}, 'key'), 'value')
+
+    def test_get_item_with_key_not_in_dict_returns_the_specified_key(self):
+        self.assertEqual(get_item({'key1': 'value'}, 'key2'), 'key2')
+
+    def test_interpolate_a_string(self):
+        self.assertEqual(
+            interpolate('my-str-with-value: %(value)s', value=1),
+            'my-str-with-value: 1',
+        )
+
+    def test_admission_training_type(self):
+        self.assertEqual(
+            admission_training_type(TrainingType.PHD.name),
+            TypeFormation.DOCTORAT.name,
+        )

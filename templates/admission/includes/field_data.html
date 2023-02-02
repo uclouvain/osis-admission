@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load i18n admission %}
 {% comment "License" %}
 * OSIS stands for Open Student Information System. It's an application
 * designed to manage the core business of higher education institutions,
@@ -24,9 +24,10 @@
 {% endcomment %}
 
 {% if not hide_empty or data %}
-<dl{% if css_class %} class="{{ css_class}}"{% endif %}>
-  <dt>{{ name }}</dt>
-  {% with data|default:_('Not specified') as data_to_display %}
+{% if css_class %}<div class="{{ css_class }}">{% endif %}
+<dl>
+  <dt>{{ name|safe }}</dt>
+  {% with data|default_if_none_or_empty:_('Not specified') as data_to_display %}
   <dd>
     {% if html_tag and data %}<{{ html_tag }}>{{ data_to_display }}</{{ html_tag }}>
     {% else %}
@@ -35,4 +36,5 @@
   </dd>
   {% endwith %}
 </dl>
+{% if css_class %}</div>{% endif %}
 {% endif %}

@@ -29,6 +29,7 @@
   {% default_tab_context as tab_context %}
   {% can_update_tab tab_context.active_tab as can_update_tab %}
   {% update_tab_path_from_detail view.kwargs.uuid as update_url %}
+  {% url base_namespace|add:':pdf-recap' view.kwargs.uuid as pdf_recap_url %}
   {% if can_update_tab and update_url %}
     <div class="btn-group">
       <button
@@ -46,6 +47,11 @@
           <li>
             <a href="{{ update_url }}">
               {% trans "Update" %}
+            </a>
+          </li>
+          <li>
+            <a href="{{ pdf_recap_url }}" target="_blank" >
+              {% translate "Generate the PDF recap" %}
             </a>
           </li>
         {% endblock %}

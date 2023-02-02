@@ -252,6 +252,7 @@ class ContinuingEducationAdmissionTrainingChoiceInitializationApiTestCase(APITes
         }
 
         cls.url = resolve_url('admission_api_v1:continuing_training_choice')
+        AdmissionAcademicCalendarFactory.produce_all_required()
 
     def test_training_choice_initialization_using_api_candidate(self):
         self.client.force_authenticate(user=self.candidate.user)
@@ -416,6 +417,7 @@ class ContinuingEducationAdmissionTrainingChoiceUpdateApiTestCase(APITestCase):
 
     @classmethod
     def setUpTestData(cls):
+        AdmissionAcademicCalendarFactory.produce_all_required()
         cls.admission = ContinuingEducationAdmissionFactory()
         cls.candidate = cls.admission.candidate
         cls.training = ContinuingEducationTrainingFactory()

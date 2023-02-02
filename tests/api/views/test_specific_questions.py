@@ -47,6 +47,7 @@ from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixTypeAdresseFacturation,
 )
 from admission.tests.factories import DoctorateAdmissionFactory
+from admission.tests.factories.calendar import AdmissionAcademicCalendarFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
 from admission.tests.factories.form_item import (
     MessageAdmissionFormItemFactory,
@@ -855,12 +856,14 @@ class GeneralEducationSpecificQuestionUpdateApiTestCase(APITestCase):
         )
 
 
+@freezegun.freeze_time('2020-01-01')
 class ContinuingEducationSpecificQuestionUpdateApiTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
         # Data
         cls.admission = ContinuingEducationAdmissionFactory(training__academic_year__year=2020)
         be_country = CountryFactory(iso_code=BE_ISO_CODE)
+        AdmissionAcademicCalendarFactory.produce_all_required()
 
         cls.message_instantiation = AdmissionFormItemInstantiationFactory(
             form_item=TextAdmissionFormItemFactory(

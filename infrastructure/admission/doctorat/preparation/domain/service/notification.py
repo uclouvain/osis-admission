@@ -253,6 +253,19 @@ class Notification(INotification):
         candidat = Person.objects.get(global_id=proposition.matricule_candidat)
         admission = PropositionProxy.objects.get(uuid=proposition.entity_id.uuid)
 
+        # Create the async task to generate the pdf recap
+        task = AsyncTask.objects.create(
+            name=_('Recap of the proposition %(reference)s')
+            % {'reference': admission.reference},
+            description=_('Create the recap of the proposition'),
+            person=admission.candidate,
+        )
+        AdmissionTask.objects.create(
+            task=task,
+            admission=admission,
+            type=AdmissionTask.TaskType.DOCTORATE_RECAP.name,
+        )
+
         # Notifier le doctorant via mail
         common_tokens = cls.get_common_tokens(proposition, candidat)
         email_message = generate_email(

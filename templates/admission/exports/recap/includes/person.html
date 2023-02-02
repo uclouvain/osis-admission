@@ -1,0 +1,76 @@
+{% load i18n admission enums %}
+{% comment 'License' %}
+  * OSIS stands for Open Student Information System. It's an application
+  * designed to manage the core business of higher education institutions,
+  * such as universities, faculties, institutes and professional schools.
+  * The core business involves the administration of students, teachers,
+  * courses, programs and so on.
+  *
+  * Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+  *
+  * This program is free software: you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License as published by
+  * the Free Software Foundation, either version 3 of the License, or
+  * (at your option) any later version.
+  *
+  * This program is distributed in the hope that it will be useful,
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU General Public License for more details.
+  *
+  * A copy of this license - GNU General Public License - is available
+  * at the root of the source code of this program.  If not,
+  * see http://www.gnu.org/licenses/.
+{% endcomment %}
+{% panel _("Identification") %}
+  <div class="row">
+    {% field_data _("Last name") identification.nom "col-md-4" %}
+    {% field_data _("First name") identification.prenom "col-md-4" %}
+    {% field_data _("Other names") identification.autres_prenoms "col-md-4" hide_empty=inline %}
+    {% field_data _("First name in use") identification.prenom_d_usage "col-md-4" hide_empty=inline %}
+    {% field_data _("Sex") identification.sexe|enum_display:'ChoixSexe' "col-md-4" %}
+    {% field_data _("Gender") identification.genre|enum_display:'ChoixGenre' "col-md-4" %}
+  </div>
+  <div class="row">
+    {% if identification.date_naissance %}
+      {% field_data _("Birth date") identification.date_naissance|date:'d/m/Y' "col-md-4" %}
+    {% elif identification.annee_naissance %}
+      {% field_data _("Birth year") identification.annee_naissance "col-md-4" %}
+    {% endif %}
+    {% field_data _("Birth country") identification.nom_pays_naissance "col-md-4" %}
+    {% field_data _("Birth place") identification.lieu_naissance "col-md-4" %}
+  </div>
+  <div class="row">
+    {% field_data _("Civil status") identification.etat_civil|enum_display:'CivilState' "col-md-4" %}
+    {% field_data _("Country of citizenship") identification.nom_pays_nationalite "col-md-4" %}
+  </div>
+  {% field_data _("Identity picture") identification.photo_identite %}
+  {% field_data _("Contact language") identification.nom_langue_contact %}
+{% endpanel %}
+
+{% panel _("Proof of identity") %}
+  {% if identification.numero_registre_national_belge %}
+    {% field_data _("Belgian national registry number (SSIN)") identification.numero_registre_national_belge %}
+    {% field_data _("Identity card (both sides)") identification.carte_identite %}
+  {% elif identification.numero_carte_identite %}
+    {% field_data _("Identity card number") identification.numero_carte_identite %}
+    {% field_data _("Identity card (both sides)") identification.carte_identite %}
+  {% elif identification.numero_passeport %}
+    {% field_data _("Passport number") identification.numero_passeport %}
+    {% field_data _("Passport") identification.passeport %}
+  {% else %}
+    {% translate 'Not specified' %}
+  {% endif %}
+{% endpanel %}
+
+{% panel _("Have you previously been registered at UCLouvain?") %}
+  {% if identification.annee_derniere_inscription_ucl %}
+    <p>{% trans "Yes" %}</p>
+    <div class="row">
+      {% field_data _("Last registration year") identification.annee_derniere_inscription_ucl "col-md-6" %}
+      {% field_data _("Your previous NOMA (registration id)") identification.noma_derniere_inscription_ucl "col-md-6" %}
+    </div>
+  {% else %}
+    {% trans "No" %}
+  {% endif %}
+{% endpanel %}

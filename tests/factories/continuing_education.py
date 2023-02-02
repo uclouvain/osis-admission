@@ -78,7 +78,3 @@ class ContinuingEducationAdmissionFactory(factory.DjangoModelFactory):
             training__education_group_type__name=TrainingType.UNIVERSITY_FIRST_CYCLE_CERTIFICATE.name,
             candidate=factory.SubFactory(CompletePersonForIUFCFactory),
         )
-
-    @factory.post_generation
-    def create_accounting(self, create, extracted, **kwargs):
-        AccountingFactory(admission_id=self.pk)

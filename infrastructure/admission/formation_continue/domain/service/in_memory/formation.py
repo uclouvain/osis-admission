@@ -117,7 +117,7 @@ class FormationContinueInMemoryTranslator(IFormationContinueTranslator):
             annee=entity.entity_id.annee,
             intitule=entity.intitule,
             campus=entity.campus,
-            type=entity.type,
+            type=entity.type.name,
             code_domaine=entity.code_domaine,
             sigle_entite_gestion=entity.sigle_entite_gestion,
             campus_inscription=entity.campus_inscription,

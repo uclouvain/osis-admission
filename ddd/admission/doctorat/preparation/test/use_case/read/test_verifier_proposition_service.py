@@ -24,6 +24,7 @@
 #
 # ##############################################################################
 import datetime
+import uuid
 from unittest import TestCase
 
 import freezegun
@@ -91,7 +92,6 @@ from admission.infrastructure.admission.doctorat.preparation.repository.in_memor
     PropositionInMemoryRepository,
 )
 from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import (
-    DiplomeEtudeSecondaire,
     ExperienceNonAcademique,
     ProfilCandidatInMemoryTranslator,
     ExperienceAcademique,
@@ -101,13 +101,33 @@ from admission.infrastructure.message_bus_in_memory import message_bus_in_memory
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import AcademicYear, AcademicYearIdentity
 from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
-from osis_profile.models.enums.curriculum import Result, TranscriptType, Grade, EvaluationSystem
+from osis_profile.models.enums.curriculum import (
+    Result,
+    TranscriptType,
+    Grade,
+    EvaluationSystem,
+    ActivityType,
+    ActivitySector,
+)
 
 
 class TestVerifierPropositionServiceCommun(TestCase):
     def assertHasInstance(self, container, cls, msg=None):
         if not any(isinstance(obj, cls) for obj in container):
             self.fail(msg or f"No instance of '{cls}' has been found")
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        super().setUpClass()
+        cls.params_default_experience_non_academique = {
+            'uuid': str(uuid.uuid4()),
+            'employeur': 'UCL',
+            'type': ActivityType.WORK.name,
+            'certificat': [],
+            'fonction': 'Bibliothécaire',
+            'secteur': ActivitySector.PUBLIC.name,
+            'autre_activite': '',
+        }
 
     def setUp(self) -> None:
         self.candidat_translator = ProfilCandidatInMemoryTranslator()
@@ -968,6 +988,13 @@ class TestVerifierPropositionServiceCurriculumYears(TestVerifierPropositionServi
             grade_obtenu=Grade.GREAT_DISTINCTION.name,
             systeme_evaluation=EvaluationSystem.ECTS_CREDITS.name,
             nom_formation='Formation AA',
+            nom_pays='Belgique',
+            code_institut='',
+            type_enseignement='',
+            nom_institut='',
+            adresse_institut='',
+            communaute_institut='',
+            nom_regime_linguistique='',
         )
 
     def assertAnneesCurriculum(self, exceptions, messages):
@@ -1061,6 +1088,7 @@ class TestVerifierPropositionServiceCurriculumYears(TestVerifierPropositionServi
                 personne=self.candidat.matricule,
                 date_debut=datetime.date(2018, 9, 1),
                 date_fin=datetime.date(2021, 6, 30),
+                **self.params_default_experience_non_academique,
             ),
         )
         proposition_id = self.message_bus.invoke(self.cmd)
@@ -1074,6 +1102,7 @@ class TestVerifierPropositionServiceCurriculumYears(TestVerifierPropositionServi
                 personne=self.candidat.matricule,
                 date_debut=datetime.date(2018, 8, 1),
                 date_fin=datetime.date(2021, 7, 31),
+                **self.params_default_experience_non_academique,
             )
         )
         proposition_id = self.message_bus.invoke(self.cmd)
@@ -1087,11 +1116,13 @@ class TestVerifierPropositionServiceCurriculumYears(TestVerifierPropositionServi
                     personne=self.candidat.matricule,
                     date_debut=datetime.date(2018, 8, 1),
                     date_fin=datetime.date(2021, 7, 31),
+                    **self.params_default_experience_non_academique,
                 ),
                 ExperienceNonAcademique(
                     personne=self.candidat.matricule,
                     date_debut=datetime.date(2017, 8, 1),
                     date_fin=datetime.date(2018, 7, 31),
+                    **self.params_default_experience_non_academique,
                 ),
             ],
         )
@@ -1105,6 +1136,7 @@ class TestVerifierPropositionServiceCurriculumYears(TestVerifierPropositionServi
                 personne=self.candidat.matricule,
                 date_debut=datetime.date(2018, 10, 1),
                 date_fin=datetime.date(2021, 6, 30),
+                **self.params_default_experience_non_academique,
             )
         )
 
@@ -1120,6 +1152,7 @@ class TestVerifierPropositionServiceCurriculumYears(TestVerifierPropositionServi
                 personne=self.candidat.matricule,
                 date_debut=datetime.date(2018, 9, 1),
                 date_fin=datetime.date(2020, 9, 30),
+                **self.params_default_experience_non_academique,
             )
         )
 
@@ -1136,16 +1169,19 @@ class TestVerifierPropositionServiceCurriculumYears(TestVerifierPropositionServi
                     personne=self.candidat.matricule,
                     date_debut=datetime.date(2020, 1, 1),
                     date_fin=datetime.date(2021, 8, 31),
+                    **self.params_default_experience_non_academique,
                 ),
                 ExperienceNonAcademique(
                     personne=self.candidat.matricule,
                     date_debut=datetime.date(2019, 11, 1),
                     date_fin=datetime.date(2020, 3, 31),
+                    **self.params_default_experience_non_academique,
                 ),
                 ExperienceNonAcademique(
                     personne=self.candidat.matricule,
                     date_debut=datetime.date(2018, 7, 1),
                     date_fin=datetime.date(2019, 10, 31),
+                    **self.params_default_experience_non_academique,
                 ),
             ]
         )
@@ -1160,21 +1196,25 @@ class TestVerifierPropositionServiceCurriculumYears(TestVerifierPropositionServi
                     personne=self.candidat.matricule,
                     date_debut=datetime.date(2019, 10, 1),
                     date_fin=datetime.date(2021, 8, 31),
+                    **self.params_default_experience_non_academique,
                 ),
                 ExperienceNonAcademique(
                     personne=self.candidat.matricule,
                     date_debut=datetime.date(2019, 10, 1),
                     date_fin=datetime.date(2020, 5, 31),
+                    **self.params_default_experience_non_academique,
                 ),
                 ExperienceNonAcademique(
                     personne=self.candidat.matricule,
                     date_debut=datetime.date(2019, 9, 1),
                     date_fin=datetime.date(2019, 9, 30),
+                    **self.params_default_experience_non_academique,
                 ),
                 ExperienceNonAcademique(
                     personne=self.candidat.matricule,
                     date_debut=datetime.date(2018, 9, 1),
                     date_fin=datetime.date(2019, 6, 30),
+                    **self.params_default_experience_non_academique,
                 ),
             ]
         )
@@ -1189,11 +1229,13 @@ class TestVerifierPropositionServiceCurriculumYears(TestVerifierPropositionServi
                     personne=self.candidat.matricule,
                     date_debut=datetime.date(2018, 10, 1),
                     date_fin=datetime.date(2018, 12, 31),
+                    **self.params_default_experience_non_academique,
                 ),
                 ExperienceNonAcademique(
                     personne=self.candidat.matricule,
                     date_debut=datetime.date(2018, 9, 1),
                     date_fin=datetime.date(2019, 6, 30),
+                    **self.params_default_experience_non_academique,
                 ),
             ]
         )
@@ -1218,21 +1260,25 @@ class TestVerifierPropositionServiceCurriculumYears(TestVerifierPropositionServi
                     personne=self.candidat.matricule,
                     date_debut=datetime.date(2019, 10, 1),
                     date_fin=datetime.date(2021, 8, 31),
+                    **self.params_default_experience_non_academique,
                 ),
                 ExperienceNonAcademique(
                     personne=self.candidat.matricule,
                     date_debut=datetime.date(2019, 10, 1),
                     date_fin=datetime.date(2020, 5, 31),
+                    **self.params_default_experience_non_academique,
                 ),
                 ExperienceNonAcademique(
                     personne=self.candidat.matricule,
                     date_debut=datetime.date(2019, 2, 1),
                     date_fin=datetime.date(2019, 6, 30),
+                    **self.params_default_experience_non_academique,
                 ),
                 ExperienceNonAcademique(
                     personne=self.candidat.matricule,
                     date_debut=datetime.date(2018, 9, 1),
                     date_fin=datetime.date(2019, 1, 31),
+                    **self.params_default_experience_non_academique,
                 ),
             ]
         )
@@ -1251,22 +1297,26 @@ class TestVerifierPropositionServiceCurriculumYears(TestVerifierPropositionServi
                     personne=self.candidat.matricule,
                     date_debut=datetime.date(2019, 10, 1),
                     date_fin=datetime.date(2021, 8, 31),
+                    **self.params_default_experience_non_academique,
                 ),
                 ExperienceNonAcademique(
                     personne=self.candidat.matricule,
                     date_debut=datetime.date(2019, 9, 1),
                     date_fin=datetime.date(2020, 5, 31),
+                    **self.params_default_experience_non_academique,
                 ),
                 ExperienceNonAcademique(
                     personne=self.candidat.matricule,
                     date_debut=datetime.date(2018, 9, 1),
                     date_fin=datetime.date(2019, 1, 31),
+                    **self.params_default_experience_non_academique,
                 ),
                 # L'expérience suivante commence avant la précédente mais se termine après
                 ExperienceNonAcademique(
                     personne=self.candidat.matricule,
                     date_debut=datetime.date(2018, 2, 1),
                     date_fin=datetime.date(2019, 6, 30),
+                    **self.params_default_experience_non_academique,
                 ),
             ]
         )

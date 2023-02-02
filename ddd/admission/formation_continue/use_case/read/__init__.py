@@ -28,4 +28,5 @@ from .lister_propositions_candidat_service import lister_propositions_candidat
 from .rechercher_formations_service import rechercher_formations
 from .recuperer_elements_confirmation_service import recuperer_elements_confirmation
 from .recuperer_proposition_service import recuperer_proposition
+from .recuperer_resume_proposition_service import recuperer_resume_proposition
 from .verifier_proposition_service import verifier_proposition

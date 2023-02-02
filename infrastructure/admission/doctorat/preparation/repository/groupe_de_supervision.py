@@ -172,15 +172,7 @@ class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
     def get_cotutelle_dto(cls, uuid_proposition: str) -> 'CotutelleDTO':
         proposition_id = PropositionIdentityBuilder.build_from_uuid(uuid_proposition)
         groupe = cls.get_by_proposition_id(proposition_id=proposition_id)
-        return CotutelleDTO(
-            cotutelle=None if groupe.cotutelle is None else groupe.cotutelle != pas_de_cotutelle,
-            motivation=groupe.cotutelle and groupe.cotutelle.motivation or '',
-            institution_fwb=groupe.cotutelle and groupe.cotutelle.institution_fwb,
-            institution=groupe.cotutelle and groupe.cotutelle.institution or '',
-            demande_ouverture=groupe.cotutelle and groupe.cotutelle.demande_ouverture or [],
-            convention=groupe.cotutelle and groupe.cotutelle.convention or [],
-            autres_documents=groupe.cotutelle and groupe.cotutelle.autres_documents or [],
-        )
+        return cls.get_cotutelle_dto_from_model(cotutelle=groupe.cotutelle)
 
     @classmethod
     def search(

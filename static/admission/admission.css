@@ -154,3 +154,13 @@ textarea {
 .tooltip .tooltip-inner {
   width: auto;
 }
+
+@media print {
+  .inline-field-data {
+    display: block;
+  }
+
+  .inline-field-data dd, .inline-field-data dt {
+    display: inline;
+  }
+}

@@ -27,23 +27,30 @@ import re
 from dataclasses import dataclass
 from functools import wraps
 from inspect import getfullargspec
+from typing import Union
 
 from django import template
+from django.core.validators import EMPTY_VALUES
 from django.urls import NoReverseMatch, reverse
 from django.utils.safestring import SafeString
-from django.utils.translation import gettext_lazy as _, pgettext
+from django.utils.translation import gettext_lazy as _, pgettext, get_language
 from rules.templatetags import rules
 
 from admission.auth.constants import READ_ACTIONS_BY_TAB, UPDATE_ACTIONS_BY_TAB
 from admission.contrib.models import DoctorateAdmission
 from admission.contrib.models.base import BaseAdmission
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import STATUTS_PROPOSITION_AVANT_INSCRIPTION
+from admission.ddd.admission.enums import TYPES_ITEMS_LECTURE_SEULE, TypeItemFormulaire
 from admission.ddd.admission.repository.i_proposition import formater_reference
 from admission.ddd.parcours_doctoral.formation.domain.model.enums import (
     CategorieActivite,
     ChoixTypeEpreuve,
     StatutActivite,
 )
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import STATUTS_PROPOSITION_AVANT_INSCRIPTION
+from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
+    AnneeInscriptionFormationTranslator,
+)
+from admission.utils import get_uuid_value, format_academic_year
 from osis_role.templatetags.osis_role import has_perm
 
 CONTEXT_ADMISSION = 'admission'
@@ -398,20 +405,36 @@ def detail_tab_path_from_update(context, admission_uuid):
     )
 
 
-@register.inclusion_tag('admission/includes/field_data.html')
-def field_data(name, data=None, css_class=None, hide_empty=False, translate_data=False, inline=False, html_tag=''):
+@register.inclusion_tag('admission/includes/field_data.html', takes_context=True)
+def field_data(
+    context,
+    name,
+    data=None,
+    css_class=None,
+    hide_empty=False,
+    translate_data=False,
+    inline=False,
+    html_tag='',
+):
+    for_pdf = context.get('for_pdf')
+
     if isinstance(data, list):
-        if data:
+        if for_pdf:
+            data = _('Specified') if data else _('Not specified')
+        elif data:
             template_string = "{% load osis_document %}{% document_visualizer files %}"
             template_context = {'files': data}
             data = template.Template(template_string).render(template.Context(template_context))
         else:
             data = ''
+    elif type(data) == bool:
+        data = _('Yes') if data else _('No')
     elif translate_data is True:
         data = _(data)
 
-    if inline is True:
-        name = _("%(label)s:") % {'label': name}
+    if inline is True or for_pdf:
+        if name and name[-1] not in ':?!.':
+            name = _("%(label)s:") % {'label': name}
         css_class = (css_class + ' inline-field-data') if css_class else 'inline-field-data'
 
     return {
@@ -420,6 +443,7 @@ def field_data(name, data=None, css_class=None, hide_empty=False, translate_data
         'css_class': css_class,
         'hide_empty': hide_empty,
         'html_tag': html_tag,
+        'inline': inline,
     }
 
 
@@ -561,3 +585,77 @@ def formatted_reference(admission: BaseAdmission):
         sigle_entite_gestion=admission.training_management_faculty or admission.sigle_entite_gestion,  # From annotation
         annee=admission.training.academic_year.year,
     )
+
+
+@register.filter
+def get_academic_year(year: Union[int, str, float]):
+    """Return the academic year related to a specific year."""
+    return format_academic_year(year)
+
+
+@register.filter(is_safe=False)
+def default_if_none_or_empty(value, arg):
+    """If value is None or empty, use given default."""
+    return value if value not in EMPTY_VALUES else arg
+
+
+@register.simple_tag
+def concat(*args):
+    """Concatenate a list of strings."""
+    return ''.join(args)
+
+
+@register.inclusion_tag('admission/includes/multiple_field_data.html', takes_context=True)
+def multiple_field_data(context, configurations, data, title=_('Specific questions')):
+    """Display the answers of the specific questions based on a list of configurations and a data dictionary"""
+    current_language = get_language()
+
+    if not data:
+        data = {}
+
+    for field_instantiation in configurations:
+        field = field_instantiation.form_item
+        if field.type in TYPES_ITEMS_LECTURE_SEULE:
+            value = field.text.get(current_language, '')
+        elif field.type == TypeItemFormulaire.DOCUMENT.name:
+            value = [get_uuid_value(token) for token in data.get(str(field.uuid), [])]
+        elif field.type == TypeItemFormulaire.SELECTION.name:
+            current_value = data.get(str(field.uuid))
+            selected_options = set(current_value) if isinstance(current_value, list) else {current_value}
+            value = ', '.join(
+                [value.get(current_language) for value in field.values if value.get('key') in selected_options]
+            )
+        else:
+            value = data.get(str(field.uuid))
+        setattr(field, 'value', value)
+        setattr(field, 'translated_title', field.title.get(current_language))
+
+    return {
+        'fields': configurations,
+        'title': title,
+        'for_pdf': context.get('for_pdf'),
+    }
+
+
+@register.filter
+def admission_training_type(osis_training_type: str):
+    """Returns the admission training type based on the osis training type."""
+    return AnneeInscriptionFormationTranslator.ADMISSION_EDUCATION_TYPE_BY_OSIS_TYPE.get(osis_training_type)
+
+
+@register.simple_tag
+def get_first_truthy_value(*args):
+    """Returns the first truthy value"""
+    return next((arg for arg in args if arg), None)
+
+
+@register.filter
+def get_item(dictionary, value):
+    """Returns the value of a key in a dictionary if it exists else the value itself"""
+    return dictionary.get(value, value)
+
+
+@register.simple_tag
+def interpolate(string, **kwargs):
+    """Interpolate variables inside a string"""
+    return string % kwargs

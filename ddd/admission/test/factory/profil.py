@@ -32,6 +32,7 @@ from admission.ddd.admission.doctorat.preparation.dtos import ConditionsComptabi
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
     ExperienceAcademiqueDTO,
     AnneeExperienceAcademiqueDTO,
+    ExperienceNonAcademiqueDTO,
 )
 from admission.ddd.admission.dtos import AdressePersonnelleDTO, CoordonneesDTO, EtudesSecondairesDTO, IdentificationDTO
 from base.models.enums.civil_state import CivilState
@@ -66,6 +67,11 @@ class IdentificationDTOFactory(factory.Factory):
     etat_civil = CivilState.MARRIED.name
     pays_residence = "BE"
     langue_contact = "fr-be"
+    prenom_d_usage = factory.Faker('first_name')
+    autres_prenoms = factory.Faker('first_name')
+    nom_pays_nationalite = factory.Faker('country')
+    nom_pays_naissance = factory.Faker('country')
+    nom_langue_contact = 'Français'
 
 
 class AdressePersonnelleDTOFactory(factory.Factory):
@@ -80,11 +86,14 @@ class AdressePersonnelleDTOFactory(factory.Factory):
     lieu_dit = ''
     numero_rue = 1
     boite_postale = ''
+    nom_pays = factory.Faker('country')
 
 
 class CoordonneesDTOFactory(factory.Factory):
     domicile_legal = factory.SubFactory(AdressePersonnelleDTOFactory)
     adresse_correspondance = factory.SubFactory(AdressePersonnelleDTOFactory)
+    numero_mobile = factory.Faker('phone_number')
+    adresse_email_privee = factory.Faker('email')
 
     class Meta:
         model = CoordonneesDTO
@@ -111,15 +120,22 @@ class ExperienceAcademiqueDTOFactory(factory.Factory):
         abstract = False
 
 
+class ExperienceNonAcademiqueDTOFactory(factory.Factory):
+    class Meta:
+        model = ExperienceNonAcademiqueDTO
+        abstract = False
+
+
 class CurriculumDTOFactory(factory.Factory):
     class Meta:
         model = CurriculumDTO
         abstract = False
 
-    dates_experiences_non_academiques: List[int] = []
+    experiences_non_academiques: List[ExperienceNonAcademiqueDTOFactory] = []
     experiences_academiques: List[ExperienceAcademiqueDTOFactory] = []
     annee_derniere_inscription_ucl = factory.Faker('year')
     annee_diplome_etudes_secondaires = factory.Faker('year')
+    annee_minimum_a_remplir = factory.Faker('year')
 
 
 class ConditionsComptabiliteDTOFactory(factory.Factory):

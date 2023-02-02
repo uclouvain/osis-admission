@@ -469,4 +469,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             else None,
             reponses_questions_specifiques=admission.specific_question_answers,
             curriculum=admission.curriculum,
+            elements_confirmation=admission.confirmation_elements,
+            soumise_le=admission.submitted_at,
+            pdf_recapitulatif=admission.pdf_recap,
         )

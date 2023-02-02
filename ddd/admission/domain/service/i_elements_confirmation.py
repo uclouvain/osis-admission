@@ -128,6 +128,20 @@ class IElementsConfirmation(interface.DomainService):
         'By finalising my application, I undertake to pay the registration fees upon receipt of the invoice '
         '(provided my application is accepted). In case of cancellation, the modalities depend on the Faculties.'
     )
+    TITRE_ELEMENT_CONFIRMATION = {
+        'hors_delai': '',
+        'reglement_general': _("General Study Regulations"),
+        'protection_donnees': _("Data protection"),
+        'professions_reglementees': _("Access to regulated professions"),
+        'frais_dossier': _("Application fees"),
+        'convention_cadre_stages': _("Internship framework agreement"),
+        'communication_hopitaux': _("Communication with Host Hospitals"),
+        'documents_etudes_contingentees': _("Specific documents for quota studies"),
+        'communication_ecole_secondaire': _("Communication with your secondary school"),
+        'justificatifs': _("Supporting documents"),
+        'declaration_sur_lhonneur': _("I declare on my honour that"),
+        'droits_inscription_iufc': _("Registration fees"),
+    }
 
     @classmethod
     def recuperer(
@@ -151,19 +165,19 @@ class IElementsConfirmation(interface.DomainService):
             # Règlement général des études
             ElementConfirmation(
                 nom='reglement_general',
-                titre=_("General Study Regulations"),
+                titre=cls.TITRE_ELEMENT_CONFIRMATION['reglement_general'],
                 texte=cls.REGLEMENT_GENERAL,
             ),
             # Protection des données
             ElementConfirmation(
                 nom='protection_donnees',
-                titre=_("Data protection"),
+                titre=cls.TITRE_ELEMENT_CONFIRMATION['protection_donnees'],
                 texte=cls.PROTECTION_DONNEES,
             ),
             # Accès aux professions réglementées
             ElementConfirmation(
                 nom='professions_reglementees',
-                titre=_("Access to regulated professions"),
+                titre=cls.TITRE_ELEMENT_CONFIRMATION['professions_reglementees'],
                 texte=cls.PROFESSIONS_REGLEMENTEES,
             ),
         ]
@@ -193,7 +207,7 @@ class IElementsConfirmation(interface.DomainService):
             elements.append(
                 ElementConfirmation(
                     nom='frais_dossier',
-                    titre=_("Application fees"),
+                    titre=cls.TITRE_ELEMENT_CONFIRMATION['frais_dossier'],
                     texte=cls.FRAIS_DOSSIER,
                 )
             )
@@ -203,13 +217,13 @@ class IElementsConfirmation(interface.DomainService):
                 # Convention cadre de stages
                 ElementConfirmation(
                     nom='convention_cadre_stages',
-                    titre=_("Internship framework agreement"),
+                    titre=cls.TITRE_ELEMENT_CONFIRMATION['convention_cadre_stages'],
                     texte=cls.CONVENTION_CADRE_STAGE,
                 ),
                 # Communication avec les Hôpitaux d'accueil
                 ElementConfirmation(
                     nom='communication_hopitaux',
-                    titre=_("Communication with Host Hospitals"),
+                    titre=cls.TITRE_ELEMENT_CONFIRMATION['communication_hopitaux'],
                     texte=cls.COMMUNICATION_HOPITAUX,
                 ),
             ]
@@ -219,7 +233,7 @@ class IElementsConfirmation(interface.DomainService):
             elements.append(
                 ElementConfirmation(
                     nom='documents_etudes_contingentees',
-                    titre=_("Specific documents for quota studies"),
+                    titre=cls.TITRE_ELEMENT_CONFIRMATION['documents_etudes_contingentees'],
                     texte=cls.DOCUMENTS_ETUDES_CONTINGENTEES,
                 )
             )
@@ -233,7 +247,7 @@ class IElementsConfirmation(interface.DomainService):
             elements.append(
                 ElementConfirmation(
                     nom='communication_ecole_secondaire',
-                    titre=_("Communication with your secondary school"),
+                    titre=cls.TITRE_ELEMENT_CONFIRMATION['communication_ecole_secondaire'],
                     reponses=[_("I authorise"), _("I do not authorize")],
                     texte=cls.COMMUNICATION_ECOLE_SECONDAIRE,
                     type="radio",
@@ -253,13 +267,13 @@ class IElementsConfirmation(interface.DomainService):
             # Justificatifs
             ElementConfirmation(
                 nom='justificatifs',
-                titre=_("Supporting documents"),
+                titre=cls.TITRE_ELEMENT_CONFIRMATION['justificatifs'],
                 texte=cls.JUSTIFICATIFS % {'by_service': by_service},
             ),
             # Déclaration sur l'honneur
             ElementConfirmation(
                 nom='declaration_sur_lhonneur',
-                titre=_("I declare on my honour that"),
+                titre=cls.TITRE_ELEMENT_CONFIRMATION['declaration_sur_lhonneur'],
                 texte=cls.DECLARATION_SUR_LHONNEUR % {'to_service': to_service},
             ),
         ]
@@ -268,7 +282,7 @@ class IElementsConfirmation(interface.DomainService):
             elements.append(
                 ElementConfirmation(
                     nom='droits_inscription_iufc',
-                    titre=_("Registration fees"),
+                    titre=cls.TITRE_ELEMENT_CONFIRMATION['droits_inscription_iufc'],
                     texte=cls.DROITS_INSCRIPTION_IUFC,
                 )
             )

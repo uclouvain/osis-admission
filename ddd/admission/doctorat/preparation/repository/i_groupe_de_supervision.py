@@ -27,6 +27,7 @@ import abc
 from typing import List, Optional, Union
 
 from admission.contrib.models.enums.actor_type import ActorType
+from admission.ddd.admission.doctorat.preparation.domain.model._cotutelle import Cotutelle, pas_de_cotutelle
 from admission.ddd.admission.doctorat.preparation.domain.model.groupe_de_supervision import (
     GroupeDeSupervision,
     GroupeDeSupervisionIdentity,
@@ -111,3 +112,15 @@ class IGroupeDeSupervisionRepository(interface.AbstractRepository):
     @abc.abstractmethod
     def get_members(cls, groupe_id: 'GroupeDeSupervisionIdentity') -> List[Union['PromoteurDTO', 'MembreCADTO']]:
         raise NotImplementedError
+
+    @classmethod
+    def get_cotutelle_dto_from_model(cls, cotutelle: Optional[Cotutelle]) -> 'CotutelleDTO':
+        return CotutelleDTO(
+            cotutelle=None if cotutelle is None else cotutelle != pas_de_cotutelle,
+            motivation=cotutelle and cotutelle.motivation or '',
+            institution_fwb=cotutelle and cotutelle.institution_fwb,
+            institution=cotutelle and cotutelle.institution or '',
+            demande_ouverture=cotutelle and cotutelle.demande_ouverture or [],
+            convention=cotutelle and cotutelle.convention or [],
+            autres_documents=cotutelle and cotutelle.autres_documents or [],
+        )

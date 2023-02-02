@@ -32,6 +32,7 @@ from admission.api.views.secondary_studies import (
     GeneralSecondaryStudiesView,
     ContinuingSecondaryStudiesView,
 )
+from admission.api.views.pdf_recap import ContinuingPDFRecapView, GeneralPDFRecapView, DoctoratePDFRecapView
 from admission.api.views.languages_knowledge import LanguagesKnowledgeViewSet
 from admission.api.views.cotutelle import CotutelleAPIView
 from admission.api.views.person import (

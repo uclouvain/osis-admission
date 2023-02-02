@@ -109,5 +109,4 @@ class CoordonneesValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
         return [
             ShouldAdresseDomicileLegalCandidatEtreCompletee(adresse=self.domicile_legal),
             ShouldAdresseCorrespondanceEtreCompleteeSiSpecifiee(adresse=self.adresse_correspondance),
-            ShouldAdresseEmailPriveeEtreCompletee(adresse_email=self.adresse_email_privee),
         ]

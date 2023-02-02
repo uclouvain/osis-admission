@@ -250,4 +250,14 @@ COMMAND_HANDLERS = {
         formation_translator=_doctorat_translator,
         profil_candidat_translator=_profil_candidat_translator,
     ),
+    RecupererResumePropositionQuery: lambda msg_bus, cmd: recuperer_resume_proposition(
+        cmd,
+        proposition_repository=_proposition_repository,
+        i_profil_candidat_translator=_profil_candidat_translator,
+        i_comptabilite_translator=_comptabilite_translator,
+        groupe_supervision_repository=_groupe_supervision_repository,
+        promoteur_translator=_promoteur_translator,
+        membre_ca_translator=_membre_ca_translator,
+        academic_year_repository=_academic_year_repository,
+    ),
 }

@@ -60,6 +60,8 @@ __all__ = [
 
 
 class SupervisionDTOSerializer(DTOSerializer):
+    cotutelle = None
+
     class Meta:
         source = GroupeDeSupervisionDTO
 
@@ -68,6 +70,7 @@ class ExternalDoctoratePropositionDTOSerializer(IncludedFieldsMixin, DTOSerializ
     links = None
     erreurs = None
     reponses_questions_specifiques = None
+    elements_confirmation = None
 
     class Meta:
         source = PropositionDTO

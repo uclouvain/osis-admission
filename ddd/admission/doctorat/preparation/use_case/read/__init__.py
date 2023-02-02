@@ -32,6 +32,7 @@ from .recuperer_cotutelle_service import recuperer_cotutelle
 from .recuperer_elements_confirmation_service import recuperer_elements_confirmation
 from .recuperer_groupe_de_supervision_service import recuperer_groupe_de_supervision
 from .recuperer_proposition_service import recuperer_proposition
+from .recuperer_resume_proposition_service import recuperer_resume_proposition
 from .verifier_curriculum_service import verifier_curriculum
 from .verifier_projet_service import verifier_projet
 from .verifier_proposition_service import verifier_proposition

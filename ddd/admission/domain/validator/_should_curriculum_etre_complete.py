@@ -24,12 +24,15 @@
 #
 # ##############################################################################
 import datetime
-from typing import List, Optional, Tuple, Set, Dict
+from typing import List, Optional, Set, Dict
 
 import attr
 from dateutil.rrule import rrule, MONTHLY, rruleset
 
-from admission.ddd.admission.doctorat.preparation.dtos.curriculum import ExperienceAcademiqueDTO
+from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
+    ExperienceAcademiqueDTO,
+    ExperienceNonAcademiqueDTO,
+)
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     AnneesCurriculumNonSpecifieesException,
@@ -43,7 +46,7 @@ class ShouldAnneesCVRequisesCompletees(BusinessValidator):
     annee_courante: int
     annee_derniere_inscription_ucl: Optional[int]
     annee_diplome_etudes_secondaires: Optional[int]
-    dates_experiences_non_academiques: List[Tuple[datetime.date, datetime.date]]
+    experiences_non_academiques: List[ExperienceNonAcademiqueDTO]
     experiences_academiques: List[ExperienceAcademiqueDTO]
     experiences_academiques_incompletes: Dict[str, str]
 
@@ -73,7 +76,7 @@ class ShouldAnneesCVRequisesCompletees(BusinessValidator):
 
         nb_mois_a_valoriser = mois_a_valoriser.count()
 
-        if self.dates_experiences_non_academiques and mois_a_valoriser:
+        if self.experiences_non_academiques and mois_a_valoriser:
             nb_mois_a_valoriser = self.verifier_mois_valorises_par_les_experiences_non_academiques(
                 mois_a_valoriser=mois_a_valoriser,
                 nb_mois_a_valoriser=nb_mois_a_valoriser,
@@ -90,13 +93,14 @@ class ShouldAnneesCVRequisesCompletees(BusinessValidator):
         nb_mois_a_valoriser: int,
     ):
         """Vérifier si certains mois sont valorisés par les expériences non-académiques."""
-        iterateur_dates_experiences_non_academiques = iter(self.dates_experiences_non_academiques)
-        periode_valorisee = list(next(iterateur_dates_experiences_non_academiques))
+        iterateur_experiences_non_academiques = iter(self.experiences_non_academiques)
+        experience = next(iterateur_experiences_non_academiques)
+        periode_valorisee = [experience.date_debut, experience.date_fin]
 
-        for debut, fin in iterateur_dates_experiences_non_academiques:
-            if (periode_valorisee[0] - fin).days <= 1:
+        for experience in iterateur_experiences_non_academiques:
+            if (periode_valorisee[0] - experience.date_fin).days <= 1:
                 # Extension de la période de valorisation
-                periode_valorisee = [debut, max(fin, periode_valorisee[1])]
+                periode_valorisee = [experience.date_debut, max(experience.date_fin, periode_valorisee[1])]
             else:
                 # Rupture dans la période couverte par les expériences -> vérifier si elle valorise des mois
                 for mois in iter(mois_a_valoriser):
@@ -107,7 +111,7 @@ class ShouldAnneesCVRequisesCompletees(BusinessValidator):
                         break
 
                 # On passe à la période suivante
-                periode_valorisee = [debut, fin]
+                periode_valorisee = [experience.date_debut, experience.date_fin]
 
                 if nb_mois_a_valoriser == 0:
                     break

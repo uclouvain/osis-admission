@@ -32,6 +32,7 @@ from django.contrib.staticfiles.finders import find
 from django.core.files.storage import default_storage
 from django.template.loader import render_to_string
 from django.urls import get_script_prefix
+from weasyprint import HTML
 
 
 def django_url_fetcher(url):  # pragma: no cover
@@ -70,6 +71,15 @@ def django_url_fetcher(url):  # pragma: no cover
     return default_url_fetcher(url)
 
 
+def get_pdf_from_template(template_name, stylesheets, context) -> bytes:
+    """
+    Generate a PDF given a template name, stylesheets and context and returns it as bytes
+    """
+    html_string = render_to_string(template_name, context)
+    html = HTML(string=html_string, url_fetcher=django_url_fetcher, base_url="file:")
+    return html.write_pdf(presentational_hints=True, stylesheets=stylesheets)
+
+
 def admission_generate_pdf(admission, template, filename, context=None):
     """
     Generate a pdf given an admission task and a template
@@ -80,10 +90,7 @@ def admission_generate_pdf(admission, template, filename, context=None):
     :param filename: Filename
     :return: Writing token of the saved file
     """
-    from weasyprint import HTML
     from osis_document.utils import save_raw_content_remotely
 
-    html_string = render_to_string(template, {'admission': admission, **(context or {})})
-    html = HTML(string=html_string, url_fetcher=django_url_fetcher, base_url="file:")
-    result = html.write_pdf(presentational_hints=True)
+    result = get_pdf_from_template(template, [], {'admission': admission, **(context or {})})
     return save_raw_content_remotely(result, filename, 'application/pdf')

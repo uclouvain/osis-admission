@@ -204,6 +204,7 @@ class ContinuingEducationAdmissionManager(models.Manager.from_queryset(BaseAdmis
             .select_related(
                 "training__main_domain",
                 "training__enrollment_campus",
+                "billing_address_country",
             )
             .annotate_campus()
             .annotate_training_management_entity()

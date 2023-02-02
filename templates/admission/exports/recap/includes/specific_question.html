@@ -1,0 +1,92 @@
+{% load i18n admission enums %}
+
+{% comment "License" %}
+  * OSIS stands for Open Student Information System. It's an application
+  * designed to manage the core business of higher education institutions,
+  * such as universities, faculties, institutes and professional schools.
+  * The core business involves the administration of students, teachers,
+  * courses, programs and so on.
+  *
+  * Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+  *
+  * This program is free software: you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License as published by
+  * the Free Software Foundation, either version 3 of the License, or
+  * (at your option) any later version.
+  *
+  * This program is distributed in the hope that it will be useful,
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU General Public License for more details.
+  *
+  * A copy of this license - GNU General Public License - is available
+  * at the root of the source code of this program.  If not,
+  * see http://www.gnu.org/licenses/.
+{% endcomment %}
+
+{% if is_continuing %}
+  {% panel _('Specificities') %}
+    {% if proposition.pays_nationalite_ue_candidat == False %}
+      {% field_data _('Copy of the residence permit covering the entire course, including the evaluation test (except for courses organised online)') proposition.copie_titre_sejour %}
+    {% endif %}
+    {% field_data _('You are registering as') proposition.inscription_a_titre|enum_display:'ChoixInscriptionATitre' %}
+    {% if proposition.inscription_a_titre == 'PROFESSIONNEL' %}
+      {% field_data _('Head office name') proposition.nom_siege_social %}
+      <div class="row">
+        {% field_data _('Unique business number') proposition.numero_unique_entreprise css_class="col-md-6" %}
+        {% field_data _('VAT number') proposition.numero_tva_entreprise css_class="col-md-6" %}
+      </div>
+      {% field_data _('Your professional e-mail address') proposition.adresse_mail_professionnelle %}
+      {% if proposition.type_adresse_facturation == 'AUTRE' and proposition.adresse_facturation %}
+        {% panel _("Billing address") %}
+          <div class="row">
+            {% field_data _("Street") proposition.adresse_facturation.rue css_class="col-md-4" %}
+            {% field_data _("Number") proposition.adresse_facturation.numero_rue css_class="col-md-2" %}
+            {% field_data _("Box") proposition.adresse_facturation.boite_postale css_class="col-md-2" hide_empty=True %}
+            {% field_data _("Place") proposition.adresse_facturation.lieu_dit css_class="col-md-4" hide_empty=True %}
+          </div>
+          <div class="row">
+            {% field_data _("Country") proposition.adresse_facturation.nom_pays css_class="col-md-4" %}
+            {% field_data _("Postal code") proposition.adresse_facturation.code_postal css_class="col-md-4" %}
+            {% field_data _("City") proposition.adresse_facturation.ville css_class="col-md-4" %}
+          </div>
+        {% endpanel %}
+      {% else %}
+        {% field_data _('Billing address') proposition.type_adresse_facturation|enum_display:'ChoixTypeAdresseFacturation' %}
+      {% endif %}
+    {% endif %}
+    {% multiple_field_data specific_questions proposition.reponses_questions_specifiques title='' %}
+  {% endpanel %}
+{% else %}
+  {% multiple_field_data specific_questions proposition.reponses_questions_specifiques %}
+{% endif %}
+
+{% if enrolled_for_contingent_training %}
+  {% panel _("Enrollment in a bachelor with quota") %}
+    {% field_data _("Are you a non-resident (as defined in decree)?") proposition.est_non_resident_au_sens_decret %}
+  {% endpanel %}
+{% endif %}
+
+{% if eligible_for_modification %}
+  {% panel _("Registration change") %}
+    {% field_data _("Are you currently enrolled in the first year of a bachelor's degree at a college or university in the French Community of Belgium?") proposition.est_bachelier_belge %}
+    {% if proposition.est_bachelier_belge %}
+      {% field_data _('Would you like to change your registration for this academic year at UCLouvain?') proposition.est_modification_inscription_externe %}
+      {% if proposition.est_modification_inscription_externe %}
+        {% field_data _("Registration modification form") proposition.formulaire_modification_inscription %}
+      {% endif %}
+    {% endif %}
+  {% endpanel %}
+{% endif %}
+
+{% if eligible_for_reorientation %}
+  {% panel _("Reorientation") %}
+    {% field_data _("Are you currently enrolled in the first year of a bachelor's degree at a college or university in the French Community of Belgium?") proposition.est_bachelier_belge %}
+    {% if proposition.est_bachelier_belge %}
+      {% field_data _('Would you like to reorient yourself for this academic year at UCLouvain?') proposition.est_reorientation_inscription_externe %}
+      {% if proposition.est_reorientation_inscription_externe %}
+        {% field_data _("Certificate of regular enrolment") proposition.attestation_inscription_reguliere %}
+      {% endif %}
+    {% endif %}
+  {% endpanel %}
+{% endif %}

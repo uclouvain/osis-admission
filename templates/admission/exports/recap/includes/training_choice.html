@@ -1,0 +1,50 @@
+{% load i18n admission enums %}
+{% comment 'License' %}
+  * OSIS stands for Open Student Information System. It's an application
+  * designed to manage the core business of higher education institutions,
+  * such as universities, faculties, institutes and professional schools.
+  * The core business involves the administration of students, teachers,
+  * courses, programs and so on.
+  *
+  * Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+  *
+  * This program is free software: you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License as published by
+  * the Free Software Foundation, either version 3 of the License, or
+  * (at your option) any later version.
+  *
+  * This program is distributed in the hope that it will be useful,
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU General Public License for more details.
+  *
+  * A copy of this license - GNU General Public License - is available
+  * at the root of the source code of this program.  If not,
+  * see http://www.gnu.org/licenses/.
+{% endcomment %}
+{% panel _('Education you are applying for') %}
+  {% field_data _('Education name') formation.intitule %}
+  {% field_data _('Campus') formation.campus %}
+{% endpanel %}
+
+{% if formation.type|admission_training_type == 'DOCTORAT' %}
+  {% panel _('Student profile') %}
+    {% with proposition.bourse_erasmus_mundus.nom_court|default:_('No') as short_name %}
+      {% field_data _('Erasmus mundus scholarship') admission.bourse_erasmus_mundus.nom_long|default:short_name %}
+    {% endwith %}
+  {% endpanel %}
+{% elif formation.type|admission_training_type == 'MASTER' %}
+  {% panel _('Student profile') %}
+    {% with proposition.bourse_double_diplome.nom_court|default:_('No') as short_name %}
+      {% field_data _('Double degree scholarship') proposition.bourse_double_diplome.nom_long|default:short_name %}
+    {% endwith %}
+    {% with proposition.bourse_erasmus_mundus.nom_court|default:_('No') as short_name %}
+      {% field_data _('Erasmus mundus scholarship') proposition.bourse_erasmus_mundus.nom_long|default:short_name %}
+    {% endwith %}
+    {% with proposition.bourse_internationale.nom_court|default:_('No') as short_name %}
+      {% field_data _('International scholarship') proposition.bourse_internationale.nom_long|default:short_name %}
+    {% endwith %}
+  {% endpanel %}
+{% endif %}
+
+{% multiple_field_data specific_questions proposition.reponses_questions_specifiques %}

@@ -100,6 +100,7 @@ urlpatterns = [
     path('propositions/doctorate/<uuid:uuid>/accounting', views.DoctorateAccountingView),
     path('propositions/doctorate/<uuid:uuid>/training_choice', views.DoctorateUpdateAdmissionTypeAPIView),
     path('propositions/doctorate/<uuid:uuid>/<str:tab>/specific-question', views.DoctorateSpecificQuestionListView),
+    path('propositions/doctorate/<uuid:uuid>/pdf-recap', views.DoctoratePDFRecapView),
     # Supervision
     path('propositions/doctorate/<uuid:uuid>/supervision', views.SupervisionAPIView),
     path(
@@ -138,6 +139,7 @@ urlpatterns = [
     path(
         'propositions/general-education/<uuid:uuid>/<str:tab>/specific-question', views.GeneralSpecificQuestionListView
     ),
+    path('propositions/general-education/<uuid:uuid>/pdf-recap', views.GeneralPDFRecapView),
     path('propositions/general-education/<uuid:uuid>/accounting', views.GeneralAccountingView),
     _path('propositions/general-education/<uuid:uuid>/', include(general_education_view_set_router.urls)),
     path('propositions/general-education/<uuid:uuid>/submit', views.SubmitGeneralEducationPropositionView),
@@ -154,6 +156,7 @@ urlpatterns = [
         'propositions/continuing-education/<uuid:uuid>/<str:tab>/specific-question',
         views.ContinuingSpecificQuestionListView,
     ),
+    path('propositions/continuing-education/<uuid:uuid>/pdf-recap', views.ContinuingPDFRecapView),
     _path('propositions/continuing-education/<uuid:uuid>/', include(continuing_education_view_set_router.urls)),
     path('propositions/continuing-education/<uuid:uuid>/submit', views.SubmitContinuingEducationPropositionView),
     # Autocompletes

@@ -53,6 +53,7 @@ from admission.infrastructure.admission.formation_continue.domain.service.in_mem
 from admission.infrastructure.admission.formation_continue.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
+from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
 
 _proposition_repository = PropositionInMemoryRepository()
 _formation_continue_translator = FormationContinueInMemoryTranslator()
@@ -61,6 +62,7 @@ _titres_acces = TitresAccesInMemory()
 _profil_candidat_translator = ProfilCandidatInMemoryTranslator()
 _question_specific_translator = QuestionSpecifiqueInMemoryTranslator()
 _maximum_propositions_autorisees = MaximumPropositionsAutoriseesInMemory()
+_academic_year_repository = AcademicYearInMemoryRepository()
 
 
 COMMAND_HANDLERS = {
@@ -136,5 +138,11 @@ COMMAND_HANDLERS = {
     CompleterQuestionsSpecifiquesCommand: lambda msg_bus, cmd: completer_questions_specifiques(
         cmd,
         proposition_repository=_proposition_repository,
+    ),
+    RecupererResumePropositionQuery: lambda msg_bus, cmd: recuperer_resume_proposition(
+        cmd,
+        proposition_repository=_proposition_repository,
+        i_profil_candidat_translator=_profil_candidat_translator,
+        academic_year_repository=_academic_year_repository,
     ),
 }

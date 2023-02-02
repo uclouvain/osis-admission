@@ -73,4 +73,5 @@ class GroupeDeSupervisionDto(interface.DomainService):
                 for signature in groupe.signatures_membres_CA
             ],
             promoteur_reference=groupe.promoteur_reference_id and groupe.promoteur_reference_id.uuid or '',
+            cotutelle=repository.get_cotutelle_dto_from_model(groupe.cotutelle),
         )

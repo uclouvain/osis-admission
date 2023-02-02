@@ -3,106 +3,122 @@
 
 {% block extra_head %}
   <style>
-      #title {
-          margin-bottom: 3em;
-      }
+    #title {
+      margin-bottom: 3em;
+    }
 
-      #title h1, #title h2 {
-          font-size: 1em;
-          text-align: center;
-      }
+    #title h1, #title h2 {
+      font-size: 1em;
+      text-align: center;
+    }
 
-      #title h1 {
-          color: #5db3e6 !important;
-          text-transform: uppercase;
-          font-weight: bold;
-      }
+    #title h1 {
+      color: #5db3e6 !important;
+      text-transform: uppercase;
+      font-weight: bold;
+    }
 
-      #title h2 {
-          color: #515151 !important;
-          font-style: italic;
-      }
+    #title h2 {
+      color: #515151 !important;
+      font-style: italic;
+    }
 
-      dl {
-          margin-bottom: 10px;
-      }
+    dl {
+      margin-bottom: 10px;
+    }
 
-      dd {
-          margin-left: 5px;
-      }
+    dd {
+      margin-left: 5px;
+    }
 
-      .to-complete {
-          display: flex;
-      }
+    .to-complete {
+      display: flex;
+    }
 
-      .to-complete dd {
-          flex: 1;
-          height: 1em;
-          border-bottom: 1px dashed black;
-          margin-top: 1px;
-      }
+    .to-complete dd {
+      flex: 1;
+      height: 1em;
+      border-bottom: 1px dashed black;
+      margin-top: 1px;
+    }
 
-      .to-complete hr {
-          flex: 1;
-          margin-left: 5px;
-      }
+    .to-complete hr {
+      flex: 1;
+      margin-left: 5px;
+      margin-bottom: 0;
+    }
 
-      .dashed-line {
-          border: none;
-          border-bottom: 1px dashed black;
-          margin-top: 0;
-          height: 1em;
-      }
+    .dashed-line {
+      border: none;
+      border-bottom: 1px dashed black;
+      margin-top: 0;
+      height: 1em;
+    }
 
-      .solid-line {
-          border: none;
-          border-bottom: 1px solid black;
-          margin: 1px 5px;
-          height: 1em;
-      }
+    .solid-line {
+      border: none;
+      border-bottom: 1px solid black;
+      margin: 1px 5px;
+      height: 1em;
+    }
 
-      .list-title {
-          margin-bottom: 10px;
-          text-decoration: underline;
-          font-weight: bold;
-      }
+    .list-title {
+      margin-bottom: 10px;
+      text-decoration: underline;
+      font-weight: bold;
+    }
 
-      .avoid-break-inside {
-          break-inside: avoid;
-      }
+    .avoid-break-inside {
+      break-inside: avoid;
+    }
 
-      #confirmation-result {
-          margin-left: 2em;
-      }
+    #confirmation-result {
+      margin-left: 2em;
+    }
 
-      #confirmation-result > div {
-          margin-left: 2em;
-      }
+    #confirmation-result > div {
+      margin-left: 2em;
+      margin-bottom: 1em;
+    }
 
-      #confirmation-result label {
-          display: inline;
-          font-weight: normal;
-      }
+    #confirmation-result label {
+      display: inline;
+      font-weight: normal;
+    }
 
-      #confirmation-result input[type="checkbox"] {
-          float: left;
-          height: 1em;
-          width: 1em;
-          display: inline-block;
-          border: #444 1px solid;
-      }
+    #confirmation-result input[type="checkbox"] {
+      float: left;
+      height: 1em;
+      width: 1em;
+      display: inline-block;
+      border: #444 1px solid;
+    }
 
-      p {
-          margin-top: 1.5em;
-      }
+    p {
+      margin-top: 1.5em;
+    }
 
-      #signatures th, #signatures td {
-          text-align: center;
-      }
+    #signatures th, #signatures td {
+      text-align: center;
+    }
 
-      #signatures td {
-          min-height: 6em;
-      }
+    #signatures td {
+      min-height: 6em;
+    }
+
+    .complete-after {
+      overflow: hidden;
+      position: relative;
+    }
+
+    .complete-after:after {
+      content: "";
+      width: 100%;
+      position: absolute;
+      bottom: 0;
+      border-bottom: 1px dashed black;
+      margin: 5px;
+    }
 
   </style>
 {% endblock %}
@@ -121,7 +137,8 @@
     {% else %}
       {% translate "The doctoral student" as student_title context "male gender" %}
     {% endif %}
-    {% field_data student_title doctorate.nom_doctorant|add:" "|add:doctorate.prenom_doctorant inline=True %}
+    {% concat doctorate.nom_doctorant " " doctorate.prenom_doctorant as full_name %}
+    {% field_data student_title full_name inline=True %}
     {% field_data _("Registration Id") doctorate.noma_doctorant inline=True %}
     {% field_data _("Definitive admission date to doctorate") doctorate.admission_acceptee_le inline=True %}
 
@@ -138,7 +155,12 @@
 
     {% field_data _("Thesis title") admission.project_title inline=True %}
 
-    {% field_data _("New thesis title (if applicable)") " " "to-complete" inline=True %}
+    <div class="to-complete">
+      <strong>
+        {% translate "New thesis title (if applicable):" %}
+      </strong>
+      <hr class="dashed-line" />
+    </div>
     <hr class="dashed-line" />
 
     <span class="list-title">{% blocktranslate with label=_("Promotion") %}{{ label }}:{% endblocktranslate %}</span>
@@ -202,15 +224,12 @@
           <label for="confirmation-retaking">
             {% translate "the <strong>failure</strong> of the confirmation paper." %}
           </label>
-          <div class="to-complete">
-            <span>
-              {% if doctorate.genre_doctorant == "F" %}
-                {% translate "The committee requests the candidate to <strong>retake</strong> the paper <u>before</u>:" context "female gender" %}
-              {% else %}
-                {% translate "The committee requests the candidate to <strong>retake</strong> the paper <u>before</u>:" context "male gender"%}
-              {% endif %}
-            </span>
-            <hr class="dashed-line"/>
+          <div class="complete-after">
+            {% if doctorate.genre_doctorant == "F" %}
+              {% translate "The committee requests the candidate to <strong>retake</strong> the paper <u>before</u>:" context "female gender" %}
+            {% else %}
+              {% translate "The committee requests the candidate to <strong>retake</strong> the paper <u>before</u>:" context "male gender"%}
+            {% endif %}
           </div>
         </div>
 
@@ -252,35 +271,35 @@
         <span style="font-weight: bold; text-transform: uppercase;">{% translate "Signatures" %}</span>
       </caption>
       <thead>
-      <tr>
-        <th>{% translate "The CA members" %}</th>
-        <th>{{ student_title }}</th>
-      </tr>
+        <tr>
+          <th>{% translate "The CA members" %}</th>
+          <th>{{ student_title }}</th>
+        </tr>
       </thead>
       <tbody>
-      {% for signature_promoteur in supervision_group.signatures_promoteurs %}
-        <tr>
-          <td>
+        {% for signature_promoteur in supervision_group.signatures_promoteurs %}
+          <tr>
+            <td>
             <span>
               {{ signature_promoteur.promoteur.titre }} {{ signature_promoteur.promoteur.prenom }} {{ signature_promoteur.promoteur.nom }}
             </span>
-          </td>
-          {% if forloop.first %}
-            <td rowspan="{{ supervision_people_nb }}">
-              {{ doctorate.prenom_doctorant }} {{ doctorate.nom_doctorant }}
             </td>
-          {% endif %}
-        </tr>
-      {% endfor %}
-      {% for signature_membre_ca in supervision_group.signatures_membres_CA %}
-        <tr>
-          <td>
+            {% if forloop.first %}
+              <td rowspan="{{ supervision_people_nb }}">
+                {{ doctorate.prenom_doctorant }} {{ doctorate.nom_doctorant }}
+              </td>
+            {% endif %}
+          </tr>
+        {% endfor %}
+        {% for signature_membre_ca in supervision_group.signatures_membres_CA %}
+          <tr>
+            <td>
             <span>
               {{ signature_membre_ca.membre_CA.titre }} {{ signature_membre_ca.membre_CA.prenom }} {{ signature_membre_ca.membre_CA.nom }}
             </span>
-          </td>
-        </tr>
-      {% endfor %}
+            </td>
+          </tr>
+        {% endfor %}
       </tbody>
     </table>
 

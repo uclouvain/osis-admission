@@ -35,6 +35,7 @@ from rest_framework.test import APITestCase
 
 from admission.contrib.models.base import BaseAdmission
 from admission.tests.factories import DoctorateAdmissionFactory
+from admission.tests.factories.calendar import AdmissionAcademicCalendarFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.roles import CandidateFactory, CddManagerFactory
@@ -66,6 +67,7 @@ class BelgianHighSchoolDiplomaTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
         cls.academic_year = AcademicYearFactory(current=True)
+        AdmissionAcademicCalendarFactory.produce_all_required(cls.academic_year.year)
         cls.high_school = HighSchoolFactory()
 
         EntityVersionAddressFactory(entity_version__entity=EntityFactory(organization=cls.high_school))

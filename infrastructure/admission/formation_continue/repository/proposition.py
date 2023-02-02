@@ -210,6 +210,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
 
     @classmethod
     def _load_dto(cls, admission: ContinuingEducationAdmission) -> 'PropositionDTO':
+        has_default_language = get_language() == settings.LANGUAGE_CODE
         return PropositionDTO(
             uuid=admission.uuid,
             statut=admission.status,
@@ -263,10 +264,15 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 code_postal=admission.billing_address_postal_code,
                 ville=admission.billing_address_city,
                 pays=admission.billing_address_country.iso_code if admission.billing_address_country else '',
+                nom_pays=getattr(admission.billing_address_country, 'name' if has_default_language else 'name_en')
+                if admission.billing_address_country
+                else '',
                 destinataire=admission.billing_address_recipient,
                 boite_postale=admission.billing_address_postal_box,
                 lieu_dit=admission.billing_address_place,
             )
             if admission.billing_address_type == ChoixTypeAdresseFacturation.AUTRE.name
             else None,
+            elements_confirmation=admission.confirmation_elements,
+            pdf_recapitulatif=admission.pdf_recap,
         )
