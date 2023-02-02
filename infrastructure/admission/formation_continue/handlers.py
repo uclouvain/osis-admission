@@ -41,6 +41,7 @@ from admission.infrastructure.admission.formation_continue.domain.service.questi
     QuestionSpecifiqueTranslator,
 )
 from admission.infrastructure.admission.formation_continue.repository.proposition import PropositionRepository
+from infrastructure.shared_kernel.academic_year.repository.academic_year import AcademicYearRepository
 
 COMMAND_HANDLERS = {
     RechercherFormationContinueQuery: lambda msg_bus, cmd: rechercher_formations(
@@ -115,5 +116,11 @@ COMMAND_HANDLERS = {
     CompleterQuestionsSpecifiquesCommand: lambda msg_bus, cmd: completer_questions_specifiques(
         cmd,
         proposition_repository=PropositionRepository(),
+    ),
+    RecupererResumePropositionQuery: lambda msg_bus, cmd: recuperer_resume_proposition(
+        cmd,
+        proposition_repository=PropositionRepository(),
+        i_profil_candidat_translator=ProfilCandidatTranslator(),
+        academic_year_repository=AcademicYearRepository(),
     ),
 }

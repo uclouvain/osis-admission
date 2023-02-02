@@ -24,6 +24,7 @@
 #
 # ##############################################################################
 import datetime
+import uuid
 from typing import Optional
 from unittest import TestCase, mock
 
@@ -93,7 +94,14 @@ from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from base.models.enums.got_diploma import GotDiploma
 from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import AcademicYear, AcademicYearIdentity
 from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
-from osis_profile.models.enums.curriculum import Result, TranscriptType, Grade, EvaluationSystem
+from osis_profile.models.enums.curriculum import (
+    Result,
+    TranscriptType,
+    Grade,
+    EvaluationSystem,
+    ActivityType,
+    ActivitySector,
+)
 from osis_profile.models.enums.education import ForeignDiplomaTypes, Equivalence
 
 
@@ -168,7 +176,24 @@ class TestVerifierPropositionService(TestCase):
             nom_formation='Formation AA',
             grade_obtenu=Grade.GREAT_DISTINCTION.name,
             systeme_evaluation=EvaluationSystem.ECTS_CREDITS.name,
+            adresse_institut='',
+            code_institut='',
+            communaute_institut='',
+            nom_institut='',
+            nom_pays='',
+            nom_regime_linguistique='',
+            type_enseignement='',
         )
+
+        cls.params_defaut_experience_non_academique = {
+            'uuid': str(uuid.uuid4()),
+            'employeur': 'UCL',
+            'type': ActivityType.WORK.name,
+            'certificat': [],
+            'fonction': 'Bibliothécaire',
+            'secteur': ActivitySector.PUBLIC.name,
+            'autre_activite': '',
+        }
 
     def setUp(self) -> None:
         self.message_bus = message_bus_in_memory_instance
@@ -307,6 +332,13 @@ class TestVerifierPropositionService(TestCase):
                 nom_formation='Formation AA',
                 systeme_evaluation=EvaluationSystem.ECTS_CREDITS.name,
                 grade_obtenu=Grade.GREAT_DISTINCTION.name,
+                adresse_institut='',
+                code_institut='',
+                communaute_institut='',
+                nom_institut='',
+                nom_pays='',
+                nom_regime_linguistique='',
+                type_enseignement='',
             ),
         )
         with mock.patch.multiple(self.aggregation_proposition, equivalence_diplome=[]):
@@ -1034,6 +1066,7 @@ class TestVerifierPropositionService(TestCase):
                 personne=self.bachelier_proposition.matricule_candidat,
                 date_debut=datetime.date(2015, 1, 1),
                 date_fin=datetime.date(2018, 1, 1),
+                **self.params_defaut_experience_non_academique,
             )
         )
         self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesDTO(
@@ -1094,6 +1127,7 @@ class TestVerifierPropositionService(TestCase):
                 personne=self.bachelier_proposition.matricule_candidat,
                 date_debut=datetime.date(2015, 1, 1),
                 date_fin=datetime.date(2018, 1, 1),
+                **self.params_defaut_experience_non_academique,
             )
         )
         self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesDTO(
@@ -1614,12 +1648,3 @@ class TestVerifierPropositionService(TestCase):
             self.message_bus.invoke(VerifierPropositionQuery(uuid_proposition=propositions[2].entity_id.uuid))
 
         self.assertHasInstance(context.exception.exceptions, NombrePropositionsSoumisesDepasseException)
-
-    def test_should_verification_renvoyer_erreur_si_adresse_email_privee_non_renseignee(self):
-        with mock.patch.multiple(self.candidat_translator.coordonnees_candidats[1], adresse_email_privee=''):
-            with self.assertRaises(MultipleBusinessExceptions) as context:
-                self.message_bus.invoke(
-                    VerifierPropositionQuery(uuid_proposition=self.master_proposition.entity_id.uuid)
-                )
-
-            self.assertHasInstance(context.exception.exceptions, CoordonneesNonCompleteesException)

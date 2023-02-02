@@ -169,6 +169,11 @@ class BaseAdmission(models.Model):
         editable=False,
         null=True,
     )
+    pdf_recap = FileField(
+        blank=True,
+        upload_to=admission_directory_path,
+        verbose_name=_('PDF recap of the proposition'),
+    )
 
     class Meta:
         constraints = [

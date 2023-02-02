@@ -23,8 +23,9 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import uuid
 from collections import defaultdict
-from typing import Dict
+from typing import Dict, Union
 
 from django.core.cache import cache
 from rest_framework.generics import get_object_or_404
@@ -66,7 +67,7 @@ def get_cached_general_education_admission_perm_obj(admission_uuid):
 
 
 def get_cached_continuing_education_admission_perm_obj(admission_uuid):
-    qs = ContinuingEducationAdmission.objects.select_related('candidate')
+    qs = ContinuingEducationAdmission.objects.select_related('candidate', 'training__academic_year')
     return cache.get_or_set(
         'admission_permission_{}'.format(admission_uuid),
         lambda: get_object_or_404(qs, uuid=admission_uuid),
@@ -113,3 +114,20 @@ def takewhile_return_attribute_values(predicate, iterable, attribute):
             yield x[attribute]
         else:
             break
+
+
+def format_academic_year(year: Union[int, str, float]):
+    """Return the academic year related to a specific year."""
+    if not year:
+        return ''
+    if isinstance(year, (str, float)):
+        year = int(year)
+    return f'{year}-{year + 1}'
+
+
+def get_uuid_value(value: str) -> Union[uuid.UUID, str]:
+    """Return the uuid value from a string."""
+    try:
+        return uuid.UUID(hex=value)
+    except ValueError:
+        return value

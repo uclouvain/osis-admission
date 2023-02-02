@@ -89,35 +89,22 @@ dynamic_person_concerned_lowercase = '<span class="relationship-lw">{}</span>'.f
 
 
 class ChoixAssimilation5(ChoiceEnum):
-    A_NATIONALITE_UE = mark_safe(
-        _(
-            '%(person_concerned)s has the nationality of a country of a Member State of the European Union'
-            % {'person_concerned': dynamic_person_concerned}
-        )
+    A_NATIONALITE_UE = _(
+        '%(person_concerned)s has the nationality of a country of a Member State of the European Union'
     )
-    TITULAIRE_TITRE_SEJOUR_LONGUE_DUREE = mark_safe(
-        _(
-            '%(person_concerned)s has a long-term residence permit (B, C, D, F, F+ or M cards) in Belgium'
-            % {'person_concerned': dynamic_person_concerned}
-        )
+    TITULAIRE_TITRE_SEJOUR_LONGUE_DUREE = _(
+        '%(person_concerned)s has a long-term residence permit (B, C, D, F, F+ or M cards) in Belgium'
     )
-    CANDIDATE_REFUGIE_OU_REFUGIE_OU_APATRIDE_OU_PROTECTION_SUBSIDIAIRE_TEMPORAIRE = mark_safe(
-        _(
-            '%(person_concerned)s is a refugee applicant, refugee, stateless person, or has '
-            'temporary/subsidiary protection' % {'person_concerned': dynamic_person_concerned}
-        )
+    CANDIDATE_REFUGIE_OU_REFUGIE_OU_APATRIDE_OU_PROTECTION_SUBSIDIAIRE_TEMPORAIRE = _(
+        '%(person_concerned)s is a refugee applicant, refugee, stateless person, or has '
+        'temporary/subsidiary protection'
     )
-    AUTORISATION_SEJOUR_ET_REVENUS_PROFESSIONNELS_OU_REMPLACEMENT = mark_safe(
-        _(
-            '%(person_concerned)s has a residence permit for more than 3 months and receives professional or '
-            'replacement income' % {'person_concerned': dynamic_person_concerned}
-        )
+    AUTORISATION_SEJOUR_ET_REVENUS_PROFESSIONNELS_OU_REMPLACEMENT = _(
+        '%(person_concerned)s has a residence permit for more than 3 months and receives professional or '
+        'replacement income'
     )
-    PRIS_EN_CHARGE_OU_DESIGNE_CPAS = mark_safe(
-        _(
-            '%(person_concerned)s is supported by the CPAS, or by a CPAS rest home or designated by the CPAS'
-            % {'person_concerned': dynamic_person_concerned}
-        )
+    PRIS_EN_CHARGE_OU_DESIGNE_CPAS = _(
+        '%(person_concerned)s is supported by the CPAS, or by a CPAS rest home or designated by the CPAS'
     )
 
 

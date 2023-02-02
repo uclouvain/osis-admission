@@ -26,14 +26,17 @@
 from django.conf import settings
 from django.shortcuts import resolve_url
 from django.utils import translation
+from django.utils.translation import gettext as _
+from osis_async.models import AsyncTask
+from osis_mail_template import generate_email
+from osis_notification.contrib.handlers import EmailNotificationHandler
 
+from admission.contrib.models import AdmissionTask
+from admission.contrib.models.base import BaseAdmission
 from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition
 from admission.ddd.admission.formation_generale.domain.service.i_notification import INotification
 from admission.infrastructure.admission.formation_generale.domain.service.formation import FormationGeneraleTranslator
 from admission.mail_templates.submission import ADMISSION_EMAIL_CONFIRM_SUBMISSION_GENERAL
-from base.models.person import Person
-from osis_mail_template import generate_email
-from osis_notification.contrib.handlers import EmailNotificationHandler
 
 
 class Notification(INotification):
@@ -59,15 +62,27 @@ class Notification(INotification):
 
     @classmethod
     def confirmer_soumission(cls, proposition: Proposition) -> None:
-        candidat = Person.objects.get(global_id=proposition.matricule_candidat)
+        admission = BaseAdmission.objects.select_related('candidate').get(uuid=proposition.entity_id.uuid)
+
+        # Create the async task to generate the pdf recap
+        task = AsyncTask.objects.create(
+            name=_('Recap of the proposition %(reference)s') % {'reference': proposition.reference},
+            description=_('Create the recap of the proposition'),
+            person=admission.candidate,
+        )
+        AdmissionTask.objects.create(
+            task=task,
+            admission=admission,
+            type=AdmissionTask.TaskType.GENERAL_RECAP.name,
+        )
 
         # Notifier le doctorant via mail
-        with translation.override(candidat.language):
-            common_tokens = cls.get_common_tokens(proposition, candidat)
+        with translation.override(admission.candidate.language):
+            common_tokens = cls.get_common_tokens(proposition, admission.candidate)
         email_message = generate_email(
             ADMISSION_EMAIL_CONFIRM_SUBMISSION_GENERAL,
-            candidat.language,
+            admission.candidate.language,
             common_tokens,
-            recipients=[candidat],
+            recipients=[admission.candidate],
         )
-        EmailNotificationHandler.create(email_message, person=candidat)
+        EmailNotificationHandler.create(email_message, person=admission.candidate)

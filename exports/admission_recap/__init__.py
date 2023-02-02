@@ -1,4 +1,4 @@
-##############################################################################
+# ##############################################################################
 #
 #    OSIS stands for Open Student Information System. It's an application
 #    designed to manage the core business of higher education institutions,
@@ -22,24 +22,4 @@
 #    at the root of the source code of this program.  If not,
 #    see http://www.gnu.org/licenses/.
 #
-##############################################################################
-from typing import Optional
-
-import attr
-
-from osis_common.ddd import interface
-
-
-@attr.dataclass(frozen=True, slots=True)
-class ComptabiliteDTO(interface.DTO):
-    # Affiliations
-    etudiant_solidaire: Optional[bool]
-
-    # Compte bancaire
-    type_numero_compte: Optional[str]
-    numero_compte_iban: Optional[str]
-    iban_valide: Optional[bool]
-    numero_compte_autre_format: Optional[str]
-    code_bic_swift_banque: Optional[str]
-    prenom_titulaire_compte: Optional[str]
-    nom_titulaire_compte: Optional[str]
+# ##############################################################################

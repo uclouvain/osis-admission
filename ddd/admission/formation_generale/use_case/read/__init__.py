@@ -29,5 +29,6 @@ from .rechercher_formations_service import rechercher_formations, rechercher_for
 from .recuperer_comptabilite_service import recuperer_comptabilite
 from .recuperer_elements_confirmation_service import recuperer_elements_confirmation
 from .recuperer_proposition_service import recuperer_proposition
+from .recuperer_resume_proposition_service import recuperer_resume_proposition
 from .verifier_curriculum_service import verifier_curriculum
 from .verifier_proposition_service import verifier_proposition

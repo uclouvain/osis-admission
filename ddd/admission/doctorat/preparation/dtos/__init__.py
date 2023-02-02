@@ -35,6 +35,7 @@ from .groupe_supervision import (
     MembreCADTO,
     PromoteurDTO,
 )
+from .connaissance_langue import ConnaissanceLangueDTO
 from .proposition import PropositionDTO
 from .superieur import (
     AutreOccupationDTO,
@@ -48,6 +49,7 @@ __all__ = [
     "AnneeExperienceAcademiqueDTO",
     "AvisDTO",
     "AutreOccupationDTO",
+    "ConnaissanceLangueDTO",
     "ConditionsComptabiliteDTO",
     "ComptabiliteDTO",
     "CotutelleDTO",

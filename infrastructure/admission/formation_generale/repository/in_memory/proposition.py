@@ -195,4 +195,12 @@ class PropositionInMemoryRepository(
             reponses_questions_specifiques=proposition.reponses_questions_specifiques,
             equivalence_diplome=proposition.equivalence_diplome,
             curriculum=proposition.curriculum,
+            est_bachelier_belge=proposition.est_bachelier_belge,
+            est_non_resident_au_sens_decret=proposition.est_non_resident_au_sens_decret,
+            elements_confirmation=proposition.elements_confirmation,
+            est_modification_inscription_externe=proposition.est_modification_inscription_externe,
+            formulaire_modification_inscription=proposition.formulaire_modification_inscription,
+            est_reorientation_inscription_externe=proposition.est_reorientation_inscription_externe,
+            attestation_inscription_reguliere=proposition.attestation_inscription_reguliere,
+            pdf_recapitulatif=[],
         )

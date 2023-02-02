@@ -101,5 +101,7 @@ class CddManager(EntityRoleModel):
             'admission.add_internalnote': is_part_of_doctoral_commission,
             'admission.view_internalnote': is_part_of_doctoral_commission,
             'admission.view_debug_info': is_debug,
+            # Exports
+            'admission.download_doctorateadmission_pdf_recap': is_part_of_doctoral_commission,
         }
         return RuleSet(ruleset)

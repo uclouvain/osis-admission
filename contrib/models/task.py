@@ -52,13 +52,16 @@ class AdmissionTask(models.Model):
         ARCHIVE = 'ARCHIVE', _('PDF Export')
         CANVAS = 'CANVAS', _('Canvas')
         CONFIRMATION_SUCCESS = 'CONFIRMATION_SUCCESS', _('Confirmation success attestation')
+        GENERAL_RECAP = 'GENERAL_RECAP', _('PDF recap for a general education admission')
+        CONTINUING_RECAP = 'CONTINUING_RECAP', _('PDF recap for a continuing education admission')
+        DOCTORATE_RECAP = 'DOCTORATE_RECAP', _('PDF recap for a doctorate education admission')
 
     task = models.ForeignKey(
         'osis_async.AsyncTask',
         on_delete=models.CASCADE,
     )
     admission = models.ForeignKey(
-        'admission.DoctorateAdmission',
+        'admission.BaseAdmission',
         on_delete=models.CASCADE,
     )
     type = models.CharField(

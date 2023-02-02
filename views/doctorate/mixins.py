@@ -101,9 +101,14 @@ class LoadDossierViewMixin(LoginRequiredMixin, PermissionRequiredMixin, ContextM
     def get_permission_object(self):
         return self.admission
 
+    @cached_property
+    def base_namespace(self):
+        return ':'.join(self.request.resolver_match.namespaces[:2])
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         admission_status = self.admission.status
+        context['base_namespace'] = self.base_namespace
 
         if self.current_context == CONTEXT_DOCTORATE:
             try:

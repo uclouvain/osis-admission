@@ -134,4 +134,11 @@ COMMAND_HANDLERS = {
         formation_translator=FormationGeneraleTranslator(),
         profil_candidat_translator=ProfilCandidatTranslator(),
     ),
+    RecupererResumePropositionQuery: lambda msg_bus, cmd: recuperer_resume_proposition(
+        cmd,
+        proposition_repository=PropositionRepository(),
+        i_profil_candidat_translator=ProfilCandidatTranslator(),
+        i_comptabilite_translator=ComptabiliteTranslator(),
+        academic_year_repository=AcademicYearRepository(),
+    ),
 }

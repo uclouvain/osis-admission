@@ -41,6 +41,10 @@ class FormationIdentity(interface.EntityIdentity):
     annee: int
 
 
+def est_formation_medecine_ou_dentisterie(code_domaine: str) -> bool:
+    return code_domaine[:2] in PREFIXES_DOMAINES_FORMATIONS_DENT_MED
+
+
 @attr.dataclass(frozen=True, slots=True)
 class Formation(interface.Entity):
     entity_id: FormationIdentity
@@ -53,4 +57,4 @@ class Formation(interface.Entity):
 
     @property
     def est_formation_medecine_ou_dentisterie(self) -> bool:
-        return self.code_domaine[:2] in PREFIXES_DOMAINES_FORMATIONS_DENT_MED
+        return est_formation_medecine_ou_dentisterie(self.code_domaine)

@@ -50,6 +50,7 @@ _CANDIDATE_RULESET = {
     'view_doctorateadmission_cotutelle': is_admission_request_author,
     'view_doctorateadmission_supervision': is_admission_request_author,
     'view_doctorateadmission_training_choice': is_admission_request_author,
+    'download_doctorateadmission_pdf_recap': is_admission_request_author,
     # A candidate can view as long as he's the author and he is being enrolled
     'view_doctorateadmission_person': is_admission_request_author & is_being_enrolled,
     'view_doctorateadmission_coordinates': is_admission_request_author & is_being_enrolled,
@@ -107,6 +108,7 @@ _CANDIDATE_RULESET = {
     'view_generaleducationadmission_languages': is_admission_request_author,
     'view_generaleducationadmission_accounting': is_admission_request_author,
     'view_generaleducationadmission_specific_question': is_admission_request_author,
+    'download_generaleducationadmission_pdf_recap': is_admission_request_author,
     # A candidate can edit some tabs as long as the proposition is in progress
     'change_generaleducationadmission_training_choice': is_admission_request_author & in_progress,
     'change_generaleducationadmission_person': is_admission_request_author & in_progress,
@@ -128,6 +130,7 @@ _CANDIDATE_RULESET = {
     'view_continuingeducationadmission_secondary_studies': is_admission_request_author,
     'view_continuingeducationadmission_languages': is_admission_request_author,
     'view_continuingeducationadmission_specific_question': is_admission_request_author,
+    'download_continuingeducationadmission_pdf_recap': is_admission_request_author,
     # A candidate can edit some tabs as long as the proposition is in progress
     'change_continuingeducationadmission_training_choice': is_admission_request_author & in_progress,
     'change_continuingeducationadmission_person': is_admission_request_author & in_progress,

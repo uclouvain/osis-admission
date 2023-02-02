@@ -179,7 +179,7 @@ class ProfilCandidat(interface.DomainService):
             annee_diplome_etudes_secondaires=curriculum.annee_diplome_etudes_secondaires,
             annee_derniere_inscription_ucl=curriculum.annee_derniere_inscription_ucl,
             fichier_pdf=curriculum_pdf,
-            dates_experiences_non_academiques=curriculum.dates_experiences_non_academiques,
+            experiences_non_academiques=curriculum.experiences_non_academiques,
         ).validate()
 
     @classmethod
@@ -205,7 +205,7 @@ class ProfilCandidat(interface.DomainService):
             annee_diplome_etudes_secondaires=curriculum.annee_diplome_etudes_secondaires,
             annee_derniere_inscription_ucl=curriculum.annee_derniere_inscription_ucl,
             fichier_pdf=proposition.curriculum,
-            dates_experiences_non_academiques=curriculum.dates_experiences_non_academiques,
+            experiences_non_academiques=curriculum.experiences_non_academiques,
             type_formation=type_formation,
             equivalence_diplome=proposition.equivalence_diplome,
             sigle_formation=proposition.formation_id.sigle,

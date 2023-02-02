@@ -31,17 +31,49 @@ from osis_common.ddd import interface
 
 
 @attr.dataclass(slots=True, frozen=True)
+class GrilleHoraireDTO(interface.DTO):
+    latin: int
+    grec: int
+    chimie: int
+    physique: int
+    biologie: int
+    allemand: int
+    francais: int
+    espagnol: int
+    neerlandais: int
+    anglais: int
+    mathematique: int
+    informatique: int
+    sciences_sociales: int
+    sciences_economiques: int
+    autre_langue_moderne_label: str
+    autre_label: str
+    autre_langue_moderne_duree: Optional[int] = None
+    autre_duree: Optional[int] = None
+
+
+@attr.dataclass(slots=True, frozen=True)
 class DiplomeBelgeEtudesSecondairesDTO(interface.DTO):
+    resultat: str = ''
     certificat_inscription: List = attr.Factory(list)
     diplome: List = attr.Factory(list)
+    type_enseignement: str = ''
+    autre_type_enseignement: str = ''
+    nom_institut: str = ''
+    adresse_institut: str = ''
+    grille_horaire: Optional[GrilleHoraireDTO] = None
+    communaute: str = ''
 
 
 @attr.dataclass(slots=True, frozen=True)
 class DiplomeEtrangerEtudesSecondairesDTO(interface.DTO):
+    resultat: str = ''
     type_diplome: str = ''
     regime_linguistique: str = ''
+    pays_regime_linguistique: str = ''
     pays_membre_ue: Optional[bool] = None
     pays_iso_code: str = ''
+    pays_nom: str = ''
     releve_notes: List = attr.Factory(list)
     traduction_releve_notes: List = attr.Factory(list)
     diplome: List = attr.Factory(list)
@@ -66,4 +98,4 @@ class EtudesSecondairesDTO(interface.DTO):
     alternative_secondaires: Optional[AlternativeSecondairesDTO] = None
     diplome_etudes_secondaires: str = ''
     annee_diplome_etudes_secondaires: Optional[int] = None
-    valorisees: bool = False
+    valorisees: Optional[bool] = False

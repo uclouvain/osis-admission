@@ -39,7 +39,10 @@ from admission.ddd.admission.doctorat.preparation.domain.model._promoteur import
 from admission.ddd.admission.doctorat.preparation.domain.model._signature_promoteur import SignaturePromoteur
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixDoctoratDejaRealise, ChoixTypeAdmission
 from admission.ddd.admission.doctorat.preparation.domain.validator import *
-from admission.ddd.admission.doctorat.preparation.dtos.curriculum import ExperienceAcademiqueDTO
+from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
+    ExperienceAcademiqueDTO,
+    ExperienceNonAcademiqueDTO,
+)
 from admission.ddd.admission.domain.validator import (
     ShouldAnneesCVRequisesCompletees,
     ShouldAbsenceDeDetteEtreCompletee,
@@ -272,7 +275,7 @@ class CurriculumValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
     annee_courante: int
     annee_derniere_inscription_ucl: Optional[int]
     annee_diplome_etudes_secondaires: Optional[int]
-    dates_experiences_non_academiques: List[Tuple[datetime.date, datetime.date]]
+    experiences_non_academiques: List[ExperienceNonAcademiqueDTO]
     experiences_academiques: List[ExperienceAcademiqueDTO]
     experiences_academiques_incompletes: Dict[str, str]
 
@@ -293,7 +296,7 @@ class CurriculumValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
                 experiences_academiques_incompletes=self.experiences_academiques_incompletes,
                 annee_derniere_inscription_ucl=self.annee_derniere_inscription_ucl,
                 annee_diplome_etudes_secondaires=self.annee_diplome_etudes_secondaires,
-                dates_experiences_non_academiques=self.dates_experiences_non_academiques,
+                experiences_non_academiques=self.experiences_non_academiques,
             ),
         ]
 

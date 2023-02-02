@@ -30,6 +30,7 @@ from typing import Dict, List, Optional
 from admission.ddd.admission.doctorat.preparation.dtos import ConditionsComptabiliteDTO, CurriculumDTO
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import CurriculumAExperiencesDTO
 from admission.ddd.admission.dtos import CoordonneesDTO, EtudesSecondairesDTO, IdentificationDTO
+from admission.ddd.admission.dtos.resume import ResumeCandidatDTO
 from base.models.enums.education_group_types import TrainingType
 from osis_common.ddd import interface
 
@@ -116,4 +117,14 @@ class IProfilCandidatTranslator(interface.DomainService):
     @classmethod
     def etudes_secondaires_valorisees(cls, matricule: str) -> bool:
         """Spécifie si les études secondaires ont été valorisées."""
+        raise NotImplementedError
+
+    @classmethod
+    def recuperer_toutes_informations_candidat(
+        cls,
+        matricule: str,
+        formation: str,
+        annee_courante: int,
+    ) -> ResumeCandidatDTO:
+        """Retourne toutes les données relatives à un candidat nécessaires à son admission."""
         raise NotImplementedError

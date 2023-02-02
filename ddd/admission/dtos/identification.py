@@ -35,28 +35,33 @@ from osis_common.ddd import interface
 class IdentificationDTO(interface.DTO):
     matricule: str
 
-    nom: Optional[str]
-    prenom: Optional[str]
+    nom: str
+    prenom: str
+    prenom_d_usage: str
+    autres_prenoms: str
     date_naissance: Optional[datetime.date]
     annee_naissance: Optional[int]
-    pays_nationalite: Optional[str]
-    sexe: Optional[str]
-    genre: Optional[str]
+    pays_nationalite: str
+    pays_nationalite_europeen: Optional[bool]
+    nom_pays_nationalite: str
+    sexe: str
+    genre: str
     photo_identite: List[str]
-    pays_naissance: Optional[str]
-    lieu_naissance: Optional[str]
-    etat_civil: Optional[str]
-    pays_residence: Optional[str]
-    pays_nationalite_europeen: bool
+    pays_naissance: str
+    nom_pays_naissance: str
+    lieu_naissance: str
+    etat_civil: str
+    pays_residence: str
 
     carte_identite: List[str]
     passeport: List[str]
-    numero_registre_national_belge: Optional[str]
-    numero_carte_identite: Optional[str]
-    numero_passeport: Optional[str]
+    numero_registre_national_belge: str
+    numero_carte_identite: str
+    numero_passeport: str
 
-    langue_contact: Optional[str]
-    email: Optional[str]
+    langue_contact: str
+    nom_langue_contact: str
+    email: str
 
     annee_derniere_inscription_ucl: Optional[int]
-    noma_derniere_inscription_ucl: Optional[str]
+    noma_derniere_inscription_ucl: str

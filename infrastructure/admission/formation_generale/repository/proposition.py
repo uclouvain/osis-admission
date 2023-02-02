@@ -322,4 +322,12 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             reponses_questions_specifiques=admission.specific_question_answers,
             curriculum=admission.curriculum,
             equivalence_diplome=admission.diploma_equivalence,
+            est_bachelier_belge=admission.is_belgian_bachelor,
+            est_non_resident_au_sens_decret=admission.is_non_resident,
+            elements_confirmation=admission.confirmation_elements,
+            est_modification_inscription_externe=admission.is_external_modification,
+            formulaire_modification_inscription=admission.registration_change_form,
+            est_reorientation_inscription_externe=admission.is_external_reorientation,
+            attestation_inscription_reguliere=admission.regular_registration_proof,
+            pdf_recapitulatif=admission.pdf_recap,
         )

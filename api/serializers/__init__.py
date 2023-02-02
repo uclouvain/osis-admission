@@ -68,3 +68,4 @@ from .specific_question import (
     ModifierQuestionsSpecifiquesFormationContinueCommandSerializer,
 )
 from .submission import PropositionErrorsSerializer, SubmitPropositionSerializer
+from .pdf_recap import PDFRecapSerializer
