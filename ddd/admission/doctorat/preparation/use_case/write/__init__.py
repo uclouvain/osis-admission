@@ -15,3 +15,4 @@ from .supprimer_promoteur_service import supprimer_promoteur
 from .supprimer_proposition_service import supprimer_proposition
 from .modifier_type_admission_service import modifier_type_admission
 from .completer_curriculum_service import completer_curriculum
+from .renvoyer_invitation_signature_externe_service import renvoyer_invitation_signature_externe

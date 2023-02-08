@@ -1,28 +1,29 @@
 # ##############################################################################
 #
-#    OSIS stands for Open Student Information System. It's an application
-#    designed to manage the core business of higher education institutions,
-#    such as universities, faculties, institutes and professional schools.
-#    The core business involves the administration of students, teachers,
-#    courses, programs and so on.
+#  OSIS stands for Open Student Information System. It's an application
+#  designed to manage the core business of higher education institutions,
+#  such as universities, faculties, institutes and professional schools.
+#  The core business involves the administration of students, teachers,
+#  courses, programs and so on.
 #
-#    Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
 #
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
 #
-#    A copy of this license - GNU General Public License - is available
-#    at the root of the source code of this program.  If not,
-#    see http://www.gnu.org/licenses/.
+#  A copy of this license - GNU General Public License - is available
+#  at the root of the source code of this program.  If not,
+#  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
 from unittest.mock import patch
 
 from django.shortcuts import resolve_url
@@ -37,10 +38,12 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
     CotutelleDoitAvoirAuMoinsUnPromoteurExterneException,
     MembreCAManquantException,
     PromoteurManquantException,
+    SignataireNonTrouveException,
 )
 from admission.tests.factories import DoctorateAdmissionFactory, WriteTokenFactory
 from admission.tests.factories.roles import CddManagerFactory
 from admission.tests.factories.supervision import CaMemberFactory, ExternalPromoterFactory, PromoterFactory
+from osis_notification.models import EmailNotification
 
 
 class RequestSignaturesApiTestCase(APITestCase):
@@ -92,6 +95,7 @@ class RequestSignaturesApiTestCase(APITestCase):
 
         response = self.client.post(self.url)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(EmailNotification.objects.count(), 3)
 
     def test_request_signatures_using_api_without_ca_members_must_fail(self):
         self.client.force_authenticate(user=self.candidate.user)
@@ -165,3 +169,30 @@ class RequestSignaturesApiTestCase(APITestCase):
         response = self.client.post(self.url)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.json()['non_field_errors'][0]['status_code'], PromoteurManquantException.status_code)
+
+    def test_resend_signature(self):
+        self.client.force_authenticate(user=self.candidate.user)
+
+        promoter = PromoterFactory(is_reference_promoter=True)
+        external_promoter = ExternalPromoterFactory(process=promoter.process)
+        CaMemberFactory(process=promoter.process)
+        self.admission.supervision_group = promoter.actor_ptr.process
+        self.admission.save()
+
+        # Send first time
+        response = self.client.post(self.url)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        EmailNotification.objects.all().delete()
+
+        # Resend for internal must fail
+        response = self.client.put(self.url, {'uuid_membre': promoter.uuid})
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(
+            response.json()['non_field_errors'][0]['status_code'],
+            SignataireNonTrouveException.status_code,
+        )
+
+        # Resend for external
+        response = self.client.put(self.url, {'uuid_membre': external_promoter.uuid})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(EmailNotification.objects.count(), 1)

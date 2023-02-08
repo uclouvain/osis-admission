@@ -77,6 +77,7 @@ _CANDIDATE_RULESET = {
     'set_reference_promoter': is_admission_request_author & unconfirmed_proposition,
     # Once supervision group is signing, he can
     'approve_proposition_by_pdf': is_admission_request_author & signing_in_progress,
+    'resend_external_invitation': is_admission_request_author & signing_in_progress,
     'submit_doctorateadmission': is_admission_request_author & unconfirmed_proposition,
     # Once the candidate is enrolling, he can
     'view_doctorateadmission_confirmation': author_and_enrolled,

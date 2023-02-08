@@ -23,7 +23,11 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
+from datetime import timedelta
+
 from django.utils.functional import cached_property
+from django.utils.timezone import now
 from rest_framework import status
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
@@ -48,6 +52,7 @@ __all__ = [
     "ExternalApprovalPropositionAPIView",
     "ApproveByPdfPropositionAPIView",
 ]
+EXTERNAL_ACTOR_TOKEN_EXPIRATION_DAYS = 7
 
 
 class ApprovePropositionMixin:
@@ -130,7 +135,13 @@ class ExternalApprovalPropositionAPIView(ApprovePropositionMixin, APIView):
     def initial(self, request, *args, **kwargs):
         super().initial(request, *args, **kwargs)
         # Load actor from token
-        if not self.actor or self.actor.process_id != self.get_permission_object().supervision_group_id:
+        if (
+            not self.actor
+            # must be part of supervision group
+            or self.actor.process_id != self.get_permission_object().supervision_group_id
+            # must be not older than 7 days
+            or self.actor.states.last().created_at < now() - timedelta(days=EXTERNAL_ACTOR_TOKEN_EXPIRATION_DAYS)
+        ):
             raise PermissionDenied
         # Override the request data to use the actor's uuid loaded from token
         request.data['uuid_membre'] = str(self.actor.uuid)
