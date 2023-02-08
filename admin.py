@@ -142,9 +142,6 @@ class GeneralEducationAdmissionAdmin(ContinuingEducationAdmissionAdmin):
         'international_scholarship',
         'erasmus_mundus_scholarship',
     ]
-    readonly_fields = [
-        "submitted_at",
-    ]
 
 
 class CddMailTemplateAdmin(MailTemplateAdmin):
