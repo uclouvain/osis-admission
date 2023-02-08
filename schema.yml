@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Admission API
-  version: 1.0.65
+  version: 1.0.66
   description: This API delivers data for the Admission project.
   contact:
     name: UCLouvain - OSIS
@@ -4283,6 +4283,41 @@ paths:
               $ref: '#/components/schemas/PropositionIdentityDTO'
       responses:
         201:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PropositionIdentityDTO'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
+    put:
+      operationId: update_signatures
+      description: Resend an invitation for and external member.
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RenvoyerInvitationSignatureExterne'
+      responses:
+        200:
           content:
             application/json:
               schema:
@@ -9830,6 +9865,13 @@ components:
       required:
       - uuid_proposition
       - uuid_promoteur
+    RenvoyerInvitationSignatureExterne:
+      type: object
+      properties:
+        uuid_membre:
+          type: string
+      required:
+      - uuid_membre
     RefuserPropositionCommand:
       type: object
       properties:

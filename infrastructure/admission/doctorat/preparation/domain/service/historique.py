@@ -23,14 +23,15 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import Union
 
 from django.conf import settings
 from django.utils import translation
 
-from admission.ddd.admission.doctorat.preparation.domain.model._membre_CA import MembreCAIdentity
 from admission.ddd.admission.doctorat.preparation.domain.model._promoteur import PromoteurIdentity
-from admission.ddd.admission.doctorat.preparation.domain.model.groupe_de_supervision import GroupeDeSupervision
+from admission.ddd.admission.doctorat.preparation.domain.model.groupe_de_supervision import (
+    GroupeDeSupervision,
+    SignataireIdentity,
+)
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition
 from admission.ddd.admission.doctorat.preparation.domain.service.i_historique import IHistorique
 from admission.ddd.admission.doctorat.preparation.dtos import AvisDTO
@@ -81,12 +82,7 @@ class Historique(IHistorique):
         )
 
     @classmethod
-    def historiser_avis(
-        cls,
-        proposition: Proposition,
-        signataire_id: Union[PromoteurIdentity, MembreCAIdentity],
-        avis: AvisDTO,
-    ):
+    def historiser_avis(cls, proposition: Proposition, signataire_id: 'SignataireIdentity', avis: AvisDTO):
         signataire = cls.get_signataire(signataire_id)
         auteur = PersonneConnueUclTranslator().get(proposition.matricule_candidat) if avis.pdf else signataire
 
@@ -141,7 +137,7 @@ class Historique(IHistorique):
         cls,
         proposition: Proposition,
         groupe_de_supervision: GroupeDeSupervision,
-        signataire_id: Union[PromoteurIdentity, MembreCAIdentity],
+        signataire_id: 'SignataireIdentity',
     ):
         candidat = PersonneConnueUclTranslator().get(proposition.matricule_candidat)
         signataire = cls.get_signataire(signataire_id)
@@ -164,7 +160,7 @@ class Historique(IHistorique):
         cls,
         proposition: Proposition,
         groupe_de_supervision: GroupeDeSupervision,
-        signataire_id: Union[PromoteurIdentity, MembreCAIdentity],
+        signataire_id: 'SignataireIdentity',
     ):
         candidat = PersonneConnueUclTranslator().get(proposition.matricule_candidat)
         signataire = cls.get_signataire(signataire_id)

@@ -106,6 +106,12 @@ COMMAND_HANDLERS = {
         historique=_historique,
         notification=_notification,
     ),
+    RenvoyerInvitationSignatureExterneCommand: lambda msg_bus, cmd: renvoyer_invitation_signature_externe(
+        cmd,
+        proposition_repository=_proposition_repository,
+        groupe_supervision_repository=_groupe_supervision_repository,
+        notification=_notification,
+    ),
     VerifierPropositionQuery: lambda msg_bus, cmd: verifier_proposition(
         cmd,
         proposition_repository=_proposition_repository,

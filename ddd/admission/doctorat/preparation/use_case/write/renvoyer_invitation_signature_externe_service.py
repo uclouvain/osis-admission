@@ -24,29 +24,29 @@
 #
 # ##############################################################################
 
-from admission.ddd.admission.doctorat.preparation.domain.model.groupe_de_supervision import SignataireIdentity
-from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition
+from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import PropositionIdentityBuilder
+from admission.ddd.admission.doctorat.preparation.commands import RenvoyerInvitationSignatureExterneCommand
+from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.doctorat.preparation.domain.service.i_notification import INotification
-from admission.ddd.admission.doctorat.preparation.dtos import AvisDTO
+from admission.ddd.admission.doctorat.preparation.repository.i_groupe_de_supervision import (
+    IGroupeDeSupervisionRepository,
+)
+from admission.ddd.admission.doctorat.preparation.repository.i_proposition import IPropositionRepository
 
 
-class NotificationInMemory(INotification):
-    @classmethod
-    def envoyer_signatures(cls, *args, **kwargs) -> None:
-        pass
+def renvoyer_invitation_signature_externe(
+    cmd: 'RenvoyerInvitationSignatureExterneCommand',
+    proposition_repository: 'IPropositionRepository',
+    groupe_supervision_repository: 'IGroupeDeSupervisionRepository',
+    notification: 'INotification',
+) -> 'PropositionIdentity':
+    # GIVEN
+    proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
+    proposition_candidat = proposition_repository.get(entity_id=proposition_id)
+    groupe_supervision = groupe_supervision_repository.get_by_proposition_id(proposition_id)
+    membre = groupe_supervision.get_signataire(cmd.uuid_membre)
 
-    @classmethod
-    def notifier_avis(cls, proposition: Proposition, signataire_id: 'SignataireIdentity', avis: AvisDTO) -> None:
-        pass
+    # THEN
+    notification.renvoyer_invitation(proposition_candidat, membre)
 
-    @classmethod
-    def notifier_soumission(cls, proposition: Proposition) -> None:
-        pass
-
-    @classmethod
-    def notifier_suppression_membre(cls, proposition: Proposition, signataire_id: 'SignataireIdentity') -> None:
-        pass
-
-    @classmethod
-    def renvoyer_invitation(cls, proposition: Proposition, membre: 'SignataireIdentity'):
-        pass
+    return proposition_id

@@ -31,6 +31,7 @@ from admission.ddd.admission.doctorat.preparation.commands import (
     DesignerPromoteurReferenceCommand,
     IdentifierMembreCACommand,
     IdentifierPromoteurCommand,
+    RenvoyerInvitationSignatureExterneCommand,
     SupprimerMembreCACommand,
     SupprimerPromoteurCommand,
 )
@@ -52,6 +53,7 @@ __all__ = [
     'DesignerPromoteurReferenceCommandSerializer',
     'SupprimerPromoteurCommandSerializer',
     'SupprimerMembreCACommandSerializer',
+    'RenvoyerInvitationSignatureExterneSerializer',
     'PersonSerializer',
     'TutorSerializer',
 ]
@@ -127,6 +129,13 @@ class SupprimerPromoteurCommandSerializer(DTOSerializer):
 class SupprimerMembreCACommandSerializer(DTOSerializer):
     class Meta:
         source = SupprimerMembreCACommand
+
+
+class RenvoyerInvitationSignatureExterneSerializer(DTOSerializer):
+    uuid_proposition = None
+
+    class Meta:
+        source = RenvoyerInvitationSignatureExterneCommand
 
 
 class PersonSerializer(serializers.ModelSerializer):
