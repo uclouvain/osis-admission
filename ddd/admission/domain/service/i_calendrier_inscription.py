@@ -101,10 +101,12 @@ class ICalendrierInscription(interface.DomainService):
         residential_address = profil_candidat_translator.get_coordonnees(matricule_candidat).domicile_legal
         if identification.pays_nationalite is None:
             raise IdentificationNonCompleteeException()
-        ue_plus_5 = cls.est_ue_plus_5(
-            identification,
-            getattr(proposition.comptabilite, 'type_situation_assimilation', None) if proposition else None,
+        situation_assimilation = (
+            proposition
+            and getattr(proposition, 'comptabilite', None)
+            and getattr(proposition.comptabilite, 'type_situation_assimilation', None)
         )
+        ue_plus_5 = cls.est_ue_plus_5(identification, situation_assimilation)
         annees = cls.get_annees_academiques_pour_calcul()
         changements_etablissement = profil_candidat_translator.get_changements_etablissement(matricule_candidat, annees)
 

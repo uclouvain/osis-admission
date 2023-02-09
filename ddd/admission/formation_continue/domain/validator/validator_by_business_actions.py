@@ -27,48 +27,10 @@ from typing import List
 
 import attr
 
-from admission.ddd.admission.domain.validator import (
-    ShouldIBANCarteBancaireRemboursementEtreCompletee,
-    ShouldAutreFormatCarteBancaireRemboursementEtreCompletee,
-    ShouldTypeCompteBancaireRemboursementEtreComplete,
-)
-from admission.ddd.admission.formation_continue.domain.model._comptabilite import Comptabilite
 from admission.ddd.admission.formation_continue.domain.validator import (
-    ShouldAffiliationsEtreCompletees,
     ShouldRenseignerExperiencesCurriculum,
 )
 from base.ddd.utils.business_validator import BusinessValidator, TwoStepsMultipleBusinessExceptionListValidator
-
-
-@attr.dataclass(frozen=True, slots=True)
-class FormationContinueComptabiliteValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
-    comptabilite: Comptabilite
-
-    def get_data_contract_validators(self) -> List[BusinessValidator]:
-        return []
-
-    def get_invariants_validators(self) -> List[BusinessValidator]:
-        return [
-            ShouldAffiliationsEtreCompletees(
-                etudiant_solidaire=self.comptabilite.etudiant_solidaire,
-            ),
-            ShouldTypeCompteBancaireRemboursementEtreComplete(
-                type_numero_compte=self.comptabilite.type_numero_compte,
-            ),
-            ShouldIBANCarteBancaireRemboursementEtreCompletee(
-                type_numero_compte=self.comptabilite.type_numero_compte,
-                numero_compte_iban=self.comptabilite.numero_compte_iban,
-                prenom_titulaire_compte=self.comptabilite.prenom_titulaire_compte,
-                nom_titulaire_compte=self.comptabilite.nom_titulaire_compte,
-            ),
-            ShouldAutreFormatCarteBancaireRemboursementEtreCompletee(
-                type_numero_compte=self.comptabilite.type_numero_compte,
-                numero_compte_autre_format=self.comptabilite.numero_compte_autre_format,
-                code_bic_swift_banque=self.comptabilite.code_bic_swift_banque,
-                prenom_titulaire_compte=self.comptabilite.prenom_titulaire_compte,
-                nom_titulaire_compte=self.comptabilite.nom_titulaire_compte,
-            ),
-        ]
 
 
 @attr.dataclass(frozen=True, slots=True)

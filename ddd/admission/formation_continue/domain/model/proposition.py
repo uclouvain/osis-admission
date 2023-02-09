@@ -29,10 +29,7 @@ from typing import Optional, Dict, List
 import attr
 
 from admission.ddd.admission.domain.model.formation import FormationIdentity
-from admission.ddd.admission.dtos.formation import FormationDTO
-from admission.ddd.admission.enums import ChoixTypeCompteBancaire
 from admission.ddd.admission.formation_continue.domain.model._adresse import Adresse
-from admission.ddd.admission.formation_continue.domain.model._comptabilite import comptabilite_non_remplie, Comptabilite
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixStatutProposition,
     ChoixInscriptionATitre,
@@ -56,7 +53,6 @@ class Proposition(interface.RootEntity):
     annee_calculee: Optional[int] = None
     pot_calcule: Optional[AcademicCalendarTypes] = None
     statut: ChoixStatutProposition = ChoixStatutProposition.IN_PROGRESS
-    comptabilite: 'Comptabilite' = comptabilite_non_remplie
 
     creee_le: Optional[datetime.datetime] = None
     modifiee_le: Optional[datetime.datetime] = None
@@ -104,28 +100,6 @@ class Proposition(interface.RootEntity):
         self.curriculum = curriculum
         self.equivalence_diplome = equivalence_diplome
         self.reponses_questions_specifiques = reponses_questions_specifiques
-
-    def completer_comptabilite(
-        self,
-        etudiant_solidaire: Optional[bool],
-        type_numero_compte: Optional[str],
-        numero_compte_iban: Optional[str],
-        iban_valide: Optional[bool],
-        numero_compte_autre_format: Optional[str],
-        code_bic_swift_banque: Optional[str],
-        prenom_titulaire_compte: Optional[str],
-        nom_titulaire_compte: Optional[str],
-    ):
-        self.comptabilite = Comptabilite(
-            etudiant_solidaire=etudiant_solidaire,
-            type_numero_compte=ChoixTypeCompteBancaire[type_numero_compte] if type_numero_compte else None,
-            numero_compte_iban=numero_compte_iban,
-            iban_valide=iban_valide,
-            numero_compte_autre_format=numero_compte_autre_format,
-            code_bic_swift_banque=code_bic_swift_banque,
-            prenom_titulaire_compte=prenom_titulaire_compte,
-            nom_titulaire_compte=nom_titulaire_compte,
-        )
 
     def completer_informations_complementaires(
         self,

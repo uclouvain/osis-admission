@@ -26,11 +26,9 @@
 from rest_framework import serializers
 from rest_framework.fields import SerializerMethodField
 
-from admission.ddd.admission.formation_continue import commands as continuing_education_commands
-from admission.ddd.admission.formation_generale import commands as general_education_commands
 from admission.ddd.admission.doctorat.preparation import commands as doctorate_education_commands
 from admission.ddd.admission.doctorat.preparation.dtos import ComptabiliteDTO as DoctorateAccountingDTO
-from admission.ddd.admission.formation_continue.dtos import ComptabiliteDTO as ContinuningAccountingDTO
+from admission.ddd.admission.formation_generale import commands as general_education_commands
 from admission.ddd.admission.formation_generale.dtos import ComptabiliteDTO as GeneralAccountingDTO
 from admission.infrastructure.admission.domain.service.profil_candidat import (
     ProfilCandidatTranslator,
@@ -110,11 +108,6 @@ class GeneralEducationAccountingDTOSerializer(DoctorateEducationAccountingDTOSer
         source = GeneralAccountingDTO
 
 
-class ContinuingEducationAccountingDTOSerializer(DTOSerializer):
-    class Meta:
-        source = ContinuningAccountingDTO
-
-
 class CompleterComptabilitePropositionDoctoraleCommandSerializer(DTOSerializer):
     class Meta:
         source = doctorate_education_commands.CompleterComptabilitePropositionCommand
@@ -123,8 +116,3 @@ class CompleterComptabilitePropositionDoctoraleCommandSerializer(DTOSerializer):
 class CompleterComptabilitePropositionGeneraleCommandSerializer(DTOSerializer):
     class Meta:
         source = general_education_commands.CompleterComptabilitePropositionCommand
-
-
-class CompleterComptabilitePropositionContinueCommandSerializer(DTOSerializer):
-    class Meta:
-        source = continuing_education_commands.CompleterComptabilitePropositionCommand

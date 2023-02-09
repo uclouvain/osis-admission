@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Admission API
-  version: 1.0.66
+  version: 1.0.67
   description: This API delivers data for the Admission project.
   contact:
     name: UCLouvain - OSIS
@@ -3311,72 +3311,6 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - propositions
-  /propositions/continuing-education/{uuid}/accounting:
-    get:
-      operationId: retrieve_continuing_accounting
-      description: Get additional data conditioning the required accounting fields
-      parameters:
-      - name: uuid
-        in: path
-        required: true
-        description: ''
-        schema:
-          type: string
-      - $ref: '#/components/parameters/Accept-Language'
-      - $ref: '#/components/parameters/X-User-FirstName'
-      - $ref: '#/components/parameters/X-User-LastName'
-      - $ref: '#/components/parameters/X-User-Email'
-      - $ref: '#/components/parameters/X-User-GlobalID'
-      responses:
-        200:
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ContinuingEducationAccountingDTO'
-          description: ''
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-      tags:
-      - propositions
-    put:
-      operationId: update_continuing_accounting
-      description: Edit the accounting of a proposition
-      parameters:
-      - name: uuid
-        in: path
-        required: true
-        description: ''
-        schema:
-          type: string
-      - $ref: '#/components/parameters/Accept-Language'
-      - $ref: '#/components/parameters/X-User-FirstName'
-      - $ref: '#/components/parameters/X-User-LastName'
-      - $ref: '#/components/parameters/X-User-Email'
-      - $ref: '#/components/parameters/X-User-GlobalID'
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CompleterComptabilitePropositionContinueCommand'
-      responses:
-        200:
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PropositionIdentityDTO'
-          description: ''
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-      tags:
-      - propositions
   /propositions/continuing-education/{uuid}/curriculum/educational/{experience_id}:
     get:
       operationId: retrieveEducationalExperienceContinuingEducationAdmission
@@ -5382,10 +5316,6 @@ components:
                   retrieve_training_choice:
                     $ref: '#/components/schemas/ActionLink'
                   update_training_choice:
-                    $ref: '#/components/schemas/ActionLink'
-                  retrieve_accounting:
-                    $ref: '#/components/schemas/ActionLink'
-                  update_accounting:
                     $ref: '#/components/schemas/ActionLink'
                   submit_proposition:
                     $ref: '#/components/schemas/ActionLink'
@@ -9025,10 +8955,6 @@ components:
               $ref: '#/components/schemas/ActionLink'
             update_specific_question:
               $ref: '#/components/schemas/ActionLink'
-            retrieve_accounting:
-              $ref: '#/components/schemas/ActionLink'
-            update_accounting:
-              $ref: '#/components/schemas/ActionLink'
             destroy_proposition:
               $ref: '#/components/schemas/ActionLink'
             submit_proposition:
@@ -9098,27 +9024,6 @@ components:
       - erreurs
       - curriculum
       - equivalence_diplome
-    ContinuingEducationAccountingDTO:
-      type: object
-      properties:
-        etudiant_solidaire:
-          type: boolean
-          nullable: true
-        type_numero_compte:
-          type: string
-        numero_compte_iban:
-          type: string
-        iban_valide:
-          type: boolean
-          nullable: true
-        numero_compte_autre_format:
-          type: string
-        code_bic_swift_banque:
-          type: string
-        prenom_titulaire_compte:
-          type: string
-        nom_titulaire_compte:
-          type: string
     SectorDTO:
       type: object
       properties:
@@ -10245,31 +10150,6 @@ components:
           type: string
         reponses_questions_specifiques:
           type: object
-    CompleterComptabilitePropositionContinueCommand:
-      type: object
-      properties:
-        uuid_proposition:
-          type: string
-        etudiant_solidaire:
-          type: boolean
-          nullable: true
-        type_numero_compte:
-          type: string
-        numero_compte_iban:
-          type: string
-        iban_valide:
-          type: boolean
-          nullable: true
-        numero_compte_autre_format:
-          type: string
-        code_bic_swift_banque:
-          type: string
-        prenom_titulaire_compte:
-          type: string
-        nom_titulaire_compte:
-          type: string
-      required:
-      - uuid_proposition
     Error:
       type: object
       properties:
