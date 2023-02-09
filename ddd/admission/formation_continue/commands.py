@@ -96,11 +96,6 @@ class DeterminerAnneeAcademiqueEtPotQuery(interface.QueryRequest):
 
 
 @attr.dataclass(frozen=True, slots=True)
-class GetComptabiliteQuery(interface.QueryRequest):
-    uuid_proposition: str
-
-
-@attr.dataclass(frozen=True, slots=True)
 class CompleterComptabilitePropositionCommand(interface.CommandRequest):
     uuid_proposition: str
 

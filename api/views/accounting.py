@@ -32,7 +32,6 @@ from admission.api import serializers
 from admission.api.schema import ResponseSpecificSchema
 from admission.ddd.admission.doctorat.preparation import commands as doctorate_commands
 from admission.ddd.admission.formation_generale import commands as general_commands
-from admission.ddd.admission.formation_continue import commands as continuing_commands
 from admission.utils import (
     get_cached_admission_perm_obj,
     get_cached_general_education_admission_perm_obj,
@@ -48,17 +47,6 @@ class GeneralAccountingSchema(ResponseSpecificSchema):
         'GET': serializers.GeneralEducationAccountingDTOSerializer,
         'PUT': (
             serializers.CompleterComptabilitePropositionGeneraleCommandSerializer,
-            serializers.PropositionIdentityDTOSerializer,
-        ),
-    }
-
-
-class ContinuingAccountingSchema(ResponseSpecificSchema):
-    operation_id_base = '_continuing_accounting'
-    serializer_mapping = {
-        'GET': serializers.ContinuingEducationAccountingDTOSerializer,
-        'PUT': (
-            serializers.CompleterComptabilitePropositionContinueCommandSerializer,
             serializers.PropositionIdentityDTOSerializer,
         ),
     }
@@ -135,19 +123,3 @@ class GeneralAccountingView(BaseAccountingView):
 
     def get_permission_object(self):
         return get_cached_general_education_admission_perm_obj(self.kwargs['uuid'])
-
-
-class ContinuingAccountingView(BaseAccountingView):
-    name = 'continuing_accounting'
-    schema = ContinuingAccountingSchema()
-    permission_mapping = {
-        'GET': 'admission.view_continuingeducationadmission_accounting',
-        'PUT': 'admission.change_continuingeducationadmission_accounting',
-    }
-    get_serializer_class = serializers.ContinuingEducationAccountingDTOSerializer
-    put_serializer_class = serializers.CompleterComptabilitePropositionContinueCommandSerializer
-    get_accounting_cmd_class = continuing_commands.GetComptabiliteQuery
-    put_accounting_cmd_class = continuing_commands.CompleterComptabilitePropositionCommand
-
-    def get_permission_object(self):
-        return get_cached_continuing_education_admission_perm_obj(self.kwargs['uuid'])

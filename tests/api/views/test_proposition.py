@@ -264,9 +264,7 @@ class ContinuingPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase
                 'submit_proposition',
                 'retrieve_specific_question',
                 'update_specific_question',
-                'retrieve_accounting',
                 'destroy_proposition',
-                'update_accounting',
             ],
             forbidden_actions=[],
         )
