@@ -27,6 +27,7 @@ import datetime
 from typing import Optional, Dict, List
 
 import attr
+from django.utils.timezone import now
 
 from admission.ddd.admission.domain.model.formation import FormationIdentity
 from admission.ddd.admission.dtos.formation import FormationDTO
@@ -94,6 +95,7 @@ class Proposition(interface.RootEntity):
         self.formation_id = formation_id
         self.pot_calcule = pool
         self.elements_confirmation = elements_confirmation
+        self.soumise_le = now()
 
     def completer_curriculum(
         self,

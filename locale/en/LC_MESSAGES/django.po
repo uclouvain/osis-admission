@@ -2691,6 +2691,9 @@ msgstr ""
 msgid "Search for an EU code (outside the EU of the form)"
 msgstr ""
 
+msgid "Search on portal"
+msgstr ""
+
 msgid "Secondary studies"
 msgstr ""
 
