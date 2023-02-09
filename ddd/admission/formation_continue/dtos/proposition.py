@@ -50,11 +50,14 @@ class PropositionDTO(interface.DTO):
     matricule_candidat: str
     prenom_candidat: str
     nom_candidat: str
+    pays_nationalite_candidat: str
+    pays_nationalite_ue_candidat: Optional[bool]
 
     reponses_questions_specifiques: Dict[str, Union[str, List[str]]]
 
     curriculum: List[str]
     equivalence_diplome: List[str]
+    copie_titre_sejour: List[str]
 
     inscription_a_titre: Optional[str]
     nom_siege_social: Optional[str]
