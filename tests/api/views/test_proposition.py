@@ -23,6 +23,8 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import uuid
+
 import freezegun
 from django.shortcuts import resolve_url
 from rest_framework import status
@@ -185,6 +187,7 @@ class ContinuingPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase
         )
         cls.admission = ContinuingEducationAdmissionFactory(training__management_entity=cls.commission.entity)
         cls.admission_with_billing_address = ContinuingEducationAdmissionFactory(
+            residence_permit=[uuid.uuid4()],
             registration_as=ChoixInscriptionATitre.PROFESSIONNEL.name,
             head_office_name='UCL',
             unique_business_number='1',
@@ -206,6 +209,11 @@ class ContinuingPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase
         )
         # Users
         cls.candidate = cls.admission.candidate
+        cls.candidate.country_of_citizenship = CountryFactory(
+            iso_code=BE_ISO_CODE,
+            european_union=True,
+        )
+        cls.candidate.save(update_fields=['country_of_citizenship'])
         cls.other_candidate = CandidateFactory().person
         cls.no_role_user = PersonFactory().user
 
@@ -238,6 +246,14 @@ class ContinuingPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase
         self.assertEqual(json_response['matricule_candidat'], self.admission.candidate.global_id)
         self.assertEqual(json_response['prenom_candidat'], self.admission.candidate.first_name)
         self.assertEqual(json_response['nom_candidat'], self.admission.candidate.last_name)
+        self.assertEqual(
+            json_response['pays_nationalite_candidat'],
+            self.admission.candidate.country_of_citizenship.iso_code,
+        )
+        self.assertEqual(
+            json_response['pays_nationalite_ue_candidat'],
+            self.admission.candidate.country_of_citizenship.european_union,
+        )
         self.assertEqual(json_response['statut'], self.admission.status)
         self.assertEqual(json_response['erreurs'], [])
         self.assertEqual(json_response.get('inscription_a_titre'), self.admission.registration_as)
@@ -277,6 +293,10 @@ class ContinuingPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
 
         json_response = response.json()
+        self.assertEqual(
+            json_response.get('copie_titre_sejour'),
+            [str(self.admission_with_billing_address.residence_permit[0])],
+        )
         adresse_facturation = json_response.get('adresse_facturation')
         self.assertEqual(
             json_response.get('inscription_a_titre'),

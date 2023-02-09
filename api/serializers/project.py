@@ -497,6 +497,9 @@ class ContinuingEducationPropositionDTOSerializer(IncludedFieldsMixin, DTOSerial
             'adresse_mail_professionnelle',
             'type_adresse_facturation',
             'adresse_facturation',
+            'pays_nationalite_candidat',
+            'pays_nationalite_ue_candidat',
+            'copie_titre_sejour',
         ]
 
 

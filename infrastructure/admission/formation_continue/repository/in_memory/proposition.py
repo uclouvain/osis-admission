@@ -52,6 +52,7 @@ class _Candidat:
     prenom: str
     nom: str
     nationalite: str
+    nationalite_ue: bool
 
 
 class PropositionInMemoryRepository(
@@ -60,9 +61,9 @@ class PropositionInMemoryRepository(
     IPropositionRepository,
 ):
     candidats = {
-        "0123456789": _Candidat("Jean", "Dupont", "France"),
-        "0000000001": _Candidat("Michel", "Durand", "Belgique"),
-        "candidat": _Candidat("Pierre", "Dupond", "Belgique"),
+        "0123456789": _Candidat("Jean", "Dupont", "France", True),
+        "0000000001": _Candidat("Michel", "Durand", "Belgique", True),
+        "candidat": _Candidat("Pierre", "Dupond", "Belgique", True),
     }
     entities: List['Proposition'] = []
 
@@ -160,6 +161,8 @@ class PropositionInMemoryRepository(
             matricule_candidat=proposition.matricule_candidat,
             prenom_candidat=candidat.prenom,
             nom_candidat=candidat.nom,
+            pays_nationalite_candidat=candidat.nationalite,
+            pays_nationalite_ue_candidat=candidat.nationalite_ue,
             statut=proposition.statut.name,
             creee_le=proposition.creee_le,
             modifiee_le=proposition.modifiee_le,
@@ -172,6 +175,7 @@ class PropositionInMemoryRepository(
             reponses_questions_specifiques=proposition.reponses_questions_specifiques,
             equivalence_diplome=proposition.equivalence_diplome,
             curriculum=proposition.curriculum,
+            copie_titre_sejour=proposition.copie_titre_sejour,
             inscription_a_titre=proposition.inscription_a_titre,
             nom_siege_social=proposition.nom_siege_social,
             numero_unique_entreprise=proposition.numero_unique_entreprise,
