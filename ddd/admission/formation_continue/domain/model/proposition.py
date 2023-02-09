@@ -62,6 +62,7 @@ class Proposition(interface.RootEntity):
 
     curriculum: List[str] = attr.Factory(list)
     equivalence_diplome: List[str] = attr.Factory(list)
+    copie_titre_sejour: List[str] = attr.Factory(list)
     elements_confirmation: Dict[str, str] = attr.Factory(dict)
 
     inscription_a_titre: Optional[ChoixInscriptionATitre] = None
@@ -118,6 +119,7 @@ class Proposition(interface.RootEntity):
         adresse_facturation_boite_postale: Optional[str],
         adresse_facturation_lieu_dit: Optional[str],
         reponses_questions_specifiques: Dict,
+        copie_titre_sejour: List[str],
     ):
         self.inscription_a_titre = ChoixInscriptionATitre[inscription_a_titre] if inscription_a_titre else None
         self.nom_siege_social = nom_siege_social or ''
@@ -142,3 +144,4 @@ class Proposition(interface.RootEntity):
             else None
         )
         self.reponses_questions_specifiques = reponses_questions_specifiques
+        self.copie_titre_sejour = copie_titre_sejour

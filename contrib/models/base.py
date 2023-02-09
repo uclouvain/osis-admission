@@ -142,7 +142,6 @@ class BaseAdmission(models.Model):
 
     curriculum = FileField(
         blank=True,
-        mimetypes=['application/pdf'],
         upload_to=admission_directory_path,
         verbose_name=_('Curriculum'),
     )

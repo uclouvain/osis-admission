@@ -9012,6 +9012,15 @@ components:
             destinataire:
               type: string
           nullable: true
+        pays_nationalite_candidat:
+          type: string
+        pays_nationalite_ue_candidat:
+          type: boolean
+          nullable: true
+        copie_titre_sejour:
+          type: array
+          items:
+            type: string
       required:
       - uuid
       - reference
@@ -9024,6 +9033,8 @@ components:
       - erreurs
       - curriculum
       - equivalence_diplome
+      - pays_nationalite_candidat
+      - copie_titre_sejour
     SectorDTO:
       type: object
       properties:
@@ -10150,6 +10161,12 @@ components:
           type: string
         reponses_questions_specifiques:
           type: object
+        copie_titre_sejour:
+          type: array
+          items:
+            type: string
+      required:
+      - copie_titre_sejour
     Error:
       type: object
       properties:
