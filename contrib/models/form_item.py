@@ -152,7 +152,10 @@ class AdmissionFormItem(models.Model):
     active = models.BooleanField(
         default=True,
         verbose_name=_('Active'),
-        help_text=_('Indicates if the item will be displayed to the user or not.'),
+        help_text=_(
+            'Active items are available for new instantiations, and are shown to candidates if necessary. '
+            'Inactive elements are unavailable for future instantiations and are never shown to candidates.'
+        ),
     )
     configuration = models.JSONField(
         blank=True,
