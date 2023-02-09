@@ -102,8 +102,10 @@ class Proposition(interface.RootEntity):
     ] = None
     financement: 'Financement' = financement_non_rempli
     experience_precedente_recherche: 'ExperiencePrecedenteRecherche' = aucune_experience_precedente_recherche
+
     creee_le: Optional[datetime.datetime] = None
     modifiee_le: Optional[datetime.datetime] = None
+
     fiche_archive_signatures_envoyees: List[str] = attr.Factory(list)
     comptabilite: 'Comptabilite' = comptabilite_non_remplie
     bourse_erasmus_mundus_id: Optional[BourseIdentity] = None
