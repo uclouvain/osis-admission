@@ -110,14 +110,12 @@ class GeneralEducationAdmission(BaseAdmission):
 
     bachelor_cycle_continuation_certificate = FileField(
         blank=True,
-        mimetypes=['application/pdf'],
         upload_to=admission_directory_path,
         verbose_name=_("Certificate allowing the continuation of studies for a bachelor's degree"),
     )
 
     diploma_equivalence = FileField(
         blank=True,
-        mimetypes=['application/pdf'],
         upload_to=admission_directory_path,
         verbose_name=_('Diploma equivalence'),
     )

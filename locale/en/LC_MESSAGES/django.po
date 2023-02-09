@@ -2522,6 +2522,9 @@ msgstr ""
 msgid "Residence card of a family member of a European Union citizen"
 msgstr ""
 
+msgid "Residence permit covering the entire course"
+msgstr ""
+
 msgid "Residence permit in Belgium"
 msgstr ""
 

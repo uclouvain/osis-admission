@@ -2819,6 +2819,9 @@ msgstr ""
 "Carte de séjour permanent de membre de la famille d’un citoyen de l'Union "
 "européenne"
 
+msgid "Residence permit covering the entire course"
+msgstr "Titre de séjour couvrant la totalité de la formation"
+
 msgid "Residence permit in Belgium"
 msgstr "Titre de séjour en Belgique"
 

@@ -144,6 +144,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 'specific_question_answers': entity.reponses_questions_specifiques,
                 'curriculum': entity.curriculum,
                 'diploma_equivalence': entity.equivalence_diplome,
+                'residence_permit': entity.copie_titre_sejour,
                 'confirmation_elements': entity.elements_confirmation,
                 'registration_as': entity.inscription_a_titre.name if entity.inscription_a_titre else '',
                 'head_office_name': entity.nom_siege_social,
@@ -179,6 +180,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             reponses_questions_specifiques=admission.specific_question_answers,
             curriculum=admission.curriculum,
             equivalence_diplome=admission.diploma_equivalence,
+            copie_titre_sejour=admission.residence_permit,
             elements_confirmation=admission.confirmation_elements,
             inscription_a_titre=ChoixInscriptionATitre[admission.registration_as]
             if admission.registration_as
@@ -238,9 +240,15 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             matricule_candidat=admission.candidate.global_id,
             prenom_candidat=admission.candidate.first_name,
             nom_candidat=admission.candidate.last_name,
+            pays_nationalite_candidat=admission.candidate.country_of_citizenship.iso_code
+            if admission.candidate.country_of_citizenship
+            else '',
+            pays_nationalite_ue_candidat=admission.candidate.country_of_citizenship
+            and admission.candidate.country_of_citizenship.european_union,
             reponses_questions_specifiques=admission.specific_question_answers,
             curriculum=admission.curriculum,
             equivalence_diplome=admission.diploma_equivalence,
+            copie_titre_sejour=admission.residence_permit,
             inscription_a_titre=admission.registration_as,
             nom_siege_social=admission.head_office_name,
             numero_unique_entreprise=admission.unique_business_number,

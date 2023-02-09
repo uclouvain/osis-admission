@@ -50,9 +50,14 @@ class ContinuingEducationAdmission(BaseAdmission):
 
     diploma_equivalence = FileField(
         blank=True,
-        mimetypes=['application/pdf'],
         upload_to=admission_directory_path,
         verbose_name=_('Diploma equivalence'),
+    )
+
+    residence_permit = FileField(
+        blank=True,
+        upload_to=admission_directory_path,
+        verbose_name=_('Residence permit covering the entire course'),
     )
 
     registration_as = models.CharField(
