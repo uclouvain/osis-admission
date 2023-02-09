@@ -48,10 +48,8 @@ from .approvals import (
 from .confirmation import *
 from .doctorate import *
 from .accounting import (
-    ContinuingEducationAccountingDTOSerializer,
     DoctorateEducationAccountingDTOSerializer,
     GeneralEducationAccountingDTOSerializer,
-    CompleterComptabilitePropositionContinueCommandSerializer,
     CompleterComptabilitePropositionDoctoraleCommandSerializer,
     CompleterComptabilitePropositionGeneraleCommandSerializer,
 )

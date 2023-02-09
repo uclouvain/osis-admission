@@ -29,14 +29,6 @@ from admission.ddd.admission.doctorat.preparation.domain.model.proposition impor
 from admission.ddd.admission.doctorat.preparation.domain.service.verifier_curriculum import (
     VerifierCurriculumDoctorat,
 )
-from admission.ddd.admission.domain.service.verifier_curriculum import VerifierCurriculum
-from admission.ddd.admission.formation_continue.domain.model.proposition import Proposition as PropositionContinue
-from admission.ddd.admission.formation_continue.domain.validator.validator_by_business_actions import (
-    FormationContinueComptabiliteValidatorList,
-    FormationContinueCurriculumValidatorList,
-)
-from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition as PropositionGenerale
-
 from admission.ddd.admission.doctorat.preparation.domain.validator.validator_by_business_action import (
     ComptabiliteValidatorList,
     CurriculumValidatorList,
@@ -46,13 +38,18 @@ from admission.ddd.admission.domain.model._candidat_adresse import CandidatAdres
 from admission.ddd.admission.domain.model._candidat_signaletique import CandidatSignaletique
 from admission.ddd.admission.domain.model.formation import Formation
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
+from admission.ddd.admission.domain.service.verifier_curriculum import VerifierCurriculum
 from admission.ddd.admission.domain.validator.validator_by_business_action import (
     CoordonneesValidatorList,
     IdentificationValidatorList,
 )
+from admission.ddd.admission.formation_continue.domain.validator.validator_by_business_actions import (
+    FormationContinueCurriculumValidatorList,
+)
 from admission.ddd.admission.formation_generale.domain.model.proposition import (
     Proposition as FormationGeneraleProposition,
 )
+from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition as PropositionGenerale
 from admission.ddd.admission.formation_generale.domain.validator.validator_by_business_actions import (
     FormationGeneraleCurriculumValidatorList,
     FormationGeneraleComptabiliteValidatorList,
@@ -266,7 +263,3 @@ class ProfilCandidat(interface.DomainService):
             ),
             comptabilite=proposition.comptabilite,
         ).validate()
-
-    @classmethod
-    def verifier_comptabilite_formation_continue(cls, proposition: PropositionContinue):
-        FormationContinueComptabiliteValidatorList(comptabilite=proposition.comptabilite).validate()

@@ -127,7 +127,6 @@ _CANDIDATE_RULESET = {
     'view_continuingeducationadmission_curriculum': is_admission_request_author,
     'view_continuingeducationadmission_secondary_studies': is_admission_request_author,
     'view_continuingeducationadmission_languages': is_admission_request_author,
-    'view_continuingeducationadmission_accounting': is_admission_request_author,
     'view_continuingeducationadmission_specific_question': is_admission_request_author,
     # A candidate can edit some tabs as long as the proposition is in progress
     'change_continuingeducationadmission_training_choice': is_admission_request_author & in_progress,
@@ -136,7 +135,6 @@ _CANDIDATE_RULESET = {
     'change_continuingeducationadmission_curriculum': is_admission_request_author & in_progress,
     'change_continuingeducationadmission_secondary_studies': is_admission_request_author & in_progress,
     'change_continuingeducationadmission_languages': is_admission_request_author & in_progress,
-    'change_continuingeducationadmission_accounting': is_admission_request_author & in_progress,
     'delete_continuingeducationadmission': is_admission_request_author & in_progress,
     'submit_continuingeducationadmission': is_admission_request_author & in_progress,
     'change_continuingeducationadmission_specific_question': is_admission_request_author & in_progress,
