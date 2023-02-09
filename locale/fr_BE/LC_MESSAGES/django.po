@@ -289,6 +289,16 @@ msgstr "Actions"
 msgid "Active"
 msgstr "Actif"
 
+msgid ""
+"Active items are available for new instantiations, and are shown to "
+"candidates if necessary. Inactive elements are unavailable for future "
+"instantiations and are never shown to candidates."
+msgstr ""
+"Les éléments actifs sont disponibles pour de nouvelles instantiations, et "
+"sont montrés aux candidats le cas échéant. Les éléments inactifs sont "
+"indisponibles pour de futures instantiations et ne sont jamais montrés aux "
+"candidats."
+
 msgid "Activities"
 msgstr "Activités"
 
@@ -1732,9 +1742,6 @@ msgstr "En présentiel"
 
 msgid "In review"
 msgstr "En révision"
-
-msgid "Indicates if the item will be displayed to the user or not."
-msgstr "Indique si l'élément sera affiché ou non à l'utilisateur."
 
 msgid "Institute email"
 msgstr "Email de l'institut"

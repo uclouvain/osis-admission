@@ -54,6 +54,7 @@ class CommitteeMember(RoleModel):
             'admission.view_doctorateadmission_accounting': is_part_of_committee & is_being_enrolled,
             # A ca member can view as long as he belongs to the committee
             'admission.view_doctorateadmission': is_part_of_committee,
+            'admission.view_doctorateadmission_training_choice': is_part_of_committee,
             'admission.view_doctorateadmission_project': is_part_of_committee,
             'admission.view_doctorateadmission_cotutelle': is_part_of_committee,
             'admission.view_doctorateadmission_supervision': is_part_of_committee,

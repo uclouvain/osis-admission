@@ -64,6 +64,7 @@ class Promoter(RoleModel):
             'admission.view_doctorateadmission_accounting': is_admission_request_promoter & is_being_enrolled,
             # A promoter can view as long as he is one of the admission promoters
             'admission.view_doctorateadmission_project': is_admission_request_promoter,
+            'admission.view_doctorateadmission_training_choice': is_admission_request_promoter,
             'admission.view_doctorateadmission_cotutelle': is_admission_request_promoter,
             'admission.view_doctorateadmission_supervision': is_admission_request_promoter,
             # A promoter can approve as long as he is invited to the admission committee

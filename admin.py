@@ -191,6 +191,7 @@ class ScholarshipAdmin(admin.ModelAdmin):
         'short_name',
         'long_name',
         'type',
+        'disabled',
     ]
     search_fields = [
         'short_name',
@@ -198,6 +199,7 @@ class ScholarshipAdmin(admin.ModelAdmin):
     ]
     list_filter = [
         'type',
+        'disabled',
     ]
     fields = [
         'type',
