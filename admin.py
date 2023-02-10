@@ -32,7 +32,6 @@ from django.shortcuts import resolve_url
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _, pgettext
 from hijack.contrib.admin import HijackUserAdminMixin
-from osis_document.contrib import FileField
 
 from admission.auth.roles.adre import AdreSecretary
 from admission.auth.roles.ca_member import CommitteeMember
@@ -45,6 +44,7 @@ from admission.auth.roles.sceb import Sceb
 from admission.auth.roles.sic_director import SicDirector
 from admission.auth.roles.sic_manager import SicManager
 from admission.contrib.models import (
+    AdmissionTask,
     CddMailTemplate,
     ContinuingEducationAdmission,
     DoctorateAdmission,
@@ -59,9 +59,9 @@ from base.models.academic_year import AcademicYear
 from base.models.education_group_type import EducationGroupType
 from base.models.entity_version import EntityVersion
 from base.models.enums.education_group_categories import Categories
-from osis_mail_template.admin import MailTemplateAdmin
-
 from base.models.person import Person
+from osis_document.contrib import FileField
+from osis_mail_template.admin import MailTemplateAdmin
 from osis_profile.models import EducationalExperience, ProfessionalExperience
 from osis_role.contrib.admin import RoleModelAdmin
 
@@ -437,6 +437,28 @@ class ActivityAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Activity, ActivityAdmin)
+
+
+class AdmissionTaskAdmin(admin.ModelAdmin):
+    list_display = ['admission', 'task_uuid', 'task_status', 'type']
+    list_select_related = ['task', 'admission']
+
+    @admin.display(description="Task uuid")
+    def task_uuid(self, obj):
+        return obj.task.uuid
+
+    @admin.display(description="Task status")
+    def task_status(self, obj):
+        return obj.task.state
+
+    def has_add_permission(self, request) -> bool:
+        return False
+
+    def has_change_permission(self, request, obj=None) -> bool:
+        return False
+
+
+admin.site.register(AdmissionTask, AdmissionTaskAdmin)
 
 
 # ##############################################################################

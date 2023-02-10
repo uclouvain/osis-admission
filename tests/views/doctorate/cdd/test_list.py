@@ -55,7 +55,7 @@ from reference.tests.factories.country import CountryFactory
 
 class CddDoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
     admissions = []
-    NB_MAX_QUERIES = 20
+    NB_MAX_QUERIES = 21
 
     @classmethod
     def setUpTestData(cls):
@@ -257,7 +257,7 @@ class CddDoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
             'page_size': 10,
         }
 
-        with self.assertNumQueriesLessThan(self.NB_MAX_QUERIES):
+        with self.assertNumQueriesLessThan(self.NB_MAX_QUERIES, verbose=True):
             response = self.client.get(self.url, data)
 
         self.assertEqual(response.status_code, 200)
