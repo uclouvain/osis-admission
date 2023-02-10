@@ -343,10 +343,10 @@ class DisplayTagTestCase(TestCase):
 
     @freezegun.freeze_time('2023-01-01')
     def test_formatted_reference(self):
-        root = MainEntityVersionFactory(parent=None).entity
+        root = MainEntityVersionFactory(entity_type='', parent=None).entity
         # With school as management entity
         school = MainEntityVersionFactory(
-            entity_type=EntityType.FACULTY.name,
+            entity_type=EntityType.SCHOOL.name,
             acronym='CMC',
             parent=root,
         )
