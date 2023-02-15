@@ -124,6 +124,10 @@ class IElementsConfirmation(interface.DomainService):
         '<li>I have uploaded all relevant documents confirming the information provided</li>'
         '<li>I pledge to forward %(to_service)s any changes to the data in my file</li></ul>'
     )
+    DROITS_INSCRIPTION_IUFC = _(
+        'By finalising my application, I undertake to pay the registration fees upon receipt of the invoice '
+        '(provided my application is accepted). In case of cancellation, the modalities depend on the Faculties.'
+    )
 
     @classmethod
     def recuperer(
@@ -259,6 +263,15 @@ class IElementsConfirmation(interface.DomainService):
                 texte=cls.DECLARATION_SUR_LHONNEUR % {'to_service': to_service},
             ),
         ]
+        # Uniquement pour IUFC
+        if isinstance(proposition, PropositionContinue):
+            elements.append(
+                ElementConfirmation(
+                    nom='droits_inscription_iufc',
+                    titre=_("Registration fees"),
+                    texte=cls.DROITS_INSCRIPTION_IUFC,
+                )
+            )
         return elements
 
     @classmethod
