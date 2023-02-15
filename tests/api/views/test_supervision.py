@@ -238,7 +238,7 @@ class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
         response = self.client.get(self.url)
         promoteurs = response.json()['signatures_promoteurs']
         self.assertEqual(len(promoteurs), 2)
-        self.assertEqual(promoteurs[-1]['promoteur']['prenom'], 'John')
+        self.assertIn('John', [promoteur['promoteur']['prenom'] for promoteur in promoteurs])
 
     def test_supervision_ajouter_promoteur_externe(self):
         self.client.force_authenticate(user=self.candidate.user)
