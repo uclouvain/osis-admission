@@ -344,6 +344,7 @@ class ContinuingPropositionSubmissionTestCase(APITestCase):
                 % {'by_service': _("by the University Institute of Continuing Education")},
                 'declaration_sur_lhonneur': IElementsConfirmation.DECLARATION_SUR_LHONNEUR
                 % {'to_service': _("to the University Institute of Continuing Education")},
+                'droits_inscription_iufc': IElementsConfirmation.DROITS_INSCRIPTION_IUFC,
             },
         }
 

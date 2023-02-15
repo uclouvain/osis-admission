@@ -570,6 +570,16 @@ msgstr "Corps"
 msgid "Brief justification"
 msgstr "Justification succincte"
 
+msgid ""
+"By finalising my application, I undertake to pay the registration fees upon "
+"receipt of the invoice (provided my application is accepted). In case of "
+"cancellation, the modalities depend on the Faculties."
+msgstr ""
+"En finalisant ma demande d’admission, je m’engage à payer les droits "
+"d’inscription dès réception de la facture (pour autant que ma demande "
+"d’admission soit acceptée). En cas d’annulation, les modalités dépendent des "
+"Facultés."
+
 msgid "CA Member"
 msgstr "Membre du comité d'accompagnement"
 
@@ -2775,6 +2785,9 @@ msgstr "Attestation d’immatriculation"
 
 msgid "Registration change form"
 msgstr "Formulaire de modification d'inscription"
+
+msgid "Registration fees"
+msgstr "Droits d'inscription"
 
 msgid "Rejection reason"
 msgstr "Motif de refus"

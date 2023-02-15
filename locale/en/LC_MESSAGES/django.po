@@ -506,6 +506,12 @@ msgstr ""
 msgid "Brief justification"
 msgstr ""
 
+msgid ""
+"By finalising my application, I undertake to pay the registration fees upon "
+"receipt of the invoice (provided my application is accepted). In case of "
+"cancellation, the modalities depend on the Faculties."
+msgstr ""
+
 msgid "CA Member"
 msgstr "Supervisory panel member"
 
@@ -2479,6 +2485,9 @@ msgid "Registration certificate"
 msgstr ""
 
 msgid "Registration change form"
+msgstr ""
+
+msgid "Registration fees"
 msgstr ""
 
 msgid "Rejection reason"
