@@ -165,7 +165,7 @@ class Notification(INotification):
                 "signataire_role": actor.get_type_display(),
             }
             if actor.is_external:
-                tokens["admission_link_front"] += f"external-approval/{get_signing_token(actor)}"
+                tokens["admission_link_front"] = cls._lien_invitation_externe(proposition, actor)
             email_message = generate_email(
                 ADMISSION_EMAIL_SIGNATURE_REQUESTS_ACTOR,
                 actor.language,
@@ -351,8 +351,8 @@ class Notification(INotification):
             "signataire_first_name": actor.first_name,
             "signataire_last_name": actor.last_name,
             "signataire_role": actor.get_type_display(),
+            "admission_link_front": cls._lien_invitation_externe(proposition, actor),
         }
-        tokens["admission_link_front"] += f"external-approval/{get_signing_token(actor)}"
         email_message = generate_email(
             ADMISSION_EMAIL_SIGNATURE_REQUESTS_ACTOR,
             actor.language,
@@ -360,3 +360,8 @@ class Notification(INotification):
             recipients=[actor.email],
         )
         EmailNotificationHandler.create(email_message)
+
+    @classmethod
+    def _lien_invitation_externe(cls, proposition, actor):
+        url = settings.ADMISSION_FRONTEND_LINK.format(context='public/doctorate', uuid=proposition.entity_id.uuid)
+        return url + f"external-approval/{get_signing_token(actor)}"
