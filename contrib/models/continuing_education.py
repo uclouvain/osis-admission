@@ -50,9 +50,14 @@ class ContinuingEducationAdmission(BaseAdmission):
 
     diploma_equivalence = FileField(
         blank=True,
-        mimetypes=['application/pdf'],
         upload_to=admission_directory_path,
         verbose_name=_('Diploma equivalence'),
+    )
+
+    residence_permit = FileField(
+        blank=True,
+        upload_to=admission_directory_path,
+        verbose_name=_('Residence permit covering the entire course'),
     )
 
     registration_as = models.CharField(
@@ -188,13 +193,21 @@ class ContinuingEducationAdmissionManager(models.Manager.from_queryset(BaseAdmis
                 "candidate__country_of_citizenship",
                 "training__academic_year",
                 "training__education_group_type",
-                "training__main_domain",
-                "training__enrollment_campus",
                 "determined_academic_year",
             )
-            .annotate_campus()
             .annotate_pool_end_date()
+        )
+
+    def for_dto(self):
+        return (
+            self.get_queryset()
+            .select_related(
+                "training__main_domain",
+                "training__enrollment_campus",
+            )
+            .annotate_campus()
             .annotate_training_management_entity()
+            .annotate_training_management_faculty()
         )
 
 

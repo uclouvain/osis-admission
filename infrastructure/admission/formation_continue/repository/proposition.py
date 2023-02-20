@@ -29,7 +29,7 @@ from django.conf import settings
 from django.utils.translation import get_language
 
 from admission.auth.roles.candidate import Candidate
-from admission.contrib.models import ContinuingEducationAdmissionProxy, Accounting
+from admission.contrib.models import ContinuingEducationAdmissionProxy
 from admission.contrib.models.continuing_education import ContinuingEducationAdmission
 from admission.ddd.admission.domain.builder.formation_identity import FormationIdentityBuilder
 from admission.ddd.admission.dtos import AdressePersonnelleDTO
@@ -50,7 +50,6 @@ from admission.ddd.admission.formation_continue.repository.i_proposition import 
 from admission.ddd.admission.repository.i_proposition import formater_reference
 from admission.infrastructure.admission.repository.proposition import GlobalPropositionRepository
 from base.models.academic_year import AcademicYear
-from admission.infrastructure.admission.formation_continue.repository._comptabilite import get_accounting_from_admission
 from base.models.education_group_year import EducationGroupYear
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.person import Person
@@ -71,7 +70,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
     @classmethod
     def search_dto(cls, matricule_candidat: Optional[str] = '') -> List['PropositionDTO']:
         # Default queryset
-        qs = ContinuingEducationAdmissionProxy.objects.all()
+        qs = ContinuingEducationAdmissionProxy.objects.for_dto().all()
 
         # Add filters
         if matricule_candidat:
@@ -145,6 +144,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 'specific_question_answers': entity.reponses_questions_specifiques,
                 'curriculum': entity.curriculum,
                 'diploma_equivalence': entity.equivalence_diplome,
+                'residence_permit': entity.copie_titre_sejour,
                 'confirmation_elements': entity.elements_confirmation,
                 'registration_as': entity.inscription_a_titre.name if entity.inscription_a_titre else '',
                 'head_office_name': entity.nom_siege_social,
@@ -157,29 +157,10 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
         )
 
         Candidate.objects.get_or_create(person=candidate)
-        cls._sauvegarder_comptabilite(admission, entity)
-
-    @classmethod
-    def _sauvegarder_comptabilite(cls, admission: ContinuingEducationAdmission, entity: Proposition):
-        Accounting.objects.update_or_create(
-            admission=admission,
-            defaults={
-                'solidarity_student': entity.comptabilite.etudiant_solidaire,
-                'account_number_type': entity.comptabilite.type_numero_compte.name
-                if entity.comptabilite.type_numero_compte
-                else '',
-                'iban_account_number': entity.comptabilite.numero_compte_iban,
-                'valid_iban': entity.comptabilite.iban_valide,
-                'other_format_account_number': entity.comptabilite.numero_compte_autre_format,
-                'bic_swift_code': entity.comptabilite.code_bic_swift_banque,
-                'account_holder_first_name': entity.comptabilite.prenom_titulaire_compte,
-                'account_holder_last_name': entity.comptabilite.nom_titulaire_compte,
-            },
-        )
 
     @classmethod
     def get_dto(cls, entity_id: 'PropositionIdentity') -> 'PropositionDTO':
-        return cls._load_dto(ContinuingEducationAdmissionProxy.objects.get(uuid=entity_id.uuid))
+        return cls._load_dto(ContinuingEducationAdmissionProxy.objects.for_dto().get(uuid=entity_id.uuid))
 
     @classmethod
     def _load(cls, admission: 'ContinuingEducationAdmission') -> 'Proposition':
@@ -199,7 +180,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             reponses_questions_specifiques=admission.specific_question_answers,
             curriculum=admission.curriculum,
             equivalence_diplome=admission.diploma_equivalence,
-            comptabilite=get_accounting_from_admission(admission=admission),
+            copie_titre_sejour=admission.residence_permit,
             elements_confirmation=admission.confirmation_elements,
             inscription_a_titre=ChoixInscriptionATitre[admission.registration_as]
             if admission.registration_as
@@ -250,7 +231,8 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             reference=formater_reference(
                 reference=admission.reference,
                 nom_campus_inscription=admission.training.enrollment_campus.name,
-                sigle_entite_gestion=admission.sigle_entite_gestion,  # From annotation
+                sigle_entite_gestion=admission.training_management_faculty
+                or admission.sigle_entite_gestion,  # From annotation
                 annee=admission.training.academic_year.year,
             ),
             annee_calculee=admission.determined_academic_year and admission.determined_academic_year.year,
@@ -258,9 +240,15 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             matricule_candidat=admission.candidate.global_id,
             prenom_candidat=admission.candidate.first_name,
             nom_candidat=admission.candidate.last_name,
+            pays_nationalite_candidat=admission.candidate.country_of_citizenship.iso_code
+            if admission.candidate.country_of_citizenship
+            else '',
+            pays_nationalite_ue_candidat=admission.candidate.country_of_citizenship
+            and admission.candidate.country_of_citizenship.european_union,
             reponses_questions_specifiques=admission.specific_question_answers,
             curriculum=admission.curriculum,
             equivalence_diplome=admission.diploma_equivalence,
+            copie_titre_sejour=admission.residence_permit,
             inscription_a_titre=admission.registration_as,
             nom_siege_social=admission.head_office_name,
             numero_unique_entreprise=admission.unique_business_number,

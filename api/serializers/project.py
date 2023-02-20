@@ -232,8 +232,6 @@ class ContinuingEducationPropositionSearchDTOSerializer(IncludedFieldsMixin, DTO
                 # Project
                 'retrieve_training_choice',
                 'update_training_choice',
-                'retrieve_accounting',
-                'update_accounting',
                 'submit_proposition',
                 # Proposition
                 'destroy_proposition',
@@ -459,8 +457,6 @@ class ContinuingEducationPropositionDTOSerializer(IncludedFieldsMixin, DTOSerial
                 'update_training_choice',
                 'retrieve_specific_question',
                 'update_specific_question',
-                'retrieve_accounting',
-                'update_accounting',
                 # Proposition
                 'destroy_proposition',
                 'submit_proposition',
@@ -501,6 +497,9 @@ class ContinuingEducationPropositionDTOSerializer(IncludedFieldsMixin, DTOSerial
             'adresse_mail_professionnelle',
             'type_adresse_facturation',
             'adresse_facturation',
+            'pays_nationalite_candidat',
+            'pays_nationalite_ue_candidat',
+            'copie_titre_sejour',
         ]
 
 

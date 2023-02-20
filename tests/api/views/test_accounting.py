@@ -33,13 +33,9 @@ from rest_framework.status import HTTP_200_OK, HTTP_403_FORBIDDEN
 from rest_framework.test import APITestCase
 
 from admission.contrib.models import Accounting
-from admission.ddd.admission.formation_generale.domain.model.enums import (
-    ChoixStatutProposition as ChoixStatutPropositionGenerale,
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    ChoixStatutProposition as ChoixStatutPropositionDoctorale,
 )
-from admission.ddd.admission.formation_continue.domain.model.enums import (
-    ChoixStatutProposition as ChoixStatutPropositionContinue,
-)
-from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
 from admission.ddd.admission.enums import (
     ChoixAffiliationSport,
     ChoixAssimilation1,
@@ -51,12 +47,12 @@ from admission.ddd.admission.enums import (
     LienParente,
     TypeSituationAssimilation,
 )
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
-    ChoixStatutProposition as ChoixStatutPropositionDoctorale,
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    ChoixStatutProposition as ChoixStatutPropositionGenerale,
 )
+from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.accounting import AccountingFactory
-from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.roles import CddManagerFactory
 from admission.tests.factories.supervision import PromoterFactory, CaMemberFactory
@@ -69,7 +65,6 @@ from base.tests.factories.organization import OrganizationFactory
 from base.tests.factories.person import PersonFactory
 from osis_profile.tests.factories.curriculum import EducationalExperienceFactory, EducationalExperienceYearFactory
 from reference.tests.factories.country import CountryFactory
-
 
 doctorate_file_fields = [
     ['institute_absence_debts_certificate', 'attestation_absence_dette_etablissement'],
@@ -696,128 +691,5 @@ class GeneralAccountingAPIViewTestCase(APITestCase):
         expected_response_data.pop('uuid_proposition')
         expected_response_data['derniers_etablissements_superieurs_communaute_fr_frequentes'] = None
         expected_response_data['a_nationalite_ue'] = None
-
-        self.assertEqual(response.json(), expected_response_data)
-
-
-@override_settings(OSIS_DOCUMENT_BASE_URL='http://dummyurl/')
-class ContinuingAccountingAPIViewTestCase(APITestCase):
-    file_uuid = uuid.uuid4()
-
-    @classmethod
-    def setUpTestData(cls):
-        cls.admission = ContinuingEducationAdmissionFactory()
-        other_admission = DoctorateAdmissionFactory(
-            status=ChoixStatutPropositionContinue.ENROLLED.name,
-        )
-
-        # Users
-        cls.student = cls.admission.candidate
-        cls.other_student = other_admission.candidate
-
-        cls.admission_url = resolve_url('admission_api_v1:continuing_accounting', uuid=cls.admission.uuid)
-        cls.other_admission_url = resolve_url('admission_api_v1:continuing_accounting', uuid=other_admission.uuid)
-
-        # Data
-        cls.be_country = CountryFactory(iso_code='BE')
-
-        cls.default_api_data = {
-            'uuid_proposition': cls.admission.uuid,
-            'etudiant_solidaire': False,
-            'type_numero_compte': ChoixTypeCompteBancaire.AUTRE_FORMAT.name,
-            'numero_compte_iban': 'GB87BARC20658244971655',
-            'iban_valide': False,
-            'prenom_titulaire_compte': 'Jim',
-            'nom_titulaire_compte': 'Foe',
-            'numero_compte_autre_format': '0203040506',
-            'code_bic_swift_banque': 'GKCCBEBA',
-        }
-
-    def setUp(self):
-        # Mock documents
-        patcher = patch("osis_document.api.utils.get_remote_token", return_value="foobar")
-        patcher.start()
-        self.addCleanup(patcher.stop)
-
-        patcher = patch("osis_document.api.utils.get_remote_metadata", return_value={"name": "myfile"})
-        patcher.start()
-        self.addCleanup(patcher.stop)
-
-        patcher = patch("osis_document.api.utils.confirm_remote_upload", side_effect=lambda token, upload_to: token)
-        patcher.start()
-        self.addCleanup(patcher.stop)
-
-        # Reset student
-        self.student.country_of_citizenship = None
-        self.student.save()
-
-        # Reset accounting
-        Accounting.objects.filter(admission_id=self.admission.pk).delete()
-        AccountingFactory(
-            admission_id=self.admission.pk,
-            solidarity_student=True,
-            account_number_type=ChoixTypeCompteBancaire.IBAN.name,
-            iban_account_number='BE43068999999501',
-            valid_iban=True,
-            other_format_account_number='123456789',
-            bic_swift_code='GKCCBEBB',
-            account_holder_first_name='John',
-            account_holder_last_name='Doe',
-        )
-
-    def test_assert_methods_not_allowed(self):
-        self.client.force_authenticate(user=self.student.user)
-        not_allowed_methods = [
-            'delete',
-            'patch',
-            'post',
-        ]
-
-        for method in not_allowed_methods:
-            response = getattr(self.client, method)(self.admission_url)
-            self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
-
-    def test_forbidden_request_with_other_student(self):
-        self.client.force_authenticate(user=self.other_student.user)
-        forbidden_methods = [
-            'get',
-            'put',
-        ]
-
-        for method in forbidden_methods:
-            response = getattr(self.client, method)(self.admission_url)
-            self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-
-    def test_get_accounting_with_student(self):
-        self.client.force_authenticate(user=self.student.user)
-
-        response = self.client.get(self.admission_url)
-        self.assertEqual(response.status_code, HTTP_200_OK)
-        self.assertEqual(
-            response.json(),
-            {
-                'etudiant_solidaire': True,
-                'type_numero_compte': ChoixTypeCompteBancaire.IBAN.name,
-                'numero_compte_iban': 'BE43068999999501',
-                'iban_valide': True,
-                'numero_compte_autre_format': '123456789',
-                'code_bic_swift_banque': 'GKCCBEBB',
-                'prenom_titulaire_compte': 'John',
-                'nom_titulaire_compte': 'Doe',
-            },
-        )
-
-    def test_put_accounting_values_with_student(self):
-        self.client.force_authenticate(user=self.student.user)
-
-        response = self.client.put(self.admission_url, data=self.default_api_data)
-        self.assertEqual(response.status_code, HTTP_200_OK)
-
-        # Check updated data
-        response = self.client.get(self.admission_url)
-        self.assertEqual(response.status_code, HTTP_200_OK)
-
-        expected_response_data = self.default_api_data.copy()
-        expected_response_data.pop('uuid_proposition')
 
         self.assertEqual(response.json(), expected_response_data)

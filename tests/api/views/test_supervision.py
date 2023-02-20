@@ -1,26 +1,26 @@
 # ##############################################################################
 #
-#    OSIS stands for Open Student Information System. It's an application
-#    designed to manage the core business of higher education institutions,
-#    such as universities, faculties, institutes and professional schools.
-#    The core business involves the administration of students, teachers,
-#    courses, programs and so on.
+#  OSIS stands for Open Student Information System. It's an application
+#  designed to manage the core business of higher education institutions,
+#  such as universities, faculties, institutes and professional schools.
+#  The core business involves the administration of students, teachers,
+#  courses, programs and so on.
 #
-#    Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
 #
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
 #
-#    A copy of this license - GNU General Public License - is available
-#    at the root of the source code of this program.  If not,
-#    see http://www.gnu.org/licenses/.
+#  A copy of this license - GNU General Public License - is available
+#  at the root of the source code of this program.  If not,
+#  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
 from django.shortcuts import resolve_url
@@ -43,6 +43,7 @@ from base.tests.factories.person import PersonFactory
 from base.tests.factories.tutor import TutorFactory
 from osis_signature.enums import SignatureState
 from osis_signature.models import StateHistory
+from reference.tests.factories.country import CountryFactory
 
 
 class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
@@ -66,6 +67,17 @@ class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
         cls.other_cdd_manager_user = CddManagerFactory().person.user
         # Target url
         cls.url = resolve_url("admission_api_v1:supervision", uuid=cls.admission.uuid)
+        cls.empty_external_data = {
+            'prenom': '',
+            'nom': '',
+            'email': '',
+            'est_docteur': False,
+            'institution': '',
+            'ville': '',
+            'pays': '',
+            'langue': '',
+        }
+        CountryFactory(iso_code='FR')
 
     def test_user_not_logged_assert_not_authorized(self):
         self.client.force_authenticate(user=None)
@@ -86,7 +98,7 @@ class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
         self.client.force_authenticate(user=self.candidate.user)
 
         with self.assertNumQueriesLessThan(8):
-            response = self.client.get(self.url, format="json")
+            response = self.client.get(self.url)
         promoteurs = response.json()['signatures_promoteurs']
         self.assertEqual(len(promoteurs), 1)
         self.assertEqual(promoteurs[0]['statut'], 'NOT_INVITED')
@@ -105,7 +117,7 @@ class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
     def test_supervision_get_using_api_cdd_manager(self):
         self.client.force_authenticate(user=self.cdd_manager_user)
         response = self.client.get(self.url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
 
     def test_supervision_get_using_api_other_cdd_manager(self):
         self.client.force_authenticate(user=self.other_cdd_manager_user)
@@ -124,7 +136,7 @@ class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
         # The current user is now a supervisor of the current admission
         self.client.force_authenticate(user=self.promoter.person.user)
         response = self.client.get(self.url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
 
     def test_supervision_get_using_api_committee_member(self):
         # Current user
@@ -141,7 +153,7 @@ class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
         # The current user is now a supervisor of the admission
         self.client.force_authenticate(user=member.person.user)
         response = self.client.get(self.url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
 
     # Add member
     def test_supervision_ajouter_membre_process_inexistant(self):
@@ -152,17 +164,15 @@ class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
         self.client.force_authenticate(user=admission.candidate.user)
         self.assertIsNone(admission.supervision_group)
         url = resolve_url("admission_api_v1:supervision", uuid=admission.uuid)
-        response = self.client.put(
-            url,
-            data={
-                'member': PersonFactory(first_name="John").global_id,
-                'type': ActorType.CA_MEMBER.name,
-            },
-            format="json",
-        )
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = {
+            'matricule': PersonFactory(first_name="John").global_id,
+            'type': ActorType.CA_MEMBER.name,
+            **self.empty_external_data,
+        }
+        response = self.client.put(url, data=data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
 
-        response = self.client.get(url, format="json")
+        response = self.client.get(url)
         promoteurs = response.json()['signatures_membres_CA']
         self.assertEqual(promoteurs[0]['membre_CA']['prenom'], 'John')
         admission.refresh_from_db()
@@ -171,104 +181,138 @@ class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
     def test_supervision_ajouter_membre_ca(self):
         self.client.force_authenticate(user=self.candidate.user)
 
-        response = self.client.put(
-            self.url,
-            data={
-                'member': PersonFactory(first_name="Joe").global_id,
-                'type': ActorType.CA_MEMBER.name,
-            },
-        )
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = {
+            'matricule': PersonFactory(first_name="John").global_id,
+            'type': ActorType.CA_MEMBER.name,
+            **self.empty_external_data,
+        }
+        response = self.client.put(self.url, data=data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
 
-        response = self.client.get(self.url, format="json")
-        promoteurs = response.json()['signatures_membres_CA']
-        self.assertEqual(promoteurs[0]['membre_CA']['prenom'], 'Joe')
+        response = self.client.get(self.url)
+        membres_ca = response.json()['signatures_membres_CA']
+        self.assertEqual(membres_ca[0]['membre_CA']['prenom'], 'John')
+
+    def test_supervision_ajouter_membre_ca_externe(self):
+        self.client.force_authenticate(user=self.candidate.user)
+
+        data = {
+            'matricule': "",
+            'type': ActorType.CA_MEMBER.name,
+            'prenom': 'Jean',
+            'nom': 'Pierre',
+            'email': 'jeanpierre@example.org',
+            'est_docteur': True,
+            'institution': 'Psychiatrique',
+            'ville': 'Somewhere',
+            'pays': 'FR',
+            'langue': 'fr-be',
+        }
+        response = self.client.put(self.url, data=data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
+
+        response = self.client.get(self.url)
+        membres_ca = response.json()['signatures_membres_CA']
+        self.assertEqual(len(membres_ca), 1)
+        self.assertEqual(membres_ca[0]['membre_CA']['prenom'], 'Jean')
 
     def test_supervision_ajouter_membre_ca_inexistant(self):
         self.client.force_authenticate(user=self.candidate.user)
 
-        response = self.client.put(
-            self.url,
-            data={
-                'member': "inexistant",
-                'type': ActorType.CA_MEMBER.name,
-            },
-        )
+        data = {'matricule': "inexistant", 'type': ActorType.CA_MEMBER.name, **self.empty_external_data}
+        response = self.client.put(self.url, data=data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.json()['non_field_errors'][0]['status_code'], MembreCANonTrouveException.status_code)
 
     def test_supervision_ajouter_promoteur(self):
         self.client.force_authenticate(user=self.candidate.user)
 
-        response = self.client.put(
-            self.url,
-            data={
-                'member': TutorFactory(person__first_name="Joe").person.global_id,
-                'type': ActorType.PROMOTER.name,
-            },
-        )
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = {
+            'matricule': TutorFactory(person__first_name="John").person.global_id,
+            'type': ActorType.PROMOTER.name,
+            **self.empty_external_data,
+        }
+        response = self.client.put(self.url, data=data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
 
-        response = self.client.get(self.url, format="json")
+        response = self.client.get(self.url)
         promoteurs = response.json()['signatures_promoteurs']
         self.assertEqual(len(promoteurs), 2)
-        self.assertEqual(promoteurs[0]['promoteur']['prenom'], 'Joe')
+        self.assertIn('John', [promoteur['promoteur']['prenom'] for promoteur in promoteurs])
+
+    def test_supervision_ajouter_promoteur_externe(self):
+        self.client.force_authenticate(user=self.candidate.user)
+
+        data = {
+            'matricule': "",
+            'type': ActorType.PROMOTER.name,
+            'prenom': 'Jean',
+            'nom': 'Pierre',
+            'email': 'jeanpierre@example.org',
+            'est_docteur': True,
+            'institution': 'Psychiatrique',
+            'ville': 'Somewhere',
+            'pays': 'FR',
+            'langue': 'fr-be',
+        }
+        response = self.client.put(self.url, data=data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
+
+        response = self.client.get(self.url)
+        promoteurs = response.json()['signatures_promoteurs']
+        self.assertEqual(len(promoteurs), 2)
+        self.assertEqual(promoteurs[-1]['promoteur']['prenom'], 'Jean')
 
     def test_supervision_ajouter_promoteur_inexistant(self):
         self.client.force_authenticate(user=self.candidate.user)
 
-        response = self.client.put(
-            self.url,
-            data={
-                'member': "inexistant",
-                'type': ActorType.PROMOTER.name,
-            },
-        )
+        data = {
+            'matricule': "inexistant",
+            'type': ActorType.PROMOTER.name,
+            **self.empty_external_data,
+        }
+        response = self.client.put(self.url, data=data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.json()['non_field_errors'][0]['status_code'], PromoteurNonTrouveException.status_code)
 
     def test_supervision_ajouter_membre_no_role(self):
         self.client.force_authenticate(user=self.no_role_user)
-        response = self.client.put(
-            self.url,
-            data={
-                'member': TutorFactory(person__first_name="Joe").person.global_id,
-                'type': ActorType.PROMOTER.name,
-            },
-        )
+        data = {
+            'matricule': TutorFactory(person__first_name="Joe").person.global_id,
+            'type': ActorType.PROMOTER.name,
+            **self.empty_external_data,
+        }
+        response = self.client.put(self.url, data=data)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_supervision_ajouter_membre_other_candidate(self):
         self.client.force_authenticate(user=self.other_candidate_user)
-        response = self.client.put(
-            self.url,
-            data={
-                'member': TutorFactory(person__first_name="Joe").person.global_id,
-                'type': ActorType.PROMOTER.name,
-            },
-        )
+        data = {
+            'matricule': TutorFactory(person__first_name="Joe").person.global_id,
+            'type': ActorType.PROMOTER.name,
+            **self.empty_external_data,
+        }
+        response = self.client.put(self.url, data=data)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_supervision_ajouter_membre_cdd_manager(self):
         self.client.force_authenticate(user=self.cdd_manager_user)
-        response = self.client.put(
-            self.url,
-            data={
-                'member': TutorFactory(person__first_name="Joe").person.global_id,
-                'type': ActorType.PROMOTER.name,
-            },
-        )
+        data = {
+            'matricule': TutorFactory(person__first_name="Joe").person.global_id,
+            'type': ActorType.PROMOTER.name,
+            **self.empty_external_data,
+        }
+        response = self.client.put(self.url, data=data)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
 
     def test_supervision_ajouter_membre_other_cdd_manager(self):
         self.client.force_authenticate(user=self.other_cdd_manager_user)
-        response = self.client.put(
-            self.url,
-            data={
-                'member': TutorFactory(person__first_name="Joe").person.global_id,
-                'type': ActorType.PROMOTER.name,
-            },
-        )
+        data = {
+            'matricule': TutorFactory(person__first_name="Joe").person.global_id,
+            'type': ActorType.PROMOTER.name,
+            **self.empty_external_data,
+        }
+        response = self.client.put(self.url, data=data)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_supervision_ajouter_membre_promoter(self):
@@ -277,24 +321,22 @@ class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
 
         # The current user is not yet a supervisor of the current admission
         self.client.force_authenticate(user=other_promoter.person.user)
-        response = self.client.put(
-            self.url,
-            data={
-                'member': TutorFactory(person__first_name="Joe").person.global_id,
-                'type': ActorType.PROMOTER.name,
-            },
-        )
+        data = {
+            'matricule': TutorFactory(person__first_name="Joe").person.global_id,
+            'type': ActorType.PROMOTER.name,
+            **self.empty_external_data,
+        }
+        response = self.client.put(self.url, data=data)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
         # The current user is now a supervisor of the current admission
         self.client.force_authenticate(user=self.promoter.person.user)
-        response = self.client.put(
-            self.url,
-            data={
-                'member': TutorFactory(person__first_name="Joe").person.global_id,
-                'type': ActorType.PROMOTER.name,
-            },
-        )
+        data = {
+            'matricule': TutorFactory(person__first_name="Joe").person.global_id,
+            'type': ActorType.PROMOTER.name,
+            **self.empty_external_data,
+        }
+        response = self.client.put(self.url, data=data)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_supervision_ajouter_membre_committee_member(self):
@@ -306,24 +348,22 @@ class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
 
         # The current user is not yet a supervisor of the admission
         self.client.force_authenticate(user=other_member.person.user)
-        response = self.client.put(
-            self.url,
-            data={
-                'member': PersonFactory(first_name="Joe").global_id,
-                'type': ActorType.CA_MEMBER.name,
-            },
-        )
+        data = {
+            'matricule': PersonFactory(first_name="Joe").global_id,
+            'type': ActorType.CA_MEMBER.name,
+            **self.empty_external_data,
+        }
+        response = self.client.put(self.url, data=data)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
         # The current user is now a supervisor of the admission
         self.client.force_authenticate(user=member.person.user)
-        response = self.client.put(
-            self.url,
-            data={
-                'member': PersonFactory(first_name="Joe").global_id,
-                'type': ActorType.CA_MEMBER.name,
-            },
-        )
+        data = {
+            'matricule': PersonFactory(first_name="Joe").global_id,
+            'type': ActorType.CA_MEMBER.name,
+            **self.empty_external_data,
+        }
+        response = self.client.put(self.url, data=data)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     # Remove member
@@ -335,11 +375,11 @@ class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
         response = self.client.post(
             self.url,
             data={
-                'member': promoter.person.global_id,
                 'type': ActorType.PROMOTER.name,
+                'uuid_membre': promoter.uuid,
             },
         )
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
 
     def test_supervision_supprimer_membre_ca_using_api(self):
         self.client.force_authenticate(user=self.candidate.user)
@@ -349,11 +389,11 @@ class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
         response = self.client.post(
             self.url,
             data={
-                'member': member.person.global_id,
                 'type': ActorType.CA_MEMBER.name,
+                'uuid_membre': member.uuid,
             },
         )
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
 
     def test_supervision_supprimer_membre_no_role(self):
         self.client.force_authenticate(user=self.no_role_user)
@@ -363,8 +403,8 @@ class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
         response = self.client.post(
             self.url,
             data={
-                'member': self.promoter.person.global_id,
                 'type': ActorType.PROMOTER.name,
+                'uuid_membre': self.promoter.uuid,
             },
         )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
@@ -375,8 +415,8 @@ class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
         response = self.client.post(
             self.url,
             data={
-                'member': self.promoter.person.global_id,
                 'type': ActorType.PROMOTER.name,
+                'uuid_membre': self.promoter.uuid,
             },
         )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
@@ -386,25 +426,21 @@ class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
 
         promoter = PromoterFactory(process=self.promoter.actor_ptr.process)
 
-        response = self.client.post(
-            self.url,
-            data={
-                'member': promoter.person.global_id,
-                'type': ActorType.PROMOTER.name,
-            },
-        )
+        data = {
+            'type': ActorType.PROMOTER.name,
+            'uuid_membre': promoter.uuid,
+        }
+        response = self.client.post(self.url, data=data)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
 
     def test_supervision_supprimer_membre_other_cdd_manager(self):
         self.client.force_authenticate(user=self.other_cdd_manager_user)
 
-        response = self.client.post(
-            self.url,
-            data={
-                'member': self.promoter.person.global_id,
-                'type': ActorType.PROMOTER.name,
-            },
-        )
+        data = {
+            'type': ActorType.PROMOTER.name,
+            'uuid_membre': self.promoter.uuid,
+        }
+        response = self.client.post(self.url, data=data)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_supervision_supprimer_membre_promoter(self):
@@ -413,24 +449,16 @@ class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
 
         # The current user is not yet a supervisor of the admission
         self.client.force_authenticate(user=other_promoter.person.user)
-        response = self.client.post(
-            self.url,
-            data={
-                'member': self.promoter.person.global_id,
-                'type': ActorType.PROMOTER.name,
-            },
-        )
+        data = {
+            'type': ActorType.PROMOTER.name,
+            'uuid_membre': self.promoter.uuid,
+        }
+        response = self.client.post(self.url, data=data)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
         # The current user is now a supervisor of the admission
         self.client.force_authenticate(user=self.promoter.person.user)
-        response = self.client.post(
-            self.url,
-            data={
-                'member': self.promoter.person.global_id,
-                'type': ActorType.PROMOTER.name,
-            },
-        )
+        response = self.client.post(self.url, data=data)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_supervision_supprimer_membre_committee_member(self):
@@ -442,24 +470,16 @@ class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
 
         # The current user is not yet a supervisor of the admission
         self.client.force_authenticate(user=other_member.person.user)
-        response = self.client.put(
-            self.url,
-            data={
-                'member': member.person.global_id,
-                'type': ActorType.CA_MEMBER.name,
-            },
-        )
+        data = {
+            'matricule': member.uuid,
+            'type': ActorType.CA_MEMBER.name,
+        }
+        response = self.client.put(self.url, data=data)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
         # The current user is now a supervisor of the admission
         self.client.force_authenticate(user=member.person.user)
-        response = self.client.put(
-            self.url,
-            data={
-                'member': member.person.global_id,
-                'type': ActorType.CA_MEMBER.name,
-            },
-        )
+        response = self.client.put(self.url, data=data)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_supervision_modification_impossible_par_doctorant_apres_envoi(self):
@@ -468,22 +488,18 @@ class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
         self.admission.status = ChoixStatutProposition.SIGNING_IN_PROGRESS.name
         self.admission.save()
 
-        response = self.client.post(
-            self.url,
-            data={
-                'member': self.promoter.person.global_id,
-                'type': ActorType.PROMOTER.name,
-            },
-        )
+        data = {
+            'matricule': self.promoter.uuid,
+            'type': ActorType.PROMOTER.name,
+        }
+        response = self.client.post(self.url, data=data)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-        response = self.client.put(
-            self.url,
-            data={
-                'member': TutorFactory(person__first_name="Joe").person.global_id,
-                'type': ActorType.PROMOTER.name,
-            },
-        )
+        data = {
+            'matricule': TutorFactory(person__first_name="Joe").person.global_id,
+            'type': ActorType.PROMOTER.name,
+        }
+        response = self.client.put(self.url, data=data)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
         self.admission.status = ChoixStatutProposition.IN_PROGRESS.name
@@ -499,34 +515,31 @@ class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
         )
 
         # Check supervision before
-        response = self.client.get(self.url, format="json")
+        response = self.client.get(self.url)
         promoters = response.json()['signatures_promoteurs']
         membres_CA = response.json()['signatures_membres_CA']
         self.assertEqual(len(promoters), 2)
         self.assertEqual(len(membres_CA), 0)
 
         # Add CA member
-        response = self.client.put(
-            self.url,
-            data={
-                'member': PersonFactory(first_name="Joe").global_id,
-                'type': ActorType.CA_MEMBER.name,
-            },
-        )
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = {
+            'matricule': PersonFactory(first_name="Joe").global_id,
+            'type': ActorType.CA_MEMBER.name,
+            **self.empty_external_data,
+        }
+        response = self.client.put(self.url, data=data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
 
         # Remove promoter
-        response = self.client.post(
-            self.url,
-            data={
-                'member': promoter.person.global_id,
-                'type': ActorType.PROMOTER.name,
-            },
-        )
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = {
+            'type': ActorType.PROMOTER.name,
+            'uuid_membre': promoter.uuid,
+        }
+        response = self.client.post(self.url, data=data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
 
         # Check supervision after
-        response = self.client.get(self.url, format="json")
+        response = self.client.get(self.url)
         promoters = response.json()['signatures_promoteurs']
         membres_CA = response.json()['signatures_membres_CA']
         self.assertEqual(len(promoters), 1)
@@ -538,27 +551,23 @@ class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
         promoter2 = PromoterFactory(process=self.admission.supervision_group)
 
         url = resolve_url("admission_api_v1:set-reference-promoter", uuid=self.admission.uuid)
-        response = self.client.put(
-            url,
-            data={
-                'matricule': promoter1.person.global_id,
-                'uuid_proposition': self.admission.uuid,
-            },
-        )
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = {
+            'uuid_promoteur': promoter1.uuid,
+            'uuid_proposition': self.admission.uuid,
+        }
+        response = self.client.put(url, data=data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
 
-        response = self.client.get(self.url, format="json")
-        self.assertEqual(response.json()['promoteur_reference'], promoter1.person.global_id)
+        response = self.client.get(self.url)
+        self.assertEqual(response.json()['promoteur_reference'], str(promoter1.uuid))
 
         # Now change promoter
-        response = self.client.put(
-            url,
-            data={
-                'matricule': promoter2.person.global_id,
-                'uuid_proposition': self.admission.uuid,
-            },
-        )
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = {
+            'uuid_promoteur': promoter2.uuid,
+            'uuid_proposition': self.admission.uuid,
+        }
+        response = self.client.put(url, data=data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
 
-        response = self.client.get(self.url, format="json")
-        self.assertEqual(response.json()['promoteur_reference'], promoter2.person.global_id)
+        response = self.client.get(self.url)
+        self.assertEqual(response.json()['promoteur_reference'], str(promoter2.uuid))

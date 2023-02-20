@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Admission API
-  version: 1.0.63
+  version: 1.0.67
   description: This API delivers data for the Admission project.
   contact:
     name: UCLouvain - OSIS
@@ -1533,7 +1533,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/SupervisionActor'
+              $ref: '#/components/schemas/SupervisionActorReference'
       responses:
         201:
           content:
@@ -1568,7 +1568,114 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/SupervisionActor'
+              $ref: '#/components/schemas/IdentifierSupervisionActor'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PropositionIdentityDTO'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
+  /propositions/doctorate/{uuid}/supervision/external/{token}:
+    get:
+      operationId: get_external_proposition
+      description: Returns necessary info about proposition while checking token.
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - name: token
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExternalSupervisionDTO'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
+    post:
+      operationId: approve_external_proposition
+      description: Approve the proposition.
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - name: token
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApprouverPropositionCommand'
+      responses:
+        201:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PropositionIdentityDTO'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
+    put:
+      operationId: reject_external_proposition
+      description: Reject the proposition.
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - name: token
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefuserPropositionCommand'
       responses:
         200:
           content:
@@ -3204,72 +3311,6 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - propositions
-  /propositions/continuing-education/{uuid}/accounting:
-    get:
-      operationId: retrieve_continuing_accounting
-      description: Get additional data conditioning the required accounting fields
-      parameters:
-      - name: uuid
-        in: path
-        required: true
-        description: ''
-        schema:
-          type: string
-      - $ref: '#/components/parameters/Accept-Language'
-      - $ref: '#/components/parameters/X-User-FirstName'
-      - $ref: '#/components/parameters/X-User-LastName'
-      - $ref: '#/components/parameters/X-User-Email'
-      - $ref: '#/components/parameters/X-User-GlobalID'
-      responses:
-        200:
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ContinuingEducationAccountingDTO'
-          description: ''
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-      tags:
-      - propositions
-    put:
-      operationId: update_continuing_accounting
-      description: Edit the accounting of a proposition
-      parameters:
-      - name: uuid
-        in: path
-        required: true
-        description: ''
-        schema:
-          type: string
-      - $ref: '#/components/parameters/Accept-Language'
-      - $ref: '#/components/parameters/X-User-FirstName'
-      - $ref: '#/components/parameters/X-User-LastName'
-      - $ref: '#/components/parameters/X-User-Email'
-      - $ref: '#/components/parameters/X-User-GlobalID'
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CompleterComptabilitePropositionContinueCommand'
-      responses:
-        200:
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PropositionIdentityDTO'
-          description: ''
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-      tags:
-      - propositions
   /propositions/continuing-education/{uuid}/curriculum/educational/{experience_id}:
     get:
       operationId: retrieveEducationalExperienceContinuingEducationAdmission
@@ -4176,6 +4217,41 @@ paths:
               $ref: '#/components/schemas/PropositionIdentityDTO'
       responses:
         201:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PropositionIdentityDTO'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
+    put:
+      operationId: update_signatures
+      description: Resend an invitation for and external member.
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RenvoyerInvitationSignatureExterne'
+      responses:
+        200:
           content:
             application/json:
               schema:
@@ -5241,10 +5317,6 @@ components:
                     $ref: '#/components/schemas/ActionLink'
                   update_training_choice:
                     $ref: '#/components/schemas/ActionLink'
-                  retrieve_accounting:
-                    $ref: '#/components/schemas/ActionLink'
-                  update_accounting:
-                    $ref: '#/components/schemas/ActionLink'
                   submit_proposition:
                     $ref: '#/components/schemas/ActionLink'
                   destroy_proposition:
@@ -6146,9 +6218,12 @@ components:
               country:
                 type: string
                 nullable: true
+              obtained_diploma:
+                type: boolean
             required:
             - educationalexperienceyear_set
             - country
+            - obtained_diploma
         minimal_date:
           type: date
           readOnly: true
@@ -6754,6 +6829,8 @@ components:
               promoteur:
                 type: object
                 properties:
+                  uuid:
+                    type: string
                   matricule:
                     type: string
                   nom:
@@ -6762,23 +6839,26 @@ components:
                     type: string
                   email:
                     type: string
-                  titre:
-                    type: string
+                  est_docteur:
+                    type: boolean
                   institution:
                     type: string
                   ville:
                     type: string
                   pays:
                     type: string
+                  est_externe:
+                    type: boolean
                 required:
-                - matricule
+                - uuid
                 - nom
                 - prenom
                 - email
-                - titre
+                - est_docteur
                 - institution
                 - ville
                 - pays
+                - est_externe
               statut:
                 type: string
               date:
@@ -6807,6 +6887,8 @@ components:
               membre_CA:
                 type: object
                 properties:
+                  uuid:
+                    type: string
                   matricule:
                     type: string
                   nom:
@@ -6815,23 +6897,26 @@ components:
                     type: string
                   email:
                     type: string
-                  titre:
-                    type: string
+                  est_docteur:
+                    type: boolean
                   institution:
                     type: string
                   ville:
                     type: string
                   pays:
                     type: string
+                  est_externe:
+                    type: boolean
                 required:
-                - matricule
+                - uuid
                 - nom
                 - prenom
                 - email
-                - titre
+                - est_docteur
                 - institution
                 - ville
                 - pays
+                - est_externe
               statut:
                 type: string
               date:
@@ -6857,6 +6942,200 @@ components:
       required:
       - signatures_promoteurs
       - signatures_membres_CA
+    ExternalSupervisionDTO:
+      type: object
+      properties:
+        proposition:
+          type: object
+          properties:
+            uuid:
+              type: string
+            type_admission:
+              type: string
+            reference:
+              type: string
+            doctorat:
+              type: object
+              properties:
+                sigle:
+                  type: string
+                annee:
+                  type: integer
+                intitule:
+                  type: string
+                sigle_entite_gestion:
+                  type: string
+                campus:
+                  type: string
+                type:
+                  type: string
+                campus_inscription:
+                  type: string
+              required:
+              - sigle
+              - annee
+              - intitule
+              - sigle_entite_gestion
+              - campus
+              - type
+              - campus_inscription
+            matricule_candidat:
+              type: string
+            code_secteur_formation:
+              type: string
+            commission_proximite:
+              type: string
+            institut_these:
+              type: string
+              format: uuid
+              nullable: true
+            institution:
+              type: string
+            domaine_these:
+              type: string
+            fiche_archive_signatures_envoyees:
+              type: array
+              items:
+                type: string
+            statut:
+              type: string
+          required:
+          - uuid
+          - type_admission
+          - reference
+          - doctorat
+          - matricule_candidat
+          - code_secteur_formation
+          - domaine_these
+          - fiche_archive_signatures_envoyees
+          - statut
+        supervision:
+          type: object
+          properties:
+            signatures_promoteurs:
+              type: array
+              items:
+                type: object
+                properties:
+                  promoteur:
+                    type: object
+                    properties:
+                      uuid:
+                        type: string
+                      matricule:
+                        type: string
+                      nom:
+                        type: string
+                      prenom:
+                        type: string
+                      email:
+                        type: string
+                      est_docteur:
+                        type: boolean
+                      institution:
+                        type: string
+                      ville:
+                        type: string
+                      pays:
+                        type: string
+                      est_externe:
+                        type: boolean
+                    required:
+                    - uuid
+                    - nom
+                    - prenom
+                    - email
+                    - est_docteur
+                    - institution
+                    - ville
+                    - pays
+                    - est_externe
+                  statut:
+                    type: string
+                  date:
+                    type: string
+                    format: date-time
+                    nullable: true
+                  commentaire_externe:
+                    type: string
+                  commentaire_interne:
+                    type: string
+                  motif_refus:
+                    type: string
+                  pdf:
+                    type: array
+                    items:
+                      type: string
+                required:
+                - promoteur
+                - statut
+                - pdf
+            signatures_membres_CA:
+              type: array
+              items:
+                type: object
+                properties:
+                  membre_CA:
+                    type: object
+                    properties:
+                      uuid:
+                        type: string
+                      matricule:
+                        type: string
+                      nom:
+                        type: string
+                      prenom:
+                        type: string
+                      email:
+                        type: string
+                      est_docteur:
+                        type: boolean
+                      institution:
+                        type: string
+                      ville:
+                        type: string
+                      pays:
+                        type: string
+                      est_externe:
+                        type: boolean
+                    required:
+                    - uuid
+                    - nom
+                    - prenom
+                    - email
+                    - est_docteur
+                    - institution
+                    - ville
+                    - pays
+                    - est_externe
+                  statut:
+                    type: string
+                  date:
+                    type: string
+                    format: date-time
+                    nullable: true
+                  commentaire_externe:
+                    type: string
+                  commentaire_interne:
+                    type: string
+                  motif_refus:
+                    type: string
+                  pdf:
+                    type: array
+                    items:
+                      type: string
+                required:
+                - membre_CA
+                - statut
+                - pdf
+            promoteur_reference:
+              type: string
+          required:
+          - signatures_promoteurs
+          - signatures_membres_CA
+      required:
+      - proposition
+      - supervision
     ConfirmationPaperDTO:
       type: object
       properties:
@@ -8676,10 +8955,6 @@ components:
               $ref: '#/components/schemas/ActionLink'
             update_specific_question:
               $ref: '#/components/schemas/ActionLink'
-            retrieve_accounting:
-              $ref: '#/components/schemas/ActionLink'
-            update_accounting:
-              $ref: '#/components/schemas/ActionLink'
             destroy_proposition:
               $ref: '#/components/schemas/ActionLink'
             submit_proposition:
@@ -8737,6 +9012,15 @@ components:
             destinataire:
               type: string
           nullable: true
+        pays_nationalite_candidat:
+          type: string
+        pays_nationalite_ue_candidat:
+          type: boolean
+          nullable: true
+        copie_titre_sejour:
+          type: array
+          items:
+            type: string
       required:
       - uuid
       - reference
@@ -8749,27 +9033,8 @@ components:
       - erreurs
       - curriculum
       - equivalence_diplome
-    ContinuingEducationAccountingDTO:
-      type: object
-      properties:
-        etudiant_solidaire:
-          type: boolean
-          nullable: true
-        type_numero_compte:
-          type: string
-        numero_compte_iban:
-          type: string
-        iban_valide:
-          type: boolean
-          nullable: true
-        numero_compte_autre_format:
-          type: string
-        code_bic_swift_banque:
-          type: string
-        prenom_titulaire_compte:
-          type: string
-        nom_titulaire_compte:
-          type: string
+      - pays_nationalite_candidat
+      - copie_titre_sejour
     SectorDTO:
       type: object
       properties:
@@ -8993,16 +9258,16 @@ components:
       - annee
       - pool
       - elements_confirmation
-    SupervisionActor:
+    SupervisionActorReference:
       type: object
       properties:
         type:
           $ref: '#/components/schemas/ActorType'
-        member:
+        uuid_membre:
           type: string
       required:
       - type
-      - member
+      - uuid_membre
     ActorType:
       enum:
       - PROMOTER
@@ -9011,7 +9276,7 @@ components:
     ApprouverPropositionCommand:
       type: object
       properties:
-        matricule:
+        uuid_membre:
           type: string
         institut_these:
           type: string
@@ -9021,18 +9286,18 @@ components:
         commentaire_externe:
           type: string
       required:
-      - matricule
+      - uuid_membre
     ApprouverPropositionParPdfCommand:
       type: object
       properties:
-        matricule:
+        uuid_membre:
           type: string
         pdf:
           type: array
           items:
             type: string
       required:
-      - matricule
+      - uuid_membre
       - pdf
     DoctorateIdentityDTO:
       type: object
@@ -9480,20 +9745,53 @@ components:
       required:
       - uuid_proposition
       - type_admission
+    IdentifierSupervisionActor:
+      type: object
+      properties:
+        matricule:
+          type: string
+        prenom:
+          type: string
+        nom:
+          type: string
+        email:
+          type: string
+        est_docteur:
+          type: boolean
+          nullable: true
+        institution:
+          type: string
+        ville:
+          type: string
+        pays:
+          type: string
+        langue:
+          type: string
+        type:
+          $ref: '#/components/schemas/ActorType'
+      required:
+      - type
     DesignerPromoteurReferenceCommand:
       type: object
       properties:
         uuid_proposition:
           type: string
-        matricule:
+        uuid_promoteur:
           type: string
       required:
       - uuid_proposition
-      - matricule
+      - uuid_promoteur
+    RenvoyerInvitationSignatureExterne:
+      type: object
+      properties:
+        uuid_membre:
+          type: string
+      required:
+      - uuid_membre
     RefuserPropositionCommand:
       type: object
       properties:
-        matricule:
+        uuid_membre:
           type: string
         motif_refus:
           type: string
@@ -9502,7 +9800,7 @@ components:
         commentaire_externe:
           type: string
       required:
-      - matricule
+      - uuid_membre
       - motif_refus
     SubmitConfirmationPaperCommand:
       type: object
@@ -9863,31 +10161,12 @@ components:
           type: string
         reponses_questions_specifiques:
           type: object
-    CompleterComptabilitePropositionContinueCommand:
-      type: object
-      properties:
-        uuid_proposition:
-          type: string
-        etudiant_solidaire:
-          type: boolean
-          nullable: true
-        type_numero_compte:
-          type: string
-        numero_compte_iban:
-          type: string
-        iban_valide:
-          type: boolean
-          nullable: true
-        numero_compte_autre_format:
-          type: string
-        code_bic_swift_banque:
-          type: string
-        prenom_titulaire_compte:
-          type: string
-        nom_titulaire_compte:
-          type: string
+        copie_titre_sejour:
+          type: array
+          items:
+            type: string
       required:
-      - uuid_proposition
+      - copie_titre_sejour
     Error:
       type: object
       properties:

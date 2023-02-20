@@ -110,14 +110,12 @@ class GeneralEducationAdmission(BaseAdmission):
 
     bachelor_cycle_continuation_certificate = FileField(
         blank=True,
-        mimetypes=['application/pdf'],
         upload_to=admission_directory_path,
         verbose_name=_("Certificate allowing the continuation of studies for a bachelor's degree"),
     )
 
     diploma_equivalence = FileField(
         blank=True,
-        mimetypes=['application/pdf'],
         upload_to=admission_directory_path,
         verbose_name=_('Diploma equivalence'),
     )
@@ -155,16 +153,24 @@ class GeneralEducationAdmissionManager(models.Manager.from_queryset(BaseAdmissio
                 "candidate__country_of_citizenship",
                 "training__academic_year",
                 "training__education_group_type",
-                "training__main_domain",
-                "training__enrollment_campus",
                 "determined_academic_year",
                 "double_degree_scholarship",
                 "international_scholarship",
                 "erasmus_mundus_scholarship",
             )
-            .annotate_campus()
             .annotate_pool_end_date()
+        )
+
+    def for_dto(self):
+        return (
+            self.get_queryset()
+            .select_related(
+                "training__main_domain",
+                "training__enrollment_campus",
+            )
+            .annotate_campus()
             .annotate_training_management_entity()
+            .annotate_training_management_faculty()
         )
 
 

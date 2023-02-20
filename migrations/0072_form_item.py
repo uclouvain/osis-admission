@@ -63,7 +63,9 @@ class Migration(migrations.Migration):
                     'active',
                     models.BooleanField(
                         default=True,
-                        help_text='Indicates if the item will be displayed to the user or not.',
+                        help_text='Active items are available for new instantiations, and are shown to candidates if '
+                                  'necessary. Inactive elements are unavailable for future instantiations and are '
+                                  'never shown to candidates.',
                         verbose_name='Active',
                     ),
                 ),

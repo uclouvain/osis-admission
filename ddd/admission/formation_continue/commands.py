@@ -96,11 +96,6 @@ class DeterminerAnneeAcademiqueEtPotQuery(interface.QueryRequest):
 
 
 @attr.dataclass(frozen=True, slots=True)
-class GetComptabiliteQuery(interface.QueryRequest):
-    uuid_proposition: str
-
-
-@attr.dataclass(frozen=True, slots=True)
 class CompleterComptabilitePropositionCommand(interface.CommandRequest):
     uuid_proposition: str
 
@@ -144,3 +139,4 @@ class CompleterQuestionsSpecifiquesCommand(interface.CommandRequest):
     adresse_facturation_lieu_dit: Optional[str] = ''
 
     reponses_questions_specifiques: Dict = attr.Factory(dict)
+    copie_titre_sejour: List[str] = attr.Factory(list)

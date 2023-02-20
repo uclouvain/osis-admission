@@ -25,11 +25,13 @@
 # ##############################################################################
 
 from django import forms
+from django.conf import settings
 from django.contrib import admin
 from django.db import models
+from django.shortcuts import resolve_url
+from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _, pgettext
 from hijack.contrib.admin import HijackUserAdminMixin
-from osis_document.contrib import FileField
 
 from admission.auth.roles.adre import AdreSecretary
 from admission.auth.roles.ca_member import CommitteeMember
@@ -42,6 +44,7 @@ from admission.auth.roles.sceb import Sceb
 from admission.auth.roles.sic_director import SicDirector
 from admission.auth.roles.sic_manager import SicManager
 from admission.contrib.models import (
+    AdmissionTask,
     CddMailTemplate,
     ContinuingEducationAdmission,
     DoctorateAdmission,
@@ -51,14 +54,14 @@ from admission.contrib.models import (
 from admission.contrib.models.cdd_config import CddConfiguration
 from admission.contrib.models.doctoral_training import Activity
 from admission.contrib.models.form_item import AdmissionFormItem, AdmissionFormItemInstantiation
-from admission.ddd.parcours_doctoral.formation.domain.model.enums import CategorieActivite
+from admission.ddd.parcours_doctoral.formation.domain.model.enums import CategorieActivite, ContexteFormation
 from base.models.academic_year import AcademicYear
 from base.models.education_group_type import EducationGroupType
 from base.models.entity_version import EntityVersion
 from base.models.enums.education_group_categories import Categories
-from osis_mail_template.admin import MailTemplateAdmin
-
 from base.models.person import Person
+from osis_document.contrib import FileField
+from osis_mail_template.admin import MailTemplateAdmin
 from osis_profile.models import EducationalExperience, ProfessionalExperience
 from osis_role.contrib.admin import RoleModelAdmin
 
@@ -82,10 +85,19 @@ class AdmissionAdminForm(forms.ModelForm):
 class BaseAdmissionAdmin(admin.ModelAdmin):
     form = AdmissionAdminForm
 
+    list_display = [
+        'reference',
+        'candidate_fmt',
+        'training',
+        'type_demande',
+        'status',
+        'view_on_portal',
+    ]
     search_fields = [
         'reference',
     ]
     readonly_fields = [
+        'detailed_status',
         "submitted_at",
     ]
     filter_horizontal = [
@@ -96,8 +108,10 @@ class BaseAdmissionAdmin(admin.ModelAdmin):
         'candidate',
         'training__academic_year',
     ]
+    list_filter = ['status', 'type_demande']
 
     def get_readonly_fields(self, request, obj=None):
+        # Also mark all FileField as readonly (since we don't have admin widget yet)
         return self.readonly_fields + [
             field.name for field in self.model._meta.get_fields(include_parents=True) if isinstance(field, FileField)
         ]
@@ -105,6 +119,11 @@ class BaseAdmissionAdmin(admin.ModelAdmin):
     @admin.display(description=_('Candidate'))
     def candidate_fmt(self, obj):
         return '{} ({global_id})'.format(obj.candidate, global_id=obj.candidate.global_id)
+
+    @admin.display(description=_('Search on portal'))
+    def view_on_portal(self, obj):
+        url = f"{settings.OSIS_PORTAL_URL}admin/auth/user/?q={obj.candidate.global_id}"
+        return mark_safe(f'<a class="button" href="{url}" target="_blank">{_("Candidate on portal")}</a>')
 
 
 class DoctorateAdmissionAdmin(BaseAdmissionAdmin):
@@ -114,7 +133,7 @@ class DoctorateAdmissionAdmin(BaseAdmissionAdmin):
         'international_scholarship',
         'erasmus_mundus_scholarship',
     ]
-    list_display = ['reference', 'candidate_fmt', 'doctorate', 'type', 'status']
+    list_display = ['reference', 'candidate_fmt', 'doctorate', 'type', 'status', 'view_on_portal']
     list_filter = ['status', 'type']
     readonly_fields = [
         "detailed_status",
@@ -124,15 +143,17 @@ class DoctorateAdmissionAdmin(BaseAdmissionAdmin):
     ]
     exclude = ["valuated_experiences"]
 
+    @staticmethod
+    def view_on_site(obj):
+        return resolve_url(f'admission:doctorate', uuid=obj.uuid)
+
 
 class ContinuingEducationAdmissionAdmin(BaseAdmissionAdmin):
     autocomplete_fields = ['training']
-    list_display = ['reference', 'candidate_fmt', 'training', 'status']
-    list_filter = ['status']
-    readonly_fields = [
-        'detailed_status',
-        "submitted_at",
-    ]
+
+    @staticmethod
+    def view_on_site(obj):
+        return resolve_url(f'admission:continuing-education', uuid=obj.uuid)
 
 
 class GeneralEducationAdmissionAdmin(ContinuingEducationAdmissionAdmin):
@@ -142,9 +163,10 @@ class GeneralEducationAdmissionAdmin(ContinuingEducationAdmissionAdmin):
         'international_scholarship',
         'erasmus_mundus_scholarship',
     ]
-    readonly_fields = [
-        "submitted_at",
-    ]
+
+    @staticmethod
+    def view_on_site(obj):
+        return resolve_url(f'admission:general-education', uuid=obj.uuid)
 
 
 class CddMailTemplateAdmin(MailTemplateAdmin):
@@ -159,12 +181,17 @@ class CddMailTemplateAdmin(MailTemplateAdmin):
         'identifier',
     ]
 
+    @staticmethod
+    def view_on_site(obj):
+        return resolve_url(f'admission:config:cdd-mail-template:preview', identifier=obj.identifier, pk=obj.pk)
+
 
 class ScholarshipAdmin(admin.ModelAdmin):
     list_display = [
         'short_name',
         'long_name',
         'type',
+        'disabled',
     ]
     search_fields = [
         'short_name',
@@ -172,6 +199,7 @@ class ScholarshipAdmin(admin.ModelAdmin):
     ]
     list_filter = [
         'type',
+        'disabled',
     ]
     fields = [
         'type',
@@ -396,8 +424,43 @@ class ActivityAdmin(admin.ModelAdmin):
             return f"({obj.parent.category}) {obj.category}"
         return obj.category
 
+    @staticmethod
+    def view_on_site(obj):
+        context_mapping = {
+            ContexteFormation.DOCTORAL_TRAINING.name: 'doctoral-training',
+            ContexteFormation.COMPLEMENTARY_TRAINING.name: 'complementary-training',
+            ContexteFormation.FREE_COURSE.name: 'course-enrollment',
+        }
+        context = (
+            context_mapping[obj.context] if obj.category != CategorieActivite.UCL_COURSE.name else 'course-enrollment'
+        )
+        url = resolve_url(f'admission:doctorate:{context}', uuid=obj.doctorate.uuid)
+        return url + f'#{obj.uuid}'
+
 
 admin.site.register(Activity, ActivityAdmin)
+
+
+class AdmissionTaskAdmin(admin.ModelAdmin):
+    list_display = ['admission', 'task_uuid', 'task_status', 'type']
+    list_select_related = ['task', 'admission']
+
+    @admin.display(description="Task uuid")
+    def task_uuid(self, obj):
+        return obj.task.uuid
+
+    @admin.display(description="Task status")
+    def task_status(self, obj):
+        return obj.task.state
+
+    def has_add_permission(self, request) -> bool:
+        return False
+
+    def has_change_permission(self, request, obj=None) -> bool:
+        return False
+
+
+admin.site.register(AdmissionTask, AdmissionTaskAdmin)
 
 
 # ##############################################################################
@@ -409,12 +472,6 @@ class HijackRoleModelAdmin(HijackUserAdminMixin, RoleModelAdmin):
 
     def get_hijack_user(self, obj):
         return obj.person.user
-
-
-class ExternalCommitteeMemberAdmin(RoleModelAdmin):
-    list_display = ('person', 'is_external', 'title', 'institute', 'city', 'country')
-    list_filter = ['is_external']
-    list_select_related = ['person', 'country']
 
 
 class CDDRoleModelAdmin(HijackRoleModelAdmin):
@@ -445,21 +502,28 @@ class CDDRoleModelAdmin(HijackRoleModelAdmin):
         )
 
 
-class CandidateAdmin(RoleModelAdmin):
-    list_display = ('person', 'global_id')
+class FrontOfficeRoleModelAdmin(RoleModelAdmin):
+    list_display = ('person', 'global_id', 'view_on_portal')
 
     @admin.display(description=_('Identifier'))
     def global_id(self, obj):
         return obj.person.global_id
 
+    @admin.display(description=_('Search on portal'))
+    def view_on_portal(self, obj):
+        url = f"{settings.OSIS_PORTAL_URL}admin/auth/user/?q={obj.person.global_id}"
+        return mark_safe(f'<a class="button" href="{url}" target="_blank">{_("Search on portal")}</a>')
 
-admin.site.register(Promoter, ExternalCommitteeMemberAdmin)
-admin.site.register(CommitteeMember, ExternalCommitteeMemberAdmin)
+
+admin.site.register(Promoter, FrontOfficeRoleModelAdmin)
+admin.site.register(CommitteeMember, FrontOfficeRoleModelAdmin)
+admin.site.register(Candidate, FrontOfficeRoleModelAdmin)
+
+admin.site.register(CddManager, CDDRoleModelAdmin)
+
 admin.site.register(SicManager, HijackRoleModelAdmin)
 admin.site.register(SicDirector, HijackRoleModelAdmin)
 admin.site.register(AdreSecretary, HijackRoleModelAdmin)
-admin.site.register(Candidate, CandidateAdmin)
 admin.site.register(JurySecretary, HijackRoleModelAdmin)
 admin.site.register(Sceb, HijackRoleModelAdmin)
-admin.site.register(CddManager, CDDRoleModelAdmin)
 admin.site.register(DoctorateReader, HijackRoleModelAdmin)

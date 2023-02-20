@@ -1,32 +1,31 @@
 # ##############################################################################
 #
-#    OSIS stands for Open Student Information System. It's an application
-#    designed to manage the core business of higher education institutions,
-#    such as universities, faculties, institutes and professional schools.
-#    The core business involves the administration of students, teachers,
-#    courses, programs and so on.
+#  OSIS stands for Open Student Information System. It's an application
+#  designed to manage the core business of higher education institutions,
+#  such as universities, faculties, institutes and professional schools.
+#  The core business involves the administration of students, teachers,
+#  courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
 #
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
 #
-#    A copy of this license - GNU General Public License - is available
-#    at the root of the source code of this program.  If not,
-#    see http://www.gnu.org/licenses/.
+#  A copy of this license - GNU General Public License - is available
+#  at the root of the source code of this program.  If not,
+#  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import Union
 
 from django.conf import settings
-from django.db.models import F, OuterRef, Subquery
+from django.db.models import OuterRef, Subquery
 from django.shortcuts import resolve_url
 from django.utils import translation
 from django.utils.functional import lazy
@@ -36,22 +35,27 @@ from admission.auth.roles.cdd_manager import CddManager
 from admission.contrib.models import AdmissionTask, SupervisionActor
 from admission.contrib.models.doctorate import PropositionProxy
 from admission.contrib.models.enums.actor_type import ActorType
-from admission.ddd.admission.doctorat.preparation.domain.model._membre_CA import MembreCAIdentity
 from admission.ddd.admission.doctorat.preparation.domain.model._promoteur import PromoteurIdentity
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixEtatSignature
-from admission.ddd.admission.doctorat.preparation.domain.model.groupe_de_supervision import GroupeDeSupervision
+from admission.ddd.admission.doctorat.preparation.domain.model.groupe_de_supervision import (
+    GroupeDeSupervision,
+    SignataireIdentity,
+)
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition
 from admission.ddd.admission.doctorat.preparation.domain.service.i_notification import INotification
+from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
+    SignataireNonTrouveException,
+)
 from admission.ddd.admission.doctorat.preparation.dtos import AvisDTO
 from admission.ddd.admission.domain.model.formation import FormationIdentity
 from admission.infrastructure.admission.doctorat.preparation.domain.service.doctorat import DoctoratTranslator
 from admission.mail_templates import (
+    ADMISSION_EMAIL_CONFIRM_SUBMISSION_DOCTORATE,
     ADMISSION_EMAIL_MEMBER_REMOVED,
     ADMISSION_EMAIL_SIGNATURE_CANDIDATE,
     ADMISSION_EMAIL_SIGNATURE_REFUSAL,
     ADMISSION_EMAIL_SIGNATURE_REQUESTS_ACTOR,
     ADMISSION_EMAIL_SIGNATURE_REQUESTS_CANDIDATE,
-    ADMISSION_EMAIL_CONFIRM_SUBMISSION_DOCTORATE,
     ADMISSION_EMAIL_SUBMISSION_CDD,
     ADMISSION_EMAIL_SUBMISSION_MEMBER,
 )
@@ -61,6 +65,8 @@ from osis_mail_template import generate_email
 from osis_notification.contrib.handlers import EmailNotificationHandler, WebNotificationHandler
 from osis_notification.contrib.notification import WebNotification
 from osis_signature.enums import SignatureState
+from osis_signature.models import Actor
+from osis_signature.utils import get_signing_token
 
 
 class Notification(INotification):
@@ -112,12 +118,8 @@ class Notification(INotification):
 
         # Tokens communs
         candidat = Person.objects.get(global_id=proposition.matricule_candidat)
-        actor_list = admission.supervision_group.actors.annotate(
-            first_name=F('person__first_name'),
-            last_name=F('person__last_name'),
-            type=Subquery(SupervisionActor.objects.filter(actor_ptr=OuterRef('pk')).values('type')[:1]),
-        ).values("first_name", "last_name", "type")
         common_tokens = cls.get_common_tokens(proposition, candidat)
+        actor_list = SupervisionActor.objects.filter(process=admission.supervision_group).select_related('person')
 
         # Envoyer au gestionnaire CDD
         cdd_managers = CddManager.objects.filter(
@@ -139,7 +141,7 @@ class Notification(INotification):
         # Envoyer au doctorant
         with translation.override(candidat.language):
             actor_list_str = [
-                f"{actor['first_name']} {actor['last_name']} ({ActorType[actor['type']].value})" for actor in actor_list
+                f"{actor.first_name} {actor.last_name} ({actor.get_type_display()})" for actor in actor_list
             ]
         email_message = generate_email(
             ADMISSION_EMAIL_SIGNATURE_REQUESTS_CANDIDATE,
@@ -154,35 +156,29 @@ class Notification(INotification):
         EmailNotificationHandler.create(email_message, person=candidat)
 
         # Envoyer aux acteurs n'ayant pas répondu
-        actors_invited = (
-            admission.supervision_group.actors.select_related('person')
-            .filter(last_state=SignatureState.INVITED.name)
-            .annotate(type=Subquery(SupervisionActor.objects.filter(actor_ptr=OuterRef('pk')).values('type')[:1]))
-        )
+        actors_invited = [actor for actor in actor_list if actor.last_state == SignatureState.INVITED.name]
         for actor in actors_invited:
+            tokens = {
+                **common_tokens,
+                "signataire_first_name": actor.first_name,
+                "signataire_last_name": actor.last_name,
+                "signataire_role": actor.get_type_display(),
+            }
+            if actor.is_external:
+                tokens["admission_link_front"] = cls._lien_invitation_externe(proposition, actor)
             email_message = generate_email(
                 ADMISSION_EMAIL_SIGNATURE_REQUESTS_ACTOR,
-                actor.person.language,
-                {
-                    **common_tokens,
-                    "signataire_first_name": actor.person.first_name,
-                    "signataire_last_name": actor.person.last_name,
-                    "signataire_role": ActorType[actor.type].value,
-                },
-                recipients=[actor.person],
+                actor.language,
+                tokens,
+                recipients=[actor.email],
             )
-            EmailNotificationHandler.create(email_message, person=actor.person)
+            EmailNotificationHandler.create(email_message, person=actor.person_id and actor.person)
 
     @classmethod
-    def notifier_avis(
-        cls,
-        proposition: Proposition,
-        signataire_id: Union[PromoteurIdentity, MembreCAIdentity],
-        avis: AvisDTO,
-    ) -> None:
+    def notifier_avis(cls, proposition: Proposition, signataire_id: 'SignataireIdentity', avis: AvisDTO) -> None:
         admission = PropositionProxy.objects.get(uuid=proposition.entity_id.uuid)
         candidat = Person.objects.get(global_id=proposition.matricule_candidat)
-        signataire = Person.objects.get(global_id=signataire_id.matricule)
+        signataire = Actor.objects.get(uuid=signataire_id.uuid)
 
         if isinstance(signataire_id, PromoteurIdentity):
             actor_role = ActorType.PROMOTER.value
@@ -232,23 +228,25 @@ class Notification(INotification):
                 admission.supervision_group.actors.select_related('person')
                 .annotate(type=Subquery(SupervisionActor.objects.filter(actor_ptr=OuterRef('pk')).values('type')[:1]))
                 .filter(type=ActorType.PROMOTER.name)
-                .exclude(person__global_id=signataire_id.matricule)
+                .exclude(uuid=signataire_id.uuid)
             )
             for other_promoter in other_promoters:
                 email_message = generate_email(
                     ADMISSION_EMAIL_SIGNATURE_REFUSAL,
-                    other_promoter.person.language,
+                    other_promoter.language,
                     {
                         **common_tokens,
                         "comment": avis.commentaire_externe,
                         "decision": ChoixEtatSignature.get_value(avis.etat),
                         "reason": avis.motif_refus,
-                        "actor_first_name": other_promoter.person.first_name,
-                        "actor_last_name": other_promoter.person.last_name,
+                        "actor_first_name": other_promoter.first_name,
+                        "actor_last_name": other_promoter.last_name,
                     },
-                    recipients=[other_promoter.person],
+                    recipients=[other_promoter.email],
                 )
-                EmailNotificationHandler.create(email_message, person=other_promoter.person)
+                EmailNotificationHandler.create(
+                    email_message, person=other_promoter.person_id and other_promoter.person
+                )
 
     @classmethod
     def notifier_soumission(cls, proposition: Proposition) -> None:
@@ -299,37 +297,71 @@ class Notification(INotification):
         for actor in actors_invited:
             email_message = generate_email(
                 ADMISSION_EMAIL_SUBMISSION_MEMBER,
-                actor.person.language,
+                actor.language,
                 {
                     **common_tokens,
-                    "actor_first_name": actor.person.first_name,
-                    "actor_last_name": actor.person.last_name,
+                    "actor_first_name": actor.first_name,
+                    "actor_last_name": actor.last_name,
                 },
-                recipients=[actor.person],
+                recipients=[actor.email],
             )
-            EmailNotificationHandler.create(email_message, person=actor.person)
+            EmailNotificationHandler.create(email_message, person=actor.person_id and actor.person)
 
     @classmethod
-    def notifier_suppression_membre(
-        cls,
-        proposition: Proposition,
-        signataire_id: Union[PromoteurIdentity, MembreCAIdentity],
-    ) -> None:
+    def notifier_suppression_membre(cls, proposition: Proposition, signataire_id: 'SignataireIdentity') -> None:
         # Notifier uniquement si le signataire a déjà signé
         admission = PropositionProxy.objects.get(uuid=proposition.entity_id.uuid)
-        actor = admission.supervision_group.actors.select_related('person').get(
-            person__global_id=signataire_id.matricule
-        )
+        actor = admission.supervision_group.actors.select_related('person').get(uuid=signataire_id.uuid)
         if actor.state in [SignatureState.APPROVED.name, SignatureState.DECLINED.name]:
             candidat = Person.objects.get(global_id=proposition.matricule_candidat)
             email_message = generate_email(
                 ADMISSION_EMAIL_MEMBER_REMOVED,
-                actor.person.language,
+                actor.language,
                 {
                     **cls.get_common_tokens(proposition, candidat),
-                    "actor_first_name": actor.person.first_name,
-                    "actor_last_name": actor.person.last_name,
+                    "actor_first_name": actor.first_name,
+                    "actor_last_name": actor.last_name,
                 },
-                recipients=[actor.person],
+                recipients=[actor.email],
             )
-            EmailNotificationHandler.create(email_message, person=actor.person)
+            EmailNotificationHandler.create(email_message, person=actor.person_id and actor.person)
+
+    @classmethod
+    def renvoyer_invitation(cls, proposition: Proposition, membre: SignataireIdentity):
+        # Charger le membre et vérifier qu'il est externe et déjà invité
+        actor = SupervisionActor.objects.filter(
+            uuid=membre.uuid,
+            person_id=None,
+            last_state=SignatureState.INVITED.name,
+        ).first()
+        if not actor:
+            raise SignataireNonTrouveException
+
+        # Réinitiliser l'état afin de mettre à jour le token
+        actor.switch_state(SignatureState.INVITED)
+        actor.refresh_from_db()
+
+        # Tokens communs
+        candidat = Person.objects.get(global_id=proposition.matricule_candidat)
+        common_tokens = cls.get_common_tokens(proposition, candidat)
+
+        # Envoyer aux acteurs n'ayant pas répondu
+        tokens = {
+            **common_tokens,
+            "signataire_first_name": actor.first_name,
+            "signataire_last_name": actor.last_name,
+            "signataire_role": actor.get_type_display(),
+            "admission_link_front": cls._lien_invitation_externe(proposition, actor),
+        }
+        email_message = generate_email(
+            ADMISSION_EMAIL_SIGNATURE_REQUESTS_ACTOR,
+            actor.language,
+            tokens,
+            recipients=[actor.email],
+        )
+        EmailNotificationHandler.create(email_message)
+
+    @classmethod
+    def _lien_invitation_externe(cls, proposition, actor):
+        url = settings.ADMISSION_FRONTEND_LINK.format(context='public/doctorate', uuid=proposition.entity_id.uuid)
+        return url + f"external-approval/{get_signing_token(actor)}"

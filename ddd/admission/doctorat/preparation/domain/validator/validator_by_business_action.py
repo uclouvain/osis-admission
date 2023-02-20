@@ -1,26 +1,26 @@
 # ##############################################################################
 #
-#    OSIS stands for Open Student Information System. It's an application
-#    designed to manage the core business of higher education institutions,
-#    such as universities, faculties, institutes and professional schools.
-#    The core business involves the administration of students, teachers,
-#    courses, programs and so on.
+#  OSIS stands for Open Student Information System. It's an application
+#  designed to manage the core business of higher education institutions,
+#  such as universities, faculties, institutes and professional schools.
+#  The core business involves the administration of students, teachers,
+#  courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
 #
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
 #
-#    A copy of this license - GNU General Public License - is available
-#    at the root of the source code of this program.  If not,
-#    see http://www.gnu.org/licenses/.
+#  A copy of this license - GNU General Public License - is available
+#  at the root of the source code of this program.  If not,
+#  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
 import datetime
@@ -105,34 +105,62 @@ class CompletionPropositionValidatorList(TwoStepsMultipleBusinessExceptionListVa
 @attr.dataclass(frozen=True, slots=True)
 class IdentifierPromoteurValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
     groupe_de_supervision: 'GroupeDeSupervision'
-    promoteur_id: 'PromoteurIdentity'
+    matricule: Optional[str]
+    prenom: Optional[str]
+    nom: Optional[str]
+    email: Optional[str]
+    institution: Optional[str]
+    ville: Optional[str]
+    pays: Optional[str]
+    langue: Optional[str]
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
 
     def get_invariants_validators(self) -> List[BusinessValidator]:
-        membre_CA_id = MembreCAIdentity(matricule=self.promoteur_id.matricule)
         return [
             ShouldGroupeDeSupervisionNonCompletPourPromoteurs(self.groupe_de_supervision),
-            ShouldPromoteurPasDejaPresentDansGroupeDeSupervision(self.groupe_de_supervision, self.promoteur_id),
-            ShouldMembreCAPasDejaPresentDansGroupeDeSupervision(self.groupe_de_supervision, membre_CA_id),
+            ShouldMembreEtreInterneOuExterne(
+                self.matricule,
+                self.prenom,
+                self.nom,
+                self.email,
+                self.institution,
+                self.ville,
+                self.pays,
+                self.langue,
+            ),
         ]
 
 
 @attr.dataclass(frozen=True, slots=True)
 class IdentifierMembreCAValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
     groupe_de_supervision: 'GroupeDeSupervision'
-    membre_CA_id: 'MembreCAIdentity'
+    matricule: Optional[str]
+    prenom: Optional[str]
+    nom: Optional[str]
+    email: Optional[str]
+    institution: Optional[str]
+    ville: Optional[str]
+    pays: Optional[str]
+    langue: Optional[str]
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
 
     def get_invariants_validators(self) -> List[BusinessValidator]:
-        promoteur_id = PromoteurIdentity(matricule=self.membre_CA_id.matricule)
         return [
             ShouldGroupeDeSupervisionNonCompletPourMembresCA(self.groupe_de_supervision),
-            ShouldMembreCAPasDejaPresentDansGroupeDeSupervision(self.groupe_de_supervision, self.membre_CA_id),
-            ShouldPromoteurPasDejaPresentDansGroupeDeSupervision(self.groupe_de_supervision, promoteur_id),
+            ShouldMembreEtreInterneOuExterne(
+                self.matricule,
+                self.prenom,
+                self.nom,
+                self.email,
+                self.institution,
+                self.ville,
+                self.pays,
+                self.langue,
+            ),
         ]
 
 
@@ -359,6 +387,7 @@ class ApprobationValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
 class ApprobationPromoteurValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
     signatures_promoteurs: List['SignaturePromoteur']
     signataire: Union['PromoteurIdentity', 'MembreCAIdentity']
+    promoteur_reference: Optional[PromoteurIdentity]
     proposition_institut_these: Optional[InstitutIdentity]
     institut_these: Optional[str]
 
@@ -367,9 +396,10 @@ class ApprobationPromoteurValidatorList(TwoStepsMultipleBusinessExceptionListVal
 
     def get_invariants_validators(self) -> List[BusinessValidator]:
         return [
-            ShouldPremierPromoteurRenseignerInstitutThese(
+            ShouldPromoteurReferenceRenseignerInstitutThese(
                 self.signatures_promoteurs,
                 self.signataire,
+                self.promoteur_reference,
                 self.proposition_institut_these,
                 self.institut_these,
             ),

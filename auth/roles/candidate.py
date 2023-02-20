@@ -49,8 +49,8 @@ _CANDIDATE_RULESET = {
     'view_doctorateadmission_project': is_admission_request_author,
     'view_doctorateadmission_cotutelle': is_admission_request_author,
     'view_doctorateadmission_supervision': is_admission_request_author,
+    'view_doctorateadmission_training_choice': is_admission_request_author,
     # A candidate can view as long as he's the author and he is being enrolled
-    'view_doctorateadmission_training_choice': is_admission_request_author & in_progress,
     'view_doctorateadmission_person': is_admission_request_author & is_being_enrolled,
     'view_doctorateadmission_coordinates': is_admission_request_author & is_being_enrolled,
     'view_doctorateadmission_curriculum': is_admission_request_author & is_being_enrolled,
@@ -77,6 +77,7 @@ _CANDIDATE_RULESET = {
     'set_reference_promoter': is_admission_request_author & unconfirmed_proposition,
     # Once supervision group is signing, he can
     'approve_proposition_by_pdf': is_admission_request_author & signing_in_progress,
+    'resend_external_invitation': is_admission_request_author & signing_in_progress,
     'submit_doctorateadmission': is_admission_request_author & unconfirmed_proposition,
     # Once the candidate is enrolling, he can
     'view_doctorateadmission_confirmation': author_and_enrolled,
@@ -126,7 +127,6 @@ _CANDIDATE_RULESET = {
     'view_continuingeducationadmission_curriculum': is_admission_request_author,
     'view_continuingeducationadmission_secondary_studies': is_admission_request_author,
     'view_continuingeducationadmission_languages': is_admission_request_author,
-    'view_continuingeducationadmission_accounting': is_admission_request_author,
     'view_continuingeducationadmission_specific_question': is_admission_request_author,
     # A candidate can edit some tabs as long as the proposition is in progress
     'change_continuingeducationadmission_training_choice': is_admission_request_author & in_progress,
@@ -135,7 +135,6 @@ _CANDIDATE_RULESET = {
     'change_continuingeducationadmission_curriculum': is_admission_request_author & in_progress,
     'change_continuingeducationadmission_secondary_studies': is_admission_request_author & in_progress,
     'change_continuingeducationadmission_languages': is_admission_request_author & in_progress,
-    'change_continuingeducationadmission_accounting': is_admission_request_author & in_progress,
     'delete_continuingeducationadmission': is_admission_request_author & in_progress,
     'submit_continuingeducationadmission': is_admission_request_author & in_progress,
     'change_continuingeducationadmission_specific_question': is_admission_request_author & in_progress,

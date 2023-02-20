@@ -157,6 +157,10 @@ msgstr ""
 msgid "A justification is needed when creating a pre-admission."
 msgstr ""
 
+msgid ""
+"A member should be either internal or external, please check the fields."
+msgstr ""
+
 msgid "A or B card"
 msgstr ""
 
@@ -233,6 +237,12 @@ msgid "Actions"
 msgstr ""
 
 msgid "Active"
+msgstr ""
+
+msgid ""
+"Active items are available for new instantiations, and are shown to "
+"candidates if necessary. Inactive elements are unavailable for future "
+"instantiations and are never shown to candidates."
 msgstr ""
 
 msgid "Activities"
@@ -361,11 +371,10 @@ msgstr ""
 msgid "All promoters must have approved the proposition."
 msgstr ""
 
-msgid "Already a member of CA."
+#, fuzzy
+#| msgid "Already a member of CA."
+msgid "Already a member."
 msgstr "Already a member of the supervisory panel."
-
-msgid "Already a promoter."
-msgstr ""
 
 msgid "An education type"
 msgstr ""
@@ -495,6 +504,12 @@ msgid "Body"
 msgstr ""
 
 msgid "Brief justification"
+msgstr ""
+
+msgid ""
+"By finalising my application, I undertake to pay the registration fees upon "
+"receipt of the invoice (provided my application is accepted). In case of "
+"cancellation, the modalities depend on the Faculties."
 msgstr ""
 
 msgid "CA Member"
@@ -1551,9 +1566,6 @@ msgstr ""
 msgid "In review"
 msgstr ""
 
-msgid "Indicates if the item will be displayed to the user or not."
-msgstr ""
-
 msgid "Institute email"
 msgstr ""
 
@@ -2312,9 +2324,6 @@ msgstr ""
 msgid "Private"
 msgstr ""
 
-msgid "Prof."
-msgstr ""
-
 msgid "Professional"
 msgstr ""
 
@@ -2478,6 +2487,9 @@ msgstr ""
 msgid "Registration change form"
 msgstr ""
 
+msgid "Registration fees"
+msgstr ""
+
 msgid "Rejection reason"
 msgstr ""
 
@@ -2517,6 +2529,9 @@ msgid "Reset"
 msgstr ""
 
 msgid "Residence card of a family member of a European Union citizen"
+msgstr ""
+
+msgid "Residence permit covering the entire course"
 msgstr ""
 
 msgid "Residence permit in Belgium"
@@ -2689,6 +2704,9 @@ msgid "Search"
 msgstr ""
 
 msgid "Search for an EU code (outside the EU of the form)"
+msgstr ""
+
+msgid "Search on portal"
 msgstr ""
 
 msgid "Secondary studies"

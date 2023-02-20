@@ -74,7 +74,7 @@ class LanguagesKnowledgeViewSet(
     schema = LanguagesKnowledgeSchema()
 
     def get_queryset(self):
-        return self.request.user.person.languages_knowledge.alias(
+        return self.candidate.languages_knowledge.alias(
             relevancy=Case(
                 When(language__code='EN', then=2),
                 When(language__code='FR', then=1),

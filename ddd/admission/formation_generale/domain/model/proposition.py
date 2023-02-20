@@ -27,6 +27,7 @@ import datetime
 from typing import Dict, Optional, List
 
 import attr
+from django.utils.timezone import now
 
 from admission.ddd.admission.domain.model.formation import FormationIdentity
 from admission.ddd.admission.domain.service.i_bourse import BourseIdentity
@@ -122,6 +123,7 @@ class Proposition(interface.RootEntity):
         self.formation_id = formation_id
         self.pot_calcule = pool
         self.elements_confirmation = elements_confirmation
+        self.soumise_le = now()
         if pool != AcademicCalendarTypes.ADMISSION_POOL_HUE_UCL_PATHWAY_CHANGE:
             self.attestation_inscription_reguliere = []
         if pool != AcademicCalendarTypes.ADMISSION_POOL_EXTERNAL_ENROLLMENT_CHANGE:

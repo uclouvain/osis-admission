@@ -29,7 +29,11 @@ from django.conf import settings
 from django.utils.translation import get_language
 
 from admission.auth.roles.candidate import Candidate
-from admission.contrib.models import GeneralEducationAdmissionProxy, Scholarship, Accounting
+from admission.contrib.models import (
+    GeneralEducationAdmissionProxy,
+    Scholarship,
+    Accounting,
+)
 from admission.contrib.models.general_education import GeneralEducationAdmission
 from admission.ddd.admission.domain.builder.formation_identity import FormationIdentityBuilder
 from admission.ddd.admission.domain.model.bourse import BourseIdentity
@@ -68,7 +72,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
     @classmethod
     def search_dto(cls, matricule_candidat: Optional[str] = '') -> List['PropositionDTO']:
         # Default queryset
-        qs = GeneralEducationAdmissionProxy.objects.all()
+        qs = GeneralEducationAdmissionProxy.objects.for_dto().all()
 
         # Add filters
         if matricule_candidat:
@@ -231,7 +235,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
     @classmethod
     def get_dto(cls, entity_id: 'PropositionIdentity') -> 'PropositionDTO':
         try:
-            return cls._load_dto(GeneralEducationAdmissionProxy.objects.get(uuid=entity_id.uuid))
+            return cls._load_dto(GeneralEducationAdmissionProxy.objects.for_dto().get(uuid=entity_id.uuid))
         except GeneralEducationAdmission.DoesNotExist:
             raise PropositionNonTrouveeException
 
@@ -285,7 +289,8 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             reference=formater_reference(
                 reference=admission.reference,
                 nom_campus_inscription=admission.training.enrollment_campus.name,
-                sigle_entite_gestion=admission.sigle_entite_gestion,  # From annotation
+                sigle_entite_gestion=admission.training_management_faculty
+                or admission.sigle_entite_gestion,  # From annotation
                 annee=admission.training.academic_year.year,
             ),
             soumise_le=admission.submitted_at,

@@ -32,16 +32,12 @@ from django.utils.translation import gettext_lazy as _
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
-    AffiliationsNonCompleteesException,
-    CarteBancaireRemboursementIbanNonCompleteException,
-)
 from admission.ddd.admission.domain.service.i_elements_confirmation import IElementsConfirmation
 from admission.ddd.admission.domain.validator.exceptions import (
     NombrePropositionsSoumisesDepasseException,
     QuestionsSpecifiquesInformationsComplementairesNonCompleteesException,
 )
-from admission.ddd.admission.enums import ChoixTypeCompteBancaire, CritereItemFormulaireFormation, Onglets
+from admission.ddd.admission.enums import CritereItemFormulaireFormation, Onglets
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixStatutProposition as ChoixStatutPropositionContinue,
 )
@@ -348,6 +344,7 @@ class ContinuingPropositionSubmissionTestCase(APITestCase):
                 % {'by_service': _("by the University Institute of Continuing Education")},
                 'declaration_sur_lhonneur': IElementsConfirmation.DECLARATION_SUR_LHONNEUR
                 % {'to_service': _("to the University Institute of Continuing Education")},
+                'droits_inscription_iufc': IElementsConfirmation.DROITS_INSCRIPTION_IUFC,
             },
         }
 
@@ -478,30 +475,6 @@ class ContinuingPropositionSubmissionTestCase(APITestCase):
             EtudesSecondairesNonCompleteesException.status_code,
             [e["status_code"] for e in json_response['errors']],
         )
-
-    def test_continuing_proposition_submission_with_accounting(self):
-        admission = ContinuingEducationAdmissionFactory()
-        url = resolve_url("admission_api_v1:submit-continuing-proposition", uuid=admission.uuid)
-        self.client.force_authenticate(user=admission.candidate.user)
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        json_response = response.json()
-        status_codes = [e["status_code"] for e in json_response['errors']]
-        self.assertNotIn(AffiliationsNonCompleteesException.status_code, status_codes)
-        self.assertNotIn(CarteBancaireRemboursementIbanNonCompleteException.status_code, status_codes)
-
-        admission.accounting.account_number_type = ChoixTypeCompteBancaire.IBAN.name
-        admission.accounting.iban_account_number = ''
-        admission.accounting.solidarity_student = None
-        admission.accounting.save()
-
-        self.client.force_authenticate(user=admission.candidate.user)
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        json_response = response.json()
-        status_codes = [e["status_code"] for e in json_response['errors']]
-        self.assertIn(AffiliationsNonCompleteesException.status_code, status_codes)
-        self.assertIn(CarteBancaireRemboursementIbanNonCompleteException.status_code, status_codes)
 
     def test_continuing_proposition_submission_with_specific_questions(self):
         admission = ContinuingEducationAdmissionFactory()

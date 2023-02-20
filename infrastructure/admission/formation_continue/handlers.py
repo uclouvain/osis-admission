@@ -35,7 +35,6 @@ from admission.infrastructure.admission.domain.service.elements_confirmation imp
 from admission.infrastructure.admission.domain.service.maximum_propositions import MaximumPropositionsAutorisees
 from admission.infrastructure.admission.domain.service.profil_candidat import ProfilCandidatTranslator
 from admission.infrastructure.admission.domain.service.titres_acces import TitresAcces
-from admission.infrastructure.admission.formation_continue.domain.service.comptabilite import ComptabiliteTranslator
 from admission.infrastructure.admission.formation_continue.domain.service.formation import FormationContinueTranslator
 from admission.infrastructure.admission.formation_continue.domain.service.notification import Notification
 from admission.infrastructure.admission.formation_continue.domain.service.question_specifique import (
@@ -105,14 +104,6 @@ COMMAND_HANDLERS = {
         titres_acces=TitresAcces(),
         profil_candidat_translator=ProfilCandidatTranslator(),
         calendrier_inscription=CalendrierInscription(),
-    ),
-    CompleterComptabilitePropositionCommand: lambda msg_bus, cmd: completer_comptabilite_proposition(
-        cmd,
-        proposition_repository=PropositionRepository(),
-    ),
-    GetComptabiliteQuery: lambda msg_bus, cmd: recuperer_comptabilite(
-        cmd,
-        comptabilite_translator=ComptabiliteTranslator(),
     ),
     RecupererElementsConfirmationQuery: lambda msg_bus, cmd: recuperer_elements_confirmation(
         cmd,

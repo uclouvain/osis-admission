@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
 from unittest import TestCase
 from unittest.mock import patch
 
@@ -88,6 +89,7 @@ class ElementsConfirmationTestCase(TestCase):
                 'professions_reglementees',
                 'justificatifs',
                 'declaration_sur_lhonneur',
+                'droits_inscription_iufc',
             ]
             self.assertListEqual([e.nom for e in elements], expected)
 

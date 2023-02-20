@@ -101,10 +101,12 @@ class ICalendrierInscription(interface.DomainService):
         residential_address = profil_candidat_translator.get_coordonnees(matricule_candidat).domicile_legal
         if identification.pays_nationalite is None:
             raise IdentificationNonCompleteeException()
-        ue_plus_5 = cls.est_ue_plus_5(
-            identification,
-            getattr(proposition.comptabilite, 'type_situation_assimilation', None) if proposition else None,
+        situation_assimilation = (
+            proposition
+            and getattr(proposition, 'comptabilite', None)
+            and getattr(proposition.comptabilite, 'type_situation_assimilation', None)
         )
+        ue_plus_5 = cls.est_ue_plus_5(identification, situation_assimilation)
         annees = cls.get_annees_academiques_pour_calcul()
         changements_etablissement = profil_candidat_translator.get_changements_etablissement(matricule_candidat, annees)
 
@@ -210,7 +212,14 @@ proposition={('Proposition(' + pformat(attr.asdict(proposition)) + ')') if propo
         if (
             program == TrainingType.BACHELOR
             and not est_formation_contingentee_et_non_resident(formation_id.sigle, proposition)
-            and (proposition and proposition.est_reorientation_inscription_externe is None)
+            and (
+                proposition
+                and (
+                    proposition.est_reorientation_inscription_externe is None
+                    or proposition.est_reorientation_inscription_externe
+                    and not proposition.attestation_inscription_reguliere
+                )
+            )
             and AdmissionPoolExternalReorientationCalendar.event_reference in [pool for (pool, annee) in pool_ouverts]
         ):
             raise ReorientationInscriptionExterneNonConfirmeeException()
@@ -227,7 +236,14 @@ proposition={('Proposition(' + pformat(attr.asdict(proposition)) + ')') if propo
         if (
             program == TrainingType.BACHELOR
             and not est_formation_contingentee_et_non_resident(formation_id.sigle, proposition)
-            and (proposition and proposition.est_modification_inscription_externe is None)
+            and (
+                proposition
+                and (
+                    proposition.est_modification_inscription_externe is None
+                    or proposition.est_modification_inscription_externe
+                    and not proposition.formulaire_modification_inscription
+                )
+            )
             and AdmissionPoolExternalEnrollmentChangeCalendar.event_reference
             in [pool for (pool, annee) in pool_ouverts]
         ):

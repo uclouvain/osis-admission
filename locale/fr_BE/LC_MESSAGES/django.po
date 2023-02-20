@@ -206,6 +206,11 @@ msgstr "Un commentaire est requis."
 msgid "A justification is needed when creating a pre-admission."
 msgstr "Une justification est requise pour une pré-admission."
 
+msgid ""
+"A member should be either internal or external, please check the fields."
+msgstr ""
+"Un membre doit être soit interne, soit externe, veuillez vérifier les champs."
+
 msgid "A or B card"
 msgstr "Carte A ou B"
 
@@ -283,6 +288,16 @@ msgstr "Actions"
 
 msgid "Active"
 msgstr "Actif"
+
+msgid ""
+"Active items are available for new instantiations, and are shown to "
+"candidates if necessary. Inactive elements are unavailable for future "
+"instantiations and are never shown to candidates."
+msgstr ""
+"Les éléments actifs sont disponibles pour de nouvelles instantiations, et "
+"sont montrés aux candidats le cas échéant. Les éléments inactifs sont "
+"indisponibles pour de futures instantiations et ne sont jamais montrés aux "
+"candidats."
 
 msgid "Activities"
 msgstr "Activités"
@@ -414,11 +429,8 @@ msgstr "Historique complet"
 msgid "All promoters must have approved the proposition."
 msgstr "Tous les promoteurs doivent approuver la proposition."
 
-msgid "Already a member of CA."
-msgstr "Déjà membre du comité d'accompagnement."
-
-msgid "Already a promoter."
-msgstr "Déjà promoteur."
+msgid "Already a member."
+msgstr "Déjà membre."
 
 msgid "An education type"
 msgstr "Un type de formation"
@@ -557,6 +569,16 @@ msgstr "Corps"
 
 msgid "Brief justification"
 msgstr "Justification succincte"
+
+msgid ""
+"By finalising my application, I undertake to pay the registration fees upon "
+"receipt of the invoice (provided my application is accepted). In case of "
+"cancellation, the modalities depend on the Faculties."
+msgstr ""
+"En finalisant ma demande d’admission, je m’engage à payer les droits "
+"d’inscription dès réception de la facture (pour autant que ma demande "
+"d’admission soit acceptée). En cas d’annulation, les modalités dépendent des "
+"Facultés."
 
 msgid "CA Member"
 msgstr "Membre du comité d'accompagnement"
@@ -1370,7 +1392,7 @@ msgstr ""
 "<code>{\"TYPES_MIME_FICHIER\": [\"application/pdf\"], "
 "\"NOMBRE_MAX_DOCUMENTS\": 3}</code>.<br><br>Pour un champ sélection, il est "
 "possible de spécifier si la sélection sera réalisée via une liste "
-"(\"LISTE\", par défaut) des cases à cocher (\"CASES_A_COCHER\") ou des "
+"(\"LISTE\", par défaut), des cases à cocher (\"CASES_A_COCHER\") ou des "
 "boutons radios (\"BOUTONS_RADIOS\") en utilisant la propriété "
 "\"TYPE_SELECTION\".<br>Exemple complet : <code>{\"TYPE_SELECTION\": "
 "\"CASES_A_COCHER\"}</code>."
@@ -1730,9 +1752,6 @@ msgstr "En présentiel"
 
 msgid "In review"
 msgstr "En révision"
-
-msgid "Indicates if the item will be displayed to the user or not."
-msgstr "Indique si l'élément sera affiché ou non à l'utilisateur."
 
 msgid "Institute email"
 msgstr "Email de l'institut"
@@ -2592,9 +2611,6 @@ msgstr "Notes précédentes"
 msgid "Private"
 msgstr "Privé"
 
-msgid "Prof."
-msgstr "Prof."
-
 msgid "Professional"
 msgstr "Professionnel"
 
@@ -2770,6 +2786,9 @@ msgstr "Attestation d’immatriculation"
 msgid "Registration change form"
 msgstr "Formulaire de modification d'inscription"
 
+msgid "Registration fees"
+msgstr "Droits d'inscription"
+
 msgid "Rejection reason"
 msgstr "Motif de refus"
 
@@ -2812,6 +2831,9 @@ msgid "Residence card of a family member of a European Union citizen"
 msgstr ""
 "Carte de séjour permanent de membre de la famille d’un citoyen de l'Union "
 "européenne"
+
+msgid "Residence permit covering the entire course"
+msgstr "Titre de séjour couvrant la totalité de la formation"
 
 msgid "Residence permit in Belgium"
 msgstr "Titre de séjour en Belgique"
@@ -2990,6 +3012,9 @@ msgstr "Rechercher"
 
 msgid "Search for an EU code (outside the EU of the form)"
 msgstr "Rechercher un code UE (hors UE du formulaire)"
+
+msgid "Search on portal"
+msgstr "Voir sur le portail"
 
 msgid "Secondary studies"
 msgstr "Études secondaires"

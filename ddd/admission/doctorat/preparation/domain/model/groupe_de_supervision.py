@@ -1,26 +1,26 @@
 # ##############################################################################
 #
-#    OSIS stands for Open Student Information System. It's an application
-#    designed to manage the core business of higher education institutions,
-#    such as universities, faculties, institutes and professional schools.
-#    The core business involves the administration of students, teachers,
-#    courses, programs and so on.
+#  OSIS stands for Open Student Information System. It's an application
+#  designed to manage the core business of higher education institutions,
+#  such as universities, faculties, institutes and professional schools.
+#  The core business involves the administration of students, teachers,
+#  courses, programs and so on.
 #
-#    Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
 #
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
 #
-#    A copy of this license - GNU General Public License - is available
-#    at the root of the source code of this program.  If not,
-#    see http://www.gnu.org/licenses/.
+#  A copy of this license - GNU General Public License - is available
+#  at the root of the source code of this program.  If not,
+#  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
 import contextlib
@@ -52,14 +52,14 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.validator_by_
     ApprouverValidatorList,
     CotutelleValidatorList,
     DesignerPromoteurReferenceValidatorList,
-    IdentifierMembreCAValidatorList,
-    IdentifierPromoteurValidatorList,
     InviterASignerValidatorList,
     SignatairesValidatorList,
     SupprimerMembreCAValidatorList,
     SupprimerPromoteurValidatorList,
 )
 from osis_common.ddd import interface
+
+SignataireIdentity = Union[PromoteurIdentity, MembreCAIdentity]
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -77,15 +77,6 @@ class GroupeDeSupervision(interface.RootEntity):
     statut_signature: ChoixStatutSignatureGroupeDeSupervision = ChoixStatutSignatureGroupeDeSupervision.IN_PROGRESS
     promoteur_reference_id: Optional['PromoteurIdentity'] = None
 
-    def identifier_promoteur(self, promoteur_id: 'PromoteurIdentity') -> None:
-        IdentifierPromoteurValidatorList(
-            groupe_de_supervision=self,
-            promoteur_id=promoteur_id,
-        ).validate()
-        self.signatures_promoteurs.append(
-            SignaturePromoteur(promoteur_id=promoteur_id, etat=ChoixEtatSignature.NOT_INVITED)
-        )
-
     def designer_promoteur_reference(self, promoteur_id: 'PromoteurIdentity') -> None:
         DesignerPromoteurReferenceValidatorList(
             groupe_de_supervision=self,
@@ -93,34 +84,21 @@ class GroupeDeSupervision(interface.RootEntity):
         ).validate()
         self.promoteur_reference_id = promoteur_id
 
-    def identifier_membre_CA(self, membre_CA_id: 'MembreCAIdentity') -> None:
-        IdentifierMembreCAValidatorList(
-            groupe_de_supervision=self,
-            membre_CA_id=membre_CA_id,
-        ).validate()
-        self.signatures_membres_CA.append(
-            SignatureMembreCA(membre_CA_id=membre_CA_id, etat=ChoixEtatSignature.NOT_INVITED)
-        )
-
-    def get_signataire(self, matricule_signataire: str) -> Union['PromoteurIdentity', 'MembreCAIdentity']:
+    def get_signataire(self, uuid_signataire: str) -> SignataireIdentity:
         with contextlib.suppress(StopIteration):
-            return next(
-                s.promoteur_id for s in self.signatures_promoteurs if s.promoteur_id.matricule == matricule_signataire
-            )
+            return next(s.promoteur_id for s in self.signatures_promoteurs if s.promoteur_id.uuid == uuid_signataire)
         with contextlib.suppress(StopIteration):
-            return next(
-                s.membre_CA_id for s in self.signatures_membres_CA if s.membre_CA_id.matricule == matricule_signataire
-            )
+            return next(s.membre_CA_id for s in self.signatures_membres_CA if s.membre_CA_id.uuid == uuid_signataire)
         raise SignataireNonTrouveException
 
-    def get_promoteur(self, matricule_signataire: str) -> 'PromoteurIdentity':
-        promoteur = self.get_signataire(matricule_signataire)
+    def get_promoteur(self, signataire_id: str) -> 'PromoteurIdentity':
+        promoteur = self.get_signataire(signataire_id)
         if not isinstance(promoteur, PromoteurIdentity):
             raise PromoteurNonTrouveException
         return promoteur
 
-    def get_membre_CA(self, matricule_signataire: str) -> 'MembreCAIdentity':
-        membre_CA = self.get_signataire(matricule_signataire)
+    def get_membre_CA(self, signataire_id: str) -> 'MembreCAIdentity':
+        membre_CA = self.get_signataire(signataire_id)
         if not isinstance(membre_CA, MembreCAIdentity):
             raise MembreCANonTrouveException
         return membre_CA
@@ -159,7 +137,7 @@ class GroupeDeSupervision(interface.RootEntity):
 
     def approuver(
         self,
-        signataire_id: Union['PromoteurIdentity', 'MembreCAIdentity'],
+        signataire_id: SignataireIdentity,
         commentaire_interne: Optional[str],
         commentaire_externe: Optional[str],
     ) -> None:
@@ -188,11 +166,7 @@ class GroupeDeSupervision(interface.RootEntity):
                 )
             )
 
-    def approuver_par_pdf(
-        self,
-        signataire_id: Union['PromoteurIdentity', 'MembreCAIdentity'],
-        pdf: List[str],
-    ) -> None:
+    def approuver_par_pdf(self, signataire_id: SignataireIdentity, pdf: List[str]) -> None:
         ApprouverValidatorList(
             groupe_de_supervision=self,
             signataire_id=signataire_id,
@@ -218,7 +192,7 @@ class GroupeDeSupervision(interface.RootEntity):
 
     def refuser(
         self,
-        signataire_id: Union['PromoteurIdentity', 'MembreCAIdentity'],
+        signataire_id: SignataireIdentity,
         commentaire_interne: Optional[str],
         commentaire_externe: Optional[str],
         motif_refus: Optional[str],
@@ -280,15 +254,17 @@ class GroupeDeSupervision(interface.RootEntity):
     def verifier_signataires(self):
         SignatairesValidatorList(groupe_de_supervision=self).validate()
 
-    def verifier_premier_promoteur_renseigne_institut_these(
+    def verifier_promoteur_reference_renseigne_institut_these(
         self,
-        signataire: Union[PromoteurIdentity, MembreCAIdentity],
+        signataire: SignataireIdentity,
+        promoteur_reference: Optional[PromoteurIdentity],
         proposition_institut_these: Optional[InstitutIdentity],
         institut_these: Optional[str],
     ):
         ApprobationPromoteurValidatorList(
             signatures_promoteurs=self.signatures_promoteurs,
             signataire=signataire,
+            promoteur_reference=promoteur_reference,
             proposition_institut_these=proposition_institut_these,
             institut_these=institut_these,
         ).validate()

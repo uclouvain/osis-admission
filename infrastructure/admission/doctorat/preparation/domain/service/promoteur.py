@@ -1,33 +1,34 @@
 # ##############################################################################
 #
-#    OSIS stands for Open Student Information System. It's an application
-#    designed to manage the core business of higher education institutions,
-#    such as universities, faculties, institutes and professional schools.
-#    The core business involves the administration of students, teachers,
-#    courses, programs and so on.
+#  OSIS stands for Open Student Information System. It's an application
+#  designed to manage the core business of higher education institutions,
+#  such as universities, faculties, institutes and professional schools.
+#  The core business involves the administration of students, teachers,
+#  courses, programs and so on.
 #
-#    Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
 #
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
 #
-#    A copy of this license - GNU General Public License - is available
-#    at the root of the source code of this program.  If not,
-#    see http://www.gnu.org/licenses/.
+#  A copy of this license - GNU General Public License - is available
+#  at the root of the source code of this program.  If not,
+#  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import List
+from typing import List, Optional
 
 from django.utils.translation import get_language, gettext_lazy as _
 
-from admission.auth.roles.promoter import Promoter
+from admission.contrib.models import SupervisionActor
+from admission.contrib.models.enums.actor_type import ActorType
 from admission.ddd.admission.doctorat.preparation.domain.model._promoteur import PromoteurIdentity
 from admission.ddd.admission.doctorat.preparation.domain.service.i_promoteur import IPromoteurTranslator
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import PromoteurNonTrouveException
@@ -37,27 +38,26 @@ from base.auth.roles.tutor import Tutor
 
 class PromoteurTranslator(IPromoteurTranslator):
     @classmethod
-    def get(cls, matricule: str) -> 'PromoteurIdentity':
-        if not Tutor.objects.filter(person__global_id=matricule):
-            raise PromoteurNonTrouveException
-        return PromoteurIdentity(matricule=matricule)
+    def get(cls, promoteur_id: 'PromoteurIdentity') -> 'PromoteurIdentity':
+        raise NotImplementedError
 
     @classmethod
-    def get_dto(cls, matricule: str) -> 'PromoteurDTO':
-        promoter_role = Promoter.objects.select_related('person__tutor', 'country').get(person__global_id=matricule)
+    def get_dto(cls, promoteur_id: 'PromoteurIdentity') -> 'PromoteurDTO':
+        actor = SupervisionActor.objects.select_related('person__tutor').get(
+            type=ActorType.PROMOTER.name,
+            uuid=promoteur_id.uuid,
+        )
         return PromoteurDTO(
-            matricule=matricule,
-            nom=promoter_role.person.last_name,
-            prenom=promoter_role.person.first_name,
-            email=promoter_role.person.email,
-            titre=_('Prof.') if hasattr(promoter_role.person, 'tutor') else promoter_role.title,
-            institution=_('ucl') if not promoter_role.is_external else promoter_role.institute,
-            ville=promoter_role.city,
-            pays=(
-                promoter_role.country_id
-                and getattr(promoter_role.country, 'name_en' if get_language() == 'en' else 'name')
-                or ''
-            ),
+            uuid=promoteur_id.uuid,
+            matricule=actor.person and actor.person.global_id or '',
+            nom=actor.last_name,
+            prenom=actor.first_name,
+            email=actor.email,
+            est_docteur=True if not actor.is_external and hasattr(actor.person, 'tutor') else actor.is_doctor,
+            institution=_('ucl') if not actor.is_external else actor.institute,
+            ville=actor.city,
+            pays=actor.country_id and getattr(actor.country, 'name_en' if get_language() == 'en' else 'name') or '',
+            est_externe=actor.is_external,
         )
 
     @classmethod
@@ -65,5 +65,18 @@ class PromoteurTranslator(IPromoteurTranslator):
         raise NotImplementedError
 
     @classmethod
-    def est_externe(cls, identity: 'PromoteurIdentity') -> bool:
-        return Promoter.objects.get(person__global_id=identity.matricule).is_external
+    def est_externe(cls, promoteur_id: 'PromoteurIdentity') -> bool:
+        return SupervisionActor.objects.get(type=ActorType.PROMOTER.name, uuid=promoteur_id.uuid).is_external
+
+    @classmethod
+    def verifier_existence(cls, matricule: Optional[str]) -> bool:
+        if matricule and not cls._get_queryset(matricule).exists():
+            raise PromoteurNonTrouveException
+        return True
+
+    @classmethod
+    def _get_queryset(cls, matricule):
+        return Tutor.objects.filter(
+            person__user_id__isnull=False,
+            person__global_id=matricule,
+        ).select_related("person")

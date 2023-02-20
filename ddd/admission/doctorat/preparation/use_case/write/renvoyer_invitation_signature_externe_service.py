@@ -25,29 +25,28 @@
 # ##############################################################################
 
 from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import PropositionIdentityBuilder
-from admission.ddd.admission.doctorat.preparation.commands import DesignerPromoteurReferenceCommand
+from admission.ddd.admission.doctorat.preparation.commands import RenvoyerInvitationSignatureExterneCommand
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity
+from admission.ddd.admission.doctorat.preparation.domain.service.i_notification import INotification
 from admission.ddd.admission.doctorat.preparation.repository.i_groupe_de_supervision import (
     IGroupeDeSupervisionRepository,
 )
 from admission.ddd.admission.doctorat.preparation.repository.i_proposition import IPropositionRepository
 
 
-def designer_promoteur_reference(
-    cmd: 'DesignerPromoteurReferenceCommand',
+def renvoyer_invitation_signature_externe(
+    cmd: 'RenvoyerInvitationSignatureExterneCommand',
     proposition_repository: 'IPropositionRepository',
     groupe_supervision_repository: 'IGroupeDeSupervisionRepository',
+    notification: 'INotification',
 ) -> 'PropositionIdentity':
     # GIVEN
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
     proposition_candidat = proposition_repository.get(entity_id=proposition_id)
     groupe_supervision = groupe_supervision_repository.get_by_proposition_id(proposition_id)
-    promoteur_id = groupe_supervision.get_promoteur(cmd.uuid_promoteur)
-
-    # WHEN
-    groupe_supervision.designer_promoteur_reference(promoteur_id)
+    membre = groupe_supervision.get_signataire(cmd.uuid_membre)
 
     # THEN
-    groupe_supervision_repository.save(groupe_supervision)
+    notification.renvoyer_invitation(proposition_candidat, membre)
 
     return proposition_id

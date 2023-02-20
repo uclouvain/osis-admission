@@ -1,26 +1,26 @@
 # ##############################################################################
 #
-#    OSIS stands for Open Student Information System. It's an application
-#    designed to manage the core business of higher education institutions,
-#    such as universities, faculties, institutes and professional schools.
-#    The core business involves the administration of students, teachers,
-#    courses, programs and so on.
+#  OSIS stands for Open Student Information System. It's an application
+#  designed to manage the core business of higher education institutions,
+#  such as universities, faculties, institutes and professional schools.
+#  The core business involves the administration of students, teachers,
+#  courses, programs and so on.
 #
-#    Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
 #
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
 #
-#    A copy of this license - GNU General Public License - is available
-#    at the root of the source code of this program.  If not,
-#    see http://www.gnu.org/licenses/.
+#  A copy of this license - GNU General Public License - is available
+#  at the root of the source code of this program.  If not,
+#  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
 
@@ -41,7 +41,7 @@ from admission.infrastructure.message_bus_in_memory import message_bus_in_memory
 
 class TestDesignerPromoteurDeReferenceService(TestCase):
     def setUp(self) -> None:
-        self.matricule_promoteur = 'promoteur-SC3DP'
+        self.uuid_promoteur = 'promoteur-SC3DP'
         self.uuid_proposition = 'uuid-SC3DP-sans-promoteur-reference'
 
         self.groupe_de_supervision_repository = GroupeDeSupervisionInMemoryRepository()
@@ -50,7 +50,7 @@ class TestDesignerPromoteurDeReferenceService(TestCase):
         self.message_bus = message_bus_in_memory_instance
         self.cmd = DesignerPromoteurReferenceCommand(
             uuid_proposition=self.uuid_proposition,
-            matricule=self.matricule_promoteur,
+            uuid_promoteur=self.uuid_promoteur,
         )
         self.addCleanup(self.groupe_de_supervision_repository.reset)
 
@@ -61,27 +61,27 @@ class TestDesignerPromoteurDeReferenceService(TestCase):
         proposition_id = self.message_bus.invoke(self.cmd)
         self.assertEqual(proposition_id.uuid, self.uuid_proposition)
         groupe = self.groupe_de_supervision_repository.get_by_proposition_id(proposition_id)
-        self.assertEqual(groupe.promoteur_reference_id.matricule, self.matricule_promoteur)
+        self.assertEqual(groupe.promoteur_reference_id.uuid, self.uuid_promoteur)
 
     def test_should_changer_promoteur_reference(self):
         uuid_proposition = "uuid-SC3DP-promoteur-deja-approuve"
         groupe = self.groupe_de_supervision_repository.get_by_proposition_id(
             PropositionIdentityBuilder.build_from_uuid(uuid_proposition)
         )
-        self.assertEqual(groupe.promoteur_reference_id.matricule, "promoteur-SC3DP")
+        self.assertEqual(groupe.promoteur_reference_id.uuid, "promoteur-SC3DP")
 
         proposition_id = self.message_bus.invoke(
             DesignerPromoteurReferenceCommand(
                 uuid_proposition=uuid_proposition,
-                matricule="promoteur-SC3DP-deja-approuve",
+                uuid_promoteur="promoteur-SC3DP-deja-approuve",
             )
         )
         self.assertEqual(proposition_id.uuid, uuid_proposition)
         groupe = self.groupe_de_supervision_repository.get_by_proposition_id(proposition_id)
-        self.assertEqual(groupe.promoteur_reference_id.matricule, "promoteur-SC3DP-deja-approuve")
+        self.assertEqual(groupe.promoteur_reference_id.uuid, "promoteur-SC3DP-deja-approuve")
 
     def test_should_pas_designer_personne_si_pas_promoteur(self):
-        cmd = attr.evolve(self.cmd, matricule='paspromoteur')
+        cmd = attr.evolve(self.cmd, uuid_promoteur='paspromoteur')
         with self.assertRaises(SignataireNonTrouveException):
             self.message_bus.invoke(cmd)
 

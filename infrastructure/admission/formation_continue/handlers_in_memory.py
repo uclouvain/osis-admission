@@ -41,9 +41,6 @@ from admission.infrastructure.admission.domain.service.in_memory.maximum_proposi
 )
 from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
 from admission.infrastructure.admission.domain.service.in_memory.titres_acces import TitresAccesInMemory
-from admission.infrastructure.admission.formation_continue.domain.service.in_memory.comptabilite import (
-    ComptabiliteInMemoryTranslator,
-)
 from admission.infrastructure.admission.formation_continue.domain.service.in_memory.formation import (
     FormationContinueInMemoryTranslator,
 )
@@ -63,7 +60,6 @@ _annee_inscription_formation_translator = AnneeInscriptionFormationInMemoryTrans
 _titres_acces = TitresAccesInMemory()
 _profil_candidat_translator = ProfilCandidatInMemoryTranslator()
 _question_specific_translator = QuestionSpecifiqueInMemoryTranslator()
-_comptabilite_translator = ComptabiliteInMemoryTranslator()
 _maximum_propositions_autorisees = MaximumPropositionsAutoriseesInMemory()
 
 
@@ -129,14 +125,6 @@ COMMAND_HANDLERS = {
         titres_acces=_titres_acces,
         profil_candidat_translator=_profil_candidat_translator,
         calendrier_inscription=CalendrierInscriptionInMemory(),
-    ),
-    CompleterComptabilitePropositionCommand: lambda msg_bus, cmd: completer_comptabilite_proposition(
-        cmd,
-        proposition_repository=_proposition_repository,
-    ),
-    GetComptabiliteQuery: lambda msg_bus, cmd: recuperer_comptabilite(
-        cmd,
-        comptabilite_translator=_comptabilite_translator,
     ),
     RecupererElementsConfirmationQuery: lambda msg_bus, cmd: recuperer_elements_confirmation(
         cmd,
