@@ -23,39 +23,28 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
-from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
-from django.utils.functional import cached_property
-from django.views.generic import ListView
-
-from admission.contrib.models import GeneralEducationAdmissionProxy
-from admission.forms.filters.all_list import AllListFiltersForm
-from base.utils.htmx import HtmxMixin
-
-__all__ = [
-    "GeneralAdmissionList",
-]
+from dal import autocomplete
+from django.utils.translation import gettext_lazy as _
 
 
-class GeneralAdmissionList(LoginRequiredMixin, PermissionRequiredMixin, HtmxMixin, ListView):
-    raise_exception = True
-    template_name = 'admission/general/list.html'
-    htmx_template_name = 'admission/general/list_block.html'
-    permission_required = 'admission.view_general_dossiers'
+class Select2MultipleWithCheckboxes(autocomplete.Select2Multiple):
+    autocomplete_function = 'select2-multi-checkboxes'
 
-    @cached_property
-    def form(self):
-        # TODO session save
-        return AllListFiltersForm(data=self.request.GET or None)
+    def build_attrs(self, *args, **kwargs):
+        """Set data-autocomplete-light-language."""
+        attrs = super().build_attrs(*args, **kwargs)
+        attrs.setdefault('data-placeholder', _("Select items"))
+        attrs.setdefault('data-selection-template', _("{items} items selected of {total}"))
+        attrs.setdefault('data-select-all-label', _("Select all"))
+        attrs.setdefault('data-unselect-all-label', _("Unselect all"))
+        return attrs
 
-    def get_paginate_by(self, queryset):
-        return self.form.data.get('page_size', 10)
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['filter_form'] = self.form
-        return context
-
-    def get_queryset(self):
-        # TODO Wait for GetAdmissionsQuery
-        return GeneralEducationAdmissionProxy.objects.for_dto().all()
+    class Media:
+        extend = True
+        js = [
+            'vendor/select2/dist/js/select2.full.js',  # Keep this to make it a dependency
+            'admission/select2-multi-checkboxes.js',
+        ]
+        css = {
+            'all': ['admission/select2-multi-checkboxes.css'],
+        }

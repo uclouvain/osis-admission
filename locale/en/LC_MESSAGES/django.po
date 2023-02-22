@@ -371,8 +371,6 @@ msgstr ""
 msgid "All promoters must have approved the proposition."
 msgstr ""
 
-#, fuzzy
-#| msgid "Already a member of CA."
 msgid "Already a member."
 msgstr "Already a member of the supervisory panel."
 
@@ -1020,6 +1018,9 @@ msgstr ""
 msgid "Delete?"
 msgstr ""
 
+msgid "Demand type"
+msgstr ""
+
 msgid "Description"
 msgstr ""
 
@@ -1650,6 +1651,9 @@ msgstr ""
 msgid "Last modification"
 msgstr ""
 
+msgid "Last name / First name / E-mail"
+msgstr ""
+
 msgid "Last name / First name / E-mail / NOMA"
 msgstr ""
 
@@ -1979,10 +1983,16 @@ msgstr ""
 msgid "My partner"
 msgstr ""
 
+msgid "N# demand"
+msgstr ""
+
 msgid "N/A"
 msgstr ""
 
 msgid "NO"
+msgstr ""
+
+msgid "NOMA"
 msgstr ""
 
 msgid "NON_SOUMISE"
@@ -2718,16 +2728,20 @@ msgstr ""
 msgid "Select a mail template"
 msgstr ""
 
+msgid "Select all"
+msgstr ""
+
 msgid "Select at least one activity"
 msgstr ""
 
 msgid "Select for batch action"
 msgstr ""
 
-#, fuzzy
-#| msgid "Publication"
+msgid "Select items"
+msgstr ""
+
 msgid "Selection"
-msgstr "Publication"
+msgstr ""
 
 msgid "Selection committee"
 msgstr ""
@@ -2769,6 +2783,9 @@ msgid "Signatures"
 msgstr ""
 
 msgid "Sir"
+msgstr ""
+
+msgid "Site"
 msgstr ""
 
 msgid "Solidarity student"
@@ -2831,6 +2848,9 @@ msgid "Sport affiliation"
 msgstr ""
 
 msgid "Staff child certificate"
+msgstr ""
+
+msgid "State"
 msgstr ""
 
 msgid "Status"
@@ -3265,6 +3285,9 @@ msgstr ""
 msgid "Training choice"
 msgstr ""
 
+msgid "Training type(s)"
+msgstr ""
+
 msgid "Tutorship act"
 msgstr ""
 
@@ -3313,6 +3336,9 @@ msgstr ""
 msgid "Unique business number"
 msgstr ""
 
+msgid "Unselect all"
+msgstr ""
+
 msgid "Unsubmitted for publication"
 msgstr ""
 
@@ -3331,10 +3357,8 @@ msgstr "Valorisation of experience"
 msgid "VALID"
 msgstr "Valid"
 
-#, fuzzy
-#| msgid "CA Member"
 msgid "VAT number"
-msgstr "Supervisory panel member"
+msgstr ""
 
 msgid "VIP"
 msgstr ""
@@ -3581,4 +3605,12 @@ msgid "your mother"
 msgstr ""
 
 msgid "your partner"
+msgstr ""
+
+#, python-brace-format
+msgid "{items} items selected of {total}"
+msgstr ""
+
+#, python-brace-format
+msgid "{items} types selected"
 msgstr ""

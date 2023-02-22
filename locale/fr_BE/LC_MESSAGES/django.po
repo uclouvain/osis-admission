@@ -1095,6 +1095,9 @@ msgstr "Supprimer"
 msgid "Delete?"
 msgstr "Supprimer ?"
 
+msgid "Demand type"
+msgstr "Type de demande"
+
 msgid "Description"
 msgstr "Description"
 
@@ -1839,6 +1842,9 @@ msgstr "Connaissance des langues"
 msgid "Last modification"
 msgstr "Dernière modification"
 
+msgid "Last name / First name / E-mail"
+msgstr "Nom / Prénom / E-mail"
+
 msgid "Last name / First name / E-mail / NOMA"
 msgstr "Nom / Prénom / E-mail / NOMA"
 
@@ -2239,11 +2245,17 @@ msgstr "Ma mère"
 msgid "My partner"
 msgstr "Mon conjoint"
 
+msgid "N# demand"
+msgstr "N° demande"
+
 msgid "N/A"
 msgstr "Sans objet"
 
 msgid "NO"
 msgstr "Non"
+
+msgid "NOMA"
+msgstr "NOMA"
 
 msgid "NON_SOUMISE"
 msgstr "Non soumise"
@@ -3025,11 +3037,17 @@ msgstr "Les études secondaires doivent être complétées."
 msgid "Select a mail template"
 msgstr "Sélectionner un template d'email"
 
+msgid "Select all"
+msgstr "Sélectionner tout"
+
 msgid "Select at least one activity"
 msgstr "Veuillez sélectionner au moins une activité"
 
 msgid "Select for batch action"
 msgstr "Sélectionner pour une action en masse"
+
+msgid "Select items"
+msgstr "Sélectionner"
 
 msgid "Selection"
 msgstr "Sélection"
@@ -3075,6 +3093,9 @@ msgstr "Signatures"
 
 msgid "Sir"
 msgstr "Monsieur"
+
+msgid "Site"
+msgstr "Site"
 
 msgid "Solidarity student"
 msgstr "Étudiant solidaire"
@@ -3155,6 +3176,9 @@ msgstr "Affiliation sportive"
 
 msgid "Staff child certificate"
 msgstr "Attestation enfant du personnel"
+
+msgid "State"
+msgstr "Statut"
 
 msgid "Status"
 msgstr "Statut"
@@ -3636,6 +3660,9 @@ msgstr "Activité for formation"
 msgid "Training choice"
 msgstr "Choix de formation"
 
+msgid "Training type(s)"
+msgstr "Type(s) de formation"
+
 msgid "Tutorship act"
 msgstr "Acte de tutelle"
 
@@ -3687,6 +3714,9 @@ msgstr "Non décidé"
 
 msgid "Unique business number"
 msgstr "Numéro unique d'entreprise"
+
+msgid "Unselect all"
+msgstr "Déselectionner tout"
 
 msgid "Unsubmitted for publication"
 msgstr "Non soumis pour publication"
@@ -3986,3 +4016,11 @@ msgstr "votre mère"
 
 msgid "your partner"
 msgstr "votre conjoint"
+
+#, python-brace-format
+msgid "{items} items selected of {total}"
+msgstr "{items} sélectionnés sur {total}"
+
+#, python-brace-format
+msgid "{items} types selected"
+msgstr "{items} types sélectionnés"

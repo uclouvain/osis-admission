@@ -1,0 +1,21 @@
+.select2-container--open .select2-dropdown.select2-dropdown--above.multi-checkboxes_dropdown {
+  border-bottom: 1px solid #aaa;
+  margin-top: 2px;
+}
+.select2-container--open .select2-dropdown.select2-dropdown--below.multi-checkboxes_dropdown {
+  border-top: 1px solid #aaa;
+  margin-top: -1px;
+}
+
+.multi-checkboxes_wrap:before {
+  font-family: 'fontawesome';
+  color: #999;
+  content: "\f096";
+  width: 25px;
+  height: 25px;
+  padding-right: 10px;
+}
+
+.multi-checkboxes_wrap[aria-selected=true]:before {
+  content: "\f14a";
+}
