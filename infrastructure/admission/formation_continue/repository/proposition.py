@@ -141,6 +141,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 ),
                 'determined_pool': entity.pot_calcule and entity.pot_calcule.name,
                 'status': entity.statut.name,
+                'submitted_at': entity.soumise_le,
                 'specific_question_answers': entity.reponses_questions_specifiques,
                 'curriculum': entity.curriculum,
                 'diploma_equivalence': entity.equivalence_diplome,
@@ -170,6 +171,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             statut=ChoixStatutProposition[admission.status],
             creee_le=admission.created_at,
             modifiee_le=admission.modified_at,
+            soumise_le=admission.submitted_at,
             reference=admission.reference,
             formation_id=FormationIdentityBuilder.build(
                 sigle=admission.training.acronym,

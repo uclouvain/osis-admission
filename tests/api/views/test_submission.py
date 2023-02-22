@@ -229,6 +229,7 @@ class GeneralPropositionSubmissionTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
         self.admission_ok.refresh_from_db()
         self.assertEqual(self.admission_ok.status, ChoixStatutPropositionGenerale.SUBMITTED.name)
+        self.assertIsNotNone(self.admission_ok.submitted_at)
 
     @freezegun.freeze_time("1980-11-25")
     def test_general_proposition_submission_ok_hors_delai(self):
@@ -389,6 +390,7 @@ class ContinuingPropositionSubmissionTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
         self.admission_ok.refresh_from_db()
         self.assertEqual(self.admission_ok.status, ChoixStatutPropositionContinue.SUBMITTED.name)
+        self.assertIsNotNone(self.admission_ok.submitted_at)
 
     def test_continuing_proposition_verification_ok_valuate_experiences(self):
         educational_experience = EducationalExperience.objects.filter(person=self.second_candidate_ok).first()
