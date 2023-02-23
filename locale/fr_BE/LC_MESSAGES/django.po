@@ -2107,6 +2107,13 @@ msgstr "Gestion des inscriptions en doctorats"
 msgid "Management of the general enrolments"
 msgstr "Gestion des inscriptions en formation générale"
 
+msgid ""
+"Mandatory fields are missing in the 'Additional information > Specific "
+"questions' tab."
+msgstr ""
+"Les champs requis dans l'onglet 'Informations complémentaires > Questions "
+"spécifiques' sont manquants."
+
 msgid "Mandatory fields are missing in the cotutelle."
 msgstr "Les champs requis de la cotutelle sont manquants."
 

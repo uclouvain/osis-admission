@@ -26,6 +26,7 @@
 import factory
 
 from admission.contrib.models import ContinuingEducationAdmission
+from admission.ddd.admission.formation_continue.domain.model.enums import ChoixInscriptionATitre
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
@@ -66,6 +67,7 @@ class ContinuingEducationAdmissionFactory(factory.DjangoModelFactory):
         enrollment_campus__name='Mons',
     )
     reference = factory.LazyAttribute(generate_proposition_reference)
+    registration_as = ChoixInscriptionATitre.PRIVE.name
 
     @factory.post_generation
     def create_candidate_role(self, create, extracted, **kwargs):

@@ -29,6 +29,7 @@ import uuid
 import factory
 from factory.fuzzy import FuzzyText
 
+from admission.ddd.admission.formation_continue.domain.model.enums import ChoixInscriptionATitre
 from admission.ddd.admission.formation_continue.domain.model.proposition import PropositionIdentity, Proposition
 from admission.ddd.admission.test.factory.formation import FormationIdentityFactory
 from admission.ddd.admission.test.factory.reference import REFERENCE_MEMORY_ITERATOR
@@ -53,3 +54,4 @@ class PropositionFactory(factory.Factory):
     formation_id = factory.SubFactory(FormationIdentityFactory)
     creee_le = factory.Faker('past_datetime')
     modifiee_le = factory.Faker('past_datetime')
+    inscription_a_titre = ChoixInscriptionATitre.PRIVE

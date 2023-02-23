@@ -36,6 +36,9 @@ from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixInscriptionATitre,
     ChoixTypeAdresseFacturation,
 )
+from admission.ddd.admission.formation_continue.domain.validator.validator_by_business_action import (
+    InformationsComplementairesValidatorList,
+)
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from osis_common.ddd import interface
 
@@ -147,3 +150,7 @@ class Proposition(interface.RootEntity):
         )
         self.reponses_questions_specifiques = reponses_questions_specifiques
         self.copie_titre_sejour = copie_titre_sejour
+
+    def verifier_informations_complementaires(self):
+        """Vérification de la validité des informations complémentaires."""
+        InformationsComplementairesValidatorList(self.inscription_a_titre).validate()
