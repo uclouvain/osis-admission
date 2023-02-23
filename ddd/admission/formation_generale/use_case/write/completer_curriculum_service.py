@@ -40,8 +40,6 @@ def completer_curriculum(
 
     # WHEN
     proposition.completer_curriculum(
-        continuation_cycle_bachelier=cmd.continuation_cycle_bachelier,
-        attestation_continuation_cycle_bachelier=cmd.attestation_continuation_cycle_bachelier,
         curriculum=cmd.curriculum,
         equivalence_diplome=cmd.equivalence_diplome,
         reponses_questions_specifiques=cmd.reponses_questions_specifiques,

@@ -94,8 +94,6 @@ class SoumettrePropositionCommand(interface.CommandRequest):
 class CompleterCurriculumCommand(interface.CommandRequest):
     uuid_proposition: str
 
-    continuation_cycle_bachelier: Optional[bool] = None
-    attestation_continuation_cycle_bachelier: List[str] = attr.Factory(list)
     curriculum: List[str] = attr.Factory(list)
     equivalence_diplome: List[str] = attr.Factory(list)
     reponses_questions_specifiques: Dict = attr.Factory(dict)

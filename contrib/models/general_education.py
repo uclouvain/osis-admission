@@ -99,21 +99,6 @@ class GeneralEducationAdmission(BaseAdmission):
         null=True,
     )
 
-    bachelor_cycle_continuation = models.BooleanField(
-        blank=True,
-        null=True,
-        verbose_name=_(
-            'Do you want, on the basis of this training, to realize a cycle '
-            'continuation for the bachelor you are registering for?'
-        ),
-    )
-
-    bachelor_cycle_continuation_certificate = FileField(
-        blank=True,
-        upload_to=admission_directory_path,
-        verbose_name=_("Certificate allowing the continuation of studies for a bachelor's degree"),
-    )
-
     diploma_equivalence = FileField(
         blank=True,
         upload_to=admission_directory_path,

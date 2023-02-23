@@ -57,7 +57,5 @@ class PropositionDTO(interface.DTO):
 
     reponses_questions_specifiques: Dict[str, Union[str, List[str]]]
 
-    continuation_cycle_bachelier: Optional[bool]
-    attestation_continuation_cycle_bachelier: List[str]
     curriculum: List[str]
     equivalence_diplome: List[str]

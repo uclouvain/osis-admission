@@ -755,10 +755,6 @@ msgstr ""
 msgid "Certificate"
 msgstr ""
 
-msgid ""
-"Certificate allowing the continuation of studies for a bachelor's degree"
-msgstr ""
-
 msgid "Certificate of achievement"
 msgstr ""
 
@@ -1048,11 +1044,6 @@ msgid "Dissent from reference promoter"
 msgstr ""
 
 msgid "Do not reorder values, and keep the same count"
-msgstr ""
-
-msgid ""
-"Do you want, on the basis of this training, to realize a cycle continuation "
-"for the bachelor you are registering for?"
 msgstr ""
 
 #, python-format
@@ -2243,16 +2234,6 @@ msgid ""
 msgstr ""
 
 msgid "Please fill in at least your last or first name."
-msgstr ""
-
-msgid ""
-"Please indicate if you want, on the basis of this training, to realize a "
-"cycle continuation for the bachelor you are registering for."
-msgstr ""
-
-msgid ""
-"Please provide a copy of your certificate allowing the continuation of "
-"studies for the bachelor you are registering for."
 msgstr ""
 
 msgid "Please provide a copy of your curriculum."
