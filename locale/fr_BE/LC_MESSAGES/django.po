@@ -1185,6 +1185,9 @@ msgstr "Bourse double diplomation"
 msgid "Double or triple diplomation"
 msgstr "Double ou triple diplomation"
 
+msgid "Dr."
+msgstr "Dr."
+
 msgid "ECONOMY"
 msgstr "Economie"
 
