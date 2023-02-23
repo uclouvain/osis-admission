@@ -23,5 +23,21 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from ._should_curriculum_etre_complete import ShouldRenseignerExperiencesCurriculum
-from ._should_informations_complementaires_etre_completees import ShouldRenseignerInformationsAdditionnelles
+from typing import Optional
+
+import attr
+
+from admission.ddd.admission.formation_continue.domain.model.enums import ChoixInscriptionATitre
+from admission.ddd.admission.formation_continue.domain.validator.exceptions import (
+    InformationsComplementairesNonRenseigneesException,
+)
+from base.ddd.utils.business_validator import BusinessValidator
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ShouldRenseignerInformationsAdditionnelles(BusinessValidator):
+    inscription_a_titre: Optional[ChoixInscriptionATitre] = None
+
+    def validate(self, *args, **kwargs):
+        if not self.inscription_a_titre:
+            raise InformationsComplementairesNonRenseigneesException

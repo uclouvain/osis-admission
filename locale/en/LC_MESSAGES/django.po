@@ -1861,6 +1861,11 @@ msgstr ""
 msgid "Management of the general enrolments"
 msgstr ""
 
+msgid ""
+"Mandatory fields are missing in the 'Additional information > Specific "
+"questions' tab."
+msgstr ""
+
 msgid "Mandatory fields are missing in the cotutelle."
 msgstr ""
 
