@@ -28,8 +28,6 @@ from ._should_comptabilite_etre_completee import (
     ShouldReductionDesDroitsInscriptionEtreCompletee,
 )
 from ._should_curriculum_etre_complete import (
-    ShouldAttestationContinuationCycleBachelierEtreSpecifiee,
-    ShouldContinuationCycleBachelierEtreSpecifiee,
     ShouldCurriculumFichierEtreSpecifie,
     ShouldEquivalenceEtreSpecifiee,
 )

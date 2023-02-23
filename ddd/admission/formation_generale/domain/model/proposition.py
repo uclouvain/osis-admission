@@ -86,8 +86,6 @@ class Proposition(interface.RootEntity):
 
     reponses_questions_specifiques: Dict = attr.Factory(dict)
 
-    continuation_cycle_bachelier: Optional[bool] = None
-    attestation_continuation_cycle_bachelier: List[str] = attr.Factory(list)
     curriculum: List[str] = attr.Factory(list)
     equivalence_diplome: List[str] = attr.Factory(list)
     elements_confirmation: Dict[str, str] = attr.Factory(dict)
@@ -131,14 +129,10 @@ class Proposition(interface.RootEntity):
 
     def completer_curriculum(
         self,
-        continuation_cycle_bachelier: Optional[bool],
-        attestation_continuation_cycle_bachelier: List[str],
         curriculum: List[str],
         equivalence_diplome: List[str],
         reponses_questions_specifiques: Dict,
     ):
-        self.continuation_cycle_bachelier = continuation_cycle_bachelier
-        self.attestation_continuation_cycle_bachelier = attestation_continuation_cycle_bachelier
         self.curriculum = curriculum
         self.equivalence_diplome = equivalence_diplome
         self.reponses_questions_specifiques = reponses_questions_specifiques

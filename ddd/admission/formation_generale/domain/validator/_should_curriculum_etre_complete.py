@@ -23,21 +23,18 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import List, Optional
+from typing import List
 
 import attr
 
-from admission.ddd import BE_ISO_CODE, CODE_BACHELIER_VETERINAIRE
+from admission.ddd import BE_ISO_CODE
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import ExperienceAcademiqueDTO
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
     FichierCurriculumNonRenseigneException,
     EquivalenceNonRenseigneeException,
-    ContinuationBachelierNonRenseigneeException,
-    AttestationContinuationBachelierNonRenseigneeException,
 )
 from base.ddd.utils.business_validator import BusinessValidator
 from base.models.enums.education_group_types import TrainingType
-from osis_profile.models.enums.curriculum import Result
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -67,37 +64,3 @@ class ShouldEquivalenceEtreSpecifiee(BusinessValidator):
             and all(experience.pays != BE_ISO_CODE for experience in experiences_avec_diplome)
         ):
             raise EquivalenceNonRenseigneeException
-
-
-@attr.dataclass(frozen=True, slots=True)
-class ShouldContinuationCycleBachelierEtreSpecifiee(BusinessValidator):
-    continuation_cycle_bachelier: Optional[bool]
-    type_formation: TrainingType
-    experiences_academiques: List[ExperienceAcademiqueDTO]
-
-    def validate(self, *args, **kwargs):
-        if (
-            self.type_formation == TrainingType.BACHELOR
-            and self.continuation_cycle_bachelier is None
-            and any(
-                annee.resultat == Result.SUCCESS.name
-                for experience in self.experiences_academiques
-                for annee in experience.annees
-            )
-        ):
-            raise ContinuationBachelierNonRenseigneeException
-
-
-@attr.dataclass(frozen=True, slots=True)
-class ShouldAttestationContinuationCycleBachelierEtreSpecifiee(BusinessValidator):
-    continuation_cycle_bachelier: Optional[bool]
-    attestation_continuation_cycle_bachelier: List[str]
-    sigle_formation: str
-
-    def validate(self, *args, **kwargs):
-        if (
-            self.sigle_formation == CODE_BACHELIER_VETERINAIRE
-            and self.continuation_cycle_bachelier
-            and not self.attestation_continuation_cycle_bachelier
-        ):
-            raise AttestationContinuationBachelierNonRenseigneeException

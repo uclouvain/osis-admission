@@ -70,8 +70,6 @@ from admission.ddd.admission.formation_generale.domain.builder.proposition_ident
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutProposition
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
-    AttestationContinuationBachelierNonRenseigneeException,
-    ContinuationBachelierNonRenseigneeException,
     EquivalenceNonRenseigneeException,
     FichierCurriculumNonRenseigneException,
     EtudesSecondairesNonCompleteesException,
@@ -313,50 +311,6 @@ class TestVerifierPropositionService(TestCase):
         with mock.patch.multiple(self.aggregation_proposition, equivalence_diplome=[]):
             proposition_id = self.message_bus.invoke(self.cmd(self.aggregation_proposition.entity_id.uuid))
             self.assertEqual(proposition_id.uuid, self.aggregation_proposition.entity_id.uuid)
-
-    def test_should_retourner_erreur_si_continuation_cycle_bachelier_non_remplie_avec_succes(self):
-        with mock.patch.multiple(self.bachelier_proposition, continuation_cycle_bachelier=None):
-            with self.assertRaises(MultipleBusinessExceptions) as context:
-                self.message_bus.invoke(self.cmd(self.bachelier_proposition.entity_id.uuid))
-            self.assertEqual(len(context.exception.exceptions), 1)
-            self.assertIsInstance(context.exception.exceptions.pop(), ContinuationBachelierNonRenseigneeException)
-
-    def test_should_verifier_etre_ok_si_continuation_cycle_bachelier_non_remplie_sans_succes(self):
-        with mock.patch.multiple(self.bachelier_proposition, continuation_cycle_bachelier=None):
-            for exp in self.experiences_academiques:
-                if exp.personne == self.bachelier_proposition.matricule_candidat:
-                    for a in exp.annees:
-                        a.resultat = Result.SUCCESS_WITH_RESIDUAL_CREDITS.name
-            proposition_id = self.message_bus.invoke(self.cmd(self.bachelier_proposition.entity_id.uuid))
-            self.assertEqual(proposition_id.uuid, self.bachelier_proposition.entity_id.uuid)
-
-    def test_should_verifier_etre_ok_si_continuation_cycle_bachelier_est_faux(self):
-        with mock.patch.multiple(self.bachelier_proposition, continuation_cycle_bachelier=False):
-            proposition_id = self.message_bus.invoke(self.cmd(self.bachelier_proposition.entity_id.uuid))
-            self.assertEqual(proposition_id.uuid, self.bachelier_proposition.entity_id.uuid)
-
-    def test_should_retourner_erreur_si_attestation_continuation_cycle_bachelier_non_remplie_si_continuation_veto(self):
-        with mock.patch.multiple(
-            self.bachelier_veto_proposition,
-            continuation_cycle_bachelier=True,
-            attestation_continuation_cycle_bachelier=[],
-        ):
-            with self.assertRaises(MultipleBusinessExceptions) as context:
-                self.message_bus.invoke(self.cmd(self.bachelier_veto_proposition.entity_id.uuid))
-            self.assertEqual(len(context.exception.exceptions), 1)
-            self.assertIsInstance(
-                context.exception.exceptions.pop(),
-                AttestationContinuationBachelierNonRenseigneeException,
-            )
-
-    def test_should_verifier_etre_ok_si_continuation_cycle_bachelier_est_faux_et_pas_attestation_veto(self):
-        with mock.patch.multiple(
-            self.bachelier_veto_proposition,
-            continuation_cycle_bachelier=False,
-            attestation_continuation_cycle_bachelier=[],
-        ):
-            proposition_id = self.message_bus.invoke(self.cmd(self.bachelier_veto_proposition.entity_id.uuid))
-            self.assertEqual(proposition_id.uuid, self.bachelier_veto_proposition.entity_id.uuid)
 
     def test_should_retourner_erreur_si_questions_specifiques_pas_completees_pour_curriculum(self):
         with mock.patch.multiple(

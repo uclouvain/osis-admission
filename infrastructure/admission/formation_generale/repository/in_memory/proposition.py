@@ -110,8 +110,6 @@ class PropositionInMemoryRepository(
                 bourse_erasmus_mundus_id=BourseInMemoryTranslator.bourse_em_1.entity_id,
                 bourse_internationale_id=BourseInMemoryTranslator.bourse_ifg_1.entity_id,
                 curriculum=['file1.pdf'],
-                continuation_cycle_bachelier=['file1.pdf'],
-                attestation_continuation_cycle_bachelier=None,
                 reponses_questions_specifiques={
                     '16de0c3d-3c06-4c93-8eb4-c8648f04f140': 'My response 0',
                     '16de0c3d-3c06-4c93-8eb4-c8648f04f141': 'My response 1',
@@ -124,15 +122,11 @@ class PropositionInMemoryRepository(
                 entity_id=factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-BACHELIER-ECO1'),
                 matricule_candidat='0000000001',
                 formation_id=FormationIdentityFactory(sigle="BACHELIER-ECO", annee=2020),
-                continuation_cycle_bachelier=['file1.pdf'],
-                attestation_continuation_cycle_bachelier=None,
             ),
             PropositionFactory(
                 entity_id=factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-BACHELIER-VET'),
                 matricule_candidat='0000000001',
                 formation_id=FormationIdentityFactory(sigle=CODE_BACHELIER_VETERINAIRE, annee=2020),
-                continuation_cycle_bachelier=['file1.pdf'],
-                attestation_continuation_cycle_bachelier=True,
                 est_non_resident_au_sens_decret=False,
             ),
             PropositionFactory(
@@ -154,7 +148,6 @@ class PropositionInMemoryRepository(
                 matricule_candidat='0123456789',
                 formation_id=FormationIdentityFactory(sigle="BACHELIER-ECO", annee=2020),
                 bourse_erasmus_mundus_id=BourseInMemoryTranslator.bourse_em_1.entity_id,
-                continuation_cycle_bachelier=False,
             ),
         ]
 
@@ -200,8 +193,6 @@ class PropositionInMemoryRepository(
             if proposition.bourse_internationale_id
             else None,
             reponses_questions_specifiques=proposition.reponses_questions_specifiques,
-            continuation_cycle_bachelier=proposition.continuation_cycle_bachelier,
-            attestation_continuation_cycle_bachelier=proposition.attestation_continuation_cycle_bachelier,
             equivalence_diplome=proposition.equivalence_diplome,
             curriculum=proposition.curriculum,
         )
