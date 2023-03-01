@@ -44,8 +44,6 @@ class TestCompleterCurriculumService(SimpleTestCase):
         self.message_bus = message_bus_in_memory_instance
         self.cmd = CompleterCurriculumCommand(
             uuid_proposition='uuid-BACHELIER-ECO1',
-            continuation_cycle_bachelier=True,
-            attestation_continuation_cycle_bachelier=['new_file.pdf'],
             curriculum=['new_file.pdf'],
             equivalence_diplome=['new_file.pdf'],
             reponses_questions_specifiques={
@@ -60,11 +58,6 @@ class TestCompleterCurriculumService(SimpleTestCase):
         self.assertEqual(proposition.entity_id, proposition_id)
         self.assertEqual(proposition.reponses_questions_specifiques, self.cmd.reponses_questions_specifiques)
         self.assertEqual(proposition.curriculum, self.cmd.curriculum)
-        self.assertEqual(proposition.continuation_cycle_bachelier, self.cmd.continuation_cycle_bachelier)
-        self.assertEqual(
-            proposition.attestation_continuation_cycle_bachelier,
-            self.cmd.attestation_continuation_cycle_bachelier,
-        )
         self.assertEqual(proposition.equivalence_diplome, self.cmd.equivalence_diplome)
 
     def test_should_vider_curriculum(self):
@@ -72,8 +65,6 @@ class TestCompleterCurriculumService(SimpleTestCase):
             self.cmd,
             curriculum=[],
             reponses_questions_specifiques={},
-            continuation_cycle_bachelier=None,
-            attestation_continuation_cycle_bachelier=[],
             equivalence_diplome=[],
         )
         proposition_id = self.message_bus.invoke(cmd)
@@ -81,8 +72,6 @@ class TestCompleterCurriculumService(SimpleTestCase):
         self.assertEqual(proposition.entity_id, proposition_id)
         self.assertEqual(proposition.reponses_questions_specifiques, {})
         self.assertEqual(proposition.curriculum, [])
-        self.assertEqual(proposition.continuation_cycle_bachelier, None)
-        self.assertEqual(proposition.attestation_continuation_cycle_bachelier, [])
         self.assertEqual(proposition.equivalence_diplome, [])
 
     def test_should_empecher_si_proposition_non_trouvee(self):

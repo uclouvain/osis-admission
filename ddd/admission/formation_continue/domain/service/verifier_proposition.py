@@ -83,6 +83,7 @@ class VerifierProposition(interface.DomainService):
                 matricule=proposition_candidat.matricule_candidat,
                 profil_candidat_translator=profil_candidat_translator,
             ),
+            proposition_candidat.verifier_informations_complementaires,
             partial(
                 VerifierQuestionsSpecifiques.verifier_onglet_choix_formation,
                 proposition_candidat,

@@ -48,8 +48,6 @@ from admission.ddd.admission.dtos.etudes_secondaires import (
 from admission.ddd.admission.formation_generale.domain.validator import (
     ShouldCurriculumFichierEtreSpecifie,
     ShouldEquivalenceEtreSpecifiee,
-    ShouldContinuationCycleBachelierEtreSpecifiee,
-    ShouldAttestationContinuationCycleBachelierEtreSpecifiee,
     ShouldReductionDesDroitsInscriptionEtreCompletee,
     ShouldAffiliationsEtreCompletees,
     ShouldSpecifieSiDiplomeEtudesSecondaires,
@@ -72,8 +70,6 @@ class FormationGeneraleCurriculumValidatorList(TwoStepsMultipleBusinessException
     experiences_academiques: List[ExperienceAcademiqueDTO]
     experiences_academiques_incompletes: Dict[str, str]
     type_formation: TrainingType
-    continuation_cycle_bachelier: Optional[bool]
-    attestation_continuation_cycle_bachelier: List[str]
     equivalence_diplome: List[str]
     sigle_formation: str
 
@@ -101,16 +97,6 @@ class FormationGeneraleCurriculumValidatorList(TwoStepsMultipleBusinessException
                 equivalence=self.equivalence_diplome,
                 type_formation=self.type_formation,
                 experiences_academiques=self.experiences_academiques,
-            ),
-            ShouldContinuationCycleBachelierEtreSpecifiee(
-                continuation_cycle_bachelier=self.continuation_cycle_bachelier,
-                type_formation=self.type_formation,
-                experiences_academiques=self.experiences_academiques,
-            ),
-            ShouldAttestationContinuationCycleBachelierEtreSpecifiee(
-                continuation_cycle_bachelier=self.continuation_cycle_bachelier,
-                attestation_continuation_cycle_bachelier=self.attestation_continuation_cycle_bachelier,
-                sigle_formation=self.sigle_formation,
             ),
         ]
 

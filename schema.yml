@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Admission API
-  version: 1.0.67
+  version: 1.0.68
   description: This API delivers data for the Admission project.
   contact:
     name: UCLouvain - OSIS
@@ -8596,13 +8596,6 @@ components:
           nullable: true
         reponses_questions_specifiques:
           type: object
-        continuation_cycle_bachelier:
-          type: boolean
-          nullable: true
-        attestation_continuation_cycle_bachelier:
-          type: array
-          items:
-            type: string
         curriculum:
           type: array
           items:
@@ -8621,7 +8614,6 @@ components:
       - creee_le
       - statut
       - erreurs
-      - attestation_continuation_cycle_bachelier
       - curriculum
       - equivalence_diplome
     PoolQuestions:
@@ -9870,13 +9862,6 @@ components:
       properties:
         uuid_proposition:
           type: string
-        continuation_cycle_bachelier:
-          type: boolean
-          nullable: true
-        attestation_continuation_cycle_bachelier:
-          type: array
-          items:
-            type: string
         curriculum:
           type: array
           items:
@@ -9889,7 +9874,6 @@ components:
           type: object
       required:
       - uuid_proposition
-      - attestation_continuation_cycle_bachelier
       - curriculum
       - equivalence_diplome
     CompleterComptabilitePropositionGeneraleCommand:

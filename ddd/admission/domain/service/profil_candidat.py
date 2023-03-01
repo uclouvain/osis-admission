@@ -206,8 +206,6 @@ class ProfilCandidat(interface.DomainService):
             fichier_pdf=proposition.curriculum,
             dates_experiences_non_academiques=curriculum.dates_experiences_non_academiques,
             type_formation=type_formation,
-            continuation_cycle_bachelier=proposition.continuation_cycle_bachelier,
-            attestation_continuation_cycle_bachelier=proposition.attestation_continuation_cycle_bachelier,
             equivalence_diplome=proposition.equivalence_diplome,
             sigle_formation=proposition.formation_id.sigle,
         ).validate()

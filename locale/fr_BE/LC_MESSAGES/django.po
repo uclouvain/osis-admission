@@ -827,10 +827,6 @@ msgstr "Libellés de catégories"
 msgid "Certificate"
 msgstr "Attestation"
 
-msgid ""
-"Certificate allowing the continuation of studies for a bachelor's degree"
-msgstr "Attestation autorisant à poursuivre les études de bachelier"
-
 msgid "Certificate of achievement"
 msgstr "Attestation de réussite"
 
@@ -1125,13 +1121,6 @@ msgstr "Avis négatif du promoteur de référence"
 msgid "Do not reorder values, and keep the same count"
 msgstr "Ne pas réordonner les valeurs, and garder le même nombre"
 
-msgid ""
-"Do you want, on the basis of this training, to realize a cycle continuation "
-"for the bachelor you are registering for?"
-msgstr ""
-"Demandez-vous, sur base de cette formation, de réaliser une poursuite de "
-"cycle pour le bachelier auquel vous vous inscrivez ?"
-
 #, python-format
 msgid "Do you wish to move the doctorate to the \"%(status)s\" state?"
 msgstr "Souhaitez-vous passer la demande dans l'état \"%(status)s\" ?"
@@ -1184,6 +1173,9 @@ msgstr "Bourse double diplomation"
 
 msgid "Double or triple diplomation"
 msgstr "Double ou triple diplomation"
+
+msgid "Dr."
+msgstr "Dr."
 
 msgid "ECONOMY"
 msgstr "Economie"
@@ -2115,6 +2107,13 @@ msgstr "Gestion des inscriptions en doctorats"
 msgid "Management of the general enrolments"
 msgstr "Gestion des inscriptions en formation générale"
 
+msgid ""
+"Mandatory fields are missing in the 'Additional information > Specific "
+"questions' tab."
+msgstr ""
+"Les champs requis dans l'onglet 'Informations complémentaires > Questions "
+"spécifiques' sont manquants."
+
 msgid "Mandatory fields are missing in the cotutelle."
 msgstr "Les champs requis de la cotutelle sont manquants."
 
@@ -2520,20 +2519,6 @@ msgstr ""
 
 msgid "Please fill in at least your last or first name."
 msgstr "Merci de spécifier au-moins votre nom ou votre prénom."
-
-msgid ""
-"Please indicate if you want, on the basis of this training, to realize a "
-"cycle continuation for the bachelor you are registering for."
-msgstr ""
-"Merci de préciser si vous souhaitez, sur base de cette formation, réaliser "
-"une poursuite de cycle pour le bachelier auquel vous vous inscrivez."
-
-msgid ""
-"Please provide a copy of your certificate allowing the continuation of "
-"studies for the bachelor you are registering for."
-msgstr ""
-"Merci de fournir une copie de votre attestation autorisant à poursuivre les "
-"études du bachelier auquel vous vous inscrivez."
 
 msgid "Please provide a copy of your curriculum."
 msgstr "Merci de fournir une copie de votre curriculum."

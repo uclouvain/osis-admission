@@ -603,8 +603,6 @@ class GeneralEducationCurriculumTestCase(
             'curriculum': ['file1.pdf'],
             'uuid_proposition': cls.admission.uuid,
             'equivalence_diplome': ['file2.pdf'],
-            'continuation_cycle_bachelier': False,
-            'attestation_continuation_cycle_bachelier': [],
         }
 
         # Users
@@ -636,8 +634,6 @@ class GeneralEducationCurriculumTestCase(
         )
         self.assertEqual(updated_admission.curriculum, [uuid.UUID('550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92')])
         self.assertEqual(updated_admission.diploma_equivalence, [uuid.UUID('550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92')])
-        self.assertEqual(updated_admission.bachelor_cycle_continuation_certificate, [])
-        self.assertEqual(updated_admission.bachelor_cycle_continuation, False)
 
 
 @override_settings(ROOT_URLCONF='admission.api.url_v1', OSIS_DOCUMENT_BASE_URL='http://dummyurl/')

@@ -447,7 +447,8 @@ class AdmissionTaskAdmin(admin.ModelAdmin):
 
     @admin.display(description="Task uuid")
     def task_uuid(self, obj):
-        return obj.task.uuid
+        url = resolve_url('admin:osis_async_asynctask_change', obj.task.pk)
+        return mark_safe(f'<a href="{url}" target="_blank">{obj.task.uuid}</a>')
 
     @admin.display(description="Task status")
     def task_status(self, obj):

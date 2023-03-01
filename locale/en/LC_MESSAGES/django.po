@@ -755,10 +755,6 @@ msgstr ""
 msgid "Certificate"
 msgstr ""
 
-msgid ""
-"Certificate allowing the continuation of studies for a bachelor's degree"
-msgstr ""
-
 msgid "Certificate of achievement"
 msgstr ""
 
@@ -1050,11 +1046,6 @@ msgstr ""
 msgid "Do not reorder values, and keep the same count"
 msgstr ""
 
-msgid ""
-"Do you want, on the basis of this training, to realize a cycle continuation "
-"for the bachelor you are registering for?"
-msgstr ""
-
 #, python-format
 msgid "Do you wish to move the doctorate to the \"%(status)s\" state?"
 msgstr ""
@@ -1106,6 +1097,9 @@ msgid "Double degree scholarship"
 msgstr ""
 
 msgid "Double or triple diplomation"
+msgstr ""
+
+msgid "Dr."
 msgstr ""
 
 msgid "ECONOMY"
@@ -1867,6 +1861,11 @@ msgstr ""
 msgid "Management of the general enrolments"
 msgstr ""
 
+msgid ""
+"Mandatory fields are missing in the 'Additional information > Specific "
+"questions' tab."
+msgstr ""
+
 msgid "Mandatory fields are missing in the cotutelle."
 msgstr ""
 
@@ -2240,16 +2239,6 @@ msgid ""
 msgstr ""
 
 msgid "Please fill in at least your last or first name."
-msgstr ""
-
-msgid ""
-"Please indicate if you want, on the basis of this training, to realize a "
-"cycle continuation for the bachelor you are registering for."
-msgstr ""
-
-msgid ""
-"Please provide a copy of your certificate allowing the continuation of "
-"studies for the bachelor you are registering for."
 msgstr ""
 
 msgid "Please provide a copy of your curriculum."

@@ -143,8 +143,6 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 'is_non_resident': entity.est_non_resident_au_sens_decret,
                 'status': entity.statut.name,
                 'specific_question_answers': entity.reponses_questions_specifiques,
-                'bachelor_cycle_continuation': entity.continuation_cycle_bachelier,
-                'bachelor_cycle_continuation_certificate': entity.attestation_continuation_cycle_bachelier,
                 'curriculum': entity.curriculum,
                 'diploma_equivalence': entity.equivalence_diplome,
                 'confirmation_elements': entity.elements_confirmation,
@@ -274,8 +272,6 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             est_non_resident_au_sens_decret=admission.is_non_resident,
             curriculum=admission.curriculum,
             equivalence_diplome=admission.diploma_equivalence,
-            continuation_cycle_bachelier=admission.bachelor_cycle_continuation,
-            attestation_continuation_cycle_bachelier=admission.bachelor_cycle_continuation_certificate,
             comptabilite=get_accounting_from_admission(admission=admission),
             elements_confirmation=admission.confirmation_elements,
         )
@@ -326,6 +322,4 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             reponses_questions_specifiques=admission.specific_question_answers,
             curriculum=admission.curriculum,
             equivalence_diplome=admission.diploma_equivalence,
-            continuation_cycle_bachelier=admission.bachelor_cycle_continuation,
-            attestation_continuation_cycle_bachelier=admission.bachelor_cycle_continuation_certificate,
         )

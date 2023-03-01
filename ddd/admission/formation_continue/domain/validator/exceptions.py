@@ -54,3 +54,11 @@ class ExperiencesCurriculumNonRenseigneesException(BusinessException):
             "and your most recent non-academic experience."
         )
         super().__init__(message, **kwargs)
+
+
+class InformationsComplementairesNonRenseigneesException(BusinessException):
+    status_code = "FORMATION-CONTINUE-4"
+
+    def __init__(self, **kwargs):
+        message = _("Mandatory fields are missing in the 'Additional information > Specific questions' tab.")
+        super().__init__(message, **kwargs)

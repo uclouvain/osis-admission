@@ -34,12 +34,12 @@ from admission.ddd.admission.domain.validator.exceptions import (
     QuestionsSpecifiquesChoixFormationNonCompleteesException,
 )
 from admission.ddd.admission.dtos import EtudesSecondairesDTO
-from admission.ddd.admission.enums import ChoixTypeCompteBancaire
 from admission.ddd.admission.formation_continue.commands import VerifierPropositionQuery
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutProposition
 from admission.ddd.admission.formation_continue.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.formation_continue.domain.validator.exceptions import (
     ExperiencesCurriculumNonRenseigneesException,
+    InformationsComplementairesNonRenseigneesException,
 )
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
     EtudesSecondairesNonCompleteesException,
@@ -215,3 +215,15 @@ class TestVerifierPropositionService(TestCase):
             context.exception.exceptions,
             ExperiencesCurriculumNonRenseigneesException,
         )
+
+    def test_should_retourner_erreur_si_inscription_en_tant_que_pas_renseignee(self):
+        with mock.patch.multiple(
+            self.complete_proposition,
+            inscription_a_titre='',
+        ):
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                self.message_bus.invoke(self.verifier_commande)
+            self.assertHasInstance(
+                context.exception.exceptions,
+                InformationsComplementairesNonRenseigneesException,
+            )

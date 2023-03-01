@@ -23,39 +23,27 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import datetime
-from typing import Dict, List, Optional, Union
+from typing import List, Optional
 
 import attr
 
-from admission.ddd.admission.dtos.bourse import BourseDTO
-from admission.ddd.admission.dtos.formation import FormationDTO
-from osis_common.ddd import interface
+from admission.ddd.admission.formation_continue.domain.model.enums import ChoixInscriptionATitre
+from admission.ddd.admission.formation_continue.domain.validator import (
+    ShouldRenseignerInformationsAdditionnelles,
+)
+from base.ddd.utils.business_validator import BusinessValidator, TwoStepsMultipleBusinessExceptionListValidator
 
 
 @attr.dataclass(frozen=True, slots=True)
-class PropositionDTO(interface.DTO):
-    uuid: str
-    formation: FormationDTO
-    reference: str
-    annee_calculee: Optional[int]
-    pot_calcule: Optional[str]
-    date_fin_pot: Optional[datetime.date]
-    creee_le: datetime.datetime
-    modifiee_le: datetime.datetime
-    soumise_le: Optional[datetime.datetime]
-    erreurs: List[Dict[str, str]]
-    statut: str
+class InformationsComplementairesValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+    inscription_a_titre: Optional[ChoixInscriptionATitre] = None
 
-    matricule_candidat: str
-    prenom_candidat: str
-    nom_candidat: str
+    def get_data_contract_validators(self) -> List[BusinessValidator]:
+        return []
 
-    bourse_double_diplome: Optional[BourseDTO]
-    bourse_internationale: Optional[BourseDTO]
-    bourse_erasmus_mundus: Optional[BourseDTO]
-
-    reponses_questions_specifiques: Dict[str, Union[str, List[str]]]
-
-    curriculum: List[str]
-    equivalence_diplome: List[str]
+    def get_invariants_validators(self) -> List[BusinessValidator]:
+        return [
+            ShouldRenseignerInformationsAdditionnelles(
+                inscription_a_titre=self.inscription_a_titre,
+            ),
+        ]
