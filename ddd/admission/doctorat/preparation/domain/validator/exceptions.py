@@ -381,7 +381,9 @@ class AbsenceDeDetteNonCompleteeException(BusinessException):
     status_code = "PROPOSITION-43"
 
     def __init__(self, **kwargs):
-        message = _("Some fields are missing in the 'Absence of debt' block in the 'Finalization > Accounting' tab.")
+        message = _(
+            "Some fields are missing in the 'Absence of debt' block in the 'Additional information > Accounting' tab."
+        )
         super().__init__(message, **kwargs)
 
 
@@ -390,7 +392,8 @@ class ReductionDesDroitsInscriptionNonCompleteeException(BusinessException):
 
     def __init__(self, **kwargs):
         message = _(
-            "Some fields are missing in the 'Reduced registration fees' block in the 'Finalization > Accounting' tab."
+            "Some fields are missing in the 'Reduced registration fees' block in the 'Additional information > "
+            "Accounting' tab."
         )
         super().__init__(message, **kwargs)
 
@@ -399,7 +402,9 @@ class AssimilationNonCompleteeException(BusinessException):
     status_code = "PROPOSITION-45"
 
     def __init__(self, **kwargs):
-        message = _("Some fields are missing in the 'Assimilation' block in the 'Finalization > Accounting' tab.")
+        message = _(
+            "Some fields are missing in the 'Assimilation' block in the 'Additional information > Accounting' tab.",
+        )
         super().__init__(message, **kwargs)
 
 
@@ -407,7 +412,9 @@ class AffiliationsNonCompleteesException(BusinessException):
     status_code = "PROPOSITION-46"
 
     def __init__(self, **kwargs):
-        message = _("Some fields are missing in the 'Affiliations' block in the 'Finalization > Accounting' tab.")
+        message = _(
+            "Some fields are missing in the 'Affiliations' block in the 'Additional information > Accounting' tab."
+        )
         super().__init__(message, **kwargs)
 
 
@@ -416,8 +423,8 @@ class CarteBancaireRemboursementIbanNonCompleteException(BusinessException):
 
     def __init__(self, **kwargs):
         message = _(
-            "Some fields related to the bank account number in IBAN format are missing in the 'Finalization > "
-            "Accounting' tab."
+            "Some fields related to the bank account number in IBAN format are missing in the 'Additional "
+            "information > Accounting' tab."
         )
         super().__init__(message, **kwargs)
 
@@ -426,7 +433,9 @@ class CarteBancaireRemboursementAutreFormatNonCompleteException(BusinessExceptio
     status_code = "PROPOSITION-48"
 
     def __init__(self, **kwargs):
-        message = _("Some fields related to the bank account are missing in the 'Finalization > Accounting' tab.")
+        message = _(
+            "Some fields related to the bank account are missing in the 'Additional information > Accounting' tab."
+        )
         super().__init__(message, **kwargs)
 
 
@@ -444,6 +453,7 @@ class TypeCompteBancaireRemboursementNonCompleteException(BusinessException):
 
     def __init__(self, **kwargs):
         message = _(
-            "You haven't answered to the question about your bank account in the 'Finalization > Accounting' tab."
+            "You haven't answered to the question about your bank account in the 'Additional information > "
+            "Accounting' tab."
         )
         super().__init__(message, **kwargs)
