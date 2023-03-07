@@ -74,7 +74,7 @@
     <td>{{ admission.candidate }}</td>
     <td>{{ admission.training }}</td>
     <td>{{ admission.candidate.country_of_citizenship|default_if_none:'' }}</td>
-    <td>{{ admission.status|enum_display:'ChoixStatutProposition' }}</td>
+    <td>{{ admission.status|enum_display:'ChoixStatutPropositionGenerale' }}</td>
     <td>{{ admission.modified_at|date:'d/m/Y H:i' }}</td>
   </tr>
   {% endfor %}

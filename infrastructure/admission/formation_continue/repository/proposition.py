@@ -39,7 +39,7 @@ from admission.ddd.admission.formation_continue.domain.builder.proposition_ident
 )
 from admission.ddd.admission.formation_continue.domain.model._adresse import Adresse
 from admission.ddd.admission.formation_continue.domain.model.enums import (
-    ChoixStatutProposition,
+    ChoixStatutPropositionContinue,
     ChoixInscriptionATitre,
     ChoixTypeAdresseFacturation,
 )
@@ -47,7 +47,6 @@ from admission.ddd.admission.formation_continue.domain.model.proposition import 
 from admission.ddd.admission.formation_continue.domain.validator.exceptions import PropositionNonTrouveeException
 from admission.ddd.admission.formation_continue.dtos import PropositionDTO
 from admission.ddd.admission.formation_continue.repository.i_proposition import IPropositionRepository
-from admission.ddd.admission.repository.i_proposition import formater_reference
 from admission.infrastructure.admission.repository.proposition import GlobalPropositionRepository
 from base.models.academic_year import AcademicYear
 from base.models.education_group_year import EducationGroupYear
@@ -168,7 +167,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
         return Proposition(
             entity_id=PropositionIdentityBuilder().build_from_uuid(admission.uuid),
             matricule_candidat=admission.candidate.global_id,
-            statut=ChoixStatutProposition[admission.status],
+            statut=ChoixStatutPropositionContinue[admission.status],
             creee_le=admission.created_at,
             modifiee_le=admission.modified_at,
             soumise_le=admission.submitted_at,
@@ -231,13 +230,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 campus_inscription=admission.training.enrollment_campus.name,
                 sigle_entite_gestion=admission.sigle_entite_gestion,  # from annotation
             ),
-            reference=formater_reference(
-                reference=admission.reference,
-                nom_campus_inscription=admission.training.enrollment_campus.name,
-                sigle_entite_gestion=admission.training_management_faculty
-                or admission.sigle_entite_gestion,  # From annotation
-                annee=admission.training.academic_year.year,
-            ),
+            reference=admission.formatted_reference,
             annee_calculee=admission.determined_academic_year and admission.determined_academic_year.year,
             pot_calcule=admission.determined_pool or '',
             matricule_candidat=admission.candidate.global_id,

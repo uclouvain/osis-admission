@@ -39,8 +39,13 @@ from rules.templatetags import rules
 from admission.auth.constants import READ_ACTIONS_BY_TAB, UPDATE_ACTIONS_BY_TAB
 from admission.contrib.models import DoctorateAdmission
 from admission.contrib.models.base import BaseAdmission
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import STATUTS_PROPOSITION_AVANT_INSCRIPTION
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    STATUTS_PROPOSITION_AVANT_INSCRIPTION,
+    ChoixStatutPropositionDoctorale,
+)
 from admission.ddd.admission.enums import TYPES_ITEMS_LECTURE_SEULE, TypeItemFormulaire
+from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
+from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.ddd.admission.repository.i_proposition import formater_reference
 from admission.ddd.parcours_doctoral.formation.domain.model.enums import (
     CategorieActivite,
@@ -49,6 +54,8 @@ from admission.ddd.parcours_doctoral.formation.domain.model.enums import (
 )
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
+    ADMISSION_EDUCATION_TYPE_BY_ADMISSION_CONTEXT,
+    ADMISSION_CONTEXT_BY_OSIS_EDUCATION_TYPE,
 )
 from admission.utils import get_uuid_value, format_academic_year
 from osis_role.templatetags.osis_role import has_perm
@@ -659,3 +666,25 @@ def get_item(dictionary, value):
 def interpolate(string, **kwargs):
     """Interpolate variables inside a string"""
     return string % kwargs
+
+
+@register.simple_tag
+def admission_url(admission_uuid: str, osis_education_type: str):
+    """Get the base URL of a specific admission"""
+    admission_context = ADMISSION_CONTEXT_BY_OSIS_EDUCATION_TYPE.get(osis_education_type)
+    return reverse(f'admission:{admission_context}:debug', kwargs={'uuid': admission_uuid})
+
+
+@register.simple_tag
+def admission_status(status: str, osis_education_type: str):
+    """Get the status of a specific admission"""
+    admission_context = ADMISSION_CONTEXT_BY_OSIS_EDUCATION_TYPE.get(osis_education_type)
+    return (
+        {
+            'general-education': ChoixStatutPropositionGenerale,
+            'continuing-education': ChoixStatutPropositionContinue,
+            'doctorate': ChoixStatutPropositionDoctorale,
+        }
+        .get(admission_context)
+        .get_value(status)
+    )

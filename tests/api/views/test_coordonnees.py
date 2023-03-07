@@ -29,7 +29,7 @@ from django.test import override_settings
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutProposition
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.roles import CddManagerFactory
 from admission.tests.factories.supervision import CaMemberFactory, PromoterFactory
@@ -158,7 +158,7 @@ class CoordonneesTestCase(APITestCase):
         self.assertEqual(contact_address.street, "Rue du pin")
 
     def test_coordonnees_update_candidate_with_other_submitted_proposition(self):
-        candidate = DoctorateAdmissionFactory(status=ChoixStatutProposition.SUBMITTED.name).candidate
+        candidate = DoctorateAdmissionFactory(status=ChoixStatutPropositionDoctorale.CONFIRMEE.name).candidate
         self.client.force_authenticate(candidate.user)
         response = self.client.put(self.agnostic_url, self.updated_data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -167,7 +167,7 @@ class CoordonneesTestCase(APITestCase):
         self.client.force_authenticate(self.candidate_user)
         submitted_admission = DoctorateAdmissionFactory(
             candidate=self.address.person,
-            status=ChoixStatutProposition.SUBMITTED.name,
+            status=ChoixStatutPropositionDoctorale.CONFIRMEE.name,
         )
         response = self.client.put(resolve_url('coordonnees', uuid=submitted_admission.uuid), self.updated_data)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)

@@ -23,20 +23,16 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
-from django.db.models import Value, IntegerField, Count, Q
+from django.db.models import Count, Q
 
 from admission.contrib.models import GeneralEducationAdmission, ContinuingEducationAdmission, DoctorateAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
-    ChoixStatutProposition as ChoixStatutPropositionDoctorale,
+    ChoixStatutPropositionDoctorale,
     STATUTS_PROPOSITION_AVANT_SOUMISSION,
 )
 from admission.ddd.admission.domain.service.i_maximum_propositions import IMaximumPropositionsAutorisees
-from admission.ddd.admission.formation_generale.domain.model.enums import (
-    ChoixStatutProposition as ChoixStatutPropositionGenerale,
-)
-from admission.ddd.admission.formation_continue.domain.model.enums import (
-    ChoixStatutProposition as ChoixStatutPropositionContinue,
-)
+from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
+from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
 from base.models.person import Person
 
 
@@ -45,21 +41,21 @@ class MaximumPropositionsAutorisees(IMaximumPropositionsAutorisees):
     def nb_propositions_envoyees_formation_generale(cls, matricule: str) -> int:
         return GeneralEducationAdmission.objects.filter(
             candidate__global_id=matricule,
-            status=ChoixStatutPropositionGenerale.SUBMITTED.name,
+            status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
         ).count()
 
     @classmethod
     def nb_propositions_envoyees_formation_continue(cls, matricule: str) -> int:
         return ContinuingEducationAdmission.objects.filter(
             candidate__global_id=matricule,
-            status=ChoixStatutPropositionContinue.SUBMITTED.name,
+            status=ChoixStatutPropositionContinue.CONFIRMEE.name,
         ).count()
 
     @classmethod
     def nb_propositions_envoyees_formation_doctorale(cls, matricule: str) -> int:
         return DoctorateAdmission.objects.filter(
             candidate__global_id=matricule,
-            status=ChoixStatutPropositionDoctorale.SUBMITTED.name,
+            status=ChoixStatutPropositionDoctorale.CONFIRMEE.name,
         ).count()
 
     @classmethod
@@ -76,7 +72,7 @@ class MaximumPropositionsAutorisees(IMaximumPropositionsAutorisees):
                     'baseadmissions__generaleducationadmission',
                     filter=Q(
                         baseadmissions__generaleducationadmission__status=(
-                            ChoixStatutPropositionGenerale.IN_PROGRESS.name
+                            ChoixStatutPropositionGenerale.EN_BROUILLON.name
                         ),
                     ),
                 ),
@@ -84,7 +80,7 @@ class MaximumPropositionsAutorisees(IMaximumPropositionsAutorisees):
                     'baseadmissions__continuingeducationadmission',
                     filter=Q(
                         baseadmissions__continuingeducationadmission__status=(
-                            ChoixStatutPropositionContinue.IN_PROGRESS.name
+                            ChoixStatutPropositionContinue.EN_BROUILLON.name
                         ),
                     ),
                 ),

@@ -447,6 +447,9 @@ msgstr "Éléments de formulaire pour admission"
 msgid "Admission type"
 msgstr "Type de l'admission"
 
+msgid "Advanced filters"
+msgstr "Filtres avancés"
+
 msgid "Affiliations"
 msgstr "Affiliations"
 
@@ -525,6 +528,18 @@ msgstr "Frais de dossier"
 msgid "Application for a study allowance from the French Community of Belgium"
 msgstr ""
 "Demande d'allocation d'études auprès de la Communauté française de Belgique"
+
+msgid "Application numero"
+msgstr "Numéro de demande"
+
+msgid "Application status"
+msgstr "État de la demande"
+
+msgid "Application type"
+msgstr "Type de la demande"
+
+msgid "Applications"
+msgstr "Demandes"
 
 msgid "Approbation by pdf"
 msgstr "Approbation par pdf"
@@ -606,6 +621,16 @@ msgstr "Pièces jointes"
 
 msgid "Attachments:"
 msgstr "Annexes :"
+
+#, python-format
+msgid ""
+"Attention, the following entity doesn't exist at UCLouvain: %(entities)s"
+msgid_plural ""
+"Attention, the following entities don't exist at UCLouvain: %(entities)s"
+msgstr[0] ""
+"Attention, l'entité suivante n'existe pas à l'UCLouvain : %(entities)s"
+msgstr[1] ""
+"Attention, les entités suivantes n'existent pas à l'UCLouvain : %(entities)s"
 
 msgid "Attestation of the communication"
 msgstr "Attestation de communication"
@@ -709,9 +734,6 @@ msgstr "Membre du comité d'accompagnement"
 
 msgid "CA members"
 msgstr "Membres du comité d'accompagnement"
-
-msgid "CANCELLED"
-msgstr "Annulé"
 
 msgid "CDD"
 msgstr "CDD"
@@ -921,6 +943,9 @@ msgstr "Peut voir les informations relatives aux études secondaires"
 msgid "Cancel"
 msgstr "Annuler"
 
+msgid "Cancelled application"
+msgstr "Demande annulée"
+
 msgid "Candidate"
 msgstr "Candidat"
 
@@ -1038,6 +1063,9 @@ msgstr "État civil"
 msgid "Close"
 msgstr "Fermer"
 
+msgid "Closed"
+msgstr "Clôturée"
+
 msgid "Comment"
 msgstr "Commentaire"
 
@@ -1071,6 +1099,9 @@ msgstr "Formation complémentaire non activée"
 msgid "Complementary training proposition"
 msgstr "Proposition de formation complémentaire"
 
+msgid "Completed application"
+msgstr "Demande complétée"
+
 msgid "Configuration"
 msgstr "Configuration"
 
@@ -1097,6 +1128,9 @@ msgctxt "tab"
 msgid "Confirmation"
 msgstr "Confirmation"
 
+msgid "Confirmation date"
+msgstr "Date confirmation"
+
 msgid "Confirmation date:"
 msgstr "Date de confirmation :"
 
@@ -1111,6 +1145,9 @@ msgstr "Épreuve de confirmation non trouvée."
 
 msgid "Confirmation success attestation"
 msgstr "Attestation de réussite de l'épreuve de confirmation"
+
+msgid "Confirmed application (by student)"
+msgstr "Demande confirmée (par étudiant)"
 
 msgid "Contact"
 msgstr "Contact"
@@ -1592,9 +1629,6 @@ msgstr "ECTS pour la participation"
 msgid "EFT"
 msgstr "EFT"
 
-msgid "ENROLLED"
-msgstr "Inscrit"
-
 msgid "ERC - European Research Council"
 msgstr "ERC - European Research Council"
 
@@ -1671,11 +1705,29 @@ msgstr "Valeurs en anglais"
 msgid "Enroll in a course"
 msgstr "S'inscrire à un cours"
 
+msgid "Enrollment allowed"
+msgstr "Inscription autorisée"
+
+msgid "Enrollment denied"
+msgstr "Inscription refusée"
+
 msgid "Enrollment in a bachelor with quota"
 msgstr "Inscription à un bachelier contingenté"
 
+msgid "Enrolment applications"
+msgstr "Demandes d'inscription"
+
+msgid "Enrolment campus"
+msgstr "Site d'inscription"
+
+msgid "Enrolment management"
+msgstr "Gestion des inscriptions"
+
 msgid "Enrolments"
 msgstr "Inscriptions"
+
+msgid "Entities"
+msgstr "Entité(s)"
 
 msgid "Entity"
 msgstr "Entité"
@@ -1691,6 +1743,9 @@ msgstr "Bourse Erasmus Mundus"
 
 msgid "Estimated time to complete the doctorate (in months)"
 msgstr "Durée prévue pour la réalisation du doctorat (en mois)"
+
+msgid "European Union country"
+msgstr "Pays de l'Union Européenne"
 
 msgid "Evaluation type"
 msgstr "Système d'évaluation"
@@ -2254,6 +2309,9 @@ msgstr ""
 "uclouvain.be/calendrier-inscriptions</a>, je confirme postuler pour l'année "
 "académique %(year)s."
 
+msgid "In draft"
+msgstr "En brouillon"
+
 msgid "In person"
 msgstr "En présentiel"
 
@@ -2364,6 +2422,9 @@ msgstr "Dernière modification"
 
 msgid "Last name"
 msgstr "Nom"
+
+msgid "Last name / First name / E-mail"
+msgstr "Nom / Prénom / E-mail"
 
 msgid "Last name / First name / E-mail / NOMA"
 msgstr "Nom / Prénom / E-mail / NOMA"
@@ -2650,6 +2711,9 @@ msgstr "Gestion des inscriptions en formation continue"
 msgid "Management of the doctorate enrolments"
 msgstr "Gestion des inscriptions en doctorats"
 
+msgid "Management of the enrolment applications"
+msgstr "Gestion des demandes d'inscription"
+
 msgid "Management of the general enrolments"
 msgstr "Gestion des inscriptions en formation générale"
 
@@ -2743,6 +2807,9 @@ msgstr "Téléphone mobile"
 
 msgid "Modern languages"
 msgstr "Langues modernes"
+
+msgid "Modification author"
+msgstr "Auteur modif."
 
 msgid "Modified"
 msgstr "Modifée"
@@ -2860,11 +2927,11 @@ msgstr "Pas de cotutelle"
 msgid "No defense reason"
 msgstr "Raison de non-soutenance"
 
-msgid "No doctorate enrolment"
-msgstr "Aucune inscription en doctorat n'a été trouvée"
-
 msgid "No doctorate found."
 msgstr "Doctorat non trouvé."
+
+msgid "No enrolment application"
+msgstr "Aucune demande d'inscription n'a été trouvée"
 
 msgid "No general enrolment"
 msgstr "Aucune inscription en formation générale n'a été trouvée"
@@ -2886,6 +2953,9 @@ msgstr "Formation non trouvée."
 
 msgid "No."
 msgstr "Non."
+
+msgid "Noma"
+msgstr "Noma"
 
 msgid "Non-retrievable attachment"
 msgstr "Pièce jointe non récupérable"
@@ -2930,12 +3000,12 @@ msgid "One choice per line, leave the \"Other\" value out"
 msgstr "Un choix, par ligne, ne pas renseigner la valeur \"Autre\""
 
 #, python-format
-msgid "One doctorate enrolment"
+msgid "One enrolment application"
 msgid_plural ""
-"%(start_index)s to %(end_index)s of %(total_counts)s doctorate enrolments"
-msgstr[0] "Une inscription en doctorat"
+"%(start_index)s to %(end_index)s of %(total_counts)s enrolment applications"
+msgstr[0] "Une demande d'inscription"
 msgstr[1] ""
-"%(start_index)s à %(end_index)s sur %(total_counts)s inscriptions en doctorat"
+"%(start_index)s à %(end_index)s sur %(total_counts)s demandes d'inscription"
 
 msgid "Online"
 msgstr "En ligne"
@@ -3059,6 +3129,9 @@ msgstr "Numéro de passeport"
 
 msgid "Past confirmation papers"
 msgstr "Epreuves de confirmation passées"
+
+msgid "Pending validation from management"
+msgstr "En attente de validation de la direction"
 
 msgid "Permanent residence card of a family member of a European Union citizen"
 msgstr ""
@@ -3218,6 +3291,12 @@ msgstr "Privé"
 msgctxt "admission"
 msgid "Private email"
 msgstr "E-mail privé"
+
+msgid "Processing by Fac/CDD"
+msgstr "Traitement en Fac/CDD"
+
+msgid "Processing by SIC"
+msgstr "Traitement en SIC"
 
 msgid "Professional"
 msgstr "Professionnel"
@@ -3643,9 +3722,6 @@ msgstr "Soumise"
 msgid "STATISTICS"
 msgstr "Statistiques"
 
-msgid "SUBMITTED"
-msgstr "Soumis"
-
 msgid "SUBMITTED_CONFIRMATION"
 msgstr "Confirmation soumise"
 
@@ -3991,6 +4067,12 @@ msgstr "L'acronyme de la bourse d'études"
 
 msgid "The activity title"
 msgstr "Le titre de l'activité"
+
+msgid "The candidate has a scholarship"
+msgstr "Le candidat est boursier"
+
+msgid "The candidate has several enrolment applications in progress"
+msgstr "Le candidat a plusieurs demandes d'inscription en cours"
 
 msgid "The certificate of achievement is being generated."
 msgstr "L'attestation de réussite est en cours de génération."
@@ -4352,6 +4434,12 @@ msgstr "Intitulé de la formation"
 msgid "To"
 msgstr "À"
 
+msgid "To be completed (by student) for FAC/CDD"
+msgstr "A compléter (par étudiant) pour Fac/CDD"
+
+msgid "To be completed (by student) for SIC"
+msgstr "A compléter (par étudiant) pour SIC"
+
 msgid ""
 "To be uploaded in your dossier on the doctoral platform as soon as possible "
 "after the confirmation test"
@@ -4383,6 +4471,9 @@ msgstr ""
 
 msgid "Training choice"
 msgstr "Choix de formation"
+
+msgid "Training type"
+msgstr "Type de formation"
 
 msgid "Transcript"
 msgstr "Relevé de notes"
@@ -4448,6 +4539,9 @@ msgstr "UUID"
 msgid "Undecided"
 msgstr "Non décidé"
 
+msgid "Under appeal"
+msgstr "En recours"
+
 msgid "Undertake and declaration"
 msgstr "Engagement et déclaration"
 
@@ -4502,6 +4596,9 @@ msgstr "WBI - Wallonie Bruxelles International"
 
 msgid "WORK_CONTRACT"
 msgstr "Contrat de travail"
+
+msgid "Waiting for signature"
+msgstr "En attente de signature"
 
 msgid ""
 "We congratulate you on your successful completion of the paper and wish you "
@@ -4834,7 +4931,3 @@ msgstr "votre mère"
 
 msgid "your partner"
 msgstr "votre conjoint"
-
-#, python-format
-#~ msgid "I confirm that I am applying for the academic year %(year)s."
-#~ msgstr "Je confirme que je m'inscris bien pour l'année académique %(year)s."

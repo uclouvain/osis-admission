@@ -31,7 +31,7 @@ from rest_framework.settings import api_settings
 
 from admission.contrib.models.base import BaseAdmission, BaseAdmissionQuerySet, admission_directory_path
 from admission.ddd.admission.dtos.conditions import InfosDetermineesDTO
-from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutProposition
+from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from base.models.academic_year import AcademicYear
 from osis_common.ddd.interface import BusinessException
 from osis_document.contrib import FileField
@@ -39,9 +39,9 @@ from osis_document.contrib import FileField
 
 class GeneralEducationAdmission(BaseAdmission):
     status = models.CharField(
-        choices=ChoixStatutProposition.choices(),
+        choices=ChoixStatutPropositionGenerale.choices(),
         max_length=30,
-        default=ChoixStatutProposition.IN_PROGRESS.name,
+        default=ChoixStatutPropositionGenerale.EN_BROUILLON.name,
     )
 
     double_degree_scholarship = models.ForeignKey(
@@ -156,6 +156,7 @@ class GeneralEducationAdmissionManager(models.Manager.from_queryset(BaseAdmissio
             .annotate_campus()
             .annotate_training_management_entity()
             .annotate_training_management_faculty()
+            .annotate_with_reference()
         )
 
 

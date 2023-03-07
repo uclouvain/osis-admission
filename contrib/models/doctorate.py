@@ -42,7 +42,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixDoctoratDejaRealise,
     ChoixLangueRedactionThese,
     ChoixSousDomaineSciences,
-    ChoixStatutProposition,
+    ChoixStatutPropositionDoctorale,
     ChoixTypeAdmission,
     ChoixTypeFinancement,
 )
@@ -262,9 +262,9 @@ class DoctorateAdmission(BaseAdmission):
     )
 
     status = models.CharField(
-        choices=ChoixStatutProposition.choices(),
+        choices=ChoixStatutPropositionDoctorale.choices(),
         max_length=30,
-        default=ChoixStatutProposition.IN_PROGRESS.name,
+        default=ChoixStatutPropositionDoctorale.EN_BROUILLON.name,
     )
     status_cdd = models.CharField(
         choices=ChoixStatutCDD.choices(),
@@ -453,6 +453,7 @@ class PropositionManager(models.Manager.from_queryset(BaseAdmissionQuerySet)):
             .annotate_campus()
             .annotate_pool_end_date()
             .annotate_training_management_entity()
+            .annotate_with_reference(with_management_faculty=False)
         )
 
 
@@ -494,8 +495,8 @@ class DemandeManager(models.Manager):
             )
             .filter(
                 status__in=[
-                    ChoixStatutProposition.SUBMITTED.name,
-                    ChoixStatutProposition.ENROLLED.name,
+                    ChoixStatutPropositionDoctorale.CONFIRMEE.name,
+                    ChoixStatutPropositionDoctorale.INSCRIPTION_AUTORISEE.name,
                 ]
             )
         )
@@ -542,6 +543,7 @@ class DoctorateManager(models.Manager.from_queryset(BaseAdmissionQuerySet)):
                 post_enrolment_status=ChoixStatutDoctorat.ADMISSION_IN_PROGRESS.name,
             )
             .annotate_training_management_entity()
+            .annotate_with_reference(with_management_faculty=False)
         )
 
 

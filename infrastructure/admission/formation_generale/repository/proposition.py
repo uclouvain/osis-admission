@@ -43,16 +43,15 @@ from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_generale.domain.builder.proposition_identity_builder import (
     PropositionIdentityBuilder,
 )
-from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutProposition
+from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition, PropositionIdentity
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import PropositionNonTrouveeException
 from admission.ddd.admission.formation_generale.dtos import PropositionDTO
 from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
-from admission.ddd.admission.repository.i_proposition import formater_reference
 from admission.infrastructure.admission.domain.service.bourse import BourseTranslator
+from admission.infrastructure.admission.formation_generale.repository._comptabilite import get_accounting_from_admission
 from admission.infrastructure.admission.repository.proposition import GlobalPropositionRepository
 from base.models.academic_year import AcademicYear
-from admission.infrastructure.admission.formation_generale.repository._comptabilite import get_accounting_from_admission
 from base.models.education_group_year import EducationGroupYear
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.person import Person
@@ -253,7 +252,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             soumise_le=admission.submitted_at,
             annee_calculee=admission.determined_academic_year and admission.determined_academic_year.year,
             pot_calcule=admission.determined_pool and AcademicCalendarTypes[admission.determined_pool],
-            statut=ChoixStatutProposition[admission.status],
+            statut=ChoixStatutPropositionGenerale[admission.status],
             bourse_internationale_id=BourseIdentity(uuid=str(admission.international_scholarship.uuid))
             if admission.international_scholarship
             else None,
@@ -282,13 +281,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             uuid=admission.uuid,
             creee_le=admission.created_at,
             modifiee_le=admission.modified_at,
-            reference=formater_reference(
-                reference=admission.reference,
-                nom_campus_inscription=admission.training.enrollment_campus.name,
-                sigle_entite_gestion=admission.training_management_faculty
-                or admission.sigle_entite_gestion,  # From annotation
-                annee=admission.training.academic_year.year,
-            ),
+            reference=admission.formatted_reference,
             soumise_le=admission.submitted_at,
             erreurs=admission.detailed_status or [],
             statut=admission.status,

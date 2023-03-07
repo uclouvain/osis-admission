@@ -41,7 +41,7 @@ from admission.ddd.parcours_doctoral.epreuve_confirmation.validators.exceptions 
     EpreuveConfirmationNonTrouveeException,
 )
 from admission.ddd.admission.doctorat.preparation.commands import GetPropositionCommand
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutProposition
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import PropositionNonTrouveeException
 from admission.ddd.admission.doctorat.preparation.dtos import PropositionDTO
 from admission.ddd.admission.doctorat.validation.commands import RecupererDemandeQuery
@@ -112,11 +112,11 @@ class LoadDossierViewMixin(LoginRequiredMixin, PermissionRequiredMixin, ContextM
 
         if self.current_context == CONTEXT_DOCTORATE:
             try:
-                if admission_status == ChoixStatutProposition.ENROLLED.name:
+                if admission_status == ChoixStatutPropositionDoctorale.INSCRIPTION_AUTORISEE.name:
                     context['dossier'] = self.dossier
                     context['doctorate'] = self.doctorate
                 else:
-                    if admission_status == ChoixStatutProposition.SUBMITTED.name:
+                    if admission_status == ChoixStatutPropositionDoctorale.CONFIRMEE.name:
                         context['dossier'] = self.dossier
 
                     context['admission'] = self.proposition

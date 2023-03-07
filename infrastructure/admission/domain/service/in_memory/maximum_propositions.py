@@ -24,16 +24,12 @@
 #
 ##############################################################################
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
-    ChoixStatutProposition as ChoixStatutPropositionDoctorale,
+    ChoixStatutPropositionDoctorale,
     STATUTS_PROPOSITION_AVANT_SOUMISSION,
 )
 from admission.ddd.admission.domain.service.i_maximum_propositions import IMaximumPropositionsAutorisees
-from admission.ddd.admission.formation_generale.domain.model.enums import (
-    ChoixStatutProposition as ChoixStatutPropositionGenerale,
-)
-from admission.ddd.admission.formation_continue.domain.model.enums import (
-    ChoixStatutProposition as ChoixStatutPropositionContinue,
-)
+from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
+from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
 from admission.infrastructure.admission.doctorat.preparation.repository.in_memory.proposition import (
     PropositionInMemoryRepository as PropositionDoctoraleInMemoryRepository,
 )
@@ -50,7 +46,7 @@ class MaximumPropositionsAutoriseesInMemory(IMaximumPropositionsAutorisees):
     def nb_propositions_envoyees_formation_generale(cls, matricule: str) -> int:
         propositions_candidat = PropositionGeneraleInMemoryRepository.search(matricule_candidat=matricule)
         return sum(
-            proposition.statut.name == ChoixStatutPropositionGenerale.SUBMITTED.name
+            proposition.statut.name == ChoixStatutPropositionGenerale.CONFIRMEE.name
             for proposition in propositions_candidat
         )
 
@@ -58,7 +54,7 @@ class MaximumPropositionsAutoriseesInMemory(IMaximumPropositionsAutorisees):
     def nb_propositions_envoyees_formation_continue(cls, matricule: str) -> int:
         propositions_candidat = PropositionContinueInMemoryRepository.search(matricule_candidat=matricule)
         return sum(
-            proposition.statut.name == ChoixStatutPropositionContinue.SUBMITTED.name
+            proposition.statut.name == ChoixStatutPropositionContinue.CONFIRMEE.name
             for proposition in propositions_candidat
         )
 
@@ -66,7 +62,7 @@ class MaximumPropositionsAutoriseesInMemory(IMaximumPropositionsAutorisees):
     def nb_propositions_envoyees_formation_doctorale(cls, matricule: str) -> int:
         propositions_candidat = PropositionDoctoraleInMemoryRepository.search(matricule_candidat=matricule)
         return sum(
-            proposition.statut.name == ChoixStatutPropositionDoctorale.SUBMITTED.name
+            proposition.statut.name == ChoixStatutPropositionDoctorale.CONFIRMEE.name
             for proposition in propositions_candidat
         )
 
@@ -78,11 +74,11 @@ class MaximumPropositionsAutoriseesInMemory(IMaximumPropositionsAutorisees):
 
         return (
             sum(
-                proposition.statut.name == ChoixStatutPropositionGenerale.IN_PROGRESS.name
+                proposition.statut.name == ChoixStatutPropositionGenerale.EN_BROUILLON.name
                 for proposition in propositions_generales_candidat
             )
             + sum(
-                proposition.statut.name == ChoixStatutPropositionContinue.IN_PROGRESS.name
+                proposition.statut.name == ChoixStatutPropositionContinue.EN_BROUILLON.name
                 for proposition in propositions_continues_candidat
             )
             + sum(

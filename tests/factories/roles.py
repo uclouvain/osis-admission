@@ -32,6 +32,7 @@ from admission.auth.roles.candidate import Candidate
 from admission.auth.roles.cdd_manager import CddManager
 from admission.auth.roles.doctorate_reader import DoctorateReader
 from admission.auth.roles.promoter import Promoter
+from admission.auth.roles.sic_manager import SicManager
 
 
 class BaseFactory(factory.DjangoModelFactory):
@@ -76,4 +77,10 @@ class AdreSecretaryRoleFactory(BaseFactory):
 class DoctorateReaderRoleFactory(BaseFactory):
     class Meta:
         model = DoctorateReader
+        django_get_or_create = ('person',)
+
+
+class SicManagerRoleFactory(BaseFactory):
+    class Meta:
+        model = SicManager
         django_get_or_create = ('person',)

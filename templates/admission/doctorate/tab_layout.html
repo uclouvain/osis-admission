@@ -81,7 +81,7 @@
             {% if doctorate %}
               {{ doctorate.statut|enum_display:'ChoixStatutDoctorat' }}
             {% else %}
-              {{ admission.statut|enum_display:'ChoixStatutProposition' }}
+              {{ admission.statut|enum_display:'ChoixStatutPropositionDoctorale' }}
               {% if dossier %}
                 | {% trans "CDD:" %}
                 {{ dossier.statut_cdd|enum_display:'ChoixStatutCDD' }}

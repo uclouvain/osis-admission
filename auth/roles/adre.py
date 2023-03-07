@@ -47,6 +47,7 @@ class AdreSecretary(RoleModel):
             'admission.upload_signed_scholarship': rules.always_allow,
             'admission.check_publication_authorisation': rules.always_allow,
             'admission.view_cdddossiers': rules.always_allow,
+            'admission.view_dossiers': rules.always_allow,
             'admission.view_doctorateadmission_person': rules.always_allow,
             'admission.view_doctorateadmission_coordinates': rules.always_allow,
             'admission.view_doctorateadmission_secondary_studies': rules.always_allow,

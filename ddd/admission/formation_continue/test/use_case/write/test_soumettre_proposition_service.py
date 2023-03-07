@@ -31,7 +31,7 @@ from admission.ddd.admission.formation_continue.commands import SoumettreProposi
 from admission.ddd.admission.formation_continue.domain.builder.proposition_identity_builder import (
     PropositionIdentityBuilder,
 )
-from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutProposition
+from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
 from admission.infrastructure.admission.domain.service.in_memory.elements_confirmation import (
     ElementsConfirmationInMemory,
 )
@@ -65,4 +65,4 @@ class TestSoumettrePropositionContinue(TestCase):
         # Command result
         self.assertEqual(proposition_id.uuid, updated_proposition.entity_id.uuid)
         # Updated proposition
-        self.assertEqual(updated_proposition.statut, ChoixStatutProposition.SUBMITTED)
+        self.assertEqual(updated_proposition.statut, ChoixStatutPropositionContinue.CONFIRMEE)

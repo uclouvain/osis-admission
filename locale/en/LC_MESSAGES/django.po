@@ -388,6 +388,9 @@ msgstr ""
 msgid "Admission type"
 msgstr ""
 
+msgid "Advanced filters"
+msgstr ""
+
 msgid "Affiliations"
 msgstr ""
 
@@ -453,6 +456,18 @@ msgid "Application fees"
 msgstr ""
 
 msgid "Application for a study allowance from the French Community of Belgium"
+msgstr ""
+
+msgid "Application numero"
+msgstr ""
+
+msgid "Application status"
+msgstr ""
+
+msgid "Application type"
+msgstr ""
+
+msgid "Applications"
 msgstr ""
 
 msgid "Approbation by pdf"
@@ -531,6 +546,14 @@ msgstr ""
 
 msgid "Attachments:"
 msgstr ""
+
+#, python-format
+msgid ""
+"Attention, the following entity doesn't exist at UCLouvain: %(entities)s"
+msgid_plural ""
+"Attention, the following entities don't exist at UCLouvain: %(entities)s"
+msgstr[0] ""
+msgstr[1] ""
 
 msgid "Attestation of the communication"
 msgstr ""
@@ -629,9 +652,6 @@ msgid "CA Member"
 msgstr "Supervisory panel member"
 
 msgid "CA members"
-msgstr ""
-
-msgid "CANCELLED"
 msgstr ""
 
 msgid "CDD"
@@ -838,6 +858,9 @@ msgstr ""
 msgid "Cancel"
 msgstr ""
 
+msgid "Cancelled application"
+msgstr ""
+
 msgid "Candidate"
 msgstr ""
 
@@ -949,6 +972,9 @@ msgstr ""
 msgid "Close"
 msgstr ""
 
+msgid "Closed"
+msgstr ""
+
 msgid "Comment"
 msgstr ""
 
@@ -982,6 +1008,9 @@ msgstr ""
 msgid "Complementary training proposition"
 msgstr ""
 
+msgid "Completed application"
+msgstr ""
+
 msgid "Configuration"
 msgstr ""
 
@@ -1008,6 +1037,9 @@ msgctxt "tab"
 msgid "Confirmation"
 msgstr ""
 
+msgid "Confirmation date"
+msgstr ""
+
 msgid "Confirmation date:"
 msgstr ""
 
@@ -1021,6 +1053,9 @@ msgid "Confirmation paper not found."
 msgstr ""
 
 msgid "Confirmation success attestation"
+msgstr ""
+
+msgid "Confirmed application (by student)"
 msgstr ""
 
 msgid "Contact"
@@ -1459,9 +1494,6 @@ msgstr ""
 msgid "EFT"
 msgstr ""
 
-msgid "ENROLLED"
-msgstr "Enrolled"
-
 msgid "ERC - European Research Council"
 msgstr ""
 
@@ -1536,10 +1568,28 @@ msgstr ""
 msgid "Enroll in a course"
 msgstr ""
 
+msgid "Enrollment allowed"
+msgstr ""
+
+msgid "Enrollment denied"
+msgstr ""
+
 msgid "Enrollment in a bachelor with quota"
 msgstr ""
 
+msgid "Enrolment applications"
+msgstr ""
+
+msgid "Enrolment campus"
+msgstr ""
+
+msgid "Enrolment management"
+msgstr ""
+
 msgid "Enrolments"
+msgstr ""
+
+msgid "Entities"
 msgstr ""
 
 msgid "Entity"
@@ -1555,6 +1605,9 @@ msgid "Erasmus mundus scholarship"
 msgstr ""
 
 msgid "Estimated time to complete the doctorate (in months)"
+msgstr ""
+
+msgid "European Union country"
 msgstr ""
 
 msgid "Evaluation type"
@@ -2003,6 +2056,9 @@ msgid ""
 "academic year %(year)s."
 msgstr ""
 
+msgid "In draft"
+msgstr ""
+
 msgid "In person"
 msgstr ""
 
@@ -2110,6 +2166,9 @@ msgid "Last modification"
 msgstr ""
 
 msgid "Last name"
+msgstr ""
+
+msgid "Last name / First name / E-mail"
 msgstr ""
 
 msgid "Last name / First name / E-mail / NOMA"
@@ -2338,6 +2397,9 @@ msgstr ""
 msgid "Management of the doctorate enrolments"
 msgstr ""
 
+msgid "Management of the enrolment applications"
+msgstr ""
+
 msgid "Management of the general enrolments"
 msgstr ""
 
@@ -2419,6 +2481,9 @@ msgid "Mobile phone"
 msgstr ""
 
 msgid "Modern languages"
+msgstr ""
+
+msgid "Modification author"
 msgstr ""
 
 msgid "Modified"
@@ -2532,10 +2597,10 @@ msgstr ""
 msgid "No defense reason"
 msgstr ""
 
-msgid "No doctorate enrolment"
+msgid "No doctorate found."
 msgstr ""
 
-msgid "No doctorate found."
+msgid "No enrolment application"
 msgstr ""
 
 msgid "No general enrolment"
@@ -2557,6 +2622,9 @@ msgid "No training found."
 msgstr ""
 
 msgid "No."
+msgstr ""
+
+msgid "Noma"
 msgstr ""
 
 msgid "Non-retrievable attachment"
@@ -2602,9 +2670,9 @@ msgid "One choice per line, leave the \"Other\" value out"
 msgstr ""
 
 #, python-format
-msgid "One doctorate enrolment"
+msgid "One enrolment application"
 msgid_plural ""
-"%(start_index)s to %(end_index)s of %(total_counts)s doctorate enrolments"
+"%(start_index)s to %(end_index)s of %(total_counts)s enrolment applications"
 msgstr[0] ""
 msgstr[1] ""
 
@@ -2729,6 +2797,9 @@ msgid "Passport number"
 msgstr ""
 
 msgid "Past confirmation papers"
+msgstr ""
+
+msgid "Pending validation from management"
 msgstr ""
 
 msgid "Permanent residence card of a family member of a European Union citizen"
@@ -2868,6 +2939,12 @@ msgstr ""
 
 msgctxt "admission"
 msgid "Private email"
+msgstr ""
+
+msgid "Processing by Fac/CDD"
+msgstr ""
+
+msgid "Processing by SIC"
 msgstr ""
 
 msgid "Professional"
@@ -3271,9 +3348,6 @@ msgstr ""
 msgid "STATISTICS"
 msgstr "Statistics"
 
-msgid "SUBMITTED"
-msgstr "Submitted"
-
 msgid "SUBMITTED_CONFIRMATION"
 msgstr "Submitted confirmation"
 
@@ -3598,6 +3672,12 @@ msgstr ""
 msgid "The activity title"
 msgstr ""
 
+msgid "The candidate has a scholarship"
+msgstr ""
+
+msgid "The candidate has several enrolment applications in progress"
+msgstr ""
+
 msgid "The certificate of achievement is being generated."
 msgstr ""
 
@@ -3910,6 +3990,12 @@ msgstr ""
 msgid "To"
 msgstr ""
 
+msgid "To be completed (by student) for FAC/CDD"
+msgstr ""
+
+msgid "To be completed (by student) for SIC"
+msgstr ""
+
 msgid ""
 "To be uploaded in your dossier on the doctoral platform as soon as possible "
 "after the confirmation test"
@@ -3937,6 +4023,9 @@ msgid "Training certificate, with dates, justifying the specified period"
 msgstr ""
 
 msgid "Training choice"
+msgstr ""
+
+msgid "Training type"
 msgstr ""
 
 msgid "Transcript"
@@ -3999,6 +4088,9 @@ msgstr ""
 msgid "Undecided"
 msgstr ""
 
+msgid "Under appeal"
+msgstr ""
+
 msgid "Undertake and declaration"
 msgstr ""
 
@@ -4051,6 +4143,9 @@ msgstr ""
 
 msgid "WORK_CONTRACT"
 msgstr "Work contract"
+
+msgid "Waiting for signature"
+msgstr "En attente de signature"
 
 msgid ""
 "We congratulate you on your successful completion of the paper and wish you "

@@ -32,7 +32,7 @@ from django.utils.timezone import now
 from admission.ddd.admission.domain.model.formation import FormationIdentity
 from admission.ddd.admission.formation_continue.domain.model._adresse import Adresse
 from admission.ddd.admission.formation_continue.domain.model.enums import (
-    ChoixStatutProposition,
+    ChoixStatutPropositionContinue,
     ChoixInscriptionATitre,
     ChoixTypeAdresseFacturation,
 )
@@ -56,7 +56,7 @@ class Proposition(interface.RootEntity):
     reference: int
     annee_calculee: Optional[int] = None
     pot_calcule: Optional[AcademicCalendarTypes] = None
-    statut: ChoixStatutProposition = ChoixStatutProposition.IN_PROGRESS
+    statut: ChoixStatutPropositionContinue = ChoixStatutPropositionContinue.EN_BROUILLON
 
     creee_le: Optional[datetime.datetime] = None
     modifiee_le: Optional[datetime.datetime] = None
@@ -82,7 +82,7 @@ class Proposition(interface.RootEntity):
         self.reponses_questions_specifiques = reponses_questions_specifiques
 
     def supprimer(self):
-        self.statut = ChoixStatutProposition.CANCELLED
+        self.statut = ChoixStatutPropositionContinue.ANNULEE
 
     def soumettre(
         self,
@@ -90,7 +90,7 @@ class Proposition(interface.RootEntity):
         pool: 'AcademicCalendarTypes',
         elements_confirmation: Dict[str, str],
     ):
-        self.statut = ChoixStatutProposition.SUBMITTED
+        self.statut = ChoixStatutPropositionContinue.CONFIRMEE
         self.annee_calculee = formation_id.annee
         self.formation_id = formation_id
         self.pot_calcule = pool

@@ -29,12 +29,14 @@ from django.contrib.postgres.aggregates import StringAgg
 from django.core.cache import cache
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db import models
-from django.db.models import OuterRef, Subquery, Q
+from django.db.models import OuterRef, Subquery, Q, F, Value, Func, CharField
+from django.db.models.functions import Concat, Left, Coalesce, NullIf, Mod, LPad, Replace
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
+from admission.contrib.models.functions import ToChar
 from admission.ddd.admission.enums.type_demande import TypeDemande
 from base.models.academic_calendar import AcademicCalendar
 from base.models.entity_version import EntityVersion, PEDAGOGICAL_ENTITY_ADDED_EXCEPTIONS
@@ -63,6 +65,94 @@ def admission_directory_path(admission: 'BaseAdmission', filename: str):
         admission.uuid,
         filename,
     )
+
+
+class BaseAdmissionQuerySet(models.QuerySet):
+    def annotate_campus(self):
+        return self.annotate(
+            teaching_campus=Subquery(
+                EducationGroupVersion.objects.filter(offer_id=OuterRef('training_id'))
+                .select_related('root_group__main_teaching_campus')
+                .annotate(
+                    campus_name=StringAgg(
+                        'root_group__main_teaching_campus__name',
+                        delimiter=',',
+                        distinct=True,
+                    )
+                )
+                .values('campus_name')[:1]
+            ),
+        )
+
+    def annotate_pool_end_date(self):
+        today = timezone.now().today()
+        return self.annotate(
+            pool_end_date=models.Subquery(
+                AcademicCalendar.objects.filter(
+                    reference=OuterRef('determined_pool'),
+                    start_date__lte=today,
+                    end_date__gte=today,
+                ).values('end_date')[:1],
+            ),
+        )
+
+    def annotate_training_management_entity(self):
+        return self.annotate(
+            sigle_entite_gestion=models.Subquery(
+                EntityVersion.objects.filter(entity_id=OuterRef("training__management_entity_id"))
+                .order_by('-start_date')
+                .values("acronym")[:1]
+            )
+        )
+
+    def annotate_training_management_faculty(self):
+        today = timezone.now().today()
+        cte = EntityVersion.objects.with_children(entity_id=OuterRef("training__management_entity_id"))
+        faculty = (
+            cte.join(EntityVersion, id=cte.col.id)
+            .with_cte(cte)
+            .filter(Q(entity_type=EntityType.FACULTY.name) | Q(acronym__in=PEDAGOGICAL_ENTITY_ADDED_EXCEPTIONS))
+            .exclude(end_date__lte=today)
+        )
+
+        return self.annotate(training_management_faculty=CTESubquery(faculty.values("acronym")[:1]))
+
+    def annotate_with_reference(self, with_management_faculty=True):
+        """
+        Annotate the admission with its reference.
+        Note that the query must previously be annotate with 'training_management_faculty' and 'sigle_entite_gestion'.
+        """
+        return self.annotate(
+            formatted_reference=Concat(
+                # First letter of the campus name
+                Left('training__enrollment_campus__name', 1),
+                Value('-'),
+                # Management entity acronym
+                Coalesce(
+                    NullIf(F('training_management_faculty'), Value('')),
+                    F('sigle_entite_gestion'),
+                )
+                if with_management_faculty
+                else F('sigle_entite_gestion'),
+                # Academic year
+                Mod('training__academic_year__year', 100),
+                Value('-'),
+                # Formatted numero (e.g. 12 -> 000.012)
+                Replace(ToChar(F('reference'), Value('fm999G000G000')), Value(','), Value('.')),
+                output_field=CharField(),
+            )
+        )
+
+
+class BaseAdmissionManager(models.Manager.from_queryset(BaseAdmissionQuerySet)):
+    def with_training_management_and_reference(self):
+        return (
+            self.get_queryset()
+            .annotate_training_management_entity()
+            .annotate_training_management_faculty()
+            .annotate_with_reference()
+            .annotate_campus()
+        )
 
 
 class BaseAdmission(models.Model):
@@ -219,52 +309,10 @@ def _invalidate_candidate_cache(sender, instance, **kwargs):
         cache.delete_many(keys)
 
 
-class BaseAdmissionQuerySet(models.QuerySet):
-    def annotate_campus(self):
-        return self.annotate(
-            teaching_campus=Subquery(
-                EducationGroupVersion.objects.filter(offer_id=OuterRef('training_id'))
-                .select_related('root_group__main_teaching_campus')
-                .annotate(
-                    campus_name=StringAgg(
-                        'root_group__main_teaching_campus__name',
-                        delimiter=',',
-                        distinct=True,
-                    )
-                )
-                .values('campus_name')[:1]
-            ),
-        )
+class BaseAdmissionProxy(BaseAdmission):
+    """Proxy model of base.BaseAdmission"""
 
-    def annotate_pool_end_date(self):
-        today = timezone.now().today()
-        return self.annotate(
-            pool_end_date=models.Subquery(
-                AcademicCalendar.objects.filter(
-                    reference=OuterRef('determined_pool'),
-                    start_date__lte=today,
-                    end_date__gte=today,
-                ).values('end_date')[:1],
-            ),
-        )
+    objects = BaseAdmissionManager()
 
-    def annotate_training_management_entity(self):
-        return self.annotate(
-            sigle_entite_gestion=models.Subquery(
-                EntityVersion.objects.filter(entity_id=OuterRef("training__management_entity_id"))
-                .order_by('-start_date')
-                .values("acronym")[:1]
-            )
-        )
-
-    def annotate_training_management_faculty(self):
-        today = timezone.now().today()
-        cte = EntityVersion.objects.with_children(entity_id=OuterRef("training__management_entity_id"))
-        faculty = (
-            cte.join(EntityVersion, id=cte.col.id)
-            .with_cte(cte)
-            .filter(Q(entity_type=EntityType.FACULTY.name) | Q(acronym__in=PEDAGOGICAL_ENTITY_ADDED_EXCEPTIONS))
-            .exclude(end_date__lte=today)
-        )
-
-        return self.annotate(training_management_faculty=CTESubquery(faculty.values("acronym")[:1]))
+    class Meta:
+        proxy = True

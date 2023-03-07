@@ -32,7 +32,7 @@ from rest_framework.settings import api_settings
 from admission.contrib.models.base import BaseAdmission, BaseAdmissionQuerySet, admission_directory_path
 from admission.ddd.admission.dtos.conditions import InfosDetermineesDTO
 from admission.ddd.admission.formation_continue.domain.model.enums import (
-    ChoixStatutProposition,
+    ChoixStatutPropositionContinue,
     ChoixInscriptionATitre,
     ChoixTypeAdresseFacturation,
 )
@@ -43,9 +43,9 @@ from osis_document.contrib import FileField
 
 class ContinuingEducationAdmission(BaseAdmission):
     status = models.CharField(
-        choices=ChoixStatutProposition.choices(),
+        choices=ChoixStatutPropositionContinue.choices(),
         max_length=30,
-        default=ChoixStatutProposition.IN_PROGRESS.name,
+        default=ChoixStatutPropositionContinue.EN_BROUILLON.name,
     )
 
     diploma_equivalence = FileField(
@@ -209,6 +209,7 @@ class ContinuingEducationAdmissionManager(models.Manager.from_queryset(BaseAdmis
             .annotate_campus()
             .annotate_training_management_entity()
             .annotate_training_management_faculty()
+            .annotate_with_reference()
         )
 
 

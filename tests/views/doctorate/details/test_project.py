@@ -33,7 +33,7 @@ from admission.contrib.models import DoctorateAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE, ENTITY_CDSS
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     BourseRecherche,
-    ChoixStatutProposition,
+    ChoixStatutPropositionDoctorale,
     ChoixTypeAdmission,
     ChoixTypeContratTravail,
     ChoixTypeFinancement,
@@ -88,7 +88,7 @@ class DoctorateAdmissionProjectDetailViewTestCase(TestCase):
             DoctorateAdmissionFactory(
                 training__management_entity=first_doctoral_commission,
                 training__academic_year=academic_years[0],
-                status=ChoixStatutProposition.SUBMITTED.name,
+                status=ChoixStatutPropositionDoctorale.CONFIRMEE.name,
                 candidate=candidate.person,
                 financing_type=ChoixTypeFinancement.SEARCH_SCHOLARSHIP.name,
                 other_international_scholarship=BourseRecherche.ARC.name,

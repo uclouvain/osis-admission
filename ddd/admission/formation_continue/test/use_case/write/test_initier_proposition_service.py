@@ -28,7 +28,7 @@ from django.test import SimpleTestCase
 
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import MaximumPropositionsAtteintException
 from admission.ddd.admission.formation_continue.commands import InitierPropositionCommand
-from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutProposition
+from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
 from admission.ddd.admission.formation_continue.domain.validator.exceptions import FormationNonTrouveeException
 from admission.infrastructure.admission.formation_continue.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
@@ -52,7 +52,7 @@ class TestInitierPropositionService(SimpleTestCase):
         proposition_id = self.message_bus.invoke(self.cmd)
         proposition = self.proposition_repository.get(proposition_id)
         self.assertEqual(proposition.entity_id, proposition_id)
-        self.assertEqual(proposition.statut, ChoixStatutProposition.IN_PROGRESS)
+        self.assertEqual(proposition.statut, ChoixStatutPropositionContinue.EN_BROUILLON)
         self.assertEqual(proposition.formation_id.sigle, self.cmd.sigle_formation)
         self.assertEqual(proposition.formation_id.annee, self.cmd.annee_formation)
         self.assertEqual(proposition.matricule_candidat, self.cmd.matricule_candidat)
