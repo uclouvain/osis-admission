@@ -1,4 +1,4 @@
 python-dateutil==2.8.2
 freezegun==1.2.2
 img2pdf==0.4.4
-pikepdf==6.2.9
+pikepdf==5.1.3
