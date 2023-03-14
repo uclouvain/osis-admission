@@ -2417,6 +2417,9 @@ msgstr "Langue"
 msgid "Languages knowledge"
 msgstr "Connaissance des langues"
 
+msgid "Last 24 hours views:"
+msgstr "Vues des 24 dernières heures :"
+
 msgid "Last modification"
 msgstr "Dernière modification"
 
@@ -3137,6 +3140,9 @@ msgid "Permanent residence card of a family member of a European Union citizen"
 msgstr ""
 "Carte de séjour permanent de membre de la famille d’un citoyen de l'Union "
 "européenne"
+
+msgid "Person"
+msgstr "Personne"
 
 msgid "Personal data"
 msgstr "Données personnelles"
@@ -4590,6 +4596,12 @@ msgstr "Validé"
 
 msgid "Values"
 msgstr "Valeurs"
+
+msgid "Viewed at"
+msgstr "Vue le"
+
+msgid "Viewed by"
+msgstr "Vue par"
 
 msgid "WBI - Wallonie Bruxelles International"
 msgstr "WBI - Wallonie Bruxelles International"

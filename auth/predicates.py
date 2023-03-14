@@ -136,7 +136,10 @@ def is_admission_reference_promoter(self, user: User, obj: DoctorateAdmission):
 @predicate_failed_msg(message=_("You must be a member of the doctoral commission to access this admission"))
 @predicate_cache(cache_key_fn=lambda obj: getattr(obj, 'pk', None))
 def is_part_of_doctoral_commission(self, user: User, obj: DoctorateAdmission):
-    return obj.doctorate.management_entity_id in self.context['role_qs'].get_entities_ids()
+    return (
+        isinstance(obj, DoctorateAdmission)
+        and obj.doctorate.management_entity_id in self.context['role_qs'].get_entities_ids()
+    )
 
 
 @predicate(bind=True)

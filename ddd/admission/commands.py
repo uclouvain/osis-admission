@@ -45,3 +45,4 @@ class ListerToutesDemandesQuery(SortedQueryRequest):
     bourse_internationale: Optional[str] = ''
     bourse_erasmus_mundus: Optional[str] = ''
     bourse_double_diplomation: Optional[str] = ''
+    demandeur: Optional[str] = ''

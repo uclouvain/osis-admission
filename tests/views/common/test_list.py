@@ -32,9 +32,10 @@ from django.test import RequestFactory, TestCase
 from django.urls import reverse
 
 from admission.contrib.models import DoctorateAdmission, GeneralEducationAdmission, ContinuingEducationAdmission
-from admission.ddd.admission.dtos.liste import DemandeRechercheDTO
+from admission.ddd.admission.dtos.liste import DemandeRechercheDTO, VisualiseurAdmissionDTO
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.tests import QueriesAssertionsMixin
+from admission.tests.factories.admission_viewer import AdmissionViewerFactory
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.roles import SicManagerRoleFactory
 from base.models.enums.entity_type import EntityType
@@ -62,6 +63,7 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
         )
 
         cls.sic_manager_user = SicManagerRoleFactory().person.user
+        cls.other_sic_manager = SicManagerRoleFactory().person
 
         # Academic years
         AcademicYearFactory.produce(base_year=2023, number_past=2, number_future=2)
@@ -90,6 +92,12 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
                 training__management_entity=cls.first_entity,
             ),
         ]
+
+        admission_viewers = [
+            AdmissionViewerFactory(person=cls.sic_manager_user.person, admission=cls.admissions[0]),
+            AdmissionViewerFactory(person=cls.other_sic_manager, admission=cls.admissions[0]),
+        ]
+
         cls.lite_reference = '{:07,}'.format(cls.admissions[0].reference).replace(',', '.')
 
         cls.student = StudentFactory(
@@ -131,7 +139,13 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
                 derniere_modification_le=cls.admissions[0].modified_at,
                 derniere_modification_par='',
                 derniere_modification_par_candidat=False,
-                derniere_vue_par='',
+                dernieres_vues_par=[
+                    VisualiseurAdmissionDTO(
+                        nom=admission_viewers[1].person.last_name,
+                        prenom=admission_viewers[1].person.first_name,
+                        date=admission_viewers[1].viewed_at,
+                    ),
+                ],
                 date_confirmation=cls.admissions[0].submitted_at,
             ),
         ]
