@@ -245,7 +245,7 @@ class SubmitDoctoralPropositionView(
     def get(self, request, *args, **kwargs):
         """Check the proposition to be OK with all validators."""
         admission = self.get_permission_object()
-        admission.update_detailed_status()
+        admission.update_detailed_status(request.user.person)
 
         data = {'errors': admission.detailed_status}
         self.add_access_conditions_url(data)
@@ -298,7 +298,7 @@ class SubmitGeneralEducationPropositionView(
     def get(self, request, *args, **kwargs):
         """Check the proposition to be OK with all validators."""
         admission = self.get_permission_object()
-        admission.update_detailed_status()
+        admission.update_detailed_status(request.user.person)
 
         data = {'errors': admission.detailed_status}
         error_codes = [e['status_code'] for e in data['errors']]
@@ -367,7 +367,7 @@ class SubmitContinuingEducationPropositionView(
     def get(self, request, *args, **kwargs):
         """Check the proposition to be OK with all validators."""
         admission = self.get_permission_object()
-        admission.update_detailed_status()
+        admission.update_detailed_status(request.user.person)
 
         data = {'errors': admission.detailed_status}
         self.add_access_conditions_url(data)

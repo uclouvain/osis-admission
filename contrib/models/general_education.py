@@ -33,6 +33,7 @@ from admission.contrib.models.base import BaseAdmission, BaseAdmissionQuerySet, 
 from admission.ddd.admission.dtos.conditions import InfosDetermineesDTO
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from base.models.academic_year import AcademicYear
+from base.models.person import Person
 from osis_common.ddd.interface import BusinessException
 from osis_document.contrib import FileField
 
@@ -110,7 +111,7 @@ class GeneralEducationAdmission(BaseAdmission):
         ordering = ('-created_at',)
         permissions = []
 
-    def update_detailed_status(self):
+    def update_detailed_status(self, author: 'Person'):
         """Gather exceptions from verification and update determined pool and academic year"""
         from admission.ddd.admission.formation_generale.commands import (
             VerifierPropositionQuery,
@@ -121,12 +122,21 @@ class GeneralEducationAdmission(BaseAdmission):
 
         error_key = api_settings.NON_FIELD_ERRORS_KEY
         self.detailed_status = gather_business_exceptions(VerifierPropositionQuery(self.uuid)).get(error_key, [])
+        self.last_update_author = author
 
         with suppress(BusinessException):
             dto: 'InfosDetermineesDTO' = message_bus_instance.invoke(DeterminerAnneeAcademiqueEtPotQuery(self.uuid))
             self.determined_academic_year = AcademicYear.objects.get(year=dto.annee)
             self.determined_pool = dto.pool.name
-        self.save(update_fields=['detailed_status', 'determined_academic_year', 'determined_pool'])
+
+        self.save(
+            update_fields=[
+                'detailed_status',
+                'determined_academic_year',
+                'determined_pool',
+                'last_update_author',
+            ],
+        )
 
 
 class GeneralEducationAdmissionManager(models.Manager.from_queryset(BaseAdmissionQuerySet)):

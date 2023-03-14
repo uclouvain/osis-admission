@@ -272,6 +272,15 @@ class BaseAdmission(models.Model):
         related_name='viewed_admissions',
     )
 
+    last_update_author = models.ForeignKey(
+        to="base.Person",
+        verbose_name=_("Last update author"),
+        on_delete=models.SET_NULL,
+        related_name='+',
+        null=True,
+        blank=True,
+    )
+
     class Meta:
         constraints = [
             models.CheckConstraint(

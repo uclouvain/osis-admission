@@ -54,7 +54,7 @@ class BasePersonViewSet(
     def put(self, request, *args, **kwargs):
         response = self.update(request, *args, **kwargs)
         if self.get_permission_object():
-            self.get_permission_object().update_detailed_status()
+            self.get_permission_object().update_detailed_status(request.user.person)
         return response
 
 

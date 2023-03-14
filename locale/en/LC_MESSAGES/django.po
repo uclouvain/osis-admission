@@ -2186,6 +2186,9 @@ msgstr ""
 msgid "Last registration year"
 msgstr ""
 
+msgid "Last update author"
+msgstr ""
+
 msgid "Latin"
 msgstr ""
 
@@ -4387,6 +4390,9 @@ msgid "by the UCLouvain Registration Service"
 msgstr ""
 
 msgid "by the University Institute of Continuing Education"
+msgstr ""
+
+msgid "candidate"
 msgstr ""
 
 msgid "created"

@@ -93,6 +93,9 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
             ),
         ]
 
+        cls.admissions[0].last_update_author = cls.admissions[0].candidate
+        cls.admissions[0].save()
+
         admission_viewers = [
             AdmissionViewerFactory(person=cls.sic_manager_user.person, admission=cls.admissions[0]),
             AdmissionViewerFactory(person=cls.other_sic_manager, admission=cls.admissions[0]),
@@ -137,8 +140,8 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
                 etat_demande=cls.admissions[0].status,
                 type_demande=cls.admissions[0].type_demande,
                 derniere_modification_le=cls.admissions[0].modified_at,
-                derniere_modification_par='',
-                derniere_modification_par_candidat=False,
+                derniere_modification_par=cls.admissions[0].last_update_author.user.username,
+                derniere_modification_par_candidat=True,
                 dernieres_vues_par=[
                     VisualiseurAdmissionDTO(
                         nom=admission_viewers[1].person.last_name,

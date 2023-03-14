@@ -112,5 +112,5 @@ class LanguagesKnowledgeViewSet(
             many=True,
         )
         if self.get_permission_object():
-            self.get_permission_object().update_detailed_status()
+            self.get_permission_object().update_detailed_status(person)
         return Response(output_serializer.data, status=status.HTTP_201_CREATED)
