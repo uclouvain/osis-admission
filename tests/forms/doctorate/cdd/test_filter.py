@@ -228,7 +228,7 @@ class FilterTestCase(TestCase):
         form = CddFilterForm(
             user=self.user_with_one_cdd,
             data={
-                'page_size': PAGINATOR_SIZE_LIST[0],
+                'taille_page': PAGINATOR_SIZE_LIST[0],
                 'cdds': [ENTITY_CDE],
                 'numero': '000.000',
             },
@@ -238,7 +238,7 @@ class FilterTestCase(TestCase):
     def test_form_validation_with_invalid_data(self):
         # Check form
         default_params = {
-            'page_size': PAGINATOR_SIZE_LIST[0],
+            'taille_page': PAGINATOR_SIZE_LIST[0],
             'cdds': [ENTITY_CDE],
         }
         form = CddFilterForm(
@@ -255,7 +255,7 @@ class FilterTestCase(TestCase):
         form = CddFilterForm(
             user=self.user_with_one_cdd,
             data={
-                'page_size': PAGINATOR_SIZE_LIST[0],
+                'taille_page': PAGINATOR_SIZE_LIST[0],
                 'cdds': [ENTITY_CDE],
                 'numero': '000.000',
                 'nationalite': self.country.iso_code,
@@ -279,7 +279,7 @@ class FilterTestCase(TestCase):
         form = CddFilterForm(
             user=self.user_with_one_cdd,
             data={
-                'page_size': PAGINATOR_SIZE_LIST[0],
+                'taille_page': PAGINATOR_SIZE_LIST[0],
                 'cdds': [ENTITY_CDE],
                 'numero': '000.000',
                 'nationalite': 'FR',
@@ -297,7 +297,7 @@ class FilterTestCase(TestCase):
         form = CddFilterForm(
             user=self.user_with_one_cdd,
             data={
-                'page_size': PAGINATOR_SIZE_LIST[0],
+                'taille_page': PAGINATOR_SIZE_LIST[0],
                 'cdds': [ENTITY_CDE],
                 'numero': '000.001',
             },

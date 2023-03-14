@@ -167,7 +167,7 @@ class ContinuingEducationAdmission(BaseAdmission):
         ordering = ('-created_at',)
         permissions = []
 
-    def update_detailed_status(self, author: 'Person'):
+    def update_detailed_status(self, author: 'Person' = None):
         from admission.ddd.admission.formation_continue.commands import (
             VerifierPropositionQuery,
             DeterminerAnneeAcademiqueEtPotQuery,
@@ -179,19 +179,22 @@ class ContinuingEducationAdmission(BaseAdmission):
         self.detailed_status = gather_business_exceptions(VerifierPropositionQuery(self.uuid)).get(error_key, [])
         self.last_update_author = author
 
+        update_fields = [
+            'detailed_status',
+            'determined_academic_year',
+            'determined_pool',
+        ]
+
+        if author:
+            self.last_update_author = author
+            update_fields.append('last_update_author')
+
         with suppress(BusinessException):
             dto: 'InfosDetermineesDTO' = message_bus_instance.invoke(DeterminerAnneeAcademiqueEtPotQuery(self.uuid))
             self.determined_academic_year = AcademicYear.objects.get(year=dto.annee)
             self.determined_pool = dto.pool.name
 
-        self.save(
-            update_fields=[
-                'detailed_status',
-                'determined_academic_year',
-                'determined_pool',
-                'last_update_author',
-            ],
-        )
+        self.save(update_fields=update_fields)
 
 
 class ContinuingEducationAdmissionManager(models.Manager.from_queryset(BaseAdmissionQuerySet)):

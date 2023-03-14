@@ -29,11 +29,11 @@ from dal import autocomplete
 from django import forms
 from django.utils.translation import gettext_lazy as _, ngettext
 
+from admission.constants import DEFAULT_PAGINATOR_SIZE
 from admission.contrib.models import Scholarship
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.enums import TypeBourse
+from admission.ddd.admission.enums.statut import CHOIX_STATUT_TOUTE_PROPOSITION
 from admission.ddd.admission.enums.type_demande import TypeDemande
-from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.forms import ALL_EMPTY_CHOICE, get_academic_year_choices
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
@@ -41,7 +41,6 @@ from admission.infrastructure.admission.domain.service.annee_inscription_formati
 from base.forms.widgets import Select2MultipleCheckboxesWidget
 from base.models.entity_version import EntityVersion
 from base.models.enums.education_group_types import TrainingType
-from base.models.enums.organization_type import MAIN
 from base.templatetags.pagination import PAGINATOR_SIZE_LIST
 from education_group.forms.fields import MainCampusChoiceField
 
@@ -53,14 +52,6 @@ class AllAdmissionsFilterForm(forms.Form):
     INITIAL_TRAINING_TYPES = list(
         AnneeInscriptionFormationTranslator.GENERAL_EDUCATION_TYPES
         | AnneeInscriptionFormationTranslator.DOCTORATE_EDUCATION_TYPES
-    )
-    STATUSES = [(status.name, status.value) for status in ChoixStatutPropositionGenerale]
-    STATUSES.insert(
-        1,
-        (
-            ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE.name,
-            ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE.value,
-        ),
     )
 
     annee_academique = forms.ChoiceField(
@@ -101,7 +92,7 @@ class AllAdmissionsFilterForm(forms.Form):
     )
 
     etat = forms.ChoiceField(
-        choices=[ALL_EMPTY_CHOICE[0]] + STATUSES,
+        choices=[ALL_EMPTY_CHOICE[0]] + CHOIX_STATUT_TOUTE_PROPOSITION,
         label=_('Application status'),
         required=False,
     )
@@ -170,12 +161,21 @@ class AllAdmissionsFilterForm(forms.Form):
         to_field_name='uuid',
     )
 
-    page_size = forms.ChoiceField(
+    taille_page = forms.TypedChoiceField(
         label=_("Page size"),
         choices=((size, size) for size in PAGINATOR_SIZE_LIST),
         widget=forms.Select(attrs={'form': 'search_form', 'autocomplete': 'off'}),
         help_text=_("items per page"),
         required=False,
+        initial=DEFAULT_PAGINATOR_SIZE,
+        coerce=int,
+    )
+
+    page = forms.IntegerField(
+        label=_("Page"),
+        widget=forms.HiddenInput(),
+        required=False,
+        initial=1,
     )
 
     def __init__(self, user, load_labels=False, *args, **kwargs):
@@ -202,6 +202,12 @@ class AllAdmissionsFilterForm(forms.Form):
     def clean_bourse_double_diplomation(self):
         bourse_double_diplomation = self.cleaned_data.get('bourse_double_diplomation')
         return bourse_double_diplomation.uuid if bourse_double_diplomation else ''
+
+    def clean_taille_page(self):
+        return self.cleaned_data.get('taille_page') or self.fields['taille_page'].initial
+
+    def clean_page(self):
+        return self.cleaned_data.get('page') or self.fields['page'].initial
 
     def clean_entites(self):
         entities = self.cleaned_data.get('entites')

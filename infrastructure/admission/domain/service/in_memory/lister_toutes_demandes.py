@@ -39,6 +39,7 @@ from admission.infrastructure.admission.formation_continue.repository.in_memory.
 from admission.infrastructure.admission.formation_generale.repository.in_memory.proposition import (
     PropositionInMemoryRepository as PropositionGeneraleInMemoryRepository,
 )
+from admission.views import PaginatedList
 
 
 class ListerToutesDemandesInMemory(IListerToutesDemandes):
@@ -59,27 +60,26 @@ class ListerToutesDemandesInMemory(IListerToutesDemandes):
         bourse_erasmus_mundus: Optional[str] = '',
         bourse_double_diplomation: Optional[str] = '',
         demandeur: Optional[str] = '',
-    ) -> List[DemandeRechercheDTO]:
-        return (
-            [
-                cls._load_from_general_proposition(proposition)
-                for proposition in PropositionGeneraleInMemoryRepository.search_dto(
-                    matricule_candidat=matricule_candidat
-                )
-            ]
-            + [
-                cls._load_from_continuing_proposition(proposition)
-                for proposition in PropositionContinueInMemoryRepository.search_dto(
-                    matricule_candidat=matricule_candidat
-                )
-            ]
-            + [
-                cls._load_from_doctorate_proposition(proposition)
-                for proposition in PropositionDoctoraleInMemoryRepository.search_dto(
-                    matricule_candidat=matricule_candidat
-                )
-            ]
-        )
+        tri_inverse: bool = False,
+        champ_tri: Optional[str] = None,
+        page: Optional[int] = None,
+        taille_page: Optional[int] = None,
+    ) -> PaginatedList[DemandeRechercheDTO]:
+
+        result = PaginatedList()
+
+        for proposition in PropositionGeneraleInMemoryRepository.search_dto(matricule_candidat=matricule_candidat):
+            result.append(cls._load_from_general_proposition(proposition))
+
+        for proposition in PropositionContinueInMemoryRepository.search_dto(matricule_candidat=matricule_candidat):
+            result.append(cls._load_from_continuing_proposition(proposition))
+
+        for proposition in PropositionDoctoraleInMemoryRepository.search_dto(matricule_candidat=matricule_candidat):
+            result.append(cls._load_from_doctorate_proposition(proposition))
+
+        result.total_count = len(result)
+
+        return result
 
     @classmethod
     def _load_from_general_proposition(cls, proposition: PropositionGeneraleDTO):
@@ -109,7 +109,7 @@ class ListerToutesDemandesInMemory(IListerToutesDemandes):
             derniere_modification_le=proposition.modifiee_le,
             derniere_modification_par='',
             derniere_modification_par_candidat=False,
-            derniere_vue_par='',
+            dernieres_vues_par=[],
             date_confirmation=proposition.soumise_le,
         )
 
@@ -135,7 +135,7 @@ class ListerToutesDemandesInMemory(IListerToutesDemandes):
             derniere_modification_le=proposition.modifiee_le,
             derniere_modification_par='',
             derniere_modification_par_candidat=False,
-            derniere_vue_par='',
+            dernieres_vues_par=[],
             date_confirmation=proposition.soumise_le,
         )
 
@@ -161,6 +161,6 @@ class ListerToutesDemandesInMemory(IListerToutesDemandes):
             derniere_modification_le=proposition.modifiee_le,
             derniere_modification_par='',
             derniere_modification_par_candidat=False,
-            derniere_vue_par='',
+            dernieres_vues_par=[],
             date_confirmation=proposition.soumise_le,
         )

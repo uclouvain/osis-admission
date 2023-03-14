@@ -76,6 +76,7 @@ class GeneralEducationAdmissionFactory(factory.DjangoModelFactory):
     erasmus_mundus_scholarship = factory.SubFactory(ErasmusMundusScholarshipFactory)
     double_degree_scholarship = factory.SubFactory(DoubleDegreeScholarshipFactory)
     international_scholarship = factory.SubFactory(InternationalScholarshipFactory)
+    last_update_author = factory.SubFactory(PersonFactory)
 
     @factory.post_generation
     def create_candidate_role(self, create, extracted, **kwargs):

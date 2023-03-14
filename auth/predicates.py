@@ -26,7 +26,6 @@
 from django.contrib.auth.models import User
 from django.utils.translation import gettext_lazy as _
 
-from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from osis_signature.enums import SignatureState
 from rules import predicate
 from waffle import switch_is_active

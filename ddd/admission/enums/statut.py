@@ -24,34 +24,14 @@
 #
 # ##############################################################################
 
-from typing import List
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
+from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 
-from admission.ddd.admission.commands import ListerToutesDemandesQuery
-from admission.ddd.admission.domain.service.i_filtrer_toutes_demandes import IListerToutesDemandes
-from admission.ddd.admission.dtos.liste import DemandeRechercheDTO
-
-
-def lister_demandes(
-    cmd: 'ListerToutesDemandesQuery',
-    filtrer_toutes_demandes_service: 'IListerToutesDemandes',
-) -> 'List[DemandeRechercheDTO]':
-    return filtrer_toutes_demandes_service.filtrer(
-        annee_academique=cmd.annee_academique,
-        numero=cmd.numero,
-        noma=cmd.noma,
-        matricule_candidat=cmd.matricule_candidat,
-        etat=cmd.etat,
-        type=cmd.type,
-        site_inscription=cmd.site_inscription,
-        entites=cmd.entites,
-        types_formation=cmd.types_formation,
-        formation=cmd.formation,
-        bourse_internationale=cmd.bourse_internationale,
-        bourse_erasmus_mundus=cmd.bourse_erasmus_mundus,
-        bourse_double_diplomation=cmd.bourse_double_diplomation,
-        demandeur=cmd.demandeur,
-        tri_inverse=cmd.tri_inverse,
-        champ_tri=cmd.champ_tri,
-        page=cmd.page,
-        taille_page=cmd.taille_page,
-    )
+CHOIX_STATUT_TOUTE_PROPOSITION = [(status.name, status.value) for status in ChoixStatutPropositionGenerale]
+CHOIX_STATUT_TOUTE_PROPOSITION.insert(
+    1,
+    (
+        ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE.name,
+        ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE.value,
+    ),
+)

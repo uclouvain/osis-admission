@@ -188,7 +188,7 @@ class BaseFilterForm(forms.Form):
         label=_("Scholarship grant"),
         required=False,
     )
-    page_size = forms.ChoiceField(
+    taille_page = forms.ChoiceField(
         label=_("Page size"),
         choices=((size, size) for size in PAGINATOR_SIZE_LIST),
         widget=forms.Select(attrs={'form': 'search_form', 'autocomplete': 'off'}),
