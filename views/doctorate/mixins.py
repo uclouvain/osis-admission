@@ -145,7 +145,7 @@ class LoadDossierViewMixin(LoginRequiredMixin, PermissionRequiredMixin, ContextM
         if (
             request.method == 'GET'
             and self.admission_uuid
-            and request.user.person
+            and getattr(request.user, 'person', None)
             and SicManager.belong_to(request.user.person)
         ):
             AdmissionViewer.add_viewer(person=request.user.person, admission=self.admission)

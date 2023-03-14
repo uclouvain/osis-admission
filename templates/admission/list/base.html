@@ -145,14 +145,14 @@
     }
 
     /* Customize input and buttons above the list */
-    .list-actions {
+    #list-actions {
       display: flex;
       justify-content: right;
       align-items: center;
       gap: 10px;
     }
 
-    .list-actions > * {
+    #list-actions > * {
       width: fit-content;
     }
 
@@ -188,25 +188,29 @@
   <script src="{% static 'admission/admission.js' %}"></script>
 
   <script>
-      // Prevent to save the DOM in cache when using htmx requests
+      {# Prevent to save the DOM in cache when using htmx requests #}
       htmx.config.refreshOnHistoryMiss = true;
       htmx.config.historyCacheSize = 0;
 
       $(document).ready(function () {
-          // Clear inputs when the form is reset
+          {# Clear inputs when the form is reset #}
+          const formFields = $('#admission-search :input');
           $('#search_form').on('reset', function(evt) {
-              $('#search_form :input:not([type=hidden])').val(null).trigger('change');
+              $.each(formFields, function(index, field) {
+                  $(this).val({{ default_form_values|safe }}[field.id] || null).change();
+              });
               evt.preventDefault();
               $('#search_form button[type=submit]').click();
               return false;
           });
 
-          // Display / hide the form errors
+          {# Display / hide the form errors #}
           $('#admission-search').on('htmx:beforeSend', function(evt) {
               $('#form_errors').html('');
           });
 
-          $(document).on('change', '#id_page_size', function(evt) {
+          {# Select the pagination #}
+          $(document).on('change', '#id_taille_page', function(evt) {
               $('#search_form button[type=submit]').click();
           })
       });

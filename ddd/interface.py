@@ -34,3 +34,5 @@ from osis_common.ddd.interface import QueryRequest
 class SortedQueryRequest(QueryRequest):
     tri_inverse: bool = False
     champ_tri: Optional[str] = None
+    page: Optional[int] = None
+    taille_page: Optional[int] = None

@@ -70,7 +70,7 @@ class ApprovePropositionMixin:
                 **serializer.data,
             ),
         )
-        self.get_permission_object().update_detailed_status(request.user.person)
+        self.get_permission_object().update_detailed_status(getattr(request.user, 'person', None))
 
         serializer = serializers.PropositionIdentityDTOSerializer(instance=proposition_id)
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -86,7 +86,7 @@ class ApprovePropositionMixin:
                 **serializer.data,
             ),
         )
-        self.get_permission_object().update_detailed_status(request.user.person)
+        self.get_permission_object().update_detailed_status(getattr(request.user, 'person', None))
 
         serializer = serializers.PropositionIdentityDTOSerializer(instance=proposition_id)
         return Response(serializer.data, status=status.HTTP_200_OK)
