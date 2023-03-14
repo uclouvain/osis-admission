@@ -51,6 +51,7 @@ from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctor
 from base.models.academic_year import AcademicYear
 from base.models.entity_version import EntityVersion
 from base.models.enums.entity_type import SECTOR
+from base.models.person import Person
 from base.utils.cte import CTESubquery
 from osis_common.ddd.interface import BusinessException
 from osis_document.contrib import FileField
@@ -401,7 +402,7 @@ class DoctorateAdmission(BaseAdmission):
         super().save(*args, **kwargs)
         cache.delete('admission_permission_{}'.format(self.uuid))
 
-    def update_detailed_status(self):
+    def update_detailed_status(self, author: 'Person'):
         from admission.ddd.admission.doctorat.preparation.commands import (
             VerifierProjetQuery,
             VerifierPropositionQuery,
@@ -414,12 +415,21 @@ class DoctorateAdmission(BaseAdmission):
         project_errors = gather_business_exceptions(VerifierProjetQuery(self.uuid)).get(error_key, [])
         submission_errors = gather_business_exceptions(VerifierPropositionQuery(self.uuid)).get(error_key, [])
         self.detailed_status = project_errors + submission_errors
+        self.last_update_author = author
 
         with suppress(BusinessException):
             dto: 'InfosDetermineesDTO' = message_bus_instance.invoke(DeterminerAnneeAcademiqueEtPotQuery(self.uuid))
             self.determined_academic_year = AcademicYear.objects.get(year=dto.annee)
             self.determined_pool = dto.pool.name
-        self.save(update_fields=['detailed_status', 'determined_academic_year', 'determined_pool'])
+
+        self.save(
+            update_fields=[
+                'detailed_status',
+                'determined_academic_year',
+                'determined_pool',
+                'last_update_author',
+            ],
+        )
 
 
 class PropositionManager(models.Manager.from_queryset(BaseAdmissionQuerySet)):

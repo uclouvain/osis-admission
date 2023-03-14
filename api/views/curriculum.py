@@ -186,7 +186,7 @@ class CurriculumView(BaseCurriculumView):
         serializer = self.get_serializer_class()(data=request.data)
         serializer.is_valid(raise_exception=True)
         message_bus_instance.invoke(self.complete_command_class(**serializer.data))
-        self.get_permission_object().update_detailed_status()
+        self.get_permission_object().update_detailed_status(request.user.person)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
@@ -270,7 +270,7 @@ class ExperienceViewSet(
     def create(self, request, *args, **kwargs):
         response = super().create(request, *args, **kwargs)
         if self.get_permission_object():
-            self.get_permission_object().update_detailed_status()
+            self.get_permission_object().update_detailed_status(request.user.person)
         return response
 
     def _check_perms_update(self):
@@ -281,7 +281,7 @@ class ExperienceViewSet(
         self._check_perms_update()
         response = super().update(request, *args, **kwargs)
         if self.get_permission_object():
-            self.get_permission_object().update_detailed_status()
+            self.get_permission_object().update_detailed_status(request.user.person)
         return response
 
     def destroy(self, request, *args, **kwargs):
@@ -290,7 +290,7 @@ class ExperienceViewSet(
 
         response = super().destroy(request, *args, **kwargs)
         if self.get_permission_object():
-            self.get_permission_object().update_detailed_status()
+            self.get_permission_object().update_detailed_status(request.user.person)
         return response
 
 
