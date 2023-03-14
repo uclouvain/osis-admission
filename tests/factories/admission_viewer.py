@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -24,30 +24,11 @@
 #
 # ##############################################################################
 
-from typing import List
+import factory
 
-from admission.ddd.admission.commands import ListerToutesDemandesQuery
-from admission.ddd.admission.domain.service.i_filtrer_toutes_demandes import IListerToutesDemandes
-from admission.ddd.admission.dtos.liste import DemandeRechercheDTO
+from admission.contrib.models import AdmissionViewer
 
 
-def lister_demandes(
-    cmd: 'ListerToutesDemandesQuery',
-    filtrer_toutes_demandes_service: 'IListerToutesDemandes',
-) -> 'List[DemandeRechercheDTO]':
-    return filtrer_toutes_demandes_service.filtrer(
-        annee_academique=cmd.annee_academique,
-        numero=cmd.numero,
-        noma=cmd.noma,
-        matricule_candidat=cmd.matricule_candidat,
-        etat=cmd.etat,
-        type=cmd.type,
-        site_inscription=cmd.site_inscription,
-        entites=cmd.entites,
-        types_formation=cmd.types_formation,
-        formation=cmd.formation,
-        bourse_internationale=cmd.bourse_internationale,
-        bourse_erasmus_mundus=cmd.bourse_erasmus_mundus,
-        bourse_double_diplomation=cmd.bourse_double_diplomation,
-        demandeur=cmd.demandeur,
-    )
+class AdmissionViewerFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = AdmissionViewer

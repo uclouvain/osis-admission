@@ -172,6 +172,10 @@
       vertical-align: middle;
     }
 
+    .popover {
+      min-width: max-content;
+    }
+
   </style>
 {% endblock %}
 
@@ -181,14 +185,14 @@
 
   {{ filter_form.media }}
 
+  <script src="{% static 'admission/admission.js' %}"></script>
+
   <script>
       // Prevent to save the DOM in cache when using htmx requests
       htmx.config.refreshOnHistoryMiss = true;
       htmx.config.historyCacheSize = 0;
 
       $(document).ready(function () {
-
-
           // Clear inputs when the form is reset
           $('#search_form').on('reset', function(evt) {
               $('#search_form :input:not([type=hidden])').val(null).trigger('change');

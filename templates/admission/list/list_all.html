@@ -1,5 +1,5 @@
 {% extends "admission/list/base.html" %}
-{% load bootstrap3 i18n %}
+{% load bootstrap3 i18n static %}
 
 {% comment "License" %}
 * OSIS stands for Open Student Information System. It's an application
@@ -54,17 +54,15 @@
 
 {% block script %}
   {{ block.super }}
-  <script>
-      function getReferenceMask(reference) {
-          return /^\d/.test(reference) ? '000.000' : 'A-AAASZZ-000.000';
-      }
 
+  <script>
       $(document).ready(function () {
+          initializePopover({ trigger: 'hover' })
+
           const $reference = $('#id_numero');
           $reference.mask(getReferenceMask($reference.val()), {
               translation: {
                   'S': { pattern: /[a-zA-Z]/, optional: true },
-                  'Z': { pattern: /[a-zA-Z0-9]/, optional: true },
               },
               onKeyPress: function (cep, e, field, options) {
                   $reference.mask(getReferenceMask(cep), options);

@@ -24,11 +24,18 @@
 #
 # ##############################################################################
 import datetime
-from typing import Optional
+from typing import Optional, List
 
 import attr
 
 from osis_common.ddd import interface
+
+
+@attr.dataclass(frozen=True, slots=True)
+class VisualiseurAdmissionDTO(interface.DTO):
+    nom: str
+    prenom: str
+    date: datetime.datetime
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -52,5 +59,5 @@ class DemandeRechercheDTO(interface.DTO):
     derniere_modification_le: datetime.datetime
     derniere_modification_par: str
     derniere_modification_par_candidat: bool
-    derniere_vue_par: str
+    dernieres_vues_par: List[VisualiseurAdmissionDTO]
     date_confirmation: Optional[datetime.datetime]

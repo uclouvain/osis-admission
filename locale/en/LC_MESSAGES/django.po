@@ -2162,6 +2162,9 @@ msgstr ""
 msgid "Languages knowledge"
 msgstr ""
 
+msgid "Last 24 hours views:"
+msgstr ""
+
 msgid "Last modification"
 msgstr ""
 
@@ -2803,6 +2806,9 @@ msgid "Pending validation from management"
 msgstr ""
 
 msgid "Permanent residence card of a family member of a European Union citizen"
+msgstr ""
+
+msgid "Person"
 msgstr ""
 
 msgid "Personal data"
@@ -4136,6 +4142,12 @@ msgid "Validated"
 msgstr ""
 
 msgid "Values"
+msgstr ""
+
+msgid "Viewed at"
+msgstr ""
+
+msgid "Viewed by"
 msgstr ""
 
 msgid "WBI - Wallonie Bruxelles International"

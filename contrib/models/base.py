@@ -265,6 +265,13 @@ class BaseAdmission(models.Model):
         verbose_name=_('PDF recap of the proposition'),
     )
 
+    viewers = models.ManyToManyField(
+        Person,
+        through='AdmissionViewer',
+        verbose_name=_('Viewed by'),
+        related_name='viewed_admissions',
+    )
+
     class Meta:
         constraints = [
             models.CheckConstraint(
@@ -316,3 +323,27 @@ class BaseAdmissionProxy(BaseAdmission):
 
     class Meta:
         proxy = True
+
+
+class AdmissionViewer(models.Model):
+    person = models.ForeignKey(
+        Person,
+        on_delete=models.CASCADE,
+        verbose_name=_('Person'),
+    )
+    admission = models.ForeignKey(
+        BaseAdmission,
+        on_delete=models.CASCADE,
+        verbose_name=_('Admission'),
+    )
+    viewed_at = models.DateTimeField(
+        auto_now=True,
+        verbose_name=_('Viewed at'),
+    )
+
+    @classmethod
+    def add_viewer(cls, person, admission):
+        AdmissionViewer.objects.update_or_create(
+            person=person,
+            admission=admission,
+        )

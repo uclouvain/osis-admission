@@ -81,6 +81,9 @@ class BaseAdmissionList(LoginRequiredMixin, PermissionRequiredMixin, HtmxMixin, 
             return self.form_class
         raise NotImplemented  # pragma: no cover
 
+    def additional_command_kwargs(self):
+        return {}
+
     def get_queryset(self):
         query_params = self.request.GET.copy()
 
@@ -110,7 +113,7 @@ class BaseAdmissionList(LoginRequiredMixin, PermissionRequiredMixin, HtmxMixin, 
             filters['tri_inverse'] = ordering_field[0][0] == '-'
             filters['champ_tri'] = ordering_field[0].lstrip('-')
 
-        return message_bus_instance.invoke(self.filtering_query_class(**filters))
+        return message_bus_instance.invoke(self.filtering_query_class(**filters, **self.additional_command_kwargs()))
 
 
 class AdmissionList(BaseAdmissionList):
@@ -120,3 +123,8 @@ class AdmissionList(BaseAdmissionList):
     filtering_query_class = ListerToutesDemandesQuery
     form_class = AllAdmissionsFilterForm
     urlpatterns = 'all-list'
+
+    def additional_command_kwargs(self):
+        return {
+            'demandeur': self.request.user.person.uuid,
+        }

@@ -23,19 +23,21 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import datetime
 from typing import Optional, List
 
 from django.conf import settings
-from django.db.models import Q, F, Value, Exists, ExpressionWrapper, BooleanField, OuterRef
+from django.db.models import Q, F, Value, Exists, ExpressionWrapper, BooleanField, OuterRef, Prefetch
 from django.db.models.functions import Coalesce, NullIf
 from django.utils.translation import get_language
 
+from admission.contrib.models import AdmissionViewer
 from admission.contrib.models.base import BaseAdmission, BaseAdmissionProxy
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     STATUTS_PROPOSITION_AVANT_SOUMISSION,
 )
 from admission.ddd.admission.domain.service.i_filtrer_toutes_demandes import IListerToutesDemandes
-from admission.ddd.admission.dtos.liste import DemandeRechercheDTO
+from admission.ddd.admission.dtos.liste import DemandeRechercheDTO, VisualiseurAdmissionDTO
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 
@@ -57,6 +59,7 @@ class ListerToutesDemandes(IListerToutesDemandes):
         bourse_internationale: Optional[str] = '',
         bourse_erasmus_mundus: Optional[str] = '',
         bourse_double_diplomation: Optional[str] = '',
+        demandeur: Optional[str] = '',
     ) -> List[DemandeRechercheDTO]:
         qs = (
             BaseAdmissionProxy.objects.with_training_management_and_reference()
@@ -90,7 +93,18 @@ class ListerToutesDemandes(IListerToutesDemandes):
                 'training__enrollment_campus',
                 'training__education_group_type',
             )
+            .prefetch_related(
+                Prefetch(
+                    'admissionviewer_set',
+                    AdmissionViewer.objects.filter(viewed_at__gte=datetime.datetime.now() - datetime.timedelta(days=1))
+                    .exclude(person__uuid=demandeur)
+                    .select_related('person')
+                    .order_by('-viewed_at')
+                    .only('person__first_name', 'person__last_name', 'viewed_at'),
+                ),
+            )
         )
+
         # Add filters
         if annee_academique:
             qs = qs.filter(training__academic_year__year=annee_academique)
@@ -116,7 +130,7 @@ class ListerToutesDemandes(IListerToutesDemandes):
                 training_filters &= Q(Q(training__acronym__contains=term) | Q(training__title__contains=term))
             qs = qs.filter(training_filters)
         if etat:
-            qs = qs.filter(generaleducationadmission__status=etat)
+            qs = qs.filter(status=etat)
         else:
             qs = qs.exclude(Q(status__in=cls.DEFAULT_STATUSES_TO_FILTER))
         if bourse_internationale:
@@ -163,6 +177,13 @@ class ListerToutesDemandes(IListerToutesDemandes):
             derniere_modification_le=admission.modified_at,
             derniere_modification_par='',  # TODO
             derniere_modification_par_candidat=False,  # TODO
-            derniere_vue_par='',  # TODO
+            dernieres_vues_par=[
+                VisualiseurAdmissionDTO(
+                    nom=viewer.person.last_name,
+                    prenom=viewer.person.first_name,
+                    date=viewer.viewed_at,
+                )
+                for viewer in admission.admissionviewer_set.all()
+            ],
             date_confirmation=admission.submitted_at,
         )

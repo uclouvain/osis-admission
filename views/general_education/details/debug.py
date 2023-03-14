@@ -32,14 +32,14 @@ from django.views.generic import DetailView
 
 from admission.contrib.models import GeneralEducationAdmission
 from admission.ddd.admission.formation_generale.commands import DeterminerAnneeAcademiqueEtPotQuery
+from admission.views.doctorate.mixins import LoadDossierViewMixin
 from osis_common.ddd.interface import BusinessException
-from osis_role.contrib.views import PermissionRequiredMixin
 
 __all__ = ["GeneralDebugView"]
 
 
 # TODO Move to 'common' once we have the same logic as frontoffice
-class GeneralDebugView(PermissionRequiredMixin, DetailView):
+class GeneralDebugView(LoadDossierViewMixin, DetailView):
     urlpatterns = 'debug'
     template_name = 'admission/debug.html'
     model = GeneralEducationAdmission

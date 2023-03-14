@@ -29,7 +29,9 @@ from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 from django.views.generic.base import ContextMixin
 
+from admission.auth.roles.sic_manager import SicManager
 from admission.contrib.models import DoctorateAdmission
+from admission.contrib.models.base import AdmissionViewer
 from admission.ddd.parcours_doctoral.commands import RecupererDoctoratQuery
 from admission.ddd.parcours_doctoral.domain.validator.exceptions import DoctoratNonTrouveException
 from admission.ddd.parcours_doctoral.dtos import DoctoratDTO
@@ -101,6 +103,18 @@ class LoadDossierViewMixin(LoginRequiredMixin, PermissionRequiredMixin, ContextM
     def get_permission_object(self):
         return self.admission
 
+    @property
+    def is_doctorate(self):
+        return self.current_context == CONTEXT_DOCTORATE
+
+    @property
+    def is_continuing(self):
+        return self.current_context == CONTEXT_CONTINUING
+
+    @property
+    def is_general(self):
+        return self.current_context == CONTEXT_GENERAL
+
     @cached_property
     def base_namespace(self):
         return ':'.join(self.request.resolver_match.namespaces[:2])
@@ -110,7 +124,7 @@ class LoadDossierViewMixin(LoginRequiredMixin, PermissionRequiredMixin, ContextM
         admission_status = self.admission.status
         context['base_namespace'] = self.base_namespace
 
-        if self.current_context == CONTEXT_DOCTORATE:
+        if self.is_doctorate:
             try:
                 if admission_status == ChoixStatutPropositionDoctorale.INSCRIPTION_AUTORISEE.name:
                     context['dossier'] = self.dossier
@@ -126,6 +140,17 @@ class LoadDossierViewMixin(LoginRequiredMixin, PermissionRequiredMixin, ContextM
         else:
             context['admission'] = self.admission
         return context
+
+    def dispatch(self, request, *args, **kwargs):
+        if (
+            request.method == 'GET'
+            and self.admission_uuid
+            and request.user.person
+            and SicManager.belong_to(request.user.person)
+        ):
+            AdmissionViewer.add_viewer(person=request.user.person, admission=self.admission)
+
+        return super().dispatch(request, *args, **kwargs)
 
 
 class DoctorateAdmissionLastConfirmationMixin(LoadDossierViewMixin):
