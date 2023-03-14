@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import datetime
 from typing import List, Union
 
 import freezegun
@@ -50,7 +51,7 @@ from reference.tests.factories.country import CountryFactory
 @freezegun.freeze_time('2023-01-01')
 class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
     admissions = []
-    NB_MAX_QUERIES = 22
+    NB_MAX_QUERIES = 23
 
     @classmethod
     def setUpTestData(cls):
@@ -88,8 +89,13 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
         cls.admissions: List[Union[DoctorateAdmission, GeneralEducationAdmission, ContinuingEducationAdmission]] = [
             GeneralEducationAdmissionFactory(
                 candidate__country_of_citizenship=CountryFactory(european_union=True, name='Belgique'),
+                candidate__first_name="John",
+                candidate__last_name="Doe",
                 status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
                 training__management_entity=cls.first_entity,
+                training__acronym="ABCD0",
+                last_update_author__user__username='user1',
+                submitted_at=datetime.date(2023, 1, 1),
             ),
         ]
 
@@ -155,7 +161,7 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
 
         cls.default_params = {
             'annee_academique': 2022,
-            'page_size': 10,
+            'taille_page': 10,
         }
 
         # Targeted url
@@ -370,13 +376,27 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
             ],
         )
 
+    def test_list_with_filter_by_admission_status(self):
+        self.client.force_login(user=self.sic_manager_user)
+
+        response = self.client.get(
+            self.url,
+            data={
+                'etat': self.admissions[0].status,
+                **self.default_params,
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(self.results[0], response.context['object_list'])
+
     def test_list_with_filter_by_training_type(self):
         self.client.force_login(user=self.sic_manager_user)
 
         response = self.client.get(
             self.url,
             data={
-                'types_formation_0': self.admissions[0].training.education_group_type.name,
+                'types_formation': self.admissions[0].training.education_group_type.name,
                 **self.default_params,
             },
         )
@@ -464,3 +484,227 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertIn(self.results[0], response.context['object_list'])
+
+    def test_list_asc_sort_by_reference(self):
+        self.client.force_login(user=self.sic_manager_user)
+
+        second_admission = GeneralEducationAdmissionFactory(
+            training=self.admissions[0].training,
+            status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
+        )
+
+        response = self.client.get(
+            self.url,
+            data={
+                'o': 'numero_demande',
+                **self.default_params,
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        result = response.context['object_list']
+        self.assertEqual(len(result), 2)
+        self.assertEqual(result[0].uuid, self.admissions[0].uuid)
+        self.assertEqual(result[1].uuid, second_admission.uuid)
+
+    def test_list_desc_sort_by_reference(self):
+        self.client.force_login(user=self.sic_manager_user)
+
+        second_admission = (
+            GeneralEducationAdmissionFactory(
+                training=self.admissions[0].training,
+                status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
+            ),
+        )
+
+        response = self.client.get(
+            self.url,
+            data={
+                'o': '-numero_demande',
+                **self.default_params,
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        result = response.context['object_list']
+        self.assertEqual(len(result), 2)
+        self.assertEqual(result[0].uuid, second_admission[0].uuid)
+        self.assertEqual(result[1].uuid, self.admissions[0].uuid)
+
+    def test_list_sort_by_candidate_name(self):
+        self.client.force_login(user=self.sic_manager_user)
+
+        second_admission = GeneralEducationAdmissionFactory(
+            candidate__first_name="Joe",
+            candidate__last_name="Doe",
+            status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
+        )
+
+        response = self.client.get(
+            self.url,
+            data={
+                'o': 'nom_candidat',
+                **self.default_params,
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        result = response.context['object_list']
+        self.assertEqual(len(result), 2)
+        self.assertEqual(result[0].uuid, second_admission.uuid)
+        self.assertEqual(result[1].uuid, self.admissions[0].uuid)
+
+    def test_list_sort_by_training(self):
+        self.client.force_login(user=self.sic_manager_user)
+
+        second_admission = GeneralEducationAdmissionFactory(
+            training__acronym="AACD0",
+            status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
+        )
+
+        response = self.client.get(
+            self.url,
+            data={
+                'o': 'formation',
+                **self.default_params,
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        result = response.context['object_list']
+        self.assertEqual(len(result), 2)
+        self.assertEqual(result[0].uuid, second_admission.uuid)
+        self.assertEqual(result[1].uuid, self.admissions[0].uuid)
+
+    def test_list_sort_by_candidate_nationality(self):
+        self.client.force_login(user=self.sic_manager_user)
+
+        second_admission = GeneralEducationAdmissionFactory(
+            candidate__country_of_citizenship=CountryFactory(european_union=False, name='Andorre'),
+            status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
+        )
+
+        response = self.client.get(
+            self.url,
+            data={
+                'o': 'nationalite_candidat',
+                **self.default_params,
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        result = response.context['object_list']
+        self.assertEqual(len(result), 2)
+        self.assertEqual(result[0].uuid, second_admission.uuid)
+        self.assertEqual(result[1].uuid, self.admissions[0].uuid)
+
+    def test_list_sort_by_vip(self):
+        self.client.force_login(user=self.sic_manager_user)
+
+        second_admission = GeneralEducationAdmissionFactory(
+            status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
+            erasmus_mundus_scholarship=None,
+            double_degree_scholarship=None,
+            international_scholarship=None,
+        )
+
+        response = self.client.get(
+            self.url,
+            data={
+                'o': 'vip',
+                **self.default_params,
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        result = response.context['object_list']
+        self.assertEqual(len(result), 2)
+        self.assertEqual(result[0].uuid, second_admission.uuid)
+        self.assertEqual(result[1].uuid, self.admissions[0].uuid)
+
+    def test_list_sort_by_admission_status(self):
+        self.client.force_login(user=self.sic_manager_user)
+
+        second_admission = GeneralEducationAdmissionFactory(
+            status=ChoixStatutPropositionGenerale.INSCRIPTION_AUTORISEE.name,
+        )
+
+        response = self.client.get(
+            self.url,
+            data={
+                'o': '-type_demande',
+                **self.default_params,
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        result = response.context['object_list']
+        self.assertEqual(len(result), 2)
+        self.assertEqual(result[0].uuid, second_admission.uuid)
+        self.assertEqual(result[1].uuid, self.admissions[0].uuid)
+
+    @freezegun.freeze_time('2022-12-31')
+    def test_list_sort_by_modified_date(self):
+        self.client.force_login(user=self.sic_manager_user)
+
+        second_admission = GeneralEducationAdmissionFactory(
+            status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
+        )
+
+        response = self.client.get(
+            self.url,
+            data={
+                'o': 'derniere_modification_le',
+                **self.default_params,
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        result = response.context['object_list']
+        self.assertEqual(len(result), 2)
+        self.assertEqual(result[0].uuid, second_admission.uuid)
+        self.assertEqual(result[1].uuid, self.admissions[0].uuid)
+
+    def test_list_sort_by_modified_author(self):
+        self.client.force_login(user=self.sic_manager_user)
+
+        second_admission = GeneralEducationAdmissionFactory(
+            last_update_author__user__username='user0',
+            status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
+        )
+
+        response = self.client.get(
+            self.url,
+            data={
+                'o': 'derniere_modification_par',
+                **self.default_params,
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        result = response.context['object_list']
+        self.assertEqual(len(result), 2)
+        self.assertEqual(result[0].uuid, second_admission.uuid)
+        self.assertEqual(result[1].uuid, self.admissions[0].uuid)
+
+    def test_list_sort_by_confirmation_date(self):
+        self.client.force_login(user=self.sic_manager_user)
+
+        second_admission = GeneralEducationAdmissionFactory(
+            status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
+            submitted_at=datetime.date(2022, 12, 31),
+        )
+
+        response = self.client.get(
+            self.url,
+            data={
+                'o': 'date_confirmation',
+                **self.default_params,
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        result = response.context['object_list']
+        self.assertEqual(len(result), 2)
+        self.assertEqual(result[0].uuid, second_admission.uuid)
+        self.assertEqual(result[1].uuid, self.admissions[0].uuid)

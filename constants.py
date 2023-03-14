@@ -26,3 +26,4 @@
 from django.utils.translation import gettext_lazy as _
 
 FIELD_REQUIRED_MESSAGE = _("This field is required.")
+DEFAULT_PAGINATOR_SIZE = 10

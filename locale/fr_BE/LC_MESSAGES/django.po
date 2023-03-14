@@ -3100,6 +3100,9 @@ msgstr "Types d'activité pour la catégorie Publication"
 msgid "PUBLIC_DEFENSE"
 msgstr "Soutenance publique"
 
+msgid "Page"
+msgstr "Page"
+
 msgid "Page size"
 msgstr "Taille de la page"
 

@@ -2769,6 +2769,9 @@ msgstr ""
 msgid "PUBLIC_DEFENSE"
 msgstr ""
 
+msgid "Page"
+msgstr ""
+
 msgid "Page size"
 msgstr ""
 

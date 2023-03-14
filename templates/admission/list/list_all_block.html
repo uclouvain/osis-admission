@@ -65,8 +65,8 @@
   </td>
   <td>
     <div class="flex-content-no-wrap">
-    {{ admission.nom_candidat }} {{ admission.prenom_candidat }}
-    {% if admission.noma_candidat %}({{ admission.noma_candidat }}){% endif %}
+    {% display admission.nom_candidat ',' admission.prenom_candidat ' ' '(' admission.noma_candidat ')' as candidate_complete_name %}
+    {{ candidate_complete_name }}
     {% if admission.plusieurs_demandes %}
       <span class="fa-solid fa-list-ol" title="{% translate "The candidate has several enrolment applications in progress" %}"></span>
     {% endif %}
@@ -74,8 +74,8 @@
   </td>
   <td>
     <a href="{{ access_conditions_url }}" target="_blank">
-      {{ admission.sigle_formation }} - {{ admission.intitule_formation }}
-      {% if admission.lieu_formation %} ({{ admission.lieu_formation }}){% endif %}
+      {% display admission.sigle_formation '-' admission.intitule_formation ' ' '(' admission.lieu_formation ')' as training_complete_name %}
+      {{ training_complete_name }}
     </a>
   </td>
   <td>

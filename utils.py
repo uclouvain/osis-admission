@@ -35,7 +35,6 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
     AnneesCurriculumNonSpecifieesException,
 )
 from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
-
 from admission.mail_templates import (
     ADMISSION_EMAIL_GENERIC_ONCE_ADMITTED,
     ADMISSION_EMAIL_CONFIRMATION_PAPER_INFO_STUDENT,

@@ -30,6 +30,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import Choi
 from admission.ddd.admission.dtos.liste import DemandeRechercheDTO
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
+from admission.views import PaginatedList
 from osis_common.ddd import interface
 
 
@@ -62,5 +63,9 @@ class IListerToutesDemandes(interface.DomainService):
         bourse_erasmus_mundus: Optional[str] = '',
         bourse_double_diplomation: Optional[str] = '',
         demandeur: Optional[str] = '',
-    ) -> List[DemandeRechercheDTO]:
+        tri_inverse: bool = False,
+        champ_tri: Optional[str] = None,
+        page: Optional[int] = None,
+        taille_page: Optional[int] = None,
+    ) -> PaginatedList[DemandeRechercheDTO]:
         raise NotImplementedError

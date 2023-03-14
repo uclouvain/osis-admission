@@ -30,10 +30,12 @@ from django.core.exceptions import NON_FIELD_ERRORS
 from django.utils.translation import gettext as _
 from django.views.generic import ListView
 
+from admission.constants import DEFAULT_PAGINATOR_SIZE
 from admission.ddd.admission.commands import ListerToutesDemandesQuery
 from admission.forms.admission.filter import AllAdmissionsFilterForm
 from base.utils.htmx import HtmxMixin
 from infrastructure.messages_bus import message_bus_instance
+from .. import ListPaginator
 
 __all__ = [
     "AdmissionList",
@@ -42,7 +44,6 @@ __all__ = [
 
 class BaseAdmissionList(LoginRequiredMixin, PermissionRequiredMixin, HtmxMixin, ListView):
     raise_exception = True
-    DEFAULT_PAGINATOR_SIZE = '10'
     filtering_query_class = None
     form_class = None
     htmx_template_name = None
@@ -71,10 +72,13 @@ class BaseAdmissionList(LoginRequiredMixin, PermissionRequiredMixin, HtmxMixin, 
         context = super().get_context_data(**kwargs)
         context['filter_form'] = self.form
         context['htmx_template_name'] = self.htmx_template_name
+        context['default_form_values'] = {field.id_for_label: field.initial for field in self.form if field.initial}
         return context
 
     def get_paginate_by(self, queryset):
-        return self.form.data.get('page_size', self.DEFAULT_PAGINATOR_SIZE)
+        if self.form.is_valid() and self.form.cleaned_data:
+            return self.form.cleaned_data.get('taille_page', DEFAULT_PAGINATOR_SIZE)
+        return DEFAULT_PAGINATOR_SIZE
 
     def get_form(self):
         if self.form_class:
@@ -88,7 +92,6 @@ class BaseAdmissionList(LoginRequiredMixin, PermissionRequiredMixin, HtmxMixin, 
         query_params = self.request.GET.copy()
 
         ordering_field = query_params.pop('o', None)
-        query_params.pop('page', None)
 
         self.form = self.get_form()(
             user=self.request.user,
@@ -102,11 +105,11 @@ class BaseAdmissionList(LoginRequiredMixin, PermissionRequiredMixin, HtmxMixin, 
             return []
 
         if query_params:
+            query_params.pop('page', None)
+            query_params.pop('taille_page', None)
             cache.set(self.cache_key, query_params)
 
         filters = self.form.cleaned_data
-
-        filters.pop('page_size', None)
 
         # Order the queryset
         if ordering_field:
@@ -123,6 +126,7 @@ class AdmissionList(BaseAdmissionList):
     filtering_query_class = ListerToutesDemandesQuery
     form_class = AllAdmissionsFilterForm
     urlpatterns = 'all-list'
+    paginator_class = ListPaginator
 
     def additional_command_kwargs(self):
         return {
