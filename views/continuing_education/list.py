@@ -47,7 +47,7 @@ class ContinuingAdmissionList(LoginRequiredMixin, PermissionRequiredMixin, HtmxM
         return BaseFilterForm(self.request.user, data=self.request.GET or None)
 
     def get_paginate_by(self, queryset):
-        return self.form.data.get('page_size', 10)
+        return self.form.data.get('taille_page', 10)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

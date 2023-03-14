@@ -26,10 +26,11 @@
 import datetime
 from typing import List
 
+import freezegun
 from django.test import TestCase
 from django.urls import reverse
 
-from admission.contrib.models import DoctorateAdmission
+from admission.contrib.models import DoctorateAdmission, AdmissionViewer
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE, ENTITY_CDSS
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     BourseRecherche,
@@ -40,7 +41,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
 )
 from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixStatutCDD, ChoixStatutSIC
 from admission.tests.factories import DoctorateAdmissionFactory
-from admission.tests.factories.roles import CandidateFactory, CddManagerFactory
+from admission.tests.factories.roles import CandidateFactory, CddManagerFactory, SicManagerRoleFactory
 from admission.tests.factories.supervision import PromoterFactory
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityFactory
@@ -72,6 +73,8 @@ class DoctorateAdmissionProjectDetailViewTestCase(TestCase):
         )
         promoter = PromoterFactory()
         cls.promoter = promoter.person
+
+        cls.sic_manage_user = SicManagerRoleFactory().person.user
 
         # Create admissions
         cls.admissions: List[DoctorateAdmission] = [
@@ -133,7 +136,7 @@ class DoctorateAdmissionProjectDetailViewTestCase(TestCase):
 
         response = self.client.get(url)
 
-        response.status_code = 403
+        self.assertEqual(response.status_code, 200)
 
     def test_project_detail_cdd_user_admission(self):
         self.client.force_login(user=self.one_cdd_user)
@@ -156,3 +159,26 @@ class DoctorateAdmissionProjectDetailViewTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIsNotNone(response.context.get('admission'))
         self.assertIsNotNone(response.context.get('dossier'))
+
+    def test_project_detail_with_sic_manager(self):
+        self.client.force_login(user=self.sic_manage_user)
+
+        self.assertFalse(
+            AdmissionViewer.objects.filter(
+                admission=self.admissions[0],
+                person=self.sic_manage_user.person,
+            ).exists()
+        )
+
+        url = reverse('admission:doctorate:project', args=[self.admissions[0].uuid])
+
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 200)
+
+        self.assertTrue(
+            AdmissionViewer.objects.filter(
+                admission=self.admissions[0],
+                person=self.sic_manage_user.person,
+            ).exists()
+        )

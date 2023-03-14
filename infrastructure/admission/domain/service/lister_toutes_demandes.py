@@ -27,7 +27,19 @@ import datetime
 from typing import Optional, List
 
 from django.conf import settings
-from django.db.models import Q, F, Value, Exists, ExpressionWrapper, BooleanField, OuterRef, Prefetch
+from django.db.models import (
+    Q,
+    F,
+    Value,
+    Exists,
+    ExpressionWrapper,
+    BooleanField,
+    OuterRef,
+    Prefetch,
+    Case,
+    When,
+    IntegerField,
+)
 from django.db.models.functions import Coalesce, NullIf
 from django.utils.translation import get_language
 
@@ -38,8 +50,10 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
 )
 from admission.ddd.admission.domain.service.i_filtrer_toutes_demandes import IListerToutesDemandes
 from admission.ddd.admission.dtos.liste import DemandeRechercheDTO, VisualiseurAdmissionDTO
+from admission.ddd.admission.enums.statut import CHOIX_STATUT_TOUTE_PROPOSITION
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
+from admission.views import PaginatedList
 
 
 class ListerToutesDemandes(IListerToutesDemandes):
@@ -60,7 +74,13 @@ class ListerToutesDemandes(IListerToutesDemandes):
         bourse_erasmus_mundus: Optional[str] = '',
         bourse_double_diplomation: Optional[str] = '',
         demandeur: Optional[str] = '',
-    ) -> List[DemandeRechercheDTO]:
+        tri_inverse: bool = False,
+        champ_tri: Optional[str] = None,
+        page: Optional[int] = None,
+        taille_page: Optional[int] = None,
+    ) -> PaginatedList[DemandeRechercheDTO]:
+        default_language = get_language() == settings.LANGUAGE_CODE
+
         qs = (
             BaseAdmissionProxy.objects.with_training_management_and_reference()
             .annotate(
@@ -147,12 +167,49 @@ class ListerToutesDemandes(IListerToutesDemandes):
         if bourse_double_diplomation:
             qs = qs.filter(generaleducationadmission__double_degree_scholarship_id=bourse_double_diplomation)
 
-        result = qs.all()
-        return [cls.load_dto_from_model(admission) for admission in result]
+        field_order = []
+        if champ_tri:
+            if champ_tri == 'type_demande':
+                qs = qs.annotate(
+                    ordered_status=Case(
+                        *(When(status=member[0], then=i) for i, member in enumerate(CHOIX_STATUT_TOUTE_PROPOSITION)),
+                        output_field=IntegerField(),
+                    )
+                )
+
+            field_order = {
+                'numero_demande': ['formatted_reference'],
+                'nom_candidat': ['candidate__last_name', 'candidate__first_name'],
+                'formation': ['training__acronym'],
+                'nationalite_candidat': [
+                    'candidate__country_of_citizenship__{}'.format('name' if default_language else 'name_en')
+                ],
+                'vip': ['is_vip'],
+                'type_demande': ['ordered_status'],
+                'derniere_modification_le': ['modified_at'],
+                'derniere_modification_par': ['last_update_author__user__username'],
+                'date_confirmation': ['submitted_at'],
+            }[champ_tri]
+
+            if tri_inverse:
+                field_order = ['-' + field for field in field_order]
+
+        qs = qs.order_by(*field_order, 'id')
+
+        result = PaginatedList(total_count=qs.count())
+
+        if page and taille_page:
+            bottom = (page - 1) * taille_page
+            top = page * taille_page
+            qs = qs[bottom:top]
+
+        for admission in qs:
+            result.append(cls.load_dto_from_model(admission, default_language))
+
+        return result
 
     @classmethod
-    def load_dto_from_model(cls, admission: BaseAdmission) -> DemandeRechercheDTO:
-        default_language = get_language() == settings.LANGUAGE_CODE
+    def load_dto_from_model(cls, admission: BaseAdmission, default_language: bool) -> DemandeRechercheDTO:
         return DemandeRechercheDTO(
             uuid=admission.uuid,
             numero_demande=admission.formatted_reference,  # From annotation
@@ -166,7 +223,8 @@ class ListerToutesDemandes(IListerToutesDemandes):
             type_formation=admission.training.education_group_type.name,
             lieu_formation=admission.teaching_campus,
             nationalite_candidat=getattr(
-                admission.candidate.country_of_citizenship, 'name' if default_language else 'name_en'
+                admission.candidate.country_of_citizenship,
+                'name' if default_language else 'name_en',
             )
             if admission.candidate.country_of_citizenship
             else '',

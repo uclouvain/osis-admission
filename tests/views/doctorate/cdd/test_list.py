@@ -254,7 +254,7 @@ class CddDoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
 
         data = {
             'cdds': [ENTITY_CDE],
-            'page_size': 10,
+            'taille_page': 10,
         }
 
         with self.assertNumQueriesLessThan(self.NB_MAX_QUERIES, verbose=True):
@@ -272,7 +272,7 @@ class CddDoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
         # Sorting
         data = {
             'cdds': [ENTITY_CDE],
-            'page_size': 10,
+            'taille_page': 10,
             'o': 'numero_demande',
         }
 
@@ -300,7 +300,7 @@ class CddDoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
 
         data = {
             'cdds': [ENTITY_CDE],
-            'page_size': 10,
+            'taille_page': 10,
             'numero': str(self.admissions[1]),
             'etat_cdd': self.admissions[1].status_cdd,
             'etat_sic': self.admissions[1].status_sic,
@@ -341,7 +341,7 @@ class CddDoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
 
         data = {
             'cdds': [ENTITY_CDE],
-            'page_size': 10,
+            'taille_page': 10,
             'cotutelle': False,
         }
 
@@ -359,7 +359,7 @@ class CddDoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
 
         data = {
             'cdds': [ENTITY_CDE],
-            'page_size': 10,
+            'taille_page': 10,
             'matricule_promoteur': self.promoter.global_id,
         }
 
@@ -377,7 +377,7 @@ class CddDoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
 
         data = {
             'cdds': [ENTITY_CDE, ENTITY_CDSS],
-            'page_size': 10,
+            'taille_page': 10,
         }
 
         with self.assertNumQueriesLessThan(self.NB_MAX_QUERIES):
@@ -411,7 +411,7 @@ class CddDoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
         self.client.force_login(user=self.doctorate_reader_user)
 
         with self.assertNumQueriesLessThan(self.NB_MAX_QUERIES):
-            response = self.client.get(self.url, data={'page_size': 10})
+            response = self.client.get(self.url, data={'taille_page': 10})
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.context['object_list']), 3)
