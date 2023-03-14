@@ -95,8 +95,12 @@
     {{ type_demande }}
   </td>
   <td>{{ admission.derniere_modification_le|date:'d/m/Y H:i' }}</td>
-  <td class="{% if admission.derniere_modification_par_candidat %}bold-text{% endif %}">
-    {{ admission.derniere_modification_par }}
-  </td>
+  {% if admission.derniere_modification_par_candidat %}
+    <td class="bold-text">
+      {% translate 'candidate' %}
+    </td>
+  {% else %}
+    <td>{{ admission.derniere_modification_par }}</td>
+  {% endif %}
   <td>{{ admission.date_confirmation|date:'d/m/Y H:i' }}</td>
 {% endblock %}

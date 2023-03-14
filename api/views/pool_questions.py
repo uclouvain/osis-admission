@@ -154,5 +154,5 @@ class PoolQuestionsView(APIPermissionRequiredMixin, RetrieveAPIView):
         serializer = PoolQuestionsSerializer(instance=admission, data=data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        self.get_permission_object().update_detailed_status()
+        self.get_permission_object().update_detailed_status(request.user.person)
         return Response(serializer.data, status=status.HTTP_200_OK)

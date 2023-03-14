@@ -89,6 +89,7 @@ class ListerToutesDemandes(IListerToutesDemandes):
             )
             .select_related(
                 'candidate__country_of_citizenship',
+                'last_update_author__user',
                 'training__academic_year',
                 'training__enrollment_campus',
                 'training__education_group_type',
@@ -175,8 +176,10 @@ class ListerToutesDemandes(IListerToutesDemandes):
             etat_demande=admission.status,  # From annotation
             type_demande=admission.type_demande,
             derniere_modification_le=admission.modified_at,
-            derniere_modification_par='',  # TODO
-            derniere_modification_par_candidat=False,  # TODO
+            derniere_modification_par=admission.last_update_author.user.username
+            if admission.last_update_author_id
+            else '',
+            derniere_modification_par_candidat=admission.candidate_id == admission.last_update_author_id,
             dernieres_vues_par=[
                 VisualiseurAdmissionDTO(
                     nom=viewer.person.last_name,

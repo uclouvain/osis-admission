@@ -101,6 +101,7 @@ class BaseAdmissionAdmin(admin.ModelAdmin):
     readonly_fields = [
         'detailed_status',
         "submitted_at",
+        "last_update_author",
     ]
     filter_horizontal = [
         "professional_valuated_experiences",
@@ -142,6 +143,7 @@ class DoctorateAdmissionAdmin(BaseAdmissionAdmin):
         "submitted_profile",
         "pre_admission_submission_date",
         "submitted_at",
+        "last_update_author",
     ]
     exclude = ["valuated_experiences"]
 

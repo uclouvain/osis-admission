@@ -73,6 +73,6 @@ class CotutelleAPIView(APIPermissionRequiredMixin, mixins.RetrieveModelMixin, mi
                 **serializer.data,
             )
         )
-        self.get_permission_object().update_detailed_status()
+        self.get_permission_object().update_detailed_status(request.user.person)
         serializer = serializers.PropositionIdentityDTOSerializer(instance=result)
         return Response(serializer.data, status=status.HTTP_200_OK)

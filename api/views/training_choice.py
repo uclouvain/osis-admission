@@ -74,7 +74,7 @@ class GeneralTrainingChoiceAPIView(
                 **serializer.data,
             )
         )
-        get_cached_general_education_admission_perm_obj(result.uuid).update_detailed_status()
+        get_cached_general_education_admission_perm_obj(result.uuid).update_detailed_status(request.user.person)
         serializer = serializers.PropositionIdentityDTOSerializer(instance=result)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
@@ -109,7 +109,7 @@ class ContinuingTrainingChoiceAPIView(
                 **serializer.data,
             )
         )
-        get_cached_continuing_education_admission_perm_obj(result.uuid).update_detailed_status()
+        get_cached_continuing_education_admission_perm_obj(result.uuid).update_detailed_status(request.user.person)
         serializer = serializers.PropositionIdentityDTOSerializer(instance=result)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
@@ -141,7 +141,7 @@ class DoctorateTrainingChoiceAPIView(
         serializer = serializers.InitierPropositionCommandSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         result = message_bus_instance.invoke(doctorate_education_commands.InitierPropositionCommand(**serializer.data))
-        get_cached_admission_perm_obj(result.uuid).update_detailed_status()
+        get_cached_admission_perm_obj(result.uuid).update_detailed_status(request.user.person)
         serializer = serializers.PropositionIdentityDTOSerializer(instance=result)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
@@ -170,7 +170,7 @@ class GeneralUpdateTrainingChoiceAPIView(
                 **serializer.data,
             )
         )
-        self.get_permission_object().update_detailed_status()
+        self.get_permission_object().update_detailed_status(request.user.person)
         serializer = serializers.PropositionIdentityDTOSerializer(instance=result)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -199,7 +199,7 @@ class DoctorateUpdateAdmissionTypeAPIView(
                 **serializer.data,
             )
         )
-        self.get_permission_object().update_detailed_status()
+        self.get_permission_object().update_detailed_status(request.user.person)
         serializer = serializers.PropositionIdentityDTOSerializer(instance=result)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -227,6 +227,6 @@ class ContinuingUpdateTrainingChoiceAPIView(
                 **serializer.data,
             )
         )
-        self.get_permission_object().update_detailed_status()
+        self.get_permission_object().update_detailed_status(request.user.person)
         serializer = serializers.PropositionIdentityDTOSerializer(instance=result)
         return Response(serializer.data, status=status.HTTP_200_OK)

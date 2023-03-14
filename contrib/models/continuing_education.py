@@ -37,6 +37,7 @@ from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixTypeAdresseFacturation,
 )
 from base.models.academic_year import AcademicYear
+from base.models.person import Person
 from osis_common.ddd.interface import BusinessException
 from osis_document.contrib import FileField
 
@@ -166,7 +167,7 @@ class ContinuingEducationAdmission(BaseAdmission):
         ordering = ('-created_at',)
         permissions = []
 
-    def update_detailed_status(self):
+    def update_detailed_status(self, author: 'Person'):
         from admission.ddd.admission.formation_continue.commands import (
             VerifierPropositionQuery,
             DeterminerAnneeAcademiqueEtPotQuery,
@@ -176,12 +177,21 @@ class ContinuingEducationAdmission(BaseAdmission):
 
         error_key = api_settings.NON_FIELD_ERRORS_KEY
         self.detailed_status = gather_business_exceptions(VerifierPropositionQuery(self.uuid)).get(error_key, [])
+        self.last_update_author = author
 
         with suppress(BusinessException):
             dto: 'InfosDetermineesDTO' = message_bus_instance.invoke(DeterminerAnneeAcademiqueEtPotQuery(self.uuid))
             self.determined_academic_year = AcademicYear.objects.get(year=dto.annee)
             self.determined_pool = dto.pool.name
-        self.save(update_fields=['detailed_status', 'determined_academic_year', 'determined_pool'])
+
+        self.save(
+            update_fields=[
+                'detailed_status',
+                'determined_academic_year',
+                'determined_pool',
+                'last_update_author',
+            ],
+        )
 
 
 class ContinuingEducationAdmissionManager(models.Manager.from_queryset(BaseAdmissionQuerySet)):

@@ -145,7 +145,7 @@ class GeneralSpecificQuestionAPIView(APIPermissionRequiredMixin, mixins.UpdateMo
     def put(self, request, *args, **kwargs):
         response = self.update(request, *args, **kwargs)
         admission = self.get_permission_object()
-        admission.update_detailed_status()
+        admission.update_detailed_status(request.user.person)
         response.data = serializers.PropositionIdentityDTOSerializer(instance=admission).data
         return response
 
@@ -173,6 +173,6 @@ class ContinuingSpecificQuestionAPIView(APIPermissionRequiredMixin, GenericAPIVi
             )
         )
         admission = self.get_permission_object()
-        admission.update_detailed_status()
+        admission.update_detailed_status(request.user.person)
         serializer = serializers.PropositionIdentityDTOSerializer(instance=result)
         return Response(serializer.data, status=status.HTTP_200_OK)
