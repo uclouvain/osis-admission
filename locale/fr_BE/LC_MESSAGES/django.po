@@ -426,11 +426,20 @@ msgstr "Informations complémentaires"
 msgid "Admission"
 msgstr "Admission"
 
+msgid "Admission applications"
+msgstr "Demandes d'admission"
+
+msgid "Admission applications export"
+msgstr "Export des demandes d'admission"
+
 msgid "Admission conditions not met."
 msgstr "Conditions d'accès non remplies."
 
 msgid "Admission date"
 msgstr "Date admission"
+
+msgid "Admission export"
+msgstr "Export d'admission"
 
 msgid "Admission form item"
 msgstr "Élément de formulaire pour admission"
@@ -1412,6 +1421,9 @@ msgstr "Template d'email personnalisé enregistré avec succès."
 msgid "Custom mail templates"
 msgstr "Templates d'email personnalisé"
 
+msgid "DD/scholarship/EM?"
+msgstr "DD/boursier/EM ?"
+
 msgid "DOCTORAL_TRAINING"
 msgstr "Formation doctorale"
 
@@ -1761,6 +1773,12 @@ msgstr "Toutes les formations"
 
 msgid "Example"
 msgstr "Exemple"
+
+msgid "Excel export of admission"
+msgstr "Export excel à partir d'admission"
+
+msgid "Excel export of admission applications"
+msgstr "Export excel des demandes d'admission"
 
 msgid "Expected date of graduation (signed document)"
 msgstr "Date (prévue) de délivrance du diplôme (document signé)"
@@ -2423,6 +2441,9 @@ msgstr "Vues des 24 dernières heures :"
 msgid "Last modification"
 msgstr "Dernière modification"
 
+msgid "Last modification (author)"
+msgstr "Dernière modif. (auteur)"
+
 msgid "Last name"
 msgstr "Nom"
 
@@ -2816,6 +2837,9 @@ msgstr "Langues modernes"
 
 msgid "Modification author"
 msgstr "Auteur modif."
+
+msgid "Modification date"
+msgstr "Date modif."
 
 msgid "Modified"
 msgstr "Modifée"
@@ -3834,6 +3858,9 @@ msgstr "Expéditeur"
 msgid "Services"
 msgstr "Services"
 
+msgid "Several applications?"
+msgstr "Plusieurs demandes ?"
+
 msgid "Sex"
 msgstr "Sexe"
 
@@ -4198,6 +4225,12 @@ msgstr ""
 msgid "The experiences that have been valuated from this admission."
 msgstr "Les expériences qui ont été valorisées via cette admission."
 
+msgid "The export has been planned"
+msgstr "L'export a été planifié"
+
+msgid "The export has failed"
+msgstr "L'export a échoué"
+
 msgid "The first name of the candidate"
 msgstr "Le prénom du candidat"
 
@@ -4471,6 +4504,9 @@ msgstr "Volume horaire total"
 msgid "Training"
 msgstr "Formation"
 
+msgid "Training acronym"
+msgstr "Sigle formation"
+
 msgid "Training activities"
 msgstr "Activités de formation"
 
@@ -4483,6 +4519,9 @@ msgstr ""
 
 msgid "Training choice"
 msgstr "Choix de formation"
+
+msgid "Training title"
+msgstr "Intitulé formation"
 
 msgid "Training type"
 msgstr "Type de formation"

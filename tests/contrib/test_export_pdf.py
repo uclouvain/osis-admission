@@ -32,7 +32,7 @@ from django.test import TestCase
 from admission.contrib.models import AdmissionTask
 from admission.tests.factories import DoctorateAdmissionFactory
 from osis_async.models import AsyncTask
-from osis_async.models.enums import TaskStates
+from osis_async.models.enums import TaskState
 
 
 class ExportPdfTestCase(TestCase):
@@ -56,7 +56,7 @@ class ExportPdfTestCase(TestCase):
         call_command("process_admission_tasks")
         save.assert_called()
         async_task.refresh_from_db()
-        self.assertEqual(async_task.state, TaskStates.DONE.name)
+        self.assertEqual(async_task.state, TaskState.DONE.name)
 
     @patch('osis_document.utils.save_raw_content_remotely')
     def test_pdf_archive_with_error(self, save):
@@ -71,4 +71,4 @@ class ExportPdfTestCase(TestCase):
             call_command("process_admission_tasks")
         save.assert_called()
         async_task.refresh_from_db()
-        self.assertEqual(async_task.state, TaskStates.PENDING.name)
+        self.assertEqual(async_task.state, TaskState.PENDING.name)

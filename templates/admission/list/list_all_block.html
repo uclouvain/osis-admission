@@ -1,5 +1,5 @@
 {% extends "admission/list/base_block.html" %}
-{% load bootstrap3 i18n admission enums%}
+{% load bootstrap3 i18n admission enums %}
 
 {% comment "License" %}
 * OSIS stands for Open Student Information System. It's an application
@@ -24,6 +24,20 @@
 * at the root of the source code of this program.  If not,
 * see http://www.gnu.org/licenses/.
 {% endcomment %}
+
+{% block exports_list %}
+  <li>
+    <a
+        href="#"
+        hx-get="{% url 'admission:admission-list-excel-export' %}"
+        hx-include="#search_form"
+        hx-indicator="#htmx-overlay"
+        hx-swap="none"
+    >
+      {% translate "Admission applications" %}
+    </a>
+  </li>
+{% endblock %}
 
 {% block list_block_header %}
   {% sortable_header_div 'numero_demande' _('Application numero') %}
@@ -65,11 +79,11 @@
   </td>
   <td>
     <div class="flex-content-no-wrap">
-    {% display admission.nom_candidat ',' admission.prenom_candidat ' ' '(' admission.noma_candidat ')' as candidate_complete_name %}
-    {{ candidate_complete_name }}
-    {% if admission.plusieurs_demandes %}
-      <span class="fa-solid fa-list-ol" title="{% translate "The candidate has several enrolment applications in progress" %}"></span>
-    {% endif %}
+      {% display admission.nom_candidat ',' admission.prenom_candidat ' ' '(' admission.noma_candidat ')' as candidate_complete_name %}
+      {{ candidate_complete_name }}
+      {% if admission.plusieurs_demandes %}
+        <span class="fa-solid fa-list-ol" title="{% translate "The candidate has several enrolment applications in progress" %}"></span>
+      {% endif %}
     </div>
   </td>
   <td>

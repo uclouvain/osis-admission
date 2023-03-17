@@ -49,8 +49,9 @@ REGEX_REFERENCE = r'\d{3}\.\d{3}$'
 
 
 class AllAdmissionsFilterForm(forms.Form):
-    annee_academique = forms.ChoiceField(
+    annee_academique = forms.TypedChoiceField(
         label=_('Year'),
+        coerce=int,
     )
 
     numero = forms.RegexField(

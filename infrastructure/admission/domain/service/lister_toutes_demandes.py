@@ -198,12 +198,15 @@ class ListerToutesDemandes(IListerToutesDemandes):
 
         qs = qs.order_by(*field_order, 'id')
 
-        result = PaginatedList(total_count=qs.count())
+        result = PaginatedList()
 
         if page and taille_page:
+            result.total_count = qs.count()
             bottom = (page - 1) * taille_page
             top = page * taille_page
             qs = qs[bottom:top]
+        else:
+            result.total_count = len(qs)
 
         for admission in qs:
             result.append(cls.load_dto_from_model(admission, language_is_french))
