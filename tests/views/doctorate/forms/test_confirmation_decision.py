@@ -55,7 +55,7 @@ from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityFactory
 from base.tests.factories.entity_version import EntityVersionFactory
 from infrastructure.messages_bus import message_bus_instance
-from osis_async.models.enums import TaskStates
+from osis_async.models.enums import TaskState
 from osis_notification.models import EmailNotification
 
 
@@ -213,13 +213,13 @@ class CddDoctorateAdmissionConfirmationSuccessDecisionViewTestCase(TestCase):
 
         admission_task = AdmissionTask.objects.filter(admission=doctorate).first()
         self.assertEqual(admission_task.type, AdmissionTask.TaskType.CONFIRMATION_SUCCESS.name)
-        self.assertEqual(admission_task.task.state, TaskStates.PENDING.name)
+        self.assertEqual(admission_task.task.state, TaskState.PENDING.name)
 
         # Simulate the triggering of the async tasks
         call_command("process_admission_tasks")
         admission_task.refresh_from_db()
 
-        self.assertEqual(admission_task.task.state, TaskStates.DONE.name)
+        self.assertEqual(admission_task.task.state, TaskState.DONE.name)
 
         c = ConfirmationPaper.objects.filter(admission=doctorate).first()
         self.assertEqual(c.certificate_of_achievement, [uuid.UUID('4bdffb42-552d-415d-9e4c-725f10dce228')])

@@ -26,7 +26,7 @@
 
 from django.core.management import BaseCommand
 from django.utils.timezone import now
-from osis_async.models.enums import TaskStates
+from osis_async.models.enums import TaskState
 from osis_async.utils import update_task
 
 from admission.contrib.models import AdmissionTask
@@ -53,19 +53,19 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         # Get all unprocessed admission tasks
         task_list = (
-            AdmissionTask.objects.filter(task__state=TaskStates.PENDING.name)
+            AdmissionTask.objects.filter(task__state=TaskState.PENDING.name)
             .order_by('-task__created_at')
             .values_list('task__uuid', 'type')
         )
         errors = []
         for task_uuid, task_type in task_list:
-            update_task(task_uuid, progression=0, state=TaskStates.PROCESSING, started_at=now())
+            update_task(task_uuid, progression=0, state=TaskState.PROCESSING, started_at=now())
             try:
                 if task_type in self.task_operation_by_type:
                     self.task_operation_by_type[task_type](task_uuid)
-                update_task(task_uuid, progression=100, state=TaskStates.DONE, completed_at=now())
+                update_task(task_uuid, progression=100, state=TaskState.DONE, completed_at=now())
             except Exception as e:
-                update_task(task_uuid, progression=0, state=TaskStates.PENDING)
+                update_task(task_uuid, progression=0, state=TaskState.PENDING)
                 errors.append(e)
 
         if errors:

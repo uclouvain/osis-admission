@@ -367,10 +367,19 @@ msgstr ""
 msgid "Admission"
 msgstr ""
 
+msgid "Admission applications"
+msgstr ""
+
+msgid "Admission applications export"
+msgstr ""
+
 msgid "Admission conditions not met."
 msgstr ""
 
 msgid "Admission date"
+msgstr ""
+
+msgid "Admission export"
 msgstr ""
 
 msgid "Admission form item"
@@ -1282,6 +1291,9 @@ msgstr ""
 msgid "Custom mail templates"
 msgstr ""
 
+msgid "DD/scholarship/EM?"
+msgstr ""
+
 msgid "DOCTORAL_TRAINING"
 msgstr "Doctoral training"
 
@@ -1623,6 +1635,12 @@ msgid "Every education"
 msgstr ""
 
 msgid "Example"
+msgstr ""
+
+msgid "Excel export of admission"
+msgstr ""
+
+msgid "Excel export of admission applications"
 msgstr ""
 
 msgid "Expected date of graduation (signed document)"
@@ -2168,6 +2186,9 @@ msgstr ""
 msgid "Last modification"
 msgstr ""
 
+msgid "Last modification (author)"
+msgstr ""
+
 msgid "Last name"
 msgstr ""
 
@@ -2490,6 +2511,9 @@ msgid "Modern languages"
 msgstr ""
 
 msgid "Modification author"
+msgstr ""
+
+msgid "Modification date"
 msgstr ""
 
 msgid "Modified"
@@ -3460,6 +3484,9 @@ msgstr ""
 msgid "Services"
 msgstr ""
 
+msgid "Several applications?"
+msgstr ""
+
 msgid "Sex"
 msgstr ""
 
@@ -3781,6 +3808,12 @@ msgstr ""
 msgid "The experiences that have been valuated from this admission."
 msgstr ""
 
+msgid "The export has been planned"
+msgstr ""
+
+msgid "The export has failed"
+msgstr ""
+
 msgid "The first name of the candidate"
 msgstr ""
 
@@ -4025,6 +4058,9 @@ msgstr ""
 msgid "Training"
 msgstr ""
 
+msgid "Training acronym"
+msgstr ""
+
 msgid "Training activities"
 msgstr ""
 
@@ -4035,6 +4071,9 @@ msgid "Training certificate, with dates, justifying the specified period"
 msgstr ""
 
 msgid "Training choice"
+msgstr ""
+
+msgid "Training title"
 msgstr ""
 
 msgid "Training type"
