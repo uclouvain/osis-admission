@@ -496,19 +496,19 @@ class AdmissionTagsTestCase(TestCase):
     def test_admission_url_for_a_doctorate(self):
         self.assertEqual(
             admission_url(admission_uuid=self.admission_uuid, osis_education_type=self.doctorate_training_type),
-            reverse('admission:doctorate:debug', kwargs={'uuid': self.admission_uuid}),
+            reverse('admission:doctorate', kwargs={'uuid': self.admission_uuid}),
         )
 
     def test_admission_url_for_a_general_training(self):
         self.assertEqual(
             admission_url(admission_uuid=self.admission_uuid, osis_education_type=self.general_training_type),
-            reverse('admission:general-education:debug', kwargs={'uuid': self.admission_uuid}),
+            reverse('admission:general-education', kwargs={'uuid': self.admission_uuid}),
         )
 
     def test_admission_url_for_a_continuing_education(self):
         self.assertEqual(
             admission_url(admission_uuid=self.admission_uuid, osis_education_type=self.continuing_training_type),
-            reverse('admission:continuing-education:debug', kwargs={'uuid': self.admission_uuid}),
+            reverse('admission:continuing-education', kwargs={'uuid': self.admission_uuid}),
         )
 
     def test_admission_status_for_a_doctorate(self):

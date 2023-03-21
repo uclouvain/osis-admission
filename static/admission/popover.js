@@ -38,8 +38,3 @@ function initializePopover(configuration) {
     });
   });
 }
-
-function getReferenceMask(reference) {
-  return /^\d/.test(reference) ? '000.000' : 'A-AAAS00-000.000';
-}
-

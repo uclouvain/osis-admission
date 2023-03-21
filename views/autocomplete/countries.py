@@ -38,7 +38,7 @@ __all__ = [
 class CountriesAutocomplete(LoginRequiredMixin, autocomplete.Select2QuerySetView):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.name_field = 'name' if get_language() == settings.LANGUAGE_CODE else 'name_en'
+        self.name_field = 'name' if get_language() == settings.LANGUAGE_CODE_FR else 'name_en'
 
     def get_queryset(self):
         search_term = self.request.GET.get('q', '')

@@ -246,7 +246,7 @@ class BaseFilterForm(forms.Form):
         self.doctorates = (
             self.get_doctorate_queryset()
             .distinct('acronym')
-            .values_list('acronym', 'title' if get_language() == settings.LANGUAGE_CODE else 'title_english')
+            .values_list('acronym', 'title' if get_language() == settings.LANGUAGE_CODE_FR else 'title_english')
             .order_by('acronym')
         )
         self.fields['sigles_formations'].choices = [
@@ -257,7 +257,7 @@ class BaseFilterForm(forms.Form):
         self.fields['commission_proximite'].choices = self.get_proximity_commission_choices()
 
         # Initialize the academic year field
-        self.fields['annee_academique'].choices = [EMPTY_CHOICE[0]] + get_academic_year_choices()[0]
+        self.fields['annee_academique'].choices = [EMPTY_CHOICE[0]] + get_academic_year_choices()
 
         # Initialize the labels of the autocomplete fields
         if load_labels:
@@ -265,7 +265,7 @@ class BaseFilterForm(forms.Form):
             if nationality:
                 country = (
                     Country.objects.filter(iso_code=nationality)
-                    .values_list('name' if get_language() == settings.LANGUAGE_CODE else 'name_end')
+                    .values_list('name' if get_language() == settings.LANGUAGE_CODE_FR else 'name_en')
                     .first()
                 )
                 if country:
