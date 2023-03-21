@@ -672,7 +672,7 @@ def interpolate(string, **kwargs):
 def admission_url(admission_uuid: str, osis_education_type: str):
     """Get the base URL of a specific admission"""
     admission_context = ADMISSION_CONTEXT_BY_OSIS_EDUCATION_TYPE.get(osis_education_type)
-    return reverse(f'admission:{admission_context}:debug', kwargs={'uuid': admission_uuid})
+    return reverse(f'admission:{admission_context}', kwargs={'uuid': admission_uuid})
 
 
 @register.simple_tag

@@ -79,7 +79,7 @@ class ListerToutesDemandes(IListerToutesDemandes):
         page: Optional[int] = None,
         taille_page: Optional[int] = None,
     ) -> PaginatedList[DemandeRechercheDTO]:
-        default_language = get_language() == settings.LANGUAGE_CODE
+        language_is_french = get_language() == settings.LANGUAGE_CODE_FR
 
         qs = (
             BaseAdmissionProxy.objects.with_training_management_and_reference()
@@ -104,6 +104,7 @@ class ListerToutesDemandes(IListerToutesDemandes):
                         | Q(continuingeducationadmission__status=ChoixStatutPropositionContinue.EN_BROUILLON.name)
                         | Q(doctorateadmission__status__in=STATUTS_PROPOSITION_AVANT_SOUMISSION),
                     )
+                    .filter(training__academic_year__year=annee_academique)
                     .exclude(pk=OuterRef('pk')),
                 ),
             )
@@ -122,6 +123,7 @@ class ListerToutesDemandes(IListerToutesDemandes):
                     .select_related('person')
                     .order_by('-viewed_at')
                     .only('person__first_name', 'person__last_name', 'viewed_at'),
+                    to_attr='other_admission_viewers',
                 ),
             )
         )
@@ -153,7 +155,7 @@ class ListerToutesDemandes(IListerToutesDemandes):
         if etat:
             qs = qs.filter(status=etat)
         else:
-            qs = qs.exclude(Q(status__in=cls.DEFAULT_STATUSES_TO_FILTER))
+            qs = qs.exclude(Q(status__in=cls.STATUTS_A_FILTRER_PAR_DEFAUT))
         if bourse_internationale:
             qs = qs.filter(
                 Q(doctorateadmission__international_scholarship_id=bourse_internationale)
@@ -182,7 +184,7 @@ class ListerToutesDemandes(IListerToutesDemandes):
                 'nom_candidat': ['candidate__last_name', 'candidate__first_name'],
                 'formation': ['training__acronym'],
                 'nationalite_candidat': [
-                    'candidate__country_of_citizenship__{}'.format('name' if default_language else 'name_en')
+                    'candidate__country_of_citizenship__{}'.format('name' if language_is_french else 'name_en')
                 ],
                 'vip': ['is_vip'],
                 'type_demande': ['ordered_status'],
@@ -204,12 +206,12 @@ class ListerToutesDemandes(IListerToutesDemandes):
             qs = qs[bottom:top]
 
         for admission in qs:
-            result.append(cls.load_dto_from_model(admission, default_language))
+            result.append(cls.load_dto_from_model(admission, language_is_french))
 
         return result
 
     @classmethod
-    def load_dto_from_model(cls, admission: BaseAdmission, default_language: bool) -> DemandeRechercheDTO:
+    def load_dto_from_model(cls, admission: BaseAdmission, language_is_french: bool) -> DemandeRechercheDTO:
         return DemandeRechercheDTO(
             uuid=admission.uuid,
             numero_demande=admission.formatted_reference,  # From annotation
@@ -219,12 +221,12 @@ class ListerToutesDemandes(IListerToutesDemandes):
             plusieurs_demandes=admission.has_other_admission_in_progress,  # From annotation
             sigle_formation=admission.training.acronym,
             sigle_partiel_formation=admission.training.partial_acronym,
-            intitule_formation=getattr(admission.training, 'title' if default_language else 'title_english'),
+            intitule_formation=getattr(admission.training, 'title' if language_is_french else 'title_english'),
             type_formation=admission.training.education_group_type.name,
             lieu_formation=admission.teaching_campus,
             nationalite_candidat=getattr(
                 admission.candidate.country_of_citizenship,
-                'name' if default_language else 'name_en',
+                'name' if language_is_french else 'name_en',
             )
             if admission.candidate.country_of_citizenship
             else '',
@@ -244,7 +246,7 @@ class ListerToutesDemandes(IListerToutesDemandes):
                     prenom=viewer.person.first_name,
                     date=viewer.viewed_at,
                 )
-                for viewer in admission.admissionviewer_set.all()
+                for viewer in admission.other_admission_viewers
             ],
             date_confirmation=admission.submitted_at,
         )
