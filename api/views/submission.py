@@ -68,11 +68,9 @@ from admission.utils import (
     get_cached_general_education_admission_perm_obj,
 )
 from base.models.academic_calendar import AcademicCalendar
-from base.models.education_group_year import EducationGroupYear
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.education_group_types import TrainingType
 from ddd.logic.formation_catalogue.commands import GetSigleFormationParenteQuery
-from infrastructure.formation_catalogue.repository.program_tree import ProgramTreeRepository
 from infrastructure.messages_bus import message_bus_instance
 from osis_profile.models import EducationalExperience, ProfessionalExperience
 from osis_role.contrib.views import APIPermissionRequiredMixin
@@ -202,11 +200,12 @@ def get_access_conditions_url(training_type, training_acronym, partial_training_
         sigle = training_acronym
         with suppress(ProgramTreeNotFoundException):  # pragma: no cover
             # Try to get the acronym from the parent, if it exists
-            parent = ProgramTreeRepository.get_identite_parent_2M(partial_training_acronym, year)
-            sigle = EducationGroupYear.objects.get(
-                partial_acronym=parent.code,
-                academic_year__year=parent.year,
-            ).acronym
+            sigle = message_bus_instance.invoke(
+                GetSigleFormationParenteQuery(
+                    code_formation=partial_training_acronym,
+                    annee=year,
+                )
+            )
 
         return f"https://uclouvain.be/prog-{year}-{sigle}-cond_adm"
 
