@@ -72,7 +72,6 @@ class BaseAdmissionQuerySet(models.QuerySet):
         return self.annotate(
             teaching_campus=Subquery(
                 EducationGroupVersion.objects.filter(offer_id=OuterRef('training_id'))
-                .select_related('root_group__main_teaching_campus')
                 .annotate(
                     campus_name=StringAgg(
                         'root_group__main_teaching_campus__name',

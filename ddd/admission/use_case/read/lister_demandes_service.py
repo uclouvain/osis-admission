@@ -33,9 +33,9 @@ from admission.ddd.admission.dtos.liste import DemandeRechercheDTO
 
 def lister_demandes(
     cmd: 'ListerToutesDemandesQuery',
-    filtrer_toutes_demandes_service: 'IListerToutesDemandes',
+    lister_toutes_demandes_service: 'IListerToutesDemandes',
 ) -> 'List[DemandeRechercheDTO]':
-    return filtrer_toutes_demandes_service.filtrer(
+    return lister_toutes_demandes_service.filtrer(
         annee_academique=cmd.annee_academique,
         numero=cmd.numero,
         noma=cmd.noma,

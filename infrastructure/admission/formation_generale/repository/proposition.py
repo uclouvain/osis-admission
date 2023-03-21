@@ -292,7 +292,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 sigle=admission.training.acronym,
                 annee=admission.training.academic_year.year,
                 intitule=admission.training.title
-                if get_language() == settings.LANGUAGE_CODE
+                if get_language() == settings.LANGUAGE_CODE_FR
                 else admission.training.title_english,
                 campus=admission.teaching_campus or '',  # from annotation
                 type=admission.training.education_group_type.name,
