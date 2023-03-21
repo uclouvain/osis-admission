@@ -35,7 +35,7 @@ from osis_common.ddd import interface
 
 
 class IListerToutesDemandes(interface.DomainService):
-    DEFAULT_STATUSES_TO_FILTER = {
+    STATUTS_A_FILTRER_PAR_DEFAUT = {
         ChoixStatutPropositionGenerale.ANNULEE.name,
         ChoixStatutPropositionGenerale.EN_BROUILLON.name,
         ChoixStatutPropositionDoctorale.ANNULEE.name,

@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -32,6 +32,6 @@ from admission.infrastructure.admission.domain.service.in_memory.lister_toutes_d
 COMMAND_HANDLERS = {
     ListerToutesDemandesQuery: lambda msg_bus, cmd: lister_demandes(
         cmd,
-        filtrer_toutes_demandes_service=ListerToutesDemandesInMemory(),
+        lister_toutes_demandes_service=ListerToutesDemandesInMemory(),
     ),
 }

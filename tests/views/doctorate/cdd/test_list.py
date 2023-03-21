@@ -55,7 +55,7 @@ from reference.tests.factories.country import CountryFactory
 
 class CddDoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
     admissions = []
-    NB_MAX_QUERIES = 22
+    NB_MAX_QUERIES = 21
 
     @classmethod
     def setUpTestData(cls):

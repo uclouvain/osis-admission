@@ -125,7 +125,4 @@ def get_academic_year_choices(min_year=MINIMUM_SELECTABLE_YEAR, max_year=MAXIMUM
         min_year=min_year,
         max_year=max_year,
     ).order_by('-year')
-    return (
-        [(academic_year.year, format_to_academic_year(academic_year.year)) for academic_year in academic_years],
-        academic_years.current().year,
-    )
+    return [(academic_year.year, format_to_academic_year(academic_year.year)) for academic_year in academic_years]
