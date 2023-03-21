@@ -493,13 +493,14 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
             status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
         )
 
-        response = self.client.get(
-            self.url,
-            data={
-                'o': 'numero_demande',
-                **self.default_params,
-            },
-        )
+        with self.assertNumQueriesLessThan(self.NB_MAX_QUERIES):
+            response = self.client.get(
+                self.url,
+                data={
+                    'o': 'numero_demande',
+                    **self.default_params,
+                },
+            )
 
         self.assertEqual(response.status_code, 200)
         result = response.context['object_list']

@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from unittest import mock
 from unittest.mock import Mock
 
 from django.conf import settings
@@ -31,6 +32,7 @@ from django.shortcuts import get_object_or_404
 from django.test.utils import override_settings
 from django.urls.base import reverse
 from django.urls.conf import path
+from django.utils import translation
 from django.utils.translation import get_language, gettext as _
 from rest_framework.serializers import Serializer
 from rest_framework.test import APIRequestFactory, APITestCase
@@ -354,34 +356,25 @@ class SerializerFieldsTestCase(APITestCase):
 
 
 class TranslatedFieldTestCase(APITestCase):
-    @classmethod
-    def setUpTestData(cls):
-        cls.default_language = settings.LANGUAGE_CODE
-
-    def tearDown(self):
-        settings.LANGUAGE_CODE = self.default_language
-
     def test_with_supported_language(self):
         mock_obj = Mock(title='Mon titre', title_en='My title')
-        settings.LANGUAGE_CODE = get_language()
+        with translation.override(settings.LANGUAGE_CODE_EN):
+            serializer_field = TranslatedField(field_name='title', en_field_name='title_en')
 
-        serializer_field = TranslatedField(field_name='title', en_field_name='title_en')
-
-        self.assertEqual(
-            serializer_field.to_representation(mock_obj),
-            'Mon titre',
-        )
+            self.assertEqual(
+                serializer_field.to_representation(mock_obj),
+                'My title',
+            )
 
     def test_with_unsupported_language(self):
         mock_obj = Mock(title='Mon titre', title_en='My title')
-        settings.LANGUAGE_CODE = 'azerty'
+        with translation.override('azerty'):
+            serializer_field = TranslatedField(field_name='title', en_field_name='title_en')
 
-        serializer_field = TranslatedField(field_name='title', en_field_name='title_en')
-
-        self.assertEqual(
-            serializer_field.to_representation(mock_obj),
-            'My title',
-        )
+            self.assertEqual(
+                serializer_field.to_representation(mock_obj),
+                'Mon titre',
+            )
 
 
 class RelatedInstituteFieldTestCase(APITestCase):

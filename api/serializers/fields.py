@@ -50,10 +50,10 @@ class TranslatedField(serializers.SerializerMethodField):
         self.en_field_name = en_field_name
 
     def to_representation(self, value):
-        if get_language() == settings.LANGUAGE_CODE:
-            return getattr(value, self.field_name)
-        else:
+        if get_language() == settings.LANGUAGE_CODE_EN:
             return getattr(value, self.en_field_name)
+        else:
+            return getattr(value, self.field_name)
 
 
 class ActionLinksField(serializers.Field):

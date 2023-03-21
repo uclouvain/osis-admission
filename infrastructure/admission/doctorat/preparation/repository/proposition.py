@@ -451,7 +451,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             nationalite_candidat=admission.candidate.country_of_citizenship
             and getattr(
                 admission.candidate.country_of_citizenship,
-                'name' if get_language() == settings.LANGUAGE_CODE else 'name_en',
+                'name' if get_language() == settings.LANGUAGE_CODE_FR else 'name_en',
             ),
             modifiee_le=admission.modified_at,
             fiche_archive_signatures_envoyees=admission.archived_record_signatures_sent,

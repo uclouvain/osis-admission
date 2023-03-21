@@ -27,7 +27,7 @@
 from admission.auth.roles.cdd_manager import CddManager
 from admission.ddd.admission.doctorat.validation.commands import FiltrerDemandesQuery
 from admission.forms.doctorate.cdd.filter import CddFilterForm, BaseFilterForm
-from admission.views.common.list import BaseAdmissionList
+from admission.views.list import BaseAdmissionList
 
 __all__ = [
     "CddDoctorateAdmissionList",
@@ -40,7 +40,7 @@ class CddDoctorateAdmissionList(BaseAdmissionList):
     permission_required = 'admission.view_cdddossiers'
     filtering_query_class = FiltrerDemandesQuery
 
-    def get_form(self):
+    def get_form_class(self):
         if CddManager.belong_to(self.request.user.person):
             return CddFilterForm
         else:
