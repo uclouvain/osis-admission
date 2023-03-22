@@ -23,6 +23,8 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from urllib.parse import unquote
+
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import RedirectView
 
@@ -44,6 +46,6 @@ class AccessConditionsURL(LoginRequiredMixin, RedirectView):
     def get_redirect_url(self, *args, **kwargs) -> str:
         return get_access_conditions_url(
             training_type=self.kwargs.get('training_type'),
-            training_acronym=self.kwargs.get('training_acronym'),
+            training_acronym=unquote(self.kwargs.get('training_acronym')),
             partial_training_acronym=self.kwargs.get('partial_training_acronym'),
         )

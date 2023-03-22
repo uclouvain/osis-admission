@@ -39,7 +39,7 @@
 
 {% block list_block_row_result %}
   {% admission_url admission.uuid admission.type_formation as admission_url %}
-  {% url 'admission:access-conditions-url' admission.type_formation admission.sigle_formation admission.sigle_partiel_formation as access_conditions_url %}
+  {% url 'admission:access-conditions-url' admission.type_formation admission.sigle_formation|urlencode:'' admission.sigle_partiel_formation as access_conditions_url %}
   <td class="flex-content-no-wrap">
     <a href="{{ admission_url }}">
       {{ admission.type_demande|enum_display:'TypeDemande' }}<br>
