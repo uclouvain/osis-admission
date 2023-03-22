@@ -37,14 +37,14 @@
     </a>
   </li>
   <li class="active">
-    {{ object.training.title }} ({{ object.reference }})
+    {{ admission.formation.intitule }} ({{ admission.reference }})
   </li>
 {% endblock %}
 
 {% block page-header %}
   <div class="page-header flex-content">
     <h2>
-      {{ object.training.title }} ({{ object.reference }})
+      {{ admission.formation.intitule }} ({{ admission.reference }})
     </h2>
     <a
         href="{% url 'admission:general-education:list' %}"
@@ -57,21 +57,148 @@
 {% endblock %}
 
 {% block panel-heading %}
-  <div>
-    {% trans "Candidate:" %} {{ object.candidate.first_name }} {{ object.candidate.last_name }}
-  </div>
-  <div>
-    {% trans "Status:" %}
-    {{ object.status|enum_display:'ChoixStatutPropositionGenerale' }}
-  </div>
-  <div>
-    {% trans "Type:" %}
-    {{ object.type_demande|enum_display:'TypeDemande' }}
-  </div>
-  {% if object.submitted_at %}
-    <div>
-      {% trans "Submission date:" %}
-      {{ object.submitted_at|date:'d/m/Y H:i' }}
+  {% display admission.nom_candidat ',' admission.prenom_candidat as full_candidate_name %}
+  <div id="admission-panel-header" class="row">
+    <div class="col-md-1 text-center">
+      {% get_image_file_url admission.photo_identite_candidat as id_photo_url %}
+      <img
+          {% if id_photo_url %}
+            src="{{ id_photo_url }}"
+          {% else %}
+            src="{% static 'img/men_unknown.png' %}"
+          {% endif %}
+            alt="{% translate 'Identity picture of the candidate' %}"
+            class="img-thumbnail"
+      />
     </div>
-  {% endif %}
+    <div class="col-md-7">
+      <span class="bold-text">{{ full_candidate_name }}</span>
+      {% if admission.nationalite_candidat %}
+        <span>
+        - {{ admission.nationalite_candidat }}, {{ admission.nationalite_ue_candidat|yesno:_('EU,NEU') }},
+        {{ admission.candidat_assimile|yesno:_('assimilated,non-assimilated') }}
+        </span>
+      {% endif %}
+      <br>
+      <span>
+        {% if admission.noma %}
+          {% translate 'Noma' %} {{ admission.noma }}
+        {% else %}
+          {% translate 'Unknown noma' %}
+        {% endif %}
+      </span>
+      <address style="display: inline">
+        <a href="mailto:{{ admission.adresse_email_candidat }}?subject={{ admission.reference }}">
+          <i class="fa-solid fa-envelope"></i>
+          {{ admission.adresse_email_candidat }}</a>,
+      </address>
+      <span>{% translate 'contact language:' %} {{ admission.langue_contact_candidat }}</span>
+      <br>
+      <span>{{ admission.type|enum_display:'TypeDemande' }}</span>
+      <span class="copy-to-clipboard">
+        <button class="copy-button">
+          <i class="far fa-copy"></i>
+        </button>
+        <span class="copy-to-clipboard-text bold-text">{{ admission.reference }}</span>
+      </span>
+      {% if admission.soumise_le %}
+        <span>
+        ({% translate 'submission' %} {{ admission.soumise_le|date:'SHORT_DATE_FORMAT' }})
+        </span>
+      {% endif %}
+      <br>
+      {% url 'admission:access-conditions-url' admission.formation.type admission.formation.sigle|urlencode:'' admission.formation.code as access_conditions_url %}
+      <span>
+      <a href="{{ access_conditions_url }}" target="_blank">{{ admission.formation.sigle }}</a> -
+      {{ admission.formation.intitule }}
+      ({{ admission.formation.campus }})
+      <span class="label label-default">{{ admission.formation.annee|get_academic_year }}</span>
+      </span>
+    </div>
+    <div class="col-md-3">
+      <span>
+        {% translate 'Status:' %} <span class="label label-success">{{ admission.statut|enum_display:'ChoixStatutPropositionGenerale' }}</span>
+        {{ date_changement_statut|date:'SHORT_DATE_FORMAT' }}
+      </span>
+      <br>
+      <span>
+        {% translate 'Not specified' context "admission-header" as not_specified %}
+        {% translate 'Access condition:' %} <span class="label label-primary">{{ admission.titre_access|default:not_specified }}</span>
+      </span>
+    </div>
+    <div class="col-md-1">
+      {% if admission.fraudeur_ares %}
+        <span class="label label-danger">{% translate 'Fraudster (ARES)' %}</span>
+      {% endif %}
+      {% if admission.candidat_vip %}
+        <span class="label label-success">{% translate 'VIP' %}</span>
+      {% endif %}
+      {% if admission.est_inscription_tardive %}
+        <span class="label label-danger">{% translate 'Late enrollment' %}</span>
+      {% endif %}
+      {% if admission.non_financable %}
+        <span class="label label-danger">{% translate 'Not fundable' %}</span>
+      {% endif %}
+      {% if admission.candidat_a_plusieurs_demandes %}
+        <span class="label label-info">{% translate 'Several applications' %}</span>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}
+
+{% block script %}
+  {{ block.super }}
+  <script src="{% static 'admission/clipboard.js' %}"></script>
+
+  <script>
+      $(function () {
+          writeTextToClipboard('.copy-to-clipboard');
+      });
+  </script>
+{% endblock %}
+
+{% block style %}
+  {{ block.super }}
+  <style>
+    .panel-heading > div {
+      width: 100%;
+    }
+
+    .panel-heading img {
+      width: 100px;
+      height: 100px;
+      border-radius: 10%;
+      object-fit: cover;
+    }
+
+    #admission-panel-header > * > * {
+      margin-bottom: 3px;
+      display: inline-block;
+    }
+
+    #admission-panel-header .label {
+      width: min-content;
+    }
+
+    @media only screen and (max-width : 992px) {
+      #admission-panel-header img {
+        text-align: center;
+      }
+
+      #admission-panel-header > div {
+        border-bottom: 1px solid #ddd;
+      }
+
+      #admission-panel-header > div:last-child {
+        border-bottom: none;
+      }
+
+      #admission-panel-header > div {
+        border-bottom: 1px solid #ddd;
+        padding-top: 1em;
+        padding-bottom: 1em;
+      }
+
+    }
+  </style>
 {% endblock %}

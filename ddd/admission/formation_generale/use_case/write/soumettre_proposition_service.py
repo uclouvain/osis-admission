@@ -25,7 +25,6 @@
 # ##############################################################################
 import datetime
 
-from admission.calendar.admission_calendar import DIPLOMES_ACCES_BELGE
 from admission.ddd.admission.domain.builder.formation_identity import FormationIdentityBuilder
 from admission.ddd.admission.domain.service.i_calendrier_inscription import ICalendrierInscription
 from admission.ddd.admission.domain.service.i_elements_confirmation import IElementsConfirmation
@@ -39,6 +38,7 @@ from admission.ddd.admission.formation_generale.domain.builder.proposition_ident
 )
 from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.formation_generale.domain.service.i_formation import IFormationGeneraleTranslator
+from admission.ddd.admission.formation_generale.domain.service.i_inscription_tardive import IInscriptionTardive
 from admission.ddd.admission.formation_generale.domain.service.i_notification import INotification
 from admission.ddd.admission.formation_generale.domain.service.i_question_specifique import (
     IQuestionSpecifiqueTranslator,
@@ -62,6 +62,7 @@ def soumettre_proposition(
     element_confirmation: 'IElementsConfirmation',
     notification: 'INotification',
     maximum_propositions_service: 'IMaximumPropositionsAutorisees',
+    inscription_tardive_service: 'IInscriptionTardive',
 ) -> 'PropositionIdentity':
     # GIVEN
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
@@ -91,6 +92,7 @@ def soumettre_proposition(
         calendrier_inscription,
         profil_candidat_translator,
     )
+    pool = AcademicCalendarTypes[cmd.pool]
 
     # WHEN
     VerifierProposition.verifier(
@@ -102,7 +104,7 @@ def soumettre_proposition(
         annee_courante=annee_courante,
         questions_specifiques=questions_specifiques,
         annee_soumise=cmd.annee,
-        pool_soumis=AcademicCalendarTypes[cmd.pool],
+        pool_soumis=pool,
         maximum_propositions_service=maximum_propositions_service,
         formation=formation,
         titres=titres,
@@ -115,8 +117,10 @@ def soumettre_proposition(
         profil_candidat_translator=profil_candidat_translator,
     )
 
+    est_inscription_tardive = inscription_tardive_service.est_inscription_tardive(pool)
+
     # THEN
-    proposition.soumettre(formation_id, AcademicCalendarTypes[cmd.pool], cmd.elements_confirmation, type_demande)
+    proposition.soumettre(formation_id, pool, cmd.elements_confirmation, type_demande, est_inscription_tardive)
     proposition_repository.save(proposition)
     notification.confirmer_soumission(proposition)
 

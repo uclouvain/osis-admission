@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Admission API
-  version: 1.0.70
+  version: 1.0.71
   description: This API delivers data for the Admission project.
   contact:
     name: UCLouvain - OSIS
@@ -5293,6 +5293,8 @@ components:
                 properties:
                   sigle:
                     type: string
+                  code:
+                    type: string
                   annee:
                     type: integer
                   intitule:
@@ -5309,6 +5311,7 @@ components:
                     type: string
                 required:
                 - sigle
+                - code
                 - annee
                 - intitule
                 - campus
@@ -5394,6 +5397,8 @@ components:
                 properties:
                   sigle:
                     type: string
+                  code:
+                    type: string
                   annee:
                     type: integer
                   intitule:
@@ -5410,6 +5415,7 @@ components:
                     type: string
                 required:
                 - sigle
+                - code
                 - annee
                 - intitule
                 - campus
@@ -8644,6 +8650,8 @@ components:
           properties:
             sigle:
               type: string
+            code:
+              type: string
             annee:
               type: integer
             intitule:
@@ -8660,6 +8668,7 @@ components:
               type: string
           required:
           - sigle
+          - code
           - annee
           - intitule
           - campus
@@ -9072,6 +9081,8 @@ components:
           properties:
             sigle:
               type: string
+            code:
+              type: string
             annee:
               type: integer
             intitule:
@@ -9088,6 +9099,7 @@ components:
               type: string
           required:
           - sigle
+          - code
           - annee
           - intitule
           - campus
@@ -9278,6 +9290,8 @@ components:
       properties:
         sigle:
           type: string
+        code:
+          type: string
         annee:
           type: integer
         intitule:
@@ -9294,6 +9308,7 @@ components:
           type: string
       required:
       - sigle
+      - code
       - annee
       - intitule
       - campus
@@ -9306,6 +9321,8 @@ components:
       properties:
         sigle:
           type: string
+        code:
+          type: string
         annee:
           type: integer
         intitule:
@@ -9322,6 +9339,7 @@ components:
           type: string
       required:
       - sigle
+      - code
       - annee
       - intitule
       - campus

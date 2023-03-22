@@ -90,6 +90,8 @@ class Proposition(interface.RootEntity):
     equivalence_diplome: List[str] = attr.Factory(list)
     elements_confirmation: Dict[str, str] = attr.Factory(dict)
 
+    est_inscription_tardive: bool = False
+
     def modifier_choix_formation(
         self,
         formation_id: FormationIdentity,
@@ -114,6 +116,7 @@ class Proposition(interface.RootEntity):
         pool: 'AcademicCalendarTypes',
         elements_confirmation: Dict[str, str],
         type_demande: TypeDemande,
+        est_inscription_tardive: bool,
     ):
         self.statut = ChoixStatutPropositionGenerale.CONFIRMEE
         self.type_demande = type_demande
@@ -126,6 +129,7 @@ class Proposition(interface.RootEntity):
             self.attestation_inscription_reguliere = []
         if pool != AcademicCalendarTypes.ADMISSION_POOL_EXTERNAL_ENROLLMENT_CHANGE:
             self.formulaire_modification_inscription = []
+        self.est_inscription_tardive = est_inscription_tardive
 
     def completer_curriculum(
         self,

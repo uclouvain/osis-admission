@@ -24,40 +24,31 @@
 #
 # ##############################################################################
 import datetime
-from typing import Optional, List
+from abc import abstractmethod
+from typing import Optional
 
-import attr
-
+from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from osis_common.ddd import interface
 
 
-@attr.dataclass(frozen=True, slots=True)
-class VisualiseurAdmissionDTO(interface.DTO):
-    nom: str
-    prenom: str
-    date: datetime.datetime
+class IInscriptionTardive(interface.DomainService):
+    POTS_INSCRIPTION_TARDIVE = [
+        AcademicCalendarTypes.ADMISSION_POOL_HUE_UCL_PATHWAY_CHANGE,
+        AcademicCalendarTypes.ADMISSION_POOL_UE5_BELGIAN,
+    ]
+    SEUIL_JOURS_INSCRIPTION_TARDIVE = 30
 
+    @classmethod
+    @abstractmethod
+    def _recuperer_date_fin_pot(cls, pot: AcademicCalendarTypes, today: datetime.date) -> Optional[datetime.date]:
+        raise NotImplementedError
 
-@attr.dataclass(frozen=True, slots=True)
-class DemandeRechercheDTO(interface.DTO):
-    uuid: str
-    numero_demande: str
-    nom_candidat: str
-    prenom_candidat: str
-    noma_candidat: Optional[str]
-    plusieurs_demandes: bool
-    sigle_formation: str
-    code_formation: str
-    intitule_formation: str
-    type_formation: str
-    lieu_formation: str
-    nationalite_candidat: str
-    nationalite_ue_candidat: Optional[bool]
-    vip: bool
-    etat_demande: str
-    type_demande: str
-    derniere_modification_le: datetime.datetime
-    derniere_modification_par: str
-    derniere_modification_par_candidat: bool
-    dernieres_vues_par: List[VisualiseurAdmissionDTO]
-    date_confirmation: Optional[datetime.datetime]
+    @classmethod
+    def est_inscription_tardive(cls, pot: AcademicCalendarTypes) -> bool:
+        if pot not in cls.POTS_INSCRIPTION_TARDIVE:
+            return False
+
+        today = datetime.date.today()
+        date_fin_pot = cls._recuperer_date_fin_pot(pot, today)
+
+        return date_fin_pot is not None and (date_fin_pot - today).days < cls.SEUIL_JOURS_INSCRIPTION_TARDIVE

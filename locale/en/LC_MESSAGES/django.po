@@ -252,6 +252,9 @@ msgstr ""
 msgid "Accepted"
 msgstr ""
 
+msgid "Access condition:"
+msgstr ""
+
 msgid "Access to regulated professions"
 msgstr ""
 
@@ -1518,6 +1521,9 @@ msgstr ""
 msgid "ERC - European Research Council"
 msgstr ""
 
+msgid "EU,NEU"
+msgstr ""
+
 msgid "Economic sciences"
 msgstr ""
 
@@ -1766,6 +1772,9 @@ msgid "Formation is not available for this year (%(sigle)s in %(annee)s)."
 msgstr ""
 
 msgid "Formation is not available for this year."
+msgstr ""
+
+msgid "Fraudster (ARES)"
 msgstr ""
 
 msgid "French"
@@ -2037,6 +2046,9 @@ msgstr ""
 msgid "Identity picture"
 msgstr ""
 
+msgid "Identity picture of the candidate"
+msgstr ""
+
 msgid "If other, specify"
 msgstr ""
 
@@ -2217,6 +2229,9 @@ msgid "Last registration year"
 msgstr ""
 
 msgid "Last update author"
+msgstr ""
+
+msgid "Late enrollment"
 msgstr ""
 
 msgid "Latin"
@@ -2681,6 +2696,13 @@ msgstr ""
 msgid "Not VIP"
 msgstr ""
 
+msgid "Not fundable"
+msgstr ""
+
+msgid "Not specified"
+msgstr ""
+
+msgctxt "admission-header"
 msgid "Not specified"
 msgstr ""
 
@@ -3493,6 +3515,9 @@ msgstr ""
 msgid "Services"
 msgstr ""
 
+msgid "Several applications"
+msgstr ""
+
 msgid "Several applications?"
 msgstr ""
 
@@ -4127,9 +4152,6 @@ msgstr ""
 msgid "Type of training"
 msgstr ""
 
-msgid "Type:"
-msgstr ""
-
 msgid "UCLOUVAIN_SCIENTIFIC_STAFF"
 msgstr "UCLouvain scientific staff"
 
@@ -4166,6 +4188,9 @@ msgid ""
 msgstr ""
 
 msgid "Unique business number"
+msgstr ""
+
+msgid "Unknown noma"
 msgstr ""
 
 msgid "Unsubmitted for publication"
@@ -4443,6 +4468,9 @@ msgstr ""
 msgid "actions"
 msgstr ""
 
+msgid "assimilated,non-assimilated"
+msgstr ""
+
 msgid "by the UCLouvain Registration Service"
 msgstr ""
 
@@ -4450,6 +4478,9 @@ msgid "by the University Institute of Continuing Education"
 msgstr ""
 
 msgid "candidate"
+msgstr ""
+
+msgid "contact language:"
 msgstr ""
 
 msgid "created"
@@ -4473,6 +4504,9 @@ msgstr ""
 
 #, python-format
 msgid "on %(date)s at %(time)s"
+msgstr ""
+
+msgid "submission"
 msgstr ""
 
 msgid "the <strong>failure</strong> of the confirmation paper."

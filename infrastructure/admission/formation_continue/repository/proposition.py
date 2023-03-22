@@ -220,6 +220,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             date_fin_pot=admission.pool_end_date,  # from annotation
             formation=FormationDTO(
                 sigle=admission.training.acronym,
+                code=admission.training.partial_acronym,
                 annee=admission.training.academic_year.year,
                 intitule=admission.training.title if language_is_french else admission.training.title_english,
                 campus=admission.teaching_campus or '',  # from annotation

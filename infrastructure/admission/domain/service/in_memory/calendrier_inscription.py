@@ -53,15 +53,24 @@ class CalendrierInscriptionInMemory(ICalendrierInscription):
         today = date.today()
         for pool_name, dates in cls.periodes_ouvertes.items():
             for annee in cls.get_annees_academiques_pour_calcul():
-                debut, fin = dates
-                date_debut = date(annee + debut.annee, debut.mois, debut.jour)
-                if fin is None:
-                    date_fin = date_debut.replace(year=date_debut.year + 1) - timedelta(days=1)
-                else:
-                    date_fin = date(annee + fin.annee, fin.mois, fin.jour)
+                date_debut, date_fin = cls._get_dates_completes(annee, dates[0], dates[1])
                 if date_debut <= today <= date_fin:
                     opened.append((pool_name, annee))
         return opened
+
+    @classmethod
+    def get_dates_pool(cls, pool_name, annee) -> Tuple[date, date]:
+        debut, fin = cls.periodes_ouvertes.get(pool_name)
+        return cls._get_dates_completes(annee, debut, fin)
+
+    @classmethod
+    def _get_dates_completes(cls, annee, debut, fin):
+        date_debut = date(annee + debut.annee, debut.mois, debut.jour)
+        if fin is None:
+            date_fin = date_debut.replace(year=date_debut.year + 1) - timedelta(days=1)
+        else:
+            date_fin = date(annee + fin.annee, fin.mois, fin.jour)
+        return date_debut, date_fin
 
     @classmethod
     def est_ue_plus_5(

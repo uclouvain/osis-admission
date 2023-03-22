@@ -177,6 +177,7 @@ class DoctorateAdmissionListApiTestCase(QueriesAssertionsMixin, CheckActionLinks
             proposition['formation'],
             {
                 'sigle': self.general_education_admission.training.acronym,
+                'code': self.general_education_admission.training.partial_acronym,
                 'annee': self.general_education_admission.training.academic_year.year,
                 'intitule': self.general_education_admission.training.title,
                 'campus': self.general_campus_name,
@@ -232,6 +233,7 @@ class DoctorateAdmissionListApiTestCase(QueriesAssertionsMixin, CheckActionLinks
             proposition['formation'],
             {
                 'sigle': self.continuing_education_admission.training.acronym,
+                'code': self.continuing_education_admission.training.partial_acronym,
                 'annee': self.continuing_education_admission.training.academic_year.year,
                 'intitule': self.continuing_education_admission.training.title,
                 'campus': self.continuing_campus_name,

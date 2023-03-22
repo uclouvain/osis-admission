@@ -29,9 +29,12 @@ from typing import List, Optional
 import factory
 
 from admission.ddd import CODE_BACHELIER_VETERINAIRE
+from admission.ddd.admission.enums import TypeSituationAssimilation
+from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition, PropositionIdentity
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import PropositionNonTrouveeException
 from admission.ddd.admission.formation_generale.dtos import PropositionDTO
+from admission.ddd.admission.formation_generale.dtos.proposition import PropositionGestionnaireDTO
 from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
 from admission.ddd.admission.formation_generale.test.factory.proposition import (
     PropositionFactory,
@@ -45,6 +48,7 @@ from admission.infrastructure.admission.formation_generale.domain.service.in_mem
     FormationGeneraleInMemoryTranslator,
 )
 from admission.infrastructure.admission.repository.in_memory.proposition import GlobalPropositionInMemoryRepository
+from admission.infrastructure.utils import dto_to_dict
 from base.ddd.utils.in_memory_repository import InMemoryGenericRepository
 
 
@@ -203,4 +207,34 @@ class PropositionInMemoryRepository(
             est_reorientation_inscription_externe=proposition.est_reorientation_inscription_externe,
             attestation_inscription_reguliere=proposition.attestation_inscription_reguliere,
             pdf_recapitulatif=[],
+        )
+
+    @classmethod
+    def get_dto_for_gestionnaire(cls, entity_id: 'PropositionIdentity') -> 'PropositionGestionnaireDTO':
+        proposition = cls.get(entity_id=entity_id)
+        propositions = cls.search_dto(matricule_candidat=proposition.matricule_candidat)
+        base_proposition = cls._load_dto(proposition)
+
+        candidat = ProfilCandidatInMemoryTranslator.get_identification(proposition.matricule_candidat)
+
+        return PropositionGestionnaireDTO(
+            **dto_to_dict(base_proposition),
+            type='',
+            date_changement_statut=base_proposition.modifiee_le,
+            genre_candidat=candidat.genre,
+            noma_candidat=candidat.noma_derniere_inscription_ucl,
+            adresse_email_candidat=candidat.email,
+            langue_contact_candidat=candidat.langue_contact,
+            nationalite_candidat=candidat.pays_nationalite,
+            nationalite_ue_candidat=candidat.pays_nationalite_europeen,
+            photo_identite_candidat=candidat.photo_identite,
+            candidat_a_plusieurs_demandes=any(
+                proposition.statut == ChoixStatutPropositionGenerale.EN_BROUILLON for proposition in propositions
+            ),
+            titre_access='',
+            candidat_assimile=proposition.comptabilite.type_situation_assimilation
+            and proposition.comptabilite.type_situation_assimilation != TypeSituationAssimilation.AUCUNE_ASSIMILATION,
+            fraudeur_ares=False,
+            non_financable=False,
+            est_inscription_tardive=proposition.est_inscription_tardive,
         )

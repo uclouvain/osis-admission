@@ -44,6 +44,7 @@ class FormationEtendue(Formation):
     campus: str
     campus_inscription: str
     sigle_entite_gestion: str
+    code: str
 
 
 class FormationFactory(factory.Factory):
@@ -53,6 +54,7 @@ class FormationFactory(factory.Factory):
 
     entity_id = factory.SubFactory(FormationIdentityFactory)
     intitule = factory.Faker('sentence')
+    code = factory.Sequence(lambda n: 'code%02d' % n)
     code_domaine = '01A'
     campus = factory.Iterator(
         [

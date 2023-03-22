@@ -121,6 +121,7 @@ class FormationContinueInMemoryTranslator(IFormationContinueTranslator):
             code_domaine=entity.code_domaine,
             sigle_entite_gestion=entity.sigle_entite_gestion,
             campus_inscription=entity.campus_inscription,
+            code=entity.code,
         )
 
     @classmethod

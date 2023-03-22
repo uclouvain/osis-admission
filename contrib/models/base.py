@@ -29,7 +29,7 @@ from django.contrib.postgres.aggregates import StringAgg
 from django.core.cache import cache
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db import models
-from django.db.models import OuterRef, Subquery, Q, F, Value, Func, CharField
+from django.db.models import OuterRef, Subquery, Q, F, Value, Func, CharField, Exists
 from django.db.models.functions import Concat, Left, Coalesce, NullIf, Mod, LPad, Replace
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -37,7 +37,10 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from admission.contrib.models.functions import ToChar
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import STATUTS_PROPOSITION_AVANT_SOUMISSION
 from admission.ddd.admission.enums.type_demande import TypeDemande
+from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
+from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from base.models.academic_calendar import AcademicCalendar
 from base.models.entity_version import EntityVersion, PEDAGOGICAL_ENTITY_ADDED_EXCEPTIONS
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
@@ -137,9 +140,23 @@ class BaseAdmissionQuerySet(models.QuerySet):
                 Mod('training__academic_year__year', 100),
                 Value('-'),
                 # Formatted numero (e.g. 12 -> 000.012)
-                Replace(ToChar(F('reference'), Value('fm999G000G000')), Value(','), Value('.')),
+                Replace(ToChar(F('reference'), Value('fm999,000,000')), Value(','), Value('.')),
                 output_field=CharField(),
             )
+        )
+
+    def annotate_other_admissions_in_progress(self):
+        return self.annotate(
+            has_other_admission_in_progress=Exists(
+                BaseAdmission.objects.filter(candidate_id=OuterRef('candidate_id'))
+                .filter(
+                    Q(generaleducationadmission__status=ChoixStatutPropositionGenerale.EN_BROUILLON.name)
+                    | Q(continuingeducationadmission__status=ChoixStatutPropositionContinue.EN_BROUILLON.name)
+                    | Q(doctorateadmission__status__in=STATUTS_PROPOSITION_AVANT_SOUMISSION),
+                )
+                .filter(determined_academic_year_id=OuterRef('determined_academic_year_id'))
+                .exclude(pk=OuterRef('pk')),
+            ),
         )
 
 

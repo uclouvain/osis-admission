@@ -23,41 +23,9 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import datetime
-from typing import Optional, List
-
 import attr
 
-from osis_common.ddd import interface
 
-
-@attr.dataclass(frozen=True, slots=True)
-class VisualiseurAdmissionDTO(interface.DTO):
-    nom: str
-    prenom: str
-    date: datetime.datetime
-
-
-@attr.dataclass(frozen=True, slots=True)
-class DemandeRechercheDTO(interface.DTO):
-    uuid: str
-    numero_demande: str
-    nom_candidat: str
-    prenom_candidat: str
-    noma_candidat: Optional[str]
-    plusieurs_demandes: bool
-    sigle_formation: str
-    code_formation: str
-    intitule_formation: str
-    type_formation: str
-    lieu_formation: str
-    nationalite_candidat: str
-    nationalite_ue_candidat: Optional[bool]
-    vip: bool
-    etat_demande: str
-    type_demande: str
-    derniere_modification_le: datetime.datetime
-    derniere_modification_par: str
-    derniere_modification_par_candidat: bool
-    dernieres_vues_par: List[VisualiseurAdmissionDTO]
-    date_confirmation: Optional[datetime.datetime]
+def dto_to_dict(dto):
+    """Make a shallow dict copy of a DTO."""
+    return dict((field.name, getattr(dto, field.name)) for field in attr.fields(type(dto)))

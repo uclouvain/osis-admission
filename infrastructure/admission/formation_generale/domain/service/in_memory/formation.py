@@ -171,6 +171,7 @@ class FormationGeneraleInMemoryTranslator(IFormationGeneraleTranslator):
     def _build_dto(cls, entity: FormationFactory) -> 'FormationDTO':
         return FormationDTO(
             sigle=entity.entity_id.sigle,
+            code=entity.code,
             annee=entity.entity_id.annee,
             intitule=entity.intitule,
             campus=entity.campus,
