@@ -307,6 +307,9 @@ msgstr "Accepter ces cours"
 msgid "Accepted"
 msgstr "Acceptée"
 
+msgid "Access condition:"
+msgstr "Condition d'accès :"
+
 msgid "Access to regulated professions"
 msgstr "Accès aux professions réglementées"
 
@@ -1653,6 +1656,9 @@ msgstr "EFT"
 msgid "ERC - European Research Council"
 msgstr "ERC - European Research Council"
 
+msgid "EU,NEU"
+msgstr "UE,HUE"
+
 msgid "Economic sciences"
 msgstr "Sciences économiques"
 
@@ -1930,6 +1936,9 @@ msgstr ""
 
 msgid "Formation is not available for this year."
 msgstr "La formation n'est pas disponible pour cette année."
+
+msgid "Fraudster (ARES)"
+msgstr "Fraudeur (ARES)"
 
 msgid "French"
 msgstr "Français"
@@ -2265,6 +2274,9 @@ msgstr ""
 msgid "Identity picture"
 msgstr "Photo d'identité"
 
+msgid "Identity picture of the candidate"
+msgstr "Photo d'identité du candidat"
+
 msgid "If other, specify"
 msgstr "Si autre, préciser"
 
@@ -2473,6 +2485,9 @@ msgstr "Dernière année d'inscription"
 
 msgid "Last update author"
 msgstr "Auteur de la dernière mise à jour"
+
+msgid "Late enrollment"
+msgstr "Inscription tardive"
 
 msgid "Latin"
 msgstr "Latin"
@@ -3011,8 +3026,15 @@ msgstr "Non-UE"
 msgid "Not VIP"
 msgstr "Non-VIP"
 
+msgid "Not fundable"
+msgstr "Non-finançable"
+
 msgid "Not specified"
 msgstr "Non renseigné(e)"
+
+msgctxt "admission-header"
+msgid "Not specified"
+msgstr "Non précisée"
 
 msgid "Number"
 msgstr "Numéro"
@@ -3867,6 +3889,9 @@ msgstr "Expéditeur"
 msgid "Services"
 msgstr "Services"
 
+msgid "Several applications"
+msgstr "Plusieurs demandes"
+
 msgid "Several applications?"
 msgstr "Plusieurs demandes ?"
 
@@ -4574,9 +4599,6 @@ msgstr "Type de publication"
 msgid "Type of training"
 msgstr "Type de formation"
 
-msgid "Type:"
-msgstr "Type :"
-
 msgid "UCLOUVAIN_SCIENTIFIC_STAFF"
 msgstr "Personnel scientifique UCLouvain"
 
@@ -4620,6 +4642,9 @@ msgstr ""
 
 msgid "Unique business number"
 msgstr "Numéro unique d'entreprise"
+
+msgid "Unknown noma"
+msgstr "Noma inconnu"
 
 msgid "Unsubmitted for publication"
 msgstr "Non soumis pour publication"
@@ -4939,6 +4964,9 @@ msgstr "année académique"
 msgid "actions"
 msgstr "actions"
 
+msgid "assimilated,non-assimilated"
+msgstr "assimilé(e),non-assimilé(e)"
+
 msgid "by the UCLouvain Registration Service"
 msgstr "par le Service des Inscriptions de l'UCLouvain"
 
@@ -4947,6 +4975,9 @@ msgstr "par l'Institut Universitaire de Formation Continue (IUFC)"
 
 msgid "candidate"
 msgstr "candidat"
+
+msgid "contact language:"
+msgstr "langue de contact :"
 
 msgid "created"
 msgstr "créé"
@@ -4970,6 +5001,9 @@ msgstr "modifiée"
 #, python-format
 msgid "on %(date)s at %(time)s"
 msgstr "le %(date)s à %(time)s"
+
+msgid "submission"
+msgstr "soumission"
 
 msgid "the <strong>failure</strong> of the confirmation paper."
 msgstr "l'<strong>échec</strong> de l'épreuve de confirmation."

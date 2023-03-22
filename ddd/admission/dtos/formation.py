@@ -31,6 +31,7 @@ from osis_common.ddd import interface
 @attr.dataclass(frozen=True, slots=True)
 class FormationDTO(interface.DTO):
     sigle: str
+    code: str
     annee: int
     intitule: str
     campus: str

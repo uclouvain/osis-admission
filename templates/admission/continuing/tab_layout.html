@@ -37,14 +37,14 @@
     </a>
   </li>
   <li class="active">
-    {{ object.training.title }} ({{ object.reference }})
+    {{ admission.training.title }} ({{ admission.reference }})
   </li>
 {% endblock %}
 
 {% block page-header %}
   <div class="page-header flex-content">
     <h2>
-      {{ object.training.title }} ({{ object.reference }})
+      {{ admission.training.title }} ({{ admission.reference }})
     </h2>
     <a
         href="{% url 'admission:continuing-education:list' %}"
@@ -58,16 +58,16 @@
 
 {% block panel-heading %}
   <div>
-    {% trans "Candidate:" %} {{ object.candidate.first_name }} {{ object.candidate.last_name }}
+    {% trans "Candidate:" %} {{ admission.candidate.first_name }} {{ admission.candidate.last_name }}
   </div>
   <div>
     {% trans "Status:" %}
-    {{ object.status|enum_display:'ChoixStatutPropositionContinue' }}
+    {{ admission.status|enum_display:'ChoixStatutPropositionContinue' }}
   </div>
-  {% if object.submitted_at %}
+  {% if admission.submitted_at %}
     <div>
       {% trans "Submission date:" %}
-      {{ object.submitted_at|date:'d/m/Y H:i' }}
+      {{ admission.submitted_at|date:'d/m/Y H:i' }}
     </div>
   {% endif %}
 {% endblock %}

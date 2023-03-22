@@ -200,3 +200,8 @@ class CompleterComptabilitePropositionCommand(interface.CommandRequest):
 @attr.dataclass(frozen=True, slots=True)
 class RecupererElementsConfirmationQuery(interface.QueryRequest):
     uuid_proposition: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RecupererPropositionGestionnaireQuery(interface.QueryRequest):
+    uuid_proposition: str

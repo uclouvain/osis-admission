@@ -48,6 +48,9 @@ from admission.infrastructure.admission.formation_generale.domain.service.in_mem
 from admission.infrastructure.admission.formation_generale.domain.service.in_memory.formation import (
     FormationGeneraleInMemoryTranslator,
 )
+from admission.infrastructure.admission.formation_generale.domain.service.in_memory.inscription_tardive import (
+    InscriptionTardiveInMemory,
+)
 from admission.infrastructure.admission.formation_generale.domain.service.in_memory.notification import (
     NotificationInMemory,
 )
@@ -125,6 +128,7 @@ COMMAND_HANDLERS = {
         element_confirmation=ElementsConfirmationInMemory(),
         notification=NotificationInMemory(),
         maximum_propositions_service=_maximum_propositions_autorisees,
+        inscription_tardive_service=InscriptionTardiveInMemory(),
     ),
     CompleterCurriculumCommand: lambda msg_bus, cmd: completer_curriculum(
         cmd,
@@ -166,5 +170,9 @@ COMMAND_HANDLERS = {
         i_profil_candidat_translator=_profil_candidat_translator,
         i_comptabilite_translator=_comptabilite_translator,
         academic_year_repository=_academic_year_repository,
+    ),
+    RecupererPropositionGestionnaireQuery: lambda msg_bus, cmd: recuperer_proposition_gestionnaire(
+        cmd,
+        proposition_repository=_proposition_repository,
     ),
 }

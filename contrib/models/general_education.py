@@ -105,6 +105,11 @@ class GeneralEducationAdmission(BaseAdmission):
         upload_to=admission_directory_path,
         verbose_name=_('Diploma equivalence'),
     )
+    late_enrollment = models.BooleanField(
+        blank=True,
+        null=True,
+        verbose_name=_('Late enrollment'),
+    )
 
     class Meta:
         verbose_name = _("General education admission")

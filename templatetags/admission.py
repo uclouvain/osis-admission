@@ -37,7 +37,7 @@ from django.utils.translation import gettext_lazy as _, pgettext, get_language
 from rules.templatetags import rules
 
 from admission.auth.constants import READ_ACTIONS_BY_TAB, UPDATE_ACTIONS_BY_TAB
-from admission.contrib.models import DoctorateAdmission
+from admission.contrib.models import DoctorateAdmission, GeneralEducationAdmission, ContinuingEducationAdmission
 from admission.contrib.models.base import BaseAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     STATUTS_PROPOSITION_AVANT_INSCRIPTION,
@@ -52,12 +52,13 @@ from admission.ddd.parcours_doctoral.formation.domain.model.enums import (
     ChoixTypeEpreuve,
     StatutActivite,
 )
+from admission.exports.admission_recap.attachments import IMAGE_MIME_TYPES
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
-    ADMISSION_EDUCATION_TYPE_BY_ADMISSION_CONTEXT,
     ADMISSION_CONTEXT_BY_OSIS_EDUCATION_TYPE,
 )
 from admission.utils import get_uuid_value, format_academic_year
+from osis_document.api.utils import get_remote_token, get_remote_metadata
 from osis_role.templatetags.osis_role import has_perm
 
 CONTEXT_ADMISSION = 'admission'
@@ -295,6 +296,11 @@ TAB_TREES = {
             Tab('debug', _('Debug'), 'bug'),
         ],
     },
+    CONTEXT_CONTINUING: {
+        Tab('management', pgettext('tab', 'Management'), 'gear'): [
+            Tab('debug', _('Debug'), 'bug'),
+        ],
+    },
 }
 
 
@@ -368,10 +374,15 @@ def current_subtabs(context):
     return tab_context
 
 
-def get_current_context(admission: DoctorateAdmission):
-    if admission.status in STATUTS_PROPOSITION_AVANT_INSCRIPTION:
-        return CONTEXT_ADMISSION
-    return CONTEXT_DOCTORATE
+def get_current_context(admission: Union[DoctorateAdmission, GeneralEducationAdmission, ContinuingEducationAdmission]):
+    if isinstance(admission, DoctorateAdmission):
+        if admission.status in STATUTS_PROPOSITION_AVANT_INSCRIPTION:
+            return CONTEXT_ADMISSION
+        return CONTEXT_DOCTORATE
+    elif isinstance(admission, GeneralEducationAdmission):
+        return CONTEXT_GENERAL
+    elif isinstance(admission, ContinuingEducationAdmission):
+        return CONTEXT_CONTINUING
 
 
 @register.inclusion_tag('admission/includes/doctorate_subtabs_bar.html', takes_context=True)
@@ -452,6 +463,18 @@ def field_data(
         'html_tag': html_tag,
         'inline': inline,
     }
+
+
+@register.simple_tag
+def get_image_file_url(file_uuids):
+    """Returns the url of the file whose uuid is the first of the specified ones, if it is an image."""
+    if file_uuids:
+        token = get_remote_token(file_uuids[0])
+        if token:
+            metadata = get_remote_metadata(token)
+            if metadata and metadata.get('mimetype') in IMAGE_MIME_TYPES:
+                return metadata.get('url')
+    return ''
 
 
 @register.filter

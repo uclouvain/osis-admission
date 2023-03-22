@@ -36,9 +36,10 @@ from django.urls import reverse
 from django.utils.translation import gettext as _
 from openpyxl.workbook import Workbook
 from openpyxl.worksheet.worksheet import Worksheet
+from osis_async.models import AsyncTask
+from osis_async.models.enums import TaskState
 
 from admission.ddd.admission.dtos.liste import DemandeRechercheDTO, VisualiseurAdmissionDTO
-from admission.ddd.admission.enums.statut import CHOIX_STATUT_TOUTE_PROPOSITION
 from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.tests import QueriesAssertionsMixin
@@ -59,8 +60,6 @@ from base.tests.factories.entity import EntityFactory
 from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.person import PersonFactory
 from base.tests.factories.student import StudentFactory
-from osis_async.models import AsyncTask
-from osis_async.models.enums import TaskState
 from osis_export.models import Export
 from osis_export.models.enums.types import ExportTypes
 from program_management.models.education_group_version import EducationGroupVersion
@@ -155,7 +154,7 @@ class AdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, TestCase):
             noma_candidat=cls.admission.candidate.last_registration_id,
             plusieurs_demandes=False,
             sigle_formation=cls.admission.training.acronym,
-            sigle_partiel_formation=cls.admission.training.partial_acronym,
+            code_formation=cls.admission.training.partial_acronym,
             intitule_formation=cls.admission.training.title,
             type_formation=cls.admission.training.education_group_type.name,
             lieu_formation=teaching_campus,

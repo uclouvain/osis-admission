@@ -129,7 +129,7 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
                 noma_candidat=cls.admissions[0].candidate.last_registration_id,
                 plusieurs_demandes=False,
                 sigle_formation=cls.admissions[0].training.acronym,
-                sigle_partiel_formation=cls.admissions[0].training.partial_acronym,
+                code_formation=cls.admissions[0].training.partial_acronym,
                 intitule_formation=cls.admissions[0].training.title,
                 type_formation=cls.admissions[0].training.education_group_type.name,
                 lieu_formation=teaching_campus,

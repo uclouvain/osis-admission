@@ -24,40 +24,17 @@
 #
 # ##############################################################################
 import datetime
-from typing import Optional, List
+from typing import Optional
 
-import attr
-
-from osis_common.ddd import interface
-
-
-@attr.dataclass(frozen=True, slots=True)
-class VisualiseurAdmissionDTO(interface.DTO):
-    nom: str
-    prenom: str
-    date: datetime.datetime
+from admission.ddd.admission.formation_generale.domain.service.i_inscription_tardive import IInscriptionTardive
+from admission.infrastructure.admission.domain.service.in_memory.calendrier_inscription import (
+    CalendrierInscriptionInMemory,
+)
+from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 
 
-@attr.dataclass(frozen=True, slots=True)
-class DemandeRechercheDTO(interface.DTO):
-    uuid: str
-    numero_demande: str
-    nom_candidat: str
-    prenom_candidat: str
-    noma_candidat: Optional[str]
-    plusieurs_demandes: bool
-    sigle_formation: str
-    code_formation: str
-    intitule_formation: str
-    type_formation: str
-    lieu_formation: str
-    nationalite_candidat: str
-    nationalite_ue_candidat: Optional[bool]
-    vip: bool
-    etat_demande: str
-    type_demande: str
-    derniere_modification_le: datetime.datetime
-    derniere_modification_par: str
-    derniere_modification_par_candidat: bool
-    dernieres_vues_par: List[VisualiseurAdmissionDTO]
-    date_confirmation: Optional[datetime.datetime]
+class InscriptionTardiveInMemory(IInscriptionTardive):
+    @classmethod
+    def _recuperer_date_fin_pot(cls, pot: AcademicCalendarTypes, today: datetime.date) -> Optional[datetime.date]:
+        periode_ouverte = CalendrierInscriptionInMemory.get_dates_pool(pot.name, today.year)
+        return periode_ouverte and periode_ouverte[1]

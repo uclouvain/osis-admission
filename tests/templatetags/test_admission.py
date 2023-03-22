@@ -25,7 +25,7 @@
 # ##############################################################################
 import datetime
 import uuid
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 import freezegun
 import mock
@@ -37,11 +37,12 @@ from django.urls import path, reverse
 from django.utils.translation import gettext as _
 from django.views import View
 
-from admission.contrib.models import ContinuingEducationAdmissionProxy
+from admission.contrib.models import ContinuingEducationAdmissionProxy, DoctorateAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.domain.enums import TypeFormation
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
+from admission.exports.admission_recap.attachments import PDF_MIME_TYPE, JPEG_MIME_TYPE, PNG_MIME_TYPE
 from admission.templatetags.admission import (
     TAB_TREES,
     Tab,
@@ -61,7 +62,9 @@ from admission.templatetags.admission import (
     admission_training_type,
     admission_url,
     admission_status,
+    get_image_file_url,
 )
+from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
 from admission.tests.factories.form_item import (
     DocumentAdmissionFormItemFactory,
@@ -199,6 +202,10 @@ class AdmissionTabsTestCase(TestCase):
                 Tab('t22', 'tab 22'),
             ],
         }
+        doctorate_admission = DoctorateAdmissionFactory(
+            status=ChoixStatutPropositionDoctorale.INSCRIPTION_AUTORISEE.name,
+        )
+        cls.doctorate_admission = DoctorateAdmission.objects.get(uuid=doctorate_admission.uuid)
 
     def test_get_active_parent_with_valid_tab_name(self):
         result = get_active_parent(tab_tree=self.tab_tree, tab_name='t21')
@@ -259,7 +266,9 @@ class AdmissionTabsTestCase(TestCase):
                     url_name='project',
                 ),
             ),
-            'view': Mock(),
+            'view': Mock(
+                get_permission_object=Mock(return_value=self.doctorate_admission),
+            ),
         }
         result = current_subtabs(context)
         self.assertEqual(result['subtabs'], TAB_TREES['doctorate'][Tab('doctorate', _('Doctorate'), 'graduation-cap')])
@@ -272,7 +281,9 @@ class AdmissionTabsTestCase(TestCase):
                     url_name='failure',
                 ),
             ),
-            'view': Mock(),
+            'view': Mock(
+                get_permission_object=Mock(return_value=self.doctorate_admission),
+            ),
         }
         result = current_subtabs(context)
         self.assertEqual(result['subtabs'], TAB_TREES['doctorate'][Tab('confirmation', '')])
@@ -539,4 +550,58 @@ class AdmissionTagsTestCase(TestCase):
                 osis_education_type=self.continuing_training_type,
             ),
             status.value,
+        )
+
+
+@override_settings(OSIS_DOCUMENT_BASE_URL='http://dummyurl/')
+class AdmissionGetImageFileUrlTestCase(TestCase):
+    def setUp(self) -> None:
+        patcher = patch('admission.templatetags.admission.get_remote_token', return_value='foobar')
+        self.token_patcher = patcher.start()
+        self.addCleanup(patcher.stop)
+
+        self.image_url = 'http://dummyurl/img.png'
+        patcher = patch('admission.templatetags.admission.get_remote_metadata', return_value={'url': self.image_url})
+        self.metadata_patcher = patcher.start()
+        self.addCleanup(patcher.stop)
+
+    def test_get_image_file_url_without_file_uuid(self):
+        self.assertEqual(
+            get_image_file_url(file_uuids=[]),
+            '',
+        )
+
+    def test_get_image_file_url_with_not_accessible_token(self):
+        self.token_patcher.return_value = None
+        self.assertEqual(
+            get_image_file_url(file_uuids=['file_uuid']),
+            '',
+        )
+
+    def test_get_image_file_url_with_not_accessible_metadata(self):
+        self.metadata_patcher.return_value = None
+        self.assertEqual(
+            get_image_file_url(file_uuids=['file_uuid']),
+            '',
+        )
+
+    def test_get_image_file_url_with_pdf_file(self):
+        self.metadata_patcher.return_value['mimetype'] = PDF_MIME_TYPE
+        self.assertEqual(
+            get_image_file_url(file_uuids=['file_uuid']),
+            '',
+        )
+
+    def test_get_image_file_url_with_jpeg_file(self):
+        self.metadata_patcher.return_value['mimetype'] = JPEG_MIME_TYPE
+        self.assertEqual(
+            get_image_file_url(file_uuids=['file_uuid']),
+            self.image_url,
+        )
+
+    def test_get_image_file_url_with_png_file(self):
+        self.metadata_patcher.return_value['mimetype'] = PNG_MIME_TYPE
+        self.assertEqual(
+            get_image_file_url(file_uuids=['file_uuid']),
+            self.image_url,
         )

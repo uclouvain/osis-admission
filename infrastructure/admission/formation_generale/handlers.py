@@ -27,17 +27,18 @@
 from admission.ddd.admission.formation_generale.commands import *
 from admission.ddd.admission.formation_generale.use_case.read import *
 from admission.ddd.admission.formation_generale.use_case.write import *
-from admission.infrastructure.admission.domain.service.elements_confirmation import ElementsConfirmation
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
 from admission.infrastructure.admission.domain.service.bourse import BourseTranslator
 from admission.infrastructure.admission.domain.service.calendrier_inscription import CalendrierInscription
+from admission.infrastructure.admission.domain.service.elements_confirmation import ElementsConfirmation
 from admission.infrastructure.admission.domain.service.maximum_propositions import MaximumPropositionsAutorisees
 from admission.infrastructure.admission.domain.service.profil_candidat import ProfilCandidatTranslator
 from admission.infrastructure.admission.domain.service.titres_acces import TitresAcces
 from admission.infrastructure.admission.formation_generale.domain.service.comptabilite import ComptabiliteTranslator
 from admission.infrastructure.admission.formation_generale.domain.service.formation import FormationGeneraleTranslator
+from admission.infrastructure.admission.formation_generale.domain.service.inscription_tardive import InscriptionTardive
 from admission.infrastructure.admission.formation_generale.domain.service.notification import Notification
 from admission.infrastructure.admission.formation_generale.domain.service.question_specifique import (
     QuestionSpecifiqueTranslator,
@@ -99,6 +100,7 @@ COMMAND_HANDLERS = {
         element_confirmation=ElementsConfirmation(),
         notification=Notification(),
         maximum_propositions_service=MaximumPropositionsAutorisees(),
+        inscription_tardive_service=InscriptionTardive(),
     ),
     CompleterCurriculumCommand: lambda msg_bus, cmd: completer_curriculum(
         cmd,
@@ -140,5 +142,9 @@ COMMAND_HANDLERS = {
         i_profil_candidat_translator=ProfilCandidatTranslator(),
         i_comptabilite_translator=ComptabiliteTranslator(),
         academic_year_repository=AcademicYearRepository(),
+    ),
+    RecupererPropositionGestionnaireQuery: lambda msg_bus, cmd: recuperer_proposition_gestionnaire(
+        cmd,
+        proposition_repository=PropositionRepository(),
     ),
 }

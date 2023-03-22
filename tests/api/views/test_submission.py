@@ -230,6 +230,25 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
         self.admission_ok.refresh_from_db()
         self.assertEqual(self.admission_ok.status, ChoixStatutPropositionGenerale.CONFIRMEE.name)
         self.assertIsNotNone(self.admission_ok.submitted_at)
+        self.assertEqual(self.admission_ok.late_enrollment, False)
+
+    @freezegun.freeze_time("1980-10-22")
+    def test_general_proposition_submission_with_late_enrollment(self):
+        self.client.force_authenticate(user=self.candidate_ok.user)
+
+        # The submission is in October so we need to valuate September
+        ProfessionalExperienceFactory(
+            person=self.candidate_ok,
+            start_date=datetime.date(1980, 9, 1),
+            end_date=datetime.date(1980, 9, 30),
+        )
+
+        response = self.client.post(self.ok_url, self.data_ok)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
+        self.admission_ok.refresh_from_db()
+        self.assertEqual(self.admission_ok.status, ChoixStatutPropositionGenerale.CONFIRMEE.name)
+        self.assertEqual(self.admission_ok.late_enrollment, True)
 
     @freezegun.freeze_time("1980-11-25")
     def test_general_proposition_submission_ok_hors_delai(self):

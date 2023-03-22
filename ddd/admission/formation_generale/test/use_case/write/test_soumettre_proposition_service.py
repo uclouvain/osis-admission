@@ -25,15 +25,18 @@
 # ##############################################################################
 import datetime
 from unittest import TestCase
+from unittest.mock import patch
 
 import freezegun
 
 from admission.ddd.admission.formation_generale.commands import SoumettrePropositionCommand
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
+from admission.ddd.admission.formation_generale.test.factory.proposition import PropositionFactory
 from admission.infrastructure.admission.domain.service.in_memory.elements_confirmation import (
     ElementsConfirmationInMemory,
 )
+from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
 from admission.infrastructure.admission.formation_generale.domain.service.in_memory.formation import (
     FormationGeneraleInMemoryTranslator,
 )
@@ -51,8 +54,9 @@ class TestSoumettrePropositionGenerale(TestCase):
         self.proposition_repository = PropositionInMemoryRepository()
         self.addCleanup(self.proposition_repository.reset)
         self.message_bus = message_bus_in_memory_instance
-
         self.academic_year_repository = AcademicYearInMemoryRepository()
+        self.candidat_translator = ProfilCandidatInMemoryTranslator()
+        self.candidat = self.candidat_translator.profil_candidats[1]
 
         for annee in range(2016, 2023):
             self.academic_year_repository.save(
@@ -84,3 +88,92 @@ class TestSoumettrePropositionGenerale(TestCase):
         self.assertEqual(proposition_id.uuid, updated_proposition.entity_id.uuid)
         # Updated proposition
         self.assertEqual(updated_proposition.statut, ChoixStatutPropositionGenerale.CONFIRMEE)
+        self.assertEqual(updated_proposition.est_inscription_tardive, False)
+
+    @freezegun.freeze_time('22/10/2020')
+    def test_should_soumettre_proposition_tardive(self):
+        with patch.multiple(
+            self.candidat,
+            annee_derniere_inscription_ucl=2019,
+            noma_derniere_inscription_ucl='00000001',
+            pays_nationalite="AR",
+        ):
+            proposition = PropositionFactory(
+                est_bachelier_en_reorientation=True,
+                formation_id__sigle="BACHELIER-ECO",
+                formation_id__annee=2020,
+                matricule_candidat=self.candidat.matricule,
+            )
+
+            self.proposition_repository.save(proposition)
+
+            elements_confirmation = ElementsConfirmationInMemory.get_elements_for_tests(
+                self.proposition_repository.get(proposition.entity_id),
+                FormationGeneraleInMemoryTranslator(),
+                profil_translator=self.candidat_translator,
+            )
+
+            proposition_id = self.message_bus.invoke(
+                SoumettrePropositionCommand(
+                    uuid_proposition=proposition.entity_id.uuid,
+                    pool=AcademicCalendarTypes.ADMISSION_POOL_HUE_UCL_PATHWAY_CHANGE.name,
+                    annee=2020,
+                    elements_confirmation=elements_confirmation,
+                ),
+            )
+
+            proposition = self.proposition_repository.get(entity_id=proposition_id)
+            self.assertEqual(proposition.est_inscription_tardive, True)
+
+    @freezegun.freeze_time('22/09/2020')
+    def test_should_soumettre_proposition_non_tardive_avant_limite(self):
+        with patch.multiple(
+            self.candidat,
+            annee_derniere_inscription_ucl=2019,
+            noma_derniere_inscription_ucl='00000001',
+            pays_nationalite="AR",
+        ):
+            proposition = PropositionFactory(
+                est_bachelier_en_reorientation=True,
+                formation_id__sigle="BACHELIER-ECO",
+                formation_id__annee=2020,
+                matricule_candidat=self.candidat.matricule,
+            )
+
+            self.proposition_repository.save(proposition)
+
+            elements_confirmation = ElementsConfirmationInMemory.get_elements_for_tests(
+                self.proposition_repository.get(proposition.entity_id),
+                FormationGeneraleInMemoryTranslator(),
+                profil_translator=self.candidat_translator,
+            )
+
+            proposition_id = self.message_bus.invoke(
+                SoumettrePropositionCommand(
+                    uuid_proposition=proposition.entity_id.uuid,
+                    pool=AcademicCalendarTypes.ADMISSION_POOL_HUE_UCL_PATHWAY_CHANGE.name,
+                    annee=2020,
+                    elements_confirmation=elements_confirmation,
+                ),
+            )
+
+            proposition = self.proposition_repository.get(entity_id=proposition_id)
+            self.assertEqual(proposition.est_inscription_tardive, False)
+
+    @freezegun.freeze_time('22/10/2020')
+    def test_should_soumettre_proposition_non_tardive_pot_sans_possibilite_inscription_tardive(self):
+        elements_confirmation = ElementsConfirmationInMemory.get_elements_for_tests(
+            self.proposition_repository.get(PropositionIdentity("uuid-MASTER-SCI")),
+            FormationGeneraleInMemoryTranslator(),
+        )
+        proposition_id = self.message_bus.invoke(
+            SoumettrePropositionCommand(
+                uuid_proposition="uuid-MASTER-SCI",
+                pool=AcademicCalendarTypes.ADMISSION_POOL_VIP.name,
+                annee=2020,
+                elements_confirmation=elements_confirmation,
+            ),
+        )
+
+        updated_proposition = self.proposition_repository.get(proposition_id)
+        self.assertEqual(updated_proposition.est_inscription_tardive, False)

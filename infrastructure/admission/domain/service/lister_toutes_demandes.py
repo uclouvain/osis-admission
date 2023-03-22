@@ -31,10 +31,8 @@ from django.db.models import (
     Q,
     F,
     Value,
-    Exists,
     ExpressionWrapper,
     BooleanField,
-    OuterRef,
     Prefetch,
     Case,
     When,
@@ -45,14 +43,9 @@ from django.utils.translation import get_language
 
 from admission.contrib.models import AdmissionViewer
 from admission.contrib.models.base import BaseAdmission, BaseAdmissionProxy
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
-    STATUTS_PROPOSITION_AVANT_SOUMISSION,
-)
 from admission.ddd.admission.domain.service.i_filtrer_toutes_demandes import IListerToutesDemandes
 from admission.ddd.admission.dtos.liste import DemandeRechercheDTO, VisualiseurAdmissionDTO
 from admission.ddd.admission.enums.statut import CHOIX_STATUT_TOUTE_PROPOSITION
-from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
-from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.views import PaginatedList
 
 
@@ -93,6 +86,7 @@ class ListerToutesDemandes(IListerToutesDemandes):
 
         qs = (
             BaseAdmissionProxy.objects.with_training_management_and_reference()
+            .annotate_other_admissions_in_progress()
             .annotate(
                 status=Coalesce(
                     NullIf(F('continuingeducationadmission__status'), Value('')),
@@ -106,16 +100,6 @@ class ListerToutesDemandes(IListerToutesDemandes):
                     | Q(generaleducationadmission__erasmus_mundus_scholarship_id__isnull=False)
                     | Q(generaleducationadmission__double_degree_scholarship_id__isnull=False),
                     output_field=BooleanField(),
-                ),
-                has_other_admission_in_progress=Exists(
-                    BaseAdmission.objects.filter(candidate_id=OuterRef('candidate_id'))
-                    .filter(
-                        Q(generaleducationadmission__status=ChoixStatutPropositionGenerale.EN_BROUILLON.name)
-                        | Q(continuingeducationadmission__status=ChoixStatutPropositionContinue.EN_BROUILLON.name)
-                        | Q(doctorateadmission__status__in=STATUTS_PROPOSITION_AVANT_SOUMISSION),
-                    )
-                    .filter(training__academic_year__year=annee_academique)
-                    .exclude(pk=OuterRef('pk')),
                 ),
             )
             .select_related(
@@ -136,7 +120,7 @@ class ListerToutesDemandes(IListerToutesDemandes):
 
         # Add filters
         if annee_academique:
-            qs = qs.filter(training__academic_year__year=annee_academique)
+            qs = qs.filter(determined_academic_year__year=annee_academique)
         if numero:
             qs = qs.filter(reference=numero)
         if noma:
@@ -229,7 +213,7 @@ class ListerToutesDemandes(IListerToutesDemandes):
             noma_candidat=admission.candidate.last_registration_id,
             plusieurs_demandes=admission.has_other_admission_in_progress,  # From annotation
             sigle_formation=admission.training.acronym,
-            sigle_partiel_formation=admission.training.partial_acronym,
+            code_formation=admission.training.partial_acronym,
             intitule_formation=getattr(admission.training, 'title' if language_is_french else 'title_english'),
             type_formation=admission.training.education_group_type.name,
             lieu_formation=admission.teaching_campus,

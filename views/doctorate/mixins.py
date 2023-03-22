@@ -23,6 +23,8 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
+from typing import Union
+
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import Http404
 from django.utils.functional import cached_property
@@ -32,6 +34,16 @@ from django.views.generic.base import ContextMixin
 from admission.auth.roles.sic_manager import SicManager
 from admission.contrib.models import DoctorateAdmission
 from admission.contrib.models.base import AdmissionViewer
+from admission.ddd.admission.doctorat.preparation.commands import GetPropositionCommand
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
+from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import PropositionNonTrouveeException
+from admission.ddd.admission.doctorat.preparation.dtos import PropositionDTO
+from admission.ddd.admission.doctorat.validation.commands import RecupererDemandeQuery
+from admission.ddd.admission.doctorat.validation.domain.validator.exceptions import DemandeNonTrouveeException
+from admission.ddd.admission.doctorat.validation.dtos import DemandeDTO
+from admission.ddd.admission.formation_continue.commands import RecupererPropositionQuery
+from admission.ddd.admission.formation_generale.commands import RecupererPropositionGestionnaireQuery
+from admission.ddd.admission.formation_generale.dtos.proposition import PropositionGestionnaireDTO
 from admission.ddd.parcours_doctoral.commands import RecupererDoctoratQuery
 from admission.ddd.parcours_doctoral.domain.validator.exceptions import DoctoratNonTrouveException
 from admission.ddd.parcours_doctoral.dtos import DoctoratDTO
@@ -42,13 +54,6 @@ from admission.ddd.parcours_doctoral.epreuve_confirmation.dtos import EpreuveCon
 from admission.ddd.parcours_doctoral.epreuve_confirmation.validators.exceptions import (
     EpreuveConfirmationNonTrouveeException,
 )
-from admission.ddd.admission.doctorat.preparation.commands import GetPropositionCommand
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
-from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import PropositionNonTrouveeException
-from admission.ddd.admission.doctorat.preparation.dtos import PropositionDTO
-from admission.ddd.admission.doctorat.validation.commands import RecupererDemandeQuery
-from admission.ddd.admission.doctorat.validation.domain.validator.exceptions import DemandeNonTrouveeException
-from admission.ddd.admission.doctorat.validation.dtos import DemandeDTO
 from admission.templatetags.admission import CONTEXT_CONTINUING, CONTEXT_DOCTORATE, CONTEXT_GENERAL
 from admission.utils import (
     get_cached_admission_perm_obj,
@@ -61,8 +66,8 @@ from osis_role.contrib.views import PermissionRequiredMixin
 
 class LoadDossierViewMixin(LoginRequiredMixin, PermissionRequiredMixin, ContextMixin):
     @property
-    def admission_uuid(self):
-        return self.kwargs.get('uuid')
+    def admission_uuid(self) -> str:
+        return self.kwargs.get('uuid', '')
 
     @property
     def current_context(self):
@@ -77,8 +82,13 @@ class LoadDossierViewMixin(LoginRequiredMixin, PermissionRequiredMixin, ContextM
         }[self.current_context](self.admission_uuid)
 
     @cached_property
-    def proposition(self) -> 'PropositionDTO':
-        return message_bus_instance.invoke(GetPropositionCommand(uuid_proposition=self.admission_uuid))
+    def proposition(self) -> Union[PropositionDTO, PropositionGestionnaireDTO]:
+        cmd = {
+            CONTEXT_DOCTORATE: GetPropositionCommand(uuid_proposition=self.admission_uuid),
+            CONTEXT_CONTINUING: RecupererPropositionQuery(uuid_proposition=self.admission_uuid),
+            CONTEXT_GENERAL: RecupererPropositionGestionnaireQuery(uuid_proposition=self.admission_uuid),
+        }[self.current_context]
+        return message_bus_instance.invoke(cmd)
 
     @cached_property
     def dossier(self) -> 'DemandeDTO':
@@ -137,6 +147,8 @@ class LoadDossierViewMixin(LoginRequiredMixin, PermissionRequiredMixin, ContextM
 
             except (PropositionNonTrouveeException, DemandeNonTrouveeException, DoctoratNonTrouveException) as e:
                 raise Http404(e.message)
+        elif self.is_general:
+            context['admission'] = self.proposition
         else:
             context['admission'] = self.admission
         return context

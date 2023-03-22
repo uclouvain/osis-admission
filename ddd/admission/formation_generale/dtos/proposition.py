@@ -71,3 +71,36 @@ class PropositionDTO(interface.DTO):
 
     elements_confirmation: Dict[str, str]
     pdf_recapitulatif: List[str]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class PropositionGestionnaireDTO(PropositionDTO):
+    type: str
+    date_changement_statut: Optional[datetime.datetime]
+
+    genre_candidat: str
+    noma_candidat: str
+    adresse_email_candidat: str
+    langue_contact_candidat: str
+    nationalite_candidat: str
+    nationalite_ue_candidat: Optional[bool]
+    photo_identite_candidat: List[str]
+
+    candidat_a_plusieurs_demandes: bool
+
+    titre_access: str
+    candidat_assimile: bool
+    fraudeur_ares: bool
+    non_financable: bool
+    est_inscription_tardive: bool
+
+    @property
+    def candidat_vip(self) -> bool:
+        return any(
+            bourse
+            for bourse in [
+                self.bourse_internationale,
+                self.bourse_double_diplome,
+                self.bourse_erasmus_mundus,
+            ]
+        )
