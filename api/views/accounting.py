@@ -88,7 +88,7 @@ class BaseAccountingView(
         serializer = self.put_serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         result = message_bus_instance.invoke(self.put_accounting_cmd_class(**serializer.data))
-        self.get_permission_object().update_detailed_status()
+        self.get_permission_object().update_detailed_status(author=request.user.person)
         serializer = serializers.PropositionIdentityDTOSerializer(instance=result)
         return Response(serializer.data, status=status.HTTP_200_OK)
 

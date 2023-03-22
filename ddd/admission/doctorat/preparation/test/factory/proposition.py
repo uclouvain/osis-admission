@@ -46,7 +46,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     BourseRecherche,
     ChoixLangueRedactionThese,
     ChoixSousDomaineSciences,
-    ChoixStatutProposition,
+    ChoixStatutPropositionDoctorale,
     ChoixTypeAdmission,
     ChoixTypeFinancement,
 )
@@ -167,7 +167,7 @@ class _PropositionFactory(factory.Factory):
     entity_id = factory.SubFactory(_PropositionIdentityFactory)
     matricule_candidat = factory.fuzzy.FuzzyText(length=10, chars=string.digits)
     formation_id = factory.SubFactory(FormationIdentityFactory)
-    statut = ChoixStatutProposition.IN_PROGRESS
+    statut = ChoixStatutPropositionDoctorale.EN_BROUILLON
     projet = factory.SubFactory(_DetailProjetFactory)
     creee_le = factory.Faker('past_datetime')
     financement = factory.SubFactory(_FinancementFactory)
@@ -205,7 +205,7 @@ class PropositionAdmissionESP3DPMinimaleFactory(_PropositionFactory):
 
 
 class PropositionAdmissionSC3DPMinimaleAnnuleeFactory(PropositionAdmissionSC3DPMinimaleFactory):
-    statut = ChoixStatutProposition.CANCELLED
+    statut = ChoixStatutPropositionDoctorale.ANNULEE
     matricule_candidat = '0123456789'
 
 
@@ -276,7 +276,7 @@ class PropositionAdmissionSC3DPAvecPromoteurRefuseEtMembreCADejaApprouveFactory(
 class PropositionAdmissionSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory(PropositionAdmissionSC3DPMinimaleFactory):
     entity_id = factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-SC3DP-promoteurs-membres-deja-approuves')
     matricule_candidat = '0123456789'
-    statut = ChoixStatutProposition.SIGNING_IN_PROGRESS
+    statut = ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE
 
 
 class PropositionPreAdmissionSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory(

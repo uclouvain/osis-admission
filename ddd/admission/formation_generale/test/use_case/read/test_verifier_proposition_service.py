@@ -70,7 +70,7 @@ from admission.ddd.admission.enums import (
 from admission.ddd.admission.formation_generale.domain.builder.proposition_identity_builder import (
     PropositionIdentityBuilder,
 )
-from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutProposition
+from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
     EquivalenceNonRenseigneeException,
     FichierCurriculumNonRenseigneException,
@@ -1639,10 +1639,10 @@ class TestVerifierPropositionService(TestCase):
     def test_should_verification_renvoyer_erreur_si_trop_de_demandes_envoyees(self):
         propositions = self.proposition_in_memory.search(matricule_candidat='0000000001')
         for proposition in propositions:
-            proposition.statut = ChoixStatutProposition.IN_PROGRESS
+            proposition.statut = ChoixStatutPropositionGenerale.EN_BROUILLON
 
         for proposition_index in range(2):
-            propositions[proposition_index].statut = ChoixStatutProposition.SUBMITTED
+            propositions[proposition_index].statut = ChoixStatutPropositionGenerale.CONFIRMEE
 
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(VerifierPropositionQuery(uuid_proposition=propositions[2].entity_id.uuid))

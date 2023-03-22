@@ -30,7 +30,7 @@ from unittest import TestCase
 
 import freezegun
 
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutProposition
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.doctorat.validation.builder.demande_identity import DemandeIdentityBuilder
 from admission.ddd.admission.doctorat.validation.commands import ApprouverDemandeCddCommand
 from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixStatutCDD
@@ -69,7 +69,7 @@ class TestApprouverDemandeCDD(TestCase):
             PropositionIdentityTranslator.convertir_depuis_demande(demande_a_approuver_entity_id),
         )
         proposition = PropositionInMemoryRepository.get(proposition_id.entity_id)
-        self.assertEqual(proposition.statut, ChoixStatutProposition.ENROLLED)
+        self.assertEqual(proposition.statut, ChoixStatutPropositionDoctorale.INSCRIPTION_AUTORISEE)
 
         # Updated dossier
         demande = DemandeInMemoryRepository.get(demande_a_approuver_entity_id)

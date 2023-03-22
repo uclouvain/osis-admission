@@ -32,7 +32,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixCommissionProximiteCDEouCLSM,
     ChoixCommissionProximiteCDSS,
     ChoixSousDomaineSciences,
-    ChoixStatutProposition,
+    ChoixStatutPropositionDoctorale,
     ChoixTypeAdmission,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import (
@@ -82,7 +82,7 @@ class PropositionBuilder(interface.RootEntityBuilder):
         return Proposition(
             entity_id=PropositionIdentityBuilder.build(),
             reference=reference,
-            statut=ChoixStatutProposition.IN_PROGRESS,
+            statut=ChoixStatutPropositionDoctorale.EN_BROUILLON,
             justification=cmd.justification,
             type_admission=ChoixTypeAdmission[cmd.type_admission],
             formation_id=doctorat_id,

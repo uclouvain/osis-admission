@@ -29,7 +29,7 @@ from unittest import TestCase
 import freezegun
 
 from admission.ddd.admission.formation_generale.commands import SoumettrePropositionCommand
-from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutProposition
+from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
 from admission.infrastructure.admission.domain.service.in_memory.elements_confirmation import (
     ElementsConfirmationInMemory,
@@ -83,4 +83,4 @@ class TestSoumettrePropositionGenerale(TestCase):
         # Command result
         self.assertEqual(proposition_id.uuid, updated_proposition.entity_id.uuid)
         # Updated proposition
-        self.assertEqual(updated_proposition.statut, ChoixStatutProposition.SUBMITTED)
+        self.assertEqual(updated_proposition.statut, ChoixStatutPropositionGenerale.CONFIRMEE)

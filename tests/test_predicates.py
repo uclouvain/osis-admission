@@ -37,7 +37,7 @@ from admission.auth.predicates import (
 )
 from admission.auth.roles.cdd_manager import CddManager
 from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutProposition
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.roles import CandidateFactory, CddManagerFactory, PromoterRoleFactory
 from admission.tests.factories.supervision import PromoterFactory as PromoterActorFactory, _ProcessFactory
@@ -111,13 +111,13 @@ class PredicatesTestCase(TestCase):
         admission = DoctorateAdmissionFactory()
 
         valid_status = [
-            ChoixStatutProposition.IN_PROGRESS.name,
-            ChoixStatutProposition.SIGNING_IN_PROGRESS.name,
+            ChoixStatutPropositionDoctorale.EN_BROUILLON.name,
+            ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE.name,
         ]
         invalid_status = [
-            ChoixStatutProposition.CANCELLED.name,
-            ChoixStatutProposition.SUBMITTED.name,
-            ChoixStatutProposition.ENROLLED.name,
+            ChoixStatutPropositionDoctorale.ANNULEE.name,
+            ChoixStatutPropositionDoctorale.CONFIRMEE.name,
+            ChoixStatutPropositionDoctorale.INSCRIPTION_AUTORISEE.name,
         ]
 
         for status in valid_status:
@@ -138,13 +138,13 @@ class PredicatesTestCase(TestCase):
         admission = DoctorateAdmissionFactory()
 
         valid_status = [
-            ChoixStatutProposition.ENROLLED.name,
+            ChoixStatutPropositionDoctorale.INSCRIPTION_AUTORISEE.name,
         ]
         invalid_status = [
-            ChoixStatutProposition.IN_PROGRESS.name,
-            ChoixStatutProposition.SIGNING_IN_PROGRESS.name,
-            ChoixStatutProposition.SUBMITTED.name,
-            ChoixStatutProposition.CANCELLED.name,
+            ChoixStatutPropositionDoctorale.EN_BROUILLON.name,
+            ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE.name,
+            ChoixStatutPropositionDoctorale.CONFIRMEE.name,
+            ChoixStatutPropositionDoctorale.ANNULEE.name,
         ]
 
         for status in valid_status:
@@ -163,13 +163,13 @@ class PredicatesTestCase(TestCase):
         admission = DoctorateAdmissionFactory()
 
         valid_status = [
-            ChoixStatutProposition.IN_PROGRESS.name,
-            ChoixStatutProposition.SIGNING_IN_PROGRESS.name,
-            ChoixStatutProposition.SUBMITTED.name,
+            ChoixStatutPropositionDoctorale.EN_BROUILLON.name,
+            ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE.name,
+            ChoixStatutPropositionDoctorale.CONFIRMEE.name,
         ]
         invalid_status = [
-            ChoixStatutProposition.ENROLLED.name,
-            ChoixStatutProposition.CANCELLED.name,
+            ChoixStatutPropositionDoctorale.INSCRIPTION_AUTORISEE.name,
+            ChoixStatutPropositionDoctorale.ANNULEE.name,
         ]
 
         for status in valid_status:

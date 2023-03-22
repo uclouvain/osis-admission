@@ -29,9 +29,14 @@ from django import forms
 from django.utils.translation import gettext_lazy as _
 
 from base.forms.utils.datefield import DATE_FORMAT
+from base.models.academic_year import AcademicYear
+from education_group.templatetags.education_group_extra import format_to_academic_year
 
 EMPTY_CHOICE = (('', ' - '),)
 NONE_CHOICE = ((None, ' - '),)
+ALL_EMPTY_CHOICE = (('', _('All')),)
+MINIMUM_SELECTABLE_YEAR = 2004
+MAXIMUM_SELECTABLE_YEAR = 2031
 
 
 class SelectOrOtherWidget(forms.MultiWidget):
@@ -112,3 +117,12 @@ class CustomDateInput(forms.DateInput):
                 'data-mask': '00/00/0000',
             }
         super().__init__(attrs, format)
+
+
+def get_academic_year_choices(min_year=MINIMUM_SELECTABLE_YEAR, max_year=MAXIMUM_SELECTABLE_YEAR):
+    """Return the list of choices of academic years between min_year and max_year"""
+    academic_years = AcademicYear.objects.min_max_years(
+        min_year=min_year,
+        max_year=max_year,
+    ).order_by('-year')
+    return [(academic_year.year, format_to_academic_year(academic_year.year)) for academic_year in academic_years]

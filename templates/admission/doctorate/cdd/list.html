@@ -1,5 +1,5 @@
-{% extends "layout.html" %}
-{% load bootstrap3 i18n osis_role pagination static enums %}
+{% extends "admission/list/base.html" %}
+{% load bootstrap3 i18n %}
 
 {% comment "License" %}
 * OSIS stands for Open Student Information System. It's an application
@@ -25,197 +25,62 @@
 * see http://www.gnu.org/licenses/.
 {% endcomment %}
 
-{% block breadcrumb %}
-<li>
-  <a href="{% url 'admissions' %}" id="lnk_admissions">
-    {% trans 'Enrolments' %}
-  </a>
-</li>
-<li class="active">
-  {% trans 'Doctorate enrolments' %}
-</li>
-{% endblock %}
-
-{% block content %}
-
-<div class="page-header">
-  <h2 class="d-inline-block">{% trans "Doctorate enrolments" %}</h2>
-</div>
-
-<div id="admission-search" class="panel panel-default">
-  <div class="panel-body">
-    <div id="form_errors">
-      {% bootstrap_form_errors filter_form %}
-    </div>
-    <form
-        id="search_form"
-        action="{% url 'admission:doctorate:cdd:list' %}"
-        method="get"
-        hx-boost="true"
-        hx-target="#table_doctorate_admission"
-        hx-indicator="#htmx-overlay"
-    >
-      <div class="row">
-        {% bootstrap_field filter_form.numero form_group_class="form-group col-md-3" %}
-        {% bootstrap_field filter_form.matricule_candidat form_group_class="form-group col-md-3" %}
-        {% bootstrap_field filter_form.nationalite form_group_class="form-group col-md-3" %}
-        {% bootstrap_field filter_form.type form_group_class="form-group col-md-3" %}
-      </div>
-      <div class="row">
-        {% bootstrap_field filter_form.cdds form_group_class="form-group col-md-3" %}
-        {% bootstrap_field filter_form.commission_proximite form_group_class="form-group col-md-3" %}
-        {% bootstrap_field filter_form.annee_academique form_group_class="form-group col-md-3" %}
-        {% bootstrap_field filter_form.sigles_formations form_group_class="form-group col-md-3" %}
-      </div>
-      <div class="row">
-        {% bootstrap_field filter_form.matricule_promoteur form_group_class="form-group col-md-3" %}
-        {% bootstrap_field filter_form.cotutelle form_group_class="form-group col-md-3" %}
-        {% bootstrap_field filter_form.type_financement form_group_class="form-group col-md-3" %}
-        {% bootstrap_field filter_form.type_contrat_travail form_group_class="form-group col-md-3" %}
-        {% bootstrap_field filter_form.bourse_recherche form_group_class="form-group col-md-3" %}
-      </div>
-      <div class="row">
-        <div class="col-md-3">
-          <fieldset class="panel panel-default">
-            <legend>{% trans "Pre-admission date" %}</legend>
-            {% bootstrap_field filter_form.date_pre_admission_debut form_group_class="form-group col-md-6" %}
-            {% bootstrap_field filter_form.date_pre_admission_fin form_group_class="form-group col-md-6" %}
-          </fieldset>
-        </div>
-
-        <div class="col-md-3">
-          <fieldset class="panel panel-default">
-            <legend>{% trans "Admission date" %}</legend>
-            {% bootstrap_field filter_form.date_admission_debut form_group_class="form-group col-md-6" %}
-            {% bootstrap_field filter_form.date_admission_fin form_group_class="form-group col-md-6" %}
-          </fieldset>
-        </div>
-        {% bootstrap_field filter_form.etat_cdd form_group_class="form-group col-md-2" %}
-        {% bootstrap_field filter_form.etat_sic form_group_class="form-group col-md-2" %}
-
-        <div class="col-md-2">
-          <label class="control-label">&nbsp;</label>
-          <div class="text-right">
-            <button
-                type="submit"
-                id="bt_submit_admission_doctorate_groups_search"
-                class="btn btn-primary"
-                role="button"
-                aria-label="{% trans 'Search' %}"
-            >
-              <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
-            </button>
-            <button
-                type="reset"
-                id="bt_reset_admission_doctorate_groups_search"
-                class="btn btn-default"
-                role="button"
-                aria-label="{% trans 'Reset' %}"
-            >
-              <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span>
-            </button>
-          </div>
-        </div>
-      </div>
-
-
-    </form>
-
-    <hr>
-
-    <div class="table-responsive mt-1" id="table_doctorate_admission">
-      {% include 'admission/doctorate/cdd/list_block.html' with object_list=object_list %}
-    </div>
-
+{% block form_fields %}
+  <div class="row">
+    {% bootstrap_field filter_form.numero form_group_class="form-group col-md-3" %}
+    {% bootstrap_field filter_form.matricule_candidat form_group_class="form-group col-md-3" %}
+    {% bootstrap_field filter_form.nationalite form_group_class="form-group col-md-3" %}
+    {% bootstrap_field filter_form.type form_group_class="form-group col-md-3" %}
   </div>
-</div>
+  <div class="row">
+    {% bootstrap_field filter_form.cdds form_group_class="form-group col-md-3" %}
+    {% bootstrap_field filter_form.commission_proximite form_group_class="form-group col-md-3" %}
+    {% bootstrap_field filter_form.annee_academique form_group_class="form-group col-md-3" %}
+    {% bootstrap_field filter_form.sigles_formations form_group_class="form-group col-md-3" %}
+  </div>
+  <div class="row">
+    {% bootstrap_field filter_form.matricule_promoteur form_group_class="form-group col-md-3" %}
+    {% bootstrap_field filter_form.cotutelle form_group_class="form-group col-md-3" %}
+    {% bootstrap_field filter_form.type_financement form_group_class="form-group col-md-3" %}
+    {% bootstrap_field filter_form.type_contrat_travail form_group_class="form-group col-md-3" %}
+    {% bootstrap_field filter_form.bourse_recherche form_group_class="form-group col-md-3" %}
+  </div>
+  <div class="row">
+    <div class="col-md-3">
+      <fieldset class="panel panel-default">
+        <legend>{% trans "Pre-admission date" %}</legend>
+        {% bootstrap_field filter_form.date_pre_admission_debut form_group_class="form-group col-md-6" %}
+        {% bootstrap_field filter_form.date_pre_admission_fin form_group_class="form-group col-md-6" %}
+      </fieldset>
+    </div>
+
+    <div class="col-md-3">
+      <fieldset class="panel panel-default">
+        <legend>{% trans "Admission date" %}</legend>
+        {% bootstrap_field filter_form.date_admission_debut form_group_class="form-group col-md-6" %}
+        {% bootstrap_field filter_form.date_admission_fin form_group_class="form-group col-md-6" %}
+      </fieldset>
+    </div>
+    {% bootstrap_field filter_form.etat_cdd form_group_class="form-group col-md-3" %}
+    {% bootstrap_field filter_form.etat_sic form_group_class="form-group col-md-3" %}
+  </div>
 {% endblock %}
 
-{% block style %}
-
-{{ block.super }}
-
-<link rel="stylesheet" href="{% static 'admission/admission.css' %}" type='text/css'>
-<link rel="stylesheet" href="{% static 'css/bootstrap-datepicker3.min.css' %}" type='text/css'>
-<style>
-  .mt-1 {
-    margin-top: 1em;
-  }
-
-  /* Customize the form inputs */
-  #search_form fieldset {
-    padding-bottom: 1em;
-  }
-
-  #search_form fieldset > legend {
-    font-size: 1em;
-    padding: 0 5px;
-    width: inherit;
-    border: none;
-    font-weight: bold;
-    margin-bottom: 0.5em;
-  }
-
-  #search_form .select2-container {
-    min-width: unset;
-  }
-  #search_form .select2-selection__rendered {
-    white-space: break-spaces;
-  }
-
-  /* Customize input and buttons above the list */
-  .list-actions {
-    display: flex;
-    justify-content: right;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .list-actions > * {
-    width: fit-content;
-  }
-
-</style>
-{% endblock %}
 
 {% block script %}
 
-{{ block.super }}
+  {{ block.super }}
 
-{{ filter_form.media }}
-
-<script>
-  // Prevent to save the DOM in cache when using htmx requests
-  htmx.config.refreshOnHistoryMiss = true;
-  htmx.config.historyCacheSize = 0;
-
-  $(document).ready(function () {
-
-    // Display / hide inputs depending on the values of other inputs
-    $('#id_type_contrat_travail').closest('.form-group').dependsOn({
-      '#id_type_financement': { values: ['WORK_CONTRACT'] },
-    }, { duration: 0, valueOnDisable: '', });
-    $('#id_bourse_recherche').closest('.form-group').dependsOn({
-      '#id_type_financement': { values: ['SEARCH_SCHOLARSHIP'] },
-    }, { duration: 0, valueOnDisable: '', });
-
-    // Clear inputs when the form is reset
-    $('#search_form').on('reset', function(evt) {
-      $('#search_form :input:not([type=hidden])').val(null).trigger('change');
-      evt.preventDefault();
-      $('#search_form button[type=submit]').click();
-      return false;
-    });
-
-    // Display / hide the form errors
-    $('#admission-search').on('htmx:beforeSend', function(evt) {
-      $('#form_errors').html('');
-    });
-
-    $(document).on('change', '#id_page_size', function(evt) {
-      $('#search_form button[type=submit]').click();
-    })
-  });
-</script>
+  <script>
+      $(document).ready(function () {
+          // Display / hide inputs depending on the values of other inputs
+          $('#id_type_contrat_travail').closest('.form-group').dependsOn({
+              '#id_type_financement': { values: ['WORK_CONTRACT'] },
+          }, { duration: 0, valueOnDisable: '', });
+          $('#id_bourse_recherche').closest('.form-group').dependsOn({
+              '#id_type_financement': { values: ['SEARCH_SCHOLARSHIP'] },
+          }, { duration: 0, valueOnDisable: '', });
+      });
+  </script>
 
 {% endblock %}

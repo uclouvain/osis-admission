@@ -27,14 +27,12 @@ from datetime import date
 from typing import List, Optional
 
 from django.conf import settings
-from django.db import connection
 from django.db.models import OuterRef, Subquery
 from django.utils.translation import get_language
 
 from admission.auth.roles.candidate import Candidate
 from admission.contrib.models import Accounting, DoctorateAdmission
 from admission.contrib.models.doctorate import PropositionProxy
-from admission.contrib.models.base import REFERENCE_SEQ_NAME
 from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import PropositionIdentityBuilder
 from admission.ddd.admission.doctorat.preparation.domain.model._detail_projet import (
     DetailProjet,
@@ -55,7 +53,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixDoctoratDejaRealise,
     ChoixLangueRedactionThese,
     ChoixSousDomaineSciences,
-    ChoixStatutProposition,
+    ChoixStatutPropositionDoctorale,
     ChoixTypeAdmission,
     ChoixTypeContratTravail,
     ChoixTypeFinancement,
@@ -76,7 +74,6 @@ from admission.ddd.admission.doctorat.preparation.repository.i_proposition impor
 )
 from admission.ddd.admission.domain.model.bourse import BourseIdentity
 from admission.ddd.admission.domain.model.formation import FormationIdentity
-from admission.ddd.admission.repository.i_proposition import formater_reference
 from admission.infrastructure.admission.doctorat.preparation.repository._comptabilite import (
     get_accounting_from_admission,
 )
@@ -120,7 +117,7 @@ def _instantiate_admission(admission: 'DoctorateAdmission') -> 'Proposition':
             lettres_recommandation=admission.recommendation_letters,
         ),
         justification=admission.comment,
-        statut=ChoixStatutProposition[admission.status],
+        statut=ChoixStatutPropositionDoctorale[admission.status],
         bourse_erasmus_mundus_id=BourseIdentity(uuid=admission.erasmus_mundus_scholarship.uuid)
         if admission.erasmus_mundus_scholarship_id
         else None,
@@ -397,12 +394,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
     def _load_dto(cls, admission: DoctorateAdmission) -> 'PropositionDTO':
         return PropositionDTO(
             uuid=admission.uuid,
-            reference=formater_reference(
-                reference=admission.reference,
-                nom_campus_inscription=admission.training.enrollment_campus.name,
-                sigle_entite_gestion=admission.sigle_entite_gestion,  # From annotation
-                annee=admission.training.academic_year.year,
-            ),
+            reference=admission.formatted_reference,
             type_admission=admission.type,
             doctorat=DoctoratDTO(
                 sigle=admission.doctorate.acronym,
@@ -459,7 +451,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             nationalite_candidat=admission.candidate.country_of_citizenship
             and getattr(
                 admission.candidate.country_of_citizenship,
-                'name' if get_language() == settings.LANGUAGE_CODE else 'name_en',
+                'name' if get_language() == settings.LANGUAGE_CODE_FR else 'name_en',
             ),
             modifiee_le=admission.modified_at,
             fiche_archive_signatures_envoyees=admission.archived_record_signatures_sent,

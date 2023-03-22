@@ -45,12 +45,14 @@ from admission.auth.roles.sic_director import SicDirector
 from admission.auth.roles.sic_manager import SicManager
 from admission.contrib.models import (
     AdmissionTask,
+    AdmissionViewer,
     CddMailTemplate,
     ContinuingEducationAdmission,
     DoctorateAdmission,
     GeneralEducationAdmission,
     Scholarship,
 )
+from admission.contrib.models.base import BaseAdmission
 from admission.contrib.models.cdd_config import CddConfiguration
 from admission.contrib.models.doctoral_training import Activity
 from admission.contrib.models.form_item import AdmissionFormItem, AdmissionFormItemInstantiation
@@ -99,6 +101,7 @@ class BaseAdmissionAdmin(admin.ModelAdmin):
     readonly_fields = [
         'detailed_status',
         "submitted_at",
+        "last_update_author",
     ]
     filter_horizontal = [
         "professional_valuated_experiences",
@@ -140,6 +143,7 @@ class DoctorateAdmissionAdmin(BaseAdmissionAdmin):
         "submitted_profile",
         "pre_admission_submission_date",
         "submitted_at",
+        "last_update_author",
     ]
     exclude = ["valuated_experiences"]
 
@@ -329,6 +333,32 @@ class AdmissionFormItemInstantiationAdmin(admin.ModelAdmin):
             return obj.education_group.most_recent_acronym
 
 
+class AdmissionViewerAdmin(admin.ModelAdmin):
+    list_display = ['admission', 'person', 'viewed_at']
+    search_fields = ['admission__reference']
+    autocomplete_fields = [
+        'person',
+        'admission',
+    ]
+    readonly_fields = [
+        'viewed_at',
+    ]
+
+
+class BaseAdmissionAdmin(admin.ModelAdmin):
+    # Only used to search admissions through autocomplete fields
+    search_fields = ['reference']
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+
 admin.site.register(DoctorateAdmission, DoctorateAdmissionAdmin)
 admin.site.register(CddMailTemplate, CddMailTemplateAdmin)
 admin.site.register(CddConfiguration)
@@ -337,6 +367,8 @@ admin.site.register(AdmissionFormItem, AdmissionFormItemAdmin)
 admin.site.register(AdmissionFormItemInstantiation, AdmissionFormItemInstantiationAdmin)
 admin.site.register(GeneralEducationAdmission, GeneralEducationAdmissionAdmin)
 admin.site.register(ContinuingEducationAdmission, ContinuingEducationAdmissionAdmin)
+admin.site.register(BaseAdmission, BaseAdmissionAdmin)
+admin.site.register(AdmissionViewer, AdmissionViewerAdmin)
 
 
 class ActivityAdmin(admin.ModelAdmin):

@@ -81,7 +81,10 @@ from admission.ddd.admission.enums import (
     ChoixAssimilation5,
     ChoixAssimilation6,
 )
-from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutProposition, ChoixInscriptionATitre
+from admission.ddd.admission.formation_continue.domain.model.enums import (
+    ChoixStatutPropositionContinue,
+    ChoixInscriptionATitre,
+)
 from admission.ddd.admission.formation_continue.dtos import PropositionDTO as PropositionFormationContinueDTO
 from admission.ddd.admission.formation_generale.dtos import (
     PropositionDTO as PropositionFormationGeneraleDTO,
@@ -841,7 +844,7 @@ class SectionsAttachmentsTestCase(TestCase):
             modifiee_le=datetime.datetime(2023, 1, 1),
             soumise_le=None,
             erreurs=[],
-            statut=ChoixStatutProposition.IN_PROGRESS.name,
+            statut=ChoixStatutPropositionContinue.EN_BROUILLON.name,
             matricule_candidat='MAT1',
             prenom_candidat='John',
             nom_candidat='Doe',
@@ -881,7 +884,7 @@ class SectionsAttachmentsTestCase(TestCase):
             modifiee_le=datetime.datetime(2023, 1, 1),
             soumise_le=None,
             erreurs=[],
-            statut=ChoixStatutProposition.IN_PROGRESS.name,
+            statut=ChoixStatutPropositionContinue.EN_BROUILLON.name,
             matricule_candidat='MAT1',
             prenom_candidat='John',
             nom_candidat='Doe',
@@ -919,7 +922,7 @@ class SectionsAttachmentsTestCase(TestCase):
             modifiee_le=datetime.datetime(2023, 1, 1),
             soumise_le=None,
             erreurs=[],
-            statut=ChoixStatutProposition.IN_PROGRESS.name,
+            statut=ChoixStatutPropositionContinue.EN_BROUILLON.name,
             matricule_candidat='MAT1',
             prenom_candidat='John',
             nom_candidat='Doe',

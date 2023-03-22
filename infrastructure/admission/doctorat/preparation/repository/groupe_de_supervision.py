@@ -44,7 +44,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model._signature_promot
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixEtatSignature,
-    ChoixStatutProposition,
+    ChoixStatutPropositionDoctorale,
     ChoixStatutSignatureGroupeDeSupervision,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.groupe_de_supervision import (
@@ -151,7 +151,7 @@ class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
             ),
             cotutelle=cotutelle,
             statut_signature=ChoixStatutSignatureGroupeDeSupervision.SIGNING_IN_PROGRESS
-            if proposition.status == ChoixStatutProposition.SIGNING_IN_PROGRESS.name
+            if proposition.status == ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE.name
             else None,
         )
 

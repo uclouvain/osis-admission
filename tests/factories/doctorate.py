@@ -30,7 +30,7 @@ import factory
 from admission.contrib.models import DoctorateAdmission
 from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
-    ChoixStatutProposition,
+    ChoixStatutPropositionDoctorale,
     ChoixTypeFinancement,
 )
 from admission.tests.factories.utils import generate_proposition_reference
@@ -94,7 +94,7 @@ class DoctorateAdmissionFactory(factory.DjangoModelFactory):
             cotutelle_convention=factory.LazyFunction(generate_token),
         )
         admitted = factory.Trait(
-            status=ChoixStatutProposition.ENROLLED.name,
+            status=ChoixStatutPropositionDoctorale.INSCRIPTION_AUTORISEE.name,
             post_enrolment_status=ChoixStatutDoctorat.ADMITTED.name,
             submitted_profile={
                 "coordinates": {

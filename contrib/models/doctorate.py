@@ -42,7 +42,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixDoctoratDejaRealise,
     ChoixLangueRedactionThese,
     ChoixSousDomaineSciences,
-    ChoixStatutProposition,
+    ChoixStatutPropositionDoctorale,
     ChoixTypeAdmission,
     ChoixTypeFinancement,
 )
@@ -51,6 +51,7 @@ from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctor
 from base.models.academic_year import AcademicYear
 from base.models.entity_version import EntityVersion
 from base.models.enums.entity_type import SECTOR
+from base.models.person import Person
 from base.utils.cte import CTESubquery
 from osis_common.ddd.interface import BusinessException
 from osis_document.contrib import FileField
@@ -262,9 +263,9 @@ class DoctorateAdmission(BaseAdmission):
     )
 
     status = models.CharField(
-        choices=ChoixStatutProposition.choices(),
+        choices=ChoixStatutPropositionDoctorale.choices(),
         max_length=30,
-        default=ChoixStatutProposition.IN_PROGRESS.name,
+        default=ChoixStatutPropositionDoctorale.EN_BROUILLON.name,
     )
     status_cdd = models.CharField(
         choices=ChoixStatutCDD.choices(),
@@ -401,7 +402,7 @@ class DoctorateAdmission(BaseAdmission):
         super().save(*args, **kwargs)
         cache.delete('admission_permission_{}'.format(self.uuid))
 
-    def update_detailed_status(self):
+    def update_detailed_status(self, author: 'Person' = None):
         from admission.ddd.admission.doctorat.preparation.commands import (
             VerifierProjetQuery,
             VerifierPropositionQuery,
@@ -414,12 +415,24 @@ class DoctorateAdmission(BaseAdmission):
         project_errors = gather_business_exceptions(VerifierProjetQuery(self.uuid)).get(error_key, [])
         submission_errors = gather_business_exceptions(VerifierPropositionQuery(self.uuid)).get(error_key, [])
         self.detailed_status = project_errors + submission_errors
+        self.last_update_author = author
+
+        update_fields = [
+            'detailed_status',
+            'determined_academic_year',
+            'determined_pool',
+        ]
+
+        if author:
+            self.last_update_author = author
+            update_fields.append('last_update_author')
 
         with suppress(BusinessException):
             dto: 'InfosDetermineesDTO' = message_bus_instance.invoke(DeterminerAnneeAcademiqueEtPotQuery(self.uuid))
             self.determined_academic_year = AcademicYear.objects.get(year=dto.annee)
             self.determined_pool = dto.pool.name
-        self.save(update_fields=['detailed_status', 'determined_academic_year', 'determined_pool'])
+
+        self.save(update_fields=update_fields)
 
 
 class PropositionManager(models.Manager.from_queryset(BaseAdmissionQuerySet)):
@@ -453,6 +466,7 @@ class PropositionManager(models.Manager.from_queryset(BaseAdmissionQuerySet)):
             .annotate_campus()
             .annotate_pool_end_date()
             .annotate_training_management_entity()
+            .annotate_with_reference(with_management_faculty=False)
         )
 
 
@@ -494,8 +508,8 @@ class DemandeManager(models.Manager):
             )
             .filter(
                 status__in=[
-                    ChoixStatutProposition.SUBMITTED.name,
-                    ChoixStatutProposition.ENROLLED.name,
+                    ChoixStatutPropositionDoctorale.CONFIRMEE.name,
+                    ChoixStatutPropositionDoctorale.INSCRIPTION_AUTORISEE.name,
                 ]
             )
         )
@@ -542,6 +556,7 @@ class DoctorateManager(models.Manager.from_queryset(BaseAdmissionQuerySet)):
                 post_enrolment_status=ChoixStatutDoctorat.ADMISSION_IN_PROGRESS.name,
             )
             .annotate_training_management_entity()
+            .annotate_with_reference(with_management_faculty=False)
         )
 
 

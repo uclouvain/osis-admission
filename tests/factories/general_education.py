@@ -40,6 +40,7 @@ from admission.tests.factories.scholarship import (
 )
 from base.models.enums import education_group_categories
 from base.models.enums.education_group_types import TrainingType
+from base.models.enums.organization_type import MAIN
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.education_group_year import EducationGroupYearFactory
 from base.tests.factories.person import PersonFactory
@@ -70,10 +71,12 @@ class GeneralEducationAdmissionFactory(factory.DjangoModelFactory):
         GeneralEducationTrainingFactory,
         academic_year__current=True,
         enrollment_campus__name='Mons',
+        enrollment_campus__organization__type=MAIN,
     )
     erasmus_mundus_scholarship = factory.SubFactory(ErasmusMundusScholarshipFactory)
     double_degree_scholarship = factory.SubFactory(DoubleDegreeScholarshipFactory)
     international_scholarship = factory.SubFactory(InternationalScholarshipFactory)
+    last_update_author = factory.SubFactory(PersonFactory)
 
     @factory.post_generation
     def create_candidate_role(self, create, extracted, **kwargs):

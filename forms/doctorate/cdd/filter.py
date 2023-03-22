@@ -49,17 +49,13 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
 )
 from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixStatutCDD, ChoixStatutSIC
 from admission.ddd.admission.enums.type_bourse import TypeBourse
-from admission.forms import CustomDateInput, EMPTY_CHOICE
-from base.models.academic_year import AcademicYear
+from admission.forms import CustomDateInput, EMPTY_CHOICE, get_academic_year_choices
 from base.models.education_group_year import EducationGroupYear
 from base.models.enums.education_group_types import TrainingType
 from base.models.enums.entity_type import EntityType
 from base.models.person import Person
 from base.templatetags.pagination import PAGINATOR_SIZE_LIST
 from reference.models.country import Country
-
-MINIMUM_SELECTABLE_YEAR = 2004
-MAXIMUM_SELECTABLE_YEAR = 2031
 
 
 class BaseFilterForm(forms.Form):
@@ -192,7 +188,7 @@ class BaseFilterForm(forms.Form):
         label=_("Scholarship grant"),
         required=False,
     )
-    page_size = forms.ChoiceField(
+    taille_page = forms.ChoiceField(
         label=_("Page size"),
         choices=((size, size) for size in PAGINATOR_SIZE_LIST),
         widget=forms.Select(attrs={'form': 'search_form', 'autocomplete': 'off'}),
@@ -250,7 +246,7 @@ class BaseFilterForm(forms.Form):
         self.doctorates = (
             self.get_doctorate_queryset()
             .distinct('acronym')
-            .values_list('acronym', 'title' if get_language() == settings.LANGUAGE_CODE else 'title_english')
+            .values_list('acronym', 'title' if get_language() == settings.LANGUAGE_CODE_FR else 'title_english')
             .order_by('acronym')
         )
         self.fields['sigles_formations'].choices = [
@@ -261,14 +257,7 @@ class BaseFilterForm(forms.Form):
         self.fields['commission_proximite'].choices = self.get_proximity_commission_choices()
 
         # Initialize the academic year field
-        academic_years = AcademicYear.objects.min_max_years(
-            min_year=MINIMUM_SELECTABLE_YEAR,
-            max_year=MAXIMUM_SELECTABLE_YEAR,
-        ).order_by('-year')
-
-        self.fields['annee_academique'].choices = [EMPTY_CHOICE[0]] + [
-            (academic_year.year, str(academic_year)) for academic_year in academic_years
-        ]
+        self.fields['annee_academique'].choices = [EMPTY_CHOICE[0]] + get_academic_year_choices()
 
         # Initialize the labels of the autocomplete fields
         if load_labels:
@@ -276,7 +265,7 @@ class BaseFilterForm(forms.Form):
             if nationality:
                 country = (
                     Country.objects.filter(iso_code=nationality)
-                    .values_list('name' if get_language() == settings.LANGUAGE_CODE else 'name_end')
+                    .values_list('name' if get_language() == settings.LANGUAGE_CODE_FR else 'name_en')
                     .first()
                 )
                 if country:

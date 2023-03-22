@@ -208,7 +208,7 @@ class PropositionViewSet(
         serializer = serializers.CompleterPropositionCommandSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         result = message_bus_instance.invoke(CompleterPropositionCommand(**serializer.data))
-        self.get_permission_object().update_detailed_status()
+        self.get_permission_object().update_detailed_status(request.user.person)
         serializer = serializers.PropositionIdentityDTOSerializer(instance=result)
         return Response(serializer.data, status=status.HTTP_200_OK)
 

@@ -25,6 +25,7 @@
 # ##############################################################################
 from django.contrib.auth.models import User
 from django.utils.translation import gettext_lazy as _
+
 from osis_signature.enums import SignatureState
 from rules import predicate
 from waffle import switch_is_active
@@ -34,7 +35,7 @@ from admission.ddd.parcours_doctoral.domain.model.enums import (
     STATUTS_DOCTORAT_EPREUVE_CONFIRMATION_EN_COURS,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
-    ChoixStatutProposition,
+    ChoixStatutPropositionDoctorale,
     ChoixTypeAdmission,
     STATUTS_PROPOSITION_AVANT_SOUMISSION,
     STATUTS_PROPOSITION_AVANT_INSCRIPTION,
@@ -56,13 +57,13 @@ def is_admission_request_author(self, user: User, obj: BaseAdmission):
 @predicate(bind=True)
 @predicate_failed_msg(message=_("Invitations must have been sent"))
 def in_progress(self, user: User, obj: DoctorateAdmission):
-    return obj.status == ChoixStatutProposition.IN_PROGRESS.name
+    return obj.status == ChoixStatutPropositionDoctorale.EN_BROUILLON.name
 
 
 @predicate(bind=True)
 @predicate_failed_msg(message=_("Invitations have not been sent"))
 def signing_in_progress(self, user: User, obj: DoctorateAdmission):
-    return obj.status == ChoixStatutProposition.SIGNING_IN_PROGRESS.name
+    return obj.status == ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE.name
 
 
 @predicate(bind=True)
@@ -74,7 +75,7 @@ def unconfirmed_proposition(self, user: User, obj: DoctorateAdmission):
 @predicate(bind=True)
 @predicate_failed_msg(message=_("Must be enrolled"))
 def is_enrolled(self, user: User, obj: DoctorateAdmission):
-    return obj.status == ChoixStatutProposition.ENROLLED.name
+    return obj.status == ChoixStatutPropositionDoctorale.INSCRIPTION_AUTORISEE.name
 
 
 @predicate(bind=True)
@@ -134,7 +135,10 @@ def is_admission_reference_promoter(self, user: User, obj: DoctorateAdmission):
 @predicate_failed_msg(message=_("You must be a member of the doctoral commission to access this admission"))
 @predicate_cache(cache_key_fn=lambda obj: getattr(obj, 'pk', None))
 def is_part_of_doctoral_commission(self, user: User, obj: DoctorateAdmission):
-    return obj.doctorate.management_entity_id in self.context['role_qs'].get_entities_ids()
+    return (
+        isinstance(obj, DoctorateAdmission)
+        and obj.doctorate.management_entity_id in self.context['role_qs'].get_entities_ids()
+    )
 
 
 @predicate(bind=True)

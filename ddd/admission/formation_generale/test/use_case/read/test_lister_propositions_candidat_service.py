@@ -29,7 +29,7 @@ from django.test import SimpleTestCase
 
 from admission.ddd.admission.enums.type_bourse import TypeBourse
 from admission.ddd.admission.formation_generale.commands import ListerPropositionsCandidatQuery
-from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutProposition
+from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.ddd.admission.formation_generale.dtos import PropositionDTO
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 
@@ -46,7 +46,7 @@ class TestListerPropositionsCandidatService(SimpleTestCase):
         self.assertEqual(results[0].formation.annee, 2020)
         self.assertEqual(results[0].formation.intitule, 'Bachelier en sciences économiques et de gestion')
         self.assertEqual(results[0].formation.campus, 'Louvain-La-Neuve')
-        self.assertEqual(results[0].statut, ChoixStatutProposition.IN_PROGRESS.name)
+        self.assertEqual(results[0].statut, ChoixStatutPropositionGenerale.EN_BROUILLON.name)
         self.assertEqual(results[0].matricule_candidat, '0123456789')
         self.assertEqual(results[0].prenom_candidat, 'John')
         self.assertEqual(results[0].nom_candidat, 'Doe')

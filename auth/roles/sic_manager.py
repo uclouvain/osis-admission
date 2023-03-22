@@ -40,6 +40,7 @@ class SicManager(RoleModel):
     @classmethod
     def rule_set(cls):
         ruleset = {
+            'admission.view_dossiers': rules.always_allow,
             'admission.change_doctorateadmission': rules.always_allow,
             'admission.delete_doctorateadmission': rules.always_deny,
             'admission.view_doctorateadmission': rules.always_allow,

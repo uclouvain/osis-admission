@@ -41,7 +41,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixCommissionProximiteCDSS,
     ChoixSousDomaineSciences,
     ChoixTypeAdmission,
-    ChoixStatutProposition,
+    ChoixStatutPropositionDoctorale,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
@@ -99,7 +99,7 @@ class TestInitierPropositionService(TestCase):
         self.assertEqual(self.cmd.sigle_formation, proposition.formation_id.sigle)
         self.assertEqual(self.cmd.annee_formation, proposition.formation_id.annee)
         self.assertEqual(self.cmd.matricule_candidat, proposition.matricule_candidat)
-        self.assertEqual(ChoixStatutProposition.IN_PROGRESS, proposition.statut)
+        self.assertEqual(ChoixStatutPropositionDoctorale.EN_BROUILLON, proposition.statut)
         self.assertEqual(self.cmd.bourse_erasmus_mundus, proposition.bourse_erasmus_mundus_id.uuid)
 
     def test_should_initier_financement(self):

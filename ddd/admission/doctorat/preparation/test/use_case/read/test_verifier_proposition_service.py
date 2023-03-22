@@ -84,7 +84,7 @@ from admission.ddd.admission.domain.validator.exceptions import (
     QuestionsSpecifiquesEtudesSecondairesNonCompleteesException,
     NombrePropositionsSoumisesDepasseException,
 )
-from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutProposition
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.infrastructure.admission.doctorat.preparation.repository.in_memory.groupe_de_supervision import (
     GroupeDeSupervisionInMemoryRepository,
 )
@@ -909,8 +909,8 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
         propositions = self.proposition_repository.search(matricule_candidat=self.candidat.matricule)
         last_proposition = propositions.pop()
         for proposition in propositions:
-            proposition.statut = ChoixStatutProposition.IN_PROGRESS
-        last_proposition.statut = ChoixStatutProposition.SUBMITTED
+            proposition.statut = ChoixStatutPropositionDoctorale.EN_BROUILLON
+        last_proposition.statut = ChoixStatutPropositionDoctorale.CONFIRMEE
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.cmd)
 

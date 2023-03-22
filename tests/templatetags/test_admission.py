@@ -38,7 +38,10 @@ from django.utils.translation import gettext as _
 from django.views import View
 
 from admission.contrib.models import ContinuingEducationAdmissionProxy
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.domain.enums import TypeFormation
+from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
+from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.templatetags.admission import (
     TAB_TREES,
     Tab,
@@ -54,7 +57,10 @@ from admission.templatetags.admission import (
     multiple_field_data,
     get_first_truthy_value,
     get_item,
-    interpolate, admission_training_type,
+    interpolate,
+    admission_training_type,
+    admission_url,
+    admission_status,
 )
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
 from admission.tests.factories.form_item import (
@@ -476,4 +482,61 @@ class SimpleAdmissionTemplateTagsTestCase(TestCase):
         self.assertEqual(
             admission_training_type(TrainingType.PHD.name),
             TypeFormation.DOCTORAT.name,
+        )
+
+
+class AdmissionTagsTestCase(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.doctorate_training_type = TrainingType.PHD.name
+        cls.general_training_type = TrainingType.BACHELOR.name
+        cls.continuing_training_type = TrainingType.UNIVERSITY_FIRST_CYCLE_CERTIFICATE.name
+        cls.admission_uuid = str(uuid.uuid4())
+
+    def test_admission_url_for_a_doctorate(self):
+        self.assertEqual(
+            admission_url(admission_uuid=self.admission_uuid, osis_education_type=self.doctorate_training_type),
+            reverse('admission:doctorate', kwargs={'uuid': self.admission_uuid}),
+        )
+
+    def test_admission_url_for_a_general_training(self):
+        self.assertEqual(
+            admission_url(admission_uuid=self.admission_uuid, osis_education_type=self.general_training_type),
+            reverse('admission:general-education', kwargs={'uuid': self.admission_uuid}),
+        )
+
+    def test_admission_url_for_a_continuing_education(self):
+        self.assertEqual(
+            admission_url(admission_uuid=self.admission_uuid, osis_education_type=self.continuing_training_type),
+            reverse('admission:continuing-education', kwargs={'uuid': self.admission_uuid}),
+        )
+
+    def test_admission_status_for_a_doctorate(self):
+        status = ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE
+        self.assertEqual(
+            admission_status(
+                status=status.name,
+                osis_education_type=self.doctorate_training_type,
+            ),
+            status.value,
+        )
+
+    def test_admission_status_for_a_general_training(self):
+        status = ChoixStatutPropositionGenerale.TRAITEMENT_SIC
+        self.assertEqual(
+            admission_status(
+                status=status.name,
+                osis_education_type=self.general_training_type,
+            ),
+            status.value,
+        )
+
+    def test_admission_status_for_a_continuing_education(self):
+        status = ChoixStatutPropositionContinue.EN_BROUILLON
+        self.assertEqual(
+            admission_status(
+                status=status.name,
+                osis_education_type=self.continuing_training_type,
+            ),
+            status.value,
         )

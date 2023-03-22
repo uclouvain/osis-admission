@@ -28,6 +28,7 @@ from .admission.doctorat.preparation import handlers as preparation_handlers
 from .admission.doctorat.validation import handlers as validation_handlers
 from .admission.formation_continue import handlers as formation_continue_handlers
 from .admission.formation_generale import handlers as formation_generale_handlers
+from .admission import handlers as admission_handlers
 from .parcours_doctoral import handlers as doctorat_handlers
 from .parcours_doctoral.epreuve_confirmation import handlers as epreuve_confirmation_handlers
 from .parcours_doctoral.formation import handlers as formation_handlers
@@ -42,4 +43,5 @@ class MessageBusCommands(AbstractMessageBusCommands):
         **validation_handlers.COMMAND_HANDLERS,
         **formation_continue_handlers.COMMAND_HANDLERS,
         **formation_generale_handlers.COMMAND_HANDLERS,
+        **admission_handlers.COMMAND_HANDLERS,
     }

@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,99 +23,25 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
-from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
-from django.contrib.messages import error
-from django.core.cache import cache
-from django.core.exceptions import NON_FIELD_ERRORS
-from django.utils.translation import gettext as _
-from django.views.generic import ListView
 
 from admission.auth.roles.cdd_manager import CddManager
 from admission.ddd.admission.doctorat.validation.commands import FiltrerDemandesQuery
 from admission.forms.doctorate.cdd.filter import CddFilterForm, BaseFilterForm
-from base.utils.htmx import HtmxMixin
-from infrastructure.messages_bus import message_bus_instance
+from admission.views.list import BaseAdmissionList
 
 __all__ = [
     "CddDoctorateAdmissionList",
 ]
 
 
-class CddDoctorateAdmissionList(LoginRequiredMixin, PermissionRequiredMixin, HtmxMixin, ListView):
-    raise_exception = True
-
+class CddDoctorateAdmissionList(BaseAdmissionList):
     template_name = 'admission/doctorate/cdd/list.html'
     htmx_template_name = 'admission/doctorate/cdd/list_block.html'
-
     permission_required = 'admission.view_cdddossiers'
+    filtering_query_class = FiltrerDemandesQuery
 
-    DEFAULT_PAGINATOR_SIZE = '10'
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.form = None
-
-    @property
-    def cache_key(self):
-        return "_".join(['cache_filter', str(self.request.user.id), self.request.path])
-
-    @staticmethod
-    def htmx_render_form_errors(request, form):
-        """Display the form errors through the django messages."""
-        for field_name, errors in form.errors.items():
-            error(
-                request=request,
-                message='{} - {}'.format(
-                    form.fields.get(field_name).label if field_name != NON_FIELD_ERRORS else _('General'),
-                    ' '.join(errors),
-                ),
-            )
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['filter_form'] = self.form
-        return context
-
-    def get_paginate_by(self, queryset):
-        return self.form.data.get('page_size', self.DEFAULT_PAGINATOR_SIZE)
-
-    def get_form(self):
+    def get_form_class(self):
         if CddManager.belong_to(self.request.user.person):
             return CddFilterForm
         else:
             return BaseFilterForm
-
-    def get_queryset(self):
-        query_params = self.request.GET.copy()
-
-        ordering_field = query_params.pop('o', None)
-        query_params.pop('page', None)
-
-        self.form = self.get_form()(
-            user=self.request.user,
-            data=query_params or cache.get(self.cache_key) or None,
-            load_labels=not self.request.htmx,
-        )
-
-        if not self.form.is_valid():
-            if self.request.htmx:
-                self.htmx_render_form_errors(self.request, self.form)
-            return []
-
-        if query_params:
-            cache.set(self.cache_key, query_params)
-
-        filters = self.form.cleaned_data
-
-        filters.pop('page_size', None)
-
-        # Order the queryset
-        if ordering_field:
-            filters['tri_inverse'] = ordering_field[0][0] == '-'
-            filters['champ_tri'] = ordering_field[0].lstrip('-')
-
-        return message_bus_instance.invoke(
-            FiltrerDemandesQuery(
-                **filters,
-            )
-        )

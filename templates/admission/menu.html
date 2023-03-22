@@ -34,6 +34,14 @@
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu">
+    {% if perms.admission.view_dossiers %}
+      <li>
+        <a href="{% url 'admission:all-list' %}">
+          <span class="fa fa-chalkboard-user"></span>
+          {% trans 'Enrolment applications' %}
+        </a>
+      </li>
+    {% endif %}
     {% if perms.admission.view_cdddossiers %}
       <li>
         <a href="{% url 'admission:doctorate:cdd:list' %}" id="lnk_dropdown_doctorateadmissions">

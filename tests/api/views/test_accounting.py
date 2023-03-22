@@ -33,9 +33,7 @@ from rest_framework.status import HTTP_200_OK, HTTP_403_FORBIDDEN
 from rest_framework.test import APITestCase
 
 from admission.contrib.models import Accounting
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
-    ChoixStatutProposition as ChoixStatutPropositionDoctorale,
-)
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.enums import (
     ChoixAffiliationSport,
     ChoixAssimilation1,
@@ -47,9 +45,7 @@ from admission.ddd.admission.enums import (
     LienParente,
     TypeSituationAssimilation,
 )
-from admission.ddd.admission.formation_generale.domain.model.enums import (
-    ChoixStatutProposition as ChoixStatutPropositionGenerale,
-)
+from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.accounting import AccountingFactory
@@ -138,7 +134,7 @@ class DoctorateAccountingAPIViewTestCase(APITestCase):
             supervision_group=promoter.process,
         )
         other_admission = DoctorateAdmissionFactory(
-            status=ChoixStatutPropositionDoctorale.ENROLLED.name,
+            status=ChoixStatutPropositionDoctorale.INSCRIPTION_AUTORISEE.name,
             post_enrolment_status=ChoixStatutDoctorat.ADMITTED.name,
             training__management_entity=commission,
             supervision_group=other_promoter.process,
@@ -425,7 +421,7 @@ class GeneralAccountingAPIViewTestCase(APITestCase):
         )
 
         other_admission = GeneralEducationAdmissionFactory(
-            status=ChoixStatutPropositionGenerale.ENROLLED.name,
+            status=ChoixStatutPropositionGenerale.INSCRIPTION_AUTORISEE.name,
         )
 
         # Users

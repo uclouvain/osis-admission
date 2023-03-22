@@ -34,7 +34,7 @@
 {#      {% endblocktrans %}#}
     </p>
       <div class="text-right list-actions">
-        {% bootstrap_field filter_form.page_size show_label=False form_group_class="fit-content" show_help=False %}
+        {% bootstrap_field filter_form.taille_page show_label=False form_group_class="fit-content" show_help=False %}
         <span>{% trans "items per page" %}</span>
         <button
             id="dLabel"
@@ -74,7 +74,7 @@
     <td>{{ admission.candidate }}</td>
     <td>{{ admission.training }}</td>
     <td>{{ admission.candidate.country_of_citizenship|default_if_none:'' }}</td>
-    <td>{{ admission.status|enum_display:'ChoixStatutProposition' }}</td>
+    <td>{{ admission.status|enum_display:'ChoixStatutPropositionContinue' }}</td>
     <td>{{ admission.modified_at|date:'d/m/Y H:i' }}</td>
   </tr>
   {% endfor %}

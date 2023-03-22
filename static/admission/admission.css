@@ -61,6 +61,13 @@ textarea {
   flex-wrap: wrap;
 }
 
+.flex-content-no-wrap {
+  display: flex;
+  justify-content:space-between;
+  align-items: center;
+  gap: 1em;
+}
+
 .border-right {
   border-right: 1px solid #ddd;
 }
@@ -163,4 +170,16 @@ textarea {
   .inline-field-data dd, .inline-field-data dt {
     display: inline;
   }
+}
+
+.mt-1 {
+  margin-top: 1em;
+}
+
+.bold-text {
+  font-weight: bold;
+}
+
+.default-cursor {
+  cursor: default;
 }

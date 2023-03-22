@@ -38,7 +38,7 @@ from rest_framework.test import APITestCase
 
 from admission.contrib.models import ContinuingEducationAdmission, GeneralEducationAdmission
 from admission.ddd import FR_ISO_CODE
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutProposition
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.contrib.models.base import BaseAdmission
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.calendar import AdmissionAcademicCalendarFactory
@@ -511,7 +511,7 @@ class DoctorateCurriculumTestCase(BaseCurriculumTestCase, BaseIncompleteCurricul
         super().setUpTestData()
         # Mocked data
         cls.admission = DoctorateAdmissionFactory(
-            status=ChoixStatutProposition.IN_PROGRESS.name,
+            status=ChoixStatutPropositionDoctorale.EN_BROUILLON.name,
             training__academic_year=cls.academic_year_2018,
         )
         cls.other_admission = DoctorateAdmissionFactory()
