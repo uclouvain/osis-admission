@@ -397,6 +397,9 @@ msgstr ""
 msgid "Admission type"
 msgstr ""
 
+msgid "Admissions"
+msgstr ""
+
 msgid "Advanced filters"
 msgstr ""
 
@@ -1271,6 +1274,12 @@ msgid "Created"
 msgstr ""
 
 msgid "Created at"
+msgstr ""
+
+msgid "Created by"
+msgstr ""
+
+msgid "Creation date"
 msgstr ""
 
 msgid "Curriculum"
