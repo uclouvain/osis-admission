@@ -148,6 +148,7 @@ def _instantiate_admission(admission: 'DoctorateAdmission') -> 'Proposition':
         reponses_questions_specifiques=admission.specific_question_answers,
         curriculum=admission.curriculum,
         elements_confirmation=admission.confirmation_elements,
+        fiche_archive_signatures_envoyees=admission.archived_record_signatures_sent,
     )
 
 
