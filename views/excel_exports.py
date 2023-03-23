@@ -25,9 +25,10 @@
 # ##############################################################################
 
 import ast
+from typing import Dict
 
-from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.contrib import messages
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template.defaultfilters import yesno
 from django.urls import reverse
@@ -35,6 +36,13 @@ from django.utils.text import slugify
 from django.utils.translation import gettext as _, gettext_lazy
 from django.views import View
 
+from admission.contrib.models import Scholarship
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
+from admission.ddd.admission.enums.type_demande import TypeDemande
+from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
+from base.models.campus import Campus
+from base.models.enums.education_group_types import TrainingType
+from base.models.person import Person
 from osis_async.models import AsyncTask
 from osis_export.contrib.export_mixins import ExportMixin, ExcelFileExportMixin
 
@@ -68,6 +76,9 @@ class BaseAdmissionExcelExportView(
     failure_message = gettext_lazy('The export has failed')
     redirect_url_name = 'admission'
     command = None
+    with_legend_worksheet = True
+    with_parameters_worksheet = True
+    description = gettext_lazy('Admissions')
 
     def get_filters(self):
         """Get filters as a dict of key/value pairs corresponding to the command params"""
@@ -120,6 +131,77 @@ class AdmissionListExcelExportView(BaseAdmissionExcelExportView):
     redirect_url_name = 'admission:all-list'
     urlpatterns = 'admission-list-excel-export'
 
+    def get_formatted_filters_parameters_worksheet(self, filters: str) -> Dict:
+        formatted_filters = super().get_formatted_filters_parameters_worksheet(filters)
+
+        # Formatting of the names of the filters
+        base_fields = AllAdmissionsFilterForm.base_fields
+        mapping_filter_key_name = {
+            key: str(base_fields[key].label) if key in base_fields else key for key in formatted_filters
+        }
+
+        # Formatting of the values of the filters
+        mapping_filter_key_value = {}
+
+        # Retrieve candidate name
+        candidate_global_id = formatted_filters.get('matricule_candidat')
+        if candidate_global_id:
+            person = Person.objects.filter(global_id=candidate_global_id).first()
+            if person:
+                mapping_filter_key_value['matricule_candidat'] = person.full_name
+
+        # Retrieve enrolment site name
+        campus = formatted_filters.get('site_inscription')
+        if campus:
+            campus = Campus.objects.filter(uuid=campus).first()
+            if campus:
+                mapping_filter_key_value['site_inscription'] = campus.name
+
+        # Retrieve the names of the scholarships
+        scholarship_values = {
+            scholarship: formatted_filters.get(scholarship)
+            for scholarship in [
+                'bourse_internationale',
+                'bourse_erasmus_mundus',
+                'bourse_double_diplomation',
+            ]
+            if formatted_filters.get(scholarship)
+        }
+
+        if scholarship_values:
+            scholarships_names_by_uuid = {
+                str(s.uuid): s.short_name
+                for s in Scholarship.objects.filter(uuid__in=scholarship_values.values()).only('uuid', 'short_name')
+            }
+
+            for scholarship in scholarship_values:
+                mapping_filter_key_value[scholarship] = scholarships_names_by_uuid.get(
+                    scholarship_values[scholarship],
+                    scholarship_values[scholarship],
+                )
+
+        # Format enums
+        status = formatted_filters.get('etat')
+        if status:
+            mapping_filter_key_value['etat'] = (
+                ChoixStatutPropositionGenerale.get_value(status)
+                if hasattr(ChoixStatutPropositionGenerale, status)
+                else ChoixStatutPropositionDoctorale.get_value(status)
+            )
+
+        admission_type = formatted_filters.get('type')
+        if admission_type:
+            mapping_filter_key_value['type'] = TypeDemande.get_value(admission_type)
+
+        trainings_types = formatted_filters.get('types_formation')
+        if trainings_types:
+            mapping_filter_key_value['types_formation'] = [TrainingType.get_value(t) for t in trainings_types]
+
+        return {
+            mapping_filter_key_name[key]: mapping_filter_key_value.get(key, formatted_filters[key])
+            for key, value in formatted_filters.items()
+        }
+
     def get_header(self):
         return [
             _('Application numero'),
@@ -160,6 +242,5 @@ class AdmissionListExcelExportView(BaseAdmissionExcelExportView):
             filters = form.cleaned_data
             filters.pop('taille_page', None)
             filters.pop('page', None)
-            filters['demandeur'] = str(self.request.user.person.uuid)
             return form.cleaned_data
         return {}
