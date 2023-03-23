@@ -189,19 +189,19 @@ class AllAdmissionsFilterForm(forms.Form):
 
     def clean_site_inscription(self):
         site_inscription = self.cleaned_data.get('site_inscription')
-        return site_inscription.uuid if site_inscription else ''
+        return str(site_inscription.uuid) if site_inscription else ''
 
     def clean_bourse_internationale(self):
         bourse_internationale = self.cleaned_data.get('bourse_internationale')
-        return bourse_internationale.uuid if bourse_internationale else ''
+        return str(bourse_internationale.uuid) if bourse_internationale else ''
 
     def clean_bourse_erasmus_mundus(self):
         bourse_erasmus_mundus = self.cleaned_data.get('bourse_erasmus_mundus')
-        return bourse_erasmus_mundus.uuid if bourse_erasmus_mundus else ''
+        return str(bourse_erasmus_mundus.uuid) if bourse_erasmus_mundus else ''
 
     def clean_bourse_double_diplomation(self):
         bourse_double_diplomation = self.cleaned_data.get('bourse_double_diplomation')
-        return bourse_double_diplomation.uuid if bourse_double_diplomation else ''
+        return str(bourse_double_diplomation.uuid) if bourse_double_diplomation else ''
 
     def clean_taille_page(self):
         return self.cleaned_data.get('taille_page') or self.fields['taille_page'].initial

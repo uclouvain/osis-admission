@@ -33,19 +33,31 @@ import mock
 from django.contrib.auth.models import User
 from django.test import RequestFactory, TestCase
 from django.urls import reverse
-from django.utils.translation import gettext
+from django.utils.translation import gettext as _
+from openpyxl.workbook import Workbook
+from openpyxl.worksheet.worksheet import Worksheet
 
 from admission.ddd.admission.dtos.liste import DemandeRechercheDTO, VisualiseurAdmissionDTO
+from admission.ddd.admission.enums.statut import CHOIX_STATUT_TOUTE_PROPOSITION
+from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.tests import QueriesAssertionsMixin
 from admission.tests.factories.admission_viewer import AdmissionViewerFactory
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.roles import SicManagerRoleFactory
+from admission.tests.factories.scholarship import (
+    InternationalScholarshipFactory,
+    DoubleDegreeScholarshipFactory,
+    ErasmusMundusScholarshipFactory,
+)
 from admission.views.excel_exports import AdmissionListExcelExportView
+from base.models.enums.education_group_types import TrainingType
 from base.models.enums.entity_type import EntityType
 from base.tests.factories.academic_year import AcademicYearFactory
+from base.tests.factories.campus import CampusFactory
 from base.tests.factories.entity import EntityFactory
 from base.tests.factories.entity_version import EntityVersionFactory
+from base.tests.factories.person import PersonFactory
 from base.tests.factories.student import StudentFactory
 from osis_async.models import AsyncTask
 from osis_async.models.enums import TaskState
@@ -230,8 +242,8 @@ class AdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, TestCase):
 
         task = AsyncTask.objects.filter(person=self.sic_manager_user.person).first()
         self.assertIsNotNone(task)
-        self.assertEqual(task.name, gettext('Admission applications export'))
-        self.assertEqual(task.description, gettext('Excel export of admission applications'))
+        self.assertEqual(task.name, _('Admission applications export'))
+        self.assertEqual(task.description, _('Excel export of admission applications'))
         self.assertEqual(task.state, TaskState.PENDING.name)
 
         export = Export.objects.filter(job_uuid=task.uuid).first()
@@ -270,3 +282,77 @@ class AdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, TestCase):
         with mock.patch.object(self.result, 'plusieurs_demandes', True):
             row_data = view.get_row_data(self.result)
             self.assertEqual(row_data[4], 'oui')
+
+    def test_export_configuration(self):
+        candidate = PersonFactory()
+        campus = CampusFactory()
+        international_scholarship = InternationalScholarshipFactory(short_name='ID1')
+        double_degree_scholarship = DoubleDegreeScholarshipFactory(short_name="DD1")
+        erasmus_mundus_scholarship = ErasmusMundusScholarshipFactory(short_name="EM1")
+        filters = str(
+            {
+                'annee_academique': 2022,
+                'numero': 1,
+                'noma': '00000001',
+                'matricule_candidat': candidate.global_id,
+                'etat': ChoixStatutPropositionGenerale.CONFIRMEE.name,
+                'type': TypeDemande.ADMISSION.name,
+                'site_inscription': str(campus.uuid),
+                'entites': 'ENT',
+                'types_formation': [TrainingType.BACHELOR.name, TrainingType.PHD.name],
+                'formation': 'Informatique',
+                'bourse_internationale': str(international_scholarship.uuid),
+                'bourse_erasmus_mundus': str(erasmus_mundus_scholarship.uuid),
+                'bourse_double_diplomation': str(double_degree_scholarship.uuid),
+            }
+        )
+
+        view = AdmissionListExcelExportView()
+        workbook = Workbook()
+        worksheet: Worksheet = workbook.create_sheet()
+
+        view.customize_parameters_worksheet(
+            worksheet=worksheet,
+            person=self.sic_manager_user.person,
+            filters=filters,
+        )
+
+        names, values = list(worksheet.iter_cols(values_only=True))
+        self.assertEqual(len(names), 16)
+        self.assertEqual(len(values), 16)
+
+        # Check the names of the parameters
+        self.assertEqual(names[0], _('Creation date'))
+        self.assertEqual(names[1], _('Created by'))
+        self.assertEqual(names[2], _('Description'))
+        self.assertEqual(names[3], _('Year'))
+        self.assertEqual(names[4], _('Application numero'))
+        self.assertEqual(names[5], _('Noma'))
+        self.assertEqual(names[6], _('Last name / First name / E-mail'))
+        self.assertEqual(names[7], _('Application status'))
+        self.assertEqual(names[8], _('Application type'))
+        self.assertEqual(names[9], _('Enrolment campus'))
+        self.assertEqual(names[10], _('Entities'))
+        self.assertEqual(names[11], _('Training type'))
+        self.assertEqual(names[12], _('Training'))
+        self.assertEqual(names[13], _('International scholarship'))
+        self.assertEqual(names[14], _('Erasmus Mundus'))
+        self.assertEqual(names[15], _('Double degree scholarship'))
+
+        # Check the values of the parameters
+        self.assertEqual(values[0], '1 Janvier 2023')
+        self.assertEqual(values[1], self.sic_manager_user.person.full_name)
+        self.assertEqual(values[2], _('Export') + ' - Admissions')
+        self.assertEqual(values[3], '2022')
+        self.assertEqual(values[4], '1')
+        self.assertEqual(values[5], '00000001')
+        self.assertEqual(values[6], candidate.full_name)
+        self.assertEqual(values[7], ChoixStatutPropositionGenerale.CONFIRMEE.value)
+        self.assertEqual(values[8], TypeDemande.ADMISSION.value)
+        self.assertEqual(values[9], campus.name)
+        self.assertEqual(values[10], 'ENT')
+        self.assertEqual(values[11], f"['{TrainingType.BACHELOR.value}', '{TrainingType.PHD.value}']")
+        self.assertEqual(values[12], 'Informatique')
+        self.assertEqual(values[13], international_scholarship.short_name)
+        self.assertEqual(values[14], erasmus_mundus_scholarship.short_name)
+        self.assertEqual(values[15], double_degree_scholarship.short_name)
