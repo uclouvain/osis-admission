@@ -545,6 +545,7 @@ class DoctorateManager(models.Manager.from_queryset(BaseAdmissionQuerySet)):
                 'financing_type',
                 'international_scholarship',
                 'other_international_scholarship',
+                'supervision_group_id',
             )
             .select_related(
                 'candidate',
