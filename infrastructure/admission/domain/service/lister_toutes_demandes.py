@@ -81,6 +81,16 @@ class ListerToutesDemandes(IListerToutesDemandes):
     ) -> PaginatedList[DemandeRechercheDTO]:
         language_is_french = get_language() == settings.LANGUAGE_CODE_FR
 
+        prefetch_viewers_queryset = (
+            AdmissionViewer.objects.filter(viewed_at__gte=datetime.datetime.now() - datetime.timedelta(days=1))
+            .select_related('person')
+            .order_by('-viewed_at')
+            .only('person__first_name', 'person__last_name', 'viewed_at')
+        )
+
+        if demandeur:
+            prefetch_viewers_queryset = prefetch_viewers_queryset.exclude(person__uuid=demandeur)
+
         qs = (
             BaseAdmissionProxy.objects.with_training_management_and_reference()
             .annotate(
@@ -118,11 +128,7 @@ class ListerToutesDemandes(IListerToutesDemandes):
             .prefetch_related(
                 Prefetch(
                     'admissionviewer_set',
-                    AdmissionViewer.objects.filter(viewed_at__gte=datetime.datetime.now() - datetime.timedelta(days=1))
-                    .exclude(person__uuid=demandeur)
-                    .select_related('person')
-                    .order_by('-viewed_at')
-                    .only('person__first_name', 'person__last_name', 'viewed_at'),
+                    prefetch_viewers_queryset,
                     to_attr='other_admission_viewers',
                 ),
             )

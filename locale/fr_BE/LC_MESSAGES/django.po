@@ -456,6 +456,9 @@ msgstr "Éléments de formulaire pour admission"
 msgid "Admission type"
 msgstr "Type de l'admission"
 
+msgid "Admissions"
+msgstr "Admissions"
+
 msgid "Advanced filters"
 msgstr "Filtres avancés"
 
@@ -1402,6 +1405,12 @@ msgstr "Créé"
 
 msgid "Created at"
 msgstr "Créé le"
+
+msgid "Created by"
+msgstr "Créé le"
+
+msgid "Creation date"
+msgstr "Date de création"
 
 msgid "Curriculum"
 msgstr "Curriculum"
