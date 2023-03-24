@@ -1,34 +1,40 @@
 # ##############################################################################
 #
-#    OSIS stands for Open Student Information System. It's an application
-#    designed to manage the core business of higher education institutions,
-#    such as universities, faculties, institutes and professional schools.
-#    The core business involves the administration of students, teachers,
-#    courses, programs and so on.
+#  OSIS stands for Open Student Information System. It's an application
+#  designed to manage the core business of higher education institutions,
+#  such as universities, faculties, institutes and professional schools.
+#  The core business involves the administration of students, teachers,
+#  courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
 #
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
 #
-#    A copy of this license - GNU General Public License - is available
-#    at the root of the source code of this program.  If not,
-#    see http://www.gnu.org/licenses/.
+#  A copy of this license - GNU General Public License - is available
+#  at the root of the source code of this program.  If not,
+#  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
 from django.conf import settings
 from django.db import models
 from django.utils import translation
 from django.utils.translation import gettext_lazy as _
 
 from admission.ddd.parcours_doctoral.formation.domain.model.enums import CategorieActivite
+from admission.forms.translation_field import (
+    TextareaArrayField,
+    TranslatedTextareasWidget,
+    TranslatedValueField,
+)
 from base.models.enums.entity_type import DOCTORAL_COMMISSION
 
 
@@ -214,6 +220,15 @@ def default_complementary_course_types():
     }
 
 
+class TranslatedMultilineField(models.JSONField):
+    def formfield(self, form_class=None, choices_form_class=None, **kwargs):
+        kwargs.setdefault('form_class', TranslatedValueField)
+        kwargs.setdefault('help_text', _('One choice per line, leave the "Other" value out'))
+        kwargs.setdefault('base_field', TextareaArrayField)
+        kwargs.setdefault('widget', TranslatedTextareasWidget())
+        return super().formfield(**kwargs)
+
+
 class CddConfiguration(models.Model):
     cdd = models.OneToOneField(
         'base.Entity',
@@ -226,43 +241,43 @@ class CddConfiguration(models.Model):
         default=False,
         help_text=_('This adds a "Complementary training" tab on admissions concerning this CDD.'),
     )
-    category_labels = models.JSONField(
+    category_labels = TranslatedMultilineField(
         verbose_name=_("Category labels"),
         default=default_category_labels,
     )
-    conference_types = models.JSONField(
+    conference_types = TranslatedMultilineField(
         verbose_name=_("CONFERENCE types"),
         default=default_conference_types,
     )
-    conference_publication_types = models.JSONField(
+    conference_publication_types = TranslatedMultilineField(
         verbose_name=_("CONFERENCE PUBLICATION types"),
         default=default_conference_publication_types,
     )
-    communication_types = models.JSONField(
+    communication_types = TranslatedMultilineField(
         verbose_name=_("COMMUNICATION types"),
         default=default_communication_types,
     )
-    seminar_types = models.JSONField(
+    seminar_types = TranslatedMultilineField(
         verbose_name=_("SEMINAR types"),
         default=default_seminar_types,
     )
-    publication_types = models.JSONField(
+    publication_types = TranslatedMultilineField(
         verbose_name=_("PUBLICATION types"),
         default=default_publication_types,
     )
-    service_types = models.JSONField(
+    service_types = TranslatedMultilineField(
         verbose_name=_("SERVICE types"),
         default=default_service_types,
     )
-    residency_types = models.JSONField(
+    residency_types = TranslatedMultilineField(
         verbose_name=_("RESIDENCY types"),
         default=default_residency_types,
     )
-    course_types = models.JSONField(
+    course_types = TranslatedMultilineField(
         verbose_name=_("COURSE types"),
         default=default_course_types,
     )
-    complementary_course_types = models.JSONField(
+    complementary_course_types = TranslatedMultilineField(
         verbose_name=_("COURSE types for complementary training"),
         default=default_complementary_course_types,
     )

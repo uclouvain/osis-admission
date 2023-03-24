@@ -14,6 +14,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='cddconfiguration',
             name='course_types',
-            field=models.JSONField(default=admission.contrib.models.cdd_config.default_course_types, verbose_name='COURSE types'),
+            field=admission.contrib.models.cdd_config.TranslatedMultilineField(default=admission.contrib.models.cdd_config.default_course_types, verbose_name='COURSE types'),
         ),
     ]
