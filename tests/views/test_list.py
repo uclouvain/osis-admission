@@ -95,7 +95,7 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
                 training__management_entity=cls.first_entity,
                 training__acronym="ABCD0",
                 last_update_author__user__username='user1',
-                submitted_at=datetime.date(2023, 1, 1),
+                submitted_at=datetime.datetime(2023, 1, 1),
             ),
         ]
 
@@ -693,7 +693,7 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
 
         second_admission = GeneralEducationAdmissionFactory(
             status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
-            submitted_at=datetime.date(2022, 12, 31),
+            submitted_at=datetime.datetime(2022, 12, 31),
         )
 
         response = self.client.get(
