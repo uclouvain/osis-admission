@@ -65,6 +65,8 @@ from osis_role.contrib.views import PermissionRequiredMixin
 
 
 class LoadDossierViewMixin(LoginRequiredMixin, PermissionRequiredMixin, ContextMixin):
+    permission_required_by_context = None
+
     @property
     def admission_uuid(self) -> str:
         return self.kwargs.get('uuid', '')
@@ -72,6 +74,10 @@ class LoadDossierViewMixin(LoginRequiredMixin, PermissionRequiredMixin, ContextM
     @property
     def current_context(self):
         return self.request.resolver_match.namespaces[1]
+
+    @cached_property
+    def formatted_current_context(self):
+        return self.current_context.replace('-', '_')
 
     @property
     def admission(self) -> DoctorateAdmission:
@@ -113,6 +119,11 @@ class LoadDossierViewMixin(LoginRequiredMixin, PermissionRequiredMixin, ContextM
     def get_permission_object(self):
         return self.admission
 
+    def get_permission_required(self):
+        if self.permission_required_by_context and self.current_context in self.permission_required_by_context:
+            return (self.permission_required_by_context[self.current_context],)
+        return super().get_permission_required()
+
     @property
     def is_doctorate(self):
         return self.current_context == CONTEXT_DOCTORATE
@@ -133,6 +144,7 @@ class LoadDossierViewMixin(LoginRequiredMixin, PermissionRequiredMixin, ContextM
         context = super().get_context_data(**kwargs)
         admission_status = self.admission.status
         context['base_namespace'] = self.base_namespace
+        context['base_template'] = f'admission/{self.formatted_current_context}/tab_layout.html'
 
         if self.is_doctorate:
             try:

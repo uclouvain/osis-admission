@@ -66,8 +66,8 @@
   {% endblock page-header %}
 
   <div class="panel panel-default">
-    <div class="panel-heading flex-content">
-      <div>
+    <div id="admission-panel-header-container" class="panel-heading flex-content">
+      <div id="admission-panel-header">
         {% block panel-heading %}
           <div>
             {% if doctorate %}
@@ -147,6 +147,7 @@
 
 {% block style %}
   <link href="{% static "admission/admission.css" %}" rel="stylesheet"/>
+  <link href="{% static "osis_document/osis-document.css" %}" rel="stylesheet" />
 
   <style>
     p {

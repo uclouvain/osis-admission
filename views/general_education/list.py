@@ -38,8 +38,8 @@ __all__ = [
 
 class GeneralAdmissionList(LoginRequiredMixin, PermissionRequiredMixin, HtmxMixin, ListView):
     raise_exception = True
-    template_name = 'admission/general/list.html'
-    htmx_template_name = 'admission/general/list_block.html'
+    template_name = 'admission/general_education/list.html'
+    htmx_template_name = 'admission/general_education/list_block.html'
     permission_required = 'admission.view_general_dossiers'
 
     @cached_property

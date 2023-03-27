@@ -25,9 +25,9 @@
 # Association between a read-only tab name (path name) and a permission
 READ_ACTIONS_BY_TAB = {
     # Personal data
-    'coordonnees': 'admission.view_doctorateadmission_coordinates',
+    'coordonnees': 'admission.view_%([context])s_coordinates',
     'cotutelle': 'admission.view_doctorateadmission_cotutelle',
-    'person': 'admission.view_doctorateadmission_person',
+    'person': 'admission.view_%([context])s_person',
     # Previous experience
     'curriculum': 'admission.view_doctorateadmission_curriculum',
     'education': 'admission.view_doctorateadmission_secondary_studies',

@@ -38,8 +38,8 @@ __all__ = [
 
 class ContinuingAdmissionList(LoginRequiredMixin, PermissionRequiredMixin, HtmxMixin, ListView):
     raise_exception = True
-    template_name = 'admission/continuing/list.html'
-    htmx_template_name = 'admission/continuing/list_block.html'
+    template_name = 'admission/continuing_education/list.html'
+    htmx_template_name = 'admission/continuing_education/list_block.html'
     permission_required = 'admission.view_continuing_dossiers'
 
     @cached_property

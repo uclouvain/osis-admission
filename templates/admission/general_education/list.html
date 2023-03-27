@@ -32,14 +32,14 @@
   </a>
 </li>
 <li class="active">
-  {% trans 'Continuing enrolments' %}
+  {% trans 'General enrolments' %}
 </li>
 {% endblock %}
 
 {% block content %}
 
 <div class="page-header">
-  <h2 class="d-inline-block">{% trans "Continuing enrolments" %}</h2>
+  <h2 class="d-inline-block">{% trans "General enrolments" %}</h2>
 </div>
 
 <div id="admission-search" class="panel panel-default">
@@ -49,10 +49,10 @@
     </div>
     <form
         id="search_form"
-        action="{% url 'admission:continuing-education:list' %}"
+        action="{% url 'admission:general-education:list' %}"
         method="get"
         hx-boost="true"
-        hx-target="#table_continuing_admission"
+        hx-target="#table_general_admission"
         hx-indicator="#htmx-overlay"
     >
     {% comment %}
@@ -105,8 +105,8 @@
 
     <hr>
 
-    <div class="table-responsive mt-1" id="table_continuing_admission">
-      {% include 'admission/continuing/list_block.html' with object_list=object_list %}
+    <div class="table-responsive mt-1" id="table_general_admission">
+      {% include 'admission/general_education/list_block.html' with object_list=object_list %}
     </div>
 
   </div>

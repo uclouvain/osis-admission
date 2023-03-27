@@ -30,7 +30,8 @@ from ckeditor.fields import RichTextField
 from django.conf import settings
 from django.core.cache import cache
 from django.db import models
-from django.db.models import OuterRef
+from django.db.models import OuterRef, F, ExpressionWrapper, CharField
+from django.db.models.fields.json import KeyTextTransform, KeyTransform
 from django.db.models.functions import Cast
 from django.utils.datetime_safe import date
 from django.utils.translation import get_language, gettext_lazy as _
@@ -495,13 +496,17 @@ class DemandeManager(models.Manager):
                 'status_sic',
             )
             .annotate(
-                nationalite_iso_code=Cast(
-                    'submitted_profile__identification__country_of_citizenship', output_field=models.CharField()
+                nationalite_iso_code=KeyTextTransform(
+                    'country_of_citizenship',
+                    KeyTransform('identification', 'submitted_profile'),
                 ),
                 nom_pays_nationalite=models.Subquery(
                     Country.objects.filter(iso_code=OuterRef('nationalite_iso_code')).values(country_title_field)[:1]
                 ),
-                pays_iso_code=Cast('submitted_profile__coordinates__country', models.CharField()),
+                pays_iso_code=KeyTextTransform(
+                    'country',
+                    KeyTransform('coordinates', 'submitted_profile'),
+                ),
                 nom_pays=models.Subquery(
                     Country.objects.filter(iso_code=OuterRef('pays_iso_code')).values(country_title_field)[:1]
                 ),

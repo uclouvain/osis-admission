@@ -1,0 +1,68 @@
+{% extends base_template %}
+{% load i18n static admission index %}
+
+{% comment "License" %}
+* OSIS stands for Open Student Information System. It's an application
+* designed to manage the core business of higher education institutions,
+* such as universities, faculties, institutes and professional schools.
+* The core business involves the administration of students, teachers,
+* courses, programs and so on.
+*
+* Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+*
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* A copy of this license - GNU General Public License - is available
+* at the root of the source code of this program.  If not,
+* see http://www.gnu.org/licenses/.
+{% endcomment %}
+
+{% block tab_content %}
+    {% panel _("Residential address") %}
+        <div class="row">
+            <div class="col-md-4">{% field_data _("Street") coordonnees.residential.street %}</div>
+            <div class="col-md-2">{% field_data _("Number") coordonnees.residential.street_number %}</div>
+            <div class="col-md-2">{% field_data _("Box") coordonnees.residential.postal_box hide_empty=True %} </div>
+            <div class="col-md-4">{% field_data _("Place") coordonnees.residential.place hide_empty=True %}</div>
+        </div>
+        <div class="row">
+            {% get_country_name coordonnees.residential.country as residential_country %}
+            <div class="col-md-4">{% field_data _("Country") residential_country %}</div>
+            <div class="col-md-4">{% field_data _("Postal code") coordonnees.residential.postal_code %}</div>
+            <div class="col-md-4">{% field_data _("City") coordonnees.residential.city %}</div>
+        </div>
+    {% endpanel %}
+    {% if coordonnees.contact %}
+        {% translate 'Contact address' context 'admission' as contact_panel_title %}
+        {% panel contact_panel_title %}
+            <div class="row">
+                <div class="col-md-4">{% field_data _("Street") coordonnees.contact.street %}</div>
+                <div class="col-md-2">{% field_data _("Number") coordonnees.contact.street_number %}</div>
+                <div class="col-md-2">{% field_data _("Box") coordonnees.contact.postal_box hide_empty=True %}</div>
+                <div class="col-md-4">{% field_data _("Place") coordonnees.contact.place hide_empty=True %}</div>
+            </div>
+            <div class="row">
+                {% get_country_name coordonnees.contact.country as contact_country %}
+                <div class="col-md-4">{% field_data _("Country") contact_country %}</div>
+                <div class="col-md-4">{% field_data _("Postal code") coordonnees.contact.postal_code %}</div>
+                <div class="col-md-4">{% field_data _("City") coordonnees.contact.city %}</div>
+            </div>
+        {% endpanel %}
+    {% endif %}
+    {% panel _("Contact") %}
+        <div class="row">
+            {% trans "Mobile phone" context "admission" as mobile_phone_label %}
+            {% field_data mobile_phone_label coordonnees.phone_mobile "col-md-6" %}
+            {% trans "Private email" context "admission" as email_label %}
+            {% field_data email_label coordonnees.private_email "col-md-6" %}
+        </div>
+    {% endpanel %}
+{% endblock %}

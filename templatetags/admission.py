@@ -27,9 +27,10 @@ import re
 from dataclasses import dataclass
 from functools import wraps
 from inspect import getfullargspec
-from typing import Union
+from typing import Union, Optional
 
 from django import template
+from django.conf import settings
 from django.core.validators import EMPTY_VALUES
 from django.urls import NoReverseMatch, reverse
 from django.utils.safestring import SafeString
@@ -60,11 +61,18 @@ from admission.infrastructure.admission.domain.service.annee_inscription_formati
 from admission.utils import get_uuid_value, format_academic_year
 from osis_document.api.utils import get_remote_token, get_remote_metadata
 from osis_role.templatetags.osis_role import has_perm
+from reference.models.country import Country
 
 CONTEXT_ADMISSION = 'admission'
 CONTEXT_DOCTORATE = 'doctorate'
 CONTEXT_GENERAL = 'general-education'
 CONTEXT_CONTINUING = 'continuing-education'
+
+PERMISSION_BY_ADMISSION_CLASS = {
+    DoctorateAdmission: 'doctorateadmission',
+    GeneralEducationAdmission: 'generaleducationadmission',
+    ContinuingEducationAdmission: 'continuingeducationadmission',
+}
 
 register = template.Library()
 
@@ -250,6 +258,7 @@ TAB_TREES = {
     CONTEXT_DOCTORATE: {
         Tab('person', _('Personal data'), 'user'): [
             Tab('person', _('Personal data'), 'user'),
+            Tab('coordonnees', _('Contact details')),
         ],
         Tab('education', _('Previous experience'), 'list-alt'): [
             Tab('education', _('Previous experience'), 'list-alt'),
@@ -283,7 +292,8 @@ TAB_TREES = {
     },
     CONTEXT_GENERAL: {
         Tab('person', _('Personal data'), 'user'): [
-            Tab('person', _('Personal data'), 'user'),
+            Tab('person', _('Identification'), 'user'),
+            Tab('coordonnees', _('Contact details'), 'user'),
         ],
         Tab('education', _('Previous experience'), 'list-alt'): [
             Tab('education', _('Previous experience'), 'list-alt'),
@@ -297,6 +307,10 @@ TAB_TREES = {
         ],
     },
     CONTEXT_CONTINUING: {
+        Tab('person', _('Personal data'), 'user'): [
+            Tab('person', _('Identification'), 'user'),
+            Tab('coordonnees', _('Contact details'), 'user'),
+        ],
         Tab('management', pgettext('tab', 'Management'), 'gear'): [
             Tab('debug', _('Debug'), 'bug'),
         ],
@@ -524,6 +538,7 @@ def bootstrap_field_with_tooltip(field, classes='', show_help=False):
 def has_perm(context, perm, obj=None):
     if not obj:
         obj = context['view'].get_permission_object()
+    perm = perm % {'[context]': PERMISSION_BY_ADMISSION_CLASS[type(obj)]}
     return rules.has_perm(perm, context['request'].user, obj)
 
 
@@ -711,3 +726,11 @@ def admission_status(status: str, osis_education_type: str):
         .get(admission_context)
         .get_value(status)
     )
+
+
+@register.simple_tag
+def get_country_name(country: Optional[Country]):
+    """Return the country name."""
+    if not country:
+        return ''
+    return getattr(country, 'name' if get_language() == settings.LANGUAGE_CODE_FR else 'name_en')
