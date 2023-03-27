@@ -39,14 +39,9 @@ from base.ddd.utils.business_validator import BusinessValidator
 class ShouldReductionDesDroitsInscriptionEtreCompletee(BusinessValidator):
     demande_allocation_d_etudes_communaute_francaise_belgique: Optional[bool]
     enfant_personnel: Optional[bool]
-    attestation_enfant_personnel: List[str]
 
     def validate(self, *args, **kwargs):
-        if (
-            self.demande_allocation_d_etudes_communaute_francaise_belgique is None
-            or self.enfant_personnel is None
-            or (self.enfant_personnel and not self.attestation_enfant_personnel)
-        ):
+        if self.demande_allocation_d_etudes_communaute_francaise_belgique is None or self.enfant_personnel is None:
             raise ReductionDesDroitsInscriptionNonCompleteeException
 
 
