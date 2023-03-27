@@ -405,9 +405,9 @@ class TestVerifierPropositionService(TestCase):
                 QuestionsSpecifiquesChoixFormationNonCompleteesException,
             )
 
-    def test_should_retourner_erreur_si_comptabilite_incomplete_pour_document_enfant_personnel(self):
+    def test_should_retourner_erreur_si_comptabilite_incomplete_pour_enfant_personnel(self):
         self._test_should_retourner_erreur_si_comptabilite_incomplete(
-            comptabilite=_ComptabiliteFactory(enfant_personnel=True, attestation_enfant_personnel=[]),
+            comptabilite=_ComptabiliteFactory(enfant_personnel=None),
             exception=ReductionDesDroitsInscriptionNonCompleteeException,
         )
 

@@ -125,7 +125,6 @@ class FormationGeneraleComptabiliteValidatorList(TwoStepsMultipleBusinessExcepti
             ShouldReductionDesDroitsInscriptionEtreCompletee(
                 demande_allocation_d_etudes_communaute_francaise_belgique=demande_allocation_etudes_fr_be,
                 enfant_personnel=self.comptabilite.enfant_personnel,
-                attestation_enfant_personnel=self.comptabilite.attestation_enfant_personnel,
             ),
             ShouldAssimilationEtreCompletee(
                 pays_nationalite_ue=self.pays_nationalite_ue,
