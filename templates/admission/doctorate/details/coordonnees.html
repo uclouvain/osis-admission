@@ -1,4 +1,4 @@
-{% extends "admission/doctorate/details/tab_layout.html" %}
+{% extends "admission/details/coordonnees.html" %}
 {% load i18n static admission %}
 
 {% comment "License" %}
@@ -36,4 +36,5 @@
       {{ dossier.profil_candidat.nom_pays }}
     </p>
   {% endif %}
+  {{ block.super }}
 {% endblock %}

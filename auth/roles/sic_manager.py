@@ -40,7 +40,13 @@ class SicManager(RoleModel):
     @classmethod
     def rule_set(cls):
         ruleset = {
+            # Common
+            # > Listing
             'admission.view_dossiers': rules.always_allow,
+            # > Management
+            'admission.view_internalnote': rules.always_allow,
+            'admission.view_debug_info': is_debug,
+            # Doctorate
             'admission.change_doctorateadmission': rules.always_allow,
             'admission.delete_doctorateadmission': rules.always_deny,
             'admission.view_doctorateadmission': rules.always_allow,
@@ -60,7 +66,24 @@ class SicManager(RoleModel):
             'admission.view_doctorateadmission_supervision': rules.always_allow,
             'admission.add_supervision_member': rules.always_allow,
             'admission.remove_supervision_member': rules.always_allow,
-            'admission.view_internalnote': rules.always_allow,
-            'admission.view_debug_info': is_debug,
+            # General admission
+            'admission.view_generaleducationadmission': rules.always_allow,
+            'admission.view_generaleducationadmission_person': rules.always_allow,
+            'admission.view_generaleducationadmission_coordinates': rules.always_allow,
+            'admission.view_generaleducationadmission_curriculum': rules.always_allow,
+            'admission.view_generaleducationadmission_secondary_studies': rules.always_allow,
+            'admission.view_generaleducationadmission_languages': rules.always_allow,
+            'admission.view_generaleducationadmission_accounting': rules.always_allow,
+            'admission.view_generaleducationadmission_specific_question': rules.always_allow,
+            'admission.download_generaleducationadmission_pdf_recap': rules.always_allow,
+            # Continuing admission
+            'admission.view_continuingeducationadmission': rules.always_allow,
+            'admission.view_continuingeducationadmission_person': rules.always_allow,
+            'admission.view_continuingeducationadmission_coordinates': rules.always_allow,
+            'admission.view_continuingeducationadmission_curriculum': rules.always_allow,
+            'admission.view_continuingeducationadmission_secondary_studies': rules.always_allow,
+            'admission.view_continuingeducationadmission_languages': rules.always_allow,
+            'admission.view_continuingeducationadmission_specific_question': rules.always_allow,
+            'admission.download_continuingeducationadmission_pdf_recap': rules.always_allow,
         }
         return RuleSet(ruleset)

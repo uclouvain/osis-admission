@@ -32,7 +32,7 @@
     </a>
   </li>
   <li>
-    <a href="{% url 'admission:continuing-education:list' %}" id="lnk_admissions">
+    <a href="{% url 'admission:all-list' %}" id="lnk_admissions">
       {% trans 'Continuing enrolments' %}
     </a>
   </li>
@@ -47,7 +47,7 @@
       {{ admission.training.title }} ({{ admission.reference }})
     </h2>
     <a
-        href="{% url 'admission:continuing-education:list' %}"
+        href="{% url 'admission:all-list' %}"
         class="text-primary"
     >
       <span class="fa fa-stream"></span>

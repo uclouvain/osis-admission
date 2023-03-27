@@ -23,16 +23,33 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from django.utils.translation.trans_real import get_languages
+from django.views.generic import TemplateView
 
-from admission.contrib.models import ContinuingEducationAdmission
-from admission.ddd.admission.formation_continue.commands import DeterminerAnneeAcademiqueEtPotQuery
-from admission.views.general_education.details.debug import GeneralDebugView
-
-__all__ = ["ContinuingDebugView"]
+from admission.templatetags.admission import CONTEXT_GENERAL, CONTEXT_DOCTORATE, CONTEXT_CONTINUING
+from admission.views.doctorate.mixins import LoadDossierViewMixin
+from base.models.enums.civil_state import CivilState
 
 
-# TODO Move to 'common' once we have the same logic as frontoffice
-class ContinuingDebugView(GeneralDebugView):
-    model = ContinuingEducationAdmission
-    cmd = DeterminerAnneeAcademiqueEtPotQuery
-    extra_context = {'base_template': 'admission/continuing_education/tab_layout.html'}
+__all__ = ['AdmissionPersonDetailView']
+
+
+class AdmissionPersonDetailView(LoadDossierViewMixin, TemplateView):
+    template_name = "admission/details/person.html"
+    permission_required_by_context = {
+        CONTEXT_DOCTORATE: 'admission.view_doctorateadmission_person',
+        CONTEXT_GENERAL: 'admission.view_generaleducationadmission_person',
+        CONTEXT_CONTINUING: 'admission.view_continuingeducationadmission_person',
+    }
+
+    def get_template_names(self):
+        return [
+            f'admission/{self.formatted_current_context}/details/person.html',
+            'admission/details/person.html',
+        ]
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['person'] = self.admission.candidate
+        context['contact_language'] = get_languages().get(self.admission.candidate.language)
+        return context
