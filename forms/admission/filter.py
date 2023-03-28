@@ -120,7 +120,7 @@ class AllAdmissionsFilterForm(forms.Form):
         ],
         label=_('Training type'),
         required=False,
-        widget=Select2MultipleCheckboxesWidget(),
+        widget=Select2MultipleCheckboxesWidget(attrs={'data-dropdown-auto-width': True}),
     )
 
     formation = forms.CharField(
@@ -212,6 +212,7 @@ class AllAdmissionsFilterForm(forms.Form):
     def clean_entites(self):
         entities = self.cleaned_data.get('entites')
         if entities:
+            entities = entities.upper()
             entities = entities.split(',')
             existing_entities = set(
                 EntityVersion.objects.filter(acronym__in=entities).values_list('acronym', flat=True)

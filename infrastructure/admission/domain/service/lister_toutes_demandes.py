@@ -156,7 +156,7 @@ class ListerToutesDemandes(IListerToutesDemandes):
             training_filters = Q()
             for term in terms:
                 # The term can be a part of the acronym or of the training title
-                training_filters &= Q(Q(training__acronym__contains=term) | Q(training__title__contains=term))
+                training_filters &= Q(Q(training__acronym__icontains=term) | Q(training__title__icontains=term))
             qs = qs.filter(training_filters)
         if etat:
             qs = qs.filter(status=etat)
