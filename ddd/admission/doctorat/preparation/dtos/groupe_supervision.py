@@ -41,6 +41,7 @@ class PromoteurDTO(interface.DTO):
     est_docteur: bool = False
     institution: str = ""
     ville: str = ""
+    code_pays: str = ""
     pays: str = ""
     est_externe: bool = False
 
@@ -55,6 +56,7 @@ class MembreCADTO(interface.DTO):
     est_docteur: bool = False
     institution: str = ""
     ville: str = ""
+    code_pays: str = ""
     pays: str = ""
     est_externe: bool = False
 

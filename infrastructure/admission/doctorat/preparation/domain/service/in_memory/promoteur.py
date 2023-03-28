@@ -43,6 +43,7 @@ class Promoteur:
     institution: str = ''
     ville: str = ''
     pays: str = ''
+    langue: str = 'fr-be'
 
     @property
     def externe(self):

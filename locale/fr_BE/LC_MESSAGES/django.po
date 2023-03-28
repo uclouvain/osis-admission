@@ -4272,6 +4272,9 @@ msgstr ""
 msgid "The maximum number of documents must be a positive number."
 msgstr "Le nombre maximum de documents doit être un nombre positif."
 
+msgid "The member is not external."
+msgstr "Le membre n'est pas externe."
+
 msgid "The mimetypes must be a list with at least one mimetype."
 msgstr ""
 "Les types MIME doivent être spécifiés avec une liste contenant au-moins un "
@@ -4329,6 +4332,9 @@ msgstr "L'année académique et le pot déterminés ne concordent pas."
 msgid "The selection type must be one of the following values: %(values)s."
 msgstr ""
 "Le type de sélection doit être l'une des valeurs suivantes : %(values)s."
+
+msgid "The signature request procedure is already in progress."
+msgstr "La procédure de demande de signature a déjà été lancée."
 
 msgid "The signature request procedure isn't in progress."
 msgstr "La procédure de demande de signature n'a pas été lancée."

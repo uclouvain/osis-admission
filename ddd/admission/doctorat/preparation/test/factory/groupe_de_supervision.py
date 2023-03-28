@@ -287,7 +287,6 @@ class GroupeDeSupervisionSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory(_Gro
     signatures_membres_CA = factory.LazyFunction(
         lambda: [
             _SignatureMembreCAFactory(membre_CA_id__uuid='membre-ca-SC3DP', etat=ChoixEtatSignature.APPROVED),
-            _SignatureMembreCAFactory(membre_CA_id__uuid='membre-ca-SC3DP', etat=ChoixEtatSignature.APPROVED),
         ]
     )
     cotutelle = pas_de_cotutelle

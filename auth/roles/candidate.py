@@ -75,6 +75,7 @@ _CANDIDATE_RULESET = {
     'request_signatures': is_admission_request_author & in_progress,
     'add_supervision_member': is_admission_request_author & in_progress,
     'remove_supervision_member': is_admission_request_author & in_progress,
+    'edit_external_supervision_member': is_admission_request_author & in_progress,
     'set_reference_promoter': is_admission_request_author & unconfirmed_proposition,
     # Once supervision group is signing, he can
     'approve_proposition_by_pdf': is_admission_request_author & signing_in_progress,

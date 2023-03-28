@@ -36,7 +36,7 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
 from admission.tests import QueriesAssertionsMixin
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.roles import CandidateFactory, CddManagerFactory
-from admission.tests.factories.supervision import CaMemberFactory, PromoterFactory
+from admission.tests.factories.supervision import CaMemberFactory, ExternalPromoterFactory, PromoterFactory
 from base.models.enums.entity_type import EntityType
 from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.person import PersonFactory
@@ -87,7 +87,7 @@ class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
 
     def test_assert_methods_not_allowed(self):
         self.client.force_authenticate(user=self.candidate.user)
-        methods_not_allowed = ['delete', 'patch']
+        methods_not_allowed = ['delete']
 
         for method in methods_not_allowed:
             response = getattr(self.client, method)(self.url)
@@ -544,6 +544,40 @@ class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
         membres_CA = response.json()['signatures_membres_CA']
         self.assertEqual(len(promoters), 1)
         self.assertEqual(membres_CA[0]['membre_CA']['prenom'], 'Joe')
+
+    def test_supervision_modification_externe_par_doctorant(self):
+        self.client.force_authenticate(user=self.candidate.user)
+
+        external = ExternalPromoterFactory(process=self.admission.supervision_group, first_name="John")
+
+        # Check supervision before
+        response = self.client.get(self.url)
+        data = response.json()
+        self.assertEqual(len(data['signatures_promoteurs']), 2)
+        self.assertEqual(data['signatures_promoteurs'][1]['promoteur']['prenom'], 'John')
+
+        # Edit member
+        data = {
+            'uuid_proposition': self.admission.uuid,
+            'uuid_membre': external.uuid,
+            'prenom': 'Joe',
+            'nom': 'Dalton',
+            'email': 'joe@example.org',
+            'est_docteur': False,
+            'institution': 'Nope',
+            'ville': 'Nope',
+            'pays': 'FR',
+            'langue': 'fr-be',
+        }
+        response = self.client.patch(self.url, data=data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
+
+        # Check supervision after
+        response = self.client.get(self.url)
+        data = response.json()
+        self.assertEqual(len(data['signatures_promoteurs']), 2)
+        self.assertEqual(len(data['signatures_membres_CA']), 0)
+        self.assertEqual(data['signatures_promoteurs'][1]['promoteur']['prenom'], 'Joe')
 
     def test_supervision_designer_promoteur_reference(self):
         self.client.force_authenticate(user=self.candidate.user)

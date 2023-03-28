@@ -208,3 +208,29 @@ class GroupeDeSupervisionInMemoryRepository(InMemoryGenericRepository, IGroupeDe
         for membre in groupe.signatures_membres_CA:
             members.append(MembreCAInMemoryTranslator.get_dto(membre.membre_CA_id))
         return members
+
+    @classmethod
+    def edit_external_member(
+        cls,
+        groupe_id: 'GroupeDeSupervisionIdentity',
+        membre_id: 'SignataireIdentity',
+        first_name: Optional[str] = '',
+        last_name: Optional[str] = '',
+        email: Optional[str] = '',
+        is_doctor: Optional[bool] = False,
+        institute: Optional[str] = '',
+        city: Optional[str] = '',
+        country_code: Optional[str] = '',
+        language: Optional[str] = '',
+    ) -> None:
+        for membre in PromoteurInMemoryTranslator.promoteurs + MembreCAInMemoryTranslator.membres_CA:
+            if membre.id == membre_id:
+                membre.prenom = first_name
+                membre.nom = last_name
+                membre.email = email
+                membre.est_docteur = is_doctor
+                membre.institution = institute
+                membre.ville = city
+                membre.pays = country_code
+                membre.langue = language
+                return

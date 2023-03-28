@@ -307,6 +307,7 @@ class DoctoratePropositionDTOSerializer(IncludedFieldsMixin, DTOSerializer):
             # Supervision
             'add_approval': DOCTORATE_ACTION_LINKS['add_approval'],
             'add_member': DOCTORATE_ACTION_LINKS['add_member'],
+            'edit_external_member': DOCTORATE_ACTION_LINKS['edit_external_member'],
             'remove_member': DOCTORATE_ACTION_LINKS['remove_member'],
             'set_reference_promoter': DOCTORATE_ACTION_LINKS['set_reference_promoter'],
             'retrieve_supervision': DOCTORATE_ACTION_LINKS['retrieve_supervision'],

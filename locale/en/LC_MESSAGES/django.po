@@ -3853,6 +3853,9 @@ msgstr ""
 msgid "The maximum number of documents must be a positive number."
 msgstr ""
 
+msgid "The member is not external."
+msgstr ""
+
 msgid "The mimetypes must be a list with at least one mimetype."
 msgstr ""
 
@@ -3899,6 +3902,9 @@ msgstr ""
 
 #, python-format
 msgid "The selection type must be one of the following values: %(values)s."
+msgstr ""
+
+msgid "The signature request procedure is already in progress."
 msgstr ""
 
 msgid "The signature request procedure isn't in progress."

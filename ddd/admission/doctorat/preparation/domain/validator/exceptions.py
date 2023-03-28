@@ -465,3 +465,19 @@ class CoordonneesNonCompleteesException(BusinessException):
     def __init__(self, **kwargs):
         message = _("Please fill in all the required information in the 'Personal Data > Coordinates' tab.")
         super().__init__(message, **kwargs)
+
+
+class ProcedureDemandeSignatureLanceeException(BusinessException):
+    status_code = "PROPOSITION-52"
+
+    def __init__(self, **kwargs):
+        message = _("The signature request procedure is already in progress.")
+        super().__init__(message, **kwargs)
+
+
+class MembreNonExterneException(BusinessException):
+    status_code = "PROPOSITION-14"
+
+    def __init__(self, **kwargs):
+        message = _("The member is not external.")
+        super().__init__(message, **kwargs)
