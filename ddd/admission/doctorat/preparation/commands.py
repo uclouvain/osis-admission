@@ -121,6 +121,20 @@ class IdentifierMembreCACommand(interface.CommandRequest):
 
 
 @attr.dataclass(frozen=True, slots=True)
+class ModifierMembreSupervisionExterneCommand(interface.CommandRequest):
+    uuid_proposition: str
+    uuid_membre: str
+    prenom: Optional[str]
+    nom: Optional[str]
+    email: Optional[str]
+    est_docteur: Optional[bool]
+    institution: Optional[str]
+    ville: Optional[str]
+    pays: Optional[str]
+    langue: Optional[str]
+
+
+@attr.dataclass(frozen=True, slots=True)
 class DemanderSignaturesCommand(interface.CommandRequest):
     uuid_proposition: str
 

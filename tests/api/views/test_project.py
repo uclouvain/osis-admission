@@ -525,6 +525,7 @@ class DoctorateAdmissionGetApiTestCase(CheckActionLinksMixin, DoctorateAdmission
             'retrieve_cotutelle',
             'update_cotutelle',
             'add_member',
+            'edit_external_member',
             'remove_member',
             'set_reference_promoter',
             'retrieve_supervision',

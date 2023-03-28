@@ -336,3 +336,28 @@ class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
                 )
             )
         return members
+
+    @classmethod
+    def edit_external_member(
+        cls,
+        groupe_id: 'GroupeDeSupervisionIdentity',
+        membre_id: 'SignataireIdentity',
+        first_name: Optional[str] = '',
+        last_name: Optional[str] = '',
+        email: Optional[str] = '',
+        is_doctor: Optional[bool] = False,
+        institute: Optional[str] = '',
+        city: Optional[str] = '',
+        country_code: Optional[str] = '',
+        language: Optional[str] = '',
+    ) -> None:
+        SupervisionActor.objects.filter(process__uuid=groupe_id.uuid, uuid=membre_id.uuid).update(
+            first_name=first_name,
+            last_name=last_name,
+            email=email,
+            is_doctor=is_doctor,
+            institute=institute,
+            city=city,
+            country=Country.objects.get(iso_code=country_code) if country_code else None,
+            language=language,
+        )

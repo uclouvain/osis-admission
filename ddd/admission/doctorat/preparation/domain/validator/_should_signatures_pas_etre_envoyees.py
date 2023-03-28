@@ -24,25 +24,20 @@
 #
 # ##############################################################################
 
-import uuid
+import attr
 
-from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity
-from osis_common.ddd.interface import CommandRequest, DTO, EntityIdentityBuilder
+from admission.ddd.admission.doctorat.preparation.business_types import *
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutSignatureGroupeDeSupervision
+from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
+    ProcedureDemandeSignatureLanceeException,
+)
+from base.ddd.utils.business_validator import BusinessValidator
 
 
-class PropositionIdentityBuilder(EntityIdentityBuilder):
-    @classmethod
-    def build_from_command(cls, cmd: 'CommandRequest') -> 'PropositionIdentity':
-        return PropositionIdentity(uuid=cmd.uuid_proposition)
+@attr.dataclass(frozen=True, slots=True)
+class ShouldSignaturesPasEtreEnvoyees(BusinessValidator):
+    groupe_de_supervision: 'GroupeDeSupervision'
 
-    @classmethod
-    def build_from_repository_dto(cls, dto_object: 'DTO') -> 'PropositionIdentity':
-        raise NotImplementedError
-
-    @classmethod
-    def build(cls) -> 'PropositionIdentity':
-        return PropositionIdentity(uuid=str(uuid.uuid4()))
-
-    @classmethod
-    def build_from_uuid(cls, uuid: str) -> 'PropositionIdentity':
-        return PropositionIdentity(uuid=uuid)
+    def validate(self, *args, **kwargs):
+        if self.groupe_de_supervision.statut_signature == ChoixStatutSignatureGroupeDeSupervision.SIGNING_IN_PROGRESS:
+            raise ProcedureDemandeSignatureLanceeException

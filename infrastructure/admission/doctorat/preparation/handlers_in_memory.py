@@ -98,6 +98,13 @@ COMMAND_HANDLERS = {
         membre_ca_translator=_membre_ca_translator,
         historique=_historique,
     ),
+    ModifierMembreSupervisionExterneCommand: lambda msg_bus, cmd: modifier_membre_supervision_externe(
+        cmd,
+        proposition_repository=_proposition_repository,
+        groupe_supervision_repository=_groupe_supervision_repository,
+        promoteur_translator=_promoteur_translator,
+        membre_ca_translator=_membre_ca_translator,
+    ),
     DemanderSignaturesCommand: lambda msg_bus, cmd: demander_signatures(
         cmd,
         proposition_repository=_proposition_repository,

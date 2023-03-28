@@ -105,6 +105,23 @@ class IGroupeDeSupervisionRepository(interface.AbstractRepository):
 
     @classmethod
     @abc.abstractmethod
+    def edit_external_member(
+        cls,
+        groupe_id: 'GroupeDeSupervisionIdentity',
+        membre_id: 'SignataireIdentity',
+        first_name: Optional[str] = '',
+        last_name: Optional[str] = '',
+        email: Optional[str] = '',
+        is_doctor: Optional[bool] = False,
+        institute: Optional[str] = '',
+        city: Optional[str] = '',
+        country_code: Optional[str] = '',
+        language: Optional[str] = '',
+    ) -> None:
+        raise NotImplementedError
+
+    @classmethod
+    @abc.abstractmethod
     def remove_member(cls, groupe_id: 'GroupeDeSupervisionIdentity', signataire: 'SignataireIdentity') -> None:
         raise NotImplementedError
 

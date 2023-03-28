@@ -53,6 +53,7 @@ from ._should_signataire_etre_invite import ShouldSignataireEtreInvite
 from ._should_signataire_pas_invite import ShouldSignatairePasDejaInvite
 from ._should_type_contrat_travail_dependre_type_financement import ShouldTypeContratTravailDependreTypeFinancement
 from ._should_membre_etre_interne_ou_externe import ShouldMembreEtreInterneOuExterne
+from ._should_signatures_pas_etre_envoyees import ShouldSignaturesPasEtreEnvoyees
 
 __all__ = [
     "ShouldInstitutionDependreDoctoratRealise",
@@ -78,4 +79,5 @@ __all__ = [
     "ShouldGroupeDeSupervisionAvoirUnPromoteurDeReference",
     "ShouldAffiliationsEtreCompletees",
     "ShouldMembreEtreInterneOuExterne",
+    "ShouldSignaturesPasEtreEnvoyees",
 ]

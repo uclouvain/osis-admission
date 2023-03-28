@@ -25,10 +25,18 @@
 # ##############################################################################
 from typing import Optional
 
+from admission.ddd.admission.doctorat.preparation.domain.model._membre_CA import MembreCAIdentity
+from admission.ddd.admission.doctorat.preparation.domain.model._promoteur import PromoteurIdentity
 from admission.ddd.admission.doctorat.preparation.domain.model.groupe_de_supervision import (
     GroupeDeSupervisionIdentity,
+    SignataireIdentity,
 )
-from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import DejaMembreException
+from admission.ddd.admission.doctorat.preparation.domain.service.i_membre_CA import IMembreCATranslator
+from admission.ddd.admission.doctorat.preparation.domain.service.i_promoteur import IPromoteurTranslator
+from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
+    DejaMembreException,
+    MembreNonExterneException,
+)
 from admission.ddd.admission.doctorat.preparation.repository.i_groupe_de_supervision import (
     IGroupeDeSupervisionRepository,
 )
@@ -55,3 +63,19 @@ class MembresGroupeDeSupervision(interface.DomainService):
                 and membre.email == email
             ):
                 raise DejaMembreException
+
+    @classmethod
+    def verifier_externe(
+        cls,
+        signataire: 'SignataireIdentity',
+        promoteur_translator: 'IPromoteurTranslator',
+        membre_ca_translator: 'IMembreCATranslator',
+    ) -> None:
+        # Verifier que le membre est bien externe
+        if (
+            isinstance(signataire, PromoteurIdentity)
+            and not promoteur_translator.get_dto(signataire).est_externe
+            or isinstance(signataire, MembreCAIdentity)
+            and not membre_ca_translator.get_dto(signataire).est_externe
+        ):
+            raise MembreNonExterneException

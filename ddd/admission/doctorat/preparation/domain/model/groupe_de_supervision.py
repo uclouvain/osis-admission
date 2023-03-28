@@ -41,6 +41,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixStatutSignatureGroupeDeSupervision,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity
+from admission.ddd.admission.doctorat.preparation.domain.validator import ShouldSignaturesPasEtreEnvoyees
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     MembreCANonTrouveException,
     PromoteurNonTrouveException,
@@ -250,6 +251,9 @@ class GroupeDeSupervision(interface.RootEntity):
 
     def verrouiller_groupe_pour_signature(self):
         self.statut_signature = ChoixStatutSignatureGroupeDeSupervision.SIGNING_IN_PROGRESS
+
+    def verifier_signatures_non_envoyees(self):
+        ShouldSignaturesPasEtreEnvoyees(groupe_de_supervision=self).validate()
 
     def verifier_signataires(self):
         SignatairesValidatorList(groupe_de_supervision=self).validate()
