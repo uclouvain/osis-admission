@@ -38,7 +38,6 @@ __all__ = [
 
 class AdmissionPDFRecapExportView(LoadDossierViewMixin, RedirectView):
     permission_required = 'admission.download_doctorateadmission_pdf_recap'
-    urlpatterns = 'pdf-recap'
 
     def get(self, request, *args, **kwargs):
         reading_token = admission_pdf_recap(self.admission, settings.LANGUAGE_CODE)
