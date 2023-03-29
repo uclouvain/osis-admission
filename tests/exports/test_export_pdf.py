@@ -24,7 +24,7 @@
 #
 # ##############################################################################
 
-from unittest.mock import patch
+from unittest.mock import ANY, patch
 
 from django.core.management import call_command
 from django.test import TestCase
@@ -55,11 +55,13 @@ class ExportPdfTestCase(TestCase):
         )
         call_command("process_admission_tasks")
         save.assert_called()
+        confirm.assert_called_with(token='a-token', upload_to=ANY)
         async_task.refresh_from_db()
         self.assertEqual(async_task.state, TaskState.DONE.name)
 
     @patch('osis_document.utils.save_raw_content_remotely')
-    def test_pdf_archive_with_error(self, save):
+    @patch('osis_document.api.utils.confirm_remote_upload')
+    def test_pdf_archive_with_error(self, confirm, save):
         save.side_effect = Exception("API not working")
         async_task = AsyncTask.objects.create(name="Export pdf")
         AdmissionTask.objects.create(
@@ -70,5 +72,6 @@ class ExportPdfTestCase(TestCase):
         with self.assertRaises(Exception):
             call_command("process_admission_tasks")
         save.assert_called()
+        confirm.assert_not_called()
         async_task.refresh_from_db()
         self.assertEqual(async_task.state, TaskState.PENDING.name)
