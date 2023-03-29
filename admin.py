@@ -84,7 +84,7 @@ class AdmissionAdminForm(forms.ModelForm):
         self.fields['valuated_secondary_studies_person'].queryset = Person.objects.filter(pk=self.instance.candidate.pk)
 
 
-class BaseAdmissionAdmin(admin.ModelAdmin):
+class AdmissionAdminMixin(admin.ModelAdmin):
     form = AdmissionAdminForm
 
     list_display = [
@@ -113,6 +113,10 @@ class BaseAdmissionAdmin(admin.ModelAdmin):
     ]
     list_filter = ['status', 'type_demande']
 
+    def has_add_permission(self, request):
+        # Prevent adding from admin site as we lose all business checks
+        return False
+
     def get_readonly_fields(self, request, obj=None):
         # Also mark all FileField as readonly (since we don't have admin widget yet)
         return self.readonly_fields + [
@@ -129,7 +133,7 @@ class BaseAdmissionAdmin(admin.ModelAdmin):
         return mark_safe(f'<a class="button" href="{url}" target="_blank">{_("Candidate on portal")}</a>')
 
 
-class DoctorateAdmissionAdmin(BaseAdmissionAdmin):
+class DoctorateAdmissionAdmin(AdmissionAdminMixin):
     autocomplete_fields = [
         'training',
         'thesis_institute',
@@ -152,7 +156,7 @@ class DoctorateAdmissionAdmin(BaseAdmissionAdmin):
         return resolve_url(f'admission:doctorate', uuid=obj.uuid)
 
 
-class ContinuingEducationAdmissionAdmin(BaseAdmissionAdmin):
+class ContinuingEducationAdmissionAdmin(AdmissionAdminMixin):
     autocomplete_fields = ['training']
 
     @staticmethod
@@ -160,7 +164,7 @@ class ContinuingEducationAdmissionAdmin(BaseAdmissionAdmin):
         return resolve_url(f'admission:continuing-education', uuid=obj.uuid)
 
 
-class GeneralEducationAdmissionAdmin(ContinuingEducationAdmissionAdmin):
+class GeneralEducationAdmissionAdmin(AdmissionAdminMixin):
     autocomplete_fields = [
         'training',
         'double_degree_scholarship',
@@ -348,9 +352,6 @@ class AdmissionViewerAdmin(admin.ModelAdmin):
 class BaseAdmissionAdmin(admin.ModelAdmin):
     # Only used to search admissions through autocomplete fields
     search_fields = ['reference']
-
-    def has_delete_permission(self, request, obj=None):
-        return False
 
     def has_add_permission(self, request):
         return False
