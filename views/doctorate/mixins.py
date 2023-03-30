@@ -25,6 +25,7 @@
 ##############################################################################
 from typing import Union
 
+from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import Http404
 from django.utils.functional import cached_property
@@ -66,6 +67,7 @@ from osis_role.contrib.views import PermissionRequiredMixin
 
 class LoadDossierViewMixin(LoginRequiredMixin, PermissionRequiredMixin, ContextMixin):
     permission_required_by_context = None
+    message_on_success = _('Your data has been saved')
 
     @property
     def admission_uuid(self) -> str:
@@ -139,6 +141,10 @@ class LoadDossierViewMixin(LoginRequiredMixin, PermissionRequiredMixin, ContextM
     @cached_property
     def base_namespace(self):
         return ':'.join(self.request.resolver_match.namespaces[:2])
+
+    def form_valid(self, form):
+        messages.success(self.request, self.message_on_success)
+        return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

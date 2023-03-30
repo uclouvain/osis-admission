@@ -26,7 +26,6 @@
 import datetime
 from typing import List
 
-import freezegun
 from django.test import TestCase
 from django.urls import reverse
 

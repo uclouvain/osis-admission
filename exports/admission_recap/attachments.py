@@ -30,6 +30,7 @@ import img2pdf
 from django.conf import settings
 from django.utils.translation import gettext as _
 
+from admission.constants import IMAGE_MIME_TYPES, DEFAULT_MIME_TYPES
 from admission.contrib.models import AdmissionFormItemInstantiation
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixTypeFinancement
 from admission.ddd.admission.doctorat.preparation.dtos import ExperienceAcademiqueDTO
@@ -43,13 +44,6 @@ from base.models.enums.got_diploma import GotDiploma
 from osis_document.api.utils import get_raw_content_remotely
 from osis_profile.models.enums.curriculum import TranscriptType, ActivityType
 from osis_profile.models.enums.education import ForeignDiplomaTypes, Equivalence
-
-
-PDF_MIME_TYPE = 'application/pdf'
-JPEG_MIME_TYPE = 'image/jpeg'
-PNG_MIME_TYPE = 'image/png'
-IMAGE_MIME_TYPES = {JPEG_MIME_TYPE, PNG_MIME_TYPE}
-DEFAULT_MIME_TYPES = {PDF_MIME_TYPE} | IMAGE_MIME_TYPES
 
 
 class Attachment:

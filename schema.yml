@@ -8544,11 +8544,7 @@ components:
           type: boolean
           readOnly: true
         type:
-          enum:
-          - CONFIRMATION_PAPER
-          - PRIVATE_DEFENSE
-          - PUBLIC_DEFENSE
-          type: string
+          $ref: '#/components/schemas/ChoixTypeEpreuve'
         ects:
           type: number
           nullable: true
@@ -8637,6 +8633,12 @@ components:
       - DOCTORAL_TRAINING
       - COMPLEMENTARY_TRAINING
       - FREE_COURSE
+      type: string
+    ChoixTypeEpreuve:
+      enum:
+      - CONFIRMATION_PAPER
+      - PRIVATE_DEFENSE
+      - PUBLIC_DEFENSE
       type: string
     GeneralEducationPropositionDTO:
       type: object

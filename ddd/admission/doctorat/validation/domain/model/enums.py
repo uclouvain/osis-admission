@@ -23,13 +23,31 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from django.utils.translation import gettext_lazy as _
+from django.utils.translation import gettext_lazy as _, pgettext_lazy
 
+from admission.enum_utils import build_enum_from_choices
 from base.models.person import Person
 from base.models.utils.utils import ChoiceEnum
 
-ChoixGenre = ChoiceEnum('ChoixGenre', Person.GENDER_CHOICES)  # type: ignore
-ChoixSexe = ChoiceEnum('ChoixSexe', Person.SEX_CHOICES)  # type: ignore
+
+ChoixGenre = build_enum_from_choices(
+    enum_name='ChoixGenre',
+    choices=Person.GENDER_CHOICES,
+    values=[
+        pgettext_lazy('admission gender', 'Female'),
+        pgettext_lazy('admission gender', 'Male'),
+        pgettext_lazy('admission gender', 'Other'),
+    ],
+)
+
+ChoixSexe = build_enum_from_choices(
+    enum_name='ChoixSexe',
+    choices=Person.SEX_CHOICES,
+    values=[
+        pgettext_lazy('admission sex', 'Female'),
+        pgettext_lazy('admission sex', 'Male'),
+    ],
+)
 
 
 class ChoixStatutCDD(ChoiceEnum):

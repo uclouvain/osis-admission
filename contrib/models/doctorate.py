@@ -30,9 +30,8 @@ from ckeditor.fields import RichTextField
 from django.conf import settings
 from django.core.cache import cache
 from django.db import models
-from django.db.models import OuterRef, F, ExpressionWrapper, CharField
+from django.db.models import OuterRef
 from django.db.models.fields.json import KeyTextTransform, KeyTransform
-from django.db.models.functions import Cast
 from django.utils.datetime_safe import date
 from django.utils.translation import get_language, gettext_lazy as _
 from rest_framework.settings import api_settings
