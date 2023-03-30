@@ -290,7 +290,7 @@ class ChoicesEnumSchema(BetterChoicesSchema):
     def map_choicefield(self, field):
         # The only way to retrieve the original enum is to compare choices
         for declared_enum in ChoiceEnum.__subclasses__():
-            if OrderedDict(declared_enum.choices()) == field.choices:
+            if declared_enum.get_names() == list(field.choices.keys()):
                 self.enums[declared_enum.__name__] = super().map_choicefield(field)
                 return {
                     '$ref': "#/components/schemas/{}".format(declared_enum.__name__),

@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,15 +23,39 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from django.views.generic import TemplateView
 
-from admission.views.doctorate.mixins import LoadDossierViewMixin
+from dal import autocomplete
+from rules.contrib.views import LoginRequiredMixin
 
 __all__ = [
-    "DoctorateAdmissionPersonFormView",
+    'CitiesAutocomplete',
 ]
 
+from reference.models.zipcode import ZipCode
 
-class DoctorateAdmissionPersonFormView(LoadDossierViewMixin, TemplateView):
-    template_name = 'admission/doctorate/forms/person.html'
-    permission_required = 'admission.change_doctorateadmission_person'
+
+class CitiesAutocomplete(LoginRequiredMixin, autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        qs = ZipCode.objects.all()
+
+        postal_code = self.forwarded.get('postal_code', '')
+        if postal_code:
+            qs = qs.filter(zip_code=postal_code)
+
+        if self.q:
+            qs = qs.filter(municipality__icontains=self.q)
+
+        return qs.values('municipality', 'zip_code').order_by(
+            'municipality',
+            'zip_code',
+        )
+
+    def get_results(self, context):
+        """Return data for the 'results' key of the response."""
+        return [
+            {
+                'id': city.get('zip_code'),
+                'text': f"{city.get('municipality')} - {city.get('zip_code')}",
+            }
+            for city in context['object_list']
+        ]

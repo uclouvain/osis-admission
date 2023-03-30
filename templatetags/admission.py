@@ -53,7 +53,7 @@ from admission.ddd.parcours_doctoral.formation.domain.model.enums import (
     ChoixTypeEpreuve,
     StatutActivite,
 )
-from admission.exports.admission_recap.attachments import IMAGE_MIME_TYPES
+from admission.constants import IMAGE_MIME_TYPES
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
     ADMISSION_CONTEXT_BY_OSIS_EDUCATION_TYPE,
@@ -299,11 +299,11 @@ TAB_TREES = {
             Tab('education', _('Previous experience'), 'list-alt'),
         ],
         Tab('management', pgettext('tab', 'Management'), 'gear'): [
+            Tab('debug', _('Debug'), 'bug'),
             Tab('history-all', _('All history')),
             Tab('history', _('Status changes')),
             Tab('send-mail', _('Send a mail')),
             Tab('internal-note', _('Internal notes'), 'note-sticky'),
-            Tab('debug', _('Debug'), 'bug'),
         ],
     },
     CONTEXT_CONTINUING: {

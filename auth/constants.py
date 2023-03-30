@@ -56,9 +56,9 @@ READ_ACTIONS_BY_TAB = {
 # Association between a write-only tab name (path name) and a permission
 UPDATE_ACTIONS_BY_TAB = {
     # Personal data
-    'coordonnees': 'admission.change_doctorateadmission_coordinates',
+    'coordonnees': 'admission.change_%([context])s_coordinates',
     'cotutelle': 'admission.change_doctorateadmission_cotutelle',
-    'person': 'admission.change_doctorateadmission_person',
+    'person': 'admission.change_%([context])s_person',
     # Previous experience
     'curriculum': 'admission.change_doctorateadmission_curriculum',
     'education': 'admission.change_doctorateadmission_secondary_studies',

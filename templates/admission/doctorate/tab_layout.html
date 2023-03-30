@@ -25,6 +25,14 @@
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
 
+{% comment "Usage" %}
+  `tab_layout.html` gère le layout des formulaires et des détails, ceci implique
+  - si la variable `form` est présente, le {% block form %} est affiché
+  - si dans `form` il y a des `visible_fields`, la balise
+  <form> est ajoutée ainsi que les boutons de soumission et le lien
+  d'annulation dans les actions et en bas de page
+{% endcomment %}
+
 {% block breadcrumb %}
   <li>
     <a href="{% url 'admissions' %}" id="lnk_admissions">
@@ -45,7 +53,15 @@
   </li>
 {% endblock %}
 
+{% url base_namespace|add:request.resolver_match.url_name view.kwargs.pk as cancel_url %}
+{% url base_namespace|add:":update:"|add:request.resolver_match.url_name view.kwargs.pk as change_url %}
+
 {% block content %}
+  {% if form or force_form %}
+    {% include "admission/modal/prevent_quitting_modal.html" %}
+  {% endif %}
+
+  {% default_tab_context as tab_context %}
   {% block page-header %}
     <div class="page-header flex-content">
       <h2>
@@ -113,6 +129,34 @@
             </button>
             <ul class="dropdown-menu pull-right">
               {% block actions %}
+                {% if form or force_form %}
+                  {# Form -> link to the details page #}
+                  {% can_read_tab tab_context.active_tab as can_read_tab %}
+                  {% detail_tab_path_from_update view.kwargs.uuid as read_url %}
+                  <li>
+                    <button class="btn btn-primary" type="submit" form="admission-form" style="width: 100%">
+                      {% translate 'Save' %}
+                    </button>
+                  </li>
+                  {% if can_read_tab and read_url %}
+                    <li>
+                      <a class="btn" href="{{ read_url }}">
+                        {% translate 'Cancel' %}
+                      </a>
+                    </li>
+                  {% endif %}
+                {% else %}
+                  {# Details -> link to the form page #}
+                  {% can_update_tab tab_context.active_tab as can_update_tab %}
+                  {% update_tab_path_from_detail view.kwargs.uuid as update_url %}
+                  {% if can_update_tab and update_url %}
+                    <li>
+                      <a href="{{ update_url }}">
+                        {% translate "Update" %}
+                      </a>
+                    </li>
+                  {% endif %}
+                {% endif %}
               {% endblock %}
             </ul>
           </div>
@@ -130,7 +174,26 @@
         <div class="col-md-10">
       {% endif %}
       {% block tab_content %}
-        <p>{% trans "This page is currently under construction." %}</p>
+        {% if form.visible_fields or force_form %}
+          {# Display the form if needed #}
+          <form id="admission-form" class="osis-form" method="post" action="">
+            {% csrf_token %}
+            {% block form %}{% endblock %}
+          </form>
+          <div class="text-right">
+            {% can_read_tab tab_context.active_tab as can_read_tab %}
+            {% detail_tab_path_from_update view.kwargs.uuid as read_url %}
+            <a href="{{ read_url }}" class="btn btn-default" style="margin-left: 10px;" role="button">
+              {% translate 'Cancel' %}
+            </a>
+            <button class="btn btn-primary" type="submit" form="admission-form">
+              <span class="glyphicon glyphicon-floppy-save" aria-hidden="true"></span>
+              {% translate 'Save' %}
+            </button>
+          </div>
+        {% else %}
+          <p>{% trans "This page is currently under construction." %}</p>
+        {% endif %}
       {% endblock %}
       {% if children|length > 1 %}
         </div>
@@ -142,13 +205,33 @@
 {% endblock %}
 
 {% block script %}
-  <script src="{% static 'osis_document/osis-document.umd.min.js' %}"></script>
+  {# Add either form scripts or osis-documents for detail #}
+  {{ block.super }}
+  {% if form %}
+    {{ form.media.js }}
+    <script src="{% static 'admission/popover.js' %}"></script>
+    <script>
+      $(function () {
+          initializePopover();
+          // Prevent to submit data from form inputs in disabled containers
+          $('form').on('submit', function() {
+              $(this).find('div[disabled] *').prop('disabled', true);
+          })
+      });
+    </script>
+  {% else %}
+    <script src="{% static 'osis_document/osis-document.umd.min.js' %}"></script>
+  {% endif %}
 {% endblock %}
 
 {% block style %}
   <link href="{% static "admission/admission.css" %}" rel="stylesheet"/>
-  <link href="{% static "osis_document/osis-document.css" %}" rel="stylesheet" />
-
+  {# Add either form styles or osis-documents for detail #}
+  {% if form %}
+    {{ form.media.css }}
+  {% else %}
+    <link href="{% static "osis_document/osis-document.css" %}" rel="stylesheet" />
+  {% endif %}
   <style>
     p {
       margin-bottom: 20px;

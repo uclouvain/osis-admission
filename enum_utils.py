@@ -23,32 +23,18 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from django.utils.translation.trans_real import get_languages
-from django.views.generic import TemplateView
-
-from admission.templatetags.admission import CONTEXT_GENERAL, CONTEXT_DOCTORATE, CONTEXT_CONTINUING
-from admission.views.doctorate.mixins import LoadDossierViewMixin
-from base.models.enums.civil_state import CivilState
+from base.models.utils.utils import ChoiceEnum
 
 
-__all__ = ['AdmissionPersonDetailView']
+def build_enum_from_choices(enum_name, choices, values=None):
+    """
+    Builds an enum from a list of choices.
 
-
-class AdmissionPersonDetailView(LoadDossierViewMixin, TemplateView):
-    permission_required_by_context = {
-        CONTEXT_DOCTORATE: 'admission.view_doctorateadmission_person',
-        CONTEXT_GENERAL: 'admission.view_generaleducationadmission_person',
-        CONTEXT_CONTINUING: 'admission.view_continuingeducationadmission_person',
-    }
-
-    def get_template_names(self):
-        return [
-            f'admission/{self.formatted_current_context}/details/person.html',
-            'admission/details/person.html',
-        ]
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['person'] = self.admission.candidate
-        context['contact_language'] = get_languages().get(self.admission.candidate.language)
-        return context
+    :param enum_name: The name of the enum.
+    :param choices: A list of choices.
+    :param values: A list of values.
+    """
+    return ChoiceEnum(
+        enum_name,
+        choices if not values else [(choice[0], value) for choice, value in zip(choices, values)],
+    )
