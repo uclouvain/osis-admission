@@ -45,7 +45,6 @@ class GeneralDebugView(LoadDossierViewMixin, TemplateView):
     template_name = 'admission/debug.html'
     permission_required = "admission.view_debug_info"
     cmd = DeterminerAnneeAcademiqueEtPotQuery
-    extra_context = {'base_template': 'admission/general_education/tab_layout.html'}
 
     def get_context_data(self, **kwargs):
         from infrastructure.messages_bus import message_bus_instance

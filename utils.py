@@ -130,3 +130,16 @@ def get_uuid_value(value: str) -> Union[uuid.UUID, str]:
         return uuid.UUID(hex=value)
     except ValueError:
         return value
+
+
+def force_title(string: str):
+    """
+    Return a string in which all words are lowercase, except for the first letter of each one, which can written in
+    upper or lower case"""
+    title_string = list(string.title())
+
+    for index, char in enumerate(title_string):
+        if char.isupper() and string[index].islower():
+            title_string[index] = string[index]
+
+    return ''.join(title_string)

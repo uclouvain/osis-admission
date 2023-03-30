@@ -69,7 +69,9 @@ class SicManager(RoleModel):
             # General admission
             'admission.view_generaleducationadmission': rules.always_allow,
             'admission.view_generaleducationadmission_person': rules.always_allow,
+            'admission.change_generaleducationadmission_person': rules.always_allow,
             'admission.view_generaleducationadmission_coordinates': rules.always_allow,
+            'admission.change_generaleducationadmission_coordinates': rules.always_allow,
             'admission.view_generaleducationadmission_curriculum': rules.always_allow,
             'admission.view_generaleducationadmission_secondary_studies': rules.always_allow,
             'admission.view_generaleducationadmission_languages': rules.always_allow,
@@ -79,7 +81,9 @@ class SicManager(RoleModel):
             # Continuing admission
             'admission.view_continuingeducationadmission': rules.always_allow,
             'admission.view_continuingeducationadmission_person': rules.always_allow,
+            'admission.change_continuingeducationadmission_person': rules.always_allow,
             'admission.view_continuingeducationadmission_coordinates': rules.always_allow,
+            'admission.change_continuingeducationadmission_coordinates': rules.always_allow,
             'admission.view_continuingeducationadmission_curriculum': rules.always_allow,
             'admission.view_continuingeducationadmission_secondary_studies': rules.always_allow,
             'admission.view_continuingeducationadmission_languages': rules.always_allow,

@@ -1658,6 +1658,9 @@ msgstr ""
 msgid "Excel export of admission applications"
 msgstr ""
 
+msgid "Exit without saving"
+msgstr ""
+
 msgid "Expected date of graduation (signed document)"
 msgstr ""
 
@@ -1699,6 +1702,14 @@ msgid "Failure of the confirmation paper"
 msgstr ""
 
 msgid "Failure of the test"
+msgstr ""
+
+msgctxt "admission gender"
+msgid "Female"
+msgstr ""
+
+msgctxt "admission sex"
+msgid "Female"
 msgstr ""
 
 msgid "File MIME types"
@@ -1852,6 +1863,9 @@ msgid ""
 msgstr ""
 
 msgid "Have you ever started or completed a PhD?"
+msgstr ""
+
+msgid "Have you got a Belgian national registry number (SSIN)?"
 msgstr ""
 
 msgid "Have you previously been registered at UCLouvain?"
@@ -2183,6 +2197,9 @@ msgstr ""
 msgid "Is non-resident (as defined in decree)"
 msgstr ""
 
+msgid "Is your contact address different from your residential address?"
+msgstr ""
+
 msgid "Journal"
 msgstr ""
 
@@ -2238,6 +2255,9 @@ msgid "Latin"
 msgstr ""
 
 msgid "Learning unit"
+msgstr ""
+
+msgid "Leave the page?"
 msgstr ""
 
 msgid "Legal cohabitation certificate"
@@ -2436,6 +2456,14 @@ msgstr ""
 msgid ""
 "Mail sent to the members of the supervision panel to inform them that the "
 "application has been submitted to UCLouvain by the applicant"
+msgstr ""
+
+msgctxt "admission gender"
+msgid "Male"
+msgstr ""
+
+msgctxt "admission sex"
+msgid "Male"
 msgstr ""
 
 msgctxt "tab"
@@ -2764,6 +2792,10 @@ msgstr ""
 msgid "Other"
 msgstr ""
 
+msgctxt "admission gender"
+msgid "Other"
+msgstr ""
+
 msgid "Other cotutelle-related documents"
 msgstr ""
 
@@ -2884,6 +2916,9 @@ msgstr ""
 msgid "Place"
 msgstr ""
 
+msgid "Place (optional)"
+msgstr ""
+
 msgid ""
 "Placeholder text for Text form elements. Not used for Document, Selection "
 "and Message elements."
@@ -2938,6 +2973,9 @@ msgid "Please provide a copy of your identity card."
 msgstr ""
 
 msgid "Please provide a copy of your passport."
+msgstr ""
+
+msgid "Please provide one of these two identification information:"
 msgstr ""
 
 msgid "Please specify at least one identity number."
@@ -3424,6 +3462,10 @@ msgstr ""
 msgid "Save"
 msgstr ""
 
+msgctxt "admission"
+msgid "Save"
+msgstr ""
+
 msgid "Save and view result"
 msgstr ""
 
@@ -3733,10 +3775,16 @@ msgstr ""
 msgid "The <strong>additional training</strong> has been completed: yes / no."
 msgstr ""
 
+msgid "The Belgian national register number must consist of 11 digits."
+msgstr ""
+
 msgid "The CA members"
 msgstr "The supervisory panel members"
 
 msgid "The IBAN account number is valid"
+msgstr ""
+
+msgid "The NOMA must contain 8 digits."
 msgstr ""
 
 msgid "The acronym of the scholarship grant"
@@ -4039,6 +4087,12 @@ msgstr ""
 msgid "This experience cannot be updated as it has already been valuated."
 msgstr ""
 
+msgid "This field is required if the first name is missing."
+msgstr ""
+
+msgid "This field is required if the last name is missing."
+msgstr ""
+
 msgid "This field is required."
 msgstr ""
 
@@ -4190,6 +4244,9 @@ msgstr ""
 msgid "Unique business number"
 msgstr ""
 
+msgid "Unknown birth date"
+msgstr ""
+
 msgid "Unknown noma"
 msgstr ""
 
@@ -4259,6 +4316,12 @@ msgid "What diploma did you get (or will you get)?"
 msgstr ""
 
 msgid "What result did you get?"
+msgstr ""
+
+msgid "What was your NOMA (registration id)?"
+msgstr ""
+
+msgid "What was your last year of UCLouvain enrollment?"
 msgstr ""
 
 msgid ""
@@ -4441,6 +4504,9 @@ msgstr ""
 msgid "You must set a reference promoter."
 msgstr ""
 
+msgid "You seem to have unsaved modifications, they will be lost."
+msgstr ""
+
 msgid "You specified that no assimilation proposals applies to you."
 msgstr ""
 
@@ -4487,6 +4553,10 @@ msgid "created"
 msgstr ""
 
 msgid "dd/mm/yyyy"
+msgstr ""
+
+#, python-format
+msgid "e.g.: %(example)s"
 msgstr ""
 
 msgid "education group type"
@@ -4543,4 +4613,7 @@ msgid "your mother"
 msgstr ""
 
 msgid "your partner"
+msgstr ""
+
+msgid "yyyy"
 msgstr ""

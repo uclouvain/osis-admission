@@ -98,10 +98,8 @@ from admission.exports.admission_recap.admission_async_recap import (
 from admission.exports.admission_recap.admission_recap import admission_pdf_recap
 from admission.exports.admission_recap.attachments import (
     Attachment,
-    PDF_MIME_TYPE,
-    JPEG_MIME_TYPE,
-    PNG_MIME_TYPE,
 )
+from admission.constants import PDF_MIME_TYPE, JPEG_MIME_TYPE, PNG_MIME_TYPE
 from admission.exports.admission_recap.constants import ACCOUNTING_LABEL, CURRICULUM_ACTIVITY_LABEL
 from admission.exports.admission_recap.section import (
     get_pdf_from_template,

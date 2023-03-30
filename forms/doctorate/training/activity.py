@@ -112,11 +112,18 @@ class AcademicYearField(forms.ModelChoiceField):
         kwargs.setdefault('queryset', AcademicYear.objects.order_by('-year'))
         if kwargs.pop('future_only', False):
             kwargs.setdefault('limit_choices_to', self.limit_to_future_years_choices)
+        if kwargs.pop('past_only', False):
+            kwargs.setdefault('limit_choices_to', self.limit_to_past_years_choices)
+
         super().__init__(*args, **kwargs)
 
     @staticmethod
     def limit_to_future_years_choices():
         return {'year__gte': date.today().year}
+
+    @staticmethod
+    def limit_to_past_years_choices():
+        return {'start_date__lte': date.today()}
 
     def label_from_instance(self, obj: AcademicYear) -> str:
         return f"{obj.year}-{obj.year + 1}"

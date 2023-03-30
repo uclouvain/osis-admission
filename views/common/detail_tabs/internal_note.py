@@ -23,7 +23,6 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from django.contrib import messages
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import CreateView
@@ -38,6 +37,7 @@ class InternalNoteView(LoadDossierViewMixin, CreateView):
     model = InternalNote
     fields = ['text']
     template_name = 'admission/doctorate/forms/internal_note.html'
+    message_on_success = _('Your note has been added.')
 
     @property
     def permission_required(self):
@@ -61,7 +61,6 @@ class InternalNoteView(LoadDossierViewMixin, CreateView):
     def form_valid(self, form):
         form.instance.author = self.request.user.person
         form.instance.admission = self.admission
-        messages.success(self.request, _('Your note has been added.'))
         return super().form_valid(form)
 
     def get_success_url(self):

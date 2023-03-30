@@ -29,8 +29,8 @@ from django.contrib.postgres.aggregates import StringAgg
 from django.core.cache import cache
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db import models
-from django.db.models import OuterRef, Subquery, Q, F, Value, Func, CharField, Exists
-from django.db.models.functions import Concat, Left, Coalesce, NullIf, Mod, LPad, Replace
+from django.db.models import OuterRef, Subquery, Q, F, Value, CharField, Exists
+from django.db.models.functions import Concat, Left, Coalesce, NullIf, Mod, Replace
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils import timezone

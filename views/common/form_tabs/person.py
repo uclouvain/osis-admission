@@ -23,32 +23,51 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from django.utils.translation.trans_real import get_languages
-from django.views.generic import TemplateView
+from django.urls import reverse
+from django.utils.functional import cached_property
+from django.views.generic import UpdateView
 
+from admission.ddd import BE_ISO_CODE
+from admission.forms.admission.person import AdmissionPersonForm
 from admission.templatetags.admission import CONTEXT_GENERAL, CONTEXT_DOCTORATE, CONTEXT_CONTINUING
 from admission.views.doctorate.mixins import LoadDossierViewMixin
-from base.models.enums.civil_state import CivilState
+from base.models.enums.person_address_type import PersonAddressType
+from base.models.person_address import PersonAddress
+from reference.models.country import Country
+
+__all__ = ['AdmissionPersonFormView']
 
 
-__all__ = ['AdmissionPersonDetailView']
-
-
-class AdmissionPersonDetailView(LoadDossierViewMixin, TemplateView):
+class AdmissionPersonFormView(LoadDossierViewMixin, UpdateView):
+    template_name = 'admission/forms/person.html'
     permission_required_by_context = {
-        CONTEXT_DOCTORATE: 'admission.view_doctorateadmission_person',
-        CONTEXT_GENERAL: 'admission.view_generaleducationadmission_person',
-        CONTEXT_CONTINUING: 'admission.view_continuingeducationadmission_person',
+        CONTEXT_DOCTORATE: 'admission.change_doctorateadmission_person',
+        CONTEXT_GENERAL: 'admission.change_generaleducationadmission_person',
+        CONTEXT_CONTINUING: 'admission.change_continuingeducationadmission_person',
     }
+    form_class = AdmissionPersonForm
 
-    def get_template_names(self):
-        return [
-            f'admission/{self.formatted_current_context}/details/person.html',
-            'admission/details/person.html',
-        ]
+    def get_object(self):
+        return self.admission.candidate
+
+    def get_success_url(self):
+        return reverse(f'admission:{self.current_context}:person', kwargs=self.kwargs)
+
+    @cached_property
+    def resides_in_belgium(self):
+        return PersonAddress.objects.filter(
+            person=self.admission.candidate,
+            label=PersonAddressType.RESIDENTIAL.name,
+            country__iso_code=BE_ISO_CODE,
+        ).exists()
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['person'] = self.admission.candidate
-        context['contact_language'] = get_languages().get(self.admission.candidate.language)
+        context['resides_in_belgium'] = self.resides_in_belgium
+        context['BE_ISO_CODE'] = Country.objects.get(iso_code=BE_ISO_CODE).pk
         return context
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['resides_in_belgium'] = self.resides_in_belgium
+        return kwargs

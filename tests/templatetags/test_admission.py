@@ -29,11 +29,13 @@ from unittest.mock import Mock, patch
 
 import freezegun
 import mock
+from django.conf import settings
 from django.http import HttpResponse
 from django.template import Context, Template
 from django.test import RequestFactory, TestCase
 from django.test.utils import override_settings
 from django.urls import path, reverse
+from django.utils import translation
 from django.utils.translation import gettext as _
 from django.views import View
 
@@ -42,7 +44,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import Choi
 from admission.ddd.admission.domain.enums import TypeFormation
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
-from admission.exports.admission_recap.attachments import PDF_MIME_TYPE, JPEG_MIME_TYPE, PNG_MIME_TYPE
+from admission.constants import PDF_MIME_TYPE, JPEG_MIME_TYPE, PNG_MIME_TYPE
 from admission.templatetags.admission import (
     TAB_TREES,
     Tab,
@@ -63,6 +65,7 @@ from admission.templatetags.admission import (
     admission_url,
     admission_status,
     get_image_file_url,
+    get_country_name,
 )
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
@@ -78,6 +81,7 @@ from base.models.entity_version import EntityVersion
 from base.models.enums.education_group_types import TrainingType
 from base.models.enums.entity_type import EntityType
 from base.tests.factories.entity_version import EntityVersionFactory, MainEntityVersionFactory
+from reference.tests.factories.country import CountryFactory
 
 
 # Mock views
@@ -494,6 +498,19 @@ class SimpleAdmissionTemplateTagsTestCase(TestCase):
             admission_training_type(TrainingType.PHD.name),
             TypeFormation.DOCTORAT.name,
         )
+
+    def test_get_country_name_with_no_country(self):
+        self.assertEqual(get_country_name(None), '')
+
+    def test_get_country_name_with_country_fr(self):
+        with translation.override(settings.LANGUAGE_CODE_FR):
+            country = CountryFactory(name='Belgique', name_en='Belgium')
+            self.assertEqual(get_country_name(country), 'Belgique')
+
+    def test_get_country_name_with_country_en(self):
+        with translation.override(settings.LANGUAGE_CODE_EN):
+            country = CountryFactory(name='Belgique', name_en='Belgium')
+            self.assertEqual(get_country_name(country), 'Belgium')
 
 
 class AdmissionTagsTestCase(TestCase):

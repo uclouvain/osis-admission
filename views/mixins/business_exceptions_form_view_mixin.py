@@ -31,7 +31,6 @@ from base.ddd.utils.business_validator import MultipleBusinessExceptions
 
 class BusinessExceptionFormViewMixin:
     error_mapping = {}
-    message_on_success = _('Your data has been saved')
 
     def __init__(self, *args, **kwargs):
         self._error_mapping = {exc.value: field for exc, field in self.error_mapping.items()}
@@ -43,7 +42,6 @@ class BusinessExceptionFormViewMixin:
     def form_valid(self, form):
         try:
             self.call_command(form=form)
-            messages.success(self.request, self.message_on_success)
         except MultipleBusinessExceptions as multiple_exceptions:
             messages.error(self.request, _("Some errors have been encountered."))
             for exception in multiple_exceptions.exceptions:

@@ -1795,6 +1795,9 @@ msgstr "Export excel à partir d'admission"
 msgid "Excel export of admission applications"
 msgstr "Export excel des demandes d'admission"
 
+msgid "Exit without saving"
+msgstr "Quitter sans enregistrer"
+
 msgid "Expected date of graduation (signed document)"
 msgstr "Date (prévue) de délivrance du diplôme (document signé)"
 
@@ -1837,6 +1840,14 @@ msgstr "Échec de l'épreuve de confirmation"
 
 msgid "Failure of the test"
 msgstr "Échec de l'épreuve"
+
+msgctxt "admission gender"
+msgid "Female"
+msgstr "Féminin"
+
+msgctxt "admission sex"
+msgid "Female"
+msgstr "Féminin"
 
 msgid "File MIME types"
 msgstr "Types de fichier MIME"
@@ -2023,6 +2034,9 @@ msgstr ""
 msgid "Have you ever started or completed a PhD?"
 msgstr ""
 "Avez-vous été inscrit antérieurement pour réaliser une thèse de doctorat ?"
+
+msgid "Have you got a Belgian national registry number (SSIN)?"
+msgstr "Avez-vous un numéro de registre national belge (NISS) ?"
 
 msgid "Have you previously been registered at UCLouvain?"
 msgstr "Avez-vous déjà été inscrit à l'UCLouvain antérieurement ?"
@@ -2438,6 +2452,11 @@ msgstr "S'agit-il d'une institution de la Fédération Wallonie-Bruxelles ?"
 msgid "Is non-resident (as defined in decree)"
 msgstr "Est non-résident (au sens du décret)"
 
+msgid "Is your contact address different from your residential address?"
+msgstr ""
+"Souhaitez vous recevoir votre courrier à une autre adresse que votre "
+"domicile légal ?"
+
 msgid "Journal"
 msgstr "Nom de la revue ou de la maison d'édition"
 
@@ -2494,6 +2513,9 @@ msgstr "Latin"
 
 msgid "Learning unit"
 msgstr "Unité d'enseignement"
+
+msgid "Leave the page?"
+msgstr "Quitter la page ?"
 
 msgid "Legal cohabitation certificate"
 msgstr "Attestation de cohabitation légale"
@@ -2751,6 +2773,14 @@ msgid ""
 msgstr ""
 "E-mail envoyé aux membres du groupe de supervision pour les informer que la "
 "demande a été soumise à l'UCLouvain par le candidat"
+
+msgctxt "admission gender"
+msgid "Male"
+msgstr "Masculin"
+
+msgctxt "admission sex"
+msgid "Male"
+msgstr "Masculin"
 
 msgctxt "tab"
 msgid "Management"
@@ -3095,6 +3125,10 @@ msgstr "Institution organisatrice"
 msgid "Other"
 msgstr "Autre"
 
+msgctxt "admission gender"
+msgid "Other"
+msgstr "Autre"
+
 msgid "Other cotutelle-related documents"
 msgstr "Autres documents relatifs à la cotutelle"
 
@@ -3217,6 +3251,9 @@ msgstr "Physique"
 msgid "Place"
 msgstr "Lieu-dit"
 
+msgid "Place (optional)"
+msgstr "Lieu-dit (optionnel)"
+
 msgid ""
 "Placeholder text for Text form elements. Not used for Document, Selection "
 "and Message elements."
@@ -3288,6 +3325,9 @@ msgstr "Merci de fournir une copie de votre carte d'identité."
 
 msgid "Please provide a copy of your passport."
 msgstr "Merci de fournir une copie de votre passeport."
+
+msgid "Please provide one of these two identification information:"
+msgstr "Veuillez fournir l’une de ces deux informations d’identification :"
 
 msgid "Please specify at least one identity number."
 msgstr "Merci de spécifier au-moins un numéro d'identité."
@@ -3798,6 +3838,10 @@ msgstr "Fiches de rémunération"
 msgid "Save"
 msgstr "Enregistrer"
 
+msgctxt "admission"
+msgid "Save"
+msgstr "Enregistrer"
+
 msgid "Save and view result"
 msgstr "Enregistrer et voir le résultat"
 
@@ -4129,11 +4173,17 @@ msgid "The <strong>additional training</strong> has been completed: yes / no."
 msgstr ""
 "La <strong>formation complémentaire</strong> a été réalisée : oui / non."
 
+msgid "The Belgian national register number must consist of 11 digits."
+msgstr "Le numéro de registre national belge doit être composé de 11 chiffres."
+
 msgid "The CA members"
 msgstr "Les membres du comité d’accompagnement"
 
 msgid "The IBAN account number is valid"
 msgstr "Le numéro de compte IBAN est valide"
+
+msgid "The NOMA must contain 8 digits."
+msgstr "Le NOMA doit contenir exactement 8 chiffres."
 
 msgid "The acronym of the scholarship grant"
 msgstr "L'acronyme de la bourse d'études"
@@ -4481,6 +4531,12 @@ msgid "This experience cannot be updated as it has already been valuated."
 msgstr ""
 "Cette expérience ne peut être mise à jour car elle a déjà été valorisée."
 
+msgid "This field is required if the first name is missing."
+msgstr "Ce champ est obligatoire si le prénom est manquant."
+
+msgid "This field is required if the last name is missing."
+msgstr "Ce champ est obligatoire si le nom est manquant."
+
 msgid "This field is required."
 msgstr "Ce champ est obligatoire."
 
@@ -4643,6 +4699,9 @@ msgstr ""
 msgid "Unique business number"
 msgstr "Numéro unique d'entreprise"
 
+msgid "Unknown birth date"
+msgstr "Date de naissance exacte inconnue"
+
 msgid "Unknown noma"
 msgstr "Noma inconnu"
 
@@ -4715,6 +4774,12 @@ msgstr "Quel diplôme avez-vous obtenu (ou obtiendrez-vous) ?"
 
 msgid "What result did you get?"
 msgstr "Quel résultat avez-vous obtenu ?"
+
+msgid "What was your NOMA (registration id)?"
+msgstr "Quel était votre NOMA (numéro de matricule) ?"
+
+msgid "What was your last year of UCLouvain enrollment?"
+msgstr "Quelle a été votre dernière année d'inscription à l'UCLouvain ?"
 
 msgid ""
 "When you have submitted your application, you have agreed to the following:"
@@ -4936,6 +5001,11 @@ msgstr ""
 msgid "You must set a reference promoter."
 msgstr "Vous devez désigner un promoteur de référence."
 
+msgid "You seem to have unsaved modifications, they will be lost."
+msgstr ""
+"Vous semblez avoir des modifications non enregistrées, celles-ci seront "
+"perdues."
+
 msgid "You specified that no assimilation proposals applies to you."
 msgstr ""
 "Vous avez spécifié qu'aucune situation d'assimilation ne s'appliquait à vous."
@@ -4984,6 +5054,10 @@ msgstr "créé"
 
 msgid "dd/mm/yyyy"
 msgstr "jj/mm/aaaa"
+
+#, python-format
+msgid "e.g.: %(example)s"
+msgstr "ex: %(example)s"
 
 msgid "education group type"
 msgstr "type de formation"
@@ -5040,3 +5114,6 @@ msgstr "votre mère"
 
 msgid "your partner"
 msgstr "votre conjoint"
+
+msgid "yyyy"
+msgstr "aaaa"
