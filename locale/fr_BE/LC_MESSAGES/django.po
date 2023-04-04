@@ -604,6 +604,9 @@ msgstr ""
 msgid "Assent from reference promoter"
 msgstr "Avis positif du promoteur de référence"
 
+msgid "Assimilated,Non-assimilated"
+msgstr "Assimilé(e),Non assimilé(e)"
+
 msgid "Assimilation"
 msgstr "Assimilation"
 
@@ -4071,7 +4074,7 @@ msgid "Status of the doctoral training"
 msgstr "État d’avancement de la formation doctorale"
 
 msgid "Status:"
-msgstr "Statut :"
+msgstr "État :"
 
 msgid "Street"
 msgstr "Rue"
@@ -5034,9 +5037,6 @@ msgstr "année académique"
 msgid "actions"
 msgstr "actions"
 
-msgid "assimilated,non-assimilated"
-msgstr "assimilé(e),non-assimilé(e)"
-
 msgid "by the UCLouvain Registration Service"
 msgstr "par le Service des Inscriptions de l'UCLouvain"
 
@@ -5045,9 +5045,6 @@ msgstr "par l'Institut Universitaire de Formation Continue (IUFC)"
 
 msgid "candidate"
 msgstr "candidat"
-
-msgid "contact language:"
-msgstr "langue de contact :"
 
 msgid "created"
 msgstr "créé"
@@ -5075,9 +5072,6 @@ msgstr "modifiée"
 #, python-format
 msgid "on %(date)s at %(time)s"
 msgstr "le %(date)s à %(time)s"
-
-msgid "submission"
-msgstr "soumission"
 
 msgid "the <strong>failure</strong> of the confirmation paper."
 msgstr "l'<strong>échec</strong> de l'épreuve de confirmation."

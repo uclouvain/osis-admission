@@ -529,6 +529,9 @@ msgstr ""
 msgid "Assent from reference promoter"
 msgstr ""
 
+msgid "Assimilated,Non-assimilated"
+msgstr ""
+
 msgid "Assimilation"
 msgstr ""
 
@@ -4534,9 +4537,6 @@ msgstr ""
 msgid "actions"
 msgstr ""
 
-msgid "assimilated,non-assimilated"
-msgstr ""
-
 msgid "by the UCLouvain Registration Service"
 msgstr ""
 
@@ -4544,9 +4544,6 @@ msgid "by the University Institute of Continuing Education"
 msgstr ""
 
 msgid "candidate"
-msgstr ""
-
-msgid "contact language:"
 msgstr ""
 
 msgid "created"
@@ -4574,9 +4571,6 @@ msgstr ""
 
 #, python-format
 msgid "on %(date)s at %(time)s"
-msgstr ""
-
-msgid "submission"
 msgstr ""
 
 msgid "the <strong>failure</strong> of the confirmation paper."

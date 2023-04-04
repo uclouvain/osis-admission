@@ -62,3 +62,6 @@ class UtilsTestCase(TestCase):
 
     def test_format_academic_year_with_year_as_float(self):
         self.assertEqual(format_academic_year(2020.0), '2020-2021')
+
+    def test_format_academic_year_in_short_version(self):
+        self.assertEqual(format_academic_year(2020, short=True), '2020-21')

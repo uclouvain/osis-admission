@@ -59,6 +59,7 @@ class GetPropositionDTOForGestionnaireTestCase(TestCase):
             erasmus_mundus_scholarship=None,
             double_degree_scholarship=None,
             international_scholarship=None,
+            candidate__private_email='john.doe@example.com',
         )
 
     def _get_command_result(self, uuid_proposition=None) -> PropositionGestionnaireDTO:
@@ -108,7 +109,7 @@ class GetPropositionDTOForGestionnaireTestCase(TestCase):
         self.assertEqual(result.date_changement_statut, None)
         self.assertEqual(result.genre_candidat, self.admission.candidate.gender)
         self.assertEqual(result.noma_candidat, '')
-        self.assertEqual(result.adresse_email_candidat, self.admission.candidate.email)
+        self.assertEqual(result.adresse_email_candidat, self.admission.candidate.private_email)
         self.assertEqual(result.langue_contact_candidat, self.admission.candidate.language)
         self.assertEqual(result.nationalite_candidat, '')
         self.assertEqual(result.nationalite_ue_candidat, None)

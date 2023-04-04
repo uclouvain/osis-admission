@@ -633,9 +633,20 @@ def formatted_reference(admission: BaseAdmission):
 
 
 @register.filter
+def formatted_language(language: str):
+    return language[:2].upper() if language else ''
+
+
+@register.filter
 def get_academic_year(year: Union[int, str, float]):
     """Return the academic year related to a specific year."""
     return format_academic_year(year)
+
+
+@register.filter
+def get_short_academic_year(year: Union[int, str, float]):
+    """Return the academic year related to a specific year with only two digits for the end year."""
+    return format_academic_year(year, short=True)
 
 
 @register.filter(is_safe=False)
