@@ -495,6 +495,7 @@ class DemandeManager(models.Manager):
                 'status_sic',
             )
             .annotate(
+                # TODO to be simplified with the KT operator (>= Django 4.2)
                 nationalite_iso_code=KeyTextTransform(
                     'country_of_citizenship',
                     KeyTransform('identification', 'submitted_profile'),
@@ -502,6 +503,7 @@ class DemandeManager(models.Manager):
                 nom_pays_nationalite=models.Subquery(
                     Country.objects.filter(iso_code=OuterRef('nationalite_iso_code')).values(country_title_field)[:1]
                 ),
+                # TODO to be simplified with the KT operator (>= Django 4.2)
                 pays_iso_code=KeyTextTransform(
                     'country',
                     KeyTransform('coordinates', 'submitted_profile'),

@@ -221,3 +221,7 @@ textarea {
   visibility: visible;
   opacity: 1;
 }
+
+.label-admission-primary {
+  background-color: #269abc;
+}

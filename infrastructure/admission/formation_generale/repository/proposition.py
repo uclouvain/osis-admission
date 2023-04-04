@@ -344,7 +344,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             genre_candidat=admission.candidate.gender,
             noma_candidat=admission.student_registration_id or '',  # from annotation
             photo_identite_candidat=admission.candidate.id_photo,
-            adresse_email_candidat=admission.candidate.email,
+            adresse_email_candidat=admission.candidate.private_email,
             langue_contact_candidat=admission.candidate.language,
             nationalite_candidat=getattr(
                 admission.candidate.country_of_citizenship,

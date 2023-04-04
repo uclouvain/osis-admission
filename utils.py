@@ -115,13 +115,16 @@ def takewhile_return_attribute_values(predicate, iterable, attribute):
             break
 
 
-def format_academic_year(year: Union[int, str, float]):
+def format_academic_year(year: Union[int, str, float], short: bool = False) -> str:
     """Return the academic year related to a specific year."""
     if not year:
         return ''
     if isinstance(year, (str, float)):
         year = int(year)
-    return f'{year}-{year + 1}'
+    end_year = year + 1
+    if short:
+        end_year = end_year % 100
+    return f'{year}-{end_year}'
 
 
 def get_uuid_value(value: str) -> Union[uuid.UUID, str]:

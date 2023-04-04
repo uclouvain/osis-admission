@@ -66,6 +66,7 @@ from admission.templatetags.admission import (
     admission_status,
     get_image_file_url,
     get_country_name,
+    formatted_language,
 )
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
@@ -511,6 +512,24 @@ class SimpleAdmissionTemplateTagsTestCase(TestCase):
         with translation.override(settings.LANGUAGE_CODE_EN):
             country = CountryFactory(name='Belgique', name_en='Belgium')
             self.assertEqual(get_country_name(country), 'Belgium')
+
+    def test_formatted_language_with_fr_be(self):
+        self.assertEqual(
+            formatted_language(settings.LANGUAGE_CODE_FR),
+            'FR',
+        )
+
+    def test_formatted_language_with_en(self):
+        self.assertEqual(
+            formatted_language(settings.LANGUAGE_CODE_EN),
+            'EN',
+        )
+
+    def test_formatted_language_with_empty_language(self):
+        self.assertEqual(
+            formatted_language(''),
+            '',
+        )
 
 
 class AdmissionTagsTestCase(TestCase):
