@@ -23,31 +23,30 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from django.utils.translation import gettext as _
+from datetime import datetime
+from typing import List, Optional
 
-from base.models.enums.education_group_types import TrainingType
-from osis_profile.models.enums.curriculum import ActivityType
+import attr
 
-TRAINING_TYPES_WITH_EQUIVALENCE = {
-    TrainingType.AGGREGATION.name,
-    TrainingType.CAPAES.name,
-    TrainingType.UNIVERSITY_FIRST_CYCLE_CERTIFICATE.name,
-}
-FORMATTED_RELATIONSHIPS = {
-    'PERE': _('your father'),
-    'MERE': _('your mother'),
-    'TUTEUR_LEGAL': _('your legal tutor'),
-    'CONJOINT': _('your partner'),
-    'COHABITANT_LEGAL': _('your legal cohabitant'),
-}
-CURRICULUM_ACTIVITY_LABEL = {
-    ActivityType.LANGUAGE_TRAVEL.name: _(
-        'Certificate justifying your activity, mentioning this activity, for the specified period'
-    ),
-    ActivityType.INTERNSHIP.name: _('Training certificate, with dates, justifying the specified period'),
-    ActivityType.UNEMPLOYMENT.name: _(
-        'Unemployment certificate issued by the relevant organisation, justifying the specified period'
-    ),
-    ActivityType.VOLUNTEERING.name: _('Certificate, with dates, justifying the specified period'),
-    ActivityType.WORK.name: _('Employment certificate from the employer, with dates, justifying the specified period'),
-}
+from admission.ddd.admission.enums.document import TypeDocument, StatutDocument
+from osis_common.ddd import interface
+
+
+@attr.dataclass(frozen=True, slots=True)
+class DocumentIdentity(interface.EntityIdentity):
+    identifiant: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class Document(interface.Entity):
+    entity_id: DocumentIdentity
+    libelle: str
+    uuids: List[str]
+    auteur: str
+    type: TypeDocument
+    statut: StatutDocument
+    requis: bool
+    justification_gestionnaire: str
+    soumis_le: Optional[datetime] = None
+    reclame_le: Optional[datetime] = None
+    a_echeance_le: Optional[datetime] = None

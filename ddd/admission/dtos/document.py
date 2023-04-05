@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,28 +23,35 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
-from typing import List
+import datetime
+from typing import Optional, List
 
-from admission.ddd.admission.domain.model.question_specifique import QuestionSpecifique
-from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
+import attr
+
 from osis_common.ddd import interface
 
 
-class ISuperQuestionSpecifiqueTranslator(interface.DomainService):
-    @classmethod
-    def search_by_proposition(
-        cls,
-        proposition_uuid: str,
-        onglets: List[str] = None,
-    ) -> List['QuestionSpecifique']:
-        raise NotImplementedError
+@attr.dataclass(frozen=True, slots=True)
+class AuteurDTO(interface.DTO):
+    matricule: str
+    nom: str
+    prenom: str
+    est_candidat: bool
 
-    @classmethod
-    def search_dto_by_proposition(
-        cls,
-        proposition_uuid: str,
-        onglets: List[str] = None,
-        type: str = None,
-        requis: bool = None,
-    ) -> List['QuestionSpecifiqueDTO']:
-        raise NotImplementedError
+
+@attr.dataclass(frozen=True, slots=True)
+class DocumentDTO(interface.Entity):
+    identifiant: str
+    libelle: str
+    uuids: List[str]
+    auteur: str
+    type: str
+    statut: str
+    requis: bool
+    justification_gestionnaire: str
+    soumis_le: Optional[datetime.datetime]
+    reclame_le: Optional[datetime.datetime]
+    derniere_action_le: Optional[datetime.datetime]
+    a_echeance_le: Optional[datetime.datetime]
+    onglet: str
+    nom_onglet: str

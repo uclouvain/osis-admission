@@ -57,10 +57,10 @@
         {% field_data _('Billing address') proposition.type_adresse_facturation|enum_display:'ChoixTypeAdresseFacturation' %}
       {% endif %}
     {% endif %}
-    {% multiple_field_data specific_questions proposition.reponses_questions_specifiques title='' %}
+    {% multiple_field_data specific_questions title='' %}
   {% endpanel %}
 {% else %}
-  {% multiple_field_data specific_questions proposition.reponses_questions_specifiques %}
+  {% multiple_field_data specific_questions %}
 {% endif %}
 
 {% if enrolled_for_contingent_training %}

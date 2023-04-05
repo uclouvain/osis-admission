@@ -23,35 +23,22 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import Optional, List
+from typing import List
 
-import attr
-
-from admission.ddd.interface import SortedQueryRequest
-from osis_common.ddd import interface
-
-
-@attr.dataclass(frozen=True, slots=True)
-class ListerToutesDemandesQuery(SortedQueryRequest):
-    annee_academique: Optional[int] = None
-    numero: Optional[int] = None
-    noma: Optional[str] = ''
-    matricule_candidat: Optional[str] = ''
-    etats: Optional[List[str]] = None
-    type: Optional[str] = ''
-    site_inscription: Optional[str] = ''
-    entites: Optional[List[str]] = None
-    types_formation: Optional[List[str]] = None
-    formation: Optional[str] = ''
-    bourse_internationale: Optional[str] = ''
-    bourse_erasmus_mundus: Optional[str] = ''
-    bourse_double_diplomation: Optional[str] = ''
-    demandeur: Optional[str] = ''
+from admission.ddd.admission.commands import RecupererQuestionsSpecifiquesQuery
+from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
+from admission.ddd.admission.domain.service.i_question_specifique import (
+    ISuperQuestionSpecifiqueTranslator,
+)
 
 
-@attr.dataclass(frozen=True, slots=True)
-class RecupererQuestionsSpecifiquesQuery(interface.QueryRequest):
-    uuid_proposition: str
-    type: Optional[str] = None
-    requis: Optional[bool] = None
-    onglets: List[str] = None
+def recuperer_questions_specifiques_demande(
+    cmd: 'RecupererQuestionsSpecifiquesQuery',
+    question_specifique_translator: 'ISuperQuestionSpecifiqueTranslator',
+) -> 'List[QuestionSpecifiqueDTO]':
+    return question_specifique_translator.search_dto_by_proposition(
+        proposition_uuid=cmd.uuid_proposition,
+        onglets=cmd.onglets,
+        type=cmd.type,
+        requis=cmd.requis,
+    )

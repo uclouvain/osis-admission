@@ -378,6 +378,33 @@ class BaseAdmission(CommentDeleteMixin, models.Model):
         blank=True,
     )
 
+    requested_documents = models.JSONField(
+        blank=True,
+        default=dict,
+        encoder=DjangoJSONEncoder,
+        verbose_name=_('Requested documents'),
+    )
+    fac_documents = FileField(
+        blank=True,
+        upload_to=admission_directory_path,
+        verbose_name=_('FAC free documents'),
+    )
+    sic_documents = FileField(
+        blank=True,
+        upload_to=admission_directory_path,
+        verbose_name=_('SIC free documents'),
+    )
+    uclouvain_sic_documents = FileField(
+        blank=True,
+        upload_to=admission_directory_path,
+        verbose_name=_('UCLouvain SIC free documents'),
+    )
+    uclouvain_fac_documents = FileField(
+        blank=True,
+        upload_to=admission_directory_path,
+        verbose_name=_('UCLouvain FAC free documents'),
+    )
+
     class Meta:
         constraints = [
             models.CheckConstraint(

@@ -212,6 +212,8 @@ class PropositionInMemoryRepository(
             est_reorientation_inscription_externe=proposition.est_reorientation_inscription_externe,
             attestation_inscription_reguliere=proposition.attestation_inscription_reguliere,
             pdf_recapitulatif=[],
+            login_candidat=candidat.email,
+            documents_demandes={},
         )
 
     @classmethod

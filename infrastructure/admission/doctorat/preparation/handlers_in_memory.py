@@ -27,6 +27,7 @@
 from admission.ddd.admission.doctorat.preparation.commands import *
 from admission.ddd.admission.doctorat.preparation.use_case.read import *
 from admission.ddd.admission.doctorat.preparation.use_case.write import *
+from admission.ddd.admission.use_case.read import recuperer_questions_specifiques_demande
 from admission.infrastructure.admission.domain.service.in_memory.annee_inscription_formation import (
     AnneeInscriptionFormationInMemoryTranslator,
 )
@@ -62,6 +63,7 @@ _titres_acces = TitresAccesInMemory()
 _membre_ca_translator = MembreCAInMemoryTranslator()
 _comptabilite_translator = ComptabiliteInMemoryTranslator()
 _maximum_propositions_autorisees = MaximumPropositionsAutoriseesInMemory()
+_question_specific_translator = QuestionSpecifiqueInMemoryTranslator()
 
 
 COMMAND_HANDLERS = {
@@ -126,7 +128,7 @@ COMMAND_HANDLERS = {
         profil_candidat_translator=_profil_candidat_translator,
         academic_year_repository=_academic_year_repository,
         titres_acces=_titres_acces,
-        questions_specifiques_translator=QuestionSpecifiqueInMemoryTranslator(),
+        questions_specifiques_translator=_question_specific_translator,
         formation_translator=_doctorat_translator,
         calendrier_inscription=CalendrierInscriptionInMemory(),
         maximum_propositions_service=_maximum_propositions_autorisees,
@@ -136,7 +138,7 @@ COMMAND_HANDLERS = {
         proposition_repository=_proposition_repository,
         groupe_supervision_repository=_groupe_supervision_repository,
         promoteur_translator=_promoteur_translator,
-        questions_specifiques_translator=QuestionSpecifiqueInMemoryTranslator(),
+        questions_specifiques_translator=_question_specific_translator,
     ),
     SupprimerPromoteurCommand: lambda msg_bus, cmd: supprimer_promoteur(
         cmd,
@@ -181,7 +183,7 @@ COMMAND_HANDLERS = {
         historique=_historique,
         notification=_notification,
         titres_acces=_titres_acces,
-        questions_specifiques_translator=QuestionSpecifiqueInMemoryTranslator(),
+        questions_specifiques_translator=_question_specific_translator,
         doctorat_translator=_doctorat_translator,
         calendrier_inscription=CalendrierInscriptionInMemory(),
         element_confirmation=ElementsConfirmationInMemory(),
@@ -267,5 +269,9 @@ COMMAND_HANDLERS = {
         promoteur_translator=_promoteur_translator,
         membre_ca_translator=_membre_ca_translator,
         academic_year_repository=_academic_year_repository,
+    ),
+    RecupererQuestionsSpecifiquesQuery: lambda msg_bus, cmd: recuperer_questions_specifiques_demande(
+        cmd,
+        question_specifique_translator=_question_specific_translator,
     ),
 }

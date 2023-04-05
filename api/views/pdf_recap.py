@@ -66,13 +66,7 @@ class BasePDFRecapView(APIPermissionRequiredMixin, RetrieveAPIView):
 
         admission = self.get_permission_object()
 
-        admission.candidate = Person.objects.select_related(
-            'country_of_citizenship',
-            'belgianhighschooldiploma',
-            'foreignhighschooldiploma__linguistic_regime',
-        ).get(pk=admission.candidate_id)
-
-        token = admission_pdf_recap(admission=admission, language=get_language())
+        token = admission_pdf_recap(admission=admission, language=admission.candidate.language)
         serializer = serializers.PDFRecapSerializer(instance={'token': token})
         return Response(serializer.data)
 

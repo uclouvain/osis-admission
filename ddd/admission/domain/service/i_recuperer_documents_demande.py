@@ -23,31 +23,21 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from django.utils.translation import gettext as _
+from abc import abstractmethod
+from typing import List
 
-from base.models.enums.education_group_types import TrainingType
-from osis_profile.models.enums.curriculum import ActivityType
+from admission.ddd.admission.dtos.document import DocumentDTO
+from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
+from admission.ddd.admission.dtos.resume import ResumePropositionDTO
+from osis_common.ddd import interface
 
-TRAINING_TYPES_WITH_EQUIVALENCE = {
-    TrainingType.AGGREGATION.name,
-    TrainingType.CAPAES.name,
-    TrainingType.UNIVERSITY_FIRST_CYCLE_CERTIFICATE.name,
-}
-FORMATTED_RELATIONSHIPS = {
-    'PERE': _('your father'),
-    'MERE': _('your mother'),
-    'TUTEUR_LEGAL': _('your legal tutor'),
-    'CONJOINT': _('your partner'),
-    'COHABITANT_LEGAL': _('your legal cohabitant'),
-}
-CURRICULUM_ACTIVITY_LABEL = {
-    ActivityType.LANGUAGE_TRAVEL.name: _(
-        'Certificate justifying your activity, mentioning this activity, for the specified period'
-    ),
-    ActivityType.INTERNSHIP.name: _('Training certificate, with dates, justifying the specified period'),
-    ActivityType.UNEMPLOYMENT.name: _(
-        'Unemployment certificate issued by the relevant organisation, justifying the specified period'
-    ),
-    ActivityType.VOLUNTEERING.name: _('Certificate, with dates, justifying the specified period'),
-    ActivityType.WORK.name: _('Employment certificate from the employer, with dates, justifying the specified period'),
-}
+
+class IRecupererDocumentsDemandeTranslator(interface.DomainService):
+    @classmethod
+    @abstractmethod
+    def recuperer(
+        cls,
+        resume_dto: ResumePropositionDTO,
+        questions_specifiques: List[QuestionSpecifiqueDTO],
+    ) -> List[DocumentDTO]:
+        raise NotImplementedError

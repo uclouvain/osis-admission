@@ -28,12 +28,13 @@ import re
 from dataclasses import dataclass
 from functools import wraps
 from inspect import getfullargspec
-from typing import Optional, Union
+from typing import Union, Optional, List
 
 from django import template
 from django.conf import settings
 from django.core.validators import EMPTY_VALUES
 from django.urls import NoReverseMatch, reverse
+from django.utils.dateparse import parse_datetime
 from django.utils.safestring import SafeString
 from django.utils.translation import get_language, gettext_lazy as _, pgettext
 from rules.templatetags import rules
@@ -49,7 +50,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixStatutPropositionDoctorale,
     STATUTS_PROPOSITION_AVANT_INSCRIPTION,
 )
-from admission.ddd.admission.enums import TYPES_ITEMS_LECTURE_SEULE, TypeItemFormulaire
+from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.ddd.admission.repository.i_proposition import formater_reference
@@ -311,6 +312,9 @@ TAB_TREES = {
         ],
         Tab('education', _('Previous experience'), 'list-alt'): [
             Tab('education', _('Previous experience'), 'list-alt'),
+        ],
+        Tab('document', _('Documents'), 'folder-open'): [
+            Tab('document', _('Documents'), 'folder-open'),
         ],
         Tab('management', pgettext('tab', 'Management'), 'gear'): [
             Tab('debug', _('Debug'), 'bug'),
@@ -693,30 +697,8 @@ def concat(*args):
 
 
 @register.inclusion_tag('admission/includes/multiple_field_data.html', takes_context=True)
-def multiple_field_data(context, configurations, data, title=_('Specificities')):
-    """Display the answers of the specific questions based on a list of configurations and a data dictionary"""
-    current_language = get_language()
-
-    if not data:
-        data = {}
-
-    for field_instantiation in configurations:
-        field = field_instantiation.form_item
-        if field.type in TYPES_ITEMS_LECTURE_SEULE:
-            value = field.text.get(current_language, '')
-        elif field.type == TypeItemFormulaire.DOCUMENT.name:
-            value = [get_uuid_value(token) for token in data.get(str(field.uuid), [])]
-        elif field.type == TypeItemFormulaire.SELECTION.name:
-            current_value = data.get(str(field.uuid))
-            selected_options = set(current_value) if isinstance(current_value, list) else {current_value}
-            value = ', '.join(
-                [value.get(current_language) for value in field.values if value.get('key') in selected_options]
-            )
-        else:
-            value = data.get(str(field.uuid))
-        setattr(field, 'value', value)
-        setattr(field, 'translated_title', field.title.get(current_language))
-
+def multiple_field_data(context, configurations: List[QuestionSpecifiqueDTO], title=_('Specificities')):
+    """Display the answers of the specific questions based on a list of configurations."""
     return {
         'fields': configurations,
         'title': title,
@@ -740,6 +722,30 @@ def get_first_truthy_value(*args):
 def get_item(dictionary, value):
     """Returns the value of a key in a dictionary if it exists else the value itself"""
     return dictionary.get(value, value)
+
+
+@register.filter
+def get_item_or_none(dictionary, value):
+    """Returns the value of a key in a dictionary if it exists else None"""
+    return dictionary.get(value)
+
+
+@register.simple_tag(takes_context=True)
+def get_attachment_date(context, uuid: str):
+    """Get the date of an attachment (admission submission date or submission file if later"""
+    admission = context['view'].get_permission_object()
+    if context['files'].get(uuid):
+        uploaded_at = parse_datetime(context['files'][uuid].get('uploaded_at'))
+        if uploaded_at >= admission.submitted_at:
+            return uploaded_at
+    return admission.submitted_at
+
+
+@register.simple_tag(takes_context=True)
+def get_attachment_author(context, uuid: str):
+    if context['files'].get(uuid) and context['files'][uuid].get('author'):
+        return context['files'][uuid]['author']
+    return _('Candidate')
 
 
 @register.simple_tag

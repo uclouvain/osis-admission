@@ -170,3 +170,11 @@ class ElementsConfirmationNonConcordants(BusinessException):
 
 class NombrePropositionsSoumisesDepasseException(BusinessException):
     status_code = "ADMISSION-15"
+
+
+class PropositionNonTrouveeException(BusinessException):
+    status_code = "ADMISSION-16"
+
+    def __init__(self, **kwargs):
+        message = _("Proposition not found.")
+        super().__init__(message, **kwargs)
