@@ -86,5 +86,6 @@ class CentralManager(EntityRoleModel):
             'admission.view_debug_info': is_entity_manager & is_debug,
             'admission.view_historyentry': is_entity_manager,
             'admission.download_doctorateadmission_pdf_recap': is_entity_manager,
+            'admission.view_documents_management': is_entity_manager,
         }
         return RuleSet(ruleset)

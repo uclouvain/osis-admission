@@ -30,8 +30,8 @@ import attr
 
 from admission.ddd.admission.domain.model.formation import FormationIdentity
 from admission.ddd.admission.domain.model.question_specifique import QuestionSpecifique, QuestionSpecifiqueIdentity
-
 from admission.ddd.admission.domain.service.i_question_specifique import ISuperQuestionSpecifiqueTranslator
+from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.enums.question_specifique import (
     Onglets,
     TypeItemFormulaire,
@@ -222,5 +222,32 @@ class SuperQuestionSpecifiqueInMemoryTranslator(ISuperQuestionSpecifiqueTranslat
                 proposition_uuid=proposition_uuid,
                 onglets=onglets,
                 requis=True,
+            )
+        ]
+
+    @classmethod
+    def search_dto_by_proposition(
+        cls,
+        proposition_uuid: str,
+        onglets: List[str] = None,
+        type: str = None,
+        requis: bool = None,
+    ) -> List['QuestionSpecifiqueDTO']:
+        return [
+            QuestionSpecifiqueDTO(
+                uuid=question.entity_id.uuid,
+                type=question.type.name,
+                requis=question.requis,
+                configuration=question.configuration,
+                onglet=question.onglet.name,
+                label='',
+                valeur='',
+                valeur_formatee='',
+            )
+            for question in cls._extended_search_by_proposition(
+                proposition_uuid=proposition_uuid,
+                onglets=onglets,
+                requis=requis,
+                type=type,
             )
         ]

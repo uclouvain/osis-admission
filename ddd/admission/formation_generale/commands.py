@@ -27,6 +27,7 @@ from typing import Dict, List, Optional
 
 import attr
 
+from admission.ddd.admission.commands import RecupererQuestionsSpecifiquesQuery
 from osis_common.ddd import interface
 
 
@@ -205,3 +206,13 @@ class RecupererElementsConfirmationQuery(interface.QueryRequest):
 @attr.dataclass(frozen=True, slots=True)
 class RecupererPropositionGestionnaireQuery(interface.QueryRequest):
     uuid_proposition: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RecupererDocumentsDemandeQuery(interface.QueryRequest):
+    uuid_demande: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RecupererQuestionsSpecifiquesQuery(RecupererQuestionsSpecifiquesQuery):
+    pass

@@ -51,6 +51,7 @@ class PropositionDTO(interface.DTO):
     matricule_candidat: str
     prenom_candidat: str
     nom_candidat: str
+    login_candidat: str
 
     bourse_double_diplome: Optional[BourseDTO]
     bourse_internationale: Optional[BourseDTO]
@@ -72,6 +73,8 @@ class PropositionDTO(interface.DTO):
 
     elements_confirmation: Dict[str, str]
     pdf_recapitulatif: List[str]
+
+    documents_demandes: Dict
 
 
 @attr.dataclass(frozen=True, slots=True)

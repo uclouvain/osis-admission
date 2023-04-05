@@ -23,35 +23,20 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import Optional, List
+from typing import Dict, Union, List
 
 import attr
 
-from admission.ddd.interface import SortedQueryRequest
 from osis_common.ddd import interface
 
 
-@attr.dataclass(frozen=True, slots=True)
-class ListerToutesDemandesQuery(SortedQueryRequest):
-    annee_academique: Optional[int] = None
-    numero: Optional[int] = None
-    noma: Optional[str] = ''
-    matricule_candidat: Optional[str] = ''
-    etats: Optional[List[str]] = None
-    type: Optional[str] = ''
-    site_inscription: Optional[str] = ''
-    entites: Optional[List[str]] = None
-    types_formation: Optional[List[str]] = None
-    formation: Optional[str] = ''
-    bourse_internationale: Optional[str] = ''
-    bourse_erasmus_mundus: Optional[str] = ''
-    bourse_double_diplomation: Optional[str] = ''
-    demandeur: Optional[str] = ''
-
-
-@attr.dataclass(frozen=True, slots=True)
-class RecupererQuestionsSpecifiquesQuery(interface.QueryRequest):
-    uuid_proposition: str
-    type: Optional[str] = None
-    requis: Optional[bool] = None
-    onglets: List[str] = None
+@attr.dataclass(slots=True)
+class QuestionSpecifiqueDTO(interface.DTO):
+    uuid: str
+    type: str
+    requis: bool
+    configuration: Dict
+    onglet: str
+    label: str
+    valeur: Union[str, List[str]]
+    valeur_formatee: Union[str, List[str]]
