@@ -1,26 +1,26 @@
 # ##############################################################################
 #
-#    OSIS stands for Open Student Information System. It's an application
-#    designed to manage the core business of higher education institutions,
-#    such as universities, faculties, institutes and professional schools.
-#    The core business involves the administration of students, teachers,
-#    courses, programs and so on.
+#  OSIS stands for Open Student Information System. It's an application
+#  designed to manage the core business of higher education institutions,
+#  such as universities, faculties, institutes and professional schools.
+#  The core business involves the administration of students, teachers,
+#  courses, programs and so on.
 #
-#    Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
 #
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
 #
-#    A copy of this license - GNU General Public License - is available
-#    at the root of the source code of this program.  If not,
-#    see http://www.gnu.org/licenses/.
+#  A copy of this license - GNU General Public License - is available
+#  at the root of the source code of this program.  If not,
+#  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
 
@@ -31,7 +31,6 @@ from rest_framework.test import APITestCase
 
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.tests.factories import DoctorateAdmissionFactory
-from admission.tests.factories.roles import CddManagerFactory
 from admission.tests.factories.supervision import CaMemberFactory, PromoterFactory
 from base.models.enums.person_address_type import PersonAddressType
 from base.models.person_address import PersonAddress
@@ -81,7 +80,6 @@ class CoordonneesTestCase(APITestCase):
         cls.candidate_user = cls.address.person.user
         cls.candidate_user_without_admission = cls.other_address.person.user
         cls.no_role_user = PersonFactory(first_name="Joe").user
-        cls.cdd_manager_user = CddManagerFactory(entity=doctoral_commission).person.user
         cls.committee_member_user = CaMemberFactory(process=promoter.process).person.user
 
     def test_user_not_logged_assert_not_authorized(self):
@@ -172,11 +170,6 @@ class CoordonneesTestCase(APITestCase):
         response = self.client.put(resolve_url('coordonnees', uuid=submitted_admission.uuid), self.updated_data)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         submitted_admission.delete()
-
-    def test_coordonnees_get_cdd_manager(self):
-        self.client.force_authenticate(self.cdd_manager_user)
-        response = self.client.get(self.admission_url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
 
     def test_coordonnees_get_promoter(self):
         self.client.force_authenticate(self.promoter_user)

@@ -40,6 +40,14 @@ from osis_role.contrib.models import RoleModel
 
 
 class Promoter(RoleModel):
+    """
+    Promoteur
+
+    Le promoteur intervient dans plusieurs processus.
+    Un promoteur peut être dit "de référence" pour un doctorat donné, il a alors des actions supplémentaires
+    à réaliser (spécifier l'institut de la thèse, donner son accord sur les activités de formation doctorale, etc.).
+    """
+
     class Meta:
         verbose_name = _("Role: Promoter")
         verbose_name_plural = _("Role: Promoters")

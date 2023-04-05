@@ -60,7 +60,6 @@ from admission.exports.admission_recap.section import (
     get_supervision_section,
     get_confirmation_section,
 )
-from admission.exports.utils import get_pdf_from_template
 from infrastructure.messages_bus import message_bus_instance
 from osis_document.api.utils import get_several_remote_metadata, get_remote_tokens
 from osis_document.utils import save_raw_content_remotely
@@ -81,6 +80,8 @@ def admission_pdf_recap(
     language: str,
 ):
     """Generates the admission pdf and returns a token to access it."""
+    from admission.exports.utils import get_pdf_from_template
+
     commands = {
         ContinuingEducationAdmission: continuing_education_commands,
         GeneralEducationAdmission: general_education_commands,

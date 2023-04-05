@@ -127,7 +127,7 @@ class AdmissionListExcelExportView(BaseAdmissionExcelExportView):
     command = ListerToutesDemandesQuery
     export_name = gettext_lazy('Admission applications export')
     export_description = gettext_lazy('Excel export of admission applications')
-    permission_required = 'admission.view_dossiers'
+    permission_required = 'admission.view_enrolment_applications'
     redirect_url_name = 'admission:all-list'
     urlpatterns = 'admission-list-excel-export'
 

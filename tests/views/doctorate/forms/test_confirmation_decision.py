@@ -29,18 +29,13 @@ import uuid
 from typing import List, Optional
 from unittest.mock import patch
 
+from django.core.cache import cache
 from django.core.management import call_command
 from django.test import TestCase, override_settings
 from django.urls import reverse
 from rest_framework import status
 
 from admission.contrib.models import AdmissionTask, ConfirmationPaper, DoctorateAdmission
-from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE, ENTITY_CDSS
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
-    ChoixTypeAdmission,
-    ChoixTypeContratTravail,
-    ChoixTypeFinancement,
-)
 from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
 from admission.ddd.parcours_doctoral.epreuve_confirmation.commands import RecupererEpreuvesConfirmationQuery
 from admission.mail_templates import (
@@ -49,18 +44,15 @@ from admission.mail_templates import (
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.confirmation_paper import ConfirmationPaperFactory
 from admission.tests.factories.mail_template import CddMailTemplateFactory
-from admission.tests.factories.roles import CddManagerFactory
-from admission.tests.factories.supervision import ExternalPromoterFactory, PromoterFactory
 from base.tests.factories.academic_year import AcademicYearFactory
-from base.tests.factories.entity import EntityFactory
-from base.tests.factories.entity_version import EntityVersionFactory
+from base.tests.factories.program_manager import ProgramManagerFactory
 from infrastructure.messages_bus import message_bus_instance
 from osis_async.models.enums import TaskState
 from osis_notification.models import EmailNotification
 
 
 @override_settings(OSIS_DOCUMENT_BASE_URL='http://dummyurl')
-class CddDoctorateAdmissionConfirmationSuccessDecisionViewTestCase(TestCase):
+class DoctorateConfirmationDecisionViewTestCase(TestCase):
     admission_with_confirmation_papers = Optional[DoctorateAdmissionFactory]
     admission_without_confirmation_paper = Optional[DoctorateAdmissionFactory]
     confirmation_papers = List[ConfirmationPaperFactory]
@@ -96,51 +88,19 @@ class CddDoctorateAdmissionConfirmationSuccessDecisionViewTestCase(TestCase):
         # Create some academic years
         academic_years = [AcademicYearFactory(year=year) for year in [2021, 2022]]
 
-        # First entity
-        first_doctoral_commission = EntityFactory()
-        EntityVersionFactory(entity=first_doctoral_commission, acronym=ENTITY_CDE)
-
-        second_doctoral_commission = EntityFactory()
-        EntityVersionFactory(entity=second_doctoral_commission, acronym=ENTITY_CDSS)
-
-        promoter = PromoterFactory()
-        cls.promoter = promoter.person
-        ExternalPromoterFactory(process=promoter.process)
-
         # Create admissions
         cls.admission_without_confirmation_paper = DoctorateAdmissionFactory(
-            training__management_entity=first_doctoral_commission,
             training__academic_year=academic_years[0],
-            cotutelle=False,
-            supervision_group=promoter.process,
-            financing_type=ChoixTypeFinancement.WORK_CONTRACT.name,
-            financing_work_contract=ChoixTypeContratTravail.UCLOUVAIN_SCIENTIFIC_STAFF.name,
-            type=ChoixTypeAdmission.PRE_ADMISSION.name,
-            pre_admission_submission_date=datetime.datetime.now(),
             admitted=True,
             post_enrolment_status=ChoixStatutDoctorat.SUBMITTED_CONFIRMATION.name,
         )
         cls.admission_with_confirmation_papers = DoctorateAdmissionFactory(
-            training__management_entity=first_doctoral_commission,
-            training__academic_year=academic_years[0],
-            cotutelle=False,
-            supervision_group=promoter.process,
-            financing_type=ChoixTypeFinancement.WORK_CONTRACT.name,
-            financing_work_contract=ChoixTypeContratTravail.UCLOUVAIN_SCIENTIFIC_STAFF.name,
-            type=ChoixTypeAdmission.PRE_ADMISSION.name,
-            pre_admission_submission_date=datetime.datetime.now(),
+            training=cls.admission_without_confirmation_paper.training,
             admitted=True,
             post_enrolment_status=ChoixStatutDoctorat.SUBMITTED_CONFIRMATION.name,
         )
         cls.admission_with_incomplete_confirmation_paper = DoctorateAdmissionFactory(
-            training__management_entity=first_doctoral_commission,
-            training__academic_year=academic_years[0],
-            cotutelle=False,
-            supervision_group=promoter.process,
-            financing_type=ChoixTypeFinancement.WORK_CONTRACT.name,
-            financing_work_contract=ChoixTypeContratTravail.UCLOUVAIN_SCIENTIFIC_STAFF.name,
-            type=ChoixTypeAdmission.PRE_ADMISSION.name,
-            pre_admission_submission_date=datetime.datetime.now(),
+            training=cls.admission_without_confirmation_paper.training,
             admitted=True,
             post_enrolment_status=ChoixStatutDoctorat.SUBMITTED_CONFIRMATION.name,
         )
@@ -158,13 +118,31 @@ class CddDoctorateAdmissionConfirmationSuccessDecisionViewTestCase(TestCase):
             ),
         ]
 
-        cls.candidate = cls.admission_without_confirmation_paper.candidate
+        cls.manager = ProgramManagerFactory(
+            education_group=cls.admission_without_confirmation_paper.training.education_group
+        ).person.user
 
-        # User with one cdd
-        cls.cdd_person = CddManagerFactory(entity=first_doctoral_commission).person
+        cls.custom_cdd_mail_template = CddMailTemplateFactory(
+            identifier=ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_RETAKING_STUDENT,
+            language=cls.admission_with_confirmation_papers.candidate.language,
+            cdd=cls.admission_with_confirmation_papers.doctorate.management_entity,
+            name='My custom mail',
+            subject='The email subject',
+            body='The email body',
+        )
 
-        # Targeted path
-        cls.path = 'admission:doctorate:confirmation:success'
+        cls.success_path = 'admission:doctorate:confirmation:success'
+        cls.failure_path = 'admission:doctorate:confirmation:failure'
+        cls.retaking_path = 'admission:doctorate:confirmation:retaking'
+
+    def setUp(self):
+        self.client.force_login(user=self.manager)
+        cache.clear()
+
+        # Mock weasyprint
+        patcher = patch('admission.exports.utils.get_pdf_from_template', return_value=b'some content')
+        patcher.start()
+        self.addCleanup(patcher.stop)
 
     @classmethod
     def tearDownClass(cls):
@@ -173,31 +151,16 @@ class CddDoctorateAdmissionConfirmationSuccessDecisionViewTestCase(TestCase):
         cls.get_remote_token_patcher.stop()
         super().tearDownClass()
 
-    def test_confirmation_success_decision_cdd_user_with_unknown_doctorate(self):
-        self.client.force_login(user=self.cdd_person.user)
-
-        url = reverse(self.path, args=[uuid.uuid4()])
+    def test_confirmation_success_decision_without_confirmation_paper(self):
+        url = reverse(self.success_path, args=[self.admission_without_confirmation_paper.uuid])
 
         response = self.client.post(url)
-
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
-    def test_confirmation_success_decision_cdd_user_without_confirmation_paper(self):
-        self.client.force_login(user=self.cdd_person.user)
-
-        url = reverse(self.path, args=[self.admission_without_confirmation_paper.uuid])
+    def test_confirmation_success_decision_with_confirmation_paper(self):
+        url = reverse(self.success_path, args=[self.admission_with_confirmation_papers.uuid])
 
         response = self.client.post(url)
-
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-
-    def test_confirmation_success_decision_cdd_user_with_confirmation_paper(self):
-        self.client.force_login(user=self.cdd_person.user)
-
-        url = reverse(self.path, args=[self.admission_with_confirmation_papers.uuid])
-
-        response = self.client.post(url)
-
         self.assertRedirects(
             response,
             reverse(
@@ -228,13 +191,10 @@ class CddDoctorateAdmissionConfirmationSuccessDecisionViewTestCase(TestCase):
         self.assertEqual(EmailNotification.objects.count(), 1)
         self.assertEqual(EmailNotification.objects.first().person, self.admission_with_confirmation_papers.candidate)
 
-    def test_confirmation_success_decision_cdd_user_with_incomplete_confirmation_paper(self):
-        self.client.force_login(user=self.cdd_person.user)
-
-        url = reverse(self.path, args=[self.admission_with_incomplete_confirmation_paper.uuid])
+    def test_confirmation_success_decision_with_incomplete_confirmation_paper(self):
+        url = reverse(self.success_path, args=[self.admission_with_incomplete_confirmation_paper.uuid])
 
         response = self.client.post(url)
-
         self.assertRedirects(
             response,
             reverse(
@@ -248,157 +208,25 @@ class CddDoctorateAdmissionConfirmationSuccessDecisionViewTestCase(TestCase):
         )
         self.assertEqual(doctorate.post_enrolment_status, ChoixStatutDoctorat.SUBMITTED_CONFIRMATION.name)
 
-
-@override_settings(OSIS_DOCUMENT_BASE_URL='http://dummyurl')
-class CddDoctorateAdmissionConfirmationFailureDecisionViewTestCase(TestCase):
-    admission_with_confirmation_papers = Optional[DoctorateAdmissionFactory]
-    admission_without_confirmation_paper = Optional[DoctorateAdmissionFactory]
-    confirmation_papers = List[ConfirmationPaperFactory]
-
-    @classmethod
-    def setUpTestData(cls):
-        cls.confirm_remote_upload_patcher = patch('osis_document.api.utils.confirm_remote_upload')
-        patched = cls.confirm_remote_upload_patcher.start()
-        patched.return_value = '4bdffb42-552d-415d-9e4c-725f10dce228'
-
-        cls.get_remote_metadata_patcher = patch('osis_document.api.utils.get_remote_metadata')
-        patched = cls.get_remote_metadata_patcher.start()
-        patched.return_value = {"name": "test.pdf"}
-
-        cls.get_remote_token_patcher = patch('osis_document.api.utils.get_remote_token')
-        patched = cls.get_remote_token_patcher.start()
-        patched.return_value = 'foobar'
-
-        # Create some academic years
-        cls.academic_years = [AcademicYearFactory(year=year) for year in [2021, 2022]]
-
-        # First entity
-        cls.first_doctoral_commission = EntityFactory()
-        EntityVersionFactory(entity=cls.first_doctoral_commission, acronym=ENTITY_CDE)
-
-        cls.second_doctoral_commission = EntityFactory()
-        EntityVersionFactory(entity=cls.second_doctoral_commission, acronym=ENTITY_CDSS)
-
-        promoter = PromoterFactory()
-        cls.promoter = promoter
-        ExternalPromoterFactory(process=promoter.process)
-
-        # User with one cdd
-        cls.cdd_person = CddManagerFactory(entity=cls.first_doctoral_commission).person
-
-        # Targeted path
-        cls.path = 'admission:doctorate:confirmation:failure'
-
-    def setUp(self):
-        # Create admissions
-        self.admission_without_confirmation_paper = DoctorateAdmissionFactory(
-            training__management_entity=self.first_doctoral_commission,
-            training__academic_year=self.academic_years[0],
-            cotutelle=False,
-            supervision_group=self.promoter.process,
-            financing_type=ChoixTypeFinancement.WORK_CONTRACT.name,
-            financing_work_contract=ChoixTypeContratTravail.UCLOUVAIN_SCIENTIFIC_STAFF.name,
-            type=ChoixTypeAdmission.PRE_ADMISSION.name,
-            pre_admission_submission_date=datetime.datetime.now(),
-            admitted=True,
-            post_enrolment_status=ChoixStatutDoctorat.SUBMITTED_CONFIRMATION.name,
-        )
-        self.admission_with_confirmation_papers = DoctorateAdmissionFactory(
-            training__management_entity=self.first_doctoral_commission,
-            training__academic_year=self.academic_years[0],
-            cotutelle=False,
-            supervision_group=self.promoter.process,
-            financing_type=ChoixTypeFinancement.WORK_CONTRACT.name,
-            financing_work_contract=ChoixTypeContratTravail.UCLOUVAIN_SCIENTIFIC_STAFF.name,
-            type=ChoixTypeAdmission.PRE_ADMISSION.name,
-            pre_admission_submission_date=datetime.datetime.now(),
-            admitted=True,
-            post_enrolment_status=ChoixStatutDoctorat.SUBMITTED_CONFIRMATION.name,
-        )
-        self.admission_with_incomplete_confirmation_paper = DoctorateAdmissionFactory(
-            training__management_entity=self.first_doctoral_commission,
-            training__academic_year=self.academic_years[0],
-            cotutelle=False,
-            supervision_group=self.promoter.process,
-            financing_type=ChoixTypeFinancement.WORK_CONTRACT.name,
-            financing_work_contract=ChoixTypeContratTravail.UCLOUVAIN_SCIENTIFIC_STAFF.name,
-            type=ChoixTypeAdmission.PRE_ADMISSION.name,
-            pre_admission_submission_date=datetime.datetime.now(),
-            admitted=True,
-            post_enrolment_status=ChoixStatutDoctorat.SUBMITTED_CONFIRMATION.name,
-        )
-        self.confirmation_papers = [
-            ConfirmationPaperFactory(
-                admission=self.admission_with_confirmation_papers,
-                confirmation_date=datetime.date(2022, 4, 1),
-                confirmation_deadline=datetime.date(2022, 4, 5),
-                supervisor_panel_report=['f2'],
-            ),
-            ConfirmationPaperFactory(
-                admission=self.admission_with_incomplete_confirmation_paper,
-                confirmation_deadline=datetime.date(2022, 4, 5),
-                confirmation_date=datetime.date(2022, 4, 5),
-            ),
-        ]
-        self.custom_cdd_mail_template = CddMailTemplateFactory(
-            identifier=ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_RETAKING_STUDENT,
-            language=self.admission_with_confirmation_papers.candidate.language,
-            cdd=self.admission_with_confirmation_papers.doctorate.management_entity,
-            name='My custom mail',
-            subject='The email subject',
-            body='The email body',
-        )
-
-        self.candidate = self.admission_without_confirmation_paper.candidate
-
-    @classmethod
-    def tearDownClass(cls):
-        cls.confirm_remote_upload_patcher.stop()
-        cls.get_remote_metadata_patcher.stop()
-        cls.get_remote_token_patcher.stop()
-        super().tearDownClass()
-
-    def test_get_confirmation_failure_decision_cdd_user_with_unknown_doctorate(self):
-        self.client.force_login(user=self.cdd_person.user)
-
-        url = reverse(self.path, args=[uuid.uuid4()])
+    def test_get_confirmation_failure_decision_without_confirmation_paper(self):
+        url = reverse(self.failure_path, args=[self.admission_without_confirmation_paper.uuid])
 
         response = self.client.get(url)
-
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
-    def test_get_confirmation_failure_decision_cdd_user_without_confirmation_paper(self):
-        self.client.force_login(user=self.cdd_person.user)
-
-        url = reverse(self.path, args=[self.admission_without_confirmation_paper.uuid])
+    def test_get_confirmation_failure_decision_with_confirmation_paper_and_generic_email(self):
+        url = reverse(self.failure_path, args=[self.admission_with_confirmation_papers.uuid])
 
         response = self.client.get(url)
-
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-
-    def test_get_confirmation_failure_decision_cdd_user_with_confirmation_paper_and_generic_email(self):
-        self.client.force_login(user=self.cdd_person.user)
-
-        url = reverse(self.path, args=[self.admission_with_confirmation_papers.uuid])
-
-        response = self.client.get(url)
-
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIsNotNone(response.context.get('select_template_form'))
         message_form = response.context.get('form')
         self.assertIsNotNone(message_form)
 
-    def test_get_confirmation_failure_decision_cdd_user_with_confirmation_paper_and_custom_email(self):
-        self.client.force_login(user=self.cdd_person.user)
+    def test_get_confirmation_failure_decision_with_confirmation_paper_and_custom_email(self):
+        url = reverse(self.failure_path, args=[self.admission_with_confirmation_papers.uuid])
 
-        url = reverse(self.path, args=[self.admission_with_confirmation_papers.uuid])
-
-        response = self.client.get(
-            url,
-            {
-                'template': self.custom_cdd_mail_template.pk,
-            },
-        )
+        response = self.client.get(url, {'template': self.custom_cdd_mail_template.pk})
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIsNotNone(response.context.get('select_template_form'))
@@ -407,10 +235,8 @@ class CddDoctorateAdmissionConfirmationFailureDecisionViewTestCase(TestCase):
         self.assertEqual(message_form.initial.get('subject'), self.custom_cdd_mail_template.subject)
         self.assertEqual(message_form.initial.get('body'), self.custom_cdd_mail_template.body)
 
-    def test_get_confirmation_failure_decision_cdd_user_with_confirmation_paper_and_custom_email_and_htmx(self):
-        self.client.force_login(user=self.cdd_person.user)
-
-        url = reverse(self.path, args=[self.admission_with_confirmation_papers.uuid])
+    def test_get_confirmation_failure_decision_with_confirmation_paper_and_custom_email_and_htmx(self):
+        url = reverse(self.failure_path, args=[self.admission_with_confirmation_papers.uuid])
 
         response = self.client.get(
             url,
@@ -424,37 +250,20 @@ class CddDoctorateAdmissionConfirmationFailureDecisionViewTestCase(TestCase):
         self.assertEqual(message_form.initial.get('subject'), self.custom_cdd_mail_template.subject)
         self.assertEqual(message_form.initial.get('body'), self.custom_cdd_mail_template.body)
 
-    def test_post_confirmation_failure_decision_cdd_user_with_unknown_doctorate(self):
-        self.client.force_login(user=self.cdd_person.user)
-
-        url = reverse(self.path, args=[uuid.uuid4()])
+    def test_post_confirmation_failure_decision_without_confirmation_paper(self):
+        url = reverse(self.failure_path, args=[self.admission_without_confirmation_paper.uuid])
 
         response = self.client.post(url)
-
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
-    def test_post_confirmation_failure_decision_cdd_user_without_confirmation_paper(self):
-        self.client.force_login(user=self.cdd_person.user)
+    def test_post_confirmation_failure_decision_with_confirmation_paper(self):
+        url = reverse(self.failure_path, args=[self.admission_with_confirmation_papers.uuid])
 
-        url = reverse(self.path, args=[self.admission_without_confirmation_paper.uuid])
-
-        response = self.client.post(url)
-
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-
-    def test_post_confirmation_failure_decision_cdd_user_with_confirmation_paper(self):
-        self.client.force_login(user=self.cdd_person.user)
-
-        url = reverse(self.path, args=[self.admission_with_confirmation_papers.uuid])
-
-        response = self.client.post(
-            url,
-            {
-                'subject': 'The subject of the message',
-                'body': 'The body of the message',
-            },
-        )
-
+        data = {
+            'subject': 'The subject of the message',
+            'body': 'The body of the message',
+        }
+        response = self.client.post(url, data)
         self.assertRedirects(
             response,
             reverse(
@@ -471,19 +280,14 @@ class CddDoctorateAdmissionConfirmationFailureDecisionViewTestCase(TestCase):
         self.assertEqual(EmailNotification.objects.count(), 1)
         self.assertEqual(EmailNotification.objects.first().person, self.admission_with_confirmation_papers.candidate)
 
-    def test_post_confirmation_failure_decision_cdd_user_with_incomplete_confirmation_paper(self):
-        self.client.force_login(user=self.cdd_person.user)
+    def test_post_confirmation_failure_decision_with_incomplete_confirmation_paper(self):
+        url = reverse(self.failure_path, args=[self.admission_with_incomplete_confirmation_paper.uuid])
 
-        url = reverse(self.path, args=[self.admission_with_incomplete_confirmation_paper.uuid])
-
-        response = self.client.post(
-            url,
-            {
-                'subject': 'The subject of the message',
-                'body': 'The body of the message',
-            },
-        )
-
+        data = {
+            'subject': 'The subject of the message',
+            'body': 'The body of the message',
+        }
+        response = self.client.post(url, data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertFormError(
             response,
@@ -500,172 +304,32 @@ class CddDoctorateAdmissionConfirmationFailureDecisionViewTestCase(TestCase):
         )
         self.assertEqual(doctorate.post_enrolment_status, ChoixStatutDoctorat.SUBMITTED_CONFIRMATION.name)
 
-    def test_post_confirmation_failure_decision_cdd_user_with_incomplete_form(self):
-        self.client.force_login(user=self.cdd_person.user)
+    def test_post_confirmation_failure_decision_with_incomplete_form(self):
+        url = reverse(self.failure_path, args=[self.admission_with_confirmation_papers.uuid])
 
-        url = reverse(self.path, args=[self.admission_with_confirmation_papers.uuid])
-
-        response = self.client.post(
-            url,
-            {
-                'subject': 'The subject of the message',
-            },
-        )
-
+        response = self.client.post(url, {'subject': 'The subject of the message'})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertFormError(response, 'form', 'body', ['Ce champ est obligatoire.'])
 
-
-@override_settings(OSIS_DOCUMENT_BASE_URL='http://dummyurl')
-class CddDoctorateAdmissionConfirmationRetakingDecisionViewTestCase(TestCase):
-    admission_with_confirmation_papers = Optional[DoctorateAdmissionFactory]
-    admission_without_confirmation_paper = Optional[DoctorateAdmissionFactory]
-    confirmation_papers = List[ConfirmationPaperFactory]
-
-    @classmethod
-    def setUpTestData(cls):
-        cls.confirm_remote_upload_patcher = patch('osis_document.api.utils.confirm_remote_upload')
-        patched = cls.confirm_remote_upload_patcher.start()
-        patched.return_value = '4bdffb42-552d-415d-9e4c-725f10dce228'
-
-        cls.get_remote_metadata_patcher = patch('osis_document.api.utils.get_remote_metadata')
-        patched = cls.get_remote_metadata_patcher.start()
-        patched.return_value = {"name": "test.pdf"}
-
-        cls.get_remote_token_patcher = patch('osis_document.api.utils.get_remote_token')
-        patched = cls.get_remote_token_patcher.start()
-        patched.return_value = 'foobar'
-
-        # Create some academic years
-        cls.academic_years = [AcademicYearFactory(year=year) for year in [2021, 2022]]
-
-        # First entity
-        cls.first_doctoral_commission = EntityFactory()
-        EntityVersionFactory(entity=cls.first_doctoral_commission, acronym=ENTITY_CDE)
-
-        cls.second_doctoral_commission = EntityFactory()
-        EntityVersionFactory(entity=cls.second_doctoral_commission, acronym=ENTITY_CDSS)
-
-        promoter = PromoterFactory()
-        cls.promoter = promoter
-        ExternalPromoterFactory(process=promoter.process)
-
-        # User with one cdd
-        cls.cdd_person = CddManagerFactory(entity=cls.first_doctoral_commission).person
-
-        # Targeted path
-        cls.path = 'admission:doctorate:confirmation:retaking'
-
-    def setUp(self):
-        # Create admissions
-        self.admission_without_confirmation_paper = DoctorateAdmissionFactory(
-            training__management_entity=self.first_doctoral_commission,
-            training__academic_year=self.academic_years[0],
-            cotutelle=False,
-            supervision_group=self.promoter.process,
-            financing_type=ChoixTypeFinancement.WORK_CONTRACT.name,
-            financing_work_contract=ChoixTypeContratTravail.UCLOUVAIN_SCIENTIFIC_STAFF.name,
-            type=ChoixTypeAdmission.PRE_ADMISSION.name,
-            pre_admission_submission_date=datetime.datetime.now(),
-            admitted=True,
-            post_enrolment_status=ChoixStatutDoctorat.SUBMITTED_CONFIRMATION.name,
-        )
-        self.admission_with_confirmation_papers = DoctorateAdmissionFactory(
-            training__management_entity=self.first_doctoral_commission,
-            training__academic_year=self.academic_years[0],
-            cotutelle=False,
-            supervision_group=self.promoter.process,
-            financing_type=ChoixTypeFinancement.WORK_CONTRACT.name,
-            financing_work_contract=ChoixTypeContratTravail.UCLOUVAIN_SCIENTIFIC_STAFF.name,
-            type=ChoixTypeAdmission.PRE_ADMISSION.name,
-            pre_admission_submission_date=datetime.datetime.now(),
-            admitted=True,
-            post_enrolment_status=ChoixStatutDoctorat.SUBMITTED_CONFIRMATION.name,
-        )
-        self.admission_with_incomplete_confirmation_paper = DoctorateAdmissionFactory(
-            training__management_entity=self.first_doctoral_commission,
-            training__academic_year=self.academic_years[0],
-            cotutelle=False,
-            supervision_group=self.promoter.process,
-            financing_type=ChoixTypeFinancement.WORK_CONTRACT.name,
-            financing_work_contract=ChoixTypeContratTravail.UCLOUVAIN_SCIENTIFIC_STAFF.name,
-            type=ChoixTypeAdmission.PRE_ADMISSION.name,
-            pre_admission_submission_date=datetime.datetime.now(),
-            admitted=True,
-            post_enrolment_status=ChoixStatutDoctorat.SUBMITTED_CONFIRMATION.name,
-        )
-        self.confirmation_papers = [
-            ConfirmationPaperFactory(
-                admission=self.admission_with_confirmation_papers,
-                confirmation_date=datetime.date(2022, 4, 1),
-                confirmation_deadline=datetime.date(2022, 4, 5),
-                supervisor_panel_report=['f2'],
-            ),
-            ConfirmationPaperFactory(
-                admission=self.admission_with_incomplete_confirmation_paper,
-                confirmation_deadline=datetime.date(2022, 4, 5),
-                confirmation_date=datetime.date(2022, 4, 5),
-            ),
-        ]
-        self.custom_cdd_mail_template = CddMailTemplateFactory(
-            identifier=ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_RETAKING_STUDENT,
-            language=self.admission_with_confirmation_papers.candidate.language,
-            cdd=self.admission_with_confirmation_papers.doctorate.management_entity,
-            name='My custom mail',
-            subject='The email subject',
-            body='The email body',
-        )
-
-        self.candidate = self.admission_without_confirmation_paper.candidate
-
-    @classmethod
-    def tearDownClass(cls):
-        cls.confirm_remote_upload_patcher.stop()
-        cls.get_remote_metadata_patcher.stop()
-        cls.get_remote_token_patcher.stop()
-        super().tearDownClass()
-
-    def test_get_confirmation_retaking_decision_cdd_user_with_unknown_doctorate(self):
-        self.client.force_login(user=self.cdd_person.user)
-
-        url = reverse(self.path, args=[uuid.uuid4()])
+    def test_get_confirmation_retaking_decision_without_confirmation_paper(self):
+        url = reverse(self.retaking_path, args=[self.admission_without_confirmation_paper.uuid])
 
         response = self.client.get(url)
-
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
-    def test_get_confirmation_retaking_decision_cdd_user_without_confirmation_paper(self):
-        self.client.force_login(user=self.cdd_person.user)
-
-        url = reverse(self.path, args=[self.admission_without_confirmation_paper.uuid])
+    def test_get_confirmation_retaking_decision_with_confirmation_paper_and_generic_email(self):
+        url = reverse(self.retaking_path, args=[self.admission_with_confirmation_papers.uuid])
 
         response = self.client.get(url)
-
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-
-    def test_get_confirmation_retaking_decision_cdd_user_with_confirmation_paper_and_generic_email(self):
-        self.client.force_login(user=self.cdd_person.user)
-
-        url = reverse(self.path, args=[self.admission_with_confirmation_papers.uuid])
-
-        response = self.client.get(url)
-
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIsNotNone(response.context.get('select_template_form'))
         message_form = response.context.get('form')
         self.assertIsNotNone(message_form)
 
-    def test_get_confirmation_retaking_decision_cdd_user_with_confirmation_paper_and_custom_email(self):
-        self.client.force_login(user=self.cdd_person.user)
+    def test_get_confirmation_retaking_decision_with_confirmation_paper_and_custom_email(self):
+        url = reverse(self.retaking_path, args=[self.admission_with_confirmation_papers.uuid])
 
-        url = reverse(self.path, args=[self.admission_with_confirmation_papers.uuid])
-
-        response = self.client.get(
-            url,
-            {
-                'template': self.custom_cdd_mail_template.pk,
-            },
-        )
+        response = self.client.get(url, {'template': self.custom_cdd_mail_template.pk})
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIsNotNone(response.context.get('select_template_form'))
@@ -674,10 +338,8 @@ class CddDoctorateAdmissionConfirmationRetakingDecisionViewTestCase(TestCase):
         self.assertEqual(message_form.initial.get('subject'), self.custom_cdd_mail_template.subject)
         self.assertEqual(message_form.initial.get('body'), self.custom_cdd_mail_template.body)
 
-    def test_get_confirmation_retaking_decision_cdd_user_with_confirmation_paper_and_custom_email_and_htmx(self):
-        self.client.force_login(user=self.cdd_person.user)
-
-        url = reverse(self.path, args=[self.admission_with_confirmation_papers.uuid])
+    def test_get_confirmation_retaking_decision_with_confirmation_paper_and_custom_email_and_htmx(self):
+        url = reverse(self.retaking_path, args=[self.admission_with_confirmation_papers.uuid])
 
         response = self.client.get(
             url,
@@ -691,37 +353,21 @@ class CddDoctorateAdmissionConfirmationRetakingDecisionViewTestCase(TestCase):
         self.assertEqual(message_form.initial.get('subject'), self.custom_cdd_mail_template.subject)
         self.assertEqual(message_form.initial.get('body'), self.custom_cdd_mail_template.body)
 
-    def test_post_confirmation_retaking_decision_cdd_user_with_unknown_doctorate(self):
-        self.client.force_login(user=self.cdd_person.user)
-
-        url = reverse(self.path, args=[uuid.uuid4()])
+    def test_post_confirmation_retaking_decision_without_confirmation_paper(self):
+        url = reverse(self.retaking_path, args=[self.admission_without_confirmation_paper.uuid])
 
         response = self.client.post(url)
-
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
-    def test_post_confirmation_retaking_decision_cdd_user_without_confirmation_paper(self):
-        self.client.force_login(user=self.cdd_person.user)
+    def test_post_confirmation_retaking_decision_with_confirmation_paper(self):
+        url = reverse(self.retaking_path, args=[self.admission_with_confirmation_papers.uuid])
 
-        url = reverse(self.path, args=[self.admission_without_confirmation_paper.uuid])
-
-        response = self.client.post(url)
-
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-
-    def test_post_confirmation_retaking_decision_cdd_user_with_confirmation_paper(self):
-        self.client.force_login(user=self.cdd_person.user)
-
-        url = reverse(self.path, args=[self.admission_with_confirmation_papers.uuid])
-
-        response = self.client.post(
-            url,
-            {
-                'subject': 'The subject of the message',
-                'body': 'The body of the message',
-                'date_limite': datetime.date(2022, 1, 1),
-            },
-        )
+        data = {
+            'subject': 'The subject of the message',
+            'body': 'The body of the message',
+            'date_limite': datetime.date(2022, 1, 1),
+        }
+        response = self.client.post(url, data)
 
         self.assertRedirects(
             response,
@@ -735,30 +381,24 @@ class CddDoctorateAdmissionConfirmationRetakingDecisionViewTestCase(TestCase):
             uuid=self.admission_with_confirmation_papers.uuid
         )
         self.assertEqual(doctorate.post_enrolment_status, ChoixStatutDoctorat.CONFIRMATION_TO_BE_REPEATED.name)
-
         self.assertEqual(EmailNotification.objects.count(), 1)
         self.assertEqual(EmailNotification.objects.first().person, self.admission_with_confirmation_papers.candidate)
 
         confirmation_papers = message_bus_instance.invoke(
             RecupererEpreuvesConfirmationQuery(doctorat_uuid=doctorate.uuid)
         )
-
         self.assertEqual(len(confirmation_papers), 2)
         self.assertEqual(confirmation_papers[0].date_limite, datetime.date(2022, 1, 1))
 
-    def test_post_confirmation_retaking_decision_cdd_user_with_incomplete_confirmation_paper(self):
-        self.client.force_login(user=self.cdd_person.user)
+    def test_post_confirmation_retaking_decision_with_incomplete_confirmation_paper(self):
+        url = reverse(self.retaking_path, args=[self.admission_with_incomplete_confirmation_paper.uuid])
 
-        url = reverse(self.path, args=[self.admission_with_incomplete_confirmation_paper.uuid])
-
-        response = self.client.post(
-            url,
-            {
-                'subject': 'The subject of the message',
-                'body': 'The body of the message',
-                'date_limite': datetime.date(2022, 1, 1),
-            },
-        )
+        data = {
+            'subject': 'The subject of the message',
+            'body': 'The body of the message',
+            'date_limite': datetime.date(2022, 1, 1),
+        }
+        response = self.client.post(url, data)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertFormError(
@@ -774,27 +414,20 @@ class CddDoctorateAdmissionConfirmationRetakingDecisionViewTestCase(TestCase):
         doctorate: DoctorateAdmission = DoctorateAdmission.objects.get(
             uuid=self.admission_with_incomplete_confirmation_paper.uuid
         )
-
         self.assertEqual(doctorate.post_enrolment_status, ChoixStatutDoctorat.SUBMITTED_CONFIRMATION.name)
 
         confirmation_papers = message_bus_instance.invoke(
             RecupererEpreuvesConfirmationQuery(doctorat_uuid=doctorate.uuid)
         )
-
         self.assertEqual(len(confirmation_papers), 1)
 
-    def test_post_confirmation_retaking_decision_cdd_user_with_incomplete_form(self):
-        self.client.force_login(user=self.cdd_person.user)
+    def test_post_confirmation_retaking_decision_with_incomplete_form(self):
+        url = reverse(self.retaking_path, args=[self.admission_with_confirmation_papers.uuid])
 
-        url = reverse(self.path, args=[self.admission_with_confirmation_papers.uuid])
-
-        response = self.client.post(
-            url,
-            {
-                'subject': 'The subject of the message',
-                'body': 'The body of the message',
-            },
-        )
-
+        data = {
+            'subject': 'The subject of the message',
+            'body': 'The body of the message',
+        }
+        response = self.client.post(url, data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertFormError(response, 'form', 'date_limite', ['Ce champ est obligatoire.'])

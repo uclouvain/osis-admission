@@ -35,7 +35,7 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
 )
 from admission.tests import QueriesAssertionsMixin
 from admission.tests.factories import DoctorateAdmissionFactory
-from admission.tests.factories.roles import CandidateFactory, CddManagerFactory
+from admission.tests.factories.roles import CandidateFactory
 from admission.tests.factories.supervision import CaMemberFactory, ExternalPromoterFactory, PromoterFactory
 from base.models.enums.entity_type import EntityType
 from base.tests.factories.entity_version import EntityVersionFactory
@@ -63,8 +63,6 @@ class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
         cls.candidate = cls.admission.candidate
         cls.other_candidate_user = CandidateFactory(person__first_name="Jim").person.user
         cls.no_role_user = PersonFactory(first_name="Joe").user
-        cls.cdd_manager_user = CddManagerFactory(entity=cls.commission).person.user
-        cls.other_cdd_manager_user = CddManagerFactory().person.user
         # Target url
         cls.url = resolve_url("admission_api_v1:supervision", uuid=cls.admission.uuid)
         cls.empty_external_data = {
@@ -111,16 +109,6 @@ class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
 
     def test_supervision_get_using_api_other_candidate(self):
         self.client.force_authenticate(user=self.other_candidate_user)
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-
-    def test_supervision_get_using_api_cdd_manager(self):
-        self.client.force_authenticate(user=self.cdd_manager_user)
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
-
-    def test_supervision_get_using_api_other_cdd_manager(self):
-        self.client.force_authenticate(user=self.other_cdd_manager_user)
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
@@ -295,26 +283,6 @@ class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
         response = self.client.put(self.url, data=data)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    def test_supervision_ajouter_membre_cdd_manager(self):
-        self.client.force_authenticate(user=self.cdd_manager_user)
-        data = {
-            'matricule': TutorFactory(person__first_name="Joe").person.global_id,
-            'type': ActorType.PROMOTER.name,
-            **self.empty_external_data,
-        }
-        response = self.client.put(self.url, data=data)
-        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
-
-    def test_supervision_ajouter_membre_other_cdd_manager(self):
-        self.client.force_authenticate(user=self.other_cdd_manager_user)
-        data = {
-            'matricule': TutorFactory(person__first_name="Joe").person.global_id,
-            'type': ActorType.PROMOTER.name,
-            **self.empty_external_data,
-        }
-        response = self.client.put(self.url, data=data)
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-
     def test_supervision_ajouter_membre_promoter(self):
         # Other user
         other_promoter = PromoterFactory()
@@ -419,28 +387,6 @@ class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
                 'uuid_membre': self.promoter.uuid,
             },
         )
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-
-    def test_supervision_supprimer_membre_cdd_manager(self):
-        self.client.force_authenticate(user=self.cdd_manager_user)
-
-        promoter = PromoterFactory(process=self.promoter.actor_ptr.process)
-
-        data = {
-            'type': ActorType.PROMOTER.name,
-            'uuid_membre': promoter.uuid,
-        }
-        response = self.client.post(self.url, data=data)
-        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
-
-    def test_supervision_supprimer_membre_other_cdd_manager(self):
-        self.client.force_authenticate(user=self.other_cdd_manager_user)
-
-        data = {
-            'type': ActorType.PROMOTER.name,
-            'uuid_membre': self.promoter.uuid,
-        }
-        response = self.client.post(self.url, data=data)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_supervision_supprimer_membre_promoter(self):

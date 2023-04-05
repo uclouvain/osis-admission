@@ -1098,7 +1098,7 @@ msgstr ""
 msgid "Continuing education admission"
 msgstr ""
 
-msgid "Continuing enrolments"
+msgid "Continuing enrolment applications"
 msgstr ""
 
 msgid "Coordinates"
@@ -1466,7 +1466,7 @@ msgstr ""
 msgid "Doctorate admissions"
 msgstr ""
 
-msgid "Doctorate enrolments"
+msgid "Doctorate enrolment applications"
 msgstr ""
 
 msgid "Document"
@@ -2473,16 +2473,13 @@ msgctxt "tab"
 msgid "Management"
 msgstr ""
 
-msgid "Management of the continuing enrolments"
+msgid "Management of the continuing enrolment applications"
 msgstr ""
 
 msgid "Management of the doctorate enrolments"
 msgstr ""
 
 msgid "Management of the enrolment applications"
-msgstr ""
-
-msgid "Management of the general enrolments"
 msgstr ""
 
 msgid ""
@@ -3369,16 +3366,22 @@ msgstr ""
 msgid "Role: ADRE secretary"
 msgstr ""
 
-msgid "Role: CDD manager"
+msgid "Role: CDD configurator"
 msgstr ""
 
-msgid "Role: CDD managers"
+msgid "Role: CDD configurators"
 msgstr ""
 
 msgid "Role: Candidate"
 msgstr ""
 
 msgid "Role: Candidates"
+msgstr ""
+
+msgid "Role: Central manager"
+msgstr ""
+
+msgid "Role: Central managers"
 msgstr ""
 
 msgid "Role: Committee member"
@@ -3399,6 +3402,12 @@ msgstr ""
 msgid "Role: Jury secretary"
 msgstr ""
 
+msgid "Role: Program manager"
+msgstr ""
+
+msgid "Role: Program managers"
+msgstr ""
+
 msgid "Role: Promoter"
 msgstr ""
 
@@ -3411,16 +3420,7 @@ msgstr ""
 msgid "Role: SCEBs"
 msgstr ""
 
-msgid "Role: SIC director"
-msgstr ""
-
-msgid "Role: SIC directors"
-msgstr ""
-
-msgid "Role: SIC manager"
-msgstr ""
-
-msgid "Role: SIC managers"
+msgid "Role: SIC management"
 msgstr ""
 
 msgid "SEARCH_SCHOLARSHIP"
@@ -4610,4 +4610,8 @@ msgid "your partner"
 msgstr ""
 
 msgid "yyyy"
+msgstr ""
+
+#, python-brace-format
+msgid "{items} types out of {total}"
 msgstr ""

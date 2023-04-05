@@ -40,6 +40,12 @@ class ExportPdfTestCase(TestCase):
     def setUpTestData(cls):
         cls.admission = DoctorateAdmissionFactory()
 
+    def setUp(self):
+        # Mock weasyprint
+        patcher = patch('admission.exports.utils.get_pdf_from_template', return_value=b'some content')
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
     @patch('osis_document.api.utils.get_remote_metadata')
     @patch('osis_document.utils.save_raw_content_remotely')
     @patch('osis_document.api.utils.confirm_remote_upload')

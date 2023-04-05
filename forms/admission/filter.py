@@ -120,7 +120,12 @@ class AllAdmissionsFilterForm(forms.Form):
         ],
         label=_('Training type'),
         required=False,
-        widget=Select2MultipleCheckboxesWidget(attrs={'data-dropdown-auto-width': True}),
+        widget=Select2MultipleCheckboxesWidget(
+            attrs={
+                'data-dropdown-auto-width': True,
+                'data-selection-template': _("{items} types out of {total}"),
+            }
+        ),
     )
 
     formation = forms.CharField(
@@ -128,33 +133,22 @@ class AllAdmissionsFilterForm(forms.Form):
         required=False,
     )
 
-    bourse_internationale = forms.ModelChoiceField(
+    bourse_internationale = forms.TypedChoiceField(
         label=_('International scholarship'),
-        empty_label=_('All'),
-        queryset=Scholarship.objects.filter(
-            type__in=[
-                TypeBourse.BOURSE_INTERNATIONALE_DOCTORAT.name,
-                TypeBourse.BOURSE_INTERNATIONALE_FORMATION_GENERALE.name,
-            ]
-        ).order_by('short_name'),
+        empty_value=None,
         required=False,
-        to_field_name='uuid',
     )
 
-    bourse_erasmus_mundus = forms.ModelChoiceField(
+    bourse_erasmus_mundus = forms.TypedChoiceField(
         label=_('Erasmus Mundus'),
-        empty_label=_('All'),
-        queryset=Scholarship.objects.filter(type=TypeBourse.ERASMUS_MUNDUS.name).order_by('short_name'),
+        empty_value=None,
         required=False,
-        to_field_name='uuid',
     )
 
-    bourse_double_diplomation = forms.ModelChoiceField(
+    bourse_double_diplomation = forms.TypedChoiceField(
         label=_('Double degree scholarship'),
-        empty_label=_('All'),
-        queryset=Scholarship.objects.filter(type=TypeBourse.DOUBLE_TRIPLE_DIPLOMATION.name).order_by('short_name'),
+        empty_value=None,
         required=False,
-        to_field_name='uuid',
     )
 
     taille_page = forms.TypedChoiceField(
@@ -181,6 +175,26 @@ class AllAdmissionsFilterForm(forms.Form):
         self.fields['types_formation'].initial = list(
             AnneeInscriptionFormationTranslator.GENERAL_EDUCATION_TYPES
             | AnneeInscriptionFormationTranslator.DOCTORATE_EDUCATION_TYPES
+        )
+
+        scholarships = Scholarship.objects.order_by('short_name').in_bulk(field_name='uuid')
+        self.fields['bourse_internationale'].coerce = scholarships.get
+        self.fields['bourse_internationale'].choices = ALL_EMPTY_CHOICE + tuple(
+            (s.uuid, str(s))
+            for s in scholarships.values()
+            if s.type
+            in [
+                TypeBourse.BOURSE_INTERNATIONALE_DOCTORAT.name,
+                TypeBourse.BOURSE_INTERNATIONALE_FORMATION_GENERALE.name,
+            ]
+        )
+        self.fields['bourse_erasmus_mundus'].coerce = scholarships.get
+        self.fields['bourse_erasmus_mundus'].choices = ALL_EMPTY_CHOICE + tuple(
+            (s.uuid, str(s)) for s in scholarships.values() if s.type == TypeBourse.ERASMUS_MUNDUS.name
+        )
+        self.fields['bourse_double_diplomation'].coerce = scholarships.get
+        self.fields['bourse_double_diplomation'].choices = ALL_EMPTY_CHOICE + tuple(
+            (s.uuid, str(s)) for s in scholarships.values() if s.type == TypeBourse.DOUBLE_TRIPLE_DIPLOMATION.name
         )
 
     def clean_numero(self):

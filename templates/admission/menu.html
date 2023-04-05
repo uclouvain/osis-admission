@@ -7,7 +7,7 @@
   * The core business involves the administration of students, teachers,
   * courses, programs and so on.
   *
-  * Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+  * Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
   *
   * This program is free software: you can redistribute it and/or modify
   * it under the terms of the GNU General Public License as published by
@@ -27,14 +27,14 @@
 {# TODO Add the admission permission #}
 <li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button"
-     aria-haspopup="true" aria-expanded="false"
-     id="lnk_home_dropdown_admissions">
+      aria-haspopup="true" aria-expanded="false"
+      id="lnk_home_dropdown_admissions">
     <span class="hidden-md fa fa-address-card" aria-hidden="true"></span>
     <span class="hidden-sm">{% trans 'Enrolments' %}</span>
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu">
-    {% if perms.admission.view_dossiers %}
+    {% if perms.admission.view_enrolment_applications %}
       <li>
         <a href="{% url 'admission:all-list' %}">
           <span class="fa fa-chalkboard-user"></span>
@@ -42,27 +42,19 @@
         </a>
       </li>
     {% endif %}
-    {% if perms.admission.view_cdddossiers %}
+    {% if perms.admission.view_doctorate_enrolment_applications %}
       <li>
-        <a href="{% url 'admission:doctorate:cdd:list' %}" id="lnk_dropdown_doctorateadmissions">
+        <a href="{% url 'admission:doctorate:cdd:list' %}">
           <span class="fa fa-graduation-cap"></span>
-          {% trans 'Doctorate enrolments' %}
+          {% trans 'Doctorate enrolment applications' %}
         </a>
       </li>
     {% endif %}
-    {% if perms.admission.view_general_dossiers %}
-      <li>
-        <a href="{% url 'admission:general-education:list' %}">
-          <span class="fa fa-chalkboard-user"></span>
-          {% trans 'General enrolments' %}
-        </a>
-      </li>
-    {% endif %}
-    {% if perms.admission.view_continuing_dossiers %}
+    {% if perms.admission.view_continuing_enrolment_applications %}
       <li>
         <a href="{% url 'admission:continuing-education:list' %}">
           <span class="fa fa-chalkboard-user"></span>
-          {% trans 'Continuing enrolments' %}
+          {% trans 'Continuing enrolment applications' %}
         </a>
       </li>
     {% endif %}

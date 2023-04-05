@@ -1,46 +1,46 @@
 # ##############################################################################
 #
-#    OSIS stands for Open Student Information System. It's an application
-#    designed to manage the core business of higher education institutions,
-#    such as universities, faculties, institutes and professional schools.
-#    The core business involves the administration of students, teachers,
-#    courses, programs and so on.
+#  OSIS stands for Open Student Information System. It's an application
+#  designed to manage the core business of higher education institutions,
+#  such as universities, faculties, institutes and professional schools.
+#  The core business involves the administration of students, teachers,
+#  courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
 #
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
 #
-#    A copy of this license - GNU General Public License - is available
-#    at the root of the source code of this program.  If not,
-#    see http://www.gnu.org/licenses/.
+#  A copy of this license - GNU General Public License - is available
+#  at the root of the source code of this program.  If not,
+#  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
 
 from django.test import TestCase
 
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
-    ChoixCommissionProximiteCDEouCLSM,
-    ChoixCommissionProximiteCDSS,
-    ChoixSousDomaineSciences,
-)
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import (
     ENTITY_CDE,
     ENTITY_CDSS,
     ENTITY_CLSM,
     SIGLE_SCIENCES,
 )
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    ChoixCommissionProximiteCDEouCLSM,
+    ChoixCommissionProximiteCDSS,
+    ChoixSousDomaineSciences,
+)
 from admission.forms import EMPTY_CHOICE
-from admission.forms.doctorate.cdd.filter import BaseFilterForm, CddFilterForm
+from admission.forms.doctorate.cdd.filter import DoctorateListFilterForm
 from admission.tests.factories import DoctorateAdmissionFactory
-from admission.tests.factories.roles import CddManagerFactory
+from admission.tests.factories.roles import CentralManagerRoleFactory
 from base.models.enums.entity_type import EntityType
 from base.templatetags.pagination import PAGINATOR_SIZE_LIST
 from base.tests.factories.academic_year import AcademicYearFactory
@@ -108,6 +108,14 @@ class FilterTestCase(TestCase):
             ),
         ]
 
+        cls.all_admissions = cls.first_entity_admissions + cls.second_entity_admissions + cls.third_entity_admissions
+        cls.all_commissions = [
+            EMPTY_CHOICE[0],
+            ['{} / {}'.format(ENTITY_CDE, ENTITY_CLSM), ChoixCommissionProximiteCDEouCLSM.choices()],
+            [ENTITY_CDSS, ChoixCommissionProximiteCDSS.choices()],
+            [SIGLE_SCIENCES, ChoixSousDomaineSciences.choices()],
+        ]
+
         # Other entity
         EntityVersionFactory(
             entity=EntityFactory(),
@@ -119,16 +127,16 @@ class FilterTestCase(TestCase):
         cls.country = CountryFactory()
 
         # User with several cdds
-        person_with_several_cdds = CddManagerFactory(entity=first_doctoral_commission).person
+        person_with_several_cdds = CentralManagerRoleFactory(entity=first_doctoral_commission).person
         cls.user_with_several_cdds = person_with_several_cdds.user
 
         for entity in [second_doctoral_commission, third_doctoral_commission]:
-            manager_factory = CddManagerFactory(entity=entity)
+            manager_factory = CentralManagerRoleFactory(entity=entity)
             manager_factory.person = person_with_several_cdds
             manager_factory.save()
 
         # User with one cdd
-        cls.user_with_one_cdd = CddManagerFactory(entity=first_doctoral_commission).person.user
+        cls.user_with_one_cdd = CentralManagerRoleFactory(entity=first_doctoral_commission).person.user
 
         # User without cdd
         cls.user_without_cdd = PersonFactory().user
@@ -138,14 +146,24 @@ class FilterTestCase(TestCase):
         cls.promoter = PersonFactory()
 
     def test_form_initialization_with_user_without_cdd(self):
-        form = CddFilterForm(user=self.user_without_cdd)
+        form = DoctorateListFilterForm(user=self.user_without_cdd)
 
         # Check initial values of dynamic fields
-        self.assertEqual(form.fields['cdds'].choices, [])
+        self.assertCountEqual(
+            form.fields['cdds'].choices,
+            [
+                (ENTITY_CDE, ENTITY_CDE),
+                (ENTITY_CDSS, ENTITY_CDSS),
+                ('ABC', 'ABC'),
+            ],
+        )
+        for admission in self.all_admissions:
+            self.assertIn(
+                (admission.doctorate.acronym, '{} - {}'.format(admission.doctorate.acronym, admission.doctorate.title)),
+                form.fields['sigles_formations'].choices,
+            )
 
-        self.assertEqual(form.fields['sigles_formations'].choices, [])
-
-        self.assertEqual(form.fields['commission_proximite'].choices, [EMPTY_CHOICE[0]])
+        self.assertEqual(form.fields['commission_proximite'].choices, self.all_commissions)
 
         self.assertEqual(
             form.fields['annee_academique'].choices,
@@ -156,13 +174,8 @@ class FilterTestCase(TestCase):
             ],
         )
 
-        # Check some fields are hidden
-        hidden_fields_names = [field.name for field in form.hidden_fields()]
-        self.assertIn('cdds', hidden_fields_names)
-        self.assertIn('commission_proximite', hidden_fields_names)
-
     def test_form_initialization_with_user_with_one_cdd(self):
-        form = CddFilterForm(user=self.user_with_one_cdd)
+        form = DoctorateListFilterForm(user=self.user_with_one_cdd)
 
         # Check initial values of dynamic fields
         self.assertEqual(
@@ -188,7 +201,7 @@ class FilterTestCase(TestCase):
         self.assertIn('cdds', hidden_fields_names)
 
     def test_form_initialization_with_user_with_several_cdds(self):
-        form = CddFilterForm(user=self.user_with_several_cdds)
+        form = DoctorateListFilterForm(user=self.user_with_several_cdds)
 
         # Check initial values of dynamic fields
         for cdd in [ENTITY_CDE, ENTITY_CDSS]:
@@ -197,7 +210,7 @@ class FilterTestCase(TestCase):
                 form.fields['cdds'].choices,
             )
 
-        for admission in self.first_entity_admissions + self.second_entity_admissions + self.third_entity_admissions:
+        for admission in self.all_admissions:
             self.assertIn(
                 (admission.doctorate.acronym, '{} - {}'.format(admission.doctorate.acronym, admission.doctorate.title)),
                 form.fields['sigles_formations'].choices,
@@ -220,12 +233,12 @@ class FilterTestCase(TestCase):
         self.assertEqual(len(form.hidden_fields()), 0)
 
     def test_form_validation_with_no_data(self):
-        form = CddFilterForm(user=self.user_with_one_cdd, data={})
+        form = DoctorateListFilterForm(user=self.user_with_one_cdd, data={})
 
         self.assertTrue(form.is_valid())
 
     def test_form_validation_with_valid_data(self):
-        form = CddFilterForm(
+        form = DoctorateListFilterForm(
             user=self.user_with_one_cdd,
             data={
                 'taille_page': PAGINATOR_SIZE_LIST[0],
@@ -241,7 +254,7 @@ class FilterTestCase(TestCase):
             'taille_page': PAGINATOR_SIZE_LIST[0],
             'cdds': [ENTITY_CDE],
         }
-        form = CddFilterForm(
+        form = DoctorateListFilterForm(
             user=self.user_with_one_cdd,
             data={
                 'numero': '320-300000',
@@ -252,7 +265,7 @@ class FilterTestCase(TestCase):
         self.assertIn('numero', form.errors)
 
     def test_form_validation_with_valid_cached_data(self):
-        form = CddFilterForm(
+        form = DoctorateListFilterForm(
             user=self.user_with_one_cdd,
             data={
                 'taille_page': PAGINATOR_SIZE_LIST[0],
@@ -276,7 +289,7 @@ class FilterTestCase(TestCase):
         )
 
     def test_form_validation_with_invalid_cached_data(self):
-        form = CddFilterForm(
+        form = DoctorateListFilterForm(
             user=self.user_with_one_cdd,
             data={
                 'taille_page': PAGINATOR_SIZE_LIST[0],
@@ -294,7 +307,7 @@ class FilterTestCase(TestCase):
         self.assertEqual(form.fields['matricule_promoteur'].widget.choices, [])
 
     def test_form_validation_with_no_autocomplete_cached_data(self):
-        form = CddFilterForm(
+        form = DoctorateListFilterForm(
             user=self.user_with_one_cdd,
             data={
                 'taille_page': PAGINATOR_SIZE_LIST[0],
@@ -307,35 +320,3 @@ class FilterTestCase(TestCase):
         self.assertEqual(form.fields['nationalite'].widget.choices, [])
         self.assertEqual(form.fields['matricule_candidat'].widget.choices, [])
         self.assertEqual(form.fields['matricule_promoteur'].widget.choices, [])
-
-    def test_base_form_initialization(self):
-        form = BaseFilterForm(user=self.user_with_one_cdd)
-
-        # Check initial values of dynamic fields
-        self.assertCountEqual(
-            form.fields['cdds'].choices,
-            [
-                (ENTITY_CDE, ENTITY_CDE),
-                (ENTITY_CDSS, ENTITY_CDSS),
-                ('ABC', 'ABC'),
-            ],
-        )
-
-        for admission in self.first_entity_admissions + self.second_entity_admissions + self.third_entity_admissions:
-            self.assertIn(
-                (admission.doctorate.acronym, '{} - {}'.format(admission.doctorate.acronym, admission.doctorate.title)),
-                form.fields['sigles_formations'].choices,
-            )
-
-        self.assertCountEqual(
-            form.fields['commission_proximite'].choices,
-            [
-                EMPTY_CHOICE[0],
-                ['{} / {}'.format(ENTITY_CDE, ENTITY_CLSM), ChoixCommissionProximiteCDEouCLSM.choices()],
-                [ENTITY_CDSS, ChoixCommissionProximiteCDSS.choices()],
-                [SIGLE_SCIENCES, ChoixSousDomaineSciences.choices()],
-            ],
-        )
-
-        # Check no fields is hidden
-        self.assertEqual(len(form.hidden_fields()), 0)

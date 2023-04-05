@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@ from django.db.models import OuterRef, Subquery
 from django.views import generic
 from django.utils.translation import gettext_lazy as _
 
-from admission.auth.roles.cdd_manager import CddManager
+from admission.auth.roles.cdd_configurator import CddConfigurator
 from admission.contrib.models.cdd_config import CddConfiguration
 from admission.forms.cdd_config import CddConfigForm
 from base.models.entity_version import EntityVersion
@@ -48,7 +48,7 @@ class CddConfigListView(PermissionRequiredMixin, generic.ListView):
 
     def get_queryset(self):
         managed_cdds = (
-            CddManager.objects.filter(person=self.request.user.person)
+            CddConfigurator.objects.filter(person=self.request.user.person)
             .annotate(
                 most_recent_acronym=Subquery(
                     EntityVersion.objects.filter(
@@ -74,7 +74,9 @@ class CddConfigChangeView(PermissionRequiredMixin, SuccessMessageMixin, generic.
     success_message = _("Configuration saved.")
 
     def has_permission(self):
-        managed_cdds = CddManager.objects.filter(person=self.request.user.person).values_list('entity_id', flat=True)
+        managed_cdds = CddConfigurator.objects.filter(
+            person=self.request.user.person,
+        ).values_list('entity_id', flat=True)
         return super().has_permission() and self.kwargs['pk'] in managed_cdds
 
     def get_object(self):

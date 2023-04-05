@@ -29,7 +29,7 @@ from typing import List
 from django.test import TestCase
 from django.urls import reverse
 
-from admission.contrib.models import DoctorateAdmission, AdmissionViewer
+from admission.contrib.models import AdmissionViewer, DoctorateAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE, ENTITY_CDSS
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     BourseRecherche,
@@ -40,8 +40,11 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
 )
 from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixStatutCDD, ChoixStatutSIC
 from admission.tests.factories import DoctorateAdmissionFactory
-from admission.tests.factories.roles import CandidateFactory, CddManagerFactory, SicManagerRoleFactory
-from admission.tests.factories.supervision import PromoterFactory
+from admission.tests.factories.roles import (
+    CandidateFactory,
+    ProgramManagerRoleFactory,
+    SicManagementRoleFactory,
+)
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityFactory
 from base.tests.factories.entity_version import EntityVersionFactory
@@ -70,26 +73,19 @@ class DoctorateAdmissionProjectDetailViewTestCase(TestCase):
                 name_en='Belgium',
             )
         )
-        promoter = PromoterFactory()
-        cls.promoter = promoter.person
-
-        cls.sic_manage_user = SicManagerRoleFactory().person.user
-
         # Create admissions
+        admission = DoctorateAdmissionFactory(
+            training__management_entity=first_doctoral_commission,
+            training__academic_year=academic_years[0],
+            financing_type=ChoixTypeFinancement.WORK_CONTRACT.name,
+            financing_work_contract=ChoixTypeContratTravail.UCLOUVAIN_SCIENTIFIC_STAFF.name,
+            type=ChoixTypeAdmission.PRE_ADMISSION.name,
+            pre_admission_submission_date=datetime.datetime.now(),
+        )
         cls.admissions: List[DoctorateAdmission] = [
+            admission,
             DoctorateAdmissionFactory(
-                training__management_entity=first_doctoral_commission,
-                training__academic_year=academic_years[0],
-                cotutelle=False,
-                supervision_group=promoter.process,
-                financing_type=ChoixTypeFinancement.WORK_CONTRACT.name,
-                financing_work_contract=ChoixTypeContratTravail.UCLOUVAIN_SCIENTIFIC_STAFF.name,
-                type=ChoixTypeAdmission.PRE_ADMISSION.name,
-                pre_admission_submission_date=datetime.datetime.now(),
-            ),
-            DoctorateAdmissionFactory(
-                training__management_entity=first_doctoral_commission,
-                training__academic_year=academic_years[0],
+                training=admission.training,
                 status=ChoixStatutPropositionDoctorale.CONFIRMEE.name,
                 candidate=candidate.person,
                 financing_type=ChoixTypeFinancement.SEARCH_SCHOLARSHIP.name,
@@ -124,21 +120,11 @@ class DoctorateAdmissionProjectDetailViewTestCase(TestCase):
             ),
         ]
 
-        # User with one cdd
-        cdd_person_user = CddManagerFactory(entity=first_doctoral_commission).person
-        cls.one_cdd_user = cdd_person_user.user
+        cls.sic_user = SicManagementRoleFactory(entity=first_doctoral_commission).person.user
+        cls.manager = ProgramManagerRoleFactory(education_group=admission.training.education_group).person.user
 
-    def test_project_detail_candidate_user(self):
-        self.client.force_login(user=self.admissions[0].candidate.user)
-
-        url = reverse('admission:doctorate:project', args=[self.admissions[0].uuid])
-
-        response = self.client.get(url)
-
-        self.assertEqual(response.status_code, 200)
-
-    def test_project_detail_cdd_user_admission(self):
-        self.client.force_login(user=self.one_cdd_user)
+    def test_project_detail_manager_admission(self):
+        self.client.force_login(user=self.manager)
 
         url = reverse('admission:doctorate:project', args=[self.admissions[0].uuid])
 
@@ -148,8 +134,8 @@ class DoctorateAdmissionProjectDetailViewTestCase(TestCase):
         self.assertIsNotNone(response.context.get('admission'))
         self.assertIsNone(response.context.get('folder'))
 
-    def test_project_detail_cdd_user_folder(self):
-        self.client.force_login(user=self.one_cdd_user)
+    def test_project_detail_manager_folder(self):
+        self.client.force_login(user=self.manager)
 
         url = reverse('admission:doctorate:project', args=[self.admissions[1].uuid])
 
@@ -159,13 +145,13 @@ class DoctorateAdmissionProjectDetailViewTestCase(TestCase):
         self.assertIsNotNone(response.context.get('admission'))
         self.assertIsNotNone(response.context.get('dossier'))
 
-    def test_project_detail_with_sic_manager(self):
-        self.client.force_login(user=self.sic_manage_user)
+    def test_project_detail_with_sic(self):
+        self.client.force_login(user=self.sic_user)
 
         self.assertFalse(
             AdmissionViewer.objects.filter(
                 admission=self.admissions[0],
-                person=self.sic_manage_user.person,
+                person=self.sic_user.person,
             ).exists()
         )
 
@@ -178,6 +164,6 @@ class DoctorateAdmissionProjectDetailViewTestCase(TestCase):
         self.assertTrue(
             AdmissionViewer.objects.filter(
                 admission=self.admissions[0],
-                person=self.sic_manage_user.person,
+                person=self.sic_user.person,
             ).exists()
         )

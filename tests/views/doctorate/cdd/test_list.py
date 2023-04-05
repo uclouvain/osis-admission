@@ -44,27 +44,28 @@ from admission.ddd.admission.doctorat.validation.domain.model.enums import Choix
 from admission.ddd.admission.doctorat.validation.dtos import DemandeRechercheDTO
 from admission.tests import QueriesAssertionsMixin
 from admission.tests.factories import DoctorateAdmissionFactory
-from admission.tests.factories.roles import CandidateFactory, CddManagerFactory, DoctorateReaderRoleFactory
+from admission.tests.factories.roles import (
+    CandidateFactory,
+    DoctorateReaderRoleFactory,
+    ProgramManagerRoleFactory,
+    SicManagementRoleFactory,
+)
 from admission.tests.factories.supervision import PromoterFactory
 from base.models.enums.entity_type import EntityType
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityFactory
 from base.tests.factories.entity_version import EntityVersionFactory
+from base.tests.factories.user import UserFactory
 from reference.tests.factories.country import CountryFactory
 
 
-class CddDoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
+class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
     admissions = []
-    NB_MAX_QUERIES = 21
+    NB_MAX_QUERIES = 20
 
     @classmethod
     def setUpTestData(cls):
         cls.factory = RequestFactory()
-        cls.user = User.objects.create_user(
-            username='john_doe',
-            password='top_secret',
-        )
-
         cls.doctorate_reader_user = DoctorateReaderRoleFactory().person.user
 
         # Create some academic years
@@ -96,22 +97,24 @@ class CddDoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
         cls.promoter = promoter.person
 
         # Create admissions
+        admission = DoctorateAdmissionFactory(
+            training__management_entity=first_doctoral_commission,
+            training__academic_year=academic_years[0],
+            training__enrollment_campus__name='Mons',
+            cotutelle=False,
+            supervision_group=promoter.process,
+            financing_type=ChoixTypeFinancement.WORK_CONTRACT.name,
+            financing_work_contract=ChoixTypeContratTravail.UCLOUVAIN_SCIENTIFIC_STAFF.name,
+            type=ChoixTypeAdmission.PRE_ADMISSION.name,
+            pre_admission_submission_date=datetime.datetime.now(),
+        )
         cls.admissions: List[DoctorateAdmission] = [
-            DoctorateAdmissionFactory(
-                training__management_entity=first_doctoral_commission,
-                training__academic_year=academic_years[0],
-                training__enrollment_campus__name='Mons',
-                cotutelle=False,
-                supervision_group=promoter.process,
-                financing_type=ChoixTypeFinancement.WORK_CONTRACT.name,
-                financing_work_contract=ChoixTypeContratTravail.UCLOUVAIN_SCIENTIFIC_STAFF.name,
-                type=ChoixTypeAdmission.PRE_ADMISSION.name,
-                pre_admission_submission_date=datetime.datetime.now(),
-            ),
+            admission,
             DoctorateAdmissionFactory(
                 cotutelle=None,
                 training__management_entity=first_doctoral_commission,
                 training__academic_year=academic_years[0],
+                training__education_group=admission.training.education_group,
                 training__enrollment_campus__name='Mons',
                 status=ChoixStatutPropositionDoctorale.CONFIRMEE.name,
                 candidate=candidate.person,
@@ -210,16 +213,11 @@ class CddDoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
             ),
         ]
 
-        # User with one cdd
-        cdd_person_user = CddManagerFactory(entity=first_doctoral_commission).person
-        cls.one_cdd_user = cdd_person_user.user
-
-        # User with several cdds
-        several_cdd_person_user = CddManagerFactory(entity=first_doctoral_commission).person
-        cdd_manager = CddManagerFactory(entity=second_doctoral_commission)
-        cdd_manager.person = several_cdd_person_user
-        cdd_manager.save()
-        cls.several_cdds_user = several_cdd_person_user.user
+        cls.sic_user = SicManagementRoleFactory(entity=first_doctoral_commission).person.user
+        manager_person = ProgramManagerRoleFactory(education_group=cls.admissions[0].training.education_group).person
+        ProgramManagerRoleFactory(education_group=cls.admissions[1].training.education_group, person=manager_person)
+        ProgramManagerRoleFactory(education_group=cls.admissions[2].training.education_group, person=manager_person)
+        cls.manager_user = manager_person.user
 
         # Targeted url
         cls.url = reverse('admission:doctorate:cdd:list')
@@ -228,35 +226,25 @@ class CddDoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
         cache.clear()
 
     def test_list_user_without_person(self):
-        self.client.force_login(user=self.user)
+        self.client.force_login(user=UserFactory())
 
         response = self.client.get(self.url)
-
         self.assertEqual(response.status_code, 403)
 
-    def test_list_candidate_user(self):
-        self.client.force_login(user=self.admissions[0].candidate.user)
+    def test_list_manager_without_any_query_param(self):
+        self.client.force_login(user=self.manager_user)
 
         response = self.client.get(self.url)
-
-        self.assertEqual(response.status_code, 403)
-
-    def test_list_cdd_user_without_any_query_param(self):
-        self.client.force_login(user=self.one_cdd_user)
-
-        response = self.client.get(self.url)
-
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context['object_list'], [])
 
-    def test_list_cdd_user_with_needed_query_params(self):
-        self.client.force_login(user=self.one_cdd_user)
+    def test_list_manager_with_needed_query_params(self):
+        self.client.force_login(user=self.manager_user)
 
         data = {
             'cdds': [ENTITY_CDE],
             'taille_page': 10,
         }
-
         with self.assertNumQueriesLessThan(self.NB_MAX_QUERIES, verbose=True):
             response = self.client.get(self.url, data)
 
@@ -266,8 +254,22 @@ class CddDoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
         self.assertIn(self.results[0], response.context['object_list'])
         self.assertIn(self.results[1], response.context['object_list'])
 
-    def test_list_cdd_user_with_sorting(self):
-        self.client.force_login(user=self.one_cdd_user)
+    def test_list_other_manager(self):
+        other_manager = ProgramManagerRoleFactory()
+        self.client.force_login(user=other_manager.person.user)
+
+        data = {
+            'cdds': [ENTITY_CDE],
+            'taille_page': 10,
+        }
+        with self.assertNumQueriesLessThan(self.NB_MAX_QUERIES, verbose=True):
+            response = self.client.get(self.url, data)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['object_list'], [])
+
+    def test_list_manager_with_sorting(self):
+        self.client.force_login(user=self.manager_user)
 
         # Sorting
         data = {
@@ -275,7 +277,6 @@ class CddDoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
             'taille_page': 10,
             'o': 'numero_demande',
         }
-
         with self.assertNumQueriesLessThan(self.NB_MAX_QUERIES):
             response = self.client.get(self.url, data)
 
@@ -295,8 +296,8 @@ class CddDoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
         self.assertEqual(response.context['object_list'][0].numero_demande, self.results[1].numero_demande)
         self.assertEqual(response.context['object_list'][1].numero_demande, self.results[0].numero_demande)
 
-    def test_list_cdd_user_with_all_query_params(self):
-        self.client.force_login(user=self.one_cdd_user)
+    def test_list_manager_with_all_query_params(self):
+        self.client.force_login(user=self.manager_user)
 
         data = {
             'cdds': [ENTITY_CDE],
@@ -314,30 +315,28 @@ class CddDoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
             'type_contrat_travail': self.admissions[1].financing_work_contract,
             'autre_bourse_recherche': self.admissions[1].other_international_scholarship,
         }
-
         response = self.client.get(self.url, data)
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.context['object_list']), 1)
         self.assertEqual(response.context['object_list'][0], self.results[1])
 
-    def test_list_cdd_user_with_other_params(self):
-        self.client.force_login(user=self.several_cdds_user)
+    def test_list_manager_with_other_params(self):
+        self.client.force_login(user=self.manager_user)
 
         data = {
             'cdds': [ENTITY_CDSS],
             'type_contrat_travail': ChoixTypeContratTravail.OTHER.name,
             'bourse_recherche': BourseRecherche.OTHER.name,
         }
-
         response = self.client.get(self.url, data)
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.context['object_list']), 1)
         self.assertEqual(response.context['object_list'][0], self.results[2])
 
-    def test_list_cdd_user_with_cotutelle_query_param(self):
-        self.client.force_login(user=self.one_cdd_user)
+    def test_list_manager_with_cotutelle_query_param(self):
+        self.client.force_login(user=self.manager_user)
 
         data = {
             'cdds': [ENTITY_CDE],
@@ -345,61 +344,34 @@ class CddDoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
             'cotutelle': False,
         }
 
-        response = self.client.get(
-            self.url,
-            data,
-        )
+        response = self.client.get(self.url, data)
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.context['object_list']), 1)
         self.assertEqual(response.context['object_list'][0], self.results[0])
 
-    def test_list_cdd_user_with_promoter_query_param(self):
-        self.client.force_login(user=self.one_cdd_user)
+    def test_list_manager_with_promoter_query_param(self):
+        self.client.force_login(user=self.manager_user)
 
         data = {
             'cdds': [ENTITY_CDE],
             'taille_page': 10,
             'matricule_promoteur': self.promoter.global_id,
         }
-
-        response = self.client.get(
-            self.url,
-            data,
-        )
+        response = self.client.get(self.url, data)
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.context['object_list']), 1)
         self.assertEqual(response.context['object_list'][0], self.results[0])
 
-    def test_list_cdd_user_with_several_cdds(self):
-        self.client.force_login(user=self.several_cdds_user)
-
-        data = {
-            'cdds': [ENTITY_CDE, ENTITY_CDSS],
-            'taille_page': 10,
-        }
-
-        with self.assertNumQueriesLessThan(self.NB_MAX_QUERIES):
-            response = self.client.get(self.url, data)
-
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.context['object_list']), 3)
-        self.assertCountEqual(self.results, response.context['object_list'])
-
     def test_htmx_form_errors(self):
-        self.client.force_login(user=self.one_cdd_user)
+        self.client.force_login(user=self.manager_user)
 
         data = {
             'nationalite': 'FR',
             'cdds': 'unknown_cdd',
         }
-
-        response = self.client.get(
-            self.url,
-            data,
-            HTTP_HX_REQUEST='true',
-        )
+        response = self.client.get(self.url, data, HTTP_HX_REQUEST='true')
 
         self.assertEqual(response.status_code, 200)
         self.assertIn(

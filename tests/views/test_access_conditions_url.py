@@ -30,7 +30,7 @@ from django.urls import reverse
 
 from admission.tests import QueriesAssertionsMixin
 from admission.tests.factories import DoctorateAdmissionFactory
-from admission.tests.factories.roles import SicManagerRoleFactory
+from admission.tests.factories.roles import SicManagementRoleFactory
 
 
 @freezegun.freeze_time('2023-01-01')
@@ -39,13 +39,13 @@ class AdmissionAccessConditionsURLTestCase(QueriesAssertionsMixin, TestCase):
     def setUpTestData(cls):
         cls.doctorate_admission = DoctorateAdmissionFactory()
 
-        cls.sic_manager_user = SicManagerRoleFactory().person.user
+        cls.sic_management_user = SicManagementRoleFactory().person.user
 
         # Targeted url
         cls.conditions_url = 'admission:access-conditions-url'
 
     def test_access_conditions_url_with_a_doctorate(self):
-        self.client.force_login(user=self.sic_manager_user)
+        self.client.force_login(user=self.sic_management_user)
 
         response = self.client.get(
             reverse(

@@ -56,7 +56,6 @@ from admission.exports.admission_recap.constants import (
     FORMATTED_RELATIONSHIPS,
     CURRICULUM_ACTIVITY_LABEL,
 )
-from admission.exports.utils import get_pdf_from_template
 from admission.infrastructure.admission.domain.service.calendrier_inscription import CalendrierInscription
 from base.models.enums.community import CommunityEnum
 from base.models.enums.education_group_types import TrainingType
@@ -73,6 +72,8 @@ class Section:
         extra_context: dict = None,
         attachments: Optional[List[Attachment]] = None,
     ):
+        from admission.exports.utils import get_pdf_from_template
+
         self.attachments = attachments if attachments is not None else []
         self.label = label
         self.content = get_pdf_from_template(

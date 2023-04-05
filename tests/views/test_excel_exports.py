@@ -45,7 +45,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import ChoixS
 from admission.tests import QueriesAssertionsMixin
 from admission.tests.factories.admission_viewer import AdmissionViewerFactory
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
-from admission.tests.factories.roles import SicManagerRoleFactory
+from admission.tests.factories.roles import SicManagementRoleFactory
 from admission.tests.factories.scholarship import (
     InternationalScholarshipFactory,
     DoubleDegreeScholarshipFactory,
@@ -91,8 +91,8 @@ class AdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, TestCase):
             password='top_secret',
         )
 
-        cls.sic_manager_user = SicManagerRoleFactory().person.user
-        cls.other_sic_manager = SicManagerRoleFactory().person
+        cls.sic_management_user = SicManagementRoleFactory().person.user
+        cls.other_sic_manager = SicManagementRoleFactory().person
 
         # Academic years
         AcademicYearFactory.produce(base_year=2023, number_past=2, number_future=2)
@@ -129,7 +129,7 @@ class AdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, TestCase):
         cls.admission.save()
 
         admission_viewers = [
-            AdmissionViewerFactory(person=cls.sic_manager_user.person, admission=cls.admission),
+            AdmissionViewerFactory(person=cls.sic_management_user.person, admission=cls.admission),
             AdmissionViewerFactory(person=cls.other_sic_manager, admission=cls.admission),
         ]
 
@@ -206,8 +206,8 @@ class AdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, TestCase):
 
         self.assertEqual(response.status_code, 403)
 
-    def test_export_sic_manager_user(self):
-        self.client.force_login(user=self.sic_manager_user)
+    def test_export_sic_management_user(self):
+        self.client.force_login(user=self.sic_management_user)
 
         response = self.client.get(self.url)
         self.assertRedirects(response, expected_url=self.list_url, fetch_redirect_response=False)
@@ -219,27 +219,27 @@ class AdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, TestCase):
 
         self.assertEqual(response.status_code, 200)
 
-    def test_export_with_sic_manager_user_without_filters_doesnt_plan_the_export(self):
-        self.client.force_login(user=self.sic_manager_user)
+    def test_export_with_sic_management_user_without_filters_doesnt_plan_the_export(self):
+        self.client.force_login(user=self.sic_management_user)
 
         response = self.client.get(self.url)
 
         self.assertRedirects(response, expected_url=self.list_url, fetch_redirect_response=False)
 
-        task = AsyncTask.objects.filter(person=self.sic_manager_user.person).first()
+        task = AsyncTask.objects.filter(person=self.sic_management_user.person).first()
         self.assertIsNone(task)
 
-        export = Export.objects.filter(person=self.sic_manager_user.person).first()
+        export = Export.objects.filter(person=self.sic_management_user.person).first()
         self.assertIsNone(export)
 
-    def test_export_with_sic_manager_user_with_filters_plans_the_export(self):
-        self.client.force_login(user=self.sic_manager_user)
+    def test_export_with_sic_management_user_with_filters_plans_the_export(self):
+        self.client.force_login(user=self.sic_management_user)
 
         response = self.client.get(self.url, data=self.default_params)
 
         self.assertRedirects(response, expected_url=self.list_url, fetch_redirect_response=False)
 
-        task = AsyncTask.objects.filter(person=self.sic_manager_user.person).first()
+        task = AsyncTask.objects.filter(person=self.sic_management_user.person).first()
         self.assertIsNotNone(task)
         self.assertEqual(task.name, _('Admission applications export'))
         self.assertEqual(task.description, _('Excel export of admission applications'))
@@ -312,7 +312,7 @@ class AdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, TestCase):
 
         view.customize_parameters_worksheet(
             worksheet=worksheet,
-            person=self.sic_manager_user.person,
+            person=self.sic_management_user.person,
             filters=filters,
         )
 
@@ -340,7 +340,7 @@ class AdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, TestCase):
 
         # Check the values of the parameters
         self.assertEqual(values[0], '1 Janvier 2023')
-        self.assertEqual(values[1], self.sic_manager_user.person.full_name)
+        self.assertEqual(values[1], self.sic_management_user.person.full_name)
         self.assertEqual(values[2], _('Export') + ' - Admissions')
         self.assertEqual(values[3], '2022')
         self.assertEqual(values[4], '1')

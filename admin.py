@@ -27,6 +27,7 @@
 from django import forms
 from django.conf import settings
 from django.contrib import admin
+from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.shortcuts import resolve_url
 from django.utils.safestring import mark_safe
@@ -36,13 +37,14 @@ from hijack.contrib.admin import HijackUserAdminMixin
 from admission.auth.roles.adre import AdreSecretary
 from admission.auth.roles.ca_member import CommitteeMember
 from admission.auth.roles.candidate import Candidate
-from admission.auth.roles.cdd_manager import CddManager
+from admission.auth.roles.cdd_configurator import CddConfigurator
 from admission.auth.roles.doctorate_reader import DoctorateReader
 from admission.auth.roles.jury_secretary import JurySecretary
+from admission.auth.roles.program_manager import ProgramManager
 from admission.auth.roles.promoter import Promoter
 from admission.auth.roles.sceb import Sceb
-from admission.auth.roles.sic_director import SicDirector
-from admission.auth.roles.sic_manager import SicManager
+from admission.auth.roles.sic_management import SicManagement
+from admission.auth.roles.central_manager import CentralManager
 from admission.contrib.models import (
     AdmissionTask,
     AdmissionViewer,
@@ -62,10 +64,12 @@ from base.models.education_group_type import EducationGroupType
 from base.models.entity_version import EntityVersion
 from base.models.enums.education_group_categories import Categories
 from base.models.person import Person
+from education_group.auth.scope import Scope
+from education_group.contrib.admin import EducationGroupRoleModelAdmin
 from osis_document.contrib import FileField
 from osis_mail_template.admin import MailTemplateAdmin
 from osis_profile.models import EducationalExperience, ProfessionalExperience
-from osis_role.contrib.admin import RoleModelAdmin
+from osis_role.contrib.admin import EntityRoleModelAdmin, RoleModelAdmin
 
 
 # ##############################################################################
@@ -508,7 +512,7 @@ class HijackRoleModelAdmin(HijackUserAdminMixin, RoleModelAdmin):
         return obj.person.user
 
 
-class CDDRoleModelAdmin(HijackRoleModelAdmin):
+class CddConfiguratorAdmin(HijackRoleModelAdmin):
     list_display = ('person', 'most_recent_acronym')
     search_fields = [
         'person__first_name',
@@ -549,14 +553,44 @@ class FrontOfficeRoleModelAdmin(RoleModelAdmin):
         return mark_safe(f'<a class="button" href="{url}" target="_blank">{_("Search on portal")}</a>')
 
 
+class TypeField(forms.CheckboxSelectMultiple):
+    def format_value(self, value):
+        if isinstance(value, str):
+            value = value.split(',')
+        return super().format_value(value)
+
+
+class CentralManagerAdmin(HijackUserAdminMixin, EntityRoleModelAdmin):
+    list_select_related = ['person__user']
+    list_display = ('person', 'entity', 'scopes')
+    search_fields = ['person__first_name', 'person__last_name', 'entity__entityversion__acronym']
+    raw_id_fields = (
+        'person',
+        'entity',
+    )
+    formfield_overrides = {ArrayField: {'widget': TypeField(choices=Scope.choices())}}
+
+    def get_hijack_user(self, obj):
+        return obj.person.user
+
+
+class ProgramManagerAdmin(HijackUserAdminMixin, EducationGroupRoleModelAdmin):
+    list_select_related = ['person__user']
+    list_display = ['person', 'education_group_most_recent_acronym']
+
+    def get_hijack_user(self, obj):
+        return obj.person.user
+
+
 admin.site.register(Promoter, FrontOfficeRoleModelAdmin)
 admin.site.register(CommitteeMember, FrontOfficeRoleModelAdmin)
 admin.site.register(Candidate, FrontOfficeRoleModelAdmin)
 
-admin.site.register(CddManager, CDDRoleModelAdmin)
+admin.site.register(CddConfigurator, CddConfiguratorAdmin)
 
-admin.site.register(SicManager, HijackRoleModelAdmin)
-admin.site.register(SicDirector, HijackRoleModelAdmin)
+admin.site.register(CentralManager, CentralManagerAdmin)
+admin.site.register(ProgramManager, ProgramManagerAdmin)
+admin.site.register(SicManagement, HijackRoleModelAdmin)
 admin.site.register(AdreSecretary, HijackRoleModelAdmin)
 admin.site.register(JurySecretary, HijackRoleModelAdmin)
 admin.site.register(Sceb, HijackRoleModelAdmin)

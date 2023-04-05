@@ -25,36 +25,39 @@
 # ##############################################################################
 
 import rules
+from django.db import models
 from django.utils.translation import gettext_lazy as _
 from rules import RuleSet
 
-from osis_role.contrib.models import RoleModel
+from base.models.entity import Entity
+from base.models.enums.entity_type import DOCTORAL_COMMISSION
+from osis_role.contrib.models import EntityRoleModel
 
 
-class JurySecretary(RoleModel):
+class CddConfigurator(EntityRoleModel):
     """
-    Secrétaire de Jury
+    Configurateur CDD
 
-    Le secrétaire/président du jury intervient pour acter les décisions du jury lors de la défense privée
-    et la soutenance.
+    Le configurateur CDD met à jour les tables de configuration pour sa CDD
+    (menus "Configuration de la CDD" et "Templates d'email de CDD").
     """
+
+    entity = models.ForeignKey(
+        Entity,
+        on_delete=models.CASCADE,
+        related_name='+',
+        limit_choices_to={'entityversion__entity_type': DOCTORAL_COMMISSION},
+    )
 
     class Meta:
-        verbose_name = _("Role: Jury secretary")
-        verbose_name_plural = _("Role: Jury secretaries")
-        group_name = "jury_secretary"
+        verbose_name = _("Role: CDD configurator")
+        verbose_name_plural = _("Role: CDD configurators")
+        group_name = "cdd_configurators"
 
     @classmethod
     def rule_set(cls):
         ruleset = {
-            'admission.upload_defense_report': rules.always_allow,
-            'admission.view_doctorateadmission': rules.always_allow,
-            'admission.view_doctorateadmission_person': rules.always_allow,
-            'admission.view_doctorateadmission_coordinates': rules.always_allow,
-            'admission.view_doctorateadmission_secondary_studies': rules.always_allow,
-            'admission.view_doctorateadmission_curriculum': rules.always_allow,
-            'admission.view_doctorateadmission_project': rules.always_allow,
-            'admission.view_doctorateadmission_cotutelle': rules.always_allow,
-            'admission.view_doctorateadmission_supervision': rules.always_allow,
+            'admission.change_cddconfiguration': rules.always_allow,
+            'admission.change_cddmailtemplate': rules.always_allow,
         }
         return RuleSet(ruleset)

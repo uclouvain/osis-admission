@@ -24,19 +24,20 @@
 #
 # ##############################################################################
 import datetime
-from typing import Optional, List
+from typing import List, Optional
 
 from django.conf import settings
+from django.contrib.auth.models import User
 from django.db.models import (
-    Q,
-    F,
-    Value,
-    ExpressionWrapper,
     BooleanField,
-    Prefetch,
     Case,
-    When,
+    ExpressionWrapper,
+    F,
     IntegerField,
+    Prefetch,
+    Q,
+    Value,
+    When,
 )
 from django.db.models.functions import Coalesce, NullIf
 from django.utils.translation import get_language
@@ -47,6 +48,9 @@ from admission.ddd.admission.domain.service.i_filtrer_toutes_demandes import ILi
 from admission.ddd.admission.dtos.liste import DemandeRechercheDTO, VisualiseurAdmissionDTO
 from admission.ddd.admission.enums.statut import CHOIX_STATUT_TOUTE_PROPOSITION
 from admission.views import PaginatedList
+from education_group.contrib.models import EducationGroupRoleModel
+from osis_role.contrib.models import EntityRoleModel
+from osis_role.contrib.permissions import _get_relevant_roles
 
 
 class ListerToutesDemandes(IListerToutesDemandes):
@@ -78,11 +82,13 @@ class ListerToutesDemandes(IListerToutesDemandes):
             AdmissionViewer.objects.filter(viewed_at__gte=datetime.datetime.now() - datetime.timedelta(days=1))
             .select_related('person')
             .order_by('-viewed_at')
-            .only('person__first_name', 'person__last_name', 'viewed_at')
         )
 
+        roles = []
         if demandeur:
             prefetch_viewers_queryset = prefetch_viewers_queryset.exclude(person__uuid=demandeur)
+            demandeur_user: User = User.objects.filter(person__uuid=demandeur).first()
+            roles = _get_relevant_roles(demandeur_user, 'admission.view_enrolment_application')
 
         qs = (
             BaseAdmissionProxy.objects.with_training_management_and_reference()
@@ -133,6 +139,27 @@ class ListerToutesDemandes(IListerToutesDemandes):
             qs = qs.filter(training__enrollment_campus__uuid=site_inscription)
         if entites:
             qs = qs.filter(Q(sigle_entite_gestion__in=entites) | Q(training_management_faculty__in=entites))
+
+        # Filter managed entities
+        entities_conditions = Q()
+        for entity_aware_role in [r for r in roles if issubclass(r, EntityRoleModel)]:
+            entities_conditions |= Q(
+                training__management_entity_id__in=entity_aware_role.objects.filter(
+                    person__uuid=demandeur
+                ).get_entities_ids()
+            )
+        qs = qs.filter(entities_conditions)
+
+        # Filter managed education groups
+        education_group_conditions = Q()
+        for education_aware_role in [r for r in roles if issubclass(r, EducationGroupRoleModel)]:
+            education_group_conditions |= Q(
+                training__education_group_id__in=education_aware_role.objects.filter(
+                    person__uuid=demandeur
+                ).values_list('education_group_id')
+            )
+        qs = qs.filter(education_group_conditions)
+
         if types_formation:
             qs = qs.filter(training__education_group_type__name__in=types_formation)
         if formation:

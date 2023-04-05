@@ -1,28 +1,29 @@
 # ##############################################################################
 #
-#    OSIS stands for Open Student Information System. It's an application
-#    designed to manage the core business of higher education institutions,
-#    such as universities, faculties, institutes and professional schools.
-#    The core business involves the administration of students, teachers,
-#    courses, programs and so on.
+#  OSIS stands for Open Student Information System. It's an application
+#  designed to manage the core business of higher education institutions,
+#  such as universities, faculties, institutes and professional schools.
+#  The core business involves the administration of students, teachers,
+#  courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
 #
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
 #
-#    A copy of this license - GNU General Public License - is available
-#    at the root of the source code of this program.  If not,
-#    see http://www.gnu.org/licenses/.
+#  A copy of this license - GNU General Public License - is available
+#  at the root of the source code of this program.  If not,
+#  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
 import uuid
 from unittest.mock import patch
 
@@ -50,8 +51,7 @@ from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctor
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.accounting import AccountingFactory
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
-from admission.tests.factories.roles import CddManagerFactory
-from admission.tests.factories.supervision import PromoterFactory, CaMemberFactory
+from admission.tests.factories.supervision import CaMemberFactory, PromoterFactory
 from base.models.enums.community import CommunityEnum
 from base.models.enums.entity_type import EntityType
 from base.tasks.synchronize_entities_addresses import UCLouvain_acronym
@@ -145,7 +145,6 @@ class DoctorateAccountingAPIViewTestCase(APITestCase):
         cls.other_student = other_admission.candidate
         cls.promoter = promoter.person.user
         cls.other_promoter = other_promoter.person.user
-        cls.cdd_person = CddManagerFactory(entity=commission).person
 
         cls.admission_url = resolve_url('admission_api_v1:doctorate_accounting', uuid=cls.admission.uuid)
         cls.other_admission_url = resolve_url('admission_api_v1:doctorate_accounting', uuid=other_admission.uuid)

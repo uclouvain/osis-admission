@@ -1,28 +1,29 @@
 # ##############################################################################
 #
-#    OSIS stands for Open Student Information System. It's an application
-#    designed to manage the core business of higher education institutions,
-#    such as universities, faculties, institutes and professional schools.
-#    The core business involves the administration of students, teachers,
-#    courses, programs and so on.
+#  OSIS stands for Open Student Information System. It's an application
+#  designed to manage the core business of higher education institutions,
+#  such as universities, faculties, institutes and professional schools.
+#  The core business involves the administration of students, teachers,
+#  courses, programs and so on.
 #
-#    Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
 #
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
 #
-#    A copy of this license - GNU General Public License - is available
-#    at the root of the source code of this program.  If not,
-#    see http://www.gnu.org/licenses/.
+#  A copy of this license - GNU General Public License - is available
+#  at the root of the source code of this program.  If not,
+#  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
 from django.shortcuts import resolve_url
 from django.test import override_settings
 from rest_framework import status
@@ -30,7 +31,7 @@ from rest_framework.test import APITestCase
 
 from admission.contrib.models import DoctorateAdmission
 from admission.tests.factories import DoctorateAdmissionFactory
-from admission.tests.factories.roles import CandidateFactory, CddManagerFactory
+from admission.tests.factories.roles import CandidateFactory
 from admission.tests.factories.supervision import CaMemberFactory, PromoterFactory
 from base.tests.factories.entity import EntityFactory
 from base.tests.factories.person import PersonFactory
@@ -62,8 +63,6 @@ class CotutelleApiTestCase(APITestCase):
         cls.candidate = cls.admission.candidate
         cls.other_candidate_user = CandidateFactory().person.user
         cls.no_role_user = PersonFactory().user
-        cls.cdd_manager_user = CddManagerFactory(entity=doctoral_commission).person.user
-        cls.other_cdd_manager_user = CddManagerFactory().person.user
         cls.promoter_user = promoter.person.user
         cls.other_promoter_user = PromoterFactory().person.user
         cls.committee_member_user = committee_member.person.user
@@ -120,26 +119,6 @@ class CotutelleApiTestCase(APITestCase):
 
     def test_cotutelle_update_other_candidate(self):
         self.client.force_authenticate(user=self.other_candidate_user)
-        response = self.client.put(self.url, data=self.updated_data, format="json")
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.content)
-
-    def test_cotutelle_get_cdd_manager(self):
-        self.client.force_authenticate(user=self.cdd_manager_user)
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
-
-    def test_cotutelle_update_cdd_manager(self):
-        self.client.force_authenticate(user=self.cdd_manager_user)
-        response = self.client.put(self.url, data=self.updated_data, format="json")
-        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
-
-    def test_cotutelle_get_other_cdd_manager(self):
-        self.client.force_authenticate(user=self.other_cdd_manager_user)
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.content)
-
-    def test_cotutelle_update_other_cdd_manager(self):
-        self.client.force_authenticate(user=self.other_cdd_manager_user)
         response = self.client.put(self.url, data=self.updated_data, format="json")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.content)
 
