@@ -27,7 +27,7 @@
 import datetime
 from email.header import decode_header, make_header
 from email.message import EmailMessage
-from typing import Optional, Type, Union
+from typing import Optional, Union
 from unittest.mock import Mock
 from uuid import UUID
 
@@ -38,10 +38,9 @@ from django.utils.functional import Promise, lazy
 from django.utils.module_loading import import_string
 from django.utils.translation import get_language, gettext as _
 
-from admission.auth.roles.cdd_manager import CddManager
 from admission.contrib.models import AdmissionTask, DoctorateAdmission, SupervisionActor
 from admission.contrib.models.doctorate import DoctorateProxy
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import BourseRecherche, ChoixTypeFinancement
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixTypeFinancement
 from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
 from admission.ddd.parcours_doctoral.epreuve_confirmation.domain.model.epreuve_confirmation import (
     EpreuveConfirmation,
@@ -58,6 +57,7 @@ from admission.mail_templates import (
     ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_SUCCESS_STUDENT,
     ADMISSION_EMAIL_CONFIRMATION_PAPER_SUBMISSION_ADRE,
 )
+from admission.utils import get_doctoral_cdd_managers
 from base.forms.utils.datefield import DATE_FORMAT
 from osis_async.models import AsyncTask
 from osis_common.messaging.message_config import create_receiver
@@ -79,8 +79,8 @@ class Notification(INotification):
         """Populate the translations of the doctorate title and lazy return them"""
         # Create a dict to cache the translations of the doctorate title
         doctorate_title = {
-            settings.LANGUAGE_CODE_EN: doctorate.doctorate.title_english,
-            settings.LANGUAGE_CODE_FR: doctorate.doctorate.title,
+            settings.LANGUAGE_CODE_EN: doctorate.training.title_english,
+            settings.LANGUAGE_CODE_FR: doctorate.training.title,
         }
 
         # Return a lazy proxy which, when evaluated to string, return the correct translation given the current language
@@ -134,14 +134,10 @@ class Notification(INotification):
         }
 
     @classmethod
-    def _send_notification_to_managers(cls, entity_id: Type[int], content: str, tokens: dict) -> None:
-        cdd_managers = CddManager.objects.filter(
-            entity_id=entity_id,
-        ).select_related('person')
-
-        for manager in cdd_managers:
-            with translation.override(manager.person.language):
-                web_notification = WebNotification(recipient=manager.person, content=str(content % tokens))
+    def _send_notification_to_managers(cls, education_group_id: int, content: str, tokens: dict) -> None:
+        for manager in get_doctoral_cdd_managers(education_group_id):
+            with translation.override(manager.language):
+                web_notification = WebNotification(recipient=manager, content=str(content % tokens))
             WebNotificationHandler.create(web_notification)
 
     @classmethod
@@ -176,7 +172,7 @@ class Notification(INotification):
 
         # Notify the CDD managers > web notification
         cls._send_notification_to_managers(
-            entity_id=doctorate.doctorate.management_entity_id,
+            education_group_id=doctorate.training.education_group_id,
             content=manager_notification_content,
             tokens=common_tokens,
         )
@@ -188,7 +184,7 @@ class Notification(INotification):
 
         # Notify the CDD managers > web notification
         cls._send_notification_to_managers(
-            entity_id=doctorate.doctorate.management_entity_id,
+            education_group_id=doctorate.training.education_group_id,
             content=_(
                 '<a href="%(confirmation_paper_link_back)s">%(reference)s</a> - '
                 'A promoter submitted documents related to the confirmation paper of '
@@ -204,7 +200,7 @@ class Notification(INotification):
 
         # Notify the CCD managers > web notification
         cls._send_notification_to_managers(
-            entity_id=doctorate.doctorate.management_entity_id,
+            education_group_id=doctorate.training.education_group_id,
             content=_(
                 '<a href="%(confirmation_paper_link_back)s">%(reference)s</a> - '
                 '%(student_first_name)s %(student_last_name)s proposed a new deadline '

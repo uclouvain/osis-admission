@@ -34,26 +34,24 @@ from rest_framework import status
 from admission.contrib.models import CddMailTemplate
 from admission.mail_templates import ADMISSION_EMAIL_GENERIC_ONCE_ADMITTED
 from admission.tests.factories import DoctorateAdmissionFactory
-from admission.tests.factories.roles import CddManagerFactory
 from admission.tests.factories.supervision import CaMemberFactory, ExternalPromoterFactory, PromoterFactory
-from base.tests.factories.entity import EntityFactory
+from base.tests.factories.program_manager import ProgramManagerFactory
 from osis_notification.models import EmailNotification
 
 
 class SendMailDoctorateStudentTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.cdd = doctoral_commission = EntityFactory()
         process = PromoterFactory().process
         CaMemberFactory(process=process)
         ExternalPromoterFactory(process=process)
         cls.admission = DoctorateAdmissionFactory(
-            training__management_entity=doctoral_commission,
             admitted=True,
             candidate__language=settings.LANGUAGE_CODE_EN,
             supervision_group=process,
         )
-        cls.user = CddManagerFactory(entity=doctoral_commission).person.user
+        cls.cdd = cls.admission.training.management_entity
+        cls.user = ProgramManagerFactory(education_group=cls.admission.training.education_group).person.user
         cls.url = resolve_url('admission:doctorate:send-mail', uuid=cls.admission.uuid)
 
     def test_prefill_no_selection(self):

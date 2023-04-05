@@ -1,28 +1,29 @@
 # ##############################################################################
 #
-#    OSIS stands for Open Student Information System. It's an application
-#    designed to manage the core business of higher education institutions,
-#    such as universities, faculties, institutes and professional schools.
-#    The core business involves the administration of students, teachers,
-#    courses, programs and so on.
+#  OSIS stands for Open Student Information System. It's an application
+#  designed to manage the core business of higher education institutions,
+#  such as universities, faculties, institutes and professional schools.
+#  The core business involves the administration of students, teachers,
+#  courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
 #
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
 #
-#    A copy of this license - GNU General Public License - is available
-#    at the root of the source code of this program.  If not,
-#    see http://www.gnu.org/licenses/.
+#  A copy of this license - GNU General Public License - is available
+#  at the root of the source code of this program.  If not,
+#  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
 import uuid
 from unittest.mock import patch
 
@@ -47,9 +48,9 @@ from admission.ddd.parcours_doctoral.formation.domain.model.enums import (
 from admission.forms.doctorate.training.activity import INSTITUTION_UCL
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.activity import *
-from admission.tests.factories.roles import CddManagerFactory
 from admission.tests.factories.supervision import PromoterFactory
 from base.tests.factories.academic_year import AcademicYearFactory
+from base.tests.factories.program_manager import ProgramManagerFactory
 from osis_notification.models import WebNotification
 
 
@@ -59,7 +60,7 @@ class DoctorateTrainingActivityViewTestCase(TestCase):
     def setUpTestData(cls):
         # A doctorate without doctoral and complementary training
         cls.restricted_doctorate = DoctorateAdmissionFactory(type=ChoixTypeAdmission.PRE_ADMISSION.name, admitted=True)
-        CddConfiguration.objects.create(cdd=cls.restricted_doctorate.doctorate.management_entity)
+        CddConfiguration.objects.create(cdd=cls.restricted_doctorate.training.management_entity)
 
         # A normal doctorate
         cls.reference_promoter = PromoterFactory(is_reference_promoter=True)
@@ -73,18 +74,19 @@ class DoctorateTrainingActivityViewTestCase(TestCase):
         cls.ucl_course = UclCourseFactory(doctorate=cls.doctorate, learning_unit_year__academic_year__current=True)
 
         # A manager that can manage both doctorates
-        cls.manager = CddManagerFactory(entity=cls.doctorate.doctorate.management_entity)
+        manager_person = ProgramManagerFactory(education_group=cls.doctorate.training.education_group).person
+        cls.manager = manager_person.user
         CddConfiguration.objects.create(
-            cdd=cls.doctorate.doctorate.management_entity,
+            cdd=cls.doctorate.training.management_entity,
             is_complementary_training_enabled=True,
         )
-        CddManagerFactory(entity=cls.restricted_doctorate.doctorate.management_entity, person=cls.manager.person)
+        ProgramManagerFactory(education_group=cls.restricted_doctorate.training.education_group, person=manager_person)
 
         cls.url = resolve_url(cls.namespace, uuid=cls.doctorate.uuid)
         cls.default_url_args = dict(uuid=cls.doctorate.uuid, activity_id=cls.conference.uuid)
 
     def setUp(self) -> None:
-        self.client.force_login(self.manager.person.user)
+        self.client.force_login(self.manager)
 
     def test_view(self):
         response = self.client.get(self.url)

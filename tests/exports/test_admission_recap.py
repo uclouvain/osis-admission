@@ -32,100 +32,96 @@ import attr
 import freezegun
 import mock
 from django.conf import settings
+from django.shortcuts import resolve_url
+from django.test import override_settings
 from django.utils.translation import gettext as _
-from osis_async.models import AsyncTask
+from rest_framework import status
 
 from admission.calendar.admission_calendar import (
-    AdmissionPoolExternalReorientationCalendar,
     AdmissionPoolExternalEnrollmentChangeCalendar,
+    AdmissionPoolExternalReorientationCalendar,
 )
 from admission.contrib.models import AdmissionTask
 from admission.ddd import FR_ISO_CODE
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
-    ChoixTypeFinancement,
     ChoixStatutSignatureGroupeDeSupervision,
+    ChoixTypeFinancement,
 )
 from admission.ddd.admission.doctorat.preparation.dtos import (
-    CurriculumDTO,
-    PropositionDTO as PropositionFormationDoctoraleDTO,
-    ExperienceAcademiqueDTO,
     AnneeExperienceAcademiqueDTO,
-    DoctoratDTO,
     ConnaissanceLangueDTO,
     CotutelleDTO,
-    GroupeDeSupervisionDTO,
-    DetailSignaturePromoteurDTO,
-    PromoteurDTO,
+    CurriculumDTO,
     DetailSignatureMembreCADTO,
+    DetailSignaturePromoteurDTO,
+    DoctoratDTO,
+    ExperienceAcademiqueDTO,
+    GroupeDeSupervisionDTO,
     MembreCADTO,
+    PromoteurDTO,
+    PropositionDTO as PropositionFormationDoctoraleDTO,
 )
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import ExperienceNonAcademiqueDTO
-from admission.ddd.admission.dtos import IdentificationDTO, CoordonneesDTO, EtudesSecondairesDTO, AdressePersonnelleDTO
+from admission.ddd.admission.dtos import AdressePersonnelleDTO, CoordonneesDTO, EtudesSecondairesDTO, IdentificationDTO
 from admission.ddd.admission.dtos.etudes_secondaires import (
+    AlternativeSecondairesDTO,
     DiplomeBelgeEtudesSecondairesDTO,
     DiplomeEtrangerEtudesSecondairesDTO,
-    AlternativeSecondairesDTO,
 )
 from admission.ddd.admission.dtos.formation import FormationDTO
 from admission.ddd.admission.dtos.resume import ResumePropositionDTO
 from admission.ddd.admission.enums import (
-    Onglets,
-    TypeItemFormulaire,
-    TypeSituationAssimilation,
     ChoixAffiliationSport,
-    ChoixTypeCompteBancaire,
     ChoixAssimilation1,
     ChoixAssimilation2,
     ChoixAssimilation3,
-    LienParente,
     ChoixAssimilation5,
     ChoixAssimilation6,
+    ChoixTypeCompteBancaire,
+    LienParente,
+    Onglets,
+    TypeItemFormulaire,
+    TypeSituationAssimilation,
 )
 from admission.ddd.admission.formation_continue.domain.model.enums import (
-    ChoixStatutPropositionContinue,
     ChoixInscriptionATitre,
+    ChoixStatutPropositionContinue,
 )
 from admission.ddd.admission.formation_continue.dtos import PropositionDTO as PropositionFormationContinueDTO
 from admission.ddd.admission.formation_generale.dtos import (
-    PropositionDTO as PropositionFormationGeneraleDTO,
     ComptabiliteDTO,
+    PropositionDTO as PropositionFormationGeneraleDTO,
 )
-from admission.exports.admission_recap.admission_async_recap import (
-    continuing_education_admission_pdf_recap_from_task,
-    general_education_admission_pdf_recap_from_task,
-    doctorate_education_admission_pdf_recap_from_task,
-)
-from admission.exports.admission_recap.admission_recap import admission_pdf_recap
 from admission.exports.admission_recap.attachments import (
     Attachment,
 )
 from admission.constants import PDF_MIME_TYPE, JPEG_MIME_TYPE, PNG_MIME_TYPE
 from admission.exports.admission_recap.constants import ACCOUNTING_LABEL, CURRICULUM_ACTIVITY_LABEL
 from admission.exports.admission_recap.section import (
-    get_pdf_from_template,
-    get_secondary_studies_section,
-    get_identification_section,
+    get_accounting_section,
+    get_cotutelle_section,
     get_curriculum_section,
     get_educational_experience_section,
-    get_non_educational_experience_section,
-    get_specific_questions_section,
-    get_accounting_section,
+    get_identification_section,
     get_languages_section,
+    get_non_educational_experience_section,
     get_research_project_section,
-    get_cotutelle_section,
+    get_secondary_studies_section,
+    get_specific_questions_section,
     get_supervision_section,
 )
 from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import UnfrozenDTO
-from admission.tests import TestCase, QueriesAssertionsMixin
+from admission.tests import QueriesAssertionsMixin, TestCase
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
 from admission.tests.factories.form_item import (
-    TextAdmissionFormItemFactory,
     AdmissionFormItemInstantiationFactory,
     DocumentAdmissionFormItemFactory,
+    TextAdmissionFormItemFactory,
 )
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.person import CompletePersonForIUFCFactory
+from admission.tests.factories.roles import ProgramManagerRoleFactory
 from base.models.enums.civil_state import CivilState
 from base.models.enums.community import CommunityEnum
 from base.models.enums.education_group_types import TrainingType
@@ -133,20 +129,21 @@ from base.models.enums.got_diploma import GotDiploma
 from base.models.enums.teaching_type import TeachingTypeEnum
 from base.tests.factories.academic_calendar import AcademicCalendarFactory
 from base.tests.factories.academic_year import AcademicYearFactory
+from osis_async.models import AsyncTask
 from osis_profile.models.enums.curriculum import (
+    ActivitySector,
+    ActivityType,
     EvaluationSystem,
-    TranscriptType,
     Grade,
     Result,
-    ActivityType,
-    ActivitySector,
+    TranscriptType,
 )
 from osis_profile.models.enums.education import (
+    BelgianCommunitiesOfEducation,
     DiplomaResults,
     EducationalType,
-    BelgianCommunitiesOfEducation,
-    ForeignDiplomaTypes,
     Equivalence,
+    ForeignDiplomaTypes,
 )
 from reference.tests.factories.country import CountryFactory
 
@@ -242,11 +239,9 @@ class _GroupeDeSupervisionDTO(UnfrozenDTO, GroupeDeSupervisionDTO):
 
 
 @freezegun.freeze_time('2023-01-01')
-class BaseAdmissionRecapTestCaseMixin:
+class AdmissionRecapTestCase(TestCase, QueriesAssertionsMixin):
     @classmethod
     def setUpTestData(cls):
-        cls.default_content = get_pdf_from_template('admission/exports/recap/default_content.html', [], {})
-        cls.bytes_io_default_content = BytesIO(cls.default_content)
         cls.academic_year = AcademicYearFactory(current=True)
         cls.specific_questions = {
             tab.name: [
@@ -265,6 +260,13 @@ class BaseAdmissionRecapTestCaseMixin:
         }
 
     def setUp(self):
+        # Mock weasyprint
+        patcher = mock.patch('admission.exports.utils.get_pdf_from_template', return_value=b'some content')
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+        self.bytes_io_default_content = BytesIO(b'some content')
+
         # Mock osis-document
         patcher = mock.patch('osis_document.api.utils.get_remote_token', return_value='foobar')
         patcher.start()
@@ -303,7 +305,7 @@ class BaseAdmissionRecapTestCaseMixin:
 
         patcher = mock.patch('admission.exports.admission_recap.attachments.get_raw_content_remotely')
         self.get_raw_content_mock = patcher.start()
-        self.get_raw_content_mock.return_value = self.default_content
+        self.get_raw_content_mock.return_value = b'some content'
         self.addCleanup(patcher.stop)
 
         patcher = mock.patch('admission.exports.admission_recap.admission_recap.save_raw_content_remotely')
@@ -314,7 +316,7 @@ class BaseAdmissionRecapTestCaseMixin:
         # Mock img2pdf
         patcher = mock.patch('admission.exports.admission_recap.attachments.img2pdf.convert')
         self.convert_img_mock = patcher.start()
-        self.convert_img_mock.return_value = self.default_content
+        self.convert_img_mock.return_value = b'some content'
         self.addCleanup(patcher.stop)
 
         # Mock pikepdf
@@ -325,14 +327,6 @@ class BaseAdmissionRecapTestCaseMixin:
         patched.open.return_value.__enter__.return_value = mock.Mock(pdf_version=1, pages=[None])
         self.addCleanup(patcher.stop)
 
-        # Mock weasyprint
-        patcher = mock.patch('admission.exports.utils.get_pdf_from_template')
-        self.get_template_pdf_mock = patcher.start()
-        self.get_template_pdf_mock.return_value = self.default_content
-        self.addCleanup(patcher.stop)
-
-
-class AttachmentTestCase(BaseAdmissionRecapTestCaseMixin, TestCase):
     def test_get_raw_with_pdf_attachment(self):
         pdf_attachment = Attachment(label='PDF', uuids=[''])
         pdf_attachment.get_raw(
@@ -398,15 +392,14 @@ class AttachmentTestCase(BaseAdmissionRecapTestCaseMixin, TestCase):
         self.get_raw_content_mock.assert_called_once_with('token')
         self.assertEqual(raw, self.bytes_io_default_content)
 
-
-@freezegun.freeze_time('2023-01-01')
-class PDFRecapGenerationTestCase(BaseAdmissionRecapTestCaseMixin, TestCase, QueriesAssertionsMixin):
     def test_generation_with_continuing_education(self):
         candidate = CompletePersonForIUFCFactory(country_of_citizenship=CountryFactory(european_union=False))
         admission = ContinuingEducationAdmissionFactory(
             candidate=candidate,
             residence_permit=['file-uuid'],
         )
+
+        from admission.exports.admission_recap.admission_recap import admission_pdf_recap
 
         pdf_token = admission_pdf_recap(admission, settings.LANGUAGE_CODE)
 
@@ -451,6 +444,8 @@ class PDFRecapGenerationTestCase(BaseAdmissionRecapTestCaseMixin, TestCase, Quer
     def test_generation_with_general_education(self):
         admission = GeneralEducationAdmissionFactory(training__education_group_type__name=TrainingType.BACHELOR.name)
 
+        from admission.exports.admission_recap.admission_recap import admission_pdf_recap
+
         admission_pdf_recap(admission, settings.LANGUAGE_CODE)
 
         call_args = self.outline_root.append.call_args_list
@@ -483,6 +478,8 @@ class PDFRecapGenerationTestCase(BaseAdmissionRecapTestCaseMixin, TestCase, Quer
 
     def test_generation_with_doctorate_education(self):
         admission = DoctorateAdmissionFactory()
+
+        from admission.exports.admission_recap.admission_recap import admission_pdf_recap
 
         admission_pdf_recap(admission, settings.LANGUAGE_CODE)
 
@@ -532,6 +529,10 @@ class PDFRecapGenerationTestCase(BaseAdmissionRecapTestCaseMixin, TestCase, Quer
         self.assertEqual(len(admission.pdf_recap), 0)
 
         with self.assertNumQueriesLessThan(11):
+            from admission.exports.admission_recap.admission_async_recap import (
+                continuing_education_admission_pdf_recap_from_task,
+            )
+
             continuing_education_admission_pdf_recap_from_task(str(async_task.uuid))
 
         admission.refresh_from_db()
@@ -553,6 +554,10 @@ class PDFRecapGenerationTestCase(BaseAdmissionRecapTestCaseMixin, TestCase, Quer
         self.assertEqual(len(admission.pdf_recap), 0)
 
         with self.assertNumQueriesLessThan(12):
+            from admission.exports.admission_recap.admission_async_recap import (
+                general_education_admission_pdf_recap_from_task,
+            )
+
             general_education_admission_pdf_recap_from_task(str(async_task.uuid))
 
         admission.refresh_from_db()
@@ -572,10 +577,30 @@ class PDFRecapGenerationTestCase(BaseAdmissionRecapTestCaseMixin, TestCase, Quer
         with self.assertNumQueriesLessThan(16):
             self.assertEqual(len(admission.pdf_recap), 0)
 
+        from admission.exports.admission_recap.admission_async_recap import (
+            doctorate_education_admission_pdf_recap_from_task,
+        )
+
         doctorate_education_admission_pdf_recap_from_task(str(async_task.uuid))
 
         admission.refresh_from_db()
         self.assertEqual(len(admission.pdf_recap), 1)
+
+    @override_settings(OSIS_DOCUMENT_BASE_URL='http://dummyurl/')
+    def test_pdf_recap_export_doctorate(self):
+        admission = DoctorateAdmissionFactory(admitted=True)
+        url = resolve_url("admission:doctorate:pdf-recap", uuid=admission.uuid)
+
+        manager = ProgramManagerRoleFactory(education_group=admission.training.education_group).person
+        other_program_manager = ProgramManagerRoleFactory().person
+
+        self.client.force_login(user=other_program_manager.user)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        self.client.force_login(user=manager.user)
+        response = self.client.get(url)
+        self.assertRedirects(response, 'http://dummyurl/file/pdf-token', fetch_redirect_response=False)
 
 
 @freezegun.freeze_time('2023-01-01')
@@ -1047,6 +1072,12 @@ class SectionsAttachmentsTestCase(TestCase):
                 ),
             ),
         )
+
+    def setUp(self) -> None:
+        # Mock weasyprint
+        patcher = mock.patch('admission.exports.utils.get_pdf_from_template', return_value=b'some content')
+        patcher.start()
+        self.addCleanup(patcher.stop)
 
     # Identification attachments
     def test_identification_attachments_without_id_number(self):

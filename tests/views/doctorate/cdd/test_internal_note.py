@@ -41,7 +41,11 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
 )
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.internal_note import InternalNoteFactory
-from admission.tests.factories.roles import CddManagerFactory, DoctorateReaderRoleFactory
+from admission.tests.factories.roles import (
+    DoctorateReaderRoleFactory,
+    ProgramManagerRoleFactory,
+    SicManagementRoleFactory,
+)
 from admission.tests.factories.supervision import PromoterFactory
 from base.models.enums.entity_type import EntityType
 from base.tests.factories.academic_year import AcademicYearFactory
@@ -96,6 +100,7 @@ class InternalNoteTestCase(TestCase):
         cls.second_admission = DoctorateAdmissionFactory(
             training__management_entity=first_doctoral_commission,
             training__academic_year=academic_year,
+            training__education_group=cls.first_admission.training.education_group,
             cotutelle=False,
             supervision_group=promoter.process,
             financing_type=ChoixTypeFinancement.WORK_CONTRACT.name,
@@ -105,8 +110,10 @@ class InternalNoteTestCase(TestCase):
         )
 
         # Cdd user
-        cdd_person_person = CddManagerFactory(entity=first_doctoral_commission).person
-        cls.one_cdd_user = cdd_person_person.user
+        cls.sic_user = SicManagementRoleFactory(entity=first_doctoral_commission).person.user
+        cls.manager_user = ProgramManagerRoleFactory(
+            education_group=cls.first_admission.training.education_group
+        ).person.user
 
         cls.doctorate_reader_user = DoctorateReaderRoleFactory().person.user
 
@@ -117,17 +124,17 @@ class InternalNoteTestCase(TestCase):
         # Create internal notes
         self.first_admission_note_1 = InternalNoteFactory(
             admission=self.first_admission,
-            author=self.one_cdd_user.person,
+            author=self.manager_user.person,
             text='T11',
         )
         self.first_admission_note_2 = InternalNoteFactory(
             admission=self.first_admission,
-            author=self.one_cdd_user.person,
+            author=self.manager_user.person,
             text='T12',
         )
         self.second_admission_note_1 = InternalNoteFactory(
             admission=self.second_admission,
-            author=self.one_cdd_user.person,
+            author=self.manager_user.person,
             text='T21',
         )
 
@@ -151,8 +158,17 @@ class InternalNoteTestCase(TestCase):
         response = self.client.post(self.url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    def test_get_with_cdd_user_retrieves_previous_notes(self):
-        self.client.force_login(user=self.one_cdd_user)
+    def test_get_with_sic_retrieves_previous_notes(self):
+        self.client.force_login(user=self.sic_user)
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        internal_notes = response.context.get('internal_notes')
+
+        self.assertEqual(len(internal_notes), 2)
+
+    def test_get_with_manager_retrieves_previous_notes(self):
+        self.client.force_login(user=self.manager_user)
         response = self.client.get(self.url)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -176,8 +192,8 @@ class InternalNoteTestCase(TestCase):
 
         self.assertIn('form', response.context.keys())
 
-    def test_post_with_cdd_user_and_missing_text_prevents_the_note_creation(self):
-        self.client.force_login(user=self.one_cdd_user)
+    def test_post_with_manager_and_missing_text_prevents_the_note_creation(self):
+        self.client.force_login(user=self.manager_user)
         response = self.client.post(self.url, data={'text': ''})
 
         self.assertEqual(response.status_code, 200)
@@ -185,8 +201,8 @@ class InternalNoteTestCase(TestCase):
 
         self.assertEqual(InternalNote.objects.filter(admission=self.first_admission).count(), 2)
 
-    def test_post_with_cdd_user_and_valid_form_creates_a_new_note(self):
-        self.client.force_login(user=self.one_cdd_user)
+    def test_post_with_manager_and_valid_form_creates_a_new_note(self):
+        self.client.force_login(user=self.manager_user)
         response = self.client.post(self.url, data={'text': 'A fantastic text'})
 
         self.assertRedirects(response, self.url)
@@ -194,5 +210,5 @@ class InternalNoteTestCase(TestCase):
         internal_notes: List[InternalNote] = InternalNote.objects.filter(admission=self.first_admission)
 
         self.assertEqual(len(internal_notes), 3)
-        self.assertEqual(internal_notes[0].author, self.one_cdd_user.person)
+        self.assertEqual(internal_notes[0].author, self.manager_user.person)
         self.assertEqual(internal_notes[0].text, 'A fantastic text')

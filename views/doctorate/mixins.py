@@ -1,4 +1,4 @@
-##############################################################################
+# ##############################################################################
 #
 #    OSIS stands for Open Student Information System. It's an application
 #    designed to manage the core business of higher education institutions,
@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -32,7 +32,8 @@ from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 from django.views.generic.base import ContextMixin
 
-from admission.auth.roles.sic_manager import SicManager
+from admission.auth.roles.central_manager import CentralManager
+from admission.auth.roles.sic_management import SicManagement
 from admission.contrib.models import DoctorateAdmission
 from admission.contrib.models.base import AdmissionViewer
 from admission.ddd.admission.doctorat.preparation.commands import GetPropositionCommand
@@ -176,7 +177,7 @@ class LoadDossierViewMixin(LoginRequiredMixin, PermissionRequiredMixin, ContextM
             request.method == 'GET'
             and self.admission_uuid
             and getattr(request.user, 'person', None)
-            and SicManager.belong_to(request.user.person)
+            and (SicManagement.belong_to(request.user.person) or CentralManager.belong_to(request.user.person))
         ):
             AdmissionViewer.add_viewer(person=request.user.person, admission=self.admission)
 

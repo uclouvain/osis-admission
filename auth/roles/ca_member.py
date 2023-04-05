@@ -36,6 +36,13 @@ from osis_role.contrib.models import RoleModel
 
 
 class CommitteeMember(RoleModel):
+    """
+    Membre du comité
+
+    Membre du comité d'accompagnement du doctorand, il approuve l'admission et le Jury. Dans d'autres processus
+    c'est la CDD ou le promoteur qui acte la décision collégiale du comité d'accompagnement dans le système.
+    """
+
     class Meta:
         verbose_name = _("Role: Committee member")
         verbose_name_plural = _("Role: Committee members")

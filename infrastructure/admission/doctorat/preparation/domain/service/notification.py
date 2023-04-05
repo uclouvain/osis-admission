@@ -31,7 +31,6 @@ from django.utils import translation
 from django.utils.functional import lazy
 from django.utils.translation import get_language, gettext_lazy as _
 
-from admission.auth.roles.cdd_manager import CddManager
 from admission.contrib.models import AdmissionTask, SupervisionActor
 from admission.contrib.models.doctorate import PropositionProxy
 from admission.contrib.models.enums.actor_type import ActorType
@@ -59,6 +58,7 @@ from admission.mail_templates import (
     ADMISSION_EMAIL_SUBMISSION_CDD,
     ADMISSION_EMAIL_SUBMISSION_MEMBER,
 )
+from admission.utils import get_admission_cdd_managers
 from base.models.person import Person
 from osis_async.models import AsyncTask
 from osis_mail_template import generate_email
@@ -121,12 +121,9 @@ class Notification(INotification):
         common_tokens = cls.get_common_tokens(proposition, candidat)
         actor_list = SupervisionActor.objects.filter(process=admission.supervision_group).select_related('person')
 
-        # Envoyer au gestionnaire CDD
-        cdd_managers = CddManager.objects.filter(
-            entity_id=admission.doctorate.management_entity_id,
-        ).select_related('person')
-        for manager in cdd_managers:
-            with translation.override(manager.person.language):
+        # Envoyer aux gestionnaires CDD
+        for manager in get_admission_cdd_managers(admission.training.education_group_id):
+            with translation.override(manager.language):
                 content = (
                     _(
                         '<a href="%(admission_link_back)s">%(reference)s</a> - '
@@ -135,7 +132,7 @@ class Notification(INotification):
                     )
                     % common_tokens
                 )
-                web_notification = WebNotification(recipient=manager.person, content=str(content))
+                web_notification = WebNotification(recipient=manager, content=str(content))
             WebNotificationHandler.create(web_notification)
 
         # Envoyer au doctorant
@@ -255,8 +252,7 @@ class Notification(INotification):
 
         # Create the async task to generate the pdf recap
         task = AsyncTask.objects.create(
-            name=_('Recap of the proposition %(reference)s')
-            % {'reference': admission.reference},
+            name=_('Recap of the proposition %(reference)s') % {'reference': admission.reference},
             description=_('Create the recap of the proposition'),
             person=admission.candidate,
         )
@@ -277,23 +273,20 @@ class Notification(INotification):
         EmailNotificationHandler.create(email_message, person=candidat)
 
         # Envoyer aux gestionnaires CDD
-        cdd_managers = CddManager.objects.filter(
-            entity_id=admission.doctorate.management_entity_id,
-        ).select_related('person')
-        for manager in cdd_managers:
+        for manager in get_admission_cdd_managers(admission.training.education_group_id):
             email_message = generate_email(
                 ADMISSION_EMAIL_SUBMISSION_CDD,
-                manager.person.language,
+                manager.language,
                 {
                     **common_tokens,
-                    "actor_first_name": manager.person.first_name,
-                    "actor_last_name": manager.person.last_name,
+                    "actor_first_name": manager.first_name,
+                    "actor_last_name": manager.last_name,
                 },
-                recipients=[manager.person],
+                recipients=[manager],
             )
-            EmailNotificationHandler.create(email_message, person=manager.person)
+            EmailNotificationHandler.create(email_message, person=manager)
 
-            with translation.override(manager.person.language):
+            with translation.override(manager.language):
                 content = (
                     _(
                         '<a href="%(admission_link_back)s">%(reference)s</a> - '
@@ -302,7 +295,7 @@ class Notification(INotification):
                     )
                     % common_tokens
                 )
-                web_notification = WebNotification(recipient=manager.person, content=str(content))
+                web_notification = WebNotification(recipient=manager, content=str(content))
             WebNotificationHandler.create(web_notification)
 
         # Envoyer aux membres du groupe de supervision

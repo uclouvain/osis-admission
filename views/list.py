@@ -25,7 +25,6 @@
 # ##############################################################################
 
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
-from django.contrib.messages import error
 from django.core.cache import cache
 from django.core.exceptions import NON_FIELD_ERRORS
 from django.utils.translation import gettext as _
@@ -35,10 +34,10 @@ from django.views.generic.edit import FormMixin
 from admission.constants import DEFAULT_PAGINATOR_SIZE
 from admission.ddd.admission.commands import ListerToutesDemandesQuery
 from admission.forms.admission.filter import AllAdmissionsFilterForm
+from admission.views import ListPaginator
 from base.utils.htmx import HtmxMixin
 from base.views.common import display_error_messages
 from infrastructure.messages_bus import message_bus_instance
-from admission.views import ListPaginator
 
 __all__ = [
     "AdmissionList",
@@ -134,7 +133,7 @@ class BaseAdmissionList(LoginRequiredMixin, PermissionRequiredMixin, HtmxMixin, 
 class AdmissionList(BaseAdmissionList):
     template_name = 'admission/list/list_all.html'
     htmx_template_name = 'admission/list/list_all_block.html'
-    permission_required = 'admission.view_dossiers'
+    permission_required = 'admission.view_enrolment_applications'
     filtering_query_class = ListerToutesDemandesQuery
     form_class = AllAdmissionsFilterForm
     urlpatterns = 'all-list'

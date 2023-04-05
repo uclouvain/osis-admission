@@ -1,48 +1,53 @@
 # ##############################################################################
 #
-#    OSIS stands for Open Student Information System. It's an application
-#    designed to manage the core business of higher education institutions,
-#    such as universities, faculties, institutes and professional schools.
-#    The core business involves the administration of students, teachers,
-#    courses, programs and so on.
+#  OSIS stands for Open Student Information System. It's an application
+#  designed to manage the core business of higher education institutions,
+#  such as universities, faculties, institutes and professional schools.
+#  The core business involves the administration of students, teachers,
+#  courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
 #
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
 #
-#    A copy of this license - GNU General Public License - is available
-#    at the root of the source code of this program.  If not,
-#    see http://www.gnu.org/licenses/.
+#  A copy of this license - GNU General Public License - is available
+#  at the root of the source code of this program.  If not,
+#  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
 import uuid
 from collections import defaultdict
 from typing import Dict, Union
 
 from django.core.cache import cache
+from django.db import models
+from django.db.models import QuerySet
 from rest_framework.generics import get_object_or_404
 
-from admission.contrib.models import DoctorateAdmission, GeneralEducationAdmission, ContinuingEducationAdmission
+from admission.auth.roles.program_manager import ProgramManager as AdmissionProgramManager
+from admission.contrib.models import ContinuingEducationAdmission, DoctorateAdmission, GeneralEducationAdmission
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     AnneesCurriculumNonSpecifieesException,
 )
 from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
 from admission.mail_templates import (
-    ADMISSION_EMAIL_GENERIC_ONCE_ADMITTED,
     ADMISSION_EMAIL_CONFIRMATION_PAPER_INFO_STUDENT,
+    ADMISSION_EMAIL_GENERIC_ONCE_ADMITTED,
 )
 from backoffice.settings.rest_framework.exception_handler import get_error_data
+from base.auth.roles.program_manager import ProgramManager
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
-from infrastructure.messages_bus import message_bus_instance
-from osis_common.ddd.interface import QueryRequest, BusinessException
+from base.models.person import Person
+from osis_common.ddd.interface import BusinessException, QueryRequest
 
 
 def get_cached_admission_perm_obj(admission_uuid):
@@ -80,6 +85,8 @@ def sort_business_exceptions(exception: BusinessException):
 
 
 def gather_business_exceptions(command: QueryRequest) -> Dict[str, list]:
+    from infrastructure.messages_bus import message_bus_instance
+
     data = defaultdict(list)
     try:
         # Trigger the verification command
@@ -146,3 +153,18 @@ def force_title(string: str):
             title_string[index] = string[index]
 
     return ''.join(title_string)
+
+
+def get_admission_cdd_managers(education_group_id) -> models.QuerySet[Person]:
+    return Person.objects.filter(
+        models.Q(
+            id__in=AdmissionProgramManager.objects.filter(education_group_id=education_group_id).values('person_id')
+        )
+        | models.Q(id__in=ProgramManager.objects.filter(education_group_id=education_group_id).values('person_id'))
+    )
+
+
+def get_doctoral_cdd_managers(education_group_id) -> QuerySet[Person]:
+    return Person.objects.filter(
+        id__in=ProgramManager.objects.filter(education_group_id=education_group_id).values('person_id')
+    )

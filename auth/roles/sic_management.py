@@ -28,33 +28,32 @@ import rules
 from django.utils.translation import gettext_lazy as _
 from rules import RuleSet
 
-from osis_role.contrib.models import RoleModel
+from admission.auth.predicates import is_entity_manager
+from admission.auth.roles.central_manager import CentralManager
+from osis_role.contrib.models import EntityRoleModel
 
 
-class JurySecretary(RoleModel):
+class SicManagement(EntityRoleModel):
     """
-    Secrétaire de Jury
+    Direction SIC
 
-    Le secrétaire/président du jury intervient pour acter les décisions du jury lors de la défense privée
-    et la soutenance.
+    L'assistant à la direction SIC intervient dans l'admission pour valider l'autorisation d'inscription.
+    Il a un peu plus de pouvoir que le gestionnaire central d'admission.
     """
 
     class Meta:
-        verbose_name = _("Role: Jury secretary")
-        verbose_name_plural = _("Role: Jury secretaries")
-        group_name = "jury_secretary"
+        verbose_name = _("Role: SIC management")
+        verbose_name_plural = _("Role: SIC management")
+        group_name = "admission_sic_management"
 
     @classmethod
     def rule_set(cls):
         ruleset = {
-            'admission.upload_defense_report': rules.always_allow,
-            'admission.view_doctorateadmission': rules.always_allow,
-            'admission.view_doctorateadmission_person': rules.always_allow,
-            'admission.view_doctorateadmission_coordinates': rules.always_allow,
-            'admission.view_doctorateadmission_secondary_studies': rules.always_allow,
-            'admission.view_doctorateadmission_curriculum': rules.always_allow,
-            'admission.view_doctorateadmission_project': rules.always_allow,
-            'admission.view_doctorateadmission_cotutelle': rules.always_allow,
-            'admission.view_doctorateadmission_supervision': rules.always_allow,
+            **CentralManager.rule_set(),
+            # Listings
+            'admission.view_enrolment_applications': rules.always_allow,
+            'admission.view_doctorate_enrolment_applications': rules.always_allow,
+            'admission.view_continuing_enrolment_applications': rules.always_allow,
+            'admission.validate_registration': is_entity_manager,
         }
         return RuleSet(ruleset)

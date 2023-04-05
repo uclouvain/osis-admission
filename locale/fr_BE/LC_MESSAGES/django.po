@@ -1189,8 +1189,8 @@ msgstr "Formation continue"
 msgid "Continuing education admission"
 msgstr "Admission en formation continue"
 
-msgid "Continuing enrolments"
-msgstr "Inscriptions en formation continue"
+msgid "Continuing enrolment applications"
+msgstr "Demandes d'inscription en formation continue"
 
 msgid "Coordinates"
 msgstr "Coordonnées"
@@ -1601,8 +1601,8 @@ msgstr "Admission en doctorat"
 msgid "Doctorate admissions"
 msgstr "Admissions en doctorat"
 
-msgid "Doctorate enrolments"
-msgstr "Inscriptions en doctorat"
+msgid "Doctorate enrolment applications"
+msgstr "Demandes d'inscription en doctorat"
 
 msgid "Document"
 msgstr "Document"
@@ -2789,17 +2789,14 @@ msgctxt "tab"
 msgid "Management"
 msgstr "Gestion"
 
-msgid "Management of the continuing enrolments"
-msgstr "Gestion des inscriptions en formation continue"
+msgid "Management of the continuing enrolment applications"
+msgstr "Gestion des demandes d'inscription en formation continue"
 
 msgid "Management of the doctorate enrolments"
-msgstr "Gestion des inscriptions en doctorats"
+msgstr "Gestion des demandes d'inscription en doctorat"
 
 msgid "Management of the enrolment applications"
 msgstr "Gestion des demandes d'inscription"
-
-msgid "Management of the general enrolments"
-msgstr "Gestion des inscriptions en formation générale"
 
 msgid ""
 "Mandatory fields are missing in the 'Additional information > Specific "
@@ -3743,17 +3740,23 @@ msgstr "Rôle: Secrétaires ADRE"
 msgid "Role: ADRE secretary"
 msgstr "Rôle: Secrétaire ADRE"
 
-msgid "Role: CDD manager"
-msgstr "Rôle: Gestionnaire CDD"
+msgid "Role: CDD configurator"
+msgstr "Rôle: Configurateur CDD"
 
-msgid "Role: CDD managers"
-msgstr "Rôle: Gestionnaires CDD"
+msgid "Role: CDD configurators"
+msgstr "Rôle: Configurateurs CDD"
 
 msgid "Role: Candidate"
 msgstr "Rôle: Candidat"
 
 msgid "Role: Candidates"
-msgstr "Candidats"
+msgstr "Rôle: Candidats"
+
+msgid "Role: Central manager"
+msgstr "Rôle: Gestionnaire central"
+
+msgid "Role: Central managers"
+msgstr "Rôle: Gestionnaires centraux"
 
 msgid "Role: Committee member"
 msgstr "Rôle: Membre du comité"
@@ -3773,6 +3776,12 @@ msgstr "Rôle: Secrétaires de jury"
 msgid "Role: Jury secretary"
 msgstr "Rôle: Secrétaire de jury"
 
+msgid "Role: Program manager"
+msgstr "Rôle: Gestionnaire d'admission d'un programme"
+
+msgid "Role: Program managers"
+msgstr "Rôle: Gestionnaires d'admission d'un programme"
+
 msgid "Role: Promoter"
 msgstr "Rôle: Promoteur"
 
@@ -3785,17 +3794,8 @@ msgstr "Rôle: SCEB"
 msgid "Role: SCEBs"
 msgstr "Rôle: SCEBs"
 
-msgid "Role: SIC director"
-msgstr "Rôle: Directeur SIC"
-
-msgid "Role: SIC directors"
-msgstr "Rôle: Directeurs SIC"
-
-msgid "Role: SIC manager"
-msgstr "Rôle: Gestionnaire SIC"
-
-msgid "Role: SIC managers"
-msgstr "Rôle: Gestionnaires SIC"
+msgid "Role: SIC management"
+msgstr "Rôle: Direction SIC"
 
 msgid "SEARCH_SCHOLARSHIP"
 msgstr "Bourse de recherche"
@@ -5111,3 +5111,7 @@ msgstr "votre conjoint"
 
 msgid "yyyy"
 msgstr "aaaa"
+
+#, python-brace-format
+msgid "{items} types out of {total}"
+msgstr "{items} types sur {total}"

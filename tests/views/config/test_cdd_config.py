@@ -1,28 +1,29 @@
 # ##############################################################################
 #
-#    OSIS stands for Open Student Information System. It's an application
-#    designed to manage the core business of higher education institutions,
-#    such as universities, faculties, institutes and professional schools.
-#    The core business involves the administration of students, teachers,
-#    courses, programs and so on.
+#  OSIS stands for Open Student Information System. It's an application
+#  designed to manage the core business of higher education institutions,
+#  such as universities, faculties, institutes and professional schools.
+#  The core business involves the administration of students, teachers,
+#  courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
 #
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
 #
-#    A copy of this license - GNU General Public License - is available
-#    at the root of the source code of this program.  If not,
-#    see http://www.gnu.org/licenses/.
+#  A copy of this license - GNU General Public License - is available
+#  at the root of the source code of this program.  If not,
+#  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
 from django.db.models import JSONField
 from django.shortcuts import resolve_url
 from django.test import TestCase
@@ -31,7 +32,7 @@ from rest_framework import status
 
 from admission.contrib.models.cdd_config import CddConfiguration
 from admission.ddd.parcours_doctoral.formation.domain.model.enums import CategorieActivite
-from admission.tests.factories.roles import CddManagerFactory
+from admission.tests.factories.roles import CddConfiguratorFactory
 from base.tests.factories.person import SuperUserPersonFactory
 
 
@@ -40,7 +41,7 @@ class CddConfigTestCase(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        cls.manager = CddManagerFactory(entity__version__acronym="FOO")
+        cls.configurator = CddConfiguratorFactory(entity__version__acronym="FOO")
         for field in CddConfiguration._meta.fields:
             if field.name == 'category_labels':
                 values = [str(v) for v in dict(CategorieActivite.choices()).values()]
@@ -58,15 +59,22 @@ class CddConfigTestCase(TestCase):
 
     def test_cdd_config_list(self):
         url = resolve_url('admission:config:cdd-config:list')
-        self.client.force_login(self.manager.person.user)
+        self.client.force_login(self.configurator.person.user)
         response = self.client.get(url)
         self.assertContains(response, "FOO")
 
     def test_cdd_config_edit(self):
-        url = resolve_url('admission:config:cdd-config:edit', pk=self.manager.entity_id)
-        self.client.force_login(self.manager.person.user)
+        url = resolve_url('admission:config:cdd-config:edit', pk=self.configurator.entity_id)
+        self.client.force_login(self.configurator.person.user)
 
+        # No config is created
         self.assertEqual(CddConfiguration.objects.count(), 0)
+
+        # But viewing list creates a config
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(CddConfiguration.objects.count(), 1)
+
         response = self.client.post(url, self.data)
         self.assertEqual(response.status_code, status.HTTP_302_FOUND)
         expected = {
