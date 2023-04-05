@@ -1,0 +1,71 @@
+{% load enums i18n admission %}
+
+{% comment "License" %}
+  * OSIS stands for Open Student Information System. It's an application
+  * designed to manage the core business of higher education institutions,
+  * such as universities, faculties, institutes and professional schools.
+  * The core business involves the administration of students, teachers,
+  * courses, programs and so on.
+  *
+  * Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+  *
+  * This program is free software: you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License as published by
+  * the Free Software Foundation, either version 3 of the License, or
+  * (at your option) any later version.
+  *
+  * This program is distributed in the hope that it will be useful,
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU General Public License for more details.
+  *
+  * A copy of this license - GNU General Public License - is available
+  * at the root of the source code of this program.  If not,
+  * see http://www.gnu.org/licenses/.
+{% endcomment %}
+
+<div>
+  <table
+      id="document-list-table"
+      class="table table-bordered table-responsive"
+  >
+    <thead>
+      <tr>
+        <th>{% translate 'Document' %}</th>
+        <th>{% translate 'Actor' %}</th>
+        <th>{% translate 'Date' %}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for document in documents %}
+        {% if document.type in DOCUMENTS_UCLOUVAIN %}
+          <tr>
+            <td class="auto-width">
+              <i class="fa-solid fa-school"></i>
+              {% if document.type == 'INTERNE_FAC' %}
+                <i class="fa-solid fa-building-columns"></i>
+              {% endif %}
+              {{ document.libelle }}
+            </td>
+            <td class="min-width">
+              {% if document.auteur %}
+                {{ document.auteur }}
+                {% if document.type == 'SYSTEME' %}
+                  <i class="fa-solid fa-play"></i>
+                {% else %}
+                  <i class="fa-solid fa-arrow-up"></i>
+                {% endif %}
+              {% else %}
+                {% translate 'System' %}
+                <i class="fa-solid fa-gear"></i>
+              {% endif %}
+            </td>
+            <td class="min-width">
+              {{ document.soumis_le|date:'DATETIME_FORMAT' }}
+            </td>
+          </tr>
+        {% endif %}
+      {% endfor %}
+    </tbody>
+  </table>
+</div>

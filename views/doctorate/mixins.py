@@ -35,8 +35,8 @@ from django.views.generic.base import ContextMixin
 
 from admission.auth.roles.central_manager import CentralManager
 from admission.auth.roles.sic_management import SicManagement
-from admission.contrib.models import DoctorateAdmission
 from admission.contrib.models.base import AdmissionViewer, BaseAdmission
+from admission.contrib.models import DoctorateAdmission, GeneralEducationAdmission, ContinuingEducationAdmission
 from admission.ddd.admission.doctorat.preparation.commands import GetPropositionCommand
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import PropositionNonTrouveeException
@@ -84,7 +84,7 @@ class LoadDossierViewMixin(LoginRequiredMixin, PermissionRequiredMixin, ContextM
         return self.current_context.replace('-', '_')
 
     @property
-    def admission(self) -> DoctorateAdmission:
+    def admission(self) -> Union[DoctorateAdmission, GeneralEducationAdmission, ContinuingEducationAdmission]:
         return {
             CONTEXT_DOCTORATE: get_cached_admission_perm_obj,
             CONTEXT_GENERAL: get_cached_general_education_admission_perm_obj,

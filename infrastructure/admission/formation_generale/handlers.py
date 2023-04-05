@@ -27,6 +27,7 @@
 from admission.ddd.admission.formation_generale.commands import *
 from admission.ddd.admission.formation_generale.use_case.read import *
 from admission.ddd.admission.formation_generale.use_case.write import *
+from admission.ddd.admission.use_case.read import recuperer_questions_specifiques_demande
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
@@ -36,6 +37,9 @@ from admission.infrastructure.admission.domain.service.elements_confirmation imp
 from admission.infrastructure.admission.domain.service.historique import Historique
 from admission.infrastructure.admission.domain.service.maximum_propositions import MaximumPropositionsAutorisees
 from admission.infrastructure.admission.domain.service.profil_candidat import ProfilCandidatTranslator
+from admission.infrastructure.admission.domain.service.recuperer_documents_demande import (
+    RecupererDocumentsDemandeTranslator,
+)
 from admission.infrastructure.admission.domain.service.titres_acces import TitresAcces
 from admission.infrastructure.admission.formation_generale.domain.service.comptabilite import ComptabiliteTranslator
 from admission.infrastructure.admission.formation_generale.domain.service.formation import FormationGeneraleTranslator
@@ -150,5 +154,18 @@ COMMAND_HANDLERS = {
     RecupererPropositionGestionnaireQuery: lambda msg_bus, cmd: recuperer_proposition_gestionnaire(
         cmd,
         proposition_repository=PropositionRepository(),
+    ),
+    RecupererDocumentsDemandeQuery: lambda msg_bus, cmd: recuperer_documents_demande(
+        cmd,
+        proposition_repository=PropositionRepository(),
+        profil_candidat_translator=ProfilCandidatTranslator(),
+        comptabilite_translator=ComptabiliteTranslator(),
+        question_specifique_translator=QuestionSpecifiqueTranslator(),
+        recuperer_documents_demande_translator=RecupererDocumentsDemandeTranslator(),
+        academic_year_repository=AcademicYearRepository(),
+    ),
+    RecupererQuestionsSpecifiquesQuery: lambda msg_bus, cmd: recuperer_questions_specifiques_demande(
+        cmd,
+        question_specifique_translator=QuestionSpecifiqueTranslator(),
     ),
 }

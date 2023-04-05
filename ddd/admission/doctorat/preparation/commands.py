@@ -28,6 +28,7 @@ from typing import Dict, List, Optional
 
 import attr
 
+from admission.ddd.admission.commands import RecupererQuestionsSpecifiquesQuery
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixDoctoratDejaRealise,
     ChoixLangueRedactionThese,
@@ -361,3 +362,8 @@ class DeterminerAnneeAcademiqueEtPotQuery(interface.QueryRequest):
 @attr.dataclass(frozen=True, slots=True)
 class RecupererElementsConfirmationQuery(interface.QueryRequest):
     uuid_proposition: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RecupererQuestionsSpecifiquesQuery(RecupererQuestionsSpecifiquesQuery):
+    pass

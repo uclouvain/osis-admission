@@ -318,6 +318,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             matricule_candidat=admission.candidate.global_id,
             prenom_candidat=admission.candidate.first_name,
             nom_candidat=admission.candidate.last_name,
+            login_candidat=admission.candidate.user.username if admission.candidate.user else '',
             bourse_double_diplome=BourseTranslator.build_dto(admission.double_degree_scholarship)
             if admission.double_degree_scholarship
             else None,
@@ -338,6 +339,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             est_reorientation_inscription_externe=admission.is_external_reorientation,
             attestation_inscription_reguliere=admission.regular_registration_proof,
             pdf_recapitulatif=admission.pdf_recap,
+            documents_demandes=admission.requested_documents,
         )
 
     @classmethod

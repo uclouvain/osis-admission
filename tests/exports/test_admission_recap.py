@@ -34,17 +34,21 @@ import mock
 from django.conf import settings
 from django.shortcuts import resolve_url
 from django.test import override_settings
-from django.utils.translation import gettext as _, ngettext
+from django.utils.translation import ngettext
+from osis_async.models import AsyncTask
 from rest_framework import status
 
 from admission.calendar.admission_calendar import (
     AdmissionPoolExternalEnrollmentChangeCalendar,
     AdmissionPoolExternalReorientationCalendar,
 )
-from admission.constants import JPEG_MIME_TYPE, PDF_MIME_TYPE, PNG_MIME_TYPE
+from admission.constants import PDF_MIME_TYPE, JPEG_MIME_TYPE, PNG_MIME_TYPE
 from admission.contrib.models import AdmissionTask
-from admission.ddd import FR_ISO_CODE
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixEtatSignature, ChoixTypeFinancement
+from admission.ddd import FR_ISO_CODE, BE_ISO_CODE
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    ChoixTypeFinancement,
+    ChoixEtatSignature,
+)
 from admission.ddd.admission.doctorat.preparation.dtos import (
     AnneeExperienceAcademiqueDTO,
     ConnaissanceLangueDTO,
@@ -67,6 +71,7 @@ from admission.ddd.admission.dtos.etudes_secondaires import (
     DiplomeEtrangerEtudesSecondairesDTO,
 )
 from admission.ddd.admission.dtos.formation import FormationDTO
+from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.dtos.resume import ResumePropositionDTO
 from admission.ddd.admission.enums import (
     ChoixAffiliationSport,
@@ -81,6 +86,19 @@ from admission.ddd.admission.enums import (
     TypeItemFormulaire,
     TypeSituationAssimilation,
 )
+from admission.ddd.admission.enums.document import (
+    DocumentsIdentification,
+    DocumentsInterOnglets,
+    DocumentsEtudesSecondaires,
+    DocumentsCurriculum,
+    DocumentsQuestionsSpecifiques,
+    DocumentsComptabilite,
+    DocumentsConnaissancesLangues,
+    DocumentsProjetRecherche,
+    DocumentsCotutelle,
+    DocumentsSupervision,
+)
+from admission.ddd.admission.formation_continue.commands import RecupererQuestionsSpecifiquesQuery
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixInscriptionATitre,
     ChoixStatutPropositionContinue,
@@ -93,7 +111,7 @@ from admission.ddd.admission.formation_generale.dtos import (
 from admission.exports.admission_recap.attachments import (
     Attachment,
 )
-from admission.exports.admission_recap.constants import ACCOUNTING_LABEL, CURRICULUM_ACTIVITY_LABEL
+from admission.exports.admission_recap.constants import CURRICULUM_ACTIVITY_LABEL
 from admission.exports.admission_recap.section import (
     get_accounting_section,
     get_cotutelle_section,
@@ -106,6 +124,8 @@ from admission.exports.admission_recap.section import (
     get_secondary_studies_section,
     get_specific_questions_section,
     get_supervision_section,
+    get_dynamic_questions_by_tab,
+    get_training_choice_section,
 )
 from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import UnfrozenDTO
 from admission.tests import QueriesAssertionsMixin, TestCase
@@ -126,7 +146,7 @@ from base.models.enums.got_diploma import GotDiploma
 from base.models.enums.teaching_type import TeachingTypeEnum
 from base.tests.factories.academic_calendar import AcademicCalendarFactory
 from base.tests.factories.academic_year import AcademicYearFactory
-from osis_async.models import AsyncTask
+from infrastructure.messages_bus import message_bus_instance
 from osis_profile.models.enums.curriculum import (
     ActivitySector,
     ActivityType,
@@ -197,6 +217,11 @@ class _PropositionFormationDoctoraleDTO(UnfrozenDTO, PropositionFormationDoctora
 
 @attr.dataclass
 class _FormationDTO(UnfrozenDTO, FormationDTO):
+    pass
+
+
+@attr.dataclass
+class _DiplomeBelgeEtudesSecondairesDTO(UnfrozenDTO, DiplomeBelgeEtudesSecondairesDTO):
     pass
 
 
@@ -325,7 +350,7 @@ class AdmissionRecapTestCase(TestCase, QueriesAssertionsMixin):
         self.addCleanup(patcher.stop)
 
     def test_get_raw_with_pdf_attachment(self):
-        pdf_attachment = Attachment(label='PDF', uuids=[''])
+        pdf_attachment = Attachment(label='PDF', uuids=[''], identifier=DocumentsIdentification.CARTE_IDENTITE)
         pdf_attachment.get_raw(
             token='token',
             metadata={
@@ -337,7 +362,7 @@ class AdmissionRecapTestCase(TestCase, QueriesAssertionsMixin):
         self.get_raw_content_mock.assert_called_once_with('token')
 
     def test_convert_and_get_raw_with_jpeg_attachment(self):
-        image_attachment = Attachment(label='JPEG', uuids=[''])
+        image_attachment = Attachment(label='JPEG', uuids=[''], identifier=DocumentsIdentification.CARTE_IDENTITE)
         image_attachment.get_raw(
             token='token',
             metadata={
@@ -350,7 +375,7 @@ class AdmissionRecapTestCase(TestCase, QueriesAssertionsMixin):
         self.convert_img_mock.assert_called_once_with(self.get_raw_content_mock.return_value)
 
     def test_convert_and_get_raw_with_png_attachment(self):
-        image_attachment = Attachment(label='PNG', uuids=[''])
+        image_attachment = Attachment(label='PNG', uuids=[''], identifier=DocumentsIdentification.CARTE_IDENTITE)
         image_attachment.get_raw(
             token='token',
             metadata={
@@ -363,7 +388,7 @@ class AdmissionRecapTestCase(TestCase, QueriesAssertionsMixin):
         self.convert_img_mock.assert_called_once_with(self.get_raw_content_mock.return_value)
 
     def test_get_default_content_if_mimetype_is_not_supported(self):
-        unknown_attachment = Attachment(label='Unknown', uuids=[''])
+        unknown_attachment = Attachment(label='Unknown', uuids=[''], identifier=DocumentsIdentification.CARTE_IDENTITE)
         raw = unknown_attachment.get_raw(
             token='token',
             metadata={
@@ -377,7 +402,7 @@ class AdmissionRecapTestCase(TestCase, QueriesAssertionsMixin):
 
     def test_get_default_content_if_no_retrieved_content(self):
         self.get_raw_content_mock.return_value = None
-        pdf_attachment = Attachment(label='PDF', uuids=[''])
+        pdf_attachment = Attachment(label='PDF', uuids=[''], identifier=DocumentsIdentification.CARTE_IDENTITE)
         raw = pdf_attachment.get_raw(
             token='token',
             metadata={
@@ -427,7 +452,7 @@ class AdmissionRecapTestCase(TestCase, QueriesAssertionsMixin):
         self.assertEqual(call_args_by_tab['curriculum'].title, 'Curriculum')
         self.assertEqual(call_args_by_tab['curriculum_academic_experience'].title, 'Curriculum > Computer science')
         self.assertEqual(call_args_by_tab['curriculum_non_academic_experience'].title, 'Curriculum > Travail')
-        self.assertEqual(call_args_by_tab['specific_question'].title, 'Questions spécifiques')
+        self.assertEqual(call_args_by_tab['specific_question'].title, 'Informations complémentaires')
         self.assertEqual(len(call_args_by_tab['specific_question'].children), 1)
         self.assertEqual(
             call_args_by_tab['specific_question'].children[0].title,
@@ -469,7 +494,7 @@ class AdmissionRecapTestCase(TestCase, QueriesAssertionsMixin):
         self.assertEqual(call_args_by_tab['training_choice'].title, 'Choix de formation')
         self.assertEqual(call_args_by_tab['education'].title, 'Études secondaires')
         self.assertEqual(call_args_by_tab['curriculum'].title, 'Curriculum')
-        self.assertEqual(call_args_by_tab['specific_question'].title, 'Questions spécifiques')
+        self.assertEqual(call_args_by_tab['specific_question'].title, 'Informations complémentaires')
         self.assertEqual(call_args_by_tab['accounting'].title, 'Comptabilité')
         self.assertEqual(call_args_by_tab['confirmation'].title, 'Finalisation')
 
@@ -525,7 +550,7 @@ class AdmissionRecapTestCase(TestCase, QueriesAssertionsMixin):
 
         self.assertEqual(len(admission.pdf_recap), 0)
 
-        with self.assertNumQueriesLessThan(11):
+        with self.assertNumQueriesLessThan(12):
             from admission.exports.admission_recap.admission_async_recap import (
                 continuing_education_admission_pdf_recap_from_task,
             )
@@ -550,7 +575,7 @@ class AdmissionRecapTestCase(TestCase, QueriesAssertionsMixin):
 
         self.assertEqual(len(admission.pdf_recap), 0)
 
-        with self.assertNumQueriesLessThan(12):
+        with self.assertNumQueriesLessThan(13):
             from admission.exports.admission_recap.admission_async_recap import (
                 general_education_admission_pdf_recap_from_task,
             )
@@ -601,9 +626,24 @@ class AdmissionRecapTestCase(TestCase, QueriesAssertionsMixin):
 
 
 @freezegun.freeze_time('2023-01-01')
+@override_settings(OSIS_DOCUMENT_BASE_URL='http://dummyurl/')
 class SectionsAttachmentsTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
+        # Mock osis-document
+        cls.get_remote_token_patcher = mock.patch("osis_document.api.utils.get_remote_token", return_value="foobar")
+        cls.get_remote_token_patcher.start()
+
+        cls.get_remote_metadata_patcher = mock.patch(
+            "osis_document.api.utils.get_remote_metadata", return_value={"name": "myfile"}
+        )
+        cls.get_remote_metadata_patcher.start()
+
+        cls.confirm_remote_upload_patcher = mock.patch(
+            "osis_document.api.utils.confirm_remote_upload", side_effect=lambda token, upload_to: token
+        )
+        cls.confirm_remote_upload_patcher.start()
+
         cls.academic_year = AcademicYearFactory(current=True)
         AcademicCalendarFactory(
             reference=AdmissionPoolExternalReorientationCalendar.event_reference,
@@ -618,29 +658,41 @@ class SectionsAttachmentsTestCase(TestCase):
             end_date=datetime.date(2023, 9, 30),
         )
 
-        cls.specific_questions: Dict[str, List[AdmissionFormItemInstantiationFactory]] = {
+        specific_questions: Dict[str, List[AdmissionFormItemInstantiationFactory]] = {
             tab.name: [
                 AdmissionFormItemInstantiationFactory(
                     form_item=TextAdmissionFormItemFactory(),
                     academic_year=cls.academic_year,
                     tab=tab.name,
+                    weight=0,
                 ),
                 AdmissionFormItemInstantiationFactory(
                     form_item=DocumentAdmissionFormItemFactory(),
                     academic_year=cls.academic_year,
                     tab=tab.name,
+                    weight=1,
                 ),
             ]
             for tab in Onglets
         }
-        cls.empty_questions = {tab.name: [] for tab in Onglets}
-        cls.answers_to_specific_questions = {
-            str(question.form_item.uuid): f'answer-{index}'
-            if question.form_item.type == TypeItemFormulaire.TEXTE.name
-            else [f'uuid-file-{index}']
-            for index, tab_questions in enumerate(cls.specific_questions.values())
-            for question in tab_questions
-        }
+
+        cls.admission = ContinuingEducationAdmissionFactory(
+            training__academic_year=cls.academic_year,
+            specific_question_answers={
+                str(question.form_item.uuid): f'answer-{index}'
+                if question.form_item.type == TypeItemFormulaire.TEXTE.name
+                else [f'uuid-file-{index}']
+                for index, tab_questions in enumerate(specific_questions.values())
+                for question in tab_questions
+            },
+        )
+
+        all_specific_questions_dto: List[QuestionSpecifiqueDTO] = message_bus_instance.invoke(
+            RecupererQuestionsSpecifiquesQuery(uuid_proposition=cls.admission.uuid),
+        )
+
+        cls.specific_questions = get_dynamic_questions_by_tab(all_specific_questions_dto)
+        cls.empty_questions = get_dynamic_questions_by_tab([])
 
         identification_dto = _IdentificationDTO(
             matricule='MAT1',
@@ -687,6 +739,78 @@ class SectionsAttachmentsTestCase(TestCase):
             numero_mobile='0123456789',
             adresse_email_privee='johndoe@example.com',
         )
+        cls.belgian_academic_curriculum_experience = _ExperienceAcademiqueDTO(
+            uuid='uuid-1',
+            pays=BE_ISO_CODE,
+            nom_pays='France',
+            nom_institut='Institut 1',
+            adresse_institut='Paris',
+            code_institut='I1',
+            communaute_institut=CommunityEnum.FRENCH_SPEAKING.name,
+            regime_linguistique=FR_ISO_CODE,
+            nom_regime_linguistique='Français',
+            type_releve_notes=TranscriptType.ONE_FOR_ALL_YEARS.name,
+            releve_notes=['uuid-releve-notes'],
+            traduction_releve_notes=['uuid-traduction-releve-notes'],
+            annees=[
+                _AnneeExperienceAcademiqueDTO(
+                    annee=2023,
+                    resultat=Result.SUCCESS.name,
+                    releve_notes=['uuid-releve-notes-1'],
+                    traduction_releve_notes=['uuid-traduction-releve-notes'],
+                    credits_inscrits=220,
+                    credits_acquis=220,
+                )
+            ],
+            a_obtenu_diplome=True,
+            diplome=['uuid-diplome'],
+            traduction_diplome=['uuid-traduction-diplome'],
+            rang_diplome='10',
+            date_prevue_delivrance_diplome=datetime.date(2023, 1, 1),
+            titre_memoire='Title',
+            note_memoire='15',
+            resume_memoire=['uuid-resume-memoire'],
+            grade_obtenu=Grade.GREAT_DISTINCTION.name,
+            systeme_evaluation=EvaluationSystem.ECTS_CREDITS.name,
+            nom_formation='Computer science',
+            type_enseignement=TeachingTypeEnum.FULL_TIME.name,
+        )
+        cls.foreign_academic_curriculum_experience = _ExperienceAcademiqueDTO(
+            uuid='uuid-1',
+            pays=FR_ISO_CODE,
+            nom_pays='France',
+            nom_institut='Institut 1',
+            adresse_institut='Paris',
+            code_institut='I1',
+            communaute_institut=CommunityEnum.FRENCH_SPEAKING.name,
+            regime_linguistique=FR_ISO_CODE,
+            nom_regime_linguistique='Français',
+            type_releve_notes=TranscriptType.ONE_FOR_ALL_YEARS.name,
+            releve_notes=['uuid-releve-notes'],
+            traduction_releve_notes=['uuid-traduction-releve-notes'],
+            annees=[
+                _AnneeExperienceAcademiqueDTO(
+                    annee=2023,
+                    resultat=Result.SUCCESS.name,
+                    releve_notes=['uuid-releve-notes-1'],
+                    traduction_releve_notes=['uuid-traduction-releve-notes'],
+                    credits_inscrits=220,
+                    credits_acquis=220,
+                )
+            ],
+            a_obtenu_diplome=True,
+            diplome=['uuid-diplome'],
+            traduction_diplome=['uuid-traduction-diplome'],
+            rang_diplome='10',
+            date_prevue_delivrance_diplome=datetime.date(2023, 1, 1),
+            titre_memoire='Title',
+            note_memoire='15',
+            resume_memoire=['uuid-resume-memoire'],
+            grade_obtenu=Grade.GREAT_DISTINCTION.name,
+            systeme_evaluation=EvaluationSystem.ECTS_CREDITS.name,
+            nom_formation='Computer science',
+            type_enseignement=TeachingTypeEnum.FULL_TIME.name,
+        )
         curriculum_dto = _CurriculumDTO(
             experiences_non_academiques=[
                 _ExperienceNonAcademiqueDTO(
@@ -702,42 +826,7 @@ class SectionsAttachmentsTestCase(TestCase):
                 )
             ],
             experiences_academiques=[
-                _ExperienceAcademiqueDTO(
-                    uuid='uuid-1',
-                    pays=FR_ISO_CODE,
-                    nom_pays='France',
-                    nom_institut='Institut 1',
-                    adresse_institut='Paris',
-                    code_institut='I1',
-                    communaute_institut=CommunityEnum.FRENCH_SPEAKING.name,
-                    regime_linguistique=FR_ISO_CODE,
-                    nom_regime_linguistique='Français',
-                    type_releve_notes=TranscriptType.ONE_FOR_ALL_YEARS.name,
-                    releve_notes=['uuid-releve-notes'],
-                    traduction_releve_notes=['uuid-traduction-releve-notes'],
-                    annees=[
-                        _AnneeExperienceAcademiqueDTO(
-                            annee=2023,
-                            resultat=Result.SUCCESS.name,
-                            releve_notes=['uuid-releve-notes-1'],
-                            traduction_releve_notes=['uuid-traduction-releve-notes'],
-                            credits_inscrits=220,
-                            credits_acquis=220,
-                        )
-                    ],
-                    a_obtenu_diplome=True,
-                    diplome=['uuid-diplome'],
-                    traduction_diplome=['uuid-traduction-diplome'],
-                    rang_diplome='10',
-                    date_prevue_delivrance_diplome=datetime.date(2023, 1, 1),
-                    titre_memoire='Title',
-                    note_memoire='15',
-                    resume_memoire=['uuid-resume-memoire'],
-                    grade_obtenu=Grade.GREAT_DISTINCTION.name,
-                    systeme_evaluation=EvaluationSystem.ECTS_CREDITS.name,
-                    nom_formation='Computer science',
-                    type_enseignement=TeachingTypeEnum.FULL_TIME.name,
-                )
+                cls.foreign_academic_curriculum_experience,
             ],
             annee_derniere_inscription_ucl=2020,
             annee_diplome_etudes_secondaires=2015,
@@ -752,7 +841,7 @@ class SectionsAttachmentsTestCase(TestCase):
             valorisees=False,
         )
         bachelor_secondary_studies_dto = _EtudesSecondairesDTO(
-            diplome_belge=DiplomeBelgeEtudesSecondairesDTO(
+            diplome_belge=_DiplomeBelgeEtudesSecondairesDTO(
                 resultat=DiplomaResults.GT_75_RESULT.name,
                 certificat_inscription=['uuid-certificat-inscription'],
                 diplome=['uuid-diplome'],
@@ -871,7 +960,7 @@ class SectionsAttachmentsTestCase(TestCase):
             nom_candidat='Doe',
             pays_nationalite_candidat='BE',
             pays_nationalite_ue_candidat=True,
-            reponses_questions_specifiques=cls.answers_to_specific_questions,
+            reponses_questions_specifiques=cls.admission.specific_question_answers,
             curriculum=['uuid-curriculum'],
             equivalence_diplome=['uuid-equivalence-diplome'],
             copie_titre_sejour=['uuid-copie-titre-sejour'],
@@ -910,7 +999,7 @@ class SectionsAttachmentsTestCase(TestCase):
             matricule_candidat='MAT1',
             prenom_candidat='John',
             nom_candidat='Doe',
-            reponses_questions_specifiques=cls.answers_to_specific_questions,
+            reponses_questions_specifiques=cls.admission.specific_question_answers,
             curriculum=['uuid-curriculum'],
             equivalence_diplome=['uuid-equivalence-diplome'],
             elements_confirmation={},
@@ -924,6 +1013,8 @@ class SectionsAttachmentsTestCase(TestCase):
             est_non_resident_au_sens_decret=None,
             est_reorientation_inscription_externe=None,
             formulaire_modification_inscription=['uuid-formulaire-modification-inscription'],
+            documents_demandes={},
+            login_candidat='candidate',
         )
         doctorate_proposition_dto = _PropositionFormationDoctoraleDTO(
             uuid='uuid-proposition',
@@ -948,7 +1039,7 @@ class SectionsAttachmentsTestCase(TestCase):
             matricule_candidat='MAT1',
             prenom_candidat='John',
             nom_candidat='Doe',
-            reponses_questions_specifiques=cls.answers_to_specific_questions,
+            reponses_questions_specifiques=cls.admission.specific_question_answers,
             curriculum=['uuid-curriculum'],
             elements_confirmation={},
             pdf_recapitulatif=['uuid-pdf-recapitulatif'],
@@ -1083,6 +1174,13 @@ class SectionsAttachmentsTestCase(TestCase):
             ),
         )
 
+    @classmethod
+    def tearDownClass(cls) -> None:
+        cls.get_remote_token_patcher.stop()
+        cls.get_remote_metadata_patcher.stop()
+        cls.confirm_remote_upload_patcher.stop()
+        super().tearDownClass()
+
     def setUp(self) -> None:
         # Mock weasyprint
         patcher = mock.patch('admission.exports.utils.get_pdf_from_template', return_value=b'some content')
@@ -1097,13 +1195,15 @@ class SectionsAttachmentsTestCase(TestCase):
             numero_registre_national_belge='',
             numero_passeport='',
         ):
-            section = get_identification_section(self.continuing_context)
-            self.assertCountEqual(
-                section.attachments,
-                [
-                    Attachment(_('Identity picture'), self.continuing_context.identification.photo_identite),
-                ],
-            )
+            section = get_identification_section(self.continuing_context, True)
+            attachments = section.attachments
+
+            self.assertEqual(len(attachments), 1)
+
+            self.assertEqual(attachments[0].identifier, DocumentsIdentification.PHOTO_IDENTITE.name)
+            self.assertEqual(attachments[0].label, DocumentsIdentification.PHOTO_IDENTITE.value)
+            self.assertEqual(attachments[0].uuids, self.continuing_context.identification.photo_identite)
+            self.assertTrue(attachments[0].required)
 
     def test_identification_attachments_with_national_number(self):
         with mock.patch.multiple(
@@ -1112,14 +1212,20 @@ class SectionsAttachmentsTestCase(TestCase):
             numero_registre_national_belge='0123456',
             numero_passeport='',
         ):
-            section = get_identification_section(self.continuing_context)
-            self.assertCountEqual(
-                section.attachments,
-                [
-                    Attachment(_('Identity picture'), self.continuing_context.identification.photo_identite),
-                    Attachment(_('Identity card (both sides)'), self.continuing_context.identification.carte_identite),
-                ],
-            )
+            section = get_identification_section(self.continuing_context, False)
+            attachments = section.attachments
+
+            self.assertEqual(len(attachments), 2)
+
+            self.assertEqual(attachments[0].identifier, DocumentsIdentification.PHOTO_IDENTITE.name)
+            self.assertEqual(attachments[0].label, DocumentsIdentification.PHOTO_IDENTITE.value)
+            self.assertEqual(attachments[0].uuids, self.continuing_context.identification.photo_identite)
+            self.assertTrue(attachments[0].required)
+
+            self.assertEqual(attachments[1].identifier, DocumentsIdentification.CARTE_IDENTITE.name)
+            self.assertEqual(attachments[1].label, DocumentsIdentification.CARTE_IDENTITE.value)
+            self.assertEqual(attachments[1].uuids, self.continuing_context.identification.carte_identite)
+            self.assertTrue(attachments[1].required)
 
     def test_identification_attachments_with_id_card_number(self):
         with mock.patch.multiple(
@@ -1128,14 +1234,20 @@ class SectionsAttachmentsTestCase(TestCase):
             numero_registre_national_belge='',
             numero_passeport='',
         ):
-            section = get_identification_section(self.continuing_context)
-            self.assertCountEqual(
-                section.attachments,
-                [
-                    Attachment(_('Identity picture'), self.continuing_context.identification.photo_identite),
-                    Attachment(_('Identity card (both sides)'), self.continuing_context.identification.carte_identite),
-                ],
-            )
+            section = get_identification_section(self.continuing_context, False)
+            attachments = section.attachments
+
+            self.assertEqual(len(attachments), 2)
+
+            self.assertEqual(attachments[0].identifier, DocumentsIdentification.PHOTO_IDENTITE.name)
+            self.assertEqual(attachments[0].label, DocumentsIdentification.PHOTO_IDENTITE.value)
+            self.assertEqual(attachments[0].uuids, self.continuing_context.identification.photo_identite)
+            self.assertTrue(attachments[0].required)
+
+            self.assertEqual(attachments[1].identifier, DocumentsIdentification.CARTE_IDENTITE.name)
+            self.assertEqual(attachments[1].label, DocumentsIdentification.CARTE_IDENTITE.value)
+            self.assertEqual(attachments[1].uuids, self.continuing_context.identification.carte_identite)
+            self.assertTrue(attachments[1].required)
 
     def test_identification_attachments_with_passport_number(self):
         with mock.patch.multiple(
@@ -1144,47 +1256,39 @@ class SectionsAttachmentsTestCase(TestCase):
             numero_registre_national_belge='',
             numero_passeport='0123456',
         ):
-            section = get_identification_section(self.continuing_context)
-            self.assertCountEqual(
-                section.attachments,
-                [
-                    Attachment(_('Identity picture'), self.continuing_context.identification.photo_identite),
-                    Attachment(_('Passport'), self.continuing_context.identification.passeport),
-                ],
-            )
+            section = get_identification_section(self.continuing_context, False)
+            attachments = section.attachments
+
+            self.assertEqual(len(attachments), 2)
+
+            self.assertEqual(attachments[0].identifier, DocumentsIdentification.PHOTO_IDENTITE.name)
+            self.assertEqual(attachments[0].label, DocumentsIdentification.PHOTO_IDENTITE.value)
+            self.assertEqual(attachments[0].uuids, self.continuing_context.identification.photo_identite)
+            self.assertTrue(attachments[0].required)
+
+            self.assertEqual(attachments[1].identifier, DocumentsIdentification.PASSEPORT.name)
+            self.assertEqual(attachments[1].label, DocumentsIdentification.PASSEPORT.value)
+            self.assertEqual(attachments[1].uuids, self.continuing_context.identification.passeport)
+            self.assertTrue(attachments[1].required)
 
     # Secondary studies attachments
     def test_secondary_studies_attachments_for_continuing_proposition(self):
         section = get_secondary_studies_section(
             self.continuing_context,
-            settings.LANGUAGE_CODE_FR,
             self.specific_questions,
+            True,
         )
+        attachments = section.attachments
         document_question = self.specific_questions.get(Onglets.ETUDES_SECONDAIRES.name)[1]
-        self.assertCountEqual(
-            section.attachments,
-            [
-                Attachment(
-                    document_question.form_item.title.get(settings.LANGUAGE_CODE_FR),
-                    self.answers_to_specific_questions[str(document_question.form_item.uuid)],
-                )
-            ],
+
+        self.assertEqual(len(attachments), 1)
+
+        self.assertEqual(
+            attachments[0].identifier, f'{DocumentsInterOnglets.QUESTION_SPECIFIQUE.name}.{document_question.uuid}'
         )
-        section = get_secondary_studies_section(
-            self.continuing_context,
-            settings.LANGUAGE_CODE_EN,
-            self.specific_questions,
-        )
-        document_question = self.specific_questions.get(Onglets.ETUDES_SECONDAIRES.name)[1]
-        self.assertCountEqual(
-            section.attachments,
-            [
-                Attachment(
-                    document_question.form_item.title.get(settings.LANGUAGE_CODE_EN),
-                    self.answers_to_specific_questions[str(document_question.form_item.uuid)],
-                )
-            ],
-        )
+        self.assertEqual(attachments[0].label, document_question.label)
+        self.assertEqual(attachments[0].uuids, self.admission.specific_question_answers[document_question.uuid])
+        self.assertFalse(attachments[0].required)
 
     def test_secondary_studies_attachments_for_bachelor_proposition_and_got_belgian_diploma(self):
         with mock.patch.multiple(
@@ -1195,18 +1299,20 @@ class SectionsAttachmentsTestCase(TestCase):
         ):
             section = get_secondary_studies_section(
                 self.general_bachelor_context,
-                settings.LANGUAGE_CODE_FR,
                 self.empty_questions,
+                False,
             )
-            self.assertCountEqual(
-                section.attachments,
-                [
-                    Attachment(
-                        _('High school diploma'),
-                        self.general_bachelor_context.etudes_secondaires.diplome_belge.diplome,
-                    )
-                ],
+            attachments = section.attachments
+
+            self.assertEqual(len(attachments), 1)
+
+            self.assertEqual(attachments[0].identifier, DocumentsEtudesSecondaires.DIPLOME_BELGE_DIPLOME.name)
+            self.assertEqual(attachments[0].label, DocumentsEtudesSecondaires.DIPLOME_BELGE_DIPLOME.value)
+            self.assertEqual(
+                attachments[0].uuids,
+                self.general_bachelor_context.etudes_secondaires.diplome_belge.diplome,
             )
+            self.assertTrue(attachments[0].required)
 
     def test_secondary_studies_attachments_for_bachelor_proposition_and_got_belgian_diploma_this_year(self):
         with mock.patch.multiple(
@@ -1215,24 +1321,104 @@ class SectionsAttachmentsTestCase(TestCase):
             alternative_secondaires=None,
             diplome_etudes_secondaires=GotDiploma.THIS_YEAR.name,
         ):
+            # Both attachments are specified -> we consider them as facultative
             section = get_secondary_studies_section(
                 self.general_bachelor_context,
-                settings.LANGUAGE_CODE_FR,
                 self.empty_questions,
+                False,
             )
-            self.assertCountEqual(
-                section.attachments,
-                [
-                    Attachment(
-                        _('High school diploma'),
-                        self.general_bachelor_context.etudes_secondaires.diplome_belge.diplome,
-                    ),
-                    Attachment(
-                        _('Certificate of enrolment or school attendance'),
-                        self.general_bachelor_context.etudes_secondaires.diplome_belge.certificat_inscription,
-                    ),
-                ],
+            attachments = section.attachments
+
+            self.assertEqual(len(attachments), 2)
+
+            self.assertEqual(attachments[0].identifier, DocumentsEtudesSecondaires.DIPLOME_BELGE_DIPLOME.name)
+            self.assertEqual(attachments[0].label, DocumentsEtudesSecondaires.DIPLOME_BELGE_DIPLOME.value)
+            self.assertEqual(
+                attachments[0].uuids,
+                self.general_bachelor_context.etudes_secondaires.diplome_belge.diplome,
             )
+            self.assertFalse(attachments[0].required)
+
+            self.assertEqual(
+                attachments[1].identifier,
+                DocumentsEtudesSecondaires.DIPLOME_BELGE_CERTIFICAT_INSCRIPTION.name,
+            )
+            self.assertEqual(
+                attachments[1].label,
+                DocumentsEtudesSecondaires.DIPLOME_BELGE_CERTIFICAT_INSCRIPTION.value,
+            )
+            self.assertEqual(
+                attachments[1].uuids,
+                self.general_bachelor_context.etudes_secondaires.diplome_belge.certificat_inscription,
+            )
+            self.assertFalse(attachments[1].required)
+
+            # Both diploma and enrolment certificate are missing -> we consider them as facultative
+            with mock.patch.multiple(
+                self.general_bachelor_context.etudes_secondaires.diplome_belge,
+                diplome=[],
+                certificat_inscription=[],
+            ):
+                section = get_secondary_studies_section(
+                    self.general_bachelor_context,
+                    self.empty_questions,
+                    False,
+                )
+                attachments = section.attachments
+
+                self.assertEqual(len(attachments), 2)
+
+                self.assertEqual(attachments[0].identifier, DocumentsEtudesSecondaires.DIPLOME_BELGE_DIPLOME.name)
+                self.assertEqual(
+                    attachments[1].identifier,
+                    DocumentsEtudesSecondaires.DIPLOME_BELGE_CERTIFICAT_INSCRIPTION.name,
+                )
+                self.assertFalse(attachments[0].required)
+                self.assertFalse(attachments[1].required)
+
+            # Only the diploma is specified -> we consider it as mandatory
+            with mock.patch.multiple(
+                self.general_bachelor_context.etudes_secondaires.diplome_belge,
+                certificat_inscription=[],
+            ):
+                section = get_secondary_studies_section(
+                    self.general_bachelor_context,
+                    self.empty_questions,
+                    False,
+                )
+                attachments = section.attachments
+
+                self.assertEqual(len(attachments), 2)
+
+                self.assertEqual(attachments[0].identifier, DocumentsEtudesSecondaires.DIPLOME_BELGE_DIPLOME.name)
+                self.assertEqual(
+                    attachments[1].identifier,
+                    DocumentsEtudesSecondaires.DIPLOME_BELGE_CERTIFICAT_INSCRIPTION.name,
+                )
+                self.assertTrue(attachments[0].required)
+                self.assertFalse(attachments[1].required)
+
+            # Only the enrolment certificate is specified -> we consider it as mandatory
+            with mock.patch.multiple(
+                self.general_bachelor_context.etudes_secondaires.diplome_belge,
+                diplome=[],
+            ):
+                section = get_secondary_studies_section(
+                    self.general_bachelor_context,
+                    self.empty_questions,
+                    False,
+                )
+                attachments = section.attachments
+
+                self.assertEqual(len(attachments), 2)
+
+                self.assertEqual(attachments[0].identifier, DocumentsEtudesSecondaires.DIPLOME_BELGE_DIPLOME.name)
+                self.assertEqual(
+                    attachments[1].identifier,
+                    DocumentsEtudesSecondaires.DIPLOME_BELGE_CERTIFICAT_INSCRIPTION.name,
+                )
+                self.assertFalse(attachments[0].required)
+                self.assertTrue(attachments[1].required)
 
     def test_secondary_studies_attachments_for_bachelor_proposition_and_alternative(self):
         with mock.patch.multiple(
@@ -1243,21 +1429,60 @@ class SectionsAttachmentsTestCase(TestCase):
         ):
             section = get_secondary_studies_section(
                 self.general_bachelor_context,
-                settings.LANGUAGE_CODE_FR,
                 self.empty_questions,
+                False,
             )
-            self.assertCountEqual(
-                section.attachments,
-                [
-                    Attachment(
-                        _(
-                            'Certificate of successful completion of the admission test for the first cycle of higher '
-                            'education'
-                        ),
-                        self.general_bachelor_context.etudes_secondaires.alternative_secondaires.examen_admission_premier_cycle,
-                    ),
-                ],
+            attachments = section.attachments
+
+            self.assertEqual(len(attachments), 1)
+
+            self.assertEqual(
+                attachments[0].identifier,
+                DocumentsEtudesSecondaires.ALTERNATIVE_SECONDAIRES_EXAMEN_ADMISSION_PREMIER_CYCLE.name,
             )
+            self.assertEqual(
+                attachments[0].label,
+                DocumentsEtudesSecondaires.ALTERNATIVE_SECONDAIRES_EXAMEN_ADMISSION_PREMIER_CYCLE.value,
+            )
+            self.assertEqual(
+                attachments[0].uuids,
+                self.general_bachelor_context.etudes_secondaires.alternative_secondaires.examen_admission_premier_cycle,
+            )
+            # Required because it is not a VAE access
+            self.assertTrue(attachments[0].required)
+
+            # Simulate a VAE access (36 months of non academic experiences) -> Not required
+            experience = self.general_bachelor_context.curriculum.experiences_non_academiques[0]
+            with mock.patch.multiple(experience, date_debut=datetime.date(2020, 4, 1)):
+                section = get_secondary_studies_section(
+                    self.general_bachelor_context,
+                    self.empty_questions,
+                    False,
+                )
+                attachments = section.attachments
+
+                self.assertEqual(len(attachments), 1)
+                self.assertEqual(
+                    attachments[0].identifier,
+                    DocumentsEtudesSecondaires.ALTERNATIVE_SECONDAIRES_EXAMEN_ADMISSION_PREMIER_CYCLE.name,
+                )
+                self.assertFalse(attachments[0].required)
+
+            # Simulate a non-VAE access (35 months of non academic experiences) -> Required
+            with mock.patch.multiple(experience, date_debut=datetime.date(2020, 5, 1)):
+                section = get_secondary_studies_section(
+                    self.general_bachelor_context,
+                    self.empty_questions,
+                    False,
+                )
+                attachments = section.attachments
+
+                self.assertEqual(len(attachments), 1)
+                self.assertEqual(
+                    attachments[0].identifier,
+                    DocumentsEtudesSecondaires.ALTERNATIVE_SECONDAIRES_EXAMEN_ADMISSION_PREMIER_CYCLE.name,
+                )
+                self.assertTrue(attachments[0].required)
 
     def test_secondary_studies_attachments_for_bachelor_proposition_and_foreign_diploma(self):
         with mock.patch.multiple(
@@ -1268,22 +1493,28 @@ class SectionsAttachmentsTestCase(TestCase):
         ):
             section = get_secondary_studies_section(
                 self.general_bachelor_context,
-                settings.LANGUAGE_CODE_FR,
                 self.empty_questions,
+                False,
             )
-            self.assertCountEqual(
-                section.attachments,
-                [
-                    Attachment(
-                        _('High school diploma'),
-                        self.general_bachelor_context.etudes_secondaires.diplome_etranger.diplome,
-                    ),
-                    Attachment(
-                        _('A transcript or your last year at high school'),
-                        self.general_bachelor_context.etudes_secondaires.diplome_etranger.releve_notes,
-                    ),
-                ],
+
+            attachments = section.attachments
+            self.assertEqual(len(attachments), 2)
+
+            self.assertEqual(attachments[0].identifier, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_DIPLOME.name)
+            self.assertEqual(attachments[0].label, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_DIPLOME.value)
+            self.assertEqual(
+                attachments[0].uuids,
+                self.general_bachelor_context.etudes_secondaires.diplome_etranger.diplome,
             )
+            self.assertTrue(attachments[0].required)
+
+            self.assertEqual(attachments[1].identifier, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_RELEVE_NOTES.name)
+            self.assertEqual(attachments[1].label, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_RELEVE_NOTES.value)
+            self.assertEqual(
+                attachments[1].uuids,
+                self.general_bachelor_context.etudes_secondaires.diplome_etranger.releve_notes,
+            )
+            self.assertTrue(attachments[1].required)
 
     def test_secondary_studies_attachments_for_bachelor_proposition_and_foreign_diploma_with_translations(self):
         with mock.patch.multiple(
@@ -1297,33 +1528,71 @@ class SectionsAttachmentsTestCase(TestCase):
         ):
             section = get_secondary_studies_section(
                 self.general_bachelor_context,
-                settings.LANGUAGE_CODE_FR,
                 self.empty_questions,
+                False,
             )
-            self.assertCountEqual(
-                section.attachments,
-                [
-                    Attachment(
-                        _('High school diploma'),
-                        self.general_bachelor_context.etudes_secondaires.diplome_etranger.diplome,
-                    ),
-                    Attachment(
-                        _('A transcript or your last year at high school'),
-                        self.general_bachelor_context.etudes_secondaires.diplome_etranger.releve_notes,
-                    ),
-                    Attachment(
-                        _('A certified translation of your high school diploma'),
-                        self.general_bachelor_context.etudes_secondaires.diplome_etranger.traduction_diplome,
-                    ),
-                    Attachment(
-                        _(
-                            'A certified translation of your official transcript of marks for your final year of '
-                            'secondary education'
-                        ),
-                        self.general_bachelor_context.etudes_secondaires.diplome_etranger.traduction_releve_notes,
-                    ),
-                ],
+
+            attachments = section.attachments
+
+            self.assertEqual(len(attachments), 4)
+
+            self.assertEqual(attachments[0].identifier, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_DIPLOME.name)
+            self.assertEqual(attachments[0].label, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_DIPLOME.value)
+            self.assertEqual(
+                attachments[0].uuids,
+                self.general_bachelor_context.etudes_secondaires.diplome_etranger.diplome,
             )
+            self.assertTrue(attachments[0].required)
+
+            self.assertEqual(
+                attachments[1].identifier, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_TRADUCTION_DIPLOME.name
+            )
+            self.assertEqual(attachments[1].label, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_TRADUCTION_DIPLOME.value)
+            self.assertEqual(
+                attachments[1].uuids,
+                self.general_bachelor_context.etudes_secondaires.diplome_etranger.traduction_diplome,
+            )
+            self.assertTrue(attachments[1].required)
+
+            self.assertEqual(attachments[2].identifier, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_RELEVE_NOTES.name)
+            self.assertEqual(attachments[2].label, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_RELEVE_NOTES.value)
+            self.assertEqual(
+                attachments[2].uuids,
+                self.general_bachelor_context.etudes_secondaires.diplome_etranger.releve_notes,
+            )
+            self.assertTrue(attachments[2].required)
+
+            self.assertEqual(
+                attachments[3].identifier, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_TRADUCTION_RELEVE_NOTES.name
+            )
+            self.assertEqual(
+                attachments[3].label, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_TRADUCTION_RELEVE_NOTES.value
+            )
+            self.assertEqual(
+                attachments[3].uuids,
+                self.general_bachelor_context.etudes_secondaires.diplome_etranger.traduction_releve_notes,
+            )
+            self.assertTrue(attachments[3].required)
+
+            # The diploma is not specified -> the related translation is required
+            with mock.patch.multiple(
+                self.general_bachelor_context.etudes_secondaires.diplome_etranger,
+                diplome=[],
+            ):
+                section = get_secondary_studies_section(
+                    self.general_bachelor_context,
+                    self.empty_questions,
+                    False,
+                )
+                attachments = section.attachments
+
+                self.assertEqual(len(attachments), 4)
+
+                self.assertEqual(
+                    attachments[1].identifier,
+                    DocumentsEtudesSecondaires.DIPLOME_ETRANGER_TRADUCTION_DIPLOME.name,
+                )
+                self.assertTrue(attachments[1].required)
 
     def test_secondary_studies_attachments_for_bachelor_proposition_and_not_ue_foreign_diploma_this_year(self):
         with mock.patch.multiple(
@@ -1337,22 +1606,107 @@ class SectionsAttachmentsTestCase(TestCase):
         ):
             section = get_secondary_studies_section(
                 self.general_bachelor_context,
-                settings.LANGUAGE_CODE_FR,
                 self.empty_questions,
+                False,
             )
-            self.assertCountEqual(
-                section.attachments,
-                [
-                    Attachment(
-                        _('High school diploma'),
-                        self.general_bachelor_context.etudes_secondaires.diplome_etranger.diplome,
-                    ),
-                    Attachment(
-                        _('A transcript or your last year at high school'),
-                        self.general_bachelor_context.etudes_secondaires.diplome_etranger.releve_notes,
-                    ),
-                ],
+
+            attachments = section.attachments
+
+            self.assertEqual(len(attachments), 2)
+
+            self.assertEqual(attachments[0].identifier, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_DIPLOME.name)
+            self.assertEqual(attachments[0].label, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_DIPLOME.value)
+            self.assertEqual(
+                attachments[0].uuids,
+                self.general_bachelor_context.etudes_secondaires.diplome_etranger.diplome,
             )
+            self.assertTrue(attachments[0].required)
+
+            self.assertEqual(attachments[1].identifier, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_RELEVE_NOTES.name)
+            self.assertEqual(attachments[1].label, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_RELEVE_NOTES.value)
+            self.assertEqual(
+                attachments[1].uuids,
+                self.general_bachelor_context.etudes_secondaires.diplome_etranger.releve_notes,
+            )
+            self.assertTrue(attachments[1].required)
+
+    def test_secondary_studies_attachments_for_bachelor_proposition_and_not_ue_foreign_diploma_with_translations(self):
+        with mock.patch.multiple(
+            self.general_bachelor_context.etudes_secondaires,
+            diplome_belge=None,
+            alternative_secondaires=None,
+        ), mock.patch.multiple(
+            self.general_bachelor_context.etudes_secondaires.diplome_etranger,
+            pays_membre_ue=False,
+            regime_linguistique='BR',
+        ):
+            section = get_secondary_studies_section(
+                self.general_bachelor_context,
+                self.empty_questions,
+                False,
+            )
+
+            attachments = section.attachments
+
+            self.assertEqual(len(attachments), 4)
+
+            self.assertEqual(attachments[0].identifier, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_DIPLOME.name)
+            self.assertEqual(attachments[0].label, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_DIPLOME.value)
+            self.assertEqual(
+                attachments[0].uuids,
+                self.general_bachelor_context.etudes_secondaires.diplome_etranger.diplome,
+            )
+            self.assertTrue(attachments[0].required)
+
+            self.assertEqual(
+                attachments[1].identifier, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_TRADUCTION_DIPLOME.name
+            )
+            self.assertEqual(attachments[1].label, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_TRADUCTION_DIPLOME.value)
+            self.assertEqual(
+                attachments[1].uuids,
+                self.general_bachelor_context.etudes_secondaires.diplome_etranger.traduction_diplome,
+            )
+            self.assertTrue(attachments[1].required)
+
+            self.assertEqual(attachments[2].identifier, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_RELEVE_NOTES.name)
+            self.assertEqual(attachments[2].label, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_RELEVE_NOTES.value)
+            self.assertEqual(
+                attachments[2].uuids,
+                self.general_bachelor_context.etudes_secondaires.diplome_etranger.releve_notes,
+            )
+            self.assertTrue(attachments[2].required)
+
+            self.assertEqual(
+                attachments[3].identifier, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_TRADUCTION_RELEVE_NOTES.name
+            )
+            self.assertEqual(
+                attachments[3].label, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_TRADUCTION_RELEVE_NOTES.value
+            )
+            self.assertEqual(
+                attachments[3].uuids,
+                self.general_bachelor_context.etudes_secondaires.diplome_etranger.traduction_releve_notes,
+            )
+            self.assertTrue(attachments[3].required)
+
+            # The diploma is not specified -> the related translation is required
+            with mock.patch.multiple(
+                self.general_bachelor_context.etudes_secondaires.diplome_etranger,
+                diplome=[],
+            ):
+                section = get_secondary_studies_section(
+                    self.general_bachelor_context,
+                    self.empty_questions,
+                    False,
+                )
+                attachments = section.attachments
+
+                self.assertEqual(len(attachments), 4)
+
+                self.assertEqual(
+                    attachments[1].identifier,
+                    DocumentsEtudesSecondaires.DIPLOME_ETRANGER_TRADUCTION_DIPLOME.name,
+                )
+                self.assertTrue(attachments[1].required)
 
     def test_secondary_studies_attachments_for_bachelor_proposition_and_ue_foreign_diploma_this_year(self):
         with mock.patch.multiple(
@@ -1366,41 +1720,105 @@ class SectionsAttachmentsTestCase(TestCase):
         ):
             section = get_secondary_studies_section(
                 self.general_bachelor_context,
-                settings.LANGUAGE_CODE_FR,
                 self.empty_questions,
+                False,
             )
-            self.assertCountEqual(
-                section.attachments,
-                [
-                    Attachment(
-                        _('High school diploma'),
-                        self.general_bachelor_context.etudes_secondaires.diplome_etranger.diplome,
-                    ),
-                    Attachment(
-                        _('A transcript or your last year at high school'),
-                        self.general_bachelor_context.etudes_secondaires.diplome_etranger.releve_notes,
-                    ),
-                    Attachment(
-                        _('A certified translation of your high school diploma'),
-                        self.general_bachelor_context.etudes_secondaires.diplome_etranger.traduction_diplome,
-                    ),
-                    Attachment(
-                        _(
-                            'A certified translation of your official transcript of marks for your final year of '
-                            'secondary education'
-                        ),
-                        self.general_bachelor_context.etudes_secondaires.diplome_etranger.traduction_releve_notes,
-                    ),
-                    Attachment(
-                        _('Certificate of enrolment or school attendance'),
-                        self.general_bachelor_context.etudes_secondaires.diplome_etranger.certificat_inscription,
-                    ),
-                    Attachment(
-                        _('A certified translation of your certificate of enrolment or school attendance'),
-                        self.general_bachelor_context.etudes_secondaires.diplome_etranger.traduction_certificat_inscription,
-                    ),
-                ],
+
+            attachments = section.attachments
+
+            self.assertEqual(len(attachments), 6)
+
+            self.assertEqual(attachments[0].identifier, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_DIPLOME.name)
+            self.assertEqual(attachments[0].label, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_DIPLOME.value)
+            self.assertEqual(
+                attachments[0].uuids,
+                self.general_bachelor_context.etudes_secondaires.diplome_etranger.diplome,
             )
+            self.assertFalse(attachments[0].required)
+
+            self.assertEqual(
+                attachments[1].identifier, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_TRADUCTION_DIPLOME.name
+            )
+            self.assertEqual(attachments[1].label, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_TRADUCTION_DIPLOME.value)
+            self.assertEqual(
+                attachments[1].uuids,
+                self.general_bachelor_context.etudes_secondaires.diplome_etranger.traduction_diplome,
+            )
+            # The diploma is specified -> the related translation is required
+            self.assertTrue(attachments[1].required)
+
+            self.assertEqual(
+                attachments[2].identifier, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_CERTIFICAT_INSCRIPTION.name
+            )
+            self.assertEqual(
+                attachments[2].label, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_CERTIFICAT_INSCRIPTION.value
+            )
+            self.assertEqual(
+                attachments[2].uuids,
+                self.general_bachelor_context.etudes_secondaires.diplome_etranger.certificat_inscription,
+            )
+            self.assertFalse(attachments[2].required)
+
+            self.assertEqual(
+                attachments[3].identifier,
+                DocumentsEtudesSecondaires.DIPLOME_ETRANGER_TRADUCTION_CERTIFICAT_INSCRIPTION.name,
+            )
+            self.assertEqual(
+                attachments[3].label,
+                DocumentsEtudesSecondaires.DIPLOME_ETRANGER_TRADUCTION_CERTIFICAT_INSCRIPTION.value,
+            )
+            self.assertEqual(
+                attachments[3].uuids,
+                self.general_bachelor_context.etudes_secondaires.diplome_etranger.traduction_certificat_inscription,
+            )
+            # The enrolment certificate is specified -> the related translation is required
+            self.assertTrue(attachments[3].required)
+
+            self.assertEqual(attachments[4].identifier, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_RELEVE_NOTES.name)
+            self.assertEqual(attachments[4].label, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_RELEVE_NOTES.value)
+            self.assertEqual(
+                attachments[4].uuids,
+                self.general_bachelor_context.etudes_secondaires.diplome_etranger.releve_notes,
+            )
+            self.assertTrue(attachments[4].required)
+
+            self.assertEqual(
+                attachments[5].identifier, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_TRADUCTION_RELEVE_NOTES.name
+            )
+            self.assertEqual(
+                attachments[5].label, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_TRADUCTION_RELEVE_NOTES.value
+            )
+            self.assertEqual(
+                attachments[5].uuids,
+                self.general_bachelor_context.etudes_secondaires.diplome_etranger.traduction_releve_notes,
+            )
+            self.assertTrue(attachments[5].required)
+
+            # The diploma and the enrolment certificate are not specified -> the related translations are not required
+            with mock.patch.multiple(
+                self.general_bachelor_context.etudes_secondaires.diplome_etranger,
+                diplome=[],
+                certificat_inscription=[],
+            ):
+                section = get_secondary_studies_section(
+                    self.general_bachelor_context,
+                    self.empty_questions,
+                    False,
+                )
+                attachments = section.attachments
+
+                self.assertEqual(len(attachments), 6)
+
+                self.assertEqual(
+                    attachments[1].identifier,
+                    DocumentsEtudesSecondaires.DIPLOME_ETRANGER_TRADUCTION_DIPLOME.name,
+                )
+                self.assertEqual(
+                    attachments[3].identifier,
+                    DocumentsEtudesSecondaires.DIPLOME_ETRANGER_TRADUCTION_CERTIFICAT_INSCRIPTION.name,
+                )
+                self.assertFalse(attachments[1].required)
+                self.assertFalse(attachments[3].required)
 
     def test_secondary_studies_attachments_for_bachelor_proposition_and_assimilated_foreign_diploma_this_year(
         self,
@@ -1417,28 +1835,106 @@ class SectionsAttachmentsTestCase(TestCase):
             self.general_bachelor_context.proposition.formation,
             code_domaine='11SA',
         ):
-            section = get_secondary_studies_section(
-                self.general_bachelor_context,
-                settings.LANGUAGE_CODE_FR,
-                self.empty_questions,
+            section = get_secondary_studies_section(self.general_bachelor_context, self.empty_questions, False)
+
+            attachments = section.attachments
+
+            self.assertEqual(len(attachments), 3)
+
+            self.assertEqual(attachments[0].identifier, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_DIPLOME.name)
+            self.assertEqual(attachments[0].label, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_DIPLOME.value)
+            self.assertEqual(
+                attachments[0].uuids,
+                self.general_bachelor_context.etudes_secondaires.diplome_etranger.diplome,
             )
-            self.assertCountEqual(
-                section.attachments,
-                [
-                    Attachment(
-                        _('High school diploma'),
-                        self.general_bachelor_context.etudes_secondaires.diplome_etranger.diplome,
-                    ),
-                    Attachment(
-                        _('A transcript or your last year at high school'),
-                        self.general_bachelor_context.etudes_secondaires.diplome_etranger.releve_notes,
-                    ),
-                    Attachment(
-                        _('Certificate of enrolment or school attendance'),
-                        self.general_bachelor_context.etudes_secondaires.diplome_etranger.certificat_inscription,
-                    ),
-                ],
+            self.assertFalse(attachments[0].required)
+
+            self.assertEqual(
+                attachments[1].identifier, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_CERTIFICAT_INSCRIPTION.name
             )
+            self.assertEqual(
+                attachments[1].label, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_CERTIFICAT_INSCRIPTION.value
+            )
+            self.assertEqual(
+                attachments[1].uuids,
+                self.general_bachelor_context.etudes_secondaires.diplome_etranger.certificat_inscription,
+            )
+            self.assertFalse(attachments[1].required)
+
+            self.assertEqual(attachments[2].identifier, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_RELEVE_NOTES.name)
+            self.assertEqual(attachments[2].label, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_RELEVE_NOTES.value)
+            self.assertEqual(
+                attachments[2].uuids,
+                self.general_bachelor_context.etudes_secondaires.diplome_etranger.releve_notes,
+            )
+            self.assertTrue(attachments[2].required)
+
+            # Both attachments are missing -> we consider them as facultative
+            with mock.patch.multiple(
+                self.general_bachelor_context.etudes_secondaires.diplome_etranger,
+                diplome=[],
+                certificat_inscription=[],
+            ):
+                section = get_secondary_studies_section(
+                    self.general_bachelor_context,
+                    self.empty_questions,
+                    False,
+                )
+                attachments = section.attachments
+
+                self.assertEqual(len(attachments), 3)
+
+                self.assertEqual(attachments[0].identifier, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_DIPLOME.name)
+                self.assertEqual(
+                    attachments[1].identifier,
+                    DocumentsEtudesSecondaires.DIPLOME_ETRANGER_CERTIFICAT_INSCRIPTION.name,
+                )
+                self.assertFalse(attachments[0].required)
+                self.assertFalse(attachments[1].required)
+
+            # Only one document is specified -> we consider it as mandatory
+            with mock.patch.multiple(
+                self.general_bachelor_context.etudes_secondaires.diplome_etranger,
+                certificat_inscription=[],
+            ):
+                section = get_secondary_studies_section(
+                    self.general_bachelor_context,
+                    self.empty_questions,
+                    False,
+                )
+                attachments = section.attachments
+
+                self.assertEqual(len(attachments), 3)
+
+                self.assertEqual(attachments[0].identifier, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_DIPLOME.name)
+                self.assertEqual(
+                    attachments[1].identifier,
+                    DocumentsEtudesSecondaires.DIPLOME_ETRANGER_CERTIFICAT_INSCRIPTION.name,
+                )
+                self.assertTrue(attachments[0].required)
+                self.assertFalse(attachments[1].required)
+
+            # Only one document is specified -> we consider it as mandatory
+            with mock.patch.multiple(
+                self.general_bachelor_context.etudes_secondaires.diplome_etranger,
+                diplome=[],
+            ):
+                section = get_secondary_studies_section(
+                    self.general_bachelor_context,
+                    self.empty_questions,
+                    False,
+                )
+                attachments = section.attachments
+
+                self.assertEqual(len(attachments), 3)
+
+                self.assertEqual(attachments[0].identifier, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_DIPLOME.name)
+                self.assertEqual(
+                    attachments[1].identifier,
+                    DocumentsEtudesSecondaires.DIPLOME_ETRANGER_CERTIFICAT_INSCRIPTION.name,
+                )
+                self.assertFalse(attachments[0].required)
+                self.assertTrue(attachments[1].required)
 
     def test_secondary_studies_attachments_for_bachelor_proposition_and_not_ue_foreign_national_bachelor_diploma_equiv(
         self,
@@ -1454,31 +1950,42 @@ class SectionsAttachmentsTestCase(TestCase):
         ):
             section = get_secondary_studies_section(
                 self.general_bachelor_context,
-                settings.LANGUAGE_CODE_FR,
                 self.empty_questions,
+                False,
             )
-            self.assertCountEqual(
-                section.attachments,
-                [
-                    Attachment(
-                        _('High school diploma'),
-                        self.general_bachelor_context.etudes_secondaires.diplome_etranger.diplome,
-                    ),
-                    Attachment(
-                        _('A transcript or your last year at high school'),
-                        self.general_bachelor_context.etudes_secondaires.diplome_etranger.releve_notes,
-                    ),
-                    Attachment(
-                        _(
-                            "A double-sided copy of the final equivalence decision issued by the Ministry of the "
-                            "French Community of Belgium (possibly with the DAES or the admission test for the first "
-                            "cycle of higher education if your equivalence doesn't give access to the desired "
-                            "programme)"
-                        ),
-                        self.general_bachelor_context.etudes_secondaires.diplome_etranger.decision_final_equivalence_hors_ue,
-                    ),
-                ],
+            attachments = section.attachments
+
+            self.assertEqual(len(attachments), 3)
+
+            self.assertEqual(
+                attachments[0].identifier,
+                DocumentsEtudesSecondaires.DIPLOME_ETRANGER_DECISION_FINAL_EQUIVALENCE_HORS_UE.name,
             )
+            self.assertEqual(
+                attachments[0].label,
+                DocumentsEtudesSecondaires.DIPLOME_ETRANGER_DECISION_FINAL_EQUIVALENCE_HORS_UE.value,
+            )
+            self.assertEqual(
+                attachments[0].uuids,
+                self.general_bachelor_context.etudes_secondaires.diplome_etranger.decision_final_equivalence_hors_ue,
+            )
+            self.assertTrue(attachments[0].required)
+
+            self.assertEqual(attachments[1].identifier, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_DIPLOME.name)
+            self.assertEqual(attachments[1].label, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_DIPLOME.value)
+            self.assertEqual(
+                attachments[1].uuids,
+                self.general_bachelor_context.etudes_secondaires.diplome_etranger.diplome,
+            )
+            self.assertTrue(attachments[1].required)
+
+            self.assertEqual(attachments[2].identifier, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_RELEVE_NOTES.name)
+            self.assertEqual(attachments[2].label, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_RELEVE_NOTES.value)
+            self.assertEqual(
+                attachments[2].uuids,
+                self.general_bachelor_context.etudes_secondaires.diplome_etranger.releve_notes,
+            )
+            self.assertTrue(attachments[2].required)
 
     def test_secondary_studies_attachments_for_bachelor_proposition_and_ue_foreign_national_bachelor_diploma_equival(
         self,
@@ -1492,32 +1999,40 @@ class SectionsAttachmentsTestCase(TestCase):
             type_diplome=ForeignDiplomaTypes.NATIONAL_BACHELOR.name,
             equivalence=Equivalence.YES.name,
         ):
-            section = get_secondary_studies_section(
-                self.general_bachelor_context,
-                settings.LANGUAGE_CODE_FR,
-                self.empty_questions,
+            section = get_secondary_studies_section(self.general_bachelor_context, self.empty_questions, False)
+
+            attachments = section.attachments
+
+            self.assertEqual(len(attachments), 3)
+
+            self.assertEqual(
+                attachments[0].identifier,
+                DocumentsEtudesSecondaires.DIPLOME_ETRANGER_DECISION_FINAL_EQUIVALENCE_UE.name,
             )
-            self.assertCountEqual(
-                section.attachments,
-                [
-                    Attachment(
-                        _('High school diploma'),
-                        self.general_bachelor_context.etudes_secondaires.diplome_etranger.diplome,
-                    ),
-                    Attachment(
-                        _('A transcript or your last year at high school'),
-                        self.general_bachelor_context.etudes_secondaires.diplome_etranger.releve_notes,
-                    ),
-                    Attachment(
-                        _(
-                            'A double-sided copy of the final equivalence decision (possibly with the '
-                            'DAES or the admission test for the first cycle of higher education in case of restrictive '
-                            'equivalence)'
-                        ),
-                        self.general_bachelor_context.etudes_secondaires.diplome_etranger.decision_final_equivalence_ue,
-                    ),
-                ],
+            self.assertEqual(
+                attachments[0].label, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_DECISION_FINAL_EQUIVALENCE_UE.value
             )
+            self.assertEqual(
+                attachments[0].uuids,
+                self.general_bachelor_context.etudes_secondaires.diplome_etranger.decision_final_equivalence_ue,
+            )
+            self.assertTrue(attachments[0].required)
+
+            self.assertEqual(attachments[1].identifier, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_DIPLOME.name)
+            self.assertEqual(attachments[1].label, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_DIPLOME.value)
+            self.assertEqual(
+                attachments[1].uuids,
+                self.general_bachelor_context.etudes_secondaires.diplome_etranger.diplome,
+            )
+            self.assertTrue(attachments[1].required)
+
+            self.assertEqual(attachments[2].identifier, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_RELEVE_NOTES.name)
+            self.assertEqual(attachments[2].label, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_RELEVE_NOTES.value)
+            self.assertEqual(
+                attachments[2].uuids,
+                self.general_bachelor_context.etudes_secondaires.diplome_etranger.releve_notes,
+            )
+            self.assertTrue(attachments[2].required)
 
     def test_secondary_studies_attachments_for_bachelor_proposition_and_ue_foreign_national_bachelor_diploma_pending_eq(
         self,
@@ -1533,26 +2048,42 @@ class SectionsAttachmentsTestCase(TestCase):
         ):
             section = get_secondary_studies_section(
                 self.general_bachelor_context,
-                settings.LANGUAGE_CODE_FR,
                 self.empty_questions,
+                False,
             )
-            self.assertCountEqual(
-                section.attachments,
-                [
-                    Attachment(
-                        _('High school diploma'),
-                        self.general_bachelor_context.etudes_secondaires.diplome_etranger.diplome,
-                    ),
-                    Attachment(
-                        _('A transcript or your last year at high school'),
-                        self.general_bachelor_context.etudes_secondaires.diplome_etranger.releve_notes,
-                    ),
-                    Attachment(
-                        _('Proof of the final equivalence decision'),
-                        self.general_bachelor_context.etudes_secondaires.diplome_etranger.preuve_decision_equivalence,
-                    ),
-                ],
+            attachments = section.attachments
+
+            self.assertEqual(len(attachments), 3)
+
+            self.assertEqual(
+                attachments[0].identifier,
+                DocumentsEtudesSecondaires.DIPLOME_ETRANGER_PREUVE_DECISION_EQUIVALENCE.name,
             )
+            self.assertEqual(
+                attachments[0].label,
+                DocumentsEtudesSecondaires.DIPLOME_ETRANGER_PREUVE_DECISION_EQUIVALENCE.value,
+            )
+            self.assertEqual(
+                attachments[0].uuids,
+                self.general_bachelor_context.etudes_secondaires.diplome_etranger.preuve_decision_equivalence,
+            )
+            self.assertTrue(attachments[0].required)
+
+            self.assertEqual(attachments[1].identifier, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_DIPLOME.name)
+            self.assertEqual(attachments[1].label, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_DIPLOME.value)
+            self.assertEqual(
+                attachments[1].uuids,
+                self.general_bachelor_context.etudes_secondaires.diplome_etranger.diplome,
+            )
+            self.assertTrue(attachments[1].required)
+
+            self.assertEqual(attachments[2].identifier, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_RELEVE_NOTES.name)
+            self.assertEqual(attachments[2].label, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_RELEVE_NOTES.value)
+            self.assertEqual(
+                attachments[2].uuids,
+                self.general_bachelor_context.etudes_secondaires.diplome_etranger.releve_notes,
+            )
+            self.assertTrue(attachments[2].required)
 
     def test_secondary_studies_attachments_for_bachelor_proposition_and_ue_foreign_national_bachelor_diploma_without_eq(
         self,
@@ -1566,118 +2097,175 @@ class SectionsAttachmentsTestCase(TestCase):
             type_diplome=ForeignDiplomaTypes.NATIONAL_BACHELOR.name,
             equivalence=Equivalence.NO.name,
         ):
-            section = get_secondary_studies_section(
-                self.general_bachelor_context,
-                settings.LANGUAGE_CODE_FR,
-                self.empty_questions,
+            section = get_secondary_studies_section(self.general_bachelor_context, self.empty_questions, False)
+            attachments = section.attachments
+
+            self.assertEqual(len(attachments), 2)
+
+            self.assertEqual(attachments[0].identifier, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_DIPLOME.name)
+            self.assertEqual(attachments[0].label, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_DIPLOME.value)
+            self.assertEqual(
+                attachments[0].uuids,
+                self.general_bachelor_context.etudes_secondaires.diplome_etranger.diplome,
             )
-            self.assertCountEqual(
-                section.attachments,
-                [
-                    Attachment(
-                        _('High school diploma'),
-                        self.general_bachelor_context.etudes_secondaires.diplome_etranger.diplome,
-                    ),
-                    Attachment(
-                        _('A transcript or your last year at high school'),
-                        self.general_bachelor_context.etudes_secondaires.diplome_etranger.releve_notes,
-                    ),
-                ],
+            self.assertTrue(attachments[0].required)
+
+            self.assertEqual(attachments[1].identifier, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_RELEVE_NOTES.name)
+            self.assertEqual(attachments[1].label, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_RELEVE_NOTES.value)
+            self.assertEqual(
+                attachments[1].uuids,
+                self.general_bachelor_context.etudes_secondaires.diplome_etranger.releve_notes,
             )
+            self.assertTrue(attachments[1].required)
 
     # Curriculum attachments
     def test_curriculum_attachments_for_continuing_proposition_without_equivalence(self):
         section = get_curriculum_section(
             self.continuing_context,
-            settings.LANGUAGE_CODE_FR,
             self.specific_questions,
+            True,
         )
+        attachments = section.attachments
 
         document_question = self.specific_questions.get(Onglets.CURRICULUM.name)[1]
-        self.assertCountEqual(
-            section.attachments,
-            [
-                Attachment(
-                    document_question.form_item.title.get(settings.LANGUAGE_CODE_FR),
-                    self.answers_to_specific_questions[str(document_question.form_item.uuid)],
-                ),
-                Attachment(
-                    _('Curriculum vitae detailed, dated and signed'), self.continuing_context.proposition.curriculum
-                ),
-            ],
+
+        self.assertEqual(len(attachments), 2)
+
+        self.assertEqual(attachments[0].identifier, DocumentsCurriculum.CURRICULUM.name)
+        self.assertEqual(attachments[0].label, DocumentsCurriculum.CURRICULUM.value)
+        self.assertEqual(attachments[0].uuids, self.continuing_context.proposition.curriculum)
+        self.assertFalse(attachments[0].required)
+
+        self.assertEqual(
+            attachments[1].identifier, f'{DocumentsInterOnglets.QUESTION_SPECIFIQUE.name}.{document_question.uuid}'
         )
+        self.assertEqual(attachments[1].label, document_question.label)
+        self.assertEqual(attachments[1].uuids, self.admission.specific_question_answers[document_question.uuid])
+        self.assertFalse(attachments[1].required)
 
     def test_curriculum_attachments_for_continuing_proposition_with_equivalence(self):
         with mock.patch.multiple(
             self.continuing_context.proposition.formation,
             type=TrainingType.UNIVERSITY_FIRST_CYCLE_CERTIFICATE.name,
         ):
-            section = get_curriculum_section(self.continuing_context, settings.LANGUAGE_CODE_FR, self.empty_questions)
+            section = get_curriculum_section(self.continuing_context, self.empty_questions, False)
+            attachments = section.attachments
 
-            self.assertCountEqual(
-                section.attachments,
-                [
-                    Attachment(
-                        _('Curriculum vitae detailed, dated and signed'),
-                        self.continuing_context.proposition.curriculum,
-                    ),
-                    Attachment(
-                        _(
-                            'Copy of the equivalence decision delivered by the French Community of Belgium making your '
-                            '2nd cycle diploma (bac+5) equivalent to the academic grade of a corresponding master.',
-                        ),
-                        self.continuing_context.proposition.equivalence_diplome,
-                    ),
-                ],
-            )
+            self.assertEqual(len(attachments), 2)
+
+            self.assertEqual(attachments[0].identifier, DocumentsCurriculum.DIPLOME_EQUIVALENCE.name)
+            self.assertEqual(attachments[0].label, DocumentsCurriculum.DIPLOME_EQUIVALENCE.value)
+            self.assertEqual(attachments[0].uuids, self.continuing_context.proposition.equivalence_diplome)
+            self.assertFalse(attachments[0].required)
+
+            self.assertEqual(attachments[1].identifier, DocumentsCurriculum.CURRICULUM.name)
+            self.assertEqual(attachments[1].label, DocumentsCurriculum.CURRICULUM.value)
+            self.assertEqual(attachments[1].uuids, self.continuing_context.proposition.curriculum)
+            self.assertFalse(attachments[1].required)
 
     def test_curriculum_attachments_for_master_proposition(self):
         with mock.patch.multiple(
             self.general_bachelor_context.proposition.formation,
             type=TrainingType.MASTER_MC.name,
         ):
-            section = get_curriculum_section(
-                self.general_bachelor_context, settings.LANGUAGE_CODE_FR, self.empty_questions
-            )
+            section = get_curriculum_section(self.general_bachelor_context, self.empty_questions, False)
+            attachments = section.attachments
 
-            self.assertCountEqual(
-                section.attachments,
-                [
-                    Attachment(
-                        _('Curriculum vitae detailed, dated and signed'),
-                        self.continuing_context.proposition.curriculum,
-                    ),
-                ],
-            )
+            self.assertEqual(len(attachments), 1)
+
+            self.assertEqual(attachments[0].identifier, DocumentsCurriculum.CURRICULUM.name)
+            self.assertEqual(attachments[0].label, DocumentsCurriculum.CURRICULUM.value)
+            self.assertEqual(attachments[0].uuids, self.general_bachelor_context.proposition.curriculum)
+            self.assertTrue(attachments[0].required)
 
     def test_curriculum_attachments_for_capaes_proposition_and_equivalence(self):
         with mock.patch.multiple(
             self.general_bachelor_context.proposition.formation,
             type=TrainingType.CAPAES.name,
         ):
-            section = get_curriculum_section(
-                self.general_bachelor_context, settings.LANGUAGE_CODE_FR, self.empty_questions
-            )
+            # With one obtained foreign diploma, display a required equivalence
+            section = get_curriculum_section(self.general_bachelor_context, self.empty_questions, False)
+            attachments = section.attachments
 
-            self.assertCountEqual(
-                section.attachments,
-                [
-                    Attachment(
-                        _('Curriculum vitae detailed, dated and signed'),
-                        self.continuing_context.proposition.curriculum,
-                    ),
-                    Attachment(
-                        _(
-                            'Copy of the equivalence decision delivered by the French Community of Belgium making your '
-                            '2nd cycle diploma (bac+5) equivalent to the academic grade of a corresponding master.',
-                        ),
-                        self.continuing_context.proposition.equivalence_diplome,
-                    ),
+            self.assertEqual(len(attachments), 2)
+
+            self.assertEqual(attachments[0].identifier, DocumentsCurriculum.DIPLOME_EQUIVALENCE.name)
+            self.assertEqual(attachments[0].label, DocumentsCurriculum.DIPLOME_EQUIVALENCE.value)
+            self.assertEqual(attachments[0].uuids, self.general_bachelor_context.proposition.equivalence_diplome)
+            self.assertTrue(attachments[0].required)
+
+            self.assertEqual(attachments[1].identifier, DocumentsCurriculum.CURRICULUM.name)
+            self.assertEqual(attachments[1].label, DocumentsCurriculum.CURRICULUM.value)
+            self.assertEqual(attachments[1].uuids, self.general_bachelor_context.proposition.curriculum)
+            self.assertTrue(attachments[1].required)
+
+            # With only one obtained belgian diploma, don't display the equivalence
+            with mock.patch.multiple(
+                self.general_bachelor_context.curriculum.experiences_academiques[0],
+                pays=BE_ISO_CODE,
+            ):
+                section = get_curriculum_section(self.general_bachelor_context, self.empty_questions, False)
+                attachments = section.attachments
+
+                self.assertEqual(len(attachments), 1)
+                self.assertEqual(attachments[0].identifier, DocumentsCurriculum.CURRICULUM.name)
+
+            # Without diploma, don't display the equivalence
+            with mock.patch.multiple(
+                self.general_bachelor_context.curriculum,
+                experiences_academiques=[],
+            ):
+                section = get_curriculum_section(self.general_bachelor_context, self.empty_questions, False)
+                attachments = section.attachments
+
+                self.assertEqual(len(attachments), 1)
+                self.assertEqual(attachments[0].identifier, DocumentsCurriculum.CURRICULUM.name)
+
+            # Without obtained diploma, don't display the equivalence
+            with mock.patch.multiple(
+                self.general_bachelor_context.curriculum.experiences_academiques[0],
+                a_obtenu_diplome=False,
+            ):
+                section = get_curriculum_section(self.general_bachelor_context, self.empty_questions, False)
+                attachments = section.attachments
+
+                self.assertEqual(len(attachments), 1)
+                self.assertEqual(attachments[0].identifier, DocumentsCurriculum.CURRICULUM.name)
+
+            # With both obtained foreign and belgian diplomas, display a facultative equivalence
+            with mock.patch.multiple(
+                self.general_bachelor_context.curriculum,
+                experiences_academiques=[
+                    self.foreign_academic_curriculum_experience,
+                    self.belgian_academic_curriculum_experience,
                 ],
-            )
+            ):
+                section = get_curriculum_section(self.general_bachelor_context, self.empty_questions, False)
+                attachments = section.attachments
+
+                self.assertEqual(len(attachments), 2)
+
+                self.assertEqual(attachments[0].identifier, DocumentsCurriculum.DIPLOME_EQUIVALENCE.name)
+                self.assertFalse(attachments[0].required)
+
+            # With several obtained foreign diplomas, display a required equivalence
+            with mock.patch.multiple(
+                self.general_bachelor_context.curriculum,
+                experiences_academiques=[
+                    self.foreign_academic_curriculum_experience,
+                    self.foreign_academic_curriculum_experience,
+                ],
+            ):
+                section = get_curriculum_section(self.general_bachelor_context, self.empty_questions, False)
+                attachments = section.attachments
+
+                self.assertEqual(len(attachments), 2)
+
+                self.assertEqual(attachments[0].identifier, DocumentsCurriculum.DIPLOME_EQUIVALENCE.name)
+                self.assertTrue(attachments[0].required)
 
     def test_curriculum_attachments_for_bachelor_proposition(self):
-        section = get_curriculum_section(self.general_bachelor_context, settings.LANGUAGE_CODE_FR, self.empty_questions)
+        section = get_curriculum_section(self.general_bachelor_context, self.empty_questions, False)
         self.assertEqual(len(section.attachments), 0)
 
     def test_curriculum_acad_experience_attachments_with_continuing_proposition(self):
@@ -1685,11 +2273,16 @@ class SectionsAttachmentsTestCase(TestCase):
         section = get_educational_experience_section(
             self.continuing_context,
             experience,
+            True,
         )
-        self.assertCountEqual(
-            section.attachments,
-            [Attachment(_('Graduate degree'), experience.diplome)],
-        )
+        attachments = section.attachments
+
+        self.assertEqual(len(attachments), 1)
+
+        self.assertEqual(attachments[0].identifier, DocumentsCurriculum.DIPLOME.name)
+        self.assertEqual(attachments[0].label, DocumentsCurriculum.DIPLOME.value)
+        self.assertEqual(attachments[0].uuids, experience.diplome)
+        self.assertTrue(attachments[0].required)
 
     def test_curriculum_acad_experience_attachments_with_general_proposition_and_global_transcript(self):
         experience = self.general_bachelor_context.curriculum.experiences_academiques[0]
@@ -1697,14 +2290,21 @@ class SectionsAttachmentsTestCase(TestCase):
             section = get_educational_experience_section(
                 self.general_bachelor_context,
                 experience,
+                False,
             )
-            self.assertCountEqual(
-                section.attachments,
-                [
-                    Attachment(_('Transcript'), experience.releve_notes),
-                    Attachment(_('Graduate degree'), experience.diplome),
-                ],
-            )
+            attachments = section.attachments
+
+            self.assertEqual(len(attachments), 2)
+
+            self.assertEqual(attachments[0].identifier, DocumentsCurriculum.RELEVE_NOTES.name)
+            self.assertEqual(attachments[0].label, DocumentsCurriculum.RELEVE_NOTES.value)
+            self.assertEqual(attachments[0].uuids, experience.releve_notes)
+            self.assertTrue(attachments[0].required)
+
+            self.assertEqual(attachments[1].identifier, DocumentsCurriculum.DIPLOME.name)
+            self.assertEqual(attachments[1].label, DocumentsCurriculum.DIPLOME.value)
+            self.assertEqual(attachments[1].uuids, experience.diplome)
+            self.assertTrue(attachments[1].required)
 
     def test_curriculum_acad_experience_attachments_with_general_proposition_and_global_transcript_and_translation(
         self,
@@ -1718,16 +2318,32 @@ class SectionsAttachmentsTestCase(TestCase):
             section = get_educational_experience_section(
                 self.general_bachelor_context,
                 experience,
+                False,
             )
-            self.assertCountEqual(
-                section.attachments,
-                [
-                    Attachment(_('Transcript'), experience.releve_notes),
-                    Attachment(_('Transcript translation'), experience.traduction_releve_notes),
-                    Attachment(_('Graduate degree'), experience.diplome),
-                    Attachment(_('Graduate degree translation'), experience.traduction_diplome),
-                ],
-            )
+
+            attachments = section.attachments
+
+            self.assertEqual(len(attachments), 4)
+
+            self.assertEqual(attachments[0].identifier, DocumentsCurriculum.RELEVE_NOTES.name)
+            self.assertEqual(attachments[0].label, DocumentsCurriculum.RELEVE_NOTES.value)
+            self.assertEqual(attachments[0].uuids, experience.releve_notes)
+            self.assertTrue(attachments[0].required)
+
+            self.assertEqual(attachments[1].identifier, DocumentsCurriculum.TRADUCTION_RELEVE_NOTES.name)
+            self.assertEqual(attachments[1].label, DocumentsCurriculum.TRADUCTION_RELEVE_NOTES.value)
+            self.assertEqual(attachments[1].uuids, experience.traduction_releve_notes)
+            self.assertTrue(attachments[1].required)
+
+            self.assertEqual(attachments[2].identifier, DocumentsCurriculum.DIPLOME.name)
+            self.assertEqual(attachments[2].label, DocumentsCurriculum.DIPLOME.value)
+            self.assertEqual(attachments[2].uuids, experience.diplome)
+            self.assertTrue(attachments[2].required)
+
+            self.assertEqual(attachments[3].identifier, DocumentsCurriculum.TRADUCTION_DIPLOME.name)
+            self.assertEqual(attachments[3].label, DocumentsCurriculum.TRADUCTION_DIPLOME.value)
+            self.assertEqual(attachments[3].uuids, experience.traduction_diplome)
+            self.assertTrue(attachments[3].required)
 
     def test_curriculum_acad_experience_attachments_with_general_proposition_and_annual_transcript(self):
         experience = self.general_bachelor_context.curriculum.experiences_academiques[0]
@@ -1736,14 +2352,25 @@ class SectionsAttachmentsTestCase(TestCase):
             section = get_educational_experience_section(
                 self.general_bachelor_context,
                 experience,
+                False,
             )
-            self.assertCountEqual(
-                section.attachments,
-                [
-                    Attachment(_('Transcript') + f' - {experience_year.annee}', experience_year.releve_notes),
-                    Attachment(_('Graduate degree'), experience.diplome),
-                ],
+            attachments = section.attachments
+
+            self.assertEqual(len(attachments), 2)
+
+            self.assertEqual(
+                attachments[0].identifier, f'{DocumentsCurriculum.RELEVE_NOTES_ANNUEL.name}.{experience_year.annee}'
             )
+            self.assertEqual(
+                attachments[0].label, f'{DocumentsCurriculum.RELEVE_NOTES_ANNUEL.value} - {experience_year.annee}'
+            )
+            self.assertEqual(attachments[0].uuids, experience_year.releve_notes)
+            self.assertTrue(attachments[0].required)
+
+            self.assertEqual(attachments[1].identifier, DocumentsCurriculum.DIPLOME.name)
+            self.assertEqual(attachments[1].label, DocumentsCurriculum.DIPLOME.value)
+            self.assertEqual(attachments[1].uuids, experience.diplome)
+            self.assertTrue(attachments[1].required)
 
     def test_curriculum_acad_experience_attachments_with_general_proposition_and_annual_transcript_and_translation(
         self,
@@ -1758,39 +2385,73 @@ class SectionsAttachmentsTestCase(TestCase):
             section = get_educational_experience_section(
                 self.general_bachelor_context,
                 experience,
+                False,
             )
-            self.assertCountEqual(
-                section.attachments,
-                [
-                    Attachment(_('Transcript') + f' - {experience_year.annee}', experience_year.releve_notes),
-                    Attachment(
-                        _('Transcript translation') + f' - {experience_year.annee}',
-                        experience_year.traduction_releve_notes,
-                    ),
-                    Attachment(_('Graduate degree'), experience.diplome),
-                    Attachment(_('Graduate degree translation'), experience.traduction_diplome),
-                ],
+            attachments = section.attachments
+
+            self.assertEqual(len(attachments), 4)
+
+            self.assertEqual(
+                attachments[0].identifier, f'{DocumentsCurriculum.RELEVE_NOTES_ANNUEL.name}.{experience_year.annee}'
             )
+            self.assertEqual(
+                attachments[0].label, f'{DocumentsCurriculum.RELEVE_NOTES_ANNUEL.value} - {experience_year.annee}'
+            )
+            self.assertEqual(attachments[0].uuids, experience_year.releve_notes)
+            self.assertTrue(attachments[0].required)
+
+            self.assertEqual(
+                attachments[1].identifier,
+                f'{DocumentsCurriculum.TRADUCTION_RELEVE_NOTES_ANNUEL.name}.{experience_year.annee}',
+            )
+            self.assertEqual(
+                attachments[1].label,
+                f'{DocumentsCurriculum.TRADUCTION_RELEVE_NOTES_ANNUEL.value} - {experience_year.annee}',
+            )
+            self.assertEqual(attachments[1].uuids, experience_year.traduction_releve_notes)
+            self.assertTrue(attachments[1].required)
+
+            self.assertEqual(attachments[2].identifier, DocumentsCurriculum.DIPLOME.name)
+            self.assertEqual(attachments[2].label, DocumentsCurriculum.DIPLOME.value)
+            self.assertEqual(attachments[2].uuids, experience.diplome)
+            self.assertTrue(attachments[2].required)
+
+            self.assertEqual(attachments[3].identifier, DocumentsCurriculum.TRADUCTION_DIPLOME.name)
+            self.assertEqual(attachments[3].label, DocumentsCurriculum.TRADUCTION_DIPLOME.value)
+            self.assertEqual(attachments[3].uuids, experience.traduction_diplome)
+            self.assertTrue(attachments[3].required)
 
     def test_curriculum_acad_experience_attachments_with_doctorate_proposition(self):
         experience = self.doctorate_context.curriculum.experiences_academiques[0]
         section = get_educational_experience_section(
             self.doctorate_context,
             experience,
+            False,
         )
-        self.assertCountEqual(
-            section.attachments,
-            [
-                Attachment(_('Dissertation summary'), experience.resume_memoire),
-                Attachment(_('Transcript'), experience.releve_notes),
-                Attachment(_('Graduate degree'), experience.diplome),
-            ],
-        )
+        attachments = section.attachments
+
+        self.assertEqual(len(attachments), 3)
+
+        self.assertEqual(attachments[0].identifier, DocumentsCurriculum.RELEVE_NOTES.name)
+        self.assertEqual(attachments[0].label, DocumentsCurriculum.RELEVE_NOTES.value)
+        self.assertEqual(attachments[0].uuids, experience.releve_notes)
+        self.assertTrue(attachments[0].required)
+
+        self.assertEqual(attachments[1].identifier, DocumentsCurriculum.RESUME_MEMOIRE.name)
+        self.assertEqual(attachments[1].label, DocumentsCurriculum.RESUME_MEMOIRE.value)
+        self.assertEqual(attachments[1].uuids, experience.resume_memoire)
+        self.assertTrue(attachments[1].required)
+
+        self.assertEqual(attachments[2].identifier, DocumentsCurriculum.DIPLOME.name)
+        self.assertEqual(attachments[2].label, DocumentsCurriculum.DIPLOME.value)
+        self.assertEqual(attachments[2].uuids, experience.diplome)
+        self.assertTrue(attachments[2].required)
 
     def test_curriculum_non_academic_experience_attachments_with_continuing_proposition(self):
         section = get_non_educational_experience_section(
             self.continuing_context,
             self.continuing_context.curriculum.experiences_non_academiques[0],
+            True,
         )
         self.assertEqual(len(section.attachments), 0)
 
@@ -1799,42 +2460,39 @@ class SectionsAttachmentsTestCase(TestCase):
         section = get_non_educational_experience_section(
             self.general_bachelor_context,
             experience,
+            False,
         )
-        self.assertCountEqual(
-            section.attachments,
-            [
-                Attachment(
-                    CURRICULUM_ACTIVITY_LABEL.get(ActivityType.WORK.name),
-                    experience.certificat,
-                ),
-            ],
-        )
+        attachments = section.attachments
+
+        self.assertEqual(len(attachments), 1)
+
+        self.assertEqual(attachments[0].identifier, DocumentsCurriculum.CERTIFICAT_EXPERIENCE.name)
+        self.assertEqual(attachments[0].label, CURRICULUM_ACTIVITY_LABEL.get(ActivityType.WORK.name))
+        self.assertEqual(attachments[0].uuids, experience.certificat)
+        self.assertFalse(attachments[0].required)
 
     def test_curriculum_non_academic_experience_attachments_with_general_proposition_and_other_activity(self):
         experience = self.general_bachelor_context.curriculum.experiences_non_academiques[0]
         with mock.patch.multiple(experience, type=ActivityType.OTHER.name):
-            section = get_non_educational_experience_section(
-                self.general_bachelor_context,
-                experience,
-            )
+            section = get_non_educational_experience_section(self.general_bachelor_context, experience, False)
             self.assertEqual(len(section.attachments), 0)
 
-    def test_curriculum_non_academic_experience_attachments_with_doctorate_proposition_and_other_activity(self):
+    def test_curriculum_non_academic_experience_attachments_with_doctorate_proposition_and_travel_activity(self):
         experience = self.doctorate_context.curriculum.experiences_non_academiques[0]
         with mock.patch.multiple(experience, type=ActivityType.LANGUAGE_TRAVEL.name):
             section = get_non_educational_experience_section(
                 self.doctorate_context,
                 experience,
+                False,
             )
-            self.assertCountEqual(
-                section.attachments,
-                [
-                    Attachment(
-                        CURRICULUM_ACTIVITY_LABEL.get(ActivityType.LANGUAGE_TRAVEL.name),
-                        experience.certificat,
-                    ),
-                ],
-            )
+            attachments = section.attachments
+
+            self.assertEqual(len(attachments), 1)
+
+            self.assertEqual(attachments[0].identifier, DocumentsCurriculum.CERTIFICAT_EXPERIENCE.name)
+            self.assertEqual(attachments[0].label, CURRICULUM_ACTIVITY_LABEL.get(ActivityType.LANGUAGE_TRAVEL.name))
+            self.assertEqual(attachments[0].uuids, experience.certificat)
+            self.assertFalse(attachments[0].required)
 
     def test_specific_questions_attachments_with_continuing_proposition(self):
         with mock.patch.multiple(
@@ -1843,20 +2501,20 @@ class SectionsAttachmentsTestCase(TestCase):
         ):
             section = get_specific_questions_section(
                 self.continuing_context,
-                settings.LANGUAGE_CODE_FR,
                 self.specific_questions,
+                True,
             )
+            attachments = section.attachments
             document_question = self.specific_questions.get(Onglets.INFORMATIONS_ADDITIONNELLES.name)[1]
 
-            self.assertCountEqual(
-                section.attachments,
-                [
-                    Attachment(
-                        document_question.form_item.title.get(settings.LANGUAGE_CODE_FR),
-                        self.answers_to_specific_questions[str(document_question.form_item.uuid)],
-                    ),
-                ],
+            self.assertEqual(len(attachments), 1)
+
+            self.assertEqual(
+                attachments[0].identifier, f'{DocumentsInterOnglets.QUESTION_SPECIFIQUE.name}.{document_question.uuid}'
             )
+            self.assertEqual(attachments[0].label, document_question.label)
+            self.assertEqual(attachments[0].uuids, self.admission.specific_question_answers[document_question.uuid])
+            self.assertFalse(attachments[0].required)
 
     def test_specific_questions_attachments_with_continuing_proposition_non_ue_candidate(self):
         with mock.patch.multiple(
@@ -1865,21 +2523,18 @@ class SectionsAttachmentsTestCase(TestCase):
         ):
             section = get_specific_questions_section(
                 self.continuing_context,
-                settings.LANGUAGE_CODE_FR,
                 self.empty_questions,
+                False,
             )
 
-            self.assertCountEqual(
-                section.attachments,
-                [
-                    Attachment(
-                        _(
-                            'Copy of the residence permit covering the entire course, including the evaluation test (except for courses organised online)'
-                        ),
-                        self.continuing_context.proposition.copie_titre_sejour,
-                    )
-                ],
-            )
+            attachments = section.attachments
+
+            self.assertEqual(len(attachments), 1)
+
+            self.assertEqual(attachments[0].identifier, DocumentsQuestionsSpecifiques.COPIE_TITRE_SEJOUR.name)
+            self.assertEqual(attachments[0].label, DocumentsQuestionsSpecifiques.COPIE_TITRE_SEJOUR.value)
+            self.assertEqual(attachments[0].uuids, self.continuing_context.proposition.copie_titre_sejour)
+            self.assertFalse(attachments[0].required)
 
     def test_specific_questions_attachments_with_general_proposition_and_reorientation(self):
         with mock.patch.multiple(
@@ -1889,19 +2544,27 @@ class SectionsAttachmentsTestCase(TestCase):
         ):
             section = get_specific_questions_section(
                 self.general_bachelor_context,
-                settings.LANGUAGE_CODE_FR,
                 self.empty_questions,
+                False,
             )
+            attachments = section.attachments
 
-            self.assertCountEqual(
-                section.attachments,
-                [
-                    Attachment(
-                        _('Certificate of regular enrolment'),
-                        self.general_bachelor_context.proposition.attestation_inscription_reguliere,
-                    )
-                ],
+            self.assertEqual(len(attachments), 1)
+
+            self.assertEqual(
+                attachments[0].identifier,
+                DocumentsQuestionsSpecifiques.ATTESTATION_INSCRIPTION_REGULIERE.name,
             )
+            self.assertEqual(
+                attachments[0].label,
+                DocumentsQuestionsSpecifiques.ATTESTATION_INSCRIPTION_REGULIERE.value,
+            )
+            self.assertEqual(
+                attachments[0].uuids,
+                self.general_bachelor_context.proposition.attestation_inscription_reguliere,
+            )
+            self.assertTrue(attachments[0].required)
+
         with mock.patch.multiple(
             self.general_bachelor_context.proposition,
             est_non_resident_au_sens_decret=False,
@@ -1909,8 +2572,8 @@ class SectionsAttachmentsTestCase(TestCase):
         ):
             section = get_specific_questions_section(
                 self.general_bachelor_context,
-                settings.LANGUAGE_CODE_FR,
                 self.empty_questions,
+                False,
             )
 
             self.assertEqual(len(section.attachments), 0)
@@ -1923,19 +2586,28 @@ class SectionsAttachmentsTestCase(TestCase):
         ):
             section = get_specific_questions_section(
                 self.general_bachelor_context,
-                settings.LANGUAGE_CODE_FR,
                 self.empty_questions,
+                False,
             )
 
-            self.assertCountEqual(
-                section.attachments,
-                [
-                    Attachment(
-                        _('Registration modification form'),
-                        self.general_bachelor_context.proposition.formulaire_modification_inscription,
-                    )
-                ],
+            attachments = section.attachments
+
+            self.assertEqual(len(attachments), 1)
+
+            self.assertEqual(
+                attachments[0].identifier,
+                DocumentsQuestionsSpecifiques.FORMULAIRE_MODIFICATION_INSCRIPTION.name,
             )
+            self.assertEqual(
+                attachments[0].label,
+                DocumentsQuestionsSpecifiques.FORMULAIRE_MODIFICATION_INSCRIPTION.value,
+            )
+            self.assertEqual(
+                attachments[0].uuids,
+                self.general_bachelor_context.proposition.formulaire_modification_inscription,
+            )
+            self.assertTrue(attachments[0].required)
+
         with mock.patch.multiple(
             self.general_bachelor_context.proposition,
             est_non_resident_au_sens_decret=False,
@@ -1943,155 +2615,263 @@ class SectionsAttachmentsTestCase(TestCase):
         ):
             section = get_specific_questions_section(
                 self.general_bachelor_context,
-                settings.LANGUAGE_CODE_FR,
                 self.empty_questions,
+                False,
             )
 
             self.assertEqual(len(section.attachments), 0)
 
     def test_accounting_attachments_with_general_proposition_for_ue_candidate_and_french_frequented_institute(self):
-        section = get_accounting_section(self.general_bachelor_context)
-        self.assertCountEqual(
-            section.attachments,
-            [
-                Attachment(
-                    ngettext(
-                        'Certificate stating the absence of debts towards the institution attended during '
-                        'the academic year %(academic_year)s: %(names)s',
-                        'Certificates stating the absence of debts towards the institutions attended during '
-                        'the academic year %(academic_year)s: %(names)s',
-                        1,
-                    )
-                    % {'academic_year': '2023-2024', 'names': 'Institut 1'},
-                    self.general_bachelor_context.comptabilite.attestation_absence_dette_etablissement,
-                ),
-            ],
+        section = get_accounting_section(self.general_bachelor_context, True)
+        attachments = section.attachments
+
+        self.assertEqual(len(attachments), 1)
+
+        self.assertEqual(
+            attachments[0].identifier,
+            DocumentsComptabilite.ATTESTATION_ABSENCE_DETTE_ETABLISSEMENT.name,
         )
+        self.assertEqual(
+            attachments[0].label,
+            ngettext(
+                'Certificate stating the absence of debts towards the institution attended during '
+                'the academic year %(academic_year)s: %(names)s',
+                'Certificates stating the absence of debts towards the institutions attended during '
+                'the academic year %(academic_year)s: %(names)s',
+                1,
+            )
+            % {'academic_year': '2023-2024', 'names': 'Institut 1'},
+            self.general_bachelor_context.comptabilite.attestation_absence_dette_etablissement,
+        )
+        self.assertEqual(
+            attachments[0].uuids, self.general_bachelor_context.comptabilite.attestation_absence_dette_etablissement
+        )
+        self.assertTrue(attachments[0].required)
 
     def test_accounting_attachments_with_general_proposition_for_ue_child_staff_candidate(self):
         with mock.patch.multiple(self.general_bachelor_context.comptabilite, enfant_personnel=True):
-            section = get_accounting_section(self.general_bachelor_context)
-            self.assertCountEqual(
-                section.attachments,
-                [
-                    Attachment(
-                        ngettext(
-                            'Certificate stating the absence of debts towards the institution attended during '
-                            'the academic year %(academic_year)s: %(names)s',
-                            'Certificates stating the absence of debts towards the institutions attended during '
-                            'the academic year %(academic_year)s: %(names)s',
-                            1,
-                        )
-                        % {'academic_year': '2023-2024', 'names': 'Institut 1'},
-                        self.general_bachelor_context.comptabilite.attestation_absence_dette_etablissement,
-                    ),
-                    Attachment(
-                        _('Staff child certificate'),
-                        self.general_bachelor_context.comptabilite.attestation_enfant_personnel,
-                    ),
-                ],
+            section = get_accounting_section(self.general_bachelor_context, False)
+
+            attachments = section.attachments
+
+            self.assertEqual(len(attachments), 2)
+
+            self.assertEqual(
+                attachments[0].identifier,
+                DocumentsComptabilite.ATTESTATION_ABSENCE_DETTE_ETABLISSEMENT.name,
             )
+            self.assertEqual(
+                attachments[0].label,
+                ngettext(
+                    'Certificate stating the absence of debts towards the institution attended during '
+                    'the academic year %(academic_year)s: %(names)s',
+                    'Certificates stating the absence of debts towards the institutions attended during '
+                    'the academic year %(academic_year)s: %(names)s',
+                    1,
+                )
+                % {'academic_year': '2023-2024', 'names': 'Institut 1'},
+                self.general_bachelor_context.comptabilite.attestation_absence_dette_etablissement,
+            )
+            self.assertEqual(
+                attachments[0].uuids, self.general_bachelor_context.comptabilite.attestation_absence_dette_etablissement,
+            )
+            self.assertTrue(attachments[0].required)
+
+            self.assertEqual(
+                attachments[1].identifier,
+                DocumentsComptabilite.ATTESTATION_ENFANT_PERSONNEL.name,
+            )
+            self.assertEqual(
+                attachments[1].label,
+                DocumentsComptabilite.ATTESTATION_ENFANT_PERSONNEL.value,
+            )
+            self.assertEqual(
+                attachments[1].uuids,
+                self.general_bachelor_context.comptabilite.attestation_enfant_personnel,
+            )
+            self.assertFalse(attachments[1].required)
 
     def test_accounting_attachments_with_general_proposition_for_not_ue_candidate(self):
+        type_situation = TypeSituationAssimilation.PROCHE_A_NATIONALITE_UE_OU_RESPECTE_ASSIMILATIONS_1_A_4.name
         with mock.patch.multiple(
             self.general_bachelor_context.identification,
             pays_nationalite_europeen=False,
         ), mock.patch.multiple(
             self.general_bachelor_context.comptabilite,
-            type_situation_assimilation=TypeSituationAssimilation.PROCHE_A_NATIONALITE_UE_OU_RESPECTE_ASSIMILATIONS_1_A_4.name,
+            type_situation_assimilation=type_situation,
             sous_type_situation_assimilation_5=ChoixAssimilation5.PRIS_EN_CHARGE_OU_DESIGNE_CPAS.name,
             relation_parente=LienParente.PERE.name,
         ):
-            section = get_accounting_section(self.general_bachelor_context)
-            self.assertCountEqual(
-                section.attachments,
-                [
-                    Attachment(
-                        ngettext(
-                            'Certificate stating the absence of debts towards the institution attended during '
-                            'the academic year %(academic_year)s: %(names)s',
-                            'Certificates stating the absence of debts towards the institutions attended during '
-                            'the academic year %(academic_year)s: %(names)s',
-                            1,
-                        )
-                        % {'academic_year': '2023-2024', 'names': 'Institut 1'},
-                        self.general_bachelor_context.comptabilite.attestation_absence_dette_etablissement,
-                    ),
-                    Attachment(
-                        ACCOUNTING_LABEL['composition_menage_acte_naissance'],
-                        self.general_bachelor_context.comptabilite.composition_menage_acte_naissance,
-                    ),
-                    Attachment(
-                        ACCOUNTING_LABEL['attestation_cpas_parent'] % {'person_concerned': 'votre père'},
-                        self.general_bachelor_context.comptabilite.attestation_cpas_parent,
-                    ),
-                ],
+            section = get_accounting_section(self.general_bachelor_context, False)
+
+            attachments = section.attachments
+
+            self.assertEqual(len(attachments), 3)
+
+            self.assertEqual(
+                attachments[0].identifier,
+                DocumentsComptabilite.ATTESTATION_ABSENCE_DETTE_ETABLISSEMENT.name,
             )
+            self.assertEqual(
+                attachments[0].label,
+                ngettext(
+                    'Certificate stating the absence of debts towards the institution attended during '
+                    'the academic year %(academic_year)s: %(names)s',
+                    'Certificates stating the absence of debts towards the institutions attended during '
+                    'the academic year %(academic_year)s: %(names)s',
+                    1,
+                )
+                % {'academic_year': '2023-2024', 'names': 'Institut 1'},
+                self.general_bachelor_context.comptabilite.attestation_absence_dette_etablissement,
+            )
+            self.assertEqual(
+                attachments[0].uuids, self.general_bachelor_context.comptabilite.attestation_absence_dette_etablissement
+            )
+            self.assertTrue(attachments[0].required)
+
+            self.assertEqual(
+                attachments[1].identifier,
+                DocumentsComptabilite.COMPOSITION_MENAGE_ACTE_NAISSANCE.name,
+            )
+            self.assertEqual(
+                attachments[1].label,
+                DocumentsComptabilite.COMPOSITION_MENAGE_ACTE_NAISSANCE.value,
+            )
+            self.assertEqual(
+                attachments[1].uuids,
+                self.general_bachelor_context.comptabilite.composition_menage_acte_naissance,
+            )
+            self.assertTrue(attachments[1].required)
+
+            self.assertEqual(
+                attachments[2].identifier,
+                DocumentsComptabilite.ATTESTATION_CPAS_PARENT.name,
+            )
+            self.assertEqual(
+                attachments[2].label,
+                DocumentsComptabilite.ATTESTATION_CPAS_PARENT.value % {'person_concerned': 'votre père'},
+            )
+            self.assertEqual(
+                attachments[2].uuids,
+                self.general_bachelor_context.comptabilite.attestation_cpas_parent,
+            )
+            self.assertTrue(attachments[2].required)
 
     def test_languages_attachments_with_doctorate_proposition(self):
-        section = get_languages_section(self.doctorate_context)
-        self.assertCountEqual(
-            section.attachments,
-            [
-                Attachment(
-                    _('Certificate of language knowledge') + ' - French',
-                    self.doctorate_context.connaissances_langues[0].certificat,
-                ),
-                Attachment(
-                    _('Certificate of language knowledge') + ' - English',
-                    self.doctorate_context.connaissances_langues[1].certificat,
-                ),
-            ],
+        section = get_languages_section(self.doctorate_context, True)
+        attachments = section.attachments
+
+        self.assertEqual(len(attachments), 2)
+
+        self.assertEqual(
+            attachments[0].identifier,
+            f'{DocumentsConnaissancesLangues.CERTIFICAT_CONNAISSANCE_LANGUE.name}.'
+            f'{self.doctorate_context.connaissances_langues[0].langue}',
         )
+        self.assertEqual(
+            attachments[0].label,
+            f'{DocumentsConnaissancesLangues.CERTIFICAT_CONNAISSANCE_LANGUE.value} - '
+            f'{self.doctorate_context.connaissances_langues[0].nom_langue}',
+        )
+        self.assertEqual(
+            attachments[0].uuids,
+            self.doctorate_context.connaissances_langues[0].certificat,
+        )
+        self.assertFalse(attachments[0].required)
+
+        self.assertEqual(
+            attachments[1].identifier,
+            f'{DocumentsConnaissancesLangues.CERTIFICAT_CONNAISSANCE_LANGUE.name}.'
+            f'{self.doctorate_context.connaissances_langues[1].langue}',
+        )
+        self.assertEqual(
+            attachments[1].label,
+            f'{DocumentsConnaissancesLangues.CERTIFICAT_CONNAISSANCE_LANGUE.value} - '
+            f'{self.doctorate_context.connaissances_langues[1].nom_langue}',
+        )
+        self.assertEqual(
+            attachments[1].uuids,
+            self.doctorate_context.connaissances_langues[1].certificat,
+        )
+        self.assertFalse(attachments[1].required)
 
     def test_research_project_attachments_with_doctorate_proposition(self):
-        section = get_research_project_section(self.doctorate_context)
-        self.assertCountEqual(
-            section.attachments,
-            [
-                Attachment(_('Research project'), self.doctorate_context.proposition.documents_projet),
-                Attachment(
-                    _("Doctoral program proposition"), self.doctorate_context.proposition.proposition_programme_doctoral
-                ),
-                Attachment(
-                    _("Complementary training proposition"),
-                    self.doctorate_context.proposition.projet_formation_complementaire,
-                ),
-                Attachment(_("Gantt graph"), self.doctorate_context.proposition.graphe_gantt),
-                Attachment(_("Recommendation letters"), self.doctorate_context.proposition.lettres_recommandation),
-            ],
-        )
+        section = get_research_project_section(self.doctorate_context, True)
+        attachments = section.attachments
+
+        self.assertEqual(len(attachments), 5)
+
+        self.assertEqual(attachments[0].identifier, DocumentsProjetRecherche.DOCUMENTS_PROJET.name)
+        self.assertEqual(attachments[0].label, DocumentsProjetRecherche.DOCUMENTS_PROJET.value)
+        self.assertEqual(attachments[0].uuids, self.doctorate_context.proposition.documents_projet)
+        self.assertTrue(attachments[0].required)
+
+        self.assertEqual(attachments[1].identifier, DocumentsProjetRecherche.PROPOSITION_PROGRAMME_DOCTORAL.name)
+        self.assertEqual(attachments[1].label, DocumentsProjetRecherche.PROPOSITION_PROGRAMME_DOCTORAL.value)
+        self.assertEqual(attachments[1].uuids, self.doctorate_context.proposition.proposition_programme_doctoral)
+        self.assertTrue(attachments[1].required)
+
+        self.assertEqual(attachments[2].identifier, DocumentsProjetRecherche.PROJET_FORMATION_COMPLEMENTAIRE.name)
+        self.assertEqual(attachments[2].label, DocumentsProjetRecherche.PROJET_FORMATION_COMPLEMENTAIRE.value)
+        self.assertEqual(attachments[2].uuids, self.doctorate_context.proposition.projet_formation_complementaire)
+        self.assertFalse(attachments[2].required)
+
+        self.assertEqual(attachments[3].identifier, DocumentsProjetRecherche.GRAPHE_GANTT.name)
+        self.assertEqual(attachments[3].label, DocumentsProjetRecherche.GRAPHE_GANTT.value)
+        self.assertEqual(attachments[3].uuids, self.doctorate_context.proposition.graphe_gantt)
+        self.assertFalse(attachments[3].required)
+
+        self.assertEqual(attachments[4].identifier, DocumentsProjetRecherche.LETTRES_RECOMMANDATION.name)
+        self.assertEqual(attachments[4].label, DocumentsProjetRecherche.LETTRES_RECOMMANDATION.value)
+        self.assertEqual(attachments[4].uuids, self.doctorate_context.proposition.lettres_recommandation)
+        self.assertFalse(attachments[4].required)
 
     def test_research_project_attachments_with_doctorate_proposition_and_search_scholarship(self):
         with mock.patch.multiple(
             self.doctorate_context.proposition,
             type_financement=ChoixTypeFinancement.SEARCH_SCHOLARSHIP.name,
         ):
-            section = get_research_project_section(self.doctorate_context)
-            self.assertCountEqual(
-                section.attachments,
-                [
-                    Attachment(_('Research project'), self.doctorate_context.proposition.documents_projet),
-                    Attachment(
-                        _("Doctoral program proposition"),
-                        self.doctorate_context.proposition.proposition_programme_doctoral,
-                    ),
-                    Attachment(
-                        _("Complementary training proposition"),
-                        self.doctorate_context.proposition.projet_formation_complementaire,
-                    ),
-                    Attachment(_("Gantt graph"), self.doctorate_context.proposition.graphe_gantt),
-                    Attachment(_("Recommendation letters"), self.doctorate_context.proposition.lettres_recommandation),
-                    Attachment(_('Scholarship proof'), self.doctorate_context.proposition.bourse_preuve),
-                ],
-            )
+            section = get_research_project_section(self.doctorate_context, False)
+            attachments = section.attachments
+
+            self.assertEqual(len(attachments), 6)
+
+            self.assertEqual(attachments[0].identifier, DocumentsProjetRecherche.PREUVE_BOURSE.name)
+            self.assertEqual(attachments[0].label, DocumentsProjetRecherche.PREUVE_BOURSE.value)
+            self.assertEqual(attachments[0].uuids, self.doctorate_context.proposition.bourse_preuve)
+            self.assertFalse(attachments[0].required)
+
+            self.assertEqual(attachments[1].identifier, DocumentsProjetRecherche.DOCUMENTS_PROJET.name)
+            self.assertEqual(attachments[1].label, DocumentsProjetRecherche.DOCUMENTS_PROJET.value)
+            self.assertEqual(attachments[1].uuids, self.doctorate_context.proposition.documents_projet)
+            self.assertTrue(attachments[1].required)
+
+            self.assertEqual(attachments[2].identifier, DocumentsProjetRecherche.PROPOSITION_PROGRAMME_DOCTORAL.name)
+            self.assertEqual(attachments[2].label, DocumentsProjetRecherche.PROPOSITION_PROGRAMME_DOCTORAL.value)
+            self.assertEqual(attachments[2].uuids, self.doctorate_context.proposition.proposition_programme_doctoral)
+            self.assertTrue(attachments[2].required)
+
+            self.assertEqual(attachments[3].identifier, DocumentsProjetRecherche.PROJET_FORMATION_COMPLEMENTAIRE.name)
+            self.assertEqual(attachments[3].label, DocumentsProjetRecherche.PROJET_FORMATION_COMPLEMENTAIRE.value)
+            self.assertEqual(attachments[3].uuids, self.doctorate_context.proposition.projet_formation_complementaire)
+            self.assertFalse(attachments[3].required)
+
+            self.assertEqual(attachments[4].identifier, DocumentsProjetRecherche.GRAPHE_GANTT.name)
+            self.assertEqual(attachments[4].label, DocumentsProjetRecherche.GRAPHE_GANTT.value)
+            self.assertEqual(attachments[4].uuids, self.doctorate_context.proposition.graphe_gantt)
+            self.assertFalse(attachments[4].required)
+
+            self.assertEqual(attachments[5].identifier, DocumentsProjetRecherche.LETTRES_RECOMMANDATION.name)
+            self.assertEqual(attachments[5].label, DocumentsProjetRecherche.LETTRES_RECOMMANDATION.value)
+            self.assertEqual(attachments[5].uuids, self.doctorate_context.proposition.lettres_recommandation)
+            self.assertFalse(attachments[5].required)
 
     def test_cotutelle_attachments_with_doctorate_proposition_without_specified_cotutelle(self):
         with mock.patch.multiple(
             self.doctorate_context.groupe_supervision,
             cotutelle=None,
         ):
-            section = get_cotutelle_section(self.doctorate_context)
+            section = get_cotutelle_section(self.doctorate_context, True)
             self.assertEqual(len(section.attachments), 0)
 
     def test_cotutelle_attachments_with_doctorate_proposition_with_no_cotutelle(self):
@@ -2099,41 +2879,91 @@ class SectionsAttachmentsTestCase(TestCase):
             self.doctorate_context.groupe_supervision.cotutelle,
             cotutelle=False,
         ):
-            section = get_cotutelle_section(self.doctorate_context)
+            section = get_cotutelle_section(self.doctorate_context, False)
             self.assertEqual(len(section.attachments), 0)
 
     def test_cotutelle_attachments_with_doctorate_proposition_with_specified_cotutelle(self):
-        section = get_cotutelle_section(self.doctorate_context)
-        self.assertCountEqual(
-            section.attachments,
-            [
-                Attachment(
-                    _('Cotutelle opening request'),
-                    self.doctorate_context.groupe_supervision.cotutelle.demande_ouverture,
-                ),
-                Attachment(
-                    _('Cotutelle convention'),
-                    self.doctorate_context.groupe_supervision.cotutelle.convention,
-                ),
-                Attachment(
-                    _('Other documents concerning cotutelle'),
-                    self.doctorate_context.groupe_supervision.cotutelle.autres_documents,
-                ),
-            ],
-        )
+        section = get_cotutelle_section(self.doctorate_context, False)
+        attachments = section.attachments
+
+        self.assertEqual(len(attachments), 3)
+
+        self.assertEqual(attachments[0].identifier, DocumentsCotutelle.DEMANDE_OUVERTURE.name)
+        self.assertEqual(attachments[0].label, DocumentsCotutelle.DEMANDE_OUVERTURE.value)
+        self.assertEqual(attachments[0].uuids, self.doctorate_context.groupe_supervision.cotutelle.demande_ouverture)
+        self.assertTrue(attachments[0].required)
+
+        self.assertEqual(attachments[1].identifier, DocumentsCotutelle.CONVENTION.name)
+        self.assertEqual(attachments[1].label, DocumentsCotutelle.CONVENTION.value)
+        self.assertEqual(attachments[1].uuids, self.doctorate_context.groupe_supervision.cotutelle.convention)
+        self.assertFalse(attachments[1].required)
+
+        self.assertEqual(attachments[2].identifier, DocumentsCotutelle.AUTRES_DOCUMENTS.name)
+        self.assertEqual(attachments[2].label, DocumentsCotutelle.AUTRES_DOCUMENTS.value)
+        self.assertEqual(attachments[2].uuids, self.doctorate_context.groupe_supervision.cotutelle.autres_documents)
+        self.assertFalse(attachments[2].required)
 
     def test_supervision_attachments_with_doctorate_proposition(self):
-        section = get_supervision_section(self.doctorate_context)
-        self.assertCountEqual(
-            section.attachments,
-            [
-                Attachment(
-                    _('Approbation by pdf of %(member)s') % {'member': 'Jane Foe'},
-                    self.doctorate_context.groupe_supervision.signatures_membres_CA[0].pdf,
-                ),
-                Attachment(
-                    _('Approbation by pdf of %(member)s') % {'member': 'John Doe'},
-                    self.doctorate_context.groupe_supervision.signatures_promoteurs[0].pdf,
-                ),
-            ],
+        section = get_supervision_section(self.doctorate_context, False)
+        attachments = section.attachments
+        signature_promoteur = self.doctorate_context.groupe_supervision.signatures_promoteurs[0]
+        signature_membre_ca = self.doctorate_context.groupe_supervision.signatures_membres_CA[0]
+
+        self.assertEqual(len(attachments), 2)
+
+        self.assertEqual(
+            attachments[0].identifier,
+            f'{DocumentsSupervision.APPROBATION_PDF.name}.{signature_promoteur.promoteur.uuid}',
         )
+        self.assertEqual(
+            attachments[0].label,
+            f'{DocumentsSupervision.APPROBATION_PDF.value} - '
+            f'{signature_promoteur.promoteur.prenom} {signature_promoteur.promoteur.nom}',
+        )
+        self.assertEqual(attachments[0].uuids, signature_promoteur.pdf)
+        self.assertFalse(attachments[0].required)
+
+        self.assertEqual(
+            attachments[1].identifier,
+            f'{DocumentsSupervision.APPROBATION_PDF.name}.{signature_membre_ca.membre_CA.uuid}',
+        )
+        self.assertEqual(
+            attachments[1].label,
+            f'{DocumentsSupervision.APPROBATION_PDF.value} - '
+            f'{signature_membre_ca.membre_CA.prenom} {signature_membre_ca.membre_CA.nom}',
+        )
+        self.assertEqual(attachments[1].uuids, signature_membre_ca.pdf)
+        self.assertFalse(attachments[1].required)
+
+    def test_training_choice_attachments(self):
+        section = get_training_choice_section(
+            self.continuing_context,
+            self.specific_questions,
+            True,
+        )
+        attachments = section.attachments
+        document_question = self.specific_questions.get(Onglets.CHOIX_FORMATION.name)[1]
+
+        self.assertEqual(len(attachments), 1)
+
+        self.assertEqual(
+            attachments[0].identifier, f'{DocumentsInterOnglets.QUESTION_SPECIFIQUE.name}.{document_question.uuid}'
+        )
+        self.assertEqual(attachments[0].label, document_question.label)
+        self.assertEqual(attachments[0].uuids, self.admission.specific_question_answers[document_question.uuid])
+        self.assertFalse(attachments[0].required)
+
+        with mock.patch.multiple(document_question, requis=True):
+            section = get_training_choice_section(
+                self.continuing_context,
+                self.specific_questions,
+                True,
+            )
+            attachments = section.attachments
+
+            self.assertEqual(len(attachments), 1)
+            self.assertEqual(
+                attachments[0].identifier, f'{DocumentsInterOnglets.QUESTION_SPECIFIQUE.name}.{document_question.uuid}'
+            )
+
+            self.assertTrue(attachments[0].required)
