@@ -28,18 +28,18 @@
 READ_ACTIONS_BY_TAB = {
     # Personal data
     'coordonnees': 'admission.view_%([context])s_coordinates',
-    'cotutelle': 'admission.view_doctorateadmission_cotutelle',
+    'cotutelle': 'admission.view_admission_cotutelle',
     'person': 'admission.view_%([context])s_person',
     # Previous experience
-    'curriculum': 'admission.view_doctorateadmission_curriculum',
-    'education': 'admission.view_doctorateadmission_secondary_studies',
-    'languages': 'admission.view_doctorateadmission_languages',
+    'curriculum': 'admission.view_admission_curriculum',
+    'education': 'admission.view_admission_secondary_studies',
+    'languages': 'admission.view_admission_languages',
     # Project
-    'project': 'admission.view_doctorateadmission_project',
-    'supervision': 'admission.view_doctorateadmission_supervision',
+    'project': 'admission.view_admission_project',
+    'supervision': 'admission.view_admission_supervision',
     # Confirmation paper
-    'confirmation': 'admission.view_doctorateadmission_confirmation',
-    'extension-request': 'admission.view_doctorateadmission_confirmation',
+    'confirmation': 'admission.view_admission_confirmation',
+    'extension-request': 'admission.view_admission_confirmation',
     # History
     'history': 'admission.view_historyentry',
     'history-all': 'admission.view_historyentry',
@@ -59,18 +59,18 @@ READ_ACTIONS_BY_TAB = {
 UPDATE_ACTIONS_BY_TAB = {
     # Personal data
     'coordonnees': 'admission.change_%([context])s_coordinates',
-    'cotutelle': 'admission.change_doctorateadmission_cotutelle',
+    'cotutelle': 'admission.change_admission_cotutelle',
     'person': 'admission.change_%([context])s_person',
     # Previous experience
-    'curriculum': 'admission.change_doctorateadmission_curriculum',
-    'education': 'admission.change_doctorateadmission_secondary_studies',
-    'languages': 'admission.change_doctorateadmission_languages',
+    'curriculum': 'admission.change_admission_curriculum',
+    'education': 'admission.change_admission_secondary_studies',
+    'languages': 'admission.change_admission_languages',
     # Project
-    'project': 'admission.change_doctorateadmission_project',
-    'supervision': 'admission.change_doctorateadmission_supervision',
+    'project': 'admission.change_admission_project',
+    'supervision': 'admission.change_admission_supervision',
     # Confirmation paper
-    'confirmation': 'admission.change_doctorateadmission_confirmation',
-    'extension-request': 'admission.change_doctorateadmission_confirmation_extension',
+    'confirmation': 'admission.change_admission_confirmation',
+    'extension-request': 'admission.change_admission_confirmation_extension',
     # Mails
     'send-mail': 'admission.send_message',
     # Training

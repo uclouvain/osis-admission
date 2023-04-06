@@ -29,7 +29,6 @@ from django.views.generic import UpdateView
 
 from admission.ddd import BE_ISO_CODE
 from admission.forms.admission.person import AdmissionPersonForm
-from admission.templatetags.admission import CONTEXT_GENERAL, CONTEXT_DOCTORATE, CONTEXT_CONTINUING
 from admission.views.doctorate.mixins import LoadDossierViewMixin
 from base.models.enums.person_address_type import PersonAddressType
 from base.models.person_address import PersonAddress
@@ -40,11 +39,7 @@ __all__ = ['AdmissionPersonFormView']
 
 class AdmissionPersonFormView(LoadDossierViewMixin, UpdateView):
     template_name = 'admission/forms/person.html'
-    permission_required_by_context = {
-        CONTEXT_DOCTORATE: 'admission.change_doctorateadmission_person',
-        CONTEXT_GENERAL: 'admission.change_generaleducationadmission_person',
-        CONTEXT_CONTINUING: 'admission.change_continuingeducationadmission_person',
-    }
+    permission_required = 'admission.change_admission_person'
     form_class = AdmissionPersonForm
 
     def get_object(self):

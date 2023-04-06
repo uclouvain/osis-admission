@@ -26,20 +26,13 @@
 from django.utils.translation.trans_real import get_languages
 from django.views.generic import TemplateView
 
-from admission.templatetags.admission import CONTEXT_GENERAL, CONTEXT_DOCTORATE, CONTEXT_CONTINUING
 from admission.views.doctorate.mixins import LoadDossierViewMixin
-from base.models.enums.civil_state import CivilState
-
 
 __all__ = ['AdmissionPersonDetailView']
 
 
 class AdmissionPersonDetailView(LoadDossierViewMixin, TemplateView):
-    permission_required_by_context = {
-        CONTEXT_DOCTORATE: 'admission.view_doctorateadmission_person',
-        CONTEXT_GENERAL: 'admission.view_generaleducationadmission_person',
-        CONTEXT_CONTINUING: 'admission.view_continuingeducationadmission_person',
-    }
+    permission_required = 'admission.view_admission_person'
 
     def get_template_names(self):
         return [

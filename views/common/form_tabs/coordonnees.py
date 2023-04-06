@@ -27,8 +27,7 @@ from django.urls import reverse
 from django.views.generic import FormView
 
 from admission.ddd import BE_ISO_CODE
-from admission.forms.admission.coordonnees import AdmissionCoordonneesForm, AdmissionAddressForm
-from admission.templatetags.admission import CONTEXT_GENERAL, CONTEXT_DOCTORATE, CONTEXT_CONTINUING
+from admission.forms.admission.coordonnees import AdmissionAddressForm, AdmissionCoordonneesForm
 from admission.views.doctorate.mixins import LoadDossierViewMixin
 from base.models.enums.person_address_type import PersonAddressType
 from base.models.person_address import PersonAddress
@@ -39,11 +38,7 @@ __all__ = ['AdmissionCoordonneesFormView']
 
 class AdmissionCoordonneesFormView(LoadDossierViewMixin, FormView):
     template_name = 'admission/forms/coordonnees.html'
-    permission_required_by_context = {
-        CONTEXT_DOCTORATE: 'admission.change_doctorateadmission_coordinates',
-        CONTEXT_GENERAL: 'admission.change_generaleducationadmission_coordinates',
-        CONTEXT_CONTINUING: 'admission.change_continuingeducationadmission_coordinates',
-    }
+    permission_required = 'admission.change_admission_coordinates'
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

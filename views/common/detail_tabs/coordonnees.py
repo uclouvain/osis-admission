@@ -25,7 +25,6 @@
 # ##############################################################################
 from django.views.generic import TemplateView
 
-from admission.templatetags.admission import CONTEXT_GENERAL, CONTEXT_DOCTORATE, CONTEXT_CONTINUING
 from admission.views.doctorate.mixins import LoadDossierViewMixin
 from base.models.enums.person_address_type import PersonAddressType
 from base.models.person_address import PersonAddress
@@ -34,11 +33,7 @@ __all__ = ['AdmissionCoordonneesDetailView']
 
 
 class AdmissionCoordonneesDetailView(LoadDossierViewMixin, TemplateView):
-    permission_required_by_context = {
-        CONTEXT_DOCTORATE: 'admission.view_doctorateadmission_coordinates',
-        CONTEXT_GENERAL: 'admission.view_generaleducationadmission_coordinates',
-        CONTEXT_CONTINUING: 'admission.view_continuingeducationadmission_coordinates',
-    }
+    permission_required = 'admission.view_admission_coordinates'
 
     def get_template_names(self):
         return [

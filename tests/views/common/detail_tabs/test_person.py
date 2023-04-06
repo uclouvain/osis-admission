@@ -25,164 +25,90 @@
 # ##############################################################################
 
 from django.conf import settings
+from django.shortcuts import resolve_url
 from django.test import TestCase
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
-from admission.contrib.models import ContinuingEducationAdmission, GeneralEducationAdmission, DoctorateAdmission
-from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE, ENTITY_CDSS
+from admission.contrib.models import ContinuingEducationAdmission, DoctorateAdmission, GeneralEducationAdmission
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
-from admission.tests.factories.roles import CandidateFactory, SicManagerRoleFactory, CddManagerFactory
+from admission.tests.factories.roles import CentralManagerRoleFactory, SicManagementRoleFactory
 from base.tests.factories.academic_year import AcademicYearFactory
-from base.tests.factories.entity import EntityFactory
+from base.tests.factories.entity import EntityFactory, EntityWithVersionFactory
 from base.tests.factories.entity_version import EntityVersionFactory
 
 
-class ContinuingAdmissionPersonDetailViewTestCase(TestCase):
+class PersonDetailViewTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
         academic_years = [AcademicYearFactory(year=year) for year in [2021, 2022]]
 
-        first_doctoral_commission = EntityFactory()
-        EntityVersionFactory(entity=first_doctoral_commission, acronym=ENTITY_CDE)
+        first_doctoral_commission = EntityWithVersionFactory(version__acronym=ENTITY_CDE)
+        EntityVersionFactory(
+            entity=first_doctoral_commission,
+        )
 
-        cls.sic_manager_user = SicManagerRoleFactory().person.user
+        cls.sic_manager_user = SicManagementRoleFactory(entity=first_doctoral_commission).person.user
 
-        cls.admission: ContinuingEducationAdmission = ContinuingEducationAdmissionFactory(
+        cls.continuing_admission: ContinuingEducationAdmission = ContinuingEducationAdmissionFactory(
             training__management_entity=first_doctoral_commission,
             training__academic_year=academic_years[0],
             candidate__language=settings.LANGUAGE_CODE_FR,
         )
 
-        cls.url = reverse('admission:continuing-education:person', args=[cls.admission.uuid])
-
-    def test_person_detail_candidate_user(self):
-        self.client.force_login(user=self.admission.candidate.user)
-
-        response = self.client.get(self.url)
-
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.context['admission'].uuid, self.admission.uuid)
-        self.assertEqual(response.context['person'], self.admission.candidate)
-
-    def test_person_detail_other_candidate_user(self):
-        self.client.force_login(user=CandidateFactory().person.user)
-
-        response = self.client.get(self.url)
-
-        self.assertEqual(response.status_code, 403)
-
-    def test_person_detail_sic_manager(self):
-        self.client.force_login(user=self.sic_manager_user)
-
-        response = self.client.get(self.url)
-
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.context['admission'].uuid, self.admission.uuid)
-        self.assertEqual(response.context['person'], self.admission.candidate)
-        self.assertEqual(response.context['contact_language'], _('French'))
-
-
-class GeneralAdmissionPersonDetailViewTestCase(TestCase):
-    @classmethod
-    def setUpTestData(cls):
-        academic_years = [AcademicYearFactory(year=year) for year in [2021, 2022]]
-
-        first_doctoral_commission = EntityFactory()
-        EntityVersionFactory(entity=first_doctoral_commission, acronym=ENTITY_CDE)
-
-        cls.sic_manager_user = SicManagerRoleFactory().person.user
-
-        cls.admission: GeneralEducationAdmission = GeneralEducationAdmissionFactory(
+        cls.general_admission: GeneralEducationAdmission = GeneralEducationAdmissionFactory(
             training__management_entity=first_doctoral_commission,
             training__academic_year=academic_years[0],
             candidate__language=settings.LANGUAGE_CODE_EN,
         )
 
-        cls.url = reverse('admission:general-education:person', args=[cls.admission.uuid])
-
-    def test_person_detail_candidate_user(self):
-        self.client.force_login(user=self.admission.candidate.user)
-
-        response = self.client.get(self.url)
-
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.context['admission'].uuid, self.admission.uuid)
-        self.assertEqual(response.context['person'], self.admission.candidate)
-
-    def test_person_detail_other_candidate_user(self):
-        self.client.force_login(user=CandidateFactory().person.user)
-
-        response = self.client.get(self.url)
-
-        self.assertEqual(response.status_code, 403)
-
-    def test_person_detail_sic_manager(self):
-        self.client.force_login(user=self.sic_manager_user)
-
-        response = self.client.get(self.url)
-
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.context['admission'].uuid, self.admission.uuid)
-        self.assertEqual(response.context['person'], self.admission.candidate)
-        self.assertEqual(response.context['contact_language'], _('English'))
-
-
-class DoctorateAdmissionPersonDetailViewTestCase(TestCase):
-    @classmethod
-    def setUpTestData(cls):
-        academic_years = [AcademicYearFactory(year=year) for year in [2021, 2022]]
-
-        first_doctoral_commission = EntityFactory()
-        EntityVersionFactory(entity=first_doctoral_commission, acronym=ENTITY_CDE)
-
-        cls.cdd_manager = CddManagerFactory(
-            entity=first_doctoral_commission,
-        )
-
-        cls.sic_manager_user = SicManagerRoleFactory().person.user
-
-        cls.admission: DoctorateAdmission = DoctorateAdmissionFactory(
+        cls.central_manager = CentralManagerRoleFactory(entity=first_doctoral_commission)
+        cls.doctoral_admission: DoctorateAdmission = DoctorateAdmissionFactory(
             training__management_entity=first_doctoral_commission,
             training__academic_year=academic_years[0],
             candidate__language=settings.LANGUAGE_CODE_FR,
         )
 
-        cls.url = reverse('admission:doctorate:person', args=[cls.admission.uuid])
+        cls.doctoral_url = resolve_url('admission:doctorate:person', uuid=cls.doctoral_admission.uuid)
 
-    def test_person_detail_candidate_user(self):
-        self.client.force_login(user=self.admission.candidate.user)
-
-        response = self.client.get(self.url)
-
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.context['admission'].uuid, self.admission.uuid)
-        self.assertEqual(response.context['person'], self.admission.candidate)
-
-    def test_person_detail_cdd_manager_user(self):
-        self.client.force_login(user=self.cdd_manager.person.user)
-
-        response = self.client.get(self.url)
-
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.context['admission'].uuid, self.admission.uuid)
-        self.assertEqual(response.context['person'], self.admission.candidate)
-
-    def test_person_detail_other_candidate_user(self):
-        self.client.force_login(user=CandidateFactory().person.user)
-
-        response = self.client.get(self.url)
-
-        self.assertEqual(response.status_code, 403)
-
-    def test_person_detail_sic_manager(self):
+    def test_continuing_person_detail_sic_manager(self):
         self.client.force_login(user=self.sic_manager_user)
 
-        response = self.client.get(self.url)
+        url = resolve_url('admission:continuing-education:person', uuid=self.continuing_admission.uuid)
+        response = self.client.get(url)
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.context['admission'].uuid, self.admission.uuid)
-        self.assertEqual(response.context['person'], self.admission.candidate)
+        self.assertEqual(response.context['admission'].uuid, self.continuing_admission.uuid)
+        self.assertEqual(response.context['person'], self.continuing_admission.candidate)
+        self.assertEqual(response.context['contact_language'], _('French'))
+
+    def test_general_person_detail_sic_manager(self):
+        self.client.force_login(user=self.sic_manager_user)
+
+        url = resolve_url('admission:general-education:person', uuid=self.general_admission.uuid)
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['admission'].uuid, self.general_admission.uuid)
+        self.assertEqual(response.context['person'], self.general_admission.candidate)
+        self.assertEqual(response.context['contact_language'], _('English'))
+
+    def test_doctoral_person_detail_cdd_manager_user(self):
+        self.client.force_login(user=self.central_manager.person.user)
+
+        response = self.client.get(self.doctoral_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['admission'].uuid, self.doctoral_admission.uuid)
+        self.assertEqual(response.context['person'], self.doctoral_admission.candidate)
+
+    def test_doctoral_person_detail_sic_manager(self):
+        self.client.force_login(user=self.sic_manager_user)
+
+        response = self.client.get(self.doctoral_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['admission'].uuid, self.doctoral_admission.uuid)
+        self.assertEqual(response.context['person'], self.doctoral_admission.candidate)
         self.assertEqual(response.context['contact_language'], _('French'))
